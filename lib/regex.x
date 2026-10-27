@@ -74,7 +74,7 @@ static macro Stmt $error.depth(Expr $pattern, Expr $limit) {
           (limit $($limit)));
 }
 
-// nodes
+// private representation
 
 /* One node of the compiled pattern; `next` follows the sequence. A `<set>`
    or `<any>` node matches one byte, and `<bol>`, `<eol>`, `<wordb>`, and
@@ -91,72 +91,171 @@ static struct _RegexNode {
   _RegexNode child, sibling, next;
 };
 
-static _RegexNode _node(Symbol kind) {
-  _RegexNode node = xcalloc(1, sizeof(struct _RegexNode));
-  node.kind = kind;
-  return node;
-}
+static typedef struct Parser {
+  Regex regex, const char *text, int pos, len;
+} Parser;
 
-static _RegexNode _group_node(int index, _RegexNode child) {
-  _RegexNode group = _node(<group>);
-  group.index = index;
-  group.child = child;
-  return group;
-}
+/* One search of `text`: `end` is where the match ends, `depth` counts the
+   iterations of repeated groups in progress, and `starts` and `ends` hold
+   each capture's offsets, or -1. */
+static typedef struct Matcher {
+  Regex regex, const char *text, int len, end, depth, int *starts, *ends;
+} Matcher;
 
-// byte sets
+/* What runs once a sequence ends: the node after a group or alternation,
+   or the next iteration of a repeated group. */
+static typedef struct Rest {
+  int repeat, _RegexNode node, int count, start, struct Rest *up;
+} *Rest;
 
-static void _add(_RegexNode node, int byte) =>
-  node.set[byte >> 3] |= (unsigned char) (1 << (byte & 7));
+/* Each iteration of a repeated group is a C frame, so a match bounds them
+   before the stack runs out, on any thread. */
+static const int _DEPTH_LIMIT = 2000;
 
-static int _has(_RegexNode node, int byte) =>
-  node.set[byte >> 3] & (1 << (byte & 7));
+// patterns
 
-static void _add_range(_RegexNode node, int low, int high) {
-  for (int byte = low; byte <= high; byte++) _add(node, byte);
-}
+/** Compiles `pattern` and returns the `Regex`, owned by the current scope.
+    Raises: `<malformed>` with `reason`, the `pattern`, and the byte `offset`
+    of the problem when the pattern does not parse.
+*/
+Regex Regex.compile(String pattern) => Regex.new(pattern);
 
-static int _is_word(int byte) =>
-  byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
+/** Returns the text `regex` was compiled from. */
+String Regex.pattern(Regex regex) => regex.pattern;
 
-/* Adds the bytes of `\d`, `\w`, or `\s` to `node`, or every other byte
-   for the capital letter. */
-static void _add_class(_RegexNode node, int letter) {
-  struct _RegexNode members = {0};
-  _RegexNode bytes = &members;
-  int negate = letter == 'D' || letter == 'W' || letter == 'S';
-  if (negate) letter += 'a' - 'A';
-  if (letter == 'd') _add_range(bytes, '0', '9');
-  if (letter == 'w')
-    for (int byte = 0; byte < 256; byte++)
-      if (_is_word(byte)) _add(bytes, byte);
-  if (letter == 's') {
-    _add(bytes, ' ');
-    _add_range(bytes, '\t', '\r');
+/** Returns the number of capturing groups in `regex`. */
+int Regex.capture_count(Regex regex) => regex.capture_count;
+
+/** Returns the names of the capturing groups of `regex` in capture order,
+    with NULL for a group without a name.
+*/
+List Regex.capture_names(Regex regex) => regex.capture_names;
+
+/** Returns `literal` with every ASCII byte that is not a letter, digit, or
+    underscore escaped, so that it matches itself inside a pattern.
+*/
+String Regex.escape(String literal) {
+  Buffer out = auto Buffer.new(0);
+  int n = literal.len();
+  for (int i = 0; i < n; i++) {
+    int byte = (unsigned char) literal[i];
+    if (byte < 128 && !_is_word(byte)) out.write_char('\\');
+    out.write_char((char) byte);
   }
-  for (int i = 0; i < 32; i++)
-    node.set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
+  return out;
 }
 
-static void _fold(_RegexNode node) {
-  for (int byte = 'a'; byte <= 'z'; byte++) {
-    int upper = byte - 'a' + 'A';
-    if (_has(node, byte) || _has(node, upper)) {
-      _add(node, byte);
-      _add(node, upper);
-    }
-  }
+// searching
+
+/** Returns the first match of `r` in `subject` at or after the byte
+    `offset`, or NULL. An offset beyond the end of `subject` finds nothing.
+*/
+RegexMatch Regex.match_from(Regex r, String subject, int offset) =>
+  offset < 0 || offset > subject.len() ? NULL : _search(r, subject, offset);
+
+/** Returns the first match of `r` in `subject`, or NULL. */
+RegexMatch Regex.match(Regex r, String subject) => _search(r, subject, 0);
+
+/** Returns every non-overlapping match of `r` in `subject`, in order.
+    An empty match advances one byte. No match returns an empty `List`.
+*/
+List Regex.find_all(Regex r, String subject) {
+  Array found = auto [];
+  for (RegexMatch next = _search(r, subject, 0); next;
+       next = _next(r, subject, next))
+    found.push(next);
+  return found;
 }
+
+/** Returns the text of `subject` between the matches of `regex`, keeping
+    an empty field where two matches touch or a match sits at either end.
+*/
+List Regex.split(Regex regex, String subject) {
+  Array parts = auto [];
+  int cursor = 0;
+  for (RegexMatch found = _search(regex, subject, 0); found;
+       found = _next(regex, subject, found)) {
+    parts.push(subject[cursor:_whole(found).start()]);
+    cursor = _whole(found).end();
+  }
+  parts.push(subject[cursor:]);
+  return parts;
+}
+
+// replacement
+
+/** Returns `subject` with the first match of `regex` replaced. In
+    `replacement`, `$0` through `$9` and `${name}` insert a capture and `$$`
+    is a dollar sign.
+*/
+String Regex.replace(Regex regex, String subject, String replacement) =>
+  _rebuild(regex, subject, 0, NULL, replacement);
+
+/** Returns `subject` with every match of `regex` replaced, expanding
+    `replacement` as `replace` does.
+*/
+String Regex.replace_all(Regex regex, String subject, String replacement) =>
+  _rebuild(regex, subject, 1, NULL, replacement);
+
+/** Returns `subject` with every match of `regex` replaced by what `fn`
+    returns for its `RegexMatch`, inserted as is.
+    Raises: whatever `fn` raises.
+*/
+String Regex.replace_fn(Regex regex, String subject, Func fn) =>
+  _rebuild(regex, subject, 1, fn, NULL);
+
+// captures
+
+/** Returns the text of the capture selected by `key`, or NULL when the
+    capture does not exist or did not take part in the match.
+*/
+String RegexMatch.getindex(RegexMatch found, Var key) {
+  RegexCapture capture = found.capture(key);
+  return capture && capture.matched() ? capture.text() : NULL;
+}
+
+/** Returns the capture of `found` selected by `key`: a capture number, or
+    a name as a `Symbol` or `String`. NULL when there is no such capture.
+*/
+RegexCapture RegexMatch.capture(RegexMatch found, Var key) {
+  int numbered = key.is_integer(), number = numbered ? key : -1;
+  String name = numbered ? NULL : key.str();
+  foreach (RegexCapture capture in found) {
+    if (numbered && capture.index() == number) return capture;
+    if (!numbered && capture.name() == name) return capture;
+  }
+  return NULL;
+}
+
+/** Returns the capture number, with 0 for the whole match. */
+int RegexCapture.index(RegexCapture capture) => capture[0].int();
+
+/** Returns the capture's name, or NULL. */
+String RegexCapture.name(RegexCapture capture) => capture[1];
+
+/** Reports whether the capture took part in the match. */
+int RegexCapture.matched(RegexCapture capture) => !!capture[2];
+
+/** Returns the matched text, or NULL for a capture that did not take part. */
+String RegexCapture.text(RegexCapture capture) => capture[3];
+
+/** Returns the byte offset where the capture starts, or -1. */
+int RegexCapture.start(RegexCapture capture) => capture[4].int();
+
+/** Returns the byte offset after the capture, or -1. */
+int RegexCapture.end(RegexCapture capture) => capture[5].int();
+
+/** Reads a `RegexCapture` back out of a `Var`, as `foreach` does. */
+meta native RegexCapture Var.regexcapture(Var v) => (RegexCapture) v.list();
+
+/** Reads a `RegexMatch` back out of a `Var`, as `foreach` does. */
+meta native RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();
 
 /* parsing
 
    The parser reads the pattern once from left to right and builds the
    node tree. A malformed pattern raises `<malformed>` at the byte offset
    where the parser stands. */
-
-static typedef struct Parser {
-  Regex regex, const char *text, int pos, len;
-} Parser;
 
 static Regex Regex.new(String pattern) {
   Regex regex = xcalloc(1, sizeof(struct Regex));
@@ -212,6 +311,92 @@ static _RegexNode _sequence(Parser &p) {
   }
   return head;
 }
+
+/* A quantifier here has nothing before it to repeat. */
+static _RegexNode _atom(Parser &p) {
+  int byte = (unsigned char) p.text[p.pos];
+  if (_is_quantifier(byte)) _fail(p, $reason.no_repeat());
+  p.pos++;
+  switch (byte) {
+    case '.':  return _node(<any>);
+    case '^':  return _node(<bol>);
+    case '$':  return _node(<eol>);
+    case '[':  return _set(p);
+    case '(':  return _parse_group(p);
+    case '\\': return _escape_atom(p);
+  }
+  return _literal(p, byte);
+}
+
+// capture groups
+
+/* A group after its `(`. A plain `(` captures by number, `(?<name>` by
+   number and name, and `(?:` not at all. */
+static _RegexNode _parse_group(Parser &p) {
+  int index = _peek(p) == '?' ? _group_syntax(p) : _add_capture(p, NULL);
+  _RegexNode body = _parse_alternation(p);
+  if (_peek(p) != ')') _fail(p, $reason.missing_close());
+  p.pos++;
+  return _group_node(index, index < 0 ? body : _close_capture(body, index));
+}
+
+/* Reads the rest of a `(?` and returns the group's capture number, or -1
+   for `(?:`. */
+static int _group_syntax(Parser &p) {
+  p.pos++;
+  int marker = _peek(p);
+  if (marker == ':') {
+    p.pos++;
+    return -1;
+  }
+  if (marker != '<') {
+    p.pos--;
+    _fail(p, $reason.group_syntax());
+  }
+  p.pos++;
+  return _add_capture(p, _name(p));
+}
+
+/* Reads a capture name and its `>`: word bytes that do not start with a
+   digit. */
+static String _name(Parser &p) {
+  int start = p.pos;
+  while (_is_word(_peek(p))) p.pos++;
+  if (p.pos == start || scan_ascii_digit(p.text[start]) || _peek(p) != '>') {
+    p.pos = start;
+    _fail(p, $reason.group_name());
+  }
+  String name = p.regex.pattern[start:p.pos];
+  p.pos++;
+  return name;
+}
+
+/* Numbers a new capture and records its name, which may be NULL. */
+static int _add_capture(Parser &p, String name) {
+  int index = ++p.regex.capture_count;
+  p.regex.capture_names = p.regex.capture_names.append($(name));
+  return index;
+}
+
+/* Ends the sequence `body` with the `<capend>` node of capture `index`. */
+static _RegexNode _close_capture(_RegexNode body, int index) {
+  _RegexNode end = _node(<capend>);
+  end.index = index;
+  if (!body) return end;
+  _RegexNode last = body;
+  while (last.next) last = last.next;
+  last.next = end;
+  return body;
+}
+
+static _RegexNode _group_node(int index, _RegexNode child) {
+  _RegexNode group = _node(<group>);
+  group.index = index;
+  group.child = child;
+  return group;
+}
+
+// quantifiers
 
 /* Wraps `atom` in the repetition that follows it, if any. A `?` after the
    quantifier makes it lazy, and another quantifier after that has nothing
@@ -291,108 +476,7 @@ static int _digits(Parser &p, long long &out) {
 static int _is_quantifier(int byte) =>
   byte == '*' || byte == '+' || byte == '?';
 
-static int _peek(Parser &p) =>
-  p.pos < p.len ? (unsigned char) p.text[p.pos] : -1;
-
-static void _fail(Parser &p, String why) {
-  $error.compile(why, p.regex.pattern, p.pos);
-}
-
-// atoms
-
-/* A quantifier here has nothing before it to repeat. */
-static _RegexNode _atom(Parser &p) {
-  int byte = (unsigned char) p.text[p.pos];
-  if (_is_quantifier(byte)) _fail(p, $reason.no_repeat());
-  p.pos++;
-  switch (byte) {
-    case '.':  return _node(<any>);
-    case '^':  return _node(<bol>);
-    case '$':  return _node(<eol>);
-    case '[':  return _set(p);
-    case '(':  return _parse_group(p);
-    case '\\': return _escape_atom(p);
-  }
-  return _literal(p, byte);
-}
-
-/* An escape outside a set: a word boundary test, or a set of the byte or
-   class the escape names. */
-static _RegexNode _escape_atom(Parser &p) {
-  int letter = _peek(p);
-  if (letter != 'b' && letter != 'B') return _literal(p, _escape(p));
-  p.pos++;
-  return _node(letter == 'b' ? <wordb> : <nwordb>);
-}
-
-/* A set of one byte, or of the class a negated letter names, folded when
-   the pattern ignores case. */
-static _RegexNode _literal(Parser &p, int byte) {
-  _RegexNode node = _node(<set>);
-  if (byte < 0) _add_class(node, -byte);
-  else _add(node, byte);
-  if (p.regex.caseless) _fold(node);
-  return node;
-}
-
-/* A group after its `(`. A plain `(` captures by number, `(?<name>` by
-   number and name, and `(?:` not at all. */
-static _RegexNode _parse_group(Parser &p) {
-  int index = _peek(p) == '?' ? _group_syntax(p) : _add_capture(p, NULL);
-  _RegexNode body = _parse_alternation(p);
-  if (_peek(p) != ')') _fail(p, $reason.missing_close());
-  p.pos++;
-  return _group_node(index, index < 0 ? body : _close_capture(body, index));
-}
-
-/* Reads the rest of a `(?` and returns the group's capture number, or -1
-   for `(?:`. */
-static int _group_syntax(Parser &p) {
-  p.pos++;
-  int marker = _peek(p);
-  if (marker == ':') {
-    p.pos++;
-    return -1;
-  }
-  if (marker != '<') {
-    p.pos--;
-    _fail(p, $reason.group_syntax());
-  }
-  p.pos++;
-  return _add_capture(p, _name(p));
-}
-
-/* Reads a capture name and its `>`: word bytes that do not start with a
-   digit. */
-static String _name(Parser &p) {
-  int start = p.pos;
-  while (_is_word(_peek(p))) p.pos++;
-  if (p.pos == start || scan_ascii_digit(p.text[start]) || _peek(p) != '>') {
-    p.pos = start;
-    _fail(p, $reason.group_name());
-  }
-  String name = p.regex.pattern[start:p.pos];
-  p.pos++;
-  return name;
-}
-
-/* Numbers a new capture and records its name, which may be NULL. */
-static int _add_capture(Parser &p, String name) {
-  int index = ++p.regex.capture_count;
-  p.regex.capture_names = p.regex.capture_names.append($(name));
-  return index;
-}
-
-/* Ends the sequence `body` with the `<capend>` node of capture `index`. */
-static _RegexNode _close_capture(_RegexNode body, int index) {
-  _RegexNode end = _node(<capend>);
-  end.index = index;
-  if (!body) return end;
-  _RegexNode last = body;
-  while (last.next) last = last.next;
-  last.next = end;
-  return body;
-}
+// character classes
 
 /* A set after its `[`. A `]` first in the set is a member, and a leading
    `^` negates the set after case folding. */
@@ -433,6 +517,17 @@ static int _range_end(Parser &p, int low) {
   return high;
 }
 
+// escapes
+
+/* An escape outside a set: a word boundary test, or a set of the byte or
+   class the escape names. */
+static _RegexNode _escape_atom(Parser &p) {
+  int letter = _peek(p);
+  if (letter != 'b' && letter != 'B') return _literal(p, _escape(p));
+  p.pos++;
+  return _node(letter == 'b' ? <wordb> : <nwordb>);
+}
+
 /* Reads the byte after a backslash and returns the byte it stands for, or
    the negated letter of a `\d`, `\w`, or `\s` class or its capital. */
 static int _escape(Parser &p) {
@@ -452,17 +547,79 @@ static int _escape(Parser &p) {
   _fail(p, $reason.unknown_escape());
 }
 
+// parser primitives
+
+/* A set of one byte, or of the class a negated letter names, folded when
+   the pattern ignores case. */
+static _RegexNode _literal(Parser &p, int byte) {
+  _RegexNode node = _node(<set>);
+  if (byte < 0) _add_class(node, -byte);
+  else _add(node, byte);
+  if (p.regex.caseless) _fold(node);
+  return node;
+}
+
+static int _peek(Parser &p) =>
+  p.pos < p.len ? (unsigned char) p.text[p.pos] : -1;
+
+static void _fail(Parser &p, String why) {
+  $error.compile(why, p.regex.pattern, p.pos);
+}
+
+static _RegexNode _node(Symbol kind) {
+  _RegexNode node = xcalloc(1, sizeof(struct _RegexNode));
+  node.kind = kind;
+  return node;
+}
+
+// byte sets
+
+/* Adds the bytes of `\d`, `\w`, or `\s` to `node`, or every other byte
+   for the capital letter. */
+static void _add_class(_RegexNode node, int letter) {
+  struct _RegexNode members = {0};
+  _RegexNode bytes = &members;
+  int negate = letter == 'D' || letter == 'W' || letter == 'S';
+  if (negate) letter += 'a' - 'A';
+  if (letter == 'd') _add_range(bytes, '0', '9');
+  if (letter == 'w')
+    for (int byte = 0; byte < 256; byte++)
+      if (_is_word(byte)) _add(bytes, byte);
+  if (letter == 's') {
+    _add(bytes, ' ');
+    _add_range(bytes, '\t', '\r');
+  }
+  for (int i = 0; i < 32; i++)
+    node.set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
+}
+
+static int _is_word(int byte) =>
+  byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
+
+static void _add_range(_RegexNode node, int low, int high) {
+  for (int byte = low; byte <= high; byte++) _add(node, byte);
+}
+
+static void _fold(_RegexNode node) {
+  for (int byte = 'a'; byte <= 'z'; byte++) {
+    int upper = byte - 'a' + 'A';
+    if (_has(node, byte) || _has(node, upper)) {
+      _add(node, byte);
+      _add(node, upper);
+    }
+  }
+}
+
+static void _add(_RegexNode node, int byte) =>
+  node.set[byte >> 3] |= (unsigned char) (1 << (byte & 7));
+
+static int _has(_RegexNode node, int byte) =>
+  node.set[byte >> 3] & (1 << (byte & 7));
+
 /* matching
 
    A search runs the program from each start offset in turn. The first
    start where it matches gives the match, as the List of its captures. */
-
-/* One search of `text`: `end` is where the match ends, `depth` counts the
-   iterations of repeated groups in progress, and `starts` and `ends` hold
-   each capture's offsets, or -1. */
-static typedef struct Matcher {
-  Regex regex, const char *text, int len, end, depth, int *starts, *ends;
-} Matcher;
 
 static RegexMatch _search(Regex regex, String subject, int offset) {
   int count = regex.capture_count + 1;
@@ -476,44 +633,12 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
   return NULL;
 }
 
-/* The match that starts at `at`, with its captures in number order. */
-static RegexMatch _found(Matcher &m, String subject, int at) {
-  m.starts[0] = at;
-  m.ends[0] = m.end;
-  List captures = NULL;
-  for (int i = m.regex.capture_count; i >= 0; i--)
-    captures = cons(_capture(m, subject, i), captures);
-  return (RegexMatch) captures;
-}
-
-/* Result fields are `(index name matched text start end)`. */
-static RegexCapture _capture(Matcher &m, String subject, int i) {
-  int start = m.starts[i], end = m.ends[i], matched = start >= 0;
-  String name = i ? m.regex.capture_names[i - 1] : NULL;
-  String text = matched ? subject[start:end] : NULL;
-  return $(i, name, matched, text, start, end);
-}
-
-static RegexCapture _whole(RegexMatch found) => found.car();
-
-/* The match after `previous`; an empty match advances one byte. */
-static RegexMatch _next(Regex r, String subject, RegexMatch previous) {
-  int start = _whole(previous).start(), end = _whole(previous).end();
-  return _search(r, subject, end > start ? end : end + 1);
-}
-
 /* backtracking
 
    A byte test or an assertion goes on to the next node of its sequence. A
    group, capture end, alternation, or repeat runs the rest of the match
    itself and passes what follows its body as a continuation, so a failure
    returns to the most recent choice. */
-
-/* What runs once a sequence ends: the node after a group or alternation,
-   or the next iteration of a repeated group. */
-static typedef struct Rest {
-  int repeat, _RegexNode node, int count, start, struct Rest *up;
-} *Rest;
 
 /* Runs the sequence from `n` at `pos`, then the rest `k`, and returns
    whether the whole pattern matched. */
@@ -537,23 +662,14 @@ static int _run(Matcher &m, _RegexNode n, int pos, Rest k) {
   return _resume(m, pos, k);
 }
 
-static int _accepts(Matcher &m, _RegexNode n, int pos) {
-  if (pos >= m.len) return 0;
-  int byte = (unsigned char) m.text[pos];
-  if (n.kind == <any>) return m.regex.dotall || byte != '\n';
-  return _has(n, byte) != 0;
-}
-
-static int _at_line_start(Matcher &m, int pos) =>
-  pos == 0 || (m.regex.multiline && m.text[pos - 1] == '\n');
-
-static int _at_line_end(Matcher &m, int pos) =>
-  pos == m.len || (m.regex.multiline && m.text[pos] == '\n');
-
-static int _at_boundary(Matcher &m, int pos) {
-  int before = pos > 0 && _is_word((unsigned char) m.text[pos - 1]);
-  int after = pos < m.len && _is_word((unsigned char) m.text[pos]);
-  return before != after;
+/* Without a continuation the match is complete at `pos`. */
+static int _resume(Matcher &m, int pos, Rest k) {
+  if (!k) {
+    m.end = pos;
+    return 1;
+  }
+  if (k.repeat) return _iterate(m, k.node, k.count + 1, pos, k.start, k.up);
+  return _run(m, k.node, pos, k.up);
 }
 
 /* A capture records its start, and restores the old offsets when the rest
@@ -584,25 +700,11 @@ static int _match_alternation(Matcher &m, _RegexNode n, int pos, Rest k) {
   return 0;
 }
 
-/* Without a continuation the match is complete at `pos`. */
-static int _resume(Matcher &m, int pos, Rest k) {
-  if (!k) {
-    m.end = pos;
-    return 1;
-  }
-  if (k.repeat) return _iterate(m, k.node, k.count + 1, pos, k.start, k.up);
-  return _run(m, k.node, pos, k.up);
-}
-
 /* repeats
 
    A repeated byte test counts its longest run and offers the ends in
    greedy or lazy order. Any other repeat runs each iteration through a
    continuation. */
-
-/* Each iteration of a repeated group is a C frame, so a match bounds them
-   before the stack runs out, on any thread. */
-static const int _DEPTH_LIMIT = 2000;
 
 static int _repeat(Matcher &m, _RegexNode n, int pos, Rest k) {
   if (n.child.kind == <set> || n.child.kind == <any>)
@@ -635,10 +737,6 @@ static int _iterate(
   return matched;
 }
 
-static void _too_deep(Matcher &m) {
-  $error.depth(m.regex.pattern, _DEPTH_LIMIT);
-}
-
 /* Runs the body again or goes on with the rest, in greedy or lazy order.
    An iteration that matched nothing ends the repeat once `min` is met, so
    an empty body cannot loop. */
@@ -656,6 +754,61 @@ static int _iteration(
   if (_run(m, rep.next, pos, k)) return 1;
   return more && _run(m, rep.child, pos, &again);
 }
+
+// byte and position tests
+
+static int _accepts(Matcher &m, _RegexNode n, int pos) {
+  if (pos >= m.len) return 0;
+  int byte = (unsigned char) m.text[pos];
+  if (n.kind == <any>) return m.regex.dotall || byte != '\n';
+  return _has(n, byte) != 0;
+}
+
+static int _at_line_start(Matcher &m, int pos) =>
+  pos == 0 || (m.regex.multiline && m.text[pos - 1] == '\n');
+
+static int _at_line_end(Matcher &m, int pos) =>
+  pos == m.len || (m.regex.multiline && m.text[pos] == '\n');
+
+static int _at_boundary(Matcher &m, int pos) {
+  int before = pos > 0 && _is_word((unsigned char) m.text[pos - 1]);
+  int after = pos < m.len && _is_word((unsigned char) m.text[pos]);
+  return before != after;
+}
+
+static void _too_deep(Matcher &m) {
+  $error.depth(m.regex.pattern, _DEPTH_LIMIT);
+}
+
+// match results
+
+/* The match that starts at `at`, with its captures in number order. */
+static RegexMatch _found(Matcher &m, String subject, int at) {
+  m.starts[0] = at;
+  m.ends[0] = m.end;
+  List captures = NULL;
+  for (int i = m.regex.capture_count; i >= 0; i--)
+    captures = cons(_capture(m, subject, i), captures);
+  return (RegexMatch) captures;
+}
+
+/* Result fields are `(index name matched text start end)`. */
+static RegexCapture _capture(Matcher &m, String subject, int i) {
+  int start = m.starts[i], end = m.ends[i], matched = start >= 0;
+  String name = i ? m.regex.capture_names[i - 1] : NULL;
+  String text = matched ? subject[start:end] : NULL;
+  return $(i, name, matched, text, start, end);
+}
+
+// successive matches
+
+/* The match after `previous`; an empty match advances one byte. */
+static RegexMatch _next(Regex r, String subject, RegexMatch previous) {
+  int start = _whole(previous).start(), end = _whole(previous).end();
+  return _search(r, subject, end > start ? end : end + 1);
+}
+
+static RegexCapture _whole(RegexMatch found) => found.car();
 
 // replacement
 
@@ -707,140 +860,3 @@ static int _reference(Buffer out, RegexMatch found, String text, int i) {
   found[text[i + 2:close]].write_str(out);
   return close;
 }
-
-// patterns
-
-/** Compiles `pattern` and returns the `Regex`, owned by the current scope.
-    Raises: `<malformed>` with `reason`, the `pattern`, and the byte `offset`
-    of the problem when the pattern does not parse.
-*/
-Regex Regex.compile(String pattern) => Regex.new(pattern);
-
-/** Returns the text `regex` was compiled from. */
-String Regex.pattern(Regex regex) => regex.pattern;
-
-/** Returns the number of capturing groups in `regex`. */
-int Regex.capture_count(Regex regex) => regex.capture_count;
-
-/** Returns the names of the capturing groups of `regex` in capture order,
-    with NULL for a group without a name.
-*/
-List Regex.capture_names(Regex regex) => regex.capture_names;
-
-/** Returns `literal` with every ASCII byte that is not a letter, digit, or
-    underscore escaped, so that it matches itself inside a pattern.
-*/
-String Regex.escape(String literal) {
-  Buffer out = auto Buffer.new(0);
-  int n = literal.len();
-  for (int i = 0; i < n; i++) {
-    int byte = (unsigned char) literal[i];
-    if (byte < 128 && !_is_word(byte)) out.write_char('\\');
-    out.write_char((char) byte);
-  }
-  return out;
-}
-
-// searching
-
-/** Returns the first match of `r` in `subject` at or after the byte
-    `offset`, or NULL. An offset beyond the end of `subject` finds nothing.
-*/
-RegexMatch Regex.match_from(Regex r, String subject, int offset) =>
-  offset < 0 || offset > subject.len() ? NULL : _search(r, subject, offset);
-
-/** Returns the first match of `r` in `subject`, or NULL. */
-RegexMatch Regex.match(Regex r, String subject) => _search(r, subject, 0);
-
-/** Returns every non-overlapping match of `r` in `subject`, in order.
-    An empty match advances one byte. No match returns an empty `List`.
-*/
-List Regex.find_all(Regex r, String subject) {
-  Array found = auto [];
-  for (RegexMatch next = _search(r, subject, 0); next;
-       next = _next(r, subject, next))
-    found.push(next);
-  return found;
-}
-
-/** Returns the text of `subject` between the matches of `regex`, keeping
-    an empty field where two matches touch or a match sits at either end.
-*/
-List Regex.split(Regex regex, String subject) {
-  Array parts = auto [];
-  int cursor = 0;
-  for (RegexMatch found = _search(regex, subject, 0); found;
-       found = _next(regex, subject, found)) {
-    parts.push(subject[cursor:_whole(found).start()]);
-    cursor = _whole(found).end();
-  }
-  parts.push(subject[cursor:]);
-  return parts;
-}
-
-/** Returns `subject` with the first match of `regex` replaced. In
-    `replacement`, `$0` through `$9` and `${name}` insert a capture and `$$`
-    is a dollar sign.
-*/
-String Regex.replace(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, 0, NULL, replacement);
-
-/** Returns `subject` with every match of `regex` replaced, expanding
-    `replacement` as `replace` does.
-*/
-String Regex.replace_all(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, 1, NULL, replacement);
-
-/** Returns `subject` with every match of `regex` replaced by what `fn`
-    returns for its `RegexMatch`, inserted as is.
-    Raises: whatever `fn` raises.
-*/
-String Regex.replace_fn(Regex regex, String subject, Func fn) =>
-  _rebuild(regex, subject, 1, fn, NULL);
-
-// captures
-
-/** Returns the capture of `found` selected by `key`: a capture number, or
-    a name as a `Symbol` or `String`. NULL when there is no such capture.
-*/
-RegexCapture RegexMatch.capture(RegexMatch found, Var key) {
-  int numbered = key.is_integer(), number = numbered ? key : -1;
-  String name = numbered ? NULL : key.str();
-  foreach (RegexCapture capture in found) {
-    if (numbered && capture.index() == number) return capture;
-    if (!numbered && capture.name() == name) return capture;
-  }
-  return NULL;
-}
-
-/** Returns the text of the capture selected by `key`, or NULL when the
-    capture does not exist or did not take part in the match.
-*/
-String RegexMatch.getindex(RegexMatch found, Var key) {
-  RegexCapture capture = found.capture(key);
-  return capture && capture.matched() ? capture.text() : NULL;
-}
-
-/** Returns the capture number, with 0 for the whole match. */
-int RegexCapture.index(RegexCapture capture) => capture[0].int();
-
-/** Returns the capture's name, or NULL. */
-String RegexCapture.name(RegexCapture capture) => capture[1];
-
-/** Reports whether the capture took part in the match. */
-int RegexCapture.matched(RegexCapture capture) => !!capture[2];
-
-/** Returns the matched text, or NULL for a capture that did not take part. */
-String RegexCapture.text(RegexCapture capture) => capture[3];
-
-/** Returns the byte offset where the capture starts, or -1. */
-int RegexCapture.start(RegexCapture capture) => capture[4].int();
-
-/** Returns the byte offset after the capture, or -1. */
-int RegexCapture.end(RegexCapture capture) => capture[5].int();
-
-/** Reads a `RegexCapture` back out of a `Var`, as `foreach` does. */
-meta native RegexCapture Var.regexcapture(Var v) => (RegexCapture) v.list();
-
-/** Reads a `RegexMatch` back out of a `Var`, as `foreach` does. */
-meta native RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();

@@ -159,7 +159,7 @@ Wraps a parsed node in the source location of its opening token.
 A null node remains null. Macro construction uses its active `m-origin`
 marker; otherwise a node without a token remains unwrapped.
 
-Source: `src/compiler/source-locations.x:29`
+Source: `src/compiler/source-locations.x:12`
 
 <a id="Compiler.assume_condition"></a>
 #### Compiler.assume_condition
@@ -297,7 +297,7 @@ Source: `src/compiler/patterns.x:145`
 
 Carries declaration metadata with one actual symbol contribution.
 
-Source: `src/compiler/source-locations.x:82`
+Source: `src/compiler/source-locations.x:75`
 
 <a id="Compiler.define_pattern_binders"></a>
 #### Compiler.define_pattern_binders
@@ -483,7 +483,7 @@ Source: `src/compiler/patterns.x:56`
 
 Carries declaration metadata beside a completed symbol-map merge.
 
-Source: `src/compiler/source-locations.x:93`
+Source: `src/compiler/source-locations.x:68`
 
 <a id="Compiler.merge_translation_dependencies"></a>
 #### Compiler.merge_translation_dependencies
@@ -641,7 +641,7 @@ A null token returns zero. Callers pass the token that opened a construct,
 so an `(at N node)` wrapper retains its start for transform diagnostics
 after `c.token` has reached end of file.
 
-Source: `src/compiler/source-locations.x:13`
+Source: `src/compiler/source-locations.x:26`
 
 <a id="Compiler.record_source_declaration"></a>
 #### Compiler.record_source_declaration
@@ -660,7 +660,7 @@ Source: `src/compiler/source-locations.x:38`
 Records a resolved reference without inventing spans for constructed
 ASTs.
 
-Source: `src/compiler/source-locations.x:73`
+Source: `src/compiler/source-locations.x:59`
 
 <a id="Compiler.replay_declaration_source"></a>
 #### Compiler.replay_declaration_source

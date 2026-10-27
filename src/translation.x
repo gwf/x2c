@@ -59,137 +59,6 @@ static macro Stmt $progress.main_translated(
     <success>, %"Translated $($n) x2c $($noun) to $($out_dir) in $(
       $duration)");
 
-// translating a unit
-
-/* Compile one translation unit through the pipeline. An inspection prints
-   its stage and returns, so every input is inspected and a failing later
-   input still fails the command. */
-static void _translate_unit(
-  Frontend frontend, String filename, String output_dir) {
-  CliRequest request = frontend.request;
-  Symbol dump = request.dump;
-  ParsedUnit unit;
-  int started = frontend.start(filename, unit);
-  defer unit.close();
-  Compiler c = unit.compiler;
-  if (!started) _fail(c);
-  c.own_diagnostics();
-  if (dump == <tokens>) {
-    c.dump_tokens();
-    return;
-  }
-  int collected = unit.collect(frontend);
-  _report_diagnostics(c);
-  if (!collected) exit(1);
-  if (_inspect_collected(unit, dump)) return;
-  if (!unit.parse()) _fail(c);
-  c.recovery_depth = 0;
-  if (_inspect_parsed(unit, filename, dump)) return;
-  List ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
-  if (_inspect_transformed(c, ast, dump)) return;
-  c.generate_code(ast, output_dir);
-  if (!c.write_depfile(request, filename, output_dir)) exit(1);
-  // A unit that reaches here has no errors, so any diagnostic is a warning.
-  if (request.fatal_warnings && c.diagnostics()) exit(1);
-}
-
-static void _fail(Compiler c) {
-  _report_diagnostics(c);
-  exit(1);
-}
-
-// Emit collected diagnostics when the compiler has not already logged them.
-static void _report_diagnostics(Compiler c) {
-  if (c.diagnostics.printer) return;
-  List entries = c.diagnostics();
-  if (entries) report_suspend();
-  foreach (List entry in entries) c.print_diagnostic(entry);
-}
-
-static List _transform_ast(Compiler c, List ast) {
-  ast = c.transform(ast);
-  if (c.error_count()) _fail(c);
-  return ast;
-}
-
-/* Each inspection prints one stage's view of the unit and returns 1 when
-   `dump` selects it. A unit collected with `--no-cpp` has no preprocessor
-   output to print. */
-static int _inspect_collected(ParsedUnit &unit, Symbol dump) {
-  Compiler cpp = unit.preprocessor;
-  String text = unit.preprocessor_output;
-  switch (dump) {
-    case <dump-cpp>:   if (text) printf("%s", text); break;
-    case <cpp-tokens>: if (cpp) cpp.dump_tokens(); break;
-    case <dump-csym>:  if (cpp) cpp.dump_symbol_table(unit.globals); break;
-    default:           return 0;
-  }
-  return 1;
-}
-
-static int _inspect_parsed(ParsedUnit &unit, String filename, Symbol dump) {
-  Compiler c = unit.compiler;
-  switch (dump) {
-    case <dump-cache>: c.dump_cache(); break;
-    case <symbols>:    c.dump_symbol_table(c.sym.current_symbols()); break;
-    case <dump-ast>:   _print_ast(unit.ast); break;
-    case <conform>:    _print_conformance(c, filename, unit.globals); break;
-    default:           return 0;
-  }
-  return 1;
-}
-
-static int _inspect_transformed(Compiler c, List ast, Symbol dump) {
-  switch (dump) {
-    case <transforms>: _print_ast(ast); break;
-    case <dump-defs>:  c.dump_definitions(ast); break;
-    case <dump-code>:
-      puts(c.code_pretty_string(c.emit(ast, NULL), NULL)); break;
-    default:           return 0;
-  }
-  return 1;
-}
-
-static void _print_conformance(Compiler c, String filename, Map globals) {
-  printf("(unit %s)\n", filename);
-  c.dump_conformance(globals);
-}
-
-static void _print_ast(List ast) {
-  foreach (List node in _renumbered_bindings(ast))
-    printf("\n%s\n", _node_repr(node));
-}
-
-/* A binding number counts every binding the unit has issued, collection's
-   included, so it depends on whether the includes replayed or were parsed
-   cold. A dump numbers bindings by their first appearance in its text. */
-static List _renumbered_bindings(List ast) {
-  Map numbers = {}, replaced = {};
-  Array pending = auto [ast];
-  while (pending.len()) {
-    Var node = pending.take_last();
-    if (node is not <list> || node.is_nil()) continue;
-    if (node.list() ~= %(binding ?identity ?spelling)) {
-      Var number;
-      if (!numbers.try_get(identity, number)) {
-        number = (int) numbers.len() + 1;
-        numbers[identity] = number;
-      }
-      replaced[(void *) node.list()] =
-        %(binding $number $spelling);
-      continue;
-    }
-    foreach (Var child in node.list().reverse()) pending.push(child);
-  }
-  return Ast.replace_nodes(ast, replaced);
-}
-
-static String _node_repr(List node) {
-  if (node ~= %(macrodef (name ?name) *))
-    return %"(macrodef <macro $name>)";
-  return node.repr();
-}
-
 // translation requests
 
 static typedef struct Translation {
@@ -251,17 +120,17 @@ static void _preflight(Translation &t) {
     _make_out_dir(request.out_dir);
 }
 
+static void _stem_collision(
+  String stem, String first, String other, String out_dir) {
+  $report.main_stem_collision(stem, first, other, out_dir);
+  exit(2);
+}
+
 static void _make_out_dir(String out_dir) {
   try Path.make_dirs(out_dir);
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   if (access(out_dir, W_OK | X_OK))
     $fail.main_directory_unwritable(out_dir);
-}
-
-static void _stem_collision(
-  String stem, String first, String other, String out_dir) {
-  $report.main_stem_collision(stem, first, other, out_dir);
-  exit(2);
 }
 
 static void _print_command(CliRequest request) {
@@ -273,45 +142,6 @@ static void _print_command(CliRequest request) {
 
 static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
-}
-
-static void _translate_serial(Translation &t) {
-  int done = 0;
-  foreach (String input in t.request.inputs) {
-    if (t.progress) t.progress(t.context, input, 0);
-    else report_progress(<translate>, done, t.total, input);
-    _translate(t, input);
-    done++;
-    if (t.progress) t.progress(t.context, input, 1);
-    else report_progress(<translate>, done, t.total, input);
-  }
-}
-
-static void _translate(Translation &t, String input) =>
-  _translate_unit(t.frontend, input, _output_dir(t, input));
-
-/* Where one unit's generated C, header, and depfile are written. A build
-   gives each unit its own directory so units sharing an output stem cannot
-   collide; `x2c translate` writes them all to the shared `--out-dir`. */
-static String _output_dir(Translation &t, String input) {
-  if (!t.unit_dirs) return t.request.out_dir;
-  return t.unit_dirs[input];
-}
-
-static void _report(Translation &t, unsigned long started_at) {
-  if (!report_receipts()) return;
-  String out_dir = t.request.out_dir;
-  unsigned long long bytes = 0;
-  foreach (String input in t.request.inputs) {
-    String stem = Path.stem(input);
-    bytes += Path.regular_bytes(%"$out_dir/$stem.c");
-    bytes += Path.regular_bytes(%"$out_dir/$stem.h");
-  }
-  String duration = report_duration(report_now_us() - started_at);
-  int n = t.total;
-  String noun = n == 1 ? "file" : "files";
-  $progress.main_translated(n, noun, out_dir, duration);
-  report_generated(n, bytes);
 }
 
 // translation workers
@@ -448,6 +278,27 @@ static int _run_workers(Translation &t, Array slices) {
   return _workers.failed;
 }
 
+// stop signals
+
+/* Routes `number` through `_forward_stop` unless this process ignores it.
+   `previous` receives the action to restore. */
+static void _forward_stop_signal(int number, struct sigaction *previous) {
+  struct sigaction forward = {.sa_handler = _forward_stop};
+  sigaction(number, NULL, previous);
+  if (previous->sa_handler != SIG_IGN) sigaction(number, &forward, NULL);
+}
+
+/* Sends TERM or INT on to each live worker, then stops this process as the
+   signal's default action does. */
+static void _forward_stop(int number) {
+  for (int slot = 0; slot < _workers.live; slot++)
+    kill((pid_t) _workers.pids[slot], number);
+  signal(number, SIG_DFL);
+  kill(getpid(), number);
+}
+
+// worker lifecycle
+
 /* Starts the next slice. A slice that cannot start counts as one failure.
    Stop signals wait until the parent records the worker, so a forwarded
    stop reaches every worker. */
@@ -477,11 +328,31 @@ static void _start(Workers &w) {
   w.failed++;
 }
 
+/* Forks a worker that continues the current program with inherited state.
+   Returns zero in the child, its PID in the parent, or -1 on fork failure.
+   The call attempts to flush all process streams before the fork so
+   successfully flushed bytes cannot be written by both processes. Flush
+   failure is ignored. The child must leave through `_exit_worker`. */
+static long _fork_worker(void) {
+  fflush(NULL);
+  pid_t pid = fork();
+  return pid < 0 ? -1 : (long) pid;
+}
+
 // A forked worker exits after its slice, or at the first unit that fails.
 static void _work(Translation &t, List slice) {
   foreach (String input in slice) _translate(t, input);
   Compiler.stop_meta_helper();
   _exit_worker(0);
+}
+
+/* Attempts to flush process streams and terminates a worker with `status`.
+   Flush failure is ignored. This function does not return and does not run
+   `atexit` handlers. Those belong to the parent process and would close its
+   log and process-lifetime `Scope`s twice. */
+static void _exit_worker(int status) {
+  fflush(NULL);
+  _exit(status);
 }
 
 /* Keeps the ended worker's captured bytes for `show`. The last live worker
@@ -508,24 +379,14 @@ static void _reap(Workers &w) {
   if (!w.t.progress) report_progress(<translate>, w.done, w.t.total, NULL);
 }
 
-/* Forks a worker that continues the current program with inherited state.
-   Returns zero in the child, its PID in the parent, or -1 on fork failure.
-   The call attempts to flush all process streams before the fork so
-   successfully flushed bytes cannot be written by both processes. Flush
-   failure is ignored. The child must leave through `_exit_worker`. */
-static long _fork_worker(void) {
-  fflush(NULL);
-  pid_t pid = fork();
-  return pid < 0 ? -1 : (long) pid;
-}
-
-/* Attempts to flush process streams and terminates a worker with `status`.
-   Flush failure is ignored. This function does not return and does not run
-   `atexit` handlers. Those belong to the parent process and would close its
-   log and process-lifetime `Scope`s twice. */
-static void _exit_worker(int status) {
-  fflush(NULL);
-  _exit(status);
+/* Blocks TERM and INT and returns the mask that unblocks them again. */
+static sigset_t _block_stop_signals(void) {
+  sigset_t stops, previous;
+  sigemptyset(&stops);
+  sigaddset(&stops, SIGTERM);
+  sigaddset(&stops, SIGINT);
+  sigprocmask(SIG_BLOCK, &stops, &previous);
+  return previous;
 }
 
 /* Waits until one of the `count` workers in `pids` exits and returns its
@@ -565,31 +426,172 @@ static int _carries(Workers &w, int index) {
   return 0;
 }
 
-// stop signals
-
-/* Sends TERM or INT on to each live worker, then stops this process as the
-   signal's default action does. */
-static void _forward_stop(int number) {
-  for (int slot = 0; slot < _workers.live; slot++)
-    kill((pid_t) _workers.pids[slot], number);
-  signal(number, SIG_DFL);
-  kill(getpid(), number);
+static void _translate_serial(Translation &t) {
+  int done = 0;
+  foreach (String input in t.request.inputs) {
+    if (t.progress) t.progress(t.context, input, 0);
+    else report_progress(<translate>, done, t.total, input);
+    _translate(t, input);
+    done++;
+    if (t.progress) t.progress(t.context, input, 1);
+    else report_progress(<translate>, done, t.total, input);
+  }
 }
 
-/* Routes `number` through `_forward_stop` unless this process ignores it.
-   `previous` receives the action to restore. */
-static void _forward_stop_signal(int number, struct sigaction *previous) {
-  struct sigaction forward = {.sa_handler = _forward_stop};
-  sigaction(number, NULL, previous);
-  if (previous->sa_handler != SIG_IGN) sigaction(number, &forward, NULL);
+static void _translate(Translation &t, String input) =>
+  _translate_unit(t.frontend, input, _output_dir(t, input));
+
+// translating a unit
+
+/* Compile one translation unit through the pipeline. An inspection prints
+   its stage and returns, so every input is inspected and a failing later
+   input still fails the command. */
+static void _translate_unit(
+  Frontend frontend, String filename, String output_dir) {
+  CliRequest request = frontend.request;
+  Symbol dump = request.dump;
+  ParsedUnit unit;
+  int started = frontend.start(filename, unit);
+  defer unit.close();
+  Compiler c = unit.compiler;
+  if (!started) _fail(c);
+  c.own_diagnostics();
+  if (dump == <tokens>) {
+    c.dump_tokens();
+    return;
+  }
+  int collected = unit.collect(frontend);
+  _report_diagnostics(c);
+  if (!collected) exit(1);
+  if (_inspect_collected(unit, dump)) return;
+  if (!unit.parse()) _fail(c);
+  c.recovery_depth = 0;
+  if (_inspect_parsed(unit, filename, dump)) return;
+  List ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
+  if (_inspect_transformed(c, ast, dump)) return;
+  c.generate_code(ast, output_dir);
+  if (!c.write_depfile(request, filename, output_dir)) exit(1);
+  // A unit that reaches here has no errors, so any diagnostic is a warning.
+  if (request.fatal_warnings && c.diagnostics()) exit(1);
 }
 
-/* Blocks TERM and INT and returns the mask that unblocks them again. */
-static sigset_t _block_stop_signals(void) {
-  sigset_t stops, previous;
-  sigemptyset(&stops);
-  sigaddset(&stops, SIGTERM);
-  sigaddset(&stops, SIGINT);
-  sigprocmask(SIG_BLOCK, &stops, &previous);
-  return previous;
+/* Each inspection prints one stage's view of the unit and returns 1 when
+   `dump` selects it. A unit collected with `--no-cpp` has no preprocessor
+   output to print. */
+static int _inspect_collected(ParsedUnit &unit, Symbol dump) {
+  Compiler cpp = unit.preprocessor;
+  String text = unit.preprocessor_output;
+  switch (dump) {
+    case <dump-cpp>:   if (text) printf("%s", text); break;
+    case <cpp-tokens>: if (cpp) cpp.dump_tokens(); break;
+    case <dump-csym>:  if (cpp) cpp.dump_symbol_table(unit.globals); break;
+    default:           return 0;
+  }
+  return 1;
+}
+
+static int _inspect_parsed(ParsedUnit &unit, String filename, Symbol dump) {
+  Compiler c = unit.compiler;
+  switch (dump) {
+    case <dump-cache>: c.dump_cache(); break;
+    case <symbols>:    c.dump_symbol_table(c.sym.current_symbols()); break;
+    case <dump-ast>:   _print_ast(unit.ast); break;
+    case <conform>:    _print_conformance(c, filename, unit.globals); break;
+    default:           return 0;
+  }
+  return 1;
+}
+
+static void _print_conformance(Compiler c, String filename, Map globals) {
+  printf("(unit %s)\n", filename);
+  c.dump_conformance(globals);
+}
+
+static List _transform_ast(Compiler c, List ast) {
+  ast = c.transform(ast);
+  if (c.error_count()) _fail(c);
+  return ast;
+}
+
+static void _fail(Compiler c) {
+  _report_diagnostics(c);
+  exit(1);
+}
+
+// Emit collected diagnostics when the compiler has not already logged them.
+static void _report_diagnostics(Compiler c) {
+  if (c.diagnostics.printer) return;
+  List entries = c.diagnostics();
+  if (entries) report_suspend();
+  foreach (List entry in entries) c.print_diagnostic(entry);
+}
+
+static int _inspect_transformed(Compiler c, List ast, Symbol dump) {
+  switch (dump) {
+    case <transforms>: _print_ast(ast); break;
+    case <dump-defs>:  c.dump_definitions(ast); break;
+    case <dump-code>:
+      puts(c.code_pretty_string(c.emit(ast, NULL), NULL)); break;
+    default:           return 0;
+  }
+  return 1;
+}
+
+static void _print_ast(List ast) {
+  foreach (List node in _renumbered_bindings(ast))
+    printf("\n%s\n", _node_repr(node));
+}
+
+/* A binding number counts every binding the unit has issued, collection's
+   included, so it depends on whether the includes replayed or were parsed
+   cold. A dump numbers bindings by their first appearance in its text. */
+static List _renumbered_bindings(List ast) {
+  Map numbers = {}, replaced = {};
+  Array pending = auto [ast];
+  while (pending.len()) {
+    Var node = pending.take_last();
+    if (node is not <list> || node.is_nil()) continue;
+    if (node.list() ~= %(binding ?identity ?spelling)) {
+      Var number;
+      if (!numbers.try_get(identity, number)) {
+        number = (int) numbers.len() + 1;
+        numbers[identity] = number;
+      }
+      replaced[(void *) node.list()] =
+        %(binding $number $spelling);
+      continue;
+    }
+    foreach (Var child in node.list().reverse()) pending.push(child);
+  }
+  return Ast.replace_nodes(ast, replaced);
+}
+
+static String _node_repr(List node) {
+  if (node ~= %(macrodef (name ?name) *))
+    return %"(macrodef <macro $name>)";
+  return node.repr();
+}
+
+/* Where one unit's generated C, header, and depfile are written. A build
+   gives each unit its own directory so units sharing an output stem cannot
+   collide; `x2c translate` writes them all to the shared `--out-dir`. */
+static String _output_dir(Translation &t, String input) {
+  if (!t.unit_dirs) return t.request.out_dir;
+  return t.unit_dirs[input];
+}
+
+static void _report(Translation &t, unsigned long started_at) {
+  if (!report_receipts()) return;
+  String out_dir = t.request.out_dir;
+  unsigned long long bytes = 0;
+  foreach (String input in t.request.inputs) {
+    String stem = Path.stem(input);
+    bytes += Path.regular_bytes(%"$out_dir/$stem.c");
+    bytes += Path.regular_bytes(%"$out_dir/$stem.h");
+  }
+  String duration = report_duration(report_now_us() - started_at);
+  int n = t.total;
+  String noun = n == 1 ? "file" : "files";
+  $progress.main_translated(n, noun, out_dir, duration);
+  report_generated(n, bytes);
 }

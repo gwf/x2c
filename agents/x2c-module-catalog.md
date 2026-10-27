@@ -387,9 +387,9 @@ Public functions:
 `Compiler.at_completion`, `_x2c_complete_here`, `Compiler.collect_unit_macro`,
 `Compiler.replay_declaration_source`, `Compiler.freeze_declaration_syntax`,
 `Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
-`Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.anchor_origin`, `Compiler.record_origin`,
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
-`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`Compiler.merge_source_declarations`, `Compiler.copy_source_declaration`,
 `Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
 `Compiler.add_support`, `Compiler.add_init`, `Pending.reset`, `Pending.area`,
 `Pending.initializes`, `Pending.checkpoint`, `Pending.restore`,
@@ -1201,7 +1201,7 @@ Public functions:
 `Regex.compile`, `Regex.pattern`, `Regex.capture_count`, `Regex.capture_names`,
 `Regex.escape`, `Regex.match_from`, `Regex.match`, `Regex.find_all`,
 `Regex.split`, `Regex.replace`, `Regex.replace_all`, `Regex.replace_fn`,
-`RegexMatch.capture`, `RegexMatch.getindex`, `RegexCapture.index`,
+`RegexMatch.getindex`, `RegexMatch.capture`, `RegexCapture.index`,
 `RegexCapture.name`, `RegexCapture.matched`, `RegexCapture.text`,
 `RegexCapture.start`, `RegexCapture.end`, `Var.regexcapture`, `Var.regexmatch`
 

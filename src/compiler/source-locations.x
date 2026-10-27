@@ -4,6 +4,19 @@
    facts on, as for the editor adapter, declarations and references also
    record their source ranges. */
 
+/** Wraps a parsed node in the source location of its opening token.
+
+    A null node remains null. Macro construction uses its active `m-origin`
+    marker; otherwise a node without a token remains unwrapped.
+*/
+List Compiler.anchor_origin(Compiler c, List node, Token token) {
+  if (!node) return node;
+  if (c.macro_holes) return %(at m-origin $node);
+  int occurrence = c.record_origin(token);
+  if (!occurrence) return node;
+  return %(at $occurrence $node);
+}
+
 /** Records a token's location and returns its one-based occurrence.
 
     A null token returns zero. Callers pass the token that opened a construct,
@@ -19,19 +32,6 @@ int Compiler.record_origin(Compiler c, Token token) {
   c.origins.push(
     %(source $file $line $(c.token_column(token)) $(token.len) $(token.pos)));
   return c.origins.len();
-}
-
-/** Wraps a parsed node in the source location of its opening token.
-
-    A null node remains null. Macro construction uses its active `m-origin`
-    marker; otherwise a node without a token remains unwrapped.
-*/
-List Compiler.anchor_origin(Compiler c, List node, Token token) {
-  if (!node) return node;
-  if (c.macro_holes) return %(at m-origin $node);
-  int occurrence = c.record_origin(token);
-  if (!occurrence) return node;
-  return %(at $occurrence $node);
 }
 
 /** Records a physical declaration using the binding's actual scope and key. */
@@ -53,20 +53,6 @@ void Compiler.record_source_declaration(
   }
 }
 
-static List _source_range(Compiler c, Token first, Token after) {
-  if (!first || !after || first >= after || c.macro_holes) return NULL;
-  Token last = after - 1;
-  while (last > first &&
-         (last.type == <space> || last.type == <comment> ||
-          last.type == <preproc>)) last--;
-  // A module member's range counts from the start of the member.
-  int start = first.pos;
-  String path = Path.resolved_absolute(c.text_source(first.pos, start));
-  if (!c.line_markers && !(path in c.source_texts))
-    c.source_texts[path] = c.text;
-  return $(path, start, start + last.pos + last.len - first.pos);
-}
-
 /** Records a resolved reference without inventing spans for constructed
     ASTs.
 */
@@ -76,6 +62,13 @@ void Compiler.record_source_reference(
       !Ast.try_binding(binding, NULL, NULL)) return;
   List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push($(@range, binding, type));
+}
+
+/** Carries declaration metadata beside a completed symbol-map merge. */
+void Compiler.merge_source_declarations(Compiler c, Map target, Map source) {
+  if (!c.source_facts) return;
+  foreach (Var key in source.keys())
+    if (key is <list>) c.copy_source_declaration(target, source, key);
 }
 
 /** Carries declaration metadata with one actual symbol contribution. */
@@ -89,9 +82,16 @@ void Compiler.copy_source_declaration(
   else c.sym.drop(c.source_declarations, target_key);
 }
 
-/** Carries declaration metadata beside a completed symbol-map merge. */
-void Compiler.merge_source_declarations(Compiler c, Map target, Map source) {
-  if (!c.source_facts) return;
-  foreach (Var key in source.keys())
-    if (key is <list>) c.copy_source_declaration(target, source, key);
+static List _source_range(Compiler c, Token first, Token after) {
+  if (!first || !after || first >= after || c.macro_holes) return NULL;
+  Token last = after - 1;
+  while (last > first &&
+         (last.type == <space> || last.type == <comment> ||
+          last.type == <preproc>)) last--;
+  // A module member's range counts from the start of the member.
+  int start = first.pos;
+  String path = Path.resolved_absolute(c.text_source(first.pos, start));
+  if (!c.line_markers && !(path in c.source_texts))
+    c.source_texts[path] = c.text;
+  return $(path, start, start + last.pos + last.len - first.pos);
 }
