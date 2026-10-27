@@ -53,8 +53,7 @@ Symbol Symbol.compound_assignment(Symbol op) {
 /** Returns the protocol member corresponding to a direct binary operator.
     Returns zero when the operator has no direct protocol mapping.
 */
-Symbol Compiler.operator_member(Compiler c, Symbol op) {
-  (void) c;
+Symbol Compiler.operator_member(Symbol op) {
   switch (op) { $operator.direct(); }
   return 0;
 }
@@ -63,8 +62,7 @@ Symbol Compiler.operator_member(Compiler c, Symbol op) {
     Inequality derives from `equal`, ordered comparisons derive from `compare`,
     and unsupported operators return zero.
 */
-Symbol Compiler.derived_member(Compiler c, Symbol op) {
-  (void) c;
+Symbol Compiler.derived_member(Symbol op) {
   switch (op) { $operator.derived(); }
   return 0;
 }

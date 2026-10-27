@@ -85,10 +85,13 @@ static void _check_arity(
 }
 
 static int _parameters_variadic(List parameters) {
-  foreach (Var parameter in parameters)
-    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
-        (parameter.car() == <...> || parameter.car() == <....>)))
-      return 1;
+  foreach (Var parameter in parameters) {
+    if (parameter == <...>) return 1;
+    if (parameter is <list> && !parameter.is_nil()) {
+      Type type = parameter;
+      if (type.car() == <...> || type.rest_container()) return 1;
+    }
+  }
   return 0;
 }
 
