@@ -109,7 +109,7 @@ code formatting helpers for the x2c compiler.
 
 Public functions:
 
-`Compiler.code_pretty_string`
+`Compiler.code_pretty_string`, `Compiler.code_text`
 
 ### [src/frontend.x](../src/frontend.x)
 
@@ -400,12 +400,13 @@ Public functions:
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
 `Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
-`Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
-`Compiler.condition_bindings`, `Compiler.open_condition_scope`,
-`Compiler.read_source`, `Compiler.canonical_path`,
-`Compiler.owns_package_source`, `Path.real`, `Path.resolved_absolute`,
-`Compiler.portable_path`, `Compiler.absolute_home_path`,
-`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
+`Compiler.match_capture_name`, `Compiler.match_capture_value`,
+`Compiler.pattern_binder_declarations`, `Compiler.condition_bindings`,
+`Compiler.open_condition_scope`, `Compiler.read_source`,
+`Compiler.canonical_path`, `Compiler.owns_package_source`, `Path.real`,
+`Path.resolved_absolute`, `Compiler.portable_path`,
+`Compiler.absolute_home_path`, `Map.merge_translation_dependency`,
+`Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.source_path`
 
 ### [src/components/bracket-access.x](../src/components/bracket-access.x)
@@ -518,7 +519,7 @@ C tokens from normalized x2c ASTs.
 
 Public functions:
 
-`Compiler.emit`
+`Compiler.emit`, `Compiler.render_placed`
 
 ### [src/expressions/expressions.x](../src/expressions/expressions.x)
 

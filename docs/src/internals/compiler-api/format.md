@@ -13,6 +13,7 @@ Code formatting helpers for the x2c compiler.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.code_pretty_string`](#Compiler.code_pretty_string) | Returns a canonical formatted C `String` for an emitted token `Array`. |
+| [`Compiler.code_text`](#Compiler.code_text) | Returns `tokens` as one line of C text, spaced as formatting spaces them, for code that later passes carry as written. |
 
 ### `Compiler`
 
@@ -31,6 +32,16 @@ Emitted `src-at` markers carry existing compiler origin IDs; zero restores
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
 Source: `src/format.x:34`
+
+<a id="Compiler.code_text"></a>
+#### Compiler.code_text
+
+`String Compiler.code_text(Compiler c, Array tokens)`
+
+Returns `tokens` as one line of C text, spaced as formatting spaces
+them, for code that later passes carry as written.
+
+Source: `src/format.x:71`
 
 ## Design notes
 

@@ -24,6 +24,9 @@ static int _emitted_precedence(Var node) {
     case %((!or cast sizeof) *): return EMIT_UNARY;
     case %(postfix ? ?):         return EMIT_POSTFIX;
     case %(commas *):            return 1;
+    case %(m-all *):             return _operator_precedence(<"&&">);
+    case %(m-any *):             return _operator_precedence(<"||">);
+    case %(m-bits *):            return _operator_precedence(<"==">);
   }
   return EMIT_PRIMARY;
 }
@@ -82,6 +85,17 @@ static void _op_spine(Emitter &e, Var operator, Var left, Var right) {
     Symbol binary = operators[i];
     _put(e, binary);
     _operand(e, rights[i], _right_operand_level(binary));
+  }
+}
+
+/* Writes each of `tests` with the C operator `op` between them, each
+   grouped as that operator's right operand needs. */
+module void _joined(Emitter &e, List tests, Symbol op) {
+  int first = 1;
+  foreach (Var test in tests) {
+    if (!first) _put(e, op);
+    first = 0;
+    _operand(e, test, _right_operand_level(op));
   }
 }
 

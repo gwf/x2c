@@ -153,24 +153,22 @@ int main(void){
 
   }
   {
-    List _x2c_gensym_match_expr = values; List _x2c_gensym_match_cursor;
+    List _x2c_gensym_match_expr_0 = values;
     switch(0){
-        default: ;
-       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_1 = _x2c_gensym_match_cursor;
-      {
+      default:{List _x2c_gensym_match_at_0; Var x2c_match_value_0; List x2c_match_list_1; if(_x2c_gensym_match_expr_0 &&(x2c_match_value_0 = _x2c_gensym_match_expr_0 ->car, 1) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_0, 1)){{
         Var head;
-        head = _x2c_gensym_match_value_0;
+        head = x2c_match_value_0;
         List tail;
-        tail = _x2c_gensym_match_list_1;
+        tail = x2c_match_list_1;
         {
           count += 1;
         }
 
       }
-       break; } }{
+      break;}}{{
         count = 0;
       }
-       break;
+      break;}
     }
 
   }

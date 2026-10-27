@@ -1,0 +1,321 @@
+#!/usr/bin/env -S x2c script
+/*  run-match-differential -- match statements agree with the Match runtime
+
+    Generates random patterns over every Match operator, binder kind, and
+    List shape, with inputs built to match each pattern, nearly match it,
+    or be unrelated. Each group of patterns is written three ways: a match
+    statement on a List, a match statement on a Var, and a chain of `~=`
+    conditions. The compiled program checks every arm choice and every
+    definite capture against `x2c_match_try_capture` on the same patterns
+    in the same order. Run from any directory:
+
+        run-match-differential [SEED [ROUNDS [GROUPS]]]
+
+    Each round uses the next seed. A failure prints the seed, group, input,
+    and patterns that disagree.
+*/
+#include "probe.x"
+
+static unsigned long long state;
+
+/* A pseudo-random number below `n`, from a fixed xorshift sequence. */
+static int _random(int n) {
+  state ^= state << 13;
+  state ^= state >> 7;
+  state ^= state << 17;
+  return (int) (state % (unsigned long long) n);
+}
+
+static Var _pick(List choices) => choices[_random(choices.len())];
+
+// patterns
+
+static Var _pattern_atom(void) {
+  switch (_random(8)) {
+    case 0: case 1: case 2: return _pick(%(a b c));
+    case 3: return _pick(%(1 2 3L));
+    case 4: return _pick(%("s" "t"));
+    case 5: return <?>;
+    default: return _pick(%(?x ?y ?z));
+  }
+}
+
+static List _pattern_list(int depth);
+static List _pattern_guard(int depth);
+
+/* One element of a pattern. */
+static Var _pattern_part(int depth) {
+  int choice = _random(depth >= 3 ? 6 : 10);
+  if (choice < 6) return _pattern_atom();
+  if (choice < 8) return _pattern_list(depth + 1);
+  return _pattern_guard(depth + 1);
+}
+
+/* A List pattern, sometimes ending in `*` or `*name`, and sometimes with a
+   `*` before its end, which only Match's search can test. */
+static List _pattern_list(int depth) {
+  Array parts = [];
+  int count = _random(4);
+  for (int i = 0; i < count; i++) parts.push(_pattern_part(depth));
+  switch (_random(10)) {
+    case 0: case 1: parts.push(<*>); break;
+    case 2: case 3: parts.push(_pick(%(*rest *tail))); break;
+    case 4:
+      if (count) {
+        parts.insert(_random(count), <*>);
+        break;
+      }
+  }
+  return parts.list_free();
+}
+
+static List _pattern_guard(int depth) {
+  Var op = _pick(%(!or !or !and !not !set !quote !is));
+  Array parts = [op];
+  if (op == <!quote>) {
+    parts.push(_random(3) ? _pattern_atom() : %(a b));
+    return parts.list_free();
+  }
+  if (_random(4) == 0) parts.push(<?w>);
+  if (op == <!is>) {
+    List shape = _pick(%((type string) (type symbol) (type i32) (type list)
+                         (atom) (var binder) (binder) (op)));
+    foreach (Var item in shape) parts.push(item);
+    return parts.list_free();
+  }
+  int count = 1 + _random(3);
+  for (int i = 0; i < count; i++) parts.push(_pattern_part(depth));
+  return parts.list_free();
+}
+
+/* A pattern for one arm: usually a List, sometimes a guard on the whole
+   subject. */
+static List _pattern(void) =>
+  _random(8) ? _pattern_list(0) : _pattern_guard(1);
+
+// inputs
+
+static Var _value(int depth) {
+  switch (_random(depth >= 3 ? 7 : 9)) {
+    case 0: case 1: case 2: return _pick(%(a b c d));
+    case 3: return _pick(%(1 2 3 3L 2u));
+    case 4: return _pick(%("s" "t" "u"));
+    case 5: return _pick(%(?x *l !or));
+    case 6: return %();
+    default: {
+      Array parts = [];
+      int count = _random(4);
+      for (int i = 0; i < count; i++) parts.push(_value(depth + 1));
+      return parts.list_free();
+    }
+  }
+}
+
+/* A value `part` probably matches. Repeated binders reuse their value
+   from `seen`, and one choice in ten is noise. */
+static Var _instance(Var part, Map seen, int depth) {
+  if (depth > 6 || _random(10) == 0) return _value(depth);
+  if (part == <?>) return _value(depth + 1);
+  if (part.is_atom_binder()) {
+    Var known;
+    if (seen.try_get(part, known) && _random(5)) return known;
+    Var fresh = _value(depth + 1);
+    seen[part] = fresh;
+    return fresh;
+  }
+  if (part is not <list> || part.is_nil()) return part;
+  List list = part;
+  Var op = list.car();
+  List args = list.cdr();
+  if (op.is_match_op()) {
+    if (op == <!quote>) return args.car();
+    if (args && args.car().is_binder() && args.cdr()) args = args.cdr();
+    if (op == <!not>) return _value(depth + 1);
+    if (op == <!is>) {
+      match (args) {
+        case %(type string): return "s";
+        case %(type symbol): return <a>;
+        case %(type i32): return 1;
+        case %(type list): return %(a);
+        case %(var binder): return <?x>;
+        case %(binder): return <*l>;
+        case %(op): return <!or>;
+      }
+      return <b>;
+    }
+    if (op == <!and>) return _instance(args.car(), seen, depth + 1);
+    return _instance(args[_random(args.len())], seen, depth + 1);
+  }
+  Array parts = [];
+  foreach (Var element in list) {
+    if (element.is_list_binder()) {
+      int extra = _random(3);
+      for (int i = 0; i < extra; i++) parts.push(_value(depth + 1));
+    }
+    else parts.push(_instance(element, seen, depth + 1));
+  }
+  return parts.list_free();
+}
+
+// writing the program
+
+/* `value` as source a `%( )` literal reads back as the same value. */
+static String _source(Var value) {
+  switch (value.tag()) {
+    case <list>: {
+      Array parts = [];
+      foreach (Var element in value.list()) parts.push(_source(element));
+      return "(" + parts.join(" ") + ")";
+    }
+    case <string>: return %"\"$value\"";
+    case <long>: return %"$(value)L";
+    case <u32>: return %"$(value)u";
+  }
+  return value.str();
+}
+
+/* The body of an arm that numbers it `arm` and copies its definite
+   binders into their capture slots. */
+static String _arm_body(List pattern, int arm) {
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(pattern);
+  String body = "{";
+  foreach (Var binder in layout.definite_list()) {
+    String name = binder.str()[1:];
+    body = body + %" values[$(layout.index(binder))] = $name;";
+  }
+  layout.free();
+  return body + %" return $arm; }";
+}
+
+/* The definite capture slots of `pattern`, ending in -1. */
+static String _definite(List pattern) {
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(pattern);
+  String slots = "{";
+  foreach (Var binder in layout.definite_list())
+    slots = slots + %"$(layout.index(binder)), ";
+  layout.free();
+  return slots + "-1}";
+}
+
+/* Whether a source arm accepts `pattern`: it must be well formed and
+   bind each named binder on every match. */
+static int _usable(List pattern) {
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(pattern);
+  int usable = layout.status != <malformed> && layout.binder_count <= 8 &&
+    layout.possible_list().len() == layout.definite_list().len();
+  layout.free();
+  return usable;
+}
+
+/* The three forms of group `g` and its reference table. */
+static String _group(int g, List patterns, List inputs) {
+  String text = %"static List patterns_$g(void) => %(";
+  foreach (List pattern in patterns) text = text + " " + _source(pattern);
+  text = text + %");\nstatic List inputs_$g(void) => %(";
+  foreach (Var input in inputs) text = text + " " + _source(input);
+  text = text + %");\nstatic const int definite_$g[][9] = {";
+  foreach (List pattern in patterns) text = text + _definite(pattern) + ", ";
+  text = text + "{-1}};\n";
+  String arms = "";
+  int arm = 1;
+  foreach (List pattern in patterns)
+    arms = arms + %"    case %$(_source(pattern)): $(_arm_body(pattern, arm++))\n";
+  text = text +
+    %"static int list_$g(List input, Var *values) {\n" +
+    %"  match (input) {\n$arms  }\n  return 0;\n}\n" +
+    %"static int var_$g(Var input, Var *values) {\n" +
+    %"  match (input) {\n$arms  }\n  return 0;\n}\n" +
+    %"static int cond_$g(List input, Var *values) {\n";
+  arm = 1;
+  foreach (List pattern in patterns)
+    text = text +
+      %"  if (input ~= %$(_source(pattern))) $(_arm_body(pattern, arm++))\n";
+  return text + "  return 0;\n}\n";
+}
+
+static String _program(unsigned long long seed, int groups) {
+  String text =
+    "#include <stdio.h>\n"
+    "static int checks = 0, failures = 0;\n"
+    "static int reference(Var subject, List patterns, Var *values) {\n"
+    "  if (subject is not <list>) return 0;\n"
+    "  int arm = 0;\n"
+    "  foreach (List pattern in patterns) {\n"
+    "    arm++;\n"
+    "    MatchCaptureBuffer capture = {.values = values, .capacity = 8};\n"
+    "    if (x2c_match_try_capture(subject.list(), pattern, capture))\n"
+    "      return arm;\n"
+    "  }\n"
+    "  return 0;\n"
+    "}\n"
+    "static void check(const char *form, int group, Var subject, int arm,\n"
+    "                  Var *actual, List patterns, const int (*definite)[9]) {\n"
+    "  Var expected[8] = {0};\n"
+    "  int wanted = reference(subject, patterns, expected), same = arm == wanted;\n"
+    "  for (int i = 0; same && arm && definite[arm - 1][i] >= 0; i++) {\n"
+    "    int slot = definite[arm - 1][i];\n"
+    "    same = actual[slot].equal(expected[slot]);\n"
+    "  }\n"
+    "  checks++;\n"
+    "  if (same) return;\n"
+    "  failures++;\n"
+    "  printf(\"MISMATCH %s group %d input %s: arm %d, Match %d\\n\",\n"
+    "         form, group, subject, arm, wanted);\n"
+    "  printf(\"  patterns %s\\n\", List_var(patterns));\n"
+    "}\n";
+  String calls = "";
+  for (int g = 0; g < groups; g++) {
+    Array patterns = [], inputs = [];
+    int count = 1 + _random(5);
+    while (patterns.len() < count) {
+      List pattern = _pattern();
+      if (_usable(pattern)) patterns.push(pattern);
+    }
+    for (int i = 0; i < 12; i++) {
+      List pattern = patterns[_random(patterns.len())];
+      inputs.push(_random(4) ? _instance(pattern, {}, 0) : _value(0));
+    }
+    text = text + _group(g, patterns.list_free(), inputs.list_free());
+    calls = calls +
+      %"  foreach (Var input in inputs_$g()) {\n" +
+      "    Var values[8] = {0};\n" +
+      "    if (input is <list>) {\n" +
+      %"      check(\"list\", $g, input, list_$g(input.list(), values), " +
+      %"values, patterns_$g(), definite_$g);\n" +
+      "      Var conditions[8] = {0};\n" +
+      %"      check(\"cond\", $g, input, cond_$g(input.list(), conditions), " +
+      %"conditions, patterns_$g(), definite_$g);\n" +
+      "    }\n" +
+      "    Var dynamic[8] = {0};\n" +
+      %"    check(\"var\", $g, input, var_$g(input, dynamic), dynamic, " +
+      %"patterns_$g(), definite_$g);\n" +
+      "  }\n";
+  }
+  return text + "int main(void) {\n" + calls +
+    %"  printf(\"seed $seed: %d checks, %d mismatches\\n\", checks, failures);\n" +
+    "  return failures != 0;\n}\n";
+}
+
+Path root = probe_root(argv[0]);
+String x2c = probe_env("X2C", root.join("builds/0/x2c"));
+String cc = probe_env("CC", "cc");
+Path build = probe_scratch(root, "match-differential");
+unsigned long long first = argc > 1 ? strtoull(argv[1], NULL, 10) : 1;
+int rounds = argc > 2 ? atoi(argv[2]) : 4;
+int groups = argc > 3 ? atoi(argv[3]) : 40;
+int failed = 0;
+for (int round = 0; round < rounds; round++) {
+  unsigned long long seed = first + round;
+  state = seed * 0x9e3779b97f4a7c15ULL + 1;
+  Path source = build.join(%"case-$seed.x"), program = build.join(%"case-$seed");
+  source.write_text(_program(seed, groups));
+  %($x2c translate --out-dir $build $source).job().run();
+  Path c_file = build.join(%"case-$seed.c");
+  String include = root.join("include/x2c"), stage = root.join("builds/0/src");
+  String library = root.join("builds/0");
+  %($cc -O1 -w -iquote $include -iquote $stage $c_file -L$library -lx2c -lm
+    -o $program).job().run();
+  if (%($program).job().status()) failed++;
+}
+if (failed) probe_fail(%"match differential: $failed of $rounds rounds disagree");
+printf("match differential: %d rounds agree\n", rounds);

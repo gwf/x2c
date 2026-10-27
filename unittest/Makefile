@@ -25,6 +25,7 @@ SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 	cli-probes package-install-probes \
 	symbol-snapshot-probes \
 	header-cache-probes protocol-probes meta-helper-probes \
+	match-differential-probes \
 	lisp-reader-benchmark clean clobber \
 	expression-bodied-function-probes \
 	FORCE
@@ -75,6 +76,10 @@ symbol-snapshot-probes:
 
 header-cache-probes:
 	./probes/run-header-cache.sh
+
+# Optional: random patterns checked against the Match runtime.
+match-differential-probes:
+	$(X2C) script probes/run-match-differential
 
 meta-helper-probes:
 	./probes/run-meta-helper.sh

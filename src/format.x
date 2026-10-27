@@ -65,6 +65,21 @@ char *Compiler.code_pretty_string(
   return p.buff.str_free();
 }
 
+/** Returns `tokens` as one line of C text, spaced as formatting spaces
+    them, for code that later passes carry as written.
+*/
+String Compiler.code_text(Compiler c, Array tokens) {
+  Buffer text = Buffer.new(0);
+  String prev = NULL;
+  foreach (Var item in tokens) {
+    String token = item.str();
+    if (_need_space(prev, token)) text.write(" ");
+    text.write(token);
+    prev = token;
+  }
+  return text.str_free();
+}
+
 /* Emit a source position after flushing the preceding physical line. */
 static void _source_marker(Pretty &p, Var value) {
   List location = p.c.origin_location(value);
