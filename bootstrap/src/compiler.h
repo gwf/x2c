@@ -319,6 +319,8 @@ void Compiler_mark_reference_present(Compiler c, List binding);
 
 void Compiler_settle_reference(Compiler c, List binding, int true_is_present, List yes, List no);
 
+List Compiler_assume_condition(Compiler c, List condition, int holds);
+
 void Compiler_restore_reference_presence(Compiler c, List before);
 
 List Compiler_optional_reference_test(Compiler c, List condition, int * truth);

@@ -3490,6 +3490,11 @@ void Compiler_settle_reference(Compiler c, List binding, int true_is_present, Li
   if(! _init_guard_) _file_init_();  if(List_truth(binding) && Ast_reference_guard_exits(true_is_present ? no : yes)) Compiler_mark_reference_present(c, binding);
 }
 
+List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
+List Compiler_assume_condition(Compiler c, List condition, int holds){
+  if(! _init_guard_) _file_init_();  List before = Compiler_present_references(c);  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, condition, &(true_is_present));  if(List_truth(binding) && true_is_present == holds) Compiler_mark_reference_present(c, binding);  return before;
+}
+
 void Compiler_restore_reference_presence(Compiler c, List before){
   if(! _init_guard_) _file_init_();  if(before == Compiler_present_references(c)) return;  if(List_truth(before)) Compiler_set_fact(c, List_var(_452), List_var(before));  else Compiler_drop_fact(c, List_var(_452));
 }
@@ -3520,10 +3525,7 @@ List Compiler_optional_reference_test(Compiler c, List condition, int * truth){
 }
 
 static List f13_binding_facts____null_comparison(Compiler c, Var op, Var left, Var right, int * truth){
-  if(f13_binding_facts____null_literal(Var_list_payload(right))){
-    (* truth) = x2c_var_equal(op, Symbol_var(8571));  return Compiler_optional_reference_test(c, Var_list_payload(left), &((* truth)));
-  }
-  if(! f13_binding_facts____null_literal(Var_list_payload(left))) return NULL; (* truth) = x2c_var_equal(op, Symbol_var(8571));  return Compiler_optional_reference_test(c, Var_list_payload(right), &((* truth)));
+  List operand = Var_list_payload(right);  if(f13_binding_facts____null_literal(Var_list_payload(right))) operand = Var_list_payload(left);  else if(! f13_binding_facts____null_literal(Var_list_payload(left))) return NULL;  if(x2c_var_equal(op, Symbol_var(15739)))(* truth) = !(* truth);  return Compiler_optional_reference_test(c, operand, &((* truth)));
 }
 
 static int f13_binding_facts____null_literal(List expr){
