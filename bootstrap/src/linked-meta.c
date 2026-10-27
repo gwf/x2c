@@ -11833,7 +11833,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9257 = List_var(_9256);
   _9258 = String_new("lib/symbol.x");
   _9259 = String_var(_9258);
-  _9260 = String_new("e41c964b");
+  _9260 = String_new("81d1a10d");
   _9261 = String_var(_9260);
   _9262 = cons(_9261, NULL);
   _9263 = cons(_9259, _9262);
@@ -12130,7 +12130,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_18(void
   _9554 = cons(_223, _9553);
   _9555 = String_new("lib/datum-reader.x");
   _9556 = String_var(_9555);
-  _9557 = String_new("dedde620");
+  _9557 = String_new("c11f16bf");
   _9558 = String_var(_9557);
   _9559 = String_new("lib/tokenizer.x");
   _9560 = String_var(_9559);
@@ -14036,7 +14036,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11448 = List_var(_11447);
   _11449 = String_new("lib/string/number.x");
   _11450 = String_var(_11449);
-  _11451 = String_new("c0424d33");
+  _11451 = String_new("df0d4683");
   _11452 = String_var(_11451);
   _11453 = cons(_11452, NULL);
   _11454 = cons(_11450, _11453);
@@ -14358,7 +14358,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11770 = List_var(_11769);
   _11771 = String_new("lib/var/construction.x");
   _11772 = String_var(_11771);
-  _11773 = String_new("df874903");
+  _11773 = String_new("18808c68");
   _11774 = String_var(_11773);
   _11775 = cons(_11774, NULL);
 }
@@ -14525,7 +14525,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11934 = cons(_10548, _11933);
   _11935 = cons(_9698, _11934);
   _11936 = List_var(_11935);
-  _11937 = String_new("bf7f8d77");
+  _11937 = String_new("ce5859c9");
   _11938 = String_var(_11937);
   _11939 = cons(_11938, NULL);
   _11940 = cons(_11936, _11939);
@@ -17203,7 +17203,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14597 = cons(_223, _14596);
   _14598 = String_new("src/literals/atoms.x");
   _14599 = String_var(_14598);
-  _14600 = String_new("a416e45e");
+  _14600 = String_new("23214781");
   _14601 = String_var(_14600);
   _14602 = cons(_14601, NULL);
   _14603 = cons(_14599, _14602);

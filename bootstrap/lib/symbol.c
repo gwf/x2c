@@ -63,7 +63,7 @@ int Symbol_try_new(String spelling, Symbol * out){
   if(! out) return 0;
   Symbol symbol = String_truth(spelling) ? Symbol_new(spelling) : 0;
   if(! String_equal(spelling, Symbol_str(symbol))) return 0;
-  * out = symbol;
+  (* out) = symbol;
   return 1;
 }
 

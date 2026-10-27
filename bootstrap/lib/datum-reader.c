@@ -263,7 +263,7 @@ static Var long_var(long);
 static Var _integer(LispReader * r, Token token){
   long value;
   String literal = String_new_len(token -> text, token -> len);
-  if(! String_try_long(literal, & value)) return _malformed_token(&((* r)), token);
+  if(! String_try_long(literal, &(value))) return _malformed_token(&((* r)), token);
   if(value ==(int) value) return int_var((int) value);
   return long_var(value);
 }
@@ -275,7 +275,7 @@ static Var double_var(double);
 static Var _floating(LispReader * r, Token token){
   double value;
   String literal = String_new_len(token -> text, token -> len);
-  if(! String_try_double(literal, & value)) return _malformed_token(&((* r)), token);
+  if(! String_try_double(literal, &(value))) return _malformed_token(&((* r)), token);
   return double_var(value);
 }
 
