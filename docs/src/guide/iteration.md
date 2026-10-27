@@ -94,9 +94,11 @@ For word counting without constructing a String for every word, include
 
 ```x2c
 #include "substring.x"
+~int main(void) {
 String text = "one two one";
 foreach (Substr word in text)
   printf("%s\n", word.str());
+~}
 ```
 
 `Substr` is an alias for `Substring`, an immutable borrowed view with a source
