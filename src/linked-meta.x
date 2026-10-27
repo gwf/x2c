@@ -768,7 +768,7 @@ static int _lambda_mentions(Var item, Map cells) {
   return 0;
 }
 
-static Var _lambda_declare_cells(List node, Map cells) {
+static Code _lambda_declare_cells(List node, Map cells) {
   Array items = [];
   int celled = 0;
   match (node) {
@@ -2247,9 +2247,9 @@ static List _string_case_index(
   return $!int{ $index };
 }
 
-static Var _string_cases(
-  Var node, Map indices, Array labels, List site) {
-  if (node is not <list> || node.is_nil()) return node;
+static List _string_cases(
+  List node, Map indices, Array labels, List site) {
+  if (!node) return node;
   match (node) {
     case %((!or expr switch match) *): return node;
     case %(at ? ?inner):
@@ -2258,7 +2258,7 @@ static Var _string_cases(
     case %(case ?label):
       return %(case $(_string_case_index(label, indices, labels, site)));
   }
-  Var child;
+  List child;
   $ast.rewrite_children(
     node, child, _string_cases(child, indices, labels, site));
 }
