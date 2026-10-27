@@ -18,6 +18,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.add_support`](#Compiler.add_support) | Appends the declaration `decl` to the unit's pending support as it is: a definition offered to every function rule, or a written one. |
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
+| [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional reference that `condition` tests present for an operand that runs only when `condition` has truth `holds`, if that truth proves presence. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -159,6 +160,17 @@ A null node remains null. Macro construction uses its active `m-origin`
 marker; otherwise a node without a token remains unwrapped.
 
 Source: `src/compiler/source-locations.x:29`
+
+<a id="Compiler.assume_condition"></a>
+#### Compiler.assume_condition
+
+`List Compiler.assume_condition(Compiler c, List condition, int holds)`
+
+Marks the optional reference that `condition` tests present for an
+operand that runs only when `condition` has truth `holds`, if that truth
+proves presence. Returns the facts to restore after the operand.
+
+Source: `src/compiler/binding-facts.x:42`
 
 <a id="Compiler.at_completion"></a>
 #### Compiler.at_completion
@@ -531,7 +543,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler/binding-facts.x:49`
+Source: `src/compiler/binding-facts.x:61`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -678,7 +690,7 @@ Source: `src/compiler/parsing/tokens.x:142`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/binding-facts.x:39`
+Source: `src/compiler/binding-facts.x:51`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state

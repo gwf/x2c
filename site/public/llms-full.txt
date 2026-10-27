@@ -2009,12 +2009,23 @@ static int bump_if_present(int &?value) {
 }
 ```
 
-In the nonnull arm of a direct test, or after a null arm that returns or
-raises, the parameter is an ordinary `T` lvalue: reads, writes, and reference
-forwarding use the caller's storage transparently. Outside such a proven
-nonnull path it remains a nullable address and can be tested or forwarded to
-another optional reference. Forwarding it to a required reference is a compile
-error, as is passing null.
+A direct test is the parameter itself, its negation, or its comparison with
+`NULL` or `0`. A direct test proves the parameter nonnull in the matching arm
+of an `if` or `?:`, after an `if` whose null arm returns or raises, and in the
+right operand of `&&` or `||` when the left operand is the test:
+
+```x2c
+static int positive(int &?value) => value && value > 0;
+static int is_unset_or_zero(int &?value) => !value || value == 0;
+static int read_or(int &?value, int fallback) => value ? value : fallback;
+```
+
+On a proven path the parameter is an ordinary `T` lvalue: reads, writes, and
+reference forwarding use the caller's storage transparently. The proof ends
+with the arm, operand, or block that holds it. Outside a proven path the
+parameter remains a nullable address and can be tested or forwarded to another
+optional reference. Forwarding it to a required reference is a compile error,
+as is passing null.
 
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership

@@ -162,7 +162,7 @@ Source: `src/expressions/syntax.x:33`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:506`
+Source: `src/expressions/syntax.x:518`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -195,7 +195,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:285`
+Source: `src/expressions/syntax.x:297`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -211,7 +211,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:216`
+Source: `src/expressions/syntax.x:228`
 
 <a id="Compiler.parse_pattern_operand"></a>
 #### Compiler.parse_pattern_operand
@@ -220,7 +220,7 @@ Source: `src/expressions/syntax.x:216`
 
 Parses the right operand of a pattern test at relational precedence.
 
-Source: `src/expressions/syntax.x:95`
+Source: `src/expressions/syntax.x:101`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -231,7 +231,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:622`
+Source: `src/expressions/syntax.x:634`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -241,7 +241,7 @@ Source: `src/expressions/syntax.x:622`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:694`
+Source: `src/expressions/syntax.x:706`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
