@@ -723,7 +723,7 @@ static Map f9_templates____private_names(Compiler c, List fresh);
 
 static Var f9_templates____fill_syntax(f9_templates___Landing * l, Var syntax);
 
-static Var f9_templates____retained_declaration(List declaration);
+static List f9_templates____retained_declaration(List declaration);
 
 static int f9_templates____splices(f9_templates___Landing * l, Var item, List * spliced);
 
@@ -7655,14 +7655,14 @@ static Var f9_templates____fill_syntax(f9_templates___Landing * l, Var syntax){
 
   }
   Var filled =(void *) items ? List_var(Array_list_free(items)) : syntax;
-  return(* l).retain && x2c_var_equal(List_car(node), Symbol_var(8932560010)) ? f9_templates____retained_declaration(Var_list_payload(filled)) : filled;
+  return(* l).retain && x2c_var_equal(List_car(node), Symbol_var(8932560010)) ? List_var(f9_templates____retained_declaration(Var_list_payload(filled))) : filled;
 }
 
 List Type_declaration_base(Type, List *);
 
 List Ast_append_modifiers(List, List);
 
-static Var f9_templates____retained_declaration(List declaration){
+static List f9_templates____retained_declaration(List declaration){
   {
     List _x2c_gensym_match_expr_57 = declaration;
     {List _x2c_gensym_match_at_212, _x2c_gensym_match_at_213, _x2c_gensym_match_at_214, _x2c_gensym_match_at_215, _x2c_gensym_match_at_216; Var x2c_match_value_0; List x2c_match_list_1; if(_x2c_gensym_match_expr_57 && _x2c_gensym_match_expr_57 ->car.u64 == 9224497945694178442ULL &&(_x2c_gensym_match_at_212 = _x2c_gensym_match_expr_57 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_212 ->car, 1) &&(_x2c_gensym_match_at_213 = _x2c_gensym_match_at_212 ->cdr) &&(Var_is(_x2c_gensym_match_at_213 -> car, 806120) &&(_x2c_gensym_match_at_214 = Var_list_payload(_x2c_gensym_match_at_213 -> car), 1)) && _x2c_gensym_match_at_214 && _x2c_gensym_match_at_214 ->car.u64 == 9224498094476456422ULL &&(_x2c_gensym_match_at_215 = _x2c_gensym_match_at_214 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_215, 1) && !(_x2c_gensym_match_at_216 = _x2c_gensym_match_at_213 ->cdr)){
@@ -7673,7 +7673,7 @@ static Var f9_templates____retained_declaration(List declaration){
       {
         List modifiers = NULL;
         List base = Type_declaration_base(Var_type(specifiers), &(modifiers));
-        if(! List_truth(modifiers)) return List_var(declaration);
+        if(! List_truth(modifiers)) return declaration;
         Array moved = Array_new();
         {
           List row;
@@ -7686,10 +7686,10 @@ static Var f9_templates____retained_declaration(List declaration){
           }
 
         }
-        return List_var(({
+        return({
           Var _x2c_gensym_literal_part_112 = List_var(base);  Var _x2c_gensym_literal_part_113 = List_var(cons(_213, List_append(Array_list_free(moved), NULL)));  cons(_217, cons(_x2c_gensym_literal_part_112, cons(_x2c_gensym_literal_part_113, NULL)));
         }
-        ));
+        );
       }
 
     }
@@ -7697,7 +7697,7 @@ static Var f9_templates____retained_declaration(List declaration){
   }
 
 }
-return List_var(declaration);
+return declaration;
 }
 
 static int f9_templates____splices(f9_templates___Landing * l, Var item, List * spliced){

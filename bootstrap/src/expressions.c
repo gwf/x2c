@@ -284,7 +284,7 @@ static List f6_access____typedef_index(Compiler c, List expr, List index, Type t
 
 static int f6_access____collection_index_type(Compiler c, Type type);
 
-static List f6_access____getindex_expression(Compiler c, List expr, List index, Var params, Var rtype);
+static List f6_access____getindex_expression(Compiler c, List expr, List index, List params, Var rtype);
 
 static List f6_access____native_index(Compiler c, List expr, List index, Type type);
 
@@ -2566,7 +2566,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1960 = cons(_1959, NULL);
   _1961 = cons(_204, _1960);
   _1962 = List_var(_1961);
-  _1963 = int_var(92577);
+  _1963 = int_var(92646);
   _1964 = cons(_1963, NULL);
   _1965 = cons(_209, _1964);
   _1966 = List_var(_1965);
@@ -2765,7 +2765,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2156 = cons(_2155, NULL);
   _2157 = cons(_196, _2156);
   _2158 = List_var(_2157);
-  _2159 = int_var(92939);
+  _2159 = int_var(93008);
   _2160 = cons(_2159, NULL);
   _2161 = cons(_209, _2160);
   _2162 = List_var(_2161);
@@ -2882,7 +2882,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2273 = cons(_2272, NULL);
   _2274 = cons(_196, _2273);
   _2275 = List_var(_2274);
-  _2276 = int_var(93701);
+  _2276 = int_var(93770);
   _2277 = cons(_2276, NULL);
   _2278 = cons(_209, _2277);
   _2279 = List_var(_2278);
@@ -2980,7 +2980,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2371 = cons(_2370, NULL);
   _2372 = cons(_196, _2371);
   _2373 = List_var(_2372);
-  _2374 = int_var(93785);
+  _2374 = int_var(93854);
   _2375 = cons(_2374, NULL);
   _2376 = cons(_209, _2375);
   _2377 = List_var(_2376);
@@ -3105,7 +3105,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2496 = cons(_2495, NULL);
   _2497 = cons(_196, _2496);
   _2498 = List_var(_2497);
-  _2499 = int_var(93522);
+  _2499 = int_var(93591);
   _2500 = cons(_2499, NULL);
   _2501 = cons(_209, _2500);
   _2502 = List_var(_2501);
@@ -3206,7 +3206,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2594 = cons(_2593, NULL);
   _2595 = cons(_196, _2594);
   _2596 = List_var(_2595);
-  _2597 = int_var(93351);
+  _2597 = int_var(93420);
   _2598 = cons(_2597, NULL);
   _2599 = cons(_209, _2598);
   _2600 = List_var(_2599);
@@ -3298,7 +3298,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2686 = cons(_2685, NULL);
   _2687 = cons(_196, _2686);
   _2688 = List_var(_2687);
-  _2689 = int_var(93992);
+  _2689 = int_var(94061);
   _2690 = cons(_2689, NULL);
   _2691 = cons(_209, _2690);
   _2692 = List_var(_2691);
@@ -3510,7 +3510,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2898 = cons(_2897, NULL);
   _2899 = cons(_196, _2898);
   _2900 = List_var(_2899);
-  _2901 = int_var(96340);
+  _2901 = int_var(96409);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_209, _2902);
   _2904 = List_var(_2903);
@@ -5881,7 +5881,7 @@ List _x2c_nominal_getindex(Compiler c, Type type);
 static List f6_access____typedef_index(Compiler c, List expr, List index, Type type){
   int collection = f6_access____collection_index_type(c, type);  List resolved = _x2c_nominal_getindex(c, type);  if(! List_truth(resolved) && collection) resolved = Compiler_resolve_protocol_member(c, type, _1540);  Type signature = List_truth(resolved) ? Var_type(List_cadr(resolved)) : NULL; {
     List _x2c_gensym_match_expr_49 = Type_list(signature); {List _x2c_gensym_match_at_334, _x2c_gensym_match_at_335, _x2c_gensym_match_at_336, _x2c_gensym_match_at_337, _x2c_gensym_match_at_338, _x2c_gensym_match_at_339, _x2c_gensym_match_at_340, _x2c_gensym_match_at_341; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2; if(_x2c_gensym_match_expr_49 &&(Var_is(_x2c_gensym_match_expr_49 -> car, 806120) &&(_x2c_gensym_match_at_334 = Var_list_payload(_x2c_gensym_match_expr_49 -> car), 1)) && _x2c_gensym_match_at_334 && _x2c_gensym_match_at_334 ->car.u64 == 9224497936762055558ULL &&(_x2c_gensym_match_at_335 = _x2c_gensym_match_at_334 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_335 ->car, 1) &&((Var_is(_x2c_gensym_match_at_335 -> car, 806120) &&(_x2c_gensym_match_at_336 = Var_list_payload(_x2c_gensym_match_at_335 -> car), 1)) && _x2c_gensym_match_at_336 &&(x2c_match_value_1 = _x2c_gensym_match_at_336 ->car, 1) &&(_x2c_gensym_match_at_337 = _x2c_gensym_match_at_336 ->cdr) && !(_x2c_gensym_match_at_338 = _x2c_gensym_match_at_337 ->cdr)) && !(_x2c_gensym_match_at_339 = _x2c_gensym_match_at_335 ->cdr) &&(_x2c_gensym_match_at_340 = _x2c_gensym_match_expr_49 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_340 ->car, 1) && !(_x2c_gensym_match_at_341 = _x2c_gensym_match_at_340 ->cdr)){
-      Var params;  params = x2c_match_value_0;  Var receiver;  receiver = x2c_match_value_1;  Var rtype;  rtype = x2c_match_value_2;  if(collection || x2c_var_equal(receiver, List_var(type))) return f6_access____getindex_expression(c, expr, index, params, rtype);
+      Var params;  params = x2c_match_value_0;  Var receiver;  receiver = x2c_match_value_1;  Var rtype;  rtype = x2c_match_value_2;  if(collection || x2c_var_equal(receiver, List_var(type))) return f6_access____getindex_expression(c, expr, index, Var_list_payload(params), rtype);
     }
 
   }
@@ -5927,8 +5927,8 @@ List _x2c_nominal_getindex(Compiler c, Type type){
 return NULL;
 }
 
-static List f6_access____getindex_expression(Compiler c, List expr, List index, Var params, Var rtype){
-  Type key = Var_type(Var_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(c -> sym, supplied, _1254)) Compiler_report_error(c, 1362954, _1544, c -> token, NULL);  return({
+static List f6_access____getindex_expression(Compiler c, List expr, List index, List params, Var rtype){
+  Type key = Var_type(List_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(c -> sym, supplied, _1254)) Compiler_report_error(c, 1362954, _1544, c -> token, NULL);  return({
     Var _x2c_gensym_literal_part_107 = List_var(cons(rtype, NULL));  Var _x2c_gensym_literal_part_108 = List_var(cons(_1545, cons(List_var(expr), cons(List_var(index), NULL))));  cons(_1, cons(_x2c_gensym_literal_part_107, cons(_x2c_gensym_literal_part_108, NULL)));
   }
   );

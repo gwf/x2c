@@ -31,7 +31,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _captured_value(Compiler c, Var captured, Type want);
 
-static Var _name_syntax(Compiler c, List node, Token site);
+static List _name_syntax(Compiler c, List node, Token site);
 
 static Var _scalar_value(Compiler c, Var value, Type want);
 
@@ -39,7 +39,7 @@ static Var _cached_constant(Compiler c, List key);
 
 static Var _constant_leaf(Compiler c, List expr);
 
-static Var _cast_constant(Compiler c, Var type, List inner);
+static Var _cast_constant(Compiler c, Type type, List inner);
 
 static Var _joined_constant(Compiler c, Var left, Var right);
 
@@ -337,7 +337,7 @@ Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCal
   }
 
 }
-if(Var_is_void(value)) value = _name_syntax(c, node, site);  return _scalar_value(c, value, want);
+if(Var_is_void(value)) value = List_var(_name_syntax(c, node, site));  return _scalar_value(c, value, want);
 }
 
 int Sym_is_var_type(Sym, Type);
@@ -349,11 +349,11 @@ static Var _captured_value(Compiler c, Var captured, Type want){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-static Var _name_syntax(Compiler c, List node, Token site){
+static List _name_syntax(Compiler c, List node, Token site){
   {
     List _x2c_gensym_match_expr_2 = node;
     {List _x2c_gensym_match_at_19, _x2c_gensym_match_at_20, _x2c_gensym_match_at_21, _x2c_gensym_match_at_22, _x2c_gensym_match_at_23, _x2c_gensym_match_at_24; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_19 = _x2c_gensym_match_expr_2 ->cdr) &&(_x2c_gensym_match_at_20 = _x2c_gensym_match_at_19 ->cdr) &&(Var_is(_x2c_gensym_match_at_20 -> car, 806120) &&(_x2c_gensym_match_at_21 = Var_list_payload(_x2c_gensym_match_at_20 -> car), 1)) && _x2c_gensym_match_at_21 && _x2c_gensym_match_at_21 ->car.u64 == 9224497936780766120ULL &&(_x2c_gensym_match_at_22 = _x2c_gensym_match_at_21 ->cdr) && !(_x2c_gensym_match_at_23 = _x2c_gensym_match_at_22 ->cdr) && !(_x2c_gensym_match_at_24 = _x2c_gensym_match_at_20 ->cdr)){
-      return List_var(node);
+      return node;
     }
 
   }
@@ -459,7 +459,7 @@ static Var _constant_leaf(Compiler c, List expr){
         type = x2c_match_value_0;
         Var inner;
         inner = x2c_match_value_1;
-        return _cast_constant(c, type, Var_list_payload(inner));
+        return _cast_constant(c, Var_type(type), Var_list_payload(inner));
       }
       break;
       }}{List _x2c_gensym_match_at_31, _x2c_gensym_match_at_32, _x2c_gensym_match_at_33, _x2c_gensym_match_at_34, _x2c_gensym_match_at_35, _x2c_gensym_match_at_36; Var x2c_match_value_0; if(_x2c_gensym_match_expr_5 && _x2c_gensym_match_expr_5 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_31 = _x2c_gensym_match_expr_5 ->cdr) &&(_x2c_gensym_match_at_32 = _x2c_gensym_match_at_31 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_32 ->car, 1) &&((Var_is(_x2c_gensym_match_at_32 -> car, 806120) &&(_x2c_gensym_match_at_33 = Var_list_payload(_x2c_gensym_match_at_32 -> car), 1)) && _x2c_gensym_match_at_33 && _x2c_gensym_match_at_33 ->car.u64 == 9224497936767982090ULL &&(_x2c_gensym_match_at_34 = _x2c_gensym_match_at_33 ->cdr) && !(_x2c_gensym_match_at_35 = _x2c_gensym_match_at_34 ->cdr)) && !(_x2c_gensym_match_at_36 = _x2c_gensym_match_at_32 ->cdr)){{
@@ -518,8 +518,8 @@ static Var _constant_leaf(Compiler c, List expr){
   if(List_truth(expr) && x2c_var_equal(List_car(expr), Symbol_var(377892))) return((void) 0, Void);  return List_var(expr);
 }
 
-static Var _cast_constant(Compiler c, Var type, List inner){
-  Var constant = _constant_leaf(c, inner);  if(Var_is_void(constant)) return((void) 0, Void);  Symbol tag = Type_scalar_tag((Var_type(type)));  return tag ? Var_convert(constant, tag) : constant;
+static Var _cast_constant(Compiler c, Type type, List inner){
+  Var constant = _constant_leaf(c, inner);  if(Var_is_void(constant)) return((void) 0, Void);  Symbol tag = Type_scalar_tag(type);  return tag ? Var_convert(constant, tag) : constant;
 }
 
 static Var _joined_constant(Compiler c, Var left, Var right){

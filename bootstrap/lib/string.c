@@ -739,7 +739,7 @@ Iter String_iter(String x, Iter dest){
 }
 
 static int f8_adapters____next(Iter iter, Var * out){
-  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_as_string(iter -> obj);  if(index < 0 || index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
+  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_as_string(iter -> obj);  if(index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
 }
 
 int String_try_next(String str, int * cursor, int * out){
@@ -1131,7 +1131,7 @@ Split Var_split(Var value){
 }
 
 static inline int f7_cursors____end(String str, String sep, int start, int * next){
-  int length = String_len(str);  if(! String_truth(str) || start < 0 || start > length) return - 1;  if(! String_truth(sep)){
+  int length = String_len(str);  if(start < 0) return - 1;  if(! String_truth(sep)){
     (* next) = - 1;  return length;
   }
   const char * found = strstr(str + start, sep);  if(! found){
@@ -1141,7 +1141,7 @@ static inline int f7_cursors____end(String str, String sep, int start, int * nex
 }
 
 static inline int f7_cursors____line_end(String str, int start, int keep_ends, int * next){
-  int length = String_len(str);  if(! String_truth(str) || start < 0 || start >= length) return - 1;  const char * text = str;  int end = start;  while(end < length && text[end] != '\n' && text[end] != '\r') end ++;  int ending = 0;  if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1; (* next) = end + ending;  return keep_ends ?(* next) : end;
+  int length = String_len(str);  if(start >= length) return - 1;  const char * text = str;  int end = start;  while(end < length && text[end] != '\n' && text[end] != '\r') end ++;  int ending = 0;  if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1; (* next) = end + ending;  return keep_ends ?(* next) : end;
 }
 
 List String_split_n(String str, String sep, int max_splits){
@@ -1194,7 +1194,7 @@ Split String_splits(String str, String sep){
 }
 
 int Split_try_next(Split split, int * cursor, String * out){
-  if(! split || ! cursor || ! out || ! split -> next) return 0;  return split -> next(split, &(* cursor), &(* out));
+  if(! split || ! cursor || ! out) return 0;  return split -> next(split, &(* cursor), &(* out));
 }
 
 static int f7_cursors____iter_next(Iter iter, Var * out){

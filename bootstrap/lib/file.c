@@ -496,7 +496,7 @@ Iter File_iter(File file, Iter dest){
 }
 
 static int _next_line(Iter iter, Var * out){
-  File file = Var_file_payload(iter -> obj);  if(! file) return 0;  Block line = Var_block_payload(iter -> state);  if(line == NULL) return 0;  int keep = 0; {
+  File file = Var_file_payload(iter -> obj);  Block line = Var_block_payload(iter -> state);  if(line == NULL) return 0;  int keep = 0; {
     _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
       0
     }

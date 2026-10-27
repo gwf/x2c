@@ -138,7 +138,7 @@ static List _cursor_spec(Type collection_type, Type owner, int arity);
 
 static List _typed_cursor_spec(Type collection_type, List targets);
 
-static int _atom_type(List type);
+static int _atom_type(Type type);
 
 static int _valid_outputs(List outputs);
 
@@ -2231,18 +2231,18 @@ Type Type_canonicalize(Type);
 int Type_is_integral(Type);
 
 static List _cursor_spec(Type collection_type, Type owner, int arity){
-  if(! _atom_type(Type_list(collection_type)) || ! _atom_type(Type_list(owner))) return NULL;
+  if(! _atom_type(collection_type) || ! _atom_type(owner)) return NULL;
   Code function = _method(owner, _541);
   if(! List_truth(function)) return NULL;
   Type type = Code_type(function);
   List parameters = Type_parameters(type);
   List rest = List_cdr(parameters);
-  Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));
-  List outputs = List_truth(rest) ? List_cdr(rest) : NULL;
+  Type cursor_parameter = Var_type(List_car(rest));
+  List outputs = List_cdr(rest);
   if(! List_equal(Type_list(Type_return_type(type)), _543) ||(List_equal(Type_list(owner), Type_list(collection_type)) ? ! x2c_var_equal(List_car(parameters), List_var(collection_type)) : ! List_equal(Type_list(Type_resolve(Var_type(List_car(parameters)))), Type_list(Type_resolve(collection_type)))) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;
   Type cursor_type = Type_element(cursor_parameter);
   if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(Type_resolve(cursor_type)), Type_list(Type_resolve(collection_type)))) return NULL;
-  if(! List_truth(outputs) ||(arity == 2 && List_len(outputs) < 2)) return NULL;
+  if(List_len(outputs) < arity) return NULL;
   if(! _valid_outputs(outputs)) return NULL;
   List output_types = List_map(outputs, _x2c_gensym_func_handle_0);
   if(x2c_var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));
@@ -2250,7 +2250,6 @@ static List _cursor_spec(Type collection_type, Type owner, int arity){
 }
 
 static List _typed_cursor_spec(Type collection_type, List targets){
-  if(! List_truth(targets)) return NULL;
   Type requested = Code_type(Var_list_payload(List_last(targets)));
   List spec = _cursor_spec(collection_type, requested, List_len(targets));
   if(! List_truth(spec)) return NULL;
@@ -2259,10 +2258,8 @@ static List _typed_cursor_spec(Type collection_type, List targets){
   return List_equal(Type_list(Type_resolve(output)), Type_list(Type_resolve(requested))) ? spec : NULL;
 }
 
-static int _atom_type(List type){
-  if(List_len(type) != 1) return 0;
-  Var name = List_car(type);
-  return Var_is_row(name, 11, 7, 1) || Var_kind(name) == 1328354264;
+static int _atom_type(Type type){
+  return List_len(Type_list(type)) == 1;
 }
 
 static int _valid_outputs(List outputs){
@@ -2273,7 +2270,7 @@ static int _valid_outputs(List outputs){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       output = Var_type(_x2c_gensym_macro_cursor_output_1);
-      if(! Type_is_pointer(Type_canonicalize(output)) || ! _atom_type(Type_list(Type_element(output)))) return 0;
+      if(! Type_is_pointer(Type_canonicalize(output)) || ! _atom_type(Type_element(output))) return 0;
     }
 
   }
@@ -2371,7 +2368,7 @@ static List _loop(Foreach * f, List condition, List body, List setup){
 
 static List _iter_constructor(Foreach * f, List converter){
   List type =(* f).type;
-  int atom = _atom_type(type);
+  int atom = _atom_type(List_type(type));
   String owner = atom ? Var_str(List_car(type)) : _566;
   List enumerate = NULL;
   if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _529)) enumerate = MetaContext_function_reference(String_add(owner, _567));
@@ -2494,7 +2491,7 @@ static List _named(List fields){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       field = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      if(Var_is_row(List_car(field), 11, 7, 1) && String_len(Var_str(List_car(field))) > 0) Array_push(named, List_var(field));
+      if(String_len(Var_str(List_car(field))) > 0) Array_push(named, List_var(field));
     }
 
   }
