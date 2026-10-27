@@ -1109,17 +1109,17 @@ static int f6_number____only_space(const char * rest){
 }
 
 int String_try_long(String str, long * out){
-  if(! String_truth(str) || ! out) return 0;  const char * digits = str;  while(isspace((unsigned char) * digits)) digits ++;  int negative = 0;  if(* digits == '+' || * digits == '-'){
+  if(! out) return 0;  if(! String_truth(str)) return 0;  const char * digits = str;  while(isspace((unsigned char) * digits)) digits ++;  int negative = 0;  if(* digits == '+' || * digits == '-'){
     negative = * digits == '-';  digits ++;
   }
   if(digits[0] == '0' &&(digits[1] == 'b' || digits[1] == 'B' || digits[1] == 'o' || digits[1] == 'O')){
-    int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;  const char * number = digits + 2;  char * stop = NULL;  if(number[0] < '0' || number[0] >= '0' + base) return 0;  errno = 0;  unsigned long magnitude = strtoul(number, & stop, base);  if(errno == ERANGE || ! f6_number____only_space(stop)) return 0;  unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;  if(magnitude > limit) return 0;  if(! negative) * out =(long) magnitude;  else if(magnitude == limit) * out = LONG_MIN;  else * out = -(long) magnitude;  return 1;
+    int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;  const char * number = digits + 2;  char * stop = NULL;  if(number[0] < '0' || number[0] >= '0' + base) return 0;  errno = 0;  unsigned long magnitude = strtoul(number, & stop, base);  if(errno == ERANGE || ! f6_number____only_space(stop)) return 0;  unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;  if(magnitude > limit) return 0;  if(! negative)(* out) =(long) magnitude;  else if(magnitude == limit)(* out) = LONG_MIN;  else(* out) = -(long) magnitude;  return 1;
   }
-  char * stop = NULL;  errno = 0;  long value = strtol(str, & stop, 0);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  * out = value;  return 1;
+  char * stop = NULL;  errno = 0;  long value = strtol(str, & stop, 0);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0; (* out) = value;  return 1;
 }
 
 int String_try_double(String str, double * out){
-  if(! String_truth(str) || ! out) return 0;  char * stop = NULL;  errno = 0;  double value = strtod(str, & stop);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0;  * out = value;  return 1;
+  if(! out) return 0;  if(! String_truth(str)) return 0;  char * stop = NULL;  errno = 0;  double value = strtod(str, & stop);  if(stop ==(const char *) str || errno == ERANGE || ! f6_number____only_space(stop)) return 0; (* out) = value;  return 1;
 }
 
 Var Split_var(Split split){

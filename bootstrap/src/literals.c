@@ -1237,7 +1237,7 @@ static String _angle_spelling(String text){
 }
 
 static Symbol _exact_symbol(Compiler c, Token token, String spelling){
-  Symbol symbol;  if(Symbol_try_new(spelling, & symbol)) return symbol;  Symbol lossy = String_truth(spelling) ? Symbol_new(spelling) : 0;  Compiler_report_error(c, 33658058, _217, token, ({
+  Symbol symbol;  if(Symbol_try_new(spelling, &(symbol))) return symbol;  Symbol lossy = String_truth(spelling) ? Symbol_new(spelling) : 0;  Compiler_report_error(c, 33658058, _217, token, ({
     Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(_218), cons(String_var(spelling), NULL))));  Var _x2c_gensym_literal_part_12 = String_var(String_join(NULL, cons(String_var(_219), cons(String_var(Symbol_str(lossy)), NULL))));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
   }
   ));

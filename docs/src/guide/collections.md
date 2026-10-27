@@ -833,9 +833,9 @@ Numeric parsing reports success separately from the result:
 
 ```x2c
 long value;
-if ("42".try_long(&value)) printf("parsed %ld\n", value);
-if (!"abc".try_long(&value)) printf("rejected abc\n");
-if (!"4x".try_long(&value)) printf("rejected 4x\n");
+if ("42".try_long(value)) printf("parsed %ld\n", value);
+if (!"abc".try_long(value)) printf("rejected abc\n");
+if (!"4x".try_long(value)) printf("rejected 4x\n");
 ```
 
 ```text

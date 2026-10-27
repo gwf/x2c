@@ -26,12 +26,13 @@ static int _only_space(const char *rest) {
 
     ```x2c
     ~long value = 0;
-    printf("%d %ld\n", " -0b101 ".try_long(&value), value);
-    printf("%d\n", "42junk".try_long(&value));
+    printf("%d %ld\n", " -0b101 ".try_long(value), value);
+    printf("%d\n", "42junk".try_long(value));
     ```
 */
-meta native int String.try_long(String str, long *out) {
-  if (!str || !out) return 0;
+meta native int String.try_long(String str, long &?out) {
+  if (!out) return 0;
+  if (!str) return 0;
   const char *digits = str;
   while (isspace((unsigned char) *digits)) digits++;
   int negative = 0;
@@ -53,9 +54,9 @@ meta native int String.try_long(String str, long *out) {
     unsigned long limit =
       negative ? (unsigned long) LONG_MAX + 1ul : (unsigned long) LONG_MAX;
     if (magnitude > limit) return 0;
-    if (!negative) *out = (long) magnitude;
-    else if (magnitude == limit) *out = LONG_MIN;
-    else *out = -(long) magnitude;
+    if (!negative) out = (long) magnitude;
+    else if (magnitude == limit) out = LONG_MIN;
+    else out = -(long) magnitude;
     return 1;
   }
   char *stop = NULL;
@@ -63,7 +64,7 @@ meta native int String.try_long(String str, long *out) {
   long value = strtol(str, &stop, 0);
   if (stop == (const char *) str || errno == ERANGE || !_only_space(stop))
     return 0;
-  *out = value;
+  out = value;
   return 1;
 }
 
@@ -80,13 +81,14 @@ meta native int String.try_long(String str, long *out) {
     underflows `double` fails. The integer parser's `0o` and `0b` prefixes
     leave unconsumed text, so `0b101` fails the complete-parse check.
 */
-meta native int String.try_double(String str, double *out) {
-  if (!str || !out) return 0;
+meta native int String.try_double(String str, double &?out) {
+  if (!out) return 0;
+  if (!str) return 0;
   char *stop = NULL;
   errno = 0;
   double value = strtod(str, &stop);
   if (stop == (const char *) str || errno == ERANGE || !_only_space(stop))
     return 0;
-  *out = value;
+  out = value;
   return 1;
 }

@@ -121,7 +121,7 @@ static int _raised(Lint l, int at, Map diagnostics):
   int open = l.next(at)
   Symbol cause
   return l.token_is(at, "raise") && l.token_is(open, "%(") &&
-    Symbol.try_new(_cause(l, open), &cause) && cause in shared_causes
+    Symbol.try_new(_cause(l, open), cause) && cause in shared_causes
 
 /* Whether the tokens at `at` start a manual shape test: `.car(`, `.cdr(`,
    `.cadr(` and its relatives, `.len(`, `.is(<list>)`, `is <list>` or

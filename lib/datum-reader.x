@@ -118,14 +118,14 @@ static Var _atom(LispReader &r, Token token) {
 static Var _integer(LispReader &r, Token token) {
   long value;
   String literal = String.new_len(token.text, token.len);
-  if (!literal.try_long(&value)) return _malformed_token(r, token);
+  if (!literal.try_long(value)) return _malformed_token(r, token);
   if (value == (int) value) return (int) value;
   return value;
 }
 
 static Var _floating(LispReader &r, Token token) {
   double value, String literal = String.new_len(token.text, token.len);
-  if (!literal.try_double(&value)) return _malformed_token(r, token);
+  if (!literal.try_double(value)) return _malformed_token(r, token);
   return value;
 }
 

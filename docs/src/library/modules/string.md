@@ -1371,7 +1371,7 @@ Source: `lib/string/adapters.x:23`
 <a id="String.try_double"></a>
 #### String.try_double
 
-`meta native int String.try_double(String str, double *out)`
+`meta native int String.try_double(String str, double &?out)`
 
 Parses all of `str` as a floating-point number, writing `out`.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
@@ -1386,12 +1386,12 @@ as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
 underflows `double` fails. The integer parser's `0o` and `0b` prefixes
 leave unconsumed text, so `0b101` fails the complete-parse check.
 
-Source: `lib/string/number.x:83`
+Source: `lib/string/number.x:84`
 
 <a id="String.try_long"></a>
 #### String.try_long
 
-`meta native int String.try_long(String str, long *out)`
+`meta native int String.try_long(String str, long &?out)`
 
 Parses all of `str` as an integer, writing it through `out`.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
@@ -1405,8 +1405,8 @@ A value outside the range of `long` fails.
 
 ```x2c
 ~long value = 0;
-printf("%d %ld\n", " -0b101 ".try_long(&value), value);
-printf("%d\n", "42junk".try_long(&value));
+printf("%d %ld\n", " -0b101 ".try_long(value), value);
+printf("%d\n", "42junk".try_long(value));
 ```
 
 Source: `lib/string/number.x:33`

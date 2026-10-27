@@ -206,13 +206,13 @@ meta native Var Var.parse(String str, Symbol kind) {
   switch (kind) {
     case <int>: {
       long value;
-      if (!str.try_long(&value) || value < INT_MIN || value > INT_MAX)
+      if (!str.try_long(value) || value < INT_MIN || value > INT_MAX)
         return void;
       return (int) value;
     }
     case <float>: case <double>: {
       double value;
-      if (!str.try_double(&value)) return void;
+      if (!str.try_double(value)) return void;
       return value;
     }
     case <string>:    return str.parse();

@@ -1335,12 +1335,12 @@ Var Var_parse(String str, Symbol kind){
   switch(kind){
     case 19368 :{
       long value;
-      if(! String_try_long(str, & value) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
+      if(! String_try_long(str, &(value)) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
       return int_var((int) value);
     }
     case 13400168 : case 301273866 :{
       double value;
-      if(! String_try_double(str, & value)) return((void) 0, Void);
+      if(! String_try_double(str, &(value))) return((void) 0, Void);
       return double_var(value);
     }
     case 1318210446 : return String_var(String_parse(str));

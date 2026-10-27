@@ -107,11 +107,11 @@ Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
     the spelling. The null `String` is the empty `Symbol`.
     Raises: `<alloc-fail>` while checking the decoded spelling.
 */
-meta native int Symbol.try_new(String spelling, Symbol *out) {
+meta native int Symbol.try_new(String spelling, Symbol &?out) {
   if (!out) return 0;
   Symbol symbol = spelling ? Symbol.new(spelling) : 0;
   if (!spelling.equal(symbol)) return 0;
-  *out = symbol;
+  out = symbol;
   return 1;
 }
 
