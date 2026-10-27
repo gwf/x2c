@@ -232,7 +232,8 @@ module List _view_since(ErrorRegion &?region, int mark) {
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
     Var entry = _copy_value(region, record.entry);
-    out = region ? _cons(region, entry, out) : cons(entry, out);
+    if (region) out = _cons(region, entry, out);
+    else out = cons(entry, out);
   }
   return out;
 }
