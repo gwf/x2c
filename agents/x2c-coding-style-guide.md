@@ -549,44 +549,83 @@ typedef Block Widget;
 
 ## FI-4 - Reading order
 
-See FI-4 in [the standard](x2c-code-standard.md).
+See FI-4 and FI-5 in [the standard](x2c-code-standard.md). Use
+[order-x2c-functions](skills/order-x2c-functions/SKILL.md) to check an existing
+file or revise its order without changing function bodies.
 
-Prefer:
+The following fragment is illustrative. Two public operations precede their
+private groups. The first operation claims the shared `_normalize` helper.
+The later comparison group calls that helper upward rather than duplicating
+it or scattering the parsing group.
 
 ```x2c
-// slice normalization
+// values
 
-Array Array.getslice(Array a, int start, int stop, int step) {
-  // ...
-}
+int read_value(int depth) => _parse(depth);
 
-static int _normalize_bound(int length, int *bound) {
-  // ...
-}
+int compare_values(int left, int right) => _compare(left, right);
+
+// parsing
+
+static int _parse(int depth) =>
+  depth > 0 ? _parse_group(depth - 1) : _normalize(depth);
+
+static int _parse_group(int depth) => _parse(depth);
+
+static int _normalize(int value) => value % 10;
+
+// comparison
+
+static int _compare(int left, int right) =>
+  _normalize(left) - _normalize(right);
 ```
 
-Avoid:
+`_parse` and `_parse_group` are mutually recursive. Their component follows
+`read_value`; inside it, the parser entry precedes the group step that calls
+back. No internal order can make every recursive call point downward.
+If one public operation calls another, put the caller first, accounting for
+paths through private functions too. Leave independent public operations in
+their existing order unless a clearer explanation warrants a different tie.
+
+In [regex.x](../lib/regex.x), compilation claims pattern construction and
+shared byte tests. Matching follows with `_run` and `_resume` together so
+the reader learns continuation behavior before the individual node actions.
+Traversal and replacement reuse the earlier search machinery. These upward
+cross-group calls conform to FI-4; moving the shared machinery after its
+last caller would weaken the thematic groups.
+
+Source-order-sensitive code is a boundary, not another function to sort.
+Preserve macro availability, preprocessing regions, top-level script work,
+and required declarations. Check module members through their containing
+unit, while keeping definitions in their current physical files.
+
+Place section introductions at their operations. A parsing introduction
+belongs above the parser entry, while a representation comment belongs by
+the parser's type. Avoid labels that merely mirror visibility tiers or
+remain attached to a former first function after the section changes.
+
+Prefer a short lower-case label:
+
+```x2c
+// immutable programs
+```
+
+When the reader needs a constraint, give the section one focused explanation:
+
+```x2c
+/* file walks
+
+   A cold walk splits a file at its includes and visibility boundaries and
+   records each segment's declarations in source order. */
+```
+
+Avoid rulers and a comment table of contents:
 
 ```x2c
 // PRIVATE HELPERS ===========================================================
 // PUBLIC INTERFACE ---------------------------------------------------------
 // ARRAY METHODS ============================================================
 // SLICE METHODS ============================================================
-```
-
-Example:
-
-```x2c
-// immutable programs
-```
-
-Example:
-
-```x2c
-/* file walks
-
-   A cold walk splits a file at its includes and visibility pragmas and
-   records each segment's declarations in source order. */
 ```
 
 ## CM-1 - Choose the narrowest comment form

@@ -419,21 +419,44 @@ elsewhere.
 
 **FI-3** Keep the prologue order: header; `#pragma once` in a module other
 modules include; includes needed by public declarations; public types and
-declarations; implementation includes; private representation, state, and
-definitions. Use `static` for private declarations. Types needed by public
-interfaces are promoted automatically.
+declarations; implementation includes; private representation and owner state.
+Function definitions follow FI-4. Use `static` for file-private declarations
+and preserve `module` storage where the unit needs it. Types needed by public
+interfaces are promoted automatically. Preserve source-order requirements.
 
-**FI-4** Order the file so it reads top to bottom: representation and
-owner state; the central operation; the concepts it uses, in the order it
-uses them, one section each; incidental work; lifecycle and public entry
-points. Inside a section, the main function comes first and its helpers
-follow in call order. Macros and types precede their first use.
+**FI-4** Put public function definitions first, in caller-before-callee
+order, including dependencies through private functions. Then, for each
+public function in that order, place its reachable private dependencies that
+have not already appeared. Order each private group caller before callee.
+A shared helper belongs to the first group that reaches it; later groups may
+call upward. Treat `module` functions as private implementation without
+changing their storage. Use remaining module functions as roots next, then
+remaining private components; in an all-private file, start with components
+that have no incoming local calls.
+
+Treat mutually recursive functions as one component for ordering. Within a
+recursive component, put the central operation first, then its continuation
+and conceptual steps. If a cycle spans public and private functions, keep
+public definitions first. Prefer existing order for unrelated functions; adjust
+unconstrained ties for a clear explanation. Broad conformance permits these
+choices instead of requiring one exact sort. Do not infer dead code from
+missing callers. The [function-order skill](skills/order-x2c-functions/SKILL.md)
+applies this rule in check or revise mode.
+
+Apply the order within regions that can move safely. Keep macros, aliases,
+includes, preprocessing branches, declarations, and top-level statements at
+the positions their semantics require. Source-order constraints take
+precedence; explain a material exception rather than adding prototypes,
+changing visibility, or rewriting functions to satisfy the order.
 
 **FI-5** Open each section with a plain lower-case label, `// file walks`.
 A concept that needs more gets up to three sentences in one block comment
 that starts with the label: `/* file walks`, a blank line, the sentences.
-Aim for 3 to 12 functions per section; a section over 400 lines or with two
-concepts splits. Never use rulers, all-capital labels, or a table of
+Place each label at the first operation it introduces; keep representation
+comments with the type or state they explain. Carry function documentation
+with its definition when moving it. Aim for 3 to 12 functions per section;
+a section over 400 lines or with two concepts splits. A dependency group may
+have several sections. Never use rulers, all-capital labels, or a table of
 contents made of comments.
 
 **FI-6** Rely on complete-unit collection instead of redundant forward
