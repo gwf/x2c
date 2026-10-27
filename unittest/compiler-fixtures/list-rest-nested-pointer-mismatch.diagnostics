@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-rest-nested-pointer-mismatch.x:7:2: type: incompatible List rest calling convention
+unittest/compiler-fixtures/list-rest-nested-pointer-mismatch.x:7:2: type: incompatible rest calling convention
    int (*invoke_ordinary)(Ordinary) = invoke_rest;
    ^^^
 

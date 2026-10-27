@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-rest-missing-prefix.x:3:18: xform: too few arguments for List rest function
+unittest/compiler-fixtures/list-rest-missing-prefix.x:3:18: xform: too few arguments for rest function
   int main(void) { return count(); }
                    ^^^^^^
 

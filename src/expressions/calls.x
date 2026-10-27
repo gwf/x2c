@@ -278,6 +278,11 @@ static macro Stmt $func_splice(Expr $function, Expr $storage,
   $storage[$index] = x2c_func_splice_argument($function, $index, $value);
 }
 
+static macro Stmt $func_map_splice(Expr $function, Expr $storage,
+    Expr $index, Expr $value) {
+  $storage[$index] = x2c_func_map_splice_argument($function, $index, $value);
+}
+
 static macro Expression $func_value(Expr $argument) =>
   FuncArg_value($argument);
 
@@ -301,9 +306,10 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
   foreach (List argument in arguments) {
     List index = $!int{ $(position++) };
     match (argument) case %(expr ? (splice ?value)): {
-      Macro splice = $func_splice;
+      int map = c.sym.is_map_type(value.cadr());
+      Macro splice = map ? $func_map_splice : $func_splice;
       prepared.push(splice(function, storage, index,
-        c.convert_expression(value, %("List"))));
+        c.convert_expression(value, map ? %("Map") : %("List"))));
       continue;
     }
     Type type = argument.cadr();
@@ -342,9 +348,18 @@ static macro Expression $func_call(Expr $callee, Expr $count,
   Func_apply(function, $count, storage);
 });
 
+/* A dynamic call passes each Map rest entry as its key and then its value;
+   Func.apply pairs them into the Map. */
 static List _resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
-  List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
+  Array flat = [];
+  foreach (List argument in
+           _resolve_call_arguments(c, NULL, supplied, origin))
+    match (argument) {
+      case %(expr ? (map-entry ?key ?value)): flat.push(key), flat.push(value);
+      default: flat.push(argument);
+    }
+  List arguments = flat.list_free();
   if (_deferred_call(callee, NULL, arguments)) {
     Macro called = $called;
     return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
@@ -389,10 +404,12 @@ static List _func_arg_part(List argument) {
   Macro prepare = $func_argument, absent = $func_null_argument,
         boxed = $func_value;
   Var value = %(no-value), address = NULL, source = NULL;
-  Macro splice = $func_splice;
+  Macro splice = $func_splice, map_splice = $func_map_splice;
   match (argument) {
     case splice(?function, ?storage, ?index, ?value):
       return %(func-splice $value);
+    case map_splice(?function, ?storage, ?index, ?value):
+      return %(func-map-splice $value);
     case prepare(
       ?function, ?storage, ?count, ?index, ?pointer, ?type, ?alternative): {
       match (alternative) case boxed(?boxed_value): value = boxed_value;

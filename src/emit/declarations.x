@@ -31,7 +31,8 @@ module void _bind(Emitter &e, List ident, List mods) {
 }
 
 module void _param(Emitter &e, List type, List mods) {
-  _emit(e, type === %(....) ? %("List") : type);
+  Type container = Type.rest_container(type);
+  _emit(e, container ? container : type);
   _node(e, mods);
 }
 
