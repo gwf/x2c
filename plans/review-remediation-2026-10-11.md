@@ -1,6 +1,8 @@
 # Remaining language-reference explanations
 
-> Status: active, narrowed 2026-10-24 against `7e9fd0178`.
+> Status: active, narrowed 2026-10-24 against `7e9fd0178`; the Lisp row
+> was narrowed to runtime Lisp on 2026-10-27 after compile-time Lisp was
+> removed in `ff3aba2aa`.
 > Repair batches and their decisions are delivered. Only the selected
 > writing remains here; its missing coverage must be identified precisely.
 
@@ -12,7 +14,7 @@ Finish the three accepted explanations by extending their existing owners:
 | --- | --- | --- |
 | Canonical source forms and their legal positions | The [AST grammar](../docs/src/internals/ast-grammar.md) catalogs current List layouts and positions; the [language reference](../docs/src/reference/language.md) owns semantics. | AST catalog delivered. Keep source-position contracts linked to that reference; this closes only the catalog writing, not the unrelated explanations below. |
 | Rewrite order, decline, and visibility | [Generating code](../docs/src/guide/generating-code.md) and the rule selection/decline contract in `lib/meta.x` | Check the accepted examples against the existing explanation and fill only missing ordering or visibility cases. |
-| Compile-time Lisp truthiness, binding, and host limits | The Lisp binding, inherited-name, `set_global`, and `eval` sections in [the language reference](../docs/src/reference/language.md) | Identify missing truthiness and implementation-limit explanations; do not rewrite already documented binding behavior. |
+| Runtime Lisp truthiness, binding, and host limits | The Runtime Lisp section of [the language reference](../docs/src/reference/language.md), with its binding, inherited-name, `set_global`, and `eval` text | Identify missing truthiness and implementation-limit explanations for runtime Lisp; do not rewrite already documented binding behavior. Compile-time Lisp no longer exists. |
 
 Maintain factual supported-feature and platform descriptions as ordinary
 documentation. Do not create an additional ABI promise or portability campaign.

@@ -102,11 +102,11 @@ pointer commits on `main`.
    Follow that exact run through upload, Pages, live checks and retained
    proof. Report completion only after production verification succeeds.
 
-The retained legacy `pages.yml` source is only a baseline recovery tool during
-the first-release transition; its workflow registration stays disabled. It is not part of normal candidate promotion;
-never dispatch it as an alternative to deploying the selected site archive.
-The first release must establish its production baseline and recovery path
-under deployment operations before Gary advances main.
+The retained legacy `pages.yml` source is not part of candidate promotion;
+its workflow registration stays disabled, and it is never dispatched as an
+alternative to deploying the selected site archive. The 0.15.0 and 0.15.1
+releases established the production baseline and recovery path recorded
+under deployment operations.
 
 ## Versions and packages
 

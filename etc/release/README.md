@@ -211,20 +211,17 @@ install/run jobs after staging and four after production, with torch on two
 platforms. First-release fault/two-candidate rehearsal is one-time. Activation
 must have the agreed cost approval; do not invent a new ordinary gate.
 
-## First-cutover recovery prerequisite
+## Recovery baseline
 
-The restoration workflow accepts releases produced and verified by this new
-pipeline. The pre-cutover production release has no such receipt. Before
-retiring the old Pages workflow, capture its exact deployed Pages artifact,
-record its SHA-256 and deployment/run ID, and rehearse deploying that retained
-artifact through Pages without rebuilding the site. Preserve that baseline
-and its separate Gary-approved recovery procedure for the first release.
-The currently inspected legacy Pages artifact has expired. Baseline capture
-and its recovery procedure remain unresolved and must be settled with Gary
-before the first production promotion; do not label a fresh site rebuild the
-previously deployed site. Keep the legacy Pages source available with its registration disabled until
-this recovery decision is
-settled. It does not authorize inspection or changes to ongoing sessions.
+The restoration workflow accepts releases produced and verified by this
+pipeline. The 0.15.0 (2026-10-16) and 0.15.1 (2026-10-17) releases were
+promoted through it with their receipts, so recovery restores the newest of
+those receipts. The pre-cutover Pages artifact expired before it was
+captured, and no SHA-256 or deployment ID was recorded, so the site that
+preceded 0.15.0 cannot be restored from a receipt; do not label a fresh
+site rebuild the previously deployed site. The legacy Pages source stays
+with its registration disabled until Gary retires it. It does not
+authorize inspection or changes to ongoing sessions.
 
 ## Local verification
 
