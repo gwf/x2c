@@ -39,11 +39,11 @@ struct Func{
 }
 ;
 
-static List _12, _10, _7, _6, _3, _1;
+static List _13, _11, _10, _7, _6, _3, _1;
 
 static String _8, _4;
 
-static Var _11, _9, _5, _2, _0;
+static Var _12, _9, _5, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -127,15 +127,16 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = cons(_0, NULL);
   _2 = Symbol_var(194457181);
   _3 = cons(_2, NULL);
-  _4 = String_new("Map");
+  _4 = String_new("List");
   _5 = String_var(_4);
   _6 = cons(_5, NULL);
   _7 = cons(_2, _6);
-  _8 = String_new("List");
+  _8 = String_new("Map");
   _9 = String_var(_8);
   _10 = cons(_9, NULL);
-  _11 = Symbol_var(1473096);
-  _12 = cons(_11, NULL);
+  _11 = cons(_2, _10);
+  _12 = Symbol_var(1473096);
+  _13 = cons(_12, NULL);
 }
 
 static size_t f4_func____context_offset(void){
@@ -556,15 +557,15 @@ if(context_size > SIZE_MAX - context_offset){
 
 }
 Var last = List_last(params);
-if(x2c_var_equal(last, List_var(_3))) rest = 1;
-else if(x2c_var_equal(last, List_var(_7))) rest = 2;
-else if(rest && ! x2c_var_equal(last, List_var(_10))){
+if(x2c_var_equal(last, List_var(_3)) || x2c_var_equal(last, List_var(_7))) rest = 1;
+else if(x2c_var_equal(last, List_var(_11))) rest = 2;
+else if(rest && ! x2c_var_equal(last, List_var(_6))){
   static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 508,.runtime = 1};
   x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372535886, 1, Symbol_var(39502), List_var(signature));
   __builtin_unreachable();
 }
 int n = List_len(params);
-int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_12));
+int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_13));
 Func fn = xcalloc(1, context_offset + context_size);
 fn -> sig = signature;
 fn -> params = void_params ? NULL : params;
