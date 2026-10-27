@@ -5887,6 +5887,7 @@ List Compiler_parse_parameter(Compiler c){
   if(rest && ! Compiler_test(c, 93)) return _723;
   List qual = rest ? NULL : _type_qualifiers(c);
   List spec = rest ? _725 : _type_specifier(c), type = List_append(qual, List_append(spec, NULL));
+  if(! rest && List_equal(type, _444) && Compiler_test(c, 129)) rest = 1, type = _725;
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, &(method), &(first), &(after));
