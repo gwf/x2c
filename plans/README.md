@@ -47,7 +47,6 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Compiler Lisp independence](compiler-lisp-independence.md) | Earlier cleanup batch, integrated as PR #294. | Historical scope and evidence; the native-compiler plan owns the new goal. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
@@ -78,12 +77,15 @@ first-cutover recovery prerequisite. No production promotion is selected here.
 
 ### Decisions and completed records
 
-Landed 2026-10-25:
+Completed work archived on 2026-10-26:
 
-- [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md): the
+- [Compiler Lisp independence](archive/compiler-lisp-independence.md):
+  the cleanup batch landed as PR #294 (`71088fa33`); the native-compiler
+  plan superseded its remaining dependencies and easy-wins limit.
+- [Native compiler with runtime Lisp](archive/native-compiler-runtime-lisp.md): the
   compiler neither links nor evaluates Lisp; published in `ff3aba2aa` with
   cleanup `735e72f73`.
-- [Collection reading and parenthesized unquote](collection-reading-and-unquote.md):
+- [Collection reading and parenthesized unquote](archive/collection-reading-and-unquote.md):
   `$(...)` and `@(...)` replace braced insertion and splicing, `$(a, b)` builds
   a List, and `${key: value}` builds a Map; published in `b9eed26d1`.
 

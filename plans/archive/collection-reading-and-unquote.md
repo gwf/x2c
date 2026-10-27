@@ -1,6 +1,6 @@
 # Collection reading and parenthesized unquote
 
-> Status: landed
+> Status: done
 > Specification and implementation plan approved in discussion, 2026-10-25.
 > Implemented, validated with `agent-pr-check`, and published to `dev` in
 > `b9eed26d1` on 2026-10-25.

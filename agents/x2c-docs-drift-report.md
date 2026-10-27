@@ -65,18 +65,9 @@ supported behavior merely by appearing in the repository.
 The `docs/` entries above are chapters of the mdBook whose spine is
 `docs/src/SUMMARY.md`.
 
-## Remaining staged audit
+## Coverage limit
 
-- Fragmentary code blocks in the coding-style guide need explicit
-  illustrative/pseudo labels before a
-  future audit can require all claimed standalone examples to compile.
-
-## Repair order
-
-1. Keep the checked entry points, language guides, examples, and generated
-   catalog green.
-2. Reconcile the remaining coding-style examples with live idioms.
-
-Do not call the entire documentation set verified merely because
-`make doc-check` passes. The command states its exact coverage, and this
-report keeps the remaining families explicit.
+The [source style examples](x2c-coding-style-guide.md) identify their code as
+illustrative fragments. They are not compiled by the book example checks.
+`make doc-check` therefore does not establish that every fragment uses current
+syntax or APIs. Review the relevant example against source before adopting it.

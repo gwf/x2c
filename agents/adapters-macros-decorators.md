@@ -543,22 +543,17 @@ node with a typed quotation such as `$!String{ $text }`, or with a `%(...)`
 List where the generator manipulates structure. The SDK declares no
 constructors.
 
-## Measure a candidate
+## Evaluate a candidate
 
-Before keeping a macro or decorator, record:
+Compare the direct code and the proposed replacement. Explain which facts
+have one owner, which operations disappear, and any added indirection or
+public surface. Source-line counts support that comparison; they do not prove
+that the replacement is easier to understand.
 
-- direct source lines removed;
-- macro, decorator, ledger, and helper lines added;
-- number and clarity of invocation sites;
-- which facts now have one owner;
-- generated public-surface changes;
-- normal and live-symbol translation results;
-- generated C differences;
-- relevant runtime or translation benchmark results;
-- diagnostics from one deliberately invalid use.
-
-Count each candidate independently. A useful cleanup elsewhere must not hide
-a macro that loses on its own.
+Use focused checks that distinguish the affected behavior. The root
+[validation instructions](../AGENTS.md#validate-publication) own publication
+checks, and [performance checkpoints](performance-checkpoints.md) owns
+performance evidence. This guide adds no separate validation sequence.
 
 ## Add what we learn
 

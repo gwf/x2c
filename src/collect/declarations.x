@@ -60,6 +60,22 @@ module void _needed_types(List syntax, Map rows, Map needed) {
   }
 }
 
+/* Adds complete type families until their declaration dependencies close. */
+static void _select_type_families(
+  Map rows, Map statics, Map needed, Map selected) {
+  int changed;
+  do {
+    changed = 0;
+    foreach (Var (key, value) in rows) {
+      List family = _row_type_family(rows, statics, key, value);
+      if (!family || !(family in needed) || key in selected) continue;
+      selected[key] = value;
+      if (value is <list>) _needed_types(value, rows, needed);
+      changed = 1;
+    }
+  } while (changed);
+}
+
 module void _select_public(FileWalk &w) {
   if (!w.unit) return;
   Map rows = {}, needed = {}, selected = {};
@@ -69,21 +85,11 @@ module void _select_public(FileWalk &w) {
     if (value ~= %(declaration-source *)) continue;
     List family = _row_type_family(rows, w.statics, key, value);
     if (_private_row(w.statics, key, family)) continue;
-    selected[key] = 1;
+    selected[key] = value;
     if (family) needed[family] = 1;
     if (value is <list>) _needed_types(value, rows, needed);
   }
-  int changed;
-  do {
-    changed = 0;
-    foreach (Var (key, value) in rows) {
-      List family = _row_type_family(rows, w.statics, key, value);
-      if (!family || !(family in needed) || key in selected) continue;
-      selected[key] = 1;
-      if (value is <list>) _needed_types(value, rows, needed);
-      changed = 1;
-    }
-  } while (changed);
+  _select_type_families(rows, w.statics, needed, selected);
   foreach (Var part in w.parts) {
     if (part is not <map>) continue;
     Array dropped = auto [];
@@ -507,20 +513,9 @@ static void _publish_inline_dependencies(
   if (!additions.len()) return;
   List entry = _entry(c, path);
   if (!entry) return;
-  Map needed = {}, selected = {};
+  Map needed = {};
   foreach (List value in additions) _needed_types(value, all, needed);
-  int changed;
-  do {
-    changed = 0;
-    foreach (Var (key, value) in all) {
-      List family = _row_type_family(all, statics, key, value);
-      if (!family || !(family in needed) || key in selected) continue;
-      selected[key] = 1;
-      additions[key] = value;
-      if (value is <list>) _needed_types(value, all, needed);
-      changed = 1;
-    }
-  } while (changed);
+  _select_type_families(all, statics, needed, additions);
   Map published = {};
   foreach (Var part in entry.car())
     if (part is <map>)

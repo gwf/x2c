@@ -1,6 +1,6 @@
 # Native compiler with runtime Lisp
 
-> Status: landed
+> Status: done
 > Approved design, 2026-10-25. Implemented, validated with
 > `agent-pr-check`, and published to `dev` on 2026-10-25 with Gary's
 > approval.

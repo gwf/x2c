@@ -1,20 +1,11 @@
 # Compiler independence from Lisp
 
-> Status: active
-> Local work authorized by Gary on 2026-10-24, starting at `9e68d6b`.
-> Preserve canonical Lists, the REPL, and runtime Lisp.
-> Reconciled with predecessor PR #285 at `5f7274f978b7749e5d2d9cad1b218ea99277ea2b`.
-> Gary authorized local replay and combined validation on 2026-10-24.
-> The independent source changes are replayed on `5f7274f` in
-> `codex/lisp-independence-pr285`; combined local validation passed.
-> Current dev `a90359210` is integrated locally; reassessment and fresh
-> combined validation passed. Scalar forwarding is implemented and validated
-> locally. All selected changes remain unpublished.
-> The two compiler-owned Func inventory wrappers are implemented locally;
-> signature, identity, lifetime, initialization, and full local checks pass.
-> Gary now authorizes a draft GitHub PR for the completed batch. Push only
-> its work branch; keep further exploration local. No dev/main push or merge
-> is authorized. Harder cases remain deferred.
+> Status: done
+> The cleanup batch landed as PR #294 (`71088fa33`) on 2026-10-24.
+> [Native compiler with runtime Lisp](native-compiler-runtime-lisp.md)
+> superseded the remaining compiler-Lisp dependencies and easy-wins limit.
+> Local-only and draft-PR instructions below record historical authorization;
+> current work follows the root [AGENTS.md](../../AGENTS.md).
 
 ## Result and boundaries
 
