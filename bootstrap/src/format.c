@@ -92,6 +92,29 @@ char * Compiler_code_pretty_string(Compiler c, Array code, String output_file){
   return Buffer_str_free(p.buff);
 }
 
+String Compiler_code_text(Compiler c, Array tokens){
+  Buffer text = Buffer_new(0);
+  String prev = NULL;
+  {
+    Var item;
+    Array _x2c_gensym_macro_object_0 = tokens;
+    int _x2c_gensym_macro_cursor_0 = 0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(Array_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      item = _x2c_gensym_macro_cursor_output_0;
+      {
+        String token = Var_str(item);
+        if(_need_space(prev, token)) Buffer_write(text, " ");
+        Buffer_write(text, token);
+        prev = token;
+      }
+
+    }
+
+  }
+  return Buffer_str_free(text);
+}
+
 List Compiler_origin_location(Compiler, int);
 
 static void _source_marker(Pretty * p, Var value){

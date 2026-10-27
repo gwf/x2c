@@ -680,11 +680,12 @@ static List _unit_private_rows(Compiler c, Map globs){
       key = _x2c_gensym_macro_cursor_output_2;
       owner = _x2c_gensym_macro_cursor_output_3;
       {
-        Var _x2c_gensym_match_var = key; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
-        List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-          if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _21 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        Var _x2c_gensym_match_var_0 = key;
+        int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);
+        List _x2c_gensym_match_expr_0 = Var_list_payload(_x2c_gensym_match_var_0);
+        if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _21 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
           Var name;
-          name = _x2c_gensym_match_value_0;
+          name = x2c_match_value_0;
           {
             String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
             if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
@@ -693,13 +694,15 @@ static List _unit_private_rows(Compiler c, Map globs){
           }
 
         }
-         } } }
+
       }
 
     }
 
   }
-  return Array_list_free(rows);
+
+}
+return Array_list_free(rows);
 }
 
 static List _unit_private_row(Map globs, List key){
