@@ -10,6 +10,10 @@ shipped, built, and tested with x2c, and need an explicit include. Runtime
 internals are implementation details. Third-party libraries are under
 `packages/` and use `import`.
 
+Number parsing, number formatting, and case mapping call C's locale
+functions and are specified for the default `C` locale; a program that
+calls `setlocale` changes what they accept and produce.
+
 ## Hold a value whose type varies
 
 Use [Var](modules/var.md) when you do not know the type of a value until the
