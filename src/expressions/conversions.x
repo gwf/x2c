@@ -70,8 +70,9 @@ module void _check_converter_args(
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    if (expected.rest_container() == %("Map")) break;
-    if (expected.rest_container()) {
+    Type container = expected.rest_container();
+    if (container == %("Map")) break;
+    if (container) {
       expected = %("Var");
       if (argument ~= %(expr ? (splice ?value)))
         argument = value, expected = %("List");

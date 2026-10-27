@@ -15,6 +15,10 @@ static String show(Map options) {
   return String.join(",", entries.sort());
 }
 
+macro Entry $pair(Literal $key, Expr $value) {
+  $key: $value, "extra": 0
+}
+
 static String opts(int fixed, Map @options) => %"$fixed:$(show(options))";
 static int count(Map @options) => options.len();
 static String String.tag(String self, Map @options) =>
@@ -28,6 +32,7 @@ int main(void) {
   printf("%s\n", opts(3, (key): 7, "s": 8, <sym>: 9));
   printf("%s %s\n", opts(4, @base, size: 2), opts(5, size: 2, @base));
   printf("%s\n", opts(6, a: 1, a: 2));
+  printf("%s\n", opts(9, $pair("open", 1), c: 3));
   int entries = count(x: step(1), @(({ step(2); base; })), y: step(3));
   printf("%d trace %d\n", entries, trace);
   printf("%s\n", "t".tag(k: 1));
