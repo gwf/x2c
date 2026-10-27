@@ -142,7 +142,7 @@ static int f11_expressions____right_operand_level(Symbol operator);
 
 static void _operand(Emitter * e, Var node, int level);
 
-static void f11_expressions____op_spine(Emitter * e, Var operator, Var left, Var right);
+static void f11_expressions____op_spine(Emitter * e, Symbol operator, Var left, Var right);
 
 static void _joined(Emitter * e, List tests, Symbol op);
 
@@ -2052,7 +2052,7 @@ static void _operand(Emitter * e, Var node, int level){
   if(grouped) _put(&((* e)), String_var(_2));
 }
 
-static void f11_expressions____op_spine(Emitter * e, Var operator, Var left, Var right){
+static void f11_expressions____op_spine(Emitter * e, Symbol operator, Var left, Var right){
   Array operators = Array_new();
   const Array _x2c_gensym_macro_acquired_1 = operators;
   {
@@ -2081,7 +2081,7 @@ static void f11_expressions____op_spine(Emitter * e, Var operator, Var left, Var
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_3);
         {
-          Var op_item = operator, left_item = left, right_item = right;
+          Var op_item = Symbol_var(operator), left_item = left, right_item = right;
           int level = 0;
           for(; ; ){
             Array_push(operators, op_item);
@@ -2220,7 +2220,7 @@ static void _binary(Emitter * e, Symbol operator, Var left, Var right){
     List _x2c_gensym_match_expr_13 = Var_list_payload(_x2c_gensym_match_var_3);
     if(! _x2c_gensym_match_none_3){List _x2c_gensym_match_at_75, _x2c_gensym_match_at_76, _x2c_gensym_match_at_77, _x2c_gensym_match_at_78; if(_x2c_gensym_match_expr_13 && _x2c_gensym_match_expr_13 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_75 = _x2c_gensym_match_expr_13 ->cdr) &&(_x2c_gensym_match_at_76 = _x2c_gensym_match_at_75 ->cdr) &&(Var_is(_x2c_gensym_match_at_76 -> car, 806120) &&(_x2c_gensym_match_at_77 = Var_list_payload(_x2c_gensym_match_at_76 -> car), 1)) && _x2c_gensym_match_at_77 && _x2c_gensym_match_at_77 ->car.u64 == 9224497936761619424ULL && !(_x2c_gensym_match_at_78 = _x2c_gensym_match_at_76 ->cdr)){
       {
-        f11_expressions____op_spine(&((* e)), Symbol_var(operator), left, right);
+        f11_expressions____op_spine(&((* e)), operator, left, right);
         return;
       }
 

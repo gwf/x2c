@@ -44,9 +44,9 @@ static void f6_scopes____clear_symbols(Sym s, Map globals, int base_scopes);
 
 static void f6_scopes____push_symbols(Sym s, Map symbols);
 
-static int f6_scopes____unseen(Map seen, Var name);
+static int f6_scopes____unseen(Map seen, String name);
 
-static Symbol f6_scopes____macro_kind(Var definition);
+static Symbol f6_scopes____macro_kind(List definition);
 
 static int f8_bindings____retained_member(List key);
 
@@ -517,7 +517,7 @@ List Sym_visible_symbols(Sym s){
             Var _x2c_gensym_match_value_0 = name;
             {
               String name = Var_as_string(_x2c_gensym_match_value_0);
-              if(f6_scopes____unseen(seen, String_var(name))) Array_push(rows, List_var(cons(String_var(name), cons(value, NULL))));
+              if(f6_scopes____unseen(seen, name)) Array_push(rows, List_var(cons(String_var(name), cons(value, NULL))));
             }
 
           }
@@ -539,8 +539,8 @@ List Sym_visible_symbols(Sym s){
     while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
       name = _x2c_gensym_macro_cursor_output_2;
       definition = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
-      if(Var_is_row(name, 11, 7, 1) && f6_scopes____unseen(seen, name)) Array_push(rows, List_var(({
-        Var _x2c_gensym_literal_part_0 = name;  Var _x2c_gensym_literal_part_1 = Symbol_var(f6_scopes____macro_kind(List_var(definition)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+      if(Var_is_row(name, 11, 7, 1) && f6_scopes____unseen(seen, Var_as_string(name))) Array_push(rows, List_var(({
+        Var _x2c_gensym_literal_part_0 = name;  Var _x2c_gensym_literal_part_1 = Symbol_var(f6_scopes____macro_kind(definition));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
       }
       )));
     }
@@ -551,14 +551,14 @@ List Sym_visible_symbols(Sym s){
 return Array_list_free(rows);
 }
 
-static int f6_scopes____unseen(Map seen, Var name){
-  if(Map_contains(seen, name)) return 0;
-  Map_setindex(seen, name, int_var(1));
+static int f6_scopes____unseen(Map seen, String name){
+  if(Map_contains(seen, String_var(name))) return 0;
+  Map_setindex(seen, String_var(name), int_var(1));
   return 1;
 }
 
-static Symbol f6_scopes____macro_kind(Var definition){
-  Symbol kind = Var_symbol(Var_is_row(definition, 9, 7, 4) ? List_assoc(Var_list(definition), Symbol_var(740232)) : int_var(0));
+static Symbol f6_scopes____macro_kind(List definition){
+  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));
   return kind == 1362954 ? 45733174647966 : 27335838;
 }
 

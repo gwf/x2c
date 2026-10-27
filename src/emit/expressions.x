@@ -61,7 +61,7 @@ module void _operand(Emitter &e, Var node, int level) {
    walk the spine iteratively, so a long chain spends no recursion on its
    left operands. The walk stops where the nested operator needs
    parentheses, leaving that operand to the ordinary recursion. */
-static void _op_spine(Emitter &e, Var operator, Var left, Var right) {
+static void _op_spine(Emitter &e, Symbol operator, Var left, Var right) {
   Array operators = auto [];
   Array rights = auto [];
   Var op_item = operator, left_item = left, right_item = right;

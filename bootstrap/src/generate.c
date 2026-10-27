@@ -75,7 +75,7 @@ static int f6_output____needs_errors(List item);
 
 static List f6_output____vertical_spacing(List code);
 
-static void f6_output____push_line(Array out, Var node);
+static void f6_output____push_line(Array out, List node);
 
 static List f6_output____include_guard(Compiler c, List content);
 
@@ -142,9 +142,9 @@ static void f10_projection____promote_typedefs(Array header, Array pending);
 
 static int f10_projection____at(f10_projection___HeaderNeeds * n, int i, List names);
 
-static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, Var name);
+static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, String name);
 
-static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, Var name);
+static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, String name);
 
 static void _spelled_types(List node, Map names);
 
@@ -1023,7 +1023,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _568 = cons(_565, _567);
   _569 = List_var(_568);
   _570 = Symbol_var(1133019155420);
-  _571 = int_var(39641);
+  _571 = int_var(39648);
   _572 = cons(_571, NULL);
   _573 = cons(_570, _572);
   _574 = List_var(_573);
@@ -1106,7 +1106,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _651 = cons(_650, NULL);
   _652 = cons(_557, _651);
   _653 = List_var(_652);
-  _654 = int_var(39555);
+  _654 = int_var(39562);
   _655 = cons(_654, NULL);
   _656 = cons(_570, _655);
   _657 = List_var(_656);
@@ -1476,15 +1476,15 @@ static List f6_output____vertical_spacing(List code){
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      f6_output____push_line(out, List_var(node));
+      f6_output____push_line(out, node);
     }
 
   }
   return Array_list_free(out);
 }
 
-static void f6_output____push_line(Array out, Var node){
-  Array_push(out, node);
+static void f6_output____push_line(Array out, List node){
+  Array_push(out, List_var(node));
   Array_push(out, List_var(_17));
 }
 
@@ -1578,7 +1578,7 @@ static List f6_output____source_unit(Compiler c, List content){
           Var _x2c_gensym_macro_cursor_output_6;
           while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
             include = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
-            f6_output____push_line(lines, List_var(include));
+            f6_output____push_line(lines, include);
           }
 
         }
@@ -1589,11 +1589,11 @@ static List f6_output____source_unit(Compiler c, List content){
           Var _x2c_gensym_macro_cursor_output_7;
           while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
             include = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
-            f6_output____push_line(lines, List_var(include));
+            f6_output____push_line(lines, include);
           }
 
         }
-        f6_output____push_line(lines, List_var(f6_output____runtime_entry(c, node)));
+        f6_output____push_line(lines, f6_output____runtime_entry(c, node));
       }
 
     }
@@ -2179,14 +2179,14 @@ static int f10_projection____at(f10_projection___HeaderNeeds * n, int i, List na
     Var _x2c_gensym_macro_cursor_output_16;
     while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_16))){
       name = Var_as_string(_x2c_gensym_macro_cursor_output_16);
-      if(! f10_projection____declared_before(&((* n)), i, String_var(name)) && f10_projection____spelled_after(&((* n)), i, String_var(name))) return 1;
+      if(! f10_projection____declared_before(&((* n)), i, name) && f10_projection____spelled_after(&((* n)), i, name)) return 1;
     }
 
   }
   return 0;
 }
 
-static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, Var name){
+static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, String name){
   if((void *)(* n).declared == 0){
     (* n).declared = Map_new();
     int count = Array_len((* n).header);
@@ -2204,16 +2204,16 @@ static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, i
 
   }
   Var first;
-  return Map_try_get((* n).declared, name, &(first)) && Var_int(first) < i;
+  return Map_try_get((* n).declared, String_var(name), &(first)) && Var_int(first) < i;
 }
 
-static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, Var name){
+static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, String name){
   if((void *)(* n).spelled == 0)(* n).spelled = Map_new();
   while((* n).walked > i + 1){
     Var item = Array_getindex((* n).header, --(* n).walked);
     if(Var_is_row(item, 9, 7, 4)) _spelled_types(Var_list_payload(item), (* n).spelled);
   }
-  return Map_contains((* n).spelled, name);
+  return Map_contains((* n).spelled, String_var(name));
 }
 
 int Symbol_is_type_qualifier(Symbol);

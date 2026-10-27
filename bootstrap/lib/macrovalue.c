@@ -180,13 +180,13 @@ static int f11_recognition____identity_equal(void * raw_machine, int slot, Var l
 
 static int f11_recognition____has_slot(const int * slots, int count, int slot);
 
-static String f11_recognition____source_spelling(Var value);
+static String f11_recognition____source_spelling(List value);
 
 static int f11_recognition____held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value);
 
 static Var f11_recognition____unwrap(Var value);
 
-static MacroPublishing f11_recognition____publishing(Macro t, Var pattern, List names, List internal);
+static MacroPublishing f11_recognition____publishing(Macro t, List pattern, List names, List internal);
 
 static int f11_recognition____publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published);
 
@@ -1130,7 +1130,7 @@ static int f11_recognition____pending_capture(Macro t, List grouped, List names,
   ;
   List internal = f11_recognition____internal_names(t, names, 1);
   if(! x2c_match_try_capture(grouped, List_var(internal), &(captured))) return 0;
-  MacroPublishing route = f11_recognition____publishing(t, List_var(internal), names, internal);
+  MacroPublishing route = f11_recognition____publishing(t, internal, names, internal);
   return f11_recognition____publish(&(route), &(captured), published);
 }
 
@@ -1169,7 +1169,7 @@ static int f11_recognition____capture(List code, MatchPlan plan, MacroFixedSlots
 static int f11_recognition____derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   macro_subject_used = 0;
   List pattern = f11_recognition____case_shape(t, names);
-  MacroPublishing route = f11_recognition____publishing(t, List_var(pattern), names, f11_recognition____internal_names(t, names, 0));
+  MacroPublishing route = f11_recognition____publishing(t, pattern, names, f11_recognition____internal_names(t, names, 0));
   if(f11_recognition____keep(site, t, names, pattern, &(route))) return f11_recognition____capture(code, site -> match.plan, &(site -> policy), &(site -> route), published);
   MatchPlan plan = MatchPlan_prepare(List_var(pattern));
   {
@@ -1360,8 +1360,8 @@ static int f11_recognition____identity_equal(void * raw_machine, int slot, Var l
   right = f11_recognition____unwrap(right);
   if(f11_recognition____has_slot(policy -> name_slots, policy -> names, slot)){
     String spelling = NULL;
-    if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = f11_recognition____source_spelling(right);
-    else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = f11_recognition____source_spelling(left);
+    if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = f11_recognition____source_spelling(Var_list_payload(right));
+    else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = f11_recognition____source_spelling(Var_list_payload(left));
     if(String_truth(spelling)) return x2c_var_equal(String_var(spelling), (Var_is_row(left, 11, 7, 1) ? left : right));
   }
   if(! Var_equal(left, right)) return 0;
@@ -1374,8 +1374,7 @@ static int f11_recognition____has_slot(const int * slots, int count, int slot){
   return 0;
 }
 
-static String f11_recognition____source_spelling(Var value){
-  if(! Var_is_row(value, 9, 7, 4)) return NULL;
+static String f11_recognition____source_spelling(List value){
   {
     List row;
     List _x2c_gensym_macro_object_15 = Var_is_row(macro_subject, 9, 7, 4) ? Var_list(macro_subject) : NULL;
@@ -1393,7 +1392,7 @@ static String f11_recognition____source_spelling(Var value){
           Var _x2c_gensym_match_value_4 = spelling;
           {
             String spelling = Var_as_string(_x2c_gensym_match_value_4);
-            if(List_compare(Var_list_payload(binding), Var_list_payload(value)) == 0) return spelling;
+            if(List_compare(Var_list_payload(binding), value) == 0) return spelling;
           }
 
         }
@@ -1406,10 +1405,8 @@ static String f11_recognition____source_spelling(Var value){
 
 }
 {
-  Var _x2c_gensym_match_var_3 = value;
-  int _x2c_gensym_match_none_3 = ! Var_is(_x2c_gensym_match_var_3, 806120);
-  List _x2c_gensym_match_expr_11 = Var_list_payload(_x2c_gensym_match_var_3);
-  if(! _x2c_gensym_match_none_3){List _x2c_gensym_match_at_46, _x2c_gensym_match_at_47, _x2c_gensym_match_at_48; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_46 = _x2c_gensym_match_expr_11 ->cdr) &&(_x2c_gensym_match_at_47 = _x2c_gensym_match_at_46 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_47 ->car, 1) && Var_is(_x2c_gensym_match_at_47 -> car, 1318210446) && !(_x2c_gensym_match_at_48 = _x2c_gensym_match_at_47 ->cdr)){
+  List _x2c_gensym_match_expr_11 = value;
+  {List _x2c_gensym_match_at_46, _x2c_gensym_match_at_47, _x2c_gensym_match_at_48; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_46 = _x2c_gensym_match_expr_11 ->cdr) &&(_x2c_gensym_match_at_47 = _x2c_gensym_match_at_46 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_47 ->car, 1) && Var_is(_x2c_gensym_match_at_47 -> car, 1318210446) && !(_x2c_gensym_match_at_48 = _x2c_gensym_match_at_47 ->cdr)){
     Var spelling;
     spelling = x2c_match_value_0;
     Var _x2c_gensym_match_value_5 = spelling;
@@ -1455,10 +1452,10 @@ static Var f11_recognition____unwrap(Var value){
           inner = x2c_match_value_0;
           {
             {
-              Var _x2c_gensym_match_var_4 = inner;
-              int _x2c_gensym_match_none_4 = ! Var_is(_x2c_gensym_match_var_4, 806120);
-              List _x2c_gensym_match_expr_13 = Var_list_payload(_x2c_gensym_match_var_4);
-              if(! _x2c_gensym_match_none_4){if(_x2c_gensym_match_expr_13 && _x2c_gensym_match_expr_13 ->car.u64 == 9224497936761996324ULL){
+              Var _x2c_gensym_match_var_3 = inner;
+              int _x2c_gensym_match_none_3 = ! Var_is(_x2c_gensym_match_var_3, 806120);
+              List _x2c_gensym_match_expr_13 = Var_list_payload(_x2c_gensym_match_var_3);
+              if(! _x2c_gensym_match_none_3){if(_x2c_gensym_match_expr_13 && _x2c_gensym_match_expr_13 ->car.u64 == 9224497936761996324ULL){
                 {
                   value = inner;
                   continue;
@@ -1482,12 +1479,12 @@ static Var f11_recognition____unwrap(Var value){
 }
 }
 
-static MacroPublishing f11_recognition____publishing(Macro t, Var pattern, List names, List internal){
+static MacroPublishing f11_recognition____publishing(Macro t, List pattern, List names, List internal){
   MacroPublishing route ={
     .complete = 1
   }
   ;
-  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);
+  MatchCaptureLayout actual = MatchCaptureLayout_analyze(List_var(pattern));
   MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(names));
   List holes = Var_list_payload(List_assoc(t, Symbol_var(1129338912386214)));
   for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){

@@ -208,11 +208,9 @@ static List _typed_cursor_spec(Type collection_type, List targets) {
 }
 
 /* Whether `type` is named by one String or Symbol. */
-static int _atom_type(Var type) {
-  if (type is not <list>) return 0;
-  List items = type;
-  if (items.len() != 1) return 0;
-  Var name = items.car();
+static int _atom_type(List type) {
+  if (type.len() != 1) return 0;
+  Var name = type.car();
   return name is <string> || name.kind() == <symbol>;
 }
 

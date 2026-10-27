@@ -497,10 +497,8 @@ static List _complete_iter_call(
   return c.rebuild_expression(%("Iter"), called(callee, values));
 }
 
-static int _exact_iter_type(Var value) {
-  Type type = value is <list> ? value : $(value);
-  return type.canonicalize() == %("Iter");
-}
+static int _exact_iter_type(Type type) =>
+  type.canonicalize() == %("Iter");
 
 static List _iter_destination(void) =>
   $!(struct Iter *){ &(struct Iter){ 0 } };

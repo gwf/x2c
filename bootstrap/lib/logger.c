@@ -209,7 +209,7 @@ static Var _retain(LogMemorySink l, Var value);
 
 static Var _retain_wide(LogMemorySink l, Var value);
 
-static Var _retain_string(LogMemorySink l, Var value);
+static Var _retain_string(LogMemorySink l, String value);
 
 static Var _retain_lisp_symbol(LogMemorySink l, Var value);
 
@@ -1238,11 +1238,13 @@ static void _destroy_memory(Var data){
   xfree(context);
 }
 
+String Var_as_string(Var);
+
 static Var _retain(LogMemorySink l, Var value){
   if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
   if(Var_is_wide(value)) return _retain_wide(l, value);
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is_row(value, 11, 7, 1)) return _retain_string(l, value);
+  if(Var_is_row(value, 11, 7, 1)) return _retain_string(l, Var_as_string(value));
   if(Var_is(value, 826970)) return _retain_lisp_symbol(l, value);
   if(Var_is_row(value, 9, 7, 4)) return List_var(_retain_list(l, Var_list_payload(value)));
   return value;
@@ -1275,12 +1277,9 @@ static Var _retain_wide(LogMemorySink l, Var value){
   return copy;
 }
 
-String Var_as_string(Var);
-
-static Var _retain_string(LogMemorySink l, Var value){
-  if(_pool_chain_owns(l -> pool, value)) return value;
-  String string = Var_as_string(value);
-  return String_var(String_new_in(l -> pool, string, String_len(string)));
+static Var _retain_string(LogMemorySink l, String value){
+  if(_pool_chain_owns(l -> pool, String_var(value))) return String_var(value);
+  return String_var(String_new_in(l -> pool, value, String_len(value)));
 }
 
 static Var _retain_lisp_symbol(LogMemorySink l, Var value){

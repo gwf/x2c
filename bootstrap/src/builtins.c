@@ -138,7 +138,7 @@ static List _cursor_spec(Type collection_type, Type owner, int arity);
 
 static List _typed_cursor_spec(Type collection_type, List targets);
 
-static int _atom_type(Var type);
+static int _atom_type(List type);
 
 static int _valid_outputs(List outputs);
 
@@ -2231,7 +2231,7 @@ Type Type_canonicalize(Type);
 int Type_is_integral(Type);
 
 static List _cursor_spec(Type collection_type, Type owner, int arity){
-  if(! _atom_type(List_var(collection_type)) || ! _atom_type(List_var(owner))) return NULL;
+  if(! _atom_type(Type_list(collection_type)) || ! _atom_type(Type_list(owner))) return NULL;
   Code function = _method(owner, _541);
   if(! List_truth(function)) return NULL;
   Type type = Code_type(function);
@@ -2259,11 +2259,9 @@ static List _typed_cursor_spec(Type collection_type, List targets){
   return List_equal(Type_list(Type_resolve(output)), Type_list(Type_resolve(requested))) ? spec : NULL;
 }
 
-static int _atom_type(Var type){
-  if(! Var_is_row(type, 9, 7, 4)) return 0;
-  List items = Var_list_payload(type);
-  if(List_len(items) != 1) return 0;
-  Var name = List_car(items);
+static int _atom_type(List type){
+  if(List_len(type) != 1) return 0;
+  Var name = List_car(type);
   return Var_is_row(name, 11, 7, 1) || Var_kind(name) == 1328354264;
 }
 
@@ -2275,7 +2273,7 @@ static int _valid_outputs(List outputs){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       output = Var_type(_x2c_gensym_macro_cursor_output_1);
-      if(! Type_is_pointer(Type_canonicalize(output)) || ! _atom_type(List_var(Type_element(output)))) return 0;
+      if(! Type_is_pointer(Type_canonicalize(output)) || ! _atom_type(Type_list(Type_element(output)))) return 0;
     }
 
   }
@@ -2373,7 +2371,7 @@ static List _loop(Foreach * f, List condition, List body, List setup){
 
 static List _iter_constructor(Foreach * f, List converter){
   List type =(* f).type;
-  int atom = _atom_type(List_var(type));
+  int atom = _atom_type(type);
   String owner = atom ? Var_str(List_car(type)) : _566;
   List enumerate = NULL;
   if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _529)) enumerate = MetaContext_function_reference(String_add(owner, _567));

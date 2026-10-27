@@ -100,7 +100,7 @@ static Array _cache_ids(Compiler c, List code) {
    Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
    identity memo avoids repeatedly walking shared subgraphs. A collision only
    replaces one memo entry and may cause harmless extra work. */
-static void _collect_ids(Compiler c, Var value, List *seen, Array ids) {
+static void _collect_ids(Compiler c, List value, List *seen, Array ids) {
   auto Array pending = [$(value)], marked = [];
   marked.resize(c.id_keys.len());
   while (pending) {
