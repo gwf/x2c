@@ -17986,7 +17986,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15374 = List_var(_15373);
   _15375 = String_new("src/meta-native/bindings.x");
   _15376 = String_var(_15375);
-  _15377 = String_new("304ce6b3");
+  _15377 = String_new("a53043d6");
   _15378 = String_var(_15377);
   _15379 = cons(_15378, NULL);
   _15380 = cons(_15376, _15379);
