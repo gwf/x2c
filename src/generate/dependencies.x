@@ -237,7 +237,7 @@ static int _inline_binding(Compiler c, List binding) =>
 
 
 
-/* Adds to `available` each binding `value` declares, with each function's
+/* Adds to `declared` each binding `value` declares, with each function's
    native spelling and each typedef's spelling. */
 static void _collect_declared(Var value, Map declared) {
   if (value is not <list> || value.is_nil()) return;
