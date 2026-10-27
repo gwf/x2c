@@ -3457,8 +3457,7 @@ int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder){
 
 int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
   if(! _init_guard_) _file_init_();
-  if(! m) return 0;
-  if(index < 0 || index >=(* m).capacity || index >= MACHINE_BINDER_MAX) return 0;
+  if(! m || index < 0 || index >=(* m).capacity || index >= MACHINE_BINDER_MAX) return 0;
   return _capture_bit((* m).present, index);
 }
 
@@ -3483,8 +3482,7 @@ static int _prepared(MatchPlan plan, const char * owner){
 }
 
 static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
-  if(! captures) return 0;
-  if(! layout ||(* captures).capacity < layout -> binder_count) return 0;
+  if(! captures || ! layout ||(* captures).capacity < layout -> binder_count) return 0;
   return ! layout -> binder_count ||(* captures).values != NULL;
 }
 
@@ -3542,8 +3540,7 @@ static int f9_execution____key_equal(MatchPlan plan, Var value, Var key){
 }
 
 static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures){
-  if(! captures) return - 1;
-  if((* captures).capacity < view.binder_count ||(view.binder_count && !(* captures).values)) return - 1;
+  if(! captures ||(* captures).capacity < view.binder_count ||(view.binder_count && !(* captures).values)) return - 1;
   MatchMachine_begin(&((* m)), view, input);
   MatchMachine_run(&((* m)));
   int result = - 1;
@@ -4096,7 +4093,7 @@ int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var 
   MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_search(input, pat, out_match, out_bindings);
   if(! out_match || ! out_bindings) return 0;
-  return MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
+  return MatchPlan_try_search(plan, input, &((* out_match)), &((* out_bindings))) == 1;
 }
 
 List List_search(List input, Var pat);
@@ -4206,7 +4203,7 @@ List List_search(List input, Var pat){
 
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  return out_match && out_bindings && MatchCache_try_search(MatchCache_current(), input, pat, out_match, out_bindings, "List.try_search");
+  return out_match && out_bindings && MatchCache_try_search(MatchCache_current(), input, pat, &((* out_match)), &((* out_bindings)), "List.try_search");
 }
 
 List List_search_replace(List input, Var pat, Var template){

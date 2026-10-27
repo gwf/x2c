@@ -1835,7 +1835,7 @@ char ArrayChar_push(ArrayChar _x2c_gensym_macro_array_16, char _x2c_gensym_macro
 static int Block_try_pop(Block, void *);
 
 int ArrayChar_try_take_last(ArrayChar _x2c_gensym_macro_array_17, char * _x2c_gensym_macro_out_5){
-  return _x2c_gensym_macro_out_5 ? _x2c_gensym_macro_array_17 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_17, &(* _x2c_gensym_macro_out_5)) : 0;
+  return _x2c_gensym_macro_array_17 != NULL && _x2c_gensym_macro_out_5 ? Block_try_pop((Block) _x2c_gensym_macro_array_17, &(* _x2c_gensym_macro_out_5)) : 0;
 }
 
 char ArrayChar_take_last(ArrayChar _x2c_gensym_macro_array_18){
@@ -2472,7 +2472,7 @@ short ArrayShort_push(ArrayShort _x2c_gensym_macro_array_65, short _x2c_gensym_m
 }
 
 int ArrayShort_try_take_last(ArrayShort _x2c_gensym_macro_array_66, short * _x2c_gensym_macro_out_18){
-  return _x2c_gensym_macro_out_18 ? _x2c_gensym_macro_array_66 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_66, &(* _x2c_gensym_macro_out_18)) : 0;
+  return _x2c_gensym_macro_array_66 != NULL && _x2c_gensym_macro_out_18 ? Block_try_pop((Block) _x2c_gensym_macro_array_66, &(* _x2c_gensym_macro_out_18)) : 0;
 }
 
 short ArrayShort_take_last(ArrayShort _x2c_gensym_macro_array_67){
@@ -3079,7 +3079,7 @@ int ArrayInt_push(ArrayInt _x2c_gensym_macro_array_114, int _x2c_gensym_macro_va
 }
 
 int ArrayInt_try_take_last(ArrayInt _x2c_gensym_macro_array_115, int * _x2c_gensym_macro_out_31){
-  return _x2c_gensym_macro_out_31 ? _x2c_gensym_macro_array_115 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_115, &(* _x2c_gensym_macro_out_31)) : 0;
+  return _x2c_gensym_macro_array_115 != NULL && _x2c_gensym_macro_out_31 ? Block_try_pop((Block) _x2c_gensym_macro_array_115, &(* _x2c_gensym_macro_out_31)) : 0;
 }
 
 int ArrayInt_take_last(ArrayInt _x2c_gensym_macro_array_116){
@@ -3688,7 +3688,7 @@ long ArrayLong_push(ArrayLong _x2c_gensym_macro_array_163, long _x2c_gensym_macr
 }
 
 int ArrayLong_try_take_last(ArrayLong _x2c_gensym_macro_array_164, long * _x2c_gensym_macro_out_44){
-  return _x2c_gensym_macro_out_44 ? _x2c_gensym_macro_array_164 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_164, &(* _x2c_gensym_macro_out_44)) : 0;
+  return _x2c_gensym_macro_array_164 != NULL && _x2c_gensym_macro_out_44 ? Block_try_pop((Block) _x2c_gensym_macro_array_164, &(* _x2c_gensym_macro_out_44)) : 0;
 }
 
 long ArrayLong_take_last(ArrayLong _x2c_gensym_macro_array_165){
@@ -4295,7 +4295,7 @@ float ArrayFloat_push(ArrayFloat _x2c_gensym_macro_array_212, float _x2c_gensym_
 }
 
 int ArrayFloat_try_take_last(ArrayFloat _x2c_gensym_macro_array_213, float * _x2c_gensym_macro_out_57){
-  return _x2c_gensym_macro_out_57 ? _x2c_gensym_macro_array_213 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_213, &(* _x2c_gensym_macro_out_57)) : 0;
+  return _x2c_gensym_macro_array_213 != NULL && _x2c_gensym_macro_out_57 ? Block_try_pop((Block) _x2c_gensym_macro_array_213, &(* _x2c_gensym_macro_out_57)) : 0;
 }
 
 float ArrayFloat_take_last(ArrayFloat _x2c_gensym_macro_array_214){
@@ -4902,7 +4902,7 @@ double ArrayDbl_push(ArrayDbl _x2c_gensym_macro_array_261, double _x2c_gensym_ma
 }
 
 int ArrayDbl_try_take_last(ArrayDbl _x2c_gensym_macro_array_262, double * _x2c_gensym_macro_out_70){
-  return _x2c_gensym_macro_out_70 ? _x2c_gensym_macro_array_262 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_262, &(* _x2c_gensym_macro_out_70)) : 0;
+  return _x2c_gensym_macro_array_262 != NULL && _x2c_gensym_macro_out_70 ? Block_try_pop((Block) _x2c_gensym_macro_array_262, &(* _x2c_gensym_macro_out_70)) : 0;
 }
 
 double ArrayDbl_take_last(ArrayDbl _x2c_gensym_macro_array_263){
@@ -5511,7 +5511,7 @@ String ArrayString_push(ArrayString _x2c_gensym_macro_array_310, String _x2c_gen
 }
 
 int ArrayString_try_take_last(ArrayString _x2c_gensym_macro_array_311, String * _x2c_gensym_macro_out_83){
-  return _x2c_gensym_macro_out_83 ? _x2c_gensym_macro_array_311 != NULL && Block_try_pop((Block) _x2c_gensym_macro_array_311, &(* _x2c_gensym_macro_out_83)) : 0;
+  return _x2c_gensym_macro_array_311 != NULL && _x2c_gensym_macro_out_83 ? Block_try_pop((Block) _x2c_gensym_macro_array_311, &(* _x2c_gensym_macro_out_83)) : 0;
 }
 
 String ArrayString_take_last(ArrayString _x2c_gensym_macro_array_312){
