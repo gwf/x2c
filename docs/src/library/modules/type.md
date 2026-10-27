@@ -487,9 +487,10 @@ Source: `lib/type.x:158`
 
 Returns the container Type, `("List")` or `("Map")`, that a rest
 parameter packs its arguments into, or NULL for any other parameter.
-`List @name` has the Type `(....)` and `Map @name` has `(.... "Map")`.
+`List @name` has the Type `(.... "List")` and `Map @name` has
+`(.... "Map")`.
 
-Source: `lib/type.x:195`
+Source: `lib/type.x:196`
 
 <a id="Type.rest_index"></a>
 #### Type.rest_index

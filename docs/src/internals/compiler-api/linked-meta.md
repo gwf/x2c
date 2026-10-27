@@ -196,7 +196,7 @@ Source: `src/linked-meta.x:918`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2718`
+Source: `src/linked-meta.x:2716`
 
 #### linked_meta_targets
 
@@ -205,7 +205,7 @@ Source: `src/linked-meta.x:2718`
 Returns a fresh Map of linked copies and runtime builders by name.
 The Map borrows shared Func handles that live for the program.
 
-Source: `src/linked-meta.x:2479`
+Source: `src/linked-meta.x:2477`
 
 #### match_condition_lowering
 
@@ -239,7 +239,7 @@ Source: `src/linked-meta.x:2011`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:2126`
+Source: `src/linked-meta.x:2124`
 
 #### raise_lowering
 
@@ -248,7 +248,7 @@ Source: `src/linked-meta.x:2126`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:2189`
+Source: `src/linked-meta.x:2187`
 
 #### register_rewrite
 
@@ -265,7 +265,7 @@ Source: `src/linked-meta.x:109`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:2288`
+Source: `src/linked-meta.x:2286`
 
 #### try_lowering
 
@@ -273,7 +273,7 @@ Source: `src/linked-meta.x:2288`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2447`
+Source: `src/linked-meta.x:2445`
 
 ## Design notes
 
