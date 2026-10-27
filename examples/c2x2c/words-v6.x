@@ -38,8 +38,8 @@ static MapStringInt path_unique_words(Path root) {
     .foldl(MapStringInt.new(), accumulate);
 }
 
-static Var count_words(Var filename) {
-  String text = filename.string().open("r").string_close()
+static MapSubInt count_words(Path filename) {
+  String text = filename.open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   MapSubInt counts = MapSubInt.new();
   foreach (Substr word in text)

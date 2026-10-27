@@ -59,7 +59,7 @@ static Ast f9_traversal____destructuring_value(Compiler c, Ast ast);
 
 static Ast f9_traversal____placed(Compiler c, Ast code);
 
-static Var f9_traversal____held_within(Compiler c, Var node, Map held);
+static Ast f9_traversal____held_within(Compiler c, Ast node, Map held);
 
 static Ast _default_node(Compiler c, Ast ast);
 
@@ -2140,7 +2140,7 @@ List Compiler_render_placed(Compiler, List, Map);
 static Ast f9_traversal____placed(Compiler c, Ast code){
   if(! c -> slot_watch) return _step(c, code);
   Map held = Map_new();
-  code = Var_list_payload(f9_traversal____held_within(c, List_var(code), held));
+  code = f9_traversal____held_within(c, code, held);
   {
     List _x2c_gensym_match_expr_2 = code;
     switch(_x2c_gensym_match_expr_2 ? _x2c_gensym_match_expr_2 -> car.u64 : 0){
@@ -2163,21 +2163,21 @@ static Ast f9_traversal____placed(Compiler c, Ast code){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-static Var f9_traversal____held_within(Compiler c, Var node, Map held){
-  if(! Var_is_row(node, 9, 7, 4) || Var_is_nil(node)) return node;
-  Ast lowered = Compiler_watched_step(c, Var_list_payload(node));
+static Ast f9_traversal____held_within(Compiler c, Ast node, Map held){
+  if(! List_truth(node)) return node;
+  Ast lowered = Compiler_watched_step(c, node);
   if(List_truth(lowered)){
     Map_setindex(held, Var_new(3683441, (void *) lowered), int_var(1));
-    return List_var(lowered);
+    return lowered;
   }
-  Var child;
-  List _x2c_gensym_macro_original_0 = Var_list_payload(node);
+  List child;
+  List _x2c_gensym_macro_original_0 = node;
   Array _x2c_gensym_macro_rewritten_0 = NULL;
   for(List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_original_0;  List_truth(_x2c_gensym_macro_cursor_1);  _x2c_gensym_macro_cursor_1 = List_cdr(_x2c_gensym_macro_cursor_1)){
     Var _x2c_gensym_macro_item_1 = List_car(_x2c_gensym_macro_cursor_1), _x2c_gensym_macro_value_0 = _x2c_gensym_macro_item_1;
     if(Var_is_row(_x2c_gensym_macro_item_1, 9, 7, 4)){
-      child = _x2c_gensym_macro_item_1;
-      _x2c_gensym_macro_value_0 = f9_traversal____held_within(c, child, held);
+      child = Var_list_payload(_x2c_gensym_macro_item_1);
+      _x2c_gensym_macro_value_0 = List_var(f9_traversal____held_within(c, child, held));
     }
     if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_1)){
       _x2c_gensym_macro_rewritten_0 = Array_new();
@@ -2185,7 +2185,7 @@ static Var f9_traversal____held_within(Compiler c, Var node, Map held){
     }
     if((void *) _x2c_gensym_macro_rewritten_0) Array_push(_x2c_gensym_macro_rewritten_0, _x2c_gensym_macro_value_0);
   }
-  return List_var((void *) _x2c_gensym_macro_rewritten_0 ? Array_list_free(_x2c_gensym_macro_rewritten_0) : _x2c_gensym_macro_original_0);
+  return(void *) _x2c_gensym_macro_rewritten_0 ? Array_list_free(_x2c_gensym_macro_rewritten_0) : _x2c_gensym_macro_original_0;
 }
 
 #endif
@@ -3863,7 +3863,7 @@ static int f9_operators____string_operand(Compiler c, Type type){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List f9_operators____protocol_update(Compiler c, Type type, Symbol op, List arg, List * rhs, Symbol spelled){
-  Symbol member = Compiler_operator_member(c, op);
+  Symbol member = Compiler_operator_member(op);
   if(! member) return NULL;
   String member_name = Symbol_str(member);
   List resolved = Compiler_resolve_protocol_member(c, type, member_name);

@@ -28,7 +28,7 @@ Borrowed immutable views of String bytes.
 
 Returns a borrowed immutable view of the requested byte range.
 
-Source: `lib/substring.x:20`
+Source: `lib/substring.x`
 
 ### `Substring`
 
@@ -39,7 +39,7 @@ Source: `lib/substring.x:20`
 
 Compares contents in bytewise lexical order.
 
-Source: `lib/substring.x:48`
+Source: `lib/substring.x`
 
 <a id="Substring.equal"></a>
 #### Substring.equal
@@ -48,7 +48,7 @@ Source: `lib/substring.x:48`
 
 Compares contents without materializing either view.
 
-Source: `lib/substring.x:41`
+Source: `lib/substring.x`
 
 <a id="Substring.hash"></a>
 #### Substring.hash
@@ -57,7 +57,7 @@ Source: `lib/substring.x:41`
 
 Hashes the referenced bytes, independent of their source or offset.
 
-Source: `lib/substring.x:36`
+Source: `lib/substring.x`
 
 <a id="Substring.len"></a>
 #### Substring.len
@@ -66,7 +66,7 @@ Source: `lib/substring.x:36`
 
 Returns the byte length without allocating.
 
-Source: `lib/substring.x:33`
+Source: `lib/substring.x`
 
 <a id="Substring.new"></a>
 #### Substring.new
@@ -75,7 +75,7 @@ Source: `lib/substring.x:33`
 
 Borrows length bytes at offset. An invalid range raises bad-arg.
 
-Source: `lib/substring.x:24`
+Source: `lib/substring.x`
 
 <a id="Substring.str"></a>
 #### Substring.str
@@ -85,7 +85,7 @@ Source: `lib/substring.x:24`
 Materializes a canonical String in the active pool. Repeated conversion
 reuses the canonical value. The result follows its actual owning pool.
 
-Source: `lib/substring.x:63`
+Source: `lib/substring.x`
 
 <a id="Substring.string"></a>
 #### Substring.string
@@ -94,7 +94,7 @@ Source: `lib/substring.x:63`
 
 Materializes the same canonical String as str().
 
-Source: `lib/substring.x:58`
+Source: `lib/substring.x`
 
 <a id="Substring.try_next"></a>
 #### Substring.try_next
@@ -105,7 +105,7 @@ Yields the next word view. Start the caller-owned cursor at zero. The
 source must stay live; exhaustion leaves cursor and out unchanged.
 foreach (Substr word in source) uses this allocation-free cursor.
 
-Source: `lib/substring.x:71`
+Source: `lib/substring.x`
 
 ## Public types
 
@@ -121,7 +121,7 @@ Source: `lib/substring.x:71`
 
 Short name for the same borrowed view representation as Substring.
 
-Source: `lib/substring.x:17`
+Source: `lib/substring.x`
 
 <a id="Substring"></a>
 ### Substring
@@ -133,7 +133,7 @@ allocates nothing. Keep the source alive and unchanged through every use;
 use str() or string() to obtain a canonical String in the active pool.
 Construct views through Substring.new or String.substring.
 
-Source: `lib/substring.x:11`
+Source: `lib/substring.x`
 
 ## Tests and examples
 

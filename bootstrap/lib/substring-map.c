@@ -657,7 +657,6 @@ MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_0){
 
 static int _x2c_gensym_macro__step_0(Iter _x2c_gensym_macro_iter_0, Substr * _x2c_gensym_macro_key_9, int * _x2c_gensym_macro_val_4){
   MapSubInt _x2c_gensym_macro_map_22 = Var_mapsubint(_x2c_gensym_macro_iter_0 -> obj);
-  if((void *) _x2c_gensym_macro_map_22 == 0) return 0;
   unsigned _x2c_gensym_macro_cursor_3 = Var_uint(Var_convert(_x2c_gensym_macro_iter_0 -> state, 3847013));
   if(! MapSubInt_try_next(_x2c_gensym_macro_map_22, &(_x2c_gensym_macro_cursor_3), &((* _x2c_gensym_macro_key_9)), &((* _x2c_gensym_macro_val_4)))) return 0;
   _x2c_gensym_macro_iter_0 -> state = unsigned_var(_x2c_gensym_macro_cursor_3);
@@ -667,7 +666,7 @@ static int _x2c_gensym_macro__step_0(Iter _x2c_gensym_macro_iter_0, Substr * _x2
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_1, Var * _x2c_gensym_macro_out_2){
   Substr _x2c_gensym_macro_key_10;
   int _x2c_gensym_macro_val_5;
-  if(! _x2c_gensym_macro_out_2 || ! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_1, &(_x2c_gensym_macro_key_10), &(_x2c_gensym_macro_val_5))) return 0;
+  if(! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_1, &(_x2c_gensym_macro_key_10), &(_x2c_gensym_macro_val_5))) return 0;
   * _x2c_gensym_macro_out_2 = _box_value(_x2c_gensym_macro_val_5);
   return 1;
 }
@@ -675,7 +674,7 @@ static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_1, Var * _x2c_g
 static int _x2c_gensym_macro__keys_next_0(Iter _x2c_gensym_macro_iter_2, Var * _x2c_gensym_macro_out_3){
   Substr _x2c_gensym_macro_key_11;
   int _x2c_gensym_macro_val_6;
-  if(! _x2c_gensym_macro_out_3 || ! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_2, &(_x2c_gensym_macro_key_11), &(_x2c_gensym_macro_val_6))) return 0;
+  if(! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_2, &(_x2c_gensym_macro_key_11), &(_x2c_gensym_macro_val_6))) return 0;
   * _x2c_gensym_macro_out_3 = _box_key(_x2c_gensym_macro_key_11);
   return 1;
 }
@@ -687,7 +686,7 @@ List cons(Var, List);
 static int _x2c_gensym_macro__enumerate_next_0(Iter _x2c_gensym_macro_iter_3, Var * _x2c_gensym_macro_out_4){
   Substr _x2c_gensym_macro_key_12;
   int _x2c_gensym_macro_val_7;
-  if(! _x2c_gensym_macro_out_4 || ! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_3, &(_x2c_gensym_macro_key_12), &(_x2c_gensym_macro_val_7))) return 0;
+  if(! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_3, &(_x2c_gensym_macro_key_12), &(_x2c_gensym_macro_val_7))) return 0;
   Var _x2c_gensym_macro_boxed_key_0 = _box_key(_x2c_gensym_macro_key_12), _x2c_gensym_macro_boxed_value_0 = _box_value(_x2c_gensym_macro_val_7);
   * _x2c_gensym_macro_out_4 = List_var(cons(_x2c_gensym_macro_boxed_key_0, cons(_x2c_gensym_macro_boxed_value_0, NULL)));
   return 1;

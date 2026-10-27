@@ -456,7 +456,7 @@ static List _convert_reference(
       $fail.expressions_ref_address(c, NULL);
     return %(expr $target (op & (parens $expr)));
   }
-  if (type.car() == <&> && target.car() == <opt-ref> &&
+  if (type.car() == <&> && target.is_optional_reference() &&
       cdr(type) === cdr(target))
     return %(expr $target $expr);
   if (cdr(type) == cdr(target) && type.car() == <&> && target.car() == <*>)
@@ -612,7 +612,7 @@ static void _check_reference_value(
   Compiler c, Type type, Type target) {
   /* An unchecked optional reference forwards only to another optional
      reference or a pointer. */
-  if (type.car() == <opt-ref> &&
+  if (type.is_optional_reference() &&
       (target.car() == <&> || !c.sym.resolve_key(target).is_pointer()))
     $fail.expressions_optional_ref_unchecked(c, NULL);
   if (target.is_reference() && !type.is_reference() &&

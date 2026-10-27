@@ -23,7 +23,7 @@ Array and Map literals.
 
 Builds an Array literal from its elements.
 
-Source: `src/components/collection-literals.x:14`
+Source: `src/components/collection-literals.x`
 
 #### map_literal
 
@@ -31,7 +31,7 @@ Source: `src/components/collection-literals.x:14`
 
 Builds a Map literal from its keys and values, alternating.
 
-Source: `src/components/collection-literals.x:32`
+Source: `src/components/collection-literals.x`
 
 ## Design notes
 

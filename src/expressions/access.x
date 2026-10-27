@@ -50,7 +50,7 @@ List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access) {
 List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
   int call_context) {
-  if (receiver_type.car() == <opt-ref>)
+  if (receiver_type.is_optional_reference())
     $fail.expressions_optional_ref_access(c, c.token);
   Type type = receiver_type.canonicalize();
   if (access == <"->">)
@@ -263,13 +263,13 @@ module List _resolve_indexed(
   Compiler c, List receiver, List selector, Token origin) {
   receiver = c.resolve_expression(receiver, origin);
   selector = c.resolve_expression(selector, origin);
-  if (receiver.cadr().car() == <opt-ref>)
+  Type receiver_type = receiver.cadr();
+  if (receiver_type.is_optional_reference())
     $fail.expressions_optional_ref_index(c, origin);
   if (_deferred_receiver(receiver) || _deferred_receiver(selector))
     return %(expr (<macro-expr>) (index $receiver $selector));
   List resolved = _postfix_index_expression(c, receiver, selector);
   if (resolved) return resolved;
-  Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
       receiver ~= %(expr () (op (!or . ->) * *)))
@@ -297,8 +297,9 @@ static List _typedef_index(Compiler c, List expr, List index, Type type) {
   return _native_index(c, expr, index, type);
 }
 
+/* The matched getter signature supplies its two-parameter List. */
 static List _getindex_expression(
-  Compiler c, List expr, List index, Var params, Var rtype) {
+  Compiler c, List expr, List index, List params, Var rtype) {
   Type key = params.cadr(), supplied = index.cadr();
   if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
     $fail.expressions_index_symbol(c, c.token);

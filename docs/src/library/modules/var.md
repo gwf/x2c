@@ -57,7 +57,7 @@ Variant type for dynamic typing.
 
 Returns a boxed custom object's descriptor, or NULL for another value.
 
-Source: `lib/var/classes.x:51`
+Source: `lib/var/classes.x`
 
 #### x2c_var_declare
 
@@ -67,7 +67,7 @@ Returns the process-lifetime descriptor declared for custom `tag`,
 declaring it on first use. The caller holds the descriptor lock and has
 checked that registration is open and `tag` is not built in.
 
-Source: `lib/var/classes.x:103`
+Source: `lib/var/classes.x`
 
 #### x2c_var_descriptor_index
 
@@ -78,7 +78,7 @@ The row is the tag's offset from `<array>` and includes the `Symbol` row.
 Numbers, pointers, references, custom tags, and invalid encodings have no
 built-in row.
 
-Source: `lib/var/encoding.x:206`
+Source: `lib/var/encoding.x`
 
 #### x2c_var_equal
 
@@ -91,7 +91,7 @@ NaN equals nothing. Other values compare through `Var.equal`.
 
 **Raises:** `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
 
-Source: `lib/var/operators.x:121`
+Source: `lib/var/operators.x`
 
 #### x2c_var_identical
 
@@ -103,7 +103,7 @@ so two boxes of one `long` are identical, `NaN === NaN` holds, and
 `+0.0 === -0.0` does not. Other values are identical when their `Var`
 bits are, as `Var.same` reports.
 
-Source: `lib/var/operators.x:133`
+Source: `lib/var/operators.x`
 
 #### x2c_var_order
 
@@ -118,7 +118,7 @@ values return the order `Var.compare` gives.
 **Raises:** `<void-op>` when either operand is `void`, and `<bad-enc>` when
 a numeric comparison meets invalid `Var` bits.
 
-Source: `lib/var/operators.x:143`
+Source: `lib/var/operators.x`
 
 #### x2c_var_postfix_volatile
 
@@ -128,7 +128,7 @@ Applies `Var.postfix` semantics to a volatile destination in generated
 code. Volatile preserves accesses across exception transfer, without
 providing thread synchronization.
 
-Source: `lib/var/operators.x:221`
+Source: `lib/var/operators.x`
 
 #### x2c_var_tag_descriptor_index
 
@@ -136,7 +136,7 @@ Source: `lib/var/operators.x:221`
 
 Returns a built-in object or `Symbol` tag's descriptor row, or `-1`.
 
-Source: `lib/var/encoding.x:222`
+Source: `lib/var/encoding.x`
 
 #### x2c_var_update_volatile
 
@@ -146,7 +146,7 @@ Applies `Var.update` semantics to a volatile destination in generated code.
 Volatile preserves accesses across exception transfer, without providing
 thread synchronization.
 
-Source: `lib/var/operators.x:238`
+Source: `lib/var/operators.x`
 
 ### `Var`
 
@@ -161,7 +161,7 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 `String` addition returns a canonical concatenation, and a protocol result
 keeps the ownership chosen by its callback.
 
-Source: `lib/var/operators.x:305`
+Source: `lib/var/operators.x`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -185,7 +185,7 @@ or `<bad-shift>`, and `String` concatenation or wide boxing may raise
 `<size-limit>`, `<alloc-fail>`, or `<bad-enc>`.
 A selected protocol, truth, or comparison callback may raise its own cause.
 
-Source: `lib/var/operators.x:269`
+Source: `lib/var/operators.x`
 
 <a id="Var.box_record"></a>
 #### Var.box_record
@@ -199,7 +199,7 @@ are taken, the copy carries its descriptor in front of it.
 **Raises:** `<bad-target>` when `tag` names no declared class, or
 `<alloc-fail>` when the copy cannot be allocated.
 
-Source: `lib/var/classes.x:67`
+Source: `lib/var/classes.x`
 
 <a id="Var.convert"></a>
 #### Var.convert
@@ -222,7 +222,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/var/conversion.x:123`
+Source: `lib/var/conversion.x`
 
 <a id="Var.div"></a>
 #### Var.div
@@ -234,7 +234,7 @@ Numeric integer zero divisors raise; floating division uses host infinity
 and NaN behavior. Other promotion, failure, and ownership follow
 `Var.binary`.
 
-Source: `lib/var/operators.x:327`
+Source: `lib/var/operators.x`
 
 <a id="Var.fallback_truth"></a>
 #### Var.fallback_truth
@@ -248,7 +248,7 @@ supported built-ins are true. Container-specific truth comes from dispatch.
 **Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
 `<bad-types>` when no truthiness rule exists.
 
-Source: `lib/var/operators.x:178`
+Source: `lib/var/operators.x`
 
 <a id="Var.is"></a>
 #### Var.is
@@ -262,7 +262,7 @@ This tests one family. A `Var` holding an `unsigned char` answers 0 for
 As with `Var.tag`, validate externally constructed bits first: an invalid
 encoding uses the `<f64>` fallback.
 
-Source: `lib/var/encoding.x:73`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_floating"></a>
 #### Var.is_floating
@@ -275,7 +275,7 @@ True for `<f32>`, `<f64>`, and `<ldouble>`, and for the discrete `<nan>`,
 with `Var.long_double_value` when the tag is `<ldouble>` and the extra
 precision matters.
 
-Source: `lib/var/encoding.x:106`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_integer"></a>
 #### Var.is_integer
@@ -288,7 +288,7 @@ True for every signed and unsigned integer family from `<u8>` through
 their own and answer 0 here, even though `Var.integer` returns a `Symbol`'s
 numeric value.
 
-Source: `lib/var/encoding.x:114`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_nil"></a>
 #### Var.is_nil
@@ -301,7 +301,7 @@ The empty `List` is a native null pointer carrying the `<list>` tag.
 every exhausted `List.cdr` yields this one value, so an identity test on
 the bits is a valid emptiness test.
 
-Source: `lib/var/encoding.x:191`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_null"></a>
 #### Var.is_null
@@ -317,7 +317,7 @@ family for `Var.is` to match.
 Write `Null` as `(Var) { .u64 = 0 }`. An unresolved C `NULL` macro also
 converts to this value when its x2c target is `Var`.
 
-Source: `lib/var/encoding.x:178`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_object"></a>
 #### Var.is_object
@@ -330,7 +330,7 @@ True for the builtin classes such as `String`, `List`, `Array`, `Map`,
 `Var.register_object_tag`. A pointer to a handle, such as `<string*>`, is
 `<reference>` instead and answers 0 here.
 
-Source: `lib/var/encoding.x:128`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_pointer"></a>
 #### Var.is_pointer
@@ -339,7 +339,7 @@ Source: `lib/var/encoding.x:128`
 
 Reports whether `v` holds a native pointer.
 
-Source: `lib/var/encoding.x:117`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_reference"></a>
 #### Var.is_reference
@@ -348,7 +348,7 @@ Source: `lib/var/encoding.x:117`
 
 Reports whether `v` holds a pointer to a boxed handle.
 
-Source: `lib/var/encoding.x:120`
+Source: `lib/var/encoding.x`
 
 <a id="Var.is_void"></a>
 #### Var.is_void
@@ -375,7 +375,7 @@ printf("void: void=%d null=%d\n", void is void, void.is_null());
 
 This is the test that accepts a `void` argument.
 
-Source: `lib/var/encoding.x:167`
+Source: `lib/var/encoding.x`
 
 <a id="Var.matmul"></a>
 #### Var.matmul
@@ -386,7 +386,7 @@ Multiplies matrices through a registered `matmul` behavior.
 `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/var/operators.x:91`
+Source: `lib/var/operators.x`
 
 <a id="Var.mod"></a>
 #### Var.mod
@@ -398,7 +398,7 @@ Numeric operands use the common promoted integer type and reject a zero
 divisor; floating operands are not accepted. Other failure and ownership
 follow `Var.binary`.
 
-Source: `lib/var/operators.x:335`
+Source: `lib/var/operators.x`
 
 <a id="Var.mul"></a>
 #### Var.mul
@@ -409,7 +409,7 @@ Multiplies dynamic values through numeric or registered `mul` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/var/operators.x:319`
+Source: `lib/var/operators.x`
 
 <a id="Var.neg"></a>
 #### Var.neg
@@ -424,7 +424,7 @@ promotion and wrapping, so a narrow integer promotes before negation.
 for an object without `neg`, or any cause from protocol or numeric
 subtraction.
 
-Source: `lib/var/operators.x:101`
+Source: `lib/var/operators.x`
 
 <a id="Var.new"></a>
 #### Var.new
@@ -455,7 +455,7 @@ identical bits.
 when a wide box cannot be allocated, and `<bad-enc>` when a box address
 cannot be represented or a pointer does not satisfy its tag's alignment.
 
-Source: `lib/var/construction.x:28`
+Source: `lib/var/construction.x`
 
 <a id="Var.null"></a>
 #### Var.null
@@ -465,7 +465,7 @@ Source: `lib/var/construction.x:28`
 Returns `Null`, the all-zero `Var` that stands for external `nil`.
 Generated call adapters return it for a `void` target.
 
-Source: `lib/var/encoding.x:183`
+Source: `lib/var/encoding.x`
 
 <a id="Var.postfix"></a>
 #### Var.postfix
@@ -482,7 +482,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/var/operators.x:215`
+Source: `lib/var/operators.x`
 
 <a id="Var.sub"></a>
 #### Var.sub
@@ -493,7 +493,7 @@ Subtracts dynamic values through numeric or registered `sub` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/var/operators.x:312`
+Source: `lib/var/operators.x`
 
 <a id="Var.tag_bottom"></a>
 #### Var.tag_bottom
@@ -502,7 +502,7 @@ Source: `lib/var/operators.x:312`
 
 Returns the bottom encoding field of built-in `tag`.
 
-Source: `lib/var/encoding.x:57`
+Source: `lib/var/encoding.x`
 
 <a id="Var.tag_top"></a>
 #### Var.tag_top
@@ -511,7 +511,7 @@ Source: `lib/var/encoding.x:57`
 
 Returns the top encoding field of built-in `tag`.
 
-Source: `lib/var/encoding.x:49`
+Source: `lib/var/encoding.x`
 
 <a id="Var.truth"></a>
 #### Var.truth
@@ -529,7 +529,7 @@ return false independently of object state. The call does not retain
 `<bad-types>` when no truthiness rule exists, plus any cause raised by a
 selected descriptor callback.
 
-Source: `lib/var/operators.x:160`
+Source: `lib/var/operators.x`
 
 <a id="Var.update"></a>
 #### Var.update
@@ -547,7 +547,7 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/var/operators.x:203`
+Source: `lib/var/operators.x`
 
 ### `X2CVarNumeric`
 
@@ -559,7 +559,7 @@ Source: `lib/var/operators.x:203`
 Converts a decoded numeric value to native `float` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:233`
+Source: `lib/var/conversion.x`
 
 <a id="X2CVarNumeric.f64"></a>
 #### X2CVarNumeric.f64
@@ -569,7 +569,7 @@ Source: `lib/var/conversion.x:233`
 Converts a decoded numeric value to native `double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:242`
+Source: `lib/var/conversion.x`
 
 <a id="X2CVarNumeric.ldouble"></a>
 #### X2CVarNumeric.ldouble
@@ -579,7 +579,7 @@ Source: `lib/var/conversion.x:242`
 Converts a decoded numeric value to native `long double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/var/conversion.x:251`
+Source: `lib/var/conversion.x`
 
 ## Advanced and interop API
 
@@ -656,7 +656,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `float`.
 
-Source: `lib/var/operators.x:56`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_f64
 
@@ -673,7 +673,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `double`.
 
-Source: `lib/var/operators.x:57`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_i16
 
@@ -690,7 +690,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `short`.
 
-Source: `lib/var/operators.x:48`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_i32
 
@@ -707,7 +707,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `int`.
 
-Source: `lib/var/operators.x:50`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_i8
 
@@ -724,7 +724,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `char`.
 
-Source: `lib/var/operators.x:45`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_long
 
@@ -741,7 +741,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long`.
 
-Source: `lib/var/operators.x:52`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_long_double
 
@@ -758,7 +758,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long double`.
 
-Source: `lib/var/operators.x:58`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_long_long
 
@@ -775,7 +775,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long long`.
 
-Source: `lib/var/operators.x:54`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_schar
 
@@ -792,7 +792,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `signed char`.
 
-Source: `lib/var/operators.x:46`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_u16
 
@@ -809,7 +809,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `ushort`.
 
-Source: `lib/var/operators.x:49`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_u32
 
@@ -826,7 +826,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `uint`.
 
-Source: `lib/var/operators.x:51`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_u8
 
@@ -843,7 +843,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `uchar`.
 
-Source: `lib/var/operators.x:47`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_ulong
 
@@ -860,7 +860,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `ulong`.
 
-Source: `lib/var/operators.x:53`
+Source: `lib/var/operators.x`
 
 #### x2c_var_update_ulong_long
 
@@ -877,7 +877,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `unsigned long long`.
 
-Source: `lib/var/operators.x:55`
+Source: `lib/var/operators.x`
 
 ### `Var`
 
@@ -892,7 +892,7 @@ Extracts the `Array` payload of `value`.
 from `Var` to `Array` uses `Var.array_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:64`
+Source: `lib/var/conversion.x`
 
 <a id="Var.as_iter"></a>
 #### Var.as_iter
@@ -905,7 +905,7 @@ Extracts the `Iter` payload of `value`.
 from `Var` to `Iter` uses `Var.iter_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:69`
+Source: `lib/var/conversion.x`
 
 <a id="Var.block"></a>
 #### Var.block
@@ -918,7 +918,7 @@ Extracts the `Block` payload of `value`.
 from `Var` to `Block` uses `Var.block_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:65`
+Source: `lib/var/conversion.x`
 
 <a id="Var.box_long"></a>
 #### Var.box_long
@@ -947,7 +947,7 @@ printf("equal=%d identical=%d same=%d tag=%s\n", five == also,
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var/numbers.x:44`
+Source: `lib/var/numbers.x`
 
 <a id="Var.box_long_double"></a>
 #### Var.box_long_double
@@ -964,7 +964,7 @@ extra precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var/numbers.x:97`
+Source: `lib/var/numbers.x`
 
 <a id="Var.box_long_long"></a>
 #### Var.box_long_long
@@ -977,7 +977,7 @@ Boxes a native signed long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var/numbers.x:71`
+Source: `lib/var/numbers.x`
 
 <a id="Var.box_ulong"></a>
 #### Var.box_ulong
@@ -995,7 +995,7 @@ tags. `==` converts the two as C does. Read it back with
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var/numbers.x:60`
+Source: `lib/var/numbers.x`
 
 <a id="Var.box_ulong_long"></a>
 #### Var.box_ulong_long
@@ -1008,7 +1008,7 @@ Boxes a native unsigned long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var/numbers.x:82`
+Source: `lib/var/numbers.x`
 
 <a id="Var.buffer"></a>
 #### Var.buffer
@@ -1021,7 +1021,7 @@ Extracts the `Buffer` payload of `value`.
 from `Var` to `Buffer` uses `Var.buffer_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:66`
+Source: `lib/var/conversion.x`
 
 <a id="Var.bytes"></a>
 #### Var.bytes
@@ -1034,7 +1034,7 @@ Extracts the `Bytes` payload of `value`.
 from `Var` to `Bytes` uses `Var.bytes_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:67`
+Source: `lib/var/conversion.x`
 
 <a id="Var.encoding_valid"></a>
 #### Var.encoding_valid
@@ -1045,7 +1045,7 @@ Reports whether `value` has a valid structural `Var` encoding.
 An address-bearing encoding must still refer to live storage of the right
 type; wide encodings in particular require a readable `Scope`-owned box.
 
-Source: `lib/var/encoding.x:197`
+Source: `lib/var/encoding.x`
 
 <a id="Var.file"></a>
 #### Var.file
@@ -1058,7 +1058,7 @@ Extracts the `File` payload of `value`.
 from `Var` to `File` uses `Var.file_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:68`
+Source: `lib/var/conversion.x`
 
 <a id="Var.floating"></a>
 #### Var.floating
@@ -1079,7 +1079,7 @@ the scalar-named readers such as `Var.double` do this for you.
 
 An unhandled tag yields 0.0.
 
-Source: `lib/var/numbers.x:158`
+Source: `lib/var/numbers.x`
 
 <a id="Var.integer"></a>
 #### Var.integer
@@ -1108,7 +1108,7 @@ printf("small=%ld text=%ld\n", small.integer(), text.integer());
 
 An unhandled tag yields 0.
 
-Source: `lib/var/numbers.x:192`
+Source: `lib/var/numbers.x`
 
 <a id="Var.integer_box"></a>
 #### Var.integer_box
@@ -1123,7 +1123,7 @@ active `Scope`.
 **Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
 `<bad-enc>` while boxing a wide result.
 
-Source: `lib/var/conversion.x:178`
+Source: `lib/var/conversion.x`
 
 <a id="Var.integer_compare"></a>
 #### Var.integer_compare
@@ -1140,7 +1140,7 @@ Both arguments are assumed to be integer-kinded. Another value is decoded
 by `Var.integer`, which reads it as 0. Confirm with `Var.is_integer` when
 the kinds are not known.
 
-Source: `lib/var/ordering.x:19`
+Source: `lib/var/ordering.x`
 
 <a id="Var.integer_floating_compare"></a>
 #### Var.integer_floating_compare
@@ -1157,7 +1157,7 @@ never equal to an integer.
 integer. NaN is not ordered and reports -1. Test the tag for `<nan>`
 first if that distinction matters.
 
-Source: `lib/var/ordering.x:37`
+Source: `lib/var/ordering.x`
 
 <a id="Var.integer_tag"></a>
 #### Var.integer_tag
@@ -1170,7 +1170,7 @@ callers applying integer promotion must first select its resulting
 signedness. Ranks four through six select the 48-bit, `long`, and
 `long long` families. A rank above six returns the null `Symbol`.
 
-Source: `lib/var/conversion.x:220`
+Source: `lib/var/conversion.x`
 
 <a id="Var.kind"></a>
 #### Var.kind
@@ -1188,7 +1188,7 @@ integer widths answer `<integer>`, and every builtin class handle such as
 means a pointer to an object handle such as `<string*>`. NaN and the
 infinities are `<floating>`. Only `void` is `<void>`.
 
-Source: `lib/var/encoding.x:141`
+Source: `lib/var/encoding.x`
 
 <a id="Var.known_tag"></a>
 #### Var.known_tag
@@ -1197,7 +1197,7 @@ Source: `lib/var/encoding.x:141`
 
 Reports whether `tag` has a built-in encoding or declared custom class.
 
-Source: `lib/var/var.x:89`
+Source: `lib/var/var.x`
 
 <a id="Var.list"></a>
 #### Var.list
@@ -1210,7 +1210,7 @@ Extracts the `List` payload of `value`.
 from `Var` to `List` uses `Var.list_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:70`
+Source: `lib/var/conversion.x`
 
 <a id="Var.long_double_value"></a>
 #### Var.long_double_value
@@ -1224,7 +1224,7 @@ floating tag, `<f64>` included, yields 0.0 here instead of being widened.
 
 A tag mismatch yields 0.0.
 
-Source: `lib/var/numbers.x:334`
+Source: `lib/var/numbers.x`
 
 <a id="Var.long_long_value"></a>
 #### Var.long_long_value
@@ -1233,7 +1233,7 @@ Source: `lib/var/numbers.x:334`
 
 Returns an `<llong>` box's signed payload, or 0 for another tag.
 
-Source: `lib/var/numbers.x:244`
+Source: `lib/var/numbers.x`
 
 <a id="Var.long_value"></a>
 #### Var.long_value
@@ -1247,7 +1247,7 @@ use this one when the tag is known and the payload must survive intact.
 
 A tag mismatch yields 0.
 
-Source: `lib/var/numbers.x:228`
+Source: `lib/var/numbers.x`
 
 <a id="Var.map"></a>
 #### Var.map
@@ -1260,7 +1260,7 @@ Extracts the `Map` payload of `value`.
 from `Var` to `Map` uses `Var.map_payload`, which reads the payload or
 NULL without raising.
 
-Source: `lib/var/conversion.x:71`
+Source: `lib/var/conversion.x`
 
 <a id="Var.numeric_decode"></a>
 #### Var.numeric_decode
@@ -1275,7 +1275,7 @@ use the members described by `X2CVarNumeric`.
 `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
 failures leave `out` unchanged.
 
-Source: `lib/var/conversion.x:156`
+Source: `lib/var/conversion.x`
 
 <a id="Var.numeric_info"></a>
 #### Var.numeric_info
@@ -1286,7 +1286,7 @@ Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
-Source: `lib/var/conversion.x:205`
+Source: `lib/var/conversion.x`
 
 <a id="Var.parse"></a>
 #### Var.parse
@@ -1322,7 +1322,7 @@ printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
 **Raises:** `<alloc-fail>` while constructing `String` or quoted-`Symbol`
 output.
 
-Source: `lib/var/construction.x:75`
+Source: `lib/var/construction.x`
 
 <a id="Var.pointer"></a>
 #### Var.pointer
@@ -1345,7 +1345,7 @@ decoder also accepts some reserved pointer-shaped bit patterns. Validate
 external bits with `Var.encoding_valid`, then confirm the family with
 `Var.tag` or `Var.is` before trusting the result.
 
-Source: `lib/var/classes.x:136`
+Source: `lib/var/classes.x`
 
 <a id="Var.register_object_tag"></a>
 #### Var.register_object_tag
@@ -1359,7 +1359,7 @@ changing the registry. Declaration must finish before the first successful
 `Thread.start`; afterward it raises `<bad-state>`. Native registry-mutex
 failure aborts.
 
-Source: `lib/var/classes.x:88`
+Source: `lib/var/classes.x`
 
 <a id="Var.signed_from_bits"></a>
 #### Var.signed_from_bits
@@ -1369,7 +1369,7 @@ Source: `lib/var/classes.x:88`
 Interprets the low `bits` of `raw` as a two's-complement signed value.
 `bits` must be between one and the width of `unsigned long long`.
 
-Source: `lib/var/conversion.x:260`
+Source: `lib/var/conversion.x`
 
 <a id="Var.string"></a>
 #### Var.string
@@ -1382,7 +1382,7 @@ Extracts the `String` payload of `value`.
 a `Var` implicitly through `Var.as_string` instead, and
 `Var.string_payload` reads the payload or NULL without raising.
 
-Source: `lib/var/conversion.x:46`
+Source: `lib/var/conversion.x`
 
 <a id="Var.tag"></a>
 #### Var.tag
@@ -1405,7 +1405,7 @@ as `<f64>`, since the shifted double range covers everything left over.
 printf("%s %s\n", raw.tag().str(), void.tag().str());
 ```
 
-Source: `lib/var/encoding.x:93`
+Source: `lib/var/encoding.x`
 
 <a id="Var.ulong_long_value"></a>
 #### Var.ulong_long_value
@@ -1414,7 +1414,7 @@ Source: `lib/var/encoding.x:93`
 
 Returns a `<ullong>` box's unsigned payload, or 0 for another tag.
 
-Source: `lib/var/numbers.x:248`
+Source: `lib/var/numbers.x`
 
 <a id="Var.ulong_value"></a>
 #### Var.ulong_value
@@ -1430,7 +1430,7 @@ doubt.
 
 A tag mismatch yields 0.
 
-Source: `lib/var/numbers.x:240`
+Source: `lib/var/numbers.x`
 
 <a id="Var.wide_compare"></a>
 #### Var.wide_compare
@@ -1447,7 +1447,7 @@ order deterministically.
 argument that is not a wide box. Check the tags first, or use
 `Var.compare`, the runtime's full ordering.
 
-Source: `lib/var/numbers.x:313`
+Source: `lib/var/numbers.x`
 
 <a id="Var.wide_equal"></a>
 #### Var.wide_equal
@@ -1466,7 +1466,7 @@ that is not a wide box and a pair whose tags differ. For a general
 equality test use `Var.equal`, which covers every family, or `==`, which
 compares two numbers as C does.
 
-Source: `lib/var/numbers.x:284`
+Source: `lib/var/numbers.x`
 
 <a id="Var.wide_hash"></a>
 #### Var.wide_hash
@@ -1475,7 +1475,7 @@ Source: `lib/var/numbers.x:284`
 
 Returns a supported wide scalar box's content hash, or 0 otherwise.
 
-Source: `lib/var/numbers.x:258`
+Source: `lib/var/numbers.x`
 
 <a id="Var.width_mask"></a>
 #### Var.width_mask
@@ -1486,7 +1486,7 @@ Returns a mask containing the low `bits` bits.
 Zero yields zero and a width at least `unsigned long long` yields
 `ULLONG_MAX`; `bits` must not be negative.
 
-Source: `lib/var/conversion.x:276`
+Source: `lib/var/conversion.x`
 
 ## Runtime-internal callables
 
@@ -1514,7 +1514,7 @@ tells the two apart. Returns `void` when `value` is not wide.
 **Raises:** `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>`
 if its address cannot be represented in a `Var`.
 
-Source: `lib/var/numbers.x:109`
+Source: `lib/var/numbers.x`
 
 <a id="Var.custom_descriptor_index"></a>
 #### Var.custom_descriptor_index
@@ -1525,7 +1525,7 @@ Returns a boxed custom object's row, or `-1` for another value.
 Rows below 30 belong to one class each; row 30 holds every overflow heap
 class and row 31 every overflow record.
 
-Source: `lib/var/encoding.x:216`
+Source: `lib/var/encoding.x`
 
 <a id="Var.move_wide_to"></a>
 #### Var.move_wide_to
@@ -1540,7 +1540,7 @@ For a wide value, raises `<bad-arg>` when `scope` is NULL, or
 `<alloc-fail>` when a new destination `Scope` cannot be allocated.
 Ownership is unchanged on failure.
 
-Source: `lib/var/numbers.x:133`
+Source: `lib/var/numbers.x`
 
 <a id="Var.wide_owner"></a>
 #### Var.wide_owner
@@ -1549,7 +1549,7 @@ Source: `lib/var/numbers.x:133`
 
 Returns the `Scope` owning a live wide numeric box, or NULL otherwise.
 
-Source: `lib/var/numbers.x:140`
+Source: `lib/var/numbers.x`
 
 ## Public types
 
@@ -1568,7 +1568,7 @@ Integer values use the low `bits` of `raw`, with signed values represented
 in two's-complement; floating values use `floating_value`. The record
 holds no storage and retains nothing from the source `Var`.
 
-Source: `lib/var/var.x:31`
+Source: `lib/var/var.x`
 
 <a id="X2CVarNumericInfo"></a>
 ### X2CVarNumericInfo
@@ -1580,7 +1580,7 @@ Describes one numeric `Var` family without holding a value.
 its native payload width, and `rank` orders promotion. Callers normally
 obtain a valid record from `Var.numeric_info`.
 
-Source: `lib/var/var.x:22`
+Source: `lib/var/var.x`
 
 ## Internal types
 
@@ -1603,7 +1603,7 @@ Names the built-in `Var` tags in `var-tags.x` ledger order, which
 is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
 agree.
 
-Source: `lib/var/var.x:54`
+Source: `lib/var/var.x`
 
 <a id="VarDecodeGroup"></a>
 ### VarDecodeGroup
@@ -1614,7 +1614,7 @@ Resolves one encoding top: the selector is the middle field when
 `by_middle` is set and the bottom field under `mask` otherwise, and
 `ids` maps it to a `TagId`, or `_invalid_` where no tag has it.
 
-Source: `lib/var/var.x:83`
+Source: `lib/var/var.x`
 
 <a id="VarTagInfo"></a>
 ### VarTagInfo
@@ -1623,7 +1623,7 @@ Source: `lib/var/var.x:83`
 
 Describes one built-in `Var` tag's kind and encoding fields.
 
-Source: `lib/var/var.x:74`
+Source: `lib/var/var.x`
 
 ## Design notes
 

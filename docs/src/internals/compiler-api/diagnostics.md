@@ -51,7 +51,7 @@ forked translation workers sharing the descriptor never interleave lines,
 and a line is complete before any exit. Returns zero when `path` cannot be
 opened.
 
-Source: `src/diagnostics.x:103`
+Source: `src/diagnostics.x`
 
 ### `Compiler`
 
@@ -64,7 +64,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:364`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -74,7 +74,7 @@ Source: `src/diagnostics.x:364`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:265`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -83,7 +83,7 @@ Source: `src/diagnostics.x:265`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:399`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -92,7 +92,7 @@ Source: `src/diagnostics.x:399`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:394`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -102,7 +102,7 @@ Source: `src/diagnostics.x:394`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:384`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -112,7 +112,7 @@ Source: `src/diagnostics.x:384`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:358`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.file_prefix"></a>
 #### Compiler.file_prefix
@@ -123,7 +123,7 @@ Returns the prefix that the statics of the module file holding the
 current token take, or NULL outside a module unit. A module's first row
 marks the start of its text, so other units return before any scan.
 
-Source: `src/diagnostics.x:113`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -137,7 +137,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:215`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -149,7 +149,7 @@ one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:319`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -163,7 +163,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:145`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.report_problem"></a>
 #### Compiler.report_problem
@@ -174,7 +174,7 @@ Records and emits a located compiler error, then returns so the
 translation continues; it fails when it finishes. Location and the
 message default match `Compiler.report_error`.
 
-Source: `src/diagnostics.x:162`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -186,7 +186,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:203`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -197,7 +197,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:302`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.take_diagnostics"></a>
 #### Compiler.take_diagnostics
@@ -208,7 +208,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/diagnostics.x:338`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.text_source"></a>
 #### Compiler.text_source
@@ -220,7 +220,7 @@ the compiler's text, and sets `offset` to that byte's offset in the file.
 Without such a marker, the file is the compiler's own and `offset` is
 `position`.
 
-Source: `src/diagnostics.x:128`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.token_column"></a>
 #### Compiler.token_column
@@ -230,7 +230,7 @@ Source: `src/diagnostics.x:128`
 Returns `token`'s column in the file that holds it. A module region
 that begins inside a line of its file continues that line's columns.
 
-Source: `src/diagnostics.x:291`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -246,7 +246,7 @@ pool hierarchy and retain their actual producing-pool lifetimes; an
 unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:246`
+Source: `src/diagnostics.x`
 
 <a id="Compiler.token_source"></a>
 #### Compiler.token_source
@@ -257,7 +257,7 @@ Returns the file that the line markers of a merged text give `token`,
 and sets `line` to the token's line in that file. A token outside the
 marked regions keeps the compiler's own file and its line.
 
-Source: `src/diagnostics.x:279`
+Source: `src/diagnostics.x`
 
 ### `Diagnostics`
 
@@ -272,7 +272,7 @@ retain their actual producing-pool lifetime. They share the stored entry
 `List`s. The snapshot includes warnings and the limit notice; changing or
 resetting `diag` does not change it.
 
-Source: `src/diagnostics.x:374`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.hold"></a>
 #### Diagnostics.hold
@@ -282,7 +282,7 @@ Source: `src/diagnostics.x:374`
 Stops streaming until `Diagnostics.release` and records the current
 entries, count, and limit state.
 
-Source: `src/diagnostics.x:60`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.new"></a>
 #### Diagnostics.new
@@ -293,7 +293,7 @@ Creates an empty diagnostic store that streams through `printer`.
 A NULL `printer` does not stream. A negative `limit` is treated as zero;
 zero collects without a stopping threshold. The printer is borrowed.
 
-Source: `src/diagnostics.x:49`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.reached_limit"></a>
 #### Diagnostics.reached_limit
@@ -303,7 +303,7 @@ Source: `src/diagnostics.x:49`
 Returns whether counted reports have reached the positive limit.
 A zero limit never reports that it has been reached.
 
-Source: `src/diagnostics.x:90`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.release"></a>
 #### Diagnostics.release
@@ -314,7 +314,7 @@ Restores the streaming saved by `hold`. When `keep` is set, entries
 published since the hold remain and stream now; otherwise they are
 discarded with the count and limit state they changed.
 
-Source: `src/diagnostics.x:72`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.report"></a>
 #### Diagnostics.report
@@ -329,7 +329,7 @@ first error. Later reports are ignored. Supplied
 message, location, and notes are shared; their canonical-value pools must
 outlive the store and its snapshots.
 
-Source: `src/diagnostics.x:178`
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.reset"></a>
 #### Diagnostics.reset
@@ -338,7 +338,7 @@ Source: `src/diagnostics.x:178`
 
 Clears stored entries and limit state while preserving configuration.
 
-Source: `src/diagnostics.x:348`
+Source: `src/diagnostics.x`
 
 ## Public types
 
@@ -358,7 +358,7 @@ A value is valid after `Diagnostics.new`. The store and backing `Array` are
 their producing canonical-value pools. A borrowed `printer` must remain
 valid while it is installed.
 
-Source: `src/diagnostics.x:17`
+Source: `src/diagnostics.x`
 
 <a id="DiagnosticsHold"></a>
 ### DiagnosticsHold
@@ -367,7 +367,7 @@ Source: `src/diagnostics.x:17`
 
 Records where `Diagnostics.hold` stopped streaming.
 
-Source: `src/diagnostics.x:26`
+Source: `src/diagnostics.x`
 
 ## Design notes
 

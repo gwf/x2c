@@ -368,8 +368,7 @@ static int _has_slot(const int *slots, int count, int slot) {
 
 /* The caller's source spelling survives helper transport in the existing
    subject rows; ordinary bindings use the spelling they already carry. */
-static String _source_spelling(Var value) {
-  if (value is not <list>) return NULL;
+static String _source_spelling(List value) {
   foreach (List row in macro_subject is <list> ? macro_subject.list() : NULL)
     if (row ~= %(source-spelling ?binding ?(String spelling)) &&
         List.compare(binding, value) == 0) return spelling;
@@ -421,7 +420,7 @@ static Var _unwrap(Var value) {
    internal binder in `pattern` and its own slot among `names`. A binder
    either side lacks leaves the route incomplete. */
 static MacroPublishing _publishing(
-  Macro t, Var pattern, List names, List internal) {
+  Macro t, List pattern, List names, List internal) {
   MacroPublishing route = {.complete = 1};
   MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
   MatchCaptureLayout logical = MatchCaptureLayout.analyze(names);

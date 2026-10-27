@@ -21,7 +21,7 @@ The types the compiler prelude declares first.
 Immutable canonical cons chain; NULL is `nil`.
 Its lifetime follows its owning `List` pool, which may be an ancestor.
 
-Source: `lib/common-types.x:23`
+Source: `lib/common-types.x`
 
 <a id="Mutex"></a>
 ### Mutex
@@ -32,7 +32,7 @@ A native mutex allocated in the active `Scope` without recursive locking.
 Its `Scope` and handle must outlive every user and waiter. Destroy it only
 while unlocked, and do not use the handle or its storage after that.
 
-Source: `lib/common-types.x:29`
+Source: `lib/common-types.x`
 
 <a id="Var"></a>
 ### Var
@@ -43,7 +43,7 @@ Eight-byte tagged runtime value for immediate scalars and encoded handles.
 Pointer-bearing values follow the ownership rules of their concrete type;
 raw `Null` is all zero bits and `void` is all one bits.
 
-Source: `lib/common-types.x:15`
+Source: `lib/common-types.x`
 
 ## Design notes
 

@@ -231,7 +231,7 @@ static int _needs_errors(List item) {
     "ErrorCatchSite" in types || "ErrorHandler" in types;
 }
 
-static void _push_line(Array out, Var node) {
+static void _push_line(Array out, List node) {
   out.push(node);
   out.push(%(space "\n"));
 }

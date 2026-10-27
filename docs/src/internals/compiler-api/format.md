@@ -31,7 +31,7 @@ Emitted `src-at` markers carry existing compiler origin IDs; zero restores
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
-Source: `src/format.x:34`
+Source: `src/format.x`
 
 <a id="Compiler.code_text"></a>
 #### Compiler.code_text
@@ -41,7 +41,7 @@ Source: `src/format.x:34`
 Returns `tokens` as one line of C text, spaced as formatting spaces
 them, for code that later passes carry as written.
 
-Source: `src/format.x:71`
+Source: `src/format.x`
 
 ## Design notes
 

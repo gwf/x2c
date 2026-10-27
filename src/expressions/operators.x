@@ -16,7 +16,7 @@ Symbol _x2c_indexed_builtin_helper(Compiler c, Type type) {
 module List _unary(Resolve &r, Var operator, List operand) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
-  if (lhs_type.car() == <opt-ref> && operator != <!>)
+  if (lhs_type.is_optional_reference() && operator != <!>)
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
@@ -54,7 +54,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
 module List _postfix(Resolve &r, Var operator, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   Type operand_type = operand.cadr();
-  if (operand_type.car() == <opt-ref>)
+  if (operand_type.is_optional_reference())
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operand_type === %(<macro-expr>))
     return %(expr (<macro-expr>) (postfix $operator $operand));
@@ -207,7 +207,7 @@ static int _convert_string_addition(
 static void _check_untyped_operand(
   Compiler c, Symbol operator, Type participant, List other,
   Token origin) {
-  Symbol member = c.operator_member(operator);
+  Symbol member = Compiler.operator_member(operator);
   if (!member || operator == <==> || operator == <!=>) return;
   if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
@@ -261,7 +261,7 @@ static int _is_comparison(Symbol op) {
 static void _check_optional_operands(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
-  if (ltype.car() != <opt-ref> && rtype.car() != <opt-ref>) return;
+  if (!ltype.is_optional_reference() && !rtype.is_optional_reference()) return;
   int null_test = _null_literal(lhs) || _null_literal(rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)
@@ -337,8 +337,8 @@ static List _protocol_operator_expression(
   if (!derived && c.resolve_protocol_member(result, "discard"))
     _note_fresh_callee(c, binding);
   if (which) {
-    Symbol member = rhs ? c.operator_member(op) : <neg>;
-    if (!member) member = c.derived_member(op);
+    Symbol member = rhs ? Compiler.operator_member(op) : <neg>;
+    if (!member) member = Compiler.derived_member(op);
     Type participant = lhs.cadr();
     participant = participant.canonicalize();
     List helper = c.protocol_discard_helper(participant, member, which);
@@ -381,8 +381,8 @@ static List _resolve_protocol_operator(
   }
   else {
     if (!participant) return NULL;
-    member = c.operator_member(op);
-    Symbol source = c.derived_member(op);
+    member = Compiler.operator_member(op);
+    Symbol source = Compiler.derived_member(op);
     if (!member) member = source;
     derived = source;
     if (!member) return NULL;

@@ -428,9 +428,9 @@ static List f16_source_locations____source_range(Compiler c, Token first, Token 
 
 static void f13_binding_facts____settle(Compiler c, List proven, List other_arm);
 
-static List f13_binding_facts____junction(Compiler c, Var op, Var left, Var right, int holds);
+static List f13_binding_facts____junction(Compiler c, Symbol op, List left, List right, int holds);
 
-static List f13_binding_facts____null_comparison(Compiler c, Var op, Var left, Var right, int holds);
+static List f13_binding_facts____null_comparison(Compiler c, Symbol op, List left, List right, int holds);
 
 static int f13_binding_facts____null_literal(List expr);
 
@@ -3811,10 +3811,10 @@ List Compiler_proven_references(Compiler c, List condition, int holds){
         Var operand;  operand = x2c_match_value_0;  return Compiler_proven_references(c, Var_list_payload(operand), ! holds);
       }
       break;}}{List _x2c_gensym_match_at_267, _x2c_gensym_match_at_268, _x2c_gensym_match_at_269, _x2c_gensym_match_at_270, _x2c_gensym_match_at_271, _x2c_gensym_match_at_272, _x2c_gensym_match_at_273, _x2c_gensym_match_at_274; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2; if(_x2c_gensym_match_expr_39 && _x2c_gensym_match_expr_39 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_267 = _x2c_gensym_match_expr_39 ->cdr) &&(_x2c_gensym_match_at_268 = _x2c_gensym_match_at_267 ->cdr) &&(Var_is(_x2c_gensym_match_at_268 -> car, 806120) &&(_x2c_gensym_match_at_269 = Var_list_payload(_x2c_gensym_match_at_268 -> car), 1)) && _x2c_gensym_match_at_269 && _x2c_gensym_match_at_269 ->car.u64 == 9224497936761619424ULL &&(_x2c_gensym_match_at_270 = _x2c_gensym_match_at_269 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_270 ->car, 1) &&(_x2c_gensym_match_at_270 ->car.u64 == 9224497936761628237ULL || _x2c_gensym_match_at_270 ->car.u64 == 9224497936761650425ULL) &&(_x2c_gensym_match_at_271 = _x2c_gensym_match_at_270 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_271 ->car, 1) &&(_x2c_gensym_match_at_272 = _x2c_gensym_match_at_271 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_272 ->car, 1) && !(_x2c_gensym_match_at_273 = _x2c_gensym_match_at_272 ->cdr) && !(_x2c_gensym_match_at_274 = _x2c_gensym_match_at_268 ->cdr)){{
-        Var op;  op = x2c_match_value_0;  Var left;  left = x2c_match_value_1;  Var right;  right = x2c_match_value_2;  return f13_binding_facts____junction(c, op, left, right, holds);
+        Var op;  op = x2c_match_value_0;  Var left;  left = x2c_match_value_1;  Var right;  right = x2c_match_value_2;  return f13_binding_facts____junction(c, Var_symbol(op), Var_list_payload(left), Var_list_payload(right), holds);
       }
       break;}}{List _x2c_gensym_match_at_267, _x2c_gensym_match_at_268, _x2c_gensym_match_at_269, _x2c_gensym_match_at_270, _x2c_gensym_match_at_271, _x2c_gensym_match_at_272, _x2c_gensym_match_at_273, _x2c_gensym_match_at_274; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2; if(_x2c_gensym_match_expr_39 && _x2c_gensym_match_expr_39 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_267 = _x2c_gensym_match_expr_39 ->cdr) &&(_x2c_gensym_match_at_268 = _x2c_gensym_match_at_267 ->cdr) &&(Var_is(_x2c_gensym_match_at_268 -> car, 806120) &&(_x2c_gensym_match_at_269 = Var_list_payload(_x2c_gensym_match_at_268 -> car), 1)) && _x2c_gensym_match_at_269 && _x2c_gensym_match_at_269 ->car.u64 == 9224497936761619424ULL &&(_x2c_gensym_match_at_270 = _x2c_gensym_match_at_269 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_270 ->car, 1) &&(_x2c_gensym_match_at_270 ->car.u64 == 9224497936761634171ULL || _x2c_gensym_match_at_270 ->car.u64 == 9224497936761627003ULL) &&(_x2c_gensym_match_at_271 = _x2c_gensym_match_at_270 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_271 ->car, 1) &&(_x2c_gensym_match_at_272 = _x2c_gensym_match_at_271 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_272 ->car, 1) && !(_x2c_gensym_match_at_273 = _x2c_gensym_match_at_272 ->cdr) && !(_x2c_gensym_match_at_274 = _x2c_gensym_match_at_268 ->cdr)){{
-        Var op;  op = x2c_match_value_0;  Var left;  left = x2c_match_value_1;  Var right;  right = x2c_match_value_2;  return f13_binding_facts____null_comparison(c, op, left, right, holds);
+        Var op;  op = x2c_match_value_0;  Var left;  left = x2c_match_value_1;  Var right;  right = x2c_match_value_2;  return f13_binding_facts____null_comparison(c, Var_symbol(op), Var_list_payload(left), Var_list_payload(right), holds);
       }
       break;}}{List _x2c_gensym_match_at_267, _x2c_gensym_match_at_268, _x2c_gensym_match_at_269, _x2c_gensym_match_at_270, _x2c_gensym_match_at_271, _x2c_gensym_match_at_272, _x2c_gensym_match_at_273; Var x2c_match_value_0; if(_x2c_gensym_match_expr_39 && _x2c_gensym_match_expr_39 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_267 = _x2c_gensym_match_expr_39 ->cdr) &&(Var_is(_x2c_gensym_match_at_267 -> car, 806120) &&(_x2c_gensym_match_at_268 = Var_list_payload(_x2c_gensym_match_at_267 -> car), 1)) && _x2c_gensym_match_at_268 && _x2c_gensym_match_at_268 ->car.u64 == 9224497970091626828ULL &&(_x2c_gensym_match_at_269 = _x2c_gensym_match_at_267 ->cdr) &&(Var_is(_x2c_gensym_match_at_269 -> car, 806120) &&(_x2c_gensym_match_at_270 = Var_list_payload(_x2c_gensym_match_at_269 -> car), 1)) && _x2c_gensym_match_at_270 && _x2c_gensym_match_at_270 ->car.u64 == 9224497936780766120ULL &&(_x2c_gensym_match_at_271 = _x2c_gensym_match_at_270 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_271 ->car, 1) && !(_x2c_gensym_match_at_272 = _x2c_gensym_match_at_271 ->cdr) && !(_x2c_gensym_match_at_273 = _x2c_gensym_match_at_269 ->cdr)){{
         Var binding;  binding = x2c_match_value_0;  if(holds && Map_contains(Compiler_semantic_binding_facts(c), List_var(cons(_367, cons(binding, NULL))))) return cons(binding, NULL);
@@ -3826,12 +3826,12 @@ List Compiler_proven_references(Compiler c, List condition, int holds){
   return NULL;
 }
 
-static List f13_binding_facts____junction(Compiler c, Var op, Var left, Var right, int holds){
-  if(holds !=(x2c_var_equal(op, Symbol_var(9805)))) return NULL;  return List_append(Compiler_proven_references(c, Var_list_payload(left), holds), Compiler_proven_references(c, Var_list_payload(right), holds));
+static List f13_binding_facts____junction(Compiler c, Symbol op, List left, List right, int holds){
+  if(holds !=(op == 9805)) return NULL;  return List_append(Compiler_proven_references(c, left, holds), Compiler_proven_references(c, right, holds));
 }
 
-static List f13_binding_facts____null_comparison(Compiler c, Var op, Var left, Var right, int holds){
-  List operand = Var_list_payload(right);  if(f13_binding_facts____null_literal(Var_list_payload(right))) operand = Var_list_payload(left);  else if(! f13_binding_facts____null_literal(Var_list_payload(left))) return NULL;  return Compiler_proven_references(c, operand, x2c_var_equal(op, Symbol_var(15739)) ? ! holds : holds);
+static List f13_binding_facts____null_comparison(Compiler c, Symbol op, List left, List right, int holds){
+  List operand = right;  if(f13_binding_facts____null_literal(right)) operand = left;  else if(! f13_binding_facts____null_literal(left)) return NULL;  return Compiler_proven_references(c, operand, op == 15739 ? ! holds : holds);
 }
 
 static int f13_binding_facts____null_literal(List expr){

@@ -77,8 +77,7 @@ static void _value(Render &r, Var elem) {
 /* Writes a List's elements in turn, each rendered as `_value`
    does. Cells are immutable, so a chain cannot reach itself; a cycle through
    a mutable container in a car stops at that container's own guard. */
-static void _items(Render &r, Var elem) {
-  List lst = elem;
+static void _items(Render &r, List lst) {
   Buffer out = r.out;
   if (out.pos - out.tabstop() > 5) out.newline_indent();
   _open(lst, out);
@@ -108,10 +107,10 @@ static void _nil(Buffer out) {
 
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
-static int _fits(Render &r, Var elem) {
+static int _fits(Render &r, List elem) {
   Buffer line = auto Buffer.new(r.out.padding);
   Render flat = {line, r.mode};
-  _flat(flat, elem);
+  _flat_items(flat, elem);
   if (r.out.pos + line.content.length > _WIDTH) return 0;
   r.out.write_len(line.content.bytes, line.content.length);
   return 1;
@@ -124,8 +123,7 @@ static void _flat(Render &r, Var elem) {
   else _flat_items(r, elem);
 }
 
-static void _flat_items(Render &r, Var elem) {
-  List lst = elem;
+static void _flat_items(Render &r, List lst) {
   Buffer out = r.out;
   _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {

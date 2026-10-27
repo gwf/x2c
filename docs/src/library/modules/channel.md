@@ -30,7 +30,7 @@ Var transport and explicit storage handoff.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/channel.x:67`
+Source: `lib/channel.x`
 
 <a id="Channel.close"></a>
 #### Channel.close
@@ -43,7 +43,7 @@ payloads, or acknowledge completion of a borrow.
 
 **Raises:** <bad-arg> for NULL.
 
-Source: `lib/channel.x:159`
+Source: `lib/channel.x`
 
 <a id="Channel.free"></a>
 #### Channel.free
@@ -56,7 +56,7 @@ subtrees are destroyed outside the queue monitor; ordinary payloads are
 not followed. NULL does nothing. Owner destruction releases these native
 queue nodes and resources through the same finalizer.
 
-Source: `lib/channel.x:150`
+Source: `lib/channel.x`
 
 <a id="Channel.iter"></a>
 #### Channel.iter
@@ -67,7 +67,7 @@ Initializes a borrowed iterator that blocks for each received message.
 Normal close and draining end iteration; cooperative stop raises instead.
 The Channel must outlive traversal.
 
-Source: `lib/channel.x:184`
+Source: `lib/channel.x`
 
 <a id="Channel.new"></a>
 #### Channel.new
@@ -83,7 +83,7 @@ means rendezvous. Queuing does not intern or export message contents.
 **Raises:** <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
 for storage, or <io-fail> for native condition initialization.
 
-Source: `lib/channel.x:83`
+Source: `lib/channel.x`
 
 <a id="Channel.receive"></a>
 #### Channel.receive
@@ -100,7 +100,7 @@ A committed delivery succeeds despite a later stop request.
 **Raises:** <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
 <bad-state> for cooperative stop.
 
-Source: `lib/channel.x:195`
+Source: `lib/channel.x`
 
 <a id="Channel.scope"></a>
 #### Channel.scope
@@ -111,7 +111,7 @@ Returns the Channel's own storage scope. Owned queued payloads stay
 detached; ordinary messages remain borrowed. This scope is not a shared
 adoption destination for concurrent senders. NULL returns NULL.
 
-Source: `lib/channel.x:115`
+Source: `lib/channel.x`
 
 <a id="Channel.send"></a>
 #### Channel.send
@@ -126,7 +126,7 @@ commits under synchronization; later stop cannot retract that send.
 mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
 for native buffered queue storage. Failure dispatch holds no queue lock.
 
-Source: `lib/channel.x:126`
+Source: `lib/channel.x`
 
 <a id="Channel.send_owned"></a>
 #### Channel.send_owned
@@ -148,7 +148,7 @@ ownership graphs remain caller responsibilities.
 
 **Raises:** the send causes, or <bad-arg> for a null/nonpointer payload.
 
-Source: `lib/channel.x:142`
+Source: `lib/channel.x`
 
 <a id="Channel.var"></a>
 #### Channel.var
@@ -157,7 +157,7 @@ Source: `lib/channel.x:142`
 
 Boxes the borrowed Channel handle without changing its lifetime.
 
-Source: `lib/channel.x:170`
+Source: `lib/channel.x`
 
 ### `Var`
 
@@ -170,7 +170,7 @@ Reads a Channel handle with its exact tag. Ownership is unchanged.
 
 **Raises:** <bad-types> for another tag.
 
-Source: `lib/channel.x:175`
+Source: `lib/channel.x`
 
 ## Public types
 
@@ -189,7 +189,7 @@ send_owned explicitly hands off a detached, exclusively owned storage
 subtree. Close ends sends and lets accepted values drain. Every user
 and waiter must finish before the Channel's storage scope is destroyed.
 
-Source: `lib/channel.x:29`
+Source: `lib/channel.x`
 
 ## Design notes
 

@@ -44,6 +44,8 @@ Ast Ast_rewrap_origin(Ast original, Ast replacement);
 
 List Ast_written_definitions(List decl);
 
+List Ast_lone_item(List node);
+
 List Ast_entry_call(String entry);
 
 int Ast_reference_guard_exits(List arm);

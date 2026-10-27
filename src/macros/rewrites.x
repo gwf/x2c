@@ -363,8 +363,7 @@ static Var _kept_lowered(Var result, List source, Array parts) {
    unless it is a lowered carrier. It lowers outside the watch that chose
    its rule, as any definition does, and a shipped rule's is written. */
 static List _lowered_definition(Compiler c, Var result) {
-  List bound = c.bind_syntax(result, <unit>, NULL);
-  if (bound ~= %(seq ?only)) bound = only;
+  List bound = Ast.lone_item(c.bind_syntax(result, <unit>, NULL));
   if (result ~= %(code-value "lowered" *)) return bound;
   with (c.slot_watch = NULL) {
     return c.normalize(_written_support(c, bound));

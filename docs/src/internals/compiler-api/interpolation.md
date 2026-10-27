@@ -22,7 +22,7 @@ Interpolated Strings.
 
 Joins an interpolated String's parts.
 
-Source: `src/components/interpolation.x:14`
+Source: `src/components/interpolation.x`
 
 ## Design notes
 

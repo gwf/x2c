@@ -1,8 +1,8 @@
 /*  words-v1.x -- scope-owned allocation and deferred cleanup
 
     Keeps V0's line reader, hash table, and full sort. Replaces checked native
-    allocations with scope-owned storage, uses dot member access, and defers
-    cleanup of the native getline buffer.
+    allocations with scope-owned storage, borrows Counts through references,
+    uses dot member access, and defers cleanup of the native getline buffer.
 */
 
 #include <ctype.h>
@@ -37,16 +37,16 @@ int main(int argc, char **argv) {
   char *line = NULL;
   defer free(line); // x2c: replaces later free; getline uses native storage.
   size_t capacity = 0;
-  while (getline(&line, &capacity, input) != -1) count_line(&counts, line);
+  while (getline(&line, &capacity, input) != -1) count_line(counts, line);
   int finished = feof(input);
   fclose(input);
   if (!finished)
     fail("Could not finish reading " + argv[1]);
-  print_top_ten(&counts);
+  print_top_ten(counts);
   return EXIT_SUCCESS; // Root scope frees words and table.
 }
 
-static void count_line(Counts *counts, char *line) {
+static void count_line(Counts &counts, char *line) {
   char *p = line;
   while (*p) {
     while (isspace((unsigned char)*p)) ++p;
@@ -59,7 +59,7 @@ static void count_line(Counts *counts, char *line) {
   }
 }
 
-static void print_top_ten(const Counts *counts) {
+static void print_top_ten(const Counts &counts) {
   if (!counts.length) return;
   Entry **entries = xcalloc(counts.length, sizeof(*entries)); // Scope-owned.
   size_t length = 0;
@@ -78,7 +78,7 @@ static void normalize_word(char *word) {
   *out = '\0';
 }
 
-static void count_word(Counts *counts, const char *word) {
+static void count_word(Counts &counts, const char *word) {
   if (!counts.capacity) grow_counts(counts);
   uint64_t hash = hash_word(word);
   size_t bucket = hash % counts.capacity;
@@ -108,7 +108,7 @@ static int compare_entries(const void *a, const void *b) {
   return strcmp(left.word, right.word);
 }
 
-static void grow_counts(Counts *counts) {
+static void grow_counts(Counts &counts) {
   if (counts.capacity > SIZE_MAX / 2)
     fail("Too many words.");
   size_t capacity = counts.capacity ? counts.capacity * 2 : 64;

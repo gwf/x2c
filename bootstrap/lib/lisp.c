@@ -417,7 +417,7 @@ static void f8_sessions____install_specials(Lisp lisp);
 static Var f8_sessions____special_stub(void);
 static Var f10_primitives____bool(int x);
 static int f10_primitives____is_lisp_number(Var value);
-static int f10_primitives____number_class(Var value, long double magnitude);
+static int f10_primitives____number_class(long double magnitude);
 static Var f10_primitives____chain(List values, String operation, int want, int expect);
 static char * f10_primitives____string_charset(Var chars);
 static VarMethods _x2c_gensym_protocol_methods_0;
@@ -2896,7 +2896,7 @@ int Lisp_try_get(Lisp lisp, String name, Var * out){
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 206,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 207,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_37, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
@@ -2904,7 +2904,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     Var _x2c_gensym_literal_part_44 = String_var(String_new("Lisp.set_global"));
     Var _x2c_gensym_literal_part_45 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 208,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_set_global",.line = 209,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_38, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_44, Symbol_var(1218550748), _x2c_gensym_literal_part_45);
       __builtin_unreachable();
     }
@@ -2941,7 +2941,7 @@ Var Map_del(Map, Var);
 void Lisp_remove_global(Lisp lisp, String name){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 225,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 226,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_39, 4372499598, 1, Symbol_var(34096809266140), String_var(String_new("Lisp.remove_global")));
     __builtin_unreachable();
   }
@@ -2949,7 +2949,7 @@ void Lisp_remove_global(Lisp lisp, String name){
     Var _x2c_gensym_literal_part_46 = String_var(String_new("Lisp.remove_global"));
     Var _x2c_gensym_literal_part_47 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 227,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_remove_global",.line = 228,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_46, Symbol_var(1218550748), _x2c_gensym_literal_part_47);
       __builtin_unreachable();
     }
@@ -2961,7 +2961,7 @@ void Lisp_remove_global(Lisp lisp, String name){
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_bind",.line = 242,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/lisp/sessions.x",.function = "Lisp_bind",.line = 243,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_41, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
@@ -3085,11 +3085,8 @@ Symbol lisp_type(Var value){
   return Var_tag(value);
 }
 
-static int f10_primitives____number_class(Var value, long double magnitude){
-  Symbol tag = Var_tag(value);
-  if(tag == 2050956) return 0;
-  if(tag == 1854348) return 2;
-  if(tag == 28764 || magnitude != magnitude) return 3;
+static int f10_primitives____number_class(long double magnitude){
+  if(magnitude != magnitude) return 3;
   if(magnitude == 1.0L / 0.0L) return 2;
   if(magnitude == - 1.0L / 0.0L) return 0;
   return 1;
@@ -3108,7 +3105,7 @@ Var lisp_compare(Var a, Var b){
     Var _x2c_gensym_literal_part_53 = Symbol_var(Var_kind(a));
     Var _x2c_gensym_literal_part_54 = Symbol_var(Var_kind(b));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 91,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 89,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_44, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_52, Symbol_var(26746169281416), _x2c_gensym_literal_part_53, Symbol_var(1286928228633480), _x2c_gensym_literal_part_54);
       __builtin_unreachable();
     }
@@ -3117,7 +3114,7 @@ Var lisp_compare(Var a, Var b){
   Symbol ak = Var_kind(a), bk = Var_kind(b);
   long double da = ak == 439096724366 ? Var_long_double(a) : 0.0L;
   long double db = bk == 439096724366 ? Var_long_double(b) : 0.0L;
-  int ca = f10_primitives____number_class(a, da), cb = f10_primitives____number_class(b, db);
+  int ca = f10_primitives____number_class(da), cb = f10_primitives____number_class(db);
   if(ca != cb) return int_var(ca < cb ? - 1 : 1);
   if(ca != 1) return int_var(0);
   if(ak == 20309162340 && bk == 20309162340) return int_var(Var_integer_compare(a, b));
@@ -3158,7 +3155,7 @@ Var lisp_plus(List values){
 Var lisp_minus(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_minus",.line = 124,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_minus",.line = 122,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_45, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("-")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -3201,7 +3198,7 @@ Var lisp_times(List values){
 Var lisp_divide(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_divide",.line = 145,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_divide",.line = 143,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_46, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("/")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -3227,7 +3224,7 @@ Var lisp_divide(List values){
 static Var f10_primitives____chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 161,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 159,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_47, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }

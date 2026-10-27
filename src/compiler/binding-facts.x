@@ -84,8 +84,10 @@ static void _settle(Compiler c, List proven, List other_arm) {
 }
 
 /* A conjunction keeps its operands' proofs when it holds and a disjunction
-   when it fails, the only outcomes that require every operand's result. */
-static List _junction(Compiler c, Var op, Var left, Var right, int holds) {
+   when it fails, the only outcomes that require every operand's result.
+   proven_references selects Symbol operators and expression List operands. */
+static List _junction(
+  Compiler c, Symbol op, List left, List right, int holds) {
   if (holds != (op == <&&>)) return NULL;
   return c.proven_references(left, holds).append(
     c.proven_references(right, holds));
@@ -94,7 +96,7 @@ static List _junction(Compiler c, Var op, Var left, Var right, int holds) {
 /* A comparison with a null literal tests the other operand; `==` inverts
    the outcome that proves presence. */
 static List _null_comparison(
-  Compiler c, Var op, Var left, Var right, int holds) {
+  Compiler c, Symbol op, List left, List right, int holds) {
   List operand = right;
   if (_null_literal(right)) operand = left;
   else if (!_null_literal(left)) return NULL;

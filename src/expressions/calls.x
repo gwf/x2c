@@ -78,7 +78,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
       continue;
     }
     Type type = argument.cadr();
-    int forwarded = type.car() == <opt-ref>;
+    int forwarded = type.is_optional_reference();
     List source = c.cache_literal_list(
       c.sym.normalize_declared_type(forwarded ? type.cdr() : type));
     /* C text boxes as a String, as it does for any Var destination. */
@@ -283,17 +283,18 @@ static List _complete_iter_call(
 // calls
 
 static int _parameters_variadic(List parameters) {
-  foreach (Var parameter in parameters)
-    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
-        (parameter.car() == <...> || parameter.car() == <....>)))
-      return 1;
+  foreach (Var parameter in parameters) {
+    if (parameter == <...>) return 1;
+    if (parameter is <list> && !parameter.is_nil()) {
+      Type type = parameter;
+      if (type.car() == <...> || type.rest_container()) return 1;
+    }
+  }
   return 0;
 }
 
-static int _exact_iter_type(Var value) {
-  Type type = value is <list> ? value : $(value);
-  return type.canonicalize() == %("Iter");
-}
+static int _exact_iter_type(Type type) =>
+  type.canonicalize() == %("Iter");
 
 static List _iter_destination(void) =>
   $!(struct Iter *){ &(struct Iter){ 0 } };

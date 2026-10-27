@@ -218,8 +218,9 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 }
 
 /* A name that is not a constant, such as a template's own local, passes as
-   its syntax. Anything else is reported at `site`. */
-static Var _name_syntax(Compiler c, List node, Token site) {
+   its syntax. The caller supplies expression syntax; anything other than a
+   name is reported at `site`. */
+static List _name_syntax(Compiler c, List node, Token site) {
   if (node ~= %(expr ? (ident ?))) return node;
   $fail.stage_argument_constant(c, site);
 }
@@ -281,10 +282,11 @@ static Var _constant_leaf(Compiler c, List expr) {
   return expr;
 }
 
-static Var _cast_constant(Compiler c, Var type, List inner) {
+/* The type comes from a canonical cast expression's semantic Type slot. */
+static Var _cast_constant(Compiler c, Type type, List inner) {
   Var constant = _constant_leaf(c, inner);
   if (constant is void) return void;
-  Symbol tag = ((Type) type).scalar_tag();
+  Symbol tag = type.scalar_tag();
   return tag ? constant.convert(tag) : constant;
 }
 
@@ -294,9 +296,10 @@ static Var _joined_constant(Compiler c, Var left, Var right) {
   return a.string().add(b);
 }
 
-static List _string_literal(Compiler c, Type declared, Type type, Var value) {
+static List _string_literal(
+  Compiler c, Type declared, Type type, String value) {
   if (!declared || type === $!Type{ char * })
-    return %(expr (* char) (literal (* char) $(value.repr())));
+    return %(expr (* char) (literal (* char) $(((Var) value).repr())));
   if (type !== %("String")) return NULL;
   List literal = %(expr ("String") (literal ("String") $value));
   return %(expr $declared $(c.cache(%(string $literal))));
@@ -348,9 +351,9 @@ static List _data_form(Compiler c, Var value) {
   return _map_form(c, value);
 }
 
-static List _list_form(Compiler c, Var value) {
+static List _list_form(Compiler c, List value) {
   List tail = %(nil);
-  foreach (Var item in value.list().reverse()) {
+  foreach (Var item in value.reverse()) {
     List head = _data_form(c, item);
     if (!head) return NULL;
     tail = %(expr ("List") (cons $head $tail));
@@ -358,9 +361,9 @@ static List _list_form(Compiler c, Var value) {
   return tail;
 }
 
-static List _array_form(Compiler c, Var value) {
+static List _array_form(Compiler c, Array value) {
   Array items = auto [];
-  foreach (Var item in value.array()) {
+  foreach (Var item in value) {
     List code = _data_form(c, item);
     if (!code) return NULL;
     items.push(code);
@@ -368,8 +371,7 @@ static List _array_form(Compiler c, Var value) {
   return %(expr ("Array") (array @(items.list())));
 }
 
-static List _map_form(Compiler c, Var value) {
-  Map map = value;
+static List _map_form(Compiler c, Map map) {
   auto Array keys = [], entries = [];
   foreach (Var (key, item) in map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.

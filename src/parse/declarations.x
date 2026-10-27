@@ -421,9 +421,10 @@ module List _bind_collected_initializers(
 /* Completes a constructed declaration's base type, then installs each
    declarator as the parser does. Only a field may declare a bit-field.
    Collection keeps file-scope initializers for the full parse, with the
-   macro stack that constructed them. */
+   macro stack that constructed them. Binding selects a Symbol declaration
+   tag before this path runs. */
 module List _bind_declaration(
-  Compiler c, Var tag, Var base, List declarators, Symbol context) {
+  Compiler c, Symbol tag, Var base, List declarators, Symbol context) {
   int shallow = c.shallow;
   if (c.public_bodies && context == <unit>) c.shallow = 1;
   defer c.shallow = shallow;
@@ -457,7 +458,7 @@ module List _bind_declaration(
 
 /* A typedef stands in a unit or a block, a `decl` only in a block, and any
    other declaration also in an aggregate. */
-static int _declaration_legal(Var tag, Symbol context) {
+static int _declaration_legal(Symbol tag, Symbol context) {
   if (tag == <typedef>) return context == <unit> || context == <block>;
   if (tag == <decl>) return context == <block>;
   return context == <unit> || context == <block> || context == <field>;

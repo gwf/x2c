@@ -26,7 +26,7 @@ An invalid `Atom` appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:93`
+Source: `lib/atom.x`
 
 ### `Var`
 
@@ -37,7 +37,7 @@ Source: `lib/atom.x:93`
 
 Reports whether `value` is an exact-spelling `Atom`.
 
-Source: `lib/atom.x:54`
+Source: `lib/atom.x`
 
 ## Advanced and interop API
 
@@ -64,7 +64,7 @@ comment, has no numeric prefix, and holds no backslash, which would read
 as an escape. Both reader scanners consume it whole. The unit-interface
 writer uses the same bare-symbol decision.
 
-Source: `lib/atom.x:43`
+Source: `lib/atom.x`
 
 <a id="Atom.first"></a>
 #### Atom.first
@@ -73,7 +73,7 @@ Source: `lib/atom.x:43`
 
 Returns the first byte of `atom`'s exact spelling, or NUL when invalid.
 
-Source: `lib/atom.x:57`
+Source: `lib/atom.x`
 
 <a id="Atom.initialize"></a>
 #### Atom.initialize
@@ -87,7 +87,7 @@ Repeated calls after successful registration have no effect.
 `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
 when registration returns zero.
 
-Source: `lib/atom.x:69`
+Source: `lib/atom.x`
 
 <a id="Atom.intern"></a>
 #### Atom.intern
@@ -105,7 +105,7 @@ escapes its innermost owning pool.
 its canonical `String` cannot be allocated, or `<bad-enc>` if the
 long-`Atom` pointer cannot be boxed.
 
-Source: `lib/atom.x:143`
+Source: `lib/atom.x`
 
 <a id="Atom.promote"></a>
 #### Atom.promote
@@ -119,7 +119,7 @@ pointer.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/atom.x:32`
+Source: `lib/atom.x`
 
 <a id="Atom.str"></a>
 #### Atom.str
@@ -133,7 +133,7 @@ module lifetime rule above. An invalid `Atom` returns NULL.
 
 **Raises:** `<alloc-fail>` while canonicalizing a compact spelling.
 
-Source: `lib/atom.x:127`
+Source: `lib/atom.x`
 
 <a id="Atom.write_repr"></a>
 #### Atom.write_repr
@@ -147,7 +147,7 @@ The escaping makes the result readable as the same exact `Atom`. An invalid
 **Raises:** `<alloc-fail>` while decoding a compact `Atom`, or `<size-limit>`
 or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:105`
+Source: `lib/atom.x`
 
 ## Design notes
 

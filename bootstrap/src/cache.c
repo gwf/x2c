@@ -41,7 +41,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Array _cache_ids(Compiler c, List code);
 
-static void _collect_ids(Compiler c, Var value, List * seen, Array ids);
+static void _collect_ids(Compiler c, List value, List * seen, Array ids);
 
 static List _helper_call(Compiler c, List helper);
 
@@ -432,7 +432,7 @@ static Array _cache_ids(Compiler c, List code){
   }
   ;
   Array ids = Array_new();
-  _collect_ids(c, List_var(code), seen, ids);
+  _collect_ids(c, code, seen, ids);
   if(! Array_truth(ids)){
     Array_free(ids);
     return NULL;
@@ -440,8 +440,8 @@ static Array _cache_ids(Compiler c, List code){
   return ids;
 }
 
-static void _collect_ids(Compiler c, Var value, List * seen, Array ids){
-  Array pending = Array_update_n(Array_new(), 1, List_var(cons(value, NULL)));
+static void _collect_ids(Compiler c, List value, List * seen, Array ids){
+  Array pending = Array_update_n(Array_new(), 1, List_var(cons(List_var(value), NULL)));
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0

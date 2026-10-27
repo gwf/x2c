@@ -36,7 +36,7 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:190`
+Source: `src/stage.x`
 
 <a id="Compiler.folded_constant"></a>
 #### Compiler.folded_constant
@@ -48,7 +48,7 @@ is only known at run time. Literal folding hoists a constant into the
 compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
 `var` and `string` leaves.
 
-Source: `src/stage.x:109`
+Source: `src/stage.x`
 
 <a id="Compiler.literal_text_value"></a>
 #### Compiler.literal_text_value
@@ -59,7 +59,7 @@ Returns the value of a String or character literal from its source
 `spelling`, quotes included: adjacent pieces are unescaped on their own
 and joined, as C does, and a character is its code.
 
-Source: `src/stage.x:123`
+Source: `src/stage.x`
 
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument
@@ -74,7 +74,7 @@ syntax as the literal's value, a `TypeInfo` parameter as the description
 of its type, and a `Source` parameter with its source text. Anything
 else is reported at `site`.
 
-Source: `src/stage.x:63`
+Source: `src/stage.x`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -84,7 +84,7 @@ Source: `src/stage.x:63`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:201`
+Source: `src/stage.x`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -97,7 +97,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/stage.x:151`
+Source: `src/stage.x`
 
 ## Public types
 
@@ -112,7 +112,7 @@ Source: `src/stage.x:151`
 
 Evaluates a nested `$` call among a call's arguments.
 
-Source: `src/stage.x:45`
+Source: `src/stage.x`
 
 ## Design notes
 

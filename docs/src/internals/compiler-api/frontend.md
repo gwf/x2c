@@ -36,7 +36,7 @@ replay them from the process cache. The collection runs as an empty
 unit, whatever dump or symbol mode the request selects. Returns zero
 after reporting a failure.
 
-Source: `src/frontend.x:155`
+Source: `src/frontend.x`
 
 <a id="Frontend.load_support"></a>
 #### Frontend.load_support
@@ -47,7 +47,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:233`
+Source: `src/frontend.x`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -58,7 +58,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:215`
+Source: `src/frontend.x`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -68,7 +68,7 @@ Source: `src/frontend.x:215`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:98`
+Source: `src/frontend.x`
 
 <a id="Frontend.open_reporting"></a>
 #### Frontend.open_reporting
@@ -80,7 +80,7 @@ and parsing print each diagnostic as it is reported; a tokenizing
 failure prints its diagnostics afterward. A failed unit is closed; the
 caller must close a successful one.
 
-Source: `src/frontend.x:106`
+Source: `src/frontend.x`
 
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
@@ -91,7 +91,7 @@ Opens an empty submission unit with the ordinary runtime prelude. The
 caller must close the unit on either result; submissions and inspection
 results borrow its Context.
 
-Source: `src/frontend.x:121`
+Source: `src/frontend.x`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -101,7 +101,7 @@ Source: `src/frontend.x:121`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:133`
+Source: `src/frontend.x`
 
 ### `ParsedUnit`
 
@@ -113,7 +113,7 @@ Source: `src/frontend.x:133`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:199`
+Source: `src/frontend.x`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -123,7 +123,7 @@ Source: `src/frontend.x:199`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:176`
+Source: `src/frontend.x`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -133,7 +133,7 @@ Source: `src/frontend.x:176`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:139`
+Source: `src/frontend.x`
 
 ## Public types
 
@@ -152,7 +152,7 @@ Borrows a configured request and owns shared native-preprocessor setup.
 Nested units close in reverse order; process caches outlive the session.
 The optional stderr sink runs synchronously; units also retain that text.
 
-Source: `src/frontend.x:23`
+Source: `src/frontend.x`
 
 <a id="FrontendErrorSink"></a>
 ### FrontendErrorSink
@@ -162,7 +162,7 @@ Source: `src/frontend.x:23`
 Receives borrowed native-preprocessor stderr synchronously during
 collect.
 
-Source: `src/frontend.x:17`
+Source: `src/frontend.x`
 
 <a id="ParsedUnit"></a>
 ### ParsedUnit
@@ -172,7 +172,7 @@ Source: `src/frontend.x:17`
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
 
-Source: `src/frontend.x:33`
+Source: `src/frontend.x`
 
 ## Design notes
 

@@ -204,7 +204,7 @@ static int _string_operand(Compiler c, Type type) =>
    returns NULL. */
 static List _protocol_update(
   Compiler c, Type type, Symbol op, List arg, List &?rhs, Symbol spelled) {
-  Symbol member = c.operator_member(op);
+  Symbol member = Compiler.operator_member(op);
   if (!member) return NULL;
   String member_name = member;
   List resolved = c.resolve_protocol_member(type, member_name);

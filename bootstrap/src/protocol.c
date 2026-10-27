@@ -11,9 +11,9 @@
 #include "expressions/expressions.h"
 #include "parse/parse.h"
 #include "meta.h"
-Symbol Compiler_operator_member(Compiler c, Symbol op);
+Symbol Compiler_operator_member(Symbol op);
 
-Symbol Compiler_derived_member(Compiler c, Symbol op);
+Symbol Compiler_derived_member(Symbol op);
 
 typedef struct f8_registry___AdoptionDraft{
   Compiler c;

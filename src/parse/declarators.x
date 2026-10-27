@@ -520,7 +520,7 @@ static void _parameter_facts(Compiler c, Var binding, List parameter) {
   Type type = parameter.type_from_ast();
   if (type.is_reference())
     c.set_fact(%(reference-param $binding), 1);
-  if (type.car() == <opt-ref>)
+  if (type.is_optional_reference())
     c.set_fact(%(optional-reference-param $binding), 1);
 }
 

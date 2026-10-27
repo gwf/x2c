@@ -75,7 +75,7 @@ static int f6_output____needs_errors(List item);
 
 static List f6_output____vertical_spacing(List code);
 
-static void f6_output____push_line(Array out, Var node);
+static void f6_output____push_line(Array out, List node);
 
 static List f6_output____include_guard(Compiler c, List content);
 
@@ -142,9 +142,9 @@ static void f10_projection____promote_typedefs(Array header, Array pending);
 
 static int f10_projection____at(f10_projection___HeaderNeeds * n, int i, List names);
 
-static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, Var name);
+static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, String name);
 
-static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, Var name);
+static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, String name);
 
 static void _spelled_types(List node, Map names);
 
@@ -238,11 +238,11 @@ static int f14_initialization____cache_only(Compiler c);
 
 static Map f14_initialization____cache_reachable(List source);
 
-static int f14_initialization____record_calls(Var value, Var caller, Map callers);
+static int f14_initialization____record_calls(Var value, String caller, Map callers);
 
 typedef struct f12_dependencies___Forward{
   Compiler c;
-  Map available, statics, seen;
+  Map declared, statics;
   Array out;
 }
 f12_dependencies___Forward;
@@ -259,9 +259,9 @@ static Map f12_dependencies____undef_positions(List source);
 
 static void f12_dependencies____place_bodies(Array out, Array bodies, List arms);
 
-static void f12_dependencies____collect_declared(Var value, Map available);
+static void f12_dependencies____collect_declared(Var value, Map declared);
 
-static void f12_dependencies____set_function(Map names, Var binding, Var value);
+static void f12_dependencies____set_function(Map names, List binding, Var value);
 
 static void f12_dependencies____set_typedef(Map names, List binding, Var value);
 
@@ -269,17 +269,17 @@ static List _declaration_binding(List declarator);
 
 static void f12_dependencies____source_declarations(Var value, Map statics);
 
-static void f12_dependencies____set_static(Map statics, Var base, List declarator);
+static void f12_dependencies____set_static(Map statics, List base, List declarator);
 
-static void f12_dependencies____dependencies(f12_dependencies___Forward * f, Var value);
+static void f12_dependencies____dependencies(f12_dependencies___Forward * f, List value);
 
 static List f12_dependencies____next(List node, Array resume);
 
 static void f12_dependencies____visit(f12_dependencies___Forward * f, List node);
 
-static void f12_dependencies____binding(f12_dependencies___Forward * f, Var binding);
+static void f12_dependencies____binding(f12_dependencies___Forward * f, List binding);
 
-static void f12_dependencies____global(f12_dependencies___Forward * f, Var binding, String spelling);
+static void f12_dependencies____global(f12_dependencies___Forward * f, List binding, String spelling);
 
 static void f12_dependencies____declaration(f12_dependencies___Forward * f, Var key);
 
@@ -1023,7 +1023,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _568 = cons(_565, _567);
   _569 = List_var(_568);
   _570 = Symbol_var(1133019155420);
-  _571 = int_var(39641);
+  _571 = int_var(39648);
   _572 = cons(_571, NULL);
   _573 = cons(_570, _572);
   _574 = List_var(_573);
@@ -1106,7 +1106,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _651 = cons(_650, NULL);
   _652 = cons(_557, _651);
   _653 = List_var(_652);
-  _654 = int_var(39555);
+  _654 = int_var(39562);
   _655 = cons(_654, NULL);
   _656 = cons(_570, _655);
   _657 = List_var(_656);
@@ -1476,15 +1476,15 @@ static List f6_output____vertical_spacing(List code){
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      f6_output____push_line(out, List_var(node));
+      f6_output____push_line(out, node);
     }
 
   }
   return Array_list_free(out);
 }
 
-static void f6_output____push_line(Array out, Var node){
-  Array_push(out, node);
+static void f6_output____push_line(Array out, List node){
+  Array_push(out, List_var(node));
   Array_push(out, List_var(_17));
 }
 
@@ -1578,7 +1578,7 @@ static List f6_output____source_unit(Compiler c, List content){
           Var _x2c_gensym_macro_cursor_output_6;
           while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
             include = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
-            f6_output____push_line(lines, List_var(include));
+            f6_output____push_line(lines, include);
           }
 
         }
@@ -1589,11 +1589,11 @@ static List f6_output____source_unit(Compiler c, List content){
           Var _x2c_gensym_macro_cursor_output_7;
           while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
             include = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
-            f6_output____push_line(lines, List_var(include));
+            f6_output____push_line(lines, include);
           }
 
         }
-        f6_output____push_line(lines, List_var(f6_output____runtime_entry(c, node)));
+        f6_output____push_line(lines, f6_output____runtime_entry(c, node));
       }
 
     }
@@ -2179,14 +2179,14 @@ static int f10_projection____at(f10_projection___HeaderNeeds * n, int i, List na
     Var _x2c_gensym_macro_cursor_output_16;
     while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_16))){
       name = Var_as_string(_x2c_gensym_macro_cursor_output_16);
-      if(! f10_projection____declared_before(&((* n)), i, String_var(name)) && f10_projection____spelled_after(&((* n)), i, String_var(name))) return 1;
+      if(! f10_projection____declared_before(&((* n)), i, name) && f10_projection____spelled_after(&((* n)), i, name)) return 1;
     }
 
   }
   return 0;
 }
 
-static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, Var name){
+static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, int i, String name){
   if((void *)(* n).declared == 0){
     (* n).declared = Map_new();
     int count = Array_len((* n).header);
@@ -2204,16 +2204,16 @@ static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, i
 
   }
   Var first;
-  return Map_try_get((* n).declared, name, &(first)) && Var_int(first) < i;
+  return Map_try_get((* n).declared, String_var(name), &(first)) && Var_int(first) < i;
 }
 
-static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, Var name){
+static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, String name){
   if((void *)(* n).spelled == 0)(* n).spelled = Map_new();
   while((* n).walked > i + 1){
     Var item = Array_getindex((* n).header, --(* n).walked);
     if(Var_is_row(item, 9, 7, 4)) _spelled_types(Var_list_payload(item), (* n).spelled);
   }
-  return Map_contains((* n).spelled, name);
+  return Map_contains((* n).spelled, String_var(name));
 }
 
 int Symbol_is_type_qualifier(Symbol);
@@ -3288,7 +3288,7 @@ static Map f14_initialization____cache_reachable(List source){
           definition = x2c_match_value_0;
           Var spelling;
           spelling = x2c_match_value_1;
-          if(f14_initialization____record_calls(definition, spelling, callers)) Array_push(queue, spelling);
+          if(f14_initialization____record_calls(definition, Var_as_string(spelling), callers)) Array_push(queue, spelling);
         }
 
       }
@@ -3319,7 +3319,7 @@ Array_free(queue);
 return reachable;
 }
 
-static int f14_initialization____record_calls(Var value, Var caller, Map callers){
+static int f14_initialization____record_calls(Var value, String caller, Map callers){
   if(! Var_is_row(value, 9, 7, 4)) return 0;
   List node = Var_list_payload(value);
   {
@@ -3331,7 +3331,7 @@ static int f14_initialization____record_calls(Var value, Var caller, Map callers
         callee = x2c_match_value_0;
         {
           List found = Var_list_payload(Map_getdefault(callers, callee, List_var(NULL)));
-          Map_setindex(callers, callee, List_var(cons(caller, found)));
+          Map_setindex(callers, callee, List_var(cons(String_var(caller), found)));
           return 0;
         }
 
@@ -3357,10 +3357,10 @@ static int f14_initialization____record_calls(Var value, Var caller, Map callers
 
 static List _forward_declarations(Compiler c, List source, int source_includes){
   f12_dependencies___Forward f ={
-    .c = c, .available = Map_new(), .statics = Map_new(), .seen = Map_new(), .out = Array_new()
+    .c = c, .declared = Map_new(), .statics = Map_new(), .out = Array_new()
   }
   ;
-  if(c -> runtime_inc && source_includes) Compiler_runtime_function_declarations(c, f.available);
+  if(c -> runtime_inc && source_includes) Compiler_runtime_function_declarations(c, f.declared);
   f12_dependencies____source_declarations(List_var(source), f.statics);
   {
     List node;
@@ -3371,7 +3371,7 @@ static List _forward_declarations(Compiler c, List source, int source_includes){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_39);
       {
         node = f12_dependencies____inline_prototype(c, node);
-        if(x2c_var_equal(List_car(node), Symbol_var(44661285196)) && Map_contains(f.seen, List_var(node))) continue;
+        if(x2c_var_equal(List_car(node), Symbol_var(44661285196)) && Map_contains(f.declared, List_var(node))) continue;
         if(source_includes){
           List _x2c_gensym_match_expr_37 = node;
           {List _x2c_gensym_match_at_187, _x2c_gensym_match_at_188; Var x2c_match_value_0; if(_x2c_gensym_match_expr_37 && _x2c_gensym_match_expr_37 ->car.u64 == 9224497972340888518ULL &&(_x2c_gensym_match_at_187 = _x2c_gensym_match_expr_37 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_187 ->car, 1) && Var_is(_x2c_gensym_match_at_187 -> car, 1318210446) && !(_x2c_gensym_match_at_188 = _x2c_gensym_match_at_187 ->cdr)){
@@ -3383,7 +3383,7 @@ static List _forward_declarations(Compiler c, List source, int source_includes){
               {
                 int angle = 0;
                 String target = Compiler_preproc_include_target(text, &(angle));
-                if(String_truth(target)) Compiler_include_function_declarations(c, target, angle, f.available);
+                if(String_truth(target)) Compiler_include_function_declarations(c, target, angle, f.declared);
               }
 
             }
@@ -3393,8 +3393,8 @@ static List _forward_declarations(Compiler c, List source, int source_includes){
         }
 
       }
-      f12_dependencies____collect_declared(List_var(node), f.available);
-      f12_dependencies____dependencies(&(f), List_var(node));
+      f12_dependencies____collect_declared(List_var(node), f.declared);
+      f12_dependencies____dependencies(&(f), node);
       Array_push(f.out, List_var(node));
     }
 
@@ -3713,7 +3713,7 @@ int Type_is_function(Type);
 
 Type List_type_from_ast(List);
 
-static void f12_dependencies____collect_declared(Var value, Map available){
+static void f12_dependencies____collect_declared(Var value, Map declared){
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return;
   List node = Var_list_payload(value);
   {
@@ -3722,12 +3722,12 @@ static void f12_dependencies____collect_declared(Var value, Map available){
       case 9224498395122781148ULL :{List _x2c_gensym_match_at_213, _x2c_gensym_match_at_214, _x2c_gensym_match_at_215, _x2c_gensym_match_at_216, _x2c_gensym_match_at_217, _x2c_gensym_match_at_218, _x2c_gensym_match_at_219, _x2c_gensym_match_at_220, _x2c_gensym_match_at_221, _x2c_gensym_match_at_222, _x2c_gensym_match_at_223, _x2c_gensym_match_at_224; Var x2c_match_value_0; if(_x2c_gensym_match_expr_43 && _x2c_gensym_match_expr_43 ->car.u64 == 9224498395122781148ULL &&(_x2c_gensym_match_at_213 = _x2c_gensym_match_expr_43 ->cdr) &&(_x2c_gensym_match_at_214 = _x2c_gensym_match_at_213 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_214 ->car, 1) &&((Var_is(_x2c_gensym_match_at_214 -> car, 806120) &&(_x2c_gensym_match_at_215 = Var_list_payload(_x2c_gensym_match_at_214 -> car), 1)) && _x2c_gensym_match_at_215 && _x2c_gensym_match_at_215 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_216 = _x2c_gensym_match_at_215 ->cdr) &&(Var_is(_x2c_gensym_match_at_216 -> car, 806120) &&(_x2c_gensym_match_at_217 = Var_list_payload(_x2c_gensym_match_at_216 -> car), 1)) && _x2c_gensym_match_at_217 && _x2c_gensym_match_at_217 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_218 = _x2c_gensym_match_at_217 ->cdr) &&(_x2c_gensym_match_at_219 = _x2c_gensym_match_at_218 ->cdr) && !(_x2c_gensym_match_at_220 = _x2c_gensym_match_at_219 ->cdr) &&(_x2c_gensym_match_at_221 = _x2c_gensym_match_at_216 ->cdr) && !(_x2c_gensym_match_at_222 = _x2c_gensym_match_at_221 ->cdr)) &&(_x2c_gensym_match_at_223 = _x2c_gensym_match_at_214 ->cdr) && !(_x2c_gensym_match_at_224 = _x2c_gensym_match_at_223 ->cdr)){{
         Var declarator;
         declarator = x2c_match_value_0;
-        f12_dependencies____set_function(available, List_var(_declaration_binding(Var_list_payload(declarator))), int_var(1));
+        f12_dependencies____set_function(declared, _declaration_binding(Var_list_payload(declarator)), int_var(1));
       }
       break;}} case 9224497945694178442ULL :{List _x2c_gensym_match_at_213, _x2c_gensym_match_at_214, _x2c_gensym_match_at_215, _x2c_gensym_match_at_216, _x2c_gensym_match_at_217, _x2c_gensym_match_at_218, _x2c_gensym_match_at_219, _x2c_gensym_match_at_220, _x2c_gensym_match_at_221, _x2c_gensym_match_at_222, _x2c_gensym_match_at_223; Var x2c_match_value_0; if(_x2c_gensym_match_expr_43 && _x2c_gensym_match_expr_43 ->car.u64 == 9224497945694178442ULL &&(_x2c_gensym_match_at_213 = _x2c_gensym_match_expr_43 ->cdr) &&(_x2c_gensym_match_at_214 = _x2c_gensym_match_at_213 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_214 ->car, 1) &&((Var_is(_x2c_gensym_match_at_214 -> car, 806120) &&(_x2c_gensym_match_at_215 = Var_list_payload(_x2c_gensym_match_at_214 -> car), 1)) && _x2c_gensym_match_at_215 && _x2c_gensym_match_at_215 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_216 = _x2c_gensym_match_at_215 ->cdr) &&(Var_is(_x2c_gensym_match_at_216 -> car, 806120) &&(_x2c_gensym_match_at_217 = Var_list_payload(_x2c_gensym_match_at_216 -> car), 1)) && _x2c_gensym_match_at_217 && _x2c_gensym_match_at_217 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_218 = _x2c_gensym_match_at_217 ->cdr) &&(_x2c_gensym_match_at_219 = _x2c_gensym_match_at_218 ->cdr) && !(_x2c_gensym_match_at_220 = _x2c_gensym_match_at_219 ->cdr) &&(_x2c_gensym_match_at_221 = _x2c_gensym_match_at_216 ->cdr) && !(_x2c_gensym_match_at_222 = _x2c_gensym_match_at_221 ->cdr)) && !(_x2c_gensym_match_at_223 = _x2c_gensym_match_at_214 ->cdr)){{
         Var declarator;
         declarator = x2c_match_value_0;
-        if(Type_is_function(List_type_from_ast(node))) f12_dependencies____set_function(available, List_var(_declaration_binding(Var_list_payload(declarator))), int_var(1));
+        if(Type_is_function(List_type_from_ast(node))) f12_dependencies____set_function(declared, _declaration_binding(Var_list_payload(declarator)), int_var(1));
       }
       break;}}{List _x2c_gensym_match_at_213, _x2c_gensym_match_at_214, _x2c_gensym_match_at_215, _x2c_gensym_match_at_216, _x2c_gensym_match_at_217; List x2c_match_list_0; if(_x2c_gensym_match_expr_43 && _x2c_gensym_match_expr_43 ->car.u64 == 9224497945694178442ULL &&(_x2c_gensym_match_at_213 = _x2c_gensym_match_expr_43 ->cdr) && Var_is(_x2c_gensym_match_at_213 -> car, 806120) &&(_x2c_gensym_match_at_214 = _x2c_gensym_match_at_213 ->cdr) &&(Var_is(_x2c_gensym_match_at_214 -> car, 806120) &&(_x2c_gensym_match_at_215 = Var_list_payload(_x2c_gensym_match_at_214 -> car), 1)) && _x2c_gensym_match_at_215 && _x2c_gensym_match_at_215 ->car.u64 == 9224498094476456422ULL &&(_x2c_gensym_match_at_216 = _x2c_gensym_match_at_215 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_216, 1) && !(_x2c_gensym_match_at_217 = _x2c_gensym_match_at_214 ->cdr)){{
         List declarators;
@@ -3741,7 +3741,7 @@ static void f12_dependencies____collect_declared(Var value, Map available){
             declarator = Var_list_payload(_x2c_gensym_macro_cursor_output_46);
             {
               List binding = _declaration_binding(declarator);
-              if(List_truth(binding)) Map_setindex(available, List_var(binding), int_var(1));
+              if(List_truth(binding)) Map_setindex(declared, List_var(binding), int_var(1));
             }
 
           }
@@ -3759,7 +3759,7 @@ static void f12_dependencies____collect_declared(Var value, Map available){
           Var _x2c_gensym_macro_cursor_output_47;
           while(List_try_next(_x2c_gensym_macro_object_48, &(_x2c_gensym_macro_cursor_51), &(_x2c_gensym_macro_cursor_output_47))){
             declarator = Var_list_payload(_x2c_gensym_macro_cursor_output_47);
-            f12_dependencies____set_typedef(available, _declaration_binding(declarator), int_var(1));
+            f12_dependencies____set_typedef(declared, _declaration_binding(declarator), int_var(1));
           }
 
         }
@@ -3772,7 +3772,7 @@ static void f12_dependencies____collect_declared(Var value, Map available){
         Var _x2c_gensym_macro_cursor_output_48;
         while(List_try_next(_x2c_gensym_macro_object_49, &(_x2c_gensym_macro_cursor_52), &(_x2c_gensym_macro_cursor_output_48))){
           child = _x2c_gensym_macro_cursor_output_48;
-          f12_dependencies____collect_declared(child, available);
+          f12_dependencies____collect_declared(child, declared);
         }
 
       }
@@ -3783,9 +3783,9 @@ static void f12_dependencies____collect_declared(Var value, Map available){
 
 }
 
-static void f12_dependencies____set_function(Map names, Var binding, Var value){
-  Map_setindex(names, binding, value);
-  Map_setindex(names, List_var(cons(_685, cons(String_var(Ast_binding_spelling(Var_list_payload(binding))), NULL))), value);
+static void f12_dependencies____set_function(Map names, List binding, Var value){
+  Map_setindex(names, List_var(binding), value);
+  Map_setindex(names, List_var(cons(_685, cons(String_var(Ast_binding_spelling(binding)), NULL))), value);
 }
 
 static void f12_dependencies____set_typedef(Map names, List binding, Var value){
@@ -3823,7 +3823,7 @@ static void f12_dependencies____source_declarations(Var value, Map statics){
         signature = x2c_match_value_1;
         Var binding;
         binding = x2c_match_value_2;
-        f12_dependencies____set_function(statics, binding, List_var(_prototype(Var_list_payload(type), Var_list_payload(signature))));
+        f12_dependencies____set_function(statics, Var_list_payload(binding), List_var(_prototype(Var_list_payload(type), Var_list_payload(signature))));
       }
       break;}} case 9224497945694178442ULL :{List _x2c_gensym_match_at_244, _x2c_gensym_match_at_245, _x2c_gensym_match_at_246, _x2c_gensym_match_at_247, _x2c_gensym_match_at_248; Var x2c_match_value_0; List x2c_match_list_1; if(_x2c_gensym_match_expr_45 && _x2c_gensym_match_expr_45 ->car.u64 == 9224497945694178442ULL &&(_x2c_gensym_match_at_244 = _x2c_gensym_match_expr_45 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_244 ->car, 1) &&(_x2c_gensym_match_at_245 = _x2c_gensym_match_at_244 ->cdr) &&(Var_is(_x2c_gensym_match_at_245 -> car, 806120) &&(_x2c_gensym_match_at_246 = Var_list_payload(_x2c_gensym_match_at_245 -> car), 1)) && _x2c_gensym_match_at_246 && _x2c_gensym_match_at_246 ->car.u64 == 9224498094476456422ULL &&(_x2c_gensym_match_at_247 = _x2c_gensym_match_at_246 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_247, 1) && !(_x2c_gensym_match_at_248 = _x2c_gensym_match_at_245 ->cdr)){{
         Var base;
@@ -3837,7 +3837,7 @@ static void f12_dependencies____source_declarations(Var value, Map statics){
           Var _x2c_gensym_macro_cursor_output_49;
           while(List_try_next(_x2c_gensym_macro_object_50, &(_x2c_gensym_macro_cursor_53), &(_x2c_gensym_macro_cursor_output_49))){
             declarator = Var_list_payload(_x2c_gensym_macro_cursor_output_49);
-            f12_dependencies____set_static(statics, base, declarator);
+            f12_dependencies____set_static(statics, Var_list_payload(base), declarator);
           }
 
         }
@@ -3877,7 +3877,7 @@ static void f12_dependencies____source_declarations(Var value, Map statics){
 
 }
 
-static void f12_dependencies____set_static(Map statics, Var base, List declarator){
+static void f12_dependencies____set_static(Map statics, List base, List declarator){
   List binding = _declaration_binding(declarator);
   if(! List_truth(binding)) return;
   {
@@ -3892,13 +3892,13 @@ static void f12_dependencies____set_static(Map statics, Var base, List declarato
 
 }
 Map_setindex(statics, List_var(binding), List_var(({
-  Var _x2c_gensym_literal_part_52 = base;  Var _x2c_gensym_literal_part_53 = List_var(cons(_116, cons(List_var(declarator), NULL)));  cons(_117, cons(_x2c_gensym_literal_part_52, cons(_x2c_gensym_literal_part_53, NULL)));
+  Var _x2c_gensym_literal_part_52 = List_var(base);  Var _x2c_gensym_literal_part_53 = List_var(cons(_116, cons(List_var(declarator), NULL)));  cons(_117, cons(_x2c_gensym_literal_part_52, cons(_x2c_gensym_literal_part_53, NULL)));
 }
 )));
 }
 
-static void f12_dependencies____dependencies(f12_dependencies___Forward * f, Var value){
-  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return;
+static void f12_dependencies____dependencies(f12_dependencies___Forward * f, List value){
+  if(! List_truth(value)) return;
   Array resume = Array_new();
   const Array _x2c_gensym_macro_acquired_8 = resume;
   {
@@ -3913,7 +3913,7 @@ static void f12_dependencies____dependencies(f12_dependencies___Forward * f, Var
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_9);
     {
-      for(List node = Var_list_payload(value);  List_truth(node);  node = f12_dependencies____next(node, resume)) f12_dependencies____visit(&((* f)), node);
+      for(List node = value;  List_truth(node);  node = f12_dependencies____next(node, resume)) f12_dependencies____visit(&((* f)), node);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
   }
@@ -3945,7 +3945,7 @@ static void f12_dependencies____visit(f12_dependencies___Forward * f, List node)
       default:{List _x2c_gensym_match_at_256, _x2c_gensym_match_at_257, _x2c_gensym_match_at_258; Var x2c_match_value_0; if((x2c_match_value_0 = List_var(_x2c_gensym_match_expr_47), 1) &&(_x2c_gensym_match_expr_47 && _x2c_gensym_match_expr_47 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_256 = _x2c_gensym_match_expr_47 ->cdr) &&(_x2c_gensym_match_at_257 = _x2c_gensym_match_at_256 ->cdr) && !(_x2c_gensym_match_at_258 = _x2c_gensym_match_at_257 ->cdr))){{
         Var binding;
         binding = x2c_match_value_0;
-        f12_dependencies____binding(&((* f)), binding);
+        f12_dependencies____binding(&((* f)), Var_list_payload(binding));
       }
       break;}}{List _x2c_gensym_match_at_256; Var x2c_match_value_0; if(_x2c_gensym_match_expr_47 && _x2c_gensym_match_expr_47 ->car.u64 == 9224497936761817880ULL &&(_x2c_gensym_match_at_256 = _x2c_gensym_match_expr_47 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_256 ->car, 1) && Var_is(_x2c_gensym_match_at_256 -> car, 1318210446)){{
         Var name;
@@ -3972,10 +3972,10 @@ static void f12_dependencies____visit(f12_dependencies___Forward * f, List node)
 
 }
 
-static void f12_dependencies____binding(f12_dependencies___Forward * f, Var binding){
-  String spelling = Ast_binding_spelling(Var_list_payload(binding));
+static void f12_dependencies____binding(f12_dependencies___Forward * f, List binding){
+  String spelling = Ast_binding_spelling(binding);
   List native = cons(_685, cons(String_var(spelling), NULL));
-  if(Map_contains((* f).statics, binding)) f12_dependencies____declaration(&((* f)), binding);
+  if(Map_contains((* f).statics, List_var(binding))) f12_dependencies____declaration(&((* f)), List_var(binding));
   else if(Map_contains((* f).statics, List_var(native))) f12_dependencies____declaration(&((* f)), List_var(native));
   else f12_dependencies____global(&((* f)), binding, spelling);
 }
@@ -3986,14 +3986,14 @@ int Compiler_native_protocol_alias(Compiler, String);
 
 List Type_declaration_ast(Type, List);
 
-static void f12_dependencies____global(f12_dependencies___Forward * f, Var binding, String spelling){
+static void f12_dependencies____global(f12_dependencies___Forward * f, List binding, String spelling){
   Compiler c =(* f).c;
   Type type = NULL;
   List global = String_truth(spelling) ? Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), &(type)) : NULL;
-  if(! List_truth(global) || ! List_equal(global, Var_list_payload(binding)) || ! Type_is_function(type)) return;
-  if(Map_contains((* f).available, List_var(global)) || Map_contains((* f).available, List_var(cons(_685, cons(String_var(spelling), NULL)))) || Map_contains((* f).seen, List_var(global))) return;
+  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return;
+  if(Map_contains((* f).declared, List_var(global)) || Map_contains((* f).declared, List_var(cons(_685, cons(String_var(spelling), NULL))))) return;
   if(List_truth(Sym_get(c -> sym, cons(String_var(_686), cons(String_var(spelling), NULL)))) &&(! c -> meta_build || Compiler_native_protocol_alias(c, spelling))) return;
-  Map_setindex((* f).seen, List_var(global), int_var(1));
+  Map_setindex((* f).declared, List_var(global), int_var(1));
   f12_dependencies____types(&((* f)), type);
   List declaration = Ast_prototype_declarator(Type_declaration_ast(type, global));
   Array_push((* f).out, List_var(f12_dependencies____inline_prototype(c, declaration)));
@@ -4001,11 +4001,10 @@ static void f12_dependencies____global(f12_dependencies___Forward * f, Var bindi
 
 static void f12_dependencies____declaration(f12_dependencies___Forward * f, Var key){
   Var declaration;
-  if(Map_contains((* f).available, key) || Map_contains((* f).seen, key) || ! Map_try_get((* f).statics, key, &(declaration))) return;
-  Map_setindex((* f).seen, key, int_var(1));
-  Map_setindex((* f).seen, declaration, int_var(1));
-  f12_dependencies____collect_declared(declaration, (* f).available);
-  f12_dependencies____dependencies(&((* f)), declaration);
+  if(Map_contains((* f).declared, key) || ! Map_try_get((* f).statics, key, &(declaration))) return;
+  Map_setindex((* f).declared, declaration, int_var(1));
+  f12_dependencies____collect_declared(declaration, (* f).declared);
+  f12_dependencies____dependencies(&((* f)), Var_list_payload(declaration));
   Array_push((* f).out, declaration);
 }
 

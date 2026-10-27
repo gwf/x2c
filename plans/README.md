@@ -47,7 +47,7 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
+| [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 | [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
@@ -72,13 +72,17 @@ or establish a useful caller before selecting a candidate.
 
 Individual quotation adoption and TagId generation remain optional candidates
 in the quotation plan. Future releases use [releasing](../agents/releasing.md)
-and [deployment operations](../etc/release/README.md), including the unresolved
-first-cutover recovery prerequisite. No production promotion is selected here.
+and [deployment operations](../etc/release/README.md); the 0.15.0 and 0.15.1
+releases established the recovery baseline. No production promotion is
+selected here.
 
 ### Decisions and completed records
 
 Completed work archived on 2026-10-27:
 
+- [Review simplification candidates](archive/simplify-review-candidates-2026-10-27.md):
+  three duplicate owners removed in `76cca9ad2`; three candidates rejected
+  with evidence.
 - [Match pattern tests](archive/match-pattern-tests.md): delivered in
   `5fd0a079e`; every Match operator is tested in place.
 - [List rest parameters](archive/list-rest-parameters.md): delivered in

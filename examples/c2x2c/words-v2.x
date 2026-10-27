@@ -30,18 +30,18 @@ int main(int argc, char **argv) {
   Counts counts = {0};
   File input = File.open(argv[1], "r"); // Open failures raise.
   defer input.close(); // Close on return.
-  count_words(&counts, input.string());
-  print_top_ten(&counts);
+  count_words(counts, input.string());
+  print_top_ten(counts);
   return EXIT_SUCCESS; // Root scope frees entries and table.
 }
 
-static void count_words(Counts *counts, String text) {
+static void count_words(Counts &counts, String text) {
   text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   foreach (Substr word in text)
     count_word(counts, word);
 }
 
-static void print_top_ten(const Counts *counts) {
+static void print_top_ten(const Counts &counts) {
   if (!counts.length) return;
   Entry **entries = xcalloc(counts.length, sizeof(*entries)); // Scope-owned.
   size_t length = 0;
@@ -53,7 +53,7 @@ static void print_top_ten(const Counts *counts) {
     printf("%d\t%s\n", entries[i].count, entries[i].word.str());
 } // Root scope releases the sorting array.
 
-static void count_word(Counts *counts, Substr word) {
+static void count_word(Counts &counts, Substr word) {
   if (!counts.capacity) grow_counts(counts);
   uint64_t hash = word.hash();
   size_t bucket = hash % counts.capacity;
@@ -83,7 +83,7 @@ static int compare_entries(const void *a, const void *b) {
   return left.word.compare(right.word); // Bytewise alphabetical ties.
 }
 
-static void grow_counts(Counts *counts) {
+static void grow_counts(Counts &counts) {
   if (counts.capacity > SIZE_MAX / 2)
     fail("Too many words.");
   size_t capacity = counts.capacity ? counts.capacity * 2 : 64;

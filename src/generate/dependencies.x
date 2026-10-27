@@ -5,11 +5,11 @@
    Each node follows the declarations it needs: the static declarations it
    references and prototypes of the global functions nothing declares. */
 
-/* `available` holds what is already declared, `statics` each static
-   declaration by binding and spelling, `seen` what is already forwarded,
-   and `out` the ordered source. */
+/* `declared` holds every key and forwarded declaration a reader at the
+   current position can already see, `statics` each static declaration by
+   binding and spelling, and `out` the ordered source. */
 static typedef struct Forward {
-  Compiler c, Map available, statics, seen, Array out;
+  Compiler c, Map declared, statics, Array out;
 } Forward;
 
 // prototypes and bodies
@@ -20,21 +20,20 @@ static typedef struct Forward {
 module List _forward_declarations(
   Compiler c, List source, int source_includes) {
   Forward f = {
-    .c = c, .available = {}, .statics = {}, .seen = {},
-    .out = []};
+    .c = c, .declared = {}, .statics = {}, .out = []};
   if (c.runtime_inc && source_includes)
-    c.runtime_function_declarations(f.available);
+    c.runtime_function_declarations(f.declared);
   _source_declarations(source, f.statics);
   foreach (List node in source) {
     node = _inline_prototype(c, node);
-    if (node.car() == <typedef> && node in f.seen) continue;
+    if (node.car() == <typedef> && node in f.declared) continue;
     if (source_includes && node ~= %(preproc ?(String text))) {
       int angle = 0;
       String target = Compiler.preproc_include_target(text, angle);
       if (target)
-        c.include_function_declarations(target, angle, f.available);
+        c.include_function_declarations(target, angle, f.declared);
     }
-    _collect_declared(node, f.available);
+    _collect_declared(node, f.declared);
     _dependencies(f, node);
     f.out.push(node);
   }
@@ -135,7 +134,7 @@ static void _source_declarations(Var value, Map statics) {
   }
 }
 
-static void _set_static(Map statics, Var base, List declarator) {
+static void _set_static(Map statics, List base, List declarator) {
   List binding = _declaration_binding(declarator);
   if (!binding) return;
   if (declarator ~= %(op = ?target ?)) declarator = target;
@@ -143,9 +142,10 @@ static void _set_static(Map statics, Var base, List declarator) {
 }
 
 /* Pending sibling suffixes stay off the C stack. Only declaration
-   dependencies recurse; ordinary expressions share the same worklist. */
-static void _dependencies(Forward &f, Var value) {
-  if (value is not <list> || value.is_nil()) return;
+   dependencies recurse; ordinary expressions share the same worklist.
+   Inputs are source Lists or declarations produced for statics. */
+static void _dependencies(Forward &f, List value) {
+  if (!value) return;
   Array resume = auto [];
   for (List node = value; node; node = _next(node, resume)) _visit(f, node);
 }
@@ -161,7 +161,7 @@ static void _visit(Forward &f, List node) {
 
 /* A binding needs its static declaration, found by binding or by native
    spelling, or else the prototype of the global function it names. */
-static void _binding(Forward &f, Var binding) {
+static void _binding(Forward &f, List binding) {
   String spelling = Ast.binding_spelling(binding);
   List native = %(native $spelling);
   if (binding in f.statics) _declaration(f, binding);
@@ -172,15 +172,14 @@ static void _binding(Forward &f, Var binding) {
 /* A helper group omits its provider's runtime header, so forward the
    ordinary adapters its typed bodies call. Native aliases still come from
    their defining headers; a host function-like macro cannot be prototyped. */
-static void _global(Forward &f, Var binding, String spelling) {
+static void _global(Forward &f, List binding, String spelling) {
   Compiler c = f.c, Type type = NULL;
   List global = spelling ? c.sym.resolve_global($(spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
-  if (global in f.available || %(native $spelling) in f.available ||
-      global in f.seen) return;
+  if (global in f.declared || %(native $spelling) in f.declared) return;
   if (c.sym.get($("generated-protocol", spelling)) &&
       (!c.meta_build || c.native_protocol_alias(spelling))) return;
-  f.seen[global] = 1;
+  f.declared[global] = 1;
   _types(f, type);
   List declaration = Ast.prototype_declarator(type.declaration_ast(global));
   f.out.push(_inline_prototype(c, declaration));
@@ -189,11 +188,9 @@ static void _global(Forward &f, Var binding, String spelling) {
 /* Emits prerequisites before forwarding the symbol under `key` once. */
 static void _declaration(Forward &f, Var key) {
   Var declaration;
-  if (key in f.available || key in f.seen ||
-      !f.statics.try_get(key, declaration)) return;
-  f.seen[key] = 1;
-  f.seen[declaration] = 1;
-  _collect_declared(declaration, f.available);
+  if (key in f.declared || !f.statics.try_get(key, declaration)) return;
+  f.declared[declaration] = 1;
+  _collect_declared(declaration, f.declared);
   _dependencies(f, declaration);
   f.out.push(declaration);
 }
@@ -242,29 +239,29 @@ static int _inline_binding(Compiler c, List binding) =>
 
 /* Adds to `available` each binding `value` declares, with each function's
    native spelling and each typedef's spelling. */
-static void _collect_declared(Var value, Map available) {
+static void _collect_declared(Var value, Map declared) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
     case %(function ? (!set ?declarator (bind (binding ? ?) ?)) ?):
-      _set_function(available, _declaration_binding(declarator), 1);
+      _set_function(declared, _declaration_binding(declarator), 1);
     case %(declare ? (!set ?declarator (bind (binding ? ?) ?))):
       if (node.type_from_ast().is_function())
-        _set_function(available, _declaration_binding(declarator), 1);
+        _set_function(declared, _declaration_binding(declarator), 1);
     case %(declare (*) (bindings *declarators)):
       foreach (List declarator in declarators) {
         List binding = _declaration_binding(declarator);
-        if (binding) available[binding] = 1;
+        if (binding) declared[binding] = 1;
       }
     case %(typedef (*) (bindings *declarators)):
       foreach (List declarator in declarators)
-        _set_typedef(available, _declaration_binding(declarator), 1);
-    default: foreach (Var child in node) _collect_declared(child, available);
+        _set_typedef(declared, _declaration_binding(declarator), 1);
+    default: foreach (Var child in node) _collect_declared(child, declared);
   }
 }
 
 /* A function is found by its binding and by its native spelling. */
-static void _set_function(Map names, Var binding, Var value) {
+static void _set_function(Map names, List binding, Var value) {
   names[binding] = value;
   names[%(native $(Ast.binding_spelling(binding)))] = value;
 }

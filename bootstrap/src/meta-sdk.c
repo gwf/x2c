@@ -67,7 +67,7 @@ static int f5_types____symbol_words(List type);
 
 static Type f6_syntax____binding_type(List binding);
 
-static String f6_syntax____binding_spelling(List value, Var syntax);
+static String f6_syntax____binding_spelling(List value, List syntax);
 
 static List f8_rewrites____rewrite_holes(Macro shape, List supplied);
 
@@ -83,7 +83,7 @@ static List f8_rewrites____rule_operators(Var position);
 
 static int f8_rewrites____rule_dynamic(Var type, List operands);
 
-static int f8_rewrites____rule_var(Var type);
+static int f8_rewrites____rule_var(Type type);
 
 static List f8_rewrites____rule_dynamic_kinds(List operators, Symbol form);
 
@@ -1149,10 +1149,10 @@ String Code_binding_spelling(Var syntax){
   }
 
 }
-return f6_syntax____binding_spelling(value, syntax);
+return f6_syntax____binding_spelling(value, Var_list_payload(syntax));
 }
 
-static String f6_syntax____binding_spelling(List value, Var syntax){
+static String f6_syntax____binding_spelling(List value, List syntax){
   int identity = 0;
   String spelling = NULL;
   {
@@ -1166,7 +1166,7 @@ static String f6_syntax____binding_spelling(List value, Var syntax){
   }
 
 }
-if(! Ast_try_binding(value, &(identity), &(spelling))) _reject_value(_101, syntax);
+if(! Ast_try_binding(value, &(identity), &(spelling))) _reject_value(_101, List_var(syntax));
 Var registered = Map_getindex(Compiler_semantic_binding_facts(active.expander), List_var(cons(_102, cons(int_var(identity), NULL))));
 if(! Var_is_row(registered, 11, 7, 1) || ! String_equal(Var_string(registered), spelling)) MetaContext_reject(_99, cons(String_var(String_join(NULL, cons(String_var(_100), cons(String_var(List_repr(value)), NULL)))), NULL));
 return spelling;
@@ -1512,7 +1512,7 @@ return Array_list_free(found);
 }
 
 static int f8_rewrites____rule_dynamic(Var type, List operands){
-  if(f8_rewrites____rule_var(type)) return 1;
+  if(f8_rewrites____rule_var(Var_type(type))) return 1;
   {
     Var operand;
     List _x2c_gensym_macro_object_16 = operands;
@@ -1541,7 +1541,7 @@ static int f8_rewrites____rule_dynamic(Var type, List operands){
         if(! _x2c_gensym_match_none_4){List _x2c_gensym_match_at_116; Var x2c_match_value_0; if(_x2c_gensym_match_expr_27 && _x2c_gensym_match_expr_27 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_116 = _x2c_gensym_match_expr_27 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_116 ->car, 1)){
           Var operand_type;
           operand_type = x2c_match_value_0;
-          if(f8_rewrites____rule_var(operand_type)) return 1;
+          if(f8_rewrites____rule_var(Var_type(operand_type))) return 1;
         }
 
       }
@@ -1557,8 +1557,8 @@ return 0;
 
 int Sym_is_var_type(Sym, Type);
 
-static int f8_rewrites____rule_var(Var type){
-  return Var_is_row(type, 9, 7, 4) && Sym_is_var_type(active.expander -> sym, Var_type(type));
+static int f8_rewrites____rule_var(Type type){
+  return Sym_is_var_type(active.expander -> sym, type);
 }
 
 static List f8_rewrites____rule_dynamic_kinds(List operators, Symbol form){

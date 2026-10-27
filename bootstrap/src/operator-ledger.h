@@ -14,9 +14,9 @@ Symbol Symbol_compound_operator(Symbol op);
 
 Symbol Symbol_compound_assignment(Symbol op);
 
-Symbol Compiler_operator_member(Compiler c, Symbol op);
+Symbol Compiler_operator_member(Symbol op);
 
-Symbol Compiler_derived_member(Compiler c, Symbol op);
+Symbol Compiler_derived_member(Symbol op);
 
 
 #endif /* __GUARD_0xC69EE0D1__ */

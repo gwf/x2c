@@ -29,7 +29,7 @@ A NULL input or no parsed prerequisites returns NULL.
 Returned cells and path `String`s follow the current canonical `List` and
 `String` pool lifetimes.
 
-Source: `src/deps.x:62`
+Source: `src/deps.x`
 
 ### `Compiler`
 
@@ -50,7 +50,7 @@ return zero. Cleanup attempts to unlink an opened sibling but does not
 report an unlink failure. Allocation failure transfers through ordinary
 runtime `Error` handling instead of returning zero.
 
-Source: `src/deps.x:38`
+Source: `src/deps.x`
 
 ## Design notes
 

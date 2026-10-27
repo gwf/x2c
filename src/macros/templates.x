@@ -150,8 +150,8 @@ List Compiler.land_quotation(
     }
     transaction.commit();
   }
-  if ((position == <block> || position == <statement> ||
-       position == <unit>) && bound ~= %(seq ?item)) return item;
+  if (position == <block> || position == <statement> || position == <unit>)
+    return Ast.lone_item(bound);
   return bound;
 }
 
@@ -429,8 +429,9 @@ static Var _fill_syntax(Landing &l, Var syntax) {
 }
 
 /* A retained declaration with its base's pointer, array, and function
-   modifiers moved onto each declarator, as parsing moves them. */
-static Var _retained_declaration(List declaration) {
+   modifiers moved onto each declarator, as parsing moves them. The caller
+   supplies a filled declaration List. */
+static List _retained_declaration(List declaration) {
   if (declaration ~= %(declare ?specifiers (bindings *rows))) {
     List modifiers = NULL;
     List base = Type.declaration_base(specifiers, modifiers);

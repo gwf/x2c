@@ -34,7 +34,7 @@ generated-name counters as it allocates temporaries. The returned
 `Array` holds `String`s owned by pools active during emission; promote
 them before releasing those pools if the tokens must survive.
 
-Source: `src/emit/dispatch.x:17`
+Source: `src/emit/dispatch.x`
 
 <a id="Compiler.render_placed"></a>
 #### Compiler.render_placed
@@ -47,7 +47,7 @@ nodes: each held node and each cached value stays a node, which later
 passes and emission handle, and the rest becomes the text emission would
 print.
 
-Source: `src/emit/dispatch.x:39`
+Source: `src/emit/dispatch.x`
 
 ## Design notes
 

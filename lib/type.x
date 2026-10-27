@@ -89,7 +89,10 @@ int Type.is_enum_tag_body(Type type) => type ~= %(enum ? (*));
 // declarators
 
 /** Returns whether `t` is a reference or an optional reference. */
-int Type.is_reference(Type t) => t.car() == <&> || t.car() == <opt-ref>;
+int Type.is_reference(Type t) => t.car() == <&> || t.is_optional_reference();
+
+/** Returns whether `t` is an optional reference. */
+int Type.is_optional_reference(Type t) => t.car() == <opt-ref>;
 
 /** Returns whether the outer declarator is a function or inline function. */
 int Type.is_function(Type type) {

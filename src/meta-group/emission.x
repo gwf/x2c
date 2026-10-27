@@ -179,8 +179,7 @@ static int _after_directives(Array units) {
 
 /* `node` with each template call replaced by a call of `x2c_template_call`,
    named by `callee`, on its template and its arguments as Vars. */
-static Var _template_calls(Compiler c, Var node, List callee) {
-  if (node is not <list>) return node;
+static List _template_calls(Compiler c, List node, List callee) {
   if (node ~= %(expr ?type (tpl-call ?stored (args *arguments)))) {
     List values = %(nil);
     foreach (List argument in arguments.reverse())
@@ -198,8 +197,7 @@ static Var _template_calls(Compiler c, Var node, List callee) {
 /* `node` with each use of a native module's function made through the
    address `lookup` finds in that module. A native module's C target lives
    in the module, not in the helper. */
-static Var _native_targets(Compiler c, Var node, List lookup) {
-  if (node is not <list>) return node;
+static List _native_targets(Compiler c, List node, List lookup) {
   match (node) {
     case %(expr ?(Type result) $($called(
         %(!set ?callee
@@ -225,13 +223,12 @@ static Var _native_targets(Compiler c, Var node, List lookup) {
    supplies it. A Func argument the module takes as a Var is passed boxed.
 */
 static List _native_call(
-  Compiler c, Var callee, String name, List arguments, List lookup) {
+  Compiler c, List callee, String name, List arguments, List lookup) {
   Type native = NULL;
   if (!(name in c.native_meta) || !c.native_meta_module(name, native))
     return NULL;
   Array values = [];
-  List declared = c.func_signature(callee.list().cadr()).car().list()
-                   .cadr();
+  List declared = c.func_signature(callee.cadr()).car().list().cadr();
   List parameters = native.car().list().cadr();
   foreach (List argument in arguments) {
     argument = _native_targets(c, argument, lookup);

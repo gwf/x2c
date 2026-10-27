@@ -26,7 +26,7 @@ X2c project manifests.
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project/planning.x:28`
+Source: `src/project/planning.x`
 
 ### `ProjectBuild`
 
@@ -42,7 +42,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project/planning.x:12`
+Source: `src/project/planning.x`
 
 <a id="ProjectBuild.valid_name"></a>
 #### ProjectBuild.valid_name
@@ -52,7 +52,7 @@ Source: `src/project/planning.x:12`
 Returns whether a target, profile, or manifest field name contains only
 letters, digits, underscores, and hyphens, and is not empty.
 
-Source: `src/project/manifest.x:20`
+Source: `src/project/manifest.x`
 
 ## Public types
 
@@ -71,7 +71,7 @@ struct is owned by the current `Scope` and needs no individual cleanup; its
 `String` and `List` fields retain their canonical pool lifetimes and may
 share values with the command request.
 
-Source: `src/project/project.x:19`
+Source: `src/project/project.x`
 
 ## Design notes
 

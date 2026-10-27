@@ -230,6 +230,12 @@ List Ast.written_definitions(List decl) {
   return decl;
 }
 
+/** Returns the single item of a one-item `seq`, or `node` itself. */
+List Ast.lone_item(List node) {
+  match (node) case %(seq ?only): return only;
+  return node;
+}
+
 
 
 /** Applies `per_child` to each `List` child of `ast` and returns the node

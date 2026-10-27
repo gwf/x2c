@@ -31,7 +31,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _captured_value(Compiler c, Var captured, Type want);
 
-static Var _name_syntax(Compiler c, List node, Token site);
+static List _name_syntax(Compiler c, List node, Token site);
 
 static Var _scalar_value(Compiler c, Var value, Type want);
 
@@ -39,13 +39,13 @@ static Var _cached_constant(Compiler c, List key);
 
 static Var _constant_leaf(Compiler c, List expr);
 
-static Var _cast_constant(Compiler c, Var type, List inner);
+static Var _cast_constant(Compiler c, Type type, List inner);
 
 static Var _joined_constant(Compiler c, Var left, Var right);
 
 static void _refuse(Compiler c, Var value, Token site);
 
-static List _string_literal(Compiler c, Type declared, Type type, Var value);
+static List _string_literal(Compiler c, Type declared, Type type, String value);
 
 static List _number_literal(Compiler c, Type declared, Type type, Var value);
 
@@ -55,11 +55,11 @@ static List _data_form(Compiler c, Var value);
 
 static int _immutable(Var value);
 
-static List _list_form(Compiler c, Var value);
+static List _list_form(Compiler c, List value);
 
-static List _array_form(Compiler c, Var value);
+static List _array_form(Compiler c, Array value);
 
-static List _map_form(Compiler c, Var value);
+static List _map_form(Compiler c, Map map);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -337,7 +337,7 @@ Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCal
   }
 
 }
-if(Var_is_void(value)) value = _name_syntax(c, node, site);  return _scalar_value(c, value, want);
+if(Var_is_void(value)) value = List_var(_name_syntax(c, node, site));  return _scalar_value(c, value, want);
 }
 
 int Sym_is_var_type(Sym, Type);
@@ -349,11 +349,11 @@ static Var _captured_value(Compiler c, Var captured, Type want){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-static Var _name_syntax(Compiler c, List node, Token site){
+static List _name_syntax(Compiler c, List node, Token site){
   {
     List _x2c_gensym_match_expr_2 = node;
     {List _x2c_gensym_match_at_19, _x2c_gensym_match_at_20, _x2c_gensym_match_at_21, _x2c_gensym_match_at_22, _x2c_gensym_match_at_23, _x2c_gensym_match_at_24; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_19 = _x2c_gensym_match_expr_2 ->cdr) &&(_x2c_gensym_match_at_20 = _x2c_gensym_match_at_19 ->cdr) &&(Var_is(_x2c_gensym_match_at_20 -> car, 806120) &&(_x2c_gensym_match_at_21 = Var_list_payload(_x2c_gensym_match_at_20 -> car), 1)) && _x2c_gensym_match_at_21 && _x2c_gensym_match_at_21 ->car.u64 == 9224497936780766120ULL &&(_x2c_gensym_match_at_22 = _x2c_gensym_match_at_21 ->cdr) && !(_x2c_gensym_match_at_23 = _x2c_gensym_match_at_22 ->cdr) && !(_x2c_gensym_match_at_24 = _x2c_gensym_match_at_20 ->cdr)){
-      return List_var(node);
+      return node;
     }
 
   }
@@ -459,7 +459,7 @@ static Var _constant_leaf(Compiler c, List expr){
         type = x2c_match_value_0;
         Var inner;
         inner = x2c_match_value_1;
-        return _cast_constant(c, type, Var_list_payload(inner));
+        return _cast_constant(c, Var_type(type), Var_list_payload(inner));
       }
       break;
       }}{List _x2c_gensym_match_at_31, _x2c_gensym_match_at_32, _x2c_gensym_match_at_33, _x2c_gensym_match_at_34, _x2c_gensym_match_at_35, _x2c_gensym_match_at_36; Var x2c_match_value_0; if(_x2c_gensym_match_expr_5 && _x2c_gensym_match_expr_5 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_31 = _x2c_gensym_match_expr_5 ->cdr) &&(_x2c_gensym_match_at_32 = _x2c_gensym_match_at_31 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_32 ->car, 1) &&((Var_is(_x2c_gensym_match_at_32 -> car, 806120) &&(_x2c_gensym_match_at_33 = Var_list_payload(_x2c_gensym_match_at_32 -> car), 1)) && _x2c_gensym_match_at_33 && _x2c_gensym_match_at_33 ->car.u64 == 9224497936767982090ULL &&(_x2c_gensym_match_at_34 = _x2c_gensym_match_at_33 ->cdr) && !(_x2c_gensym_match_at_35 = _x2c_gensym_match_at_34 ->cdr)) && !(_x2c_gensym_match_at_36 = _x2c_gensym_match_at_32 ->cdr)){{
@@ -518,8 +518,8 @@ static Var _constant_leaf(Compiler c, List expr){
   if(List_truth(expr) && x2c_var_equal(List_car(expr), Symbol_var(377892))) return((void) 0, Void);  return List_var(expr);
 }
 
-static Var _cast_constant(Compiler c, Var type, List inner){
-  Var constant = _constant_leaf(c, inner);  if(Var_is_void(constant)) return((void) 0, Void);  Symbol tag = Type_scalar_tag((Var_type(type)));  return tag ? Var_convert(constant, tag) : constant;
+static Var _cast_constant(Compiler c, Type type, List inner){
+  Var constant = _constant_leaf(c, inner);  if(Var_is_void(constant)) return((void) 0, Void);  Symbol tag = Type_scalar_tag(type);  return tag ? Var_convert(constant, tag) : constant;
 }
 
 static Var _joined_constant(Compiler c, Var left, Var right){
@@ -546,7 +546,7 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : List_type(Macro_number_type(value));  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _119)){
     List expression = Compiler_macro_value_literal(c, Var_list_payload(value));  return cons(_2, cons(_123, cons(List_caddr(expression), NULL)));
   }
-  if(Sym_is_var_type(c -> sym, type)) type = List_type(_74);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _74) return _number_literal(c, declared, type, value);  Type kind = NULL;  if(Var_is(value, 3313778)) kind = List_type(_126);  else if(Var_is(value, 26720)) kind = List_type(_129);  else if(Var_is_row(value, 9, 7, 4)) kind = List_type(_132);  if(List_truth(Type_list(declared)) ? type == _74 || type == kind : List_truth(Type_list(kind)) && kind != _132) return _data_literal(c, declared, value, site);  if(Var_is_row(value, 11, 7, 1)) return _string_literal(c, declared, type, value);  if(Var_is(value, 1328354264) &&(! List_truth(Type_list(declared)) || type == _135)) return cons(_2, cons(_136, cons(List_var(({
+  if(Sym_is_var_type(c -> sym, type)) type = List_type(_74);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _74) return _number_literal(c, declared, type, value);  Type kind = NULL;  if(Var_is(value, 3313778)) kind = List_type(_126);  else if(Var_is(value, 26720)) kind = List_type(_129);  else if(Var_is_row(value, 9, 7, 4)) kind = List_type(_132);  if(List_truth(Type_list(declared)) ? type == _74 || type == kind : List_truth(Type_list(kind)) && kind != _132) return _data_literal(c, declared, value, site);  if(Var_is_row(value, 11, 7, 1)) return _string_literal(c, declared, type, Var_as_string(value));  if(Var_is(value, 1328354264) &&(! List_truth(Type_list(declared)) || type == _135)) return cons(_2, cons(_136, cons(List_var(({
     Var _x2c_gensym_literal_part_0 = String_var(Symbol_str(Var_symbol(value)));  Var _x2c_gensym_literal_part_1 = Symbol_var(Var_symbol(value));  cons(_102, cons(_136, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL))));
   }
   )), NULL)));  return NULL;
@@ -568,8 +568,8 @@ static void _refuse(Compiler c, Var value, Token site){
 
 }
 
-static List _string_literal(Compiler c, Type declared, Type type, Var value){
-  if(! List_truth(Type_list(declared)) || type == _114) return cons(_2, cons(_115, cons(List_var(cons(_102, cons(_115, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _19) return NULL;  List literal = cons(_2, cons(_20, cons(List_var(cons(_102, cons(_20, cons(value, NULL)))), NULL)));  return({
+static List _string_literal(Compiler c, Type declared, Type type, String value){
+  if(! List_truth(Type_list(declared)) || type == _114) return cons(_2, cons(_115, cons(List_var(cons(_102, cons(_115, cons(String_var(Var_repr((String_var(value)))), NULL)))), NULL)));  if(type != _19) return NULL;  List literal = cons(_2, cons(_20, cons(List_var(cons(_102, cons(_20, cons(String_var(value), NULL)))), NULL)));  return({
     Var _x2c_gensym_literal_part_2 = List_var(declared);  Var _x2c_gensym_literal_part_3 = List_var(Compiler_cache(c, cons(_137, cons(List_var(literal), NULL))));  cons(_2, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
   }
   );
@@ -588,7 +588,7 @@ static List _data_form(Compiler c, Var value){
   if(Var_is_null(value)) return _148;  if(_immutable(value)){
     if(Var_is_row(value, 9, 7, 4)) return Compiler_cache_literal_list(c, Var_list_payload(value));  return cons(_2, cons(_75, cons(List_var(Compiler_cache_literal_var(c, value)), NULL)));
   }
-  if(Var_is_row(value, 9, 7, 4)) return _list_form(c, value);  if(Var_is(value, 3313778)) return _array_form(c, value);  if(! Var_is(value, 26720)) return NULL;  return _map_form(c, value);
+  if(Var_is_row(value, 9, 7, 4)) return _list_form(c, Var_list_payload(value));  if(Var_is(value, 3313778)) return _array_form(c, Var_array_payload(value));  if(! Var_is(value, 26720)) return NULL;  return _map_form(c, Var_map_payload(value));
 }
 
 static int _immutable(Var value){
@@ -604,9 +604,9 @@ static int _immutable(Var value){
   return Var_is_row(value, 11, 7, 1) || Var_is_atom(value) || Var_is_integer(value) || Var_is_floating(value);
 }
 
-static List _list_form(Compiler c, Var value){
+static List _list_form(Compiler c, List value){
   List tail = _150; {
-    Var item;  List _x2c_gensym_macro_object_1 = List_reverse(Var_list(value));  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+    Var item;  List _x2c_gensym_macro_object_1 = List_reverse(value);  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       item = _x2c_gensym_macro_cursor_output_1; {
         List head = _data_form(c, item);  if(! List_truth(head)) return NULL;  tail = cons(_2, cons(_151, cons(List_var(cons(_152, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
       }
@@ -617,7 +617,7 @@ static List _list_form(Compiler c, Var value){
   return tail;
 }
 
-static List _array_form(Compiler c, Var value){
+static List _array_form(Compiler c, Array value){
   Array items = Array_new();  const Array _x2c_gensym_macro_acquired_1 = items; {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
@@ -627,7 +627,7 @@ static List _array_form(Compiler c, Var value){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_1); {
       {
-        Var item;  Array _x2c_gensym_macro_object_2 = Var_array(value);  int _x2c_gensym_macro_cursor_2 = 0;  Var _x2c_gensym_macro_cursor_output_2;  while(Array_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+        Var item;  Array _x2c_gensym_macro_object_2 = value;  int _x2c_gensym_macro_cursor_2 = 0;  Var _x2c_gensym_macro_cursor_output_2;  while(Array_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
           item = _x2c_gensym_macro_cursor_output_2; {
             List code = _data_form(c, item);  if(! List_truth(code)){
               List _x2c_gensym_return_value_0 = NULL; {
@@ -654,8 +654,8 @@ static List _array_form(Compiler c, Var value){
 
 }
 
-static List _map_form(Compiler c, Var value){
-  Map map = Var_map_payload(value);  Array keys = Array_new(); {
+static List _map_form(Compiler c, Map map){
+  Array keys = Array_new(); {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }

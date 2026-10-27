@@ -29,7 +29,7 @@
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/file.x:67`
+Source: `lib/file.x`
 
 <a id="File.copy_to"></a>
 #### File.copy_to
@@ -44,7 +44,7 @@ failure.
 
 **Raises:** `<io-fail>` on a source read or destination write failure.
 
-Source: `lib/file.x:174`
+Source: `lib/file.x`
 
 <a id="File.getw"></a>
 #### File.getw
@@ -55,7 +55,7 @@ Reads and returns one native `int`, or EOF when a full word is unavailable.
 A stored value equal to EOF is indistinguishable from the sentinel without
 inspecting the stream indicators.
 
-Source: `lib/file.x:266`
+Source: `lib/file.x`
 
 <a id="File.iter"></a>
 #### File.iter
@@ -76,7 +76,7 @@ exhausted.
 causes as `File.readline`; none return to the pull, and a transfer releases
 the iterator's line storage.
 
-Source: `lib/file.x:199`
+Source: `lib/file.x`
 
 <a id="File.open"></a>
 #### File.open
@@ -89,7 +89,7 @@ raises `<not-found>`; another host failure raises `<io-fail>`; and a null
 path or mode raises `<bad-arg>`. Host failures carry the path, operation,
 and captured errno.
 
-Source: `lib/file.x:390`
+Source: `lib/file.x`
 
 <a id="File.path_error"></a>
 #### File.path_error
@@ -99,7 +99,7 @@ Source: `lib/file.x:390`
 Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
 with `operation`, `path`, and `errno` details.
 
-Source: `lib/file.x:442`
+Source: `lib/file.x`
 
 <a id="File.read_into"></a>
 #### File.read_into
@@ -116,7 +116,7 @@ unchanged; a read failure transfers instead, leaving its partial bytes in
 **Raises:** `<io-fail>` on a stream read error, or the cause reported by
 `Block.append` when the destination cannot grow.
 
-Source: `lib/file.x:142`
+Source: `lib/file.x`
 
 <a id="File.readline_into"></a>
 #### File.readline_into
@@ -133,7 +133,7 @@ instead, leaving its partial bytes in `dest`.
 **Raises:** `<io-fail>` on a stream read error, or `<size-limit>` or
 `<alloc-fail>` when the destination cannot grow.
 
-Source: `lib/file.x:221`
+Source: `lib/file.x`
 
 <a id="File.write_all"></a>
 #### File.write_all
@@ -148,7 +148,7 @@ leave a prefix already written.
 **Raises:** `<io-fail>` on a short or failed write, which does not return
 here.
 
-Source: `lib/file.x:161`
+Source: `lib/file.x`
 
 ### `String`
 
@@ -163,7 +163,7 @@ raises `<not-found>`; another host failure raises `<io-fail>`; and a null
 path or mode raises `<bad-arg>`. Host failures carry the path, operation,
 and captured errno.
 
-Source: `lib/file.x:382`
+Source: `lib/file.x`
 
 ## Advanced and interop API
 
@@ -201,7 +201,7 @@ Source: `lib/file.x:382`
 
 Reports whether `x` and `y` are the same native stream handle.
 
-Source: `lib/file.x:324`
+Source: `lib/file.x`
 
 <a id="File.fdopen"></a>
 #### File.fdopen
@@ -214,7 +214,7 @@ the stream. On failure the caller still owns the descriptor. A host failure
 raises `<io-fail>` with the operation and captured errno; a null mode
 raises `<bad-arg>`.
 
-Source: `lib/file.x:399`
+Source: `lib/file.x`
 
 <a id="File.gets"></a>
 #### File.gets
@@ -225,7 +225,7 @@ Reads a native line into `str` and returns `str`, or NULL at EOF or error.
 At most `size - 1` bytes are stored followed by NUL, and a newline is kept
 when it fits.
 
-Source: `lib/file.x:248`
+Source: `lib/file.x`
 
 <a id="File.hash"></a>
 #### File.hash
@@ -234,7 +234,7 @@ Source: `lib/file.x:248`
 
 Returns a handle-identity hash consistent with `File.equal`.
 
-Source: `lib/file.x:321`
+Source: `lib/file.x`
 
 <a id="File.popen"></a>
 #### File.popen
@@ -248,7 +248,7 @@ to close the pipe and collect the child status. A host failure raises
 `path`, operation, and captured errno; a null command or mode raises
 `<bad-arg>`.
 
-Source: `lib/file.x:414`
+Source: `lib/file.x`
 
 <a id="File.printf"></a>
 #### File.printf
@@ -258,7 +258,7 @@ Source: `lib/file.x:414`
 Formats values into `file`.
 Returns the character count or a negative value on failure.
 
-Source: `lib/file.x:301`
+Source: `lib/file.x`
 
 <a id="File.putc"></a>
 #### File.putc
@@ -267,7 +267,7 @@ Source: `lib/file.x:301`
 
 Writes one byte and returns it as an unsigned char, or EOF on failure.
 
-Source: `lib/file.x:251`
+Source: `lib/file.x`
 
 <a id="File.puts"></a>
 #### File.puts
@@ -277,7 +277,7 @@ Source: `lib/file.x:251`
 Writes a NUL-terminated C string.
 Returns a nonnegative value on success or EOF on failure.
 
-Source: `lib/file.x:256`
+Source: `lib/file.x`
 
 <a id="File.putw"></a>
 #### File.putw
@@ -286,7 +286,7 @@ Source: `lib/file.x:256`
 
 Writes one native `int` and returns `w`, or EOF on a short write.
 
-Source: `lib/file.x:259`
+Source: `lib/file.x`
 
 <a id="File.read"></a>
 #### File.read
@@ -295,7 +295,7 @@ Source: `lib/file.x:259`
 
 Reads up to `nitems` elements and returns the number read.
 
-Source: `lib/file.x:283`
+Source: `lib/file.x`
 
 <a id="File.reopen"></a>
 #### File.reopen
@@ -309,7 +309,7 @@ path raises `<not-found>`; another host failure raises `<io-fail>`; and a
 null stream, path, or mode raises `<bad-arg>`. Host failures carry the
 path, operation, and captured errno.
 
-Source: `lib/file.x:429`
+Source: `lib/file.x`
 
 <a id="File.repr"></a>
 #### File.repr
@@ -318,7 +318,7 @@ Source: `lib/file.x:429`
 
 Returns a readable handle and descriptor representation without reading.
 
-Source: `lib/file.x:327`
+Source: `lib/file.x`
 
 <a id="File.scanf"></a>
 #### File.scanf
@@ -327,7 +327,7 @@ Source: `lib/file.x:327`
 
 Scans values from `file`, returning the assignment count or EOF.
 
-Source: `lib/file.x:310`
+Source: `lib/file.x`
 
 <a id="File.setbuffer"></a>
 #### File.setbuffer
@@ -337,7 +337,7 @@ Source: `lib/file.x:310`
 Installs caller-supplied buffering, or disables buffering for a null `buf`.
 A nonnull buffer is borrowed until the stream closes or buffering changes.
 
-Source: `lib/file.x:294`
+Source: `lib/file.x`
 
 <a id="File.setlinebuf"></a>
 #### File.setlinebuf
@@ -347,7 +347,7 @@ Source: `lib/file.x:294`
 Requests line buffering for `file` and returns zero.
 The underlying `setvbuf` result is intentionally not exposed.
 
-Source: `lib/file.x:274`
+Source: `lib/file.x`
 
 <a id="File.stat"></a>
 #### File.stat
@@ -357,7 +357,7 @@ Source: `lib/file.x:274`
 Writes metadata for `file` into `buf`.
 Returns zero on success or -1 on a native error.
 
-Source: `lib/file.x:366`
+Source: `lib/file.x`
 
 <a id="File.str"></a>
 #### File.str
@@ -370,7 +370,7 @@ canonical result under the pool-chain lifetime described above or NULL
 when empty, and transfers the same causes. A null handle returns its
 pointer representation without reading.
 
-Source: `lib/file.x:338`
+Source: `lib/file.x`
 
 <a id="File.string"></a>
 #### File.string
@@ -385,7 +385,7 @@ no bytes remain.
 contain an embedded NUL, `<size-limit>` when the `String` cannot be
 represented, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:349`
+Source: `lib/file.x`
 
 <a id="File.string_close"></a>
 #### File.string_close
@@ -398,7 +398,7 @@ stream and all of its aliases are invalid afterward.
 
 **Raises:** the same causes as `File.string`.
 
-Source: `lib/file.x:126`
+Source: `lib/file.x`
 
 <a id="File.ungetc"></a>
 #### File.ungetc
@@ -407,7 +407,7 @@ Source: `lib/file.x:126`
 
 Pushes one byte back and returns it, or EOF when it cannot be pushed.
 
-Source: `lib/file.x:280`
+Source: `lib/file.x`
 
 <a id="File.write"></a>
 #### File.write
@@ -416,7 +416,7 @@ Source: `lib/file.x:280`
 
 Writes up to `nitems` elements and returns the number written.
 
-Source: `lib/file.x:287`
+Source: `lib/file.x`
 
 <a id="File.write_repr"></a>
 #### File.write_repr
@@ -425,7 +425,7 @@ Source: `lib/file.x:287`
 
 Appends the readable pointer representation of `file` to `out`.
 
-Source: `lib/file.x:369`
+Source: `lib/file.x`
 
 ## Convenience API
 
@@ -450,7 +450,7 @@ requested `String` cannot be represented, `<bad-arg>` when the bytes
 contain an embedded NUL, `<io-fail>` on a stream read error, or
 `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:109`
+Source: `lib/file.x`
 
 <a id="File.readline"></a>
 #### File.readline
@@ -466,7 +466,7 @@ bytes should remain separate.
 are not valid `String` text, `<size-limit>` when the line cannot be
 represented, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:94`
+Source: `lib/file.x`
 
 ## Runtime-internal callables
 
@@ -487,7 +487,7 @@ for source readers but are not supported as user API.
 Publishes the process's borrowed standard streams as `File` globals.
 The globals do not take ownership or arrange cleanup of the native streams.
 
-Source: `lib/file.x:451`
+Source: `lib/file.x`
 
 ## Public types
 
@@ -506,7 +506,7 @@ A successful open returns an owned stream. `Stdin`, `Stdout`, and `Stderr`
 are borrowed. An alias does not retain a stream, and closing one
 invalidates every alias.
 
-Source: `lib/file.x:30`
+Source: `lib/file.x`
 
 <a id="FileReadStatus"></a>
 ### FileReadStatus
@@ -517,7 +517,7 @@ Reports `<data>` when a raw `File` read produced bytes, `<eof>` at clean
 EOF, or `<error>` for invalid arguments. Host read failures transfer
 `<io-fail>` instead of returning `<error>`.
 
-Source: `lib/file.x:65`
+Source: `lib/file.x`
 
 ## Design notes
 
