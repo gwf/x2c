@@ -623,17 +623,25 @@ static typedef struct _Layout {
   int count, nsig, nlines, top;
 } _Layout;
 
+/* Layout arrays are raw storage freed by `_close`. */
+static void *_layout_alloc(size_t count, size_t size) {
+  void *storage = calloc(count, size);
+  if (!storage) raise %(alloc-fail);
+  return storage;
+}
+
 static _Layout _layout_open(Tokenizer t) {
   int count = t.tokens.len() - 1;
   _Layout l = {
     .all = (struct Token *) t.tokens, .count = count,
-    .sig = calloc(count + 1, sizeof(Token)),
-    .depths = calloc(count + 1, sizeof(int)),
-    .lines = calloc(count + 1, sizeof(_LayoutLine)),
-    .edits = calloc(count + 1, sizeof(_LayoutEdit)),
-    .indents = calloc(count + 2, sizeof(int)),
-    .closers = calloc(count + 2, sizeof(String)),
-    .enums = calloc(count + 2, 1), .ternary = calloc(count + 1, 1)};
+    .sig = _layout_alloc(count + 1, sizeof(Token)),
+    .depths = _layout_alloc(count + 1, sizeof(int)),
+    .lines = _layout_alloc(count + 1, sizeof(_LayoutLine)),
+    .edits = _layout_alloc(count + 1, sizeof(_LayoutEdit)),
+    .indents = _layout_alloc(count + 2, sizeof(int)),
+    .closers = _layout_alloc(count + 2, sizeof(String)),
+    .enums = _layout_alloc(count + 2, 1),
+    .ternary = _layout_alloc(count + 1, 1)};
   for (int i = 0; i < count; i++)
     if (l.all[i].type != <space> && l.all[i].type != <comment>)
       l.sig[l.nsig++] = &l.all[i];
