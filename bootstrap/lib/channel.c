@@ -746,7 +746,7 @@ static size_t _capacity(Var value){
     if(capacity >= 0) return(size_t) capacity;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 252,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 250,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
     __builtin_unreachable();
   }
@@ -759,22 +759,22 @@ Scope Scope_parent(Scope);
 
 static void _send(Channel channel, Var value, int owned){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 256,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 254,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 257,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 255,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(channel -> type != 45156 && Var_tag(value) != channel -> type){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 259,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 257,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(owned && ! Var_pointer(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "_send",.line = 261,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "_send",.line = 259,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
     __builtin_unreachable();
   }
@@ -824,7 +824,7 @@ static void _send(Channel channel, Var value, int owned){
       }
       if(status < 0) x2c_thread_cancel();
       if(! status){
-        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "_send",.line = 295,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "_send",.line = 293,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
         __builtin_unreachable();
       }
@@ -897,7 +897,7 @@ static void _notify(Channel channel){
 static ChannelMessage _message(Var value, int owned){
   ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if(! message){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 373,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 367,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }

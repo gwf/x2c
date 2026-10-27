@@ -160,7 +160,7 @@ void Block_append_fill(Block b, const void * element, size_t count){
 
 void Block_append(Block b, const void * source, size_t count){
   if(b == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append",.line = 115,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append",.line = 113,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -171,7 +171,7 @@ void Block_append(Block b, const void * source, size_t count){
 
 void Block_reserve(Block block, size_t minimum){
   if(block == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 144,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 140,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -184,7 +184,7 @@ void Block_reserve(Block block, size_t minimum){
       Var _x2c_gensym_literal_part_0 = Var_box_ulong(width);
       Var _x2c_gensym_literal_part_1 = Var_box_ulong(cap);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 150,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 146,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_6, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_0, Symbol_var(6240), _x2c_gensym_literal_part_1);
         __builtin_unreachable();
       }
@@ -217,7 +217,7 @@ Bytes Bytes_new(size_t width){
 
 Block Block_new(size_t width){
   if(! width){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_new",.line = 238,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_new",.line = 232,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -228,7 +228,7 @@ Block Block_new(size_t width){
   ;
   size_t size = _allocation_size(width, block -> cap);
   if(! size){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_new",.line = 242,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_new",.line = 236,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
     __builtin_unreachable();
   }
@@ -303,7 +303,7 @@ static void _append_growing(Block b, const void * source, size_t count){
       Var _x2c_gensym_literal_part_2 = Var_box_ulong(width);
       Var _x2c_gensym_literal_part_3 = Var_box_ulong(count);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 335,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 329,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_2, Symbol_var(7318440), _x2c_gensym_literal_part_3);
         __builtin_unreachable();
       }
@@ -313,7 +313,7 @@ static void _append_growing(Block b, const void * source, size_t count){
   }
   size_t size = count * b -> width, offset = _reserved_offset(b, source);
   if(offset != SIZE_MAX && size > b -> cap * b -> width - offset){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 339,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 333,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(7318440), Var_box_ulong(count));
     __builtin_unreachable();
   }

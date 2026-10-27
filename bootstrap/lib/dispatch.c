@@ -398,7 +398,7 @@ Iter Var_fallback_iter(Var x, Iter dest);
 Iter Var_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 351,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 349,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }
@@ -411,7 +411,7 @@ Iter Var_iter(Var x, Iter dest){
 Iter Var_fallback_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 364,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 362,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }
@@ -434,7 +434,7 @@ int Var_contains(Var value, Var needle){
   if(descriptor -> methods.contains) return descriptor -> methods.contains(value, needle);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 383,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 381,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -450,7 +450,7 @@ Var Var_getindex(Var value, Var key){
   if(descriptor -> methods.getindex) return descriptor -> methods.getindex(value, key);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 398,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 396,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -467,7 +467,7 @@ Var Var_setindex(Var value, Var key, Var replacement){
   if(descriptor -> methods.setindex) return descriptor -> methods.setindex(value, key, replacement);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 414,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 412,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -484,7 +484,7 @@ Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
   if(descriptor -> methods.updateindex) return descriptor -> methods.updateindex(value, key, op, rhs);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 432,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 430,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -500,7 +500,7 @@ Var Var_postfixindex(Var value, Var key, Symbol op){
   if(descriptor -> methods.postfixindex) return descriptor -> methods.postfixindex(value, key, op);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 447,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 445,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -557,7 +557,7 @@ void x2c_register_type(String name){
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/dispatch.x",.function = "x2c_register_type",.line = 526,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/dispatch.x",.function = "x2c_register_type",.line = 524,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_type")), NULL))));
         __builtin_unreachable();
       }
@@ -578,7 +578,7 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/dispatch.x",.function = "x2c_register_builtin_descriptor",.line = 543,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/dispatch.x",.function = "x2c_register_builtin_descriptor",.line = 541,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_builtin_descriptor")), NULL))));
         __builtin_unreachable();
       }
@@ -626,7 +626,7 @@ int x2c_try_register_descriptor(String name, VarMethods methods){
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_descriptor",.line = 583,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_descriptor",.line = 581,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_descriptor")), NULL))));
         __builtin_unreachable();
       }
@@ -662,7 +662,7 @@ void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)
   if(! x2c_try_register_tagged_descriptor(tag, name, methods)){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_register_tagged_descriptor")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 597,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 595,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_14, 4477477457162, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag), Symbol_var(920394), String_var(name));
       __builtin_unreachable();
     }
@@ -681,7 +681,7 @@ int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods metho
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       if(descriptor_registration_frozen){
-        static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_tagged_descriptor",.line = 617,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/dispatch.x",.function = "x2c_try_register_tagged_descriptor",.line = 615,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_15, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_try_register_tagged_descriptor")), NULL))));
         __builtin_unreachable();
       }
@@ -931,7 +931,7 @@ static void _valid_member_operand(Var value, String side){
     {
       Var _x2c_gensym_literal_part_1 = Var_box_ulong(bits);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 881,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 879,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_1, Symbol_var(1263882), String_var(side));
         __builtin_unreachable();
       }
@@ -940,7 +940,7 @@ static void _valid_member_operand(Var value, String side){
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 883,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 881,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 1, Symbol_var(1263882), String_var(side));
     __builtin_unreachable();
   }
@@ -952,7 +952,7 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
   if(descriptor) return descriptor;
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 890,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 888,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_18, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }

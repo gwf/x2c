@@ -1110,7 +1110,7 @@ static _Layout _layout_open(Tokenizer t){
 static void * _layout_alloc(size_t count, size_t size){
   void * storage = calloc(count, size);
   if(! storage){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 685,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 683,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
     __builtin_unreachable();
   }
