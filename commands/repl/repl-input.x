@@ -96,7 +96,7 @@ static struct ReplInput {
 static typedef struct EditState {
   ReplInput input;
   char *buf, **history;
-  size_t buflen, buflen_max;
+  size_t buflen;
   const char *prompt;
   size_t plen, pos, len, cols, oldrows;
   int oldrpos, history_index, history_len, fold_count;
@@ -111,7 +111,6 @@ static typedef struct EditState {
 #define LINENOISE_INITIAL_BUFLEN 4096
 #define PASTE_FOLD_THRESHOLD 200
 #define PASTE_FOLD_CONTEXT 8
-#define PASTE_MAX_BYTES LINENOISE_MAX_LINE
 static const char *unsupported_term[] = {"dumb", "cons25", "emacs", NULL};
 
 // UTF-8 movement and display width
@@ -847,21 +846,21 @@ static void _refresh_line(EditState &l) {
   _render(l, REFRESH_ALL);
 }
 
-/* Stops at the configured interactive-input limit. */
+/* Stops at the fixed interactive-input limit. */
 static int _grow(EditState &l, size_t needed) {
   size_t newlen;
   char *newbuf;
 
   if (needed <= l.buflen) return 0;
 
-  if (needed > l.buflen_max) return -1;
+  if (needed > LINENOISE_MAX_LINE) return -1;
 
-  /* Grow exponentially, but stop at the configured maximum before the
+  /* Grow exponentially, but stop at the input limit before the
    * doubling would overflow or go past it. */
   newlen = l.buflen ? l.buflen : 16;
   while (newlen < needed) {
-    if (newlen > l.buflen_max/2) {
-      newlen = l.buflen_max;
+    if (newlen > LINENOISE_MAX_LINE/2) {
+      newlen = LINENOISE_MAX_LINE;
       break;
     }
     newlen *= 2;
@@ -1029,7 +1028,6 @@ static void _prepare(
   input.ofd = STDOUT_FILENO;
   l.buf = xmalloc(LINENOISE_INITIAL_BUFLEN);
   l.buflen = LINENOISE_INITIAL_BUFLEN - 1;
-  l.buflen_max = LINENOISE_MAX_LINE;
   l.prompt = prompt;
   l.plen = prompt.len();
   l.complete = complete;
@@ -1050,49 +1048,19 @@ static void _close(EditState &l) {
   xfree(l.buf);
 }
 
-/* Make sure the temporary paste buffer can hold len+need bytes. Return -1 on
- * allocation failure or if the requested size is over PASTE_MAX_BYTES. */
-static int _reserve_paste(char *&buf, size_t &cap, size_t len, size_t need) {
-  size_t want;
-  char *nb;
-
-  /* Nothing to do if the current paste buffer already has room for the
-   * bytes collected so far plus the new bytes we want to append. */
-  if (cap >= len + need) return 0;
-
-  /* Start small, then double like the line buffer. The cap avoids turning a
-   * huge paste into an unbounded allocation attempt. */
-  want = cap ? cap : 64;
-  while (want < len + need) {
-    size_t doubled = want*2;
-    if (doubled <= want || doubled > PASTE_MAX_BYTES) {
-      want = PASTE_MAX_BYTES;
-      break;
-    }
-    want = doubled;
-  }
-  if (want < len + need) return -1;
-
-  /* xrealloc(NULL, want) handles the first allocation too. */
-  nb = xrealloc(buf, want);
-  buf = nb;
-  cap = want;
-  return 0;
-}
-
-/* Append bytes to the temporary paste buffer, growing both it and l.buf as
- * needed. Return -1 if the paste is too large or allocation fails. */
+/* Stage bytes within the remaining edit-buffer limit. The caller drains
+   an oversized paste before reporting it; allocation failures transfer. */
 static int _append_paste(
-  EditState &l, char *&buf, size_t &cap, size_t &len,
-  const char *s, size_t slen, size_t maxlen) {
-  size_t needed;
-
-  if (len > maxlen || slen > maxlen-len) return -1;
-  needed = len+slen;
-  if (_grow(l, l.len+needed) == -1) return -1;
-  if (_reserve_paste(buf,cap,len,slen) == -1) return -1;
-  memcpy(buf+len,s,slen);
-  len = needed;
+  EditState &l, Block &bytes, const char *source, size_t count,
+  size_t maximum) {
+  size_t used = bytes.len();
+  if (count > maximum - used) return -1;
+  _grow(l, l.len + used + count);
+  if (bytes == NULL) {
+    bytes = Block.new(sizeof(char));
+    bytes.reserve(64);
+  }
+  bytes.append(source, count);
   return 0;
 }
 
@@ -1110,14 +1078,10 @@ static int _read_byte(EditState &l, char &out) {
 static void _paste(EditState &l) {
   static const char END[] = "\x1b[201~";
   const size_t ENDLEN = sizeof(END)-1;
-  char *buf = NULL;
-  defer xfree(buf);
-  size_t cap = 0, len = 0, match = 0;
-  size_t maxlen = l.buflen_max ? l.buflen_max : l.buflen;
+  auto Block bytes = NULL;
+  size_t match = 0, maxlen = LINENOISE_MAX_LINE - l.len;
   int overflowed = 0;
 
-  maxlen = maxlen > l.len ? maxlen - l.len : 0;
-  if (maxlen > PASTE_MAX_BYTES) maxlen = PASTE_MAX_BYTES;
   /* Consume an excess folded paste before reporting the size limit. */
   if (l.fold_count == LINENOISE_MAX_FOLDS) maxlen = 0;
 
@@ -1136,7 +1100,7 @@ static void _paste(EditState &l) {
 
     if (match > 0) {
       if (!overflowed &&
-        _append_paste(l, buf,cap,len,END,match,maxlen) == -1)
+        _append_paste(l, bytes, END, match, maxlen) == -1)
         overflowed = 1;
       match = 0;
       if (c == END[0]) {
@@ -1146,12 +1110,14 @@ static void _paste(EditState &l) {
     }
 
     if (!overflowed &&
-      _append_paste(l, buf,cap,len,&c,1,maxlen) == -1)
+      _append_paste(l, bytes, &c, 1, maxlen) == -1)
       overflowed = 1;
   }
 
   if (overflowed) _size_limit();
-  if (buf == NULL) return;
+  size_t len = bytes.len();
+  if (!len) return;
+  char *buf = bytes.bytes;
 
   {
     /* Normalize pasted CR and CRLF to LF, so the edit buffer uses one
