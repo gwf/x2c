@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-wrong-arm.x:3:33: type: check optional reference before using its value
+  static int pick(int &?value) => value ? 0 : use(value);
+                                  ^^^^^
+

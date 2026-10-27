@@ -35,6 +35,18 @@ void Compiler.settle_reference(
     c.mark_reference_present(binding);
 }
 
+/** Marks the optional reference that `condition` tests present for an
+    operand that runs only when `condition` has truth `holds`, if that truth
+    proves presence. Returns the facts to restore after the operand.
+*/
+List Compiler.assume_condition(Compiler c, List condition, int holds) {
+  List before = c.present_references();
+  int true_is_present = 1;
+  List binding = c.optional_reference_test(condition, true_is_present);
+  if (binding && true_is_present == holds) c.mark_reference_present(binding);
+  return before;
+}
+
 /** Restores the optional-reference facts saved before a lexical path. */
 void Compiler.restore_reference_presence(Compiler c, List before) {
   if (before === c.present_references()) return;
@@ -64,17 +76,15 @@ List Compiler.optional_reference_test(
   return NULL;
 }
 
-/* A comparison with a null literal tests the other operand; its true arm
-   proves presence for `!=`. */
+/* A comparison with a null literal tests the other operand; `==` inverts
+   the truth that proves presence. */
 static List _null_comparison(
   Compiler c, Var op, Var left, Var right, int &truth) {
-  if (_null_literal(right)) {
-    truth = op == <!=>;
-    return c.optional_reference_test(left, truth);
-  }
-  if (!_null_literal(left)) return NULL;
-  truth = op == <!=>;
-  return c.optional_reference_test(right, truth);
+  List operand = right;
+  if (_null_literal(right)) operand = left;
+  else if (!_null_literal(left)) return NULL;
+  if (op == <==>) truth = !truth;
+  return c.optional_reference_test(operand, truth);
 }
 
 static int _null_literal(List expr) {

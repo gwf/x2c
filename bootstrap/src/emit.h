@@ -16,5 +16,7 @@
 #include "cleanup/cleanup.h"
 Array Compiler_emit(Compiler c, List ast, Map cache_bindings);
 
+List Compiler_render_placed(Compiler c, List code, Map held);
+
 
 #endif /* __GUARD_0xA506BF2E__ */

@@ -211,11 +211,12 @@ List type_declaration_parts(List type){
 
 static Var _modifier_syntax(Var modifier){
   {
-    Var _x2c_gensym_match_var = modifier; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
-    List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
-      if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936762055558ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+    Var _x2c_gensym_match_var_0 = modifier;
+    int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);
+    List _x2c_gensym_match_expr_0 = Var_list_payload(_x2c_gensym_match_var_0);
+    if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936762055558ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && Var_is(_x2c_gensym_match_at_0 -> car, 806120) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
       Var parameters;
-      parameters = _x2c_gensym_match_value_0;
+      parameters = x2c_match_value_0;
       Var _x2c_gensym_match_value_0 = parameters;
       {
         List parameters = Var_list_payload(_x2c_gensym_match_value_0);
@@ -248,8 +249,10 @@ static Var _modifier_syntax(Var modifier){
       }
 
     }
-     } } }
+
   }
-  return modifier;
+
+}
+return modifier;
 }
 

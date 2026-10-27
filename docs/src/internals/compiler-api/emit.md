@@ -13,6 +13,7 @@ C tokens from normalized x2c ASTs.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.emit`](#Compiler.emit) | Emits a bound, typed, transform-normalized AST sequence as flat C tokens. |
+| [`Compiler.render_placed`](#Compiler.render_placed) | Renders the placed code `code`, whose watched source parts the transform lowered into the nodes `held` records, as a run of C text and nodes: each held node and each cached value stays a node, which later passes and emission handle, and the rest becomes the text emission would print. |
 
 ### `Compiler`
 
@@ -33,7 +34,20 @@ generated-name counters as it allocates temporaries. The returned
 `Array` holds `String`s owned by pools active during emission; promote
 them before releasing those pools if the tokens must survive.
 
-Source: `src/emit/dispatch.x:122`
+Source: `src/emit/dispatch.x:123`
+
+<a id="Compiler.render_placed"></a>
+#### Compiler.render_placed
+
+`List Compiler.render_placed(Compiler c, List code, Map held)`
+
+Renders the placed code `code`, whose watched source parts the
+transform lowered into the nodes `held` records, as a run of C text and
+nodes: each held node and each cached value stays a node, which later
+passes and emission handle, and the rest becomes the text emission would
+print.
+
+Source: `src/emit/dispatch.x:145`
 
 ## Design notes
 

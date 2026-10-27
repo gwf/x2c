@@ -103,7 +103,8 @@ static void _index(Emitter &e, Var array, Var index) {
 }
 
 static void _cache(Emitter &e, Var id) {
-  if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
+  if (e.held) e.out.push(%(cache $id));
+  else if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
   else _put(e, %"_$id");
 }
 
@@ -135,6 +136,28 @@ Array Compiler.emit(Compiler c, List ast, Map cache_bindings) {
   return before.concat(e.out).concat(after);
 }
 
+/** Renders the placed code `code`, whose watched source parts the
+    transform lowered into the nodes `held` records, as a run of C text and
+    nodes: each held node and each cached value stays a node, which later
+    passes and emission handle, and the rest becomes the text emission would
+    print.
+*/
+List Compiler.render_placed(Compiler c, List code, Map held) {
+  Emitter e = {.c = c, .native_macros = [], .out = [], .held = held};
+  _emit(e, code);
+  Array runs = [], text = [];
+  foreach (Var token in e.out) {
+    if (token is <list>) {
+      if (text.len()) runs.push(c.code_text(text));
+      text = [];
+      runs.push(token);
+    }
+    else text.push(token);
+  }
+  if (text.len()) runs.push(c.code_text(text));
+  return runs.list_free();
+}
+
 /* Emission visits sibling nodes from left to right because generated names
    and origins change during the walk. Generic sequences walk their items in
    order; a specialized form writes its text and emits its children in the
@@ -145,6 +168,11 @@ Array Compiler.emit(Compiler c, List ast, Map cache_bindings) {
    C-shaped nodes. */
 module void _emit(Emitter &e, List ast) {
   if (!ast) return;
+  Var kept;
+  if (e.held && e.held.try_get((void *) ast, kept)) {
+    e.out.push(ast);
+    return;
+  }
   Var head = ast.car();
   if (head is not <symbol>) {
     _sequence(e, ast);
@@ -164,6 +192,35 @@ module void _emit(Emitter &e, List ast) {
       _put(e, "){0}))");
     }
     case %(at ?origin ?inner): _at(e, origin, inner);
+    case %(placed ?code): _emit(e, code);
+    case %(m-all *tests): _joined(e, tests, <"&&">);
+    case %(m-any *tests): _joined(e, tests, <"||">);
+    case %(m-next ?at ?prior): {
+      _put(e, "(");
+      _node(e, at);
+      _put(e, "=");
+      _node(e, prior);
+      _put(e, "->cdr, 1)");
+    }
+    case %(m-step ?at ?prior): {
+      _put(e, "(");
+      _node(e, at);
+      _put(e, "=");
+      _node(e, prior);
+      _put(e, "->cdr)");
+    }
+    case %(m-take ?local ?at): {
+      _put(e, "(");
+      _node(e, local);
+      _put(e, "=");
+      _node(e, at);
+      _put(e, "->car, 1)");
+    }
+    case %(m-bits ?at ?bits): {
+      _node(e, at);
+      _put(e, "->car.u64 ==");
+      _node(e, bits);
+    }
     case %(cons ?item ?tail):
       _write(e, %("cons(" $item ", " $tail ")"));
     case %(append ?head ?tail):
@@ -215,7 +272,8 @@ module void _emit(Emitter &e, List ast) {
     case %(return): _put(e, "return;");
     case %(return (!set ?expr (expr ? ?))): _return(e, expr);
     case %(goto ?label): _write(e, %("goto" $label ";"));
-    case %(raise ?cause (args *args)): _put_all(e, _raise(e, ast, cause, args));
+    case %(raise ?cause (args *args)):
+      _put_all(e, _raise(e, ast, cause, args));
     case %((!or fnmod func) ?params): _parameters(e, params);
     case %(label ?name): _label(e, name);
     case %(ident ?binding): _ident(e, binding);

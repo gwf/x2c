@@ -81,7 +81,7 @@ the form `source` of `kind`, bound and lowered with the support. The
 kernel has no lowering of its own for `source`, so no rule ends the
 translation as `_shipped_lowering` does.
 
-Source: `src/transform/traversal.x:124`
+Source: `src/transform/traversal.x:125`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform

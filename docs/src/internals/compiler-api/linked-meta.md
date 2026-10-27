@@ -31,7 +31,7 @@ Shipped `meta` code compiled into the compiler.
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns a fresh Map of linked copies and runtime builders by name. |
 | [`match_condition_lowering`](#match_condition_lowering) | Lowers a pattern condition through the ordinary match tests. |
-| [`match_lowering`](#match_lowering) | Lowers the bound match `node` to C text around its subject, patterns, and bodies. |
+| [`match_lowering`](#match_lowering) | Lowers the bound match `node` to a block around its subject, patterns, and bodies. |
 | [`printf_values`](#printf_values) | Reads the Var values a printf-family call's static format consumes. |
 | [`protocol_conformance`](#protocol_conformance) | Places the forwarding members, descriptor thunks, method table, and descriptor registration of one conformance. |
 | [`raise_lowering`](#raise_lowering) | Converts a raise's code and details, or declines a raise whose parts already have their types. |
@@ -196,7 +196,7 @@ Source: `src/linked-meta.x:918`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2424`
+Source: `src/linked-meta.x:2716`
 
 #### linked_meta_targets
 
@@ -205,7 +205,7 @@ Source: `src/linked-meta.x:2424`
 Returns a fresh Map of linked copies and runtime builders by name.
 The Map borrows shared Func handles that live for the program.
 
-Source: `src/linked-meta.x:2206`
+Source: `src/linked-meta.x:2477`
 
 #### match_condition_lowering
 
@@ -213,16 +213,16 @@ Source: `src/linked-meta.x:2206`
 
 Lowers a pattern condition through the ordinary match tests.
 
-Source: `src/linked-meta.x:1601`
+Source: `src/linked-meta.x:1874`
 
 #### match_lowering
 
 `Code match_lowering(Code node)`
 
-Lowers the bound match `node` to C text around its subject, patterns,
+Lowers the bound match `node` to a block around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1570`
+Source: `src/linked-meta.x:1848`
 
 #### printf_values
 
@@ -230,7 +230,7 @@ Source: `src/linked-meta.x:1570`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1738`
+Source: `src/linked-meta.x:2011`
 
 #### protocol_conformance
 
@@ -239,7 +239,7 @@ Source: `src/linked-meta.x:1738`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:1853`
+Source: `src/linked-meta.x:2124`
 
 #### raise_lowering
 
@@ -248,7 +248,7 @@ Source: `src/linked-meta.x:1853`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1916`
+Source: `src/linked-meta.x:2187`
 
 #### register_rewrite
 
@@ -265,7 +265,7 @@ Source: `src/linked-meta.x:109`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:2015`
+Source: `src/linked-meta.x:2286`
 
 #### try_lowering
 
@@ -273,7 +273,7 @@ Source: `src/linked-meta.x:2015`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2174`
+Source: `src/linked-meta.x:2445`
 
 ## Design notes
 

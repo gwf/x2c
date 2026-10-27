@@ -18,6 +18,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.add_support`](#Compiler.add_support) | Appends the declaration `decl` to the unit's pending support as it is: a definition offered to every function rule, or a written one. |
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
+| [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional reference that `condition` tests present for an operand that runs only when `condition` has truth `holds`, if that truth proves presence. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -41,7 +42,8 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.gensym`](#Compiler.gensym) | Returns a fresh semantic identity for an anonymous aggregate. |
 | [`Compiler.mark_completion`](#Compiler.mark_completion) | Retags the token beginning at `position` as a private completion marker. |
 | [`Compiler.mark_reference_present`](#Compiler.mark_reference_present) | Records a nonnull optional parameter for the current lexical path. |
-| [`Compiler.match_capture_value`](#Compiler.match_capture_value) | Returns the typed expression reading one native match capture slot. |
+| [`Compiler.match_capture_name`](#Compiler.match_capture_name) | Returns the name of the local that carries a native match arm's `index`th capture into its body, `x2c_match_value_INDEX` or `x2c_match_list_INDEX`, which the match lowering declares. |
+| [`Compiler.match_capture_value`](#Compiler.match_capture_value) | Returns the typed expression reading one native match capture. |
 | [`Compiler.match_pattern_binders`](#Compiler.match_pattern_binders) | Returns definite binders from a typed `Match` pattern AST. |
 | [`Compiler.match_pattern_is_static`](#Compiler.match_pattern_is_static) | Reports whether a typed `Match` pattern has a fully static value graph. |
 | [`Compiler.match_pattern_value`](#Compiler.match_pattern_value) | Recovers a pattern value graph, using `x2c-dyn` for computed values. |
@@ -159,6 +161,17 @@ marker; otherwise a node without a token remains unwrapped.
 
 Source: `src/compiler/source-locations.x:29`
 
+<a id="Compiler.assume_condition"></a>
+#### Compiler.assume_condition
+
+`List Compiler.assume_condition(Compiler c, List condition, int holds)`
+
+Marks the optional reference that `condition` tests present for an
+operand that runs only when `condition` has truth `holds`, if that truth
+proves presence. Returns the facts to restore after the operand.
+
+Source: `src/compiler/binding-facts.x:42`
+
 <a id="Compiler.at_completion"></a>
 #### Compiler.at_completion
 
@@ -275,7 +288,7 @@ Source: `src/compiler/declarations/production.x:17`
 Returns captures established by a true condition. Other operations do
 not establish names, including negation and disjunction.
 
-Source: `src/compiler/patterns.x:139`
+Source: `src/compiler/patterns.x:145`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -405,14 +418,25 @@ Records a nonnull optional parameter for the current lexical path.
 
 Source: `src/compiler/binding-facts.x:22`
 
+<a id="Compiler.match_capture_name"></a>
+#### Compiler.match_capture_name
+
+`String Compiler.match_capture_name(Var binder, int index)`
+
+Returns the name of the local that carries a native match arm's
+`index`th capture into its body, `x2c_match_value_INDEX` or
+`x2c_match_list_INDEX`, which the match lowering declares.
+
+Source: `src/compiler/patterns.x:110`
+
 <a id="Compiler.match_capture_value"></a>
 #### Compiler.match_capture_value
 
 `List Compiler.match_capture_value(Var binder, int index)`
 
-Returns the typed expression reading one native match capture slot.
+Returns the typed expression reading one native match capture.
 
-Source: `src/compiler/patterns.x:107`
+Source: `src/compiler/patterns.x:114`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -508,7 +532,7 @@ Source: `src/compiler/parsing/tokens.x:165`
 Opens a scope for the captures established by a true condition. Returns
 whether a scope was opened; the caller closes it after its continuation.
 
-Source: `src/compiler/patterns.x:154`
+Source: `src/compiler/patterns.x:160`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test
@@ -519,7 +543,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler/binding-facts.x:49`
+Source: `src/compiler/binding-facts.x:61`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -551,7 +575,7 @@ Source: `src/compiler/source-files.x:26`
 Builds ordinary declarations from a pattern scope's issued bindings.
 A catch reads through its handler; a match reads its capture slots.
 
-Source: `src/compiler/patterns.x:115`
+Source: `src/compiler/patterns.x:121`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek
@@ -666,7 +690,7 @@ Source: `src/compiler/parsing/tokens.x:142`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/binding-facts.x:39`
+Source: `src/compiler/binding-facts.x:51`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state

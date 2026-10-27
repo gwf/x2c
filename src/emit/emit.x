@@ -22,7 +22,8 @@
 
 /* `native_macros` holds the `#define` rows initializer choices need, and
    `static_support` records that a runtime static was emitted, so the unit
-   includes its runtime headers. `out` holds the tokens written so far. */
+   includes its runtime headers. `out` holds the tokens written so far, and
+   `held` the nodes that rendering placed code keeps as nodes. */
 module typedef struct Emitter {
   delegate Compiler c;
   int origin, String fn_name, List native_aliases;
@@ -30,6 +31,7 @@ module typedef struct Emitter {
   Map static_objects, cache_bindings;
   int static_support;
   Array out;
+  Map held;
 } Emitter;
 
 // operator grouping

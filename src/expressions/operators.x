@@ -56,8 +56,8 @@ module List _postfix(Resolve &r, Var operator, List operand) {
 module List _conditional(
   Resolve &r, Var operator, List condition, List ontrue, List onfalse) {
   condition = r.c.resolve_expression(condition, r.origin);
-  ontrue = r.c.resolve_expression(ontrue, r.origin);
-  onfalse = r.c.resolve_expression(onfalse, r.origin);
+  ontrue = _resolve_when(r, condition, 1, ontrue);
+  onfalse = _resolve_when(r, condition, 0, onfalse);
   Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
   if (condition.cadr() === %(<macro-expr>) ||
       true_type === %(<macro-expr>) ||
@@ -92,12 +92,22 @@ module List _binary(Resolve &r, Var operator, List left, List right) {
   if (operator == <&&>) {
     int scoped = r.c.open_condition_scope(lhs);
     defer { if (scoped) r.c.sym.pop_scope(); }
-    rhs = r.c.resolve_expression(right, r.origin);
+    rhs = _resolve_when(r, lhs, 1, right);
   }
+  else if (operator == <||>) rhs = _resolve_when(r, lhs, 0, right);
   else rhs = r.c.resolve_expression(right, r.origin);
   if (operator == <~=>)
     return r.c.bind_match_condition(lhs, rhs, NULL, r.origin);
   return _binary_expression(r.c, operator, lhs, rhs, r.origin);
+}
+
+/* Resolves an operand that runs only when `condition` has truth `holds`. */
+static List _resolve_when(
+  Resolve &r, List condition, int holds, List operand) {
+  List present_before = r.c.assume_condition(condition, holds);
+  List resolved = r.c.resolve_expression(operand, r.origin);
+  r.c.restore_reference_presence(present_before);
+  return resolved;
 }
 
 module List _binary_expression(

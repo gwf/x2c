@@ -10,15 +10,19 @@ Match statements.
 
 ## Design notes
 
-C text surrounds the subject, patterns, and bodies. A block reads the
-subject once as a List and switches on its head's bits. Lowering steps
-into the embedded nodes. The generated `switch` makes `break` leave
+A match lowers to a block that reads the subject once as a List and
+switches on its head's bits. The generated `switch` makes `break` leave
 the match and `continue` reach the enclosing loop. A failed arm
 continues to the next arm.
 
-Static patterns of literals, unique binders, typed captures, nested
-Lists, and a final `*` use direct cursor tests. Other patterns capture
-through macros or Match, with static sites for fixed pattern values.
+A static pattern first becomes a tree of tests on single values joined
+by and, or, and not, so every Match operator is tested in place; only a
+`*` segment before the end of a List needs Match's search. Other
+patterns capture through macros or Match, with static sites for fixed
+pattern values. The block that reads the subject is a quotation, which
+the rule's caller binds. The switch inside it is placed: the transform
+lowers only the arm bodies it holds, and the emit module renders the
+rest as C text.
 
 Definitions that reach compile-time operations precede their callers:
 the compiler settles a linked copy's reachability when the copy binds.

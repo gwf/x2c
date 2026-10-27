@@ -21,7 +21,6 @@ Expression syntax and its resolution.
 | [`Compiler.is_builtin_converter_call`](#Compiler.is_builtin_converter_call) | The global builtin boxers and scalar formatters only observe their arguments. |
 | [`Compiler.needs_resolution`](#Compiler.needs_resolution) | True when syntax still needs ordinary binding or macro substitution. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
-| [`Compiler.parse_call_entry`](#Compiler.parse_call_entry) | Parses a `key: value` argument for a Map rest parameter as `(expr ("Map") (map-entry KEY VALUE))`, or returns NULL without consuming an ordinary argument. |
 | [`Compiler.parse_call_splice`](#Compiler.parse_call_splice) | Parses an explicit List splice argument, or returns NULL without consuming an ordinary argument. |
 | [`Compiler.parse_conditional`](#Compiler.parse_conditional) | Parses a binary expression and its optional conditional tail. |
 | [`Compiler.parse_expression`](#Compiler.parse_expression) | Parses an assignment expression and any following comma expressions. |
@@ -68,7 +67,7 @@ the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
 completed recursively; a call missing only that last formal receives the
 hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
-Source: `src/expressions/calls.x:450`
+Source: `src/expressions/calls.x:433`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -82,7 +81,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions/conversions.x:225`
+Source: `src/expressions/conversions.x:224`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -98,7 +97,7 @@ use `Var.str`. A segment statically spelled `Var` uses `Var.str` for every
 runtime tag. An ordinary `String` destination uses `Var.as_string`, which
 returns NULL for `void` and `Null`.
 
-Source: `src/expressions/conversions.x:410`
+Source: `src/expressions/conversions.x:409`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -109,7 +108,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions/conversions.x:568`
+Source: `src/expressions/conversions.x:567`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -123,7 +122,7 @@ Var, or `(no-value)` when it has no Var form; its address, or 0; and its
 type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
-Source: `src/expressions/calls.x:384`
+Source: `src/expressions/calls.x:369`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
@@ -133,7 +132,7 @@ Source: `src/expressions/calls.x:384`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions/conversions.x:622`
+Source: `src/expressions/conversions.x:621`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -155,17 +154,6 @@ assignment only for `=`. `c.token` stops after the expression.
 
 Source: `src/expressions/syntax.x:33`
 
-<a id="Compiler.parse_call_entry"></a>
-#### Compiler.parse_call_entry
-
-`List Compiler.parse_call_entry(Compiler c)`
-
-Parses a `key: value` argument for a Map rest parameter as
-`(expr ("Map") (map-entry KEY VALUE))`, or returns NULL without consuming
-an ordinary argument. Map literal rules decide the entry and its key.
-
-Source: `src/expressions/syntax.x:521`
-
 <a id="Compiler.parse_call_splice"></a>
 #### Compiler.parse_call_splice
 
@@ -174,7 +162,7 @@ Source: `src/expressions/syntax.x:521`
 Parses an explicit List splice argument, or returns NULL without consuming
 an ordinary argument. Parentheses delimit a complete splice expression.
 
-Source: `src/expressions/syntax.x:506`
+Source: `src/expressions/syntax.x:518`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -207,7 +195,7 @@ Parses one macro target through the cast-expression grammar.
 Parsing starts at `c.token` and leaves it at the first token after
 the target.
 
-Source: `src/expressions/syntax.x:285`
+Source: `src/expressions/syntax.x:297`
 
 <a id="Compiler.parse_parenthesized_statement"></a>
 #### Compiler.parse_parenthesized_statement
@@ -223,7 +211,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions/syntax.x:216`
+Source: `src/expressions/syntax.x:228`
 
 <a id="Compiler.parse_pattern_operand"></a>
 #### Compiler.parse_pattern_operand
@@ -232,7 +220,7 @@ Source: `src/expressions/syntax.x:216`
 
 Parses the right operand of a pattern test at relational precedence.
 
-Source: `src/expressions/syntax.x:95`
+Source: `src/expressions/syntax.x:101`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -243,7 +231,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:635`
+Source: `src/expressions/syntax.x:634`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -253,7 +241,7 @@ Source: `src/expressions/syntax.x:635`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:707`
+Source: `src/expressions/syntax.x:706`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -276,7 +264,7 @@ literal, the canonical `String` one becomes, or the `String_new` of one;
 any other format, such as a variable or an object macro, is not readable
 here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions/calls.x:538`
+Source: `src/expressions/calls.x:521`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -288,7 +276,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions/conversions.x:179`
+Source: `src/expressions/conversions.x:178`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -312,7 +300,7 @@ Source: `src/expressions/resolution.x:52`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:453`
+Source: `src/expressions/resolution.x:451`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -346,7 +334,7 @@ Source: `src/expressions/identifiers.x:190`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:340`
+Source: `src/expressions/resolution.x:338`
 
 ## Public types
 

@@ -103,11 +103,17 @@ List Compiler.define_pattern_binders(Compiler c, List pattern) {
 static List _binder_type(Var binder) =>
   binder.is_list_binder() ? %("List") : %("Var");
 
-/** Returns the typed expression reading one native match capture slot. */
+/** Returns the name of the local that carries a native match arm's
+    `index`th capture into its body, `x2c_match_value_INDEX` or
+    `x2c_match_list_INDEX`, which the match lowering declares.
+*/
+String Compiler.match_capture_name(Var binder, int index) =>
+  %"x2c_match_$(binder.is_list_binder() ? "list" : "value")_$index";
+
+/** Returns the typed expression reading one native match capture. */
 List Compiler.match_capture_value(Var binder, int index) =>
   %(expr $(_binder_type(binder))
-    ($(%"_x2c_gensym_match_$(
-      binder.is_list_binder() ? "list" : "value")_$index")));
+    ($(Compiler.match_capture_name(binder, index))));
 
 /** Builds ordinary declarations from a pattern scope's issued bindings.
     A catch reads through its handler; a match reads its capture slots.

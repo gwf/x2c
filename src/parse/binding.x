@@ -496,9 +496,8 @@ static int _declares_binders(List body, List bindings) {
   }
   int index = 0;
   foreach (List binding in bindings) {
+    String slot = Compiler.match_capture_name(binding.car(), index);
     String n = %"$(index++)";
-    String slot = %"_x2c_gensym_match_$(
-      binding.car().is_list_binder() ? "list" : "value")_$n";
     if (!(slot in read || %(catch $n) in read)) return 0;
   }
   return 1;

@@ -1309,14 +1309,19 @@ Var Macro_inserted(Var, int, int);
 
 static Code _batch_without_callback(Code code){
   {
-    List _x2c_gensym_match_expr = code; Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };
-      static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _222, _25, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0];
+    List _x2c_gensym_match_expr_0 = code;
+    Var _x2c_gensym_match_values_0[1];
+    MatchCaptureBuffer _x2c_gensym_match_capture_0 ={
+      .values = _x2c_gensym_match_values_0, .capacity = 1
+    }
+    ;
+    {static MacroCaseSite _x2c_gensym_macro_site_2; if(Macro_case_capture_at(& _x2c_gensym_macro_site_2, _x2c_gensym_match_expr_0, _222, _25, & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0];
     {
       Var jobs;
-      jobs = _x2c_gensym_match_value_0;
+      jobs = x2c_match_value_0;
       return cons(_28, cons(_225, cons(List_var(cons(_96, cons(_110, cons(List_var(cons(_54, cons(Macro_inserted(jobs, 1, 1), _238))), NULL)))), NULL)));
     }
-     }
+    }}
   }
   return code;
 }

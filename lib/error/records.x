@@ -124,10 +124,8 @@ module Var _copy_value(ErrorRegion &?region, Var value) {
                         : "error snapshot contains an identity-bearing value");
 }
 
-static Var _copy_wide(ErrorRegion &?region, Var value) {
-  if (!region) return _snapshot_wide(value);
-  return _clone_in(&region.values, value);
-}
+static Var _copy_wide(ErrorRegion &?region, Var value) =>
+  region ? _clone_in(&region.values, value) : _snapshot_wide(value);
 
 /* A wide box belongs to the outermost `Scope` of the caller's active slot, so
    a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
@@ -232,8 +230,7 @@ module List _view_since(ErrorRegion &?region, int mark) {
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
     Var entry = _copy_value(region, record.entry);
-    if (region) out = _cons(region, entry, out);
-    else out = cons(entry, out);
+    out = region ? _cons(region, entry, out) : cons(entry, out);
   }
   return out;
 }
