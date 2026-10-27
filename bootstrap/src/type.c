@@ -34,7 +34,7 @@ static List _from_bind(List mods, List context);
 
 static List _from_fields(List fields, List context);
 
-static List _from_aggregate(List node, Var head);
+static List _from_aggregate(List node, Symbol head);
 
 static List _without_leading_text(List items);
 
@@ -155,8 +155,8 @@ static List _from_ast(List node, List context){
         return cons(value, NULL);
       }
       break;}}{if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497936761996324ULL){return _from_items(node, context);
-      break;}} case 9224497938079852776ULL :{if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497938079852776ULL){return _from_aggregate(node, Symbol_var(1318234344));
-      break;}} case 9224497936806595548ULL :{if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497936806595548ULL){return _from_aggregate(node, Symbol_var(44977116));
+      break;}} case 9224497938079852776ULL :{if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497938079852776ULL){return _from_aggregate(node, 1318234344);
+      break;}} case 9224497936806595548ULL :{if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497936806595548ULL){return _from_aggregate(node, 44977116);
       break;}} default: break;
     }
 
@@ -253,14 +253,14 @@ static List _from_fields(List fields, List context){
   return Array_list_free(types);
 }
 
-static List _from_aggregate(List node, Var head){
+static List _from_aggregate(List node, Symbol head){
   if(Type_is_aggregate_tag(List_type(node))) return node;
   if(! Type_is_aggregate_tag_body(List_type(node))){
     List fields = List_flatten(_from_ast(Var_list_payload(List_cadr(node)), NULL));
-    return cons(head, cons(List_var(fields), NULL));
+    return cons(Symbol_var(head), cons(List_var(fields), NULL));
   }
   return({
-    Var _x2c_gensym_literal_part_0 = head;  Var _x2c_gensym_literal_part_1 = List_cadr(node);  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+    Var _x2c_gensym_literal_part_0 = Symbol_var(head);  Var _x2c_gensym_literal_part_1 = List_cadr(node);  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
   }
   );
 }

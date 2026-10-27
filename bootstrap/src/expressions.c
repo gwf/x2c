@@ -369,7 +369,7 @@ static List f5_calls____slot_statements(List items);
 
 static List f5_calls____complete_iter_call(Compiler c, List expression, List callee, List arguments, List parameters, List binding);
 
-static int f5_calls____exact_iter_type(Var value);
+static int f5_calls____exact_iter_type(Type type);
 
 static List f5_calls____iter_destination(void);
 
@@ -7044,8 +7044,8 @@ List Compiler_complete_iter_chain(Compiler c, List expression){
 }
 
 static List f5_calls____complete_iter_call(Compiler c, List expression, List callee, List arguments, List parameters, List binding){
-  Type result = Var_type(List_cadr(expression));  String name = Ast_binding_spelling(binding);  if(! f5_calls____exact_iter_type(List_var(result)) || String_equal(name, _2989) || f5_calls____parameters_variadic(parameters)) return expression;  List formal = parameters, actual = arguments;  int supplied = List_len(arguments), expected = List_len(formal);  if(! List_truth(formal) ||(supplied != expected && supplied + 1 != expected) || ! f5_calls____exact_iter_type(List_last(formal))) return expression;  Array completed = Array_new();  int changed = 0;  while(List_truth(actual)){
-    List argument = Var_list_payload(List_car(actual)), rewritten = argument;  if(f5_calls____exact_iter_type(List_car(formal))) rewritten = Compiler_complete_iter_chain(c, argument);  if(! List_equal(rewritten, argument)) changed = 1;  Array_push(completed, List_var(rewritten));  actual = List_cdr(actual);  formal = List_cdr(formal);
+  Type result = Var_type(List_cadr(expression));  String name = Ast_binding_spelling(binding);  if(! f5_calls____exact_iter_type(result) || String_equal(name, _2989) || f5_calls____parameters_variadic(parameters)) return expression;  List formal = parameters, actual = arguments;  int supplied = List_len(arguments), expected = List_len(formal);  if(! List_truth(formal) ||(supplied != expected && supplied + 1 != expected) || ! f5_calls____exact_iter_type(Var_type(List_last(formal)))) return expression;  Array completed = Array_new();  int changed = 0;  while(List_truth(actual)){
+    List argument = Var_list_payload(List_car(actual)), rewritten = argument;  if(f5_calls____exact_iter_type(Var_type(List_car(formal)))) rewritten = Compiler_complete_iter_chain(c, argument);  if(! List_equal(rewritten, argument)) changed = 1;  Array_push(completed, List_var(rewritten));  actual = List_cdr(actual);  formal = List_cdr(formal);
   }
   List values = Array_list_free(completed);  if(supplied + 1 == expected){
     values = List_append(values, cons(List_var(f5_calls____iter_destination()), NULL));  changed = 1;
@@ -7053,8 +7053,8 @@ static List f5_calls____complete_iter_call(Compiler c, List expression, List cal
   if(! changed) return expression;  Macro called = _609;  return Compiler_rebuild_expression(c, List_type(_2992), Macro_apply(called, cons(List_var(callee), cons(List_var(values), NULL))));
 }
 
-static int f5_calls____exact_iter_type(Var value){
-  Type type = Var_type(Var_is_row(value, 9, 7, 4) ? value : List_var(cons(value, NULL)));  return List_equal(Type_list(Type_canonicalize(type)), _2992);
+static int f5_calls____exact_iter_type(Type type){
+  return List_equal(Type_list(Type_canonicalize(type)), _2992);
 }
 
 static List f5_calls____iter_destination(void){

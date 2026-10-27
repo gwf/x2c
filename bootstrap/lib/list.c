@@ -134,13 +134,13 @@ static void f9_rendering____leaf(f9_rendering___Render * r, Var elem);
 
 static void f9_rendering____nil(Buffer out);
 
-static int f9_rendering____fits(f9_rendering___Render * r, Var elem);
+static int f9_rendering____fits(f9_rendering___Render * r, List elem);
 
-static void f9_rendering____items(f9_rendering___Render * r, Var elem);
+static void f9_rendering____items(f9_rendering___Render * r, List lst);
 
 static void f9_rendering____flat(f9_rendering___Render * r, Var elem);
 
-static void f9_rendering____flat_items(f9_rendering___Render * r, Var elem);
+static void f9_rendering____flat_items(f9_rendering___Render * r, List lst);
 
 static void f9_rendering____write_leaf(f9_rendering___Render * r, Var elem);
 
@@ -1615,7 +1615,7 @@ static void f9_rendering____value(f9_rendering___Render * r, Var elem){
   if(out -> pos >= f9_rendering____WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
   if(! Var_is_row(elem, 9, 7, 4)) f9_rendering____leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) f9_rendering____nil(out);
-  else if(! f9_rendering____fits(&((* r)), elem)) f9_rendering____items(&((* r)), elem);
+  else if(! f9_rendering____fits(&((* r)), Var_list_payload(elem))) f9_rendering____items(&((* r)), Var_list_payload(elem));
 }
 
 static void f9_rendering____leaf(f9_rendering___Render * r, Var elem){
@@ -1634,7 +1634,7 @@ static void f9_rendering____nil(Buffer out){
   Buffer_write(out, "()");
 }
 
-static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
+static int f9_rendering____fits(f9_rendering___Render * r, List elem){
   Buffer line = Buffer_new((* r).out -> padding);
   const Buffer _x2c_gensym_macro_acquired_20 = line;
   {
@@ -1653,7 +1653,7 @@ static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
         line, (* r).mode
       }
       ;
-      f9_rendering____flat(&(flat), elem);
+      f9_rendering____flat_items(&(flat), elem);
       if((* r).out -> pos + line -> content -> length > f9_rendering____WIDTH){
         int _x2c_gensym_return_value_23 = 0;
         {
@@ -1678,8 +1678,7 @@ static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
 
 }
 
-static void f9_rendering____items(f9_rendering___Render * r, Var elem){
-  List lst = Var_list_payload(elem);
+static void f9_rendering____items(f9_rendering___Render * r, List lst){
   Buffer out =(* r).out;
   if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
   f9_rendering____open(lst, out);
@@ -1693,11 +1692,10 @@ static void f9_rendering____items(f9_rendering___Render * r, Var elem){
 static void f9_rendering____flat(f9_rendering___Render * r, Var elem){
   if(! Var_is_row(elem, 9, 7, 4)) f9_rendering____write_leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) Buffer_write((* r).out, "()");
-  else f9_rendering____flat_items(&((* r)), elem);
+  else f9_rendering____flat_items(&((* r)), Var_list_payload(elem));
 }
 
-static void f9_rendering____flat_items(f9_rendering___Render * r, Var elem){
-  List lst = Var_list_payload(elem);
+static void f9_rendering____flat_items(f9_rendering___Render * r, List lst){
   Buffer out =(* r).out;
   f9_rendering____open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){

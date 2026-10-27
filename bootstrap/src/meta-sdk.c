@@ -67,7 +67,7 @@ static int f5_types____symbol_words(List type);
 
 static Type f6_syntax____binding_type(List binding);
 
-static String f6_syntax____binding_spelling(List value, Var syntax);
+static String f6_syntax____binding_spelling(List value, List syntax);
 
 static List f8_rewrites____rewrite_holes(Macro shape, List supplied);
 
@@ -1149,10 +1149,10 @@ String Code_binding_spelling(Var syntax){
   }
 
 }
-return f6_syntax____binding_spelling(value, syntax);
+return f6_syntax____binding_spelling(value, Var_list_payload(syntax));
 }
 
-static String f6_syntax____binding_spelling(List value, Var syntax){
+static String f6_syntax____binding_spelling(List value, List syntax){
   int identity = 0;
   String spelling = NULL;
   {
@@ -1166,7 +1166,7 @@ static String f6_syntax____binding_spelling(List value, Var syntax){
   }
 
 }
-if(! Ast_try_binding(value, &(identity), &(spelling))) _reject_value(_101, syntax);
+if(! Ast_try_binding(value, &(identity), &(spelling))) _reject_value(_101, List_var(syntax));
 Var registered = Map_getindex(Compiler_semantic_binding_facts(active.expander), List_var(cons(_102, cons(int_var(identity), NULL))));
 if(! Var_is_row(registered, 11, 7, 1) || ! String_equal(Var_string(registered), spelling)) MetaContext_reject(_99, cons(String_var(String_join(NULL, cons(String_var(_100), cons(String_var(List_repr(value)), NULL)))), NULL));
 return spelling;

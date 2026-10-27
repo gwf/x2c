@@ -270,7 +270,8 @@ static void _refuse(Compiler c, Var value, Token site) {
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
-static List _string_literal(Compiler c, Type declared, Type type, String value) {
+static List _string_literal(
+  Compiler c, Type declared, Type type, String value) {
   if (!declared || type === $!Type{ char * })
     return %(expr (* char) (literal (* char) $(((Var) value).repr())));
   if (type !== %("String")) return NULL;
