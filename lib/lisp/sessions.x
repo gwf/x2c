@@ -186,10 +186,8 @@ void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
     `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
     canonicalized.
 */
-int Lisp.try_get(Lisp lisp, String name, Var &?out) {
-  if (!out) return 0;
-  return lisp && name && _global_lookup(lisp, Atom.intern(name), out);
-}
+int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
+  lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
 
 /** Binds `name` to `value` in the embedded Lisp global environment.
     The session stores the value in a raw slot, so `void` remains distinct

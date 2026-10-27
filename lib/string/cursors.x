@@ -243,7 +243,7 @@ meta native Split String.splits(String str, String sep) =>
 */
 int Split.try_next(Split split, int &?cursor, String &?out) {
   if (!split || !cursor || !out || !split.next) return 0;
-  return split.next(split, cursor, out);
+  return split.next(split, &cursor, &out);
 }
 
 static int _iter_next(Iter iter, Var *out) {

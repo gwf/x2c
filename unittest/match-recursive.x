@@ -429,7 +429,7 @@ List match_recursive_search(List input, Var pattern) =>
 int match_recursive_try_search(
   List input, Var pattern, Var &?out_match, List &?out_bindings) =>
     out_match && out_bindings &&
-         _first(input, pattern, 1, out_match, out_bindings);
+         _first(input, pattern, 1, &out_match, &out_bindings);
 
 /** Replaces every recursively matching node and returns the resulting `List`.
     Traversal rewrites car, then cdr, then matches the node. The result is

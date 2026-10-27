@@ -450,7 +450,7 @@ Var Array_push(Array _x2c_gensym_macro_array_16, Var _x2c_gensym_macro_value_3){
 }
 
 int Array_try_take_last(Array _x2c_gensym_macro_array_17, Var * _x2c_gensym_macro_out_5){
-  return _x2c_gensym_macro_array_17 != NULL && _x2c_gensym_macro_out_5 ? Block_try_pop((Block) _x2c_gensym_macro_array_17, _x2c_gensym_macro_out_5) : 0;
+  return _x2c_gensym_macro_array_17 != NULL && _x2c_gensym_macro_out_5 ? Block_try_pop((Block) _x2c_gensym_macro_array_17, &(* _x2c_gensym_macro_out_5)) : 0;
 }
 
 Var Array_take_last(Array _x2c_gensym_macro_array_18){

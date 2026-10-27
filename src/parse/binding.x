@@ -361,40 +361,33 @@ static List _bind_while(Compiler c, Var condition, Var body) {
 static List _bind_switch(Compiler c, Var expr, Var body) =>
   %(switch $(_resolve(c, expr)) $(_bind_statement(c, body)));
 
-/* Binds the arm where an optional-reference test holds with the reference
-   present, and marks it present after the `if` when the other arm cannot
-   fall through. */
+/* Binds each arm with the optional references its outcome proves present,
+   and marks them present after the `if` when the other arm cannot fall
+   through. */
 static List _bind_if(Compiler c, Var condition, Var ontrue) {
   List test = _bind_clause(c, condition);
-  int true_is_present = 1;
-  List binding = c.optional_reference_test(test, true_is_present);
-  List yes = _bind_condition_branch(c, test, ontrue, binding, true_is_present);
-  c.settle_reference(binding, true_is_present, yes, NULL);
+  List yes = _bind_condition_branch(c, test, ontrue);
+  c.settle_condition(test, yes, NULL);
   return %(if $test $yes);
 }
 
 static List _bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse) {
   List test = _bind_clause(c, condition);
-  int true_is_present = 1;
-  List binding = c.optional_reference_test(test, true_is_present);
-  List yes = _bind_condition_branch(c, test, ontrue, binding, true_is_present);
-  List no = _bind_branch(c, onfalse, binding, !true_is_present);
-  c.settle_reference(binding, true_is_present, yes, no);
+  List yes = _bind_condition_branch(c, test, ontrue);
+  List no = _bind_branch(c, onfalse, test, 0);
+  c.settle_condition(test, yes, no);
   // A source `if` without `else` parses no false arm.
   return no ? %(if $test $yes $no) : %(if $test $yes);
 }
 
-static List _bind_condition_branch(
-  Compiler c, List test, Var arm, List binding, int present) {
+static List _bind_condition_branch(Compiler c, List test, Var arm) {
   int scoped = c.open_condition_scope(test);
   defer { if (scoped) c.sym.pop_scope(); }
-  return _bind_branch(c, arm, binding, present);
+  return _bind_branch(c, arm, test, 1);
 }
 
-static List _bind_branch(Compiler c, Var arm, List binding, int present) {
-  if (!binding) return _bind_statement(c, arm);
-  List before = c.present_references();
-  if (present) c.mark_reference_present(binding);
+static List _bind_branch(Compiler c, Var arm, List test, int holds) {
+  List before = c.assume_condition(test, holds);
   List bound = _bind_statement(c, arm);
   c.restore_reference_presence(before);
   return bound;

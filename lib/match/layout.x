@@ -325,8 +325,7 @@ int MatchCaptureLayout.index(MatchCaptureLayout layout, Atom binder) =>
     returns false. Presence is independent of the captured `Var` value.
 */
 int MatchCaptureBuffer.has(MatchCaptureBuffer &?m, int index) {
-  if (!m) return 0;
-  if (index < 0 || index >= m.capacity || index >= MACHINE_BINDER_MAX)
+  if (!m || index < 0 || index >= m.capacity || index >= MACHINE_BINDER_MAX)
     return 0;
   return _capture_bit(m.present, index);
 }

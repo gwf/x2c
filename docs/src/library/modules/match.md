@@ -1052,7 +1052,7 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match/execution.x:160`
+Source: `lib/match/execution.x:159`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
@@ -1165,7 +1165,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match/execution.x:181`
+Source: `lib/match/execution.x:180`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace

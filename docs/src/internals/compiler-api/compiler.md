@@ -18,7 +18,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.add_support`](#Compiler.add_support) | Appends the declaration `decl` to the unit's pending support as it is: a definition offered to every function rule, or a written one. |
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
-| [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional reference that `condition` tests present for an operand that runs only when `condition` has truth `holds`, if that truth proves presence. |
+| [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional references that `condition` proves present for an operand that runs only when `condition` has truth `holds`. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -54,13 +54,13 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.new_shared`](#Compiler.new_shared) | Creates a compiler sharing its owner's package and generated-name state. |
 | [`Compiler.next`](#Compiler.next) | Consumes the current token and advances past following trivia. |
 | [`Compiler.open_condition_scope`](#Compiler.open_condition_scope) | Opens a scope for the captures established by a true condition. |
-| [`Compiler.optional_reference_test`](#Compiler.optional_reference_test) | Returns the optional-reference parameter tested by `condition`, or NULL. |
 | [`Compiler.own_diagnostics`](#Compiler.own_diagnostics) | Routes this compiler's diagnostic store through its own printer. |
 | [`Compiler.owns_package_source`](#Compiler.owns_package_source) | Reports whether an x2c source belongs to the current package root. |
 | [`Compiler.pattern_binder_declarations`](#Compiler.pattern_binder_declarations) | Builds ordinary declarations from a pattern scope's issued bindings. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
+| [`Compiler.proven_references`](#Compiler.proven_references) | Returns the optional-reference parameters that `condition` proves the caller supplied when it has truth `holds`. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
 | [`Compiler.record_inline_function`](#Compiler.record_inline_function) | Records the header linkage of a public inline definition. |
 | [`Compiler.record_origin`](#Compiler.record_origin) | Records a token's location and returns its one-based occurrence. |
@@ -71,7 +71,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.restore_reference_presence`](#Compiler.restore_reference_presence) | Restores the optional-reference facts saved before a lexical path. |
 | [`Compiler.return_unit_state`](#Compiler.return_unit_state) | Returns that state to `owner`, so the next segment starts where this one finished and any bindings this segment created stay alive after the shadow is released. |
 | [`Compiler.select_declaration_defaults`](#Compiler.select_declaration_defaults) | Selects the owning file's declaration defaults after all its segments. |
-| [`Compiler.settle_reference`](#Compiler.settle_reference) | Marks the optional reference `binding` present after an `if` when the arm that runs without it cannot fall through: `no` when the true arm proves presence, `yes` otherwise. |
+| [`Compiler.settle_condition`](#Compiler.settle_condition) | Marks the optional references that `condition` proves present after an `if` whose arm for the other outcome cannot fall through. |
 | [`Compiler.shallow_parse`](#Compiler.shallow_parse) | Collects file-scope declarations into `globals` without parsing bodies. |
 | [`Compiler.shallow_parse_overlay`](#Compiler.shallow_parse_overlay) | Collects declarations with reads over `base` then `overlay`. |
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the bindings that hold the group's stubs. |
@@ -166,11 +166,11 @@ Source: `src/compiler/source-locations.x:29`
 
 `List Compiler.assume_condition(Compiler c, List condition, int holds)`
 
-Marks the optional reference that `condition` tests present for an
-operand that runs only when `condition` has truth `holds`, if that truth
-proves presence. Returns the facts to restore after the operand.
+Marks the optional references that `condition` proves present for an
+operand that runs only when `condition` has truth `holds`. Returns the
+facts to restore after the operand.
 
-Source: `src/compiler/binding-facts.x:42`
+Source: `src/compiler/binding-facts.x:46`
 
 <a id="Compiler.at_completion"></a>
 #### Compiler.at_completion
@@ -534,17 +534,6 @@ whether a scope was opened; the caller closes it after its continuation.
 
 Source: `src/compiler/patterns.x:160`
 
-<a id="Compiler.optional_reference_test"></a>
-#### Compiler.optional_reference_test
-
-`List Compiler.optional_reference_test( Compiler c, List condition, int &truth)`
-
-Returns the optional-reference parameter tested by `condition`, or NULL.
-`truth` is set to whether the condition's true arm proves that the caller
-supplied an object. Only a direct truth or null test proves presence.
-
-Source: `src/compiler/binding-facts.x:61`
-
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
 
@@ -609,6 +598,17 @@ Source: `src/compiler/source-files.x:82`
 Returns the optional references proven present in this lexical path.
 
 Source: `src/compiler/binding-facts.x:18`
+
+<a id="Compiler.proven_references"></a>
+#### Compiler.proven_references
+
+`List Compiler.proven_references(Compiler c, List condition, int holds)`
+
+Returns the optional-reference parameters that `condition` proves the
+caller supplied when it has truth `holds`. Direct truth and null tests
+prove presence, and `&&` and `||` combine their operands' proofs.
+
+Source: `src/compiler/binding-facts.x:64`
 
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
@@ -690,7 +690,7 @@ Source: `src/compiler/parsing/tokens.x:142`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/binding-facts.x:51`
+Source: `src/compiler/binding-facts.x:54`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state
@@ -715,14 +715,14 @@ signatures for the caller to retain in the header-cache lifetime.
 
 Source: `src/compiler/declarations/defaults.x:23`
 
-<a id="Compiler.settle_reference"></a>
-#### Compiler.settle_reference
+<a id="Compiler.settle_condition"></a>
+#### Compiler.settle_condition
 
-`void Compiler.settle_reference( Compiler c, List binding, int true_is_present, List yes, List no)`
+`void Compiler.settle_condition(Compiler c, List condition, List yes, List no)`
 
-Marks the optional reference `binding` present after an `if` when the
-arm that runs without it cannot fall through: `no` when the true arm
-proves presence, `yes` otherwise. A missing `no` arm falls through.
+Marks the optional references that `condition` proves present after an
+`if` whose arm for the other outcome cannot fall through. A missing `no`
+arm falls through.
 
 Source: `src/compiler/binding-facts.x:32`
 

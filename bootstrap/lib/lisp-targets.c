@@ -2600,7 +2600,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _206 = cons(_205, _51);
   _207 = String_new("List_concat");
   _208 = Symbol_var(194457181);
-  _209 = cons(_208, _51);
+  _209 = cons(_208, NULL);
   _210 = List_var(_209);
   _211 = cons(_210, NULL);
   _212 = List_var(_211);
