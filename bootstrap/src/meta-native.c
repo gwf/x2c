@@ -130,12 +130,14 @@ static void f7_modules____native_module_shutdown(void);
 
 static int _native_module_loaded(String path);
 
-static struct Extension{
+typedef struct f7_modules___Extension{
   const char * name;
   Map(* targets)(void);
-  struct Extension * next;
+  struct f7_modules___Extension * next;
 }
-* f7_modules___extensions;
+* f7_modules___Extension;
+
+static f7_modules___Extension f7_modules___extensions;
 
 _x2c_gensym_initializer_choice_65953FEE_6((f7_modules___extensions = NULL))
 static Map f6_linked___shipped_targets;
@@ -3345,7 +3347,7 @@ void Compiler_select_native_modules(List paths){
   if(! _init_guard_) _file_init_();
   f7_modules____load_compiler_module();
   Array linked = Array_new();
-  for(struct Extension * e = f7_modules___extensions;  e;  e = e -> next){
+  for(f7_modules___Extension e = f7_modules___extensions;  e;  e = e -> next){
     String key = String_join(NULL, cons(String_var(_1676), cons(String_var(String_new(e -> name)), cons(String_var(_1677), NULL))));
     if(! _native_module_loaded(key)) _add_native_module(key, e -> targets);
     Array_push(linked, String_var(key));
@@ -3556,9 +3558,9 @@ int Compiler_supplies_native_meta(String name){
 
 void x2c_register_extension(const char * name, Map(* targets)(void)){
   if(! _init_guard_) _file_init_();
-  struct Extension * extension = malloc(sizeof * extension);
+  f7_modules___Extension extension = malloc(sizeof * extension);
   if(! extension) abort();
-  * extension =(struct Extension){
+  * extension =(struct f7_modules___Extension){
     name, targets, f7_modules___extensions
   }
   ;
@@ -3567,7 +3569,7 @@ void x2c_register_extension(const char * name, Map(* targets)(void)){
 
 int Compiler_links_extension(String name){
   if(! _init_guard_) _file_init_();
-  for(struct Extension * e = f7_modules___extensions;  e;  e = e -> next) if(! strcmp(name, e -> name)) return 1;
+  for(f7_modules___Extension e = f7_modules___extensions;  e;  e = e -> next) if(! strcmp(name, e -> name)) return 1;
   return 0;
 }
 

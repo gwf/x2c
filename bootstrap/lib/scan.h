@@ -74,7 +74,7 @@ int scan_escape_sequence(char * s);
 
 int scan_utf8_length(const unsigned char * s);
 
-void scan_next_line_col(char * s, int n, int * l, int * c);
+void scan_next_line_col(char * s, int n, int * line, int * col);
 
 
 #endif /* __GUARD_0x23637011__ */

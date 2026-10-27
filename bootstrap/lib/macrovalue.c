@@ -59,7 +59,7 @@ static inline int Macro_case_start(List code, Symbol head, List * cursor){
   if(! List_truth(code)) return 0;
   Symbol first = Macro_case_symbol(code -> car);
   if(first == head &&(head != 377892 || Macro_case_own(List_caddr(code)))){
-    * cursor = code;
+    (* cursor) = code;
     return 2;
   }
   return first && first != 104 && first != 40070 && first != 377892 && first != 39266 ? 0 : - 1;
@@ -82,8 +82,8 @@ int Macro_case_view(Var value, List * cursor);
 static inline int Macro_case_enter(Var value, List * cursor){
   List node = Var_list_payload(value);
   Symbol head = List_truth(node) ? Macro_case_symbol(node -> car) : 0;
-  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, cursor);
-  * cursor = node;
+  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, &((* cursor)));
+  (* cursor) = node;
   return 1;
 }
 
@@ -948,7 +948,7 @@ int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, 
   if(! _init_guard_) _file_init_();
   List grouped = NULL;
   if(f11_recognition____pending_parts(t, code, &(grouped))) return f11_recognition____pending_capture(t, grouped, names, published);
-  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return f11_recognition____capture(code, site -> match.plan, & site -> policy, & site -> route, published);
+  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return f11_recognition____capture(code, site -> match.plan, &(site -> policy), &(site -> route), published);
   return f11_recognition____derived_capture(site, code, t, names, published);
 }
 
@@ -957,13 +957,13 @@ int Macro_case_root(List code, Macro t, List names, int statement, List * cursor
   List grouped = NULL;
   Var head = List_truth(code) ? List_car(code) : Var_null();
   if((! Var_is(head, 1328354264) || x2c_var_equal(head, Symbol_var(377892))) && f11_recognition____pending_parts(t, code, &(grouped))) return f11_recognition____pending_capture(t, grouped, names, published);
-  if(! Macro_case_enter(List_var(code), cursor)) return 0;
+  if(! Macro_case_enter(List_var(code), &((* cursor)))) return 0;
   if(statement){
-    List _x2c_gensym_match_expr = * cursor; List _x2c_gensym_match_cursor;
+    List _x2c_gensym_match_expr =(* cursor); List _x2c_gensym_match_cursor;
       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761657698ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
       Var only;
       only = _x2c_gensym_match_value_0;
-      return Macro_case_enter(only, cursor) ? 2 : 0;
+      return Macro_case_enter(only, &((* cursor))) ? 2 : 0;
     }
      } }
   }
@@ -974,7 +974,7 @@ int Macro_case_view(Var value, List * cursor){
   if(! _init_guard_) _file_init_();
   Var seen = f11_recognition____unwrap(value);
   if(! Var_is_row(seen, 9, 7, 4)) return 0;
-  * cursor = Var_list_payload(seen);
+  (* cursor) = Var_list_payload(seen);
   return 1;
 }
 
@@ -1046,7 +1046,7 @@ int MacroMatcher_matches(MacroMatcher * m, List code){
       MatchPlan plan = MatchLease_plan(&(lease));
       MacroFixedSlots policy = f11_recognition____fixed_slots((* m).shape, (* m).holes, plan);
       {
-        int _x2c_gensym_return_value_2 = f11_recognition____case_match(code, plan, & policy, NULL);
+        int _x2c_gensym_return_value_2 = f11_recognition____case_match(code, plan, &(policy), NULL);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
           return _x2c_gensym_return_value_2;
@@ -1128,7 +1128,7 @@ static int f11_recognition____pending_capture(Macro t, List grouped, List names,
   Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX
   }
-  ;  List internal = f11_recognition____internal_names(t, names, 1);  if(! x2c_match_try_capture(grouped, List_var(internal), & captured)) return 0;  MacroPublishing route = f11_recognition____publishing(t, List_var(internal), names, internal);  return f11_recognition____publish(& route, & captured, published);
+  ;  List internal = f11_recognition____internal_names(t, names, 1);  if(! x2c_match_try_capture(grouped, List_var(internal), &(captured))) return 0;  MacroPublishing route = f11_recognition____publishing(t, List_var(internal), names, internal);  return f11_recognition____publish(&(route), &(captured), published);
 }
 
 static List f11_recognition____internal_names(Macro t, List names, int pending){
@@ -1150,14 +1150,14 @@ static int f11_recognition____capture(List code, MatchPlan plan, MacroFixedSlots
     values, 0, MACHINE_BINDER_MAX
   }
   ;
-  return f11_recognition____case_match(code, plan, policy, & captured) && f11_recognition____publish(route, & captured, published);
+  return f11_recognition____case_match(code, plan, &((* policy)), &(captured)) && f11_recognition____publish(&((* route)), &(captured), published);
 }
 
 static int f11_recognition____derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   macro_subject_used = 0;
   List pattern = f11_recognition____case_shape(t, names);
   MacroPublishing route = f11_recognition____publishing(t, List_var(pattern), names, f11_recognition____internal_names(t, names, 0));
-  if(f11_recognition____keep(site, t, names, pattern, &(route))) return f11_recognition____capture(code, site -> match.plan, & site -> policy, & site -> route, published);
+  if(f11_recognition____keep(site, t, names, pattern, &(route))) return f11_recognition____capture(code, site -> match.plan, &(site -> policy), &(site -> route), published);
   MatchPlan plan = MatchPlan_prepare(List_var(pattern));
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
@@ -1173,7 +1173,7 @@ static int f11_recognition____derived_capture(MacroCaseSite * site, List code, M
     {
       MacroFixedSlots policy = f11_recognition____fixed_slots(t, names, plan);
       {
-        int _x2c_gensym_return_value_3 = f11_recognition____capture(code, plan, & policy, & route, published);
+        int _x2c_gensym_return_value_3 = f11_recognition____capture(code, plan, &(policy), &(route), published);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           return _x2c_gensym_return_value_3;
@@ -1320,12 +1320,12 @@ static MacroFixedSlots f11_recognition____fixed_slots(Macro t, List names, Match
 }
 
 static int f11_recognition____case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
-  if(plan -> status != 1138535534920) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;
+  if(plan -> status != 1138535534920) return MatchPlan_execute_capture(plan, List_var(code), captured, NULL) == 1;
   if(! MatchPlan_admits(plan, List_var(code), f11_recognition____unwrap)) return 0;
   MatchMachine machine;
   MatchMachine_open(&(machine));
   machine.relation = f11_recognition____identity_equal;
-  machine.relation_context = policy;
+  machine.relation_context = &(* policy);
   machine.view = f11_recognition____unwrap;
   MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));
   MatchMachine_run(&(machine));
@@ -1339,8 +1339,8 @@ static int f11_recognition____take_slots(MatchMachine * machine, MatchCaptureBuf
   for(int i = 0;  i <(* machine).slot_count;  i ++){
     MachineSlot * slot = &(* machine).slots[i];
     if(slot -> kind == 20313104968) continue;
-    captured -> values[i] = slot -> kind == 1278044 ? List_var(MatchMachine_materialize_span(&((* machine)), slot -> span)) : slot -> value;
-    captured -> present |= 1UL << i;
+    (* captured).values[i] = slot -> kind == 1278044 ? List_var(MatchMachine_materialize_span(&((* machine)), slot -> span)) : slot -> value;
+    (* captured).present |= 1UL << i;
   }
   return(* machine).status == 982;
 }
@@ -1498,15 +1498,15 @@ static MacroPublishing f11_recognition____publishing(Macro t, Var pattern, List 
 }
 
 static int f11_recognition____publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
-  if(! route -> complete) return 0;
+  if(!(* route).complete) return 0;
   Var ordered[MACHINE_BINDER_MAX];
-  for(int i = 0;  i < route -> count;  i ++){
-    int from = MatchCaptureBuffer_has(captured, route -> from[i]) ? route -> from[i] : route -> fallback[i];
-    if(from < 0 || ! MatchCaptureBuffer_has(captured, from)) return 0;
-    ordered[route -> to[i]] = captured -> values[from];
+  for(int i = 0;  i <(* route).count;  i ++){
+    int from = MatchCaptureBuffer_has(&((* captured)), (* route).from[i]) ?(* route).from[i] :(* route).fallback[i];
+    if(from < 0 || ! MatchCaptureBuffer_has(&((* captured)), from)) return 0;
+    ordered[(* route).to[i]] =(* captured).values[from];
   }
-  for(int i = 0;  i < route -> binders;  i ++) published -> values[i] = ordered[i];
-  published -> present = route -> definite;
+  for(int i = 0;  i <(* route).binders;  i ++) published -> values[i] = ordered[i];
+  published -> present =(* route).definite;
   return 1;
 }
 

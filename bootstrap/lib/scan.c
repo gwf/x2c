@@ -654,17 +654,15 @@ int scan_utf8_length(const unsigned char * s){
   return length;
 }
 
-void scan_next_line_col(char * s, int n, int * l, int * c){
-  int line = * l, col = * c;
+void scan_next_line_col(char * s, int n, int * line, int * col){
   char * next = s, * end = s + n;
   while(next < end){
     char * newline = memchr(next, '\n', end - next);
     if(! newline) break;
-    line ++;
-    col = 1;
+    (* line) ++;
+    (* col) = 1;
     next = newline + 1;
   }
-  * l = line;
-  * c = col +(end - next);
+  (* col) += end - next;
 }
 

@@ -41,11 +41,11 @@ typedef struct Thread * Thread;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-struct ParallelRun{
+typedef struct ParallelRun{
   Array ready;
   int stopping;
 }
-;
+* ParallelRun;
 
 struct Thread{
   pthread_t native;
@@ -58,7 +58,7 @@ struct Thread{
   void * policy;
   Symbol state;
   int finished;
-  struct ParallelRun * parallel;
+  ParallelRun parallel;
   int assigned;
   int stop_requested;
   pthread_cond_t * waiting;
@@ -114,11 +114,11 @@ static size_t _input_offset(void);
 
 static void * _input(Thread thread);
 
-static Thread _start(ThreadFn function, const void * input, size_t input_size, struct ParallelRun * parallel);
+static Thread _start(ThreadFn function, const void * input, size_t input_size, ParallelRun parallel);
 
 static Var _call_value(const void * input, size_t size);
 
-static Thread _start_value(ThreadValueFn function, Var value, struct ParallelRun * parallel, Pool pool);
+static Thread _start_value(ThreadValueFn function, Var value, ParallelRun parallel, Pool pool);
 
 static Thread _new_handle(ThreadFn function, const void * input, size_t input_size);
 
@@ -166,11 +166,11 @@ static void _parallel_run(Thread thread);
 
 static int _parallel_park(Thread thread);
 
-static Thread _parallel_wait(struct ParallelRun * run);
+static Thread _parallel_wait(ParallelRun run);
 
 static void _parallel_assign(Thread worker, Var input);
 
-static void _parallel_stop(struct ParallelRun * run, Array workers);
+static void _parallel_stop(ParallelRun run, Array workers);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -467,7 +467,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _176 = cons(_173, _175);
   _177 = List_var(_176);
   _178 = Symbol_var(1133019155420);
-  _179 = int_var(24354);
+  _179 = int_var(24351);
   _180 = cons(_179, NULL);
   _181 = cons(_178, _180);
   _182 = List_var(_181);
@@ -611,7 +611,7 @@ Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size
   return _start(function, input, input_size, NULL);
 }
 
-static Thread _start(ThreadFn function, const void * input, size_t input_size, struct ParallelRun * parallel){
+static Thread _start(ThreadFn function, const void * input, size_t input_size, ParallelRun parallel){
   if(! function ||(input_size && ! input)){
     static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/thread.x",.function = "_start",.line = 201,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start_raw")), NULL))));
@@ -699,7 +699,7 @@ Thread Thread_start(ThreadValueFn function, Var value){
   return _start_value(function, value, NULL, NULL);
 }
 
-static Thread _start_value(ThreadValueFn function, Var value, struct ParallelRun * parallel, Pool pool){
+static Thread _start_value(ThreadValueFn function, Var value, ParallelRun parallel, Pool pool){
   if(! function){
     static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/thread.x",.function = "_start_value",.line = 252,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
@@ -1359,7 +1359,7 @@ int Iter_try_next(Iter, Var *);
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
   if(! _init_guard_) _file_init_();
   if(! map) return seed;
-  struct ParallelRun * run = xcalloc(1, sizeof(struct ParallelRun));
+  ParallelRun run = xcalloc(1, sizeof(struct ParallelRun));
   Array workers = NULL;
   {
     _x2c_gensym_defer_env_10 _x2c_gensym_macro_environment_10 ={
@@ -1445,7 +1445,7 @@ static int _parallel_park(Thread thread){
   return again;
 }
 
-static Thread _parallel_wait(struct ParallelRun * run){
+static Thread _parallel_wait(ParallelRun run){
   x2c_thread_wait_lock();
   while(! Array_len(run -> ready) && ! x2c_thread_stopping()) x2c_thread_wait(& thread_completion_condition);
   Thread ready = x2c_thread_stopping() ? NULL : Var_pointer(Array_remove(run -> ready, 0));
@@ -1467,7 +1467,7 @@ static void _parallel_assign(Thread worker, Var input){
   _completion_check(pthread_mutex_unlock(& thread_completion_mutex));
 }
 
-static void _parallel_stop(struct ParallelRun * run, Array workers){
+static void _parallel_stop(ParallelRun run, Array workers){
   stop_mask ++;
   {
     X2CCleanup _x2c_gensym_defer_record_12 ={
@@ -1632,7 +1632,7 @@ static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
 
 static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
   _x2c_gensym_defer_env_10 * _x2c_gensym_defer_data_10 =(_x2c_gensym_defer_env_10 *) _x2c_gensym_defer_opaque_11;
-  _parallel_stop((*(struct ParallelRun * *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_12), (*(Array *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_13));
+  _parallel_stop((*(ParallelRun *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_12), (*(Array *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_13));
 }
 
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
@@ -1646,7 +1646,7 @@ static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
 
 static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
   _x2c_gensym_defer_env_12 * _x2c_gensym_defer_data_12 =(_x2c_gensym_defer_env_12 *) _x2c_gensym_defer_opaque_13;
-  Array_cleanup((*(struct ParallelRun * *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_15) -> ready);
+  Array_cleanup((*(ParallelRun *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_15) -> ready);
 }
 
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
@@ -1656,7 +1656,7 @@ static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15){
   _x2c_gensym_defer_env_14 * _x2c_gensym_defer_data_14 =(_x2c_gensym_defer_env_14 *) _x2c_gensym_defer_opaque_15;
-  xfree((*(struct ParallelRun * *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_17));
+  xfree((*(ParallelRun *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_17));
 }
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){

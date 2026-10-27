@@ -47,7 +47,7 @@ typedef struct ErrorRegion{
 ErrorRegion;
 
 typedef struct ErrorRecord{
-  struct ErrorRegion region;
+  ErrorRegion region;
   List entry;
 }
 ErrorRecord;
@@ -60,7 +60,7 @@ ErrorRecord;
 struct ErrorHandler{
   struct ErrorHandler * prev;
   struct ErrorHandler * running;
-  struct ErrorRegion view;
+  ErrorRegion view;
   ErrorHandlerFn fn;
   Var data;
   int watermark;
@@ -602,53 +602,53 @@ static List f7_records____counted_detail(ErrorRegion * region, Symbol code, unsi
   Block pairs = Block_new(sizeof(f7_records___ErrorPair));
   for(unsigned i = 0;  i < count;  i ++){
     f7_records___ErrorPair pair ={
-      .key = _copy_value(region, va_arg(args, Var))
+      .key = _copy_value(&((* region)), va_arg(args, Var))
     }
     ;
-    pair.value = _copy_value(region, va_arg(args, Var));
+    pair.value = _copy_value(&((* region)), va_arg(args, Var));
     Block_push(pairs, & pair);
   }
   f7_records___ErrorPair * items = pairs -> bytes;
   List detail = NULL;
-  for(int i =(int) count - 1;  i >= 0;  i --) detail = f7_records____field(region, items[i].key, items[i].value, detail);
+  for(int i =(int) count - 1;  i >= 0;  i --) detail = f7_records____field(&((* region)), items[i].key, items[i].value, detail);
   Block_free(pairs);
   if(pushed) Scope_pop();
   return detail;
 }
 
 static List f7_records____entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
-  List location = f7_records____location(region, site), entry = NULL;
-  entry = f7_records____field(region, Symbol_var(857050729436), List_var(location), entry);
-  entry = f7_records____field(region, Symbol_var(280234584), List_var(detail), entry);
-  entry = f7_records____field(region, Symbol_var(227594), Symbol_var(code), entry);
+  List location = f7_records____location(&((* region)), site), entry = NULL;
+  entry = f7_records____field(&((* region)), Symbol_var(857050729436), List_var(location), entry);
+  entry = f7_records____field(&((* region)), Symbol_var(280234584), List_var(detail), entry);
+  entry = f7_records____field(&((* region)), Symbol_var(227594), Symbol_var(code), entry);
   return entry;
 }
 
 static List f7_records____location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
-  String file = f7_records____site_text(e, site -> file);
-  String function = f7_records____site_text(e, site -> function);
-  List location = site -> runtime ? f7_records____field(e, Symbol_var(40094681930), int_var(1), NULL) : NULL;
-  location = f7_records____field(e, Symbol_var(458361162716), String_var(function), location);
-  location = f7_records____field(e, Symbol_var(805770), int_var(site -> line), location);
-  return f7_records____field(e, Symbol_var(412426), String_var(file), location);
+  String file = f7_records____site_text(&((* e)), site -> file);
+  String function = f7_records____site_text(&((* e)), site -> function);
+  List location = site -> runtime ? f7_records____field(&((* e)), Symbol_var(40094681930), int_var(1), NULL) : NULL;
+  location = f7_records____field(&((* e)), Symbol_var(458361162716), String_var(function), location);
+  location = f7_records____field(&((* e)), Symbol_var(805770), int_var(site -> line), location);
+  return f7_records____field(&((* e)), Symbol_var(412426), String_var(file), location);
 }
 
 static String f7_records____site_text(ErrorRegion * region, const char * text){
   if(! text) text = "<unknown>";
-  return String_new_in(region -> pool, text, strlen(text));
+  return String_new_in((* region).pool, text, strlen(text));
 }
 
 static List f7_records____field(ErrorRegion * region, Var key, Var value, List tail){
-  return _cons(region, List_var(f7_records____pair(region, key, value)), tail);
+  return _cons(&((* region)), List_var(f7_records____pair(&((* region)), key, value)), tail);
 }
 
 static List f7_records____pair(ErrorRegion * region, Var key, Var value){
-  return _cons(region, key, _cons(region, value, NULL));
+  return _cons(&((* region)), key, _cons(&((* region)), value, NULL));
 }
 
 static List _cons(ErrorRegion * region, Var head, List tail){
-  return List_cons_in(region -> pool, head, tail);
+  return List_cons_in((* region).pool, head, tail);
 }
 
 static ErrorRecord * _record_at(int index){
@@ -677,7 +677,8 @@ static Var _copy_value(ErrorRegion * region, Var value){
 }
 
 static Var f7_records____copy_wide(ErrorRegion * region, Var value){
-  return region ? f7_records____clone_in(& region -> values, value) : f7_records____snapshot_wide(value);
+  if(! region) return f7_records____snapshot_wide(value);
+  return f7_records____clone_in(&(* region).values, value);
 }
 
 static Var f7_records____snapshot_wide(Var v){
@@ -697,7 +698,7 @@ static Var f7_records____clone_in(Scope * owner, Var v){
 static Var f7_records____copy_text(ErrorRegion * region, Var value){
   String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
   if(! region) return f7_records____snapshot_text(value, source);
-  String owned = String_new_in(region -> pool, source, String_len(source));
+  String owned = String_new_in((* region).pool, source, String_len(source));
   return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);
 }
 
@@ -715,7 +716,7 @@ static Var f7_records____snapshot_text(Var value, String source){
 static List f7_records____copy_list(ErrorRegion * region, List source){
   Var head = _copy_value(region, List_car(source));
   List tail = Var_list_payload(_copy_value(region, List_var(List_cdr(source))));
-  if(region) return _cons(region, head, tail);
+  if(region) return _cons(&((* region)), head, tail);
   List owned = cons(head, tail);
   List_try_own(owned);
   return owned;
@@ -732,10 +733,10 @@ static ErrorRegion _region_new(void){
 }
 
 static void _destroy(ErrorRegion * region){
-  if(region -> pool) region -> pool = Pool_release(region -> pool);
-  if(region -> values){
-    Scope_destroy(region -> values);
-    region -> values = NULL;
+  if((* region).pool)(* region).pool = Pool_release((* region).pool);
+  if((* region).values){
+    Scope_destroy((* region).values);
+    (* region).values = NULL;
   }
 
 }
@@ -777,7 +778,7 @@ List Error_since_in(int mark, Scope * values, Pool pool){
   ErrorRegion region = f7_records____owners(values, pool);
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List out = _view_since(& region, mark);
+  List out = _view_since(&(region), mark);
   state -> floor_only --;
   * values = region.values;
   return out;
@@ -805,7 +806,7 @@ Var Error_snapshot_in(Var value, Scope * values, Pool pool){
   ErrorRegion region = f7_records____owners(values, pool);
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  Var copy = _copy_value(& region, value);
+  Var copy = _copy_value(&(region), value);
   state -> floor_only --;
   * values = region.values;
   return copy;
@@ -845,7 +846,7 @@ static int f8_handlers____catch_arm(ErrorHandler h, ErrorRecord * record, List p
   }
   ;
   int matched = i == h -> site -> default_arm ||(plan -> status == 1138535534920 && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
-  if(matched) f8_handlers____commit_captures(h, record, layout, & captures);
+  if(matched) f8_handlers____commit_captures(h, record, layout, &(captures));
   if(values) xfree(values);
   return matched;
 }
@@ -868,7 +869,7 @@ static void f8_handlers____commit_captures(ErrorHandler handle, ErrorRecord * re
   Var * values = handle -> capture_values -> bytes;
   for(int i = 0;  i < layout -> binder_count;  i ++){
     values[i] =((void) 0, Void);
-    if(MatchCaptureBuffer_has(captures, i)) values[i] = _copy_value(&(record -> region), captures -> values[i]);
+    if(MatchCaptureBuffer_has(&((* captures)), i)) values[i] = _copy_value(&(record -> region), (* captures).values[i]);
   }
   if(pushed) Scope_pop();
 }

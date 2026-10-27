@@ -48,7 +48,7 @@ static inline int Macro_case_start(List code, Symbol head, List * cursor){
   if(! List_truth(code)) return 0;
   Symbol first = Macro_case_symbol(code -> car);
   if(first == head &&(head != 377892 || Macro_case_own(List_caddr(code)))){
-    * cursor = code;
+    (* cursor) = code;
     return 2;
   }
   return first && first != 104 && first != 40070 && first != 377892 && first != 39266 ? 0 : - 1;
@@ -73,8 +73,8 @@ int Macro_case_view(Var, List *);
 static inline int Macro_case_enter(Var value, List * cursor){
   List node = Var_list_payload(value);
   Symbol head = List_truth(node) ? Macro_case_symbol(node -> car) : 0;
-  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, cursor);
-  * cursor = node;
+  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, &((* cursor)));
+  (* cursor) = node;
   return 1;
 }
 

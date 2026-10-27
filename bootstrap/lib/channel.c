@@ -18,7 +18,7 @@ typedef struct ChannelMessage{
   struct ChannelMessage * next;
   int owned;
 }
-ChannelMessage;
+* ChannelMessage;
 
 typedef struct ChannelWait{
   Var value;
@@ -26,12 +26,12 @@ typedef struct ChannelWait{
   struct ChannelWait * previous, * next;
   int committed, owned;
 }
-ChannelWait;
+* ChannelWait;
 
-static _Thread_local ChannelWait rendezvous_wait;
+static _Thread_local struct ChannelWait rendezvous_wait;
 
 typedef struct ChannelWaits{
-  ChannelWait * first, * last;
+  ChannelWait first, last;
 }
 ChannelWaits;
 
@@ -39,7 +39,7 @@ struct Channel{
   Scope lifetime;
   Symbol type;
   size_t capacity, count;
-  ChannelMessage * first, * last;
+  ChannelMessage first, last;
   ChannelWaits senders, receivers;
   pthread_cond_t changed;
   int initialized, closed;
@@ -66,11 +66,11 @@ static Code _new_empty(Code code);
 
 static Code _new_one(Code code);
 
-static void _append_wait(ChannelWaits * queue, ChannelWait * wait);
+static void _append_wait(ChannelWaits * queue, ChannelWait wait);
 
-static void _remove_wait(ChannelWaits * queue, ChannelWait * wait);
+static void _remove_wait(ChannelWaits * queue, ChannelWait wait);
 
-static ChannelWait * _live_wait(ChannelWaits * queue);
+static ChannelWait _live_wait(ChannelWaits * queue);
 
 static void _notify(Channel channel);
 
@@ -78,11 +78,11 @@ static int _rendezvous_send(Channel channel, Var value, int owned);
 
 static int _rendezvous_receive(Channel channel, Var * out, int * owned);
 
-static int _buffer_send(Channel channel, ChannelMessage * message);
+static int _buffer_send(Channel channel, ChannelMessage message);
 
-static int _buffer_receive(Channel channel, ChannelMessage * * out);
+static int _buffer_receive(Channel channel, ChannelMessage * out);
 
-static ChannelMessage * _message(Var value, int owned);
+static ChannelMessage _message(Var value, int owned);
 
 static int _container(Var value);
 
@@ -241,7 +241,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(4177);
+  _109 = int_var(4180);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -440,7 +440,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _305 = cons(_304, NULL);
   _306 = cons(_95, _305);
   _307 = List_var(_306);
-  _308 = int_var(4233);
+  _308 = int_var(4236);
   _309 = cons(_308, NULL);
   _310 = cons(_108, _309);
   _311 = List_var(_310);
@@ -495,12 +495,12 @@ Scope Scope_owner(void *);
 
 static void _drop(void * bytes){
   Channel channel = bytes;
-  ChannelMessage * message = channel -> first;
+  ChannelMessage message = channel -> first;
   channel -> first = channel -> last = NULL;
   channel -> count = 0;
   channel -> closed = 1;
   while(message){
-    ChannelMessage * next = message -> next;
+    ChannelMessage next = message -> next;
     if(message -> owned) Scope_destroy(Scope_owner(Var_pointer(message -> value)));
     free(message);
     message = next;
@@ -690,22 +690,22 @@ Scope Channel_scope(Channel channel){
   return channel ? channel -> lifetime : NULL;
 }
 
-static void _append_wait(ChannelWaits * queue, ChannelWait * wait){
-  wait -> previous = queue -> last;
-  if(queue -> last) queue -> last -> next = wait;
-  else queue -> first = wait;
-  queue -> last = wait;
+static void _append_wait(ChannelWaits * queue, ChannelWait wait){
+  wait -> previous =(* queue).last;
+  if((* queue).last)(* queue).last -> next = wait;
+  else(* queue).first = wait;
+  (* queue).last = wait;
 }
 
-static void _remove_wait(ChannelWaits * queue, ChannelWait * wait){
+static void _remove_wait(ChannelWaits * queue, ChannelWait wait){
   if(wait -> previous) wait -> previous -> next = wait -> next;
-  else queue -> first = wait -> next;
+  else(* queue).first = wait -> next;
   if(wait -> next) wait -> next -> previous = wait -> previous;
-  else queue -> last = wait -> previous;
+  else(* queue).last = wait -> previous;
 }
 
-static ChannelWait * _live_wait(ChannelWaits * queue){
-  for(ChannelWait * wait = queue -> first;  wait;  wait = wait -> next) if(! x2c_thread_wait_stopped(wait -> owner)) return wait;
+static ChannelWait _live_wait(ChannelWaits * queue){
+  for(ChannelWait wait =(* queue).first;  wait;  wait = wait -> next) if(! x2c_thread_wait_stopped(wait -> owner)) return wait;
   return NULL;
 }
 
@@ -716,56 +716,56 @@ static void _notify(Channel channel){
 static int _rendezvous_send(Channel channel, Var value, int owned){
   if(x2c_thread_stopping()) return - 1;
   if(channel -> closed) return 0;
-  ChannelWait * receiver = _live_wait(& channel -> receivers);
+  ChannelWait receiver = _live_wait(&(channel -> receivers));
   if(receiver){
     receiver -> value = value;
     receiver -> owned = owned;
     receiver -> committed = 1;
-    _remove_wait(& channel -> receivers, receiver);
+    _remove_wait(&(channel -> receivers), receiver);
     _notify(channel);
     return 1;
   }
-  ChannelWait * wait = & rendezvous_wait;
-  * wait =(ChannelWait){
+  ChannelWait wait = & rendezvous_wait;
+  * wait =(struct ChannelWait){
     .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
   }
   ;
-  _append_wait(& channel -> senders, wait);
+  _append_wait(&(channel -> senders), wait);
   while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
   if(wait -> committed) return 1;
-  _remove_wait(& channel -> senders, wait);
+  _remove_wait(&(channel -> senders), wait);
   return x2c_thread_stopping() ? - 1 : 0;
 }
 
 static int _rendezvous_receive(Channel channel, Var * out, int * owned){
   if(x2c_thread_stopping()) return - 1;
-  ChannelWait * sender = _live_wait(& channel -> senders);
+  ChannelWait sender = _live_wait(&(channel -> senders));
   if(sender && ! channel -> closed){
     (* out) = sender -> value;
     (* owned) = sender -> owned;
     sender -> committed = 1;
-    _remove_wait(& channel -> senders, sender);
+    _remove_wait(&(channel -> senders), sender);
     _notify(channel);
     return 1;
   }
   if(channel -> closed) return 0;
-  ChannelWait * wait = & rendezvous_wait;
-  * wait =(ChannelWait){
+  ChannelWait wait = & rendezvous_wait;
+  * wait =(struct ChannelWait){
     .owner = x2c_thread_wait_owner()
   }
   ;
-  _append_wait(& channel -> receivers, wait);
+  _append_wait(&(channel -> receivers), wait);
   while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
   if(wait -> committed){
     (* out) = wait -> value;
     (* owned) = wait -> owned;
     return 1;
   }
-  _remove_wait(& channel -> receivers, wait);
+  _remove_wait(&(channel -> receivers), wait);
   return x2c_thread_stopping() ? - 1 : 0;
 }
 
-static int _buffer_send(Channel channel, ChannelMessage * message){
+static int _buffer_send(Channel channel, ChannelMessage message){
   while(channel -> count == channel -> capacity && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
   if(x2c_thread_stopping()) return - 1;
   if(channel -> closed) return 0;
@@ -777,27 +777,27 @@ static int _buffer_send(Channel channel, ChannelMessage * message){
   return 1;
 }
 
-static int _buffer_receive(Channel channel, ChannelMessage * * out){
+static int _buffer_receive(Channel channel, ChannelMessage * out){
   while(! channel -> count && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
   if(x2c_thread_stopping()) return - 1;
   if(! channel -> count) return 0;
-  ChannelMessage * message = channel -> first;
+  ChannelMessage message = channel -> first;
   channel -> first = message -> next;
   if(! channel -> first) channel -> last = NULL;
   channel -> count --;
-  * out = message;
+  (* out) = message;
   _notify(channel);
   return 1;
 }
 
-static ChannelMessage * _message(Var value, int owned){
-  ChannelMessage * message = malloc(sizeof(ChannelMessage));
+static ChannelMessage _message(Var value, int owned){
+  ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if(! message){
     static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "_message",.line = 271,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
-  * message =(ChannelMessage){
+  * message =(struct ChannelMessage){
     .value = value, .owned = owned
   }
   ;
@@ -862,7 +862,7 @@ static void _send(Channel channel, Var value, int owned){
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
     __builtin_unreachable();
   }
-  ChannelMessage * message = NULL;
+  ChannelMessage message = NULL;
   int status = 0;
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
@@ -938,10 +938,10 @@ Var Channel_receive(Channel channel){
   Scope * destination = Scope_top();
   if(! * destination) * destination = Scope_new();
   Var value =((void) 0, Void);
-  ChannelMessage * message = NULL;
+  ChannelMessage message = NULL;
   int owned = 0;
   x2c_thread_wait_lock();
-  int status = channel -> capacity ? _buffer_receive(channel, & message) : _rendezvous_receive(channel, &(value), &(owned));
+  int status = channel -> capacity ? _buffer_receive(channel, &(message)) : _rendezvous_receive(channel, &(value), &(owned));
   if(message){
     value = message -> value;
     owned = message -> owned;
@@ -1023,6 +1023,6 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  if((*(ChannelMessage * *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2) &&(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3) != 1) free((*(ChannelMessage * *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2));
+  if((*(ChannelMessage *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2) &&(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3) != 1) free((*(ChannelMessage *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2));
 }
 

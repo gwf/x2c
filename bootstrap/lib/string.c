@@ -402,7 +402,7 @@ int String_getindex(String str, int index){
 }
 
 String String_getslice(String s, int start, int stop, int step){
-  if(! String_truth(s) || step == 0) return NULL;  int n = String_len(s), len = x2c_normalize_slice(& start, & stop, step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return x2c_string_from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];  return _finish(string, len);
+  if(! String_truth(s) || step == 0) return NULL;  int n = String_len(s), len = x2c_normalize_slice(&(start), &(stop), step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return x2c_string_from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];  return _finish(string, len);
 }
 
 String String_join(String sep, List strings);

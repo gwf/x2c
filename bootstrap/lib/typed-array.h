@@ -45,11 +45,11 @@ char ArrayChar_remove(ArrayChar _x2c_gensym_macro_array_22, int _x2c_gensym_macr
 
 ArrayChar ArrayChar_copy(ArrayChar _x2c_gensym_macro_array_23);
 
-ArrayChar ArrayChar_getslice(ArrayChar _x2c_gensym_macro_array_24, int _x2c_gensym_macro_start_5, int _x2c_gensym_macro_end_4, int _x2c_gensym_macro_step_1);
+ArrayChar ArrayChar_getslice(ArrayChar _x2c_gensym_macro_array_24, int _x2c_gensym_macro_start_6, int _x2c_gensym_macro_end_5, int _x2c_gensym_macro_step_1);
 
-ArrayChar ArrayChar_setslice(ArrayChar _x2c_gensym_macro_array_25, int _x2c_gensym_macro_start_6, int _x2c_gensym_macro_end_5, ArrayChar _x2c_gensym_macro_values_2);
+ArrayChar ArrayChar_setslice(ArrayChar _x2c_gensym_macro_array_25, int _x2c_gensym_macro_start_7, int _x2c_gensym_macro_end_6, ArrayChar _x2c_gensym_macro_values_2);
 
-ArrayChar ArrayChar_remslice(ArrayChar _x2c_gensym_macro_array_26, int _x2c_gensym_macro_start_7, int _x2c_gensym_macro_end_6);
+ArrayChar ArrayChar_remslice(ArrayChar _x2c_gensym_macro_array_26, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7);
 
 ArrayChar ArrayChar_splice(ArrayChar _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_6, int _x2c_gensym_macro_remove_count_1, ArrayChar _x2c_gensym_macro_values_3);
 
@@ -214,11 +214,11 @@ short ArrayShort_remove(ArrayShort _x2c_gensym_macro_array_71, int _x2c_gensym_m
 
 ArrayShort ArrayShort_copy(ArrayShort _x2c_gensym_macro_array_72);
 
-ArrayShort ArrayShort_getslice(ArrayShort _x2c_gensym_macro_array_73, int _x2c_gensym_macro_start_13, int _x2c_gensym_macro_end_11, int _x2c_gensym_macro_step_3);
+ArrayShort ArrayShort_getslice(ArrayShort _x2c_gensym_macro_array_73, int _x2c_gensym_macro_start_15, int _x2c_gensym_macro_end_13, int _x2c_gensym_macro_step_3);
 
-ArrayShort ArrayShort_setslice(ArrayShort _x2c_gensym_macro_array_74, int _x2c_gensym_macro_start_14, int _x2c_gensym_macro_end_12, ArrayShort _x2c_gensym_macro_values_7);
+ArrayShort ArrayShort_setslice(ArrayShort _x2c_gensym_macro_array_74, int _x2c_gensym_macro_start_16, int _x2c_gensym_macro_end_14, ArrayShort _x2c_gensym_macro_values_7);
 
-ArrayShort ArrayShort_remslice(ArrayShort _x2c_gensym_macro_array_75, int _x2c_gensym_macro_start_15, int _x2c_gensym_macro_end_13);
+ArrayShort ArrayShort_remslice(ArrayShort _x2c_gensym_macro_array_75, int _x2c_gensym_macro_start_17, int _x2c_gensym_macro_end_15);
 
 ArrayShort ArrayShort_splice(ArrayShort _x2c_gensym_macro_array_76, int _x2c_gensym_macro_index_19, int _x2c_gensym_macro_remove_count_3, ArrayShort _x2c_gensym_macro_values_8);
 
@@ -375,11 +375,11 @@ int ArrayInt_remove(ArrayInt _x2c_gensym_macro_array_120, int _x2c_gensym_macro_
 
 ArrayInt ArrayInt_copy(ArrayInt _x2c_gensym_macro_array_121);
 
-ArrayInt ArrayInt_getslice(ArrayInt _x2c_gensym_macro_array_122, int _x2c_gensym_macro_start_21, int _x2c_gensym_macro_end_18, int _x2c_gensym_macro_step_5);
+ArrayInt ArrayInt_getslice(ArrayInt _x2c_gensym_macro_array_122, int _x2c_gensym_macro_start_24, int _x2c_gensym_macro_end_21, int _x2c_gensym_macro_step_5);
 
-ArrayInt ArrayInt_setslice(ArrayInt _x2c_gensym_macro_array_123, int _x2c_gensym_macro_start_22, int _x2c_gensym_macro_end_19, ArrayInt _x2c_gensym_macro_values_12);
+ArrayInt ArrayInt_setslice(ArrayInt _x2c_gensym_macro_array_123, int _x2c_gensym_macro_start_25, int _x2c_gensym_macro_end_22, ArrayInt _x2c_gensym_macro_values_12);
 
-ArrayInt ArrayInt_remslice(ArrayInt _x2c_gensym_macro_array_124, int _x2c_gensym_macro_start_23, int _x2c_gensym_macro_end_20);
+ArrayInt ArrayInt_remslice(ArrayInt _x2c_gensym_macro_array_124, int _x2c_gensym_macro_start_26, int _x2c_gensym_macro_end_23);
 
 ArrayInt ArrayInt_splice(ArrayInt _x2c_gensym_macro_array_125, int _x2c_gensym_macro_index_32, int _x2c_gensym_macro_remove_count_5, ArrayInt _x2c_gensym_macro_values_13);
 
@@ -536,11 +536,11 @@ long ArrayLong_remove(ArrayLong _x2c_gensym_macro_array_169, int _x2c_gensym_mac
 
 ArrayLong ArrayLong_copy(ArrayLong _x2c_gensym_macro_array_170);
 
-ArrayLong ArrayLong_getslice(ArrayLong _x2c_gensym_macro_array_171, int _x2c_gensym_macro_start_29, int _x2c_gensym_macro_end_25, int _x2c_gensym_macro_step_7);
+ArrayLong ArrayLong_getslice(ArrayLong _x2c_gensym_macro_array_171, int _x2c_gensym_macro_start_33, int _x2c_gensym_macro_end_29, int _x2c_gensym_macro_step_7);
 
-ArrayLong ArrayLong_setslice(ArrayLong _x2c_gensym_macro_array_172, int _x2c_gensym_macro_start_30, int _x2c_gensym_macro_end_26, ArrayLong _x2c_gensym_macro_values_17);
+ArrayLong ArrayLong_setslice(ArrayLong _x2c_gensym_macro_array_172, int _x2c_gensym_macro_start_34, int _x2c_gensym_macro_end_30, ArrayLong _x2c_gensym_macro_values_17);
 
-ArrayLong ArrayLong_remslice(ArrayLong _x2c_gensym_macro_array_173, int _x2c_gensym_macro_start_31, int _x2c_gensym_macro_end_27);
+ArrayLong ArrayLong_remslice(ArrayLong _x2c_gensym_macro_array_173, int _x2c_gensym_macro_start_35, int _x2c_gensym_macro_end_31);
 
 ArrayLong ArrayLong_splice(ArrayLong _x2c_gensym_macro_array_174, int _x2c_gensym_macro_index_45, int _x2c_gensym_macro_remove_count_7, ArrayLong _x2c_gensym_macro_values_18);
 
@@ -697,11 +697,11 @@ float ArrayFloat_remove(ArrayFloat _x2c_gensym_macro_array_218, int _x2c_gensym_
 
 ArrayFloat ArrayFloat_copy(ArrayFloat _x2c_gensym_macro_array_219);
 
-ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_gensym_macro_array_220, int _x2c_gensym_macro_start_37, int _x2c_gensym_macro_end_32, int _x2c_gensym_macro_step_9);
+ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_gensym_macro_array_220, int _x2c_gensym_macro_start_42, int _x2c_gensym_macro_end_37, int _x2c_gensym_macro_step_9);
 
-ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_gensym_macro_array_221, int _x2c_gensym_macro_start_38, int _x2c_gensym_macro_end_33, ArrayFloat _x2c_gensym_macro_values_22);
+ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_gensym_macro_array_221, int _x2c_gensym_macro_start_43, int _x2c_gensym_macro_end_38, ArrayFloat _x2c_gensym_macro_values_22);
 
-ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_gensym_macro_array_222, int _x2c_gensym_macro_start_39, int _x2c_gensym_macro_end_34);
+ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_gensym_macro_array_222, int _x2c_gensym_macro_start_44, int _x2c_gensym_macro_end_39);
 
 ArrayFloat ArrayFloat_splice(ArrayFloat _x2c_gensym_macro_array_223, int _x2c_gensym_macro_index_58, int _x2c_gensym_macro_remove_count_9, ArrayFloat _x2c_gensym_macro_values_23);
 
@@ -817,11 +817,11 @@ double ArrayDbl_remove(ArrayDbl _x2c_gensym_macro_array_267, int _x2c_gensym_mac
 
 ArrayDbl ArrayDbl_copy(ArrayDbl _x2c_gensym_macro_array_268);
 
-ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_gensym_macro_array_269, int _x2c_gensym_macro_start_45, int _x2c_gensym_macro_end_39, int _x2c_gensym_macro_step_11);
+ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_gensym_macro_array_269, int _x2c_gensym_macro_start_51, int _x2c_gensym_macro_end_45, int _x2c_gensym_macro_step_11);
 
-ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_gensym_macro_array_270, int _x2c_gensym_macro_start_46, int _x2c_gensym_macro_end_40, ArrayDbl _x2c_gensym_macro_values_27);
+ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_gensym_macro_array_270, int _x2c_gensym_macro_start_52, int _x2c_gensym_macro_end_46, ArrayDbl _x2c_gensym_macro_values_27);
 
-ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_gensym_macro_array_271, int _x2c_gensym_macro_start_47, int _x2c_gensym_macro_end_41);
+ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_gensym_macro_array_271, int _x2c_gensym_macro_start_53, int _x2c_gensym_macro_end_47);
 
 ArrayDbl ArrayDbl_splice(ArrayDbl _x2c_gensym_macro_array_272, int _x2c_gensym_macro_index_71, int _x2c_gensym_macro_remove_count_11, ArrayDbl _x2c_gensym_macro_values_28);
 
@@ -937,11 +937,11 @@ String ArrayString_remove(ArrayString _x2c_gensym_macro_array_316, int _x2c_gens
 
 ArrayString ArrayString_copy(ArrayString _x2c_gensym_macro_array_317);
 
-ArrayString ArrayString_getslice(ArrayString _x2c_gensym_macro_array_318, int _x2c_gensym_macro_start_53, int _x2c_gensym_macro_end_46, int _x2c_gensym_macro_step_13);
+ArrayString ArrayString_getslice(ArrayString _x2c_gensym_macro_array_318, int _x2c_gensym_macro_start_60, int _x2c_gensym_macro_end_53, int _x2c_gensym_macro_step_13);
 
-ArrayString ArrayString_setslice(ArrayString _x2c_gensym_macro_array_319, int _x2c_gensym_macro_start_54, int _x2c_gensym_macro_end_47, ArrayString _x2c_gensym_macro_values_32);
+ArrayString ArrayString_setslice(ArrayString _x2c_gensym_macro_array_319, int _x2c_gensym_macro_start_61, int _x2c_gensym_macro_end_54, ArrayString _x2c_gensym_macro_values_32);
 
-ArrayString ArrayString_remslice(ArrayString _x2c_gensym_macro_array_320, int _x2c_gensym_macro_start_55, int _x2c_gensym_macro_end_48);
+ArrayString ArrayString_remslice(ArrayString _x2c_gensym_macro_array_320, int _x2c_gensym_macro_start_62, int _x2c_gensym_macro_end_55);
 
 ArrayString ArrayString_splice(ArrayString _x2c_gensym_macro_array_321, int _x2c_gensym_macro_index_84, int _x2c_gensym_macro_remove_count_13, ArrayString _x2c_gensym_macro_values_33);
 

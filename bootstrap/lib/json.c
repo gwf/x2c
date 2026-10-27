@@ -594,7 +594,7 @@ void scan_next_line_col(char *, int, int *, int *);
 
 _Noreturn static void _fail(Reader * r, String why){
   int line = 1, column = 1, offset =(* r).at;
-  scan_next_line_col((char *)(* r).text, offset, & line, & column);
+  scan_next_line_col((char *)(* r).text, offset, &(line), &(column));
   if(String_truth((* r).path)){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var((* r).path);

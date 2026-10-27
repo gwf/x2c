@@ -128,16 +128,16 @@ typedef struct LispEnv{
   const Var * values;
   struct LispEnv * parent;
 }
-LispEnv;
+* LispEnv;
 
 static inline Var Lambda_var(Lambda value);
 
 static inline Lambda Var_lambda(Var value);
 
-static Var f8_evaluate____eval(Lisp lisp, Var expr, LispEnv * env);
+static Var f8_evaluate____eval(Lisp lisp, Var expr, LispEnv env);
 
 #define LISP_NATIVE_ARG_MAX  8
-static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv * env);
+static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv env);
 
 static Symbol f8_evaluate____special_id(Lisp lisp, Func fn);
 
@@ -145,41 +145,41 @@ static Var _apply_values(Lisp lisp, Var callable, List values);
 
 static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values);
 
-static Var f8_evaluate____apply_special(Lisp lisp, Symbol id, List args, LispEnv * env);
+static Var f8_evaluate____apply_special(Lisp lisp, Symbol id, List args, LispEnv env);
 
 static Var f8_evaluate____special_quote(List args);
 
-static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____special_cond(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_cond(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____cond_select(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____cond_select(Lisp lisp, List args, LispEnv env);
 
 static List f8_evaluate____cond_clause(Var clause);
 
-static Var f8_evaluate____special_quasiquote(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_quasiquote(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____special_eval(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_eval(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____special_bind(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_bind(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____special_apply(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_apply(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____special_import(Lisp lisp, List args, LispEnv * env);
+static Var f8_evaluate____special_import(Lisp lisp, List args, LispEnv env);
 
-static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv * env, int depth);
+static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth);
 
-static List f8_evaluate____qq_elements(Lisp lisp, List items, LispEnv * env, int depth);
+static List f8_evaluate____qq_elements(Lisp lisp, List items, LispEnv env, int depth);
 
 static int f8_evaluate____is_splice(Var expr);
 
-static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv * env);
+static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv env);
 
-static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv * env, int macro);
+static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv env, int macro);
 
 typedef struct f8_evaluate___FreeNames{
   Lisp lisp;
-  LispEnv * env;
+  LispEnv env;
   Map captures;
 }
 f8_evaluate___FreeNames;
@@ -200,7 +200,7 @@ static List f8_evaluate____with_params(List bound, List rest);
 
 static int f8_evaluate____param_has(List params, Var name);
 
-static Var f8_evaluate____apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv * env);
+static Var f8_evaluate____apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv env);
 
 static Var f8_evaluate____call_lambda(Lisp lisp, Lambda lambda, List args);
 
@@ -212,19 +212,19 @@ static List f8_evaluate____value_list(const Var * values, int count);
 
 static void f8_evaluate____bind_params(Scope * frame, Lambda lambda, List args, Map bindings);
 
-static void f8_evaluate____bind_values(LispEnv * local, Lambda lambda, const Var * values, int count);
+static void f8_evaluate____bind_values(LispEnv local, Lambda lambda, const Var * values, int count);
 
-static Var f8_evaluate____run_source(Lisp lisp, Var body, LispEnv * env, Scope * frame);
+static Var f8_evaluate____run_source(Lisp lisp, Var body, LispEnv env, Scope * frame);
 
-static Var f8_evaluate____eval_tail(Lisp lisp, Var expr, LispEnv * env);
+static Var f8_evaluate____eval_tail(Lisp lisp, Var expr, LispEnv env);
 
-static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv * env);
+static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv env);
 
-static int f8_evaluate____lookup(Lisp lisp, LispEnv * env, Var name, Var * out);
+static int f8_evaluate____lookup(Lisp lisp, LispEnv env, Var name, Var * out);
 
-static int f8_evaluate____env_lookup(LispEnv * env, Var name, Var * out);
+static int f8_evaluate____env_lookup(LispEnv env, Var name, Var * out);
 
-static int f8_evaluate____local_lookup(LispEnv * env, Var name, Var * out);
+static int f8_evaluate____local_lookup(LispEnv env, Var name, Var * out);
 
 static void f8_evaluate____spend_call(Lisp lisp);
 
@@ -814,7 +814,7 @@ static List List_cdr(List);
 
 
 
-static Var f8_evaluate____eval(Lisp lisp, Var expr, LispEnv * env){
+static Var f8_evaluate____eval(Lisp lisp, Var expr, LispEnv env){
   if(Var_is_void(expr)){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____eval",.line = 39,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
@@ -857,7 +857,7 @@ void x2c_exception_leave(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 
-static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv * env){
+static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv env){
   if(Var_is_row(callable, 9, 7, 3)) return f8_evaluate____apply_lambda(lisp, Var_lambda(callable), raw, env);
   if(! Var_is_row(callable, 9, 7, 1)){
     static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____apply",.line = 61,.runtime = 1};
@@ -1001,7 +1001,7 @@ static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
 
 }
 
-static Var f8_evaluate____apply_special(Lisp lisp, Symbol id, List args, LispEnv * env){
+static Var f8_evaluate____apply_special(Lisp lisp, Symbol id, List args, LispEnv env){
   switch(id){
     case 37059850 : return f8_evaluate____special_quote(args);
     case 8524 : return f8_evaluate____special_def(lisp, args, env);
@@ -1029,7 +1029,7 @@ int String_startswith(String, String);
 
 String Var_str(Var);
 
-static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env){
   Var name, form;
   List _x2c_gensym_destructure_0 = args;
   name = List_getindex(_x2c_gensym_destructure_0, 0);
@@ -1081,7 +1081,7 @@ static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv * env){
   return value;
 }
 
-static Var f8_evaluate____special_cond(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_cond(Lisp lisp, List args, LispEnv env){
   Var form = f8_evaluate____cond_select(lisp, args, env);
   if(Var_is_void(form)) return List_var(NULL);
   return f8_evaluate____eval(lisp, form, env);
@@ -1093,7 +1093,7 @@ int Var_truth(Var);
 
 Var lisp_truth(Var value);
 
-static Var f8_evaluate____cond_select(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____cond_select(Lisp lisp, List args, LispEnv env){
   if(! List_truth(args)){
     static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_select",.line = 168,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
@@ -1149,19 +1149,19 @@ static List f8_evaluate____cond_clause(Var clause){
   return pair;
 }
 
-static Var f8_evaluate____special_quasiquote(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_quasiquote(Lisp lisp, List args, LispEnv env){
   f8_evaluate____arity(args, 1, _3);
   return f8_evaluate____qq(lisp, List_car(args), env, 0);
 }
 
-static Var f8_evaluate____special_eval(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_eval(Lisp lisp, List args, LispEnv env){
   f8_evaluate____arity(args, 1, _4);
   return f8_evaluate____eval(lisp, f8_evaluate____eval(lisp, List_car(args), env), NULL);
 }
 
 String Var_as_string(Var);
 
-static Var f8_evaluate____special_bind(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_bind(Lisp lisp, List args, LispEnv env){
   f8_evaluate____arity(args, 2, _5);
   Var name_form, signature_form;
   List _x2c_gensym_destructure_2 = args;
@@ -1190,7 +1190,7 @@ static Var f8_evaluate____special_bind(Lisp lisp, List args, LispEnv * env){
   return Func_var(fn);
 }
 
-static Var f8_evaluate____special_apply(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_apply(Lisp lisp, List args, LispEnv env){
   f8_evaluate____arity(args, 2, _0);
   Var callable_form, values_form;
   List _x2c_gensym_destructure_3 = args;
@@ -1209,7 +1209,7 @@ Var Lisp_eval_file(Lisp l, File source);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-static Var f8_evaluate____special_import(Lisp lisp, List args, LispEnv * env){
+static Var f8_evaluate____special_import(Lisp lisp, List args, LispEnv env){
   f8_evaluate____arity(args, 1, _6);
   Var path = f8_evaluate____eval(lisp, List_car(args), env);
   f8_evaluate____string_argument(path, _6);
@@ -1244,7 +1244,7 @@ static Var f8_evaluate____special_import(Lisp lisp, List args, LispEnv * env){
 
 List Var_cons(Var, List);
 
-static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv * env, int depth){
+static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth){
   if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return expr;
   List form = Var_list_payload(expr);
   Var head = List_car(form);
@@ -1280,7 +1280,7 @@ Var Array_push(Array, Var);
 
 List Array_list(Array);
 
-static List f8_evaluate____qq_elements(Lisp lisp, List items, LispEnv * env, int depth){
+static List f8_evaluate____qq_elements(Lisp lisp, List items, LispEnv env, int depth){
   Array values = Array_new();
   const Array _x2c_gensym_macro_acquired_1 = values;
   {
@@ -1341,7 +1341,7 @@ static int f8_evaluate____is_splice(Var expr){
   return Var_is_row(expr, 9, 7, 4) && ! Var_is_nil(expr) && x2c_var_equal(Var_car(expr), lsym_splicing);
 }
 
-static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv * env){
+static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv env){
   List form = Var_list_payload(expr);
   if(List_len(form) != 2){
     Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
@@ -1368,7 +1368,7 @@ static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv * env){
 
 void Scope_push(Scope *);
 
-static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
+static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv env, int macro){
   if(List_len(args) != 2 || ! Var_is_row(List_car(args), 9, 7, 4)){
     Symbol operation = macro ? 27335838 : 808259842;
     {
@@ -1535,7 +1535,7 @@ static int f8_evaluate____param_has(List params, Var name){
   return 0;
 }
 
-static Var f8_evaluate____apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv * env){
+static Var f8_evaluate____apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv env){
   if(lambda -> macro) return f8_evaluate____eval(l, f8_evaluate____call_lambda(l, lambda, raw), env);
   int count = List_len(raw), index = 0;
   Var * values = Scope_malloc_in(& l -> scope, (count + 1) * sizeof(Var));
@@ -1694,11 +1694,11 @@ static Var f8_evaluate____run_frame(Lisp lisp, Lambda lambda, const Var * values
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_8);
     {
-      LispEnv captured ={
+      struct LispEnv captured ={
         .bindings = lambda -> captures, .parent = NULL
       }
       ;
-      LispEnv local ={
+      struct LispEnv local ={
         .parent = & captured
       }
       ;
@@ -1810,7 +1810,7 @@ static void f8_evaluate____bind_params(Scope * frame, Lambda lambda, List args, 
 
 }
 
-static void f8_evaluate____bind_values(LispEnv * local, Lambda lambda, const Var * values, int count){
+static void f8_evaluate____bind_values(LispEnv local, Lambda lambda, const Var * values, int count){
   if(count != List_len(lambda -> params)){
     Var _x2c_gensym_literal_part_21 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
@@ -1824,7 +1824,7 @@ static void f8_evaluate____bind_values(LispEnv * local, Lambda lambda, const Var
   local -> values = values;
 }
 
-static Var f8_evaluate____run_source(Lisp lisp, Var body, LispEnv * env, Scope * frame){
+static Var f8_evaluate____run_source(Lisp lisp, Var body, LispEnv env, Scope * frame){
   Scope * caller_owner = lisp -> automatic_owner;
   Scope * caller_result_owner = lisp -> result_owner;
   {
@@ -1858,7 +1858,7 @@ static Var f8_evaluate____run_source(Lisp lisp, Var body, LispEnv * env, Scope *
 
 }
 
-static Var f8_evaluate____eval_tail(Lisp lisp, Var expr, LispEnv * env){
+static Var f8_evaluate____eval_tail(Lisp lisp, Var expr, LispEnv env){
   for(; ; ){
     if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return f8_evaluate____eval(lisp, expr, env);
     List form = Var_list_payload(expr);
@@ -1878,7 +1878,7 @@ static Var f8_evaluate____eval_tail(Lisp lisp, Var expr, LispEnv * env){
 
 }
 
-static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv * env){
+static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv env){
   int count = List_len(raw), index = 0;
   Var * values = Scope_malloc_in(& lisp -> scope, (count + 1) * sizeof(Var));
   int pending = 0;
@@ -1925,16 +1925,16 @@ static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv 
 
 }
 
-static int f8_evaluate____lookup(Lisp lisp, LispEnv * env, Var name, Var * out){
+static int f8_evaluate____lookup(Lisp lisp, LispEnv env, Var name, Var * out){
   return f8_evaluate____env_lookup(env, name, &((* out))) || _global_lookup(lisp, name, &((* out))) || _reserved_lookup(lisp, name, &((* out)));
 }
 
-static int f8_evaluate____env_lookup(LispEnv * env, Var name, Var * out){
-  for(LispEnv * cur = env;  cur;  cur = cur -> parent) if(f8_evaluate____local_lookup(cur, name, &((* out)))) return 1;
+static int f8_evaluate____env_lookup(LispEnv env, Var name, Var * out){
+  for(LispEnv cur = env;  cur;  cur = cur -> parent) if(f8_evaluate____local_lookup(cur, name, &((* out)))) return 1;
   return 0;
 }
 
-static int f8_evaluate____local_lookup(LispEnv * env, Var name, Var * out){
+static int f8_evaluate____local_lookup(LispEnv env, Var name, Var * out){
   int found = 0, at = 0;
   for(List p = env -> params;  List_truth(p);  p = List_cdr(p), at ++) if(List_car(p).u64 == name.u64){
     (* out) = env -> values[at];

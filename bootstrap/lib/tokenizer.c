@@ -793,7 +793,7 @@ int Tokenizer_tokenize(Tokenizer t, int len, Symbol type){
   }
   ;
   t -> tokens = Bytes_append(t -> tokens, & tok, 1);
-  scan_next_line_col(t -> text + t -> pos, len, & t -> line, & t -> col);
+  scan_next_line_col(t -> text + t -> pos, len, &(t -> line), &(t -> col));
   t -> pos += len;
   return 1;
 }

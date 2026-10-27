@@ -63,11 +63,11 @@ static ArrayChar ArrayChar_slice_elements(ArrayChar _x2c_gensym_macro_array_4, i
 
 static inline int _x2c_gensym_macro__normalize_bound_0(ArrayChar _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_2);
 
-static inline void _x2c_gensym_macro__normalize_span_0(ArrayChar _x2c_gensym_macro_array_6, int * _x2c_gensym_macro_begin_0, int * _x2c_gensym_macro_finish_0);
+static inline void _x2c_gensym_macro__normalize_span_0(ArrayChar _x2c_gensym_macro_array_6, int * _x2c_gensym_macro_start_2, int * _x2c_gensym_macro_end_1);
 
-static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int _x2c_gensym_macro_start_2, int _x2c_gensym_macro_end_1, ArrayChar _x2c_gensym_macro_values_0);
+static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int _x2c_gensym_macro_start_3, int _x2c_gensym_macro_end_2, ArrayChar _x2c_gensym_macro_values_0);
 
-static ArrayChar ArrayChar_cut_elements(ArrayChar _x2c_gensym_macro_array_8, int _x2c_gensym_macro_start_3, int _x2c_gensym_macro_end_2);
+static ArrayChar ArrayChar_cut_elements(ArrayChar _x2c_gensym_macro_array_8, int _x2c_gensym_macro_start_4, int _x2c_gensym_macro_end_3);
 
 static ArrayChar ArrayChar_splice_elements(ArrayChar _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_3, int _x2c_gensym_macro_remove_count_0, ArrayChar _x2c_gensym_macro_values_1);
 
@@ -216,15 +216,15 @@ static int ArrayShort_remove_element(ArrayShort _x2c_gensym_macro_array_51, int 
 
 static ArrayShort ArrayShort_copy_elements(ArrayShort _x2c_gensym_macro_array_52);
 
-static ArrayShort ArrayShort_slice_elements(ArrayShort _x2c_gensym_macro_array_53, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7, int _x2c_gensym_macro_step_2);
+static ArrayShort ArrayShort_slice_elements(ArrayShort _x2c_gensym_macro_array_53, int _x2c_gensym_macro_start_9, int _x2c_gensym_macro_end_8, int _x2c_gensym_macro_step_2);
 
 static inline int _x2c_gensym_macro__normalize_bound_1(ArrayShort _x2c_gensym_macro_array_54, int _x2c_gensym_macro_index_15);
 
-static inline void _x2c_gensym_macro__normalize_span_1(ArrayShort _x2c_gensym_macro_array_55, int * _x2c_gensym_macro_begin_3, int * _x2c_gensym_macro_finish_3);
+static inline void _x2c_gensym_macro__normalize_span_1(ArrayShort _x2c_gensym_macro_array_55, int * _x2c_gensym_macro_start_11, int * _x2c_gensym_macro_end_9);
 
-static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, int _x2c_gensym_macro_start_10, int _x2c_gensym_macro_end_8, ArrayShort _x2c_gensym_macro_values_5);
+static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, int _x2c_gensym_macro_start_12, int _x2c_gensym_macro_end_10, ArrayShort _x2c_gensym_macro_values_5);
 
-static ArrayShort ArrayShort_cut_elements(ArrayShort _x2c_gensym_macro_array_57, int _x2c_gensym_macro_start_11, int _x2c_gensym_macro_end_9);
+static ArrayShort ArrayShort_cut_elements(ArrayShort _x2c_gensym_macro_array_57, int _x2c_gensym_macro_start_13, int _x2c_gensym_macro_end_11);
 
 static ArrayShort ArrayShort_splice_elements(ArrayShort _x2c_gensym_macro_array_58, int _x2c_gensym_macro_index_16, int _x2c_gensym_macro_remove_count_2, ArrayShort _x2c_gensym_macro_values_6);
 
@@ -355,15 +355,15 @@ static int ArrayInt_remove_element(ArrayInt _x2c_gensym_macro_array_100, int _x2
 
 static ArrayInt ArrayInt_copy_elements(ArrayInt _x2c_gensym_macro_array_101);
 
-static ArrayInt ArrayInt_slice_elements(ArrayInt _x2c_gensym_macro_array_102, int _x2c_gensym_macro_start_16, int _x2c_gensym_macro_end_14, int _x2c_gensym_macro_step_4);
+static ArrayInt ArrayInt_slice_elements(ArrayInt _x2c_gensym_macro_array_102, int _x2c_gensym_macro_start_18, int _x2c_gensym_macro_end_16, int _x2c_gensym_macro_step_4);
 
 static inline int _x2c_gensym_macro__normalize_bound_2(ArrayInt _x2c_gensym_macro_array_103, int _x2c_gensym_macro_index_28);
 
-static inline void _x2c_gensym_macro__normalize_span_2(ArrayInt _x2c_gensym_macro_array_104, int * _x2c_gensym_macro_begin_6, int * _x2c_gensym_macro_finish_6);
+static inline void _x2c_gensym_macro__normalize_span_2(ArrayInt _x2c_gensym_macro_array_104, int * _x2c_gensym_macro_start_20, int * _x2c_gensym_macro_end_17);
 
-static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int _x2c_gensym_macro_start_18, int _x2c_gensym_macro_end_15, ArrayInt _x2c_gensym_macro_values_10);
+static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int _x2c_gensym_macro_start_21, int _x2c_gensym_macro_end_18, ArrayInt _x2c_gensym_macro_values_10);
 
-static ArrayInt ArrayInt_cut_elements(ArrayInt _x2c_gensym_macro_array_106, int _x2c_gensym_macro_start_19, int _x2c_gensym_macro_end_16);
+static ArrayInt ArrayInt_cut_elements(ArrayInt _x2c_gensym_macro_array_106, int _x2c_gensym_macro_start_22, int _x2c_gensym_macro_end_19);
 
 static ArrayInt ArrayInt_splice_elements(ArrayInt _x2c_gensym_macro_array_107, int _x2c_gensym_macro_index_29, int _x2c_gensym_macro_remove_count_4, ArrayInt _x2c_gensym_macro_values_11);
 
@@ -494,15 +494,15 @@ static int ArrayLong_remove_element(ArrayLong _x2c_gensym_macro_array_149, int _
 
 static ArrayLong ArrayLong_copy_elements(ArrayLong _x2c_gensym_macro_array_150);
 
-static ArrayLong ArrayLong_slice_elements(ArrayLong _x2c_gensym_macro_array_151, int _x2c_gensym_macro_start_24, int _x2c_gensym_macro_end_21, int _x2c_gensym_macro_step_6);
+static ArrayLong ArrayLong_slice_elements(ArrayLong _x2c_gensym_macro_array_151, int _x2c_gensym_macro_start_27, int _x2c_gensym_macro_end_24, int _x2c_gensym_macro_step_6);
 
 static inline int _x2c_gensym_macro__normalize_bound_3(ArrayLong _x2c_gensym_macro_array_152, int _x2c_gensym_macro_index_41);
 
-static inline void _x2c_gensym_macro__normalize_span_3(ArrayLong _x2c_gensym_macro_array_153, int * _x2c_gensym_macro_begin_9, int * _x2c_gensym_macro_finish_9);
+static inline void _x2c_gensym_macro__normalize_span_3(ArrayLong _x2c_gensym_macro_array_153, int * _x2c_gensym_macro_start_29, int * _x2c_gensym_macro_end_25);
 
-static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, int _x2c_gensym_macro_start_26, int _x2c_gensym_macro_end_22, ArrayLong _x2c_gensym_macro_values_15);
+static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, int _x2c_gensym_macro_start_30, int _x2c_gensym_macro_end_26, ArrayLong _x2c_gensym_macro_values_15);
 
-static ArrayLong ArrayLong_cut_elements(ArrayLong _x2c_gensym_macro_array_155, int _x2c_gensym_macro_start_27, int _x2c_gensym_macro_end_23);
+static ArrayLong ArrayLong_cut_elements(ArrayLong _x2c_gensym_macro_array_155, int _x2c_gensym_macro_start_31, int _x2c_gensym_macro_end_27);
 
 static ArrayLong ArrayLong_splice_elements(ArrayLong _x2c_gensym_macro_array_156, int _x2c_gensym_macro_index_42, int _x2c_gensym_macro_remove_count_6, ArrayLong _x2c_gensym_macro_values_16);
 
@@ -633,15 +633,15 @@ static int ArrayFloat_remove_element(ArrayFloat _x2c_gensym_macro_array_198, int
 
 static ArrayFloat ArrayFloat_copy_elements(ArrayFloat _x2c_gensym_macro_array_199);
 
-static ArrayFloat ArrayFloat_slice_elements(ArrayFloat _x2c_gensym_macro_array_200, int _x2c_gensym_macro_start_32, int _x2c_gensym_macro_end_28, int _x2c_gensym_macro_step_8);
+static ArrayFloat ArrayFloat_slice_elements(ArrayFloat _x2c_gensym_macro_array_200, int _x2c_gensym_macro_start_36, int _x2c_gensym_macro_end_32, int _x2c_gensym_macro_step_8);
 
 static inline int _x2c_gensym_macro__normalize_bound_4(ArrayFloat _x2c_gensym_macro_array_201, int _x2c_gensym_macro_index_54);
 
-static inline void _x2c_gensym_macro__normalize_span_4(ArrayFloat _x2c_gensym_macro_array_202, int * _x2c_gensym_macro_begin_12, int * _x2c_gensym_macro_finish_12);
+static inline void _x2c_gensym_macro__normalize_span_4(ArrayFloat _x2c_gensym_macro_array_202, int * _x2c_gensym_macro_start_38, int * _x2c_gensym_macro_end_33);
 
-static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, int _x2c_gensym_macro_start_34, int _x2c_gensym_macro_end_29, ArrayFloat _x2c_gensym_macro_values_20);
+static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, int _x2c_gensym_macro_start_39, int _x2c_gensym_macro_end_34, ArrayFloat _x2c_gensym_macro_values_20);
 
-static ArrayFloat ArrayFloat_cut_elements(ArrayFloat _x2c_gensym_macro_array_204, int _x2c_gensym_macro_start_35, int _x2c_gensym_macro_end_30);
+static ArrayFloat ArrayFloat_cut_elements(ArrayFloat _x2c_gensym_macro_array_204, int _x2c_gensym_macro_start_40, int _x2c_gensym_macro_end_35);
 
 static ArrayFloat ArrayFloat_splice_elements(ArrayFloat _x2c_gensym_macro_array_205, int _x2c_gensym_macro_index_55, int _x2c_gensym_macro_remove_count_8, ArrayFloat _x2c_gensym_macro_values_21);
 
@@ -731,15 +731,15 @@ static int ArrayDbl_remove_element(ArrayDbl _x2c_gensym_macro_array_247, int _x2
 
 static ArrayDbl ArrayDbl_copy_elements(ArrayDbl _x2c_gensym_macro_array_248);
 
-static ArrayDbl ArrayDbl_slice_elements(ArrayDbl _x2c_gensym_macro_array_249, int _x2c_gensym_macro_start_40, int _x2c_gensym_macro_end_35, int _x2c_gensym_macro_step_10);
+static ArrayDbl ArrayDbl_slice_elements(ArrayDbl _x2c_gensym_macro_array_249, int _x2c_gensym_macro_start_45, int _x2c_gensym_macro_end_40, int _x2c_gensym_macro_step_10);
 
 static inline int _x2c_gensym_macro__normalize_bound_5(ArrayDbl _x2c_gensym_macro_array_250, int _x2c_gensym_macro_index_67);
 
-static inline void _x2c_gensym_macro__normalize_span_5(ArrayDbl _x2c_gensym_macro_array_251, int * _x2c_gensym_macro_begin_15, int * _x2c_gensym_macro_finish_15);
+static inline void _x2c_gensym_macro__normalize_span_5(ArrayDbl _x2c_gensym_macro_array_251, int * _x2c_gensym_macro_start_47, int * _x2c_gensym_macro_end_41);
 
-static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int _x2c_gensym_macro_start_42, int _x2c_gensym_macro_end_36, ArrayDbl _x2c_gensym_macro_values_25);
+static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int _x2c_gensym_macro_start_48, int _x2c_gensym_macro_end_42, ArrayDbl _x2c_gensym_macro_values_25);
 
-static ArrayDbl ArrayDbl_cut_elements(ArrayDbl _x2c_gensym_macro_array_253, int _x2c_gensym_macro_start_43, int _x2c_gensym_macro_end_37);
+static ArrayDbl ArrayDbl_cut_elements(ArrayDbl _x2c_gensym_macro_array_253, int _x2c_gensym_macro_start_49, int _x2c_gensym_macro_end_43);
 
 static ArrayDbl ArrayDbl_splice_elements(ArrayDbl _x2c_gensym_macro_array_254, int _x2c_gensym_macro_index_68, int _x2c_gensym_macro_remove_count_10, ArrayDbl _x2c_gensym_macro_values_26);
 
@@ -829,15 +829,15 @@ static int ArrayString_remove_element(ArrayString _x2c_gensym_macro_array_296, i
 
 static ArrayString ArrayString_copy_elements(ArrayString _x2c_gensym_macro_array_297);
 
-static ArrayString ArrayString_slice_elements(ArrayString _x2c_gensym_macro_array_298, int _x2c_gensym_macro_start_48, int _x2c_gensym_macro_end_42, int _x2c_gensym_macro_step_12);
+static ArrayString ArrayString_slice_elements(ArrayString _x2c_gensym_macro_array_298, int _x2c_gensym_macro_start_54, int _x2c_gensym_macro_end_48, int _x2c_gensym_macro_step_12);
 
 static inline int _x2c_gensym_macro__normalize_bound_6(ArrayString _x2c_gensym_macro_array_299, int _x2c_gensym_macro_index_80);
 
-static inline void _x2c_gensym_macro__normalize_span_6(ArrayString _x2c_gensym_macro_array_300, int * _x2c_gensym_macro_begin_18, int * _x2c_gensym_macro_finish_18);
+static inline void _x2c_gensym_macro__normalize_span_6(ArrayString _x2c_gensym_macro_array_300, int * _x2c_gensym_macro_start_56, int * _x2c_gensym_macro_end_49);
 
-static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301, int _x2c_gensym_macro_start_50, int _x2c_gensym_macro_end_43, ArrayString _x2c_gensym_macro_values_30);
+static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301, int _x2c_gensym_macro_start_57, int _x2c_gensym_macro_end_50, ArrayString _x2c_gensym_macro_values_30);
 
-static ArrayString ArrayString_cut_elements(ArrayString _x2c_gensym_macro_array_302, int _x2c_gensym_macro_start_51, int _x2c_gensym_macro_end_44);
+static ArrayString ArrayString_cut_elements(ArrayString _x2c_gensym_macro_array_302, int _x2c_gensym_macro_start_58, int _x2c_gensym_macro_end_51);
 
 static ArrayString ArrayString_splice_elements(ArrayString _x2c_gensym_macro_array_303, int _x2c_gensym_macro_index_81, int _x2c_gensym_macro_remove_count_12, ArrayString _x2c_gensym_macro_values_31);
 
@@ -1651,7 +1651,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 
 static ArrayChar ArrayChar_slice_elements(ArrayChar _x2c_gensym_macro_array_4, int _x2c_gensym_macro_start_0, int _x2c_gensym_macro_end_0, int _x2c_gensym_macro_step_0){
   ArrayChar _x2c_gensym_macro_slice_0 =(ArrayChar) Block_new(sizeof(char));
-  int _x2c_gensym_macro_newlen_0 = x2c_normalize_slice(& _x2c_gensym_macro_start_0, & _x2c_gensym_macro_end_0, _x2c_gensym_macro_step_0, (int) _x2c_gensym_macro_array_4 -> length);
+  int _x2c_gensym_macro_newlen_0 = x2c_normalize_slice(&(_x2c_gensym_macro_start_0), &(_x2c_gensym_macro_end_0), _x2c_gensym_macro_step_0, (int) _x2c_gensym_macro_array_4 -> length);
   if(_x2c_gensym_macro_newlen_0 <= 0) return _x2c_gensym_macro_slice_0;
   if(_x2c_gensym_macro_step_0 == 1){
     Block_append((Block) _x2c_gensym_macro_slice_0, (unsigned char *) _x2c_gensym_macro_array_4 -> bytes + _x2c_gensym_macro_start_0 * sizeof(char), _x2c_gensym_macro_newlen_0);
@@ -1670,25 +1670,24 @@ static ArrayChar ArrayChar_slice_elements(ArrayChar _x2c_gensym_macro_array_4, i
 static inline int _x2c_gensym_macro__normalize_bound_0(ArrayChar _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_2){
   int _x2c_gensym_macro_length_0 =(int) _x2c_gensym_macro_array_5 -> length;
   int _x2c_gensym_macro_start_1 = _x2c_gensym_macro_index_2, _x2c_gensym_macro_stop_0 = _x2c_gensym_macro_index_2;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_1, & _x2c_gensym_macro_stop_0, 1, _x2c_gensym_macro_length_0);
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_1), &(_x2c_gensym_macro_stop_0), 1, _x2c_gensym_macro_length_0);
   return _x2c_gensym_macro_start_1;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_0(ArrayChar _x2c_gensym_macro_array_6, int * _x2c_gensym_macro_begin_0, int * _x2c_gensym_macro_finish_0){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_0, _x2c_gensym_macro_finish_0, 1, (int) _x2c_gensym_macro_array_6 -> length);
-  if(* _x2c_gensym_macro_finish_0 < * _x2c_gensym_macro_begin_0){
-    int _x2c_gensym_macro_tmp_0 = * _x2c_gensym_macro_begin_0;
-    * _x2c_gensym_macro_begin_0 = * _x2c_gensym_macro_finish_0;
-    * _x2c_gensym_macro_finish_0 = _x2c_gensym_macro_tmp_0;
+static inline void _x2c_gensym_macro__normalize_span_0(ArrayChar _x2c_gensym_macro_array_6, int * _x2c_gensym_macro_start_2, int * _x2c_gensym_macro_end_1){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_2)), &((* _x2c_gensym_macro_end_1)), 1, (int) _x2c_gensym_macro_array_6 -> length);
+  if((* _x2c_gensym_macro_end_1) <(* _x2c_gensym_macro_start_2)){
+    int _x2c_gensym_macro_tmp_0 =(* _x2c_gensym_macro_start_2);
+    (* _x2c_gensym_macro_start_2) =(* _x2c_gensym_macro_end_1);
+    (* _x2c_gensym_macro_end_1) = _x2c_gensym_macro_tmp_0;
   }
 
 }
 
-static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int _x2c_gensym_macro_start_2, int _x2c_gensym_macro_end_1, ArrayChar _x2c_gensym_macro_values_0){
+static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int _x2c_gensym_macro_start_3, int _x2c_gensym_macro_end_2, ArrayChar _x2c_gensym_macro_values_0){
   int _x2c_gensym_macro_n_3 =(int) _x2c_gensym_macro_array_7 -> length;
-  int _x2c_gensym_macro_begin_1 = _x2c_gensym_macro_start_2, _x2c_gensym_macro_finish_1 = _x2c_gensym_macro_end_1;
-  _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_7, & _x2c_gensym_macro_begin_1, & _x2c_gensym_macro_finish_1);
-  int _x2c_gensym_macro_remove_0 = _x2c_gensym_macro_finish_1 - _x2c_gensym_macro_begin_1;
+  _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_7, &(_x2c_gensym_macro_start_3), &(_x2c_gensym_macro_end_2));
+  int _x2c_gensym_macro_remove_0 = _x2c_gensym_macro_end_2 - _x2c_gensym_macro_start_3;
   int _x2c_gensym_macro_insert_0 = ArrayChar_truth(_x2c_gensym_macro_values_0) ?(int) _x2c_gensym_macro_values_0 -> length : 0;
   int _x2c_gensym_macro_delta_0 = _x2c_gensym_macro_insert_0 - _x2c_gensym_macro_remove_0;
   ArrayChar _x2c_gensym_macro_source_0 = _x2c_gensym_macro_values_0;
@@ -1723,9 +1722,9 @@ static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int 
         Block_append((Block) _x2c_gensym_macro_array_7, NULL, _x2c_gensym_macro_delta_0);
       }
       char * _x2c_gensym_macro_data_4 =(char *) _x2c_gensym_macro_array_7 -> bytes;
-      int _x2c_gensym_macro_tail_0 = _x2c_gensym_macro_n_3 - _x2c_gensym_macro_finish_1;
-      if(_x2c_gensym_macro_tail_0 > 0 && _x2c_gensym_macro_delta_0 != 0) memmove(_x2c_gensym_macro_data_4 + _x2c_gensym_macro_begin_1 + _x2c_gensym_macro_insert_0, _x2c_gensym_macro_data_4 + _x2c_gensym_macro_finish_1, _x2c_gensym_macro_tail_0 * sizeof(char));
-      if(_x2c_gensym_macro_insert_0 > 0) memcpy(_x2c_gensym_macro_data_4 + _x2c_gensym_macro_begin_1, _x2c_gensym_macro_source_0 -> bytes, _x2c_gensym_macro_insert_0 * sizeof(char));
+      int _x2c_gensym_macro_tail_0 = _x2c_gensym_macro_n_3 - _x2c_gensym_macro_end_2;
+      if(_x2c_gensym_macro_tail_0 > 0 && _x2c_gensym_macro_delta_0 != 0) memmove(_x2c_gensym_macro_data_4 + _x2c_gensym_macro_start_3 + _x2c_gensym_macro_insert_0, _x2c_gensym_macro_data_4 + _x2c_gensym_macro_end_2, _x2c_gensym_macro_tail_0 * sizeof(char));
+      if(_x2c_gensym_macro_insert_0 > 0) memcpy(_x2c_gensym_macro_data_4 + _x2c_gensym_macro_start_3, _x2c_gensym_macro_source_0 -> bytes, _x2c_gensym_macro_insert_0 * sizeof(char));
       if(_x2c_gensym_macro_delta_0 < 0) _x2c_gensym_macro_array_7 -> length = _x2c_gensym_macro_n_3 + _x2c_gensym_macro_delta_0;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
@@ -1733,27 +1732,26 @@ static void ArrayChar_replace_elements(ArrayChar _x2c_gensym_macro_array_7, int 
 
 }
 
-static ArrayChar ArrayChar_cut_elements(ArrayChar _x2c_gensym_macro_array_8, int _x2c_gensym_macro_start_3, int _x2c_gensym_macro_end_2){
+static ArrayChar ArrayChar_cut_elements(ArrayChar _x2c_gensym_macro_array_8, int _x2c_gensym_macro_start_4, int _x2c_gensym_macro_end_3){
   int _x2c_gensym_macro_n_4 =(int) _x2c_gensym_macro_array_8 -> length;
-  int _x2c_gensym_macro_begin_2 = _x2c_gensym_macro_start_3, _x2c_gensym_macro_finish_2 = _x2c_gensym_macro_end_2;
-  _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_8, & _x2c_gensym_macro_begin_2, & _x2c_gensym_macro_finish_2);
-  if(_x2c_gensym_macro_begin_2 >= _x2c_gensym_macro_finish_2) return(ArrayChar) Block_new(sizeof(char));
-  ArrayChar _x2c_gensym_macro_removed_0 = ArrayChar_slice_elements(_x2c_gensym_macro_array_8, _x2c_gensym_macro_begin_2, _x2c_gensym_macro_finish_2, 1);
+  _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_8, &(_x2c_gensym_macro_start_4), &(_x2c_gensym_macro_end_3));
+  if(_x2c_gensym_macro_start_4 >= _x2c_gensym_macro_end_3) return(ArrayChar) Block_new(sizeof(char));
+  ArrayChar _x2c_gensym_macro_removed_0 = ArrayChar_slice_elements(_x2c_gensym_macro_array_8, _x2c_gensym_macro_start_4, _x2c_gensym_macro_end_3, 1);
   char * _x2c_gensym_macro_data_5 =(char *) _x2c_gensym_macro_array_8 -> bytes;
-  int _x2c_gensym_macro_tail_1 = _x2c_gensym_macro_n_4 - _x2c_gensym_macro_finish_2;
-  if(_x2c_gensym_macro_tail_1 > 0) memmove(_x2c_gensym_macro_data_5 + _x2c_gensym_macro_begin_2, _x2c_gensym_macro_data_5 + _x2c_gensym_macro_finish_2, _x2c_gensym_macro_tail_1 * sizeof(char));
-  _x2c_gensym_macro_array_8 -> length = _x2c_gensym_macro_n_4 -(_x2c_gensym_macro_finish_2 - _x2c_gensym_macro_begin_2);
+  int _x2c_gensym_macro_tail_1 = _x2c_gensym_macro_n_4 - _x2c_gensym_macro_end_3;
+  if(_x2c_gensym_macro_tail_1 > 0) memmove(_x2c_gensym_macro_data_5 + _x2c_gensym_macro_start_4, _x2c_gensym_macro_data_5 + _x2c_gensym_macro_end_3, _x2c_gensym_macro_tail_1 * sizeof(char));
+  _x2c_gensym_macro_array_8 -> length = _x2c_gensym_macro_n_4 -(_x2c_gensym_macro_end_3 - _x2c_gensym_macro_start_4);
   return _x2c_gensym_macro_removed_0;
 }
 
 static ArrayChar ArrayChar_splice_elements(ArrayChar _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_3, int _x2c_gensym_macro_remove_count_0, ArrayChar _x2c_gensym_macro_values_1){
   if(_x2c_gensym_macro_remove_count_0 < 0) _x2c_gensym_macro_remove_count_0 = 0;
   int _x2c_gensym_macro_n_5 =(int) _x2c_gensym_macro_array_9 -> length;
-  int _x2c_gensym_macro_start_4 = _x2c_gensym_macro__normalize_bound_0(_x2c_gensym_macro_array_9, _x2c_gensym_macro_index_3);
-  long long _x2c_gensym_macro_target_0 =(long long) _x2c_gensym_macro_start_4 + _x2c_gensym_macro_remove_count_0;
-  int _x2c_gensym_macro_end_3 = _x2c_gensym_macro_target_0 > _x2c_gensym_macro_n_5 ? _x2c_gensym_macro_n_5 :(int) _x2c_gensym_macro_target_0;
-  ArrayChar _x2c_gensym_macro_removed_1 = ArrayChar_slice_elements(_x2c_gensym_macro_array_9, _x2c_gensym_macro_start_4, _x2c_gensym_macro_end_3, 1);
-  ArrayChar_replace_elements(_x2c_gensym_macro_array_9, _x2c_gensym_macro_start_4, _x2c_gensym_macro_end_3, _x2c_gensym_macro_values_1);
+  int _x2c_gensym_macro_start_5 = _x2c_gensym_macro__normalize_bound_0(_x2c_gensym_macro_array_9, _x2c_gensym_macro_index_3);
+  long long _x2c_gensym_macro_target_0 =(long long) _x2c_gensym_macro_start_5 + _x2c_gensym_macro_remove_count_0;
+  int _x2c_gensym_macro_end_4 = _x2c_gensym_macro_target_0 > _x2c_gensym_macro_n_5 ? _x2c_gensym_macro_n_5 :(int) _x2c_gensym_macro_target_0;
+  ArrayChar _x2c_gensym_macro_removed_1 = ArrayChar_slice_elements(_x2c_gensym_macro_array_9, _x2c_gensym_macro_start_5, _x2c_gensym_macro_end_4, 1);
+  ArrayChar_replace_elements(_x2c_gensym_macro_array_9, _x2c_gensym_macro_start_5, _x2c_gensym_macro_end_4, _x2c_gensym_macro_values_1);
   return _x2c_gensym_macro_removed_1;
 }
 
@@ -1915,27 +1913,27 @@ ArrayChar ArrayChar_copy(ArrayChar _x2c_gensym_macro_array_23){
   return ArrayChar_copy_elements(_x2c_gensym_macro_array_23);
 }
 
-ArrayChar ArrayChar_getslice(ArrayChar _x2c_gensym_macro_array_24, int _x2c_gensym_macro_start_5, int _x2c_gensym_macro_end_4, int _x2c_gensym_macro_step_1){
+ArrayChar ArrayChar_getslice(ArrayChar _x2c_gensym_macro_array_24, int _x2c_gensym_macro_start_6, int _x2c_gensym_macro_end_5, int _x2c_gensym_macro_step_1){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_24 == NULL || ! _x2c_gensym_macro_step_1) _bad_step(_0, _x2c_gensym_macro_step_1);
   if(_x2c_gensym_macro_array_24 -> length > INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_24 -> length);
-  return ArrayChar_slice_elements(_x2c_gensym_macro_array_24, _x2c_gensym_macro_start_5, _x2c_gensym_macro_end_4, _x2c_gensym_macro_step_1);
+  return ArrayChar_slice_elements(_x2c_gensym_macro_array_24, _x2c_gensym_macro_start_6, _x2c_gensym_macro_end_5, _x2c_gensym_macro_step_1);
 }
 
-ArrayChar ArrayChar_setslice(ArrayChar _x2c_gensym_macro_array_25, int _x2c_gensym_macro_start_6, int _x2c_gensym_macro_end_5, ArrayChar _x2c_gensym_macro_values_2){
+ArrayChar ArrayChar_setslice(ArrayChar _x2c_gensym_macro_array_25, int _x2c_gensym_macro_start_7, int _x2c_gensym_macro_end_6, ArrayChar _x2c_gensym_macro_values_2){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_25 == NULL) _bad_operation(_0, 1317790304458);
   if(_x2c_gensym_macro_array_25 -> length > INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_25 -> length);
   if(ArrayChar_truth(_x2c_gensym_macro_values_2) && _x2c_gensym_macro_values_2 -> length > INT_MAX) _size_limit(_0, _x2c_gensym_macro_values_2 -> length);
-  ArrayChar_replace_elements(_x2c_gensym_macro_array_25, _x2c_gensym_macro_start_6, _x2c_gensym_macro_end_5, _x2c_gensym_macro_values_2);
+  ArrayChar_replace_elements(_x2c_gensym_macro_array_25, _x2c_gensym_macro_start_7, _x2c_gensym_macro_end_6, _x2c_gensym_macro_values_2);
   return _x2c_gensym_macro_array_25;
 }
 
-ArrayChar ArrayChar_remslice(ArrayChar _x2c_gensym_macro_array_26, int _x2c_gensym_macro_start_7, int _x2c_gensym_macro_end_6){
+ArrayChar ArrayChar_remslice(ArrayChar _x2c_gensym_macro_array_26, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_26 == NULL) _bad_operation(_0, 1248601065674);
   if(_x2c_gensym_macro_array_26 -> length > INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_26 -> length);
-  return ArrayChar_cut_elements(_x2c_gensym_macro_array_26, _x2c_gensym_macro_start_7, _x2c_gensym_macro_end_6);
+  return ArrayChar_cut_elements(_x2c_gensym_macro_array_26, _x2c_gensym_macro_start_8, _x2c_gensym_macro_end_7);
 }
 
 ArrayChar ArrayChar_splice(ArrayChar _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_6, int _x2c_gensym_macro_remove_count_1, ArrayChar _x2c_gensym_macro_values_3){
@@ -2292,46 +2290,45 @@ static ArrayShort ArrayShort_copy_elements(ArrayShort _x2c_gensym_macro_array_52
   return _x2c_gensym_macro_copy_1;
 }
 
-static ArrayShort ArrayShort_slice_elements(ArrayShort _x2c_gensym_macro_array_53, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7, int _x2c_gensym_macro_step_2){
+static ArrayShort ArrayShort_slice_elements(ArrayShort _x2c_gensym_macro_array_53, int _x2c_gensym_macro_start_9, int _x2c_gensym_macro_end_8, int _x2c_gensym_macro_step_2){
   ArrayShort _x2c_gensym_macro_slice_1 =(ArrayShort) Block_new(sizeof(short));
-  int _x2c_gensym_macro_newlen_1 = x2c_normalize_slice(& _x2c_gensym_macro_start_8, & _x2c_gensym_macro_end_7, _x2c_gensym_macro_step_2, (int) _x2c_gensym_macro_array_53 -> length);
+  int _x2c_gensym_macro_newlen_1 = x2c_normalize_slice(&(_x2c_gensym_macro_start_9), &(_x2c_gensym_macro_end_8), _x2c_gensym_macro_step_2, (int) _x2c_gensym_macro_array_53 -> length);
   if(_x2c_gensym_macro_newlen_1 <= 0) return _x2c_gensym_macro_slice_1;
   if(_x2c_gensym_macro_step_2 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_1, (unsigned char *) _x2c_gensym_macro_array_53 -> bytes + _x2c_gensym_macro_start_8 * sizeof(short), _x2c_gensym_macro_newlen_1);
+    Block_append((Block) _x2c_gensym_macro_slice_1, (unsigned char *) _x2c_gensym_macro_array_53 -> bytes + _x2c_gensym_macro_start_9 * sizeof(short), _x2c_gensym_macro_newlen_1);
     return _x2c_gensym_macro_slice_1;
   }
   short * _x2c_gensym_macro_data_14 =(short *) _x2c_gensym_macro_array_53 -> bytes;
   if(_x2c_gensym_macro_step_2 < 0){
-    for(int _x2c_gensym_macro_i_10 = _x2c_gensym_macro_start_8;  _x2c_gensym_macro_i_10 > _x2c_gensym_macro_end_7;  _x2c_gensym_macro_i_10 += _x2c_gensym_macro_step_2) Block_append((Block) _x2c_gensym_macro_slice_1, _x2c_gensym_macro_data_14 + _x2c_gensym_macro_i_10, 1);
+    for(int _x2c_gensym_macro_i_10 = _x2c_gensym_macro_start_9;  _x2c_gensym_macro_i_10 > _x2c_gensym_macro_end_8;  _x2c_gensym_macro_i_10 += _x2c_gensym_macro_step_2) Block_append((Block) _x2c_gensym_macro_slice_1, _x2c_gensym_macro_data_14 + _x2c_gensym_macro_i_10, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_11 = _x2c_gensym_macro_start_8;  _x2c_gensym_macro_i_11 < _x2c_gensym_macro_end_7;  _x2c_gensym_macro_i_11 += _x2c_gensym_macro_step_2) Block_append((Block) _x2c_gensym_macro_slice_1, _x2c_gensym_macro_data_14 + _x2c_gensym_macro_i_11, 1);
+    for(int _x2c_gensym_macro_i_11 = _x2c_gensym_macro_start_9;  _x2c_gensym_macro_i_11 < _x2c_gensym_macro_end_8;  _x2c_gensym_macro_i_11 += _x2c_gensym_macro_step_2) Block_append((Block) _x2c_gensym_macro_slice_1, _x2c_gensym_macro_data_14 + _x2c_gensym_macro_i_11, 1);
   }
   return _x2c_gensym_macro_slice_1;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_1(ArrayShort _x2c_gensym_macro_array_54, int _x2c_gensym_macro_index_15){
   int _x2c_gensym_macro_length_1 =(int) _x2c_gensym_macro_array_54 -> length;
-  int _x2c_gensym_macro_start_9 = _x2c_gensym_macro_index_15, _x2c_gensym_macro_stop_1 = _x2c_gensym_macro_index_15;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_9, & _x2c_gensym_macro_stop_1, 1, _x2c_gensym_macro_length_1);
-  return _x2c_gensym_macro_start_9;
+  int _x2c_gensym_macro_start_10 = _x2c_gensym_macro_index_15, _x2c_gensym_macro_stop_1 = _x2c_gensym_macro_index_15;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_10), &(_x2c_gensym_macro_stop_1), 1, _x2c_gensym_macro_length_1);
+  return _x2c_gensym_macro_start_10;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_1(ArrayShort _x2c_gensym_macro_array_55, int * _x2c_gensym_macro_begin_3, int * _x2c_gensym_macro_finish_3){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_3, _x2c_gensym_macro_finish_3, 1, (int) _x2c_gensym_macro_array_55 -> length);
-  if(* _x2c_gensym_macro_finish_3 < * _x2c_gensym_macro_begin_3){
-    int _x2c_gensym_macro_tmp_2 = * _x2c_gensym_macro_begin_3;
-    * _x2c_gensym_macro_begin_3 = * _x2c_gensym_macro_finish_3;
-    * _x2c_gensym_macro_finish_3 = _x2c_gensym_macro_tmp_2;
+static inline void _x2c_gensym_macro__normalize_span_1(ArrayShort _x2c_gensym_macro_array_55, int * _x2c_gensym_macro_start_11, int * _x2c_gensym_macro_end_9){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_11)), &((* _x2c_gensym_macro_end_9)), 1, (int) _x2c_gensym_macro_array_55 -> length);
+  if((* _x2c_gensym_macro_end_9) <(* _x2c_gensym_macro_start_11)){
+    int _x2c_gensym_macro_tmp_2 =(* _x2c_gensym_macro_start_11);
+    (* _x2c_gensym_macro_start_11) =(* _x2c_gensym_macro_end_9);
+    (* _x2c_gensym_macro_end_9) = _x2c_gensym_macro_tmp_2;
   }
 
 }
 
-static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, int _x2c_gensym_macro_start_10, int _x2c_gensym_macro_end_8, ArrayShort _x2c_gensym_macro_values_5){
+static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, int _x2c_gensym_macro_start_12, int _x2c_gensym_macro_end_10, ArrayShort _x2c_gensym_macro_values_5){
   int _x2c_gensym_macro_n_14 =(int) _x2c_gensym_macro_array_56 -> length;
-  int _x2c_gensym_macro_begin_4 = _x2c_gensym_macro_start_10, _x2c_gensym_macro_finish_4 = _x2c_gensym_macro_end_8;
-  _x2c_gensym_macro__normalize_span_1(_x2c_gensym_macro_array_56, & _x2c_gensym_macro_begin_4, & _x2c_gensym_macro_finish_4);
-  int _x2c_gensym_macro_remove_1 = _x2c_gensym_macro_finish_4 - _x2c_gensym_macro_begin_4;
+  _x2c_gensym_macro__normalize_span_1(_x2c_gensym_macro_array_56, &(_x2c_gensym_macro_start_12), &(_x2c_gensym_macro_end_10));
+  int _x2c_gensym_macro_remove_1 = _x2c_gensym_macro_end_10 - _x2c_gensym_macro_start_12;
   int _x2c_gensym_macro_insert_1 = ArrayShort_truth(_x2c_gensym_macro_values_5) ?(int) _x2c_gensym_macro_values_5 -> length : 0;
   int _x2c_gensym_macro_delta_1 = _x2c_gensym_macro_insert_1 - _x2c_gensym_macro_remove_1;
   ArrayShort _x2c_gensym_macro_source_2 = _x2c_gensym_macro_values_5;
@@ -2366,9 +2363,9 @@ static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, i
         Block_append((Block) _x2c_gensym_macro_array_56, NULL, _x2c_gensym_macro_delta_1);
       }
       short * _x2c_gensym_macro_data_15 =(short *) _x2c_gensym_macro_array_56 -> bytes;
-      int _x2c_gensym_macro_tail_2 = _x2c_gensym_macro_n_14 - _x2c_gensym_macro_finish_4;
-      if(_x2c_gensym_macro_tail_2 > 0 && _x2c_gensym_macro_delta_1 != 0) memmove(_x2c_gensym_macro_data_15 + _x2c_gensym_macro_begin_4 + _x2c_gensym_macro_insert_1, _x2c_gensym_macro_data_15 + _x2c_gensym_macro_finish_4, _x2c_gensym_macro_tail_2 * sizeof(short));
-      if(_x2c_gensym_macro_insert_1 > 0) memcpy(_x2c_gensym_macro_data_15 + _x2c_gensym_macro_begin_4, _x2c_gensym_macro_source_2 -> bytes, _x2c_gensym_macro_insert_1 * sizeof(short));
+      int _x2c_gensym_macro_tail_2 = _x2c_gensym_macro_n_14 - _x2c_gensym_macro_end_10;
+      if(_x2c_gensym_macro_tail_2 > 0 && _x2c_gensym_macro_delta_1 != 0) memmove(_x2c_gensym_macro_data_15 + _x2c_gensym_macro_start_12 + _x2c_gensym_macro_insert_1, _x2c_gensym_macro_data_15 + _x2c_gensym_macro_end_10, _x2c_gensym_macro_tail_2 * sizeof(short));
+      if(_x2c_gensym_macro_insert_1 > 0) memcpy(_x2c_gensym_macro_data_15 + _x2c_gensym_macro_start_12, _x2c_gensym_macro_source_2 -> bytes, _x2c_gensym_macro_insert_1 * sizeof(short));
       if(_x2c_gensym_macro_delta_1 < 0) _x2c_gensym_macro_array_56 -> length = _x2c_gensym_macro_n_14 + _x2c_gensym_macro_delta_1;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
@@ -2376,27 +2373,26 @@ static void ArrayShort_replace_elements(ArrayShort _x2c_gensym_macro_array_56, i
 
 }
 
-static ArrayShort ArrayShort_cut_elements(ArrayShort _x2c_gensym_macro_array_57, int _x2c_gensym_macro_start_11, int _x2c_gensym_macro_end_9){
+static ArrayShort ArrayShort_cut_elements(ArrayShort _x2c_gensym_macro_array_57, int _x2c_gensym_macro_start_13, int _x2c_gensym_macro_end_11){
   int _x2c_gensym_macro_n_15 =(int) _x2c_gensym_macro_array_57 -> length;
-  int _x2c_gensym_macro_begin_5 = _x2c_gensym_macro_start_11, _x2c_gensym_macro_finish_5 = _x2c_gensym_macro_end_9;
-  _x2c_gensym_macro__normalize_span_1(_x2c_gensym_macro_array_57, & _x2c_gensym_macro_begin_5, & _x2c_gensym_macro_finish_5);
-  if(_x2c_gensym_macro_begin_5 >= _x2c_gensym_macro_finish_5) return(ArrayShort) Block_new(sizeof(short));
-  ArrayShort _x2c_gensym_macro_removed_2 = ArrayShort_slice_elements(_x2c_gensym_macro_array_57, _x2c_gensym_macro_begin_5, _x2c_gensym_macro_finish_5, 1);
+  _x2c_gensym_macro__normalize_span_1(_x2c_gensym_macro_array_57, &(_x2c_gensym_macro_start_13), &(_x2c_gensym_macro_end_11));
+  if(_x2c_gensym_macro_start_13 >= _x2c_gensym_macro_end_11) return(ArrayShort) Block_new(sizeof(short));
+  ArrayShort _x2c_gensym_macro_removed_2 = ArrayShort_slice_elements(_x2c_gensym_macro_array_57, _x2c_gensym_macro_start_13, _x2c_gensym_macro_end_11, 1);
   short * _x2c_gensym_macro_data_16 =(short *) _x2c_gensym_macro_array_57 -> bytes;
-  int _x2c_gensym_macro_tail_3 = _x2c_gensym_macro_n_15 - _x2c_gensym_macro_finish_5;
-  if(_x2c_gensym_macro_tail_3 > 0) memmove(_x2c_gensym_macro_data_16 + _x2c_gensym_macro_begin_5, _x2c_gensym_macro_data_16 + _x2c_gensym_macro_finish_5, _x2c_gensym_macro_tail_3 * sizeof(short));
-  _x2c_gensym_macro_array_57 -> length = _x2c_gensym_macro_n_15 -(_x2c_gensym_macro_finish_5 - _x2c_gensym_macro_begin_5);
+  int _x2c_gensym_macro_tail_3 = _x2c_gensym_macro_n_15 - _x2c_gensym_macro_end_11;
+  if(_x2c_gensym_macro_tail_3 > 0) memmove(_x2c_gensym_macro_data_16 + _x2c_gensym_macro_start_13, _x2c_gensym_macro_data_16 + _x2c_gensym_macro_end_11, _x2c_gensym_macro_tail_3 * sizeof(short));
+  _x2c_gensym_macro_array_57 -> length = _x2c_gensym_macro_n_15 -(_x2c_gensym_macro_end_11 - _x2c_gensym_macro_start_13);
   return _x2c_gensym_macro_removed_2;
 }
 
 static ArrayShort ArrayShort_splice_elements(ArrayShort _x2c_gensym_macro_array_58, int _x2c_gensym_macro_index_16, int _x2c_gensym_macro_remove_count_2, ArrayShort _x2c_gensym_macro_values_6){
   if(_x2c_gensym_macro_remove_count_2 < 0) _x2c_gensym_macro_remove_count_2 = 0;
   int _x2c_gensym_macro_n_16 =(int) _x2c_gensym_macro_array_58 -> length;
-  int _x2c_gensym_macro_start_12 = _x2c_gensym_macro__normalize_bound_1(_x2c_gensym_macro_array_58, _x2c_gensym_macro_index_16);
-  long long _x2c_gensym_macro_target_1 =(long long) _x2c_gensym_macro_start_12 + _x2c_gensym_macro_remove_count_2;
-  int _x2c_gensym_macro_end_10 = _x2c_gensym_macro_target_1 > _x2c_gensym_macro_n_16 ? _x2c_gensym_macro_n_16 :(int) _x2c_gensym_macro_target_1;
-  ArrayShort _x2c_gensym_macro_removed_3 = ArrayShort_slice_elements(_x2c_gensym_macro_array_58, _x2c_gensym_macro_start_12, _x2c_gensym_macro_end_10, 1);
-  ArrayShort_replace_elements(_x2c_gensym_macro_array_58, _x2c_gensym_macro_start_12, _x2c_gensym_macro_end_10, _x2c_gensym_macro_values_6);
+  int _x2c_gensym_macro_start_14 = _x2c_gensym_macro__normalize_bound_1(_x2c_gensym_macro_array_58, _x2c_gensym_macro_index_16);
+  long long _x2c_gensym_macro_target_1 =(long long) _x2c_gensym_macro_start_14 + _x2c_gensym_macro_remove_count_2;
+  int _x2c_gensym_macro_end_12 = _x2c_gensym_macro_target_1 > _x2c_gensym_macro_n_16 ? _x2c_gensym_macro_n_16 :(int) _x2c_gensym_macro_target_1;
+  ArrayShort _x2c_gensym_macro_removed_3 = ArrayShort_slice_elements(_x2c_gensym_macro_array_58, _x2c_gensym_macro_start_14, _x2c_gensym_macro_end_12, 1);
+  ArrayShort_replace_elements(_x2c_gensym_macro_array_58, _x2c_gensym_macro_start_14, _x2c_gensym_macro_end_12, _x2c_gensym_macro_values_6);
   return _x2c_gensym_macro_removed_3;
 }
 
@@ -2554,27 +2550,27 @@ ArrayShort ArrayShort_copy(ArrayShort _x2c_gensym_macro_array_72){
   return ArrayShort_copy_elements(_x2c_gensym_macro_array_72);
 }
 
-ArrayShort ArrayShort_getslice(ArrayShort _x2c_gensym_macro_array_73, int _x2c_gensym_macro_start_13, int _x2c_gensym_macro_end_11, int _x2c_gensym_macro_step_3){
+ArrayShort ArrayShort_getslice(ArrayShort _x2c_gensym_macro_array_73, int _x2c_gensym_macro_start_15, int _x2c_gensym_macro_end_13, int _x2c_gensym_macro_step_3){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_73 == NULL || ! _x2c_gensym_macro_step_3) _bad_step(_1, _x2c_gensym_macro_step_3);
   if(_x2c_gensym_macro_array_73 -> length > INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_73 -> length);
-  return ArrayShort_slice_elements(_x2c_gensym_macro_array_73, _x2c_gensym_macro_start_13, _x2c_gensym_macro_end_11, _x2c_gensym_macro_step_3);
+  return ArrayShort_slice_elements(_x2c_gensym_macro_array_73, _x2c_gensym_macro_start_15, _x2c_gensym_macro_end_13, _x2c_gensym_macro_step_3);
 }
 
-ArrayShort ArrayShort_setslice(ArrayShort _x2c_gensym_macro_array_74, int _x2c_gensym_macro_start_14, int _x2c_gensym_macro_end_12, ArrayShort _x2c_gensym_macro_values_7){
+ArrayShort ArrayShort_setslice(ArrayShort _x2c_gensym_macro_array_74, int _x2c_gensym_macro_start_16, int _x2c_gensym_macro_end_14, ArrayShort _x2c_gensym_macro_values_7){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_74 == NULL) _bad_operation(_1, 1317790304458);
   if(_x2c_gensym_macro_array_74 -> length > INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_74 -> length);
   if(ArrayShort_truth(_x2c_gensym_macro_values_7) && _x2c_gensym_macro_values_7 -> length > INT_MAX) _size_limit(_1, _x2c_gensym_macro_values_7 -> length);
-  ArrayShort_replace_elements(_x2c_gensym_macro_array_74, _x2c_gensym_macro_start_14, _x2c_gensym_macro_end_12, _x2c_gensym_macro_values_7);
+  ArrayShort_replace_elements(_x2c_gensym_macro_array_74, _x2c_gensym_macro_start_16, _x2c_gensym_macro_end_14, _x2c_gensym_macro_values_7);
   return _x2c_gensym_macro_array_74;
 }
 
-ArrayShort ArrayShort_remslice(ArrayShort _x2c_gensym_macro_array_75, int _x2c_gensym_macro_start_15, int _x2c_gensym_macro_end_13){
+ArrayShort ArrayShort_remslice(ArrayShort _x2c_gensym_macro_array_75, int _x2c_gensym_macro_start_17, int _x2c_gensym_macro_end_15){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_75 == NULL) _bad_operation(_1, 1248601065674);
   if(_x2c_gensym_macro_array_75 -> length > INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_75 -> length);
-  return ArrayShort_cut_elements(_x2c_gensym_macro_array_75, _x2c_gensym_macro_start_15, _x2c_gensym_macro_end_13);
+  return ArrayShort_cut_elements(_x2c_gensym_macro_array_75, _x2c_gensym_macro_start_17, _x2c_gensym_macro_end_15);
 }
 
 ArrayShort ArrayShort_splice(ArrayShort _x2c_gensym_macro_array_76, int _x2c_gensym_macro_index_19, int _x2c_gensym_macro_remove_count_3, ArrayShort _x2c_gensym_macro_values_8){
@@ -2903,46 +2899,45 @@ static ArrayInt ArrayInt_copy_elements(ArrayInt _x2c_gensym_macro_array_101){
   return _x2c_gensym_macro_copy_2;
 }
 
-static ArrayInt ArrayInt_slice_elements(ArrayInt _x2c_gensym_macro_array_102, int _x2c_gensym_macro_start_16, int _x2c_gensym_macro_end_14, int _x2c_gensym_macro_step_4){
+static ArrayInt ArrayInt_slice_elements(ArrayInt _x2c_gensym_macro_array_102, int _x2c_gensym_macro_start_18, int _x2c_gensym_macro_end_16, int _x2c_gensym_macro_step_4){
   ArrayInt _x2c_gensym_macro_slice_2 =(ArrayInt) Block_new(sizeof(int));
-  int _x2c_gensym_macro_newlen_2 = x2c_normalize_slice(& _x2c_gensym_macro_start_16, & _x2c_gensym_macro_end_14, _x2c_gensym_macro_step_4, (int) _x2c_gensym_macro_array_102 -> length);
+  int _x2c_gensym_macro_newlen_2 = x2c_normalize_slice(&(_x2c_gensym_macro_start_18), &(_x2c_gensym_macro_end_16), _x2c_gensym_macro_step_4, (int) _x2c_gensym_macro_array_102 -> length);
   if(_x2c_gensym_macro_newlen_2 <= 0) return _x2c_gensym_macro_slice_2;
   if(_x2c_gensym_macro_step_4 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_2, (unsigned char *) _x2c_gensym_macro_array_102 -> bytes + _x2c_gensym_macro_start_16 * sizeof(int), _x2c_gensym_macro_newlen_2);
+    Block_append((Block) _x2c_gensym_macro_slice_2, (unsigned char *) _x2c_gensym_macro_array_102 -> bytes + _x2c_gensym_macro_start_18 * sizeof(int), _x2c_gensym_macro_newlen_2);
     return _x2c_gensym_macro_slice_2;
   }
   int * _x2c_gensym_macro_data_25 =(int *) _x2c_gensym_macro_array_102 -> bytes;
   if(_x2c_gensym_macro_step_4 < 0){
-    for(int _x2c_gensym_macro_i_20 = _x2c_gensym_macro_start_16;  _x2c_gensym_macro_i_20 > _x2c_gensym_macro_end_14;  _x2c_gensym_macro_i_20 += _x2c_gensym_macro_step_4) Block_append((Block) _x2c_gensym_macro_slice_2, _x2c_gensym_macro_data_25 + _x2c_gensym_macro_i_20, 1);
+    for(int _x2c_gensym_macro_i_20 = _x2c_gensym_macro_start_18;  _x2c_gensym_macro_i_20 > _x2c_gensym_macro_end_16;  _x2c_gensym_macro_i_20 += _x2c_gensym_macro_step_4) Block_append((Block) _x2c_gensym_macro_slice_2, _x2c_gensym_macro_data_25 + _x2c_gensym_macro_i_20, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_21 = _x2c_gensym_macro_start_16;  _x2c_gensym_macro_i_21 < _x2c_gensym_macro_end_14;  _x2c_gensym_macro_i_21 += _x2c_gensym_macro_step_4) Block_append((Block) _x2c_gensym_macro_slice_2, _x2c_gensym_macro_data_25 + _x2c_gensym_macro_i_21, 1);
+    for(int _x2c_gensym_macro_i_21 = _x2c_gensym_macro_start_18;  _x2c_gensym_macro_i_21 < _x2c_gensym_macro_end_16;  _x2c_gensym_macro_i_21 += _x2c_gensym_macro_step_4) Block_append((Block) _x2c_gensym_macro_slice_2, _x2c_gensym_macro_data_25 + _x2c_gensym_macro_i_21, 1);
   }
   return _x2c_gensym_macro_slice_2;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_2(ArrayInt _x2c_gensym_macro_array_103, int _x2c_gensym_macro_index_28){
   int _x2c_gensym_macro_length_2 =(int) _x2c_gensym_macro_array_103 -> length;
-  int _x2c_gensym_macro_start_17 = _x2c_gensym_macro_index_28, _x2c_gensym_macro_stop_2 = _x2c_gensym_macro_index_28;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_17, & _x2c_gensym_macro_stop_2, 1, _x2c_gensym_macro_length_2);
-  return _x2c_gensym_macro_start_17;
+  int _x2c_gensym_macro_start_19 = _x2c_gensym_macro_index_28, _x2c_gensym_macro_stop_2 = _x2c_gensym_macro_index_28;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_19), &(_x2c_gensym_macro_stop_2), 1, _x2c_gensym_macro_length_2);
+  return _x2c_gensym_macro_start_19;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_2(ArrayInt _x2c_gensym_macro_array_104, int * _x2c_gensym_macro_begin_6, int * _x2c_gensym_macro_finish_6){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_6, _x2c_gensym_macro_finish_6, 1, (int) _x2c_gensym_macro_array_104 -> length);
-  if(* _x2c_gensym_macro_finish_6 < * _x2c_gensym_macro_begin_6){
-    int _x2c_gensym_macro_tmp_4 = * _x2c_gensym_macro_begin_6;
-    * _x2c_gensym_macro_begin_6 = * _x2c_gensym_macro_finish_6;
-    * _x2c_gensym_macro_finish_6 = _x2c_gensym_macro_tmp_4;
+static inline void _x2c_gensym_macro__normalize_span_2(ArrayInt _x2c_gensym_macro_array_104, int * _x2c_gensym_macro_start_20, int * _x2c_gensym_macro_end_17){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_20)), &((* _x2c_gensym_macro_end_17)), 1, (int) _x2c_gensym_macro_array_104 -> length);
+  if((* _x2c_gensym_macro_end_17) <(* _x2c_gensym_macro_start_20)){
+    int _x2c_gensym_macro_tmp_4 =(* _x2c_gensym_macro_start_20);
+    (* _x2c_gensym_macro_start_20) =(* _x2c_gensym_macro_end_17);
+    (* _x2c_gensym_macro_end_17) = _x2c_gensym_macro_tmp_4;
   }
 
 }
 
-static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int _x2c_gensym_macro_start_18, int _x2c_gensym_macro_end_15, ArrayInt _x2c_gensym_macro_values_10){
+static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int _x2c_gensym_macro_start_21, int _x2c_gensym_macro_end_18, ArrayInt _x2c_gensym_macro_values_10){
   int _x2c_gensym_macro_n_25 =(int) _x2c_gensym_macro_array_105 -> length;
-  int _x2c_gensym_macro_begin_7 = _x2c_gensym_macro_start_18, _x2c_gensym_macro_finish_7 = _x2c_gensym_macro_end_15;
-  _x2c_gensym_macro__normalize_span_2(_x2c_gensym_macro_array_105, & _x2c_gensym_macro_begin_7, & _x2c_gensym_macro_finish_7);
-  int _x2c_gensym_macro_remove_2 = _x2c_gensym_macro_finish_7 - _x2c_gensym_macro_begin_7;
+  _x2c_gensym_macro__normalize_span_2(_x2c_gensym_macro_array_105, &(_x2c_gensym_macro_start_21), &(_x2c_gensym_macro_end_18));
+  int _x2c_gensym_macro_remove_2 = _x2c_gensym_macro_end_18 - _x2c_gensym_macro_start_21;
   int _x2c_gensym_macro_insert_2 = ArrayInt_truth(_x2c_gensym_macro_values_10) ?(int) _x2c_gensym_macro_values_10 -> length : 0;
   int _x2c_gensym_macro_delta_2 = _x2c_gensym_macro_insert_2 - _x2c_gensym_macro_remove_2;
   ArrayInt _x2c_gensym_macro_source_4 = _x2c_gensym_macro_values_10;
@@ -2977,9 +2972,9 @@ static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int 
         Block_append((Block) _x2c_gensym_macro_array_105, NULL, _x2c_gensym_macro_delta_2);
       }
       int * _x2c_gensym_macro_data_26 =(int *) _x2c_gensym_macro_array_105 -> bytes;
-      int _x2c_gensym_macro_tail_4 = _x2c_gensym_macro_n_25 - _x2c_gensym_macro_finish_7;
-      if(_x2c_gensym_macro_tail_4 > 0 && _x2c_gensym_macro_delta_2 != 0) memmove(_x2c_gensym_macro_data_26 + _x2c_gensym_macro_begin_7 + _x2c_gensym_macro_insert_2, _x2c_gensym_macro_data_26 + _x2c_gensym_macro_finish_7, _x2c_gensym_macro_tail_4 * sizeof(int));
-      if(_x2c_gensym_macro_insert_2 > 0) memcpy(_x2c_gensym_macro_data_26 + _x2c_gensym_macro_begin_7, _x2c_gensym_macro_source_4 -> bytes, _x2c_gensym_macro_insert_2 * sizeof(int));
+      int _x2c_gensym_macro_tail_4 = _x2c_gensym_macro_n_25 - _x2c_gensym_macro_end_18;
+      if(_x2c_gensym_macro_tail_4 > 0 && _x2c_gensym_macro_delta_2 != 0) memmove(_x2c_gensym_macro_data_26 + _x2c_gensym_macro_start_21 + _x2c_gensym_macro_insert_2, _x2c_gensym_macro_data_26 + _x2c_gensym_macro_end_18, _x2c_gensym_macro_tail_4 * sizeof(int));
+      if(_x2c_gensym_macro_insert_2 > 0) memcpy(_x2c_gensym_macro_data_26 + _x2c_gensym_macro_start_21, _x2c_gensym_macro_source_4 -> bytes, _x2c_gensym_macro_insert_2 * sizeof(int));
       if(_x2c_gensym_macro_delta_2 < 0) _x2c_gensym_macro_array_105 -> length = _x2c_gensym_macro_n_25 + _x2c_gensym_macro_delta_2;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
@@ -2987,27 +2982,26 @@ static void ArrayInt_replace_elements(ArrayInt _x2c_gensym_macro_array_105, int 
 
 }
 
-static ArrayInt ArrayInt_cut_elements(ArrayInt _x2c_gensym_macro_array_106, int _x2c_gensym_macro_start_19, int _x2c_gensym_macro_end_16){
+static ArrayInt ArrayInt_cut_elements(ArrayInt _x2c_gensym_macro_array_106, int _x2c_gensym_macro_start_22, int _x2c_gensym_macro_end_19){
   int _x2c_gensym_macro_n_26 =(int) _x2c_gensym_macro_array_106 -> length;
-  int _x2c_gensym_macro_begin_8 = _x2c_gensym_macro_start_19, _x2c_gensym_macro_finish_8 = _x2c_gensym_macro_end_16;
-  _x2c_gensym_macro__normalize_span_2(_x2c_gensym_macro_array_106, & _x2c_gensym_macro_begin_8, & _x2c_gensym_macro_finish_8);
-  if(_x2c_gensym_macro_begin_8 >= _x2c_gensym_macro_finish_8) return(ArrayInt) Block_new(sizeof(int));
-  ArrayInt _x2c_gensym_macro_removed_4 = ArrayInt_slice_elements(_x2c_gensym_macro_array_106, _x2c_gensym_macro_begin_8, _x2c_gensym_macro_finish_8, 1);
+  _x2c_gensym_macro__normalize_span_2(_x2c_gensym_macro_array_106, &(_x2c_gensym_macro_start_22), &(_x2c_gensym_macro_end_19));
+  if(_x2c_gensym_macro_start_22 >= _x2c_gensym_macro_end_19) return(ArrayInt) Block_new(sizeof(int));
+  ArrayInt _x2c_gensym_macro_removed_4 = ArrayInt_slice_elements(_x2c_gensym_macro_array_106, _x2c_gensym_macro_start_22, _x2c_gensym_macro_end_19, 1);
   int * _x2c_gensym_macro_data_27 =(int *) _x2c_gensym_macro_array_106 -> bytes;
-  int _x2c_gensym_macro_tail_5 = _x2c_gensym_macro_n_26 - _x2c_gensym_macro_finish_8;
-  if(_x2c_gensym_macro_tail_5 > 0) memmove(_x2c_gensym_macro_data_27 + _x2c_gensym_macro_begin_8, _x2c_gensym_macro_data_27 + _x2c_gensym_macro_finish_8, _x2c_gensym_macro_tail_5 * sizeof(int));
-  _x2c_gensym_macro_array_106 -> length = _x2c_gensym_macro_n_26 -(_x2c_gensym_macro_finish_8 - _x2c_gensym_macro_begin_8);
+  int _x2c_gensym_macro_tail_5 = _x2c_gensym_macro_n_26 - _x2c_gensym_macro_end_19;
+  if(_x2c_gensym_macro_tail_5 > 0) memmove(_x2c_gensym_macro_data_27 + _x2c_gensym_macro_start_22, _x2c_gensym_macro_data_27 + _x2c_gensym_macro_end_19, _x2c_gensym_macro_tail_5 * sizeof(int));
+  _x2c_gensym_macro_array_106 -> length = _x2c_gensym_macro_n_26 -(_x2c_gensym_macro_end_19 - _x2c_gensym_macro_start_22);
   return _x2c_gensym_macro_removed_4;
 }
 
 static ArrayInt ArrayInt_splice_elements(ArrayInt _x2c_gensym_macro_array_107, int _x2c_gensym_macro_index_29, int _x2c_gensym_macro_remove_count_4, ArrayInt _x2c_gensym_macro_values_11){
   if(_x2c_gensym_macro_remove_count_4 < 0) _x2c_gensym_macro_remove_count_4 = 0;
   int _x2c_gensym_macro_n_27 =(int) _x2c_gensym_macro_array_107 -> length;
-  int _x2c_gensym_macro_start_20 = _x2c_gensym_macro__normalize_bound_2(_x2c_gensym_macro_array_107, _x2c_gensym_macro_index_29);
-  long long _x2c_gensym_macro_target_2 =(long long) _x2c_gensym_macro_start_20 + _x2c_gensym_macro_remove_count_4;
-  int _x2c_gensym_macro_end_17 = _x2c_gensym_macro_target_2 > _x2c_gensym_macro_n_27 ? _x2c_gensym_macro_n_27 :(int) _x2c_gensym_macro_target_2;
-  ArrayInt _x2c_gensym_macro_removed_5 = ArrayInt_slice_elements(_x2c_gensym_macro_array_107, _x2c_gensym_macro_start_20, _x2c_gensym_macro_end_17, 1);
-  ArrayInt_replace_elements(_x2c_gensym_macro_array_107, _x2c_gensym_macro_start_20, _x2c_gensym_macro_end_17, _x2c_gensym_macro_values_11);
+  int _x2c_gensym_macro_start_23 = _x2c_gensym_macro__normalize_bound_2(_x2c_gensym_macro_array_107, _x2c_gensym_macro_index_29);
+  long long _x2c_gensym_macro_target_2 =(long long) _x2c_gensym_macro_start_23 + _x2c_gensym_macro_remove_count_4;
+  int _x2c_gensym_macro_end_20 = _x2c_gensym_macro_target_2 > _x2c_gensym_macro_n_27 ? _x2c_gensym_macro_n_27 :(int) _x2c_gensym_macro_target_2;
+  ArrayInt _x2c_gensym_macro_removed_5 = ArrayInt_slice_elements(_x2c_gensym_macro_array_107, _x2c_gensym_macro_start_23, _x2c_gensym_macro_end_20, 1);
+  ArrayInt_replace_elements(_x2c_gensym_macro_array_107, _x2c_gensym_macro_start_23, _x2c_gensym_macro_end_20, _x2c_gensym_macro_values_11);
   return _x2c_gensym_macro_removed_5;
 }
 
@@ -3163,27 +3157,27 @@ ArrayInt ArrayInt_copy(ArrayInt _x2c_gensym_macro_array_121){
   return ArrayInt_copy_elements(_x2c_gensym_macro_array_121);
 }
 
-ArrayInt ArrayInt_getslice(ArrayInt _x2c_gensym_macro_array_122, int _x2c_gensym_macro_start_21, int _x2c_gensym_macro_end_18, int _x2c_gensym_macro_step_5){
+ArrayInt ArrayInt_getslice(ArrayInt _x2c_gensym_macro_array_122, int _x2c_gensym_macro_start_24, int _x2c_gensym_macro_end_21, int _x2c_gensym_macro_step_5){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_122 == NULL || ! _x2c_gensym_macro_step_5) _bad_step(_2, _x2c_gensym_macro_step_5);
   if(_x2c_gensym_macro_array_122 -> length > INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_122 -> length);
-  return ArrayInt_slice_elements(_x2c_gensym_macro_array_122, _x2c_gensym_macro_start_21, _x2c_gensym_macro_end_18, _x2c_gensym_macro_step_5);
+  return ArrayInt_slice_elements(_x2c_gensym_macro_array_122, _x2c_gensym_macro_start_24, _x2c_gensym_macro_end_21, _x2c_gensym_macro_step_5);
 }
 
-ArrayInt ArrayInt_setslice(ArrayInt _x2c_gensym_macro_array_123, int _x2c_gensym_macro_start_22, int _x2c_gensym_macro_end_19, ArrayInt _x2c_gensym_macro_values_12){
+ArrayInt ArrayInt_setslice(ArrayInt _x2c_gensym_macro_array_123, int _x2c_gensym_macro_start_25, int _x2c_gensym_macro_end_22, ArrayInt _x2c_gensym_macro_values_12){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_123 == NULL) _bad_operation(_2, 1317790304458);
   if(_x2c_gensym_macro_array_123 -> length > INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_123 -> length);
   if(ArrayInt_truth(_x2c_gensym_macro_values_12) && _x2c_gensym_macro_values_12 -> length > INT_MAX) _size_limit(_2, _x2c_gensym_macro_values_12 -> length);
-  ArrayInt_replace_elements(_x2c_gensym_macro_array_123, _x2c_gensym_macro_start_22, _x2c_gensym_macro_end_19, _x2c_gensym_macro_values_12);
+  ArrayInt_replace_elements(_x2c_gensym_macro_array_123, _x2c_gensym_macro_start_25, _x2c_gensym_macro_end_22, _x2c_gensym_macro_values_12);
   return _x2c_gensym_macro_array_123;
 }
 
-ArrayInt ArrayInt_remslice(ArrayInt _x2c_gensym_macro_array_124, int _x2c_gensym_macro_start_23, int _x2c_gensym_macro_end_20){
+ArrayInt ArrayInt_remslice(ArrayInt _x2c_gensym_macro_array_124, int _x2c_gensym_macro_start_26, int _x2c_gensym_macro_end_23){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_124 == NULL) _bad_operation(_2, 1248601065674);
   if(_x2c_gensym_macro_array_124 -> length > INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_124 -> length);
-  return ArrayInt_cut_elements(_x2c_gensym_macro_array_124, _x2c_gensym_macro_start_23, _x2c_gensym_macro_end_20);
+  return ArrayInt_cut_elements(_x2c_gensym_macro_array_124, _x2c_gensym_macro_start_26, _x2c_gensym_macro_end_23);
 }
 
 ArrayInt ArrayInt_splice(ArrayInt _x2c_gensym_macro_array_125, int _x2c_gensym_macro_index_32, int _x2c_gensym_macro_remove_count_5, ArrayInt _x2c_gensym_macro_values_13){
@@ -3512,46 +3506,45 @@ static ArrayLong ArrayLong_copy_elements(ArrayLong _x2c_gensym_macro_array_150){
   return _x2c_gensym_macro_copy_3;
 }
 
-static ArrayLong ArrayLong_slice_elements(ArrayLong _x2c_gensym_macro_array_151, int _x2c_gensym_macro_start_24, int _x2c_gensym_macro_end_21, int _x2c_gensym_macro_step_6){
+static ArrayLong ArrayLong_slice_elements(ArrayLong _x2c_gensym_macro_array_151, int _x2c_gensym_macro_start_27, int _x2c_gensym_macro_end_24, int _x2c_gensym_macro_step_6){
   ArrayLong _x2c_gensym_macro_slice_3 =(ArrayLong) Block_new(sizeof(long));
-  int _x2c_gensym_macro_newlen_3 = x2c_normalize_slice(& _x2c_gensym_macro_start_24, & _x2c_gensym_macro_end_21, _x2c_gensym_macro_step_6, (int) _x2c_gensym_macro_array_151 -> length);
+  int _x2c_gensym_macro_newlen_3 = x2c_normalize_slice(&(_x2c_gensym_macro_start_27), &(_x2c_gensym_macro_end_24), _x2c_gensym_macro_step_6, (int) _x2c_gensym_macro_array_151 -> length);
   if(_x2c_gensym_macro_newlen_3 <= 0) return _x2c_gensym_macro_slice_3;
   if(_x2c_gensym_macro_step_6 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_3, (unsigned char *) _x2c_gensym_macro_array_151 -> bytes + _x2c_gensym_macro_start_24 * sizeof(long), _x2c_gensym_macro_newlen_3);
+    Block_append((Block) _x2c_gensym_macro_slice_3, (unsigned char *) _x2c_gensym_macro_array_151 -> bytes + _x2c_gensym_macro_start_27 * sizeof(long), _x2c_gensym_macro_newlen_3);
     return _x2c_gensym_macro_slice_3;
   }
   long * _x2c_gensym_macro_data_36 =(long *) _x2c_gensym_macro_array_151 -> bytes;
   if(_x2c_gensym_macro_step_6 < 0){
-    for(int _x2c_gensym_macro_i_30 = _x2c_gensym_macro_start_24;  _x2c_gensym_macro_i_30 > _x2c_gensym_macro_end_21;  _x2c_gensym_macro_i_30 += _x2c_gensym_macro_step_6) Block_append((Block) _x2c_gensym_macro_slice_3, _x2c_gensym_macro_data_36 + _x2c_gensym_macro_i_30, 1);
+    for(int _x2c_gensym_macro_i_30 = _x2c_gensym_macro_start_27;  _x2c_gensym_macro_i_30 > _x2c_gensym_macro_end_24;  _x2c_gensym_macro_i_30 += _x2c_gensym_macro_step_6) Block_append((Block) _x2c_gensym_macro_slice_3, _x2c_gensym_macro_data_36 + _x2c_gensym_macro_i_30, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_31 = _x2c_gensym_macro_start_24;  _x2c_gensym_macro_i_31 < _x2c_gensym_macro_end_21;  _x2c_gensym_macro_i_31 += _x2c_gensym_macro_step_6) Block_append((Block) _x2c_gensym_macro_slice_3, _x2c_gensym_macro_data_36 + _x2c_gensym_macro_i_31, 1);
+    for(int _x2c_gensym_macro_i_31 = _x2c_gensym_macro_start_27;  _x2c_gensym_macro_i_31 < _x2c_gensym_macro_end_24;  _x2c_gensym_macro_i_31 += _x2c_gensym_macro_step_6) Block_append((Block) _x2c_gensym_macro_slice_3, _x2c_gensym_macro_data_36 + _x2c_gensym_macro_i_31, 1);
   }
   return _x2c_gensym_macro_slice_3;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_3(ArrayLong _x2c_gensym_macro_array_152, int _x2c_gensym_macro_index_41){
   int _x2c_gensym_macro_length_3 =(int) _x2c_gensym_macro_array_152 -> length;
-  int _x2c_gensym_macro_start_25 = _x2c_gensym_macro_index_41, _x2c_gensym_macro_stop_3 = _x2c_gensym_macro_index_41;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_25, & _x2c_gensym_macro_stop_3, 1, _x2c_gensym_macro_length_3);
-  return _x2c_gensym_macro_start_25;
+  int _x2c_gensym_macro_start_28 = _x2c_gensym_macro_index_41, _x2c_gensym_macro_stop_3 = _x2c_gensym_macro_index_41;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_28), &(_x2c_gensym_macro_stop_3), 1, _x2c_gensym_macro_length_3);
+  return _x2c_gensym_macro_start_28;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_3(ArrayLong _x2c_gensym_macro_array_153, int * _x2c_gensym_macro_begin_9, int * _x2c_gensym_macro_finish_9){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_9, _x2c_gensym_macro_finish_9, 1, (int) _x2c_gensym_macro_array_153 -> length);
-  if(* _x2c_gensym_macro_finish_9 < * _x2c_gensym_macro_begin_9){
-    int _x2c_gensym_macro_tmp_6 = * _x2c_gensym_macro_begin_9;
-    * _x2c_gensym_macro_begin_9 = * _x2c_gensym_macro_finish_9;
-    * _x2c_gensym_macro_finish_9 = _x2c_gensym_macro_tmp_6;
+static inline void _x2c_gensym_macro__normalize_span_3(ArrayLong _x2c_gensym_macro_array_153, int * _x2c_gensym_macro_start_29, int * _x2c_gensym_macro_end_25){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_29)), &((* _x2c_gensym_macro_end_25)), 1, (int) _x2c_gensym_macro_array_153 -> length);
+  if((* _x2c_gensym_macro_end_25) <(* _x2c_gensym_macro_start_29)){
+    int _x2c_gensym_macro_tmp_6 =(* _x2c_gensym_macro_start_29);
+    (* _x2c_gensym_macro_start_29) =(* _x2c_gensym_macro_end_25);
+    (* _x2c_gensym_macro_end_25) = _x2c_gensym_macro_tmp_6;
   }
 
 }
 
-static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, int _x2c_gensym_macro_start_26, int _x2c_gensym_macro_end_22, ArrayLong _x2c_gensym_macro_values_15){
+static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, int _x2c_gensym_macro_start_30, int _x2c_gensym_macro_end_26, ArrayLong _x2c_gensym_macro_values_15){
   int _x2c_gensym_macro_n_36 =(int) _x2c_gensym_macro_array_154 -> length;
-  int _x2c_gensym_macro_begin_10 = _x2c_gensym_macro_start_26, _x2c_gensym_macro_finish_10 = _x2c_gensym_macro_end_22;
-  _x2c_gensym_macro__normalize_span_3(_x2c_gensym_macro_array_154, & _x2c_gensym_macro_begin_10, & _x2c_gensym_macro_finish_10);
-  int _x2c_gensym_macro_remove_3 = _x2c_gensym_macro_finish_10 - _x2c_gensym_macro_begin_10;
+  _x2c_gensym_macro__normalize_span_3(_x2c_gensym_macro_array_154, &(_x2c_gensym_macro_start_30), &(_x2c_gensym_macro_end_26));
+  int _x2c_gensym_macro_remove_3 = _x2c_gensym_macro_end_26 - _x2c_gensym_macro_start_30;
   int _x2c_gensym_macro_insert_3 = ArrayLong_truth(_x2c_gensym_macro_values_15) ?(int) _x2c_gensym_macro_values_15 -> length : 0;
   int _x2c_gensym_macro_delta_3 = _x2c_gensym_macro_insert_3 - _x2c_gensym_macro_remove_3;
   ArrayLong _x2c_gensym_macro_source_6 = _x2c_gensym_macro_values_15;
@@ -3586,9 +3579,9 @@ static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, in
         Block_append((Block) _x2c_gensym_macro_array_154, NULL, _x2c_gensym_macro_delta_3);
       }
       long * _x2c_gensym_macro_data_37 =(long *) _x2c_gensym_macro_array_154 -> bytes;
-      int _x2c_gensym_macro_tail_6 = _x2c_gensym_macro_n_36 - _x2c_gensym_macro_finish_10;
-      if(_x2c_gensym_macro_tail_6 > 0 && _x2c_gensym_macro_delta_3 != 0) memmove(_x2c_gensym_macro_data_37 + _x2c_gensym_macro_begin_10 + _x2c_gensym_macro_insert_3, _x2c_gensym_macro_data_37 + _x2c_gensym_macro_finish_10, _x2c_gensym_macro_tail_6 * sizeof(long));
-      if(_x2c_gensym_macro_insert_3 > 0) memcpy(_x2c_gensym_macro_data_37 + _x2c_gensym_macro_begin_10, _x2c_gensym_macro_source_6 -> bytes, _x2c_gensym_macro_insert_3 * sizeof(long));
+      int _x2c_gensym_macro_tail_6 = _x2c_gensym_macro_n_36 - _x2c_gensym_macro_end_26;
+      if(_x2c_gensym_macro_tail_6 > 0 && _x2c_gensym_macro_delta_3 != 0) memmove(_x2c_gensym_macro_data_37 + _x2c_gensym_macro_start_30 + _x2c_gensym_macro_insert_3, _x2c_gensym_macro_data_37 + _x2c_gensym_macro_end_26, _x2c_gensym_macro_tail_6 * sizeof(long));
+      if(_x2c_gensym_macro_insert_3 > 0) memcpy(_x2c_gensym_macro_data_37 + _x2c_gensym_macro_start_30, _x2c_gensym_macro_source_6 -> bytes, _x2c_gensym_macro_insert_3 * sizeof(long));
       if(_x2c_gensym_macro_delta_3 < 0) _x2c_gensym_macro_array_154 -> length = _x2c_gensym_macro_n_36 + _x2c_gensym_macro_delta_3;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
@@ -3596,27 +3589,26 @@ static void ArrayLong_replace_elements(ArrayLong _x2c_gensym_macro_array_154, in
 
 }
 
-static ArrayLong ArrayLong_cut_elements(ArrayLong _x2c_gensym_macro_array_155, int _x2c_gensym_macro_start_27, int _x2c_gensym_macro_end_23){
+static ArrayLong ArrayLong_cut_elements(ArrayLong _x2c_gensym_macro_array_155, int _x2c_gensym_macro_start_31, int _x2c_gensym_macro_end_27){
   int _x2c_gensym_macro_n_37 =(int) _x2c_gensym_macro_array_155 -> length;
-  int _x2c_gensym_macro_begin_11 = _x2c_gensym_macro_start_27, _x2c_gensym_macro_finish_11 = _x2c_gensym_macro_end_23;
-  _x2c_gensym_macro__normalize_span_3(_x2c_gensym_macro_array_155, & _x2c_gensym_macro_begin_11, & _x2c_gensym_macro_finish_11);
-  if(_x2c_gensym_macro_begin_11 >= _x2c_gensym_macro_finish_11) return(ArrayLong) Block_new(sizeof(long));
-  ArrayLong _x2c_gensym_macro_removed_6 = ArrayLong_slice_elements(_x2c_gensym_macro_array_155, _x2c_gensym_macro_begin_11, _x2c_gensym_macro_finish_11, 1);
+  _x2c_gensym_macro__normalize_span_3(_x2c_gensym_macro_array_155, &(_x2c_gensym_macro_start_31), &(_x2c_gensym_macro_end_27));
+  if(_x2c_gensym_macro_start_31 >= _x2c_gensym_macro_end_27) return(ArrayLong) Block_new(sizeof(long));
+  ArrayLong _x2c_gensym_macro_removed_6 = ArrayLong_slice_elements(_x2c_gensym_macro_array_155, _x2c_gensym_macro_start_31, _x2c_gensym_macro_end_27, 1);
   long * _x2c_gensym_macro_data_38 =(long *) _x2c_gensym_macro_array_155 -> bytes;
-  int _x2c_gensym_macro_tail_7 = _x2c_gensym_macro_n_37 - _x2c_gensym_macro_finish_11;
-  if(_x2c_gensym_macro_tail_7 > 0) memmove(_x2c_gensym_macro_data_38 + _x2c_gensym_macro_begin_11, _x2c_gensym_macro_data_38 + _x2c_gensym_macro_finish_11, _x2c_gensym_macro_tail_7 * sizeof(long));
-  _x2c_gensym_macro_array_155 -> length = _x2c_gensym_macro_n_37 -(_x2c_gensym_macro_finish_11 - _x2c_gensym_macro_begin_11);
+  int _x2c_gensym_macro_tail_7 = _x2c_gensym_macro_n_37 - _x2c_gensym_macro_end_27;
+  if(_x2c_gensym_macro_tail_7 > 0) memmove(_x2c_gensym_macro_data_38 + _x2c_gensym_macro_start_31, _x2c_gensym_macro_data_38 + _x2c_gensym_macro_end_27, _x2c_gensym_macro_tail_7 * sizeof(long));
+  _x2c_gensym_macro_array_155 -> length = _x2c_gensym_macro_n_37 -(_x2c_gensym_macro_end_27 - _x2c_gensym_macro_start_31);
   return _x2c_gensym_macro_removed_6;
 }
 
 static ArrayLong ArrayLong_splice_elements(ArrayLong _x2c_gensym_macro_array_156, int _x2c_gensym_macro_index_42, int _x2c_gensym_macro_remove_count_6, ArrayLong _x2c_gensym_macro_values_16){
   if(_x2c_gensym_macro_remove_count_6 < 0) _x2c_gensym_macro_remove_count_6 = 0;
   int _x2c_gensym_macro_n_38 =(int) _x2c_gensym_macro_array_156 -> length;
-  int _x2c_gensym_macro_start_28 = _x2c_gensym_macro__normalize_bound_3(_x2c_gensym_macro_array_156, _x2c_gensym_macro_index_42);
-  long long _x2c_gensym_macro_target_3 =(long long) _x2c_gensym_macro_start_28 + _x2c_gensym_macro_remove_count_6;
-  int _x2c_gensym_macro_end_24 = _x2c_gensym_macro_target_3 > _x2c_gensym_macro_n_38 ? _x2c_gensym_macro_n_38 :(int) _x2c_gensym_macro_target_3;
-  ArrayLong _x2c_gensym_macro_removed_7 = ArrayLong_slice_elements(_x2c_gensym_macro_array_156, _x2c_gensym_macro_start_28, _x2c_gensym_macro_end_24, 1);
-  ArrayLong_replace_elements(_x2c_gensym_macro_array_156, _x2c_gensym_macro_start_28, _x2c_gensym_macro_end_24, _x2c_gensym_macro_values_16);
+  int _x2c_gensym_macro_start_32 = _x2c_gensym_macro__normalize_bound_3(_x2c_gensym_macro_array_156, _x2c_gensym_macro_index_42);
+  long long _x2c_gensym_macro_target_3 =(long long) _x2c_gensym_macro_start_32 + _x2c_gensym_macro_remove_count_6;
+  int _x2c_gensym_macro_end_28 = _x2c_gensym_macro_target_3 > _x2c_gensym_macro_n_38 ? _x2c_gensym_macro_n_38 :(int) _x2c_gensym_macro_target_3;
+  ArrayLong _x2c_gensym_macro_removed_7 = ArrayLong_slice_elements(_x2c_gensym_macro_array_156, _x2c_gensym_macro_start_32, _x2c_gensym_macro_end_28, 1);
+  ArrayLong_replace_elements(_x2c_gensym_macro_array_156, _x2c_gensym_macro_start_32, _x2c_gensym_macro_end_28, _x2c_gensym_macro_values_16);
   return _x2c_gensym_macro_removed_7;
 }
 
@@ -3774,27 +3766,27 @@ ArrayLong ArrayLong_copy(ArrayLong _x2c_gensym_macro_array_170){
   return ArrayLong_copy_elements(_x2c_gensym_macro_array_170);
 }
 
-ArrayLong ArrayLong_getslice(ArrayLong _x2c_gensym_macro_array_171, int _x2c_gensym_macro_start_29, int _x2c_gensym_macro_end_25, int _x2c_gensym_macro_step_7){
+ArrayLong ArrayLong_getslice(ArrayLong _x2c_gensym_macro_array_171, int _x2c_gensym_macro_start_33, int _x2c_gensym_macro_end_29, int _x2c_gensym_macro_step_7){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_171 == NULL || ! _x2c_gensym_macro_step_7) _bad_step(_3, _x2c_gensym_macro_step_7);
   if(_x2c_gensym_macro_array_171 -> length > INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_171 -> length);
-  return ArrayLong_slice_elements(_x2c_gensym_macro_array_171, _x2c_gensym_macro_start_29, _x2c_gensym_macro_end_25, _x2c_gensym_macro_step_7);
+  return ArrayLong_slice_elements(_x2c_gensym_macro_array_171, _x2c_gensym_macro_start_33, _x2c_gensym_macro_end_29, _x2c_gensym_macro_step_7);
 }
 
-ArrayLong ArrayLong_setslice(ArrayLong _x2c_gensym_macro_array_172, int _x2c_gensym_macro_start_30, int _x2c_gensym_macro_end_26, ArrayLong _x2c_gensym_macro_values_17){
+ArrayLong ArrayLong_setslice(ArrayLong _x2c_gensym_macro_array_172, int _x2c_gensym_macro_start_34, int _x2c_gensym_macro_end_30, ArrayLong _x2c_gensym_macro_values_17){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_172 == NULL) _bad_operation(_3, 1317790304458);
   if(_x2c_gensym_macro_array_172 -> length > INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_172 -> length);
   if(ArrayLong_truth(_x2c_gensym_macro_values_17) && _x2c_gensym_macro_values_17 -> length > INT_MAX) _size_limit(_3, _x2c_gensym_macro_values_17 -> length);
-  ArrayLong_replace_elements(_x2c_gensym_macro_array_172, _x2c_gensym_macro_start_30, _x2c_gensym_macro_end_26, _x2c_gensym_macro_values_17);
+  ArrayLong_replace_elements(_x2c_gensym_macro_array_172, _x2c_gensym_macro_start_34, _x2c_gensym_macro_end_30, _x2c_gensym_macro_values_17);
   return _x2c_gensym_macro_array_172;
 }
 
-ArrayLong ArrayLong_remslice(ArrayLong _x2c_gensym_macro_array_173, int _x2c_gensym_macro_start_31, int _x2c_gensym_macro_end_27){
+ArrayLong ArrayLong_remslice(ArrayLong _x2c_gensym_macro_array_173, int _x2c_gensym_macro_start_35, int _x2c_gensym_macro_end_31){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_173 == NULL) _bad_operation(_3, 1248601065674);
   if(_x2c_gensym_macro_array_173 -> length > INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_173 -> length);
-  return ArrayLong_cut_elements(_x2c_gensym_macro_array_173, _x2c_gensym_macro_start_31, _x2c_gensym_macro_end_27);
+  return ArrayLong_cut_elements(_x2c_gensym_macro_array_173, _x2c_gensym_macro_start_35, _x2c_gensym_macro_end_31);
 }
 
 ArrayLong ArrayLong_splice(ArrayLong _x2c_gensym_macro_array_174, int _x2c_gensym_macro_index_45, int _x2c_gensym_macro_remove_count_7, ArrayLong _x2c_gensym_macro_values_18){
@@ -4123,46 +4115,45 @@ static ArrayFloat ArrayFloat_copy_elements(ArrayFloat _x2c_gensym_macro_array_19
   return _x2c_gensym_macro_copy_4;
 }
 
-static ArrayFloat ArrayFloat_slice_elements(ArrayFloat _x2c_gensym_macro_array_200, int _x2c_gensym_macro_start_32, int _x2c_gensym_macro_end_28, int _x2c_gensym_macro_step_8){
+static ArrayFloat ArrayFloat_slice_elements(ArrayFloat _x2c_gensym_macro_array_200, int _x2c_gensym_macro_start_36, int _x2c_gensym_macro_end_32, int _x2c_gensym_macro_step_8){
   ArrayFloat _x2c_gensym_macro_slice_4 =(ArrayFloat) Block_new(sizeof(float));
-  int _x2c_gensym_macro_newlen_4 = x2c_normalize_slice(& _x2c_gensym_macro_start_32, & _x2c_gensym_macro_end_28, _x2c_gensym_macro_step_8, (int) _x2c_gensym_macro_array_200 -> length);
+  int _x2c_gensym_macro_newlen_4 = x2c_normalize_slice(&(_x2c_gensym_macro_start_36), &(_x2c_gensym_macro_end_32), _x2c_gensym_macro_step_8, (int) _x2c_gensym_macro_array_200 -> length);
   if(_x2c_gensym_macro_newlen_4 <= 0) return _x2c_gensym_macro_slice_4;
   if(_x2c_gensym_macro_step_8 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_4, (unsigned char *) _x2c_gensym_macro_array_200 -> bytes + _x2c_gensym_macro_start_32 * sizeof(float), _x2c_gensym_macro_newlen_4);
+    Block_append((Block) _x2c_gensym_macro_slice_4, (unsigned char *) _x2c_gensym_macro_array_200 -> bytes + _x2c_gensym_macro_start_36 * sizeof(float), _x2c_gensym_macro_newlen_4);
     return _x2c_gensym_macro_slice_4;
   }
   float * _x2c_gensym_macro_data_47 =(float *) _x2c_gensym_macro_array_200 -> bytes;
   if(_x2c_gensym_macro_step_8 < 0){
-    for(int _x2c_gensym_macro_i_40 = _x2c_gensym_macro_start_32;  _x2c_gensym_macro_i_40 > _x2c_gensym_macro_end_28;  _x2c_gensym_macro_i_40 += _x2c_gensym_macro_step_8) Block_append((Block) _x2c_gensym_macro_slice_4, _x2c_gensym_macro_data_47 + _x2c_gensym_macro_i_40, 1);
+    for(int _x2c_gensym_macro_i_40 = _x2c_gensym_macro_start_36;  _x2c_gensym_macro_i_40 > _x2c_gensym_macro_end_32;  _x2c_gensym_macro_i_40 += _x2c_gensym_macro_step_8) Block_append((Block) _x2c_gensym_macro_slice_4, _x2c_gensym_macro_data_47 + _x2c_gensym_macro_i_40, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_41 = _x2c_gensym_macro_start_32;  _x2c_gensym_macro_i_41 < _x2c_gensym_macro_end_28;  _x2c_gensym_macro_i_41 += _x2c_gensym_macro_step_8) Block_append((Block) _x2c_gensym_macro_slice_4, _x2c_gensym_macro_data_47 + _x2c_gensym_macro_i_41, 1);
+    for(int _x2c_gensym_macro_i_41 = _x2c_gensym_macro_start_36;  _x2c_gensym_macro_i_41 < _x2c_gensym_macro_end_32;  _x2c_gensym_macro_i_41 += _x2c_gensym_macro_step_8) Block_append((Block) _x2c_gensym_macro_slice_4, _x2c_gensym_macro_data_47 + _x2c_gensym_macro_i_41, 1);
   }
   return _x2c_gensym_macro_slice_4;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_4(ArrayFloat _x2c_gensym_macro_array_201, int _x2c_gensym_macro_index_54){
   int _x2c_gensym_macro_length_4 =(int) _x2c_gensym_macro_array_201 -> length;
-  int _x2c_gensym_macro_start_33 = _x2c_gensym_macro_index_54, _x2c_gensym_macro_stop_4 = _x2c_gensym_macro_index_54;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_33, & _x2c_gensym_macro_stop_4, 1, _x2c_gensym_macro_length_4);
-  return _x2c_gensym_macro_start_33;
+  int _x2c_gensym_macro_start_37 = _x2c_gensym_macro_index_54, _x2c_gensym_macro_stop_4 = _x2c_gensym_macro_index_54;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_37), &(_x2c_gensym_macro_stop_4), 1, _x2c_gensym_macro_length_4);
+  return _x2c_gensym_macro_start_37;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_4(ArrayFloat _x2c_gensym_macro_array_202, int * _x2c_gensym_macro_begin_12, int * _x2c_gensym_macro_finish_12){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_12, _x2c_gensym_macro_finish_12, 1, (int) _x2c_gensym_macro_array_202 -> length);
-  if(* _x2c_gensym_macro_finish_12 < * _x2c_gensym_macro_begin_12){
-    int _x2c_gensym_macro_tmp_8 = * _x2c_gensym_macro_begin_12;
-    * _x2c_gensym_macro_begin_12 = * _x2c_gensym_macro_finish_12;
-    * _x2c_gensym_macro_finish_12 = _x2c_gensym_macro_tmp_8;
+static inline void _x2c_gensym_macro__normalize_span_4(ArrayFloat _x2c_gensym_macro_array_202, int * _x2c_gensym_macro_start_38, int * _x2c_gensym_macro_end_33){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_38)), &((* _x2c_gensym_macro_end_33)), 1, (int) _x2c_gensym_macro_array_202 -> length);
+  if((* _x2c_gensym_macro_end_33) <(* _x2c_gensym_macro_start_38)){
+    int _x2c_gensym_macro_tmp_8 =(* _x2c_gensym_macro_start_38);
+    (* _x2c_gensym_macro_start_38) =(* _x2c_gensym_macro_end_33);
+    (* _x2c_gensym_macro_end_33) = _x2c_gensym_macro_tmp_8;
   }
 
 }
 
-static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, int _x2c_gensym_macro_start_34, int _x2c_gensym_macro_end_29, ArrayFloat _x2c_gensym_macro_values_20){
+static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, int _x2c_gensym_macro_start_39, int _x2c_gensym_macro_end_34, ArrayFloat _x2c_gensym_macro_values_20){
   int _x2c_gensym_macro_n_47 =(int) _x2c_gensym_macro_array_203 -> length;
-  int _x2c_gensym_macro_begin_13 = _x2c_gensym_macro_start_34, _x2c_gensym_macro_finish_13 = _x2c_gensym_macro_end_29;
-  _x2c_gensym_macro__normalize_span_4(_x2c_gensym_macro_array_203, & _x2c_gensym_macro_begin_13, & _x2c_gensym_macro_finish_13);
-  int _x2c_gensym_macro_remove_4 = _x2c_gensym_macro_finish_13 - _x2c_gensym_macro_begin_13;
+  _x2c_gensym_macro__normalize_span_4(_x2c_gensym_macro_array_203, &(_x2c_gensym_macro_start_39), &(_x2c_gensym_macro_end_34));
+  int _x2c_gensym_macro_remove_4 = _x2c_gensym_macro_end_34 - _x2c_gensym_macro_start_39;
   int _x2c_gensym_macro_insert_4 = ArrayFloat_truth(_x2c_gensym_macro_values_20) ?(int) _x2c_gensym_macro_values_20 -> length : 0;
   int _x2c_gensym_macro_delta_4 = _x2c_gensym_macro_insert_4 - _x2c_gensym_macro_remove_4;
   ArrayFloat _x2c_gensym_macro_source_8 = _x2c_gensym_macro_values_20;
@@ -4197,9 +4188,9 @@ static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, 
         Block_append((Block) _x2c_gensym_macro_array_203, NULL, _x2c_gensym_macro_delta_4);
       }
       float * _x2c_gensym_macro_data_48 =(float *) _x2c_gensym_macro_array_203 -> bytes;
-      int _x2c_gensym_macro_tail_8 = _x2c_gensym_macro_n_47 - _x2c_gensym_macro_finish_13;
-      if(_x2c_gensym_macro_tail_8 > 0 && _x2c_gensym_macro_delta_4 != 0) memmove(_x2c_gensym_macro_data_48 + _x2c_gensym_macro_begin_13 + _x2c_gensym_macro_insert_4, _x2c_gensym_macro_data_48 + _x2c_gensym_macro_finish_13, _x2c_gensym_macro_tail_8 * sizeof(float));
-      if(_x2c_gensym_macro_insert_4 > 0) memcpy(_x2c_gensym_macro_data_48 + _x2c_gensym_macro_begin_13, _x2c_gensym_macro_source_8 -> bytes, _x2c_gensym_macro_insert_4 * sizeof(float));
+      int _x2c_gensym_macro_tail_8 = _x2c_gensym_macro_n_47 - _x2c_gensym_macro_end_34;
+      if(_x2c_gensym_macro_tail_8 > 0 && _x2c_gensym_macro_delta_4 != 0) memmove(_x2c_gensym_macro_data_48 + _x2c_gensym_macro_start_39 + _x2c_gensym_macro_insert_4, _x2c_gensym_macro_data_48 + _x2c_gensym_macro_end_34, _x2c_gensym_macro_tail_8 * sizeof(float));
+      if(_x2c_gensym_macro_insert_4 > 0) memcpy(_x2c_gensym_macro_data_48 + _x2c_gensym_macro_start_39, _x2c_gensym_macro_source_8 -> bytes, _x2c_gensym_macro_insert_4 * sizeof(float));
       if(_x2c_gensym_macro_delta_4 < 0) _x2c_gensym_macro_array_203 -> length = _x2c_gensym_macro_n_47 + _x2c_gensym_macro_delta_4;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
@@ -4207,27 +4198,26 @@ static void ArrayFloat_replace_elements(ArrayFloat _x2c_gensym_macro_array_203, 
 
 }
 
-static ArrayFloat ArrayFloat_cut_elements(ArrayFloat _x2c_gensym_macro_array_204, int _x2c_gensym_macro_start_35, int _x2c_gensym_macro_end_30){
+static ArrayFloat ArrayFloat_cut_elements(ArrayFloat _x2c_gensym_macro_array_204, int _x2c_gensym_macro_start_40, int _x2c_gensym_macro_end_35){
   int _x2c_gensym_macro_n_48 =(int) _x2c_gensym_macro_array_204 -> length;
-  int _x2c_gensym_macro_begin_14 = _x2c_gensym_macro_start_35, _x2c_gensym_macro_finish_14 = _x2c_gensym_macro_end_30;
-  _x2c_gensym_macro__normalize_span_4(_x2c_gensym_macro_array_204, & _x2c_gensym_macro_begin_14, & _x2c_gensym_macro_finish_14);
-  if(_x2c_gensym_macro_begin_14 >= _x2c_gensym_macro_finish_14) return(ArrayFloat) Block_new(sizeof(float));
-  ArrayFloat _x2c_gensym_macro_removed_8 = ArrayFloat_slice_elements(_x2c_gensym_macro_array_204, _x2c_gensym_macro_begin_14, _x2c_gensym_macro_finish_14, 1);
+  _x2c_gensym_macro__normalize_span_4(_x2c_gensym_macro_array_204, &(_x2c_gensym_macro_start_40), &(_x2c_gensym_macro_end_35));
+  if(_x2c_gensym_macro_start_40 >= _x2c_gensym_macro_end_35) return(ArrayFloat) Block_new(sizeof(float));
+  ArrayFloat _x2c_gensym_macro_removed_8 = ArrayFloat_slice_elements(_x2c_gensym_macro_array_204, _x2c_gensym_macro_start_40, _x2c_gensym_macro_end_35, 1);
   float * _x2c_gensym_macro_data_49 =(float *) _x2c_gensym_macro_array_204 -> bytes;
-  int _x2c_gensym_macro_tail_9 = _x2c_gensym_macro_n_48 - _x2c_gensym_macro_finish_14;
-  if(_x2c_gensym_macro_tail_9 > 0) memmove(_x2c_gensym_macro_data_49 + _x2c_gensym_macro_begin_14, _x2c_gensym_macro_data_49 + _x2c_gensym_macro_finish_14, _x2c_gensym_macro_tail_9 * sizeof(float));
-  _x2c_gensym_macro_array_204 -> length = _x2c_gensym_macro_n_48 -(_x2c_gensym_macro_finish_14 - _x2c_gensym_macro_begin_14);
+  int _x2c_gensym_macro_tail_9 = _x2c_gensym_macro_n_48 - _x2c_gensym_macro_end_35;
+  if(_x2c_gensym_macro_tail_9 > 0) memmove(_x2c_gensym_macro_data_49 + _x2c_gensym_macro_start_40, _x2c_gensym_macro_data_49 + _x2c_gensym_macro_end_35, _x2c_gensym_macro_tail_9 * sizeof(float));
+  _x2c_gensym_macro_array_204 -> length = _x2c_gensym_macro_n_48 -(_x2c_gensym_macro_end_35 - _x2c_gensym_macro_start_40);
   return _x2c_gensym_macro_removed_8;
 }
 
 static ArrayFloat ArrayFloat_splice_elements(ArrayFloat _x2c_gensym_macro_array_205, int _x2c_gensym_macro_index_55, int _x2c_gensym_macro_remove_count_8, ArrayFloat _x2c_gensym_macro_values_21){
   if(_x2c_gensym_macro_remove_count_8 < 0) _x2c_gensym_macro_remove_count_8 = 0;
   int _x2c_gensym_macro_n_49 =(int) _x2c_gensym_macro_array_205 -> length;
-  int _x2c_gensym_macro_start_36 = _x2c_gensym_macro__normalize_bound_4(_x2c_gensym_macro_array_205, _x2c_gensym_macro_index_55);
-  long long _x2c_gensym_macro_target_4 =(long long) _x2c_gensym_macro_start_36 + _x2c_gensym_macro_remove_count_8;
-  int _x2c_gensym_macro_end_31 = _x2c_gensym_macro_target_4 > _x2c_gensym_macro_n_49 ? _x2c_gensym_macro_n_49 :(int) _x2c_gensym_macro_target_4;
-  ArrayFloat _x2c_gensym_macro_removed_9 = ArrayFloat_slice_elements(_x2c_gensym_macro_array_205, _x2c_gensym_macro_start_36, _x2c_gensym_macro_end_31, 1);
-  ArrayFloat_replace_elements(_x2c_gensym_macro_array_205, _x2c_gensym_macro_start_36, _x2c_gensym_macro_end_31, _x2c_gensym_macro_values_21);
+  int _x2c_gensym_macro_start_41 = _x2c_gensym_macro__normalize_bound_4(_x2c_gensym_macro_array_205, _x2c_gensym_macro_index_55);
+  long long _x2c_gensym_macro_target_4 =(long long) _x2c_gensym_macro_start_41 + _x2c_gensym_macro_remove_count_8;
+  int _x2c_gensym_macro_end_36 = _x2c_gensym_macro_target_4 > _x2c_gensym_macro_n_49 ? _x2c_gensym_macro_n_49 :(int) _x2c_gensym_macro_target_4;
+  ArrayFloat _x2c_gensym_macro_removed_9 = ArrayFloat_slice_elements(_x2c_gensym_macro_array_205, _x2c_gensym_macro_start_41, _x2c_gensym_macro_end_36, 1);
+  ArrayFloat_replace_elements(_x2c_gensym_macro_array_205, _x2c_gensym_macro_start_41, _x2c_gensym_macro_end_36, _x2c_gensym_macro_values_21);
   return _x2c_gensym_macro_removed_9;
 }
 
@@ -4383,27 +4373,27 @@ ArrayFloat ArrayFloat_copy(ArrayFloat _x2c_gensym_macro_array_219){
   return ArrayFloat_copy_elements(_x2c_gensym_macro_array_219);
 }
 
-ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_gensym_macro_array_220, int _x2c_gensym_macro_start_37, int _x2c_gensym_macro_end_32, int _x2c_gensym_macro_step_9){
+ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_gensym_macro_array_220, int _x2c_gensym_macro_start_42, int _x2c_gensym_macro_end_37, int _x2c_gensym_macro_step_9){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_220 == NULL || ! _x2c_gensym_macro_step_9) _bad_step(_4, _x2c_gensym_macro_step_9);
   if(_x2c_gensym_macro_array_220 -> length > INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_220 -> length);
-  return ArrayFloat_slice_elements(_x2c_gensym_macro_array_220, _x2c_gensym_macro_start_37, _x2c_gensym_macro_end_32, _x2c_gensym_macro_step_9);
+  return ArrayFloat_slice_elements(_x2c_gensym_macro_array_220, _x2c_gensym_macro_start_42, _x2c_gensym_macro_end_37, _x2c_gensym_macro_step_9);
 }
 
-ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_gensym_macro_array_221, int _x2c_gensym_macro_start_38, int _x2c_gensym_macro_end_33, ArrayFloat _x2c_gensym_macro_values_22){
+ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_gensym_macro_array_221, int _x2c_gensym_macro_start_43, int _x2c_gensym_macro_end_38, ArrayFloat _x2c_gensym_macro_values_22){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_221 == NULL) _bad_operation(_4, 1317790304458);
   if(_x2c_gensym_macro_array_221 -> length > INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_221 -> length);
   if(ArrayFloat_truth(_x2c_gensym_macro_values_22) && _x2c_gensym_macro_values_22 -> length > INT_MAX) _size_limit(_4, _x2c_gensym_macro_values_22 -> length);
-  ArrayFloat_replace_elements(_x2c_gensym_macro_array_221, _x2c_gensym_macro_start_38, _x2c_gensym_macro_end_33, _x2c_gensym_macro_values_22);
+  ArrayFloat_replace_elements(_x2c_gensym_macro_array_221, _x2c_gensym_macro_start_43, _x2c_gensym_macro_end_38, _x2c_gensym_macro_values_22);
   return _x2c_gensym_macro_array_221;
 }
 
-ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_gensym_macro_array_222, int _x2c_gensym_macro_start_39, int _x2c_gensym_macro_end_34){
+ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_gensym_macro_array_222, int _x2c_gensym_macro_start_44, int _x2c_gensym_macro_end_39){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_222 == NULL) _bad_operation(_4, 1248601065674);
   if(_x2c_gensym_macro_array_222 -> length > INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_222 -> length);
-  return ArrayFloat_cut_elements(_x2c_gensym_macro_array_222, _x2c_gensym_macro_start_39, _x2c_gensym_macro_end_34);
+  return ArrayFloat_cut_elements(_x2c_gensym_macro_array_222, _x2c_gensym_macro_start_44, _x2c_gensym_macro_end_39);
 }
 
 ArrayFloat ArrayFloat_splice(ArrayFloat _x2c_gensym_macro_array_223, int _x2c_gensym_macro_index_58, int _x2c_gensym_macro_remove_count_9, ArrayFloat _x2c_gensym_macro_values_23){
@@ -4732,46 +4722,45 @@ static ArrayDbl ArrayDbl_copy_elements(ArrayDbl _x2c_gensym_macro_array_248){
   return _x2c_gensym_macro_copy_5;
 }
 
-static ArrayDbl ArrayDbl_slice_elements(ArrayDbl _x2c_gensym_macro_array_249, int _x2c_gensym_macro_start_40, int _x2c_gensym_macro_end_35, int _x2c_gensym_macro_step_10){
+static ArrayDbl ArrayDbl_slice_elements(ArrayDbl _x2c_gensym_macro_array_249, int _x2c_gensym_macro_start_45, int _x2c_gensym_macro_end_40, int _x2c_gensym_macro_step_10){
   ArrayDbl _x2c_gensym_macro_slice_5 =(ArrayDbl) Block_new(sizeof(double));
-  int _x2c_gensym_macro_newlen_5 = x2c_normalize_slice(& _x2c_gensym_macro_start_40, & _x2c_gensym_macro_end_35, _x2c_gensym_macro_step_10, (int) _x2c_gensym_macro_array_249 -> length);
+  int _x2c_gensym_macro_newlen_5 = x2c_normalize_slice(&(_x2c_gensym_macro_start_45), &(_x2c_gensym_macro_end_40), _x2c_gensym_macro_step_10, (int) _x2c_gensym_macro_array_249 -> length);
   if(_x2c_gensym_macro_newlen_5 <= 0) return _x2c_gensym_macro_slice_5;
   if(_x2c_gensym_macro_step_10 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_5, (unsigned char *) _x2c_gensym_macro_array_249 -> bytes + _x2c_gensym_macro_start_40 * sizeof(double), _x2c_gensym_macro_newlen_5);
+    Block_append((Block) _x2c_gensym_macro_slice_5, (unsigned char *) _x2c_gensym_macro_array_249 -> bytes + _x2c_gensym_macro_start_45 * sizeof(double), _x2c_gensym_macro_newlen_5);
     return _x2c_gensym_macro_slice_5;
   }
   double * _x2c_gensym_macro_data_58 =(double *) _x2c_gensym_macro_array_249 -> bytes;
   if(_x2c_gensym_macro_step_10 < 0){
-    for(int _x2c_gensym_macro_i_50 = _x2c_gensym_macro_start_40;  _x2c_gensym_macro_i_50 > _x2c_gensym_macro_end_35;  _x2c_gensym_macro_i_50 += _x2c_gensym_macro_step_10) Block_append((Block) _x2c_gensym_macro_slice_5, _x2c_gensym_macro_data_58 + _x2c_gensym_macro_i_50, 1);
+    for(int _x2c_gensym_macro_i_50 = _x2c_gensym_macro_start_45;  _x2c_gensym_macro_i_50 > _x2c_gensym_macro_end_40;  _x2c_gensym_macro_i_50 += _x2c_gensym_macro_step_10) Block_append((Block) _x2c_gensym_macro_slice_5, _x2c_gensym_macro_data_58 + _x2c_gensym_macro_i_50, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_51 = _x2c_gensym_macro_start_40;  _x2c_gensym_macro_i_51 < _x2c_gensym_macro_end_35;  _x2c_gensym_macro_i_51 += _x2c_gensym_macro_step_10) Block_append((Block) _x2c_gensym_macro_slice_5, _x2c_gensym_macro_data_58 + _x2c_gensym_macro_i_51, 1);
+    for(int _x2c_gensym_macro_i_51 = _x2c_gensym_macro_start_45;  _x2c_gensym_macro_i_51 < _x2c_gensym_macro_end_40;  _x2c_gensym_macro_i_51 += _x2c_gensym_macro_step_10) Block_append((Block) _x2c_gensym_macro_slice_5, _x2c_gensym_macro_data_58 + _x2c_gensym_macro_i_51, 1);
   }
   return _x2c_gensym_macro_slice_5;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_5(ArrayDbl _x2c_gensym_macro_array_250, int _x2c_gensym_macro_index_67){
   int _x2c_gensym_macro_length_5 =(int) _x2c_gensym_macro_array_250 -> length;
-  int _x2c_gensym_macro_start_41 = _x2c_gensym_macro_index_67, _x2c_gensym_macro_stop_5 = _x2c_gensym_macro_index_67;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_41, & _x2c_gensym_macro_stop_5, 1, _x2c_gensym_macro_length_5);
-  return _x2c_gensym_macro_start_41;
+  int _x2c_gensym_macro_start_46 = _x2c_gensym_macro_index_67, _x2c_gensym_macro_stop_5 = _x2c_gensym_macro_index_67;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_46), &(_x2c_gensym_macro_stop_5), 1, _x2c_gensym_macro_length_5);
+  return _x2c_gensym_macro_start_46;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_5(ArrayDbl _x2c_gensym_macro_array_251, int * _x2c_gensym_macro_begin_15, int * _x2c_gensym_macro_finish_15){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_15, _x2c_gensym_macro_finish_15, 1, (int) _x2c_gensym_macro_array_251 -> length);
-  if(* _x2c_gensym_macro_finish_15 < * _x2c_gensym_macro_begin_15){
-    int _x2c_gensym_macro_tmp_10 = * _x2c_gensym_macro_begin_15;
-    * _x2c_gensym_macro_begin_15 = * _x2c_gensym_macro_finish_15;
-    * _x2c_gensym_macro_finish_15 = _x2c_gensym_macro_tmp_10;
+static inline void _x2c_gensym_macro__normalize_span_5(ArrayDbl _x2c_gensym_macro_array_251, int * _x2c_gensym_macro_start_47, int * _x2c_gensym_macro_end_41){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_47)), &((* _x2c_gensym_macro_end_41)), 1, (int) _x2c_gensym_macro_array_251 -> length);
+  if((* _x2c_gensym_macro_end_41) <(* _x2c_gensym_macro_start_47)){
+    int _x2c_gensym_macro_tmp_10 =(* _x2c_gensym_macro_start_47);
+    (* _x2c_gensym_macro_start_47) =(* _x2c_gensym_macro_end_41);
+    (* _x2c_gensym_macro_end_41) = _x2c_gensym_macro_tmp_10;
   }
 
 }
 
-static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int _x2c_gensym_macro_start_42, int _x2c_gensym_macro_end_36, ArrayDbl _x2c_gensym_macro_values_25){
+static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int _x2c_gensym_macro_start_48, int _x2c_gensym_macro_end_42, ArrayDbl _x2c_gensym_macro_values_25){
   int _x2c_gensym_macro_n_58 =(int) _x2c_gensym_macro_array_252 -> length;
-  int _x2c_gensym_macro_begin_16 = _x2c_gensym_macro_start_42, _x2c_gensym_macro_finish_16 = _x2c_gensym_macro_end_36;
-  _x2c_gensym_macro__normalize_span_5(_x2c_gensym_macro_array_252, & _x2c_gensym_macro_begin_16, & _x2c_gensym_macro_finish_16);
-  int _x2c_gensym_macro_remove_5 = _x2c_gensym_macro_finish_16 - _x2c_gensym_macro_begin_16;
+  _x2c_gensym_macro__normalize_span_5(_x2c_gensym_macro_array_252, &(_x2c_gensym_macro_start_48), &(_x2c_gensym_macro_end_42));
+  int _x2c_gensym_macro_remove_5 = _x2c_gensym_macro_end_42 - _x2c_gensym_macro_start_48;
   int _x2c_gensym_macro_insert_5 = ArrayDbl_truth(_x2c_gensym_macro_values_25) ?(int) _x2c_gensym_macro_values_25 -> length : 0;
   int _x2c_gensym_macro_delta_5 = _x2c_gensym_macro_insert_5 - _x2c_gensym_macro_remove_5;
   ArrayDbl _x2c_gensym_macro_source_10 = _x2c_gensym_macro_values_25;
@@ -4806,9 +4795,9 @@ static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int 
         Block_append((Block) _x2c_gensym_macro_array_252, NULL, _x2c_gensym_macro_delta_5);
       }
       double * _x2c_gensym_macro_data_59 =(double *) _x2c_gensym_macro_array_252 -> bytes;
-      int _x2c_gensym_macro_tail_10 = _x2c_gensym_macro_n_58 - _x2c_gensym_macro_finish_16;
-      if(_x2c_gensym_macro_tail_10 > 0 && _x2c_gensym_macro_delta_5 != 0) memmove(_x2c_gensym_macro_data_59 + _x2c_gensym_macro_begin_16 + _x2c_gensym_macro_insert_5, _x2c_gensym_macro_data_59 + _x2c_gensym_macro_finish_16, _x2c_gensym_macro_tail_10 * sizeof(double));
-      if(_x2c_gensym_macro_insert_5 > 0) memcpy(_x2c_gensym_macro_data_59 + _x2c_gensym_macro_begin_16, _x2c_gensym_macro_source_10 -> bytes, _x2c_gensym_macro_insert_5 * sizeof(double));
+      int _x2c_gensym_macro_tail_10 = _x2c_gensym_macro_n_58 - _x2c_gensym_macro_end_42;
+      if(_x2c_gensym_macro_tail_10 > 0 && _x2c_gensym_macro_delta_5 != 0) memmove(_x2c_gensym_macro_data_59 + _x2c_gensym_macro_start_48 + _x2c_gensym_macro_insert_5, _x2c_gensym_macro_data_59 + _x2c_gensym_macro_end_42, _x2c_gensym_macro_tail_10 * sizeof(double));
+      if(_x2c_gensym_macro_insert_5 > 0) memcpy(_x2c_gensym_macro_data_59 + _x2c_gensym_macro_start_48, _x2c_gensym_macro_source_10 -> bytes, _x2c_gensym_macro_insert_5 * sizeof(double));
       if(_x2c_gensym_macro_delta_5 < 0) _x2c_gensym_macro_array_252 -> length = _x2c_gensym_macro_n_58 + _x2c_gensym_macro_delta_5;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
@@ -4816,27 +4805,26 @@ static void ArrayDbl_replace_elements(ArrayDbl _x2c_gensym_macro_array_252, int 
 
 }
 
-static ArrayDbl ArrayDbl_cut_elements(ArrayDbl _x2c_gensym_macro_array_253, int _x2c_gensym_macro_start_43, int _x2c_gensym_macro_end_37){
+static ArrayDbl ArrayDbl_cut_elements(ArrayDbl _x2c_gensym_macro_array_253, int _x2c_gensym_macro_start_49, int _x2c_gensym_macro_end_43){
   int _x2c_gensym_macro_n_59 =(int) _x2c_gensym_macro_array_253 -> length;
-  int _x2c_gensym_macro_begin_17 = _x2c_gensym_macro_start_43, _x2c_gensym_macro_finish_17 = _x2c_gensym_macro_end_37;
-  _x2c_gensym_macro__normalize_span_5(_x2c_gensym_macro_array_253, & _x2c_gensym_macro_begin_17, & _x2c_gensym_macro_finish_17);
-  if(_x2c_gensym_macro_begin_17 >= _x2c_gensym_macro_finish_17) return(ArrayDbl) Block_new(sizeof(double));
-  ArrayDbl _x2c_gensym_macro_removed_10 = ArrayDbl_slice_elements(_x2c_gensym_macro_array_253, _x2c_gensym_macro_begin_17, _x2c_gensym_macro_finish_17, 1);
+  _x2c_gensym_macro__normalize_span_5(_x2c_gensym_macro_array_253, &(_x2c_gensym_macro_start_49), &(_x2c_gensym_macro_end_43));
+  if(_x2c_gensym_macro_start_49 >= _x2c_gensym_macro_end_43) return(ArrayDbl) Block_new(sizeof(double));
+  ArrayDbl _x2c_gensym_macro_removed_10 = ArrayDbl_slice_elements(_x2c_gensym_macro_array_253, _x2c_gensym_macro_start_49, _x2c_gensym_macro_end_43, 1);
   double * _x2c_gensym_macro_data_60 =(double *) _x2c_gensym_macro_array_253 -> bytes;
-  int _x2c_gensym_macro_tail_11 = _x2c_gensym_macro_n_59 - _x2c_gensym_macro_finish_17;
-  if(_x2c_gensym_macro_tail_11 > 0) memmove(_x2c_gensym_macro_data_60 + _x2c_gensym_macro_begin_17, _x2c_gensym_macro_data_60 + _x2c_gensym_macro_finish_17, _x2c_gensym_macro_tail_11 * sizeof(double));
-  _x2c_gensym_macro_array_253 -> length = _x2c_gensym_macro_n_59 -(_x2c_gensym_macro_finish_17 - _x2c_gensym_macro_begin_17);
+  int _x2c_gensym_macro_tail_11 = _x2c_gensym_macro_n_59 - _x2c_gensym_macro_end_43;
+  if(_x2c_gensym_macro_tail_11 > 0) memmove(_x2c_gensym_macro_data_60 + _x2c_gensym_macro_start_49, _x2c_gensym_macro_data_60 + _x2c_gensym_macro_end_43, _x2c_gensym_macro_tail_11 * sizeof(double));
+  _x2c_gensym_macro_array_253 -> length = _x2c_gensym_macro_n_59 -(_x2c_gensym_macro_end_43 - _x2c_gensym_macro_start_49);
   return _x2c_gensym_macro_removed_10;
 }
 
 static ArrayDbl ArrayDbl_splice_elements(ArrayDbl _x2c_gensym_macro_array_254, int _x2c_gensym_macro_index_68, int _x2c_gensym_macro_remove_count_10, ArrayDbl _x2c_gensym_macro_values_26){
   if(_x2c_gensym_macro_remove_count_10 < 0) _x2c_gensym_macro_remove_count_10 = 0;
   int _x2c_gensym_macro_n_60 =(int) _x2c_gensym_macro_array_254 -> length;
-  int _x2c_gensym_macro_start_44 = _x2c_gensym_macro__normalize_bound_5(_x2c_gensym_macro_array_254, _x2c_gensym_macro_index_68);
-  long long _x2c_gensym_macro_target_5 =(long long) _x2c_gensym_macro_start_44 + _x2c_gensym_macro_remove_count_10;
-  int _x2c_gensym_macro_end_38 = _x2c_gensym_macro_target_5 > _x2c_gensym_macro_n_60 ? _x2c_gensym_macro_n_60 :(int) _x2c_gensym_macro_target_5;
-  ArrayDbl _x2c_gensym_macro_removed_11 = ArrayDbl_slice_elements(_x2c_gensym_macro_array_254, _x2c_gensym_macro_start_44, _x2c_gensym_macro_end_38, 1);
-  ArrayDbl_replace_elements(_x2c_gensym_macro_array_254, _x2c_gensym_macro_start_44, _x2c_gensym_macro_end_38, _x2c_gensym_macro_values_26);
+  int _x2c_gensym_macro_start_50 = _x2c_gensym_macro__normalize_bound_5(_x2c_gensym_macro_array_254, _x2c_gensym_macro_index_68);
+  long long _x2c_gensym_macro_target_5 =(long long) _x2c_gensym_macro_start_50 + _x2c_gensym_macro_remove_count_10;
+  int _x2c_gensym_macro_end_44 = _x2c_gensym_macro_target_5 > _x2c_gensym_macro_n_60 ? _x2c_gensym_macro_n_60 :(int) _x2c_gensym_macro_target_5;
+  ArrayDbl _x2c_gensym_macro_removed_11 = ArrayDbl_slice_elements(_x2c_gensym_macro_array_254, _x2c_gensym_macro_start_50, _x2c_gensym_macro_end_44, 1);
+  ArrayDbl_replace_elements(_x2c_gensym_macro_array_254, _x2c_gensym_macro_start_50, _x2c_gensym_macro_end_44, _x2c_gensym_macro_values_26);
   return _x2c_gensym_macro_removed_11;
 }
 
@@ -4992,27 +4980,27 @@ ArrayDbl ArrayDbl_copy(ArrayDbl _x2c_gensym_macro_array_268){
   return ArrayDbl_copy_elements(_x2c_gensym_macro_array_268);
 }
 
-ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_gensym_macro_array_269, int _x2c_gensym_macro_start_45, int _x2c_gensym_macro_end_39, int _x2c_gensym_macro_step_11){
+ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_gensym_macro_array_269, int _x2c_gensym_macro_start_51, int _x2c_gensym_macro_end_45, int _x2c_gensym_macro_step_11){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_269 == NULL || ! _x2c_gensym_macro_step_11) _bad_step(_5, _x2c_gensym_macro_step_11);
   if(_x2c_gensym_macro_array_269 -> length > INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_269 -> length);
-  return ArrayDbl_slice_elements(_x2c_gensym_macro_array_269, _x2c_gensym_macro_start_45, _x2c_gensym_macro_end_39, _x2c_gensym_macro_step_11);
+  return ArrayDbl_slice_elements(_x2c_gensym_macro_array_269, _x2c_gensym_macro_start_51, _x2c_gensym_macro_end_45, _x2c_gensym_macro_step_11);
 }
 
-ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_gensym_macro_array_270, int _x2c_gensym_macro_start_46, int _x2c_gensym_macro_end_40, ArrayDbl _x2c_gensym_macro_values_27){
+ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_gensym_macro_array_270, int _x2c_gensym_macro_start_52, int _x2c_gensym_macro_end_46, ArrayDbl _x2c_gensym_macro_values_27){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_270 == NULL) _bad_operation(_5, 1317790304458);
   if(_x2c_gensym_macro_array_270 -> length > INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_270 -> length);
   if(ArrayDbl_truth(_x2c_gensym_macro_values_27) && _x2c_gensym_macro_values_27 -> length > INT_MAX) _size_limit(_5, _x2c_gensym_macro_values_27 -> length);
-  ArrayDbl_replace_elements(_x2c_gensym_macro_array_270, _x2c_gensym_macro_start_46, _x2c_gensym_macro_end_40, _x2c_gensym_macro_values_27);
+  ArrayDbl_replace_elements(_x2c_gensym_macro_array_270, _x2c_gensym_macro_start_52, _x2c_gensym_macro_end_46, _x2c_gensym_macro_values_27);
   return _x2c_gensym_macro_array_270;
 }
 
-ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_gensym_macro_array_271, int _x2c_gensym_macro_start_47, int _x2c_gensym_macro_end_41){
+ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_gensym_macro_array_271, int _x2c_gensym_macro_start_53, int _x2c_gensym_macro_end_47){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_271 == NULL) _bad_operation(_5, 1248601065674);
   if(_x2c_gensym_macro_array_271 -> length > INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_271 -> length);
-  return ArrayDbl_cut_elements(_x2c_gensym_macro_array_271, _x2c_gensym_macro_start_47, _x2c_gensym_macro_end_41);
+  return ArrayDbl_cut_elements(_x2c_gensym_macro_array_271, _x2c_gensym_macro_start_53, _x2c_gensym_macro_end_47);
 }
 
 ArrayDbl ArrayDbl_splice(ArrayDbl _x2c_gensym_macro_array_272, int _x2c_gensym_macro_index_71, int _x2c_gensym_macro_remove_count_11, ArrayDbl _x2c_gensym_macro_values_28){
@@ -5341,46 +5329,45 @@ static ArrayString ArrayString_copy_elements(ArrayString _x2c_gensym_macro_array
   return _x2c_gensym_macro_copy_6;
 }
 
-static ArrayString ArrayString_slice_elements(ArrayString _x2c_gensym_macro_array_298, int _x2c_gensym_macro_start_48, int _x2c_gensym_macro_end_42, int _x2c_gensym_macro_step_12){
+static ArrayString ArrayString_slice_elements(ArrayString _x2c_gensym_macro_array_298, int _x2c_gensym_macro_start_54, int _x2c_gensym_macro_end_48, int _x2c_gensym_macro_step_12){
   ArrayString _x2c_gensym_macro_slice_6 =(ArrayString) Block_new(sizeof(String));
-  int _x2c_gensym_macro_newlen_6 = x2c_normalize_slice(& _x2c_gensym_macro_start_48, & _x2c_gensym_macro_end_42, _x2c_gensym_macro_step_12, (int) _x2c_gensym_macro_array_298 -> length);
+  int _x2c_gensym_macro_newlen_6 = x2c_normalize_slice(&(_x2c_gensym_macro_start_54), &(_x2c_gensym_macro_end_48), _x2c_gensym_macro_step_12, (int) _x2c_gensym_macro_array_298 -> length);
   if(_x2c_gensym_macro_newlen_6 <= 0) return _x2c_gensym_macro_slice_6;
   if(_x2c_gensym_macro_step_12 == 1){
-    Block_append((Block) _x2c_gensym_macro_slice_6, (unsigned char *) _x2c_gensym_macro_array_298 -> bytes + _x2c_gensym_macro_start_48 * sizeof(String), _x2c_gensym_macro_newlen_6);
+    Block_append((Block) _x2c_gensym_macro_slice_6, (unsigned char *) _x2c_gensym_macro_array_298 -> bytes + _x2c_gensym_macro_start_54 * sizeof(String), _x2c_gensym_macro_newlen_6);
     return _x2c_gensym_macro_slice_6;
   }
   String * _x2c_gensym_macro_data_69 =(String *) _x2c_gensym_macro_array_298 -> bytes;
   if(_x2c_gensym_macro_step_12 < 0){
-    for(int _x2c_gensym_macro_i_60 = _x2c_gensym_macro_start_48;  _x2c_gensym_macro_i_60 > _x2c_gensym_macro_end_42;  _x2c_gensym_macro_i_60 += _x2c_gensym_macro_step_12) Block_append((Block) _x2c_gensym_macro_slice_6, _x2c_gensym_macro_data_69 + _x2c_gensym_macro_i_60, 1);
+    for(int _x2c_gensym_macro_i_60 = _x2c_gensym_macro_start_54;  _x2c_gensym_macro_i_60 > _x2c_gensym_macro_end_48;  _x2c_gensym_macro_i_60 += _x2c_gensym_macro_step_12) Block_append((Block) _x2c_gensym_macro_slice_6, _x2c_gensym_macro_data_69 + _x2c_gensym_macro_i_60, 1);
   }
   else{
-    for(int _x2c_gensym_macro_i_61 = _x2c_gensym_macro_start_48;  _x2c_gensym_macro_i_61 < _x2c_gensym_macro_end_42;  _x2c_gensym_macro_i_61 += _x2c_gensym_macro_step_12) Block_append((Block) _x2c_gensym_macro_slice_6, _x2c_gensym_macro_data_69 + _x2c_gensym_macro_i_61, 1);
+    for(int _x2c_gensym_macro_i_61 = _x2c_gensym_macro_start_54;  _x2c_gensym_macro_i_61 < _x2c_gensym_macro_end_48;  _x2c_gensym_macro_i_61 += _x2c_gensym_macro_step_12) Block_append((Block) _x2c_gensym_macro_slice_6, _x2c_gensym_macro_data_69 + _x2c_gensym_macro_i_61, 1);
   }
   return _x2c_gensym_macro_slice_6;
 }
 
 static inline int _x2c_gensym_macro__normalize_bound_6(ArrayString _x2c_gensym_macro_array_299, int _x2c_gensym_macro_index_80){
   int _x2c_gensym_macro_length_6 =(int) _x2c_gensym_macro_array_299 -> length;
-  int _x2c_gensym_macro_start_49 = _x2c_gensym_macro_index_80, _x2c_gensym_macro_stop_6 = _x2c_gensym_macro_index_80;
-  x2c_normalize_slice(& _x2c_gensym_macro_start_49, & _x2c_gensym_macro_stop_6, 1, _x2c_gensym_macro_length_6);
-  return _x2c_gensym_macro_start_49;
+  int _x2c_gensym_macro_start_55 = _x2c_gensym_macro_index_80, _x2c_gensym_macro_stop_6 = _x2c_gensym_macro_index_80;
+  x2c_normalize_slice(&(_x2c_gensym_macro_start_55), &(_x2c_gensym_macro_stop_6), 1, _x2c_gensym_macro_length_6);
+  return _x2c_gensym_macro_start_55;
 }
 
-static inline void _x2c_gensym_macro__normalize_span_6(ArrayString _x2c_gensym_macro_array_300, int * _x2c_gensym_macro_begin_18, int * _x2c_gensym_macro_finish_18){
-  x2c_normalize_slice(_x2c_gensym_macro_begin_18, _x2c_gensym_macro_finish_18, 1, (int) _x2c_gensym_macro_array_300 -> length);
-  if(* _x2c_gensym_macro_finish_18 < * _x2c_gensym_macro_begin_18){
-    int _x2c_gensym_macro_tmp_12 = * _x2c_gensym_macro_begin_18;
-    * _x2c_gensym_macro_begin_18 = * _x2c_gensym_macro_finish_18;
-    * _x2c_gensym_macro_finish_18 = _x2c_gensym_macro_tmp_12;
+static inline void _x2c_gensym_macro__normalize_span_6(ArrayString _x2c_gensym_macro_array_300, int * _x2c_gensym_macro_start_56, int * _x2c_gensym_macro_end_49){
+  x2c_normalize_slice(&((* _x2c_gensym_macro_start_56)), &((* _x2c_gensym_macro_end_49)), 1, (int) _x2c_gensym_macro_array_300 -> length);
+  if((* _x2c_gensym_macro_end_49) <(* _x2c_gensym_macro_start_56)){
+    int _x2c_gensym_macro_tmp_12 =(* _x2c_gensym_macro_start_56);
+    (* _x2c_gensym_macro_start_56) =(* _x2c_gensym_macro_end_49);
+    (* _x2c_gensym_macro_end_49) = _x2c_gensym_macro_tmp_12;
   }
 
 }
 
-static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301, int _x2c_gensym_macro_start_50, int _x2c_gensym_macro_end_43, ArrayString _x2c_gensym_macro_values_30){
+static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301, int _x2c_gensym_macro_start_57, int _x2c_gensym_macro_end_50, ArrayString _x2c_gensym_macro_values_30){
   int _x2c_gensym_macro_n_69 =(int) _x2c_gensym_macro_array_301 -> length;
-  int _x2c_gensym_macro_begin_19 = _x2c_gensym_macro_start_50, _x2c_gensym_macro_finish_19 = _x2c_gensym_macro_end_43;
-  _x2c_gensym_macro__normalize_span_6(_x2c_gensym_macro_array_301, & _x2c_gensym_macro_begin_19, & _x2c_gensym_macro_finish_19);
-  int _x2c_gensym_macro_remove_6 = _x2c_gensym_macro_finish_19 - _x2c_gensym_macro_begin_19;
+  _x2c_gensym_macro__normalize_span_6(_x2c_gensym_macro_array_301, &(_x2c_gensym_macro_start_57), &(_x2c_gensym_macro_end_50));
+  int _x2c_gensym_macro_remove_6 = _x2c_gensym_macro_end_50 - _x2c_gensym_macro_start_57;
   int _x2c_gensym_macro_insert_6 = ArrayString_truth(_x2c_gensym_macro_values_30) ?(int) _x2c_gensym_macro_values_30 -> length : 0;
   int _x2c_gensym_macro_delta_6 = _x2c_gensym_macro_insert_6 - _x2c_gensym_macro_remove_6;
   ArrayString _x2c_gensym_macro_source_12 = _x2c_gensym_macro_values_30;
@@ -5415,9 +5402,9 @@ static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301
         Block_append((Block) _x2c_gensym_macro_array_301, NULL, _x2c_gensym_macro_delta_6);
       }
       String * _x2c_gensym_macro_data_70 =(String *) _x2c_gensym_macro_array_301 -> bytes;
-      int _x2c_gensym_macro_tail_12 = _x2c_gensym_macro_n_69 - _x2c_gensym_macro_finish_19;
-      if(_x2c_gensym_macro_tail_12 > 0 && _x2c_gensym_macro_delta_6 != 0) memmove(_x2c_gensym_macro_data_70 + _x2c_gensym_macro_begin_19 + _x2c_gensym_macro_insert_6, _x2c_gensym_macro_data_70 + _x2c_gensym_macro_finish_19, _x2c_gensym_macro_tail_12 * sizeof(String));
-      if(_x2c_gensym_macro_insert_6 > 0) memcpy(_x2c_gensym_macro_data_70 + _x2c_gensym_macro_begin_19, _x2c_gensym_macro_source_12 -> bytes, _x2c_gensym_macro_insert_6 * sizeof(String));
+      int _x2c_gensym_macro_tail_12 = _x2c_gensym_macro_n_69 - _x2c_gensym_macro_end_50;
+      if(_x2c_gensym_macro_tail_12 > 0 && _x2c_gensym_macro_delta_6 != 0) memmove(_x2c_gensym_macro_data_70 + _x2c_gensym_macro_start_57 + _x2c_gensym_macro_insert_6, _x2c_gensym_macro_data_70 + _x2c_gensym_macro_end_50, _x2c_gensym_macro_tail_12 * sizeof(String));
+      if(_x2c_gensym_macro_insert_6 > 0) memcpy(_x2c_gensym_macro_data_70 + _x2c_gensym_macro_start_57, _x2c_gensym_macro_source_12 -> bytes, _x2c_gensym_macro_insert_6 * sizeof(String));
       if(_x2c_gensym_macro_delta_6 < 0) _x2c_gensym_macro_array_301 -> length = _x2c_gensym_macro_n_69 + _x2c_gensym_macro_delta_6;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_31);
@@ -5425,27 +5412,26 @@ static void ArrayString_replace_elements(ArrayString _x2c_gensym_macro_array_301
 
 }
 
-static ArrayString ArrayString_cut_elements(ArrayString _x2c_gensym_macro_array_302, int _x2c_gensym_macro_start_51, int _x2c_gensym_macro_end_44){
+static ArrayString ArrayString_cut_elements(ArrayString _x2c_gensym_macro_array_302, int _x2c_gensym_macro_start_58, int _x2c_gensym_macro_end_51){
   int _x2c_gensym_macro_n_70 =(int) _x2c_gensym_macro_array_302 -> length;
-  int _x2c_gensym_macro_begin_20 = _x2c_gensym_macro_start_51, _x2c_gensym_macro_finish_20 = _x2c_gensym_macro_end_44;
-  _x2c_gensym_macro__normalize_span_6(_x2c_gensym_macro_array_302, & _x2c_gensym_macro_begin_20, & _x2c_gensym_macro_finish_20);
-  if(_x2c_gensym_macro_begin_20 >= _x2c_gensym_macro_finish_20) return(ArrayString) Block_new(sizeof(String));
-  ArrayString _x2c_gensym_macro_removed_12 = ArrayString_slice_elements(_x2c_gensym_macro_array_302, _x2c_gensym_macro_begin_20, _x2c_gensym_macro_finish_20, 1);
+  _x2c_gensym_macro__normalize_span_6(_x2c_gensym_macro_array_302, &(_x2c_gensym_macro_start_58), &(_x2c_gensym_macro_end_51));
+  if(_x2c_gensym_macro_start_58 >= _x2c_gensym_macro_end_51) return(ArrayString) Block_new(sizeof(String));
+  ArrayString _x2c_gensym_macro_removed_12 = ArrayString_slice_elements(_x2c_gensym_macro_array_302, _x2c_gensym_macro_start_58, _x2c_gensym_macro_end_51, 1);
   String * _x2c_gensym_macro_data_71 =(String *) _x2c_gensym_macro_array_302 -> bytes;
-  int _x2c_gensym_macro_tail_13 = _x2c_gensym_macro_n_70 - _x2c_gensym_macro_finish_20;
-  if(_x2c_gensym_macro_tail_13 > 0) memmove(_x2c_gensym_macro_data_71 + _x2c_gensym_macro_begin_20, _x2c_gensym_macro_data_71 + _x2c_gensym_macro_finish_20, _x2c_gensym_macro_tail_13 * sizeof(String));
-  _x2c_gensym_macro_array_302 -> length = _x2c_gensym_macro_n_70 -(_x2c_gensym_macro_finish_20 - _x2c_gensym_macro_begin_20);
+  int _x2c_gensym_macro_tail_13 = _x2c_gensym_macro_n_70 - _x2c_gensym_macro_end_51;
+  if(_x2c_gensym_macro_tail_13 > 0) memmove(_x2c_gensym_macro_data_71 + _x2c_gensym_macro_start_58, _x2c_gensym_macro_data_71 + _x2c_gensym_macro_end_51, _x2c_gensym_macro_tail_13 * sizeof(String));
+  _x2c_gensym_macro_array_302 -> length = _x2c_gensym_macro_n_70 -(_x2c_gensym_macro_end_51 - _x2c_gensym_macro_start_58);
   return _x2c_gensym_macro_removed_12;
 }
 
 static ArrayString ArrayString_splice_elements(ArrayString _x2c_gensym_macro_array_303, int _x2c_gensym_macro_index_81, int _x2c_gensym_macro_remove_count_12, ArrayString _x2c_gensym_macro_values_31){
   if(_x2c_gensym_macro_remove_count_12 < 0) _x2c_gensym_macro_remove_count_12 = 0;
   int _x2c_gensym_macro_n_71 =(int) _x2c_gensym_macro_array_303 -> length;
-  int _x2c_gensym_macro_start_52 = _x2c_gensym_macro__normalize_bound_6(_x2c_gensym_macro_array_303, _x2c_gensym_macro_index_81);
-  long long _x2c_gensym_macro_target_6 =(long long) _x2c_gensym_macro_start_52 + _x2c_gensym_macro_remove_count_12;
-  int _x2c_gensym_macro_end_45 = _x2c_gensym_macro_target_6 > _x2c_gensym_macro_n_71 ? _x2c_gensym_macro_n_71 :(int) _x2c_gensym_macro_target_6;
-  ArrayString _x2c_gensym_macro_removed_13 = ArrayString_slice_elements(_x2c_gensym_macro_array_303, _x2c_gensym_macro_start_52, _x2c_gensym_macro_end_45, 1);
-  ArrayString_replace_elements(_x2c_gensym_macro_array_303, _x2c_gensym_macro_start_52, _x2c_gensym_macro_end_45, _x2c_gensym_macro_values_31);
+  int _x2c_gensym_macro_start_59 = _x2c_gensym_macro__normalize_bound_6(_x2c_gensym_macro_array_303, _x2c_gensym_macro_index_81);
+  long long _x2c_gensym_macro_target_6 =(long long) _x2c_gensym_macro_start_59 + _x2c_gensym_macro_remove_count_12;
+  int _x2c_gensym_macro_end_52 = _x2c_gensym_macro_target_6 > _x2c_gensym_macro_n_71 ? _x2c_gensym_macro_n_71 :(int) _x2c_gensym_macro_target_6;
+  ArrayString _x2c_gensym_macro_removed_13 = ArrayString_slice_elements(_x2c_gensym_macro_array_303, _x2c_gensym_macro_start_59, _x2c_gensym_macro_end_52, 1);
+  ArrayString_replace_elements(_x2c_gensym_macro_array_303, _x2c_gensym_macro_start_59, _x2c_gensym_macro_end_52, _x2c_gensym_macro_values_31);
   return _x2c_gensym_macro_removed_13;
 }
 
@@ -5603,27 +5589,27 @@ ArrayString ArrayString_copy(ArrayString _x2c_gensym_macro_array_317){
   return ArrayString_copy_elements(_x2c_gensym_macro_array_317);
 }
 
-ArrayString ArrayString_getslice(ArrayString _x2c_gensym_macro_array_318, int _x2c_gensym_macro_start_53, int _x2c_gensym_macro_end_46, int _x2c_gensym_macro_step_13){
+ArrayString ArrayString_getslice(ArrayString _x2c_gensym_macro_array_318, int _x2c_gensym_macro_start_60, int _x2c_gensym_macro_end_53, int _x2c_gensym_macro_step_13){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_318 == NULL || ! _x2c_gensym_macro_step_13) _bad_step(_6, _x2c_gensym_macro_step_13);
   if(_x2c_gensym_macro_array_318 -> length > INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_318 -> length);
-  return ArrayString_slice_elements(_x2c_gensym_macro_array_318, _x2c_gensym_macro_start_53, _x2c_gensym_macro_end_46, _x2c_gensym_macro_step_13);
+  return ArrayString_slice_elements(_x2c_gensym_macro_array_318, _x2c_gensym_macro_start_60, _x2c_gensym_macro_end_53, _x2c_gensym_macro_step_13);
 }
 
-ArrayString ArrayString_setslice(ArrayString _x2c_gensym_macro_array_319, int _x2c_gensym_macro_start_54, int _x2c_gensym_macro_end_47, ArrayString _x2c_gensym_macro_values_32){
+ArrayString ArrayString_setslice(ArrayString _x2c_gensym_macro_array_319, int _x2c_gensym_macro_start_61, int _x2c_gensym_macro_end_54, ArrayString _x2c_gensym_macro_values_32){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_319 == NULL) _bad_operation(_6, 1317790304458);
   if(_x2c_gensym_macro_array_319 -> length > INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_319 -> length);
   if(ArrayString_truth(_x2c_gensym_macro_values_32) && _x2c_gensym_macro_values_32 -> length > INT_MAX) _size_limit(_6, _x2c_gensym_macro_values_32 -> length);
-  ArrayString_replace_elements(_x2c_gensym_macro_array_319, _x2c_gensym_macro_start_54, _x2c_gensym_macro_end_47, _x2c_gensym_macro_values_32);
+  ArrayString_replace_elements(_x2c_gensym_macro_array_319, _x2c_gensym_macro_start_61, _x2c_gensym_macro_end_54, _x2c_gensym_macro_values_32);
   return _x2c_gensym_macro_array_319;
 }
 
-ArrayString ArrayString_remslice(ArrayString _x2c_gensym_macro_array_320, int _x2c_gensym_macro_start_55, int _x2c_gensym_macro_end_48){
+ArrayString ArrayString_remslice(ArrayString _x2c_gensym_macro_array_320, int _x2c_gensym_macro_start_62, int _x2c_gensym_macro_end_55){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_array_320 == NULL) _bad_operation(_6, 1248601065674);
   if(_x2c_gensym_macro_array_320 -> length > INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_320 -> length);
-  return ArrayString_cut_elements(_x2c_gensym_macro_array_320, _x2c_gensym_macro_start_55, _x2c_gensym_macro_end_48);
+  return ArrayString_cut_elements(_x2c_gensym_macro_array_320, _x2c_gensym_macro_start_62, _x2c_gensym_macro_end_55);
 }
 
 ArrayString ArrayString_splice(ArrayString _x2c_gensym_macro_array_321, int _x2c_gensym_macro_index_84, int _x2c_gensym_macro_remove_count_13, ArrayString _x2c_gensym_macro_values_33){

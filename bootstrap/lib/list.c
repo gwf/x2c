@@ -582,7 +582,7 @@ List List_subseq(List list, int start, int stop, int step){
     }
 
   }
-  int span = x2c_normalize_slice(& start, & stop, step, List_len(list));
+  int span = x2c_normalize_slice(&(start), &(stop), step, List_len(list));
   return f9_traversal____collect_subseq(list, start, step, span);
 }
 
@@ -634,7 +634,7 @@ List List_getslice(List list, int start, int stop, int step){
     }
 
   }
-  int len = List_len(list), span = x2c_normalize_slice(& start, & stop, step, len);
+  int len = List_len(list), span = x2c_normalize_slice(&(start), &(stop), step, len);
   if(step == 1 && start == 0 && span == len &&(! List_truth(list) || f9_traversal____is_active_canonical(list))) return list;
   if(step > 0) return f9_traversal____collect_subseq(list, start, step, span);
   if(span <= 0) return NULL;
