@@ -8284,7 +8284,7 @@ static int f11_conversions____takes_reference(Compiler c, Type type, Type target
 }
 
 static void f11_conversions____check_object_pointer(Compiler c, Type type, Type target, int type_is_var){
-  if(! x2c_var_equal(List_car(Type_list(target)), Symbol_var(54)) || type_is_var) return;  Type source = Sym_resolve_key(c -> sym, type);  if(List_truth(Type_list(source)) && ! Type_is_pointer(source) && ! Type_is_array(source) && ! Type_is_function(source)) Compiler_report_error(c, 1362954, ({
+  if(! x2c_var_equal(List_car(Type_list(target)), Symbol_var(54)) || type_is_var) return;  Type source = Sym_resolve_key(c -> sym, type);  if(! List_truth(Type_list(source)) || Type_is_array(source) || Type_is_function(source)) return;  if(! Type_is_pointer(source) ||(List_equal(Type_list(source), Type_list(Sym_resolve_key(c -> sym, List_type(cdr(Type_list(target)))))) && Type_base_type(source) != _419)) Compiler_report_error(c, 1362954, ({
     Var _x2c_gensym_literal_part_235 = String_var(List_repr(Type_list(type)));  Var _x2c_gensym_literal_part_236 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_3255), cons(_x2c_gensym_literal_part_235, cons(String_var(_3256), cons(_x2c_gensym_literal_part_236, cons(String_var(_3134), NULL))))));
   }
   ), NULL, _3262);

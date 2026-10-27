@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/string-to-string-pointer.x:6:3: type: cannot pass ("String") where (* "String") is expected
+    name(text);
+    ^^^^
+  note: write &value to pass its address
+

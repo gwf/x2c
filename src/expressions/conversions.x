@@ -702,12 +702,17 @@ static int _takes_reference(Compiler c, Type type, Type target) {
     (referenced.is_aggregate_tag() && c.sym.resolve_key(type) === referenced);
 }
 
+/* An object pointer takes an address, not a value of its pointee type, even
+   when that type is itself a pointer such as String or List. C converts a
+   void pointer to any object pointer. */
 static void _check_object_pointer(
   Compiler c, Type type, Type target, int type_is_var) {
   if (target.car() != <*> || type_is_var) return;
   Type source = c.sym.resolve_key(type);
-  if (source && !source.is_pointer() && !source.is_array() &&
-      !source.is_function())
+  if (!source || source.is_array() || source.is_function()) return;
+  if (!source.is_pointer() ||
+      (source == c.sym.resolve_key(cdr(target)) &&
+       source.base_type() !== %(void)))
     $fail.expressions_pointer_address(c, NULL, type, target);
 }
 
