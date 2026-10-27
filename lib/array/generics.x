@@ -198,7 +198,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   static $array $array.slice_elements(
     $array array, int start, int end, int step) {
     $array slice = ($array) Block_new(sizeof($element));
-    int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
+    int newlen = x2c_normalize_slice(start, end, step, (int) array.length);
     if (newlen <= 0) return slice;
     if (step == 1) {
       Block_append(
@@ -225,28 +225,27 @@ macro Unit $array.core.family(Type $array, Type $element) {
   static inline int _normalize_bound($array array, int index) {
     int length = (int) array.length;
     int start = index, stop = index;
-    x2c_normalize_slice(&start, &stop, 1, length);
+    x2c_normalize_slice(start, stop, 1, length);
     return start;
   }
 
   /* One shared call decides both bounds, so `array[start:end]` and
      `setslice(start, end, ...)` select the same region. A reversed pair is
      swapped. */
-  static inline void _normalize_span($array array, int *begin, int *finish) {
-    x2c_normalize_slice(begin, finish, 1, (int) array.length);
-    if (*finish < *begin) {
-      int tmp = *begin;
-      *begin = *finish;
-      *finish = tmp;
+  static inline void _normalize_span($array array, int &start, int &end) {
+    x2c_normalize_slice(start, end, 1, (int) array.length);
+    if (end < start) {
+      int tmp = start;
+      start = end;
+      end = tmp;
     }
   }
 
   static void $array.replace_elements(
     $array array, int start, int end, $array values) {
     int n = (int) array.length;
-    int begin = start, finish = end;
-    _normalize_span(array, &begin, &finish);
-    int remove = finish - begin;
+    _normalize_span(array, start, end);
+    int remove = end - start;
     int insert = values ? (int) values.length : 0;
     int delta = insert - remove;
     $array source = values;
@@ -264,25 +263,24 @@ macro Unit $array.core.family(Type $array, Type $element) {
       Block_append((Block) array, NULL, delta);
     }
     $element *data = ($element *) array.bytes;
-    int tail = n - finish;
+    int tail = n - end;
     if (tail > 0 && delta != 0)
-      memmove(data + begin + insert, data + finish, tail * sizeof($element));
+      memmove(data + start + insert, data + end, tail * sizeof($element));
     if (insert > 0)
-      memcpy(data + begin, source.bytes, insert * sizeof($element));
+      memcpy(data + start, source.bytes, insert * sizeof($element));
     if (delta < 0) array.length = n + delta;
   }
 
   static $array $array.cut_elements($array array, int start, int end) {
     int n = (int) array.length;
-    int begin = start, finish = end;
-    _normalize_span(array, &begin, &finish);
-    if (begin >= finish) return ($array) Block_new(sizeof($element));
-    $array removed = array.slice_elements(begin, finish, 1);
+    _normalize_span(array, start, end);
+    if (start >= end) return ($array) Block_new(sizeof($element));
+    $array removed = array.slice_elements(start, end, 1);
     $element *data = ($element *) array.bytes;
-    int tail = n - finish;
+    int tail = n - end;
     if (tail > 0)
-      memmove(data + begin, data + finish, tail * sizeof($element));
-    array.length = n - (finish - begin);
+      memmove(data + start, data + end, tail * sizeof($element));
+    array.length = n - (end - start);
     return removed;
   }
 

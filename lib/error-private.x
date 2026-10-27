@@ -9,14 +9,14 @@ macro Field $error.private.region.fields() {
 }
 
 macro Field $error.private.record.fields() {
-    struct ErrorRegion region;
+    ErrorRegion region;
     List entry;
 }
 
 macro Field $error.private.handler.fields() {
     struct ErrorHandler *prev;
     struct ErrorHandler *running;
-    struct ErrorRegion view;
+    ErrorRegion view;
     ErrorHandlerFn fn;
     Var data;
     int watermark;

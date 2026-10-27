@@ -61,7 +61,7 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
-static struct ParallelRun { Array ready; int stopping; };
+static typedef struct ParallelRun { Array ready; int stopping; } *ParallelRun;
 
 static struct Thread {
   pthread_t native, ThreadFn function, size_t input_size, Scope error_scope;
@@ -71,7 +71,7 @@ static struct Thread {
   void *policy;
   Symbol state;
   int finished;
-  struct ParallelRun *parallel;
+  ParallelRun parallel;
   int assigned;
   int stop_requested;
   pthread_cond_t *waiting;
@@ -197,7 +197,7 @@ Thread Thread.start_raw(
 
 static Thread _start(
   ThreadFn function, const void *input, size_t input_size,
-  struct ParallelRun *parallel) {
+  ParallelRun parallel) {
   if (!function || (input_size && !input))
     raise %(bad-arg (operation "Thread.start_raw"));
   Thread thread = _new_handle(function, input, input_size);
@@ -248,7 +248,7 @@ Thread Thread.start(ThreadValueFn function, Var value) {
 }
 
 static Thread _start_value(
-  ThreadValueFn function, Var value, struct ParallelRun *parallel, Pool pool) {
+  ThreadValueFn function, Var value, ParallelRun parallel, Pool pool) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
   struct ThreadValueInput input = { function, value, pool };
   return _start(_call_value, &input, sizeof(input), parallel);
@@ -712,7 +712,7 @@ static ParallelMap _parallel_map(
 */
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
-  struct ParallelRun *run = xcalloc(1, sizeof(struct ParallelRun));
+  ParallelRun run = xcalloc(1, sizeof(struct ParallelRun));
   Array workers = NULL;
   defer _parallel_stop(run, workers);
   workers = [];
@@ -771,7 +771,7 @@ static int _parallel_park(Thread thread) {
   return again;
 }
 
-static Thread _parallel_wait(struct ParallelRun *run) {
+static Thread _parallel_wait(ParallelRun run) {
   x2c_thread_wait_lock();
   while (!run.ready.len() && !x2c_thread_stopping())
     x2c_thread_wait(&thread_completion_condition);
@@ -794,7 +794,7 @@ static void _parallel_assign(Thread worker, Var input) {
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
 }
 
-static void _parallel_stop(struct ParallelRun *run, Array workers) {
+static void _parallel_stop(ParallelRun run, Array workers) {
   stop_mask++;
   defer --stop_mask;
   defer xfree(run);

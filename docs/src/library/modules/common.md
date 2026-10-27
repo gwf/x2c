@@ -128,7 +128,7 @@ Source: `lib/common.x:850`
 
 #### x2c_normalize_slice
 
-`int x2c_normalize_slice(int *start, int *stop, int step, int length)`
+`int x2c_normalize_slice(int &start, int &stop, int step, int length)`
 
 Normalizes slice bounds and returns the resulting element count.
 Bounds change in place following x2c conventions:
@@ -140,10 +140,9 @@ Bounds change in place following x2c conventions:
   defaults to the forward endpoint or the reverse sentinel before zero.
 Returns 0 if the slice is empty.
 
-**Raises:** `<bad-arg>` when either bound pointer is NULL, step is zero, or
-length is negative.
+**Raises:** `<bad-arg>` when step is zero or length is negative.
 
-Source: `lib/common.x:876`
+Source: `lib/common.x:875`
 
 #### x2c_slice_bound
 

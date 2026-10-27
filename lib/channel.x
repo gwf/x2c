@@ -32,7 +32,7 @@ static typedef struct ChannelMessage {
   Var value;
   struct ChannelMessage *next;
   int owned;
-} ChannelMessage;
+} *ChannelMessage;
 
 /* Only the shared monitor reads links, owner tokens, and commitment flags. */
 static typedef struct ChannelWait {
@@ -40,22 +40,22 @@ static typedef struct ChannelWait {
   Thread owner;
   struct ChannelWait *previous, *next;
   int committed, owned;
-} ChannelWait;
+} *ChannelWait;
 
 /* A blocked native thread cannot reenter Channel code: no callback or Error
    dispatch runs while registered. Every exit unlinks before dispatching, so
    one native-thread record covers both managed workers and the main thread. */
-static threaded ChannelWait rendezvous_wait;
+static threaded struct ChannelWait rendezvous_wait;
 
 static typedef struct ChannelWaits {
-  ChannelWait *first, *last;
+  ChannelWait first, last;
 } ChannelWaits;
 
 static struct Channel {
   Scope lifetime;
   Symbol type;
   size_t capacity, count;
-  ChannelMessage *first, *last;
+  ChannelMessage first, last;
   ChannelWaits senders, receivers;
   pthread_cond_t changed;
   int initialized, closed;
@@ -71,12 +71,12 @@ static void _native_check(int error) {
 
 static void _drop(void *bytes) {
   Channel channel = bytes;
-  ChannelMessage *message = channel.first;
+  ChannelMessage message = channel.first;
   channel.first = channel.last = NULL;
   channel.count = 0;
   channel.closed = 1;
   while (message) {
-    ChannelMessage *next = message.next;
+    ChannelMessage next = message.next;
     if (message.owned) Scope.owner(message.value.pointer()).destroy();
     free(message);
     message = next;
@@ -157,22 +157,22 @@ Scope Channel.scope(Channel channel) => channel ? channel.lifetime : NULL;
 
 // rendezvous queues
 
-static void _append_wait(ChannelWaits *queue, ChannelWait *wait) {
+static void _append_wait(ChannelWaits &queue, ChannelWait wait) {
   wait.previous = queue.last;
   if (queue.last) queue.last.next = wait;
   else queue.first = wait;
   queue.last = wait;
 }
 
-static void _remove_wait(ChannelWaits *queue, ChannelWait *wait) {
+static void _remove_wait(ChannelWaits &queue, ChannelWait wait) {
   if (wait.previous) wait.previous.next = wait.next;
   else queue.first = wait.next;
   if (wait.next) wait.next.previous = wait.previous;
   else queue.last = wait.previous;
 }
 
-static ChannelWait *_live_wait(ChannelWaits *queue) {
-  for (ChannelWait *wait = queue.first; wait; wait = wait.next)
+static ChannelWait _live_wait(ChannelWaits &queue) {
+  for (ChannelWait wait = queue.first; wait; wait = wait.next)
     if (!x2c_thread_wait_stopped(wait.owner)) return wait;
   return NULL;
 }
@@ -185,42 +185,42 @@ static void _notify(Channel channel) =>
 static int _rendezvous_send(Channel channel, Var value, int owned) {
   if (x2c_thread_stopping()) return -1;
   if (channel.closed) return 0;
-  ChannelWait *receiver = _live_wait(&channel.receivers);
+  ChannelWait receiver = _live_wait(channel.receivers);
   if (receiver) {
     receiver.value = value;
     receiver.owned = owned;
     receiver.committed = 1;
-    _remove_wait(&channel.receivers, receiver);
+    _remove_wait(channel.receivers, receiver);
     _notify(channel);
     return 1;
   }
-  ChannelWait *wait = &rendezvous_wait;
-  *wait = (ChannelWait) {
+  ChannelWait wait = &rendezvous_wait;
+  *wait = (struct ChannelWait) {
     .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
   };
-  _append_wait(&channel.senders, wait);
+  _append_wait(channel.senders, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
   if (wait.committed) return 1;
-  _remove_wait(&channel.senders, wait);
+  _remove_wait(channel.senders, wait);
   return x2c_thread_stopping() ? -1 : 0;
 }
 
 static int _rendezvous_receive(Channel channel, Var &out, int &owned) {
   if (x2c_thread_stopping()) return -1;
-  ChannelWait *sender = _live_wait(&channel.senders);
+  ChannelWait sender = _live_wait(channel.senders);
   if (sender && !channel.closed) {
     out = sender.value;
     owned = sender.owned;
     sender.committed = 1;
-    _remove_wait(&channel.senders, sender);
+    _remove_wait(channel.senders, sender);
     _notify(channel);
     return 1;
   }
   if (channel.closed) return 0;
-  ChannelWait *wait = &rendezvous_wait;
-  *wait = (ChannelWait) { .owner = x2c_thread_wait_owner() };
-  _append_wait(&channel.receivers, wait);
+  ChannelWait wait = &rendezvous_wait;
+  *wait = (struct ChannelWait) { .owner = x2c_thread_wait_owner() };
+  _append_wait(channel.receivers, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
   if (wait.committed) {
@@ -228,13 +228,13 @@ static int _rendezvous_receive(Channel channel, Var &out, int &owned) {
     owned = wait.owned;
     return 1;
   }
-  _remove_wait(&channel.receivers, wait);
+  _remove_wait(channel.receivers, wait);
   return x2c_thread_stopping() ? -1 : 0;
 }
 
 // buffered queues
 
-static int _buffer_send(Channel channel, ChannelMessage *message) {
+static int _buffer_send(Channel channel, ChannelMessage message) {
   while (channel.count == channel.capacity && !channel.closed &&
          !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
@@ -248,16 +248,16 @@ static int _buffer_send(Channel channel, ChannelMessage *message) {
   return 1;
 }
 
-static int _buffer_receive(Channel channel, ChannelMessage **out) {
+static int _buffer_receive(Channel channel, ChannelMessage &out) {
   while (!channel.count && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
   if (x2c_thread_stopping()) return -1;
   if (!channel.count) return 0;
-  ChannelMessage *message = channel.first;
+  ChannelMessage message = channel.first;
   channel.first = message.next;
   if (!channel.first) channel.last = NULL;
   channel.count--;
-  *out = message;
+  out = message;
   _notify(channel);
   return 1;
 }
@@ -266,10 +266,10 @@ static int _buffer_receive(Channel channel, ChannelMessage **out) {
 
 /* A sender owns native queue storage until commitment. The queue, then the
    receiver, owns the accepted node independently of Scope lists. */
-static ChannelMessage *_message(Var value, int owned) {
-  ChannelMessage *message = malloc(sizeof(ChannelMessage));
+static ChannelMessage _message(Var value, int owned) {
+  ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if (!message) raise %(alloc-fail (operation "Channel.send"));
-  *message = (ChannelMessage) { .value = value, .owned = owned };
+  *message = (struct ChannelMessage) { .value = value, .owned = owned };
   return message;
 }
 
@@ -305,7 +305,7 @@ static void _send(Channel channel, Var value, int owned) {
   if (owned && !value.pointer())
     raise %(bad-arg (operation "Channel.send_owned"));
 
-  ChannelMessage *message = NULL;
+  ChannelMessage message = NULL;
   int status = 0;
   defer if (message && status != 1) free(message);
   if (channel.capacity) message = _message(value, owned);
@@ -379,10 +379,10 @@ Var Channel.receive(Channel channel) {
   Scope *destination = Scope.top();
   if (!*destination) *destination = Scope.new();
   Var value = void;
-  ChannelMessage *message = NULL;
+  ChannelMessage message = NULL;
   int owned = 0;
   x2c_thread_wait_lock();
-  int status = channel.capacity ? _buffer_receive(channel, &message)
+  int status = channel.capacity ? _buffer_receive(channel, message)
                                : _rendezvous_receive(channel, value, owned);
   if (message) { value = message.value; owned = message.owned; }
   x2c_thread_wait_unlock();

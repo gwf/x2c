@@ -26,9 +26,9 @@ module int _prepared(MatchPlan plan, const char *owner) {
 }
 
 module int _buffer_valid(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
-  if (!layout || !captures) return 0;
-  if (captures.capacity < layout.binder_count) return 0;
+  MatchCaptureLayout layout, MatchCaptureBuffer &?captures) {
+  if (!captures) return 0;
+  if (!layout || captures.capacity < layout.binder_count) return 0;
   return !layout.binder_count || captures.values != NULL;
 }
 
@@ -63,7 +63,8 @@ int MatchPlan.try_capture(
     plan.execute_capture(input, captures, NULL);
 
 module int _capture(
-  MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
+  MatchPlan m, Var input, MatchCaptureBuffer &?captures,
+  MachineStats &?stats) {
   if (!m.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
   int result = _run_capture(m.program.view(), *machine, input, captures);
@@ -111,8 +112,9 @@ static int _key_equal(MatchPlan plan, Var value, Var key) =>
 /* Runs one prepared execution and commits positional values only after the
    machine and every lazy-span materialization have succeeded. */
 module int _run_capture(
-  MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer *captures) {
-  if (!captures || captures.capacity < view.binder_count ||
+  MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer &?captures) {
+  if (!captures) return -1;
+  if (captures.capacity < view.binder_count ||
       (view.binder_count && !captures.values))
     return -1;
   m.begin(view, input);
@@ -127,7 +129,7 @@ module int _run_capture(
 /* Materializes each captured span, then commits every present value at
    once; a failed materialization leaves the buffer unchanged. */
 static int _commit(
-  MachineView view, MatchMachine &m, MatchCaptureBuffer *captures) {
+  MachineView view, MatchMachine &m, MatchCaptureBuffer &captures) {
   Var values[MACHINE_BINDER_MAX];
   unsigned long present = 0;
   for (int i = 0; i < view.binder_count; i++) {
@@ -163,10 +165,10 @@ int MatchPlan.execute(
   $match.machine(machine, stats);
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = _run_capture(plan.program.view(), *machine, input, &captures);
+  int result = _run_capture(plan.program.view(), *machine, input, captures);
   /* Publication reads committed captures, never speculative matcher state. */
   List bindings;
-  if (result == 1) bindings = _publish_captures(plan.layout, &captures);
+  if (result == 1) bindings = _publish_captures(plan.layout, captures);
   machine.release();
   if (result == 1) out_bindings = bindings;
   return result;
@@ -181,7 +183,7 @@ int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
 
 /* The committed captures as an association List in reverse slot order. */
 module List _publish_captures(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
+  MatchCaptureLayout layout, MatchCaptureBuffer &captures) {
   List bindings = NULL;
   for (int i = 0; i < layout.binder_count; i++) {
     if (!_capture_bit(captures.present, i)) continue;

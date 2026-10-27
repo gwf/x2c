@@ -11,7 +11,7 @@ Macros as values that build and recognize code.
 | --- | --- |
 | [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
 | [`Macro_case_capture_at`](#Macro_case_capture_at) | Recognizes code built by `t` for the `case` whose site is `site`, which may be NULL, and publishes the captures under `names`. |
-| [`Macro_case_enter`](#Macro_case_enter) | Stores in `*cursor` the List a macro-valued `case` examines for `value`, beneath its source wrappers, and returns whether there is one. |
+| [`Macro_case_enter`](#Macro_case_enter) | Stores in `cursor` the List a macro-valued `case` examines for `value`, beneath its source wrappers, and returns whether there is one. |
 | [`Macro_case_own`](#Macro_case_own) | Whether an `expr` node whose content is `content` is its own view: the content is not a List headed by an Atom, as a retained invocation's is, or by the `expr` a template shell holds. |
 | [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
 | [`Macro_case_root`](#Macro_case_root) | Starts a macro-valued `case` whose derived pattern generated `match` code tests in place. |
@@ -60,9 +60,9 @@ Source: `lib/macrovalue/recognition.x:29`
 <a id="Macro_case_enter"></a>
 #### Macro_case_enter
 
-`inline int Macro_case_enter(Var value, List *cursor)`
+`inline int Macro_case_enter(Var value, List &cursor)`
 
-Stores in `*cursor` the List a macro-valued `case` examines for
+Stores in `cursor` the List a macro-valued `case` examines for
 `value`, beneath its source wrappers, and returns whether there is
 one. A List headed by another Symbol than a wrapper or `expr` is its
 own view.
@@ -93,12 +93,12 @@ Source: `lib/macrovalue/recognition.x:13`
 <a id="Macro_case_root"></a>
 #### Macro_case_root
 
-`int Macro_case_root( List code, Macro t, List names, int statement, List *cursor, MatchCaptureBuffer *published)`
+`int Macro_case_root( List code, Macro t, List names, int statement, List &cursor, MatchCaptureBuffer *published)`
 
 Starts a macro-valued `case` whose derived pattern generated `match`
 code tests in place. Returns 1 when `code` is a retained invocation of
 `t` and its arguments captured under `names` into `published`, 0 when
-`code` cannot match, and 2 after storing in `*cursor` the List the
+`code` cannot match, and 2 after storing in `cursor` the List the
 pattern tests: the view of `code` or, for a `statement` body, of the one
 statement a `seq` holds.
 
@@ -120,11 +120,11 @@ Source: `lib/macrovalue/recognition.x:21`
 <a id="Macro_case_start"></a>
 #### Macro_case_start
 
-`inline int Macro_case_start(List code, Symbol head, List *cursor)`
+`inline int Macro_case_start(List code, Symbol head, List &cursor)`
 
 Starts a macro-valued `case` without `Macro_case_root` when `code` is
 its own view. `head`, the Symbol heading the derived pattern, is not a
-source wrapper or `seq`. Returns 2 after storing `code` in `*cursor`
+source wrapper or `seq`. Returns 2 after storing `code` in `cursor`
 for a subject headed by `head`, 0 for an empty subject or one headed by
 another Symbol than a wrapper, `expr`, or `seq`, which cannot match,
 and -1 when `Macro_case_root` must decide.
@@ -143,7 +143,7 @@ Source: `lib/macrovalue/macrovalue.x:87`
 <a id="Macro_case_view"></a>
 #### Macro_case_view
 
-`int Macro_case_view(Var value, List *cursor)`
+`int Macro_case_view(Var value, List &cursor)`
 
 `Macro_case_enter` for a `value` that may be wrapped or may hold no
 List.

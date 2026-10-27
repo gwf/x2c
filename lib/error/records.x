@@ -13,8 +13,8 @@ module void _record(const X2CErrorSite *site, Symbol code, List detail) {
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  detail = _copy_value(&(record.region), detail);
-  record.entry = _entry(&(record.region), site, code, detail);
+  detail = _copy_value(record.region, detail);
+  record.entry = _entry(record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -26,8 +26,8 @@ module void _record_n(
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  List detail = _counted_detail(&(record.region), code, pair_count, args);
-  record.entry = _entry(&(record.region), site, code, detail);
+  List detail = _counted_detail(record.region, code, pair_count, args);
+  record.entry = _entry(record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -38,7 +38,7 @@ static typedef struct ErrorPair { Var key, value; } ErrorPair;
    argument order. The pairs wait in a Block because the List is built from
    its end. */
 static List _counted_detail(
-  ErrorRegion *region, Symbol code, unsigned count, va_list args) {
+  ErrorRegion &region, Symbol code, unsigned count, va_list args) {
   int pushed = _scope_push(
     code, "could not enter error scope for counted detail");
   Block pairs = Block.new(sizeof(ErrorPair));
@@ -57,7 +57,7 @@ static List _counted_detail(
 }
 
 static List _entry(
-  ErrorRegion *region, const X2CErrorSite *site, Symbol code, List detail) {
+  ErrorRegion &region, const X2CErrorSite *site, Symbol code, List detail) {
   List location = _location(region, site), entry = NULL;
   entry = _field(region, <location>, location, entry);
   entry = _field(region, <detail>, detail, entry);
@@ -65,7 +65,7 @@ static List _entry(
   return entry;
 }
 
-static List _location(ErrorRegion *e, const X2CErrorSite *site) {
+static List _location(ErrorRegion &e, const X2CErrorSite *site) {
   if (!site) return NULL;
   String file = _site_text(e, site.file);
   String function = _site_text(e, site.function);
@@ -75,19 +75,19 @@ static List _location(ErrorRegion *e, const X2CErrorSite *site) {
   return _field(e, <file>, file, location);
 }
 
-static String _site_text(ErrorRegion *region, const char *text) {
+static String _site_text(ErrorRegion &region, const char *text) {
   if (!text) text = "<unknown>";
   return String.new_in(region.pool, text, strlen(text));
 }
 
 static List _field(
-  ErrorRegion *region, Var key, Var value, List tail) =>
+  ErrorRegion &region, Var key, Var value, List tail) =>
   _cons(region, _pair(region, key, value), tail);
 
-static List _pair(ErrorRegion *region, Var key, Var value) =>
+static List _pair(ErrorRegion &region, Var key, Var value) =>
   _cons(region, key, _cons(region, value, NULL));
 
-module List _cons(ErrorRegion *region, Var head, List tail) =>
+module List _cons(ErrorRegion &region, Var head, List tail) =>
   List.cons_in(region.pool, head, tail);
 
 module ErrorRecord *_record_at(int index) {
@@ -99,7 +99,7 @@ module void _truncate(int mark) {
   if (!Error.ready() || mark < 0) return;
   while (Error.count() > mark) {
     ErrorRecord *record = _record_at(Error.count() - 1);
-    _destroy(&(record.region));
+    _destroy(record.region);
     _thread().stack.pop();
   }
 }
@@ -109,7 +109,7 @@ module void _truncate(int mark) {
 /* A NULL region requests an ordinary snapshot: construct in the active
    canonical pool, then promote that same object. An explicit region copies
    into its pool instead. Both policies traverse the same immutable shape. */
-module Var _copy_value(ErrorRegion *region, Var value) {
+module Var _copy_value(ErrorRegion &?region, Var value) {
   if (value is void)
     _floor(
       <bad-types>, region ? "void is not an admissible error detail"
@@ -124,8 +124,10 @@ module Var _copy_value(ErrorRegion *region, Var value) {
                         : "error snapshot contains an identity-bearing value");
 }
 
-static Var _copy_wide(ErrorRegion *region, Var value) =>
-  region ? _clone_in(&region.values, value) : _snapshot_wide(value);
+static Var _copy_wide(ErrorRegion &?region, Var value) {
+  if (!region) return _snapshot_wide(value);
+  return _clone_in(&region.values, value);
+}
 
 /* A wide box belongs to the outermost `Scope` of the caller's active slot, so
    a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
@@ -145,7 +147,7 @@ static Var _clone_in(Scope *owner, Var v) {
   return copy;
 }
 
-static Var _copy_text(ErrorRegion *region, Var value) {
+static Var _copy_text(ErrorRegion &?region, Var value) {
   String source = value is <lsym> ? value.str() : value.string();
   if (!region) return _snapshot_text(value, source);
   String owned = String.new_in(region.pool, source, source.len());
@@ -164,7 +166,7 @@ static Var _snapshot_text(Var value, String source) {
   return atom;
 }
 
-static List _copy_list(ErrorRegion *region, List source) {
+static List _copy_list(ErrorRegion &?region, List source) {
   Var head = _copy_value(region, source.car());
   List tail = _copy_value(region, source.cdr());
   if (region) return _cons(region, head, tail);
@@ -182,7 +184,7 @@ module ErrorRegion _region_new(void) {
 
 /* Release canonical values before their borrowed wide scalar boxes.
    No region value survives this operation. */
-module void _destroy(ErrorRegion *region) {
+module void _destroy(ErrorRegion &region) {
   if (region.pool) region.pool = Pool.release(region.pool);
   if (region.values) {
     Scope.destroy(region.values);
@@ -225,7 +227,7 @@ List Error.since(int mark) {
 }
 
 /* Copies errors oldest first, using an explicit region or active pools. */
-module List _view_since(ErrorRegion *region, int mark) {
+module List _view_since(ErrorRegion &?region, int mark) {
   List out = NULL;
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
@@ -248,7 +250,7 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List out = _view_since(&region, mark);
+  List out = _view_since(region, mark);
   state.floor_only--;
   *values = region.values;
   return out;
@@ -287,7 +289,7 @@ Var Error.snapshot_in(Var value, Scope *values, Pool pool) {
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var copy = _copy_value(&region, value);
+  Var copy = _copy_value(region, value);
   state.floor_only--;
   *values = region.values;
   return copy;

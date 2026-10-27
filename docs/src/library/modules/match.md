@@ -82,7 +82,7 @@ Source: `lib/match/sites.x:255`
 
 #### x2c_match_site_try_match
 
-`int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List *out_bindings)`
+`int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List &?out_bindings)`
 
 Matches through one compiler-owned site, writing bindings on success.
 Results follow `List.try_match`.
@@ -91,7 +91,7 @@ Source: `lib/match/sites.x:190`
 
 #### x2c_match_site_try_match_replace
 
-`int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var *out)`
+`int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)`
 
 `Match`-replaces through one compiler-owned site.
 Results follow `List.try_match_replace`.
@@ -100,7 +100,7 @@ Source: `lib/match/sites.x:233`
 
 #### x2c_match_site_try_search
 
-`int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var *out_match, List *out_bindings)`
+`int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)`
 
 Searches through one compiler-owned site, writing the first match.
 Results follow `List.try_search`.
@@ -119,7 +119,7 @@ already be closed.
 
 **Raises:** `<bad-state>` when a lease remains active.
 
-Source: `lib/match/cache.x:517`
+Source: `lib/match/cache.x:514`
 
 ### `List`
 
@@ -231,7 +231,7 @@ the token storage remains owned by its `Context` `Scope`.
 **Raises:** `<bad-state>` when `token` is not the top state or its cache has an
 active lease. The failure leaves the state installed.
 
-Source: `lib/match/cache.x:500`
+Source: `lib/match/cache.x:497`
 
 <a id="MatchCache.context_open"></a>
 #### MatchCache.context_open
@@ -246,18 +246,18 @@ active `Scope` and must be passed to `MatchCache.context_close` before that
 
 **Raises:** `<alloc-fail>` when the state cannot be allocated.
 
-Source: `lib/match/cache.x:486`
+Source: `lib/match/cache.x:483`
 
 ### `MatchLease`
 
 <a id="MatchLease.plan"></a>
 #### MatchLease.plan
 
-`MatchPlan MatchLease.plan(MatchLease *m)`
+`MatchPlan MatchLease.plan(MatchLease &m)`
 
 Borrows the acquired program until this active lease is released.
 
-Source: `lib/match/cache.x:313`
+Source: `lib/match/cache.x:311`
 
 ### `MatchPlan`
 
@@ -270,7 +270,7 @@ Reports whether `input`, seen through `view` when one is given, begins
 as one of the keys of prepared `plan` requires. A plan without keys
 admits every input, and a refused input is one the plan cannot match.
 
-Source: `lib/match/execution.x:78`
+Source: `lib/match/execution.x:79`
 
 ## Advanced and interop API
 
@@ -314,7 +314,7 @@ Source: `lib/match/sites.x:171`
 
 #### x2c_match_site_try_capture
 
-`int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer *captures)`
+`int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)`
 
 Matches through one compiler-owned static capture site.
 Its first admissible pattern permanently binds the site; direct C callers
@@ -334,7 +334,7 @@ Source: `lib/match/sites.x:80`
 
 #### x2c_match_try_capture
 
-`int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)`
+`int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)`
 
 Matches a runtime pattern into positional storage.
 The active default cache prepares the pattern on its first use and
@@ -673,7 +673,7 @@ Returns the active default `Match` cache, creating it on first use.
 
 **Raises:** `<alloc-fail>` when the cache cannot be created.
 
-Source: `lib/match/cache.x:453`
+Source: `lib/match/cache.x:450`
 
 <a id="MatchCache.dispose"></a>
 #### MatchCache.dispose
@@ -687,7 +687,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match/cache.x:562`
+Source: `lib/match/cache.x:559`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default
@@ -701,7 +701,7 @@ compiler capture sites are unaffected.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache installed.
 
-Source: `lib/match/cache.x:472`
+Source: `lib/match/cache.x:469`
 
 <a id="MatchCache.new"></a>
 #### MatchCache.new
@@ -717,7 +717,7 @@ pools. `MatchCache.dispose` is required after every lease is released.
 storage dimensions cannot be represented, and `<alloc-fail>` when cache
 storage cannot be allocated.
 
-Source: `lib/match/cache.x:534`
+Source: `lib/match/cache.x:531`
 
 <a id="MatchCache.search"></a>
 #### MatchCache.search
@@ -733,7 +733,7 @@ that `List` is nonempty.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match/cache.x:393`
+Source: `lib/match/cache.x:390`
 
 <a id="MatchCache.search_replace"></a>
 #### MatchCache.search_replace
@@ -748,7 +748,7 @@ or machine error returns 0 and writes `input` unchanged.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match/cache.x:424`
+Source: `lib/match/cache.x:421`
 
 <a id="MatchCache.try_capture"></a>
 #### MatchCache.try_capture
@@ -763,7 +763,7 @@ malformed pattern, invalid buffer, cache pressure, or machine error returns
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match/cache.x:350`
+Source: `lib/match/cache.x:347`
 
 <a id="MatchCache.try_match"></a>
 #### MatchCache.try_match
@@ -778,7 +778,7 @@ binding shape and order follow `MatchPlan.execute`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or publishing.
 
-Source: `lib/match/cache.x:364`
+Source: `lib/match/cache.x:361`
 
 <a id="MatchCache.try_match_replace"></a>
 #### MatchCache.try_match_replace
@@ -793,7 +793,7 @@ may be any `Var`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match/cache.x:410`
+Source: `lib/match/cache.x:407`
 
 <a id="MatchCache.try_search"></a>
 #### MatchCache.try_search
@@ -808,14 +808,14 @@ follows `MatchPlan.try_search`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing bindings.
 
-Source: `lib/match/cache.x:378`
+Source: `lib/match/cache.x:375`
 
 ### `MatchCaptureBuffer`
 
 <a id="MatchCaptureBuffer.has"></a>
 #### MatchCaptureBuffer.has
 
-`int MatchCaptureBuffer.has(MatchCaptureBuffer *m, int index)`
+`int MatchCaptureBuffer.has(MatchCaptureBuffer &?m, int index)`
 
 Reports whether a committed capture slot is present.
 A null buffer or an index outside its capacity or `Match`'s binder limit
@@ -891,14 +891,14 @@ Source: `lib/match/layout.x:306`
 <a id="MatchLease.release"></a>
 #### MatchLease.release
 
-`void MatchLease.release(MatchLease *lease)`
+`void MatchLease.release(MatchLease &lease)`
 
 Releases the prepared program held by `lease`.
 Releasing an inactive lease has no effect. A successful release destroys a
 transient plan or unpins its cached entry and makes the lease inactive.
 
-**Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
-entry state is inconsistent. The failure leaves the lease active.
+**Raises:** `<bad-state>` when its cache or entry state is inconsistent. The
+failure leaves the lease active.
 
 Source: `lib/match/cache.x:289`
 
@@ -1052,7 +1052,7 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match/execution.x:158`
+Source: `lib/match/execution.x:160`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
@@ -1165,7 +1165,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match/execution.x:179`
+Source: `lib/match/execution.x:181`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace

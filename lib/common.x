@@ -870,42 +870,41 @@ int x2c_slice_bound(int bound) => bound == INT_MIN ? bound + 1 : bound;
     - INT_MIN marks a missing bound. Start defaults to 0 or len - 1; stop
       defaults to the forward endpoint or the reverse sentinel before zero.
     Returns 0 if the slice is empty.
-    Raises: `<bad-arg>` when either bound pointer is NULL, step is zero, or
-    length is negative.
+    Raises: `<bad-arg>` when step is zero or length is negative.
 */
-int x2c_normalize_slice(int *start, int *stop, int step, int length) {
-  if (!start || !stop || !step || length < 0)
+int x2c_normalize_slice(int &start, int &stop, int step, int length) {
+  if (!step || length < 0)
     raise %(bad-arg (operation "x2c_normalize_slice"));
-  int orig_stop = *stop;
-  if (*start == INT_MIN) *start = (step > 0) ? 0 : length - 1;
-  if (*stop == INT_MIN) *stop = -1;
+  int orig_stop = stop;
+  if (start == INT_MIN) start = (step > 0) ? 0 : length - 1;
+  if (stop == INT_MIN) stop = -1;
   // normalize start against the concrete element range
-  if (*start < 0) {
-    *start += length;
-    if (*start < 0) *start = (step < 0) ? -1 : 0;
+  if (start < 0) {
+    start += length;
+    if (start < 0) start = (step < 0) ? -1 : 0;
   }
-  else if (*start >= length)
-    *start = (step < 0) ? length - 1 : length;
+  else if (start >= length)
+    start = (step < 0) ? length - 1 : length;
 
   // normalize negative forward stops against the endpoint after the last item
-  if (*stop < 0) {
-    if (step > 0) *stop += length + 1;
+  if (stop < 0) {
+    if (step > 0) stop += length + 1;
     else {
       // preserve the default -1 sentinel so a reverse slice includes index 0
       if (orig_stop != INT_MIN)
-        *stop += length;  // explicit negative stop is relative to len
+        stop += length;  // explicit negative stop is relative to len
     }
   }
-  if (*stop < -1) *stop = -1;
-  if (*stop > length) *stop = length;
+  if (stop < -1) stop = -1;
+  if (stop > length) stop = length;
   /* The span must be strictly positive before it is counted. C division
      truncates toward zero, so an empty or reversed range would otherwise
      count one element and the caller would read a position outside the
      value. */
   int newlen = 0;
-  if (step < 0 && *start > *stop) newlen = (*start - *stop - 1) / (-step) + 1;
-  else if (step > 0 && *start < *stop)
-    newlen = (*stop - *start - 1) / step + 1;
+  if (step < 0 && start > stop) newlen = (start - stop - 1) / (-step) + 1;
+  else if (step > 0 && start < stop)
+    newlen = (stop - start - 1) / step + 1;
   return newlen;
 }
 

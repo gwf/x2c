@@ -34,19 +34,19 @@ int Macro_case_capture_at(
     return _pending_capture(t, grouped, names, published);
   if (site && __atomic_load_n(&site.ready, __ATOMIC_ACQUIRE))
     return _capture(
-      code, site.match.plan, &site.policy, &site.route, published);
+      code, site.match.plan, site.policy, site.route, published);
   return _derived_capture(site, code, t, names, published);
 }
 
 /** Starts a macro-valued `case` whose derived pattern generated `match`
     code tests in place. Returns 1 when `code` is a retained invocation of
     `t` and its arguments captured under `names` into `published`, 0 when
-    `code` cannot match, and 2 after storing in `*cursor` the List the
+    `code` cannot match, and 2 after storing in `cursor` the List the
     pattern tests: the view of `code` or, for a `statement` body, of the one
     statement a `seq` holds.
 */
 int Macro_case_root(
-  List code, Macro t, List names, int statement, List *cursor,
+  List code, Macro t, List names, int statement, List &cursor,
   MatchCaptureBuffer *published) {
   List grouped = NULL;
   Var head = code ? code.car() : NULL;
@@ -56,7 +56,7 @@ int Macro_case_root(
       _pending_parts(t, code, grouped))
     return _pending_capture(t, grouped, names, published);
   if (!Macro_case_enter(code, cursor)) return 0;
-  if (statement && *cursor ~= %(seq ?only))
+  if (statement && cursor ~= %(seq ?only))
     return Macro_case_enter(only, cursor) ? 2 : 0;
   return 2;
 }
@@ -64,10 +64,10 @@ int Macro_case_root(
 /** `Macro_case_enter` for a `value` that may be wrapped or may hold no
     List.
 */
-int Macro_case_view(Var value, List *cursor) {
+int Macro_case_view(Var value, List &cursor) {
   Var seen = _unwrap(value);
   if (seen is not <list>) return 0;
-  *cursor = seen;
+  cursor = seen;
   return 1;
 }
 
@@ -95,7 +95,7 @@ int MacroMatcher.matches(MacroMatcher &m, List code) {
   if (status != <prepared>) return 0;
   MatchPlan plan = lease.plan();
   MacroFixedSlots policy = _fixed_slots(m.shape, m.holes, plan);
-  return _case_match(code, plan, &policy, NULL);
+  return _case_match(code, plan, policy, NULL);
 }
 
 /** Tests complete code against a macro and its hole patterns. Repeated
@@ -170,9 +170,9 @@ static int _pending_capture(
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
   List internal = _internal_names(t, names, 1);
-  if (!x2c_match_try_capture(grouped, internal, &captured)) return 0;
+  if (!x2c_match_try_capture(grouped, internal, captured)) return 0;
   MacroPublishing route = _publishing(t, internal, names, internal);
-  return _publish(&route, &captured, published);
+  return _publish(route, captured, published);
 }
 
 /* The binder each parameter is captured under inside the derived pattern:
@@ -191,12 +191,12 @@ static List _internal_names(Macro t, List names, int pending) {
 }
 
 static int _capture(
-  List code, MatchPlan plan, MacroFixedSlots *policy, MacroPublishing *route,
+  List code, MatchPlan plan, MacroFixedSlots &policy, MacroPublishing &route,
   MatchCaptureBuffer *published) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
-  return _case_match(code, plan, policy, &captured) &&
-    _publish(route, &captured, published);
+  return _case_match(code, plan, policy, captured) &&
+    _publish(route, captured, published);
 }
 
 /* Derives the pattern for this call. `site` keeps a pattern that does not
@@ -211,11 +211,11 @@ static int _derived_capture(
     t, pattern, names, _internal_names(t, names, 0));
   if (_keep(site, t, names, pattern, route))
     return _capture(
-      code, site.match.plan, &site.policy, &site.route, published);
+      code, site.match.plan, site.policy, site.route, published);
   MatchPlan plan = MatchPlan.prepare(pattern);
   defer plan.free();
   MacroFixedSlots policy = _fixed_slots(t, names, plan);
-  return _capture(code, plan, &policy, &route, published);
+  return _capture(code, plan, policy, route, published);
 }
 
 /* Keeps `pattern` in `site` with its fixed slots and route once Match
@@ -306,15 +306,15 @@ static MacroFixedSlots _fixed_slots(
    view, and copies captures when requested. An unprepared plan takes Match's
    ordinary route, which reports why. */
 static int _case_match(
-  List code, MatchPlan plan, MacroFixedSlots *policy,
-  MatchCaptureBuffer *captured) {
+  List code, MatchPlan plan, MacroFixedSlots &policy,
+  MatchCaptureBuffer &?captured) {
   if (plan.status != <prepared>)
-    return plan.execute_capture(code, *captured, NULL) == 1;
+    return plan.execute_capture(code, captured, NULL) == 1;
   if (!plan.admits(code, _unwrap)) return 0;
   MatchMachine machine;
   machine.open();
   machine.relation = _identity_equal;
-  machine.relation_context = policy;
+  machine.relation_context = &policy;
   machine.view = _unwrap;
   machine.begin(plan.program.view(), code);
   machine.run();
@@ -328,7 +328,7 @@ static int _case_match(
 /* Copies each slot the machine filled, materializing spans, and returns
    whether the machine is still ok. */
 static int _take_slots(
-  MatchMachine &machine, MatchCaptureBuffer *captured) {
+  MatchMachine &machine, MatchCaptureBuffer &captured) {
   for (int i = 0; i < machine.slot_count; i++) {
     MachineSlot *slot = &machine.slots[i];
     if (slot.kind == <invalid>) continue;
@@ -448,7 +448,7 @@ static MacroPublishing _publishing(
 /* Publishes the internal captures under the user's binders. An incomplete
    route or an absent capture publishes nothing and returns 0. */
 static int _publish(
-  MacroPublishing *route, MatchCaptureBuffer *captured,
+  MacroPublishing &route, MatchCaptureBuffer &captured,
   MatchCaptureBuffer *published) {
   if (!route.complete) return 0;
   Var ordered[MACHINE_BINDER_MAX];

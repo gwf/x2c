@@ -517,7 +517,7 @@ static void match_flat_typed_capture_agrees_with_runtime(void) {
       MatchCaptureBuffer capture = {.values = expected, .capacity = 2};
       int matched = _flat_typed_pair(input, &actual[0], &actual[1]);
       int reference = x2c_match_try_capture(
-        input, %(flat (!is ?a type string) ?b), &capture);
+        input, %(flat (!is ?a type string) ?b), capture);
       EXPECT_INT_EQ(matched, reference);
       if (matched) {
         EXPECT_TRUE(actual[0].u64 == expected[0].u64);
@@ -538,7 +538,7 @@ static void match_flat_capture_agrees_with_runtime(void) {
       Var actual[2], expected[2];
       MatchCaptureBuffer capture = {.values = expected, .capacity = 2};
       int matched = _flat_pair(input, &actual[0], &actual[1]);
-      int reference = x2c_match_try_capture(input, %(flat ?a ?b), &capture);
+      int reference = x2c_match_try_capture(input, %(flat ?a ?b), capture);
       EXPECT_INT_EQ(matched, reference);
       if (matched) {
         EXPECT_TRUE(actual[0].u64 == expected[0].u64);

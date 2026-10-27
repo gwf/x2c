@@ -20,17 +20,12 @@ static void normalization_failures_transfer(void) {
   }
   catch %(bad-arg *): {}
   try {
-    x2c_normalize_slice(&start, &stop, 0, 4);
+    x2c_normalize_slice(start, stop, 0, 4);
     resumed++;
   }
   catch %(bad-arg *): {}
   try {
-    x2c_normalize_slice(NULL, &stop, 1, 4);
-    resumed++;
-  }
-  catch %(bad-arg *): {}
-  try {
-    x2c_normalize_slice(&start, &stop, 1, -1);
+    x2c_normalize_slice(start, stop, 1, -1);
     resumed++;
   }
   catch %(bad-arg *): {}

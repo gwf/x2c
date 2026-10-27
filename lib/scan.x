@@ -707,11 +707,11 @@ int scan_utf8_length(const unsigned char *s) {
 
 // source positions
 
-/* Advances one-based `*l` and `*c` across `n` borrowed bytes.
+/* Advances one-based `line` and `col` across `n` borrowed bytes.
    Each newline increments the line and resets the next byte to column one.
-   `n` is nonnegative and all pointers are valid; columns count bytes. */
-void scan_next_line_col(char *s, int n, int *l, int *c) {
-  int line = *l, col = *c, char *next = s, *end = s + n;
+   `n` is nonnegative and `s` is valid; columns count bytes. */
+void scan_next_line_col(char *s, int n, int &line, int &col) {
+  char *next = s, *end = s + n;
   while (next < end) {
     char *newline = memchr(next, '\n', end - next);
     if (!newline) break;
@@ -719,5 +719,5 @@ void scan_next_line_col(char *s, int n, int *l, int *c) {
     col = 1;
     next = newline + 1;
   }
-  *l = line; *c = col + (end - next);
+  col += end - next;
 }

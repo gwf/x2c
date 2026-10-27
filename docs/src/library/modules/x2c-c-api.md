@@ -56,15 +56,15 @@ prefix.
 | [`x2c_match_site_prepare`](match.md#x2c_match_site_prepare) | `lib/match/match.x` | `MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern)` |
 | [`x2c_match_site_search`](match.md#x2c_match_site_search) | `lib/match/match.x` | `List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)` |
 | [`x2c_match_site_search_replace`](match.md#x2c_match_site_search_replace) | `lib/match/match.x` | `List x2c_match_site_search_replace( MatchCaptureSite *site, List input, Var pat, Var template)` |
-| [`x2c_match_site_try_capture`](match.md#x2c_match_site_try_capture) | `lib/match/match.x` | `int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer *captures)` |
-| [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match/match.x` | `int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List *out_bindings)` |
-| [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match/match.x` | `int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var *out)` |
-| [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match/match.x` | `int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var *out_match, List *out_bindings)` |
+| [`x2c_match_site_try_capture`](match.md#x2c_match_site_try_capture) | `lib/match/match.x` | `int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)` |
+| [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match/match.x` | `int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List &?out_bindings)` |
+| [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match/match.x` | `int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)` |
+| [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match/match.x` | `int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)` |
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match/match.x` | `void x2c_match_thread_release(void)` |
-| [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
+| [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
-| [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
+| [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int &start, int &stop, int step, int length)` |
 | [`x2c_pool_exchange`](pool.md#x2c_pool_exchange) | `lib/pool/pool.x` | `Pool x2c_pool_exchange(Pool pool)` |
 | [`x2c_pool_lookup_string`](pool.md#x2c_pool_lookup_string) | `lib/pool/pool.x` | `String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |

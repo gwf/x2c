@@ -9,12 +9,12 @@ static void scan_whitespace_and_positions(void) {
   EXPECT_INT_EQ(scan_white_space(""), -1);
 
   int line = 3, col = 5;
-  scan_next_line_col("ab\ncd\nx", 7, &line, &col);
+  scan_next_line_col("ab\ncd\nx", 7, line, col);
   EXPECT_INT_EQ(line, 5);
   EXPECT_INT_EQ(col, 2);
 
   line = 2; col = 4;
-  scan_next_line_col("plain", 5, &line, &col);
+  scan_next_line_col("plain", 5, line, col);
   EXPECT_INT_EQ(line, 2);
   EXPECT_INT_EQ(col, 9);
 }

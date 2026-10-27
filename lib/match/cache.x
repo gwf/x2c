@@ -84,12 +84,12 @@ static struct MatchCache {
 Symbol MatchCache.acquire(
   MatchCache m, Var pattern, MatchLease &lease, const char *owner) {
   lease = (MatchLease) {.slot = -1};
-  if (!_admitted(m, pattern)) return _transient(m, pattern, &lease, owner);
+  if (!_admitted(m, pattern)) return _transient(m, pattern, lease, owner);
   unsigned long key = pattern.u64;
   int slot = _find(m, key);
   if (slot >= 0) {
     _touch(m, slot);
-    _activate(m, slot, &lease);
+    _activate(m, slot, lease);
     return m.entries[slot].plan.status;
   }
   slot = m.size < m.capacity ? _free_slot(m) : _victim(m);
@@ -97,13 +97,13 @@ Symbol MatchCache.acquire(
   MatchPlan plan = _prepare(m, pattern, owner);
   if (m.entries[slot].occupied) _remove(m, slot);
   _insert(m, slot, key, plan);
-  _activate(m, slot, &lease);
+  _activate(m, slot, lease);
   return plan.status;
 }
 
 /* An inadmissible pattern gets a plan its lease owns. */
 static Symbol _transient(
-  MatchCache cache, Var pattern, MatchLease *lease, const char *owner) {
+  MatchCache cache, Var pattern, MatchLease &lease, const char *owner) {
   MatchPlan plan = _unfenced(MatchPlan.prepare(pattern), owner);
   lease.cache = cache;
   lease.transient_plan = plan;
@@ -270,7 +270,7 @@ static void _remove(MatchCache cache, int slot) {
 // leases
 
 /* Pins `slot` for `lease`, which records the entry's generation. */
-static void _activate(MatchCache m, int slot, MatchLease *lease) {
+static void _activate(MatchCache m, int slot, MatchLease &lease) {
   MatchCacheEntry *entry = &m.entries[slot];
   lease.cache = m;
   lease.generation = entry.generation;
@@ -283,12 +283,10 @@ static void _activate(MatchCache m, int slot, MatchLease *lease) {
 /** Releases the prepared program held by `lease`.
     Releasing an inactive lease has no effect. A successful release destroys a
     transient plan or unpins its cached entry and makes the lease inactive.
-    Raises: `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
-    entry state is inconsistent. The failure leaves the lease active.
+    Raises: `<bad-state>` when its cache or entry state is inconsistent. The
+    failure leaves the lease active.
 */
-void MatchLease.release(MatchLease *lease) {
-  if (!lease) raise %(bad-arg (operation "MatchLease.release"));
-
+void MatchLease.release(MatchLease &lease) {
   if (!lease.active) return;
   if (lease.transient_plan) {
     if (!lease.cache || lease.cache.active_leases <= 0)
@@ -310,13 +308,13 @@ void MatchLease.release(MatchLease *lease) {
 }
 
 /** Borrows the acquired program until this active lease is released. */
-MatchPlan MatchLease.plan(MatchLease *m) =>
+MatchPlan MatchLease.plan(MatchLease &m) =>
   m.transient_plan ? m.transient_plan
     : m.cache.entries[m.slot].plan;
 
 /* The entry an active cached lease pins, or NULL once the slot is empty or
    recycled under a newer generation. */
-static MatchCacheEntry *_entry(MatchLease *lease) {
+static MatchCacheEntry *_entry(MatchLease &lease) {
   MatchCache cache = lease.cache;
   if (!cache || lease.slot < 0 || lease.slot >= cache.capacity) return NULL;
   MatchCacheEntry *entry = &cache.entries[lease.slot];
@@ -333,9 +331,8 @@ static MatchCacheEntry *_entry(MatchLease *lease) {
    until the scope exits, or NULL when acquisition prepared none. */
 static macro Stmt $match.plan(
   Name $plan, Expr $cache, Expr $pattern, Expr $owner) {
-  MatchLease storage;
-  MatchLease *lease = &storage;
-  Symbol status = $cache.acquire($pattern, *lease, $owner);
+  MatchLease lease;
+  Symbol status = $cache.acquire($pattern, lease, $owner);
   defer lease.release();
   MatchPlan $plan = status == <prepared> ? lease.plan() : NULL;
 }

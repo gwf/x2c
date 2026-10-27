@@ -148,10 +148,10 @@ static Symbol _offer(
 /* The view belongs to the handler, not to this frame: `exit()` from the
    callback abandons the frame, and shutdown reclaims the handler. */
 static Symbol _observe(ErrorThreadState e, ErrorHandler h) {
-  defer _destroy(&(h.view));
+  defer _destroy(h.view);
   e.floor_only++;
   h.view = _region_new();
-  List slice = _view_since(&(h.view), h.watermark);
+  List slice = _view_since(h.view, h.watermark);
   e.floor_only--;
   return h.fn(slice, h.data);
 }

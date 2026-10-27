@@ -429,7 +429,7 @@ static int _peek(Reader &r) => (unsigned char) r.text[r.at];
 
 static void _fail(Reader &r, String why) {
   int line = 1, column = 1, offset = r.at;
-  scan_next_line_col((char *) r.text, offset, &line, &column);
+  scan_next_line_col((char *) r.text, offset, line, column);
   if (r.path) $error.read.file(r.path, why, offset, line, column);
   $error.read.text(why, offset, line, column);
 }

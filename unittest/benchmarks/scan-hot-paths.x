@@ -58,7 +58,7 @@ int main(void) {
   start = now_ns();
   for (int i = 0; i < fast_count; i++) {
     int line = 1, col = 1;
-    scan_next_line_col(same_line, 18, &line, &col);
+    scan_next_line_col(same_line, 18, line, col);
     sink += line + col;
   }
   result("line-col-single", now_ns() - start, fast_count);
@@ -66,7 +66,7 @@ int main(void) {
   start = now_ns();
   for (int i = 0; i < fast_count; i++) {
     int line = 1, col = 1;
-    scan_next_line_col(multi_line, 17, &line, &col);
+    scan_next_line_col(multi_line, 17, line, col);
     sink += line + col;
   }
   result("line-col-multi", now_ns() - start, fast_count);
@@ -80,7 +80,7 @@ int main(void) {
     sink += scan_number(decimal);
     sink += scan_number(hex);
     sink += scan_string_segment(segment);
-    scan_next_line_col(same_line, 18, &line, &col);
+    scan_next_line_col(same_line, 18, line, col);
     sink += line + col;
   }
   result("weighted-mix", now_ns() - start, mixed_count);

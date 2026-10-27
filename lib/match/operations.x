@@ -17,9 +17,9 @@
     preparing or matching.
 */
 int x2c_match_try_capture(
-  List input, Var pattern, MatchCaptureBuffer *captures) {
+  List input, Var pattern, MatchCaptureBuffer &?captures) {
   if (!captures) return 0;
-  return MatchCache.current().try_capture(input, pattern, *captures, "match");
+  return MatchCache.current().try_capture(input, pattern, captures, "match");
 }
 
 /** Matches `input` against `pat`, writing bindings on success.

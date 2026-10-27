@@ -64,7 +64,7 @@ Registers package `name`'s compile-time part, linked into the compiler,
 whose `targets` returns its name-to-`Func` Map. The registration unit
 `x2c build --extension` generates calls it from a constructor.
 
-Source: `src/meta-native/modules.x:261`
+Source: `src/meta-native/modules.x:263`
 
 ### `Compiler`
 
@@ -176,7 +176,7 @@ Returns the archive of the linked packages' objects that the build of
 this compiler kept beside it, named by the compiler's identity, or NULL
 when the compiler links none. Project meta code links it.
 
-Source: `src/meta-native/modules.x:281`
+Source: `src/meta-native/modules.x:283`
 
 <a id="Compiler.install_collected_meta_function"></a>
 #### Compiler.install_collected_meta_function
@@ -276,7 +276,7 @@ Source: `src/meta-native/linked.x:96`
 Reports whether package `name`'s compile-time part is linked into the
 compiler, so its import loads no module.
 
-Source: `src/meta-native/modules.x:271`
+Source: `src/meta-native/modules.x:273`
 
 <a id="Compiler.links_meta_function"></a>
 #### Compiler.links_meta_function

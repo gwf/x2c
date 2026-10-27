@@ -111,11 +111,11 @@ int MatchPlan.search_replace(
 
 static int _test(MatchWalk &m, Var node) =>
   m.plan.admits(node, NULL)
-    ? _run_capture(m.view, *m.m, node, m.captures) : 0;
+    ? _run_capture(m.view, *m.m, node, *m.captures) : 0;
 
 /* One search result: `(* node)` followed by the node's bindings. */
 static List _hit(MatchWalk &walk, Var node) =>
-  cons(%(* $node), _publish_captures(walk.plan.layout, walk.captures));
+  cons(%(* $node), _publish_captures(walk.plan.layout, *walk.captures));
 
 static Var _spine_get(Block spine, size_t index) =>
   ((Var *) spine.bytes)[index];
@@ -199,7 +199,7 @@ static int _settle(MatchWalk &walk, Var node) {
   int status = _test(walk, node);
   if (status != 1) return status;
   walk.found = node;
-  walk.bindings = _publish_captures(walk.plan.layout, walk.captures);
+  walk.bindings = _publish_captures(walk.plan.layout, *walk.captures);
   return 1;
 }
 

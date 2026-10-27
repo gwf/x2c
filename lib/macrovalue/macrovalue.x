@@ -56,16 +56,16 @@ typedef struct MacroCaseSite {
 
 /** Starts a macro-valued `case` without `Macro_case_root` when `code` is
     its own view. `head`, the Symbol heading the derived pattern, is not a
-    source wrapper or `seq`. Returns 2 after storing `code` in `*cursor`
+    source wrapper or `seq`. Returns 2 after storing `code` in `cursor`
     for a subject headed by `head`, 0 for an empty subject or one headed by
     another Symbol than a wrapper, `expr`, or `seq`, which cannot match,
     and -1 when `Macro_case_root` must decide.
 */
-inline int Macro_case_start(List code, Symbol head, List *cursor) {
+inline int Macro_case_start(List code, Symbol head, List &cursor) {
   if (!code) return 0;
   Symbol first = Macro_case_symbol(code.car);
   if (first == head && (head != <expr> || Macro_case_own(code.caddr()))) {
-    *cursor = code;
+    cursor = code;
     return 2;
   }
   return first && first != <at> && first != <src> && first != <expr> &&
@@ -89,17 +89,17 @@ inline Symbol Macro_case_symbol(Var value) {
   return symbol < 1ul << 51 ? symbol : 0;
 }
 
-/** Stores in `*cursor` the List a macro-valued `case` examines for
+/** Stores in `cursor` the List a macro-valued `case` examines for
     `value`, beneath its source wrappers, and returns whether there is
     one. A List headed by another Symbol than a wrapper or `expr` is its
     own view.
 */
-inline int Macro_case_enter(Var value, List *cursor) {
+inline int Macro_case_enter(Var value, List &cursor) {
   List node = value.list_payload();
   Symbol head = node ? Macro_case_symbol(node.car) : 0;
   if (!head || head == <at> || head == <src> || head == <expr>)
     return Macro_case_view(value, cursor);
-  *cursor = node;
+  cursor = node;
   return 1;
 }
 

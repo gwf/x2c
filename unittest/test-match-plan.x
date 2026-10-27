@@ -726,10 +726,6 @@ static void unbound_alternative_binder_template_is_retained(void) {
 
 // positional capture contract - - - - - - - - - - - - - - - - - - - - - - -
 
-static int _capture_present(MatchCaptureBuffer *captures, int index) {
-  return captures.has(index);
-}
-
 static void capture_layout_owns_canonical_order(void) {
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(
     %(!and ?root
@@ -805,9 +801,9 @@ static void prepared_capture_is_atomic_and_positional(void) {
   int value_index = plan.layout.index(Atom.intern("?value"));
   int message_index = plan.layout.index(Atom.intern("?message"));
   int rest_index = plan.layout.index(Atom.intern("*rest"));
-  EXPECT_FALSE(_capture_present(&captures, value_index));
-  EXPECT_TRUE(_capture_present(&captures, message_index));
-  EXPECT_TRUE(_capture_present(&captures, rest_index));
+  EXPECT_FALSE(captures.has(value_index));
+  EXPECT_TRUE(captures.has(message_index));
+  EXPECT_TRUE(captures.has(rest_index));
   EXPECT_TRUE(values[message_index] == <bad>);
   EXPECT_TRUE(values[rest_index].list() == %(a b));
   plan.free();
@@ -881,7 +877,7 @@ static void capture_presence_is_separate_from_void(void) {
   Var value = <old>;
   MatchCaptureBuffer captures = { &value, 0, 1 };
   EXPECT_INT_EQ(plan.execute_capture(void, captures, NULL), 1);
-  EXPECT_TRUE(_capture_present(&captures, 0));
+  EXPECT_TRUE(captures.has(0));
   EXPECT_TRUE(value is void);
   plan.free();
 }
@@ -891,7 +887,7 @@ static void source_site_owns_only_its_static_plan(void) {
   MatchCaptureBuffer captures = { &value, 0x55UL, 1 };
   Var pattern = %(ok ?value);
   EXPECT_INT_EQ(
-    x2c_match_site_try_capture(&capture_site, %(ok 7), pattern, &captures), 1
+    x2c_match_site_try_capture(&capture_site, %(ok 7), pattern, captures), 1
   );
   EXPECT_TRUE(capture_site.plan != NULL);
   EXPECT_INT_EQ(value.int(), 7);
@@ -900,7 +896,7 @@ static void source_site_owns_only_its_static_plan(void) {
   captures.present = 0x55UL;
   EXPECT_INT_EQ(
     x2c_match_site_try_capture(
-      &capture_site, %(missing), pattern, &captures
+      &capture_site, %(missing), pattern, captures
     ), 0
   );
   EXPECT_TRUE(value == <old>);
@@ -909,7 +905,7 @@ static void source_site_owns_only_its_static_plan(void) {
   value = <old>;
   captures.present = 0x55UL;
   EXPECT_INT_EQ(
-    x2c_match_site_try_capture(&capture_site, %(ok 9), pattern, &captures), 1
+    x2c_match_site_try_capture(&capture_site, %(ok 9), pattern, captures), 1
   );
   EXPECT_INT_EQ(value.int(), 9);
   MatchCache.flush_default();
@@ -964,10 +960,10 @@ static void source_sites_reproduce_the_runtime_operations(void) {
 
     List bindings = %(untouched);
     EXPECT_INT_EQ(
-      x2c_match_site_try_match(&try_match_site, hit, pattern, &bindings), 1);
+      x2c_match_site_try_match(&try_match_site, hit, pattern, bindings), 1);
     EXPECT_LIST_EQ(bindings, hit.match(pattern));
     EXPECT_INT_EQ(
-      x2c_match_site_try_match(&try_match_site, miss, pattern, &bindings), 0);
+      x2c_match_site_try_match(&try_match_site, miss, pattern, bindings), 0);
     EXPECT_LIST_EQ(bindings, hit.match(pattern));
 
     EXPECT_LIST_EQ(
@@ -977,7 +973,7 @@ static void source_sites_reproduce_the_runtime_operations(void) {
     Var found = <untouched>, List found_bindings = %(untouched);
     EXPECT_INT_EQ(
       x2c_match_site_try_search(
-        &try_search_site, document, pattern, &found, &found_bindings), 1);
+        &try_search_site, document, pattern, found, found_bindings), 1);
     EXPECT_LIST_EQ(found.list(), %(ok 7));
     EXPECT_LIST_EQ(found_bindings, hit.match(pattern));
 
@@ -993,11 +989,11 @@ static void source_sites_reproduce_the_runtime_operations(void) {
     Var out = <untouched>;
     EXPECT_INT_EQ(
       x2c_match_site_try_match_replace(
-        &try_match_replace_site, hit, pattern, %(got ?value), &out), 1);
+        &try_match_replace_site, hit, pattern, %(got ?value), out), 1);
     EXPECT_LIST_EQ(out.list(), %(got 7));
     EXPECT_INT_EQ(
       x2c_match_site_try_match_replace(
-        &try_match_replace_site, miss, pattern, %(got ?value), &out), 0);
+        &try_match_replace_site, miss, pattern, %(got ?value), out), 0);
     EXPECT_LIST_EQ(out.list(), %(got 7));
 
     EXPECT_LIST_EQ(

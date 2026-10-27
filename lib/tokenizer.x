@@ -336,7 +336,7 @@ int Tokenizer.tokenize(Tokenizer t, int len, Symbol type) {
     .line = t.line, .col = t.col, .pos = t.pos
   };
   t.tokens = t.tokens.append(&tok, 1);
-  scan_next_line_col(t.text + t.pos, len, &t.line, &t.col);
+  scan_next_line_col(t.text + t.pos, len, t.line, t.col);
   t.pos += len;
   return 1;
 }

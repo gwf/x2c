@@ -23,7 +23,7 @@ module Symbol _catch_match(ErrorHandler h) {
   List detail = record.entry.cadr().list().cadr();
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List projection = _cons(&(record.region), code, detail);
+  List projection = _cons(record.region, code, detail);
   Pool.open_named("Error catch bindings");
   int selected = _catch_select(h, record, projection);
   Pool.close();
@@ -54,7 +54,7 @@ static int _catch_arm(
   int matched = i == h.site.default_arm ||
     (plan.status == <prepared> &&
      plan.execute_capture(projection, captures, NULL) == 1);
-  if (matched) _commit_captures(h, record, layout, &captures);
+  if (matched) _commit_captures(h, record, layout, captures);
   if (values) xfree(values);
   return matched;
 }
@@ -69,7 +69,7 @@ static MatchPlan _arm_plan(ErrorHandler h, int i) {
 
 static void _commit_captures(
   ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
-  MatchCaptureBuffer *captures) {
+  MatchCaptureBuffer &captures) {
   if (handle.capture_values != NULL) {
     handle.capture_values.free();
     handle.capture_values = NULL;
@@ -83,7 +83,7 @@ static void _commit_captures(
   for (int i = 0; i < layout.binder_count; i++) {
     values[i] = void;
     if (captures.has(i))
-      values[i] = _copy_value(&(record.region), captures.values[i]);
+      values[i] = _copy_value(record.region, captures.values[i]);
   }
   if (pushed) Scope.pop();
 }
@@ -113,7 +113,7 @@ static void _retained_destroy(Block retained) {
   if (retained == NULL) return;
   ErrorRecord *records = retained.bytes;
   for (size_t i = 0; i < retained.length; i++)
-    _destroy(&(records[i].region));
+    _destroy(records[i].region);
   retained.free();
 }
 
@@ -173,7 +173,7 @@ module void _free(ErrorHandler handle) {
   _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
-  _destroy(&(handle.view));
+  _destroy(handle.view);
   xfree(handle);
 }
 

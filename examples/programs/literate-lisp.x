@@ -445,7 +445,7 @@ typedef struct Reader {
 
 static Var Reader.error(Reader &self, Symbol cause, unsigned at) {
   int line = 1, column = 1;
-  scan_next_line_col(self.source, (int) at, &line, &column);                     // C addresses for output parameters.
+  scan_next_line_col(self.source, (int) at, line, column);                       // References update both counters.
   if (cause == <incomplete>)                                                     // Symbols compare as integers.
     raise %(incomplete (source $(self.source))                                   // $(...) interpolates an expression.
                        (line $line) (column $column));                           // $line interpolates a named value.

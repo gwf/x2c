@@ -213,7 +213,7 @@ meta native Self List.tail(Self list, unsigned count) {
 */
 meta native Self List.subseq(Self list, int start, int stop, int step) {
   if (step < 1) raise %(bad-arg (operation "List.subseq") (step $step));
-  int span = x2c_normalize_slice(&start, &stop, step, list.len());
+  int span = x2c_normalize_slice(start, stop, step, list.len());
   return _collect_subseq(list, start, step, span);
 }
 
@@ -238,7 +238,7 @@ static List _collect_subseq(List list, int start, int step, int span) {
 */
 meta native Self List.getslice(Self list, int start, int stop, int step) {
   if (!step) raise %(bad-arg (operation "List.getslice") (step $step));
-  int len = list.len(), span = x2c_normalize_slice(&start, &stop, step, len);
+  int len = list.len(), span = x2c_normalize_slice(start, stop, step, len);
   if (step == 1 && start == 0 && span == len &&
       (!list || _is_active_canonical(list))) return list;
   if (step > 0) return _collect_subseq(list, start, step, span);

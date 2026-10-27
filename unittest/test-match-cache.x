@@ -58,14 +58,11 @@ static void cache_lifecycle_failures_transfer(void) {
   try MatchCache.new(0);
   catch %(bad-arg *): caught++;
 
-  try MatchLease.release(NULL);
-  catch %(bad-arg *): caught++;
-
   MatchLease invalid = {
     .transient_plan = (MatchPlan) 1,
     .active = 1
   };
-  try MatchLease.release(&invalid);
+  try MatchLease.release(invalid);
   catch %(bad-state *): caught++;
   EXPECT_TRUE(invalid.active);
 
@@ -75,7 +72,7 @@ static void cache_lifecycle_failures_transfer(void) {
     .slot = -1,
     .active = 1
   };
-  try MatchLease.release(&stale);
+  try MatchLease.release(stale);
   catch %(bad-state *): caught++;
   EXPECT_TRUE(stale.active);
 
@@ -83,10 +80,10 @@ static void cache_lifecycle_failures_transfer(void) {
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(1), held) == <prepared>);
   try cache.dispose();
   catch %(bad-state *): caught++;
-  MatchLease.release(&held);
+  MatchLease.release(held);
   EXPECT_FALSE(held.active);
   cache.dispose();
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 4);
 }
 
 static void cache_admission_and_bypass(void) {
@@ -97,22 +94,22 @@ static void cache_admission_and_bypass(void) {
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(1), lease) == <prepared>);
   unsigned long generation = lease.generation;
   int slot = lease.slot;
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(1), lease) == <prepared>);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   // Canonical long Atoms are raw-identity values and remain admissible.
   Var long_pattern = %(cache-key ?VeryLongIdentifierValue);
   EXPECT_TRUE(_acquire(cache, long_pattern, lease) == <prepared>);
   generation = lease.generation;
   slot = lease.slot;
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, long_pattern, lease) == <prepared>);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   // A String the outermost pool owns is process-lifetime, so a pattern
   // holding one is admitted like any other canonical graph.
@@ -121,11 +118,11 @@ static void cache_admission_and_bypass(void) {
   EXPECT_TRUE(_acquire(cache, text_pattern, lease) == <prepared>);
   generation = lease.generation;
   slot = lease.slot;
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, text_pattern, lease) == <prepared>);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   // A String a nested pool can still reclaim stays bypassed: a transient
   // program executes and is released with its lease.
@@ -134,7 +131,7 @@ static void cache_admission_and_bypass(void) {
   EXPECT_FALSE(nested.is_permanent());
   EXPECT_TRUE(_acquire(cache, %(tag $nested ?v), lease) == <prepared>);
   EXPECT_TRUE(lease.generation == 0);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_NULL(lease.transient_plan);
   Pool.close();
 
@@ -143,7 +140,7 @@ static void cache_admission_and_bypass(void) {
   Var wide = wide_value;
   EXPECT_TRUE(_acquire(cache, %(tag $wide ?v), lease) == <prepared>);
   EXPECT_TRUE(lease.generation == 0);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   // Raw key zero is the inadmissible null-pointer Var: it must bypass
   // both times, never echoing out of the zero-filled memo.
@@ -152,7 +149,7 @@ static void cache_admission_and_bypass(void) {
   for (int i = 0; i < 2; i++) {
     EXPECT_TRUE(_acquire(cache, zero, lease) == <prepared>);
     EXPECT_TRUE(lease.generation == 0);
-    MatchLease.release(&lease);
+    MatchLease.release(lease);
   }
 
   // Admissible atoms retain their prepared cache entry.
@@ -160,11 +157,11 @@ static void cache_admission_and_bypass(void) {
   EXPECT_TRUE(_acquire(cache, atom, lease) == <prepared>);
   generation = lease.generation;
   slot = lease.slot;
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, atom, lease) == <prepared>);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   cache.dispose();
 }
@@ -176,17 +173,17 @@ static void cache_eviction_is_deterministic(void) {
   for (int i = 1; i <= 2; i++) {
     EXPECT_TRUE(_acquire(cache, _keyed_pattern(i), lease) == <prepared>);
     generations[i - 1] = lease.generation;
-    MatchLease.release(&lease);
+    MatchLease.release(lease);
   }
   // Inserting a third pattern evicts the least recently used first.
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(3), lease) == <prepared>);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(2), lease) == <prepared>);
   EXPECT_TRUE(lease.generation == generations[1]);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(1), lease) == <prepared>);
   EXPECT_TRUE(lease.generation != generations[0]);
-  MatchLease.release(&lease);
+  MatchLease.release(lease);
 
   // Churn through a working set wider than capacity replaces a generation
   // on every acquire.
@@ -196,7 +193,7 @@ static void cache_eviction_is_deterministic(void) {
       EXPECT_TRUE(_acquire(cache, _keyed_pattern(i), lease) == <prepared>);
       EXPECT_TRUE(lease.generation > last_generation);
       last_generation = lease.generation;
-      MatchLease.release(&lease);
+      MatchLease.release(lease);
     }
   cache.dispose();
 }
@@ -210,17 +207,17 @@ static void cache_pins_protect_active_leases(void) {
   // than evicting the program under execution.
   MatchLease blocked;
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(2), blocked) == <pressure>);
-  MatchLease.release(&blocked);
+  MatchLease.release(blocked);
 
   // The pinned lease still protects its program.
   MatchLease stale = held;
-  MatchLease.release(&held);
+  MatchLease.release(held);
 
   // Released, the slot recycles and invalidates the old generation.
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(2), blocked) == <prepared>);
-  MatchLease.release(&blocked);
+  MatchLease.release(blocked);
   int caught = 0;
-  try MatchLease.release(&stale);
+  try MatchLease.release(stale);
   catch %(bad-state *): caught++;
   EXPECT_INT_EQ(caught, 1);
   stale.active = 0;
@@ -239,15 +236,15 @@ static void cache_scalar_lease_survives_eviction(void) {
   // pattern: the held scalar entry must never be chosen as victim.
   MatchLease l1;
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(1), l1) == <prepared>);
-  MatchLease.release(&l1);
+  MatchLease.release(l1);
 
   MatchLease l2;
   EXPECT_TRUE(_acquire(cache, _keyed_pattern(2), l2) == <prepared>);
-  MatchLease.release(&l2);
+  MatchLease.release(l2);
 
   // Releasing the held scalar lease must not assert/crash even
   // though the cache has since evicted and reused every other slot.
-  MatchLease.release(&held);
+  MatchLease.release(held);
   cache.dispose();
 }
 
@@ -375,7 +372,7 @@ static void cache_product_pipeline_matches_oracle(void) {
   List nested;
   EXPECT_TRUE(_search(cache, document, notes_pattern, nested));
   EXPECT_TRUE(nested == oracle_full);
-  MatchLease.release(&held);
+  MatchLease.release(held);
 
   cache.dispose();
 }
@@ -400,7 +397,7 @@ static void cache_retires_a_nested_pool_pattern_with_its_level(void) {
     // no round may answer from the entry the previous round left behind
     if (lease.generation && lease.generation == previous) reused++;
     previous = lease.generation;
-    MatchLease.release(&lease);
+    MatchLease.release(lease);
     List bindings = %(sentinel);
     if (!_try_match(cache, %(round $counter ok), pattern, bindings) ||
         bindings.assoc(<?value>) != <ok>)

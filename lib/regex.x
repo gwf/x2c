@@ -513,11 +513,11 @@ static RegexMatch _next(Regex r, String subject, RegexMatch previous) {
    or the next iteration of a repeated group. */
 static typedef struct Rest {
   int repeat, _RegexNode node, int count, start, struct Rest *up;
-} Rest;
+} *Rest;
 
 /* Runs the sequence from `n` at `pos`, then the rest `k`, and returns
    whether the whole pattern matched. */
-static int _run(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _run(Matcher &m, _RegexNode n, int pos, Rest k) {
   for (; n; n = n.next) {
     switch (n.kind) {
       case <set>: case <any>:
@@ -558,8 +558,8 @@ static int _at_boundary(Matcher &m, int pos) {
 
 /* A capture records its start, and restores the old offsets when the rest
    of the match fails. */
-static int _match_group(Matcher &m, _RegexNode n, int pos, Rest *k) {
-  Rest after = {0, n.next, 0, 0, k};
+static int _match_group(Matcher &m, _RegexNode n, int pos, Rest k) {
+  struct Rest after = {0, n.next, 0, 0, k};
   if (n.index < 0) return _run(m, n.child, pos, &after);
   int old_start = m.starts[n.index], old_end = m.ends[n.index];
   m.starts[n.index] = pos;
@@ -569,7 +569,7 @@ static int _match_group(Matcher &m, _RegexNode n, int pos, Rest *k) {
   return 0;
 }
 
-static int _capture_end(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _capture_end(Matcher &m, _RegexNode n, int pos, Rest k) {
   int old_end = m.ends[n.index];
   m.ends[n.index] = pos;
   if (_run(m, n.next, pos, k)) return 1;
@@ -577,15 +577,15 @@ static int _capture_end(Matcher &m, _RegexNode n, int pos, Rest *k) {
   return 0;
 }
 
-static int _match_alternation(Matcher &m, _RegexNode n, int pos, Rest *k) {
-  Rest after = {0, n.next, 0, 0, k};
+static int _match_alternation(Matcher &m, _RegexNode n, int pos, Rest k) {
+  struct Rest after = {0, n.next, 0, 0, k};
   for (_RegexNode alt = n.child; alt; alt = alt.sibling)
     if (_run(m, alt.child, pos, &after)) return 1;
   return 0;
 }
 
 /* Without a continuation the match is complete at `pos`. */
-static int _resume(Matcher &m, int pos, Rest *k) {
+static int _resume(Matcher &m, int pos, Rest k) {
   if (!k) {
     m.end = pos;
     return 1;
@@ -604,13 +604,13 @@ static int _resume(Matcher &m, int pos, Rest *k) {
    before the stack runs out, on any thread. */
 static const int _DEPTH_LIMIT = 2000;
 
-static int _repeat(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _repeat(Matcher &m, _RegexNode n, int pos, Rest k) {
   if (n.child.kind == <set> || n.child.kind == <any>)
     return _byte_loop(m, n, pos, k);
   return _iterate(m, n, 0, pos, -1, k);
 }
 
-static int _byte_loop(Matcher &m, _RegexNode rep, int pos, Rest *k) {
+static int _byte_loop(Matcher &m, _RegexNode rep, int pos, Rest k) {
   int limit = rep.max < 0 ? m.len - pos : rep.max, count = 0;
   while (count < limit && _accepts(m, rep.child, pos + count)) count++;
   if (count < rep.min) return 0;
@@ -627,7 +627,7 @@ static int _byte_loop(Matcher &m, _RegexNode rep, int pos, Rest *k) {
 /* Runs iteration `count` of `rep` at `pos`; the previous iteration started
    at `last_start`. */
 static int _iterate(
-  Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest *k) {
+  Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest k) {
   if (m.depth == _DEPTH_LIMIT) _too_deep(m);
   m.depth++;
   int matched = _iteration(m, rep, count, pos, last_start, k);
@@ -643,11 +643,11 @@ static void _too_deep(Matcher &m) {
    An iteration that matched nothing ends the repeat once `min` is met, so
    an empty body cannot loop. */
 static int _iteration(
-  Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest *k) {
+  Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest k) {
   if (count > 0 && pos == last_start && count >= rep.min)
     return _run(m, rep.next, pos, k);
   int more = rep.max < 0 || count < rep.max;
-  Rest again = {1, rep, count, pos, k};
+  struct Rest again = {1, rep, count, pos, k};
   if (count < rep.min) return _run(m, rep.child, pos, &again);
   if (rep.greedy) {
     if (more && _run(m, rep.child, pos, &again)) return 1;

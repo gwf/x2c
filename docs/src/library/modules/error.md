@@ -198,7 +198,7 @@ Source: `lib/error/policy.x:67`
 Returns the number of errors currently accumulated.
 Returns zero before `Error` initialization and after shutdown.
 
-Source: `lib/error/records.x:202`
+Source: `lib/error/records.x:204`
 
 <a id="Error.depth"></a>
 #### Error.depth
@@ -252,7 +252,7 @@ Source: `lib/error/runtime.x:47`
 Captures the current error-stack position.
 Pass the result to `Error.since` to inspect only later errors.
 
-Source: `lib/error/records.x:207`
+Source: `lib/error/records.x:209`
 
 <a id="Error.note_rendered"></a>
 #### Error.note_rendered
@@ -443,7 +443,7 @@ caller's outermost `Scope` and canonical pools and remains live until
 those owners are released. Failure to materialize it reaches the
 non-reentrant error floor.
 
-Source: `lib/error/records.x:217`
+Source: `lib/error/records.x:219`
 
 <a id="Error.snapshot"></a>
 #### Error.snapshot
@@ -458,7 +458,7 @@ outermost `Scope`, so nested caller brackets may be released safely.
 Invalid or identity-bearing values and failures while copying reach the raw
 error floor; they never re-enter handler dispatch.
 
-Source: `lib/error/records.x:271`
+Source: `lib/error/records.x:273`
 
 <a id="Error.trim"></a>
 #### Error.trim
@@ -541,7 +541,7 @@ live until that `Scope` is destroyed. An unavailable runtime or negative
 mark returns `nil`. `Null` owners or failures while copying reach the raw
 floor.
 
-Source: `lib/error/records.x:246`
+Source: `lib/error/records.x:248`
 
 <a id="Error.snapshot_in"></a>
 #### Error.snapshot_in
@@ -555,7 +555,7 @@ live until their actual owning pool is released. Wide scalar boxes enter
 live until that `Scope` is destroyed. `Null` owners, invalid or
 identity-bearing values, and failures while copying reach the raw floor.
 
-Source: `lib/error/records.x:286`
+Source: `lib/error/records.x:288`
 
 ## Public types
 

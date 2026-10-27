@@ -25,7 +25,7 @@ static uint64_t _mix(uint64_t hash, uint64_t value) {
 }
 
 static uint64_t _capture_hash(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
+  MatchCaptureLayout layout, MatchCaptureBuffer &captures) {
   uint64_t hash = 0x63617074757265ULL;
   for (int i = 0; i < layout.binder_count; i++)
     if (captures.has(i))
@@ -41,7 +41,7 @@ static uint64_t _binding_hash(MatchCaptureLayout layout, List bindings) {
 }
 
 static uint64_t _local_hash(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
+  MatchCaptureLayout layout, MatchCaptureBuffer &captures) {
   Var b0 = layout.binder_count > 0 ? captures.values[0] : void;
   Var b1 = layout.binder_count > 1 ? captures.values[1] : void;
   Var b2 = layout.binder_count > 2 ? captures.values[2] : void;
@@ -90,8 +90,8 @@ static uint64_t _time_prepared_capture(
     int matched = plan.try_capture(input, captures);
     uint64_t value = matched == 1
                    ? (named_local
-                      ? _local_hash(layout, &captures)
-                      : _capture_hash(layout, &captures))
+                      ? _local_hash(layout, captures)
+                      : _capture_hash(layout, captures))
                    : 0xfeedULL;
     hash = _mix(hash, value);
   }
@@ -111,7 +111,7 @@ static uint64_t _time_recursive_capture(
       layout, input, captures
     );
     uint64_t value = matched == 1
-                   ? _capture_hash(layout, &captures) : 0xfeedULL;
+                   ? _capture_hash(layout, captures) : 0xfeedULL;
     hash = _mix(hash, value);
   }
   *receipt = hash;
@@ -262,8 +262,8 @@ static void _check_captures(void) {
   );
   if (match_recursive_try_capture(
         alternatives, %(right 9), captures) != 1 ||
-      MatchCaptureBuffer.has(&captures, 0) ||
-      !MatchCaptureBuffer.has(&captures, 1) || values[1] != 9)
+      captures.has(0) ||
+      !captures.has(1) || values[1] != 9)
     exit(5);
   alternatives.free();
 }

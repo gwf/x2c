@@ -79,7 +79,7 @@ static pthread_mutex_t match_site_mutex =
 */
 int x2c_match_site_try_capture(
   MatchCaptureSite *site, List input, Var pattern,
-  MatchCaptureBuffer *captures) {
+  MatchCaptureBuffer &?captures) {
   if (!captures) return 0;
   MatchPlan plan = _published(site, pattern);
   // a pattern the site cannot retain takes the ordinary runtime route
@@ -188,11 +188,11 @@ static MatchPlan _plan(MatchCaptureSite *site, Var pattern) {
     Results follow `List.try_match`.
 */
 int x2c_match_site_try_match(
-  MatchCaptureSite *site, List input, Var pat, List *out_bindings) {
+  MatchCaptureSite *site, List input, Var pat, List &?out_bindings) {
   MatchPlan plan = _plan(site, pat);
-  if (!plan) return input.try_match(pat, *out_bindings);
+  if (!plan) return input.try_match(pat, out_bindings);
   if (!out_bindings) return 0;
-  return plan.try_match(input, *out_bindings) == 1;
+  return plan.try_match(input, out_bindings) == 1;
 }
 
 /** Returns bindings through one compiler-owned site, or `nil` on a miss.
@@ -200,7 +200,7 @@ int x2c_match_site_try_match(
 */
 List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat) {
   List bindings;
-  if (!x2c_match_site_try_match(site, input, pat, &bindings)) return NULL;
+  if (!x2c_match_site_try_match(site, input, pat, bindings)) return NULL;
   return bindings ? bindings : %(());
 }
 
@@ -208,12 +208,12 @@ List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat) {
     Results follow `List.try_search`.
 */
 int x2c_match_site_try_search(
-  MatchCaptureSite *site, List input, Var pat, Var *out_match,
-  List *out_bindings) {
+  MatchCaptureSite *site, List input, Var pat, Var &?out_match,
+  List &?out_bindings) {
   MatchPlan plan = _plan(site, pat);
-  if (!plan) return input.try_search(pat, *out_match, *out_bindings);
+  if (!plan) return input.try_search(pat, out_match, out_bindings);
   if (!out_match || !out_bindings) return 0;
-  return plan.try_search(input, *out_match, *out_bindings) == 1;
+  return plan.try_search(input, out_match, out_bindings) == 1;
 }
 
 /** Returns every matching subtree through one compiler-owned site.
@@ -231,11 +231,11 @@ List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
     Results follow `List.try_match_replace`.
 */
 int x2c_match_site_try_match_replace(
-  MatchCaptureSite *site, List input, Var pat, Var template, Var *out) {
+  MatchCaptureSite *site, List input, Var pat, Var template, Var &?out) {
   MatchPlan plan = _plan(site, pat);
-  if (!plan) return input.try_match_replace(pat, template, *out);
+  if (!plan) return input.try_match_replace(pat, template, out);
   if (!out) return 0;
-  return plan.try_match_replace(input, template, *out) == 1;
+  return plan.try_match_replace(input, template, out) == 1;
 }
 
 /** Returns the `List` replacement through one compiler-owned site.
@@ -244,7 +244,7 @@ int x2c_match_site_try_match_replace(
 List x2c_match_site_match_replace(
   MatchCaptureSite *site, List input, Var pat, Var template) {
   Var result;
-  if (!x2c_match_site_try_match_replace(site, input, pat, template, &result))
+  if (!x2c_match_site_try_match_replace(site, input, pat, template, result))
     return input;
   return result is <list> ? result : NULL;
 }

@@ -98,7 +98,7 @@ int String.getindex(String str, int index) {
 */
 meta native String String.getslice(String s, int start, int stop, int step) {
   if (!s || step == 0) return NULL;
-  int n = s.len(), len = x2c_normalize_slice(&start, &stop, step, n);
+  int n = s.len(), len = x2c_normalize_slice(start, stop, step, n);
   if (len <= 0) return NULL;
   if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
   if (step == 1) return x2c_string_from_bytes(s + start, len);

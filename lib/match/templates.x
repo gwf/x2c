@@ -33,7 +33,7 @@ int MatchPlan.try_match_replace(
   if (!out) return -1;
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = _capture(plan, input, &captures, NULL);
+  int result = _capture(plan, input, captures, NULL);
   if (result != 1) return result;
   ReplacementSource source = { plan.layout, &captures, NULL };
   out = _replace(template, source);
