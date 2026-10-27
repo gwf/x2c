@@ -58,6 +58,8 @@ int Type_is_pointer(Type t);
 
 int Type_is_reference(Type t);
 
+int Type_is_optional_reference(Type t);
+
 int Type_is_array(Type type);
 
 int Type_is_function(Type type);

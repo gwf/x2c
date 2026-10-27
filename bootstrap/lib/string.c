@@ -148,7 +148,6 @@ _Noreturn static void f6_format____nested(f6_format___Format * f, String reason,
 static int f6_number____only_space(const char * rest);
 typedef struct Split * Split;
 #include <ctype.h>
-#include <string.h>
 #include "var/var.h"
 #include "list/list.h"
 #include "array/array.h"
@@ -1134,10 +1133,10 @@ static inline int f7_cursors____end(String str, String sep, int start, int * nex
   int length = String_len(str);  if(start < 0) return - 1;  if(! String_truth(sep)){
     (* next) = - 1;  return length;
   }
-  const char * found = strstr(str + start, sep);  if(! found){
+  int end = String_find_within(str, sep, start, - 1);  if(end < 0){
     (* next) = - 1;  return length;
   }
-  int end = found - str; (* next) = end + String_len(sep);  return end;
+  (* next) = end + String_len(sep);  return end;
 }
 
 static inline int f7_cursors____line_end(String str, int start, int keep_ends, int * next){

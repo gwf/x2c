@@ -447,9 +447,16 @@ int Type_is_pointer(Type t){
 );
 }
 
+int Type_is_optional_reference(Type t);
+
 int Type_is_reference(Type t){
   if(! _init_guard_) _file_init_();
-  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
+  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || Type_is_optional_reference(t);
+}
+
+int Type_is_optional_reference(Type t){
+  if(! _init_guard_) _file_init_();
+  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
 }
 
 int Type_is_array(Type type){
