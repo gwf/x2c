@@ -487,11 +487,11 @@ List Compiler.parse_parameter_list(Compiler c) {
     current `Sym` scope. The following delimiter remains current.
 */
 List Compiler.parse_parameter(Compiler c) {
-  int rest = c.test(<...>);
-  if (rest && !c.test(<.>)) return %(...);
-  List qual = rest ? NULL : _type_qualifiers(c);
-  List spec = rest ? %(....) : _type_specifier(c), type = %( @qual @spec );
-  if (!rest && type == %("List") && c.test(<@>)) rest = 1, type = %(....);
+  if (c.test(<...>)) return %(...);
+  List qual = _type_qualifiers(c), spec = _type_specifier(c);
+  List type = %( @qual @spec );
+  int rest = type == %("List") && c.test(<@>);
+  if (rest) type = %(....);
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);
