@@ -356,6 +356,9 @@ static List _capture_children(
   return children.list_free();
 }
 
+/* A hand worklist rather than `$ast.walk`: an `expr` contributes only its
+   content, since an anonymous aggregate type in its type slot is not a
+   source definition, and the walk macro cannot skip one child. */
 static int _source_type_definition(List value) {
   Array pending = auto [];
   pending.push(value);

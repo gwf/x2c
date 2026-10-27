@@ -316,7 +316,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
       continue;
     }
     Type type = argument.cadr();
-    int forwarded = type.car() == <opt-ref>;
+    int forwarded = type.is_optional_reference();
     List source = c.cache_literal_list(
       c.sym.normalize_declared_type(forwarded ? type.cdr() : type));
     /* C text boxes as a String, as it does for any Var destination. */

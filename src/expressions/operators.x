@@ -5,7 +5,7 @@
 module List _unary(Resolve &r, Var operator, List operand) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
-  if (lhs_type.car() == <opt-ref> && operator != <!>)
+  if (lhs_type.is_optional_reference() && operator != <!>)
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
@@ -43,7 +43,7 @@ module List _unary(Resolve &r, Var operator, List operand) {
 module List _postfix(Resolve &r, Var operator, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   Type operand_type = operand.cadr();
-  if (operand_type.car() == <opt-ref>)
+  if (operand_type.is_optional_reference())
     $fail.expressions_optional_ref_unchecked(r.c, r.origin);
   if (operand_type === %(<macro-expr>))
     return %(expr (<macro-expr>) (postfix $operator $operand));
@@ -257,7 +257,7 @@ static int _is_comparison(Symbol op) {
 static void _check_optional_operands(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
-  if (ltype.car() != <opt-ref> && rtype.car() != <opt-ref>) return;
+  if (!ltype.is_optional_reference() && !rtype.is_optional_reference()) return;
   int null_test = _null_literal(lhs) || _null_literal(rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)

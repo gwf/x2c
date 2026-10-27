@@ -237,8 +237,7 @@ static List _capture(Decoration &d, List target) {
    seen through a lone `seq` and a foreign alias. */
 static int _private_target(Compiler c, List target) {
   int private_target = c.source_private > 0;
-  List visibility_target = target;
-  if (visibility_target ~= %(seq ?only)) visibility_target = only;
+  List visibility_target = Ast.lone_item(target);
   if (visibility_target ~= %(falias ?declaration ?))
     visibility_target = declaration;
   if (visibility_target ~= %((!or function declare typedef) ?type *))

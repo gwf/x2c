@@ -41,10 +41,10 @@ Public functions:
 `Ast.addressed_identifier`, `Ast.direct_identifier`, `Ast.indirect_identifier`,
 `Ast.written_operand`, `Ast.rewrite_children`, `Ast.contains_head`,
 `Ast.replace_nodes`, `Ast.collect_binding_references`, `Ast.without_origin`,
-`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.entry_call`,
-`Ast.reference_guard_exits`, `Ast.never_returns`, `Symbol.is_assignment_op`,
-`Symbol.changes_left_operand`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.lone_item`,
+`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
+`Symbol.is_assignment_op`, `Symbol.changes_left_operand`,
+`Ast.initializer_cases`, `Ast.initializer_functions`
 
 ### [src/builtins.x](../src/builtins.x)
 
@@ -1336,14 +1336,14 @@ Public functions:
 `Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
 `Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
 `Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
-`Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
-`Type.dereference`, `Type.qualify`, `Type.reference`, `Type.apply`,
-`Type.function_parts`, `Type.rest_container`, `Type.rest_index`,
-`Type.is_static`, `Type.is_inline`, `Type.is_extern`, `Type.is_threaded`,
-`Type.is_typedef`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
-`Type.discards_qualifiers`, `Type.is_char_pointer_like`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_number`,
-`Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
+`Type.is_reference`, `Type.is_optional_reference`, `Type.is_array`,
+`Type.is_function`, `Type.is_bitfield`, `Type.dereference`, `Type.qualify`,
+`Type.reference`, `Type.apply`, `Type.function_parts`, `Type.rest_container`,
+`Type.rest_index`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
+`Type.is_threaded`, `Type.is_typedef`, `Type.base_type`, `Type.canonicalize`,
+`Type.declared`, `Type.discards_qualifiers`, `Type.is_char_pointer_like`,
+`Type.is_builtin`, `Type.is_typedef_name`, `Type.is_bare_typedef_name`,
+`Type.is_number`, `Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
 `Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
 `Type.integer_literal_magnitude`

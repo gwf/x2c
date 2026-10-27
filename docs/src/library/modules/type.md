@@ -40,6 +40,7 @@ Semantic type values and their structural operations.
 | [`Type.is_inline`](#Type.is_inline) | Returns whether `type` carries the `inline` function specifier. |
 | [`Type.is_integral`](#Type.is_integral) | Returns whether `type` is a fixed integral scalar or an enum. |
 | [`Type.is_number`](#Type.is_number) | Returns whether `type` is a fixed numeric scalar or an enum. |
+| [`Type.is_optional_reference`](#Type.is_optional_reference) | Returns whether `t` is an optional reference. |
 | [`Type.is_pointer`](#Type.is_pointer) | Returns whether `t` begins with a pointer-like modifier. |
 | [`Type.is_reference`](#Type.is_reference) | Returns whether `t` is a reference or an optional reference. |
 | [`Type.is_static`](#Type.is_static) | Returns whether `type` carries the `static` storage class. |
@@ -363,6 +364,15 @@ Source: `lib/type.x`
 `int Type.is_number(Type type)`
 
 Returns whether `type` is a fixed numeric scalar or an enum.
+
+Source: `lib/type.x`
+
+<a id="Type.is_optional_reference"></a>
+#### Type.is_optional_reference
+
+`int Type.is_optional_reference(Type t)`
+
+Returns whether `t` is an optional reference.
 
 Source: `lib/type.x`
 

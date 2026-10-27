@@ -28,8 +28,7 @@ List Compiler.parse_function_definition(Compiler c) {
 List Compiler.parse_function_target(Compiler c) {
   List macro = c.try_parse_macro_target_at(<unit>);
   if (!macro) return c.parse_function_definition();
-  match (macro) case %(seq ?function): return function;
-  return macro;
+  return Ast.lone_item(macro);
 }
 
 // Complete a token-parsed or generated function in its parameter scope.

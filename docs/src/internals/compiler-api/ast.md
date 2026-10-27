@@ -23,6 +23,7 @@ Shared helpers for x2c compiler AST nodes.
 | [`Ast.indirect_identifier`](#Ast.indirect_identifier) | Returns the name of the pointer an expression designates through, or `NULL` when it designates no object through a single name. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
+| [`Ast.lone_item`](#Ast.lone_item) | Returns the single item of a one-item `seq`, or `node` itself. |
 | [`Ast.lvalue_binding`](#Ast.lvalue_binding) | Returns the binding whose stored object the lvalue `ast` names, or `NULL`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
 | [`Ast.prototype_declarator`](#Ast.prototype_declarator) | Returns `declarator` with the outermost `volatile` removed from each of its parameters. |
@@ -148,6 +149,15 @@ Source: `src/ast.x`
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
+
+Source: `src/ast.x`
+
+<a id="Ast.lone_item"></a>
+#### Ast.lone_item
+
+`List Ast.lone_item(List node)`
+
+Returns the single item of a one-item `seq`, or `node` itself.
 
 Source: `src/ast.x`
 

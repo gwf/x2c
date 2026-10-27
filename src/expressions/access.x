@@ -47,13 +47,13 @@ module List _resolve_indexed(
   Compiler c, List receiver, List selector, Token origin) {
   receiver = c.resolve_expression(receiver, origin);
   selector = c.resolve_expression(selector, origin);
-  if (receiver.cadr().car() == <opt-ref>)
+  Type receiver_type = receiver.cadr();
+  if (receiver_type.is_optional_reference())
     $fail.expressions_optional_ref_index(c, origin);
   if (_deferred_receiver(receiver) || _deferred_receiver(selector))
     return %(expr (<macro-expr>) (index $receiver $selector));
   List resolved = _postfix_index_expression(c, receiver, selector);
   if (resolved) return resolved;
-  Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
       receiver ~= %(expr () (op (!or . ->) * *)))
@@ -164,7 +164,7 @@ module List _slice(Resolve &r, List slice) {
 List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
   int call_context) {
-  if (receiver_type.car() == <opt-ref>)
+  if (receiver_type.is_optional_reference())
     $fail.expressions_optional_ref_access(c, c.token);
   Type type = receiver_type.canonicalize();
   if (access == <"->">)

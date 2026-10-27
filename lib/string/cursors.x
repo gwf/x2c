@@ -30,7 +30,6 @@ Split Var.split(Var value) => (Split) value.pointer();
 protocol Var(Split);
 
 #include <ctype.h>
-#include <string.h>
 
 #include "var/var.x"
 #include "list/list.x"
@@ -50,12 +49,11 @@ static inline int _end(String str, String sep, int start, int &next) {
     next = -1;
     return length;
   }
-  const char *found = strstr(str + start, sep);
-  if (!found) {
+  int end = str.find_within(sep, start, -1);
+  if (end < 0) {
     next = -1;
     return length;
   }
-  int end = found - str;
   next = end + sep.len();
   return end;
 }

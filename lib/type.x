@@ -111,7 +111,10 @@ List Type.body(Type t) {
 int Type.is_pointer(Type t) => t ~= %((!or (!quote *) & opt-ref ^) *);
 
 /** Returns whether `t` is a reference or an optional reference. */
-int Type.is_reference(Type t) => t.car() == <&> || t.car() == <opt-ref>;
+int Type.is_reference(Type t) => t.car() == <&> || t.is_optional_reference();
+
+/** Returns whether `t` is an optional reference. */
+int Type.is_optional_reference(Type t) => t.car() == <opt-ref>;
 
 /** Returns whether the outer declarator represented by `type` is an array. */
 int Type.is_array(Type type) => _declarator_kind(type) == <dim>;

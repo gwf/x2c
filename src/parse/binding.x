@@ -239,7 +239,7 @@ static List _bind_invocation(
     transaction.commit();
     if (pending && (context == <block> || context == <statement> ||
                     context == <unit>))
-      match (bound) case %(seq ?item): return item;
+      return Ast.lone_item(bound);
     return bound;
   }
 }
@@ -247,9 +247,8 @@ static List _bind_invocation(
 /* An anchor keeps a lone bound item, and a macro's origin marker becomes
    the compiler's current origin. */
 static List _anchor(Compiler c, Var origin, List bound) {
-  match (bound) case %(seq ?only): bound = only;
   Var anchor = origin == <m-origin> ? c.origin : origin;
-  return %(at $anchor $bound);
+  return %(at $anchor $(Ast.lone_item(bound)));
 }
 
 /* An anchored block item is followed by the code placed after it. */

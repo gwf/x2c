@@ -357,8 +357,8 @@ List Compiler.land_quotation(
     }
     transaction.commit();
   }
-  if ((position == <block> || position == <statement> ||
-       position == <unit>) && bound ~= %(seq ?item)) return item;
+  if (position == <block> || position == <statement> || position == <unit>)
+    return Ast.lone_item(bound);
   return bound;
 }
 

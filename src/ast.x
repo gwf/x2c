@@ -303,6 +303,12 @@ List Ast.written_definitions(List decl) {
   return decl;
 }
 
+/** Returns the single item of a one-item `seq`, or `node` itself. */
+List Ast.lone_item(List node) {
+  match (node) case %(seq ?only): return only;
+  return node;
+}
+
 /** Returns the statement calling the `void (void)` function `entry`. */
 List Ast.entry_call(String entry) =>
   %((stmnt (expr (void) (call $entry (args)))));
