@@ -596,21 +596,8 @@ static void _beep(void) {
 
 // editable buffer and display folds
 
-/* A fold is a display-only replacement for a range in l.buf. The edited
- * buffer always keeps the real bytes; refresh code asks _render_buffer(l)
- * for a temporary printable version plus the cursor position inside it. */
-static typedef struct EditFold {
-  size_t start;
-  size_t end;
-  char display[64];
-  size_t displaylen;
-} EditFold;
-
-static typedef struct EditFolds {
-  int count;
-  EditFold fold[LINENOISE_MAX_FOLDS];
-} EditFolds;
-
+/* Folds are sorted, non-overlapping ranges in the real edit buffer.
+   Rendering replaces each range with a marker; editing uses its endpoints. */
 /* Return the number of logical lines in the range. */
 static size_t _fold_line_count(const char *buf, size_t len) {
   size_t lines = 1, j;
@@ -624,33 +611,17 @@ static int _should_fold(const char *buf, size_t len) {
   return memchr(buf, '\n', len) != NULL || len >= PASTE_FOLD_THRESHOLD;
 }
 
-/* Fill f.display with the text shown instead of the folded range. */
-static void _set_fold_text(EditFold &f, const char *buf) {
-  size_t hidden = f.end - f.start;
-  size_t lines = _fold_line_count(buf + f.start, hidden);
-  int n;
-
-  if (lines > 1)
-    n = snprintf(
-      f.display, sizeof(f.display), "[... %zu pasted lines ...]", lines);
-  else
-    n = snprintf(
-      f.display, sizeof(f.display), "[... %zu pasted chars ...]", hidden);
-  if (n < 0) n = 0;
-  f.displaylen = (size_t)n;
-}
-
-/* Populate f with one fold reconstructed from a history entry. History stores
+/* Restore one fold from a history entry. History stores
  * the real text, but not the original paste boundaries, so we reconstruct
  * an approximation of text we want to hide on the fly: if it is long or
  * contains newlines. */
-static int _history_fold(EditState &l, EditFold &f) {
-  f.start = f.end = f.displaylen = 0;
-  if (l.len == 0) return 0;
-  if (!_should_fold(l.buf,l.len)) return 0;
+static void _history_fold(EditState &l) {
+  size_t start = 0, end = 0;
+  if (l.len == 0) return;
+  if (!_should_fold(l.buf,l.len)) return;
 
-  f.start = 0;
-  f.end = l.len;
+  start = 0;
+  end = l.len;
   if (l.len > PASTE_FOLD_CONTEXT*2) {
     size_t pos = 0, chars = 0;
     int nl = 0;
@@ -664,7 +635,7 @@ static int _history_fold(EditState &l, EditFold &f) {
       pos += step;
       chars++;
     }
-    f.start = nl ? 0 : pos;
+    start = nl ? 0 : pos;
 
     /* And also on the end side. */
     pos = l.len;
@@ -677,131 +648,53 @@ static int _history_fold(EditState &l, EditFold &f) {
       if (l.buf[pos] == '\n') nl = 1;
       chars++;
     }
-    f.end = nl ? l.len : pos;
-    if (f.start >= f.end) {
-      f.start = 0;
-      f.end = l.len;
+    end = nl ? l.len : pos;
+    if (start >= end) {
+      start = 0;
+      end = l.len;
     }
   }
-  _set_fold_text(f,l.buf);
-  return 1;
+  _fold_add(l, start, end);
 }
 
-/* Populate fs with the folds to render for the current buffer. As a side
- * effect, the rendered text of each fold is updated. Return 1 if folding
- * should be used, or 0 if the buffer should be rendered as-is. */
-static int _render_folds(EditState &l, EditFolds &fs) {
-  int j;
-
-  fs.count = 0;
-  if (l.len == 0) return 0;
-
-  for (j = 0; j < l.fold_count; j++) {
-    size_t start = l.fold_start[j];
-    size_t end = l.fold_end[j];
-
-    if (start >= end || end > l.len) continue;
-    int index = fs.count++;
-    fs.fold[index].start = start;
-    fs.fold[index].end = end;
-    _set_fold_text(fs.fold[index],l.buf);
-  }
-  return fs.count != 0;
-}
-
-/* Return the freshly allocated string content that is actually displayed in
- * the user prompt. It can be the actual edited line, or a special version
- * where pasted or multiline history ranges are replaced by their folded
- * "[...]" style versions. outpos is l.pos translated into this rendered
- * buffer. */
-static void _render_buffer(
-  EditState &l, char *&out, size_t &outlen, size_t &outpos) {
-  EditFolds fs;
-  size_t len, pos, src, dst;
-  char *r;
-  int j, pos_set = 0;
-
-  if (!_render_folds(l, fs)) {
-    /* Keep the refresh code simple: it always owns a temporary render
-     * buffer, even when the render is identical to the real edit buffer. */
-    r = xmalloc(l.len + 1);
-    memcpy(r,l.buf,l.len);
-    r[l.len] = '\0';
-    out = r;
-    outlen = l.len;
-    outpos = l.pos;
-    return;
-  }
-
-  /* Gaps are copied as-is, folded ranges are replaced by their markers.
-   * The bytes inside each [start,end) range stay in l.buf but are not
-   * emitted to the terminal. */
-  len = l.len;
-  for (j = 0; j < fs.count; j++) {
-    EditFold f = fs.fold[j];
-    len -= f.end - f.start;
-    len += f.displaylen;
-  }
-  r = xmalloc(len + 1);
-
-  src = dst = 0;
-  pos = 0;
-  for (j = 0; j < fs.count; j++) {
-    EditFold f = fs.fold[j];
-    size_t gap = f.start - src;
-
-    if (!pos_set && l.pos <= f.start) {
-      pos = dst + (l.pos - src);
-      pos_set = 1;
+/* Writes the visible gaps and fold markers, translating the byte cursor
+   into the rendered buffer. Stored fold ranges stay in the edit buffer. */
+static void _render_buffer(EditState &l, Buffer out, size_t &outpos) {
+  size_t source = 0;
+  int positioned = 0;
+  for (int i = 0; i < l.fold_count; i++) {
+    size_t start = l.fold_start[i], end = l.fold_end[i];
+    if (!positioned && l.pos <= start) {
+      outpos = out.len() + l.pos - source;
+      positioned = 1;
     }
-    memcpy(r+dst,l.buf+src,gap);
-    dst += gap;
-
-    if (!pos_set && l.pos < f.end) {
-      pos = dst + f.displaylen;
-      pos_set = 1;
+    out.write_len(l.buf + source, start - source);
+    size_t lines = _fold_line_count(l.buf + start, end - start);
+    if (lines > 1) out.printf("[... %zu pasted lines ...]", lines);
+    else out.printf("[... %zu pasted chars ...]", end - start);
+    if (!positioned && l.pos <= end) {
+      outpos = out.len();
+      positioned = 1;
     }
-    memcpy(r+dst,f.display,f.displaylen);
-    dst += f.displaylen;
-    if (!pos_set && l.pos == f.end) {
-      pos = dst;
-      pos_set = 1;
-    }
-    src = f.end;
+    source = end;
   }
-  if (!pos_set) pos = dst + (l.pos - src);
-  memcpy(r+dst,l.buf+src,l.len-src);
-  r[len] = '\0';
-
-  out = r;
-  outlen = len;
-  outpos = pos;
+  if (!positioned) outpos = out.len() + l.pos - source;
+  out.write_len(l.buf + source, l.len - source);
 }
 
 /* Return the number of bytes to move right from pos. If pos is at the start of
  * a folded range, the whole hidden range is skipped by one cursor movement. */
 static size_t _next_edit_len(EditState &l, size_t pos) {
-  EditFolds fs;
-  int j;
-
-  if (_render_folds(l, fs))
-    for (j = 0; j < fs.count; j++)
-      if (pos == fs.fold[j].start)
-        return fs.fold[j].end - fs.fold[j].start;
-  return _next_grapheme_len(l.buf,pos,l.len);
+  for (int i = 0; i < l.fold_count; i++)
+    if (pos == l.fold_start[i]) return l.fold_end[i] - l.fold_start[i];
+  return _next_grapheme_len(l.buf, pos, l.len);
 }
 
-/* Return the number of bytes to move left from pos. If pos is at the end of a
- * folded range, the whole hidden range is skipped by one cursor movement. */
+/* A left move at a fold's end skips the same stored range. */
 static size_t _previous_edit_len(EditState &l, size_t pos) {
-  EditFolds fs;
-  int j;
-
-  if (_render_folds(l, fs))
-    for (j = 0; j < fs.count; j++)
-      if (pos == fs.fold[j].end)
-        return fs.fold[j].end - fs.fold[j].start;
-  return _previous_grapheme_len(l.buf,pos);
+  for (int i = 0; i < l.fold_count; i++)
+    if (pos == l.fold_end[i]) return l.fold_end[i] - l.fold_start[i];
+  return _previous_grapheme_len(l.buf, pos);
 }
 
 /* Keeps the fold array sorted by start offset. */
@@ -881,8 +774,8 @@ static void _adjust_folds_after_delete(
    batching escape sequences into one write to reduce flicker. */
 static void _render(EditState &l, int flags) {
   size_t pwidth = _display_width(l.prompt, l.plen);
-  char *render = NULL;
-  size_t render_len, render_pos;
+  char *render = l.buf;
+  size_t render_len = l.len, render_pos = l.pos;
   size_t bufwidth;
   size_t poswidth;
   int rows; /* rows used by current rendered buffer. */
@@ -892,8 +785,12 @@ static void _render(EditState &l, int flags) {
   int old_rows = l.oldrows;
   int fd = l.input.ofd, j;
 
-  _render_buffer(l, render, render_len, render_pos);
-  defer xfree(render);
+  Buffer folded = auto l.fold_count ? Buffer.new(0) : NULL;
+  if (l.fold_count) {
+    _render_buffer(l, folded, render_pos);
+    render = folded.content.bytes;
+    render_len = folded.len();
+  }
   bufwidth = _display_width(render, render_len);
   poswidth = _display_width(render, render_pos);
   rows = (pwidth+bufwidth+l.cols-1)/l.cols;
@@ -1041,7 +938,6 @@ static void _recall(EditState &l, int dir) {
   if (l.history_len > 1) {
     const char *src;
     size_t len;
-    EditFold f;
 
     /* Update the current history entry before to
      * overwrite it with the next one. */
@@ -1070,8 +966,7 @@ static void _recall(EditState &l, int dir) {
     /* History stores the real text, but not the original paste ranges.
      * If the recalled entry needs folding, create one display fold now
      * so text typed after recall remains outside the folded range. */
-    if (_history_fold(l, f))
-      _fold_add(l, f.start,f.end);
+    _history_fold(l);
     _refresh_line(l);
   }
 }
