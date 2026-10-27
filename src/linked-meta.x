@@ -1605,7 +1605,7 @@ static List _match_captures(List binders, List values) {
 
 static List _match_arm(
   List pattern, Var value, List expr, List finished, Array pool) {
-  if (!pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
+  if (!(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
       value is not <list>)
     return NULL;
   Array names = [], cursors = [];
