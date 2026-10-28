@@ -142,10 +142,10 @@ def probe(root, directory):
     broken = directory / "broken.x"
     orphan = directory / "orphan.x"
     manifest = directory / "x2c.toml"
-    header = directory / "live" / "decl.xh"
+    header = directory / "live" / "decl.x"
     (directory / "disk").mkdir()
     header.parent.mkdir()
-    (directory / "disk" / "decl.xh").write_text("char value(void);\n")
+    (directory / "disk" / "decl.x").write_text("char value(void);\n")
     header.write_text("int value(void);\n")
     (directory / "helper.x").write_text("meta int twice(int x) => x * 2;\n")
     source.write_text('#include "helper.x"\nint disk_only(void);\n')
@@ -153,7 +153,7 @@ def probe(root, directory):
     orphan.write_text("int orphan(void);\n")
     manifest.write_text('[target.app]\nsources = ["main.x", "broken.x"]\ninclude-dirs = ["disk"]\n')
     live_manifest = '[target.app]\nsources = ["main.x", "broken.x"]\ninclude-dirs = ["live"]\n'
-    source_text = '#include "decl.xh"\nint main(void) { return value() + $twice(1); }\n'
+    source_text = '#include "decl.x"\nint main(void) { return value() + $twice(1); }\n'
     client = Client(root, directory)
     observed_children = set()
     try:
