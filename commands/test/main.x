@@ -107,7 +107,7 @@ static void _run_files(Run &run, Array files) {
     }
     Job job = pending.remove(0);
     int status = job.status();
-    String output = _output(job);
+    String output = status ? job.output_text : job.output();
     if (output) fputs(output, stdout);
     if (status) run.files_failed++;
     else run.files_passed++;
@@ -138,9 +138,4 @@ static Job _start(Run run, Path file) {
   return job.options({stderr: <stdout>, env: {
     "X2C_CACHE_DIR": %"$(run.root)/.x2c-build/tests"
   }}).start();
-}
-
-static String _output(Job job) {
-  try return job.output();
-  catch %(cmd-fail (command ?) (status ?) (output ?text)): return text;
 }
