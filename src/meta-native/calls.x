@@ -34,8 +34,8 @@ List Compiler.evaluate_meta_statement(
 
 /** Runs the explicit meta call `expression` at `site`. The project meta
     build's own parse leaves a project function's call for the translation:
-    an expression takes a placeholder, and a template `slot`, which has
-    none, is reported.
+    an expression takes a placeholder. A template `slot` or a pattern
+    outside a meta body cannot use that placeholder, so it is deferred.
 */
 Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) =>
@@ -126,7 +126,7 @@ static Var _run_meta(
                          : _meta_named_value(c, name, arguments, site);
   catch %(meta-later *): {
     value = void;
-    if (slot)
+    if (slot || (c.in_pattern && !c.meta_body))
       $fail.meta_native_call_deferred(c, site);
   }
   catch %(malformed (category ?category)):
