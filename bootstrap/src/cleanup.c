@@ -3314,7 +3314,7 @@ List Compiler_rewrite_defer_list(Compiler c, List stmts){
         .values = _x2c_gensym_match_values_0, .capacity = 1
       }
       ;
-      {List _x2c_gensym_match_at_216, _x2c_gensym_match_at_217; int _x2c_gensym_match_root_0 = Macro_case_start(_x2c_gensym_match_expr_41, 8728932, & _x2c_gensym_match_cursor_0); if(_x2c_gensym_match_root_0 < 0) _x2c_gensym_match_root_0 = Macro_case_root(_x2c_gensym_match_expr_41, _684, _686, 1, & _x2c_gensym_match_cursor_0, & _x2c_gensym_match_capture_0); if(_x2c_gensym_match_root_0 == 1 || _x2c_gensym_match_root_0 == 2 &&(_x2c_gensym_match_cursor_0 && _x2c_gensym_match_cursor_0 ->car.u64 == 9224497936770347364ULL &&(_x2c_gensym_match_at_216 = _x2c_gensym_match_cursor_0 ->cdr) &&(_x2c_gensym_match_values_0[0] = _x2c_gensym_match_at_216 ->car, 1) && !(_x2c_gensym_match_at_217 = _x2c_gensym_match_at_216 ->cdr))){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0];
+      {List _x2c_gensym_match_at_216, _x2c_gensym_match_at_217; int _x2c_gensym_match_root_0 =(Macro_case_start(_x2c_gensym_match_expr_41, 8728932, & _x2c_gensym_match_cursor_0)); if(_x2c_gensym_match_root_0 < 0) _x2c_gensym_match_root_0 = Macro_case_root(_x2c_gensym_match_expr_41, _684, _686, 1, & _x2c_gensym_match_cursor_0, & _x2c_gensym_match_capture_0); if(_x2c_gensym_match_root_0 == 1 || _x2c_gensym_match_root_0 == 2 &&(_x2c_gensym_match_cursor_0 && _x2c_gensym_match_cursor_0 ->car.u64 == 9224497936770347364ULL &&(_x2c_gensym_match_at_216 = _x2c_gensym_match_cursor_0 ->cdr) &&(_x2c_gensym_match_values_0[0] = _x2c_gensym_match_at_216 ->car, 1) && !(_x2c_gensym_match_at_217 = _x2c_gensym_match_at_216 ->cdr))){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]);
       {
         Var final_stmt;
         final_stmt = x2c_match_value_0;

@@ -52,7 +52,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`declarator_append_modifiers`](#declarator_append_modifiers) | Appends a base type's modifiers to a declarator, preserving its initializer. |
+| [`declarator_append_modifiers`](#declarator_append_modifiers) | Appends a base type's modifiers, preserving the initializer. |
 
 ### Functions
 
@@ -60,7 +60,7 @@ for source readers but are not supported as user API.
 
 `List declarator_append_modifiers(List declarator, List modifiers)`
 
-Appends a base type's modifiers to a declarator, preserving its initializer.
+Appends a base type's modifiers, preserving the initializer.
 
 Source: `lib/meta.x`
 

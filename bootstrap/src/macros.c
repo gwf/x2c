@@ -4438,7 +4438,7 @@ static void _file_scope_locals(List rows, Map locals){
                   .values = _x2c_gensym_match_values_0, .capacity = 1
                 }
                 ;
-                if(! _x2c_gensym_match_none_10){static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_16, List_var(_396), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; {
+                if(! _x2c_gensym_match_none_10){static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_16, List_var(_396), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]); {
                   Var tag;  tag = x2c_match_value_0;  if(Var_is_binder(tag)) Map_setindex(locals, tag, int_var(1));
                 }
                 }}
@@ -4447,7 +4447,7 @@ static void _file_scope_locals(List rows, Map locals){
                 Var _x2c_gensym_match_var_11 = type;  int _x2c_gensym_match_none_11 = ! Var_is(_x2c_gensym_match_var_11, 806120);  List _x2c_gensym_match_expr_17 = Var_list_payload(_x2c_gensym_match_var_11);  Var _x2c_gensym_match_values_1[1];  MatchCaptureBuffer _x2c_gensym_match_capture_1 ={
                   .values = _x2c_gensym_match_values_1, .capacity = 1
                 }
-                ;  if(! _x2c_gensym_match_none_11){static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_17, List_var(_403), & _x2c_gensym_match_capture_1)){List x2c_match_list_0 = Var_list_payload(_x2c_gensym_match_values_1[0]); {
+                ;  if(! _x2c_gensym_match_none_11){static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_17, List_var(_403), & _x2c_gensym_match_capture_1)){List x2c_match_list_0 =(Var_list_payload(_x2c_gensym_match_values_1[0])); {
                   List members;  members = x2c_match_list_0;  f9_expansion____file_scope_declarators(members, locals);
                 }
                 }}

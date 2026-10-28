@@ -531,7 +531,7 @@ static Var _modifier_syntax(Var modifier) {
   return modifier;
 }
 
-/** Appends a base type's modifiers to a declarator, preserving its initializer. */
+/** Appends a base type's modifiers, preserving the initializer. */
 List declarator_append_modifiers(List declarator, List modifiers) {
   if (!modifiers) return declarator;
   match (declarator) {

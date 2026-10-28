@@ -3400,7 +3400,7 @@ static String f8_emission____diagnostic_line(List entry){
       .values = _x2c_gensym_match_values_0, .capacity = 6
     }
     ;
-    {static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_29, List_var(_1024), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; Var x2c_match_value_1 = _x2c_gensym_match_values_0[1]; Var x2c_match_value_2 = _x2c_gensym_match_values_0[2]; Var x2c_match_value_3 = _x2c_gensym_match_values_0[3]; Var x2c_match_value_4 = _x2c_gensym_match_values_0[4]; Var x2c_match_value_5 = _x2c_gensym_match_values_0[5]; {
+    {static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_29, List_var(_1024), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]); Var x2c_match_value_1 =(_x2c_gensym_match_values_0[1]); Var x2c_match_value_2 =(_x2c_gensym_match_values_0[2]); Var x2c_match_value_3 =(_x2c_gensym_match_values_0[3]); Var x2c_match_value_4 =(_x2c_gensym_match_values_0[4]); Var x2c_match_value_5 =(_x2c_gensym_match_values_0[5]); {
       Var code;  code = x2c_match_value_0;  Var message;  message = x2c_match_value_1;  Var file;  file = x2c_match_value_2;  Var row;  row = x2c_match_value_3;  Var column;  column = x2c_match_value_4;  Var notes;  notes = x2c_match_value_5;  Var _x2c_gensym_match_value_11 = message;  Var _x2c_gensym_match_value_12 = notes; {
         String message = Var_as_string(_x2c_gensym_match_value_11);  List notes = Var_list_payload(_x2c_gensym_match_value_12); {
           line =({
@@ -3529,7 +3529,7 @@ static List f8_emission____native_targets(Compiler c, List node, List lookup){
     }
     ;
     switch(_x2c_gensym_match_expr_31 ? _x2c_gensym_match_expr_31 -> car.u64 : 0){
-      case 9224497936761996324ULL :{static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_31, List_var(_1129), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 = _x2c_gensym_match_values_1[0]; Var x2c_match_value_1 = _x2c_gensym_match_values_1[1]; Var x2c_match_value_2 = _x2c_gensym_match_values_1[2]; List x2c_match_list_3 = Var_list_payload(_x2c_gensym_match_values_1[3]);{{
+      case 9224497936761996324ULL :{static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_31, List_var(_1129), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 =(_x2c_gensym_match_values_1[0]); Var x2c_match_value_1 =(_x2c_gensym_match_values_1[1]); Var x2c_match_value_2 =(_x2c_gensym_match_values_1[2]); List x2c_match_list_3 =(Var_list_payload(_x2c_gensym_match_values_1[3]));{{
         Var result;  result = x2c_match_value_0;  Var callee;  callee = x2c_match_value_1;  Var name;  name = x2c_match_value_2;  List arguments;  arguments = x2c_match_list_3; {
           Var _x2c_gensym_match_value_13 = result; {
             Type result = Var_type(_x2c_gensym_match_value_13); {

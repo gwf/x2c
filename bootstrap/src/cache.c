@@ -847,7 +847,7 @@ static List _rewrite_static(Compiler c, List decl, StaticQueue * q){
     }
     ;
     switch(_x2c_gensym_match_expr_5 ? _x2c_gensym_match_expr_5 -> car.u64 : 0){
-      case 9224497945694178442ULL :{static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_5, List_var(_90), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; List x2c_match_list_1 = Var_list_payload(_x2c_gensym_match_values_0[1]);{{
+      case 9224497945694178442ULL :{static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_5, List_var(_90), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]); List x2c_match_list_1 =(Var_list_payload(_x2c_gensym_match_values_0[1]));{{
         Var decltype;  decltype = x2c_match_value_0;  List bound_list;  bound_list = x2c_match_list_1;  return _defer_bindings(c, Var_list_payload(decltype), bound_list, &((* q)));
       }
       break;}}} default: break;
@@ -859,7 +859,7 @@ static List _rewrite_static(Compiler c, List decl, StaticQueue * q){
       .values = _x2c_gensym_match_values_1, .capacity = 2
     }
     ;  switch(_x2c_gensym_match_expr_6 ? _x2c_gensym_match_expr_6 -> car.u64 : 0){
-      case 9224497945694178442ULL :{static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_6, List_var(_95), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 = _x2c_gensym_match_values_1[0]; List x2c_match_list_1 = Var_list_payload(_x2c_gensym_match_values_1[1]);{{
+      case 9224497945694178442ULL :{static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_6, List_var(_95), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 =(_x2c_gensym_match_values_1[0]); List x2c_match_list_1 =(Var_list_payload(_x2c_gensym_match_values_1[1]));{{
         Var decltype;  decltype = x2c_match_value_0;  List bound_list;  bound_list = x2c_match_list_1;  return _defer_bindings(c, Var_list_payload(decltype), bound_list, &((* q)));
       }
       break;}}} default: break;

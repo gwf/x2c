@@ -679,7 +679,7 @@ static Type _integer_literal_type(
 
 // declarations
 
-/** Constructs a declaration, moving the base type's modifiers to each binding. */
+/** Constructs a declaration, moving type modifiers to each binding. */
 List Macro.declaration(Type specifiers, List rows) {
   List modifiers = NULL;
   List base = Type.declaration_base(specifiers, modifiers);

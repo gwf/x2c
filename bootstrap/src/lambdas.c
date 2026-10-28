@@ -1232,13 +1232,13 @@ void Compiler_respell_captures(Compiler c, List binding){
           .values = _x2c_gensym_match_values_0, .capacity = 1
         }
         ;
-        {static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_6, List_var(_48), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; {
+        {static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_6, List_var(_48), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]); {
           Var scope;  scope = x2c_match_value_0; {
             Var _x2c_gensym_match_var_0 = Map_getdefault(facts, List_var(cons(_49, cons(scope, cons(List_var(binding), NULL)))), Var_null());  int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);  List _x2c_gensym_match_expr_7 = Var_list_payload(_x2c_gensym_match_var_0);  Var _x2c_gensym_match_values_1[1];  MatchCaptureBuffer _x2c_gensym_match_capture_1 ={
               .values = _x2c_gensym_match_values_1, .capacity = 1
             }
             ;  switch(_x2c_gensym_match_expr_7 ? _x2c_gensym_match_expr_7 -> car.u64 : 0){
-              case 9224497943306087562ULL : if(! _x2c_gensym_match_none_0){static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_7, List_var(_53), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 = _x2c_gensym_match_values_1[0];{{
+              case 9224497943306087562ULL : if(! _x2c_gensym_match_none_0){static MatchCaptureSite _x2c_gensym_match_site_1; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_1, _x2c_gensym_match_expr_7, List_var(_53), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 =(_x2c_gensym_match_values_1[0]);{{
                 Var captured;  captured = x2c_match_value_0; {
                   _inherit_spelling(c, binding, Var_list_payload(captured));  binding = Var_list_payload(captured);
                 }

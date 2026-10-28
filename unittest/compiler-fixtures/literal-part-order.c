@@ -80,7 +80,7 @@ int main(void){
   }
   );
   List spliced =({
-    List _x2c_gensym_literal_part_2 = items(_5);  List _x2c_gensym_literal_part_3 = items(_6);  cons(_8, List_append(_x2c_gensym_literal_part_2, cons(_10, List_append(_x2c_gensym_literal_part_3, NULL))));
+    List _x2c_gensym_literal_part_2 = items(_5);  List _x2c_gensym_literal_part_3 = items(_6);  cons(_8, List_append(_x2c_gensym_literal_part_2, cons(_10, _x2c_gensym_literal_part_3)));
   }
   );
   String joined =({

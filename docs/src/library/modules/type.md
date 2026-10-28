@@ -591,7 +591,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`Macro.declaration`](#Macro.declaration) | Constructs a declaration, moving the base type's modifiers to each binding. |
+| [`Macro.declaration`](#Macro.declaration) | Constructs a declaration, moving type modifiers to each binding. |
 | [`Type.declaration_base`](#Type.declaration_base) | Returns the declaration specifiers `t` without the pointer, array, or function modifiers an alias in them contributes, and sets `modifiers` to those modifiers for `declarator_append_modifiers` to append. |
 
 ### `Macro`
@@ -601,7 +601,7 @@ for source readers but are not supported as user API.
 
 `List Macro.declaration(Type specifiers, List rows)`
 
-Constructs a declaration, moving the base type's modifiers to each binding.
+Constructs a declaration, moving type modifiers to each binding.
 
 Source: `lib/type.x`
 

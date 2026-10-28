@@ -543,7 +543,7 @@ static Var _constant_leaf(Compiler c, List expr){
         }
 
       }
-      }{static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_7, List_var(_147), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 = _x2c_gensym_match_values_0[0]; {
+      }{static MatchCaptureSite _x2c_gensym_match_site_0; if(x2c_match_site_try_capture(& _x2c_gensym_match_site_0, _x2c_gensym_match_expr_7, List_var(_147), & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]); {
         Var text;  text = x2c_match_value_0;  if(Var_is_row(text, 11, 7, 1)){
           return Compiler_literal_text_value(Var_as_string(text));  break;
         }
