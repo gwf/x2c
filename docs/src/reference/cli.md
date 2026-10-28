@@ -341,9 +341,11 @@ for an editor's C parser.
 The language server is experimental and is not included by `make install`.
 Build the checkout commands with `make commands`, then use the matching
 `builds/0/x2c` compiler. Run `x2c lsp` from the workspace root to serve
-editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full document synchronization.
-One process serves one workspace and keeps the compiler frontend resident.
-It provides frontend diagnostics, definition navigation, and type hover.
+editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
+document synchronization. One process serves one workspace and keeps the
+compiler resident. It provides frontend diagnostics, definition
+navigation, type hover, completion, symbols, references, rename, and lexical
+semantic tokens.
 It does not report errors left to the native C compiler, such as unresolved
 C identifiers.
 
@@ -378,17 +380,28 @@ vim.api.nvim_create_autocmd("FileType", { pattern = "x2c",
   end })
 ```
 
+Completion uses the compiler's grammar role and visible symbols. Document
+symbols list authored function and type definitions in the current file.
+Workspace symbols search only documents already analyzed; they do not start
+workspace indexing. References and rename analyze the selected target's
+inputs sequentially, using unsaved buffers. Without a manifest, they search
+only the current document. Rename requires a physical definition inside the
+workspace. Lexical semantic tokens classify source tokens; they do not infer
+the type or binding of each identifier.
+
 The server runs macros during analysis. Start it only for workspaces you
-trust. Completion, symbols, references, rename, and semantic tokens are
-planned additions. Formatting and native C compiler diagnostics are outside
-this server's current scope.
+trust. Formatting and native C compiler diagnostics are outside this server's
+current scope. Queued requests can be cancelled. A running request finishes
+before the server handles another message, including a reference or rename
+request that analyzes several inputs.
 
 ### VS Code diagnostics, definitions, and hover
 
 Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
 from VSIX**. VS Code 1.82 or newer is required. The extension starts
 `x2c lsp` and uses its standard language client for synchronization,
-diagnostics, definition navigation, hover, and cancellation.
+diagnostics, definition navigation, hover, completion, symbols, references,
+rename, semantic tokens, and cancellation.
 
 Select the compiler from the checkout where you built the experimental
 server:
