@@ -166,8 +166,10 @@ static List _expression_body(Compiler c) {
       _.expect(<;>);
       /* A `void` result has no value to return, and C rejects a returned
          value there, so the expression stands as the body's statement. */
-      result = _.return_type === %(void)
-             ? %(stmnt $expression) : _.finish_return_statement(expression);
+      with (_.token = origin) {
+        result = _.return_type === %(void)
+               ? %(stmnt $expression) : _.finish_return_statement(expression);
+      }
     }
     return %(block $(_.anchor_origin(result, origin)));
   }

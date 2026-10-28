@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/return-void-typed.x:4:26: type: cannot return a void expression from a function returning (int)
+  int count(void) { return tick(); }
+                           ^^^^
+
