@@ -36,7 +36,8 @@ List Compiler.parse_named_type(Compiler c) {
   if (c.test(<;>)) return %(named-type $name ());
   List qualifiers = _type_qualifiers(c);
   List base = qualifiers.append(
-    _record_follows(c) ? _record_body(c, name, start) : _type_specifier(c));
+    _record_follows(c) ? _record_body(c, name, start, after_name) :
+                         _type_specifier(c));
   Type type = _declare_named_type(c, key, base, start, after_name);
   return %(named-type $name $type);
 }
@@ -217,12 +218,19 @@ static List _tagged_type(Compiler c) {
   Symbol tag = c.peek(0);
   c.next();
   _skip_attributes(c);
+  Token name_first = c.token;
   List name = _tag_name(c);
+  Token name_after = c.token;
   if (name && (c.package || c.line_markers))
     name = _scoped_aggregate_name(c, tag, name);
   int defines = c.peek(0) == <"{"> ||
     (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
   Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
+  if (c.source_facts && name && name_first.type == <ident>) {
+    Type semantic = NULL;
+    List binding = c.sym.lookup($(tag, name.car()), semantic);
+    c.record_source_reference(binding, semantic, name_first, name_after);
+  }
   List type = $(tag, used), members = NULL;
   if (c.test(<"{">)) {
     members = c.parse_members(tag == <enum> ? <enumerator> : <field>, type);
@@ -595,14 +603,21 @@ static int _record_follows(Compiler c) =>
   c.peek(0) == <"{"> ||
   ((c.peek(0) == <struct> || c.peek(0) == <union>) && c.peek(1) == <"{">);
 
-static List _record_body(Compiler c, String name, Token start) {
+static List _record_body(
+  Compiler c, String name, Token start, Token after_name) {
   Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
   if (c.peek(0) != <"{">) c.next();
   c.expect(<"{">);
   List fields = c.parse_members(<field>, $(tag, name));
   c.expect(<"}">);
-  return c.macro_holes ? %($tag $name (fields @fields))
-                       : _publish_aggregate_type(c, tag, name, fields, start);
+  if (c.macro_holes) return %($tag $name (fields @fields));
+  List type = _publish_aggregate_type(c, tag, name, fields, start);
+  if (c.source_facts) {
+    Type semantic = NULL;
+    List binding = c.sym.lookup($(tag, name), semantic);
+    c.record_source_declaration(binding, start, after_name);
+  }
+  return type;
 }
 
 /* Completes a named type from the abstract declarator after its base. The
