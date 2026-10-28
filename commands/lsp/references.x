@@ -4,6 +4,7 @@
 */
 #pragma once
 #include "analysis.x"
+#include "references-types.x"
 
 /** Finds references across the selected target's x2c input units. */
 Map LspWorkspace.references(
@@ -12,7 +13,7 @@ Map LspWorkspace.references(
   if (query == NULL) return {"result": []};
   w.close_unit();
   Array locations;
-  if (!_reference_locations(w, query, include_declaration, locations))
+  if (!_reference_locations(w, query, include_declaration, locations, NULL))
     return _reference_failure();
   Array result = [];
   foreach (Map location in locations)
@@ -44,15 +45,15 @@ Map LspWorkspace.rename(
   if (!spelling.endswith(selected)) return _rename_spelling_failure();
   String replacement = spelling[:spelling.len() - selected.len()] + new_name;
   Array locations;
-  if (!_reference_locations(w, query, 1, locations))
+  if (!_reference_locations(w, query, 1, locations, replacement))
     return _reference_failure();
   Map changes = {};
   foreach (Map location in locations) {
-    String source = location["spelling"];
-    if (!spelling.endswith(source)) return _rename_spelling_failure();
-    String prefix = spelling[:spelling.len() - source.len()];
-    if (!replacement.startswith(prefix)) return _rename_spelling_failure();
-    String text = replacement[prefix.len():];
+    String text = location.getdefault("replacement", NULL);
+    if (!text) {
+      text = _reference_replacement(spelling, replacement, location["spelling"]);
+      if (!text) return _rename_spelling_failure();
+    }
     String uri = location["uri"];
     Array edits = changes.setdefault(uri, []);
     edits.push({"range": location["range"], "newText": text});
@@ -84,33 +85,96 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
   Map query = {"target": $(target[0], target[1], target[2]),
     "declaration": _reference_location(w, target), "inputs": inputs,
     "selection": _reference_location(w, row),
-    "spelling": Ast.binding_spelling(row[3])};
+    "spelling": Ast.binding_spelling(row[3]),
+    "external": _reference_external(target)};
   return w.retain(query);
 }
 
-/* Exact definition locations identify a binding across independent units.
-   A failed parse cannot support a complete references or rename result. */
+/* External emitted names join ordinary declarations across source units.
+   Other bindings retain their physical declaration identity. */
 static int _reference_locations(
-  LspWorkspace w, Map query, int include_declaration, Array &locations) {
+  LspWorkspace w, Map query, int include_declaration, Array &locations,
+  String replacement) {
   locations = [];
   Map seen = {};
   if (include_declaration && !query["declaration"].is_null())
     _reference_add(w, locations, seen, query["declaration"]);
-  List target = query["target"];
   foreach (String input in query["inputs"].array()) {
     if (!w.analyze(input)) return 0;
     Compiler c = w.unit.compiler;
+    Map declarations = {}, methods = {};
+    if (replacement)
+      foreach (Map method, lsp_type_rename_methods(c, query["target"], replacement))
+        methods[method["binding"]] = method;
+    foreach ((Var source_key, List declaration) in c.source_declarations) {
+      foreach ((Var binding, Map method) in methods)
+        if (_reference_method_declaration(c, binding, declaration)) {
+          Map location = _reference_method_location(w, method, declaration);
+          if (location != NULL) _reference_add(w, locations, seen, location);
+        }
+      if (!_reference_matches(query, declaration)) continue;
+      declarations[_reference_range(declaration)] = 1;
+      if (!include_declaration) continue;
+      Map location = _reference_location(w, declaration);
+      if (location != NULL) _reference_add(w, locations, seen, location);
+    }
     foreach (List row in c.source_occurrences) {
+      Var method = methods[row[3]];
+      if (method is <map>) {
+        Map location = _reference_method_location(w, method.map(), row);
+        if (location != NULL) _reference_add(w, locations, seen, location);
+      }
       Var definition = c.source_definitions[row[3]];
       if (definition is not <list> ||
-          !_reference_same(definition.list(), target)) continue;
-      if (!include_declaration && _reference_same(row, target)) continue;
+          !_reference_matches(query, definition.list())) continue;
+      if (!include_declaration && _reference_range(row) in declarations) continue;
       Map location = _reference_location(w, row);
       if (location != NULL) _reference_add(w, locations, seen, location);
     }
   }
   return 1;
 }
+
+static int _reference_method_declaration(
+  Compiler c, List binding, List declaration) {
+  Var definition = c.source_definitions[binding];
+  if (definition is not <list>) return 0;
+  String external = _reference_external(definition.list());
+  return external ? _reference_external(declaration) == external
+                  : _reference_same(declaration, definition.list());
+}
+
+static Map _reference_method_location(LspWorkspace w, Map method, List row) {
+  Map location = _reference_location(w, row);
+  if (location == NULL) return NULL;
+  String source = location["spelling"], member = method["member"];
+  if (!source.endswith("_" + member)) return NULL;
+  String replacement = _reference_replacement(
+    method["spelling"], method["replacement"], source);
+  if (!replacement) return NULL;
+  location["replacement"] = replacement;
+  return location;
+}
+
+static String _reference_replacement(
+  String spelling, String replacement, String source) {
+  if (!spelling.endswith(source)) return NULL;
+  String prefix = spelling[:spelling.len() - source.len()];
+  return replacement.startswith(prefix) ? replacement[prefix.len():] : NULL;
+}
+
+static String _reference_external(List declaration) {
+  Var name = declaration[6];
+  return name is <string> ? name.str() : NULL;
+}
+
+static int _reference_matches(Map query, List declaration) {
+  String external = query["external"];
+  return external ? _reference_external(declaration) == external
+                  : _reference_same(declaration, query["target"]);
+}
+
+static List _reference_range(List row) => $(row[0], row[1], row[2]);
 
 static int _reference_same(List row, List target) =>
   row[0] == target[0] && row[1] == target[1] && row[2] == target[2];
