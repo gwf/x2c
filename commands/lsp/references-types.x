@@ -42,7 +42,6 @@ Array lsp_type_rename_methods(
       if (selected != binding) continue;
     }
     String suffix = "_" + member;
-    if (!spelling.endswith(suffix)) continue;
     String method_owner = spelling[:spelling.len() - suffix.len()];
     if (!method_owner.endswith(owner)) continue;
     String prefix = method_owner[:method_owner.len() - owner.len()];
