@@ -10,7 +10,7 @@
    inspect but cannot consume one, while a matching compiler catch transfers
    control without returning to its raising call. */
 module const SymbolSet error_nonreturning_causes =
-  $error.nonreturning.causes();
+  nonreturning_causes;
 
 /* A capture holds only `Symbol` pairs and its own allocation, so it crosses a
    thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The

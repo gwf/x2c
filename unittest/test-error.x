@@ -5,7 +5,7 @@
 #include <string.h>
 
 static const SymbolSet nonreturning_error_causes =
-  $error.nonreturning.causes();
+  nonreturning_causes;
 
 /* A plain C string literal is an immutable raise detail. */
 static void error_plain_literal_detail(void) {

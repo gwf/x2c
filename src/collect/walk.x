@@ -95,9 +95,10 @@ void Compiler.install_syntax_prelude(Compiler c) {
     A cold provider does not register an import in its including unit.
 */
 void Compiler.configure_package(Compiler c, List roots, String filename) {
-  String source = Path.absolute(filename);
-  String package = Compiler.package_directory(roots, source);
-  if (!package || !Compiler.is_package_source(package, source)) return;
+  /* The lookup normalizes filename; only a match needs source membership. */
+  String package = Compiler.package_directory(roots, filename);
+  if (!package ||
+      !Compiler.is_package_source(package, Path.absolute(filename))) return;
   String name = Path.basename(package);
   c.package = name;
   if (!(name in c.package_roots)) c.package_roots = c.package_roots.copy();

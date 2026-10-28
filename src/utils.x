@@ -265,6 +265,8 @@ int Path.is_layout_source(String path) =>
     that child's name is an identifier. Returns NULL for any other path.
 */
 String Compiler.package_directory(List roots, String path) {
+  /* No package can match without a search root. */
+  if (!roots) return NULL;
   String source = Path.absolute(path);
   foreach (String root in roots) {
     String prefix = %"$(Path.absolute(root))/";

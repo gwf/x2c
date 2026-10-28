@@ -410,6 +410,7 @@ int Path_is_layout_source(String path){
 
 String Compiler_package_directory(List roots, String path){
   if(! _init_guard_) _file_init_();
+  if(! List_truth(roots)) return NULL;
   String source = Path_absolute(path);
   {
     String root;

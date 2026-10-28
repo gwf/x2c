@@ -4,7 +4,7 @@
 #pragma once
 
 /* The shared Error causes that never return to their raising call. */
-macro Expression $error.nonreturning.causes() => %<<
+alias nonreturning_causes to %<<
   alloc-fail size-limit invariant bad-state init-fail bad-arg bad-enc
   void-op bad-types bad-target no-convert conv-range bad-op div-zero
   bad-shift no-member format not-found io-fail cmd-fail bad-sig

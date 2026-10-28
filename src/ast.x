@@ -12,7 +12,7 @@
 #include "symbolset.x"
 
 static const SymbolSet nonreturning_error_causes =
-  $error.nonreturning.causes();
+  nonreturning_causes;
 
 static List terminating_calls =
   %("abort" "exit" "_Exit" "_exit" "quick_exit");
