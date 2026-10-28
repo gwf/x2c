@@ -10,7 +10,7 @@ COPY lib/ ./lib/
 COPY include/ ./include/
 COPY etc/ ./etc/
 COPY tools/ ./tools/
-COPY commands/manifest.txt ./commands/
+COPY commands/ ./commands/
 COPY examples/power/exceptions.x ./examples/power/
 COPY examples/data/power-exceptions/ ./examples/data/power-exceptions/
 RUN mkdir -p bin && make build-safe && make wasm-runtime \
@@ -18,7 +18,7 @@ RUN mkdir -p bin && make build-safe && make wasm-runtime \
        tools/wasm-build examples/power/exceptions.x /tmp/warm \
     && chmod -R a+rX /opt/x2c /emsdk \
     && chmod -R a-w /opt/x2c
-ENV HOME=/tmp EM_CACHE=/emsdk/upstream/emscripten/cache
+ENV HOME=/tmp EM_CACHE=/emsdk/upstream/emscripten/cache EM_FROZEN_CACHE=1
 USER 65534:65534
 WORKDIR /tmp
 ENTRYPOINT ["node", "/opt/x2c/etc/playground/compile.mjs"]

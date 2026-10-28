@@ -332,11 +332,11 @@ expected outputs after the operators correction. The static site check
 passes. Real Chrome and Chromium run the three named programs through the
 browser worker. Compile diagnostics, Stop, and the 10-second limit work.
 
-Remaining validation gaps are a real Docker build/run, Firefox execution,
-and Safari execution. Docker's daemon and Playwright's Firefox executable
-are unavailable here. The site test suite also has an unchanged baseline
-theme assertion failure; its new playground test passes. Final generated
-artifacts, publication gate, and publication belong to the shared integrator.
+The initial validation lacked a running Docker daemon and supported Firefox
+automation. The real-container follow-up below closes the Docker gap.
+The site test suite has an unchanged baseline theme assertion failure; its
+new playground test passes. Publication validation belongs to the shared
+integrator.
 
 ## Delivery
 
@@ -351,7 +351,41 @@ errors, and Stop; responses from aborted compilations are ignored. The
 shared integrator passed the full publication gate and confirmed the
 remote merged revision. No full gate ran in the author checkout.
 
-The container has not run against a real Docker daemon here. Firefox and
-Safari execution and public service deployment remain unverified. The
-site keeps Run hidden until its build receives a service URL. These gaps
-do not constitute completed deployment or cross-browser validation.
+Firefox and Safari program execution remain unverified. Installed Firefox
+131.0.3 predates Memory64 support; its unsupported notice and disabled Run
+button are verified. Public service deployment is not configured. The site
+keeps Run hidden until its build receives a service URL. Local Docker
+validation does not constitute completed public deployment.
+
+### Real-container follow-up
+
+Starting the installed Docker Desktop made its daemon available. Building
+the actual image exposed two packaging defects: the image omitted the
+compiler-owned build command sources, and Emscripten attempted mutable
+cache writes despite its prewarmed libraries. The Dockerfile now copies
+`commands/` and enables supported `EM_FROZEN_CACHE=1` for requests. The
+read-only image and request restrictions remain in place.
+
+The corrected ARM64 image builds. Real HTTP requests compile foreach,
+the language tour, exceptions, and the native meta example. Returned wasm
+exits successfully under Node and matches each expected output. Chrome
+also runs fresh compilations of these programs through the actual service
+and container with matching output. Docker inspection confirms the
+non-root user, no network, read-only image, 512 MiB memory limit, one CPU,
+64-process limit, and executable 128 MiB tmpfs. A shortened request
+deadline returns 504 and removes the observed running container.
+
+Chrome also displays real compilation diagnostics, stops a running wasm
+loop on request, and terminates it automatically after 10 seconds. A
+subsequent run succeeds. These checks use the actual HTTP service and
+restricted request containers, not the earlier artifact-response fixture.
+The local Docker Desktop check does not verify a production rootless host.
+
+A second image check against dev `4a9c551c5` plus the Dockerfile repair also
+passes with the added HTTP, networking, and JSON runtime units. All four
+restricted endpoint compilations again return wasm with exact expected
+Node output. Native TCP sockets and HTTP servers remain outside the
+browser target; in-memory HTTP parsing, routing, and response construction
+are available. The notice follows the native socket/thread implementation
+and [Emscripten's networking boundary](https://emscripten.org/docs/porting/networking.html),
+which does not provide browser access to ordinary TCP sockets.

@@ -117,9 +117,11 @@ WASM_LDFLAGS='--embed-file examples/data/power-exceptions' \
 ```
 
 Program memory starts at 64 MB and can grow to 256 MB; the stack is 4 MB.
-Threads and process execution are unsupported in this single-threaded
-build. `Job`, `File.popen`, `Thread`, `Channel`, `Dispatch`, and pool workers
-cannot provide their native behavior. Browser execution requires Memory64;
+Threads, process execution, native TCP sockets, and HTTP servers are
+unsupported in this single-threaded browser build. `Job`, `File.popen`,
+`Thread`, `Channel`, `Dispatch`, and pool workers cannot provide their native
+behavior. In-memory HTTP parsing, routing, and response construction remain
+available. Browser execution requires Memory64;
 check the playground's support notice before running a program.
 
 ## Contributor checks

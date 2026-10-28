@@ -22,7 +22,9 @@ PLAYGROUND_ORIGINS=https://x2c.org node etc/playground/server.mjs
 ```
 
 The image builds the checked-out x2c compiler and wasm runtime. It prewarms
-the Emscripten link cache because request containers have a read-only image.
+the Emscripten system libraries because request containers have a read-only
+image. Requests use Emscripten frozen-cache mode, which reads these libraries
+and bypasses its mutable JavaScript caches.
 The tiny `examples/data/power-exceptions` fixture is embedded into each
 program's in-memory filesystem so the curated exception example can run.
 No request receives a host filesystem mount.

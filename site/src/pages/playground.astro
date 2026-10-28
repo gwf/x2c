@@ -36,7 +36,7 @@ const service = import.meta.env.PLAYGROUND_URL || "";
     </div>
     <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still explore and edit the examples."}</p>
     <p id="playground-support" class="playground-support">Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+). Safari support is checked in your browser. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
-    <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, and pool workers are unavailable.</p>
+    <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
     <noscript><p>JavaScript is required to select examples and run programs.</p></noscript>
     <script type="application/json" data-theme set:html={JSON.stringify(x2cDarkTheme).replaceAll("<", "\\u003c")} />
     <script type="application/json" data-examples set:html={JSON.stringify(playgroundExamples).replaceAll("<", "\\u003c")} />
