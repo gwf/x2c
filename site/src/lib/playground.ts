@@ -59,7 +59,7 @@ export function setupPlayground() {
     worker = undefined;
     request?.abort();
     request = undefined;
-    run.disabled = false;
+    run.disabled = !memory64;
     stop.hidden = true;
     status.textContent = message;
   };
