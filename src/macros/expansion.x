@@ -58,16 +58,13 @@ void Compiler.print_macro_expansion(Compiler c, List frame, List result) {
   (List definition, List input, Var bindings, Token invocation) = frame;
   (void) bindings;
   List site = c.token_location(invocation);
-  List origin = definition.assoc(<origin>);
-  List captured = input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
+  String source = _definition_note(definition).remove_prefix("definition: ");
   printf(
-    "expansion %s:%d:%d %s\n  definition %s:%d:%d\n"
+    "expansion %s:%d:%d %s\n  definition %s\n"
     "  input %s\n  result\n",
     site.assoc(<file>), site.assoc(<line>).int(),
     site.assoc(<column>).int(), definition.assoc(<name>),
-    origin.assoc(<file>), origin.assoc(<line>).int(),
-    origin.assoc(<column>).int(), _source_unwrap(captured).repr());
+    source, _expansion_input(input).repr());
   Ast.print_dump($(result));
 }
 
