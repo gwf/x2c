@@ -4341,8 +4341,9 @@ String Compiler_token_source(Compiler, Token, int *);
 
 static int f9_functions____install_included_meta(Compiler c, List declaration, Token marker){
   Type type = Type_canonicalize(List_type_from_ast(declaration));
+  if(Type_is_static(type)) return 0;
   String file = Compiler_canonical_path(c, Compiler_token_source(c, marker, NULL));
-  if(Type_is_static(type) || String_equal(file, Compiler_canonical_path(c, c -> filename))) return 0;
+  if(String_equal(file, Compiler_canonical_path(c, c -> filename))) return 0;
   String name = _native_meta_name(c, declaration, marker);
   Compiler_install_project_meta_effect(c, ({
     Var _x2c_gensym_literal_part_14 = String_var(name);  Var _x2c_gensym_literal_part_15 = List_var(Compiler_func_signature(c, type));  Var _x2c_gensym_literal_part_16 = String_var(Compiler_portable_path(file));  cons(_1711, cons(_x2c_gensym_literal_part_14, cons(_x2c_gensym_literal_part_15, cons(_x2c_gensym_literal_part_16, NULL))));

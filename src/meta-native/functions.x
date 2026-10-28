@@ -212,8 +212,10 @@ static void _subject_globals(
 static int _install_included_meta(
   Compiler c, List declaration, Token marker) {
   Type type = declaration.type_from_ast().canonicalize();
+  /* Static meta functions keep their unit-local binding. */
+  if (type.is_static()) return 0;
   String file = c.canonical_path(c.token_source(marker, NULL));
-  if (type.is_static() || file == c.canonical_path(c.filename)) return 0;
+  if (file == c.canonical_path(c.filename)) return 0;
   String name = _native_meta_name(c, declaration, marker);
   c.install_project_meta_effect(
     %(project-meta $name $(c.func_signature(type))

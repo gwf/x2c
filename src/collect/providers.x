@@ -73,9 +73,11 @@ Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path in c.deps.keys()) {
     if (!Path.is_x2c_source(path)) continue;
-    List entry = _entry(c, _canonical_path(path));
+    /* The proof and hash key name the same provider identity. */
+    String canonical = _canonical_path(path);
+    List entry = _entry(c, canonical);
     if (!entry) continue;
-    String provider = Compiler.portable_path(_canonical_path(path));
+    String provider = Compiler.portable_path(canonical);
     List proof = NULL;
     Map hashes = NULL;
     foreach (Var part in entry.car()) {

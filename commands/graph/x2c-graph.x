@@ -1012,9 +1012,8 @@ static String _canonical_input(String input) {
 
 static String _display_input(String input) {
   String path = _canonical_input(input);
-  char root_path[PATH_MAX];
-  String root = realpath(x2c_get_root(), root_path)
-              ? String.new(root_path) : x2c_get_root();
+  /* Environment setup supplies the resolved absolute home spelling. */
+  String root = x2c_get_root();
   int length = strlen(root);
   return path.startswith(root) && path[length] == '/'
        ? String.new(path + length + 1) : path;

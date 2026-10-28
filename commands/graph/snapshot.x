@@ -182,7 +182,8 @@ static Map _snapshot_build(Array arguments) {
   return snapshot;
 }
 
-static void _snapshot_publish(Path destination, Map snapshot) {
+static Path _snapshot_publish(Path destination, Map snapshot) {
+  /* Publication and its result use this same resolved destination. */
   destination = Path.absolute(destination);
   if (destination.exists() &&
       !destination.join("snapshot.datum").is_file())
@@ -199,6 +200,7 @@ static void _snapshot_publish(Path destination, Map snapshot) {
   staged.write_text(snapshot_text(snapshot));
   if (!destination.exists()) temporary.move_to(destination);
   else staged.move_to(destination.join("snapshot.datum"));
+  return destination;
 }
 
 static Map _snapshot_status(Map snapshot, String executable) {
@@ -254,9 +256,9 @@ int graph_snapshot_command(int argc, char **argv) {
       Array arguments = [];
       for (int i = 3; i < argc; i++) arguments.push(String.new(argv[i]));
       Map snapshot = _snapshot_build(arguments);
-      _snapshot_publish(String.new(argv[2]), snapshot);
+      Path destination = _snapshot_publish(String.new(argv[2]), snapshot);
       result = {"snapshot": snapshot["identity"],
-        "path": Path.absolute(String.new(argv[2])),
+        "path": destination,
         "coverage": snapshot["coverage"]};
     }
     else {

@@ -244,12 +244,14 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
     producing-pool lifetime.
 */
 List Compiler.token_location(Compiler compiler, Token token) {
+  /* A token can select a different source file through line markers. */
   String file = compiler.filename ? compiler.filename : "<stdin>";
-  if (compiler.source_facts) file = compiler.display_path(file);
   // Unreadable input fails before tokenization; anchor it at the file start.
   if (!token) token = compiler.token;
-  if (!token)
+  if (!token) {
+    if (compiler.source_facts) file = compiler.display_path(file);
     return %( (file $file) (line 1) (column 1) (length 0) (position 0) );
+  }
   int line = token.line, column = compiler.token_column(token);
   if (compiler.line_markers) file = compiler.token_source(token, line);
   file = compiler.display_path(file);

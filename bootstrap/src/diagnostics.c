@@ -409,9 +409,11 @@ String Compiler_token_source(Compiler c, Token token, int * line);
 List Compiler_token_location(Compiler compiler, Token token){
   if(! _init_guard_) _file_init_();
   String file = String_truth(compiler -> filename) ? compiler -> filename : _6;
-  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
   if(! token) token = compiler -> token;
-  if(! token) return cons(List_var(cons(_1, cons(String_var(file), NULL))), _22);
+  if(! token){
+    if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
+    return cons(List_var(cons(_1, cons(String_var(file), NULL))), _22);
+  }
   int line = token -> line, column = Compiler_token_column(compiler, token);
   if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));
   file = Compiler_display_path(compiler, file);

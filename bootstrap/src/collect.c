@@ -4950,9 +4950,10 @@ void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows){
       path = Var_as_string(_x2c_gensym_macro_item_80);
       {
         if(! Path_is_x2c_source(path)) continue;
-        List entry = _entry(c, _canonical_path(path));
+        String canonical = _canonical_path(path);
+        List entry = _entry(c, canonical);
         if(! List_truth(entry)) continue;
-        String provider = Compiler_portable_path(_canonical_path(path));
+        String provider = Compiler_portable_path(canonical);
         List proof = NULL;
         Map hashes = NULL;
         {
