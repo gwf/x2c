@@ -538,12 +538,20 @@ static List _complex_identifier(Compiler c, List &?method_identity) {
     ident = c.package_member_spelling(c.token.text);
   if (!ident) ident = c.token.text;
   Type idtype = c.sym.get($(ident));
+  Token owner_first = c.token;
   c.next();
+  Token owner_after = c.token;
   if ((toktype.is_builtin_type() || toktype.is_type_modifier() ||
        (toktype == <ident> &&
         (idtype.is_typedef() || (c.signature_only && method_identity)))) &&
-      c.test(<.>))
+      c.test(<.>)) {
+    if (c.source_facts) {
+      Type type = NULL;
+      List binding = c.sym.lookup($(ident), type);
+      c.record_source_reference(binding, type, owner_first, owner_after);
+    }
     return _member_name(c, ident, method_identity);
+  }
   return $(ident);
 }
 
