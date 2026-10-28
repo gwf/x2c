@@ -520,3 +520,27 @@ Runtime/driver, macro diagnostics, and return checks were submitted as PRs
 #603, #604, and #605. The expansion dump completes the authored plan; final
 bootstrap/doc regeneration, full publication validation, and dev publication
 belong to the integrator. Submission does not establish publication.
+
+
+### Integration repair (2026-10-28)
+
+The repair chain is replayed on fixed integration base `dea671913`, without
+merging a moving dev branch. Staging now defers a pattern-producing call
+outside a meta body instead of replacing its result with integer zero.
+Ordinary meta-body calls and genuine staged failure causes retain their
+existing behavior.
+
+Expansion-note presentation replaces binding identities with source spellings
+and cache identities with per-input ordinals before rendering and truncation.
+Repeated cache references keep the same ordinal; distinct caches keep distinct
+ordinals. Literal payloads remain opaque. Semantic source unwrapping belongs
+to AST and is unchanged. Diagnostics owns note formatting, avoiding a macro
+object dependency in the isolated unit runner. All callers, including completed
+quotations and expansion dumps, use those owners.
+
+The existing protocol probe now covers binding, literal, and quotation inputs
+with the same snapshot/live compiler invocation count and exact full stderr
+comparison. Both `source_capture` and `dump_expansions` remain shared by child
+compilers. Repair submission requires focused checks and `make stage-2` on the
+committed combined candidate; the integrator still owns the final full gate,
+generated artifacts, and dev publication.
