@@ -218,7 +218,7 @@ static List _present(ProtocolAdapters &a, List row) {
       if (status == <no-member>)
         parts = _inherited_part(a, member, template);
       if ((status == <implmntd> || parts) &&
-          a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
+          a.c.sym.lookup_field(%(struct "VarMethods"), $(member), NULL))
         parts = parts.append($(_thunk(a, member, template)));
     }
     return $(member, status, source, expected, template, @parts);

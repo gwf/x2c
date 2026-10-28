@@ -51,7 +51,7 @@ List Type.marked_fields(Type aggregate, Symbol mark) {
 /** Implements `Type.resolve_member`, declared in `lib/meta.x`. */
 List Type.resolve_member(Type type, String name, int call) {
   _require_expansion("Type.resolve_member");
-  return active.expander.resolve_postfix_member(type, $(name), <.>, call);
+  return active.expander.resolve_postfix_member(type, $(name), <.>, call, NULL);
 }
 
 /** Selects a callable protocol member in the current compilation context.
@@ -185,7 +185,7 @@ List MetaContext.type_description(Var value) {
   Compiler c = active.expander;
   Array methods = [];
   foreach (String member in c.postfix_completions(type, <.>))
-    match (c.resolve_postfix_member(type, $(member), <.>, 1))
+    match (c.resolve_postfix_member(type, $(member), <.>, 1, NULL))
       case %(method * *): methods.push(member);
   return %((name $name) (kind $kind) (type $type) (fields $fields)
            (methods $(methods.list_free())));

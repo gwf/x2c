@@ -382,11 +382,11 @@ static List _lookup(CallSite &k) {
   k.receiver = k.c.resolve_expression(k.receiver, k.origin);
   k.type = k.receiver.cadr();
   k.method = k.field.car().str();
-  List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+  List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1, NULL);
   if (!resolution && _is_raw_string_literal(k.receiver)) {
     k.receiver = k.c.promote_string_literal(k.receiver);
     k.type = k.receiver.cadr();
-    resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+    resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1, NULL);
   }
   return resolution;
 }

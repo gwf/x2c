@@ -218,7 +218,7 @@ static List _forwarded(
   Compiler c = d.c;
   String name = %"$(child.car())_$member";
   if (c.sym.get($(name))) return %(seq);
-  List method = c.resolve_postfix_member(parent, $(member), <.>, 1);
+  List method = c.resolve_postfix_member(parent, $(member), <.>, 1, NULL);
   if (!method) {
     if (parent in d.pending) return NULL;
     return fallback ? _bind_default(c, fallback.car()) : NULL;

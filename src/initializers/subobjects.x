@@ -113,7 +113,7 @@ static List _designated_path(
       case %(dotinit ?field ?inner): {
         selectors = cons(%(dotinit $field), selectors);
         List selected = _named_field_path(c, type, field.car(), path);
-        type = c.sym.lookup_field(type, field);
+        type = c.sym.lookup_field(type, field, NULL);
         path = selected ? selected
           : cons(%($owner field $(field.car()) $type ()), path);
         node = inner;

@@ -121,18 +121,23 @@ int Sym.is_named_value_type(Sym s, Type type, String name) {
 /** Returns an aggregate field's declared type, or `NULL`.
     A member of an anonymous struct or union belongs to its enclosing
     aggregate in C, so unnamed rows are searched the way a designated
-    initializer already reaches them.
+    initializer already reaches them. When provided, `binding` receives the
+    selected field's identity, or NULL on a miss.
 */
-Type Sym.lookup_field(Sym s, Type type, List field) {
+Type Sym.lookup_field(Sym s, Type type, List field, List &?binding) {
+  if (binding) binding = NULL;
   Type object = s.normalize_declared_type(type);
   type = s.resolve_key(object);
   if (!type || !type.is_aggregate_tag()) return NULL;
   Type found = s.get(%( @type @field ));
-  if (found) return found.qualify(object);
+  if (found) {
+    if (binding) binding = s.reference(%( @type @field ), NULL);
+    return found.qualify(object);
+  }
   foreach (List row in s.field_order(type).cdr()) {
     Type member = row.cadr();
     if (row.car() || !s.resolve_key(member).is_aggregate()) continue;
-    found = s.lookup_field(member, field);
+    found = s.lookup_field(member, field, binding);
     if (found) return found.qualify(object);
   }
   return NULL;

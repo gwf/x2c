@@ -440,6 +440,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Macro called = $called;
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
+  if (c.source_facts && !c.macro_holes)
+    _record_delegated_call(c, expr, result, origin);
   int method = expr ~=
     %(expr () (op . ? (?)));
   _check_converter_args(c, result, method, notes.list_free());
@@ -447,6 +449,29 @@ static List _parse_postfix_apply(Compiler c, List expr) {
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
   return result;
+}
+
+/* A delegate rewrite selects its method after the initial member lookup.
+   Record only a literal dotted name whose final callee is that method. */
+static void _record_delegated_call(
+  Compiler c, List expr, List result, Token opening) {
+  match (expr) case %(expr ? (op . ?receiver (?(String member)))): {
+    if (c.resolve_postfix_member(receiver.cadr(), $(member), <.>, 1, NULL))
+      return;
+    Token begin = c.tokenizer.tokens, first = opening - 1;
+    while (first > begin &&
+           (first.type == <space> || first.type == <comment>)) first--;
+    if (first == begin || first.text != member) return;
+    Token dot = first - 1;
+    while (dot > begin &&
+           (dot.type == <space> || dot.type == <comment>)) dot--;
+    if (dot.type != <.>) return;
+    match (result) case $called(%(expr ?signature (ident ?binding)), *): {
+      List method = c.fact(%(method $binding));
+      if (method && method.cadr() == member)
+        c.record_source_reference(binding, signature, first, first + 1);
+    }
+  }
 }
 
 static List _parse_ident_primary(Compiler c) {
@@ -806,9 +831,14 @@ static List _parse_postfix_arrow(Compiler c, List expr) {
     List rows = c.postfix_completions(expr.cadr(), <"->">);
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
+  Token first = c.token;
   List field = _parse_field_name(c, <"->">, expr);
-  return c.resolve_expression(
+  Token after = c.token;
+  List result = c.resolve_expression(
     %(expr () (op -> $expr $field)), origin);
+  if (c.source_facts)
+    _record_postfix_field(c, expr, field, <"->">, first, after);
+  return result;
 }
 
 static List _parse_postfix_dot(Compiler c, List expr) {
@@ -820,13 +850,33 @@ static List _parse_postfix_dot(Compiler c, List expr) {
     List rows = c.postfix_completions(receiver, <.>);
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
+  Token first = c.token;
   List field = _parse_field_name(c, <.>, expr);
+  Token after = c.token;
   List result = %(expr () (op . $expr $field));
-  if (c.peek(0) != <(>)
-    return c.resolve_expression(result, origin);
+  if (c.peek(0) != <(>) {
+    result = c.resolve_expression(result, origin);
+    if (c.source_facts)
+      _record_postfix_field(c, expr, field, <.>, first, after);
+    return result;
+  }
   // Allocate a method identity before parsing its arguments.
-  (void) c.resolve_postfix_member(expr.cadr(), field, <.>, 1);
+  if (c.source_facts) {
+    List binding = NULL;
+    List member = c.resolve_postfix_member(expr.cadr(), field, <.>, 1, binding);
+    c.record_source_reference(binding, member.caddr(), first, after);
+  }
+  else (void) c.resolve_postfix_member(expr.cadr(), field, <.>, 1, NULL);
   return result;
+}
+
+static void _record_postfix_field(
+  Compiler c, List receiver, List field, Symbol access,
+  Token first, Token after) {
+  List binding = NULL;
+  List member = c.resolve_postfix_member(
+    receiver.cadr(), field, access, 0, binding);
+  c.record_source_reference(binding, member.caddr(), first, after);
 }
 
 static List _parse_field_name(Compiler c, Symbol op_sym, List lhs_opt) {
