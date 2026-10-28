@@ -18,8 +18,8 @@ static macro Stmt $warn.region_after_free(
   _warn(
     $w, <after-free>, $site, %"'$($name)' is used after $($ended)", NULL);
 
-static macro Expression $reason.region_moved() => "Scope.realloc moved it";
-static macro Expression $reason.region_freed() => "it was freed";
+static alias reason_moved to "Scope.realloc moved it";
+static alias reason_freed to "it was freed";
 
 // statements
 
@@ -465,8 +465,7 @@ static void _scan_ident(Walk &w, Var binding) {
   }
   if (!fact.dead) return;
   String name = Ast.binding_spelling(binding);
-  String ended = fact.dead == <moved> ? $reason.region_moved()
-                                      : $reason.region_freed();
+  String ended = fact.dead == <moved> ? reason_moved : reason_freed;
   $warn.region_after_free(w, w.origin, name, ended);
   fact.dead = 0;
 }

@@ -418,7 +418,8 @@ the complete rules.
 
 ## Name an expression
 
-`alias expression as name;` gives an expression a short name for the rest
+`alias name to expression;` (equivalently, `alias expression as name;`)
+gives an expression a short name for the rest
 of the scope. `alias expression { ... }` names it `_` within the body:
 
 ```x2c

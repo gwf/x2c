@@ -13,10 +13,7 @@ static macro Stmt $fail.meta_sdk_symbol_set_duplicate(
     "_x2c_symbol_set requires distinct Symbols",
     $("symbol:", $values[$duplicate].repr()));
 
-static macro Stmt $fail.meta_sdk_native_declarations() =>
-  MetaContext.reject(
-    "native module sources declare no meta function",
-    %("declare each exported function with a bodyless meta prototype"));
+static alias fail_native_declarations to MetaContext.reject("native module sources declare no meta function", %("declare each exported function with a bodyless meta prototype"));
 
 /** Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
@@ -108,6 +105,6 @@ static List _native_rows(Symbol inventory, List leading, List trailing) {
 static List _declared_targets(List paths) {
   List rows = Compiler.native_meta_targets(paths, 1);
   if (!rows)
-    $fail.meta_sdk_native_declarations();
+    fail_native_declarations;
   return rows;
 }

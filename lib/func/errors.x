@@ -4,9 +4,7 @@
 /* Func binding and adapter error conditions. Captures keep their original
    payload order and types; each selected raise expands at its call site. */
 
-macro Stmt $error.apply.args() {
-  raise %(bad-arg (operation "Func.apply"));
-}
+macro Stmt $error.apply.args() { raise %(bad-arg (operation "Func.apply")); }
 
 macro Stmt $error.apply.arity(Expr $sig, Expr $expected, Expr $actual) {
   raise %(bad-arity (sig $($sig)) (expected $($expected)) (actual $($actual)));
@@ -54,21 +52,15 @@ macro Stmt $error.bind.sig(Expr $sig) {
   raise %(bad-sig (sig $($sig)));
 }
 
-macro Stmt $error.context.source() {
-  raise %(bad-arg (operation "Func.new_context"));
-}
+macro Stmt $error.context.source() { raise %(bad-arg (operation "Func.new_context")); }
 
 macro Stmt $error.context.size(Expr $size) {
   raise %(size-limit (operation "Func.new_context") (size $($size)));
 }
 
-macro Stmt $error.signature.null() {
-  raise %(bad-arg (operation "Func.signature"));
-}
+macro Stmt $error.signature.null() { raise %(bad-arg (operation "Func.signature")); }
 
-macro Stmt $error.context.null() {
-  raise %(bad-arg (operation "Func.context"));
-}
+macro Stmt $error.context.null() { raise %(bad-arg (operation "Func.context")); }
 
 macro Stmt $error.box.type(Expr $actual) {
   raise %(bad-types (want func) (actual $($actual)));

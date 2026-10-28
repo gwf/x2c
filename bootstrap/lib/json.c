@@ -240,7 +240,7 @@ int Json_boolean(Var value){
     {
       Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Json.boolean")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 187,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 181,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
         __builtin_unreachable();
       }
@@ -620,7 +620,7 @@ _Noreturn static void _fail(Reader * r, String why){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var((* r).path);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/json.x",.function = "_fail",.line = 472,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/json.x",.function = "_fail",.line = 466,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 6, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1051920), _x2c_gensym_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
@@ -629,7 +629,7 @@ _Noreturn static void _fail(Reader * r, String why){
   {
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/json.x",.function = "_fail",.line = 473,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/json.x",.function = "_fail",.line = 467,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 28682226919752, 5, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
@@ -711,7 +711,7 @@ static void _write_value(Writer * w, Var value, int depth){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/json.x",.function = "_write_value",.line = 505,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/json.x",.function = "_write_value",.line = 499,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1218550748), _x2c_gensym_literal_part_5);
       __builtin_unreachable();
     }
@@ -729,7 +729,7 @@ static void _write_value(Writer * w, Var value, int depth){
     {
       Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/json.x",.function = "_write_value",.line = 516,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/json.x",.function = "_write_value",.line = 510,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(41038), Symbol_var(tag));
         __builtin_unreachable();
       }
@@ -810,7 +810,7 @@ static void _members(Writer * w, Map object, int depth){
                 Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
                 Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL)));
                 {
-                  static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/json.x",.function = "_members",.line = 537,.runtime = 1};
+                  static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/json.x",.function = "_members",.line = 531,.runtime = 1};
                   x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(1510312), _x2c_gensym_literal_part_8, Symbol_var(41038), Symbol_var(tag));
                   __builtin_unreachable();
                 }
@@ -841,7 +841,7 @@ static void _members(Writer * w, Map object, int depth){
               Var _x2c_gensym_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
               Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL)));
               {
-                static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/json.x",.function = "_members",.line = 548,.runtime = 1};
+                static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/json.x",.function = "_members",.line = 542,.runtime = 1};
                 x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(920394), String_var(text));
                 __builtin_unreachable();
               }
@@ -938,7 +938,7 @@ static void _write_double(Buffer out, double number){
     Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
     Var _x2c_gensym_literal_part_12 = String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/json.x",.function = "_write_double",.line = 608,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/json.x",.function = "_write_double",.line = 602,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_7, 245103016899018, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(1218550748), _x2c_gensym_literal_part_12);
       __builtin_unreachable();
     }

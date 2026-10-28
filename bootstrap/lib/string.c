@@ -1092,7 +1092,7 @@ static void f6_format____fail(f6_format___Format * f, String reason){
 
 _Noreturn static void f6_format____format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 340,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 334,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));  __builtin_unreachable();
   }
 
 }
@@ -1100,7 +1100,7 @@ _Noreturn static void f6_format____format_error(int offset, String reason){
 _Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details){
   List cause = cons(code, details); {
     Var _x2c_gensym_literal_part_4 = int_var((* f).offset); {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 347,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 341,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));  __builtin_unreachable();
     }
 
   }

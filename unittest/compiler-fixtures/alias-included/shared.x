@@ -5,5 +5,5 @@ typedef struct Config { int level; } Config;
 extern Config config;
 
 alias config.level as level;
-alias level * 2 as doubled;
-static alias config.level + 100 as private_level;
+alias doubled to level * 2;
+static alias private_level to config.level + 100;

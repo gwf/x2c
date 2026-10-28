@@ -504,9 +504,8 @@ static inline Symbol _scan_mode(Tokenizer t) => t.modes[-1];
 /* After an operand `%` is modulo, except where a statement starts after a
    control condition or a statement block. */
 static inline int _percent_is_operator(Tokenizer tokenizer) {
-  if (_layout_statement_start(tokenizer)) return 0;
   Token token = _significant_back(tokenizer, 0);
-  return _token_ends_operand(token) &&
+  return _prev_token_ends_operand(tokenizer) &&
          !_closes_control_condition(tokenizer, token) &&
          !_closes_statement_block(tokenizer, token);
 }
@@ -527,9 +526,21 @@ static inline int _can_start_symbol_literal(Tokenizer tokenizer) {
          _token_ends_operand(_significant_back(tokenizer, back));
 }
 
-static inline int _prev_token_ends_operand(Tokenizer tokenizer) =>
-  !_layout_statement_start(tokenizer) &&
-  _token_ends_operand(_significant_back(tokenizer, 0));
+static inline int _prev_token_ends_operand(Tokenizer tokenizer) {
+  if (_layout_statement_start(tokenizer)) return 0;
+  Token token = _significant_back(tokenizer, 0);
+  return _token_ends_operand(token) && !_alias_value_starts(tokenizer, token);
+}
+
+/* Only the complete name-first alias prefix makes `to` precede an operand.
+   Ordinary uses of an identifier named `to` keep `%` and `<` as operators. */
+static int _alias_value_starts(Tokenizer tokenizer, Token token) {
+  if (token.type != <ident> || token.text != "to") return 0;
+  Token name = _significant_before(tokenizer, token);
+  if (!name || name.type != <ident>) return 0;
+  Token head = _significant_before(tokenizer, name);
+  return head && head.type == <ident> && head.text == "alias";
+}
 
 /* True when the indentation syntax starts a statement at the current
    position: a line break precedes it and it is no deeper than the line that
@@ -559,7 +570,7 @@ static int _closes_control_condition(Tokenizer tokenizer, Token token) =>
 
 /* True when `token` is the `}` of a compound statement or declaration body,
    which binary `%` cannot follow. The token before its `{` decides: a
-   statement boundary, an identifier or `]` as in `alias value {`, or a `)`
+   statement boundary, an operand as in `alias name to value {`, or a `)`
    after a control keyword, `match`, or an identifier as in a function header,
    `foreach (...)`, or `with (...)`. A compound literal or initializer brace
    follows an operator or a cast's `)` and does not qualify. */
@@ -572,12 +583,12 @@ static int _closes_statement_block(Tokenizer tokenizer, Token token) {
     case <else>: case <do>: case <try>: case <finally>: case <defer>:
       return 1;
     case <")">: {
-      Token head = _before_group(tokenizer, before, <"(">);
+      Token head = _before_group(tokenizer, before, 0);
       return head && (head.type == <ident> || head.type == <match> ||
                       _is_control_keyword(head));
     }
   }
-  return 0;
+  return _token_ends_operand(before);
 }
 
 static inline int _is_control_keyword(Token token) =>
@@ -585,7 +596,7 @@ static inline int _is_control_keyword(Token token) =>
             token.type == <for> || token.type == <switch>);
 
 /* Returns the significant token before the group that the `)` or `}` token
-   `close` ends, or NULL when that group does not open with `opener` or
+   `close` ends, or NULL when a nonzero `opener` does not match or
    starts the stream. Nesting counts delimiter token types, so parentheses
    and braces inside strings, comments, and Lisp atoms never count. */
 static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
@@ -599,8 +610,8 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
       case <"(">: case <"%(">: case <"$(">: case <"@(">: case <"?(">:
       case <"{">: case <"%{">: case <"${">:
         if (--depth) break;
-        return scan.type == opener ? _significant_before(tokenizer, scan)
-                                   : NULL;
+        return !opener || scan.type == opener
+          ? _significant_before(tokenizer, scan) : NULL;
     }
   }
   return NULL;

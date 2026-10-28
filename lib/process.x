@@ -53,13 +53,9 @@ typedef Symbol Env;
 /* Job launch and result error conditions.
    Reports expand at their existing owners. */
 
-static macro Stmt $error.start.alloc() {
-  raise %(alloc-fail);
-}
+static macro Stmt $error.start.alloc() { raise %(alloc-fail); }
 
-static macro Stmt $error.start.empty() {
-  raise %(bad-arg (operation "Job.start") (reason "empty command"));
-}
+static macro Stmt $error.start.empty() { raise %(bad-arg (operation "Job.start") (reason "empty command")); }
 
 static macro Stmt $error.start.missing(Expr $program, Expr $error) {
   raise %(not-found (operation "Job.start") (program $($program))
@@ -83,9 +79,7 @@ static macro Stmt $error.job.started(Expr $operation) {
   raise %(bad-arg (operation $($operation)) (reason "the job has started"));
 }
 
-static macro Stmt $error.options.key() {
-  raise %(bad-arg (operation "Job.options") (reason "option keys are atoms"));
-}
+static macro Stmt $error.options.key() { raise %(bad-arg (operation "Job.options") (reason "option keys are atoms")); }
 
 static macro Stmt $error.options.unknown(Expr $name) {
   raise %(bad-arg (operation "Job.options") (option $($name)));
@@ -117,9 +111,7 @@ static macro Stmt $error.text.nul(Expr $operation) {
   raise %(bad-arg (operation $($operation)) (reason "embedded NUL"));
 }
 
-static macro Stmt $error.wait.unstarted() {
-  raise %(bad-arg (operation "Job.wait_any") (reason "a job has not started"));
-}
+static macro Stmt $error.wait.unstarted() { raise %(bad-arg (operation "Job.wait_any") (reason "a job has not started")); }
 
 #include <errno.h>
 #include <fcntl.h>

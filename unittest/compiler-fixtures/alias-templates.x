@@ -10,7 +10,7 @@
 typedef struct Point { int x, y; } Point;
 
 macro Stmt $set_x(Expr $target, Expr $value) {
-  alias $target as t;
+  alias t to $target;
   t.x = $value;
 }
 
@@ -24,7 +24,7 @@ macro Stmt $bump(Expr $target) {
 }
 
 macro Unit $reader(Name $name, Expr $source) {
-  alias $source as source;
+  alias source to $source;
   int $name(void) { return source; }
 }
 

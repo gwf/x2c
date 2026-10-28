@@ -108,6 +108,8 @@ void Compiler.select_package_module(
   }
 }
 
+static alias fail_module_platform to Diagnostics.driver_error("native modules are not supported on this platform");
+
 /** Loads the native module at `path` once per process and returns its
     absolute path. Loading runs the module's code inside the compiler, so it
     happens only on request. A module from another compiler, a file that is
@@ -115,7 +117,7 @@ void Compiler.select_package_module(
 */
 String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
-    $fail.meta_native_module_platform();
+    fail_module_platform;
   String absolute = Path.absolute(path);
   if (_native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);

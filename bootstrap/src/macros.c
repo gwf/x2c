@@ -46,11 +46,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "expressions-reports.h"
-static List _851, _838, _835, _830, _825, _823, _822, _821, _820, _819, _818, _810, _809, _807, _805, _804, _803, _802, _801, _800, _799, _798, _797, _796, _795, _794, _793, _792, _791, _790, _789, _787, _785, _783, _781, _780, _778, _777, _776, _775, _774, _772, _771, _767, _766, _762, _759, _758, _754, _753, _749, _748, _745, _744, _742, _741, _739, _737, _736, _735, _733, _732, _730, _729, _727, _724, _723, _721, _720, _718, _717, _716, _715, _714, _712, _710, _708, _707, _704, _703, _702, _700, _698, _696, _694, _692, _691, _689, _687, _686, _685, _683, _682, _680, _679, _676, _675, _673, _672, _669, _668, _665, _664, _662, _660, _657, _656, _655, _653, _652, _647, _640, _639, _638, _636, _635, _633, _632, _627, _626, _625, _623, _622, _619, _618, _617, _615, _614, _612, _611, _606, _603, _602, _601, _600, _598, _597, _596, _595, _592, _591, _590, _589, _588, _587, _586, _585, _584, _583, _582, _581, _577, _576, _574, _573, _569, _568, _566, _565, _564, _562, _561, _558, _556, _555, _554, _551, _550, _549, _547, _545, _544, _543, _542, _541, _539, _538, _530, _521, _516, _514, _513, _512, _511, _510, _509, _508, _501, _496, _489, _488, _487, _485, _482, _475, _473, _472, _471, _470, _468, _467, _466, _465, _462, _461, _460, _456, _455, _454, _453, _452, _451, _448, _446, _445, _444, _443, _439, _438, _437, _436, _435, _434, _433, _426, _424, _423, _422, _421, _420, _417, _416, _414, _413, _409, _403, _402, _398, _397, _396, _395, _393, _391, _390, _389, _386, _385, _384, _383, _381, _380, _379, _377, _376, _373, _372, _370, _369, _368, _367, _363, _362, _348, _347, _345, _344, _343, _342, _336, _335, _334, _326, _325, _323, _322, _319, _318, _315, _314, _309, _308, _299, _294, _291, _287, _281, _280, _279, _277, _276, _273, _270, _269, _267, _266, _265, _263, _262, _258, _257, _256, _255, _254, _251, _248, _247, _246, _244, _243, _241, _240, _238, _237, _236, _234, _233, _232, _227, _224, _223, _222, _220, _210, _205, _202, _200, _194, _191, _190, _189, _184, _161, _160, _159, _158, _157, _156, _155, _154, _149, _148, _147, _146, _145, _144, _130, _129, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _106, _104, _102, _95, _94, _92, _91, _90, _87, _86, _77, _72, _57, _55, _54, _38, _34, _33, _24, _14, _10, _8;
+static List _852, _838, _835, _830, _825, _823, _822, _821, _820, _819, _818, _810, _809, _807, _805, _804, _803, _802, _801, _800, _799, _798, _797, _796, _795, _794, _793, _792, _791, _790, _789, _787, _785, _783, _781, _780, _778, _777, _776, _775, _774, _772, _771, _767, _766, _762, _759, _758, _754, _753, _749, _748, _745, _744, _742, _741, _739, _737, _736, _735, _733, _732, _730, _729, _727, _724, _723, _721, _720, _718, _717, _716, _715, _714, _712, _710, _708, _707, _704, _703, _702, _700, _698, _696, _694, _692, _691, _689, _687, _686, _685, _683, _682, _680, _679, _676, _675, _673, _672, _669, _668, _665, _664, _662, _660, _657, _656, _655, _653, _652, _647, _640, _639, _638, _636, _635, _633, _632, _627, _626, _625, _623, _622, _619, _618, _617, _615, _614, _612, _611, _606, _603, _602, _601, _600, _598, _597, _596, _595, _592, _591, _590, _589, _588, _587, _586, _585, _584, _583, _582, _581, _577, _576, _574, _573, _569, _568, _566, _565, _564, _562, _561, _558, _556, _555, _554, _551, _550, _549, _547, _545, _544, _543, _542, _541, _539, _538, _530, _521, _516, _514, _513, _512, _511, _510, _509, _508, _501, _496, _489, _488, _487, _485, _482, _475, _473, _472, _471, _470, _468, _467, _466, _465, _462, _461, _460, _456, _455, _454, _453, _452, _451, _448, _446, _445, _444, _443, _439, _438, _437, _436, _435, _434, _433, _426, _424, _423, _422, _421, _420, _417, _416, _414, _413, _409, _403, _402, _398, _397, _396, _395, _393, _391, _390, _389, _386, _385, _384, _383, _381, _380, _379, _377, _376, _373, _372, _370, _369, _368, _367, _363, _362, _348, _347, _345, _344, _343, _342, _336, _335, _334, _326, _325, _323, _322, _319, _318, _315, _314, _309, _308, _299, _294, _291, _287, _281, _280, _279, _277, _276, _273, _270, _269, _267, _266, _265, _263, _262, _258, _257, _256, _255, _254, _251, _248, _247, _246, _244, _243, _241, _240, _238, _237, _236, _234, _233, _232, _227, _224, _223, _222, _220, _210, _205, _202, _200, _194, _191, _190, _189, _184, _161, _160, _159, _158, _157, _156, _155, _154, _149, _148, _147, _146, _145, _144, _130, _129, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _106, _104, _102, _95, _94, _92, _91, _90, _87, _86, _77, _72, _57, _55, _54, _38, _34, _33, _24, _14, _10, _8;
 
-static String _853, _849, _848, _847, _846, _845, _844, _843, _842, _841, _840, _839, _836, _833, _832, _831, _828, _827, _826, _817, _816, _815, _814, _813, _812, _811, _751, _658, _650, _649, _645, _644, _643, _642, _630, _609, _570, _567, _536, _535, _534, _533, _532, _528, _526, _525, _524, _523, _522, _520, _519, _518, _517, _506, _505, _504, _503, _502, _500, _499, _498, _497, _495, _494, _493, _492, _490, _480, _479, _478, _477, _476, _418, _410, _407, _406, _405, _404, _400, _360, _359, _358, _357, _356, _355, _354, _351, _350, _337, _330, _329, _328, _327, _320, _312, _311, _310, _306, _305, _304, _303, _302, _301, _300, _297, _292, _289, _288, _285, _284, _283, _274, _271, _261, _260, _259, _249, _225, _211, _208, _207, _203, _198, _197, _196, _195, _182, _181, _179, _178, _177, _176, _152, _150, _142, _140, _138, _136, _134, _132, _131, _112, _100, _99, _98, _97, _96, _81, _80, _68, _67, _61, _60, _59, _58, _51, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _35, _31, _29, _28, _27, _26, _25, _22, _21, _20, _19, _18, _17, _16, _15, _12, _11, _6, _5, _4, _3, _2, _1, _0;
+static String _854, _850, _849, _848, _847, _846, _845, _844, _843, _842, _841, _840, _839, _836, _833, _832, _831, _828, _827, _826, _817, _816, _815, _814, _813, _812, _811, _751, _658, _650, _649, _645, _644, _643, _642, _630, _609, _570, _567, _536, _535, _534, _533, _532, _528, _526, _525, _524, _523, _522, _520, _519, _518, _517, _506, _505, _504, _503, _502, _500, _499, _498, _497, _495, _494, _493, _492, _490, _480, _479, _478, _477, _476, _418, _410, _407, _406, _405, _404, _400, _360, _359, _358, _357, _356, _355, _354, _351, _350, _337, _330, _329, _328, _327, _320, _312, _311, _310, _306, _305, _304, _303, _302, _301, _300, _297, _292, _289, _288, _285, _284, _283, _274, _271, _261, _260, _259, _249, _225, _211, _208, _207, _203, _198, _197, _196, _195, _182, _181, _179, _178, _177, _176, _152, _150, _142, _140, _138, _136, _134, _132, _131, _112, _100, _99, _98, _97, _96, _81, _80, _68, _67, _61, _60, _59, _58, _51, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _35, _31, _29, _28, _27, _26, _25, _22, _21, _20, _19, _18, _17, _16, _15, _12, _11, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _854, _852, _850, _837, _834, _829, _824, _808, _806, _788, _786, _784, _782, _779, _773, _770, _769, _768, _765, _764, _763, _761, _760, _757, _756, _755, _752, _750, _747, _746, _743, _740, _738, _734, _731, _728, _726, _725, _722, _719, _713, _711, _709, _706, _705, _701, _699, _697, _695, _693, _690, _688, _684, _681, _678, _677, _674, _671, _670, _667, _666, _663, _661, _659, _654, _651, _648, _646, _641, _637, _634, _631, _629, _628, _624, _621, _620, _616, _613, _610, _608, _607, _605, _604, _599, _594, _593, _580, _579, _578, _575, _572, _571, _563, _560, _559, _557, _553, _552, _548, _546, _540, _537, _531, _529, _527, _515, _507, _491, _486, _484, _483, _481, _474, _469, _464, _463, _459, _458, _457, _450, _449, _447, _442, _441, _440, _432, _431, _430, _429, _428, _427, _425, _419, _415, _412, _411, _408, _401, _399, _394, _392, _388, _387, _382, _378, _375, _374, _371, _366, _365, _364, _361, _353, _352, _349, _346, _341, _340, _339, _338, _333, _332, _331, _324, _321, _317, _316, _313, _307, _298, _296, _295, _293, _290, _286, _282, _278, _275, _272, _268, _264, _253, _252, _250, _245, _242, _239, _235, _231, _230, _229, _228, _226, _221, _219, _218, _217, _216, _215, _214, _213, _212, _209, _206, _204, _201, _199, _193, _192, _188, _187, _186, _185, _183, _180, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _153, _151, _143, _141, _139, _137, _135, _133, _128, _127, _116, _115, _114, _113, _111, _110, _109, _108, _107, _105, _103, _101, _93, _89, _88, _85, _84, _83, _82, _79, _78, _76, _75, _74, _73, _71, _70, _69, _66, _65, _64, _63, _62, _56, _53, _52, _50, _49, _37, _36, _32, _30, _23, _13, _9, _7;
+static Var _855, _853, _851, _837, _834, _829, _824, _808, _806, _788, _786, _784, _782, _779, _773, _770, _769, _768, _765, _764, _763, _761, _760, _757, _756, _755, _752, _750, _747, _746, _743, _740, _738, _734, _731, _728, _726, _725, _722, _719, _713, _711, _709, _706, _705, _701, _699, _697, _695, _693, _690, _688, _684, _681, _678, _677, _674, _671, _670, _667, _666, _663, _661, _659, _654, _651, _648, _646, _641, _637, _634, _631, _629, _628, _624, _621, _620, _616, _613, _610, _608, _607, _605, _604, _599, _594, _593, _580, _579, _578, _575, _572, _571, _563, _560, _559, _557, _553, _552, _548, _546, _540, _537, _531, _529, _527, _515, _507, _491, _486, _484, _483, _481, _474, _469, _464, _463, _459, _458, _457, _450, _449, _447, _442, _441, _440, _432, _431, _430, _429, _428, _427, _425, _419, _415, _412, _411, _408, _401, _399, _394, _392, _388, _387, _382, _378, _375, _374, _371, _366, _365, _364, _361, _353, _352, _349, _346, _341, _340, _339, _338, _333, _332, _331, _324, _321, _317, _316, _313, _307, _298, _296, _295, _293, _290, _286, _282, _278, _275, _272, _268, _264, _253, _252, _250, _245, _242, _239, _235, _231, _230, _229, _228, _226, _221, _219, _218, _217, _216, _215, _214, _213, _212, _209, _206, _204, _201, _199, _193, _192, _188, _187, _186, _185, _183, _180, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _153, _151, _143, _141, _139, _137, _135, _133, _128, _127, _116, _115, _114, _113, _111, _110, _109, _108, _107, _105, _103, _101, _93, _89, _88, _85, _84, _83, _82, _79, _78, _76, _75, _74, _73, _71, _70, _69, _66, _65, _64, _63, _62, _56, _53, _52, _50, _49, _37, _36, _32, _30, _23, _13, _9, _7;
 
 static int _init_guard_ = 0;
 
@@ -776,6 +776,8 @@ AliasHead;
 static int f7_aliases____unalias_starts(Compiler c);
 
 static int f7_aliases____continues_operand(Symbol type);
+
+static int f7_aliases____name_first(Token name);
 
 static AliasHead f7_aliases____head(Compiler c);
 
@@ -2193,22 +2195,23 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _836 = String_new("unalias");
   _837 = String_var(_836);
   _838 = cons(_837, NULL);
-  _839 = String_new("alias requires an expression");
-  _840 = String_new("expected ';' or '{' after an alias expression");
-  _841 = String_new("_");
-  _842 = String_new("expected an alias identifier after 'as'");
-  _843 = String_new("declaration \'");
-  _844 = String_new("\' is already bound");
-  _845 = String_new("prior binding: \'");
-  _846 = String_new("unalias cannot be the body of a statement");
-  _847 = String_new("no alias \'");
-  _848 = String_new("\' to remove in this scope");
-  _849 = String_new("an alias of an enclosing scope ends with that scope");
-  _850 = String_var(_849);
-  _851 = cons(_850, NULL);
-  _852 = Symbol_var(285841920328);
-  _853 = String_new("this include aliases \'");
-  _854 = Symbol_var(647498998088);
+  _839 = String_new("to");
+  _840 = String_new("alias requires an expression");
+  _841 = String_new("expected ';' or '{' after an alias expression");
+  _842 = String_new("_");
+  _843 = String_new("expected an alias identifier after 'as'");
+  _844 = String_new("declaration \'");
+  _845 = String_new("\' is already bound");
+  _846 = String_new("prior binding: \'");
+  _847 = String_new("unalias cannot be the body of a statement");
+  _848 = String_new("no alias \'");
+  _849 = String_new("\' to remove in this scope");
+  _850 = String_new("an alias of an enclosing scope ends with that scope");
+  _851 = String_var(_850);
+  _852 = cons(_851, NULL);
+  _853 = Symbol_var(285841920328);
+  _854 = String_new("this include aliases \'");
+  _855 = Symbol_var(647498998088);
 }
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
@@ -8441,7 +8444,7 @@ static void f6_values____place_support(Compiler c, Var code){
 
 int Type_is_typedef(Type);
 int Compiler_alias_form_starts(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_at_word(c, _826)) return f7_aliases____unalias_starts(c);  Token word = c -> token;  if(word -> type == 1317118534 && Sym_at_file_scope(c -> sym)) word = Token_skip_trivia(word + 1);  if(word -> type != 19147688 || ! String_equal(word -> text, _827)) return 0;  Token next = Token_skip_trivia(word + 1);  if(f7_aliases____continues_operand(next -> type)) return 0;  Type named = List_type(Sym_get(c -> sym, _830));  for(Token token = next;  token -> type != 11212 && token -> type != 119;  token = Token_after_group(token)){
+  if(! _init_guard_) _file_init_();  if(Compiler_at_word(c, _826)) return f7_aliases____unalias_starts(c);  Token word = c -> token;  if(word -> type == 1317118534 && Sym_at_file_scope(c -> sym)) word = Token_skip_trivia(word + 1);  if(word -> type != 19147688 || ! String_equal(word -> text, _827)) return 0;  Token next = Token_skip_trivia(word + 1);  if(f7_aliases____continues_operand(next -> type)) return 0;  if(f7_aliases____name_first(next)) return 1;  Type named = List_type(Sym_get(c -> sym, _830));  for(Token token = next;  token -> type != 11212 && token -> type != 119;  token = Token_after_group(token)){
     if(token -> type == 19147688 && String_equal(token -> text, _831)) return 1;  if(token -> type == 247) return ! List_truth(Type_list(named)) || ! Type_is_typedef(named);  if(token -> type == 251 || Symbol_is_assignment_op(token -> type)) return 0;
   }
   return 0;
@@ -8556,28 +8559,35 @@ static int f7_aliases____continues_operand(Symbol type){
   return Symbol_is_assignment_op(type) || SymbolSet_contains(f7_aliases____operand_tails, type) ||(Symbol_binary_precedence(type) && !(SymbolSet_contains(f7_aliases____prefix_operators, type)));
 }
 
+static int f7_aliases____name_first(Token name){
+  if(name -> type != 19147688) return 0;  Token to = Token_skip_trivia(name + 1);  return to -> type == 19147688 && String_equal(to -> text, _839);
+}
+
 static AliasHead f7_aliases____head(Compiler c){
   AliasHead head ={
     .start = c -> token, .storage = Compiler_test(c, 1317118534)
   }
-  ;  Compiler_next(c);  if((Compiler_peek(c, 0) == 247 && Compiler_peek(c, 1) == 251) || Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212) Compiler_report_error(c, 33658058, _839, c -> token, NULL);  head.expression = Compiler_parse_expression(c);  head.name = f7_aliases____alias_name(c);  if(Compiler_peek(c, 0) != 119 && Compiler_peek(c, 0) != 247) Compiler_report_error(c, 33658058, _840, c -> token, NULL);  return head;
+  ;  Compiler_next(c);  if(f7_aliases____name_first(c -> token)){
+    head.name = c -> token -> text;  Compiler_next(c);  Compiler_next(c);
+  }
+  if((Compiler_peek(c, 0) == 247 && Compiler_peek(c, 1) == 251) || Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212) Compiler_report_error(c, 33658058, _840, c -> token, NULL);  head.expression = Compiler_parse_expression(c);  if(! String_truth(head.name)) head.name = f7_aliases____alias_name(c);  if(Compiler_peek(c, 0) != 119 && Compiler_peek(c, 0) != 247) Compiler_report_error(c, 33658058, _841, c -> token, NULL);  return head;
 }
 
 static String f7_aliases____alias_name(Compiler c){
-  if(! Compiler_take_word(c, _831)) return _841;  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _842, c -> token, NULL);  String name = c -> token -> text;  Compiler_next(c);  return name;
+  if(! Compiler_take_word(c, _831)) return _842;  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _843, c -> token, NULL);  String name = c -> token -> text;  Compiler_next(c);  return name;
 }
 
 Map Sym_current_symbols(Sym);
 static void f7_aliases____define_local(Compiler c, AliasHead * head){
-  if(Map_contains(Sym_current_symbols(c -> sym), List_var(cons(String_var((* head).name), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_843), cons(String_var((* head).name), cons(String_var(_844), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_845), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  Sym_define_alias(c -> sym, (* head).name, (* head).expression);
+  if(Map_contains(Sym_current_symbols(c -> sym), List_var(cons(String_var((* head).name), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_844), cons(String_var((* head).name), cons(String_var(_845), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_846), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  Sym_define_alias(c -> sym, (* head).name, (* head).expression);
 }
 
 void Sym_undefine_alias(Sym, String);
 static List f7_aliases____unalias(Compiler c, int block){
-  Token start = c -> token;  Compiler_next(c);  String name = c -> token -> text;  Compiler_next(c);  Compiler_expect(c, 119);  if(! block) Compiler_report_error(c, 33658058, _846, start, NULL);  List row = Sym_current_binding(c -> sym, cons(String_var(name), NULL));  if(List_truth(row) && List_truth(Compiler_fact(c, List_var(cons(_463, cons(List_var(row), NULL)))))){
+  Token start = c -> token;  Compiler_next(c);  String name = c -> token -> text;  Compiler_next(c);  Compiler_expect(c, 119);  if(! block) Compiler_report_error(c, 33658058, _847, start, NULL);  List row = Sym_current_binding(c -> sym, cons(String_var(name), NULL));  if(List_truth(row) && List_truth(Compiler_fact(c, List_var(cons(_463, cons(List_var(row), NULL)))))){
     Sym_undefine_alias(c -> sym, name);  return _521;
   }
-  Var key;  if(! f7_aliases____same_scope(c, f7_aliases____entry(c, name, &(key)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_847), cons(String_var(name), cons(String_var(_848), NULL)))), start, _851);  f7_aliases____remove(c, key);  if(! c -> alias_level && Sym_at_file_scope(c -> sym) && f7_aliases____public_key(key)) _record_compile_time_effect(c, cons(_427, cons(_469, cons(String_var(name), NULL))), start);  return _521;
+  Var key;  if(! f7_aliases____same_scope(c, f7_aliases____entry(c, name, &(key)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_848), cons(String_var(name), cons(String_var(_849), NULL)))), start, _852);  f7_aliases____remove(c, key);  if(! c -> alias_level && Sym_at_file_scope(c -> sym) && f7_aliases____public_key(key)) _record_compile_time_effect(c, cons(_427, cons(_469, cons(String_var(name), NULL))), start);  return _521;
 }
 
 static int f7_aliases____public_key(Var key){
@@ -8715,8 +8725,8 @@ static List f7_aliases____wrapped_forms(Compiler c, int skip_body){
 }
 
 static void f7_aliases____declare(Compiler c, AliasHead * head, int collecting){
-  if(f7_aliases____same_scope(c, f7_aliases____entry(c, (* head).name, NULL))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_843), cons(String_var((* head).name), cons(String_var(_844), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_845), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  int depth = Sym_scope_count(c -> sym), level = c -> alias_level;  int file_scope = ! level && Sym_at_file_scope(c -> sym);  if(collecting && file_scope && ! c -> interface_provider && List_truth(Sym_get(c -> sym, cons(String_var((* head).name), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_843), cons(String_var((* head).name), cons(String_var(_844), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_845), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  Var key =(* head).storage ? List_var(f7_aliases____private_key(c, (* head).name)) : String_var((* head).name);  f7_aliases____install(c, key, ({
-    Var _x2c_gensym_literal_part_135 = int_var(depth);  Var _x2c_gensym_literal_part_136 = int_var(level);  Var _x2c_gensym_literal_part_137 = List_var((* head).expression);  cons(_852, cons(_x2c_gensym_literal_part_135, cons(_x2c_gensym_literal_part_136, cons(_x2c_gensym_literal_part_137, NULL))));
+  if(f7_aliases____same_scope(c, f7_aliases____entry(c, (* head).name, NULL))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_844), cons(String_var((* head).name), cons(String_var(_845), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_846), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  int depth = Sym_scope_count(c -> sym), level = c -> alias_level;  int file_scope = ! level && Sym_at_file_scope(c -> sym);  if(collecting && file_scope && ! c -> interface_provider && List_truth(Sym_get(c -> sym, cons(String_var((* head).name), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_844), cons(String_var((* head).name), cons(String_var(_845), NULL)))), (* head).start, cons(String_var(String_join(NULL, cons(String_var(_846), cons(String_var((* head).name), cons(String_var(_6), NULL))))), NULL));  Var key =(* head).storage ? List_var(f7_aliases____private_key(c, (* head).name)) : String_var((* head).name);  f7_aliases____install(c, key, ({
+    Var _x2c_gensym_literal_part_135 = int_var(depth);  Var _x2c_gensym_literal_part_136 = int_var(level);  Var _x2c_gensym_literal_part_137 = List_var((* head).expression);  cons(_853, cons(_x2c_gensym_literal_part_135, cons(_x2c_gensym_literal_part_136, cons(_x2c_gensym_literal_part_137, NULL))));
   }
   ));  if(file_scope && !(* head).storage) _record_compile_time_effect(c, ({
     Var _x2c_gensym_literal_part_138 = String_var((* head).name);  Var _x2c_gensym_literal_part_139 = Compiler_freeze_declaration_syntax(c, List_var((* head).expression));  cons(_427, cons(_463, cons(_x2c_gensym_literal_part_138, cons(_x2c_gensym_literal_part_139, NULL))));
@@ -8767,7 +8777,7 @@ static List f7_aliases____visible(Compiler c, Map table, Var key, List entry, in
       {
         List expression = _rebind_globals(c, Var_list_payload(Compiler_thaw_declaration_syntax(c, frozen)));
         entry =({
-          Var _x2c_gensym_literal_part_140 = int_var(Sym_base_scope_count(c -> sym));  cons(_852, cons(_x2c_gensym_literal_part_140, cons(_105, cons(List_var(expression), List_append(shadowed, NULL)))));
+          Var _x2c_gensym_literal_part_140 = int_var(Sym_base_scope_count(c -> sym));  cons(_853, cons(_x2c_gensym_literal_part_140, cons(_105, cons(List_var(expression), List_append(shadowed, NULL)))));
         }
         );
         Map_setindex(table, key, List_var(entry));
@@ -8801,8 +8811,8 @@ return NULL;
 void Compiler_report_problem(Compiler, Symbol, String, Token, List);
 
 static void _install_imported_alias(Compiler c, String name, List frozen){
-  if(f7_aliases____full_parse(c) &&(f7_aliases____same_scope(c, f7_aliases____entry(c, name, NULL)) || List_truth(Sym_current_binding(c -> sym, cons(String_var(name), NULL))))) Compiler_report_problem(c, 33658058, String_join(NULL, cons(String_var(_843), cons(String_var(name), cons(String_var(_844), NULL)))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_853), cons(String_var(name), cons(String_var(_6), NULL))))), NULL));
-  f7_aliases____install(c, String_var(name), cons(_854, cons(List_var(frozen), NULL)));
+  if(f7_aliases____full_parse(c) &&(f7_aliases____same_scope(c, f7_aliases____entry(c, name, NULL)) || List_truth(Sym_current_binding(c -> sym, cons(String_var(name), NULL))))) Compiler_report_problem(c, 33658058, String_join(NULL, cons(String_var(_844), cons(String_var(name), cons(String_var(_845), NULL)))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_854), cons(String_var(name), cons(String_var(_6), NULL))))), NULL));
+  f7_aliases____install(c, String_var(name), cons(_855, cons(List_var(frozen), NULL)));
 }
 
 static int f7_aliases____full_parse(Compiler c){

@@ -48,10 +48,7 @@ static macro Stmt $error.read.text(
           (offset $($offset)) (line $($line)) (column $($column)));
 }
 
-static macro Stmt $error.write.depth() {
-  raise %(size-limit (operation "Var.json")
-          (reason "nesting exceeds 512 levels"));
-}
+static macro Stmt $error.write.depth() { raise %(size-limit (operation "Var.json") (reason "nesting exceeds 512 levels")); }
 
 static macro Stmt $error.write.type(Expr $tag) {
   raise %(bad-types (operation "Var.json") (tag $($tag)));
@@ -67,10 +64,7 @@ static macro Stmt $error.write.duplicate(Expr $text) {
           (name $($text)));
 }
 
-static macro Stmt $error.write.nonfinite() {
-  raise %(conv-range (operation "Var.json")
-          (reason "JSON has no NaN or infinity"));
-}
+static macro Stmt $error.write.nonfinite() { raise %(conv-range (operation "Var.json") (reason "JSON has no NaN or infinity")); }
 
 static macro Stmt $error.read.trailing(Expr $reader) =>
   _fail($reader, "unexpected text after the value");

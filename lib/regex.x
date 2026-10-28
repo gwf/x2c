@@ -50,18 +50,17 @@ protocol RegexMatchIndex(RegexMatch);
 
 /* regex diagnostic messages. Payload owners retain failure policy. */
 
-static macro Expression $reason.unmatched_close() => "unmatched closing parenthesis";
-static macro Expression $reason.no_repeat() => "nothing to repeat";
-static macro Expression $reason.repeat_count() => "repetition count too large";
-static macro Expression $reason.repeat_range() => "repetition range out of order";
-static macro Expression $reason.missing_close() => "missing closing parenthesis";
-static macro Expression $reason.group_syntax() => "unknown group syntax";
-static macro Expression $reason.group_name() => "malformed group name";
-static macro Expression $reason.unterminated_class() =>
-  "unterminated character class";
-static macro Expression $reason.character_range() => "character range out of order";
-static macro Expression $reason.trailing_backslash() => "pattern ends in a backslash";
-static macro Expression $reason.unknown_escape() => "unknown escape";
+static alias reason_unmatched_close to "unmatched closing parenthesis";
+static alias reason_no_repeat to "nothing to repeat";
+static alias reason_repeat_count to "repetition count too large";
+static alias reason_repeat_range to "repetition range out of order";
+static alias reason_missing_close to "missing closing parenthesis";
+static alias reason_group_syntax to "unknown group syntax";
+static alias reason_group_name to "malformed group name";
+static alias reason_unterminated_class to "unterminated character class";
+static alias reason_character_range to "character range out of order";
+static alias reason_trailing_backslash to "pattern ends in a backslash";
+static alias reason_unknown_escape to "unknown escape";
 
 static macro Stmt $error.compile(Expr $why, Expr $pattern, Expr $offset) {
   raise %(malformed (operation "Regex.compile") (reason $($why))
@@ -263,7 +262,7 @@ static Regex Regex.new(String pattern) {
   Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
   _flags(p);
   regex.program = _parse_alternation(p);
-  if (p.pos < p.len) _fail(p, $reason.unmatched_close());
+  if (p.pos < p.len) _fail(p, reason_unmatched_close);
   return regex;
 }
 
@@ -315,7 +314,7 @@ static _RegexNode _sequence(Parser &p) {
 /* A quantifier here has nothing before it to repeat. */
 static _RegexNode _atom(Parser &p) {
   int byte = (unsigned char) p.text[p.pos];
-  if (_is_quantifier(byte)) _fail(p, $reason.no_repeat());
+  if (_is_quantifier(byte)) _fail(p, reason_no_repeat);
   p.pos++;
   switch (byte) {
     case '.':  return _node(<any>);
@@ -335,7 +334,7 @@ static _RegexNode _atom(Parser &p) {
 static _RegexNode _parse_group(Parser &p) {
   int index = _peek(p) == '?' ? _group_syntax(p) : _add_capture(p, NULL);
   _RegexNode body = _parse_alternation(p);
-  if (_peek(p) != ')') _fail(p, $reason.missing_close());
+  if (_peek(p) != ')') _fail(p, reason_missing_close);
   p.pos++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
@@ -351,7 +350,7 @@ static int _group_syntax(Parser &p) {
   }
   if (marker != '<') {
     p.pos--;
-    _fail(p, $reason.group_syntax());
+    _fail(p, reason_group_syntax);
   }
   p.pos++;
   return _add_capture(p, _name(p));
@@ -364,7 +363,7 @@ static String _name(Parser &p) {
   while (_is_word(_peek(p))) p.pos++;
   if (p.pos == start || scan_ascii_digit(p.text[start]) || _peek(p) != '>') {
     p.pos = start;
-    _fail(p, $reason.group_name());
+    _fail(p, reason_group_name);
   }
   String name = p.regex.pattern[start:p.pos];
   p.pos++;
@@ -406,7 +405,7 @@ static _RegexNode _quantified(Parser &p, _RegexNode atom) {
   if (!_bounds(p, min, max)) return atom;
   if (atom.kind == <bol> || atom.kind == <eol> || atom.kind == <wordb> ||
       atom.kind == <nwordb>)
-    _fail(p, $reason.no_repeat());
+    _fail(p, reason_no_repeat);
   p.pos++;
   _RegexNode node = _node(<repeat>);
   node.min = min;
@@ -414,7 +413,7 @@ static _RegexNode _quantified(Parser &p, _RegexNode atom) {
   node.greedy = _peek(p) != '?';
   node.child = atom;
   if (!node.greedy) p.pos++;
-  if (_is_quantifier(_peek(p))) _fail(p, $reason.no_repeat());
+  if (_is_quantifier(_peek(p))) _fail(p, reason_no_repeat);
   return node;
 }
 
@@ -451,11 +450,11 @@ static int _braces(Parser &p, int &min, int &max) {
   }
   if (low > INT_MAX || high > INT_MAX) {
     p.pos++;
-    _fail(p, $reason.repeat_count());
+    _fail(p, reason_repeat_count);
   }
   if (high >= 0 && high < low) {
     p.pos++;
-    _fail(p, $reason.repeat_range());
+    _fail(p, reason_repeat_range);
   }
   min = (int) low;
   max = (int) high;
@@ -486,7 +485,7 @@ static _RegexNode _set(Parser &p) {
   if (negate) p.pos++;
   int first = p.pos;
   while (p.pos == first || _peek(p) != ']') {
-    if (p.pos >= p.len) _fail(p, $reason.unterminated_class());
+    if (p.pos >= p.len) _fail(p, reason_unterminated_class);
     _member(p, node);
   }
   p.pos++;
@@ -513,7 +512,7 @@ static int _range_end(Parser &p, int low) {
   p.pos++;
   int high = (unsigned char) p.text[p.pos++];
   if (high == '\\') high = _escape(p);
-  if (high < low) _fail(p, $reason.character_range());
+  if (high < low) _fail(p, reason_character_range);
   return high;
 }
 
@@ -531,7 +530,7 @@ static _RegexNode _escape_atom(Parser &p) {
 /* Reads the byte after a backslash and returns the byte it stands for, or
    the negated letter of a `\d`, `\w`, or `\s` class or its capital. */
 static int _escape(Parser &p) {
-  if (p.pos >= p.len) _fail(p, $reason.trailing_backslash());
+  if (p.pos >= p.len) _fail(p, reason_trailing_backslash);
   int byte = (unsigned char) p.text[p.pos++];
   switch (byte) {
     case 't': return '\t';
@@ -544,7 +543,7 @@ static int _escape(Parser &p) {
   }
   if (!_is_word(byte) && byte < 128) return byte;
   p.pos--;
-  _fail(p, $reason.unknown_escape());
+  _fail(p, reason_unknown_escape);
 }
 
 // parser primitives

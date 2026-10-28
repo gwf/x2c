@@ -346,6 +346,7 @@ indentation returns:
 | `for (a; b; c):` and a block | `for (a; b; c) {` ... `}` |
 | `with (p = v):` and a block | `with (p = v) {` ... `}` |
 | `alias e as n:` and a block | `alias e as n {` ... `}` |
+| `alias n to e:` and a block | `alias n to e {` ... `}` |
 | `if x: s` | `if (x) s;` |
 | `else: s` | `else s;` |
 | `case X:`, `default:`, `catch P:` and a block | `case X: {` ... `}` |
@@ -4039,16 +4040,19 @@ spelling `(with)(arguments);`. A macro template may contain `with`.
 
 ### Expression aliases with `alias`
 
-`alias expression as name;` gives an expression a short lexical name. The
-braced form `alias expression as name { ... }` limits the name to its body.
-In the braced form, `as name` may be omitted, and the name is then `_`:
+`alias name to expression;` gives an expression a short lexical name.
+`alias expression as name;` is the equivalent expression-first spelling.
+The braced forms `alias name to expression { ... }` and
+`alias expression as name { ... }` limit the name to their body.
+In the expression-first braced form, `as name` may be omitted, and the name
+is then `_`:
 
 ```x2c
 ~typedef struct Settings { int width, height; } Settings;
 ~typedef struct Window { Settings settings; } Window;
 ~int main(void) {
 Window window = { { 3, 4 } };
-alias window.settings as settings;
+alias settings to window.settings;
 settings.width = 5;
 alias window.settings {
   _.height = 6;
@@ -4068,6 +4072,10 @@ stands for the parsed expression, grouped as one operand. After
 evaluates nothing, and each use evaluates the expression again, so a call
 used twice is called twice. A use can be assigned when the expression is
 assignable. An alias expression may use an earlier alias.
+
+Parenthesize an expression when its trailing type could consume the alias
+body as a C compound literal. For example, write
+`alias size to (sizeof(int)) { ... }` for a braced alias of `sizeof(int)`.
 
 The expression keeps the bindings visible at the declaration. A later
 declaration that hides one of its names does not change what the alias
@@ -4146,7 +4154,8 @@ file scope: another alias or a declaration of its name there conflicts, in
 either order. In a
 [module unit](#module-blocks), a member's alias is visible to later members
 and to the entry text after the module block.
-`static alias expression as name;` keeps the alias in its declaring file, or
+`static alias name to expression;`, or the expression-first equivalent,
+keeps the alias in its declaring file, or
 in its member within a module unit, including while that member splices a
 nested member. An alias inside a macro template belongs to that template:
 its name does not capture a caller's name of the same spelling.
@@ -4180,10 +4189,13 @@ another statement. A file-scope removal of a public alias reaches the files
 that include this one at the include line, so a file that aliases a name
 and then removes it leaves nothing visible to its includers.
 
-`alias` and `unalias` are contextual words. Each stays an ordinary name where
-it continues an operand, as in `alias = 3;` or `alias(4)`. A typedef named
+`alias`, `unalias`, `as`, and `to` are contextual words. `as` separates an
+expression from its name; `to` separates a name from its expression only
+immediately after `alias name`. Elsewhere they stay ordinary identifiers.
+`alias` and `unalias` each stay an ordinary name where they continue an
+operand, as in `alias = 3;` or `alias(4)`. A typedef named
 `unalias` keeps its meaning, and so does a typedef named `alias` where no
-`as` follows.
+`as` follows and the declaration does not start with `alias name to`.
 
 ### Foreach
 

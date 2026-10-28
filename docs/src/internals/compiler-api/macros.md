@@ -118,11 +118,11 @@ Source: `src/macros/aliases.x`
 `int Compiler.alias_form_starts(Compiler c)`
 
 Reports whether the cursor begins an alias or its removal. An alias is
-the word `alias`, or at file scope `static alias`, then an expression
-followed by `as` or a braced body; a removal is `unalias name;`. Each
-word stays an ordinary name where it continues an operand, as in
-`alias = value;`, and where it names a type that no `as` follows. This
-query does not consume tokens.
+the word `alias`, or at file scope `static alias`, then `name to` and
+an expression, or an expression followed by `as` or a braced body.
+A removal is `unalias name;`. Each word stays an ordinary name where it
+continues an operand, as in `alias = value;`, or names a type outside
+either alias declaration head. This query does not consume tokens.
 
 Source: `src/macros/aliases.x`
 

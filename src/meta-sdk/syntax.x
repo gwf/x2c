@@ -37,8 +37,7 @@ static macro Stmt $fail.meta_sdk_parameter_missing(
     %"Code.parameter cannot find '$($wanted)'",
     %("function: $(Code.name($function).repr())"));
 
-static macro Stmt $fail.meta_sdk_constant() =>
-  MetaContext.reject("captured code is not a compile-time constant", NULL);
+static alias fail_constant to MetaContext.reject("captured code is not a compile-time constant", NULL);
 
 static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
   _reject_value(
@@ -54,7 +53,7 @@ Var Code.value(Code code) {
     code = compiler.capture_macro_value(definition);
   Var value = compiler.folded_constant(code);
   if (value is void)
-    $fail.meta_sdk_constant();
+    fail_constant;
   return value;
 }
 

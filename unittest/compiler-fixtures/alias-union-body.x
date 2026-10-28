@@ -6,7 +6,7 @@ typedef union Cell {
   alias 4 as size;
   char bytes[size];
   unalias size;
-  alias 2 as half;
+  alias half to 2;
   char pair[half];
 } Cell;
 

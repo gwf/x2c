@@ -285,7 +285,8 @@ twice: `$twice(f())` calls `f()` twice.
 | Decorator macro | Transform the following expression, statement, field, function, named type, or unit item |
 
 A `meta` function can also be called at runtime; `$f(...)` runs it at
-compile time. `alias expression as name;` substitutes the expression at
+compile time. `alias name to expression;` (also `alias expression as name;`)
+substitutes the expression at
 each use of `name`. See [macros](macros.md),
 [meta functions](meta-functions.md), and
 [generating code](generating-code.md).

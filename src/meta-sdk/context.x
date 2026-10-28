@@ -3,9 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-static macro Stmt $fail.meta_sdk_invocation_missing() =>
-  MetaContext.reject(
-    "x2c invocation location used outside macro expansion", NULL);
+static alias fail_invocation_missing to MetaContext.reject("x2c invocation location used outside macro expansion", NULL);
 
 static macro Stmt $fail.meta_sdk_notes_string(Expr $operation, Expr $note) =>
   _reject_value(%"$($operation) notes must be Strings", $note);
@@ -50,7 +48,7 @@ int x2c_invocation_column(void) =>
 /** Returns the location of the active macro invocation. */
 List MetaContext.invocation_location(void) {
   if (!active.expander || !active.expander.macro_stack || !active.site)
-    $fail.meta_sdk_invocation_missing();
+    fail_invocation_missing;
   return active.expander.token_location(active.site);
 }
 

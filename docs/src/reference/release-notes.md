@@ -34,7 +34,8 @@ commands, and packages since the previous release. The
 - `with (place = value) { ... }` assigns for the block and restores the
   old value on every exit, replacing `$let`. See
   [Temporary assignments with `with`](language.md#temporary-assignments-with-with).
-- `alias expr as name;` substitutes an expression for a name until the end
+- `alias name to expr;`, also written `alias expr as name;`, substitutes
+  an expression for a name until the end
   of its scope, `static alias` does so at file scope, and `unalias name;`
   ends an alias early. The old `with` alias form is removed. See
   [Expression aliases with `alias`](language.md#expression-aliases-with-alias).

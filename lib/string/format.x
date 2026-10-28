@@ -20,28 +20,22 @@
 
 /* string-format diagnostic messages. Payload owners retain failure policy. */
 
-static macro Expression $reason.excess_values() => "excess values";
-static macro Expression $reason.missing_value() => "missing value";
-static macro Expression $reason.incomplete() => "incomplete conversion";
-static macro Expression $reason.width_range() => "width exceeds int range";
-static macro Expression $reason.missing_star() => "missing star value";
-static macro Expression $reason.length() => "unsupported length modifier";
-static macro Expression $reason.positional() =>
-  "positional formats are unsupported";
-static macro Expression $reason.conversion() => "unsupported conversion";
-static macro Expression $reason.integer_length() =>
-  "unsupported integer length";
-static macro Expression $reason.floating_length() =>
-  "unsupported floating length";
-static macro Expression $reason.wide_text() =>
-  "wide strings and characters are unsupported";
-static macro Expression $reason.flag() => "unsupported flag for conversion";
-static macro Expression $reason.character_precision() =>
-  "unsupported precision for %c";
-static macro Expression $reason.character_nul() =>
-  "%c cannot produce an embedded NUL";
-static macro Expression $reason.string() => "string conversion failed";
-static macro Expression $reason.value() => "value conversion failed";
+static alias reason_excess_values to "excess values";
+static alias reason_missing_value to "missing value";
+static alias reason_incomplete to "incomplete conversion";
+static alias reason_width_range to "width exceeds int range";
+static alias reason_missing_star to "missing star value";
+static alias reason_length to "unsupported length modifier";
+static alias reason_positional to "positional formats are unsupported";
+static alias reason_conversion to "unsupported conversion";
+static alias reason_integer_length to "unsupported integer length";
+static alias reason_floating_length to "unsupported floating length";
+static alias reason_wide_text to "wide strings and characters are unsupported";
+static alias reason_flag to "unsupported flag for conversion";
+static alias reason_character_precision to "unsupported precision for %c";
+static alias reason_character_nul to "%c cannot produce an embedded NUL";
+static alias reason_string to "string conversion failed";
+static alias reason_value to "value conversion failed";
 static macro Expression $reason.range(Expr $label) =>
   %"$($label) exceeds int range";
 
@@ -105,7 +99,7 @@ String String.format(String fmt, List @values) {
     if (_byte(f) == '%') _conversion(f);
     else f.cursor++;
   _write_literal(f);
-  if (f.args) _format_error(f.length, $reason.excess_values());
+  if (f.args) _format_error(f.length, reason_excess_values);
   return out;
 }
 
@@ -121,7 +115,7 @@ static void _conversion(Format &f) {
   }
   else {
     Spec spec = _spec(f);
-    _print(f, spec, _take(f, $reason.missing_value()));
+    _print(f, spec, _take(f, reason_missing_value));
   }
   f.literal = f.cursor;
 }
@@ -161,7 +155,7 @@ static int _flags(Format &f) {
 static void _width(Format &f, Spec &spec) {
   if (_byte(f) == '*') {
     int width = _star(f);
-    if (width == INT_MIN) _fail(f, $reason.width_range());
+    if (width == INT_MIN) _fail(f, reason_width_range);
     if (width < 0) spec.flags |= FORMAT_LEFT;
     spec.width = abs(width);
     f.cursor++;
@@ -183,12 +177,12 @@ static void _precision(Format &f, Spec &spec) {
 
 /* A conversion that reaches the end of the format is incomplete. */
 static void _need_byte(Format &f) {
-  if (f.cursor == f.length) _fail(f, $reason.incomplete());
+  if (f.cursor == f.length) _fail(f, reason_incomplete);
 }
 
 /* A `*` width or precision is the next value as an int. */
 static int _star(Format &f) =>
-  (int) _number(f, _take(f, $reason.missing_star()), <i32>).integer();
+  (int) _number(f, _take(f, reason_missing_star), <i32>).integer();
 
 /* Reads the digits at the cursor. An overflow reports the offset of the
    first digit and names the field with `label`. */
@@ -211,7 +205,7 @@ static Symbol _modifier(Format &f) {
     case 'h': return _doubled(f, 'h', <short>, <char>);
     case 'l': return _doubled(f, 'l', <long>, <llong>);
     case 'L': f.cursor++; return <ldouble>;
-    case 'j': case 'z': case 't': _fail(f, $reason.length());
+    case 'j': case 'z': case 't': _fail(f, reason_length);
   }
   return <none>;
 }
@@ -232,19 +226,19 @@ static void _check(Format &f, Spec spec) {
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if (ch == '$') _fail(f, $reason.positional());
-  if (!integer && !floating && !text) _fail(f, $reason.conversion());
+  if (ch == '$') _fail(f, reason_positional);
+  if (!integer && !floating && !text) _fail(f, reason_conversion);
   if (integer && spec.modifier == <ldouble>)
-    _fail(f, $reason.integer_length());
+    _fail(f, reason_integer_length);
   if (floating && spec.modifier != <none> && spec.modifier != <long> &&
       spec.modifier != <ldouble>)
-    _fail(f, $reason.floating_length());
+    _fail(f, reason_floating_length);
   if (text && spec.modifier != <none>)
-    _fail(f, $reason.wide_text());
+    _fail(f, reason_wide_text);
   if (text && (spec.flags & ~FORMAT_LEFT))
-    _fail(f, $reason.flag());
+    _fail(f, reason_flag);
   if (ch == 'c' && spec.precision >= 0)
-    _fail(f, $reason.character_precision());
+    _fail(f, reason_character_precision);
 }
 
 // conversion arguments
@@ -306,7 +300,7 @@ static Buffer _floating(
 
 static Buffer _character(Format &f, const char *text, Var arg) {
   int byte = (int) _number(f, arg, <i32>).integer();
-  if (!(unsigned char) byte) _fail(f, $reason.character_nul());
+  if (!(unsigned char) byte) _fail(f, reason_character_nul);
   return f.out.printf(text, byte);
 }
 
@@ -315,7 +309,7 @@ static Buffer _string(Format &f, const char *text, Var arg) {
   String string = NULL;
   try string = arg.str();
   catch %(?code *details):
-    _nested(f, $reason.string(), code, details);
+    _nested(f, reason_string, code, details);
   return f.out.printf(text, string ? string : "");
 }
 
@@ -324,7 +318,7 @@ static Var _number(Format &f, Var arg, Symbol target) {
   Var converted = void;
   try converted = arg.convert(target);
   catch %(?code *details):
-    _nested(f, $reason.value(), code, details);
+    _nested(f, reason_value, code, details);
   return converted;
 }
 

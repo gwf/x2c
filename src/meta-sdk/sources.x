@@ -8,8 +8,7 @@ static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
     "Code.source_text requires complete captured syntax",
     active.has_bindings ? NULL : %("value: $($value.repr())"));
 
-static macro Stmt $fail.meta_sdk_embed_path_empty() =>
-  MetaContext.reject("x2c_embed_text requires a non-empty path", NULL);
+static alias fail_embed_path_empty to MetaContext.reject("x2c_embed_text requires a non-empty path", NULL);
 
 static macro Stmt $fail.meta_sdk_embed_literal(Expr $requested) =>
   _reject_value(
@@ -44,7 +43,7 @@ String x2c_embed_text(Var requested) {
   if (requested is <string>) requested_path = requested;
   else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
-    $fail.meta_sdk_embed_path_empty();
+    fail_embed_path_empty;
   String path = _embed_path(c, source_file, requested_path);
   String text = c.sources ? _embed_source(c, path) : _embed_file(c, path);
   c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));

@@ -475,7 +475,7 @@ _Noreturn void MetaContext_reject(String message, List notes){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 97};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 95};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), String_var(message));
       __builtin_unreachable();
     }
@@ -1025,7 +1025,7 @@ List MetaContext_function_reference(String name){
   if(! _init_guard_) _file_init_();
   Compiler c = active.evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk/syntax.x",.function = "MetaContext_function_reference",.line = 160};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk/syntax.x",.function = "MetaContext_function_reference",.line = 159};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));
     __builtin_unreachable();
   }

@@ -22,24 +22,24 @@ static Owner *counted(void) {
 }
 
 alias owner.settings as shared;
-alias counted()->count as tally;
+alias tally to counted()->count;
 
 enum { BASE = 10 };
 
 enum Kinds {
-  alias BASE + 1 as first;
+  alias first to BASE + 1;
   ONE = first,
   alias BASE * 2 { TWO = _, THREE, }
   FOUR
 };
 
 typedef struct Grid {
-  alias 3 as side;
+  alias side to 3;
   int cells[side * side];
   alias 4 { int extra[_]; }
 } Grid;
 
-alias owner.settings as wrapped {
+alias wrapped to owner.settings {
   static int area(void) { return wrapped.width * wrapped.height; }
   static int parameter(int wrapped) { return wrapped; }
 }
@@ -48,14 +48,14 @@ static int wrapped = 50;
 
 int main(void) {
   Owner local = { { 1, 2 }, 0 };
-  alias local.settings as settings;
+  alias settings to local.settings;
   settings.width = 5;
   alias local.settings {
     _.height = 6;
     printf("braced %d %d\n", _.width, _.height);
   }
 
-  alias counted() as unused;
+  alias unused to counted();
   tally += 1;
   tally += 1;
   printf("tally %d evaluations %d\n", owner.count, evaluations);
@@ -69,18 +69,39 @@ int main(void) {
     printf("shadowed %d\n", settings);
   }
   alias settings.width as width;
-  alias width as again;
+  alias again to width;
   again = 8;
   printf("chain %d\n", local.settings.width);
 
   int x = 1;
-  alias x as y;
+  alias y to x;
   {
     int x = 2;
     y = y + 10;
     printf("hidden %d %d\n", x, y);
   }
   printf("kept %d\n", x);
+
+  alias one to 1 { if (one != 1) return 1; }
+  %(after integer).len();
+  alias text to "text" { if (strcmp(text, "text")) return 1; }
+  %(after string).len();
+  alias items to %(one two) { if (items.len() != 2) return 1; }
+  %(after list).len();
+  alias symbol to <symbol>;
+  if (symbol != <symbol>) return 1;
+  alias size to (sizeof(int)) { if (size != sizeof(int)) return 1; }
+
+  int to = 3;
+  alias saved to to;
+  alias saved_as to saved;
+  alias saved as saved_old;
+  if (saved != 3 || saved_as != 3 || saved_old != 3) return 1;
+  if (to % (2) != 1 || !(to < 4)) return 1;
+  {
+    alias to to saved;
+    if (to != 3) return 1;
+  }
 
   int alias = 3;
   alias += 1;

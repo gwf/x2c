@@ -1,11 +1,11 @@
 /*  aliases.x -- lexical expression aliases
 
-    `alias expression as name` names a parsed expression until the name's
-    scope ends. Each use of the name in expression position stands for the
-    parsed expression as one grouped operand, so an unused alias evaluates
-    nothing and every use keeps the bindings the expression had at the
-    declaration. Inside a function an alias is a row of its Sym scope. At
-    file scope, and in an aggregate, enumerator, or wrapper body, it is an
+    `alias name to expression` or `alias expression as name` names a parsed
+    expression until the name's scope ends. Each use in expression position
+    stands for the parsed expression as one grouped operand. An unused
+    alias evaluates nothing; every use keeps the declaration-time bindings.
+    Inside a function an alias is a row of its Sym scope. At file scope,
+    and in an aggregate, enumerator, or wrapper body, it is an
     entry of the unit's macro state: a file-scope entry follows macro
     visibility through includes, and a body's entries end at its closing
     brace.
@@ -60,8 +60,8 @@ static const SymbolSet _prefix_operators = %<<* & - +>>;
 
 // declarations
 
-/* One alias head: `[static] alias expression [as name]`, stopped at its
-   `;` or `{`. An unnamed alias names `_`. */
+/* One alias head, name-first or expression-first, stopped at its `;` or
+   `{`. An unnamed expression-first alias names `_`. */
 module typedef struct AliasHead {
   Token start;
   int storage;
@@ -72,11 +72,11 @@ module typedef struct AliasHead {
 // recognition
 
 /** Reports whether the cursor begins an alias or its removal. An alias is
-    the word `alias`, or at file scope `static alias`, then an expression
-    followed by `as` or a braced body; a removal is `unalias name;`. Each
-    word stays an ordinary name where it continues an operand, as in
-    `alias = value;`, and where it names a type that no `as` follows. This
-    query does not consume tokens.
+    the word `alias`, or at file scope `static alias`, then `name to` and
+    an expression, or an expression followed by `as` or a braced body.
+    A removal is `unalias name;`. Each word stays an ordinary name where it
+    continues an operand, as in `alias = value;`, or names a type outside
+    either alias declaration head. This query does not consume tokens.
 */
 int Compiler.alias_form_starts(Compiler c) {
   if (c.at_word("unalias")) return _unalias_starts(c);
@@ -86,6 +86,7 @@ int Compiler.alias_form_starts(Compiler c) {
   if (word.type != <ident> || word.text != "alias") return 0;
   Token next = Token.skip_trivia(word + 1);
   if (_continues_operand(next.type)) return 0;
+  if (_name_first(next)) return 1;
   Type named = c.sym.get(%("alias"));
   for (Token token = next; token.type != <eof> && token.type != <;>;
        token = token.after_group()) {
@@ -231,14 +232,25 @@ static int _continues_operand(Symbol type) =>
   type.is_assignment_op() || type in _operand_tails ||
   (type.binary_precedence() && !(type in _prefix_operators));
 
+static int _name_first(Token name) {
+  if (name.type != <ident>) return 0;
+  Token to = Token.skip_trivia(name + 1);
+  return to.type == <ident> && to.text == "to";
+}
+
 static AliasHead _head(Compiler c) {
   AliasHead head = { .start = c.token, .storage = c.test(<static>) };
   c.next();
+  if (_name_first(c.token)) {
+    head.name = c.token.text;
+    c.next();
+    c.next();
+  }
   if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
       c.peek(0) == <;> || c.peek(0) == <eof>)
     $fail.macros_alias_expression(c, c.token);
   head.expression = c.parse_expression();
-  head.name = _alias_name(c);
+  if (!head.name) head.name = _alias_name(c);
   if (c.peek(0) != <;> && c.peek(0) != <"{">)
     $fail.macros_alias_end(c, c.token);
   return head;

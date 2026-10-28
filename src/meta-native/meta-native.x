@@ -114,9 +114,6 @@ static macro Stmt $warn.meta_native_function_hidden(
     <native>, "the compiler's own function hides a native module's",
     $site, %("name: $($binding.name)"));
 
-static macro Stmt $fail.meta_native_module_platform() =>
-  Diagnostics.driver_error("native modules are not supported on this platform");
-
 static macro Stmt $fail.meta_native_module_invalid(Expr $path) =>
   Diagnostics.driver_error(%"not an x2c native module: $($path)");
 

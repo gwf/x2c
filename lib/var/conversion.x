@@ -18,9 +18,7 @@ static macro Stmt $error.encoding.bad(Expr $bits) {
   raise %(bad-enc (value $($bits)));
 }
 
-static macro Stmt $error.convert.void() {
-  raise %(void-op (operation "Var.convert"));
-}
+static macro Stmt $error.convert.void() { raise %(void-op (operation "Var.convert")); }
 
 static macro Stmt $error.target.invalid(Expr $target) {
   raise %(bad-target (target $($target)));
@@ -70,13 +68,9 @@ $var.tag.exact(Iter, as_iter, iter_payload, <iter>, "Iter");
 $var.tag.exact(List, list, list_payload, <list>, "List");
 $var.tag.exact(Map, map, map_payload, <map>, "Map");
 
-static macro Stmt $error.decode.output() {
-  raise %(bad-arg (operation "Var.numeric_decode"));
-}
+static macro Stmt $error.decode.output() { raise %(bad-arg (operation "Var.numeric_decode")); }
 
-static macro Stmt $error.decode.void() {
-  raise %(void-op (operation "Var.numeric_decode"));
-}
+static macro Stmt $error.decode.void() { raise %(void-op (operation "Var.numeric_decode")); }
 
 static macro Stmt $error.decode.type(Expr $tag) {
   raise %(bad-types (source $($tag)));

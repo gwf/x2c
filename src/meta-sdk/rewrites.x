@@ -3,11 +3,9 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-static macro Stmt $fail.meta_sdk_rewrite_pattern() =>
-  MetaContext.reject("unsupported rewrite pattern", NULL);
+static alias fail_rewrite_pattern to MetaContext.reject("unsupported rewrite pattern", NULL);
 
-static macro Stmt $fail.meta_sdk_initialization_pattern() =>
-  MetaContext.reject("after-initialization requires a declaration pattern", NULL);
+static alias fail_initialization_pattern to MetaContext.reject("after-initialization requires a declaration pattern", NULL);
 
 /** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
     pattern's form selects the family and its keys. A function rule is
@@ -71,7 +69,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kinds = $(_function_rule_key(type)); }
   }
-  if (!point) $fail.meta_sdk_rewrite_pattern();
+  if (!point) fail_rewrite_pattern;
   return _rewrite_registration(
     function, shape ? shape : pattern, holes, point, kinds);
 }
@@ -85,7 +83,7 @@ Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   List pattern = shape.pattern(holes);
   if (pattern ~= %(declare *))
     return _rewrite_registration(c, shape, holes, <decl>, %(init));
-  $fail.meta_sdk_initialization_pattern();
+  fail_initialization_pattern;
 }
 
 // compile-time SDK rewrites

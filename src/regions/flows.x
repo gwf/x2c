@@ -23,19 +23,13 @@ static macro Stmt $warn.region_escape(
     %"$($subject) can outlive the region it was allocated in when $($exit)",
     _opened((*$f.w), $region));
 
-static macro Expression $reason.region_returned() => "returned";
-static macro Expression $reason.region_static_store() =>
-  "stored into a static";
-static macro Expression $reason.region_local() =>
-  "assigned to a local declared outside the region";
-static macro Expression $reason.region_pointer() =>
-  "stored through an unknown pointer";
-static macro Expression $reason.region_parameter() =>
-  "stored through a parameter";
-static macro Expression $reason.region_other() =>
-  "stored into an object of another region";
-static macro Expression $reason.region_outer() =>
-  "stored into an object of an outer region";
+static alias reason_returned to "returned";
+static alias reason_static_store to "stored into a static";
+static alias reason_local to "assigned to a local declared outside the region";
+static alias reason_pointer to "stored through an unknown pointer";
+static alias reason_parameter to "stored through a parameter";
+static alias reason_other to "stored into an object of another region";
+static alias reason_outer to "stored into an object of an outer region";
 
 // flows
 
@@ -149,22 +143,22 @@ static int _check(Flow &f, Fact target, Region region, int born, int report) {
 
 static String _exit_reason(Flow &f, Fact target, Region region) {
   switch (f.sink) {
-    case <return>: return $reason.region_returned();
-    case <static>: return $reason.region_static_store();
+    case <return>: return reason_returned;
+    case <static>: return reason_static_store;
     case <local>:
       return target.depth < region.depth
-        ? $reason.region_local() : NULL;
+        ? reason_local : NULL;
     default:
-      if (!target) return $reason.region_pointer();
-      if (target.param >= 0) return $reason.region_parameter();
+      if (!target) return reason_pointer;
+      if (target.param >= 0) return reason_parameter;
       if (target.region == region) return NULL;
       if (_cleanup(target.acquired) == region ||
           (target.region && _cleanup(target.region.acquired) == region))
         return NULL;
       // Every region a function opens ends before its own storage.
       if (target.region)
-        return region == f.w.frame ? NULL : $reason.region_other();
-      return $reason.region_outer();
+        return region == f.w.frame ? NULL : reason_other;
+      return reason_outer;
   }
 }
 

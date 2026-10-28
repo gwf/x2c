@@ -46,9 +46,7 @@ $cleanup.by(Lisp, destroy);
 /* Lisp form error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
-static macro Stmt $error.eval.void() {
-  raise %(void-op (operation "eval"));
-}
+static macro Stmt $error.eval.void() { raise %(void-op (operation "eval")); }
 
 static macro Stmt $error.eval.unbound(Expr $expr) {
   raise %(unbound (name $($expr)));
@@ -75,9 +73,7 @@ static macro Stmt $error.def.frozen(Expr $name) {
   raise %(bad-state (operation "def") (reason "frozen") (name $($name)));
 }
 
-static macro Stmt $error.cond.empty() {
-  raise %(bad-arity (operation "cond") (expected 1) (actual 0));
-}
+static macro Stmt $error.cond.empty() { raise %(bad-arity (operation "cond") (expected 1) (actual 0)); }
 
 static macro Stmt $error.cond.type(Expr $clause) {
   raise %(bad-types (operation "cond") (value $($clause)) (want "List"));
@@ -121,13 +117,9 @@ static macro Stmt $error.apply.arity(Expr $body) {
   raise %(bad-arity (operation "apply") (value $($body)));
 }
 
-static macro Stmt $error.apply.interrupted() {
-  raise %(interrupt (operation "apply"));
-}
+static macro Stmt $error.apply.interrupted() { raise %(interrupt (operation "apply")); }
 
-static macro Stmt $error.apply.steps() {
-  raise %(call-stack (operation "apply") (reason "steps"));
-}
+static macro Stmt $error.apply.steps() { raise %(call-stack (operation "apply") (reason "steps")); }
 
 static macro Stmt $error.apply.stack(Expr $body) {
   raise %(call-stack (operation "apply") (value $($body)));
@@ -168,17 +160,13 @@ static macro Stmt $error.entry.null(Expr $operation) {
   raise %(bad-arg (operation $($operation)));
 }
 
-static macro Stmt $error.global.args() {
-  raise %(bad-arg (operation "Lisp.set_global"));
-}
+static macro Stmt $error.global.args() { raise %(bad-arg (operation "Lisp.set_global")); }
 
 static macro Stmt $error.global.frozen(Expr $operation) {
   raise %(bad-state (operation $($operation)) (reason "frozen"));
 }
 
-static macro Stmt $error.bind.args() {
-  raise %(bad-arg (operation "Lisp.bind"));
-}
+static macro Stmt $error.bind.args() { raise %(bad-arg (operation "Lisp.bind")); }
 
 static macro Stmt $error.source.callable(Expr $callable) {
   raise %(bad-types (operation "lisp_source_function") (want "Lambda")
