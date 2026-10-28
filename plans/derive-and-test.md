@@ -1,6 +1,7 @@
 > Status: active
-> Implemented on 2026-10-28; awaiting shared integration. Focused checks
-> pass; the integration agent owns final generated artifacts and full gates.
+> Implementation delivered on 2026-10-28 in PR #602, merged as
+> `606406d7a347dfcee37559ee457321a18ae001f2`. Remaining follow-ups are
+> listed below; compiler defects have separate owning records.
 > Drafted 2026-10-28 from a working probe set kept under
 > `plans/reference/probes-2026-10-28/derive/` (`p4f.x`, `r8.x`, `r10.x`;
 > run each with `builds/0/x2c run FILE`). The probes establish
@@ -44,10 +45,12 @@ All probes ran with `builds/0/x2c run` on `dev` `9aeeef265`.
 - A method definition returned by a meta function through a deferred
   named template (`$derive.method(type, name, body)`) compiles to
   `int(P v){` in C: the dotted declarator loses its name. This is a
-  compiler defect to record separately; the plan does not use that form.
+  compiler defect tracked in [Deferred method names](compiler-deferred-method-name.md);
+  the implementation does not use that form.
 - A `meta static` helper reached only through an include fails with
   `explicit meta call cannot be resolved: no binding for probe_make`
-  (the known gap). A nonstatic `meta` helper in an included module works
+  (tracked in [Included static meta helpers](compiler-included-static-meta.md)).
+  A nonstatic `meta` helper in an included module works
   with `x2c run main.x module.x` and with `x2c script main.x`. A shipped
   `lib/` module needs neither: `tools/gen-linked-meta.sh` copies every
   bodied `meta` function under `lib/` into `src/linked-meta.x`, so the
@@ -334,3 +337,25 @@ review finds before running the gate.
   Map and row conversion preserve their tags. No new encoding is introduced.
 - The authored diff was reviewed. Shared integration must regenerate linked
   meta, bootstrap, and generated documentation and run the publication gate.
+
+## Remaining follow-ups
+
+The implementation is delivered. These items do not block its use or
+commission another implementation campaign.
+
+| Follow-up | Current boundary | Next action |
+| --- | --- | --- |
+| JSON round trips for Symbol and List fields | Existing JSON conversion loses those tags; the limitation is documented and tested. | Establish a caller that needs those round trips, then decide the representation and compatibility policy before changing it. |
+| Shared assertion implementation | User tests use `lib/test.x`; repository tests keep their existing harness and Scope-balance rules. | Once `test.x` has users, assess whether sharing assertions removes duplication without weakening either contract. |
+| Promote `x2c test` to shipped | The command is experimental and built in checkouts; `make install` excludes it. The library already ships. | Review experience with the public library and runner, then explicitly select promotion and update the command manifest. |
+
+The two compiler defects are tracked independently:
+
+- [Deferred method names](compiler-deferred-method-name.md): a method
+  returned through a deferred named template loses its C declarator name.
+- [Included static meta helpers](compiler-included-static-meta.md): an
+  explicit meta call cannot resolve a static helper reached through an include.
+
+Both records distinguish the original probe report from current reproduction.
+Neither defect was repaired by this campaign. The direct method templates and
+linked-meta helpers keep derive independent of those repairs.
