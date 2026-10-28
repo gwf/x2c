@@ -134,7 +134,8 @@ north 1.5
 
 These methods depend only on List, so database packages can consume them
 without a dependency from the runtime to a database. For example,
-`insert.bind(reading.row())` binds the record's fields to SQLite parameters.
+`insert.bind(@(reading.row()))` binds the record's fields to SQLite parameters.
+The explicit `@(...)` splice passes each row value as one parameter.
 Select columns in declaration order before passing a returned row to
 `Reading.from_row`.
 

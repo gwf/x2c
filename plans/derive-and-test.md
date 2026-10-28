@@ -116,7 +116,7 @@ kind is a Symbol literal; `<map>` is implied by `<json>`, `<args>`, and
 | `<equal>` | `int Type.equal(Type, Type)` | Fieldwise: `==` for numbers and Symbols, `String.equal`, `Var.equal` for Array, List, and Map, the nested type's `equal` for a struct. |
 | `<repr>` | `String Type.repr(Type)` | `Person{ age: 42, name: "Ada", ... }` using each field's `repr`. |
 | `<args>` | `List Type.args_spec(void)`, `Type Type.from_args(List)` | One `--field` row per field with `(value "FIELD")`; `from_args` runs `Args.parse` and `from_map`. Array, List, Map, and nested fields are rejected for this kind. |
-| `<row>` | `List Type.columns(void)`, `List Type.row(Type)`, `Type Type.from_row(List)` | Column names, positional values, and the reverse, for `Prepared.bind(p.row())` and the `List` rows SQLite returns. Nested fields are rejected for this kind. |
+| `<row>` | `List Type.columns(void)`, `List Type.row(Type)`, `Type Type.from_row(List)` | Column names, positional values, and the reverse, for `Prepared.bind(@(p.row()))` and the `List` rows SQLite returns. Nested fields are rejected for this kind. |
 
 Field type coverage: `int`, `long`, `double`, other numeric scalars and
 enums, `String`, `Symbol`, `Array`, `List`, `Map`, and a struct that was
@@ -264,7 +264,7 @@ the matching driver from `Compiler.driver_executable()`.
    tests, 120 of chapter.
 2. `<args>` and `<row>`; their rejections; test additions; the sqlite
    README gains a `$derive(..., <row>)` paragraph showing
-   `insert.bind(reading.row())` and `Reading.from_row(row)`. About 90
+   `insert.bind(@(reading.row()))` and `Reading.from_row(row)`. About 90
    lines of library and 60 of tests.
 3. `lib/test.x`, `commands/test/`, `test-test.x`, the smoke test, the
    testing chapter, the CLI entry. About 200 lines of library, 180 of
@@ -360,3 +360,18 @@ The two compiler reports were investigated independently:
 Both records distinguish the original probe report from current reproduction.
 The derive implementation retains its direct method templates and linked-meta
 helpers; the compiler investigation does not change that library design.
+
+## SQLite adoption pilot (2026-10-28)
+
+`packages/sqlite/tests/derive/` is a standalone test project using derive,
+`test.x`, and `x2c test`. Its manifest supplies the package directory; the
+SQLite README documents the pinned native header path through `CPATH`.
+
+The test binds two records with `<row>`, selects them in SQL order, and
+compares reconstructed records with `<equal>`. It covers String, double,
+and a long integer larger than 32 bits, column order, and result exhaustion.
+`Prepared.bind` takes List rest arguments, so a generated row is passed as
+`bind(@(record.row()))`; earlier examples omitted that splice and are corrected.
+
+The existing package and repository harnesses remain unchanged. The pilot is
+an optional explicit invocation, not a new build or publication requirement.

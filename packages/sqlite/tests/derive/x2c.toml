@@ -1,0 +1,3 @@
+[target.reading-tests]
+sources = ["reading_test.x"]
+package-dirs = ["../../.."]
