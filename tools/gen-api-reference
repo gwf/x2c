@@ -761,6 +761,8 @@ static const char *evidence_rows[][2] = {
               "`unittest/test-channel-batch.x`) and `make examples` "
               "(`power/channel-word-count`, `power/channel-service`)."},
   {"context", "`make verify` (`unittest/test-context.x`)."},
+  {"derive", "`make verify` (`unittest/test-derive.x`) and `make examples` "
+             "(`power/derive`)."},
   {"diff", "`make verify` (`unittest/test-diff.x`)."},
   {"digest", "`make verify` (`unittest/test-digest.x`)."},
   {"regex", "`make verify` (`unittest/test-regex.x`)."},
@@ -770,6 +772,8 @@ static const char *evidence_rows[][2] = {
   {"http", "`make verify` (`unittest/test-http.x`) and `make examples` "
            "(`apps/notes/notes`)."},
   {"net", "`make verify` (`unittest/test-net.x`)."},
+  {"test", "`make verify` (`unittest/test-test.x`) and "
+           "`make commands-check` (`commands/test/tests/run.sh`)."},
   {"iter", "`make verify` (`unittest/test-iter.x`) and `make examples` "
            "(`iter-examples`)."},
   {"lisp", "`make verify` (`unittest/test-lisp.x`) and `make examples`."},

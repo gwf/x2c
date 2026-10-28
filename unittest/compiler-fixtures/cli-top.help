@@ -22,6 +22,7 @@ Commands:
   lsp         Serve editors over the Language Server Protocol
   package     Install, remove, and list packages
   repl        Evaluate a supported x2c subset
+  test        Build and run project tests
 
 Global options:
   -h, --help                  Show help and exit
