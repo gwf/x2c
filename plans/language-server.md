@@ -99,6 +99,10 @@ granularity the server offers.
   read set contains F, and closes the open unit if its read set contains F.
   The next request or publish reanalyzes. Nothing finer exists: the
   compiler has no incremental parse.
+  Overlay mutations also close the open unit before `SourceView.set` or
+  `unset`, even when its read set is unrelated. `SourceView` requires
+  configuration before a frontend unit opens. This preserves cached exported
+  results but can require a later hover to reparse after an unrelated edit.
 - Diagnostics publishing: after each `didOpen`, `didChange`, and `didSave`
   the server reanalyzes that document and sends `publishDiagnostics`, but
   only when no further message is already waiting on stdin (`poll` with
@@ -218,6 +222,9 @@ completed analysis of the generation; a proposed initial budget is 64 MiB.
 This bounds history between checkpoints, not the size of one document,
 analysis, or queued input burst. A fresh generation establishes its baseline
 after restoring live documents and completing its first analysis.
+Before that first analysis, use a cold baseline so edits to unrelated buffers
+can still trigger checkpoints. Replace that baseline once after compiler
+setup, avoiding repeated restarts caused only by cold setup allocations.
 
 The change stays in `commands/lsp/`; it does not change compiler/runtime
 ownership or ABI. Its costs are serialization proportional to current live
