@@ -41,23 +41,61 @@ send obsolete requests for withdrawn, superseded, or already landed revisions.
 
 ## Finish batches and keep pace
 
-The result is published work, not completed checking. Own the queue's delivery
-rate as well as correctness. Use existing queue snapshots and batch timings;
-do not build a separate monitoring system. When arrivals outpace landings,
-combine compatible work in the next batch rather than repeating small batches.
-Do not wait for Gary to notice the backlog.
+Manage the whole eligible queue, including unaffected revisions held by parked
+batches. Use coordinator snapshots and batch records, not a second queue in
+agent notes. A failing submission must not hold unrelated delivery.
+
+### Select the queue before validation
+
+Before starting a broad gate, inspect `status` for the entire ready queue,
+active candidate, parked holds, dependencies, and readiness times. In the
+existing batch evidence, record the snapshot time, selected PR numbers and
+pinned heads, and a concrete exclusion reason for each omitted eligible PR.
+State that selection briefly before gating. Use existing PR evidence, source
+interactions, and focused checks to establish compatibility. The coordinator
+records the prepare snapshot and refreshes selection before a gate. It refuses
+unexplained omissions, including parked holds. For a necessary exclusion, pass
+`--exclude-file PATH` to `prepare` or `land`. The JSON list pins each reason:
+
+```json
+[{"number": 604, "head": "FULL_40_CHARACTER_SHA", "reason": "Reproduced helper staging failure; command and log reference"}]
+```
+
+Use the actual head, blocker, and evidence. The coordinator checks completeness
+and pinned identity; the integrator must justify semantic incompatibility.
+A selection refusal starts no build. Regroup compatible work rather than invent
+an exclusion to bypass the refusal.
+
+Combine all compatible eligible submissions. **Do not start a singleton gate
+while another compatible submission is ready.** Apply the same rule to narrow
+multi-PR selections. `--prs`, `--max-batch`, `--flush`, age, and a frozen
+candidate are not exemptions. Valid exclusions identify a pinned dependency
+that is unavailable, a reproduced blocker, an unresolved semantic conflict,
+a withdrawal or moved head, or Gary's explicit delivery boundary. Shared files
+or an inconvenient merge alone do not establish incompatibility. Record the
+actual conflict and why it cannot be resolved within the submitted intent.
+
+If compatible submissions arrive before the gate starts, regroup through
+`park`, `release`, and a new `prepare` using all compatible work. Preserve and
+review local repairs because release does not transfer them. Do not edit the
+old record's pinned membership. Once validation starts, finish that attempt
+without chasing arrivals; batch those arrivals next. A successful gate proceeds
+to publication. Recheck selection before another broad attempt after failure,
+not before a publish or recovery that reuses successful proof.
 
 Repeat this loop without routine user approval:
 
 1. Run `tools/integrate-dev.py wait --timeout 60`. Repeat an empty wait quietly.
-   Follow fresh user instructions. An active batch takes priority over arrivals.
+   Follow fresh user instructions. Resume recorded work, subject to the
+   queue selection and failure rules in this skill.
 2. Run `tools/integrate-dev.py prepare`. By default it freezes the eligible
    backlog and complete dependencies in one candidate. Five or more eligible
    submissions run immediately; a smaller queue can accumulate for up to five
    minutes from its oldest submission. Use `--flush` to drain it immediately,
    `--prs N ...` for an interaction-based selection, or `--max-batch N` when
    there is a concrete reason to bound the group. A count alone is not a reason
-   to pay another full gate. Never grow or replace a frozen batch for arrivals.
+   to pay another full gate. Apply the queue selection rule above before
+   starting validation; never silently change pinned membership.
 3. Review the pinned submissions, focused evidence, and combined authored
    changes once. Concentrate on interactions, conflicts, and concrete gaps in
    submitted evidence. Preserve the changes' intended succession. Resolve
@@ -73,7 +111,8 @@ Repeat this loop without routine user approval:
    same inputs and build states. Do not expand measurements for noise or concerns
    about revisions outside this batch. Evidence remains advisory under that
    policy; missing measurements must not become an indefinite publication hold.
-5. Run `tools/integrate-dev.py land <batch-id>`. Follow the command through
+5. State the selected members and exclusions using the queue selection rule.
+   Run `tools/integrate-dev.py land <batch-id>`. Follow the command through
    completion. `review` means upstream was integrated before a gate started;
    review only the new delta and its interactions, then resume the same batch.
    `gated` means validation completed. Review generated changes as they become
@@ -125,25 +164,34 @@ transactional cancellation. `main` promotion remains separately authorized.
 
 ## Preserve failures and resume independent work
 
-A failed gate stops publication. Read its full logs, reproduce and diagnose
-with focused checks, and keep the failed tree. The existing helper permits a
-second round only for its recognized bootstrap convergence failure; do not
-blindly rerun ordinary failing gates or automatically gate each constituent PR.
+A failed gate stops publication of that candidate. Read the full logs and
+identify every known blocker. Before another broad attempt, record the changed
+input or repaired cause and the focused result that clears each known blocker.
+A new failure can require another repair; elapsed time or a coordinator error
+alone cannot justify validation. Keep the helper's recognized bootstrap
+convergence retry; do not run its broad components separately.
 
-Resolve routine conflicts or integration defects within the submitted intent.
-If a batch needs worker repair or a consequential decision, retain the
-reproduction and diagnosis and run `tools/integrate-dev.py park <batch-id>`.
-Complete the repair handoff below, report the hold and any decision needed,
-then continue independent ready work. Parked revisions and their dependents
-stay held until superseded by a new submission or explicitly retried with
-`prepare --retry <batch-id>`. Retry resumes the retained candidate and its
-frozen PR heads, preserving local repairs; finish or park any other active
-batch first. Never reinterpret a newer PR head as validated. If a moved head prevents
-retrying the frozen batch, use `release <batch-id> --prs N ... --reason TEXT`
-to release selected holds for a new batch. This keeps the original candidate,
-pinned membership, and logs. Unreleased revisions stay held; a batch with
-released holds cannot be retried. Review retained local repairs when preparing
-the new batch; release does not carry them or gate evidence forward.
+Resolve routine defects within the submitted intent. If author repair or a
+consequential decision is needed, park the candidate and deliver the repair
+handoff below. Identify the blocked revisions and their transitive dependents
+from pinned dependencies and reproduced interactions. Release **all unaffected
+revisions together**, then combine them with the rest of the compatible ready
+queue in one new candidate. Do not release and gate them one at a time. A
+parked hold alone is not a blocker for an unaffected revision. Do not wait for
+the blocked author before delivering independent work.
+
+Use `release <batch-id> --prs N ... --reason TEXT` with the whole unaffected
+set and a reason that names the retained blockers. Use `--exclude-file PATH`
+to name every retained revision and its blocker or blocked dependency. The
+coordinator refuses unexplained retained peers and releases that depend on a
+retained revision. Recorded retained reasons also explain those holds during
+later queue selection. Preserve the original candidate and logs. Review retained repairs when assembling the new candidate;
+release carries neither repairs nor validation proof. Keep blocked revisions
+and dependents held until superseded or explicitly retried. `prepare --retry
+<batch-id>` preserves the frozen heads and local repairs, requires no other
+active batch, and cannot resume a batch whose holds were released. A changed
+head requires a new submission and candidate, never reinterpretation of old
+proof. Record where each held revision and useful local repair will continue.
 
 ### Deliver the repair handoff
 
@@ -186,10 +234,55 @@ explicit report to Gary of the routing failure, continue independent work
 unless Gary's priority requires waiting. Withdraw contacts when their task
 scope ends.
 
-For an interrupted gate or push, inspect Git history, the durable record, and
-gate-state evidence through coordinator recovery. A recorded running state is
-not proof of success or failure. Do not discard a candidate, rerun a known
-successful gate, or repeat a confirmed push merely because the session ended.
-Keep logs and report unresolved external failures plainly. Starting this skill
-installs no daemon or scheduler; if the session stops, its submissions and
-records wait for a resumed integrator.
+## Recover validation and retire candidates
+
+After an interrupted command or coordinator/Git failure, inspect the attempt
+log, candidate HEAD and working tree, `debug/land-dev-review.json`, gate-state
+proof, and remote ancestry before choosing another action. Distinguish a
+failed check from successful checks followed by a failed generated commit,
+record update, or push. Never manufacture a review receipt or treat exit
+status alone as proof that validation failed.
+
+Run `land <batch-id>` to recover `gating`, `needs-attention`, or `publishing`
+when successful gate proof remains valid. The coordinator checks pinned
+ancestry and proof. If the matching review receipt is missing, it uses
+`land-dev --recover-reviewed` to commit only generated changes, check proof
+again, and write the receipt. This path cannot build, run `ensure`, or push.
+Review recovered generated changes before `land --publish`. An ordinary check
+failure has no valid proof and is not recovered as successful.
+
+If recovery fails, preserve the candidate and inspect the recovery log. Resolve
+the specific Git or filesystem failure before retrying. Do not manufacture a
+receipt or change state manually. Actual input changes require the applicable
+existing checks; unchanged contents can retain proof across a commit. Confirm
+remote ancestry and reconcile readiness after a successful push, without
+pushing or validating again.
+
+Keep active candidates through review, validation, and reconciliation. After
+confirmed publication and PR reconciliation, mark their worktrees and build
+outputs as eligible for retirement. Preserve batch metadata, pinned SHAs,
+attempt logs, repair handoffs, and delivery evidence outside the candidate
+before removing anything. A failed candidate remains retained while it owns
+an unresolved reproduction or unique repair. Once superseded or resolved,
+record its replacement and preserve the necessary patch and reproduction;
+then mark its worktree and build outputs eligible for retirement too.
+
+Use the existing batch evidence to record retention reason, owner or next
+action, and retirement eligibility. Do this when the batch changes state;
+do not add a scheduled cleanup or validation gate. Inspect retirement with
+`retire <batch-id> --reason TEXT`; removal additionally requires `--apply` and
+separate cleanup authorization. A resolved parked failure also requires
+`--replacement LANDED_BATCH`. The command refuses unreconciled publication,
+unresolved holds, pending changes, and ignored files outside known build-output
+directories or Python bytecode caches. Unique unpublished commits also stop
+retirement unless a reconciled replacement covers the old submissions and
+`--archive-repairs` explicitly preserves that history. Review the replacement
+and retention reason before using this option. The command verifies a full
+candidate bundle and saves its binary patch before removal; a replacement
+name alone does not authorize losing repairs.
+The command retains batch records, attempts, pinned refs, a candidate bundle,
+and candidate debug evidence outside the removed worktree. It uses ordinary
+Git worktree removal without force. Never delete retained failures merely
+because they are old, or remove records to release holds. Report remaining
+retained candidates and their reasons at handoff. Starting this skill installs
+no daemon or scheduler; stopped sessions leave records for the next integrator.

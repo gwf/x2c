@@ -272,8 +272,9 @@ class Queue:
     def open_pulls(self):
         return self.api("pulls?state=open&base=dev&per_page=100", pages=True)
 
-    def ready(self):
-        pulls = self.open_pulls()
+    def ready(self, pulls=None):
+        pulls = self.open_pulls() if pulls is None else pulls
+        self.observed_entries = []
         held = {(pr["number"], pr["head"]) for record in self.records()
                 if record["state"] == "parked"
                 for pr in record["prs"]
@@ -288,6 +289,7 @@ class Queue:
             try:
                 entry = self.entry(pull)
                 if (entry["number"], entry["head"]) in held:
+                    self.observed_entries.append(entry)
                     raise ValueError("revision is held after a parked batch")
                 events = self.api(
                     f"issues/{entry['number']}/events?per_page=100", pages=True)
@@ -297,6 +299,7 @@ class Queue:
                 if not labels:
                     raise ValueError("readiness event is unavailable")
                 entry["ready_at"] = max(labels)
+                self.observed_entries.append(entry)
                 ready.append(entry)
             except (ValueError, KeyError, TypeError) as error:
                 pending.append({"number": pull["number"], "reason": str(error)})
@@ -345,6 +348,45 @@ class Queue:
             if len(selected) < (args.max_batch or 5) and age < args.window:
                 return [], errors, max(0, args.window - age)
         return selected, errors, 0
+
+    def exclusions(self, path):
+        if not path:
+            return []
+        values = json.loads(Path(path).read_text())
+        if not isinstance(values, list):
+            raise ValueError("exclusions must be a JSON list")
+        for item in values:
+            if (not isinstance(item, dict) or type(item.get("number")) is not int or
+                    not isinstance(item.get("reason"), str) or
+                    not item["reason"].strip()):
+                raise ValueError("each exclusion needs number, head, and concrete reason")
+            revision(item["head"])
+        return values
+
+    def selection(self, record, entries, pending, exclusions):
+        selected = {(e["number"], e["head"]) for e in record["prs"]}
+        reasons = {(e["number"], e["head"]): e["reason"]
+                   for e in exclusions}
+        # Dependency failures are established by the existing selector.
+        options = argparse.Namespace(prs=None, max_batch=None, flush=True)
+        _, blocked, _ = self.select(entries, record["base"], options)
+        blocked = {e["number"]: e["reason"] for e in blocked}
+        omitted = []
+        for entry in self.observed_entries:
+            key = entry["number"], entry["head"]
+            if key not in selected:
+                omitted.append({"number": key[0], "head": key[1],
+                                "reason": reasons.get(key, blocked.get(key[0]))})
+        decision = {"observed_at": now(), "eligible": self.observed_entries,
+                    "selected": record["prs"], "excluded": omitted,
+                    "pending": pending}
+        record["selection"] = decision
+        self.save(record)
+        missing = [str(e["number"]) for e in omitted if not e["reason"]]
+        if missing:
+            raise ValueError("regroup compatible submissions or supply pinned "
+                             "exclusions with --exclude-file for PRs " + ", ".join(missing))
+        return decision
 
     def submit(self, args):
         contact = submission_contact(
@@ -434,7 +476,11 @@ class Queue:
                   "repository": self.repository(), "base": base,
                   "prs": selected, "branch": "codex/integration-" + identifier,
                   "worktree": str(directory / "tree"), "state": "preparing",
-                  "merged": [], "attempts": [], "started_at": now()}
+                  "merged": [], "attempts": [], "started_at": now(),
+                  "exclusions": self.exclusions(args.exclude_file),
+                  "queue_snapshot": {"observed_at": now(),
+                                     "eligible": self.observed_entries,
+                                     "pending": pending + blocked}}
         self.save(record)
         return self.assemble(record)
 
@@ -479,6 +525,20 @@ class Queue:
         selected = set(args.prs)
         if not selected <= {entry["number"] for entry in record["prs"]}:
             raise ValueError("selected PR is not in the frozen batch")
+        exclusions = self.exclusions(args.exclude_file)
+        prior = {e["number"] for e in record.get("released_prs", [])}
+        retained = [e for e in record["prs"] if e["number"] not in selected | prior]
+        reasons = {(e["number"], e["head"]): e["reason"] for e in exclusions}
+        if any((e["number"], e["head"]) not in reasons for e in retained):
+            raise ValueError("release all unaffected revisions together; name each "
+                             "retained blocker in --exclude-file")
+        held = {(e["number"], e["head"]) for e in retained}
+        for entry in record["prs"]:
+            if entry["number"] in selected and any(
+                    (d["pr"], d["head"]) in held for d in entry["dependencies"]):
+                raise ValueError("released revision depends on a retained blocker")
+        record["retained"] = [{**e, "reason": reasons[e["number"], e["head"]]}
+                              for e in retained]
         released = record.setdefault("released_prs", [])
         for entry in record["prs"]:
             if entry["number"] in selected and not any(
@@ -520,23 +580,40 @@ class Queue:
         return "doc-check"
 
     def recover_gate(self, record):
-        if record["state"] != "gating":
+        if record["state"] not in {"gating", "needs-attention", "publishing"}:
+            return False
+        if not record.get("gate") or not record.get("reviewed"):
             return False
         tree = Path(record["worktree"])
+        if not all(self.ancestor(e["head"], "HEAD", tree) for e in record["prs"]):
+            return False
         try:
             review = json.loads((tree / "debug" / "land-dev-review.json").read_text())
         except FileNotFoundError:
-            return False
+            review = {}
         head = git(tree, "rev-parse", "HEAD")
-        if (review.get("candidate") != head or
-                review.get("upstream") != record["base"] or
-                review.get("gate") != record["gate"] or
-                git(tree, "status", "--porcelain")):
-            return False
         proof = command([str(tree / "tools" / "gate-state.py"), "check",
                          record["gate"]], tree, check=False)
         if proof.returncode:
             return False
+        if (review.get("candidate") != head or
+                review.get("upstream") != record["base"] or
+                review.get("gate") != record["gate"] or
+                git(tree, "status", "--porcelain")):
+            # land-dev owns generated commits and receipts. Recovery cannot build.
+            log = self.path(record["id"]).parent / f"recovery-{uuid.uuid4().hex}.log"
+            with log.open("w") as stream:
+                result = subprocess.run([
+                    str(self.root / "tools" / "land-dev"), "--recover-reviewed",
+                    "--expected-dev", record["base"], "--gate", record["gate"],
+                    "refresh bootstrap for integration batch"], cwd=tree,
+                    stdout=stream, stderr=subprocess.STDOUT)
+            record.setdefault("recoveries", []).append(
+                {"at": now(), "log": str(log), "returncode": result.returncode})
+            self.save(record)
+            if result.returncode:
+                raise ValueError("proof passed but recovery failed; see " + str(log))
+            head = git(tree, "rev-parse", "HEAD")
         record.update(state="gated", gated=head)
         record.pop("reason", None)
         self.save(record)
@@ -589,6 +666,26 @@ class Queue:
                 raise ValueError("gate selection changed")
             args_land += ["--publish-reviewed", head]
         else:
+            if (record["state"] == "gated" and record.get("gated") == head and
+                    record.get("gate") == gate and not command(
+                        [str(tree / "tools" / "gate-state.py"), "check", gate],
+                        tree, check=False).returncode):
+                output(record)
+                return
+            entries, pending = self.ready(list(pulls.values()))
+            exclusions = record.get("exclusions", []) + self.exclusions(args.exclude_file)
+            for parked in self.records():
+                if parked["state"] == "parked":
+                    exclusions += parked.get("retained", [])
+            exclusions = list({(e["number"], e["head"]): e
+                               for e in exclusions}.values())
+            decision = self.selection(record, entries, pending, exclusions)
+            print("integration selection: " + json.dumps({
+                "observed_at": decision["observed_at"],
+                "selected": [{"number": e["number"], "head": e["head"]}
+                             for e in record["prs"]],
+                "excluded": decision["excluded"]}), file=sys.stderr, flush=True)
+            record["exclusions"] = exclusions
             record.update(reviewed=head, gate=gate)
             args_land += ["--review-stop", "refresh bootstrap for integration batch"]
         attempt = {"phase": "publish" if args.publish else "gate",
@@ -614,6 +711,68 @@ class Queue:
             record.update(state="gated", gated=git(tree, "rev-parse", "HEAD"))
             record.pop("reason", None)
         self.save(record)
+        output(record)
+
+    def retire(self, args):
+        self.integrator()
+        record = self.read(args.batch)
+        if record.get("retired_at"):
+            output(record)
+            return
+        base = self.fetch_dev()
+        replacement = self.read(args.replacement) if args.replacement else None
+        if replacement and (replacement["state"] != "landed" or
+                            not replacement.get("reconciled") or
+                            not self.ancestor(replacement["landed"], base)):
+            raise ValueError("replacement must be landed and reconciled")
+        if record["state"] == "landed":
+            if not record.get("reconciled") or not self.ancestor(record["landed"], base):
+                raise ValueError("confirm publication and reconciliation before retirement")
+        elif record["state"] == "parked" and replacement:
+            replacements = {e["number"] for e in replacement["prs"]}
+            if any(e["number"] not in replacements and not self.ancestor(e["head"], base)
+                   for e in record["prs"]):
+                raise ValueError("parked revisions still own unresolved holds")
+        else:
+            raise ValueError("only reconciled landed or resolved parked candidates can retire")
+        tree = Path(record["worktree"])
+        expected = self.path(record["id"]).parent / "tree"
+        if tree != expected or not tree.exists():
+            raise ValueError("candidate path does not match its batch")
+        if git(tree, "status", "--porcelain"):
+            raise ValueError("candidate has pending changes")
+        head = git(tree, "rev-parse", "HEAD")
+        if git(tree, "branch", "--show-current") != record["branch"]:
+            raise ValueError("candidate branch changed; preserve its history first")
+        if not self.ancestor(head, base) and not (replacement and args.archive_repairs):
+            raise ValueError("candidate contains unique unpublished commits; preserve repairs first "
+                             "with a landed replacement and --archive-repairs")
+        ignored = git(tree, "ls-files", "--others", "--ignored", "--exclude-standard")
+        unexpected = [p for p in ignored.splitlines()
+                      if not p.startswith(("debug/", "builds/", "unittest/build/")) and
+                      not ("__pycache__" in Path(p).parts and p.endswith(".pyc"))]
+        if unexpected:
+            raise ValueError("preserve ignored files outside build outputs: " + ", ".join(unexpected))
+        retirement = {"reason": args.reason, "replacement": args.replacement,
+                      "head": head, "eligible_at": now(), "worktree": str(tree)}
+        record["retirement"] = retirement
+        self.save(record)
+        if args.apply:
+            # Archive diagnostics and pinned history outside the disposable tree.
+            import shutil
+            destination = expected.parent / "retained-debug"
+            if (tree / "debug").exists():
+                shutil.copytree(tree / "debug", destination, dirs_exist_ok=True,
+                                symlinks=True)
+            command(["git", "bundle", "create", str(expected.parent / "candidate.bundle"),
+                     record["branch"]], self.root)
+            command(["git", "bundle", "verify", str(expected.parent / "candidate.bundle")],
+                    self.root)
+            patch = command(["git", "diff", "--binary", record["base"], head], tree)
+            (expected.parent / "candidate.patch").write_text(patch.stdout)
+            git(self.root, "worktree", "remove", str(tree))
+            record["retired_at"] = now()
+            self.save(record)
         output(record)
 
     def status(self):
@@ -674,6 +833,7 @@ def main():
         operation.add_argument("--flush", action="store_true")
         if name == "prepare":
             operation.add_argument("--prs", type=int, nargs="+")
+            operation.add_argument("--exclude-file", help="pinned exclusions JSON")
             operation.add_argument("--retry", help="resume a parked candidate "
                                    "with its original pinned PRs and repairs")
         else:
@@ -684,6 +844,7 @@ def main():
     land = commands.add_parser("land", help="gate, or publish a reviewed gated batch")
     land.add_argument("batch")
     land.add_argument("--publish", action="store_true")
+    land.add_argument("--exclude-file", help="pinned exclusions JSON")
     park = commands.add_parser("park", help="retain a candidate and hold its revisions")
     park.add_argument("batch")
     park.add_argument("--reason", default="parked for diagnosis")
@@ -692,6 +853,14 @@ def main():
     release.add_argument("batch")
     release.add_argument("--prs", type=int, nargs="+", required=True)
     release.add_argument("--reason", default="released for reselection")
+    release.add_argument("--exclude-file", help="JSON reasons for every retained revision")
+    retire = commands.add_parser("retire", help="inspect retirement eligibility; --apply removes candidate")
+    retire.add_argument("batch")
+    retire.add_argument("--reason", required=True)
+    retire.add_argument("--replacement", help="landed replacement batch for a resolved failure")
+    retire.add_argument("--apply", action="store_true")
+    retire.add_argument("--archive-repairs", action="store_true",
+                        help="preserve unique candidate history with a landed replacement")
     args = parser.parse_args()
     try:
         deadline = None
@@ -724,6 +893,8 @@ def main():
                     queue.land(args)
                 elif args.operation == "release":
                     queue.release(args)
+                elif args.operation == "retire":
+                    queue.retire(args)
                 elif args.operation == "park":
                     queue.integrator()
                     record = queue.read(args.batch)

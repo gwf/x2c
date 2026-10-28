@@ -132,7 +132,9 @@ Queue commands are agent responsibilities. The standing skill uses `status`,
 and `park <batch-id>`; Gary need only start the integrator and select it for
 submitting sessions. Records and preserved candidates live under the
 integration checkout's ignored `debug/integration/` directory and survive
-session restarts.
+session restarts. Follow the [integration skill](skills/integrate-x2c-prs/SKILL.md)
+for whole-queue selection, failure regrouping, proof recovery, and candidate
+retirement. Selection flags do not exempt a batch from those rules.
 
 ## Build and validate
 

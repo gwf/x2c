@@ -283,6 +283,174 @@ class IntegrationProbe(unittest.TestCase):
         result=self.cli('land',batch,'--publish')
         self.assertEqual(json.loads(result.stdout)['state'],'landed',result.stdout)
 
+    def exclusions(self, *numbers):
+        path = self.root / 'debug' / 'exclusions.json'
+        pulls = self.state()['pulls']
+        entries = []
+        for item in numbers:
+            number, head = item if isinstance(item, tuple) else (
+                item, pulls[str(item)]['head']['sha'])
+            entries.append({'number': number, 'head': head,
+                            'reason': f'fixture reproduced blocker in PR {number}'})
+        self.write(path, json.dumps(entries))
+        return str(path)
+
+    def test_gate_requires_complete_selection_including_late_arrivals(self):
+        self.pr(1)
+        batch = self.prepare()
+        self.pr(2)
+        result = self.cli('land', batch, ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('exclusions', result.stderr)
+        self.assertEqual(self.state().get('gates', []), [])
+        self.assertEqual(self.state().get('makes', []), [])
+        decision = self.record(batch)['selection']
+        self.assertEqual([e['number'] for e in decision['excluded']], [2])
+        self.cli('land', batch, '--exclude-file', self.exclusions(2))
+        self.assertEqual(self.record(batch)['state'], 'gated')
+        self.pr(3)
+        self.cli('land', batch)
+        self.cli('land', batch, '--publish')
+        self.assertEqual(len(self.state()['gates']), 1)
+
+    def test_selection_cannot_hide_parked_peers_or_use_stale_exclusions(self):
+        self.pr(1)
+        parked = self.prepare()
+        self.cli('park', parked)
+        self.pr(2)
+        batch = self.prepare()
+        self.assertNotEqual(self.cli('land', batch, ok=False).returncode, 0)
+        self.assertEqual(self.state().get('gates', []), [])
+        path = self.exclusions(1)
+        values = json.loads(Path(path).read_text())
+        values[0]['head'] = '0' * 40
+        self.write(Path(path), json.dumps(values))
+        self.assertNotEqual(self.cli('land', batch, '--exclude-file', path,
+                                    ok=False).returncode, 0)
+        self.cli('land', batch, '--exclude-file', self.exclusions(1))
+        self.assertEqual(self.record(batch)['state'], 'gated')
+
+    def test_release_requires_whole_unaffected_set_and_dependency_closure(self):
+        first = self.pr(1)
+        self.pr(2, base=first, depends=[(1, first)])
+        self.pr(3)
+        batch = self.prepare()
+        self.cli('park', batch)
+        before = self.record(batch)
+        self.assertNotEqual(self.cli('release', batch, '--prs', 1,
+                                    ok=False).returncode, 0)
+        self.assertEqual(self.record(batch), before)
+        self.assertNotEqual(self.cli('release', batch, '--prs', 2, 3,
+                                    '--exclude-file', self.exclusions(1),
+                                    ok=False).returncode, 0)
+        self.cli('release', batch, '--prs', 1, 2,
+                 '--exclude-file', self.exclusions(3))
+        self.pr(4)
+        combined = self.prepare()
+        self.assertEqual([e['number'] for e in self.record(combined)['prs']], [1, 2, 4])
+        self.land(combined)
+        self.assertEqual(len(self.state()['gates']), 1)
+
+    def test_post_gate_commit_failure_recovers_without_build_or_receipt(self):
+        self.pr(1)
+        batch = self.prepare()
+        candidate = self.checkout(self.record(batch))
+        helper = candidate / 'tools' / 'land-dev'
+        helper.write_text(helper.read_text().replace(
+            'import sys\n', 'import sys\nif "--recover-reviewed" in sys.argv: sys.exit(2)\n'))
+        self.git('add', 'tools/land-dev', cwd=candidate)
+        self.git('commit', '-qm', 'fixture older candidate helper', cwd=candidate)
+        hooks = self.directory / 'commit-hooks'
+        hooks.mkdir()
+        shutil.copy2(candidate / 'tools' / 'hooks' / 'pre-push', hooks / 'pre-push')
+        hook = hooks / 'pre-commit'
+        self.write(hook, '#!/bin/sh\nif git diff --cached --name-only | '
+                   'grep -q bootstrap; then exit 1; fi\n', executable=True)
+        self.git('config', 'core.hooksPath', str(hooks))
+        self.cli('land', batch)
+        self.assertEqual(self.record(batch)['state'], 'needs-attention')
+        self.assertFalse((candidate / 'debug' / 'land-dev-review.json').exists())
+        before = self.state()
+        hook.unlink()
+        self.cli('land', batch)
+        self.assertEqual(self.record(batch)['state'], 'gated')
+        self.assertEqual(self.state()['makes'], before['makes'])
+        self.assertEqual(self.state()['gates'], before['gates'])
+        self.cli('land', batch, '--publish')
+
+    def test_retirement_is_explicit_and_preserves_records_and_proof(self):
+        self.pr(1)
+        batch = self.prepare()
+        self.assertNotEqual(self.cli('retire', batch, '--reason', 'complete',
+                                    ok=False).returncode, 0)
+        self.land(batch)
+        record = self.record(batch)
+        candidate = self.checkout(record)
+        self.cli('retire', batch, '--reason', 'published')
+        self.assertTrue(candidate.exists())
+        self.cli('retire', batch, '--reason', 'published', '--apply')
+        self.assertFalse(candidate.exists())
+        self.assertTrue(Path(record['_path']).exists())
+        self.assertTrue((Path(record['_path']).parent / 'candidate.bundle').exists())
+        self.assertTrue((Path(record['_path']).parent / 'retained-debug' /
+                         'land-dev-review.json').exists())
+        self.assertTrue(self.record(batch)['retired_at'])
+        self.assertEqual(len(self.state()['gates']), 1)
+
+    def test_retirement_refuses_unique_repairs_and_unclassified_ignored_files(self):
+        self.pr(1)
+        batch = self.prepare()
+        self.land(batch)
+        candidate = self.checkout(self.record(batch))
+        self.write(self.root / '.git' / 'info' / 'exclude', 'private-note\n')
+        self.write(candidate / 'private-note', 'retained personal note\n')
+        result = self.cli('retire', batch, '--reason', 'done', '--apply', ok=False)
+        self.assertIn('ignored files', result.stderr)
+        (candidate / 'private-note').unlink()
+        self.write(candidate / 'src' / 'repair.x', 'unpublished repair\n')
+        self.git('add', '.', cwd=candidate)
+        self.git('commit', '-qm', 'fixture private repair', cwd=candidate)
+        result = self.cli('retire', batch, '--reason', 'done', '--apply', ok=False)
+        self.assertIn('unique unpublished', result.stderr)
+        self.assertTrue(candidate.exists())
+
+    def test_superseded_failure_retires_only_after_explicit_history_archival(self):
+        self.pr(1)
+        failed = self.prepare()
+        candidate = self.checkout(self.record(failed))
+        self.write(candidate / 'src' / 'repair.x', 'unique failed-candidate repair\n')
+        self.git('add', '.', cwd=candidate)
+        self.git('commit', '-qm', 'fixture retained repair', cwd=candidate)
+        repair = self.git('rev-parse', 'HEAD', cwd=candidate).stdout.strip()
+        self.cli('park', failed)
+        # Emulate GitHub replacing the PR ref after an author rewrites its branch.
+        self.git('--git-dir', str(self.remote), 'update-ref', '-d', 'refs/pull/1/head')
+        self.pr(1, content='replacement implementation\n')
+        replacement = self.prepare()
+        self.land(replacement)
+        arguments = ['retire', failed, '--reason', 'superseded by repaired submission',
+                     '--replacement', replacement, '--apply']
+        self.assertNotEqual(self.cli(*arguments, ok=False).returncode, 0)
+        self.cli(*arguments, '--archive-repairs')
+        self.assertFalse(candidate.exists())
+        record = self.record(failed)
+        bundle = Path(record['_path']).parent / 'candidate.bundle'
+        archived = self.directory / 'archived-candidate'
+        self.command(['git', 'clone', '--branch', record['branch'], str(bundle),
+                      str(archived)], cwd=self.directory)
+        self.assertEqual(self.git('rev-parse', 'HEAD', cwd=archived).stdout.strip(), repair)
+        self.assertTrue((archived / 'src' / 'repair.x').exists())
+
+    def test_malformed_exclusions_fail_without_traceback_or_gate(self):
+        self.pr(1)
+        batch = self.prepare()
+        path = self.root / 'debug' / 'invalid-exclusions.json'
+        self.write(path, '[null]')
+        result = self.cli('land', batch, '--exclude-file', path, ok=False)
+        self.assertIn('each exclusion', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(self.state().get('gates', []), [])
+
     def test_context_preserves_conflicting_hooks_path(self):
         self.git('config','core.hooksPath','custom-hooks')
         result=self.cli('context','--role','individual','--delivery','direct',
@@ -756,13 +924,14 @@ if hasattr(lock,'close'): lock.close()
         self.assertNotEqual(self.cli('prepare','--retry',batch,ok=False).returncode,0)
         status=json.loads(self.cli('status').stdout)
         self.assertIn(1,[p['number'] for p in status['pending']])
-        self.cli('release',batch,'--prs',1,'--reason','peer resubmitted')
+        self.cli('release',batch,'--prs',1,'--reason','peer resubmitted',
+                 '--exclude-file',self.exclusions((2,second)))
         released=self.record(batch)
         for key in ('prs','worktree','candidate','attempts'):
             self.assertEqual(released[key],before[key])
         self.assertEqual(released['released_prs'][0]['head'],first)
         self.assertEqual(released['released_prs'][0]['reason'],'peer resubmitted')
-        self.cli('release',batch,'--prs',1)
+        self.cli('release',batch,'--prs',1,'--exclude-file',self.exclusions((2,second)))
         self.assertEqual(self.record(batch),released)
         self.assertNotEqual(self.cli('prepare','--retry',batch,ok=False).returncode,0)
         fresh=self.prepare('--prs',1,2)
@@ -778,7 +947,7 @@ if hasattr(lock,'close'): lock.close()
         self.cli('park',batch); before=self.record(batch)
         self.assertNotEqual(self.cli('release',batch,'--prs',1,99,ok=False).returncode,0)
         self.assertEqual(self.record(batch),before)
-        self.cli('release',batch,'--prs',1)
+        self.cli('release',batch,'--prs',1,'--exclude-file',self.exclusions(2))
         status=json.loads(self.cli('status').stdout)
         self.assertEqual([p['number'] for p in status['ready']],[1])
         self.assertEqual([p['number'] for p in status['pending']],[2])

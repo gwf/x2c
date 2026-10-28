@@ -140,6 +140,19 @@ def publish_reviewed(args: argparse.Namespace, run: Path) -> None:
         raise ValueError("dev advanced; return to integration and review")
 
 
+def recover_reviewed(args: argparse.Namespace, run: Path) -> None:
+    if not args.expected_dev:
+        raise ValueError("recovery requires --expected-dev")
+    base = args.expected_dev
+    git("merge-base", "--is-ancestor", base, "HEAD")
+    require_command(["tools/gate-state.py", "check", args.gate], run / "proof-before.log")
+    commit_generated(args.message, run / "generated-commit.log")
+    candidate = git("rev-parse", "HEAD").strip()
+    verify(candidate, base, args.gate, run)
+    save_review(candidate, base, args.gate, run)
+    print(f"land-dev: recovered candidate {candidate}; stopped before push")
+
+
 def prepare(args: argparse.Namespace, run: Path) -> None:
     for attempt in range(1, 5):
         logs = run / f"attempt-{attempt}"
@@ -231,13 +244,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("message", nargs="?")
     parser.add_argument("--review-stop", action="store_true")
+    parser.add_argument("--recover-reviewed", action="store_true")
     parser.add_argument("--publish-reviewed", type=sha)
     parser.add_argument("--expected-dev", type=sha)
     parser.add_argument("--gate", choices=("agent-pr-check", "doc-check"),
                         default="agent-pr-check")
     args = parser.parse_args()
-    if args.review_stop and args.publish_reviewed:
-        parser.error("choose --review-stop or --publish-reviewed")
+    if sum(bool(v) for v in (args.review_stop, args.publish_reviewed, args.recover_reviewed)) > 1:
+        parser.error("choose one review, recovery, or publication operation")
     if not args.message and not args.publish_reviewed:
         parser.error("a generated refresh commit message is required")
     lock = None
@@ -256,6 +270,8 @@ def main() -> int:
         print(f"land-dev: logs in {run}", flush=True)
         if args.publish_reviewed:
             publish_reviewed(args, run)
+        elif args.recover_reviewed:
+            recover_reviewed(args, run)
         else:
             prepare(args, run)
         return 0
