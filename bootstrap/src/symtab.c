@@ -943,7 +943,10 @@ static void f8_bindings____note_source_key(Sym s, SymScope * scope, List key, Li
   );
   Sym_put(s, s -> binding_facts, List_var(cons(_46, cons(List_var(binding), NULL))), List_var(source_key));
   Var declaration;
-  if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))) Map_setindex(c -> source_definitions, List_var(binding), declaration);
+  if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))){
+    Compiler_materialize_source_declaration(c, binding, Var_list_payload(declaration));
+  }
+
 }
 
 List Ast_binding(int, String);
@@ -1788,8 +1791,9 @@ List Sym_field_order(Sym s, Type type);
 
 int Type_is_aggregate(Type);
 
-Type Sym_lookup_field(Sym s, Type type, List field){
+Type Sym_lookup_field(Sym s, Type type, List field, List * binding){
   if(! _init_guard_) _file_init_();
+  if(binding)(* binding) = NULL;
   Type object = Sym_normalize_declared_type(s, type);
   type = Sym_resolve_key(s, object);
   if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;
@@ -1797,7 +1801,13 @@ Type Sym_lookup_field(Sym s, Type type, List field){
     List _x2c_gensym_literal_part_23 = Type_list(type);  List_append(_x2c_gensym_literal_part_23, field);
   }
   )));
-  if(List_truth(Type_list(found))) return Type_qualify(found, object);
+  if(List_truth(Type_list(found))){
+    if(binding)(* binding) = Sym_reference(s, ({
+      List _x2c_gensym_literal_part_24 = Type_list(type);  List_append(_x2c_gensym_literal_part_24, field);
+    }
+    ), NULL);
+    return Type_qualify(found, object);
+  }
   {
     List row;
     List _x2c_gensym_macro_object_13 = List_cdr(Sym_field_order(s, type));
@@ -1808,7 +1818,7 @@ Type Sym_lookup_field(Sym s, Type type, List field){
       {
         Type member = Var_type(List_cadr(row));
         if(Var_truth(List_car(row)) || ! Type_is_aggregate(Sym_resolve_key(s, member))) continue;
-        found = Sym_lookup_field(s, member, field);
+        found = Sym_lookup_field(s, member, field, binding);
         if(List_truth(Type_list(found))) return Type_qualify(found, object);
       }
 
@@ -1862,11 +1872,11 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
 void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name){
   if(! _init_guard_) _file_init_();
   Sym_set(s, ({
-    List _x2c_gensym_literal_part_24 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_24, cons(Symbol_var(mark), cons(String_var(name), NULL)));
+    List _x2c_gensym_literal_part_25 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_25, cons(Symbol_var(mark), cons(String_var(name), NULL)));
   }
   ), cons(Symbol_var(mark), NULL));
   Sym_set(s, ({
-    List _x2c_gensym_literal_part_25 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_25, cons(Symbol_var(mark), NULL));
+    List _x2c_gensym_literal_part_26 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_26, cons(Symbol_var(mark), NULL));
   }
   ), cons(Symbol_var(mark), NULL));
 }
@@ -1885,7 +1895,7 @@ List Sym_marked_fields(Sym s, Type aggregate, Symbol mark){
       {
         String name = Var_as_string(List_car(row));
         if(String_truth(name) && List_truth(Sym_get(s, ({
-          List _x2c_gensym_literal_part_26 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_26, cons(Symbol_var(mark), cons(String_var(name), NULL)));
+          List _x2c_gensym_literal_part_27 = Type_list(aggregate);  List_append(_x2c_gensym_literal_part_27, cons(Symbol_var(mark), cons(String_var(name), NULL)));
         }
         )))) Array_push(rows, List_var(row));
       }
@@ -1967,7 +1977,7 @@ static Type f5_types____local_tag(Sym s, Type type, Type base){
     SymScope * scope = _scope_at(s, i);
     Var binding;
     if(Map_try_get(scope -> bindings, List_var(base), &(binding))) return f5_types____replace_type_base(type, base, List_type(({
-      Var _x2c_gensym_literal_part_27 = List_car(Type_list(base));  cons(_x2c_gensym_literal_part_27, cons(binding, NULL));
+      Var _x2c_gensym_literal_part_28 = List_car(Type_list(base));  cons(_x2c_gensym_literal_part_28, cons(binding, NULL));
     }
     )));
   }
@@ -2077,10 +2087,10 @@ static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops)
 static List f5_types____field_row(Sym s, Type type, List declaration, List declarator){
   String name = Ast_binding_spelling(Var_list_payload(List_cadr(declarator)));
   Type declared = String_truth(name) ? List_type(Sym_get(s, ({
-    List _x2c_gensym_literal_part_28 = Type_list(type);  List_append(_x2c_gensym_literal_part_28, cons(String_var(name), NULL));
+    List _x2c_gensym_literal_part_29 = Type_list(type);  List_append(_x2c_gensym_literal_part_29, cons(String_var(name), NULL));
   }
   ))) : Type_declared(List_type_from_ast(({
-    Var _x2c_gensym_literal_part_29 = List_cadr(declaration);  Var _x2c_gensym_literal_part_30 = List_var(cons(_85, cons(List_var(declarator), NULL)));  cons(_86, cons(_x2c_gensym_literal_part_29, cons(_x2c_gensym_literal_part_30, NULL)));
+    Var _x2c_gensym_literal_part_30 = List_cadr(declaration);  Var _x2c_gensym_literal_part_31 = List_var(cons(_85, cons(List_var(declarator), NULL)));  cons(_86, cons(_x2c_gensym_literal_part_30, cons(_x2c_gensym_literal_part_31, NULL)));
   }
   )));
   return cons(String_var(name), cons(List_var(declared), NULL));
@@ -2108,6 +2118,10 @@ SymTxn Compiler_begin_semantic_transaction(Compiler c){
   f12_transactions____save(&(transaction), * _scope_at(c -> sym, transaction.scope_index));
   if(transaction.extended) f12_transactions____save_effects(&(transaction));
   if(c -> source_facts && c -> source_primary) f12_transactions____save_sources(&(transaction));
+  if(c -> source_capture != NULL){
+    transaction.source_capture = c -> source_capture;
+    transaction.source_capture_length = Array_len(c -> source_capture);
+  }
   c -> names -> counters = Map_copy(c -> names -> counters);
   c -> sym -> transactions ++;
   transaction.active = 1;
@@ -2169,6 +2183,7 @@ void SymTxn_rollback(SymTxn * s){
   f12_transactions____restore(&((* s)));
   if((* s).extended) f12_transactions____restore_effects(&((* s)));
   if(c -> source_facts && c -> source_primary) f12_transactions____restore_sources(&((* s)));
+  if((* s).source_capture != NULL) Array_resize((* s).source_capture, (* s).source_capture_length);
   f12_transactions____finish(&((* s)));
 }
 

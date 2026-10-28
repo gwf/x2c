@@ -552,12 +552,12 @@ List Type_marked_fields(Type aggregate, Symbol mark){
   return Sym_marked_fields(active.expander -> sym, aggregate, mark);
 }
 
-List Compiler_resolve_postfix_member(Compiler, Type, List, Symbol, int);
+List Compiler_resolve_postfix_member(Compiler, Type, List, Symbol, int, List *);
 
 List Type_resolve_member(Type type, String name, int call){
   if(! _init_guard_) _file_init_();
   _require_expansion(_13);
-  return Compiler_resolve_postfix_member(active.expander, type, cons(String_var(name), NULL), 93, call);
+  return Compiler_resolve_postfix_member(active.expander, type, cons(String_var(name), NULL), 93, call, NULL);
 }
 
 List Compiler_resolve_protocol_member(Compiler, Type, String);
@@ -806,7 +806,7 @@ List MetaContext_type_description(Var value){
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_2))){
       member = Var_as_string(_x2c_gensym_macro_cursor_output_2);
       {
-        List _x2c_gensym_match_expr_3 = Compiler_resolve_postfix_member(c, type, cons(String_var(member), NULL), 93, 1);
+        List _x2c_gensym_match_expr_3 = Compiler_resolve_postfix_member(c, type, cons(String_var(member), NULL), 93, 1, NULL);
         MatchCaptureBuffer _x2c_gensym_match_capture_0 ={
           0
         }

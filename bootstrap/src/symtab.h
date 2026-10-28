@@ -169,7 +169,7 @@ int Sym_is_map_type(Sym s, Type type);
 
 int Sym_is_named_value_type(Sym s, Type type, String name);
 
-Type Sym_lookup_field(Sym s, Type type, List field);
+Type Sym_lookup_field(Sym s, Type type, List field, List * binding);
 
 Type Sym_normalize_declared_type(Sym s, Type type);
 

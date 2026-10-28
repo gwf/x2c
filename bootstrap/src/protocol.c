@@ -2498,10 +2498,10 @@ static List f10_resolution____requirement(ProtocolAdapters * a, List rows){
 return NULL;
 }
 
-Type Sym_lookup_field(Sym, Type, List);
+Type Sym_lookup_field(Sym, Type, List, List *);
 
 static List _descriptor_requirement(ProtocolAdapters * a, String member, Type template){
-  if((* a).base != _94 || ! List_truth(Type_list(Sym_lookup_field((* a).c -> sym, List_type(_266), cons(String_var(member), NULL))))) return NULL;
+  if((* a).base != _94 || ! List_truth(Type_list(Sym_lookup_field((* a).c -> sym, List_type(_266), cons(String_var(member), NULL), NULL)))) return NULL;
   return f10_resolution____conversion_requirement(&((* a)), member, template, 42511254);
 }
 
@@ -4360,7 +4360,7 @@ static List f8_adapters____present(ProtocolAdapters * a, List row){
           if(status == 4507969008424) parts = f8_adapters____default_part(&((* a)), member, expected);
           else if(f8_adapters____has_descriptor(&((* a)))){
             if(status == 31884573479268) parts = f8_adapters____inherited_part(&((* a)), member, template);
-            if((status == 647492367624 || List_truth(parts)) && List_truth(Type_list(Sym_lookup_field((* a).c -> sym, List_type(_266), cons(String_var(member), NULL))))) parts = List_append(parts, cons(List_var(f8_adapters____thunk(&((* a)), member, template)), NULL));
+            if((status == 647492367624 || List_truth(parts)) && List_truth(Type_list(Sym_lookup_field((* a).c -> sym, List_type(_266), cons(String_var(member), NULL), NULL)))) parts = List_append(parts, cons(List_var(f8_adapters____thunk(&((* a)), member, template)), NULL));
           }
           return cons(String_var(member), cons(Symbol_var(status), cons(String_var(source), cons(List_var(expected), cons(List_var(template), parts)))));
         }

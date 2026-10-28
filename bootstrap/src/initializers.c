@@ -930,7 +930,7 @@ static List f10_subobjects____row_cases(Compiler c, Type root, List value, List 
   return Array_list_free(cases);
 }
 
-Type Sym_lookup_field(Sym, Type, List);
+Type Sym_lookup_field(Sym, Type, List, List *);
 
 static List f10_subobjects____designated_path(Compiler c, Type root, List node, List * value, List * normalized){
   List path = NULL, selectors = NULL;
@@ -948,7 +948,7 @@ static List f10_subobjects____designated_path(Compiler c, Type root, List node, 
           {
             selectors = cons(List_var(cons(_7, cons(field, NULL))), selectors);
             List selected = f10_subobjects____named_field_path(c, type, Var_car(field), path);
-            type = Sym_lookup_field(c -> sym, type, Var_list_payload(field));
+            type = Sym_lookup_field(c -> sym, type, Var_list_payload(field), NULL);
             path = List_truth(selected) ? selected : cons(List_var(({
               Var _x2c_gensym_literal_part_6 = List_var(owner);  Var _x2c_gensym_literal_part_7 = Var_car(field);  cons(_x2c_gensym_literal_part_6, cons(_8, cons(_x2c_gensym_literal_part_7, cons(List_var(type), _9))));
             }

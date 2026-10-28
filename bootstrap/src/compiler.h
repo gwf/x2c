@@ -158,6 +158,7 @@ typedef struct Compiler{
   SourceView sources;
   int source_facts, source_primary;
   Array source_occurrences;
+  Array source_capture;
   Map source_definitions, source_declarations, source_texts;
 }
 * Compiler;
@@ -173,6 +174,8 @@ typedef struct SymTxn{
   Map statics, binding_facts;
   Map source_definitions;
   int source_occurrences;
+  Array source_capture;
+  int source_capture_length;
   int extended;
   Map adapters;
   PendingMark pending;
@@ -286,9 +289,15 @@ List Compiler_anchor_origin(Compiler c, List node, Token token);
 
 int Compiler_record_origin(Compiler c, Token token);
 
-void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
+void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after, int external);
+
+void Compiler_clear_source_external(Compiler c, List binding);
 
 void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
+
+void Compiler_attach_source_references(Compiler c, List binding, Array capture);
+
+void Compiler_materialize_source_declaration(Compiler c, List binding, List declaration);
 
 void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
 

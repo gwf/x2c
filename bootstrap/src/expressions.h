@@ -59,7 +59,7 @@ List _x2c_nominal_getindex(Compiler c, Type type);
 
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 
-List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
+List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context, List * binding);
 
 List _x2c_func_call_arguments(List function, List storage, List arguments);
 
