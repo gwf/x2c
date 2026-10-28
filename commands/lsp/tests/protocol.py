@@ -83,6 +83,9 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-protocol-") as temporary:
             hover = client.hover(source, 1, column)
             assert "int value(void);" in hover["contents"]["value"], hover
             assert hover["range"]["start"] == {"line": 1, "character": column}, hover
+        client.opened(source, "int broken(void) { return ; + }\n")
+        diagnostics = client.diagnostics()
+        assert any(row["code"] == "parse" for row in diagnostics), diagnostics
     finally:
         client.close()
 

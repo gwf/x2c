@@ -285,10 +285,10 @@ artifacts. Manual VS Code and Neovim sessions remain unperformed.
   `builds/0/libexec/x2c-lsp` with frames written by a `frame` shell
   function (`printf` body to a file, `wc -c` for the length). It sends
   `initialize`, `initialized`, `didOpen` with an unsaved text that differs
-  from the disk file, `hover`, `definition`, a `didChange` introducing a
-  parse error, `shutdown`, and `exit`, then checks with `grep` that the
-  responses carry the expected ids, the hover text `int value(void);`, a
-  `publishDiagnostics` with code `parse`, and that the process exited 0.
+  from the disk file, `hover`, `definition`, `shutdown`, and `exit`.
+  It checks the response ids and hover text `int value(void);` with `grep`,
+  and requires exit status 0. Its paced protocol client then waits for
+  `publishDiagnostics` with code `parse` after changing the open document.
   Phases 2 and 3 extend the same script with completion, documentSymbol,
   references, rename, and semanticTokens checks. The script uses its own
   temporary and cache directories, as the editor test does.

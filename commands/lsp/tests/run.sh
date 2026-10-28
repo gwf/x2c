@@ -17,17 +17,6 @@ frame() {
   frame '{"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x","languageId":"x2c","version":1,"text":"int value(void);\nint call(void) { return value(); }\n"}}}'
   frame '{"jsonrpc":"2.0","id":2,"method":"textDocument/hover","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x"},"position":{"line":1,"character":25}}}'
   frame '{"jsonrpc":"2.0","id":3,"method":"textDocument/definition","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x"},"position":{"line":1,"character":25}}}'
-  frame '{"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x","version":2},"contentChanges":[{"text":"int broken(void) { return ; + }\n"}]}}'
-  # Observe diagnostics before shutdown, including during a loaded gate.
-  attempt=0
-  until grep -q '"code":"parse"' "$BUILD/replies" 2>/dev/null; do
-    attempt=$((attempt + 1))
-    if [ "$attempt" -ge 100 ]; then
-      echo 'language server did not publish parse diagnostics' >&2
-      exit 1
-    fi
-    sleep 0.1
-  done
   frame '{"jsonrpc":"2.0","id":4,"method":"shutdown"}'
   frame '{"jsonrpc":"2.0","method":"exit"}'
 } | "$SERVER" > "$BUILD/replies" 2> "$BUILD/stderr"
@@ -37,8 +26,6 @@ grep -q '"id":2' "$BUILD/replies"
 grep -q 'int value(void);' "$BUILD/replies"
 grep -q '"id":3' "$BUILD/replies"
 grep -q '"uri":"file://.*/input.x"' "$BUILD/replies"
-grep -q '"method":"textDocument/publishDiagnostics"' "$BUILD/replies"
-grep -q '"code":"parse"' "$BUILD/replies"
 grep -q '"id":4,"jsonrpc":"2.0","result":null' "$BUILD/replies"
 # JSON parse failures leave the following frame readable.
 {
