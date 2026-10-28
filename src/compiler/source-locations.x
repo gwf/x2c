@@ -121,8 +121,10 @@ void Compiler.materialize_source_declaration(
     (String file, int start, int end, List target,
      Type type, List key) = entry;
     Var source;
-    if (key && c.source_declarations.try_get(key, source))
+    if (key && c.source_declarations.try_get(key, source)) {
+      c.set_fact(%(src-key $target), key);
       c.materialize_source_declaration(target, source);
+    }
     c.source_occurrences.push($(file, start, end, target, type));
   }
 }

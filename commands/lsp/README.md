@@ -35,8 +35,10 @@ classify the document's lexical tokens, without assigning inferred types to
 identifiers. Their UTF-16 ranges split multiline tokens into physical lines.
 
 Renaming a type also updates its method-owner qualifiers and coupled C
-spellings. Rename a method at `value.member` with the new member name. When
-selecting its C spelling, such as `Type_member`, keep the owner prefix in the
+spellings. A type rename is refused when its defining file is outside the
+selected source units. This includes imported package and header types whose
+owning units are not searched. Rename a method at `value.member` with the new
+member name. When selecting its C spelling, such as `Type_member`, keep the owner prefix in the
 new name when member calls use that binding.
 
 At idle checkpoints, 64 MiB of retained allocation growth causes the server

@@ -391,6 +391,9 @@ workspace. Lexical semantic tokens classify source tokens; they do not infer
 the type or binding of each identifier.
 
 Renaming a type updates related method-owner qualifiers and C spellings.
+A type rename is refused when its defining file is outside the selected source
+units. This includes imported package and header types whose
+owning units are not searched.
 Rename a method at `value.member` with the new member name. If you select a C
 spelling such as `Type_member`, keep the owner prefix in the new name when
 member calls use that binding.

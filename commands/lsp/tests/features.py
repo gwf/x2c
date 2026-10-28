@@ -179,4 +179,28 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-dependencies-") as temporary:
         assert sum(row["uri"] == library.as_uri() for row in references) == 2, references
     finally:
         client.close()
+with tempfile.TemporaryDirectory(prefix="x2c-lsp-type-scope-") as temporary:
+    directory = Path(temporary).resolve()
+    header, main = directory / "api.xh", directory / "main.x"
+    header_text = ('typedef int Counter;\n'
+                   'Counter helper(Counter value) { return value; }\n')
+    main_text = ('#include "api.xh"\n'
+                 'int main(void) { Counter value = 1; return helper(value) == 1 ? 0 : 1; }\n')
+    header.write_text(header_text)
+    main.write_text(main_text)
+    client = Client(root, directory, ["translate", str(main)])
+    try:
+        client.opened(main, main_text)
+        assert client.diagnostics() == []
+        response = query(client, "rename", main, main_text, "Counter", 1,
+                         newName="Amount")
+        assert response["error"]["code"] == -32803, response
+        assert "selected source units" in response["error"]["message"], response
+        assert "result" not in response and "changes" not in response, response
+        assert header.read_text() == header_text and main.read_text() == main_text
+        references = query(client, "references", main, main_text, "Counter", 1,
+                           context={"includeDeclaration": True})["result"]
+        assert len(references) == 2, references
+    finally:
+        client.close()
 print("language server completion, symbols, references, rename, and tokens passed")

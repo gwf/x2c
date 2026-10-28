@@ -38,6 +38,10 @@ Map LspWorkspace.rename(
     return _rename_failure("x2c lsp: the definition is outside the workspace");
   if (query["declaration"].is_null())
     return _rename_failure("x2c lsp: this binding has no identifier range");
+  if (!_rename_type_in_scope(query))
+    return {"error": {"code": -32803,
+      "message": "x2c lsp: the type's defining file is outside "
+                 "the selected source units"}};
   Map selection = query["selection"];
   if (selection == NULL)
     return _rename_failure("x2c lsp: this occurrence has no identifier range");
@@ -69,6 +73,10 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
   Var definition = w.unit.compiler.source_definitions[row[3]];
   if (definition is not <list>) return NULL;
   List target = definition;
+  Type declared = target[3];
+  List binding = row[3], source_key =
+    w.unit.compiler.fact(%(src-key $binding));
+  List key = source_key ? source_key.cadr() : NULL;
   Array inputs = [];
   String manifest = w.request.project_manifest();
   if (manifest && w.request.command == <build> && !w.request.inputs) {
@@ -86,8 +94,18 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
     "declaration": _reference_location(w, target), "inputs": inputs,
     "selection": _reference_location(w, row),
     "spelling": Ast.binding_spelling(row[3]),
-    "external": _reference_external(target)};
+    "external": _reference_external(target),
+    "type": declared.is_typedef() ||
+            (key ~= %((!or struct union enum) ?))};
   return w.retain(query);
+}
+
+static int _rename_type_in_scope(Map query) {
+  if (!query["type"]) return 1;
+  List target = query["target"];
+  foreach (String input in query["inputs"].array())
+    if (Path.resolved_absolute(input) == target[0]) return 1;
+  return 0;
 }
 
 /* External emitted names join ordinary declarations across source units.

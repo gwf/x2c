@@ -270,9 +270,9 @@ Cover header/body/caller, external objects, static and local controls, aliases,
 method components, type owners, dependency inputs, and recursive class bodies.
 These extend the planned feature tests; they do not add a publication gate.
 
-### Proposed boundary for type rename outside selected source units
+### Approved boundary for type rename outside selected source units (2026-10-28)
 
-Decision requested: retain the planned search scope and refuse type rename
+Gary approved retaining the planned search scope and refusing type rename
 when the type's defining file is not one of the source units being searched.
 Return `-32803` with a message that the defining unit is outside the selected
 analysis scope. Do not return a partial WorkspaceEdit.
@@ -447,7 +447,8 @@ and recursive classes. Selecting the captured recursive self-type returns the
 same complete edits as selecting its declaration. Focused capture transaction
 and nested-scope controls pass. Two combined-server exec checkpoints preserve
 cached workspace symbols and live state; descriptor counts remain six.
-Imported/header type rename coverage awaits the explicit scope decision above.
+Imported/header type rename is refused when its defining file is outside the
+selected source units, as approved above.
 The applied-rename and checkpoint workloads remain optional focused probes;
 they do not add recurring gate work.
 
