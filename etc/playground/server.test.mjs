@@ -81,7 +81,7 @@ test('container runner supplies isolation flags and removes timed-out containers
   t.after(async () => { process.env.PATH = oldPath; delete process.env.FAKE_TIMEOUT; await rm(directory, { recursive: true }); });
   assert.deepEqual(await compileInContainer('source'), { loader: 'export default 1', wasm: 'AA==' });
   const args = await readFile(log, 'utf8');
-  for (const flag of ['--network=none', '--read-only', '--user=65534:65534', '--memory=512m', '--pids-limit=64', '--cap-drop=ALL'])
+  for (const flag of ['--network=none', '--read-only', '--user=65534:65534', '--memory=512m', '--pids-limit=64', '--cap-drop=ALL', '--tmpfs=/tmp:rw,exec,nosuid,nodev,size=128m,mode=1777'])
     assert.ok(args.includes(flag), flag);
   process.env.FAKE_TIMEOUT = 'yes';
   await assert.rejects(compileInContainer('source', { timeout: 30 }), error => error.status === 504);

@@ -30,7 +30,7 @@ export function compileInContainer(source, { image = 'x2c-playground', timeout =
       '--network=none', '--read-only', '--user=65534:65534', '--cap-drop=ALL',
       '--security-opt=no-new-privileges', '--memory=512m', '--memory-swap=512m',
       '--cpus=1', '--pids-limit=64', '--ulimit=nofile=256:256',
-      '--tmpfs=/tmp:rw,nosuid,nodev,size=128m,mode=1777', image],
+      '--tmpfs=/tmp:rw,exec,nosuid,nodev,size=128m,mode=1777', image],
     { stdio: ['pipe', 'pipe', 'pipe'] });
     let output = '', errors = '', bytes = 0, failed = false;
     const stop = (error) => {
