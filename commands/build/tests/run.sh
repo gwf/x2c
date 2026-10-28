@@ -54,6 +54,11 @@ status=0
 [ "$status" = 1 ]
 grep -q 'missing-include.x:1:10:.*support/helpers.h.*file not found' missing-include.log
 
+# Source-mapped project meta groups retain included provider selection.
+printf '#pragma once\nmeta int twice(int n) => n * 2;\n' > meta-provider.x
+printf '#include "meta-provider.x"\nmeta int plus(int n) => twice(n) + 1;\nint main(void) { return $plus(3) != 7; }\n' > meta-include.x
+"$X2C" run -q meta-include.x meta-provider.x
+
 printf 'int main(void) { int n = ; }\n' > bad.x
 status=0
 "$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?

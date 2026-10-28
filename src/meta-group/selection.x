@@ -233,7 +233,7 @@ static Map _placeholders(Compiler c) {
 /* A project's included provider uses its group header, which declares the
    types and native functions shared by the provider objects. */
 static Var _group_include(Compiler c, List node, String lib) {
-  match (node) case %(preproc ?(String text)): {
+  match (Ast.without_origin(node)) case %(preproc ?(String text)): {
     int angle = 0;
     String target = Compiler.preproc_include_target(text, angle);
     if (!target || !Path.is_x2c_source(target)) break;
@@ -241,7 +241,8 @@ static Var _group_include(Compiler c, List node, String lib) {
       c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
     if (path && meta_build_tables.try_get(Path.absolute(path), index))
-      return %(preproc $(%"#include \"meta_group_$index.h\""));
+      return Ast.rewrap_origin(
+        node, %(preproc $(%"#include \"meta_group_$index.h\"")));
     if (Path.is_file(%"$lib$target")) break;
     return void;
   }

@@ -170,7 +170,7 @@ static void _native_lookups(Compiler c, Array units) {
 static int _after_directives(Array units) {
   int after = 0;
   while (after < (int) units.len() &&
-         ((List) units[after]).car() == <preproc>)
+         Ast.without_origin(units[after]).car() == <preproc>)
     after++;
   return after;
 }
