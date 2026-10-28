@@ -14,7 +14,10 @@ Map LspWorkspace.references(
   Array locations;
   if (!_reference_locations(w, query, include_declaration, locations))
     return _reference_failure();
-  return {"result": locations};
+  Array result = [];
+  foreach (Map location in locations)
+    result.push({"uri": location["uri"], "range": location["range"]});
+  return {"result": result};
 }
 
 /** Returns source edits without changing buffers or files. */
@@ -34,14 +37,25 @@ Map LspWorkspace.rename(
     return _rename_failure("x2c lsp: the definition is outside the workspace");
   if (query["declaration"].is_null())
     return _rename_failure("x2c lsp: this binding has no identifier range");
+  Map selection = query["selection"];
+  if (selection == NULL)
+    return _rename_failure("x2c lsp: this occurrence has no identifier range");
+  String spelling = query["spelling"], selected = selection["spelling"];
+  if (!spelling.endswith(selected)) return _rename_spelling_failure();
+  String replacement = spelling[:spelling.len() - selected.len()] + new_name;
   Array locations;
   if (!_reference_locations(w, query, 1, locations))
     return _reference_failure();
   Map changes = {};
   foreach (Map location in locations) {
+    String source = location["spelling"];
+    if (!spelling.endswith(source)) return _rename_spelling_failure();
+    String prefix = spelling[:spelling.len() - source.len()];
+    if (!replacement.startswith(prefix)) return _rename_spelling_failure();
+    String text = replacement[prefix.len():];
     String uri = location["uri"];
     Array edits = changes.setdefault(uri, []);
-    edits.push({"range": location["range"], "newText": new_name});
+    edits.push({"range": location["range"], "newText": text});
   }
   return {"result": {"changes": changes}};
 }
@@ -55,13 +69,22 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
   if (definition is not <list>) return NULL;
   List target = definition;
   Array inputs = [];
-  if (w.request.project_manifest()) {
+  String manifest = w.request.project_manifest();
+  if (manifest && w.request.command == <build> && !w.request.inputs) {
+    for (ProjectBuild node = ProjectBuild.plan(w.request); node;
+         node = node.next)
+      foreach (String input in node.request.inputs)
+        if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
+  }
+  else if (manifest) {
     foreach (String input in w.frontend.request.inputs)
       if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
   }
   else inputs.push(path);
   Map query = {"target": $(target[0], target[1], target[2]),
-    "declaration": _reference_location(w, target), "inputs": inputs};
+    "declaration": _reference_location(w, target), "inputs": inputs,
+    "selection": _reference_location(w, row),
+    "spelling": Ast.binding_spelling(row[3])};
   return w.retain(query);
 }
 
@@ -100,13 +123,16 @@ static Map _reference_location(LspWorkspace w, List row) {
   Tokenizer tokenizer = Tokenizer.new(text[first:after], <x2c>);
   tokenizer.scan();
   Token token;
+  String spelling = NULL;
   while ((token = tokenizer.next()).type != <eof>)
     if (token.text.is_identifier()) {
       start = first + token.pos;
       end = start + token.len;
+      spelling = token.text;
     }
   if (start < 0) return NULL;
-  return {"uri": lsp_uri(file), "range": lsp_range(text, start, end)};
+  return {"uri": lsp_uri(file), "range": lsp_range(text, start, end),
+          "spelling": spelling};
 }
 
 static void _reference_add(
@@ -120,6 +146,10 @@ static void _reference_add(
 
 static Map _rename_failure(String message) =>
   {"error": {"code": -32602, "message": message}};
+
+static Map _rename_spelling_failure(void) =>
+  _rename_failure("x2c lsp: the new name must preserve the binding's owner "
+                  "and namespace prefixes");
 
 static Map _reference_failure(void) =>
   {"error": {"code": -32803,
