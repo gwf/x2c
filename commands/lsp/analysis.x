@@ -77,11 +77,13 @@ Array LspWorkspace.affected(LspWorkspace w, String path) {
 
 void LspWorkspace.change(
   LspWorkspace w, String path, String text, int dirty) {
+  w.close_unit();
   w.invalidate(path);
   w.sources.set(path, text, dirty);
 }
 
 void LspWorkspace.close_document(LspWorkspace w, String path) {
+  w.close_unit();
   w.invalidate(path);
   w.sources.unset(path);
   w.analyses.del(path);
@@ -110,13 +112,14 @@ int LspWorkspace.analyze(LspWorkspace w, String path) {
   if (w.request.command != <build> && w.request.command != <translate>)
     return 0;
   CliRequest selected = w.request;
-  Map reads = {$(path): 1};
+  String manifest = NULL;
   if (!selected.inputs && selected.command == <build>) {
-    String manifest = selected.project_manifest();
-    if (manifest) reads[Path.absolute(manifest)] = 1;
+    manifest = selected.project_manifest();
     selected = ProjectBuild.owning_target(selected, path);
   }
   if (!selected) {
+    Map reads = {(path): 1};
+    if (manifest) reads[Path.absolute(manifest)] = 1;
     w.analyses[path] = {"diagnostics": [], "reads": reads,
                         "definitions": []};
     w.notice = "x2c lsp: document has no unique selected target; configure a direct translate command";
@@ -136,6 +139,8 @@ int LspWorkspace.analyze(LspWorkspace w, String path) {
     w.notice = "x2c lsp: unsaved sources with native CPP symbol modes are not supported; syntax highlighting remains available";
     return 0;
   }
+  Map reads = {(path): 1};
+  if (manifest) reads[Path.absolute(manifest)] = 1;
   foreach (Var file in c.deps.keys()) reads[Path.absolute(file)] = 1;
   foreach (Var file in c.source_texts.keys()) reads[Path.absolute(file)] = 1;
   Map analysis = {"diagnostics": _lsp_diagnostics(w), "reads": reads,
@@ -263,6 +268,6 @@ static Map _lsp_definition_row(
     start = begin.pos;
     end = finish.pos;
   }
-  return {name: name, display: display, kind: kind,
-          range: lsp_range(w.text(w.path), start, end)};
+  return {"name": name, "display": display, "kind": kind,
+          "range": lsp_range(w.text(w.path), start, end)};
 }

@@ -9,23 +9,30 @@
 #include <poll.h>
 #include <errno.h>
 #include <limits.h>
+#include <fcntl.h>
+#include <dirent.h>
 
 static typedef struct Server {
   File output;
   LspWorkspace workspace;
-  Array queued;
+  Array queued, arguments;
   Map cancelled, pending, documents;
-  int initialized, shutdown, exiting, eof;
+  int initialized, shutdown, exiting, eof, baseline_warm, restart_disabled;
+  size_t baseline;
 } Server;
 
 /** Serves one workspace until exit or clean EOF. */
-int lsp_serve(void) {
+int lsp_serve(int resume) {
   File output = auto File.fdopen(dup(STDOUT_FILENO), "w");
+  if (fcntl(output.fileno(), F_SETFD, FD_CLOEXEC) < 0) return 2;
   fflush(stdout);
   if (dup2(STDERR_FILENO, STDOUT_FILENO) < 0) return 2;
   setvbuf(stdin, NULL, _IONBF, 0);
   Context session = Context.open_isolated_named("language server");
-  Server server = {.output = output, .queued = [], .cancelled = {}, .pending = {}, .documents = {}};
+  Server server = {.output = output, .queued = [], .cancelled = {},
+                   .pending = {}, .documents = {}};
+  if (resume >= 0) _restore(server, resume);
+  server.baseline = _retained_bytes();
   while (!server.exiting) {
     if (!server.queued.len() && !server.eof) _receive(server);
     while (!server.eof && _waiting()) _receive(server);
@@ -37,6 +44,8 @@ int lsp_serve(void) {
     }
     else if (server.eof) break;
     if (!server.queued.len() && (server.eof || !_waiting())) _publish(server);
+    if (!server.queued.len() && !server.pending.len() && !server.eof &&
+        !server.shutdown && !server.exiting && !_waiting()) _checkpoint(server);
   }
   if (server.workspace) server.workspace.close_unit();
   int result = server.exiting && !server.shutdown ? 1 : 0;
@@ -148,14 +157,20 @@ static void _dispatch(Server &server, Map message) {
     case "workspace/didChangeWatchedFiles": _watched(server, params); return;
     case "textDocument/hover": _query(server, id, params, 0); return;
     case "textDocument/definition": _query(server, id, params, 1); return;
-    default: if (request) _error(server, id, -32601, "Method not found"); return;
+    default:
+      if (request) _error(server, id, -32601, "Method not found");
+      return;
   }
 }
 
 static void _initialize(Server &server, Var id, Map params) {
-  if (server.initialized) { _error(server, id, -32600, "Already initialized"); return; }
+  if (server.initialized) {
+    _error(server, id, -32600, "Already initialized");
+    return;
+  }
   Map options = params.getdefault("initializationOptions", {});
-  server.workspace = LspWorkspace.new(options.getdefault("arguments", []));
+  server.arguments = options.getdefault("arguments", []).array().copy();
+  server.workspace = LspWorkspace.new(server.arguments);
   server.initialized = 1;
   _reply(server, id, {capabilities: {
     textDocumentSync: {openClose: Json.bool(1), change: 1,
@@ -217,7 +232,8 @@ static void _close(Server &server, Map params) {
 
 static void _watched(Server &server, Map params) {
   foreach (Map change, params.getdefault("changes", []).array()) {
-    String path = server.workspace.retain(lsp_path(change.getdefault("uri", NULL)));
+    String uri = change.getdefault("uri", NULL);
+    String path = server.workspace.retain(lsp_path(uri));
     if (path) { _affected(server, path); server.workspace.invalidate(path); }
   }
 }
@@ -241,7 +257,8 @@ static void _publish(Server &server) {
   foreach (String path, paths) {
     Array diagnostics = server.workspace.diagnostics(path);
     Map params = {uri: lsp_uri(path), diagnostics: diagnostics};
-    if (!server.pending[path].is_null()) params[<version>] = server.pending[path];
+    if (!server.pending[path].is_null())
+      params[<version>] = server.pending[path];
     _send(server, {jsonrpc: "2.0", method: "textDocument/publishDiagnostics",
                    params: params});
     server.pending.del(path);
@@ -283,3 +300,103 @@ static void _discard(Var value) {
     array.free();
   }
 }
+
+/* A cold baseline bounds overlay-only traffic. Reset it once after the first
+   completed unit to include cold compiler setup in the generation baseline. */
+static void _checkpoint(Server &server) {
+  if (!server.workspace || server.restart_disabled) return;
+  size_t retained = _retained_bytes();
+  if (!server.baseline_warm && server.workspace.unit.context) {
+    server.baseline = retained;
+    server.baseline_warm = 1;
+  }
+  if (retained <= server.baseline ||
+      retained - server.baseline < 64 * 1024 * 1024)
+    return;
+  server.workspace.close_unit();
+  Context checkpoint =
+    auto Context.open_isolated_named("language server checkpoint");
+  try _restart(server);
+  catch %(*failure): {
+    server.restart_disabled = 1;
+    Stderr.printf("x2c lsp: idle restart failed: %s\n", failure.repr());
+    _send(server, {jsonrpc: "2.0", method: "window/showMessage", params: {
+      type: 2, message: "x2c lsp: could not reclaim retained history; "
+                       "restart the language server when convenient"}});
+  }
+}
+
+/* Only exported data crosses exec. No queued request or borrowed compiler
+   value is checkpointed; the protocol descriptor remains the same pipe. */
+static void _restart(Server &server) {
+  File saved = tmpfile();
+  if (!saved) raise %(lsp-exec (operation "tmpfile"));
+  defer saved.close();
+  Map state = {arguments: server.arguments, documents: server.documents,
+    overlays: server.workspace.sources.overlays,
+    dirty: server.workspace.sources.dirty_paths,
+    analyses: server.workspace.analyses, notices: server.workspace.notices,
+    notice: server.workspace.notice};
+  saved.printf("%s", Var.json(state));
+  if (saved.flush() || saved.seek(0, SEEK_SET) ||
+      fcntl(saved.fileno(), F_SETFD, 0) < 0)
+    raise %(lsp-exec (operation "checkpoint"));
+  Compiler.use_meta_helper(NULL);
+  Map descriptors = {};
+  defer _restore_descriptors(descriptors);
+  _close_on_exec(saved.fileno(), descriptors);
+  fflush(stdout);
+  if (dup2(server.output.fileno(), STDOUT_FILENO) < 0)
+    raise %(lsp-exec (operation "stdout"));
+  defer dup2(STDERR_FILENO, STDOUT_FILENO);
+  char descriptor[32];
+  snprintf(descriptor, sizeof(descriptor), "%d", saved.fileno());
+  String executable = x2c_get_executable();
+  Stderr.puts("x2c lsp: restarting after retained allocation growth\n");
+  execl(executable, executable, "--lsp-resume", descriptor, (char *) NULL);
+  int error = errno;
+  raise %(lsp-exec (operation "exec") (errno $error));
+}
+
+static void _restore(Server &server, int descriptor) {
+  Context restore = Context.open_isolated_named("language server restore");
+  File saved = File.fdopen(descriptor, "r");
+  Map state = restore.export(Json.parse(saved.string_close()));
+  restore.close();
+  server.arguments = state["arguments"];
+  server.documents = state["documents"];
+  server.workspace = LspWorkspace.new(server.arguments);
+  server.workspace.sources.overlays = state["overlays"];
+  server.workspace.sources.dirty_paths = state["dirty"];
+  server.workspace.analyses = state["analyses"];
+  server.workspace.notices = state["notices"];
+  server.workspace.notice = state["notice"];
+  server.initialized = 1;
+}
+
+/* A native module may own ordinary File descriptors. Preserve their flags if
+   exec fails; successful exec keeps only stdio and the checkpoint file. */
+static void _close_on_exec(int checkpoint, Map descriptors) {
+  DIR *directory = opendir("/dev/fd");
+  if (!directory) raise %(lsp-exec (operation "descriptors"));
+  defer closedir(directory);
+  struct dirent *entry;
+  while ((entry = readdir(directory))) {
+    if (entry->d_name[0] < '0' || entry->d_name[0] > '9') continue;
+    int descriptor = atoi(entry->d_name);
+    if (descriptor < 3 || descriptor == checkpoint) continue;
+    int flags = fcntl(descriptor, F_GETFD);
+    if (flags < 0 || flags & FD_CLOEXEC) continue;
+    descriptors[descriptor] = flags;
+    if (fcntl(descriptor, F_SETFD, flags | FD_CLOEXEC) < 0)
+      raise %(lsp-exec (operation "descriptors"));
+  }
+}
+
+static void _restore_descriptors(Map descriptors) {
+  foreach ((int descriptor, int flags) in descriptors)
+    fcntl(descriptor, F_SETFD, flags);
+}
+
+static size_t _retained_bytes(void) =>
+  Scope.stats().live_requested_bytes + Pool.stats(Pool.current()).backing_bytes;
