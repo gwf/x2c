@@ -417,3 +417,44 @@ probes, 18 varops tests with 7,279 assertions, both new conversion fixtures,
 source-map retained-build reuse probe. Updated fixture artifacts contain the
 reviewed conversion call/static-site changes. Final generated publication
 artifacts remain with the integrator.
+
+
+### Phase 2: meta causes and expansion notes
+
+Implemented the quotation member-hole diagnostic, unresolved bracket receiver
+report, staged failure propagation, and innermost expansion notes. The shared
+meta diagnostic formatter and input unwrap now have one reusable owner.
+
+The staging premise needed correction. Ordinary staging deliberately defers
+slot invocations whose generated declarations are not available yet. The
+first error diagnostic now distinguishes that `meta-later` deferral from a
+real parse failure. Errors after a deliberate deferral remain translation's
+responsibility. Warnings do not become refusal causes. Loaded builds keep
+printing their failures. No staging state or manifest format was added.
+
+| Probe | Observed result |
+| --- | --- |
+| `c2.x:16:1` | Refusal carries the real quotation failure at `c2.x:9:45`, including the expression/member hole conflict. |
+| `c2-noinvoke.x:9:45` | Reports the hole conflict directly at the quotation. |
+| `b1.x:15:1` | `type: unresolved identifier: result`, with `gen.it` definition and input note. |
+| `f1-type.x:5:18` | Existing method error now includes the `half` definition and input note. |
+
+Focused worker checks passed: 547 diagnostic fixtures, then eight checks
+covering the warning correction and related meta behavior. The rollback
+fixture's valid meta provider moved to a support unit so the erroneous
+consumer still tests both original rollback/placement failures. Removing new
+expansion notes from existing sidecars recovers the previous diagnostic bytes
+except the planned unresolved-index and missing-group messages and that
+fixture relocation.
+
+The working examples `magic/meta-functions`, `magic/imported-macros`, and
+`magic/stacked-decorators` exit zero and match their manifest output. The plan's
+`derive.x`, `routes.x`, `stack.x`, `c2b.x`, and `f3-hygiene.x` were unavailable;
+they were not run. The three checked-in examples cover working meta functions,
+imported macros, and stacked decorators instead.
+
+The expansion notes work independently of the proposed dump metadata.
+Existing retained function and initializer rows already restore their
+construction stack; bounded Unit probes report both invocation and definition
+without adding metadata. The separate dump extension remains private pending
+prototype measurements and an adoption decision.
