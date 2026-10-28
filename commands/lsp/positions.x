@@ -41,13 +41,23 @@ String lsp_uri(String path) {
 
 /** Converts a UTF-8 byte offset to an LSP UTF-16 position. */
 Map lsp_position(String text, int offset) {
-  int line = 0, column = 0, length = text.len();
-  if (offset > length) offset = length;
-  for (int at = 0; at < offset;) {
+  int at = 0, line = 0, column = 0;
+  lsp_advance(text, offset, at, line, column);
+  return {line: line, character: column};
+}
+
+/** Advances a byte cursor and its UTF-16 position to a later boundary.
+    Reusing the cursor visits each byte once across a sorted token stream.
+*/
+void lsp_advance(
+  String text, int end, int &at, int &line, int &column) {
+  int length = text.len();
+  if (end > length) end = length;
+  while (at < end) {
     int byte = (unsigned char) text[at];
     if (byte == '\r' || byte == '\n') {
       int width = byte == '\r' && at + 1 < length && text[at + 1] == '\n' ? 2 : 1;
-      if (at + width > offset) break;
+      if (at + width > end) break;
       line++;
       column = 0;
       at += width;
@@ -55,12 +65,11 @@ Map lsp_position(String text, int offset) {
     else {
       int width = scan_utf8_length((const unsigned char *) text + at);
       if (width < 1) width = 1;
-      if (at + width > offset) break;
+      if (at + width > end) break;
       column += width == 4 ? 2 : 1;
       at += width;
     }
   }
-  return {line: line, character: column};
 }
 
 /** Converts an LSP UTF-16 position to a UTF-8 byte offset. */

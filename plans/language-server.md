@@ -1,9 +1,11 @@
-> Status: active - phase 1 ready for shared integration; phases 2-4 pending
+> Status: active - phase 1 published; phases 2 and 3 in progress
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
 > Ready PRs go to the shared integration agent, which owns full gates.
 > Phase 1 lands before phases 2 and 3 start. Phase 4 waits for the extension
 > release that uses the language client.
+> Phase 1 landed through PR #599. PR #600 published the JSON-boolean
+> startup repair. Phases 2 and 3 will form one coherent feature batch.
 
 # Resident language server: `x2c lsp`
 
@@ -188,6 +190,126 @@ to absolute paths and `Path.absolute` keeps logical identity, as in
 
 ## Delivery
 
+### Source facts required by phases 2 and 3
+
+The first navigation probes exposed missing records, rather than new language
+semantics. Typedef uses, named-type declarations, and instance member uses need
+physical source facts from their existing parser and binder owners. Record
+canonical bindings and consumed token ranges there. Keep constructed syntax
+without a physical range unchanged; do not invent origin tracking or a second
+binding namespace. Normal compilation does not allocate editor metadata.
+
+Field typing does not return a physical member binding to the parser. Extend
+the existing lookup owner with a nullable binding output and update its
+compiler-internal callers. Method-call parsing can reuse its existing lookup.
+For physical non-call fields and arrow access, an additional lookup only when
+`source_facts` is enabled reuses that owner without adding transient metadata
+to the generic expression resolver. This costs extra lookup work for editor
+analysis and leaves the normal traversal unchanged.
+
+Each reopened analysis unit refreshes source collections because the process
+cache does not retain unit-owned declaration origins. This follows the planned
+whole-unit boundary instead of adding a source-fact cache. A focused two-file
+probe measured about 0.770 seconds to reopen and about 0.0002 seconds for a
+same-unit cached request; these are local observations, not throughput claims.
+
+Completion copies keyword and candidate Strings while the completion catch is
+active. Error payload storage ends at the catch, so normal Context export can
+only retain the copied canonical values.
+
+### Rename findings requiring a design correction
+
+The original definition-location equality is insufficient for ordinary C
+external linkage. A focused project with a header prototype, implementation,
+and caller builds and runs before rename. The implementation and caller
+resolve to different declaration locations. Renaming from either side omits
+the other side; applying the edits then fails to link. Controls with same-name
+static functions in separate files and a shadowing local rename independently
+and still build and run.
+
+A separate valid method probe uses `Counter.peek`, `c.peek()`, and the
+canonical C spelling `Counter_peek`. Type rename must also change physical
+method-owner qualifiers and the owner component in the canonical C spelling.
+Member rename must preserve that owner component. Replacing an entire
+`Counter_peek` token with `look` produces an undeclared callee after edits.
+Recursive class-body type references are also absent because collection
+parses those tokens before the primary source-fact pass.
+
+These findings hold phases 2 and 3 from submission until a corrected design
+and applied-edit checks cover the missing references. They do not change
+language semantics or authorize textual prefix substitution.
+
+### Corrected cross-unit identity and source spelling
+
+Keep physical declaration location as the identity for locals, file-static
+bindings, types, fields, and foreign aliases. External function and object
+references instead share the emitted name established at their ordinary
+binding owner. Carry that optional name in the existing source-declaration
+row after the method and capture slots. The declaration owner knows namespace,
+scope, storage, and inherited static linkage before stored Type erases storage.
+The foreign-alias owner clears external identity because its C spelling is a
+macro alias, and independent aliases can have different native targets.
+
+Build each query's identity from these facts, without a persistent symbol
+index. Enumerate real declaration rows as well as occurrences, so a body that
+overrides its prototype's source definition does not hide the header edit.
+Use the existing configured build plan to include dependency source units,
+rather than only a lowered link request containing dependency archives.
+
+Preserve each physical spelling when creating edits. A member selection uses
+the new member component; a canonical C identifier keeps its actual owner
+prefix. A full C-identifier selection must retain the owner prefix needed by
+member uses, or rename returns an error instead of broken edits. Type rename
+uses actual declared method-owner facts and resolved member bindings to change
+related owner qualifiers and canonical C spellings. It does not match arbitrary
+identifier prefixes. Physical owner tokens are recorded at their parser owner.
+
+Focused checks apply returned edits and compile and run the changed project.
+Cover header/body/caller, external objects, static and local controls, aliases,
+method components, type owners, dependency inputs, and recursive class bodies.
+These extend the planned feature tests; they do not add a publication gate.
+
+### Approved scoped capture for named-type source references (2026-10-28)
+
+Gary approved retaining physical references parsed inside a named-type body
+through that declaration's existing collection metadata. Collection already
+consumes these tokens; the primary parser reuses the completed declaration.
+Recording only primary-parser references cannot recover them.
+
+Use one nullable, borrowed capture Array on `Compiler`, active only while
+`parse_named_type` parses its body with `source_facts` enabled. The existing
+`record_source_reference` owner captures the real physical range, actual child
+binding, canonical Type, and existing source key. Attach the completed capture
+to the enclosing declaration's source metadata, after the existing location,
+Type, and method fields. Do not create source ranges for constructed syntax.
+
+When the existing `_note_source_key` owner materializes the declaration in a
+primary compiler, replay those occurrences and install their actual target
+rows from `source_declarations`. Child binding IDs are already unique within
+the unit through `names.next_binding`; no replacement binding or second
+namespace is needed. A missing target remains a missing source definition.
+The enclosing class range must never stand in for the target's range.
+
+Restore the prior capture when parsing leaves the body. Existing semantic
+transactions save and restore only the active capture's length. Do not enable
+collection-wide source-map snapshots or remove the primary/shallow guards.
+This confines extra allocations to named-type source analysis. Normal builds
+keep a null pointer and do not allocate capture Arrays. Captures share the
+unit's current source-metadata lifetime and the approved process checkpoints.
+
+Smaller alternatives: recording the primary pass alone is disproved by the
+recursive-body probe. Searching text by name cannot preserve binding identity.
+Removing source-primary guards globally would expand transaction snapshots
+and collection metadata far beyond the missing named-type references.
+
+Affected owners are `src/compiler/compiler.x`, `src/compiler/source-locations.x`,
+`src/parse/types.x`, `src/symtab/bindings.x`, and `src/symtab/transactions.x`.
+Child compiler initialization carries the active borrowed capture only where
+it already shares the unit's source metadata. Tests apply rename edits to a
+recursive pointer class and build the result. Nested and failed speculative
+parses must not leak occurrences. Separate typedef/tag controls must remain
+separate. The work adds no gate or recurring validation requirement.
+
 ### Approved lifetime revision (2026-10-28)
 
 The first implementation exposed a lifetime gap in the original architecture.
@@ -295,9 +417,9 @@ artifacts. Manual VS Code and Neovim sessions remain unperformed.
 - Extension: `npm ci && npm test` in `etc/vsc-extension` (not gated).
 - Manual: open `src/` in VS Code and in Neovim with the snippet; confirm
   diagnostics, hover, and definition on `src/frontend.x`.
-- Publication: `tools/gate-state.py ensure agent-pr-check` for every phase
-  (commands change the validated tree). No performance checkpoint: no
-  compiler hot path changes.
+- Publication: the shared integration agent owns the applicable performance
+  work, final generated artifacts, and `agent-pr-check` for each coherent
+  submitted batch. The implementation session runs focused checks only.
 
 ## Phases and size
 
@@ -308,9 +430,10 @@ artifacts. Manual VS Code and Neovim sessions remain unperformed.
 | 3 | references, rename, semantic tokens | about 300 lines of x2c |
 | 4 | retire `commands/editor`, `tools/x2c-editor`, `workerPath` | deletion only |
 
-Each phase is one publication. Phase 1 ships before 2 and 3 are started
-because the extension switch is the only user-visible risk; phases 2 and 3
-are independent of each other.
+Phase 1 ships before 2 and 3 are started because the extension switch is the
+first user-visible risk. Phases 2 and 3 are independent and can be collected
+into one coherent shared-integrator batch, using one publication validation
+for their combined result. Retirement retains its extension-release prerequisite.
 
 ## Plan review
 
@@ -337,7 +460,12 @@ in the background.
 Idiomatic x2c: Map literals and `Var.json` build messages; `match` reads
 compiler rows; isolated frame parsing and retained-unit or server dispatch;
 no JSON-RPC framework, no handler registry object, no abstract transport.
-Dispatch is one `switch` on the method String.
+Dispatch is one `switch` on the method String. The proposed named-type capture
+reuses physical source keys, declaration metadata, actual child bindings, and
+semantic transactions. Its one borrowed Array is needed because collection
+consumes source tokens before primary parsing; replay does not re-resolve names
+or create another semantic identity. The applied-edit and rollback probes
+protect missing edits and leaked speculative references.
 
 Validators and negative fixtures: the smoke test's parse-error document
 protects diagnostic delivery; the malformed-frame `-32700` reply protects

@@ -29,7 +29,8 @@ class Client:
         self.next_id = 1
         self.initialize_responses = 0
         self.send("initialize", {"initializationOptions": {"arguments": []}}, 1)
-        self.wait(lambda message: message.get("id") == 1)
+        self.capabilities = self.wait(lambda message:
+            message.get("id") == 1)["result"]["capabilities"]
         self.send("initialized")
 
     def send(self, method, params=None, identifier=None):
@@ -93,10 +94,14 @@ class Client:
         )["params"]["diagnostics"]
 
     def query(self, method, path):
+        return self.request("textDocument/" + method, {
+            "textDocument": {"uri": path.as_uri()},
+            "position": {"line": 1, "character": 25}})
+
+    def request(self, method, params):
         self.next_id += 1
         identifier = self.next_id
-        self.send("textDocument/" + method, {"textDocument": {"uri": path.as_uri()},
-            "position": {"line": 1, "character": 25}}, identifier)
+        self.send(method, params, identifier)
         return self.wait(lambda message: message.get("id") == identifier)["result"]
 
     def checkpoints(self):
@@ -170,6 +175,11 @@ def probe(root, directory):
         definition = client.query("definition", source)
         assert definition["uri"] == header.as_uri(), definition
         assert len(client.notices()) == 1, client.notices()
+        symbols = None
+        if client.capabilities.get("workspaceSymbolProvider"):
+            symbols = sorted(client.request("workspace/symbol", {"query": ""}),
+                             key=lambda row: json.dumps(row, sort_keys=True))
+            assert any(row["name"] == "main" for row in symbols), symbols
         observed_children.update(descendants(client.pid))
         warm_rss = client.rss()
         warm_fds = client.fd_count()
@@ -205,6 +215,10 @@ def probe(root, directory):
                 client.query("hover", orphan)
                 assert len(client.notices()) == 1, client.notices()
                 assert client.initialize_responses == 1
+                if symbols is not None:
+                    restored = client.request("workspace/symbol", {"query": ""})
+                    assert sorted(restored, key=lambda row:
+                                  json.dumps(row, sort_keys=True)) == symbols
                 fd_count = client.fd_count()
                 assert fd_count <= warm_fds, (warm_fds, fd_count)
                 observed_children.update(descendants(client.pid))

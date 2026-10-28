@@ -1,69 +1,9 @@
 """Paced source and dependency changes against the resident language server."""
-import json
-import os
 from pathlib import Path
-import select
-import subprocess
 import sys
 import tempfile
 
-
-class Client:
-    def __init__(self, root, directory, arguments):
-        self.process = subprocess.Popen(
-            [str(root / "builds/0/libexec/x2c-lsp")], cwd=directory,
-            env=dict(os.environ, X2C_CACHE_DIR=str(directory / "cache")),
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, bufsize=0)
-        self.versions = {}
-        self.send("initialize", {"initializationOptions": {"arguments": arguments}}, 1)
-        self.wait("id", 1)
-        self.send("initialized")
-
-    def send(self, method, params=None, identifier=None):
-        message = {"jsonrpc": "2.0", "method": method, "params": params or {}}
-        if identifier is not None:
-            message["id"] = identifier
-        body = json.dumps(message).encode()
-        self.process.stdin.write(f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
-        self.process.stdin.flush()
-
-    def wait(self, key, value):
-        while True:
-            assert select.select([self.process.stdout], [], [], 20)[0], "response timeout"
-            headers = {}
-            while (line := self.process.stdout.readline()) not in (b"\n", b"\r\n"):
-                assert line, (self.process.poll(), self.process.stderr.read())
-                name, field = line.decode().split(":", 1)
-                headers[name.lower()] = field.strip()
-            message = json.loads(self.process.stdout.read(int(headers["content-length"])))
-            if message.get(key) == value:
-                return message
-
-    def opened(self, source, text, language="x2c"):
-        uri = source.as_uri()
-        version = self.versions.get(uri, 0) + 1
-        self.versions[uri] = version
-        if version == 1:
-            self.send("textDocument/didOpen", {"textDocument": {
-                "uri": uri, "languageId": language, "version": version, "text": text}})
-        else:
-            self.send("textDocument/didChange", {"textDocument": {
-                "uri": uri, "version": version}, "contentChanges": [{"text": text}]})
-
-    def diagnostics(self):
-        return self.wait("method", "textDocument/publishDiagnostics")["params"]["diagnostics"]
-
-    def hover(self, source, line, character):
-        self.send("textDocument/hover", {"textDocument": {"uri": source.as_uri()},
-            "position": {"line": line, "character": character}}, 2)
-        return self.wait("id", 2)["result"]
-
-    def close(self):
-        self.send("shutdown", identifier=99)
-        self.wait("id", 99)
-        self.send("exit")
-        assert self.process.wait(timeout=10) == 0
+from client import Client
 
 
 root = Path(sys.argv[1]).resolve()

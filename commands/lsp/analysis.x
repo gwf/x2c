@@ -283,16 +283,18 @@ static void _lsp_add_definition(
     if (Path.resolved_absolute(c.text_source(end - 1, end)) != path) return;
     end++;
     String text = w.text(path);
+    Map selection = _lsp_definition_selection(w, name, path, start, end);
+    if (!selection) return;
     Map range = lsp_range(text, start, end);
-    Map selection = _lsp_definition_selection(w, name, path, start, end, range);
     rows.push({"name": name, "display": display, "kind": kind, "file": path,
                "range": range, "selectionRange": selection});
   }
 }
 
 static Map _lsp_definition_selection(
-  LspWorkspace w, String name, String path, int start, int end, Map range) {
+  LspWorkspace w, String name, String path, int start, int end) {
   int selected = end;
+  Map range = NULL;
   foreach ((List binding, List location) in w.unit.compiler.source_definitions) {
     if (Ast.binding_spelling(binding) != name) continue;
     String file = location[0];
