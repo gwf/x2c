@@ -57,6 +57,38 @@ Its optional arguments select the input file and database filename. Repeated
 runs append observations. The `run` target starts from a fresh example database
 for reproducible output.
 
+## Bind a derived record
+
+Include `derive.x` and request `<row>` to bind a record in declaration
+order. The generated methods use only `List`; they do not depend on SQLite.
+
+```x2c
+#include "derive.x"
+import "sqlite" with Database, Prepared;
+typedef struct Reading { String station; double value; } Reading;
+$derive(Reading, <row>);
+
+int main(void) {
+  Database db = Database.open(":memory:");
+  defer db.close();
+  db.execute("CREATE TABLE reading(station TEXT, value REAL)");
+  Prepared insert = db.prepare("INSERT INTO reading VALUES (?, ?)");
+  defer insert.free();
+  Reading reading = { "north", 1.5 };
+  insert.bind(reading.row()).execute();
+  Prepared select = db.prepare("SELECT station, value FROM reading");
+  defer select.free();
+  foreach (List row in select) {
+    Reading copy = Reading.from_row(row);
+    printf("%s %.1f\n", copy.station, copy.value);
+  }
+  return 0;
+}
+```
+
+Select columns in the record's declaration order. `Reading.columns()`
+returns those names as a List for callers that build a query.
+
 ## Connections, statements, and values
 
 `Database.open(path)` opens or creates a database; use `":memory:"` for an
