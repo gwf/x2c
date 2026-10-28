@@ -808,33 +808,33 @@ static void _emit(Emitter * e, List ast){
     Array_push((* e).out, List_var(ast));
     return;
   }
-  {
-    List _x2c_gensym_match_expr_0 = ast;
-    switch(0){
-      default:{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; List x2c_match_list_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _15 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) && _x2c_gensym_match_at_0 ->car.u64 == 9224497936761657698ULL &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_1, 1)){{
-        List items;
-        items = x2c_match_list_0;
-        {
-          _emit(&((* e)), items);
-          return;
-        }
-
-      }
-      break;}}{List _x2c_gensym_match_at_0; List x2c_match_list_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _18 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_0, 1)){{
-        List code;
-        code = x2c_match_list_0;
-        {
-          _emit(&((* e)), code);
-          return;
-        }
-
-      }
-      break;}}
-    }
-
-  }
   Var head = List_car(ast);
   if(! Var_is(head, 1328354264)){
+    {
+      List _x2c_gensym_match_expr_0 = ast;
+      switch(0){
+        default:{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; List x2c_match_list_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _15 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) && _x2c_gensym_match_at_0 ->car.u64 == 9224497936761657698ULL &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_1, 1)){{
+          List items;
+          items = x2c_match_list_0;
+          {
+            _emit(&((* e)), items);
+            return;
+          }
+
+        }
+        break;}}{List _x2c_gensym_match_at_0; List x2c_match_list_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _18 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr, 1) &&(x2c_match_list_0 = _x2c_gensym_match_at_0, 1)){{
+          List code;
+          code = x2c_match_list_0;
+          {
+            _emit(&((* e)), code);
+            return;
+          }
+
+        }
+        break;}}
+      }
+
+    }
     f8_dispatch____sequence(&((* e)), ast);
     return;
   }

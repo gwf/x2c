@@ -54,7 +54,8 @@ module Ast _step(Compiler c, Ast ast) {
     if (watched) return watched;
   }
   Var head = ast.car();
-  if (head is not <symbol>) return _default_node(c, ast);
+  if (head is not <symbol>)
+    return head == "x2c.quoted" ? ast : _default_node(c, ast);
   match (ast) {
     case %(at ?origin ?inner): return _at_node(c, ast, origin, inner);
     case %(function ?return_type

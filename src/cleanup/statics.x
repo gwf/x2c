@@ -126,7 +126,7 @@ module List _static_regions(Compiler c, List ast, Map runtime) {
     case %(expr *):
       return _rewrite_expression(
         ast, %!(List block) => _static_regions(c, block, runtime));
-    case %((!or function localinit typedef) *): return ast;
+    case %((!or function localinit typedef "x2c.quoted") *): return ast;
     case %(try *): return _landing_form(c, ast, runtime);
     case %(declare ?type ?bindings):
       return _static_initializers(c, type, bindings, runtime);
