@@ -273,6 +273,33 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
 
 ## Outstanding Items
 
+### Constructed array-dimension macro
+
+On 2026-10-28, `160828e5f` reproduces an unresolved macro in a constructed
+array dimension, before the retained-expansion inspection prototype. Save
+this source as `/tmp/dimension.x`:
+
+```x2c
+macro Expr $width() => 3;
+macro Unit $make(Name $name) { int $name[$width()]; }
+$make(values);
+int main(void) { return sizeof(values); }
+```
+
+`builds/0/x2c translate --dump-code /tmp/dimension.x` emits
+`int values[macro-invoke m-invoke];`. Ordinary translation with
+`--out-dir /tmp/dimension-output` exits 1 with
+`emit: failed to write interface file`. Parsed and transformed dumps both
+retain the unresolved invocation. Passing `$width()` as an Expr argument to
+`$make` instead produces `int values[3];` and translates successfully.
+
+`src/parse/declarators.x` `_finish_fnmod` completes function parameters but
+leaves dimension modifiers unchanged. Constructed declaration binding calls
+that helper; transformation preserves the uninitialized declarator, and
+`src/emit/declarations.x` `_array_declarator` tokenizes its dimension. This
+is a separate compiler follow-up; inspection neither loses an executed
+expansion in this probe nor causes the normal translation failure.
+
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions
 crash with a 256 KiB stack limit. The same augmented source fails before
