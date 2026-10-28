@@ -106,9 +106,20 @@ static List _manifest(Helper &h) {
   Path.make_dirs(h.directory);
   int lock = Path.lock_file(%"$(h.directory)/lock", 1);
   defer close(lock);
-  List manifest = _current(h.directory);
+  int searched = _search_link(h.toolchain.ld_args);
+  List manifest = searched ? NULL : _current(h.directory);
   if (manifest) return manifest;
+  if (searched) h.changed = 1;
   return _build(h);
+}
+
+/* Like script publication, named library selections cannot reuse an output
+   whose selected native files are absent from the dependency fingerprint. */
+static int _search_link(List arguments) {
+  foreach (String argument in arguments)
+    foreach (String part in argument.split(","))
+      if (part.startswith("-l")) return 1;
+  return 0;
 }
 
 // building the helper

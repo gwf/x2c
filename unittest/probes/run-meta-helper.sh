@@ -69,6 +69,22 @@ ar rcs native/libother.a native/other.o
   fail "changed native archive failed: $(cat package-meta.log)"
 grep -q 'return 91;' out/package-meta.c || fail "native archive kept stale helper"
 
+# Search-name libraries follow the ordinary build's conservative relink rule.
+# Replacing a selected archive must not keep yesterday's compiled value.
+printf '%s\n' '-Dfixture_native_value=fixture_link_value' \
+  "-L$BUILD/native" '-lother' >"$native_response"
+"$X2C" translate --package-dir packages --out-dir out package-meta.x >package-meta.log 2>&1 ||
+  fail "search-name native link failed: $(cat package-meta.log)"
+grep -q 'return 91;' out/package-meta.c || fail "search-name native meta result"
+cat >native/other.c <<'EOF'
+int fixture_link_value(void) { return 113; }
+EOF
+cc -c native/other.c -o native/other.o
+ar rcs native/libother.a native/other.o
+"$X2C" translate --package-dir packages --out-dir out package-meta.x >package-meta.log 2>&1 ||
+  fail "changed search-name archive failed: $(cat package-meta.log)"
+grep -q 'return 113;' out/package-meta.c || fail "search-name archive kept stale helper"
+
 cat > calls.x <<'EOF'
 #include <stdlib.h>
 
