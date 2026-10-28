@@ -91,3 +91,10 @@ parameters, and path redirects, as documented with the Go implementation.
 A shared-host application comparison does not isolate intrinsic language speed.
 
 Dated reports live under [reports/](reports/). No benchmark is added to a gate.
+
+The [2026-10-28 report](reports/2026-10-28/interpretation.md) contains the
+measured comparison and its limits. Go led all five 64-client lookup pairs;
+x2c led all five single-client lookup pairs and used lower peak RSS in every
+pair. Durable-write results were too variable to rank. The dated directory
+retains the full matrix, paired ratios, build/configuration verification, and
+raw samples; no slow samples were removed.
