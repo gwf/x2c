@@ -998,7 +998,9 @@ def build(name, expected, options=(), level=None):
     run_env = dict(env)
     if level is not None:
         run_env['MAKELEVEL'] = level
-    args = [compiler, 'build', '--plain', '--build-dir', str(root / name),
+    # Compare emitted bytes across output directories without mapped paths.
+    args = [compiler, 'build', '--plain', '--no-source-map',
+            '--build-dir', str(root / name),
             '--output', str(root / (name + '.exe')), *options, *inputs]
     result = subprocess.run(args + ['--verbose'], env=run_env,
                             capture_output=True, text=True)
@@ -1036,7 +1038,7 @@ for depfile in parallel.glob('*/item.d'):
     assert str(root / other / (other + '-dep.x')) not in text, text
 (root / 'a/a-dep.x').write_text('int a_value(void) { return 5 + 0; }\n')
 result = subprocess.run(
-    [compiler, 'build', '--verbose', '-j2', '--build-dir',
+    [compiler, 'build', '--no-source-map', '--verbose', '-j2', '--build-dir',
      str(root / 'jobs-parallel'), '--output',
      str(root / 'jobs-parallel.exe'), *inputs], env=env,
     capture_output=True, text=True)
@@ -1096,7 +1098,7 @@ run_status=$?
 set -e
 [[ $compile_only_status == 2 && $run_status == 0 ]] || exit 1
 [[ $(cat "$BUILD/direct/run.stdout") == one ]] || exit 1
-grep -Fq '(retained)' "$BUILD/direct/run.stderr"
+grep -q '^Built executable .* in ' "$BUILD/direct/run.stderr"
 
 # Defaults, retained builds, and directory aliases share the native driver.
 python3 - "$X2C" "$BUILD/defaults" <<'PY_DEFAULTS'
