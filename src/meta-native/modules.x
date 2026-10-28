@@ -108,7 +108,8 @@ void Compiler.select_package_module(
   }
 }
 
-static alias fail_module_platform to Diagnostics.driver_error("native modules are not supported on this platform");
+static alias fail_module_platform to Diagnostics.driver_error(
+  "native modules are not supported on this platform");
 
 /** Loads the native module at `path` once per process and returns its
     absolute path. Loading runs the module's code inside the compiler, so it

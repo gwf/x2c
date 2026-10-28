@@ -3,7 +3,8 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-static alias fail_invocation_missing to MetaContext.reject("x2c invocation location used outside macro expansion", NULL);
+static alias fail_invocation_missing to MetaContext.reject(
+  "x2c invocation location used outside macro expansion", NULL);
 
 static macro Stmt $fail.meta_sdk_notes_string(Expr $operation, Expr $note) =>
   _reject_value(%"$($operation) notes must be Strings", $note);
