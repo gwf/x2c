@@ -350,7 +350,7 @@ static List _hole_method(Compiler c) {
 // The member after a method owner's `.`: a Name hole or an identifier.
 static Var _method_member(Compiler c) {
   c.expect(<.>);
-  if (c.peek(0) == <$>) return c.try_parse_macro_slot(<name>);
+  if (c.peek(0) == <$>) return c.try_parse_macro_member();
   if (!c.token.text.is_identifier()) $fail.parse_macro_member(c, c.token);
   String member = c.token.text;
   c.next();

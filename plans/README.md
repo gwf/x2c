@@ -48,8 +48,7 @@ and status; it does not implement the remaining features.
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
-| [Deferred method names](compiler-deferred-method-name.md) | Reported compiler defect: deferred method template loses its declarator name. | Recover a failing reproducer and diagnose the current compiler. |
-| [Included static meta helpers](compiler-included-static-meta.md) | Reported compiler defect: include-only static meta helper has no resolved binding. | Recover a failing reproducer and establish the owning binding contract. |
+| [Deferred method names](compiler-deferred-method-name.md) | Reproduced identifier-valued method Name defect repaired locally. | Integrate the repair and its focused regression evidence. |
 | [Language server](language-server.md) | Phase 1 is ready for shared integration; completion, symbols, references, rename, and tokens follow. | Integrate phase 1, then implement phases 2 and 3. Retirement waits for the client extension release. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
@@ -81,6 +80,10 @@ releases established the recovery baseline. No production promotion is
 selected here.
 
 ### Decisions and completed records
+
+- [Included static meta helper report](archive/compiler-included-static-meta.md):
+  rejected as a compiler defect on 2026-10-28. Supported provider-owned calls
+  pass; cross-unit static access is outside the existing visibility contract.
 
 Completed work archived on 2026-10-27:
 

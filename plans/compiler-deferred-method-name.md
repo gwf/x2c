@@ -1,41 +1,58 @@
 > Status: active
-> Reported by the derive probes on 2026-10-28 at `9aeeef265`.
-> Current reproduction and diagnosis remain open; this record does not
-> authorize implementation.
+> Reproduced and repaired locally on 2026-10-28 at base `282f5bfb8`.
+> Awaiting the combined compiler-defect submission and shared integration.
 
 # Deferred method template loses its name
 
-## Reported behavior
+## Reproduction and repair
 
-The [derive campaign](derive-and-test.md#what-the-probe-established) reports
-that returning a method definition from a meta function through a deferred
-named template, `$derive.method(type, name, body)`, produces `int(P v){`
-in generated C. The dotted declarator loses its method name.
+A meta helper applies a Unit Macro value with a Type and
+`x2c_ident("get")` as its Name argument. The macro declares
+`int $type.$name($type value)`. Before repair, the generated C contains
+`int(P _x2c_gensym_macro_v_0){` without a function name. Calling the method
+instead reports that `P` has no method `get`.
 
-The generated C must retain the method's name and remain callable through
-its ordinary method spelling. The derive implementation avoids the affected
-form by writing dotted declarators directly in Unit macros.
+The failure reproduces at `282f5bfb8181b73ebfc924d8b77ac00a861a1607`.
+A direct invocation and a deferred String Name argument work on that same
+compiler. The original [derive probe report](derive-and-test.md#what-the-probe-established)
+at `9aeeef265` is now narrowed to this reproduced identifier-valued Name
+case. The original failing source was not retained, so its exact shape
+cannot be confirmed.
 
-## Evidence and next action
+`_method_member` in `src/parse/declarators.x` used the Name hole's raw value.
+That leaves the member as `("x2c.ident" "get")`, while a method declarator
+needs its member spelling. The repair uses `try_parse_macro_member`, the
+existing operation that selects the Name hole's member projection.
+`_member_spelling` already converts identifier values and renamed bindings
+to their source spelling. Method installation and binding remain unchanged.
 
-The report comes from the original probe investigation on `dev` `9aeeef265`.
-The campaign retains related successful probes in
-`plans/reference/probes-2026-10-28/derive/`; those files are not claimed to
-reproduce this failing template form. No standalone failing reproducer is
-currently attached to this record, and the defect was not reverified while
-recording this follow-up.
+## Verification
 
-1. Recover or reconstruct the failing deferred-template input and save a
-   minimal reproducer with its exact compiler revision and generated C.
-2. Compare the deferred form with a direct Unit macro on the same compiler.
-3. Trace where the declarator loses its name before selecting a repair.
+The [regression fixture](../unittest/compiler-fixtures/macro-deferred-method-member.x)
+calls methods generated through a Macro value with an identifier Name, a
+named template call with an identifier Name, and a literal owner. Direct
+source and deferred String Name invocations remain controls. It prints
+`41 42 43 44 45` and compiles without native warnings.
 
-A repair should preserve ordinary dotted-method naming and binding. Verify
-that the minimal deferred form emits valid C and can be called. Do not
-substitute new public syntax or origin restrictions for the missing name.
+Focused checks:
+
+- `make build-safe` and `make build` pass.
+- `run.sh check --fixture macro-deferred-method-member` passes.
+- Neighboring fixtures `macro-member-name-hole`, `macro-mixed-name-case`,
+  `macro-type-hole-method-owner`, `local-unit-macro-collection`, and
+  `macro-values` pass.
+
+Here `run.sh` is `unittest/compiler-fixtures/run.sh`. The submitting parent
+passed `make stage-2` on the combined tree and ran the regression with the
+stage-two compiler; it also printed `41 42 43 44 45`. The shared integrator
+owns final generated artifacts and the publication gate. No full gate ran
+in this repair session.
 
 ## Plan review
 
-This is a defect record, not a chosen repair. It adds no compiler machinery,
-validator, fixture, or recurring check. Diagnosis must identify the owner
-that loses the existing method identity before implementation is selected.
+The method member is already a Name hole. Its established member projection
+owns conversion to the source spelling. Reusing that projection removes the
+raw identifier marker before ordinary method installation consumes it.
+The repair adds no representation, traversal, validator, or origin restriction.
+The regression checks callable generated methods rather than an additional
+rejection or diagnostic.
