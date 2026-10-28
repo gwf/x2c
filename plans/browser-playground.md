@@ -345,7 +345,7 @@ compile service, playground, and gallery links. Follow-up review corrected
 the executable tmpfs required by native meta helpers and preserved the
 unsupported-browser Run guard after page lifecycle events.
 
-The published wasm binaries declare 64 MiB initial memory and a 256 MiB
+The tested wasm binaries declare 64 MiB initial memory and a 256 MiB
 maximum. Repeated browser runs use fresh worker state after completion,
 errors, and Stop; responses from aborted compilations are ignored. The
 shared integrator passed the full publication gate and confirmed the
