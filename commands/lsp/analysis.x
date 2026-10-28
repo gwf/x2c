@@ -64,6 +64,7 @@ void LspWorkspace.invalidate(LspWorkspace w, String path) {
   foreach ((Var document, Map analysis) in w.analyses)
     if (path in analysis["reads"].map()) removed.push(document);
   foreach (Var document in removed) w.analyses.del(document);
+  Compiler.refresh_source_collections();
 }
 
 /** Lists analyzed documents whose read sets contain the changed file. */
