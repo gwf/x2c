@@ -8,7 +8,8 @@ root, compiler, source = (Path(value).resolve() for value in sys.argv[1:4])
 client = Client(root, Path.cwd(), sys.argv[4:] or ["build"], compiler=compiler)
 try:
     client.opened(source, source.read_text())
-    client.diagnostics()
+    diagnostics = client.diagnostics()
+    assert diagnostics == [], diagnostics
     response = client.request("textDocument/hover", {
         "textDocument": {"uri": source.as_uri()},
         "position": {"line": 0, "character": 0}})
