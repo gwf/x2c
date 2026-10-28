@@ -17,6 +17,46 @@ static const SymbolSet nonreturning_error_causes =
 static List terminating_calls =
   %("abort" "exit" "_Exit" "_exit" "quick_exit");
 
+// inspection
+
+/** Prints bound AST nodes with stable binding numbers and compact macro
+    definitions. Binding numbers follow their first appearance in `ast`.
+*/
+void Ast.print_dump(List ast) {
+  foreach (List node in _renumbered_bindings(ast))
+    printf("\n%s\n", _node_repr(node));
+}
+
+/* A binding number counts every binding the unit has issued, collection's
+   included, so it depends on whether the includes replayed or were parsed
+   cold. A dump numbers bindings by their first appearance in its text. */
+static List _renumbered_bindings(List ast) {
+  Map numbers = {}, replaced = {};
+  Array pending = auto [ast];
+  while (pending.len()) {
+    Var node = pending.take_last();
+    if (node is not <list> || node.is_nil()) continue;
+    if (node.list() ~= %(binding ?identity ?spelling)) {
+      Var number;
+      if (!numbers.try_get(identity, number)) {
+        number = (int) numbers.len() + 1;
+        numbers[identity] = number;
+      }
+      replaced[(void *) node.list()] =
+        %(binding $number $spelling);
+      continue;
+    }
+    foreach (Var child in node.list().reverse()) pending.push(child);
+  }
+  return Ast.replace_nodes(ast, replaced);
+}
+
+static String _node_repr(List node) {
+  if (node ~= %(macrodef (name ?name) *))
+    return %"(macrodef <macro $name>)";
+  return node.repr();
+}
+
 // operators
 
 /* operator-ledger.x owns these methods in a separate implementation unit. */

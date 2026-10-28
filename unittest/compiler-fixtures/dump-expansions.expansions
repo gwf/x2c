@@ -1,0 +1,32 @@
+expansion unittest/compiler-fixtures/dump-expansions.x:8:1 define
+  definition unittest/compiler-fixtures/dump-expansions.x:3:1
+  input (args "Alias" "answer")
+  result
+
+(seq (typedef (int) (bindings (bind (binding 1 "Alias") ()))) 
+ (function (int) 
+  (bind (binding 2 "answer") ((fnmod (params (param (void) (bind () ())))))) 
+  (block (at 5 (return (int) (expr (int) (literal (int) "7")))))))
+expansion unittest/compiler-fixtures/dump-expansions.x:8:1 through
+  definition unittest/compiler-fixtures/dump-expansions.x:7:1
+  input (args "Alias" "answer")
+  result
+
+(seq (typedef (int) (bindings (bind (binding 1 "Alias") ()))) 
+ (function (int) 
+  (bind (binding 2 "answer") ((fnmod (params (param (void) (bind () ())))))) 
+  (block (at 5 (return (int) (expr (int) (literal (int) "7")))))))
+expansion unittest/compiler-fixtures/dump-expansions.x:9:25 inner
+  definition unittest/compiler-fixtures/dump-expansions.x:1:1
+  input (args (expr (int) (literal (int) "7")))
+  result
+
+(expr (int) 
+ (op + (expr (int) (literal (int) "7")) (expr (int) (literal (int) "1"))))
+expansion unittest/compiler-fixtures/dump-expansions.x:9:25 outer
+  definition unittest/compiler-fixtures/dump-expansions.x:2:1
+  input (args (expr (int) (literal (int) "7")))
+  result
+
+(expr (int) 
+ (op + (expr (int) (literal (int) "7")) (expr (int) (literal (int) "1"))))

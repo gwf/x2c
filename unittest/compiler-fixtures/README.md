@@ -5,6 +5,7 @@ the fixture checks. Supported phases are:
 
 - `tokens` - non-trivia token types, text, and positions before preprocessing
 - `ast` - parsed AST from `--dump-ast`
+- `expansions` - bound macro expansions from `--dump-expansions`
 - `transform` - normalized AST from `--dump-transforms`
 - `emit` - pre-generation emitted tokens from `--dump-code`
 - `symbols` - `--dump-symbols` entries selected by the fixture's required

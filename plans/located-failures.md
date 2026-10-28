@@ -456,29 +456,91 @@ imported macros, and stacked decorators instead.
 The expansion notes work independently of the proposed dump metadata.
 Existing retained function and initializer rows already restore their
 construction stack; bounded Unit probes report both invocation and definition
-without adding metadata. The separate dump extension remains private pending
-prototype measurements and an adoption decision.
+without adding metadata. The separate dump extension was measured and approved for adoption, as
+recorded below.
 
 
-### Phase 3: return check; dump prototype remains private
+### Phase 3: return check and adopted expansion dump
 
 Implemented the void-expression return diagnostic using resolved source and
 return types, including typedef aliases to void. Ordinary and expression-body
 parsers retain the expression's token so the error points at the expression.
-The retained `p-voidreturn.x` probe now reports line 2, column 26 before native
-compilation: `type: cannot return a void expression from a function returning
-(int)`.
+The retained `p-voidreturn.x` probe reports line 2, column 26 before native
+compilation. Decision 5 was submitted separately in PR #605.
 
-The ordinary expression and Function-decorator dump implementation is a
-private checkpoint. It is not submitted: retained Unit expansions replay a
-collected declaration production without calling the expansion binder again,
-and nested Unit boundaries were flattened. A root-only frame would therefore
-miss nested results. Existing function/initializer construction stacks remain
-sufficient for phase 2 diagnostics.
+Gary approved adoption and shared-integrator submission of the measured dump
+on 2026-10-28. `--dump-expansions` prints invocation/definition locations,
+input, and bound results, then stops after parsing. The shared AST renderer
+keeps binding numbers stable. Input unwrapping reuses phase 2's owner.
 
-Gary authorized an inspection-only metadata prototype and measurements before
-adoption. The candidate preserves expansion boundaries only while dumping;
-ordinary builds should retain existing records and allocations. Its build-time
-cost is not yet measured. Prototype changes and generated development artifacts
-stay private until correctness, output equality, and comparable measurements
-support a separate adoption decision. The full dump deliverable remains open.
+Retained Unit productions carry nested `exp-begin`/`exp-end` rows only in dump
+mode. Default selection preserves these boundaries. Replay prints bound result
+ranges without executing producers again. Ordinary builds keep existing
+production records and allocate no inspection markers, frames, or ranges.
+Compiler objects are 944 bytes with both the planned dump flag and metadata,
+compared with 936 bytes before the dump feature. Metadata adds flag checks,
+child flag copying, and a restoration wrapper call on ordinary paths.
+
+The measured correction uses a Match dispatcher for inspection rows. An
+earlier pattern-if chain failed a strict native build with a dangling-else
+warning; those failed-build observations are excluded from the comparison.
+The unused stream experiment was reverted and is not included.
+
+### Metadata measurements and scope
+
+The comparison isolates metadata against the planned dump checkpoint, not the
+whole feature against the delivered compiler. Both compilers were converged
+with matched preludes. Gary explicitly authorized measurement under sustained
+background load. Five alternating six-input translation pairs and three
+alternating clean stage-1 build pairs completed. Each stage build translated
+72 runtime, 62 compiler, and five driver units with 139 native compilations.
+All six clean builds passed without warnings.
+
+| Median metric | Planned dump | Metadata prototype |
+| --- | ---: | ---: |
+| Direct translator instructions | 27,224,285,087 | 27,196,788,005 |
+| Clean stage-1 elapsed seconds | 11.061 | 11.440 |
+| Clean stage-1 child-inclusive CPU seconds | 40.366 | 42.077 |
+
+Instruction ranges overlap. Paired elapsed differences were -1.447, -0.132,
+and +0.379 seconds. Loaded timings do not establish a consistent slowdown or
+speedup. Make's retired-instruction counter excludes descendants and is not
+reported as a whole-build instruction metric. Twelve fixed-input C/H files
+matched exactly, totaling 1,724,218 bytes. Publication performance evidence
+and the full gate remain the integrator's responsibility.
+
+Focused prototype coverage includes nested expression and Unit macros,
+typedef-only and empty Units, included definitions, generated defaults, and
+expression arguments supplied to Units. The independent constructed
+array-dimension defect is recorded in `unittest/STATUS.md`; it also fails in
+the baseline compiler and was not repaired by this plan. Its initially
+suspected connection to lost inspection metadata was disproved.
+
+Runtime/driver, macro diagnostics, and return checks were submitted as PRs
+#603, #604, and #605. The expansion dump completes the authored plan; final
+bootstrap/doc regeneration, full publication validation, and dev publication
+belong to the integrator. Submission does not establish publication.
+
+
+### Integration repair (2026-10-28)
+
+The repair chain is replayed on fixed integration base `dea671913`, without
+merging a moving dev branch. Staging now defers a pattern-producing call
+outside a meta body instead of replacing its result with integer zero.
+Ordinary meta-body calls and genuine staged failure causes retain their
+existing behavior.
+
+Expansion-note presentation replaces binding identities with source spellings
+and cache identities with per-input ordinals before rendering and truncation.
+Repeated cache references keep the same ordinal; distinct caches keep distinct
+ordinals. Literal payloads remain opaque. Semantic source unwrapping belongs
+to AST and is unchanged. Diagnostics owns note formatting, avoiding a macro
+object dependency in the isolated unit runner. All callers, including completed
+quotations and expansion dumps, use those owners.
+
+The existing protocol probe now covers binding, literal, and quotation inputs
+with the same snapshot/live compiler invocation count and exact full stderr
+comparison. Both `source_capture` and `dump_expansions` remain shared by child
+compilers. Repair submission requires focused checks and `make stage-2` on the
+committed combined candidate; the integrator still owns the final full gate,
+generated artifacts, and dev publication.

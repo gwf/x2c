@@ -53,6 +53,22 @@ Token Compiler.macro_invocation_site(Compiler c, Var site) {
   return invocation;
 }
 
+/** Prints one invocation frame and the bound result of its expansion. */
+void Compiler.print_macro_expansion(Compiler c, List frame, List result) {
+  (List definition, List input, Var bindings, Token invocation) = frame;
+  (void) bindings;
+  List site = c.token_location(invocation);
+  String source = Diagnostics.macro_definition_note(definition)
+    .remove_prefix("definition: ");
+  printf(
+    "expansion %s:%d:%d %s\n  definition %s\n"
+    "  input %s\n  result\n",
+    site.assoc(<file>), site.assoc(<line>).int(),
+    site.assoc(<column>).int(), definition.assoc(<name>),
+    source, Diagnostics.macro_expansion_input(input).repr());
+  Ast.print_dump($(result));
+}
+
 // macro expansion and hygienic names
 
 /* The definition a node names: a visible macro, a local macro, or a Macro
@@ -138,6 +154,19 @@ static List _bind_expansion(Expansion &x, Symbol position) {
       position, c.return_type);
   }
   c.close_placements(placed, result);
+  if (c.dump_expansions && x.invocation)
+    result = _inspected_expansion(c, result);
+  return result;
+}
+
+/* Collection retains inspection boundaries with the declaration rows, so
+   replay can print each bound result without invoking its producer again. */
+static List _inspected_expansion(Compiler c, List result) {
+  List frame = c.macro_stack.car();
+  if (!c.shallow) c.print_macro_expansion(frame, result);
+  else if (result ~= %(declaration-bundle (rows *rows)))
+    return %(declaration-bundle
+      (rows (exp-begin $frame) @rows (exp-end)));
   return result;
 }
 
