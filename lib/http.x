@@ -115,8 +115,8 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
   String connection = req.headers.contains("connection") ?
     req.headers["connection"].str().lower() : NULL;
   req.keep_alive = version == "HTTP/1.1";
-  if (connection == "close") req.keep_alive = 0;
-  if (connection == "keep-alive") req.keep_alive = 1;
+  if (_token(connection, "keep-alive")) req.keep_alive = 1;
+  if (_token(connection, "close")) req.keep_alive = 0;
   return req;
 }
 
@@ -307,14 +307,23 @@ void HttpServer.close(HttpServer s) {
 
 static String _line(File input, int limit, int status) {
   if (limit < 2) Http.fail(status, "headers too large");
-  char bytes[65538];
-  int capacity = limit + 1;
-  if (capacity > (int) sizeof(bytes)) capacity = sizeof(bytes);
-  char *read = input.gets(bytes, capacity);
-  input.readblock(0);
-  if (!read) return NULL;
-  size_t size = strlen(bytes);
-  if (!size || bytes[size - 1] != '\n') Http.fail(status, "line too large");
+  char bytes[65536];
+  int size = 0;
+  flockfile(input);
+  defer funlockfile(input);
+  for (;;) {
+    int byte = getc_unlocked(input);
+    if (byte == EOF) {
+      input.readblock(0);
+      if (size) Http.fail(400, "incomplete line");
+      return NULL;
+    }
+    if (!byte) Http.fail(400, "NUL in header");
+    if (size >= limit || size >= (int) sizeof(bytes))
+      Http.fail(status, "line too large");
+    bytes[size++] = byte;
+    if (byte == '\n') break;
+  }
   if (size < 2 || bytes[size - 2] != '\r') Http.fail(400, "CRLF required");
   return String.new_len(bytes, size - 2);
 }
@@ -349,6 +358,12 @@ static int _method(String method) =>
   method == "GET" || method == "POST" || method == "PUT" ||
   method == "DELETE" || method == "HEAD" || method == "OPTIONS" || method == "PATCH";
 
+static int _token(String values, String token) {
+  foreach (String value in values.split(","))
+    if (value.strip(NULL) == token) return 1;
+  return 0;
+}
+
 static int _header_name(String name) {
   if (!name) return 0;
   for (int i = 0; i < name.len(); i++) {
@@ -368,7 +383,10 @@ static int _match(List pattern, List path, Map captures) {
     }
     if (!path) return 0;
     String value = path.car(); path = path.cdr();
-    if (segment && segment[0] == ':') captures[String.new(segment + 1)] = value;
+    if (segment && segment[0] == ':') {
+      if (!value) return 0;
+      captures[String.new(segment + 1)] = value;
+    }
     else if (segment != value) return 0;
   }
   return !path;

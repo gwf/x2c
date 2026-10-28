@@ -34,6 +34,12 @@ static void http_parser(void) {
   EXPECT_FALSE(HttpRequest.read(old, 100).keep_alive);
   File persistent = auto _input("GET / HTTP/1.0\r\nConnection: keep-alive\r\n\r\n");
   EXPECT_TRUE(HttpRequest.read(persistent, 100).keep_alive);
+  File tokens = auto _input("GET / HTTP/1.1\r\nHost: x\r\nConnection: foo, Close\r\n\r\n");
+  EXPECT_FALSE(HttpRequest.read(tokens, 100).keep_alive);
+  File old_tokens = auto _input("GET / HTTP/1.0\r\nConnection: Foo, keep-alive\r\n\r\n");
+  EXPECT_TRUE(HttpRequest.read(old_tokens, 100).keep_alive);
+  File both = auto _input("GET / HTTP/1.1\r\nHost: x\r\nConnection: keep-alive, close\r\n\r\n");
+  EXPECT_FALSE(HttpRequest.read(both, 100).keep_alive);
 }
 
 static void http_parser_rejections(void) {
@@ -54,6 +60,24 @@ static void http_parser_rejections(void) {
   EXPECT_INT_EQ(_rejected(longline, 100), 400);
   longline.clear().write("GET / HTTP/1.1\r\nHost: x\r\nBig: ").write_repeat('x', 65536).write("\r\n\r\n");
   EXPECT_INT_EQ(_rejected(longline, 100), 431);
+}
+
+static void http_nul_framing(void) {
+  $test.scoped();
+  const char header[] = "GET / HTTP/1.1\r\nHost: x\r\nX: a\0b\r\n\r\n";
+  File input = auto tmpfile();
+  input.write_all(header, sizeof(header) - 1); rewind(input);
+  int status = 0;
+  try HttpRequest.read(input, 100);
+  catch %(http-fail (status ?code) *): status = code.integer();
+  EXPECT_INT_EQ(status, 400);
+  const char body[] = "POST / HTTP/1.1\r\nHost: x\r\nContent-Length: 3\r\n\r\na\0b";
+  File second = auto tmpfile();
+  second.write_all(body, sizeof(body) - 1); rewind(second);
+  status = 0;
+  try HttpRequest.read(second, 100);
+  catch %(http-fail (status ?code) *): status = code.integer();
+  EXPECT_INT_EQ(status, 400);
 }
 
 static void http_router_and_response(void) {
@@ -83,6 +107,10 @@ static void http_router_and_response(void) {
   catch %(http-fail (status ?code) *): status = code.integer();
   EXPECT_INT_EQ(status, 405);
   req.path = "/absent";
+  try routes.dispatch(req, res);
+  catch %(http-fail (status ?code) *): status = code.integer();
+  EXPECT_INT_EQ(status, 404);
+  req.method = <get>; req.path = "/notes/";
   try routes.dispatch(req, res);
   catch %(http-fail (status ?code) *): status = code.integer();
   EXPECT_INT_EQ(status, 404);
@@ -116,7 +144,10 @@ static void http_loopback(void) {
   routes.post("/notes", %!(HttpRequest req, HttpResponse res) => res.status(201).json(req.json()));
   routes.get("/fail", %!(HttpRequest req, HttpResponse res) => { Http.fail(422, "rejected"); });
   routes.get("/bug", %!(HttpRequest req, HttpResponse res) => { raise %(bad-arg); });
-  routes.get("/io-bug", %!(HttpRequest req, HttpResponse res) => { raise %(io-fail (errno 5)); });
+  routes.get("/io-bug", %!(HttpRequest req, HttpResponse res) => {
+    res.status(201).text("partial");
+    raise %(io-fail (errno 5));
+  });
   routes.route(<head>, "/head", %!(HttpRequest req, HttpResponse res) => res.text("hidden"));
   routes.files("/", directory);
   Logger logger = Logger.new(<error>);
@@ -147,8 +178,14 @@ static void http_loopback(void) {
   client.output.puts("GET //etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
   _response(client, code);
   EXPECT_INT_EQ(code, 404);
-  client.output.puts("GET /io-bug HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
+  client.output.puts("GET /%2fetc/passwd HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
   _response(client, code);
+  EXPECT_INT_EQ(code, 404);
+  client.output.puts("GET /%2e%2e/etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
+  _response(client, code);
+  EXPECT_INT_EQ(code, 404);
+  client.output.puts("GET /io-bug HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
+  EXPECT_STR_EQ(_response(client, code), "{\"error\":\"internal server error\"}");
   EXPECT_INT_EQ(code, 500);
   client.output.puts("HEAD /head HTTP/1.1\r\nHost: x\r\n\r\nGET /notes/two HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
   EXPECT_TRUE(client.input.readline().contains("200"));
@@ -172,6 +209,7 @@ static void http_loopback(void) {
 void http_suite(void) {
   $test.run(http_parser);
   $test.run(http_parser_rejections);
+  $test.run(http_nul_framing);
   $test.run(http_router_and_response);
   $test.run(http_loopback);
 }
