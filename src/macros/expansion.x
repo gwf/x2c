@@ -53,6 +53,24 @@ Token Compiler.macro_invocation_site(Compiler c, Var site) {
   return invocation;
 }
 
+/** Prints one invocation frame and the bound result of its expansion. */
+void Compiler.print_macro_expansion(Compiler c, List frame, List result) {
+  (List definition, List input, Var bindings, Token invocation) = frame;
+  (void) bindings;
+  List site = c.token_location(invocation);
+  List origin = definition.assoc(<origin>);
+  List captured = input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  printf(
+    "expansion %s:%d:%d %s\n  definition %s:%d:%d\n"
+    "  input %s\n  result\n",
+    site.assoc(<file>), site.assoc(<line>).int(),
+    site.assoc(<column>).int(), definition.assoc(<name>),
+    origin.assoc(<file>), origin.assoc(<line>).int(),
+    origin.assoc(<column>).int(), _source_unwrap(captured).repr());
+  Ast.print_dump($(result));
+}
+
 // macro expansion and hygienic names
 
 /* The definition a node names: a visible macro, a local macro, or a Macro
@@ -138,23 +156,20 @@ static List _bind_expansion(Expansion &x, Symbol position) {
       position, c.return_type);
   }
   c.close_placements(placed, result);
-  if (c.dump_expansions && x.invocation) _dump_expansion(x, result);
+  if (c.dump_expansions && x.invocation)
+    result = _inspected_expansion(c, result);
   return result;
 }
 
-static void _dump_expansion(Expansion &x, List result) {
-  List site = x.c.token_location(x.invocation);
-  List origin = x.definition.assoc(<origin>);
-  List captured = x.input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
-  printf(
-    "expansion %s:%d:%d %s\n  definition %s:%d:%d\n"
-    "  input %s\n  result\n",
-    site.assoc(<file>), site.assoc(<line>).int(),
-    site.assoc(<column>).int(), x.definition.assoc(<name>),
-    origin.assoc(<file>), origin.assoc(<line>).int(),
-    origin.assoc(<column>).int(), _source_unwrap(captured).repr());
-  Ast.print_dump($(result));
+/* Collection retains inspection boundaries with the declaration rows, so
+   replay can print each bound result without invoking its producer again. */
+static List _inspected_expansion(Compiler c, List result) {
+  List frame = c.macro_stack.car();
+  if (!c.shallow) c.print_macro_expansion(frame, result);
+  else if (result ~= %(declaration-bundle (rows *rows)))
+    return %(declaration-bundle
+      (rows (exp-begin $frame) @rows (exp-end)));
+  return result;
 }
 
 /* Allocates each fresh name of the definition. A name meta calls read

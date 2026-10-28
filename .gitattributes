@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/*.ast whitespace=-trailing-space
+unittest/compiler-fixtures/*.expansions whitespace=-trailing-space
 unittest/compiler-fixtures/*.transform whitespace=-trailing-space
 unittest/compiler-fixtures/*.definitions whitespace=-trailing-space
 unittest/compiler-fixtures/*.diagnostics whitespace=-blank-at-eof

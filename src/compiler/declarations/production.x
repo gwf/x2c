@@ -96,6 +96,20 @@ static List _declaration_source_key(Compiler c, Token token) {
    visited once, and later source declarations keep their ordinary order. */
 module void _restore_declaration_bindings(
   Compiler c, Var syntax, Map facts, Map seen) {
+  if (!c.dump_expansions) {
+    _restore_bindings(c, syntax, facts, seen);
+    return;
+  }
+  List rows = syntax;
+  if (syntax ~= %(declaration-bundle (rows *items))) rows = items;
+  foreach (List row in rows) {
+    if (row ~= %((!or exp-begin exp-end) *)) continue;
+    _restore_bindings(c, row, facts, seen);
+  }
+}
+
+static void _restore_bindings(
+  Compiler c, Var syntax, Map facts, Map seen) {
   if (syntax is not <list> || syntax in seen) return;
   seen[syntax] = 1;
   int identity = 0;
@@ -109,5 +123,5 @@ module void _restore_declaration_bindings(
   }
   /* The preceding tag guard establishes the List payload. */
   foreach (Var child in syntax.list_payload())
-    _restore_declaration_bindings(c, child, facts, seen);
+    _restore_bindings(c, child, facts, seen);
 }

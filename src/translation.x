@@ -460,11 +460,11 @@ static void _translate_unit(
     c.dump_tokens();
     return;
   }
+  c.dump_expansions = dump == <expansions>;
   int collected = unit.collect(frontend);
   _report_diagnostics(c);
   if (!collected) exit(1);
   if (_inspect_collected(unit, dump)) return;
-  c.dump_expansions = dump == <expansions>;
   if (!unit.parse()) _fail(c);
   c.recovery_depth = 0;
   if (_inspect_parsed(unit, filename, dump)) return;

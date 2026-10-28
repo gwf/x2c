@@ -740,10 +740,34 @@ module List _bind_named_type(Compiler c, String name, Var type) {
    as a bundle. */
 module List _bind_bundle(Compiler c, List rows) {
   if (c.shallow) c.declaration_produced = 1;
+  if (c.dump_expansions) return _bind_inspected_bundle(c, rows);
   Array projected = [];
   foreach (List row in rows) {
     List bound = c.bind_syntax(row, <unit>, c.return_type);
     _append_rows(projected, bound);
+  }
+  List items = projected.list_free();
+  return c.shallow ? %(declaration-bundle (rows @items)) : %(seq @items);
+}
+
+/* The ordinary row stream stays flat while inspection boundaries nest.
+   Defaults and recipes retain these rows through collection and replay. */
+static List _bind_inspected_bundle(Compiler c, List rows) {
+  Array projected = [], frames = auto [];
+  foreach (List row in rows) {
+    if (row ~= %(exp-begin ?frame)) {
+      if (c.shallow) projected.push(row);
+      else frames.push($(frame, (int) projected.len()));
+    }
+    else if (row == %(exp-end)) {
+      if (c.shallow) projected.push(row);
+      else {
+        (List frame, int first) = frames.take_last();
+        Array range = projected[first:];
+        c.print_macro_expansion(frame, %(seq @(range.list_free())));
+      }
+    }
+    else _append_rows(projected, c.bind_syntax(row, <unit>, c.return_type));
   }
   List items = projected.list_free();
   return c.shallow ? %(declaration-bundle (rows @items)) : %(seq @items);
