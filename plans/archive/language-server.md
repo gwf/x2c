@@ -1,4 +1,5 @@
-> Status: active - client 0.4.0 published; phase 4 ready for shared integration
+> Status: done
+> Completed on 2026-10-28 through PR #615 after the verified client 0.4.0 release.
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
 > Ready PRs go to the shared integration agent, which owns full gates.
@@ -576,3 +577,12 @@ existing message. These are request-boundary errors, not another AST validator.
 Last implementation step for each phase: review the completed authored
 diff for repeated facts, unused machinery, and reuse missed above, fix what
 it finds, then run the publication validation.
+
+## Completion
+
+PR #615 retires the replaced editor command and compatibility launcher, ships
+`lsp` through the existing installer policy, and retains optional legacy
+regressions through LSP. The Marketplace 0.4.0 archive matches the exact tested
+VSIX. Installed-prefix analysis works without a package manager or dependency
+installation. The submitting parent passed `make stage-2` and focused LSP
+checks; the shared integrator owns final publication validation.

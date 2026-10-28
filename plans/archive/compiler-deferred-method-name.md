@@ -1,6 +1,6 @@
-> Status: active
-> Reproduced and repaired locally on 2026-10-28 at base `282f5bfb8`.
-> Awaiting the combined compiler-defect submission and shared integration.
+> Status: done
+> Published on 2026-10-28 through PR #614 at
+> `fba02f6087b80c262ed6a40612f71571f448c711`.
 
 # Deferred method template loses its name
 
@@ -14,7 +14,7 @@ instead reports that `P` has no method `get`.
 
 The failure reproduces at `282f5bfb8181b73ebfc924d8b77ac00a861a1607`.
 A direct invocation and a deferred String Name argument work on that same
-compiler. The original [derive probe report](derive-and-test.md#what-the-probe-established)
+compiler. The original [derive probe report](../derive-and-test.md#what-the-probe-established)
 at `9aeeef265` is now narrowed to this reproduced identifier-valued Name
 case. The original failing source was not retained, so its exact shape
 cannot be confirmed.
@@ -28,7 +28,7 @@ to their source spelling. Method installation and binding remain unchanged.
 
 ## Verification
 
-The [regression fixture](../unittest/compiler-fixtures/macro-deferred-method-member.x)
+The [regression fixture](../../unittest/compiler-fixtures/macro-deferred-method-member.x)
 calls methods generated through a Macro value with an identifier Name, a
 named template call with an identifier Name, and a literal owner. Direct
 source and deferred String Name invocations remain controls. It prints

@@ -46,7 +46,7 @@ All probes ran with `builds/0/x2c run` on `dev` `9aeeef265`.
   losing its C declarator name. Current investigation reproduced the
   identifier-valued Name case and repaired its member projection; direct
   and deferred String Names work. See
-  [Deferred method names](compiler-deferred-method-name.md).
+  [Deferred method names](archive/compiler-deferred-method-name.md).
 - The original include-only `meta static` report was investigated and
   [closed as misclassified](archive/compiler-included-static-meta.md).
   Provider-owned private calls work; consumer access to another unit's static
@@ -350,9 +350,9 @@ commission another implementation campaign.
 
 The two compiler reports were investigated independently:
 
-- [Deferred method names](compiler-deferred-method-name.md): the
-  identifier-valued method Name case reproduces and has a scoped repair
-  awaiting integration. Direct and deferred String Names already worked.
+- [Deferred method names](archive/compiler-deferred-method-name.md): the
+  identifier-valued method Name case was repaired and published in PR #614.
+  Direct and deferred String Names already worked.
 - [Included static meta helpers](archive/compiler-included-static-meta.md):
   closed as misclassified. Supported provider-owned calls pass; consumer
   access to private helpers is outside the documented visibility contract.
