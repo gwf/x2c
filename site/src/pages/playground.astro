@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { playgroundExamples } from "../lib/examples";
+import "../styles/playground.css";
+import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
+const service = import.meta.env.PLAYGROUND_URL || "";
+---
+<BaseLayout title="Playground - x2c" description="Edit an x2c program and run it in your browser as WebAssembly.">
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <section class="playground plain-editor" data-playground data-service={service}>
+    <p class="about-eyebrow">playground</p>
+    <h1>Try x2c.</h1>
+    <p class="playground-intro">Edit a program. Run it in your browser.</p>
+    <div class="playground-toolbar">
+      <label for="playground-example">Example</label>
+      <select id="playground-example">
+        {playgroundExamples.map((example) => <option value={example.id}>{example.label}</option>)}
+      </select>
+      <button type="button" data-run hidden={!service}>Run</button>
+      <button type="button" data-stop hidden>Stop</button>
+    </div>
+    <div class="playground-workspace">
+      <div class="playground-source">
+        <label for="playground-source">Source</label>
+        <div class="playground-editor">
+          <pre aria-hidden="true" data-highlight></pre>
+          <textarea id="playground-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="playground-support">{playgroundExamples[0]?.source}</textarea>
+        </div>
+      </div>
+      <div class="playground-result">
+        <h2>Output</h2>
+        <pre data-output role="log" aria-label="Program output"></pre>
+      </div>
+    </div>
+    <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still explore and edit the examples."}</p>
+    <p id="playground-support" class="playground-support">Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+). Safari support is checked in your browser. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
+    <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, and pool workers are unavailable.</p>
+    <noscript><p>JavaScript is required to select examples and run programs.</p></noscript>
+    <script type="application/json" data-theme set:html={JSON.stringify(x2cDarkTheme).replaceAll("<", "\\u003c")} />
+    <script type="application/json" data-examples set:html={JSON.stringify(playgroundExamples).replaceAll("<", "\\u003c")} />
+  </section>
+  <SiteFooter />
+</BaseLayout>
+<script>
+  import { setupPlayground } from "../lib/playground";
+  setupPlayground();
+</script>
