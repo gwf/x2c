@@ -15,8 +15,9 @@ instead reports that `P` has no method `get`.
 The failure reproduces at `282f5bfb8181b73ebfc924d8b77ac00a861a1607`.
 A direct invocation and a deferred String Name argument work on that same
 compiler. The original [derive probe report](derive-and-test.md#what-the-probe-established)
-at `9aeeef265` therefore described the identifier-valued Name case, not all
-deferred method templates.
+at `9aeeef265` is now narrowed to this reproduced identifier-valued Name
+case. The original failing source was not retained, so its exact shape
+cannot be confirmed.
 
 `_method_member` in `src/parse/declarators.x` used the Name hole's raw value.
 That leaves the member as `("x2c.ident" "get")`, while a method declarator
@@ -42,8 +43,10 @@ Focused checks:
   `macro-values` pass.
 
 Here `run.sh` is `unittest/compiler-fixtures/run.sh`. The submitting parent
-owns the combined stage-two build. The shared integrator owns final generated
-artifacts and the publication gate. No full gate ran for this private repair.
+passed `make stage-2` on the combined tree and ran the regression with the
+stage-two compiler; it also printed `41 42 43 44 45`. The shared integrator
+owns final generated artifacts and the publication gate. No full gate ran
+in this repair session.
 
 ## Plan review
 

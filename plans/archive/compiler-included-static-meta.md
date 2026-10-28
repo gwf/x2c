@@ -8,7 +8,7 @@
 
 ## Report and current finding
 
-The [derive campaign](derive-and-test.md#what-the-probe-established) reported
+The [derive campaign](../derive-and-test.md#what-the-probe-established) reported
 `explicit meta call cannot be resolved: no binding for probe_make` from an
 included `meta static` helper at `9aeeef265`. The original failing source
 was not retained, so its exact call form cannot be verified.
@@ -19,9 +19,9 @@ is rejected as a private function. A consumer macro that keeps the private
 helper with `using` reproduces the reported no-binding category, but that
 form is also outside the documented contract.
 
-The [meta-function guide](../docs/src/guide/meta-functions.md#how-a-meta-function-runs)
+The [meta-function guide](../../docs/src/guide/meta-functions.md#how-a-meta-function-runs)
 says static helpers and state remain in the provider. Public meta functions
-can call them there. The [macro using rules](../docs/src/reference/language.md#keeping-a-file-scope-name-with-using)
+can call them there. The [macro using rules](../../docs/src/reference/language.md#keeping-a-file-scope-name-with-using)
 restrict an internal-linkage name to its own unit; cross-unit applications
 keep nonstatic names instead. Fixing the unsupported macro case by exposing
 the static helper would change that contract.

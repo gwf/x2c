@@ -1,7 +1,7 @@
 > Status: active
 > Implementation delivered on 2026-10-28 in PR #602, merged as
 > `606406d7a347dfcee37559ee457321a18ae001f2`. Remaining follow-ups are
-> listed below; compiler defects have separate owning records.
+> listed below; compiler investigation outcomes have separate records.
 > Drafted 2026-10-28 from a working probe set kept under
 > `plans/reference/probes-2026-10-28/derive/` (`p4f.x`, `r8.x`, `r10.x`;
 > run each with `builds/0/x2c run FILE`). The probes establish
@@ -42,19 +42,18 @@ All probes ran with `builds/0/x2c run` on `dev` `9aeeef265`.
   struct conversion uses it, so the nested type must be derived earlier
   in the unit; otherwise the ordinary undeclared-name diagnostic reports
   the spelling.
-- A method definition returned by a meta function through a deferred
-  named template (`$derive.method(type, name, body)`) compiles to
-  `int(P v){` in C: the dotted declarator loses its name. This is a
-  compiler defect tracked in [Deferred method names](compiler-deferred-method-name.md);
-  the implementation does not use that form.
-- A `meta static` helper reached only through an include fails with
-  `explicit meta call cannot be resolved: no binding for probe_make`
-  (tracked in [Included static meta helpers](compiler-included-static-meta.md)).
-  A nonstatic `meta` helper in an included module works
-  with `x2c run main.x module.x` and with `x2c script main.x`. A shipped
-  `lib/` module needs neither: `tools/gen-linked-meta.sh` copies every
-  bodied `meta` function under `lib/` into `src/linked-meta.x`, so the
-  helpers run inside the compiler as `system-macros.x` helpers do.
+- The original probe reported a method returned through a deferred template
+  losing its C declarator name. Current investigation reproduced the
+  identifier-valued Name case and repaired its member projection; direct
+  and deferred String Names work. See
+  [Deferred method names](compiler-deferred-method-name.md).
+- The original include-only `meta static` report was investigated and
+  [closed as misclassified](archive/compiler-included-static-meta.md).
+  Provider-owned private calls work; consumer access to another unit's static
+  helper is outside the existing visibility contract. Nonstatic meta helpers
+  are available to includers. Shipped `lib/` helpers use linked meta:
+  `tools/gen-linked-meta.sh` copies their bodied meta definitions into
+  `src/linked-meta.x`, as it does for `system-macros.x`.
 - `x2c_diagnostic_fail` from the helper reports at the `$derive(Bad);`
   invocation with the field name and type, and stops the expansion.
 - The full probe generated `to_map`, `from_map`, `equal`, and `repr` for
@@ -349,13 +348,15 @@ commission another implementation campaign.
 | Shared assertion implementation | User tests use `lib/test.x`; repository tests keep their existing harness and Scope-balance rules. | Once `test.x` has users, assess whether sharing assertions removes duplication without weakening either contract. |
 | Promote `x2c test` to shipped | The command is experimental and built in checkouts; `make install` excludes it. The library already ships. | Review experience with the public library and runner, then explicitly select promotion and update the command manifest. |
 
-The two compiler defects are tracked independently:
+The two compiler reports were investigated independently:
 
-- [Deferred method names](compiler-deferred-method-name.md): a method
-  returned through a deferred named template loses its C declarator name.
-- [Included static meta helpers](compiler-included-static-meta.md): an
-  explicit meta call cannot resolve a static helper reached through an include.
+- [Deferred method names](compiler-deferred-method-name.md): the
+  identifier-valued method Name case reproduces and has a scoped repair
+  awaiting integration. Direct and deferred String Names already worked.
+- [Included static meta helpers](archive/compiler-included-static-meta.md):
+  closed as misclassified. Supported provider-owned calls pass; consumer
+  access to private helpers is outside the documented visibility contract.
 
 Both records distinguish the original probe report from current reproduction.
-Neither defect was repaired by this campaign. The direct method templates and
-linked-meta helpers keep derive independent of those repairs.
+The derive implementation retains its direct method templates and linked-meta
+helpers; the compiler investigation does not change that library design.
