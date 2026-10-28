@@ -144,7 +144,8 @@ static void _not_expression(Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   String spelling = definition.assoc(<name>).str();
   $fail.macros_result_expr(
-    c, invocation, kind, spelling, _definition_note(definition));
+      c, invocation, kind, spelling,
+      Diagnostics.macro_definition_note(definition));
 }
 
 static List _expression_decorator(
@@ -153,7 +154,7 @@ static List _expression_decorator(
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
     String spelling = definition.assoc(<name>).str();
     $fail.macros_decorator_expr(
-      c, invocation, spelling, _definition_note(definition));
+      c, invocation, spelling, Diagnostics.macro_definition_note(definition));
   }
   List target = c.parse_macro_expression_target();
   List input = %(

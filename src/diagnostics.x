@@ -29,7 +29,6 @@ typedef struct DiagnosticsHold {
 } DiagnosticsHold;
 
 #include "type.x"
-#include "macros/macros.x"
 
 #include "json.x"
 #include "report.x"
@@ -208,6 +207,39 @@ void Compiler.report_warning(
   String expansion = c.macro_expansion_note();
   if (expansion) notes = notes.append($(expansion));
   c.report_warning_at(code, message, _compiler_location(c, token), notes);
+}
+
+/** Returns the innermost source expansion's definition and input note. */
+String Compiler.macro_expansion_note(Compiler c) {
+  foreach (List active in c.macro_stack) {
+    (List definition, List input, Var bindings, Token invocation) = active;
+    (void) bindings;
+    if (!invocation) continue;
+    String name = definition.assoc(<name>).str();
+    String source = Diagnostics.macro_definition_note(definition)
+      .remove_prefix("definition: ");
+    List lines = Diagnostics.macro_expansion_input(input)
+      .repr().split_lines(0);
+    String shown = " ".join(
+      lines.map(%!(line) => String.strip(line, NULL)));
+    if (shown.len() > 160) shown = %"$(shown[:157])...";
+    return %"in expansion of '$name' defined at $source; input: $shown";
+  }
+  return NULL;
+}
+
+/** Removes captured-argument transport and source wrappers for a note. */
+Var Diagnostics.macro_expansion_input(List input) {
+  List captured = input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  return Ast.source_unwrap(captured);
+}
+
+/** Formats a macro definition's recorded source location. */
+String Diagnostics.macro_definition_note(List definition) {
+  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
+  int line = origin.assoc(<line>), column = origin.assoc(<column>);
+  return %"definition: $file:$line:$column";
 }
 
 /** Resolves a recorded occurrence through generated ancestry to its source.

@@ -115,7 +115,7 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
   if (!(kind in alias_kinds)) {
     String spelling = _kind_spelling(kind);
     $fail.macros_keyword_internal(
-      c, declaration, spelling, _definition_note(definition));
+      c, declaration, spelling, Diagnostics.macro_definition_note(definition));
   }
   c.expect(<;>);
   c.kw_aliases[alias] = definition;

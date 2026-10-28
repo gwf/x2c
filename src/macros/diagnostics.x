@@ -330,37 +330,7 @@ void Compiler.report_meta_failure(
   $fail.macros_meta_failed(c, invocation, source, error);
 }
 
-/** Returns the innermost source expansion's definition and input note. */
-String Compiler.macro_expansion_note(Compiler c) {
-  foreach (List active in c.macro_stack) {
-    (List definition, List input, Var bindings, Token invocation) = active;
-    (void) bindings;
-    if (!invocation) continue;
-    String name = definition.assoc(<name>).str();
-    String source = _definition_note(definition).remove_prefix("definition: ");
-    List lines = _expansion_input(input).repr().split_lines(0);
-    String shown = " ".join(
-      lines.map(%!(line) => String.strip(line, NULL)));
-    if (shown.len() > 160) shown = %"$(shown[:157])...";
-    return %"in expansion of '$name' defined at $source; input: $shown";
-  }
-  return NULL;
-}
-
 // macro diagnostics and source notes
-
-/* Captured source arguments without their transport and origin wrappers. */
-module Var _expansion_input(List input) {
-  List captured = input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
-  return _source_unwrap(captured);
-}
-
-module String _definition_note(List definition) {
-  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
-  int line = origin.assoc(<line>), column = origin.assoc(<column>);
-  return %"definition: $file:$line:$column";
-}
 
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */
