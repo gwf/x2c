@@ -101,12 +101,11 @@ After building the checkout commands and SQLite package, run from the
 repository root:
 
 ```sh
-CPATH="$PWD/packages/sqlite/deps/include${CPATH:+:$CPATH}" \
-  builds/0/x2c test --manifest packages/sqlite/tests/derive/x2c.toml
+builds/0/x2c test --manifest packages/sqlite/tests/derive/x2c.toml
 ```
 
-The pilot's manifest supplies the package search directory. `CPATH` selects
-the prepared dependency's pinned SQLite headers for native compilation.
+The pilot's manifest supplies the package search directory. SQLite's native
+response file supplies its prepared dependency's pinned header directory.
 The pilot's own test project keeps discovery separate from the existing
 package test harness.
 Use `--list` to list the test, or `--filter round_trip --quiet` to select it.
@@ -211,7 +210,6 @@ For an application outside this repository:
 
 ```sh
 /path/to/x2c build --package-dir /path/to/x2c/packages \
-  --c-include-dir /path/to/x2c/packages/sqlite/deps/include \
   --output report report.x
 ```
 

@@ -365,7 +365,8 @@ helpers; the compiler investigation does not change that library design.
 
 `packages/sqlite/tests/derive/` is a standalone test project using derive,
 `test.x`, and `x2c test`. Its manifest supplies the package directory; the
-SQLite README documents the pinned native header path through `CPATH`.
+SQLite native response file supplies the pinned native header directory, so
+the documented pilot invocation needs no `CPATH` setup.
 
 The test binds two records with `<row>`, selects them in SQL order, and
 compares reconstructed records with `<equal>`. It covers String, double,
