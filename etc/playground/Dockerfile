@@ -4,7 +4,6 @@ WORKDIR /opt/x2c
 COPY Makefile configure LICENSE NOTICE THIRD_PARTY.md ./
 COPY LICENSES/ ./LICENSES/
 COPY builds/Makefile builds/stage.mk ./builds/
-COPY bin/Makefile ./bin/
 COPY bootstrap/ ./bootstrap/
 COPY src/ ./src/
 COPY lib/ ./lib/
@@ -14,7 +13,7 @@ COPY tools/ ./tools/
 COPY commands/manifest.txt ./commands/
 COPY examples/power/exceptions.x ./examples/power/
 COPY examples/data/power-exceptions/ ./examples/data/power-exceptions/
-RUN make build-safe && make wasm-runtime \
+RUN mkdir -p bin && make build-safe && make wasm-runtime \
     && WASM_LDFLAGS='--embed-file /opt/x2c/examples/data/power-exceptions@examples/data/power-exceptions' \
        tools/wasm-build examples/power/exceptions.x /tmp/warm \
     && chmod -R a+rX /opt/x2c /emsdk \

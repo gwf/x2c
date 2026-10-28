@@ -33,8 +33,8 @@ The handler listens on `127.0.0.1:8787`; `HOST` and `PORT` override this.
 Terminate HTTPS at the deployment's reverse proxy. Configure its request
 body limit to 64 KiB and its response timeout above 20 seconds.
 
-Build the static site with `PLAYGROUND_URL=https://compile.example/compile`.
-The URL is the complete endpoint, including `/compile`. Browser preflight
+Build the static site with `PLAYGROUND_URL=https://compile.example`.
+The client appends `/compile` to this service base URL. Browser preflight
 and responses allow only origins listed in `PLAYGROUND_ORIGINS`.
 Requests without an Origin header can be made by command-line clients.
 The handler uses the socket client address and ignores forwarded headers.
@@ -58,7 +58,7 @@ Each cache miss starts a fresh container with:
 - a 20-second deadline, followed by forced container removal.
 
 The writable tmpfs permits native compile-time helpers to execute. Translation
-can evaluate user macros and Lisp, so source filtering is not the sandbox.
+can execute native compile-time code, so source filtering is not the sandbox.
 Literal absolute and parent includes, nonliteral include directives, and
 `process.x` are rejected with diagnostics. Other unavailable browser APIs
 retain their ordinary runtime failures. The output is capped at 8 MiB.
