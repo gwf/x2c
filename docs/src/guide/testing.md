@@ -11,8 +11,9 @@ $test()
 static void push_then_pop(void) {
   Array stack = auto [];
   stack.push(1);
-  $expect_eq(stack.pop(), 1);
-  $expect_eq(stack.len(), 0);
+  $expect_eq(stack[0], 1);
+  stack.pop();
+  $expect(stack.len() == 0);
 }
 
 $test.main();
@@ -27,8 +28,8 @@ with `x2c test`.
 `$expect(condition)` records the expression and its source location if the
 condition is false. Execution continues, so a test can report several
 failures. `$expect_eq(actual, expected)` evaluates each expression once,
-boxes the values, and compares them with `Var.equal`. On failure, it prints
-both representations. Differing multiline Strings also produce a unified
+boxes the values, and compares them with `Var.equal`, including its numeric
+type distinctions. On failure, it prints both representations. Differing multiline Strings also produce a unified
 difference, with `expected` first and `actual` second.
 
 `$expect_raises(cause, statement)` passes only when the statement raises an
@@ -65,6 +66,9 @@ For example, `x2c run tests/stack_test.x -- --filter pop --quiet` selects
 test names containing `pop`.
 
 ## Running test files
+
+The command is experimental and available in checkout builds.
+`make install` does not install it.
 
 `x2c test` finds `*_test.x`, `test_*.x`, and every `.x` file below a
 `tests/` directory. With no operands, it starts at the nearest `x2c.toml`

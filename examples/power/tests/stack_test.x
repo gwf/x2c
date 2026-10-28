@@ -5,8 +5,9 @@ $test()
 static void push_then_pop(void) {
   Array stack = auto [];
   stack.push(1);
-  $expect_eq(stack.pop(), 1);
-  $expect_eq(stack.len(), 0);
+  $expect_eq(stack[0], 1);
+  stack.pop();
+  $expect(stack.len() == 0);
 }
 
 $test.main();

@@ -74,6 +74,16 @@ done
   --target app "$WORK/project/a_test.x") >"$WORK/explicit-manifest"
 grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' \
   "$WORK/explicit-manifest"
+# Tests also belong to library projects; selecting settings does not run a target.
+cat >"$WORK/project/x2c.toml" <<'LIBRARY'
+[target.app]
+kind = "static-library"
+sources = ["src/main.x"]
+include-dirs = ["include"]
+LIBRARY
+run a_test.x
+[ "$status" = 0 ]
+grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
 "$TOOL" --help >"$WORK/help"
 grep -q 'x2c test' "$WORK/help"
 # The normal dispatcher routes to the same command and help.

@@ -53,7 +53,7 @@ static Run _configure(Map options) {
   long count = strtol(jobs ? jobs : "", &end, 10);
   if (!jobs || *end || count < 1 || count > INT_MAX)
     Diagnostics.driver_error("test: -j requires a positive integer");
-  CliRequest project = CliRequest.new(<run>);
+  CliRequest project = CliRequest.new(<build>);
   project.manifest = options["manifest"];
   project.target = options["target"];
   project.dry_run = 1;
@@ -61,8 +61,9 @@ static Run _configure(Map options) {
   Path root = manifest ? Path.dirname(Path.absolute(manifest)) : Path.absolute(".");
   if (manifest) {
     project.manifest = manifest;
+    // The selected target follows all its dependencies.
     for (ProjectBuild node = ProjectBuild.plan(project); node; node = node.next)
-      if (node.request.command == <run>) project = node.request;
+      project = node.request;
   }
   Array args = [];
   foreach (String filter in options["filter"].list()) {

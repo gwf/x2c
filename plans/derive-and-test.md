@@ -1,4 +1,6 @@
 > Status: active
+> Implemented on 2026-10-28; awaiting shared integration. Focused checks
+> pass; the integration agent owns final generated artifacts and full gates.
 > Drafted 2026-10-28 from a working probe set kept under
 > `plans/reference/probes-2026-10-28/derive/` (`p4f.x`, `r8.x`, `r10.x`;
 > run each with `builds/0/x2c run FILE`). The probes establish
@@ -209,12 +211,13 @@ the matching driver from `Compiler.driver_executable()`.
   root is the directory of the nearest `x2c.toml` (or the current
   directory). It selects `*_test.x`, `test_*.x`, and `tests/**/*.x`,
   sorted bytewise, excluding `.x2c-build/`.
-- Build and run: for each file it runs `x2c run -q --build-dir
-  <root>/.x2c-build/tests/<stem> <file> -- <program args>`. `run` compiles
-  the file; the file's own includes compile as local modules exactly as
-  `x2c script` documents, and the project's `--package-dir` and
-  `--x-include-dir` from the selected manifest target are forwarded.
-  Nothing in `commands/build` changes.
+- Build and run: for each file it runs `x2c script <file> <program args>`
+  with `X2C_CACHE_DIR=<root>/.x2c-build/tests`. The script build owns local
+  included modules and its per-script cache directories. The project's
+  `--package-dir` and `--x-include-dir` from the selected manifest target
+  are forwarded before the file. Nothing in `commands/build` changes.
+  Gary selected this adjustment during implementation on 2026-10-28 because
+  `run` does not discover local included modules.
 - Options: `--filter`, `--list`, and `--quiet` pass through to every test
   program; `-j N` runs files concurrently through `Process` jobs with
   output captured per file and printed in order.
@@ -292,7 +295,7 @@ Gary agreed on 2026-10-28:
   `(unit-init)` runs before `main`. No consumer rechecks these.
 - Reuse: `Json.parse`, `Var.json`, `Args.parse`, `Var.equal`,
   `String.equal`, `Diff.unified`, `Process`, `Compiler.driver_executable`,
-  and the `run` build path are reused as they are. New lasting mechanisms
+  and the `script` build path are reused as they are. New lasting mechanisms
   are the field classifier, the per-kind piece helpers, the test registry
   with its runner, and the discovery loop; each is the smallest owner of a
   behavior that nothing else supplies.
@@ -314,3 +317,20 @@ same facts: delete any check that repeats what `Type.fields` or the macro
 hygiene already guarantees, fold helpers that one quotation can express,
 confirm every generated signature appears in the chapter, and fix what the
 review finds before running the gate.
+
+## Implementation evidence (2026-10-28)
+
+- All three phases are implemented together for shared integration.
+- Focused combined suites: 6 tests, 60 assertions; both derive compiler
+  fixtures pass. The command smoke covers library projects, local helpers,
+  selected manifest settings, parallel output, filters, and failure exits.
+- The derive example output matches its checked-in expectation. Both new
+  chapters' runnable samples and the optional-library API audit pass.
+- `from_args` parses required option text before calling `from_map`; numeric
+  fields use `Json.parse` and Symbol fields use `Symbol.parse`. Existing
+  wrong-type conversions raise `<no-convert>`, not the draft's `<conv-type>`.
+- JSON retains existing `Var.json`/`Json.parse` semantics: Symbol and List
+  fields lose their tags, so they cannot round-trip through strict reads.
+  Map and row conversion preserve their tags. No new encoding is introduced.
+- The authored diff was reviewed. Shared integration must regenerate linked
+  meta, bootstrap, and generated documentation and run the publication gate.
