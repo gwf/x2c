@@ -112,4 +112,15 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-protocol-") as temporary:
                    .get("location", {}).get("uri") == header.as_uri() for row in diagnostics), diagnostics
     finally:
         client.close()
+
+    source.write_text("int disk_only(void);\n")
+    (directory / "helper.x").write_text("meta int twice(int x) => x * 2;\n")
+    client = Client(root, directory, ["translate", str(source)])
+    try:
+        client.opened(source, '#include "helper.x"\n'
+            'int value(void) { return $twice(1); }\n')
+        assert client.diagnostics() == []
+        assert "int value(void);" in client.hover(source, 1, 4)["contents"]["value"]
+    finally:
+        client.close()
 print("language server positions, clean CPP, and dependency overlays passed")

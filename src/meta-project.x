@@ -214,8 +214,7 @@ static int _file(Scan &s, String path) {
   if (_compiler_owns(path) && s.c.linked_meta_provider_current(path))
     return 0;
   String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return 0;
+  if (!s.request.sources.read(path, text)) return 0;
   text = _module_text(s, path, text);
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = Path.is_layout_source(path);
