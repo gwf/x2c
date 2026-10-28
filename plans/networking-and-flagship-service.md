@@ -428,7 +428,12 @@ Implementation differences from the sketch:
 - Combining a package import with application meta functions exposed missing
   foreign link flags in the project meta helper. The repair reuses the
   imported package's native response options and includes those native inputs
-  in helper cache identity. The SQLite example needs no linker workaround.
+  in helper cache identity. Unresolved -l library selections conservatively
+  rebuild the helper, following the ordinary build command cache policy. A
+  tiny native-provider probe measured median warm translation of 0.454 s
+  with reuse and 0.600 s with rebuilding (five samples); this is not a full
+  build or compiler-throughput measurement. Package-free meta helpers keep
+  their existing cache behavior. SQLite needs no linker workaround.
 
 Focused evidence:
 
