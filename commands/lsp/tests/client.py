@@ -80,4 +80,3 @@ class Client:
         self.wait("id", 99)
         self.send("exit")
         assert self.process.wait(timeout=10) == 0
-
