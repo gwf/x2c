@@ -139,9 +139,6 @@ continuation. Wrap arguments by semantic group. Never align to an opening
 parenthesis. The close and its `{`, `=>`, or `;` stay with the last item
 unless an item spans several lines.
 
-When an alias declaration does not fit, break after `to` or `as` and indent
-the continuation two spaces. Wrap the continued expression only if needed.
-
 **LY-5** Put spaces around binary operators and after commas. Put no space
 inside parentheses or brackets. Separate `auto` and `with` from their
 parenthesized arguments with a space: `auto (&scope)`, `with (place = value)`.

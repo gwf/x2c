@@ -3,12 +3,11 @@
     Copyright (c) 2026 Gary William Flake.
 */
 
-static alias fail_rewrite_pattern to
-  MetaContext.reject("unsupported rewrite pattern", NULL);
+static alias fail_rewrite_pattern to MetaContext.reject(
+  "unsupported rewrite pattern", NULL);
 
-static alias fail_initialization_pattern to
-  MetaContext.reject(
-    "after-initialization requires a declaration pattern", NULL);
+static alias fail_initialization_pattern to MetaContext.reject(
+  "after-initialization requires a declaration pattern", NULL);
 
 /** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
     pattern's form selects the family and its keys. A function rule is
