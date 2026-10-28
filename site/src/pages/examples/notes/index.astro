@@ -1,0 +1,66 @@
+---
+import { codeToHtml } from "shiki";
+import source from "../../../../../examples/apps/notes/notes.x?raw";
+import grammar from "../../../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import ExampleHeading from "../../../components/ExampleHeading.astro";
+import CoreSetup from "../../../components/CoreSetup.astro";
+import "../../../styles/example-pages.css";
+import { articles } from "../../../lib/examples";
+
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const page = articles.find(article => article.frontmatter.slug === "notes")!.frontmatter;
+const html = await codeToHtml(source, {
+  lang: { ...grammar, name: "x2c" }, theme: x2cDarkTheme,
+});
+---
+<BaseLayout title={`${page.title} - x2c`} description={page.description}>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <article class="example-page" data-example="notes" data-section="magic"
+    data-surface="detail">
+    <ExampleHeading page={page} sourceUrl="#source"
+      downloadUrl={local("examples/notes/source.txt")} />
+    <div class="example-prose">
+      <p>Create a note, attach tags, and search title and body. The same program
+        serves the browser page and the JSON API. Notes survive a restart in
+        a JSON file; the optional SQLite variant uses prepared statements.</p>
+      <p>HTTP workers pass accepted connections through a bounded channel.
+        Each request gets an isolated Context. A Mutex coordinates the store,
+        a compile-time field table generates record mappings, and a Lisp
+        hook controls which notes the service accepts.</p>
+      <p>The source below is the service entry point. Its record table, stores,
+        page, policy, and benchmark live beside it in the
+        <a href="https://github.com/gwf/x2c/tree/dev/examples/apps/notes">notes
+        directory</a>. Core networking uses plain TCP. Deploy behind a TLS
+        reverse proxy.</p>
+    </div>
+    <section id="run" class="example-run" aria-labelledby="run-heading">
+      <p class="example-eyebrow">Run the service</p>
+      <h2 id="run-heading">Start locally or run the client transcript.</h2>
+      <CoreSetup run={`make -C examples/apps/notes run
+
+# Run a deterministic create, search, stats, and delete check.
+make -C examples/apps/notes check`} />
+    </section>
+    <section id="source" aria-label="Service source">
+      <h2>Service source</h2>
+      <div class="source-scroll" tabindex="0" role="region"
+        aria-label="Source code; scroll horizontally on narrow screens"
+        set:html={html} />
+    </section>
+  </article>
+  <SiteFooter />
+</BaseLayout>
+<style>
+  .source-scroll { max-width: 100%; overflow-x: auto; margin-top: 24px; }
+  .source-scroll :global(pre) {
+    width: max-content;
+    min-width: 100%;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+</style>

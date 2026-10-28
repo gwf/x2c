@@ -32,7 +32,9 @@ class Socket struct { int fd; File input, output; String peer; } *;
 
 protocol Cleanup(Listener);
 protocol Cleanup(Socket);
+/** Releases the listener when a managed local leaves its block. */
 void Listener.cleanup(Listener listener) { listener.close(); }
+/** Releases both streams when a managed local leaves its block. */
 void Socket.cleanup(Socket socket) { socket.close(); }
 
 static pthread_once_t sigpipe_once = (pthread_once_t) PTHREAD_ONCE_INIT;
@@ -87,6 +89,12 @@ int x2c_net_accept_fd(Listener listener) {
     int fd = accept(listener.fd, NULL, NULL);
     if (fd < 0 && (errno == EINTR || errno == EAGAIN)) continue;
     if (fd < 0) _io("Listener.accept", errno);
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags < 0 || fcntl(fd, F_SETFL, flags & ~O_NONBLOCK)) {
+      int error = errno;
+      close(fd);
+      _io("Listener.accept", error);
+    }
     return fd;
   }
   return -1;
@@ -204,6 +212,9 @@ static int _bind(struct addrinfo *address) {
   if (address->ai_family == AF_INET6 &&
       setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &disabled, sizeof(disabled)))
     return _failed(fd);
+  /* Readiness can disappear before accept; never block past the stop poll. */
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK)) return _failed(fd);
   if (bind(fd, address->ai_addr, address->ai_addrlen) || listen(fd, SOMAXCONN))
     return _failed(fd);
   return fd;

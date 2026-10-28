@@ -1,7 +1,8 @@
-> Status: needs author scoping
+> Status: implemented; awaiting shared-integrator validation
 > Planned 2026-10-28 against `gwf/repo-survey-major-features-933090`
-> (`f5d0eb2fb`). Nothing is implemented. The feasibility notes below come
-> from reading `lib/` source; the compiler was not built for this plan.
+> (`f5d0eb2fb`). Implementation evidence and differences follow in the
+> execution record below. The original feasibility notes came from source
+> inspection before implementation.
 
 # Networking runtime and a flagship service
 
@@ -395,3 +396,66 @@ throughput.
    and `Json`; for code that `File` or `Path` already supplies; for any
    helper, cache, or check that does not earn its keep; and for non-idiomatic
    shapes, and fix what the review finds before running the gate.
+
+
+## Execution record, 2026-10-28
+
+The TCP and HTTP modules, unit suites, file-backed notes service, generated
+record mappings, browser page, runtime Lisp policy, SQLite variant, guide,
+gallery page, and benchmark are implemented. The authored sources are one
+coherent submission to the shared integrator, as requested for this session.
+No full publication gate ran in the author session. The integrator owns final
+bootstrap and generated-document refresh, applicable performance work, the
+publication gate, and the dev push.
+
+Implementation differences from the sketch:
+
+- Timed connect uses nonblocking connect plus poll, then restores blocking
+  mode. Listener descriptors also use nonblocking mode so disappearing poll
+  readiness cannot defeat the stop interval; accepted sockets are blocking.
+- The HTTP parser reads into a fixed bounded buffer. Unbounded
+  File.readline_into cannot enforce the planned limits before allocation.
+  Binary responses use Buffer's underlying Block without converting bytes
+  into canonical text. HEAD suppresses response bytes and preserves length.
+- Method Symbols use the language's canonical lowercase spelling: <get>,
+  <post>, and the other supported methods. Server options use Symbol keys,
+  including <idle-ms> and <body-limit>.
+- Notes uses four source units: notes.x, record.x, store.x, and service.x.
+  Its Makefile and example flags build all four. Each stored record owns a
+  canonical-value pool through its Map's Scope, so replacing or deleting a
+  note reclaims its text. A single application field table drives the record,
+  mappings, validation, and SQL column list.
+- Combining a package import with application meta functions exposed missing
+  foreign link flags in the project meta helper. The repair reuses the
+  imported package's native response options and includes those native inputs
+  in helper cache identity. The SQLite example needs no linker workaround.
+
+Focused evidence:
+
+- TCP and HTTP suites: 14 tests, 95 assertions, no failures or skips.
+- Runtime public documentation audit: 42 callables and 7 types.
+- All three networking chapter examples compile.
+- Notes loopback transcript covers creation, search, stats, validation,
+  runtime policy rejection, and deletion. Its manifest check passes.
+- Browser controls cover create, edit, tag filtering, delete, and policy
+  rejection. Desktop and 390-pixel layouts were inspected; no page errors
+  or horizontal overflow. The accessibility scan reports no violations.
+- Persistence probe covers 24 concurrent creates, 8 updates, 8 deletes,
+  restart, and the next id. Storage replacement/rollback/deletion probes
+  show no continuing root canonical-pool growth.
+- The SQLite prepared-statement CRUD target passes on the repaired compiler.
+- The notes gallery route builds with Astro; generated book output remains
+  the integration owner's responsibility.
+
+The informational loopback run used 64 keep-alive clients, 10 seconds per
+sample, and five samples on macOS arm64. Median throughput was 42,455.1
+requests/s for the notes service and 203,584.8 requests/s for fixed-body C
+(x2c/C 0.209). The notes service performs lookup, snapshot copying, JSON
+encoding, and access logging. The reference returns fixed JSON. These are
+stated workloads rather than equivalent implementations. Raw samples and
+source hashes are in examples/apps/notes/bench/.
+
+Remaining measurement: the Go reference source and runner are supplied, but
+Go is not installed on this host. baseline.json explicitly records that no
+Go result was measured. It requires a host with the Go toolchain; no result
+was inferred or copied from another workload.
