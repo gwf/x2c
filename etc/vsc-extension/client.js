@@ -22,4 +22,22 @@ function selectCompiler(settings, workspace) {
   return local && findExecutable(local, workspace) ? local : "x2c";
 }
 
-module.exports = { findExecutable, selectCompiler };
+
+// The server canonicalizes paths. Return workspace resources through the URI
+// spelling VS Code already uses for its open buffers.
+function uriConverters(cwd, Uri) {
+  const realRoot = fs.realpathSync(cwd);
+  return {
+    code2Protocol: (uri) => uri.toString(),
+    protocol2Code(value) {
+      const uri = Uri.parse(value);
+      if (uri.scheme !== "file") return uri;
+      const relative = path.relative(realRoot, uri.fsPath);
+      if (relative === ".." || relative.startsWith(".." + path.sep) || path.isAbsolute(relative))
+        return uri;
+      return Uri.file(path.join(cwd, relative));
+    }
+  };
+}
+
+module.exports = { findExecutable, selectCompiler, uriConverters };

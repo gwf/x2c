@@ -32,8 +32,11 @@ Run `npm ci && npm run build` in `etc/vsc-extension`, then install the resulting
 ## Compiler diagnostics, definitions, and hover
 
 See the book's [editor setup and configuration](https://x2c-lang.dev/docs/reference/cli.html#vs-code-diagnostics-definitions-and-hover).
-The language server is experimental and is not included by `make install`.
-Run `make commands` in the compiler checkout, then select its matching
+Compiler language features require a compiler that provides `x2c lsp` and
+its matching server executable. Syntax highlighting remains available with
+older compilers; upgrade the compiler to enable language features.
+
+For a development checkout, run `make commands` and select its matching
 compiler:
 
 ```json
@@ -41,9 +44,8 @@ compiler:
 ```
 
 VS Code 1.82 or newer is required. The extension starts `x2c lsp` over
-stdio and keeps one server per local workspace. The deprecated
-`x2c.semantic.workerPath` setting remains accepted but is unused by the
-language client. Setup errors appear in the **x2c** Output channel.
+stdio and keeps one server per local workspace. Setup errors appear in the
+**x2c** Output channel.
 
 Semantic analysis runs only in trusted local workspaces because compiling
 x2c can execute macros. Untrusted and virtual workspaces retain syntax

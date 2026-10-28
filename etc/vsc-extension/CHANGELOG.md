@@ -12,8 +12,8 @@ first.
   VS Code language client. Preserve trusted local workspaces, compiler path
   selection, compiler arguments, and unsaved included files.
 - Require VS Code 1.82 or newer and a compiler checkout with the experimental
-  `lsp` command built. The deprecated `workerPath` setting is retained but
-  unused.
+  `lsp` command built. Remove the retired `workerPath` setting; select the
+  compiler with `compilerPath`.
 
 - Rebuild the package so an interpolated String inside a parenthesized
   `$(...)` List unquote no longer leaves the rest of the file highlighted as

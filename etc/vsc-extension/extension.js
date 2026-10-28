@@ -1,7 +1,7 @@
 const vscode = require("vscode");
 const path = require("path");
 const { LanguageClient, State } = require("vscode-languageclient/node");
-const { selectCompiler, findExecutable } = require("./client");
+const { selectCompiler, findExecutable, uriConverters } = require("./client");
 
 let active;
 
@@ -57,6 +57,7 @@ function activate(context) {
       documentSelector: [{ language: "x2c", scheme: "file",
         pattern: new vscode.RelativePattern(cwd, "**/*") }],
       workspaceFolder: folder,
+      uriConverters: uriConverters(cwd, vscode.Uri),
       initializationOptions: { arguments: settings.get("semantic.arguments", []) },
       synchronize: { fileEvents: watcher }, outputChannel: output,
       middleware: { async didOpen(open, next) {

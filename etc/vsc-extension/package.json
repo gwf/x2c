@@ -90,13 +90,6 @@
           "description": "Enable compiler language support in trusted local workspaces.",
           "scope": "resource"
         },
-        "x2c.semantic.workerPath": {
-          "type": "string",
-          "default": "x2c-editor-worker",
-          "description": "Deprecated compatibility setting; the language server uses compilerPath or compiler discovery.",
-          "deprecationMessage": "Use x2c.semantic.compilerPath with a current x2c compiler.",
-          "scope": "resource"
-        },
         "x2c.semantic.arguments": {
           "type": "array",
           "items": {
