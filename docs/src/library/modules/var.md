@@ -22,6 +22,7 @@ Variant type for dynamic typing.
 | [`Var.binary`](#Var.binary) | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. |
 | [`Var.box_record`](#Var.box_record) | Boxes a copy of the `size`-byte record at `record` as custom `tag`. |
 | [`Var.convert`](#Var.convert) | Converts `value` to a numeric `target`, or returns exact-tag identity. |
+| [`Var.convert_at`](#Var.convert_at) | Converts `value` using `Var.convert` and records `site` on conversion failures for a void or nonnumeric source or a nonnumeric target. |
 | [`Var.div`](#Var.div) | Divides dynamic values through numeric or registered `div` behavior. |
 | [`Var.fallback_truth`](#Var.fallback_truth) | Returns built-in truthiness without consulting a registered descriptor. |
 | [`Var.is`](#Var.is) | Reports whether `value` has the requested runtime tag. |
@@ -221,6 +222,18 @@ source, `<conv-range>` when the result does not fit, or `<alloc-fail>`
 while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.convert_at"></a>
+#### Var.convert_at
+
+`Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site)`
+
+Converts `value` using `Var.convert` and records `site` on conversion
+failures for a void or nonnumeric source or a nonnumeric target.
+A null `site` records no source location. The site is borrowed only
+during the call; conversion and result ownership follow `Var.convert`.
 
 Source: `lib/var/conversion.x`
 

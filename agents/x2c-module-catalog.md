@@ -197,9 +197,10 @@ Public functions:
 `Compiler.preproc_include_target`, `Compiler.preproc_marker_file`,
 `Compiler.scan_conditionals`, `Compiler.preproc_open_state`,
 `Compiler.preproc_branch_state`, `Compiler.leading_preproc`,
-`Compiler.note_preprocessor_macros`, `Compiler.note_object_macro`,
-`Compiler.preproc_track_arms`, `Compiler.preproc_conditional_kind`,
-`Compiler.preproc_directive`, `Compiler.preproc_within_arms`
+`Compiler.located_preproc`, `Compiler.note_preprocessor_macros`,
+`Compiler.note_object_macro`, `Compiler.preproc_track_arms`,
+`Compiler.preproc_conditional_kind`, `Compiler.preproc_directive`,
+`Compiler.preproc_within_arms`
 
 ### [src/report.x](../src/report.x)
 
@@ -1616,8 +1617,8 @@ handler stack and accumulated errors.
 
 Public functions:
 
-`x2c_error_raise`, `Error.raise`, `x2c_error_raise_n`, `Error.depth`,
-`Error.note_rendered`, `Error.policy_set`, `Error.policy_get`,
+`x2c_error_raise`, `Error.raise`, `Error.raise_at`, `x2c_error_raise_n`,
+`Error.depth`, `Error.note_rendered`, `Error.policy_set`, `Error.policy_get`,
 `Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
 `Error.policy_release`, `Error.context_open`, `Error.bound`,
 `Error.context_close`, `Error.mark`, `Error.since`, `Error.since_in`,
@@ -1845,8 +1846,8 @@ Public functions:
 `Var.wide_equal`, `Var.wide_compare`, `Var.long_double_value`,
 `Var.integer_compare`, `Var.integer_floating_compare`, `Var.string`,
 `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`,
-`Var.list`, `Var.map`, `Var.convert`, `Var.numeric_decode`, `Var.integer_box`,
-`Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
+`Var.list`, `Var.map`, `Var.convert`, `Var.convert_at`, `Var.numeric_decode`,
+`Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
 `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`, `Var.signed_from_bits`,
 `Var.width_mask`, `x2c_var_update_i8`, `x2c_var_update_schar`,
 `x2c_var_update_u8`, `x2c_var_update_i16`, `x2c_var_update_u16`,
