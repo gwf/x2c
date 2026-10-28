@@ -34,6 +34,10 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   _save(transaction, *_scope_at(c.sym, transaction.scope_index));
   if (transaction.extended) _save_effects(transaction);
   if (c.source_facts && c.source_primary) _save_sources(transaction);
+  if (c.source_capture) {
+    transaction.source_capture = c.source_capture;
+    transaction.source_capture_length = c.source_capture.len();
+  }
   /* Related compilers with their own symbol tables share these counters,
      so the transaction stages a copy instead of logging their writes. */
   c.names.counters = c.names.counters.copy();
@@ -106,6 +110,7 @@ void SymTxn.rollback(SymTxn &?s) {
   _restore(s);
   if (s.extended) _restore_effects(s);
   if (c.source_facts && c.source_primary) _restore_sources(s);
+  if (s.source_capture) s.source_capture.resize(s.source_capture_length);
   _finish(s);
 }
 

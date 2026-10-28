@@ -49,7 +49,7 @@ void Compiler.record_source_declaration(
   List declaration = $(@range, type, method);
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
-    c.source_definitions[binding] = declaration;
+    c.materialize_source_declaration(binding, declaration);
     c.source_occurrences.push($(@range, binding, type));
   }
 }
@@ -59,10 +59,49 @@ void Compiler.record_source_declaration(
 */
 void Compiler.record_source_reference(
   Compiler c, List binding, Type type, Token first, Token after) {
-  if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
+  if (!c.source_facts || c.macro_holes ||
       !Ast.try_binding(binding, NULL, NULL)) return;
+  if (!c.source_primary || c.shallow) {
+    if (!c.source_capture) return;
+    List range = _source_range(c, first, after);
+    if (range)
+      c.source_capture.push($(@range, binding, type,
+        c.fact(%(src-key $binding))));
+    return;
+  }
   List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push($(@range, binding, type));
+}
+
+/** Attaches a completed named-type capture to its existing declaration row. */
+void Compiler.attach_source_references(Compiler c, List binding, Array capture) {
+  List key = c.fact(%(src-key $binding));
+  List declaration = c.source_declarations[key];
+  declaration = %(@(declaration[:5]) $capture @(declaration[6:]));
+  c.sym.put(c.source_declarations, key, declaration);
+  if (c.source_primary && !c.shallow)
+    c.materialize_source_declaration(binding, declaration);
+}
+
+/** Materializes one producer-owned source row and its captured references.
+    Row fields are file, start, end, Type, method, and optional capture.
+    Installing the row before replay marks self and mutually recursive rows.
+*/
+void Compiler.materialize_source_declaration(
+  Compiler c, List binding, List declaration) {
+  if (c.source_definitions[binding] === declaration) return;
+  c.source_definitions[binding] = declaration;
+  List method = declaration[4];
+  if (method) c.set_fact(%(method $binding), method);
+  Array capture = declaration.len() > 5 ? declaration[5] : NULL;
+  foreach (List entry in capture) {
+    (String file, int start, int end, List target,
+     Type type, List key) = entry;
+    Var source;
+    if (key && c.source_declarations.try_get(key, source))
+      c.materialize_source_declaration(target, source);
+    c.source_occurrences.push($(file, start, end, target, type));
+  }
 }
 
 /** Carries declaration metadata beside a completed symbol-map merge. */

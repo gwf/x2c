@@ -34,12 +34,15 @@ List Compiler.parse_named_type(Compiler c) {
   List key = $(name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (c.test(<;>)) return %(named-type $name ());
-  List qualifiers = _type_qualifiers(c);
-  List base = qualifiers.append(
-    _record_follows(c) ? _record_body(c, name, start, after_name) :
-                         _type_specifier(c));
-  Type type = _declare_named_type(c, key, base, start, after_name);
-  return %(named-type $name $type);
+  Array capture = c.source_facts && !c.macro_holes ? [] : NULL;
+  with (c.source_capture = capture) {
+    List qualifiers = _type_qualifiers(c);
+    List base = qualifiers.append(
+      _record_follows(c) ? _record_body(c, name, start, after_name) :
+                           _type_specifier(c));
+    Type type = _declare_named_type(c, key, base, start, after_name);
+    return %(named-type $name $type);
+  }
 }
 
 // fields
@@ -638,6 +641,8 @@ static Type _declare_named_type(
   if (!c.macro_holes) {
     List binding = c.sym.declare_resolved(%(typedef), key, type);
     c.record_source_declaration(binding, start, after_name);
+    if (c.source_capture && c.source_capture.len())
+      c.attach_source_references(binding, c.source_capture);
   }
   Type specifier = base.type().base_type();
   if (specifier.is_aggregate_tag_body())
