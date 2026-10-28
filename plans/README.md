@@ -47,7 +47,7 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Language server](language-server.md) | Phase 1 is ready for shared integration; completion, symbols, references, rename, and tokens follow. | Integrate phase 1, then implement phases 2 and 3. Retirement waits for the client extension release. |
+| [Language server](language-server.md) | Phases 1-3 and client 0.4.0 are published. Phase 4 retirement passes focused checks. | Integrate the retirement, then archive the completed plan. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
