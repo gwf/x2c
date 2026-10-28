@@ -248,6 +248,13 @@ static List _lsp_occurrence(Compiler c, String path, int offset) {
     if (file != path || offset < start || offset >= end) continue;
     if (!found || end - start < found[2].int() - found[1].int()) found = row;
   }
+  if (found) return found;
+  foreach ((List binding, List declaration) in c.source_definitions) {
+    (String file, int start, int end, Type type) = declaration;
+    if (file != path || offset < start || offset >= end) continue;
+    if (!found || end - start < found[2].int() - found[1].int())
+      found = $(file, start, end, binding, type);
+  }
   return found;
 }
 
