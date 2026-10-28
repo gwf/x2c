@@ -657,6 +657,7 @@ static List _alias_target(
         $fail.parse_alias_function(c, c.token, native_type);
       if (List.equal(binding, native_binding))
         $fail.parse_alias_self(c, c.token);
+      c.clear_source_external(binding);
       return %(falias $declaration $native_binding);
     }
   $fail.parse_alias_identifier(c, c.token);

@@ -291,6 +291,8 @@ typedef struct Compiler {
   SourceView sources;
   int source_facts, source_primary;
   Array source_occurrences;
+  // Borrowed only while a named-type body captures its physical references.
+  Array source_capture;
   Map source_definitions, source_declarations, source_texts;
 } *Compiler;
 
@@ -309,6 +311,8 @@ typedef struct SymTxn {
   Map statics, binding_facts;
   Map source_definitions;
   int source_occurrences;
+  Array source_capture;
+  int source_capture_length;
   /* A macro value application also stages producer effects: adapters,
      base bindings, pending code, origins and errors. */
   int extended, Map adapters;

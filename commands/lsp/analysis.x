@@ -132,6 +132,7 @@ int LspWorkspace.analyze(LspWorkspace w, String path) {
   }
   w.frontend.prepare_meta($(path));
   w.path = path;
+  Compiler.refresh_source_collections();
   w.parsed = w.frontend.open(path, w.unit);
   Compiler c = w.unit.compiler;
   if (_lsp_native_cpp(w) && _lsp_changed_dependency(c, w.sources)) {
@@ -156,9 +157,14 @@ Array LspWorkspace.diagnostics(LspWorkspace w, String path) {
   return analysis is <map> ? analysis.map()["diagnostics"].array() : [];
 }
 
+/** Returns the narrowest recorded occurrence at a physical source offset. */
+List LspWorkspace.occurrence(LspWorkspace w, String path, int offset) {
+  if (!w.analyze(path)) return NULL;
+  return _lsp_occurrence(w.unit.compiler, path, offset);
+}
+
 Var LspWorkspace.definition(LspWorkspace w, String path, int offset) {
-  if (!w.analyze(path)) return (Var) {0};
-  List row = _lsp_occurrence(w.unit.compiler, path, offset);
+  List row = w.occurrence(path, offset);
   if (!row) return (Var) {0};
   Var value = w.unit.compiler.source_definitions[row[3]];
   if (value is not <list>) return (Var) {0};
@@ -168,9 +174,8 @@ Var LspWorkspace.definition(LspWorkspace w, String path, int offset) {
 }
 
 Var LspWorkspace.hover(LspWorkspace w, String path, int offset) {
-  if (!w.analyze(path)) return (Var) {0};
+  List row = w.occurrence(path, offset);
   Compiler c = w.unit.compiler;
-  List row = _lsp_occurrence(c, path, offset);
   if (!row) return (Var) {0};
   Type type = row[4];
   if (!type) return (Var) {0};
@@ -243,6 +248,13 @@ static List _lsp_occurrence(Compiler c, String path, int offset) {
     if (file != path || offset < start || offset >= end) continue;
     if (!found || end - start < found[2].int() - found[1].int()) found = row;
   }
+  if (found) return found;
+  foreach ((List binding, List declaration) in c.source_definitions) {
+    (String file, int start, int end, Type type) = declaration;
+    if (file != path || offset < start || offset >= end) continue;
+    if (!found || end - start < found[2].int() - found[1].int())
+      found = $(file, start, end, binding, type);
+  }
   return found;
 }
 
@@ -252,22 +264,44 @@ static Array _lsp_definitions(LspWorkspace w) {
   Compiler c = w.unit.compiler;
   foreach (List row in c.definition_rows(w.unit.ast)) match (row) {
     case %(function ?name ?display ? ? ? ? ? ? ? ?span):
-      rows.push(_lsp_definition_row(w, name, display, 12, span));
+      _lsp_add_definition(w, rows, name, display, 12, span);
     case %(typedef ?name ? ? ?span):
-      rows.push(_lsp_definition_row(w, name, name, 5, span));
+      _lsp_add_definition(w, rows, name, name, 5, span);
   }
   return rows;
 }
 
-static Map _lsp_definition_row(
-  LspWorkspace w, String name, String display, int kind, List span) {
-  int start = 0, end = 0;
-  if (span ~= %(?(int first) ?(int last) *)) {
-    Token tokens = w.unit.compiler.tokenizer.tokens;
-    Token begin = tokens + first, finish = tokens + last;
-    start = begin.pos;
-    end = finish.pos;
+/* Token spans count in the combined module text; map both ends to the file. */
+static void _lsp_add_definition(
+  LspWorkspace w, Array rows, String name, String display, int kind, List span) {
+  match (span) case %(?(int first) ?(int after) *): {
+    Compiler c = w.unit.compiler;
+    Token tokens = c.tokenizer.tokens;
+    Token begin = tokens + first, last = tokens + after - 1;
+    int start = begin.pos, end = last.pos + last.len;
+    String path = Path.resolved_absolute(c.text_source(start, start));
+    if (Path.resolved_absolute(c.text_source(end - 1, end)) != path) return;
+    end++;
+    String text = w.text(path);
+    Map selection = _lsp_definition_selection(w, name, path, start, end);
+    if (!selection) return;
+    Map range = lsp_range(text, start, end);
+    rows.push({"name": name, "display": display, "kind": kind, "file": path,
+               "range": range, "selectionRange": selection});
   }
-  return {"name": name, "display": display, "kind": kind,
-          "range": lsp_range(w.text(w.path), start, end)};
+}
+
+static Map _lsp_definition_selection(
+  LspWorkspace w, String name, String path, int start, int end) {
+  int selected = end;
+  Map range = NULL;
+  foreach ((List binding, List location) in w.unit.compiler.source_definitions) {
+    if (Ast.binding_spelling(binding) != name) continue;
+    String file = location[0];
+    int first = location[1], after = location[2];
+    if (file != path || first < start || after > end || first >= selected) continue;
+    selected = first;
+    range = lsp_range(w.text(path), first, after);
+  }
+  return range;
 }

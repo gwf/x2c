@@ -34,9 +34,12 @@ int Compiler.record_origin(Compiler c, Token token) {
   return c.origins.len();
 }
 
-/** Records a physical declaration using the binding's actual scope and key. */
+/** Records a physical declaration using the binding's actual scope and key.
+    Occurrence rows retain their five-field prefix and append `<decl>`
+    so references can omit earlier declarations that a later one replaced.
+*/
 void Compiler.record_source_declaration(
-  Compiler c, List binding, Token first, Token after) {
+  Compiler c, List binding, Token first, Token after, int external) {
   if (!c.source_facts || c.macro_holes) return;
   Var value;
   if (!c.semantic_binding_facts().try_get(%(src-key $binding), value)) return;
@@ -45,11 +48,31 @@ void Compiler.record_source_declaration(
   Map symbols = source_key.car();
   List key = source_key.cadr();
   Type type = symbols[key];
-  List declaration = $(@range, type);
+  List method = c.fact(%(method $binding));
+  List declaration = $(@range, type, method);
+  if (external)
+    declaration = %(@declaration () $(c.emitted_binding_name(binding)));
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
-    c.source_definitions[binding] = declaration;
-    c.source_occurrences.push($(@range, binding, type));
+    c.materialize_source_declaration(binding, declaration);
+    c.source_occurrences.push($(@range, binding, type, <decl>));
+  }
+}
+
+/** A foreign alias emits a macro, not an external C symbol of its own. */
+void Compiler.clear_source_external(Compiler c, List binding) {
+  if (!c.source_facts) return;
+  List key = c.fact(%(src-key $binding));
+  Var value;
+  if (key && c.source_declarations.try_get(key, value)) {
+    List declaration = value;
+    if (declaration[6] is <string>)
+      c.sym.put(c.source_declarations, key, declaration[:6]);
+  }
+  if (c.source_definitions.try_get(binding, value)) {
+    List declaration = value;
+    if (declaration[6] is <string>)
+      c.source_definitions[binding] = declaration[:6];
   }
 }
 
@@ -58,10 +81,52 @@ void Compiler.record_source_declaration(
 */
 void Compiler.record_source_reference(
   Compiler c, List binding, Type type, Token first, Token after) {
-  if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
+  if (!c.source_facts || c.macro_holes ||
       !Ast.try_binding(binding, NULL, NULL)) return;
+  if (!c.source_primary || c.shallow) {
+    if (c.source_capture == NULL) return;
+    List range = _source_range(c, first, after);
+    if (range)
+      c.source_capture.push($(@range, binding, type,
+        c.fact(%(src-key $binding))));
+    return;
+  }
   List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push($(@range, binding, type));
+}
+
+/** Attaches a completed named-type capture to its existing declaration row. */
+void Compiler.attach_source_references(Compiler c, List binding, Array capture) {
+  List key = c.fact(%(src-key $binding));
+  List declaration = c.source_declarations[key];
+  declaration = %(@(declaration[:5]) $capture @(declaration[6:]));
+  c.sym.put(c.source_declarations, key, declaration);
+  if (c.source_primary && !c.shallow)
+    c.materialize_source_declaration(binding, declaration);
+}
+
+/** Materializes one producer-owned source row and its captured references.
+    Row fields are file, start, end, Type, method, optional capture, and
+    optional external emitted name. Only ordinary declarations supply linkage.
+    Installing the row before replay marks self and mutually recursive rows.
+*/
+void Compiler.materialize_source_declaration(
+  Compiler c, List binding, List declaration) {
+  if (c.source_definitions[binding] === declaration) return;
+  c.source_definitions[binding] = declaration;
+  List method = declaration[4];
+  if (method) c.set_fact(%(method $binding), method);
+  Array capture = declaration[5];
+  foreach (List entry in capture) {
+    (String file, int start, int end, List target,
+     Type type, List key) = entry;
+    Var source;
+    if (key && c.source_declarations.try_get(key, source)) {
+      c.set_fact(%(src-key $target), key);
+      c.materialize_source_declaration(target, source);
+    }
+    c.source_occurrences.push($(file, start, end, target, type));
+  }
 }
 
 /** Carries declaration metadata beside a completed symbol-map merge. */

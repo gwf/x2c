@@ -49,3 +49,4 @@ grep -q '"code":-32800.*"id":21' "$BUILD/cancel"
 printf '%s\n' 'language server smoke tests passed'
 
 python3 "$ROOT/commands/lsp/tests/protocol.py" "$ROOT"
+python3 "$ROOT/commands/lsp/tests/features.py" "$ROOT"

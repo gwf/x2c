@@ -368,7 +368,7 @@ module List _finish_parameter(
   declarator = _install_declarator(
     c, base, NULL, declarator,
     method_identity, preserved_self);
-  c.record_source_declaration(declarator.cadr(), source_first, source_after);
+  c.record_source_declaration(declarator.cadr(), source_first, source_after, 0);
   List modifiers = NULL;
   base = Type.declaration_base(base, modifiers);
   declarator = Ast.append_modifiers(declarator, modifiers);
@@ -538,12 +538,20 @@ static List _complex_identifier(Compiler c, List &?method_identity) {
     ident = c.package_member_spelling(c.token.text);
   if (!ident) ident = c.token.text;
   Type idtype = c.sym.get($(ident));
+  Token owner_first = c.token;
   c.next();
+  Token owner_after = c.token;
   if ((toktype.is_builtin_type() || toktype.is_type_modifier() ||
        (toktype == <ident> &&
         (idtype.is_typedef() || (c.signature_only && method_identity)))) &&
-      c.test(<.>))
+      c.test(<.>)) {
+    if (c.source_facts) {
+      Type type = NULL;
+      List binding = c.sym.lookup($(ident), type);
+      c.record_source_reference(binding, type, owner_first, owner_after);
+    }
     return _member_name(c, ident, method_identity);
+  }
   return $(ident);
 }
 
@@ -653,7 +661,13 @@ module List _declarator_init(Compiler c, List type, List context) {
   List bind = _declarator(c, type, context, method, first, after);
   int preserved_self = 0;
   bind = _install_declarator(c, type, context, bind, method, preserved_self);
-  c.record_source_declaration(bind.cadr(), first, after);
+  if (c.source_facts) {
+    Type declared = %(declare $type (bindings $bind)).type_from_ast();
+    int external = !context && !type.type().is_static() &&
+      !c.sym.is_file_static(bind.cadr()) &&
+      (c.sym.at_file_scope() || type.type().is_extern() || declared.is_function());
+    c.record_source_declaration(bind.cadr(), first, after, external);
+  }
   int function_arrow = !c.in_proto && _x2c_at_function_arrow(c) &&
     %(declare $type (bindings $bind)).type_from_ast().is_function();
   if (!c.in_proto && !function_arrow && c.test(<=>))

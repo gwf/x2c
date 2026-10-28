@@ -189,7 +189,8 @@ void Lint.member_arrows(Lint l, Compiler c, List ast):
   Map reached = {}
   foreach List hit in ast.search(%(op -> (expr ?type ?) (?name))):
     Var name = hit.assoc(<?name>)
-    List dot = c.resolve_postfix_member(hit.assoc(<?type>), $(name), <.>, 1)
+    List dot = c.resolve_postfix_member(
+      hit.assoc(<?type>), $(name), <.>, 1, NULL)
     reached[name] = dot.match(%(field -> ?)) &&
                     reached.getdefault(name, 1).int()
   for (int at = 1; at < l.count; at++):

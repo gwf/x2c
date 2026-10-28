@@ -5,6 +5,10 @@
 #pragma once
 #include "positions.x"
 #include "analysis.x"
+#include "completion.x"
+#include "symbols.x"
+#include "references.x"
+#include "semantic-tokens.x"
 #include "json.x"
 #include <poll.h>
 #include <errno.h>
@@ -20,6 +24,11 @@ static typedef struct Server {
   int initialized, shutdown, exiting, eof, baseline_warm, restart_disabled;
   size_t baseline;
 } Server;
+
+static typedef struct Cursor {
+  String path;
+  int offset;
+} Cursor;
 
 /** Serves one workspace until exit or clean EOF. */
 int lsp_serve(int resume) {
@@ -157,6 +166,12 @@ static void _dispatch(Server &server, Map message) {
     case "workspace/didChangeWatchedFiles": _watched(server, params); return;
     case "textDocument/hover": _query(server, id, params, 0); return;
     case "textDocument/definition": _query(server, id, params, 1); return;
+    case "textDocument/completion": _completion(server, id, params); return;
+    case "textDocument/documentSymbol": _symbols(server, id, params); return;
+    case "workspace/symbol": _workspace_symbols(server, id, params); return;
+    case "textDocument/references": _references(server, id, params); return;
+    case "textDocument/rename": _rename(server, id, params); return;
+    case "textDocument/semanticTokens/full": _tokens(server, id, params); return;
     default:
       if (request) _error(server, id, -32601, "Method not found");
       return;
@@ -175,7 +190,12 @@ static void _initialize(Server &server, Var id, Map params) {
   _reply(server, id, {capabilities: {
     textDocumentSync: {openClose: Json.bool(1), change: 1,
                        save: {includeText: Json.bool(1)}},
-    definitionProvider: Json.bool(1), hoverProvider: Json.bool(1)},
+    definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
+    completionProvider: {triggerCharacters: [".", "$"]},
+    documentSymbolProvider: Json.bool(1), workspaceSymbolProvider: Json.bool(1),
+    referencesProvider: Json.bool(1), renameProvider: Json.bool(1),
+    semanticTokensProvider: {full: Json.bool(1),
+      legend: {tokenTypes: lsp_token_types(), tokenModifiers: []}}},
     serverInfo: {name: "x2c"}});
 }
 
@@ -239,14 +259,71 @@ static void _watched(Server &server, Map params) {
 }
 
 static void _query(Server &server, Var id, Map params, int definition) {
-  String path = server.workspace.retain(_document(params));
-  if (!path) { _reply(server, id, NULL); return; }
-  Map position = params.getdefault("position", {});
-  int offset = lsp_offset(server.workspace.text(path), position);
-  Var result = definition ? server.workspace.definition(path, offset)
-                          : server.workspace.hover(path, offset);
+  Cursor cursor = _cursor(server, params);
+  if (!cursor.path) { _reply(server, id, NULL); return; }
+  Var result = definition
+    ? server.workspace.definition(cursor.path, cursor.offset)
+    : server.workspace.hover(cursor.path, cursor.offset);
   _reply(server, id, result);
   _notice(server);
+}
+
+static Cursor _cursor(Server &server, Map params) {
+  String path = server.workspace.retain(_document(params));
+  int offset = path ? lsp_offset(server.workspace.text(path),
+    params.getdefault("position", {}).map()) : 0;
+  return (Cursor) {.path = path, .offset = offset};
+}
+
+static void _completion(Server &server, Var id, Map params) {
+  Cursor cursor = _cursor(server, params);
+  _reply(server, id, cursor.path
+    ? server.workspace.complete(cursor.path, cursor.offset) : (Var) {0});
+  _notice(server);
+}
+
+static void _symbols(Server &server, Var id, Map params) {
+  String path = server.workspace.retain(_document(params));
+  _reply(server, id, path ? server.workspace.document_symbols(path) : []);
+  _notice(server);
+}
+
+static void _workspace_symbols(Server &server, Var id, Map params) {
+  _reply(server, id,
+    server.workspace.workspace_symbols(params.getdefault("query", "")));
+}
+
+static void _references(Server &server, Var id, Map params) {
+  Cursor cursor = _cursor(server, params);
+  if (!cursor.path) { _reply(server, id, []); return; }
+  Map context = params.getdefault("context", {});
+  _answer(server, id, server.workspace.references(
+    cursor.path, cursor.offset,
+    Json.boolean(context.getdefault("includeDeclaration", Json.bool(0)))));
+}
+
+static void _rename(Server &server, Var id, Map params) {
+  Cursor cursor = _cursor(server, params);
+  if (!cursor.path) {
+    _error(server, id, -32602, "Rename requires a file document");
+    return;
+  }
+  _answer(server, id, server.workspace.rename(
+    cursor.path, cursor.offset, params.getdefault("newName", "")));
+}
+
+static void _answer(Server &server, Var id, Map answer) {
+  Map message = {jsonrpc: "2.0", id: id};
+  if (answer.contains("error")) message[<error>] = answer["error"];
+  else message[<result>] = answer["result"];
+  _send(server, message);
+  _notice(server);
+}
+
+static void _tokens(Server &server, Var id, Map params) {
+  String path = server.workspace.retain(_document(params));
+  _reply(server, id,
+    {data: path ? server.workspace.semantic_tokens(path) : []});
 }
 
 static void _publish(Server &server) {

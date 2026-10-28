@@ -675,7 +675,7 @@ static List _requirement(ProtocolAdapters &a, List rows) {
 module List _descriptor_requirement(
   ProtocolAdapters &a, String member, Type template) {
   if (a.base !== %("Var") ||
-      !a.c.sym.lookup_field(%(struct "VarMethods"), $(member)))
+      !a.c.sym.lookup_field(%(struct "VarMethods"), $(member), NULL))
     return NULL;
   return _conversion_requirement(a, member, template, <thunk>);
 }

@@ -133,7 +133,8 @@ static void _share_unit(Compiler c, Compiler owner) {
                package_roots, package_aliases, package_members,
                package_effects, names,
                source_map, recovery_depth, sources, declaration_produced,
-               source_facts, source_occurrences, source_definitions,
+               source_facts, source_capture, source_occurrences,
+               source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
                meta_build, meta_helper, pending_inline_bodies,
                collection_native_files);

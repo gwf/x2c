@@ -284,8 +284,9 @@ static void _note_source_key(
   s.put(s.binding_facts, %(src-key $binding), source_key);
   Var declaration;
   if (c.source_primary && !c.shallow &&
-      c.source_declarations.try_get(source_key, declaration))
-    c.source_definitions[binding] = declaration;
+      c.source_declarations.try_get(source_key, declaration)) {
+    c.materialize_source_declaration(binding, declaration);
+  }
 }
 
 static List _new_binding(Sym s, List key) {

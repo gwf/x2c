@@ -33,7 +33,8 @@ List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access) {
   if (access == <.>) _completion_methods(c, receiver, seen, names);
   names.sort();
   foreach (String name in names) {
-    List resolution = c.resolve_postfix_member(receiver, $(name), access, 1);
+    List resolution = c.resolve_postfix_member(
+      receiver, $(name), access, 1, NULL);
     if (resolution ~= %((!or field method) ? ?)) accepted.push(name);
   }
   return accepted.list_free();
@@ -45,26 +46,32 @@ List Compiler.postfix_completions(Compiler c, Type receiver, Symbol access) {
     `field` is a single-name `List` and `access` is `.` or `->`. The result is
     a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
     row, or NULL when no member is visible. Method lookup is enabled only by
-    `call_context` and records the selected binding in `c.sym`.
+    `call_context` and records the selected binding in `c.sym`. Optional
+    `binding` receives the selected field or method identity, or NULL.
 */
 List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
-  int call_context) {
+  int call_context, List &?binding) {
+  if (binding) binding = NULL;
   if (receiver_type.is_optional_reference())
     $fail.expressions_optional_ref_access(c, c.token);
   Type type = receiver_type.canonicalize();
   if (access == <"->">)
-    return _field_member(c, receiver_type, field, <"->">);
+    return _field_member(c, receiver_type, field, <"->">, binding);
   int hops = 0, tagged = 0;
   while (type) {
     if (call_context && _method_owner(type)) {
       List method = _method_member(c, receiver_type, type, field);
-      if (method) return method;
+      if (method) {
+        if (binding) match (method)
+          case %(method ?selected ?): binding = selected;
+        return method;
+      }
     }
     if (type.is_pointer())
-      return _field_member(c, receiver_type, field, <"->">);
+      return _field_member(c, receiver_type, field, <"->">, binding);
     if (type.is_aggregate()) {
-      List member = _field_member(c, receiver_type, field, <.>);
+      List member = _field_member(c, receiver_type, field, <.>, binding);
       if (member || !call_context) return member;
     }
     type = _next_method_type(c, type, hops, tagged);
@@ -80,10 +87,10 @@ static int _collection_index_type(Compiler c, Type type) =>
 
 /* A field inherits its containing object's qualifiers, not its pointer's. */
 static List _field_member(
-  Compiler c, Type receiver, List field, Symbol access) {
+  Compiler c, Type receiver, List field, Symbol access, List &?binding) {
   Type object = access == <"->">
     ? c.sym.normalize_declared_type(receiver).dereference() : receiver;
-  Type declared = c.sym.lookup_field(object, field);
+  Type declared = c.sym.lookup_field(object, field, binding);
   return declared ? %(field $access $declared) : NULL;
 }
 
@@ -357,7 +364,7 @@ module List _member(Resolve &r, Var operator, List receiver, List field) {
   receiver = r.c.resolve_expression(receiver, r.origin);
   Type receiver_type = receiver.cadr();
   List resolution = r.c.resolve_postfix_member(
-    receiver_type, field, operator, 0);
+    receiver_type, field, operator, 0, NULL);
   if (resolution ~= %(field ?access ?field_type))
     return %(expr $field_type (op $access $receiver $field));
   Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
