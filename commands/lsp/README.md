@@ -1,8 +1,9 @@
 # Language server
 
 `x2c lsp` serves one workspace over stdio using LSP 3.17 and JSON-RPC 2.0.
-Build the experimental command with `make commands`. Start the compiler from
-its workspace directory. The driver selects its matching `x2c-lsp` executable.
+Normal installations include the server. Build the checkout command with
+`make commands`. Start the compiler from its workspace directory. The driver
+selects its matching `x2c-lsp` executable.
 
 Send ordinary compiler arguments in `initializationOptions.arguments`, for
 example `["build", "--target", "app"]`. An empty list selects the discovered
@@ -63,3 +64,8 @@ For an optional, longer checkpoint probe, run
 `python3 commands/lsp/tests/restart.py "$PWD"` from the checkout root. It
 uses the production budget and writes an evidence report in its temporary
 directory. It is separate from `make commands-check`.
+
+For optional regressions retained from the retired editor adapter, run
+`python3 commands/lsp/tests/legacy.py "$PWD"`. These cover unsaved includes,
+macro declaration identity and repair, package aliases, and native CPP read
+boundaries. They are separate from `make commands-check`.

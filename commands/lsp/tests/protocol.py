@@ -1,6 +1,7 @@
 """Paced source and dependency changes against the resident language server."""
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 
 from client import Client
@@ -84,4 +85,8 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-protocol-") as temporary:
         assert "int value(void);" in client.hover(source, 1, 4)["contents"]["value"]
     finally:
         client.close()
+    helpers = subprocess.run(
+        ["pgrep", "-f", str(directory / "cache/meta/project-")],
+        capture_output=True, text=True)
+    assert helpers.returncode == 1, ("helper survives shutdown", helpers.stdout)
 print("language server positions, clean CPP, and dependency overlays passed")

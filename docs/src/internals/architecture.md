@@ -619,7 +619,7 @@ module block, so its files share no private scope.
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
 - `src/sourceview.x` -- request-owned source overlays and logical file paths;
-- `commands/editor/editor.x` -- one-request diagnostics, definition, and hover transport
+- `commands/lsp/analysis.x` -- resident source analysis and exported results
   over the configured frontend and source overlays.
 
 The internal frontend is shared by the CLI, editor, and source graph tool. A
@@ -635,23 +635,27 @@ Process type/header caches and generated-name state still require sequential
 units. The frontend is not a concurrent or stable public compiler-library API. A
 user macro that aborts or exits still ends the process.
 
-The optional editor worker in `tools/x2c-editor/` uses the same frontend and
-project configuration. `SourceView` supplies immutable unsaved text under each
-file's canonical path; an empty overlay remains a present file. The request
-owns overlays, while a parsed unit owns disk text and semantic results.
+The language server in `commands/lsp/` uses the same frontend and project
+configuration. `SourceView` supplies immutable unsaved text under each file's
+canonical path; an empty overlay remains a present file. The server owns
+current overlays and exported analysis rows. One parsed unit owns borrowed
+semantic results and closes before another unit opens.
 
 Declaration metadata follows the actual symbol-map contribution and key
-through collection and imports. The primary parser associates resolved
-bindings with physical token spans for definition and hover queries. It does
-not infer a source location for constructed syntax that has no physical token.
-Each editor request runs in a fresh process and collects source declarations
-without reading `.xi` interfaces, which do not carry their physical spans.
-This isolates process caches and macro failures from the editor service.
+through collection and imports. Resolved bindings carry physical token spans
+for navigation. Constructed syntax without a physical token has no invented
+source location. Source collection bypasses `.xi` interfaces, which do not
+carry physical spans.
 
-The VS Code adapter under `etc/vsc-extension/` converts compiler UTF-8 byte
-offsets to editor positions and discards responses after document changes or
-cancellation. It executes semantic requests only in trusted local workspaces.
-Syntax highlighting remains available independently of the native worker.
+The server converts compiler UTF-8 byte offsets to LSP UTF-16 positions.
+Queued requests can be cancelled; an analysis already running completes.
+Idle process checkpoints preserve protocol state and current documents while
+reclaiming accumulated allocation history. A macro that aborts or exits still
+terminates the server.
+
+The VS Code language client under `etc/vsc-extension/` synchronizes documents
+and serves standard editor features. Semantic execution requires trusted local
+workspaces. Syntax highlighting remains available independently of the server.
 
 ## The runtime boundary
 

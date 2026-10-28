@@ -489,11 +489,11 @@ rm -rf .x2c-build
 "$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
 
 # An absent package manager stops a real build before its output is made,
-# but editor requests and dry runs never invoke it.
+# but language-server requests and dry runs never invoke it.
 mv "$package" "$package.saved"
 "$x2c" build -### --output "$BUILD/missing-client" >"$BUILD/dry.out" 2>&1
-"$x2c" editor "$BUILD/editor.json" "$BUILD/project/src/client.x" hover 0 0 -- build
-[[ -s "$BUILD/editor.json" ]] || fail "editor without package command"
+python3 "$ROOT/commands/lsp/tests/installed.py" \
+  "$ROOT" "$x2c" "$BUILD/project/src/client.x" build
 set +e
 "$x2c" build -q --output "$BUILD/missing-client" 2>"$BUILD/build-missing.err"
 [[ $? == 2 ]] || fail "build accepted missing package command"

@@ -339,10 +339,9 @@ for an editor's C parser.
 
 ### Language server
 
-The language server is experimental and is not included by `make install`.
-Build the checkout commands with `make commands`, then use the matching
-`builds/0/x2c` compiler. Run `x2c lsp` from the workspace root to serve
-editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
+Normal compiler installations include the language server. Checkout builds
+use `make commands` and the matching `builds/0/x2c` compiler. Run `x2c lsp`
+from the workspace root to serve editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
 document synchronization. One process serves one workspace and keeps the
 compiler resident. It provides frontend diagnostics, definition
 navigation, type hover, completion, symbols, references, rename, and lexical
@@ -413,8 +412,8 @@ from VSIX**. VS Code 1.82 or newer is required. The extension starts
 diagnostics, definition navigation, hover, completion, symbols, references,
 rename, semantic tokens, and cancellation.
 
-Select the compiler from the checkout where you built the experimental
-server:
+Normal compiler installations include the server. To select a particular
+installation or a checkout build, set:
 
 ```json
 "x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
@@ -424,8 +423,6 @@ Selection order is an explicit `x2c.semantic.compilerPath`, executable
 `./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
 selection never switches to another compiler. Setup errors appear in the
 **x2c** Output channel. The extension does not build or install the compiler.
-The deprecated `x2c.semantic.workerPath` setting remains accepted but is
-unused by the language client.
 
 Configure the server with ordinary compiler arguments:
 
@@ -439,9 +436,6 @@ It restarts the client when x2c settings or workspace folders change.
 Semantic execution requires a trusted local workspace because compilation
 can run macros. Untrusted and virtual workspaces retain syntax highlighting.
 Set `"x2c.semantic.enabled": false` to disable semantic execution.
-
-The legacy `x2c editor` command remains available during the extension
-transition. Its private request and response formats are not a public API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and

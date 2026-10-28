@@ -43,8 +43,8 @@ Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
   `try-catch.x` (try, catch, and finally);
 - output: `cache.x`, `generate/generate.x`, `emit/emit.x`, `format.x`;
 - project planning and native primitives: `project/project.x`, `toolchain.x`;
-  build/run/script workflows live in `commands/build/`, and the editor
-  adapter lives in `commands/editor/`;
+  build/run/script workflows live in `commands/build/`, and the language
+  server lives in `commands/lsp/`;
 - external package management: `commands/package/` owns installation, removal,
   listing, and project dependency lockfiles.
 

@@ -6,9 +6,10 @@ import subprocess
 
 
 class Client:
-    def __init__(self, root, directory, arguments):
+    def __init__(self, root, directory, arguments, compiler=None):
         self.process = subprocess.Popen(
-            [str(root / "builds/0/libexec/x2c-lsp")], cwd=directory,
+            ([str(compiler), "lsp"] if compiler else
+             [str(root / "builds/0/libexec/x2c-lsp")]), cwd=directory,
             env=dict(os.environ, X2C_CACHE_DIR=str(directory / "cache")),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, bufsize=0)

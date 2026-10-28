@@ -164,8 +164,8 @@ commits need not rebuild from their own bootstrap.
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the typed CLI request, `translation` runs source translation and workers,
   `toolchain` owns native actions, `report` owns progress and receipts,
-  `commands/build` owns build, run, and script execution, `commands/editor` owns the
-  one-request semantic adapter, and `utils` owns environment discovery.
+  `commands/build` owns build, run, and script execution, `commands/lsp` owns the
+  resident language server, and `utils` owns environment discovery.
 - `lib/` - representative runtime modules include string, list, array, map,
   var (including conversion and operators), iter, match, scope, block,
   buffer, error,
