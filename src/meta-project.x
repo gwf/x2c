@@ -531,10 +531,15 @@ static void _parse_source(
   unit.compiler.diagnostics.reset();
   if (!unit.parse()) {
     if (h.entries) _print_diagnostics(unit.compiler);
-    List entry = unit.compiler.diagnostics().car();
+    List entry = NULL;
+    foreach (List diagnostic in unit.compiler.diagnostics())
+      if (diagnostic.assoc(<severity>) == <error>) {
+        entry = diagnostic;
+        break;
+      }
     /* After a deferred form, later code can name declarations that only
        its expansion supplies. The translation owns those diagnostics. */
-    if (h.entries || entry.assoc(<code>) != <meta-later>) {
+    if (entry && (h.entries || entry.assoc(<code>) != <meta-later>)) {
       String failure = Compiler.meta_diagnostic_line(entry);
       Path.write_text(
         %"$(_base(h, index)).failure",

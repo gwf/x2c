@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-staging-warning.x:4:16: conversion: unnecessary conversion: the operand already has type (int)
+    int number = (int) 0;
+                 ^
+  note: remove the cast
+
