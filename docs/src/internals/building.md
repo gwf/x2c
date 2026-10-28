@@ -78,6 +78,50 @@ parameter `Type` `(void)`. Ordinary adapters and Lisp bindings build the
 same signature: a typedef parameter, reference target, or result keeps its
 declared name, such as `("Byte")` or `(& "Byte")`.
 
+## WebAssembly runtime and programs
+
+The optional browser target uses Emscripten Memory64 (`-m64`). It keeps the
+language's 64-bit `long`, pointers, and `Var` representation. Install
+Emscripten and Node separately, then run from the checkout root:
+
+```sh
+make wasm-runtime
+tools/wasm-build examples/tours/language.x /tmp/language
+node --input-type=module -e \
+  'import("file:///tmp/language.js").then(m => m.default())'
+```
+
+`make wasm-runtime` builds stage zero, compiles its generated runtime C, and
+writes `builds/wasm/libx2c.a`. `tools/wasm-build` translates one `.x` file
+and links the whole archive directly with Emscripten. It writes an ES module
+loader (`.js`) and a `.wasm` file beside the requested output stem. The
+native runtime archive is never passed to this link. Neither command is
+part of `make check`; the manual check workflow has an optional wasm job.
+
+The build defaults to `emcc`, `emar`, signed characters, size optimization,
+and Emscripten longjmp support. `WASM_CC`, `WASM_AR`, and `WASM_CFLAGS`
+override the corresponding build settings. `tools/wasm-build` also accepts
+whitespace-separated linker options in `WASM_LDFLAGS`, without evaluating
+shell syntax. Retain `-m64` and `-sSUPPORT_LONGJMP=emscripten` when changing
+compiler flags. The loader supports browsers, workers, and Node; Node must
+support Memory64 and ES modules. Node 26 can load the generated `.js`
+module directly as shown above.
+
+Programs use a temporary in-memory filesystem. Source files and host data
+are not copied into it automatically. For example, the exceptions gallery
+sample requires its fixtures at the same virtual path:
+
+```sh
+WASM_LDFLAGS='--embed-file examples/data/power-exceptions' \
+  tools/wasm-build examples/power/exceptions.x /tmp/exceptions
+```
+
+Program memory starts at 64 MB and can grow to 256 MB; the stack is 4 MB.
+Threads and process execution are unsupported in this single-threaded
+build. `Job`, `File.popen`, `Thread`, `Channel`, `Dispatch`, and pool workers
+cannot provide their native behavior. Browser execution requires Memory64;
+check the playground's support notice before running a program.
+
 ## Contributor checks
 
 `make doc-examples` compiles the book and website samples, including the
