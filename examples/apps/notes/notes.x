@@ -120,15 +120,14 @@ static void list_notes(Notes app, HttpRequest req, HttpResponse res) {
 }
 
 static void get_note(Notes app, HttpRequest req, HttpResponse res) {
-  Map note;
+  List row;
   $lock(app.mutex) {
     Prepared select = auto app.db.prepare(
       "SELECT id, title, body, tags, created, updated FROM note WHERE id = ?");
-    List row = select.bind(req.params["id"]).next();
-    if (!row) Http.fail(404, "no such note");
-    note = note_json(row);
+    row = select.bind(req.params["id"]).next();
   }
-  res.json(note);
+  if (!row) Http.fail(404, "no such note");
+  res.json(note_json(row));
 }
 
 static void create_note(Notes app, HttpRequest req, HttpResponse res) {
