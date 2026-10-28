@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-decorator-public-variadic-drop.x:14:1: parse: expected syntax
   $drop()
   ^
-  note: in expansion of 'discard_target' defined at unittest/compiler-fixtures/macro-decorator-public-variadic-drop.x:3:1; input: (args (declare (int) (bindings (op = (bind (binding 2 "visible_value") ()) (expr (int) (literal (int) "42"))))))
+  note: in expansion of 'discard_target' defined at unittest/compiler-fixtures/macro-decorator-public-variadic-drop.x:3:1; input: (args (declare (int) (bindings (op = (bind "visible_value" ()) (expr (int) (literal (int) "42"))))))
 

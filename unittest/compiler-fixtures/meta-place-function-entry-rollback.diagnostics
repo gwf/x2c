@@ -1,7 +1,7 @@
 unittest/compiler-fixtures/meta-place-function-entry-rollback.x:16:10: type: operator 'is' requires Var on the left
     return $failing(value);
            ^
-  note: operand type: (int) in expansion of 'failing' defined at unittest/compiler-fixtures/meta-place-function-entry-rollback.x:13:1; input: (args (expr (int) (ident (binding 11 "value"))))
+  note: operand type: (int) in expansion of 'failing' defined at unittest/compiler-fixtures/meta-place-function-entry-rollback.x:13:1; input: (args (expr (int) (ident "value")))
 
 unittest/compiler-fixtures/meta-place-function-entry-rollback.x:23:22: macro: code placed at function entry needs an enclosing function
   static int outside = $entry(1);

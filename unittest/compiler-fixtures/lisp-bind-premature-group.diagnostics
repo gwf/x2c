@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lisp-bind-premature-group.x:12:1: macro: native Lisp binding appears after its group was installed
   $lisp.binding(sample, "late")
   ^
-  note: group: sample in expansion of 'lisp.binding' defined at lib/lisp-bindings.x:<line>:<column>; input: (target (args "sample" (expr (* char) (literal (* char) "\"late\""))) (function (static int) (bind (binding 19 "late") ((fnmod (params (param (int) (bind (bi...
+  note: group: sample in expansion of 'lisp.binding' defined at lib/lisp-bindings.x:<line>:<column>; input: (target (args "sample" (expr (* char) (literal (* char) "\"late\""))) (function (static int) (bind "late" ((fnmod (params (param (int) (bind "value" ()))))))...
 

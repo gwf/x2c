@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/managed-twice.x:8:3: parse: managed initializer cannot manage an already managed local
     Block b = $auto((a));
     ^^^^^
-  note: local: a in expansion of 'auto' defined at etc/compiler-prelude.x:70:1; input: (args (expr ("Block") (parens (expr ("Block") (ident (binding 3 "a"))))))
+  note: local: a in expansion of 'auto' defined at etc/compiler-prelude.x:70:1; input: (args (expr ("Block") (parens (expr ("Block") (ident "a")))))
 

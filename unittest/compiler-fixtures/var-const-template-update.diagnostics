@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/var-const-template-update.x:8:3: type: dynamic update cannot target a const object
     $update(target, step);
     ^
-  note: in expansion of 'update' defined at unittest/compiler-fixtures/var-const-template-update.x:3:1; input: (args (expr (const int) (ident (binding 3 "target"))) (expr ("Var") (ident (binding 4 "step"))))
+  note: in expansion of 'update' defined at unittest/compiler-fixtures/var-const-template-update.x:3:1; input: (args (expr (const int) (ident "target")) (expr ("Var") (ident "step")))
 

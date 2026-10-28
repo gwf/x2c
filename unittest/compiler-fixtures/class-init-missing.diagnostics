@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/class-init-missing.x:1:1: macro: class Missing requires void Missing.init(Missing)
   class Missing struct { Array items; } *;
   ^^^^^
-  note: in expansion of 'class' defined at etc/compiler-prelude.x:72:1; input: (target (args) (named-type "Missing" (* struct "Missing" (fields (declare ("Array") (bindings (bind (binding 3 "items") ())))))))
+  note: in expansion of 'class' defined at etc/compiler-prelude.x:72:1; input: (target (args) (named-type "Missing" (* struct "Missing" (fields (declare ("Array") (bindings (bind "items" ())))))))
 

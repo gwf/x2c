@@ -6,5 +6,5 @@ unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:17:1: protocol: 
 unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:21:3: macro: type ("InvalidChild") is not iterable
     foreach(int value, values) (void) value;
     ^^^^^^^
-  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind (binding 22 "value") ()))) (expr ("InvalidChild") (ident (binding 20 "values")))) (stmnt (expr (void) (cast (dec...
+  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind "value" ()))) (expr ("InvalidChild") (ident "values"))) (stmnt (expr (void) (cast (decl (void) (bindings (bind (...
 

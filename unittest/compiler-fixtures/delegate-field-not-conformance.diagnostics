@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/delegate-field-not-conformance.x:21:3: macro: type ("DelegateNotIterable") is not iterable
     foreach(int item, value) total += item;
     ^^^^^^^
-  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind (binding 24 "item") ()))) (expr ("DelegateNotIterable") (ident (binding 21 "value")))) (stmnt (expr (int) (op +=...
+  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind "item" ()))) (expr ("DelegateNotIterable") (ident "value"))) (stmnt (expr (int) (op += (expr (int) (ident "total...
 

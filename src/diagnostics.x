@@ -218,7 +218,8 @@ String Compiler.macro_expansion_note(Compiler c) {
     String name = definition.assoc(<name>).str();
     String source = Diagnostics.macro_definition_note(definition)
       .remove_prefix("definition: ");
-    List lines = Diagnostics.macro_expansion_input(input)
+    List syntax = Diagnostics.macro_expansion_input(input);
+    List lines = syntax.search_replace(%(binding ? ?name), <?name>)
       .repr().split_lines(0);
     String shown = " ".join(
       lines.map(%!(line) => String.strip(line, NULL)));

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lisp-bind-unknown-group.x:4:3: macro: unknown native Lisp binding group
     $lisp.install(lisp, missing);
     ^
-  note: group: missing in expansion of 'lisp.install' defined at lib/lisp-bindings.x:<line>:<column>; input: (args (expr ("Lisp") (ident (binding 3 "lisp"))) "missing")
+  note: group: missing in expansion of 'lisp.install' defined at lib/lisp-bindings.x:<line>:<column>; input: (args (expr ("Lisp") (ident "lisp")) "missing")
 

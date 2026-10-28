@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/protocol-iter-adoption-required.x:14:3: macro: type ("Bag") is not iterable
     foreach(int value, bag)
     ^^^^^^^
-  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind (binding 19 "value") ()))) (expr ("Bag") (ident (binding 16 "bag")))) (stmnt (expr (void) (cast (decl (void) (bi...
+  note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare (int) (bindings (bind "value" ()))) (expr ("Bag") (ident "bag"))) (stmnt (expr (void) (cast (decl (void) (bindings (bind () ()))) (exp...
 
