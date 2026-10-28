@@ -1,7 +1,8 @@
-> Status: needs author scoping
+> Status: active
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
-> (`9aeeef265`) from reproduced probes. Nothing is implemented. Three
-> public-behavior choices wait for Gary (see "Decisions for Gary").
+> (`9aeeef265`) from reproduced probes. Nothing is implemented. The three
+> public-behavior choices were settled with Gary on 2026-10-28 (see
+> "Settled decisions").
 
 # Located failures
 
@@ -313,21 +314,22 @@ file's evidence table.
 
 Each phase is a separate delivery; phase 2 does not depend on phase 1.
 
-## Decisions for Gary
+## Settled decisions
 
-1. `build` and `run` enable the source map by default. Consequence:
-   `__FILE__` and `__LINE__` in those products name the `.x` source, and
-   debuggers step `.x` lines with `-g`. Alternative with no generated-C
-   change: the formatter writes a sidecar line map and the driver rewrites
-   cc's captured text through it; about 60 more lines and a second owner of
-   the mapping.
-2. `run` prints one line by default. Alternative: keep today's output and
-   only move the muted receipts behind `-v`.
-3. No x2c-level report for a bare undeclared identifier, because the
-   compiler cannot tell a C name from a mistake. Alternative: an opt-in
-   `--strict-names` that reports a forward binding created inside an
-   expansion; it would reject templates that call C library functions
-   unless they list them with `using`.
+Gary agreed on 2026-10-28:
+
+1. `build` and `run` enable the source map by default. `__FILE__` and
+   `__LINE__` in those products name the `.x` source, and debuggers step
+   `.x` lines with `-g`. `--no-source-map` and `translate` keep generated-C
+   locations. The sidecar line map was rejected as a second owner of the
+   mapping.
+2. `run` prints one line by default; the phase lines and receipts stay
+   behind `-v`, as `script` already does.
+3. No x2c-level report for a bare undeclared identifier. Forward-binding
+   unknown spellings as C names is the premise that lets x2c call any C
+   function without declarations. The expansion note and the unresolved
+   receiver report cover the macro case that was reproduced. An opt-in
+   `--strict-names` is not planned.
 
 ## Plan review
 

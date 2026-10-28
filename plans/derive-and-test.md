@@ -1,10 +1,10 @@
-> Status: needs author scoping
+> Status: active
 > Drafted 2026-10-28 from a working probe set kept under
 > `plans/reference/probes-2026-10-28/derive/` (`p4f.x`, `r8.x`, `r10.x`;
 > run each with `builds/0/x2c run FILE`). The probes establish
-> every generation technique the plan relies on. Gary has not yet reviewed
-> the public surface or the three decisions listed under "Decisions for
-> Gary".
+> every generation technique the plan relies on. Gary settled the public
+> surface and the three decisions on 2026-10-28 (see "Settled
+> decisions").
 
 # Derive library and test runner
 
@@ -200,8 +200,8 @@ $test.main();
 
 ### `x2c test`
 
-A new command `commands/test/` with `test|shipped|Build and run project
-tests` in `commands/manifest.txt`. It follows `new` and `package`: it
+A new command `commands/test/` with `test|experimental|Build and run
+project tests` in `commands/manifest.txt`. It follows `new` and `package`: it
 initializes the command environment with the embedded identity and spawns
 the matching driver from `Compiler.driver_executable()`.
 
@@ -268,18 +268,20 @@ the matching driver from `Compiler.driver_executable()`.
 Each phase is one coherent publication batch. Phase 3 does not depend on
 phases 1 and 2.
 
-## Decisions for Gary
+## Settled decisions
+
+Gary agreed on 2026-10-28:
 
 1. `<row>` lives in `lib/derive.x` and generates only `List` values, so
-   the core never names `Prepared`. The task suggested placing the SQL
-   target in `packages/sqlite`; this plan keeps the package untouched
-   except for documentation. Confirm or move it.
-2. The command ships as `shipped` in the manifest. `external-commands.md`
-   says to choose `experimental` unless shipping is already decided; the
-   request says shipped, so the plan records that choice.
-3. The `$derive` spelling takes Symbol literals (`<map>`). The alternative
-   of one macro per kind (`$derive.map(Point)`) was not chosen because the
-   combination then repeats the type name and cannot imply `<map>`.
+   the core never names `Prepared`. The sqlite package changes only its
+   documentation, and any other database package reads the same rows.
+2. `x2c test` enters the manifest as `experimental`, following
+   `external-commands.md`; promotion to `shipped` is a one-line manifest
+   change once the library surface has users. `lib/test.x` ships with the
+   runtime regardless.
+3. `$derive` takes Symbol-literal kinds (`$derive(Point, <map>, <equal>)`).
+   One macro per kind was rejected because it repeats the type name and
+   cannot imply `<map>`.
 
 ## Plan review
 

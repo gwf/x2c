@@ -1,10 +1,11 @@
-> Status: needs author scoping
+> Status: active
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`9aeeef265`) with `builds/0/x2c` identity `48fd687ab075ad6f`. No
 > implementation has started. The probe corrected the premise: a converged
 > tree already replays the prelude from `.xi` interfaces in about 70 ms;
-> the 0.5-0.8 s cold walk is the cost of a stale stage. Gary decides whether
-> phase 1's floor work and phase 2's `run` cache are wanted.
+> the 0.5-0.8 s cold walk is the cost of a stale stage. Gary decided on
+> 2026-10-28: skip the replay floor change (phase 1 step 1), keep the
+> stale-stage visibility in `x2c env`, and do the `run` cache.
 
 # Compile startup floor
 
@@ -12,9 +13,9 @@
 
 - Every command that opens a unit (`translate`, `build`, `run`, `script`,
   `repl`, `editor`) keeps replaying the runtime prelude from the stage's
-  `.xi` interfaces, and the replay gets cheaper: the empty-program
-  `translate` floor goes from 80 ms to a target of 60 ms wall on the M4 Max
-  host (receipt time 75 ms to about 55 ms).
+  `.xi` interfaces; the converged empty-program `translate` floor stays at
+  about 80 ms wall on the M4 Max host (the replay change that would reach
+  60 ms was declined on 2026-10-28; see phase 1).
 - `x2c env` reports a prelude interface only when it validates as the
   compiler would replay it, so a stale stage (edited `lib/` source without
   a rebuilt stage) is visible instead of silently costing 0.4 s per process.
@@ -123,7 +124,13 @@ are, and a binary image would remove only the 21 ms parse.
    phase on the same host, converged tree, alternating runs, per
    `agents/performance-checkpoints.md`.
 
-## Phase 1: prelude replay floor and stale-stage visibility
+## Phase 1: stale-stage visibility
+
+Settled 2026-10-28: step 1 below is not done. A 20 ms change to how
+parsed interface records are retained is below what a user notices, and
+the gate would not detect a subtle retention regression. Steps 2 and 3
+stand; step 4 measures only `x2c env`. The probe table stays as the
+record of the converged floor.
 
 Files: `src/collect/interfaces.x`, `src/utils.x` (or wherever `x2c env`
 builds its rows), `docs/src/reference/cli.md` (Environment),
@@ -157,10 +164,11 @@ builds its rows), `docs/src/reference/cli.md` (Environment),
 4. Measure: empty program, `foreach.x`, the tour, `expressions.x`, and
    one `make stage-1` wall time, before and after, in the plan.
 
-Target: 60 ms wall for the empty program (from 80). Under 50 ms is not
-reachable without the rejected second format or a change to candidate
-precedence (the 15 ms of probing opens up to six candidate paths per unit
-in a fixed order that the architecture documents).
+For the record: step 1 would have reached about 60 ms wall for the empty
+program (from 80). Under 50 ms is not reachable without the rejected
+second format or a change to candidate precedence (the 15 ms of probing
+opens up to six candidate paths per unit in a fixed order that the
+architecture documents). Neither is planned.
 
 Size: about 20 changed lines in `interfaces.x`, 15 in `env`, 15 of
 documentation.
