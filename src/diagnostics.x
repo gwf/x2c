@@ -29,6 +29,7 @@ typedef struct DiagnosticsHold {
 } DiagnosticsHold;
 
 #include "type.x"
+#include "ast-rewrite.x"
 
 #include "json.x"
 #include "report.x"
@@ -218,9 +219,8 @@ String Compiler.macro_expansion_note(Compiler c) {
     String name = definition.assoc(<name>).str();
     String source = Diagnostics.macro_definition_note(definition)
       .remove_prefix("definition: ");
-    List syntax = Diagnostics.macro_expansion_input(input);
-    List lines = syntax.search_replace(%(binding ? ?name), <?name>)
-      .repr().split_lines(0);
+    Var syntax = Diagnostics.macro_expansion_input(input);
+    List lines = _expansion_note_syntax(syntax, {}).repr().split_lines(0);
     String shown = " ".join(
       lines.map(%!(line) => String.strip(line, NULL)));
     if (shown.len() > 160) shown = %"$(shown[:157])...";
@@ -437,6 +437,26 @@ void Compiler.dump_symbol_table(Compiler compiler, Map map) {
 void Compiler.dump_cache(Compiler compiler) {
   foreach (Var (key, value) in compiler.key_ids)
     printf("%s\t==>\t%s\n", value.repr(), key.repr());
+}
+
+// expansion note presentation
+
+static Var _expansion_note_syntax(Var value, Map caches) {
+  if (value is not <list> || value.is_nil()) return value;
+  match (value) {
+    case %(binding ? ?name): return name;
+    case %(cache ?id): {
+      Var ordinal;
+      if (!caches.try_get(id, ordinal)) {
+        ordinal = (int) caches.len();
+        caches[id] = ordinal;
+      }
+      return %(cache $ordinal);
+    }
+  }
+  List child;
+  $ast.rewrite_children(
+    value.list(), child, _expansion_note_syntax(child, caches));
 }
 
 // diagnostic emission
