@@ -988,14 +988,17 @@ grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
 # Case 12: an interface is the same bytes whichever unit first walked its
 # file. The batch walks the cycle hist-a.x <-> hist-b.x inside hist-main.x,
 # after path.x has been included and bindings numbered; translating each
-# file alone walks it first.
+# file alone walks it first. Each side's enum uses the macro the other side
+# declared before entering the cycle.
 mkdir -p "$FAKE/hist-batch" "$FAKE/hist-a" "$FAKE/hist-b"
 for name in a b; do
   other=$([[ $name == a ]] && echo b || echo a)
   upper=$(echo "$name" | tr a-z A-Z)
   cat >"$FAKE/src/hist-$name.x" <<EOF
 #include "path.x"
+macro Expression \$hist_${name}_count() => 4;
 #include "hist-$other.x"
+enum { Hist${upper}Count = \$hist_${other}_count() };
 class Hist$upper struct {
   Path path;
 } *;
@@ -1169,6 +1172,7 @@ cp -R "$FAKE/lib/array" "$BUILD/elsewhere/lib/"
 (cd "$BUILD/elsewhere" && X2C_HOME="$BUILD/fake-link" \
   "$BUILD/fake-link/builds/0/x2c" translate \
   --out-dir "$BUILD/linked-out" "$BUILD/fake-link/lib/array/array.x" \
+  "$BUILD/fake-link/lib/error-macros.x" \
   "$BUILD/fake-link/lib/x2c.x") >"$BUILD/linked.log" 2>&1 ||
   fail "a runtime operand spelled through a symlinked home did not translate"
 

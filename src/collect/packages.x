@@ -100,27 +100,25 @@ static void _merge_surface(Surface &s, String path, Map rows) {
   String prefix = %"$(s.name)__";
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"$(s.root)/");
-  _take_exports(s, rows);
+  Array exports = auto [];
   foreach (Var (key, value) in rows) {
     if (key is not <list> || key.is_nil()) continue;
     String spelling = _package_key_spelling(key);
-    if (_package_protocol_row(key, value)) _take(s, rows, key, value);
+    if (_package_protocol_row(key, value)) {
+      // The prelude and earlier includes already supplied this source row.
+      if (s.c.sym.get(key)) continue;
+      _take(s, rows, key, value);
+      if ($(key, value) ~=
+          %(("source-node" (? ? ?position))
+            (!set ?effect ((!or compile-time project-meta) *))))
+        exports.push($(position, effect));
+    }
     else if (spelling && (keeps || spelling.startswith(prefix)))
       _take(s, rows, key, value);
     else if (spelling && foreign) _reject(s, path, spelling);
   }
-}
-
-/* Compile-time definitions follow the package's ordinary include walk. */
-static void _take_exports(Surface &s, Map rows) {
-  Array found = auto [];
-  foreach (Var (key, value) in rows)
-    if ($(key, value) ~=
-        %(("source-node" (? ? ?position))
-          (!set ?effect ((!or compile-time project-meta) *))))
-      found.push($(position, effect));
-  found.sort();
-  foreach (List entry in found) s.exports.push(entry.cadr());
+  exports.sort();
+  foreach (List entry in exports) s.exports.push(entry.cadr());
 }
 
 static void _take(Surface &s, Map rows, List key, Var value) {
@@ -188,8 +186,9 @@ static int _package_protocol_row(List key, Var value) {
 
 /* Replays package imports and public compile-time definitions in source
    order. The shadow borrows the unit's macro state and package registries.
-   The full parse collects effects for the include line and leaves the
-   unit's own definitions at their source sites.
+   The unit's own definitions stay at their source sites. Provider
+   collection replays active include-cycle prefixes; the full parse
+   collects effects for the include line.
 */
 module void _replay_package_imports(
   Compiler c, Map globs, Map rows, Array exports) {
@@ -200,7 +199,8 @@ module void _replay_package_imports(
       if (value is not <list> || !value.list() ||
           !(value.list().car() in
             %(package-import compile-time project-meta))) continue;
-      if (exports == NULL || !_imported_here(c, path)) {
+      if ((exports == NULL && c.interface_provider) ||
+          !_imported_here(c, path)) {
         if (!imports) imports = [];
         imports.push($(path, position, value));
       }

@@ -48,15 +48,15 @@ int x2c_var_tag_descriptor_index(Symbol tag);
 
 // display text
 
-static macro Expression $display.format.character() => "%c";
-static macro Expression $display.format.sint() => "%d";
-static macro Expression $display.format.slong() => "%ld";
-static macro Expression $display.format.sllong() => "%lld";
-static macro Expression $display.format.uint() => "%u";
-static macro Expression $display.format.ulong() => "%lu";
-static macro Expression $display.format.ullong() => "%llu";
-static macro Expression $display.format.floating() => "%lf";
-static macro Expression $display.format.extended() => "%Lf";
+static alias fmt_char   to "%c";
+static alias fmt_sint   to "%d";
+static alias fmt_slong  to "%ld";
+static alias fmt_sllong to "%lld";
+static alias fmt_uint   to "%u";
+static alias fmt_ulong  to "%lu";
+static alias fmt_ullong to "%llu";
+static alias fmt_float  to "%lf";
+static alias fmt_double to "%Lf";
 
 // recursive rendering
 
@@ -657,15 +657,15 @@ static VarDescriptor *_row(int index) {
 
 static String _primitive_str(Var v, Symbol tag) {
   switch (tag) {
-    case <i8>:   case <u8>:   return $display.format.character().printf(v);
-    case <i16>:  case <i32>:  return $display.format.sint().printf(v);
-    case <i48>:  case <long>:  return $display.format.slong().printf(v);
-    case <llong>: return $display.format.sllong().printf(v);
-    case <u16>:  case <u32>:  return $display.format.uint().printf(v);
-    case <u48>:  case <ulong>:  return $display.format.ulong().printf(v);
-    case <ullong>: return $display.format.ullong().printf(v);
-    case <f32>:  case <f64>:  return $display.format.floating().printf(v);
-    case <ldouble>: return $display.format.extended().printf(v);
+    case <i8>:   case <u8>:   return fmt_char.printf(v);
+    case <i16>:  case <i32>:  return fmt_sint.printf(v);
+    case <i48>:  case <long>:  return fmt_slong.printf(v);
+    case <llong>: return fmt_sllong.printf(v);
+    case <u16>:  case <u32>:  return fmt_uint.printf(v);
+    case <u48>:  case <ulong>:  return fmt_ulong.printf(v);
+    case <ullong>: return fmt_ullong.printf(v);
+    case <f32>:  case <f64>:  return fmt_float.printf(v);
+    case <ldouble>: return fmt_double.printf(v);
     case <nan>:  case <+inf>: case <-inf>: return %"$tag";
   }
   return v.pointer_string();
@@ -677,15 +677,15 @@ static Buffer _write_text(Buffer out, String text) =>
 
 static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
   switch (tag) {
-    case <i8>:  case <u8>:  return out.printf($display.format.character(), v);
-    case <i16>:  case <i32>:  return out.printf($display.format.sint(), v);
-    case <i48>:  case <long>:  return out.printf($display.format.slong(), v);
-    case <llong>: return out.printf($display.format.sllong(), v);
-    case <u16>:  case <u32>:  return out.printf($display.format.uint(), v);
-    case <u48>:  case <ulong>:  return out.printf($display.format.ulong(), v);
-    case <ullong>: return out.printf($display.format.ullong(), v);
-    case <f32>:  case <f64>:  return out.printf($display.format.floating(), v);
-    case <ldouble>: return out.printf($display.format.extended(), v);
+    case <i8>:  case <u8>:  return out.printf(fmt_char, v);
+    case <i16>:  case <i32>:  return out.printf(fmt_sint, v);
+    case <i48>:  case <long>:  return out.printf(fmt_slong, v);
+    case <llong>: return out.printf(fmt_sllong, v);
+    case <u16>:  case <u32>:  return out.printf(fmt_uint, v);
+    case <u48>:  case <ulong>:  return out.printf(fmt_ulong, v);
+    case <ullong>: return out.printf(fmt_ullong, v);
+    case <f32>:  case <f64>:  return out.printf(fmt_float, v);
+    case <ldouble>: return out.printf(fmt_double, v);
     case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
   }
   return out.write(v.pointer_string());

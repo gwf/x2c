@@ -43,7 +43,7 @@ static const List trust_boundaries = %(
 
 /* The causes `lib/error-macros.x` lists as never returning when this
    command is built. */
-static const SymbolSet shared_causes = $error.nonreturning.causes()
+static const SymbolSet shared_causes = nonreturning_causes
 
 /* Bare conditional bodies have no inner anchor. Scoring counts their actual
    report_error calls, even when a macro supplied the call's source
