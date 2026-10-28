@@ -155,5 +155,6 @@ read and write cookie streams through the Socket's File fields; HTTP uses
 those streams for all I/O. Creating a TLS package is separate work.
 
 The [notes service](https://github.com/gwf/x2c/tree/dev/examples/apps/notes)
-combines routing, JSON, a file-backed store, record generation, and a runtime
-Lisp policy. Its `--check` mode runs a deterministic loopback client script.
+serves a page and a JSON API for creating, editing, tagging, and searching
+notes. SQLite preserves its data across restarts. Its README explains setup,
+API requests, and the external HTTP checks.
