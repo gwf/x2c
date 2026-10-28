@@ -17,11 +17,13 @@
 #include "channel.x"
 #include "common.x"
 #include "compiler-meta.x"
+#include "derive.x"
 #include "lisp-bindings.x"
 #include "list-selectors.x"
 #include "native-scalar-types.x"
 #include "rewrite.x"
 #include "system-macros.x"
+#include "test.x"
 #include "thread.x"
 #include "var-tags.x"
 #include "var/var.x"
@@ -53,6 +55,192 @@ static int _var_tag_bottom(List tag) =>
 static Symbol _literal_tag(List tag) {
   if (tag ~= %(expr ? (literal ? ? ?key))) return key;
   return 0;
+}
+
+/* --- lib/derive.x -------------------------------------------------------- */
+
+List _derive_methods(
+  Type type, List kinds, Macro map, Macro json, Macro equal, Macro repr,
+  Macro args, Macro row) {
+  Array values = [];
+  foreach (Code kind in kinds) values.push(Code.value(kind));
+  kinds = values.list_free();
+  Array methods = [];
+  if (<map> in kinds || <json> in kinds || <args> in kinds || <row> in kinds)
+    methods.push(map(type));
+  if (<json> in kinds) methods.push(json(type));
+  if (<equal> in kinds) methods.push(equal(type));
+  if (<repr> in kinds) methods.push(repr(type));
+  if (<args> in kinds) methods.push(args(type));
+  if (<row> in kinds) methods.push(row(type));
+  return methods.list_free();
+}
+
+List _derive_construct(Type type, List map) {
+  List name = x2c_ident(%"$(type.car())_from_map");
+  return $!( $name($map) );
+}
+
+List _derive_args_spec(Type type) {
+  List name = x2c_ident(%"$(type.car())_args_spec");
+  return $!( $name() );
+}
+
+Symbol _derive_field_kind(Type t) {
+  if (t ~= %("String")) return <string>;
+  if (t ~= %("Symbol")) return <symbol>;
+  if (t ~= %("Array") || t ~= %("List") || t ~= %("Map")) return <value>;
+  Type r = Type.resolve(t);
+  if (r.car() == <*>) return <pointer>;
+  if (r.car() == <struct>) return <struct>;
+  if (Type.is_value(t)) return <scalar>;
+  return <pointer>;
+}
+
+List _derive_fields(Type type, Symbol kind) {
+  Array result = [];
+  foreach (List field in Type.fields(type)) {
+    Symbol category = _derive_field_kind(field.cadr());
+    if (category == <pointer>)
+      x2c_diagnostic_fail(
+        %"derive: field '$(field.car())' of $(type.car()) has pointer type "
+          + field.cadr().repr(), %());
+    if ((kind == <args> && (category == <value> || category == <struct>)) ||
+        (kind == <row> && category == <struct>))
+      x2c_diagnostic_fail(
+        %"derive: field '$(field.car())' of $(type.car()) "
+          + %"is not supported by <$(kind)>", %());
+    result.push($( @field, category ));
+  }
+  return result.list_free();
+}
+
+List _derive_puts(Type type, List v, List out) {
+  Array puts = [];
+  foreach (List field in _derive_fields(type, <map>)) {
+    String key = field.car();
+    List f = x2c_ident(key);
+    if (field.caddr() == <struct>)
+      puts.push($!{ $out[$key] = $v.$f.to_map(); });
+    else puts.push($!{ $out[$key] = $v.$f; });
+  }
+  return puts.list_free();
+}
+
+List _derive_read(Type type, Symbol kind, List value) {
+  switch (kind) {
+    case <struct>: {
+      List nested = x2c_ident(%"$(type.car())_from_map");
+      return $!( $nested($value.map()) );
+    }
+    case <string>: return $!( $value.string() );
+    case <symbol>: return $!( $value.convert(<symbol>).symbol() );
+    case <value>:
+      if (type ~= %("Array")) return $!( $value.array() );
+      if (type ~= %("Map")) return $!( $value.map() );
+      return $!( $value.list() );
+    default: return value;
+  }
+}
+
+List _derive_gets(Type type, List v, List m) {
+  Array gets = [];
+  foreach (List field in _derive_fields(type, <map>)) {
+    String key = field.car();
+    List name = x2c_ident(key);
+    gets.push(
+      $!{
+      if (!($key in $m))
+        raise %(bad-arg (operation "from_map")
+          (field $($(key))) (reason "missing"));
+    });
+    List read = _derive_read(field.cadr(), field.caddr(), $!( $m[$key] ));
+    gets.push($!{ $v.$name = $read; });
+  }
+  return gets.list_free();
+}
+
+List _derive_equal(Type type, List a, List b) {
+  List equal = $!( 1 );
+  foreach (List field in _derive_fields(type, <map>)) {
+    List f = x2c_ident(field.car());
+    List e;
+    switch ((Symbol) field.caddr()) {
+      case <struct>: case <string>: e = $!( $a.$f.equal($b.$f) ); break;
+      case <value>: e = $!( ((Var) $a.$f).equal((Var) $b.$f) ); break;
+      default: e = $!( $a.$f == $b.$f );
+    }
+    equal = $!( $equal && $e );
+  }
+  return equal;
+}
+
+List _derive_repr(Type type, List a) {
+  Array parts = [];
+  foreach (List field in _derive_fields(type, <map>)) {
+    List f = x2c_ident(field.car());
+    String label = %"$(field.car()): ";
+    List text = field.caddr() == <struct>
+      ? $!( $a.$f.repr() ) : $!( ((Var) $a.$f).repr() );
+    parts.push($!( $label + $text ));
+  }
+  List items = parts.list_free();
+  String open = %"$(type.car()){ ";
+  return $!( $open + ", ".join(%[@items]) + " }" );
+}
+
+List _derive_spec(Type type) {
+  Array rows = [];
+  foreach (List field in _derive_fields(type, <args>)) {
+    String option = "--" + field.car().str();
+    String placeholder = field.car().str().upper();
+    rows.push($!( %($($(option)) (value $($(placeholder))) required) ));
+  }
+  return _derive_list(rows.list_free());
+}
+
+List _derive_parse_args(Type type, List map) {
+  Array statements = [];
+  foreach (List field in _derive_fields(type, <args>)) {
+    String key = field.car();
+    switch ((Symbol) field.caddr()) {
+      case <scalar>:
+        statements.push($!{ $map[$key] = Json.parse($map[$key].str()); });
+        break;
+      case <symbol>:
+        statements.push($!{ $map[$key] = Symbol.parse($map[$key].str()); });
+        break;
+    }
+  }
+  return statements.list_free();
+}
+
+List _derive_columns(Type type) {
+  Array columns = [];
+  foreach (List field in _derive_fields(type, <row>))
+    columns.push($!String{ $(field.car()) });
+  return _derive_list(columns.list_free());
+}
+
+List _derive_row(Type type, List value) {
+  Array entries = [];
+  foreach (List field in _derive_fields(type, <row>)) {
+    List name = x2c_ident(field.car());
+    entries.push($!( $value.$name ));
+  }
+  return _derive_list(entries.list_free());
+}
+
+List _derive_from_row(Type type, List value, List row) {
+  Array statements = [];
+  int index = 0;
+  foreach (List field in _derive_fields(type, <row>)) {
+    List name = x2c_ident(field.car());
+    List read = _derive_read(field.cadr(), field.caddr(), $!( $row[$index] ));
+    statements.push($!{ $value.$name = $read; });
+    index++;
+  }
+  return statements.list_free();
 }
 
 /* --- lib/lisp-bindings.x ------------------------------------------------- */
@@ -134,6 +322,21 @@ List _macros_location(void) =>
 
 List _macros_source(Source code) =>
   $!String{ $(Code.source_text(code)) };
+
+/* --- lib/test.x ---------------------------------------------------------- */
+
+/** Keeps a decorated test and registers it at unit initialization. */
+List test_register(List function) {
+  String name = Code.name(function);
+  List target = x2c_ident(name);
+  String file = x2c_invocation_file();
+  int line = x2c_invocation_line();
+  x2c_place(
+    %(unit-init), $!{
+    Test.register($name, $target, $file, $line);
+  });
+  return $(function);
+}
 
 /* --- lib/thread.x -------------------------------------------------------- */
 
@@ -2481,6 +2684,21 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
   $linked.row(rows, "_literal_tag", _literal_tag);
+  $linked.row(rows, "_derive_methods", _derive_methods);
+  $linked.row(rows, "_derive_construct", _derive_construct);
+  $linked.row(rows, "_derive_args_spec", _derive_args_spec);
+  $linked.row(rows, "_derive_field_kind", _derive_field_kind);
+  $linked.row(rows, "_derive_fields", _derive_fields);
+  $linked.row(rows, "_derive_puts", _derive_puts);
+  $linked.row(rows, "_derive_read", _derive_read);
+  $linked.row(rows, "_derive_gets", _derive_gets);
+  $linked.row(rows, "_derive_equal", _derive_equal);
+  $linked.row(rows, "_derive_repr", _derive_repr);
+  $linked.row(rows, "_derive_spec", _derive_spec);
+  $linked.row(rows, "_derive_parse_args", _derive_parse_args);
+  $linked.row(rows, "_derive_columns", _derive_columns);
+  $linked.row(rows, "_derive_row", _derive_row);
+  $linked.row(rows, "_derive_from_row", _derive_from_row);
   $linked.row(rows, "_lisp_native_declarations", _lisp_native_declarations);
   $linked.row(rows, "_selector_chain", _selector_chain);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
@@ -2492,6 +2710,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_macros_source", _macros_source);
+  $linked.row(rows, "test_register", test_register);
   $linked.row(rows, "_batch_without_callback", _batch_without_callback);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
@@ -2657,6 +2876,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_lowering", try_lowering);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_x2c_operator_rows", _x2c_operator_rows);
+  $linked.row(rows, "_derive_list", _derive_list);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);
   $linked.row(rows, "_scalar_access_units", _scalar_access_units);

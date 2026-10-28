@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 71
+- Runtime modules: 73
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -962,6 +962,14 @@ Public functions:
 `Buffer.write_datum_frame`, `Buffer.write_datum`, `String.read_datum_frame`,
 `String.read_datum`, `Var.independent_data_problem`
 
+### [lib/derive.x](../lib/derive.x)
+
+generate record mappings from declared fields.
+
+Public functions:
+
+`_derive_list`
+
 ### [lib/diff.x](../lib/diff.x)
 
 line differences between two texts.
@@ -1325,6 +1333,14 @@ convenience macros for text, timing, and processes.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [lib/test.x](../lib/test.x)
+
+registered tests and assertions for user programs.
+
+Public functions:
+
+`Test.register`, `Test.check`, `Test.compare`, `Test.skip`, `Test.main`
 
 ### [lib/thread-state.x](../lib/thread-state.x)
 

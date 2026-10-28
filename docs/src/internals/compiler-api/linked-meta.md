@@ -37,6 +37,7 @@ Shipped `meta` code compiled into the compiler.
 | [`raise_lowering`](#raise_lowering) | Converts a raise's code and details, or declines a raise whose parts already have their types. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its pattern and hole patterns. |
 | [`string_switch_lowering`](#string_switch_lowering) | Lowers a switch on a String to an integer switch on its selector's index among the labels it owns, or declines another switch. |
+| [`test_register`](#test_register) | Keeps a decorated test and registers it at unit initialization. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 
 ### Functions
@@ -264,6 +265,14 @@ Source: `src/linked-meta.x`
 
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
+
+Source: `src/linked-meta.x`
+
+#### test_register
+
+`List test_register(List function)`
+
+Keeps a decorated test and registers it at unit initialization.
 
 Source: `src/linked-meta.x`
 
