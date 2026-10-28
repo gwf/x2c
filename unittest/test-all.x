@@ -56,6 +56,8 @@ void protocols_suite(void);
 void atomic_container_suite(void);
 void var_suite(void);
 void varops_suite(void);
+void net_suite(void);
+void http_suite(void);
 void iter_suite(void);
 void diagnostics_suite(void);
 void logger_suite(void);
@@ -103,6 +105,8 @@ int main(int argc, char **argv) {
   $test.suite(match_logic_suite);
   $test.suite(match_binder_contract_suite);
   $test.suite(file_suite);
+  $test.suite(net_suite);
+  $test.suite(http_suite);
   $test.suite(array_suite);
   $test.suite(typed_array_suite);
   $test.suite(typed_list_suite);
