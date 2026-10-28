@@ -45,3 +45,56 @@ This lookup workload measures a complete read route. Add separately reported
 create/update/delete workloads when comparing durable writes. A fixed JSON
 response does not perform the same operation. No cross-language performance
 claim is made by this load tool.
+
+## x2c versus Go
+
+The [Go server](go/README.md) implements the same Notes operations with
+`net/http`, `database/sql`, and the same native SQLite library. Build it as
+that README describes, then run from the repository root:
+
+```sh
+python3 examples/apps/notes/bench/compare.py --go-binary /tmp/notes-go \
+  --go-tool go --output examples/apps/notes/bench/reports/current
+```
+
+The comparison builds the x2c application, SQLite adapter, and common load
+client with `-O2`. Go uses its ordinary optimized build, with Cgo's default
+`-O2 -g` preserved. The pinned native SQLite library is already built with
+`-O2`. The comparison does not change the application architecture or its
+ordinary build defaults.
+
+Both executables first pass the same external Notes tests. Preflight compares
+normalized lookup, list, stats, and update results from copies of one fixture.
+Recorded runs use 1,000 notes, one database connection, DELETE journaling,
+FULL synchronization, and access logging in both servers. SQL statements are
+prepared per operation. There is no response or statement cache. The logging
+formatters differ, and their cost remains in each application's result.
+
+The default matrix is lookup and update at one and 64 persistent clients.
+Each server sample starts from an identical database copy, warms up for one
+second, and runs for five seconds. Five pairs alternate execution order; the
+first server is counterbalanced across cases. The update client uses a unique
+fixed-width title on every request, so updates change database contents.
+Request formatting is outside the round-trip timer but inside the throughput
+interval. Geometric sample recording occurs between requests.
+
+JSON records every sample, source/binary/native-library hashes, toolchain
+versions, order, and host load. CPU and peak RSS cover the server's full
+lifetime, including startup, warmup, and shutdown. Client CPU covers its full
+process lifetime, including sorting samples; it is a saturation diagnostic,
+not timed-request CPU. Latency values are closed-loop round trips measured by
+the common client on the same host.
+
+These are matched ASCII lookup/update workloads. The ordinary Go and x2c
+libraries differ for Unicode regular expressions, escaped NUL, duplicate query
+parameters, and path redirects, as documented with the Go implementation.
+A shared-host application comparison does not isolate intrinsic language speed.
+
+Dated reports live under [reports/](reports/). No benchmark is added to a gate.
+
+The [2026-10-28 report](reports/2026-10-28/interpretation.md) contains the
+measured comparison and its limits. Go led all five 64-client lookup pairs;
+x2c led all five single-client lookup pairs and used lower peak RSS in every
+pair. Durable-write results were too variable to rank. The dated directory
+retains the full matrix, paired ratios, build/configuration verification, and
+raw samples; no slow samples were removed.
