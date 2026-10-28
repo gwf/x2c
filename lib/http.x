@@ -189,14 +189,13 @@ Router Router.new(void) {
 }
 
 /** Registers a method, segment pattern, and two-argument handler. */
-Router Router.route(
-  Router router, Symbol method, String pattern, Func handler) {
+Router Router.route(Router r, Symbol method, String pattern, Func handler) {
   HttpRoute route = Scope.calloc(1, sizeof(struct HttpRoute));
   route.method = method;
   route.segments = pattern.split("/");
   route.handler = handler;
-  router.routes.push(Var.new(<p48>, route));
-  return router;
+  r.routes.push(Var.new(<p48>, route));
+  return r;
 }
 
 /** Registers GET. */
