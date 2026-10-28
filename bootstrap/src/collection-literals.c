@@ -441,7 +441,7 @@ Code array_literal(Code code){
       int count = Array_len(values);
       List elements = Array_list_free(values);
       return cons(_28, cons(_94, cons(List_var(cons(_187, cons(_259, cons(List_var(({
-        Var _x2c_gensym_literal_part_0 = Macro_inserted(int_var(count), 1, 1);  List _x2c_gensym_literal_part_1 = Macro_inserted_items(elements);  cons(_54, cons(_262, cons(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, NULL))));
+        Var _x2c_gensym_literal_part_0 = Macro_inserted(int_var(count), 1, 1);  List _x2c_gensym_literal_part_1 = Macro_inserted_items(elements);  cons(_54, cons(_262, cons(_x2c_gensym_literal_part_0, _x2c_gensym_literal_part_1)));
       }
       )), NULL)))), NULL)));
     }
@@ -507,7 +507,7 @@ Code map_literal(Code code){
       int count = List_len(rows);
       List elements = Array_list_free(values);
       return cons(_28, cons(_224, cons(List_var(cons(_187, cons(_372, cons(List_var(({
-        Var _x2c_gensym_literal_part_2 = Macro_inserted(int_var(count), 1, 1);  List _x2c_gensym_literal_part_3 = Macro_inserted_items(elements);  cons(_54, cons(_375, cons(_x2c_gensym_literal_part_2, List_append(_x2c_gensym_literal_part_3, NULL))));
+        Var _x2c_gensym_literal_part_2 = Macro_inserted(int_var(count), 1, 1);  List _x2c_gensym_literal_part_3 = Macro_inserted_items(elements);  cons(_54, cons(_375, cons(_x2c_gensym_literal_part_2, _x2c_gensym_literal_part_3)));
       }
       )), NULL)))), NULL)));
     }

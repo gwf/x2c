@@ -184,7 +184,8 @@ static List _quoted_cons(
   Compiler c, List head, List tail, Token origin) {
   List value = c.convert_expression(
     c.resolve_expression(head, origin), %("Var"));
-  return %(expr ("List") (cons $value $tail));
+  if (tail ~= %(expr ("List") (nil))) tail = %(nil);
+  return c.literal_cell(value, tail);
 }
 
 /* A quotation whose template applies no other template builds its syntax
@@ -213,7 +214,56 @@ static List _construction(Definition &d, Map holes) {
     "x2c.quoted", fresh.list_free(),
     c.freeze_declaration_syntax(_macro_value_names(d.template)));
   List cells = _built_cells(c, quoted, keys, d.start);
-  return cells ? %(expr ("List") $cells) : NULL;
+  if (!cells) return NULL;
+  List deferred = %(expr ("List") $cells);
+  if (d.fresh || !_constructed_template(d, keys)) return deferred;
+  List syntax = _macro_value_names(d.rebuild.car());
+  List built = syntax
+    ? _typed_cells(c, syntax, keys, d.start, 0)
+    : _typed_hole(c, keys[d.template.last()], d.start, 0);
+  List constructed = c.literal_cell(c.cache_literal_var("x2c.quoted"), built);
+  // A source wrapper keeps projection after unwrapping at placement.
+  List delayed = NULL;
+  foreach (List hole in d.parameters) {
+    List condition = NULL;
+    Symbol kind = hole.assoc(<kind>);
+    List local = _hole_value(c, hole, d.start);
+    if (kind == <type>)
+      condition = _runtime_call(c, "type_name_error", $(local), d.start);
+    else if (kind == <expr> && !hole.assoc(<sequence>).int() &&
+             !local.cadr().type().scalar() &&
+             !c.sym.is_string_type(local.cadr()))
+      condition = _runtime_call(c, "Macro_needs_shell", $(local), d.start);
+    else if (kind == <name> && !hole.assoc(<sequence>).int() &&
+             !c.sym.is_string_type(local.cadr())) {
+      List boxed = c.convert_expression(local, %("Var"));
+      List value = _runtime_call(c, "Var_list_payload", $(boxed), d.start);
+      List head = _runtime_call(c, "car", $(value), d.start);
+      condition = _runtime_call(
+        c, "Var_equal", $(head, c.cache_literal_var(<src>)), d.start);
+    }
+    if (condition)
+      delayed = delayed ? %(expr () (op || $delayed $condition)) : condition;
+  }
+  return delayed ? c.resolve_expression(
+    %(expr () (op ? $delayed $deferred $constructed)), d.start) : constructed;
+}
+
+/* A completed body keeps no frozen fragments, private names, or member
+   projections that need the consumer's binding facts. Source anchors stay
+   with the existing placement path. */
+static int _constructed_template(Definition &d, Map keys) {
+  List syntax;
+  $ast.walk(d.template, syntax) {
+    if (syntax ~= %(at m-origin ?)) return 0;
+    foreach (Var item in syntax) {
+      Var row;
+      if (item.is_binder() && keys.try_get(item, row) &&
+          row ~= %(? member)) return 0;
+    }
+  }
+  Var body = _macro_value_names(d.rebuild.car());
+  return d.c.freeze_declaration_syntax(body) === body;
 }
 
 /* The List cells that build `items`: constant syntax from the literal
@@ -284,7 +334,7 @@ static List _typed_construction(Definition &d, Map holes) {
   match (d.rebuild.car()) case %(expr ? *content):
     return c.literal_cell(
       c.cache_literal_var(<expr>),
-      c.literal_cell(d.type, _typed_cells(c, content, keys, d.start)));
+      c.literal_cell(d.type, _typed_cells(c, content, keys, d.start, 1)));
   /* The rebuild template of an expression that is one hole is empty; the
      definition's template names the hole, which `Macro.typed` inserts. */
   List hole = keys[d.template.last()].list().car();
@@ -305,8 +355,8 @@ static List _typed_construction(Definition &d, Map holes) {
 static List _part_construction(Definition &d) {
   Map keys = _written_keys(d);
   if (d.rebuild.car() ~= %(macro-bind ?binder))
-    return _typed_hole(d.c, keys[binder], d.start);
-  return %(expr ("List") $(_typed_cells(d.c, d.rebuild.car(), keys, d.start)));
+    return _typed_hole(d.c, keys[binder], d.start, 1);
+  return %(expr ("List") $(_typed_cells(d.c, d.rebuild.car(), keys, d.start, 1)));
 }
 
 /* The hole projections a quotation built where it is written fills. Such a
@@ -324,18 +374,27 @@ static Map _written_keys(Definition &d) {
 /* The List cells that build `items`. A sequence or splice hole
    contributes its items to the List that holds it. */
 static List _typed_cells(
-  Compiler c, List items, Map keys, Token start) {
+  Compiler c, List items, Map keys, Token start, int check_types) {
   if (!items) return %(nil);
-  List tail = _typed_cells(c, items.cdr(), keys, start);
+  List tail = _typed_cells(c, items.cdr(), keys, start, check_types);
   Var item = items.car(), row;
+  if (!check_types && item ~= %(declare ?specifiers (bindings *rows))) {
+    // Parsed specifiers are already a base; only a Type splice adds modifiers.
+    foreach (Var specifier in specifiers) if (specifier.is_binder()) {
+      List base = %(expr ("List") $(_typed_cells(c, specifiers, keys, start, 0)));
+      List bindings = %(expr ("List") $(_typed_cells(c, rows, keys, start, 0)));
+      return c.literal_cell(
+        _runtime_call(c, "Macro_declaration", $(base, bindings), start), tail);
+    }
+  }
   if (item is <list> && !item.is_nil())
     return c.literal_cell(
-      %(expr ("List") $(_typed_cells(c, item, keys, start))), tail);
+      %(expr ("List") $(_typed_cells(c, item, keys, start, check_types))), tail);
   if (!item.is_binder() || !item.str()[1:].startswith("__macro_"))
     return c.literal_cell(c.cache_literal_var(item), tail);
   if (!keys.try_get(item, row)) $fail.macros_typed_quotation(c, start);
   (List hole, Symbol projection) = row.list();
-  List value = _typed_hole(c, row, start);
+  List value = _typed_hole(c, row, start, check_types);
   if (projection == <splice> || hole.assoc(<sequence>).int())
     value = %(splice $value);
   return c.literal_cell(value, tail);
@@ -347,18 +406,22 @@ static List _typed_cells(
    declares inserts the name `Macro.declared` makes. An expression sequence
    lifts each item as `Macro.inserted_items` does. A type inserts its
    syntax once it is checked, and other syntax inserts as it is. */
-static List _typed_hole(Compiler c, List row, Token start) {
+static List _typed_hole(
+  Compiler c, List row, Token start, int check_types) {
   (List hole, Symbol projection) = row;
   List local = _hole_value(c, hole, start);
   Symbol kind = hole.assoc(<kind>);
   int lifts = kind == <expr>;
   int expression = projection == <expression>;
-  if (kind == <type>) return _checked_type(c, local, start);
+  if (kind == <type>)
+    return check_types ? _checked_type(c, local, start) : local;
   if (hole.assoc(<sequence>).int())
     return lifts ? _runtime_call(c, "Macro_inserted_items", $(local), start)
                  : local;
   if (kind == <name> && projection == <value>)
-    return _runtime_call(c, "Macro_declared", $(local), start);
+    return c.sym.is_string_type(local.cadr())
+      ? c.literal_cell(local, %(nil))
+      : _runtime_call(c, "Macro_declared", $(local), start);
   if (!lifts && !expression && kind != <name>) return local;
   return _runtime_call(
     c, "Macro_inserted",

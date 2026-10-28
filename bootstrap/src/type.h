@@ -17,8 +17,6 @@ Map Type_var_tag_rows(void);
 
 Type List_type_from_ast(List ast);
 
-List Type_declaration_base(Type t, List * modifiers);
-
 List Type_declaration_ast(Type type, List binding);
 
 List Type_parameter_ast(Type type, List binding);

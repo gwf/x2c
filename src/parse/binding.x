@@ -64,8 +64,12 @@ List Compiler.bind_syntax(
   if (_take_staged(c, syntax)) return syntax;
   syntax = c.evaluate_macro_slot(syntax);
   if (_take_staged(c, syntax)) return syntax;
-  match (syntax) case %("x2c.quoted" ?(List fresh) ?quoted):
-    return c.land_quotation(fresh, quoted, context, return_type);
+  match (syntax) {
+    case %("x2c.quoted" ?(List fresh) ?quoted):
+      return c.land_quotation(fresh, quoted, context, return_type);
+    case %("x2c.quoted" *quoted):
+      return c.land_quotation(%(built), quoted, context, return_type);
+  }
   if (syntax is not <list>)
     $fail.parse_syntax_expected(c, c.token);
   List input = syntax;

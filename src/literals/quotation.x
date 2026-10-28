@@ -368,6 +368,7 @@ static List _append_splice(Compiler c, List head, List tail) {
   if (c.sym.is_var_type(head.cadr()))
     head = %(expr ("List") (call "Var_list_payload" (args $head)));
   else head = c.convert_expression(head, %("List"));
+  if (tail ~= %(!or (nil) (expr ("List") (nil)))) return head;
   return %(expr ("List") (append $head $tail));
 }
 

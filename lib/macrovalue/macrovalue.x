@@ -98,10 +98,7 @@ inline int Macro_case_enter(Var value, List &cursor) {
 }
 
 /** The short Symbol `value` holds, or 0 for any other value. */
-inline Symbol Macro_case_symbol(Var value) {
-  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
-  return symbol < 1ul << 51 ? symbol : 0;
-}
+inline Symbol Macro_case_symbol(Var value) => value.compact_symbol();
 
 /** Retains a macro and hole patterns for repeated recognition. A pattern
     independent of subject bindings is derived once; contextual references

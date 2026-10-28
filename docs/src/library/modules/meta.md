@@ -45,6 +45,25 @@ neither a short Symbol nor a long Atom supplies that representation.
 
 Source: `lib/meta.x`
 
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`declarator_append_modifiers`](#declarator_append_modifiers) | Appends a base type's modifiers to a declarator, preserving its initializer. |
+
+### Functions
+
+#### declarator_append_modifiers
+
+`List declarator_append_modifiers(List declarator, List modifiers)`
+
+Appends a base type's modifiers to a declarator, preserving its initializer.
+
+Source: `lib/meta.x`
+
 ## Public types
 
 | Type | Kind | Summary |

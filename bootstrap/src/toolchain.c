@@ -294,7 +294,7 @@ ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output
 
 ToolAction Toolchain_archive_action(Toolchain t, String output, List objects){
   if(! _init_guard_) _file_init_();
-  return _action(t, 3362278794, cons(String_var(t -> ar), cons(String_var(_12), cons(String_var(output), List_append(objects, NULL)))));
+  return _action(t, 3362278794, cons(String_var(t -> ar), cons(String_var(_12), cons(String_var(output), objects))));
 }
 
 ToolAction Toolchain_link_action(Toolchain t, String output, List inputs){
@@ -537,7 +537,7 @@ static ToolAction _action(Toolchain t, Symbol phase, List arguments){
 
 static List _compile_arguments(Toolchain t, List gen_dirs){
   return({
-    Var _x2c_gensym_literal_part_6 = String_var(t -> cc);  List _x2c_gensym_literal_part_7 = List_flatten(List_map(gen_dirs, _x2c_gensym_func_handle_0));  cons(_x2c_gensym_literal_part_6, cons(String_var(_45), List_append(_x2c_gensym_literal_part_7, cons(String_var(_46), cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
+    Var _x2c_gensym_literal_part_6 = String_var(t -> cc);  List _x2c_gensym_literal_part_7 = List_flatten(List_map(gen_dirs, _x2c_gensym_func_handle_0));  cons(_x2c_gensym_literal_part_6, cons(String_var(_45), List_append(_x2c_gensym_literal_part_7, cons(String_var(_46), cons(String_var(t -> include_dir), t -> cc_args)))));
   }
   );
 }

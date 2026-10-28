@@ -129,21 +129,23 @@ void x2c_diagnostic_warn(String message, List notes);
 
 Map x2c_meta_definition_hashes(void);
 
-static const SymbolSet _base_keywords =(SymbolSet) "\001\000\000\000\016\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\000\001\001\016\011\000\000\000\010\000\000\000\000\000\000\000\004\003\007\003\010\014\013\114\041\005\146\012\000\000\000\350\250\222\116\000\000\000\000\334\113\256\002\000\000\000\000\132\165\005\000\000\000\000\000\130\250\321\125\000\000\000\000\250\113\000\000\000\000\000\000\216\173\014\000\000\000\000\000\250\174\150\002\000\000\000\000\144\100\003\000\000\000\000\000\110\161\047\115\000\000\000\000\110\161\047\115\127\001\000\000\110\172\026\000\000\000\000\000\150\170\314\000\000\000\000\000\012\023\365\021\000\000\000\000";
-
-static const SymbolSet _type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\003\001\000\000\000\350\164\157\000\000\000\000\000\350\110\222\316\042\001\000\000\012\113\064\260\147\001\000\000";
-
 static List _3;
 
 static String _1, _0;
 
-static Var _7, _6, _5, _4, _2;
+static Var _9, _8, _7, _6, _5, _4, _2;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static int _base_keyword(Symbol symbol);
+
+static int _type_qualifier(Symbol symbol);
+
 static Var _modifier_syntax(Var modifier);
+
+List Macro_declaration(Type specifiers, List rows);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -157,12 +159,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = Symbol_var(33656922);
   _6 = Symbol_var(13528008);
   _7 = Symbol_var(1077021542);
+  _8 = Symbol_var(992);
+  _9 = Symbol_var(123);
 }
 
 String type_name_error(List type){
   if(! _init_guard_) _file_init_();
   Var name = List_last(type);
-  if(! Var_is(name, 826970) &&(! Var_is(name, 1328354264) || x2c_var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name)))) return NULL;
+  if(Var_is_row(name, 11, 7, 1)) return NULL;
+  Symbol symbol = Var_symbol(name);
+  if(symbol &&(symbol == 54 || _base_keyword(symbol) || _type_qualifier(symbol))) return NULL;
+  if(! Var_is(name, 826970) && ! Var_is(name, 1328354264)) return NULL;
   Array fixed = Array_new();
   for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));
   Array_push(fixed, String_var(Var_str(name)));
@@ -190,7 +197,7 @@ List base = type_base_suffix(type);
 if(! List_truth(base)) return cons(List_var(type), _3);
 List reversed = NULL, qualifiers = NULL;
 for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);
-while(List_truth(reversed) && Var_is(List_car(reversed), 1328354264) && SymbolSet_contains(_type_qualifiers, Var_symbol(List_car(reversed)))){
+while(List_truth(reversed) && _type_qualifier(Var_symbol(List_car(reversed)))){
   qualifiers = cons(List_car(reversed), qualifiers);
   reversed = List_cdr(reversed);
 }
@@ -215,9 +222,21 @@ return({
 List type_base_suffix(List type){
   for(;  List_truth(type);  type = List_cdr(type)){
     Var head = List_car(type);
-    if(Var_is_row(head, 11, 7, 1) ||(Var_is(head, 1328354264) && SymbolSet_contains(_base_keywords, Var_symbol(head)))) return type;
+    if(Var_is_row(head, 11, 7, 1) || _base_keyword(Var_symbol(head))) return type;
   }
   return NULL;
+}
+
+static int _base_keyword(Symbol symbol){
+  switch(symbol){
+    case 44661285196 : case 1318234344 : case 44977116 : case 357722 : case 1439803480 : case 19368 : case 818062 : case 40402088 : case 213092 : case 1294430536 : case 1474468213064 : case 1473096 : case 13400168 : case 301273866 : return 1;
+    default: return 0;
+  }
+
+}
+
+static int _type_qualifier(Symbol symbol){
+  return symbol == 7304424 || symbol == 1249006209256 || symbol == 1544849476362;
 }
 
 static Var _modifier_syntax(Var modifier){
@@ -254,7 +273,7 @@ static Var _modifier_syntax(Var modifier){
             }
 
           }
-          return List_var(cons(_6, cons(List_var(cons(_7, List_append(Array_list_free(params), NULL))), NULL)));
+          return List_var(cons(_6, cons(List_var(cons(_7, Array_list_free(params))), NULL)));
         }
 
       }
@@ -265,5 +284,41 @@ static Var _modifier_syntax(Var modifier){
 
 }
 return modifier;
+}
+
+List declarator_append_modifiers(List declarator, List modifiers){
+  if(! _init_guard_) _file_init_();
+  if(! List_truth(modifiers)) return declarator;
+  {
+    List _x2c_gensym_match_expr_2 = declarator;
+    switch(_x2c_gensym_match_expr_2 ? _x2c_gensym_match_expr_2 -> car.u64 : 0){
+      case 9224497936761768840ULL :{List _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_expr_2 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_2 ->car, 1) &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_3 ->car, 1) && !(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr)){{
+        Var binding;
+        binding = x2c_match_value_0;
+        Var mods;
+        mods = x2c_match_value_1;
+        return({
+          Var _x2c_gensym_literal_part_6 = binding;  Var _x2c_gensym_literal_part_7 = List_var(({
+            List _x2c_gensym_literal_part_5 = Var_list_payload(mods);  List_append(_x2c_gensym_literal_part_5, modifiers);
+          }
+          ));  cons(_4, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
+        }
+        );
+      }
+      break;}} case 9224497936761619424ULL :{List _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761619424ULL &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_expr_2 ->cdr) && _x2c_gensym_match_at_2 ->car.u64 == 9224497936761618555ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_3 ->car, 1) &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_4 ->car, 1) && !(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr)){{
+        Var binding;
+        binding = x2c_match_value_0;
+        Var initializer;
+        initializer = x2c_match_value_1;
+        return({
+          Var _x2c_gensym_literal_part_8 = List_var(declarator_append_modifiers(Var_list_payload(binding), modifiers));  cons(_8, cons(_9, cons(_x2c_gensym_literal_part_8, cons(initializer, NULL))));
+        }
+        );
+      }
+      break;}} default: break;
+    }
+
+  }
+  return declarator;
 }
 

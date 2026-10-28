@@ -878,7 +878,7 @@ void Thread_finish_all(Array pending){
             code = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
             List volatile detail;
             detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));
-            failures = cons(Error_snapshot(List_var(cons(code, List_append(detail, NULL)))), failures);
+            failures = cons(Error_snapshot(List_var(cons(code, detail))), failures);
           }
 
         }

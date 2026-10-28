@@ -610,7 +610,8 @@ _template_call][invocation-expressions];
 
 ```text
 APPLICATION ::= ("x2c.template" MACRO-DEFINITION (VALUE*))
-QUOTED      ::= ("x2c.quoted" (QUOTED-FRESH-ROW*) NODE)
+QUOTED      ::= ("x2c.quoted" . NODE)
+              | ("x2c.quoted" (QUOTED-FRESH-ROW*) NODE)
 QUOTED-HOLE ::= ("x2c.hole" REDUCED-HOLE PROJECTION VALUE)
 REDUCED-HOLE ::= (macro-param (kind HOLE-KIND) (sequence FLAG))
 QUOTED-ANCHOR ::= ("x2c.at" NODE)
@@ -618,6 +619,12 @@ IDENTIFIER-VALUE ::= ("x2c.ident" SPELLING)
 QUOTED-FRESH-ROW ::= (BINDER SPELLING FILE-LINKAGE-FLAG)
 PROJECTION ::= source | value | expression | splice | member | shell
 ```
+
+In the completed form, `. NODE` denotes the tail itself: cons the String tag
+onto the canonical node. Constant quotations can share the literal cache's
+node and carrier. The three-field form retains supplied values whose
+projections, private names, or source information still use placement. Its
+hole records do not represent arguments waiting to be supplied.
 
 A NAME-SLOT, TYPE-SLOT, MEMBER-SLOT, BODY-SLOT, or category row slot in the
 preceding productions is a `macro-bind` or `macro-slot` in that parser

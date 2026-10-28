@@ -3333,7 +3333,7 @@ void Compiler_select_native_modules(List paths){
     Array_push(linked, String_var(key));
   }
   paths =({
-    Var _x2c_gensym_literal_part_0 = String_var(f7_modules___compiler_supplier);  List _x2c_gensym_literal_part_1 = paths;  List _x2c_gensym_literal_part_2 = Array_list_free(linked);  cons(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, List_append(_x2c_gensym_literal_part_2, NULL)));
+    Var _x2c_gensym_literal_part_0 = String_var(f7_modules___compiler_supplier);  List _x2c_gensym_literal_part_1 = paths;  List _x2c_gensym_literal_part_2 = Array_list_free(linked);  cons(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, _x2c_gensym_literal_part_2));
   }
   );
   List_try_own(paths);
@@ -5068,7 +5068,7 @@ int Compiler_native_meta_accepts(Compiler c, Var function, List signature){
           List boxed =({ static MatchCaptureSite _x2c_gensym_match_site_0;
           x2c_match_site_search_replace(& _x2c_gensym_match_site_0, parameters, List_var(_651), List_var(_33)); });
           return List_equal(target, f8_bindings____native_signature_type(c, ({
-            Var _x2c_gensym_literal_part_21 = List_var(cons(_16, cons(List_var(boxed), NULL)));  cons(_x2c_gensym_literal_part_21, List_append(result, NULL));
+            Var _x2c_gensym_literal_part_21 = List_var(cons(_16, cons(List_var(boxed), NULL)));  cons(_x2c_gensym_literal_part_21, result);
           }
           )));
         }
@@ -5270,7 +5270,7 @@ static List f8_bindings____native_signature_type(Compiler c, List signature){
           }
           Type native = Sym_normalize_declared_type(c -> sym, List_type(result));
           return({
-            Var _x2c_gensym_literal_part_29 = List_var(cons(_16, cons(List_var(Array_list_free(resolved)), NULL)));  List _x2c_gensym_literal_part_30 = Type_list(native);  cons(_x2c_gensym_literal_part_29, List_append(_x2c_gensym_literal_part_30, NULL));
+            Var _x2c_gensym_literal_part_29 = List_var(cons(_16, cons(List_var(Array_list_free(resolved)), NULL)));  List _x2c_gensym_literal_part_30 = Type_list(native);  cons(_x2c_gensym_literal_part_29, _x2c_gensym_literal_part_30);
           }
           );
         }

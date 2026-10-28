@@ -256,7 +256,7 @@ int Compiler_run_command(String name, List arguments){
     volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
-      int _x2c_gensym_return_value_0 = Job_status(Job_options(List_job(cons(String_var(path), List_append(arguments, NULL))), options));
+      int _x2c_gensym_return_value_0 = Job_status(Job_options(List_job(cons(String_var(path), arguments)), options));
       {
         x2c_error_catch_close(_x2c_gensym_error_handler_0);
         _x2c_gensym_error_handler_0 = NULL;

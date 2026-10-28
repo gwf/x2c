@@ -151,6 +151,10 @@ module void _emit(Emitter &e, List ast) {
     e.out.push(ast);
     return;
   }
+  match (ast) {
+    case %("x2c.quoted" seq *items): { _emit(e, items); return; }
+    case %("x2c.quoted" *code): { _emit(e, code); return; }
+  }
   Var head = ast.car();
   if (head is not <symbol>) {
     _sequence(e, ast);

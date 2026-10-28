@@ -21,7 +21,7 @@ List Macro_apply(Macro t, List values) =>
     or a binding as it is.
 */
 Var Macro.declared(Var value) {
-  Var spelling = Macro.inserted(value, 0, 0);
+  Var spelling = _spelling(value);
   return spelling is <string> ? $(spelling).var() : value;
 }
 
@@ -36,7 +36,7 @@ List Macro.inserted_items(List values) => _expr_values(values);
     String typed `String` is a String literal.
 */
 List Macro.typed(List type, Var value) {
-  if (value is <list> && value.list().car().is_match_op())
+  if (value is <list> && value.list_payload().car().is_match_op())
     return %(expr $type $value);
   if (value is <string> && List.compare(type, %("String")) == 0)
     value = %(expr ("String") (segments
@@ -56,13 +56,38 @@ List Macro.typed(List type, Var value) {
     String.
 */
 Var Macro.inserted(Var value, int lifts, int expression) {
+  match (value) case %(expr *): return value;
   if (lifts) value = _expr_value(value);
-  Var spelling = value;
-  if (value ~= %("x2c.ident" ?(String name))) spelling = name;
-  if (!expression) return lifts ? value : spelling;
+  if (!expression && lifts) return value;
+  Var spelling = _spelling(value);
+  if (!expression) return spelling;
   if (spelling is <string>) return %(expr () (ident $spelling));
   if (value ~= %(binding ? ?)) return %(expr () (ident $value));
   return value;
+}
+
+static Var _spelling(Var value) {
+  if (value is not <list>) return value;
+  List syntax = value;
+  if (syntax.car() is not <string>) return value;
+  match (syntax) case %("x2c.ident" ?(String name)): return name;
+  return value;
+}
+
+/** Whether an ordinary expression hole still needs placement's expression
+    shell. Scalars are lifted by insertion; complete expressions, staged
+    code, and identifier values already have their insertion forms. Other
+    Lists keep the existing projection path without changing their syntax.
+*/
+int Macro.needs_shell(Var value) {
+  if (value is not <list>)
+    return !(value.is_integer() || value.is_floating() ||
+             value is <string> || value is <symbol>);
+  match (value) {
+    case %(!or (expr ? *) (code-value ? ? ?) ("x2c.ident" ?) (binding ? ?)):
+      return 0;
+  }
+  return 1;
 }
 
 // number literals

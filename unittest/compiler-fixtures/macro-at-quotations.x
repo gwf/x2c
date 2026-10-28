@@ -11,12 +11,10 @@ static List many(Array log, int marker) {
            (expr (int) (literal (int) "2")));
 }
 static void check_plain(List code) {
-  match (code) case %("x2c.quoted" () (expr ? (call ? (args
-    ("x2c.hole" ? splice ?(List items)) ("x2c.hole" ? shell ?single))))): {
-    if (items.len() != 2 ||
-        single !== %(expr (int) (literal (int) "3"))) abort();
-    return;
-  }
+  match (code) case %("x2c.quoted" expr ? (call ? (args
+    (expr (int) (literal (int) "1"))
+    (expr (int) (literal (int) "2"))
+    (expr (int) (literal (int) "3"))))): return;
   abort();
 }
 static void check_typed(List code) {

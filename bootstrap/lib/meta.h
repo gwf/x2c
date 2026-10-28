@@ -139,5 +139,9 @@ List type_declaration_parts(List type);
 
 List type_base_suffix(List type);
 
+List declarator_append_modifiers(List declarator, List modifiers);
+
+List Macro_declaration(Type specifiers, List rows);
+
 
 #endif /* __GUARD_0x194AFD99__ */

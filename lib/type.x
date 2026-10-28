@@ -15,6 +15,32 @@
 #include "native-scalar-types.x"
 #include <limits.h>
 
+/** Returns the declaration specifiers `t` without the pointer, array, or
+    function modifiers an alias in them contributes, and sets `modifiers`
+    to those modifiers for `declarator_append_modifiers` to append.
+    Storage and source specifier text, such as `("_Noreturn")`, stay on
+    the base.
+*/
+List Type.declaration_base(Type t, List &modifiers) {
+  if (type_base_suffix(t) === t) {
+    modifiers = NULL;
+    return t;
+  }
+  Array storage = [], text = [], typed = [];
+  defer { storage.free(); text.free(); typed.free(); }
+  foreach (Var item in t)
+    if (item is <list> && car(item) is <string>) text.push(item);
+    else typed.push(item);
+  List (base, mods) = type_declaration_parts(typed.list().type().declared());
+  modifiers = mods;
+  if (!mods) return t;
+  foreach (Var item in t)
+    if (item is <symbol> &&
+        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
+      storage.push(item);
+  return %( @(storage.list()) @(text.list()) @base );
+}
+
 // specifier symbols
 
 static const SymbolSet storage_classes =
@@ -649,4 +675,17 @@ static Type _integer_literal_type(
     return signed_only ? NULL : %(unsigned long long);
   }
   return %(unsigned long long);
+}
+
+// declarations
+
+/** Constructs a declaration, moving the base type's modifiers to each binding. */
+List Macro.declaration(Type specifiers, List rows) {
+  List modifiers = NULL;
+  List base = Type.declaration_base(specifiers, modifiers);
+  if (!modifiers) return %(declare $base (bindings @rows));
+  Array moved = [];
+  foreach (List row in rows)
+    moved.push(declarator_append_modifiers(row, modifiers));
+  return %(declare $base (bindings @(moved.list_free())));
 }

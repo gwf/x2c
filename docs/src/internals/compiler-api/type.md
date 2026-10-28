@@ -15,7 +15,6 @@ X2c semantic types.
 | [`List.type_from_ast`](#List.type_from_ast) | Returns the semantic `Type` represented by a complete `(declare ...)` AST. |
 | [`Type.begin_unit`](#Type.begin_unit) | Starts an empty set of source-declared `Var` rows for one translation unit. |
 | [`Type.declaration_ast`](#Type.declaration_ast) | Returns a complete `(declare ...)` AST for `type` and `binding`. |
-| [`Type.declaration_base`](#Type.declaration_base) | Returns the declaration specifiers `t` without the pointer, array, or function modifiers an alias in them contributes, and sets `modifiers` to those modifiers, for `Ast.append_modifiers` to give each declarator. |
 | [`Type.end_unit`](#Type.end_unit) | Restores the enclosing unit's source-declared `Var` rows before the current unit's `Scope` is released. |
 | [`Type.fixed_var_tag`](#Type.fixed_var_tag) | Returns the process-lifetime `Var` tag fixed for `type`, or zero. |
 | [`Type.parameter_ast`](#Type.parameter_ast) | Returns a complete `(param ...)` AST for `type` and `binding`. |
@@ -58,19 +57,6 @@ Source: `src/type.x`
 
 Returns a complete `(declare ...)` AST for `type` and `binding`.
 A `NULL` binding produces an abstract declaration.
-
-Source: `src/type.x`
-
-<a id="Type.declaration_base"></a>
-#### Type.declaration_base
-
-`List Type.declaration_base(Type t, List &modifiers)`
-
-Returns the declaration specifiers `t` without the pointer, array, or
-function modifiers an alias in them contributes, and sets `modifiers`
-to those modifiers, for `Ast.append_modifiers` to give each declarator.
-Storage and source specifier text, such as `("_Noreturn")`, stay on
-the base.
 
 Source: `src/type.x`
 

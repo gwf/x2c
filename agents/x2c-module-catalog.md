@@ -278,10 +278,10 @@ x2c semantic types.
 
 Public functions:
 
-`List.type_from_ast`, `Type.declaration_base`, `Type.declaration_ast`,
-`Type.parameter_ast`, `Type.parts`, `Type.var_tag`, `Type.var_converter`,
-`Type.var_tag_row`, `Type.register_var_tag`, `Type.register_var_adoption`,
-`Type.fixed_var_tag`, `Type.begin_unit`, `Type.end_unit`
+`List.type_from_ast`, `Type.declaration_ast`, `Type.parameter_ast`,
+`Type.parts`, `Type.var_tag`, `Type.var_converter`, `Type.var_tag_row`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.fixed_var_tag`,
+`Type.begin_unit`, `Type.end_unit`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -917,12 +917,12 @@ Public functions:
 `double.str`, `double.repr`, `ulong.var`, `long.str`, `long.repr`, `long.var`,
 `Var.is_row`, `Var.string_payload`, `Var.array_payload`, `Var.block_payload`,
 `Var.buffer_payload`, `Var.bytes_payload`, `Var.file_payload`,
-`Var.iter_payload`, `Var.list_payload`, `Var.map_payload`, `Var.symbol`,
-`Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
-`Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
-`Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize`,
-`x2c_initialize_protocols`, `x2c_normalize_index`, `x2c_slice_bound`,
-`x2c_normalize_slice`
+`Var.iter_payload`, `Var.list_payload`, `Var.map_payload`,
+`Var.compact_symbol`, `Var.symbol`, `Var.char`, `Var.uchar`, `Var.short`,
+`Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`, `Var.long`, `Var.ulong`,
+`Var.long_long`, `Var.ulong_long`, `Var.long_double`, `Var.float`,
+`Var.double`, `x2c_initialize`, `x2c_initialize_protocols`,
+`x2c_normalize_index`, `x2c_slice_bound`, `x2c_normalize_slice`
 
 ### [lib/compiler-meta.x](../lib/compiler-meta.x)
 
@@ -1135,7 +1135,8 @@ the compiler surface a `meta` function calls.
 
 Public functions:
 
-`type_name_error`, `type_declaration_parts`, `type_base_suffix`
+`type_name_error`, `type_declaration_parts`, `type_base_suffix`,
+`declarator_append_modifiers`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -1336,15 +1337,15 @@ semantic type values and their structural operations.
 
 Public functions:
 
-`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
-`Type.tag`, `Type.body`, `Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`,
-`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_reference`,
-`Type.is_optional_reference`, `Type.is_function`, `Type.is_bitfield`,
-`Type.reference`, `Type.list`, `Type.apply`, `Type.rest_index`,
-`Type.function_parts`, `Type.dereference`, `List.type`, `Type.is_pointer`,
-`Type.is_array`, `Var.type`, `Type.qualify`, `Type.rest_container`,
-`Type.is_static`, `Type.is_inline`, `Type.is_extern`, `Type.is_threaded`,
-`Type.is_typedef`, `Type.canonicalize`, `Type.declared`,
+`Type.declaration_base`, `Symbol.is_type_modifier`, `Symbol.is_builtin_type`,
+`Type.is_aggregate`, `Type.tag`, `Type.body`, `Type.is_aggregate_tag`,
+`Type.is_aggregate_tag_body`, `Type.is_enum_tag`, `Type.is_enum_tag_body`,
+`Type.is_reference`, `Type.is_optional_reference`, `Type.is_function`,
+`Type.is_bitfield`, `Type.reference`, `Type.list`, `Type.apply`,
+`Type.rest_index`, `Type.function_parts`, `Type.dereference`, `List.type`,
+`Type.is_pointer`, `Type.is_array`, `Var.type`, `Type.qualify`,
+`Type.rest_container`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
+`Type.is_threaded`, `Type.is_typedef`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_char_pointer_like`, `Type.is_builtin`,
 `Type.is_typedef_name`, `Type.base_type`, `Type.is_bare_typedef_name`,
 `Type.is_number`, `Type.var_numeric_extractor`,
@@ -1352,7 +1353,7 @@ Public functions:
 `Type.numeric_literal`, `Type.numeric_literal_value`,
 `Type.integer_literal_magnitude`, `Type.is_integral`, `Type.is_enum`,
 `Type.scalar_tag`, `Type.scalar`, `Symbol.is_storage_class`,
-`Symbol.is_inline`, `Symbol.is_type_qualifier`
+`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Macro.declaration`
 
 ### [lib/typed-array.x](../lib/typed-array.x)
 
@@ -1664,11 +1665,11 @@ Public functions:
 
 `Macro_case_start`, `Macro_case_own`, `Macro_case_enter`, `Macro_case_symbol`,
 `Macro_close`, `Macro_apply`, `Macro.declared`, `Macro.inserted_items`,
-`Macro.typed`, `Macro.inserted`, `Macro.number_type`, `Macro.number_literal`,
-`Macro.subject`, `Macro.use_subject`, `Macro_pattern`, `Macro.binder`,
-`Macro_case_pattern`, `Macro_case_shape`, `Macro_case_capture_at`,
-`Macro_case_root`, `Macro_case_view`, `Macro.matcher`, `Macro.matches`,
-`MacroMatcher.matches`
+`Macro.typed`, `Macro.inserted`, `Macro.needs_shell`, `Macro.number_type`,
+`Macro.number_literal`, `Macro.subject`, `Macro.use_subject`, `Macro_pattern`,
+`Macro.binder`, `Macro_case_pattern`, `Macro_case_shape`,
+`Macro_case_capture_at`, `Macro_case_root`, `Macro_case_view`, `Macro.matcher`,
+`Macro.matches`, `MacroMatcher.matches`
 
 ### [lib/map/map.x](../lib/map/map.x)
 

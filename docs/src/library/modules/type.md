@@ -584,6 +584,42 @@ Returns the `List` payload of `x` as a `Type`, or `NULL` for another tag.
 
 Source: `lib/type.x`
 
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`Macro.declaration`](#Macro.declaration) | Constructs a declaration, moving the base type's modifiers to each binding. |
+| [`Type.declaration_base`](#Type.declaration_base) | Returns the declaration specifiers `t` without the pointer, array, or function modifiers an alias in them contributes, and sets `modifiers` to those modifiers for `declarator_append_modifiers` to append. |
+
+### `Macro`
+
+<a id="Macro.declaration"></a>
+#### Macro.declaration
+
+`List Macro.declaration(Type specifiers, List rows)`
+
+Constructs a declaration, moving the base type's modifiers to each binding.
+
+Source: `lib/type.x`
+
+### `Type`
+
+<a id="Type.declaration_base"></a>
+#### Type.declaration_base
+
+`List Type.declaration_base(Type t, List &modifiers)`
+
+Returns the declaration specifiers `t` without the pointer, array, or
+function modifiers an alias in them contributes, and sets `modifiers`
+to those modifiers for `declarator_append_modifiers` to append.
+Storage and source specifier text, such as `("_Noreturn")`, stay on
+the base.
+
+Source: `lib/type.x`
+
 ## Design notes
 
 These operations inspect captured types without compiler state. Name

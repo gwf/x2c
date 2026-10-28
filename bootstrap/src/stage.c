@@ -647,7 +647,7 @@ static List _array_form(Compiler c, Array value){
 
       }
       {
-        List _x2c_gensym_return_value_1 = cons(_2, cons(_164, cons(List_var(cons(_165, List_append(Array_list(items), NULL))), NULL))); {
+        List _x2c_gensym_return_value_1 = cons(_2, cons(_164, cons(List_var(cons(_165, Array_list(items))), NULL))); {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);  return _x2c_gensym_return_value_1;
         }
 
@@ -698,7 +698,7 @@ static List _map_form(Compiler c, Map map){
 
           }
           {
-            List _x2c_gensym_return_value_3 = cons(_2, cons(_167, cons(List_var(cons(_168, List_append(Array_list(entries), NULL))), NULL))); {
+            List _x2c_gensym_return_value_3 = cons(_2, cons(_167, cons(List_var(cons(_168, Array_list(entries))), NULL))); {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_3);  x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_3;
             }
 

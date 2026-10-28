@@ -500,7 +500,7 @@ static List _build(Helper * h){
   {
     String path;
     List _x2c_gensym_macro_object_0 =({
-      List _x2c_gensym_literal_part_0 = Array_list((* h).owners);  List _x2c_gensym_literal_part_1 = Array_list((* h).modules);  List _x2c_gensym_literal_part_2 = _loop_sources();  List_append(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, List_append(_x2c_gensym_literal_part_2, NULL)));
+      List _x2c_gensym_literal_part_0 = Array_list((* h).owners);  List _x2c_gensym_literal_part_1 = Array_list((* h).modules);  List _x2c_gensym_literal_part_2 = _loop_sources();  List_append(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, _x2c_gensym_literal_part_2));
     }
     );
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
@@ -944,7 +944,7 @@ String Compiler_extension_archive(void);
 static List _group_flags(CliRequest request, Map packages){
   List includes = List_flatten(List_map(request -> include_dirs, _x2c_gensym_func_handle_1));
   List flags =({
-    List _x2c_gensym_literal_part_3 = includes;  List _x2c_gensym_literal_part_4 = _host_args(request -> cc_args);  List_append(_x2c_gensym_literal_part_3, List_append(_x2c_gensym_literal_part_4, NULL));
+    List _x2c_gensym_literal_part_3 = includes;  List _x2c_gensym_literal_part_4 = _host_args(request -> cc_args);  List_append(_x2c_gensym_literal_part_3, _x2c_gensym_literal_part_4);
   }
   );
   {
@@ -966,7 +966,7 @@ static List _group_flags(CliRequest request, Map packages){
   }
   String archive = Compiler_extension_archive();
   if(String_truth(archive)) flags =({
-    Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_23), NULL))));  cons(String_var(_22), cons(_x2c_gensym_literal_part_8, List_append(flags, NULL)));
+    Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_23), NULL))));  cons(String_var(_22), cons(_x2c_gensym_literal_part_8, flags));
   }
   );
   return flags;

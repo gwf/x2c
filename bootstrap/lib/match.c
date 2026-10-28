@@ -3228,7 +3228,7 @@ static List f6_layout____normalize_pattern(List pattern){
   List rest = List_cdr(args);
   if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
   return({
-    Var _x2c_gensym_literal_part_3 = binder;  Var _x2c_gensym_literal_part_4 = List_var(f6_layout____normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
+    Var _x2c_gensym_literal_part_3 = binder;  Var _x2c_gensym_literal_part_4 = List_var(f6_layout____normalize_pattern(cons(op, rest)));  cons(_0, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
   }
   );
 }
@@ -3683,11 +3683,11 @@ static Var _replace(Var input, ReplacementSource * source){
         f9_templates___ReplacementCell row =((f9_templates___ReplacementCell *) spine -> bytes)[i - 1];
         Var head = row.value;
         if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(({
-          List _x2c_gensym_literal_part_7 = Var_list_payload(head);  List _x2c_gensym_literal_part_8 = Var_list_payload(tail);  List_append(_x2c_gensym_literal_part_7, List_append(_x2c_gensym_literal_part_8, NULL));
+          List _x2c_gensym_literal_part_7 = Var_list_payload(head);  List _x2c_gensym_literal_part_8 = Var_list_payload(tail);  List_append(_x2c_gensym_literal_part_7, _x2c_gensym_literal_part_8);
         }
         ));
         else tail = List_var(({
-          Var _x2c_gensym_literal_part_9 = head;  List _x2c_gensym_literal_part_10 = Var_list_payload(tail);  cons(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, NULL));
+          Var _x2c_gensym_literal_part_9 = head;  List _x2c_gensym_literal_part_10 = Var_list_payload(tail);  cons(_x2c_gensym_literal_part_9, _x2c_gensym_literal_part_10);
         }
         ));
       }

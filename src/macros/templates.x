@@ -2,16 +2,15 @@
 
 /* quoted syntax
 
-   A quotation whose template applies no other template builds that
-   template where it is written, as `("x2c.quoted" FRESH SYNTAX)`. Each
-   use of a hole is `("x2c.hole" HOLE PROJECTION VALUE)`, holding the
-   local's value, and each origin anchor is `("x2c.at" NODE)`. A FRESH
-   row is `(BINDER SPELLING FILE)`, where FILE marks a name that a
-   file-scope row declares with linkage. Landing fills the syntax as an
-   expansion fills its template: it names the private binders, projects
-   each hole as a capture row would, and keeps anchors only where an
-   invocation lands it. Recovery gives binding a semantic transaction.
-   It counts no expansion, since the template applies nothing. */
+   Completed syntax is the tail of `("x2c.quoted" . SYNTAX)`. The tag
+   distinguishes code from List data; construction already inserted values
+   and splices. Placement still supplies binding, origins and effects.
+
+   Syntax needing consumer-side projections retains
+   `("x2c.quoted" FRESH SYNTAX)`. A use of a supplied value is
+   `("x2c.hole" HOLE PROJECTION VALUE)`; origin anchors are `("x2c.at" NODE)`.
+   FRESH rows `(BINDER SPELLING FILE)` name private binders at placement.
+   Recovery gives both forms the existing semantic transaction. */
 
 /* One landing of quoted syntax. `retain` keeps each hole's value as the
    syntax it is, as a rebuild does. */
@@ -143,8 +142,13 @@ List Compiler.land_quotation(
     if (c.recovery_depth > 0)
       transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
-    landing.names = _private_names(c, fresh);
-    Var filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
+    Var filled;
+    if (fresh == %(built))
+      filled = _source_unwrap(_helper_result(c, syntax));
+    else {
+      landing.names = _private_names(c, fresh);
+      filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
+    }
     with (c.token = site, c.origin = c.record_origin(site)) {
       bound = c.bind_syntax(filled, position, return_type);
     }
@@ -216,7 +220,7 @@ static Var _constructed_identifier(Var result, Var construction) {
 static Var _slot_rows(Var result) {
   match (result) {
     case %(code-value ? ? ?): return result;
-    case %(!or (macro-invoke ? ? ?) ("x2c.quoted" ? ?)):
+    case %(!or (macro-invoke ? ? ?) ("x2c.quoted" *)):
       return %(seq $result);
     case %(seq *): return result;
   }
@@ -359,10 +363,11 @@ module String _definition_file(List definition) {
    it uses. Quoted syntax fills its own holes and keeps their values. */
 static List _rebuild(
   Compiler c, List application, List target) {
-  if (application ~= %("x2c.quoted" ? ?syntax)) {
+  if (application ~= %("x2c.quoted" ?(List fresh) ?syntax)) {
     Landing landing = {.c = c, .site = c.token, .retain = 1};
     return _fill_syntax(landing, syntax);
   }
+  if (application.car() == "x2c.quoted") return application.cdr();
   (Var marker, List definition, List values) = application;
   (void) marker;
   List rebuild = definition.assoc(<rebuild>);
@@ -432,15 +437,8 @@ static Var _fill_syntax(Landing &l, Var syntax) {
    modifiers moved onto each declarator, as parsing moves them. The caller
    supplies a filled declaration List. */
 static List _retained_declaration(List declaration) {
-  if (declaration ~= %(declare ?specifiers (bindings *rows))) {
-    List modifiers = NULL;
-    List base = Type.declaration_base(specifiers, modifiers);
-    if (!modifiers) return declaration;
-    Array moved = [];
-    foreach (List row in rows)
-      moved.push(Ast.append_modifiers(row, modifiers));
-    return %(declare $base (bindings @(moved.list_free())));
-  }
+  if (declaration ~= %(declare ?specifiers (bindings *rows)))
+    return Macro.declaration(specifiers, rows);
   return declaration;
 }
 
@@ -511,7 +509,9 @@ static Map _private_names(Compiler c, List fresh) {
    expression or binds a statement. Ordinary binding consumes the carrier. */
 static int _statement_expression(Compiler c, List value) {
   loop match (value) {
-    case %((!or "x2c.quoted" src at) ? ?root): value = root;
+    case %("x2c.quoted" ?(List fresh) ?root): value = root;
+    case %("x2c.quoted" *root): value = root;
+    case %((!or src at) ? ?root): value = root;
     case %("x2c.at" ?root): value = root;
     case %(code-value ? ?root ?): value = root;
     case %(macro-invoke ?stored ? ?site):

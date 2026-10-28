@@ -74,7 +74,7 @@ List Ast_lambda_pattern(void){
 List Ast_declarator_pattern(List fields){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_gensym_literal_part_0 = List_var(cons(_29, List_append(fields, NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_30, cons(_31, cons(List_var(cons(_29, List_append(fields, NULL))), _32))));  cons(_33, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_0 = List_var(cons(_29, fields));  Var _x2c_gensym_literal_part_1 = List_var(cons(_30, cons(_31, cons(List_var(cons(_29, fields)), _32))));  cons(_33, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   );
 }

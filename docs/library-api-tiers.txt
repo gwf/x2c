@@ -241,3 +241,7 @@ lib/match/match.x|internal|MachineWord,MatchFrame,MatchMachine,MatchMachine.acqu
 lib/match/match.x|internal|MatchMachine.begin,MatchMachine.clean,MatchMachine.dispose,MatchMachine.finish
 lib/match/match.x|internal|MatchMachine.materialize_span,MatchMachine.open,MatchMachine.release,MatchMachine.release_spares
 lib/match/match.x|internal|MatchMachine.run,MatchMachine.step
+lib/common.x|internal|Var.compact_symbol
+lib/macrovalue/macrovalue.x|internal|Macro.needs_shell
+lib/meta.x|internal|declarator_append_modifiers
+lib/type.x|internal|Macro.declaration,Type.declaration_base

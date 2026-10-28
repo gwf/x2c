@@ -406,7 +406,7 @@ String String_new(const char *);
 List Args_from_argv(int argc, char * * argv){
   List result = NULL;
   for(int i = argc - 1;  i > 0;  i --) result =({
-    Var _x2c_gensym_literal_part_0 = String_var(String_new(argv[i]));  cons(_x2c_gensym_literal_part_0, List_append(result, NULL));
+    Var _x2c_gensym_literal_part_0 = String_var(String_new(argv[i]));  cons(_x2c_gensym_literal_part_0, result);
   }
   );
   return result;

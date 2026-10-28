@@ -491,10 +491,11 @@ meta static Array _match_named(Array cursors, Array pool) {
 /* The declaration of `binding` as `type`, initialized to `value` when it
    is given. The initializer carries its type for the passes that read
    declarations. */
-meta static List _match_declare(Type type, List binding, List value) =>
-  value
-    ? %(declare $type (bindings (op = (bind $binding ()) (expr $type $value))))
-    : %(declare $type (bindings (bind $binding ())));
+meta static Code _match_declare(Type type, List binding, List content) {
+  Code value = content ? $!($type){ ($content) } : NULL;
+  return content ? $!{ $type $binding = $value; }
+                 : $!{ $type $binding; };
+}
 
 /* Adds a declaration of each cursor the tests assign to `declared`. */
 meta static void _match_cursors(Array cursors, Array declared) {

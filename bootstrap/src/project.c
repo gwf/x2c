@@ -910,15 +910,15 @@ static CliRequest f8_planning____target_request(Project p, ProjectTarget target)
   f8_planning____set_product(p, target, request);
   request -> inputs = f8_planning____target_inputs(p, target, request -> kind);
   request -> native_modules =({
-    List _x2c_gensym_literal_part_2 = command -> native_modules;  List _x2c_gensym_literal_part_3 = f8_planning____target_modules(p, target);  List_append(_x2c_gensym_literal_part_2, List_append(_x2c_gensym_literal_part_3, NULL));
+    List _x2c_gensym_literal_part_2 = command -> native_modules;  List _x2c_gensym_literal_part_3 = f8_planning____target_modules(p, target);  List_append(_x2c_gensym_literal_part_2, _x2c_gensym_literal_part_3);
   }
   );
   request -> include_dirs =({
-    List _x2c_gensym_literal_part_4 = command -> include_dirs;  List _x2c_gensym_literal_part_5 = f8_planning____paths(p -> root, target -> include_dirs);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, NULL));
+    List _x2c_gensym_literal_part_4 = command -> include_dirs;  List _x2c_gensym_literal_part_5 = f8_planning____paths(p -> root, target -> include_dirs);  List_append(_x2c_gensym_literal_part_4, _x2c_gensym_literal_part_5);
   }
   );
   request -> package_dirs =({
-    List _x2c_gensym_literal_part_6 = command -> package_dirs;  List _x2c_gensym_literal_part_7 = f8_planning____paths(p -> root, target -> package_dirs);  List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, NULL));
+    List _x2c_gensym_literal_part_6 = command -> package_dirs;  List _x2c_gensym_literal_part_7 = f8_planning____paths(p -> root, target -> package_dirs);  List_append(_x2c_gensym_literal_part_6, _x2c_gensym_literal_part_7);
   }
   );
   f8_planning____set_flags(p, target, request);
@@ -998,13 +998,13 @@ static void f8_planning____set_flags(Project p, ProjectTarget target, CliRequest
     compile = f8_planning____profile_flags(p, profile);
     link = profile -> link_flags;
   }
-  request -> cpp_args = List_append(defines, List_append(profile_defines, List_append(command -> cpp_args, NULL)));
+  request -> cpp_args = List_append(defines, List_append(profile_defines, command -> cpp_args));
   request -> cc_args =({
-    List _x2c_gensym_literal_part_8 = defines;  List _x2c_gensym_literal_part_9 = f8_planning____c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_10 = profile_defines;  List _x2c_gensym_literal_part_11 = compile;  List _x2c_gensym_literal_part_12 = command -> cc_args;  List _x2c_gensym_literal_part_13 = f8_planning____path_options(p -> root, target -> include_dirs, _63);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, NULL))))));
+    List _x2c_gensym_literal_part_8 = defines;  List _x2c_gensym_literal_part_9 = f8_planning____c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_10 = profile_defines;  List _x2c_gensym_literal_part_11 = compile;  List _x2c_gensym_literal_part_12 = command -> cc_args;  List _x2c_gensym_literal_part_13 = f8_planning____path_options(p -> root, target -> include_dirs, _63);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, _x2c_gensym_literal_part_13)))));
   }
   );
   request -> ld_args =({
-    List _x2c_gensym_literal_part_14 = f8_planning____path_options(p -> root, target -> library_dirs, _64);  List _x2c_gensym_literal_part_15 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
+    List _x2c_gensym_literal_part_14 = f8_planning____path_options(p -> root, target -> library_dirs, _64);  List _x2c_gensym_literal_part_15 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, List_append(target -> link_flags, List_append(link, command -> ld_args))));
   }
   );
 }
@@ -1027,7 +1027,7 @@ static List f8_planning____profile_flags(Project p, ProjectProfile profile){
   int optimized = List_any(cc_args, _x2c_gensym_func_handle_1);
   int debug = profile -> debug && !(List_contains(cc_args, String_var(_66)));
   return({
-    List _x2c_gensym_literal_part_16 = f8_planning____c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_17 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_67), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_18 = debug ? _70 : NULL;  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, List_append(_x2c_gensym_literal_part_18, NULL)));
+    List _x2c_gensym_literal_part_16 = f8_planning____c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_17 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_67), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_18 = debug ? _70 : NULL;  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, _x2c_gensym_literal_part_18));
   }
   );
 }

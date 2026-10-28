@@ -1562,10 +1562,11 @@ static Array _match_named(Array cursors, Array pool) {
   return rows;
 }
 
-static List _match_declare(Type type, List binding, List value) =>
-  value
-    ? %(declare $type (bindings (op = (bind $binding ()) (expr $type $value))))
-    : %(declare $type (bindings (bind $binding ())));
+static Code _match_declare(Type type, List binding, List content) {
+  Code value = content ? $!($type){ ($content) } : NULL;
+  return content ? $!{ $type $binding = $value; }
+                 : $!{ $type $binding; };
+}
 
 static void _match_cursors(Array cursors, Array declared) {
   Array names = [];

@@ -987,6 +987,7 @@ for source readers but are not supported as user API.
 | [`x2c_hash_bytes`](#x2c_hash_bytes) | Hashes an arbitrary byte block through the shared 64-bit mixer. |
 | [`x2c_hash_word`](#x2c_hash_word) | Narrows a mixed word to the nonzero 32-bit hash the tables expect. |
 | [`x2c_mix64`](#x2c_mix64) | Avalanches one 64-bit word. |
+| [`Var.compact_symbol`](#Var.compact_symbol) | Returns a compact Symbol payload, or 0 for another representation. |
 
 ### Functions
 
@@ -1019,6 +1020,17 @@ This is MurmurHash3's fmix64 finalizer, the shared mixer behind every
 fixed-width hash in the runtime. It is six instructions, and its low bits
 are as well distributed as its high ones, which is what `Map` masks. Use
 `x2c_hash_bytes` for a block that spans several words.
+
+Source: `lib/common.x`
+
+### `Var`
+
+<a id="Var.compact_symbol"></a>
+#### Var.compact_symbol
+
+`inline Symbol Var.compact_symbol(Var value)`
+
+Returns a compact Symbol payload, or 0 for another representation.
 
 Source: `lib/common.x`
 

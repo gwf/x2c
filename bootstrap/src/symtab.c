@@ -1199,7 +1199,7 @@ static List f12_declarations____declare(Sym s, List context, List key, List ast,
   if(! Sym_at_file_scope(s) && ! List_equal(declared, key)) f12_declarations____link_local(s, declared);
   key = declared;
   f12_declarations____check_spelling(s -> c, f12_declarations____declared_spelling(key));
-  Type ctxkey = List_type(List_append(context, List_append(key, NULL))), type = List_type_from_ast(ast);
+  Type ctxkey = List_type(List_append(context, key)), type = List_type_from_ast(ast);
   Type declared_type = type;
   Type prior = Type_is_function(type) ? List_type(Sym_get(s, Type_list(ctxkey))) : NULL;
   if(Type_is_function(prior) && ! Sym_same_rest_convention(s, type, prior)) Compiler_report_error(s -> c, 1362954, _59, NULL, NULL);
@@ -1794,7 +1794,7 @@ Type Sym_lookup_field(Sym s, Type type, List field){
   type = Sym_resolve_key(s, object);
   if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;
   Type found = List_type(Sym_get(s, ({
-    List _x2c_gensym_literal_part_23 = Type_list(type);  List_append(_x2c_gensym_literal_part_23, List_append(field, NULL));
+    List _x2c_gensym_literal_part_23 = Type_list(type);  List_append(_x2c_gensym_literal_part_23, field);
   }
   )));
   if(List_truth(Type_list(found))) return Type_qualify(found, object);
@@ -1856,7 +1856,7 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
     }
 
   }
-  Sym_set(s, List_append(Type_list(type), _154), cons(_155, List_append(Array_list_free(rows), NULL)));
+  Sym_set(s, List_append(Type_list(type), _154), cons(_155, Array_list_free(rows)));
 }
 
 void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name){

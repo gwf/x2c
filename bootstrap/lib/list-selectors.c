@@ -311,8 +311,12 @@ int String_len(String);
 
 int String_getindex(String, int);
 
+int Macro_needs_shell(Var);
+
+Var Macro_inserted(Var, int, int);
+
 static List _selector_chain(String spelling, List value){
-  for(int i = String_len(spelling) - 2;  i >= 1;  i --) value = String_getindex(spelling, i) == 'a' ? cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL))) : cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_51, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL)));
+  for(int i = String_len(spelling) - 2;  i >= 1;  i --) value = String_getindex(spelling, i) == 'a' ? Macro_needs_shell(List_var(value)) ? cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL))) : cons(_1, cons(_3, cons(_6, cons(List_var(cons(_7, cons(_21, cons(List_var(cons(_22, cons(Macro_inserted(List_var(value), 1, 1), NULL))), NULL)))), NULL)))) : Macro_needs_shell(List_var(value)) ? cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_51, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL))) : cons(_1, cons(_3, cons(_6, cons(List_var(cons(_7, cons(_51, cons(List_var(cons(_22, cons(Macro_inserted(List_var(value), 1, 1), NULL))), NULL)))), NULL))));
   return value;
 }
 
@@ -345,7 +349,7 @@ static List _selector_double(List steps){
   if(! List_truth(steps)) return NULL;
   String rest = Var_as_string(List_car(steps)), a = String_join(NULL, cons(String_var(_54), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_55), cons(String_var(rest), NULL)));
   return({
-    Var _x2c_gensym_literal_part_0 = String_var(a);  Var _x2c_gensym_literal_part_1 = String_var(d);  List _x2c_gensym_literal_part_2 = _selector_double(List_cdr(steps));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, List_append(_x2c_gensym_literal_part_2, NULL)));
+    Var _x2c_gensym_literal_part_0 = String_var(a);  Var _x2c_gensym_literal_part_1 = String_var(d);  List _x2c_gensym_literal_part_2 = _selector_double(List_cdr(steps));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, _x2c_gensym_literal_part_2));
   }
   );
 }
@@ -363,7 +367,7 @@ static List _selector_units(List middles, Macro car, Macro cdr){
   if(List_contains(_67, String_var(middle))) return rest;
   String name = String_join(NULL, cons(String_var(_68), cons(String_var(middle), cons(String_var(_69), NULL))));
   return({
-    Var _x2c_gensym_literal_part_3 = List_var(String_startswith(middle, _70) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_gensym_literal_part_3, List_append(rest, NULL));
+    Var _x2c_gensym_literal_part_3 = List_var(String_startswith(middle, _70) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_gensym_literal_part_3, rest);
   }
   );
 }

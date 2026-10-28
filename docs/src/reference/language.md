@@ -1939,7 +1939,15 @@ where it fills a type. A `String` local fills an expression hole as a string
 literal and an `int` local as an integer literal. A `$name` that matches no
 local is a macro invocation or a `meta` call, as in a template, so
 `@rows($items)` splices a `meta` function's result where the quotation
-expands. A `$(expression)`, with `(` directly after `$`, is a hole whose value
+expands.
+
+The quotation receives its referenced locals' values when it is built.
+Straight syntax and sequence splices can be constructed at that point.
+Binding free names and making private names still happen where the code is
+inserted. Construction preserves supplied code and its stage; it does not
+bind or lower those children again.
+
+A `$(expression)`, with `(` directly after `$`, is a hole whose value
 is an expression of the function that contains the quotation. It means the
 same as a local declared just before the quotation and named with `$`. The
 function evaluates each such expression once, where the quotation is written,

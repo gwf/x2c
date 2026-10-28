@@ -12,6 +12,16 @@
 #include "symbolset.h"
 #include "native-scalar-types.h"
 #include <limits.h>
+static List _145, _144, _142, _141, _139, _138, _136, _135, _134, _132, _129, _128, _127, _121, _120, _119, _118, _112, _111, _110, _109, _103, _102, _101, _100, _94, _93, _92, _91, _85, _83, _82, _81, _78, _76, _75, _74, _68, _66, _65, _64, _58, _57, _56, _55, _49, _48, _47, _46, _41, _39, _38, _37, _31, _29, _28, _27, _21, _19, _18, _17, _11, _9, _8, _7, _1;
+
+static String _146, _125, _123, _116, _114, _107, _105, _98, _96, _89, _87, _79, _72, _70, _62, _60, _53, _51, _44, _42, _35, _33, _25, _23, _15, _13, _5, _3;
+
+static Var _148, _147, _143, _140, _137, _133, _131, _130, _126, _124, _122, _117, _115, _113, _108, _106, _104, _99, _97, _95, _90, _88, _86, _84, _80, _77, _73, _71, _69, _67, _63, _61, _59, _54, _52, _50, _45, _43, _40, _36, _34, _32, _30, _26, _24, _22, _20, _16, _14, _12, _10, _6, _4, _2, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
 static const SymbolSet storage_classes =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\003\000\000\005\000\007\000\001\000\004\000\000\114\041\005\146\012\000\000\000\106\242\201\116\000\000\000\000\036\255\001\000\000\000\000\000\234\054\024\027\000\000\000\000\144\241\063\235\042\001\000\000\110\041\241\110\104\001\000\000";
 
 static const SymbolSet type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\003\001\000\000\000\350\164\157\000\000\000\000\000\350\110\222\316\042\001\000\000\012\113\064\260\147\001\000\000";
@@ -29,21 +39,16 @@ Specifiers;
 
 static Map scalartypes;
 
-static List _145, _144, _142, _141, _139, _138, _136, _135, _134, _132, _129, _128, _127, _121, _120, _119, _118, _112, _111, _110, _109, _103, _102, _101, _100, _94, _93, _92, _91, _85, _83, _82, _81, _78, _76, _75, _74, _68, _66, _65, _64, _58, _57, _56, _55, _49, _48, _47, _46, _41, _39, _38, _37, _31, _29, _28, _27, _21, _19, _18, _17, _11, _9, _8, _7, _1;
-
-static String _146, _125, _123, _116, _114, _107, _105, _98, _96, _89, _87, _79, _72, _70, _62, _60, _53, _51, _44, _42, _35, _33, _25, _23, _15, _13, _5, _3;
-
-static Var _143, _140, _137, _133, _131, _130, _126, _124, _122, _117, _115, _113, _108, _106, _104, _99, _97, _95, _90, _88, _86, _84, _80, _77, _73, _71, _69, _67, _63, _61, _59, _54, _52, _50, _45, _43, _40, _36, _34, _32, _30, _26, _24, _22, _20, _16, _14, _12, _10, _6, _4, _2, _0;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
 Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
 static Var List_var(List);
+
+#include "exception.h"
+
+
+
 
 _x2c_gensym_initializer_choice_DF23AB2E_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_1), List_var(_9), List_var(_11), List_var(_19), List_var(_21), List_var(_29), List_var(_31), List_var(_39), List_var(_41), List_var(_48), List_var(_49), List_var(_57), List_var(_58), List_var(_66), List_var(_68), List_var(_76), List_var(_78), List_var(_83), List_var(_85), List_var(_93), List_var(_94), List_var(_102), List_var(_103), List_var(_111), List_var(_112), List_var(_120), List_var(_121), List_var(_129))))
 static inline List Type_list(Type x){
@@ -99,6 +104,15 @@ static int _literal_magnitude(String text, int end, unsigned long long * magnitu
 static int _radix(String text, int end, int * pos);
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative);
+
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
+  const void * _x2c_gensym_defer_capture_1;
+  const void * _x2c_gensym_defer_capture_2;
+}
+_x2c_gensym_defer_env_0;
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
 static Var Symbol_var(Symbol);
 
@@ -255,7 +269,108 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _144 = cons(_143, _134);
   _145 = cons(_130, _144);
   _146 = String_new("Var_int");
+  _147 = Symbol_var(157714837990);
+  _148 = Symbol_var(8932560010);
   _x2c_gensym_static_initialize_0();
+}
+
+void x2c_cleanup_push(X2CCleanup *);
+
+static Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+static List Var_list_payload(Var);
+
+Type Type_declared(Type type);
+
+static int List_truth(List);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+int Var_is(Var, Symbol);
+
+int Symbol_is_storage_class(Symbol sym);
+
+int Symbol_is_inline(Symbol sym);
+
+List Type_declaration_base(Type t, List * modifiers){
+  if(! _init_guard_) _file_init_();
+  if(type_base_suffix(Type_list(t)) == t){
+    (* modifiers) = NULL;
+    return Type_list(t);
+  }
+  Array storage = Array_new(), text = Array_new(), typed = Array_new();
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & storage;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & text;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_2 =(const void *) & typed;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      {
+        Var item;
+        Iter _x2c_gensym_macro_iterator_0 = List_iter(Type_list(t), &(struct Iter){
+          int_var(0)
+        }
+        );
+        Var _x2c_gensym_macro_item_0;
+        while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+          item = _x2c_gensym_macro_item_0;
+          if(Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list_payload(item)), 11, 7, 1)) Array_push(text, item);
+          else Array_push(typed, item);
+        }
+
+      }
+      List base, mods;
+      List _x2c_gensym_destructure_0 = type_declaration_parts(Type_list(Type_declared(List_type(Array_list(typed)))));
+      base = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));
+      mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1));
+      (* modifiers) = mods;
+      if(! List_truth(mods)){
+        List _x2c_gensym_return_value_0 = Type_list(t);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
+        }
+
+      }
+      {
+        Var item;
+        Iter _x2c_gensym_macro_iterator_1 = List_iter(Type_list(t), &(struct Iter){
+          int_var(0)
+        }
+        );
+        Var _x2c_gensym_macro_item_1;
+        while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
+          item = _x2c_gensym_macro_item_1;
+          if(Var_is(item, 1328354264) &&(Symbol_is_storage_class(Var_symbol(item)) || Symbol_is_inline(Var_symbol(item)))) Array_push(storage, item);
+        }
+
+      }
+      {
+        List _x2c_gensym_return_value_1 =({
+          List _x2c_gensym_literal_part_0 = Array_list(storage);  List _x2c_gensym_literal_part_1 = Array_list(text);  List_append(_x2c_gensym_literal_part_0, List_append(_x2c_gensym_literal_part_1, base));
+        }
+        );
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
 }
 
 int Symbol_is_type_modifier(Symbol sym){
@@ -395,10 +510,8 @@ int Type_is_bitfield(Type type){
 
 Type Type_reference(Type type){
   if(! _init_guard_) _file_init_();
-  return List_type(cons(_130, List_append(Type_list(type), NULL)));
+  return List_type(cons(_130, Type_list(type)));
 }
-
-static int List_truth(List);
 
 int Type_is_pointer(Type t);
 
@@ -460,7 +573,7 @@ int Type_function_parts(Type type, List * params, Type * return_type){
 
       }
       (* params) = values;
-      if(return_type)(* return_type) = List_type(cons(return_head, List_append(return_tail, NULL)));
+      if(return_type)(* return_type) = List_type(cons(return_head, return_tail));
       return 1;
     }
 
@@ -505,15 +618,9 @@ int Type_is_array(Type type){
   return _declarator_kind(type) == 8794;
 }
 
-int Var_is(Var, Symbol);
-
 int Symbol_is_type_qualifier(Symbol sym);
 
 static Symbol Var_symbol(Var);
-
-static Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
 
 Type Type_qualify(Type type, Type source){
   if(! _init_guard_) _file_init_();
@@ -521,13 +628,13 @@ Type Type_qualify(Type type, Type source){
   Array out = Array_new();
   {
     Var item;
-    Iter _x2c_gensym_macro_iterator_0 = List_iter(Type_list(source), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_2 = List_iter(Type_list(source), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_0;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
-      item = _x2c_gensym_macro_item_0;
+    Var _x2c_gensym_macro_item_2;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
+      item = _x2c_gensym_macro_item_2;
       {
         if(! Var_is(item, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(item))) break;
         Array_push(out, item);
@@ -538,13 +645,13 @@ Type Type_qualify(Type type, Type source){
   }
   {
     Var item;
-    Iter _x2c_gensym_macro_iterator_1 = List_iter(Type_list(type), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_3 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_1;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
-      item = _x2c_gensym_macro_item_1;
+    Var _x2c_gensym_macro_item_3;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      item = _x2c_gensym_macro_item_3;
       Array_push(out, item);
     }
 
@@ -845,13 +952,13 @@ Type Type_scalar(Type t){
   ;
   {
     Var item;
-    Iter _x2c_gensym_macro_iterator_2 = List_iter(Type_list(t), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_4 = List_iter(Type_list(t), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_2;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
-      item = _x2c_gensym_macro_item_2;
+    Var _x2c_gensym_macro_item_4;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
+      item = _x2c_gensym_macro_item_4;
       if(! Var_is(item, 1328354264) || ! _add(&(s), Var_symbol(item))) return NULL;
     }
 
@@ -925,13 +1032,13 @@ static Type _canonical(Type type, int keep_qualifiers){
   Array out = Array_new();
   {
     Var item;
-    Iter _x2c_gensym_macro_iterator_3 = List_iter(Type_list(type), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_5 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_3;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      item = _x2c_gensym_macro_item_3;
+    Var _x2c_gensym_macro_item_5;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
+      item = _x2c_gensym_macro_item_5;
       if(_kept(item, keep_qualifiers)) Array_push(out, item);
     }
 
@@ -1026,8 +1133,6 @@ static Type _spelling(Specifiers * s){
 
 Var Map_getindex(Map, Var);
 
-static List Var_list_payload(Var);
-
 static List _scalar_row(Type type){
   Type scalar = Type_scalar(type);
   if(! List_truth(Type_list(scalar))) return NULL;
@@ -1120,6 +1225,42 @@ static Type _integer_literal_type(unsigned long long magnitude, int decimal, int
     return signed_only ? NULL : List_type(_112);
   }
   return List_type(_112);
+}
+
+List Macro_declaration(Type specifiers, List rows){
+  if(! _init_guard_) _file_init_();
+  List modifiers = NULL;
+  List base = Type_declaration_base(specifiers, &(modifiers));
+  if(! List_truth(modifiers)) return({
+    Var _x2c_gensym_literal_part_2 = List_var(base);  Var _x2c_gensym_literal_part_3 = List_var(cons(_147, rows));  cons(_148, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
+  }
+  );
+  Array moved = Array_new();
+  {
+    List row;
+    List _x2c_gensym_macro_object_6 = rows;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_0))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      Array_push(moved, List_var(declarator_append_modifiers(row, modifiers)));
+    }
+
+  }
+  return({
+    Var _x2c_gensym_literal_part_4 = List_var(base);  Var _x2c_gensym_literal_part_5 = List_var(cons(_147, Array_list_free(moved)));  cons(_148, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
+  }
+  );
+}
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  {
+    Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+    Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));
+    Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_2));
+  }
+
 }
 
 #undef _x2c_gensym_initializer_choice_DF23AB2E_0_expanded

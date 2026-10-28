@@ -12,6 +12,8 @@
 #include "symbolset.h"
 #include "native-scalar-types.h"
 #include <limits.h>
+List Type_declaration_base(Type t, List * modifiers);
+
 int Symbol_is_type_modifier(Symbol sym);
 
 int Symbol_is_builtin_type(Symbol sym);
@@ -127,6 +129,8 @@ int Symbol_is_storage_class(Symbol sym);
 int Symbol_is_inline(Symbol sym);
 
 int Symbol_is_type_qualifier(Symbol sym);
+
+List Macro_declaration(Type specifiers, List rows);
 
 
 #endif /* __GUARD_0x2654FD8E__ */

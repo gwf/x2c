@@ -829,7 +829,7 @@ Symbol Logger_error_handler(List errors, Var data){
 
       }
       if(policy == 2260136 && _plain_report(logger)) _report_uncaught(entry);
-      else Logger_log(logger, 11703268, 392730881588392, List_append(entry, NULL));
+      else Logger_log(logger, 11703268, 392730881588392, entry);
       Error_note_rendered();
       {
         Symbol _x2c_gensym_return_value_17 = 285842436424;
@@ -1741,7 +1741,7 @@ static void _log_pending(Logger active){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       entry = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      Logger_log(active, 11703268, 392730881588392, List_append(entry, NULL));
+      Logger_log(active, 11703268, 392730881588392, entry);
     }
 
   }

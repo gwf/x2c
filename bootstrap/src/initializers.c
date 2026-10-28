@@ -1780,7 +1780,7 @@ static List f10_conversion____convert_composite(Compiler c, List items, Type tar
   }
   List converted = Array_list_free(elements);
   return({
-    Var _x2c_gensym_literal_part_56 = List_var(target);  Var _x2c_gensym_literal_part_57 = List_var(cons(_58, cons(List_var(cons(_59, List_append(Macro_inserted_items(converted), NULL))), NULL)));  cons(_2, cons(_x2c_gensym_literal_part_56, cons(_x2c_gensym_literal_part_57, NULL)));
+    Var _x2c_gensym_literal_part_56 = List_var(target);  Var _x2c_gensym_literal_part_57 = List_var(cons(_58, cons(List_var(cons(_59, Macro_inserted_items(converted))), NULL)));  cons(_2, cons(_x2c_gensym_literal_part_56, cons(_x2c_gensym_literal_part_57, NULL)));
   }
   );
 }
@@ -1834,7 +1834,7 @@ static List f10_conversion____convert_initval_row(Compiler c, List row, List ter
   Ast_initializer_cases(Var_list_payload(List_caddr(terminal)), &(header));
   List choices = Array_list_free(checked);
   if(List_truth(header)) choices = cons(List_var(header), choices);
-  List value = cons(_2, cons(_0, cons(List_var(cons(_60, List_append(choices, NULL))), NULL)));
+  List value = cons(_2, cons(_0, cons(List_var(cons(_60, choices)), NULL)));
   return f10_conversion____replace_value(original, value);
 }
 
@@ -2266,7 +2266,7 @@ static List f10_conversion____capture_leaves(Compiler c, List value, Array input
 
           }
           return({
-            Var _x2c_gensym_literal_part_92 = type;  Var _x2c_gensym_literal_part_93 = List_var(cons(_58, cons(List_var(cons(_59, List_append(Array_list_free(captured), NULL))), NULL)));  cons(_2, cons(_x2c_gensym_literal_part_92, cons(_x2c_gensym_literal_part_93, NULL)));
+            Var _x2c_gensym_literal_part_92 = type;  Var _x2c_gensym_literal_part_93 = List_var(cons(_58, cons(List_var(cons(_59, Array_list_free(captured))), NULL)));  cons(_2, cons(_x2c_gensym_literal_part_92, cons(_x2c_gensym_literal_part_93, NULL)));
           }
           );
         }
@@ -2360,8 +2360,8 @@ static List f10_conversion____materialize_mixed_row(Compiler c, List original, L
 }
 List choices = Array_list_free(replaced);
 if(uses_input) inputs = cons(List_var(cons(String_var(formal), cons(List_var(source), NULL))), inputs);
-if(List_truth(inputs)) choices = cons(List_var(cons(_415, List_append(inputs, NULL))), choices);
-List result = cons(_2, cons(_0, cons(List_var(cons(_60, List_append(choices, NULL))), NULL)));
+if(List_truth(inputs)) choices = cons(List_var(cons(_415, inputs)), choices);
+List result = cons(_2, cons(_0, cons(List_var(cons(_60, choices)), NULL)));
 return f10_conversion____replace_value(original, result);
 }
 
@@ -2489,8 +2489,8 @@ static List f10_conversion____value_adapter(Compiler c, List source, List conver
       List parameter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _571));  List input =({
         Var _x2c_gensym_hole_0 = List_cadr(source);  Macro_typed(Var_list_payload(_x2c_gensym_hole_0), List_var(parameter));
       }
-      );  body = List_search_replace(body, List_var(cons(_414, cons(List_var(formal), NULL))), List_var(input));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _572));  Compiler_add_early(c, Compiler_wrapper_function(c, List_type(cons(_256, List_append(Type_list(result), NULL))), binding, cons(List_var(Type_parameter_ast(from, parameter)), NULL), cons(List_var(cons(_573, cons(List_var(result), cons(List_var(body), NULL)))), NULL)));  Type callable = List_type(({
-        Var _x2c_gensym_literal_part_100 = List_var(cons(_574, cons(List_var(cons(List_var(from), NULL)), NULL)));  List _x2c_gensym_literal_part_101 = Type_list(result);  cons(_x2c_gensym_literal_part_100, List_append(_x2c_gensym_literal_part_101, NULL));
+      );  body = List_search_replace(body, List_var(cons(_414, cons(List_var(formal), NULL))), List_var(input));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _572));  Compiler_add_early(c, Compiler_wrapper_function(c, List_type(cons(_256, Type_list(result))), binding, cons(List_var(Type_parameter_ast(from, parameter)), NULL), cons(List_var(cons(_573, cons(List_var(result), cons(List_var(body), NULL)))), NULL)));  Type callable = List_type(({
+        Var _x2c_gensym_literal_part_100 = List_var(cons(_574, cons(List_var(cons(List_var(from), NULL)), NULL)));  List _x2c_gensym_literal_part_101 = Type_list(result);  cons(_x2c_gensym_literal_part_100, _x2c_gensym_literal_part_101);
       }
       ));  adapter = Macro_typed(Type_list(callable), List_var(binding));
     }

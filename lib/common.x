@@ -669,10 +669,18 @@ static inline Block Bytes.block(Bytes);
 static inline void Block.pop(Block);
 static inline void Block.truncate(Block, size_t);
 
+/** Returns a compact Symbol payload, or 0 for another representation. */
+inline Symbol Var.compact_symbol(Var value) {
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
+  return symbol < 1ul << 51 ? symbol : 0;
+}
+
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.
 */
 inline Symbol Var.symbol(Var x) {
+  Symbol symbol = x.compact_symbol();
+  if (symbol) return symbol;
   if (x is <symbol>) return x.integer();
   return 0;
 }

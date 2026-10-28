@@ -304,6 +304,7 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`Macro.binder`](#Macro.binder) | Returns the binder that captures one projection of the template hole whose binder is `binder`. |
+| [`Macro.needs_shell`](#Macro.needs_shell) | Whether an ordinary expression hole still needs placement's expression shell. |
 
 ### `Macro`
 
@@ -318,6 +319,18 @@ always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
 Source: `lib/macrovalue/patterns.x`
+
+<a id="Macro.needs_shell"></a>
+#### Macro.needs_shell
+
+`int Macro.needs_shell(Var value)`
+
+Whether an ordinary expression hole still needs placement's expression
+shell. Scalars are lifted by insertion; complete expressions, staged
+code, and identifier values already have their insertion forms. Other
+Lists keep the existing projection path without changing their syntax.
+
+Source: `lib/macrovalue/construction.x`
 
 ## Public types
 

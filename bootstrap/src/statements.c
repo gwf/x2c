@@ -484,7 +484,7 @@ List Compiler_parse_governed(Compiler c, Symbol position){
         if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
       }
       {
-        List _x2c_gensym_return_value_0 = Var_list_payload(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_7, List_append(Array_list(items), NULL))));
+        List _x2c_gensym_return_value_0 = Var_list_payload(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_7, Array_list(items))));
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
           return _x2c_gensym_return_value_0;
@@ -1204,7 +1204,7 @@ static Symbol _arm_end(List run){
 static List _continued(Compiler c, List statement){
   if(c -> token == c -> directives_taken) return statement;
   List directives = Compiler_leading_preproc(c);
-  return List_truth(directives) ? cons(_7, cons(List_var(statement), List_append(directives, NULL))) : statement;
+  return List_truth(directives) ? cons(_7, cons(List_var(statement), directives)) : statement;
 }
 
 static List _block_keywords(void){

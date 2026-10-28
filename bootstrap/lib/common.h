@@ -896,8 +896,12 @@ static inline Map Var_map_payload(Var _x2c_gensym_macro_value_8){
 Iter Var_as_iter(Var value);
 File Var_file(Var value);
 Block Var_block(Var value);
+static inline Symbol Var_compact_symbol(Var value){
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;  return symbol < 1ul << 51 ? symbol : 0;
+}
+
 static inline Symbol Var_symbol(Var x){
-  if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
+  Symbol symbol = Var_compact_symbol(x);  if(symbol) return symbol;  if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }
 
 char Var_char(Var x);

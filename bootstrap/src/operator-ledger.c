@@ -63,10 +63,13 @@ static List _operator_cases(int key, int value, int derived){
         if(derived >= 0 && ! x2c_var_equal(List_getindex(row, 4), int_var(derived))) continue;
         Symbol label = Var_symbol(List_getindex(row, key));
         Var result = List_getindex(row, value);
-        Array_push(cases, List_var(cons(_1, cons(_2, cons(List_var(({
+        Array_push(cases, List_var(Macro_needs_shell(Symbol_var(label)) || Macro_needs_shell(result) ? cons(_1, cons(_2, cons(List_var(({
           Var _x2c_gensym_literal_part_0 = List_var(cons(_3, cons(List_var(cons(_5, cons(_20, cons(_21, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_22, cons(_2, cons(List_var(cons(_5, cons(_20, cons(_21, cons(result, NULL))))), NULL))));  cons(_23, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
         }
-        )), NULL)))));
+        )), NULL))) :({
+          Var _x2c_gensym_literal_part_2 = List_var(cons(_3, cons(Macro_inserted(Symbol_var(label), 1, 1), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_22, cons(_2, cons(Macro_inserted(result, 1, 1), NULL))));  cons(_1, cons(_23, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL))));
+        }
+        )));
       }
 
     }

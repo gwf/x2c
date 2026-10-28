@@ -73,9 +73,10 @@ static inline int Macro_case_enter(Var value, List * cursor){
   return 1;
 }
 
+static Symbol Var_compact_symbol(Var);
+
 static inline Symbol Macro_case_symbol(Var value){
-  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
-  return symbol < 1ul << 51 ? symbol : 0;
+  return Var_compact_symbol(value);
 }
 
 typedef struct MacroMatcher{
@@ -95,6 +96,8 @@ List Macro_inserted_items(List values);
 List Macro_typed(List type, Var value);
 
 Var Macro_inserted(Var value, int lifts, int expression);
+
+int Macro_needs_shell(Var value);
 
 List Macro_number_type(Var value);
 

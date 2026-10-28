@@ -452,10 +452,6 @@ meta Map x2c_meta_definition_hashes(void);
    The compiler and a project's helper both spell a Type as declaration
    syntax, so the one implementation lives here. */
 
-static const SymbolSet _base_keywords = %<<typedef struct union enum unqual int
-  long short char signed unsigned void float double>>;
-static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
-
 /** Returns the diagnostic for a `type` that names its type with an Atom
     other than a C type keyword, as `%(String)` and `%(* Point)` do, or
     `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
@@ -463,10 +459,12 @@ static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
 */
 String type_name_error(List type) {
   Var name = type.last();
-  if (name is not <lsym> &&
-      (name is not <symbol> || name == <*> || name in _base_keywords ||
-       name in _type_qualifiers))
+  if (name is <string>) return NULL;
+  Symbol symbol = name;
+  if (symbol &&
+      (symbol == <*> || _base_keyword(symbol) || _type_qualifier(symbol)))
     return NULL;
+  if (name is not <lsym> && name is not <symbol>) return NULL;
   Array fixed = [];
   for (List rest = type; rest.cdr(); rest = rest.cdr())
     fixed.push(rest.car());
@@ -487,8 +485,7 @@ List type_declaration_parts(List type) {
   List reversed = %(), qualifiers = %();
   for (List rest = type; rest !== base; rest = rest.cdr())
     reversed = cons(rest.car(), reversed);
-  while (reversed && reversed.car() is <symbol> &&
-         reversed.car() in _type_qualifiers) {
+  while (reversed && _type_qualifier(reversed.car())) {
     qualifiers = cons(reversed.car(), qualifiers);
     reversed = reversed.cdr();
   }
@@ -503,11 +500,23 @@ List type_declaration_parts(List type) {
 List type_base_suffix(List type) {
   for (; type; type = type.cdr()) {
     Var head = type.car();
-    if (head is <string> || (head is <symbol> && head in _base_keywords))
+    if (head is <string> || _base_keyword(head))
       return type;
   }
   return NULL;
 }
+
+static int _base_keyword(Symbol symbol) {
+  switch (symbol) {
+    case <typedef>: case <struct>: case <union>: case <enum>: case <unqual>:
+    case <int>: case <long>: case <short>: case <char>: case <signed>:
+    case <unsigned>: case <void>: case <float>: case <double>: return 1;
+    default: return 0;
+  }
+}
+
+static int _type_qualifier(Symbol symbol) =>
+  symbol == <const> || symbol == <restrict> || symbol == <volatile>;
 
 /* A function modifier's parameter types become parameter declarations. */
 static Var _modifier_syntax(Var modifier) {
@@ -521,3 +530,19 @@ static Var _modifier_syntax(Var modifier) {
   }
   return modifier;
 }
+
+/** Appends a base type's modifiers to a declarator, preserving its initializer. */
+List declarator_append_modifiers(List declarator, List modifiers) {
+  if (!modifiers) return declarator;
+  match (declarator) {
+    case %(bind ?binding ?mods):
+      return %(bind $binding (@(mods) @modifiers));
+    case %(op = ?binding ?initializer):
+      return %(op = $(declarator_append_modifiers(binding, modifiers))
+               $initializer);
+  }
+  return declarator;
+}
+
+/** Constructs a declaration with the type modifiers on its bindings. */
+List Macro.declaration(Type specifiers, List rows);
