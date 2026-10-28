@@ -376,3 +376,18 @@ and a long integer larger than 32 bits, column order, and result exhaustion.
 
 The existing package and repository harnesses remain unchanged. The pilot is
 an optional explicit invocation, not a new build or publication requirement.
+
+### Pilot follow-ups (2026-10-28)
+
+- SQLite's native response metadata now carries the pinned header directory;
+  both ordinary consumers and the pilot need no `CPATH` workaround.
+- The test runner now reads failed output from its completed Job. Its old
+  helper returned a borrowed Error catch capture after the catch closed,
+  which could discard native compiler diagnostics. The existing command
+  smoke now verifies a native build diagnostic is printed.
+- The full command build's redundant package-command `.str()` conversion is
+  removed. SQLite no longer repeats the executable toolchain's `-lm` argument;
+  its pinned profile has no math-library symbols or optional math functions.
+- Combined checks pass: warning-free `make commands`, command smoke, the
+  standalone SQLite pilot without header environment variables, and the
+  unchanged SQLite harness (15 tests, 134 assertions). No full gate ran here.
