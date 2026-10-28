@@ -1,4 +1,4 @@
-> Status: active
+> Status: reference
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`9aeeef265`) with `builds/0/x2c` identity `48fd687ab075ad6f`. No
 > implementation had started when drafted. The probe corrected the premise:
@@ -306,3 +306,38 @@ The integrator owns final generated documentation and bootstrap, converged
 performance measurements, and `agent-pr-check`. The focused documentation
 audit currently reports only the expected generated `collect.md` API prose
 changes for the two updated environment-report methods.
+
+## Integration checkpoint, 2026-10-28
+
+The selected implementation and validation are complete in PR #601. The
+replay-retention optimization remains declined. This checkpoint compares
+converged stage-zero compilers at baseline `f0b30539e` and combined candidate
+`0cc41b984`, which also includes PR #600's JSON boolean export repair.
+Both compilers report a valid prelude and no missing interfaces.
+
+The table gives median wall milliseconds from five alternating baseline and
+candidate runs on this Mac. Translation uses `-q` and temporary output
+directories. Both execution commands use the same empty `main` program.
+Each command is warmed before sampling and has an isolated cache directory.
+
+| Workload | Baseline ms | Candidate ms |
+| --- | ---: | ---: |
+| `env` | 14.3 | 50.2 |
+| `translate` empty program | 91.9 | 90.4 |
+| `translate` foreach | 92.3 | 91.8 |
+| `translate` language tour | 99.3 | 99.2 |
+| `translate` expressions module | 538.6 | 533.7 |
+| warm `run` empty program | 245.7 | 49.1 |
+| warm `script` empty program | 46.5 | 46.1 |
+
+`env` pays the intended validation cost. Cached `run` avoids translation,
+compilation, and linking. `/usr/bin/time -l` reports median retired
+instructions of 1,862,612,535 versus 313,179,583 for warm `run`, and
+84,175,788 versus 596,327,596 for `env`. These instruction counts are
+separate from the wall-time measurements.
+
+The empty-program symbol dumps have identical sets of 5,860 key/value
+records. Raw dump order differs, so the complete parsed records were
+compared independently of order. The full publication gate passed for the
+candidate. This measurement record is the only subsequent authored change.
+Raw samples remain with the integration batch's `debug/startup-performance.json`.
