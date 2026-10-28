@@ -1,6 +1,6 @@
 const vscode = require("vscode");
 const path = require("path");
-const { LanguageClient, TransportKind, State } = require("vscode-languageclient/node");
+const { LanguageClient, State } = require("vscode-languageclient/node");
 const { selectCompiler, findExecutable } = require("./client");
 
 let active;
@@ -52,7 +52,7 @@ function activate(context) {
       cwd, "**/*.{x,xh,xc,x2c,xp,xlisp,toml,h}"));
     let initialOverlays;
     const client = new LanguageClient("x2c", "x2c", {
-      command, args: ["lsp"], transport: TransportKind.stdio, options: { cwd }
+      command, args: ["lsp"], options: { cwd }
     }, {
       documentSelector: [{ language: "x2c", scheme: "file",
         pattern: new vscode.RelativePattern(cwd, "**/*") }],
