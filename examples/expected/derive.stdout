@@ -1,0 +1,4 @@
+{ "home": { "x": 3, "y": 4 }, "name": "Ada", "tags": [ "x", 2 ], "age": 42, "score": 1.5 }
+Person{ age: 42, name: "Ada", score: 1.5, home: Point{ x: 3, y: 4 }, tags: [ "x", 2 ] }
+equal 1
+equal 0 Person{ age: 42, name: "Ada", score: 1.5, home: Point{ x: 3, y: 9 }, tags: [ "x", 2 ] }

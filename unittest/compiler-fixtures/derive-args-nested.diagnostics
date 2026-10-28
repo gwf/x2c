@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/derive-args-nested.x:5:1: macro: derive: field 'home' of Bad is not supported by <args>
+  $derive(Bad, <args>);
+  ^
+

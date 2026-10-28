@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/derive-pointer-field.x:3:1: macro: derive: field 'raw' of Bad has pointer type (* int)
+  $derive(Bad, <map>);
+  ^
+
