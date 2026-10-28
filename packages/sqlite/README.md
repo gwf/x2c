@@ -75,7 +75,7 @@ int main(void) {
   Prepared insert = db.prepare("INSERT INTO reading VALUES (?, ?)");
   defer insert.free();
   Reading reading = { "north", 1.5 };
-  insert.bind(reading.row()).execute();
+  insert.bind(@(reading.row())).execute();
   Prepared select = db.prepare("SELECT station, value FROM reading");
   defer select.free();
   foreach (List row in select) {
@@ -86,8 +86,31 @@ int main(void) {
 }
 ```
 
-Select columns in the record's declaration order. `Reading.columns()`
-returns those names as a List for callers that build a query.
+The explicit `@(...)` splice passes the row's values as separate bind
+parameters. Select columns in the record's declaration order.
+`Reading.columns()` returns those names as a List for callers that build a query.
+
+### Run the derive and test pilot
+
+The standalone [record round-trip test](tests/derive/reading_test.x) uses
+`$derive(Reading, <row>, <equal>)`, `test.x`, and `x2c test` together. It
+binds two records, reads them in SQL order, and compares reconstructed
+records, including text, real values, and an integer larger than 32 bits.
+
+After building the checkout commands and SQLite package, run from the
+repository root:
+
+```sh
+CPATH="$PWD/packages/sqlite/deps/include${CPATH:+:$CPATH}" \
+  builds/0/x2c test --manifest packages/sqlite/tests/derive/x2c.toml
+```
+
+The pilot's manifest supplies the package search directory. `CPATH` selects
+the prepared dependency's pinned SQLite headers for native compilation.
+The pilot's own test project keeps discovery separate from the existing
+package test harness.
+Use `--list` to list the test, or `--filter round_trip --quiet` to select it.
+The pilot is optional and adds no build or publication gate.
 
 ## Connections, statements, and values
 
