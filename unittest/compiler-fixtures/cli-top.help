@@ -16,7 +16,6 @@ Commands:
   remove      Remove an installed package
   list        List installed packages
   help        Show help for x2c or one command
-  editor      Serve semantic editor requests
   graph       Inspect x2c source graphs
   lint        Inspect x2c source style and idioms
   lsp         Serve editors over the Language Server Protocol
