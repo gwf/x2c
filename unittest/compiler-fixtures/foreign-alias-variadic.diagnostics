@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/foreign-alias-variadic.x:4:1: parse: foreign alias cannot be variadic
   $x2c.foreign.alias(printf)
   ^
+  note: in expansion of 'x2c.foreign.alias' defined at etc/compiler-prelude.x:27:1; input: (target (args (expr () (ident (binding 5 "printf")))) (declare (inline int) (bindings (bind (binding 7 "alias_printf") ((fnmod (params (param (const char) (b...
 

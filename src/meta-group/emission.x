@@ -46,7 +46,7 @@ module List _emit_prepared(
   }
   catch %(?kind *detail): {
     List entries = c.diagnostics.entries();
-    failure = entries ? _diagnostic_line(entries.car())
+    failure = entries ? Compiler.meta_diagnostic_line(entries.car())
                       : cons(kind, detail).repr();
     code = NULL;
   }
@@ -81,9 +81,10 @@ static void _name_provider_bindings(
     }
 }
 
-/* A diagnostic the emission reported, as one line that names its place in
-   the `meta` body: `FILE:LINE:COLUMN: CODE: MESSAGE`, then its notes. */
-static String _diagnostic_line(List entry) {
+/** Formats a meta diagnostic as `FILE:LINE:COLUMN: CODE: MESSAGE`,
+    followed by its notes on the same line.
+*/
+String Compiler.meta_diagnostic_line(List entry) {
   String line = entry.repr();
   if (entry ~= %((code ?code) * (message ?(String message))
         (location ((file ?file) (line ?row) (column ?column) *))

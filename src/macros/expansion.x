@@ -91,9 +91,7 @@ static void _check(Expansion &x) {
 static void _recursion(Expansion &x) {
   Atom name = x.definition.assoc(<name>);
   String spelling = name.str();
-  List captured = x.input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
-  Var shown = _source_unwrap(captured);
+  Var shown = _expansion_input(x.input);
   $fail.macros_expansion_recursive(
     x.c, x.invocation, spelling, _definition_note(x.definition), shown);
 }

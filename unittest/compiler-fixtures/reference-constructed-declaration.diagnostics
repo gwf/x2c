@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/reference-constructed-declaration.x:12:1: type: transparent references are only supported on parameters
   $construct();
   ^
+  note: in expansion of 'construct' defined at unittest/compiler-fixtures/reference-constructed-declaration.x:7:1; input: (args)
 

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-binding-spelling-invalid-name.x:6:15: macro: Code.binding_spelling requires an identifier spelling
   char *value = $spelling();
                 ^
-  note: value: "not valid"
+  note: value: "not valid" in expansion of 'spelling' defined at unittest/compiler-fixtures/macro-binding-spelling-invalid-name.x:3:1; input: (args)
 

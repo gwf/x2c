@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-source-text-derived.x:6:13: macro: Code.source_text requires complete captured syntax
   int value = $derived(1 + 2);
               ^
+  note: in expansion of 'derived' defined at unittest/compiler-fixtures/macro-source-text-derived.x:3:1; input: (args (expr (int) (op + (expr (int) (literal (int) "1")) (expr (int) (literal (int) "2")))))
 

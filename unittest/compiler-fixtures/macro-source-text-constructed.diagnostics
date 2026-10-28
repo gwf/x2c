@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-source-text-constructed.x:6:16: macro: Code.source_text requires complete captured syntax
   String value = $constructed();
                  ^
-  note: value: (expr (int) (literal (int) "1"))
+  note: value: (expr (int) (literal (int) "1")) in expansion of 'constructed' defined at unittest/compiler-fixtures/macro-source-text-constructed.x:3:1; input: (args)
 

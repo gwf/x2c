@@ -29,6 +29,7 @@ typedef struct DiagnosticsHold {
 } DiagnosticsHold;
 
 #include "type.x"
+#include "macros/macros.x"
 
 #include "json.x"
 #include "report.x"
@@ -162,6 +163,8 @@ void Compiler.report_error(
 void Compiler.report_problem(
   Compiler c, Symbol code, String message, Token token, List notes) {
   message = message ? message : "compiler error";
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
   c.diagnostics.report(code, message, _compiler_location(c, token), notes);
 }
 
@@ -202,6 +205,8 @@ void Diagnostics.report(
 */
 void Compiler.report_warning(
   Compiler c, Symbol code, String message, Token token, List notes) {
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
   c.report_warning_at(code, message, _compiler_location(c, token), notes);
 }
 

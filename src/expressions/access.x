@@ -283,6 +283,9 @@ module List _resolve_indexed(
   if (!receiver_type &&
       receiver ~= %(expr () (op (!or . ->) * *)))
     return %(expr () (index $receiver $selector));
+  if (receiver ~= %(expr () (ident ?binding)))
+    $fail.expressions_receiver_unresolved(
+      c, origin, Ast.binding_spelling(binding));
   $fail.expressions_index_unsupported(c, origin, receiver_type);
 }
 

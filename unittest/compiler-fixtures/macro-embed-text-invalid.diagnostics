@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-embed-text-invalid.x:6:16: macro: x2c_embed_text requires a String or captured String literal
   String value = $embed.invalid(123);
                  ^
-  note: value: (expr (int) (literal (int) "123"))
+  note: value: (expr (int) (literal (int) "123")) in expansion of 'embed.invalid' defined at unittest/compiler-fixtures/macro-embed-text-invalid.x:3:1; input: (args (expr (int) (literal (int) "123")))
 

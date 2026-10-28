@@ -529,9 +529,17 @@ static void _parse_source(
      helper exists; the parse still reaches every definition. */
   unit.collect(f);
   unit.compiler.diagnostics.reset();
-  if (!unit.parse() && h.entries) {
-    _print_diagnostics(unit.compiler);
-    Path.write_text(%"$(_base(h, index)).failure", "x2c reported errors");
+  if (!unit.parse()) {
+    if (h.entries) _print_diagnostics(unit.compiler);
+    List entry = unit.compiler.diagnostics().car();
+    /* After a deferred form, later code can name declarations that only
+       its expansion supplies. The translation owns those diagnostics. */
+    if (h.entries || entry.assoc(<code>) != <meta-later>) {
+      String failure = Compiler.meta_diagnostic_line(entry);
+      Path.write_text(
+        %"$(_base(h, index)).failure",
+        %"its unit did not translate: $failure");
+    }
   }
   foreach ((String read, Var _) in unit.compiler.deps) h.deps[read] = 1;
 }

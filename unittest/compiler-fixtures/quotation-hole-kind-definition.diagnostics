@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/quotation-hole-kind-definition.x:9:45: parse: hole '$member' is an expression in this quotation and cannot name a member
+      puts.push($!{ $result[$member] = $value.$member; });
+                                              ^
+  note: a quotation's first use of a hole gives it its kind; bind a second local for the member spelling
+

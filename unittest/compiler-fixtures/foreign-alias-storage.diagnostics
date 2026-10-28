@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/foreign-alias-storage.x:4:1: parse: foreign alias has invalid storage class
   $x2c.foreign.alias(abs)
   ^
-  note: allowed storage: static or inline
+  note: allowed storage: static or inline in expansion of 'x2c.foreign.alias' defined at etc/compiler-prelude.x:27:1; input: (target (args (expr ((func ((int))) int) (ident (binding 5 "abs")))) (declare (extern int) (bindings (bind (binding 7 "alias_extern") ((fnmod (params (param ...
 

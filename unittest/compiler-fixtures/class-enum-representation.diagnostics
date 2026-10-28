@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/class-enum-representation.x:10:1: macro: class Color cannot take an enum value representation: Var has no fixed tag for an enum
   class Color enum { RED, GREEN };
   ^^^^^
-  note: give the enum a typedef and name that typedef instead
+  note: give the enum a typedef and name that typedef instead in expansion of 'class' defined at etc/compiler-prelude.x:72:1; input: (target (args) (named-type "Color" (enum (gensym "unittest/compiler-fixtures/class-enum-representation.x" 1) (("RED") ("GREEN")))))
 

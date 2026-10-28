@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/quotation-hole-kind.x:16:1: macro: this function cannot run at compile time
+  $gen.it(Person);
+  ^
+  note: function: gen reason: its unit did not translate: unittest/compiler-fixtures/quotation-hole-kind.x:9:45: parse: hole '$member' is an expression in this quotation and cannot name a member; a quotation's first use of a hole gives it its kind; bind a second local for the member spelling in expansion of 'gen.it' defined at unittest/compiler-fixtures/quotation-hole-kind.x:15:1; input: (args ("Person"))
+

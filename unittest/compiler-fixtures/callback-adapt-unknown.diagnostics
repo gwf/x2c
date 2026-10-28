@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/callback-adapt-unknown.x:4:3: macro: typed callback adapter target must be a typedef name
     $x2c.callback.adapt(MissingCallback, String.str);
     ^
+  note: in expansion of 'x2c.callback.adapt' defined at etc/compiler-prelude.x:31:1; input: (args (expr () (ident (binding 4 "MissingCallback"))) (expr ((func (("String"))) "String") (ident (binding 5 "String_str"))))
 

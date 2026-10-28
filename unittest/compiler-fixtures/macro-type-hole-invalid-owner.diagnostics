@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-type-hole-invalid-owner.x:11:1: type: method name has no concrete owner
   $box_pointer(MacroInvalidOwner *);
   ^
+  note: in expansion of 'box_pointer' defined at unittest/compiler-fixtures/macro-type-hole-invalid-owner.x:5:1; input: (args (* "MacroInvalidOwner"))
 

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-enumerator-rollback.x:9:3: parse: enumerator 'ROLLBACK_ENUM' is already bound in this scope
     $duplicate_enumerator()
     ^
-  note: prior binding: 'ROLLBACK_ENUM'
+  note: prior binding: 'ROLLBACK_ENUM' in expansion of 'duplicate_enumerator' defined at unittest/compiler-fixtures/macro-enumerator-rollback.x:3:1; input: (args)
 

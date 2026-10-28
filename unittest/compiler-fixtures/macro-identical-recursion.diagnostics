@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-identical-recursion.x:5:14: macro: identical recursive expansion of 'forever'
   int result = $forever(1);
                ^
-  note: definition: unittest/compiler-fixtures/macro-identical-recursion.x:3:1 input: (args (expr (int) (literal (int) "1")))
+  note: definition: unittest/compiler-fixtures/macro-identical-recursion.x:3:1 input: (args (expr (int) (literal (int) "1"))) in expansion of 'forever' defined at unittest/compiler-fixtures/macro-identical-recursion.x:3:1; input: (args (expr (int) (literal (int) "1")))
 

@@ -53,7 +53,7 @@ static macro Stmt $fail.meta_native_meta_storage(
 
 static macro Stmt $fail.meta_native_call_deferred(Expr $c, Expr $site) =>
   $c.report_error(
-    <macro>,
+    <meta-later>,
     "this meta call is left for the translation",
     $site, NULL);
 

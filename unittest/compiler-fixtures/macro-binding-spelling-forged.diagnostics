@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-binding-spelling-forged.x:6:15: macro: Code.binding_spelling requires a known binding
   char *value = $spelling();
                 ^
-  note: binding: (binding 999 "forged")
+  note: binding: (binding 999 "forged") in expansion of 'spelling' defined at unittest/compiler-fixtures/macro-binding-spelling-forged.x:3:1; input: (args)
 

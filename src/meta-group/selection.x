@@ -128,8 +128,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
   if (result && result.is_pointer())
     return "an address result has no compile-time value; return data built "
            "from the pointed-to values";
-  return "a parameter or the result has no Var form, such as C's bool; use "
-         "int, a String, a Symbol, or a List";
+  return "the function is not in the unit's staged group";
 }
 
 /** Reports at `site` that the `meta` function `name` cannot run at compile

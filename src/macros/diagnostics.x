@@ -151,6 +151,20 @@ static macro Stmt $fail.macros_typed_quotation_nested(Expr $c, Expr $origin) {
   }
 }
 
+static macro Stmt $fail.macros_hole_kind_conflict(
+  Expr $c, Expr $site, Expr $name, Expr $kind) {
+  {
+    String kind = $kind == <expr> ? "an expression"
+      : %"a $(_kind_spelling($kind)) hole";
+    String note = "a quotation's first use of a hole gives it its kind; "
+      "bind a second local for the member spelling";
+    $c.report_error(
+      <parse>,
+      %"hole '$$$($name)' is $kind in this quotation and cannot name a member",
+      $site, $(note));
+  }
+}
+
 static macro Stmt $fail.macros_hole_ambiguous(
   Expr $c, Expr $origin, Expr $spelling, Expr $first, Expr $also) =>
   $c.report_error(
@@ -316,9 +330,31 @@ void Compiler.report_meta_failure(
   $fail.macros_meta_failed(c, invocation, source, error);
 }
 
-
+/** Returns the innermost source expansion's definition and input note. */
+String Compiler.macro_expansion_note(Compiler c) {
+  foreach (List active in c.macro_stack) {
+    (List definition, List input, Var bindings, Token invocation) = active;
+    (void) bindings;
+    if (!invocation) continue;
+    String name = definition.assoc(<name>).str();
+    String source = _definition_note(definition).remove_prefix("definition: ");
+    List lines = _expansion_input(input).repr().split_lines(0);
+    String shown = " ".join(
+      lines.map(%!(line) => String.strip(line, NULL)));
+    if (shown.len() > 160) shown = %"$(shown[:157])...";
+    return %"in expansion of '$name' defined at $source; input: $shown";
+  }
+  return NULL;
+}
 
 // macro diagnostics and source notes
+
+/* Captured source arguments without their transport and origin wrappers. */
+module Var _expansion_input(List input) {
+  List captured = input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  return _source_unwrap(captured);
+}
 
 module String _definition_note(List definition) {
   List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);

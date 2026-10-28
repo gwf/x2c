@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-ident-repeat.x:8:1: parse: declaration 'generated_repeat' is already bound
   $define_repeat(2);
   ^
-  note: prior binding: 'generated_repeat'
+  note: prior binding: 'generated_repeat' in expansion of 'define_repeat' defined at unittest/compiler-fixtures/macro-ident-repeat.x:3:1; input: (args (expr (int) (literal (int) "2")))
 

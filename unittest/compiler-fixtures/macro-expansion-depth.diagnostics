@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-expansion-depth.x:70:25: macro: macro expansion depth exceeds 64
   int main(void) { return $step64(0); }
                           ^
-  note: definition: unittest/compiler-fixtures/macro-expansion-depth.x:4:1 first expansion: definition: unittest/compiler-fixtures/macro-expansion-depth.x:68:1
+  note: definition: unittest/compiler-fixtures/macro-expansion-depth.x:4:1 first expansion: definition: unittest/compiler-fixtures/macro-expansion-depth.x:68:1 in expansion of 'step1' defined at unittest/compiler-fixtures/macro-expansion-depth.x:5:1; input: (args (expr (int) (literal (int) "0")))
 

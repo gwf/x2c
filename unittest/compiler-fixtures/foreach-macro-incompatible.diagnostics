@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/foreach-macro-incompatible.x:9:3: type: cannot convert Var to type ("Pair")
     foreach(Pair value, values) (void) value;
     ^^^^^^^
+  note: in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1; input: (target (args (declare ("Pair") (bindings (bind (binding 11 "value") ()))) (expr ("List") (ident (binding 9 "values")))) (stmnt (expr (void) (cast (decl (voi...
 

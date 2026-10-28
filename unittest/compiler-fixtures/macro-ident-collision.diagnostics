@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-ident-collision.x:9:1: parse: declaration 'generated_collision' is already bound
   $define_collision();
   ^
-  note: prior binding: 'generated_collision'
+  note: prior binding: 'generated_collision' in expansion of 'define_collision' defined at unittest/compiler-fixtures/macro-ident-collision.x:5:1; input: (args)
 

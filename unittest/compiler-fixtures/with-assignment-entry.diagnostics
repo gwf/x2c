@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/with-assignment-entry.x:5:3: macro: with requires 'destination = expression' entries
     with (value += 1) {
     ^^^^
-  note: parenthesize a comma expression inside an entry
+  note: parenthesize a comma expression inside an entry in expansion of 'x2c.with' defined at etc/compiler-prelude.x:57:1; input: (target (args (expr (int) (op += (expr (int) (ident (binding 3 "value"))) (expr (int) (literal (int) "1"))))) (block (at 2 (stmnt (expr (int) (op = (expr (in...
 

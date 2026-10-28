@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lisp-bind-non-literal-name.x:3:1: macro: native Lisp binding name requires a String literal
   $lisp.binding(sample, 42)
   ^
-  note: value: (expr (int) (literal (int) "42"))
+  note: value: (expr (int) (literal (int) "42")) in expansion of 'lisp.binding' defined at lib/lisp-bindings.x:<line>:<column>; input: (target (args "sample" (expr (int) (literal (int) "42"))) (function (static int) (bind (binding 8 "answer") ((fnmod (params (param (int) (bind (binding 7 "va...
 

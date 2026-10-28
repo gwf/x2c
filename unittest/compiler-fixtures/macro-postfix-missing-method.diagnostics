@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-postfix-missing-method.x:12:10: type: type ("MacroMissingMethod") has no method missing
     return $macro_call_missing(value);
            ^
+  note: in expansion of 'macro_call_missing' defined at unittest/compiler-fixtures/macro-postfix-missing-method.x:7:1; input: (args (expr ("MacroMissingMethod") (ident (binding 9 "value"))))
 

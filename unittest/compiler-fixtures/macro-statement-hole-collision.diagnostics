@@ -5,4 +5,5 @@ unittest/compiler-fixtures/macro-statement-hole-collision.x:8:8: parse: expected
 unittest/compiler-fixtures/macro-statement-hole-collision.x:12:3: parse: expected syntax
     $broken(0);
     ^
+  note: in expansion of 'broken' defined at unittest/compiler-fixtures/macro-statement-hole-collision.x:7:1; input: (args (expr (int) (literal (int) "0")))
 

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-diagnostic-fail.x:7:13: macro: chosen compile-time failure
   int value = $reject(1);
               ^
-  note: first note second note
+  note: first note second note in expansion of 'reject' defined at unittest/compiler-fixtures/macro-diagnostic-fail.x:3:1; input: (args (expr (int) (literal (int) "1")))
 

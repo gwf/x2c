@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/managed-init-assignment.x:3:29: parse: managed initializer requires a complete block-local initializer
   int main(void) { int value; value = $auto(1); return value; }
                               ^^^^^
+  note: in expansion of 'auto' defined at etc/compiler-prelude.x:70:1; input: (args (expr (int) (literal (int) "1")))
 
