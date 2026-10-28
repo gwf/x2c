@@ -199,12 +199,12 @@ Pool Pool.release(Pool inner) {
   _storage_lock();
   _lock(inner);
   Pool up = inner.up;
+  _lock(up);
   if (up) {
-    _lock(up);
     up.child_capacity = inner.table.capacity;
-    _unlock(up);
   }
   _release_blocks(inner);
+  _unlock(up);
   _unlock(inner);
   _storage_unlock();
   pthread_mutex_destroy(&inner.mutex);

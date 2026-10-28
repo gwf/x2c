@@ -142,8 +142,10 @@ static void pool_release_reclaims_wholesale(void) {
     snprintf(cell, 32, "cell-%d", i);
   }
   PoolStats during = child.stats();
-  EXPECT_INT_EQ(during.allocation_calls - before.allocation_calls, 100);
-  EXPECT_INT_EQ(during.requested_bytes - before.requested_bytes, 3200);
+  EXPECT_INT_EQ(during.allocation_calls - before.allocation_calls,
+                Scope.accounting_enabled() ? 100 : 0);
+  EXPECT_INT_EQ(during.requested_bytes - before.requested_bytes,
+                Scope.accounting_enabled() ? 3200 : 0);
   EXPECT_TRUE(during.active_blocks > before.active_blocks);
   EXPECT_TRUE(during.active_bytes > before.active_bytes);
   child.release();
@@ -171,7 +173,8 @@ static void pool_reuses_small_slots_and_blocks(void) {
   PoolProbe *reused = child.malloc(sizeof(PoolProbe));
   PoolStats after_slot = child.stats();
   EXPECT_TRUE(reused == duplicate);
-  EXPECT_INT_EQ(after_slot.slot_reuses, before_slot.slot_reuses + 1);
+  EXPECT_INT_EQ(after_slot.slot_reuses,
+                before_slot.slot_reuses + Scope.accounting_enabled());
 
   child.release();
   PoolStats before_block = root.stats();
@@ -315,7 +318,9 @@ static void pool_string_bracket_and_wipe(void) {
   EXPECT_TRUE(promoted == kept);  // promotion is pointer-stable
   Pool.close();
   ScopeStats after = Scope.stats();
-  EXPECT_TRUE(after.live_allocations < during.live_allocations);
+  if (Scope.accounting_enabled())
+    EXPECT_TRUE(after.live_allocations < during.live_allocations);
+  else EXPECT_INT_EQ(after.live_allocations, 0);
   EXPECT_STR_EQ(kept, "pool-transient-137");
   // The survivor stays canonical: re-interning is a hit, not an alloc.
   PoolStats before_hit = Pool.stats(NULL);
@@ -325,7 +330,9 @@ static void pool_string_bracket_and_wipe(void) {
   // Wiped garbage lost its identity: re-interning allocates afresh.
   String again = String.new("pool-transient-0");
   PoolStats after_miss = Pool.stats(NULL);
-  EXPECT_TRUE(after_miss.allocation_calls > after_hit.allocation_calls);
+  if (Scope.accounting_enabled())
+    EXPECT_TRUE(after_miss.allocation_calls > after_hit.allocation_calls);
+  else EXPECT_INT_EQ(after_miss.allocation_calls, 0);
   EXPECT_STR_EQ(again, "pool-transient-0");
 }
 
@@ -338,7 +345,8 @@ static void pool_string_free_reuses_small_slot(void) {
   String reused = String.malloc(24);
   PoolStats after = Pool.stats(NULL);
   EXPECT_TRUE(reused == first);
-  EXPECT_INT_EQ(after.slot_reuses, before.slot_reuses + 1);
+  EXPECT_INT_EQ(after.slot_reuses,
+                before.slot_reuses + Scope.accounting_enabled());
   reused.free();
 }
 
@@ -376,7 +384,9 @@ static void pool_unpromoted_identity_is_wiped(void) {
   PoolStats before = Pool.stats(NULL);
   List again = cons(seed + 1, cons(seed + 2, cons(seed + 3, NULL)));
   PoolStats after = Pool.stats(NULL);
-  EXPECT_TRUE(after.allocation_calls > before.allocation_calls);
+  if (Scope.accounting_enabled())
+    EXPECT_TRUE(after.allocation_calls > before.allocation_calls);
+  else EXPECT_INT_EQ(after.allocation_calls, 0);
   EXPECT_INT_EQ(again.len(), 3);
 }
 
@@ -464,7 +474,11 @@ static void pool_release_and_parent_allocation_do_not_deadlock(void) {
   for (int i = 0; i < 5000; i++) {
     Pool child = parent.retain_named("concurrent child");
     void *allocation = child.malloc(16);
-    child.free(allocation);
+    if (i % 2) {
+      child.insert(i);
+      child.promote(i, allocation);
+    }
+    else child.free(allocation);
     child.release();
     ScopeStats stats = Scope.stats();
     if (stats.live_allocations > stats.allocation_calls ||
@@ -476,6 +490,26 @@ static void pool_release_and_parent_allocation_do_not_deadlock(void) {
   EXPECT_TRUE(probe.allocations > 0);
   EXPECT_TRUE(stats_valid);
   parent.release();
+}
+
+static void pool_free_from_child_uses_parent_owner(void) {
+  Pool parent = Pool.retain(NULL), child = parent.retain();
+  PoolThreadProbe probe = {.parent = parent};
+  pthread_t worker;
+  Pool.thread_start();
+  int created = pthread_create(&worker, NULL, _pool_parent_allocator, &probe);
+  EXPECT_INT_EQ(created, 0);
+  if (!created) {
+    while (!atomic_load(&probe.started)) {}
+    for (int i = 0; i < 10000; i++) {
+      void *allocation = parent.malloc(16);
+      child.free(allocation);
+    }
+    atomic_store(&probe.stop, 1);
+    EXPECT_INT_EQ(pthread_join(worker, NULL), 0);
+    EXPECT_TRUE(probe.allocations > 0);
+  }
+  Pool.release(child.release());
 }
 
 #include "test-macros.x"
@@ -501,4 +535,5 @@ void pool_suite(void) {
   $test.run(string_is_permanent_asks_without_promoting);
   $test.run(pool_bracket_requires_an_open_child);
   $test.run(pool_release_and_parent_allocation_do_not_deadlock);
+  $test.run(pool_free_from_child_uses_parent_owner);
 }
