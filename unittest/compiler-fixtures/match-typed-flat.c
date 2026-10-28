@@ -80,7 +80,7 @@ static int classify(List form){
         {
           Var _x2c_gensym_match_value_1 = right;
           {
-            int right = Var_int(Var_convert(_x2c_gensym_match_value_1, 3453797));
+            int right = Var_int(Var_convert_at(_x2c_gensym_match_value_1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/match-typed-flat.x",.function = "classify",.line = 5}; & _x2c_gensym_error_site_0; })));
             return 3;
           }
 

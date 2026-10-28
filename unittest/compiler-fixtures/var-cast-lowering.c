@@ -7,7 +7,7 @@
 int main(void){
   x2c_initialize();
   Var boxed = int_var(5);
-  int unboxed = Var_int(Var_convert(boxed, 3453797));
+  int unboxed = Var_int(Var_convert_at(boxed, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-cast-lowering.x",.function = "main",.line = 5}; & _x2c_gensym_error_site_0; })));
   Var round_trip = int_var((unboxed + 1));
   printf("%d %d\n", unboxed, Var_int(round_trip));
   return unboxed == 5 && Var_int(round_trip) == 6 ? 0 : 1;

@@ -29,9 +29,12 @@ int main(int argc, char **argv) {
   if (diagnostics && !diagnostics_write_json(diagnostics))
     Diagnostics.driver_error(%"cannot open diagnostics file '$diagnostics'");
   if (request.command == <script> && request.prepare_script()) return 0;
+  int running = request.command == <run>;
   report_configure(
-    request.quiet, request.plain, request.color_mode,
-    request.verbose || request.debugging, request.dry_run, request.inspects());
+    request.quiet || (running && !request.verbose),
+    request.plain, request.color_mode,
+    (request.verbose && !running) || request.debugging,
+    request.dry_run, request.inspects());
   _configure_logging(request.debugging);
   Frontend.load_support(request);
   Context command = Context.open_isolated_named("compiler command");

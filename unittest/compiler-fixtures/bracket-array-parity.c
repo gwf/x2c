@@ -9,14 +9,14 @@ int main(void){
   Array values = Array_update_n(Array_new(), 3, int_var(10), int_var(20), int_var(30));
   Var dynamic = int_var(1);
   int scalar = 2;
-  Var bracket_dynamic = Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)));
-  Var method_dynamic = Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)));
+  Var bracket_dynamic = Array_getindex(values, Var_int(Var_convert_at(dynamic, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/bracket-array-parity.x",.function = "main",.line = 7}; & _x2c_gensym_error_site_0; }))));
+  Var method_dynamic = Array_getindex(values, Var_int(Var_convert_at(dynamic, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/bracket-array-parity.x",.function = "main",.line = 8}; & _x2c_gensym_error_site_1; }))));
   Var bracket_scalar = Array_getindex(values, scalar);
   Var method_scalar = Array_getindex(values, scalar);
   Var bracket_negative = Array_getindex(values, - 1);
   Var method_negative = Array_getindex(values, - 1);
-  Array_setindex(values, Var_int(Var_convert(dynamic, 3453797)), int_var(21));
-  Array_setindex(values, Var_int(Var_convert(dynamic, 3453797)), int_var(Var_int(Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)))) + 1));
+  Array_setindex(values, Var_int(Var_convert_at(dynamic, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/bracket-array-parity.x",.function = "main",.line = 13}; & _x2c_gensym_error_site_2; }))), int_var(21));
+  Array_setindex(values, Var_int(Var_convert_at(dynamic, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/bracket-array-parity.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_3; }))), int_var(Var_int(Array_getindex(values, Var_int(Var_convert_at(dynamic, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/bracket-array-parity.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_4; }))))) + 1));
   Array_setindex(values, - 1, int_var(40));
   printf("%d %d\n", Var_int(bracket_dynamic), Var_int(method_dynamic));
   printf("%d %d\n", Var_int(bracket_scalar), Var_int(method_scalar));

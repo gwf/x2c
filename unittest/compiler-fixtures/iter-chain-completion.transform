@@ -219,10 +219,10 @@
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident (binding 26 "_x2c_gensym_macro_item_1"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (block (declare (int) (bindings (bind (binding 28 "right") ()))) 
         (declare ("Iter") 
          (bindings 
@@ -277,10 +277,10 @@
               (expr (int) 
                (call "Var_int" 
                 (args (expr ("Var") 
-                       (call "Var_convert" 
+                       (call "Var_convert_at" 
                         (args (expr ("Var") 
                                (ident (binding 31 "_x2c_gensym_macro_item_0"))) 
-                         (expr ("Symbol") "3453797")))))))))) 
+                         (expr ("Symbol") "3453797") (error-site)))))))))) 
            (stmnt 
             (expr (int) 
              (op += (expr (int) (ident (binding 23 "nested"))) 

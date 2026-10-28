@@ -36,7 +36,7 @@ static int add_promoted(unsigned char left, signed char right){
 }
 
 static ulong_alias unbox_alias(Var value){
-  return Var_ulong(Var_convert(value, 44858254));
+  return Var_ulong(Var_convert_at(value, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/scalar-types.x",.function = "unbox_alias",.line = 25}; & _x2c_gensym_error_site_0; })));
 }
 
 int main(void){

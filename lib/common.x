@@ -385,6 +385,7 @@ int x2c_var_identical(Var a, Var b);
 double x2c_var_order(Var a, Var b);
 
 Var Var.convert(Var value, Symbol target);
+Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site);
 int Var.truth(Var value);
 int Var.fallback_truth(Var value);
 meta Iter Var.fallback_iter(Var value, Iter dest);

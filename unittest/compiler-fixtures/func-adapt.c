@@ -138,8 +138,8 @@ int main(void){
 }
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 1, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/func-adapt.x",.function = "_x2c_gensym_func_adapt_0",.line = 0}; & _x2c_gensym_error_site_0; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/func-adapt.x",.function = "_x2c_gensym_func_adapt_0",.line = 0}; & _x2c_gensym_error_site_1; })));
   return long_var(add(a0, a1));
   ;
 }
@@ -157,7 +157,7 @@ static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncA
 }
 
 static Var _x2c_gensym_func_adapt_3(Func _x2c_gensym_func_binding_3, const FuncArg * _x2c_gensym_func_argv_3){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/func-adapt.x",.function = "_x2c_gensym_func_adapt_3",.line = 0}; & _x2c_gensym_error_site_2; })));
   discard(a0);
   return((void) 0, Void);
 }

@@ -64,9 +64,9 @@
     (expr ("ulong_alias") 
      (call "Var_ulong" 
       (args (expr ("Var") 
-             (call "Var_convert" 
+             (call "Var_convert_at" 
               (args (expr ("Var") (ident (binding 16 "value"))) 
-               (expr ("Symbol") "44858254")))))))))))
+               (expr ("Symbol") "44858254") (error-site)))))))))))
 
 (function (int) 
  (bind (binding 17 "main") ((fnmod (params (param (void) (bind () ())))))) 

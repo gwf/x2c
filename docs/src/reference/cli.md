@@ -94,10 +94,11 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 
 ### Source mapping
 
-`--source-map` adds source locations to generated C for `translate`, `build`,
-and `run`. It is off by default. Combine it with native debug information to
-set breakpoints, step through statements, and read backtraces in the original
-`.x` files:
+`build` and `run` map generated C locations to the original `.x` sources by
+default. Use `--no-source-map` for generated-C locations. `translate` keeps
+generated-C locations by default and accepts `--source-map` to enable the
+map. Combine source mapping with native debug information to set breakpoints,
+step through statements, and read backtraces in the original `.x` files:
 
 ```sh
 ./x2c build --source-map -g -O0 --save-temps -o /tmp/example example.x
@@ -107,9 +108,9 @@ lldb /tmp/example
 With source mapping enabled, C `__FILE__` and `__LINE__` refer to the original
 x2c source. Macro expansions use their invocation locations; generated cleanup
 uses its owning source construct. Compiler scaffolding without a source origin
-retains a generated-file location. `-g` alone keeps generated-C locations, and
-`--source-map` alone does not add native debug information. Changing the option
-invalidates reused translation output. Optimized builds may combine or remove
+retains a generated-file location. Source mapping does not add native debug
+information by itself. Changing the option invalidates reused translation
+output. Optimized builds may combine or remove
 statements, so source mapping does not guarantee exact stepping or recovery of
 optimized-away values.
 
@@ -432,10 +433,14 @@ initialization rules.
 ./x2c run examples/foreach.x -- first -second input.x
 ```
 
+By default, `run` prints one `Built executable PATH in N ms` line and then
+runs the program. Use `-v` for phase lines, build receipts, and native commands.
 Use `-q` to suppress build progress and receipts while preserving program
-output. Use `--build-dir <dir>` to retain generated files and objects for
-inspection or reuse. Otherwise temporary intermediates are removed after the
-program finishes.
+output. `build` and `run` enable source mapping, so native diagnostics,
+`__FILE__`, and `__LINE__` name the `.x` source; use `--no-source-map` for
+generated-C locations. Use `--build-dir <dir>` to retain generated files and
+objects for inspection or reuse. Otherwise temporary intermediates are removed
+after the program finishes.
 
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's

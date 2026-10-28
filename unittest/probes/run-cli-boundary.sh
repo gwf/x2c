@@ -1943,13 +1943,14 @@ def run(arguments):
     return result.stdout
 
 
-command = [compiler, 'build', '--quiet', '-g', '-O0', '--build-dir',
+command = [compiler, 'build', '--no-source-map', '--quiet', '-g', '-O0',
+           '--build-dir',
            str(root / 'build'), '--output', str(root / 'app'),
            str(source), str(helper), str(provider)]
 run(command)
 generated = list((root / 'build').rglob('*.c'))
 assert generated and all('#line ' not in p.read_text() for p in generated)
-mapped = command[:2] + ['--source-map'] + command[2:]
+mapped = command[:2] + command[3:]
 run(mapped)
 expected = (f'source={source}:6\nmultiline=8\nmacro=9\nimported=11\n'
             f'included={helper}:3\ncleanup=12\n')

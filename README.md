@@ -36,9 +36,11 @@ contains generated C for the bootstrap.
 ```sh
 make build-safe
 ./x2c run hello.x
+./x2c run hello.x -- first second
 ```
 
-`run` compiles and executes the program. To keep an executable instead:
+`run` compiles and executes the program. `--` starts the program's arguments.
+To keep an executable instead:
 
 ```sh
 ./x2c build hello.x -o hello

@@ -23,6 +23,28 @@ printf 'build -q --output app @@input.x\n' > build.rsp
 "$COMMAND" build -q --output direct @@input.x
 ./direct
 "$COMMAND" run -q @@input.x
+# Run keeps one default build receipt, while verbose shows the build phases.
+printf 'int main(void) { puts("program output"); return 0; }\n' > run-output.x
+"$X2C" run --plain run-output.x >run-output.out 2>run-output.log
+[ "$(cat run-output.out)" = "program output" ]
+[ "$(wc -l < run-output.log | tr -d ' ')" = 1 ]
+grep -q '^Built executable .* in ' run-output.log
+"$X2C" run --plain -q run-output.x >quiet.out 2>quiet.log
+[ ! -s quiet.log ]
+"$X2C" run --plain -v run-output.x >verbose.out 2>verbose.log
+grep -q 'Translate 1 x2c file' verbose.log
+grep -q 'Generated 1 C file' verbose.log
+grep -q '^Running ' verbose.log
+"$X2C" run --plain -q -v run-output.x >quiet-verbose.out 2>quiet-verbose.log
+if grep -q '^Running ' quiet-verbose.log; then exit 1; fi
+
+# Native warnings use the x2c source unless generated-C locations are asked for.
+printf 'int main(void) { char *raw = "hello"; return raw == "hello"; }\n' > warning.x
+"$X2C" build -q -Xcc -Waddress -o warning warning.x 2>warning.log
+grep -q 'warning.x:1:' warning.log
+"$X2C" build -q --no-source-map -Xcc -Waddress -o warning warning.x 2>generated.log
+grep -q 'warning.c:' generated.log
+
 printf 'int main(void) { int n = ; }\n' > bad.x
 status=0
 "$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?

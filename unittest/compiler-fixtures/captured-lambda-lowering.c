@@ -216,9 +216,9 @@ static Var _x2c_gensym_lambda_0(int value, int bias){
 }
 
 static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg * _x2c_gensym_lambda_argv_0){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_0, _x2c_gensym_lambda_argv_0, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_0, _x2c_gensym_lambda_argv_0, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_1",.line = 0}; & _x2c_gensym_error_site_0; })));
   const struct _x2c_gensym_lambda_context_0 * record =(const struct _x2c_gensym_lambda_context_0 *) Func_context(_x2c_gensym_lambda_closure_0);
-  return _x2c_gensym_lambda_0(a0, Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_0(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_1",.line = 0}; & _x2c_gensym_error_site_1; }))));
 }
 
 static Var _x2c_gensym_lambda_2(int value, int right, int left){
@@ -227,9 +227,9 @@ static Var _x2c_gensym_lambda_2(int value, int right, int left){
 }
 
 static Var _x2c_gensym_lambda_3(Func _x2c_gensym_lambda_closure_1, const FuncArg * _x2c_gensym_lambda_argv_1){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_1, _x2c_gensym_lambda_argv_1, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_1, _x2c_gensym_lambda_argv_1, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_3",.line = 0}; & _x2c_gensym_error_site_2; })));
   const struct _x2c_gensym_lambda_context_2 * record =(const struct _x2c_gensym_lambda_context_2 *) Func_context(_x2c_gensym_lambda_closure_1);
-  return _x2c_gensym_lambda_2(a0, Var_int(Var_convert(record -> c0, 3453797)), Var_int(Var_convert(record -> c1, 3453797)));
+  return _x2c_gensym_lambda_2(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_3",.line = 0}; & _x2c_gensym_error_site_3; }))), Var_int(Var_convert_at(record -> c1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_3",.line = 0}; & _x2c_gensym_error_site_4; }))));
 }
 
 static Var _x2c_gensym_lambda_4(int second, int first){
@@ -244,9 +244,9 @@ static Var _x2c_gensym_lambda_4(int second, int first){
 }
 
 static Var _x2c_gensym_lambda_5(Func _x2c_gensym_lambda_closure_2, const FuncArg * _x2c_gensym_lambda_argv_2){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_2, _x2c_gensym_lambda_argv_2, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_2, _x2c_gensym_lambda_argv_2, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_5",.line = 0}; & _x2c_gensym_error_site_5; })));
   const struct _x2c_gensym_lambda_context_4 * record =(const struct _x2c_gensym_lambda_context_4 *) Func_context(_x2c_gensym_lambda_closure_2);
-  return _x2c_gensym_lambda_4(a0, Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_4(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_5",.line = 0}; & _x2c_gensym_error_site_6; }))));
 }
 
 static Var _x2c_gensym_lambda_6(int * value){
@@ -265,9 +265,9 @@ static Var _x2c_gensym_lambda_8(int value, int direct_bias){
 }
 
 static Var _x2c_gensym_lambda_9(Func _x2c_gensym_lambda_closure_4, const FuncArg * _x2c_gensym_lambda_argv_4){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_4, _x2c_gensym_lambda_argv_4, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_4, _x2c_gensym_lambda_argv_4, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_9",.line = 0}; & _x2c_gensym_error_site_7; })));
   const struct _x2c_gensym_lambda_context_8 * record =(const struct _x2c_gensym_lambda_context_8 *) Func_context(_x2c_gensym_lambda_closure_4);
-  return _x2c_gensym_lambda_8(a0, Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_8(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_9",.line = 0}; & _x2c_gensym_error_site_8; }))));
 }
 
 static Var _x2c_gensym_lambda_10(int zero_value){
@@ -277,7 +277,7 @@ static Var _x2c_gensym_lambda_10(int zero_value){
 
 static Var _x2c_gensym_lambda_11(Func _x2c_gensym_lambda_closure_5, const FuncArg * _x2c_gensym_lambda_argv_5){
   const struct _x2c_gensym_lambda_context_10 * record =(const struct _x2c_gensym_lambda_context_10 *) Func_context(_x2c_gensym_lambda_closure_5);
-  return _x2c_gensym_lambda_10(Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_10(Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_11",.line = 0}; & _x2c_gensym_error_site_9; }))));
 }
 
 static Var _x2c_gensym_lambda_12(int value, int first, int second){
@@ -286,9 +286,9 @@ static Var _x2c_gensym_lambda_12(int value, int first, int second){
 }
 
 static Var _x2c_gensym_lambda_13(Func _x2c_gensym_lambda_closure_6, const FuncArg * _x2c_gensym_lambda_argv_6){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_6, _x2c_gensym_lambda_argv_6, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_6, _x2c_gensym_lambda_argv_6, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_13",.line = 0}; & _x2c_gensym_error_site_10; })));
   const struct _x2c_gensym_lambda_context_12 * record =(const struct _x2c_gensym_lambda_context_12 *) Func_context(_x2c_gensym_lambda_closure_6);
-  return _x2c_gensym_lambda_12(a0, Var_int(Var_convert(record -> c0, 3453797)), Var_int(Var_convert(record -> c1, 3453797)));
+  return _x2c_gensym_lambda_12(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_13",.line = 0}; & _x2c_gensym_error_site_11; }))), Var_int(Var_convert_at(record -> c1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "unittest/compiler-fixtures/captured-lambda-lowering.x",.function = "_x2c_gensym_lambda_13",.line = 0}; & _x2c_gensym_error_site_12; }))));
 }
 
 #undef _x2c_gensym_initializer_choice_3B252372_0_expanded

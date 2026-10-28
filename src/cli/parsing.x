@@ -83,6 +83,8 @@ module CliOption cli_options[] = {
   { <src-map>, %<<translate build run script>>, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0,
     CLI_FIELD(<flag>, source_map) },
+  { <no-srcmap>, %<<build run>>, <output>, "--no-source-map", NULL,
+    "Keep generated C locations in native diagnostics", 0 },
   { <no-deps>, %<<translate>>, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0, CLI_FIELD(<flag>, no_deps) },
   { <dep-file>, %<<translate>>, <output>, "--dep-file", "<file>",
@@ -495,6 +497,7 @@ static void _apply(Parse &p, Given given) {
   String spelling = given.spelling, value = given.value;
   switch (given.option.id) {
     case <help>: _help_exit(r.command, 0); break;
+    case <no-srcmap>: r.source_map = 0; break;
     case <color>: r.color_mode = _color_mode(value); break;
     case <include>: _include_dir(p, value); break;
     case <x-include>: p.include_dirs.push(value); break;

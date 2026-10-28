@@ -182,7 +182,7 @@ if(result != 90) return 6;
       a = x2c_match_value_0;
       Var _x2c_gensym_match_value_0 = a;
       {
-        int a = Var_int(Var_convert(_x2c_gensym_match_value_0, 3453797));
+        int a = Var_int(Var_convert_at(_x2c_gensym_match_value_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/match-condition.x",.function = "main",.line = 39}; & _x2c_gensym_error_site_0; })));
         if(a == 7){
           _x2c_gensym_condition_4 = 1;
           result = a;
@@ -205,7 +205,7 @@ if(result != 7 || a != 90) return 8;
     a = x2c_match_value_0;
     Var _x2c_gensym_match_value_1 = a;
     {
-      int a = Var_int(Var_convert(_x2c_gensym_match_value_1, 3453797));
+      int a = Var_int(Var_convert_at(_x2c_gensym_match_value_1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/match-condition.x",.function = "main",.line = 42}; & _x2c_gensym_error_site_1; })));
       return 9;
     }
 
@@ -390,7 +390,7 @@ dynamic = List_var(_28);
       a = x2c_match_value_0;
       Var _x2c_gensym_match_value_4 = a;
       {
-        int a = Var_int(Var_convert(_x2c_gensym_match_value_4, 3453797));
+        int a = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/match-condition.x",.function = "main",.line = 78}; & _x2c_gensym_error_site_2; })));
         {
           _x2c_gensym_condition_10 = 1;
           result = a;
@@ -418,8 +418,8 @@ if(result != 8) return 23;
       Var _x2c_gensym_match_value_5 = a;
       Var _x2c_gensym_match_value_6 = b;
       {
-        int a = Var_int(Var_convert(_x2c_gensym_match_value_5, 3453797));
-        int b = Var_int(Var_convert(_x2c_gensym_match_value_6, 3453797));
+        int a = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/match-condition.x",.function = "main",.line = 82}; & _x2c_gensym_error_site_3; })));
+        int b = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/match-condition.x",.function = "main",.line = 82}; & _x2c_gensym_error_site_4; })));
         {
           _x2c_gensym_condition_11 = 1;
           result = a + b;

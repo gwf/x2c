@@ -35,7 +35,7 @@ int main(void){
   Var count = int_var(3), name = String_var(_0);
   log_printf("%s=%s (%d)\n", Var_str(name), Var_str(count), 7);
   log_printf("%s=%s (%d)\n", Var_str(name), Var_str(count), 8);
-  printf("%d %s\n", Var_int(Var_convert(count, 3453797)), Var_str(name));
+  printf("%d %s\n", Var_int(Var_convert_at(count, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/rewrite-call-family.x",.function = "main",.line = 36}; & _x2c_gensym_error_site_0; }))), Var_str(name));
   return 0;
 }
 

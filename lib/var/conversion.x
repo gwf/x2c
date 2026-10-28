@@ -18,21 +18,32 @@ static macro Stmt $error.encoding.bad(Expr $bits) {
   raise %(bad-enc (value $($bits)));
 }
 
-static macro Stmt $error.convert.void() { raise %(void-op (operation "Var.convert")); }
+static macro Stmt $error.convert.void(Expr $target, Expr $site) {
+  Error.raise_at($site, <void-op>,
+    %((operation "Var.convert") (target $($target))));
+}
 
 static macro Stmt $error.target.invalid(Expr $target) {
   raise %(bad-target (target $($target)));
 }
 
-static macro Stmt $error.source.numeric(Expr $source_tag, Expr $target) {
+static macro Stmt $error.source.numeric(
+  Expr $source_tag, Expr $target, Expr $site) {
   using $lower;
   {
     List $lower = %(bad-types (source $($source_tag)));
-    raise %(no-convert (target $($target)) (cause $($lower)));
+    Error.raise_at($site, <no-convert>,
+      %((target $($target)) (cause $($lower))));
   }
 }
 
-static macro Stmt $error.no_convert(Expr $source_tag, Expr $target) {
+static macro Stmt $error.no_convert(
+  Expr $source_tag, Expr $target, Expr $site) {
+  Error.raise_at($site, <no-convert>,
+    %((source $($source_tag)) (target $($target))));
+}
+
+static macro Stmt $error.payload.type(Expr $source_tag, Expr $target) {
   raise %(no-convert (source $($source_tag)) (target $($target)));
 }
 
@@ -42,7 +53,7 @@ static macro Stmt $error.no_convert(Expr $source_tag, Expr $target) {
     `Var.string_payload` reads the payload or NULL without raising.
 */
 String Var.string(Var value) {
-  if (value is not <string>) $error.no_convert(value.tag(), "String");
+  if (value is not <string>) $error.payload.type(value.tag(), "String");
   return value.string_payload();
 }
 
@@ -54,7 +65,7 @@ static macro Unit $var.tag.exact(
       NULL without raising.
   */
   $type Var.$method(Var value) {
-    if (value is not $tag) $error.no_convert(value.tag(), $name);
+    if (value is not $tag) $error.payload.type(value.tag(), $name);
     return value.$payload();
   }
 }
@@ -114,12 +125,20 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
     decoding, with the decoder's `<bad-types>` detail nested under
     `<no-convert>`.
 */
-meta native Var Var.convert(Var value, Symbol target) {
+meta native Var Var.convert(Var value, Symbol target) =>
+  Var.convert_at(value, target, NULL);
+
+/** Converts `value` using `Var.convert` and records `site` on conversion
+    failures for a void or nonnumeric source or a nonnumeric target.
+    A null `site` records no source location. The site is borrowed only
+    during the call; conversion and result ownership follow `Var.convert`.
+*/
+Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site) {
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     $error.encoding.bad(bits);
   }
-  if (value is void) $error.convert.void();
+  if (value is void) $error.convert.void(target, site);
   if (!target || !Var.known_tag(target) || target == <void> ||
       target == <nan> || target == <-inf> || target == <+inf>)
     $error.target.invalid(target);
@@ -130,11 +149,11 @@ meta native Var Var.convert(Var value, Symbol target) {
     return value;
   X2CVarNumericInfo info;
   if (!Var.numeric_info(source_tag, info))
-    $error.source.numeric(source_tag, target);
+    $error.source.numeric(source_tag, target, site);
   X2CVarNumeric source;
   _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
-    $error.no_convert(source_tag, target);
+    $error.no_convert(source_tag, target, site);
   return info.floating
        ? _convert_to_float(source, target)
        : _convert_to_integer(source, target, info.unsigned_value, info.bits);

@@ -146,9 +146,9 @@
       (expr (double) 
        (call "Var_floating" 
         (args (expr ("Var") 
-               (call "Var_convert" 
+               (call "Var_convert_at" 
                 (args (expr ("Var") (ident (binding 21 "sum"))) 
-                 (expr ("Symbol") "3356265"))))))))))) 
+                 (expr ("Symbol") "3356265") (error-site))))))))))) 
   (at 104 
    (declare ("Var") 
     (bindings 
@@ -171,9 +171,9 @@
       (expr (double) 
        (call "Var_floating" 
         (args (expr ("Var") 
-               (call "Var_convert" 
+               (call "Var_convert_at" 
                 (args (expr ("Var") (ident (binding 28 "infinity"))) 
-                 (expr ("Symbol") "3356265"))))))))))) 
+                 (expr ("Symbol") "3356265") (error-site))))))))))) 
   (at 106 
    (declare (double) 
     (bindings 
@@ -181,9 +181,9 @@
       (expr (double) 
        (call "Var_floating" 
         (args (expr ("Var") 
-               (call "Var_convert" 
+               (call "Var_convert_at" 
                 (args (expr ("Var") (ident (binding 29 "not_number"))) 
-                 (expr ("Symbol") "3356265"))))))))))) 
+                 (expr ("Symbol") "3356265") (error-site))))))))))) 
   (at 27 
    (declare (double) 
     (bindings 
