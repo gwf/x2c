@@ -390,6 +390,9 @@ Source includes previously discarded their origin before emission. The
 source-aware directive reader now preserves the existing `at` wrapper for
 includes, and projection/dependency readers inspect through that wrapper.
 Raw directive analysis and unmapped translation keep their existing shapes.
+Meta group include replacement and leading-directive ordering also inspect
+through the wrapper. Independent review reproduced and repaired a missed
+meta-provider include consumer; its multiunit driver regression now passes.
 
 Observed after-text (paths below are under the retained probe directory):
 
