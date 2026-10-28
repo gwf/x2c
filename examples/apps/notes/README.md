@@ -1,30 +1,41 @@
 # Notes
 
-A notes service with JSON persistence, tags, regular-expression search, and a
-browser interface. The service uses the optional blocking `net.x` and `http.x`
-modules. The HTTP worker pool supplies threads and a bounded channel; each
-request has an isolated Context.
+Create notes, organize them with tags, and search their titles and bodies.
+The program serves a browser page and a JSON API. It saves notes in SQLite so
+changes survive a restart.
 
 From the repository root, after building x2c:
 
 ```sh
-make -C examples/apps/notes build
-examples/apps/notes/builds/notes --host 127.0.0.1 --port 8080 --store notes.json
+make -C examples/apps/notes prepare
+make -C examples/apps/notes run
 ```
 
-Open <http://127.0.0.1:8080/>. Ctrl-C stops accepting requests, joins the workers,
-and closes the listener. The server also accepts `--workers N`, `--public DIR`,
-and `--policy FILE`. The defaults are eight workers, this example's `public`
-directory, and `policy.xlisp`. Relative paths are relative to the process's
-working directory. Bind behind a TLS reverse proxy for deployment; the core
-server speaks plain HTTP.
+The first command prepares the optional SQLite dependency. The second builds
+the application and prints its URL. Open <http://127.0.0.1:8080/> to create,
+edit, search, tag, and delete notes. Ctrl-C stops the server and closes the
+database.
+
+The defaults are loopback port 8080, eight workers, `notes.db`, and this
+example's `public` directory. To select another database or address, run the
+built executable from the repository root:
+
+```sh
+examples/apps/notes/builds/notes --host 127.0.0.1 --port 8081 \
+  --workers 8 --store /tmp/my-notes.db --public examples/apps/notes/public
+```
+
+Relative paths use the process's working directory. The `--store` path names
+an SQLite database. Existing JSON store files remain at their current paths.
+The server speaks plain HTTP; use a TLS reverse proxy for deployment.
 
 ## API
 
-All note bodies are JSON objects. `title` is required nonempty text; `body`
-defaults to empty text and `tags` to an empty array of nonempty strings. IDs
-are decimal strings. The server owns `id`, `created`, and `updated`; timestamps
-are Unix seconds. PUT replaces title, body, and tags and preserves `created`.
+A note has `id`, `title`, `body`, `tags`, `created`, and `updated` fields.
+`title` is required nonempty text. `body` defaults to empty text, and `tags`
+defaults to an empty array of nonempty strings. IDs are decimal strings.
+The server assigns IDs and Unix timestamps. PUT replaces title, body, and
+tags while preserving the creation time.
 
 | Method | Route | Result |
 | --- | --- | --- |
@@ -41,40 +52,27 @@ curl -d '{"title":"First note","body":"Hello","tags":["work"]}' \
 curl 'http://127.0.0.1:8080/api/notes?tag=work&q=Hello'
 ```
 
-Validation and policy failures return status 422 with `{"error":"reason"}`.
-The service loads `policy.xlisp` for each mutation. The supplied policy rejects
-notes tagged `forbidden` and bodies larger than 65536 bytes. The Lisp function
-receives the tags and body and can call the native `body-size` binding. A
-missing policy file allows the note. Change the policy without recompiling or
-restarting the service.
+Invalid note fields return status 422 with `{"error":"reason"}`. Malformed
+JSON returns status 400. A missing note returns status 404.
 
-## Storage and source
+## Source and checks
 
-`record.x` has one compile-time field table. It generates `struct Note`, the
-Map conversion in both directions, field validation, and the SQL column list.
-The `match` in its reader generator selects validation by the declared field
-type. `service.x` supplies the handlers for either store.
+[notes.x](notes.x) contains the request handlers, validation, and database
+queries. The [public directory](public/) contains the page and its JavaScript.
+Queries use bound parameters. The optional `http.x` module supplies routing,
+connection handling, and the worker pool.
 
-The core `MapStore` serializes access with a Mutex. A mutation writes the full
-Map to a sibling temporary file and renames it over the store. A failed write
-restores the previous in-memory record. Each stored note owns a private
-canonical-value pool through its Map's Scope; replacing or deleting the note
-reclaims its text and tags. Reads return request-owned snapshots.
-
-This file store rewrites the complete dataset on each mutation and takes a
-snapshot for each read. It is an example for small datasets. The optional
-[SQLite variant](../../packages/notes-sqlite/README.md) reuses the handlers and
-record table, with prepared statements for persistent operations.
-
-## Check
+After preparing SQLite, run the application checks with:
 
 ```sh
 make -C examples/apps/notes check
 ```
 
-`--check` binds loopback port zero, creates three notes, searches, reads tag
-counts, exercises validation and the Lisp policy, deletes a note, and removes
-its temporary store. The transcript is deterministic. The regular examples
-manifest also runs this check.
+The Python checks start the executable against temporary databases and send
+HTTP requests. They cover note operations, validation, search, tag counts,
+persistence across restart, concurrent creation, and the page. They run
+outside the application process. The optional application is separate from
+`make examples`, which does not fetch SQLite.
 
-The optional benchmark is described in [bench/README.md](bench/README.md).
+See [bench/README.md](bench/README.md) for the separate read-load tool and its
+measurement procedure.

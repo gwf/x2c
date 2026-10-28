@@ -243,14 +243,16 @@ and review the resulting differences.
 
 ## A notes service
 
-[apps/notes](apps/notes/README.md) combines a blocking HTTP server, JSON
-persistence, record generation, and an editable runtime Lisp policy. Its page
-lists, creates, searches, and tags notes. Run the loopback transcript with:
+[apps/notes](apps/notes/README.md) serves a browser page and a JSON API for
+creating, editing, searching, tagging, and deleting notes. SQLite preserves
+notes across restarts. From the repository root:
 
 ```sh
-make -C examples/apps/notes check
+make -C examples/apps/notes prepare
+make -C examples/apps/notes run
 ```
 
-The [SQLite variant](packages/notes-sqlite/README.md) uses prepared statements
-through the optional package. The [benchmark](apps/notes/bench/README.md)
-compares the notes lookup route with fixed-body C and Go reference servers.
+The application prints its local URL. Run its external HTTP checks with
+`make -C examples/apps/notes check`. This optional application uses the SQLite
+package and is separate from `make examples`. Its
+[read-load tool](apps/notes/bench/README.md) measures the running service.
