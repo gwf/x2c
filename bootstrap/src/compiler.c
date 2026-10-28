@@ -121,6 +121,7 @@ typedef struct Compiler{
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;
+  Array meta_definitions;
   Map meta_group_bound;
   int meta_build;
   int skipped_form;
@@ -856,7 +857,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _288 = String_var(_287);
   _289 = List_var(NULL);
   _290 = Symbol_var(106239471489226);
-  _291 = int_var(2238);
+  _291 = int_var(2243);
   _292 = String_new("");
   _293 = String_var(_292);
   _294 = Atom_intern(String_new("macro-param"));
@@ -1120,6 +1121,7 @@ static Compiler f9_lifecycle____new(Compiler owner){
   c -> braces = Array_new();
   c -> line_starts = Array_new();
   c -> meta_group = Array_new();
+  c -> meta_definitions = Array_new();
   c -> placements = Array_new();
   c -> ancestors = Block_new(sizeof(Ancestor));
   c -> origins = owner ? owner -> origins : Array_new();
@@ -1537,6 +1539,7 @@ Map Compiler_included_compile_time_effects(Compiler, Map);
 
 static void f13_parsing_parse____reset_parse(Compiler c, Map globs, int generated){
   Array_clear(c -> meta_group);
+  Array_clear(c -> meta_definitions);
   c -> skipped_form = 0;
   c -> meta_group_bound = Map_new();
   c -> meta_comptime = Map_new();

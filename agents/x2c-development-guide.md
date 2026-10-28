@@ -10,8 +10,10 @@ project skills own task execution.
 - Never hand-edit generated C/H under `bootstrap/` or numbered `builds/`.
 - Never hand-edit `lib/x2c.x`; `lib/Makefile` generates it. Never hand-edit
   `src/linked-meta.x` or `etc/meta-queries.x`; `tools/gen-linked-meta.sh`
-  and `tools/gen-meta-queries.sh` generate them. A compiler operation is a
-  bodyless prototype in `lib/meta.x` and its answer in `src/meta-sdk/meta-sdk.x`.
+  and `tools/gen-meta-queries.sh` generate them, selecting what to copy or
+  forward from the `meta` rows of `bin/x2c-bootstrap translate
+  --dump-definitions`. A compiler operation is a bodyless prototype in
+  `lib/meta.x` and its answer in `src/meta-sdk/meta-sdk.x`.
 - Use `builds/0/x2c` for current behavior. `bin/x2c` remains the bootstrap
   compiler unless stage 0 was intentionally installed.
 - Keep temporary output in `/tmp` or `unittest/build/` and failure logs under

@@ -13,8 +13,8 @@
 #include <unistd.h>
 
 /** One unit's projection: `path`, `module` (its opening comment, or NULL),
-    and `functions` and `types`, each an `Array` of row `Map`s in the order
-    the compiler defines them.
+    and `functions`, `types`, and `meta`, each an `Array` of row `Map`s in
+    the order the compiler defines them.
 */
 typedef Map Unit
 
@@ -35,6 +35,7 @@ static Unit _unit(String path):
   unit["module"] = NULL
   unit["functions"] = []
   unit["types"] = []
+  unit["meta"] = []
   return unit
 
 /* The units of one dump, each starting at its `unit` row. The dump is read
@@ -52,6 +53,7 @@ static List _units(String dump):
       units.push(unit)
     else if kind == <module>: unit["module"] = row.cadr()
     else if kind == <function>: unit["functions"].array().push(_fields(row))
+    else if kind == <meta>: unit["meta"].array().push(_fields(row))
     else: unit["types"].array().push(_fields(row))
   return units.list_free()
 

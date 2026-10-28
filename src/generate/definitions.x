@@ -4,8 +4,10 @@
 
 /** Prints the `--dump-definitions` projection of the lowered unit `ast`:
     `(unit PATH)`, the module comment as `(module TEXT)` when the file opens
-    with one, then one row per `Compiler.definition_rows` entry. The
-    command-line reference in the book describes the fields.
+    with one, one row per `Compiler.definition_rows` entry, then a `meta`
+    row for each bodied `meta` function the file spells, saying whether
+    it reaches a compiler operation. The command-line reference in the
+    book describes the fields.
 */
 void Compiler.dump_definitions(Compiler c, List ast) {
   printf("%s\n", %(unit $(c.filename)).repr());
@@ -16,6 +18,10 @@ void Compiler.dump_definitions(Compiler c, List ast) {
     case %(function *): _print_function(c, tokens, row);
     case %(typedef *): _print_type(c, tokens, row);
   }
+  foreach (List row in c.meta_definitions)
+    if (row ~= %(?(String name) ?line))
+      printf("%s\n", %(meta (name $name) (line $line)
+                        (comptime $(name in c.meta_comptime))).repr());
 }
 
 // definition rows

@@ -13,7 +13,7 @@ The generated header and source of one unit.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
-| [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
+| [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, one row per `Compiler.definition_rows` entry, then a `meta` row for each bodied `meta` function the file spells, saying whether it reaches a compiler operation. |
 | [`Compiler.generate_code`](#Compiler.generate_code) | Writes the generated C header and source for one lowered translation unit. |
 | [`Compiler.generate_code_text`](#Compiler.generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
 | [`Compiler.header_guard`](#Compiler.header_guard) | Returns the guard macro of the header generated for this unit, named from its path below the home when it has one there, else as spelled, so a meta group that copies the unit names the same guard. |
@@ -49,8 +49,10 @@ Source: `src/generate/definitions.x`
 
 Prints the `--dump-definitions` projection of the lowered unit `ast`:
 `(unit PATH)`, the module comment as `(module TEXT)` when the file opens
-with one, then one row per `Compiler.definition_rows` entry. The
-command-line reference in the book describes the fields.
+with one, one row per `Compiler.definition_rows` entry, then a `meta`
+row for each bodied `meta` function the file spells, saying whether
+it reaches a compiler operation. The command-line reference in the
+book describes the fields.
 
 Source: `src/generate/definitions.x`
 

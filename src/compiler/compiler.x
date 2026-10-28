@@ -219,6 +219,9 @@ typedef struct Compiler {
      names the REPL bound to staged native code, the modules it reset, and
      each bodyless `meta` prototype nothing supplies. */
   Array unit_nodes, meta_group;
+  /* Each bodied `meta` function the unit spells, as `(name line)`, for
+     the definitions dump. */
+  Array meta_definitions;
   Map meta_group_bound;
   /* Zero for ordinary parsing, one for metadata collection, or the
      project helper table index plus one. */

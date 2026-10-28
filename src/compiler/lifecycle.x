@@ -111,7 +111,8 @@ static Compiler _new(Compiler owner) {
   c.diagnostics = Diagnostics.new(
     owner && owner.diagnostics.printer ? c : NULL,
     owner ? owner.diagnostics.limit : 1);
-  $set_fields(c, [], braces, line_starts, meta_group, placements);
+  $set_fields(c, [], braces, line_starts, meta_group, meta_definitions,
+              placements);
   c.ancestors = Block.new(sizeof(Ancestor));
   c.origins = owner ? owner.origins : [];
   c.root_dir = x2c_get_root();

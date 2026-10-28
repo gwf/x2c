@@ -31,6 +31,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
    state that collection or an earlier parse left. */
 static void _reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
+  c.meta_definitions.clear();
   c.skipped_form = 0;
   c.meta_group_bound = {};
   c.meta_comptime = {};

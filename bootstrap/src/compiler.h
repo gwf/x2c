@@ -112,6 +112,7 @@ typedef struct Compiler{
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;
+  Array meta_definitions;
   Map meta_group_bound;
   int meta_build;
   int skipped_form;

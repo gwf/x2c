@@ -5,12 +5,14 @@
 # their `meta` markers, so their tokens, and
 # therefore their definition hashes, match the source. A public function
 # with a run-time form is bound to its ordinary provider's definition: one that
-# is not static and reaches no compiler operation. The file is rewritten
-# only when its text changes.
+# is not static and reaches no compiler operation. The compiler's definitions
+# dump says which functions reach one. The file is rewritten only when its
+# text changes.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 out=${1:-$root/src/linked-meta.x}
+x2c=${X2C:-$root/bin/x2c-bootstrap}
 cd "$root"
 
 # Native advertisements already bind their runtime symbols. Bodied meta
@@ -21,8 +23,16 @@ sources=$(awk '/^meta / && !/^meta native / && !seen[FILENAME]++ {
   sed '/^src\/linked-meta\.x$/d' | sort)
 
 tmp="$out.$$"
-trap 'rm -f "$tmp"' EXIT
-awk '
+dump="$tmp.dump"
+trap 'rm -f "$tmp" "$dump"' EXIT
+"$x2c" translate --dump-definitions $sources > "$dump"
+awk -v dump="$dump" '
+FILENAME == dump {
+  if (match($0, /^\(unit "[^"]*"/)) unit = substr($0, 8, RLENGTH - 8)
+  else if (match($0, /^\(meta \(name "[^"]*"/))
+    comptime[unit, substr($0, 14, RLENGTH - 14)] = ($0 ~ /\(comptime 1\)/)
+  next
+}
 function scan(line,    i, ch, n) {
   n = length(line)
   for (i = 1; i <= n; i++) {
@@ -43,15 +53,14 @@ function scan(line,    i, ch, n) {
     else if (ch == ")" || ch == "}" || ch == "]") depth--
   }
 }
-function finish(    name, text) {
+function finish(    text) {
   text = def
   if (!isvalue) {
-    if (text !~ /=>/ && text !~ /\{/) { prototypes[++nproto] = defcall; return }
+    if (text !~ /=>/ && text !~ /\{/) return
     if (text !~ /\)[ \t\n]*(=>|\{)/) return
   }
   ndef++
   names[ndef] = defname
-  calls[ndef] = defcall
   bodies[ndef] = (defdoc == "" ? "" : defdoc "\n") text
   statics[ndef] = (header ~ /^meta static /)
   values[ndef] = isvalue
@@ -75,9 +84,7 @@ indoc { doc = doc "\n" $0; if ($0 ~ /\*\//) indoc = 0; next }
   if (isvalue) sub(/[ \t]*=.*/, "", defname)
   sub(/\(.*/, "", defname)
   sub(/.*[^A-Za-z0-9_.]/, "", defname)
-  # Calls may use a receiver; registrations use the lowered linkage name.
-  defcall = defname
-  sub(/.*\./, "", defcall)
+  # Registrations use the lowered linkage name.
   gsub(/\./, "_", defname)
   def = substr($0, 6)
   depth = 0; quote = ""; incomment = 0
@@ -86,86 +93,12 @@ indoc { doc = doc "\n" $0; if ($0 ~ /\*\//) indoc = 0; next }
   else capturing = 1
 }
 { doc = "" }
-function refers(text, name, value) {
-  return text ~ ("(^|[^A-Za-z0-9_])" name \
-    (value ? "([^A-Za-z0-9_]|$)" : "[ \t]*\\("))
-}
-function push(mode, depth) { modes[++sp] = mode; depths[sp] = depth }
-# The text a definition evaluates: comments, strings, and the data in its
-# `%(...)` lists and `$!` quotations become spaces, except the code of a
-# `$(...)` or `@(...)` hole and the name a `$name` or `@name` hole inserts.
-# A quotation keeps a `(` right after a hole, where a slot calls a
-# definition.
-function code_of(text,    out, i, j, n, ch, two, mode, hole) {
-  n = length(text); out = ""; sp = 0; push("c", 0)
-  for (i = 1; i <= n; i++) {
-    ch = substr(text, i, 1); two = substr(text, i, 2); mode = modes[sp]
-    if (mode == "s") {
-      if (ch == "\\" || two == "$$") i++
-      else if (ch == "\"") sp--
-      else if (two == "$(") { push("c", 1); i++ }
-      out = out " "; continue
-    }
-    if (two == "/*") {
-      j = index(substr(text, i + 2), "*/"); i = j ? i + j + 2 : n
-      out = out " "; continue
-    }
-    if (two == "//") {
-      j = index(substr(text, i), "\n"); i = j ? i + j - 2 : n
-      out = out " "; continue
-    }
-    if (two == "%\"") { push("s", 0); i++; out = out " "; continue }
-    if (ch == "\"" || ch == "\x27") {
-      for (j = i + 1; j <= n && substr(text, j, 1) != ch; j++)
-        if (substr(text, j, 1) == "\\") j++
-      i = j; out = out " "; continue
-    }
-    if ((mode != "c" && (two == "$(" || two == "@(")) ||
-        (mode == "l" && two == "${")) {
-      push("c", 1); i++; out = out " "; continue
-    }
-    if (mode != "c" && (ch == "$" || ch == "@") &&
-        match(substr(text, i + 1), /^[A-Za-z_][A-Za-z0-9_]*/)) {
-      out = out "$" substr(text, i + 1, RLENGTH); i += RLENGTH
-      hole = mode == "q"; continue
-    }
-    if (mode == "c" && (two == "%(" || two == "$!")) {
-      push(two == "%(" ? "l" : "q", two == "%("); i++; out = out " "; continue
-    }
-    if (ch == "(" || ch == "{" || ch == "[") depths[sp]++
-    # `$!(T){ ... }` quotes its type and then its code.
-    else if ((ch == ")" || ch == "}" || ch == "]") && --depths[sp] == 0 &&
-             sp > 1 && !(mode == "q" && ch == ")" &&
-                         substr(text, i + 1) ~ /^[ \t\n]*\{/)) {
-      sp--; out = out " "; continue
-    }
-    if (mode == "c" || (hole && ch == "(")) out = out ch
-    else out = out " "
-    hole = 0
-  }
-  return out
-}
 END {
   # A static definition has no run-time symbol, so it is copied. One that
   # reaches a compiler operation, through what it calls, has no run-time
   # form, so it is copied too; any other public function has one.
-  for (i = 1; i <= ndef; i++) {
-    code[i] = code_of(bodies[i])
-    reaches[i] = values[i]
-    for (p = 1; p <= nproto; p++)
-      if (refers(code[i], prototypes[p])) reaches[i] = 1
-  }
-  do {
-    changed = 0
-    for (i = 1; i <= ndef; i++) {
-      if (reaches[i]) continue
-      for (j = 1; j <= ndef; j++)
-        if (reaches[j] && refers(code[i], calls[j], values[j])) {
-          reaches[i] = 1; changed = 1; break
-        }
-    }
-  } while (changed)
-  for (i = 1; i <= ndef; i++) copied[i] = statics[i] || reaches[i]
+  for (i = 1; i <= ndef; i++)
+    copied[i] = statics[i] || values[i] || comptime[files[i], names[i]]
 
   print "/*  linked-meta.x -- shipped `meta` code compiled into the compiler"
   print ""
@@ -226,10 +159,11 @@ END {
   print "  return $linked.hashes();"
   print "}"
 }
-' $sources > "$tmp"
+' "$dump" $sources > "$tmp"
 if [ -e "$out" ] && cmp -s "$tmp" "$out"; then
   rm -f "$tmp"
 else
   mv "$tmp" "$out"
 fi
+rm -f "$dump"
 trap - EXIT

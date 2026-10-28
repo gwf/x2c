@@ -194,8 +194,13 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
 - `kind` is `alias`, `struct`, `union`, `enum`, `callback`, or `class`, and
   `private` is 1 for a type declared with `static`.
 
-Compile-time-only `meta` functions are not part of the translated unit and
-are not listed.
+A bodied `meta` function the file spells prints a `meta` row after the
+definitions, `(meta (name NAME) (line LINE) (comptime N))`, where
+`N` is 1 when the function reaches a compiler operation and so has
+no runtime form. A compile-time-only function is not part of the
+translated unit and has no `function` row. `tools/gen-linked-meta.sh` and
+`tools/gen-meta-queries.sh` select the compiler's linked copies and the
+helper's forwarders from these rows.
 
 An inspection that does not write generated files does not need `--out-dir`.
 Only one inspection mode runs; the last option given wins.

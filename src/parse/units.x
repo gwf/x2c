@@ -476,6 +476,9 @@ static List _defined(
   }
   _record_meta_hash(c, function, first, 0);
   _publish_definition(c, decl, function, meta, staged);
+  if (staged && !c.macro_holes &&
+      (function ~= %(function ? (bind (binding ? ?(String name)) *) ?)))
+    c.meta_definitions.push(%($name $(meta.line)));
   if (staged && c.capture_unit && c.shallow)
     c.record_project_meta_effect(decl, staged);
   if (!c.capture_unit && staged && c.meta_is_comptime_only(function))
