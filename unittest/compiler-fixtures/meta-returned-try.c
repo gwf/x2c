@@ -185,7 +185,7 @@ int main(void){
           {
             Var volatile value;
             value = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
-            partial = Var_int(Var_convert(Var_binary(value, 56, int_var(List_len(rest))), 3453797));
+            partial = Var_int(Var_convert_at(Var_binary(value, 56, int_var(List_len(rest))), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/meta-returned-try.x",.function = "main",.line = 30}; & _x2c_gensym_error_site_2; })));
           }
 
         }

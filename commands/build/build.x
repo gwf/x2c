@@ -48,7 +48,8 @@ typedef struct Build {
 /* build command reports. */
 
 static macro Stmt $fail.build_input_unsupported(Expr $input) =>
-  Diagnostics.driver_error(%"unsupported build input: $($input)");
+  Diagnostics.driver_error(
+    %"unsupported build input: $($input); program arguments follow '--'");
 
 static macro Stmt $fail.build_archive_nested(Expr $input) =>
   Diagnostics.driver_error(
@@ -76,7 +77,7 @@ static macro Stmt $progress.build_debug_symbols(Expr $b) =>
   report_line(<muted>, %"  Debug symbols $($b.output).dSYM");
 
 static macro Stmt $progress.build_running(Expr $b) =>
-  report_line(<phase>, %"Running $($b.output)");
+  fprintf(stderr, "Running %s\n", $b.output);
 
 static macro Stmt $progress.build_translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
@@ -1000,6 +1001,10 @@ static void _extension_sources(
 
 /** Prints the completed build receipt and artifact details when enabled. */
 void Build.report_success(Build b) {
+  if (b.request.command == <run> && !b.request.quiet &&
+      !b.request.verbose && !b.request.debugging && !b.request.dry_run &&
+      !b.request.inspects())
+    fprintf(stderr, "%s\n", _headline(b));
   if (!report_receipts()) return;
   report_line(<success>, _headline(b));
   if (b.xlat_n) report_generated(b.xlat_n, b.gen_bytes);
@@ -1053,7 +1058,7 @@ static String _retention(Build b) {
     A dry run prints the action without launching the program.
 */
 int Build.run_program(Build b) {
-  $progress.build_running(b);
+  if (b.request.verbose && !b.request.quiet) $progress.build_running(b);
   String executable = Path.absolute(b.output);
   ToolAction action = ToolAction.new(
     <run>, $(executable, @(b.request.run_args)), b.request.verbose,

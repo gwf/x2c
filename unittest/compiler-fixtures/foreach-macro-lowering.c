@@ -107,7 +107,7 @@ int main(void){
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      current = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_0, 3453797));
+      current = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 38}; & _x2c_gensym_error_site_0; })));
       {
         existing = current;
         existing_total += existing;
@@ -137,7 +137,7 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_3;
     Var _x2c_gensym_macro_cursor_output_4;
     while(Map_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3), &(_x2c_gensym_macro_cursor_output_4))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_4, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 47}; & _x2c_gensym_error_site_1; })));
       typed_total += value;
     }
 
@@ -187,8 +187,8 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_9;
     Var _x2c_gensym_macro_cursor_output_10;
     while(Map_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_9), &(_x2c_gensym_macro_cursor_output_10))){
-      key = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_9, 3453797));
-      count = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_10, 3453797));
+      key = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_9, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 65}; & _x2c_gensym_error_site_2; })));
+      count = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 65}; & _x2c_gensym_error_site_3; })));
       converted_total += key + count;
     }
 
@@ -201,7 +201,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_6;
     while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
-      key = Var_int(Var_convert(_x2c_gensym_macro_item_6, 3453797));
+      key = Var_int(Var_convert_at(_x2c_gensym_macro_item_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 66}; & _x2c_gensym_error_site_4; })));
       key_total += key;
     }
 
@@ -328,8 +328,8 @@ int main(void){
               x2c_cleanup_push(& _x2c_gensym_defer_record_1);
               {
                 if(Var_truth(value)){
-                  static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 93};
-                  x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
+                  static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 93};
+                  x2c_error_raise_n(& _x2c_gensym_error_site_5, 20800632064936, 0);
                   __builtin_unreachable();
                 }
 

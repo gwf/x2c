@@ -79,7 +79,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_0;
     while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_0, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/protocol-typedef-inherited-adoption.x",.function = "main",.line = 43}; & _x2c_gensym_error_site_0; })));
       inherited_total += value;
     }
 
@@ -92,7 +92,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_1;
     while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_1, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/protocol-typedef-inherited-adoption.x",.function = "main",.line = 44}; & _x2c_gensym_error_site_1; })));
       overridden_total += value;
     }
 

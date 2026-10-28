@@ -118,7 +118,7 @@ module int _recover_form(Compiler c, Token start, int braces) {
 /* Directives join the nodes in source order, after they record native
    macro names and includes deliver their public compile-time effects. */
 module void _append_preproc(Compiler c, Array nodes) {
-  List directives = c.leading_preproc();
+  List directives = c.located_preproc();
   c.note_preprocessor_macros(directives);
   if (c.included_effects.len()) c.install_included_effects();
   foreach (List directive in directives) nodes.push(directive);

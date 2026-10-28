@@ -27,7 +27,8 @@ module List _forward_declarations(
   foreach (List node in source) {
     node = _inline_prototype(c, node);
     if (node.car() == <typedef> && node in f.declared) continue;
-    if (source_includes && node ~= %(preproc ?(String text))) {
+    if (source_includes &&
+        Ast.without_origin(node) ~= %(preproc ?(String text))) {
       int angle = 0;
       String target = Compiler.preproc_include_target(text, angle);
       if (target)

@@ -270,7 +270,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_3;
     while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_3, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 205}; & _x2c_gensym_error_site_0; })));
       fallback_total += value;
     }
 
@@ -283,7 +283,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_4;
     while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_4, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 206}; & _x2c_gensym_error_site_1; })));
       fallback_total += value;
     }
 
@@ -296,7 +296,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_5;
     while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_5, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 207}; & _x2c_gensym_error_site_2; })));
       fallback_total += value;
     }
 
@@ -309,7 +309,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_6;
     while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_6, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 208}; & _x2c_gensym_error_site_3; })));
       fallback_total += value;
     }
 
@@ -322,7 +322,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_7;
     while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_7, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_7, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 209}; & _x2c_gensym_error_site_4; })));
       fallback_total += value;
     }
 
@@ -335,7 +335,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_8;
     while(Iter_try_next(_x2c_gensym_macro_iterator_8, &(_x2c_gensym_macro_item_8))){
-      value = Var_int(Var_convert(_x2c_gensym_macro_item_8, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_item_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "unittest/compiler-fixtures/foreach-cursor-signatures.x",.function = "main",.line = 210}; & _x2c_gensym_error_site_5; })));
       fallback_total += value;
     }
 

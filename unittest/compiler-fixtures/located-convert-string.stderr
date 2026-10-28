@@ -1,0 +1,1 @@
+x2c: uncaught <no-convert> in main (unittest/compiler-fixtures/located-convert-string.x:3): target i32, cause (bad-types (source string))

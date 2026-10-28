@@ -77,6 +77,42 @@ run_multi --clean run-sources/multi.x run-sources/other.x
 "$X2C" run '-###' run-sources/not-created.x >run-logs/dry 2>&1
 [ ! -e run-sources/not-created.x ]
 unset X2C_CACHE_DIR
+# Run keeps one default build receipt, while verbose shows the build phases.
+printf 'int main(void) { puts("program output"); return 0; }\n' > run-output.x
+"$X2C" run --plain run-output.x >run-output.out 2>run-output.log
+[ "$(cat run-output.out)" = "program output" ]
+[ "$(wc -l < run-output.log | tr -d ' ')" = 1 ]
+grep -q '^Built executable .* in ' run-output.log
+"$X2C" run --plain -q run-output.x >quiet.out 2>quiet.log
+[ ! -s quiet.log ]
+"$X2C" run --plain --rebuild -v run-output.x >verbose.out 2>verbose.log
+grep -q 'Translate 1 x2c file' verbose.log
+grep -q 'Generated 1 C file' verbose.log
+grep -q '^x2c: run ' verbose.log
+"$X2C" run --plain -q -v run-output.x >quiet-verbose.out 2>quiet-verbose.log
+if grep -q '^x2c: run ' quiet-verbose.log; then exit 1; fi
+
+# Native warnings use the x2c source unless generated-C locations are asked for.
+printf 'int main(void) { char *raw = "hello"; return raw == "hello"; }\n' > warning.x
+"$X2C" build -q -Xcc -Waddress -o warning warning.x 2>warning.log
+grep -q 'warning.x:1:' warning.log
+"$X2C" build -q --no-source-map -Xcc -Waddress -o warning warning.x 2>generated.log
+grep -q 'warning.c:' generated.log
+
+# A native include failure retains the location of the source include.
+mkdir support
+printf 'int helper(void) { return 0; }\n' > support/helpers.x
+printf '#include "support/helpers.x"\nint main(void) { return 0; }\n' > missing-include.x
+status=0
+"$X2C" build -q missing-include.x >missing-include.log 2>&1 || status=$?
+[ "$status" = 1 ]
+grep -q 'missing-include.x:1:10:.*support/helpers.h.*file not found' missing-include.log
+
+# Source-mapped project meta groups retain included provider selection.
+printf '#pragma once\nmeta int twice(int n) => n * 2;\n' > meta-provider.x
+printf '#include "meta-provider.x"\nmeta int plus(int n) => twice(n) + 1;\nint main(void) { return $plus(3) != 7; }\n' > meta-include.x
+"$X2C" run -q meta-include.x meta-provider.x
+
 printf 'int main(void) { int n = ; }\n' > bad.x
 status=0
 "$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?

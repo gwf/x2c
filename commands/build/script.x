@@ -132,7 +132,7 @@ int CliRequest.run_script(CliRequest c) {
    the script's path. */
 static void _exec(CliRequest c) {
   String executable = _executable(c);
-  if (c.verbose) _print_run(c);
+  if (c.verbose && !c.quiet) _print_run(c);
   char **argv = xcalloc(c.run_args.len() + 2, sizeof(char *));
   int n = 0;
   argv[n++] = c.inputs.car().str();

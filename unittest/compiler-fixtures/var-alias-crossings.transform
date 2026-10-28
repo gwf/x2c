@@ -37,9 +37,9 @@
     (expr (long) 
      (call "Var_long" 
       (args (expr ("Var") 
-             (call "Var_convert" 
+             (call "Var_convert_at" 
               (args (expr ("DynamicAlias") (ident (binding 10 "value"))) 
-               (expr ("Symbol") "818062")))))))))))
+               (expr ("Symbol") "818062") (error-site)))))))))))
 
 (function (int) 
  (bind (binding 11 "main") ((fnmod (params (param (void) (bind () ())))))) 
@@ -91,9 +91,9 @@
       (expr (long) 
        (call "Var_long" 
         (args (expr ("Var") 
-               (call "Var_convert" 
+               (call "Var_convert_at" 
                 (args (expr ("DynamicAlias") (ident (binding 16 "returned"))) 
-                 (expr ("Symbol") "818062")))))))) 
+                 (expr ("Symbol") "818062") (error-site)))))))) 
      (op = (bind (binding 18 "through") ()) 
       (expr (long) 
        (call (expr ((func (("DynamicAlias"))) long) 

@@ -14,7 +14,7 @@ static Var box_value(long long value){
 }
 
 static long long unbox_value(Var value){
-  return Var_long_long(Var_convert(value, 25983886));
+  return Var_long_long(Var_convert_at(value, 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-wide-long-long.x",.function = "unbox_value",.line = 9}; & _x2c_gensym_error_site_0; })));
 }
 
 int main(void){

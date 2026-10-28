@@ -14,7 +14,7 @@ static Var box_value(long value){
 }
 
 static long unbox_value(Var value){
-  return Var_long(Var_convert(value, 818062));
+  return Var_long(Var_convert_at(value, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-wide-long.x",.function = "unbox_value",.line = 9}; & _x2c_gensym_error_site_0; })));
 }
 
 int main(void){
@@ -23,7 +23,7 @@ int main(void){
   Var boxed = box_value(value);
   Array values = Array_new();
   Array_push(values, long_var(value));
-  long from_array = Var_long(Var_convert(Array_getindex(values, 0), 818062));
+  long from_array = Var_long(Var_convert_at(Array_getindex(values, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/var-wide-long.x",.function = "main",.line = 17}; & _x2c_gensym_error_site_1; })));
   printf("%d %d %ld\n", Var_is(boxed, 818062), unbox_value(boxed) == value, from_array);
   return from_array != value;
 }

@@ -76,10 +76,10 @@ int main(void){
   Var shifted = Var_binary(a, 15481, b);
   Var bits = Var_binary(a, 249, b);
   Var quotient = Var_binary(a, 95, double_var(4.0));
-  double converted = Var_floating(Var_convert(sum, 3356265));
+  double converted = Var_floating(Var_convert_at(sum, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 49}; & _x2c_gensym_error_site_0; })));
   Var infinity = double_var(1.0 / 0.0), not_number = double_var(0.0 / 0.0);
-  double converted_infinity = Var_floating(Var_convert(infinity, 3356265));
-  double converted_nan = Var_floating(Var_convert(not_number, 3356265));
+  double converted_infinity = Var_floating(Var_convert_at(infinity, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 51}; & _x2c_gensym_error_site_1; })));
+  double converted_nan = Var_floating(Var_convert_at(not_number, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 52}; & _x2c_gensym_error_site_2; })));
   double compound_infinity = 2.0;
   x2c_var_update_f64(&(compound_infinity), 54, infinity);
   int native = 3;
@@ -154,8 +154,8 @@ int main(void){
       x2c_var_update_i32(&(*(& addressed)), 56, b);
       x2c_var_update_i32(&((& addressed_box) -> value), 56, b);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
-        x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
+        x2c_error_raise_n(& _x2c_gensym_error_site_3, 20800632064936, 0);
         __builtin_unreachable();
       }
 

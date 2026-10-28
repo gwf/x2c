@@ -1,6 +1,7 @@
 > Status: active
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
-> (`9aeeef265`) from reproduced probes. Nothing is implemented. The three
+> (`9aeeef265`) from reproduced probes. Implementation started 2026-10-28.
+> The three
 > public-behavior choices were settled with Gary on 2026-10-28 (see
 > "Settled decisions").
 
@@ -368,3 +369,51 @@ shared builder exists, a check that repeats a type fact, or a message that
 does not name the user's location. Fix what the review finds, rerun the
 probes in the evidence table, record the after-text here, then run
 `tools/gate-state.py ensure agent-pr-check`.
+
+
+## Execution evidence (2026-10-28)
+
+This execution uses shared-integrator delivery. Focused checks run in the
+implementing worktrees and the submitting worktree. The integrator owns final
+bootstrap and documentation regeneration, performance evidence, the full gate,
+and publication. The phase descriptions above do not require worker gates.
+
+### Phase 1: runtime sites and driver
+
+Implemented the compatible `Error.raise_at` and `Var.convert_at` entries,
+static conversion sites, default build/run source maps, `--no-source-map`,
+program-argument guidance, and the single default run receipt. Explicit
+extractors retain their existing runtime error locations. Quiet output still
+wins over verbose progress.
+
+Source includes previously discarded their origin before emission. The
+source-aware directive reader now preserves the existing `at` wrapper for
+includes, and projection/dependency readers inspect through that wrapper.
+Raw directive analysis and unmapped translation keep their existing shapes.
+Meta group include replacement and leading-directive ordering also inspect
+through the wrapper. Independent review reproduced and repaired a missed
+meta-provider include consumer; its multiunit driver regression now passes.
+
+Observed after-text (paths below are under the retained probe directory):
+
+| Probe | Observed result |
+| --- | --- |
+| `m2_maptype.x:3` | `<void-op> in main (FILE:3): operation Var.convert, target i32` |
+| `m2b_maptype.x:3` | `<no-convert> in main (FILE:3): target i32, cause (bad-types (source string))` |
+| `m5_oob.x:4` | `<void-op> in main (FILE:4): operation Var.convert, target i32` |
+| `m3_cptr.x:5` | Native warning names the `.x` file and line. |
+| `share.x:2:10` | Native missing-header error names the source include. |
+| `p-quote-unresolved.x:8` | Native undeclared-name error names the invocation line. |
+| `p-setindex.x` | Existing ignored out-of-range write still succeeds. |
+
+Correction to decision 2's example: `#line` changes the native diagnostic's
+filename and line. Clang can still show generated C beneath its caret,
+including a generated column number for an expanded expression. No diagnostic
+rewriter or source-map sidecar was added.
+
+Focused worker checks passed: build-safe/build, the external build command
+probes, 18 varops tests with 7,279 assertions, both new conversion fixtures,
+35 affected existing conversion fixtures, three include fixtures, and the
+source-map retained-build reuse probe. Updated fixture artifacts contain the
+reviewed conversion call/static-site changes. Final generated publication
+artifacts remain with the integrator.

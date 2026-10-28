@@ -52,6 +52,7 @@ TargetKind *TargetKind.of(Symbol kind) {
 CliRequest CliRequest.new(Symbol command) {
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = command;
+  request.source_map = command in %<<build run>>;
   request.jobs = _default_jobs();
   request.max_errors = 20;
   if (command in %<<build run script>>) request.kind = <executable>;

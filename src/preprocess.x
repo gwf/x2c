@@ -10,6 +10,7 @@
 */
 #pragma once
 #include "compiler/compiler.x"
+#include "ast.x"
 #include <ctype.h>
 
 /* conditional arms
@@ -115,22 +116,21 @@ int Compiler.preproc_branch_state(int state) => state == 1 ? 2 : 0;
 
     Spaces and comments remain trivia rather than becoming AST nodes.
 */
-List Compiler.leading_preproc(Compiler c) {
-  List noncode = %();
-  Token base = c.tokenizer.tokens, token = c.token;
-  while (--token >= base) {
-    if (token.type == <preproc>)
-      noncode = cons(%( preproc $(token.text) ), noncode);
-    else if (token.type != <space> && token.type != <comment>) break;
-  }
-  return noncode;
-}
+List Compiler.leading_preproc(Compiler c) => _leading_preproc(c, 0);
+
+/** Returns preceding directives with source-mapped include locations.
+    Analysis callers use `leading_preproc` for unwrapped directive nodes.
+    Source includes reuse the ordinary `at` origin through C emission.
+*/
+List Compiler.located_preproc(Compiler c) =>
+  _leading_preproc(c, c.source_map);
 
 /** Records object-like `#define` names and removes names after `#undef`.
     Source storage determines visibility independently of directives.
 */
 void Compiler.note_preprocessor_macros(Compiler c, List directives) {
-  foreach (List directive in directives) c.note_object_macro(directive.cadr());
+  foreach (List directive in directives)
+    c.note_object_macro(Ast.without_origin(directive).cadr());
 }
 
 /** Records the name of the `#define` line `content` so a bare atom spelled
@@ -199,6 +199,22 @@ List Compiler.preproc_within_arms(List arms, List items) {
   foreach (List item in items) out.push(item);
   for (unsigned i = arms.len(); i; i--) out.push(%(preproc "#endif"));
   return out.list_free();
+}
+
+static List _leading_preproc(Compiler c, int located) {
+  List noncode = %();
+  Token base = c.tokenizer.tokens, token = c.token;
+  while (--token >= base) {
+    if (token.type == <preproc>) {
+      List directive = %(preproc $(token.text));
+      int angle = 0;
+      if (located && Compiler.preproc_include_target(token.text, angle))
+        directive = c.anchor_origin(directive, token);
+      noncode = cons(directive, noncode);
+    }
+    else if (token.type != <space> && token.type != <comment>) break;
+  }
+  return noncode;
 }
 
 // conditional branch tracking

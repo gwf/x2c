@@ -478,8 +478,8 @@ static List _read_var(Compiler c, List expr, Type type, Type target) {
     String extractor = scalar_target.var_numeric_extractor();
     if (extractor) {
       String tagsym = %"$((unsigned long) tag)";
-      List converted = %(expr ("Var") (call "Var_convert" (args
-        $expr (expr ("Symbol") $tagsym))));
+      List converted = %(expr ("Var") (call "Var_convert_at" (args
+        $expr (expr ("Symbol") $tagsym) (error-site))));
       return %(expr $target (call $extractor (args $converted)));
     }
   }
