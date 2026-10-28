@@ -338,8 +338,10 @@ for an editor's C parser.
 
 ### Language server
 
-Run `x2c lsp` from the workspace root to serve editors over stdio. The
-server uses LSP 3.17 with UTF-16 positions and full document synchronization.
+The language server is experimental and is not included by `make install`.
+Build the checkout commands with `make commands`, then use the matching
+`builds/0/x2c` compiler. Run `x2c lsp` from the workspace root to serve
+editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full document synchronization.
 One process serves one workspace and keeps the compiler frontend resident.
 It provides frontend diagnostics, definition navigation, and type hover.
 It does not report errors left to the native C compiler, such as unresolved
@@ -383,10 +385,11 @@ from VSIX**. VS Code 1.82 or newer is required. The extension starts
 `x2c lsp` and uses its standard language client for synchronization,
 diagnostics, definition navigation, hover, and cancellation.
 
-Set an absolute compiler path when it is not on `PATH`:
+Select the compiler from the checkout where you built the experimental
+server:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
 ```
 
 Selection order is an explicit `x2c.semantic.compilerPath`, executable

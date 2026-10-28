@@ -1,6 +1,6 @@
 const vscode = require("vscode");
 const path = require("path");
-const { LanguageClient, TransportKind } = require("vscode-languageclient/node");
+const { LanguageClient, TransportKind, State } = require("vscode-languageclient/node");
 const { selectCompiler, findExecutable } = require("./client");
 
 let active;
@@ -67,22 +67,29 @@ function activate(context) {
         return next(open);
       } }
     });
-    clients.set(cwd, { client, watcher });
+    const state = client.onDidChangeState(({ newState }) => {
+      if (newState === State.Running) initialOverlays = undefined;
+    });
+    clients.set(cwd, { client, watcher, state });
     try {
       await client.start();
     }
     catch (error) {
       clients.delete(cwd);
+      state.dispose();
       watcher.dispose();
-      await client.dispose();
       output.appendLine(`Cannot start x2c lsp: ${error.message}`);
+      // The client rejects stop() when startup never reached Running.
+      try { await client.dispose(); }
+      catch { /* The original startup error is already reported. */ }
     }
   }
 
   async function stop() {
     const entries = [...clients.values()];
     clients.clear();
-    await Promise.all(entries.map(async ({ client, watcher }) => {
+    await Promise.all(entries.map(async ({ client, watcher, state }) => {
+      state.dispose();
       watcher.dispose();
       await client.dispose();
     }));

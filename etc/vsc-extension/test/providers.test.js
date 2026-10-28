@@ -12,7 +12,7 @@ function setup() {
     getText: () => "int value;" };
   const header = { uri: uri("/project/header.h"), languageId: "c", version: 3,
     getText: () => "/* 🌍 */ int value;\r\n" };
-  let available = true;
+  let available = true, failStartup = false;
   const settings = { "semantic.compilerPath": "/selected/x2c",
     "semantic.arguments": ["build", "--target", "app"] };
   const event = (name) => (fn) => { handlers[name] = fn; return { dispose() {} }; };
@@ -36,25 +36,32 @@ function setup() {
       Object.assign(this, { id, name, server, options, notifications: [], started: 0, disposed: 0 });
       clients.push(this);
     }
+    onDidChangeState(handler) { this.stateHandler = handler; return { dispose() {} }; }
     async start() {
+      if (failStartup) throw new Error("server initialize failed");
+      this.stateHandler({ newState: 2 });
       this.started++;
       await this.options.middleware.didOpen(document, async () => {
         assert.equal(this.notifications[0].method, "textDocument/didOpen");
         assert.equal(this.notifications[0].params.textDocument.uri, header.uri.toString());
       });
     }
-    async dispose() { this.disposed++; }
+    async dispose() {
+      this.disposed++;
+      if (failStartup) throw new Error("Client is not running and can't be stopped");
+    }
     async sendNotification(method, params) { this.notifications.push({ method, params }); }
   }
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "extension.js"), "utf8"), {
     module, require: (name) => name === "vscode" ? vscode :
-      name === "vscode-languageclient/node" ? { LanguageClient, TransportKind: { stdio: 0 } } :
+      name === "vscode-languageclient/node" ? { LanguageClient, TransportKind: { stdio: 0 }, State: { Running: 2 } } :
       name === "./client" ? { selectCompiler: () => settings["semantic.compilerPath"],
         findExecutable: () => available ? "/selected/x2c" : null } : require(name)
   });
   return { extension: module.exports, handlers, clients, messages, vscode, document, header,
-    settings, context: { subscriptions: [] }, unavailable: () => { available = false; } };
+    settings, context: { subscriptions: [] }, unavailable: () => { available = false; },
+    failStartup: () => { failStartup = true; } };
 }
 
 test("trusted workspace starts one stdio client with compiler arguments and full overlays", async () => {
@@ -77,6 +84,9 @@ test("trusted workspace starts one stdio client with compiler arguments and full
   await s.handlers.open(s.document);
   assert.equal(s.clients.length, 1);
   assert.equal(client.notifications.length, 1, "language client owns x2c synchronization");
+  // vscode-languageclient reuses the same client object after a server crash.
+  await client.start();
+  assert.equal(client.notifications.length, 2, "restart resends unsaved dependency overlays");
   await s.handlers.change({ document: s.header });
   assert.equal(client.notifications.at(-1).params.contentChanges[0].text, s.header.getText());
   await s.handlers.save(s.header);
@@ -105,5 +115,18 @@ test("disabled and virtual documents never launch a client and missing compiler 
   const virtual = { ...s.document, uri: { scheme: "untitled" } };
   await s.handlers.open(virtual);
   assert.equal(s.clients.length, 0);
+  await s.extension.deactivate();
+});
+
+
+test("failed startup reports the original server error when client disposal also rejects", async () => {
+  const s = setup();
+  s.vscode.workspace.isTrusted = true;
+  s.failStartup();
+  await s.extension.activate(s.context);
+  assert.equal(s.messages.length, 1);
+  assert.match(s.messages[0], /server initialize failed/);
+  assert.equal(s.clients[0].disposed, 1);
+  assert.equal(s.clients[0].options.synchronize.fileEvents.disposed, true);
   await s.extension.deactivate();
 });

@@ -32,11 +32,12 @@ not publish a Marketplace release.
 ## Compiler diagnostics, definitions, and hover
 
 See the book's [editor setup and configuration](https://x2c-lang.dev/docs/reference/cli.html#vs-code-diagnostics-definitions-and-hover).
-A current compiler on `PATH` or executable `./x2c` in the trusted workspace
-works without a path setting. To choose an installed compiler explicitly:
+The language server is experimental and is not included by `make install`.
+Run `make commands` in the compiler checkout, then select its matching
+compiler:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
 ```
 
 VS Code 1.82 or newer is required. The extension starts `x2c lsp` over

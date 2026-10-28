@@ -3,7 +3,10 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { SemanticService, byteOffset } = require("../../../etc/vsc-extension/semantic");
+const { execFile } = require("node:child_process");
+const { promisify } = require("node:util");
+const execute = promisify(execFile);
+const byteOffset = (text, offset) => Buffer.byteLength(text.slice(0, offset), "utf8");
 
 const prefix = process.env.X2C_EDITOR_COMPILER ? ["editor"] : [];
 const worker = process.env.X2C_EDITOR_COMPILER || process.env.X2C_EDITOR_WORKER ||
@@ -15,10 +18,28 @@ async function workspace(t) {
   return root;
 }
 
-function configured(t, root, args) {
-  const service = new SemanticService({ worker, prefix, cwd: root, args });
-  t.after(() => service.dispose());
-  return service;
+function configured(_t, root, args) {
+  const documents = new Map();
+  return {
+    update(file, text, version, dirty = true) { documents.set(file, { text, dirty }); },
+    async analyze(file, kind = "diagnostics", offset = 0) {
+      const directory = await fs.mkdtemp(path.join(os.tmpdir(), "x2c-editor-request-"));
+      const response = path.join(directory, "response.json");
+      const argv = [...prefix, response, file, kind, String(offset), String(documents.size)];
+      try {
+        let index = 0;
+        for (const [logical, { text, dirty }] of documents) {
+          const snapshot = path.join(directory, `${index++}.source`);
+          await fs.writeFile(snapshot, text);
+          argv.push(logical, snapshot, dirty ? "1" : "0");
+        }
+        await execute(worker, [...argv, "--", ...args], { cwd: root });
+        return JSON.parse(await fs.readFile(response, "utf8"));
+      }
+      catch (error) { return { error: error.stderr || error.message }; }
+      finally { await fs.rm(directory, { recursive: true, force: true }); }
+    }
+  };
 }
 
 test("native worker resolves lexical definitions and hover from unsaved text", async (t) => {
