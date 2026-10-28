@@ -804,11 +804,9 @@ programs. The command is experimental and available in checkout builds;
 nearest `x2c.toml`, or the current directory. Discovery selects `*_test.x`, `test_*.x`, and `.x` files
 inside `tests/`, excluding `.x2c-build/`.
 
-Use `--filter SUBSTRING`, `--list`, and `--quiet` to select or inspect tests.
-Filters can repeat. `-j N` runs up to N files concurrently and prints each
-file's captured output in discovery order. `--manifest FILE` and
-`--target NAME` select the project settings. The selected target's include
-and package directories are forwarded to each build. Each file runs through
+The selected target's include and package directories are forwarded to
+each build. Concurrent runs print each file's captured output in discovery
+order. Each file runs through
 `x2c script`, so local `.x` includes compile as helpers. The script cache
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.

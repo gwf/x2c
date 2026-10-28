@@ -8,8 +8,9 @@
 #include "json.x"
 #include "args.x"
 
-meta List _derive_methods(Type type, List kinds,
-  Macro map, Macro json, Macro equal, Macro repr, Macro args, Macro row) {
+meta List _derive_methods(
+  Type type, List kinds, Macro map, Macro json, Macro equal, Macro repr,
+  Macro args, Macro row) {
   Array values = [];
   foreach (Code kind in kinds) values.push(Code.value(kind));
   kinds = values.list_free();
@@ -51,11 +52,13 @@ meta List _derive_fields(Type type, Symbol kind) {
     Symbol category = _derive_field_kind(field.cadr());
     if (category == <pointer>)
       x2c_diagnostic_fail(
-        %"derive: field '$(field.car())' of $(type.car()) has pointer type $(field.cadr().repr())", %());
+        %"derive: field '$(field.car())' of $(type.car()) has pointer type "
+          + field.cadr().repr(), %());
     if ((kind == <args> && (category == <value> || category == <struct>)) ||
         (kind == <row> && category == <struct>))
       x2c_diagnostic_fail(
-        %"derive: field '$(field.car())' of $(type.car()) is not supported by <$(kind)>", %());
+        %"derive: field '$(field.car())' of $(type.car()) "
+          + %"is not supported by <$(kind)>", %());
     result.push($( @field, category ));
   }
   return result.list_free();
@@ -66,7 +69,8 @@ meta List _derive_puts(Type type, List v, List out) {
   foreach (List field in _derive_fields(type, <map>)) {
     String key = field.car();
     List f = x2c_ident(key);
-    if (field.caddr() == <struct>) puts.push($!{ $out[$key] = $v.$f.to_map(); });
+    if (field.caddr() == <struct>)
+      puts.push($!{ $out[$key] = $v.$f.to_map(); });
     else puts.push($!{ $out[$key] = $v.$f; });
   }
   return puts.list_free();
@@ -93,7 +97,8 @@ meta List _derive_gets(Type type, List v, List m) {
   foreach (List field in _derive_fields(type, <map>)) {
     String key = field.car();
     List name = x2c_ident(key);
-    gets.push($!{
+    gets.push(
+      $!{
       if (!($key in $m))
         raise %(bad-arg (operation "from_map")
           (field $($(key))) (reason "missing"));
@@ -247,7 +252,6 @@ static macro Unit $derive.row(Type $type) {
     return $value;
   }
 }
-
 
 /** Generates the requested record methods. Kinds are Symbol literals:
     `<map>`, `<json>`, `<equal>`, `<repr>`, `<args>`, and `<row>`.

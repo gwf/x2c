@@ -95,7 +95,8 @@ int Test.main(int argc, char **argv) {
     }
   }
   if (!list)
-    Stdout.printf("%d passed, %d failed, %d skipped\n", passed, failed, skipped);
+    Stdout.printf(
+      "%d passed, %d failed, %d skipped\n", passed, failed, skipped);
   return failed ? 1 : filters && !matched ? 2 : 0;
 }
 
@@ -120,7 +121,8 @@ meta List test_register(List function) {
   List target = x2c_ident(name);
   String file = x2c_invocation_file();
   int line = x2c_invocation_line();
-  x2c_place(%(unit-init), $!{
+  x2c_place(
+    %(unit-init), $!{
     Test.register($name, $target, $file, $line);
   });
   return $(function);
@@ -131,14 +133,15 @@ macro Decorator $test(Unit $function) { @test_register($function) }
 
 /** Records a failed condition without stopping the test. */
 macro Stmt $expect(Expr $condition) {
-  Test.check($condition, $_macros_source($condition),
+  Test.check(
+    $condition, $_macros_source($condition),
     $x2c_invocation_file(), $x2c_invocation_line());
 }
 
 /** Evaluates each value once and compares them with `Var.equal`. */
 macro Stmt $expect_eq(Expr $actual, Expr $expected) {
-  Test.compare($actual, $expected,
-    $x2c_invocation_file(), $x2c_invocation_line());
+  Test.compare(
+    $actual, $expected, $x2c_invocation_file(), $x2c_invocation_line());
 }
 
 /** Records a failure unless the statement raises the requested cause. */
@@ -149,10 +152,11 @@ macro Stmt $expect_raises(Expr $cause, Stmt $statement) {
     int $raised = 0;
     try $statement
     catch %(?caught *detail): { $actual = caught; $raised = 1; }
-    Test.check($raised, "Error to be raised",
+    Test.check(
+      $raised, "Error to be raised",
       $x2c_invocation_file(), $x2c_invocation_line());
-    if ($raised) Test.compare($actual, $expected,
-      $x2c_invocation_file(), $x2c_invocation_line());
+    if ($raised) Test.compare(
+      $actual, $expected, $x2c_invocation_file(), $x2c_invocation_line());
   }
 }
 
