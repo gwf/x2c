@@ -917,12 +917,12 @@ Public functions:
 `double.str`, `double.repr`, `ulong.var`, `long.str`, `long.repr`, `long.var`,
 `Var.is_row`, `Var.string_payload`, `Var.array_payload`, `Var.block_payload`,
 `Var.buffer_payload`, `Var.bytes_payload`, `Var.file_payload`,
-`Var.iter_payload`, `Var.list_payload`, `Var.map_payload`,
-`Var.compact_symbol`, `Var.symbol`, `Var.char`, `Var.uchar`, `Var.short`,
-`Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`, `Var.long`, `Var.ulong`,
-`Var.long_long`, `Var.ulong_long`, `Var.long_double`, `Var.float`,
-`Var.double`, `x2c_initialize`, `x2c_initialize_protocols`,
-`x2c_normalize_index`, `x2c_slice_bound`, `x2c_normalize_slice`
+`Var.iter_payload`, `Var.list_payload`, `Var.map_payload`, `Var.symbol`,
+`Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
+`Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
+`Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize`,
+`x2c_initialize_protocols`, `x2c_normalize_index`, `x2c_slice_bound`,
+`x2c_normalize_slice`
 
 ### [lib/compiler-meta.x](../lib/compiler-meta.x)
 

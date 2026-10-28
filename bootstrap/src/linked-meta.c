@@ -16589,7 +16589,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13731 = List_var(_13730);
   _13732 = String_new("src/cleanup/statics.x");
   _13733 = String_var(_13732);
-  _13734 = String_new("91aaa92a");
+  _13734 = String_new("2331f5ff");
   _13735 = String_var(_13734);
   _13736 = cons(_13735, NULL);
   _13737 = cons(_13733, _13736);
@@ -20062,7 +20062,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_33(void
   _17183 = List_var(_17182);
   _17184 = String_new("src/transform/traversal.x");
   _17185 = String_var(_17184);
-  _17186 = String_new("533bbacd");
+  _17186 = String_new("902ec7b7");
   _17187 = String_var(_17186);
   _17188 = cons(_17187, NULL);
   _17189 = cons(_17185, _17188);

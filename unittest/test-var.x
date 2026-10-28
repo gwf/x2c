@@ -1019,12 +1019,13 @@ static void var_wide_value_semantics(void) {
   EXPECT_TRUE(wide_infinity.compare(wide_nan) < 0);
   EXPECT_TRUE(wide_nan.compare(first_float) > 0);
 
-  Symbol large_symbol = (Symbol) (1ul << 55);
-  Var boxed_symbol = large_symbol, empty_symbol = (Symbol) 0;
-  Symbol restored_symbol = boxed_symbol, restored_empty = empty_symbol;
+  Symbol large_symbol = (Symbol) ((1ul << 51) - 1);
+  Var symbol_value = large_symbol, empty_symbol = (Symbol) 0;
+  Symbol restored_symbol = symbol_value, restored_empty = empty_symbol;
   EXPECT_TRUE(restored_symbol == large_symbol);
   EXPECT_TRUE(restored_empty == (Symbol) 0);
-  EXPECT_TRUE(Macro_case_symbol(boxed_symbol) == (Symbol) 0);
+  EXPECT_TRUE(Macro_case_symbol(symbol_value) == large_symbol);
+  EXPECT_TRUE(Macro_case_symbol(first) == (Symbol) 0);
 
   Map map = {};
   map[first] = 73;
