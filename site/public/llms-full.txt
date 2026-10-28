@@ -6388,8 +6388,8 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
 A bodied `meta` function the file spells prints a `meta` row after the
 definitions, `(meta (name NAME) (line LINE) (comptime N))`, where
 `N` is 1 when the function reaches a compiler operation and so has
-no runtime form. Such a function is not part of the translated unit and
-has no `function` row. `tools/gen-linked-meta.sh` and
+no runtime form. A compile-time-only function is not part of the
+translated unit and has no `function` row. `tools/gen-linked-meta.sh` and
 `tools/gen-meta-queries.sh` select the compiler's linked copies and the
 helper's forwarders from these rows.
 
