@@ -458,3 +458,27 @@ Existing retained function and initializer rows already restore their
 construction stack; bounded Unit probes report both invocation and definition
 without adding metadata. The separate dump extension remains private pending
 prototype measurements and an adoption decision.
+
+
+### Phase 3: return check; dump prototype remains private
+
+Implemented the void-expression return diagnostic using resolved source and
+return types, including typedef aliases to void. Ordinary and expression-body
+parsers retain the expression's token so the error points at the expression.
+The retained `p-voidreturn.x` probe now reports line 2, column 26 before native
+compilation: `type: cannot return a void expression from a function returning
+(int)`.
+
+The ordinary expression and Function-decorator dump implementation is a
+private checkpoint. It is not submitted: retained Unit expansions replay a
+collected declaration production without calling the expansion binder again,
+and nested Unit boundaries were flattened. A root-only frame would therefore
+miss nested results. Existing function/initializer construction stacks remain
+sufficient for phase 2 diagnostics.
+
+Gary authorized an inspection-only metadata prototype and measurements before
+adoption. The candidate preserves expansion boundaries only while dumping;
+ordinary builds should retain existing records and allocations. Its build-time
+cost is not yet measured. Prototype changes and generated development artifacts
+stay private until correctness, output equality, and comparable measurements
+support a separate adoption decision. The full dump deliverable remains open.

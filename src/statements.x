@@ -65,6 +65,12 @@ static macro Stmt $fail.statements_catch_pattern(Expr $c, Expr $site) =>
     <parse>, "catch filter requires a %() pattern literal",
     $site, %("use catch %(code (key pattern)...):"));
 
+static macro Stmt $fail.statements_return_void(
+  Expr $c, Expr $site, Expr $type) =>
+  $c.report_error(
+    <type>, %"cannot return a void expression from a function returning $(
+      $type.repr())", $site, NULL);
+
 // conditionals and loops
 
 /** Parses the clause `kind` of a source `if`, `while`, `do`, `for`,
@@ -223,6 +229,9 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
 List Compiler.finish_return_statement(Compiler c, List expr) {
   if (!expr) return %(return);
   List resolved = c.resolve_expression(expr, c.token);
+  if (c.sym.resolve_key(resolved.cadr()) == %(void) &&
+      c.sym.resolve_key(c.return_type) != %(void))
+    $fail.statements_return_void(c, c.token, c.return_type);
   c.check_explicit_converter(resolved, c.return_type, 0);
   return %(return $(c.return_type) $resolved);
 }
@@ -591,9 +600,12 @@ static List _return_statement(Compiler c) {
     c.next();
     return c.finish_return_statement(NULL);
   }
+  Token origin = c.token;
   List expr = c.parse_expression();
   c.expect(<;>);
-  return c.finish_return_statement(expr);
+  with (c.token = origin) {
+    return c.finish_return_statement(expr);
+  }
 }
 
 static List _case_statement(Compiler c) {
