@@ -30,6 +30,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/exception.x`](exception.md) | transfer frames for x2c `Error` unwinding and cleanup. |
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
 | [`lib/func/func.x`](func.md) | generic native function binding. |
+| [`lib/http.x`](http.md) | blocking HTTP/1.1 routing and worker-pool service. |
 | [`lib/iter.x`](iter.md) | single-pass pull iterators. |
 | [`lib/json.x`](json.md) | JSON text to and from ordinary x2c values. |
 | [`lib/lib.x`](lib.md) | disjoint sets with union-find. |
@@ -43,6 +44,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
+| [`lib/net.x`](net.md) | blocking TCP sockets backed by File streams. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/pool/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
@@ -71,9 +73,11 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
 - [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
+- [`lib/http.x`](http.md) - HTTP requests, responses, routing, and a blocking worker-pool server; explicitly include `http.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `var/var.x`; include `meta.x` explicitly where `meta` functions are written.
+- [`lib/net.x`](net.md) - Blocking TCP sockets and listeners; explicitly include `net.x` to use them.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.

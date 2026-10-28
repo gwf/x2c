@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 69
+- Runtime modules: 71
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -1048,6 +1048,20 @@ Public functions:
 `String.open`, `File.open`, `File.fdopen`, `File.popen`, `File.reopen`,
 `File.path_error`, `File.initialize`
 
+### [lib/http.x](../lib/http.x)
+
+blocking HTTP/1.1 routing and worker-pool service.
+
+Public functions:
+
+`Http.fail`, `HttpRequest.read`, `HttpRequest.json`, `HttpResponse.new`,
+`HttpResponse.status`, `HttpResponse.header`, `HttpResponse.text`,
+`HttpResponse.json`, `HttpResponse.bytes`, `HttpResponse.write`, `Router.new`,
+`Router.route`, `Router.get`, `Router.post`, `Router.put`, `Router.delete`,
+`Router.files`, `Router.dispatch`, `HttpServer.new`, `HttpServer.port`,
+`HttpServer.serve`, `HttpServer.start`, `HttpServer.stop`, `HttpServer.close`,
+`HttpRequest.init`, `HttpResponse.init`, `Router.init`, `HttpServer.init`
+
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
 shared raw integer arithmetic.
@@ -1155,6 +1169,17 @@ Public functions:
 
 `_scalar_tag`, `_scalar_key`, `_scalar_access_units`, `native_scalar_types`,
 `native_scalar_access`
+
+### [lib/net.x](../lib/net.x)
+
+blocking TCP sockets backed by File streams.
+
+Public functions:
+
+`Listener.cleanup`, `Socket.cleanup`, `Listener.bind`, `Listener.accept`,
+`x2c_net_accept_fd`, `Listener.port`, `Listener.stop`, `Listener.close`,
+`Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
+`Socket.shutdown_write`, `Socket.peer`, `Socket.close`
 
 ### [lib/path.x](../lib/path.x)
 
