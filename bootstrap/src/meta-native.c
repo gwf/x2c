@@ -4671,6 +4671,8 @@ static int f5_calls____code_result(Compiler c, Var value){
   return Ast_try_binding(Var_list_payload(value), NULL, NULL);
 }
 
+int Compiler_error_count(Compiler);
+void Compiler_report_problem(Compiler, Symbol, String, Token, List);
 static Var f5_calls____run_meta(Compiler c, List expression, String name, List arguments, Token site, int slot){
   Var volatile value;  f5_calls___meta_call_form = NULL; {
     ExceptionFrame _x2c_gensym_exception_frame_0;  static MatchCaptureSite _x2c_gensym_macro_arms_0[3];  Var _x2c_gensym_macro_patterns_0[3];  static ErrorCatchSite _x2c_gensym_macro_site_0 ={
@@ -4683,13 +4685,13 @@ static Var f5_calls____run_meta(Compiler c, List expression, String name, List a
       x2c_exception_landed(& _x2c_gensym_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
         int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);  x2c_error_catch_detach(_x2c_gensym_error_handler_0);  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);  if(_x2c_gensym_macro_selected_0 == 0){
           {
-            value =((void) 0, Void);  if(slot) Compiler_report_error(c, 27335838, _1764, site, NULL);
+            value =((void) 0, Void);  if(slot ||(c -> in_pattern && ! c -> meta_body)) Compiler_report_error(c, 927167433253220, _1764, site, NULL);  else if(! c -> meta_body && ! Compiler_error_count(c)) Compiler_report_problem(c, 927167433253220, _1764, site, NULL);
           }
 
         }
         if(_x2c_gensym_macro_selected_0 == 1){
           Var volatile category;  category = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0); {
-            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 133};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____run_meta",.line = 136};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
           }
 
         }
@@ -4848,7 +4850,7 @@ static Var f5_calls____meta_function(Compiler c, String name, Token site){
   if(! Compiler_meta_binding(c, name, &(function)) && _bind_project_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(! Compiler_meta_binding(c, name, &(function)) && Compiler_bind_native_meta(c, name)) Compiler_meta_binding(c, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 239};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 242};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1805, site, cons(String_var(String_join(NULL, cons(String_var(_1810), cons(String_var(name), NULL)))), NULL));

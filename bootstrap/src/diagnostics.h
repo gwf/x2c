@@ -26,6 +26,7 @@ typedef struct DiagnosticsHold{
 DiagnosticsHold;
 
 #include "type.h"
+#include "ast-rewrite.h"
 #include "json.h"
 #include "report.h"
 #include <errno.h>
@@ -52,6 +53,12 @@ void Compiler_report_problem(Compiler c, Symbol code, String message, Token toke
 void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
 
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);
+
+String Compiler_macro_expansion_note(Compiler c);
+
+Var Diagnostics_macro_expansion_input(List input);
+
+String Diagnostics_macro_definition_note(List definition);
 
 List Compiler_origin_location(Compiler compiler, int occurrence);
 

@@ -10,6 +10,8 @@
 #include "ast-rewrite.h"
 #include "grammar.h"
 #include "symbolset.h"
+void Ast_print_dump(List ast);
+
 Symbol Symbol_compound_operator(Symbol op);
 
 Symbol Symbol_compound_assignment(Symbol op);
@@ -57,6 +59,8 @@ String Ast_binding_spelling(List binding);
 int Ast_try_binding(List binding, int * identity, String * spelling);
 
 Ast Ast_without_origin(Ast ast);
+
+Var Ast_source_unwrap(Var value);
 
 int Symbol_changes_left_operand(Symbol op);
 

@@ -155,6 +155,7 @@ typedef struct Compiler{
   GenNames names;
   Array origins;
   int origin, source_map;
+  int dump_expansions;
   SourceView sources;
   int source_facts, source_primary;
   Array source_occurrences;

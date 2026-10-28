@@ -156,8 +156,6 @@ static List _emit_prepared(Compiler c, String stamp, String stem, String suffix,
 
 static void f8_emission____name_provider_bindings(Compiler c, String provider, Array units, Map dependencies);
 
-static String f8_emission____diagnostic_line(List entry);
-
 static void f8_emission____isolate(Compiler c, struct Compiler * saved, struct GenNames * names, String stem);
 
 static List f8_emission____lower(Compiler c, Array units, String stamp, String suffix);
@@ -1209,7 +1207,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _935 = String_new("a struct");
   _936 = String_new("a struct or union result has no compile-time value; return its " "fields as a List or Map");
   _937 = String_new("an address result has no compile-time value; return data built " "from the pointed-to values");
-  _938 = String_new("a parameter or the result has no Var form, such as C's bool; use " "int, a String, a Symbol, or a List");
+  _938 = String_new("the function is not in the unit's staged group");
   _939 = String_new("this function cannot run at compile time");
   _940 = String_new("function: ");
   _941 = String_new("reason: ");
@@ -2657,7 +2655,7 @@ static void f9_selection____check_runtime_meta_calls(Compiler c, Var root){
                 {
                   Var _x2c_gensym_match_value_5 = origin;
                   {
-                    int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-group/selection.x",.function = "f9_selection____check_runtime_meta_calls",.line = 150}; & _x2c_gensym_error_site_0; })));
+                    int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-group/selection.x",.function = "f9_selection____check_runtime_meta_calls",.line = 149}; & _x2c_gensym_error_site_0; })));
                     {
                       {
                         int * _x2c_gensym_macro_address_0 = & c -> origin;
@@ -3268,6 +3266,8 @@ List Compiler_generate_protocol_adapters(Compiler, List);
 
 List Diagnostics_entries(Diagnostics);
 
+String Compiler_meta_diagnostic_line(List entry);
+
 void SymTxn_rollback(SymTxn *);
 
 #include "error.h"
@@ -3326,7 +3326,7 @@ static List _emit_prepared(Compiler c, String stamp, String stem, String suffix,
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));
           {
             List entries = Diagnostics_entries(c -> diagnostics);
-            (* failure) = List_truth(entries) ? f8_emission____diagnostic_line(Var_list_payload(List_car(entries))) : List_repr(cons(kind, detail));
+            (* failure) = List_truth(entries) ? Compiler_meta_diagnostic_line(Var_list_payload(List_car(entries))) : List_repr(cons(kind, detail));
             code = NULL;
           }
 
@@ -3395,7 +3395,8 @@ static void f8_emission____name_provider_bindings(Compiler c, String provider, A
 
 }
 
-static String f8_emission____diagnostic_line(List entry){
+String Compiler_meta_diagnostic_line(List entry){
+  if(! _init_guard_) _file_init_();
   String line = List_repr(entry);
   {
     List _x2c_gensym_match_expr_29 = entry;

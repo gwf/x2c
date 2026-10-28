@@ -36,9 +36,7 @@ typedef struct Translation{
 }
 Translation;
 
-static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
-
-static Var _11;
+static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -121,12 +119,6 @@ static void _report_diagnostics(Compiler c);
 
 static int _inspect_transformed(Compiler c, List ast, Symbol dump);
 
-static void _print_ast(List ast);
-
-static List _renumbered_bindings(List ast);
-
-static String _node_repr(List node);
-
 static String _output_dir(Translation * t, String input);
 
 static void _report(Translation * t, unsigned long started_at);
@@ -152,13 +144,6 @@ _x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
-typedef struct _x2c_gensym_defer_env_3{
-  const void * _x2c_gensym_defer_capture_3;
-}
-_x2c_gensym_defer_env_3;
-
-static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
-
 #include "exception.h"
 
 
@@ -179,17 +164,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _8 = String_new("}");
   _9 = String_new("import");
   _10 = String_new("could not start a translation worker");
-  _11 = Symbol_var(4928588686);
-  _12 = String_new("(macrodef <macro ");
-  _13 = String_new(">)");
-  _14 = String_new(".c");
-  _15 = String_new(".h");
-  _16 = String_new("file");
-  _17 = String_new("files");
-  _18 = String_new("Translated ");
-  _19 = String_new(" x2c ");
-  _20 = String_new(" to ");
-  _21 = String_new(" in ");
+  _11 = String_new(".c");
+  _12 = String_new(".h");
+  _13 = String_new("file");
+  _14 = String_new("files");
+  _15 = String_new("Translated ");
+  _16 = String_new(" x2c ");
+  _17 = String_new(" to ");
+  _18 = String_new(" in ");
 }
 
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed)){
@@ -788,6 +770,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
         }
 
       }
+      c -> dump_expansions = dump == 405722918124454;
       int collected = ParsedUnit_collect(&(unit), frontend);
       _report_diagnostics(c);
       if(! collected) exit(1);
@@ -836,14 +819,17 @@ void Compiler_dump_cache(Compiler);
 
 Map Sym_current_symbols(Sym);
 
+void Ast_print_dump(List);
+
 static int _inspect_parsed(ParsedUnit * unit, String filename, Symbol dump){
   Compiler c =(* unit).compiler;
   switch(dump){
+    case 405722918124454 : break;
     case 328584264751626 : Compiler_dump_cache(c);
     break;
     case 42507336486 : Compiler_dump_symbol_table(c, Sym_current_symbols(c -> sym));
     break;
-    case 320883068136 : _print_ast((* unit).ast);
+    case 320883068136 : Ast_print_dump((* unit).ast);
     break;
     case 7478869146 : _print_conformance(c, filename, (* unit).globals);
     break;
@@ -894,7 +880,7 @@ static void _report_diagnostics(Compiler c){
 
 static int _inspect_transformed(Compiler c, List ast, Symbol dump){
   switch(dump){
-    case 1447057375073126 : _print_ast(ast);
+    case 1447057375073126 : Ast_print_dump(ast);
     break;
     case 10268258347430 : Compiler_dump_definitions(c, ast);
     break;
@@ -903,106 +889,6 @@ static int _inspect_transformed(Compiler c, List ast, Symbol dump){
     default: return 0;
   }
   return 1;
-}
-
-static void _print_ast(List ast){
-  {
-    List node;
-    List _x2c_gensym_macro_object_9 = _renumbered_bindings(ast);
-    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
-    Var _x2c_gensym_macro_cursor_output_8;
-    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_8))){
-      node = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
-      printf("\n%s\n", _node_repr(node));
-    }
-
-  }
-
-}
-
-Var Ast_replace_nodes(Var, Map);
-
-static List _renumbered_bindings(List ast){
-  Map numbers = Map_new(), replaced = Map_new();
-  Array pending = Array_update_n(Array_new(), 1, List_var(ast));
-  const Array _x2c_gensym_macro_acquired_0 = pending;
-  {
-    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
-    {
-      while(Array_len(pending)){
-        Var node = Array_take_last(pending);
-        if(! Var_is_row(node, 9, 7, 4) || Var_is_nil(node)) continue;
-        {
-          List _x2c_gensym_match_expr_0 = Var_list(node);
-          {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_1 ->car, 1) && !(_x2c_gensym_match_at_2 = _x2c_gensym_match_at_1 ->cdr)){
-            Var identity;
-            identity = x2c_match_value_0;
-            Var spelling;
-            spelling = x2c_match_value_1;
-            {
-              Var number;
-              if(! Map_try_get(numbers, identity, &(number))){
-                number = int_var((int) Map_len(numbers) + 1);
-                Map_setindex(numbers, identity, number);
-              }
-              Map_setindex(replaced, Var_new(3683441, (void *) Var_list(node)), List_var(cons(_11, cons(number, cons(spelling, NULL)))));
-              continue;
-            }
-
-          }
-
-        }
-
-      }
-      {
-        Var child;
-        List _x2c_gensym_macro_object_10 = List_reverse(Var_list(node));
-        List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;
-        Var _x2c_gensym_macro_cursor_output_9;
-        while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_9))){
-          child = _x2c_gensym_macro_cursor_output_9;
-          Array_push(pending, child);
-        }
-
-      }
-
-    }
-    {
-      List _x2c_gensym_return_value_1 = Var_list_payload(Ast_replace_nodes(List_var(ast), replaced));
-      {
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-        return _x2c_gensym_return_value_1;
-      }
-
-    }
-
-  }
-  x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-}
-}
-
-static String _node_repr(List node){
-  {
-    List _x2c_gensym_match_expr_1 = node;
-    {List _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6; Var x2c_match_value_0; if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224498832502366540ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_expr_1 ->cdr) &&(Var_is(_x2c_gensym_match_at_3 -> car, 806120) &&(_x2c_gensym_match_at_4 = Var_list_payload(_x2c_gensym_match_at_3 -> car), 1)) && _x2c_gensym_match_at_4 && _x2c_gensym_match_at_4 ->car.u64 == 9224497936762538826ULL &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_5 ->car, 1) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_5 ->cdr)){
-      Var name;
-      name = x2c_match_value_0;
-      return String_join(NULL, cons(String_var(_12), cons(String_var(Var_str(name)), cons(String_var(_13), NULL))));
-    }
-
-  }
-
-}
-return List_repr(node);
 }
 
 static String _output_dir(Translation * t, String input){
@@ -1016,15 +902,15 @@ static void _report(Translation * t, unsigned long started_at){
   unsigned long long bytes = 0;
   {
     String input;
-    List _x2c_gensym_macro_object_11 =(* t).request -> inputs;
-    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
-    Var _x2c_gensym_macro_cursor_output_10;
-    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_10))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_10);
+    List _x2c_gensym_macro_object_9 =(* t).request -> inputs;
+    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_8))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         String stem = Path_stem(input);
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_14), NULL))))));
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_15), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_11), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_12), NULL))))));
       }
 
     }
@@ -1032,8 +918,8 @@ static void _report(Translation * t, unsigned long started_at){
   }
   String duration = report_duration(report_now_us() - started_at);
   int n =(* t).total;
-  String noun = n == 1 ? _16 : _17;
-  report_line(42217975014, String_join(NULL, cons(String_var(_18), cons(String_var(int_str(n)), cons(String_var(_19), cons(String_var(noun), cons(String_var(_20), cons(String_var(out_dir), cons(String_var(_21), cons(String_var(duration), NULL))))))))));
+  String noun = n == 1 ? _13 : _14;
+  report_line(42217975014, String_join(NULL, cons(String_var(_15), cons(String_var(int_str(n)), cons(String_var(_16), cons(String_var(noun), cons(String_var(_17), cons(String_var(out_dir), cons(String_var(_18), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 
@@ -1050,10 +936,5 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2)));
-}
-
-static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
-  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 

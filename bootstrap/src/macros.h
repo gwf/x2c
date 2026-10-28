@@ -61,6 +61,8 @@ List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List argument
 
 Token Compiler_macro_invocation_site(Compiler c, Var site);
 
+void Compiler_print_macro_expansion(Compiler c, List frame, List result);
+
 typedef struct f8_rewrites___Effects{
   int bindings, names, origins, pending, placements, diagnostics;
 }
