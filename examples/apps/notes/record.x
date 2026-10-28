@@ -43,9 +43,10 @@ Map Note.to_map(Note note) {
 meta static List note_read(void) {
   Array statements = [];
   foreach (List row in note_fields()) {
-    String key = row[0].str(), type = row[1].str();
+    String key = row[0].str();
     List name = x2c_ident(key);
-    if (type == "String") {
+    match (row) {
+    case %(? String ?): {
       String reason = %"$key must be text";
       statements.push($!{
         if (values[$(key)] is not void && values[$(key)] is not <string>)
@@ -56,7 +57,7 @@ meta static List note_read(void) {
         if (!note.$(name)) raise %(note-error (reason "title is required"));
       });
     }
-    else if (type == "Array") statements.push($!{
+    case %(? Array ?): statements.push($!{
       if (values[$(key)] is not void && values[$(key)] is not <array>)
         raise %(note-error (reason "tags must be an array"));
       note.$(name) = values[$(key)] is void ? [] : values[$(key)];
@@ -64,11 +65,12 @@ meta static List note_read(void) {
         if (tag is not <string> || !tag.string())
           raise %(note-error (reason "each tag must be nonempty text"));
     });
-    else statements.push($!{
+    case %(? long ?): statements.push($!{
       if (values[$(key)] is not void && !values[$(key)].is_integer())
         raise %(note-error (reason "timestamps must be integers"));
       note.$(name) = values[$(key)] is void ? 0 : values[$(key)];
     });
+  }
   }
   List body = statements.list_free();
   return $!{ @body };
