@@ -88,34 +88,13 @@ static CliRequest _configure(Query &q, int argc, char **argv) {
   if (request.command != <build> && request.command != <translate>)
     _fail("x2c editor: use a build or translate configuration\n");
   if (!request.inputs && request.command == <build>)
-    request = _project_target(request, q.source);
+    request = ProjectBuild.owning_target(request, q.source);
+  if (!request) exit(2);
   request.sources = q.sources;
   if (q.sources.is_changed(q.source) && _native_cpp(request))
     _fail(unsaved_cpp);
   request.source_facts = 1;
   return request;
-}
-
-/* With a project manifest, the request becomes the one selected target
-   whose inputs hold `source`. */
-static CliRequest _project_target(CliRequest request, String source) {
-  String manifest = request.project_manifest();
-  if (!manifest) return request;
-  request.manifest = manifest;
-  CliRequest selected = NULL;
-  for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next)
-    foreach (String input, node.request.inputs) {
-      if (Path.absolute(input) != source) continue;
-      if (selected && selected != node.request)
-        _fail("x2c editor: source belongs to multiple selected targets\n");
-      selected = node.request;
-    }
-  if (!selected)
-    _fail(
-      "x2c editor: this document is not a selected target input; "
-      "open its owning source for semantic results or configure "
-      "a direct translate command\n");
-  return selected;
 }
 
 /* Ends a request the adapter does not serve. */

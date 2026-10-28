@@ -3,90 +3,130 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
-const semantic = require("../semantic");
 
-test("providers preserve syntax in untrusted workspaces and use real spans when trusted", async () => {
-  const registrations = {};
-  const services = [];
-  const output = [];
-  let available = true;
-  const noop = () => ({ dispose() {} });
+function setup() {
+  const handlers = {}, clients = [], messages = [];
   const uri = (name) => ({ scheme: "file", fsPath: name, toString: () => `file://${name}` });
+  const folder = { uri: uri("/project"), name: "project", index: 0 };
   const document = { uri: uri("/project/app.x"), languageId: "x2c", version: 7,
-    isDirty: true, getText: () => "/* \ud83c\udf0d */ int item;", offsetAt: () => 13 };
-  const header = { uri: uri("/project/item.x"), languageId: "plaintext", version: 9,
-    isDirty: true, getText: () => "int item;" };
-  class FakeService {
-    constructor(options) { this.options = options; this.documents = new Map(); services.push(this); }
-    update(file, text, version, dirty) { this.documents.set(file, { text, version, dirty }); }
-    close(file) { this.documents.delete(file); }
-    dispose() {}
-    async analyze(file, kind, offset) {
-      this.last = { file, kind, offset };
-      return { definition: { file: header.uri.fsPath, start: 4, end: 8 },
-        hover: { file, start: 15, end: 19, text: "int item;" },
-        texts: new Map([[file, document.getText()], [header.uri.fsPath, header.getText()]]) };
-    }
-  }
+    getText: () => "int value;" };
+  const header = { uri: uri("/project/header.h"), languageId: "c", version: 3,
+    getText: () => "/* 🌍 */ int value;\r\n" };
+  let available = true, failStartup = false;
+  const settings = { "semantic.compilerPath": "/selected/x2c",
+    "semantic.arguments": ["build", "--target", "app"] };
+  const event = (name) => (fn) => { handlers[name] = fn; return { dispose() {} }; };
   const vscode = {
-    workspace: { isTrusted: false, textDocuments: [document, header],
-      getConfiguration: () => ({ get: (_name, fallback) => fallback,
-        inspect: () => ({ defaultValue: "x2c-editor-worker" }) }),
-      getWorkspaceFolder: () => ({ uri: uri("/project") }),
-      onDidOpenTextDocument: noop, onDidChangeTextDocument: noop,
-      onDidSaveTextDocument: noop, onDidCloseTextDocument: noop,
-      onDidChangeConfiguration: noop, onDidGrantWorkspaceTrust: noop,
-      onDidChangeWorkspaceFolders: noop,
-      createFileSystemWatcher: () => ({ dispose() {},
-        onDidChange: noop, onDidCreate: noop, onDidDelete: noop }) },
-    languages: {
-      createDiagnosticCollection: () => ({ set() {}, clear() {}, delete() {}, dispose() {} }),
-      registerDefinitionProvider: (selector, provider) => {
-        registrations.definition = { selector, provider }; return noop();
-      },
-      registerHoverProvider: (selector, provider) => {
-        registrations.hover = { selector, provider }; return noop();
-      }
+    workspace: {
+      isTrusted: false, textDocuments: [header, document],
+      getWorkspaceFolder: () => folder,
+      getConfiguration: () => ({ get: (key, fallback) => settings[key] ?? fallback }),
+      onDidOpenTextDocument: event("open"), onDidChangeTextDocument: event("change"),
+      onDidSaveTextDocument: event("save"), onDidCloseTextDocument: event("close"),
+      onDidChangeConfiguration: event("configuration"), onDidGrantWorkspaceTrust: event("trust"),
+      onDidChangeWorkspaceFolders: event("folders"),
+      createFileSystemWatcher: (pattern) => ({ pattern, disposed: false,
+        dispose() { this.disposed = true; } })
     },
-    window: { createOutputChannel: () => ({ appendLine: (message) => output.push(message), dispose() {} }) },
-    Range: class { constructor(line, character, endLine, endCharacter) {
-      Object.assign(this, { line, character, endLine, endCharacter });
-    } },
-    Location: class { constructor(uri, range) { Object.assign(this, { uri, range }); } },
-    MarkdownString: class { appendCodeblock(text, language) { Object.assign(this, { text, language }); } },
-    Hover: class { constructor(contents, range) { Object.assign(this, { contents, range }); } },
-    Uri: { file: uri }
+    window: { createOutputChannel: () => ({ appendLine: (text) => messages.push(text), dispose() {} }) },
+    RelativePattern: class { constructor(base, pattern) { Object.assign(this, { base, pattern }); } }
   };
+  class LanguageClient {
+    constructor(id, name, server, options) {
+      Object.assign(this, { id, name, server, options, notifications: [], started: 0, disposed: 0 });
+      clients.push(this);
+    }
+    onDidChangeState(handler) { this.stateHandler = handler; return { dispose() {} }; }
+    async start() {
+      if (failStartup) throw new Error("server initialize failed");
+      this.stateHandler({ newState: 2 });
+      this.started++;
+      await this.options.middleware.didOpen(document, async () => {
+        assert.equal(this.notifications[0].method, "textDocument/didOpen");
+        assert.equal(this.notifications[0].params.textDocument.uri, header.uri.toString());
+      });
+    }
+    async dispose() {
+      this.disposed++;
+      if (failStartup) throw new Error("Client is not running and can't be stopped");
+    }
+    async sendNotification(method, params) { this.notifications.push({ method, params }); }
+  }
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "extension.js"), "utf8"), {
-    module, require: (name) => name === "vscode" ? vscode : name === "./semantic" ?
-      { ...semantic, SemanticService: FakeService,
-        findExecutable: () => available ? "/selected/x2c" : null } : require(name),
-    AbortController, setTimeout: () => 0, clearTimeout() {}
+    module, require: (name) => name === "vscode" ? vscode :
+      name === "vscode-languageclient/node" ? { LanguageClient, TransportKind: { stdio: 0 }, State: { Running: 2 } } :
+      name === "./client" ? { selectCompiler: () => settings["semantic.compilerPath"],
+        findExecutable: () => available ? "/selected/x2c" : null } : require(name)
   });
-  const context = { subscriptions: [] };
-  module.exports.activate(context);
-  const hoverProvider = registrations.hover.provider;
-  assert.equal(await hoverProvider.provideHover(document, {}), null);
-  assert.equal(services.length, 0, "untrusted workspace must not execute compiler macros");
-  assert.equal(registrations.hover.selector.scheme, "file");
-  vscode.workspace.isTrusted = true;
-  const hover = await hoverProvider.provideHover(document, {});
-  assert.equal(hover.contents.text, "int item;");
-  assert.equal(services[0].last.offset, semantic.byteOffset(document.getText(), 13));
-  assert.equal(services[0].documents.get(header.uri.fsPath).version, 9);
-  const definition = await registrations.definition.provider.provideDefinition(document, {});
-  assert.equal(definition.uri.fsPath, header.uri.fsPath);
-  assert.equal(definition.range.character, 4);
-  assert.equal(definition.range.endCharacter, 8);
-  assert.equal(services[0].options.worker, "/selected/x2c");
-  assert.deepEqual(Array.from(services[0].options.prefix), ["editor"]);
-  available = false;
-  assert.equal(await hoverProvider.provideHover(document, {}), null);
-  assert.equal(await hoverProvider.provideHover(document, {}), null);
-  assert.equal(output.length, 1, "missing tool setup is reported once");
-  assert.match(output[0], /semantic.compilerPath/);
-  available = true;
-  assert.ok(await hoverProvider.provideHover(document, {}));
-  for (const disposable of context.subscriptions) disposable.dispose();
+  return { extension: module.exports, handlers, clients, messages, vscode, document, header,
+    settings, context: { subscriptions: [] }, unavailable: () => { available = false; },
+    failStartup: () => { failStartup = true; } };
+}
+
+test("trusted workspace starts one stdio client with compiler arguments and full overlays", async () => {
+  const s = setup();
+  await s.extension.activate(s.context);
+  assert.equal(s.clients.length, 0, "untrusted workspace must not execute macros");
+  s.vscode.workspace.isTrusted = true;
+  await s.handlers.trust();
+  const client = s.clients[0];
+  assert.equal(client.started, 1);
+  assert.equal(client.server.command, "/selected/x2c");
+  assert.deepEqual(Array.from(client.server.args), ["lsp"]);
+  assert.equal(client.server.options.cwd, "/project");
+  assert.deepEqual(Array.from(client.options.initializationOptions.arguments), ["build", "--target", "app"]);
+  assert.equal(client.options.documentSelector[0].scheme, "file");
+  assert.equal(client.options.documentSelector[0].language, "x2c");
+  assert.equal(client.options.workspaceFolder.uri.fsPath, "/project");
+  assert.equal(client.notifications[0].method, "textDocument/didOpen");
+  assert.equal(client.notifications[0].params.textDocument.text, s.header.getText());
+  await s.handlers.open(s.document);
+  assert.equal(s.clients.length, 1);
+  assert.equal(client.notifications.length, 1, "language client owns x2c synchronization");
+  // vscode-languageclient reuses the same client object after a server crash.
+  await client.start();
+  assert.equal(client.notifications.length, 2, "restart resends unsaved dependency overlays");
+  await s.handlers.change({ document: s.header });
+  assert.equal(client.notifications.at(-1).params.contentChanges[0].text, s.header.getText());
+  await s.handlers.save(s.header);
+  assert.equal(client.notifications.at(-1).method, "textDocument/didSave");
+  await s.handlers.close(s.header);
+  assert.equal(client.notifications.at(-1).method, "textDocument/didClose");
+  await s.handlers.configuration({ affectsConfiguration: () => true });
+  await s.extension.deactivate();
+  assert.equal(client.disposed, 1);
+  assert.equal(client.options.synchronize.fileEvents.disposed, true);
+  assert.equal(s.clients[1].disposed, 1);
+});
+
+test("disabled and virtual documents never launch a client and missing compiler is reported once", async () => {
+  const s = setup();
+  s.vscode.workspace.isTrusted = true;
+  s.settings["semantic.enabled"] = false;
+  await s.extension.activate(s.context);
+  assert.equal(s.clients.length, 0);
+  s.settings["semantic.enabled"] = true;
+  s.unavailable();
+  await s.handlers.open(s.document);
+  await s.handlers.open(s.document);
+  assert.equal(s.messages.length, 1);
+  assert.match(s.messages[0], /semantic.compilerPath/);
+  const virtual = { ...s.document, uri: { scheme: "untitled" } };
+  await s.handlers.open(virtual);
+  assert.equal(s.clients.length, 0);
+  await s.extension.deactivate();
+});
+
+
+test("failed startup reports the original server error when client disposal also rejects", async () => {
+  const s = setup();
+  s.vscode.workspace.isTrusted = true;
+  s.failStartup();
+  await s.extension.activate(s.context);
+  assert.equal(s.messages.length, 1);
+  assert.match(s.messages[0], /server initialize failed/);
+  assert.equal(s.clients[0].disposed, 1);
+  assert.equal(s.clients[0].options.synchronize.fileEvents.disposed, true);
+  await s.extension.deactivate();
 });

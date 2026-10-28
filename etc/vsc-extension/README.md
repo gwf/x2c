@@ -32,17 +32,18 @@ not publish a Marketplace release.
 ## Compiler diagnostics, definitions, and hover
 
 See the book's [editor setup and configuration](https://x2c-lang.dev/docs/reference/cli.html#vs-code-diagnostics-definitions-and-hover).
-A current compiler on `PATH` or executable `./x2c` in the trusted workspace
-works without a path setting. To choose an installed compiler explicitly:
+The language server is experimental and is not included by `make install`.
+Run `make commands` in the compiler checkout, then select its matching
+compiler:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
 ```
 
-An explicit legacy `x2c.semantic.workerPath` still selects its original
-transport unless `compilerPath` is also set. No separate worker build is
-required for the new compiler interface. Setup errors appear in the **x2c**
-Output channel.
+VS Code 1.82 or newer is required. The extension starts `x2c lsp` over
+stdio and keeps one server per local workspace. The deprecated
+`x2c.semantic.workerPath` setting remains accepted but is unused by the
+language client. Setup errors appear in the **x2c** Output channel.
 
 Semantic analysis runs only in trusted local workspaces because compiling
 x2c can execute macros. Untrusted and virtual workspaces retain syntax
