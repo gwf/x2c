@@ -1450,7 +1450,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _559 = List_var(_558);
   _560 = cons(_480, _477);
   _561 = List_var(_560);
-  _562 = int_var(115355);
+  _562 = int_var(115351);
   _563 = cons(_562, NULL);
   _564 = cons(_485, _563);
   _565 = List_var(_564);
@@ -6512,7 +6512,7 @@ static List f11_declarators____hole_method(Compiler c){
 
 static Var f11_declarators____method_member(Compiler c){
   Compiler_expect(c, 93);
-  if(Compiler_peek(c, 0) == 73) return List_var(Compiler_try_parse_macro_slot(c, 920394));
+  if(Compiler_peek(c, 0) == 73) return List_var(Compiler_try_parse_macro_member(c));
   if(! String_is_identifier(c -> token -> text)) Compiler_report_error(c, 33658058, _241, c -> token, NULL);
   String member = c -> token -> text;
   Compiler_next(c);
