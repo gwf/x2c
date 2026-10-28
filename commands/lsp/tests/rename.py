@@ -74,6 +74,10 @@ def check_case(root, directory, texts, inputs, selections, manifest=True):
             response = client.request("textDocument/rename", {
                 "textDocument": {"uri": (directory / name).as_uri()},
                 "position": position(texts[name], needle), "newName": new_name})
+            if count is None:
+                assert response["error"]["code"] == -32602, response
+                assert "result" not in response, response
+                continue
             assert "result" in response, response
             changes = response["result"]["changes"]
             assert sum(map(len, changes.values())) == count, changes
@@ -121,7 +125,9 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-rename-") as temporary:
         '&& other.peek() == 3 && Other_peek(other) == 3 ? 0 : 1; }\n')},
         ["main.x"], [
             ("main.x", "Counter;", "Amount", 6),
-            ("main.x", "peek(Counter", "look", 4)], manifest=False)
+            ("main.x", "peek(Counter", "look", 4),
+            ("main.x", "Counter_peek(c)", "Counter_look", 4),
+            ("main.x", "Counter_peek(c)", "free_name", None)], manifest=False)
     check_case(root, work / "recursive", {"main.x": (
         'class Pair struct { Pair *next; int value; } *;\n'
         'void Pair.init(Pair pair) { pair->next = NULL; pair->value = 1; }\n'

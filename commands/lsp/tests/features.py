@@ -107,6 +107,17 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         items = query(client, "completion", main, typed, "Count size", 3)["result"]
         assert any(item["label"] == "Count" for item in items), items
 
+        prototypes = ("int repeated(void);\n"
+                      "int repeated(void) { return 1; }\n"
+                      "int use_repeated(void) { return repeated(); }\n")
+        client.opened(main, prototypes)
+        assert client.diagnostics() == []
+        for include, count in ((False, 1), (True, 3)):
+            references = query(client, "references", main, prototypes,
+                               "repeated(); }", 1,
+                               context={"includeDeclaration": include})["result"]
+            assert len(references) == count, references
+
         named = ("class Pair struct { int field; };\n"
                  "int Pair.read(Pair value) { return 1; }\n")
         client.opened(main, named)

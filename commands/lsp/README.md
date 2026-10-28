@@ -28,10 +28,16 @@ selected target input during one request.
 Document symbols list authored function and type definitions physically in
 the requested file. Workspace symbols search cached definitions of documents
 already analyzed. References and rename match definitions across selected
-target inputs; without a manifest they search only the current document.
+target inputs and their build dependencies; without a manifest they search
+only the current document.
 Rename requires a physical definition inside the workspace. Semantic tokens
 classify the document's lexical tokens, without assigning inferred types to
 identifiers. Their UTF-16 ranges split multiline tokens into physical lines.
+
+Renaming a type also updates its method-owner qualifiers and coupled C
+spellings. Rename a method at `value.member` with the new member name. When
+selecting its C spelling, such as `Type_member`, keep the owner prefix in the
+new name when member calls use that binding.
 
 At idle checkpoints, 64 MiB of retained allocation growth causes the server
 to replace itself while preserving its PID, stdio connection, current buffers,
@@ -45,6 +51,11 @@ The command does not index the workspace in the background or run a C compiler.
 
 Run `commands/lsp/tests/run.sh` after building the command for the framed
 protocol smoke test. `make commands-check` includes that test.
+
+For optional applied-rename checks, run
+`python3 commands/lsp/tests/rename.py "$PWD"`. The checks compile and run
+programs after applying the returned WorkspaceEdits. They are separate from
+`make commands-check`.
 
 For an optional, longer checkpoint probe, run
 `python3 commands/lsp/tests/restart.py "$PWD"` from the checkout root. It

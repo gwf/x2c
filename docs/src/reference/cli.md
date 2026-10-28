@@ -384,10 +384,16 @@ Completion uses the compiler's grammar role and visible symbols. Document
 symbols list authored function and type definitions in the current file.
 Workspace symbols search only documents already analyzed; they do not start
 workspace indexing. References and rename analyze the selected target's
-inputs sequentially, using unsaved buffers. Without a manifest, they search
+inputs and build dependencies sequentially, using unsaved buffers. Without a
+manifest, they search
 only the current document. Rename requires a physical definition inside the
 workspace. Lexical semantic tokens classify source tokens; they do not infer
 the type or binding of each identifier.
+
+Renaming a type updates related method-owner qualifiers and C spellings.
+Rename a method at `value.member` with the new member name. If you select a C
+spelling such as `Type_member`, keep the owner prefix in the new name when
+member calls use that binding.
 
 The server runs macros during analysis. Start it only for workspaces you
 trust. Formatting and native C compiler diagnostics are outside this server's

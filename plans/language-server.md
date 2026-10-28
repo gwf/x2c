@@ -124,12 +124,12 @@ granularity the server offers.
 | `textDocument/completion` | overlay with marker text at the cursor, `mark_completion`, catch `<replcomp>`, filter rows and keywords by prefix and role | 2 |
 | `textDocument/documentSymbol` | `Compiler.definition_rows(unit.ast)` | 2 |
 | `workspace/symbol` | the cached `Analysis` rows of analyzed documents, filtered by substring | 2 |
-| `textDocument/references` | `source_occurrences` of every target input unit whose definition location equals the selected binding's definition location | 3 |
+| `textDocument/references` | physical occurrences and declarations across selected units; external symbols share owner-supplied emitted identity | 3 |
 | `textDocument/rename` | references, as one `WorkspaceEdit`; refused when the definition lies outside the workspace or has no source range | 3 |
 | `textDocument/semanticTokens/full` | `Tokenizer.scan` on the document text; token `type` mapped to LSP token types | 3 |
 
 Completion details: the server copies the document text with
-`__x2c_completion__` inserted at the cursor into a private overlay, runs
+`__x2c_completion__` replacing the current identifier in a private overlay, runs
 `frontend.start`, `unit.compiler.mark_completion(offset)`, then `collect`
 and `parse` inside `try`, and catches `<replcomp>`. Candidate rows are
 `(spelling Type)` from `c.sym.visible_symbols()`; the server keeps the
@@ -139,9 +139,10 @@ filter of about 30 lines, without the REPL's session and internal-name
 rules. Completion of a `meta` declaration form returns no candidates, as
 the REPL decides.
 
-References and rename analyze each selected target input sequentially
-through the same one-unit rule, matching bindings by definition location
-(file, start, end) because binding numbers are per unit. A workspace
+References and rename analyze each selected target input and build dependency
+sequentially through the same one-unit rule. External functions and objects
+match by their producer-supplied emitted identity; other bindings match by
+physical definition location because binding numbers are per unit. A workspace
 without a manifest searches only the current document. The graph snapshot
 is not used: it indexes saved files, not overlays, and loads in seconds.
 
@@ -268,6 +269,40 @@ Focused checks apply returned edits and compile and run the changed project.
 Cover header/body/caller, external objects, static and local controls, aliases,
 method components, type owners, dependency inputs, and recursive class bodies.
 These extend the planned feature tests; they do not add a publication gate.
+
+### Proposed boundary for type rename outside selected source units
+
+Decision requested: retain the planned search scope and refuse type rename
+when the type's defining file is not one of the source units being searched.
+Return `-32803` with a message that the defining unit is outside the selected
+analysis scope. Do not return a partial WorkspaceEdit.
+
+Two valid probes establish the gap. An imported package type has a parameter
+use in its own package source that consumer-only parsing misses. Namespace
+mapping repairs its C-spelled method edits, but still omits that parameter.
+A separate header probe has `typedef int Counter`, a helper's Counter return
+and parameter, and a Counter variable in the current document. The baseline
+builds and runs; current rename returns two edits instead of the required four.
+Collection contributes declarations, but does not fully parse included bodies.
+
+The refusal preserves references within configured target inputs and build
+dependencies, or the current document without a manifest. Type rename still
+works for types owned by those searched source units. Ordinary external
+function and object identities continue joining their selected units. This
+adds one request-boundary refusal for a demonstrated incomplete-edit case.
+
+The alternative is a separate extension to search additional package source
+units and included-file bodies. Existing Frontend operations can parse package
+sources with consumer flags, but every added unit costs another whole parse.
+ProjectBuild does not select imported files as target inputs. Included headers
+also need their actual owning compilation context; opening each dependency
+as an independent input is not equivalent. That extension needs its source
+selection and cost settled before implementation. No background index or
+collection-wide capture is part of the current proposal.
+
+Validate the refusal with both probes and require an error without changes.
+Keep the existing applied-edit checks for selected-unit types and bindings.
+Do not claim general imported-type rename support in this batch.
 
 ### Approved scoped capture for named-type source references (2026-10-28)
 
@@ -403,6 +438,19 @@ an isolated performance benchmark. No full gate ran in the implementation
 session. The shared integrator owns publication validation and generated
 artifacts. Manual VS Code and Neovim sessions remain unperformed.
 
+Phases 2 and 3 focused evidence (2026-10-28): the combined server passes
+framed smoke, paced protocol, completion, symbols, dependency references,
+declaration filtering, and UTF-16 token checks. Optional applied-rename checks
+compile, link, and run edited programs for external functions and objects,
+static/local isolation, distinct type owners, member and canonical C spellings,
+and recursive classes. Selecting the captured recursive self-type returns the
+same complete edits as selecting its declaration. Focused capture transaction
+and nested-scope controls pass. Two combined-server exec checkpoints preserve
+cached workspace symbols and live state; descriptor counts remain six.
+Imported/header type rename coverage awaits the explicit scope decision above.
+The applied-rename and checkpoint workloads remain optional focused probes;
+they do not add recurring gate work.
+
 - `commands/lsp/tests/run.sh`, run by `make commands-check`, drives
   `builds/0/libexec/x2c-lsp` with frames written by a `frame` shell
   function (`printf` body to a file, `wc -c` for the length). It sends
@@ -460,17 +508,22 @@ in the background.
 Idiomatic x2c: Map literals and `Var.json` build messages; `match` reads
 compiler rows; isolated frame parsing and retained-unit or server dispatch;
 no JSON-RPC framework, no handler registry object, no abstract transport.
-Dispatch is one `switch` on the method String. The proposed named-type capture
+Dispatch is one `switch` on the method String. The approved named-type capture
 reuses physical source keys, declaration metadata, actual child bindings, and
 semantic transactions. Its one borrowed Array is needed because collection
 consumes source tokens before primary parsing; replay does not re-resolve names
 or create another semantic identity. The applied-edit and rollback probes
 protect missing edits and leaked speculative references.
 
-Validators and negative fixtures: the smoke test's parse-error document
+Validators and negative fixtures: rename rejects invalid identifiers,
+keywords, definitions outside the workspace, missing physical ranges, owner
+prefix changes incompatible with member selectors, and failed selected-unit
+analysis. These checks prevent unusable or partial edits. Applied-edit tests
+compile and run the result; static/local/alias and same-representation type
+controls prevent editing another binding. The smoke test's parse-error document
 protects diagnostic delivery; the malformed-frame `-32700` reply protects
 the stream against a client bug; the unsaved-CPP refusal keeps the
-existing message. No other dedicated diagnostics.
+existing message. These are request-boundary errors, not another AST validator.
 
 Last implementation step for each phase: review the completed authored
 diff for repeated facts, unused machinery, and reuse missed above, fix what
