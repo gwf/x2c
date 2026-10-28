@@ -74,3 +74,8 @@ programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showca
 programs/tiny-lisp|external-input|build||-|Eight-form independent Lisp; unary arithmetic with decimal input/output in data/tiny-lisp.slp.
 programs/tiny-lisp-min|external-input|build||-|Code-golf version of Tiny Lisp; same language and arithmetic example.
 programs/tiny-lisp.max|external-input|build||-|Formatted and annotated Tiny Lisp; see programs/tiny-lisp.md.
+apps/notes/notes|showcase|run|--check --policy ../../../examples/apps/notes/policy.xlisp|expected/apps-notes.stdout|Notes service with file persistence, generated records, and a Lisp policy.
+apps/notes/record|probe|none||-|Shared compile-time record table.
+apps/notes/store|probe|none||-|Shared notes persistence protocol and file store.
+apps/notes/service|probe|none||-|Shared HTTP routes and runtime Lisp policy.
+apps/notes/bench/load|probe|none||-|Optional loopback benchmark client.

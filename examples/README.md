@@ -240,3 +240,17 @@ expected output by `make -C packages/pcre2 run`, also included in
 Generated files stay under ignored `build/`. Normal checks never rewrite
 expected output. For an intentional output change, use `make examples-update`
 and review the resulting differences.
+
+## A notes service
+
+[apps/notes](apps/notes/README.md) combines a blocking HTTP server, JSON
+persistence, record generation, and an editable runtime Lisp policy. Its page
+lists, creates, searches, and tags notes. Run the loopback transcript with:
+
+```sh
+make -C examples/apps/notes check
+```
+
+The [SQLite variant](packages/notes-sqlite/README.md) uses prepared statements
+through the optional package. The [benchmark](apps/notes/bench/README.md)
+compares the notes lookup route with fixed-body C and Go reference servers.

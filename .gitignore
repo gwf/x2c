@@ -45,6 +45,8 @@ examples/*
 !examples/programs/**
 !examples/tours/
 !examples/tours/**
+!examples/apps/
+!examples/apps/**
 !examples/c2x2c/
 !examples/c2x2c/**
 !examples/deprecated/

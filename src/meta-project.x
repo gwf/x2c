@@ -92,6 +92,7 @@ static MetaHelper _build_meta(Frontend f, List inputs, List entries) {
   String compiler = Compiler.meta_cc_identity(cc);
   h.include = include;
   h.flags = _group_flags(f.request, h.packages);
+  _package_native(h);
   h.modules = _modules(f.request, h.packages);
   h.identity = _identify(h, stamp, compiler);
   h.directory = _directory(root, h.identity, h.owners);
@@ -105,9 +106,20 @@ static List _manifest(Helper &h) {
   Path.make_dirs(h.directory);
   int lock = Path.lock_file(%"$(h.directory)/lock", 1);
   defer close(lock);
-  List manifest = _current(h.directory);
+  int searched = _search_link(h.toolchain.ld_args);
+  List manifest = searched ? NULL : _current(h.directory);
   if (manifest) return manifest;
+  if (searched) h.changed = 1;
   return _build(h);
+}
+
+/* Like script publication, named library selections cannot reuse an output
+   whose selected native files are absent from the dependency fingerprint. */
+static int _search_link(List arguments) {
+  foreach (String argument in arguments)
+    foreach (String part in argument.split(","))
+      if (part.startswith("-l")) return 1;
+  return 0;
 }
 
 // building the helper
@@ -342,6 +354,22 @@ static List _group_flags(CliRequest request, Map packages) {
   return flags;
 }
 
+/* A provider compiled into the helper has the package's foreign native
+   dependencies. Its own archive is not linked: the groups define its code. */
+static void _package_native(Helper &h) {
+  foreach ((String root, int _) in h.packages) {
+    String name = Path.basename(root);
+    String response = %"$root/builds/$name.native.rsp";
+    if (!Path.is_file(response)) continue;
+    CliRequest native = CliRequest.package_options(response, root);
+    h.flags = h.flags.append(_host_args(native.cc_args));
+    h.toolchain.ld_args = h.toolchain.ld_args.append(native.ld_args);
+    h.deps[response] = 1;
+    foreach (String path in native.ld_args)
+      if (Path.is_file(path)) h.deps[Path.absolute(path)] = 1;
+  }
+}
+
 /* `cc_args` without the flags that select a target architecture, ABI, or
    system root, since the helper runs on the host. */
 static List _host_args(List cc_args) {
@@ -375,13 +403,15 @@ static Array _modules(CliRequest request, Map packages) {
 
 /* Everything the helper is built with besides its sources. The helper's
    own source is read at build time, not linked into the compiler, so the
-   stamp does not cover it. */
+   stamp does not cover it. Native response and archive digests enter the
+   identity because a changed archive leaves the group objects unchanged. */
 static String _identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_text();
   return %"$stamp\n$compiler\n$(_cc_flags().repr())\n"
     + %"$(h.entries.repr())\n"
     + %"$(h.flags.repr())\n$(h.include)\n$(h.toolchain.runtime_lib)\n"
-    + %"$(h.modules.list().repr())\n"
+    + %"$(h.modules.list().repr())\n$(h.toolchain.ld_args.repr())\n"
+    + %"$(_digests(h.deps).repr())\n"
     + %"$(h.frontend.request.package_dirs.repr())\n"
     + %"$(h.packages.keys().list().sort().repr())\n"
     + (loop ? loop.sha256() : "");
@@ -685,10 +715,11 @@ static List _link_arguments(
   Helper &h, String output, String tables, String support) {
   Toolchain t = h.toolchain;
 #ifdef __APPLE__
-  t.ld_args = $(%"-Wl,-force_load,$(t.runtime_lib)");
+  t.ld_args = t.ld_args.append($(%"-Wl,-force_load,$(t.runtime_lib)"));
 #else
-  t.ld_args = %("-Wl,--export-dynamic,--whole-archive" $(t.runtime_lib)
-                "-Wl,--no-whole-archive");
+  t.ld_args = t.ld_args.append(
+    %("-Wl,--export-dynamic,--whole-archive" $(t.runtime_lib)
+      "-Wl,--no-whole-archive"));
 #endif
   List inputs = $(@(h.objects.list()), tables, support);
   String archive = Compiler.extension_archive();

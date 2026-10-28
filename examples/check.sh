@@ -39,7 +39,7 @@ source_of() {
 
 list_sources() {
   find "$example_dir" -maxdepth 1 -type f \( -name '*.x' -o -name '*.xp' \)
-  find "$example_dir"/{love,power,magic,programs,scripts,tours} \
+  find "$example_dir"/{love,power,magic,programs,scripts,tours,apps} \
     -type f \( -name '*.x' -o -name '*.xp' \)
 }
 

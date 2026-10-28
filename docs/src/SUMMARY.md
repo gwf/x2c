@@ -25,6 +25,7 @@
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Commands and Files](guide/scripting.md)
+- [Sockets and HTTP](guide/networking.md)
 - [Experimental REPL](guide/repl.md)
 - [Indentation Syntax](guide/indentation.md)
 - [Programming Idioms](guide/idioms.md)

@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-28T15:34:23.643531+00:00",
+  "machine": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+  "processor": "arm64",
+  "connections": 64,
+  "seconds": 10,
+  "runs": 5,
+  "source_sha256": {
+    "c": "6c0000fe6e672391b261ba7f2d3493f579d0803a79481b959751bfec89a95e0c",
+    "go": "d31ddbc1fc2b815eb670898f8ad1364ea89fae78d7c2411f4e658cda25e27b2a",
+    "client": "a1b553dad1878ce67ae432b58ac9442d4c8d5a7440eaa8f82168f9533460a6cc"
+  },
+  "references": {
+    "c": {
+      "samples": [
+        {
+          "requests": 2036007,
+          "elapsed_s": 10.00078,
+          "requests_per_s": 203584.82,
+          "p50_us": 312.0,
+          "p99_us": 429.0
+        },
+        {
+          "requests": 2039722,
+          "elapsed_s": 10.000838,
+          "requests_per_s": 203955.109,
+          "p50_us": 310.0,
+          "p99_us": 434.0
+        },
+        {
+          "requests": 2047414,
+          "elapsed_s": 10.000912,
+          "requests_per_s": 204722.729,
+          "p50_us": 311.0,
+          "p99_us": 433.0
+        },
+        {
+          "requests": 2019806,
+          "elapsed_s": 10.000775,
+          "requests_per_s": 201964.948,
+          "p50_us": 318.0,
+          "p99_us": 446.0
+        },
+        {
+          "requests": 2027919,
+          "elapsed_s": 10.00076,
+          "requests_per_s": 202776.489,
+          "p50_us": 312.0,
+          "p99_us": 443.0
+        }
+      ],
+      "median": {
+        "requests_per_s": 203584.82,
+        "p50_us": 312.0,
+        "p99_us": 434.0
+      }
+    }
+  },
+  "unavailable": {
+    "go": "Go toolchain is not installed"
+  },
+  "hardware": {
+    "machdep.cpu.brand_string": "Apple M4 Max",
+    "hw.model": "Mac16,5",
+    "hw.memsize": "137438953472"
+  }
+}

@@ -241,3 +241,5 @@ lib/match/match.x|internal|MachineWord,MatchFrame,MatchMachine,MatchMachine.acqu
 lib/match/match.x|internal|MatchMachine.begin,MatchMachine.clean,MatchMachine.dispose,MatchMachine.finish
 lib/match/match.x|internal|MatchMachine.materialize_span,MatchMachine.open,MatchMachine.release,MatchMachine.release_spares
 lib/match/match.x|internal|MatchMachine.run,MatchMachine.step
+lib/net.x|internal|x2c_net_accept_fd
+lib/net.x|advanced|Listener.cleanup,Socket.cleanup

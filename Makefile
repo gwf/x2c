@@ -157,6 +157,7 @@ packages: configure-packages				## Build packages and examples
 	$(MAKE) -C packages/sqlite build short-example example lisp-example
 	$(MAKE) -C packages/libcurl build short-example example lisp-example
 	$(MAKE) -C examples/packages/http-json-releases build
+	$(MAKE) -C examples/packages/notes-sqlite build
 	$(MAKE) -C packages/termbox2 build short-example example
 	$(MAKE) -C packages/blis build short-example example
 	$(MAKE) -C packages/libuv build short-example example
@@ -173,6 +174,7 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/sqlite test run run-lisp
 	$(MAKE) -C packages/libcurl test run run-lisp
 	$(MAKE) -C examples/packages/http-json-releases test
+	$(MAKE) -C examples/packages/notes-sqlite test
 	$(MAKE) -C packages/termbox2 test run
 	$(MAKE) -C packages/blis test run
 	$(MAKE) -C packages/libuv test run
