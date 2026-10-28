@@ -274,7 +274,8 @@ next stage replay when the stage compilers are byte-identical, as they are
 once the bootstrap matches the source. No tracked file is both an input and
 an output of a build. An installation writes its runtime interfaces with
 the compiler it installs. `x2c env prelude` prints the prelude interface
-this compiler wrote; an empty value means the compiler walks the source of
+this compiler can replay, after checking source and dependency hashes and
+include roots; an empty value means the compiler walks the source of
 `lib/x2c.x`, which costs about a quarter of a second per process. Replay must
 match the walk it replaces: `make proof-cold-collection` retranslates `lib/`
 and `src/` with the hidden `--no-interfaces` option, which reads no

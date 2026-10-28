@@ -433,9 +433,17 @@ initialization rules.
 ```
 
 Use `-q` to suppress build progress and receipts while preserving program
-output. Use `--build-dir <dir>` to retain generated files and objects for
-inspection or reuse. Otherwise temporary intermediates are removed after the
-program finishes.
+output. With explicit inputs, `run` caches its executable under `runs/` in
+the [script cache](#run-a-script). An unchanged run launches the cached
+executable without a build receipt. The script invalidation rules below
+apply, and `argv[0]` is the first input's absolute path. `--rebuild` runs
+the build again; `--clean` removes that input list's entry without running it.
+
+An explicit `-o`, `--build-dir`, `--save-temps`, `--compile-commands`, or
+a project manifest keeps the ordinary build path. Use `--build-dir <dir>`
+to retain generated files and objects for inspection or reuse. Otherwise
+temporary intermediates are removed after the program finishes. `--clean`
+and `--rebuild` require the cached path.
 
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's
@@ -505,12 +513,15 @@ modules come from their archives instead.
 `env -S` splits the line into words. Where `x2c` has a fixed location, the
 interpreter path works without it: `#!/usr/local/bin/x2c script`.
 
-Each script builds under `scripts/` in the cache root: `X2C_CACHE_DIR` when
+Scripts build under `scripts/`, and cached `run` programs under `runs/`,
+in the cache root: `X2C_CACHE_DIR` when
 set, otherwise `$XDG_CACHE_HOME/x2c`, otherwise `~/.cache/x2c`.
 `x2c env cache_dir` prints the root. Concurrent runs of one script share its
 build and wait for each other. `x2c script --clean <file>` removes that
 script's entry without running it, and every build removes the entries of
-scripts that no longer exist. Removing the cache is always safe.
+programs whose first input no longer exists from both directories. Removing
+the cache is always safe. Different ordered input lists have separate
+`run` entries; `script` and `run` never share an executable.
 
 ## Selecting inputs
 
@@ -724,11 +735,12 @@ archive, prelude interface, package roots, C compiler, archiver, and script
 cache root as `name = value` lines. It also reports `libexec`, the directory
 for external commands, and `identity`, the compiler executable's identity.
 The prelude is the runtime `x2c.xi`
-interface the compiler replays for the runtime declarations. Only an
-interface the same compiler wrote qualifies; an empty value means the
-compiler reads `lib/x2c.x` from source once per process. `prelude_missing`
-lists the runtime units that prelude includes whose own interface the
-compiler cannot find; each one is read from source once per process, so a
+interface the compiler can replay for the runtime declarations. Its compiler
+identity, source and dependency hashes, and include roots must all match.
+An empty value means a missing interface or a source or stage change
+requires reading `lib/x2c.x` from source once per process. `prelude_missing`
+lists the runtime units that prelude includes whose own interface is absent
+or stale; each one is read from source once per process, so a
 converged stage build leaves it empty.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.

@@ -17,15 +17,16 @@ static macro Stmt $progress.main_translation_verbose(
 /* A build runs its explicit inputs as one target, or each target of its
    project manifest. Every target adds its compile commands to one
    database. */
-int build_request(CliRequest request) {
+int build_request(CliRequest request, int cached) {
   Array commands = request.compile_commands && !request.dry_run ? [] : NULL;
   int status = request.inputs
-    ? _build_inputs(request, commands) : _build_manifest(request, commands);
+    ? _build_inputs(request, commands, cached)
+    : _build_manifest(request, commands);
   if (status || commands == NULL || request.command == <run>) return status;
   return !Build.write_commands(request.compile_commands, commands);
 }
 
-static int _build_inputs(CliRequest request, Array commands) {
+static int _build_inputs(CliRequest request, Array commands, int cached) {
   /* Manifest options have no meaning without a manifest. The build fails
      before it builds something the command did not describe. */
   if (request.manifest)
@@ -34,7 +35,7 @@ static int _build_inputs(CliRequest request, Array commands) {
     Diagnostics.driver_error("--target conflicts with explicit inputs");
   if (request.profile)
     Diagnostics.driver_error("--profile conflicts with explicit inputs");
-  return _build_target(request, commands);
+  return _build_target(request, commands, cached);
 }
 
 static int _build_manifest(CliRequest request, Array commands) {
@@ -43,13 +44,13 @@ static int _build_manifest(CliRequest request, Array commands) {
       "--compile-only needs input operands, not a manifest");
   ProjectBuild first = ProjectBuild.plan(request);
   for (ProjectBuild node = first; node; node = node.next) {
-    int status = _build_target(node.request, commands);
+    int status = _build_target(node.request, commands, 0);
     if (status) return status;
   }
   return 0;
 }
 
-static int _build_target(CliRequest request, Array commands) {
+static int _build_target(CliRequest request, Array commands, int cached) {
   /* A target has its own build graph and native-action scratch. Isolate
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
@@ -66,9 +67,9 @@ static int _build_target(CliRequest request, Array commands) {
     return status;
   }
   b.report_success();
-  if (request.command == <run>) status = b.run_program();
-  else if (request.command == <script> && !request.dry_run)
+  if (cached && !request.dry_run)
     b.publish_script(%"$(request.build_dir)/run");
+  else if (!cached && request.command == <run>) status = b.run_program();
   b.cleanup(1);
   return status;
 }

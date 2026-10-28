@@ -23,6 +23,60 @@ printf 'build -q --output app @@input.x\n' > build.rsp
 "$COMMAND" build -q --output direct @@input.x
 ./direct
 "$COMMAND" run -q @@input.x
+
+# Explicit runs share the script cache machinery, with their own entries.
+mkdir run-sources run-logs
+export X2C_CACHE_DIR="$BUILD/run-cache"
+cat > run-sources/main.x <<'SOURCE'
+#include <stdio.h>
+int main(int argc, char **argv) {
+  printf("%s:%s\n", argv[0], argc > 1 ? argv[1] : "none");
+  return 0;
+}
+SOURCE
+"$X2C" run --plain run-sources/main.x -- first >run-logs/out 2>run-logs/cold
+grep -q 'Built executable' run-logs/cold
+[ "$(cat run-logs/out)" = "$BUILD/run-sources/main.x:first" ]
+"$X2C" run --plain run-sources/main.x -- second >run-logs/out 2>run-logs/warm
+[ ! -s run-logs/warm ]
+[ "$(cat run-logs/out)" = "$BUILD/run-sources/main.x:second" ]
+"$X2C" run -v run-sources/main.x >run-logs/out 2>run-logs/verbose
+grep -q '^x2c: run ' run-logs/verbose
+if grep -q 'Built executable' run-logs/verbose; then exit 1; fi
+printf '\n' >> run-sources/main.x
+"$X2C" run --plain run-sources/main.x >run-logs/out 2>run-logs/edited
+grep -q 'Built executable' run-logs/edited
+"$X2C" run --plain --rebuild run-sources/main.x >run-logs/out 2>run-logs/rebuilt
+grep -q 'Built executable' run-logs/rebuilt
+"$X2C" run --clean run-sources/main.x
+[ "$(find "$X2C_CACHE_DIR/runs" -name source | wc -l | tr -d ' ')" = 0 ]
+"$X2C" run -q -o explicit-run run-sources/main.x >run-logs/out
+[ -x explicit-run ]
+"$X2C" run -q --build-dir retained-run run-sources/main.x >run-logs/out
+[ -x retained-run/run ]
+[ "$(find "$X2C_CACHE_DIR/runs" -name source | wc -l | tr -d ' ')" = 0 ]
+
+# A second input's included file participates in executable freshness.
+printf 'int value(void); int main(void) { return value(); }\n' >run-sources/multi.x
+printf 'enum { RESULT = 0 };\n' >run-sources/constants.h
+printf '#include "constants.h"\nint value(void) { return RESULT; }\n' >run-sources/value.x
+run_multi() { "$X2C" run -I "$BUILD/run-sources" "$@"; }
+run_multi -q run-sources/multi.x run-sources/value.x
+run_multi --plain run-sources/multi.x run-sources/value.x 2>run-logs/multi-warm
+[ ! -s run-logs/multi-warm ]
+printf 'enum { RESULT = 7 };\n' >run-sources/constants.h
+status=0
+run_multi --plain run-sources/multi.x run-sources/value.x 2>run-logs/header || status=$?
+[ "$status" = 7 ]
+grep -q 'Built executable' run-logs/header
+printf 'int value(void) { return 0; }\n' >run-sources/other.x
+run_multi -q run-sources/multi.x run-sources/other.x
+[ "$(find "$X2C_CACHE_DIR/runs" -name source | wc -l | tr -d ' ')" = 2 ]
+run_multi --clean run-sources/multi.x run-sources/value.x
+run_multi --clean run-sources/multi.x run-sources/other.x
+"$X2C" run '-###' run-sources/not-created.x >run-logs/dry 2>&1
+[ ! -e run-sources/not-created.x ]
+unset X2C_CACHE_DIR
 printf 'int main(void) { int n = ; }\n' > bad.x
 status=0
 "$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?

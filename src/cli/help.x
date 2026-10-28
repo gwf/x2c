@@ -80,7 +80,10 @@ static HelpPage help_pages[] = {
     $dedent(%"
       The selected target must be executable. After a successful build,
       x2c returns the program's exit status.
-      Direct runs use a temporary executable unless intermediates are retained.
+      Explicit inputs use runs/ in the script cache, with argv[0] set to
+      the first input's absolute path. Unchanged runs skip the build.
+      --rebuild builds again; --clean removes the entry without running it.
+      -o, --build-dir, --save-temps, and --compile-commands bypass that cache.
       --save-temps retains and reuses intermediates in .x2c-build.
       --save-temps=<dir> and --build-dir <dir> select the retained directory;
       the last named directory wins. Manifest products default to
