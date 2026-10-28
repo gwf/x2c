@@ -8,8 +8,8 @@ static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
     "Code.source_text requires complete captured syntax",
     active.has_bindings ? NULL : %("value: $($value.repr())"));
 
-static alias fail_embed_path_empty to MetaContext.reject(
-  "x2c_embed_text requires a non-empty path", NULL);
+static alias fail_embed_path_empty to
+  MetaContext.reject("x2c_embed_text requires a non-empty path", NULL);
 
 static macro Stmt $fail.meta_sdk_embed_literal(Expr $requested) =>
   _reject_value(
