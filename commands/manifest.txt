@@ -6,3 +6,4 @@ lsp|experimental|Serve editors over the Language Server Protocol
 new|shipped|Create a project that builds and runs
 package|shipped|Install, remove, and list packages
 repl|experimental|Evaluate a supported x2c subset
+test|experimental|Build and run project tests
