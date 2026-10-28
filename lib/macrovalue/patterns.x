@@ -76,8 +76,10 @@ static List _binder_rows(Macro t, List names, int case_pattern) {
     Var selected = _hidden(given);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? $(selected).var() : selected;
-    // An explicit expression pattern owns its type constraint.
-    if (!sequence && selected is <list> && selected.list().car() == <expr>)
+    /* An explicit expression pattern owns its type constraint; shell
+       inspection follows the List tag test. */
+    if (!sequence && selected is <list> &&
+        selected.list_payload().car() == <expr>)
       projected = %(!and $selected);
     if (case_pattern && kind == <name>)
       projected = %(!and $given $(_name_identity(hole)));
@@ -118,7 +120,9 @@ static Var _inline(List environment, Var tree) {
     case %(literal *): return tree;
   }
   Array parts = [];
-  foreach (Var part in tree.list()) parts.push(_inline(environment, part));
+  /* Scalar leaves have already returned. */
+  foreach (Var part in tree.list_payload())
+    parts.push(_inline(environment, part));
   return parts.list_free();
 }
 
@@ -193,13 +197,14 @@ static Var _pattern_view(Var value) {
 }
 
 /* A template's shell passes through a binder or the expression it holds;
-   any other expression matches whatever type binding derived. */
+   any other expression matches whatever type binding derived. Both shell
+   branches establish the List tag before inspecting the head. */
 static Var _expr_view(Var type, Var body) {
   int shell = type === %(<macro-expr>);
   if (shell && body.is_binder()) return _shown(body);
-  if (shell && body is <list> && body.list().car().is_match_op())
+  if (shell && body is <list> && body.list_payload().car().is_match_op())
     return body;
-  if (shell && body is <list> && body.list().car() == <expr>)
+  if (shell && body is <list> && body.list_payload().car() == <expr>)
     return _pattern_view(body);
   return %(expr ? $(_pattern_view(body)));
 }
@@ -237,7 +242,8 @@ static Var _slot_binder(Var form) {
     return form.str().len() > 1 && form.str()[0] == '*' &&
       _shown(form) == form ? form : NULL;
   if (form is not <list>) return NULL;
-  foreach (Var child in form.list()) {
+  /* Only compound forms reach child traversal. */
+  foreach (Var child in form.list_payload()) {
     Var binder = _slot_binder(child);
     if (binder) return binder;
   }

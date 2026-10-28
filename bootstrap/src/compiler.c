@@ -856,7 +856,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _288 = String_var(_287);
   _289 = List_var(NULL);
   _290 = Symbol_var(106239471489226);
-  _291 = int_var(2237);
+  _291 = int_var(2238);
   _292 = String_new("");
   _293 = String_var(_292);
   _294 = Atom_intern(String_new("macro-param"));
@@ -3557,7 +3557,7 @@ return List_var(syntax);
 static int f21_declarations_defaults____taken(f21_declarations_defaults___Defaults * d, String spelling){
   Compiler c =(* d).c;  List key = cons(String_var(spelling), NULL);  Type declared = List_type(Sym_get(c -> sym, key));  if(! List_truth(Type_list(declared))) return 0;  if(! Type_is_function(declared) || Map_contains((* d).definitions, String_var(spelling)) || Map_contains(c -> fn_defs, String_var(spelling)) || Map_contains(Sym_file_statics(c -> sym), List_var(cons(_0, cons(String_var(spelling), NULL))))) return 1; {
     Var part;  Array _x2c_gensym_macro_object_31 =(* d).parts;  int _x2c_gensym_macro_cursor_31 = 0;  Var _x2c_gensym_macro_cursor_output_30;  while(Array_try_next(_x2c_gensym_macro_object_31, &(_x2c_gensym_macro_cursor_31), &(_x2c_gensym_macro_cursor_output_30))){
-      part = _x2c_gensym_macro_cursor_output_30;  if(Var_is(part, 26720) && Map_contains(Var_map(part), List_var(key))) return 0;
+      part = _x2c_gensym_macro_cursor_output_30;  if(Var_is(part, 26720) && Map_contains(Var_map_payload(part), List_var(key))) return 0;
     }
 
   }

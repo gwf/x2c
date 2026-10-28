@@ -2609,8 +2609,8 @@ static Symbol _target_kind(Definition * d){
 }
 
 static List _recorded(Map m){
-  Var order = m != NULL ? Map_getindex(m, Symbol_var(32645476)) :((void) 0, Void);
-  return Var_is_row(order, 9, 7, 4) ? List_reverse(Var_list(order)) : NULL;
+  List order = Var_list_payload(m != NULL ? Map_getindex(m, Symbol_var(32645476)) :((void) 0, Void));
+  return List_reverse(order);
 }
 
 static List f19_definitions_reading____signature_hole(Compiler c){
@@ -2842,11 +2842,11 @@ void Compiler_set_fact(Compiler, Var, Var);
 
 static List f21_definitions_templates____definition_local(Compiler c, String spelling, int tag){
   Map locals = Compiler_macro_definition_locals(c);
-  Var order = Map_getindex(locals, Symbol_var(32645476));
-  int identity = INT_MAX -(Var_is_row(order, 9, 7, 4) ? List_len(Var_list(order)) : 0);
+  List order = Var_list_payload(Map_getindex(locals, Symbol_var(32645476)));
+  int identity = INT_MAX - List_len(order);
   List introduced = Ast_binding(identity, spelling);
   Compiler_set_fact(c, List_var(cons(_73, cons(int_var(identity), NULL))), String_var(spelling));
-  Map_setindex(locals, Symbol_var(32645476), List_var(cons(List_var(introduced), Var_is_row(order, 9, 7, 4) ? Var_list_payload(order) : NULL)));
+  Map_setindex(locals, Symbol_var(32645476), List_var(cons(List_var(introduced), order)));
   Map_setindex(locals, List_var(introduced), String_var(spelling));
   if(tag) Map_setindex(locals, List_var(cons(_74, cons(List_var(introduced), NULL))), int_var(1));
   return introduced;
@@ -3551,11 +3551,11 @@ static int _quoted_role(Compiler c, Symbol role){
 int Sym_binding_is_local(Sym, List);
 int Sym_is_named_value_type(Sym, Type, String);
 static List _quoted_hole(Compiler c, String spelling, Token prefix){
-  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_194)))) return NULL;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _297) ? 1362954 : 0;  int sequence = prefix -> type == 129 || prefix -> type == 16465;  List hole = _record_hole(c, spelling, kind, sequence);  Var quoted = Map_getindex(c -> macro_holes, List_var(_299));  Map_setindex(c -> macro_holes, List_var(_299), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));  return hole;
+  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_194)))) return NULL;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _297) ? 1362954 : 0;  int sequence = prefix -> type == 129 || prefix -> type == 16465;  List hole = _record_hole(c, spelling, kind, sequence);  List quoted = Var_list_payload(Map_getindex(c -> macro_holes, List_var(_299)));  Map_setindex(c -> macro_holes, List_var(_299), List_var(cons(List_var(hole), quoted)));  return hole;
 }
 
 static List _quoted_holes(Compiler c){
-  Var quoted = Map_getindex(c -> macro_holes, List_var(_299));  return Var_is_row(quoted, 9, 7, 4) ? List_reverse(Var_list(quoted)) : NULL;
+  List quoted = Var_list_payload(Map_getindex(c -> macro_holes, List_var(_299)));  return List_reverse(quoted);
 }
 
 int Compiler_meta_call_starts_declaration(Compiler c){

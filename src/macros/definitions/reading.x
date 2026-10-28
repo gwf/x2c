@@ -294,10 +294,11 @@ module Symbol _target_kind(Definition &d) {
   return d.target.assoc(<kind>);
 }
 
-/* The entries a map lists under `<order>`, oldest first, or NULL. */
+/* The entries a map lists under `<order>`, oldest first, or NULL.
+   Missing or non-List sequence slots read as nil. */
 module List _recorded(Map m) {
-  Var order = m != NULL ? m[<order>] : void;
-  return order is <list> ? order.list().reverse() : NULL;
+  List order = m != NULL ? m[<order>] : void;
+  return order.reverse();
 }
 
 /* signature holes

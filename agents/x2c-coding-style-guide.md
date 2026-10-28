@@ -26,6 +26,74 @@ if (!_regular_file(path))
   c.report_error(<input>, "unreadable include", token, %($path));
 ```
 
+## PR-4 - Trust established facts
+
+See PR-4, EX-4, VT-3, and CM-3 in [the standard](x2c-code-standard.md).
+
+Close the producer chain before narrowing a private `Var` parameter. Include
+every caller, recursive transition, callback registration, stored-value
+writer, and relevant alias. Stop at the established owner, not a fixed call
+depth. A graph's missing edge does not establish an impossible input.
+
+| Pattern | Simplification and retained boundary |
+| --- | --- |
+| Private container holds only Lists | Trace every insertion and replacement, then type its consumers as List. Keep semantic shape recognition. |
+| Dispatcher already returns nil | Remove the helper's repeated nil test; keep tail exhaustion and ownership checks. |
+| Earlier branch establishes a fact | Remove a later test only while the value and predicate remain unchanged and the predicate has no observable effects. |
+| Existing operation owns failure | Delegate the duplicate check while preserving preparation order, failure status, callbacks, and output atomicity. |
+| Callback constructor supplies userdata | Rely on its established type and lifetime; preserve the callback ABI. |
+| Existing exact tag guard precedes extraction | Read the established object payload without repeating checked conversion. Keep the input guard. |
+| Destination already supplies nil fallback | Use the typed destination instead of another tag-test ternary. This preserves mixed inputs rather than proving them impossible. |
+
+For example, a sequence slot can be absent or contain another tag. Prefer:
+
+```x2c
+/* Missing or non-List sequence slots read as nil. */
+List order = rows[<order>];
+return order.reverse();
+```
+
+Over:
+
+```x2c
+Var order = rows[<order>];
+return order is <list> ? order.list().reverse() : NULL;
+```
+
+The List destination preserves the same nil fallback. `List.len(nil)` is
+zero and `List.reverse(nil)` is nil; neither needs a separate absence path.
+Other operations need their own contract. `Iter.try_next(NULL, out)` reports
+exhaustion before invoking a callback, but dropping zip's right-input guard
+would consume the left input before discovering that absence.
+
+An exact String branch can use `value.string_payload()` after `value is
+<string>`. Do not replace a general `value.str()` or a String destination:
+those can render another tag through a registered callback. Preserve
+materialization such as `Array.list()` when it changes representation or
+ownership.
+
+Three source owners illustrate the limits:
+
+- [Header projection](../src/generate/projection.x): all private header
+  writers and pending replacements supply Lists; not every item declares a
+  type, so declaration recognition remains.
+- [Match execution](../lib/match/execution.x): a checked buffer address can
+  pass through required references. An equality callback can still change
+  aliased capacity after entry validation; the later capacity check remains.
+- [Context export](../lib/context.x): the dispatcher excludes nil before its
+  private List helper; the helper still checks pool ownership and tail ends.
+
+Distinguish null from empty and inspect actual dispatch. `!map` also accepts
+an empty Map; removing that guard before `try_get` can add key hashing and
+registered callbacks. Symbol and Atom equality may dispatch too. A String
+type alone does not establish nonempty text, and a List type does not
+establish every element's shape. Typed pattern captures establish only the
+constraints that their emitted recognition actually enforces.
+
+State the precondition once for each connected removal. Report whether the
+proof establishes an impossible input, repeats validation, or delegates to
+an equivalent operation. Smaller source does not establish a speedup.
+
 ## LY-1 - Indentation, width, and text
 
 See LY-1 in [the standard](x2c-code-standard.md).
@@ -331,7 +399,7 @@ Avoid:
 ```x2c
 static Var _publish_label(
   Var input, String replacement, Array labels, Map fields) {
-  String text = input.string();
+  String text = input.as_string();
   fields[<label>] = replacement.var();
   labels.push(text.var());
   return replacement.var();

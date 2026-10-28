@@ -556,7 +556,7 @@ List Sym_lookup_macro(Sym s, Atom name){
 Map Compiler_macro_definition_locals(Compiler c){
   if(! _init_guard_) _file_init_();
   Var stored = Map_getindex(c -> macro_holes, List_var(_1));
-  return Var_is(stored, 26720) ? Var_map_payload(stored) : NULL;
+  return Var_map_payload(stored);
 }
 
 int Compiler_macro_template_local(Compiler c, List binding){

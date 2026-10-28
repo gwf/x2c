@@ -322,8 +322,9 @@ static Var _export_value(Context c, Var v) {
   raise %(bad-types (operation "Context.export") (tag $tag));
 }
 
+/* The dispatcher returns boxed nil before calling this helper. */
 static List _export_list(Context c, List list) {
-  if (!list || (c.pool && !c.pool.owns(list))) return list;
+  if (c.pool && !c.pool.owns(list)) return list;
   Block heads = auto Block.new(sizeof(Var));
   List tail = list;
   while (tail && (!c.pool || c.pool.owns(tail))) {
@@ -396,7 +397,8 @@ static Var _export_atom(Context c, Var value) {
 
 /* Block, Bytes, and Buffer storage moves and keeps its identity. */
 static Var _export_storage(Context c, Var v) {
-  void *allocation = v is <bytes> ? v.bytes().block() : v.pointer();
+  /* The Bytes arm establishes its tag before storage extraction. */
+  void *allocation = v is <bytes> ? v.bytes_payload().block() : v.pointer();
   if (!c.owns(allocation)) return v;
   if (v is <buffer>) _export_memo(c).set(v, 1);
   else c.move_block((Block) allocation);

@@ -206,6 +206,7 @@ Source: `src/symtab/namespaces.x`
 `Map Compiler.macro_definition_locals(Compiler c)`
 
 Returns the active macro definition's borrowed local map, or `NULL`.
+The Map destination maps other value tags to NULL.
 
 Source: `src/symtab/scopes.x`
 

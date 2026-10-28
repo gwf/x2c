@@ -1516,7 +1516,7 @@ static Var _retain(LogMemorySink l, Var value){
 }
 
 static List _retain_list(LogMemorySink l, List list){
-  if(! List_truth(list) || _pool_chain_owns(l -> pool, List_var(list))) return list;
+  if(_pool_chain_owns(l -> pool, List_var(list))) return list;
   Block heads = Block_new(sizeof(Var));
   const Block _x2c_gensym_macro_acquired_0 = heads;
   {

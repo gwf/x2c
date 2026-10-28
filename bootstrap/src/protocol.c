@@ -795,7 +795,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _374 = List_var(_373);
   _375 = Symbol_var(39266);
   _376 = Symbol_var(106239471489226);
-  _377 = int_var(2204);
+  _377 = int_var(2206);
   _378 = String_new("");
   _379 = String_var(_378);
   _380 = String_new("x2c.hole");
@@ -939,7 +939,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _515 = cons(_364, _514);
   _516 = cons(_358, _515);
   _517 = List_var(_516);
-  _518 = int_var(2211);
+  _518 = int_var(2213);
   _519 = cons(_431, NULL);
   _520 = cons(_464, _507);
   _521 = cons(_483, _520);
@@ -947,7 +947,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _523 = cons(_522, NULL);
   _524 = String_new("discard-helper");
   _525 = String_new("fresh-callee ");
-  _526 = int_var(2280);
+  _526 = int_var(2282);
   _527 = cons(_405, NULL);
   _528 = cons(_383, _527);
   _529 = List_var(_528);
@@ -2060,7 +2060,7 @@ static Type f10_resolution____participant_definition(Compiler c, Type participan
   if(! Type_is_bare_typedef_name(participant)) return NULL;
   String name = Var_as_string(List_car(Type_list(participant)));
   Var definition = Map_getindex(Sym_global_symbols(c -> sym), List_var(cons(_177, cons(String_var(name), NULL))));
-  return Var_is_row(definition, 9, 7, 4) ? Var_type(definition) : NULL;
+  return Var_type(definition);
 }
 
 void Sym_define_global(Sym, List, List);
@@ -2138,7 +2138,7 @@ static List f10_resolution____resolve_ordinary(Compiler c, Type base, Type parti
   (* failure) = NULL;
   Var stored;
   List key = cons(List_var(base), cons(List_var(participant), NULL));
-  if(Map_try_get(c -> conforms, List_var(key), &(stored))) return Var_is_row(stored, 9, 7, 4) ? Var_list_payload(stored) : NULL;
+  if(Map_try_get(c -> conforms, List_var(key), &(stored))) return Var_list_payload(stored);
   String base_name = _base_name(base);
   if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) goto does_not_conform;
   String forward = f10_resolution____forward_binding(c, base, participant);

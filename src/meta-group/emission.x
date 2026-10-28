@@ -228,8 +228,11 @@ static List _native_call(
   if (!(name in c.native_meta) || !c.native_meta_module(name, native))
     return NULL;
   Array values = [];
-  List declared = c.func_signature(callee.cadr()).car().list().cadr();
-  List parameters = native.car().list().cadr();
+  /* Compiler and native Func signatures retain List function headers. */
+  List declared_header = c.func_signature(callee.cadr()).car();
+  List native_header = native.car();
+  List declared = declared_header.cadr();
+  List parameters = native_header.cadr();
   foreach (List argument in arguments) {
     argument = _native_targets(c, argument, lookup);
     if (_boxes_func(c, declared.car(), parameters.car()))

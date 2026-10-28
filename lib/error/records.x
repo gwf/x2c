@@ -158,7 +158,8 @@ static Var _clone_in(Scope *owner, Var v) {
 }
 
 static Var _copy_text(ErrorRegion &?region, Var value) {
-  String source = value is <lsym> ? value.str() : value.string();
+  /* Only String or lsym enters; lsym keeps its dynamic rendering. */
+  String source = value is <lsym> ? value.str() : value.string_payload();
   if (!region) return _snapshot_text(value, source);
   String owned = String.new_in(region.pool, source, source.len());
   return value is <lsym> ? Var.new(<lsym>, owned) : owned;

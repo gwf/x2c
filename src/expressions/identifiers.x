@@ -171,9 +171,9 @@ static void _capture_identifier(Compiler c, List binding) {
       !c.sym.binding_is_local_before(
         binding, c.local_macro_capture_scopes) ||
       binding in c.local_macro_captures) return;
-  Var order = c.local_macro_captures[<order>];
-  c.local_macro_captures[<order>] = cons(
-    binding, order is <list> ? order : NULL);
+  /* Missing or non-List sequence slots read as nil. */
+  List order = c.local_macro_captures[<order>];
+  c.local_macro_captures[<order>] = cons(binding, order);
   c.local_macro_captures[binding] = 1;
 }
 

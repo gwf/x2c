@@ -248,15 +248,16 @@ static Var _decode_number(String tag, String text) {
   return Var.convert(value, target);
 }
 
-/* The first problem among the items of a List, Array, or Map, or NULL. */
+/* The first problem among the items of a List, Array, or Map, or NULL.
+   Each traversal branch establishes its collection tag. */
 static List _items_problem(Var value, Map marks) {
   if (value is <list>)
-    foreach (Var item in value.list()) {
+    foreach (Var item in value.list_payload()) {
       List problem = Var.independent_data_problem(item, marks);
       if (problem) return problem;
     }
   else if (value is <array>)
-    foreach (Var item in value.array()) {
+    foreach (Var item in value.array_payload()) {
       List problem = Var.independent_data_problem(item, marks);
       if (problem) return problem;
     }

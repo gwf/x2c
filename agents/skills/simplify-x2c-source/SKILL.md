@@ -55,6 +55,18 @@ recreating old distinctions through modes and callbacks may defeat the goal.
 
 Apply PR-4 and PR-10 in the standard to validation and compatibility.
 
+For private value-contract reductions, use the
+[contract examples](../../x2c-coding-style-guide.md#pr-4---trust-established-facts).
+Follow callers, recursive arguments, callback construction, all storage
+writers, and relevant aliases until the input guarantee closes. Distinguish
+impossible inputs from repeated validation and equivalent nil-fallback
+delegation. Preserve the public failure owner, callback ABI, preparation
+order, and effects. Nonnull pointers do not freeze aliased metadata; a
+String need not be nonempty, and an empty Map can still hash a key.
+State the precondition once per connected change under CM-3. Keep optional
+and unresolved cases outside the proved change set, and report small guard
+or conversion cleanups as such rather than as a larger machinery deletion.
+
 ## Complete and verify the removal
 
 Follow the same cause through private APIs, state, helpers, diagnostics,

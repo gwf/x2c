@@ -60,8 +60,18 @@ Apply LY, ST, EX, CM, and NM within the selected scope. Keep tables,
 diagrams, grammars, and equations intact when columns carry meaning.
 Verify unfamiliar syntax in current source, book pages, or a compiler probe.
 
+Use EX-4 and VT-3 for local exact-tag payload reads and typed destinations
+that preserve the existing nil fallback. The
+[contract examples](../../x2c-coding-style-guide.md#pr-4---trust-established-facts)
+distinguish those from checked failures, String rendering, and collection
+materialization. Keep the owning guard and its failure behavior. A change
+that needs caller, recursive-input, or container-writer proof is a connected
+simplification; use `simplify-x2c-source` within the authorized scope.
+
 Reread the whole file after edits, including the surroundings of changed
 hunks. Check that substantive comments and semantic details remain available.
+Retain one concise precondition per connected removal under CM-3 rather
+than repeating the proof at every checked read.
 For multiple files, review each in its own context and validate the coherent
 batch.
 
