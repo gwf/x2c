@@ -31,7 +31,7 @@ static int _external_name(const char * name);
 
 static void _run_command(Array arguments);
 
-static void _exec(String path, char * * args);
+static void _exec(String command, String path, char * * args);
 
 static int _run_env(CliRequest request);
 
@@ -155,14 +155,14 @@ int main(int argc, char * * argv){
 
 static void _run_external(int argc, char * * argv){
   String path = _external_path(argv[1]);
-  if(String_truth(path)) _exec(path, argv + 1);
+  if(String_truth(path)) _exec(String_new(argv[1]), path, argv + 1);
   if(argc != 3 || strcmp(argv[1], "help")) return;
   char * args[] ={
     NULL, "--help", NULL
   }
   ;
   path = _external_path(argv[2]);
-  if(String_truth(path)) _exec(path, args);
+  if(String_truth(path)) _exec(String_new(argv[2]), path, args);
 }
 
 static String _external_path(const char * name){
@@ -200,13 +200,13 @@ static void _run_command(Array arguments){
     String argument = Var_as_string(Array_getindex(arguments, i));
     args[i + 2] = String_truth(argument) ? argument : "";
   }
-  _exec(path, args);
+  _exec(command, path, args);
 }
 
-static void _exec(String path, char * * args){
+static void _exec(String command, String path, char * * args){
   {
     String name, value;
-    Map _x2c_gensym_macro_object_0 = Compiler_command_environment();
+    Map _x2c_gensym_macro_object_0 = Compiler_command_environment(command);
     unsigned _x2c_gensym_macro_cursor_0 = 0;
     Var _x2c_gensym_macro_cursor_output_0;
     Var _x2c_gensym_macro_cursor_output_1;

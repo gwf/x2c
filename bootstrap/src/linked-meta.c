@@ -13921,7 +13921,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10903 = List_var(_10902);
   _10904 = String_new("lib/scope/scope.x");
   _10905 = String_var(_10904);
-  _10906 = String_new("9e66b0cb");
+  _10906 = String_new("f3a3264d");
   _10907 = String_var(_10906);
   _10908 = cons(_10907, NULL);
   _10909 = cons(_10905, _10908);
@@ -15920,7 +15920,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12890 = List_var(_12889);
   _12891 = String_new("lib/scope/accounting.x");
   _12892 = String_var(_12891);
-  _12893 = String_new("90a9ea70");
+  _12893 = String_new("b17e0f9d");
   _12894 = String_var(_12893);
   _12895 = cons(_12894, NULL);
   _12896 = cons(_12892, _12895);
@@ -15942,14 +15942,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12912 = List_var(_12911);
   _12913 = String_new("lib/scope/regions.x");
   _12914 = String_var(_12913);
-  _12915 = String_new("e52fbe20");
+  _12915 = String_new("3a73e731");
   _12916 = String_var(_12915);
   _12917 = cons(_12916, NULL);
   _12918 = cons(_12914, _12917);
   _12919 = List_var(_12918);
   _12920 = String_new("lib/scope/runtime.x");
   _12921 = String_var(_12920);
-  _12922 = String_new("a334d2aa");
+  _12922 = String_new("928250bf");
   _12923 = String_var(_12922);
   _12924 = cons(_12923, NULL);
   _12925 = cons(_12921, _12924);
@@ -17799,7 +17799,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14760 = List_var(_14759);
   _14761 = String_new("src/utils.x");
   _14762 = String_var(_14761);
-  _14763 = String_new("18092191");
+  _14763 = String_new("c5a7b26d");
   _14764 = String_var(_14763);
   _14765 = cons(_14764, NULL);
   _14766 = cons(_14762, _14765);

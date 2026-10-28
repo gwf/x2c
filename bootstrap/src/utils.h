@@ -45,7 +45,7 @@ String Compiler_home_libexec(void);
 
 String Compiler_stage_dir(void);
 
-Map Compiler_command_environment(void);
+Map Compiler_command_environment(String name);
 
 String Compiler_driver_executable(void);
 

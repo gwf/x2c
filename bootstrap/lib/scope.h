@@ -95,6 +95,8 @@ ScopeStats Scope_stats(void);
 
 void Scope_initialize(void);
 
+int Scope_accounting_enabled(void);
+
 void Scope_shutdown_hook(void(* hook)(void));
 
 void Scope_shutdown(void);
