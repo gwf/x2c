@@ -1,4 +1,4 @@
-> Status: active - phases 1-3 published; client release and phase 4 in progress
+> Status: active - client 0.4.0 published; phase 4 ready for shared integration
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
 > Ready PRs go to the shared integration agent, which owns full gates.
@@ -6,7 +6,8 @@
 > release that uses the language client.
 > Phase 1 landed through PR #599. PR #600 published the JSON-boolean
 > startup repair. Phases 2 and 3 landed through PR #610 at `404a24862`.
-> The 0.4.0 client candidate passes real-editor checks; publication is pending.
+> Client 0.4.0 passed real-editor checks and was published to Marketplace.
+> PR #613 landed at `282f5bfb8`. Phase 4 removes the replaced editor path.
 
 # Resident language server: `x2c lsp`
 
@@ -498,6 +499,23 @@ until the new client release is verified. Phase 4 must also mark `lsp` shipped:
 the existing installer deliberately copies only shipped commands. Replacing
 the manifest row preserves installed editor support without changing that
 installer policy.
+
+## Phase 4 verification (2026-10-28)
+
+Marketplace verification completed for public client 0.4.0 before submission
+of the core retirement. The tested archive above was uploaded unchanged.
+The parent retirement tree passes `make build-safe`, `make stage-2`, the LSP
+artifact build, smoke/protocol/features checks, and the optional retained
+legacy regressions. These are development builds and focused checks; no full
+publication gate ran in the implementation session.
+
+The installed-prefix probe confirms that normal installation includes
+`x2c lsp` and excludes `x2c editor`. Framed analysis through the installed
+driver succeeds with the package command absent, without creating a lockfile
+or installing dependencies. Existing helper-shutdown coverage moves to the
+LSP protocol test. Additional legacy regressions remain optional. Historical
+references link to their original source; active documentation describes LSP.
+The shared integrator owns final generated artifacts and publication checks.
 
 ## Phases and size
 

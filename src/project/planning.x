@@ -13,14 +13,14 @@ CliRequest ProjectBuild.owning_target(CliRequest request, String source) {
     foreach (String input, node.request.inputs) {
       if (Path.absolute(input) != source) continue;
       if (selected && selected != node.request) {
-        fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
+        fputs("x2c lsp: source belongs to multiple selected targets\n", stderr);
         return NULL;
       }
       selected = node.request;
     }
   if (!selected)
     fputs(
-      "x2c editor: this document is not a selected target input; "
+      "x2c lsp: this document is not a selected target input; "
       "open its owning source for semantic results or configure "
       "a direct translate command\n", stderr);
   return selected;
