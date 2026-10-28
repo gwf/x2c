@@ -439,8 +439,6 @@ void Compiler.dump_cache(Compiler compiler) {
     printf("%s\t==>\t%s\n", value.repr(), key.repr());
 }
 
-// expansion note presentation
-
 static Var _expansion_note_syntax(Var value, Map caches) {
   if (value is not <list> || value.is_nil()) return value;
   match (value) {
