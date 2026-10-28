@@ -1,6 +1,7 @@
-> Status: active
-> Phases 1 and 2 authorized for implementation on 2026-10-28, with
-> shared-integrator delivery. Phase 3 remains unscoped.
+> Status: reference
+> Phases 1 and 2 published to dev on 2026-10-28 through PR #596
+> (`b1584a01fffab7b18eaf80afc23fd5fdb19189c6`). The shared integrator
+> passed the full publication gate. Phase 3 remains unscoped.
 > Planned 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). The original feasibility evidence follows. The runtime
 > and three programs
@@ -336,3 +337,21 @@ and Safari execution. Docker's daemon and Playwright's Firefox executable
 are unavailable here. The site test suite also has an unchanged baseline
 theme assertion failure; its new playground test passes. Final generated
 artifacts, publication gate, and publication belong to the shared integrator.
+
+## Delivery
+
+PR #596 includes the runtime archive, program build script, optional CI job,
+compile service, playground, and gallery links. Follow-up review corrected
+the executable tmpfs required by native meta helpers and preserved the
+unsupported-browser Run guard after page lifecycle events.
+
+The published wasm binaries declare 64 MiB initial memory and a 256 MiB
+maximum. Repeated browser runs use fresh worker state after completion,
+errors, and Stop; responses from aborted compilations are ignored. The
+shared integrator passed the full publication gate and confirmed the
+remote merged revision. No full gate ran in the author checkout.
+
+The container has not run against a real Docker daemon here. Firefox and
+Safari execution and public service deployment remain unverified. The
+site keeps Run hidden until its build receives a service URL. These gaps
+do not constitute completed deployment or cross-browser validation.
