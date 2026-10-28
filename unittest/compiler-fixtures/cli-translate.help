@@ -32,6 +32,7 @@ Inspection options:
       --dump-cpp-text         Alias for --dump-cpp
       --dump-cpp-tokens       Print host-preprocessed tokens and stop
       --dump-ast              Print the parsed AST and stop
+      --dump-expansions       Print bound macro expansions and stop
       --dump-transforms       Print the transformed AST and stop
       --dump-definitions      Print each definition's location and documentation and stop
       --dump-code             Print unformatted generated code and stop
