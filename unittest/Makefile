@@ -39,7 +39,7 @@ test-all: $(BUILD)/test-all.o $(SUITE_OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 test: test-all compiler-fixtures
-	./test-all
+	X2C_SCOPE_ACCOUNTING=1 ./test-all
 
 sanitizer: test-all
 	./probes/run-full-sanitizer.sh

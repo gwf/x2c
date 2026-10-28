@@ -148,6 +148,9 @@ error. `--stats` prints the concise runtime report at exit, to standard error.
 both statistics options are present, one verbose report is printed. The
 options can be combined with `--dump`.
 
+The `x2c repl` driver enables allocation accounting before starting the command.
+When invoking `x2c-repl` directly, set `X2C_SCOPE_ACCOUNTING=1` before startup.
+
 The report separates absolute live or retained quantities from activity since
 the REPL opened. Scope allocation objects and live requested bytes are
 process-wide runtime values; requested bytes count public managed payload.

@@ -98,3 +98,48 @@ x2c led all five single-client lookup pairs and used lower peak RSS in every
 pair. Durable-write results were too variable to rank. The dated directory
 retains the full matrix, paired ratios, build/configuration verification, and
 raw samples; no slow samples were removed.
+
+## Database thread comparison
+
+[threaded-notes.x](threaded-notes.x) is a standalone comparison server. One
+thread opens, uses, and closes SQLite. HTTP workers send a request on one
+shared channel and wait on the reply channel carried by that request. The
+HTTP workers construct note Maps and encode responses after receiving the
+copied rows. The ordinary [Notes server](../notes.x) remains the mutex baseline.
+
+Build both against the same optimized runtime and SQLite adapter:
+
+```sh
+prefix="$(python3 packages/tools/deps.py path packages/sqlite/dependency.json prefix)"
+make -C packages/sqlite build \
+  "PACKAGE_C_FLAGS=-O2 --c-include-dir src --c-include-dir $prefix/include"
+for variant in notes bench/threaded-notes; do
+  builds/0/x2c build -O2 --package-dir packages \
+    --c-include-dir packages/sqlite/src --c-include-dir "$prefix/include" \
+    -o "/tmp/$(basename "$variant")" "examples/apps/notes/$variant.x"
+done
+builds/0/x2c build -O2 -o /tmp/notes-load examples/apps/notes/bench/load.x
+```
+
+Build Go as described above, then compare the three servers:
+
+```sh
+python3 examples/apps/notes/bench/compare-architectures.py \
+  --mutex /tmp/notes --database-thread /tmp/threaded-notes \
+  --go /tmp/notes-go --load /tmp/notes-load \
+  --output /tmp/notes-architecture-results
+```
+
+The runner checks all three APIs and normalized fixture responses before
+measuring lookup throughput. It unsets `X2C_SCOPE_ACCOUNTING` for the run so
+both x2c servers use the default disabled mode. Defaults are 1,000 rows,
+64 clients, one-second warmup, five-second samples, and five rounds with
+varying order. `--fixture` can reuse a prepared database; `--rows` must match
+its note count. Every server receives an independent database copy. The JSON
+report retains every sample, order, latency, lifetime CPU/RSS, host load,
+binary/source hashes, and the temporary directory containing logs.
+
+The [2026-10-28 architecture comparison](reports/2026-10-28-architectures/interpretation.md)
+records the default-off accounting results. The database-thread variant has
+lower throughput and lower p99 latency than the mutex variant in all five
+rounds; the report includes CPU, memory, raw samples, and limitations.

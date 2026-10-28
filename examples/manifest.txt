@@ -78,3 +78,4 @@ apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/a
 apps/notes/bench/load|probe|none||-|Optional loopback benchmark client.
 power/derive|showcase|run||expected/derive.stdout|Generated record mappings, equality, and representation.
 power/tests/stack_test|probe|none||-|Standalone tests using test.x and its program entry.
+apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.

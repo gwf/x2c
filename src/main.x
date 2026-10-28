@@ -60,11 +60,11 @@ int main(int argc, char **argv) {
    <name>` runs it with `--help`. */
 static void _run_external(int argc, char **argv) {
   String path = _external_path(argv[1]);
-  if (path) _exec(path, argv + 1);
+  if (path) _exec(String.new(argv[1]), path, argv + 1);
   if (argc != 3 || strcmp(argv[1], "help")) return;
   char *args[] = { NULL, "--help", NULL };
   path = _external_path(argv[2]);
-  if (path) _exec(path, args);
+  if (path) _exec(String.new(argv[2]), path, args);
 }
 
 static String _external_path(const char *name) {
@@ -103,11 +103,11 @@ static void _run_command(Array arguments) {
     String argument = arguments[i];
     args[i + 2] = argument ? argument : "";
   }
-  _exec(path, args);
+  _exec(command, path, args);
 }
 
-static void _exec(String path, char **args) {
-  foreach (String (name, value) in Compiler.command_environment())
+static void _exec(String command, String path, char **args) {
+  foreach (String (name, value) in Compiler.command_environment(command))
     setenv(name, value, 1);
   args[0] = path;
   execv(path, args);

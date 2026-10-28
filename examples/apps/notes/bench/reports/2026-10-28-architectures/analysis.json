@@ -1,0 +1,14 @@
+{
+  "database_thread_over_mutex_rps": 0.776634246163933,
+  "database_thread_over_mutex_cpu": 2.3835596380833466,
+  "database_thread_over_mutex_p99": 0.5521210829247495,
+  "paired_thread_over_mutex": [
+    0.767721437785583,
+    0.7686788543288362,
+    0.7910533698695241,
+    0.7719178790446106,
+    0.8215700936321612
+  ],
+  "thread_wins_throughput": 0,
+  "thread_wins_p99": 5
+}

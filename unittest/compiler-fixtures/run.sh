@@ -327,7 +327,8 @@ run_fixture() {
 
   stderr_raw="$case_build/stderr.raw"
   set +e
-  ( "$program" >"$case_build/stdout.actual" 2>"$stderr_raw"
+  ( X2C_SCOPE_ACCOUNTING=1 "$program" \
+      >"$case_build/stdout.actual" 2>"$stderr_raw"
     child_status=$?
     exit "$child_status"
   ) 2>/dev/null

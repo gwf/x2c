@@ -1,8 +1,11 @@
 # Language server
 
 `x2c lsp` serves one workspace over stdio using LSP 3.17 and JSON-RPC 2.0.
-Build the experimental command with `make commands`. Start the compiler from
-its workspace directory. The driver selects its matching `x2c-lsp` executable.
+Build the experimental command with `make commands`. The driver enables
+allocation accounting before starting the server. A direct `x2c-lsp` invocation
+requires `X2C_SCOPE_ACCOUNTING=1` for its retained-memory restart policy.
+Start the compiler from its workspace directory. The driver selects its
+matching `x2c-lsp` executable.
 
 Send ordinary compiler arguments in `initializationOptions.arguments`, for
 example `["build", "--target", "app"]`. An empty list selects the discovered

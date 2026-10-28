@@ -1,0 +1,59 @@
+{
+  "native_and_toolchain_sha256": {
+    "/tmp/x2c-accounting-worker/builds/0/x2c": "f741d87d201c596940a7247046ad5b74fbe60b432edc83c8db771e558d722258",
+    "/tmp/x2c-accounting-worker/builds/0/libx2c.a": "d7264b1882636bd75ac6c9816f0a9194b76154d8ef47e74b2a4e4af9974f375e",
+    "/Users/gary/.codex/worktrees/216e/x2c/packages/sqlite/builds/libsqlite.a": "370bb4472f0451588453f72eea34f6f0bafb094039fc56760a3bdaa8eb5d5b60",
+    "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/lib/libsqlite3.a": "def377ee1367e50a5d905dcac0e25f2ce99bbee113ce8e38343dd424e6cf9ccc",
+    "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/include/sqlite3.h": "919e7f2e8ed1d8f56ac17b412b8971c76aa5d1a879752cc6058f75e7d5910e1d"
+  },
+  "build_commands": {
+    "mutex": [
+      "/tmp/x2c-accounting-worker/builds/0/x2c",
+      "build",
+      "-O2",
+      "-o",
+      "/tmp/notes-architectures-build-sjdyyky_/notes-mutex",
+      "--build-dir",
+      "/tmp/notes-architectures-build-sjdyyky_/mutex-build",
+      "--package-dir",
+      "/Users/gary/.codex/worktrees/216e/x2c/packages",
+      "--c-include-dir",
+      "/Users/gary/.codex/worktrees/216e/x2c/packages/sqlite/src",
+      "--c-include-dir",
+      "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/include",
+      "/Users/gary/.codex/worktrees/216e/x2c/examples/apps/notes/notes.x"
+    ],
+    "database-thread": [
+      "/tmp/x2c-accounting-worker/builds/0/x2c",
+      "build",
+      "-O2",
+      "-o",
+      "/tmp/notes-architectures-build-sjdyyky_/notes-database-thread",
+      "--build-dir",
+      "/tmp/notes-architectures-build-sjdyyky_/database-thread-build",
+      "--package-dir",
+      "/Users/gary/.codex/worktrees/216e/x2c/packages",
+      "--c-include-dir",
+      "/Users/gary/.codex/worktrees/216e/x2c/packages/sqlite/src",
+      "--c-include-dir",
+      "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/include",
+      "/Users/gary/.codex/worktrees/216e/x2c/examples/apps/notes/bench/threaded-notes.x"
+    ]
+  },
+  "runtime_source_sha256": {
+    "lib/scope/accounting.x": "9b746931964916511a20ad015a8d104eb10ab8f227304d4ae7d9edc95431e1ac",
+    "lib/scope/allocation.x": "26d02231640decff82f116bbea0a3f7d544b5c81ec3f272844650a0547dca71e",
+    "lib/scope/regions.x": "f012dd53c874c5d6343a386974e0b8102c9b918f47eb7bc39f8ada09d4f57cd4",
+    "lib/scope/runtime.x": "01551317cfbdeee12dc3bb7d7ac379486683f28bf7cdd5cd2792e776a26b01e8",
+    "lib/scope/scope.x": "3c5c55a7d4cc74597e920fb8691ffcce59f3d465ee8b935188f16f679b5db1a7"
+  },
+  "go_build": "/private/tmp/x2c-notes-go-w10r0v0i/notes-go: go1.27.3\n\tpath\tx2c.example/notes\n\tmod\tx2c.example/notes\t(devel)\t\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.52\th1:wVbm2Qnf4OXkqhBTSPuCRZDRnxfbVrrmiCEroVdog8U=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-tags=libsqlite3\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\"-O2 -g -I/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/include\"\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=-L/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/lib\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=2e75d9d9638ef2e78de6a6212ea0382a825f7f6c\n\tbuild\tvcs.time=2026-10-28T18:25:11Z\n\tbuild\tvcs.modified=true\n",
+  "sql_configuration": {
+    "version": "3.53.4",
+    "journal_mode": "delete",
+    "synchronous": 2,
+    "busy_timeout": 0,
+    "cache_size": -2000
+  },
+  "accounting_mode": "default disabled; X2C_SCOPE_ACCOUNTING unset"
+}

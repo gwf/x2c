@@ -116,6 +116,7 @@ done
       exit 1
     fi
   fi
+  X2C_SCOPE_ACCOUNTING=1 \
   ASAN_OPTIONS="detect_leaks=$detect_leaks:halt_on_error=1:abort_on_error=1" \
   UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
     "$test_program"

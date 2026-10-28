@@ -16,8 +16,7 @@ static String _stdout(Job job) {
 
 /* Runs a mode that must exit zero with `output` on standard output, and
    returns its standard error. */
-static String _passes(Path program, String mode, String output) {
-  Job job = $(program, mode).job().options({stderr: <capture>});
+static String _checked(Job job, String mode, String output) {
   if (job.status())
     probe_fail(%"$mode: exited with status $(job.status())");
   if (_stdout(job).rstrip("\n") != output)
@@ -25,11 +24,18 @@ static String _passes(Path program, String mode, String output) {
   return job.errors();
 }
 
+static String _passes(Path program, String mode, String output) {
+  Job job = $(program, mode).job().options({stderr: <capture>,
+    env: {"X2C_SCOPE_ACCOUNTING": "1"}});
+  return _checked(job, mode, output);
+}
+
 /* Runs a mode that must end in a terminal failure with nothing on standard
    output, reporting `message` when it succeeds, and returns the first line
    of its standard error. */
 static String _fails(Path program, String mode, String message) {
-  Job job = $(program, mode).job().options({stderr: <capture>});
+  Job job = $(program, mode).job().options({stderr: <capture>,
+    env: {"X2C_SCOPE_ACCOUNTING": "1"}});
   if (!job.status()) probe_fail(message);
   if (_stdout(job)) probe_fail(%"$mode: unexpected standard output");
   List lines = job.errors().split_lines(0);
@@ -67,6 +73,16 @@ Path scope_o = stage_lib.join("scope.o");
 Path thread_o = stage_lib.join("thread-state.o");
 %(cc -g -iquote $stage_lib $preinit_c $scope_o $thread_o -pthread -lm
   -o $preinit).job().run();
+
+Job default_off = %(env -u X2C_SCOPE_ACCOUNTING $program accounting-off)
+  .job().options({stderr: <capture>});
+if (_checked(default_off, "accounting-off", NULL))
+  probe_fail("default accounting emitted a leak report");
+Job explicit_off = %(env X2C_SCOPE_ACCOUNTING=0 $program accounting-off)
+  .job().options({stderr: <capture>});
+if (_checked(explicit_off, "accounting-off", NULL))
+  probe_fail("disabled accounting emitted a leak report");
+_quiet(program, "accounting-on");
 
 foreach (String mode, %("allocate" "shutdown")) _quiet(preinit, mode);
 _stderr("malloc-overflow",
