@@ -169,6 +169,12 @@ String JsonBool.repr(JsonBool value) => value;
 /** Returns nonzero for `true`. */
 int JsonBool.truth(JsonBool value) => value.value != 0;
 
+/** Preserves process-lifetime boolean singletons across Context export. */
+JsonBool JsonBool.export_context(JsonBool value, Context source) {
+  (void) source;
+  return value;
+}
+
 /** Reports whether `value` is a JSON boolean. */
 int Json.is_bool(Var value) => value is <jsonbool>;
 
