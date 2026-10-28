@@ -21,6 +21,7 @@ A unit's meta group, emitted as C.
 | [`Compiler.meta_cc`](#Compiler.meta_cc) | Returns the C compiler and the runtime header directory that build `meta` code, or NULL before `Compiler.use_meta_toolchain`. |
 | [`Compiler.meta_cc_identity`](#Compiler.meta_cc_identity) | Returns the identity of the C compiler at `cc`: its path and content hash. |
 | [`Compiler.meta_cc_run`](#Compiler.meta_cc_run) | Runs `arguments`, a C compiler command building the group C in `directory`, and returns NULL, or else its first error, which names `directory` when a group's C is the cause. |
+| [`Compiler.meta_diagnostic_line`](#Compiler.meta_diagnostic_line) | Formats a meta diagnostic as `FILE:LINE:COLUMN: CODE: MESSAGE`, followed by its notes on the same line. |
 | [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Reports whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
 | [`Compiler.prepare_loaded_functions`](#Compiler.prepare_loaded_functions) | Adds a loaded unit's public functions and object accessors to its targets. |
 | [`Compiler.prepare_loaded_main`](#Compiler.prepare_loaded_main) | Exposes a loaded unit's main through the ordinary helper target table. |
@@ -127,6 +128,16 @@ Runs `arguments`, a C compiler command building the group C in
 `directory` when a group's C is the cause.
 
 Source: `src/meta-group/toolchain.x`
+
+<a id="Compiler.meta_diagnostic_line"></a>
+#### Compiler.meta_diagnostic_line
+
+`String Compiler.meta_diagnostic_line(List entry)`
+
+Formats a meta diagnostic as `FILE:LINE:COLUMN: CODE: MESSAGE`,
+followed by its notes on the same line.
+
+Source: `src/meta-group/emission.x`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time

@@ -54,6 +54,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.parse_macro_quotation`](#Compiler.parse_macro_quotation) | Parses a quotation at `$!` into the code it builds from the locals its body names. |
 | [`Compiler.peek_macro_hole`](#Compiler.peek_macro_hole) | Returns the registered hole descriptor for a named or expression hole. |
 | [`Compiler.place`](#Compiler.place) | Places `code` where `where` says, under the active expansion's transaction: `(after-statement)` after the enclosing block item or initialized declarator; `(block-exit)` on every exit from the enclosing block from that point on, as a `defer` placed after it; `(function-entry)` at the entry of the enclosing function, at parse or transform time, in placement order before its first statement; `(unit-support)` among the unit's support declarations, once per KEY with `(unit-support KEY)`; or `(unit-init)` in the unit's file initialization, in AREA with `(unit-init AREA)`. |
+| [`Compiler.print_macro_expansion`](#Compiler.print_macro_expansion) | Prints one invocation frame and the bound result of its expansion. |
 | [`Compiler.publish_macro_definition_node`](#Compiler.publish_macro_definition_node) | Publishes a canonical `macrodef` in source order and returns `node`. |
 | [`Compiler.rebound`](#Compiler.rebound) | Records that binding built the statement `bound` again from `source`, a value the active lowering watches, so it watches `bound` as well. |
 | [`Compiler.rebuild_expression`](#Compiler.rebuild_expression) | Rebuilds an expression from a pending Macro value application, preserving its established root `type`, child stage, and source wrappers. |
@@ -558,6 +559,15 @@ with `(unit-support KEY)`; or `(unit-init)` in the unit's file
 initialization, in AREA with `(unit-init AREA)`.
 
 Source: `src/macros/values.x`
+
+<a id="Compiler.print_macro_expansion"></a>
+#### Compiler.print_macro_expansion
+
+`void Compiler.print_macro_expansion(Compiler c, List frame, List result)`
+
+Prints one invocation frame and the bound result of its expansion.
+
+Source: `src/macros/expansion.x`
 
 <a id="Compiler.publish_macro_definition_node"></a>
 #### Compiler.publish_macro_definition_node

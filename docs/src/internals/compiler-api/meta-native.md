@@ -416,8 +416,9 @@ Source: `src/meta-native/functions.x`
 
 Runs the explicit meta call `expression` at `site`. The project meta
 build's own parse leaves a project function's call for the translation:
-an expression takes a placeholder, and a template `slot`, which has
-none, is reported.
+ordinary expressions keep a placeholder after recording the first
+deferral. A template `slot` or a pattern outside a meta body recovers
+without a placeholder; meta-body calls keep their typed runtime form.
 
 Source: `src/meta-native/calls.x`
 

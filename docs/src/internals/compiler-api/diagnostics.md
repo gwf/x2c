@@ -20,6 +20,7 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content. |
 | [`Compiler.error_count`](#Compiler.error_count) | Returns the number of counted diagnostics accepted since the last reset. |
 | [`Compiler.file_prefix`](#Compiler.file_prefix) | Returns the prefix that the statics of the module file holding the current token take, or NULL outside a module unit. |
+| [`Compiler.macro_expansion_note`](#Compiler.macro_expansion_note) | Returns the innermost source expansion's definition and input note. |
 | [`Compiler.origin_location`](#Compiler.origin_location) | Resolves a recorded occurrence through generated ancestry to its source. |
 | [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `diagnostics_write_json`. |
 | [`Compiler.report_error`](#Compiler.report_error) | Submits a located compiler error, then transfers or exits. |
@@ -33,6 +34,8 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.token_source`](#Compiler.token_source) | Returns the file that the line markers of a merged text give `token`, and sets `line` to the token's line in that file. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
 | [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
+| [`Diagnostics.macro_definition_note`](#Diagnostics.macro_definition_note) | Formats a macro definition's recorded source location. |
+| [`Diagnostics.macro_expansion_input`](#Diagnostics.macro_expansion_input) | Removes captured-argument transport and source wrappers for a note. |
 | [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store that streams through `printer`. |
 | [`Diagnostics.reached_limit`](#Diagnostics.reached_limit) | Returns whether counted reports have reached the positive limit. |
 | [`Diagnostics.release`](#Diagnostics.release) | Restores the streaming saved by `hold`. |
@@ -122,6 +125,15 @@ Source: `src/diagnostics.x`
 Returns the prefix that the statics of the module file holding the
 current token take, or NULL outside a module unit. A module's first row
 marks the start of its text, so other units return before any scan.
+
+Source: `src/diagnostics.x`
+
+<a id="Compiler.macro_expansion_note"></a>
+#### Compiler.macro_expansion_note
+
+`String Compiler.macro_expansion_note(Compiler c)`
+
+Returns the innermost source expansion's definition and input note.
 
 Source: `src/diagnostics.x`
 
@@ -281,6 +293,24 @@ Source: `src/diagnostics.x`
 
 Stops streaming until `Diagnostics.release` and records the current
 entries, count, and limit state.
+
+Source: `src/diagnostics.x`
+
+<a id="Diagnostics.macro_definition_note"></a>
+#### Diagnostics.macro_definition_note
+
+`String Diagnostics.macro_definition_note(List definition)`
+
+Formats a macro definition's recorded source location.
+
+Source: `src/diagnostics.x`
+
+<a id="Diagnostics.macro_expansion_input"></a>
+#### Diagnostics.macro_expansion_input
+
+`Var Diagnostics.macro_expansion_input(List input)`
+
+Removes captured-argument transport and source wrappers for a note.
 
 Source: `src/diagnostics.x`
 

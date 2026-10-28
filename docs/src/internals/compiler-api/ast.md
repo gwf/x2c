@@ -26,11 +26,13 @@ Shared helpers for x2c compiler AST nodes.
 | [`Ast.lone_item`](#Ast.lone_item) | Returns the single item of a one-item `seq`, or `node` itself. |
 | [`Ast.lvalue_binding`](#Ast.lvalue_binding) | Returns the binding whose stored object the lvalue `ast` names, or `NULL`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
+| [`Ast.print_dump`](#Ast.print_dump) | Prints bound AST nodes with stable binding numbers and compact macro definitions. |
 | [`Ast.prototype_declarator`](#Ast.prototype_declarator) | Returns `declarator` with the outermost `volatile` removed from each of its parameters. |
 | [`Ast.reference_guard_exits`](#Ast.reference_guard_exits) | Returns whether `arm` ends with a return or non-returning raise. |
 | [`Ast.replace_nodes`](#Ast.replace_nodes) | Returns `root` with each list beneath it that `replaced` maps, keyed by its address, swapped for its value, and adds each rebuilt ancestor to `replaced`. |
 | [`Ast.rewrap_origin`](#Ast.rewrap_origin) | Returns `replacement` under the anchors of `original`, the statement it replaces, so a rewrite does not lose the node's source position. |
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
+| [`Ast.source_unwrap`](#Ast.source_unwrap) | Returns `value` without source wrappers. |
 | [`Ast.try_binding`](#Ast.try_binding) | Extracts a valid `(binding positive-integer string)` node. |
 | [`Ast.without_origin`](#Ast.without_origin) | Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped in. |
 | [`Ast.written_definitions`](#Ast.written_definitions) | Returns `decl` with each function definition marked `kernel` as written. |
@@ -185,6 +187,16 @@ calls, and blocks ending in either one when the block contains no
 
 Source: `src/ast.x`
 
+<a id="Ast.print_dump"></a>
+#### Ast.print_dump
+
+`void Ast.print_dump(List ast)`
+
+Prints bound AST nodes with stable binding numbers and compact macro
+definitions. Binding numbers follow their first appearance in `ast`.
+
+Source: `src/ast.x`
+
 <a id="Ast.prototype_declarator"></a>
 #### Ast.prototype_declarator
 
@@ -239,6 +251,17 @@ Applies `per_child` to each `List` child of `ast` and returns the node
 rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
+
+Source: `src/ast.x`
+
+<a id="Ast.source_unwrap"></a>
+#### Ast.source_unwrap
+
+`Var Ast.source_unwrap(Var value)`
+
+Returns `value` without source wrappers. Pending invocations and
+quotations keep their own capture rows or holes, so nested applications
+unwrap each argument once.
 
 Source: `src/ast.x`
 

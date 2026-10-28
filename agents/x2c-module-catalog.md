@@ -36,15 +36,15 @@ shared helpers for x2c compiler AST nodes.
 
 Public functions:
 
-`Ast.binding`, `Ast.append_modifiers`, `Ast.prototype_declarator`,
-`Ast.lvalue_binding`, `Ast.indirect_identifier`, `Ast.addressed_identifier`,
-`Ast.direct_identifier`, `Ast.written_operand`, `Ast.contains_head`,
-`Ast.replace_nodes`, `Ast.collect_binding_references`, `Ast.rewrap_origin`,
-`Ast.written_definitions`, `Ast.lone_item`, `Ast.rewrite_children`,
-`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
-`Ast.binding_spelling`, `Ast.try_binding`, `Ast.without_origin`,
-`Symbol.changes_left_operand`, `Symbol.is_assignment_op`,
-`Ast.initializer_functions`, `Ast.initializer_cases`
+`Ast.print_dump`, `Ast.binding`, `Ast.append_modifiers`,
+`Ast.prototype_declarator`, `Ast.lvalue_binding`, `Ast.indirect_identifier`,
+`Ast.addressed_identifier`, `Ast.direct_identifier`, `Ast.written_operand`,
+`Ast.contains_head`, `Ast.replace_nodes`, `Ast.collect_binding_references`,
+`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.lone_item`,
+`Ast.rewrite_children`, `Ast.entry_call`, `Ast.reference_guard_exits`,
+`Ast.never_returns`, `Ast.binding_spelling`, `Ast.try_binding`,
+`Ast.without_origin`, `Ast.source_unwrap`, `Symbol.changes_left_operand`,
+`Symbol.is_assignment_op`, `Ast.initializer_functions`, `Ast.initializer_cases`
 
 ### [src/builtins.x](../src/builtins.x)
 
@@ -80,7 +80,9 @@ Public functions:
 `Diagnostics.new`, `Diagnostics.hold`, `Diagnostics.release`,
 `Diagnostics.reached_limit`, `diagnostics_write_json`, `Compiler.file_prefix`,
 `Compiler.text_source`, `Compiler.report_error`, `Compiler.report_problem`,
-`Diagnostics.report`, `Compiler.report_warning`, `Compiler.origin_location`,
+`Diagnostics.report`, `Compiler.report_warning`,
+`Compiler.macro_expansion_note`, `Diagnostics.macro_expansion_input`,
+`Diagnostics.macro_definition_note`, `Compiler.origin_location`,
 `Compiler.token_location`, `Compiler.display_path`, `Compiler.token_source`,
 `Compiler.token_column`, `Compiler.report_warning_at`,
 `Compiler.print_diagnostic`, `Compiler.take_diagnostics`, `Diagnostics.reset`,
@@ -594,11 +596,11 @@ Public functions:
 `Compiler.try_parse_macro_member`, `Compiler.try_parse_macro_slot`,
 `Compiler.peek_macro_hole`, `Compiler.after_hole`,
 `Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
-`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
-`Compiler.lower_replacement`, `Compiler.rewrite_written`,
-`Compiler.rewrite_lowered`, `Compiler.lower_rewrite`,
-`Compiler.applying_shipped`, `Compiler.rebound`, `Compiler.watched_step`,
-`Compiler.publish_macro_definition_node`,
+`Compiler.print_macro_expansion`, `Compiler.marked_rewrite`,
+`Compiler.has_rewrites`, `Compiler.rewrite`, `Compiler.lower_replacement`,
+`Compiler.rewrite_written`, `Compiler.rewrite_lowered`,
+`Compiler.lower_rewrite`, `Compiler.applying_shipped`, `Compiler.rebound`,
+`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
 `Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
@@ -633,9 +635,9 @@ Public functions:
 `Compiler.group_meta_function`, `Compiler.finish_meta_functions`,
 `Compiler.meta_reaches_compile_time`, `Compiler.public_native_function`,
 `Compiler.refuse_record_meta_call`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
-`Compiler.stage_session_function`
+`Compiler.refuse_meta_call`, `Compiler.meta_diagnostic_line`,
+`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
+`Compiler.bind_meta_group`, `Compiler.stage_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 
