@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
       .inputs = parsed.inputs, .index = parsed.index, .sha256 = parsed.sha256,
       .quiet = parsed.quiet, .force = parsed.force
     };
-    return _run(parsed.command.str(), request);
+    return _run(parsed.command, request);
   }
   List args = Args.from_argv(argc, argv);
   String operation = args ? args.car() : "--help";

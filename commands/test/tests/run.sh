@@ -64,6 +64,18 @@ printf 'this is not source\n' >"$WORK/project/broken_test.x"
 run -j 2 a_test.x broken_test.x
 [ "$status" = 1 ]
 grep -Fxq 'files: 1 passed, 1 failed; tests: 1 passed, 0 failed' "$WORK/out"
+# Native build failures retain their diagnostics after the failed Job is read.
+printf '#error "native-build-diagnostic %s"\n' \
+  'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
+  >"$WORK/project/include/failing.h"
+cat >"$WORK/project/native_test.x" <<NATIVE
+#include "$WORK/project/include/failing.h"
+int main(void) => 0;
+NATIVE
+run native_test.x
+[ "$status" = 1 ]
+grep -Fq 'native-build-diagnostic' "$WORK/out"
+grep -Fxq 'files: 0 passed, 1 failed; tests: 0 passed, 0 failed' "$WORK/out"
 run "$WORK/empty"
 [ "$status" = 2 ]
 for jobs in 0 -1 nope ''; do

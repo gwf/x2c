@@ -15,8 +15,10 @@
 - Native build: the unchanged amalgamation, `-O2 -std=c99 -pthread`, with
   `SQLITE_THREADSAFE=1`. No `SQLITE_OMIT_*` or optional `SQLITE_ENABLE_*`
   definitions are added. The upstream JSON functions are included by default.
-- Linkage: static `libsqlite3.a`, platform C runtime, math, and pthread
-  support.
+- Linkage: static `libsqlite3.a`, platform C runtime, and pthread support.
+  The pinned default build does not enable SQLite's optional math functions.
+  x2c supplies its runtime math library when it links an executable; the
+  SQLite package does not repeat that link argument.
   No additional library, framework, or loadable module is bundled.
 - Native extension loading retains SQLite's default: disabled for a connection
   until explicitly enabled through the raw API. Optional FTS, RTree, session,
