@@ -13702,7 +13702,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10859 = cons(_223, _10858);
   _10860 = String_new("lib/json.x");
   _10861 = String_var(_10860);
-  _10862 = String_new("f51a49b0");
+  _10862 = String_new("14cdd9c4");
   _10863 = String_var(_10862);
   _10864 = String_new("cwd:./math.h");
   _10865 = String_var(_10864);
@@ -16621,14 +16621,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13763 = List_var(_13762);
   _13764 = String_new("src/cli/help.x");
   _13765 = String_var(_13764);
-  _13766 = String_new("cfc8807a");
+  _13766 = String_new("22e4169b");
   _13767 = String_var(_13766);
   _13768 = cons(_13767, NULL);
   _13769 = cons(_13765, _13768);
   _13770 = List_var(_13769);
   _13771 = String_new("src/cli/parsing.x");
   _13772 = String_var(_13771);
-  _13773 = String_new("f841e508");
+  _13773 = String_new("e7325c12");
   _13774 = String_var(_13773);
   _13775 = cons(_13774, NULL);
   _13776 = cons(_13772, _13775);
@@ -16780,7 +16780,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13919 = List_var(_13918);
   _13920 = String_new("src/collect/interfaces.x");
   _13921 = String_var(_13920);
-  _13922 = String_new("f0338973");
+  _13922 = String_new("9775018d");
   _13923 = String_var(_13922);
   _13924 = cons(_13923, NULL);
   _13925 = cons(_13921, _13924);

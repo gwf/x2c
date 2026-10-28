@@ -26,6 +26,8 @@ String JsonBool_repr(JsonBool value);
 
 int JsonBool_truth(JsonBool value);
 
+JsonBool JsonBool_export_context(JsonBool value, Context source);
+
 int Json_is_bool(Var value);
 
 int Json_boolean(Var value);
