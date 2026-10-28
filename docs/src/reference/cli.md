@@ -362,6 +362,11 @@ or index the workspace in the background. Native CPP symbol modes cannot
 consume unsaved source text and report that limitation. Macro-generated
 syntax can lack a physical definition or identifier location.
 
+The server reclaims retained history at idle checkpoints while preserving the
+editor connection, current buffers, and exported results. The next analysis
+rebuilds compiler state. Each checkpoint resets macro and native-module
+process state.
+
 For Neovim with built-in LSP support:
 
 ```lua

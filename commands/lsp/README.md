@@ -23,6 +23,12 @@ uses each analyzed document's read set. Diagnostics wait until queued changes
 have drained. Queued requests can be cancelled; an analysis already running
 finishes before the next message is handled.
 
+At idle checkpoints, 64 MiB of retained allocation growth causes the server
+to replace itself while preserving its PID, stdio connection, current buffers,
+and exported results. The next analysis rebuilds compiler state. Macro and
+native-module process state resets. The budget limits retained history between
+checkpoints; one analysis or input burst can exceed it.
+
 Protocol messages use `Content-Length` framing. Compiler output goes to stderr.
 `shutdown` returns a null result; `exit` terminates the process. EOF also exits.
 The command does not index the workspace in the background or run a C compiler.

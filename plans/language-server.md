@@ -71,7 +71,9 @@ granularity the server offers.
 - Configuration: `initializationOptions.arguments` (the current
   `x2c.semantic.arguments` list) becomes the `CliRequest` after `--`, with
   the same `build` default and `build`/`translate` restriction as
-  `editor.x`. One `Frontend` is created per process. `source_facts` is on.
+  `editor.x`. One current `Frontend` serves the selected target. A target
+  change closes the previous unit before configuring the next frontend.
+  `source_facts` is on.
 - Target selection: move `editor.x`'s `_project_target` into
   `src/project/` as `ProjectBuild.owning_target(CliRequest, String source)`,
   returning the selected request or NULL with the existing ambiguity
