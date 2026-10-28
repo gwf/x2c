@@ -36,7 +36,7 @@ int lsp_serve(void) {
       _discard(message);
     }
     else if (server.eof) break;
-    if (!server.queued.len() && !_waiting()) _publish(server);
+    if (!server.queued.len() && (server.eof || !_waiting())) _publish(server);
   }
   if (server.workspace) server.workspace.close_unit();
   int result = server.exiting && !server.shutdown ? 1 : 0;
