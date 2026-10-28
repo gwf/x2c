@@ -760,9 +760,9 @@ when no earlier known consumer already explains the helper. Recursive groups,
 unrelated ties and later consumers calling earlier shared helpers are accepted.
 Macros, decorators, meta definitions and other source forms limit the checked
 runs. Coverage is printed on standard error; no finding does not establish
-full-file conformance. The candidate uses existing `lint: allow function-
-reading-order FI-4: reason` suppressions and proposes no automatic fix.
-Findings do not change lint's exit status.
+full-file conformance. The candidate uses existing
+`lint: allow function-reading-order FI-4: reason` suppressions and proposes no
+automatic fix. Findings do not change lint's exit status.
 
 `x2c lint` reports an unreadable input's path and system error on standard
 error and exits `1`, while checking the other readable inputs. This also

@@ -1,7 +1,7 @@
 # Optional function reading-order candidate
 
 > Status: done, implementation and findings review complete, 2026-10-27.
-> Gary authorized validation and publication of the opt-in lint change.
+> Implementation: `2422a235`. Gary authorized validation and publication.
 > All nine reviewed placements and the module layout remain unchanged.
 > Thematic fragmentation and further ordering work remain deferred.
 
