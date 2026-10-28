@@ -17,12 +17,14 @@
 
 /** One rule: its code, its `<language>` or `<style>` family, whether a
     finding is a `<violation>` or a review `<candidate>`, and the rule ID in
-    `agents/x2c-code-standard.md` that owns it.
+    `agents/x2c-code-standard.md` that owns it. `explicit_only` excludes a
+    rule from family selection, including `--all`.
 */
 typedef struct Rule:
   String code
   Symbol family, kind
   String rule
+  int explicit_only
 Rule
 
 /** One file under lint. `partner` maps each bracket or interpolated-string
@@ -51,6 +53,7 @@ typedef struct Lint:
 *Lint
 
 static const Rule rules[] = {
+  {"function-reading-order", <style>, <candidate>, "FI-4", 1},
   {"same-line-else", <style>, <violation>, "ST-1"},
   {"empty-constructor", <style>, <candidate>, "EX-1"},
   {"saved-local", <style>, <candidate>, "NM-4"},
@@ -143,7 +146,8 @@ const Rule *Rule.find(String code):
 /** Selects in `selected` the rules of `family`. */
 void Rule.select_family(Map selected, Symbol family):
   for (int at = 0; at < rule_count; at++):
-    if rules[at].family == family: selected[rules[at].code] = 1
+    if !rules[at].explicit_only && rules[at].family == family:
+      selected[rules[at].code] = 1
 
 /** Prints the rule table, one rule per line. */
 void Rule.print_table(void):

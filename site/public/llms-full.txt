@@ -6927,6 +6927,19 @@ through `x2c-lint`. It reports the change without an automatic
 fix; mixed cleanup groups and bindings that can change keep initializer
 `auto`.
 
+The style candidate `function-reading-order` checks public placement and
+caller-before-callee dependencies within ordinary function runs. Select it
+through lint's rule option; selecting all ordinary rules does not enable it.
+Run `x2c help lint` for the invocation syntax. Pass a module's entry file to check its physical
+members in context. Public dependency paths include private or generated
+intermediates. The private check reports direct dependencies only when no
+earlier known consumer already explains the helper. Recursive groups,
+unrelated ties and later consumers calling earlier shared helpers are accepted. Macros, decorators, meta definitions and
+other source forms limit the checked runs. Coverage is printed on standard
+error; no finding does not establish full-file conformance. The candidate
+uses existing `lint: allow function-reading-order FI-4: reason` suppressions
+and proposes no automatic fix. Findings do not change lint's exit status.
+
 `x2c lint` reports an unreadable input's path and system error on standard
 error and exits `1`, while checking the other readable inputs. This also
 applies when checking formatting or showing formatting differences. The lint

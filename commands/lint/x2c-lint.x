@@ -8,8 +8,9 @@
     Prints each finding as `FILE:LINE: KIND CODE RULE-ID: MESSAGE`, in line
     order. The language rules run unless `--all` or `--rule` selects rules;
     `--rules` prints the table of codes, families, kinds, and standard rule
-    IDs. Each file is scanned for the token rules and parsed by the
-    compiler for the declaration and member-arrow rules. The compiler's
+    IDs. `function-reading-order` requires explicit `--rule` selection;
+    `--all` does not select it. Each file is scanned for token rules and
+    parsed by the compiler for declaration and member-arrow rules. The compiler's
     diagnostics go to standard error; a file that does not parse gets the
     token rules only and makes the exit status 1. Findings alone leave the
     exit status 0. An unreadable input reports its path on standard error,
@@ -33,6 +34,7 @@
 #include "lint.x"
 #include "tokens.x"
 #include "declarations.x"
+#include "order.x"
 #include "lifetime.x"
 #include "idioms.x"
 #include "comments.x"
@@ -50,7 +52,8 @@ static void _usage(void):
   fputs("usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... "
         "FILE...\n"
         "       x2c-lint --fmt-check [--fmt-diff] FILE...\n"
-        "       x2c-lint --rules\n", stderr)
+        "       x2c-lint --rules\n"
+        "function-reading-order requires --rule (excluded from --all).\n", stderr)
 
 static void _preprocessor_errors(String text):
   fputs(text, stderr)
@@ -70,12 +73,13 @@ static int _read(Path path, String &text):
 
 /* Parses `path` and runs the rules that read its parse. Returns 0 and
    prints the compiler's diagnostics when the unit does not parse. */
-static int _parse(Lint l, Frontend frontend, String path):
+static int _parse(Lint l, Frontend frontend, String path, Map order_seen):
   ParsedUnit parsed
   if !frontend.open_reporting(path, parsed): return 0
   List rows = parsed.compiler.definition_rows(parsed.ast)
   l.comment_rules(parsed.compiler, parsed.ast, rows)
   l.declaration_rules(parsed.compiler, parsed.ast, rows)
+  l.order_rules(parsed.compiler, parsed.ast, rows, order_seen)
   l.lifetime_rules(parsed.compiler, parsed.ast)
   l.member_arrows(parsed.compiler, parsed.ast)
   l.validation_rules(parsed.compiler, parsed.ast)
@@ -159,6 +163,7 @@ int main(int argc, char **argv):
     translate.push(dir)
   Path work = fix ? Path.temp_dir() : NULL
   int status = 0, count = 0
+  Map order_seen = "function-reading-order" in selected ? {} : NULL
   Lint *lints = xcalloc(inputs.len() + 1, sizeof(Lint))
   foreach Path file in inputs:
     String source
@@ -168,7 +173,7 @@ int main(int argc, char **argv):
     Lint l = lints[count++] = Lint.new(file, source, selected)
     l.token_rules()
     l.idiom_rules()
-    if !_parse(l, frontend, file):
+    if !_parse(l, frontend, file, order_seen):
       l.comment_rules(NULL, NULL, NULL)
       status = 1
     l.structure_rules()
