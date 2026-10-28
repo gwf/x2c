@@ -55,8 +55,10 @@ function setup() {
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "extension.js"), "utf8"), {
     module, require: (name) => name === "vscode" ? vscode :
-      name === "vscode-languageclient/node" ? { LanguageClient, TransportKind: { stdio: 0 }, State: { Running: 2 } } :
-      name === "./client" ? { selectCompiler: () => settings["semantic.compilerPath"],
+      name === "vscode-languageclient/node" ? { LanguageClient, State: { Running: 2 } } :
+      name === "./client" ? {
+        uriConverters: (cwd) => ({ cwd }),
+        selectCompiler: () => settings["semantic.compilerPath"],
         findExecutable: () => available ? "/selected/x2c" : null } : require(name)
   });
   return { extension: module.exports, handlers, clients, messages, vscode, document, header,
@@ -74,7 +76,10 @@ test("trusted workspace starts one stdio client with compiler arguments and full
   assert.equal(client.started, 1);
   assert.equal(client.server.command, "/selected/x2c");
   assert.deepEqual(Array.from(client.server.args), ["lsp"]);
+  // An explicit stdio transport makes vscode-languageclient 9 append --stdio.
+  assert.equal(Object.hasOwn(client.server, "transport"), false);
   assert.equal(client.server.options.cwd, "/project");
+  assert.equal(client.options.uriConverters.cwd, "/project");
   assert.deepEqual(Array.from(client.options.initializationOptions.arguments), ["build", "--target", "app"]);
   assert.equal(client.options.documentSelector[0].scheme, "file");
   assert.equal(client.options.documentSelector[0].language, "x2c");

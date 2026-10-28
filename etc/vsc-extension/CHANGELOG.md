@@ -3,7 +3,17 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
-## Unreleased
+## 0.4.0 - 2026-10-28
+
+- Start `x2c lsp` for compiler diagnostics, definitions, hover, completion,
+  document and workspace symbols, references, rename, and lexical semantic
+  tokens. Keep unsaved buffers in the resident workspace server.
+- Replace per-request worker processes and snapshot files with the standard
+  VS Code language client. Preserve trusted local workspaces, compiler path
+  selection, compiler arguments, and unsaved included files.
+- Require VS Code 1.82 or newer and a compiler checkout with the experimental
+  `lsp` command built. Remove the retired `workerPath` setting; select the
+  compiler with `compilerPath`.
 
 - Rebuild the package so an interpolated String inside a parenthesized
   `$(...)` List unquote no longer leaves the rest of the file highlighted as
@@ -54,7 +64,7 @@ first.
 - Associate ordinary `.xp` indentation syntax files with x2c.
 - Highlight `static keyword` aliases; macros use ordinary source modules.
 
-## 0.3.0
+## 0.3.0 - Repository preview
 
 - Use `x2c editor` from an installed compiler for diagnostics, definitions, and
   hover, with trusted workspace and PATH discovery.

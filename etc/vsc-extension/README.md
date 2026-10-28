@@ -18,22 +18,25 @@ including a standalone `$`. The color settings below make sigils bold. Quoted Li
 `@items` and `@(expression)` splices; Lisp retains `,@` unquote-splicing.
 Native C variadic `...` remains distinct from macro syntax.
 
-With a current x2c compiler available, the extension also provides compiler
-diagnostics, definition navigation, and type hover. Syntax highlighting works
+With a compatible x2c compiler available, the extension provides compiler
+diagnostics, definition navigation, type hover, completion, symbols,
+references, rename, and lexical semantic tokens. Syntax highlighting works
 without the compiler. The extension does not install tools or collect
 telemetry.
 
 ## Installation
 
 Run `npm ci && npm run build` in `etc/vsc-extension`, then install the resulting
-0.3.0 VSIX with **Extensions: Install from VSIX**. This repository change does
-not publish a Marketplace release.
+0.4.0 VSIX with **Extensions: Install from VSIX**.
 
 ## Compiler diagnostics, definitions, and hover
 
 See the book's [editor setup and configuration](https://x2c-lang.dev/docs/reference/cli.html#vs-code-diagnostics-definitions-and-hover).
-The language server is experimental and is not included by `make install`.
-Run `make commands` in the compiler checkout, then select its matching
+Compiler language features require a compiler that provides `x2c lsp` and
+its matching server executable. Syntax highlighting remains available with
+older compilers; upgrade the compiler to enable language features.
+
+For a development checkout, run `make commands` and select its matching
 compiler:
 
 ```json
@@ -41,14 +44,13 @@ compiler:
 ```
 
 VS Code 1.82 or newer is required. The extension starts `x2c lsp` over
-stdio and keeps one server per local workspace. The deprecated
-`x2c.semantic.workerPath` setting remains accepted but is unused by the
-language client. Setup errors appear in the **x2c** Output channel.
+stdio and keeps one server per local workspace. Setup errors appear in the
+**x2c** Output channel.
 
 Semantic analysis runs only in trusted local workspaces because compiling
 x2c can execute macros. Untrusted and virtual workspaces retain syntax
 highlighting. The book describes project/target selection, unsaved sources,
-native CPP limitations, and the boundaries of definition and hover results.
+native CPP limitations, and the boundaries of the server's results.
 
 ## Distinct x2c colors
 
@@ -294,7 +296,7 @@ x2c form and the ordinary C syntax it could be confused with.
 ## Marketplace identity
 
 The Marketplace publisher is `x2c-lang`, displayed as x2c. The extension ID is
-`x2c-lang.x2c-syntax`. Version 0.1.23 retains the Preview label.
+`x2c-lang.x2c-syntax`. Version 0.4.0 retains the Preview label.
 
 ## License and support
 
