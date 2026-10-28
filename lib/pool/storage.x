@@ -103,10 +103,11 @@ void Pool.free(Pool inner, void *alloc) {
   if (!inner) raise %(bad-arg (operation "Pool.free"));
   _storage_lock();
   defer _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
   PoolBlock block = _find_block(alloc);
-  pool_free_calls++;
+  Pool owner = block ? block.owner : inner;
+  _lock(owner);
+  defer _unlock(owner);
+  if (Scope.accounting_enabled()) pool_free_calls++;
   if (block) _free_slot(block, alloc);
   else xfree(alloc);
 }
@@ -185,10 +186,21 @@ PoolStats Pool.stats(Pool inner) {
   return stats;
 }
 
-/* Takes a slot from the class's current block, leasing another block when
-   that one is full. When the depot has no block to lease, a fresh one is
-   allocated with no lock held and offered to the next attempt. */
+/* The current block needs only its owner's lock when traffic accounting is
+   off. A miss releases that lock before entering storage -> owner order.
+   Fresh backing allocation remains outside both locks. */
 static void *_small_malloc(Pool inner, int class_index, size_t size) {
+  int accounting = Scope.accounting_enabled();
+  if (!accounting) {
+    _lock(inner);
+    PoolBlock block = _block_with_room(inner, class_index);
+    if (block) {
+      void *slot = _take_slot(block, class_index, 0);
+      _unlock(inner);
+      return slot;
+    }
+    _unlock(inner);
+  }
   PoolBlock fresh = NULL;
   loop {
     _storage_lock();
@@ -197,7 +209,7 @@ static void *_small_malloc(Pool inner, int class_index, size_t size) {
     if (!block) block = _block_lease(inner, class_index, fresh);
     if (block) {
       if (block == fresh) fresh = NULL;
-      void *slot = _take_slot(block, class_index);
+      void *slot = _take_slot(block, class_index, accounting);
       _record_request(size);
       _unlock(inner);
       _storage_unlock();
@@ -229,11 +241,11 @@ static int _has_room(PoolBlock block) {
 }
 
 /* Reuses a freed slot, or else hands out the next slot never used. */
-static void *_take_slot(PoolBlock block, int class_index) {
+static void *_take_slot(PoolBlock block, int class_index, int accounting) {
   void *slot = block.free;
   if (slot) {
     block.free = *(void **) slot;
-    pool_slot_reuses++;
+    if (accounting) pool_slot_reuses++;
     return slot;
   }
   slot = _data(block) + block.used;
@@ -400,6 +412,7 @@ module void _fatal(const char *message) {
 /* Accounts for one satisfied request. The caller holds the storage lock, so
    the small-class path takes no lock of its own. */
 static void _record_request(size_t size) {
+  if (!Scope.accounting_enabled()) return;
   pool_allocation_calls++;
   if (SIZE_MAX - pool_requested_bytes < size) pool_requested_bytes = SIZE_MAX;
   else pool_requested_bytes += size;
@@ -446,8 +459,14 @@ static int _contains(PoolBlock block, const void *ptr) {
   if (!block.owner) return 0;
   const char *data = _data(block), *candidate = ptr;
   unsigned size = pool_class_sizes[block.class_index];
-  if (candidate < data || candidate >= data + block.used) return 0;
-  return (size_t) (candidate - data) % size == 0;
+  if (candidate < data ||
+      candidate >= data + block.bytes - POOL_BLOCK_DATA_OFFSET ||
+      (size_t) (candidate - data) % size) return 0;
+  Pool owner = block.owner;
+  _lock(owner);
+  int contains = candidate < data + block.used;
+  _unlock(owner);
+  return contains;
 }
 
 /* Moves `object` from `inner` to `inner.up`. `block` is the region block

@@ -42,7 +42,10 @@ typedef struct Pool {
 } *Pool;
 
 /** Reports one pool level's activity and process-wide storage counters.
-    The snapshot owns no storage; `requested_bytes` saturates at `SIZE_MAX`.
+    Allocation/free calls, requested bytes, and slot reuse require
+    `X2C_SCOPE_ACCOUNTING=1` at startup and are zero otherwise. Block and
+    backing-storage metrics remain available. The snapshot owns no storage;
+    `requested_bytes` saturates at `SIZE_MAX`.
 */
 typedef struct PoolStats {
   int depth, size_t interned, promoted, allocation_calls, free_calls;
