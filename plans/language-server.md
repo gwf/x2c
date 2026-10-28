@@ -1,7 +1,9 @@
-> Status: needs author scoping
+> Status: implementation authorized; phase 1 in progress
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
-> (`f5d0eb2fb`). No implementation has started. Gary decides whether the
-> command is wanted and whether phase 1 proceeds before the later phases.
+> (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
+> Ready PRs go to the shared integration agent, which owns full gates.
+> Phase 1 lands before phases 2 and 3 start. Phase 4 waits for the extension
+> release that uses the language client.
 
 # Resident language server: `x2c lsp`
 
@@ -177,6 +179,52 @@ to absolute paths and `Path.absolute` keeps logical identity, as in
 `_snapshots`. Non-`file` URIs are ignored.
 
 ## Delivery
+
+### Approved lifetime revision (2026-10-28)
+
+The first implementation exposed a lifetime gap in the original architecture.
+The server Context retains every exported snapshot String. A paced probe with
+100 distinct 128 KiB edits grew RSS from 181,728 KiB to 192,752 KiB.
+Compiler collection also retains historical declaration rows deliberately:
+`Compiler.refresh_source_collections()` drops indexes, not their backing values
+(`src/collect/cache.x`). Collection promotes retained Strings and Lists to the
+root pool. Native modules and the source-path cache also have process lifetimes.
+
+Gary requested a revised lifetime design before submission. Two smaller
+alternatives do not reclaim the full history:
+
+- Keeping document bytes in Buffers and canonicalizing only the current
+  snapshot would bound overlay Strings, but not compiler-global history.
+- Rebuilding the isolated server Context would reclaim its own history, but
+  not values promoted to the root pool or compiler process scopes.
+
+Proposed replacement boundary: restart the language server in place with
+`exec` at an idle checkpoint when retained allocation growth exceeds a fixed
+budget. Keep the same PID and stdio connection. No supervisor or second
+analysis process is introduced. Serialize initialization arguments, current
+open overlays and dirty flags, exported Analysis records, document versions,
+and notice deduplication
+state into an anonymous inherited temporary-file descriptor. Checkpoint only
+after queued messages and pending diagnostics drain, so no in-flight request
+is replayed. Stop the compiler's meta helper and release its temporary state
+through its existing owner before exec. Restore protocol stdout before the
+new executable starts. Resume without sending a second initialize response.
+Restore exported Analysis records; never serialize borrowed compiler values.
+
+Use the existing allocator counters to compare retained growth with the first
+completed analysis of the generation; a proposed initial budget is 64 MiB.
+This bounds history between checkpoints, not the size of one document,
+analysis, or queued input burst. A fresh generation establishes its baseline
+after restoring live documents and completing its first analysis.
+
+The change stays in `commands/lsp/`; it does not change compiler/runtime
+ownership or ABI. Its costs are serialization proportional to current live
+buffer bytes, temporary storage of those bytes, and cold compiler/meta setup
+after each checkpoint. Native-module and macro process state resets at that
+boundary. A focused forced-checkpoint probe must verify continued hover,
+unsaved headers, framing, and shutdown on the same client connection.
+Gary approved idle exec checkpoints with the 64 MiB growth budget on
+2026-10-28. Implement this revision before submitting phase 1.
 
 1. `commands/lsp/`: `main.x` (identity, `--help`, exit), `lsp.x` (framing,
    dispatch, positions), `analysis.x` (workspace state, unit lifetime,
