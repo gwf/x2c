@@ -391,3 +391,9 @@ an optional explicit invocation, not a new build or publication requirement.
 - Combined checks pass: warning-free `make commands`, command smoke, the
   standalone SQLite pilot without header environment variables, and the
   unchanged SQLite harness (15 tests, 134 assertions). No full gate ran here.
+
+The pilot now runs with the documented plain `x2c test` invocation after the
+ordinary package build. This supports another bounded standalone package
+integration test when it covers a real missing path. It does not establish
+that migrating the existing harness or promoting the command would be useful;
+those decisions remain conditional follow-ups.
