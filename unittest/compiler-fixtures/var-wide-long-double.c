@@ -13,7 +13,7 @@ static Var box_value(long double value){
 }
 
 static long double unbox_value(Var value){
-  return Var_long_double(Var_convert(value, 26071077642));
+  return Var_long_double(Var_convert_at(value, 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-wide-long-double.x",.function = "unbox_value",.line = 8}; & _x2c_gensym_error_site_0; })));
 }
 
 int main(void){

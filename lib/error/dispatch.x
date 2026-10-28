@@ -46,6 +46,16 @@ Symbol Error.raise(Symbol code, List detail) {
   return _dispatch(r);
 }
 
+/** Raises one cause with structured detail and an optional source location.
+    A null `site` records no location. Detail ownership, dispatch, and return
+    behavior follow `Error.raise`; the runtime copies the site during the call.
+*/
+void Error.raise_at(const X2CErrorSite *site, Symbol code, List detail) {
+  ErrorRaise r = _raise_enter(code);
+  _record(site, r.code, detail);
+  _dispatch(r);
+}
+
 /** Raises one compiler-generated error from native key-value arguments.
     `pair_count` controls the following alternating `Var` keys and values;
     `site` may be NULL. The runtime copies admissible values and preserves

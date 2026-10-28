@@ -64,6 +64,7 @@ prefix.
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
+| [`x2c_net_accept_fd`](net.md#x2c_net_accept_fd) | `lib/net.x` | `int x2c_net_accept_fd(Listener listener)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int &start, int &stop, int step, int length)` |
 | [`x2c_pool_exchange`](pool.md#x2c_pool_exchange) | `lib/pool/pool.x` | `Pool x2c_pool_exchange(Pool pool)` |
@@ -109,4 +110,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 97 functions.
+Total: 98 functions.

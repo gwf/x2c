@@ -254,6 +254,7 @@ module void _emit(Emitter &e, List ast) {
     case %(return): _put(e, "return;");
     case %(return (!set ?expr (expr ? ?))): _return(e, expr);
     case %(goto ?label): _write(e, %("goto" $label ";"));
+    case %(error-site): _put_all(e, _error_site(e));
     case %(raise ?cause (args *args)):
       _put_all(e, _raise(e, ast, cause, args));
     case %((!or fnmod func) ?params): _parameters(e, params);
@@ -366,26 +367,37 @@ static List _raise(Emitter &e, Ast ast, Var cause, List arguments) {
   List code = _tokens(e, cause);
   List arg_tokens = _commas(_grouped(e, arguments));
   String site_name = e.fresh_name("error_site");
-  List location = e.origin_location(e.origin);
-  String file = location
-    ? location.assoc(<file>) : e.c.filename;
-  int line = location ? location.assoc(<line>) : 0;
-  String file_literal = _c_string_literal(file);
-  String function_literal = _c_string_literal(e.fn_name);
+  List fields = _site_fields(e);
   List tail = arguments ? %("," @arg_tokens) : NULL;
   List terminal = ast.never_returns()
                 ? %("__builtin_unreachable();") : NULL;
-  List runtime = e.c.runtime_inc ? NULL : %("," ".runtime = 1");
   return %("{"
     "static const X2CErrorSite " $site_name " = {"
-      ".file = " $file_literal ","
-      ".function = " $function_literal ","
-      ".line = " $line @runtime
+      @fields
     "};"
     "x2c_error_raise_n(&" $site_name "," @code ","
       "$(arguments.len() / 2)" @tail ");"
     @terminal
   "}");
+}
+
+static List _error_site(Emitter &e) {
+  String name = e.fresh_name("error_site");
+  List fields = _site_fields(e);
+  return %("({ static const X2CErrorSite " $name " = {" @fields
+           "}; &" $name "; })");
+}
+
+static List _site_fields(Emitter &e) {
+  List location = e.origin_location(e.origin);
+  String file = location ? location.assoc(<file>) : e.c.filename;
+  int line = location ? location.assoc(<line>) : 0;
+  String file_literal = _c_string_literal(file);
+  String function_literal = _c_string_literal(e.fn_name);
+  List runtime = e.c.runtime_inc ? NULL : %("," ".runtime = 1");
+  return %(".file = " $file_literal ","
+           ".function = " $function_literal ","
+           ".line = " $line @runtime);
 }
 
 static void _cast(Emitter &e, Type type, Var expression) {

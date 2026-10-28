@@ -123,7 +123,7 @@ int main(void){
     );
     Var _x2c_gensym_macro_item_1;
     while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
-      left = Var_int(Var_convert(_x2c_gensym_macro_item_1, 3453797));
+      left = Var_int(Var_convert_at(_x2c_gensym_macro_item_1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/iter-chain-completion.x",.function = "main",.line = 22}; & _x2c_gensym_error_site_0; })));
       {
         int right;
         Iter _x2c_gensym_macro_iterator_0 = Iter_head(range(10, 11, 1, &(struct Iter){
@@ -135,7 +135,7 @@ int main(void){
         );
         Var _x2c_gensym_macro_item_0;
         while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
-          right = Var_int(Var_convert(_x2c_gensym_macro_item_0, 3453797));
+          right = Var_int(Var_convert_at(_x2c_gensym_macro_item_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/iter-chain-completion.x",.function = "main",.line = 23}; & _x2c_gensym_error_site_1; })));
           nested += left + right;
         }
 

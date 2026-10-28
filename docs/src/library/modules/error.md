@@ -35,6 +35,7 @@ Handler stack and accumulated errors.
 | [`Error.pop`](#Error.pop) | Closes the observing handler on top of the handler stack. |
 | [`Error.push`](#Error.push) | Pushes an observing handler and returns its removal handle. |
 | [`Error.raise`](#Error.raise) | Raises one cause with optional structured detail. |
+| [`Error.raise_at`](#Error.raise_at) | Raises one cause with structured detail and an optional source location. |
 | [`Error.ready`](#Error.ready) | Reports whether the rich `Error` runtime can currently accept raises. |
 | [`Error.restore`](#Error.restore) | Discards handler and record growth after one cleanup callback. |
 | [`Error.restore_landing`](#Error.restore_landing) | Restores `Error` state after an exception frame lands. |
@@ -380,6 +381,17 @@ reaches the non-reentrant error floor.
 
 Prefer the `raise` statement in source so generated location detail is
 retained.
+
+Source: `lib/error/dispatch.x`
+
+<a id="Error.raise_at"></a>
+#### Error.raise_at
+
+`void Error.raise_at(const X2CErrorSite *site, Symbol code, List detail)`
+
+Raises one cause with structured detail and an optional source location.
+A null `site` records no location. Detail ownership, dispatch, and return
+behavior follow `Error.raise`; the runtime copies the site during the call.
 
 Source: `lib/error/dispatch.x`
 

@@ -157,7 +157,7 @@ static List _include_guard(Compiler c, List content) {
 
 static int _has_runtime_include(List content) {
   foreach (List node in content)
-    if (node ~= %(preproc ?(String text))) {
+    if (Ast.without_origin(node) ~= %(preproc ?(String text))) {
       int angle = 0;
       if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
     }

@@ -99,11 +99,11 @@
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident 
                             (binding 20 "_x2c_gensym_macro_cursor_output_0"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (block 
         (at 11 
          (stmnt 
@@ -200,11 +200,11 @@
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident 
                             (binding 35 "_x2c_gensym_macro_cursor_output_4"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (stmnt 
         (expr (int) 
          (op += (expr (int) (ident (binding 30 "typed_total"))) 
@@ -373,22 +373,22 @@
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident 
                             (binding 60 "_x2c_gensym_macro_cursor_output_9"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (stmnt 
         (expr (int) 
          (op = (expr (int) (ident (binding 57 "count"))) 
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident 
                             (binding 61 "_x2c_gensym_macro_cursor_output_10"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (stmnt 
         (expr (int) 
          (op += (expr (int) (ident (binding 54 "converted_total"))) 
@@ -425,10 +425,10 @@
           (expr (int) 
            (call "Var_int" 
             (args (expr ("Var") 
-                   (call "Var_convert" 
+                   (call "Var_convert_at" 
                     (args (expr ("Var") 
                            (ident (binding 65 "_x2c_gensym_macro_item_6"))) 
-                     (expr ("Symbol") "3453797")))))))))) 
+                     (expr ("Symbol") "3453797") (error-site)))))))))) 
        (stmnt 
         (expr (int) 
          (op += (expr (int) (ident (binding 55 "key_total"))) 

@@ -1,0 +1,66 @@
+---
+import { codeToHtml } from "shiki";
+import source from "../../../../../examples/apps/notes/notes.x?raw";
+import grammar from "../../../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import ExampleHeading from "../../../components/ExampleHeading.astro";
+import CoreSetup from "../../../components/CoreSetup.astro";
+import "../../../styles/example-pages.css";
+import { articles } from "../../../lib/examples";
+
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const page = articles.find(article => article.frontmatter.slug === "notes")!.frontmatter;
+const html = await codeToHtml(source, {
+  lang: { ...grammar, name: "x2c" }, theme: x2cDarkTheme,
+});
+---
+<BaseLayout title={`${page.title} - x2c`} description={page.description}>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <article class="example-page" data-example="notes" data-section="magic"
+    data-surface="detail">
+    <ExampleHeading page={page} sourceUrl="#source"
+      downloadUrl={local("examples/notes/source.txt")} />
+    <div class="example-prose">
+      <p>Create a note, attach tags, and search its title and body. The same
+        program serves the browser page and the JSON API. Edit or delete notes
+        from the page, and keep them across restarts in an SQLite database.</p>
+      <p>The source below contains the handlers, input validation, and database
+        queries. Queries bind request values as parameters. The HTTP library
+        supplies routing and connection handling.</p>
+      <p>The page, external HTTP checks, and read-load tool live beside the
+        program in the
+        <a href="https://github.com/gwf/x2c/tree/dev/examples/apps/notes">notes
+        directory</a>. The server uses plain HTTP. Deploy behind a TLS
+        reverse proxy.</p>
+    </div>
+    <section id="run" class="example-run" aria-labelledby="run-heading">
+      <p class="example-eyebrow">Run the service</p>
+      <h2 id="run-heading">Start the service or run its checks.</h2>
+      <CoreSetup run={`make -C examples/apps/notes prepare
+make -C examples/apps/notes run
+
+# Check the API and persistence through HTTP requests.
+make -C examples/apps/notes check`} />
+    </section>
+    <section id="source" aria-label="Service source">
+      <h2>Service source</h2>
+      <div class="source-scroll" tabindex="0" role="region"
+        aria-label="Source code; scroll horizontally on narrow screens"
+        set:html={html} />
+    </section>
+  </article>
+  <SiteFooter />
+</BaseLayout>
+<style>
+  .source-scroll { max-width: 100%; overflow-x: auto; margin-top: 24px; }
+  .source-scroll :global(pre) {
+    width: max-content;
+    min-width: 100%;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+</style>

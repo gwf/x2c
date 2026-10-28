@@ -28,16 +28,26 @@ int main(int argc, char **argv) {
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
     Diagnostics.driver_error(%"cannot open diagnostics file '$diagnostics'");
-  if (request.command == <script> && request.prepare_script()) return 0;
+  int cached = request.command == <script> ||
+    (request.command == <run> && request.inputs && !request.output &&
+     !request.build_dir && !request.save_temps && !request.compile_commands &&
+     !request.manifest && !request.target && !request.profile);
+  if (!cached && (request.clean || request.rebuild))
+    Diagnostics.driver_error(
+      "--clean and --rebuild require a cached run with explicit inputs");
+  if (cached && request.prepare_script()) return 0;
+  int running = request.command == <run>;
   report_configure(
-    request.quiet, request.plain, request.color_mode,
-    request.verbose || request.debugging, request.dry_run, request.inspects());
+    request.quiet || (running && !request.verbose),
+    request.plain, request.color_mode,
+    (request.verbose && !running) || request.debugging,
+    request.dry_run, request.inspects());
   _configure_logging(request.debugging);
   Frontend.load_support(request);
   Context command = Context.open_isolated_named("compiler command");
-  int status = build_request(request);
+  int status = build_request(request, cached);
   command.close();
-  if (request.command == <script> && !status) status = request.run_script();
+  if (cached && !status) status = request.run_script();
   return status;
 }
 

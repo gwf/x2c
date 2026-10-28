@@ -17,6 +17,7 @@ Request-owned source overlays.
 | [`SourceView.is_changed`](#SourceView.is_changed) | Returns whether this logical file has an unsaved overlay. |
 | [`SourceView.read`](#SourceView.read) | Reads through the request overlay, falling back to a regular disk file. |
 | [`SourceView.set`](#SourceView.set) | Stores an immutable snapshot under its logical source path. |
+| [`SourceView.unset`](#SourceView.unset) | Removes a closed document so subsequent reads use the disk file. |
 
 ### `SourceView`
 
@@ -65,6 +66,15 @@ Source: `src/sourceview.x`
 
 Stores an immutable snapshot under its logical source path. Empty text
 is a present snapshot, not a request to fall back to the disk file.
+
+Source: `src/sourceview.x`
+
+<a id="SourceView.unset"></a>
+#### SourceView.unset
+
+`void SourceView.unset(SourceView s, String path)`
+
+Removes a closed document so subsequent reads use the disk file.
 
 Source: `src/sourceview.x`
 

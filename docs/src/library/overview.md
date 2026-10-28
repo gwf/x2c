@@ -301,3 +301,21 @@ int limit;
 
 The [module reference](modules/index.md) is generated from runtime source and
 compiler-verified signatures.
+
+## Open a socket
+
+Explicitly include `net.x` for blocking TCP. `Listener.bind` and
+`Listener.accept` create connections; `Socket.connect` opens a client.
+Read and write through the Socket's `input` and `output` Files. Both Socket
+and Listener adopt `Cleanup`. See [Sockets and HTTP](../guide/networking.md)
+for timeouts, half-close, listener stopping, and the process-wide SIGPIPE
+setting.
+
+## Serve HTTP
+
+Explicitly include `http.x`. Register handlers with `Router`, construct an
+`HttpServer`, and call `serve` or `start`. Requests expose path captures,
+query fields, headers, and JSON; responses buffer text, JSON, or bytes.
+`Http.fail` selects a failure status before anything is sent. The
+[networking chapter](../guide/networking.md) explains limits, worker pools,
+request storage, static files, and shutdown.

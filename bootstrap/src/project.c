@@ -761,6 +761,41 @@ _Noreturn static void _error(Project p, int line, String message){
   exit(2);
 }
 
+String CliRequest_project_manifest(CliRequest c);
+
+ProjectBuild ProjectBuild_plan(CliRequest request);
+
+Path Path_absolute(Path);
+
+CliRequest ProjectBuild_owning_target(CliRequest request, String source){
+  if(! _init_guard_) _file_init_();
+  String manifest = CliRequest_project_manifest(request);
+  if(! String_truth(manifest)) return request;
+  request -> manifest = manifest;
+  CliRequest selected = NULL;
+  for(ProjectBuild node = ProjectBuild_plan(request);  node;  node = node -> next){
+    String input;
+    List _x2c_gensym_macro_object_2 = node -> request -> inputs;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+      {
+        if(! String_equal(Path_absolute(input), source)) continue;
+        if(selected && selected != node -> request){
+          fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
+          return NULL;
+        }
+        selected = node -> request;
+      }
+
+    }
+
+  }
+  if(! selected) fputs("x2c editor: this document is not a selected target input; " "open its owning source for semantic results or configure " "a direct translate command\n", stderr);
+  return selected;
+}
+
 ProjectBuild ProjectBuild_plan(CliRequest request){
   if(! _init_guard_) _file_init_();
   Project p = f8_planning____open_project(request);
@@ -772,8 +807,6 @@ ProjectBuild ProjectBuild_plan(CliRequest request){
   f8_planning____plan_target(p, p -> selected);
   return p -> head;
 }
-
-Path Path_absolute(Path);
 
 Path Path_dirname(Path);
 
@@ -833,11 +866,11 @@ static void f8_planning____validate_target(Project p, ProjectTarget target){
   target -> visiting = 1;
   {
     String name;
-    List _x2c_gensym_macro_object_2 = f8_planning____prerequisites(target);
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_3 = f8_planning____prerequisites(target);
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_3);
       {
         ProjectTarget prerequisite = _target(p, name);
         if(! prerequisite) _error_name(p, 0, _48, name);
@@ -878,11 +911,11 @@ static void f8_planning____plan_target(Project p, ProjectTarget target){
   if(target -> planned) return;
   {
     String name;
-    List _x2c_gensym_macro_object_3 = f8_planning____prerequisites(target);
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+    List _x2c_gensym_macro_object_4 = f8_planning____prerequisites(target);
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
       f8_planning____plan_target(p, _target(p, name));
     }
 
@@ -944,11 +977,11 @@ static List f8_planning____target_inputs(Project p, ProjectTarget target, Symbol
   Array inputs = _target_sources(p, target);
   {
     String name;
-    List _x2c_gensym_macro_object_4 = target -> dependencies;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
+    List _x2c_gensym_macro_object_5 = target -> dependencies;
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
       {
         ProjectTarget dependency = _target(p, name);
         if(dependency -> kind != 1381098885964356) _error_name(p, 0, _60, dependency -> name);
@@ -965,11 +998,11 @@ static List f8_planning____target_modules(Project p, ProjectTarget target){
   Array modules = Array_new();
   {
     String name;
-    List _x2c_gensym_macro_object_5 = target -> native_modules;
-    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+    List _x2c_gensym_macro_object_6 = target -> native_modules;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       {
         ProjectTarget loaded = _target(p, name);
         if(loaded -> kind != 904178442) _error_name(p, 0, _61, name);
@@ -1035,11 +1068,11 @@ static List f8_planning____profile_flags(Project p, ProjectProfile profile){
 static List f8_planning____c_flags(Project p, List values){
   {
     String value;
-    List _x2c_gensym_macro_object_6 = values;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_6;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
-      value = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+    List _x2c_gensym_macro_object_7 = values;
+    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+    Var _x2c_gensym_macro_cursor_output_7;
+    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
+      value = Var_as_string(_x2c_gensym_macro_cursor_output_7);
       if(CliRequest_dependency_option(value)) _error_name(p, 0, _71, value);
     }
 
@@ -1080,11 +1113,11 @@ static Array _target_sources(Project p, ProjectTarget target){
   Array kept = Array_new();
   {
     String path;
-    Array _x2c_gensym_macro_object_7 = sources;
-    int _x2c_gensym_macro_cursor_7 = 0;
-    Var _x2c_gensym_macro_cursor_output_7;
-    while(Array_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_7);
+    Array _x2c_gensym_macro_object_8 = sources;
+    int _x2c_gensym_macro_cursor_8 = 0;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         if(!(Array_contains(excluded, String_var(path)))) Array_push(kept, String_var(path));
         else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", path, target -> name);
@@ -1098,11 +1131,11 @@ static Array _target_sources(Project p, ProjectTarget target){
   Array_sort(kept);
   {
     String path;
-    Array _x2c_gensym_macro_object_8 = kept;
-    int _x2c_gensym_macro_cursor_8 = 0;
-    Var _x2c_gensym_macro_cursor_output_8;
-    while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_8);
+    Array _x2c_gensym_macro_object_9 = kept;
+    int _x2c_gensym_macro_cursor_9 = 0;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_9);
       if(!(Path_is_x2c_source(path) || String_endswith(path, _96))) _error_name(p, 0, _97, path);
     }
 
@@ -1114,20 +1147,20 @@ static Array f7_sources____expand_patterns(Project p, List patterns, String owne
   Array files = Array_new();
   {
     String pattern;
-    List _x2c_gensym_macro_object_10 = patterns;
-    List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;
-    Var _x2c_gensym_macro_cursor_output_10;
-    while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
-      pattern = Var_as_string(_x2c_gensym_macro_cursor_output_10);
+    List _x2c_gensym_macro_object_11 = patterns;
+    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
+    Var _x2c_gensym_macro_cursor_output_11;
+    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
+      pattern = Var_as_string(_x2c_gensym_macro_cursor_output_11);
       {
         Array expanded = f7_sources____expand_pattern(p, pattern, owner);
         {
           String path;
-          Array _x2c_gensym_macro_object_9 = expanded;
-          int _x2c_gensym_macro_cursor_9 = 0;
-          Var _x2c_gensym_macro_cursor_output_9;
-          while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
-            path = Var_as_string(_x2c_gensym_macro_cursor_output_9);
+          Array _x2c_gensym_macro_object_10 = expanded;
+          int _x2c_gensym_macro_cursor_10 = 0;
+          Var _x2c_gensym_macro_cursor_output_10;
+          while(Array_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
+            path = Var_as_string(_x2c_gensym_macro_cursor_output_10);
             if(!(Array_contains(files, String_var(path)))) Array_push(files, String_var(path));
           }
 
@@ -1165,11 +1198,11 @@ static Array f7_sources____glob(Project p, String pattern){
   Array matches = Array_new();
   {
     String path;
-    List _x2c_gensym_macro_object_11 = found;
-    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
-    Var _x2c_gensym_macro_cursor_output_11;
-    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_11);
+    List _x2c_gensym_macro_object_12 = found;
+    List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;
+    Var _x2c_gensym_macro_cursor_output_12;
+    while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_12);
       if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_62), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
     }
 

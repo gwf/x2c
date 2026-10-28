@@ -7,20 +7,20 @@
 int main(void){
   x2c_initialize();
   Var source = double_var(3.75);
-  char plain = Var_char(Var_convert(source, 26993));
-  signed char signed_byte = Var_char(Var_convert(source, 26993));
-  unsigned char byte = Var_uchar(Var_convert(source, 30065));
-  short signed_short = Var_short(Var_convert(source, 3453293));
-  unsigned short short_value = Var_ushort(Var_convert(source, 3846509));
-  int signed_int = Var_int(Var_convert(source, 3453797));
-  unsigned int_value = Var_uint(Var_convert(source, 3847013));
-  long signed_long = Var_long(Var_convert(source, 818062));
-  unsigned long long_value = Var_ulong(Var_convert(source, 44858254));
-  long long signed_long_long = Var_long_long(Var_convert(source, 25983886));
-  unsigned long long long_long_value = Var_ulong_long(Var_convert(source, 1435270030));
-  float single = Var_float(Var_convert(source, 3355493));
-  double real = Var_floating(Var_convert(source, 3356265));
-  long double extended = Var_long_double(Var_convert(source, 26071077642));
+  char plain = Var_char(Var_convert_at(source, 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 5}; & _x2c_gensym_error_site_0; })));
+  signed char signed_byte = Var_char(Var_convert_at(source, 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 6}; & _x2c_gensym_error_site_1; })));
+  unsigned char byte = Var_uchar(Var_convert_at(source, 30065, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 7}; & _x2c_gensym_error_site_2; })));
+  short signed_short = Var_short(Var_convert_at(source, 3453293, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 8}; & _x2c_gensym_error_site_3; })));
+  unsigned short short_value = Var_ushort(Var_convert_at(source, 3846509, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 9}; & _x2c_gensym_error_site_4; })));
+  int signed_int = Var_int(Var_convert_at(source, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 10}; & _x2c_gensym_error_site_5; })));
+  unsigned int_value = Var_uint(Var_convert_at(source, 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 11}; & _x2c_gensym_error_site_6; })));
+  long signed_long = Var_long(Var_convert_at(source, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 12}; & _x2c_gensym_error_site_7; })));
+  unsigned long long_value = Var_ulong(Var_convert_at(source, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 13}; & _x2c_gensym_error_site_8; })));
+  long long signed_long_long = Var_long_long(Var_convert_at(source, 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_9; })));
+  unsigned long long long_long_value = Var_ulong_long(Var_convert_at(source, 1435270030, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 15}; & _x2c_gensym_error_site_10; })));
+  float single = Var_float(Var_convert_at(source, 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 16}; & _x2c_gensym_error_site_11; })));
+  double real = Var_floating(Var_convert_at(source, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 17}; & _x2c_gensym_error_site_12; })));
+  long double extended = Var_long_double(Var_convert_at(source, 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "unittest/compiler-fixtures/var-numeric-conversions.x",.function = "main",.line = 18}; & _x2c_gensym_error_site_13; })));
   printf("%d,%d,%u,%d,%u,%d,%u,%ld,%lu,%lld,%llu,%.2f,%.2f,%.2Lf\n", plain, signed_byte, byte, signed_short, short_value, signed_int, int_value, signed_long, long_value, signed_long_long, long_long_value, single, real, extended);
   return 0;
 }

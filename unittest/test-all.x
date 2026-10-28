@@ -52,10 +52,14 @@ void digest_suite(void);
 void regex_suite(void);
 void diff_suite(void);
 void json_suite(void);
+void derive_suite(void);
+void test_suite(void);
 void protocols_suite(void);
 void atomic_container_suite(void);
 void var_suite(void);
 void varops_suite(void);
+void net_suite(void);
+void http_suite(void);
 void iter_suite(void);
 void diagnostics_suite(void);
 void logger_suite(void);
@@ -115,6 +119,8 @@ int main(int argc, char **argv) {
   $test.suite(regex_suite);
   $test.suite(diff_suite);
   $test.suite(json_suite);
+  $test.suite(derive_suite);
+  $test.suite(test_suite);
   $test.suite(protocols_suite);
   $test.suite(atomic_container_suite);
   // The core Atom descriptor registers before suites begin. Keep the runtime
@@ -144,5 +150,7 @@ int main(int argc, char **argv) {
   $test.suite(channel_suite);
   $test.suite(storage_ownership_suite);
   $test.suite(static_init_suite);
+  $test.suite(net_suite);
+  $test.suite(http_suite);
   return TestHarness_finish();
 }

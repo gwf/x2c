@@ -23,6 +23,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/common-types.x`](common-types.md) | the types the compiler prelude declares first. |
 | [`lib/common.x`](common.md) | the `Var` encoding every runtime module shares. |
 | [`lib/context.x`](context.md) | bounded runtime state and value export. |
+| [`lib/derive.x`](derive.md) | generate record mappings from declared fields. |
 | [`lib/diff.x`](diff.md) | line differences between two texts. |
 | [`lib/digest.x`](digest.md) | SHA-256 digests of Strings and streams. |
 | [`lib/dispatch.x`](dispatch.md) | typed descriptors for runtime `Var` behavior. |
@@ -30,6 +31,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/exception.x`](exception.md) | transfer frames for x2c `Error` unwinding and cleanup. |
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
 | [`lib/func/func.x`](func.md) | generic native function binding. |
+| [`lib/http.x`](http.md) | blocking HTTP/1.1 routing and worker-pool service. |
 | [`lib/iter.x`](iter.md) | single-pass pull iterators. |
 | [`lib/json.x`](json.md) | JSON text to and from ordinary x2c values. |
 | [`lib/lib.x`](lib.md) | disjoint sets with union-find. |
@@ -43,6 +45,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
+| [`lib/net.x`](net.md) | blocking TCP sockets backed by File streams. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/pool/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
@@ -56,6 +59,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
+| [`lib/test.x`](test.md) | registered tests and assertions for user programs. |
 | [`lib/thread.x`](thread.md) | native workers with explicit result lifetimes. |
 | [`lib/type.x`](type.md) | semantic type values and their structural operations. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
@@ -69,11 +73,14 @@ These modules ship with x2c but are not loaded by the standard
 prelude. Include one explicitly to use its declarations.
 
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
+- [`lib/derive.x`](derive.md) - Generated record mappings from struct fields; explicitly include derive.x to use them.
 - [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
+- [`lib/http.x`](http.md) - HTTP requests, responses, routing, and a blocking worker-pool server; explicitly include `http.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `var/var.x`; include `meta.x` explicitly where `meta` functions are written.
+- [`lib/net.x`](net.md) - Blocking TCP sockets and listeners; explicitly include `net.x` to use them.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
@@ -82,6 +89,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/substring-map.x`](substring-map.md) - Native Substr occurrence counts; explicitly include `substring-map.x` to use them.
 - [`lib/substring.x`](substring.md) - Borrowed immutable String views; explicitly include `substring.x` to use them.
 - [`lib/system-macros.x`](system-macros.md) - Compile-time convenience macros; explicitly include system-macros.x to use them.
+- [`lib/test.x`](test.md) - Test registration, assertions, and a test program entry; explicitly include test.x to use them.
 - [`lib/type.x`](type.md) - Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.

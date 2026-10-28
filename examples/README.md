@@ -240,3 +240,19 @@ expected output by `make -C packages/pcre2 run`, also included in
 Generated files stay under ignored `build/`. Normal checks never rewrite
 expected output. For an intentional output change, use `make examples-update`
 and review the resulting differences.
+
+## A notes service
+
+[apps/notes](apps/notes/README.md) serves a browser page and a JSON API for
+creating, editing, searching, tagging, and deleting notes. SQLite preserves
+notes across restarts. From the repository root:
+
+```sh
+make -C examples/apps/notes prepare
+make -C examples/apps/notes run
+```
+
+The application prints its local URL. Run its external HTTP checks with
+`make -C examples/apps/notes check`. This optional application uses the SQLite
+package and is separate from `make examples`. Its
+[read-load tool](apps/notes/bench/README.md) measures the running service.

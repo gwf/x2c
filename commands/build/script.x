@@ -1,8 +1,8 @@
-/*  script.x -- Build-once execution of x2c scripts
+/*  script.x -- Build-once execution of scripts and explicit programs
 
     Copyright (c) 2026 Gary William Flake.
 
-    `x2c script` builds each script into its own directory under the
+    `x2c script` and `x2c run` build each program into a directory under the
     per-user cache. When everything the executable was built from is
     unchanged, a run executes it before any compiler state loads. Otherwise
     the build runs under a lock on that directory, publishes the executable,
@@ -27,29 +27,31 @@ static macro Stmt $fail.script_execute_failed(Expr $executable) =>
 
 /* cache entries
 
-   A script's entry under the cache root is `scripts/STEM-HASH`. Its files
-   include the executable `run`, the script's path in `source`, and `lock`,
-   which one build of the script holds at a time. */
+   Entries are `scripts/STEM-HASH` or `runs/STEM-HASH` under the cache root.
+   Each holds the executable `run`, the first input's path in `source`,
+   and `lock`, which one build holds at a time. */
 
-/** Points `request` at its script's cache directory and executes the cached
+/** Points `c` at its program's cache directory and executes the cached
     executable when it is current; that path does not return. Otherwise it
-    locks the directory against concurrent builds of the same script, removes
-    the entries of scripts that no longer exist, and returns 0; the caller
-    builds `request` and calls `CliRequest.run_script`. A `--clean` request
-    removes the script's entry and returns 1.
+    locks the directory against concurrent builds, prunes entries whose first
+    input no longer exists, and returns 0; the caller builds `c` and calls
+    `CliRequest.run_script`. A `--clean` request removes the entry and returns 1.
 */
 int CliRequest.prepare_script(CliRequest c) {
   String root = Compiler.cache_root();
   if (!root) Diagnostics.driver_error("no cache directory: set X2C_CACHE_DIR");
-  String script = Path.absolute(c.inputs.car());
-  c.build_dir = _entry(root, script);
+  Array inputs = [];
+  foreach (String input, c.inputs) inputs.push(Path.absolute(input));
+  c.inputs = inputs.list_free();
+  String script = c.inputs.car();
+  c.build_dir = _entry(root, c);
   if (c.clean) {
     _clean(c.build_dir);
     return 1;
   }
-  if (!Path.is_file(script))
+  if ((!c.dry_run || c.command == <script>) && !Path.is_file(script))
     $fail.script_source_missing(script);
-  _configure(c, script);
+  _configure(c);
   if (c.dry_run) return 0;
   _exec_current(c);
   try Path.make_dirs(c.build_dir);
@@ -60,14 +62,17 @@ int CliRequest.prepare_script(CliRequest c) {
   _exec_current(c);
   Path.write_text(%"$(c.build_dir)/source", script);
   _prune(%"$root/scripts");
+  _prune(%"$root/runs");
   c.output = %"$(c.output).$("%ld".printf((long) getpid()))";
   return 0;
 }
 
 /* The stem is interpolated, never a format: a path may contain a percent. */
-static String _entry(String root, String script) {
-  String stem = Path.stem(script), digest = "%08x".printf(String.hash(script));
-  return %"$root/scripts/$stem-$digest";
+static String _entry(String root, CliRequest c) {
+  String stem = Path.stem(c.inputs.car());
+  String digest = "%08x".printf(String.hash("\n".join(c.inputs)));
+  String directory = c.command == <script> ? "scripts" : "runs";
+  return %"$root/$directory/$stem-$digest";
 }
 
 /* Removes the entry once no build holds it. */
@@ -79,12 +84,10 @@ static void _clean(String entry) {
   close(lock);
 }
 
-/* The request builds the one script into the entry's executable, quietly
-   unless it is verbose. */
-static void _configure(CliRequest c, String script) {
-  c.inputs = $(script);
+/* Scripts suppress the build receipt unless verbose; runs keep it. */
+static void _configure(CliRequest c) {
   c.state_seed = "direct";
-  if (!c.verbose) c.quiet = 1;
+  if (c.command == <script> && !c.verbose) c.quiet = 1;
   c.output = _executable(c);
 }
 
@@ -96,10 +99,11 @@ static void _exec_current(CliRequest c) {
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
 }
 
-/* Removes each cache entry under `scripts` whose recorded script no longer
+/* Removes each cache entry whose recorded first input no longer
    exists and that no other run holds.
 */
 static void _prune(String scripts) {
+  if (!Path.is_dir(scripts)) return;
   foreach (String name, Path.list_dir(scripts)) {
     String directory = Path.join(scripts, name);
     Path source = %"$directory/source";
@@ -128,7 +132,7 @@ int CliRequest.run_script(CliRequest c) {
    the script's path. */
 static void _exec(CliRequest c) {
   String executable = _executable(c);
-  if (c.verbose) _print_run(c);
+  if (c.verbose && !c.quiet) _print_run(c);
   char **argv = xcalloc(c.run_args.len() + 2, sizeof(char *));
   int n = 0;
   argv[n++] = c.inputs.car().str();

@@ -25,6 +25,6 @@ static Var _x2c_gensym_lambda_0(Var value){
 }
 
 static int _x2c_gensym_lambda_adapt_0(int a0){
-  return Var_int(Var_convert(_x2c_gensym_lambda_0(int_var(a0)), 3453797));
+  return Var_int(Var_convert_at(_x2c_gensym_lambda_0(int_var(a0)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/lambda-adapt-direct-function.x",.function = "_x2c_gensym_lambda_adapt_0",.line = 0}; & _x2c_gensym_error_site_0; })));
 }
 

@@ -175,6 +175,8 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
 
 Var Var_convert(Var value, Symbol target);
 
+Var Var_convert_at(Var value, Symbol target, const X2CErrorSite * site);
+
 void Var_numeric_decode(Var value, X2CVarNumeric * out);
 
 Var Var_integer_box(Symbol target, unsigned long long raw);

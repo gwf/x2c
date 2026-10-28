@@ -83,6 +83,8 @@ module CliOption cli_options[] = {
   { <src-map>, %<<translate build run script>>, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0,
     CLI_FIELD(<flag>, source_map) },
+  { <no-srcmap>, %<<build run>>, <output>, "--no-source-map", NULL,
+    "Keep generated C locations in native diagnostics", 0 },
   { <no-deps>, %<<translate>>, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0, CLI_FIELD(<flag>, no_deps) },
   { <dep-file>, %<<translate>>, <output>, "--dep-file", "<file>",
@@ -112,11 +114,11 @@ module CliOption cli_options[] = {
   { <output>, %<<build run>>, <output>, "-o", "<file>",
     "Name the executable, library, or single object", 0,
     .alias = "--output", CLI_FIELD(<text>, output) },
-  { <rebuild>, %<<script>>, <output>, "--rebuild", NULL,
-    "Build the script even when its cached executable is current", 0,
+  { <rebuild>, %<<run script>>, <output>, "--rebuild", NULL,
+    "Build even when the cached executable is current", 0,
     CLI_FIELD(<flag>, rebuild) },
-  { <clean>, %<<script>>, <output>, "--clean", NULL,
-    "Remove the script's cached build and exit without running it", 0,
+  { <clean>, %<<run script>>, <output>, "--clean", NULL,
+    "Remove the cached build and exit without running it", 0,
     CLI_FIELD(<flag>, clean) },
   { <build-dir>, %<<build run>>, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0,
@@ -495,6 +497,7 @@ static void _apply(Parse &p, Given given) {
   String spelling = given.spelling, value = given.value;
   switch (given.option.id) {
     case <help>: _help_exit(r.command, 0); break;
+    case <no-srcmap>: r.source_map = 0; break;
     case <color>: r.color_mode = _color_mode(value); break;
     case <include>: _include_dir(p, value); break;
     case <x-include>: p.include_dirs.push(value); break;

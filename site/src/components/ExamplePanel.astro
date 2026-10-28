@@ -1,4 +1,6 @@
 ---
+import { playgroundFor } from "../lib/examples";
+
 interface Props {
   slide: any;
   codeLabel?: string;
@@ -27,6 +29,7 @@ const split = (html: string) => {
 };
 const { left, right } = split(html);
 const base = import.meta.env.BASE_URL;
+const runnable = playgroundFor(panel.slug);
 ---
 
 {part !== "notes" && <div
@@ -34,6 +37,7 @@ const base = import.meta.env.BASE_URL;
   data-code-section={section}>
   {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
   <Fragment set:html={left} />
+  {runnable && <a class="playground-link" href={`${base}playground/?example=${encodeURIComponent(runnable.id)}`}>Run in playground <span aria-hidden="true">&rarr;</span></a>}
 </div>}
 {part !== "code" && <div class="feature-copy" data-annotation-section={section}>
   {panel.status && <small class="feature-status">{panel.status}</small>}
@@ -101,3 +105,7 @@ const base = import.meta.env.BASE_URL;
     reducedMotion.addEventListener("change", () => play(!reducedMotion.matches));
   }
 </script>
+
+<style>
+  .playground-link { display: inline-block; color: var(--coral); margin: 12px 24px 18px; font-size: .8rem; }
+</style>

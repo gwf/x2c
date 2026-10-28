@@ -76,7 +76,7 @@ static List _source_projection(Compiler c, List ast, Map inline_bodies) {
 }
 
 static void _add(Partition &p, Ast node) {
-  match (node) {
+  match (Ast.without_origin(node)) {
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): _add_typedef(p, node);
     case %(function (!set ?type (*)) ?declarator (!set ?body (block *))):
@@ -577,7 +577,7 @@ static List _typedef_forwards(List items, List earlier, Compiler c) {
     first[candidates[i].car()] = i;
   foreach (List node in items) {
     if (node in moved) continue;
-    match (node) {
+    match (Ast.without_origin(node)) {
       case %(typedef ?base ?):
         _add_forwards(out, candidates, first, available, base, moved);
       case %(preproc ?(String text)) if (c): {

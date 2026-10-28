@@ -71,7 +71,7 @@ void install_bindings(Lisp lisp){
 }
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
-  Byte a0 = Var_uchar(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 30065), 30065));
+  Byte a0 = Var_uchar(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 30065), 30065, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/lisp-bind-inferred.x",.function = "_x2c_gensym_func_adapt_0",.line = 0}; & _x2c_gensym_error_site_0; })));
   return Var_new(30065, increment(a0));
   ;
 }

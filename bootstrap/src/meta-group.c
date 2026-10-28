@@ -2825,15 +2825,19 @@ static Map f9_selection____placeholders(Compiler c){
   return placeholders;
 }
 
+Ast Ast_without_origin(Ast);
+
 String Compiler_preproc_include_target(String, int *);
 
 String SourceView_resolve_include(SourceView, List, String, String, int);
 
 Path Path_dirname(Path);
 
+Ast Ast_rewrap_origin(Ast, Ast);
+
 static Var f9_selection____group_include(Compiler c, List node, String lib){
   {
-    List _x2c_gensym_match_expr_17 = node;
+    List _x2c_gensym_match_expr_17 = Ast_without_origin(node);
     switch(_x2c_gensym_match_expr_17 ? _x2c_gensym_match_expr_17 -> car.u64 : 0){
       case 9224497972340888518ULL :{List _x2c_gensym_match_at_73, _x2c_gensym_match_at_74; Var x2c_match_value_0; if(_x2c_gensym_match_expr_17 && _x2c_gensym_match_expr_17 ->car.u64 == 9224497972340888518ULL &&(_x2c_gensym_match_at_73 = _x2c_gensym_match_expr_17 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_73 ->car, 1) && Var_is(_x2c_gensym_match_at_73 -> car, 1318210446) && !(_x2c_gensym_match_at_74 = _x2c_gensym_match_at_73 ->cdr)){{
         Var text;
@@ -2848,7 +2852,7 @@ static Var f9_selection____group_include(Compiler c, List node, String lib){
               if(! String_truth(target) || ! Path_is_x2c_source(target)) break;
               String path = SourceView_resolve_include(c -> sources, c -> include_dirs, Path_dirname(c -> filename), target, angle);
               Var index;
-              if(String_truth(path) && Map_try_get(meta_build_tables, String_var(Path_absolute(path)), &(index))) return List_var(cons(_943, cons(String_var(String_join(NULL, cons(String_var(_955), cons(String_var(Var_str(index)), cons(String_var(_956), NULL))))), NULL)));
+              if(String_truth(path) && Map_try_get(meta_build_tables, String_var(Path_absolute(path)), &(index))) return List_var(Ast_rewrap_origin(node, cons(_943, cons(String_var(String_join(NULL, cons(String_var(_955), cons(String_var(Var_str(index)), cons(String_var(_956), NULL))))), NULL))));
               if(Path_is_file(String_join(NULL, cons(String_var(lib), cons(String_var(target), NULL))))) break;
               return((void) 0, Void);
             }
@@ -3458,7 +3462,7 @@ static void f8_emission____native_lookups(Compiler c, Array units){
 }
 
 static int f8_emission____after_directives(Array units){
-  int after = 0;  while(after <(int) Array_len(units) && x2c_var_equal(List_car((Var_list_payload(Array_getindex(units, after)))), Symbol_var(35579270086))) after ++;  return after;
+  int after = 0;  while(after <(int) Array_len(units) && x2c_var_equal(List_car(Ast_without_origin(Var_list_payload(Array_getindex(units, after)))), Symbol_var(35579270086))) after ++;  return after;
 }
 
 List Compiler_convert_expression(Compiler, List, Type);

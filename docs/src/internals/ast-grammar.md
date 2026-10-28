@@ -780,6 +780,17 @@ _retain_meta_protocol][protocol-registry]. See
 
 ## Lowered forms and emission
 
+### Conversion error sites
+
+```text
+ERROR-SITE ::= (error-site)
+```
+
+Compiler-inserted scalar conversions pass this expression to
+`Var_convert_at`. Emission returns the address of a static `X2CErrorSite`
+with the current origin's file, function, and line. It shares the site-field
+owner used by `raise`; the conversion reads the site only on failure.
+
 ### Native-dependent initializer alternatives
 
 ```text
@@ -1110,6 +1121,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `empty` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `env` | [Macro definitions](#macro-definitions) |
 | `exits` | [Cleanup, initialization, and generated markers](#cleanup-initialization-and-generated-markers) |
+| `error-site` | [Conversion error sites](#conversion-error-sites) |
 | `expr` | [Shells, identifiers, and atomic values](#shells-identifiers-and-atomic-values); [Reading concrete layouts](#reading-concrete-layouts) |
 | `expression` | [Pending applications and captures](#pending-applications-and-captures) |
 | `falias` | [Declaration forms](#declaration-forms) |

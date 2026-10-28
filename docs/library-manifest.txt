@@ -81,3 +81,7 @@ lib/system-macros.x|optional|Compile-time convenience macros; explicitly include
 lib/var-adapters.x|internal|Pointer converter templates shared by runtime owners.
 lib/var-tags.x|internal|The Var tag ledger shared by runtime and compiler projections.
 lib/rewrite.x|optional|Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
+lib/net.x|optional|Blocking TCP sockets and listeners; explicitly include `net.x` to use them.
+lib/http.x|optional|HTTP requests, responses, routing, and a blocking worker-pool server; explicitly include `http.x` to use them.
+lib/derive.x|optional|Generated record mappings from struct fields; explicitly include derive.x to use them.
+lib/test.x|optional|Test registration, assertions, and a test program entry; explicitly include test.x to use them.

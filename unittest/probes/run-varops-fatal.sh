@@ -45,7 +45,7 @@ check_case() {
   test "$(cat "$BUILD/$name.stderr")" = "$expected"
 }
 
-check_case convert 'x2c: uncaught <void-op>: operation Var.convert'
+check_case convert 'x2c: uncaught <void-op>: operation Var.convert, target i32'
 check_case truth 'x2c: uncaught <void-op>: operation Var.truth'
 check_case hash 'x2c: uncaught <void-op>: operation Var.hash'
 check_case compare 'x2c: uncaught <void-op>: operation Var.compare'

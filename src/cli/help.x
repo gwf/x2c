@@ -66,7 +66,8 @@ static HelpPage help_pages[] = {
       The last named directory wins. Under Make, jobs default to one;
       otherwise they default to the online processor count.
       --debug logs compiler activity; -g emits native debug information.
-      Add --source-map -O0 to -g for debugging original x2c sources.") },
+      Source mapping is on by default; -g -O0 debugs original x2c sources.
+      --no-source-map uses generated C locations.") },
   { <run>,
     $dedent(%"
       Usage:
@@ -80,13 +81,17 @@ static HelpPage help_pages[] = {
     $dedent(%"
       The selected target must be executable. After a successful build,
       x2c returns the program's exit status.
-      Direct runs use a temporary executable unless intermediates are retained.
+      Explicit inputs use runs/ in the script cache, with argv[0] set to
+      the first input's absolute path. Unchanged runs skip the build.
+      --rebuild builds again; --clean removes the entry without running it.
+      -o, --build-dir, --save-temps, and --compile-commands bypass that cache.
       --save-temps retains and reuses intermediates in .x2c-build.
       --save-temps=<dir> and --build-dir <dir> select the retained directory;
       the last named directory wins. Manifest products default to
       <project>/.x2c-build/<target-product>.
-      --debug logs compiler activity; use -g --source-map -O0 for source
-      debugging. See 'x2c help build' for other build defaults.") },
+      --debug logs compiler activity; use -g -O0 for source debugging.
+      --no-source-map uses generated C locations.
+      See 'x2c help build' for other build defaults.") },
   { <new>,
     $dedent(%"
       Usage:

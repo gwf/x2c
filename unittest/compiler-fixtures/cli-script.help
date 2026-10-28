@@ -10,8 +10,8 @@ Target options:
 
 Output options:
       --source-map            Map generated C locations to original x2c sources
-      --rebuild               Build the script even when its cached executable is current
-      --clean                 Remove the script's cached build and exit without running it
+      --rebuild               Build even when the cached executable is current
+      --clean                 Remove the cached build and exit without running it
 
 Translation options:
   -I <dir>                    Add a shared x2c/C include directory

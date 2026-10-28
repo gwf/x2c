@@ -6206,7 +6206,7 @@ The root link selects `builds/0/x2c`, the development compiler, without using
 links it to an installed copy of the development compiler. Outside the
 checkout, use `x2c` after [installation and PATH setup](https://x2c-lang.dev/docs/guide/installation.html).
 Every invocation begins with a command:
-`translate`, `build`, `run`, `new`, `script`, `env`, `install`,
+`translate`, `build`, `run`, `new`, `test`, `script`, `env`, `install`,
 `remove`, `list`, or `help`.
 
 The generated help is the short option reference:
@@ -6294,10 +6294,11 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 
 ### Source mapping
 
-`--source-map` adds source locations to generated C for `translate`, `build`,
-and `run`. It is off by default. Combine it with native debug information to
-set breakpoints, step through statements, and read backtraces in the original
-`.x` files:
+`build` and `run` map generated C locations to the original `.x` sources by
+default. Use `--no-source-map` for generated-C locations. `translate` keeps
+generated-C locations by default and accepts `--source-map` to enable the
+map. Combine source mapping with native debug information to set breakpoints,
+step through statements, and read backtraces in the original `.x` files:
 
 ```sh
 ./x2c build --source-map -g -O0 --save-temps -o /tmp/example example.x
@@ -6307,10 +6308,10 @@ lldb /tmp/example
 With source mapping enabled, C `__FILE__` and `__LINE__` refer to the original
 x2c source. Macro expansions use their invocation locations; generated cleanup
 uses its owning source construct. Compiler scaffolding without a source origin
-retains a generated-file location. `-g` alone keeps generated-C locations, and
-`--source-map` alone does not add native debug information. Changing the option
-invalidates reused translation output. Optimized builds may combine or remove
-statements, so source mapping does not guarantee exact stepping or recovery of
+retains a generated-file location. Source mapping does not add native debug
+information by itself. Changing the option invalidates reused translation
+output. Optimized builds may combine or remove statements, so source mapping
+does not guarantee exact stepping or recovery of
 optimized-away values.
 
 On macOS, mapped executable builds with effective native debug information
@@ -6536,50 +6537,89 @@ the previous file. `run` writes it before starting the program, and `-###`
 writes no database. This file describes native C compilation, not x2c syntax
 for an editor's C parser.
 
+### Language server
+
+The language server is experimental and is not included by `make install`.
+Build the checkout commands with `make commands`, then use the matching
+`builds/0/x2c` compiler. Run `x2c lsp` from the workspace root to serve
+editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full document synchronization.
+One process serves one workspace and keeps the compiler frontend resident.
+It provides frontend diagnostics, definition navigation, and type hover.
+It does not report errors left to the native C compiler, such as unresolved
+C identifiers.
+
+Set `initializationOptions.arguments` to ordinary `build` or `translate`
+arguments. An empty list discovers `x2c.toml` and its default target, or
+analyzes the current file when there is no project. For example, use
+`["build", "--target", "app", "--profile", "debug"]` to select a target.
+The selected target must include the source as an input. For a header or
+macro file outside that input list, open its owning source or configure a
+direct `translate` command with the needed include and package options.
+
+An editor that sends unsaved buffers gets diagnostics and locations from
+that text. Changes invalidate analyses of units that read the changed file.
+The compiler reparses whole units; the server does not incrementally parse
+or index the workspace in the background. Native CPP symbol modes cannot
+consume unsaved source text and report that limitation. Macro-generated
+syntax can lack a physical definition or identifier location.
+
+The server reclaims retained history at idle checkpoints while preserving the
+editor connection, current buffers, and exported results. The next analysis
+rebuilds compiler state. Each checkpoint resets macro and native-module
+process state.
+
+For Neovim with built-in LSP support:
+
+```lua
+vim.api.nvim_create_autocmd("FileType", { pattern = "x2c",
+  callback = function(ev)
+    vim.lsp.start({ name = "x2c", cmd = { "x2c", "lsp" },
+      root_dir = vim.fs.root(ev.buf, { "x2c.toml", ".git" }),
+      init_options = { arguments = {} } })
+  end })
+```
+
+The server runs macros during analysis. Start it only for workspaces you
+trust. Completion, symbols, references, rename, and semantic tokens are
+planned additions. Formatting and native C compiler diagnostics are outside
+this server's current scope.
+
 ### VS Code diagnostics, definitions, and hover
 
 Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
-from VSIX**. The extension uses the installed compiler directly; no separate
-worker build is required. Set an absolute compiler path when it is not on
-`PATH`:
+from VSIX**. VS Code 1.82 or newer is required. The extension starts
+`x2c lsp` and uses its standard language client for synchronization,
+diagnostics, definition navigation, hover, and cancellation.
+
+Select the compiler from the checkout where you built the experimental
+server:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
 ```
 
-Selection order is an explicit `x2c.semantic.compilerPath`, an explicit legacy
-`x2c.semantic.workerPath`, executable `./x2c` in the trusted workspace, then
-`x2c` on `PATH`. An explicit selection never silently switches to another
-compiler. A missing executable produces one setup message in the **x2c**
-Output channel, and discovery retries when you use the editor again. The
-extension does not build or install the compiler automatically.
+Selection order is an explicit `x2c.semantic.compilerPath`, executable
+`./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
+selection never switches to another compiler. Setup errors appear in the
+**x2c** Output channel. The extension does not build or install the compiler.
+The deprecated `x2c.semantic.workerPath` setting remains accepted but is
+unused by the language client.
 
-The default configuration discovers `x2c.toml` and its default target, or
-analyzes the current file directly when there is no project. Select a target
-or profile with ordinary compiler arguments:
+Configure the server with ordinary compiler arguments:
 
 ```json
 "x2c.semantic.arguments": ["build", "--target", "app", "--profile", "debug"]
 ```
 
-The selected target must include the open source as an input. For a header or
-macro file outside that input list, open its owning source or configure a
-`translate` command with the needed include and package options. Unsaved
-included files still affect analysis of their owning source.
+The extension passes this list as `initializationOptions.arguments` and
+synchronizes open local buffers, including unsaved headers and manifests.
+It restarts the client when x2c settings or workspace folders change.
+Semantic execution requires a trusted local workspace because compilation
+can run macros. Untrusted and virtual workspaces retain syntax highlighting.
+Set `"x2c.semantic.enabled": false` to disable semantic execution.
 
-Diagnostics, definition navigation, and type hover include unsaved source
-text. Each request runs in a fresh `x2c-editor` process with snapshots of open
-files; editing cancels obsolete results without writing buffers to disk.
-Native CPP symbol modes cannot consume unsaved source snapshots and report
-that limitation. Macro-generated syntax may lack a physical definition or
-identifier location.
-
-Semantic execution requires a trusted local workspace because compilation can
-run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
-`"x2c.semantic.enabled": false` to disable semantic execution. Completion,
-rename, workspace indexing, and general LSP support are separate features.
-The shipped `x2c-editor` command serves these providers through `x2c editor`.
-Its argument and response formats are not a public compiler API.
+The legacy `x2c editor` command remains available during the extension
+transition. Its private request and response formats are not a public API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
@@ -6593,10 +6633,24 @@ initialization rules.
 ./x2c run examples/foreach.x -- first -second input.x
 ```
 
+When a build is needed, `run` prints one `Built executable PATH in N ms`
+line and then runs the program. Use `-v` for phase lines, build receipts,
+and native commands.
 Use `-q` to suppress build progress and receipts while preserving program
-output. Use `--build-dir <dir>` to retain generated files and objects for
-inspection or reuse. Otherwise temporary intermediates are removed after the
-program finishes.
+output. With explicit inputs, `run` caches its executable under `runs/` in
+the [script cache](https://x2c-lang.dev/docs/reference/cli.html#run-a-script). An unchanged run launches the cached
+executable without a build receipt. The script invalidation rules below
+apply, and `argv[0]` is the first input's absolute path. `--rebuild` runs
+the build again; `--clean` removes that input list's entry without running it.
+
+An explicit `-o`, `--build-dir`, `--save-temps`, `--compile-commands`, or
+a project manifest keeps the ordinary build path. Use `--build-dir <dir>`
+to retain generated files and objects for inspection or reuse. Otherwise
+temporary intermediates are removed after the program finishes. `--clean`
+and `--rebuild` require the cached path.
+`build` and `run` enable source mapping, so native diagnostics,
+`__FILE__`, and `__LINE__` name the `.x` source; use `--no-source-map` for
+generated-C locations.
 
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's
@@ -6666,12 +6720,15 @@ modules come from their archives instead.
 `env -S` splits the line into words. Where `x2c` has a fixed location, the
 interpreter path works without it: `#!/usr/local/bin/x2c script`.
 
-Each script builds under `scripts/` in the cache root: `X2C_CACHE_DIR` when
+Scripts build under `scripts/`, and cached `run` programs under `runs/`,
+in the cache root: `X2C_CACHE_DIR` when
 set, otherwise `$XDG_CACHE_HOME/x2c`, otherwise `~/.cache/x2c`.
 `x2c env cache_dir` prints the root. Concurrent runs of one script share its
 build and wait for each other. `x2c script --clean <file>` removes that
 script's entry without running it, and every build removes the entries of
-scripts that no longer exist. Removing the cache is always safe.
+programs whose first input no longer exists from both directories. Removing
+the cache is always safe. Different ordered input lists have separate
+`run` entries; `script` and `run` never share an executable.
 
 ## Selecting inputs
 
@@ -6885,11 +6942,12 @@ archive, prelude interface, package roots, C compiler, archiver, and script
 cache root as `name = value` lines. It also reports `libexec`, the directory
 for external commands, and `identity`, the compiler executable's identity.
 The prelude is the runtime `x2c.xi`
-interface the compiler replays for the runtime declarations. Only an
-interface the same compiler wrote qualifies; an empty value means the
-compiler reads `lib/x2c.x` from source once per process. `prelude_missing`
-lists the runtime units that prelude includes whose own interface the
-compiler cannot find; each one is read from source once per process, so a
+interface the compiler can replay for the runtime declarations. Its compiler
+identity, source and dependency hashes, and include roots must all match.
+An empty value means a missing interface or a source or stage change
+requires reading `lib/x2c.x` from source once per process. `prelude_missing`
+lists the runtime units that prelude includes whose own interface is absent
+or stale; each one is read from source once per process, so a
 converged stage build leaves it empty.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
@@ -6946,6 +7004,23 @@ The driver passes arguments after an external command name directly to its
 program, including arguments beginning with `@`. The external command owns
 its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
+
+`x2c test [options] [files-or-directories...]` builds and runs project test
+programs. The command is experimental and available in checkout builds;
+`make install` does not install it. With no operands, it searches below the
+nearest `x2c.toml`, or the current directory. Discovery selects `*_test.x`, `test_*.x`, and `.x` files
+inside `tests/`, excluding `.x2c-build/`.
+
+The selected target's include and package directories are forwarded to
+each build. Concurrent runs print each file's captured output in discovery
+order. Each file runs through
+`x2c script`, so local `.x` includes compile as helpers. The script cache
+lives under `.x2c-build/tests/scripts/`, with a separate entry named from
+each file's stem and path hash.
+
+The final line reports passed and failed files and tests. The command exits
+with status 1 if any file fails to build or run, and 2 if discovery finds no
+files. See [Testing](https://x2c-lang.dev/docs/guide/testing.html) for the test library and assertions.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

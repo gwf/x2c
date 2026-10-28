@@ -145,8 +145,8 @@ int main(void){
 }
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 1, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_func_adapt_0",.line = 0}; & _x2c_gensym_error_site_0; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_func_adapt_0",.line = 0}; & _x2c_gensym_error_site_1; })));
   return long_var(add(a0, a1));
   ;
 }
@@ -158,8 +158,8 @@ Func _x2c_gensym_func_get_e915dee0_0(void){
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1){
   const _x2c_gensym_func_pointer_context_0 * _x2c_gensym_func_pointer_context_1 =(const _x2c_gensym_func_pointer_context_0 *) Func_context(_x2c_gensym_func_binding_1);
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 0, 818062), 818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 1, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_func_adapt_1",.line = 0}; & _x2c_gensym_error_site_2; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_func_adapt_1",.line = 0}; & _x2c_gensym_error_site_3; })));
   return long_var(_x2c_gensym_func_pointer_context_1 -> _x2c_gensym_func_pointer_1(a0, a1));
   ;
 }
@@ -181,7 +181,7 @@ static Var _x2c_gensym_lambda_0(long value){
 }
 
 static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_2, _x2c_gensym_func_argv_2, 0, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_2, _x2c_gensym_func_argv_2, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_func_adapt_2",.line = 0}; & _x2c_gensym_error_site_4; })));
   return _x2c_gensym_lambda_0(a0);
   ;
 }
@@ -197,9 +197,9 @@ static Var _x2c_gensym_lambda_1(long value, long bias){
 }
 
 static Var _x2c_gensym_lambda_2(Func _x2c_gensym_lambda_closure_0, const FuncArg * _x2c_gensym_lambda_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_0, _x2c_gensym_lambda_argv_0, 0, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_0, _x2c_gensym_lambda_argv_0, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_lambda_2",.line = 0}; & _x2c_gensym_error_site_5; })));
   const struct _x2c_gensym_lambda_context_0 * record =(const struct _x2c_gensym_lambda_context_0 *) Func_context(_x2c_gensym_lambda_closure_0);
-  return _x2c_gensym_lambda_1(a0, Var_long(Var_convert(record -> c0, 818062)));
+  return _x2c_gensym_lambda_1(a0, Var_long(Var_convert_at(record -> c0, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "unittest/compiler-fixtures/function-to-func-inline.x",.function = "_x2c_gensym_lambda_2",.line = 0}; & _x2c_gensym_error_site_6; }))));
 }
 
 Func _x2c_gensym_func_from_capture_e915dee0_0(Var c0){

@@ -425,6 +425,8 @@ double x2c_var_order(Var a, Var b);
 
 Var Var_convert(Var value, Symbol target);
 
+Var Var_convert_at(Var value, Symbol target, const X2CErrorSite * site);
+
 int Var_truth(Var value);
 
 int Var_fallback_truth(Var value);

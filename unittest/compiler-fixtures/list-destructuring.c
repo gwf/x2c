@@ -56,12 +56,12 @@ int main(void){
   c = List_getindex(_x2c_gensym_destructure_0, 2);
   int x, y;
   List _x2c_gensym_destructure_1 = values();
-  x = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_1, 0), 3453797));
-  y = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_1, 1), 3453797));
+  x = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/list-destructuring.x",.function = "main",.line = 13}; & _x2c_gensym_error_site_0; })));
+  y = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/list-destructuring.x",.function = "main",.line = 13}; & _x2c_gensym_error_site_1; })));
   List _x2c_gensym_destructure_2 = cons(_8, cons(_9, cons(char_var('m'), NULL)));
-  int mixed_i = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_2, 0), 3453797));
-  float mixed_x = Var_float(Var_convert(List_getindex(_x2c_gensym_destructure_2, 1), 3355493));
-  char mixed_c = Var_char(Var_convert(List_getindex(_x2c_gensym_destructure_2, 2), 26993));
+  int mixed_i = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/list-destructuring.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_2; })));
+  float mixed_x = Var_float(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 1), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/list-destructuring.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_3; })));
+  char mixed_c = Var_char(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 2), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/list-destructuring.x",.function = "main",.line = 14}; & _x2c_gensym_error_site_4; })));
   Var first, missing;
   {
     List _x2c_gensym_destructure_3 = _11;

@@ -1,0 +1,30 @@
+.playground { max-width: 1440px; margin: 0 auto; padding: 70px 5vw 80px; }
+.playground h1 { font-family: "Instrument Serif", serif; font-size: clamp(3.4rem, 6vw, 5.5rem); font-weight: 400; margin: 0; }
+.playground-intro { color: var(--muted-dark); font-size: 1.15rem; margin: 12px 0 32px; }
+.playground-toolbar { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.playground-toolbar select { max-width: 60%; padding: 10px; border: 1px solid var(--line); background: var(--paper); font: inherit; }
+.playground-toolbar button { border: 0; background: var(--red); color: white; padding: 11px 24px; font: inherit; }
+.playground-toolbar button:disabled { opacity: .5; cursor: default; }
+.playground-toolbar [data-stop] { background: var(--dark); }
+.playground-workspace { display: grid; grid-template-columns: 3fr 2fr; gap: 1px; background: var(--line); }
+.playground-source, .playground-result { min-width: 0; background: var(--code); color: var(--code-ink); }
+.playground-source > label, .playground-result h2 { display: block; margin: 0; padding: 15px 20px; font-size: .8rem; font-weight: 500; color: var(--muted-light); border-bottom: 1px solid var(--hairline-on-dark); }
+.playground-editor { position: relative; height: 470px; }
+.playground-editor > pre, .playground-editor textarea { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 20px; border: 0; overflow: auto; white-space: pre; tab-size: 2; font: 13px/1.75 "JetBrains Mono", monospace; }
+.playground-editor textarea { resize: none; color: transparent; caret-color: var(--code-ink); background: transparent; -webkit-text-fill-color: transparent; }
+.playground-editor textarea::selection { background: rgba(255,255,255,.2); }
+.playground-editor > pre { pointer-events: none; }
+.playground-editor > pre pre, .playground-editor code { margin: 0; padding: 0; background: transparent !important; font: inherit; }
+.plain-editor textarea { color: var(--code-ink); -webkit-text-fill-color: var(--code-ink); }
+.playground-result > pre { height: 470px; margin: 0; padding: 20px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.75 "JetBrains Mono", monospace; }
+.playground-result .stderr { color: var(--muted-light); }
+.playground [data-status] { min-height: 1.5em; }
+.playground-support { max-width: 850px; color: var(--muted-dark); font-size: .85rem; line-height: 1.7; }
+.playground :focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+@media (max-width: 750px) {
+  .playground { padding-top: 32px; }
+  .playground-workspace { grid-template-columns: 1fr; }
+  .playground-toolbar { flex-wrap: wrap; gap: 10px; }
+  .playground-editor { height: 400px; }
+  .playground-result > pre { height: 220px; }
+}

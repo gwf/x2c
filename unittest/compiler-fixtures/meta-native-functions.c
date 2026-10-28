@@ -20,7 +20,7 @@ Var MetaCount_var(MetaCount value){
 }
 
 MetaCount Var_metacount(Var value){
-  return(MetaCount) Var_int(Var_convert(value, 3453797));
+  return(MetaCount) Var_int(Var_convert_at(value, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/meta-native-functions.x",.function = "Var_metacount",.line = 0}; & _x2c_gensym_error_site_0; })));
 }
 
 static double native_total(double value){

@@ -9,17 +9,49 @@
 #include "channel.h"
 #include "common.h"
 #include "compiler-meta.h"
+#include "derive.h"
 #include "lisp-bindings.h"
 #include "list-selectors.h"
 #include "native-scalar-types.h"
 #include "rewrite.h"
 #include "system-macros.h"
+#include "test.h"
 #include "thread.h"
 #include "var-tags.h"
 #include "var/var.h"
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
+List _derive_methods(Type type, List kinds, Macro map, Macro json, Macro equal, Macro repr, Macro args, Macro row);
+
+List _derive_construct(Type type, List map);
+
+List _derive_args_spec(Type type);
+
+Symbol _derive_field_kind(Type t);
+
+List _derive_fields(Type type, Symbol kind);
+
+List _derive_puts(Type type, List v, List out);
+
+List _derive_read(Type type, Symbol kind, List value);
+
+List _derive_gets(Type type, List v, List m);
+
+List _derive_equal(Type type, List a, List b);
+
+List _derive_repr(Type type, List a);
+
+List _derive_spec(Type type);
+
+List _derive_parse_args(Type type, List map);
+
+List _derive_columns(Type type);
+
+List _derive_row(Type type, List value);
+
+List _derive_from_row(Type type, List value, List row);
+
 List _scalar_access_record(Type type);
 
 Code register_rewrite(Code function, Code pattern, List holes);
@@ -29,6 +61,8 @@ List _dedent_expand(Source text);
 List _macros_location(void);
 
 List _macros_source(Source code);
+
+List test_register(List function);
 
 List _tag_decode_group(List rows, Map counts, int top);
 

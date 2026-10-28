@@ -14,7 +14,7 @@ static Var box_value(unsigned long value){
 }
 
 static unsigned long unbox_value(Var value){
-  return Var_ulong(Var_convert(value, 44858254));
+  return Var_ulong(Var_convert_at(value, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-wide-unsigned-long.x",.function = "unbox_value",.line = 9}; & _x2c_gensym_error_site_0; })));
 }
 
 int main(void){

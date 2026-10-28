@@ -13,7 +13,7 @@ include etc/build-config.mk
 CORE_TARGETS = build build-safe commands commands-check verify examples \
 	check precommit agent-pr-check sanity-check clean help stats
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
-	stage-1 stage-2 stage-3 packages
+	stage-1 stage-2 stage-3 packages wasm-runtime
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
 	proof-cold-collection \
@@ -86,6 +86,21 @@ build: bootstrap-ready					## Build the runtime and compiler
 	tools/gen-meta-queries.sh
 	$(PARALLEL_MAKE) -C builds x2c
 
+# Reuse stage zero's runtime C without adding another target to its build.
+WASM_CC ?= emcc
+WASM_AR ?= emar
+WASM_CFLAGS ?= -fsigned-char -Os -m64 -sSUPPORT_LONGJMP=emscripten
+wasm-runtime: build					## Build the optional Memory64 runtime
+	@mkdir -p builds/wasm/lib
+	@set -e; for c in builds/0/lib/*.c; do \
+	  $(WASM_CC) $(WASM_CFLAGS) -iquote builds/0/lib -iquote include/x2c \
+	    -c "$$c" -o "builds/wasm/lib/$$(basename "$$c" .c).o"; \
+	done
+	@rm -f builds/wasm/libx2c.a
+	$(WASM_AR) rcs builds/wasm/libx2c.a \
+	  $(patsubst builds/0/lib/%.c,builds/wasm/lib/%.o,\
+	    $(wildcard builds/0/lib/*.c))
+
 build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C bootstrap clean
 	$(MAKE) bootstrap-build
@@ -142,6 +157,7 @@ packages: configure-packages				## Build packages and examples
 	$(MAKE) -C packages/sqlite build short-example example lisp-example
 	$(MAKE) -C packages/libcurl build short-example example lisp-example
 	$(MAKE) -C examples/packages/http-json-releases build
+	$(MAKE) -C examples/apps/notes build
 	$(MAKE) -C packages/termbox2 build short-example example
 	$(MAKE) -C packages/blis build short-example example
 	$(MAKE) -C packages/libuv build short-example example
@@ -158,6 +174,7 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/sqlite test run run-lisp
 	$(MAKE) -C packages/libcurl test run run-lisp
 	$(MAKE) -C examples/packages/http-json-releases test
+	$(MAKE) -C examples/apps/notes check
 	$(MAKE) -C packages/termbox2 test run
 	$(MAKE) -C packages/blis test run
 	$(MAKE) -C packages/libuv test run

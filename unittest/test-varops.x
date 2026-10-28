@@ -203,6 +203,50 @@ static void var_numeric_conversion_matrix(void) {
 }
 
 
+static void var_conversion_records_site(void) {
+  $test.scoped();
+  X2CErrorSite site = {
+    .file = "located-conversion.x", .function = "conversion_probe", .line = 17
+  };
+  Map captured = {};
+  int caught = 0;
+  try {
+    ErrorHandler observer = Error.push(_capture_conversion_error, captured);
+    defer Error.pop(observer);
+    Var.convert_at(void, <i32>, &site);
+  }
+  catch %(void-op *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  List entry = captured[<entry>], location = entry.assoc(<location>);
+  EXPECT_STR_EQ(location.assoc(<file>).string(), "located-conversion.x");
+  EXPECT_STR_EQ(location.assoc(<function>).string(), "conversion_probe");
+  EXPECT_INT_EQ(location.assoc(<line>).integer(), 17);
+  List detail = entry.assoc(<detail>);
+  EXPECT_TRUE(detail.assoc(<target>) == <i32>);
+}
+
+static void var_extractor_keeps_runtime_site(void) {
+  $test.scoped();
+  Map captured = {};
+  int caught = 0;
+  try {
+    ErrorHandler observer = Error.push(_capture_conversion_error, captured);
+    defer Error.pop(observer);
+    Var.string(42);
+  }
+  catch %(no-convert *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  List entry = captured[<entry>], location = entry.assoc(<location>);
+  EXPECT_STR_EQ(location.assoc(<function>).string(), "Var_string");
+  EXPECT_INT_EQ(location.assoc(<runtime>).integer(), 1);
+}
+
+static Symbol _capture_conversion_error(List errors, Var data) {
+  Map captured = data;
+  captured[<entry>] = Error.snapshot(errors.last());
+  return <declined>;
+}
+
 static void var_numeric_conversion_boundaries(void) {
   $test.scoped();
   Var out = Var.convert(300, <u8>);
@@ -834,6 +878,8 @@ void varops_suite(void) {
   $test.run(var_numeric_metadata_is_canonical);
   $test.run(var_numeric_conversion_matrix);
   $test.run(var_numeric_conversion_boundaries);
+  $test.run(var_conversion_records_site);
+  $test.run(var_extractor_keeps_runtime_site);
   $test.run(var_numeric_exact_floating_boundaries);
   $test.run(var_floating_rounding_matrix);
   $test.run(var_arithmetic_pair_matrix);

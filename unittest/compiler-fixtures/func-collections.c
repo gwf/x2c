@@ -163,7 +163,7 @@ static Var _x2c_gensym_lambda_0(Var value, int bias){
 static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg * _x2c_gensym_lambda_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_gensym_lambda_closure_0, _x2c_gensym_lambda_argv_0, 0, 45156);
   const struct _x2c_gensym_lambda_context_0 * record =(const struct _x2c_gensym_lambda_context_0 *) Func_context(_x2c_gensym_lambda_closure_0);
-  return _x2c_gensym_lambda_0(a0, Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_0(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/func-collections.x",.function = "_x2c_gensym_lambda_1",.line = 0}; & _x2c_gensym_error_site_0; }))));
 }
 
 static Var _x2c_gensym_lambda_2(char value, int bias){
@@ -172,13 +172,13 @@ static Var _x2c_gensym_lambda_2(char value, int bias){
 }
 
 static Var _x2c_gensym_lambda_3(Func _x2c_gensym_lambda_closure_1, const FuncArg * _x2c_gensym_lambda_argv_1){
-  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_lambda_closure_1, _x2c_gensym_lambda_argv_1, 0, 26993), 26993));
+  char a0 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_lambda_closure_1, _x2c_gensym_lambda_argv_1, 0, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/func-collections.x",.function = "_x2c_gensym_lambda_3",.line = 0}; & _x2c_gensym_error_site_1; })));
   const struct _x2c_gensym_lambda_context_2 * record =(const struct _x2c_gensym_lambda_context_2 *) Func_context(_x2c_gensym_lambda_closure_1);
-  return _x2c_gensym_lambda_2(a0, Var_int(Var_convert(record -> c0, 3453797)));
+  return _x2c_gensym_lambda_2(a0, Var_int(Var_convert_at(record -> c0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/func-collections.x",.function = "_x2c_gensym_lambda_3",.line = 0}; & _x2c_gensym_error_site_2; }))));
 }
 
 static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2){
-  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_2, _x2c_gensym_func_argv_2, 0, 26993), 26993));
+  char a0 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_2, _x2c_gensym_func_argv_2, 0, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/func-collections.x",.function = "_x2c_gensym_func_adapt_2",.line = 0}; & _x2c_gensym_error_site_3; })));
   return int_var(next_byte(a0));
   ;
 }

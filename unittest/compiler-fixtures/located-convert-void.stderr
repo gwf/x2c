@@ -1,0 +1,1 @@
+x2c: uncaught <void-op> in main (unittest/compiler-fixtures/located-convert-void.x:3): operation Var.convert, target i32

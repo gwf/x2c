@@ -58,6 +58,26 @@ static void json_booleans_stay_distinct_from_numbers(void) {
   EXPECT_INT_EQ(caught, 1);
 }
 
+static void json_booleans_cross_contexts(void) {
+  Context context = Context.open_isolated_named("parsed JSON export");
+  Var value = {0};
+  int exported = 0;
+  try {
+    value = context.export(Json.parse("{\"flags\":[true,false,{\"again\":false}]}"));
+    exported = 1;
+  }
+  catch %(bad-types *): {}
+  context.close();
+  if (!EXPECT_TRUE(exported)) return;
+  Array flags = value.map()["flags"];
+  EXPECT_TRUE(flags[0].same(Json.bool(1)));
+  EXPECT_TRUE(flags[1].same(Json.bool(0)));
+  EXPECT_TRUE(Json.boolean(flags[0]));
+  EXPECT_FALSE(Json.boolean(flags[1]));
+  EXPECT_TRUE(flags[2].map()["again"].same(Json.bool(0)));
+  EXPECT_STR_EQ(Var.json(value), "{\"flags\":[true,false,{\"again\":false}]}");
+}
+
 static void json_numbers_follow_the_grammar(void) {
   $test.scoped();
   Array numbers = Json.parse(
@@ -318,6 +338,7 @@ void json_suite(void) {
   $test.run(json_failed_string_releases_decoder);
   $test.run(json_parse_builds_ordinary_values);
   $test.run(json_booleans_stay_distinct_from_numbers);
+  $test.run(json_booleans_cross_contexts);
   $test.run(json_numbers_follow_the_grammar);
   $test.run(json_strings_decode_escapes);
   $test.run(json_rejects_malformed_text_with_position);

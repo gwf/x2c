@@ -13,6 +13,7 @@ C preprocessor directives in x2c source.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
+| [`Compiler.located_preproc`](#Compiler.located_preproc) | Returns preceding directives with source-mapped include locations. |
 | [`Compiler.note_object_macro`](#Compiler.note_object_macro) | Records the name of the `#define` line `content` so a bare atom spelled the same way inside a literal can be flagged and a declaration prefix can be read. |
 | [`Compiler.note_preprocessor_macros`](#Compiler.note_preprocessor_macros) | Records object-like `#define` names and removes names after `#undef`. |
 | [`Compiler.preproc_branch_state`](#Compiler.preproc_branch_state) | Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when the group's state was 1, and 0 otherwise. |
@@ -35,6 +36,17 @@ C preprocessor directives in x2c source.
 Returns source-ordered preprocessor nodes in the preceding trivia.
 
 Spaces and comments remain trivia rather than becoming AST nodes.
+
+Source: `src/preprocess.x`
+
+<a id="Compiler.located_preproc"></a>
+#### Compiler.located_preproc
+
+`List Compiler.located_preproc(Compiler c)`
+
+Returns preceding directives with source-mapped include locations.
+Analysis callers use `leading_preproc` for unwrapped directive nodes.
+Source includes reuse the ordinary `at` origin through C emission.
 
 Source: `src/preprocess.x`
 

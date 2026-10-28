@@ -1692,7 +1692,7 @@ static int _recover_form(Compiler c, Token start, int braces){
 void Compiler_install_included_effects(Compiler);
 
 static void _append_preproc(Compiler c, Array nodes){
-  List directives = Compiler_leading_preproc(c);
+  List directives = Compiler_located_preproc(c);
   Compiler_note_preprocessor_macros(c, directives);
   if(Map_len(c -> included_effects)) Compiler_install_included_effects(c);
   {

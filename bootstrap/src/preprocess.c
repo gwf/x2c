@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "compiler/compiler.h"
+#include "ast.h"
 #include <ctype.h>
 typedef struct ArmScan{
   Compiler c;
@@ -22,6 +23,8 @@ static Var _19, _13;
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List _leading_preproc(Compiler c, int located);
 
 static void _directive(ArmScan * s, Token token, size_t i);
 
@@ -212,13 +215,12 @@ int Compiler_preproc_branch_state(int state){
 
 List Compiler_leading_preproc(Compiler c){
   if(! _init_guard_) _file_init_();
-  List noncode = NULL;
-  Token base = c -> tokenizer -> tokens, token = c -> token;
-  while(-- token >= base){
-    if(token -> type == 35579270086) noncode = cons(List_var(cons(_13, cons(String_var(token -> text), NULL))), noncode);
-    else if(token -> type != 40896714 && token -> type != 7477210024) break;
-  }
-  return noncode;
+  return _leading_preproc(c, 0);
+}
+
+List Compiler_located_preproc(Compiler c){
+  if(! _init_guard_) _file_init_();
+  return _leading_preproc(c, c -> source_map);
 }
 
 void Compiler_note_object_macro(Compiler c, String content);
@@ -232,7 +234,7 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       directive = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      Compiler_note_object_macro(c, Var_as_string(List_cadr(directive)));
+      Compiler_note_object_macro(c, Var_as_string(List_cadr(Ast_without_origin(directive))));
     }
 
   }
@@ -317,6 +319,21 @@ List Compiler_preproc_within_arms(List arms, List items){
   }
   for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_21));
   return Array_list_free(out);
+}
+
+static List _leading_preproc(Compiler c, int located){
+  List noncode = NULL;
+  Token base = c -> tokenizer -> tokens, token = c -> token;
+  while(-- token >= base){
+    if(token -> type == 35579270086){
+      List directive = cons(_13, cons(String_var(token -> text), NULL));
+      int angle = 0;
+      if(located && String_truth(Compiler_preproc_include_target(token -> text, &(angle)))) directive = Compiler_anchor_origin(c, directive, token);
+      noncode = cons(List_var(directive), noncode);
+    }
+    else if(token -> type != 40896714 && token -> type != 7477210024) break;
+  }
+  return noncode;
 }
 
 static void _directive(ArmScan * s, Token token, size_t i){

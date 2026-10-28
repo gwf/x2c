@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "compiler/compiler.h"
+#include "ast.h"
 #include <ctype.h>
 String Compiler_preproc_include_target(String text, int * angle);
 
@@ -19,6 +20,8 @@ int Compiler_preproc_open_state(String text);
 int Compiler_preproc_branch_state(int state);
 
 List Compiler_leading_preproc(Compiler c);
+
+List Compiler_located_preproc(Compiler c);
 
 void Compiler_note_preprocessor_macros(Compiler c, List directives);
 

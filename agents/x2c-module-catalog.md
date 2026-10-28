@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 69
+- Runtime modules: 73
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -197,9 +197,10 @@ Public functions:
 `Compiler.preproc_include_target`, `Compiler.preproc_marker_file`,
 `Compiler.scan_conditionals`, `Compiler.preproc_open_state`,
 `Compiler.preproc_branch_state`, `Compiler.leading_preproc`,
-`Compiler.note_preprocessor_macros`, `Compiler.note_object_macro`,
-`Compiler.preproc_track_arms`, `Compiler.preproc_conditional_kind`,
-`Compiler.preproc_directive`, `Compiler.preproc_within_arms`
+`Compiler.located_preproc`, `Compiler.note_preprocessor_macros`,
+`Compiler.note_object_macro`, `Compiler.preproc_track_arms`,
+`Compiler.preproc_conditional_kind`, `Compiler.preproc_directive`,
+`Compiler.preproc_within_arms`
 
 ### [src/report.x](../src/report.x)
 
@@ -217,8 +218,8 @@ request-owned source overlays.
 
 Public functions:
 
-`SourceView.init`, `SourceView.set`, `SourceView.is_changed`,
-`SourceView.exists`, `SourceView.read`
+`SourceView.init`, `SourceView.set`, `SourceView.unset`,
+`SourceView.is_changed`, `SourceView.exists`, `SourceView.read`
 
 ### [src/stage.x](../src/stage.x)
 
@@ -729,7 +730,8 @@ x2c project manifests.
 
 Public functions:
 
-`ProjectBuild.valid_name`, `ProjectBuild.plan`, `CliRequest.project_manifest`
+`ProjectBuild.valid_name`, `ProjectBuild.owning_target`, `ProjectBuild.plan`,
+`CliRequest.project_manifest`
 
 ### [src/protocol/protocol.x](../src/protocol/protocol.x)
 
@@ -961,6 +963,14 @@ Public functions:
 `Buffer.write_datum_frame`, `Buffer.write_datum`, `String.read_datum_frame`,
 `String.read_datum`, `Var.independent_data_problem`
 
+### [lib/derive.x](../lib/derive.x)
+
+generate record mappings from declared fields.
+
+Public functions:
+
+`_derive_list`
+
 ### [lib/diff.x](../lib/diff.x)
 
 line differences between two texts.
@@ -1048,6 +1058,20 @@ Public functions:
 `String.open`, `File.open`, `File.fdopen`, `File.popen`, `File.reopen`,
 `File.path_error`, `File.initialize`
 
+### [lib/http.x](../lib/http.x)
+
+blocking HTTP/1.1 routing and worker-pool service.
+
+Public functions:
+
+`Http.fail`, `HttpRequest.read`, `HttpRequest.json`, `HttpResponse.new`,
+`HttpResponse.status`, `HttpResponse.header`, `HttpResponse.text`,
+`HttpResponse.json`, `HttpResponse.bytes`, `HttpResponse.write`, `Router.new`,
+`Router.route`, `Router.get`, `Router.post`, `Router.put`, `Router.delete`,
+`Router.files`, `Router.dispatch`, `HttpServer.new`, `HttpServer.port`,
+`HttpServer.serve`, `HttpServer.start`, `HttpServer.stop`, `HttpServer.close`,
+`HttpRequest.init`, `HttpResponse.init`, `Router.init`, `HttpServer.init`
+
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
 shared raw integer arithmetic.
@@ -1075,9 +1099,10 @@ JSON text to and from ordinary x2c values.
 
 Public functions:
 
-`JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `Json.is_bool`,
-`Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`, `Var.pretty_json`,
-`Json.write_file`, `Var.json`, `Var.jsonbool`, `JsonBool.str`
+`JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `JsonBool.export_context`,
+`Json.is_bool`, `Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`,
+`Var.pretty_json`, `Json.write_file`, `Var.json`, `Var.jsonbool`,
+`JsonBool.str`
 
 ### [lib/lib.x](../lib/lib.x)
 
@@ -1156,6 +1181,17 @@ Public functions:
 
 `_scalar_tag`, `_scalar_key`, `_scalar_access_units`, `native_scalar_types`,
 `native_scalar_access`
+
+### [lib/net.x](../lib/net.x)
+
+blocking TCP sockets backed by File streams.
+
+Public functions:
+
+`Listener.cleanup`, `Socket.cleanup`, `Listener.bind`, `Listener.accept`,
+`x2c_net_accept_fd`, `Listener.port`, `Listener.stop`, `Listener.close`,
+`Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
+`Socket.shutdown_write`, `Socket.peer`, `Socket.close`
 
 ### [lib/path.x](../lib/path.x)
 
@@ -1299,6 +1335,14 @@ convenience macros for text, timing, and processes.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [lib/test.x](../lib/test.x)
+
+registered tests and assertions for user programs.
+
+Public functions:
+
+`Test.register`, `Test.check`, `Test.compare`, `Test.skip`, `Test.main`
 
 ### [lib/thread-state.x](../lib/thread-state.x)
 
@@ -1574,8 +1618,8 @@ handler stack and accumulated errors.
 
 Public functions:
 
-`x2c_error_raise`, `Error.raise`, `x2c_error_raise_n`, `Error.depth`,
-`Error.note_rendered`, `Error.policy_set`, `Error.policy_get`,
+`x2c_error_raise`, `Error.raise`, `Error.raise_at`, `x2c_error_raise_n`,
+`Error.depth`, `Error.note_rendered`, `Error.policy_set`, `Error.policy_get`,
 `Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
 `Error.policy_release`, `Error.context_open`, `Error.bound`,
 `Error.context_close`, `Error.mark`, `Error.since`, `Error.since_in`,
@@ -1803,8 +1847,8 @@ Public functions:
 `Var.wide_equal`, `Var.wide_compare`, `Var.long_double_value`,
 `Var.integer_compare`, `Var.integer_floating_compare`, `Var.string`,
 `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`,
-`Var.list`, `Var.map`, `Var.convert`, `Var.numeric_decode`, `Var.integer_box`,
-`Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
+`Var.list`, `Var.map`, `Var.convert`, `Var.convert_at`, `Var.numeric_decode`,
+`Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
 `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`, `Var.signed_from_bits`,
 `Var.width_mask`, `x2c_var_update_i8`, `x2c_var_update_schar`,
 `x2c_var_update_u8`, `x2c_var_update_i16`, `x2c_var_update_u16`,
