@@ -783,7 +783,7 @@ CliRequest ProjectBuild_owning_target(CliRequest request, String source){
       {
         if(! String_equal(Path_absolute(input), source)) continue;
         if(selected && selected != node -> request){
-          fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
+          fputs("x2c lsp: source belongs to multiple selected targets\n", stderr);
           return NULL;
         }
         selected = node -> request;
@@ -792,7 +792,7 @@ CliRequest ProjectBuild_owning_target(CliRequest request, String source){
     }
 
   }
-  if(! selected) fputs("x2c editor: this document is not a selected target input; " "open its owning source for semantic results or configure " "a direct translate command\n", stderr);
+  if(! selected) fputs("x2c lsp: this document is not a selected target input; " "open its owning source for semantic results or configure " "a direct translate command\n", stderr);
   return selected;
 }
 
