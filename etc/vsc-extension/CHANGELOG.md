@@ -5,6 +5,10 @@ first.
 
 ## Unreleased
 
+- Rebuild the package so an interpolated String inside a parenthesized
+  `$(...)` List unquote no longer leaves the rest of the file highlighted as
+  a String.
+
 - Highlight parenthesized `$(expression)` insertion and `@(expression)`
   splicing in Lists, Strings, and quotation holes, replacing the retired
   braced `${expression}` and `@{expression}` forms. `$(...)` in code, the

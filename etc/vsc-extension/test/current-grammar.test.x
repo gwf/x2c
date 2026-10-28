@@ -418,20 +418,13 @@ Map map = %{key: 42, runtime: $value, computed: $(call())};
 //                                    ^^^^^^^^ constant.other.atom.x2c
 //                                              ^^ punctuation.definition.interpolation.expression.begin.x2c
 String string = %"value $name $(compute())";
-//              ^^ punctuation.definition.literal.string.begin.x2c
-//                      ^ punctuation.definition.interpolation.x2c
-//                            ^^ punctuation.definition.interpolation.expression.begin.x2c
-SymbolSet symbols = %<<alpha beta>>;
-//                  ^^^ punctuation.definition.literal.symbol-set.begin.x2c
-SymbolSet shifts = %<<"<<=" ">>=">>;
-//                          ^^^^^ constant.other.symbol.quoted.x2c.symbol-set
-//                               ^^ punctuation.definition.literal.symbol-set.end.x2c
-Lambda lambda = %!(int value) => value + 1;
-//              ^^ punctuation.definition.literal.lambda.x2c
-//                            ^^ keyword.operator.arrow.x2c
-Lambda shared = %!() using &captured => captured;
-//                   ^^^^^ keyword.control.capture.x2c
-//                                   ^^ keyword.operator.arrow.x2c
+List named = %(ident (name $(%"x2c_$(kind)_$index")));
+//                           ^^ punctuation.definition.literal.string.begin.x2c
+//                             ^^^^ string.quoted.double.x2c
+//                                 ^^ punctuation.definition.interpolation.expression.begin.x2c
+//                                         ^ punctuation.definition.interpolation.x2c
+//                                               ^ punctuation.definition.literal.string.end.x2c
+//                                                   ^ punctuation.terminator.statement.x2c
 
 int value = $project.make(42);
 //          ^ punctuation.definition.macro.sigil.x2c
