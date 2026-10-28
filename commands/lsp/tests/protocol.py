@@ -91,6 +91,24 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-protocol-") as temporary:
         client.opened(source, disk)
         assert client.diagnostics() == []
         assert "int value(void);" in client.hover(source, 1, 25)["contents"]["value"]
+        client.opened(source, disk + "/* unsaved */\n")
+        assert client.diagnostics() == []
+        assert client.hover(source, 1, 25) is None
+        client.send("textDocument/didSave", {
+            "textDocument": {"uri": source.as_uri()}, "text": disk})
+        assert client.diagnostics() == []
+        assert "int value(void);" in client.hover(source, 1, 25)["contents"]["value"]
+    finally:
+        client.close()
+
+    client = Client(root, directory, ["translate", str(source)])
+    try:
+        client.opened(source, disk.replace("int value", "double value"))
+        assert client.diagnostics() == []
+        assert "double value(void);" in client.hover(source, 1, 25)["contents"]["value"]
+        client.send("textDocument/didClose", {"textDocument": {"uri": source.as_uri()}})
+        assert client.diagnostics() == []
+        assert "int value(void);" in client.hover(source, 1, 25)["contents"]["value"]
     finally:
         client.close()
 

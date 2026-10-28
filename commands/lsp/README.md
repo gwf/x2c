@@ -35,3 +35,8 @@ The command does not index the workspace in the background or run a C compiler.
 
 Run `commands/lsp/tests/run.sh` after building the command for the framed
 protocol smoke test. `make commands-check` includes that test.
+
+For an optional, longer checkpoint probe, run
+`python3 commands/lsp/tests/restart.py "$PWD"` from the checkout root. It
+uses the production budget and writes an evidence report in its temporary
+directory. It is separate from `make commands-check`.
