@@ -1,11 +1,12 @@
-> Status: active - phase 1 published; phases 2 and 3 in progress
+> Status: active - phases 1-3 published; client release and phase 4 in progress
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
 > Ready PRs go to the shared integration agent, which owns full gates.
 > Phase 1 lands before phases 2 and 3 start. Phase 4 waits for the extension
 > release that uses the language client.
 > Phase 1 landed through PR #599. PR #600 published the JSON-boolean
-> startup repair. Phases 2 and 3 will form one coherent feature batch.
+> startup repair. Phases 2 and 3 landed through PR #610 at `404a24862`.
+> The 0.4.0 client candidate passes real-editor checks; publication is pending.
 
 # Resident language server: `x2c lsp`
 
@@ -436,7 +437,7 @@ six, and all observed helpers exited after shutdown. RSS was 322,752 KiB warm,
 and 0.879 seconds under concurrent host activity; these are observations, not
 an isolated performance benchmark. No full gate ran in the implementation
 session. The shared integrator owns publication validation and generated
-artifacts. Manual VS Code and Neovim sessions remain unperformed.
+artifacts. Real VS Code and Neovim client checks are recorded below.
 
 Phases 2 and 3 focused evidence (2026-10-28): the combined server passes
 framed smoke, paced protocol, completion, symbols, dependency references,
@@ -469,6 +470,34 @@ they do not add recurring gate work.
 - Publication: the shared integration agent owns the applicable performance
   work, final generated artifacts, and `agent-pr-check` for each coherent
   submitted batch. The implementation session runs focused checks only.
+
+## Client release verification (2026-10-28)
+
+The 0.4.0 VSIX has SHA-256
+`f4f0bd76c017a365f2fb9c0d15fd56a909a78dc89138a0f8bf2f109f1d53bb12`.
+The installed payload was compared byte-for-byte with that archive. Actual
+VS Code 1.143.1 and Neovim 0.12.6 clients pass hover, definition, completion,
+symbols, references, rename, unsaved-buffer updates, parse diagnostics, and
+repair checks. Both also answer hover and definition on `src/frontend.x`
+with an explicit translate configuration. These are manually invoked checks
+through the real editor APIs, not new recurring gates.
+
+The VS Code check found two defects before publication. Explicit executable
+`TransportKind.stdio` made the pinned language client append `--stdio`, which
+the server does not accept. Leaving the transport unspecified uses the same
+stdio streams and preserves the `x2c lsp` argument list. Compiler replies also
+use canonical physical paths; a `/tmp` workspace alias caused rename to edit
+second buffers under `/private/tmp`. The client's existing URI conversion
+facility now maps workspace resources back to the URI spelling used by that
+workspace. External resources remain unchanged. No compiler path contract or
+global URI index changed.
+
+The client release removes the already-unused `workerPath` contribution as
+its part of phase 4. The compiler command and compatibility launcher remain
+until the new client release is verified. Phase 4 must also mark `lsp` shipped:
+the existing installer deliberately copies only shipped commands. Replacing
+the manifest row preserves installed editor support without changing that
+installer policy.
 
 ## Phases and size
 
