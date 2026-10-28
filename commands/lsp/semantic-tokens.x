@@ -65,7 +65,8 @@ static void _semantic_parts(SemanticTokens &out, int end, int type) {
       out.previous_column = column;
     }
     if (out.at < end) {
-      int width = out.text[out.at] == '\r' && out.at + 1 < end &&
+      // Line comments and directives can end between the two bytes of CRLF.
+      int width = out.text[out.at] == '\r' && out.at + 1 < out.text.len() &&
                   out.text[out.at + 1] == '\n' ? 2 : 1;
       lsp_advance(out.text, out.at + width, out.at, out.line, out.column);
     }
