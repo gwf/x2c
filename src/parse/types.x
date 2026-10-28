@@ -30,13 +30,14 @@ List Compiler.parse_named_type(Compiler c) {
   Token start = c.token;
   String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
   c.expect(<ident>);
+  Token after_name = c.token;
   List key = $(name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (c.test(<;>)) return %(named-type $name ());
   List qualifiers = _type_qualifiers(c);
   List base = qualifiers.append(
     _record_follows(c) ? _record_body(c, name, start) : _type_specifier(c));
-  Type type = _declare_named_type(c, key, base, start);
+  Type type = _declare_named_type(c, key, base, start, after_name);
   return %(named-type $name $type);
 }
 
@@ -606,7 +607,8 @@ static List _record_body(Compiler c, String name, Token start) {
 
 /* Completes a named type from the abstract declarator after its base. The
    type keeps an aggregate's body in place of its tag. */
-static Type _declare_named_type(Compiler c, List key, List base, Token start) {
+static Type _declare_named_type(
+  Compiler c, List key, List base, Token start, Token after_name) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, base, NULL, method, first, after);
@@ -618,7 +620,10 @@ static Type _declare_named_type(Compiler c, List key, List base, Token start) {
   c.expect(<;>);
   Type type = %(declare $base (bindings (bind () $modifiers)))
                 .type_from_ast();
-  if (!c.macro_holes) c.sym.declare_resolved(%(typedef), key, type);
+  if (!c.macro_holes) {
+    List binding = c.sym.declare_resolved(%(typedef), key, type);
+    c.record_source_declaration(binding, start, after_name);
+  }
   Type specifier = base.type().base_type();
   if (specifier.is_aggregate_tag_body())
     type = type.list()[:type.len() - type.base_type().len()]
