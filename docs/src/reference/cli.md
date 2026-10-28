@@ -110,8 +110,8 @@ x2c source. Macro expansions use their invocation locations; generated cleanup
 uses its owning source construct. Compiler scaffolding without a source origin
 retains a generated-file location. Source mapping does not add native debug
 information by itself. Changing the option invalidates reused translation
-output. Optimized builds may combine or remove
-statements, so source mapping does not guarantee exact stepping or recovery of
+output. Optimized builds may combine or remove statements, so source mapping
+does not guarantee exact stepping or recovery of
 optimized-away values.
 
 On macOS, mapped executable builds with effective native debug information

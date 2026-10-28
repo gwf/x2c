@@ -45,6 +45,15 @@ grep -q 'warning.x:1:' warning.log
 "$X2C" build -q --no-source-map -Xcc -Waddress -o warning warning.x 2>generated.log
 grep -q 'warning.c:' generated.log
 
+# A native include failure retains the location of the source include.
+mkdir support
+printf 'int helper(void) { return 0; }\n' > support/helpers.x
+printf '#include "support/helpers.x"\nint main(void) { return 0; }\n' > missing-include.x
+status=0
+"$X2C" build -q missing-include.x >missing-include.log 2>&1 || status=$?
+[ "$status" = 1 ]
+grep -q 'missing-include.x:1:10:.*support/helpers.h.*file not found' missing-include.log
+
 printf 'int main(void) { int n = ; }\n' > bad.x
 status=0
 "$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?
