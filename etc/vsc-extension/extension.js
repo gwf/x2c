@@ -1,193 +1,125 @@
 const vscode = require("vscode");
 const path = require("path");
-const { SemanticService, byteOffset, positionAt, selectTool, findExecutable } = require("./semantic");
+const { LanguageClient, TransportKind } = require("vscode-languageclient/node");
+const { selectCompiler, findExecutable } = require("./client");
+
+let active;
 
 function activate(context) {
-  const diagnostics = vscode.languages.createDiagnosticCollection("x2c");
   const output = vscode.window.createOutputChannel("x2c");
-  const services = new Map();
-  const errors = new Map();
-  const setupErrors = new Set();
-  const timers = new Map();
-  const selector = { language: "x2c", scheme: "file" };
-  let runtimeNotice = false;
+  const clients = new Map();
+  const reported = new Set();
+  let pending = Promise.resolve();
+  let disposed = false;
 
-  function serviceFor(document) {
-    if (!vscode.workspace.isTrusted || document.uri.scheme !== "file") return null;
-    if (typeof AbortController === "undefined") {
-      if (!runtimeNotice) output.appendLine(
-        "Semantic features require a newer VS Code runtime. Syntax highlighting remains available."
-      );
-      runtimeNotice = true;
-      return null;
-    }
+  function rootFor(document) {
+    const folder = vscode.workspace.getWorkspaceFolder(document.uri);
+    return { folder, cwd: folder ? folder.uri.fsPath : path.dirname(document.uri.fsPath) };
+  }
+
+  // Non-x2c documents can be unsaved includes or project manifests. The
+  // language client owns x2c synchronization; forward only the other buffers.
+  async function overlay(method, document) {
+    if (document.uri.scheme !== "file" || document.languageId === "x2c") return;
+    const entry = clients.get(rootFor(document).cwd);
+    if (!entry) return;
+    const textDocument = { uri: document.uri.toString(), version: document.version };
+    if (method === "didOpen") Object.assign(textDocument,
+      { languageId: document.languageId, text: document.getText() });
+    const params = { textDocument };
+    if (method === "didChange") params.contentChanges = [{ text: document.getText() }];
+    if (method === "didSave") params.text = document.getText();
+    await entry.client.sendNotification(`textDocument/${method}`, params);
+  }
+
+  async function start(document) {
+    if (disposed || !vscode.workspace.isTrusted || document.uri.scheme !== "file" ||
+        document.languageId !== "x2c") return;
     const settings = vscode.workspace.getConfiguration("x2c", document.uri);
-    if (!settings.get("semantic.enabled", true)) return null;
-    const workspace = vscode.workspace.getWorkspaceFolder(document.uri);
-    const cwd = workspace ? workspace.uri.fsPath : path.dirname(document.uri.fsPath);
-    const tool = selectTool(settings, workspace?.uri.fsPath);
-    const worker = findExecutable(tool.worker, cwd);
-    const setupKey = JSON.stringify([cwd, tool.worker]);
-    if (!worker) {
-      diagnostics.delete(document.uri);
-      if (!setupErrors.has(setupKey)) output.appendLine(
-        `Cannot execute '${tool.worker}'. Install x2c and set x2c.semantic.compilerPath ` +
-        "to its executable, or place x2c on PATH. Syntax highlighting remains available."
-      );
-      setupErrors.add(setupKey);
-      return null;
-    }
-    setupErrors.delete(setupKey);
-    const args = settings.get("semantic.arguments", []);
-    const key = JSON.stringify([cwd, worker, tool.prefix, args]);
-    if (!services.has(key)) services.set(key,
-      new SemanticService({ worker, prefix: tool.prefix, cwd, args }));
-    const service = services.get(key);
-    // Include unsaved headers, imports, and manifests, not just x2c documents.
-    for (const open of vscode.workspace.textDocuments) {
-      if (open.uri.scheme !== "file") continue;
-      service.update(open.uri.fsPath, open.getText(), open.version, open.isDirty);
-    }
-    return service;
-  }
-
-  function range(result, location) {
-    const text = result.texts.get(location.file);
-    if (text === undefined) return null;
-    const start = positionAt(text, location.start);
-    const end = positionAt(text, location.end);
-    return new vscode.Range(start.line, start.character, end.line, end.character);
-  }
-
-  async function analyze(document, kind, position, token) {
-    const service = serviceFor(document);
-    if (!service) return null;
-    const controller = new AbortController();
-    const cancellation = token?.onCancellationRequested(() => controller.abort());
-    if (token?.isCancellationRequested) controller.abort();
-    try {
-      const offset = position ? byteOffset(document.getText(), document.offsetAt(position)) : 0;
-      const result = await service.analyze(document.uri.fsPath, kind, offset, controller.signal);
-      const file = document.uri.toString();
-      if (result?.error) {
-        const message = result.error.includes("ENOENT") ?
-          `${result.error}\nInstall x2c and set x2c.semantic.compilerPath to its executable.` :
-          result.error;
-        if (errors.get(file) !== message) output.appendLine(message);
-        errors.set(file, message);
-      }
-      else if (result) errors.delete(file);
-      return result;
-    }
-    finally { cancellation?.dispose(); }
-  }
-
-  async function refresh(document) {
-    const result = await analyze(document, "diagnostics");
-    if (!result) return;
-    if (result.error) {
-      diagnostics.delete(document.uri);
+    if (!settings.get("semantic.enabled", true)) return;
+    const { folder, cwd } = rootFor(document);
+    if (clients.has(cwd)) return;
+    const selected = selectCompiler(settings, folder?.uri.fsPath);
+    const command = findExecutable(selected, cwd);
+    if (!command) {
+      const message = `Cannot execute '${selected}'. Install x2c and set x2c.semantic.compilerPath ` +
+        "to its executable, or place x2c on PATH.";
+      if (!reported.has(message)) output.appendLine(message);
+      reported.add(message);
       return;
     }
-    const entries = [];
-    for (const entry of result.diagnostics || []) {
-      // Included-file diagnostics retain their location in the message when
-      // displayed on the primary file; their precise range is related info.
-      const location = range(result, entry);
-      const primary = entry.file === (result.file || document.uri.fsPath);
-      const message = primary ? entry.message : `${entry.file}: ${entry.message}`;
-      const item = new vscode.Diagnostic(
-        primary && location ? location : new vscode.Range(0, 0, 0, 0),
-        message, entry.severity === "warning" ? vscode.DiagnosticSeverity.Warning :
-          vscode.DiagnosticSeverity.Error
-      );
-      item.source = "x2c";
-      if (entry.code) item.code = entry.code;
-      if (!primary && location) item.relatedInformation = [new vscode.DiagnosticRelatedInformation(
-        new vscode.Location(vscode.Uri.file(entry.file), location), entry.message
-      )];
-      entries.push(item);
+    const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(
+      cwd, "**/*.{x,xh,xc,x2c,xp,xlisp,toml,h}"));
+    let initialOverlays;
+    const client = new LanguageClient("x2c", "x2c", {
+      command, args: ["lsp"], transport: TransportKind.stdio, options: { cwd }
+    }, {
+      documentSelector: [{ language: "x2c", scheme: "file",
+        pattern: new vscode.RelativePattern(cwd, "**/*") }],
+      workspaceFolder: folder,
+      initializationOptions: { arguments: settings.get("semantic.arguments", []) },
+      synchronize: { fileEvents: watcher }, outputChannel: output,
+      middleware: { async didOpen(open, next) {
+        initialOverlays ??= Promise.all(vscode.workspace.textDocuments
+          .filter((buffer) => buffer.uri.scheme === "file" && rootFor(buffer).cwd === cwd)
+          .map((buffer) => overlay("didOpen", buffer)));
+        await initialOverlays;
+        return next(open);
+      } }
+    });
+    clients.set(cwd, { client, watcher });
+    try {
+      await client.start();
     }
-    diagnostics.set(document.uri, entries);
-  }
-
-  function schedule(document) {
-    if (document.languageId !== "x2c" || document.uri.scheme !== "file") return;
-    const key = document.uri.toString();
-    clearTimeout(timers.get(key));
-    timers.set(key, setTimeout(() => {
-      timers.delete(key);
-      refresh(document).catch((error) => output.appendLine(error.message));
-    }, 200));
-  }
-
-  function changed(document) {
-    for (const service of services.values()) {
-      if (document.uri.scheme === "file")
-        service.update(document.uri.fsPath, document.getText(), document.version, document.isDirty);
+    catch (error) {
+      clients.delete(cwd);
+      watcher.dispose();
+      await client.dispose();
+      output.appendLine(`Cannot start x2c lsp: ${error.message}`);
     }
-    for (const open of vscode.workspace.textDocuments) schedule(open);
   }
 
-  function reset() {
-    for (const service of services.values()) service.dispose();
-    services.clear();
-    errors.clear();
-    setupErrors.clear();
-    diagnostics.clear();
-    for (const document of vscode.workspace.textDocuments) schedule(document);
+  async function stop() {
+    const entries = [...clients.values()];
+    clients.clear();
+    await Promise.all(entries.map(async ({ client, watcher }) => {
+      watcher.dispose();
+      await client.dispose();
+    }));
   }
 
-  const watcher = vscode.workspace.createFileSystemWatcher(
-    "**/*.{x,xh,xc,x2c,xp,xlisp,toml,h}"
-  );
-  function diskChanged() {
-    for (const service of services.values()) service.invalidate();
-    for (const document of vscode.workspace.textDocuments) schedule(document);
+  function enqueue(action) {
+    pending = pending.then(action).catch((error) => output.appendLine(error.message));
+    return pending;
   }
 
-  context.subscriptions.push(diagnostics, output, watcher,
-    watcher.onDidChange(diskChanged), watcher.onDidCreate(diskChanged),
-    watcher.onDidDelete(diskChanged),
-    vscode.languages.registerDefinitionProvider(selector, {
-      async provideDefinition(document, position, token) {
-        const result = await analyze(document, "definition", position, token);
-        if (!result?.definition) return null;
-        const location = range(result, result.definition);
-        return location && new vscode.Location(vscode.Uri.file(result.definition.file), location);
-      }
-    }),
-    vscode.languages.registerHoverProvider(selector, {
-      async provideHover(document, position, token) {
-        const result = await analyze(document, "hover", position, token);
-        if (!result?.hover) return null;
-        const contents = new vscode.MarkdownString();
-        contents.appendCodeblock(result.hover.text, "x2c");
-        return new vscode.Hover(contents, range(result, result.hover) || undefined);
-      }
-    }),
-    vscode.workspace.onDidOpenTextDocument(changed),
-    vscode.workspace.onDidChangeTextDocument((event) => changed(event.document)),
-    vscode.workspace.onDidSaveTextDocument(changed),
-    vscode.workspace.onDidCloseTextDocument((document) => {
-      for (const service of services.values()) service.close(document.uri.fsPath);
-      clearTimeout(timers.get(document.uri.toString()));
-      timers.delete(document.uri.toString());
-      diagnostics.delete(document.uri);
-      errors.delete(document.uri.toString());
-      for (const open of vscode.workspace.textDocuments) schedule(open);
-    }),
+  function restart() {
+    return enqueue(async () => {
+      await stop();
+      reported.clear();
+      for (const document of vscode.workspace.textDocuments) await start(document);
+    });
+  }
+
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument((document) => enqueue(async () => {
+      await start(document);
+      await overlay("didOpen", document);
+    })),
+    vscode.workspace.onDidChangeTextDocument(({ document }) => enqueue(() => overlay("didChange", document))),
+    vscode.workspace.onDidSaveTextDocument((document) => enqueue(() => overlay("didSave", document))),
+    vscode.workspace.onDidCloseTextDocument((document) => enqueue(() => overlay("didClose", document))),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("x2c")) reset();
+      if (event.affectsConfiguration("x2c")) return restart();
     }),
-    vscode.workspace.onDidGrantWorkspaceTrust(reset),
-    vscode.workspace.onDidChangeWorkspaceFolders(reset),
-    { dispose() {
-      for (const timer of timers.values()) clearTimeout(timer);
-      for (const service of services.values()) service.dispose();
-    } }
+    vscode.workspace.onDidGrantWorkspaceTrust(restart),
+    vscode.workspace.onDidChangeWorkspaceFolders(restart),
+    { dispose() { disposed = true; enqueue(stop).finally(() => output.dispose()); } }
   );
-  for (const document of vscode.workspace.textDocuments) schedule(document);
+  active = () => { disposed = true; return enqueue(stop); };
+  return restart();
 }
 
-module.exports = { activate };
+function deactivate() { return active?.(); }
+
+module.exports = { activate, deactivate };

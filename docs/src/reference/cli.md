@@ -336,50 +336,81 @@ the previous file. `run` writes it before starting the program, and `-###`
 writes no database. This file describes native C compilation, not x2c syntax
 for an editor's C parser.
 
+### Language server
+
+Run `x2c lsp` from the workspace root to serve editors over stdio. The
+server uses LSP 3.17 with UTF-16 positions and full document synchronization.
+One process serves one workspace and keeps the compiler frontend resident.
+It provides frontend diagnostics, definition navigation, and type hover.
+It does not report errors left to the native C compiler, such as unresolved
+C identifiers.
+
+Set `initializationOptions.arguments` to ordinary `build` or `translate`
+arguments. An empty list discovers `x2c.toml` and its default target, or
+analyzes the current file when there is no project. For example, use
+`["build", "--target", "app", "--profile", "debug"]` to select a target.
+The selected target must include the source as an input. For a header or
+macro file outside that input list, open its owning source or configure a
+direct `translate` command with the needed include and package options.
+
+An editor that sends unsaved buffers gets diagnostics and locations from
+that text. Changes invalidate analyses of units that read the changed file.
+The compiler reparses whole units; the server does not incrementally parse
+or index the workspace in the background. Native CPP symbol modes cannot
+consume unsaved source text and report that limitation. Macro-generated
+syntax can lack a physical definition or identifier location.
+
+For Neovim with built-in LSP support:
+
+```lua
+vim.api.nvim_create_autocmd("FileType", { pattern = "x2c",
+  callback = function(ev)
+    vim.lsp.start({ name = "x2c", cmd = { "x2c", "lsp" },
+      root_dir = vim.fs.root(ev.buf, { "x2c.toml", ".git" }),
+      init_options = { arguments = {} } })
+  end })
+```
+
+The server runs macros during analysis. Start it only for workspaces you
+trust. Completion, symbols, references, rename, and semantic tokens are
+planned additions. Formatting and native C compiler diagnostics are outside
+this server's current scope.
+
 ### VS Code diagnostics, definitions, and hover
 
 Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
-from VSIX**. The extension uses the installed compiler directly; no separate
-worker build is required. Set an absolute compiler path when it is not on
-`PATH`:
+from VSIX**. VS Code 1.82 or newer is required. The extension starts
+`x2c lsp` and uses its standard language client for synchronization,
+diagnostics, definition navigation, hover, and cancellation.
+
+Set an absolute compiler path when it is not on `PATH`:
 
 ```json
 "x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
 ```
 
-Selection order is an explicit `x2c.semantic.compilerPath`, an explicit legacy
-`x2c.semantic.workerPath`, executable `./x2c` in the trusted workspace, then
-`x2c` on `PATH`. An explicit selection never silently switches to another
-compiler. A missing executable produces one setup message in the **x2c**
-Output channel, and discovery retries when you use the editor again. The
-extension does not build or install the compiler automatically.
+Selection order is an explicit `x2c.semantic.compilerPath`, executable
+`./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
+selection never switches to another compiler. Setup errors appear in the
+**x2c** Output channel. The extension does not build or install the compiler.
+The deprecated `x2c.semantic.workerPath` setting remains accepted but is
+unused by the language client.
 
-The default configuration discovers `x2c.toml` and its default target, or
-analyzes the current file directly when there is no project. Select a target
-or profile with ordinary compiler arguments:
+Configure the server with ordinary compiler arguments:
 
 ```json
 "x2c.semantic.arguments": ["build", "--target", "app", "--profile", "debug"]
 ```
 
-The selected target must include the open source as an input. For a header or
-macro file outside that input list, open its owning source or configure a
-`translate` command with the needed include and package options. Unsaved
-included files still affect analysis of their owning source.
+The extension passes this list as `initializationOptions.arguments` and
+synchronizes open local buffers, including unsaved headers and manifests.
+It restarts the client when x2c settings or workspace folders change.
+Semantic execution requires a trusted local workspace because compilation
+can run macros. Untrusted and virtual workspaces retain syntax highlighting.
+Set `"x2c.semantic.enabled": false` to disable semantic execution.
 
-Diagnostics, definition navigation, and type hover include unsaved source
-text. Each request runs in a fresh `x2c-editor` process with snapshots of open
-files; editing cancels obsolete results without writing buffers to disk.
-Native CPP symbol modes cannot consume unsaved source snapshots and report
-that limitation. Macro-generated syntax may lack a physical definition or
-identifier location.
-
-Semantic execution requires a trusted local workspace because compilation can
-run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
-`"x2c.semantic.enabled": false` to disable semantic execution. Completion,
-rename, workspace indexing, and general LSP support are separate features.
-The shipped `x2c-editor` command serves these providers through `x2c editor`.
-Its argument and response formats are not a public compiler API.
+The legacy `x2c editor` command remains available during the extension
+transition. Its private request and response formats are not a public API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and

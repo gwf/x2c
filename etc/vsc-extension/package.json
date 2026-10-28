@@ -10,7 +10,7 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "preview": true,
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.82.0"
   },
   "categories": [
     "Programming Languages"
@@ -93,7 +93,7 @@
         "x2c.semantic.workerPath": {
           "type": "string",
           "default": "x2c-editor-worker",
-          "description": "Explicit compatibility path to a standalone worker; ignored when compilerPath is set.",
+          "description": "Deprecated compatibility setting; the language server uses compilerPath or compiler discovery.",
           "deprecationMessage": "Use x2c.semantic.compilerPath with a current x2c compiler.",
           "scope": "resource"
         },
@@ -127,5 +127,8 @@
   "main": "./extension.js",
   "activationEvents": [
     "onLanguage:x2c"
-  ]
+  ],
+  "dependencies": {
+    "vscode-languageclient": "9.0.1"
+  }
 }

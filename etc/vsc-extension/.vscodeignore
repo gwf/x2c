@@ -2,7 +2,6 @@
 .vscode-test/**
 .git/**
 .gitignore
-node_modules/**
 package-lock.json
 test/**
 *.vsix
