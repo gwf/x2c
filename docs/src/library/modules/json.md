@@ -15,6 +15,7 @@ JSON text to and from ordinary x2c values.
 | [`Json.parse`](#Json.parse) | Returns the x2c value of the JSON text `source`. |
 | [`Json.read_file`](#Json.read_file) | Returns the x2c value of the JSON file at `path`, as `Json.parse` does. |
 | [`Json.write_file`](#Json.write_file) | Replaces the file at `path` with `value` as compact JSON text. |
+| [`JsonBool.export_context`](#JsonBool.export_context) | Preserves process-lifetime boolean singletons across Context export. |
 | [`JsonBool.repr`](#JsonBool.repr) | Returns `true` or `false`. |
 | [`JsonBool.str`](#JsonBool.str) | Returns `true` or `false`. |
 | [`JsonBool.truth`](#JsonBool.truth) | Returns nonzero for `true`. |
@@ -97,6 +98,15 @@ Replaces the file at `path` with `value` as compact JSON text.
 Source: `lib/json.x`
 
 ### `JsonBool`
+
+<a id="JsonBool.export_context"></a>
+#### JsonBool.export_context
+
+`JsonBool JsonBool.export_context(JsonBool value, Context source)`
+
+Preserves process-lifetime boolean singletons across Context export.
+
+Source: `lib/json.x`
 
 <a id="JsonBool.repr"></a>
 #### JsonBool.repr

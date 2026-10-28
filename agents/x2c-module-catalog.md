@@ -1090,9 +1090,10 @@ JSON text to and from ordinary x2c values.
 
 Public functions:
 
-`JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `Json.is_bool`,
-`Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`, `Var.pretty_json`,
-`Json.write_file`, `Var.json`, `Var.jsonbool`, `JsonBool.str`
+`JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `JsonBool.export_context`,
+`Json.is_bool`, `Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`,
+`Var.pretty_json`, `Json.write_file`, `Var.json`, `Var.jsonbool`,
+`JsonBool.str`
 
 ### [lib/lib.x](../lib/lib.x)
 

@@ -39,8 +39,8 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.module_source`](#Compiler.module_source) | Returns the x2c source at `path`, whose own text is `text`, with its file-scope `module` block replaced by the text of each member it names, in order, or NULL when the text has no block. |
 | [`Compiler.name_loaded_provider`](#Compiler.name_loaded_provider) | Names declared bindings through one loaded provider. |
 | [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
-| [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
-| [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface this compiler did not write, or NULL when every one is present or there is no prelude interface. |
+| [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
+| [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
 | [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
@@ -373,9 +373,8 @@ Source: `src/collect/providers.x`
 
 `String Compiler.prelude_interface(void)`
 
-Returns the path of the first prelude interface this compiler wrote, or
-NULL when there is none or the compiler's identity is unknown. Its
-source hashes are not checked.
+Returns the path of the first prelude interface this compiler can
+replay, or NULL when every candidate is absent or stale.
 
 Source: `src/collect/interfaces.x`
 
@@ -385,8 +384,8 @@ Source: `src/collect/interfaces.x`
 `List Compiler.prelude_missing_interfaces(void)`
 
 Returns the home-relative paths of the runtime units the prelude
-interface includes whose own interface this compiler did not write, or
-NULL when every one is present or there is no prelude interface. A
+interface includes whose own interface cannot be replayed, or NULL
+when every one is current or there is no prelude interface. A
 missing interface walks that unit cold in every process, so a converged
 stage build reports none.
 
