@@ -1796,8 +1796,9 @@ Public functions:
 `Scope.retain`, `Scope.release`, `Scope.new`, `Scope.child`, `Scope.top`,
 `Scope.parent`, `Scope.transfer`, `Scope.contains`, `Scope.new_named`,
 `Scope.cleanup`, `Scope.destroy`, `x2c_scope_thread_release`, `Scope.name`,
-`Scope.stats`, `Scope.initialize`, `Scope.shutdown_hook`, `Scope_shutdown`,
-`xmalloc`, `xcalloc`, `xrealloc`, `xfree`, `xmemdup`
+`Scope.stats`, `Scope.initialize`, `Scope.accounting_enabled`,
+`Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
+`xfree`, `xmemdup`
 
 ### [lib/string/string.x](../lib/string/string.x)
 

@@ -177,7 +177,7 @@ A detached scope sits in no slot and is not active, so nothing is charged
 to it until you allocate through `Scope.malloc_in` and friends or make it
 active with `Scope.push`. End it with `Scope.destroy`. Prefer
 `Scope.new_named` for anything long-lived; the name appears in the
-exit-time leak report.
+exit-time leak report when accounting is enabled.
 
 **Raises:** `<alloc-fail>` when the scope cannot be allocated. Before `Error`
 initialization it terminates at the error floor.
@@ -267,6 +267,7 @@ Source: `lib/scope/regions.x`
 | Function | Summary |
 | --- | --- |
 | [`Scope_shutdown`](#Scope_shutdown) | Releases resources owned by `Scope`. |
+| [`Scope.accounting_enabled`](#Scope.accounting_enabled) | Reports whether process-start allocation accounting is enabled. |
 | [`Scope.calloc`](#Scope.calloc) | Allocates `count` objects of `size` bytes each, zeroed, in the active scope. |
 | [`Scope.calloc_in`](#Scope.calloc_in) | Allocates `count` zeroed objects of `size` bytes in the scope in `slot`. |
 | [`Scope.cleanup`](#Scope.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
@@ -299,6 +300,17 @@ and push/pop boundaries remain caller responsibilities.
 Source: `lib/scope/runtime.x`
 
 ### `Scope`
+
+<a id="Scope.accounting_enabled"></a>
+#### Scope.accounting_enabled
+
+`int Scope.accounting_enabled(void)`
+
+Reports whether process-start allocation accounting is enabled.
+Initializes Scope on first use. The result remains fixed and is available
+after shutdown, like `Scope.stats`.
+
+Source: `lib/scope/runtime.x`
 
 <a id="Scope.calloc"></a>
 #### Scope.calloc
@@ -514,9 +526,10 @@ Source: `lib/scope/accounting.x`
 
 Creates a detached scope carrying a copy of `name` for diagnostics.
 The name is copied, so a temporary buffer is fine. `Scope.name` reports
-it, and the allocator prints it at exit if anything the scope owns is
-still alive, as a line like `scope "request": 3 allocations`. A NULL
-`name` behaves like `Scope.new`.
+it in either accounting mode. With accounting enabled, the allocator
+prints it at exit if anything the scope owns is still alive, as a line
+like `scope "request": 3 allocations`. A NULL `name` behaves like
+`Scope.new`.
 
 ```x2c
 ~int main(void) {
@@ -580,7 +593,7 @@ scope still closes normally.
 
 A pointer into a released region is not diagnosed. Neither the compiler
 nor the runtime tracks it, and using it afterwards is undefined behavior.
-`Scope.stats` confirms that a routine leaves nothing live.
+With accounting enabled, `Scope.stats` confirms that nothing stays live.
 
 **Raises:** `<bad-state>` when no matching retain owns the active region. The
 failure leaves the active region intact. Before `Error` initialization it
@@ -643,7 +656,9 @@ behind. The snapshot also carries
 `largest_request`, `live_requested_bytes`, and
 `peak_live_requested_bytes`. Requested bytes are cumulative traffic;
 live requested bytes are the exact current managed payload total. Stats
-remain valid after shutdown.
+remain valid after shutdown. With accounting disabled, all fields are
+zero. Set `X2C_SCOPE_ACCOUNTING=1` before process startup to collect
+statistics and enable automatic exit-time leak reports.
 
 ```x2c
 ~int main(void) {
@@ -694,6 +709,9 @@ for source readers but are not supported as user API.
 `void Scope.initialize(void)`
 
 Initializes the process-wide `Scope` runtime owner.
+The first initialization enables allocation accounting only when the
+environment variable `X2C_SCOPE_ACCOUNTING` is exactly `1`. Later
+environment changes do not change the selected mode.
 
 Source: `lib/scope/runtime.x`
 
@@ -764,7 +782,7 @@ Source: `lib/scope/scope.x`
 
 Value snapshot of process-wide `Scope` allocation and lifetime counters.
 It owns no storage; live object and scope counts are derived when the
-snapshot is taken.
+snapshot is taken. Every field is zero when accounting is disabled.
 Live and peak requested bytes count public payload only, excluding Scope
 metadata, native allocator overhead, and Pool's direct small-object blocks.
 
@@ -799,8 +817,9 @@ another scope without copying.
 
 Public operations initialize the module on first use, so they are safe
 before the runtime calls `Scope.initialize`. Shutdown runs its hooks
-newest first and leaves the module terminal; `Scope.stats` still reports
-the final counts.
+newest first and leaves the module terminal. Allocation accounting is
+enabled at initialization by `X2C_SCOPE_ACCOUNTING=1`; otherwise counters
+and automatic leak reporting are disabled.
 
 ## Tests and examples
 

@@ -21,7 +21,7 @@ System utilities for environment discovery and workers.
 | [`x2c_set_root`](#x2c_set_root) | Overrides the repository root and rebuilds its default include `List`s. |
 | [`Compiler.bootstrap_runtime_dir`](#Compiler.bootstrap_runtime_dir) | Returns the checked-in bootstrap's runtime directory when this process is the bootstrap compiler, or NULL. |
 | [`Compiler.cache_root`](#Compiler.cache_root) | Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`, whichever is set first, or NULL when none is. |
-| [`Compiler.command_environment`](#Compiler.command_environment) | Returns the home, driver, and identity supplied to external commands. |
+| [`Compiler.command_environment`](#Compiler.command_environment) | Returns the home, driver, and identity supplied to an external command. |
 | [`Compiler.command_path`](#Compiler.command_path) | Returns an executable command in this compiler's libexec, or NULL. |
 | [`Compiler.cpp_include_dirs`](#Compiler.cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`. |
 | [`Compiler.default_include_dirs`](#Compiler.default_include_dirs) | Returns the borrowed default include `List`, `<root>/include/x2c`. |
@@ -148,9 +148,11 @@ Source: `src/utils.x`
 <a id="Compiler.command_environment"></a>
 #### Compiler.command_environment
 
-`Map Compiler.command_environment(void)`
+`Map Compiler.command_environment(String name)`
 
-Returns the home, driver, and identity supplied to external commands.
+Returns the home, driver, and identity supplied to an external command.
+REPL and language-server children also enable allocation accounting at
+startup for their statistics and retained-memory limits.
 
 Source: `src/utils.x`
 
