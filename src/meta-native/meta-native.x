@@ -51,8 +51,9 @@ static macro Stmt $fail.meta_native_meta_storage(
     "a meta value must have file-static storage",
     $site, %("declaration: '$($name)'"));
 
-static macro Stmt $fail.meta_native_call_deferred(Expr $c, Expr $site) =>
-  $c.report_error(
+static macro Stmt $report.meta_native_call_deferred(
+  Expr $c, Expr $site, Name $report) =>
+  $c.$report(
     <meta-later>,
     "this meta call is left for the translation",
     $site, NULL);
