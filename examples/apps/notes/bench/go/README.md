@@ -15,7 +15,7 @@ bundled SQLite source. From this directory, with Go on `PATH`:
 ```sh
 SQLITE_PREFIX="$(python3 ../../../../../packages/tools/deps.py path \
   ../../../../../packages/sqlite/dependency.json prefix)"
-CGO_ENABLED=1 CGO_CFLAGS="-I$SQLITE_PREFIX/include" \
+CGO_ENABLED=1 CGO_CFLAGS="-O2 -g -I$SQLITE_PREFIX/include" \
   CGO_LDFLAGS="-L$SQLITE_PREFIX/lib" \
   go build -tags libsqlite3 -o /tmp/notes-go .
 ```
