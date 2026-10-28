@@ -380,3 +380,12 @@ loop on request, and terminates it automatically after 10 seconds. A
 subsequent run succeeds. These checks use the actual HTTP service and
 restricted request containers, not the earlier artifact-response fixture.
 The local Docker Desktop check does not verify a production rootless host.
+
+A second image check against dev `4a9c551c5` plus the Dockerfile repair also
+passes with the added HTTP, networking, and JSON runtime units. All four
+restricted endpoint compilations again return wasm with exact expected
+Node output. Native TCP sockets and HTTP servers remain outside the
+browser target; in-memory HTTP parsing, routing, and response construction
+are available. The notice follows the native socket/thread implementation
+and [Emscripten's networking boundary](https://emscripten.org/docs/porting/networking.html),
+which does not provide browser access to ordinary TCP sockets.
