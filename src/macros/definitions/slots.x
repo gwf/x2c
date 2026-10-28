@@ -35,7 +35,12 @@ int Compiler.meta_call_starts_declaration(Compiler c) {
     supplies the spelling it captured, without hygienic renaming.
 */
 List Compiler.try_parse_macro_member(Compiler c) {
+  Token token = c.token;
   List hole = c.peek_macro_hole();
+  if (hole && hole.assoc(<kind>) && hole.assoc(<kind>) != <name>)
+    $fail.macros_hole_kind_conflict(
+      c, token, _hole_name(hole).str(),
+      hole.assoc(<kind>));
   List slot = c.try_parse_macro_slot(<name>);
   // A quotation's first use of a hole gives the hole its kind.
   if (hole) hole = _hole_record(c, _hole_name(hole));

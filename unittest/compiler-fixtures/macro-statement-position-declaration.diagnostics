@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-statement-position-declaration.x:9:5: parse: syntax cannot be constructed at this position
       $declaration();
       ^
+  note: in expansion of 'declaration' defined at unittest/compiler-fixtures/macro-statement-position-declaration.x:3:1; input: (args)
 

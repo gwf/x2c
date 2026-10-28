@@ -167,7 +167,7 @@ static List _sequence_row(Compiler c, List sources, int retain) {
         continue;
       }
     captured_sources.push(captured);
-    values.push(retain ? captured : _source_unwrap(captured));
+    values.push(retain ? captured : Ast.source_unwrap(captured));
   }
   return _capture_layout(
     1, %(source @(captured_sources.list_free())),
@@ -183,7 +183,7 @@ static List _scalar_row(Compiler c, List sources, int retain) {
     List forwarded = _forwarded_capture(c, source);
     if (forwarded) return forwarded;
   }
-  Var value = retain ? source : _source_unwrap(source);
+  Var value = retain ? source : Ast.source_unwrap(source);
   /* The List destination maps other value tags to nil. */
   List values = value;
   if (!singular)
@@ -262,16 +262,3 @@ static List _forwarded_prefix_list(void) {
 }
 
 static List forwarded_prefixes = _forwarded_prefix_list();
-
-/* `value` without its source wrappers. A pending invocation or quotation
-   inside it keeps its own capture rows or holes, so nested applications
-   unwrap each argument once. */
-module Var _source_unwrap(Var value) {
-  if (value is not <list> || value.is_nil()) return value;
-  match (value) {
-    case %(src ? ?syntax): return _source_unwrap(syntax);
-    case %((!or macro-invoke "x2c.quoted") *): return value;
-  }
-  List child;
-  $ast.rewrite_children(value.list(), child, _source_unwrap(child));
-}

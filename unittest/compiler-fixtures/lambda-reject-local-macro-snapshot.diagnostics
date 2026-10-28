@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lambda-reject-local-macro-snapshot.x:6:19: type: captured value requires 'using &name' for reference access
     Func mutation = change();
                     ^^^^^^
-  note: binding: value
+  note: binding: value in expansion of 'change' defined at unittest/compiler-fixtures/lambda-reject-local-macro-snapshot.x:5:3; input: (args)
 

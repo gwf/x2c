@@ -2,5 +2,5 @@ unittest/compiler-fixtures/macro-binding-spelling-arbitrary.x:6:13: macro: Code.
   int value = $spelling(40 + 2);
               ^
   note: value: (expr (int) 
- (op + (expr (int) (literal (int) "40")) (expr (int) (literal (int) "2"))))
+ (op + (expr (int) (literal (int) "40")) (expr (int) (literal (int) "2")))) in expansion of 'spelling' defined at unittest/compiler-fixtures/macro-binding-spelling-arbitrary.x:3:1; input: (args (expr (int) (op + (expr (int) (literal (int) "40")) (expr (int) (literal (int) "2")))))
 

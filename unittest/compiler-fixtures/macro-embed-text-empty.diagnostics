@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-embed-text-empty.x:6:16: macro: x2c_embed_text requires a non-empty path
   String value = $embed.empty_path();
                  ^
+  note: in expansion of 'embed.empty_path' defined at unittest/compiler-fixtures/macro-embed-text-empty.x:3:1; input: (args)
 

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/meta-fail-at.x:19:5: macro: only one statement is allowed
       total += 2;
       ^^^^^
-  note: reason: example
+  note: reason: example in expansion of 'single' defined at unittest/compiler-fixtures/meta-fail-at.x:13:1; input: (target (args) (block (at 6 (stmnt (expr (int) (op += (expr (int) (ident "total")) (expr (int) (literal (int) "1")))))) (at 7 (stmnt (expr (int) (op += (expr...
 

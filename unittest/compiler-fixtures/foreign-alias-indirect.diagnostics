@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/foreign-alias-indirect.x:4:1: parse: foreign alias native target must be a direct identifier
   $x2c.foreign.alias(&abs)
   ^
+  note: in expansion of 'x2c.foreign.alias' defined at etc/compiler-prelude.x:27:1; input: (target (args (expr (* (func ((int))) int) (op & (expr ((func ((int))) int) (ident "abs"))))) (declare (inline int) (bindings (bind "alias_indirect" ((fnmod ...
 

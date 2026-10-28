@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/with-empty.x:5:3: macro: with requires at least one assignment
     with () {
     ^^^^
+  note: in expansion of 'x2c.with' defined at etc/compiler-prelude.x:57:1; input: (target (args (capture (source) (value))) (block (at 2 (stmnt (expr (int) (op = (expr (int) (ident "value")) (expr (int) (literal (int) "2"))))))))
 

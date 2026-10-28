@@ -91,19 +91,18 @@ static void _check(Expansion &x) {
 static void _recursion(Expansion &x) {
   Atom name = x.definition.assoc(<name>);
   String spelling = name.str();
-  List captured = x.input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
-  Var shown = _source_unwrap(captured);
+  Var shown = Diagnostics.macro_expansion_input(x.input);
   $fail.macros_expansion_recursive(
-    x.c, x.invocation, spelling, _definition_note(x.definition), shown);
+    x.c, x.invocation, spelling,
+    Diagnostics.macro_definition_note(x.definition), shown);
 }
 
 static void _too_deep(Expansion &x) {
   /* Compiler-generated applications can have no invocation token. */
   List first = x.c.macro_stack.last().list().car();
   $fail.macros_expansion_depth(
-    x.c, x.invocation, _definition_note(x.definition),
-    _definition_note(first));
+    x.c, x.invocation, Diagnostics.macro_definition_note(x.definition),
+    Diagnostics.macro_definition_note(first));
 }
 
 /* Pushes this expansion's frame on the macro stack, fills the template,

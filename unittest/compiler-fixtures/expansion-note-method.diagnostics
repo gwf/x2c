@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/expansion-note-method.x:5:18: type: type (int) has no method len
+    printf("%d\n", $half(n));
+                   ^
+  note: in expansion of 'half' defined at unittest/compiler-fixtures/expansion-note-method.x:2:1; input: (args (expr (int) (ident "n")))
+

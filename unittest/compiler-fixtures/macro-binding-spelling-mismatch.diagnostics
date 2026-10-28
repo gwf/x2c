@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-binding-spelling-mismatch.x:13:13: macro: Code.binding_spelling requires a known binding
   int value = $spelling(value);
               ^
-  note: binding: (binding <id> "forged")
+  note: binding: (binding <id> "forged") in expansion of 'spelling' defined at unittest/compiler-fixtures/macro-binding-spelling-mismatch.x:10:1; input: (args (expr (int) (ident "value")))
 

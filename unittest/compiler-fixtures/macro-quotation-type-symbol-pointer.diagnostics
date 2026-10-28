@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-quotation-type-symbol-pointer.x:14:25: macro: type name 'Point' must be a String: write %(* "Point")
   int main(void) { return $size() == 0; }
                           ^
+  note: in expansion of 'size' defined at unittest/compiler-fixtures/macro-quotation-type-symbol-pointer.x:12:1; input: (args)
 

@@ -144,7 +144,7 @@ List Compiler.land_quotation(
     defer transaction.rollback();
     Var filled;
     if (fresh == %(built))
-      filled = _source_unwrap(_helper_result(c, syntax));
+      filled = Ast.source_unwrap(_helper_result(c, syntax));
     else {
       landing.names = _private_names(c, fresh);
       filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
@@ -203,7 +203,7 @@ static Var _slot_value(Compiler c, List slot) {
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
-    result = _replace_target(result, _source_unwrap(required), required);
+    result = _replace_target(result, Ast.source_unwrap(required), required);
   }
   if (construction is not void)
     result = _constructed_identifier(result, construction);

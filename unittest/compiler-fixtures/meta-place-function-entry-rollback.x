@@ -5,10 +5,8 @@
    code placed at function entry needs an enclosing function. The entry
    code here would be rejected if it were ever bound. */
 
-meta static List place_entry(List value) {
-  x2c_place(%(function-entry), $!{ (void) (value is int); });
-  return value;
-}
+#include "meta-place-function-entry-rollback/provider.x"
+
 macro Expression $entry(Expr $value) => $place_entry($value);
 
 // The placement succeeds, and then binding the expansion's result fails.

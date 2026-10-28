@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-unit-illegal-break.x:9:1: parse: syntax cannot be constructed at this position
   $bad();
   ^
+  note: in expansion of 'bad' defined at unittest/compiler-fixtures/macro-unit-illegal-break.x:5:1; input: (args)
 

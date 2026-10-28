@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lisp-bind-duplicate.x:8:1: macro: duplicate native Lisp binding name
   $lisp.binding(sample, "same")
   ^
-  note: group: sample name: same
+  note: group: sample name: same in expansion of 'lisp.binding' defined at lib/lisp-bindings.x:<line>:<column>; input: (target (args "sample" (expr (* char) (literal (* char) "\"same\""))) (function (static int) (bind "second" ((fnmod (params (param (int) (bind "value" ()))))...
 

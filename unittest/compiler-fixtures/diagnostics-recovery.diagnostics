@@ -15,6 +15,7 @@ unittest/compiler-fixtures/diagnostics-recovery.x:16:16: type: operator 'is' req
 unittest/compiler-fixtures/diagnostics-recovery.x:19:15: macro: x2c_embed_text requires a non-empty path
   String path = $embed.empty_path();
                 ^
+  note: in expansion of 'embed.empty_path' defined at unittest/compiler-fixtures/diagnostics-recovery.x:5:1; input: (args)
 
 unittest/compiler-fixtures/diagnostics-recovery.x:22:21: type: operator 'is' requires Var on the left
     int first = value is int;

@@ -29,6 +29,7 @@ typedef struct DiagnosticsHold {
 } DiagnosticsHold;
 
 #include "type.x"
+#include "ast-rewrite.x"
 
 #include "json.x"
 #include "report.x"
@@ -162,6 +163,8 @@ void Compiler.report_error(
 void Compiler.report_problem(
   Compiler c, Symbol code, String message, Token token, List notes) {
   message = message ? message : "compiler error";
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
   c.diagnostics.report(code, message, _compiler_location(c, token), notes);
 }
 
@@ -202,7 +205,42 @@ void Diagnostics.report(
 */
 void Compiler.report_warning(
   Compiler c, Symbol code, String message, Token token, List notes) {
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
   c.report_warning_at(code, message, _compiler_location(c, token), notes);
+}
+
+/** Returns the innermost source expansion's definition and input note. */
+String Compiler.macro_expansion_note(Compiler c) {
+  foreach (List active in c.macro_stack) {
+    (List definition, List input, Var bindings, Token invocation) = active;
+    (void) bindings;
+    if (!invocation) continue;
+    String name = definition.assoc(<name>).str();
+    String source = Diagnostics.macro_definition_note(definition)
+      .remove_prefix("definition: ");
+    Var syntax = Diagnostics.macro_expansion_input(input);
+    List lines = _expansion_note_syntax(syntax, {}).repr().split_lines(0);
+    String shown = " ".join(
+      lines.map(%!(line) => String.strip(line, NULL)));
+    if (shown.len() > 160) shown = %"$(shown[:157])...";
+    return %"in expansion of '$name' defined at $source; input: $shown";
+  }
+  return NULL;
+}
+
+/** Removes captured-argument transport and source wrappers for a note. */
+Var Diagnostics.macro_expansion_input(List input) {
+  List captured = input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  return Ast.source_unwrap(captured);
+}
+
+/** Formats a macro definition's recorded source location. */
+String Diagnostics.macro_definition_note(List definition) {
+  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
+  int line = origin.assoc(<line>), column = origin.assoc(<column>);
+  return %"definition: $file:$line:$column";
 }
 
 /** Resolves a recorded occurrence through generated ancestry to its source.
@@ -399,6 +437,24 @@ void Compiler.dump_symbol_table(Compiler compiler, Map map) {
 void Compiler.dump_cache(Compiler compiler) {
   foreach (Var (key, value) in compiler.key_ids)
     printf("%s\t==>\t%s\n", value.repr(), key.repr());
+}
+
+static Var _expansion_note_syntax(Var value, Map caches) {
+  if (value is not <list> || value.is_nil()) return value;
+  match (value) {
+    case %(binding ? ?name): return name;
+    case %(cache ?id): {
+      Var ordinal;
+      if (!caches.try_get(id, ordinal)) {
+        ordinal = (int) caches.len();
+        caches[id] = ordinal;
+      }
+      return %(cache $ordinal);
+    }
+  }
+  List child;
+  $ast.rewrite_children(
+    value.list(), child, _expansion_note_syntax(child, caches));
 }
 
 // diagnostic emission

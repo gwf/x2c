@@ -171,7 +171,7 @@ sed -e "s|$real/|TMP/|g" -e "s|$tmp/|TMP/|g" "$tmp/raw" >"$tmp/err"
 grep -qx 'TMP/raise.x:1:29: parse: raise requires a %() payload literal' \
   "$tmp/err"
 grep -qx '  int bad_raise(void) { raise 1; return 0; }' "$tmp/err"
-grep -qx 'load failed: TMP/raise.x: x2c reported errors' "$tmp/err"
+grep -Fqx 'load failed: TMP/raise.x: its unit did not translate: TMP/raise.x:1:29: parse: raise requires a %() payload literal; use raise %(code (key value)...);' "$tmp/err"
 grep -q '^TMP/undeclared.x:2:[0-9]*: error: ' "$tmp/err"
 grep -q 'return undeclared_c_name;' "$tmp/err"
 grep -qx 'load failed: TMP/undeclared.x: the C compiler reported errors' \

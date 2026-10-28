@@ -311,6 +311,20 @@ Ast Ast.without_origin(Ast ast) {
   return ast;
 }
 
+/** Returns `value` without source wrappers. Pending invocations and
+    quotations keep their own capture rows or holes, so nested applications
+    unwrap each argument once.
+*/
+Var Ast.source_unwrap(Var value) {
+  if (value is not <list> || value.is_nil()) return value;
+  match (value) {
+    case %(src ? ?syntax): return Ast.source_unwrap(syntax);
+    case %((!or macro-invoke "x2c.quoted") *): return value;
+  }
+  List child;
+  $ast.rewrite_children(value.list(), child, Ast.source_unwrap(child));
+}
+
 /** Returns whether `op` writes its left operand. */
 int Symbol.changes_left_operand(Symbol op) =>
   op == <++> || op == <--> || op.is_assignment_op();

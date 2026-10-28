@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/quotation-free-name-index.x:15:1: type: unresolved identifier: result
+  $gen.it(Person);
+  ^
+  note: in expansion of 'gen.it' defined at unittest/compiler-fixtures/quotation-free-name-index.x:14:1; input: (args ("Person"))
+

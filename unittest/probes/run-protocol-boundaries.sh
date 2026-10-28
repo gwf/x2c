@@ -248,6 +248,9 @@ for mode in snapshot live; do
   grep -q 'is not iterable' \
     "$BUILD/protocol-static/inherited-$mode.stderr" ||
     fail "$mode inherited-local rejection did not name iteration"
+  [[ $(grep -c "in expansion of 'require_note_method'" \
+    "$BUILD/protocol-static/inherited-$mode.stderr") == 2 ]] ||
+    fail "$mode omitted the literal or quotation expansion note"
 done
 cmp -s "$BUILD/protocol-static/inherited-snapshot.stderr" \
   "$BUILD/protocol-static/inherited-live.stderr" ||

@@ -151,6 +151,20 @@ static macro Stmt $fail.macros_typed_quotation_nested(Expr $c, Expr $origin) {
   }
 }
 
+static macro Stmt $fail.macros_hole_kind_conflict(
+  Expr $c, Expr $site, Expr $name, Expr $kind) {
+  {
+    String kind = $kind == <expr> ? "an expression"
+      : %"a $(_kind_spelling($kind)) hole";
+    String note = "a quotation's first use of a hole gives it its kind; "
+      "bind a second local for the member spelling";
+    $c.report_error(
+      <parse>,
+      %"hole '$$$($name)' is $kind in this quotation and cannot name a member",
+      $site, $(note));
+  }
+}
+
 static macro Stmt $fail.macros_hole_ambiguous(
   Expr $c, Expr $origin, Expr $spelling, Expr $first, Expr $also) =>
   $c.report_error(
@@ -316,15 +330,7 @@ void Compiler.report_meta_failure(
   $fail.macros_meta_failed(c, invocation, source, error);
 }
 
-
-
 // macro diagnostics and source notes
-
-module String _definition_note(List definition) {
-  List origin = definition.assoc(<origin>), String file = origin.assoc(<file>);
-  int line = origin.assoc(<line>), column = origin.assoc(<column>);
-  return %"definition: $file:$line:$column";
-}
 
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */

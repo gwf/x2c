@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-map-entry-invalid-node.x:9:19: parse: expected one Map entry
   Map values = %{ $($invalid_row()) };
                     ^
+  note: in expansion of 'invalid_row' defined at unittest/compiler-fixtures/macro-map-entry-invalid-node.x:5:1; input: (args)
 

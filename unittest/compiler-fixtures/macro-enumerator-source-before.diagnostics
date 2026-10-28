@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-enumerator-source-before.x:12:3: parse: enumerator 'SOURCE_ENUM' is already bound in this scope
     $colliding_enumerator()
     ^
-  note: prior binding: 'SOURCE_ENUM'
+  note: prior binding: 'SOURCE_ENUM' in expansion of 'colliding_enumerator' defined at unittest/compiler-fixtures/macro-enumerator-source-before.x:7:1; input: (args)
 

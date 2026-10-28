@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-unit-bitfield.x:14:1: parse: syntax cannot be constructed at this position
   $bitfield();
   ^
+  note: in expansion of 'bitfield' defined at unittest/compiler-fixtures/macro-unit-bitfield.x:10:1; input: (args)
 

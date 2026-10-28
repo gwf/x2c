@@ -119,12 +119,13 @@ static List _arguments(Decoration &d, int block_scope) {
   if (block_scope) _bind_name_arguments(c, definition, arguments);
   if (c.peek(0) == <;>)
     $fail.macros_decorator_semicolon(
-      c, d.invocation, _definition_note(definition));
+      c, d.invocation, Diagnostics.macro_definition_note(definition));
   if (c.peek(0) == <eof>) {
     Atom name = definition.assoc(<name>);
     String spelling = name.str();
     $fail.macros_decorator_target(
-      c, d.invocation, spelling, _definition_note(definition));
+      c, d.invocation, spelling,
+      Diagnostics.macro_definition_note(definition));
   }
   return arguments;
 }

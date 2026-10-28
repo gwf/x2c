@@ -1,2 +1,3 @@
 unittest/compiler-fixtures/class-pointer-container.x:1:1: macro: class Bad requires an explicit constructor
+  note: in expansion of 'class' defined at etc/compiler-prelude.x:72:1; input: (target (args) (named-type "Bad" (* "Array")))
 

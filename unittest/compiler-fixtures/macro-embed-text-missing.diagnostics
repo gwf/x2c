@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-embed-text-missing.x:6:16: macro: cannot open embedded text
   String value = $embed.missing();
                  ^
-  note: path: unittest/compiler-fixtures/missing-embed-input.txt
+  note: path: unittest/compiler-fixtures/missing-embed-input.txt in expansion of 'embed.missing' defined at unittest/compiler-fixtures/macro-embed-text-missing.x:3:1; input: (args)
 

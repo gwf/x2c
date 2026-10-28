@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-carrier-unbound.x:20:3: parse: unbound replacement variable '?__stray'
     $use_stray();
     ^
+  note: in expansion of 'stray_slot' defined at unittest/compiler-fixtures/macro-carrier-unbound.x:11:1; input: (args)
 

@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-source-text-name.x:6:16: macro: Code.source_text requires complete captured syntax
   String value = $named(identifier);
                  ^
+  note: in expansion of 'named' defined at unittest/compiler-fixtures/macro-source-text-name.x:3:1; input: (args "identifier")
 

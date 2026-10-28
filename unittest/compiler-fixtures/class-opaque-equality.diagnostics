@@ -1,2 +1,3 @@
 unittest/compiler-fixtures/class-opaque-equality.x:1:1: macro: value class Opaque requires compatible equal and hash methods
+  note: in expansion of 'class' defined at etc/compiler-prelude.x:72:1; input: (target (args) (named-type "Opaque" (struct "Opaque" (fields (declare (int) (bindings (bind "values" ((dim (expr (int) (literal (int) "2")))))))))))
 

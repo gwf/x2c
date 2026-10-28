@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/system-scope-arity.x:3:18: macro: $scope accepts zero or one destination
   int main(void) { $scope(NULL, NULL) {} return 0; }
                    ^
+  note: in expansion of 'scope' defined at etc/compiler-prelude.x:23:1; input: (target (args (capture (source (expr () (ident "NULL")) (expr () (ident "NULL"))) (value (expr () (ident "NULL")) (expr () (ident "NULL"))))) (block))
 

@@ -1,4 +1,5 @@
 unittest/compiler-fixtures/macro-decorator-stack-multiple.x:12:1: parse: expected syntax
   $outer()
   ^
+  note: in expansion of 'outer' defined at unittest/compiler-fixtures/macro-decorator-stack-multiple.x:3:1; input: (target (args) (capture (source (declare (static int) (bindings (op = (bind "value" ()) (expr (int) (literal (int) "42"))))) (declare (static int) (bindings ...
 

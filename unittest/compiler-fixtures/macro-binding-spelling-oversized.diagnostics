@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-binding-spelling-oversized.x:6:13: macro: Code.binding_spelling requires a known binding
   int value = $spelling();
               ^
-  note: binding: (binding 4294967297l "value")
+  note: binding: (binding 4294967297l "value") in expansion of 'spelling' defined at unittest/compiler-fixtures/macro-binding-spelling-oversized.x:3:1; input: (args)
 
