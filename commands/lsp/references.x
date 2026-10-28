@@ -102,23 +102,23 @@ static int _reference_locations(
   foreach (String input in query["inputs"].array()) {
     if (!w.analyze(input)) return 0;
     Compiler c = w.unit.compiler;
-    Map declarations = {}, methods = {};
+    Map methods = {};
     if (replacement)
       foreach (Map method, lsp_type_rename_methods(c, query["target"], replacement))
         methods[method["binding"]] = method;
-    foreach ((Var source_key, List declaration) in c.source_declarations) {
-      foreach ((Var binding, Map method) in methods)
-        if (_reference_method_declaration(c, binding, declaration)) {
-          Map location = _reference_method_location(w, method, declaration);
-          if (location != NULL) _reference_add(w, locations, seen, location);
-        }
-      if (!_reference_matches(query, declaration)) continue;
-      declarations[_reference_range(declaration)] = 1;
-      if (!include_declaration) continue;
-      Map location = _reference_location(w, declaration);
-      if (location != NULL) _reference_add(w, locations, seen, location);
-    }
+    if (include_declaration)
+      foreach ((Var source_key, List declaration) in c.source_declarations) {
+        foreach ((Var binding, Map method) in methods)
+          if (_reference_method_declaration(c, binding, declaration)) {
+            Map location = _reference_method_location(w, method, declaration);
+            if (location != NULL) _reference_add(w, locations, seen, location);
+          }
+        if (!_reference_matches(query, declaration)) continue;
+        Map location = _reference_location(w, declaration);
+        if (location != NULL) _reference_add(w, locations, seen, location);
+      }
     foreach (List row in c.source_occurrences) {
+      if (!include_declaration && row[5] == <decl>) continue;
       Var method = methods[row[3]];
       if (method is <map>) {
         Map location = _reference_method_location(w, method.map(), row);
@@ -127,7 +127,6 @@ static int _reference_locations(
       Var definition = c.source_definitions[row[3]];
       if (definition is not <list> ||
           !_reference_matches(query, definition.list())) continue;
-      if (!include_declaration && _reference_range(row) in declarations) continue;
       Map location = _reference_location(w, row);
       if (location != NULL) _reference_add(w, locations, seen, location);
     }
@@ -173,8 +172,6 @@ static int _reference_matches(Map query, List declaration) {
   return external ? _reference_external(declaration) == external
                   : _reference_same(declaration, query["target"]);
 }
-
-static List _reference_range(List row) => $(row[0], row[1], row[2]);
 
 static int _reference_same(List row, List target) =>
   row[0] == target[0] && row[1] == target[1] && row[2] == target[2];

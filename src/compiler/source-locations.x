@@ -34,7 +34,10 @@ int Compiler.record_origin(Compiler c, Token token) {
   return c.origins.len();
 }
 
-/** Records a physical declaration using the binding's actual scope and key. */
+/** Records a physical declaration using the binding's actual scope and key.
+    Occurrence rows retain their five-field prefix and append `<decl>`
+    so references can omit earlier declarations that a later one replaced.
+*/
 void Compiler.record_source_declaration(
   Compiler c, List binding, Token first, Token after, int external) {
   if (!c.source_facts || c.macro_holes) return;
@@ -52,7 +55,7 @@ void Compiler.record_source_declaration(
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
     c.materialize_source_declaration(binding, declaration);
-    c.source_occurrences.push($(@range, binding, type));
+    c.source_occurrences.push($(@range, binding, type, <decl>));
   }
 }
 
