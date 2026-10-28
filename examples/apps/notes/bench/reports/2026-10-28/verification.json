@@ -29,5 +29,7 @@
     "Duplicate query values select different occurrences",
     "Go standard router redirects some paths that x2c rejects"
   ],
-  "scope": "Whole applications with standard libraries, database bindings and regular logging; no channel-based alternative."
+  "scope": "Whole applications with standard libraries, database bindings and regular logging; no channel-based alternative.",
+  "x2c_runtime_repository_revision": "1f4115f28ae8e3b0f6003e409a144b8608b84b28",
+  "benchmark_harness_revision": "f68692211"
 }
