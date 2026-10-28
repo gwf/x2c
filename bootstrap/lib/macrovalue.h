@@ -73,10 +73,8 @@ static inline int Macro_case_enter(Var value, List * cursor){
   return 1;
 }
 
-static Symbol Var_compact_symbol(Var);
-
 static inline Symbol Macro_case_symbol(Var value){
-  return Var_compact_symbol(value);
+  return Var_symbol(value);
 }
 
 typedef struct MacroMatcher{
