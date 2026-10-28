@@ -169,9 +169,45 @@ def check_api(port):
     stats = request(port, "GET", "/api/stats")
     assert stats["notes"] == 18, stats
     assert stats["tags"] == {"home": 1, "work": 1, "parallel": 16}, stats
+    ordinary = {"title": "Ordinary note", "body": "x" * 70000,
+                "tags": ["forbidden"]}
+    accepted = request(port, "POST", "/api/notes", ordinary, 201)
+    note_shape(accepted, ordinary["title"], ordinary["body"],
+               ordinary["tags"], earliest)
+    assert request(port, "GET", "/api/notes/" + accepted["id"]) == accepted
     for route, filename in (("/", "index.html"), ("/app.js", "app.js")):
         assert request(port, "GET", route) == (PUBLIC / filename).read_bytes()
     return request(port, "GET", "/api/notes")
+
+
+def check_startup(binary, directory):
+    store = directory / "unused.db"
+    help_result = subprocess.run([str(binary), "--help"], cwd=ROOT,
+                                 capture_output=True, text=True, timeout=5)
+    assert help_result.returncode == 0, help_result.stderr
+    assert "--store" in help_result.stdout and "--workers" in help_result.stdout
+    for arguments in (["--bad-option"], ["--port", "-1"],
+                      ["--port", "65536"], ["--port", "abc"],
+                      ["--workers", "0"], ["--workers", "1025"],
+                      ["--workers", "abc"]):
+        result = subprocess.run([str(binary), "--store", str(store), *arguments],
+                                cwd=ROOT, capture_output=True, text=True,
+                                timeout=5)
+        assert result.returncode == 2, (
+            f"{arguments}: expected usage failure, got {result.returncode}: "
+            f"{result.stderr}")
+        assert result.stderr.strip(), f"{arguments}: missing error message"
+    assert not store.exists(), "invalid arguments created a database"
+
+    old_store = directory / "old-notes.json"
+    original = b'{"1":{"id":"1","title":"Old note","body":"keep me","tags":[]}}\n'
+    old_store.write_bytes(original)
+    result = subprocess.run([str(binary), "--store", str(old_store), "--port", "0"],
+                            cwd=ROOT, capture_output=True, text=True, timeout=5)
+    assert result.returncode > 0, (
+        f"JSON store must fail cleanly: {result.returncode}: {result.stderr}")
+    assert "notes:" in result.stderr, "missing incompatible-store diagnostic"
+    assert old_store.read_bytes() == original, "JSON store bytes changed"
 
 
 def main():
@@ -180,6 +216,7 @@ def main():
     binary = pathlib.Path(sys.argv[1]).resolve()
     with tempfile.TemporaryDirectory(prefix="x2c-notes-tests-") as temporary:
         directory = pathlib.Path(temporary)
+        check_startup(binary, directory)
         store = directory / "notes.data"
         with running(binary, store, directory) as port:
             expected = check_api(port)
@@ -190,7 +227,7 @@ def main():
                 note["id"]: note for note in expected}, "notes changed after restart"
             saved = request(port, "POST", "/api/notes", {"title": "After restart"}, 201)
             assert saved["id"] not in {note["id"] for note in expected}
-    print("notes: CRUD, validation, search, stats, concurrent creates, static files, and restart passed")
+    print("notes: API, concurrency, restart, CLI, and store compatibility passed")
 
 
 if __name__ == "__main__":
