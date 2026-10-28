@@ -1,5 +1,31 @@
 /*  planning.x -- discovery and dependency-ordered build requests */
 
+/** Returns the selected target containing `source`, or the direct request.
+    Prints the existing editor diagnostic and returns NULL for ambiguous or
+    absent membership. Manifest errors retain `ProjectBuild.plan` behavior.
+*/
+CliRequest ProjectBuild.owning_target(CliRequest request, String source) {
+  String manifest = request.project_manifest();
+  if (!manifest) return request;
+  request.manifest = manifest;
+  CliRequest selected = NULL;
+  for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next)
+    foreach (String input, node.request.inputs) {
+      if (Path.absolute(input) != source) continue;
+      if (selected && selected != node.request) {
+        fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
+        return NULL;
+      }
+      selected = node.request;
+    }
+  if (!selected)
+    fputs(
+      "x2c editor: this document is not a selected target input; "
+      "open its owning source for semantic results or configure "
+      "a direct translate command\n", stderr);
+  return selected;
+}
+
 // planning
 
 /** Parses a project manifest and returns its selected target's build plan.

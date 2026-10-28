@@ -37,6 +37,14 @@ void SourceView.set(SourceView s, String path, String text, int changed) {
   path = Path.absolute(path);
   s.overlays[path] = text;
   if (changed) s.dirty_paths[path] = 1;
+  else s.dirty_paths.del(path);
+}
+
+/** Removes a closed document so subsequent reads use the disk file. */
+void SourceView.unset(SourceView s, String path) {
+  path = Path.absolute(path);
+  s.overlays.del(path);
+  s.dirty_paths.del(path);
 }
 
 /** Returns whether this logical file has an unsaved overlay. */
