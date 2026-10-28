@@ -337,7 +337,8 @@ static void _restart(Server &server) {
     dirty: server.workspace.sources.dirty_paths,
     analyses: server.workspace.analyses, notices: server.workspace.notices,
     notice: server.workspace.notice};
-  saved.printf("%s", Var.json(state));
+  String text = Var.json(state);
+  saved.write_all(text, text.len());
   if (saved.flush() || saved.seek(0, SEEK_SET) ||
       fcntl(saved.fileno(), F_SETFD, 0) < 0)
     raise %(lsp-exec (operation "checkpoint"));
