@@ -806,7 +806,7 @@ therefore cheap. `Var` kinds other than `String`, `Atom`, and `List` are
 `Scope`-managed and outside pool jurisdiction.
 
 When another thread's pool promotes an equal cell first, that cell stays
-canonical; this one still survives, but `Pool.is_permanent` answers 0 for
+canonical; this one still survives, but `Pool.is_permanent` returns 0 for
 it. A null `lst` returns itself unchanged.
 
 Source: `lib/list/cells.x`
@@ -969,7 +969,7 @@ promoted to the outermost `List` and `String` pools. Returns 0 when an
 active pool does not own part of the value. A zero result may follow
 successful promotion of an earlier cell or child. A thread that loses a
 concurrent promotion of an equal value still gets 1, though
-`Pool.is_permanent` answers 0 for its surviving copy.
+`Pool.is_permanent` returns 0 for its surviving copy.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 

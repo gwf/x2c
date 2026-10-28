@@ -32,15 +32,15 @@ Compiler Compiler.expanding(void) =>
 
 // invocations and diagnostics
 
-/** Answers `x2c_invocation_file`, declared in `lib/meta.x`. */
+/** Implements `x2c_invocation_file`, declared in `lib/meta.x`. */
 String x2c_invocation_file(void) =>
   MetaContext.invocation_location().assoc(<file>);
 
-/** Answers `x2c_invocation_line`, declared in `lib/meta.x`. */
+/** Implements `x2c_invocation_line`, declared in `lib/meta.x`. */
 int x2c_invocation_line(void) =>
   MetaContext.invocation_location().assoc(<line>);
 
-/** Answers `x2c_invocation_column`, declared in `lib/meta.x`. */
+/** Implements `x2c_invocation_column`, declared in `lib/meta.x`. */
 int x2c_invocation_column(void) =>
   MetaContext.invocation_location().assoc(<column>);
 
@@ -53,13 +53,13 @@ List MetaContext.invocation_location(void) {
   return active.expander.token_location(active.site);
 }
 
-/** Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`. */
+/** Implements `x2c_diagnostic_fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
   _check_notes("x2c_diagnostic_fail", notes);
   MetaContext.reject(message, notes);
 }
 
-/** Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. */
+/** Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail_at(
   Var node, Symbol category, String message, List notes) {
   _check_notes("x2c_diagnostic_fail_at", notes);
@@ -67,7 +67,7 @@ void x2c_diagnostic_fail_at(
     node, category, message, active.site, notes, 1);
 }
 
-/** Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`. */
+/** Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_error_at(
   Var node, Symbol category, String message, List notes) {
   _check_notes("x2c_diagnostic_error_at", notes);
@@ -75,7 +75,7 @@ void x2c_diagnostic_error_at(
     node, category, message, active.site, notes, 0);
 }
 
-/** A warning reports where it is raised and returns, so a macro can keep
+/** Reports a warning where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns.
 */
 void x2c_diagnostic_warn(String message, List notes) {

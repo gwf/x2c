@@ -141,7 +141,7 @@ module Var _linked_target(
   return function;
 }
 
-/* Answers whether a provider's function can use its linked body.
+/* Reports whether a provider's function can use its linked body.
    Copied definitions retain precise callees; runtime bodies retain their
    provider's source dependencies, including private helpers. */
 static int _project_meta_uses_linked(

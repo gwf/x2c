@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include "meta.x"
 
-/* `x2c_enclosing` answers where an invocation stands, and `x2c_place`
+/* `x2c_enclosing` returns the invocation's enclosing syntax, and `x2c_place`
    contributes code after the enclosing block item, among the unit's
    support declarations once per key, and in its initialization. */
 

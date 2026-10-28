@@ -882,7 +882,7 @@ module List _unused_recorded(Compiler c) {
   foreach (Var key in c.protocol_helpers.keys())
     if (key ~= %("recorded-conformance" ?(Type base) ?(Type participant)))
       candidates.push($(base, participant));
-  // Ownership answers are memoized in the helpers, so they follow the scan.
+  // Ownership results are memoized in the helpers, so they follow the scan.
   foreach (List pair in candidates) {
     List row = _recorded(c, pair.car(), pair.cadr());
     if (row && !(pair in c.conforms)) unused.push($(pair, row));

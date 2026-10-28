@@ -45,7 +45,7 @@ meta List ms_names(TypeInfo type) {
 meta List ms_count(TypeInfo type) =>
   $!int{ $(ms_fields(type).len()) };
 
-/* The spelling the developer wrote, which only the source text answers.
+/* The spelling the developer wrote, available only from the source text.
    A `Source` argument carries that text with the captured syntax. */
 meta List ms_spelling(Source node) =>
   $!String{ $(Code.source_text(node)) };

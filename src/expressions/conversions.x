@@ -689,11 +689,11 @@ static int _unrelated_pointers(Compiler c, Type source, Type target) {
   }
 }
 
-/* What a pointer may point at for the rule below to call two pointers
-   different: a named struct, union, or enum, or a builtin scalar.  void is
-   excluded because C converts it, and a function, an array, or a name the
-   resolver left untouched is excluded because the compiler does not know
-   enough about it to say. */
+/* Pointee types that establish a pointer-type difference: a named struct,
+   union, or enum, or a builtin scalar.  void is excluded because C converts
+   it, and a function, an array, or a name the resolver left untouched is
+   excluded because the compiler lacks enough type information to compare
+   it. */
 static int _known_pointee(Type type) {
   if (type === %(void)) return 0;
   return type.is_aggregate_tag() || type.is_enum_tag() || !!type.scalar();
@@ -740,16 +740,16 @@ static String _not_null_pointer_constant(Compiler c, List expr) {
   return spelling;
 }
 
-/* Answer whether an expression is certainly a zero integer literal,
+/* Reports whether an expression is certainly a zero integer literal,
    certainly a nonzero one, or neither.  Parentheses are unwrapped because
    they are the one wrapper that folds away without evaluation, and
    `out_text` receives the spelling when there is one.
 
    The tokenizer already accepted the spelling and Type.numeric_literal
    already turned its prefix and suffix into the node's own type, so what
-   remains here is whether its value is zero.  A float, a name, or an enum
-   constant answers <unknown>; the null-pointer guard below stays silent
-   when it cannot decide. */
+   remains here is whether its value is zero. For a float, a name, or an enum
+   constant, this returns <unknown>; the null-pointer guard below emits no
+   diagnostic when the result is unknown. */
 static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):

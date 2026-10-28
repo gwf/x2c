@@ -1463,7 +1463,7 @@ ReplInputResult ReplInput.read(
   return _read_interactive(r, prompt, complete, completion_context);
 }
 
-/** Remembers one nonempty entry, suppressing an adjacent duplicate and
+/** Records one nonempty entry, suppressing an adjacent duplicate and
     evicting the oldest entry beyond 100. */
 void ReplInput.remember(ReplInput r, String text) {
   if (!r || !r.open || !text || !text.len()) return;

@@ -88,7 +88,7 @@ static void _reclaim_hidden(ErrorThreadState state) {
   }
 }
 
-/* Pushes the thread's error scope unless it is already on top, and answers
+/* Pushes the thread's error scope unless it is already on top, and returns
    whether the caller must pop it. */
 module int _scope_push(Symbol code, const char *message) {
   ErrorThreadState state = _thread();

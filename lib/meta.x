@@ -58,7 +58,7 @@ typedef List Source;
 
 /* captured code
 
-   The questions about code a body cannot answer by walking the List: its
+   Code properties a body cannot derive by walking the List: its
    type and value, the source the developer wrote, a binding's spelling,
    and the parts of a captured function. Each reaches compiler state the
    code only refers to. */
@@ -102,8 +102,8 @@ meta Code Code.parameter(Code function, String name);
 meta List Code.body(Code function);
 
 /** Returns the argument expressions that forward `parameters`, a `params`
-    form or the parameters themselves. A `(void)` parameter list answers
-    nothing.
+    form or the parameters themselves. A `(void)` parameter list produces
+    no arguments.
 */
 meta List Code.arguments(Code parameters);
 
@@ -224,9 +224,9 @@ meta Code Code.register_after_initialization(
 
 /* semantic types
 
-   The generated-code questions: what a struct holds, how its declaration
-   is spelled, what a name resolves to, whether a `Var` holds its values,
-   and which operation a member call selects. The answers live in the
+   The generated-code questions: what a struct holds, how its declaration is
+   spelled, what a name resolves to, whether a `Var` holds its values, and
+   which operation a member call selects. These properties are recorded in the
    symbol table, so a body cannot derive them from syntax. */
 
 /** Tests named-type ancestry without resolving through the named owner. */
@@ -377,7 +377,7 @@ meta String x2c_embed_text(Var path);
    stands and places that code where the compiler finishes it. */
 
 /** Returns the innermost `what` around the invocation, or nothing when
-    there is none. `<declarator>` answers the initialized declarator whose
+    there is none. `<declarator>` returns the initialized declarator whose
     initializer directly holds the invocation, as its one-declarator
     declaration; `<statement>` the enclosing block item, or while lowering
     the item being lowered, as its origin anchor for

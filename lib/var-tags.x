@@ -167,7 +167,7 @@ meta List _tag_decode_rows(void) {
   return rows;
 }
 
-/* `f64`, `symbol` and `void` are answered before the switch is reached. */
+/* `f64`, `symbol` and `void` are handled before the switch is reached. */
 meta int _tag_decode_row(List row) {
   Var tag = row[0];
   return !(tag == <f64> || tag == <symbol> || tag == <void>);

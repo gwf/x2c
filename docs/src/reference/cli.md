@@ -796,21 +796,21 @@ may be deliberate; leave the code unchanged when it is.
 
 Eight codes are reported as warnings:
 
-- `region` says a value allocated inside a region can still be reached after
+- `region` reports that a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
-- `after-free` says a local was read after `Scope.free`, `Scope.realloc`,
+- `after-free` reports that a local was read after `Scope.free`, `Scope.realloc`,
   or `Array.list_free` consumed it.
-- `bad-free` says `Scope.free` or `Scope.realloc` was given a literal, a
+- `bad-free` reports that `Scope.free` or `Scope.realloc` was given a literal, a
   local's address, or other storage no Scope allocator returned.
-- `literal` says a bare word inside a macro is a `Symbol` where a value was
+- `literal` reports that a bare word inside a macro is a `Symbol` where a value was
   probably meant, and shows the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
   invocation, with the notes the macro supplied.
-- `conversion` says a cast or explicit converter call spells a conversion
+- `conversion` reports that a cast or explicit converter call spells a conversion
   its destination already performs.
-- `shadow` says a protocol binder shadows a visible type name.
-- `native` says a native `meta` prototype names a function that both the
+- `shadow` reports that a protocol binder shadows a visible type name.
+- `native` reports that a native `meta` prototype names a function that both the
   compiler and a native module define, or that more than one native module
   defines.
 

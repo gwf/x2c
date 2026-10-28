@@ -12,7 +12,7 @@ static int meta_in_process = 0;
 /** Enables in-process staging of `meta` groups for compiler sessions. */
 void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 
-/** Answers whether a `meta` function or value belongs to the unit's group:
+/** Reports whether a `meta` function or value belongs to the unit's group:
     a parse meets it outside a macro definition while the project meta build
     parses the unit or a session stages it.
 */
@@ -20,7 +20,7 @@ int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
   (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
 
-/** Answers whether a call of a project `meta` function waits for the
+/** Reports whether a call of a project `meta` function waits for the
     translation: the project meta build's own parse has no helper yet. A
     loaded helper's parse calls the ordinary helper of its sources.
 */
@@ -65,7 +65,7 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
   nodes.resize(retained);
 }
 
-/** Answers whether a `meta` body reaches the compiler itself: it names a
+/** Reports whether a `meta` body reaches the compiler itself: it names a
     compile-time-only function or a compiler operation, or constructs a
     template. Such a function has no runtime form.
 */
@@ -90,7 +90,7 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
 
 // what the group reaches
 
-/** Answers whether a definition has public native linkage.
+/** Reports whether a definition has public native linkage.
     Main is excluded because its process entry needs a separate adapter.
 */
 int Compiler.public_native_function(
@@ -102,8 +102,8 @@ int Compiler.public_native_function(
 // refusing a call
 
 /** Reports at `site` that the group function `name` cannot run at compile
-    time when its result is a struct or union, which its type alone
-    decides.
+    time when its result is a struct or union, as determined from its type
+    alone.
 */
 void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
   String missing = c.meta_call_missing(name);

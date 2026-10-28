@@ -464,7 +464,7 @@ static Symbol _value_class(Walk &w, Type type) {
 
 /* Whether `value` or a destination of `type` is a number: an integer,
    floating, or enum type. A number holds no address the program can follow
-   without a cast back, so nothing the walk knows moves with it. */
+   without a cast back, so no storage facts propagate with it. */
 module int _number(Walk &w, Type type, Var value) {
   Type given = _expression_type(value);
   return (type && w.c.sym.resolve_numeric_type(type)) ||

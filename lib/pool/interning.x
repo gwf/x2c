@@ -214,7 +214,7 @@ Pool Pool.release(Pool inner) {
 
 // table lookups
 
-/* String construction already knows the bytes, length, and content hash.
+/* String construction already has the bytes, length, and content hash.
    Probe the shared table without boxing a temporary String query. */
 static String _get_string(
   PoolTable table, const char *bytes, int length, unsigned hash) {

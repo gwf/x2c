@@ -535,7 +535,7 @@ static void lisp_call_budget_stops_a_loop(void) {
   EXPECT_INT_EQ(_raised_code(lisp, "(spin 0)"), <call-stack>);
 
   // The budget is per evaluation, not per session: a later call that stays
-  // inside it answers normally.
+  // inside it returns normally.
   _ev(lisp, "(def once (lambda (n) n))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(once 3)")), 3);
   lisp.destroy();
@@ -941,7 +941,7 @@ static void lisp_standard_operations_check_object_operands(void) {
 }
 
 
-/* Numeric comparison answers about numbers, so the integer and floating
+/* Numeric comparison compares numeric values, so the integer and floating
    encodings of one value compare equal rather than by the Var total order,
    which orders them by rank to keep every value sortable. */
 static void lisp_numeric_comparison_reads_the_value(void) {

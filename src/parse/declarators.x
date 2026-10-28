@@ -216,8 +216,8 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
 
 
 
-/* Parameter declarations bind into a temporary scope. The declarator cannot
-   yet know whether a body follows, so keep that scope in `params`; finishing
+/* Parameter declarations bind into a temporary scope. Whether a body
+   follows is not yet determined, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
    the captured scope. */
 static List _function_parameters(Compiler c, int loaded_main) {

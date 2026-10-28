@@ -81,8 +81,8 @@ static void string_numeric_readers_are_exact(void) {
   EXPECT_TRUE(floating == 4.0);
   EXPECT_FALSE("  1.25tail".try_double(floating));
   EXPECT_TRUE(floating == 4.0);
-  // strtod knows no 0o or 0b prefix, so it consumes only the leading zero
-  // and the remaining bytes cause the whole conversion to fail.
+  // strtod does not recognize a 0o or 0b prefix, so it consumes only the
+  // leading zero and the remaining bytes cause the whole conversion to fail.
   EXPECT_FALSE("0b101".try_double(floating));
   EXPECT_TRUE(floating == 4.0);
   EXPECT_TRUE("  1.25 ".try_double(floating));

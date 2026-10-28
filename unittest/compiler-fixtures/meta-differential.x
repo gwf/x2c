@@ -1,4 +1,4 @@
-/*  meta-differential.x -- the two forms of a `meta` function answer alike
+/*  meta-differential.x -- both forms of a `meta` function return equal results
 
     Each row prints the answer an explicit `$` call produced during
     translation beside the answer the emitted function produced for the

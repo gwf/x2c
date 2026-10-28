@@ -120,7 +120,9 @@ direct one.
 of one expression. A local macro is worth defining when it needs typed
 holes, declarations, control flow, computed source, or more than one input.
 
-## Holes say what binds
+<a id="holes-say-what-binds"></a>
+
+## Hole syntax kinds
 
 Every hole has a syntax kind:
 
@@ -488,7 +490,7 @@ A statement macro or statement decorator may be used directly as an `if`,
 `else`, or loop body when its production contains exactly one statement.
 An explicit compound statement or `do { ... } while (0)` counts as one; an
 unwrapped sequence of block items does not. The compiler never inserts
-braces, so the production still decides scope and control flow.
+braces, so the production still determines scope and control flow.
 
 An `Expr` target makes the decorator a prefix expression:
 

@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /* A rule on the lambda head sees each lambda the transform lowers, before
-   the shipped rule, and may answer what that rule does not. */
+   the shipped rule, and may handle a lambda that rule does not. */
 
 static int made = 0;
 

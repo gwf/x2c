@@ -35,7 +35,7 @@ static void _record_objects(Compiler c, List bindings, Token site) {
     }
 }
 
-/* A definition remembers the token range of the top-level form that
+/* A definition records the token range of the top-level form that
    produced it, and whether that form is private, for the definition walk.
    A typedef or declaration may repeat its name, so each statement keys its
    own range. */

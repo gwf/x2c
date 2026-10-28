@@ -268,7 +268,7 @@ read `phys_footprint`, the ledger peak, and resident size from the same
 | 5 | `tabular` | 50 create-train-save-load-destroy cycles with injected errors |
 | 6 | `tabular` | the positive control: deliberate retention, capped at 128 MiB |
 
-Profile 6 exists to prove the measurement sees a known problem before any
+Profile 6 exists to prove the measurement detects a known problem before any
 other result is called healthy. It is not an example of ordinary use.
 
 Profile 2's ordinary form runs the explicit parameter-enumeration forward,
@@ -300,7 +300,7 @@ implies a constant process footprint: native allocators retain separate caches.
 `prepare.py` writes the data, the exact initial parameters and buffers,
 and the batch indices; both languages load them. Equal seeds are not
 equal initial conditions across two libraries. Every artifact carries
-`meta.version`, and a program refuses a mismatch rather than comparing
+`meta.version`, and a program rejects a mismatch rather than comparing
 different work.
 
 Acceptance, in the order it is checked:

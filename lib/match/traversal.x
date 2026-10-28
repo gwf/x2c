@@ -104,8 +104,8 @@ int MatchPlan.search_replace(
   return 1;
 }
 
-/* The cells answer from the last one back, so the walk remembers the last
-   cell that matched and settles on it once nothing earlier matches. */
+/* Cell matches are returned from last to first, so the walk records the last
+   cell that matched and selects it once no earlier cell matches. */
 static int _walk_first(MatchWalk &walk, Var input, int include_empty) {
   Var last_cell = void;
   int have_cell = 0, visit_tail = 1;
@@ -156,7 +156,7 @@ static int _test(MatchWalk &m, Var node) =>
    include_empty=0 before trying the match at this node. The cdr descent runs
    as a loop, so a `List` of any length costs one frame and only nesting
    depth reaches the C stack. The loop visits every car in order and then
-   answers for the cells from the last one back, which is the order the
+   returns results for the cells from the last one back, which is the order the
    recursion produced. */
 static int _walk_all(MatchWalk &walk, Var input, int include_empty) {
   Block hits = walk.spine;
@@ -191,8 +191,8 @@ static int _walk_all(MatchWalk &walk, Var input, int include_empty) {
 static List _hit(MatchWalk &walk, Var node) =>
   cons(%(* $node), _publish_captures(walk.plan.layout, *walk.captures));
 
-/* Prepends the hits the loop pushed above `base`, last one first, as the
-   recursion answered them, and releases them. */
+/* Prepends the hits the loop pushed above `base`, last one first, in the order
+   the recursion returned them, and releases them. */
 static void _answer(MatchWalk &walk, size_t base) {
   Block hits = walk.spine;
   for (size_t i = hits.length; i > base; i--)

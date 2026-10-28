@@ -7,7 +7,7 @@ typedef struct Reading {
   int humidity;
 } Reading;
 
-/* A delegate field answers a dotted call the outer type does not define,
+/* A delegate field handles a dotted call the outer type does not define,
    so a Station reads like the Reading it carries. */
 typedef struct Station {
   delegate Reading latest;

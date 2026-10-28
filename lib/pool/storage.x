@@ -57,7 +57,7 @@ static enum PoolIndexConstant {
 static PoolBlock pool_registry;
 static PoolIndexSlot *pool_index;
 static unsigned pool_index_slots, pool_index_used;
-/* The index answers a miss authoritatively only while it holds every
+/* The index establishes absence conclusively only while it holds every
    registered block. A table that cannot grow loses that permanently. */
 static int pool_index_complete = 1;
 static PoolBlock pool_depot[POOL_DEPOT_COUNT];
@@ -139,7 +139,7 @@ int Pool.promote(Pool inner, Var object, void *alloc) {
     pool can then reclaim the value. Promotion is not transactional across
     levels: an earlier level remains promoted if a later promotion transfers.
     A thread that loses a concurrent promotion of an equal value still gets
-    one, though `Pool.is_permanent` answers zero for its surviving copy.
+    one, though `Pool.is_permanent` returns zero for its surviving copy.
 
     Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
 */

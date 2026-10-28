@@ -232,7 +232,7 @@ standard-resolver profile.
 `src/curl-822.h` includes the real pinned upstream header and rejects
 another libcurl version. The complete API admitted by the static profile
 remains available under upstream names, and the generated package header
-publishes it, so a consumer that only says `import "libcurl"` can call
+publishes it, so a consumer that only uses `import "libcurl"` can call
 `curl_url_set` or `curl_version_info` directly.
 
 Uploads from a stream, socket-driven transfers, WebSockets, share

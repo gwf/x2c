@@ -3,8 +3,8 @@
 import "libcurl" with CurlBatch, CurlEasy, CurlHeader, CurlResponse,
   CurlResponseBlock;
 
-/*  A survey answers two questions per request: what came back, and did it
-    come back inside the latency budget.
+/*  A survey records each request's response and whether the request
+    completed within the latency budget.
 */
 static const long BUDGET_US = 3000000;
 

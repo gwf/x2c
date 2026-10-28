@@ -258,7 +258,7 @@ static int count_titles(String document) {
 ```
 
 A `defer` in a function that returns the handle closes it before the caller
-ever sees it. The release belongs to whoever will finish with it. A handle
+receives it. The release belongs to whoever will finish with it. A handle
 whose operations reuse internal state is not reentrant: state that in the
 README. One `Regexp` cannot be shared across threads for this reason.
 
@@ -402,7 +402,7 @@ an empty result instead of an error.
 
 An `Error` must never unwind through a C frame. When the library calls you
 back, `catch` at the boundary, record what has to survive, return a status the
-library understands, and `raise` once x2c is back in control:
+library accepts, and `raise` once x2c is back in control:
 
 ```x2c
 ~typedef struct feed_parser feed_parser;

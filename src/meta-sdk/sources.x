@@ -36,7 +36,7 @@ static macro Expression $note.meta_sdk_path_notes(Expr $c, Expr $path) =>
 
 // source and literals
 
-/** Answers `x2c_embed_text`, declared in `lib/meta.x`. */
+/** Implements `x2c_embed_text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var requested) {
   _require_expansion("x2c_embed_text");
   Compiler c = active.expander;
@@ -63,7 +63,7 @@ List MetaContext.source_description(Var value) {
 
 
 
-/** Answers `Code.source_text`, declared in `lib/meta.x`. */
+/** Implements `Code.source_text`, declared in `lib/meta.x`. */
 String Code.source_text(Var value) {
   match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _require_expansion("Code.source_text");

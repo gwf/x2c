@@ -449,12 +449,12 @@ static void _overdue(Call &c) {
   $fail.meta_helper_client_helper_timeout(c.compiler, c.site, c.limit, c.name);
 }
 
-/* Ends the helper this process started, if any, and forgets it: asks it
-   to quit, or sends `signal` to its process group, and reaps it. A process
-   group lasts, under its id, while any process in it runs, so killing the
-   helper's group after the reap ends only what the helper started and
-   left running, such as a job whose body crashed. Returns the helper's
-   wait status. */
+/* Ends the helper this process started, if any, and clears its state: requests
+   that it quit, or sends `signal` to its process group, and reaps it. A
+   process group lasts, under its id, while any process in it runs, so killing
+   the helper's group after the reap ends only what the helper started and left
+   running, such as a job whose body crashed. Returns the helper's wait
+   status. */
 static int _stop(int signal) {
   int status = 0;
   if (_running()) {

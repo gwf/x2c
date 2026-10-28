@@ -252,7 +252,7 @@ a correctly typed pointer has the same aliasing effect as in C. `const`
 prevents compile-time writes.
 
 `meta` marks functions, values and protocol adoptions, not types.
-Compile-time code can use any type the compiler sees: scalars, typedefs,
+Compile-time code can use any type visible to the compiler: scalars, typedefs,
 classes with a `Var` representation, and any complete struct, including an
 anonymous inline
 `struct { ... } value`. A struct keeps its C layout; see
@@ -370,7 +370,7 @@ no declaration of your own:
 
 The `<ctype.h>` functions are not included, because a C library may define
 them as macros. A compile-time `String` passes to a `const char *` parameter,
-so `$atoi("42")` answers 42.
+so `$atoi("42")` returns 42.
 
 The compiler also links the pure text operations of three optional modules:
 `Json.parse`, `Diff.lines`, `Diff.unified`, and `Path.join`, `dirname`,
@@ -694,7 +694,7 @@ each ordinary source module an input reaches, directly, through includes,
 or through a package. It emits them, with the declarations they use, as C through the ordinary
 backend, compiles them with the host C compiler (`--meta-cc`, default
 `cc`, never the target `--cc`), and links them with the host runtime into
-one helper program, the project meta module. A group sees the headers its
+one helper program, the project meta module. A group has access to the headers its
 unit includes, found from the unit's directory and the `-I` directories.
 The translation then
 sends each `$` call of one of those
@@ -724,7 +724,7 @@ and makes them callable from interpreted submissions.
 
 Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code
-meets compile-time code, and says evaluate now and insert the result.
+meets compile-time code, and means evaluate now and insert the result.
 
 A `match` or `catch` pattern in a `meta` body is the exception. Its
 captures come from its value, so a `$f(...)` call in it runs while the
@@ -742,10 +742,10 @@ A project `meta` function receives arguments and returns a value.
 Quotations, `x2c_ident`, `Code.name`, `Code.binding_spelling`, `Type.parts`,
 `x2c_diagnostic_fail`, and `x2c_diagnostic_warn` work in the helper. The
 typing and invocation queries, such as `Type.resolve`,
-`Type.fields`, `Code.type`, and `Type.resolve_member`, ask the
-compiler while the call waits. The compiler answers in the state of the `$`
-call's site, so a project function gets the answer that compiler-linked
-meta code gets at the same place. `Code.source_text` reads only the text a
+`Type.fields`, `Code.type`, and `Type.resolve_member`, query the
+compiler while the call waits. The compiler evaluates each query using the state
+at the `$` call's site, so a project function gets the same result as
+compiler-linked meta code at the same place. `Code.source_text` reads only the text a
 `Source` parameter carries.
 
 Running compile-time code needs what building the program needs: the C
@@ -940,7 +940,7 @@ values, local addresses, C constructs, method chaining and iteration; the
 
 A `meta` function can also take code as a `List` and return new code.
 [Generating Code](generating-code.md) covers macro helpers, source
-templates, quotations, and the questions the compiler answers.
+templates, quotations, and compiler queries.
 
 ## Sharing a `meta` function between units
 

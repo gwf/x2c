@@ -131,9 +131,10 @@ Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
 
 /** Schedules one allocation during a registered custom export callback.
     A null allocation or one outside `c`'s `Scope` chain is unchanged.
-    It immediately answers zero to `Context.owns`, preserving custom cycle
-    guards. Root export keeps it beneath any scheduled owning scope, or
-    relinks it individually after traversal when no such owner is exported.
+    `Context.owns` immediately returns zero for the allocation, preserving
+    custom cycle guards. Root export keeps it beneath any scheduled owning
+    scope, or relinks it individually after traversal when no such owner is
+    exported.
     Application code exports its value with `Context.export` instead.
     Raises: allocation and table-growth causes while recording the move.
 */
@@ -154,9 +155,10 @@ void Context.move_block(Context c, Block block) {
 
 /** Reports whether a managed allocation still needs export from `context`.
     The nonnull pointer must come from a `Scope` allocator. Registered custom
-    exporters call this before moving their own storage. An individual
-    allocation scheduled by `Context.move_allocation` answers zero, although
-    physical ownership changes only when the enclosing root export commits.
+    exporters call this before moving their own storage. `Context.owns`
+    returns zero for an individual allocation scheduled by
+    `Context.move_allocation`, although physical ownership changes only when
+    the enclosing root export commits.
     Scheduling a complete scope does not hide its unvisited descendants.
 */
 int Context.owns(Context context, void *allocation) =>

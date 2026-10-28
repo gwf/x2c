@@ -992,7 +992,7 @@ Source: `src/compiler/lifecycle.x`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Ancestor`](#Ancestor) | struct | One syntax the parser is inside, which `x2c_enclosing` answers: a function body with its declaration in `node`, and `lowering` set while the transform lowers it, a block item with the token or origin it starts at, or an initialized declarator with its declaration base in `base` and its `(bind ...)` node in `node`. |
+| [`Ancestor`](#Ancestor) | struct | An enclosing syntax construct returned by `x2c_enclosing`: a function body with its declaration in `node`, and `lowering` set while the transform lowers it, a block item with the token or origin it starts at, or an initialized declarator with its declaration base in `base` and its `(bind ...)` node in `node`. |
 | [`Compiler`](#Compiler) | struct | Holds mutable state for one source translation. |
 | [`Diagnostics`](#Diagnostics) | struct | Names the positioned diagnostic store routed by a `Compiler`. |
 | [`GenNames`](#GenNames) | struct | Holds scope-owned generated-name state shared by related compilers. |
@@ -1011,7 +1011,7 @@ Source: `src/compiler/lifecycle.x`
 
 `typedef struct Ancestor { Symbol what; Token token; int origin, lowering, callback; List base, node; } Ancestor`
 
-One syntax the parser is inside, which `x2c_enclosing` answers: a
+An enclosing syntax construct returned by `x2c_enclosing`: a
 function body with its declaration in `node`, and `lowering` set while
 the transform lowers it, a block item with the token or origin it
 starts at, or an initialized declarator with its declaration base in

@@ -88,7 +88,7 @@ Source: `src/initializers/subobjects.x`
 
 A brace initializer converts each value for the subobject that C's
 initialization order gives it. This unit owns that walk over field
-order and array bounds. A bound only the native compiler knows becomes
-a condition on an unevaluated `*(T *) 0` target, and a value converts
-under each condition that can select it. `expressions.x` converts the
-single values.
+order and array bounds. A bound resolved only by the native compiler
+becomes a condition on an unevaluated `*(T *) 0` target, and a value
+converts under each condition that can select it. `expressions.x`
+converts the single values.

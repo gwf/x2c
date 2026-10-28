@@ -934,7 +934,7 @@ Source: `lib/match/machine.x`
 `int MatchMachine.clean(MatchMachine &m)`
 
 Reports whether the observable invocation state is idle and cleared.
-Scratch capacity and the optional stats pointer do not affect the answer.
+Scratch capacity and the optional stats pointer do not affect the result.
 
 Source: `lib/match/machine.x`
 
@@ -1104,7 +1104,7 @@ Source: `lib/match/plan.x`
 
 Raises the fence an ineligible plan crossed, naming `owner`.
 This is the one place an ineligible pattern is reported. Such a pattern
-compiles to no program, so answering "no match" would be wrong and no
+compiles to no program, so returning "no match" would be wrong and no
 caller could tell it from a real miss. `reason` is the plan's static
 category string.
 

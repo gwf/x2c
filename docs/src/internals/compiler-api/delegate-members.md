@@ -10,10 +10,10 @@ Delegate fields.
 
 ## Design notes
 
-A field declared `delegate T name;` answers the method calls its
-aggregate lacks. The parser marks each such field, and the rule below
-is registered for the mark, so only a call that finds no member on a
-receiver whose aggregate declares one tests it. The rule searches the
+Method calls not defined by the aggregate are forwarded through fields
+declared `delegate T name;`. The parser marks each such field, and the
+rule below is registered for the mark, so only a call that finds no member
+on a receiver whose aggregate declares one tests it. The rule searches the
 receiver's delegate fields depth first in field order and rebuilds the
 call through the one path that finds the method. More than one path, or
 a cycle with no path, is an error.

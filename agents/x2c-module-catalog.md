@@ -663,7 +663,7 @@ Public functions:
 
 ### [src/meta-sdk/meta-sdk.x](../src/meta-sdk/meta-sdk.x)
 
-the compiler's answers to `lib/meta.x` operations.
+compiler implementations of `lib/meta.x` operations.
 
 Public functions:
 

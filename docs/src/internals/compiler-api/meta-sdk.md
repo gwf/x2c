@@ -6,47 +6,47 @@
 
 # `src/meta-sdk/meta-sdk.x`
 
-The compiler's answers to `lib/meta.x` operations.
+Compiler implementations of `lib/meta.x` operations.
 
 ## Functions
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_binding_for`](#x2c_binding_for) | Answers `x2c_binding_for`, declared in `lib/meta.x`. |
-| [`x2c_binding_fresh`](#x2c_binding_fresh) | Answers `x2c_binding_fresh`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_error_at`](#x2c_diagnostic_error_at) | Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_fail_at`](#x2c_diagnostic_fail_at) | Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. |
-| [`x2c_diagnostic_warn`](#x2c_diagnostic_warn) | A warning reports where it is raised and returns, so a macro can keep expanding. |
-| [`x2c_embed_text`](#x2c_embed_text) | Answers `x2c_embed_text`, declared in `lib/meta.x`. |
-| [`x2c_enclosing`](#x2c_enclosing) | Answers `x2c_enclosing`, declared in `lib/meta.x`. |
-| [`x2c_ident`](#x2c_ident) | Answers `x2c_ident`, declared in `lib/meta.x`. |
-| [`x2c_invocation_column`](#x2c_invocation_column) | Answers `x2c_invocation_column`, declared in `lib/meta.x`. |
-| [`x2c_invocation_file`](#x2c_invocation_file) | Answers `x2c_invocation_file`, declared in `lib/meta.x`. |
-| [`x2c_invocation_line`](#x2c_invocation_line) | Answers `x2c_invocation_line`, declared in `lib/meta.x`. |
-| [`x2c_meta_definition_hashes`](#x2c_meta_definition_hashes) | Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`. |
-| [`x2c_place`](#x2c_place) | Answers `x2c_place`, declared in `lib/meta.x`. |
-| [`Code.arguments`](#Code.arguments) | Answers `Code.arguments`, declared in `lib/meta.x`. |
-| [`Code.binding_spelling`](#Code.binding_spelling) | Answers `Code.binding_spelling`, declared in `lib/meta.x`. |
-| [`Code.body`](#Code.body) | Answers `Code.body`, declared in `lib/meta.x`. |
-| [`Code.bound`](#Code.bound) | Answers `Code.bound`, declared in `lib/meta.x`, with the carrier `Compiler.take_code_value` consumes. |
-| [`Code.call_in_order`](#Code.call_in_order) | Answers `Code.call_in_order`, declared in `lib/meta.x`. |
-| [`Code.convert`](#Code.convert) | Answers `Code.convert`, declared in `lib/meta.x`. |
+| [`x2c_binding_for`](#x2c_binding_for) | Implements `x2c_binding_for`, declared in `lib/meta.x`. |
+| [`x2c_binding_fresh`](#x2c_binding_fresh) | Implements `x2c_binding_fresh`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_error_at`](#x2c_diagnostic_error_at) | Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Implements `x2c_diagnostic_fail`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_fail_at`](#x2c_diagnostic_fail_at) | Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. |
+| [`x2c_diagnostic_warn`](#x2c_diagnostic_warn) | Reports a warning where it is raised and returns, so a macro can keep expanding. |
+| [`x2c_embed_text`](#x2c_embed_text) | Implements `x2c_embed_text`, declared in `lib/meta.x`. |
+| [`x2c_enclosing`](#x2c_enclosing) | Implements `x2c_enclosing`, declared in `lib/meta.x`. |
+| [`x2c_ident`](#x2c_ident) | Implements `x2c_ident`, declared in `lib/meta.x`. |
+| [`x2c_invocation_column`](#x2c_invocation_column) | Implements `x2c_invocation_column`, declared in `lib/meta.x`. |
+| [`x2c_invocation_file`](#x2c_invocation_file) | Implements `x2c_invocation_file`, declared in `lib/meta.x`. |
+| [`x2c_invocation_line`](#x2c_invocation_line) | Implements `x2c_invocation_line`, declared in `lib/meta.x`. |
+| [`x2c_meta_definition_hashes`](#x2c_meta_definition_hashes) | Implements `x2c_meta_definition_hashes`, declared in `lib/meta.x`. |
+| [`x2c_place`](#x2c_place) | Implements `x2c_place`, declared in `lib/meta.x`. |
+| [`Code.arguments`](#Code.arguments) | Implements `Code.arguments`, declared in `lib/meta.x`. |
+| [`Code.binding_spelling`](#Code.binding_spelling) | Implements `Code.binding_spelling`, declared in `lib/meta.x`. |
+| [`Code.body`](#Code.body) | Implements `Code.body`, declared in `lib/meta.x`. |
+| [`Code.bound`](#Code.bound) | Implements `Code.bound`, declared in `lib/meta.x`, with the carrier `Compiler.take_code_value` consumes. |
+| [`Code.call_in_order`](#Code.call_in_order) | Implements `Code.call_in_order`, declared in `lib/meta.x`. |
+| [`Code.convert`](#Code.convert) | Implements `Code.convert`, declared in `lib/meta.x`. |
 | [`Code.declared_bindings`](#Code.declared_bindings) | Returns an expression reading each binding `declaration` declares. |
-| [`Code.exits`](#Code.exits) | Answers `Code.exits`, declared in `lib/meta.x`. |
-| [`Code.format`](#Code.format) | Answers `Code.format`, declared in `lib/meta.x`. |
-| [`Code.func_parameters`](#Code.func_parameters) | Answers `Code.func_parameters`, declared in `lib/meta.x`. |
-| [`Code.is_static_pattern`](#Code.is_static_pattern) | Answers `Code.is_static_pattern`, declared in `lib/meta.x`. |
-| [`Code.lowered`](#Code.lowered) | Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier `Compiler.take_code_value` consumes. |
-| [`Code.name`](#Code.name) | Answers `Code.name`, declared in `lib/meta.x`. |
+| [`Code.exits`](#Code.exits) | Implements `Code.exits`, declared in `lib/meta.x`. |
+| [`Code.format`](#Code.format) | Implements `Code.format`, declared in `lib/meta.x`. |
+| [`Code.func_parameters`](#Code.func_parameters) | Implements `Code.func_parameters`, declared in `lib/meta.x`. |
+| [`Code.is_static_pattern`](#Code.is_static_pattern) | Implements `Code.is_static_pattern`, declared in `lib/meta.x`. |
+| [`Code.lowered`](#Code.lowered) | Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier `Compiler.take_code_value` consumes. |
+| [`Code.name`](#Code.name) | Implements `Code.name`, declared in `lib/meta.x`. |
 | [`Code.native_signature`](#Code.native_signature) | Returns the `Func` signature of the function syntax `syntax`. |
-| [`Code.parameter`](#Code.parameter) | Answers `Code.parameter`, declared in `lib/meta.x`. |
-| [`Code.pattern_value`](#Code.pattern_value) | Answers `Code.pattern_value`, declared in `lib/meta.x`. |
-| [`Code.promoted`](#Code.promoted) | Answers `Code.promoted`, declared in `lib/meta.x`. |
+| [`Code.parameter`](#Code.parameter) | Implements `Code.parameter`, declared in `lib/meta.x`. |
+| [`Code.pattern_value`](#Code.pattern_value) | Implements `Code.pattern_value`, declared in `lib/meta.x`. |
+| [`Code.promoted`](#Code.promoted) | Implements `Code.promoted`, declared in `lib/meta.x`. |
 | [`Code.register_after_initialization`](#Code.register_after_initialization) | Adds post-initialization block items while the declaration owner retains the original declarators, their type identity, and initialization order. |
-| [`Code.register_rewrite`](#Code.register_rewrite) | Answers `Code.register_rewrite`, declared in `lib/meta.x`: the pattern's form selects the family and its keys. |
-| [`Code.source_text`](#Code.source_text) | Answers `Code.source_text`, declared in `lib/meta.x`. |
-| [`Code.type`](#Code.type) | Answers the compiler-backed captured-code type query. |
+| [`Code.register_rewrite`](#Code.register_rewrite) | Implements `Code.register_rewrite`, declared in `lib/meta.x`: the pattern's form selects the family and its keys. |
+| [`Code.source_text`](#Code.source_text) | Implements `Code.source_text`, declared in `lib/meta.x`. |
+| [`Code.type`](#Code.type) | Implements the compiler-backed captured-code type query. |
 | [`Code.value`](#Code.value) | Reads a constant through the compiler's existing constant decoder. |
 | [`Compiler.add_sdk_targets`](#Compiler.add_sdk_targets) | Adds the SDK primitives the compiler's shipped sources call through `lib/compiler-meta.x` to the built-in targets `rows`. |
 | [`Compiler.expanding`](#Compiler.expanding) | Returns the compiler running the current compile-time call. |
@@ -58,25 +58,25 @@ The compiler's answers to `lib/meta.x` operations.
 | [`MetaContext.reject`](#MetaContext.reject) | Reports `message` and `notes` at the active invocation and never returns, so the rejected operation's caller cannot continue with a missing answer. |
 | [`MetaContext.source_description`](#MetaContext.source_description) | Returns what a `meta` parameter declared `Source` receives for the captured syntax `value`: `((text T) (file F) (syntax value))`, where `T` is the text the developer wrote and `F` the file it is in. |
 | [`MetaContext.type_description`](#MetaContext.type_description) | Returns what a `meta` parameter declared `TypeInfo` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
-| [`Type.aggregate`](#Type.aggregate) | Answers `Type.aggregate`, declared in `lib/meta.x`. |
-| [`Type.element`](#Type.element) | Answers `Type.element`, declared in `lib/meta.x`. |
-| [`Type.fields`](#Type.fields) | Answers `Type.fields`, declared in `lib/meta.x`. |
-| [`Type.getter`](#Type.getter) | Answers `Type.getter`, declared in `lib/meta.x`, with the getter that bracket admission selected. |
+| [`Type.aggregate`](#Type.aggregate) | Implements `Type.aggregate`, declared in `lib/meta.x`. |
+| [`Type.element`](#Type.element) | Implements `Type.element`, declared in `lib/meta.x`. |
+| [`Type.fields`](#Type.fields) | Implements `Type.fields`, declared in `lib/meta.x`. |
+| [`Type.getter`](#Type.getter) | Implements `Type.getter`, declared in `lib/meta.x`, with the getter that bracket admission selected. |
 | [`Type.is_named`](#Type.is_named) | Tests type ancestry through the active symbol table. |
 | [`Type.is_text`](#Type.is_text) | Tests the text forms accepted by string arithmetic. |
-| [`Type.is_value`](#Type.is_value) | Answers `Type.is_value`, declared in `lib/meta.x`. |
-| [`Type.layout`](#Type.layout) | Answers `Type.layout`, declared in `lib/meta.x`. |
-| [`Type.marked_fields`](#Type.marked_fields) | Answers `Type.marked_fields`, declared in `lib/meta.x`. |
-| [`Type.members`](#Type.members) | Answers `Type.members`, declared in `lib/meta.x`. |
+| [`Type.is_value`](#Type.is_value) | Implements `Type.is_value`, declared in `lib/meta.x`. |
+| [`Type.layout`](#Type.layout) | Implements `Type.layout`, declared in `lib/meta.x`. |
+| [`Type.marked_fields`](#Type.marked_fields) | Implements `Type.marked_fields`, declared in `lib/meta.x`. |
+| [`Type.members`](#Type.members) | Implements `Type.members`, declared in `lib/meta.x`. |
 | [`Type.numeric`](#Type.numeric) | Resolves numeric typedefs through the active symbol table. |
-| [`Type.parameters`](#Type.parameters) | Answers `Type.parameters`, declared in `lib/meta.x`. |
+| [`Type.parameters`](#Type.parameters) | Implements `Type.parameters`, declared in `lib/meta.x`. |
 | [`Type.protocol_member`](#Type.protocol_member) | Selects a callable protocol member in the current compilation context. |
-| [`Type.resolve`](#Type.resolve) | Answers `Type.resolve`, declared in `lib/meta.x`. |
-| [`Type.resolve_member`](#Type.resolve_member) | Answers `Type.resolve_member`, declared in `lib/meta.x`. |
-| [`Type.return_type`](#Type.return_type) | Answers `Type.return_type`, declared in `lib/meta.x`. |
-| [`Type.reverse_name`](#Type.reverse_name) | Answers `Type.reverse_name`, declared in `lib/meta.x`. |
-| [`Type.tag_name`](#Type.tag_name) | Answers `Type.tag_name`, declared in `lib/meta.x`. |
-| [`Type.update_helper`](#Type.update_helper) | Answers `Type.update_helper`, declared in `lib/meta.x`. |
+| [`Type.resolve`](#Type.resolve) | Implements `Type.resolve`, declared in `lib/meta.x`. |
+| [`Type.resolve_member`](#Type.resolve_member) | Implements `Type.resolve_member`, declared in `lib/meta.x`. |
+| [`Type.return_type`](#Type.return_type) | Implements `Type.return_type`, declared in `lib/meta.x`. |
+| [`Type.reverse_name`](#Type.reverse_name) | Implements `Type.reverse_name`, declared in `lib/meta.x`. |
+| [`Type.tag_name`](#Type.tag_name) | Implements `Type.tag_name`, declared in `lib/meta.x`. |
+| [`Type.update_helper`](#Type.update_helper) | Implements `Type.update_helper`, declared in `lib/meta.x`. |
 
 ### Functions
 
@@ -84,7 +84,7 @@ The compiler's answers to `lib/meta.x` operations.
 
 `List x2c_binding_for(Var key, String role)`
 
-Answers `x2c_binding_for`, declared in `lib/meta.x`.
+Implements `x2c_binding_for`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -92,7 +92,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `List x2c_binding_fresh(String role)`
 
-Answers `x2c_binding_fresh`, declared in `lib/meta.x`.
+Implements `x2c_binding_fresh`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -100,7 +100,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `void x2c_diagnostic_error_at( Var node, Symbol category, String message, List notes)`
 
-Answers `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
+Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -108,7 +108,7 @@ Source: `src/meta-sdk/context.x`
 
 `void x2c_diagnostic_fail(String message, List notes)`
 
-Answers `x2c_diagnostic_fail`, declared in `lib/meta.x`.
+Implements `x2c_diagnostic_fail`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -116,7 +116,7 @@ Source: `src/meta-sdk/context.x`
 
 `void x2c_diagnostic_fail_at( Var node, Symbol category, String message, List notes)`
 
-Answers `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
+Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -124,7 +124,7 @@ Source: `src/meta-sdk/context.x`
 
 `void x2c_diagnostic_warn(String message, List notes)`
 
-A warning reports where it is raised and returns, so a macro can keep
+Reports a warning where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
 
 Source: `src/meta-sdk/context.x`
@@ -133,7 +133,7 @@ Source: `src/meta-sdk/context.x`
 
 `String x2c_embed_text(Var requested)`
 
-Answers `x2c_embed_text`, declared in `lib/meta.x`.
+Implements `x2c_embed_text`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/sources.x`
 
@@ -141,7 +141,7 @@ Source: `src/meta-sdk/sources.x`
 
 `Code x2c_enclosing(Symbol what)`
 
-Answers `x2c_enclosing`, declared in `lib/meta.x`.
+Implements `x2c_enclosing`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -149,7 +149,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `List x2c_ident(String spelling)`
 
-Answers `x2c_ident`, declared in `lib/meta.x`.
+Implements `x2c_ident`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -157,7 +157,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `int x2c_invocation_column(void)`
 
-Answers `x2c_invocation_column`, declared in `lib/meta.x`.
+Implements `x2c_invocation_column`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -165,7 +165,7 @@ Source: `src/meta-sdk/context.x`
 
 `String x2c_invocation_file(void)`
 
-Answers `x2c_invocation_file`, declared in `lib/meta.x`.
+Implements `x2c_invocation_file`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -173,7 +173,7 @@ Source: `src/meta-sdk/context.x`
 
 `int x2c_invocation_line(void)`
 
-Answers `x2c_invocation_line`, declared in `lib/meta.x`.
+Implements `x2c_invocation_line`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/context.x`
 
@@ -181,7 +181,7 @@ Source: `src/meta-sdk/context.x`
 
 `Map x2c_meta_definition_hashes(void)`
 
-Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`.
+Implements `x2c_meta_definition_hashes`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/primitives.x`
 
@@ -189,7 +189,7 @@ Source: `src/meta-sdk/primitives.x`
 
 `void x2c_place(List where, Code code)`
 
-Answers `x2c_place`, declared in `lib/meta.x`.
+Implements `x2c_place`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -200,7 +200,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `List Code.arguments(Code parameters)`
 
-Answers `Code.arguments`, declared in `lib/meta.x`.
+Implements `Code.arguments`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -209,7 +209,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `String Code.binding_spelling(Var syntax)`
 
-Answers `Code.binding_spelling`, declared in `lib/meta.x`.
+Implements `Code.binding_spelling`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -218,7 +218,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `List Code.body(Code function)`
 
-Answers `Code.body`, declared in `lib/meta.x`.
+Implements `Code.body`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -227,7 +227,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.bound(Code c, List effects)`
 
-Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
+Implements `Code.bound`, declared in `lib/meta.x`, with the carrier
 `Compiler.take_code_value` consumes.
 
 Source: `src/meta-sdk/syntax.x`
@@ -237,7 +237,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.call_in_order(Code member, List arguments, Type type)`
 
-Answers `Code.call_in_order`, declared in `lib/meta.x`. The call binds
+Implements `Code.call_in_order`, declared in `lib/meta.x`. The call binds
 its temporaries here, so the result is a carrier that binds no
 further.
 
@@ -248,7 +248,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.convert(Code value, Type target)`
 
-Answers `Code.convert`, declared in `lib/meta.x`.
+Implements `Code.convert`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -266,7 +266,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `int Code.exits(Code statement)`
 
-Answers `Code.exits`, declared in `lib/meta.x`.
+Implements `Code.exits`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -275,7 +275,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `String Code.format(Code value)`
 
-Answers `Code.format`, declared in `lib/meta.x`.
+Implements `Code.format`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -284,7 +284,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `List Code.func_parameters(Code parameters, Code fn, Code argv)`
 
-Answers `Code.func_parameters`, declared in `lib/meta.x`.
+Implements `Code.func_parameters`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -293,7 +293,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `int Code.is_static_pattern(Code pattern)`
 
-Answers `Code.is_static_pattern`, declared in `lib/meta.x`.
+Implements `Code.is_static_pattern`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -302,7 +302,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.lowered(Code c, List effects)`
 
-Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
+Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier
 `Compiler.take_code_value` consumes.
 
 Source: `src/meta-sdk/syntax.x`
@@ -312,7 +312,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `String Code.name(Code function)`
 
-Answers `Code.name`, declared in `lib/meta.x`.
+Implements `Code.name`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -331,7 +331,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.parameter(Code function, String wanted)`
 
-Answers `Code.parameter`, declared in `lib/meta.x`.
+Implements `Code.parameter`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -340,7 +340,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Var Code.pattern_value(Code pattern)`
 
-Answers `Code.pattern_value`, declared in `lib/meta.x`.
+Implements `Code.pattern_value`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -349,7 +349,7 @@ Source: `src/meta-sdk/syntax.x`
 
 `Code Code.promoted(Code value)`
 
-Answers `Code.promoted`, declared in `lib/meta.x`.
+Implements `Code.promoted`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -368,7 +368,7 @@ Source: `src/meta-sdk/rewrites.x`
 
 `Code Code.register_rewrite(Code function, List pattern, List holes)`
 
-Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
+Implements `Code.register_rewrite`, declared in `lib/meta.x`: the
 pattern's form selects the family and its keys. A function rule is
 keyed by return type, which `Compiler.normalize` dispatches once per
 definition before its body lowers.
@@ -380,7 +380,7 @@ Source: `src/meta-sdk/rewrites.x`
 
 `String Code.source_text(Var value)`
 
-Answers `Code.source_text`, declared in `lib/meta.x`.
+Implements `Code.source_text`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/sources.x`
 
@@ -389,7 +389,7 @@ Source: `src/meta-sdk/sources.x`
 
 `Type Code.type(Code value)`
 
-Answers the compiler-backed captured-code type query.
+Implements the compiler-backed captured-code type query.
 
 Source: `src/meta-sdk/syntax.x`
 
@@ -520,7 +520,7 @@ Source: `src/meta-sdk/types.x`
 
 `Type Type.aggregate(Type type)`
 
-Answers `Type.aggregate`, declared in `lib/meta.x`.
+Implements `Type.aggregate`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -529,7 +529,7 @@ Source: `src/meta-sdk/types.x`
 
 `Type Type.element(Type t)`
 
-Answers `Type.element`, declared in `lib/meta.x`.
+Implements `Type.element`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -538,7 +538,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.fields(Type t)`
 
-Answers `Type.fields`, declared in `lib/meta.x`.
+Implements `Type.fields`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -547,7 +547,7 @@ Source: `src/meta-sdk/types.x`
 
 `Code Type.getter(Type type)`
 
-Answers `Type.getter`, declared in `lib/meta.x`, with the getter that
+Implements `Type.getter`, declared in `lib/meta.x`, with the getter that
 bracket admission selected.
 
 Source: `src/meta-sdk/types.x`
@@ -575,7 +575,7 @@ Source: `src/meta-sdk/types.x`
 
 `int Type.is_value(Type type)`
 
-Answers `Type.is_value`, declared in `lib/meta.x`.
+Implements `Type.is_value`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -584,7 +584,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.layout(Type type)`
 
-Answers `Type.layout`, declared in `lib/meta.x`.
+Implements `Type.layout`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -593,7 +593,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.marked_fields(Type aggregate, Symbol mark)`
 
-Answers `Type.marked_fields`, declared in `lib/meta.x`.
+Implements `Type.marked_fields`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -602,7 +602,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.members(Type type)`
 
-Answers `Type.members`, declared in `lib/meta.x`.
+Implements `Type.members`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -620,7 +620,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.parameters(Type type)`
 
-Answers `Type.parameters`, declared in `lib/meta.x`.
+Implements `Type.parameters`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -639,7 +639,7 @@ Source: `src/meta-sdk/types.x`
 
 `Type Type.resolve(Type type)`
 
-Answers `Type.resolve`, declared in `lib/meta.x`.
+Implements `Type.resolve`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -648,7 +648,7 @@ Source: `src/meta-sdk/types.x`
 
 `List Type.resolve_member(Type type, String name, int call)`
 
-Answers `Type.resolve_member`, declared in `lib/meta.x`.
+Implements `Type.resolve_member`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -657,7 +657,7 @@ Source: `src/meta-sdk/types.x`
 
 `Type Type.return_type(Type type)`
 
-Answers `Type.return_type`, declared in `lib/meta.x`.
+Implements `Type.return_type`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -666,7 +666,7 @@ Source: `src/meta-sdk/types.x`
 
 `String Type.reverse_name(String base, String participant)`
 
-Answers `Type.reverse_name`, declared in `lib/meta.x`.
+Implements `Type.reverse_name`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -675,7 +675,7 @@ Source: `src/meta-sdk/types.x`
 
 `Symbol Type.tag_name(String name)`
 
-Answers `Type.tag_name`, declared in `lib/meta.x`.
+Implements `Type.tag_name`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -684,7 +684,7 @@ Source: `src/meta-sdk/types.x`
 
 `String Type.update_helper(Type type)`
 
-Answers `Type.update_helper`, declared in `lib/meta.x`.
+Implements `Type.update_helper`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk/types.x`
 
@@ -692,14 +692,14 @@ Source: `src/meta-sdk/types.x`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`MetaContext`](#MetaContext) | struct | What the running compile-time call answers from. |
+| [`MetaContext`](#MetaContext) | struct | Context used by the running compile-time call. |
 
 <a id="MetaContext"></a>
 ### MetaContext
 
 `typedef struct MetaContext { Compiler expander, evaluator; String definition_file; Map captures; int has_bindings; Token site; } MetaContext`
 
-What the running compile-time call answers from. `expander` is the
+Context used by the running compile-time call. `expander` is the
 compiler of the active macro expansion, `definition_file` the source of
 its definition, `captures` its complete captured syntax by identity, and
 `has_bindings` whether it bound captured values. `evaluator` is the
@@ -711,10 +711,9 @@ Source: `src/meta-sdk/meta-sdk.x`
 
 ## Design notes
 
-Compile-time code asks the compiler about syntax, types, names, and
-source through the operations `lib/meta.x` declares, and the built-in
-macros ask through their own entries here. A native operation has no
-Compiler parameter, so each answer reads the running call's
-`MetaContext`, which the evaluations in `macros.x` install for their
-extent. An operation that cannot answer reports at the active
-invocation and never returns.
+Compile-time code queries syntax, types, names, and source through the
+operations `lib/meta.x` declares. Built-in macros use their own entries
+here. A native operation has no Compiler parameter, so each operation
+reads the running call's `MetaContext`, which the evaluations in
+`macros.x` install for their extent. An operation that cannot provide a
+result reports at the active invocation and never returns.

@@ -17,7 +17,7 @@ static alias fail_native_declarations to MetaContext.reject(
   "native module sources declare no meta function",
   %("declare each exported function with a bodyless meta prototype"));
 
-/** Answers `x2c_meta_definition_hashes`, declared in `lib/meta.x`. */
+/** Implements `x2c_meta_definition_hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
   _require_expansion("x2c_meta_definition_hashes");
   Compiler c = active.expander;

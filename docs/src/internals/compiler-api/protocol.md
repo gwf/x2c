@@ -27,7 +27,7 @@ Protocols from declaration to conform forms.
 | [`Compiler.protocol_update_helper`](#Compiler.protocol_update_helper) | Returns a generated helper for a direct protocol-backed update. |
 | [`Compiler.publish_protocol_node`](#Compiler.publish_protocol_node) | Validates and installs one normalized protocol or adoption node. |
 | [`Compiler.rebuild_protocols`](#Compiler.rebuild_protocols) | Rebuilds the per-unit protocol and adoption registries from `symbols`. |
-| [`Compiler.record_source_typedef`](#Compiler.record_source_typedef) | Remembers a source typedef's declaration and visibility, which native alias insertion reads for its participant. |
+| [`Compiler.record_source_typedef`](#Compiler.record_source_typedef) | Records a source typedef's declaration and visibility, which native alias insertion reads for its participant. |
 | [`Compiler.resolve_as_declared`](#Compiler.resolve_as_declared) | Resolves the adoptions visible in `symbols` as a declaring unit's full parse resolves its own: before the parse, and again, after the generated members are published, where the parse publishes each one. |
 | [`Compiler.resolve_protocol_member`](#Compiler.resolve_protocol_member) | Resolves a protocol member for `participant`. |
 | [`Compiler.resolve_protocols`](#Compiler.resolve_protocols) | Resolves every visible adoption into the current conformance registry. |
@@ -173,7 +173,7 @@ Source: `src/protocol/lookup.x`
 
 Reports whether conformance supersedes an ambient direct member: 0 when
 it does not, 1 when the participant's own adoption does, and 2 when an
-ancestor's adoption does. The answer is cached for the canonical
+ancestor's adoption does. The result is cached for the canonical
 participant and uses the first visible adopted ancestor that declares
 the member.
 
@@ -224,7 +224,7 @@ Source: `src/protocol/registry.x`
 
 `void Compiler.record_source_typedef( Compiler c, String name, List declaration, int private)`
 
-Remembers a source typedef's declaration and visibility, which native
+Records a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
 Source: `src/protocol/adapters.x`
@@ -297,7 +297,7 @@ Source: `src/protocol/call-helpers.x`
 
 This module owns the protocol feature: it parses protocol and adoption
 declarations, keeps their rows in per-unit registries, resolves each
-adoption into a conformance, answers member and operator lookups, and
+adoption into a conformance, resolves member and operator lookups, and
 presents each conformance as native aliases or a `conform` form, from which
 `src/components/protocol-adapters.x` writes the adapters. Registries are
 rebuilt per translation unit; a static row is visible only in the unit of

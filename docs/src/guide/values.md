@@ -478,7 +478,7 @@ Use `Var` when:
 
 Prefer a plain C or runtime type when:
 
-- The static type already says what the function takes.
+- The static type already specifies the function's argument type.
   `long checksum(String)` tells a reader more than `Var checksum(Var)`, and
   the compiler checks it. A `Var` moves those type errors from translation
   time to run time.

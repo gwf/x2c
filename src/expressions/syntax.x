@@ -728,7 +728,7 @@ static int _casts_to_typedef_name(Compiler c, List declaration) {
 /* A cast whose operand already has the cast type, qualifiers included,
    changes nothing. The comparison uses x2c's declared type, so a cast
    between a typedef and its C type stays silent, and only an operand whose
-   C type x2c knows is compared: a pointer difference or a character
+   C type x2c resolves is compared: a pointer difference or a character
    constant is not. A `void` cast discards a value on purpose, and a cast of
    a C string literal is how source keeps the literal native where x2c would
    otherwise promote it to a `String`. */

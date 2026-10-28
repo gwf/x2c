@@ -265,8 +265,8 @@ static List _destructure_declaration(
   List bindings = _destructure_targets(c, binding_type);
   /* A foreach destructures each element rather than an initializer, so the
      same `(a, b)` spelling stands without `=`. It reduces to the
-     multi-binding declaration a `for` header already knows how to
-     carry across `in`. */
+     multi-binding declaration already supported across `in` in a `for`
+     header. */
   if (allow_uninitialized || c.peek(0) == <in>)
     return %(declare $type (bindings @(_destructure_binds(bindings))));
   if (!c.test(<=>))

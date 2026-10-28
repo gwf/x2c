@@ -75,7 +75,7 @@ void Error.bound_set(int bound) {
     non-returning causes locked to `<abort>`; a capture carries the starting
     thread's dispositions across. `Error.policy_adopt` consumes the capture and
     `Error.policy_release` discards one that no thread adopted. An unavailable
-    `Error` runtime captures nothing and answers NULL.
+    `Error` runtime captures nothing and returns NULL.
     Raises: `<alloc-fail>` when the capture cannot be allocated.
 */
 void *Error.policy_capture(void) {

@@ -241,7 +241,7 @@ released them:
 | growth per retained graph | 6.45 MB | 3.20 MB |
 | live Scope allocations | 46 -> 903 -> 53 | n/a |
 
-The measurement sees the known problem, and the counters return. The 2.02x
+The measurement detects the known problem, and the counters return. The 2.02x
 ratio is attributed: Python holds the activations the graph needs, and x2c
 additionally holds every pre-activation intermediate, because its wrapper
 lives until the enclosing scope closes. For this shape the graph needs

@@ -65,7 +65,7 @@ Functions and types exposed by each compiler module.
 | [`src/macros/macros.x`](macros.md) | source macros and the compile-time calls they run. |
 | [`src/meta-group/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-native/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
-| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
+| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | compiler implementations of `lib/meta.x` operations. |
 | [`src/parse/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/project/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol/protocol.x`](protocol.md) | protocols from declaration to conform forms. |

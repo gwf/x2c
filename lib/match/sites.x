@@ -159,7 +159,7 @@ void x2c_match_initialize(void) {
   _thread_check(status, "register shutdown");
 }
 
-/* Returns this site's plan, publishing it on the first call and answering
+/* Returns this site's plan, publishing it on the first call and returning
    NULL for a site whose pattern it cannot retain. The refusal is recorded on
    the site, so a pattern the site rejects costs two atomic loads per call
    instead of the registry lock and a fresh admissibility walk. */
@@ -212,10 +212,10 @@ static void _prepare(MatchCaptureSite *site, Var pattern) {
    `permanent_lists` is what separates the two owners. A site keeps its
    program for the life of the process, so it needs a `List` the outermost
    pool owns: a nested pool reuses the storage of its released cells, and an
-   identity that belongs to one would let a different pattern answer at the
-   same address. The plan cache retires every entry when a level is released,
-   so a `List` that is canonical now serves it, and interning gives an equal
-   pattern the same cell. */
+   identity from a released cell could cause a lookup to reuse its plan for a
+   different pattern at the same address. The plan cache retires every entry
+   when a level is released, so a `List` that is canonical now serves it,
+   and interning gives an equal pattern the same cell. */
 static int _pattern_borrowable(Var value, int depth, int permanent_lists) {
   if (depth >= 128) return 0;
   switch (value.kind()) {

@@ -33,7 +33,7 @@ static alias reason_outer to "stored into an object of an outer region";
 
 // flows
 
-/* One value on its way to a sink: what the walk knows about it as `fact`,
+/* One value on its way to a sink: its recorded properties as `fact`,
    and the local it names as `named`. */
 static typedef struct Flow {
   Walk *w;

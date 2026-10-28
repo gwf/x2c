@@ -286,7 +286,7 @@ static void plan_star_matrix(void) {
   s9.free();
 
   // S10: a repeated final star compares values, as the interior one does:
-  // canonical interning answers (a pivot a) in one comparison, and two
+  // canonical interning matches (a pivot a) in one comparison, and two
   // boxes of one wide value are equal there too.
   MatchPlan s10 = MatchPlan.prepare(%(*same pivot *same));
   MachineStats s10_canon = _stats_case(s10, %(a pivot a), 1, %((*same (a))));
@@ -441,7 +441,7 @@ static void plan_guard_at_the_code_limit_reports_capacity(void) {
 
 // fenced patterns are loud, not silently unmatchable - - - - - - - - - - - -
 
-/* Preparation still reports INELIGIBLE, but no entry point can answer for
+/* Preparation still reports INELIGIBLE, but no entry point can execute
    such a plan, so each one raises `<size-limit>` naming the fence. */
 
 static Var _fenced_deep_pattern(void) {
@@ -809,7 +809,7 @@ static void prepared_capture_is_atomic_and_positional(void) {
   plan.free();
 }
 
-/* One capacity fence answers both implementations: the layout refuses the
+/* One capacity fence applies to both implementations: the layout rejects the
    pattern before either implementation runs it. */
 static void capture_layout_refuses_past_the_binder_limit(void) {
   Array pattern_values = [], input_values = [];
@@ -941,8 +941,8 @@ static MatchCaptureSite search_site, try_search_site;
 static MatchCaptureSite match_replace_site, try_match_replace_site;
 static MatchCaptureSite search_replace_site;
 
-/* Each compiler-emitted entry must answer exactly as the operation it
-   replaces, on a hit and on a miss, and must keep answering after its plan
+/* Each compiler-emitted entry must return the same result as the operation it
+   replaces, on a hit and on a miss, and must keep doing so after its plan
    is published. The per-call operation is the oracle. */
 static void source_sites_reproduce_the_runtime_operations(void) {
   Var pattern = %(ok ?value);

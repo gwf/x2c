@@ -115,7 +115,7 @@ void MatchMachine.finish(MatchMachine &m) {
 }
 
 /** Reports whether the observable invocation state is idle and cleared.
-    Scratch capacity and the optional stats pointer do not affect the answer.
+    Scratch capacity and the optional stats pointer do not affect the result.
 */
 int MatchMachine.clean(MatchMachine &m) {
   if (m.running || m.program.code || m.fp || m.undo_count || m.slot_count)

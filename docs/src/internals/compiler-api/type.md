@@ -19,7 +19,7 @@ X2c semantic types.
 | [`Type.end_unit`](#Type.end_unit) | Restores the enclosing unit's source-declared `Var` rows before the current unit's `Scope` is released. |
 | [`Type.fixed_var_tag`](#Type.fixed_var_tag) | Returns the process-lifetime `Var` tag fixed for `type`, or zero. |
 | [`Type.parameter_ast`](#Type.parameter_ast) | Returns a complete `(param ...)` AST for `type` and `binding`. |
-| [`Type.parts`](#Type.parts) | Answers `Type.parts`, declared in `lib/meta.x`, through `type_declaration_parts`, which a project's helper shares. |
+| [`Type.parts`](#Type.parts) | Implements `Type.parts`, declared in `lib/meta.x`, through `type_declaration_parts`, which a project's helper shares. |
 | [`Type.register_var_adoption`](#Type.register_var_adoption) | Replaces a registered type's inferred `Var` tag with `tag`, or with the fixed tag of `representation` when `tag` is zero. |
 | [`Type.register_var_tag`](#Type.register_var_tag) | Registers one named type's unit-local `Var` tag and exact forward converter. |
 | [`Type.var_converter`](#Type.var_converter) | Returns the unit-local forward `Var` converter for the canonical form of `type`, or `NULL`. |
@@ -108,7 +108,7 @@ Source: `src/type.x`
 
 `List Type.parts(Type type)`
 
-Answers `Type.parts`, declared in `lib/meta.x`, through
+Implements `Type.parts`, declared in `lib/meta.x`, through
 `type_declaration_parts`, which a project's helper shares.
 
 Source: `src/type.x`

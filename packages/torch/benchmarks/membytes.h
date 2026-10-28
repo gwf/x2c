@@ -2,9 +2,9 @@
 
     macOS reports a process's real charge as its physical footprint, the
     number the memory limits and Activity Monitor's "Memory" column use.
-    Resident size and the ledger's high-water mark answer different
-    questions, so all four are returned separately in bytes;
-    a call the kernel refuses returns 0 rather than a guess.
+    Resident size and the ledger's high-water mark measure different
+    properties, so all four are returned separately in bytes;
+    a call the kernel rejects returns 0 rather than a guess.
 
     This helper is benchmark-only. x2c links membytes.c as an ordinary C
     input and Python loads the same source built as a dylib through ctypes,

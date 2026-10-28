@@ -132,7 +132,7 @@ int Compiler.native_protocol_alias(Compiler c, String name) {
 
 // alias insertion
 
-/** Remembers a source typedef's declaration and visibility, which native
+/** Records a source typedef's declaration and visibility, which native
     alias insertion reads for its participant.
 */
 void Compiler.record_source_typedef(

@@ -9,7 +9,7 @@ static alias fail_rewrite_pattern to MetaContext.reject(
 static alias fail_initialization_pattern to MetaContext.reject(
   "after-initialization requires a declaration pattern", NULL);
 
-/** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
+/** Implements `Code.register_rewrite`, declared in `lib/meta.x`: the
     pattern's form selects the family and its keys. A function rule is
     keyed by return type, which `Compiler.normalize` dispatches once per
     definition before its body lowers.

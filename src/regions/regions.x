@@ -57,7 +57,7 @@ module typedef struct Region {
   Acquired acquired;
 } *Region;
 
-/* What the walk knows about one local or parameter: the block depth that
+/* Recorded facts about one local or parameter: the block depth that
    declares it, its parameter index or -1, whether it holds storage born in
    this function, whether a free or a realloc ended it (`ending` while the
    expression that ends it is walked), the region its value belongs to

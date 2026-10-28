@@ -3,7 +3,7 @@
     A destructuring reads its source once as a `List` and gives each target
     the element at its position, left to right; the compiler converts each
     element as an ordinary assignment or initialization does. The parser has
-    declared the targets, so each rule answers bound code that keeps their
+    declared the targets, so each rule returns bound code that keeps their
     bindings: `T (a, b) = source;` declares `a` and `b` before the read,
     `(T1 a, T2 b) = source;` declares each initialized from its element, an
     assignment statement reads in its own block, and an assignment

@@ -923,7 +923,7 @@ static VarDescriptor *_declare(Symbol tag) {
 /* Restricted Symbols fold `_` and `-` and truncate after ten characters;
    the 7-bit form truncates after seven. Distinct full names can therefore
    encode one tag and silently share this descriptor: the second registration
-   would overwrite the first's methods, and every `is` test would answer for
+   would overwrite the first's methods, and every `is` test would accept
    both. The full borrowed name is still here, so compare and diagnose that
    spelling before installation. Registration can run before Error, so use
    the same process-fatal reporting as the mutex paths. */

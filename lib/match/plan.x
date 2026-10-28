@@ -815,8 +815,8 @@ static void _record_keys(MatchPlan plan, Var pattern) {
    across distinct allocations, floating NaN is unequal to itself with equal
    bits, and a transient mutable String can be content-equal to a canonical
    String with different bits. Interning gives two Lists one identity
-   exactly when their elements are bit-equal, so a List answers for its
-   elements. */
+   exactly when their elements are bit-equal, so List identity represents
+   bit equality of its elements. */
 static int _bits_unique(Var value) {
   switch (value.tag()) {
     case <symbol>: case <lsym>:

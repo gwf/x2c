@@ -5,7 +5,7 @@ title: Code is Magic
 When you can change the language, repetition starts to look like an
 opportunity. A pattern you keep writing can become a construct you use.
 An idea that once needed a page of explanation can have a name, a syntax,
-and rules the compiler understands.
+and rules the compiler implements.
 
 Give sets their own operators. Turn a locking convention into a statement
 that always releases the lock. Describe a family of values once and let

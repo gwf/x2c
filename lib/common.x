@@ -603,10 +603,10 @@ inline Var    long.var(long x)           => Var.box_long(x);
 
 /** Reports whether `value` occupies the encoding row at `top`/`bottom`.
     `mask` selects the bits the decoder discriminates on within `top`'s
-    group, so a caller that already knows the row tests it with two
+    group, so a caller that already has the row tests it with two
     compares instead of a decode. `var-tags.x` projects the rows that
     qualify; a row whose decoded form carries a validity clause is not one
-    of them and must ask `Var.is`.
+    of them and must call `Var.is`.
 */
 inline int Var.is_row(
   Var value, unsigned top, unsigned long mask, unsigned long bottom) =>

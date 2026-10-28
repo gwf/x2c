@@ -52,8 +52,8 @@ static typedef struct _LayoutEdit {
   String before, after; Symbol type;
 } _LayoutEdit;
 
-/* What a block header's words say: an aggregate or enum header names no
-   parameters, unlike a function's, and a label keeps its colon. */
+/* Block header properties: an aggregate or enum header has no parameters,
+   unlike a function header, and a label retains its colon. */
 static typedef struct _LayoutHeader {
   int aggregate, enumeration, labeled;
 } _LayoutHeader;

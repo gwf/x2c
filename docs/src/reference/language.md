@@ -161,7 +161,8 @@ file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own, and so do the enumerators of a `static typedef enum`. The
+name is visible only in its declaring file. Enumerators of a
+`static typedef enum` have the same visibility. The
 enumerators of an enum declared without a typedef stay unit-wide, even under
 `static`. A later declaration without `static` refers to the file's static, as
 in C. Examples are the definition after a `static` prototype and a block-scope
@@ -878,7 +879,7 @@ protocol Var(T) {
 protocol Var(Array);
 ```
 
-The optional `as` form applies only to `Var` and says that the participant
+The optional `as` form applies only to `Var` and specifies that the participant
 uses an existing fixed runtime tag:
 
 ```x2c
@@ -1042,7 +1043,7 @@ conformance selects. When the nearest adopted conformance, exact or
 inherited, resolves the member as anything other than `implemented`, the
 conformance's member is used, and the type's own method with that name is
 not. When that conformance is inherited from an ancestor, a call that the
-type's own method would otherwise answer is an error: adopt the protocol for
+type's own method would otherwise handle is an error: adopt the protocol for
 that type so its own method is selected.
 
 #### Conversions required by adapters
@@ -2004,7 +2005,7 @@ apply a template, and inside another quotation it is written as a hole,
 `$($!T{ ... })`. The compiler accepts `T` as the expression's type without
 checking it. A typed quotation states the type the code has; it converts
 nothing, so write a cast inside the braces when the code needs one. See [Code
-that knows its type](../guide/generating-code.md#code-that-knows-its-type).
+with an explicit type](../guide/generating-code.md#code-that-knows-its-type).
 
 `$!Type{ T }` builds the type `T`, written as a cast writes a type name.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
@@ -2335,14 +2336,14 @@ x2c_diagnostic_warn(message, notes)
 
 A macro body calls one with `$`, as in `$Code.type($value)` or
 `@Code.body($function)`; a `meta` body that includes `meta.x` calls it
-directly, because the whole body runs at compile time. A project `meta`
-function's queries ask the compiler while the call waits; see
-[What the compiler answers](../guide/generating-code.md#what-the-compiler-answers).
+directly, because the whole body runs at compile time. The compiler evaluates
+a project `meta` function's queries while the call waits; see
+[Compiler queries](../guide/generating-code.md#what-the-compiler-answers).
 An operation on captured code or a semantic type is a method of `Code` or
 `Type`, spelled `Code.member` or `Type.member`. Any other supported operation
 is spelled `x2c_<noun>_<verb>`. A name beginning `_x2c_` is a compiler
 internal with no compatibility promise. `lib/meta.x` declares further `Code`
-and `Type` methods not listed here, and a predicate method answers `int`, 1
+and `Type` methods not listed here, and a predicate method returns `int`, 1
 or 0.
 
 `Code.type` returns the canonical semantic `Type` for supported typed
@@ -2445,14 +2446,14 @@ is rejected.
 `x2c_diagnostic_warn` reports a macro warning at the invocation with `String`
 notes and returns, so expansion continues.
 
-`x2c_enclosing` answers the innermost syntax of one kind around the
+`x2c_enclosing` returns the innermost syntax of one kind around the
 invocation, or `nil` when there is none. `<declarator>` is the initialized
-declarator whose initializer directly holds the invocation, answered as its
+declarator whose initializer directly holds the invocation, returned as its
 one-declarator declaration `(declare BASE (bindings (bind NAME MODIFIERS)))`;
 `BASE` keeps the storage class, and `Code.type` reads its declared
 type. A block item begun inside that initializer, as in a statement
 expression, hides the declarator. `<statement>` is the enclosing block item,
-answered as its origin anchor `(at N (seq))`, which `x2c_diagnostic_fail_at`
+returned as its origin anchor `(at N (seq))`, which `x2c_diagnostic_fail_at`
 reports at. `<function>` is the enclosing function definition with the empty
 body `(seq)`, which `Code.name`, `Code.parameter`, and `Code.body` read.
 `<unit>` is a `String` expression holding the unit's path. Another kind is
@@ -2464,7 +2465,7 @@ code-value carrier do. Placed code that declares a name the result uses
 takes it from `x2c_binding_fresh`. `where` is one of these Lists:
 
 - `(after-statement)` places code after the initialized declarator that
-  `x2c_enclosing` answers, or otherwise after the enclosing block item. A
+  `x2c_enclosing` returns, or otherwise after the enclosing block item. A
   declaration split after the declarator keeps the declarators before it in
   their own declaration, its shared inline type, and initialization order.
   The placing expansion's result must be that declarator's complete
@@ -2569,7 +2570,7 @@ prototype, a native function definition, an initialized file-static value, or
 a protocol adoption.
 Everywhere else it is an ordinary identifier, including as a file-scope name,
 an assignment target, and a struct field. Types need no marker: compile-time
-code can use any type the compiler sees.
+code can use any type visible to the compiler.
 
 A bodyless `meta` prototype declares a native function that the compiler
 itself links, such as `meta double sin(double);`. Compile-time code then
@@ -2707,7 +2708,7 @@ The [AST grammar](../internals/ast-grammar.md) catalogs canonical List forms,
 fields, positions, and stage variants. Internal bound and lowered forms in
 that chapter do not introduce additional source syntax.
 
-Compile-time code sees the canonical parsed, typed `List` AST used by
+Compile-time code operates on the canonical parsed, typed `List` AST used by
 `--dump-ast`, with source `(at ID NODE)` wrappers removed. Tags and semantic
 `Type`s remain `List`s. Binding records are visible so syntax can be preserved
 and compared, but their numeric IDs are opaque and must not be forged. Use
@@ -2866,8 +2867,8 @@ initializer; it is not accepted inside an operator or call argument.
 Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.
 
-`$auto(value)` is an ordinary expression macro. Its expansion asks
-`x2c.enclosing` for the initialized declarator, places a release after that
+`$auto(value)` is an ordinary expression macro. Its expansion calls
+`x2c.enclosing` to get the initialized declarator, places a release after that
 declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer. When
 the declaration finishes, the compiler checks that the result is the
@@ -3717,7 +3718,7 @@ its target unchanged.
 The `try_*` prefix remains for status results whose payload alone cannot
 represent every successful result. Examples include `Map.try_get` for
 presence, `Iter.try_next` for exhaustion, `String.try_long` for parse success,
-and match/search operations for no-match. Those integer results answer whether
+and match/search operations for no-match. Those integer results indicate whether
 a result exists or an operation applies. Failure causes still go through the
 ambient `Error` channel.
 
@@ -4011,8 +4012,8 @@ expression inside an entry, as in `with (count = (prepare(), 0))`.
 
 Entries run from left to right. Each entry evaluates its destination once,
 saves the value there, registers its restoration, and assigns the new value.
-A later entry sees the assignments of earlier entries. Each entry behaves
-like a nested single-entry `with`.
+The assignments of earlier entries take effect before a later entry runs.
+Each entry behaves like a nested single-entry `with`.
 
 Exit restores the destinations in reverse order. Restoration runs on every
 exit from the body: its end, `return`, `break`, `continue`, an outward
@@ -4148,8 +4149,8 @@ int main(void) {
 ```
 
 A file-scope alias follows the source order of
-[macro definitions](#compile-time-macros): a file that includes it sees it
-from the `#include` line onward. That alias belongs to the including file's
+[macro definitions](#compile-time-macros): an alias is visible in an including
+file from the `#include` line onward. That alias belongs to the including file's
 file scope: another alias or a declaration of its name there conflicts, in
 either order. In a
 [module unit](#module-blocks), a member's alias is visible to later members

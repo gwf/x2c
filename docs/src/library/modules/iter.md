@@ -62,12 +62,12 @@ Source: `lib/iter.x`
 
 Reports whether every remaining element satisfies `pred`.
 Vacuously true for an empty iterator, decided before `pred` is consulted.
-Otherwise it stops at the first element the predicate rejects and answers
+Otherwise it stops at the first element the predicate rejects and returns
 0, leaving the rest unconsumed. Elements are passed as values and the
 result uses ordinary `Var` truthiness.
 
-**Raises:** whatever the source, `Func.apply`, or `pred` raises. A null `pred`
-answers 1 for an empty iterator and 0 for any other.
+**Raises:** whatever the source, `Func.apply`, or `pred` raises. For a null
+`pred`, returns 1 for an empty iterator and 0 for any other.
 
 Source: `lib/iter.x`
 
@@ -78,12 +78,12 @@ Source: `lib/iter.x`
 
 Reports whether any remaining element satisfies `pred`.
 Stops at the first element the predicate accepts, so the iterator is left
-positioned after it and the rest is never pulled. An empty iterator
-answers 0. Elements are passed as values and the result uses ordinary `Var`
+positioned after it and the rest is never pulled. Returns 0 for an empty
+iterator. Elements are passed as values and the result uses ordinary `Var`
 truthiness.
 
-**Raises:** whatever the source, `Func.apply`, or `pred` raises. A null
-`pred` answers 0.
+**Raises:** whatever the source, `Func.apply`, or `pred` raises. Returns 0 for
+a null `pred`.
 
 Source: `lib/iter.x`
 

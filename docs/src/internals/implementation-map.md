@@ -151,7 +151,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
   in-process staging: `src/meta-group/meta-group.x`; the project helper:
   `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
-  `etc/meta-helper.x` answers, with the compiler queries that
+  `etc/meta-helper.x` handles its calls, with the compiler queries that
   `tools/gen-meta-queries.sh` generates from `lib/meta.x` into
   `etc/meta-queries.x`
 - Builtin macros and their native prototypes: `etc/compiler-prelude.x`;

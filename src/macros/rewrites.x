@@ -322,7 +322,7 @@ static List _rewrite_candidates(Compiler c, Symbol point, Var kind) {
   return kinds.try_get(kind, stored) ? stored.list() : NULL;
 }
 
-/* What `rule` answers for `source`. The code its meta function places
+/* The result of applying `rule` to `source`. The code its meta function places
    while it runs is that rule's, as its replacement is. */
 static Var _applied(
   Compiler c, RewriteRule rule, List source, Token site) {
@@ -531,7 +531,7 @@ static List _capture_slot(
   return $("x2c.slot", type, shape);
 }
 
-/* What conversion and lowering read of a slot value's content besides its
+/* Content properties used by conversion and lowering besides a slot's
    type: a literal's value, whether a name is a lambda's snapshot, an
    operator with its single operand or a member access with its base, a
    group's content, or else the content's head. Void for content they read

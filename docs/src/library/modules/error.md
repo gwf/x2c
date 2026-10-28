@@ -113,7 +113,8 @@ Source: `lib/error/handlers.x`
 `int x2c_error_catch_site_pending(ErrorCatchSite *site)`
 
 Reports whether one catch site still needs its patterns at registration.
-A bound static site answers 0, so its caller can skip constructing them.
+Returns 0 for a bound static site, so the caller can skip constructing
+them.
 
 Source: `lib/error/handlers.x`
 
@@ -126,7 +127,7 @@ Registers one compiler-generated transferring catch through its site.
 afterward and `site` is the static site of this `try`, whose `patterns`
 are read in source order. A pending site reads `patterns`; a bound static
 site ignores them, so a caller may pass anything once
-`x2c_error_catch_site_pending` answers 0. The first registration of a
+`x2c_error_catch_site_pending` returns 0. The first registration of a
 pending site promotes its patterns, which are literals in compiler output,
 to process lifetime and binds them there when it can. A transient
 registration borrows its patterns, and they and the target frame must
@@ -289,7 +290,7 @@ Policy is per-thread state, so a worker starts with only the shared
 non-returning causes locked to `<abort>`; a capture carries the starting
 thread's dispositions across. `Error.policy_adopt` consumes the capture and
 `Error.policy_release` discards one that no thread adopted. An unavailable
-`Error` runtime captures nothing and answers NULL.
+`Error` runtime captures nothing and returns NULL.
 
 **Raises:** `<alloc-fail>` when the capture cannot be allocated.
 

@@ -213,7 +213,7 @@ MEMBER-TOKENS ::= (C-TOKEN-OR-EXPR*)
 A statement expression retains `(parens (block ...))`; its final expression
 statement supplies its type, otherwise it is void. A cast's first child is a
 `decl` during binding and a semantic Type after normalization. Parentheses do
-not authorize a consumer to discard casts when it wants the original operand.
+not permit a consumer to discard casts when extracting the original operand.
 
 `offsetof` can retain a member designator such as `("field" "." "nested" "["
 EXPR "]")`. `_Alignof` has no dedicated AST head: it uses `(expr ("size_t")
@@ -637,7 +637,7 @@ Owners: [Macro_apply and _group][macro-construction];
 [Compiler.land_quotation, _fill_syntax, _splices, _project_hole,
 _helper_result][macro-templates]. Runtime
 [recognition][macro-recognition] and [pattern projection][macro-patterns]
-understand these structures as well as bound AST names and expression shells.
+handle these structures as well as bound AST names and expression shells.
 See [quotation semantics](../reference/language.md#macro-visible-syntax).
 
 ### Macro definitions

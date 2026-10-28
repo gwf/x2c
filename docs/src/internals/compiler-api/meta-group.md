@@ -15,18 +15,18 @@ A unit's meta group, emitted as C.
 | [`Compiler.bind_meta_group`](#Compiler.bind_meta_group) | Binds the session's group function `name` when it is not bound yet, by staging the group, and reports at `site` a function that cannot run. |
 | [`Compiler.finish_meta_functions`](#Compiler.finish_meta_functions) | Closes compile-time-only calls across later meta definitions. |
 | [`Compiler.group_meta_function`](#Compiler.group_meta_function) | Records a native callable body `fn` in the unit's helper group. |
-| [`Compiler.groups_meta`](#Compiler.groups_meta) | Answers whether a `meta` function or value belongs to the unit's group: a parse meets it outside a macro definition while the project meta build parses the unit or a session stages it. |
+| [`Compiler.groups_meta`](#Compiler.groups_meta) | Reports whether a `meta` function or value belongs to the unit's group: a parse meets it outside a macro definition while the project meta build parses the unit or a session stages it. |
 | [`Compiler.meta_call_missing`](#Compiler.meta_call_missing) | Returns why the group function `name` has no compile-time entry, from its type. |
-| [`Compiler.meta_calls_wait`](#Compiler.meta_calls_wait) | Answers whether a call of a project `meta` function waits for the translation: the project meta build's own parse has no helper yet. |
+| [`Compiler.meta_calls_wait`](#Compiler.meta_calls_wait) | Reports whether a call of a project `meta` function waits for the translation: the project meta build's own parse has no helper yet. |
 | [`Compiler.meta_cc`](#Compiler.meta_cc) | Returns the C compiler and the runtime header directory that build `meta` code, or NULL before `Compiler.use_meta_toolchain`. |
 | [`Compiler.meta_cc_identity`](#Compiler.meta_cc_identity) | Returns the identity of the C compiler at `cc`: its path and content hash. |
 | [`Compiler.meta_cc_run`](#Compiler.meta_cc_run) | Runs `arguments`, a C compiler command building the group C in `directory`, and returns NULL, or else its first error, which names `directory` when a group's C is the cause. |
-| [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Answers whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
+| [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Reports whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
 | [`Compiler.prepare_loaded_functions`](#Compiler.prepare_loaded_functions) | Adds a loaded unit's public functions and object accessors to its targets. |
 | [`Compiler.prepare_loaded_main`](#Compiler.prepare_loaded_main) | Exposes a loaded unit's main through the ordinary helper target table. |
-| [`Compiler.public_native_function`](#Compiler.public_native_function) | Answers whether a definition has public native linkage. |
+| [`Compiler.public_native_function`](#Compiler.public_native_function) | Reports whether a definition has public native linkage. |
 | [`Compiler.refuse_meta_call`](#Compiler.refuse_meta_call) | Reports at `site` that the `meta` function `name` cannot run at compile time, and `why`. |
-| [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, which its type alone decides. |
+| [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, as determined from its type alone. |
 | [`Compiler.stage_meta_in_process`](#Compiler.stage_meta_in_process) | Enables in-process staging of `meta` groups for compiler sessions. |
 | [`Compiler.stage_session_function`](#Compiler.stage_session_function) | Stages one session factory in an isolated native emission. |
 | [`Compiler.use_meta_build_directory`](#Compiler.use_meta_build_directory) | Directs each provider group into `directory`, using `owners` to name their headers by table, or stops that when `directory` is NULL. |
@@ -70,7 +70,7 @@ Source: `src/meta-group/selection.x`
 
 `int Compiler.groups_meta(Compiler c)`
 
-Answers whether a `meta` function or value belongs to the unit's group:
+Reports whether a `meta` function or value belongs to the unit's group:
 a parse meets it outside a macro definition while the project meta build
 parses the unit or a session stages it.
 
@@ -91,7 +91,7 @@ Source: `src/meta-group/selection.x`
 
 `int Compiler.meta_calls_wait(Compiler c)`
 
-Answers whether a call of a project `meta` function waits for the
+Reports whether a call of a project `meta` function waits for the
 translation: the project meta build's own parse has no helper yet. A
 loaded helper's parse calls the ordinary helper of its sources.
 
@@ -133,7 +133,7 @@ Source: `src/meta-group/toolchain.x`
 
 `int Compiler.meta_reaches_compile_time(Compiler c, Var node)`
 
-Answers whether a `meta` body reaches the compiler itself: it names a
+Reports whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
@@ -167,7 +167,7 @@ Source: `src/meta-group/loaded.x`
 
 `int Compiler.public_native_function( Compiler c, List function, String name)`
 
-Answers whether a definition has public native linkage.
+Reports whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
 Source: `src/meta-group/selection.x`
@@ -188,8 +188,8 @@ Source: `src/meta-group/selection.x`
 `void Compiler.refuse_record_meta_call(Compiler c, String name, Token site)`
 
 Reports at `site` that the group function `name` cannot run at compile
-time when its result is a struct or union, which its type alone
-decides.
+time when its result is a struct or union, as determined from its type
+alone.
 
 Source: `src/meta-group/selection.x`
 

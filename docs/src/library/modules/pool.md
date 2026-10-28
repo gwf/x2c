@@ -307,8 +307,8 @@ Source: `lib/pool/interning.x`
 `int Pool.is_permanent(Var value)`
 
 Reports whether the process root owns `value` as its canonical identity.
-Nothing is promoted, and no open bracket can reclaim a value that answers
-one.
+Nothing is promoted, and no open bracket can reclaim a value for which this
+returns one.
 
 Source: `lib/pool/threads.x`
 
@@ -350,7 +350,7 @@ chain owns it or a promotion fails. A null `inner` reports safe, since no
 pool can then reclaim the value. Promotion is not transactional across
 levels: an earlier level remains promoted if a later promotion transfers.
 A thread that loses a concurrent promotion of an equal value still gets
-one, though `Pool.is_permanent` answers zero for its surviving copy.
+one, though `Pool.is_permanent` returns zero for its surviving copy.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 

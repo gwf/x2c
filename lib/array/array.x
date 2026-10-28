@@ -340,7 +340,7 @@ meta native void Array.heap_push(Array heap, Var val) {
 /** Removes and returns the smallest element of `heap`, or `void` when it is
     empty. The remaining elements are re-heaped in O(log n), so repeated calls
     yield ascending order and draining a heap is a sort. An `Array` that never
-    satisfied the heap invariant gives a meaningless answer instead of an
+    satisfied the heap invariant produces a meaningless result instead of an
     error. Call `Array.heapify` first if it was not built with
     `Array.heap_push`.
     Raises: any cause reported by element comparison while restoring the heap.

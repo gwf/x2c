@@ -48,9 +48,9 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   $list Var.$lower(Var);
 
   /* `car` and `last` of nil are void, whose bits are all ones, so the guard
-     decides the answer instead of avoiding a null read. Reading a nil end as
-     $zero follows the runtime's silent-reader convention: an empty list
-     terminates a loop and is not a caller error. */
+   determines the result instead of avoiding a null read. Reading a nil end as
+   $zero follows the runtime's silent-reader convention: an empty list
+   terminates a loop and is not a caller error. */
   /** Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
       A nonempty `xs` must retain the `$list` element-tag invariant.
   */

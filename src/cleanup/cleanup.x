@@ -6,7 +6,7 @@
     a `try` body or catch arm, or the rest of a block after a static local
     whose initializer runs at runtime. Normalization turns each `defer`
     statement into a region. When a function is complete, each `try` takes
-    the landing form its component answers, and one walk places each
+    the landing form its component returns, and one walk places each
     region's exits on every transfer that leaves it, rejects a jump into a
     region, and keeps the locals a `sigsetjmp` landing reads either
     `volatile` or escaped.

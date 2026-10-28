@@ -45,7 +45,7 @@ with mixed-precision `gemm`.
 
 `protocol Blis(T)` maps `add`, `sub`, and `neg` to `+`, `-`,
 and unary `-`, and the protocol crosses the package boundary, so a consumer
-that only says `import "blis"` gets the punctuation. Addition and subtraction
+that only uses `import "blis"` can use these operators. Addition and subtraction
 are elementwise over equal shapes and storage precision; `matmul` is BLIS matrix
 multiplication when the left column count equals the right row count. There
 is no `*`: BLIS has no elementwise matrix product, and `*` keeps its

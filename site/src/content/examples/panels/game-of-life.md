@@ -90,7 +90,7 @@ for the next. A cell survives with two or three living neighbors. An empty
 cell becomes alive with exactly three. Everything else dies or stays empty.
 
 Each update reads only from `cells` and writes only to `next`, so every cell
-sees the same generation. The main loop swaps the two arrays after an
+update uses the same generation. The main loop swaps the two arrays after an
 update, reusing their storage for the following generation.
 
 The modulo expressions wrap both coordinates. A cell on the left edge has

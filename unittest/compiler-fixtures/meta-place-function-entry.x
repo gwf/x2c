@@ -3,7 +3,7 @@
 
 /* `x2c_place(%(function-entry), code)` puts code at the entry of the
    enclosing function, after its parameters bind and before its first
-   statement, in placement order. `x2c_enclosing(<function>)` answers that
+   statement, in placement order. `x2c_enclosing(<function>)` returns that
    function from any depth of its body. */
 
 meta static List note_entry(List value, List label) {

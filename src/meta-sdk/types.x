@@ -36,19 +36,19 @@ int Type.is_text(Type type) {
     type.canonicalize().is_char_pointer_like();
 }
 
-/** Answers `Type.aggregate`, declared in `lib/meta.x`. */
+/** Implements `Type.aggregate`, declared in `lib/meta.x`. */
 Type Type.aggregate(Type type) {
   _require_expansion("Type.aggregate");
   return active.expander.sym.aggregate_of(type);
 }
 
-/** Answers `Type.marked_fields`, declared in `lib/meta.x`. */
+/** Implements `Type.marked_fields`, declared in `lib/meta.x`. */
 List Type.marked_fields(Type aggregate, Symbol mark) {
   _require_expansion("Type.marked_fields");
   return active.expander.sym.marked_fields(aggregate, mark);
 }
 
-/** Answers `Type.resolve_member`, declared in `lib/meta.x`. */
+/** Implements `Type.resolve_member`, declared in `lib/meta.x`. */
 List Type.resolve_member(Type type, String name, int call) {
   _require_expansion("Type.resolve_member");
   return active.expander.resolve_postfix_member(type, $(name), <.>, call);
@@ -65,7 +65,7 @@ Code Type.protocol_member(Type type, String name) {
   return $!($signature){ $binding };
 }
 
-/** Answers `Type.getter`, declared in `lib/meta.x`, with the getter that
+/** Implements `Type.getter`, declared in `lib/meta.x`, with the getter that
     bracket admission selected.
 */
 Code Type.getter(Type type) {
@@ -78,7 +78,7 @@ Code Type.getter(Type type) {
   return $!($signature){ $binding };
 }
 
-/** Answers `Type.update_helper`, declared in `lib/meta.x`. */
+/** Implements `Type.update_helper`, declared in `lib/meta.x`. */
 String Type.update_helper(Type type) {
   _require_expansion("Type.update_helper");
   Type scalar = active.expander.sym.resolve_numeric_type(type);
@@ -87,33 +87,33 @@ String Type.update_helper(Type type) {
 
 // type queries
 
-/** Answers `Type.element`, declared in `lib/meta.x`. */
+/** Implements `Type.element`, declared in `lib/meta.x`. */
 Type Type.element(Type t) => t.canonicalize().dereference().canonicalize();
 
-/** Answers `Type.parameters`, declared in `lib/meta.x`. */
+/** Implements `Type.parameters`, declared in `lib/meta.x`. */
 List Type.parameters(Type type) {
   type = type.canonicalize();
   while (type.is_pointer() || type.is_array()) type = type.dereference();
   return type.match_replace(%((func ?params) *), <?params>);
 }
 
-/** Answers `Type.return_type`, declared in `lib/meta.x`. */
+/** Implements `Type.return_type`, declared in `lib/meta.x`. */
 Type Type.return_type(Type type) =>
   type.canonicalize().apply().canonicalize();
 
-/** Answers `Type.reverse_name`, declared in `lib/meta.x`. */
+/** Implements `Type.reverse_name`, declared in `lib/meta.x`. */
 String Type.reverse_name(String base, String participant) {
   _require_expansion("Type.reverse_name");
   return active.expander.reverse_converter_spelling(base, "", participant);
 }
 
-/** Answers `Type.layout`, declared in `lib/meta.x`. */
+/** Implements `Type.layout`, declared in `lib/meta.x`. */
 List Type.layout(Type type) {
   _require_expansion("Type.layout");
   return active.expander.sym.field_order(type.resolve()).cdr();
 }
 
-/** Answers `Type.is_value`, declared in `lib/meta.x`. */
+/** Implements `Type.is_value`, declared in `lib/meta.x`. */
 int Type.is_value(Type type) {
   _require_expansion("Type.is_value");
   type = type.canonicalize();
@@ -123,7 +123,7 @@ int Type.is_value(Type type) {
   return active.expander.sym.resolve_key(type).is_number();
 }
 
-/** Answers `Type.tag_name`, declared in `lib/meta.x`. */
+/** Implements `Type.tag_name`, declared in `lib/meta.x`. */
 Symbol Type.tag_name(String name) {
   _require_expansion("Type.tag_name");
   String file = active.expander.source_path(active.expander.filename);
@@ -139,7 +139,7 @@ Symbol Type.tag_name(String name) {
   return Symbol.new(encoded);
 }
 
-/** Answers `Type.members`, declared in `lib/meta.x`. */
+/** Implements `Type.members`, declared in `lib/meta.x`. */
 List Type.members(Type type) {
   Type resolved = type.resolve();
   if (resolved.car() != <enum>)
@@ -191,13 +191,13 @@ List MetaContext.type_description(Var value) {
            (methods $(methods.list_free())));
 }
 
-/** Answers `Type.resolve`, declared in `lib/meta.x`. */
+/** Implements `Type.resolve`, declared in `lib/meta.x`. */
 Type Type.resolve(Type type) {
   _require_expansion("Type.resolve");
   return active.expander.sym.resolve_key(type).type_from_ast();
 }
 
-/** Answers `Type.fields`, declared in `lib/meta.x`. */
+/** Implements `Type.fields`, declared in `lib/meta.x`. */
 List Type.fields(Type t) {
   _require_expansion("Type.fields");
   Type resolved = active.expander.sym.resolve_key(t.canonicalize());

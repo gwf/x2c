@@ -306,7 +306,7 @@ int Var.wide_equal(Var a, Var b) {
     operand is less than the other, so distinct NaN representations still
     order deterministically.
 
-    0 means equal, and it is also the answer for mismatched tags and for an
+    0 means equal, and it is also the result for mismatched tags and for an
     argument that is not a wide box. Check the tags first, or use
     `Var.compare`, the runtime's full ordering.
 */

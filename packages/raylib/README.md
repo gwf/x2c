@@ -36,7 +36,7 @@ Build the package once with `make build`, then compile a consumer with
 `--package-dir <packages>`, `--c-include-dir <prefix>/include`, and
 `-I <prefix>/include`; the driver adds the package's `builds` and `src`
 directories and links `builds/libraylib.a`. The `-I` is what lets x2c's own
-collection read `raylib.h` and know that `Vector2` is a type.
+collection read `raylib.h` and identify `Vector2` as a type.
 
 ## Images
 
@@ -177,7 +177,7 @@ measured width, draws a polygon badge, and reports what a missing tile does.
 
 `src/raylib-6.0.h` includes the real upstream header and rejects a different
 release. Importing the package is enough to reach it: `tests/test-raw-api.x`
-says only `import "raylib"` and then calls `ImageDrawTriangleEx`,
+uses only `import "raylib"` and then calls `ImageDrawTriangleEx`,
 `LoadImagePalette`, and `GetPixelDataSize` directly. Use it for interpolated
 triangles, palettes, raw and memory image loading, image-to-code export,
 codepoint and text utilities, and anything else the admitted profile

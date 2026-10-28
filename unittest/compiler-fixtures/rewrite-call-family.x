@@ -2,7 +2,7 @@
 #include "rewrite.x"
 
 /* A project's own printf-family function, which the shipped component does
-   not know. Its rule displays each Var value through `Var.str` whatever
+   not recognize. Its rule displays each Var value through `Var.str` whatever
    conversion reads it, so a `%s` formats any value. */
 static int log_printf(const char *format, ...) {
   va_list values;

@@ -98,7 +98,7 @@ typedef struct Sym *Sym;
 */
 typedef struct SlotWatch *SlotWatch;
 
-/** One syntax the parser is inside, which `x2c_enclosing` answers: a
+/** An enclosing syntax construct returned by `x2c_enclosing`: a
     function body with its declaration in `node`, and `lowering` set while
     the transform lowers it, a block item with the token or origin it
     starts at, or an initialized declarator with its declaration base in
@@ -172,8 +172,8 @@ typedef struct Compiler {
      which the following item must not read again. */
   Token directives_taken;
   Map protocols, conforms, protocol_helpers;
-  /* Answers derived from the occurrence and adoption tables. Publishing a
-     protocol or adoption drops the whole map because those answers change. */
+  /* Results derived from the occurrence and adoption tables. Publishing a
+     protocol or adoption drops the whole map because those results change. */
   Map proto_cache;
   // Visible protocol adoptions indexed by base and participant.
   Map adoptions;

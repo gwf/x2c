@@ -44,7 +44,7 @@ typedef struct List {
 List List.cons_in(Pool pool, Var head, List tail) {
   if (!pool || head is void) return NULL;
   /* Compiler construction is canonical-hit-heavy. One stack-query probe of
-     the whole chain answers a hit without allocating and leaves the miss
+     the whole chain finds a match without allocating and leaves the miss
      path the innermost insert alone. */
   struct List query = { head, tail };
   Var existing = pool.lookup((List) &query);

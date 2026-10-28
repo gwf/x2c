@@ -1068,7 +1068,7 @@ static Code _lambda_value(
 }
 
 /** Lifts the capturing lambda `node` to a static function of its
-    parameters and captures, and answers a `Func` of a record of the
+    parameters and captures, and returns a `Func` of a record of the
     captured values and addresses.
 */
 Code lambda_closure(Code node) {

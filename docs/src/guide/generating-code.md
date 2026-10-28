@@ -422,7 +422,9 @@ function to evaluate it in; it computes with a `$meta(...)` call, which runs
 where it expands. In a named template's code, `$(a, b)` is an evaluated
 List in the generated code.
 
-### Code that knows its type
+<a id="code-that-knows-its-type"></a>
+
+### Code with an explicit type
 
 A quotation is bound where it lands, so until then its code has no type.
 Sometimes the code a function builds must state its type at once: another
@@ -550,7 +552,9 @@ so the body reads it through the same `x2c_ident(...)` local. There is no
 `$!Decl{ ... }`, because `$!{ ... }` and `$!Unit{ ... }` already build
 declarations.
 
-## What the compiler answers
+<a id="what-the-compiler-answers"></a>
+
+## Compiler queries
 
 `lib/meta.x` declares the compiler operations. An operation on a value is
 a method of its type: `Code` for captured code and `Type` for a semantic
@@ -562,8 +566,8 @@ with quotations, so the module declares no constructors.
 `x2c_diagnostic_fail` and `x2c_diagnostic_warn` work in every `meta`
 function. The queries that read the compiler's symbol table, such as
 `Code.type`, `Type.fields` and `Type.resolve`, also work in every `meta`
-function: the compiler answers a project function's query while the call
-waits, in the state of the call's site. `TypeInfo` and `Source`
+function: the compiler evaluates a project function's query while the call
+waits, using the state at the call's site. `TypeInfo` and `Source`
 parameters still deliver a description in one argument. The operations
 are grouped here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
@@ -601,20 +605,21 @@ int main(void) {
 twice 42
 ```
 
-### Asking about types and fields
+<a id="asking-about-types-and-fields"></a>
+
+### Querying types and fields
 
 A `meta` function receives a type as a
-`TypeInfo` parameter, described above, or asks the compiler with the
-queries below. `Code.type` answers the canonical `Type`
-of an expression or binding. `Type.fields` answers the named fields
+`TypeInfo` parameter, described above, or uses the compiler
+queries below. `Code.type` returns the canonical `Type`
+of an expression or binding. `Type.fields` returns the named fields
 of a struct or union `Type`, each as a metadata row whose first element is
 the field name. `Type.layout`, `Type.resolve` and
-`Type.is_value` answer the remaining generated-code questions.
+`Type.is_value` provide further type information for generated code.
 `Type.parts` reads only the `Type` it receives.
-`Type.resolve_member` answers which field or method a member access
-selects. These
-answers live in the compiler's symbol table, so a macro body cannot derive
-them from the code it captured.
+`Type.resolve_member` identifies which field or method a member access
+selects. This information is stored in the compiler's symbol table, so a
+macro body cannot derive it from the code it captured.
 
 ### Source text and location
 
@@ -678,7 +683,7 @@ instead of at the invocation.
 
 ### Placing code beyond the result
 
-`x2c_enclosing` answers the syntax
+`x2c_enclosing` returns the syntax
 around the invocation: the initialized `<declarator>`, the block item
 (`<statement>`), the `<function>`, or the `<unit>`. `x2c_place` adds code
 the result cannot hold: `%(after-statement)` after that declarator or block

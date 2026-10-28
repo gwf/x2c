@@ -550,7 +550,7 @@ module int _declares_adoption(List parts) {
 }
 
 /* A file collected cold records the conformances it declares as its own
-   translation does, so a unit that includes it reuses the same answer
+   translation does, so a unit that includes it reuses the same conformances
    whether or not the file's interface was current. The file's own unit
    records them when it translates. */
 module void _record_cold_conformances(

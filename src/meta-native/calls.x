@@ -151,7 +151,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
   $fail.meta_native_call_target(c, site);
 }
 
-/* Each argument evaluates as the type its parameter declares wants.
+/* Each argument is evaluated with its parameter's declared type.
    callee is the semantic Type slot of a canonical meta-call expression. */
 static Array _meta_values(
   Compiler c, Type callee, List arguments, Token site) {

@@ -26,7 +26,7 @@ Shipped `meta` code compiled into the compiler.
 | [`dynamic_compound`](#dynamic_compound) | Updates a `Var` or numeric lvalue with a `Var` or numeric operand through the update helper of its storage. |
 | [`dynamic_unary`](#dynamic_unary) | Rejects a unary numeric operator on a `Var`. |
 | [`lambda_cells`](#lambda_cells) | Moves each local and parameter of the function `node` that a lambda in its body shares by reference into a Scope cell, so the binding outlives the call: a parameter is copied into its cell at entry, a local is declared as its cell, and every read goes through the cell. |
-| [`lambda_closure`](#lambda_closure) | Lifts the capturing lambda `node` to a static function of its parameters and captures, and answers a `Func` of a record of the captured values and addresses. |
+| [`lambda_closure`](#lambda_closure) | Lifts the capturing lambda `node` to a static function of its parameters and captures, and returns a `Func` of a record of the captured values and addresses. |
 | [`lambda_lift`](#lambda_lift) | Lifts the noncapturing lambda `node` to a static function, whose name is its value. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns a fresh Map of linked copies and runtime builders by name. |
@@ -176,7 +176,7 @@ Source: `src/linked-meta.x`
 `Code lambda_closure(Code node)`
 
 Lifts the capturing lambda `node` to a static function of its
-parameters and captures, and answers a `Func` of a record of the
+parameters and captures, and returns a `Func` of a record of the
 captured values and addresses.
 
 Source: `src/linked-meta.x`

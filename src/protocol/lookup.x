@@ -53,7 +53,7 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
 
 /** Reports whether conformance supersedes an ambient direct member: 0 when
     it does not, 1 when the participant's own adoption does, and 2 when an
-    ancestor's adoption does. The answer is cached for the canonical
+    ancestor's adoption does. The result is cached for the canonical
     participant and uses the first visible adopted ancestor that declares
     the member.
 */

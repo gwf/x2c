@@ -1,9 +1,9 @@
 /*  source-files.x -- source files and dependencies */
 
-/* The real paths this process has resolved, by spelling. The compiler
-   never changes its working directory, and translation workers are forked
-   processes, so a spelling keeps its answer. A spelling that does not
-   resolve is asked again, because its file may appear later. */
+/* The real paths this process has resolved, by spelling. The compiler never
+   changes its working directory, and translation workers are forked processes,
+   so successful resolutions are cached by spelling. An unresolved spelling is
+   retried, because its file may appear later. */
 static Map real_paths = NULL, static Scope real_paths_scope = NULL;
 
 // source paths

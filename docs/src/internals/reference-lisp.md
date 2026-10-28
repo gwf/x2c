@@ -40,7 +40,7 @@ The small `$fail` statement macro constructs the ordinary `raise` syntax from
 a cause, an operation, and the remaining field/value pairs. Each call keeps
 its diagnostic details visible and preserves their value types and order.
 
-`Interp.apply` receives values. Only `eval` decides which arguments to
+`Interp.apply` receives values. Only `eval` selects which arguments to
 evaluate: ordinary calls evaluate left to right, while a macro receives its
 raw argument forms. Native argument marshalling lives with the native
 operations, so the evaluator contains only evaluation rules.

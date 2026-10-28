@@ -34,7 +34,7 @@ double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
 ~}
 ```
 
-Nothing in the compiler knows about derivatives. `$ad.reverse()` is an
+The compiler has no derivative-specific implementation. `$ad.reverse()` is an
 ordinary decorator written with x2c `meta` functions. It reads the typed AST
 of `energy`, keeps the function, and emits `energy_grad` beside
 it: the same computation recorded on a tape, then replayed backwards to

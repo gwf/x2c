@@ -36,7 +36,7 @@ Meta functions and the native code they call.
 | [`Compiler.load_native_module`](#Compiler.load_native_module) | Loads the native module at `path` once per process and returns its absolute path. |
 | [`Compiler.matches_macro`](#Compiler.matches_macro) | Tests a registered macro with the candidate's global and source bindings. |
 | [`Compiler.meta_binding`](#Compiler.meta_binding) | Writes the callable compile-time code reaches as `name` to `out`: the unit's binding, or else a built-in algorithm or one of the compiler's own operations. |
-| [`Compiler.native_meta_accepts`](#Compiler.native_meta_accepts) | Answers whether the native target `function` matches the declared `signature`. |
+| [`Compiler.native_meta_accepts`](#Compiler.native_meta_accepts) | Reports whether the native target `function` matches the declared `signature`. |
 | [`Compiler.native_meta_module`](#Compiler.native_meta_module) | Returns the selected file-backed native module that supplies `name`, with its native `type`, or NULL for a linked or absent target. |
 | [`Compiler.native_meta_targets`](#Compiler.native_meta_targets) | Returns the declared native targets advertised by `meta` interface rows, in the row form `lib/lisp-targets/lisp-targets.x` uses for its inventory, or only those declared in the files `paths` names when it is not empty. |
 | [`Compiler.native_module_targets`](#Compiler.native_module_targets) | Returns the name-to-`Func` Map of the loaded native module at absolute `path`. |
@@ -186,7 +186,7 @@ Source: `src/meta-native/modules.x`
 Installs the stub of the bodied `meta` definition `declaration` whose
 body collection skips, so a file-scope constant after it can call it in
 the project's helper. The full parse installs it again. The
-compiler's linked copy answers while its source hashes agree; otherwise
+compiler's linked copy is used while its source hashes agree; otherwise
 the definition replaces an earlier binding with a helper stub. A group
 that stages in process waits for the full parse.
 
@@ -325,7 +325,7 @@ Source: `src/meta-native/bindings.x`
 
 `int Compiler.native_meta_accepts(Compiler c, Var function, List signature)`
 
-Answers whether the native target `function` matches the declared
+Reports whether the native target `function` matches the declared
 `signature`. A declared `Func` parameter matches a target's `Var`
 parameter, which takes the compile-time callable and adapts it. Aliases
 of one native type match each other.

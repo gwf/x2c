@@ -58,7 +58,7 @@ Var Code.value(Code code) {
   return value;
 }
 
-/** Answers `Code.call_in_order`, declared in `lib/meta.x`. The call binds
+/** Implements `Code.call_in_order`, declared in `lib/meta.x`. The call binds
     its temporaries here, so the result is a carrier that binds no
     further.
 */
@@ -68,53 +68,53 @@ Code Code.call_in_order(Code member, List arguments, Type type) {
   return Code.lowered(%(expr $type $call), NULL);
 }
 
-/** Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
+/** Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
 Code Code.lowered(Code c, List effects) => %(code-value "lowered" $c $effects);
 
-/** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
+/** Implements `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
 Code Code.bound(Code c, List effects) => %(code-value "bound" $c $effects);
 
-/** Answers `Code.func_parameters`, declared in `lib/meta.x`. */
+/** Implements `Code.func_parameters`, declared in `lib/meta.x`. */
 List Code.func_parameters(Code parameters, Code fn, Code argv) {
   _require_expansion("Code.func_parameters");
   return active.expander.func_parameters(parameters, fn, argv);
 }
 
-/** Answers `Code.exits`, declared in `lib/meta.x`. */
+/** Implements `Code.exits`, declared in `lib/meta.x`. */
 int Code.exits(Code statement) {
   _require_expansion("Code.exits");
   return Ast.reference_guard_exits(statement);
 }
 
-/** Answers `Code.convert`, declared in `lib/meta.x`. */
+/** Implements `Code.convert`, declared in `lib/meta.x`. */
 Code Code.convert(Code value, Type target) {
   _require_expansion("Code.convert");
   return active.expander.convert_expression(value, target);
 }
 
-/** Answers `Code.format`, declared in `lib/meta.x`. */
+/** Implements `Code.format`, declared in `lib/meta.x`. */
 String Code.format(Code value) {
   _require_expansion("Code.format");
   return active.expander.printf_static_format(value);
 }
 
-/** Answers `Code.is_static_pattern`, declared in `lib/meta.x`. */
+/** Implements `Code.is_static_pattern`, declared in `lib/meta.x`. */
 int Code.is_static_pattern(Code pattern) {
   _require_expansion("Code.is_static_pattern");
   return active.expander.match_pattern_is_static(pattern);
 }
 
-/** Answers `Code.pattern_value`, declared in `lib/meta.x`. */
+/** Implements `Code.pattern_value`, declared in `lib/meta.x`. */
 Var Code.pattern_value(Code pattern) {
   _require_expansion("Code.pattern_value");
   return active.expander.match_pattern_value(pattern);
 }
 
-/** Answers `Code.promoted`, declared in `lib/meta.x`. */
+/** Implements `Code.promoted`, declared in `lib/meta.x`. */
 Code Code.promoted(Code value) {
   _require_expansion("Code.promoted");
   return active.expander.promote_string_literal(value);
@@ -167,7 +167,7 @@ List MetaContext.function_reference(String name) {
 
 // names and functions
 
-/** Answers `x2c_ident`, declared in `lib/meta.x`. */
+/** Implements `x2c_ident`, declared in `lib/meta.x`. */
 List x2c_ident(String spelling) {
   _require_expansion("x2c_ident");
   if (!spelling.is_identifier())
@@ -175,7 +175,7 @@ List x2c_ident(String spelling) {
   return $("x2c.ident", spelling);
 }
 
-/** Answers `x2c_binding_fresh`, declared in `lib/meta.x`. */
+/** Implements `x2c_binding_fresh`, declared in `lib/meta.x`. */
 List x2c_binding_fresh(String role) {
   _require_expansion("x2c_binding_fresh");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
@@ -183,7 +183,7 @@ List x2c_binding_fresh(String role) {
   return c.sym.introduce(c.fresh_name(role));
 }
 
-/** Answers `x2c_binding_for`, declared in `lib/meta.x`. */
+/** Implements `x2c_binding_for`, declared in `lib/meta.x`. */
 List x2c_binding_for(Var key, String role) {
   _require_expansion("x2c_binding_for");
   if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
@@ -203,13 +203,13 @@ Var MetaContext.fresh_binding(String stem) {
   return active.expander.sym.introduce(spelling);
 }
 
-/** Answers `Code.body`, declared in `lib/meta.x`. */
+/** Implements `Code.body`, declared in `lib/meta.x`. */
 List Code.body(Code function) {
   if (function ~= %(function ? ? (block *body))) return body;
   return %();
 }
 
-/** Answers `Code.arguments`, declared in `lib/meta.x`. */
+/** Implements `Code.arguments`, declared in `lib/meta.x`. */
 List Code.arguments(Code parameters) {
   if (parameters ~= %(params *items)) parameters = items;
   if (parameters ~= %((param (void) (bind () ?)))) return %();
@@ -220,7 +220,7 @@ List Code.arguments(Code parameters) {
   return arguments.list_free();
 }
 
-/** Answers `Code.parameter`, declared in `lib/meta.x`. */
+/** Implements `Code.parameter`, declared in `lib/meta.x`. */
 Code Code.parameter(Code function, String wanted) {
   List parameters = function;
   if (function ~= %(function ? (bind ? ((fnmod (params *bound)) *)) ?))
@@ -235,7 +235,7 @@ Code Code.parameter(Code function, String wanted) {
   $fail.meta_sdk_parameter_missing(function, wanted);
 }
 
-/** Answers `Code.name`, declared in `lib/meta.x`. */
+/** Implements `Code.name`, declared in `lib/meta.x`. */
 String Code.name(Code function) {
   List identity = function;
   /* The List destination maps other value tags to nil. */
@@ -246,7 +246,7 @@ String Code.name(Code function) {
 
 
 
-/** Answers `Code.binding_spelling`, declared in `lib/meta.x`. */
+/** Implements `Code.binding_spelling`, declared in `lib/meta.x`. */
 String Code.binding_spelling(Var syntax) {
   _require_expansion("Code.binding_spelling");
   if (syntax is <string>) {
@@ -280,7 +280,7 @@ List Code.native_signature(List syntax) {
 
 
 
-/** Answers the compiler-backed captured-code type query. */
+/** Implements the compiler-backed captured-code type query. */
 Type Code.type(Code value) {
   _require_expansion("Code.type");
   match (value) {
@@ -308,7 +308,7 @@ Type Code.type(Code value) {
 
 // ancestry and placement
 
-/** Answers `x2c_enclosing`, declared in `lib/meta.x`. */
+/** Implements `x2c_enclosing`, declared in `lib/meta.x`. */
 Code x2c_enclosing(Symbol what) {
   _require_expansion("x2c_enclosing");
   if (!(what in %<<declarator statement function unit>>))
@@ -316,7 +316,7 @@ Code x2c_enclosing(Symbol what) {
   return active.expander.enclosing(what);
 }
 
-/** Answers `x2c_place`, declared in `lib/meta.x`. */
+/** Implements `x2c_place`, declared in `lib/meta.x`. */
 void x2c_place(List where, Code code) {
   _require_expansion("x2c_place");
   active.expander.place(where, code);

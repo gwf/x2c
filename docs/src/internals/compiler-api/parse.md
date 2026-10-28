@@ -27,7 +27,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.definition_doc`](#Compiler.definition_doc) | Returns the body of the doc comment that documents the definition starting at `start`, or NULL. |
 | [`Compiler.enclosing`](#Compiler.enclosing) | Returns the innermost `what` around the parser, or around the function body the transform lowers, as captured code, or NULL when there is none: the declarator whose initializer is being parsed directly in the current block item, as its one-declarator declaration; the block item, or the one the transform lowers, as its origin anchor; the function, as a definition whose body is still the empty `(seq)`; or the unit, as a `String` expression of its path. |
-| [`Compiler.enter`](#Compiler.enter) | Enters `row` as the innermost syntax `Compiler.enclosing` answers. |
+| [`Compiler.enter`](#Compiler.enter) | Enters `row` as the innermost syntax `Compiler.enclosing` returns. |
 | [`Compiler.enter_function`](#Compiler.enter_function) | Enters the function definition `declaration`, whose body the transform lowers next, so a rule lowering that body places code at its entry. |
 | [`Compiler.exit_function`](#Compiler.exit_function) | Leaves the function row at `depth` that `Compiler.enter_function` began. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
@@ -252,7 +252,7 @@ Source: `src/parse/placement.x`
 
 `void Compiler.enter(Compiler c, Ancestor row)`
 
-Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
+Enters `row` as the innermost syntax `Compiler.enclosing` returns. Its
 owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
 block item.
 

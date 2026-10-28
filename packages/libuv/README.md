@@ -56,7 +56,7 @@ queued stdin writes; each write owns its bytes until libuv completes it, and
 when their stream was not configured as `<pipe>`.
 
 A child that outlives its deadline is killed with `SIGKILL`.
-`UvProcess.timed_out` reports that afterwards, and tells it apart from the
+`UvProcess.timed_out` reports that afterwards, and distinguishes it from the
 same `SIGKILL` arriving for another reason.
 
 ## Loop callbacks

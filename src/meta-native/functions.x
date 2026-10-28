@@ -33,7 +33,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
 /** Installs the stub of the bodied `meta` definition `declaration` whose
     body collection skips, so a file-scope constant after it can call it in
     the project's helper. The full parse installs it again. The
-    compiler's linked copy answers while its source hashes agree; otherwise
+    compiler's linked copy is used while its source hashes agree; otherwise
     the definition replaces an earlier binding with a helper stub. A group
     that stages in process waits for the full parse.
 */

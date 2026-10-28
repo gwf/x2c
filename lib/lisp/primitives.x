@@ -220,7 +220,7 @@ Var lisp_write_file(String path, String text) {
 /* primitives
 
    The native operations Lisp code reaches through `bind`. A predicate
-   answers `<true>` or nil. */
+   returns `<true>` or nil. */
 
 static Var _bool(int x) { if (x) return <true>; return %(); }
 

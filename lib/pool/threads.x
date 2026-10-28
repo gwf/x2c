@@ -128,8 +128,8 @@ void Pool.initialize(void) {
 }
 
 /** Reports whether the process root owns `value` as its canonical identity.
-    Nothing is promoted, and no open bracket can reclaim a value that answers
-    one.
+    Nothing is promoted, and no open bracket can reclaim a value for which this
+    returns one.
 */
 int Pool.is_permanent(Var value) => value_root && value_root.owns(value);
 

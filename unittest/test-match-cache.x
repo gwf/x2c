@@ -383,7 +383,7 @@ static void cache_product_pipeline_matches_oracle(void) {
    built inside the bracket is owned by the nested pool, whose cells the next
    round reuses at the same address. The cache may key such a pattern while
    its level is open; closing the level retires every entry, so no round can
-   answer with the plan another round left at that address. */
+   use the plan another round left at that address. */
 static void cache_retires_a_nested_pool_pattern_with_its_level(void) {
   MatchCache cache = MatchCache.new(16);
   MatchLease lease;
@@ -394,7 +394,7 @@ static void cache_retires_a_nested_pool_pattern_with_its_level(void) {
     Var counter = i;
     Var pattern = %(round $counter ?value);
     EXPECT_TRUE(_acquire(cache, pattern, lease) == <prepared>);
-    // no round may answer from the entry the previous round left behind
+    // no round may use the entry the previous round left behind
     if (lease.generation && lease.generation == previous) reused++;
     previous = lease.generation;
     MatchLease.release(lease);
@@ -428,7 +428,7 @@ static void default_cache_answers_inside_a_value_pool_bracket(void) {
 
 
 /* A pattern held in a variable is not a source literal, so the compiler
-   leaves the call on the per-call route and the default cache answers it. */
+   leaves the call on the per-call route and the default cache handles it. */
 static void default_cache_recreates_without_new_shutdown_ownership(void) {
   Var pattern = %(cache ?value ok);
   for (int i = 0; i < 4; i++) {

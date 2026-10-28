@@ -187,7 +187,7 @@ is its resolved C name. `visibility` is the storage tier, described under
 
 - `static` is private to its file: a static in a single-file unit, or a
   static whose emitted name begins with its file's prefix in a module unit.
-- `module` is a static that every file of a module unit sees. It emits with
+- `module` is a static visible to every file of a module unit. It emits with
   no file prefix.
 - `public` is a nonstatic definition, which other units can link to.
 
@@ -469,7 +469,7 @@ identifies operations whose removal may change ownership.
 Pooled operations may reuse canonical values; the report does not
 prove fresh cells or the actual owner of a particular returned value.
 
-`flows` asks where the value returned by one exact function reaches an
+`flows` identifies where the value returned by one exact function reaches an
 argument of another exact function. It follows direct consumption, local
 declarations and assignments, returns, uniquely resolved project helpers,
 and the narrow value-preserving wrappers shown in the result. Every proved

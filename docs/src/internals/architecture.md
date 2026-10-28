@@ -578,7 +578,7 @@ module block, so its files share no private scope.
   source and constructed lambdas;
 - `src/macros/macros.x` -- compile-time macro definitions, imports, hygiene,
   meta call slots, and expansion;
-- `src/meta-sdk/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
+- `src/meta-sdk/meta-sdk.x` -- the compiler's implementations of `lib/meta.x` operations
   and the context of the running compile-time call;
 - `src/meta-native/meta-native.x` -- meta functions, explicit meta calls, native meta
   bindings and their lifetimes, and native modules;
@@ -733,8 +733,8 @@ earlier.
 The comparison is byte-exact. `tools/check-generated-stages.sh`, behind the
 `make stage-diff-0` through `make stage-diff-3` targets, compares the generated
 `.c`/`.h` file sets of two neighbouring stages and then compares every file
-byte for byte. `stage-diff-0` asks whether the bootstrap compiler re-emits the
-C it was built from; the rest ask whether each stage emits what the stage
+byte for byte. `stage-diff-0` checks whether the bootstrap compiler re-emits the
+C it was built from; the rest check whether each stage emits what the stage
 before it emitted. Once two adjacent stages agree, the chain has reached a
 fixed point.
 
@@ -865,7 +865,7 @@ them once each, left to right, moving them ahead of the join when they move.
 `src/components/destructuring.x` registers destructuring declarations
 on the statement family keyed by the `dstrdecl` head, an assignment statement
 keyed by `stmnt`, and an assignment expression on the literal family keyed by
-`dstrasgn`. Its translators answer bound carriers: a `List` local read from the
+`dstrasgn`. Its translators return bound carriers: a `List` local read from the
 source with `Code.convert`, and each target given its element through the
 conversions lowering applies to an assignment or initialization. The expression
 form keeps the source in a result local as its value. The parser has already
@@ -901,7 +901,7 @@ the unit defines, and whose participant is not numeric, as a form `(conform
 BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`. The compiler has
 already chosen each member's owner and storage, reported collisions and missing
 conversions, published the external forwarding members' signatures, and bound
-the name of every function it asks for and of the method table. Each row is
+the name of every required function and of the method table. Each row is
 `(MEMBER STATUS SOURCE EXPECTED TEMPLATE PART...)`, whose parts are `(default
 NAME STORAGE)` for a forwarding member, `(inherited NAME EXPECTED)` for the
 prototype of a member another conformance defines, and `(thunk NAME ERASED)`

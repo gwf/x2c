@@ -39,7 +39,7 @@ static void typed_list_reads_nil_as_zero(void) {
   $test.scoped();
 
   /* car and last of nil are void, whose bits are all ones, so the guard
-     decides the answer rather than merely avoiding a null read. */
+     determines the result rather than merely avoiding a null read. */
   EXPECT_INT_EQ(ListChar.car(NULL), 0);
   EXPECT_INT_EQ(ListShort.car(NULL), 0);
   EXPECT_INT_EQ(ListInt.car(NULL), 0);

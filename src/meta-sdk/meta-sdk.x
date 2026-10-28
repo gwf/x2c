@@ -1,20 +1,19 @@
-/*  meta-sdk.x -- the compiler's answers to `lib/meta.x` operations
+/*  meta-sdk.x -- compiler implementations of `lib/meta.x` operations
 
     Copyright (c) 2026 Gary William Flake.
 
-    Compile-time code asks the compiler about syntax, types, names, and
-    source through the operations `lib/meta.x` declares, and the built-in
-    macros ask through their own entries here. A native operation has no
-    Compiler parameter, so each answer reads the running call's
-    `MetaContext`, which the evaluations in `macros.x` install for their
-    extent. An operation that cannot answer reports at the active
-    invocation and never returns.
+    Compile-time code queries syntax, types, names, and source through the
+    operations `lib/meta.x` declares. Built-in macros use their own entries
+    here. A native operation has no Compiler parameter, so each operation
+    reads the running call's `MetaContext`, which the evaluations in
+    `macros.x` install for their extent. An operation that cannot provide a
+    result reports at the active invocation and never returns.
 */
 
 #pragma once
 #include "compiler/compiler.x"
 
-/** What the running compile-time call answers from. `expander` is the
+/** Context used by the running compile-time call. `expander` is the
     compiler of the active macro expansion, `definition_file` the source of
     its definition, `captures` its complete captured syntax by identity, and
     `has_bindings` whether it bound captured values. `evaluator` is the

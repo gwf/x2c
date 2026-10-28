@@ -252,7 +252,7 @@ meta int ct_array_grow(int n) {
   return (int) xs.len();
 }
 
-/* `Var.tag` answers a `Symbol`, so returning one where a `String` is
+/* `Var.tag` returns a `Symbol`, so returning one where a `String` is
    declared needs the conversion the transform would otherwise insert. */
 meta String ct_array_kind(int n) { Array xs = [n]; return Var.tag(xs); }
 
@@ -348,7 +348,7 @@ meta int ct_is_dot(String s) => s[0] == '.' ? 1 : 0;
 /* A loop carries only the locals it names. `before` is read inside, `after`
    only past the loop, and the `pad` locals nowhere after their own line, so
    dropping a local that is still needed would decline as an unbound local
-   rather than answer wrongly. */
+   rather than return a wrong result. */
 meta int ct_live_set(List xs, int seed) {
   int pad1 = seed + 1;
   int pad2 = pad1 + 1;
@@ -463,7 +463,7 @@ meta Var ct_binding_name(List form) {
 /* --- typed captures in match patterns ------------------------------------ */
 
 /* A typed capture is a tag test as well as a binder, so each of these
-   answers its fallback when the element has the wrong type. The pair of
+   returns its fallback when the element has the wrong type. The pair of
    results per function is what proves the test survived folding. */
 
 meta String ct_typed_string(List form) {

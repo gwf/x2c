@@ -182,7 +182,7 @@ static int evaluate(int input) {
 ```
 
 Every `cons` inside the bracket remains canonical. `Pool.close`
-reclaims cells created in the innermost pool and forgets their identities.
+reclaims cells created in the innermost pool and discards their identities.
 Calls nest, and every successful `Pool.open` requires one matching
 `Pool.close`. Use `defer` when an error or early return can cross the
 boundary. `Pool.open_named` gives the bracket a name that appears in `Scope`

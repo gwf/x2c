@@ -86,7 +86,7 @@ invoking it:
 
 An upgrade stages a complete payload, replaces files owned by the previous
 installation, and removes obsolete owned files using its inventory. It leaves
-unrelated files alone and refuses to overwrite an unrelated file with the same
+unrelated files alone and does not overwrite an unrelated file with the same
 name. Publication replaces individual files; do not run an installation while
 programs are compiling against it. Keep `.x2c-install-manifest` with the prefix
 so upgrades retain ownership and build identity information.

@@ -66,11 +66,11 @@ int MatchPlan.execute(
 /* plan execution
 
    Only a prepared plan runs. An entry point raises the fence of an
-   ineligible plan, and a malformed plan answers no match. */
+   ineligible plan, and a malformed plan returns no match. */
 
 /** Raises the fence an ineligible plan crossed, naming `owner`.
     This is the one place an ineligible pattern is reported. Such a pattern
-    compiles to no program, so answering "no match" would be wrong and no
+    compiles to no program, so returning "no match" would be wrong and no
     caller could tell it from a real miss. `reason` is the plan's static
     category string.
     Raises: `<size-limit>` with `operation` and the fence.

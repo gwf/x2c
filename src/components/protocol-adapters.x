@@ -141,7 +141,7 @@ meta static void _protocol_descriptor(List descriptor, List slots) {
    `(METHODS NAME VAR-TAG AREA [TAG])` for a `Var` participant with its
    own descriptor, and empty otherwise: the method table's name, the
    registered type name and its Var tag, the `unit-init` area, and an
-   explicit tag. A rule answers file-scope code for the unit's support, or
+   explicit tag. A rule returns file-scope code for the unit's support, or
    `(seq)` when it placed everything.
 
    A forwarding member or thunk passes each parameter the protocol types

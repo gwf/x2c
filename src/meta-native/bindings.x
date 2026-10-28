@@ -160,7 +160,7 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   }
 }
 
-/** Answers whether the native target `function` matches the declared
+/** Reports whether the native target `function` matches the declared
     `signature`. A declared `Func` parameter matches a target's `Var`
     parameter, which takes the compile-time callable and adapts it. Aliases
     of one native type match each other.
@@ -313,9 +313,9 @@ static List _native_parameter(Compiler c, Type parameter) {
 
 /* native lifetimes
 
-   A `meta` body's region walk needs to know what a native function's
-   result owns. A function without a runtime row takes the summary its
-   signature implies, or is rejected where it is declared. */
+   A `meta` body's region walk requires information about storage owned by a
+   native function's result. A function without a runtime row takes the summary
+   its signature implies, or is rejected where it is declared. */
 
 /* A declaration whose signature implies no summary is rejected at its
    `marker`; an advertisement read from an interface records nothing. */

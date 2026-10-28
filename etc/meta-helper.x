@@ -189,7 +189,7 @@ String Code.source_text(Var syntax) {
    file as part of the same unit.
 
    A `Source` holding a String literal is read beside its file; a String
-   must be absolute, since the helper does not know the definition's file.
+   must be absolute, since the helper has no definition-file path.
    The compiler records each file read as a translation dependency. */
 String x2c_embed_text(Var path) {
   String file = NULL, spelling = NULL;

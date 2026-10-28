@@ -264,7 +264,7 @@ static void match_repeated_star_compares_values(void) {
 }
 
 /* The doc says a template retains a binder the match did not bind, and the
-   two replacement paths answer alike. */
+   two replacement paths return the same result. */
 static void replace_retains_an_unbound_sequence_binder(void) {
   EXPECT_TRUE(%(a *m b).replace(%((?x 1))) == %(a *m b));
   EXPECT_TRUE(%(a *m b).replace(NULL) == %(a *m b));

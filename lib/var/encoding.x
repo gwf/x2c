@@ -64,8 +64,8 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
 // tags and kinds
 
 /** Reports whether `value` has the requested runtime tag.
-    This tests one family. A `Var` holding an `unsigned char` answers 0 for
-    `<i32>` even though both are integers. When any integer will do, ask
+    This tests one family. For a `Var` holding an `unsigned char`, this returns
+    0 for `<i32>` even though both are integers. When any integer will do, use
     `Var.is_integer`, or compare `Var.kind`.
     As with `Var.tag`, validate externally constructed bits first: an invalid
     encoding uses the `<f64>` fallback.
@@ -108,8 +108,8 @@ meta native int Var.is_floating(Var v)  => v.kind() == <floating>;
 /** Reports whether `v` belongs to the integer runtime family.
     True for every signed and unsigned integer family from `<u8>` through
     `<ullong>`, including the scope-owned wide boxes. `Symbol`s are a kind of
-    their own and answer 0 here, even though `Var.integer` returns a `Symbol`'s
-    numeric value.
+    their own, so this returns 0 for them, even though `Var.integer` returns a
+    `Symbol`'s numeric value.
 */
 int Var.is_integer(Var v)   => v.kind() == <integer>;
 
@@ -123,16 +123,16 @@ meta native int Var.is_reference(Var v) => v.kind() == <reference>;
     True for the builtin classes such as `String`, `List`, `Array`, `Map`,
     `File`, and `Iter`, and for any tag registered with
     `Var.register_object_tag`. A pointer to a handle, such as `<string*>`, is
-    `<reference>` instead and answers 0 here.
+    `<reference>` instead, so this returns 0 for it.
 */
 meta native int Var.is_object(Var v)    => v.kind() == <object>;
 
 /** Returns the `Symbol` naming the coarse category of `v`'s payload.
     The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
     `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
-    one. Use kind when a group of families is treated alike. All twelve
-    integer widths answer `<integer>`, and every builtin class handle such as
-    `String`, `List`, `Map`, and `File` answers `<object>`.
+    one. Use kind when a group of families is treated alike. This returns
+    `<integer>` for all twelve integer widths and `<object>` for every builtin
+    class handle such as `String`, `List`, `Map`, and `File`.
 
     `<pointer>` means a raw C pointer such as `<u8*>`, while `<reference>`
     means a pointer to an object handle such as `<string*>`. NaN and the
@@ -184,7 +184,7 @@ meta native Var Var.null(void) => (Var) { .u64 = VAR_NULL_BITS };
 
 /** Reports whether `v` is the typed empty `List`.
     The empty `List` is a native null pointer carrying the `<list>` tag.
-    `Var.is_null` answers 0 and `Var.tag` answers `<list>`. Every `%()` and
+    `Var.is_null` returns 0 and `Var.tag` returns `<list>`. Every `%()` and
     every exhausted `List.cdr` yields this one value, so an identity test on
     the bits is a valid emptiness test.
 */

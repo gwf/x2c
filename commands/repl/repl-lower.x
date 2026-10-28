@@ -1305,7 +1305,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
         return Atom.intern(name);
       /* The parser records an int-range enumerator's value as its
          initializer or its predecessor plus one. Another enumerator has no
-         recorded value, and reading it as file-scope state would answer
+         recorded value, and reading it as file-scope state would return
          zero. */
       Type named = type;
       if (!l.locals.contains(id) && named.is_enum()) {
@@ -1463,7 +1463,7 @@ static List _lower_here(Lowering &l, List k) =>
   %(at-depth $(_lower_depth(l)) $k);
 
 /* Leaves the innermost cleanup's body for a continuation outside it. The
-   body answers the exit's tag, and the exit's code runs after the cleanup,
+   body returns the exit's tag, and the exit's code runs after the cleanup,
    in the environment the `defer` saw: everything the body wrote that the
    code reads is in a cell. */
 static Var _lower_leave(Lowering &l, int target, List k) {
@@ -1912,7 +1912,8 @@ static Var _lower_boxed(Lowering &l, int id, Var value, int fresh) {
 }
 
 /* A C array's dimension, read at lowering time so a partly written one is
-   zero-filled the way C fills it. A computed dimension has no such answer. */
+   zero-filled the way C fills it. A computed dimension is unavailable at
+   lowering time. */
 static int _lower_dimension(Lowering &l, int id, int &out) {
   Var size;
   if (!l.arrays.try_get(id, size)) return 0;
@@ -2096,9 +2097,9 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
   return value;
 }
 
-/* An array literal knows it is an `Array`, so only a `List` destination
-   needs the conversion. A braced initializer knows nothing, so its
-   destination decides outright. */
+/* An array literal has type `Array`, so only a `List` destination
+   needs the conversion. A braced initializer has no type, so its
+   destination determines the type. */
 /* Whether an initializer is braced, so the value it lowers to is new. */
 static int _lower_braced_init(Var init) {
   match (init) case %(expr ? (composite *)): return 1;
@@ -2867,8 +2868,9 @@ static List _repl_type_layout(Sym sym, Type type, Map cache) {
          ? _repl_int_layout(declared, %(int)) : NULL;
   type = sym.resolve_key(declared);
   if (type && type.is_pointer()) return _repl_pointer_layout(declared, tag);
-  /* Only a struct an x2c unit defines has a layout x2c knows; a C header's
-     struct, or one with a layout attribute, keeps its C-owned layout. */
+  /* Only a struct an x2c unit defines has a layout x2c can compute; a
+     C header's struct, or one with a layout attribute, keeps its C-owned
+     layout. */
   if (!type || type.car() != <struct> || !sym.get(%(@type "x2c-record")) ||
       sym.get(%(@type "layout-attribute")))
     return NULL;

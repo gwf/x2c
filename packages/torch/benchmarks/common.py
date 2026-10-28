@@ -254,7 +254,7 @@ def agree(what, left, right, tolerance=LOSS_RTOL):
 
 
 class Result:
-    """What one benchmark process printed."""
+    """Output from one benchmark process."""
 
     def __init__(self, records, texts, samples, dropped, stdout, seconds,
                  handles=None, counters=False, curve=None):

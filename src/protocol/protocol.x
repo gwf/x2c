@@ -4,7 +4,7 @@
 
     This module owns the protocol feature: it parses protocol and adoption
     declarations, keeps their rows in per-unit registries, resolves each
-    adoption into a conformance, answers member and operator lookups, and
+    adoption into a conformance, resolves member and operator lookups, and
     presents each conformance as native aliases or a `conform` form, from which
     `src/components/protocol-adapters.x` writes the adapters. Registries are
     rebuilt per translation unit; a static row is visible only in the unit of

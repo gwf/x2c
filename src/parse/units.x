@@ -500,7 +500,7 @@ static void _reject_expanded_meta(Compiler c, List decl, Token meta) {
 }
 
 /* Hashes functions and initialized file-static values, and records the
-   names their parsed bodies reference. A linked copy answers only when
+   names their parsed bodies reference. A linked copy is used only when
    its text and the definitions it reaches agree with the source. */
 static void _record_meta_hash(
   Compiler c, List definition, Token first, int collected_body) {
@@ -589,7 +589,7 @@ static void _referenced_names(Var node, Map seen, Array names) {
 }
 
 /* A staged `meta` definition installs its compile-time form unless the
-   compiler's linked copy answers for it. Compile-time only describes a
+   compiler's linked copy is used instead. Compile-time only describes a
    `meta` definition: an ordinary declaration or definition of the same
    name, such as a copy the compiler links, is callable at run time. */
 static void _publish_definition(

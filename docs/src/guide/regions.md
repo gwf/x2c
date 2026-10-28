@@ -81,7 +81,7 @@ cover:
 - callbacks and function pointers, including entry points a Lisp binding
   calls;
 - calls into functions defined in other units, except the runtime
-  operations the pass knows; such a call is assumed to keep none of its
+  operations the pass handles; such a call is assumed to keep none of its
   arguments and to return no tracked storage;
 - other aliases of storage that `Scope.free` or `Scope.realloc` ended; the
   pass ends only the local passed to the call, and it reports a free only
@@ -100,7 +100,7 @@ without warnings is not proven memory safe.
 
 `x2c-graph certify` checks selected entry points and the functions they can
 call across the supplied source units. It applies the same region ownership
-and parameter-effect rules as the compiler's local pass, then asks whether
+and parameter-effect rules as the compiler's local pass, then checks whether
 every reachable memory effect is covered. A `proved` result establishes the
 scoped lifetime invariant for those paths under the native effect assumptions
 listed in the report. If a root hands storage to its caller or another owner,

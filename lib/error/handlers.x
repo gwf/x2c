@@ -98,7 +98,7 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
     afterward and `site` is the static site of this `try`, whose `patterns`
     are read in source order. A pending site reads `patterns`; a bound static
     site ignores them, so a caller may pass anything once
-    `x2c_error_catch_site_pending` answers 0. The first registration of a
+    `x2c_error_catch_site_pending` returns 0. The first registration of a
     pending site promotes its patterns, which are literals in compiler output,
     to process lifetime and binds them there when it can. A transient
     registration borrows its patterns, and they and the target frame must
@@ -124,7 +124,7 @@ ErrorHandler x2c_error_catch_site_push(
   const char *fenced = _prepare_arms(h, patterns, arm);
   state.floor_only--;
   /* Report the fence here, where the unusable arm can be named. Reporting it
-     from dispatch would re-enter the raise path that is already answering
+     from dispatch would re-enter the raise path that is already handling
      one error. */
   if (fenced) {
     _free(h);
@@ -136,7 +136,8 @@ ErrorHandler x2c_error_catch_site_push(
 }
 
 /** Reports whether one catch site still needs its patterns at registration.
-    A bound static site answers 0, so its caller can skip constructing them.
+    Returns 0 for a bound static site, so the caller can skip constructing
+    them.
 */
 int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
   !site || _state(site) != ERROR_CATCH_STATIC;

@@ -62,7 +62,7 @@ printf("%d\n", count.get());
 | Spelling | Rule |
 | --- | --- |
 | `int T.f(T value, int n)` | Defines `T.f`; generated C uses a function such as `T_f` |
-| `object.field` | Also works through one pointer level when x2c knows the aggregate layout; `->` remains valid |
+| `object.field` | Also works through one pointer level when the aggregate layout is available to x2c; `->` remains valid |
 | `T &value` parameter | Borrows the caller's addressable `T`; call with `value`, not `&value` |
 | `T &?value` parameter | Also accepts `NULL`; test presence before using the borrowed object |
 | `Self` in a method signature | Preserves the original receiver's static typedef at the marked parameter/result positions |

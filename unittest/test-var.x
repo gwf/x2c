@@ -149,7 +149,7 @@ static void var_float_promotion_quiets_signaling_nan(void) {
 }
 
 /* A custom class may be named after a C floating type; it is still an
-   object, so the floating payload reader answers 0.0. */
+   object, so the floating payload reader returns 0.0. */
 static void var_floating_ignores_custom_float_names(void) {
   long cell = 1;
   EXPECT_INT_EQ(Var.register_object_tag(<double>), 0);
@@ -1424,7 +1424,7 @@ static void var_symbol_atom_stream_without_allocating(void) {
   Symbol.write_str(<spelling>, out);
   EXPECT_STR_EQ(out.str_free(), <spelling>.str());
   // A zero Symbol appends nothing, which str_free reports as no String at
-  // all -- the same answer Symbol.str gives it.
+  // all -- the same result Symbol.str returns for it.
   Buffer zero = Buffer.new(0);
   Symbol.write_str(0, zero);
   EXPECT_NULL(zero.str_free());

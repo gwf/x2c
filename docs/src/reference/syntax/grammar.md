@@ -167,7 +167,7 @@ identifier; otherwise it parses one cast expression for the Symbol selector.
 An explicit pointer type requires parentheses. Arrays and function types
 are not accepted as direct `is` type selectors.
 
-A brace in expression position is a Map when `_brace_starts_map` sees an
+A brace in expression position is a Map when `_brace_starts_map` finds an
 Entry macro or the first non-conditional colon before a top-level comma or
 terminator. Otherwise it is an initializer. Consequently `{}` initially
 parses as an empty composite; its destination can establish Map meaning.

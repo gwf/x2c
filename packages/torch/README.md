@@ -51,7 +51,7 @@ integers selects each dimension in turn, so `t[%(1 2)]` is
 
 A model is a `Module.composed()` root holding registered children. Its
 forward is ordinary x2c: nothing about it enters C++, but libtorch still
-sees a module tree, so parameter enumeration, `zero_grad`, the optimizers,
+has access to a module tree, so parameter enumeration, `zero_grad`, the optimizers,
 and serialization all work and the names match Python's `state_dict()`.
 
 ```x2c
