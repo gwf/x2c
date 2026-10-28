@@ -36,7 +36,7 @@ int Compiler.record_origin(Compiler c, Token token) {
 
 /** Records a physical declaration using the binding's actual scope and key. */
 void Compiler.record_source_declaration(
-  Compiler c, List binding, Token first, Token after) {
+  Compiler c, List binding, Token first, Token after, int external) {
   if (!c.source_facts || c.macro_holes) return;
   Var value;
   if (!c.semantic_binding_facts().try_get(%(src-key $binding), value)) return;
@@ -47,10 +47,29 @@ void Compiler.record_source_declaration(
   Type type = symbols[key];
   List method = c.fact(%(method $binding));
   List declaration = $(@range, type, method);
+  if (external)
+    declaration = %(@declaration () $(c.emitted_binding_name(binding)));
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
     c.materialize_source_declaration(binding, declaration);
     c.source_occurrences.push($(@range, binding, type));
+  }
+}
+
+/** A foreign alias emits a macro, not an external C symbol of its own. */
+void Compiler.clear_source_external(Compiler c, List binding) {
+  if (!c.source_facts) return;
+  List key = c.fact(%(src-key $binding));
+  Var value;
+  if (key && c.source_declarations.try_get(key, value)) {
+    List declaration = value;
+    if (declaration[6] is <string>)
+      c.sym.put(c.source_declarations, key, declaration[:6]);
+  }
+  if (c.source_definitions.try_get(binding, value)) {
+    List declaration = value;
+    if (declaration[6] is <string>)
+      c.source_definitions[binding] = declaration[:6];
   }
 }
 
@@ -84,7 +103,8 @@ void Compiler.attach_source_references(Compiler c, List binding, Array capture) 
 }
 
 /** Materializes one producer-owned source row and its captured references.
-    Row fields are file, start, end, Type, method, and optional capture.
+    Row fields are file, start, end, Type, method, optional capture, and
+    optional external emitted name. Only ordinary declarations supply linkage.
     Installing the row before replay marks self and mutually recursive rows.
 */
 void Compiler.materialize_source_declaration(

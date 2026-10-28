@@ -618,7 +618,7 @@ static List _record_body(
   if (c.source_facts) {
     Type semantic = NULL;
     List binding = c.sym.lookup($(tag, name), semantic);
-    c.record_source_declaration(binding, start, after_name);
+    c.record_source_declaration(binding, start, after_name, 0);
   }
   return type;
 }
@@ -640,7 +640,7 @@ static Type _declare_named_type(
                 .type_from_ast();
   if (!c.macro_holes) {
     List binding = c.sym.declare_resolved(%(typedef), key, type);
-    c.record_source_declaration(binding, start, after_name);
+    c.record_source_declaration(binding, start, after_name, 0);
     if (c.source_capture && c.source_capture.len())
       c.attach_source_references(binding, c.source_capture);
   }
