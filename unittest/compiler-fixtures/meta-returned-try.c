@@ -59,7 +59,7 @@ static List omit_second_capture(List code){
         return cons(List_var(({
           Var _x2c_gensym_literal_part_3 = body;  Var _x2c_gensym_literal_part_4 = List_var(({
             Var _x2c_gensym_literal_part_2 = List_var(cons(List_var(({
-              Var _x2c_gensym_literal_part_0 = pattern;  Var _x2c_gensym_literal_part_1 = List_var(cons(_0, cons(decl, cons(assign, List_append(rest, NULL)))));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+              Var _x2c_gensym_literal_part_0 = pattern;  Var _x2c_gensym_literal_part_1 = List_var(cons(_0, cons(decl, cons(assign, rest))));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
             }
             )), NULL));  cons(_1, cons(_x2c_gensym_literal_part_2, cons(handle, NULL)));
           }
