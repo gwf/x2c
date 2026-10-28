@@ -146,4 +146,26 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
             assert rows[0] == first and rows[1] == (1, 0, 3, 3), rows
     finally:
         client.close()
+with tempfile.TemporaryDirectory(prefix="x2c-lsp-dependencies-") as temporary:
+    directory = Path(temporary).resolve()
+    library, main = directory / "lib.x", directory / "main.x"
+    library_text = ('#pragma once\nint value(void) { return 1; }\n'
+                    'int helper(void) { return value(); }\n')
+    main_text = '#include "lib.x"\nint main(void) { return value(); }\n'
+    library.write_text(library_text)
+    main.write_text(main_text)
+    (directory / "x2c.toml").write_text(
+        '[project]\ndefault-target = "app"\n'
+        '[target.dep]\nkind = "static-library"\nsources = ["lib.x"]\n'
+        '[target.app]\nsources = ["main.x"]\ndependencies = ["dep"]\n')
+    client = Client(root, directory, [])
+    try:
+        client.opened(main, main_text)
+        assert client.diagnostics() == []
+        references = query(client, "references", main, main_text, "value()", 1,
+                           context={"includeDeclaration": True})["result"]
+        assert len(references) == 3, references
+        assert sum(row["uri"] == library.as_uri() for row in references) == 2, references
+    finally:
+        client.close()
 print("language server completion, symbols, references, rename, and tokens passed")

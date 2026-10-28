@@ -113,16 +113,19 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-rename-") as temporary:
             ("a.x", "shared_count =", "updated_count", 4),
             ("b.x", "shared_count ==", "updated_count", 4)])
     check_case(root, work / "methods", {"main.x": (
-        'typedef int Counter;\n'
+        'typedef int Counter;\ntypedef int Other;\n'
         'int Counter.peek(Counter value) { return value; }\n'
-        'int main(void) { Counter c = 1; '
-        'return c.peek() + Counter.peek(c) + Counter_peek(c) == 3 ? 0 : 1; }\n')},
+        'int Other.peek(Other value) { return value + 1; }\n'
+        'int main(void) { Counter c = 1; Other other = 2; '
+        'return c.peek() + Counter.peek(c) + Counter_peek(c) == 3 '
+        '&& other.peek() == 3 && Other_peek(other) == 3 ? 0 : 1; }\n')},
         ["main.x"], [
             ("main.x", "Counter;", "Amount", 6),
             ("main.x", "peek(Counter", "look", 4)], manifest=False)
     check_case(root, work / "recursive", {"main.x": (
         'class Pair struct { Pair *next; int value; } *;\n'
+        'void Pair.init(Pair pair) { pair->next = NULL; pair->value = 1; }\n'
         'int main(void) { struct Pair storage = {NULL, 1}; Pair pair = &storage; '
         'return pair->value == 1 ? 0 : 1; }\n')}, ["main.x"],
-        [("main.x", "Pair struct", "Node", 4)], manifest=False)
+        [("main.x", "Pair struct", "Node", 6)], manifest=False)
 print("language server applied rename edits compile and run")
