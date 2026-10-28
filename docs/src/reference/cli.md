@@ -786,6 +786,23 @@ program, including arguments beginning with `@`. The external command owns
 its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
+`x2c test [options] [files-or-directories...]` builds and runs project test
+programs. With no operands, it searches below the nearest `x2c.toml`, or the
+current directory. Discovery selects `*_test.x`, `test_*.x`, and `.x` files
+inside `tests/`, excluding `.x2c-build/`.
+
+Use `--filter SUBSTRING`, `--list`, and `--quiet` to select or inspect tests.
+Filters can repeat. `-j N` runs up to N files concurrently and prints each
+file's captured output in discovery order. `--manifest FILE` and
+`--target NAME` select the project settings. The selected target's include
+and package directories are forwarded to each build. Each file runs through
+`x2c script`, so local `.x` includes compile as helpers. The script cache lives under `.x2c-build/tests/scripts/`, with a
+separate entry named from each file's stem and path hash.
+
+The final line reports passed and failed files and tests. The command exits
+with status 1 if any file fails to build or run, and 2 if discovery finds no
+files. See [Testing](../guide/testing.md) for the test library and assertions.
+
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound
 writes, address escapes, and reference arguments before reporting a group.
