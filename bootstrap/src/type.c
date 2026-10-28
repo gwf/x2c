@@ -219,9 +219,9 @@ int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsi
   Var row = Map_getindex(Type_var_tag_rows(), Symbol_var(tag));
   if(Var_is_void(row)) return 0;
   List fields = Var_list_payload(row);
-  (* top) = Var_ulong(Var_convert(List_car(fields), 44858254));
-  (* mask) = Var_ulong(Var_convert(List_cadr(fields), 44858254));
-  (* bottom) = Var_ulong(Var_convert(List_caddr(fields), 44858254));
+  (* top) = Var_ulong(Var_convert_at(List_car(fields), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/type.x",.function = "Type_var_tag_row",.line = 126}; & _x2c_gensym_error_site_0; })));
+  (* mask) = Var_ulong(Var_convert_at(List_cadr(fields), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/type.x",.function = "Type_var_tag_row",.line = 127}; & _x2c_gensym_error_site_1; })));
+  (* bottom) = Var_ulong(Var_convert_at(List_caddr(fields), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/type.x",.function = "Type_var_tag_row",.line = 128}; & _x2c_gensym_error_site_2; })));
   return 1;
 }
 

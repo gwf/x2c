@@ -45,6 +45,8 @@ void x2c_error_raise(Symbol code, List detail);
 
 Symbol Error_raise(Symbol code, List detail);
 
+void Error_raise_at(const X2CErrorSite * site, Symbol code, List detail);
+
 void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
 
 int Error_depth(void);

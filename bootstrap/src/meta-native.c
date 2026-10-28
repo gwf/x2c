@@ -5636,7 +5636,7 @@ static Var _x2c_gensym_func_adapt_35(Func _x2c_gensym_func_binding_35, const Fun
 }
 
 static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36){
-  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 0, 806120));  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 1, 1318210446));  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 2, 3453797), 3453797));  return List_var(Type_resolve_member(a0, a1, a2)); ;
+  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 0, 806120));  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 1, 1318210446));  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_36",.line = 0}; & _x2c_gensym_error_site_3; })));  return List_var(Type_resolve_member(a0, a1, a2)); ;
 }
 
 static Var _x2c_gensym_func_adapt_37(Func _x2c_gensym_func_binding_37, const FuncArg * _x2c_gensym_func_argv_37){
@@ -5680,35 +5680,48 @@ static Var _x2c_gensym_func_adapt_46(Func _x2c_gensym_func_binding_46, const Fun
 }
 
 static Var _x2c_gensym_func_adapt_47(Func _x2c_gensym_func_binding_47, const FuncArg * _x2c_gensym_func_argv_47){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_47, _x2c_gensym_func_argv_47, 0, 45156);  return String_var(x2c_embed_text(a0)); ;
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_47, _x2c_gensym_func_argv_47, 0, 45156);
+  return String_var(x2c_embed_text(a0));
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_48(Func _x2c_gensym_func_binding_48, const FuncArg * _x2c_gensym_func_argv_48){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_48, _x2c_gensym_func_argv_48, 0, 1328354264));  return List_var(x2c_enclosing(a0)); ;
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_48, _x2c_gensym_func_argv_48, 0, 1328354264));
+  return List_var(x2c_enclosing(a0));
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_49(Func _x2c_gensym_func_binding_49, const FuncArg * _x2c_gensym_func_argv_49){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_49, _x2c_gensym_func_argv_49, 0, 1318210446));  return List_var(x2c_ident(a0)); ;
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_49, _x2c_gensym_func_argv_49, 0, 1318210446));
+  return List_var(x2c_ident(a0));
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_50(Func _x2c_gensym_func_binding_50, const FuncArg * _x2c_gensym_func_argv_50){
-  return int_var(x2c_invocation_column()); ;
+  return int_var(x2c_invocation_column());
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_51(Func _x2c_gensym_func_binding_51, const FuncArg * _x2c_gensym_func_argv_51){
-  return String_var(x2c_invocation_file()); ;
+  return String_var(x2c_invocation_file());
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_52(Func _x2c_gensym_func_binding_52, const FuncArg * _x2c_gensym_func_argv_52){
-  return int_var(x2c_invocation_line()); ;
+  return int_var(x2c_invocation_line());
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_53(Func _x2c_gensym_func_binding_53, const FuncArg * _x2c_gensym_func_argv_53){
-  return Map_var(x2c_meta_definition_hashes()); ;
+  return Map_var(x2c_meta_definition_hashes());
+  ;
 }
 
 static Var _x2c_gensym_func_adapt_54(Func _x2c_gensym_func_binding_54, const FuncArg * _x2c_gensym_func_argv_54){
-  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_54, _x2c_gensym_func_argv_54, 0, 806120));  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_54, _x2c_gensym_func_argv_54, 1, 806120));  x2c_place(a0, a1);  return((void) 0, Void);
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_54, _x2c_gensym_func_argv_54, 0, 806120));
+  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_54, _x2c_gensym_func_argv_54, 1, 806120));
+  x2c_place(a0, a1);
+  return((void) 0, Void);
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
@@ -5866,16 +5879,16 @@ static Var _x2c_gensym_func_adapt_78(Func _x2c_gensym_func_binding_78, const Fun
 
 static Var _x2c_gensym_func_adapt_79(Func _x2c_gensym_func_binding_79, const FuncArg * _x2c_gensym_func_argv_79){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_79, _x2c_gensym_func_argv_79, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_79, _x2c_gensym_func_argv_79, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_79, _x2c_gensym_func_argv_79, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_79",.line = 0}; & _x2c_gensym_error_site_4; })));
   return Array_getindex(a0, a1);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_80(Func _x2c_gensym_func_binding_80, const FuncArg * _x2c_gensym_func_argv_80){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_80",.line = 0}; & _x2c_gensym_error_site_5; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_80",.line = 0}; & _x2c_gensym_error_site_6; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_80, _x2c_gensym_func_argv_80, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_80",.line = 0}; & _x2c_gensym_error_site_7; })));
   return Array_var(Array_getslice(a0, a1, a2, a3));
   ;
 }
@@ -5934,7 +5947,7 @@ static Var _x2c_gensym_func_adapt_88(Func _x2c_gensym_func_binding_88, const Fun
 
 static Var _x2c_gensym_func_adapt_89(Func _x2c_gensym_func_binding_89, const FuncArg * _x2c_gensym_func_argv_89){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_89, _x2c_gensym_func_argv_89, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_89, _x2c_gensym_func_argv_89, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_89, _x2c_gensym_func_argv_89, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_89",.line = 0}; & _x2c_gensym_error_site_8; })));
   Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_89, _x2c_gensym_func_argv_89, 2, 1328354264));
   return Array_postfixindex(a0, a1, a2);
   ;
@@ -5942,8 +5955,8 @@ static Var _x2c_gensym_func_adapt_89(Func _x2c_gensym_func_binding_89, const Fun
 
 static Var _x2c_gensym_func_adapt_90(Func _x2c_gensym_func_binding_90, const FuncArg * _x2c_gensym_func_argv_90){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_90",.line = 0}; & _x2c_gensym_error_site_9; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_90",.line = 0}; & _x2c_gensym_error_site_10; })));
   return Array_var(Array_remslice(a0, a1, a2));
   ;
 }
@@ -5956,7 +5969,7 @@ static Var _x2c_gensym_func_adapt_91(Func _x2c_gensym_func_binding_91, const Fun
 
 static Var _x2c_gensym_func_adapt_92(Func _x2c_gensym_func_binding_92, const FuncArg * _x2c_gensym_func_argv_92){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_92",.line = 0}; & _x2c_gensym_error_site_11; })));
   Array_resize(a0, a1);
   return((void) 0, Void);
 }
@@ -5969,7 +5982,7 @@ static Var _x2c_gensym_func_adapt_93(Func _x2c_gensym_func_binding_93, const Fun
 
 static Var _x2c_gensym_func_adapt_94(Func _x2c_gensym_func_binding_94, const FuncArg * _x2c_gensym_func_argv_94){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_94, _x2c_gensym_func_argv_94, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_94, _x2c_gensym_func_argv_94, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_94, _x2c_gensym_func_argv_94, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_94",.line = 0}; & _x2c_gensym_error_site_12; })));
   Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_94, _x2c_gensym_func_argv_94, 2, 45156);
   return Array_setindex(a0, a1, a2);
   ;
@@ -5977,8 +5990,8 @@ static Var _x2c_gensym_func_adapt_94(Func _x2c_gensym_func_binding_94, const Fun
 
 static Var _x2c_gensym_func_adapt_95(Func _x2c_gensym_func_binding_95, const FuncArg * _x2c_gensym_func_argv_95){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_95",.line = 0}; & _x2c_gensym_error_site_13; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_95",.line = 0}; & _x2c_gensym_error_site_14; })));
   Array a3 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_95, _x2c_gensym_func_argv_95, 3, 3313778));
   return Array_var(Array_setslice(a0, a1, a2, a3));
   ;
@@ -5992,8 +6005,8 @@ static Var _x2c_gensym_func_adapt_96(Func _x2c_gensym_func_binding_96, const Fun
 
 static Var _x2c_gensym_func_adapt_97(Func _x2c_gensym_func_binding_97, const FuncArg * _x2c_gensym_func_argv_97){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_97",.line = 0}; & _x2c_gensym_error_site_15; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_97",.line = 0}; & _x2c_gensym_error_site_16; })));
   Array a3 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_97, _x2c_gensym_func_argv_97, 3, 3313778));
   return Array_var(Array_splice(a0, a1, a2, a3));
   ;
@@ -6007,7 +6020,7 @@ static Var _x2c_gensym_func_adapt_98(Func _x2c_gensym_func_binding_98, const Fun
 
 static Var _x2c_gensym_func_adapt_99(Func _x2c_gensym_func_binding_99, const FuncArg * _x2c_gensym_func_argv_99){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_99",.line = 0}; & _x2c_gensym_error_site_17; })));
   Array_truncate(a0, a1);
   return((void) 0, Void);
 }
@@ -6027,7 +6040,7 @@ static Var _x2c_gensym_func_adapt_101(Func _x2c_gensym_func_binding_101, const F
 
 static Var _x2c_gensym_func_adapt_102(Func _x2c_gensym_func_binding_102, const FuncArg * _x2c_gensym_func_argv_102){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_102, _x2c_gensym_func_argv_102, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_102, _x2c_gensym_func_argv_102, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_102, _x2c_gensym_func_argv_102, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_102",.line = 0}; & _x2c_gensym_error_site_18; })));
   Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_102, _x2c_gensym_func_argv_102, 2, 1328354264));
   Var a3 = x2c_func_value_argument(_x2c_gensym_func_binding_102, _x2c_gensym_func_argv_102, 3, 45156);
   return Array_updateindex(a0, a1, a2, a3);
@@ -6056,7 +6069,7 @@ static Var _x2c_gensym_func_adapt_105(Func _x2c_gensym_func_binding_105, const F
 
 static Var _x2c_gensym_func_adapt_106(Func _x2c_gensym_func_binding_106, const FuncArg * _x2c_gensym_func_argv_106){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_106, _x2c_gensym_func_argv_106, 0, 178663780));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_106, _x2c_gensym_func_argv_106, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_106, _x2c_gensym_func_argv_106, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_106",.line = 0}; & _x2c_gensym_error_site_19; })));
   return int_var(Buffer_getindex(a0, a1));
   ;
 }
@@ -6068,7 +6081,7 @@ static Var _x2c_gensym_func_adapt_107(Func _x2c_gensym_func_binding_107, const F
 }
 
 static Var _x2c_gensym_func_adapt_108(Func _x2c_gensym_func_binding_108, const FuncArg * _x2c_gensym_func_argv_108){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_108, _x2c_gensym_func_argv_108, 0, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_108, _x2c_gensym_func_argv_108, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_108",.line = 0}; & _x2c_gensym_error_site_20; })));
   return Buffer_var(Buffer_new(a0));
   ;
 }
@@ -6111,7 +6124,7 @@ static Var _x2c_gensym_func_adapt_114(Func _x2c_gensym_func_binding_114, const F
 
 static Var _x2c_gensym_func_adapt_115(Func _x2c_gensym_func_binding_115, const FuncArg * _x2c_gensym_func_argv_115){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_115",.line = 0}; & _x2c_gensym_error_site_21; })));
   return Buffer_var(Buffer_reserve(a0, a1));
   ;
 }
@@ -6130,7 +6143,7 @@ static Var _x2c_gensym_func_adapt_117(Func _x2c_gensym_func_binding_117, const F
 
 static Var _x2c_gensym_func_adapt_118(Func _x2c_gensym_func_binding_118, const FuncArg * _x2c_gensym_func_argv_118){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_118",.line = 0}; & _x2c_gensym_error_site_22; })));
   return Buffer_var(Buffer_unwrite(a0, a1));
   ;
 }
@@ -6144,7 +6157,7 @@ static Var _x2c_gensym_func_adapt_119(Func _x2c_gensym_func_binding_119, const F
 
 static Var _x2c_gensym_func_adapt_120(Func _x2c_gensym_func_binding_120, const FuncArg * _x2c_gensym_func_argv_120){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 0, 178663780));
-  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 1, 26993), 26993));
+  char a1 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 1, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_120",.line = 0}; & _x2c_gensym_error_site_23; })));
   return Buffer_var(Buffer_write_char(a0, a1));
   ;
 }
@@ -6152,15 +6165,15 @@ static Var _x2c_gensym_func_adapt_120(Func _x2c_gensym_func_binding_120, const F
 static Var _x2c_gensym_func_adapt_121(Func _x2c_gensym_func_binding_121, const FuncArg * _x2c_gensym_func_argv_121){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 0, 178663780));
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 2, 44858254), 44858254));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_121",.line = 0}; & _x2c_gensym_error_site_24; })));
   return Buffer_var(Buffer_write_len(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_122(Func _x2c_gensym_func_binding_122, const FuncArg * _x2c_gensym_func_argv_122){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 0, 178663780));
-  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 1, 26993), 26993));
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 2, 44858254), 44858254));
+  char a1 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 1, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_122",.line = 0}; & _x2c_gensym_error_site_25; })));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_122",.line = 0}; & _x2c_gensym_error_site_26; })));
   return Buffer_var(Buffer_write_repeat(a0, a1, a2));
   ;
 }
@@ -6240,7 +6253,7 @@ static Var _x2c_gensym_func_adapt_133(Func _x2c_gensym_func_binding_133, const F
 
 static Var _x2c_gensym_func_adapt_134(Func _x2c_gensym_func_binding_134, const FuncArg * _x2c_gensym_func_argv_134){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_134, _x2c_gensym_func_argv_134, 0, 631140));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_134, _x2c_gensym_func_argv_134, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_134, _x2c_gensym_func_argv_134, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_134",.line = 0}; & _x2c_gensym_error_site_27; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_134, _x2c_gensym_func_argv_134, 2, 631140));
   return Iter_var(Iter_enumerate(a0, a1, a2));
   ;
@@ -6256,7 +6269,7 @@ static Var _x2c_gensym_func_adapt_135(Func _x2c_gensym_func_binding_135, const F
 
 static Var _x2c_gensym_func_adapt_136(Func _x2c_gensym_func_binding_136, const FuncArg * _x2c_gensym_func_argv_136){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_136, _x2c_gensym_func_argv_136, 0, 631140));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_136, _x2c_gensym_func_argv_136, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_136, _x2c_gensym_func_argv_136, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_136",.line = 0}; & _x2c_gensym_error_site_28; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_136, _x2c_gensym_func_argv_136, 2, 631140));
   return Iter_var(Iter_head(a0, a1, a2));
   ;
@@ -6316,7 +6329,7 @@ static Var _x2c_gensym_func_adapt_144(Func _x2c_gensym_func_binding_144, const F
 
 static Var _x2c_gensym_func_adapt_145(Func _x2c_gensym_func_binding_145, const FuncArg * _x2c_gensym_func_argv_145){
   Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_145, _x2c_gensym_func_argv_145, 0, 45156);
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_145, _x2c_gensym_func_argv_145, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_145, _x2c_gensym_func_argv_145, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_145",.line = 0}; & _x2c_gensym_error_site_29; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_145, _x2c_gensym_func_argv_145, 2, 631140));
   return Iter_var(Iter_repeat(a0, a1, a2));
   ;
@@ -6400,9 +6413,9 @@ static Var _x2c_gensym_func_adapt_156(Func _x2c_gensym_func_binding_156, const F
 
 static Var _x2c_gensym_func_adapt_157(Func _x2c_gensym_func_binding_157, const FuncArg * _x2c_gensym_func_argv_157){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_157",.line = 0}; & _x2c_gensym_error_site_30; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_157",.line = 0}; & _x2c_gensym_error_site_31; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_157",.line = 0}; & _x2c_gensym_error_site_32; })));
   return List_var(List_getslice(a0, a1, a2, a3));
   ;
 }
@@ -6415,7 +6428,7 @@ static Var _x2c_gensym_func_adapt_158(Func _x2c_gensym_func_binding_158, const F
 
 static Var _x2c_gensym_func_adapt_159(Func _x2c_gensym_func_binding_159, const FuncArg * _x2c_gensym_func_argv_159){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_159, _x2c_gensym_func_argv_159, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_159, _x2c_gensym_func_argv_159, 1, 3847013), 3847013));
+  unsigned a1 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_159, _x2c_gensym_func_argv_159, 1, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_159",.line = 0}; & _x2c_gensym_error_site_33; })));
   return List_var(List_head(a0, a1));
   ;
 }
@@ -6450,7 +6463,7 @@ static Var _x2c_gensym_func_adapt_163(Func _x2c_gensym_func_binding_163, const F
 
 static Var _x2c_gensym_func_adapt_164(Func _x2c_gensym_func_binding_164, const FuncArg * _x2c_gensym_func_argv_164){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_164, _x2c_gensym_func_argv_164, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_164, _x2c_gensym_func_argv_164, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_164, _x2c_gensym_func_argv_164, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_164",.line = 0}; & _x2c_gensym_error_site_34; })));
   return List_var(List_nth_cdr(a0, a1));
   ;
 }
@@ -6477,16 +6490,16 @@ static Var _x2c_gensym_func_adapt_167(Func _x2c_gensym_func_binding_167, const F
 
 static Var _x2c_gensym_func_adapt_168(Func _x2c_gensym_func_binding_168, const FuncArg * _x2c_gensym_func_argv_168){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_168",.line = 0}; & _x2c_gensym_error_site_35; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_168",.line = 0}; & _x2c_gensym_error_site_36; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_168",.line = 0}; & _x2c_gensym_error_site_37; })));
   return List_var(List_subseq(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_169(Func _x2c_gensym_func_binding_169, const FuncArg * _x2c_gensym_func_argv_169){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_169, _x2c_gensym_func_argv_169, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_169, _x2c_gensym_func_argv_169, 1, 3847013), 3847013));
+  unsigned a1 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_169, _x2c_gensym_func_argv_169, 1, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_169",.line = 0}; & _x2c_gensym_error_site_38; })));
   return List_var(List_tail(a0, a1));
   ;
 }
@@ -6564,7 +6577,7 @@ static Var _x2c_gensym_func_adapt_180(Func _x2c_gensym_func_binding_180, const F
 static Var _x2c_gensym_func_adapt_181(Func _x2c_gensym_func_binding_181, const FuncArg * _x2c_gensym_func_argv_181){
   Map a0 = Var_map_payload(x2c_func_value_argument(_x2c_gensym_func_binding_181, _x2c_gensym_func_argv_181, 0, 26720));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_181, _x2c_gensym_func_argv_181, 1, 45156);
-  unsigned a2 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_181, _x2c_gensym_func_argv_181, 2, 3847013), 3847013));
+  unsigned a2 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_181, _x2c_gensym_func_argv_181, 2, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_181",.line = 0}; & _x2c_gensym_error_site_39; })));
   return Map_get_hashed(a0, a1, a2);
   ;
 }
@@ -6642,7 +6655,7 @@ static Var _x2c_gensym_func_adapt_192(Func _x2c_gensym_func_binding_192, const F
 }
 
 static Var _x2c_gensym_func_adapt_193(Func _x2c_gensym_func_binding_193, const FuncArg * _x2c_gensym_func_argv_193){
-  unsigned a0 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_193, _x2c_gensym_func_argv_193, 0, 3847013), 3847013));
+  unsigned a0 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_193, _x2c_gensym_func_argv_193, 0, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_193",.line = 0}; & _x2c_gensym_error_site_40; })));
   return Map_var(Map_new_capacity(a0));
   ;
 }
@@ -6762,8 +6775,8 @@ static Var _x2c_gensym_func_adapt_208(Func _x2c_gensym_func_binding_208, const F
 }
 
 static Var _x2c_gensym_func_adapt_209(Func _x2c_gensym_func_binding_209, const FuncArg * _x2c_gensym_func_argv_209){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 0, 44858254), 44858254));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 1, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_41; })));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_42 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_42; })));
   return Var_new(3683441, Scope_calloc(a0, a1));
   ;
 }
@@ -6787,14 +6800,14 @@ static Var _x2c_gensym_func_adapt_212(Func _x2c_gensym_func_binding_212, const F
 }
 
 static Var _x2c_gensym_func_adapt_213(Func _x2c_gensym_func_binding_213, const FuncArg * _x2c_gensym_func_argv_213){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_213, _x2c_gensym_func_argv_213, 0, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_213, _x2c_gensym_func_argv_213, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_43 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_213",.line = 0}; & _x2c_gensym_error_site_43; })));
   return Var_new(3683441, Scope_malloc(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_214(Func _x2c_gensym_func_binding_214, const FuncArg * _x2c_gensym_func_argv_214){
   const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_214, _x2c_gensym_func_argv_214, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_214, _x2c_gensym_func_argv_214, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_214, _x2c_gensym_func_argv_214, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_214",.line = 0}; & _x2c_gensym_error_site_44; })));
   return Var_new(3683441, Scope_memdup(a0, a1));
   ;
 }
@@ -6830,7 +6843,7 @@ static Var _x2c_gensym_func_adapt_219(Func _x2c_gensym_func_binding_219, const F
 
 static Var _x2c_gensym_func_adapt_220(Func _x2c_gensym_func_binding_220, const FuncArg * _x2c_gensym_func_argv_220){
   void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_220, _x2c_gensym_func_argv_220, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_220, _x2c_gensym_func_argv_220, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_220, _x2c_gensym_func_argv_220, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_220",.line = 0}; & _x2c_gensym_error_site_45; })));
   return Var_new(3683441, Scope_realloc(a0, a1));
   ;
 }
@@ -6914,8 +6927,8 @@ static Var _x2c_gensym_func_adapt_232(Func _x2c_gensym_func_binding_232, const F
 static Var _x2c_gensym_func_adapt_233(Func _x2c_gensym_func_binding_233, const FuncArg * _x2c_gensym_func_argv_233){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 3, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_233",.line = 0}; & _x2c_gensym_error_site_46; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_233, _x2c_gensym_func_argv_233, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_233",.line = 0}; & _x2c_gensym_error_site_47; })));
   return List_var(String_find_all(a0, a1, a2, a3));
   ;
 }
@@ -6923,8 +6936,8 @@ static Var _x2c_gensym_func_adapt_233(Func _x2c_gensym_func_binding_233, const F
 static Var _x2c_gensym_func_adapt_234(Func _x2c_gensym_func_binding_234, const FuncArg * _x2c_gensym_func_argv_234){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 3, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_234",.line = 0}; & _x2c_gensym_error_site_48; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_234, _x2c_gensym_func_argv_234, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_49 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_234",.line = 0}; & _x2c_gensym_error_site_49; })));
   return int_var(String_find_within(a0, a1, a2, a3));
   ;
 }
@@ -6937,9 +6950,9 @@ static Var _x2c_gensym_func_adapt_235(Func _x2c_gensym_func_binding_235, const F
 
 static Var _x2c_gensym_func_adapt_236(Func _x2c_gensym_func_binding_236, const FuncArg * _x2c_gensym_func_argv_236){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_50 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_236",.line = 0}; & _x2c_gensym_error_site_50; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_51 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_236",.line = 0}; & _x2c_gensym_error_site_51; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_236, _x2c_gensym_func_argv_236, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_52 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_236",.line = 0}; & _x2c_gensym_error_site_52; })));
   return String_var(String_getslice(a0, a1, a2, a3));
   ;
 }
@@ -7056,32 +7069,32 @@ static Var _x2c_gensym_func_adapt_254(Func _x2c_gensym_func_binding_254, const F
 }
 
 static Var _x2c_gensym_func_adapt_255(Func _x2c_gensym_func_binding_255, const FuncArg * _x2c_gensym_func_argv_255){
-  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_255, _x2c_gensym_func_argv_255, 0, 26993), 26993));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_255, _x2c_gensym_func_argv_255, 1, 3453797), 3453797));
+  char a0 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_255, _x2c_gensym_func_argv_255, 0, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_53 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_255",.line = 0}; & _x2c_gensym_error_site_53; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_255, _x2c_gensym_func_argv_255, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_54 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_255",.line = 0}; & _x2c_gensym_error_site_54; })));
   return String_var(String_new_fill(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_256(Func _x2c_gensym_func_binding_256, const FuncArg * _x2c_gensym_func_argv_256){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_256, _x2c_gensym_func_argv_256, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_256, _x2c_gensym_func_argv_256, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_256, _x2c_gensym_func_argv_256, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_256, _x2c_gensym_func_argv_256, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_55 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_256",.line = 0}; & _x2c_gensym_error_site_55; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_256, _x2c_gensym_func_argv_256, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_56 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_256",.line = 0}; & _x2c_gensym_error_site_56; })));
   return String_var(String_pad_center(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_257(Func _x2c_gensym_func_binding_257, const FuncArg * _x2c_gensym_func_argv_257){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_257, _x2c_gensym_func_argv_257, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_257, _x2c_gensym_func_argv_257, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_257, _x2c_gensym_func_argv_257, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_257, _x2c_gensym_func_argv_257, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_57 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_257",.line = 0}; & _x2c_gensym_error_site_57; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_257, _x2c_gensym_func_argv_257, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_58 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_257",.line = 0}; & _x2c_gensym_error_site_58; })));
   return String_var(String_pad_left(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_258(Func _x2c_gensym_func_binding_258, const FuncArg * _x2c_gensym_func_argv_258){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_258, _x2c_gensym_func_argv_258, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_258, _x2c_gensym_func_argv_258, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_258, _x2c_gensym_func_argv_258, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_258, _x2c_gensym_func_argv_258, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_59 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_258",.line = 0}; & _x2c_gensym_error_site_59; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_258, _x2c_gensym_func_argv_258, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_60 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_258",.line = 0}; & _x2c_gensym_error_site_60; })));
   return String_var(String_pad_right(a0, a1, a2));
   ;
 }
@@ -7128,7 +7141,7 @@ static Var _x2c_gensym_func_adapt_264(Func _x2c_gensym_func_binding_264, const F
 
 static Var _x2c_gensym_func_adapt_265(Func _x2c_gensym_func_binding_265, const FuncArg * _x2c_gensym_func_argv_265){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_265, _x2c_gensym_func_argv_265, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_265, _x2c_gensym_func_argv_265, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_265, _x2c_gensym_func_argv_265, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_61 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_265",.line = 0}; & _x2c_gensym_error_site_61; })));
   return String_var(String_repeat(a0, a1));
   ;
 }
@@ -7145,7 +7158,7 @@ static Var _x2c_gensym_func_adapt_267(Func _x2c_gensym_func_binding_267, const F
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_267, _x2c_gensym_func_argv_267, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_267, _x2c_gensym_func_argv_267, 1, 1318210446));
   String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_267, _x2c_gensym_func_argv_267, 2, 1318210446));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_267, _x2c_gensym_func_argv_267, 3, 3453797), 3453797));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_267, _x2c_gensym_func_argv_267, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_62 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_267",.line = 0}; & _x2c_gensym_error_site_62; })));
   return String_var(String_replace_n(a0, a1, a2, a3));
   ;
 }
@@ -7173,7 +7186,7 @@ static Var _x2c_gensym_func_adapt_270(Func _x2c_gensym_func_binding_270, const F
 
 static Var _x2c_gensym_func_adapt_271(Func _x2c_gensym_func_binding_271, const FuncArg * _x2c_gensym_func_argv_271){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_271, _x2c_gensym_func_argv_271, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_271, _x2c_gensym_func_argv_271, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_271, _x2c_gensym_func_argv_271, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_63 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_271",.line = 0}; & _x2c_gensym_error_site_63; })));
   return List_var(String_split_lines(a0, a1));
   ;
 }
@@ -7181,7 +7194,7 @@ static Var _x2c_gensym_func_adapt_271(Func _x2c_gensym_func_binding_271, const F
 static Var _x2c_gensym_func_adapt_272(Func _x2c_gensym_func_binding_272, const FuncArg * _x2c_gensym_func_argv_272){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_272, _x2c_gensym_func_argv_272, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_272, _x2c_gensym_func_argv_272, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_272, _x2c_gensym_func_argv_272, 2, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_272, _x2c_gensym_func_argv_272, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_64 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_272",.line = 0}; & _x2c_gensym_error_site_64; })));
   return List_var(String_split_n(a0, a1, a2));
   ;
 }
@@ -7241,8 +7254,8 @@ static Var _x2c_gensym_func_adapt_280(Func _x2c_gensym_func_binding_280, const F
 
 static Var _x2c_gensym_func_adapt_281(Func _x2c_gensym_func_binding_281, const FuncArg * _x2c_gensym_func_argv_281){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_281, _x2c_gensym_func_argv_281, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_281, _x2c_gensym_func_argv_281, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_281, _x2c_gensym_func_argv_281, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_281, _x2c_gensym_func_argv_281, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_65 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_281",.line = 0}; & _x2c_gensym_error_site_65; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_281, _x2c_gensym_func_argv_281, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_66 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_281",.line = 0}; & _x2c_gensym_error_site_66; })));
   return String_var(String_withindex(a0, a1, a2));
   ;
 }
@@ -7756,93 +7769,93 @@ static Var _x2c_gensym_func_adapt_362(Func _x2c_gensym_func_binding_362, const F
 }
 
 static Var _x2c_gensym_func_adapt_363(Func _x2c_gensym_func_binding_363, const FuncArg * _x2c_gensym_func_argv_363){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_363, _x2c_gensym_func_argv_363, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_363, _x2c_gensym_func_argv_363, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_67 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_363",.line = 0}; & _x2c_gensym_error_site_67; })));
   return int_var(abs(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_364(Func _x2c_gensym_func_binding_364, const FuncArg * _x2c_gensym_func_argv_364){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_68 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_364",.line = 0}; & _x2c_gensym_error_site_68; })));
   return double_var(acos(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_365(Func _x2c_gensym_func_binding_365, const FuncArg * _x2c_gensym_func_argv_365){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_365, _x2c_gensym_func_argv_365, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_365, _x2c_gensym_func_argv_365, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_69 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_365",.line = 0}; & _x2c_gensym_error_site_69; })));
   return float_var(acosf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_366(Func _x2c_gensym_func_binding_366, const FuncArg * _x2c_gensym_func_argv_366){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_366, _x2c_gensym_func_argv_366, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_366, _x2c_gensym_func_argv_366, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_70 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_366",.line = 0}; & _x2c_gensym_error_site_70; })));
   return double_var(acosh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_367(Func _x2c_gensym_func_binding_367, const FuncArg * _x2c_gensym_func_argv_367){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_367, _x2c_gensym_func_argv_367, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_367, _x2c_gensym_func_argv_367, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_71 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_367",.line = 0}; & _x2c_gensym_error_site_71; })));
   return float_var(acoshf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_368(Func _x2c_gensym_func_binding_368, const FuncArg * _x2c_gensym_func_argv_368){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_368, _x2c_gensym_func_argv_368, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_368, _x2c_gensym_func_argv_368, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_72 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_368",.line = 0}; & _x2c_gensym_error_site_72; })));
   return double_var(asin(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_369(Func _x2c_gensym_func_binding_369, const FuncArg * _x2c_gensym_func_argv_369){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_369, _x2c_gensym_func_argv_369, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_369, _x2c_gensym_func_argv_369, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_73 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_369",.line = 0}; & _x2c_gensym_error_site_73; })));
   return float_var(asinf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_370(Func _x2c_gensym_func_binding_370, const FuncArg * _x2c_gensym_func_argv_370){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_370, _x2c_gensym_func_argv_370, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_370, _x2c_gensym_func_argv_370, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_74 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_370",.line = 0}; & _x2c_gensym_error_site_74; })));
   return double_var(asinh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_371(Func _x2c_gensym_func_binding_371, const FuncArg * _x2c_gensym_func_argv_371){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_371, _x2c_gensym_func_argv_371, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_371, _x2c_gensym_func_argv_371, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_75 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_371",.line = 0}; & _x2c_gensym_error_site_75; })));
   return float_var(asinhf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_372(Func _x2c_gensym_func_binding_372, const FuncArg * _x2c_gensym_func_argv_372){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_372, _x2c_gensym_func_argv_372, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_372, _x2c_gensym_func_argv_372, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_76 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_372",.line = 0}; & _x2c_gensym_error_site_76; })));
   return double_var(atan(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_373(Func _x2c_gensym_func_binding_373, const FuncArg * _x2c_gensym_func_argv_373){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_373, _x2c_gensym_func_argv_373, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_373, _x2c_gensym_func_argv_373, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_373, _x2c_gensym_func_argv_373, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_77 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_373",.line = 0}; & _x2c_gensym_error_site_77; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_373, _x2c_gensym_func_argv_373, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_78 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_373",.line = 0}; & _x2c_gensym_error_site_78; })));
   return double_var(atan2(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_374(Func _x2c_gensym_func_binding_374, const FuncArg * _x2c_gensym_func_argv_374){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_374, _x2c_gensym_func_argv_374, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_374, _x2c_gensym_func_argv_374, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_374, _x2c_gensym_func_argv_374, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_79 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_374",.line = 0}; & _x2c_gensym_error_site_79; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_374, _x2c_gensym_func_argv_374, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_80 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_374",.line = 0}; & _x2c_gensym_error_site_80; })));
   return float_var(atan2f(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_375(Func _x2c_gensym_func_binding_375, const FuncArg * _x2c_gensym_func_argv_375){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_375, _x2c_gensym_func_argv_375, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_375, _x2c_gensym_func_argv_375, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_81 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_375",.line = 0}; & _x2c_gensym_error_site_81; })));
   return float_var(atanf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_376(Func _x2c_gensym_func_binding_376, const FuncArg * _x2c_gensym_func_argv_376){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_376, _x2c_gensym_func_argv_376, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_376, _x2c_gensym_func_argv_376, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_82 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_376",.line = 0}; & _x2c_gensym_error_site_82; })));
   return double_var(atanh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_377(Func _x2c_gensym_func_binding_377, const FuncArg * _x2c_gensym_func_argv_377){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_377, _x2c_gensym_func_argv_377, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_377, _x2c_gensym_func_argv_377, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_83 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_377",.line = 0}; & _x2c_gensym_error_site_83; })));
   return float_var(atanhf(a0));
   ;
 }
@@ -7872,418 +7885,418 @@ static Var _x2c_gensym_func_adapt_381(Func _x2c_gensym_func_binding_381, const F
 }
 
 static Var _x2c_gensym_func_adapt_382(Func _x2c_gensym_func_binding_382, const FuncArg * _x2c_gensym_func_argv_382){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_382, _x2c_gensym_func_argv_382, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_382, _x2c_gensym_func_argv_382, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_84 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_382",.line = 0}; & _x2c_gensym_error_site_84; })));
   return double_var(cbrt(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_383(Func _x2c_gensym_func_binding_383, const FuncArg * _x2c_gensym_func_argv_383){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_383, _x2c_gensym_func_argv_383, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_383, _x2c_gensym_func_argv_383, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_85 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_383",.line = 0}; & _x2c_gensym_error_site_85; })));
   return float_var(cbrtf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_384(Func _x2c_gensym_func_binding_384, const FuncArg * _x2c_gensym_func_argv_384){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_384, _x2c_gensym_func_argv_384, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_384, _x2c_gensym_func_argv_384, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_86 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_384",.line = 0}; & _x2c_gensym_error_site_86; })));
   return double_var(ceil(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_385(Func _x2c_gensym_func_binding_385, const FuncArg * _x2c_gensym_func_argv_385){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_385, _x2c_gensym_func_argv_385, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_385, _x2c_gensym_func_argv_385, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_87 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_385",.line = 0}; & _x2c_gensym_error_site_87; })));
   return float_var(ceilf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_386(Func _x2c_gensym_func_binding_386, const FuncArg * _x2c_gensym_func_argv_386){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_386, _x2c_gensym_func_argv_386, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_386, _x2c_gensym_func_argv_386, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_386, _x2c_gensym_func_argv_386, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_88 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_386",.line = 0}; & _x2c_gensym_error_site_88; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_386, _x2c_gensym_func_argv_386, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_89 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_386",.line = 0}; & _x2c_gensym_error_site_89; })));
   return double_var(copysign(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_387(Func _x2c_gensym_func_binding_387, const FuncArg * _x2c_gensym_func_argv_387){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_387, _x2c_gensym_func_argv_387, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_387, _x2c_gensym_func_argv_387, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_387, _x2c_gensym_func_argv_387, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_90 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_387",.line = 0}; & _x2c_gensym_error_site_90; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_387, _x2c_gensym_func_argv_387, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_91 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_387",.line = 0}; & _x2c_gensym_error_site_91; })));
   return float_var(copysignf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_388(Func _x2c_gensym_func_binding_388, const FuncArg * _x2c_gensym_func_argv_388){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_388, _x2c_gensym_func_argv_388, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_388, _x2c_gensym_func_argv_388, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_92 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_388",.line = 0}; & _x2c_gensym_error_site_92; })));
   return double_var(cos(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_389(Func _x2c_gensym_func_binding_389, const FuncArg * _x2c_gensym_func_argv_389){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_389, _x2c_gensym_func_argv_389, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_389, _x2c_gensym_func_argv_389, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_93 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_389",.line = 0}; & _x2c_gensym_error_site_93; })));
   return float_var(cosf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_390(Func _x2c_gensym_func_binding_390, const FuncArg * _x2c_gensym_func_argv_390){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_390, _x2c_gensym_func_argv_390, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_390, _x2c_gensym_func_argv_390, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_94 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_390",.line = 0}; & _x2c_gensym_error_site_94; })));
   return double_var(cosh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_391(Func _x2c_gensym_func_binding_391, const FuncArg * _x2c_gensym_func_argv_391){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_391, _x2c_gensym_func_argv_391, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_391, _x2c_gensym_func_argv_391, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_95 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_391",.line = 0}; & _x2c_gensym_error_site_95; })));
   return float_var(coshf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_392(Func _x2c_gensym_func_binding_392, const FuncArg * _x2c_gensym_func_argv_392){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_392, _x2c_gensym_func_argv_392, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_392, _x2c_gensym_func_argv_392, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_96 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_392",.line = 0}; & _x2c_gensym_error_site_96; })));
   return double_var(erf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_393(Func _x2c_gensym_func_binding_393, const FuncArg * _x2c_gensym_func_argv_393){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_393, _x2c_gensym_func_argv_393, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_393, _x2c_gensym_func_argv_393, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_97 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_393",.line = 0}; & _x2c_gensym_error_site_97; })));
   return double_var(erfc(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_394(Func _x2c_gensym_func_binding_394, const FuncArg * _x2c_gensym_func_argv_394){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_394, _x2c_gensym_func_argv_394, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_394, _x2c_gensym_func_argv_394, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_98 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_394",.line = 0}; & _x2c_gensym_error_site_98; })));
   return float_var(erfcf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_395(Func _x2c_gensym_func_binding_395, const FuncArg * _x2c_gensym_func_argv_395){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_395, _x2c_gensym_func_argv_395, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_395, _x2c_gensym_func_argv_395, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_99 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_395",.line = 0}; & _x2c_gensym_error_site_99; })));
   return float_var(erff(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_396(Func _x2c_gensym_func_binding_396, const FuncArg * _x2c_gensym_func_argv_396){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_396, _x2c_gensym_func_argv_396, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_396, _x2c_gensym_func_argv_396, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_100 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_396",.line = 0}; & _x2c_gensym_error_site_100; })));
   return double_var(exp(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_397(Func _x2c_gensym_func_binding_397, const FuncArg * _x2c_gensym_func_argv_397){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_397, _x2c_gensym_func_argv_397, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_397, _x2c_gensym_func_argv_397, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_101 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_397",.line = 0}; & _x2c_gensym_error_site_101; })));
   return double_var(exp2(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_398(Func _x2c_gensym_func_binding_398, const FuncArg * _x2c_gensym_func_argv_398){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_398, _x2c_gensym_func_argv_398, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_398, _x2c_gensym_func_argv_398, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_102 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_398",.line = 0}; & _x2c_gensym_error_site_102; })));
   return float_var(exp2f(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_399(Func _x2c_gensym_func_binding_399, const FuncArg * _x2c_gensym_func_argv_399){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_399, _x2c_gensym_func_argv_399, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_399, _x2c_gensym_func_argv_399, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_103 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_399",.line = 0}; & _x2c_gensym_error_site_103; })));
   return float_var(expf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_400(Func _x2c_gensym_func_binding_400, const FuncArg * _x2c_gensym_func_argv_400){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_400, _x2c_gensym_func_argv_400, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_400, _x2c_gensym_func_argv_400, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_104 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_400",.line = 0}; & _x2c_gensym_error_site_104; })));
   return double_var(expm1(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_401(Func _x2c_gensym_func_binding_401, const FuncArg * _x2c_gensym_func_argv_401){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_401, _x2c_gensym_func_argv_401, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_401, _x2c_gensym_func_argv_401, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_105 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_401",.line = 0}; & _x2c_gensym_error_site_105; })));
   return float_var(expm1f(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_402(Func _x2c_gensym_func_binding_402, const FuncArg * _x2c_gensym_func_argv_402){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_402, _x2c_gensym_func_argv_402, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_402, _x2c_gensym_func_argv_402, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_106 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_402",.line = 0}; & _x2c_gensym_error_site_106; })));
   return double_var(fabs(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_403(Func _x2c_gensym_func_binding_403, const FuncArg * _x2c_gensym_func_argv_403){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_403, _x2c_gensym_func_argv_403, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_403, _x2c_gensym_func_argv_403, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_107 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_403",.line = 0}; & _x2c_gensym_error_site_107; })));
   return float_var(fabsf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_404(Func _x2c_gensym_func_binding_404, const FuncArg * _x2c_gensym_func_argv_404){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_404, _x2c_gensym_func_argv_404, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_404, _x2c_gensym_func_argv_404, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_404, _x2c_gensym_func_argv_404, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_108 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_404",.line = 0}; & _x2c_gensym_error_site_108; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_404, _x2c_gensym_func_argv_404, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_109 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_404",.line = 0}; & _x2c_gensym_error_site_109; })));
   return double_var(fdim(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_405(Func _x2c_gensym_func_binding_405, const FuncArg * _x2c_gensym_func_argv_405){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_405, _x2c_gensym_func_argv_405, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_405, _x2c_gensym_func_argv_405, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_405, _x2c_gensym_func_argv_405, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_110 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_405",.line = 0}; & _x2c_gensym_error_site_110; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_405, _x2c_gensym_func_argv_405, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_111 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_405",.line = 0}; & _x2c_gensym_error_site_111; })));
   return float_var(fdimf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_406(Func _x2c_gensym_func_binding_406, const FuncArg * _x2c_gensym_func_argv_406){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_406, _x2c_gensym_func_argv_406, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_406, _x2c_gensym_func_argv_406, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_112 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_406",.line = 0}; & _x2c_gensym_error_site_112; })));
   return double_var(floor(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_407(Func _x2c_gensym_func_binding_407, const FuncArg * _x2c_gensym_func_argv_407){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_407, _x2c_gensym_func_argv_407, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_407, _x2c_gensym_func_argv_407, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_113 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_407",.line = 0}; & _x2c_gensym_error_site_113; })));
   return float_var(floorf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_408(Func _x2c_gensym_func_binding_408, const FuncArg * _x2c_gensym_func_argv_408){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 1, 3356265), 3356265));
-  double a2 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 2, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_114 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_408",.line = 0}; & _x2c_gensym_error_site_114; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_115 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_408",.line = 0}; & _x2c_gensym_error_site_115; })));
+  double a2 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_408, _x2c_gensym_func_argv_408, 2, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_116 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_408",.line = 0}; & _x2c_gensym_error_site_116; })));
   return double_var(fma(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_409(Func _x2c_gensym_func_binding_409, const FuncArg * _x2c_gensym_func_argv_409){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 1, 3355493), 3355493));
-  float a2 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 2, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_117 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_409",.line = 0}; & _x2c_gensym_error_site_117; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_118 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_409",.line = 0}; & _x2c_gensym_error_site_118; })));
+  float a2 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_409, _x2c_gensym_func_argv_409, 2, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_119 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_409",.line = 0}; & _x2c_gensym_error_site_119; })));
   return float_var(fmaf(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_410(Func _x2c_gensym_func_binding_410, const FuncArg * _x2c_gensym_func_argv_410){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_410, _x2c_gensym_func_argv_410, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_410, _x2c_gensym_func_argv_410, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_410, _x2c_gensym_func_argv_410, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_120 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_410",.line = 0}; & _x2c_gensym_error_site_120; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_410, _x2c_gensym_func_argv_410, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_121 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_410",.line = 0}; & _x2c_gensym_error_site_121; })));
   return double_var(fmax(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_411(Func _x2c_gensym_func_binding_411, const FuncArg * _x2c_gensym_func_argv_411){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_411, _x2c_gensym_func_argv_411, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_411, _x2c_gensym_func_argv_411, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_411, _x2c_gensym_func_argv_411, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_122 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_411",.line = 0}; & _x2c_gensym_error_site_122; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_411, _x2c_gensym_func_argv_411, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_123 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_411",.line = 0}; & _x2c_gensym_error_site_123; })));
   return float_var(fmaxf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_412(Func _x2c_gensym_func_binding_412, const FuncArg * _x2c_gensym_func_argv_412){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_412, _x2c_gensym_func_argv_412, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_412, _x2c_gensym_func_argv_412, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_412, _x2c_gensym_func_argv_412, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_124 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_412",.line = 0}; & _x2c_gensym_error_site_124; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_412, _x2c_gensym_func_argv_412, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_125 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_412",.line = 0}; & _x2c_gensym_error_site_125; })));
   return double_var(fmin(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_413(Func _x2c_gensym_func_binding_413, const FuncArg * _x2c_gensym_func_argv_413){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_413, _x2c_gensym_func_argv_413, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_413, _x2c_gensym_func_argv_413, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_413, _x2c_gensym_func_argv_413, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_126 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_413",.line = 0}; & _x2c_gensym_error_site_126; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_413, _x2c_gensym_func_argv_413, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_127 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_413",.line = 0}; & _x2c_gensym_error_site_127; })));
   return float_var(fminf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_414(Func _x2c_gensym_func_binding_414, const FuncArg * _x2c_gensym_func_argv_414){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_414, _x2c_gensym_func_argv_414, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_414, _x2c_gensym_func_argv_414, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_414, _x2c_gensym_func_argv_414, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_128 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_414",.line = 0}; & _x2c_gensym_error_site_128; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_414, _x2c_gensym_func_argv_414, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_129 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_414",.line = 0}; & _x2c_gensym_error_site_129; })));
   return double_var(fmod(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_415(Func _x2c_gensym_func_binding_415, const FuncArg * _x2c_gensym_func_argv_415){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_415, _x2c_gensym_func_argv_415, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_415, _x2c_gensym_func_argv_415, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_415, _x2c_gensym_func_argv_415, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_130 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_415",.line = 0}; & _x2c_gensym_error_site_130; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_415, _x2c_gensym_func_argv_415, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_131 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_415",.line = 0}; & _x2c_gensym_error_site_131; })));
   return float_var(fmodf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_416(Func _x2c_gensym_func_binding_416, const FuncArg * _x2c_gensym_func_argv_416){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_416, _x2c_gensym_func_argv_416, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_416, _x2c_gensym_func_argv_416, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_132 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_416",.line = 0}; & _x2c_gensym_error_site_132; })));
   int * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_416, _x2c_gensym_func_argv_416, 1, 442085973));
   return double_var(frexp(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_417(Func _x2c_gensym_func_binding_417, const FuncArg * _x2c_gensym_func_argv_417){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_417, _x2c_gensym_func_argv_417, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_417, _x2c_gensym_func_argv_417, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_133 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_417",.line = 0}; & _x2c_gensym_error_site_133; })));
   int * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_417, _x2c_gensym_func_argv_417, 1, 442085973));
   return float_var(frexpf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_418(Func _x2c_gensym_func_binding_418, const FuncArg * _x2c_gensym_func_argv_418){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_418, _x2c_gensym_func_argv_418, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_418, _x2c_gensym_func_argv_418, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_418, _x2c_gensym_func_argv_418, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_134 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_418",.line = 0}; & _x2c_gensym_error_site_134; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_418, _x2c_gensym_func_argv_418, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_135 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_418",.line = 0}; & _x2c_gensym_error_site_135; })));
   return double_var(hypot(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_419(Func _x2c_gensym_func_binding_419, const FuncArg * _x2c_gensym_func_argv_419){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_419, _x2c_gensym_func_argv_419, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_419, _x2c_gensym_func_argv_419, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_419, _x2c_gensym_func_argv_419, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_136 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_419",.line = 0}; & _x2c_gensym_error_site_136; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_419, _x2c_gensym_func_argv_419, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_137 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_419",.line = 0}; & _x2c_gensym_error_site_137; })));
   return float_var(hypotf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_420(Func _x2c_gensym_func_binding_420, const FuncArg * _x2c_gensym_func_argv_420){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_420, _x2c_gensym_func_argv_420, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_420, _x2c_gensym_func_argv_420, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_138 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_420",.line = 0}; & _x2c_gensym_error_site_138; })));
   return int_var(ilogb(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_421(Func _x2c_gensym_func_binding_421, const FuncArg * _x2c_gensym_func_argv_421){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_421, _x2c_gensym_func_argv_421, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_421, _x2c_gensym_func_argv_421, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_139 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_421",.line = 0}; & _x2c_gensym_error_site_139; })));
   return int_var(ilogbf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_422(Func _x2c_gensym_func_binding_422, const FuncArg * _x2c_gensym_func_argv_422){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_422, _x2c_gensym_func_argv_422, 0, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_422, _x2c_gensym_func_argv_422, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_140 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_422",.line = 0}; & _x2c_gensym_error_site_140; })));
   return long_var(labs(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_423(Func _x2c_gensym_func_binding_423, const FuncArg * _x2c_gensym_func_argv_423){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_423, _x2c_gensym_func_argv_423, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_423, _x2c_gensym_func_argv_423, 1, 3453797), 3453797));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_423, _x2c_gensym_func_argv_423, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_141 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_423",.line = 0}; & _x2c_gensym_error_site_141; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_423, _x2c_gensym_func_argv_423, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_142 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_423",.line = 0}; & _x2c_gensym_error_site_142; })));
   return double_var(ldexp(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_424(Func _x2c_gensym_func_binding_424, const FuncArg * _x2c_gensym_func_argv_424){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_424, _x2c_gensym_func_argv_424, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_424, _x2c_gensym_func_argv_424, 1, 3453797), 3453797));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_424, _x2c_gensym_func_argv_424, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_143 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_424",.line = 0}; & _x2c_gensym_error_site_143; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_424, _x2c_gensym_func_argv_424, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_144 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_424",.line = 0}; & _x2c_gensym_error_site_144; })));
   return float_var(ldexpf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_425(Func _x2c_gensym_func_binding_425, const FuncArg * _x2c_gensym_func_argv_425){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_425, _x2c_gensym_func_argv_425, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_425, _x2c_gensym_func_argv_425, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_145 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_425",.line = 0}; & _x2c_gensym_error_site_145; })));
   return double_var(lgamma(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_426(Func _x2c_gensym_func_binding_426, const FuncArg * _x2c_gensym_func_argv_426){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_426, _x2c_gensym_func_argv_426, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_426, _x2c_gensym_func_argv_426, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_146 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_426",.line = 0}; & _x2c_gensym_error_site_146; })));
   return float_var(lgammaf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_427(Func _x2c_gensym_func_binding_427, const FuncArg * _x2c_gensym_func_argv_427){
-  long long a0 = Var_long_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_427, _x2c_gensym_func_argv_427, 0, 25983886), 25983886));
+  long long a0 = Var_long_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_427, _x2c_gensym_func_argv_427, 0, 25983886), 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_147 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_427",.line = 0}; & _x2c_gensym_error_site_147; })));
   return Var_box_long_long(llabs(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_428(Func _x2c_gensym_func_binding_428, const FuncArg * _x2c_gensym_func_argv_428){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_428, _x2c_gensym_func_argv_428, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_428, _x2c_gensym_func_argv_428, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_148 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_428",.line = 0}; & _x2c_gensym_error_site_148; })));
   return Var_box_long_long(llrint(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_429(Func _x2c_gensym_func_binding_429, const FuncArg * _x2c_gensym_func_argv_429){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_429, _x2c_gensym_func_argv_429, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_429, _x2c_gensym_func_argv_429, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_149 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_429",.line = 0}; & _x2c_gensym_error_site_149; })));
   return Var_box_long_long(llrintf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_430(Func _x2c_gensym_func_binding_430, const FuncArg * _x2c_gensym_func_argv_430){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_430, _x2c_gensym_func_argv_430, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_430, _x2c_gensym_func_argv_430, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_150 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_430",.line = 0}; & _x2c_gensym_error_site_150; })));
   return Var_box_long_long(llround(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_431(Func _x2c_gensym_func_binding_431, const FuncArg * _x2c_gensym_func_argv_431){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_431, _x2c_gensym_func_argv_431, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_431, _x2c_gensym_func_argv_431, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_151 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_431",.line = 0}; & _x2c_gensym_error_site_151; })));
   return Var_box_long_long(llroundf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_432(Func _x2c_gensym_func_binding_432, const FuncArg * _x2c_gensym_func_argv_432){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_432, _x2c_gensym_func_argv_432, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_432, _x2c_gensym_func_argv_432, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_152 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_432",.line = 0}; & _x2c_gensym_error_site_152; })));
   return double_var(log(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_433(Func _x2c_gensym_func_binding_433, const FuncArg * _x2c_gensym_func_argv_433){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_433, _x2c_gensym_func_argv_433, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_433, _x2c_gensym_func_argv_433, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_153 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_433",.line = 0}; & _x2c_gensym_error_site_153; })));
   return double_var(log10(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_434(Func _x2c_gensym_func_binding_434, const FuncArg * _x2c_gensym_func_argv_434){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_434, _x2c_gensym_func_argv_434, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_434, _x2c_gensym_func_argv_434, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_154 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_434",.line = 0}; & _x2c_gensym_error_site_154; })));
   return float_var(log10f(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_435(Func _x2c_gensym_func_binding_435, const FuncArg * _x2c_gensym_func_argv_435){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_435, _x2c_gensym_func_argv_435, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_435, _x2c_gensym_func_argv_435, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_155 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_435",.line = 0}; & _x2c_gensym_error_site_155; })));
   return double_var(log1p(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_436(Func _x2c_gensym_func_binding_436, const FuncArg * _x2c_gensym_func_argv_436){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_436, _x2c_gensym_func_argv_436, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_436, _x2c_gensym_func_argv_436, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_156 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_436",.line = 0}; & _x2c_gensym_error_site_156; })));
   return float_var(log1pf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_437(Func _x2c_gensym_func_binding_437, const FuncArg * _x2c_gensym_func_argv_437){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_437, _x2c_gensym_func_argv_437, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_437, _x2c_gensym_func_argv_437, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_157 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_437",.line = 0}; & _x2c_gensym_error_site_157; })));
   return double_var(log2(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_438(Func _x2c_gensym_func_binding_438, const FuncArg * _x2c_gensym_func_argv_438){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_438, _x2c_gensym_func_argv_438, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_438, _x2c_gensym_func_argv_438, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_158 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_438",.line = 0}; & _x2c_gensym_error_site_158; })));
   return float_var(log2f(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_439(Func _x2c_gensym_func_binding_439, const FuncArg * _x2c_gensym_func_argv_439){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_439, _x2c_gensym_func_argv_439, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_439, _x2c_gensym_func_argv_439, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_159 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_439",.line = 0}; & _x2c_gensym_error_site_159; })));
   return double_var(logb(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_440(Func _x2c_gensym_func_binding_440, const FuncArg * _x2c_gensym_func_argv_440){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_440, _x2c_gensym_func_argv_440, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_440, _x2c_gensym_func_argv_440, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_160 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_440",.line = 0}; & _x2c_gensym_error_site_160; })));
   return float_var(logbf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_441(Func _x2c_gensym_func_binding_441, const FuncArg * _x2c_gensym_func_argv_441){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_441, _x2c_gensym_func_argv_441, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_441, _x2c_gensym_func_argv_441, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_161 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_441",.line = 0}; & _x2c_gensym_error_site_161; })));
   return float_var(logf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_442(Func _x2c_gensym_func_binding_442, const FuncArg * _x2c_gensym_func_argv_442){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_442, _x2c_gensym_func_argv_442, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_442, _x2c_gensym_func_argv_442, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_162 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_442",.line = 0}; & _x2c_gensym_error_site_162; })));
   return long_var(lrint(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_443(Func _x2c_gensym_func_binding_443, const FuncArg * _x2c_gensym_func_argv_443){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_443, _x2c_gensym_func_argv_443, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_443, _x2c_gensym_func_argv_443, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_163 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_443",.line = 0}; & _x2c_gensym_error_site_163; })));
   return long_var(lrintf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_444(Func _x2c_gensym_func_binding_444, const FuncArg * _x2c_gensym_func_argv_444){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_444, _x2c_gensym_func_argv_444, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_444, _x2c_gensym_func_argv_444, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_164 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_444",.line = 0}; & _x2c_gensym_error_site_164; })));
   return long_var(lround(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_445(Func _x2c_gensym_func_binding_445, const FuncArg * _x2c_gensym_func_argv_445){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_445, _x2c_gensym_func_argv_445, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_445, _x2c_gensym_func_argv_445, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_165 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_445",.line = 0}; & _x2c_gensym_error_site_165; })));
   return long_var(lroundf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_446(Func _x2c_gensym_func_binding_446, const FuncArg * _x2c_gensym_func_argv_446){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_446, _x2c_gensym_func_argv_446, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_446, _x2c_gensym_func_argv_446, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_166 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_446",.line = 0}; & _x2c_gensym_error_site_166; })));
   double * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_446, _x2c_gensym_func_argv_446, 1, 429601877));
   return double_var(modf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_447(Func _x2c_gensym_func_binding_447, const FuncArg * _x2c_gensym_func_argv_447){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_447, _x2c_gensym_func_argv_447, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_447, _x2c_gensym_func_argv_447, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_167 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_447",.line = 0}; & _x2c_gensym_error_site_167; })));
   float * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_447, _x2c_gensym_func_argv_447, 1, 429503061));
   return float_var(modff(a0, a1));
   ;
@@ -8302,182 +8315,182 @@ static Var _x2c_gensym_func_adapt_449(Func _x2c_gensym_func_binding_449, const F
 }
 
 static Var _x2c_gensym_func_adapt_450(Func _x2c_gensym_func_binding_450, const FuncArg * _x2c_gensym_func_argv_450){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_450, _x2c_gensym_func_argv_450, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_450, _x2c_gensym_func_argv_450, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_168 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_450",.line = 0}; & _x2c_gensym_error_site_168; })));
   return double_var(nearbyint(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_451(Func _x2c_gensym_func_binding_451, const FuncArg * _x2c_gensym_func_argv_451){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_451, _x2c_gensym_func_argv_451, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_451, _x2c_gensym_func_argv_451, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_169 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_451",.line = 0}; & _x2c_gensym_error_site_169; })));
   return float_var(nearbyintf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_452(Func _x2c_gensym_func_binding_452, const FuncArg * _x2c_gensym_func_argv_452){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_170 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_452",.line = 0}; & _x2c_gensym_error_site_170; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_171 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_452",.line = 0}; & _x2c_gensym_error_site_171; })));
   return double_var(nextafter(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_453(Func _x2c_gensym_func_binding_453, const FuncArg * _x2c_gensym_func_argv_453){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_172 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_453",.line = 0}; & _x2c_gensym_error_site_172; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_173 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_453",.line = 0}; & _x2c_gensym_error_site_173; })));
   return float_var(nextafterf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_454(Func _x2c_gensym_func_binding_454, const FuncArg * _x2c_gensym_func_argv_454){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 0, 3356265), 3356265));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 1, 26071077642), 26071077642));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_174 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_454",.line = 0}; & _x2c_gensym_error_site_174; })));
+  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_175 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_454",.line = 0}; & _x2c_gensym_error_site_175; })));
   return double_var(nexttoward(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_455(Func _x2c_gensym_func_binding_455, const FuncArg * _x2c_gensym_func_argv_455){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 0, 3355493), 3355493));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 1, 26071077642), 26071077642));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_176 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_455",.line = 0}; & _x2c_gensym_error_site_176; })));
+  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_177 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_455",.line = 0}; & _x2c_gensym_error_site_177; })));
   return float_var(nexttowardf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_456(Func _x2c_gensym_func_binding_456, const FuncArg * _x2c_gensym_func_argv_456){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_178 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_456",.line = 0}; & _x2c_gensym_error_site_178; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_179 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_456",.line = 0}; & _x2c_gensym_error_site_179; })));
   return double_var(pow(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_457(Func _x2c_gensym_func_binding_457, const FuncArg * _x2c_gensym_func_argv_457){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_180 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_457",.line = 0}; & _x2c_gensym_error_site_180; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_181 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_457",.line = 0}; & _x2c_gensym_error_site_181; })));
   return float_var(powf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_458(Func _x2c_gensym_func_binding_458, const FuncArg * _x2c_gensym_func_argv_458){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 0, 3453797), 3453797));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 2, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_182 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_458",.line = 0}; & _x2c_gensym_error_site_182; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_183 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_458",.line = 0}; & _x2c_gensym_error_site_183; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_184 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_458",.line = 0}; & _x2c_gensym_error_site_184; })));
   Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 3, 631140));
   return Iter_var(range(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_459(Func _x2c_gensym_func_binding_459, const FuncArg * _x2c_gensym_func_argv_459){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_185 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_459",.line = 0}; & _x2c_gensym_error_site_185; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_186 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_459",.line = 0}; & _x2c_gensym_error_site_186; })));
   return double_var(remainder(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_460(Func _x2c_gensym_func_binding_460, const FuncArg * _x2c_gensym_func_argv_460){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_187 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_460",.line = 0}; & _x2c_gensym_error_site_187; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_188 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_460",.line = 0}; & _x2c_gensym_error_site_188; })));
   return float_var(remainderf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_461(Func _x2c_gensym_func_binding_461, const FuncArg * _x2c_gensym_func_argv_461){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_461, _x2c_gensym_func_argv_461, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_461, _x2c_gensym_func_argv_461, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_461, _x2c_gensym_func_argv_461, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_189 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_461",.line = 0}; & _x2c_gensym_error_site_189; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_461, _x2c_gensym_func_argv_461, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_190 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_461",.line = 0}; & _x2c_gensym_error_site_190; })));
   int * a2 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_461, _x2c_gensym_func_argv_461, 2, 442085973));
   return double_var(remquo(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_462(Func _x2c_gensym_func_binding_462, const FuncArg * _x2c_gensym_func_argv_462){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_462, _x2c_gensym_func_argv_462, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_462, _x2c_gensym_func_argv_462, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_462, _x2c_gensym_func_argv_462, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_191 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_462",.line = 0}; & _x2c_gensym_error_site_191; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_462, _x2c_gensym_func_argv_462, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_192 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_462",.line = 0}; & _x2c_gensym_error_site_192; })));
   int * a2 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_462, _x2c_gensym_func_argv_462, 2, 442085973));
   return float_var(remquof(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_463(Func _x2c_gensym_func_binding_463, const FuncArg * _x2c_gensym_func_argv_463){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_463, _x2c_gensym_func_argv_463, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_463, _x2c_gensym_func_argv_463, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_193 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_463",.line = 0}; & _x2c_gensym_error_site_193; })));
   return double_var(rint(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_464(Func _x2c_gensym_func_binding_464, const FuncArg * _x2c_gensym_func_argv_464){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_464, _x2c_gensym_func_argv_464, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_464, _x2c_gensym_func_argv_464, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_194 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_464",.line = 0}; & _x2c_gensym_error_site_194; })));
   return float_var(rintf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_465(Func _x2c_gensym_func_binding_465, const FuncArg * _x2c_gensym_func_argv_465){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_465, _x2c_gensym_func_argv_465, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_465, _x2c_gensym_func_argv_465, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_195 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_465",.line = 0}; & _x2c_gensym_error_site_195; })));
   return double_var(round(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_466(Func _x2c_gensym_func_binding_466, const FuncArg * _x2c_gensym_func_argv_466){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_466, _x2c_gensym_func_argv_466, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_466, _x2c_gensym_func_argv_466, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_196 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_466",.line = 0}; & _x2c_gensym_error_site_196; })));
   return float_var(roundf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_467(Func _x2c_gensym_func_binding_467, const FuncArg * _x2c_gensym_func_argv_467){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 0, 3356265), 3356265));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 1, 818062), 818062));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_197 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_467",.line = 0}; & _x2c_gensym_error_site_197; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_198 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_467",.line = 0}; & _x2c_gensym_error_site_198; })));
   return double_var(scalbln(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_468(Func _x2c_gensym_func_binding_468, const FuncArg * _x2c_gensym_func_argv_468){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 0, 3355493), 3355493));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 1, 818062), 818062));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_199 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_468",.line = 0}; & _x2c_gensym_error_site_199; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_200 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_468",.line = 0}; & _x2c_gensym_error_site_200; })));
   return float_var(scalblnf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_469(Func _x2c_gensym_func_binding_469, const FuncArg * _x2c_gensym_func_argv_469){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 1, 3453797), 3453797));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_201 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_469",.line = 0}; & _x2c_gensym_error_site_201; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_202 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_469",.line = 0}; & _x2c_gensym_error_site_202; })));
   return double_var(scalbn(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_470(Func _x2c_gensym_func_binding_470, const FuncArg * _x2c_gensym_func_argv_470){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 1, 3453797), 3453797));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_203 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_470",.line = 0}; & _x2c_gensym_error_site_203; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_204 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_470",.line = 0}; & _x2c_gensym_error_site_204; })));
   return float_var(scalbnf(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_471(Func _x2c_gensym_func_binding_471, const FuncArg * _x2c_gensym_func_argv_471){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_471, _x2c_gensym_func_argv_471, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_471, _x2c_gensym_func_argv_471, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_205 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_471",.line = 0}; & _x2c_gensym_error_site_205; })));
   return double_var(sin(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_472(Func _x2c_gensym_func_binding_472, const FuncArg * _x2c_gensym_func_argv_472){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_472, _x2c_gensym_func_argv_472, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_472, _x2c_gensym_func_argv_472, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_206 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_472",.line = 0}; & _x2c_gensym_error_site_206; })));
   return float_var(sinf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_473(Func _x2c_gensym_func_binding_473, const FuncArg * _x2c_gensym_func_argv_473){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_473, _x2c_gensym_func_argv_473, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_473, _x2c_gensym_func_argv_473, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_207 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_473",.line = 0}; & _x2c_gensym_error_site_207; })));
   return double_var(sinh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_474(Func _x2c_gensym_func_binding_474, const FuncArg * _x2c_gensym_func_argv_474){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_474, _x2c_gensym_func_argv_474, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_474, _x2c_gensym_func_argv_474, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_208 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_474",.line = 0}; & _x2c_gensym_error_site_208; })));
   return float_var(sinhf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_475(Func _x2c_gensym_func_binding_475, const FuncArg * _x2c_gensym_func_argv_475){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_475, _x2c_gensym_func_argv_475, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_475, _x2c_gensym_func_argv_475, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_209 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_475",.line = 0}; & _x2c_gensym_error_site_209; })));
   return double_var(sqrt(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_476(Func _x2c_gensym_func_binding_476, const FuncArg * _x2c_gensym_func_argv_476){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_476, _x2c_gensym_func_argv_476, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_476, _x2c_gensym_func_argv_476, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_210 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_476",.line = 0}; & _x2c_gensym_error_site_210; })));
   return float_var(sqrtf(a0));
   ;
 }
@@ -8492,55 +8505,55 @@ static Var _x2c_gensym_func_adapt_477(Func _x2c_gensym_func_binding_477, const F
 static Var _x2c_gensym_func_adapt_478(Func _x2c_gensym_func_binding_478, const FuncArg * _x2c_gensym_func_argv_478){
   const char * a0 = x2c_func_pointer_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 0);
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 2, 44858254), 44858254));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_211 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_478",.line = 0}; & _x2c_gensym_error_site_211; })));
   return int_var(strncmp(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_479(Func _x2c_gensym_func_binding_479, const FuncArg * _x2c_gensym_func_argv_479){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_479, _x2c_gensym_func_argv_479, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_479, _x2c_gensym_func_argv_479, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_212 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_479",.line = 0}; & _x2c_gensym_error_site_212; })));
   return double_var(tan(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_480(Func _x2c_gensym_func_binding_480, const FuncArg * _x2c_gensym_func_argv_480){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_480, _x2c_gensym_func_argv_480, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_480, _x2c_gensym_func_argv_480, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_213 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_480",.line = 0}; & _x2c_gensym_error_site_213; })));
   return float_var(tanf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_481(Func _x2c_gensym_func_binding_481, const FuncArg * _x2c_gensym_func_argv_481){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_481, _x2c_gensym_func_argv_481, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_481, _x2c_gensym_func_argv_481, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_214 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_481",.line = 0}; & _x2c_gensym_error_site_214; })));
   return double_var(tanh(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_482(Func _x2c_gensym_func_binding_482, const FuncArg * _x2c_gensym_func_argv_482){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_482, _x2c_gensym_func_argv_482, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_482, _x2c_gensym_func_argv_482, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_215 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_482",.line = 0}; & _x2c_gensym_error_site_215; })));
   return float_var(tanhf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_483(Func _x2c_gensym_func_binding_483, const FuncArg * _x2c_gensym_func_argv_483){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_483, _x2c_gensym_func_argv_483, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_483, _x2c_gensym_func_argv_483, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_216 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_483",.line = 0}; & _x2c_gensym_error_site_216; })));
   return double_var(tgamma(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_484(Func _x2c_gensym_func_binding_484, const FuncArg * _x2c_gensym_func_argv_484){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_484, _x2c_gensym_func_argv_484, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_484, _x2c_gensym_func_argv_484, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_217 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_484",.line = 0}; & _x2c_gensym_error_site_217; })));
   return float_var(tgammaf(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_485(Func _x2c_gensym_func_binding_485, const FuncArg * _x2c_gensym_func_argv_485){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_485, _x2c_gensym_func_argv_485, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_485, _x2c_gensym_func_argv_485, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_218 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_485",.line = 0}; & _x2c_gensym_error_site_218; })));
   return double_var(trunc(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_486(Func _x2c_gensym_func_binding_486, const FuncArg * _x2c_gensym_func_argv_486){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_486, _x2c_gensym_func_argv_486, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_486, _x2c_gensym_func_argv_486, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_219 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_486",.line = 0}; & _x2c_gensym_error_site_219; })));
   return float_var(truncf(a0));
   ;
 }

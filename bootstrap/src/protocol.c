@@ -3048,7 +3048,7 @@ int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String
   Type owner = Type_canonicalize(participant);
   int rejects = 0;
   Var _x2c_gensym_macro_cached_2;
-  if(Map_try_get(c -> proto_cache, List_var(cons(String_var(_338), cons(List_var(owner), cons(String_var(member), NULL)))), &(_x2c_gensym_macro_cached_2))) rejects = Var_int(Var_convert(_x2c_gensym_macro_cached_2, 3453797));
+  if(Map_try_get(c -> proto_cache, List_var(cons(String_var(_338), cons(List_var(owner), cons(String_var(member), NULL)))), &(_x2c_gensym_macro_cached_2))) rejects = Var_int(Var_convert_at(_x2c_gensym_macro_cached_2, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/protocol/lookup.x",.function = "Compiler_protocol_rejects_direct_member",.line = 64}; & _x2c_gensym_error_site_0; })));
   else{
     {
       List protocols = f6_lookup____ordered_occurrences(c);
@@ -4551,7 +4551,7 @@ static List f8_adapters____native_aliases(Compiler c, List ast, Type base, Type 
   if(! Map_try_get(c -> protocol_helpers, List_var(cons(String_var(_598), cons(List_car(Type_list(participant)), NULL))), &(stored))) return ast;
   List _x2c_gensym_destructure_18 = Var_list_payload(stored);
   List source = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 0));
-  int private = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_18, 1), 3453797));
+  int private = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_18, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/protocol/adapters.x",.function = "f8_adapters____native_aliases",.line = 356}; & _x2c_gensym_error_site_1; })));
   int make_static = _visibility(c, base, participant) == 1317118534;
   Array aliases = Array_new();
   {

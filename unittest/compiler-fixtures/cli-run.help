@@ -13,6 +13,7 @@ Target options:
 
 Output options:
       --source-map            Map generated C locations to original x2c sources
+      --no-source-map         Keep generated C locations in native diagnostics
   -o, --output <file>         Name the executable, library, or single object
       --rebuild               Build even when the cached executable is current
       --clean                 Remove the cached build and exit without running it
@@ -78,5 +79,6 @@ the first input's absolute path. Unchanged runs skip the build.
 --save-temps=<dir> and --build-dir <dir> select the retained directory;
 the last named directory wins. Manifest products default to
 <project>/.x2c-build/<target-product>.
---debug logs compiler activity; use -g --source-map -O0 for source
-debugging. See 'x2c help build' for other build defaults.
+--debug logs compiler activity; use -g -O0 for source debugging.
+--no-source-map uses generated C locations.
+See 'x2c help build' for other build defaults.

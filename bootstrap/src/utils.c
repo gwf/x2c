@@ -600,7 +600,7 @@ void Diagnostics_host_error(List detail){
   if(! _init_guard_) _file_init_();
   Var subject = List_assoc(detail, Symbol_var(1051920));
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
-  long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
+  long error = Var_long(Var_convert_at(List_assoc(detail, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/utils.x",.function = "Diagnostics_host_error",.line = 430}; & _x2c_gensym_error_site_0; })));
   Diagnostics_driver_error(({
     Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(subject));  Var _x2c_gensym_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_44), cons(_x2c_gensym_literal_part_3, cons(String_var(_45), cons(_x2c_gensym_literal_part_4, NULL))))));
   }

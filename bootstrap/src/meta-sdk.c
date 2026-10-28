@@ -415,12 +415,12 @@ String x2c_invocation_file(void){
 
 int x2c_invocation_line(void){
   if(! _init_guard_) _file_init_();
-  return Var_int(Var_convert(List_assoc(MetaContext_invocation_location(), Symbol_var(805770)), 3453797));
+  return Var_int(Var_convert_at(List_assoc(MetaContext_invocation_location(), Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk/context.x",.function = "x2c_invocation_line",.line = 41}; & _x2c_gensym_error_site_0; })));
 }
 
 int x2c_invocation_column(void){
   if(! _init_guard_) _file_init_();
-  return Var_int(Var_convert(List_assoc(MetaContext_invocation_location(), Symbol_var(233614172)), 3453797));
+  return Var_int(Var_convert_at(List_assoc(MetaContext_invocation_location(), Symbol_var(233614172)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk/context.x",.function = "x2c_invocation_column",.line = 45}; & _x2c_gensym_error_site_1; })));
 }
 
 _Noreturn void MetaContext_reject(String message, List notes);
@@ -475,8 +475,8 @@ _Noreturn void MetaContext_reject(String message, List notes){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 96};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), String_var(message));
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 96};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), String_var(message));
       __builtin_unreachable();
     }
 
@@ -1025,8 +1025,8 @@ List MetaContext_function_reference(String name){
   if(! _init_guard_) _file_init_();
   Compiler c = active.evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk/syntax.x",.function = "MetaContext_function_reference",.line = 160};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/meta-sdk/syntax.x",.function = "MetaContext_function_reference",.line = 160};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));
     __builtin_unreachable();
   }
   Type type = NULL;
@@ -1821,7 +1821,7 @@ String Code_source_text(Var value){
   Var stored =((void) 0, Void);
   if(! Map_truth(active.captures) || ! Map_try_get(active.captures, ulong_var(((ulong) value.u64)), &(stored))) MetaContext_reject(_174, active.has_bindings ? NULL : cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(Var_repr(value)), NULL)))), NULL));
   List source = Var_list_payload(stored);
-  int begin = Var_int(Var_convert(List_caddr(source), 3453797)), end = Var_int(Var_convert(List_last(source), 3453797));
+  int begin = Var_int(Var_convert_at(List_caddr(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 75}; & _x2c_gensym_error_site_4; }))), end = Var_int(Var_convert_at(List_last(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 75}; & _x2c_gensym_error_site_5; })));
   return String_new_len(active.expander -> text + begin, end - begin);
 }
 

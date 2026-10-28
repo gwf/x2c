@@ -280,6 +280,13 @@ Symbol Error_raise(Symbol code, List detail){
   return f8_dispatch____dispatch(r);
 }
 
+void Error_raise_at(const X2CErrorSite * site, Symbol code, List detail){
+  if(! _init_guard_) _file_init_();
+  f8_dispatch___ErrorRaise r = f8_dispatch____raise_enter(code);
+  _record(site, r.code, detail);
+  f8_dispatch____dispatch(r);
+}
+
 void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...){
   if(! _init_guard_) _file_init_();
   f8_dispatch___ErrorRaise r = f8_dispatch____raise_enter(code);

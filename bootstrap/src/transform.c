@@ -1999,7 +1999,7 @@ static Ast _step(Compiler c, Ast ast){
         origin = x2c_match_value_0;
         Var inner;
         inner = x2c_match_value_1;
-        return f9_traversal____at_node(c, ast, Var_int(Var_convert(origin, 3453797)), Var_list_payload(inner));
+        return f9_traversal____at_node(c, ast, Var_int(Var_convert_at(origin, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/transform/traversal.x",.function = "_step",.line = 59}; & _x2c_gensym_error_site_0; }))), Var_list_payload(inner));
       }
       break;}} case 9224498395122781148ULL :{List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2, x2c_match_value_3; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224498395122781148ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_1 ->car, 1) &&((Var_is(_x2c_gensym_match_at_1 -> car, 806120) &&(_x2c_gensym_match_at_2 = Var_list_payload(_x2c_gensym_match_at_1 -> car), 1)) && _x2c_gensym_match_at_2 && _x2c_gensym_match_at_2 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_3 ->car, 1) &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_3 ->cdr) && !(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr)) &&(_x2c_gensym_match_at_6 = _x2c_gensym_match_at_1 ->cdr) &&(x2c_match_value_3 = _x2c_gensym_match_at_6 ->car, 1) && !(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_6 ->cdr)){{
         Var return_type;
@@ -4335,7 +4335,7 @@ static List f8_literals____ordered_parts(Compiler c, Array values, Array orders)
   int count = f8_literals____ordered_count(orders);
   if(! count) return NULL;
   Array declarations = Array_new();
-  for(int i = 0;  i < count;  i ++) if(Var_int(Var_convert(Array_getindex(orders, i), 3453797))) Array_setindex(values, i, List_var(f8_literals____sequenced(c, f8_literals____passed_as(Var_list_payload(Array_getindex(values, i)), List_type(_40)), _1404, declarations)));
+  for(int i = 0;  i < count;  i ++) if(Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_parts",.line = 184}; & _x2c_gensym_error_site_1; })))) Array_setindex(values, i, List_var(f8_literals____sequenced(c, f8_literals____passed_as(Var_list_payload(Array_getindex(values, i)), List_type(_40)), _1404, declarations)));
   return Array_list_free(declarations);
 }
 
@@ -4344,7 +4344,7 @@ static List f8_literals____ordered_parts(Compiler c, Array values, Array orders)
 static int f8_literals____ordered_count(Array orders){
   int reads = 0, count = 0;
   for(int i = 0;  i < Array_len(orders);  i ++){
-    int order = Var_int(Var_convert(Array_getindex(orders, i), 3453797));
+    int order = Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_count",.line = 194}; & _x2c_gensym_error_site_2; })));
     if(order) reads ++;
     if(order > 1) count = i + 1;
   }

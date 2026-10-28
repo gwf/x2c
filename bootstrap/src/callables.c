@@ -2104,7 +2104,7 @@ List Compiler_lower_typed_adapter_expr(Compiler c, List expression){
           ;
           x2c_cleanup_push(& _x2c_gensym_defer_record_1);
           {
-            * _x2c_gensym_macro_address_0 = Var_int(Var_convert(at, 3453797));
+            * _x2c_gensym_macro_address_0 = Var_int(Var_convert_at(at, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/callables/callbacks.x",.function = "Compiler_lower_typed_adapter_expr",.line = 60}; & _x2c_gensym_error_site_0; })));
             {
               cb.target = Sym_resolve_key(c -> sym, Var_type(spelling));
               f9_callbacks____split(&(cb));

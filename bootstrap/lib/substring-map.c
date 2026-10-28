@@ -590,7 +590,7 @@ int MapSubInt_try_next(MapSubInt map, unsigned * cursor, Substr * word, int * co
 
 static int _x2c_gensym_macro__step_0(Iter _x2c_gensym_macro_iter_0, Substr * _x2c_gensym_macro_key_9, int * _x2c_gensym_macro_val_4){
   MapSubInt _x2c_gensym_macro_map_22 = Var_mapsubint(_x2c_gensym_macro_iter_0 -> obj);
-  unsigned _x2c_gensym_macro_cursor_3 = Var_uint(Var_convert(_x2c_gensym_macro_iter_0 -> state, 3847013));
+  unsigned _x2c_gensym_macro_cursor_3 = Var_uint(Var_convert_at(_x2c_gensym_macro_iter_0 -> state, 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/substring-map.x",.function = "_x2c_gensym_macro__step_0",.line = 31,.runtime = 1}; & _x2c_gensym_error_site_3; })));
   if(! MapSubInt_try_next(_x2c_gensym_macro_map_22, &(_x2c_gensym_macro_cursor_3), &((* _x2c_gensym_macro_key_9)), &((* _x2c_gensym_macro_val_4)))) return 0;
   _x2c_gensym_macro_iter_0 -> state = unsigned_var(_x2c_gensym_macro_cursor_3);
   return 1;

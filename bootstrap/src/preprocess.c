@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "compiler/compiler.h"
+#include "ast.h"
 #include <ctype.h>
 typedef struct ArmScan{
   Compiler c;
@@ -22,6 +23,8 @@ static Var _19, _13;
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List _leading_preproc(Compiler c, int located);
 
 static void _directive(ArmScan * s, Token token, size_t i);
 
@@ -212,13 +215,12 @@ int Compiler_preproc_branch_state(int state){
 
 List Compiler_leading_preproc(Compiler c){
   if(! _init_guard_) _file_init_();
-  List noncode = NULL;
-  Token base = c -> tokenizer -> tokens, token = c -> token;
-  while(-- token >= base){
-    if(token -> type == 35579270086) noncode = cons(List_var(cons(_13, cons(String_var(token -> text), NULL))), noncode);
-    else if(token -> type != 40896714 && token -> type != 7477210024) break;
-  }
-  return noncode;
+  return _leading_preproc(c, 0);
+}
+
+List Compiler_located_preproc(Compiler c){
+  if(! _init_guard_) _file_init_();
+  return _leading_preproc(c, c -> source_map);
 }
 
 void Compiler_note_object_macro(Compiler c, String content);
@@ -232,7 +234,7 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       directive = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      Compiler_note_object_macro(c, Var_as_string(List_cadr(directive)));
+      Compiler_note_object_macro(c, Var_as_string(List_cadr(Ast_without_origin(directive))));
     }
 
   }
@@ -319,6 +321,21 @@ List Compiler_preproc_within_arms(List arms, List items){
   return Array_list_free(out);
 }
 
+static List _leading_preproc(Compiler c, int located){
+  List noncode = NULL;
+  Token base = c -> tokenizer -> tokens, token = c -> token;
+  while(-- token >= base){
+    if(token -> type == 35579270086){
+      List directive = cons(_13, cons(String_var(token -> text), NULL));
+      int angle = 0;
+      if(located && String_truth(Compiler_preproc_include_target(token -> text, &(angle)))) directive = Compiler_anchor_origin(c, directive, token);
+      noncode = cons(List_var(directive), noncode);
+    }
+    else if(token -> type != 40896714 && token -> type != 7477210024) break;
+  }
+  return noncode;
+}
+
 static void _directive(ArmScan * s, Token token, size_t i){
   Symbol kind = Compiler_preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
@@ -332,7 +349,7 @@ static void _directive(ArmScan * s, Token token, size_t i){
     id = List_getindex(_x2c_gensym_destructure_0, 0);
     arm = List_getindex(_x2c_gensym_destructure_0, 1);
     state = List_getindex(_x2c_gensym_destructure_0, 2);
-    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert(state, 3453797))));
+    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert_at(state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_directive",.line = 229}; & _x2c_gensym_error_site_0; })))));
     Array_setindex((* s).stack, - 1, List_var(({
       Var _x2c_gensym_literal_part_4 = id;  Var _x2c_gensym_literal_part_5 = long_var(Var_integer(arm) + 1);  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(branch, NULL)));
     }
@@ -419,7 +436,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     if(token -> type != 19147688) continue;
     int level = 0;
     if(String_equal(token -> text, _29)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert(Map_getindex(layout, String_var(token -> text)), 3453797));
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 327}; & _x2c_gensym_error_site_1; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));

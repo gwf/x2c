@@ -742,15 +742,15 @@ static VarDescriptor * _row(int index){
 
 static String _primitive_str(Var v, Symbol tag){
   switch(tag){
-    case 26993 : case 30065 : return String_printf(_8, Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return String_printf(_9, Var_int(Var_convert(v, 3453797)));
-    case 3454065 : case 818062 : return String_printf(_10, Var_long(Var_convert(v, 818062)));
-    case 25983886 : return String_printf(_11, Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return String_printf(_12, Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : case 44858254 : return String_printf(_13, Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return String_printf(_14, Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return String_printf(_15, Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return String_printf(_16, Var_long_double(Var_convert(v, 26071077642)));
+    case 26993 : case 30065 : return String_printf(_8, Var_int(Var_convert_at(v, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 660,.runtime = 1}; & _x2c_gensym_error_site_16; }))));
+    case 3453293 : case 3453797 : return String_printf(_9, Var_int(Var_convert_at(v, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 661,.runtime = 1}; & _x2c_gensym_error_site_17; }))));
+    case 3454065 : case 818062 : return String_printf(_10, Var_long(Var_convert_at(v, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 662,.runtime = 1}; & _x2c_gensym_error_site_18; }))));
+    case 25983886 : return String_printf(_11, Var_long_long(Var_convert_at(v, 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 663,.runtime = 1}; & _x2c_gensym_error_site_19; }))));
+    case 3846509 : case 3847013 : return String_printf(_12, Var_uint(Var_convert_at(v, 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 664,.runtime = 1}; & _x2c_gensym_error_site_20; }))));
+    case 3847281 : case 44858254 : return String_printf(_13, Var_ulong(Var_convert_at(v, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 665,.runtime = 1}; & _x2c_gensym_error_site_21; }))));
+    case 1435270030 : return String_printf(_14, Var_ulong_long(Var_convert_at(v, 1435270030, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 666,.runtime = 1}; & _x2c_gensym_error_site_22; }))));
+    case 3355493 : case 3356265 : return String_printf(_15, Var_floating(Var_convert_at(v, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 667,.runtime = 1}; & _x2c_gensym_error_site_23; }))));
+    case 26071077642 : return String_printf(_16, Var_long_double(Var_convert_at(v, 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/dispatch.x",.function = "_primitive_str",.line = 668,.runtime = 1}; & _x2c_gensym_error_site_24; }))));
     case 28764 : case 1854348 : case 2050956 : return String_join(NULL, cons(String_var(Symbol_str(tag)), NULL));
   }
   return Var_pointer_string(v);
@@ -762,15 +762,15 @@ static Buffer _write_text(Buffer out, String text){
 
 static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out){
   switch(tag){
-    case 26993 : case 30065 : return Buffer_printf(out, "%c", Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return Buffer_printf(out, "%d", Var_int(Var_convert(v, 3453797)));
-    case 3454065 : case 818062 : return Buffer_printf(out, "%ld", Var_long(Var_convert(v, 818062)));
-    case 25983886 : return Buffer_printf(out, "%lld", Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return Buffer_printf(out, "%u", Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : case 44858254 : return Buffer_printf(out, "%lu", Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return Buffer_printf(out, "%llu", Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return Buffer_printf(out, "%lf", Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return Buffer_printf(out, "%Lf", Var_long_double(Var_convert(v, 26071077642)));
+    case 26993 : case 30065 : return Buffer_printf(out, "%c", Var_int(Var_convert_at(v, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 680,.runtime = 1}; & _x2c_gensym_error_site_25; }))));
+    case 3453293 : case 3453797 : return Buffer_printf(out, "%d", Var_int(Var_convert_at(v, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 681,.runtime = 1}; & _x2c_gensym_error_site_26; }))));
+    case 3454065 : case 818062 : return Buffer_printf(out, "%ld", Var_long(Var_convert_at(v, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 682,.runtime = 1}; & _x2c_gensym_error_site_27; }))));
+    case 25983886 : return Buffer_printf(out, "%lld", Var_long_long(Var_convert_at(v, 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 683,.runtime = 1}; & _x2c_gensym_error_site_28; }))));
+    case 3846509 : case 3847013 : return Buffer_printf(out, "%u", Var_uint(Var_convert_at(v, 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 684,.runtime = 1}; & _x2c_gensym_error_site_29; }))));
+    case 3847281 : case 44858254 : return Buffer_printf(out, "%lu", Var_ulong(Var_convert_at(v, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 685,.runtime = 1}; & _x2c_gensym_error_site_30; }))));
+    case 1435270030 : return Buffer_printf(out, "%llu", Var_ulong_long(Var_convert_at(v, 1435270030, ({ static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 686,.runtime = 1}; & _x2c_gensym_error_site_31; }))));
+    case 3355493 : case 3356265 : return Buffer_printf(out, "%lf", Var_floating(Var_convert_at(v, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 687,.runtime = 1}; & _x2c_gensym_error_site_32; }))));
+    case 26071077642 : return Buffer_printf(out, "%Lf", Var_long_double(Var_convert_at(v, 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/dispatch.x",.function = "_write_primitive_str",.line = 688,.runtime = 1}; & _x2c_gensym_error_site_33; }))));
     case 28764 : case 1854348 : case 2050956 : return Buffer_write(out, String_join(NULL, cons(String_var(Symbol_str(tag)), NULL)));
   }
   return Buffer_write(out, Var_pointer_string(v));
@@ -931,8 +931,8 @@ static void _valid_member_operand(Var value, String side){
     {
       Var _x2c_gensym_literal_part_1 = Var_box_ulong(bits);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 879,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_1, Symbol_var(1263882), String_var(side));
+        static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 879,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_34, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_1, Symbol_var(1263882), String_var(side));
         __builtin_unreachable();
       }
 
@@ -940,8 +940,8 @@ static void _valid_member_operand(Var value, String side){
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 881,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 1, Symbol_var(1263882), String_var(side));
+    static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 881,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_35, 48270474208, 1, Symbol_var(1263882), String_var(side));
     __builtin_unreachable();
   }
 
@@ -952,8 +952,8 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
   if(descriptor) return descriptor;
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 888,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_18, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 888,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_36, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
 

@@ -1462,7 +1462,7 @@ List _tag_numeric_row(List row){
 }
 
 int _tag_rank(List row){
-  return Var_int(Var_convert(List_getindex(row, 7), 3453797));
+  return Var_int(Var_convert_at(List_getindex(row, 7), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/var-tags.x",.function = "_tag_rank",.line = 69,.runtime = 1}; & _x2c_gensym_error_site_0; })));
 }
 
 int _tag_floating(List row){
@@ -1491,7 +1491,7 @@ List _tag_bits_expr(List row){
     Type type = Var_list_payload(bits);
     return cons(_1, cons(_2, cons(List_var(cons(_3, cons(_92, cons(List_var(cons(_93, cons(_94, cons(List_var(cons(_3, cons(_98, cons(List_var(cons(_99, cons(List_var(cons(_100, cons(List_var(cons(_101, cons(List_var(cons(List_var(cons(_6, cons(_108, cons(_21, cons(List_var(type), NULL))))), NULL)), _118))), NULL))), NULL))), NULL)))), _133)))), NULL)))), NULL)));
   }
-  int width = Var_int(Var_convert(bits, 3453797));
+  int width = Var_int(Var_convert_at(bits, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/var-tags.x",.function = "_tag_bits_expr",.line = 86,.runtime = 1}; & _x2c_gensym_error_site_1; })));
   return Macro_typed(_33, int_var(width));
 }
 
@@ -1554,7 +1554,7 @@ Array Array_update_n(Array, unsigned, ...);
 List _tag_row_entry(List row, Map counts){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_symbol(List_getindex(row, 0));
-  int top = _tag_top(row), mask = _tag_group_mask(Var_int(Var_convert(Map_getindex(counts, int_var(top)), 3453797))), bottom = _tag_bottom(row);
+  int top = _tag_top(row), mask = _tag_group_mask(Var_int(Var_convert_at(Map_getindex(counts, int_var(top)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/var-tags.x",.function = "_tag_row_entry",.line = 117,.runtime = 1}; & _x2c_gensym_error_site_2; })))), bottom = _tag_bottom(row);
   return({
     Var _x2c_gensym_literal_part_15 = List_var(Macro_typed(_48, Symbol_var(tag)));  Var _x2c_gensym_literal_part_16 = List_var(_tag_list(Array_list(({
       Var _x2c_gensym_literal_part_12 = List_var(Macro_typed(_33, int_var(top)));  Var _x2c_gensym_literal_part_13 = List_var(Macro_typed(_33, int_var(mask)));  Var _x2c_gensym_literal_part_14 = List_var(Macro_typed(_33, int_var(bottom)));  Array_update_n(Array_new(), 3, _x2c_gensym_literal_part_12, _x2c_gensym_literal_part_13, _x2c_gensym_literal_part_14);
@@ -1632,15 +1632,15 @@ int _tag_group_top(int slot){
 }
 
 int _tag_top(List row){
-  return Var_int(Var_convert(List_getindex(row, 3), 3453797));
+  return Var_int(Var_convert_at(List_getindex(row, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/var-tags.x",.function = "_tag_top",.line = 194,.runtime = 1}; & _x2c_gensym_error_site_3; })));
 }
 
 int _tag_middle(List row){
-  return Var_int(Var_convert(List_getindex(row, 4), 3453797));
+  return Var_int(Var_convert_at(List_getindex(row, 4), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/var-tags.x",.function = "_tag_middle",.line = 196,.runtime = 1}; & _x2c_gensym_error_site_4; })));
 }
 
 int _tag_bottom(List row){
-  return Var_int(Var_convert(List_getindex(row, 5), 3453797));
+  return Var_int(Var_convert_at(List_getindex(row, 5), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var-tags.x",.function = "_tag_bottom",.line = 198,.runtime = 1}; & _x2c_gensym_error_site_5; })));
 }
 
 int _tag_group_mask(int count){

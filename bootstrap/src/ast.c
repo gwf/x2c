@@ -705,7 +705,7 @@ int Ast_try_binding(List binding, int * identity, String * spelling){
     List _x2c_gensym_match_expr_13 = binding; {List _x2c_gensym_match_at_107, _x2c_gensym_match_at_108, _x2c_gensym_match_at_109; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_13 && _x2c_gensym_match_expr_13 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_107 = _x2c_gensym_match_expr_13 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_107 ->car, 1) &&(_x2c_gensym_match_at_108 = _x2c_gensym_match_at_107 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_108 ->car, 1) && Var_is(_x2c_gensym_match_at_108 -> car, 1318210446) && !(_x2c_gensym_match_at_109 = _x2c_gensym_match_at_108 ->cdr)){
       Var id;  id = x2c_match_value_0;  Var name;  name = x2c_match_value_1;  Var _x2c_gensym_match_value_0 = name; {
         String name = Var_as_string(_x2c_gensym_match_value_0); {
-          if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;  if(identity)(* identity) = Var_int(Var_convert(id, 3453797));  if(spelling)(* spelling) = name;  return 1;
+          if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;  if(identity)(* identity) = Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/ast.x",.function = "Ast_try_binding",.line = 301}; & _x2c_gensym_error_site_0; })));  if(spelling)(* spelling) = name;  return 1;
         }
 
       }

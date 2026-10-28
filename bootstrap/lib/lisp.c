@@ -3291,7 +3291,7 @@ static Var f10_primitives____chain(List values, String operation, int want, int 
     List _x2c_gensym_destructure_5 = p;
     left = List_getindex(_x2c_gensym_destructure_5, 0);
     right = List_getindex(_x2c_gensym_destructure_5, 1);
-    int order = Var_int(Var_convert(lisp_compare(left, right), 3453797));
+    int order = Var_int(Var_convert_at(lisp_compare(left, right), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 241,.runtime = 1}; & _x2c_gensym_error_site_48; })));
     if(expect ? order != want : order == want) return f10_primitives____bool(0);
   }
   return f10_primitives____bool(1);

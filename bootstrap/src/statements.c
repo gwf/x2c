@@ -669,8 +669,8 @@ static int _default_after_directive(Array groups, int saw_default, List d){
   if(kind == 1016156) Array_push(groups, List_var(cons(int_var(saw_default), cons(int_var(saw_default), NULL))));
   else if(kind && Array_len(groups)){
     List _x2c_gensym_destructure_0 = Var_list_payload(Array_take_last(groups));
-    int before = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 0), 3453797));
-    int any = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 1), 3453797));
+    int before = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 312}; & _x2c_gensym_error_site_0; })));
+    int any = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 312}; & _x2c_gensym_error_site_1; })));
     any |= saw_default;
     if(kind == 7109834) return any;
     Array_push(groups, List_var(cons(int_var(before), cons(int_var(any), NULL))));

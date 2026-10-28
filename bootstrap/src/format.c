@@ -118,13 +118,13 @@ String Compiler_code_text(Compiler c, Array tokens){
 List Compiler_origin_location(Compiler, int);
 
 static void _source_marker(Pretty * p, Var value){
-  List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));
+  List location = Compiler_origin_location((* p).c, Var_int(Var_convert_at(value, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/format.x",.function = "_source_marker",.line = 87}; & _x2c_gensym_error_site_0; }))));
   while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
   if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
   while((* p).scanned < Buffer_len((* p).buff)) if(Buffer_getindex((* p).buff, (* p).scanned ++) == '\n')(* p).output_line ++;
   String file = Var_as_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* p).output_file));
   if(! String_truth(file)) file = _0;
-  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797));
+  int line = Var_int(Var_convert_at(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/format.x",.function = "_source_marker",.line = 94}; & _x2c_gensym_error_site_1; })));
   (* p).source_line = List_truth(location) ? line : 0;
   String escaped = String_replace(String_escape(file), _1, _2);
   Buffer_write((* p).buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(line)), cons(String_var(_4), cons(String_var(escaped), cons(String_var(_5), NULL)))))));

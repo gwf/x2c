@@ -17,6 +17,7 @@ Target options:
 
 Output options:
       --source-map            Map generated C locations to original x2c sources
+      --no-source-map         Keep generated C locations in native diagnostics
   -o, --output <file>         Name the executable, library, or single object
       --build-dir <dir>       Store generated C, objects, deps, and state here
       --compile-commands <file>
@@ -86,4 +87,5 @@ in .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.
 The last named directory wins. Under Make, jobs default to one;
 otherwise they default to the online processor count.
 --debug logs compiler activity; -g emits native debug information.
-Add --source-map -O0 to -g for debugging original x2c sources.
+Source mapping is on by default; -g -O0 debugs original x2c sources.
+--no-source-map uses generated C locations.
