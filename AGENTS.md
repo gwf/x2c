@@ -246,9 +246,17 @@ rather than silently replacing it. These tools and canonical skills work for
 both providers; provider-specific session or messaging APIs are unnecessary.
 
 For shared-integrator delivery, review the authored change and run meaningful
-focused checks, then push a work branch and submit its non-draft PR through
+focused checks. A submission that changes the compiler, runtime, or shared
+build must also pass `make stage-2` on the submitted tree. Perform a local
+rebootstrap first when the seed cannot consume the change, then complete the
+stage-two build. Keep the relevant focused checks; a stage build does not
+replace them. This requirement applies to the submitting parent's
+combined tree, not each private worker checkpoint. Documentation-only and
+independent external-command submissions retain their relevant focused checks.
+Then push a work branch and submit its non-draft PR through
 `tools/integrate-dev.py submit`. Record the starting revision, exact head,
-dependencies, and focused evidence as described in
+dependencies, stage-build and local-rebootstrap evidence when applicable, and
+focused evidence as described in
 [quick start](agents/quick-start.md#submit-to-the-shared-integrator).
 The coordinator enrolls it with `integration-ready`; merely creating a PR
 does not enroll it. Readiness requests integration of that pinned revision.
@@ -257,9 +265,10 @@ across GitHub and Git.
 
 A submission may be pushed without a publication gate or final shipped
 bootstrap. Do not merge moving `dev`, regenerate final artifacts, or run a
-full gate solely to submit. Keep local bootstrap transitions usable for
-development. The integrator owns final generated artifacts and the applicable
-performance work and publication gate once per combined batch. Report a PR
+full gate solely to submit. The required stage-two build and any necessary
+local rebootstrap are development checks, not final artifact publication.
+Keep local bootstrap transitions usable for development. The integrator owns
+final generated artifacts and the applicable performance work and publication gate once per combined batch. Report a PR
 as submitted, not published or validated. Ordinary review-held PRs retain
 the existing publication validation below and are never enrolled. For that
 review stop, use `individual`/`direct` or `orchestrator`/`direct` context so

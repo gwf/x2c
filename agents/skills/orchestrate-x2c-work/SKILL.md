@@ -94,8 +94,9 @@ completed integrated tree; commit organization is an implementation choice.
 
 In shared-integrator mode, follow
 [the submission handoff](../../quick-start.md#submit-to-the-shared-integrator).
-Commit, push the work branch, and enroll one or more ready PRs targeting `dev`
-with the actual starting revision, pinned dependencies, focused evidence, and
+Complete the root submission checks on each coherent submitted tree, including
+stage two and local rebootstrap when applicable. Commit, push the work branch,
+and enroll one or more ready PRs targeting `dev` with the actual starting revision, pinned dependencies, focused evidence, and
 transition notes. Do not merge moving `dev`, refresh final generated artifacts,
 or run a publication gate solely to submit. The parent submits; subordinate
 workers remain private. A requested review stop uses `orchestrator`/`direct`

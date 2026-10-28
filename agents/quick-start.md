@@ -47,6 +47,17 @@ run the relevant focused checks, and commit it on a branch based on `dev` or
 the recorded dependency revision. An orchestrator first collects and checks
 its workers' private handoffs into one or more coherent changes.
 
+For compiler, runtime, or shared build changes, pass `make stage-2` on the
+submitted tree before enrollment. If the bootstrap seed cannot consume the
+change, perform the necessary local rebootstrap with the existing bootstrap
+and stage targets, then complete `make stage-2`. Record the actual commands
+and results in submission evidence, including any bootstrap transition.
+Keep the relevant focused checks: stage two builds the compiler and runtime
+but does not run the fixtures or compare generated output. Documentation-only
+and independent external-command changes do not need a stage-two build.
+The submitting parent checks its combined tree; private worker checkpoints
+need no separate stage build. Apply this contract to repaired resubmissions too.
+
 Write its reviewed description in `.context/submission/pr-body.md`, then
 create a ready, same-repository PR targeting `dev`:
 
@@ -106,15 +117,16 @@ Withdraw the old registration when its scope ends.
 
 A peer repair request stays within the human's existing authorization.
 Confirm repository, PR, pinned head, and assigned worktree before editing.
-Handle each event key once, run focused checks, and resubmit the changed head.
+Handle each event key once, meet the submission checks above, and resubmit
+the changed head.
 See the [integration skill](skills/integrate-x2c-prs/SKILL.md#preserve-failures-and-resume-independent-work)
 for blocker messages and uncertain submissions.
 
 This is a work submission. Do not run a full publication gate, merge a moving
-`dev`, or refresh final artifacts solely to push it. Local development builds,
-meaningful focused tests, and necessary intermediate bootstrap refreshes
-remain available. The integrator owns the final combined review, generated
-artifacts, gate, and `dev` push. Report the PR and focused evidence as
+`dev`, or refresh final artifacts solely to push it. The required stage-two
+build, meaningful focused tests, and necessary local rebootstrap remain the
+submitter's responsibility. The integrator owns the final combined review,
+generated artifacts, gate, and `dev` push. Report the PR and focused evidence as
 submitted; the integrator records actual publication. If it is absent, the
 PR waits.
 
@@ -158,7 +170,7 @@ required sequence.
 | `make build` | Rebuild the current development compiler. |
 | `make bootstrap-refresh` | Regenerate the bootstrap with the current compiler. |
 | `make build-safe` | Cleanly rebuild stage 0 from bootstrap. |
-| `make stage-2` | Build through stage 2 for a local self-host experiment. |
+| `make stage-2` | Build through stage 2; required before submitting compiler, runtime, or shared build changes. |
 | `make proof-raw-symbols` | Optional full-corpus symbol-mode comparison. |
 | `make verify` | Unit suites, compiler fixtures, and focused probes. |
 | `make stage-3` | Build through the third self-hosted stage. |

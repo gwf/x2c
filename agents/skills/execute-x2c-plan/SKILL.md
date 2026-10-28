@@ -51,9 +51,11 @@ Inspect generated changes against the authored changes that explain them.
 ## Deliver
 
 Follow the root delivery selection: direct integration is the default;
-"use the integrator" means a ready PR submission with focused evidence rather
-than a publication gate. Subordinate workers give private handoffs to their
-orchestrator. Review-held PRs and local-only requests retain their boundaries.
+"use the integrator" means a ready PR submission under the
+[root submission checks](../../../AGENTS.md#select-integration-ownership),
+including stage two and local rebootstrap when applicable, plus focused
+evidence. The integrator owns the full publication gate. Subordinate workers
+give private handoffs to their orchestrator. Review-held PRs and local-only requests retain their boundaries.
 The work is complete when the requested behavior works and the authorized
 delivery is verified. Production promotion and advancement of `main` require
 Gary's separate release authorization. Report whether the result was published,
