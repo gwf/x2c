@@ -11,6 +11,10 @@ on:
         description: Also run installation, examples, and fresh package validation
         type: boolean
         default: false
+      wasm_runtime:
+        description: Also build and run the optional Memory64 runtime
+        type: boolean
+        default: false
       windows_spike:
         description: Also probe Windows install routes (WSL2 check, MSYS2 build attempt)
         type: boolean
@@ -54,6 +58,30 @@ jobs:
         run: make build-safe
       - name: Run leak-enabled sanitizer gate
         run: X2C_DETECT_LEAKS=1 make verify-sanitize
+
+  wasm-runtime:
+    if: inputs.wasm_runtime
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 6.0.13
+      - name: Build the native compiler and Memory64 runtime
+        run: |
+          make build-safe
+          make wasm-runtime
+      - name: Run the language tour under Node
+        run: |
+          mkdir -p /tmp/x2c-wasm-tour
+          tools/wasm-build examples/tours/language.x /tmp/x2c-wasm-tour/language
+          node --input-type=module -e \
+            'import("file:///tmp/x2c-wasm-tour/language.js").then(m => m.default())' \
+            > /tmp/x2c-wasm-tour/stdout
+          diff -u examples/expected/docs-tour.stdout /tmp/x2c-wasm-tour/stdout
 
   release-validation:
     if: inputs.release_validation

@@ -1,6 +1,10 @@
-> Status: needs author scoping
+> Status: reference
+> Phases 1 and 2 published to dev on 2026-10-28 through PR #596
+> (`b1584a01fffab7b18eaf80afc23fd5fdb19189c6`). The shared integrator
+> passed the full publication gate. Phase 3 remains unscoped.
 > Planned 2026-10-28 against `gwf/repo-survey-major-features-933090`
-> (`f5d0eb2fb`). Nothing is implemented. The runtime and three programs
+> (`f5d0eb2fb`). The original feasibility evidence follows. The runtime
+> and three programs
 > were compiled to WebAssembly with Emscripten 6.0.13 and run under Node
 > 26 during planning; the compiler itself was not compiled to wasm.
 
@@ -184,8 +188,9 @@ as the service response body with exit status 1.
 
 ### Service
 
-An HTTP endpoint `POST /compile` with the source as the body and
-`application/wasm` plus the Emscripten loader JSON as the response.
+An HTTP endpoint `POST /compile` with source text as the body and an
+`application/json` response containing `loader` (ES module source) and
+`wasm` (base64 bytes). Errors return JSON with an `error` string.
 `plans/networking-and-flagship-service.md` plans `lib/http.x` but has
 status `needs author scoping`; the playground does not wait for it. Phase
 2 ships a container (`etc/playground/Dockerfile`) with the Linux x2c
@@ -231,7 +236,7 @@ advisory like the rest of that workflow and never required.
   Emscripten's in-memory filesystem; nothing reaches the server besides
   source text.
 - The service runs `x2c translate` and `emcc` on untrusted text; `x2c
-  translate` evaluates compile-time Lisp and macros, so the container runs
+  translate` can execute native compile-time code, so each request runs
   as an unprivileged user with no network, a read-only image, a 20 s
   timeout, and a 512 MB memory limit per request. `#include` of absolute
   paths and `..` is rejected before translation.
@@ -257,8 +262,9 @@ advisory like the rest of that workflow and never required.
   `examples/foreach.x`, `examples/tours/language.x`, and
   `examples/power/exceptions.x` matches each `expected` output under Node.
 - Phase 2: `make site-check` passes; `npm --prefix site test` gains one
-  test that the page renders without `PLAYGROUND_URL`; a manual run in
-  Chrome, Firefox, and Safari of the three programs above.
+  test that the page renders without `PLAYGROUND_URL`; a browser run in
+  Chrome, Firefox, and Safari of the three programs above. Record unavailable
+  browser automation as a coverage gap; do not claim inferred support as tested.
 - Delivery follows `AGENTS.md`: code and build changes use
   `tools/gate-state.py ensure agent-pr-check`; the site page alone uses
   `doc-check` plus `make site-check`.
@@ -273,8 +279,9 @@ advisory like the rest of that workflow and never required.
   runtime with its own test matrix.
 - Risk: Memory64 browser support is the one external premise; phase 1
   records the measured minimum versions, and the page states them. If
-  Safari support proves missing, the fallback is a server-run endpoint
-  with the same page, not a 32-bit runtime.
+  Safari support proves missing, the page reports the unsupported browser.
+  A server-run fallback requires a separate decision because it changes the
+  execution boundary.
 - Risk: the service runs compile-time code from strangers; the container
   limits above are the mitigation, and the cache by source hash bounds
   repeated cost.
@@ -286,3 +293,65 @@ confirm no change to `etc/x2c.mk`, `builds/stage.mk`, or `src/toolchain.x`,
 that `make check` is unchanged, that the site builds without the service
 URL, and that the book section describes only what shipped. Then run the
 validation command for the delivered change.
+
+## Implementation details settled on 2026-10-28
+
+- The service returns loader source and wasm bytes in one JSON response.
+  The browser worker passes the bytes to the Emscripten module factory.
+- Each compile runs in a separate restricted container. The HTTP handler
+  does not execute submitted source on its own host.
+- `examples/power/exceptions.x` reads `examples/data/power-exceptions`;
+  Node validation and the service embed these existing fixture files.
+  Other filesystem examples need their own data or remain excluded.
+- [Chrome 133 release notes](https://developer.chrome.com/release-notes/133)
+  document Memory64. [WebKit Technology Preview 252 notes](https://webkit.org/blog/18304/release-notes-for-safari-technology-preview-252/)
+  add Memory64; that does not establish support in stable Safari.
+  The page detects Memory64 directly and reports unsupported browsers.
+  The server-run fallback is not part of this implementation.
+- Phase 3 requires a separate scope decision and is not an implementation
+  deliverable in this batch.
+
+## Implementation review
+
+The optional build reuses stage zero's generated C and the ordinary runtime.
+No compiler, toolchain, stage makefile, or existing check target changes.
+The worker owns execution and termination; Emscripten owns the memory cap.
+The service adds a per-request container because translation can execute
+native compile-time code. Include filtering is a user-facing policy, not
+the isolation boundary. Its negative checks protect the documented source
+limit, include policy, origin policy, request rate, and timeout behavior.
+
+The gallery sweep exposed a pre-existing invalid C variadic call in the
+operators example. `Map.update_n` requires Var keys and values. Boxing its
+integer value fixes the wasm64 trap and preserves native expected output.
+The matching site slide receives the same correction.
+
+Focused evidence: all 70 runtime units compile; the three named programs
+match their Node outputs; all 20 selected gallery programs match their
+expected outputs after the operators correction. The static site check
+passes. Real Chrome and Chromium run the three named programs through the
+browser worker. Compile diagnostics, Stop, and the 10-second limit work.
+
+Remaining validation gaps are a real Docker build/run, Firefox execution,
+and Safari execution. Docker's daemon and Playwright's Firefox executable
+are unavailable here. The site test suite also has an unchanged baseline
+theme assertion failure; its new playground test passes. Final generated
+artifacts, publication gate, and publication belong to the shared integrator.
+
+## Delivery
+
+PR #596 includes the runtime archive, program build script, optional CI job,
+compile service, playground, and gallery links. Follow-up review corrected
+the executable tmpfs required by native meta helpers and preserved the
+unsupported-browser Run guard after page lifecycle events.
+
+The tested wasm binaries declare 64 MiB initial memory and a 256 MiB
+maximum. Repeated browser runs use fresh worker state after completion,
+errors, and Stop; responses from aborted compilations are ignored. The
+shared integrator passed the full publication gate and confirmed the
+remote merged revision. No full gate ran in the author checkout.
+
+The container has not run against a real Docker daemon here. Firefox and
+Safari execution and public service deployment remain unverified. The
+site keeps Run hidden until its build receives a service URL. These gaps
+do not constitute completed deployment or cross-browser validation.

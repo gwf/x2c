@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Translate one x2c source and link an ES module loader plus Memory64 wasm.
+set -euo pipefail
+if [[ $# != 2 || $1 != *.x ]]; then
+  echo 'usage: tools/wasm-build input.x output-stem' >&2
+  exit 2
+fi
+root=$(cd "$(dirname "$0")/.." && pwd)
+input=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
+mkdir -p "$(dirname "$2")"
+out=$(cd "$(dirname "$2")" && pwd)/$(basename "$2")
+if [[ ! -f "$root/builds/wasm/libx2c.a" ]]; then
+  echo 'wasm runtime missing; run make wasm-runtime first' >&2
+  exit 1
+fi
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/x2c-wasm.XXXXXXXX")
+trap 'rm -rf "$scratch"' EXIT
+"$root/builds/0/x2c" translate --out-dir "$scratch" "$input"
+# These environment variables contain shell-style whitespace-separated flags,
+# as in Make's CFLAGS; no shell evaluation is performed.
+read -r -a cflags <<< "${WASM_CFLAGS:--fsigned-char -Os -m64 -sSUPPORT_LONGJMP=emscripten}"
+read -r -a ldflags <<< "${WASM_LDFLAGS:-}"
+"${WASM_CC:-emcc}" "${cflags[@]}" \
+  -iquote "$root/builds/0/lib" -iquote "$root/include/x2c" \
+  "$scratch/$(basename "$input" .x).c" -o "$out.js" \
+  -Wl,--whole-archive "$root/builds/wasm/libx2c.a" -Wl,--no-whole-archive \
+  -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -sMODULARIZE=1 \
+  -sEXPORT_ES6=1 -sENVIRONMENT=web,worker,node -sINITIAL_MEMORY=64MB \
+  -sMAXIMUM_MEMORY=256MB -sSTACK_SIZE=4MB "${ldflags[@]}"
