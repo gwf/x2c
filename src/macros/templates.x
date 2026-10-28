@@ -144,7 +144,7 @@ List Compiler.land_quotation(
     defer transaction.rollback();
     Var filled;
     if (fresh == %(built))
-      filled = _source_unwrap(_helper_result(c, syntax));
+      filled = Ast.source_unwrap(_helper_result(c, syntax));
     else {
       landing.names = _private_names(c, fresh);
       filled = _fill_syntax(landing, c.thaw_declaration_syntax(syntax));
