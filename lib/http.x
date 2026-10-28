@@ -166,7 +166,8 @@ HttpResponse HttpResponse.bytes(HttpResponse res, Block bytes) {
 void HttpResponse.write(HttpResponse res, File output, int keep_alive) =>
   _write(res, output, keep_alive, 0);
 
-static void _write(HttpResponse res, File output, int keep_alive, int head_only) {
+static void _write(
+  HttpResponse res, File output, int keep_alive, int head_only) {
   Buffer head = auto Buffer.new(0);
   head.printf("HTTP/1.1 %d %s\r\n", res.code, _reason(res.code));
   res.headers["content-length"] = String.format("%ld", (long) res.body.len());
@@ -188,9 +189,12 @@ Router Router.new(void) {
 }
 
 /** Registers a method, segment pattern, and two-argument handler. */
-Router Router.route(Router router, Symbol method, String pattern, Func handler) {
+Router Router.route(
+  Router router, Symbol method, String pattern, Func handler) {
   HttpRoute route = Scope.calloc(1, sizeof(struct HttpRoute));
-  route.method = method; route.segments = pattern.split("/"); route.handler = handler;
+  route.method = method;
+  route.segments = pattern.split("/");
+  route.handler = handler;
   router.routes.push(Var.new(<p48>, route));
   return router;
 }
@@ -206,9 +210,10 @@ Router Router.delete(Router r, String p, Func fn) => r.route(<delete>, p, fn);
 
 /** Serves files below directory, with index.html for directories. */
 Router Router.files(Router router, String prefix, Path directory) {
-  String pattern = String.format("%s%s*rest", prefix,
-    prefix.endswith("/") ? "" : "/");
-  return router.get(pattern, %!(HttpRequest req, HttpResponse res) => {
+  String pattern = String.format(
+    "%s%s*rest", prefix, prefix.endswith("/") ? "" : "/");
+  return router.get(
+    pattern, %!(HttpRequest req, HttpResponse res) => {
     String rest = req.params["rest"];
     if (rest.startswith("/")) Http.fail(404, "not found");
     foreach (String segment in rest.split("/"))
@@ -239,18 +244,23 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
   Http.fail(found ? 405 : 404, found ? "method not allowed" : "not found");
 }
 
-/** Binds immediately; port 0 selects an available port. Options use Symbol keys. */
+/** Binds immediately; port 0 selects an available port.
+    Options use Symbol keys. */
 HttpServer HttpServer.new(Router router, Map options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
   s.router = router;
   s.workers = options.contains(<workers>) ? options[<workers>].integer() : 8;
-  s.idle_ms = options.contains(<idle-ms>) ? options[<idle-ms>].integer() : 5000;
-  s.body_limit = options.contains(<body-limit>) ? options[<body-limit>].integer() : 1048576;
+  s.idle_ms = options.contains(<idle-ms>)
+    ? options[<idle-ms>].integer() : 5000;
+  s.body_limit = options.contains(<body-limit>)
+    ? options[<body-limit>].integer() : 1048576;
   if (s.workers < 1 || s.idle_ms < 1 || s.body_limit < 0)
     raise %(bad-arg (operation "HttpServer.new"));
   s.logger = options.contains(<logger>) ? options[<logger>].pointer() : NULL;
   if (!options.contains(<logger>)) {
-    s.logger = Logger.new(<info>); s.logger.add_stderr_sink(); s.owns_logger = 1;
+    s.logger = Logger.new(<info>);
+    s.logger.add_stderr_sink();
+    s.owns_logger = 1;
   }
   String host = options.contains(<host>) ? options[<host>].str() : "::";
   int port = options.contains(<port>) ? options[<port>].integer() : 8080;
@@ -284,7 +294,8 @@ void HttpServer.serve(HttpServer s) {
 
 /** Starts serving on a joined background Thread. */
 void HttpServer.start(HttpServer s) {
-  if (s.acceptor || s.running) raise %(bad-state (operation "HttpServer.start"));
+  if (s.acceptor || s.running)
+    raise %(bad-state (operation "HttpServer.start"));
   s.acceptor = Thread.start(_accept, Var.new(<p48>, s));
 }
 
@@ -298,7 +309,8 @@ void HttpServer.stop(HttpServer s) {
   }
 }
 
-/** Stops and releases native resources. Call after synchronous serve returns. */
+/** Stops and releases native resources.
+    Call after synchronous serve returns. */
 void HttpServer.close(HttpServer s) {
   if (!s) return;
   s.stop(); s.listener.close(); s.channel.free();
@@ -412,7 +424,11 @@ static String _mime(String ext) {
   return types.contains(ext) ? types[ext].str() : "application/octet-stream";
 }
 
-static Var _accept(Var value) { HttpServer s = value.pointer(); s.serve(); return void; }
+static Var _accept(Var value) {
+  HttpServer s = value.pointer();
+  s.serve();
+  return void;
+}
 
 static Var _worker(Var value) {
   HttpServer s = value.pointer();
@@ -442,13 +458,17 @@ static void _connection(HttpServer s, Socket peer) {
     catch %(http-fail (status ?status) (reason ?reason)): {
       res = HttpResponse.new(); res.status(status.integer()).json({"error": reason});
     }
-    catch %(malformed *): { res = HttpResponse.new(); res.status(400).json({"error": "malformed JSON"}); }
+    catch %(malformed *): {
+      res = HttpResponse.new();
+      res.status(400).json({"error": "malformed JSON"});
+    }
     catch %(?code *detail): {
       s.logger.error(<http>, %(code $code), %(detail $detail));
       res = HttpResponse.new(); res.status(500).json({"error": "internal server error"});
     }
     _write(res, peer.output, keep, req && req.method == <head>);
-    s.logger.info(<http>, %(status $(res.code)), %(path $(req ? req.path : NULL)));
+    s.logger.info(
+      <http>, %(status $(res.code)), %(path $(req ? req.path : NULL)));
     x2c_thread_wait_lock();
     int stopped = s.listener.stopped;
     x2c_thread_wait_unlock();
@@ -460,7 +480,9 @@ static void _connection(HttpServer s, Socket peer) {
 void HttpRequest.init(HttpRequest value) { memset(value, 0, sizeof(*value)); }
 
 /** Initializes zeroed HttpResponse storage without acquiring resources. */
-void HttpResponse.init(HttpResponse value) { memset(value, 0, sizeof(*value)); }
+void HttpResponse.init(HttpResponse value) {
+  memset(value, 0, sizeof(*value));
+}
 
 /** Initializes zeroed Router storage without acquiring resources. */
 void Router.init(Router value) { memset(value, 0, sizeof(*value)); }

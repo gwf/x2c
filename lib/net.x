@@ -174,14 +174,12 @@ Socket Socket.adopt(int fd) {
 /** Sets receive and send timeouts in milliseconds. Zero disables timeouts.
     A timed-out File operation raises `<io-fail>` with EAGAIN or EWOULDBLOCK.
     Raises: `<bad-arg>` for negative milliseconds, or `<io-fail>`. */
-void Socket.set_timeout(Socket socket, int ms) {
+void Socket.set_timeout(Socket s, int ms) {
   if (ms < 0) raise %(bad-arg (operation "Socket.set_timeout"));
   struct timeval timeout = { .tv_sec = ms / 1000,
                             .tv_usec = (ms % 1000) * 1000 };
-  if (setsockopt(socket.fd, SOL_SOCKET, SO_RCVTIMEO,
-                 &timeout, sizeof(timeout)) ||
-      setsockopt(socket.fd, SOL_SOCKET, SO_SNDTIMEO,
-                 &timeout, sizeof(timeout)))
+  if (setsockopt(s.fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) ||
+      setsockopt(s.fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)))
     _io("Socket.set_timeout", errno);
 }
 
@@ -275,8 +273,9 @@ static String _peer(int fd) {
   if (getpeername(fd, (struct sockaddr *) &address, &size))
     _io("Socket.peer", errno);
   char host[NI_MAXHOST], port[NI_MAXSERV];
-  int status = getnameinfo((struct sockaddr *) &address, size,
-    host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+  int status = getnameinfo(
+    (struct sockaddr *) &address, size, host, sizeof(host),
+    port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
   if (status) _io("Socket.peer", status == EAI_SYSTEM ? errno : EINVAL);
   return address.ss_family == AF_INET6
     ? %"[$host]:$port" : %"$host:$port";
