@@ -1,5 +1,6 @@
-> Status: active
-> Implementation authorized on 2026-10-27; direct delivery to dev.
+> Status: done
+> Implemented and validated on 2026-10-27 in 2816c20e1.
+> Both spellings, the 43 conversions, and the 19 compact raises are complete.
 
 # Name-first expression aliases
 
@@ -30,6 +31,28 @@ braces. Preserve every message, error payload, and invocation's behavior.
 Review and fix the completed authored diff, integrate current origin/dev,
 run the applicable performance checkpoint and publication gate, review all
 generated artifacts, and publish the validated tree to dev.
+
+## Validation
+
+The final `tools/gate-state.py ensure agent-pr-check` passed: 1,308 compiler
+fixtures, 1,051 unit tests with 27,534 assertions, documentation examples,
+command checks, cold collection, bootstrap recovery, and self-host comparison.
+Integration with the independent lint-command update retained compiler proof
+and passed the changed consumer checks. Existing fixture outputs were retained.
+
+The JSON, process, regex, string, and Var generated C match the baseline after
+normalizing diagnostic source line numbers. The tokenizer and alias parser
+contain the intended syntax changes; generated linked-meta hashes were refreshed.
+
+A fixed seven-file translation corpus used the baseline unit sources for
+String, JSON, Regex, Tokenizer, Array, Map, and Var. Both compilers had current
+prelude interfaces and no missing prelude units. Five alternating measured
+runs followed warmups, using `/usr/bin/time -l` instruction counts. The baseline
+c74ee597a median was 14,655,899,860 instructions; candidate 2816c20e1 used
+14,713,367,856 instructions, an observed increase of 0.39%. The sample ranges
+over five runs were 14,615,360,143-14,687,917,639 and
+14,677,477,867-14,766,419,820 respectively. This covers translation of those
+seven inputs, not full-build or runtime performance.
 
 ## Plan review
 
