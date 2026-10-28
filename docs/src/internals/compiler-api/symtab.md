@@ -745,12 +745,13 @@ Source: `src/symtab/bindings.x`
 <a id="Sym.lookup_field"></a>
 #### Sym.lookup_field
 
-`Type Sym.lookup_field(Sym s, Type type, List field)`
+`Type Sym.lookup_field(Sym s, Type type, List field, List &?binding)`
 
 Returns an aggregate field's declared type, or `NULL`.
 A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
-initializer already reaches them.
+initializer already reaches them. When provided, `binding` receives the
+selected field's identity, or NULL on a miss.
 
 Source: `src/symtab/types.x`
 

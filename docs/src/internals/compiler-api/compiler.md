@@ -21,11 +21,13 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional references that `condition` proves present for an operand that runs only when `condition` has truth `holds`. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
+| [`Compiler.attach_source_references`](#Compiler.attach_source_references) | Attaches a completed named-type capture to its existing declaration row. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
 | [`Compiler.cache_cons_cell`](#Compiler.cache_cons_cell) | Caches a cons cell when both parts have immutable cache forms. |
 | [`Compiler.cache_literal_list`](#Compiler.cache_literal_list) | Returns a runtime `List` expression for cached compiler-owned syntax. |
 | [`Compiler.cache_literal_var`](#Compiler.cache_literal_var) | Interns an immutable value and returns its `(cache id)` reference. |
 | [`Compiler.canonical_path`](#Compiler.canonical_path) | Returns the spelling that identifies the file at `path`. |
+| [`Compiler.clear_source_external`](#Compiler.clear_source_external) | A foreign alias emits a macro, not an external C symbol of its own. |
 | [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and frees its owned meta bindings. |
 | [`Compiler.collect_compile_time_definition`](#Compiler.collect_compile_time_definition) | Collects macro definitions or keyword aliases before the full source parse. |
 | [`Compiler.collect_unit_macro`](#Compiler.collect_unit_macro) | Expands the file-scope unit macro at the cursor for collection and reports whether it did. |
@@ -48,6 +50,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.match_pattern_is_static`](#Compiler.match_pattern_is_static) | Reports whether a typed `Match` pattern has a fully static value graph. |
 | [`Compiler.match_pattern_value`](#Compiler.match_pattern_value) | Recovers a pattern value graph, using `x2c-dyn` for computed values. |
 | [`Compiler.match_value_is_static`](#Compiler.match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
+| [`Compiler.materialize_source_declaration`](#Compiler.materialize_source_declaration) | Materializes one producer-owned source row and its captured references. |
 | [`Compiler.merge_source_declarations`](#Compiler.merge_source_declarations) | Carries declaration metadata beside a completed symbol-map merge. |
 | [`Compiler.merge_translation_dependencies`](#Compiler.merge_translation_dependencies) | Merges another translation's dependency rows into this compiler. |
 | [`Compiler.new`](#Compiler.new) | Creates a compiler with independent package and generated-name state. |
@@ -192,6 +195,15 @@ query does not consume tokens.
 
 Source: `src/compiler/parsing/tokens.x`
 
+<a id="Compiler.attach_source_references"></a>
+#### Compiler.attach_source_references
+
+`void Compiler.attach_source_references(Compiler c, List binding, Array capture)`
+
+Attaches a completed named-type capture to its existing declaration row.
+
+Source: `src/compiler/source-locations.x`
+
 <a id="Compiler.cache"></a>
 #### Compiler.cache
 
@@ -247,6 +259,15 @@ exist on disk; otherwise it is the real path, or `path` itself when that
 does not resolve.
 
 Source: `src/compiler/source-files.x`
+
+<a id="Compiler.clear_source_external"></a>
+#### Compiler.clear_source_external
+
+`void Compiler.clear_source_external(Compiler c, List binding)`
+
+A foreign alias emits a macro, not an external C symbol of its own.
+
+Source: `src/compiler/source-locations.x`
 
 <a id="Compiler.close_child"></a>
 #### Compiler.close_child
@@ -476,6 +497,18 @@ Reports whether a recovered pattern value graph is fully static.
 
 Source: `src/compiler/patterns.x`
 
+<a id="Compiler.materialize_source_declaration"></a>
+#### Compiler.materialize_source_declaration
+
+`void Compiler.materialize_source_declaration( Compiler c, List binding, List declaration)`
+
+Materializes one producer-owned source row and its captured references.
+Row fields are file, start, end, Type, method, optional capture, and
+optional external emitted name. Only ordinary declarations supply linkage.
+Installing the row before replay marks self and mutually recursive rows.
+
+Source: `src/compiler/source-locations.x`
+
 <a id="Compiler.merge_source_declarations"></a>
 #### Compiler.merge_source_declarations
 
@@ -646,9 +679,11 @@ Source: `src/compiler/source-locations.x`
 <a id="Compiler.record_source_declaration"></a>
 #### Compiler.record_source_declaration
 
-`void Compiler.record_source_declaration( Compiler c, List binding, Token first, Token after)`
+`void Compiler.record_source_declaration( Compiler c, List binding, Token first, Token after, int external)`
 
 Records a physical declaration using the binding's actual scope and key.
+Occurrence rows retain their five-field prefix and append `<decl>`
+so references can omit earlier declarations that a later one replaced.
 
 Source: `src/compiler/source-locations.x`
 
@@ -1022,7 +1057,7 @@ Source: `src/compiler/compiler.x`
 <a id="Compiler"></a>
 ### Compiler
 
-`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Map source_definitions, source_declarations, source_texts; } *Compiler`
+`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; SourceView sources; int source_facts, source_primary; Array source_occurrences; Array source_capture; Map source_definitions, source_declarations, source_texts; } *Compiler`
 
 Holds mutable state for one source translation.
 
@@ -1150,7 +1185,7 @@ Source: `src/compiler/compiler.x`
 <a id="SymTxn"></a>
 ### SymTxn
 
-`typedef struct SymTxn { Compiler c; int scope_index, next_binding, active, String initializer_name; String shutdown_name, Map counters; int local_macro_names, mark, meta_group_size, ancestors, placements; SymScope scope; Map statics, binding_facts; Map source_definitions; int source_occurrences; int extended, Map adapters; PendingMark pending, int origin_count, origin, needs_exception; } SymTxn`
+`typedef struct SymTxn { Compiler c; int scope_index, next_binding, active, String initializer_name; String shutdown_name, Map counters; int local_macro_names, mark, meta_group_size, ancestors, placements; SymScope scope; Map statics, binding_facts; Map source_definitions; int source_occurrences; Array source_capture; int source_capture_length; int extended, Map adapters; PendingMark pending, int origin_count, origin, needs_exception; } SymTxn`
 
 Holds one reversible semantic transaction in caller storage.
 The zero value is inactive. Keep an active transaction in one object;

@@ -317,13 +317,14 @@ Source: `src/expressions/resolution.x`
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
 
-`List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context)`
+`List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context, List &?binding)`
 
 Resolves one field or method selection without consuming parser tokens.
 `field` is a single-name `List` and `access` is `.` or `->`. The result is
 a `(field access type)`, `(method binding signature)`, or `(ambiguous ...)`
 row, or NULL when no member is visible. Method lookup is enabled only by
-`call_context` and records the selected binding in `c.sym`.
+`call_context` and records the selected binding in `c.sym`. Optional
+`binding` receives the selected field or method identity, or NULL.
 
 Source: `src/expressions/access.x`
 
