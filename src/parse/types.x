@@ -195,11 +195,17 @@ static int _is_scalar_specifier(Symbol symbol) {
 }
 
 static List _typedef_name(Compiler c) {
+  Token first = c.token;
   String name = _package_alias_member(c);
   if (!name) name = c.package_member_spelling(c.token.text);
   if (!name) name = c.token.text;
   c.next();
   if (c.package || c.line_markers) name = _type_reference(c, 0, name);
+  if (c.source_facts) {
+    Type type = NULL;
+    List binding = c.sym.lookup($(name), type);
+    c.record_source_reference(binding, type, first, c.token);
+  }
   return $(name);
 }
 
