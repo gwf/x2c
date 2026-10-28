@@ -159,7 +159,8 @@ Source: `lib/http.x`
 
 `void HttpServer.close(HttpServer s)`
 
-Stops and releases native resources. Call after synchronous serve returns.
+Stops and releases native resources.
+Call after synchronous serve returns.
 
 Source: `lib/http.x`
 
@@ -177,7 +178,8 @@ Source: `lib/http.x`
 
 `HttpServer HttpServer.new(Router router, Map options)`
 
-Binds immediately; port 0 selects an available port. Options use Symbol keys.
+Binds immediately; port 0 selects an available port.
+Options use Symbol keys.
 
 Source: `lib/http.x`
 
@@ -294,7 +296,7 @@ Source: `lib/http.x`
 <a id="Router.route"></a>
 #### Router.route
 
-`Router Router.route(Router router, Symbol method, String pattern, Func handler)`
+`Router Router.route(Router r, Symbol method, String pattern, Func handler)`
 
 Registers a method, segment pattern, and two-argument handler.
 

@@ -128,7 +128,7 @@ Source: `lib/net.x`
 <a id="Socket.set_timeout"></a>
 #### Socket.set_timeout
 
-`void Socket.set_timeout(Socket socket, int ms)`
+`void Socket.set_timeout(Socket s, int ms)`
 
 Sets receive and send timeouts in milliseconds. Zero disables timeouts.
 A timed-out File operation raises `<io-fail>` with EAGAIN or EWOULDBLOCK.
