@@ -220,6 +220,8 @@ module CliOption cli_options[] = {
     "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0 },
   { <dump-ast>, %<<translate>>, <inspection>, "--dump-ast", NULL,
     "Print the parsed AST and stop", 0 },
+  { <expansions>, %<<translate>>, <inspection>,
+    "--dump-expansions", NULL, "Print bound macro expansions and stop", 0 },
   { <transforms>, %<<translate>>, <inspection>,
     "--dump-transforms", NULL, "Print the transformed AST and stop", 0 },
   { <dump-defs>, %<<translate>>, <inspection>, "--dump-definitions", NULL,
@@ -504,6 +506,7 @@ static void _apply(Parse &p, Given given) {
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
     case <dump-cache>: case <conform>: case <dump-defs>:
+    case <expansions>:
       r.dump = given.option.id; break;
     case <kind>: r.kind_explicit = 1; r.kind = _target_kind(value); break;
     case <jobs>: r.jobs = _count(value, 1, "job count"); break;

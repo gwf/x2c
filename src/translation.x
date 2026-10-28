@@ -464,6 +464,7 @@ static void _translate_unit(
   _report_diagnostics(c);
   if (!collected) exit(1);
   if (_inspect_collected(unit, dump)) return;
+  c.dump_expansions = dump == <expansions>;
   if (!unit.parse()) _fail(c);
   c.recovery_depth = 0;
   if (_inspect_parsed(unit, filename, dump)) return;
@@ -493,9 +494,10 @@ static int _inspect_collected(ParsedUnit &unit, Symbol dump) {
 static int _inspect_parsed(ParsedUnit &unit, String filename, Symbol dump) {
   Compiler c = unit.compiler;
   switch (dump) {
+    case <expansions>: break;
     case <dump-cache>: c.dump_cache(); break;
     case <symbols>:    c.dump_symbol_table(c.sym.current_symbols()); break;
-    case <dump-ast>:   _print_ast(unit.ast); break;
+    case <dump-ast>:   Ast.print_dump(unit.ast); break;
     case <conform>:    _print_conformance(c, filename, unit.globals); break;
     default:           return 0;
   }
@@ -528,48 +530,13 @@ static void _report_diagnostics(Compiler c) {
 
 static int _inspect_transformed(Compiler c, List ast, Symbol dump) {
   switch (dump) {
-    case <transforms>: _print_ast(ast); break;
+    case <transforms>: Ast.print_dump(ast); break;
     case <dump-defs>:  c.dump_definitions(ast); break;
     case <dump-code>:
       puts(c.code_pretty_string(c.emit(ast, NULL), NULL)); break;
     default:           return 0;
   }
   return 1;
-}
-
-static void _print_ast(List ast) {
-  foreach (List node in _renumbered_bindings(ast))
-    printf("\n%s\n", _node_repr(node));
-}
-
-/* A binding number counts every binding the unit has issued, collection's
-   included, so it depends on whether the includes replayed or were parsed
-   cold. A dump numbers bindings by their first appearance in its text. */
-static List _renumbered_bindings(List ast) {
-  Map numbers = {}, replaced = {};
-  Array pending = auto [ast];
-  while (pending.len()) {
-    Var node = pending.take_last();
-    if (node is not <list> || node.is_nil()) continue;
-    if (node.list() ~= %(binding ?identity ?spelling)) {
-      Var number;
-      if (!numbers.try_get(identity, number)) {
-        number = (int) numbers.len() + 1;
-        numbers[identity] = number;
-      }
-      replaced[(void *) node.list()] =
-        %(binding $number $spelling);
-      continue;
-    }
-    foreach (Var child in node.list().reverse()) pending.push(child);
-  }
-  return Ast.replace_nodes(ast, replaced);
-}
-
-static String _node_repr(List node) {
-  if (node ~= %(macrodef (name ?name) *))
-    return %"(macrodef <macro $name>)";
-  return node.repr();
 }
 
 /* Where one unit's generated C, header, and depfile are written. A build

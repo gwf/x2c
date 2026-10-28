@@ -1,0 +1,14 @@
+expansion unittest/compiler-fixtures/dump-expansions.x:3:25 inner
+  definition unittest/compiler-fixtures/dump-expansions.x:1:1
+  input (args (expr (int) (literal (int) "7")))
+  result
+
+(expr (int) 
+ (op + (expr (int) (literal (int) "7")) (expr (int) (literal (int) "1"))))
+expansion unittest/compiler-fixtures/dump-expansions.x:3:25 outer
+  definition unittest/compiler-fixtures/dump-expansions.x:2:1
+  input (args (expr (int) (literal (int) "7")))
+  result
+
+(expr (int) 
+ (op + (expr (int) (literal (int) "7")) (expr (int) (literal (int) "1"))))

@@ -210,8 +210,8 @@ run_fixture() {
 
   for phase in "${phases[@]}"; do
     case "$phase" in
-      tokens|ast|transform|emit|symbols|definitions|h|c|compile-status|\
-      diagnostics)
+      tokens|ast|expansions|transform|emit|symbols|definitions|h|c|\
+      compile-status|diagnostics)
         ;;
       cc-stderr|stdout|stderr|status)
         ;;
@@ -238,6 +238,7 @@ run_fixture() {
   fi
 
   has_phase ast && run_dump ast --dump-ast
+  has_phase expansions && run_dump expansions --dump-expansions
   has_phase transform && run_dump transform --dump-transforms
   has_phase emit && run_dump emit --dump-code
   has_phase symbols && run_symbol_dump

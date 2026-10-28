@@ -287,6 +287,7 @@ typedef struct Compiler {
   MetaBindings meta_bindings, int borrowed_bindings;
   GenNames names;
   Array origins, int origin, source_map;
+  int dump_expansions;
   // The request view outlives the unit; semantic stores die with this unit.
   SourceView sources;
   int source_facts, source_primary;
