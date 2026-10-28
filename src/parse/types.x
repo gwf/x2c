@@ -641,7 +641,7 @@ static Type _declare_named_type(
   if (!c.macro_holes) {
     List binding = c.sym.declare_resolved(%(typedef), key, type);
     c.record_source_declaration(binding, start, after_name, 0);
-    if (c.source_capture && c.source_capture.len())
+    if (c.source_capture)
       c.attach_source_references(binding, c.source_capture);
   }
   Type specifier = base.type().base_type();

@@ -81,7 +81,7 @@ void Compiler.record_source_reference(
   if (!c.source_facts || c.macro_holes ||
       !Ast.try_binding(binding, NULL, NULL)) return;
   if (!c.source_primary || c.shallow) {
-    if (!c.source_capture) return;
+    if (c.source_capture == NULL) return;
     List range = _source_range(c, first, after);
     if (range)
       c.source_capture.push($(@range, binding, type,
@@ -113,7 +113,7 @@ void Compiler.materialize_source_declaration(
   c.source_definitions[binding] = declaration;
   List method = declaration[4];
   if (method) c.set_fact(%(method $binding), method);
-  Array capture = declaration.len() > 5 ? declaration[5] : NULL;
+  Array capture = declaration[5];
   foreach (List entry in capture) {
     (String file, int start, int end, List target,
      Type type, List key) = entry;
