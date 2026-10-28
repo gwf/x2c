@@ -16,7 +16,10 @@ class Client:
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, bufsize=0)
         self.versions = {}
-        self.send("initialize", {"initializationOptions": {"arguments": arguments}}, 1)
+        self.send("initialize", {
+            "capabilities": {"workspace": {"applyEdit": True},
+                "textDocument": {"hover": {"dynamicRegistration": False}}},
+            "initializationOptions": {"arguments": arguments}}, 1)
         self.wait("id", 1)
         self.send("initialized")
 
