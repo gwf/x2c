@@ -1,20 +1,30 @@
 ROOT := ../../..
-SOURCES := notes.x service.x store.x record.x
+X2C ?= $(ROOT)/builds/0/x2c
+PROGRAM ?= builds/notes
+SQLITE := $(ROOT)/packages/sqlite
+DEPS_TOOL := python3 $(ROOT)/packages/tools/deps.py
+SQLITE_PREFIX ?= $(shell $(DEPS_TOOL) path $(SQLITE)/dependency.json prefix)
 
-.PHONY: all build run check clean
+.PHONY: all build run check prepare package clean
 all: build
-build: builds/notes
 
-builds/notes: $(SOURCES)
-	mkdir -p builds
-	cd $(ROOT) && ./builds/0/x2c build -o examples/apps/notes/$@ \
-	  $(addprefix examples/apps/notes/,$(SOURCES))
+build: package
+	mkdir -p $(dir $(PROGRAM))
+	$(X2C) build -o $(PROGRAM) --build-dir builds/app \
+	  --package-dir $(ROOT)/packages --c-include-dir $(SQLITE)/src \
+	  --c-include-dir $(SQLITE_PREFIX)/include notes.x
 
-run: builds/notes
-	cd $(ROOT) && examples/apps/notes/builds/notes
+package:
+	$(MAKE) -C $(SQLITE) build
 
-check: builds/notes
-	cd $(ROOT) && examples/apps/notes/builds/notes --check
+prepare:
+	$(MAKE) -C $(SQLITE) prepare
+
+run: build
+	cd $(ROOT) && $(abspath $(PROGRAM))
+
+check: build
+	python3 tests/test_notes.py $(abspath $(PROGRAM))
 
 clean:
 	rm -rf builds
