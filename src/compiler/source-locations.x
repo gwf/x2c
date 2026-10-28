@@ -45,7 +45,8 @@ void Compiler.record_source_declaration(
   Map symbols = source_key.car();
   List key = source_key.cadr();
   Type type = symbols[key];
-  List declaration = $(@range, type);
+  List method = c.fact(%(method $binding));
+  List declaration = $(@range, type, method);
   c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
     c.source_definitions[binding] = declaration;

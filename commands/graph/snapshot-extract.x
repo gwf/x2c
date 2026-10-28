@@ -97,7 +97,7 @@ static List _sx_declaration(SnapshotExtract &s, List binding) {
 
 static void _sx_declaration_source(
   SnapshotExtract &s, Map entity, List declaration) {
-  match (declaration) case %(?file ?begin ?end ?): {
+  match (declaration) case %(?file ?begin ?end *): {
     String path = file, text = s.c.source_texts[path];
     entity["file"] = path;
     entity["offset"] = begin;
@@ -339,7 +339,7 @@ static String _sx_reference(
   /* A call or protocol adapter may substitute its receiver type. The
      declaration entity keeps the binding's own signature instead. */
   List declaration = _sx_declaration(s, binding);
-  if (declaration) type = declaration.last();
+  if (declaration) type = declaration[3];
   else {
     Var key = s.c.semantic_binding_facts()[%(src-key $binding)];
     match (key) case %(?symbols ?name): type = symbols.map()[name];
