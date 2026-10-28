@@ -1,7 +1,8 @@
 > Status: done
-> Implemented and adopted locally on `codex/quotation-construction-adoption`.
-> Code and regenerated bootstrap: `3e836f926939b6e4a2652f026eaf0f4d8df40038`.
-> Verified and measured on 2026-10-28. Nothing was published remotely.
+> Implemented and adopted on `codex/quotation-construction-adoption`.
+> Initial measured code: `3e836f926939b6e4a2652f026eaf0f4d8df40038`.
+> Integrated code: `2dd6cd6fd8af2a67c04d6639aef14ac075fc3348`.
+> Gary accepted the cost and authorized publication to dev on 2026-10-28.
 
 # Ordinary quotation construction and adoption
 
@@ -34,8 +35,9 @@ Do not add a quotation-to-AST conversion API or another semantic implementation.
    actual identity, stage, source or evaluation-order behavior.
 5. Review the authored and generated diff; run focused regressions, converged
    self-host validation and the existing publication validation command for local
-   adoption. Preserve the original no-publish instruction; no remote publication
-   or recurring checks are authorized by this plan.
+   adoption. The initial spike preserves the original no-publish instruction.
+   Subsequent development publication follows Gary's explicit approval below.
+   No recurring checks are added.
 
 ## Plan review
 
@@ -192,5 +194,37 @@ Raw runs, benchmark sources, binary hashes and exact revisions are retained in
 `/tmp/x2c-quotation-adoption/`: `final-cost.json`, `final-before-after.json`,
 `final-common-inputs.json`, `final-translation-corresponding-sources.json` and
 `final-revisions.json`. Gate logs are under `debug/adoption-gate.log` and
-`debug/agent-pr-check/`. Nothing was pushed, published or scheduled. The
-canonical checkout was not edited by this work.
+`debug/agent-pr-check/`. The initial spike stayed local and added no schedules.
+The canonical checkout was not edited by this work.
+
+
+## Development integration
+
+Gary accepted the measured cost increase and explicitly authorized publication
+to dev on 2026-10-28. The implementation was integrated with upstream
+`fa1a917ce7da20d2a7624a942dd9e5d21910c46c`. Bootstrap conflicts were regenerated
+from the merged authoritative sources. The API classification conflict retains
+both upstream networking entries and the quotation entries. Review verified
+that the emitter preserves upstream source mapping and held-node ordering.
+
+The integrated code and regenerated bootstrap, `2dd6cd6fd`, pass
+`tools/gate-state.py ensure agent-pr-check`: 1,313 compiler fixtures,
+1,074 runtime tests with 27,708 assertions, bootstrap comparisons, documentation
+and command checks. The final report-only commit retains that compiler proof
+and runs the existing documentation check.
+
+A new converged baseline at `fa1a917ce` and the integrated candidate translated
+the same seven unchanged input files used above. Both reported a valid prelude
+and no missing units. Seven alternating warm trials gave these medians:
+
+| Tree | Retired instructions, billions | Elapsed seconds |
+| --- | ---: | ---: |
+| Current upstream | 63.634 | 4.36 |
+| Integrated quotation candidate | 60.895 | 4.13 |
+
+The candidate uses 4.3% fewer instructions on this workload. The accepted
+helper construction costs remain those reported above; this measurement does
+not turn the helper into a performance improvement over its handwritten AST.
+Raw integration measurements and revisions are retained under
+`/tmp/x2c-quotation-adoption/integration/`. The tree is validated for development
+publication; no production promotion or recurring checks are part of this work.
