@@ -105,8 +105,6 @@ int main(int argc, char **argv) {
   $test.suite(match_logic_suite);
   $test.suite(match_binder_contract_suite);
   $test.suite(file_suite);
-  $test.suite(net_suite);
-  $test.suite(http_suite);
   $test.suite(array_suite);
   $test.suite(typed_array_suite);
   $test.suite(typed_list_suite);
@@ -148,5 +146,7 @@ int main(int argc, char **argv) {
   $test.suite(channel_suite);
   $test.suite(storage_ownership_suite);
   $test.suite(static_init_suite);
+  $test.suite(net_suite);
+  $test.suite(http_suite);
   return TestHarness_finish();
 }

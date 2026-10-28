@@ -1367,14 +1367,14 @@ Router Router_new(void){
 
 Var Array_push(Array, Var);
 
-Router Router_route(Router router, Symbol method, String pattern, Func handler){
+Router Router_route(Router r, Symbol method, String pattern, Func handler){
   if(! _init_guard_) _file_init_();
   HttpRoute route = Scope_calloc(1, sizeof(struct HttpRoute));
   route -> method = method;
   route -> segments = String_split(pattern, _34);
   route -> handler = handler;
-  Array_push(router -> routes, Var_new(3683441, route));
-  return router;
+  Array_push(r -> routes, Var_new(3683441, route));
+  return r;
 }
 
 Router Router_get(Router r, String p, Func fn){
@@ -1471,7 +1471,7 @@ HttpServer HttpServer_new(Router router, Map options){
   s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
   s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
   if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 250,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 257,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
     __builtin_unreachable();
   }
@@ -1561,7 +1561,7 @@ void HttpServer_serve(HttpServer s){
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 287,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 297,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }

@@ -157,7 +157,7 @@ void HttpResponse_write(HttpResponse res, File output, int keep_alive);
 
 Router Router_new(void);
 
-Router Router_route(Router router, Symbol method, String pattern, Func handler);
+Router Router_route(Router r, Symbol method, String pattern, Func handler);
 
 Router Router_get(Router r, String p, Func fn);
 

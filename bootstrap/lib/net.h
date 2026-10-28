@@ -92,7 +92,7 @@ Socket Socket_connect(String host, int port, int timeout_ms);
 
 Socket Socket_adopt(int fd);
 
-void Socket_set_timeout(Socket socket, int ms);
+void Socket_set_timeout(Socket s, int ms);
 
 void Socket_shutdown_write(Socket socket);
 

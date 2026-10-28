@@ -796,7 +796,7 @@ Socket Socket_adopt(int fd){
 
 }
 
-void Socket_set_timeout(Socket socket, int ms){
+void Socket_set_timeout(Socket s, int ms){
   if(! _init_guard_) _file_init_();
   if(ms < 0){
     static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 178,.runtime = 1};
@@ -807,7 +807,7 @@ void Socket_set_timeout(Socket socket, int ms){
     .tv_sec = ms / 1000, .tv_usec =(ms % 1000) * 1000
   }
   ;
-  if(setsockopt(socket -> fd, SOL_SOCKET, SO_RCVTIMEO, & timeout, sizeof(timeout)) || setsockopt(socket -> fd, SOL_SOCKET, SO_SNDTIMEO, & timeout, sizeof(timeout))) _io(_4, errno);
+  if(setsockopt(s -> fd, SOL_SOCKET, SO_RCVTIMEO, & timeout, sizeof(timeout)) || setsockopt(s -> fd, SOL_SOCKET, SO_SNDTIMEO, & timeout, sizeof(timeout))) _io(_4, errno);
 }
 
 void Socket_shutdown_write(Socket socket){
@@ -927,7 +927,7 @@ static void _drop_socket(void * ptr){
 
 static void _port(int port, String operation){
   if(port < 0 || port > 65535){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 300,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 299,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(1080488), int_var(port));
     __builtin_unreachable();
   }
@@ -948,7 +948,7 @@ static struct addrinfo * _resolve(String host, int port, int flags){
   if(status){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("getaddrinfo")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 314,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 313,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 31862161386376, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(556264), String_var(host));
       __builtin_unreachable();
     }
@@ -966,7 +966,7 @@ static int _failed(int fd){
 
 _Noreturn static void _io(String operation, int error){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 326,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 325,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 20399393368, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
