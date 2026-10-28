@@ -217,8 +217,8 @@ request-owned source overlays.
 
 Public functions:
 
-`SourceView.init`, `SourceView.set`, `SourceView.is_changed`,
-`SourceView.exists`, `SourceView.read`
+`SourceView.init`, `SourceView.set`, `SourceView.unset`,
+`SourceView.is_changed`, `SourceView.exists`, `SourceView.read`
 
 ### [src/stage.x](../src/stage.x)
 
@@ -729,7 +729,8 @@ x2c project manifests.
 
 Public functions:
 
-`ProjectBuild.valid_name`, `ProjectBuild.plan`, `CliRequest.project_manifest`
+`ProjectBuild.valid_name`, `ProjectBuild.owning_target`, `ProjectBuild.plan`,
+`CliRequest.project_manifest`
 
 ### [src/protocol/protocol.x](../src/protocol/protocol.x)
 

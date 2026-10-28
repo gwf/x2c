@@ -13,6 +13,7 @@ X2c project manifests.
 | Function | Summary |
 | --- | --- |
 | [`CliRequest.project_manifest`](#CliRequest.project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
+| [`ProjectBuild.owning_target`](#ProjectBuild.owning_target) | Returns the selected target containing `source`, or the direct request. |
 | [`ProjectBuild.plan`](#ProjectBuild.plan) | Parses a project manifest and returns its selected target's build plan. |
 | [`ProjectBuild.valid_name`](#ProjectBuild.valid_name) | Returns whether a target, profile, or manifest field name contains only letters, digits, underscores, and hyphens, and is not empty. |
 
@@ -29,6 +30,17 @@ Discovery uses the same request view as project parsing.
 Source: `src/project/planning.x`
 
 ### `ProjectBuild`
+
+<a id="ProjectBuild.owning_target"></a>
+#### ProjectBuild.owning_target
+
+`CliRequest ProjectBuild.owning_target(CliRequest request, String source)`
+
+Returns the selected target containing `source`, or the direct request.
+Prints the existing editor diagnostic and returns NULL for ambiguous or
+absent membership. Manifest errors retain `ProjectBuild.plan` behavior.
+
+Source: `src/project/planning.x`
 
 <a id="ProjectBuild.plan"></a>
 #### ProjectBuild.plan
