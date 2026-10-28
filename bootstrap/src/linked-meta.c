@@ -16682,7 +16682,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
 }
 
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void){
-  _13824 = String_new("7621d3ca");
+  _13824 = String_new("18092191");
   _13825 = String_var(_13824);
   _13826 = cons(_13825, NULL);
   _13827 = cons(_13823, _13826);
@@ -16780,7 +16780,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13919 = List_var(_13918);
   _13920 = String_new("src/collect/interfaces.x");
   _13921 = String_var(_13920);
-  _13922 = String_new("b50968e6");
+  _13922 = String_new("f0338973");
   _13923 = String_var(_13922);
   _13924 = cons(_13923, NULL);
   _13925 = cons(_13921, _13924);
@@ -16812,7 +16812,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13951 = List_var(_13950);
   _13952 = String_new("src/collect/walk.x");
   _13953 = String_var(_13952);
-  _13954 = String_new("e4fba49f");
+  _13954 = String_new("fa4e8120");
   _13955 = String_var(_13954);
   _13956 = cons(_13955, NULL);
   _13957 = cons(_13953, _13956);

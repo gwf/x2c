@@ -2034,9 +2034,8 @@ void Compiler_install_syntax_prelude(Compiler c){
 
 void Compiler_configure_package(Compiler c, List roots, String filename){
   if(! _init_guard_) _file_init_();
-  String source = Path_absolute(filename);
-  String package = Compiler_package_directory(roots, source);
-  if(! String_truth(package) || ! Compiler_is_package_source(package, source)) return;
+  String package = Compiler_package_directory(roots, filename);
+  if(! String_truth(package) || ! Compiler_is_package_source(package, Path_absolute(filename))) return;
   String name = Path_basename(package);
   c -> package = name;
   if(!(Map_contains(c -> package_roots, String_var(name)))) c -> package_roots = Map_copy(c -> package_roots);
@@ -6628,12 +6627,13 @@ static List _interface_include_dirs(Compiler c, String canonical){
     }
 
   }
-  String root = Compiler_package_directory(c -> package_source_dirs, canonical);
   String package = NULL;
-  if(String_truth(root) && Compiler_is_package_source(root, canonical)) package = Path_basename(root);
-  else if(Compiler_owns_package_source(c, canonical)) package = c -> package;
-  int source = Path_is_x2c_source(canonical);
-  Array_push(dirs, List_var(source && String_truth(package) ? cons(_340, cons(String_var(package), NULL)) : _341));
+  if(Path_is_x2c_source(canonical)){
+    String root = Compiler_package_directory(c -> package_source_dirs, canonical);
+    if(String_truth(root) && Compiler_is_package_source(root, canonical)) package = Path_basename(root);
+    else if(Compiler_owns_package_source(c, canonical)) package = c -> package;
+  }
+  Array_push(dirs, List_var(String_truth(package) ? cons(_340, cons(String_var(package), NULL)) : _341));
   return Array_list_free(dirs);
 }
 

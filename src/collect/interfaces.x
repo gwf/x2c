@@ -392,13 +392,15 @@ module List _interface_include_dirs(Compiler c, String canonical) {
     else row = dir.startswith("/") ? %(absolute $dir) : %(relative $dir);
     dirs.push(row);
   }
-  String root = Compiler.package_directory(c.package_source_dirs, canonical);
   String package = NULL;
-  if (root && Compiler.is_package_source(root, canonical))
-    package = Path.basename(root);
-  else if (c.owns_package_source(canonical)) package = c.package;
-  int source = Path.is_x2c_source(canonical);
-  dirs.push(source && package ? %(package $package) : %(package));
+  /* Non-source interfaces record no package identity. */
+  if (Path.is_x2c_source(canonical)) {
+    String root = Compiler.package_directory(c.package_source_dirs, canonical);
+    if (root && Compiler.is_package_source(root, canonical))
+      package = Path.basename(root);
+    else if (c.owns_package_source(canonical)) package = c.package;
+  }
+  dirs.push(package ? %(package $package) : %(package));
   return dirs.list_free();
 }
 

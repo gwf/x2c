@@ -436,10 +436,10 @@ static void _link_packages(Build b, String input, String directory) {
    a test or example inside the package directory imports the package like
    any consumer. */
 static int _package_built_here(Build b, List roots, String package) {
+  /* A nonnull target package makes an absent lookup a mismatch. */
   foreach (String input, b.request.inputs) {
-    String source = Path.absolute(input);
-    if (Compiler.package_directory(roots, source) == package &&
-        Compiler.is_package_source(package, source)) return 1;
+    if (Compiler.package_directory(roots, input) == package &&
+        Compiler.is_package_source(package, Path.absolute(input))) return 1;
   }
   return 0;
 }
