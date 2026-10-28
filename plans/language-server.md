@@ -1,4 +1,4 @@
-> Status: implementation authorized; phase 1 in progress
+> Status: active - phase 1 ready for shared integration; phases 2-4 pending
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Gary authorized execution on 2026-10-28 with subagents.
 > Ready PRs go to the shared integration agent, which owns full gates.
@@ -266,6 +266,18 @@ Gary approved idle exec checkpoints with the 64 MiB growth budget on
    keeps its one remaining caller.
 
 ## Validation
+
+Phase 1 focused evidence (2026-10-28): command smoke and paced protocol tests,
+legacy editor tests, extension tests and grammar suites, and VSIX packaging
+passed. The final optional checkpoint workload crossed the real 64 MiB budget
+twice, preserving PID, stdio, unsaved source/header/manifest state, hover,
+definition, and once-only initialization/notices. Descriptor counts remained
+six, and all observed helpers exited after shutdown. RSS was 322,752 KiB warm,
+480,416 KiB maximum sampled, and 191,152 KiB settled. Cold hover took 0.823
+and 0.879 seconds under concurrent host activity; these are observations, not
+an isolated performance benchmark. No full gate ran in the implementation
+session. The shared integrator owns publication validation and generated
+artifacts. Manual VS Code and Neovim sessions remain unperformed.
 
 - `commands/lsp/tests/run.sh`, run by `make commands-check`, drives
   `builds/0/libexec/x2c-lsp` with frames written by a `frame` shell
