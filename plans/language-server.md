@@ -161,8 +161,10 @@ stdio.
   on stdout would corrupt the stream, so the server redirects fd 1 to
   stderr for the analysis and keeps its own `File` on the original fd 1.
 - JSON: `Json.parse` for input, `Var.json` for output, `Json.bool` for
-  `true`/`false`. Message Maps are built with Map literals; each message is
-  handled in its own isolated `Context`, as graph serve does.
+  `true`/`false`. Message Maps are built with Map literals. Frame and JSON
+  parsing use an isolated `Context`; queued values move to server storage.
+  Handlers run under the retained unit or server lifetime so they can close
+  the open unit. Idle checkpoints reclaim accumulated process history.
 - Positions: LSP uses UTF-16 line/character; the compiler uses UTF-8 byte
   offsets. The server converts both ways against the overlay text it owns
   (the `positionAt` and `byteOffset` rules in `semantic.js` move into the
@@ -333,8 +335,8 @@ read disk again). No new cache beyond the exported records; no index built
 in the background.
 
 Idiomatic x2c: Map literals and `Var.json` build messages; `match` reads
-compiler rows; one isolated `Context` per message as graph serve does; no
-JSON-RPC framework, no handler registry object, no abstract transport.
+compiler rows; isolated frame parsing and retained-unit or server dispatch;
+no JSON-RPC framework, no handler registry object, no abstract transport.
 Dispatch is one `switch` on the method String.
 
 Validators and negative fixtures: the smoke test's parse-error document

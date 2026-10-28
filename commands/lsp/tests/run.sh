@@ -18,8 +18,16 @@ frame() {
   frame '{"jsonrpc":"2.0","id":2,"method":"textDocument/hover","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x"},"position":{"line":1,"character":25}}}'
   frame '{"jsonrpc":"2.0","id":3,"method":"textDocument/definition","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x"},"position":{"line":1,"character":25}}}'
   frame '{"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"file://'"$BUILD"'/input.x","version":2},"contentChanges":[{"text":"int broken(void) { return ; + }\n"}]}}'
-  # Leave stdin idle so the server publishes the changed document before shutdown.
-  sleep 1
+  # Observe diagnostics before shutdown, including during a loaded gate.
+  attempt=0
+  until grep -q '"code":"parse"' "$BUILD/replies" 2>/dev/null; do
+    attempt=$((attempt + 1))
+    if [ "$attempt" -ge 100 ]; then
+      echo 'language server did not publish parse diagnostics' >&2
+      exit 1
+    fi
+    sleep 0.1
+  done
   frame '{"jsonrpc":"2.0","id":4,"method":"shutdown"}'
   frame '{"jsonrpc":"2.0","method":"exit"}'
 } | "$SERVER" > "$BUILD/replies" 2> "$BUILD/stderr"

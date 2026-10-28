@@ -40,6 +40,8 @@ void SourceView_init(SourceView sources);
 
 void SourceView_set(SourceView s, String path, String text, int changed);
 
+void SourceView_unset(SourceView s, String path);
+
 int SourceView_is_changed(SourceView sources, String path);
 
 int SourceView_exists(SourceView sources, String path);

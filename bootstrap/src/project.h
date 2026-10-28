@@ -21,6 +21,8 @@ typedef struct ProjectBuild{
 #include "buffer.h"
 int ProjectBuild_valid_name(String name);
 
+CliRequest ProjectBuild_owning_target(CliRequest request, String source);
+
 ProjectBuild ProjectBuild_plan(CliRequest request);
 
 String CliRequest_project_manifest(CliRequest c);

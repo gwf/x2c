@@ -218,6 +218,13 @@ void SourceView_set(SourceView s, String path, String text, int changed){
   path = Path_absolute(path);
   Map_setindex(s -> overlays, String_var(path), String_var(text));
   if(changed) Map_setindex(s -> dirty_paths, String_var(path), int_var(1));
+  else Map_del(s -> dirty_paths, String_var(path));
+}
+
+void SourceView_unset(SourceView s, String path){
+  path = Path_absolute(path);
+  Map_del(s -> overlays, String_var(path));
+  Map_del(s -> dirty_paths, String_var(path));
 }
 
 int SourceView_is_changed(SourceView sources, String path){
