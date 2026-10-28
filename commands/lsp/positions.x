@@ -45,7 +45,13 @@ Map lsp_position(String text, int offset) {
   if (offset > length) offset = length;
   for (int at = 0; at < offset;) {
     int byte = (unsigned char) text[at];
-    if (byte == '\n') { line++; column = 0; at++; }
+    if (byte == '\r' || byte == '\n') {
+      int width = byte == '\r' && at + 1 < length && text[at + 1] == '\n' ? 2 : 1;
+      if (at + width > offset) break;
+      line++;
+      column = 0;
+      at += width;
+    }
     else {
       int width = scan_utf8_length((const unsigned char *) text + at);
       if (width < 1) width = 1;
@@ -62,8 +68,14 @@ int lsp_offset(String text, Map position) {
   int wanted_line = position.getdefault("line", 0);
   int wanted_column = position.getdefault("character", 0);
   int at = 0, length = text.len(), line = 0, column = 0;
-  while (at < length && line < wanted_line)
-    if (text[at++] == '\n') line++;
+  while (at < length && line < wanted_line) {
+    int byte = text[at++];
+    if (byte == '\r') {
+      if (at < length && text[at] == '\n') at++;
+      line++;
+    }
+    else if (byte == '\n') line++;
+  }
   while (at < length && column < wanted_column &&
          text[at] != '\n' && text[at] != '\r') {
     int width = scan_utf8_length((const unsigned char *) text + at);

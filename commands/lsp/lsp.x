@@ -176,7 +176,9 @@ static void _open(Server &server, Map params) {
   _affected(server, path);
   if (document.getdefault("languageId", "") == "x2c")
     server.documents[path] = document.getdefault("version", NULL);
-  server.workspace.change(path, document.getdefault("text", ""), 1);
+  String text = document.getdefault("text", ""), disk = "";
+  int dirty = !SourceView.read(NULL, path, disk) || disk != text;
+  server.workspace.change(path, text, dirty);
   _pending(server, path, document.getdefault("version", NULL));
 }
 

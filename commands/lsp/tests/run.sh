@@ -52,3 +52,5 @@ grep -q '"id":10' "$BUILD/errors"
 "$SERVER" < "$BUILD/cancel-input" > "$BUILD/cancel" 2> "$BUILD/cancel-stderr"
 grep -q '"code":-32800.*"id":21' "$BUILD/cancel"
 printf '%s\n' 'language server smoke tests passed'
+
+python3 "$ROOT/commands/lsp/tests/protocol.py" "$ROOT"
