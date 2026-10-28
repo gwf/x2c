@@ -468,7 +468,9 @@ static void _record_delegated_call(
     if (dot.type != <.>) return;
     match (result) case $called(%(expr ?signature (ident ?binding)), *): {
       List method = c.fact(%(method $binding));
-      if (method && method.cadr() == member)
+      String spelling = Ast.binding_spelling(binding);
+      if (method ? method.cadr() == member
+                 : spelling && spelling.endswith("_" + member))
         c.record_source_reference(binding, signature, first, first + 1);
     }
   }
