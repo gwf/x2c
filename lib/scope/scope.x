@@ -9,8 +9,9 @@
 
     Public operations initialize the module on first use, so they are safe
     before the runtime calls `Scope.initialize`. Shutdown runs its hooks
-    newest first and leaves the module terminal; `Scope.stats` still reports
-    the final counts.
+    newest first and leaves the module terminal. Allocation accounting is
+    enabled at initialization by `X2C_SCOPE_ACCOUNTING=1`; otherwise counters
+    and automatic leak reporting are disabled.
 */
 
 #pragma once
@@ -40,7 +41,7 @@ typedef struct Scope {
 
 /** Value snapshot of process-wide `Scope` allocation and lifetime counters.
     It owns no storage; live object and scope counts are derived when the
-    snapshot is taken.
+    snapshot is taken. Every field is zero when accounting is disabled.
     Live and peak requested bytes count public payload only, excluding Scope
     metadata, native allocator overhead, and Pool's direct small-object blocks.
 */
@@ -74,6 +75,7 @@ module typedef struct ScopeThreadState {
   int retain_count, retain_capacity;
 } *ScopeThreadState;
 
+module int scope_accounting;
 module atomic_size_t scope_creations, scope_destructions;
 
 // backing storage

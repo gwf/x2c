@@ -1,5 +1,13 @@
 # Status
 
+## Allocation accounting
+
+Unit and compiler-fixture program runners enable `X2C_SCOPE_ACCOUNTING=1`
+for their existing storage assertions. Scope lifecycle probes also check the
+default disabled mode, explicit zero, initialization-time latching, scope
+names, and finalizer cleanup. Default-off subprocesses clear the inherited
+setting before startup; the probes do not change their parent's environment.
+
 ## Symbol-mode comparison scope
 
 Module units support only default symbol collection. The optional raw-symbol

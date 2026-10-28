@@ -128,7 +128,7 @@ meta native void Scope.retain(void) {
 
     A pointer into a released region is not diagnosed. Neither the compiler
     nor the runtime tracks it, and using it afterwards is undefined behavior.
-    `Scope.stats` confirms that a routine leaves nothing live.
+    With accounting enabled, `Scope.stats` confirms that nothing stays live.
     Raises: `<bad-state>` when no matching retain owns the active region. The
     failure leaves the active region intact. Before `Error` initialization it
     terminates at the error floor.
@@ -155,7 +155,7 @@ meta native void Scope.release(void) {
     to it until you allocate through `Scope.malloc_in` and friends or make it
     active with `Scope.push`. End it with `Scope.destroy`. Prefer
     `Scope.new_named` for anything long-lived; the name appears in the
-    exit-time leak report.
+    exit-time leak report when accounting is enabled.
     Raises: `<alloc-fail>` when the scope cannot be allocated. Before `Error`
     initialization it terminates at the error floor.
 */
@@ -230,9 +230,10 @@ int Scope.contains(Scope scope, Scope candidate) {
 
 /** Creates a detached scope carrying a copy of `name` for diagnostics.
     The name is copied, so a temporary buffer is fine. `Scope.name` reports
-    it, and the allocator prints it at exit if anything the scope owns is
-    still alive, as a line like `scope "request": 3 allocations`. A NULL
-    `name` behaves like `Scope.new`.
+    it in either accounting mode. With accounting enabled, the allocator
+    prints it at exit if anything the scope owns is still alive, as a line
+    like `scope "request": 3 allocations`. A NULL `name` behaves like
+    `Scope.new`.
 
     ```x2c
     ~int main(void) {
@@ -320,7 +321,7 @@ module Scope _new_scope(const char *name) {
   Scope scope = _data_malloc(sizeof(struct Scope));
   *scope = (struct Scope) {0};
   _register_name(scope, name);
-  atomic_fetch_add(&scope_creations, 1);
+  if (scope_accounting) atomic_fetch_add(&scope_creations, 1);
   return scope;
 }
 
@@ -350,7 +351,7 @@ static void _destroy_chain(Scope scope) {
       else break;
     }
     _unregister_name(scope);
-    atomic_fetch_add(&scope_destructions, 1);
+    if (scope_accounting) atomic_fetch_add(&scope_destructions, 1);
     free(scope);
     scope = down;
   }

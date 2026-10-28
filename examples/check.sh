@@ -141,7 +141,9 @@ check_example() {
   run_args=()
   [[ -n "$arguments" ]] && read -r -a run_args <<<"$arguments"
   set +e
-  (cd "$case_build" && "$program" ${run_args[@]+"${run_args[@]}"}) \
+  (cd "$case_build" || exit
+    if [[ "$name" == power/scopes ]]; then export X2C_SCOPE_ACCOUNTING=1; fi
+    "$program" ${run_args[@]+"${run_args[@]}"}) \
     >"$case_build/stdout.actual" 2>"$case_build/stderr.actual"
   run_status=$?
   set -e

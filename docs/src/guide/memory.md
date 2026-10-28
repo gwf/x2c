@@ -122,10 +122,15 @@ puts(copy);
 Scope.destroy(work);
 ```
 
-`Scope.new_named` copies a diagnostic name. Name every long-lived scope.
-At exit the allocator reports each scope that is still alive, by name.
-Without the `Scope.destroy` line above, the program prints this on standard
-error before it ends:
+`Scope.new_named` copies a diagnostic name, available through `Scope.name`.
+Name every long-lived scope. Allocation accounting is off by default.
+To collect statistics and report live scopes at exit, start the program with
+`X2C_SCOPE_ACCOUNTING=1`. The runtime reads the setting once at initialization;
+changing the environment afterward does not change the selected mode.
+`Scope.accounting_enabled()` reports that mode.
+
+With accounting enabled and without the `Scope.destroy` line above, the
+program prints this on standard error before it ends:
 
 ```text
 Scope leak detected:
@@ -137,7 +142,11 @@ Scope leak detected:
 
 The last line counts the allocator's own bookkeeping, such as the record
 holding that name. `Scope.stats` reports the same counters on demand, so
-you can check that a routine leaves no allocations behind.
+you can check that a routine leaves no allocations behind. With accounting
+disabled, every `Scope.stats` field is zero and automatic leak reports are
+disabled. Allocation ownership, cleanup, finalizers, and diagnostic scope names
+work in either mode. The compiler enables accounting for its `repl` and `lsp`
+commands, which use these counters for statistics and retained-memory limits.
 
 When several operations should allocate in the same scope without passing a
 slot to every call, `Scope.push` makes a slot active and `Scope.pop`

@@ -20,7 +20,8 @@ class Client:
         self.stderr = self.log.open("wb")
         self.process = subprocess.Popen(
             [str(root / "builds/0/libexec/x2c-lsp")], cwd=directory,
-            env=dict(os.environ, X2C_CACHE_DIR=str(directory / "cache")),
+            env=dict(os.environ, X2C_CACHE_DIR=str(directory / "cache"),
+                     X2C_SCOPE_ACCOUNTING="1"),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=self.stderr, bufsize=0)
         self.pid = self.process.pid

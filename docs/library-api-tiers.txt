@@ -185,7 +185,7 @@ lib/pool/pool.x|internal|x2c_pool_exchange
 lib/scope/scope.x|advanced|Scope.calloc,Scope.calloc_in,Scope.destroy,Scope.free
 lib/scope/scope.x|advanced|Scope.cleanup
 lib/scope/scope.x|advanced|Scope.malloc,Scope.malloc_in,Scope.memdup,Scope.memdup_in
-lib/scope/scope.x|advanced|Scope.move,Scope.name,Scope.new_named,Scope.realloc
+lib/scope/scope.x|advanced|Scope.accounting_enabled,Scope.move,Scope.name,Scope.new_named,Scope.realloc
 lib/scope/scope.x|advanced|Scope.release,Scope.retain,Scope_shutdown,Scope.stats
 lib/scope/scope.x|advanced|Scope.top
 lib/scope/scope.x|internal|Scope.initialize,Scope.shutdown_hook

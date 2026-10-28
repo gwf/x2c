@@ -54,8 +54,53 @@ static Var completed_worker(const void *input, size_t input_size) {
   return 47;
 }
 
+static int accounting_drops;
+
+static void accounting_drop(void *ptr) {
+  (void) ptr;
+  accounting_drops++;
+}
+
+static int zero_stats(ScopeStats stats) =>
+  !(stats.allocation_calls | stats.reallocation_calls | stats.free_calls |
+    stats.live_allocations | stats.scope_creations | stats.scope_destructions |
+    stats.live_scopes | stats.requested_bytes | stats.largest_request |
+    stats.live_requested_bytes | stats.peak_live_requested_bytes);
+
+static int accounting_mode(int enabled) {
+  if (Scope.accounting_enabled() != enabled) return 1;
+  ScopeStats before = Scope.stats();
+  if (!enabled && !zero_stats(before)) return 1;
+  Scope work = Scope.new_named("accounting probe");
+  if (strcmp(work.name(), "accounting probe")) return 1;
+  void *ptr = Scope.malloc_finalized_in(&work, 8, accounting_drop);
+  ptr = xrealloc(ptr, 16);
+  if (!ptr) return 1;
+  setenv("X2C_SCOPE_ACCOUNTING", enabled ? "0" : "1", 1);
+  Scope.initialize();
+  if (Scope.accounting_enabled() != enabled) return 1;
+  work.destroy();
+  ScopeStats after = Scope.stats();
+  if (accounting_drops != 1) return 1;
+  if (enabled) {
+    if (after.allocation_calls != before.allocation_calls + 1 ||
+        after.reallocation_calls != before.reallocation_calls + 1 ||
+        after.free_calls != before.free_calls + 1 ||
+        after.scope_creations != before.scope_creations + 1 ||
+        after.scope_destructions != before.scope_destructions + 1 ||
+        after.requested_bytes != before.requested_bytes + 24 ||
+        after.live_requested_bytes != before.live_requested_bytes)
+      return 1;
+  }
+  else if (!zero_stats(after)) return 1;
+  Scope_shutdown();
+  return Scope.accounting_enabled() != enabled;
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) return 2;
+  if (!strcmp(argv[1], "accounting-off")) return accounting_mode(0);
+  if (!strcmp(argv[1], "accounting-on")) return accounting_mode(1);
 
   if (!strcmp(argv[1], "clean")) {
     Scope.retain();

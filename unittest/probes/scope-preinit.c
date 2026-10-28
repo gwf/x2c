@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
   if (argc != 2) return 2;
 
   if (!strcmp(argv[1], "allocate")) {
+    if (!Scope_accounting_enabled()) return 1;
     void *ptr = Scope_malloc(8);
     if (!ptr) return 1;
     Scope_free(ptr);

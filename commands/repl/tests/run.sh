@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+export X2C_SCOPE_ACCOUNTING=1
 
 cd "$(dirname "$0")/../../.."
 tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$

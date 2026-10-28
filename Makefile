@@ -144,8 +144,8 @@ verify: build						## Build and run unit test suites
 	$(PARALLEL_MAKE) -C unittest compiler-fixtures scope-probes \
 		error-probes varops-probes
 	# thread_suite alone proves suites do not rely on earlier registration.
-	(cd ./unittest && ./test-all thread_suite)
-	(cd ./unittest && ./test-all)
+	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all thread_suite)
+	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all)
 
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
@@ -444,7 +444,7 @@ bm-scope: build						## Run focused Scope timings
 
 bm-file: build						## Run focused File timings
 	$(call RUN_X2C_BENCHMARK,file-hot-paths,-O2)
-	./unittest/build/benchmarks/file-hot-paths
+	X2C_SCOPE_ACCOUNTING=1 ./unittest/build/benchmarks/file-hot-paths
 
 bm-logger: build					## Run focused Logger timings
 	mkdir -p unittest/build/benchmarks

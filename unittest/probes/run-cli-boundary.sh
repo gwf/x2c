@@ -723,6 +723,22 @@ cp "$(dirname "$X2C")/libexec/x2c-build" "$BUILD/standalone/libexec/x2c/"
 )
 [[ -f "$BUILD/standalone/libstandalone.a" ]] || exit 1
 
+# Accounting belongs to REPL/LSP child startup, not the invoking compiler or
+# unrelated commands. Stubs expose only the child's environment.
+cp "$ROOT/commands/manifest.txt" "$BUILD/standalone/libexec/x2c/commands.txt"
+for command in repl lsp new; do
+  printf '%s\n' '#!/bin/sh' 'printf "%s\n" "${X2C_SCOPE_ACCOUNTING-unset}"' \
+    >"$BUILD/standalone/libexec/x2c/x2c-$command"
+  chmod +x "$BUILD/standalone/libexec/x2c/x2c-$command"
+done
+launcher="$BUILD/standalone/bin/x2c"
+for command in repl lsp; do
+  [[ $(env -u X2C_SCOPE_ACCOUNTING "$launcher" "$command") == 1 ]] || exit 1
+done
+[[ $(env -u X2C_SCOPE_ACCOUNTING "$launcher" new) == unset ]] || exit 1
+[[ $(X2C_SCOPE_ACCOUNTING=0 "$launcher" repl) == 1 ]] || exit 1
+[[ $(X2C_SCOPE_ACCOUNTING=0 "$launcher" new) == 0 ]] || exit 1
+
 # A directory named builds is not sufficient to identify a repository stage.
 mkdir -p "$BUILD/standalone/src" "$BUILD/standalone/include" \
   "$BUILD/standalone/lib" "$BUILD/relocated/builds"

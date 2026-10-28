@@ -145,7 +145,7 @@ int Compiler.run_command(String name, List arguments) {
   String path = Compiler.command_path(name);
   if (!path)
     $fail.utils_command_missing(name);
-  Map options = {env: Compiler.command_environment(), stdout: <inherit>};
+  Map options = {env: Compiler.command_environment(name), stdout: <inherit>};
   try return $(path, @arguments).job().options(options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   return 2;
@@ -181,14 +181,18 @@ String Compiler.stage_dir(void) {
   return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
-/** Returns the home, driver, and identity supplied to external commands. */
-Map Compiler.command_environment(void) {
+/** Returns the home, driver, and identity supplied to an external command.
+    REPL and language-server children also enable allocation accounting at
+    startup for their statistics and retained-memory limits. */
+Map Compiler.command_environment(String name) {
   Map environment = {};
   String home = Compiler.home_dir(), driver = Compiler.driver_executable();
   String identity = Compiler.identity();
   if (home) environment["X2C_HOME"] = home;
   if (driver) environment["X2C"] = driver;
   if (identity) environment["X2C_IDENTITY"] = identity;
+  if (name == "lsp" || name == "repl")
+    environment["X2C_SCOPE_ACCOUNTING"] = "1";
   return environment;
 }
 

@@ -1,3 +1,4 @@
+/* Run with X2C_SCOPE_ACCOUNTING=1 to enable the allocation assertions. */
 #include <assert.h>
 int main(void) {
 // Prepare the catch before measuring reclaimable working storage.

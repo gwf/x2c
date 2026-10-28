@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+export X2C_SCOPE_ACCOUNTING=1
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd -P)
 SERVER="$ROOT/builds/0/libexec/x2c-lsp"
 BUILD=$(mktemp -d "${TMPDIR:-/tmp}/x2c-lsp-test.XXXXXX")

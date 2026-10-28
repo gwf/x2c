@@ -6,9 +6,20 @@ static Symbol scope_state = <uninit>;
 static void(**hooks)(void);
 static int hook_count, hook_capacity;
 
-/** Initializes the process-wide `Scope` runtime owner. */
+/** Initializes the process-wide `Scope` runtime owner.
+    The first initialization enables allocation accounting only when the
+    environment variable `X2C_SCOPE_ACCOUNTING` is exactly `1`. Later
+    environment changes do not change the selected mode. */
 void Scope.initialize(void) {
   _initialize();
+}
+
+/** Reports whether process-start allocation accounting is enabled.
+    Initializes Scope on first use. The result remains fixed and is available
+    after shutdown, like `Scope.stats`. */
+int Scope.accounting_enabled(void) {
+  if (scope_state == <uninit>) _initialize();
+  return scope_accounting;
 }
 
 /** Registers `hook` to run during process-wide `Scope` shutdown.
@@ -54,6 +65,8 @@ static void _initialize(void) {
   if (scope_state == <running> || scope_state == <shutting>) return;
   if (scope_state == <shutdown>)
     _raw_fatal("operation attempted after shutdown");
+  const char *accounting = getenv("X2C_SCOPE_ACCOUNTING");
+  scope_accounting = accounting && strcmp(accounting, "1") == 0;
   ScopeThreadState state = _thread();
   state.active = &state.root;
   scope_state = <running>;
@@ -79,7 +92,7 @@ static void _run_hooks(void) {
 
 module void _raw_free(void *ptr) {
   if (!ptr) return;
-  atomic_fetch_add(&raw_free_count, 1);
+  if (scope_accounting) atomic_fetch_add(&raw_free_count, 1);
   free(ptr);
 }
 
@@ -101,7 +114,7 @@ module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
 module void *_raw_malloc(size_t size) {
   void *ptr = malloc(size);
   if (!ptr) raise %(alloc-fail);
-  atomic_fetch_add(&raw_alloc_count, 1);
+  if (scope_accounting) atomic_fetch_add(&raw_alloc_count, 1);
   return ptr;
 }
 

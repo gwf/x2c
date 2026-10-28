@@ -44,7 +44,9 @@ const char *Scope.name(Scope scope) {
     `largest_request`, `live_requested_bytes`, and
     `peak_live_requested_bytes`. Requested bytes are cumulative traffic;
     live requested bytes are the exact current managed payload total. Stats
-    remain valid after shutdown.
+    remain valid after shutdown. With accounting disabled, all fields are
+    zero. Set `X2C_SCOPE_ACCOUNTING=1` before process startup to collect
+    statistics and enable automatic exit-time leak reports.
 
     ```x2c
     ~int main(void) {
@@ -59,6 +61,7 @@ const char *Scope.name(Scope scope) {
     ```
 */
 ScopeStats Scope.stats(void) {
+  if (!scope_accounting) return (ScopeStats) {0};
   ScopeStats stats = {
     .reallocation_calls = atomic_load(&scope_reallocation_calls),
     .requested_bytes = atomic_load(&scope_requested_bytes),
@@ -126,12 +129,14 @@ module void _unregister_name(Scope scope) {
 }
 
 module void _record_allocation(size_t size) {
+  if (!scope_accounting) return;
   atomic_fetch_add(&scope_allocation_calls, 1);
   _record_request(size);
   _record_live_add(size);
 }
 
 module void _record_resize(size_t old_size, size_t size) {
+  if (!scope_accounting) return;
   atomic_fetch_add(&scope_reallocation_calls, 1);
   _record_request(size);
   if (size >= old_size) _record_live_add(size - old_size);
@@ -139,6 +144,7 @@ module void _record_resize(size_t old_size, size_t size) {
 }
 
 module void _record_free(size_t size) {
+  if (!scope_accounting) return;
   atomic_fetch_add(&scope_free_calls, 1);
   _record_live_remove(size);
 }
@@ -165,6 +171,7 @@ static void _record_live_remove(size_t size) {
 }
 
 module void _report_leaks(void) {
+  if (!scope_accounting) return;
   ScopeStats stats = Scope.stats();
   if (!stats.live_scopes && !stats.live_allocations &&
       atomic_load(&raw_alloc_count) == atomic_load(&raw_free_count))

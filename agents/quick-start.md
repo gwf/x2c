@@ -179,8 +179,8 @@ required sequence.
 
 For an optional focused unit run, build with `make -C unittest test-all`, then
 pass exact suite names, for example
-`(cd unittest && ./test-all string_suite lambda_suite)`. Names come from
-`unittest/test-all.x`. Selected suites keep their normal execution order;
+`(cd unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all string_suite lambda_suite)`.
+Names come from `unittest/test-all.x`. Selected suites keep their normal execution order;
 duplicates run once and unknown names return status 2. Without arguments the
 runner executes every suite, as the existing validation commands do.
 
