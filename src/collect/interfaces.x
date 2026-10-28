@@ -32,29 +32,45 @@ void Compiler.configure_interfaces(String out_dir, int cold) {
 }
 
 /** Returns the home-relative paths of the runtime units the prelude
-    interface includes whose own interface this compiler did not write, or
-    NULL when every one is present or there is no prelude interface. A
+    interface includes whose own interface cannot be replayed, or NULL
+    when every one is current or there is no prelude interface. A
     missing interface walks that unit cold in every process, so a converged
     stage build reports none.
 */
 List Compiler.prelude_missing_interfaces(void) {
-  String prelude = Compiler.prelude_interface();
-  List record = prelude ? _interface_record(prelude) : NULL;
-  Array missing = [];
-  if (record ~= %(interface 6 ? ? ? ?(List parts) *))
-    foreach (Var part in parts)
-      if (part is <string> &&
-          !_written_interface(Compiler.absolute_home_path(part)))
-        missing.push(part);
-  return missing.list_free();
+  Compiler c = _prelude_compiler();
+  String canonical = _canonical_path(%"$(x2c_get_root())/lib/x2c.x");
+  foreach (String path in _interface_candidates(canonical)) {
+    List record = _interface_record(path);
+    if (record ~= %(interface 6 ? ? ? ?(List parts) *)) {
+      Array missing = [];
+      foreach (Var part in parts)
+        if (part is <string> &&
+            !_entry(c, _canonical_path(Compiler.absolute_home_path(part))))
+          missing.push(part);
+      return missing.list_free();
+    }
+  }
+  return NULL;
 }
 
-/** Returns the path of the first prelude interface this compiler wrote, or
-    NULL when there is none or the compiler's identity is unknown. Its
-    source hashes are not checked.
+/** Returns the path of the first prelude interface this compiler can
+    replay, or NULL when every candidate is absent or stale.
 */
-String Compiler.prelude_interface(void) =>
-  _written_interface(_canonical_path(%"$(x2c_get_root())/lib/x2c.x"));
+String Compiler.prelude_interface(void) {
+  Compiler c = _prelude_compiler();
+  String canonical = _canonical_path(%"$(x2c_get_root())/lib/x2c.x");
+  foreach (String path in _interface_candidates(canonical))
+    if (_interface_load(c, canonical, path)) return path;
+  return NULL;
+}
+
+/* The runtime prelude uses the default include roots without a package. */
+static Compiler _prelude_compiler(void) {
+  Compiler c = Compiler.new();
+  c.include_dirs = Compiler.default_include_dirs();
+  return c;
+}
 
 // writing interfaces
 
@@ -137,21 +153,6 @@ static List _read_record(String source) {
   catch %((!or incomplete malformed) *): return NULL;
   if (!read || record is not <list>) return NULL;
   return record;
-}
-
-/* The first candidate interface of `canonical` that this compiler wrote,
-   or NULL. Only the identity header is checked. */
-static String _written_interface(String canonical) {
-  String identity = Compiler.identity();
-  if (!identity) return NULL;
-  String header = %"(interface 6 \"$identity\" ";
-  foreach (String path in _interface_candidates(canonical)) {
-    String text = NULL;
-    try text = Path.read_text(path);
-    catch %((!or not-found io-fail) *): continue;
-    if (text.startswith(header)) return path;
-  }
-  return NULL;
 }
 
 /* Candidate interface paths for one canonical source path: the output

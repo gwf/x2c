@@ -1150,10 +1150,13 @@ void Build.publish_script(Build b, String executable) {
 }
 
 static List _script_files(Build b) {
-  String script = b.request.inputs.car();
-  String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array files = [];
-  foreach (String path, _depfile_inputs(depfile)) files.push(path);
+  foreach (String input, b.request.inputs) {
+    files.push(input);
+    if (!Path.is_x2c_source(input)) continue;
+    String depfile = _unit_file(_unit_dir(b, input), input, ".d");
+    foreach (String path, _depfile_inputs(depfile)) files.push(path);
+  }
   foreach (String source, b.c_sources)
     foreach (String path, _depfile_inputs(%"$(b.dep_root)/$(_key(source)).d"))
       files.push(path);

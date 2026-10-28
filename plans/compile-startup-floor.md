@@ -1,11 +1,13 @@
 > Status: active
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`9aeeef265`) with `builds/0/x2c` identity `48fd687ab075ad6f`. No
-> implementation has started. The probe corrected the premise: a converged
-> tree already replays the prelude from `.xi` interfaces in about 70 ms;
+> implementation had started when drafted. The probe corrected the premise:
+> a converged tree already replays the prelude from `.xi` interfaces in about 70 ms;
 > the 0.5-0.8 s cold walk is the cost of a stale stage. Gary decided on
 > 2026-10-28: skip the replay floor change (phase 1 step 1), keep the
 > stale-stage visibility in `x2c env`, and do the `run` cache.
+> Implementation is complete locally. Shared-integrator submission owns
+> final generated artifacts, the performance checkpoint, and the full gate.
 
 # Compile startup floor
 
@@ -101,9 +103,8 @@ are, and a binary image would remove only the 21 ms parse.
    right action in that gap is `make build`, which rewrites the interfaces.
 3. Consumption: `load_prelude` keeps its path through `_add_prelude` ->
    `_prelude_entry` -> `_entry` -> `_interface_read` -> `_replay_cached`.
-   The change is inside `_interface_load`: parse the record under
-   `process_cache_scope`, so rows are born retained and `_read_rows` stops
-   walking every row with `try_own`. Nothing new enters the symbol table.
+   The proposed allocation change inside `_interface_load` was declined.
+   `_read_rows` keeps its ownership walk. Nothing changes in replay.
 4. Visibility: `x2c env prelude` and `prelude_missing` validate through
    `_interface_read` (identity, path, hash, include roots, dependency
    hashes) instead of the identity header alone, so a stale stage prints an
@@ -119,7 +120,7 @@ are, and a binary image would remove only the 21 ms parse.
 7. REPL and editor: `repl_run` opens its session through
    `Frontend.open_session`, and `editor` through `Frontend.open`; both
    collect with `c.prelude = 1` and reach the same `_prelude_entry`, so
-   they get phase 1 for free. Nothing to change there.
+   their collection path stays unchanged. Nothing to change there.
 8. Measurement: the table above is the baseline; repeat it after each
    phase on the same host, converged tree, alternating runs, per
    `agents/performance-checkpoints.md`.
@@ -243,18 +244,18 @@ Size: about 60 changed lines in `script.x`, 15 in `workflow.x`, 4 in
   include roots, and dependency hashes before replay; `_publish` keeps a
   file's first entry, so stage interfaces are cold-walk entries; the
   script fingerprint covers everything a reused executable depends on.
-  Phase 1 moves where parsed cells are allocated and rechecks nothing.
+  Phase 1 changes only the environment report's interface selection.
   Phase 2 calls the same fingerprint and lock; `env` calls the same
   validator the replay uses instead of its own header check.
-- Deleted or reused: `_read_rows` loses its per-row ownership walk;
-  `_written_interface`'s header-only check is replaced by `_interface_read`
+- Deleted or reused: `_read_rows` keeps its per-row ownership walk;
+  `_written_interface`'s header-only check is replaced by the replay reader
   for `env`; `run` reuses `prepare_script`, `publish_script`,
   `script_current`, `_prune`, `_exec`, and the `scripts/` layout under a
   second directory name. New lasting mechanisms: none. The `runs/`
   directory exists so a `script` entry and a `run` entry for the same file
   never overwrite each other's executable.
-- Idiomatic: both phases compose existing operations (`auto` on the cache
-  scope, the existing fingerprint) rather than adding a format, a
+- Idiomatic: both phases compose existing operations (the interface
+  reader and existing fingerprint) rather than adding a format, a
   daemon, or a second cache policy.
 - Validators, diagnostics, negative fixtures: none new. The `run.sh`
   cases are positive behavior checks of the documented cache rules.
@@ -263,7 +264,45 @@ Size: about 60 changed lines in `script.x`, 15 in `workflow.x`, 4 in
 
 Before publication validation, review the completed authored diff for the
 same points: that no step rechecks a validated fact, that `run` shares
-`script`'s code rather than copying it, that the retention change leaves
-`_retain` only on constructed values, and that documentation says what
+`script`'s code rather than copying it, that replay retention is unchanged,
+and that documentation says what
 `env` and `run` now do. Fix what the review finds, then run the
 validation above.
+
+## Implementation and handoff (2026-10-28)
+
+Starting revision: `9805a4f3add3ea56ad7ff05bacf49f71bc13222f`.
+Delivery uses the existing shared integrator, as Gary requested. This session
+does not run the publication gate or regenerate the final bootstrap.
+
+- `env` selects the prelude path through `_interface_load`, the same file
+  validator `_interface_read` uses. Missing-unit reporting reads the stored
+  include list even when the prelude is stale, then checks each unit with
+  `_entry`. Both use the default include roots and no package.
+- `run` shares script preparation, executable publication, fingerprinting,
+  locking, pruning, and execution. Its cache key includes every absolute
+  input path, in order. Ordinary output and manifest builds stay on their
+  existing path. `--clean` and `--rebuild` require a cached launch.
+- `_script_files` now records every input's translation dependencies, plus
+  the native dependencies it already recorded. This is needed for a header
+  used by the second input to invalidate a cached multi-input program.
+- The isolated environment probe generated matching runtime interfaces with
+  the current compiler. `prelude` was present and `prelude_missing` empty.
+  Appending a newline to `lib/array/array.x` cleared `prelude` and listed that
+  unit and its dependents. Restoring the source restored both report values.
+  Five matching-fixture `env` samples had a median of 54 ms. This functional
+  observation is not the final paired performance checkpoint.
+- The authored diff retains all replay ownership operations and adds no
+  interface format, cache fingerprint, or symbol-table state.
+- `make build`, `sh commands/build/tests/run.sh`, and the saved isolated
+  environment probe pass. Cache probes cover receipts, arguments, source
+  edits, second-input headers, exit status, forced builds, removal, explicit
+  outputs, retained directories, separate input lists, and dry runs.
+- `unittest/probes/run-cli-boundary.sh` passes, including script caching,
+  dependency invalidation, manifests, and explicit run outputs. Its former
+  temporary-run assertion now checks the retained cache build.
+
+The integrator owns final generated documentation and bootstrap, converged
+performance measurements, and `agent-pr-check`. The focused documentation
+audit currently reports only the expected generated `collect.md` API prose
+changes for the two updated environment-report methods.

@@ -1090,13 +1090,13 @@ set +e
   >"$BUILD/direct/compile-only.stdout" \
   2>"$BUILD/direct/compile-only.stderr"
 compile_only_status=$?
-"$X2C" run "$BUILD/direct/one.x" \
+X2C_CACHE_DIR="$BUILD/direct/run-cache" "$X2C" run "$BUILD/direct/one.x" \
   >"$BUILD/direct/run.stdout" 2>"$BUILD/direct/run.stderr"
 run_status=$?
 set -e
 [[ $compile_only_status == 2 && $run_status == 0 ]] || exit 1
 [[ $(cat "$BUILD/direct/run.stdout") == one ]] || exit 1
-grep -Fq 'temporary; removed after run' "$BUILD/direct/run.stderr"
+grep -Fq '(retained)' "$BUILD/direct/run.stderr"
 
 # Defaults, retained builds, and directory aliases share the native driver.
 python3 - "$X2C" "$BUILD/defaults" <<'PY_DEFAULTS'
