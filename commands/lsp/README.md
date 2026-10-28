@@ -11,6 +11,12 @@ supported. The server reports compiler frontend diagnostics, definitions, and
 hover. It accepts full-document changes and keeps unsaved source overlays.
 Native CPP symbol modes cannot analyze unsaved source text.
 
+Unsupported analysis commands, unsaved CPP input, and documents without a
+unique selected target produce a `window/showMessage` notice. Invalid CLI
+options and malformed or invalid project configurations retain the CLI's
+existing behavior: they print an error and terminate the server. Correct the
+configuration and restart the client in those cases.
+
 The server converts UTF-16 LSP positions to compiler byte offsets. One resident
 frontend keeps at most one source unit open. Whole-unit dependency invalidation
 uses each analyzed document's read set. Diagnostics wait until queued changes
