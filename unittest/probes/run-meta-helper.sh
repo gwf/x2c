@@ -25,6 +25,50 @@ helpers() {
   pgrep -f "$X2C_CACHE_DIR/meta/project-" || true
 }
 
+# A package's runtime definitions can be reached by project meta code too.
+# Its native response supplies the same foreign libraries to the host helper.
+mkdir -p packages/nativefixture/src packages/nativefixture/builds native
+cat >native/value.c <<'EOF'
+int fixture_link_value(void) { return 37; }
+EOF
+cc -c native/value.c -o native/value.o
+ar rcs native/libvalue.a native/value.o
+printf '%s\n' 'int fixture_native_value(void);' \
+  >packages/nativefixture/src/native-value.h
+cat >packages/nativefixture/src/nativefixture.x <<'EOF'
+typedef Symbol NativeFixture;
+#include "native-value.h"
+meta int NativeFixture.value(void) => fixture_native_value();
+EOF
+native_response="$BUILD/packages/nativefixture/builds/nativefixture.native.rsp"
+printf '%s\n' '-Dfixture_native_value=fixture_link_value' \
+  "$BUILD/native/libvalue.a" >"$native_response"
+cat >package-meta.x <<'EOF'
+import "nativefixture" with NativeFixture;
+int answer(void) => $NativeFixture.value();
+EOF
+"$X2C" translate --package-dir packages --out-dir out package-meta.x >package-meta.log 2>&1 ||
+  fail "package native helper link failed: $(cat package-meta.log)"
+grep -q 'return 37;' out/package-meta.c || fail "package native meta result"
+cat >native/other.c <<'EOF'
+int fixture_link_value(void) { return 73; }
+EOF
+cc -c native/other.c -o native/other.o
+ar rcs native/libother.a native/other.o
+printf '%s\n' '-Dfixture_native_value=fixture_link_value' \
+  "$BUILD/native/libother.a" >"$native_response"
+"$X2C" translate --package-dir packages --out-dir out package-meta.x >package-meta.log 2>&1 ||
+  fail "changed package response failed: $(cat package-meta.log)"
+grep -q 'return 73;' out/package-meta.c || fail "package response kept stale helper"
+cat >native/other.c <<'EOF'
+int fixture_link_value(void) { return 91; }
+EOF
+cc -c native/other.c -o native/other.o
+ar rcs native/libother.a native/other.o
+"$X2C" translate --package-dir packages --out-dir out package-meta.x >package-meta.log 2>&1 ||
+  fail "changed native archive failed: $(cat package-meta.log)"
+grep -q 'return 91;' out/package-meta.c || fail "native archive kept stale helper"
+
 cat > calls.x <<'EOF'
 #include <stdlib.h>
 
