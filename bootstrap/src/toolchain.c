@@ -581,7 +581,7 @@ static Job _start_tool(Job command, String program, String * failure){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_2, 0));
           {
-            long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
+            long error = Var_long(Var_convert_at(List_assoc(detail, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/toolchain.x",.function = "_start_tool",.line = 386}; & _x2c_gensym_error_site_0; })));
             String reason = String_new(strerror((int) error));
             (* failure) = String_join(NULL, cons(String_var(_57), cons(String_var(program), cons(String_var(_58), cons(String_var(reason), cons(String_var(_59), NULL))))));
           }

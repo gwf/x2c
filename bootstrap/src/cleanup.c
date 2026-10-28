@@ -1206,7 +1206,7 @@ static Var f9_transfers____rewrite(f9_transfers___Walk * w, Var value){
         {
           Var _x2c_gensym_match_value_0 = origin;
           {
-            int origin = Var_int(Var_convert(_x2c_gensym_match_value_0, 3453797));
+            int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cleanup/transfers.x",.function = "f9_transfers____rewrite",.line = 90}; & _x2c_gensym_error_site_0; })));
             return f9_transfers____lower_at(&((* w)), origin, inner);
           }
 
@@ -2006,7 +2006,7 @@ int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime){
           f7_statics____push(&(s), List_var(value), 0);
           while(Array_len(pending)){
             List node = Var_list_payload(Array_take_last(pending));
-            int address = Var_int(Var_convert(Array_take_last(modes), 3453797));
+            int address = Var_int(Var_convert_at(Array_take_last(modes), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/cleanup/statics.x",.function = "Compiler_static_value_is_runtime",.line = 27}; & _x2c_gensym_error_site_1; })));
             int result = address ? f7_statics____address(&(s), node) : f7_statics____value(&(s), node);
             if(result > 0){
               int _x2c_gensym_return_value_4 = 1;
@@ -2566,7 +2566,7 @@ static void _collect_writes(Preserve * p, List body){
         {
           while(Array_len(pending)){
             Var current = Array_take_last(pending);
-            int inside = Var_int(Var_convert(Array_take_last(flags), 3453797));
+            int inside = Var_int(Var_convert_at(Array_take_last(flags), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/cleanup/preservation.x",.function = "_collect_writes",.line = 35}; & _x2c_gensym_error_site_2; })));
             if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;
             List node = Var_list_payload(current);
             if(inside) f12_preservation____write(&((* p)), node);
@@ -2910,7 +2910,7 @@ static List f12_preservation____block(Preserve * p, List statements){
             wrapped = x2c_match_value_1;
             Var _x2c_gensym_match_value_4 = anchor;
             {
-              int anchor = Var_int(Var_convert(_x2c_gensym_match_value_4, 3453797));
+              int anchor = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cleanup/preservation.x",.function = "f12_preservation____block",.line = 161}; & _x2c_gensym_error_site_3; })));
               {
                 origin = anchor;
                 inner = wrapped;

@@ -1826,7 +1826,7 @@ static Var _worker(Var value){
     );
     Var _x2c_gensym_macro_item_5;
     while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
-      fd = Var_int(Var_convert(_x2c_gensym_macro_item_5, 3453797));
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 434,.runtime = 1}; & _x2c_gensym_error_site_4; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_3 = connection;

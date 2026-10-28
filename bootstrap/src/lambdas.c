@@ -1172,7 +1172,7 @@ int Compiler_lambda_capture_required(Compiler c, List binding){
       depth = x2c_match_value_0;
       Var supplied;
       supplied = x2c_match_value_1;
-      return List_truth(_prescribed_row(supplied, binding, binding)) || _declared_outside(c, binding, Var_int(Var_convert(depth, 3453797)));
+      return List_truth(_prescribed_row(supplied, binding, binding)) || _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/lambdas.x",.function = "Compiler_lambda_capture_required",.line = 245}; & _x2c_gensym_error_site_0; }))));
     }
 
   }
@@ -1830,7 +1830,7 @@ static List _frame_capture(Compiler c, List frame, List binding, List original, 
       supplied = x2c_match_value_3;
       {
         List prescribed = _prescribed_row(supplied, binding, original);
-        if(! List_truth(prescribed) && ! _declared_outside(c, binding, Var_int(Var_convert(depth, 3453797)))) return NULL;
+        if(! List_truth(prescribed) && ! _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/lambdas.x",.function = "_frame_capture",.line = 588}; & _x2c_gensym_error_site_1; }))))) return NULL;
         if(Type_is_static(type)) return NULL;
         Map facts = Compiler_semantic_binding_facts(c);
         List key = cons(_49, cons(scope, cons(List_var(binding), NULL)));

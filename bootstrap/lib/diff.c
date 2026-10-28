@@ -333,8 +333,8 @@ static int _myers(Script * s){
           {
             List _x2c_gensym_destructure_0 = step;
             Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_0, 0));
-            int i = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 1), 3453797));
-            int j = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 2), 3453797));
+            int i = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/diff.x",.function = "_myers",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+            int j = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/diff.x",.function = "_myers",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_1; })));
             _emit(&((* s)), kind, Var_as_string(kind == 634596520 ? Array_getindex((* s).new, (* s).lo + j) : Array_getindex((* s).old, (* s).lo + i)));
           }
 

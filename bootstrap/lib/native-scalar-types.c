@@ -483,7 +483,7 @@ static Var _x2c_gensym_macro__load_0(const void * _x2c_gensym_macro_bytes_0, Sco
 }
 
 static void _x2c_gensym_macro__store_0(void * _x2c_gensym_macro_bytes_1, Var _x2c_gensym_macro_value_1){
-  char _x2c_gensym_macro_native_1 = Var_char(Var_convert(_x2c_gensym_macro_value_1, 26993));
+  char _x2c_gensym_macro_native_1 = Var_char(Var_convert_at(_x2c_gensym_macro_value_1, 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_0",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_0; })));
   memcpy(_x2c_gensym_macro_bytes_1, & _x2c_gensym_macro_native_1, sizeof _x2c_gensym_macro_native_1);
 }
 
@@ -495,7 +495,7 @@ static Var _x2c_gensym_macro__load_1(const void * _x2c_gensym_macro_bytes_2, Sco
 }
 
 static void _x2c_gensym_macro__store_1(void * _x2c_gensym_macro_bytes_3, Var _x2c_gensym_macro_value_3){
-  double _x2c_gensym_macro_native_3 = Var_floating(Var_convert(_x2c_gensym_macro_value_3, 3356265));
+  double _x2c_gensym_macro_native_3 = Var_floating(Var_convert_at(_x2c_gensym_macro_value_3, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_1",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_1; })));
   memcpy(_x2c_gensym_macro_bytes_3, & _x2c_gensym_macro_native_3, sizeof _x2c_gensym_macro_native_3);
 }
 
@@ -507,7 +507,7 @@ static Var _x2c_gensym_macro__load_2(const void * _x2c_gensym_macro_bytes_4, Sco
 }
 
 static void _x2c_gensym_macro__store_2(void * _x2c_gensym_macro_bytes_5, Var _x2c_gensym_macro_value_5){
-  float _x2c_gensym_macro_native_5 = Var_float(Var_convert(_x2c_gensym_macro_value_5, 3355493));
+  float _x2c_gensym_macro_native_5 = Var_float(Var_convert_at(_x2c_gensym_macro_value_5, 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_2",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_2; })));
   memcpy(_x2c_gensym_macro_bytes_5, & _x2c_gensym_macro_native_5, sizeof _x2c_gensym_macro_native_5);
 }
 
@@ -519,7 +519,7 @@ static Var _x2c_gensym_macro__load_3(const void * _x2c_gensym_macro_bytes_6, Sco
 }
 
 static void _x2c_gensym_macro__store_3(void * _x2c_gensym_macro_bytes_7, Var _x2c_gensym_macro_value_7){
-  int _x2c_gensym_macro_native_7 = Var_int(Var_convert(_x2c_gensym_macro_value_7, 3453797));
+  int _x2c_gensym_macro_native_7 = Var_int(Var_convert_at(_x2c_gensym_macro_value_7, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_3",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_3; })));
   memcpy(_x2c_gensym_macro_bytes_7, & _x2c_gensym_macro_native_7, sizeof _x2c_gensym_macro_native_7);
 }
 
@@ -531,7 +531,7 @@ static Var _x2c_gensym_macro__load_4(const void * _x2c_gensym_macro_bytes_8, Sco
 }
 
 static void _x2c_gensym_macro__store_4(void * _x2c_gensym_macro_bytes_9, Var _x2c_gensym_macro_value_9){
-  long _x2c_gensym_macro_native_9 = Var_long(Var_convert(_x2c_gensym_macro_value_9, 818062));
+  long _x2c_gensym_macro_native_9 = Var_long(Var_convert_at(_x2c_gensym_macro_value_9, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_4",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_4; })));
   memcpy(_x2c_gensym_macro_bytes_9, & _x2c_gensym_macro_native_9, sizeof _x2c_gensym_macro_native_9);
 }
 
@@ -543,7 +543,7 @@ static Var _x2c_gensym_macro__load_5(const void * _x2c_gensym_macro_bytes_10, Sc
 }
 
 static void _x2c_gensym_macro__store_5(void * _x2c_gensym_macro_bytes_11, Var _x2c_gensym_macro_value_11){
-  long double _x2c_gensym_macro_native_11 = Var_long_double(Var_convert(_x2c_gensym_macro_value_11, 26071077642));
+  long double _x2c_gensym_macro_native_11 = Var_long_double(Var_convert_at(_x2c_gensym_macro_value_11, 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_5",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_5; })));
   memcpy(_x2c_gensym_macro_bytes_11, & _x2c_gensym_macro_native_11, sizeof _x2c_gensym_macro_native_11);
 }
 
@@ -555,7 +555,7 @@ static Var _x2c_gensym_macro__load_6(const void * _x2c_gensym_macro_bytes_12, Sc
 }
 
 static void _x2c_gensym_macro__store_6(void * _x2c_gensym_macro_bytes_13, Var _x2c_gensym_macro_value_13){
-  long long _x2c_gensym_macro_native_13 = Var_long_long(Var_convert(_x2c_gensym_macro_value_13, 25983886));
+  long long _x2c_gensym_macro_native_13 = Var_long_long(Var_convert_at(_x2c_gensym_macro_value_13, 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_6",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_6; })));
   memcpy(_x2c_gensym_macro_bytes_13, & _x2c_gensym_macro_native_13, sizeof _x2c_gensym_macro_native_13);
 }
 
@@ -567,7 +567,7 @@ static Var _x2c_gensym_macro__load_7(const void * _x2c_gensym_macro_bytes_14, Sc
 }
 
 static void _x2c_gensym_macro__store_7(void * _x2c_gensym_macro_bytes_15, Var _x2c_gensym_macro_value_15){
-  short _x2c_gensym_macro_native_15 = Var_short(Var_convert(_x2c_gensym_macro_value_15, 3453293));
+  short _x2c_gensym_macro_native_15 = Var_short(Var_convert_at(_x2c_gensym_macro_value_15, 3453293, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_7",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_7; })));
   memcpy(_x2c_gensym_macro_bytes_15, & _x2c_gensym_macro_native_15, sizeof _x2c_gensym_macro_native_15);
 }
 
@@ -579,7 +579,7 @@ static Var _x2c_gensym_macro__load_8(const void * _x2c_gensym_macro_bytes_16, Sc
 }
 
 static void _x2c_gensym_macro__store_8(void * _x2c_gensym_macro_bytes_17, Var _x2c_gensym_macro_value_17){
-  signed char _x2c_gensym_macro_native_17 = Var_char(Var_convert(_x2c_gensym_macro_value_17, 26993));
+  signed char _x2c_gensym_macro_native_17 = Var_char(Var_convert_at(_x2c_gensym_macro_value_17, 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_8",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_8; })));
   memcpy(_x2c_gensym_macro_bytes_17, & _x2c_gensym_macro_native_17, sizeof _x2c_gensym_macro_native_17);
 }
 
@@ -591,7 +591,7 @@ static Var _x2c_gensym_macro__load_9(const void * _x2c_gensym_macro_bytes_18, Sc
 }
 
 static void _x2c_gensym_macro__store_9(void * _x2c_gensym_macro_bytes_19, Var _x2c_gensym_macro_value_19){
-  unsigned _x2c_gensym_macro_native_19 = Var_uint(Var_convert(_x2c_gensym_macro_value_19, 3847013));
+  unsigned _x2c_gensym_macro_native_19 = Var_uint(Var_convert_at(_x2c_gensym_macro_value_19, 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_9",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_9; })));
   memcpy(_x2c_gensym_macro_bytes_19, & _x2c_gensym_macro_native_19, sizeof _x2c_gensym_macro_native_19);
 }
 
@@ -603,7 +603,7 @@ static Var _x2c_gensym_macro__load_10(const void * _x2c_gensym_macro_bytes_20, S
 }
 
 static void _x2c_gensym_macro__store_10(void * _x2c_gensym_macro_bytes_21, Var _x2c_gensym_macro_value_21){
-  unsigned char _x2c_gensym_macro_native_21 = Var_uchar(Var_convert(_x2c_gensym_macro_value_21, 30065));
+  unsigned char _x2c_gensym_macro_native_21 = Var_uchar(Var_convert_at(_x2c_gensym_macro_value_21, 30065, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_10",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_10; })));
   memcpy(_x2c_gensym_macro_bytes_21, & _x2c_gensym_macro_native_21, sizeof _x2c_gensym_macro_native_21);
 }
 
@@ -615,7 +615,7 @@ static Var _x2c_gensym_macro__load_11(const void * _x2c_gensym_macro_bytes_22, S
 }
 
 static void _x2c_gensym_macro__store_11(void * _x2c_gensym_macro_bytes_23, Var _x2c_gensym_macro_value_23){
-  unsigned long _x2c_gensym_macro_native_23 = Var_ulong(Var_convert(_x2c_gensym_macro_value_23, 44858254));
+  unsigned long _x2c_gensym_macro_native_23 = Var_ulong(Var_convert_at(_x2c_gensym_macro_value_23, 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_11",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_11; })));
   memcpy(_x2c_gensym_macro_bytes_23, & _x2c_gensym_macro_native_23, sizeof _x2c_gensym_macro_native_23);
 }
 
@@ -627,7 +627,7 @@ static Var _x2c_gensym_macro__load_12(const void * _x2c_gensym_macro_bytes_24, S
 }
 
 static void _x2c_gensym_macro__store_12(void * _x2c_gensym_macro_bytes_25, Var _x2c_gensym_macro_value_25){
-  unsigned long long _x2c_gensym_macro_native_25 = Var_ulong_long(Var_convert(_x2c_gensym_macro_value_25, 1435270030));
+  unsigned long long _x2c_gensym_macro_native_25 = Var_ulong_long(Var_convert_at(_x2c_gensym_macro_value_25, 1435270030, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_12",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_12; })));
   memcpy(_x2c_gensym_macro_bytes_25, & _x2c_gensym_macro_native_25, sizeof _x2c_gensym_macro_native_25);
 }
 
@@ -639,7 +639,7 @@ static Var _x2c_gensym_macro__load_13(const void * _x2c_gensym_macro_bytes_26, S
 }
 
 static void _x2c_gensym_macro__store_13(void * _x2c_gensym_macro_bytes_27, Var _x2c_gensym_macro_value_27){
-  unsigned short _x2c_gensym_macro_native_27 = Var_ushort(Var_convert(_x2c_gensym_macro_value_27, 3846509));
+  unsigned short _x2c_gensym_macro_native_27 = Var_ushort(Var_convert_at(_x2c_gensym_macro_value_27, 3846509, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/native-scalar-types.x",.function = "_x2c_gensym_macro__store_13",.line = 128,.runtime = 1}; & _x2c_gensym_error_site_13; })));
   memcpy(_x2c_gensym_macro_bytes_27, & _x2c_gensym_macro_native_27, sizeof _x2c_gensym_macro_native_27);
 }
 

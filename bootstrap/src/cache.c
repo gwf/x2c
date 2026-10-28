@@ -622,7 +622,7 @@ static List _prelude(HeaderCache * h, Array ids){
     int _x2c_gensym_macro_cursor_5 = 0;
     Var _x2c_gensym_macro_cursor_output_4;
     while(Array_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_4))){
-      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_4, 3453797));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cache.x",.function = "_prelude",.line = 161}; & _x2c_gensym_error_site_0; })));
       {
         List statement = _cache_initializer(c, id, (* h).bindings, 1);
         Array_push(statements, List_var(_cache_refs(statement, (* h).bindings, NULL)));
@@ -755,7 +755,7 @@ static List _source_cache(Compiler c, List source, Array ids, Map bindings, Stat
     int _x2c_gensym_macro_cursor_10 = 0;
     Var _x2c_gensym_macro_cursor_output_8;
     while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_8))){
-      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_8, 3453797));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/cache.x",.function = "_source_cache",.line = 231}; & _x2c_gensym_error_site_1; })));
       {
         List stmt = _cache_initializer(c, id, bindings, 0);
         int deferred = deferred_kind && _reaches_kind(c, cons(_64, cons(int_var(id), NULL)), deferred_kind);
@@ -1212,7 +1212,7 @@ static int _reaches_kind(Compiler c, List code, Symbol kind){
     int _x2c_gensym_macro_cursor_22 = 0;
     Var _x2c_gensym_macro_cursor_output_20;
     while(Array_try_next(_x2c_gensym_macro_object_21, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_20))){
-      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_20, 3453797));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/cache.x",.function = "_reaches_kind",.line = 545}; & _x2c_gensym_error_site_2; })));
       if(x2c_var_equal(Var_car(Array_getindex(c -> id_keys, id)), Symbol_var(kind))){
         found = 1;
         break;
@@ -1292,7 +1292,7 @@ static void _collect_ids(Compiler c, List value, List * seen, Array ids){
                   Var captured_id;
                   captured_id = x2c_match_value_0;
                   {
-                    int id = Var_int(Var_convert(captured_id, 3453797));
+                    int id = Var_int(Var_convert_at(captured_id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cache.x",.function = "_collect_ids",.line = 593}; & _x2c_gensym_error_site_3; })));
                     if(! Var_is_null(Array_getindex(marked, id))) continue;
                     Array_setindex(marked, id, int_var(1));
                     Array_push(pending, int_var(id));
@@ -1400,7 +1400,7 @@ static Map _cache_bindings(Compiler c, Array ids, String prefix){
     int _x2c_gensym_macro_cursor_26 = 0;
     Var _x2c_gensym_macro_cursor_output_24;
     while(Array_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_24))){
-      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_24, 3453797));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_24, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/cache.x",.function = "_cache_bindings",.line = 650}; & _x2c_gensym_error_site_4; })));
       {
         String name = String_truth(prefix) ? String_join(NULL, cons(String_var(prefix), cons(String_var(int_str(slot)), NULL))) : String_join(NULL, cons(String_var(_192), cons(String_var(int_str(slot)), NULL)));
         Map_setindex(bindings, int_var(id), List_var(Sym_reference(c -> sym, cons(String_var(name), NULL), NULL)));
@@ -1421,7 +1421,7 @@ static List _slot_declarations(Compiler c, Array ids, Map bindings){
     int _x2c_gensym_macro_cursor_27 = 0;
     Var _x2c_gensym_macro_cursor_output_25;
     while(Array_try_next(_x2c_gensym_macro_object_26, &(_x2c_gensym_macro_cursor_27), &(_x2c_gensym_macro_cursor_output_25))){
-      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_25, 3453797));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_25, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/cache.x",.function = "_slot_declarations",.line = 662}; & _x2c_gensym_error_site_5; })));
       {
         List binding = Var_list_payload(Map_getindex(bindings, int_var(id)));
         List bound = cons(_29, cons(List_var(binding), _158));
@@ -1535,7 +1535,7 @@ static List _cache_value(Compiler c, List expr, Map bindings){
         Var id;
         id = x2c_match_value_0;
         {
-          List val = Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert(id, 3453797)))), reference = expr;
+          List val = Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/cache.x",.function = "_cache_value",.line = 721}; & _x2c_gensym_error_site_6; }))))), reference = expr;
           if(Map_truth(bindings)){
             List binding = Var_list_payload(Map_getindex(bindings, id));
             reference = cons(_61, cons(List_var(binding), NULL));

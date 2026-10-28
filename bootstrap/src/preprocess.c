@@ -349,7 +349,7 @@ static void _directive(ArmScan * s, Token token, size_t i){
     id = List_getindex(_x2c_gensym_destructure_0, 0);
     arm = List_getindex(_x2c_gensym_destructure_0, 1);
     state = List_getindex(_x2c_gensym_destructure_0, 2);
-    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert(state, 3453797))));
+    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert_at(state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_directive",.line = 229}; & _x2c_gensym_error_site_0; })))));
     Array_setindex((* s).stack, - 1, List_var(({
       Var _x2c_gensym_literal_part_4 = id;  Var _x2c_gensym_literal_part_5 = long_var(Var_integer(arm) + 1);  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(branch, NULL)));
     }
@@ -436,7 +436,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     if(token -> type != 19147688) continue;
     int level = 0;
     if(String_equal(token -> text, _29)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert(Map_getindex(layout, String_var(token -> text)), 3453797));
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 327}; & _x2c_gensym_error_site_1; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));

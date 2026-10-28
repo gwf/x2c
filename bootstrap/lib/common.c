@@ -984,19 +984,19 @@ static inline int _x2c_gensym_proto_array_contains_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_array_getindex_0(Var a0, Var a1){
-  return Array_getindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)));
+  return Array_getindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_2; }))));
 }
 
 static inline Var _x2c_gensym_proto_array_setindex_0(Var a0, Var a1, Var a2){
-  return Array_setindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2);
+  return Array_setindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_setindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_3; }))), a2);
 }
 
 static inline Var _x2c_gensym_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
-  return Array_updateindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2, a3);
+  return Array_updateindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_updateindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_4; }))), a2, a3);
 }
 
 static inline Var _x2c_gensym_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2){
-  return Array_postfixindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2);
+  return Array_postfixindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_postfixindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_5; }))), a2);
 }
 
 static inline int _x2c_gensym_proto_block_truth_0(Var a0){
@@ -1018,7 +1018,7 @@ static inline int _x2c_gensym_proto_buffer_truth_0(Var a0){
 
 int Buffer_getindex(Buffer, int);
 static inline Var _x2c_gensym_proto_buffer_getindex_0(Var a0, Var a1){
-  return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert(a1, 3453797))));
+  return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_buffer_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_6; })))));
 }
 
 Bytes Var_bytes(Var);
@@ -1100,7 +1100,7 @@ static inline int _x2c_gensym_proto_list_contains_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_list_getindex_0(Var a0, Var a1){
-  return List_getindex(Var_list(a0), Var_int(Var_convert(a1, 3453797)));
+  return List_getindex(Var_list(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_list_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_7; }))));
 }
 
 Map Var_map(Var);
@@ -1203,7 +1203,7 @@ static inline Var _x2c_gensym_proto_string_add_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_string_getindex_0(Var a0, Var a1){
-  return int_var(String_getindex(Var_string(a0), Var_int(Var_convert(a1, 3453797))));
+  return int_var(String_getindex(Var_string(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_string_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_8; })))));
 }
 
 static inline String _x2c_gensym_proto_symbol_str_0(Var a0){

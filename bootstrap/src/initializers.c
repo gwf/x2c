@@ -909,7 +909,7 @@ static List f10_subobjects____row_cases(Compiler c, Type root, List value, List 
         List _x2c_gensym_destructure_2 = state;
         List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 0));
         List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));
-        int available = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_2, 2), 3453797));
+        int available = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/initializers/subobjects.x",.function = "f10_subobjects____row_cases",.line = 89}; & _x2c_gensym_error_site_0; })));
         Type type = available ? f10_subobjects____path_type(path, root) : NULL;
         if(first && f10_subobjects____fills_char_array(c, root, value)){
           path = NULL;
@@ -1075,7 +1075,7 @@ static List f10_subobjects____merge_states(Array states){
         List _x2c_gensym_destructure_3 = state;
         List condition = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 0));
         List path = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));
-        int available = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_3, 2), 3453797));
+        int available = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_3, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/initializers/subobjects.x",.function = "f10_subobjects____merge_states",.line = 182}; & _x2c_gensym_error_site_1; })));
         List key = cons(List_var(path), cons(int_var(available), NULL));
         Var stored;
         if(! Map_try_get(positions, List_var(key), &(stored))){
@@ -1083,7 +1083,7 @@ static List f10_subobjects____merge_states(Array states){
           Array_push(merged, List_var(state));
           continue;
         }
-        int at = Var_int(Var_convert(stored, 3453797));
+        int at = Var_int(Var_convert_at(stored, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/initializers/subobjects.x",.function = "f10_subobjects____merge_states",.line = 190}; & _x2c_gensym_error_site_2; })));
         List previous = Var_list_payload(Array_getindex(merged, at));
         condition = _condition_or(Var_list_payload(List_car(previous)), condition);
         Array_setindex(merged, at, List_var(cons(List_var(condition), cons(List_var(path), cons(int_var(available), NULL)))));

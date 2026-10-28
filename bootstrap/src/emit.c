@@ -871,7 +871,7 @@ static void _emit(Emitter * e, List ast){
         origin = x2c_match_value_0;
         Var inner;
         inner = x2c_match_value_1;
-        f8_dispatch____at(&((* e)), Var_int(Var_convert(origin, 3453797)), Var_list_payload(inner));
+        f8_dispatch____at(&((* e)), Var_int(Var_convert_at(origin, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/emit/dispatch.x",.function = "_emit",.line = 176}; & _x2c_gensym_error_site_0; }))), Var_list_payload(inner));
       }
       break;}} case 9224497937860598088ULL :{List _x2c_gensym_match_at_2, _x2c_gensym_match_at_3; Var x2c_match_value_0; if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497937860598088ULL &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_expr_1 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_2 ->car, 1) && !(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr)){{
         Var code;
@@ -1363,7 +1363,7 @@ List Compiler_origin_location(Compiler, int);
 static List f8_dispatch____site_fields(Emitter * e){
   List location = Compiler_origin_location((* e).c, (* e).origin);
   String file = Var_as_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));
-  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));
+  int line = Var_int(Var_convert_at(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/emit/dispatch.x",.function = "f8_dispatch____site_fields",.line = 394}; & _x2c_gensym_error_site_1; })));
   String file_literal = f8_dispatch____c_string_literal(file);
   String function_literal = f8_dispatch____c_string_literal((* e).fn_name);
   List runtime =(* e).c -> runtime_inc ? NULL : _102;
@@ -1525,7 +1525,7 @@ int Type_is_threaded(Type);
 
 static List _local_static(Emitter * e, List declaration, List body){
   while(x2c_var_equal(List_car(declaration), Symbol_var(104))){
-    (* e).origin = Var_int(Var_convert(List_cadr(declaration), 3453797));
+    (* e).origin = Var_int(Var_convert_at(List_cadr(declaration), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/emit/initialization.x",.function = "_local_static",.line = 134}; & _x2c_gensym_error_site_2; })));
     declaration = Var_list_payload(List_caddr(declaration));
   }
   if(f14_initialization____static_case_entry(body)){

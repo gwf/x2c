@@ -22778,7 +22778,7 @@ String _tag_id(List);
 List _tag_decode_group(List rows, Map counts, int top){
   if(! _init_guard_) _file_init_();
   int immediate = top == 0x8002 || top == 0x8003;
-  int mask = _tag_group_mask(Var_int(Var_convert(Map_getdefault(counts, int_var(top), int_var(0)), 3453797)));
+  int mask = _tag_group_mask(Var_int(Var_convert_at(Map_getdefault(counts, int_var(top), int_var(0)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/linked-meta.x",.function = "_tag_decode_group",.line = 353}; & _x2c_gensym_error_site_0; }))));
   Array ids = Array_new();
   for(int i = 0;  i < 8;  i ++) Array_push(ids, List_var(_983));
   {
@@ -27109,7 +27109,7 @@ static List _string_case_index(List label, Map indices, Array labels, List site)
     Array_push(labels, List_var(label));
     Map_setindex(indices, String_var(key), Var_box_ulong(Array_len(labels)));
   }
-  int index = Var_int(Var_convert(Map_getindex(indices, String_var(key)), 3453797));
+  int index = Var_int(Var_convert_at(Map_getindex(indices, String_var(key)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/linked-meta.x",.function = "_string_case_index",.line = 2450}; & _x2c_gensym_error_site_1; })));
   return Macro_typed(_172, int_var(index));
 }
 
@@ -28100,7 +28100,7 @@ static Var _x2c_gensym_func_adapt_32(Func _x2c_gensym_func_binding_32, const Fun
 static Var _x2c_gensym_func_adapt_33(Func _x2c_gensym_func_binding_33, const FuncArg * _x2c_gensym_func_argv_33){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 0, 806120));
   Map a1 = Var_map_payload(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 1, 26720));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 2, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_33",.line = 0}; & _x2c_gensym_error_site_2; })));
   return List_var(_tag_decode_group(a0, a1, a2));
   ;
 }
@@ -28330,7 +28330,7 @@ static Var _x2c_gensym_func_adapt_65(Func _x2c_gensym_func_binding_65, const Fun
 
 static Var _x2c_gensym_func_adapt_66(Func _x2c_gensym_func_binding_66, const FuncArg * _x2c_gensym_func_argv_66){
   Atom a0 = x2c_func_value_argument(_x2c_gensym_func_binding_66, _x2c_gensym_func_argv_66, 0, 45156);
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_66, _x2c_gensym_func_argv_66, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_66, _x2c_gensym_func_argv_66, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_66",.line = 0}; & _x2c_gensym_error_site_3; })));
   return List_var(_destructure_element(a0, a1));
   ;
 }
@@ -28370,7 +28370,7 @@ static Var _x2c_gensym_func_adapt_71(Func _x2c_gensym_func_binding_71, const Fun
 
 static Var _x2c_gensym_func_adapt_72(Func _x2c_gensym_func_binding_72, const FuncArg * _x2c_gensym_func_argv_72){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_72, _x2c_gensym_func_argv_72, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_72, _x2c_gensym_func_argv_72, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_72, _x2c_gensym_func_argv_72, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_72",.line = 0}; & _x2c_gensym_error_site_4; })));
   return int_var(_dynamic_operand(a0, a1));
   ;
 }
@@ -28547,13 +28547,13 @@ static Var _x2c_gensym_func_adapt_97(Func _x2c_gensym_func_binding_97, const Fun
 }
 
 static Var _x2c_gensym_func_adapt_98(Func _x2c_gensym_func_binding_98, const FuncArg * _x2c_gensym_func_argv_98){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_98, _x2c_gensym_func_argv_98, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_98, _x2c_gensym_func_argv_98, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_98",.line = 0}; & _x2c_gensym_error_site_5; })));
   return List_var(_lambda_field(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_99(Func _x2c_gensym_func_binding_99, const FuncArg * _x2c_gensym_func_argv_99){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_99",.line = 0}; & _x2c_gensym_error_site_6; })));
   return List_var(_lambda_member(a0));
   ;
 }
@@ -28657,7 +28657,7 @@ static Var _x2c_gensym_func_adapt_112(Func _x2c_gensym_func_binding_112, const F
 
 static Var _x2c_gensym_func_adapt_113(Func _x2c_gensym_func_binding_113, const FuncArg * _x2c_gensym_func_argv_113){
   Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_113, _x2c_gensym_func_argv_113, 0, 45156);
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_113, _x2c_gensym_func_argv_113, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_113, _x2c_gensym_func_argv_113, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_113",.line = 0}; & _x2c_gensym_error_site_7; })));
   return List_var(_match_capture(a0, a1));
   ;
 }
@@ -28734,7 +28734,7 @@ static Var _x2c_gensym_func_adapt_122(Func _x2c_gensym_func_binding_122, const F
 }
 
 static Var _x2c_gensym_func_adapt_123(Func _x2c_gensym_func_binding_123, const FuncArg * _x2c_gensym_func_argv_123){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_123, _x2c_gensym_func_argv_123, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_123, _x2c_gensym_func_argv_123, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_123",.line = 0}; & _x2c_gensym_error_site_8; })));
   return List_var(_match_int(a0));
   ;
 }
@@ -28935,8 +28935,8 @@ static Var _x2c_gensym_func_adapt_146(Func _x2c_gensym_func_binding_146, const F
 static Var _x2c_gensym_func_adapt_147(Func _x2c_gensym_func_binding_147, const FuncArg * _x2c_gensym_func_argv_147){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 0, 806120));
   List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 1, 806120));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 3, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_147",.line = 0}; & _x2c_gensym_error_site_9; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_147, _x2c_gensym_func_argv_147, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_147",.line = 0}; & _x2c_gensym_error_site_10; })));
   return List_var(_match_prologue(a0, a1, a2, a3));
   ;
 }
@@ -28990,14 +28990,14 @@ static Var _x2c_gensym_func_adapt_154(Func _x2c_gensym_func_binding_154, const F
 
 static Var _x2c_gensym_func_adapt_155(Func _x2c_gensym_func_binding_155, const FuncArg * _x2c_gensym_func_argv_155){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_155, _x2c_gensym_func_argv_155, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_155, _x2c_gensym_func_argv_155, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_155, _x2c_gensym_func_argv_155, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_155",.line = 0}; & _x2c_gensym_error_site_11; })));
   return int_var(_printf_valid(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_156(Func _x2c_gensym_func_binding_156, const FuncArg * _x2c_gensym_func_argv_156){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_156, _x2c_gensym_func_argv_156, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_156, _x2c_gensym_func_argv_156, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_156, _x2c_gensym_func_argv_156, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_156",.line = 0}; & _x2c_gensym_error_site_12; })));
   return List_var(_printf_type(a0, a1));
   ;
 }
@@ -29005,7 +29005,7 @@ static Var _x2c_gensym_func_adapt_156(Func _x2c_gensym_func_binding_156, const F
 static Var _x2c_gensym_func_adapt_157(Func _x2c_gensym_func_binding_157, const FuncArg * _x2c_gensym_func_argv_157){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 0, 806120));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 2, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_157, _x2c_gensym_func_argv_157, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_157",.line = 0}; & _x2c_gensym_error_site_13; })));
   return List_var(_printf_read(a0, a1, a2));
   ;
 }
@@ -29275,9 +29275,9 @@ static Var _x2c_gensym_func_adapt_194(Func _x2c_gensym_func_binding_194, const F
 }
 
 static Var _x2c_gensym_func_adapt_195(Func _x2c_gensym_func_binding_195, const FuncArg * _x2c_gensym_func_argv_195){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 0, 3453797), 3453797));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 2, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_195",.line = 0}; & _x2c_gensym_error_site_14; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_195",.line = 0}; & _x2c_gensym_error_site_15; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_195, _x2c_gensym_func_argv_195, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_195",.line = 0}; & _x2c_gensym_error_site_16; })));
   return List_var(_operator_cases(a0, a1, a2));
   ;
 }
@@ -29489,7 +29489,7 @@ static Var _x2c_gensym_func_adapt_223(Func _x2c_gensym_func_binding_223, const F
 }
 
 static Var _x2c_gensym_func_adapt_224(Func _x2c_gensym_func_binding_224, const FuncArg * _x2c_gensym_func_argv_224){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_224, _x2c_gensym_func_argv_224, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_224, _x2c_gensym_func_argv_224, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_224",.line = 0}; & _x2c_gensym_error_site_17; })));
   return int_var(_tag_group_top(a0));
   ;
 }
@@ -29513,7 +29513,7 @@ static Var _x2c_gensym_func_adapt_227(Func _x2c_gensym_func_binding_227, const F
 }
 
 static Var _x2c_gensym_func_adapt_228(Func _x2c_gensym_func_binding_228, const FuncArg * _x2c_gensym_func_argv_228){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_228, _x2c_gensym_func_argv_228, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_228, _x2c_gensym_func_argv_228, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/linked-meta.x",.function = "_x2c_gensym_func_adapt_228",.line = 0}; & _x2c_gensym_error_site_18; })));
   return int_var(_tag_group_mask(a0));
   ;
 }

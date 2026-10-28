@@ -917,10 +917,12 @@ static List f9_quotation____pattern_content(Compiler c, List node){
         Var value;  value = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(value));
       }
       break;}} case 9224497936767982090ULL :{List _x2c_gensym_match_at_67, _x2c_gensym_match_at_68; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497936767982090ULL &&(_x2c_gensym_match_at_67 = _x2c_gensym_match_expr_11 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_67 ->car, 1) && !(_x2c_gensym_match_at_68 = _x2c_gensym_match_at_67 ->cdr)){{
-        Var id;  id = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert(id, 3453797)))));
+        Var id;  id = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/literals/quotation.x",.function = "f9_quotation____pattern_content",.line = 444}; & _x2c_gensym_error_site_0; }))))));
       }
       break;}} case 9224497936761663588ULL :{List _x2c_gensym_match_at_67, _x2c_gensym_match_at_68; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497936761663588ULL &&(_x2c_gensym_match_at_67 = _x2c_gensym_match_expr_11 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_67 ->car, 1) && !(_x2c_gensym_match_at_68 = _x2c_gensym_match_at_67 ->cdr)){{
-        Var value;  value = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(value));
+        Var value;
+        value = x2c_match_value_0;
+        return f9_quotation____pattern_content(c, Var_list_payload(value));
       }
       break;}} default: break;
     }
@@ -930,7 +932,8 @@ static List f9_quotation____pattern_content(Compiler c, List node){
 }
 
 static List f9_quotation____and_tag_test(Compiler c, List pattern, List tag){
-  List tail = Compiler_literal_cell(c, pattern, _6);  tail = Compiler_literal_cell(c, f9_quotation____tag_test(c, ((void) 0, Void), tag), tail);
+  List tail = Compiler_literal_cell(c, pattern, _6);
+  tail = Compiler_literal_cell(c, f9_quotation____tag_test(c, ((void) 0, Void), tag), tail);
   tail = Compiler_literal_cell(c, f9_quotation____atom_element(c, _117), tail);
   return cons(_0, cons(_4, cons(List_var(tail), NULL)));
 }

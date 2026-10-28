@@ -922,7 +922,7 @@ static List f8_bindings____scope_binding(Sym s, SymScope * scope, List key){
   }
   List _x2c_gensym_destructure_0 = binding;
   Var binding_tag = List_getindex(_x2c_gensym_destructure_0, 0);
-  int identity = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 1), 3453797));
+  int identity = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/symtab/bindings.x",.function = "f8_bindings____scope_binding",.line = 264}; & _x2c_gensym_error_site_0; })));
   String spelling = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
   (void) binding_tag;
   if(!(Map_contains(s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL))), String_var(spelling));

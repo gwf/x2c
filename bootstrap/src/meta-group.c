@@ -2657,7 +2657,7 @@ static void f9_selection____check_runtime_meta_calls(Compiler c, Var root){
                 {
                   Var _x2c_gensym_match_value_5 = origin;
                   {
-                    int origin = Var_int(Var_convert(_x2c_gensym_match_value_5, 3453797));
+                    int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-group/selection.x",.function = "f9_selection____check_runtime_meta_calls",.line = 150}; & _x2c_gensym_error_site_0; })));
                     {
                       {
                         int * _x2c_gensym_macro_address_0 = & c -> origin;
@@ -3369,7 +3369,7 @@ static void f8_emission____name_provider_bindings(Compiler c, String provider, A
     Var _x2c_gensym_macro_cursor_output_27;
     while(Map_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_26), &(_x2c_gensym_macro_cursor_output_27))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_26);
-      table = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_27, 3453797));
+      table = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_27, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-group/emission.x",.function = "f8_emission____name_provider_bindings",.line = 68}; & _x2c_gensym_error_site_1; })));
       if(Map_truth(meta_build_providers) && ! String_equal(path, provider)) Compiler_name_loaded_provider(c, path, table, Var_list_payload(Map_getindex(meta_build_providers, String_var(path))));
       else if(! String_equal(path, provider) && Map_contains(dependencies, String_var(path))) Compiler_name_meta_provider_bindings(c, path, table);
     }

@@ -1373,7 +1373,7 @@ static void f6_output____publish_files(Compiler c, List outputs){
   }
   if(! List_truth(failure)) return;
   {
-    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert(List_assoc(failure, Symbol_var(11703198)), 3453797))));
+    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/generate/output.x",.function = "f6_output____publish_files",.line = 140}; & _x2c_gensym_error_site_0; })))));
     Compiler_report_error(c, 354920, _10, c -> token, ({
       Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(_11), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(_12), cons(String_var(_x2c_gensym_macro_reason_0), NULL))));  cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL));
     }
@@ -1910,7 +1910,7 @@ static void f10_projection____promote_typedefs(Array header, Array pending){
         Var index;
         index = x2c_match_value_0;
         {
-          List _x2c_gensym_destructure_2 = Var_list_payload(Array_getindex(pending, Var_int(Var_convert(index, 3453797))));
+          List _x2c_gensym_destructure_2 = Var_list_payload(Array_getindex(pending, Var_int(Var_convert_at(index, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/generate/projection.x",.function = "f10_projection____promote_typedefs",.line = 160}; & _x2c_gensym_error_site_1; })))));
           List names = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 0));
           List node = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));
           if(f10_projection____at(&(needs), i, names)) Array_setindex(header, i, List_var(node));
@@ -2876,7 +2876,7 @@ static void f10_projection____add_forwards(Array out, Array candidates, Map firs
     int _x2c_gensym_macro_cursor_32 = 0;
     Var _x2c_gensym_macro_cursor_output_29;
     while(Array_try_next(_x2c_gensym_macro_object_30, &(_x2c_gensym_macro_cursor_32), &(_x2c_gensym_macro_cursor_output_29))){
-      at = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_29, 3453797));
+      at = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_29, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/generate/projection.x",.function = "f10_projection____add_forwards",.line = 643}; & _x2c_gensym_error_site_2; })));
       {
         List _x2c_gensym_destructure_3 = Var_list_payload(Array_getindex(candidates, at));
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_3, 0));
@@ -3562,7 +3562,7 @@ static Map f12_dependencies____undef_positions(List source){
                         int _x2c_gensym_macro_cursor_45 = 0;
                         Var _x2c_gensym_macro_cursor_output_41;
                         while(Array_try_next(_x2c_gensym_macro_object_42, &(_x2c_gensym_macro_cursor_45), &(_x2c_gensym_macro_cursor_output_41))){
-                          group = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_41, 3453797));
+                          group = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_41, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/generate/dependencies.x",.function = "f12_dependencies____undef_positions",.line = 89}; & _x2c_gensym_error_site_3; })));
                           Map_setindex(positions, int_var(group), int_var(1));
                         }
 
@@ -4230,7 +4230,7 @@ static List f11_definitions____function_row(Compiler c, List type, List binding,
       range = x2c_match_value_2;
       Var _x2c_gensym_match_value_16 = recorded;
       {
-        int recorded = Var_int(Var_convert(_x2c_gensym_match_value_16, 3453797));
+        int recorded = Var_int(Var_convert_at(_x2c_gensym_match_value_16, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____function_row",.line = 73}; & _x2c_gensym_error_site_4; })));
         {
           line = recorded;
           if(Var_is_row(text, 11, 7, 1)) doc = text;
@@ -4251,7 +4251,7 @@ static List f11_definitions____function_row(Compiler c, List type, List binding,
     start = x2c_match_value_0;
     Var _x2c_gensym_match_value_17 = start;
     {
-      int start = Var_int(Var_convert(_x2c_gensym_match_value_17, 3453797));
+      int start = Var_int(Var_convert_at(_x2c_gensym_match_value_17, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____function_row",.line = 80}; & _x2c_gensym_error_site_5; })));
       if(List_truth(declarator) || alias){
         Token first = c -> tokenizer -> tokens;
         first += start;
@@ -4391,8 +4391,8 @@ static void f11_definitions____print_function(Compiler c, Token tokens, List row
             Var _x2c_gensym_match_value_20 = start;
             Var _x2c_gensym_match_value_21 = body;
             {
-              int start = Var_int(Var_convert(_x2c_gensym_match_value_20, 3453797));
-              int body = Var_int(Var_convert(_x2c_gensym_match_value_21, 3453797));
+              int start = Var_int(Var_convert_at(_x2c_gensym_match_value_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____print_function",.line = 126}; & _x2c_gensym_error_site_6; })));
+              int body = Var_int(Var_convert_at(_x2c_gensym_match_value_21, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____print_function",.line = 126}; & _x2c_gensym_error_site_7; })));
               text = f11_definitions____source_text(tokens + start, tokens + body);
             }
 
@@ -4443,8 +4443,8 @@ static void f11_definitions____print_type(Compiler c, Token tokens, List row){
             Var _x2c_gensym_match_value_22 = start;
             Var _x2c_gensym_match_value_23 = end;
             {
-              int start = Var_int(Var_convert(_x2c_gensym_match_value_22, 3453797));
-              int end = Var_int(Var_convert(_x2c_gensym_match_value_23, 3453797));
+              int start = Var_int(Var_convert_at(_x2c_gensym_match_value_22, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____print_type",.line = 145}; & _x2c_gensym_error_site_8; })));
+              int end = Var_int(Var_convert_at(_x2c_gensym_match_value_23, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____print_type",.line = 145}; & _x2c_gensym_error_site_9; })));
               {
                 Token last = tokens + end, final = last - 1;
                 if(final -> type == 119) last = final;
@@ -4539,8 +4539,8 @@ static List f11_definitions____location(Token tokens, List range){
       Var _x2c_gensym_match_value_24 = start;
       Var _x2c_gensym_match_value_25 = end;
       {
-        int start = Var_int(Var_convert(_x2c_gensym_match_value_24, 3453797));
-        int end = Var_int(Var_convert(_x2c_gensym_match_value_25, 3453797));
+        int start = Var_int(Var_convert_at(_x2c_gensym_match_value_24, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____location",.line = 194}; & _x2c_gensym_error_site_10; })));
+        int end = Var_int(Var_convert_at(_x2c_gensym_match_value_25, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/generate/definitions.x",.function = "f11_definitions____location",.line = 194}; & _x2c_gensym_error_site_11; })));
         {
           Token first = tokens + start, last = tokens + end - 1;
           return({

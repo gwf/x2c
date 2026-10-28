@@ -4666,7 +4666,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1){
   Func a0 = Var_func(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 0, 437126));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 1, 3847013), 3847013));
+  unsigned a1 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 1, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_1",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_3; })));
   const FuncArg * a2 = x2c_func_pointer_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 2);
   return Func_apply(a0, a1, a2);
   ;
@@ -5040,8 +5040,8 @@ static Var _x2c_gensym_func_adapt_49(Func _x2c_gensym_func_binding_49, const Fun
 
 static Var _x2c_gensym_func_adapt_50(Func _x2c_gensym_func_binding_50, const FuncArg * _x2c_gensym_func_argv_50){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_50, _x2c_gensym_func_argv_50, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_50, _x2c_gensym_func_argv_50, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_50, _x2c_gensym_func_argv_50, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_50, _x2c_gensym_func_argv_50, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_50",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_50, _x2c_gensym_func_argv_50, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_50",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_5; })));
   return lisp_substring(a0, a1, a2);
   ;
 }
@@ -5484,14 +5484,14 @@ static Var _x2c_gensym_func_adapt_116(Func _x2c_gensym_func_binding_116, const F
 
 static Var _x2c_gensym_func_adapt_117(Func _x2c_gensym_func_binding_117, const FuncArg * _x2c_gensym_func_argv_117){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_117, _x2c_gensym_func_argv_117, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_117, _x2c_gensym_func_argv_117, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_117, _x2c_gensym_func_argv_117, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_117",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_6; })));
   return String_var(f12_lisp_targets____string_new_len(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_118(Func _x2c_gensym_func_binding_118, const FuncArg * _x2c_gensym_func_argv_118){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_118",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_7; })));
   return Symbol_var(f12_lisp_targets____symbol_new_len(a0, a1));
   ;
 }
@@ -5506,7 +5506,7 @@ Var List_getindex(List, int);
 
 static Var _x2c_gensym_func_adapt_120(Func _x2c_gensym_func_binding_120, const FuncArg * _x2c_gensym_func_argv_120){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_120, _x2c_gensym_func_argv_120, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_120",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_8; })));
   return List_getindex(a0, a1);
   ;
 }
@@ -5590,7 +5590,7 @@ Var Array_insert(Array, int, Var);
 
 static Var _x2c_gensym_func_adapt_130(Func _x2c_gensym_func_binding_130, const FuncArg * _x2c_gensym_func_argv_130){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_130, _x2c_gensym_func_argv_130, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_130, _x2c_gensym_func_argv_130, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_130, _x2c_gensym_func_argv_130, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_130",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_9; })));
   Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_130, _x2c_gensym_func_argv_130, 2, 45156);
   return Array_insert(a0, a1, a2);
   ;
@@ -5600,7 +5600,7 @@ Var Array_remove(Array, int);
 
 static Var _x2c_gensym_func_adapt_131(Func _x2c_gensym_func_binding_131, const FuncArg * _x2c_gensym_func_argv_131){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_131, _x2c_gensym_func_argv_131, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_131, _x2c_gensym_func_argv_131, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_131, _x2c_gensym_func_argv_131, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_131",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_10; })));
   return Array_remove(a0, a1);
   ;
 }
@@ -5652,7 +5652,7 @@ static Var _x2c_gensym_func_adapt_137(Func _x2c_gensym_func_binding_137, const F
 
 static Var _x2c_gensym_func_adapt_138(Func _x2c_gensym_func_binding_138, const FuncArg * _x2c_gensym_func_argv_138){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_138, _x2c_gensym_func_argv_138, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_138, _x2c_gensym_func_argv_138, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_138, _x2c_gensym_func_argv_138, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_138",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_11; })));
   return int_var(String_getindex(a0, a1));
   ;
 }
@@ -5857,7 +5857,7 @@ Var Array_getindex(Array, int);
 
 static Var _x2c_gensym_func_adapt_167(Func _x2c_gensym_func_binding_167, const FuncArg * _x2c_gensym_func_argv_167){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_167, _x2c_gensym_func_argv_167, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_167, _x2c_gensym_func_argv_167, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_167, _x2c_gensym_func_argv_167, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_167",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_12; })));
   return Array_getindex(a0, a1);
   ;
 }
@@ -5866,9 +5866,9 @@ Array Array_getslice(Array, int, int, int);
 
 static Var _x2c_gensym_func_adapt_168(Func _x2c_gensym_func_binding_168, const FuncArg * _x2c_gensym_func_argv_168){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_168",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_13; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_168",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_14; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_168, _x2c_gensym_func_argv_168, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_168",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_15; })));
   return Array_var(Array_getslice(a0, a1, a2, a3));
   ;
 }
@@ -5943,7 +5943,7 @@ Var Array_postfixindex(Array, int, Symbol);
 
 static Var _x2c_gensym_func_adapt_177(Func _x2c_gensym_func_binding_177, const FuncArg * _x2c_gensym_func_argv_177){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_177, _x2c_gensym_func_argv_177, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_177, _x2c_gensym_func_argv_177, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_177, _x2c_gensym_func_argv_177, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_177",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_16; })));
   Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_177, _x2c_gensym_func_argv_177, 2, 1328354264));
   return Array_postfixindex(a0, a1, a2);
   ;
@@ -5953,8 +5953,8 @@ Array Array_remslice(Array, int, int);
 
 static Var _x2c_gensym_func_adapt_178(Func _x2c_gensym_func_binding_178, const FuncArg * _x2c_gensym_func_argv_178){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_178, _x2c_gensym_func_argv_178, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_178, _x2c_gensym_func_argv_178, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_178, _x2c_gensym_func_argv_178, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_178, _x2c_gensym_func_argv_178, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_178",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_17; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_178, _x2c_gensym_func_argv_178, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_178",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_18; })));
   return Array_var(Array_remslice(a0, a1, a2));
   ;
 }
@@ -5971,7 +5971,7 @@ void Array_resize(Array, size_t);
 
 static Var _x2c_gensym_func_adapt_180(Func _x2c_gensym_func_binding_180, const FuncArg * _x2c_gensym_func_argv_180){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_180, _x2c_gensym_func_argv_180, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_180, _x2c_gensym_func_argv_180, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_180, _x2c_gensym_func_argv_180, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_180",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_19; })));
   Array_resize(a0, a1);
   return((void) 0, Void);
 }
@@ -5988,7 +5988,7 @@ Var Array_setindex(Array, int, Var);
 
 static Var _x2c_gensym_func_adapt_182(Func _x2c_gensym_func_binding_182, const FuncArg * _x2c_gensym_func_argv_182){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_182, _x2c_gensym_func_argv_182, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_182, _x2c_gensym_func_argv_182, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_182, _x2c_gensym_func_argv_182, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_182",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_20; })));
   Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_182, _x2c_gensym_func_argv_182, 2, 45156);
   return Array_setindex(a0, a1, a2);
   ;
@@ -5998,8 +5998,8 @@ Array Array_setslice(Array, int, int, Array);
 
 static Var _x2c_gensym_func_adapt_183(Func _x2c_gensym_func_binding_183, const FuncArg * _x2c_gensym_func_argv_183){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_183",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_21; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_183",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_22; })));
   Array a3 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_183, _x2c_gensym_func_argv_183, 3, 3313778));
   return Array_var(Array_setslice(a0, a1, a2, a3));
   ;
@@ -6017,8 +6017,8 @@ Array Array_splice(Array, int, int, Array);
 
 static Var _x2c_gensym_func_adapt_185(Func _x2c_gensym_func_binding_185, const FuncArg * _x2c_gensym_func_argv_185){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 2, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_185",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_23; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_185",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_24; })));
   Array a3 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_185, _x2c_gensym_func_argv_185, 3, 3313778));
   return Array_var(Array_splice(a0, a1, a2, a3));
   ;
@@ -6034,7 +6034,7 @@ static Var _x2c_gensym_func_adapt_186(Func _x2c_gensym_func_binding_186, const F
 
 static Var _x2c_gensym_func_adapt_187(Func _x2c_gensym_func_binding_187, const FuncArg * _x2c_gensym_func_argv_187){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_187, _x2c_gensym_func_argv_187, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_187, _x2c_gensym_func_argv_187, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_187, _x2c_gensym_func_argv_187, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_187",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_25; })));
   Array_truncate(a0, a1);
   return((void) 0, Void);
 }
@@ -6058,7 +6058,7 @@ Var Array_updateindex(Array, int, Symbol, Var);
 
 static Var _x2c_gensym_func_adapt_190(Func _x2c_gensym_func_binding_190, const FuncArg * _x2c_gensym_func_argv_190){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_190, _x2c_gensym_func_argv_190, 0, 3313778));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_190, _x2c_gensym_func_argv_190, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_190, _x2c_gensym_func_argv_190, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_190",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_26; })));
   Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_190, _x2c_gensym_func_argv_190, 2, 1328354264));
   Var a3 = x2c_func_value_argument(_x2c_gensym_func_binding_190, _x2c_gensym_func_argv_190, 3, 45156);
   return Array_updateindex(a0, a1, a2, a3);
@@ -6099,7 +6099,7 @@ int Buffer_getindex(Buffer, int);
 
 static Var _x2c_gensym_func_adapt_194(Func _x2c_gensym_func_binding_194, const FuncArg * _x2c_gensym_func_argv_194){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_194, _x2c_gensym_func_argv_194, 0, 178663780));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_194, _x2c_gensym_func_argv_194, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_194, _x2c_gensym_func_argv_194, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_194",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_27; })));
   return int_var(Buffer_getindex(a0, a1));
   ;
 }
@@ -6115,7 +6115,7 @@ static Var _x2c_gensym_func_adapt_195(Func _x2c_gensym_func_binding_195, const F
 Buffer Buffer_new(size_t);
 
 static Var _x2c_gensym_func_adapt_196(Func _x2c_gensym_func_binding_196, const FuncArg * _x2c_gensym_func_argv_196){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_196, _x2c_gensym_func_argv_196, 0, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_196, _x2c_gensym_func_argv_196, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_196",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_28; })));
   return Buffer_var(Buffer_new(a0));
   ;
 }
@@ -6172,7 +6172,7 @@ Buffer Buffer_reserve(Buffer, size_t);
 
 static Var _x2c_gensym_func_adapt_203(Func _x2c_gensym_func_binding_203, const FuncArg * _x2c_gensym_func_argv_203){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_203, _x2c_gensym_func_argv_203, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_203, _x2c_gensym_func_argv_203, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_203, _x2c_gensym_func_argv_203, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_203",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_29; })));
   return Buffer_var(Buffer_reserve(a0, a1));
   ;
 }
@@ -6197,7 +6197,7 @@ Buffer Buffer_unwrite(Buffer, size_t);
 
 static Var _x2c_gensym_func_adapt_206(Func _x2c_gensym_func_binding_206, const FuncArg * _x2c_gensym_func_argv_206){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_206, _x2c_gensym_func_argv_206, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_206, _x2c_gensym_func_argv_206, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_206, _x2c_gensym_func_argv_206, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_206",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_30; })));
   return Buffer_var(Buffer_unwrite(a0, a1));
   ;
 }
@@ -6215,7 +6215,7 @@ Buffer Buffer_write_char(Buffer, char);
 
 static Var _x2c_gensym_func_adapt_208(Func _x2c_gensym_func_binding_208, const FuncArg * _x2c_gensym_func_argv_208){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_208, _x2c_gensym_func_argv_208, 0, 178663780));
-  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_208, _x2c_gensym_func_argv_208, 1, 26993), 26993));
+  char a1 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_208, _x2c_gensym_func_argv_208, 1, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_208",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_31; })));
   return Buffer_var(Buffer_write_char(a0, a1));
   ;
 }
@@ -6223,7 +6223,7 @@ static Var _x2c_gensym_func_adapt_208(Func _x2c_gensym_func_binding_208, const F
 static Var _x2c_gensym_func_adapt_209(Func _x2c_gensym_func_binding_209, const FuncArg * _x2c_gensym_func_argv_209){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 0, 178663780));
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 2, 44858254), 44858254));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_209",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_32; })));
   return Buffer_var(Buffer_write_len(a0, a1, a2));
   ;
 }
@@ -6232,8 +6232,8 @@ Buffer Buffer_write_repeat(Buffer, char, size_t);
 
 static Var _x2c_gensym_func_adapt_210(Func _x2c_gensym_func_binding_210, const FuncArg * _x2c_gensym_func_argv_210){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_210, _x2c_gensym_func_argv_210, 0, 178663780));
-  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_210, _x2c_gensym_func_argv_210, 1, 26993), 26993));
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_210, _x2c_gensym_func_argv_210, 2, 44858254), 44858254));
+  char a1 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_210, _x2c_gensym_func_argv_210, 1, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_210",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_33; })));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_210, _x2c_gensym_func_argv_210, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_210",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_34; })));
   return Buffer_var(Buffer_write_repeat(a0, a1, a2));
   ;
 }
@@ -6333,7 +6333,7 @@ Iter Iter_enumerate(Iter, int, Iter);
 
 static Var _x2c_gensym_func_adapt_222(Func _x2c_gensym_func_binding_222, const FuncArg * _x2c_gensym_func_argv_222){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 0, 631140));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_222",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_35; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 2, 631140));
   return Iter_var(Iter_enumerate(a0, a1, a2));
   ;
@@ -6343,7 +6343,7 @@ Iter Iter_head(Iter, int, Iter);
 
 static Var _x2c_gensym_func_adapt_223(Func _x2c_gensym_func_binding_223, const FuncArg * _x2c_gensym_func_argv_223){
   Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_223, _x2c_gensym_func_argv_223, 0, 631140));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_223, _x2c_gensym_func_argv_223, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_223, _x2c_gensym_func_argv_223, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_223",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_36; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_223, _x2c_gensym_func_argv_223, 2, 631140));
   return Iter_var(Iter_head(a0, a1, a2));
   ;
@@ -6400,7 +6400,7 @@ Iter Iter_repeat(Var, int, Iter);
 
 static Var _x2c_gensym_func_adapt_230(Func _x2c_gensym_func_binding_230, const FuncArg * _x2c_gensym_func_argv_230){
   Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_230, _x2c_gensym_func_argv_230, 0, 45156);
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_230, _x2c_gensym_func_argv_230, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_230, _x2c_gensym_func_argv_230, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_230",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_37; })));
   Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_230, _x2c_gensym_func_argv_230, 2, 631140));
   return Iter_var(Iter_repeat(a0, a1, a2));
   ;
@@ -6480,9 +6480,9 @@ List List_getslice(List, int, int, int);
 
 static Var _x2c_gensym_func_adapt_240(Func _x2c_gensym_func_binding_240, const FuncArg * _x2c_gensym_func_argv_240){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_240",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_38; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_240",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_39; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_240, _x2c_gensym_func_argv_240, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_240",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_40; })));
   return List_var(List_getslice(a0, a1, a2, a3));
   ;
 }
@@ -6499,7 +6499,7 @@ List List_head(List, unsigned);
 
 static Var _x2c_gensym_func_adapt_242(Func _x2c_gensym_func_binding_242, const FuncArg * _x2c_gensym_func_argv_242){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_242, _x2c_gensym_func_argv_242, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_242, _x2c_gensym_func_argv_242, 1, 3847013), 3847013));
+  unsigned a1 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_242, _x2c_gensym_func_argv_242, 1, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_242",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_41; })));
   return List_var(List_head(a0, a1));
   ;
 }
@@ -6542,7 +6542,7 @@ List List_nth_cdr(List, int);
 
 static Var _x2c_gensym_func_adapt_247(Func _x2c_gensym_func_binding_247, const FuncArg * _x2c_gensym_func_argv_247){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_247, _x2c_gensym_func_argv_247, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_247, _x2c_gensym_func_argv_247, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_247, _x2c_gensym_func_argv_247, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_42 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_247",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_42; })));
   return List_var(List_nth_cdr(a0, a1));
   ;
 }
@@ -6577,9 +6577,9 @@ List List_subseq(List, int, int, int);
 
 static Var _x2c_gensym_func_adapt_251(Func _x2c_gensym_func_binding_251, const FuncArg * _x2c_gensym_func_argv_251){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_43 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_251",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_43; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_251",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_44; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_251, _x2c_gensym_func_argv_251, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_251",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_45; })));
   return List_var(List_subseq(a0, a1, a2, a3));
   ;
 }
@@ -6588,7 +6588,7 @@ List List_tail(List, unsigned);
 
 static Var _x2c_gensym_func_adapt_252(Func _x2c_gensym_func_binding_252, const FuncArg * _x2c_gensym_func_argv_252){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_252, _x2c_gensym_func_argv_252, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_252, _x2c_gensym_func_argv_252, 1, 3847013), 3847013));
+  unsigned a1 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_252, _x2c_gensym_func_argv_252, 1, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_252",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_46; })));
   return List_var(List_tail(a0, a1));
   ;
 }
@@ -6682,7 +6682,7 @@ Var Map_get_hashed(Map, Var, unsigned);
 static Var _x2c_gensym_func_adapt_264(Func _x2c_gensym_func_binding_264, const FuncArg * _x2c_gensym_func_argv_264){
   Map a0 = Var_map_payload(x2c_func_value_argument(_x2c_gensym_func_binding_264, _x2c_gensym_func_argv_264, 0, 26720));
   Var a1 = x2c_func_value_argument(_x2c_gensym_func_binding_264, _x2c_gensym_func_argv_264, 1, 45156);
-  unsigned a2 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_264, _x2c_gensym_func_argv_264, 2, 3847013), 3847013));
+  unsigned a2 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_264, _x2c_gensym_func_argv_264, 2, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_264",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_47; })));
   return Map_get_hashed(a0, a1, a2);
   ;
 }
@@ -6776,7 +6776,7 @@ static Var _x2c_gensym_func_adapt_275(Func _x2c_gensym_func_binding_275, const F
 Map Map_new_capacity(unsigned);
 
 static Var _x2c_gensym_func_adapt_276(Func _x2c_gensym_func_binding_276, const FuncArg * _x2c_gensym_func_argv_276){
-  unsigned a0 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_276, _x2c_gensym_func_argv_276, 0, 3847013), 3847013));
+  unsigned a0 = Var_uint(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_276, _x2c_gensym_func_argv_276, 0, 3847013), 3847013, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_276",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_48; })));
   return Map_var(Map_new_capacity(a0));
   ;
 }
@@ -6918,8 +6918,8 @@ static Var _x2c_gensym_func_adapt_291(Func _x2c_gensym_func_binding_291, const F
 void * Scope_calloc(size_t, size_t);
 
 static Var _x2c_gensym_func_adapt_292(Func _x2c_gensym_func_binding_292, const FuncArg * _x2c_gensym_func_argv_292){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_292, _x2c_gensym_func_argv_292, 0, 44858254), 44858254));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_292, _x2c_gensym_func_argv_292, 1, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_292, _x2c_gensym_func_argv_292, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_49 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_292",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_49; })));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_292, _x2c_gensym_func_argv_292, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_50 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_292",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_50; })));
   return Var_new(3683441, Scope_calloc(a0, a1));
   ;
 }
@@ -6951,7 +6951,7 @@ static Var _x2c_gensym_func_adapt_295(Func _x2c_gensym_func_binding_295, const F
 void * Scope_malloc(size_t);
 
 static Var _x2c_gensym_func_adapt_296(Func _x2c_gensym_func_binding_296, const FuncArg * _x2c_gensym_func_argv_296){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_296, _x2c_gensym_func_argv_296, 0, 44858254), 44858254));
+  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_296, _x2c_gensym_func_argv_296, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_51 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_296",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_51; })));
   return Var_new(3683441, Scope_malloc(a0));
   ;
 }
@@ -6960,7 +6960,7 @@ void * Scope_memdup(const void *, size_t);
 
 static Var _x2c_gensym_func_adapt_297(Func _x2c_gensym_func_binding_297, const FuncArg * _x2c_gensym_func_argv_297){
   const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_297, _x2c_gensym_func_argv_297, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_297, _x2c_gensym_func_argv_297, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_297, _x2c_gensym_func_argv_297, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_52 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_297",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_52; })));
   return Var_new(3683441, Scope_memdup(a0, a1));
   ;
 }
@@ -7006,7 +7006,7 @@ void * Scope_realloc(void *, size_t);
 
 static Var _x2c_gensym_func_adapt_303(Func _x2c_gensym_func_binding_303, const FuncArg * _x2c_gensym_func_argv_303){
   void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_303, _x2c_gensym_func_argv_303, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_303, _x2c_gensym_func_argv_303, 1, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_303, _x2c_gensym_func_argv_303, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_53 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_303",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_53; })));
   return Var_new(3683441, Scope_realloc(a0, a1));
   ;
 }
@@ -7116,8 +7116,8 @@ List String_find_all(String, String, int, int);
 static Var _x2c_gensym_func_adapt_316(Func _x2c_gensym_func_binding_316, const FuncArg * _x2c_gensym_func_argv_316){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 3, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_54 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_316",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_54; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_316, _x2c_gensym_func_argv_316, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_55 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_316",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_55; })));
   return List_var(String_find_all(a0, a1, a2, a3));
   ;
 }
@@ -7127,8 +7127,8 @@ int String_find_within(String, String, int, int);
 static Var _x2c_gensym_func_adapt_317(Func _x2c_gensym_func_binding_317, const FuncArg * _x2c_gensym_func_argv_317){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 3, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_56 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_317",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_56; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_317, _x2c_gensym_func_argv_317, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_57 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_317",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_57; })));
   return int_var(String_find_within(a0, a1, a2, a3));
   ;
 }
@@ -7145,9 +7145,9 @@ String String_getslice(String, int, int, int);
 
 static Var _x2c_gensym_func_adapt_319(Func _x2c_gensym_func_binding_319, const FuncArg * _x2c_gensym_func_argv_319){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 3, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_58 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_319",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_58; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_59 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_319",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_59; })));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_319, _x2c_gensym_func_argv_319, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_60 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_319",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_60; })));
   return String_var(String_getslice(a0, a1, a2, a3));
   ;
 }
@@ -7302,8 +7302,8 @@ static Var _x2c_gensym_func_adapt_337(Func _x2c_gensym_func_binding_337, const F
 String String_new_fill(char, int);
 
 static Var _x2c_gensym_func_adapt_338(Func _x2c_gensym_func_binding_338, const FuncArg * _x2c_gensym_func_argv_338){
-  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_338, _x2c_gensym_func_argv_338, 0, 26993), 26993));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_338, _x2c_gensym_func_argv_338, 1, 3453797), 3453797));
+  char a0 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_338, _x2c_gensym_func_argv_338, 0, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_61 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_338",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_61; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_338, _x2c_gensym_func_argv_338, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_62 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_338",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_62; })));
   return String_var(String_new_fill(a0, a1));
   ;
 }
@@ -7312,8 +7312,8 @@ String String_pad_center(String, int, char);
 
 static Var _x2c_gensym_func_adapt_339(Func _x2c_gensym_func_binding_339, const FuncArg * _x2c_gensym_func_argv_339){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_339, _x2c_gensym_func_argv_339, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_339, _x2c_gensym_func_argv_339, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_339, _x2c_gensym_func_argv_339, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_339, _x2c_gensym_func_argv_339, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_63 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_339",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_63; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_339, _x2c_gensym_func_argv_339, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_64 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_339",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_64; })));
   return String_var(String_pad_center(a0, a1, a2));
   ;
 }
@@ -7322,8 +7322,8 @@ String String_pad_left(String, int, char);
 
 static Var _x2c_gensym_func_adapt_340(Func _x2c_gensym_func_binding_340, const FuncArg * _x2c_gensym_func_argv_340){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_340, _x2c_gensym_func_argv_340, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_340, _x2c_gensym_func_argv_340, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_340, _x2c_gensym_func_argv_340, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_340, _x2c_gensym_func_argv_340, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_65 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_340",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_65; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_340, _x2c_gensym_func_argv_340, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_66 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_340",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_66; })));
   return String_var(String_pad_left(a0, a1, a2));
   ;
 }
@@ -7332,8 +7332,8 @@ String String_pad_right(String, int, char);
 
 static Var _x2c_gensym_func_adapt_341(Func _x2c_gensym_func_binding_341, const FuncArg * _x2c_gensym_func_argv_341){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_341, _x2c_gensym_func_argv_341, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_341, _x2c_gensym_func_argv_341, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_341, _x2c_gensym_func_argv_341, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_341, _x2c_gensym_func_argv_341, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_67 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_341",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_67; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_341, _x2c_gensym_func_argv_341, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_68 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_341",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_68; })));
   return String_var(String_pad_right(a0, a1, a2));
   ;
 }
@@ -7394,7 +7394,7 @@ String String_repeat(String, int);
 
 static Var _x2c_gensym_func_adapt_348(Func _x2c_gensym_func_binding_348, const FuncArg * _x2c_gensym_func_argv_348){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_348, _x2c_gensym_func_argv_348, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_348, _x2c_gensym_func_argv_348, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_348, _x2c_gensym_func_argv_348, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_69 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_348",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_69; })));
   return String_var(String_repeat(a0, a1));
   ;
 }
@@ -7415,7 +7415,7 @@ static Var _x2c_gensym_func_adapt_350(Func _x2c_gensym_func_binding_350, const F
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_350, _x2c_gensym_func_argv_350, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_350, _x2c_gensym_func_argv_350, 1, 1318210446));
   String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_350, _x2c_gensym_func_argv_350, 2, 1318210446));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_350, _x2c_gensym_func_argv_350, 3, 3453797), 3453797));
+  int a3 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_350, _x2c_gensym_func_argv_350, 3, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_70 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_350",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_70; })));
   return String_var(String_replace_n(a0, a1, a2, a3));
   ;
 }
@@ -7451,7 +7451,7 @@ List String_split_lines(String, int);
 
 static Var _x2c_gensym_func_adapt_354(Func _x2c_gensym_func_binding_354, const FuncArg * _x2c_gensym_func_argv_354){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_354, _x2c_gensym_func_argv_354, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_354, _x2c_gensym_func_argv_354, 1, 3453797), 3453797));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_354, _x2c_gensym_func_argv_354, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_71 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_354",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_71; })));
   return List_var(String_split_lines(a0, a1));
   ;
 }
@@ -7461,7 +7461,7 @@ List String_split_n(String, String, int);
 static Var _x2c_gensym_func_adapt_355(Func _x2c_gensym_func_binding_355, const FuncArg * _x2c_gensym_func_argv_355){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_355, _x2c_gensym_func_argv_355, 0, 1318210446));
   String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_355, _x2c_gensym_func_argv_355, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_355, _x2c_gensym_func_argv_355, 2, 3453797), 3453797));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_355, _x2c_gensym_func_argv_355, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_72 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_355",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_72; })));
   return List_var(String_split_n(a0, a1, a2));
   ;
 }
@@ -7539,8 +7539,8 @@ String String_withindex(String, int, char);
 
 static Var _x2c_gensym_func_adapt_364(Func _x2c_gensym_func_binding_364, const FuncArg * _x2c_gensym_func_argv_364){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 2, 26993), 26993));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_73 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_364",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_73; })));
+  char a2 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_364, _x2c_gensym_func_argv_364, 2, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_74 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_364",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_74; })));
   return String_var(String_withindex(a0, a1, a2));
   ;
 }
@@ -8202,7 +8202,7 @@ static Var _x2c_gensym_func_adapt_445(Func _x2c_gensym_func_binding_445, const F
 int abs(int);
 
 static Var _x2c_gensym_func_adapt_446(Func _x2c_gensym_func_binding_446, const FuncArg * _x2c_gensym_func_argv_446){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_446, _x2c_gensym_func_argv_446, 0, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_446, _x2c_gensym_func_argv_446, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_75 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_446",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_75; })));
   return int_var(abs(a0));
   ;
 }
@@ -8210,7 +8210,7 @@ static Var _x2c_gensym_func_adapt_446(Func _x2c_gensym_func_binding_446, const F
 double acos(double);
 
 static Var _x2c_gensym_func_adapt_447(Func _x2c_gensym_func_binding_447, const FuncArg * _x2c_gensym_func_argv_447){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_447, _x2c_gensym_func_argv_447, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_447, _x2c_gensym_func_argv_447, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_76 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_447",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_76; })));
   return double_var(acos(a0));
   ;
 }
@@ -8218,7 +8218,7 @@ static Var _x2c_gensym_func_adapt_447(Func _x2c_gensym_func_binding_447, const F
 float acosf(float);
 
 static Var _x2c_gensym_func_adapt_448(Func _x2c_gensym_func_binding_448, const FuncArg * _x2c_gensym_func_argv_448){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_448, _x2c_gensym_func_argv_448, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_448, _x2c_gensym_func_argv_448, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_77 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_448",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_77; })));
   return float_var(acosf(a0));
   ;
 }
@@ -8226,7 +8226,7 @@ static Var _x2c_gensym_func_adapt_448(Func _x2c_gensym_func_binding_448, const F
 double acosh(double);
 
 static Var _x2c_gensym_func_adapt_449(Func _x2c_gensym_func_binding_449, const FuncArg * _x2c_gensym_func_argv_449){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_449, _x2c_gensym_func_argv_449, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_449, _x2c_gensym_func_argv_449, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_78 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_449",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_78; })));
   return double_var(acosh(a0));
   ;
 }
@@ -8234,7 +8234,7 @@ static Var _x2c_gensym_func_adapt_449(Func _x2c_gensym_func_binding_449, const F
 float acoshf(float);
 
 static Var _x2c_gensym_func_adapt_450(Func _x2c_gensym_func_binding_450, const FuncArg * _x2c_gensym_func_argv_450){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_450, _x2c_gensym_func_argv_450, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_450, _x2c_gensym_func_argv_450, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_79 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_450",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_79; })));
   return float_var(acoshf(a0));
   ;
 }
@@ -8242,7 +8242,7 @@ static Var _x2c_gensym_func_adapt_450(Func _x2c_gensym_func_binding_450, const F
 double asin(double);
 
 static Var _x2c_gensym_func_adapt_451(Func _x2c_gensym_func_binding_451, const FuncArg * _x2c_gensym_func_argv_451){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_451, _x2c_gensym_func_argv_451, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_451, _x2c_gensym_func_argv_451, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_80 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_451",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_80; })));
   return double_var(asin(a0));
   ;
 }
@@ -8250,7 +8250,7 @@ static Var _x2c_gensym_func_adapt_451(Func _x2c_gensym_func_binding_451, const F
 float asinf(float);
 
 static Var _x2c_gensym_func_adapt_452(Func _x2c_gensym_func_binding_452, const FuncArg * _x2c_gensym_func_argv_452){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_452, _x2c_gensym_func_argv_452, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_81 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_452",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_81; })));
   return float_var(asinf(a0));
   ;
 }
@@ -8258,7 +8258,7 @@ static Var _x2c_gensym_func_adapt_452(Func _x2c_gensym_func_binding_452, const F
 double asinh(double);
 
 static Var _x2c_gensym_func_adapt_453(Func _x2c_gensym_func_binding_453, const FuncArg * _x2c_gensym_func_argv_453){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_453, _x2c_gensym_func_argv_453, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_82 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_453",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_82; })));
   return double_var(asinh(a0));
   ;
 }
@@ -8266,7 +8266,7 @@ static Var _x2c_gensym_func_adapt_453(Func _x2c_gensym_func_binding_453, const F
 float asinhf(float);
 
 static Var _x2c_gensym_func_adapt_454(Func _x2c_gensym_func_binding_454, const FuncArg * _x2c_gensym_func_argv_454){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_83 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_454",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_83; })));
   return float_var(asinhf(a0));
   ;
 }
@@ -8274,7 +8274,7 @@ static Var _x2c_gensym_func_adapt_454(Func _x2c_gensym_func_binding_454, const F
 double atan(double);
 
 static Var _x2c_gensym_func_adapt_455(Func _x2c_gensym_func_binding_455, const FuncArg * _x2c_gensym_func_argv_455){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_84 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_455",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_84; })));
   return double_var(atan(a0));
   ;
 }
@@ -8282,8 +8282,8 @@ static Var _x2c_gensym_func_adapt_455(Func _x2c_gensym_func_binding_455, const F
 double atan2(double, double);
 
 static Var _x2c_gensym_func_adapt_456(Func _x2c_gensym_func_binding_456, const FuncArg * _x2c_gensym_func_argv_456){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_85 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_456",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_85; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_456, _x2c_gensym_func_argv_456, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_86 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_456",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_86; })));
   return double_var(atan2(a0, a1));
   ;
 }
@@ -8291,8 +8291,8 @@ static Var _x2c_gensym_func_adapt_456(Func _x2c_gensym_func_binding_456, const F
 float atan2f(float, float);
 
 static Var _x2c_gensym_func_adapt_457(Func _x2c_gensym_func_binding_457, const FuncArg * _x2c_gensym_func_argv_457){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_87 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_457",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_87; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_457, _x2c_gensym_func_argv_457, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_88 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_457",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_88; })));
   return float_var(atan2f(a0, a1));
   ;
 }
@@ -8300,7 +8300,7 @@ static Var _x2c_gensym_func_adapt_457(Func _x2c_gensym_func_binding_457, const F
 float atanf(float);
 
 static Var _x2c_gensym_func_adapt_458(Func _x2c_gensym_func_binding_458, const FuncArg * _x2c_gensym_func_argv_458){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_458, _x2c_gensym_func_argv_458, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_89 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_458",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_89; })));
   return float_var(atanf(a0));
   ;
 }
@@ -8308,7 +8308,7 @@ static Var _x2c_gensym_func_adapt_458(Func _x2c_gensym_func_binding_458, const F
 double atanh(double);
 
 static Var _x2c_gensym_func_adapt_459(Func _x2c_gensym_func_binding_459, const FuncArg * _x2c_gensym_func_argv_459){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_459, _x2c_gensym_func_argv_459, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_90 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_459",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_90; })));
   return double_var(atanh(a0));
   ;
 }
@@ -8316,7 +8316,7 @@ static Var _x2c_gensym_func_adapt_459(Func _x2c_gensym_func_binding_459, const F
 float atanhf(float);
 
 static Var _x2c_gensym_func_adapt_460(Func _x2c_gensym_func_binding_460, const FuncArg * _x2c_gensym_func_argv_460){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_460, _x2c_gensym_func_argv_460, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_91 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_460",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_91; })));
   return float_var(atanhf(a0));
   ;
 }
@@ -8356,7 +8356,7 @@ static Var _x2c_gensym_func_adapt_464(Func _x2c_gensym_func_binding_464, const F
 double cbrt(double);
 
 static Var _x2c_gensym_func_adapt_465(Func _x2c_gensym_func_binding_465, const FuncArg * _x2c_gensym_func_argv_465){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_465, _x2c_gensym_func_argv_465, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_465, _x2c_gensym_func_argv_465, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_92 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_465",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_92; })));
   return double_var(cbrt(a0));
   ;
 }
@@ -8364,7 +8364,7 @@ static Var _x2c_gensym_func_adapt_465(Func _x2c_gensym_func_binding_465, const F
 float cbrtf(float);
 
 static Var _x2c_gensym_func_adapt_466(Func _x2c_gensym_func_binding_466, const FuncArg * _x2c_gensym_func_argv_466){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_466, _x2c_gensym_func_argv_466, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_466, _x2c_gensym_func_argv_466, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_93 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_466",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_93; })));
   return float_var(cbrtf(a0));
   ;
 }
@@ -8372,7 +8372,7 @@ static Var _x2c_gensym_func_adapt_466(Func _x2c_gensym_func_binding_466, const F
 double ceil(double);
 
 static Var _x2c_gensym_func_adapt_467(Func _x2c_gensym_func_binding_467, const FuncArg * _x2c_gensym_func_argv_467){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_94 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_467",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_94; })));
   return double_var(ceil(a0));
   ;
 }
@@ -8380,7 +8380,7 @@ static Var _x2c_gensym_func_adapt_467(Func _x2c_gensym_func_binding_467, const F
 float ceilf(float);
 
 static Var _x2c_gensym_func_adapt_468(Func _x2c_gensym_func_binding_468, const FuncArg * _x2c_gensym_func_argv_468){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_95 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_468",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_95; })));
   return float_var(ceilf(a0));
   ;
 }
@@ -8388,8 +8388,8 @@ static Var _x2c_gensym_func_adapt_468(Func _x2c_gensym_func_binding_468, const F
 double copysign(double, double);
 
 static Var _x2c_gensym_func_adapt_469(Func _x2c_gensym_func_binding_469, const FuncArg * _x2c_gensym_func_argv_469){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_96 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_469",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_96; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_469, _x2c_gensym_func_argv_469, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_97 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_469",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_97; })));
   return double_var(copysign(a0, a1));
   ;
 }
@@ -8397,8 +8397,8 @@ static Var _x2c_gensym_func_adapt_469(Func _x2c_gensym_func_binding_469, const F
 float copysignf(float, float);
 
 static Var _x2c_gensym_func_adapt_470(Func _x2c_gensym_func_binding_470, const FuncArg * _x2c_gensym_func_argv_470){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_98 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_470",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_98; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_470, _x2c_gensym_func_argv_470, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_99 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_470",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_99; })));
   return float_var(copysignf(a0, a1));
   ;
 }
@@ -8406,7 +8406,7 @@ static Var _x2c_gensym_func_adapt_470(Func _x2c_gensym_func_binding_470, const F
 double cos(double);
 
 static Var _x2c_gensym_func_adapt_471(Func _x2c_gensym_func_binding_471, const FuncArg * _x2c_gensym_func_argv_471){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_471, _x2c_gensym_func_argv_471, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_471, _x2c_gensym_func_argv_471, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_100 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_471",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_100; })));
   return double_var(cos(a0));
   ;
 }
@@ -8414,7 +8414,7 @@ static Var _x2c_gensym_func_adapt_471(Func _x2c_gensym_func_binding_471, const F
 float cosf(float);
 
 static Var _x2c_gensym_func_adapt_472(Func _x2c_gensym_func_binding_472, const FuncArg * _x2c_gensym_func_argv_472){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_472, _x2c_gensym_func_argv_472, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_472, _x2c_gensym_func_argv_472, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_101 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_472",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_101; })));
   return float_var(cosf(a0));
   ;
 }
@@ -8422,7 +8422,7 @@ static Var _x2c_gensym_func_adapt_472(Func _x2c_gensym_func_binding_472, const F
 double cosh(double);
 
 static Var _x2c_gensym_func_adapt_473(Func _x2c_gensym_func_binding_473, const FuncArg * _x2c_gensym_func_argv_473){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_473, _x2c_gensym_func_argv_473, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_473, _x2c_gensym_func_argv_473, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_102 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_473",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_102; })));
   return double_var(cosh(a0));
   ;
 }
@@ -8430,7 +8430,7 @@ static Var _x2c_gensym_func_adapt_473(Func _x2c_gensym_func_binding_473, const F
 float coshf(float);
 
 static Var _x2c_gensym_func_adapt_474(Func _x2c_gensym_func_binding_474, const FuncArg * _x2c_gensym_func_argv_474){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_474, _x2c_gensym_func_argv_474, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_474, _x2c_gensym_func_argv_474, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_103 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_474",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_103; })));
   return float_var(coshf(a0));
   ;
 }
@@ -8438,7 +8438,7 @@ static Var _x2c_gensym_func_adapt_474(Func _x2c_gensym_func_binding_474, const F
 double erf(double);
 
 static Var _x2c_gensym_func_adapt_475(Func _x2c_gensym_func_binding_475, const FuncArg * _x2c_gensym_func_argv_475){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_475, _x2c_gensym_func_argv_475, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_475, _x2c_gensym_func_argv_475, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_104 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_475",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_104; })));
   return double_var(erf(a0));
   ;
 }
@@ -8446,7 +8446,7 @@ static Var _x2c_gensym_func_adapt_475(Func _x2c_gensym_func_binding_475, const F
 double erfc(double);
 
 static Var _x2c_gensym_func_adapt_476(Func _x2c_gensym_func_binding_476, const FuncArg * _x2c_gensym_func_argv_476){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_476, _x2c_gensym_func_argv_476, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_476, _x2c_gensym_func_argv_476, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_105 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_476",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_105; })));
   return double_var(erfc(a0));
   ;
 }
@@ -8454,7 +8454,7 @@ static Var _x2c_gensym_func_adapt_476(Func _x2c_gensym_func_binding_476, const F
 float erfcf(float);
 
 static Var _x2c_gensym_func_adapt_477(Func _x2c_gensym_func_binding_477, const FuncArg * _x2c_gensym_func_argv_477){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_477, _x2c_gensym_func_argv_477, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_477, _x2c_gensym_func_argv_477, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_106 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_477",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_106; })));
   return float_var(erfcf(a0));
   ;
 }
@@ -8462,7 +8462,7 @@ static Var _x2c_gensym_func_adapt_477(Func _x2c_gensym_func_binding_477, const F
 float erff(float);
 
 static Var _x2c_gensym_func_adapt_478(Func _x2c_gensym_func_binding_478, const FuncArg * _x2c_gensym_func_argv_478){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_107 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_478",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_107; })));
   return float_var(erff(a0));
   ;
 }
@@ -8470,7 +8470,7 @@ static Var _x2c_gensym_func_adapt_478(Func _x2c_gensym_func_binding_478, const F
 double exp(double);
 
 static Var _x2c_gensym_func_adapt_479(Func _x2c_gensym_func_binding_479, const FuncArg * _x2c_gensym_func_argv_479){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_479, _x2c_gensym_func_argv_479, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_479, _x2c_gensym_func_argv_479, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_108 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_479",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_108; })));
   return double_var(exp(a0));
   ;
 }
@@ -8478,7 +8478,7 @@ static Var _x2c_gensym_func_adapt_479(Func _x2c_gensym_func_binding_479, const F
 double exp2(double);
 
 static Var _x2c_gensym_func_adapt_480(Func _x2c_gensym_func_binding_480, const FuncArg * _x2c_gensym_func_argv_480){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_480, _x2c_gensym_func_argv_480, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_480, _x2c_gensym_func_argv_480, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_109 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_480",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_109; })));
   return double_var(exp2(a0));
   ;
 }
@@ -8486,7 +8486,7 @@ static Var _x2c_gensym_func_adapt_480(Func _x2c_gensym_func_binding_480, const F
 float exp2f(float);
 
 static Var _x2c_gensym_func_adapt_481(Func _x2c_gensym_func_binding_481, const FuncArg * _x2c_gensym_func_argv_481){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_481, _x2c_gensym_func_argv_481, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_481, _x2c_gensym_func_argv_481, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_110 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_481",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_110; })));
   return float_var(exp2f(a0));
   ;
 }
@@ -8494,7 +8494,7 @@ static Var _x2c_gensym_func_adapt_481(Func _x2c_gensym_func_binding_481, const F
 float expf(float);
 
 static Var _x2c_gensym_func_adapt_482(Func _x2c_gensym_func_binding_482, const FuncArg * _x2c_gensym_func_argv_482){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_482, _x2c_gensym_func_argv_482, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_482, _x2c_gensym_func_argv_482, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_111 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_482",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_111; })));
   return float_var(expf(a0));
   ;
 }
@@ -8502,7 +8502,7 @@ static Var _x2c_gensym_func_adapt_482(Func _x2c_gensym_func_binding_482, const F
 double expm1(double);
 
 static Var _x2c_gensym_func_adapt_483(Func _x2c_gensym_func_binding_483, const FuncArg * _x2c_gensym_func_argv_483){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_483, _x2c_gensym_func_argv_483, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_483, _x2c_gensym_func_argv_483, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_112 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_483",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_112; })));
   return double_var(expm1(a0));
   ;
 }
@@ -8510,7 +8510,7 @@ static Var _x2c_gensym_func_adapt_483(Func _x2c_gensym_func_binding_483, const F
 float expm1f(float);
 
 static Var _x2c_gensym_func_adapt_484(Func _x2c_gensym_func_binding_484, const FuncArg * _x2c_gensym_func_argv_484){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_484, _x2c_gensym_func_argv_484, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_484, _x2c_gensym_func_argv_484, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_113 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_484",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_113; })));
   return float_var(expm1f(a0));
   ;
 }
@@ -8518,7 +8518,7 @@ static Var _x2c_gensym_func_adapt_484(Func _x2c_gensym_func_binding_484, const F
 double fabs(double);
 
 static Var _x2c_gensym_func_adapt_485(Func _x2c_gensym_func_binding_485, const FuncArg * _x2c_gensym_func_argv_485){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_485, _x2c_gensym_func_argv_485, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_485, _x2c_gensym_func_argv_485, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_114 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_485",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_114; })));
   return double_var(fabs(a0));
   ;
 }
@@ -8526,7 +8526,7 @@ static Var _x2c_gensym_func_adapt_485(Func _x2c_gensym_func_binding_485, const F
 float fabsf(float);
 
 static Var _x2c_gensym_func_adapt_486(Func _x2c_gensym_func_binding_486, const FuncArg * _x2c_gensym_func_argv_486){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_486, _x2c_gensym_func_argv_486, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_486, _x2c_gensym_func_argv_486, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_115 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_486",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_115; })));
   return float_var(fabsf(a0));
   ;
 }
@@ -8534,8 +8534,8 @@ static Var _x2c_gensym_func_adapt_486(Func _x2c_gensym_func_binding_486, const F
 double fdim(double, double);
 
 static Var _x2c_gensym_func_adapt_487(Func _x2c_gensym_func_binding_487, const FuncArg * _x2c_gensym_func_argv_487){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_487, _x2c_gensym_func_argv_487, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_487, _x2c_gensym_func_argv_487, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_487, _x2c_gensym_func_argv_487, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_116 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_487",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_116; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_487, _x2c_gensym_func_argv_487, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_117 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_487",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_117; })));
   return double_var(fdim(a0, a1));
   ;
 }
@@ -8543,8 +8543,8 @@ static Var _x2c_gensym_func_adapt_487(Func _x2c_gensym_func_binding_487, const F
 float fdimf(float, float);
 
 static Var _x2c_gensym_func_adapt_488(Func _x2c_gensym_func_binding_488, const FuncArg * _x2c_gensym_func_argv_488){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_488, _x2c_gensym_func_argv_488, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_488, _x2c_gensym_func_argv_488, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_488, _x2c_gensym_func_argv_488, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_118 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_488",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_118; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_488, _x2c_gensym_func_argv_488, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_119 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_488",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_119; })));
   return float_var(fdimf(a0, a1));
   ;
 }
@@ -8552,7 +8552,7 @@ static Var _x2c_gensym_func_adapt_488(Func _x2c_gensym_func_binding_488, const F
 double floor(double);
 
 static Var _x2c_gensym_func_adapt_489(Func _x2c_gensym_func_binding_489, const FuncArg * _x2c_gensym_func_argv_489){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_489, _x2c_gensym_func_argv_489, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_489, _x2c_gensym_func_argv_489, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_120 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_489",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_120; })));
   return double_var(floor(a0));
   ;
 }
@@ -8560,7 +8560,7 @@ static Var _x2c_gensym_func_adapt_489(Func _x2c_gensym_func_binding_489, const F
 float floorf(float);
 
 static Var _x2c_gensym_func_adapt_490(Func _x2c_gensym_func_binding_490, const FuncArg * _x2c_gensym_func_argv_490){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_490, _x2c_gensym_func_argv_490, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_490, _x2c_gensym_func_argv_490, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_121 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_490",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_121; })));
   return float_var(floorf(a0));
   ;
 }
@@ -8568,9 +8568,9 @@ static Var _x2c_gensym_func_adapt_490(Func _x2c_gensym_func_binding_490, const F
 double fma(double, double, double);
 
 static Var _x2c_gensym_func_adapt_491(Func _x2c_gensym_func_binding_491, const FuncArg * _x2c_gensym_func_argv_491){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 1, 3356265), 3356265));
-  double a2 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 2, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_122 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_491",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_122; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_123 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_491",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_123; })));
+  double a2 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_491, _x2c_gensym_func_argv_491, 2, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_124 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_491",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_124; })));
   return double_var(fma(a0, a1, a2));
   ;
 }
@@ -8578,9 +8578,9 @@ static Var _x2c_gensym_func_adapt_491(Func _x2c_gensym_func_binding_491, const F
 float fmaf(float, float, float);
 
 static Var _x2c_gensym_func_adapt_492(Func _x2c_gensym_func_binding_492, const FuncArg * _x2c_gensym_func_argv_492){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 1, 3355493), 3355493));
-  float a2 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 2, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_125 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_492",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_125; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_126 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_492",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_126; })));
+  float a2 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_492, _x2c_gensym_func_argv_492, 2, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_127 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_492",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_127; })));
   return float_var(fmaf(a0, a1, a2));
   ;
 }
@@ -8588,8 +8588,8 @@ static Var _x2c_gensym_func_adapt_492(Func _x2c_gensym_func_binding_492, const F
 double fmax(double, double);
 
 static Var _x2c_gensym_func_adapt_493(Func _x2c_gensym_func_binding_493, const FuncArg * _x2c_gensym_func_argv_493){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_493, _x2c_gensym_func_argv_493, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_493, _x2c_gensym_func_argv_493, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_493, _x2c_gensym_func_argv_493, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_128 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_493",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_128; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_493, _x2c_gensym_func_argv_493, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_129 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_493",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_129; })));
   return double_var(fmax(a0, a1));
   ;
 }
@@ -8597,8 +8597,8 @@ static Var _x2c_gensym_func_adapt_493(Func _x2c_gensym_func_binding_493, const F
 float fmaxf(float, float);
 
 static Var _x2c_gensym_func_adapt_494(Func _x2c_gensym_func_binding_494, const FuncArg * _x2c_gensym_func_argv_494){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_494, _x2c_gensym_func_argv_494, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_494, _x2c_gensym_func_argv_494, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_494, _x2c_gensym_func_argv_494, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_130 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_494",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_130; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_494, _x2c_gensym_func_argv_494, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_131 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_494",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_131; })));
   return float_var(fmaxf(a0, a1));
   ;
 }
@@ -8606,8 +8606,8 @@ static Var _x2c_gensym_func_adapt_494(Func _x2c_gensym_func_binding_494, const F
 double fmin(double, double);
 
 static Var _x2c_gensym_func_adapt_495(Func _x2c_gensym_func_binding_495, const FuncArg * _x2c_gensym_func_argv_495){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_495, _x2c_gensym_func_argv_495, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_495, _x2c_gensym_func_argv_495, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_495, _x2c_gensym_func_argv_495, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_132 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_495",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_132; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_495, _x2c_gensym_func_argv_495, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_133 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_495",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_133; })));
   return double_var(fmin(a0, a1));
   ;
 }
@@ -8615,8 +8615,8 @@ static Var _x2c_gensym_func_adapt_495(Func _x2c_gensym_func_binding_495, const F
 float fminf(float, float);
 
 static Var _x2c_gensym_func_adapt_496(Func _x2c_gensym_func_binding_496, const FuncArg * _x2c_gensym_func_argv_496){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_496, _x2c_gensym_func_argv_496, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_496, _x2c_gensym_func_argv_496, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_496, _x2c_gensym_func_argv_496, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_134 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_496",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_134; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_496, _x2c_gensym_func_argv_496, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_135 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_496",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_135; })));
   return float_var(fminf(a0, a1));
   ;
 }
@@ -8624,8 +8624,8 @@ static Var _x2c_gensym_func_adapt_496(Func _x2c_gensym_func_binding_496, const F
 double fmod(double, double);
 
 static Var _x2c_gensym_func_adapt_497(Func _x2c_gensym_func_binding_497, const FuncArg * _x2c_gensym_func_argv_497){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_497, _x2c_gensym_func_argv_497, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_497, _x2c_gensym_func_argv_497, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_497, _x2c_gensym_func_argv_497, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_136 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_497",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_136; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_497, _x2c_gensym_func_argv_497, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_137 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_497",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_137; })));
   return double_var(fmod(a0, a1));
   ;
 }
@@ -8633,8 +8633,8 @@ static Var _x2c_gensym_func_adapt_497(Func _x2c_gensym_func_binding_497, const F
 float fmodf(float, float);
 
 static Var _x2c_gensym_func_adapt_498(Func _x2c_gensym_func_binding_498, const FuncArg * _x2c_gensym_func_argv_498){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_498, _x2c_gensym_func_argv_498, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_498, _x2c_gensym_func_argv_498, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_498, _x2c_gensym_func_argv_498, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_138 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_498",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_138; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_498, _x2c_gensym_func_argv_498, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_139 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_498",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_139; })));
   return float_var(fmodf(a0, a1));
   ;
 }
@@ -8642,7 +8642,7 @@ static Var _x2c_gensym_func_adapt_498(Func _x2c_gensym_func_binding_498, const F
 double frexp(double, int *);
 
 static Var _x2c_gensym_func_adapt_499(Func _x2c_gensym_func_binding_499, const FuncArg * _x2c_gensym_func_argv_499){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_499, _x2c_gensym_func_argv_499, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_499, _x2c_gensym_func_argv_499, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_140 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_499",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_140; })));
   int * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_499, _x2c_gensym_func_argv_499, 1, 442085973));
   return double_var(frexp(a0, a1));
   ;
@@ -8651,7 +8651,7 @@ static Var _x2c_gensym_func_adapt_499(Func _x2c_gensym_func_binding_499, const F
 float frexpf(float, int *);
 
 static Var _x2c_gensym_func_adapt_500(Func _x2c_gensym_func_binding_500, const FuncArg * _x2c_gensym_func_argv_500){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_500, _x2c_gensym_func_argv_500, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_500, _x2c_gensym_func_argv_500, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_141 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_500",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_141; })));
   int * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_500, _x2c_gensym_func_argv_500, 1, 442085973));
   return float_var(frexpf(a0, a1));
   ;
@@ -8660,8 +8660,8 @@ static Var _x2c_gensym_func_adapt_500(Func _x2c_gensym_func_binding_500, const F
 double hypot(double, double);
 
 static Var _x2c_gensym_func_adapt_501(Func _x2c_gensym_func_binding_501, const FuncArg * _x2c_gensym_func_argv_501){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_501, _x2c_gensym_func_argv_501, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_501, _x2c_gensym_func_argv_501, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_501, _x2c_gensym_func_argv_501, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_142 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_501",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_142; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_501, _x2c_gensym_func_argv_501, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_143 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_501",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_143; })));
   return double_var(hypot(a0, a1));
   ;
 }
@@ -8669,8 +8669,8 @@ static Var _x2c_gensym_func_adapt_501(Func _x2c_gensym_func_binding_501, const F
 float hypotf(float, float);
 
 static Var _x2c_gensym_func_adapt_502(Func _x2c_gensym_func_binding_502, const FuncArg * _x2c_gensym_func_argv_502){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_502, _x2c_gensym_func_argv_502, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_502, _x2c_gensym_func_argv_502, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_502, _x2c_gensym_func_argv_502, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_144 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_502",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_144; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_502, _x2c_gensym_func_argv_502, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_145 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_502",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_145; })));
   return float_var(hypotf(a0, a1));
   ;
 }
@@ -8678,7 +8678,7 @@ static Var _x2c_gensym_func_adapt_502(Func _x2c_gensym_func_binding_502, const F
 int ilogb(double);
 
 static Var _x2c_gensym_func_adapt_503(Func _x2c_gensym_func_binding_503, const FuncArg * _x2c_gensym_func_argv_503){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_503, _x2c_gensym_func_argv_503, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_503, _x2c_gensym_func_argv_503, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_146 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_503",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_146; })));
   return int_var(ilogb(a0));
   ;
 }
@@ -8686,7 +8686,7 @@ static Var _x2c_gensym_func_adapt_503(Func _x2c_gensym_func_binding_503, const F
 int ilogbf(float);
 
 static Var _x2c_gensym_func_adapt_504(Func _x2c_gensym_func_binding_504, const FuncArg * _x2c_gensym_func_argv_504){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_504, _x2c_gensym_func_argv_504, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_504, _x2c_gensym_func_argv_504, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_147 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_504",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_147; })));
   return int_var(ilogbf(a0));
   ;
 }
@@ -8694,7 +8694,7 @@ static Var _x2c_gensym_func_adapt_504(Func _x2c_gensym_func_binding_504, const F
 long labs(long);
 
 static Var _x2c_gensym_func_adapt_505(Func _x2c_gensym_func_binding_505, const FuncArg * _x2c_gensym_func_argv_505){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_505, _x2c_gensym_func_argv_505, 0, 818062), 818062));
+  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_505, _x2c_gensym_func_argv_505, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_148 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_505",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_148; })));
   return long_var(labs(a0));
   ;
 }
@@ -8702,8 +8702,8 @@ static Var _x2c_gensym_func_adapt_505(Func _x2c_gensym_func_binding_505, const F
 double ldexp(double, int);
 
 static Var _x2c_gensym_func_adapt_506(Func _x2c_gensym_func_binding_506, const FuncArg * _x2c_gensym_func_argv_506){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_506, _x2c_gensym_func_argv_506, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_506, _x2c_gensym_func_argv_506, 1, 3453797), 3453797));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_506, _x2c_gensym_func_argv_506, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_149 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_506",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_149; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_506, _x2c_gensym_func_argv_506, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_150 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_506",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_150; })));
   return double_var(ldexp(a0, a1));
   ;
 }
@@ -8711,8 +8711,8 @@ static Var _x2c_gensym_func_adapt_506(Func _x2c_gensym_func_binding_506, const F
 float ldexpf(float, int);
 
 static Var _x2c_gensym_func_adapt_507(Func _x2c_gensym_func_binding_507, const FuncArg * _x2c_gensym_func_argv_507){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_507, _x2c_gensym_func_argv_507, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_507, _x2c_gensym_func_argv_507, 1, 3453797), 3453797));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_507, _x2c_gensym_func_argv_507, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_151 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_507",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_151; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_507, _x2c_gensym_func_argv_507, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_152 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_507",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_152; })));
   return float_var(ldexpf(a0, a1));
   ;
 }
@@ -8720,7 +8720,7 @@ static Var _x2c_gensym_func_adapt_507(Func _x2c_gensym_func_binding_507, const F
 double lgamma(double);
 
 static Var _x2c_gensym_func_adapt_508(Func _x2c_gensym_func_binding_508, const FuncArg * _x2c_gensym_func_argv_508){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_508, _x2c_gensym_func_argv_508, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_508, _x2c_gensym_func_argv_508, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_153 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_508",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_153; })));
   return double_var(lgamma(a0));
   ;
 }
@@ -8728,7 +8728,7 @@ static Var _x2c_gensym_func_adapt_508(Func _x2c_gensym_func_binding_508, const F
 float lgammaf(float);
 
 static Var _x2c_gensym_func_adapt_509(Func _x2c_gensym_func_binding_509, const FuncArg * _x2c_gensym_func_argv_509){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_509, _x2c_gensym_func_argv_509, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_509, _x2c_gensym_func_argv_509, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_154 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_509",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_154; })));
   return float_var(lgammaf(a0));
   ;
 }
@@ -8736,7 +8736,7 @@ static Var _x2c_gensym_func_adapt_509(Func _x2c_gensym_func_binding_509, const F
 long long llabs(long long);
 
 static Var _x2c_gensym_func_adapt_510(Func _x2c_gensym_func_binding_510, const FuncArg * _x2c_gensym_func_argv_510){
-  long long a0 = Var_long_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_510, _x2c_gensym_func_argv_510, 0, 25983886), 25983886));
+  long long a0 = Var_long_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_510, _x2c_gensym_func_argv_510, 0, 25983886), 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_155 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_510",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_155; })));
   return Var_box_long_long(llabs(a0));
   ;
 }
@@ -8744,7 +8744,7 @@ static Var _x2c_gensym_func_adapt_510(Func _x2c_gensym_func_binding_510, const F
 long long llrint(double);
 
 static Var _x2c_gensym_func_adapt_511(Func _x2c_gensym_func_binding_511, const FuncArg * _x2c_gensym_func_argv_511){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_511, _x2c_gensym_func_argv_511, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_511, _x2c_gensym_func_argv_511, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_156 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_511",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_156; })));
   return Var_box_long_long(llrint(a0));
   ;
 }
@@ -8752,7 +8752,7 @@ static Var _x2c_gensym_func_adapt_511(Func _x2c_gensym_func_binding_511, const F
 long long llrintf(float);
 
 static Var _x2c_gensym_func_adapt_512(Func _x2c_gensym_func_binding_512, const FuncArg * _x2c_gensym_func_argv_512){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_512, _x2c_gensym_func_argv_512, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_512, _x2c_gensym_func_argv_512, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_157 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_512",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_157; })));
   return Var_box_long_long(llrintf(a0));
   ;
 }
@@ -8760,7 +8760,7 @@ static Var _x2c_gensym_func_adapt_512(Func _x2c_gensym_func_binding_512, const F
 long long llround(double);
 
 static Var _x2c_gensym_func_adapt_513(Func _x2c_gensym_func_binding_513, const FuncArg * _x2c_gensym_func_argv_513){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_513, _x2c_gensym_func_argv_513, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_513, _x2c_gensym_func_argv_513, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_158 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_513",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_158; })));
   return Var_box_long_long(llround(a0));
   ;
 }
@@ -8768,7 +8768,7 @@ static Var _x2c_gensym_func_adapt_513(Func _x2c_gensym_func_binding_513, const F
 long long llroundf(float);
 
 static Var _x2c_gensym_func_adapt_514(Func _x2c_gensym_func_binding_514, const FuncArg * _x2c_gensym_func_argv_514){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_514, _x2c_gensym_func_argv_514, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_514, _x2c_gensym_func_argv_514, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_159 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_514",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_159; })));
   return Var_box_long_long(llroundf(a0));
   ;
 }
@@ -8776,7 +8776,7 @@ static Var _x2c_gensym_func_adapt_514(Func _x2c_gensym_func_binding_514, const F
 double log(double);
 
 static Var _x2c_gensym_func_adapt_515(Func _x2c_gensym_func_binding_515, const FuncArg * _x2c_gensym_func_argv_515){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_515, _x2c_gensym_func_argv_515, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_515, _x2c_gensym_func_argv_515, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_160 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_515",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_160; })));
   return double_var(log(a0));
   ;
 }
@@ -8784,7 +8784,7 @@ static Var _x2c_gensym_func_adapt_515(Func _x2c_gensym_func_binding_515, const F
 double log10(double);
 
 static Var _x2c_gensym_func_adapt_516(Func _x2c_gensym_func_binding_516, const FuncArg * _x2c_gensym_func_argv_516){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_516, _x2c_gensym_func_argv_516, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_516, _x2c_gensym_func_argv_516, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_161 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_516",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_161; })));
   return double_var(log10(a0));
   ;
 }
@@ -8792,7 +8792,7 @@ static Var _x2c_gensym_func_adapt_516(Func _x2c_gensym_func_binding_516, const F
 float log10f(float);
 
 static Var _x2c_gensym_func_adapt_517(Func _x2c_gensym_func_binding_517, const FuncArg * _x2c_gensym_func_argv_517){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_517, _x2c_gensym_func_argv_517, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_517, _x2c_gensym_func_argv_517, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_162 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_517",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_162; })));
   return float_var(log10f(a0));
   ;
 }
@@ -8800,7 +8800,7 @@ static Var _x2c_gensym_func_adapt_517(Func _x2c_gensym_func_binding_517, const F
 double log1p(double);
 
 static Var _x2c_gensym_func_adapt_518(Func _x2c_gensym_func_binding_518, const FuncArg * _x2c_gensym_func_argv_518){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_518, _x2c_gensym_func_argv_518, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_518, _x2c_gensym_func_argv_518, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_163 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_518",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_163; })));
   return double_var(log1p(a0));
   ;
 }
@@ -8808,7 +8808,7 @@ static Var _x2c_gensym_func_adapt_518(Func _x2c_gensym_func_binding_518, const F
 float log1pf(float);
 
 static Var _x2c_gensym_func_adapt_519(Func _x2c_gensym_func_binding_519, const FuncArg * _x2c_gensym_func_argv_519){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_519, _x2c_gensym_func_argv_519, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_519, _x2c_gensym_func_argv_519, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_164 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_519",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_164; })));
   return float_var(log1pf(a0));
   ;
 }
@@ -8816,7 +8816,7 @@ static Var _x2c_gensym_func_adapt_519(Func _x2c_gensym_func_binding_519, const F
 double log2(double);
 
 static Var _x2c_gensym_func_adapt_520(Func _x2c_gensym_func_binding_520, const FuncArg * _x2c_gensym_func_argv_520){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_520, _x2c_gensym_func_argv_520, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_520, _x2c_gensym_func_argv_520, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_165 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_520",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_165; })));
   return double_var(log2(a0));
   ;
 }
@@ -8824,7 +8824,7 @@ static Var _x2c_gensym_func_adapt_520(Func _x2c_gensym_func_binding_520, const F
 float log2f(float);
 
 static Var _x2c_gensym_func_adapt_521(Func _x2c_gensym_func_binding_521, const FuncArg * _x2c_gensym_func_argv_521){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_521, _x2c_gensym_func_argv_521, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_521, _x2c_gensym_func_argv_521, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_166 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_521",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_166; })));
   return float_var(log2f(a0));
   ;
 }
@@ -8832,7 +8832,7 @@ static Var _x2c_gensym_func_adapt_521(Func _x2c_gensym_func_binding_521, const F
 double logb(double);
 
 static Var _x2c_gensym_func_adapt_522(Func _x2c_gensym_func_binding_522, const FuncArg * _x2c_gensym_func_argv_522){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_522, _x2c_gensym_func_argv_522, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_522, _x2c_gensym_func_argv_522, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_167 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_522",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_167; })));
   return double_var(logb(a0));
   ;
 }
@@ -8840,7 +8840,7 @@ static Var _x2c_gensym_func_adapt_522(Func _x2c_gensym_func_binding_522, const F
 float logbf(float);
 
 static Var _x2c_gensym_func_adapt_523(Func _x2c_gensym_func_binding_523, const FuncArg * _x2c_gensym_func_argv_523){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_523, _x2c_gensym_func_argv_523, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_523, _x2c_gensym_func_argv_523, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_168 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_523",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_168; })));
   return float_var(logbf(a0));
   ;
 }
@@ -8848,7 +8848,7 @@ static Var _x2c_gensym_func_adapt_523(Func _x2c_gensym_func_binding_523, const F
 float logf(float);
 
 static Var _x2c_gensym_func_adapt_524(Func _x2c_gensym_func_binding_524, const FuncArg * _x2c_gensym_func_argv_524){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_524, _x2c_gensym_func_argv_524, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_524, _x2c_gensym_func_argv_524, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_169 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_524",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_169; })));
   return float_var(logf(a0));
   ;
 }
@@ -8856,7 +8856,7 @@ static Var _x2c_gensym_func_adapt_524(Func _x2c_gensym_func_binding_524, const F
 long lrint(double);
 
 static Var _x2c_gensym_func_adapt_525(Func _x2c_gensym_func_binding_525, const FuncArg * _x2c_gensym_func_argv_525){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_525, _x2c_gensym_func_argv_525, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_525, _x2c_gensym_func_argv_525, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_170 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_525",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_170; })));
   return long_var(lrint(a0));
   ;
 }
@@ -8864,7 +8864,7 @@ static Var _x2c_gensym_func_adapt_525(Func _x2c_gensym_func_binding_525, const F
 long lrintf(float);
 
 static Var _x2c_gensym_func_adapt_526(Func _x2c_gensym_func_binding_526, const FuncArg * _x2c_gensym_func_argv_526){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_526, _x2c_gensym_func_argv_526, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_526, _x2c_gensym_func_argv_526, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_171 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_526",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_171; })));
   return long_var(lrintf(a0));
   ;
 }
@@ -8872,7 +8872,7 @@ static Var _x2c_gensym_func_adapt_526(Func _x2c_gensym_func_binding_526, const F
 long lround(double);
 
 static Var _x2c_gensym_func_adapt_527(Func _x2c_gensym_func_binding_527, const FuncArg * _x2c_gensym_func_argv_527){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_527, _x2c_gensym_func_argv_527, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_527, _x2c_gensym_func_argv_527, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_172 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_527",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_172; })));
   return long_var(lround(a0));
   ;
 }
@@ -8880,7 +8880,7 @@ static Var _x2c_gensym_func_adapt_527(Func _x2c_gensym_func_binding_527, const F
 long lroundf(float);
 
 static Var _x2c_gensym_func_adapt_528(Func _x2c_gensym_func_binding_528, const FuncArg * _x2c_gensym_func_argv_528){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_528, _x2c_gensym_func_argv_528, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_528, _x2c_gensym_func_argv_528, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_173 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_528",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_173; })));
   return long_var(lroundf(a0));
   ;
 }
@@ -8888,7 +8888,7 @@ static Var _x2c_gensym_func_adapt_528(Func _x2c_gensym_func_binding_528, const F
 double modf(double, double *);
 
 static Var _x2c_gensym_func_adapt_529(Func _x2c_gensym_func_binding_529, const FuncArg * _x2c_gensym_func_argv_529){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_529, _x2c_gensym_func_argv_529, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_529, _x2c_gensym_func_argv_529, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_174 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_529",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_174; })));
   double * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_529, _x2c_gensym_func_argv_529, 1, 429601877));
   return double_var(modf(a0, a1));
   ;
@@ -8897,7 +8897,7 @@ static Var _x2c_gensym_func_adapt_529(Func _x2c_gensym_func_binding_529, const F
 float modff(float, float *);
 
 static Var _x2c_gensym_func_adapt_530(Func _x2c_gensym_func_binding_530, const FuncArg * _x2c_gensym_func_argv_530){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_530, _x2c_gensym_func_argv_530, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_530, _x2c_gensym_func_argv_530, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_175 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_530",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_175; })));
   float * a1 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_530, _x2c_gensym_func_argv_530, 1, 429503061));
   return float_var(modff(a0, a1));
   ;
@@ -8922,7 +8922,7 @@ static Var _x2c_gensym_func_adapt_532(Func _x2c_gensym_func_binding_532, const F
 double nearbyint(double);
 
 static Var _x2c_gensym_func_adapt_533(Func _x2c_gensym_func_binding_533, const FuncArg * _x2c_gensym_func_argv_533){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_533, _x2c_gensym_func_argv_533, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_533, _x2c_gensym_func_argv_533, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_176 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_533",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_176; })));
   return double_var(nearbyint(a0));
   ;
 }
@@ -8930,7 +8930,7 @@ static Var _x2c_gensym_func_adapt_533(Func _x2c_gensym_func_binding_533, const F
 float nearbyintf(float);
 
 static Var _x2c_gensym_func_adapt_534(Func _x2c_gensym_func_binding_534, const FuncArg * _x2c_gensym_func_argv_534){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_534, _x2c_gensym_func_argv_534, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_534, _x2c_gensym_func_argv_534, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_177 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_534",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_177; })));
   return float_var(nearbyintf(a0));
   ;
 }
@@ -8938,8 +8938,8 @@ static Var _x2c_gensym_func_adapt_534(Func _x2c_gensym_func_binding_534, const F
 double nextafter(double, double);
 
 static Var _x2c_gensym_func_adapt_535(Func _x2c_gensym_func_binding_535, const FuncArg * _x2c_gensym_func_argv_535){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_535, _x2c_gensym_func_argv_535, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_535, _x2c_gensym_func_argv_535, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_535, _x2c_gensym_func_argv_535, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_178 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_535",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_178; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_535, _x2c_gensym_func_argv_535, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_179 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_535",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_179; })));
   return double_var(nextafter(a0, a1));
   ;
 }
@@ -8947,8 +8947,8 @@ static Var _x2c_gensym_func_adapt_535(Func _x2c_gensym_func_binding_535, const F
 float nextafterf(float, float);
 
 static Var _x2c_gensym_func_adapt_536(Func _x2c_gensym_func_binding_536, const FuncArg * _x2c_gensym_func_argv_536){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_536, _x2c_gensym_func_argv_536, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_536, _x2c_gensym_func_argv_536, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_536, _x2c_gensym_func_argv_536, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_180 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_536",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_180; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_536, _x2c_gensym_func_argv_536, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_181 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_536",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_181; })));
   return float_var(nextafterf(a0, a1));
   ;
 }
@@ -8956,8 +8956,8 @@ static Var _x2c_gensym_func_adapt_536(Func _x2c_gensym_func_binding_536, const F
 double nexttoward(double, long double);
 
 static Var _x2c_gensym_func_adapt_537(Func _x2c_gensym_func_binding_537, const FuncArg * _x2c_gensym_func_argv_537){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_537, _x2c_gensym_func_argv_537, 0, 3356265), 3356265));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_537, _x2c_gensym_func_argv_537, 1, 26071077642), 26071077642));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_537, _x2c_gensym_func_argv_537, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_182 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_537",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_182; })));
+  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_537, _x2c_gensym_func_argv_537, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_183 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_537",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_183; })));
   return double_var(nexttoward(a0, a1));
   ;
 }
@@ -8965,8 +8965,8 @@ static Var _x2c_gensym_func_adapt_537(Func _x2c_gensym_func_binding_537, const F
 float nexttowardf(float, long double);
 
 static Var _x2c_gensym_func_adapt_538(Func _x2c_gensym_func_binding_538, const FuncArg * _x2c_gensym_func_argv_538){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_538, _x2c_gensym_func_argv_538, 0, 3355493), 3355493));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_538, _x2c_gensym_func_argv_538, 1, 26071077642), 26071077642));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_538, _x2c_gensym_func_argv_538, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_184 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_538",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_184; })));
+  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_538, _x2c_gensym_func_argv_538, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_185 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_538",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_185; })));
   return float_var(nexttowardf(a0, a1));
   ;
 }
@@ -8974,8 +8974,8 @@ static Var _x2c_gensym_func_adapt_538(Func _x2c_gensym_func_binding_538, const F
 double pow(double, double);
 
 static Var _x2c_gensym_func_adapt_539(Func _x2c_gensym_func_binding_539, const FuncArg * _x2c_gensym_func_argv_539){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_539, _x2c_gensym_func_argv_539, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_539, _x2c_gensym_func_argv_539, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_539, _x2c_gensym_func_argv_539, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_186 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_539",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_186; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_539, _x2c_gensym_func_argv_539, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_187 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_539",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_187; })));
   return double_var(pow(a0, a1));
   ;
 }
@@ -8983,8 +8983,8 @@ static Var _x2c_gensym_func_adapt_539(Func _x2c_gensym_func_binding_539, const F
 float powf(float, float);
 
 static Var _x2c_gensym_func_adapt_540(Func _x2c_gensym_func_binding_540, const FuncArg * _x2c_gensym_func_argv_540){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_540, _x2c_gensym_func_argv_540, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_540, _x2c_gensym_func_argv_540, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_540, _x2c_gensym_func_argv_540, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_188 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_540",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_188; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_540, _x2c_gensym_func_argv_540, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_189 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_540",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_189; })));
   return float_var(powf(a0, a1));
   ;
 }
@@ -8992,9 +8992,9 @@ static Var _x2c_gensym_func_adapt_540(Func _x2c_gensym_func_binding_540, const F
 Iter range(int, int, int, Iter);
 
 static Var _x2c_gensym_func_adapt_541(Func _x2c_gensym_func_binding_541, const FuncArg * _x2c_gensym_func_argv_541){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 0, 3453797), 3453797));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 2, 3453797), 3453797));
+  int a0 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 0, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_190 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_541",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_190; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_191 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_541",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_191; })));
+  int a2 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 2, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_192 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_541",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_192; })));
   Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_gensym_func_binding_541, _x2c_gensym_func_argv_541, 3, 631140));
   return Iter_var(range(a0, a1, a2, a3));
   ;
@@ -9003,8 +9003,8 @@ static Var _x2c_gensym_func_adapt_541(Func _x2c_gensym_func_binding_541, const F
 double remainder(double, double);
 
 static Var _x2c_gensym_func_adapt_542(Func _x2c_gensym_func_binding_542, const FuncArg * _x2c_gensym_func_argv_542){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_542, _x2c_gensym_func_argv_542, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_542, _x2c_gensym_func_argv_542, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_542, _x2c_gensym_func_argv_542, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_193 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_542",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_193; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_542, _x2c_gensym_func_argv_542, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_194 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_542",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_194; })));
   return double_var(remainder(a0, a1));
   ;
 }
@@ -9012,8 +9012,8 @@ static Var _x2c_gensym_func_adapt_542(Func _x2c_gensym_func_binding_542, const F
 float remainderf(float, float);
 
 static Var _x2c_gensym_func_adapt_543(Func _x2c_gensym_func_binding_543, const FuncArg * _x2c_gensym_func_argv_543){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_543, _x2c_gensym_func_argv_543, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_543, _x2c_gensym_func_argv_543, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_543, _x2c_gensym_func_argv_543, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_195 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_543",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_195; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_543, _x2c_gensym_func_argv_543, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_196 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_543",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_196; })));
   return float_var(remainderf(a0, a1));
   ;
 }
@@ -9021,8 +9021,8 @@ static Var _x2c_gensym_func_adapt_543(Func _x2c_gensym_func_binding_543, const F
 double remquo(double, double, int *);
 
 static Var _x2c_gensym_func_adapt_544(Func _x2c_gensym_func_binding_544, const FuncArg * _x2c_gensym_func_argv_544){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_544, _x2c_gensym_func_argv_544, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_544, _x2c_gensym_func_argv_544, 1, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_544, _x2c_gensym_func_argv_544, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_197 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_544",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_197; })));
+  double a1 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_544, _x2c_gensym_func_argv_544, 1, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_198 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_544",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_198; })));
   int * a2 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_544, _x2c_gensym_func_argv_544, 2, 442085973));
   return double_var(remquo(a0, a1, a2));
   ;
@@ -9031,8 +9031,8 @@ static Var _x2c_gensym_func_adapt_544(Func _x2c_gensym_func_binding_544, const F
 float remquof(float, float, int *);
 
 static Var _x2c_gensym_func_adapt_545(Func _x2c_gensym_func_binding_545, const FuncArg * _x2c_gensym_func_argv_545){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_545, _x2c_gensym_func_argv_545, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_545, _x2c_gensym_func_argv_545, 1, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_545, _x2c_gensym_func_argv_545, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_199 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_545",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_199; })));
+  float a1 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_545, _x2c_gensym_func_argv_545, 1, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_200 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_545",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_200; })));
   int * a2 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_545, _x2c_gensym_func_argv_545, 2, 442085973));
   return float_var(remquof(a0, a1, a2));
   ;
@@ -9041,7 +9041,7 @@ static Var _x2c_gensym_func_adapt_545(Func _x2c_gensym_func_binding_545, const F
 double rint(double);
 
 static Var _x2c_gensym_func_adapt_546(Func _x2c_gensym_func_binding_546, const FuncArg * _x2c_gensym_func_argv_546){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_546, _x2c_gensym_func_argv_546, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_546, _x2c_gensym_func_argv_546, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_201 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_546",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_201; })));
   return double_var(rint(a0));
   ;
 }
@@ -9049,7 +9049,7 @@ static Var _x2c_gensym_func_adapt_546(Func _x2c_gensym_func_binding_546, const F
 float rintf(float);
 
 static Var _x2c_gensym_func_adapt_547(Func _x2c_gensym_func_binding_547, const FuncArg * _x2c_gensym_func_argv_547){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_547, _x2c_gensym_func_argv_547, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_547, _x2c_gensym_func_argv_547, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_202 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_547",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_202; })));
   return float_var(rintf(a0));
   ;
 }
@@ -9057,7 +9057,7 @@ static Var _x2c_gensym_func_adapt_547(Func _x2c_gensym_func_binding_547, const F
 double round(double);
 
 static Var _x2c_gensym_func_adapt_548(Func _x2c_gensym_func_binding_548, const FuncArg * _x2c_gensym_func_argv_548){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_548, _x2c_gensym_func_argv_548, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_548, _x2c_gensym_func_argv_548, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_203 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_548",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_203; })));
   return double_var(round(a0));
   ;
 }
@@ -9065,7 +9065,7 @@ static Var _x2c_gensym_func_adapt_548(Func _x2c_gensym_func_binding_548, const F
 float roundf(float);
 
 static Var _x2c_gensym_func_adapt_549(Func _x2c_gensym_func_binding_549, const FuncArg * _x2c_gensym_func_argv_549){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_549, _x2c_gensym_func_argv_549, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_549, _x2c_gensym_func_argv_549, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_204 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_549",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_204; })));
   return float_var(roundf(a0));
   ;
 }
@@ -9073,8 +9073,8 @@ static Var _x2c_gensym_func_adapt_549(Func _x2c_gensym_func_binding_549, const F
 double scalbln(double, long);
 
 static Var _x2c_gensym_func_adapt_550(Func _x2c_gensym_func_binding_550, const FuncArg * _x2c_gensym_func_argv_550){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_550, _x2c_gensym_func_argv_550, 0, 3356265), 3356265));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_550, _x2c_gensym_func_argv_550, 1, 818062), 818062));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_550, _x2c_gensym_func_argv_550, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_205 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_550",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_205; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_550, _x2c_gensym_func_argv_550, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_206 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_550",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_206; })));
   return double_var(scalbln(a0, a1));
   ;
 }
@@ -9082,8 +9082,8 @@ static Var _x2c_gensym_func_adapt_550(Func _x2c_gensym_func_binding_550, const F
 float scalblnf(float, long);
 
 static Var _x2c_gensym_func_adapt_551(Func _x2c_gensym_func_binding_551, const FuncArg * _x2c_gensym_func_argv_551){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_551, _x2c_gensym_func_argv_551, 0, 3355493), 3355493));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_551, _x2c_gensym_func_argv_551, 1, 818062), 818062));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_551, _x2c_gensym_func_argv_551, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_207 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_551",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_207; })));
+  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_551, _x2c_gensym_func_argv_551, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_208 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_551",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_208; })));
   return float_var(scalblnf(a0, a1));
   ;
 }
@@ -9091,8 +9091,8 @@ static Var _x2c_gensym_func_adapt_551(Func _x2c_gensym_func_binding_551, const F
 double scalbn(double, int);
 
 static Var _x2c_gensym_func_adapt_552(Func _x2c_gensym_func_binding_552, const FuncArg * _x2c_gensym_func_argv_552){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_552, _x2c_gensym_func_argv_552, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_552, _x2c_gensym_func_argv_552, 1, 3453797), 3453797));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_552, _x2c_gensym_func_argv_552, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_209 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_552",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_209; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_552, _x2c_gensym_func_argv_552, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_210 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_552",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_210; })));
   return double_var(scalbn(a0, a1));
   ;
 }
@@ -9100,8 +9100,8 @@ static Var _x2c_gensym_func_adapt_552(Func _x2c_gensym_func_binding_552, const F
 float scalbnf(float, int);
 
 static Var _x2c_gensym_func_adapt_553(Func _x2c_gensym_func_binding_553, const FuncArg * _x2c_gensym_func_argv_553){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_553, _x2c_gensym_func_argv_553, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_553, _x2c_gensym_func_argv_553, 1, 3453797), 3453797));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_553, _x2c_gensym_func_argv_553, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_211 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_553",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_211; })));
+  int a1 = Var_int(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_553, _x2c_gensym_func_argv_553, 1, 3453797), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_212 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_553",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_212; })));
   return float_var(scalbnf(a0, a1));
   ;
 }
@@ -9109,7 +9109,7 @@ static Var _x2c_gensym_func_adapt_553(Func _x2c_gensym_func_binding_553, const F
 double sin(double);
 
 static Var _x2c_gensym_func_adapt_554(Func _x2c_gensym_func_binding_554, const FuncArg * _x2c_gensym_func_argv_554){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_554, _x2c_gensym_func_argv_554, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_554, _x2c_gensym_func_argv_554, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_213 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_554",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_213; })));
   return double_var(sin(a0));
   ;
 }
@@ -9117,7 +9117,7 @@ static Var _x2c_gensym_func_adapt_554(Func _x2c_gensym_func_binding_554, const F
 float sinf(float);
 
 static Var _x2c_gensym_func_adapt_555(Func _x2c_gensym_func_binding_555, const FuncArg * _x2c_gensym_func_argv_555){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_555, _x2c_gensym_func_argv_555, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_555, _x2c_gensym_func_argv_555, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_214 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_555",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_214; })));
   return float_var(sinf(a0));
   ;
 }
@@ -9125,7 +9125,7 @@ static Var _x2c_gensym_func_adapt_555(Func _x2c_gensym_func_binding_555, const F
 double sinh(double);
 
 static Var _x2c_gensym_func_adapt_556(Func _x2c_gensym_func_binding_556, const FuncArg * _x2c_gensym_func_argv_556){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_556, _x2c_gensym_func_argv_556, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_556, _x2c_gensym_func_argv_556, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_215 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_556",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_215; })));
   return double_var(sinh(a0));
   ;
 }
@@ -9133,7 +9133,7 @@ static Var _x2c_gensym_func_adapt_556(Func _x2c_gensym_func_binding_556, const F
 float sinhf(float);
 
 static Var _x2c_gensym_func_adapt_557(Func _x2c_gensym_func_binding_557, const FuncArg * _x2c_gensym_func_argv_557){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_557, _x2c_gensym_func_argv_557, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_557, _x2c_gensym_func_argv_557, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_216 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_557",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_216; })));
   return float_var(sinhf(a0));
   ;
 }
@@ -9141,7 +9141,7 @@ static Var _x2c_gensym_func_adapt_557(Func _x2c_gensym_func_binding_557, const F
 double sqrt(double);
 
 static Var _x2c_gensym_func_adapt_558(Func _x2c_gensym_func_binding_558, const FuncArg * _x2c_gensym_func_argv_558){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_558, _x2c_gensym_func_argv_558, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_558, _x2c_gensym_func_argv_558, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_217 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_558",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_217; })));
   return double_var(sqrt(a0));
   ;
 }
@@ -9149,7 +9149,7 @@ static Var _x2c_gensym_func_adapt_558(Func _x2c_gensym_func_binding_558, const F
 float sqrtf(float);
 
 static Var _x2c_gensym_func_adapt_559(Func _x2c_gensym_func_binding_559, const FuncArg * _x2c_gensym_func_argv_559){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_559, _x2c_gensym_func_argv_559, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_559, _x2c_gensym_func_argv_559, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_218 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_559",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_218; })));
   return float_var(sqrtf(a0));
   ;
 }
@@ -9168,7 +9168,7 @@ int strncmp(const char *, const char *, size_t);
 static Var _x2c_gensym_func_adapt_561(Func _x2c_gensym_func_binding_561, const FuncArg * _x2c_gensym_func_argv_561){
   const char * a0 = x2c_func_pointer_argument(_x2c_gensym_func_binding_561, _x2c_gensym_func_argv_561, 0);
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_561, _x2c_gensym_func_argv_561, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_561, _x2c_gensym_func_argv_561, 2, 44858254), 44858254));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_561, _x2c_gensym_func_argv_561, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_219 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_561",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_219; })));
   return int_var(strncmp(a0, a1, a2));
   ;
 }
@@ -9176,7 +9176,7 @@ static Var _x2c_gensym_func_adapt_561(Func _x2c_gensym_func_binding_561, const F
 double tan(double);
 
 static Var _x2c_gensym_func_adapt_562(Func _x2c_gensym_func_binding_562, const FuncArg * _x2c_gensym_func_argv_562){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_562, _x2c_gensym_func_argv_562, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_562, _x2c_gensym_func_argv_562, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_220 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_562",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_220; })));
   return double_var(tan(a0));
   ;
 }
@@ -9184,7 +9184,7 @@ static Var _x2c_gensym_func_adapt_562(Func _x2c_gensym_func_binding_562, const F
 float tanf(float);
 
 static Var _x2c_gensym_func_adapt_563(Func _x2c_gensym_func_binding_563, const FuncArg * _x2c_gensym_func_argv_563){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_563, _x2c_gensym_func_argv_563, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_563, _x2c_gensym_func_argv_563, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_221 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_563",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_221; })));
   return float_var(tanf(a0));
   ;
 }
@@ -9192,7 +9192,7 @@ static Var _x2c_gensym_func_adapt_563(Func _x2c_gensym_func_binding_563, const F
 double tanh(double);
 
 static Var _x2c_gensym_func_adapt_564(Func _x2c_gensym_func_binding_564, const FuncArg * _x2c_gensym_func_argv_564){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_564, _x2c_gensym_func_argv_564, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_564, _x2c_gensym_func_argv_564, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_222 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_564",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_222; })));
   return double_var(tanh(a0));
   ;
 }
@@ -9200,7 +9200,7 @@ static Var _x2c_gensym_func_adapt_564(Func _x2c_gensym_func_binding_564, const F
 float tanhf(float);
 
 static Var _x2c_gensym_func_adapt_565(Func _x2c_gensym_func_binding_565, const FuncArg * _x2c_gensym_func_argv_565){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_565, _x2c_gensym_func_argv_565, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_565, _x2c_gensym_func_argv_565, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_223 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_565",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_223; })));
   return float_var(tanhf(a0));
   ;
 }
@@ -9208,7 +9208,7 @@ static Var _x2c_gensym_func_adapt_565(Func _x2c_gensym_func_binding_565, const F
 double tgamma(double);
 
 static Var _x2c_gensym_func_adapt_566(Func _x2c_gensym_func_binding_566, const FuncArg * _x2c_gensym_func_argv_566){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_566, _x2c_gensym_func_argv_566, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_566, _x2c_gensym_func_argv_566, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_224 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_566",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_224; })));
   return double_var(tgamma(a0));
   ;
 }
@@ -9216,7 +9216,7 @@ static Var _x2c_gensym_func_adapt_566(Func _x2c_gensym_func_binding_566, const F
 float tgammaf(float);
 
 static Var _x2c_gensym_func_adapt_567(Func _x2c_gensym_func_binding_567, const FuncArg * _x2c_gensym_func_argv_567){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_567, _x2c_gensym_func_argv_567, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_567, _x2c_gensym_func_argv_567, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_225 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_567",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_225; })));
   return float_var(tgammaf(a0));
   ;
 }
@@ -9224,7 +9224,7 @@ static Var _x2c_gensym_func_adapt_567(Func _x2c_gensym_func_binding_567, const F
 double trunc(double);
 
 static Var _x2c_gensym_func_adapt_568(Func _x2c_gensym_func_binding_568, const FuncArg * _x2c_gensym_func_argv_568){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_568, _x2c_gensym_func_argv_568, 0, 3356265), 3356265));
+  double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_568, _x2c_gensym_func_argv_568, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_226 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_568",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_226; })));
   return double_var(trunc(a0));
   ;
 }
@@ -9232,7 +9232,7 @@ static Var _x2c_gensym_func_adapt_568(Func _x2c_gensym_func_binding_568, const F
 float truncf(float);
 
 static Var _x2c_gensym_func_adapt_569(Func _x2c_gensym_func_binding_569, const FuncArg * _x2c_gensym_func_argv_569){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_569, _x2c_gensym_func_argv_569, 0, 3355493), 3355493));
+  float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_569, _x2c_gensym_func_argv_569, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_227 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_569",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_227; })));
   return float_var(truncf(a0));
   ;
 }
@@ -9252,7 +9252,7 @@ static Var _x2c_gensym_func_adapt_571(Func _x2c_gensym_func_binding_571, const F
 static Var _x2c_gensym_func_adapt_572(Func _x2c_gensym_func_binding_572, const FuncArg * _x2c_gensym_func_argv_572){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_572, _x2c_gensym_func_argv_572, 0, 178663780));
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_572, _x2c_gensym_func_argv_572, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_572, _x2c_gensym_func_argv_572, 2, 44858254), 44858254));
+  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_572, _x2c_gensym_func_argv_572, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_228 = {.file = "../../lib/lisp-targets/lisp-targets.x",.function = "_x2c_gensym_func_adapt_572",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_228; })));
   return Buffer_var(f12_lisp_targets____buffer_write_len(a0, a1, a2));
   ;
 }

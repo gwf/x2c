@@ -159,9 +159,9 @@ int Test_main(int argc, char * * argv){
       {
         List _x2c_gensym_destructure_0 = row;
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 0));
-        long function = Var_long(Var_convert(List_getindex(_x2c_gensym_destructure_0, 1), 818062));
+        long function = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/test.x",.function = "Test_main",.line = 77,.runtime = 1}; & _x2c_gensym_error_site_1; })));
         String file = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
-        int line = Var_int(Var_convert(List_getindex(_x2c_gensym_destructure_0, 3), 3453797));
+        int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/test.x",.function = "Test_main",.line = 77,.runtime = 1}; & _x2c_gensym_error_site_2; })));
         if(! _selected(name, filters)) continue;
         matched ++;
         if(list){

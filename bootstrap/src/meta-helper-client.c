@@ -321,7 +321,7 @@ void Compiler_use_meta_helper(MetaHelper helper){
     Var _x2c_gensym_macro_cursor_output_0;
     Var _x2c_gensym_macro_cursor_output_1;
     while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-      key = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_0, 3453797));
+      key = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 144}; & _x2c_gensym_error_site_0; })));
       value = Var_as_string(_x2c_gensym_macro_cursor_output_1);
       String_try_own(value);
     }
@@ -336,7 +336,7 @@ void Compiler_use_meta_helper(MetaHelper helper){
     Var _x2c_gensym_macro_cursor_output_3;
     while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
       key = Var_as_string(_x2c_gensym_macro_cursor_output_2);
-      value = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_3, 3453797));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 145}; & _x2c_gensym_error_site_1; })));
       String_try_own(key);
     }
 
@@ -635,7 +635,7 @@ static int _syntax_origin(Var node){
         {
           Var _x2c_gensym_match_value_10 = origin;
           {
-            int origin = Var_int(Var_convert(_x2c_gensym_match_value_10, 3453797));
+            int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-helper-client.x",.function = "_syntax_origin",.line = 238}; & _x2c_gensym_error_site_2; })));
             return origin;
           }
 

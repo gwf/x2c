@@ -2665,7 +2665,7 @@ static int f4_walk____track_arms(Array arms, String text){
   Symbol kind = Compiler_preproc_conditional_kind(text);
   if(! kind) return 0;
   if(kind == 1016156) Array_push(arms, int_var(Compiler_preproc_open_state(text)));
-  else if(kind == 172060880 && Array_len(arms)) Array_setindex(arms, - 1, int_var(Compiler_preproc_branch_state(Var_int(Var_convert(Array_getindex(arms, - 1), 3453797)))));
+  else if(kind == 172060880 && Array_len(arms)) Array_setindex(arms, - 1, int_var(Compiler_preproc_branch_state(Var_int(Var_convert_at(Array_getindex(arms, - 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/collect/walk.x",.function = "f4_walk____track_arms",.line = 463}; & _x2c_gensym_error_site_0; }))))));
   else if(kind == 7109834 && Array_len(arms)) Array_take_last(arms);
   return 1;
 }
@@ -2677,7 +2677,7 @@ static int f4_walk____hidden(Array arms){
     int _x2c_gensym_macro_cursor_15 = 0;
     Var _x2c_gensym_macro_cursor_output_12;
     while(Array_try_next(_x2c_gensym_macro_object_15, &(_x2c_gensym_macro_cursor_15), &(_x2c_gensym_macro_cursor_output_12))){
-      state = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_12, 3453797));
+      state = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_12, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/collect/walk.x",.function = "f4_walk____hidden",.line = 469}; & _x2c_gensym_error_site_1; })));
       if(state == 2) return 1;
     }
 
@@ -4851,7 +4851,7 @@ int Compiler_linked_meta_provider_current(Compiler c, String path){
   String canonical = _canonical_path(path);
   _process_cache();
   Var current;
-  if(Map_try_get(linked_providers, String_var(canonical), &(current))) return Var_int(Var_convert(current, 3453797));
+  if(Map_try_get(linked_providers, String_var(canonical), &(current))) return Var_int(Var_convert_at(current, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/collect/providers.x",.function = "Compiler_linked_meta_provider_current",.line = 38}; & _x2c_gensym_error_site_2; })));
   Map seen = Map_new();
   int valid = f9_providers____linked_provider_current(c, canonical, seen);
   if(valid){
@@ -5249,7 +5249,7 @@ Type Compiler_loaded_call_type(Compiler c, Type type){
 
 static int f9_providers____linked_provider_current(Compiler c, String path, Map seen){
   Var current;
-  if(Map_try_get(linked_providers, String_var(path), &(current))) return Var_int(Var_convert(current, 3453797));
+  if(Map_try_get(linked_providers, String_var(path), &(current))) return Var_int(Var_convert_at(current, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/collect/providers.x",.function = "f9_providers____linked_provider_current",.line = 188}; & _x2c_gensym_error_site_3; })));
   if(Map_contains(seen, String_var(path))) return 1;
   Map_setindex(seen, String_var(path), int_var(1));
   List source = Compiler_linked_meta_provider_source(Compiler_portable_path(path));
@@ -6179,7 +6179,7 @@ static List f10_interfaces____renumber_bindings(List node, Map identities){
 String spelling = NULL;
 if(Ast_try_binding(node, NULL, &(spelling))){
   Var identity = Map_setdefault(identities, List_var(node), unsigned_var(Map_len(identities) + 1));
-  return Ast_binding(Var_int(Var_convert(identity, 3453797)), spelling);
+  return Ast_binding(Var_int(Var_convert_at(identity, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/collect/interfaces.x",.function = "f10_interfaces____renumber_bindings",.line = 220}; & _x2c_gensym_error_site_4; }))), spelling);
 }
 Var child;
 List _x2c_gensym_macro_original_0 = node;
