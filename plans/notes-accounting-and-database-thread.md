@@ -1,8 +1,9 @@
 # Allocation accounting and Notes database ownership
 
 > Status: active
-> Implementation and comparison authorized on 2026-10-28. The mutex Notes
-> baseline retains response construction outside the database lock.
+> Implementation and focused verification are complete on 2026-10-28.
+> Ready for shared integration and final publication validation. The mutex
+> Notes baseline retains response construction outside the database lock.
 
 ## Requested result
 
@@ -50,8 +51,8 @@ Scope statistics. New comparisons therefore use matched final-runtime builds.
 Accounting and database-variant workers have isolated worktrees, based at
 8abe19fad00cd86d6cab7a57ed38f08cf47a453a, with private handoffs. The orchestrator
 owns the benchmark harness, integration, authored-diff review, and PR submission.
-The shared integrator owns full publication validation; this session runs no
-full gates. Its currently archived state may leave a ready submission waiting.
+The active shared integrator owns final generated artifacts and full
+publication validation; this session runs no full gates.
 
 After combining reviewed changes, run meaningful focused runtime/command checks
 and the existing Notes API/concurrency/restart checks for both servers. Compare
@@ -70,3 +71,14 @@ adding a runtime backend switch to the normal app. Response lifetime and error
 propagation are the main implementation questions. Do not promote either
 architecture based only on a successful prototype or a single timing sample.
 Review and fix the complete authored diff before submission.
+
+## Completed comparison
+
+The [dated report](../examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
+retains all fifteen measurements and build provenance. At 64 clients, medians
+were 49,765 requests/s for mutex x2c, 38,650 for database-thread x2c, and 65,858
+for Go. The database-thread variant had lower p99 latency (2.59 ms versus
+4.69 ms) and higher CPU use. Both x2c variants passed the external Notes suite;
+SQL error recovery, outstanding-write shutdown, and failed-reply allocation
+were also checked. The ordinary example remains the mutex version. The
+shared integrator owns the remaining final generated refresh and gate.

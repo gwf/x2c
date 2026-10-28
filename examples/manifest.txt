@@ -76,3 +76,4 @@ programs/tiny-lisp-min|external-input|build||-|Code-golf version of Tiny Lisp; s
 programs/tiny-lisp.max|external-input|build||-|Formatted and annotated Tiny Lisp; see programs/tiny-lisp.md.
 apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/apps/notes check.
 apps/notes/bench/load|probe|none||-|Optional loopback benchmark client.
+apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.
