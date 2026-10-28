@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notes</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif; color: #202020; background: #faf9f6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button, input, textarea { border: 1px solid #b8b7b2; border-radius: 3px; }
+    button { min-height: 40px; padding: 8px 14px; background: transparent;
+      color: inherit; cursor: pointer; }
+    button:hover { background: #eeede8; }
+    button:disabled { opacity: .5; cursor: wait; }
+    :focus-visible { outline: 2px solid #202020; outline-offset: 3px; }
+    input, textarea { width: 100%; padding: 10px; background: #fff;
+      color: #202020; }
+    textarea { min-height: 280px; resize: vertical; line-height: 1.6; }
+    label { display: block; margin-bottom: 7px; font-size: .85rem;
+      font-weight: 600; }
+    header { max-width: 1200px; margin: auto; padding: 42px 40px 24px;
+      display: flex; align-items: baseline; gap: 24px; }
+    h1 { margin: 0; font-size: 2.6rem; letter-spacing: -.05em; font-weight: 650; }
+    #stats { color: #5e5d58; font-size: .9rem; }
+    main { max-width: 1200px; margin: auto; padding: 0 40px 50px; }
+    .workspace { display: grid; grid-template-columns: minmax(270px, 2fr)
+      minmax(0, 3fr); border-top: 1px solid #292929; }
+    .library { padding: 24px 28px 24px 0; border-right: 1px solid #d5d4ce; }
+    .editor { padding: 24px 0 24px 36px; }
+    h2 { font-size: 1.05rem; margin: 0; font-weight: 600; }
+    .section-title { display: flex; align-items: center; justify-content:
+      space-between; gap: 12px; margin-bottom: 24px; }
+    .field { margin-bottom: 18px; }
+    .filter-row { display: flex; gap: 8px; }
+    .filter-row input { min-width: 0; }
+    .hint { font-size: .78rem; line-height: 1.5; color: #5e5d58;
+      margin: 7px 0 0; }
+    .filters { padding-bottom: 20px; border-bottom: 1px solid #d5d4ce; }
+    #note-list { list-style: none; padding: 0; margin: 0; }
+    #note-list li { border-bottom: 1px solid #d5d4ce; }
+    .note { display: block; width: 100%; text-align: left; border: 0;
+      border-radius: 0; padding: 18px 12px; margin: 0; }
+    .note[aria-pressed="true"] { background: #eeede8; }
+    .note-title { display: block; font-weight: 600; overflow-wrap: anywhere; }
+    .note-preview { display: block; margin-top: 7px; font-size: .85rem;
+      line-height: 1.5; color: #5e5d58; overflow-wrap: anywhere; }
+    .note-tags { display: block; margin-top: 8px; font-size: .76rem;
+      color: #5e5d58; overflow-wrap: anywhere; }
+    .actions { display: flex; align-items: center; gap: 10px; }
+    .primary { background: #202020; color: #fff; border-color: #202020; }
+    .primary:hover { background: #414141; }
+    #delete { margin-left: auto; }
+    #updated { font-size: .8rem; color: #5e5d58; margin: 20px 0 0; }
+    #status { min-height: 1.5em; font-size: .9rem; line-height: 1.5;
+      padding: 0; margin: 0 0 18px; overflow-wrap: anywhere; }
+    #status[data-error="true"] { border-left: 3px solid #202020;
+      padding-left: 12px; font-weight: 600; }
+    #empty { color: #5e5d58; line-height: 1.5; padding: 18px 12px; }
+    #tag-summary { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    #tag-summary button { font-size: .76rem; min-height: 32px; padding: 4px 8px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 720px) {
+      header { padding: 28px 20px 20px; flex-wrap: wrap; gap: 8px 20px; }
+      main { padding: 0 20px 30px; }
+      .workspace { grid-template-columns: 1fr; }
+      .library { padding-right: 0; border-right: 0; }
+      .editor { border-top: 1px solid #292929; padding: 24px 0; }
+      #note-list { max-height: 320px; overflow-y: auto; }
+      textarea { min-height: 220px; }
+    }
+  </style>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Notes</h1>
+    <span id="stats">Loading notes...</span>
+  </header>
+  <main>
+    <p id="status" role="status" aria-live="polite"></p>
+    <div class="workspace">
+      <section class="library" aria-labelledby="library-title">
+        <div class="section-title">
+          <h2 id="library-title">Your notes</h2>
+          <button id="new" type="button">New note</button>
+        </div>
+        <form id="filters" class="filters" role="search">
+          <div class="field">
+            <label for="search">Search title and body</label>
+            <input id="search" type="search" placeholder="Search notes"
+              aria-describedby="search-hint">
+            <p id="search-hint" class="hint">Regular expressions are supported.</p>
+          </div>
+          <label for="filter-tag">Filter by tag</label>
+          <div class="filter-row">
+            <input id="filter-tag" type="text" placeholder="All tags">
+            <button type="submit">Search</button>
+            <button id="clear" type="button">Clear</button>
+          </div>
+          <div id="tag-summary" aria-label="Tags"></div>
+        </form>
+        <p id="empty" hidden>No notes yet. Create your first note.</p>
+        <ul id="note-list" aria-label="Notes"></ul>
+      </section>
+      <section class="editor" aria-labelledby="editor-title">
+        <div class="section-title"><h2 id="editor-title">New note</h2></div>
+        <form id="editor">
+          <div class="field">
+            <label for="title">Title</label>
+            <input id="title" name="title" required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="body">Body</label>
+            <textarea id="body" name="body"></textarea>
+          </div>
+          <div class="field">
+            <label for="tags">Tags</label>
+            <input id="tags" name="tags" placeholder="work, ideas"
+              aria-describedby="tags-hint">
+            <p class="hint" id="tags-hint">Separate tags with commas.</p>
+          </div>
+          <div class="actions">
+            <button id="save" class="primary" type="submit">Create note</button>
+            <button id="delete" type="button" hidden>Delete note</button>
+          </div>
+          <p id="updated"></p>
+        </form>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

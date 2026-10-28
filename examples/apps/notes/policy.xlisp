@@ -1,0 +1,3 @@
+// Policy changes take effect on the next mutation.
+(def allow-note (lambda (tags body)
+  (and (not (member "forbidden" tags)) (<= (body-size body) 65536))))
