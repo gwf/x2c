@@ -6,7 +6,8 @@ class NoteStore { Func read, write, remove; Scope scope; } *;
 
 NoteStore NoteStore.new(Func read, Func write, Func remove) {
   NoteStore store = xmalloc(sizeof(struct NoteStore));
-  *store = (struct NoteStore) {read, write, remove, Scope.new_named("note callbacks")};
+  *store = (struct NoteStore) {read, write, remove,
+                             Scope.new_named("note callbacks")};
   read.move(&store.scope);
   write.move(&store.scope);
   remove.move(&store.scope);
@@ -56,6 +57,7 @@ MapStore MapStore.open(Path path) {
   store.pool = Pool.current();
   auto (&store.scope) store.notes = {};
   if (path.exists()) {
+    Context input = auto Context.open_isolated_named("load notes");
     Map saved = Json.read_file(path);
     foreach (Var (id, value) in saved) {
       Note note = Note.from_map(value);
@@ -121,13 +123,17 @@ static void _persist(MapStore store) {
 static void _retain_note(MapStore store, Note note) {
   String encoded = ((Var) note.to_map()).json();
   Pool pool = store.pool.retain_named("stored note");
+  int attached = 0;
+  defer if (!attached) pool.release();
   Pool previous = x2c_pool_exchange(pool);
   defer x2c_pool_exchange(previous);
   Map values;
   auto (&store.scope) values = Json.parse(encoded);
   values["tags"].array().move_to(&values.scope);
-  Pool *owner = Scope.malloc_finalized_in(&values.scope, sizeof(Pool), _release_pool);
+  Pool *owner = Scope.malloc_finalized_in(
+    &values.scope, sizeof(Pool), _release_pool);
   *owner = pool;
+  attached = 1;
   store.notes.del(note.id);
   store.notes[values["id"]] = values;
 }

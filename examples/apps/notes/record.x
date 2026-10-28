@@ -46,31 +46,31 @@ meta static List note_read(void) {
     String key = row[0].str();
     List name = x2c_ident(key);
     match (row) {
-    case %(? String ?): {
-      String reason = %"$key must be text";
-      statements.push($!{
-        if (values[$(key)] is not void && values[$(key)] is not <string>)
-          _note_invalid($(reason));
-        note.$(name) = values[$(key)] is void ? NULL : values[$(key)];
+      case %(? String ?): {
+        String reason = %"$key must be text";
+        statements.push($!{
+          if (values[$(key)] is not void && values[$(key)] is not <string>)
+            _note_invalid($(reason));
+          note.$(name) = values[$(key)] is void ? NULL : values[$(key)];
+        });
+        if (row[2] == <required>) statements.push($!{
+          if (!note.$(name)) raise %(note-error (reason "title is required"));
+        });
+      }
+      case %(? Array ?): statements.push($!{
+        if (values[$(key)] is not void && values[$(key)] is not <array>)
+          raise %(note-error (reason "tags must be an array"));
+        note.$(name) = values[$(key)] is void ? [] : values[$(key)];
+        foreach (Var tag in note.$(name))
+          if (tag is not <string> || !tag.string())
+            raise %(note-error (reason "each tag must be nonempty text"));
       });
-      if (row[2] == <required>) statements.push($!{
-        if (!note.$(name)) raise %(note-error (reason "title is required"));
+      case %(? long ?): statements.push($!{
+        if (values[$(key)] is not void && !values[$(key)].is_integer())
+          raise %(note-error (reason "timestamps must be integers"));
+        note.$(name) = values[$(key)] is void ? 0 : values[$(key)];
       });
     }
-    case %(? Array ?): statements.push($!{
-      if (values[$(key)] is not void && values[$(key)] is not <array>)
-        raise %(note-error (reason "tags must be an array"));
-      note.$(name) = values[$(key)] is void ? [] : values[$(key)];
-      foreach (Var tag in note.$(name))
-        if (tag is not <string> || !tag.string())
-          raise %(note-error (reason "each tag must be nonempty text"));
-    });
-    case %(? long ?): statements.push($!{
-      if (values[$(key)] is not void && !values[$(key)].is_integer())
-        raise %(note-error (reason "timestamps must be integers"));
-      note.$(name) = values[$(key)] is void ? 0 : values[$(key)];
-    });
-  }
   }
   List body = statements.list_free();
   return $!{ @body };
