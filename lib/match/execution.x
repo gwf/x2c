@@ -24,7 +24,7 @@ int MatchPlan.try_capture(
 int MatchPlan.execute_capture(
   MatchPlan m, Var input, MatchCaptureBuffer &?captures,
   MachineStats &?stats) {
-  if (!_prepared(m, "MatchPlan.execute_capture") ||
+  if (!_prepared(m, "MatchPlan.execute_capture") || !captures ||
       !_buffer_valid(m.layout, captures))
     return -1;
   return _capture(m, input, captures, stats);
@@ -101,15 +101,16 @@ module int _prepared(MatchPlan plan, const char *owner) {
   return plan && plan.status == <prepared>;
 }
 
+/* Both callers pass a prepared layout and checked capture-buffer address. */
 module int _buffer_valid(
-  MatchCaptureLayout layout, MatchCaptureBuffer &?captures) {
-  if (!captures || !layout || captures.capacity < layout.binder_count)
-    return 0;
+  MatchCaptureLayout layout, MatchCaptureBuffer &captures) {
+  if (captures.capacity < layout.binder_count) return 0;
   return !layout.binder_count || captures.values != NULL;
 }
 
+/* Callers supply a checked capture-buffer address or their own local buffer. */
 module int _capture(
-  MatchPlan m, Var input, MatchCaptureBuffer &?captures,
+  MatchPlan m, Var input, MatchCaptureBuffer &captures,
   MachineStats &?stats) {
   if (!m.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
@@ -133,10 +134,11 @@ static int _key_admits(
   return _key_equal(plan, element, key.inner);
 }
 
-/* The nonempty List `view` shows for `value`, or NULL. */
+/* The nonempty List `view` shows for `value`, or NULL. A List destination
+   maps other value tags to nil. */
 static List _seen_list(Var value, Var (*view)(Var)) {
   if (view) value = view(value);
-  return value is <list> ? value.list() : NULL;
+  return value;
 }
 
 static int _key_equal(MatchPlan plan, Var value, Var key) =>
@@ -145,8 +147,8 @@ static int _key_equal(MatchPlan plan, Var value, Var key) =>
 /* Runs one prepared execution and commits positional values only after the
    machine and every lazy-span materialization have succeeded. */
 module int _run_capture(
-  MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer &?captures) {
-  if (!captures || captures.capacity < view.binder_count ||
+  MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer &captures) {
+  if (captures.capacity < view.binder_count ||
       (view.binder_count && !captures.values))
     return -1;
   m.begin(view, input);

@@ -1110,7 +1110,8 @@ static List _continue_statement(Compiler c){
 
 static List _goto_statement(Compiler c){
   Compiler_expect(c, 490782);
-  List label = Compiler_parse_optional_identifier(c);
+  List label = Compiler_try_parse_macro_slot(c, 920394);
+  if(! List_truth(label)) label = Compiler_parse_optional_identifier(c);
   Compiler_expect(c, 119);
   return cons(_114, cons(List_var(label), NULL));
 }

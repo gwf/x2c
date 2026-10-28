@@ -617,7 +617,8 @@ static List _continue_statement(Compiler c) {
 
 static List _goto_statement(Compiler c) {
   c.expect(<goto>);
-  List label = c.parse_optional_identifier();
+  List label = c.try_parse_macro_slot(<name>);
+  if (!label) label = c.parse_optional_identifier();
   c.expect(<;>);
   return %(goto $label);
 }

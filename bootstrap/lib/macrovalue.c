@@ -584,7 +584,7 @@ static List f8_patterns____binder_rows(Macro t, List names, int case_pattern){
         Var selected = f8_patterns____hidden(given);
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
         Var projected = sequence ? List_var(cons(selected, NULL)) : selected;
-        if(! sequence && Var_is_row(selected, 9, 7, 4) && x2c_var_equal(List_car(Var_list(selected)), Symbol_var(377892))) projected = List_var(cons(_85, cons(selected, NULL)));
+        if(! sequence && Var_is_row(selected, 9, 7, 4) && x2c_var_equal(List_car(Var_list_payload(selected)), Symbol_var(377892))) projected = List_var(cons(_85, cons(selected, NULL)));
         if(case_pattern && x2c_var_equal(kind, Symbol_var(920394))) projected = List_var(({
           Var _x2c_gensym_literal_part_24 = given;  Atom _x2c_gensym_literal_part_25 = _name_identity(hole);  cons(_85, cons(_x2c_gensym_literal_part_24, cons(_x2c_gensym_literal_part_25, NULL)));
         }
@@ -656,7 +656,7 @@ static Var f8_patterns____inline(List environment, Var tree){
   Array parts = Array_new();
   {
     Var part;
-    List _x2c_gensym_macro_object_3 = Var_list(tree);
+    List _x2c_gensym_macro_object_3 = Var_list_payload(tree);
     List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
     Var _x2c_gensym_macro_cursor_output_3;
     while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
@@ -822,8 +822,8 @@ static Var f8_patterns____pattern_view(Var value){
 static Var f8_patterns____expr_view(Var type, Var body){
   int shell = x2c_var_identical(type, List_var(_101));
   if(shell && Var_is_binder(body)) return f8_patterns____shown(body);
-  if(shell && Var_is_row(body, 9, 7, 4) && Var_is_match_op(List_car(Var_list(body)))) return body;
-  if(shell && Var_is_row(body, 9, 7, 4) && x2c_var_equal(List_car(Var_list(body)), Symbol_var(377892))) return f8_patterns____pattern_view(body);
+  if(shell && Var_is_row(body, 9, 7, 4) && Var_is_match_op(List_car(Var_list_payload(body)))) return body;
+  if(shell && Var_is_row(body, 9, 7, 4) && x2c_var_equal(List_car(Var_list_payload(body)), Symbol_var(377892))) return f8_patterns____pattern_view(body);
   return List_var(cons(_2, cons(_86, cons(f8_patterns____pattern_view(body), NULL))));
 }
 
@@ -871,7 +871,7 @@ static Var f8_patterns____slot_binder(Var form){
   if(! Var_is_row(form, 9, 7, 4)) return Var_null();
   {
     Var child;
-    List _x2c_gensym_macro_object_8 = Var_list(form);
+    List _x2c_gensym_macro_object_8 = Var_list_payload(form);
     List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
     Var _x2c_gensym_macro_cursor_output_8;
     while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){

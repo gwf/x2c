@@ -238,8 +238,9 @@ Code Code.parameter(Code function, String wanted) {
 /** Answers `Code.name`, declared in `lib/meta.x`. */
 String Code.name(Code function) {
   List identity = function;
+  /* The List destination maps other value tags to nil. */
   if (function ~= %(function ? (bind ?binding ?) ?))
-    identity = binding is <list> ? binding.list() : NULL;
+    identity = binding;
   return Code.binding_spelling(identity);
 }
 

@@ -80,7 +80,8 @@ static List _freeze_rows(Compiler c, List syntax) {
   return rows.list_free();
 }
 
-/* Literal conversion calls refer to the consumer's global bindings. */
+/* Literal conversion calls refer to the consumer's global bindings.
+   Both cache-key walkers check the List tag before child traversal. */
 static Var _freeze_cache_key(Compiler c, Var key) {
   String name = NULL;
   if (Ast.try_binding(key, NULL, name))
@@ -88,7 +89,8 @@ static Var _freeze_cache_key(Compiler c, Var key) {
   if (key is not <list>) return _freeze_leaf(key);
   if (key ~= %(cache ?)) return c.freeze_declaration_syntax(key);
   Array out = [];
-  foreach (Var child in key.list()) out.push(_freeze_cache_key(c, child));
+  foreach (Var child in key.list_payload())
+    out.push(_freeze_cache_key(c, child));
   return out.list_free();
 }
 
@@ -103,7 +105,7 @@ static Var _thaw_cache_key(Compiler c, Var key) {
       return c.thaw_declaration_syntax(key);
   }
   Array out = [];
-  foreach (Var child in key.list()) out.push(_thaw_cache_key(c, child));
+  foreach (Var child in key.list_payload()) out.push(_thaw_cache_key(c, child));
   return out.list_free();
 }
 

@@ -236,7 +236,8 @@ static Var _call_helper(
 static int _syntax_origin(Var node) {
   if (node is not <list>) return 0;
   match (node) case %(at ?(int origin) ?): return origin;
-  foreach (Var child in node.list()) {
+  /* Scalar leaves have already returned. */
+  foreach (Var child in node.list_payload()) {
     int origin = _syntax_origin(child);
     if (origin) return origin;
   }

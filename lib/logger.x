@@ -777,9 +777,10 @@ static Var _retain(LogMemorySink l, Var value) {
 }
 
 /* Stage retained heads and rebuild the spine backwards, so a flat List uses
-   constant native stack; only nesting recurses. A retained tail is shared. */
+   constant native stack; only nesting recurses. A retained tail is shared.
+   The dispatcher returns boxed nil before calling this helper. */
 static List _retain_list(LogMemorySink l, List list) {
-  if (!list || _pool_chain_owns(l.pool, list)) return list;
+  if (_pool_chain_owns(l.pool, list)) return list;
   Block heads = auto Block.new(sizeof(Var));
   List tail = list;
   while (tail && !_pool_chain_owns(l.pool, tail)) {

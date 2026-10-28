@@ -425,14 +425,15 @@ module List _quoted_hole(
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
   int sequence = prefix.type == <@> || prefix.type == <"@(">;
   List hole = _record_hole(c, spelling, kind, sequence);
-  Var quoted = c.macro_holes[%(quoted)];
-  c.macro_holes[%(quoted)] =
-    cons(hole, quoted is <list> ? quoted.list() : NULL);
+  /* Missing or non-List sequence slots read as nil. */
+  List quoted = c.macro_holes[%(quoted)];
+  c.macro_holes[%(quoted)] = cons(hole, quoted);
   return hole;
 }
 
-/* A quotation's holes in the order its body first names them. */
+/* A quotation's holes in the order its body first names them.
+   Missing or non-List sequence slots read as nil. */
 module List _quoted_holes(Compiler c) {
-  Var quoted = c.macro_holes[%(quoted)];
-  return quoted is <list> ? quoted.list().reverse() : NULL;
+  List quoted = c.macro_holes[%(quoted)];
+  return quoted.reverse();
 }

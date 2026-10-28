@@ -119,7 +119,8 @@ static Var _function_rule_key(Var type) => _ground(type) ? type : <any>;
 static int _ground(Var pattern) {
   if (pattern is not <list>)
     return !pattern.is_binder() && !pattern.is_match_op();
-  foreach (Var part in pattern.list()) if (!_ground(part)) return 0;
+  /* The preceding tag guard establishes the List payload. */
+  foreach (Var part in pattern.list_payload()) if (!_ground(part)) return 0;
   return 1;
 }
 

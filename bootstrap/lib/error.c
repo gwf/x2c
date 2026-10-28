@@ -683,7 +683,7 @@ static Var f7_records____clone_in(Scope * owner, Var v){
 }
 
 static Var f7_records____copy_text(ErrorRegion * region, Var value){
-  String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
+  String source = Var_is(value, 826970) ? Var_str(value) : Var_string_payload(value);
   if(! region) return f7_records____snapshot_text(value, source);
   String owned = String_new_in((* region).pool, source, String_len(source));
   return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);

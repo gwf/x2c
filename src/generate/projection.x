@@ -22,7 +22,8 @@ static typedef struct Partition {
 
 /* The header items the markers are decided against. `declared` maps each
    typedef name to the first header position declaring it, and `spelled`
-   holds the type names the items from position `walked` on spell. */
+   holds the type names the items from position `walked` on spell.
+   Partition and pending replacements supply only List header items. */
 static typedef struct HeaderNeeds {
   Array header;
   Map declared, spelled;
@@ -176,9 +177,8 @@ static int _declared_before(HeaderNeeds &n, int i, String name) {
     n.declared = {};
     int count = n.header.len();
     for (int j = 0; j < count; j++)
-      if (n.header[j] is <list>)
-        foreach (Var declared in _declared_type_names(n.header[j]))
-          if (!(declared in n.declared)) n.declared[declared] = j;
+      foreach (Var declared in _declared_type_names(n.header[j]))
+        if (!(declared in n.declared)) n.declared[declared] = j;
   }
   Var first;
   return n.declared.try_get(name, first) && first.int() < i;
@@ -199,8 +199,8 @@ static List _declared_type_names(List node) {
 static int _spelled_after(HeaderNeeds &n, int i, String name) {
   if ((void *) n.spelled == 0) n.spelled = {};
   while (n.walked > i + 1) {
-    Var item = n.header[--n.walked];
-    if (item is <list>) _spelled_types(item, n.spelled);
+    List item = n.header[--n.walked];
+    _spelled_types(item, n.spelled);
   }
   return name in n.spelled;
 }
@@ -292,7 +292,8 @@ static void _add_declaration(
     _keep(p);
     return;
   }
-  if (type.is_static() && _body_tag(type)) {
+  /* A static declaration without a named body returned above. */
+  if (type.is_static()) {
     List core = type.base_type();
     List family = $(core.car(), core.cadr());
     if (p.c.publishes_type_family(family))

@@ -401,7 +401,8 @@ module List _install_declarator(
   int exact_name = 0;
   name = _declared_name(c, name, exact_name);
   List declaration = %(declare $base (bindings (bind () $mods)));
-  List prior = name is <list> ? name : NULL;
+  /* The List destination maps other value tags to nil. */
+  List prior = name;
   List method = method_identity ? method_identity
               : prior ? c.fact(%(method $prior)) : NULL;
   List self_signature = prior ? c.fact(%(self $prior)) : NULL;

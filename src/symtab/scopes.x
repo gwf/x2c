@@ -168,10 +168,12 @@ List Sym.lookup_macro(Sym s, Atom name) {
   return NULL;
 }
 
-/** Returns the active macro definition's borrowed local map, or `NULL`. */
+/** Returns the active macro definition's borrowed local map, or `NULL`.
+    The Map destination maps other value tags to NULL.
+*/
 Map Compiler.macro_definition_locals(Compiler c) {
   Var stored = c.macro_holes[%(locals)];
-  return stored is <map> ? stored : NULL;
+  return stored;
 }
 
 /** Reports whether `binding` is a local of the active macro definition or

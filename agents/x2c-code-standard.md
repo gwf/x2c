@@ -65,6 +65,14 @@ deliberate public behavior or to prevent wrong output, corrupted state, or
 an unsafe native crossing. An earlier or more specific error alone does not
 justify a check, a diagnostic, or a negative fixture.
 
+For a private helper, follow callers, recursive arguments, callback
+registrations, and stored-value writers until the owning contract closes
+the input set. A typed root does not type every recursive child; a fresh
+container's initial contents do not cover later writes or exposed aliases.
+Use the precise type or established fact downstream. Preserve validation at
+its owner and preserve preparation, failure, and callback order. A copied
+nonnull address does not make caller-owned buffer metadata immutable.
+
 **PR-5 Use the language.** Compose current language features and existing
 operations. Let target types request conversions, let system macros carry
 lifetimes, let `match` carry structure, let receivers carry ownership. Do
@@ -240,6 +248,12 @@ Keep an explicit converter or cast only where it selects different
 semantics or crosses a boundary the compiler cannot prove: dynamic tag
 inspection, variadic and macro boundaries, raw C ABI code, and tests of the
 converter itself. The compiler reports the rest as `conversion` warnings.
+
+List, Map, and Type destinations read their exact `Var` payload or NULL for
+another tag, so they can replace a tag-test ternary with that same fallback.
+A checked extractor instead raises on another tag; retain it when that
+failure is deliberate. String destinations can format other tags and are
+not equivalent to exact String payload extraction.
 
 **EX-5** Chain public receiver methods when each result feeds the next:
 `path.rstrip("/").split("/").last()`. Write `value.method()` when the
@@ -491,6 +505,10 @@ than its name and signature: a proof boundary, a producer guarantee, cache
 identity, rollback, lifetime, ordering, or why an alternative is invalid.
 An obvious helper gets no comment.
 
+When removing connected checks, state a relied-on precondition once beside
+its owner if the signature does not express it. Keep the full caller and
+producer proof in review evidence, not in repeated source comments.
+
 **CM-4** Comments describe the present. Never leave `TODO`, `FIXME`, `BUG`,
 history ("moved verbatim", "added after"), stale `file:line` references,
 first-person narration, or unexplained "optimized", "important", or
@@ -677,6 +695,10 @@ parameter. Pass the typed value.
 or the result; keep an explicit `is T` check only where the incoming `Var`
 is dynamic. Use typed readers (`Var.int`) over raw payload readers
 (`Var.integer`) unless a silent low-level decode is intended.
+
+After an exact object-tag guard, use a typed local or its payload reader
+when a checked extractor only repeats that tag rejection. This does not
+justify replacing numeric conversion or dynamic formatting operations.
 
 **VT-4** Choose collections by mutation and identity: `List` for immutable
 sequences with structural identity, `Array` for mutable indexed values and

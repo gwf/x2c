@@ -12,7 +12,8 @@ int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
 int Compiler.match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
-  foreach (Var part in value.list())
+  /* The preceding tag guard establishes the List payload. */
+  foreach (Var part in value.list_payload())
     if (!Compiler.match_value_is_static(part)) return 0;
   return 1;
 }

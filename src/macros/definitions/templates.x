@@ -50,11 +50,12 @@ List Compiler.macro_tag_name(
 
 static List _definition_local(Compiler c, String spelling, int tag) {
   Map locals = c.macro_definition_locals();
-  Var order = locals[<order>];
-  int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
+  /* Missing or non-List sequence slots read as nil. */
+  List order = locals[<order>];
+  int identity = INT_MAX - order.len();
   List introduced = Ast.binding(identity, spelling);
   c.set_fact(%(known $identity), spelling);
-  locals[<order>] = cons(introduced, order is <list> ? order : NULL);
+  locals[<order>] = cons(introduced, order);
   locals[introduced] = spelling;
   if (tag) locals[%(tag-local $introduced)] = 1;
   return introduced;

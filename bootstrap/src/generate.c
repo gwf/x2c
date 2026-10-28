@@ -609,7 +609,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _157 = List_var(NULL);
   _158 = Symbol_var(39266);
   _159 = Symbol_var(106239471489226);
-  _160 = int_var(1007);
+  _160 = int_var(1008);
   _161 = String_new("");
   _162 = String_var(_161);
   _163 = String_new("x2c.hole");
@@ -1006,7 +1006,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _551 = cons(_548, _550);
   _552 = List_var(_551);
   _553 = Symbol_var(1133019155420);
-  _554 = int_var(36441);
+  _554 = int_var(36501);
   _555 = cons(_554, NULL);
   _556 = cons(_553, _555);
   _557 = List_var(_556);
@@ -1090,7 +1090,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _635 = cons(_634, NULL);
   _636 = cons(_540, _635);
   _637 = List_var(_636);
-  _638 = int_var(36355);
+  _638 = int_var(36415);
   _639 = cons(_638, NULL);
   _640 = cons(_553, _639);
   _641 = List_var(_640);
@@ -1938,7 +1938,7 @@ static int f10_projection____declared_before(f10_projection___HeaderNeeds * n, i
   if((void *)(* n).declared == 0){
     (* n).declared = Map_new();
     int count = Array_len((* n).header);
-    for(int j = 0;  j < count;  j ++) if(Var_is_row(Array_getindex((* n).header, j), 9, 7, 4)){
+    for(int j = 0;  j < count;  j ++){
       Var declared;
       List _x2c_gensym_macro_object_13 = f10_projection____declared_type_names(Var_list_payload(Array_getindex((* n).header, j)));
       List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
@@ -1996,8 +1996,8 @@ static List f10_projection____declared_type_names(List node){
 static int f10_projection____spelled_after(f10_projection___HeaderNeeds * n, int i, String name){
   if((void *)(* n).spelled == 0)(* n).spelled = Map_new();
   while((* n).walked > i + 1){
-    Var item = Array_getindex((* n).header, --(* n).walked);
-    if(Var_is_row(item, 9, 7, 4)) _spelled_types(Var_list_payload(item), (* n).spelled);
+    List item = Var_list_payload(Array_getindex((* n).header, --(* n).walked));
+    _spelled_types(item, (* n).spelled);
   }
   return Map_contains((* n).spelled, String_var(name));
 }
@@ -2124,7 +2124,7 @@ static void f10_projection____add_declaration(f10_projection___Partition * p, Li
     f10_projection____keep(&((* p)));
     return;
   }
-  if(Type_is_static(type) && String_truth(f10_projection____body_tag(type))){
+  if(Type_is_static(type)){
     List core = Type_list(Type_base_type(type));
     List family =({
       Var _x2c_gensym_literal_part_30 = List_car(core);  Var _x2c_gensym_literal_part_31 = List_cadr(core);  cons(_x2c_gensym_literal_part_30, cons(_x2c_gensym_literal_part_31, NULL));

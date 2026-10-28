@@ -518,14 +518,10 @@ static Var _decode_number(String tag, String text){
   return Var_convert(Var_box_long_long(value), target);
 }
 
-List Var_list(Var);
-
-Array Var_array(Var);
-
 static List _items_problem(Var value, Map marks){
   if(Var_is_row(value, 9, 7, 4)){
     Var item;
-    List _x2c_gensym_macro_object_5 = Var_list(value);
+    List _x2c_gensym_macro_object_5 = Var_list_payload(value);
     List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
     Var _x2c_gensym_macro_cursor_output_6;
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
@@ -540,7 +536,7 @@ static List _items_problem(Var value, Map marks){
   }
   else if(Var_is(value, 3313778)){
     Var item;
-    Array _x2c_gensym_macro_object_6 = Var_array(value);
+    Array _x2c_gensym_macro_object_6 = Var_array_payload(value);
     int _x2c_gensym_macro_cursor_6 = 0;
     Var _x2c_gensym_macro_cursor_output_7;
     while(Array_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_7))){

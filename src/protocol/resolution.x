@@ -417,7 +417,8 @@ static Type _participant_definition(Compiler c, Type participant) {
   if (!participant.is_bare_typedef_name()) return NULL;
   String name = participant.car();
   Var definition = c.sym.global_symbols()[%(typedef $name)];
-  return definition is <list> ? definition : NULL;
+  /* The Type destination maps other value tags to nil. */
+  return definition;
 }
 
 module void _install_native_bindings(Compiler c, Type participant, List rows) {
@@ -448,8 +449,9 @@ static List _resolve_ordinary(
   failure = NULL;
   Var stored;
   List key = $(base, participant);
+  /* The List destination preserves non-List negative entries as nil. */
   if (c.conforms.try_get(key, stored))
-    return stored is <list> ? stored : NULL;
+    return stored;
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) goto does_not_conform;
   String forward = _forward_binding(c, base, participant);

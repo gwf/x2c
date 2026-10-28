@@ -2538,7 +2538,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1932 = cons(_1931, NULL);
   _1933 = cons(_250, _1932);
   _1934 = List_var(_1933);
-  _1935 = int_var(83686);
+  _1935 = int_var(83758);
   _1936 = cons(_1935, NULL);
   _1937 = cons(_255, _1936);
   _1938 = List_var(_1937);
@@ -2737,7 +2737,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2128 = cons(_2127, NULL);
   _2129 = cons(_242, _2128);
   _2130 = List_var(_2129);
-  _2131 = int_var(84048);
+  _2131 = int_var(84120);
   _2132 = cons(_2131, NULL);
   _2133 = cons(_255, _2132);
   _2134 = List_var(_2133);
@@ -2854,7 +2854,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2245 = cons(_2244, NULL);
   _2246 = cons(_242, _2245);
   _2247 = List_var(_2246);
-  _2248 = int_var(84810);
+  _2248 = int_var(84882);
   _2249 = cons(_2248, NULL);
   _2250 = cons(_255, _2249);
   _2251 = List_var(_2250);
@@ -2952,7 +2952,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2343 = cons(_2342, NULL);
   _2344 = cons(_242, _2343);
   _2345 = List_var(_2344);
-  _2346 = int_var(84894);
+  _2346 = int_var(84966);
   _2347 = cons(_2346, NULL);
   _2348 = cons(_255, _2347);
   _2349 = List_var(_2348);
@@ -3077,7 +3077,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2468 = cons(_2467, NULL);
   _2469 = cons(_242, _2468);
   _2470 = List_var(_2469);
-  _2471 = int_var(84631);
+  _2471 = int_var(84703);
   _2472 = cons(_2471, NULL);
   _2473 = cons(_255, _2472);
   _2474 = List_var(_2473);
@@ -3178,7 +3178,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2566 = cons(_2565, NULL);
   _2567 = cons(_242, _2566);
   _2568 = List_var(_2567);
-  _2569 = int_var(84460);
+  _2569 = int_var(84532);
   _2570 = cons(_2569, NULL);
   _2571 = cons(_255, _2570);
   _2572 = List_var(_2571);
@@ -3406,7 +3406,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2794 = cons(_2793, NULL);
   _2795 = cons(_242, _2794);
   _2796 = List_var(_2795);
-  _2797 = int_var(87454);
+  _2797 = int_var(87526);
   _2798 = cons(_2797, NULL);
   _2799 = cons(_255, _2798);
   _2800 = List_var(_2799);
@@ -3486,7 +3486,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2874 = cons(_2873, NULL);
   _2875 = cons(_242, _2874);
   _2876 = List_var(_2875);
-  _2877 = int_var(85101);
+  _2877 = int_var(85173);
   _2878 = cons(_2877, NULL);
   _2879 = cons(_255, _2878);
   _2880 = List_var(_2879);
@@ -5829,7 +5829,7 @@ static List f11_identifiers____landed_name(Compiler c, String spelling, Type * t
 
 int Sym_binding_is_local_before(Sym, List, int);
 static void f11_identifiers____capture_identifier(Compiler c, List binding){
-  if(c -> local_macro_captures == NULL || ! List_truth(binding) || ! Sym_binding_is_local_before(c -> sym, binding, c -> local_macro_capture_scopes) || Map_contains(c -> local_macro_captures, List_var(binding))) return;  Var order = Map_getindex(c -> local_macro_captures, Symbol_var(32645476));  Map_setindex(c -> local_macro_captures, Symbol_var(32645476), List_var(cons(List_var(binding), Var_is_row(order, 9, 7, 4) ? Var_list_payload(order) : NULL)));  Map_setindex(c -> local_macro_captures, List_var(binding), int_var(1));
+  if(c -> local_macro_captures == NULL || ! List_truth(binding) || ! Sym_binding_is_local_before(c -> sym, binding, c -> local_macro_capture_scopes) || Map_contains(c -> local_macro_captures, List_var(binding))) return;  List order = Var_list_payload(Map_getindex(c -> local_macro_captures, Symbol_var(32645476)));  Map_setindex(c -> local_macro_captures, Symbol_var(32645476), List_var(cons(List_var(binding), order)));  Map_setindex(c -> local_macro_captures, List_var(binding), int_var(1));
 }
 
 static int f11_identifiers____shadow_identifier(Compiler c, List * binding, Type type, String spelling, Map binding_facts, int kept){
@@ -6094,7 +6094,8 @@ static void f6_access____completion_owner_methods(Compiler c, String prefix, Map
         Var raw = List_getindex(_x2c_gensym_destructure_2, 1);
         if(! Var_is_row(raw, 9, 7, 4)) continue;
         Type signature = Var_type(raw);
-        if(Type_is_function(signature) && String_startswith(spelling, prefix)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, prefix));
+        if(! Type_is_function(signature)) continue;
+        if(String_startswith(spelling, prefix)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, prefix));
         {
           String package, _;
           Map _x2c_gensym_macro_object_23 = c -> package_roots;
@@ -6106,7 +6107,7 @@ static void f6_access____completion_owner_methods(Compiler c, String prefix, Map
             _ = Var_as_string(_x2c_gensym_macro_cursor_output_23);
             {
               String imported = String_join(NULL, cons(String_var(package), cons(String_var(_1530), cons(String_var(prefix), NULL))));
-              if(Type_is_function(signature) && String_startswith(spelling, imported)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, imported));
+              if(String_startswith(spelling, imported)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, imported));
             }
 
           }

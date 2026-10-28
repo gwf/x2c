@@ -162,8 +162,9 @@ static int _taken(Defaults &d, String spelling) {
   if (!declared.is_function() || spelling in d.definitions ||
       spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
     return 1;
+  /* The tag test establishes the Map used by membership lookup. */
   foreach (Var part in d.parts)
-    if (part is <map> && key in part.map()) return 0;
+    if (part is <map> && key in part.map_payload()) return 0;
   return 1;
 }
 

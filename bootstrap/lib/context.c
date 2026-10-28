@@ -344,7 +344,7 @@ static Var _export_value(Context c, Var v){
 }
 
 static List _export_list(Context c, List list){
-  if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
+  if(c -> pool && ! Pool_owns(c -> pool, List_var(list))) return list;
   Block heads = Block_new(sizeof(Var));
   const Block _x2c_gensym_macro_acquired_0 = heads;
   {
@@ -449,7 +449,7 @@ static Var _export_atom(Context c, Var value){
 }
 
 static Var _export_storage(Context c, Var v){
-  void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
+  void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes_payload(v)) : Var_pointer(v);
   if(! Context_owns(c, allocation)) return v;
   if(Var_is_row(v, 8, 7, 2)) Map_set(_export_memo(c), v, int_var(1));
   else Context_move_block(c, (Block) allocation);

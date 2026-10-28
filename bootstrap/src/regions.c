@@ -1734,7 +1734,7 @@ static Var _unwrap(Var value){
 }
 
 static Var _passed(List types, List arguments, int index, Type * type){
-  Var argument = List_getindex(arguments, index);  Var declared = List_getindex(types, index); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! Type_is_reference((* type))) return argument;  Type given = List_type(_expression_type(argument));  if(Type_is_reference(given)) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
+  Var argument = List_getindex(arguments, index);  Var declared = List_getindex(types, index); (* type) = Var_type(declared);  if(! Type_is_reference((* type))) return argument;  Type given = List_type(_expression_type(argument));  if(Type_is_reference(given)) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
     Var _x2c_gensym_literal_part_0 = List_var((* type));  Var _x2c_gensym_literal_part_1 = List_var(cons(_682, cons(_683, cons(argument, NULL))));  cons(_382, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   ));
