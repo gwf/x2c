@@ -38,8 +38,9 @@ module void _define(Cpp cpp, Token name, List site) {
     String body = close ? _body(close + 1) : NULL;
     if (!close) _set(cpp, name.text, <cond>);
     else
-      _set(cpp, name.text,
-           %(function $(name.text) $list $variadic $body $site));
+      _set(
+        cpp, name.text,
+        %(function $(name.text) $list $variadic $body $site));
   }
 }
 
@@ -106,7 +107,7 @@ static int _unreadable(Token token) {
   return 0;
 }
 
-/* The `(FILE LINE)` site of the directive `token` in the file `path`. */
+/* Locates a definition through the current source markers. */
 static List _site(Compiler c, Token token, String path) {
   int line = token.line;
   String file = c.line_markers ? c.token_source(token, line) : path;

@@ -646,8 +646,6 @@ static void _cli_fail_one_dash_removed(String arg, String use) {
   _fail(%"one-dash long option '$arg' was removed", %"use '$use'");
 }
 
-
-
 /* Prints an error and perhaps a note, then exits with status 2. The exit
    runs the atexit handlers, which Diagnostics.driver_error skips. */
 module void _fail(String message, String note) {

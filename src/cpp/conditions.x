@@ -118,7 +118,7 @@ static int _condition(Compiler c, Cpp cpp, Token token) {
   return -1;
 }
 
-/* Whether the name at `token` is defined. */
+/* Looks up the condition operand in the current macro table. */
 static int _defined(Cpp cpp, Token token) {
   if (!token.is_word()) return -1;
   Var value = cpp.macros[token.text];
@@ -301,10 +301,15 @@ static CppValue _primary(CppEval &e) {
 
 static CppValue _number(CppEval &e, String text) {
   char *end = NULL;
-  long value = (long) strtoull(text, &end, 0);
-  while (*end && strchr("uUlL", *end)) end++;
+  errno = 0;
+  unsigned long long value = strtoull(text, &end, 0);
+  int unsupported = errno == ERANGE || value > LONG_MAX;
+  while (*end && strchr("uUlL", *end)) {
+    if (*end == 'u' || *end == 'U') unsupported = 1;
+    end++;
+  }
   if (*end) e.failed = 1;
-  return _known(value);
+  return unsupported ? (CppValue) {0} : _known((long) value);
 }
 
 static CppValue _character(String text) {

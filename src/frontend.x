@@ -319,6 +319,7 @@ static void _tokenize_input(
   String text = _read_input(c);
   if (text && text.startswith("#!"))
     text = _script(c, text, resolved ? String.new(source) : c.filename);
+  c.text = text;
   c.unit_source = c.module_source(c.filename, text);
   if (c.unit_source) {
     text = c.unit_source.text;

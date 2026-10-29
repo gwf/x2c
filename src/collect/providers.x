@@ -206,6 +206,16 @@ static int _linked_provider_current(
   return 0;
 }
 
+/** Prepares a file's macro exports through signature-only collection.
+    The ordinary collector owns include traversal and retains the exports;
+    lookahead entries are provisional until ordinary collection replaces them.
+*/
+void Compiler.prepare_macro_exports(Compiler c, String path) {
+  with (c.filename = path) {
+    (void) _meta_provider_entry(c, _canonical_path(path));
+  }
+}
+
 /* Metadata lookahead reads declarations and hashes without source effects. */
 static List _meta_provider_entry(Compiler c, String canonical) {
   List entry = _entry(c, canonical);

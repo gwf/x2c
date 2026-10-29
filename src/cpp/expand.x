@@ -85,22 +85,22 @@ void Compiler.expand_macros(Compiler c) {
     _keep(x, token);
   }
   _keep(x, x.in + i);
-  if (!x.out) return;
+  if (x.out == NULL) return;
   c.tokenizer.tokens = x.out;
   c.tokenizer.expansions = x.rows;
 }
 
-/* A conditional directive records the groups open after it. */
+/* Records the conditional groups open after this token. */
 static void _directive(Expander &x, Token token) {
   int open = x.cpp.groups.len() > 0;
-  long index = x.out ? x.out.len() : token - x.in;
+  long index = x.out != NULL ? x.out.len() : token - x.in;
   Symbol kind = x.c.cpp_directive(x.cpp, token, x.c.filename);
   if (kind == <open> || (kind && open))
     x.c.arm_stacks[index] = _open_groups(x.cpp);
 }
 
 static void _keep(Expander &x, Token token) {
-  if (x.out) x.out = x.out.append(token, 1);
+  if (x.out != NULL) x.out = x.out.append(token, 1);
 }
 
 /* A `$` or `@` before a name makes it a macro hole or a reference, not a
@@ -143,7 +143,7 @@ static size_t _expand_use(Expander &x, size_t i) {
 
 /* Appends an expansion at the use's location and records its row. */
 static void _place(Expander &x, Block sink, size_t i) {
-  if (!x.out) x.out = Bytes.new(sizeof(struct Token)).append(x.in, i);
+  if (x.out == NULL) x.out = Bytes.new(sizeof(struct Token)).append(x.in, i);
   long first = x.out.len();
   CppToken *items = sink.bytes;
   for (size_t k = 0; k < sink.len(); k++) {
@@ -173,16 +173,31 @@ module Block _expand_items(Compiler c, Cpp cpp, Block items, Token site) {
    input stream after the stack. */
 static void _rescan(Expander &x, Block stack, Block sink, int input) {
   CppToken item;
+  int space = 0;
   while (!x.retreat && stack.try_pop(&item)) {
+    item.space |= space;
+    space = 0;
     List definition = _definition(x, item);
     if (!definition) sink.push(&item);
-    else if (definition.car() == <object>) {
-      List hide = cons(item.token.text, item.hide);
-      _push_all(stack, _substitute(x, definition, NULL, hide));
+    else {
+      Block replacement = NULL;
+      if (definition.car() == <object>) {
+        List hide = cons(item.token.text, item.hide);
+        replacement = _substitute(x, definition, NULL, hide);
+      }
+      else if (_paren_next(x, stack, input))
+        replacement = _call(x, stack, input, item, definition);
+      else {
+        sink.push(&item);
+        continue;
+      }
+      if (replacement == NULL) continue;
+      if (replacement.len()) {
+        ((CppToken *) replacement.bytes)[0].space = item.space;
+        _push_all(stack, replacement);
+      }
+      else space = item.space;
     }
-    else if (_paren_next(x, stack, input))
-      _call(x, stack, input, item, definition);
-    else sink.push(&item);
   }
 }
 
@@ -204,15 +219,15 @@ static int _paren_next(Expander &x, Block stack, int input) {
 
 /* Replaces the function-like use whose name is `name` and whose `(` is the
    next token. */
-static void _call(
+static Block _call(
   Expander &x, Block stack, int input, CppToken &name, List definition) {
   CppToken open, close;
   (void) _pull(x, stack, input, open);
   Array args = [];
-  if (!_arguments(x, stack, input, definition, args, close)) return;
+  if (!_arguments(x, stack, input, definition, args, close)) return NULL;
   _check_arity(x, definition, args);
   List hide = cons(name.token.text, _meet(name.hide, close.hide));
-  _push_all(stack, _substitute(x, definition, args, hide));
+  return _substitute(x, definition, args, hide);
 }
 
 /* Takes the next token from the stack, else from the input stream after
@@ -321,20 +336,31 @@ static Block _substitute(
 
 /* Substitutes the replacement tokens from `token` up to `end`. */
 static void _replace(Expander &x, Substitution &s, Token token, Token end) {
+  int space = 0;
   while (token < end) {
-    Token next = token + 1;
+    if (token.type == <space> || token.type == <comment>) {
+      space = 1;
+      token++;
+      continue;
+    }
+    Token next = Token.skip_trivia(token + 1);
     int param = _param(s, token), after = next < end;
+    int pasting = token.type == <"##">;
+    size_t first = s.out.len();
     if (s.function && token.type == <"#"> && after && _param(s, next) >= 0)
       token = _stringized(s, next);
-    else if (token.type == <"##"> && after) token = _pasted(x, s, next);
-    else if (token.type == <"##">)
+    else if (pasting && after) token = _pasted(x, s, next, end);
+    else if (pasting)
       $fail.cpp_paste_edge(x.c, x.site, _definition_note(s.definition));
     else if (param >= 0)
-      token = _argument(x, s, param, after && next.type == <"##">, next);
+      token = _argument(x, s, param, after && next.type == <"##">, token + 1);
     else if (s.variadic && token.text == "__VA_OPT__" && after &&
              next.type == <(>)
-      token = _va_opt(x, s, next, end);
+      token = _va_opt(x, s, token, end);
     else token = _copied(s, token);
+    if (!pasting && s.out.len() > first)
+      ((CppToken *) s.out.bytes)[first].space = space;
+    if (pasting || s.out.len() > first) space = 0;
   }
 }
 
@@ -395,18 +421,29 @@ static Token _stringized(Substitution &s, Token param) {
    empty argument on either side leaves the other side. Between a comma and
    the variadic argument, as GNU C reads `, ## __VA_ARGS__`, `##` keeps
    both unjoined, and an empty variadic argument removes the comma. */
-static Token _pasted(Expander &x, Substitution &s, Token next) {
+static Token _pasted(Expander &x, Substitution &s, Token next, Token end) {
   int param = _param(s, next);
   Block right = Block.new(sizeof(CppToken));
   CppToken operand = {.token = *next}, left;
+  Token after = next + 1;
   if (param >= 0) right = s.args[param];
+  else if (s.variadic && next.text == "__VA_OPT__" &&
+           Token.skip_trivia(next + 1).type == <(>) {
+    with (s.out = right) { after = _va_opt(x, s, next, end); }
+    if (right.len() == 1 &&
+        ((CppToken *) right.bytes)[0].token.type == <empty>)
+      right.clear();
+  }
   else right.push(&operand);
   if (!s.out.try_pop(&left))
     $fail.cpp_paste_edge(x.c, x.site, _definition_note(s.definition));
   CppToken *items = right.bytes;
   int comma = left.token.type == <,> && s.variadic &&
               param == s.params.len() - 1;
-  if (left.token.type == <empty>) _push_raw(s, right);
+  if (left.token.type == <empty>) {
+    if (right.len()) items[0].space = left.space;
+    _push_raw(s, right);
+  }
   else if (comma || !right.len()) {
     if (!comma || right.len()) s.out.push(&left);
     _push_block(s.out, right);
@@ -416,7 +453,7 @@ static Token _pasted(Expander &x, Substitution &s, Token next) {
     s.out.push(&joined);
     for (size_t i = 1; i < right.len(); i++) s.out.push(&items[i]);
   }
-  return next + 1;
+  return after;
 }
 
 /* The one token two tokens' text spells together. */
@@ -428,14 +465,16 @@ static CppToken _join(
     $fail.cpp_paste_invalid(
       x.c, x.site, left.token.text, right.token.text,
       _definition_note(s.definition));
-  return (CppToken) {.token = *token, .hide = _meet(left.hide, right.hide)};
+  return (CppToken) {
+    .token = *token, .hide = _meet(left.hide, right.hide),
+    .space = left.space};
 }
 
-/* `__VA_OPT__(...)` holds its tokens when the variadic argument has any. */
-static Token _va_opt(Expander &x, Substitution &s, Token open, Token end) {
-  Token close = open.group_close();
-  if (close >= end) return _copied(s, open - 1);
-  Block variadic = s.args[s.params.len() - 1];
+/* Keeps the group when the expanded variadic argument has tokens. */
+static Token _va_opt(Expander &x, Substitution &s, Token name, Token end) {
+  Token open = Token.skip_trivia(name + 1), close = open.group_close();
+  if (close >= end) return _copied(s, name);
+  Block variadic = _expanded(x, s, s.params.len() - 1);
   if (variadic.len()) _replace(x, s, open + 1, close);
   else _push_placemarker(s.out);
   return close + 1;
@@ -498,7 +537,6 @@ static Token _body_tokens(Expander &x, List definition) {
 static void _scan_body(Block tokens, String text) {
   for (Token token = Compiler.scan_directive(text); token.type != <eof>;
        token++) {
-    if (token.type == <space> || token.type == <comment>) continue;
     if (token.type != <preproc>) {
       tokens.push(token);
       continue;

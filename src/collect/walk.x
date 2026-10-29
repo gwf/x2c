@@ -383,8 +383,6 @@ static int _directive(FileWalk &w, Token token) {
   return 1;
 }
 
-
-
 /* Splice one include: replay its entry, or walk it cold, once per unit.
    Its content hash joins this file's dependencies, so a replayed interface
    is rejected when any file it spliced has changed. */
@@ -444,8 +442,6 @@ module void _walk_apart(
     _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
   }
 }
-
-
 
 /* Replay declaration maps and includes in their recorded source order.
    visited counts each included file's declarations, dependencies, and

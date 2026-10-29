@@ -101,8 +101,6 @@ void Compiler.next(Compiler c) {
 int Compiler.at_word(Compiler c, String word) =>
   c.peek(0) == <ident> && c.token.text == word;
 
-
-
 /** Returns the non-trivia token type `steps` from parser position.
 
     Zero reads the current token; positive and negative steps count forward

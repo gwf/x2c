@@ -197,6 +197,7 @@ static void _scan(Helper &h, List inputs) {
   Compiler c = Compiler.new();
   c.sources = h.frontend.request.sources;
   c.include_dirs = h.frontend.include_dirs;
+  c.command_macros = Compiler.command_macros(h.frontend.request.cpp_args);
   foreach (String input in inputs) {
     String path = Path.absolute(input);
     Scan s = {
@@ -232,12 +233,30 @@ static int _file(Scan &s, String path) {
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = Path.is_layout_source(path);
   tokens.scan();
+  _preprocess(s, path, tokens);
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
       (Compiler.is_prelude_source(path) ||
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
+}
+
+/* Discover the same declarations that parsing sees. Signature lookahead
+   makes included macro exports available without running project meta code. */
+static void _preprocess(Scan &s, String path, Tokenizer tokens) {
+  s.c.prepare_macro_exports(path);
+  Compiler c = Compiler.new_shared(s.c);
+  defer s.c.close_child(c);
+  c.filename = path;
+  c.tokenizer = tokens;
+  c.text = tokens.text;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  with (c.recovery_depth = c.recovery_depth + 1) {
+    try c.preprocess_tokens();
+    catch %(malformed *): {}
+  }
+  c.diagnostics.release(hold, 0);
 }
 
 /* Only file-scope tokens count. Each arm reads the tokens that follow its

@@ -452,8 +452,6 @@ static List _field_group(Compiler c, List context) {
   return _finish_declaration(c, <declare>, type, binds, 0);
 }
 
-
-
 /* Declaration specifiers before the qualifiers and type: storage classes
    and `inline` in source order, then `_Noreturn` and attributes as source
    text. The storage words lead, where C places them and where a declared
@@ -500,7 +498,8 @@ module int _attribute_starts(Compiler c) {
 
 /* A macro the preprocessor leaves to C, because a conditional group
    defines it, still sits in a declaration when its body is declaration
-   specifiers and attributes, such as an export annotation. A specifier position of `rank`, 0 for storage classes and
+   specifiers and attributes, such as an export annotation. A specifier
+   position of `rank`, 0 for storage classes and
    `inline`, 1 for qualifiers, and 2 for builtin types, leaves a macro with
    words of a later rank to that position; otherwise it consumes the macro
    and takes all of its words into `words`, so `int LOCAL f(void)` keeps the

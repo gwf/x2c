@@ -5,7 +5,6 @@
 
 static keyword loop $private.loop;
 
-
 // declarations
 
 /** Parses one x2c declaration row and leaves its terminator current.

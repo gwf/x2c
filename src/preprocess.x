@@ -92,8 +92,9 @@ Token Compiler.macro_directive(String content, int &undefined) {
   String directive = Compiler.preproc_directive(content);
   undefined = directive.startswith("undef");
   if (!undefined && !directive.startswith("define")) return NULL;
-  Token token = Token.skip_trivia(Compiler.scan_directive(
-    directive.remove_prefix(undefined ? "undef" : "define")));
+  Token token = Token.skip_trivia(
+    Compiler.scan_directive(
+      directive.remove_prefix(undefined ? "undef" : "define")));
   return token.is_word() ? token : NULL;
 }
 

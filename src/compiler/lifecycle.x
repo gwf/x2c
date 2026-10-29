@@ -48,8 +48,6 @@ void Compiler.take_unit_state(Compiler c, Compiler owner) {
   c.share_meta_group(owner);
 }
 
-
-
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the bindings that hold the group's stubs.
 */
