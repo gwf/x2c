@@ -38,7 +38,7 @@ List Compiler_prelude_sources(void);
 
 void Compiler_install_included_effects(Compiler c);
 
-List Compiler_included_macros(Compiler c, String target, int angle, String dir);
+List Compiler_included_macros(Compiler c, String target, int angle, String dir, Map active);
 
 Map Compiler_initial_macros(Compiler c, String path);
 

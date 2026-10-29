@@ -26,13 +26,15 @@ List Cpp_changes(Cpp cpp, Map initial);
 
 Map Cpp_table(List rows);
 
-int Token_is_word(Token token);
+int Token_is_word(Token t);
 
 String Token_spelling(Token first, Token last);
 
+void Cpp_merge(Cpp cpp, List rows);
+
 List Compiler_command_macros(List args);
 
-Symbol Compiler_cpp_directive(Compiler c, Cpp cpp, Token token, String path);
+Symbol Compiler_cpp_directive(Compiler c, Cpp cpp, Token token, String path, Map active);
 
 void Compiler_expand_macros(Compiler c);
 

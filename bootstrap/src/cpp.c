@@ -46,13 +46,11 @@ static int f3_cpp____runs_together(Token left, Token right);
 
 static int f3_cpp____word_char(char ch);
 
-static void _command(Compiler c, Cpp cpp, Token token, String path);
+static void _command(Compiler c, Cpp cpp, Token token, String path, Map active);
 
 static void _define(Cpp cpp, Token name, List site);
 
 static void _set(Cpp cpp, String name, Var value);
-
-static void f6_macros____merge(Cpp cpp, List rows);
 
 static void _touch(Cpp cpp, String name);
 
@@ -424,8 +422,8 @@ Map Cpp_table(List rows){
   return macros;
 }
 
-int Token_is_word(Token token){
-  return token -> type == 19147688 ||(String_truth(token -> text) && scan_keyword_type(token -> text, String_len(token -> text)));
+int Token_is_word(Token t){
+  return t -> type == 19147688 ||(String_truth(t -> text) && scan_keyword_type(t -> text, String_len(t -> text)));
 }
 
 String Token_spelling(Token first, Token last){
@@ -452,7 +450,9 @@ String Compiler_preproc_include_target(String, int *);
 
 Path Path_dirname(Path);
 
-static void _command(Compiler c, Cpp cpp, Token token, String path){
+void Cpp_merge(Cpp cpp, List rows);
+
+static void _command(Compiler c, Cpp cpp, Token token, String path, Map active){
   int undefined = 0, angle = 0;
   Token name = Compiler_macro_directive(token -> text, &(undefined));
   if(name && undefined) _set(cpp, name -> text, Symbol_var(44966220));
@@ -460,7 +460,7 @@ static void _command(Compiler c, Cpp cpp, Token token, String path){
   else{
     String target = Compiler_preproc_include_target(token -> text, &(angle));
     String dir = String_truth(path) ? Path_dirname(path) : _2;
-    if(String_truth(target) && ! cpp -> isolated) f6_macros____merge(cpp, Compiler_included_macros(c, target, angle, dir));
+    if(String_truth(target) && ! cpp -> isolated) Cpp_merge(cpp, Compiler_included_macros(c, target, angle, dir, active));
   }
 
 }
@@ -489,7 +489,7 @@ static void _set(Cpp cpp, String name, Var value){
   _touch(cpp, name);
 }
 
-static void f6_macros____merge(Cpp cpp, List rows){
+void Cpp_merge(Cpp cpp, List rows){
   {
     List row;
     List _x2c_gensym_macro_object_2 = rows;
@@ -587,14 +587,14 @@ static void f6_macros____command_define(Cpp cpp, String value){
 
 Symbol Compiler_preproc_conditional_kind(String);
 
-Symbol Compiler_cpp_directive(Compiler c, Cpp cpp, Token token, String path){
+Symbol Compiler_cpp_directive(Compiler c, Cpp cpp, Token token, String path, Map active){
   if(! _init_guard_) _file_init_();
   String text = token -> text;
   Symbol kind = Compiler_preproc_conditional_kind(text);
   if(kind == 1016156) f10_conditions____open(c, cpp, token);
   else if(kind == 172060880) f10_conditions____branch(c, cpp, token);
   else if(kind == 7109834) f10_conditions____close(cpp);
-  else if(! Cpp_hidden(cpp)) _command(c, cpp, token, path);
+  else if(! Cpp_hidden(cpp)) _command(c, cpp, token, path, active);
   return kind;
 }
 
@@ -975,7 +975,7 @@ void Compiler_expand_macros(Compiler c){
 static void f6_expand____directive(f6_expand___Expander * x, Token token){
   int open = Block_len((* x).cpp -> groups) > 0;
   long index =(* x).out != NULL ? Bytes_len((* x).out) : token -(* x).in;
-  Symbol kind = Compiler_cpp_directive((* x).c, (* x).cpp, token, (* x).c -> filename);
+  Symbol kind = Compiler_cpp_directive((* x).c, (* x).cpp, token, (* x).c -> filename, NULL);
   if(kind == 1016156 ||(kind && open)) Map_setindex((* x).c -> arm_stacks, long_var(index), List_var(_open_groups((* x).cpp)));
 }
 

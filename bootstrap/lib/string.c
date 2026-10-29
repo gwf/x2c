@@ -295,7 +295,7 @@ static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int len
   if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= 256){
     String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
   }
-  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > 256) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
+  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > 256) return Var_as_string(Pool_intern(pool, String_var(string), header));  return Var_as_string(Pool_intern_new(pool, String_var(string), header));
 }
 
 static inline String f7_storage____store(StringHeader header, const char * bytes, int length, unsigned hash){
@@ -307,7 +307,7 @@ static String f7_storage____intern_owned(String string){
     int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
   }
   Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
-    Pool_insert(pool, String_var(string));  return string;
+    return Var_as_string(Pool_intern_new(pool, String_var(string), header));
   }
   if(found != string) _free_unchecked(string);  return found;
 }
