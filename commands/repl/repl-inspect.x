@@ -336,7 +336,9 @@ Buffer repl_inspect_value(Buffer out, Var value, int depth, int *remaining) {
     while (items && *remaining > 0) {
       if (separator++) out.write(" ");
       (*remaining)--;
-      repl_inspect_value(out, items.car(), depth - 1, remaining);
+      Var item = items.car();
+      if (item is <symbol> || item is <lsym>) Atom.write_repr(item, out);
+      else repl_inspect_value(out, item, depth - 1, remaining);
       items = items.cdr();
     }
     if (items) out.write("...");
