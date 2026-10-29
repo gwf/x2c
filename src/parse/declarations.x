@@ -276,7 +276,9 @@ static List _destructure_declaration(
   return c.anchor_origin(result, origin_token);
 }
 
-// ( ident, ident, ... ), each declared with the destructured type.
+/* ( ident, ident, ... ), each declared with the destructured type. A `_`
+   keeps its spelling: an initialized destructuring discards its element,
+   and a foreach or uninitialized form declares it as an ordinary name. */
 static List _destructure_targets(Compiler c, List binding_type) {
   Array targets = [];
   c.expect(<(>);
@@ -284,16 +286,20 @@ static List _destructure_targets(Compiler c, List binding_type) {
     if (c.peek(0) != <ident>)
       $fail.parse_destructure_name(c, c.token);
     List ident = c.parse_basic_identifier();
-    if (c.macro_holes) {
-      List local = c.macro_introduced_name(ident.car());
-      c.bind_template_local(local, binding_type, NULL);
-      targets.push(local);
-    }
-    else targets.push(c.sym.declare(NULL, ident, binding_type));
+    targets.push(ident ~= %("_") ? ident
+                 : _destructure_target(c, ident, binding_type));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
   return targets.list_free();
+}
+
+// The declaration of the target `ident`, a template local in a template.
+static List _destructure_target(Compiler c, List ident, List binding_type) {
+  if (!c.macro_holes) return c.sym.declare(NULL, ident, binding_type);
+  List local = c.macro_introduced_name(ident.car());
+  c.bind_template_local(local, binding_type, NULL);
+  return local;
 }
 
 /* Wraps destructuring targets as the binding forms a declaration carries,
@@ -475,11 +481,13 @@ static int _has_bitfield(List declarator) {
 }
 
 /* Destructuring targets share one base type, so they bind as one
-   declaration before the source resolves. */
+   declaration before the source resolves. A `_` target discards its
+   element: it keeps its position and declares nothing. */
 module List _bind_targets(
   Compiler c, Var base, List targets, Var source) {
   Array declarators = [];
-  foreach (Var target in targets) declarators.push(%(bind $target ()));
+  foreach (List target in targets)
+    if (!(target ~= %("_"))) declarators.push(%(bind $target ()));
   List declaration = c.bind_syntax(
     %(declare $base
         (bindings @(declarators.list_free()))),
@@ -487,8 +495,12 @@ module List _bind_targets(
   );
   if (declaration ~= %(declare ?bound_base (bindings *bindings))) {
     Array bound_targets = [];
-    foreach (List binding in bindings)
+    foreach (List target in targets) {
+      if (target ~= %("_")) { bound_targets.push(target); continue; }
+      List binding = bindings.car();
+      bindings = bindings.cdr();
       if (binding ~= %(bind ?name ?)) bound_targets.push(name);
+    }
     return %(dstrdecl $bound_base
              (targets @(bound_targets.list_free()))
              $(_resolve(c, source)));
