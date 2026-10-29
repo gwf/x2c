@@ -107,12 +107,6 @@ static void _objects(ReplSession session) {
   _expect(session, "int inferred[]={2,4,6};", <executed>, NULL);
   _value(session, "sizeof(inferred)/sizeof(inferred[0])==3;", "int 1");
   _value(session, "inferred[2];", "int 6");
-  _expect(session, "struct Inline { int x; } inline_value={7};",
-          <executed>, NULL);
-  _value(session, "inline_value.x;", "int 7");
-  _expect(session, "struct { int a; int values[2]; } anonymous={3,{4,5}};",
-          <executed>, NULL);
-  _value(session, "anonymous.a+anonymous.values[1];", "int 8");
   _expect(session, "Point *locate(void) { return &point; }", <defined>, NULL);
   _expect(session, "Point *alias=locate();", <executed>, NULL);
   _expect(session, "alias->x=12;", <executed>, NULL);
@@ -129,6 +123,51 @@ static void _objects(ReplSession session) {
   _expect(session, "free(heap);", <executed>, NULL);
   _expect(session, "heap=NULL;", <executed>, NULL);
   _value(session, "heap==NULL;", "int 1");
+}
+
+static void _prompt_types(ReplSession session) {
+  _expect(session, "struct Inline { int x; } inline_value={7};",
+          <executed>, NULL);
+  _value(session, "inline_value.x;", "int 7");
+  _expect(session, "struct Inline later_inline={9};", <executed>, NULL);
+  _expect(session,
+    "struct Inline inline_sum(struct Inline left,struct Inline right) { "
+    "struct Inline sum={left.x+right.x}; return sum; }", <defined>, NULL);
+  _value(session, "inline_sum(inline_value,later_inline).x;", "int 16");
+  _expect(session, "struct { int a; int values[2]; } anonymous={3,{4,5}};",
+          <executed>, NULL);
+  _value(session, "anonymous.a+anonymous.values[1];", "int 8");
+  ReplResult anonymous = session.inspect_expression("anonymous", 3, 100);
+  _check(anonymous.status == <value> && "a: 3" in anonymous.formatted &&
+         "values: [ 4, 5 ]" in anonymous.formatted,
+         "anonymous record inspection lost its native field definitions");
+  _expect(session,
+    "struct Outer { struct Inner { int x; } inner; int y; } nested={{2},3};",
+    <executed>, NULL);
+  _value(session, "nested.inner.x+nested.y;", "int 5");
+  _expect(session, "struct Inner later_inner={8};", <executed>, NULL);
+  _expect(session, "nested.inner=later_inner;", <executed>, NULL);
+  _value(session, "nested.inner.x;", "int 8");
+  _expect(session,
+    "struct Link { int n; struct Link *next; } chain={4,NULL};",
+    <executed>, NULL);
+  _expect(session, "struct Link second={7,&chain};", <executed>, NULL);
+  _value(session, "second.next->n;", "int 4");
+  _expect(session,
+    "struct { struct { int direct; }; union { int either; long wider; }; } "
+    "embedded={.direct=5,.either=9};", <executed>, NULL);
+  _value(session, "embedded.direct+embedded.either;", "int 14");
+  _expect(session,
+    "struct RetryType { int old_field; } failed_record={1}; raise %(rejected);",
+    <failed>, NULL);
+  _expect(session,
+    "struct RetryType { int new_field; } retried_record={11};",
+    <executed>, NULL);
+  _value(session, "retried_record.new_field;", "int 11");
+  _expect(session,
+    "{ struct BlockLocal { int x; } local_record={1}; (void)local_record; }",
+    <executed>, NULL);
+  _expect(session, "struct BlockLocal escaped_record;", <rejected>, NULL);
 }
 
 static void _callbacks(ReplSession session) {
@@ -260,6 +299,7 @@ int main(int argc, char **argv) {
   String selected = argc > 1 ? String.new(argv[1]) : NULL;
   if (!selected || selected == "shared") _shared(session);
   if (!selected || selected == "objects") _objects(session);
+  if (!selected || selected == "prompt-types") _prompt_types(session);
   if (!selected || selected == "callbacks") _callbacks(session);
   if (!selected || selected == "collections") _collections(session);
   if (!selected || selected == "rollback") _rollback(session);
