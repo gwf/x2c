@@ -32,8 +32,9 @@
 
 /* One project meta build. The Kth owner parses into table K.
    A build records the files it reads in `deps` and
-   the result of each table in the fields after it. A loaded build's
-   parses call `meta`, the ordinary helper of the same sources. */
+   the result of each table in the fields after it; `uncovered` marks a
+   failure that depends on something `deps` does not record. A loaded
+   build's parses call `meta`, the ordinary helper of the same sources. */
 static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   MetaHelper meta;
@@ -41,7 +42,7 @@ static typedef struct Helper {
   List entries;
   List flags, Array modules;
   Map deps, before, providers;
-  Array groups, built, failures, objects, int changed;
+  Array groups, built, failures, objects, int changed, uncovered;
 } Helper;
 
 // reaching meta code
@@ -493,9 +494,9 @@ static List _collect_provider(
   return unit.context.export(c.loaded_provider());
 }
 
-/* Removes what a parse left of the group at `base`. */
+/* Removes what a parse and compile left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix in %(".c" ".deps" ".failure")) {
+  foreach (String suffix in %(".c" ".d" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
@@ -568,7 +569,9 @@ static void _print_diagnostics(Compiler c) {
 
 /* Compiles the group a parse left for table `index`, adding the headers it
    read to `deps`. A quoted include resolves from the directory of `unit`.
-   Returns NULL when its object is built, or else why not. */
+   A compile that stops at a missing header writes no depfile, so no digest
+   would notice the header's arrival. Returns NULL when its object is built,
+   or else why not. */
 static String _compile(Helper &h, int index, String unit) {
   String base = _base(h, index);
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
@@ -581,6 +584,7 @@ static String _compile(Helper &h, int index, String unit) {
       %"$base.d", "-c", %"$base.c", "-o", %"$base.o");
   String failure = h.entries ? _compile_loaded(command)
                              : Compiler.meta_cc_run(command, h.directory);
+  if (failure && !Path.is_file(%"$base.d")) h.uncovered = 1;
   _add_depfile(%"$base.d", h.deps);
   return failure;
 }
@@ -624,12 +628,16 @@ static String _base(Helper &h, int index) =>
 // linking
 
 /* Links the helper with the runtime when an object or the table changed,
-   so a change to program code alone keeps the helper. Returns why the
-   helper does not link, or NULL. */
+   so a change to program code alone keeps the helper. A loop that does not
+   build is a fault of the installation, such as a missing driver, which no
+   digest records. Returns why the helper does not link, or NULL. */
 static String _link(Helper &h, int count) {
   String failure = NULL;
   String support = _support(h, failure);
-  if (!support) return failure;
+  if (!support) {
+    h.uncovered = 1;
+    return failure;
+  }
   String tables = %"$(h.directory)/tables.c", table = _tables(h.built, count);
   String helper = %"$(h.directory)/helper";
   if (!h.changed && Path.is_file(tables) && Path.read_text(tables) == table &&
@@ -748,12 +756,16 @@ static List _cc_flags(void) => %("-fsigned-char" "-O1");
 /* Writes the manifest into the build directory and returns it:
    `(groups (K ...))` for each table that has a group, `(failures ((K WHY)
    ...))` for those that do not build, `(failure WHY)`, empty unless the
-   helper does not link, and `(deps ((PATH DIGEST) ...))` for every file
-   the build read. */
+   helper does not link, `(deps ((PATH DIGEST) ...))` for every file the
+   build read, and `(covered 1)` when those digests decide the outcome. A
+   loaded build prints its reports as it fails, which the manifest does not
+   keep, so its failure is not covered. */
 static List _write_manifest(Helper &h, String failure) {
+  int covered = !h.uncovered && !(h.entries && failure);
   List manifest = %(
     (groups $(h.groups.list())) (failures $(h.failures.list()))
-    (failure $(failure ? failure : "")) (deps $(_digests(h.deps))));
+    (failure $(failure ? failure : "")) (deps $(_digests(h.deps)))
+    (covered $covered));
   Buffer out = auto Buffer.new(0);
   out.write_datum(manifest, 0);
   Path.write_text(%"$(h.directory)/manifest", out);
@@ -771,7 +783,8 @@ static List _digests(Map paths) {
 }
 
 /* The manifest a previous build left in `directory` when every file it
-   read is unchanged, or NULL. */
+   read is unchanged and those files decide its outcome, or NULL. An
+   unchanged failing build fails the same way, so its manifest is reused. */
 static List _current(String directory) {
   String path = %"$directory/manifest";
   if (!Path.is_file(path)) return NULL;
@@ -782,11 +795,7 @@ static List _current(String directory) {
   catch %((!or incomplete malformed) *): return NULL;
   if (datum is not <list>) return NULL;
   List manifest = datum;
-  /* A failure may come from a file the build could not read, such as a
-     missing header, which no digest covers; build again. */
-  if (manifest.assoc(<failures>) ||
-      ((String) manifest.assoc(<failure>)).len())
-    return NULL;
+  if (!manifest.assoc(<covered>)) return NULL;
   foreach (List row in manifest.assoc(<deps>)) {
     (String file, String digest) = row;
     if (_digest(file) != digest) return NULL;
