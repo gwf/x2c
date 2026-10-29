@@ -277,7 +277,7 @@ Map Compiler.initial_macros(Compiler c, String path) {
   String canonical = _canonical_path(path);
   Map runtime = _inside(canonical, _canonical_lib())
               ? {} : _runtime_macros(c, NULL);
-  return _initial_macros(c, canonical, runtime);
+  return _initial_macros(c, canonical, runtime, 1);
 }
 
 static Map _runtime_macros(Compiler c, MacroReplay &?query) {
@@ -285,11 +285,14 @@ static Map _runtime_macros(Compiler c, MacroReplay &?query) {
   return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL, query));
 }
 
-/* One replay shares only its immutable runtime baseline. Each file still
-   starts from its own command-line policy, without includer definitions. */
-static Map _initial_macros(Compiler c, String path, Map runtime) {
-  Map macros = _inside(path, _canonical_lib()) ? {} : runtime.copy();
-  if (!_runtime_source(path))
+/* A replay can borrow its immutable baseline; the public initializer owns
+   its table. Command-line policy always gets a separate table. */
+static Map _initial_macros(
+  Compiler c, String path, Map runtime, int own) {
+  if (_inside(path, _canonical_lib())) return {};
+  int commands = !_runtime_source(path) && c.command_macros;
+  Map macros = own || commands ? runtime.copy() : runtime;
+  if (commands)
     macros.merge(Cpp.table(c.command_macros));
   return macros;
 }
@@ -842,7 +845,7 @@ static int _replay_included(
   if (!entry && prefix is not <array>) return !query || !query.root;
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
   Map runtime = query ? query.runtime : NULL;
-  Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
+  Map initial = sink ? _initial_macros(c, path, runtime, 0) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
   // Backedges read the live state; completed visits keep their final rows.
   if (cpp) visited[path] = [(void *) cpp, initial];
