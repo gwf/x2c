@@ -137,6 +137,10 @@ static void _prompt_types(ReplSession session) {
   _expect(session, "struct { int a; int values[2]; } anonymous={3,{4,5}};",
           <executed>, NULL);
   _value(session, "anonymous.a+anonymous.values[1];", "int 8");
+  _expect(session,
+    "__typeof__(anonymous) copy_anonymous(void) { return anonymous; }",
+    <defined>, NULL);
+  _value(session, "copy_anonymous().values[1];", "int 5");
   ReplResult anonymous = session.inspect_expression("anonymous", 3, 100);
   _check(anonymous.status == <value> && "a: 3" in anonymous.formatted &&
          "values: [ 4, 5 ]" in anonymous.formatted,
@@ -168,6 +172,37 @@ static void _prompt_types(ReplSession session) {
     "{ struct BlockLocal { int x; } local_record={1}; (void)local_record; }",
     <executed>, NULL);
   _expect(session, "struct BlockLocal escaped_record;", <rejected>, NULL);
+}
+
+static int _candidate(ReplSession session, String input, String name) {
+  ReplCompletion completed = session.complete(input, input.len());
+  foreach (List row, completed.candidates)
+    if (row.cadr() == name) return 1;
+  return 0;
+}
+
+static void _completion(ReplSession session) {
+  _expect(session,
+    "typedef struct CompleteRecord { int member; } CompleteRecord;",
+    <defined>, NULL);
+  _expect(session,
+    "int CompleteRecord.read(CompleteRecord value) { return value.member; }",
+    <defined>, NULL);
+  _expect(session, "CompleteRecord complete_object={12};", <executed>, NULL);
+  _check(_candidate(session, "complete_o", "complete_object"),
+         "completion did not offer a live prompt value");
+  _check(_candidate(session, "complete_object.me", "member"),
+         "dot completion did not offer a declared field");
+  _check(_candidate(session, "complete_object.re", "read"),
+         "dot completion did not offer a declared method");
+  _expect(session,
+    "typedef struct CompleteOwner { delegate CompleteRecord part; } CompleteOwner;",
+    <defined>, NULL);
+  _expect(session, "CompleteOwner complete_owner={{9}};", <executed>, NULL);
+  _check(_candidate(session, "complete_owner.re", "read"),
+         "dot completion did not offer a delegated method");
+  _value(session, "complete_object.member;", "int 12");
+  _value(session, "complete_owner.part.member;", "int 9");
 }
 
 static void _callbacks(ReplSession session) {
@@ -300,6 +335,7 @@ int main(int argc, char **argv) {
   if (!selected || selected == "shared") _shared(session);
   if (!selected || selected == "objects") _objects(session);
   if (!selected || selected == "prompt-types") _prompt_types(session);
+  if (!selected || selected == "completion") _completion(session);
   if (!selected || selected == "callbacks") _callbacks(session);
   if (!selected || selected == "collections") _collections(session);
   if (!selected || selected == "rollback") _rollback(session);
