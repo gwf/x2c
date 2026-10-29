@@ -163,9 +163,8 @@ void Compiler.report_error(
 void Compiler.report_problem(
   Compiler c, Symbol code, String message, Token token, List notes) {
   message = message ? message : "compiler error";
-  String expansion = c.macro_expansion_note();
-  if (expansion) notes = notes.append($(expansion));
-  c.diagnostics.report(code, message, _compiler_location(c, token), notes);
+  List location = _compiler_location(c, token);
+  c.diagnostics.report(code, message, location, _notes(c, location, notes));
 }
 
 // reporting
@@ -205,9 +204,8 @@ void Diagnostics.report(
 */
 void Compiler.report_warning(
   Compiler c, Symbol code, String message, Token token, List notes) {
-  String expansion = c.macro_expansion_note();
-  if (expansion) notes = notes.append($(expansion));
-  c.report_warning_at(code, message, _compiler_location(c, token), notes);
+  List location = _compiler_location(c, token);
+  c.report_warning_at(code, message, location, _notes(c, location, notes));
 }
 
 /** Returns the innermost source expansion's definition and input note. */
@@ -416,14 +414,18 @@ List Diagnostics.entries(Diagnostics diag) {
 
 // debug utilities
 
-/** Prints every non-EOF token with its position and visible content.
-    `Compiler.tokenize` must have populated the compiler's tokenizer.
+/** Prints every non-EOF token with its position and visible content, and
+    the C macro whose expansion produced it. `Compiler.tokenize` or
+    `Compiler.preprocess_tokens` must have populated the compiler's
+    tokenizer.
 */
 void Compiler.dump_tokens(Compiler compiler) {
   Token tokens = compiler.tokenizer.tokens;
   for (Token token = tokens; token.type != <eof>; token++) {
     printf("(%4d, %-3d)\t%-20s", token.line, token.col, token.type.str());
     _pprint(token.text, token.len);
+    String macro = compiler.expanding_macro(token);
+    if (macro) printf("\t(expands %s)", (char *) macro);
     putchar('\n');
   }
 }
@@ -709,6 +711,16 @@ static List _build_entry(
 static void _store(Diagnostics diag, List entry) {
   diag.published.setdefault(entry, diag.entries.len());
   diag.entries.push(entry);
+}
+
+/* A report adds the innermost x2c macro expansion and the C macro
+   expansion at its location. */
+static List _notes(Compiler c, List location, List notes) {
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
+  String macro = c.cpp_note(location);
+  if (macro) notes = notes.append($(macro));
+  return notes;
 }
 
 static List _compiler_location(Compiler compiler, Token token) {

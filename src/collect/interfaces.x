@@ -42,7 +42,7 @@ List Compiler.prelude_missing_interfaces(void) {
   String canonical = _canonical_path(%"$(x2c_get_root())/lib/x2c.x");
   foreach (String path in _interface_candidates(canonical)) {
     List record = _interface_record(path);
-    if (record ~= %(interface 6 ? ? ? ?(List parts) *)) {
+    if (record ~= %(interface 7 ? ? ? ?(List parts) *)) {
       Array missing = [];
       foreach (Var part in parts)
         if (part is <string> &&
@@ -87,7 +87,7 @@ String Compiler.interface_text(Compiler c) {
   if (cached is void) return NULL;
   Buffer out = auto Buffer.new(0);
   List record = %(
-    interface 6 $(Compiler.identity()) @(_stored_record(canonical, cached)));
+    interface 7 $(Compiler.identity()) @(_stored_record(canonical, cached)));
   /* An interface is plain data, which a loader never evaluates. */
   if (!out.write_datum(record, 0)) $fail.collect_interface_write(c, NULL);
   out.write_char('\n');
@@ -141,7 +141,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = Compiler.identity();
-  if (!identity || !source.startswith(%"(interface 6 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 7 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -181,13 +181,13 @@ static List _interface_candidates(String canonical) {
 /* An entry as an interface stores it after the compiler identity. */
 static List _stored_record(String canonical, List entry) {
   (List cached_parts, Var hash, List definitions, Map dependencies,
-   List include_dirs) = entry;
+   List include_dirs, List macros) = entry;
   Map identities = {}, Array parts = [];
   foreach (Var part in cached_parts)
     parts.push(_stored_part(part, identities));
   return $(
     Compiler.portable_path(canonical), hash, parts.list_free(), definitions,
-    _stored_dependencies(dependencies), include_dirs);
+    _stored_dependencies(dependencies), include_dirs, macros);
 }
 
 /* A stored part is a home-portable include path or the sorted rows of a
@@ -264,7 +264,7 @@ module List _interface_read(Compiler c, String canonical) {
    ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(Compiler c, String canonical, String path) {
   String identity = Compiler.identity();
-  if (_interface_record(path) ~= %(interface 6 ?(String compiler) *stored) &&
+  if (_interface_record(path) ~= %(interface 7 ?(String compiler) *stored) &&
       identity && compiler == identity)
     return _stored_entry(c, canonical, stored);
   return NULL;
@@ -274,28 +274,30 @@ static List _interface_load(Compiler c, String canonical, String path) {
    match `canonical`, or NULL. */
 static List _stored_entry(Compiler c, String canonical, List stored) {
   if (stored ~= %(?(String owner) ?(String hash) ?(List parts)
-      ?(List definitions) ?(List dependencies) ?(List include_dirs)) &&
+      ?(List definitions) ?(List dependencies) ?(List include_dirs)
+      ?(List macros)) &&
       Compiler.absolute_home_path(owner) == canonical &&
       _hash_matches(c, canonical, hash) &&
       _interface_include_dirs(c, canonical) == include_dirs)
     return _interface_entry(
-      c, canonical, hash, parts, definitions, dependencies, include_dirs);
+      c, canonical, hash, parts, definitions, dependencies,
+      $(include_dirs, macros));
   return NULL;
 }
 
 /* Rebuild a validated interface's rows as a process cache entry, or return
-   NULL when a row is malformed or a dependency has changed. */
+   NULL when a row is malformed or a dependency has changed. `tail` holds
+   the entry's include roots and exported macro rows. */
 static List _interface_entry(
   Compiler c, String canonical, String hash, List stored_parts,
-  List definitions, List stored_dependencies, List include_dirs) {
+  List definitions, List stored_dependencies, List tail) {
   Array parts = [];
   if (!_read_parts(parts, stored_parts)) return NULL;
   Map dependencies = _read_dependencies(c, stored_dependencies);
   if (dependencies == NULL) return NULL;
   foreach (Var definition in definitions)
     if (definition is not <string>) return NULL;
-  List entry = $(
-    parts.list_free(), hash, definitions, dependencies, include_dirs);
+  List entry = $(parts.list_free(), hash, definitions, dependencies, @tail);
   _retain(canonical);
   _require_retained(entry.try_own());
   _process_cache()[canonical] = entry;
@@ -383,7 +385,8 @@ static String _source_hash(Compiler c, String path) {
   return hash;
 }
 
-/* Search roots and the file's package mode must match before replay. */
+/* Search roots, the file's package mode, and the command line's macros
+   must match before replay. */
 module List _interface_include_dirs(Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir in c.include_dirs) {
@@ -402,6 +405,8 @@ module List _interface_include_dirs(Compiler c, String canonical) {
     else if (c.owns_package_source(canonical)) package = c.package;
   }
   dirs.push(package ? %(package $package) : %(package));
+  if (c.command_macros && !_runtime_source(canonical))
+    dirs.push(%(macros @(c.command_macros)));
   return dirs.list_free();
 }
 

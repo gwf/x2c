@@ -3,10 +3,11 @@
     Copyright (c) 2025 Gary William Flake.
 
     Preprocessor lines stay in the token stream and become `preproc` nodes,
-    so generated C keeps them where they were written. This module owns
-    what x2c reads from those lines without running a preprocessor: which
-    conditional arms C can reach, and what the directives before each form
-    say about layout and the unit's `#define` names.
+    so generated C keeps them where they were written. `cpp/cpp.x` expands
+    the visible macros and decides the conditional groups; this module
+    reads the directives that remain: it hides the arms C never takes,
+    marks layout attributes, and records what the directives before each
+    form say about the unit's `#define` names.
 */
 #pragma once
 #include "compiler/compiler.x"
@@ -15,19 +16,17 @@
 
 /* conditional arms
 
-   x2c output is always compiled as C by a GNU-style compiler, so an arm
-   that only C++, MSVC, or `#if 0` reaches holds no syntax x2c needs to
-   parse. Its tokens become comments; the directives around it stay in
-   place, so emission is unchanged. */
+   An arm C never takes holds no syntax x2c needs to parse. Its tokens
+   become comments; the directives around it stay in place, so emission is
+   unchanged. */
 
-/* One scan of a unit's tokens. `stack` holds the open conditional groups
-   as `(id arm state)` entries; a group's state is 2 while its arm is
-   hidden, 1 when the arms after its first `#else` will be, and 0
-   otherwise. `layout` maps each macro whose body can change a struct's
-   layout to 1, or to 2 when the body packs. */
+/* One scan of a unit's expanded tokens. `open` holds the conditional
+   groups open at the scan, as `Cpp.open_groups` rows. `layout` maps each
+   macro whose body can change a struct's layout to 1, or to 2 when the
+   body packs. */
 static typedef struct ArmScan {
-  Compiler c, Array stack, Map layout;
-  int hidden, serial;
+  Compiler c, List open, Map layout;
+  int hidden;
 } ArmScan;
 
 /* directive lines
@@ -66,15 +65,14 @@ String Compiler.preproc_marker_file(String text, int &line) {
   return rest[1:close + 1].unescape();
 }
 
-/** Records the open groups after each conditional directive of the
-    tokenized unit, and marks layout attributes where written or where a
-    macro expands to one.
+/** Hides the tokens of the arms that `c.arm_stacks`, which
+    `Compiler.expand_macros` records, marks hidden, and marks layout
+    attributes where written or where a macro x2c leaves to C expands to
+    one.
 */
 void Compiler.scan_conditionals(Compiler c) {
-  Array stack = auto [];
   Map layout = auto {};
-  ArmScan scan = {.c = c, .stack = stack, .layout = layout};
-  c.arm_stacks = {};
+  ArmScan scan = {.c = c, .layout = layout};
   c.layout_marks = [];
   c.packed_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -85,27 +83,31 @@ void Compiler.scan_conditionals(Compiler c) {
   }
 }
 
-/** Returns the hidden-arm state of the conditional group that `text` opens:
-    2 when C never takes its first arm, because the condition requires a
-    never-defined name or is `0`; 1 when C never takes the arms after its
-    first `#else`, because the condition is exactly `!defined(NAME)`; and 0
-    otherwise.
+/** Returns the name token of the `#define` or `#undef` directive
+    `content`, or NULL for any other directive, and sets `undefined` for
+    `#undef`. The text after `define` or `undef` is scanned by
+    `Compiler.scan_directive`, so the tokens after the name are the rest of
+    the directive.
 */
-int Compiler.preproc_open_state(String text) {
-  String line = _directive_line(Compiler.preproc_directive(text)).replace(
-    "defined ( <never> )", "defined <never>");
-  // A `||` gives the condition another way to hold, so the arm can be taken.
-  if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
-      line == "if defined <never>" ||
-      (line.startswith("if defined <never> && ") && !(" || " in line)))
-    return 2;
-  return line == "ifndef <never>" || line == "if ! defined <never>";
+Token Compiler.macro_directive(String content, int &undefined) {
+  String directive = Compiler.preproc_directive(content);
+  undefined = directive.startswith("undef");
+  if (!undefined && !directive.startswith("define")) return NULL;
+  Token token = Token.skip_trivia(Compiler.scan_directive(
+    directive.remove_prefix(undefined ? "undef" : "define")));
+  return token.is_word() ? token : NULL;
 }
 
-/** Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
-    the group's state was 1, and 0 otherwise.
+/** Returns the first token of `text` scanned as x2c tokens after its
+    continuation lines are joined, as a directive's text is read. The
+    tokens end in `eof` and belong to the current Scope.
 */
-int Compiler.preproc_branch_state(int state) => state == 1 ? 2 : 0;
+Token Compiler.scan_directive(String text) {
+  Tokenizer scanned = Tokenizer.new(
+    text.replace("\\\r\n", "").replace("\\\n", ""), <x2c>);
+  scanned.scan();
+  return scanned.tokens;
+}
 
 /* leading directives
 
@@ -141,8 +143,8 @@ void Compiler.note_preprocessor_macros(Compiler c, List directives) {
 */
 void Compiler.note_object_macro(Compiler c, String content) {
   int undefined;
-  Token token = _macro_directive(content, undefined);
-  if (!token) return;
+  Token token = Compiler.macro_directive(content, undefined);
+  if (!token || token.type != <ident>) return;
   String name = token.text;
   Token body = token + 1;
   if (undefined) c.object_macros.del(name);
@@ -220,48 +222,16 @@ static List _leading_preproc(Compiler c, int located) {
 // conditional branch tracking
 
 static void _directive(ArmScan &s, Token token, size_t i) {
-  Symbol kind = Compiler.preproc_conditional_kind(token.text);
-  int conditional = kind == <open> || (kind && s.stack.len());
-  if (kind == <open>)
-    s.stack.push($(++s.serial, 0, Compiler.preproc_open_state(token.text)));
-  else if (kind == <branch> && s.stack.len()) {
-    Var (id, arm, state) = s.stack[-1];
-    Var branch = Compiler.preproc_branch_state(state);
-    s.stack[-1] = $(id, arm.integer() + 1, branch);
+  Var open;
+  if (s.c.arm_stacks.try_get((long) i, open)) {
+    s.open = open;
+    s.hidden = _hidden_group(s.open);
   }
-  else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
-  if (!conditional) return;
-  s.c.arm_stacks[(long) i] = s.stack.list();
-  s.hidden = _hidden_group(s.stack);
 }
 
-/* The tokens of `directive` joined by single blanks, with each
-   never-defined name read as `<never>`, which no C token spells. */
-static String _directive_line(String directive) {
-  Tokenizer scanned = Tokenizer.new(directive, <x2c>);
-  scanned.scan();
-  Array words = [];
-  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
-       t = Token.skip_trivia(t + 1))
-    words.push(_never_defined(t.text) ? "<never>" : t.text);
-  return " ".join(words.list_free());
-}
-
-/* x2c output is compiled as C by a GNU-style compiler, so `__cplusplus` and
-   `_MSC_VER` are never defined, and a compiler built for a host other than
-   Windows never targets it. */
-static int _never_defined(String name) {
-  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
-#endif
-}
-
-static int _hidden_group(Array stack) {
-  foreach (List group in stack) if (group.caddr() == 2) return 1;
+static int _hidden_group(List open) {
+  foreach (List group in open) if (group.caddr() == <hidden>) return 1;
   return 0;
 }
 
@@ -312,10 +282,10 @@ static void _mark_layout(ArmScan &s, size_t index, int packed) {
    removes it. */
 static void _note_layout_macro(ArmScan &s, String content) {
   int undefined;
-  Token name = _macro_directive(content, undefined);
-  if (!name) return;
+  Token name = Compiler.macro_directive(content, undefined);
+  if (!name || name.type != <ident>) return;
   Map layout = s.layout;
-  if (!s.stack.len()) layout.del(name.text);
+  if (!s.open) layout.del(name.text);
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
@@ -329,20 +299,6 @@ static void _note_layout_macro(ArmScan &s, String content) {
   }
   if (value && (!(name.text in layout) || layout[name.text] < value))
     layout[name.text] = value;
-}
-
-/* Returns the name token of the `#define` or `#undef` directive `content`,
-   or NULL for any other directive, and sets `undefined` for `#undef`. The
-   directive is scanned as x2c tokens. */
-static Token _macro_directive(String content, int &undefined) {
-  String directive = Compiler.preproc_directive(content);
-  undefined = directive.startswith("undef");
-  if (!undefined && !directive.startswith("define")) return NULL;
-  Tokenizer scanned = Tokenizer.new(
-    directive.remove_prefix(undefined ? "undef" : "define"), <x2c>);
-  scanned.scan();
-  Token token = Token.skip_trivia(scanned.tokens);
-  return token.type == <ident> ? token : NULL;
 }
 
 /* 2 for a packing `__attribute__` at `token`, 1 for another attribute that

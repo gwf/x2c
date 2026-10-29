@@ -127,8 +127,9 @@ int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
     "int puts(const char *text);\n") &&
   unit.collect(frontend) && unit.parse();
 
-/** Tokenizes one input into a fresh unit with its own isolated `Context`.
-    The caller must close the unit on either result.
+/** Scans one input into a fresh unit with its own isolated `Context`;
+    collection preprocesses its tokens. The caller must close the unit on
+    either result.
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
   _start(frontend, filename, unit, _unit_context(), NULL);
@@ -170,8 +171,8 @@ int Frontend.load_prelude(Frontend frontend) {
   return loaded;
 }
 
-/** Collects symbols and retains preprocessor outputs for adapter
-    inspection.
+/** Collects symbols, retains preprocessor outputs for adapter inspection,
+    and preprocesses the unit's tokens for parsing.
 */
 int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
   Compiler c = unit.compiler;
@@ -184,6 +185,8 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
     unit.globals = _preprocess_input(frontend, unit);
     if (unit.preprocessor) c.take_diagnostics(unit.preprocessor);
     c.sym.seed_var_tags(unit.globals);
+    // Collection supplies the macros of the unit's includes.
+    c.preprocess_tokens();
   }
   catch %(malformed *): {
     if (unit.preprocessor) c.close_child(unit.preprocessor);
@@ -278,6 +281,7 @@ static Compiler _begin_unit(
   c.source_map = request.source_map;
   c.sources = request.sources;
   c.package_source_dirs = request.package_dirs;
+  c.command_macros = Compiler.command_macros(request.cpp_args);
   c.source_facts = request.source_facts;
   c.source_primary = 1;
   if (c.source_facts) {
@@ -294,7 +298,7 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source) {
   c.filename = "<repl>";
   c.prelude = c.runtime_inc = 1;
   c.include_dirs = frontend.include_dirs;
-  c.tokenize(source ? source : "");
+  c.scan_source(source ? source : "");
 }
 
 static void _tokenize_input(
@@ -314,7 +318,7 @@ static void _tokenize_input(
   }
   c.include_dirs = frontend.include_dirs;
   unit.source_lines = _source_lines(text);
-  c.tokenize(text);
+  c.scan_source(text);
   if (c.script) c.script.defines_main = c.defines_main();
 }
 
@@ -510,7 +514,9 @@ static String _take_line_markers(Compiler cpp, String text) {
   return "\n".join(kept.list_free());
 }
 
+/* The host preprocessor has already expanded every macro. */
 static void _tokenize_cpp(Compiler cpp, String text) {
+  cpp.cpp = Cpp.new({});
   cpp.tokenize(text);
   // Expanded CPP offsets cannot describe the physical input files.
   cpp.source_facts = 0;

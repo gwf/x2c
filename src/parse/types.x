@@ -446,7 +446,7 @@ module String _attribute(Compiler c) {
   if (!_attribute_starts(c)) return NULL;
   Token first = c.token, last = Token.skip_trivia(first + 1).group_close();
   c.token = last.after_group();
-  return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
+  return Token.spelling(first, last);
 }
 
 /* A GNU attribute or an attribute macro is kept as its source text. */
@@ -458,9 +458,9 @@ module int _attribute_starts(Compiler c) {
            definition == <annotation>));
 }
 
-/* Source is read before preprocessing, so a macro whose body is declaration
-   specifiers and attributes, such as an export annotation, still sits in a
-   declaration. A specifier position of `rank`, 0 for storage classes and
+/* A macro the preprocessor leaves to C, because a conditional group
+   defines it, still sits in a declaration when its body is declaration
+   specifiers and attributes, such as an export annotation. A specifier position of `rank`, 0 for storage classes and
    `inline`, 1 for qualifiers, and 2 for builtin types, leaves a macro with
    words of a later rank to that position; otherwise it consumes the macro
    and takes all of its words into `words`, so `int LOCAL f(void)` keeps the
