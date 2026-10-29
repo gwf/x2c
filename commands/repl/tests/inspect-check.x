@@ -125,6 +125,11 @@ int main(int argc, char **argv) {
   _check("distance" in session.info("metric"),
          "dependency filtering hid explicit information lookup");
   metric.del("dependency");
+  metric["unavailable"] = 1;
+  _check("no native provider" in session.info("metric") &&
+         !("execution: native" in session.info("metric")),
+         "unavailable declaration information claimed native execution");
+  metric.del("unavailable");
   session.descriptions["SCALE"] = {
     "name": "SCALE", "kind": <macro>, "type": (List) NULL,
     "declaration": "#define SCALE 3"

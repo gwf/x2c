@@ -318,7 +318,10 @@ String ReplSession.info(ReplSession session, String text) {
     }
     String documentation = description["documentation"];
     if (documentation) out.printf("%s\n", documentation);
-    out.write(description["kind"] == <macro>
+    if (description["unavailable"] is not void &&
+        description["unavailable"].truth())
+      out.write("execution: unavailable (no native provider)\n");
+    else out.write(description["kind"] == <macro>
       ? "expansion: preprocessor macro\n" : "execution: native\n");
     Type type = description["type"];
     if (type && !type.is_function()) {
