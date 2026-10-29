@@ -1,0 +1,579 @@
+/*  repl-program.x -- native library programs and retained declarations
+
+    Copyright (c) 2026 Gary William Flake.
+*/
+#pragma once
+#include "repl-types.x"
+#include "collect/collect.x"
+#include "generate/generate.x"
+#include "emit/emit.x"
+#include "format.x"
+#include "cpp/cpp.x"
+#include "project/project.x"
+#include "utils.x"
+#include <dlfcn.h>
+#include <stdio.h>
+
+static typedef struct ProgramBuild {
+  ReplProgram program;
+  Frontend frontend;
+  Array roots, headers, objects, archives, exports, includes;
+  Map seen, units, fingerprints;
+} ProgramBuild;
+
+static String _program_command(List words) {
+  String output = NULL, errors = NULL;
+  int status = tool_capture(words, output, errors);
+  return status ? errors ? errors : %"native build exited with status $status"
+                : NULL;
+}
+
+static List _program_options(CliRequest request) {
+  Array words = [];
+  foreach (String directory, request.include_dirs) {
+    words.push("--x-include-dir"); words.push(directory);
+  }
+  foreach (String directory, request.package_dirs) {
+    words.push("--package-dir"); words.push(directory);
+  }
+  foreach (String module, request.native_modules) {
+    words.push("--native-module"); words.push(module);
+  }
+  foreach (String argument, request.cpp_args) words.push(argument);
+  foreach (String argument, request.cc_args) {
+    words.push("-Xcc"); words.push(argument);
+  }
+  if (request.cc) { words.push("--cc"); words.push(request.cc); }
+  if (request.meta_cc) { words.push("--meta-cc"); words.push(request.meta_cc); }
+  if (request.ar) { words.push("--ar"); words.push(request.ar); }
+  if (request.live_symbols) words.push("--live-symbols");
+  if (request.cpp_symbols) words.push("--cpp-symbols");
+  return words.list_free();
+}
+
+static String _program_text(Compiler c, List syntax) =>
+  String.new(c.code_pretty_string(c.emit($(syntax), NULL), NULL));
+
+static List _program_span(Compiler c, List node) {
+  match (node) case %(function ? (bind ?binding ?) ?):
+    return c.fact(%(definition-span $binding));
+  return c.fact(%(definition-span $node));
+}
+
+static String _program_slice(Compiler c, List span) {
+  if (!span) return NULL;
+  Token tokens = c.tokenizer.tokens;
+  Token first = tokens + span.car().integer();
+  Token after = tokens + span.cadr().integer() - 1;
+  return c.text[first.pos:after.pos + after.len];
+}
+
+static String _program_declaration(Compiler c, Type type, String name) =>
+  _program_text(c, type.declaration_ast($(name))).strip(NULL);
+
+static int _program_private(Compiler c, String name, Type type) =>
+  type.is_static() || $(name) in c.sym.file_statics() ||
+  %(function $name) in c.sym.file_statics();
+
+static void _program_family(Map all, Map selected, Type type) {
+  List parameters = NULL;
+  Type result = NULL;
+  if (type.function_parts(parameters, result)) {
+    foreach (Type parameter, parameters) _program_family(all, selected, parameter);
+    _program_family(all, selected, result);
+    return;
+  }
+  Type base = type.base_type();
+  List family = NULL;
+  match (base) {
+    case %(?(String name)): family = %(typedef $name);
+    case %((!or ?tag struct union enum) ?name *): family = $(tag, name);
+  }
+  if (!family || family in selected) return;
+  Var found;
+  if (all.try_get(family, found)) selected[family] = found;
+  else return;
+  foreach (Var (key, value), all) {
+    if (key is not <list>) continue;
+    List parts = key;
+    if (parts.len() >= 2 && parts[:2] == family) {
+      selected[key] = value;
+      if (parts.len() == 3 && value is <list>)
+        _program_family(all, selected, value);
+    }
+  }
+  if (family.car() == <typedef>) {
+    List key = $(family.cadr());
+    if (all.try_get(key, found)) selected[key] = found;
+    if (found is <list>) _program_family(all, selected, found);
+  }
+  foreach (Var part, type)
+    if (part is <list>) _program_family(all, selected, part);
+}
+
+static void _program_symbol(
+  ProgramBuild &b, Compiler c, String path, String name, Type type,
+  List syntax, String declaration, String body, int line) {
+  if (!name || _program_private(c, name, type)) return;
+  ReplProgram program = b.program;
+  Var prior;
+  if (program.symbols.try_get($(name), prior) && !prior.equal(type))
+    raise %(repl (reason $(%"conflicting declaration: $name")));
+  program.symbols[$(name)] = type;
+  _program_family(c.sym.unit_symbols(), program.symbols, type);
+  Symbol kind = type.is_typedef() ? <type> : type.is_function() ? <native>
+                                                                : <global>;
+  program.descriptions[name] = {
+    "name": name, "kind": kind, "type": type, "path": path,
+    "source": program.sources[path], "declaration": declaration ? declaration : "",
+    "body": body ? body : "", "line": line,
+    "end_line": line + (body ? body.count("\n") : 0), "syntax": syntax};
+  if (kind != <type> && !(name in b.units)) {
+    b.units[name] = 1;
+    String native = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
+    b.exports.push($(name, native ? native : name));
+  }
+}
+
+static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
+  Compiler c = unit.compiler;
+  ReplProgram program = b.program;
+  Map definitions = {};
+  foreach (List row, c.definition_rows(unit.ast))
+    match (row) case %(function ?name ?display ?type ?parameters ?line ?doc
+                                 ?private ?origin ?declarator ?span): {
+      if (private) continue;
+      String declaration = _program_slice(c, declarator);
+      if (declaration) declaration = declaration.rstrip(NULL) + ";";
+      _program_symbol(b, c, path, name, type, row, declaration,
+                      _program_slice(c, span), line.integer());
+      Map description = b.program.descriptions[name];
+      description["display"] = display;
+      description["parameters"] = parameters;
+      description["doc"] = doc;
+      definitions[name] = 1;
+    }
+  foreach (List node, unit.ast) {
+    List spec = NULL, bindings = NULL;
+    match (node) {
+      case %((!or ?kind typedef declare) ?base (bindings *rows)): {
+        spec = kind == <typedef> ? %(typedef @base) : base;
+        bindings = rows;
+      }
+      default: continue;
+    }
+    _program_family(c.sym.unit_symbols(), program.symbols, spec);
+    foreach (List row, bindings) {
+      match (row) case %(op = ?target ?): row = target;
+      match (row) case %(bind ?binding ?): {
+        String name = Ast.binding_spelling(binding);
+        if (!name || name in definitions) continue;
+        Type type = c.sym.get_exact($(name));
+        if (!type || _program_private(c, name, type)) continue;
+        List span = _program_span(c, node);
+        Token first = span ? c.tokenizer.tokens + span.car().integer() : NULL;
+        int line = first ? first.line : 1;
+        String declaration = type.is_function() || type.is_typedef()
+          ? _program_text(c, node).strip(NULL)
+          : _program_declaration(c, type, name);
+        _program_symbol(b, c, path, name, type, node, declaration,
+                        _program_slice(c, span), line);
+      }
+    }
+  }
+  foreach (Var (key, value), program.symbols) {
+    List family = key;
+    if (family.len() != 2 ||
+        !(family.car() in %<<struct union enum typedef>>) ||
+        family.cadr() is not <string>) continue;
+    String name = family.cadr();
+    if (name in program.descriptions) continue;
+    Type type = family.car() == <typedef> ? c.sym.get_exact($(name)) : family;
+    Map description = {
+      "name": name, "kind": <type>, "type": type,
+      "path": path, "source": program.sources[path],
+      "declaration": _program_declaration(c, type, name),
+      "body": "", "line": 1, "end_line": 1};
+    foreach (Var (binding, source), c.source_definitions) {
+      List row = source;
+      if (Ast.binding_spelling(binding) != name || row.len() < 4) continue;
+      String file = row[0], text = NULL;
+      if (!c.sources.read(file, text)) continue;
+      int first = row[1], after = row[2];
+      description["path"] = file;
+      description["source"] = text;
+      description["body"] = text[first:after];
+      description["line"] = 1 + text[:first].count("\n");
+      description["end_line"] = 1 + text[:after].count("\n");
+      program.sources[file] = text;
+      break;
+    }
+    program.descriptions[name] = description;
+  }
+  foreach (Var (key, value), c.sym.unit_symbols()) {
+    if (key is not <list> || value is not <list> ||
+        !key.list().match(%(?(String name)))) continue;
+    String name = key.list().car();
+    Type type = value;
+    if (!type.is_enum() || !(type.base_type() in program.symbols) ||
+        name in program.descriptions) continue;
+    program.symbols[key] = type;
+    program.descriptions[name] = {
+      "name": name, "kind": <constant>, "type": type, "path": path,
+      "source": program.sources[path], "declaration":
+        _program_declaration(c, type, name), "body": "", "line": 1,
+      "end_line": 1};
+  }
+}
+
+/* Native C declarations retain their authored aggregate attributes. */
+static String _program_c_header(Compiler c, List ast) {
+  Buffer text = auto Buffer.new(0);
+  text.write("#pragma once\n#include \"x2c.h\"\n");
+  foreach (List node, ast) {
+    match (node) {
+      case %(preproc ?directive): {
+        text.write(directive); text.write("\n");
+      }
+      case %(typedef *): {
+        String source = _program_slice(c, _program_span(c, node));
+        if (source) { text.write(source); text.write("\n"); }
+      }
+      case %(declare ?spec (bindings *rows)): {
+        foreach (List row, rows) {
+          match (row) case %(op = ?target ?): row = target;
+          match (row) case %(bind ?binding ?): {
+            String name = Ast.binding_spelling(binding);
+            if (!name) {
+              String source = _program_slice(c, _program_span(c, node));
+              if (source) { text.write(source); text.write("\n"); }
+              continue;
+            }
+            Type type = c.sym.get_exact($(name));
+            if (!type || _program_private(c, name, type)) continue;
+            text.write("extern ");
+            text.write(_program_declaration(c, type, name));
+            text.write("\n");
+          }
+        }
+      }
+      case %(function ?spec (bind ?binding ?) ?): {
+        String name = Ast.binding_spelling(binding);
+        Type type = c.sym.get_exact($(name));
+        if (!type || _program_private(c, name, type)) continue;
+        List source = c.fact(%(api-definition $binding));
+        String declaration = source ? _program_slice(c, source.caddr()) : NULL;
+        text.write(declaration ? declaration :
+                   _program_declaration(c, type, name).rstrip(";"));
+        text.write(";\n");
+      }
+    }
+  }
+  return text;
+}
+
+static String _program_unit(ProgramBuild &b, String path) {
+  if (path in b.seen) return NULL;
+  b.seen[path] = 1;
+  ReplProgram program = b.program;
+  Frontend frontend = b.frontend;
+  struct CliRequest options = *frontend.request;
+  options.source_facts = 1;
+  struct Frontend configured = *frontend;
+  configured.request = &options;
+  ParsedUnit unit;
+  int opened = Frontend.start(&configured, path, unit);
+  defer unit.close();
+  Compiler c = unit.compiler;
+  if (!Path.is_x2c_source(path)) c.source_private = -1;
+  if (!(opened && unit.collect(&configured) && unit.parse())) {
+    foreach (List diagnostic, c.diagnostics()) c.print_diagnostic(diagnostic);
+    return %"$path: x2c could not collect its declarations";
+  }
+  struct ReplProgram collected = {
+    .symbols = {}, .descriptions = {}, .sources = {}, .macros = {}};
+  ProgramBuild local = b;
+  local.program = &collected;
+  local.exports = [];
+  local.units = {};
+  collected.sources[path] = c.text;
+  foreach (Var (file, text), c.source_texts) collected.sources[file] = text;
+  _program_describe(local, unit, path);
+  program.symbols.merge(unit.context.export(collected.symbols));
+  program.descriptions.merge(unit.context.export(collected.descriptions));
+  program.sources.merge(unit.context.export(collected.sources));
+  foreach (List row, (Array) unit.context.export(local.exports))
+    if (!(row.car() in b.units)) {
+      b.units[row.car()] = 1;
+      b.exports.push(row);
+    }
+  String header = %"$(program.directory)/unit-$(b.headers.len()).h";
+  if (Path.is_x2c_source(path)) {
+    List code = c.generate_code_text(c.transform(unit.ast),
+                                    %"unit-$(b.headers.len())");
+    Path.write_text(header, code.cadr());
+  }
+  else Path.write_text(header, _program_c_header(c, unit.ast));
+  b.headers.push(unit.context.export($(header, Path.dirname(path))));
+  foreach (Var (dependency, hash), c.deps) {
+    String file = dependency;
+    if (file.startswith("search:") || !Path.is_file(file)) continue;
+    if (!(file in b.fingerprints))
+      b.fingerprints[unit.context.export(file)] =
+        unit.context.export(Path.content_identity(file));
+    String home = Compiler.home_dir();
+    if (Path.is_x2c_source(file) &&
+        !(home && (file.startswith(%"$home/lib/") ||
+                   file.startswith(%"$home/src/") ||
+                   file.startswith(%"$home/etc/"))) && !(file in b.seen))
+      b.roots.push(unit.context.export(file));
+  }
+  foreach (List row, c.included_macros(path, 0, Path.dirname(path), NULL))
+    program.macros[unit.context.export(row.car())] =
+      unit.context.export(row.cadr());
+  return NULL;
+}
+
+static String _program_native_build(
+  ProgramBuild &b, CliRequest request, List sources, Symbol kind,
+  String output, String directory) {
+  String driver = Compiler.driver_executable();
+  if (!driver) return "the matching x2c compiler is unavailable";
+  Array command = [driver, "build", "--plain", "--kind",
+    kind == <module> ? "meta-module" : "static-library",
+    "--build-dir", directory, "--output", output, "-Xcc", "-fPIC"];
+  foreach (String option, _program_options(request)) command.push(option);
+  foreach (String directory, b.includes) {
+    command.push("--c-include-dir"); command.push(directory);
+  }
+  if (kind == <module>)
+    foreach (String option, request.ld_args) {
+      if (option.startswith("-")) command.push(option);
+      else command.push(option);
+    }
+  foreach (String source, sources) command.push(source);
+  return _program_command(command);
+}
+
+/* Each manifest dependency keeps its own compiler and native options. */
+static CliRequest _program_request(ProgramBuild &b, String &failure) {
+  CliRequest command = b.frontend.request;
+  if (!command.manifest && !command.target && !command.profile) return command;
+  struct CliRequest planning = *command;
+  planning.inputs = NULL;
+  if (!planning.sources) planning.sources = SourceView.new();
+  ProjectBuild plan = ProjectBuild.plan(&planning);
+  Map products = {};
+  int index = 0;
+  for (ProjectBuild node = plan; node; node = node.next) {
+    CliRequest request = node.request;
+    request.inputs = request.inputs.map(%!(String path) =>
+      path in products ? products[path].str() : path);
+    request.native_modules = request.native_modules.map(
+      %!(String path) =>
+        path in products ? products[path].str() : path);
+    if (!node.next) return request;
+    String directory = %"$(b.program.directory)/dependency-$index";
+    String suffix = request.kind == <module> ? ".module" : ".a";
+    String output = %"$(b.program.directory)/dependency-$index$suffix";
+    failure = _program_native_build(b, request, request.inputs, request.kind,
+                                    output, directory);
+    if (failure) return NULL;
+    if (request.output) products[request.output] = output;
+    _program_generated_dirs(%"$directory/gen", b.includes);
+    index++;
+  }
+  return command;
+}
+
+static String _program_exports(ProgramBuild &b) {
+  ReplProgram program = b.program;
+  Array code = [];
+  int index = 0;
+  foreach (List pair, b.headers) {
+    String header = pair.car(), directory = pair.cadr();
+    code.push(%"#include $(header.repr())\n");
+    (void) directory;
+  }
+  code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
+  foreach (List row, b.exports) {
+    String name = row.cadr();
+    code.push(%"    case $index: return (void *) &$name;\n");
+    index++;
+  }
+  code.push("  }\n  return 0;\n}\n");
+  code.push(%"int x2c_repl_program_count(void) { return $(b.exports.len()); }\n");
+  String source = %"$(program.directory)/addresses.c";
+  Path.write_text(source, "".join(code));
+  if (!(program.directory in b.includes)) b.includes.push(program.directory);
+  foreach (List pair, b.headers)
+    if (!(pair.cadr() in b.includes)) b.includes.push(pair.cadr());
+  b.objects.push(source);
+  String entry = %"$(program.directory)/program-entry.x";
+  Path.write_text(entry, "meta int x2c_repl_program_count(void);\n");
+  b.objects.push(entry);
+  program.exports = b.exports;
+  return NULL;
+}
+
+static void _program_generated_dirs(Path directory, Array into) {
+  if (!directory.is_dir()) return;
+  int headers = 0;
+  foreach (String name, directory.list_dir()) {
+    Path path = directory.join(name);
+    if (path.is_dir()) _program_generated_dirs(path, into);
+    else if (path.endswith(".h")) headers = 1;
+  }
+  if (headers && !(directory in into)) into.push(directory);
+}
+
+static String _program_header(ProgramBuild &b) {
+  ReplProgram program = b.program;
+  String source = %"$(program.directory)/declarations.c";
+  String expanded = %"$(program.directory)/declarations.i";
+  Buffer text = auto Buffer.new(0);
+  text.write("#include \"x2c.h\"\n#include \"meta.h\"\n");
+  text.write("#line 1 \"x2c-repl-declarations\"\n");
+  foreach (List pair, b.headers)
+    text.printf("#include %s\n", ((String) pair.car()).repr());
+  Path.write_text(source, text);
+  Array directories = b.includes.copy();
+  if (!(program.directory in directories)) directories.push(program.directory);
+  foreach (List pair, b.headers)
+    if (!(pair.cadr() in directories)) directories.push(pair.cadr());
+  ToolAction preprocess = b.frontend.toolchain.preprocess_action(
+    source, expanded, directories);
+  String failure = _program_command($(@(preprocess.arguments), "-dD"));
+  if (failure) return failure;
+  String result = Path.read_text(expanded);
+  int marker = result.find("\"x2c-repl-declarations\"");
+  if (marker < 0) return "the native declaration snapshot has no source marker";
+  int start = result[marker:].find("\n");
+  if (start >= 0) start += marker;
+  program.header = %"$(program.directory)/program.h";
+  Path.write_text(program.header,
+    "#pragma once\n" + (start < 0 ? "" : result[start + 1:]));
+  return NULL;
+}
+
+static String _program_open(ReplProgram program) {
+  program.handle = dlopen(program.module, RTLD_NOW | RTLD_LOCAL);
+  if (!program.handle) return String.new(dlerror());
+  void *(*address)(unsigned) =
+    (void *(*)(unsigned)) dlsym(program.handle, "x2c_repl_program_address");
+  if (!address) return "the native program has no address table";
+  unsigned index = 0;
+  program.addresses = {};
+  foreach (List row, program.exports)
+    program.addresses[row.car()] = address(index++);
+  return NULL;
+}
+
+/** Builds the root set as one native program without transporting its values. */
+ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) {
+  failure = NULL;
+  ReplProgram program = xcalloc(1, sizeof(struct ReplProgram));
+  *program = (struct ReplProgram) {
+    .directory = Path.temp_dir(), .symbols = {}, .addresses = {},
+    .descriptions = {}, .sources = {}, .dependencies = {}, .macros = {},
+    .cc_args = frontend.request.cc_args, .ld_args = frontend.request.ld_args};
+  ProgramBuild build = {
+    .program = program, .frontend = frontend, .roots = [], .headers = [],
+    .objects = [], .archives = [], .exports = [], .includes = [], .seen = {}, .units = {},
+    .fingerprints = {}};
+  CliRequest request = _program_request(build, failure);
+  if (!request) return NULL;
+  if (request != frontend.request) {
+    frontend = Frontend.new(request);
+    build.frontend = frontend;
+    program.cc_args = request.cc_args;
+    program.ld_args = request.ld_args;
+    roots = roots.append(request.inputs);
+  }
+  Array native = [], source = [];
+  foreach (String root, roots) {
+    String path = Path.resolved_absolute(root);
+    if (!Path.is_file(path)) { failure = %"cannot read input file: $root"; return NULL; }
+    if (path.endswith(".o") || path.endswith(".a") || path.endswith(".so") ||
+        path.endswith(".dylib")) {
+      native.push(path);
+      if (path.endswith(".so") || path.endswith(".dylib"))
+        program.dependencies[path] = Path.content_identity(path);
+    }
+    else build.roots.push(path);
+  }
+  for (int i = 0; i < build.roots.len(); i++) {
+    String path = build.roots[i];
+    failure = _program_unit(build, path);
+    if (failure) return NULL;
+    if (!path.endswith(".h") && !(path in source)) source.push(path);
+  }
+  failure = _program_exports(build);
+  if (failure) return NULL;
+  program.module = %"$(program.directory)/program.module";
+  List inputs = %(@source @(native.list()) @(build.objects.list()));
+  String native_directory = %"$(program.directory)/native";
+  failure = _program_native_build(build, request, inputs, <module>,
+                                  program.module, native_directory);
+  if (failure) return NULL;
+  _program_generated_dirs(%"$native_directory/gen", build.includes);
+  failure = _program_header(build);
+  if (failure) return NULL;
+  program.roots = roots;
+  foreach (Var (file, before), build.fingerprints)
+    if (Path.content_identity(file) != before) {
+      failure = %"$file changed while loading; load it again";
+      return NULL;
+    }
+  failure = _program_open(program);
+  return failure ? NULL : program;
+}
+
+/** Publishes native addresses and compiler-owned declaration rows in a worker. */
+void repl_program_bind(ReplProgram program, ReplSession session) {
+  session.program = program;
+  session.frontend.request.cc_args = program.cc_args;
+  session.frontend.request.ld_args = program.ld_args;
+  session.frontend.toolchain = Toolchain.new(session.frontend.request);
+  foreach (Var (key, value), program.symbols)
+    session.compiler.sym.define_global(key, value);
+  foreach (Var (name, description), program.descriptions) {
+    session.descriptions[name] = description;
+    Symbol kind = description.map()["kind"];
+    String path = description.map()["path"];
+    session.names[name] = %($kind (source $path));
+  }
+  foreach (Var (name, address), program.addresses)
+    session.addresses[name] = address;
+  session.declarations.push(%(preproc $(%"#include $(program.header.repr())")));
+}
+
+/** Returns the changed explicit native dependency, or NULL when unchanged. */
+String repl_program_changed(ReplProgram program) {
+  foreach (Var (path, identity), program.dependencies)
+    if (Path.content_identity(path) != identity)
+      return %"native dependency changed: $path; use :reload";
+  return NULL;
+}
+
+/** Exports retained artifacts and descriptions, excluding process addresses. */
+List repl_program_snapshot(ReplProgram p) =>
+  $(p.directory, p.module, p.header, p.roots, p.declarations, p.exports,
+    p.symbols, p.descriptions, p.sources, p.dependencies, p.macros,
+    p.cc_args, p.ld_args);
+
+/** Reopens an exact retained native program and recreates its addresses. */
+ReplProgram repl_program_restore(List snapshot, String &failure) {
+  ReplProgram p = xcalloc(1, sizeof(struct ReplProgram));
+  p.directory = snapshot[0]; p.module = snapshot[1]; p.header = snapshot[2];
+  p.roots = snapshot[3]; p.declarations = snapshot[4]; p.exports = snapshot[5];
+  p.symbols = snapshot[6]; p.descriptions = snapshot[7]; p.sources = snapshot[8];
+  p.dependencies = snapshot[9]; p.macros = snapshot[10];
+  p.cc_args = snapshot[11]; p.ld_args = snapshot[12];
+  failure = repl_program_changed(p);
+  if (!failure) failure = _program_open(p);
+  return failure ? NULL : p;
+}
+
+/** Ends a program binding; its code stays mapped until the worker exits. */
+void repl_program_close(ReplProgram program) { (void) program; }
