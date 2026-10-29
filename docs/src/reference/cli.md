@@ -827,8 +827,10 @@ program's `--help`. Built-in commands retain response-file expansion.
 `x2c test [options] [files-or-directories...]` builds and runs project test
 programs. The command is experimental and available in checkout builds;
 `make install` does not install it. With no operands, it searches below the
-nearest `x2c.toml`, or the current directory. Discovery selects `*_test.x`, `test_*.x`, and `.x` files
-inside `tests/`, excluding `.x2c-build/`.
+nearest `x2c.toml`, or the current directory. Discovery selects
+`*_test.x`, `test_*.x`, and `.x` files inside `tests/`, excluding
+`.x2c-build/`. Directory matching is relative to the selected project or
+search root; an ancestor named `tests` does not select application sources.
 
 The selected target's include and package directories are forwarded to
 each build. Concurrent runs print each file's captured output in discovery
@@ -837,9 +839,12 @@ order. Each file runs through
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
 
-The final line reports passed and failed files and tests. The command exits
-with status 1 if any file fails to build or run, and 2 if discovery finds no
-files. See [Testing](../guide/testing.md) for the test library and assertions.
+The final line reports passed and failed files and tests. With `--filter`,
+files containing no matching tests are omitted from output and file counts.
+The command returns 2 if filters select no tests across the whole run,
+including with `--list`, or if discovery finds no files. Actual build or
+test failures return 1 even when other files have no matches. See
+[Testing](../guide/testing.md) for the test library and assertions.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

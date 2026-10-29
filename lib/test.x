@@ -55,6 +55,7 @@ void Test.skip(String reason) {
 /** Runs registered tests, returning 1 on failure or 2 for an unmatched
     filter. `--filter TEXT` is repeatable and selects names containing any
     filter; `--list` prints selected names; `--quiet` omits passing lines.
+    Unmatched filters print a zero-test summary, including with `--list`.
 */
 int Test.main(int argc, char **argv) {
   List filters = NULL;
@@ -94,7 +95,7 @@ int Test.main(int argc, char **argv) {
       if (!quiet) Stdout.printf("ok %s\n", name);
     }
   }
-  if (!list)
+  if (!list || (filters && !matched))
     Stdout.printf(
       "%d passed, %d failed, %d skipped\n", passed, failed, skipped);
   return failed ? 1 : filters && !matched ? 2 : 0;
@@ -109,7 +110,10 @@ static int _selected(String name, List filters) {
 static void _run(TestFunction function) {
   _failures = NULL, _skipped = NULL, _did_skip = 0;
   try function();
-  catch %(test-skip (reason ?reason)): { _skipped = reason; _did_skip = 1; }
+  catch %(test-skip (reason ?reason)): {
+    _skipped = Error.snapshot(reason);
+    _did_skip = 1;
+  }
   catch %(?cause *detail):
     _failures = cons(
       %"uncaught Error $(cause.repr()): $(detail.repr())", _failures);
