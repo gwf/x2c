@@ -1,233 +1,315 @@
-/*  repl-native.x -- prompt functions with shared session bindings
+/*  repl-native.x -- native submissions with stable session bindings
 
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
-#include "repl-session.x"
+#include "repl-types.x"
 #include "ast-rewrite.x"
 #include "callables/callables.x"
 #include "expressions/expressions.x"
 #include "meta-group/meta-group.x"
-#include "lambdas.x"
-#include "protocol/protocol.x"
-#include "repl-native-types.x"
+#include "utils.x"
+#include "scope/scope.x"
+#include <stdint.h>
 
-static typedef struct PromptFunction {
+List repl_render(Compiler c, Type type, List expression, List output,
+                 int depth, int limit);
+
+static typedef struct NativeSubmission {
   ReplSession session;
-  List syntax, original, body, self, context;
-  Type type, body_type;
-  Map captures;
-  Array values;
-} PromptFunction;
+  List syntax, environment, original, entry;
+  Type type;
+  Map captures, objects;
+  Array values, identities, body;
+  int persistent, prints;
+} NativeSubmission;
 
-static List _local(Compiler c, List expression) => c.lambda_scopes
-  ? c.capture_lambda_identifier(expression.caddr().cadr(), expression.cadr())
-  : expression;
+/** Allocates native storage at the alignment the host compiler supplied. */
+void *repl_native_storage(size_t size, size_t alignment) {
+  uintptr_t base = (uintptr_t) xmalloc(size + alignment - 1);
+  return (void *) ((base + alignment - 1) & ~(uintptr_t) (alignment - 1));
+}
 
-/* Every capture is a pointer: either a native object's address or a Func.
-   The factory copies these pointers into the new function's context. */
-static List _capture(
-  PromptFunction &p, List binding, void *pointer, Type type) {
+static List _native_capture(
+  NativeSubmission &n, Var identity, void *address, Type type) {
+  Compiler c = n.session.compiler;
   Var index;
-  if (!p.captures.try_get(binding, index)) {
-    index = (int) p.values.len();
-    p.captures[binding] = index;
-    p.values.push(pointer);
+  if (!n.captures.try_get(identity, index)) {
+    index = (int) n.values.len();
+    n.captures[identity] = index;
+    n.values.push(address);
+    n.identities.push(identity);
   }
   List slot = %(expr (* void)
-    (index $(_local(p.session.compiler, p.context)) $($!int{ $index })));
+    (index $(n.environment) $($!int{ $index })));
   return %(expr $type (cast $type $slot));
 }
 
-/* Only published session bindings need an indirect call or shared object.
-   Ordinary library functions keep the compiler's native call path. */
-static List _session_value(PromptFunction &p, Type type, List binding) {
+static List _native_name(NativeSubmission &n, Type type, List binding) {
+  if (binding == n.original)
+    return %(expr $type (ident $(n.entry)));
+  Var object;
+  if (n.objects.try_get(binding, object)) {
+    List pointer = object;
+    Type address = type.reference();
+    return %(expr $type
+      (op * (expr $address (cast $address $pointer))));
+  }
   String name = Ast.binding_spelling(binding);
-  Compiler c = p.session.compiler;
   Type global_type = NULL;
-  List global = c.sym.resolve_global($(name), global_type);
-  if (!global || !global.equal(binding)) return NULL;
-  List entry = p.session.inspect(name);
-  if (type.is_function()) {
-    if (!entry && !(name in p.session.accessors) &&
-        name != "print" && name != "println") return NULL;
-    Var callable;
-    if (!p.session.evaluator.try_get(name, callable) || callable is not <func>)
-      raise %(repl (reason $(%"function has no native binding: $name")));
-    return _capture(p, binding, callable.pointer(), %("Func"));
-  }
-  if (!entry || entry.car() != <value>) return NULL;
-  Var stored;
-  p.session.evaluator.try_get("C.globals", stored);
-  Map globals = stored;
-  Var address = globals[binding.cadr()];
-  Type pointer = type.reference();
-  List captured = _capture(p, binding, address.pointer(), pointer);
-  return %(expr $type (op * $captured));
+  List global = name ? n.session.compiler.sym.resolve_global($(name), global_type)
+                     : NULL;
+  if (!global || global != binding || !(name in n.session.addresses))
+    return NULL;
+  Var stored = n.session.addresses[name];
+  Type address = type.reference();
+  List captured = _native_capture(n, binding, stored.pointer(), address);
+  return type.is_function() ? captured : %(expr $type (op * $captured));
 }
 
-static List _rewrite_call(
-  PromptFunction &p, Type result, Var target, List arguments) {
-  Compiler c = p.session.compiler;
-  Array rewritten = auto [];
-  foreach (Var argument, arguments) rewritten.push(_rewrite(p, argument));
-  match (target)
-    case %(expr ? (ident $(p.original))):
-      return %(expr $result (call (expr $(p.body_type) (ident $(p.body)))
-        (args $(_local(c, p.self)) @(rewritten.list()))));
-  Var callee = _rewrite(p, target);
-  match (callee) case %(expr ("Func") ?): {
-    /* A Func boxes each value argument by its own type, so give it the type
-       the declaration names, as the native call it replaces would. The call
-       passes a reference argument's own place. */
-    match (target) case %(expr ((func ?declared) *) ?):
-      for (int i = 0; declared && i < rewritten.len(); i++) {
-        Var param = car(declared);
-        declared = cdr(declared);
-        if (Type.rest_container(param)) break;
-        if (param is <list> && !((Type) param).is_reference())
-          rewritten[i] = c.convert_expression(rewritten[i], param);
-      }
-    List call = c.resolve_expression(
-      %(expr () (call $callee (args @(rewritten.list())))), NULL);
-    return c.convert_expression(call, result);
-  }
-  return %(expr $result (call $callee (args @(rewritten.list()))));
-}
-
-static Var _rewrite(PromptFunction &p, Var node) {
+static Var _native_rewrite(NativeSubmission &n, Var node) {
   if (node is not <list>) return node;
-  Compiler c = p.session.compiler;
   match (node) {
-    case %(expr ?type (lambda ?params (captures *captures) ?body)):
-      return _rewrite_lambda(p, type, params, captures, body);
-    case %(expr ?type (lambda ?params ?body)):
-      return _rewrite_lambda(p, type, params, NULL, body);
-    case %(expr ?result (call ?target (args *arguments))):
-      return _rewrite_call(p, result, target, arguments);
-    case %(expr ? (parens (!set ?inner (expr ? ?)))): {
-      List rewritten = _rewrite(p, inner);
-      return %(expr $(rewritten.cadr()) (parens $rewritten));
+    case %(expr ?type (ident ?binding)): {
+      List result = _native_name(n, type, binding);
+      if (result) return result;
     }
-    case %(expr ?type (op & (expr ?(Type source) ?payload))): {
-      List operand = _rewrite(p, %(expr $source $payload));
-      if (source.is_function() && operand.cadr() == %("Func")) return operand;
-      return %(expr $type (op & $operand));
-    }
-    case %(expr ?type (op ?operator (expr ?source ?payload)))
-      if (operator == <"*">): {
-        List operand = _rewrite(p, %(expr $source $payload));
-        return source != %("Func") && operand.cadr() == %("Func") ? operand
-          : %(expr $type (op $operator $operand));
-      }
-    case %(expr ?type (cast ?target (expr ?(Type source) ?payload))): {
-      List operand = _rewrite(p, %(expr $source $payload));
-      if (source != %("Func") && operand.cadr() == %("Func"))
-        return c.convert_expression(operand, target);
-      return %(expr $type (cast $target $operand));
-    }
-    case %(expr ?(Type type) (ident ?binding)): {
-      if (binding == p.original) return _local(c, p.self);
-      List captured = _session_value(p, type, binding);
-      if (captured) return captured;
-    }
+    case %(expr ?type (op & (!set ?value (expr ?(Type source) ?))))
+      if (source.is_function()): return _native_rewrite(n, value);
   }
-  /* A conditional or comma expression can now yield a Func instead of a
-     native designator. Let the ordinary resolver infer that result. */
-  match (node) case %(expr ?(Type type) ?content)
-    if (type.is_function() ||
-        (type.is_pointer() && type.dereference().is_function())): {
-      List rewritten = _rewrite(p, content);
-      return rewritten == content ? node
-        : c.resolve_expression(%(expr () $rewritten), NULL);
-    }
   List child;
-  $ast.rewrite_children(node, child, _rewrite(p, child));
+  $ast.rewrite_children(node, child, _native_rewrite(n, child));
 }
 
-/* Global references become context reads. Resolve the newly introduced
-   local through ordinary capture binding at each nested lambda. */
-static List _rewrite_lambda(
-  PromptFunction &p, Type type, List params, List captures, List body) {
-  Compiler c = p.session.compiler;
-  captures = _rewrite(p, captures);
-  with (c.lambda_scopes = c.lambda_scopes) {
-    c.begin_lambda_captures(NULL, NULL);
-    c.sym.push_new_scope();
-    defer c.sym.pop_scope();
-    body = _rewrite(p, body);
-    captures = %(@captures @(c.end_lambda_captures()));
+static List _native_function(Compiler c, Type type, List binding, List body) {
+  List declaration = type.declaration_ast(binding);
+  return %(function (static @(declaration.cadr()))
+    $(declaration.caddr().cadr()) $body);
+}
+
+static List _native_expr(Compiler c, Type type, List binding) =>
+  %(expr $type (ident $binding));
+
+static List _native_result_set(
+  Compiler c, List result, String name, List value) =>
+  c.rebuild_statement($!{ $result[$name] = $value; });
+
+static void _native_object(
+  NativeSubmission &n, Type spec, List row, List result) {
+  Compiler c = n.session.compiler;
+  List bound = row, initial = NULL;
+  match (row) case %(op = ?target ?value): {
+    bound = target;
+    initial = value;
   }
-  return captures
-    ? %(expr ("Func") (lambda $params (captures @captures) $body))
-    : %(expr $type (lambda $params $body));
+  List binding = NULL, mods = NULL;
+  match (bound) case %(bind ?found ?modifiers): {
+    binding = found;
+    mods = modifiers;
+  }
+  if (!Ast.try_binding(binding, NULL, NULL))
+    raise %(repl (reason "a persistent declaration needs a named object"));
+  Type type = %(declare $spec (bindings $bound)).type_from_ast().declared();
+  if (type.is_function()) return;
+  String name = Ast.binding_spelling(binding);
+  List pointer_binding = c.sym.introduce(
+    %"__repl_object_$(binding.cadr())");
+  List pointer = _native_expr(c, %(* void), pointer_binding);
+  c.add_early(c.bind_syntax(
+    $!Unit{ static void *$pointer_binding; }, <unit>, NULL));
+  n.objects[binding] = pointer;
+  List temporary = c.sym.introduce(%"__repl_initial_$(binding.cadr())");
+  List declaration = %(declare $spec (bindings
+    (op = (bind $temporary $mods)
+      $(initial ? _native_rewrite(n, initial) : %(composite (commas))))));
+  c.sym.bind_identity(NULL, temporary, declaration);
+  n.body.push(declaration);
+  List value = _native_expr(c, type, temporary);
+  List allocator = c.sym.reference_global(%("repl_native_storage"));
+  List allocate = c.rebuild_statement($!{
+    $pointer = $allocator(sizeof($value), _Alignof(__typeof__($value)));
+  });
+  n.body.push(allocate);
+  n.body.push(c.rebuild_statement($!{
+    memcpy($pointer, (const void *) &$value, sizeof($value));
+  }));
+  n.body.push(_native_result_set(c, result, name, pointer));
 }
 
-/* This runs inside native emission isolation so adapter and literal setup
-   belong to this module, while all captured values belong to the session. */
-static List _prepare(Compiler c, PromptFunction &p) {
-  p.session.native_type_declarations(p.syntax);
-  match (p.syntax)
-    case %(function ?spec (!set ?original
-      (bind ?binding ((fnmod (params *params)) *mods))) ?body): {
-      p.original = binding;
-      p.type = %(declare $spec (bindings $original)).type_from_ast();
-      p.body = c.sym.introduce("__repl_body");
-      List self = c.sym.introduce("__repl_self");
-      List context = c.sym.introduce("__repl_context");
-      p.self = %(expr ("Func") (ident $self));
-      p.context = %(expr (* * void) (ident $context));
-      if (params.match(%((param (void) (bind () ()))))) params = NULL;
-      List declared = %((param ("Func") (bind $self ())) @params);
-      List declarator = %(bind $(p.body) ((fnmod (params @declared)) @mods));
-      p.body_type = %(declare $spec (bindings $declarator)).type_from_ast();
-      List rewritten, setup;
-      {
-        c.sym.push_new_scope();
-        defer c.sym.pop_scope();
-        c.sym.bind_identity(NULL, self, %("Func"));
-        setup = c.bind_syntax(
-          $!{ void **$context = (void **) Func.context($(p.self)); },
-          <block>, NULL);
-        rewritten = _rewrite(p, body);
-      }
-      c.add_early(%(function (static @spec) $declarator
-        $(c.prepend_setup(rewritten, $(setup)))));
-      List target = %(expr $(p.body_type) (ident $(p.body)));
-      List adapter = c.context_func_adapter(p.type, target);
-      List signature = c.cache_literal_list(c.func_signature(p.type));
-      List factory = c.sym.introduce("__repl_factory");
-      List captures = c.sym.introduce("__repl_captures");
-      List pointer = %(expr (* void) (ident $captures));
-      List made = %(expr ("FuncAdapter") (ident $adapter));
-      List size = $!size_t{ $(p.values.len() * sizeof(void *)) };
-      return c.bind_syntax($!Unit{
-        Func $factory(void *$captures) {
-          return Func.new_context($made, $signature, $pointer, $size);
-        }
-      }, <unit>, NULL);
+static void _native_defer(NativeSubmission &n, List body) {
+  Compiler c = n.session.compiler;
+  List name = c.sym.introduce(c.fresh_name("repl_cleanup"));
+  List function = _native_function(
+    c, %((func ((void))) void), name,
+    %(block $(_native_rewrite(n, body))));
+  c.add_early(function);
+  List entry = _native_expr(c, %((func ((void))) void), name);
+  List callable = c.convert_expression(entry, %("Func"));
+  List cleanups = _native_capture(
+    n, %(<cleanups>), (void *) n.session.cleanups, %("Array"));
+  n.body.push(c.rebuild_statement($!{ $cleanups.push($callable); }));
+}
+
+static void _native_statements(
+  NativeSubmission &n, List statements, List result) {
+  Compiler c = n.session.compiler;
+  foreach (List anchored, statements) {
+    List statement = Ast.without_origin(anchored);
+    if (statement ~= %(seq *items)) {
+      _native_statements(n, items, result);
+      continue;
     }
-  return NULL;
+    if (n.persistent) {
+      match (statement) {
+        case %(declare ?spec (bindings *rows)): {
+          foreach (List row, rows) _native_object(n, spec, row, result);
+          continue;
+        }
+        case $deferred(?finalizer): {
+          _native_defer(n, finalizer);
+          continue;
+        }
+      }
+    }
+    n.body.push(_native_rewrite(n, anchored));
+  }
 }
 
-/** Compiles and instantiates one typed prompt definition without publishing
-    its name. Captured objects and functions retain the session's identity. */
-Func ReplSession.compile_function(ReplSession session, List syntax) {
-  PromptFunction prompt = {
-    .session = session, .syntax = syntax, .captures = {}, .values = []};
-  defer { prompt.captures.cleanup(); prompt.values.free(); }
+static void _native_render(
+  NativeSubmission &n, List expression, List result) {
+  Compiler c = n.session.compiler;
+  expression = _native_rewrite(n, expression);
+  Type type = expression.cadr();
+  List value = expression;
+  if (!type.is_array()) {
+    List name = c.sym.introduce(c.fresh_name("repl_result"));
+    List declaration = type.declaration_ast(name);
+    declaration = %(declare $(declaration.cadr()) (bindings
+      (op = $(declaration.caddr().cadr()) $expression)));
+    c.sym.bind_identity(NULL, name, declaration);
+    n.body.push(declaration);
+    value = _native_expr(c, type, name);
+  }
+  List output_binding = c.sym.introduce(c.fresh_name("repl_output"));
+  c.sym.bind_identity(NULL, output_binding, %("Buffer"));
+  List output = _native_expr(c, %("Buffer"), output_binding);
+  n.body.push(c.rebuild_statement($!{ Buffer $output_binding = Buffer.new(128); }));
+  n.body.push(repl_render(c, type, value, output,
+    n.session.inspect_depth, n.session.inspect_limit));
+  List formatted = c.resolve_expression($!String{ $output.str() }, NULL);
+  n.body.push(_native_result_set(c, result, "formatted", formatted));
+  n.body.push(c.rebuild_statement($!{ $output.free(); }));
+}
+
+static List _native_prepare(Compiler c, NativeSubmission &n) {
+  List env = c.sym.introduce("__repl_environment");
+  n.environment = _native_expr(c, %(* * void), env);
+  c.add_early(c.bind_syntax($!Unit{ static void **$env; }, <unit>, NULL));
+  List allocator = c.sym.introduce("repl_native_storage");
+  c.add_early(c.bind_syntax(
+    $!Unit{ void *$allocator(size_t size, size_t alignment); },
+    <unit>, NULL));
+  List argument = c.sym.introduce("__repl_captures");
+  List parameter = _native_expr(c, %(* void), argument);
+  List returned = c.sym.introduce("__repl_response");
+  List result = _native_expr(c, %("Map"), returned);
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  c.sym.bind_identity(NULL, argument, %(* void));
+  c.sym.bind_identity(NULL, returned, %("Map"));
+  n.body.push(c.rebuild_statement($!{ Map $returned = {}; }));
+  if (n.syntax ~= %(function ?spec (bind ?original ?mods) ?body)) {
+    n.original = original;
+    n.type = %(declare $spec (bindings (bind $original $mods))).type_from_ast();
+    n.entry = c.sym.introduce(
+      %"__repl_native_$(original.cadr())_$(Ast.binding_spelling(original))");
+    List storage = n.type.is_static() ? spec : cons(<static>, spec);
+    c.add_early(%(function $storage (bind $(n.entry) $mods)
+      $(_native_rewrite(n, body))));
+    List target = _native_expr(c, n.type, n.entry);
+    n.body.push(_native_result_set(c, result,
+      Ast.binding_spelling(original), c.resolve_expression(
+        $!(void *){ (void *) &$target }, NULL)));
+  }
+  else {
+    List statements = n.syntax;
+    if (n.syntax ~= %(block *items)) statements = items;
+    if (n.prints && statements) {
+      Array parts = auto statements;
+      List last = Ast.without_origin(parts[parts.len() - 1]);
+      if (last ~= %(stmnt ?expression)) {
+        parts.pop();
+        _native_statements(n, parts, result);
+        _native_render(n, expression, result);
+      }
+    }
+    else _native_statements(n, statements, result);
+  }
+  List initialize = c.rebuild_statement($!{
+    if (!$(n.environment))
+      $(n.environment) = (void **) xmemdup(
+        $parameter, $(n.values.len() * sizeof(void *)));
+  });
+  List setup = n.body;
+  List body = %(block $initialize @setup (return ("Map") $result));
+  return c.bind_syntax(
+    %(function ("Map")
+      (bind $(c.sym.introduce("__repl_factory"))
+        ((fnmod (params (param (* void) (bind $argument ())))))) $body),
+    <unit>, NULL);
+}
+
+/** Compiles one entry with the session's native configuration and runs it. */
+Map repl_native_execute(ReplSession session, List syntax, int persistent,
+                        int prints) {
+  NativeSubmission n = {
+    .session = session, .syntax = syntax, .persistent = persistent,
+    .prints = prints, .captures = {}, .objects = {},
+    .values = [], .identities = [], .body = []
+  };
+  defer {
+    n.captures.cleanup(); n.objects.cleanup();
+    n.values.free(); n.identities.free(); n.body.free();
+  }
   String failure = NULL;
-  Map targets = session.compiler.stage_session_function(
+  List code = session.compiler.emit_session_function(
     session.declarations,
-    %!(Compiler c) using &prompt => _prepare(c, prompt), failure);
-  if (!targets) raise %(repl (reason $failure));
+    %!(Compiler c) using &n => _native_prepare(c, n), failure);
+  if (!code) raise %(repl (reason $failure));
+  (String hname, String header, String cname, String source) = code;
+  CliRequest request = session.frontend ? session.frontend.request : NULL;
+  String configuration = request
+    ? $(request.cc_args, request.ld_args, request.include_dirs).repr() : "";
+  String runtime_headers = NULL;
+  Toolchain toolchain = session.frontend
+    ? session.frontend.toolchain
+    : Toolchain.for_meta(Compiler.meta_cc(runtime_headers));
+  String identity = String.sha256(
+    header + source + n.identities.repr() + configuration +
+    (session.program ? session.program.module : "") +
+    Compiler.module_stamp() + Compiler.meta_cc_identity(toolchain.cc) +
+    toolchain.include_dir);
+  String directory = %"$(Compiler.cache_root())/repl/$identity";
+  String module = %"$directory/group.module";
+  if (!Path.is_file(module)) {
+    Path.make_dirs(directory);
+    Path.write_text(%"$directory/$hname", header);
+    Path.write_text(%"$directory/$cname", source);
+    List inputs = $("-fPIC", "-O0", "-iquote", directory,
+      "-iquote", toolchain.include_dir, @(toolchain.cc_args),
+      %"$directory/$cname");
+    String output = %"$module.$((long) getpid())";
+    ToolAction action = toolchain.module_action(output, inputs, x2c_get_executable());
+    failure = Compiler.meta_cc_run(action.arguments, directory);
+    if (failure) raise %(repl (reason $failure));
+    Path.move_to(output, module);
+  }
+  String loaded = Compiler.load_native_module(module);
+  Map targets = Compiler.native_module_targets(loaded);
   Func factory = targets["__repl_factory"];
-  void **captures = xmalloc(prompt.values.len() * sizeof(void *));
+  void **captures = xcalloc(n.values.len() + 1, sizeof(void *));
   defer xfree(captures);
-  for (int i = 0; i < prompt.values.len(); i++)
-    captures[i] = prompt.values[i].pointer();
+  for (int i = 0; i < n.values.len(); i++) captures[i] = n.values[i].pointer();
   FuncArg argument = FuncArg.value(Var.new(<p48>, captures));
-  Func function = factory.apply(1, &argument);
-  function.move(session.evaluator.storage());
-  return function;
+  return factory.apply(1, &argument);
 }

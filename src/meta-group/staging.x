@@ -75,6 +75,16 @@ Map Compiler.stage_session_function(
   return Compiler.native_module_targets(Compiler.load_native_module(module));
 }
 
+/** Emits one session factory without compiling or loading its module.
+    The caller uses its configured native toolchain and retains the result. */
+List Compiler.emit_session_function(
+  Compiler c, List declarations, Func prepare, String &failure) {
+  failure = c.groups_meta() ? NULL : "native modules are unavailable";
+  if (failure) return NULL;
+  return _emit_prepared(c, Compiler.module_stamp(), "group", "",
+                        declarations, prepare, failure);
+}
+
 // meta group staging
 
 /* Builds and loads the unit's `meta` group, then binds each group

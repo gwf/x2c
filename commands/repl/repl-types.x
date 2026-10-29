@@ -20,6 +20,7 @@ typedef struct ReplSession {
   ReplProgram program;
   Map names, addresses, descriptions, internal;
   Array declarations, cleanups;
+  Scope storage;
   unsigned sequence;
   int inspect_depth, inspect_limit;
 } *ReplSession;

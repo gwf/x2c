@@ -1,105 +1,22 @@
-/*  repl-session.x -- persistent compiler submissions and inspection
+/*  repl-session.x -- native library playground submissions
 
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
-#include "frontend.x"
-#include "repl-lower.x"
-#include "repl-runtime.x"
-#include "emit/emit.x"
-#include "format.x"
-#include "ast-rewrite.x"
-
-/** One loaded file's origin and published declarations.
-    Callable adapters borrow this record until the session closes. */
-typedef struct ReplLoadedFile {
-  String path;
-  Map symbols;
-  List types;
-} *ReplLoadedFile;
-
-/** The caller keeps the compiler's unit Context open until every result and
-    this session are finished. Results borrow that Context's storage. */
-typedef struct ReplSession {
-  Compiler compiler;
-  Lisp evaluator;
-  ReplLower lowering;
-  Array declarations;
-  Map files, accessors;
-  // Runtime names the API ledgers mark internal, which completion hides.
-  Map internal;
-  MetaHelper helper;
-  // Published name -> (value), (type), (native [(source PATH) (objects CALL)]),
-  // (global (source PATH) PATHS), or
-  // (function (typed ...) (execution native)).
-  Map names;
-} *ReplSession;
-
-/** status is incomplete, empty, rejected, defined, loaded, reloaded,
-    executed, value, or failed. Empty input holds only space and comments.
-    diagnostics are ordinary compiler reports; message/cause describe the
-    adapter or evaluator failure. source retains diagnostic source text;
-    syntax and lowered support optional tracing. removed lists
-    `(PATH (NAME ...))` for each file whose functions a load removed. */
-typedef struct ReplResult {
-  Symbol status;
-  Var value;
-  String name, message, source;
-  List diagnostics, cause, syntax, lowered, removed;
-} ReplResult;
-
-/** Byte range and sorted `(kind "spelling")` replacement candidates for one
-    completion request. Candidate storage is borrowed until the session unit
-    closes. */
-typedef struct ReplCompletion {
-  size_t start, end;
-  List candidates;
-} ReplCompletion;
-
+#include "repl-types.x"
+#include "repl-native.x"
+#include "repl-ledgers.x"
 #include "parse/parse.x"
 #include "diagnostics.x"
-#include "lisp/lisp.x"
-#include "scope/scope.x"
-#include "meta.x"
-#include "refusal-errors.x"
-#include "repl-native.x"
-#include "repl-globals.x"
-#include "repl-ledgers.x"
-#include <errno.h>
-#include <signal.h>
-#include <stdio.h>
+#include "cpp/cpp.x"
+#include "ast-rewrite.x"
+#include <dlfcn.h>
 
-static void _write_stdout(String text, int newline, Symbol operation) {
-  size_t length = text.len();
-  if ((length && fwrite(text, 1, length, stdout) != length) ||
-      (newline && fputc('\n', stdout) == EOF) || ferror(stdout)) {
-    int error = errno;
-    raise %(io-fail (operation $operation) (errno $error));
-  }
-}
+void ReplSession.describe(ReplSession session, String name,
+                          List syntax, String source);
 
-static void _repl_print(String text) => _write_stdout(text, 0, <print>);
-static void _repl_println(String text) => _write_stdout(text, 1, <println>);
-
-static int _repl_puts(String text) {
-  _write_stdout(text, 1, <puts>);
-  return text.len() + 1;
-}
-
-/* Interpreted printf: the REPL's fixed-signature format, written out. */
-static int _repl_printf(String format, List values) {
-  String text = format.format(@values);
-  _write_stdout(text, 0, <printf>);
-  return text.len();
-}
-
-/* The evaluator a SIGINT interrupts while a submission runs. */
-static Lisp _running;
-
-static void _interrupt(int signal) {
-  (void) signal;
-  _running.set_interrupted(1);
-}
+static String _eval_head(void);
+static void _tokenize(ReplSession session, String source, Scope scratch);
 
 static List _ledger_rows(String text) {
   Array rows = [];
@@ -121,81 +38,6 @@ static Map _internal_names(void) {
       foreach (String name, listed.split(","))
         names[name.replace(".", "_")] = 1;
   return names;
-}
-
-/** Borrows an initialized submission compiler until its unit closes.
-    Source-fact collection must be disabled because submission scratch maps
-    are reclaimed after each call. */
-ReplSession ReplSession.new(Compiler compiler) {
-  if (compiler.source_facts)
-    raise %(bad-arg (operation "ReplSession.new")
-                   (reason "source facts retain temporary symbol maps"));
-  ReplSession session = xcalloc(1, sizeof(struct ReplSession));
-  session.compiler = compiler;
-  session.names = {};
-  session.files = {};
-  session.accessors = {};
-  session.internal = _internal_names();
-  session.declarations = [];
-  session.evaluator = Lisp.new();
-  repl_runtime_initialize(session.evaluator);
-  session.lowering = ReplLower.new(compiler, session.evaluator);
-  $lisp.bind(session.evaluator, "print", _repl_print);
-  $lisp.bind(session.evaluator, "println", _repl_println);
-  $lisp.bind(session.evaluator, "puts", _repl_puts);
-  $lisp.bind(session.evaluator, "repl.printf", _repl_printf);
-  return session;
-}
-
-/** Returns an immutable snapshot of (kind "name") entries, sorted by name.
-    Only session definitions appear; storage is borrowed until unit close. */
-List ReplSession.symbols(ReplSession session) {
-  Array names = auto [], entries = [];
-  foreach (Var (name, entry), session.names) names.push(name);
-  foreach (String name, names.sort()) {
-    List entry = session.names[name];
-    entries.push($(entry.car(), name));
-  }
-  return entries.list_free();
-}
-
-/** Returns (value), (type), (native [(source PATH) (objects CALL)]),
-    (global (source PATH) PATHS), (function (typed AST) (execution native)),
-    or NULL if absent. PATHS maps selections to getter/setter pairs.
-    These are the original canonical Lists, borrowed until unit close. */
-List ReplSession.inspect(ReplSession session, String name) {
-  Var entry;
-  return session.names.try_get(name, entry) ? entry.list() : NULL;
-}
-
-/** Returns a session function's declaration and source, or NULL for another
-    name. Formatting uses the compiler's declaration emitter without calling
-    the function. Loaded files supply their current declaration. */
-String ReplSession.function_info(ReplSession session, String name) {
-  String source = "prompt";
-  String declaration = _function_declaration(session, name, source);
-  if (!declaration) return NULL;
-  return %"$declaration;\nsource: $source\nexecution: native";
-}
-
-/* A session function's declaration without its semicolon, and the file or
-   `prompt` that defines it, or NULL for another name. */
-static String _function_declaration(
-  ReplSession session, String name, String &source) {
-  List entry = session.inspect(name);
-  if (!entry || (entry.car() != <function> && entry.car() != <native>))
-    return NULL;
-  Compiler c = session.compiler;
-  Type type = c.sym.get_exact($(name));
-  match (entry) case %(native (source ?(String path)) *): {
-    ReplLoadedFile file = session.files[path];
-    type = file.symbols[$(name)];
-    source = path;
-  }
-  List declaration = type.declaration_ast($(name));
-  String text = String.new(
-    c.code_pretty_string(c.emit($(declaration), NULL), NULL));
-  return text.strip(NULL).rstrip(";");
 }
 
 /* The compiler's input state, which a submission or completion replaces
@@ -256,7 +98,7 @@ static List _completion_filter(
       name = spelling;
       type = semantic;
     }
-    if (!name || !name.startswith(prefix) || name in session.accessors)
+    if (!name || !name.startswith(prefix) || name.startswith("__repl_"))
       continue;
     Type semantic_type = type is <list> ? type : NULL;
     if (kind == <type> && type != <typemacro> &&
@@ -267,10 +109,7 @@ static List _completion_filter(
     if (kind == <continue>) continue;
     if (type is <list>) {
       Type semantic = type;
-      Var callable;
-      if (semantic.is_function() && !session.names.contains(name) &&
-          !session.evaluator.try_get(name, callable))
-        continue;
+
     }
     Symbol candidate_kind = <name>;
     if (kind == <members>) candidate_kind = <member>;
@@ -294,6 +133,7 @@ static List _completion_filter(
     `native` also includes loaded functions and bound native prototypes. */
 List ReplSession.complete_functions(
   ReplSession session, String prefix, int native) {
+  (void) native;
   Array names = auto [], candidates = [];
   foreach (Var (candidate, stored), session.names) {
     if (candidate is not <string> || stored is not <list>) continue;
@@ -341,7 +181,7 @@ ReplCompletion ReplSession.complete(
   Symbol kind = 0;
   List rows = NULL, keywords = NULL;
   try {
-    _tokenize(c, marked, scratch);
+    _tokenize(session, marked, scratch);
     if (c.tokenizer.status() != <ok>) return result;
     /* Parsing a meta declaration can run its declaration effect. Completion
        has no publication path, so leave those forms to complete after a
@@ -360,7 +200,7 @@ ReplCompletion ReplSession.complete(
       String head = _eval_head();
       end += head.len();
       marked = head + marked + "\n}";
-      _tokenize(c, marked, scratch);
+      _tokenize(session, marked, scratch);
       c.mark_completion(head.len() + start);
     }
     (void) c.parse_submission(end);
@@ -390,435 +230,326 @@ static List _thunk(List items) =>
     (bind (binding -1 "__repl_eval") ((fnmod (params))))
     (block @items));
 
-static void _refuse(String why) { raise %(repl (reason $why)); }
+static void _tokenize(ReplSession session, String source, Scope scratch) {
+  Compiler c = session.compiler;
+  auto (&scratch) {
+    Map macros = c.initial_macros(c.filename);
+    // Loaded native headers supply the same macros to parsing and C emission.
+    c.cpp = Cpp.new(macros);
+    c.tokenize(source);
+  }
+}
 
-int _type_submission_names(List node, Array added) {
+static List _session_bare(List node) => Ast.without_origin(node);
+
+static int _type_only(List node) {
   match (node) {
-    case %(typedef ? (bindings *bindings)): {
-      foreach (List binding, bindings)
-        match (binding) case %(bind (binding ? ?(String name)) *):
-          added.push(name);
-      return 1;
-    }
-    case %(declare ?spec (bindings (bind () ()))): {
-      Type type = node.type_from_ast().base_type();
-      if (type.car() != <struct>) return 0;
-      Var name = type.cadr();
-      if (name is <string>) added.push(name);
-      else if (name is <list>)
-        added.push(Ast.binding_spelling(name));
-      return 1;
-    }
+    case %(typedef *): return 1;
+    case %(declare ?spec (bindings (bind () ()))):
+      return spec.type().base_type().is_aggregate() ||
+             spec.type().base_type().is_enum();
   }
   return 0;
 }
 
-static void _tokenize(Compiler c, String source, Scope scratch) {
-  auto (&scratch) { c.tokenize(source); }
-}
-
-/* Prompt submissions require bound names and session-owned persistent state.
-   `NULL` and `assert` are the C macros a prompt may name without a
-   declaration, as an ordinary file does. */
-static void _require_evaluable(Var syntax) {
-  match (syntax) {
-    case %(expr () (ident (binding ? ?name))):
-      if (name != "NULL" && name != "assert")
-        $refusal.binding.unresolved(name);
-    case %(declare ?spec ?):
-      if (<static> in spec || <extern> in spec || <threaded> in spec)
-        $refusal.storage.native();
+static int _file_submission(Compiler c) {
+  if (!c.test_declaration()) return 0;
+  Token token = c.token;
+  SymScope params = c.params;
+  int count = c.sym.scope_count();
+  DiagnosticsHold hold = c.diagnostics.hold();
+  defer {
+    c.token = token;
+    c.params = params;
+    while (c.sym.scope_count() > count) c.sym.pop_scope();
+    c.diagnostics.release(hold, 0);
   }
-  if (syntax is <list>) foreach (Var child, syntax.list())
-    _require_evaluable(child);
+  SymTxn transaction = c.begin_semantic_transaction();
+  defer transaction.rollback();
+  try with (c.shallow = 1) {
+    List declaration = c.parse_declaration_row();
+    return _type_only(declaration) || declaration.type_from_ast().is_function();
+  }
+  catch %((!or incomplete malformed) *): return 0;
+  return 0;
 }
 
-/* Records one new session value, which no earlier name may already hold. */
-static void _add_value(
-  Map names, Array added, Array ids, int id, String name) {
-  if (name in names || name in added || name.startswith("__repl_"))
-    $refusal.binding.redefined();
-  added.push(name);
-  ids.push(id);
-}
-
-/* An interpreted `assert` names the text between its parentheses, which
-   the typed call no longer carries. Calls and their token groups share
-   source order. A compiled prompt function keeps C's own `assert`. */
-static List _asserts(Compiler c, List node) {
-  Array texts = auto [];
-  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
-    Token open = Token.skip_trivia(token + 1);
-    if (token.type != <ident> || token.text != "assert" || open.type != <(>)
+static void _submission_objects(ReplSession session, List items,
+                                Array declarations, Array names) {
+  Compiler c = session.compiler;
+  foreach (List anchored, items) {
+    List node = _session_bare(anchored);
+    if (node ~= %(seq *children)) {
+      _submission_objects(session, children, declarations, names);
       continue;
-    Token close = open.group_close();
-    texts.push(String.new_len(
-      c.tokenizer.text + open.pos + 1, close.pos - open.pos - 1).strip(NULL));
-  }
-  int index = 0;
-  return _assert_calls(node, texts, index);
-}
-
-static Var _assert_calls(Var node, Array texts, int &index) {
-  if (node is not <list>) return node;
-  match (node)
-    case %(expr () (call (expr () (ident (binding ? "assert")))
-                         (args ?test)))
-      if (index < texts.len()): {
-        String text = texts[index++];
-        return %(expr (void)
-          (repl-assert $(_assert_calls(test, texts, index)) $text));
-      }
-  List child;
-  $ast.rewrite_children(node, child, _assert_calls(child, texts, index));
-}
-
-static List _initializers(List node, Map names, Array added, Array ids) {
-  Array statements = auto [];
-  match (_bare(node)) {
-    /* `T (a, b) = source;` publishes each target as a session value. */
-    case %(dstrdecl ?spec (targets *targets) ?source): {
-      foreach (List target, targets)
-        match (target) case %(binding ?(int id) ?(String name)):
-          _add_value(names, added, ids, id, name);
-      return _thunk(%((repl-destructure $spec (targets @targets) $source)));
+    }
+    List spec = NULL, rows = NULL;
+    match (node) case %(declare ?found (bindings *bindings)): {
+      spec = found;
+      rows = bindings;
+    }
+    if (!spec) continue;
+    foreach (List row, rows) {
+      List bound = row;
+      match (row) case %(op = ?target ?): bound = target;
+      List binding = NULL;
+      match (bound) case %(bind ?found ?): binding = found;
+      if (!binding) continue;
+      String name = Ast.binding_spelling(binding);
+      if (!name) continue;
+      if (name in session.names || name in names || name.startswith("__repl_"))
+        raise %(repl (reason $("redeclaration is disabled: " + name)));
+      List declaration = %(declare $spec (bindings $bound));
+      declarations.push(declaration);
+      names.push(name);
+      c.sym.bind_identity(NULL, binding, declaration);
+      c.sym.drop(c.semantic_binding_facts(), %(automatic $binding));
     }
   }
-  match (node) {
-    case %(declare ?spec (bindings *bindings)): {
-      foreach (List item, bindings) {
-        /* A declaration without a value starts at zero, as at file scope. */
-        List declarator = item, value = NULL;
-        match (item) case %(op = ?bound ?initial): {
-          declarator = bound;
-          value = initial;
-        }
-        match (declarator) {
-          case %(bind (binding ?(int id) ?(String name)) ?mods): {
-            _add_value(names, added, ids, id, name);
-            /* Keep the declaration's declarator and initializer together.
-               Braced initialization has meaning only in that type context;
-               the compile-time lowering consumes this private wrapper with
-               the same initializer path used by ordinary declarations. */
-            statements.push(
-              %(repl-init $spec (bind (binding $id $name) $mods) $value));
-            continue;
-          }
-        }
-        $refusal.binding.simple();
-      }
-      return _thunk(statements);
-    }
-  }
-  $refusal.form.unsupported();
-  return NULL;
 }
 
-static List _result_body(ReplSession session, List fn, int &prints) {
-  match (fn) {
-    case %(function ? ? (block *body)): {
-      Array items = auto body;
-      if (items.len()) {
-        List last = _bare(items[items.len() - 1]);
-        match (last) {
-          case %(stmnt (expr ?spec ?value)): {
-            if (spec === %(void)) return _thunk(items);
-            int effect = 0;
-            match (value) {
-              case %(op ?operator *):
-                effect = %("=" "++" "--" "+=" "-=" "*=" "/=" "%="
-                           "&=" "|=" "^=" "<<=" ">>=").contains(operator.str());
-              case %(postfix *): effect = 1;
-            }
-            if (!effect) {
-              List shown = session.inspect_global(%(expr $spec $value));
-              items[items.len() - 1] = %(return $(shown.cadr()) $shown);
-              prints = 1;
-            }
-          }
-        }
-      }
-      return _thunk(items);
-    }
+static int _submission_prints(List statements) {
+  if (!statements) return 0;
+  List last = _session_bare(statements.last());
+  List type = NULL, content = NULL;
+  match (last) case %(stmnt (expr ?found ?value)): {
+    type = found;
+    content = value;
   }
-  return fn;
-}
-
-/* Whether the submission is a bodyless `meta` prototype. It binds a
-   function the compiler links or a loaded native module supplies. A body
-   opens with `{`, or with the `=` of `=>` for an expression body, and a
-   `meta` value has an `=` initializer. */
-static int _native_prototype(Compiler c) {
-  if (!c.meta_form_is_declaration()) return 0;
-  for (Token token = c.token; token.type != <eof>; token++)
-    if (token.type == <"{"> || token.type == <=>) return 0;
+  if (!type || type == %(void)) return 0;
+  match (content) {
+    case %(op ?operator *):
+      if (%("=" "++" "--" "+=" "-=" "*=" "/=" "%="
+             "&=" "|=" "^=" "<<=" ">>=").contains(operator.str())) return 0;
+    case %(postfix *): return 0;
+  }
   return 1;
 }
 
-/** Submits one complete candidate without printing or retaining a pending
-    prefix. Only successfully initialized declarations publish new bindings;
-    evaluation effects on previously published values survive failure.
-    While the submission is evaluated, SIGINT fails it with `<interrupt>`;
-    the previous SIGINT disposition returns afterward. Diagnostics locate
-    the submission's own lines and columns. */
-ReplResult ReplSession.submit(ReplSession session, String source) {
-  ReplResult result = _submit(session, source);
-  if (result.source == source) return result;
-  String filename = session.compiler.filename;
-  Array entries = auto [];
-  foreach (List entry, result.diagnostics)
-    entries.push(_submission_entry(entry, filename, source));
-  result.diagnostics = entries;
-  result.source = source;
-  return result;
+static void _discard_cleanups(ReplSession session, size_t count) {
+  while (session.cleanups.len() > count) {
+    Func cleanup = session.cleanups[session.cleanups.len() - 1];
+    session.cleanups.pop();
+    cleanup.apply(0, NULL);
+  }
 }
 
-/* An entry located in the wrapped text moves to the same byte of `source`.
-   The wrapper's closing brace stands for the end of the submission. */
-static List _submission_entry(List entry, String filename, String source) {
-  match (entry)
-    case %(?code ?severity ?message
-           (location ((file ?(String file)) ? ? (length ?length)
-                      (position ?(int position))))
-           ?notes): {
-      if (file != filename) return entry;
-      int last = source.rstrip(NULL).len();
-      int at = position - _eval_head().len();
-      at = at < 0 ? 0 : at > last ? last : at;
-      int line = 1, start = 0;
-      for (int i = 0; i < at; i++)
-        if (source[i] == '\n') { line++; start = i + 1; }
-      return %($code $severity $message
-               (location ((file $file) (line $line)
-                          (column $(at - start + 1)) (length $length)
-                          (position $at)))
-               $notes);
-    }
-  return entry;
+static void _session_print(String text) {
+  if (text.len()) fwrite(text, 1, text.len(), stdout);
 }
 
-/* A call with the wrong number of arguments fails as its callee rejects
-   them, naming only counts and the callee's signature. The submission's
-   call with those counts names the function and its declaration. */
-static List _arity_cause(ReplSession session, List syntax, List cause) {
-  match (cause)
-    case %(bad-arity (sig ?) (expected ?wanted) (actual ?given)): {
-      int expected = wanted.int(), actual = given.int();
-      String source = NULL, plural = expected == 1 ? "" : "s";
-      List node;
-      $ast.walk(syntax, node) {
-        match (node)
-          case %(call (expr ((func ?(List parameters)) *)
-                            (ident (binding ? ?(String name))))
-                      (args *arguments)): {
-            int count = 0;
-            foreach (Var argument, arguments)
-              if (!argument.equal(%(expr (void) ()))) count++;
-            int declared = parameters == %((void)) ? 0 : parameters.len();
-            String declaration = declared == expected && count == actual
-              ? _function_declaration(session, name, source) : NULL;
-            if (declaration)
-              return %(repl (reason $(
-                %"$name takes $expected argument$plural, not $actual: "
-                + declaration)));
-          }
-      }
-    }
-  return cause;
+static void _session_println(String text) {
+  _session_print(text);
+  fputc('\n', stdout);
 }
 
-static ReplResult _submit(ReplSession session, String source) {
+/** Opens a native session in the borrowed compiler's lifetime. */
+ReplSession ReplSession.new(Compiler compiler) {
+  ReplSession session = xcalloc(1, sizeof(struct ReplSession));
+  session.compiler = compiler;
+  session.names = {};
+  session.addresses = {};
+  session.addresses["print"] = (void *) _session_print;
+  session.addresses["println"] = (void *) _session_println;
+  session.descriptions = {};
+  session.internal = _internal_names();
+  session.declarations = [];
+  session.cleanups = [];
+  session.storage = Scope.new_named("repl native objects");
+  session.inspect_depth = 3;
+  session.inspect_limit = 100;
+  return session;
+}
+
+/** Returns the published names and kinds without evaluating user code. */
+List ReplSession.symbols(ReplSession session) {
+  Array names = auto [], result = [];
+  foreach (Var name, session.names.keys()) names.push(name);
+  foreach (String name, names.sort()) {
+    List entry = session.names[name];
+    result.push($(entry.car(), name));
+  }
+  return result.list_free();
+}
+
+/** Returns a published binding's kind and retained typed syntax. */
+List ReplSession.inspect(ReplSession session, String name) {
+  Var value;
+  return session.names.try_get(name, value) ? value : NULL;
+}
+
+/** Resolves an expression without executing it or publishing bindings. */
+List ReplSession.resolve(ReplSession session, String expression) {
   Compiler c = session.compiler;
-  Map names = session.names;
-  ReplResult result = { .status = <rejected>, .value = void };
-  c.diagnostics.reset();
+  DiagnosticsHold hold = c.diagnostics.hold();
+  defer c.diagnostics.release(hold, 0);
   Scope scratch = auto Scope.new();
   struct _ParserInput input = _parser_input(c);
   defer _restore_parser_input(c, input);
   Array braces = c.braces;
   defer c.braces = braces;
-  c.directives_taken = NULL;
-  SymTxn transaction;
-  auto (&scratch) {
-    c.braces = [];
-    transaction = c.begin_semantic_transaction();
-  }
+  SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
-  Array added = [], ids = [];
-  defer { added.free(); ids.free(); }
-  List fn = NULL, forms = NULL;
-  String function_name = NULL;
-  int execute = 0, prints = 0, end = source.len();
   try {
-    result.source = source;
-    _tokenize(c, result.source, scratch);
+    auto (&scratch) c.braces = [];
+    _tokenize(session, expression, scratch);
+    List result = c.parse_expression();
+    if (c.peek(0) == <;>) c.next();
+    return c.peek(0) == <eof> ? result : NULL;
+  }
+  catch %((!or malformed incomplete) *): return NULL;
+  return NULL;
+}
+
+static ReplResult _submit_native(ReplSession session, String source) {
+  Compiler c = session.compiler;
+  c.diagnostics.reset();
+  ReplResult result = {.status = <rejected>, .value = void, .source = source};
+  Scope scratch = auto Scope.new();
+  struct _ParserInput input = _parser_input(c);
+  defer _restore_parser_input(c, input);
+  Array braces = c.braces;
+  defer c.braces = braces;
+  auto (&scratch) c.braces = [];
+  SymTxn transaction = c.begin_semantic_transaction();
+  defer transaction.rollback();
+  Array declarations = auto [], names = auto [];
+  size_t cleanup_count = session.cleanups.len();
+  List syntax = NULL;
+  String function = NULL;
+  int prints = 0, wrapped = 0;
+  try {
+    _tokenize(session, source, scratch);
     if (c.tokenizer.status() == <incomplete>) {
       result.status = <incomplete>;
       return result;
     }
-    for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
-      if (token.type == <preproc>) $refusal.input.unsupported();
-      if (token.type == <const> || token.type == <volatile>)
-        $refusal.qualifier.native();
-    }
-    if (c.peek(0) == <eof>) {
-      result.status = <empty>;
-      return result;
-    }
-    int native = _native_prototype(c);
-    if (c.peek(0) == <import> || c.protocol_form_starts() ||
-        (c.meta_form_is_declaration() && !native) ||
-        c.macro_form_is_definition() || c.keyword_form_is_definition())
-      $refusal.definition.unsupported();
-    if (c.peek(0) == <union> || c.peek(0) == <enum> ||
-        c.peek(0) == <extern> || c.peek(0) == <static>)
-      $refusal.declaration.unsupported();
-    int declaration = native || c.test_declaration();
-    if (!declaration) {
-      String prefix = _eval_head();
-      end += prefix.len();
-      result.source = prefix + source + "\n}";
-      _tokenize(c, result.source, scratch);
-    }
-    List node = c.parse_submission(end);
-    if (native) {
-      match (node)
-        case %(declare ? (bindings (bind (binding ? ?(String name)) *))): {
-          Var bound;
-          if (name in names)
-            $refusal.function.redefined();
-          if (!repl_native_binding(c, session.evaluator, name, bound))
-            $refusal.function.missing(name);
-          session.evaluator.set_global(name, bound);
-          transaction.commit_transient();
-          names[name] = %(native);
-          result.syntax = node;
-          result.name = name;
-          result.status = <defined>;
-          return result;
+    if (c.peek(0) == <eof>) { result.status = <empty>; return result; }
+    for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
+      if (token.type == <preproc>)
+        raise %(repl (reason "use :load for source/header configuration"));
+    if (c.peek(0) == <import> || c.macro_form_is_definition() ||
+        c.protocol_form_starts() || c.meta_form_is_declaration())
+      raise %(repl (reason "load compile-time declarations from a source file"));
+    if (_file_submission(c)) {
+      syntax = c.parse_submission(source.len());
+      if (_type_only(syntax)) {
+        session.declarations.push(syntax);
+        List type = syntax.type_from_ast().base_type();
+        if (syntax ~= %(typedef ? (bindings *rows))) {
+          foreach (List row, rows) names.push(Ast.binding_spelling(row.cadr()));
         }
-    }
-    _require_evaluable(node);
-    if (_type_submission_names(node, added)) {
-      foreach (String name, added)
-        if (name in names)
-          $refusal.type.redefined();
-      transaction.commit_transient();
-      session.declarations.push(node);
-      foreach (String name, added) names[name] = %(type);
-      result.syntax = node;
-      result.name = added.len() ? added[0].str() : NULL;
-      result.status = <defined>;
-      return result;
-    }
-    if (!declaration) {
-      fn = _result_body(session, _asserts(c, node), prints);
-      execute = 1;
-    }
-    else {
-      match (node) {
-        case %(function ? (bind (binding ? ?(String name)) ?) ?): {
-          Var existing;
-          if (name in names || name.startswith("__repl_") ||
-              session.evaluator.try_get(name, existing))
-            $refusal.function.redefined();
-          added.push(name);
-          function_name = name;
-          fn = node;
+        else if (type.len() > 1 && type.cadr() is <string>) names.push(type.cadr());
+        foreach (String name, names) {
+          if (name in session.names)
+            raise %(repl (reason $("a type cannot be redefined: " + name)));
+          session.names[name] = %(type);
+          session.describe(name, syntax, source);
         }
-      }
-      if (!fn) {
-        fn = _initializers(node, names, added, ids);
-        execute = 1;
-      }
-    }
-    result.syntax = fn;
-    with (c.recovery_depth = c.recovery_depth + 1) {
-      fn = session.rewrite_globals(fn);
-      if (function_name) {
-        Func function = session.compile_function(fn);
         transaction.commit_transient();
-        session.evaluator.set_global(function_name, function);
-        names[function_name] =
-          %(function (typed $(result.syntax)) (execution native));
-        result.name = function_name;
         result.status = <defined>;
+        result.name = names.len() ? names[0] : "type";
+        result.syntax = syntax;
         return result;
       }
-      forms = session.lowering.lower(fn);
-    }
-    result.diagnostics = c.diagnostics();
-  }
-  catch %(incomplete *): {
-    result.status = <incomplete>;
-    return result;
-  }
-  catch %(malformed *): {
-    result.diagnostics = c.diagnostics();
-    return result;
-  }
-  catch %(repl (reason ?why)): {
-    result.diagnostics = c.diagnostics();
-    result.message = why;
-    return result;
-  }
-  if (!forms) {
-    result.message = "unsupported: " + session.lowering.declined();
-    return result;
-  }
-  result.lowered = forms;
-  _running = session.evaluator;
-  _running.set_interrupted(0);
-  struct sigaction stop = { .sa_handler = _interrupt }, previous;
-  sigemptyset(&stop.sa_mask);
-  sigaction(SIGINT, &stop, &previous);
-  defer sigaction(SIGINT, &previous, NULL);
-  try {
-    foreach (Var form, forms) session.evaluator.eval(form);
-    if (execute) result.value = session.evaluator.eval(%(__repl_eval));
-  }
-  catch %(?cause *details): {
-    // Discard cells for unpublished bindings before rollback reuses their IDs.
-    Var storage;
-    if (session.evaluator.try_get("C.globals", storage)) {
-      Map globals = storage;
-      foreach (Var id, ids) {
-        Var address;
-        if (globals.try_get(id, address)) xfree(address.pointer());
-        globals.del(id);
+      if (syntax ~= %(function ? (bind ?binding ?) ?)) {
+        function = Ast.binding_spelling(binding);
+        if (function in session.names || function.startswith("__repl_"))
+          raise %(repl (reason $("function redeclaration is disabled: " + function)));
       }
+      else raise %(repl (reason "a function prototype needs a loaded provider"));
     }
-    result.status = <failed>;
-    result.cause = _arity_cause(session, result.syntax, cons(cause, details));
-    result.diagnostics = c.diagnostics();
-    return result;
+    else {
+      wrapped = 1;
+      String prefix = _eval_head();
+      result.source = prefix + source + "\n}";
+      _tokenize(session, result.source, scratch);
+      List parsed = c.parse_submission(prefix.len() + source.len());
+      List body = NULL;
+      match (parsed) case %(function ? ? (block *items)): body = items;
+      if (!body && parsed.car() != <function>)
+        raise %(repl (reason "expected an executable submission"));
+      syntax = %(block @body);
+      _submission_objects(session, body, declarations, names);
+      prints = _submission_prints(body);
+      c.sym.undefine_global(%("__repl_eval"));
+    }
+    result.syntax = syntax;
+    Map published = NULL;
+    auto (&session.storage)
+      published = repl_native_execute(session, syntax, wrapped, prints);
+    foreach (String name, names) {
+      session.addresses[name] = published[name];
+      session.names[name] = %(value);
+    }
+    for (int i = 0; i < names.len(); i++)
+      session.describe(names[i], declarations[i], source);
+    if (function) {
+      session.addresses[function] = published[function];
+      session.names[function] = %(function (typed $syntax) (execution native));
+      session.describe(function, syntax, source);
+      result.name = function;
+    }
+    if (function || names.len()) transaction.commit_transient();
+    if (prints) result.formatted = published["formatted"];
+    result.status = function ? <defined> : prints ? <value> : <executed>;
   }
-  if (added.len()) {
-    transaction.commit_transient();
-    foreach (String name, added) names[name] = %(value);
+  catch %(incomplete *): result.status = <incomplete>;
+  catch %(malformed *): result.diagnostics = c.diagnostics();
+  catch %(repl (reason ?why)): result.message = why;
+  catch %(?kind *details): {
+    _discard_cleanups(session, cleanup_count);
+    result.status = <failed>;
+    result.cause = cons(kind, details);
   }
   result.diagnostics = c.diagnostics();
-  result.status = prints ? <value> : <executed>;
   return result;
 }
 
-/** Releases interpreter services before closing the borrowed compiler unit. */
-void ReplSession.close(ReplSession session) {
-  session.lowering.free();
-  session.lowering = NULL;
-  session.declarations.free();
-  session.declarations = NULL;
-  session.evaluator.destroy();
-  session.evaluator = NULL;
-  foreach (Var (path, value), session.files) {
-    ReplLoadedFile file = value;
-    file.symbols.cleanup();
-    xfree(file);
+/** Compiles and executes one complete native submission. */
+ReplResult ReplSession.submit(ReplSession session, String source) {
+  ReplResult result = _submit_native(session, source);
+  if (result.source == source) return result;
+  Array entries = auto [];
+  foreach (List entry, result.diagnostics) {
+    match (entry)
+      case %(?code ?severity ?message
+        (location ((file ?file) ? ? (length ?length) (position ?(int position))))
+        ?notes): {
+        int at = position - _eval_head().len();
+        at = at < 0 ? 0 : at > source.len() ? source.len() : at;
+        int line = 1, first = 0;
+        for (int i = 0; i < at; i++)
+          if (source[i] == '\n') { line++; first = i + 1; }
+        entry = %($code $severity $message
+          (location ((file $file) (line $line) (column $(at - first + 1))
+            (length $length) (position $at))) $notes);
+      }
+    entries.push(entry);
   }
-  xfree(session.helper);
-  session.helper = NULL;
-  session.files.cleanup();
-  session.files = NULL;
-  session.accessors.cleanup();
-  session.accessors = NULL;
+  result.diagnostics = entries;
+  result.source = source;
+  return result;
+}
+
+/** Evaluates an inspection expression once using the ordinary native backend. */
+ReplResult ReplSession.inspect_expression(
+  ReplSession session, String expression, int depth, int limit) {
+  with (session.inspect_depth = depth, session.inspect_limit = limit) {
+    return session.submit(expression.rstrip("; \t\r\n") + ";");
+  }
+}
+
+/** Runs session cleanups before reclaiming persistent native storage. */
+void ReplSession.close(ReplSession session) {
+  auto (&session.storage) _discard_cleanups(session, 0);
+  session.storage.destroy();
+  session.storage = NULL;
+  session.declarations.free();
+  session.cleanups.free();
+  session.names.cleanup();
+  session.addresses.cleanup();
+  session.descriptions.cleanup();
+  session.internal.cleanup();
+  xfree(session);
 }
