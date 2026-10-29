@@ -37,7 +37,7 @@ static macro Stmt $fail.cpp_paste_edge(Expr $c, Expr $site, Expr $note) =>
    `retreat`, which leaves the use to the C compiler. `bodies` holds each
    replacement list's tokens, and `rows` the tokenizer's expansion rows. */
 static typedef struct Expander {
-  Compiler c, Cpp cpp, String path;
+  Compiler c, Cpp cpp;
   Token in, site;
   size_t next;
   Bytes out;
@@ -73,8 +73,7 @@ void Compiler.expand_macros(Compiler c) {
   c.cpp = NULL;
   c.arm_stacks = {};
   Expander x = {
-    .c = c, .cpp = cpp, .path = c.filename, .in = c.tokenizer.tokens,
-    .bodies = {}};
+    .c = c, .cpp = cpp, .in = c.tokenizer.tokens, .bodies = {}};
   size_t i = 0;
   for (; (x.in + i).type != <eof>; i++) {
     Token token = x.in + i;
@@ -91,43 +90,11 @@ void Compiler.expand_macros(Compiler c) {
   c.tokenizer.expansions = x.rows;
 }
 
-/** Returns the note that names the C macro whose expansion produced the
-    source at the diagnostic `location`, or NULL when no expansion did.
-*/
-String Compiler.cpp_note(Compiler c, List location) {
-  Tokenizer tokenizer = c.tokenizer;
-  if (!tokenizer || !tokenizer.expansions || !location) return NULL;
-  int line = location.assoc(<line>), position = location.assoc(<position>);
-  Token tokens = tokenizer.tokens;
-  foreach (List row in tokenizer.expansions) {
-    (long first, long end, String name, List site) = row;
-    Token token = tokens + first;
-    if (first < end && token.pos == position && token.line == line)
-      return _note(name, site);
-  }
-  return NULL;
-}
-
-/** Returns the name of the C macro whose expansion produced `token` of the
-    compiler's token stream, or NULL.
-*/
-String Compiler.expanding_macro(Compiler c, Token token) {
-  Tokenizer tokenizer = c.tokenizer;
-  if (!tokenizer || !tokenizer.expansions) return NULL;
-  long index = token - (Token) tokenizer.tokens;
-  foreach (List row in tokenizer.expansions) {
-    (long first, long end, String name, List site) = row;
-    (void) site;
-    if (index >= first && index < end) return name;
-  }
-  return NULL;
-}
-
 /* A conditional directive records the groups open after it. */
 static void _directive(Expander &x, Token token) {
   int open = x.cpp.groups.len() > 0;
   long index = x.out ? x.out.len() : token - x.in;
-  Symbol kind = x.c.cpp_directive(x.cpp, token, x.path);
+  Symbol kind = x.c.cpp_directive(x.cpp, token, x.c.filename);
   if (kind == <open> || (kind && open))
     x.c.arm_stacks[index] = x.cpp.open_groups();
 }
@@ -144,7 +111,8 @@ static int _use_at(Expander &x, size_t i) {
   if (!token.is_word() || !x.cpp.macros.try_get(token.text, definition) ||
       definition is not <list>)
     return 0;
-  if (i && ((x.in + i - 1).type == <$> || (x.in + i - 1).type == <@>)) return 0;
+  Symbol before = i ? (x.in + i - 1).type : 0;
+  if (before == <$> || before == <@>) return 0;
   return definition.list().car() == <object> || _input_paren(x, i + 1);
 }
 
@@ -405,17 +373,17 @@ static Block _expanded(Expander &x, Substitution &s, int param) {
 }
 
 /* `#` makes a string literal of an argument as written, its blanks
-   reduced to one space. */
+   reduced to one space. A quote or backslash can only stand in a string or
+   character literal, which x2c may scan as several tokens, so each one is
+   escaped wherever it stands. */
 static Token _stringized(Substitution &s, Token param) {
   Block arg = s.args[_param(s, param)];
   CppToken *items = arg.bytes;
   Array parts = ["\""];
   for (size_t i = 0; i < arg.len(); i++) {
-    Token token = &items[i].token;
+    String text = items[i].token.text;
     if (i && items[i].space) parts.push(" ");
-    if (token.type == <lit-char*> || token.type == <lit-char>)
-      parts.push(token.text.replace("\\", "\\\\").replace("\"", "\\\""));
-    else parts.push(token.text);
+    parts.push(text.replace("\\", "\\\\").replace("\"", "\\\""));
   }
   parts.push("\"");
   CppToken item = _made(<lit-char*>, "".join(parts.list_free()));
@@ -577,10 +545,5 @@ static List _meet(List set, List names) {
 
 // diagnostics
 
-static String _note(String name, List site) {
-  (String file, int line) = site;
-  return %"in expansion of '$name' defined at $file:$line";
-}
-
 static String _definition_note(List definition) =>
-  _note(definition.cadr(), definition.last());
+  Diagnostics.c_macro_note(definition.cadr(), definition.last());

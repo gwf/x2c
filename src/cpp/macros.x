@@ -35,10 +35,11 @@ module void _define(Cpp cpp, Token name, List site) {
     int variadic = 0;
     Token close = _parameters(after, params, variadic);
     List list = params.list_free();
+    String body = close ? _body(close + 1) : NULL;
     if (!close) _set(cpp, name.text, <cond>);
     else
       _set(cpp, name.text,
-           %(function $(name.text) $list $variadic $(_body(close + 1)) $site));
+           %(function $(name.text) $list $variadic $body $site));
   }
 }
 

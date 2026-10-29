@@ -227,6 +227,47 @@ String Compiler.macro_expansion_note(Compiler c) {
   return NULL;
 }
 
+/** Returns the note that names the C macro whose expansion produced the
+    source at the diagnostic `location`, or NULL when no expansion did. The
+    tokenizer's `expansions` rows record the uses.
+*/
+String Compiler.cpp_note(Compiler c, List location) {
+  Tokenizer tokenizer = c.tokenizer;
+  if (!tokenizer || !tokenizer.expansions || !location) return NULL;
+  int line = location.assoc(<line>), position = location.assoc(<position>);
+  Token tokens = tokenizer.tokens;
+  foreach (List row in tokenizer.expansions) {
+    (long first, long end, String name, List site) = row;
+    Token token = tokens + first;
+    if (first < end && token.pos == position && token.line == line)
+      return Diagnostics.c_macro_note(name, site);
+  }
+  return NULL;
+}
+
+/** Returns the name of the C macro whose expansion produced `token` of the
+    compiler's token stream, or NULL.
+*/
+String Compiler.expanding_macro(Compiler c, Token token) {
+  Tokenizer tokenizer = c.tokenizer;
+  if (!tokenizer || !tokenizer.expansions) return NULL;
+  long index = token - (Token) tokenizer.tokens;
+  foreach (List row in tokenizer.expansions) {
+    (long first, long end, String name, List site) = row;
+    (void) site;
+    if (index >= first && index < end) return name;
+  }
+  return NULL;
+}
+
+/** Formats the note for an expansion of the C macro `name`, which the
+    `(file line)` site defines.
+*/
+String Diagnostics.c_macro_note(String name, List site) {
+  (String file, int line) = site;
+  return %"in expansion of '$name' defined at $file:$line";
+}
+
 /** Removes captured-argument transport and source wrappers for a note. */
 Var Diagnostics.macro_expansion_input(List input) {
   List captured = input.search_replace(
