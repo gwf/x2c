@@ -841,6 +841,19 @@ The final line reports passed and failed files and tests. The command exits
 with status 1 if any file fails to build or run, and 2 if discovery finds no
 files. See [Testing](../guide/testing.md) for the test library and assertions.
 
+`x2c bind` writes the mechanical part of a new package from a C header.
+The command is experimental and available in checkout builds; `make install`
+does not install it. Run `x2c help bind` for its options. It names a handle
+type for each opaque struct pointer that a function takes first, forwards
+those functions as inline methods, and adopts `Cleanup` for a release paired
+with an acquisition, such as `close` with `open`. Functions without a handle
+receiver remain C calls through the header. A later run replaces only the
+marked generated region of the package's entry unit. Generated parameters
+are positional, because collection records parameter types without names.
+The command does not write the ordinary x2c surface, Error conversion,
+dependency pins, or license files; see
+[Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
+
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound
 writes, address escapes, and reference arguments before reporting a group.
