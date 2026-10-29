@@ -73,9 +73,13 @@ int String.getindex(String str, int index) {
 }
 
 /** Returns the canonical `String` `s[start:stop:step]`.
-    This is what slice syntax lowers to. `stop` is exclusive, negative
-    `start` and `stop` count from the end, and a negative `step` walks
-    backwards, so `s[::-1]` reverses. Indices are byte positions, so a
+    This is what slice syntax lowers to. A negative `start` counts bytes
+    from the end. A negative `stop` on a forward step counts endpoints from
+    the end: -1 is the length, so `s[:-1]` is all of `s` and `s[:-2]` omits
+    the last byte. A negative `step` walks backwards, so `s[::-1]` reverses,
+    and its negative `stop` names the byte the slice stops before. The
+    [collections guide](../../guide/collections.md#indexing-and-slicing)
+    shows the forward rule. Indices are byte positions, so a
     slice can split a multibyte sequence. A full unit-step slice may return
     `s`; other nonempty slices return their canonical `String`.
     Raises: `<alloc-fail>` while constructing a nonempty result. An empty

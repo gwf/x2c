@@ -3779,8 +3779,13 @@ The optional typed families have different indexing rules:
   indices, and it rejects indexed updates as `List` does.
 
 `Array`, `List`, and `String` support `value[start:stop:step]`. Bounds and step
-may be omitted. Negative bounds and reverse steps are normalized consistently.
-A zero step is invalid.
+may be omitted. A zero step is invalid. A negative `start` counts elements
+from the end. A negative `stop` on a forward step counts endpoints from the
+end: -1 is the length, so `value[:-1]` is the whole value and `value[:-2]`
+omits the last element. With a negative step, a negative `stop` names the
+element the slice stops before, so -1 is the last element. The
+[collections guide](../guide/collections.md#indexing-and-slicing) shows the
+forward rule shared by `Array.setslice` and `Array.remslice`.
 
 `List` indexed updates and `String` character updates remain unsupported.
 `Array`-level and `Map`-level `+=` are also unsupported; update an element

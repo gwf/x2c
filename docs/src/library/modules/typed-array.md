@@ -479,7 +479,13 @@ Source: `lib/typed-array.x`
 `ArrayChar ArrayChar.getslice(ArrayChar array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -911,7 +917,13 @@ Source: `lib/typed-array.x`
 `ArrayDbl ArrayDbl.getslice(ArrayDbl array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -1341,7 +1353,13 @@ Source: `lib/typed-array.x`
 `ArrayFloat ArrayFloat.getslice(ArrayFloat array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -1771,7 +1789,13 @@ Source: `lib/typed-array.x`
 `ArrayInt ArrayInt.getslice(ArrayInt array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -2203,7 +2227,13 @@ Source: `lib/typed-array.x`
 `ArrayLong ArrayLong.getslice(ArrayLong array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -2635,7 +2665,13 @@ Source: `lib/typed-array.x`
 `ArrayShort ArrayShort.getslice(ArrayShort array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
@@ -3067,7 +3103,13 @@ Source: `lib/typed-array.x`
 `ArrayString ArrayString.getslice(ArrayString array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
