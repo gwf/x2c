@@ -2532,6 +2532,18 @@ emitted with the aggregate definition. The native compiler rejects a false or
 nonconstant assertion. Translation and source analysis alone do not perform
 that check.
 
+### Type of an operand
+
+`typeof (operand)`, C23's spelling, and GNU C's `__typeof__` and `__typeof`
+name a type by an operand in any position that takes a type specifier, as a
+GNU macro body such as `({ __typeof__(a) _a = (a); ... })` uses them. A type
+operand names that type, and an expression operand x2c types names the
+expression's type, so `typeof(name) copy = name;` declares `copy` with the
+type of `name`. An operand that only C can type, such as a system header's
+macro, gives a type x2c does not resolve; the generated C spells it
+`__typeof__(operand)`, and C types it. `typeof_unqual` names the same type
+without its qualifiers.
+
 ### Generic selection
 
 `_Generic(controlling, type: value, ..., default: value)` is a C11 generic
@@ -5980,9 +5992,11 @@ whose use produced it.
 A condition is decided when every name it tests is visible, is known never to
 be defined, or is a literal. `#if` arithmetic is evaluated over `long`, and
 `defined NAME` fails after `#undef NAME`. x2c output is compiled as C by a
-GNU-style compiler, so `__cplusplus` and `_MSC_VER` are never defined; a
-compiler built for a host other than Windows treats `_WIN32`, `_WIN64`, and
-`__CYGWIN__` the same way. Only the taken arm of a decided group parses: the
+GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
+`_MSC_VER` are never defined; a compiler built for a host other than Windows
+treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as never defined too. Only
+`defined`, `#ifdef`, and `#ifndef` decide `__GNUC__`: its value is unknown,
+so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group parses: the
 tokens of the other arms are trivia, an `#include` in one is not read, and
 the directives around them stay in place and are emitted. A function defined
 in two arms of one conditional is one definition.
