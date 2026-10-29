@@ -20,7 +20,17 @@ typedef struct ReplOptions {
   List arguments;
 } ReplOptions;
 
-CliRequest repl_request(List arguments, ReplOptions &options);
+/** Reads reporting options without building or evaluating a saved session. */
+ReplOptions repl_reporting_options(List arguments) {
+  ReplOptions options = {.arguments = arguments};
+  foreach (String argument, arguments) {
+    if (argument == "--") break;
+    if (argument == "--dump") options.dump = 1;
+    else if (argument == "--stats") options.stats = 1;
+    else if (argument == "--verbose-stats") options.verbose_stats = 1;
+  }
+  return options;
+}
 
 static struct ReplCommand {
   String spelling, synopsis, description;
@@ -49,7 +59,6 @@ static const struct ReplCommand _commands[] = {
 };
 
 static struct ReplClient {
-  CliRequest request;
   ReplOptions options;
   ReplWorker worker;
   ReplInput input;
@@ -136,10 +145,12 @@ static void _record(struct ReplClient &client, String source) {
 }
 
 static int _replace(
-  struct ReplClient &client, List roots, List snapshot, int announce) {
-  ReplWorker candidate = repl_worker_start(
-    client.request, client.options.arguments, roots, snapshot,
-    client.interactive, client.worker);
+  struct ReplClient &client, List roots, List snapshot, List requested, int announce) {
+  ReplWorker candidate = repl_worker_start((ReplWorkerStart) {
+    .arguments = client.options.arguments, .roots = roots, .requested = requested,
+    .snapshot = snapshot, .interactive = client.interactive,
+    .previous = client.worker, .input = client.input
+  });
   if (candidate.failure) {
     fprintf(stderr, "session unchanged: %s\n", candidate.failure);
     repl_worker_close(candidate);
@@ -160,7 +171,7 @@ static int _replace(
 
 static int _recover(struct ReplClient &client, String reason) {
   fprintf(stderr, "%s; all live session state was lost\n", reason);
-  if (_replace(client, client.roots, client.snapshot, 0)) {
+  if (_replace(client, client.roots, client.snapshot, NULL, 0)) {
     fputs("started fresh session from the last successful program\n", stderr);
     return 1;
   }
@@ -302,8 +313,8 @@ static int _replay(struct ReplClient &client, String argument) {
       return 0;
     }
     ReplOptions previous = client.options;
-    client.options.arguments = arguments;
-    if (!_replace(client, NULL, NULL, 1)) {
+    client.options = repl_reporting_options(arguments);
+    if (!_replace(client, NULL, NULL, NULL, 1)) {
       client.options = previous;
       chdir(client.directory);
       return 0;
@@ -331,26 +342,32 @@ static int _control(
   if (operation == ":quit") { client.pending = ""; client.quit = 1; return 1; }
   if (operation == ":cancel") { client.pending = ""; return 1; }
   if (operation == ":help") return _help(argument) ? 1 : -1;
-  if (operation == ":files")
-    return _query(client, {operation: <files>, text: ""}, 0);
+  if (operation == ":files") {
+    if (client.worker && client.worker.pid > 0)
+      return _query(client, {operation: <files>, text: ""}, 0);
+    foreach (String path, client.roots) printf("last successful root: %s\n", path);
+    printf("launch arguments: %s\n", client.options.arguments.repr());
+    return 1;
+  }
   if (operation == ":symbols") return _symbols(client, argument);
   if (operation == ":inspect") return _inspect(client, argument);
   if (operation == ":save") return _save(client, argument);
   if (operation == ":replay") return _replay(client, argument);
   if (operation == ":reset")
-    return _replace(client, client.roots, client.snapshot, 1) ? 1 : -1;
+    return _replace(client, client.roots, client.snapshot, NULL, 1) ? 1 : -1;
   if (operation == ":reload")
-    return _replace(client, client.roots, NULL, 1) ? 1 : -1;
+    return _replace(client, client.roots, NULL, NULL, 1) ? 1 : -1;
   if (operation == ":load") {
     List paths = _paths(argument);
     if (!paths) return 0;
-    Array roots = auto [];
+    Array roots = auto [], requested = auto [];
     foreach (String path, client.roots) roots.push(path);
     foreach (String path, paths) {
       path = Path.resolved_absolute(path);
+      requested.push(path);
       if (!(path in roots)) roots.push(path);
     }
-    return _replace(client, roots, NULL, 1) ? 1 : -1;
+    return _replace(client, roots, NULL, requested, 1) ? 1 : -1;
   }
   if (operation == ":stats") {
     if (argument && argument != "verbose") return 0;
@@ -532,7 +549,7 @@ int repl_run(CliRequest request, ReplOptions options) {
     sigaction(SIGPIPE, &previous_pipe, NULL);
   }
   struct ReplClient client = {
-    .request = request, .options = options, .interactive = isatty(STDIN_FILENO),
+    .options = options, .interactive = isatty(STDIN_FILENO),
     .input = ReplInput.new(), .transcript = [], .pending = "",
     .directory = Path.absolute(".")
   };
@@ -544,7 +561,7 @@ int repl_run(CliRequest request, ReplOptions options) {
     _artifact_remove(client.artifact);
   }
   if (client.interactive) client.input.load_history();
-  if (!_replace(client, request.inputs, NULL, 0)) return 1;
+  if (!_replace(client, request.inputs, NULL, NULL, 0)) return 1;
   if (client.interactive) puts("x2c library playground; :help for commands");
   while (!client.quit) {
     String line = NULL;

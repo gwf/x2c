@@ -118,9 +118,11 @@ def pipe_until(process, token):
 with tempfile.TemporaryDirectory(prefix="x2c-repl-terminal-") as temporary:
     directory = Path(temporary)
     environment = dict(os.environ, TERM="xterm-256color",
-                       XDG_STATE_HOME=str(directory / "state"))
+                       XDG_STATE_HOME=str(directory / "state"),
+                       X2C_SCOPE_ACCOUNTING="1")
     source = directory / "terminal.c"
     source.write_text("""#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 int terminal_counter = 5;
 int terminal_answer(void) { return 42; }
@@ -133,6 +135,8 @@ void terminal_hang(void) {
   while (1) pause();
 }
 void terminal_crash(void) { __builtin_trap(); }
+static void terminal_exit_hook(void) { write(1, "native closed\\n", 14); }
+void terminal_register_exit(void) { atexit(terminal_exit_hook); }
 """)
     bad = directory / "bad.c"
     bad.write_text("int broken( {\n")
@@ -142,7 +146,14 @@ void terminal_crash(void) { __builtin_trap(); }
                 [], environment)
     require(piped.returncode == 0 and result(piped.stdout, -1) and
             result(piped.stdout, 42), (piped.stdout, piped.stderr))
+    require("Scope leak detected" not in piped.stderr,
+            (piped.stdout, piped.stderr))
     print("piped native stdin stays separate from source", flush=True)
+
+    retired = run(load + "terminal_register_exit();\n:quit\n", [], environment)
+    require(retired.returncode == 0 and retired.stdout.count("native closed\n") == 1,
+            (retired.stdout, retired.stderr))
+    print("orderly native retirement runs C exit hooks once", flush=True)
 
     preserved = run(load + "int kept = 17;\nterminal_counter = 99;\n" +
                     f':load "{bad}"\n' +

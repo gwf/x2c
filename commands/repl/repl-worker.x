@@ -6,6 +6,7 @@
 #include "repl-session.x"
 #include "repl-program.x"
 #include "repl-inspect.x"
+#include "repl-input.x"
 #include "datum.x"
 #include "file.x"
 #include <errno.h>
@@ -32,6 +33,13 @@ typedef struct ReplWorker {
   String directory;
   String failure;
 } *ReplWorker;
+
+typedef struct ReplWorkerStart {
+  List arguments, roots, requested, snapshot;
+  ReplWorker previous;
+  ReplInput input;
+  int interactive;
+} ReplWorkerStart;
 
 CliRequest repl_native_request(List arguments);
 
@@ -257,17 +265,18 @@ static Map _worker_dispatch(ReplSession session, Map message) {
     match (entry) case %(function (typed ?syntax) *): output = syntax.repr();
     if (!output) return {status: <failed>, message: %"no prompt AST for $text"};
   }
-  else if (operation == <lowered>)
+  else if (operation == <lowered> && session.info(text))
     output = "native: executable submissions compile through the ordinary compiler";
   if (output) return {status: <ok>, text: output};
   return {status: <failed>, message: %"no visible declaration for $text"};
 }
 
 static void _worker_serve(
-  CliRequest request, List roots, List snapshot, int from, int to) {
+  CliRequest request, List roots, List requested, List snapshot, int from, int to) {
   signal(SIGINT, SIG_DFL);
   signal(SIGPIPE, SIG_DFL);
-  Context context = Context.open_isolated_named("native REPL worker");
+  // Native exit hooks run before Context's registered process shutdown.
+  Context.open_isolated_named("native REPL worker");
   Frontend.load_support(request);
   Frontend frontend = Frontend.new(request);
   ParsedUnit unit;
@@ -283,7 +292,7 @@ static void _worker_serve(
   String failure = NULL;
   if (snapshot) program = repl_program_restore(snapshot, failure);
   else if (roots || request.inputs || request.manifest || request.target || request.profile)
-    program = repl_program_build(frontend, roots, failure);
+    program = repl_program_build_selected(frontend, roots, requested, failure);
   if (failure) {
     _worker_send(to, {status: <failed>, message: failure});
     _exit(1);
@@ -306,11 +315,8 @@ static void _worker_serve(
     if (message[<operation>] == <quit>) {
       session.close();
       if (program) repl_program_close(program);
-      unit.close();
-      context.close();
-      _worker_send(to, {status: <closed>});
       fflush(NULL);
-      _exit(0);
+      exit(0);
     }
     Map result = NULL;
     try result = _worker_dispatch(session, message);
@@ -322,23 +328,19 @@ static void _worker_serve(
   }
   session.close();
   if (program) repl_program_close(program);
-  unit.close();
-  context.close();
   fflush(NULL);
-  _exit(0);
+  exit(0);
 }
 
 /** Starts a fresh native session without retiring an existing worker. */
-ReplWorker repl_worker_start(
-  CliRequest request, List arguments, List roots, List snapshot,
-  int interactive, ReplWorker previous) {
+ReplWorker repl_worker_start(ReplWorkerStart start) {
   _worker_interrupted = 0;
   int requests[2], replies[2], master = -1, slave = -1;
   if (pipe(requests) || pipe(replies)) {
     int error = errno;
     raise %(io-fail (operation "repl worker pipes") (errno $error));
   }
-  if (interactive) {
+  if (start.interactive) {
     if (openpty(&master, &slave, NULL, NULL, NULL)) {
       int error = errno;
       raise %(io-fail (operation "repl worker terminal") (errno $error));
@@ -362,11 +364,12 @@ ReplWorker repl_worker_start(
   if (!pid) {
     close(requests[1]);
     close(replies[0]);
-    if (previous) {
-      if (previous.to >= 0) close(previous.to);
-      if (previous.from >= 0) close(previous.from);
-      if (previous.terminal >= 0) close(previous.terminal);
+    if (start.previous) {
+      if (start.previous.to >= 0) close(start.previous.to);
+      if (start.previous.from >= 0) close(start.previous.from);
+      if (start.previous.terminal >= 0) close(start.previous.terminal);
     }
+    start.input.discard_inherited();
     setsid();
     if (master >= 0) {
       close(master);
@@ -384,8 +387,9 @@ ReplWorker repl_worker_start(
         _exit(1);
       }
     }
-    request = repl_native_request(arguments);
-    _worker_serve(request, roots, snapshot, requests[0], replies[1]);
+    CliRequest request = repl_native_request(start.arguments);
+    _worker_serve(request, start.roots, start.requested, start.snapshot,
+                  requests[0], replies[1]);
   }
   close(requests[0]);
   close(replies[1]);

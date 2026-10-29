@@ -1526,8 +1526,16 @@ void ReplInput.save_history(ReplInput input) {
 void ReplInput.close(ReplInput r) {
   if (!r || !r.open) return;
   _restore(r);
+  r.discard_inherited();
+}
+
+/** Releases a forked worker's copy of editor storage without touching its tty. */
+void ReplInput.discard_inherited(ReplInput r) {
+  if (!r || !r.open) return;
   r.storage.destroy();
+  r.storage = NULL;
   r.history = NULL;
   r.history_len = 0;
+  r.raw = 0;
   r.open = 0;
 }

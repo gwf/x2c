@@ -24,17 +24,6 @@ CliRequest repl_native_request(List arguments) {
   return request;
 }
 
-/** Retains REPL reporting options beside the native request. */
-CliRequest repl_request(List arguments, ReplOptions &options) {
-  options.arguments = arguments;
-  foreach (String argument, arguments) {
-    if (argument == "--dump") options.dump = 1;
-    else if (argument == "--stats") options.stats = 1;
-    else if (argument == "--verbose-stats") options.verbose_stats = 1;
-  }
-  return repl_native_request(arguments);
-}
-
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   List arguments = Args.from_argv(argc, argv);
@@ -59,8 +48,8 @@ int main(int argc, char **argv) {
          "Successful loading and reloading clear prompt and library state.");
     return 0;
   }
-  ReplOptions options = {0};
-  CliRequest request = repl_request(arguments, options);
+  ReplOptions options = repl_reporting_options(arguments);
+  CliRequest request = repl_native_request(arguments);
   Context command = Context.open_isolated_named("REPL supervisor");
   int result = repl_run(request, options);
   command.close();
