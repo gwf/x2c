@@ -89,13 +89,18 @@ static void _metadata_unlock(void) {
     _raw_fatal("could not unlock metadata");
 }
 
+/* Return native allocation failure to the constructor, which frees its
+   control record before raising without relying on Error cleanup. */
 module ScopeName _register_name(Scope scope, const char *name) {
-  if (!name) return NULL;
   size_t length = strlen(name);
-  ScopeName node = _raw_malloc(sizeof(struct ScopeName));
-  int finished = 0;
-  defer if (!finished) _raw_free(node);
-  char *copy = _raw_malloc(length + 1);
+  ScopeName node = malloc(sizeof(struct ScopeName));
+  if (!node) return NULL;
+  char *copy = malloc(length + 1);
+  if (!copy) {
+    free(node);
+    return NULL;
+  }
+  if (scope_accounting) atomic_fetch_add(&raw_alloc_count, 2);
   memcpy(copy, name, length + 1);
   node.scope = scope;
   node.name = copy;
@@ -103,7 +108,6 @@ module ScopeName _register_name(Scope scope, const char *name) {
   node.next = scope_names;
   scope_names = node;
   _metadata_unlock();
-  finished = 1;
   return node;
 }
 

@@ -322,10 +322,11 @@ module Scope _new_scope(const char *name) {
   *record = (struct ScopeRecord) {0};
   Scope scope = &record.scope;
   if (name) {
-    int finished = 0;
-    defer if (!finished) free(record);
     record.name = _register_name(scope, name);
-    finished = 1;
+    if (!record.name) {
+      free(record);
+      raise %(alloc-fail);
+    }
   }
   if (scope_accounting) atomic_fetch_add(&scope_creations, 1);
   return scope;
