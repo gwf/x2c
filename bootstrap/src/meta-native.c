@@ -3701,9 +3701,8 @@ static int f6_linked____linked_texts_match(Compiler c, String name, Map linked, 
   if(! Map_try_get(c -> meta_hashes, String_var(name), &(own))){
     Var advertisement;
     if(Map_try_get(c -> project_meta, String_var(name), &(advertisement))){
-      Var _, provider;
+      Var provider;
       List _x2c_gensym_destructure_0 = Var_list_payload(advertisement);
-      _ = List_getindex(_x2c_gensym_destructure_0, 0);
       provider = List_getindex(_x2c_gensym_destructure_0, 1);
       Map hashes = Compiler_meta_provider_hashes(c, Var_as_string(provider));
       if(!(Map_contains(hashes, String_var(name)))) return 0;
