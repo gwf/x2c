@@ -363,11 +363,12 @@ Source: `src/collect/providers.x`
 <a id="Compiler.module_source"></a>
 #### Compiler.module_source
 
-`ModuleSource Compiler.module_source(Compiler c, String path, String text)`
+`ModuleSource Compiler.module_source( Compiler c, String path, String text, Tokenizer &?plain)`
 
 Returns the x2c source at `path`, whose own text is `text`, with its
 file-scope `module` block replaced by the text of each member it names,
-in order, or NULL when the text has no block. Member paths are relative
+in order, or NULL when the text has no block. `plain` receives the
+preprocessed tokens of a root without a block. Member paths are relative
 to the file that names them, and their own blocks are spliced in turn.
 A member's quoted include of a file beside it is spelled from the
 entry's directory, so it names the same file there.
