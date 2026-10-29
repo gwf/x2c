@@ -18676,7 +18676,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15616 = List_var(_15615);
   _15617 = String_new("src/cpp/expand.x");
   _15618 = String_var(_15617);
-  _15619 = String_new("a571ec38");
+  _15619 = String_new("014e2f6d");
   _15620 = String_var(_15619);
   _15621 = cons(_15620, NULL);
   _15622 = cons(_15618, _15621);
