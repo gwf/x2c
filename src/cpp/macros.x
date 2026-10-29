@@ -135,7 +135,7 @@ List Compiler.command_macros(List args) {
     if (option == "-U") _set(cpp, value, <undef>);
     else _command_define(cpp, value);
   }
-  return cpp.changes({});
+  return cpp.changes({}).sort();
 }
 
 static void _command_define(Cpp cpp, String value) {
