@@ -62,6 +62,20 @@ int main(int argc, char **argv) {
   String failure = NULL;
   ReplProgram program = repl_program_build(frontend, roots, failure);
   if (!program) { fprintf(stderr, "%s\n", failure); return 1; }
+  if ("sqlite3_open" in program.addresses) {
+    int (*open)(const char *, void **) =
+      (int (*)(const char *, void **)) program.addresses["sqlite3_open"].pointer();
+    int (*exec)(void *, const char *, void *, void *, char **) =
+      (int (*)(void *, const char *, void *, void *, char **))
+        program.addresses["sqlite3_exec"].pointer();
+    int (*close)(void *) = (int (*)(void *)) program.addresses["sqlite3_close"].pointer();
+    void *db = NULL;
+    if (open(":memory:", &db) || !db ||
+        exec(db, "CREATE TABLE sample(value); INSERT INTO sample VALUES(42)",
+             NULL, NULL, NULL) || close(db)) return 1;
+    puts("native SQLite wrapper header create/call/close passed");
+    return 0;
+  }
   if (!("playground_new" in program.addresses)) {
     if (!("main" in program.addresses)) return 1;
     List parameters = NULL;
@@ -101,6 +115,11 @@ int main(int argc, char **argv) {
       !("int y" in function["declaration"].str())) return 1;
   if (!program.symbols.contains(%(struct "PlaygroundPoint" "field-order")))
     return 1;
+  Map macro = program.descriptions["PLAYGROUND_SCALE"];
+  if (!macro || macro["kind"] != <macro> ||
+      !("#define PLAYGROUND_SCALE 3" in macro["declaration"].str())) return 1;
+  if (roots && roots.car().str().endswith(".h") &&
+      !("requested coordinates" in function["documentation"].str())) return 1;
   if (!program.macros.contains("PLAYGROUND_SCALE") ||
       !program.symbols.contains(%("PLAYGROUND_Y")) ||
       !program.symbols.contains(%(enum "PlaygroundAxis" "enumerators")))
@@ -116,6 +135,13 @@ int main(int argc, char **argv) {
   if (!restored || _check(restored)) {
     fprintf(stderr, "restore: %s\n", failure ? failure : "wrong native value");
     return 1;
+  }
+  String removed = Env.get("REPL_PROGRAM_REMOVE_NATIVE");
+  if (removed) {
+    unlink(removed);
+    if (!repl_program_changed(program) ||
+        repl_program_restore(decoded, failure) || !failure) return 1;
+    puts("changed external native dependency refuses restore");
   }
   printf("native program C ABI and snapshot checks passed\n");
   return 0;

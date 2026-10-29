@@ -17,6 +17,7 @@
 static typedef struct ProgramBuild {
   ReplProgram program;
   Frontend frontend;
+  Compiler documentation;
   Array roots, headers, objects, archives, exports, includes;
   Map seen, units, fingerprints;
 } ProgramBuild;
@@ -145,6 +146,13 @@ static void _program_family(Map all, Map selected, Type type) {
     if (part is <list>) _program_family(all, selected, part);
 }
 
+static String _program_documentation(Compiler c, int line) {
+  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
+    if (token.line >= line && !(token.type in %<<space comment preproc>>))
+      return c.definition_doc(token);
+  return NULL;
+}
+
 static void _program_symbol(
   ProgramBuild &b, Compiler c, String path, String name, Type type,
   List syntax, String declaration, String body, int line) {
@@ -164,10 +172,14 @@ static void _program_symbol(
     "source": program.sources[path], "declaration": declaration ? declaration : "",
     "body": body ? body : "", "line": line,
     "end_line": line + (body ? body.count("\n") : 0), "syntax": syntax};
+  String documentation = _program_documentation(b.documentation, line);
+  if (documentation) program.descriptions[name].map()["documentation"] = documentation;
   if (kind != <type> && !(name in b.units)) {
     b.units[name] = 1;
     String native = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-    b.exports.push($(name, native ? native : name));
+    b.exports.push(path.endswith(".h") && !type.is_inline()
+      ? $(name, native ? native : name, <dynamic>)
+      : $(name, native ? native : name));
   }
 }
 
@@ -194,7 +206,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       Map description = b.program.descriptions[name];
       description["display"] = display;
       description["parameters"] = parameters;
-      description["doc"] = doc;
+      if (doc is <string> && doc.str().len()) description["documentation"] = doc;
       definitions[name] = 1;
     }
   foreach (List node, unit.ast) {
@@ -353,6 +365,35 @@ static String _program_c_header(Compiler c, List ast) {
   return text;
 }
 
+static void _program_macro(
+  ReplProgram program, Compiler c, String root, String name, Var raw) {
+  String body = NULL, parameters = "";
+  List site = NULL;
+  match (raw) {
+    case %(object ? ?replacement ?origin): { body = replacement; site = origin; }
+    case %(function ? ?names ?variadic ?replacement ?origin): {
+      parameters = "(" + ", ".join(names) +
+        (variadic ? (names ? ", ..." : "...") : "") + ")";
+      body = replacement;
+      site = origin;
+    }
+    default: return;
+  }
+  String path = site.car(), source = NULL;
+  if (!path.startswith("<")) {
+    path = Path.resolved_absolute(path);
+    Var cached = program.sources[path];
+    if (cached is <string>) source = cached;
+    else if (c.sources.read(path, source)) program.sources[path] = source;
+  }
+  String declaration = %"#define $name$parameters$(body.len() ? " " : "")$body";
+  program.descriptions[name] = {
+    "name": name, "kind": <macro>, "type": NULL,
+    "path": path, "source": source, "line": site.cadr(),
+    "end_line": site.cadr(), "declaration": declaration,
+    "body": declaration, "dependency": path != root};
+}
+
 static String _program_unit(ProgramBuild &b, String path) {
   if (path in b.seen) return NULL;
   b.seen[path] = 1;
@@ -385,23 +426,33 @@ static String _program_unit(ProgramBuild &b, String path) {
   local.units = {};
   String original = c.source_texts[path];
   collected.sources[path] = original ? original : c.text;
+  Tokenizer authored = auto Tokenizer.new(original ? original : c.text, <x2c>);
+  authored.scan();
+  struct Compiler documentation = *c;
+  documentation.text = original ? original : c.text;
+  documentation.tokenizer = authored;
+  local.documentation = &documentation;
   foreach (Var (file, text), c.source_texts) collected.sources[file] = text;
   _program_describe(local, unit, path);
   if (native)
-    foreach (Var (key, value), unit.globals) {
+    foreach (Var (key, value), c.sym.unit_symbols()) {
       if (key is not <list> || value is not <list>) continue;
       List parts = key;
       if (parts ~= %(?(String name))) {
         Type type = value;
         if (_program_private(c, name, type)) continue;
         collected.symbols[key] = type.declared();
+        if (!type.is_typedef() && !c.sym.enumerator_owner($(name)) &&
+            !(name in local.units)) {
+          local.units[name] = 1;
+          String emitted = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
+          local.exports.push($(name, emitted ? emitted : name, <dynamic>));
+        }
       }
       else if (parts.car() in %<<struct union enum typedef>>)
         collected.symbols[key] = value;
     }
   program.symbols.merge(unit.context.export(collected.symbols));
-  program.descriptions.merge(unit.context.export(collected.descriptions));
-  program.sources.merge(unit.context.export(collected.sources));
   foreach (List row, (Array) unit.context.export(local.exports))
     if (!(row.car() in b.units)) {
       b.units[row.car()] = 1;
@@ -432,9 +483,13 @@ static String _program_unit(ProgramBuild &b, String path) {
   }
   List macros = native ? c.command_macros
     : c.included_macros(path, 0, Path.dirname(path), NULL);
-  foreach (List row, macros)
-    program.macros[unit.context.export(row.car())] =
-      unit.context.export(row.cadr());
+  foreach (List row, macros) {
+    String name = row.car();
+    program.macros[unit.context.export(name)] = unit.context.export(row.cadr());
+    _program_macro(&collected, c, path, name, row.cadr());
+  }
+  program.descriptions.merge(unit.context.export(collected.descriptions));
+  program.sources.merge(unit.context.export(collected.sources));
   return NULL;
 }
 
@@ -450,13 +505,31 @@ static String _program_native_build(
   foreach (String directory, b.includes) {
     command.push("--c-include-dir"); command.push(directory);
   }
-  if (kind == <module>)
-    foreach (String option, request.ld_args) {
-      if (option.startswith("-")) command.push(option);
-      else command.push(option);
+  if (kind == <module>) {
+    command.push("-Wl,-t");
+    foreach (String option, request.ld_args) command.push(option);
+  }
+  foreach (String source, sources) {
+    if (kind == <module> && source.endswith(".a")) {
+#ifdef __APPLE__
+      command.push("-Xlinker"); command.push("-force_load");
+      command.push("-Xlinker"); command.push(source);
+#else
+      command.push("-Xlinker"); command.push("--whole-archive");
+      command.push("-Xlinker"); command.push(source);
+      command.push("-Xlinker"); command.push("--no-whole-archive");
+#endif
     }
-  foreach (String source, sources) command.push(source);
-  return _program_command(command);
+    else command.push(source);
+  }
+  String captured = NULL, errors = NULL;
+  int status = tool_capture(command, captured, errors);
+  if (status) return errors ? errors : %"native build exited with status $status";
+  if (kind == <module>) {
+    if (captured) _program_link_dependencies(b.program, captured);
+    if (errors) _program_link_dependencies(b.program, errors);
+  }
+  return NULL;
 }
 
 /* Each manifest dependency keeps its own compiler and native options. */
@@ -551,7 +624,8 @@ static String _program_exports(ProgramBuild &b) {
   code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
   foreach (List row, b.exports) {
     String name = row.cadr();
-    code.push(%"    case $index: return (void *) &$name;\n");
+    if (row.len() < 3 || row[2] != <dynamic>)
+      code.push(%"    case $index: return (void *) &$name;\n");
     index++;
   }
   code.push("  }\n  return 0;\n}\n");
@@ -617,9 +691,50 @@ static String _program_open(ReplProgram program) {
   if (!address) return "the native program has no address table";
   unsigned index = 0;
   program.addresses = {};
-  foreach (List row, program.exports)
-    program.addresses[row.car()] = address(index++);
+  Compiler declarations = Compiler.new();
+  declarations.sym.reset(program.symbols);
+  foreach (List row, program.exports) {
+    String name = row.car();
+    void *target = row.len() >= 3 && row[2] == <dynamic>
+      ? dlsym(program.handle, row.cadr().str()) : address(index);
+    index++;
+    if (target) program.addresses[name] = target;
+    else {
+      Map description = program.descriptions[name];
+      if (!description) {
+        Type type = program.symbols[$(name)];
+        description = program.descriptions[name] = {
+          "name": name, "kind": type.is_function() ? <native> : <global>,
+          "type": type, "declaration": _program_declaration(declarations, type, name),
+          "body": "", "dependency": 1};
+      }
+      description["unavailable"] = 1;
+    }
+  }
   return NULL;
+}
+
+/* Explicit native modules stay outside the retained program artifact. */
+static void _program_native_dependencies(ReplProgram program, CliRequest request) {
+  foreach (String path, request.native_modules)
+    if (Path.is_file(path)) {
+      String file = Path.resolved_absolute(path);
+      if (!file.startswith(%"$(program.directory)/"))
+        program.dependencies[file] = Path.content_identity(file);
+    }
+}
+
+/* The native linker identifies the files it selected, including -L/-l and
+   linker forwarding options. Static archives are baked into the artifact. */
+static void _program_link_dependencies(ReplProgram program, String text) {
+  foreach (String line, text.split("\n")) {
+    String file = line.strip(NULL);
+    if (!(file.endswith(".dylib") || ".so" in Path.basename(file) ||
+          ".framework/" in file) || !Path.is_file(file)) continue;
+    file = Path.resolved_absolute(file);
+    if (!file.startswith(%"$(program.directory)/"))
+      program.dependencies[file] = Path.content_identity(file);
+  }
 }
 
 /* Selection reads declarations before building. Only explicitly added main
@@ -698,6 +813,7 @@ ReplProgram repl_program_build_selected(
     program.ld_args = request.ld_args;
     roots = roots.append(request.inputs);
   }
+  _program_native_dependencies(program, request);
   if (requested) roots = _program_select_roots(frontend, roots, requested, failure);
   if (failure) return NULL;
   Array native = [], source = [];

@@ -58,3 +58,17 @@ if "$tmp/program-api" "$tmp/main-args.c" "$tmp/main-void.x" \
   echo "conflicting startup main roots unexpectedly succeeded" >&2
   exit 1
 fi
+
+case "$(uname -s)" in
+  Darwin) shared="$tmp/libplayground.dylib"; cc -dynamiclib -fPIC \
+    commands/repl/tests/library/playground.c -o "$shared" ;;
+  *) shared="$tmp/libplayground.so"; cc -shared -fPIC \
+    commands/repl/tests/library/playground.c -o "$shared" ;;
+esac
+REPL_PROGRAM_REMOVE_NATIVE="$shared" "$tmp/program-api" \
+  "$PWD/commands/repl/tests/library/playground.h" -L"$tmp" -lplayground
+
+cat >"$tmp/sqlite-wrapper.h" <<'EOF'
+#include <sqlite3.h>
+EOF
+"$tmp/program-api" "$tmp/sqlite-wrapper.h" -lsqlite3
