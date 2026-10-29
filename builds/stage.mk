@@ -204,6 +204,10 @@ $(BIN_BUILD)/.translated: $(BIN_X_INPUTS) $(X2C_TRANSLATE_DEPS) \
 	$(X2C_TRANSLATE) --out-dir $(BIN_BUILD) \
 		$(BIN_X_FILES)
 	@touch $@
+ifeq ($(DIRECTORY),0)
+# The bootstrap can replay the runtime interfaces just written beside src/.
+$(BIN_BUILD)/.translated: | $(LIB_BUILD)/.translated
+endif
 $(BIN_C_FILES) $(BIN_H_FILES): $(BIN_BUILD)/.translated
 
 # See the library rule above: the batch stamp owns every generated file.
