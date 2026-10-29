@@ -335,6 +335,6 @@ Map repl_native_execute(ReplSession session, List syntax, int persistent,
     published["artifact"] = directory;
     return published;
   }
-  catch %(?kind *details): raise %(replrun $kind @details);
+  catch %(?kind *details): raise %(replrun (cause $(cons(kind, details))));
   return NULL;
 }

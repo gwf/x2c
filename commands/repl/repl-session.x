@@ -562,7 +562,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
     result.status = function ? <defined> : prints ? <value> : <executed>;
     committed = 1;
   }
-  catch %(replrun *cause): {
+  catch %(replrun (cause ?cause)): {
     result.status = <failed>;
     result.cause = cause;
   }
