@@ -38,6 +38,10 @@ List Compiler_prelude_sources(void);
 
 void Compiler_install_included_effects(Compiler c);
 
+List Compiler_included_macros(Compiler c, String target, int angle, String dir);
+
+Map Compiler_initial_macros(Compiler c, String path);
+
 String SourceView_resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
@@ -81,6 +85,8 @@ List Compiler_loaded_provider(Compiler c);
 void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
 
 Type Compiler_loaded_call_type(Compiler c, Type type);
+
+void Compiler_prepare_macro_exports(Compiler c, String path);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 

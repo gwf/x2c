@@ -18,6 +18,7 @@ typedef struct Tokenizer{
   struct Token * cursor;
   Symbol scan_status;
   int line, col, pos, layout;
+  Array expansions;
 }
 * Tokenizer;
 
@@ -453,6 +454,9 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
       Buffer_write(out, ", ");
       Buffer_write(out, "layout: ");
       Var_write_repr((int_var(value -> layout)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "expansions: ");
+      Array_write_repr(value -> expansions, out);
       {
         Buffer _x2c_gensym_return_value_1 = Buffer_write(out, " }");
         {
@@ -1123,7 +1127,7 @@ static _Layout _layout_open(Tokenizer t){
 static void * _layout_alloc(size_t count, size_t size){
   void * storage = calloc(count, size);
   if(! storage){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 694,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 698,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
     __builtin_unreachable();
   }

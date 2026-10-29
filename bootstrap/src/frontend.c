@@ -49,6 +49,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static int _preprocess(Compiler c);
+
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context context, String source);
 
 static Context _unit_context(void);
@@ -375,6 +377,7 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
               {
                 if((* unit).preprocessor) Compiler_close_child(c, (* unit).preprocessor);
                 (* unit).preprocessor = NULL;
+                _preprocess(c);
                 {
                   int _x2c_gensym_return_value_1 = 0;
                   {
@@ -408,7 +411,7 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
         x2c_exception_leave(& _x2c_gensym_exception_frame_2);
       }
       {
-        int _x2c_gensym_return_value_2 = ! Compiler_error_count(c);
+        int _x2c_gensym_return_value_2 = _preprocess(c) && ! Compiler_error_count(c);
         {
           if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
             Array_resize(c -> origins, origins);
@@ -437,6 +440,57 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
     x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
 
+}
+
+static int _preprocess(Compiler c){
+  {
+    ExceptionFrame _x2c_gensym_exception_frame_3;
+    static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
+    Var _x2c_gensym_macro_patterns_2[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_2 ={
+      _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
+      _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
+    }
+    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
+    x2c_exception_push(& _x2c_gensym_exception_frame_3);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)) Compiler_preprocess_tokens(c);
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_3);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
+        int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_2);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
+        if(_x2c_gensym_macro_selected_2 == 0){
+          {
+            int _x2c_gensym_return_value_3 = 0;
+            {
+              x2c_error_catch_close(_x2c_gensym_error_handler_2);
+              _x2c_gensym_error_handler_2 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+              return _x2c_gensym_return_value_3;
+            }
+
+          }
+
+        }
+        __builtin_unreachable();
+      }
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_2);
+        _x2c_gensym_error_handler_2 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+        __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_gensym_error_handler_2);
+    _x2c_gensym_error_handler_2 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+  }
+  return 1;
 }
 
 void Type_end_unit(Map);
@@ -483,19 +537,19 @@ void Compiler_begin_meta_unit(Compiler, String);
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context context, String source){
   Compiler c = _begin_unit(frontend, &((* unit)), context);
   {
-    ExceptionFrame _x2c_gensym_exception_frame_3;
-    static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
-    Var _x2c_gensym_macro_patterns_2[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_2 ={
-      _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_4;
+    static MatchCaptureSite _x2c_gensym_macro_arms_3[1];
+    Var _x2c_gensym_macro_patterns_3[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_3 ={
+      _x2c_gensym_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
-      _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_3)){
+      _x2c_gensym_macro_patterns_3[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
-    x2c_exception_push(& _x2c_gensym_exception_frame_3);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_3 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_4, & _x2c_gensym_macro_site_3, _x2c_gensym_macro_patterns_3);
+    x2c_exception_push(& _x2c_gensym_exception_frame_4);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_4.env, 0)){
       if(! String_truth(filename)) _tokenize_session(frontend, c, source);
       else{
         c -> package_dirs = CliRequest_package_roots(frontend -> request);
@@ -506,19 +560,19 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
 
     }
     else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_3);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
-        int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_2);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
-        if(_x2c_gensym_macro_selected_2 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_4);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_4)){
+        int _x2c_gensym_macro_selected_3 = x2c_error_catch_selected(_x2c_gensym_error_handler_3);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_3);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_4);
+        if(_x2c_gensym_macro_selected_3 == 0){
           {
-            int _x2c_gensym_return_value_3 = 0;
+            int _x2c_gensym_return_value_4 = 0;
             {
-              x2c_error_catch_close(_x2c_gensym_error_handler_2);
-              _x2c_gensym_error_handler_2 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-              return _x2c_gensym_return_value_3;
+              x2c_error_catch_close(_x2c_gensym_error_handler_3);
+              _x2c_gensym_error_handler_3 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_4);
+              return _x2c_gensym_return_value_4;
             }
 
           }
@@ -527,16 +581,16 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
         __builtin_unreachable();
       }
       else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_2);
-        _x2c_gensym_error_handler_2 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+        x2c_error_catch_close(_x2c_gensym_error_handler_3);
+        _x2c_gensym_error_handler_3 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_4);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_gensym_error_handler_2);
-    _x2c_gensym_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+    x2c_error_catch_close(_x2c_gensym_error_handler_3);
+    _x2c_gensym_error_handler_3 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_4);
   }
   return ! Compiler_error_count(c);
 }
@@ -546,6 +600,8 @@ static Context _unit_context(void){
 }
 
 Map Type_begin_unit(void);
+
+List Compiler_command_macros(List);
 
 static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context context){
   CliRequest request = frontend -> request;
@@ -562,6 +618,7 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   c -> source_map = request -> source_map;
   c -> sources = request -> sources;
   c -> package_source_dirs = request -> package_dirs;
+  c -> command_macros = Compiler_command_macros(request -> cpp_args);
   c -> source_facts = request -> source_facts;
   c -> source_primary = 1;
   if(c -> source_facts){
@@ -578,7 +635,7 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source){
   c -> filename = _2;
   c -> prelude = c -> runtime_inc = 1;
   c -> include_dirs = frontend -> include_dirs;
-  Compiler_tokenize(c, String_truth(source) ? source : "");
+  Compiler_scan_source(c, String_truth(source) ? source : "");
 }
 
 int Compiler_defines_main(Compiler);
@@ -591,14 +648,35 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   _runtime_roles(c, resolved ? source : NULL);
   String text = _read_input(c);
   if(String_truth(text) && String_startswith(text, _3)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
-  c -> unit_source = Compiler_module_source(c, c -> filename, text);
+  c -> text = text;
+  c -> include_dirs = frontend -> include_dirs;
+  Compiler_prepare_macro_exports(c, c -> filename);
+  {
+    ExceptionFrame _x2c_gensym_exception_frame_5;
+    x2c_exception_push(& _x2c_gensym_exception_frame_5);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_5.env, 0)) c -> unit_source = Compiler_module_source(c, c -> filename, text);
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_5);
+      {
+        if(x2c_exception_claim(& _x2c_gensym_exception_frame_5)){
+          Compiler_forget_provisional_entries();
+        }
+        x2c_exception_leave(& _x2c_gensym_exception_frame_5);
+        __builtin_unreachable();
+      }
+
+    }
+    if(x2c_exception_claim(& _x2c_gensym_exception_frame_5)){
+      Compiler_forget_provisional_entries();
+    }
+    x2c_exception_leave(& _x2c_gensym_exception_frame_5);
+  }
   if(c -> unit_source){
     text = c -> unit_source -> text;
     c -> line_markers = c -> unit_source -> markers;
   }
-  c -> include_dirs = frontend -> include_dirs;
   (* unit).source_lines = _source_lines(text);
-  Compiler_tokenize(c, text);
+  Compiler_scan_source(c, text);
   if(c -> script) c -> script -> defines_main = Compiler_defines_main(c);
 }
 
@@ -781,10 +859,10 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
         {
           _enter_package(frontend, c);
           {
-            Map _x2c_gensym_return_value_4 = Compiler_collect_symbols(c, (* unit).globals);
+            Map _x2c_gensym_return_value_5 = Compiler_collect_symbols(c, (* unit).globals);
             {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-              return _x2c_gensym_return_value_4;
+              return _x2c_gensym_return_value_5;
             }
 
           }
@@ -876,7 +954,10 @@ static String _take_line_markers(Compiler cpp, String text){
   return String_join(_15, Array_list_free(kept));
 }
 
+Cpp Cpp_new(Map);
+
 static void _tokenize_cpp(Compiler cpp, String text){
+  cpp -> cpp = Cpp_new(Map_new());
   Compiler_tokenize(cpp, text);
   cpp -> source_facts = 0;
   cpp -> source_private = - 1;

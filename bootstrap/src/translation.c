@@ -762,6 +762,10 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
       Compiler c = unit.compiler;
       if(! started) _fail(c);
       Compiler_own_diagnostics(c);
+      c -> dump_expansions = dump == 405722918124454;
+      int collected = ParsedUnit_collect(&(unit), frontend);
+      _report_diagnostics(c);
+      if(! collected) exit(1);
       if(dump == 1374366630){
         Compiler_dump_tokens(c);
         {
@@ -770,10 +774,6 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
         }
 
       }
-      c -> dump_expansions = dump == 405722918124454;
-      int collected = ParsedUnit_collect(&(unit), frontend);
-      _report_diagnostics(c);
-      if(! collected) exit(1);
       if(_inspect_collected(&(unit), dump)){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
         return;

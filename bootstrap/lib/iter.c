@@ -630,7 +630,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
 
 static void _unzip_compact(UnzipShared * shared, int column){
   int consumed = shared -> heads[column];
-  if(consumed < UNZIP_COMPACT_THRESHOLD) return;
+  if(consumed < 256) return;
   if(consumed < Array_len(shared -> buffers[column]) - consumed) return;
   Array_setslice(shared -> buffers[column], 0, consumed, NULL);
   shared -> heads[column] = 0;

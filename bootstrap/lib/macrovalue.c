@@ -8,14 +8,14 @@
 #include "common.h"
 #include "match/match.h"
 typedef struct MacroFixedSlots{
-  int count, slots[MACHINE_BINDER_MAX];
-  int names, name_slots[MACHINE_BINDER_MAX];
+  int count, slots[64];
+  int names, name_slots[64];
 }
 MacroFixedSlots;
 
 typedef struct MacroPublishing{
-  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
-  int to[MACHINE_BINDER_MAX];
+  int from[64], fallback[64];
+  int to[64];
   int count, binders, complete;
   unsigned long definite;
 }
@@ -1123,9 +1123,9 @@ return Array_list_free(projected);
 }
 
 static int f11_recognition____pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published){
-  Var values[MACHINE_BINDER_MAX];
+  Var values[64];
   MatchCaptureBuffer captured ={
-    values, 0, MACHINE_BINDER_MAX
+    values, 0, 64
   }
   ;
   List internal = f11_recognition____internal_names(t, names, 1);
@@ -1192,9 +1192,9 @@ static List f11_recognition____internal_names(Macro t, List names, int pending){
 }
 
 static int f11_recognition____capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published){
-  Var values[MACHINE_BINDER_MAX];
+  Var values[64];
   MatchCaptureBuffer captured ={
-    values, 0, MACHINE_BINDER_MAX
+    values, 0, 64
   }
   ;
   return f11_recognition____case_match(code, plan, &((* policy)), &(captured)) && f11_recognition____publish(&((* route)), &(captured), published);
@@ -1506,7 +1506,7 @@ static MacroPublishing f11_recognition____publishing(Macro t, List pattern, List
 
 static int f11_recognition____publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
   if(!(* route).complete) return 0;
-  Var ordered[MACHINE_BINDER_MAX];
+  Var ordered[64];
   for(int i = 0;  i <(* route).count;  i ++){
     int from = MatchCaptureBuffer_has(&((* captured)), (* route).from[i]) ?(* route).from[i] :(* route).fallback[i];
     if(from < 0 || ! MatchCaptureBuffer_has(&((* captured)), from)) return 0;

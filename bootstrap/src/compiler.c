@@ -26,6 +26,8 @@ typedef struct Diagnostics * Diagnostics;
 
 typedef struct MetaBindings * MetaBindings;
 
+typedef struct Cpp * Cpp;
+
 typedef struct ScriptUnit{
   String path, shebang;
   int defines_main;
@@ -97,6 +99,8 @@ typedef struct Compiler{
   Map key_ids, macros, kw_aliases;
   List binding_rows, binding_sealed;
   Map object_macros;
+  Cpp cpp;
+  List command_macros;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -196,6 +200,7 @@ SymTxn;
 #include "diagnostics.h"
 #include "symtab/symtab.h"
 #include "preprocess.h"
+#include "cpp/cpp.h"
 #include "grammar.h"
 #include "utils.h"
 #include "parse/parse.h"
@@ -867,7 +872,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2264);
+  _295 = int_var(2293);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));
@@ -1185,6 +1190,7 @@ static void f9_lifecycle____share_unit(Compiler c, Compiler owner){
   c -> meta_helper = owner -> meta_helper;
   c -> pending_inline_bodies = owner -> pending_inline_bodies;
   c -> collection_native_files = owner -> collection_native_files;
+  c -> command_macros = owner -> command_macros;
 }
 
 static void f9_lifecycle____own_unit(Compiler c){
@@ -2550,7 +2556,17 @@ static Token f19_parsing_definitions____init_token(Compiler c, List binding){
   return tokens + Var_integer(index);
 }
 
+void Compiler_scan_source(Compiler c, char * text);
+
+void Compiler_preprocess_tokens(Compiler c);
+
 void Compiler_tokenize(Compiler c, char * text){
+  if(! _init_guard_) _file_init_();
+  Compiler_scan_source(c, text);
+  Compiler_preprocess_tokens(c);
+}
+
+void Compiler_scan_source(Compiler c, char * text){
   if(! _init_guard_) _file_init_();
   if(f14_parsing_tokens____is_script_file(c)) c -> script = c -> unit_script;
   c -> input_boundary = NULL;
@@ -2560,10 +2576,16 @@ void Compiler_tokenize(Compiler c, char * text){
   Tokenizer_scan(c -> tokenizer);
   c -> layout = c -> tokenizer -> layout;
   f14_parsing_tokens____report_malformed_token(c);
+  c -> token = Token_skip_trivia(c -> tokenizer -> tokens);
+  Array_clear(c -> braces);
+}
+
+void Compiler_preprocess_tokens(Compiler c){
+  if(! _init_guard_) _file_init_();
+  Compiler_expand_macros(c);
   Compiler_scan_conditionals(c);
   f14_parsing_tokens____retag_keywords(c -> tokenizer);
   c -> token = Token_skip_trivia(c -> tokenizer -> tokens);
-  Array_clear(c -> braces);
 }
 
 void Compiler_require_input(Compiler c);
@@ -2581,7 +2603,7 @@ Symbol Compiler_expect(Compiler c, Symbol type){
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 46};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 66};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 664344300629258, 0);
     __builtin_unreachable();
   }
@@ -2618,7 +2640,7 @@ Symbol Compiler_peek(Compiler c, int steps){
   if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 95};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 113};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
@@ -2688,7 +2710,7 @@ void _x2c_complete_here(Compiler c, Symbol role, List keywords){
   if(! Compiler_at_completion(c)) return;
   List rows = Sym_visible_symbols(c -> sym);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 172};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 190};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 

@@ -15,9 +15,9 @@ String Compiler_preproc_marker_file(String text, int * line);
 
 void Compiler_scan_conditionals(Compiler c);
 
-int Compiler_preproc_open_state(String text);
+Token Compiler_macro_directive(String content, int * undefined);
 
-int Compiler_preproc_branch_state(int state);
+Token Compiler_scan_directive(String text);
 
 List Compiler_leading_preproc(Compiler c);
 

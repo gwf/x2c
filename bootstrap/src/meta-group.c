@@ -2370,7 +2370,7 @@ void Compiler_stage_meta_in_process(void){
 
 int Compiler_groups_meta(Compiler c){
   if(! _init_guard_) _file_init_();
-  return String_truth(meta_cc) && ! Map_truth(c -> macro_holes) &&(void *) c -> meta_group &&(c -> meta_build ||(! c -> meta_helper && X2C_NATIVE_MODULES && f9_selection___meta_in_process));
+  return String_truth(meta_cc) && ! Map_truth(c -> macro_holes) &&(void *) c -> meta_group &&(c -> meta_build ||(! c -> meta_helper && 1 && f9_selection___meta_in_process));
 }
 
 int Compiler_meta_calls_wait(Compiler c){

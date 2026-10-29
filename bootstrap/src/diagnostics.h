@@ -56,6 +56,12 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
 
 String Compiler_macro_expansion_note(Compiler c);
 
+String Compiler_cpp_note(Compiler c, List location);
+
+String Compiler_expanding_macro(Compiler c, Token token);
+
+String Diagnostics_c_macro_note(String name, List site);
+
 Var Diagnostics_macro_expansion_input(List input);
 
 String Diagnostics_macro_definition_note(List definition);

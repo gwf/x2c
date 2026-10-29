@@ -8,17 +8,17 @@
 #include <ctype.h>
 typedef struct ArmScan{
   Compiler c;
-  Array stack;
+  List open;
   Map layout;
-  int hidden, serial;
+  int hidden;
 }
 ArmScan;
 
-static List _21, _20;
+static List _16, _15;
 
-static String _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _18, _17, _16, _15, _14, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _22, _21, _20, _19, _18, _17, _13, _12, _11, _10, _9, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _19, _13;
+static Var _14, _8;
 
 static int _init_guard_ = 0;
 
@@ -28,11 +28,7 @@ static List _leading_preproc(Compiler c, int located);
 
 static void _directive(ArmScan * s, Token token, size_t i);
 
-static String _directive_line(String directive);
-
-static int _never_defined(String name);
-
-static int _hidden_group(Array stack);
+static int _hidden_group(List open);
 
 static size_t _code(ArmScan * s, Token token, size_t i);
 
@@ -41,8 +37,6 @@ static size_t _note_attribute(ArmScan * s, size_t index);
 static void _mark_layout(ArmScan * s, size_t index, int packed);
 
 static void _note_layout_macro(ArmScan * s, String content);
-
-static Token _macro_directive(String content, int * undefined);
 
 static int _attribute_layout(Token token);
 
@@ -65,13 +59,6 @@ _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-typedef struct _x2c_gensym_defer_env_1{
-  const void * _x2c_gensym_defer_capture_1;
-}
-_x2c_gensym_defer_env_1;
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
-
 #include "exception.h"
 
 
@@ -84,40 +71,26 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("include");
   _1 = String_new(">");
   _2 = String_new("\"");
-  _3 = String_new("defined ( <never> )");
-  _4 = String_new("defined <never>");
-  _5 = String_new("ifdef <never>");
-  _6 = String_new("if 0");
-  _7 = String_new("if ( 0 )");
-  _8 = String_new("if defined <never>");
-  _9 = String_new("if defined <never> && ");
-  _10 = String_new(" || ");
-  _11 = String_new("ifndef <never>");
-  _12 = String_new("if ! defined <never>");
-  _13 = Symbol_var(35579270086);
-  _14 = String_new("if");
-  _15 = String_new("el");
-  _16 = String_new("endif");
-  _17 = String_new("#");
-  _18 = String_new("#endif");
-  _19 = String_var(_18);
-  _20 = cons(_19, NULL);
-  _21 = cons(_13, _20);
-  _22 = String_new("<never>");
-  _23 = String_new(" ");
-  _24 = String_new("__cplusplus");
-  _25 = String_new("_MSC_VER");
-  _26 = String_new("_WIN32");
-  _27 = String_new("_WIN64");
-  _28 = String_new("__CYGWIN__");
-  _29 = String_new("__attribute__");
-  _30 = String_new("undef");
-  _31 = String_new("define");
-  _32 = String_new("packed");
-  _33 = String_new("aligned");
-  _34 = String_new("mode");
-  _35 = String_new("vector_size");
-  _36 = String_new("__declspec");
+  _3 = String_new("undef");
+  _4 = String_new("define");
+  _5 = String_new("\\\r\n");
+  _6 = String_new("");
+  _7 = String_new("\\\n");
+  _8 = Symbol_var(35579270086);
+  _9 = String_new("if");
+  _10 = String_new("el");
+  _11 = String_new("endif");
+  _12 = String_new("#");
+  _13 = String_new("#endif");
+  _14 = String_var(_13);
+  _15 = cons(_14, NULL);
+  _16 = cons(_8, _15);
+  _17 = String_new("__attribute__");
+  _18 = String_new("packed");
+  _19 = String_new("aligned");
+  _20 = String_new("mode");
+  _21 = String_new("vector_size");
+  _22 = String_new("__declspec");
 }
 
 String Compiler_preproc_directive(String text);
@@ -150,50 +123,31 @@ String Compiler_preproc_marker_file(String text, int * line){
 
 void Compiler_scan_conditionals(Compiler c){
   if(! _init_guard_) _file_init_();
-  Array stack = Array_new();
-  const Array _x2c_gensym_macro_acquired_0 = stack;
+  Map layout = Map_new();
+  const Map _x2c_gensym_macro_acquired_0 = layout;
   {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
     X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Map layout = Map_new();
-      const Map _x2c_gensym_macro_acquired_1 = layout;
-      {
-        _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-          0
-        }
-        ;
-        _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_1;
-        X2CCleanup _x2c_gensym_defer_record_1 ={
-          .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-        {
-          ArmScan scan ={
-            .c = c, .stack = stack, .layout = layout
-          }
-          ;
-          c -> arm_stacks = Map_new();
-          c -> layout_marks = Array_new();
-          c -> packed_marks = Array_new();
-          for(size_t i = 0;  i < Bytes_len(c -> tokenizer -> tokens);  i ++){
-            Token token = &((struct Token *) c -> tokenizer -> tokens)[i];
-            if(token -> type == 11212) break;
-            if(token -> type == 35579270086) _directive(&(scan), token, i);
-            else i = _code(&(scan), token, i);
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      ArmScan scan ={
+        .c = c, .layout = layout
+      }
+      ;
+      c -> layout_marks = Array_new();
+      c -> packed_marks = Array_new();
+      for(size_t i = 0;  i < Bytes_len(c -> tokenizer -> tokens);  i ++){
+        Token token = &((struct Token *) c -> tokenizer -> tokens)[i];
+        if(token -> type == 11212) break;
+        if(token -> type == 35579270086) _directive(&(scan), token, i);
+        else i = _code(&(scan), token, i);
       }
 
     }
@@ -202,15 +156,24 @@ void Compiler_scan_conditionals(Compiler c){
 
 }
 
-int Compiler_preproc_open_state(String text){
+Token Compiler_scan_directive(String text);
+
+int Token_is_word(Token);
+
+Token Compiler_macro_directive(String content, int * undefined){
   if(! _init_guard_) _file_init_();
-  String line = String_replace(_directive_line(Compiler_preproc_directive(text)), _3, _4);
-  if(String_equal(line, _5) || String_equal(line, _6) || String_equal(line, _7) || String_equal(line, _8) ||(String_startswith(line, _9) && !(String_contains(line, _10)))) return 2;
-  return String_equal(line, _11) || String_equal(line, _12);
+  String directive = Compiler_preproc_directive(content);
+  (* undefined) = String_startswith(directive, _3);
+  if(!(* undefined) && ! String_startswith(directive, _4)) return NULL;
+  Token token = Token_skip_trivia(Compiler_scan_directive(String_remove_prefix(directive, (* undefined) ? _3 : _4)));
+  return Token_is_word(token) ? token : NULL;
 }
 
-int Compiler_preproc_branch_state(int state){
-  return state == 1 ? 2 : 0;
+Token Compiler_scan_directive(String text){
+  if(! _init_guard_) _file_init_();
+  Tokenizer scanned = Tokenizer_new(String_replace(String_replace(text, _5, _6), _7, _6), 3945159);
+  Tokenizer_scan(scanned);
+  return scanned -> tokens;
 }
 
 List Compiler_leading_preproc(Compiler c){
@@ -244,8 +207,8 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
 void Compiler_note_object_macro(Compiler c, String content){
   if(! _init_guard_) _file_init_();
   int undefined;
-  Token token = _macro_directive(content, &(undefined));
-  if(! token) return;
+  Token token = Compiler_macro_directive(content, &(undefined));
+  if(! token || token -> type != 19147688) return;
   String name = token -> text;
   Token body = token + 1;
   if(undefined) Map_del(c -> object_macros, String_var(name));
@@ -258,10 +221,10 @@ Symbol Compiler_preproc_conditional_kind(String text);
 List Compiler_preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
   Symbol kind = Compiler_preproc_conditional_kind(text);
-  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_13, cons(String_var(text), NULL))), NULL)), arms);
+  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_8, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_gensym_literal_part_0 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_1 = List_var(cons(_13, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+    List _x2c_gensym_literal_part_0 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_1 = List_var(cons(_8, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -270,15 +233,15 @@ List Compiler_preproc_track_arms(List arms, String text){
 Symbol Compiler_preproc_conditional_kind(String text){
   if(! _init_guard_) _file_init_();
   String directive = Compiler_preproc_directive(text);
-  if(String_startswith(directive, _14)) return 1016156;
-  if(String_startswith(directive, _15)) return 172060880;
-  if(String_startswith(directive, _16)) return 7109834;
+  if(String_startswith(directive, _9)) return 1016156;
+  if(String_startswith(directive, _10)) return 172060880;
+  if(String_startswith(directive, _11)) return 7109834;
   return 0;
 }
 
 String Compiler_preproc_directive(String text){
   if(! _init_guard_) _file_init_();
-  return String_strip(String_remove_prefix(String_strip(text, " \t"), _17), " \t");
+  return String_strip(String_remove_prefix(String_strip(text, " \t"), _12), " \t");
 }
 
 List Compiler_preproc_within_arms(List arms, List items){
@@ -317,7 +280,7 @@ List Compiler_preproc_within_arms(List arms, List items){
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_21));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_16));
   return Array_list_free(out);
 }
 
@@ -326,7 +289,7 @@ static List _leading_preproc(Compiler c, int located){
   Token base = c -> tokenizer -> tokens, token = c -> token;
   while(-- token >= base){
     if(token -> type == 35579270086){
-      List directive = cons(_13, cons(String_var(token -> text), NULL));
+      List directive = cons(_8, cons(String_var(token -> text), NULL));
       int angle = 0;
       if(located && String_truth(Compiler_preproc_include_target(token -> text, &(angle)))) directive = Compiler_anchor_origin(c, directive, token);
       noncode = cons(List_var(directive), noncode);
@@ -337,58 +300,23 @@ static List _leading_preproc(Compiler c, int located){
 }
 
 static void _directive(ArmScan * s, Token token, size_t i){
-  Symbol kind = Compiler_preproc_conditional_kind(token -> text);
-  int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
-  if(kind == 1016156) Array_push((* s).stack, List_var(({
-    Var _x2c_gensym_literal_part_2 = int_var(++(* s).serial);  Var _x2c_gensym_literal_part_3 = int_var(Compiler_preproc_open_state(token -> text));  cons(_x2c_gensym_literal_part_2, cons(int_var(0), cons(_x2c_gensym_literal_part_3, NULL)));
+  Var open;
+  if(Map_try_get((* s).c -> arm_stacks, long_var((long) i), &(open))){
+    (* s).open = Var_list_payload(open);
+    (* s).hidden = _hidden_group((* s).open);
   }
-  )));
-  else if(kind == 172060880 && Array_len((* s).stack)){
-    Var id, arm, state;
-    List _x2c_gensym_destructure_0 = Var_list_payload(Array_getindex((* s).stack, - 1));
-    id = List_getindex(_x2c_gensym_destructure_0, 0);
-    arm = List_getindex(_x2c_gensym_destructure_0, 1);
-    state = List_getindex(_x2c_gensym_destructure_0, 2);
-    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert_at(state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_directive",.line = 229}; & _x2c_gensym_error_site_0; })))));
-    Array_setindex((* s).stack, - 1, List_var(({
-      Var _x2c_gensym_literal_part_4 = id;  Var _x2c_gensym_literal_part_5 = long_var(Var_integer(arm) + 1);  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(branch, NULL)));
-    }
-    )));
-  }
-  else if(kind == 7109834 && Array_len((* s).stack)) Array_take_last((* s).stack);
   else if(!(* s).hidden) _note_layout_macro(&((* s)), token -> text);
-  if(! conditional) return;
-  Map_setindex((* s).c -> arm_stacks, long_var((long) i), List_var(Array_list((* s).stack)));
-  (* s).hidden = _hidden_group((* s).stack);
 }
 
-static String _directive_line(String directive){
-  Tokenizer scanned = Tokenizer_new(directive, 3945159);
-  Tokenizer_scan(scanned);
-  Array words = Array_new();
-  for(Token t = Token_skip_trivia(scanned -> tokens);  t -> type != 11212;  t = Token_skip_trivia(t + 1)) Array_push(words, _never_defined(t -> text) ? String_var(_22) : String_var(t -> text));
-  return String_join(_23, Array_list_free(words));
-}
-
-static int _never_defined(String name){
-  if(String_equal(name, _24) || String_equal(name, _25)) return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return String_equal(name, _26) || String_equal(name, _27) || String_equal(name, _28);
-#endif
-
-}
-
-static int _hidden_group(Array stack){
+static int _hidden_group(List open){
   {
     List group;
-    Array _x2c_gensym_macro_object_4 = stack;
-    int _x2c_gensym_macro_cursor_4 = 0;
+    List _x2c_gensym_macro_object_4 = open;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
     Var _x2c_gensym_macro_cursor_output_4;
-    while(Array_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       group = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      if(x2c_var_equal_lane(List_caddr(group), int_var(2))) return 1;
+      if(x2c_var_equal_lane(List_caddr(group), Symbol_var(556015964))) return 1;
     }
 
   }
@@ -397,7 +325,7 @@ static int _hidden_group(Array stack){
 
 static size_t _code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _29)) return _note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && String_equal(token -> text, _17)) return _note_attribute(&((* s)), i);
   else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) _mark_layout(&((* s)), i, x2c_var_equal_lane(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
@@ -424,10 +352,10 @@ static void _mark_layout(ArmScan * s, size_t index, int packed){
 
 static void _note_layout_macro(ArmScan * s, String content){
   int undefined;
-  Token name = _macro_directive(content, &(undefined));
-  if(! name) return;
+  Token name = Compiler_macro_directive(content, &(undefined));
+  if(! name || name -> type != 19147688) return;
   Map layout =(* s).layout;
-  if(! Array_len((* s).stack)) Map_del(layout, String_var(name -> text));
+  if(! List_truth((* s).open)) Map_del(layout, String_var(name -> text));
   if(undefined) return;
   Token token = name + 1;
   if(token -> type == 81) token = Token_after_group(token);
@@ -435,21 +363,11 @@ static void _note_layout_macro(ArmScan * s, String content){
   for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     if(token -> type != 19147688) continue;
     int level = 0;
-    if(String_equal(token -> text, _29)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 327}; & _x2c_gensym_error_site_1; })));
+    if(String_equal(token -> text, _17)) level = _attribute_layout(token);
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 297}; & _x2c_gensym_error_site_0; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order_lane(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
-}
-
-static Token _macro_directive(String content, int * undefined){
-  String directive = Compiler_preproc_directive(content);
-  (* undefined) = String_startswith(directive, _30);
-  if(!(* undefined) && ! String_startswith(directive, _31)) return NULL;
-  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _30 : _31), 3945159);
-  Tokenizer_scan(scanned);
-  Token token = Token_skip_trivia(scanned -> tokens);
-  return token -> type == 19147688 ? token : NULL;
 }
 
 static int _attribute_layout(Token token){
@@ -462,11 +380,11 @@ static int _attribute_layout(Token token){
     depth += Symbol_group_step(t -> type);
     if(depth != 1 || t -> type != 19147688) continue;
     String word = String_strip(t -> text, "_");
-    if(String_equal(word, _32)){
+    if(String_equal(word, _18)){
       layout = 1;
       packed = 1;
     }
-    else if(String_equal(word, _33) || String_equal(word, _34) || String_equal(word, _35)) layout = 1;
+    else if(String_equal(word, _19) || String_equal(word, _20) || String_equal(word, _21)) layout = 1;
   }
   if(! layout) return 0;
   return packed ? 2 : 1;
@@ -537,7 +455,7 @@ static int _is_specifier(Symbol type){
 
 static int _is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _29) || String_equal(word, _36) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal_lane(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _17) || String_equal(word, _22) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal_lane(definition, Symbol_var(102150700288988)));
 }
 
 static int _prefix_rank(Var v){
@@ -561,10 +479,5 @@ static int _prefix_rank(Var v){
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
   Map_cleanup((*(const Map *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
-}
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 

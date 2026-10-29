@@ -17,6 +17,8 @@ typedef struct Diagnostics * Diagnostics;
 
 typedef struct MetaBindings * MetaBindings;
 
+typedef struct Cpp * Cpp;
+
 typedef struct ScriptUnit{
   String path, shebang;
   int defines_main;
@@ -88,6 +90,8 @@ typedef struct Compiler{
   Map key_ids, macros, kw_aliases;
   List binding_rows, binding_sealed;
   Map object_macros;
+  Cpp cpp;
+  List command_macros;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -187,6 +191,7 @@ SymTxn;
 #include "diagnostics.h"
 #include "symtab/symtab.h"
 #include "preprocess.h"
+#include "cpp/cpp.h"
 #include "grammar.h"
 #include "utils.h"
 #include "parse/parse.h"
@@ -241,6 +246,10 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_tokenize(Compiler c, char * text);
+
+void Compiler_scan_source(Compiler c, char * text);
+
+void Compiler_preprocess_tokens(Compiler c);
 
 Symbol Compiler_expect(Compiler c, Symbol type);
 

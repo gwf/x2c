@@ -1109,8 +1109,8 @@ static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv env){
   Symbol special = f8_evaluate____special_id(lisp, fn);
   if(special) return f8_evaluate____apply_special(lisp, special, raw, env);
   int count = List_len(raw);
-  FuncArg narrow[LISP_NATIVE_ARG_MAX];
-  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
+  FuncArg narrow[8];
+  FuncArg * argv = count <= 8 ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
   {
     ExceptionFrame _x2c_gensym_exception_frame_0;
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
@@ -1818,8 +1818,8 @@ static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv 
 
 static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
   int count = List_len(values);
-  FuncArg narrow[LISP_NATIVE_ARG_MAX];
-  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
+  FuncArg narrow[8];
+  FuncArg * argv = count <= 8 ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
   {
     ExceptionFrame _x2c_gensym_exception_frame_1;
     x2c_exception_push(& _x2c_gensym_exception_frame_1);
@@ -2235,10 +2235,10 @@ static unsigned long f8_evaluate____stack_allowance(unsigned long at){
     pthread_attr_destroy(& attributes);
   }
 #endif
-  if(! low || low >= at) return LISP_STACK_BYTES_MAX;
+  if(! low || low >= at) return(6L << 20);
   unsigned long left = at - low;
   left -= left / 5;
-  return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
+  return left <(6L << 20) ? left :(6L << 20);
 }
 
 static void f8_evaluate____open_call_budget(Lisp lisp){
@@ -2673,7 +2673,7 @@ Lisp Lisp_kernel(void){
           }
           lisp -> scope = session;
           lisp -> user = Scope_new_named("Lisp user");
-          lisp -> call_step_max = LISP_CALL_STEP_MAX;
+          lisp -> call_step_max = 40000000;
           {
             Scope_push(& lisp -> scope);
             {

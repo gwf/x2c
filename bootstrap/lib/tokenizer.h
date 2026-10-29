@@ -22,6 +22,7 @@ typedef struct Tokenizer{
   struct Token * cursor;
   Symbol scan_status;
   int line, col, pos, layout;
+  Array expansions;
 }
 * Tokenizer;
 

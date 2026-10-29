@@ -99,7 +99,7 @@ MachineView;
 typedef struct MachineBuilder{
   MachineWord * code;
   Var * consts;
-  Atom binders[MACHINE_BINDER_MAX];
+  Atom binders[64];
   int length, code_capacity, const_count, const_capacity, binder_count, root;
   Symbol status;
   const char * reason;
@@ -137,8 +137,8 @@ typedef struct MatchFrame{
 MatchFrame;
 
 typedef struct MachineRegs{
-  List cursors[MACHINE_CURSOR_REGS];
-  int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS];
+  List cursors[3];
+  int distances[3], ints[2];
   MachineMark mark;
 }
 MachineRegs;
@@ -166,10 +166,10 @@ typedef struct MatchMachine{
   Var(* view)(Var);
   Var * scratch;
   int scratch_capacity;
-  MatchFrame frames[MACHINE_FRAME_MAX];
-  MachineRegs regs[MACHINE_FRAME_MAX];
-  MachineSlot slots[MACHINE_BINDER_MAX];
-  MachineUndo undo[MACHINE_UNDO_MAX];
+  MatchFrame frames[128];
+  MachineRegs regs[128];
+  MachineSlot slots[64];
+  MachineUndo undo[256];
 }
 MatchMachine;
 

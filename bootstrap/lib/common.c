@@ -405,72 +405,72 @@ static inline unsigned Var_payload32(Var value){
 
 static inline double Var_decode_f64(Var value){
   switch(value.u64){
-    case VAR_NAN_BITS : return 0.0 / 0.0;  case VAR_NEGINF_BITS : return - 1.0 / 0.0;  case VAR_POSINF_BITS : return 1.0 / 0.0;
+    case 0x8003000100000000ul : return 0.0 / 0.0;  case 0x8003000200000000ul : return - 1.0 / 0.0;  case 0x8003000300000000ul : return 1.0 / 0.0;
   }
-  unsigned long raw = value.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : value.u64 - VAR_F64_SHIFT;  double result;  memcpy(& result, & raw, sizeof result);  return result;
+  unsigned long raw = value.u64 == 0x8003000400000000ul ? 0xFFEFFFFFFFFFFFFFul : value.u64 -(1ul << 52);  double result;  memcpy(& result, & raw, sizeof result);  return result;
 }
 
 static inline Var Var_box_i8(char value){
   return(Var){
-    .u64 = VAR_I8_PREFIX |(unsigned char) value
+    .u64 = 0x8002000200000000ul |(unsigned char) value
   }
   ;
 }
 
 static inline Var Var_box_u8(uchar value){
   return(Var){
-    .u64 = VAR_U8_PREFIX |(uchar) value
+    .u64 = 0x8002000100000000ul |(uchar) value
   }
   ;
 }
 
 static inline Var Var_box_i16(short value){
   return(Var){
-    .u64 = VAR_I16_PREFIX |(unsigned short) value
+    .u64 = 0x8002000400000000ul |(unsigned short) value
   }
   ;
 }
 
 static inline Var Var_box_u16(ushort value){
   return(Var){
-    .u64 = VAR_U16_PREFIX |(ushort) value
+    .u64 = 0x8002000300000000ul |(ushort) value
   }
   ;
 }
 
 static inline Var Var_box_i32_bits(unsigned value){
   return(Var){
-    .u64 = VAR_I32_PREFIX |(unsigned) value
+    .u64 = 0x8002000600000000ul |(unsigned) value
   }
   ;
 }
 
 static inline Var Var_box_u32(unsigned value){
   return(Var){
-    .u64 = VAR_U32_PREFIX |(unsigned) value
+    .u64 = 0x8002000500000000ul |(unsigned) value
   }
   ;
 }
 
 static inline Var Var_box_f32(float value){
   unsigned raw;  memcpy(& raw, & value, sizeof raw);  return(Var){
-    .u64 = VAR_F32_PREFIX | raw
+    .u64 = 0x8002000700000000ul | raw
   }
   ;
 }
 
 static inline Var Var_box_f64(double value){
   unsigned long raw;  memcpy(& raw, & value, sizeof raw);  if(value != value) return(Var){
-    .u64 = VAR_NAN_BITS
+    .u64 = 0x8003000100000000ul
   }
   ;  if(value > 0 && value == 1.0 / 0.0) return(Var){
-    .u64 = VAR_POSINF_BITS
+    .u64 = 0x8003000300000000ul
   }
   ;  if(value < 0 && value == - 1.0 / 0.0) return(Var){
-    .u64 = VAR_NEGINF_BITS
+    .u64 = 0x8003000200000000ul
   }
   ;  return(Var){
-    .u64 = raw == VAR_F64_NEG_MAX_RAW ? VAR_F64_NEG_MAX_ESCAPE : raw + VAR_F64_SHIFT
+    .u64 = raw == 0xFFEFFFFFFFFFFFFFul ? 0x8003000400000000ul : raw +(1ul << 52)
   }
   ;
 }
@@ -493,7 +493,7 @@ static inline Var Bytes_var(Bytes x){
 
 static inline Var List_var(List x){
   return(Var){
-    .u64 =(unsigned long) x | VAR_LIST_PREFIX
+    .u64 =(unsigned long) x | 0x0009000000000004ul
   }
   ;
 }
@@ -508,14 +508,14 @@ static inline Var Map_var(Map x){
 
 static inline Var String_var(String x){
   return(Var){
-    .u64 =(unsigned long) x | VAR_STRING_PREFIX
+    .u64 =(unsigned long) x | 0x000B000000000001ul
   }
   ;
 }
 
 static inline Var Symbol_var(Symbol x){
   return x <(1ul << 51) ?(Var){
-    .u64 = x + VAR_SYMBOL_OFFSET
+    .u64 = x + 0x8004000000000000ul
   }
   : Var_new(1328354264, x);
 }
@@ -702,15 +702,15 @@ static inline Block Bytes_block(Bytes);
 static inline void Block_pop(Block);
 static inline void Block_truncate(Block, size_t);
 static inline Symbol Var_symbol(Var x){
-  Symbol symbol = x.u64 - VAR_SYMBOL_OFFSET;  return symbol < 1ul << 51 ? symbol : 0;
+  Symbol symbol = x.u64 - 0x8004000000000000ul;  return symbol < 1ul << 51 ? symbol : 0;
 }
 
 static inline int Var_int(Var x){
-  if((x.u64 >> 32) ==(VAR_I32_PREFIX >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
+  if((x.u64 >> 32) ==(0x8002000600000000ul >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
 }
 
 static inline int x2c_var_i32_pair(Var lhs, Var rhs){
-  return(lhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32) &&(rhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32);
+  return(lhs.u64 >> 32) ==(0x8002000600000000ul >> 32) &&(rhs.u64 >> 32) ==(0x8002000600000000ul >> 32);
 }
 
 static inline Var x2c_var_add_lane(Var lhs, Var rhs){
@@ -744,7 +744,7 @@ static inline double x2c_var_order_lane(Var lhs, Var rhs){
 #include "dispatch.h"
 File Stdin, Stdout, Stderr;
 Var Void =(Var){
-  .u64 = VAR_VOID_BITS
+  .u64 = 0xFFFFFFFFFFFFFFFFul
 }
 ;
 List nil = NULL;

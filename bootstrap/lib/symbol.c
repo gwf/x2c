@@ -29,7 +29,7 @@ int Symbol_try_new(String spelling, Symbol * out){
 void Symbol_decode(Symbol symbol, char * dest);
 
 String Symbol_str(Symbol symbol){
-  char text[SYMBOL_MAX_5BIT + 1];
+  char text[10 + 1];
   if(! symbol) return NULL;
   Symbol_decode(symbol, text);
   return String_new_len(text, strlen(text));
@@ -41,7 +41,7 @@ int Symbol_compare(Symbol a, Symbol b){
   if(a == b) return 0;
   if(! a) return - 1;
   if(! b) return 1;
-  char a_text[SYMBOL_MAX_5BIT + 1], b_text[SYMBOL_MAX_5BIT + 1];
+  char a_text[10 + 1], b_text[10 + 1];
   Symbol_decode(a, a_text);
   Symbol_decode(b, b_text);
   int a_len = Symbol_len(a), b_len = Symbol_len(b), len = a_len < b_len ? a_len : b_len;
@@ -61,14 +61,14 @@ String Symbol_repr(Symbol symbol){
 
 Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
-  char text[SYMBOL_MAX_5BIT + 1];
+  char text[10 + 1];
   Symbol_decode(symbol, text);
   return Buffer_write(out, text);
 }
 
 Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   if(! symbol) return Buffer_write(out, "<>");
-  char text[SYMBOL_MAX_5BIT + 1];
+  char text[10 + 1];
   Symbol_decode(symbol, text);
   Buffer_write_char(out, '<');
   if(!(symbol & 1)) Buffer_write(out, text);
@@ -86,7 +86,7 @@ Buffer Symbol_write_repr(Symbol symbol, Buffer out){
 void Symbol_decode(Symbol symbol, char * dest){
   if(! dest || ! symbol) return;
   int len = Symbol_len(symbol);
-  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
+  memset(dest, 0, 10 + 1);
   if(symbol & 1){
     symbol >>= 1;
     for(int i = 0;  i < len;  i ++){
@@ -160,7 +160,7 @@ Symbol Symbol_new(const char * str){
 Symbol Symbol_new_len(const char * str, int len){
   if(! str || len <= 0) return 0;
   int is_5bit = _bytes_fit_5bit(str, len);
-  int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
+  int max_len = is_5bit ? 10 : 7;
   if(len > max_len) len = max_len;
   uint64_t result = 0;
   if(is_5bit){

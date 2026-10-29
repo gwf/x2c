@@ -116,7 +116,7 @@ static Scope f7_classes___class_scope;
 
 static Map f7_classes___declared;
 
-static VarDescriptor * f7_classes___rows[VAR_DIRECT_ROWS];
+static VarDescriptor * f7_classes___rows[30];
 
 static unsigned f7_classes___row_count;
 
@@ -700,22 +700,22 @@ Symbol Var_kind(Var v){
 }
 
 int Var_is_void(Var v){
-  return v.u64 == VAR_VOID_BITS;
+  return v.u64 == 0xFFFFFFFFFFFFFFFFul;
 }
 
 int Var_is_null(Var v){
-  return v.u64 == VAR_NULL_BITS;
+  return v.u64 == 0ul;
 }
 
 Var Var_null(void){
   return(Var){
-    .u64 = VAR_NULL_BITS
+    .u64 = 0ul
   }
   ;
 }
 
 int Var_is_nil(Var v){
-  return v.u64 == VAR_LIST_PREFIX;
+  return v.u64 == 0x0009000000000004ul;
 }
 
 int Var_encoding_valid(Var value){
@@ -744,11 +744,11 @@ static TagId _tag2id(Symbol tag){
 
 static f8_encoding___VarDecoded f8_encoding____decode(Var value){
   unsigned top = _top_bits(value), btm = _bottom_bits(value);
-  if(value.u64 == VAR_VOID_BITS) return(f8_encoding___VarDecoded){
+  if(value.u64 == 0xFFFFFFFFFFFFFFFFul) return(f8_encoding___VarDecoded){
     _void_, - 1, 1
   }
   ;
-  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(f8_encoding___VarDecoded){
+  if(value.u64 == 0x8003000400000000ul) return(f8_encoding___VarDecoded){
     _f64_, - 1, 1
   }
   ;
@@ -833,7 +833,7 @@ VarDescriptor * x2c_var_custom_descriptor(Var value){
   unsigned top = _top_bits(value);
   if(! _custom_top(top)) return NULL;
   int id = _custom_id(top, _bottom_bits(value));
-  if(id < VAR_DIRECT_ROWS) return id <(int) f7_classes____row_count() ? f7_classes___rows[id] : NULL;
+  if(id < 30) return id <(int) f7_classes____row_count() ? f7_classes___rows[id] : NULL;
   return _address(value) ? _row_descriptor(id, value) : NULL;
 }
 
@@ -849,11 +849,11 @@ Var Var_box_record(Symbol tag, const void * record, size_t size){
     }
 
   }
-  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, xmemdup(record, size));
-  char * copy = xmalloc(RECORD_PREFIX + size);
+  if(row < 30) return _new_custom_pointer(row, xmemdup(record, size));
+  char * copy = xmalloc(sizeof(max_align_t) + size);
   *(VarDescriptor * *) copy = descriptor;
-  memcpy(copy + RECORD_PREFIX, record, size);
-  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
+  memcpy(copy + sizeof(max_align_t), record, size);
+  return _new_custom_pointer(31, copy + sizeof(max_align_t));
 }
 
 VarDescriptor * x2c_var_declare(Symbol tag);
@@ -949,7 +949,7 @@ void * Var_pointer(Var v){
   if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
   if(top == 0x000F && btm > 0x6) return NULL;
   if(top >= 0x0005 && top <= 0x000F) return _address(v);
-  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
+  if((v.u64 & 0xFFFF000000000007ul) == 0x800F000000000006ul) return((VarCell *) _address(v)) -> pointer;
   if(_custom_top(top)) return _address(v);
   return NULL;
 }
@@ -959,17 +959,17 @@ static unsigned f7_classes____row_count(void){
 }
 
 static VarDescriptor * _row_descriptor(int id, Var value){
-  if(id == VAR_CELL_ROW) return((VarCell *) _address(value)) -> descriptor;
-  if(id == VAR_RECORD_ROW) return *(VarDescriptor * *)((char *) _address(value) - RECORD_PREFIX);
+  if(id == 30) return((VarCell *) _address(value)) -> descriptor;
+  if(id == 31) return *(VarDescriptor * *)((char *) _address(value) - sizeof(max_align_t));
   return f7_classes___rows[id];
 }
 
 static inline int _custom_top(unsigned top){
-  return top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8;
+  return top >= 0x800C && top < 0x800C + 32 / 8;
 }
 
 static inline int _custom_id(unsigned top, unsigned bottom){
-  return(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + bottom);
+  return(int)((top - 0x800C) * 8 + bottom);
 }
 
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
@@ -1006,8 +1006,8 @@ static int f7_classes____assign_row(VarDescriptor * descriptor){
 
       }
       unsigned count = f7_classes___row_count;
-      row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
-      if(count < VAR_DIRECT_ROWS){
+      row = count < 30 ?(int) count : 30;
+      if(count < 30){
         f7_classes___rows[count] = descriptor;
         __atomic_store_n(& f7_classes___row_count, count + 1, __ATOMIC_RELEASE);
       }
@@ -1033,7 +1033,7 @@ static Var _new_custom_pointer(int id, void * ptr){
     .u64 = raw & _bitmask(48)
   }
   ;
-  v.u64 |=(unsigned long)(VAR_CUSTOM_TAG_TOP + id / 8) << 48;
+  v.u64 |=(unsigned long)(0x800C + id / 8) << 48;
   v.u64 |= id % 8;
   return v;
 }
@@ -1046,7 +1046,7 @@ static void f7_classes____classes_shutdown(void){
 }
 
 static inline int _custom_valid(int id, Var value){
-  return id < VAR_DIRECT_ROWS ? id <(int) f7_classes____row_count() : _address(value) != NULL;
+  return id < 30 ? id <(int) f7_classes____row_count() : _address(value) != NULL;
 }
 
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
@@ -1131,8 +1131,8 @@ Var Var_new(Symbol tag, ...){
     void * pointer = va_arg(ap, void *);
     va_end(ap);
     f12_construction____require_aligned(tag, pointer, 0x7);
-    if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
-    return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
+    if(row < 30) return _new_custom_pointer(row, pointer);
+    return _new_custom_pointer(30, _cell(descriptor, pointer));
   }
   Var v = f12_construction____new_builtin(id, tag, ap);
   va_end(ap);
@@ -1255,12 +1255,12 @@ static Var f12_construction____new_floating(TagId id, double d){
   ;
   unsigned long u;
   memcpy(& u, & d, sizeof u);
-  if(u == VAR_F64_NEG_MAX_RAW) return(Var){
-    .u64 = VAR_F64_NEG_MAX_ESCAPE
+  if(u == 0xFFEFFFFFFFFFFFFFul) return(Var){
+    .u64 = 0x8003000400000000ul
   }
   ;
   return(Var){
-    .u64 = u + VAR_F64_SHIFT
+    .u64 = u +(1ul << 52)
   }
   ;
 }
@@ -1355,7 +1355,7 @@ static Var f12_construction____new_symbol(unsigned long u){
     __builtin_unreachable();
   }
   return(Var){
-    .u64 = u + VAR_SYMBOL_OFFSET
+    .u64 = u + 0x8004000000000000ul
   }
   ;
 }
@@ -1565,7 +1565,7 @@ static f7_numbers___VarWideBox f7_numbers____wide_box(Var v){
 }
 
 static double f7_numbers____f64_floating(Var v){
-  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
+  unsigned long u = v.u64 == 0x8003000400000000ul ? 0xFFEFFFFFFFFFFFFFul : v.u64 -(1ul << 52);
   double d;
   memcpy(& d, & u, sizeof d);
   return d;
@@ -2451,7 +2451,7 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     case 75 : return Var_mod(lhs, rhs);
   }
   Var result = f9_operators____fast_numeric(op, lhs, rhs);
-  if(result.u64 != VAR_VOID_BITS) return result;
+  if(result.u64 != 0xFFFFFFFFFFFFFFFFul) return result;
   f9_operators____valid_operands(lhs, rhs);
   switch(op){
     case 15739 : return Var_box_i32_bits((unsigned)(x2c_var_equal_lane(lhs, rhs)));
@@ -2502,7 +2502,7 @@ Var Var_mod(Var lhs, Var rhs){
 
 static Var f9_operators____protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   Var result = f9_operators____fast_numeric(op, lhs, rhs);
-  if(result.u64 != VAR_VOID_BITS) return result;
+  if(result.u64 != 0xFFFFFFFFFFFFFFFFul) return result;
   f9_operators____valid_operands(lhs, rhs);
   if(Var_is_void(lhs) || Var_is_void(rhs)){
     static const X2CErrorSite _x2c_gensym_error_site_61 = {.file = "../../lib/var/operators.x",.function = "f9_operators____protocol_arithmetic",.line = 342,.runtime = 1};
@@ -2562,13 +2562,13 @@ static inline Symbol f9_operators____fast_numeric_tag(Var lhs, Var rhs){
   unsigned long left_prefix = lhs.u64 & 0xFFFFFFFF00000000ul;
   unsigned long right_prefix = rhs.u64 & 0xFFFFFFFF00000000ul;
   if(left_prefix == right_prefix){
-    if(left_prefix == VAR_I32_PREFIX) return 3453797;
-    if(left_prefix == VAR_U32_PREFIX) return 3847013;
-    if(left_prefix == VAR_F32_PREFIX) return 3355493;
+    if(left_prefix == 0x8002000600000000ul) return 3453797;
+    if(left_prefix == 0x8002000500000000ul) return 3847013;
+    if(left_prefix == 0x8002000700000000ul) return 3355493;
   }
   unsigned left_top = lhs.u64 >> 48, right_top = rhs.u64 >> 48;
-  int left_f64 =(left_top >= 0x0010 && left_top <= 0x7FFF) ||(left_top >= 0x8010 && lhs.u64 != VAR_VOID_BITS);
-  int right_f64 =(right_top >= 0x0010 && right_top <= 0x7FFF) ||(right_top >= 0x8010 && rhs.u64 != VAR_VOID_BITS);
+  int left_f64 =(left_top >= 0x0010 && left_top <= 0x7FFF) ||(left_top >= 0x8010 && lhs.u64 != 0xFFFFFFFFFFFFFFFFul);
+  int right_f64 =(right_top >= 0x0010 && right_top <= 0x7FFF) ||(right_top >= 0x8010 && rhs.u64 != 0xFFFFFFFFFFFFFFFFul);
   return left_f64 && right_f64 ? 3356265 : 0;
 }
 
@@ -2729,12 +2729,12 @@ static inline int f9_operators____numeric(Var value){
   unsigned top = value.u64 >> 48;
   if(top < 0x0010) return Var_is_wide(value);
   if(top >= 0x8004 && top <= 0x800F) return 0;
-  return value.u64 != VAR_VOID_BITS;
+  return value.u64 != 0xFFFFFFFFFFFFFFFFul;
 }
 
 static int f9_operators____nan(Var value){
-  if(value.u64 == VAR_NAN_BITS) return 1;
-  if((value.u64 & 0xFFFFFFFF00000000ul) == VAR_F32_PREFIX){
+  if(value.u64 == 0x8003000100000000ul) return 1;
+  if((value.u64 & 0xFFFFFFFF00000000ul) == 0x8002000700000000ul){
     float f = Var_decode_f32(value);
     return f != f;
   }
@@ -2793,8 +2793,8 @@ static int f9_operators____logical(Var lhs, Symbol op, Var rhs){
 static inline int f9_operators____same_tag_update(Var lhs, Var rhs){
   unsigned long left = lhs.u64 & 0xFFFFFFFF00000000ul;
   unsigned long right = rhs.u64 & 0xFFFFFFFF00000000ul;
-  if(left == right) return left == VAR_I32_PREFIX || left == VAR_U32_PREFIX || left == VAR_F32_PREFIX;
-  if(left == VAR_I32_PREFIX || left == VAR_U32_PREFIX || left == VAR_F32_PREFIX || right == VAR_I32_PREFIX || right == VAR_U32_PREFIX || right == VAR_F32_PREFIX) return 0;
+  if(left == right) return left == 0x8002000600000000ul || left == 0x8002000500000000ul || left == 0x8002000700000000ul;
+  if(left == 0x8002000600000000ul || left == 0x8002000500000000ul || left == 0x8002000700000000ul || right == 0x8002000600000000ul || right == 0x8002000500000000ul || right == 0x8002000700000000ul) return 0;
   if(Var_is_wide(lhs) || Var_is_wide(rhs)) return 0;
   return f9_operators____fast_numeric_tag(lhs, rhs) == 3356265;
 }

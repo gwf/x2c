@@ -501,7 +501,7 @@ uint64_t fnv_file(uint64_t hash, String path, int * ok);
 String Path_content_identity(String path){
   if(! _init_guard_) _file_init_();
   int ok = path != NULL;
-  uint64_t hash = FNV_OFFSET_BASIS;
+  uint64_t hash = 0xcbf29ce484222325ULL;
   if(ok) hash = fnv_file(hash, path, &(ok));
   return ok ? String_printf(_44, (unsigned long long) hash) : NULL;
 }

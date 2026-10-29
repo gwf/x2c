@@ -300,7 +300,7 @@ void RenderPath_leave(RenderPath * path){
 
 unsigned Var_hash(Var v){
   if(! _init_guard_) _file_init_();
-  if(v.u64 == VAR_VOID_BITS){
+  if(v.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 226,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.hash")), NULL))));
     __builtin_unreachable();
@@ -317,7 +317,7 @@ unsigned Var_hash(Var v){
 
 unsigned Var_fallback_hash(Var v){
   if(! _init_guard_) _file_init_();
-  if(v.u64 == VAR_VOID_BITS){
+  if(v.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 246,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.fallback_hash")), NULL))));
     __builtin_unreachable();
@@ -329,7 +329,7 @@ unsigned Var_fallback_hash(Var v){
 int Var_equal(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64) return 1;
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  if(a.u64 == 0xFFFFFFFFFFFFFFFFul || b.u64 == 0xFFFFFFFFFFFFFFFFul) return 0;
   int index = x2c_var_descriptor_index(a);
   VarDescriptor * row = _row(index);
   if(row){
@@ -348,14 +348,14 @@ int Var_equal(Var a, Var b){
 int Var_fallback_equal(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64) return 1;
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  if(a.u64 == 0xFFFFFFFFFFFFFFFFul || b.u64 == 0xFFFFFFFFFFFFFFFFul) return 0;
   if(Var_tag(a) == Var_tag(b) && Var_is_wide(a)) return Var_wide_equal(a, b);
   return 0;
 }
 
 int Var_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
+  if(a.u64 == 0xFFFFFFFFFFFFFFFFul || b.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 305,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
@@ -372,7 +372,7 @@ int Var_compare(Var a, Var b){
 
 int Var_fallback_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
-  if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
+  if(a.u64 == 0xFFFFFFFFFFFFFFFFul || b.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 322,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
@@ -397,7 +397,7 @@ Iter Var_fallback_iter(Var x, Iter dest);
 
 Iter Var_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
-  if(x.u64 == VAR_VOID_BITS){
+  if(x.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 349,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
@@ -410,7 +410,7 @@ Iter Var_iter(Var x, Iter dest){
 
 Iter Var_fallback_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
-  if(x.u64 == VAR_VOID_BITS){
+  if(x.u64 == 0xFFFFFFFFFFFFFFFFul){
     static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 362,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();

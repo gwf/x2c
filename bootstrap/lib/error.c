@@ -305,7 +305,7 @@ int Error_depth(void){
 void Error_note_rendered(void){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
-  if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
+  if(state -> depth > 0 && state -> depth <= 4) state -> rendered[state -> depth] = 1;
 }
 
 int Error_ready(void);
@@ -316,7 +316,7 @@ static f8_dispatch___ErrorRaise f8_dispatch____raise_enter(Symbol code){
   Symbol effective = code ? code : 20800632064936;
   ErrorThreadState state = _thread();
   if(state -> floor_only) _floor(effective, "raise while building error state");
-  if(state -> shutdown_done || state -> depth >= ERROR_MAX_DEPTH) _floor(effective, "raise re-entered or after shutdown");
+  if(state -> shutdown_done || state -> depth >= 4) _floor(effective, "raise re-entered or after shutdown");
   state -> depth ++;
   if(! Error_ready()){
     f8_dispatch____leave();
@@ -422,7 +422,7 @@ static void f8_dispatch____terminate(ErrorThreadState e, f8_dispatch___ErrorRais
 }
 
 static void f8_dispatch____report(Symbol code){
-  char spelling[SYMBOL_MAX_5BIT + 1] ={
+  char spelling[10 + 1] ={
     __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
       0
     }
@@ -854,7 +854,7 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   ErrorCatchSite * site = Scope_malloc_in(& state -> scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
   Var * patterns =(void *)(site + 1);
   * site =(ErrorCatchSite){
-    NULL, - 1, (int) arm_count, ERROR_CATCH_TRANSIENT, - 1
+    NULL, - 1, (int) arm_count, 2, - 1
   }
   ;
   va_list args;
@@ -898,7 +898,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
 
 int x2c_error_catch_site_pending(ErrorCatchSite * site){
   if(! _init_guard_) _file_init_();
-  return ! site || f8_handlers____state(site) != ERROR_CATCH_STATIC;
+  return ! site || f8_handlers____state(site) != 1;
 }
 
 int x2c_error_catch_selected(ErrorHandler handle){
@@ -1013,8 +1013,8 @@ static void f8_handlers____plans_free(Block plans){
 
 static const char * f8_handlers____prepare_arms(ErrorHandler h, Var * patterns, int * arm){
   ErrorCatchSite * site = h -> site;
-  if(f8_handlers____state(site) == ERROR_CATCH_PENDING) f8_handlers____bind(site, patterns);
-  if(f8_handlers____state(site) == ERROR_CATCH_TRANSIENT) return f8_handlers____prepare_plans(h, patterns, &((* arm)));
+  if(f8_handlers____state(site) == 0) f8_handlers____bind(site, patterns);
+  if(f8_handlers____state(site) == 2) return f8_handlers____prepare_plans(h, patterns, &((* arm)));
   if(site -> fenced_arm < 0) return NULL;
   (* arm) = site -> fenced_arm;
   return site -> arms[(* arm)].plan -> reason;
@@ -1029,7 +1029,7 @@ static void f8_handlers____bind(ErrorCatchSite * site, Var * patterns){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      if(f8_handlers____state(site) != ERROR_CATCH_PENDING){
+      if(f8_handlers____state(site) != 0){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
         return;
       }
@@ -1040,7 +1040,7 @@ static void f8_handlers____bind(ErrorCatchSite * site, Var * patterns){
         MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
         if(plan -> status == 664475009618698 && site -> fenced_arm < 0) site -> fenced_arm = i;
       }
-      __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
+      __atomic_store_n(& site -> state, retainable ? 1 : 2, __ATOMIC_RELEASE);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
@@ -1233,7 +1233,7 @@ int Error_ready(void){
 
 static ErrorThreadState _thread(void){
   ErrorThreadState state = & f7_runtime___error_thread;
-  if(! state -> bound) state -> bound = ERROR_DEFAULT_BOUND;
+  if(! state -> bound) state -> bound = 4096;
   return state;
 }
 
@@ -1264,7 +1264,7 @@ static int _scope_push(Symbol code, const char * message){
 }
 
 _Noreturn static void _floor(Symbol code, const char * why){
-  char spelling[SYMBOL_MAX_5BIT + 1] ={
+  char spelling[10 + 1] ={
     __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
       0
     }

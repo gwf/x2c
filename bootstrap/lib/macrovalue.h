@@ -8,14 +8,14 @@
 #include "common.h"
 #include "match/match.h"
 typedef struct MacroFixedSlots{
-  int count, slots[MACHINE_BINDER_MAX];
-  int names, name_slots[MACHINE_BINDER_MAX];
+  int count, slots[64];
+  int names, name_slots[64];
 }
 MacroFixedSlots;
 
 typedef struct MacroPublishing{
-  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
-  int to[MACHINE_BINDER_MAX];
+  int from[64], fallback[64];
+  int to[64];
   int count, binders, complete;
   unsigned long definite;
 }

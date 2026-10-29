@@ -144,7 +144,7 @@ static inline uint64_t _mix(uint64_t value){
 
 static uint32_t _g(SymbolSet set, uint32_t vertex){
   unsigned width = _byte(set, 0);
-  size_t offset = SYMBOL_SET_HEADER_SIZE +(size_t) vertex * width;
+  size_t offset = 20 +(size_t) vertex * width;
   if(width == 1) return _byte(set, offset);
   if(width == 2) return _byte(set, offset) |(_byte(set, offset + 1) << 8);
   return _u32(set, offset);
@@ -157,7 +157,7 @@ static uint32_t _u32(SymbolSet set, size_t offset){
 }
 
 static size_t _order_offset(SymbolSet x, uint32_t span){
-  return SYMBOL_SET_HEADER_SIZE +(size_t) span * 3 * _byte(x, 0);
+  return 20 +(size_t) span * 3 * _byte(x, 0);
 }
 
 static unsigned _byte(SymbolSet set, size_t offset){

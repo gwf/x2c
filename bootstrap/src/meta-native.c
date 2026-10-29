@@ -3350,7 +3350,7 @@ void Compiler_select_package_module(Compiler c, String name, String root, Token 
   if(! _init_guard_) _file_init_();
   String module = String_join(NULL, cons(String_var(root), cons(String_var(_5), cons(String_var(name), cons(String_var(_6), NULL)))));
   if(Compiler_links_extension(name) || ! Path_is_file(module)) return;
-  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _7, token, ({
+  if(! 1) Compiler_report_error(c, 306819428, _7, token, ({
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_8), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(_9), cons(String_var(module), NULL))));  cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL));
   }
   ));
@@ -3386,7 +3386,7 @@ Path Path_absolute(Path);
 
 String Compiler_load_native_module(String path){
   if(! _init_guard_) _file_init_();
-  if(! X2C_NATIVE_MODULES) Diagnostics_driver_error("native modules are not supported on this platform");
+  if(! 1) Diagnostics_driver_error("native modules are not supported on this platform");
   String absolute = Path_absolute(path);
   if(_native_module_loaded(absolute)) return absolute;
   int stamp = f7_modules____module_stamp(path);
@@ -3398,7 +3398,7 @@ String Compiler_load_native_module(String path){
 
 void Compiler_preload_native_module(String path){
   if(! _init_guard_) _file_init_();
-  if(X2C_NATIVE_MODULES && ! _native_module_loaded(path) && f7_modules____module_stamp(path) == 1) f7_modules____open_native_module(path);
+  if(1 && ! _native_module_loaded(path) && f7_modules____module_stamp(path) == 1) f7_modules____open_native_module(path);
 }
 
 Map Compiler_native_module_targets(String path){

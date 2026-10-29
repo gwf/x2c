@@ -651,7 +651,7 @@ String Duration_str(Duration d){
       }
       if(size < 1000) Buffer_printf(out, "%lluns", size);
       else if(size < 1000000) _fixed(out, size, 1000, "us");
-      else if(size < NANOS) _fixed(out, size, 1000000, "ms");
+      else if(size < 1000000000LL) _fixed(out, size, 1000000, "ms");
       else _clock(out, size);
       {
         String _x2c_gensym_return_value_3 = Buffer_str(out);
@@ -679,7 +679,7 @@ Duration Time_monotonic(void){
 void Time_sleep(Duration d){
   if(d.nanoseconds <= 0) return;
   struct timespec pending ={
-    d.nanoseconds / NANOS, d.nanoseconds % NANOS
+    d.nanoseconds / 1000000000LL, d.nanoseconds % 1000000000LL
   }
   ;
   while(nanosleep(& pending, & pending) && errno == EINTR){
@@ -797,7 +797,7 @@ String DateTime_str(DateTime d){
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
       Buffer_printf(out, "%04d-%02d-%02dT%02d:%02d:%02d", d.year, d.month, d.day, d.hour, d.minute, d.second);
-      _fraction(out, d.nanosecond, NANOS);
+      _fraction(out, d.nanosecond, 1000000000LL);
       if(! d.utc_offset) Buffer_write_char(out, 'Z');
       else{
         int size = abs(d.utc_offset);
@@ -848,17 +848,17 @@ static long long _from_seconds(String operation, double seconds){
 }
 
 static long long _combine_seconds(String operation, long long seconds, long long fraction){
-  seconds = _sum(operation, seconds, fraction / NANOS);
-  fraction %= NANOS;
+  seconds = _sum(operation, seconds, fraction / 1000000000LL);
+  fraction %= 1000000000LL;
   if(seconds < 0 && fraction > 0){
     seconds ++;
-    fraction -= NANOS;
+    fraction -= 1000000000LL;
   }
   else if(seconds > 0 && fraction < 0){
     seconds --;
-    fraction += NANOS;
+    fraction += 1000000000LL;
   }
-  return _sum(operation, _product(operation, seconds, NANOS), fraction);
+  return _sum(operation, _product(operation, seconds, 1000000000LL), fraction);
 }
 
 static long long _sum(String operation, long long a, long long b){
@@ -906,11 +906,11 @@ static void _fixed(Buffer out, unsigned long long size, long unit, const char * 
 }
 
 static void _clock(Buffer out, unsigned long long size){
-  unsigned long long seconds = size / NANOS;
+  unsigned long long seconds = size / 1000000000LL;
   if(seconds >= 3600) Buffer_printf(out, "%lluh", seconds / 3600);
   if(seconds >= 60) Buffer_printf(out, "%llum", seconds / 60 % 60);
   Buffer_printf(out, "%llu", seconds % 60);
-  _fraction(out, size % NANOS, NANOS);
+  _fraction(out, size % 1000000000LL, 1000000000LL);
   Buffer_write_char(out, 's');
 }
 
@@ -930,11 +930,11 @@ static void _fraction(Buffer out, unsigned long long part, long unit){
 static long long _read_clock(clockid_t clock){
   struct timespec now;
   clock_gettime(clock, & now);
-  return now.tv_sec * NANOS + now.tv_nsec;
+  return now.tv_sec * 1000000000LL + now.tv_nsec;
 }
 
 static DateTime _fields(Time t, struct tm fields){
-  return DateTime_new(fields.tm_year + 1900, fields.tm_mon + 1, fields.tm_mday, fields.tm_hour, fields.tm_min, fields.tm_sec, (int)((t.nanoseconds % NANOS + NANOS) % NANOS), (int) fields.tm_gmtoff);
+  return DateTime_new(fields.tm_year + 1900, fields.tm_mon + 1, fields.tm_mday, fields.tm_hour, fields.tm_min, fields.tm_sec, (int)((t.nanoseconds % 1000000000LL + 1000000000LL) % 1000000000LL), (int) fields.tm_gmtoff);
 }
 
 static struct tm _broken_down(Time t, struct tm *(* convert)(const time_t *, struct tm *)){
@@ -945,8 +945,8 @@ static struct tm _broken_down(Time t, struct tm *(* convert)(const time_t *, str
 }
 
 static long long _floor_seconds(Time t){
-  long long seconds = t.nanoseconds / NANOS;
-  return t.nanoseconds % NANOS < 0 ? seconds - 1 : seconds;
+  long long seconds = t.nanoseconds / 1000000000LL;
+  return t.nanoseconds % 1000000000LL < 0 ? seconds - 1 : seconds;
 }
 
 int String_len(String);

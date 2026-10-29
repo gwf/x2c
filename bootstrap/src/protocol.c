@@ -2044,9 +2044,9 @@ static List f10_resolution____native_requirement(String member, String native, T
   List parameters = Var_list_payload(List_cadr(Var_list(List_car(Type_list(template)))));
   Type result = List_cdr(template);
   int contents = f10_resolution____contents(List_var(parameters), binder);
-  if(contents & PROTOCOL_VARIADIC) return cons(String_var(member), _243);
-  if((contents & PROTOCOL_VARIABLE) && ! f10_resolution____native_converts(participant_definition, base)) return cons(String_var(member), _247);
-  if((f10_resolution____contents(List_var(result), binder) & PROTOCOL_VARIABLE) && ! List_equal(Type_list(participant_definition), Type_list(base))) return cons(String_var(member), _250);
+  if(contents & 2) return cons(String_var(member), _243);
+  if((contents & 1) && ! f10_resolution____native_converts(participant_definition, base)) return cons(String_var(member), _247);
+  if((f10_resolution____contents(List_var(result), binder) & 1) && ! List_equal(Type_list(participant_definition), Type_list(base))) return cons(String_var(member), _250);
   return NULL;
 }
 
@@ -2521,7 +2521,7 @@ static List f10_resolution____conversion_requirement(ProtocolAdapters * a, Strin
         if(x2c_var_equal_lane(parameter, List_var(variable))){
           if(! String_truth((fallback ?(* a).forward :(* a).reverse))) return cons(String_var(member), cons(Symbol_var(adapter), cons(Symbol_var(direction), _267)));
         }
-        else if(f10_resolution____contents(parameter, (* a).binder) & PROTOCOL_VARIABLE) return cons(String_var(member), cons(Symbol_var(adapter), _269));
+        else if(f10_resolution____contents(parameter, (* a).binder) & 1) return cons(String_var(member), cons(Symbol_var(adapter), _269));
       }
 
     }
@@ -2531,13 +2531,13 @@ static List f10_resolution____conversion_requirement(ProtocolAdapters * a, Strin
   if(List_equal(Type_list(result), Type_list(variable))){
     if(! String_truth((fallback ?(* a).reverse :(* a).forward))) return cons(String_var(member), cons(Symbol_var(adapter), cons(Symbol_var(direction), _270)));
   }
-  else if(f10_resolution____contents(List_var(result), (* a).binder) & PROTOCOL_VARIABLE) return cons(String_var(member), cons(Symbol_var(adapter), _271));
+  else if(f10_resolution____contents(List_var(result), (* a).binder) & 1) return cons(String_var(member), cons(Symbol_var(adapter), _271));
   return NULL;
 }
 
 static int f10_resolution____contents(Var value, String variable){
-  if(Var_is_row(value, 11, 7, 1)) return x2c_var_equal_lane(value, String_var(variable)) ? PROTOCOL_VARIABLE : 0;
-  if(x2c_var_equal_lane(value, Symbol_var(1519197))) return PROTOCOL_VARIADIC;
+  if(Var_is_row(value, 11, 7, 1)) return x2c_var_equal_lane(value, String_var(variable)) ? 1 : 0;
+  if(x2c_var_equal_lane(value, Symbol_var(1519197))) return 2;
   if(! Var_is_row(value, 9, 7, 4)) return 0;
   int contents = 0;
   {
