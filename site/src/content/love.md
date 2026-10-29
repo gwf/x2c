@@ -1,17 +1,12 @@
 ---
 title: Code is Love
+lede: "The part you touch all day should feel good in the hand."
 ---
 
-Part of the pleasure of programming is finding a clear way to express an idea.
-C earns that love by putting you close to the machine, with little between you
-and what it can do. But that closeness comes at a cost: even simple ideas can take
-a lot of housekeeping to express.
+C puts nothing between you and the machine, and charges you housekeeping
+for the privilege. x2c keeps the directness and drops the chores. One value
+type that knows what it holds, data that reads the way you wrote it, text
+and collections that compose, loops that say what they mean, and a toolchain
+that answers fast.
 
-x2c keeps that directness and lets you focus on what your program does.
-Describe a whole configuration as readable, nested data. Work with text and
-collections through operations you can combine. Read a file without managing
-line buffers. Give your own types methods that feel as natural as the
-built-ins. C's functions, libraries, and control remain within reach.
-
-Nobody ever fell in love with boilerplate. x2c leaves more room for what you
-do love: turning an idea into code.
+Nobody ever fell in love with boilerplate. Nine ideas, each one small.

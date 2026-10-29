@@ -1,16 +1,12 @@
 ---
 title: Code is Magic
+lede: "The compiler is written in x2c, and your program can call the compiler."
 ---
 
-When you can change the language, repetition starts to look like an
-opportunity. A pattern you keep writing can become a construct you use.
-An idea that once needed a page of explanation can have a name, a syntax,
-and rules the compiler implements.
+Code is a List, so you can match it and rebuild it. Put `meta` in front of
+a function and the compiler will run it. Macros are typed templates over
+parsed syntax; decorators eat the thing after them; `keyword` gives your
+construct a name. Reflect on a struct at compile time and nothing is left
+over at run time.
 
-Give sets their own operators. Turn a locking convention into a statement
-that always releases the lock. Describe a family of values once and let
-Lisp generate the code that follows from it. Inside the finished program,
-use that same Lisp to make rules into data you can pass around and evaluate.
-
-The compiler is written in x2c, too. Follow an idea far enough and you can
-change the tool you are thinking with, in the language you already use.
+Everything in the Power section was built this way. So was the compiler.

@@ -45,57 +45,47 @@ The [c2x2c tutorial](c2x2c/README.md) follows eight versions of a word counter,
 from native C to parallel directory counting. Its manual commands and viewer
 are separate from the curated example checks.
 
-## Love: values, data, and methods
+## Love: the hand-feel
 
-- [Values](love/values.x): dynamic values, operators, type inspection, and C calls.
-- [Strings](love/strings.x): transform, slice, parse, interpolate, and iterate text.
-- [Symbols](love/symbols.x): a named state and an ordered vocabulary.
-- [Lists](love/lists.x): shared tails, transformations, and nested templates.
-- [Arrays](love/arrays.x): update scores, copy and rank them, then fold a slice.
-- [Maps](love/maps.x): stock quantities, missing keys, and stored zero values.
+- [Values](love/values.x): one Var holds any value and converts at typed boundaries.
+- [Two kinds](love/two-kinds.x): canonical values versus objects with identity.
+- [Collections](love/collections.x): Lists, Arrays, and Maps through one bracket syntax.
 - [Literals](love/literals.x): describe a workshop with nested collections.
+- [Strings](love/strings.x): slice, split, interpolate, and switch on text.
+- [Symbols](love/symbols.x): a named state and an ordered vocabulary.
+- [Loops](love/loops.x): foreach, destructuring, pattern conditions, lambdas,
+  and keyword arguments.
 - [Files](love/files.x): read a whole file, then stream and total its rows.
-- [Methods](love/methods.x): define, allocate, and move a Point.
+- [Tools](love/tools.md): the everyday commands shown on the tooling slide.
 
-## Power: put the pieces together
+## Power: real programs and your own types
 
-- [Counting](power/counting.x): count words and rank them by frequency.
-- [Indexing](power/indexing.x): build and query an index of document words.
-- [Scopes](power/scopes.x): reclaim each file's working storage and each day's
-  file list; verify cleanup on normal exit, return, and exception.
-- [Match](power/match.x): simplify nested code using patterns and templates.
-- [Threads](power/threads.x): square two copied batches and combine their sums.
-- [Channel word count](power/channel-word-count.x): stream filenames and Maps
-  through bounded channels in one supervised batch. Strings use the shared
-  process canonical pool; each result Map transfers explicitly.
-- [Channel service](power/channel-service.x): send requests with reply channels.
-  The service and its clients finish together under `Thread.run`.
-- [Exceptions](power/exceptions.x): close a file before handling a failed read.
-- [Generics](power/generics.x): count response codes with typed collections.
+- [Classes](power/classes.x): a value class and a pointer class with its own init.
+- [Protocols](power/protocols.x): set union and intersection as `+` and `*`.
+- [Derive](power/derive.x): JSON round trip, equality, and representation from
+  declared fields.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
   This example needs optional package dependencies and is checked separately.
-
-After `make examples`, try Threads directly from the repository root:
-
-```sh
-./examples/build/power-threads/threads
-```
-
-It runs two workers and prints their combined sum of squares:
-
-```text
-sum of squares: 91
-```
+- [Scopes](power/scopes.x): reclaim each file's working storage and each day's
+  file list; verify cleanup on normal exit, return, and exception.
+- [Exceptions](power/exceptions.x): close a file before handling a failed read.
+- [Channels](power/channels.x): two threads share a bounded channel under
+  `Thread.run`.
+- [Generics](power/generics.x): count response codes with typed collections.
+- [Your C](power/your-c.x): X-macros, conditional groups, and C strings in
+  an x2c unit.
+- The [notes service](apps/notes/README.md) is the service slide's source;
+  it needs the optional sqlite package.
 
 ## Magic: extend and evaluate the language
 
-- [Operators](magic/operators.x): define set union and intersection with a Map.
+- [Rewrite](magic/rewrite.x): simplify nested code using patterns and templates.
+- [Compile-time tables](magic/compile-time.x): generate two arrays from one table.
 - [Macros](magic/macros.x): swap integers or strings with one typed macro.
 - [Decorators](magic/decorators.x): trace a function's entry and exit.
 - [Keywords](magic/keywords.x): release a mutex when an exception leaves a block.
-- [Compile-time tables](magic/compile-time.x): generate two arrays from one table.
+- [Fields](magic/fields.x): a meta function generates code from a struct's fields.
 - [Runtime Lisp](magic/runtime.x): evaluate two policies using a native binding.
-- [Agreement](magic/ways-to-agree.x): build the same List four different ways.
 - [Self-hosting](magic/selfhost.md): rebuild the compiler and inspect its syntax.
 
 ## Further examples
@@ -113,7 +103,8 @@ from the gallery examples.
   `Job.wait_any` and reports failing commands.
 - Collections and execution: [collection indexing](power/collection-indexing.x),
   [word-count summary](power/word-count-summary.x),
-  [shared worker state](power/shared-threads.x),
+  [shared worker state](power/shared-threads.x), [copied batches on
+  threads](power/threads.x),
   [Context export](power/contexts.x), and iterator recipes for
   [data](power/iterators.x), [math](power/math.x), and [finance](power/finance.x).
 - Language extensions: [protocol defaults](magic/protocols.x),

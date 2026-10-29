@@ -1,0 +1,79 @@
+---
+slug: memory
+section: power
+tab: memory
+title: Free memory by lifetime, not by pointer.
+---
+
+```x2c
+~/* Run with X2C_SCOPE_ACCOUNTING=1 to enable the allocation assertions. */
+~#include <assert.h>
+~int main(void) {
+~// Prepare the catch before measuring reclaimable working storage.
+~fail_in_scope();
+~size_t before = Scope.stats().live_allocations;
+// Reclaim working storage regularly in a long-running survey.
+size_t total = 0;
+// Each day's file list lives until that survey finishes.
+while (wait_for_day()) auto {
+~  assert(Scope.stats().live_allocations == before);
+  Array files = survey_files();
+~  size_t daily = Scope.stats().live_allocations;
+
+  // Working data is reclaimed after every file.
+  foreach (String path in files) auto {
+~    assert(Scope.stats().live_allocations == daily);
+    Map findings = inspect_file(path);
+    save_findings(path, findings);
+~    assert(Scope.stats().live_allocations > daily);
+    total++;
+  }
+~  assert(Scope.stats().live_allocations == daily);
+}
+printf("processed: %zu files\n", total);
+~assert(total == 4 && Scope.stats().live_allocations == before);
+~assert(return_early() == 2);
+~assert(Scope.stats().live_allocations == before);
+~fail_in_scope();
+~assert(Scope.stats().live_allocations == before);
+~return 0;
+~}
+
+~int wait_for_day(void) { static int days = 0; return days++ < 2; }
+
+~void save_findings(String path, Map findings) {
+~  Array sizes = findings[<sizes>];
+~  assert(sizes[0] == 12 && findings[<errors>] == 0);
+~}
+
+~int return_early(void) { {
+~  Scope.retain();
+~  defer Scope.release();
+~  Array files = survey_files();
+~  return files.length;
+~} }
+
+~Array survey_files(void) => ["first.dat", "second.dat"];
+
+~void fail_in_scope(void) {
+~  size_t before = Scope.stats().live_allocations;
+~  try {
+~    Scope.retain();
+~    defer Scope.release();
+~    Map findings = inspect_file("failure.dat");
+~    assert(Scope.stats().live_allocations > before);
+~    raise %(oops);
+~  }
+~  catch %(oops): {}
+~}
+
+~Map inspect_file(String path) => {sizes: [12, 24], errors: 0};
+```
+
+`auto` retains a region around a statement and releases it on every exit,
+including `return` and a raised Error. Put it on a loop body and each
+iteration gets its own region: every file's working data dies before the
+day's file list does.
+
+No garbage collector, no reference counts, no `free`. The translator warns
+when a value could outlive its region, so the rule is checked, not hoped.

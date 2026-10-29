@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import CheatCard from "../components/CheatCard.astro";
+import "../styles/cheatsheet.css";
+
+const files = import.meta.glob("../content/cheatsheet/*.md", { eager: true });
+const cards = Object.keys(files).sort().map((path) => files[path] as any);
+const groups = ["Start", "Values", "Flow", "Types", "Memory and errors",
+  "Concurrency", "Compile time", "Toolbox"];
+const base = import.meta.env.BASE_URL;
+const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+---
+
+<BaseLayout
+  title="Cheat sheet - x2c"
+  description="x2c on one page for people who already know C: values, collections, literals, functions, classes, protocols, memory, errors, threads, macros, meta functions, and the command line."
+>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <div class="cheat-page">
+    <header class="cheat-heading">
+      <p class="about-eyebrow">cheat sheet</p>
+      <h1>You know C. Here is the rest.</h1>
+      <p class="cheat-intro">
+        Every section is a complete program or a fragment that compiles.
+        Read the comments, skim the notes, and come back when you need a
+        name. The <a href={local("docs/")}>book</a> has the long version and
+        the <a href={local("playground/")}>playground</a> runs most of it in
+        your browser.
+      </p>
+      <nav class="cheat-nav" aria-label="Sections">
+        {groups.map((group) => (
+          <a href={`#${group.toLowerCase().replace(/\s+/g, "-")}`}>{group}</a>
+        ))}
+      </nav>
+    </header>
+    {groups.map((group) => {
+      const members = cards.filter((card) => card.frontmatter.group === group);
+      if (!members.length) return null;
+      return (
+        <section class="cheat-group" id={group.toLowerCase().replace(/\s+/g, "-")}>
+          <h2>{group}</h2>
+          <div class="cheat-grid">
+            {members.map((card) => <CheatCard card={card} />)}
+          </div>
+        </section>
+      );
+    })}
+  </div>
+  <SiteFooter />
+</BaseLayout>

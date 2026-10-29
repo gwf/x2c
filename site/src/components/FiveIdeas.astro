@@ -1,0 +1,37 @@
+---
+import { inlineMarkdown } from "../lib/inline-markdown";
+
+interface Idea {
+  name: string;
+  detail: string;
+  follows: string;
+}
+
+interface Props {
+  intro: string;
+  ideas: Idea[];
+}
+
+const { intro, ideas } = Astro.props;
+const introHtml = await inlineMarkdown(intro);
+const items = await Promise.all(
+  ideas.map(async (idea) => ({
+    name: await inlineMarkdown(idea.name),
+    detail: await inlineMarkdown(idea.detail),
+    follows: await inlineMarkdown(idea.follows),
+  }))
+);
+---
+
+<aside class="hero-ideas" aria-labelledby="five-ideas-title">
+  <h2 id="five-ideas-title" set:html={introHtml} />
+  <ol class="idea-list">
+    {items.map((idea) => (
+      <li>
+        <h3 set:html={idea.name} />
+        <p set:html={idea.detail} />
+        <p class="idea-follows"><span>so you get</span> <Fragment set:html={idea.follows} /></p>
+      </li>
+    ))}
+  </ol>
+</aside>

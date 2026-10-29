@@ -1,17 +1,12 @@
 ---
 title: Code is Power
+lede: "Real programs, your own types, and C's performance. Pick three."
 ---
 
-Count the words in a stream and rank them. Build and query a search index.
-Process a day's files and release each one's memory as you go, without a
-single `free`. Rewrite code by matching its shape. Send work to another
-thread and bring the answer back.
+Give a struct methods, equality, and printing with one word. Teach it an
+operator with a protocol. Let the compiler write its JSON mapping. Import a
+C library without a single name collision. Free memory by lifetime, unwind
+errors as data, and run threads that finish together. Then serve HTTP from
+209 lines, measured against Go.
 
-None of this needs a framework. In x2c, each capability gets more useful
-through the others: collections give
-your types something to build on, iterators connect operations into flows,
-and imports bring C libraries into the same style of code.
-Substantial computations become compact enough that you can still see the
-idea running through them.
-
-The pieces are small. What you build with them needn't be.
+Reads like Python. Runs like C. Links against everything you already have.

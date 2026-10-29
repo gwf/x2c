@@ -2,22 +2,22 @@
 #include <math.h>
 
 int main(void) {
-// Var holds different kinds of values.
+// One eight-byte word holds a value and remembers what it is.
 Var count = 42, ratio = 2.5, name = "Ada";
 
-// Ordinary operators work on Vars.
+// Operators do the obvious thing for whatever is in there.
 Var next = count + 1, full = name + " Lovelace";
 
-// Vars format themselves with %s.
+// Every Var knows how to print itself.
 printf("%s %s %s\n", next, ratio, full);
 
-// Test Var properties at runtime.
+// Ask at runtime; the answer is the stored type, not a guess.
 assert(count is int && ratio is double && name is String);
 
-// Types are checked statically and dynamically as needed.
+// Cross a typed boundary and the Var converts itself.
 int whole = count; double part = ratio;
 
-// %d and %f also convert Vars.
+// Even printf's %d and %f know what to do with one.
 printf("%d %f %f\n", count, ratio, sin(ratio));
 return 0;
 }

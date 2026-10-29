@@ -9,9 +9,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
-import FeatureTable from "../components/FeatureTable.astro";
+import FiveIdeas from "../components/FiveIdeas.astro";
 import HeroTitle from "../components/HeroTitle.astro";
-import { articles, inSection, slides } from "../lib/examples";
+import {
+  articles, inSection, playgroundExamples, slides,
+} from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
@@ -30,9 +32,7 @@ import {
   Content as MagicCopy,
   frontmatter as magic,
 } from "../content/magic.md";
-import {
-  frontmatter as install,
-} from "../content/install.md";
+import { Content as TryCopy, frontmatter as tryIt } from "../content/try.md";
 
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
@@ -49,11 +49,46 @@ const [titleHtml, kickerHtml] = await Promise.all([
   inlineMarkdown(home.title),
   inlineMarkdown(home.kicker),
 ]);
+
+const sectionOf = (slug: string) =>
+  slides.find((slide) => slide.frontmatter.slug === slug)!.frontmatter.section;
+const sections = [
+  { id: "love", meta: love, Copy: LoveCopy, label: "Love ideas",
+    more: [
+      ["docs/guide/values.html", "values"],
+      ["docs/guide/collections.html", "collections and literals"],
+      ["docs/guide/symbols.html", "symbols"],
+      ["docs/guide/iteration.html", "iteration"],
+      ["docs/guide/scripting.html", "files and commands"],
+      ["docs/reference/cli.html", "the command line"],
+    ] },
+  { id: "power", meta: power, Copy: PowerCopy, label: "Power ideas",
+    more: [
+      ["docs/guide/system-macros.html", "classes"],
+      ["docs/guide/protocols.html", "protocols"],
+      ["docs/guide/deriving-records.html", "derive"],
+      ["docs/guide/packages.html", "packages"],
+      ["docs/guide/memory.html", "scopes"],
+      ["docs/guide/exceptions.html", "exceptions"],
+      ["docs/guide/channels.html", "channels"],
+      ["docs/guide/networking.html", "sockets and HTTP"],
+      ["docs/guide/from-c.html", "from C to x2c"],
+    ] },
+  { id: "magic", meta: magic, Copy: MagicCopy, label: "Magic ideas",
+    more: [
+      ["docs/guide/match.html", "match"],
+      ["docs/guide/meta-functions.html", "meta functions"],
+      ["docs/guide/macros.html", "macros"],
+      ["docs/guide/generating-code.html", "generating code"],
+      ["docs/library/overview.html#embed-lisp", "runtime Lisp"],
+      ["docs/internals/architecture.html", "the compiler"],
+    ] },
+];
 ---
 
 <BaseLayout
   title="x2c — love, power, magic"
-  description="The love child of C and Lisp with superpowers. Keep C's types, layouts, headers, libraries, ABI, and tools; lose the boilerplate."
+  description="C with batteries, without bullshit. Five ideas on top of C: one value type, two kinds of data, lifetimes by region, code as a List, and functions that run in the compiler."
 >
   <Fragment slot="header">
     <SiteHeader home />
@@ -63,117 +98,58 @@ const [titleHtml, kickerHtml] = await Promise.all([
       <header class="hero-heading">
         <HeroTitle html={titleHtml} />
         <p set:html={kickerHtml} />
-        <nav class="hero-examples" aria-label="Featured examples">
-          <span>Try an example:</span>
-          {articles.map(({ frontmatter: example }) => (
-            <a href={local(`examples/${example.slug}/`)}
-              data-example={example.slug} data-surface="hero"
-              data-section={slides.find(slide =>
-                slide.frontmatter.slug === example.slide)!.frontmatter.section}
-              data-example-action="explore">
-              {example.navTitle}</a>
-          ))}
+        <nav class="hero-examples" aria-label="Start here">
+          <span>Start here:</span>
+          <a href={local("playground/")} data-example-action="explore">Run it in your browser</a>
+          <a href={local("cheatsheet/")} data-example-action="explore">The C programmer's cheat sheet</a>
+          <a href="#examples">Programs with a Run button</a>
         </nav>
       </header>
-      <FeatureTable intro={home.featureIntro} features={home.features} />
+      <FiveIdeas intro={home.ideasIntro} ideas={home.ideas} />
       <div class="hero-prose">
         <HomeCopy />
       </div>
     </section>
   </div>
 
-  <section id="love" class="landing-section">
-    <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
-          <h2>{love.title}</h2>
-          <div class="section-overview"><LoveCopy /></div>
+  {sections.map(({ id, meta, Copy, label, more }) => (
+    <section id={id} class="landing-section idea-section">
+      <div class="section-shell">
+        <header class="section-heading idea-heading">
+          <h2>{meta.title}</h2>
+          <div class="section-overview">
+            <p class="section-lede">{meta.lede}</p>
+            <Copy />
+          </div>
         </header>
-        <FeatureCarousel
-          name="love"
-          label="Love examples"
-          slides={inSection("love")}
-        />
+        <FeatureCarousel name={id} label={label} slides={inSection(id)} />
         <p class="section-exit">
           More in the docs:{" "}
-          <a href={local("docs/guide/values.html")}>values</a>,{" "}
-          <a href={local("docs/guide/symbols.html")}>symbols</a>,{" "}
-          <a href={local("docs/guide/collections.html")}>collections and literals</a>,{" "}
-          <a href={local("docs/library/overview.html#read-or-write-a-file")}>files</a>,{" "}
-          and{" "}
-          <a href={local("docs/reference/language.html#c-foundation")}>methods</a>.
+          {more.map(([href, text], index) => (
+            <Fragment>
+              {index === more.length - 1 && "and "}
+              <a href={local(href)}>{text}</a>{index < more.length - 1 ? ", " : "."}
+            </Fragment>
+          ))}
         </p>
       </div>
-    </div>
-  </section>
-
-  <section id="power" class="landing-section">
-    <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
-          <h2>{power.title}</h2>
-          <div class="section-overview"><PowerCopy /></div>
-        </header>
-        <FeatureCarousel
-          name="power"
-          label="Power examples"
-          slides={inSection("power")}
-        />
-        <p class="section-exit">
-          More in the docs:{" "}
-          <a href={local("docs/guide/collections.html")}>collections</a>,{" "}
-          <a href={local("docs/guide/iteration.html")}>iteration</a>,{" "}
-          <a href={local("docs/guide/memory.html")}>scopes</a>,{" "}
-          <a href={local("docs/guide/match.html")}>match</a>,{" "}
-          <a href={local("docs/guide/contexts-and-threads.html")}>threads</a>,{" "}
-          <a href={local("docs/guide/exceptions.html")}>exceptions</a>,{" "}
-          and{" "}
-          <a href={local("docs/guide/packages.html")}>packages</a>.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="magic" class="landing-section">
-    <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
-          <h2>{magic.title}</h2>
-          <div class="section-overview"><MagicCopy /></div>
-        </header>
-        <FeatureCarousel
-          name="magic"
-          label="Magic examples"
-          slides={inSection("magic")}
-        />
-        <p class="section-exit">
-          More in the docs:{" "}
-          <a href={local("docs/guide/protocols.html")}>protocols</a>,{" "}
-          <a href={local("docs/guide/macros.html")}>macros and meta functions</a>,{" "}
-          <a href={local("docs/library/overview.html#embed-lisp")}>runtime Lisp</a>,{" "}
-          <a href={local("docs/internals/building.html")}>self-hosting</a>,{" "}
-          <a href={local("docs/reference/cli.html")}>compiler inspection</a>,{" "}
-          and{" "}
-          <a href={local("docs/internals/architecture.html")}>architecture</a>.
-        </p>
-      </div>
-    </div>
-  </section>
+    </section>
+  ))}
 
   <section id="install" class="landing-section landing-action">
     <div class="deal-grid">
       <div class="deal-copy">
         <header class="section-heading install-heading">
-          <h2>Install x2c</h2>
+          <h2>{tryIt.title}</h2>
           <div class="install-actions">
-            <a class="button button-primary"
-              href="https://github.com/gwf/x2c/archive/refs/heads/main.zip">
-              Download ZIP
+            <a class="button button-primary" href={local("playground/")}>
+              Open the playground
             </a>
             <a class="button button-secondary"
               href="https://github.com/gwf/x2c">View on GitHub</a>
           </div>
         </header>
+        <TryCopy />
         <p>
           <strong>Install a release.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
@@ -193,19 +169,15 @@ const [titleHtml, kickerHtml] = await Promise.all([
         <p>
           <strong>Or build from source.</strong>{" "}
           Clone the repository, build the compiler from its checked-in C,
-          and run one of the included examples. The compiler handles
-          translation, native compilation, and execution.
-        </p>
-        <p>
-          {corePrerequisites}{" "}
-          See the <a href={local("docs/internals/building.html")}>build
-          instructions</a> for the self-hosting process.
+          and run one of the included examples. {corePrerequisites}{" "}
+          The <a href={local("docs/internals/building.html")}>build
+          instructions</a> cover the self-hosting process.
         </p>
       </div>
       <figure class="install-window">
-        <figcaption>{install.caption}</figcaption>
+        <figcaption>{tryIt.caption}</figcaption>
         <div class="install-code">
-          <Code code={`${coreSetup}\n\n${installExample(install.run.trim())}`} lang="sh"
+          <Code code={`${coreSetup}\n\n${installExample(tryIt.run.trim())}`} lang="sh"
             theme={x2cDarkTheme} />
         </div>
       </figure>
@@ -248,6 +220,49 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
+  <section id="examples" class="landing-section examples-section">
+    <div class="docs-shell">
+      <div class="docs-grid">
+        <header class="docs-copy">
+          <small>examples</small>
+          <h2>Programs, with a Run button.</h2>
+          <p>
+            Six larger programs with walkthroughs, and every gallery
+            program from the sections above. Anything the browser runtime
+            supports runs in the <a href={local("playground/")}>playground</a>;
+            the rest build from a checkout in one command.
+          </p>
+        </header>
+        <div class="docs-cards example-cards">
+          {articles.map(({ frontmatter: example }) => (
+            <a class="docs-card" href={local(`examples/${example.slug}/`)}
+              data-example={example.slug} data-surface="hero"
+              data-section={sectionOf(example.slide)}
+              data-example-action="explore">
+              <small>{sectionOf(example.slide)} / walkthrough</small>
+              <h3>{example.title}</h3>
+              <p>{example.description}</p>
+            </a>
+          ))}
+          <div class="docs-card runnable-card">
+            <small>playground</small>
+            <h3>Run a gallery program.</h3>
+            <ul class="runnable-list">
+              {playgroundExamples.map((entry) => (
+                <li>
+                  <a href={local(`playground/?example=${encodeURIComponent(entry.id)}`)}
+                    data-example={entry.slug} data-surface="hero"
+                    data-section={entry.id.split("/")[0]}
+                    data-example-action="run">{entry.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="source" class="landing-section numbers-section">
     <div class="docs-shell">
       <div class="docs-grid">
@@ -256,7 +271,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           <h2>Go further.</h2>
           <p>
             <a href={local("about/")}>About x2c</a> tells its story.{" "}
-            <a href={local("docs/")}>Read the docs</a> to learn the language
+            <a href={local("docs/")}>Read the book</a> to learn the language
             and look up its library. <a href="https://github.com/gwf/x2c"
               >Browse the source</a> to see how it works or make it your own.
           </p>
@@ -301,11 +316,9 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <p>showcase examples.</p>
           </div>
           <div class="docs-card stat-card">
-            <small>packages</small>
-            <strong><a href="#packages">Build something.</a></strong>
-            <p>
-              Explore C libraries through working x2c examples.
-            </p>
+            <small>cheat sheet</small>
+            <strong><a href={local("cheatsheet/")}>One page.</a></strong>
+            <p>The whole language for people who already know C.</p>
           </div>
         </div>
       </div>

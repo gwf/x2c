@@ -72,10 +72,7 @@ check_stdout() {
     record_failure "$name has no expected stdout at $declared"
     return
   fi
-  if [[ "$name" == love/maps ]]; then
-    # Map traversal order is unspecified; compare every emitted line.
-    diff -u <(LC_ALL=C sort "$expected") <(LC_ALL=C sort "$actual") && return
-  elif diff -u "$expected" "$actual"; then
+  if diff -u "$expected" "$actual"; then
     return
   fi
   record_failure "$name stdout differs"

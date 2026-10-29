@@ -2,7 +2,7 @@
 slug: notes
 navTitle: Notes service
 order: 1
-slide: runtime-lisp
+slide: service
 customPage: true
 title: A notes service in x2c.
 description: Create, tag, and search notes through a page and a JSON API, with SQLite persistence.
