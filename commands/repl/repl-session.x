@@ -457,6 +457,8 @@ static ReplResult _submit_native(ReplSession session, String source) {
   defer transaction.rollback();
   Array declarations = auto [], names = auto [], retained = auto [];
   size_t cleanup_count = session.cleanups.len();
+  int committed = 0;
+  defer if (!committed) _discard_cleanups(session, cleanup_count);
   List syntax = NULL;
   String function = NULL;
   int prints = 0, wrapped = 0;
@@ -490,6 +492,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
           session.describe(name, syntax, source);
         }
         transaction.commit_transient();
+        committed = 1;
         result.status = <defined>;
         result.name = names.len() ? names[0] : "type";
         result.syntax = syntax;
@@ -528,6 +531,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
       auto (&session.storage)
         published = repl_native_execute(session, syntax, wrapped, prints);
     }
+    result.artifact = published["artifact"];
     foreach (List declaration, retained) {
       session.declarations.push(declaration);
       Type family = Ast.without_origin(declaration).cadr().type().base_type();
@@ -556,12 +560,16 @@ static ReplResult _submit_native(ReplSession session, String source) {
     if (function || names.len() || retained.len()) transaction.commit_transient();
     if (prints) result.formatted = published["formatted"];
     result.status = function ? <defined> : prints ? <value> : <executed>;
+    committed = 1;
+  }
+  catch %(replrun *cause): {
+    result.status = <failed>;
+    result.cause = cause;
   }
   catch %(incomplete *): result.status = <incomplete>;
   catch %(malformed *): result.diagnostics = c.diagnostics();
   catch %(repl (reason ?why)): result.message = why;
   catch %(?kind *details): {
-    _discard_cleanups(session, cleanup_count);
     result.status = <failed>;
     result.cause = cons(kind, details);
   }

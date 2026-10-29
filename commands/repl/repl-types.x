@@ -29,7 +29,7 @@ typedef struct ReplSession {
 typedef struct ReplResult {
   Symbol status;
   Var value;
-  String name, message, source, formatted;
+  String name, message, source, formatted, artifact;
   List diagnostics, cause, syntax, lowered, removed;
 } ReplResult;
 

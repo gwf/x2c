@@ -330,5 +330,11 @@ Map repl_native_execute(ReplSession session, List syntax, int persistent,
   defer xfree(captures);
   for (int i = 0; i < n.values.len(); i++) captures[i] = n.values[i].pointer();
   FuncArg argument = FuncArg.value(Var.new(<p48>, captures));
-  return factory.apply(1, &argument);
+  try {
+    Map published = factory.apply(1, &argument);
+    published["artifact"] = directory;
+    return published;
+  }
+  catch %(?kind *details): raise %(replrun $kind @details);
+  return NULL;
 }

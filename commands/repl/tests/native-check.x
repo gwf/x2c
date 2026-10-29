@@ -256,6 +256,13 @@ static void _collections(ReplSession session) {
 }
 
 static void _rollback(ReplSession session) {
+  _expect(session, "int released=0;", <executed>, NULL);
+  _expect(session, "void release(int n) { released+=n; }", <defined>, NULL);
+  _expect(session, "defer release(5); raise %(repl (reason \"user failure\"));",
+          <failed>, NULL);
+  _value(session, "released;", "int 5");
+  _expect(session, "defer release(7); raise %(incomplete);", <failed>, NULL);
+  _value(session, "released;", "int 12");
   _expect(session, "int effects=0;", <executed>, NULL);
   _expect(session,
     "int fail(void) { effects++; raise %(probe); return 0; }",

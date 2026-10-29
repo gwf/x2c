@@ -65,7 +65,7 @@ class Playground:
 
     def value(self, expression, number):
         output = self.check(expression + ";")
-        require(re.search(r"=> (?:\w+ )?" + str(number) + r"\n", output),
+        require(re.search(r"=> (?:[^\n]* )?" + str(number) + r"\n", output),
                 (expression, number, output))
 
     def close(self, expected=0):
@@ -94,7 +94,8 @@ def workflow(arguments, directory, implementation):
         repl.check("playground_move(&copy,2);", "ok")
         repl.check(":inspect copy", "x: 10", "y: 9")
         repl.check("PlaygroundPacket packet=playground_packet(7,1234);", "ok")
-        repl.check(":inspect packet", "marker: 7", "value: 1234")
+        repl.check(":inspect packet", "marker:", "value: 1234")
+        repl.value("packet.marker==7", 1)
         repl.value("sizeof(PlaygroundPacket)==5", 1)
         repl.value("PLAYGROUND_SCALE", 3)
         repl.value("PLAYGROUND_Y", 2)
@@ -205,7 +206,7 @@ int callback_data(int (*call)(int,void *),void *data) { return call(4,data); }
         sqlite_header.write_text("#include <sqlite3.h>\n")
         repl = Playground(["-l", "sqlite3", sqlite_header], directory)
         try:
-            repl.check(":symbols sqlite3_open", "sqlite3_open")
+            repl.check(":symbols --all sqlite3_open", "sqlite3_open")
             repl.check("sqlite3 *db=NULL;", "ok")
             repl.value('sqlite3_open(":memory:",&db)', 0)
             repl.check("sqlite3_stmt *query=NULL;", "ok")
