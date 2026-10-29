@@ -11,7 +11,7 @@ UTF-8 code points and base64, hex, and percent encodings.
 | --- | --- |
 | [`Block.base64_encode`](#Block.base64_encode) | Returns the bytes of `bytes` in standard base64 with `=` padding; each element contributes all of its bytes. |
 | [`Block.base64url_encode`](#Block.base64url_encode) | Returns the bytes of `bytes` in URL-safe base64 without padding. |
-| [`Block.hex_encode`](#Block.hex_encode) | Returns the bytes of `bytes` in lowercase hexadecimal; each element contributes all of its bytes. |
+| [`Block.hex_encode`](#Block.hex_encode) | Returns the bytes of `b` in lowercase hexadecimal; each element contributes all of its bytes. |
 | [`Buffer.write_code_point`](#Buffer.write_code_point) | Appends the UTF-8 encoding of `point` to `out` and returns `out`. |
 | [`String.base64_decode`](#String.base64_decode) | Returns the text that the padded standard base64 `text` encodes. |
 | [`String.base64_decode_bytes`](#String.base64_decode_bytes) | Returns the bytes that the padded standard base64 `text` encodes, as a `Block` of 1-byte elements owned by the active `Scope`. |
@@ -20,14 +20,14 @@ UTF-8 code points and base64, hex, and percent encodings.
 | [`String.base64url_decode_bytes`](#String.base64url_decode_bytes) | Returns the bytes that the URL-safe base64 `text` encodes, as a `Block` of 1-byte elements owned by the active `Scope`. |
 | [`String.base64url_encode`](#String.base64url_encode) | Returns the bytes of `text` in the URL-safe base64 alphabet of RFC 4648 section 5, which writes `-` and `_` for `+` and `/`, without padding. |
 | [`String.code_point_count`](#String.code_point_count) | Returns the number of code points that `text` encodes in UTF-8. |
-| [`String.code_points`](#String.code_points) | Initializes `dest` as a lazy iterator over the code points of `text`, each yielded as an `int`, so `foreach (int point in text.code_points())` walks them. |
+| [`String.code_points`](#String.code_points) | Initializes `dest` as a lazy iterator over the code points of `s`, each yielded as an `int`, so `foreach (int point in s.code_points())` walks them. |
 | [`String.from_code_point`](#String.from_code_point) | Returns the `String` that encodes the one code point `point` in UTF-8. |
 | [`String.hex_decode`](#String.hex_decode) | Returns the text that the hexadecimal `text` encodes, in digits of either case. |
 | [`String.hex_decode_bytes`](#String.hex_decode_bytes) | Returns the bytes that the hexadecimal `text` encodes, as a `Block` of 1-byte elements owned by the active `Scope`. |
-| [`String.hex_encode`](#String.hex_encode) | Returns the bytes of `text` in lowercase hexadecimal, two digits per byte. |
+| [`String.hex_encode`](#String.hex_encode) | Returns the bytes of `s` in lowercase hexadecimal, two digits per byte. |
 | [`String.is_utf8`](#String.is_utf8) | Reports whether `text` is well-formed UTF-8, with no overlong form, surrogate, or code point above U+10FFFF. |
 | [`String.percent_decode`](#String.percent_decode) | Returns `text` with each `%` and the two hexadecimal digits after it replaced by the byte they name. |
-| [`String.percent_encode`](#String.percent_encode) | Returns `text` with each byte outside the RFC 3986 unreserved set `A-Z a-z 0-9 - . _ ~` written as `%` and two uppercase hexadecimal digits, so the result can be one path segment, query name, or query value. |
+| [`String.percent_encode`](#String.percent_encode) | Returns `s` with each byte outside the RFC 3986 unreserved set `A-Z a-z 0-9 - . _ ~` written as `%` and two uppercase hexadecimal digits, so the result can be one path segment, query name, or query value. |
 
 ### `Block`
 
@@ -53,9 +53,9 @@ Source: `lib/encoding.x`
 <a id="Block.hex_encode"></a>
 #### Block.hex_encode
 
-`String Block.hex_encode(Block bytes)`
+`String Block.hex_encode(Block b)`
 
-Returns the bytes of `bytes` in lowercase hexadecimal; each element
+Returns the bytes of `b` in lowercase hexadecimal; each element
 contributes all of its bytes.
 
 Source: `lib/encoding.x`
@@ -159,11 +159,11 @@ Source: `lib/encoding.x`
 <a id="String.code_points"></a>
 #### String.code_points
 
-`Iter String.code_points(String text, Iter dest)`
+`Iter String.code_points(String s, Iter dest)`
 
-Initializes `dest` as a lazy iterator over the code points of `text`,
-each yielded as an `int`, so `foreach (int point in text.code_points())`
-walks them. The iterator borrows `text`.
+Initializes `dest` as a lazy iterator over the code points of `s`,
+each yielded as an `int`, so `foreach (int point in s.code_points())`
+walks them. The iterator borrows `s`.
 
 **Raises:** `<malformed>` from the pull that reaches bytes that are not
 well-formed UTF-8.
@@ -210,9 +210,9 @@ Source: `lib/encoding.x`
 <a id="String.hex_encode"></a>
 #### String.hex_encode
 
-`String String.hex_encode(String text)`
+`String String.hex_encode(String s)`
 
-Returns the bytes of `text` in lowercase hexadecimal, two digits per
+Returns the bytes of `s` in lowercase hexadecimal, two digits per
 byte.
 
 Source: `lib/encoding.x`
@@ -244,9 +244,9 @@ Source: `lib/encoding.x`
 <a id="String.percent_encode"></a>
 #### String.percent_encode
 
-`String String.percent_encode(String text)`
+`String String.percent_encode(String s)`
 
-Returns `text` with each byte outside the RFC 3986 unreserved set
+Returns `s` with each byte outside the RFC 3986 unreserved set
 `A-Z a-z 0-9 - . _ ~` written as `%` and two uppercase hexadecimal
 digits, so the result can be one path segment, query name, or query
 value.
