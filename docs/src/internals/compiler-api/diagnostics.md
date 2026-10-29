@@ -13,12 +13,14 @@ Compiler diagnostic storage and rendering.
 | Function | Summary |
 | --- | --- |
 | [`diagnostics_write_json`](#diagnostics_write_json) | Sends every later printed diagnostic to `path` as JSON Lines. |
+| [`Compiler.cpp_note`](#Compiler.cpp_note) | Returns the note that names the C macro whose expansion produced the source at the diagnostic `location`, or NULL when no expansion did. |
 | [`Compiler.diagnostics`](#Compiler.diagnostics) | Returns a report-order snapshot of all collected diagnostics. |
 | [`Compiler.display_path`](#Compiler.display_path) | Returns a physical source path for semantic facts, otherwise a path relative to the compiler root. |
 | [`Compiler.dump_cache`](#Compiler.dump_cache) | Prints each cached numeric identifier and its key to stdout. |
 | [`Compiler.dump_symbol_table`](#Compiler.dump_symbol_table) | Prints every entry in `map` to stdout in `Map` iteration order. |
-| [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content. |
+| [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content, and the C macro whose expansion produced it. |
 | [`Compiler.error_count`](#Compiler.error_count) | Returns the number of counted diagnostics accepted since the last reset. |
+| [`Compiler.expanding_macro`](#Compiler.expanding_macro) | Returns the name of the C macro whose expansion produced `token` of the compiler's token stream, or NULL. |
 | [`Compiler.file_prefix`](#Compiler.file_prefix) | Returns the prefix that the statics of the module file holding the current token take, or NULL outside a module unit. |
 | [`Compiler.macro_expansion_note`](#Compiler.macro_expansion_note) | Returns the innermost source expansion's definition and input note. |
 | [`Compiler.origin_location`](#Compiler.origin_location) | Resolves a recorded occurrence through generated ancestry to its source. |
@@ -32,6 +34,7 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.token_column`](#Compiler.token_column) | Returns `token`'s column in the file that holds it. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
 | [`Compiler.token_source`](#Compiler.token_source) | Returns the file that the line markers of a merged text give `token`, and sets `line` to the token's line in that file. |
+| [`Diagnostics.c_macro_note`](#Diagnostics.c_macro_note) | Formats the note for an expansion of the C macro `name`, which the `(file line)` site defines. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
 | [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
 | [`Diagnostics.macro_definition_note`](#Diagnostics.macro_definition_note) | Formats a macro definition's recorded source location. |
@@ -57,6 +60,17 @@ opened.
 Source: `src/diagnostics.x`
 
 ### `Compiler`
+
+<a id="Compiler.cpp_note"></a>
+#### Compiler.cpp_note
+
+`String Compiler.cpp_note(Compiler c, List location)`
+
+Returns the note that names the C macro whose expansion produced the
+source at the diagnostic `location`, or NULL when no expansion did. The
+tokenizer's `expansions` rows record the uses.
+
+Source: `src/diagnostics.x`
 
 <a id="Compiler.diagnostics"></a>
 #### Compiler.diagnostics
@@ -102,8 +116,10 @@ Source: `src/diagnostics.x`
 
 `void Compiler.dump_tokens(Compiler compiler)`
 
-Prints every non-EOF token with its position and visible content.
-`Compiler.tokenize` must have populated the compiler's tokenizer.
+Prints every non-EOF token with its position and visible content, and
+the C macro whose expansion produced it. `Compiler.tokenize` or
+`Compiler.preprocess_tokens` must have populated the compiler's
+tokenizer.
 
 Source: `src/diagnostics.x`
 
@@ -114,6 +130,16 @@ Source: `src/diagnostics.x`
 
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
+
+Source: `src/diagnostics.x`
+
+<a id="Compiler.expanding_macro"></a>
+#### Compiler.expanding_macro
+
+`String Compiler.expanding_macro(Compiler c, Token token)`
+
+Returns the name of the C macro whose expansion produced `token` of the
+compiler's token stream, or NULL.
 
 Source: `src/diagnostics.x`
 
@@ -272,6 +298,16 @@ marked regions keeps the compiler's own file and its line.
 Source: `src/diagnostics.x`
 
 ### `Diagnostics`
+
+<a id="Diagnostics.c_macro_note"></a>
+#### Diagnostics.c_macro_note
+
+`String Diagnostics.c_macro_note(String name, List site)`
+
+Formats the note for an expansion of the C macro `name`, which the
+`(file line)` site defines.
+
+Source: `src/diagnostics.x`
 
 <a id="Diagnostics.entries"></a>
 #### Diagnostics.entries

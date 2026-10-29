@@ -130,8 +130,8 @@ commits need not rebuild from their own bootstrap.
   declarations, generated names, lifecycle, binding facts, the literal cache,
   match patterns, and source files and locations; + `symtab`, its symbol
   table, and `fields`, which copies named fields) ->
-  shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
-  directives) ->
+  shared runtime `lib/tokenizer.x` (+ `cpp`, which expands C macros and
+  decides conditional groups, and `preprocess`, which reads the directives) ->
   `parse` (+ `parse-reports`, package and alias diagnostics)/
   `expressions` (+ `expressions-reports`, typing diagnostics, and
   `initializers`, which converts brace initializers)/`statements`/`macros`

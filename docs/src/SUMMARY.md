@@ -156,6 +156,7 @@
   - [src/components/raise.x](internals/compiler-api/raise.md)
   - [src/components/string-switch.x](internals/compiler-api/string-switch.md)
   - [src/components/try-catch.x](internals/compiler-api/try-catch.md)
+  - [src/cpp/cpp.x](internals/compiler-api/cpp.md)
   - [src/emit/emit.x](internals/compiler-api/emit.md)
   - [src/expressions/expressions.x](internals/compiler-api/expressions.md)
   - [src/generate/generate.x](internals/compiler-api/generate.md)

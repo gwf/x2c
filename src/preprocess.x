@@ -21,7 +21,7 @@
    unchanged. */
 
 /* One scan of a unit's expanded tokens. `open` holds the conditional
-   groups open at the scan, as `Cpp.open_groups` rows. `layout` maps each
+   groups open at the scan, as `(id arm state)` rows. `layout` maps each
    macro whose body can change a struct's layout to 1, or to 2 when the
    body packs. */
 static typedef struct ArmScan {
@@ -65,10 +65,9 @@ String Compiler.preproc_marker_file(String text, int &line) {
   return rest[1:close + 1].unescape();
 }
 
-/** Hides the tokens of the arms that `c.arm_stacks`, which
-    `Compiler.expand_macros` records, marks hidden, and marks layout
-    attributes where written or where a macro x2c leaves to C expands to
-    one.
+/** Hides the tokens of each arm that `Compiler.expand_macros` decided C
+    never takes, as `c.arm_stacks` records, and marks layout attributes
+    where written or where a macro x2c leaves to C expands to one.
 */
 void Compiler.scan_conditionals(Compiler c) {
   Map layout = auto {};

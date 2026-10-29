@@ -18,7 +18,7 @@ module void _command(Compiler c, Cpp cpp, Token token, String path) {
     String target = Compiler.preproc_include_target(token.text, angle);
     String dir = path ? Path.dirname(path) : ".";
     if (target && !cpp.isolated)
-      cpp.merge(c.included_macros(target, angle, dir));
+      _merge(cpp, c.included_macros(target, angle, dir));
   }
 }
 
@@ -48,6 +48,12 @@ module void _define(Cpp cpp, Token name, List site) {
 module void _set(Cpp cpp, String name, Var value) {
   cpp.macros[name] = value;
   _touch(cpp, name);
+}
+
+/* Applies the `(name value)` rows a file exports, as its `#include`
+   does. */
+static void _merge(Cpp cpp, List rows) {
+  foreach (List row in rows) _set(cpp, row.car(), row.cadr());
 }
 
 module void _touch(Cpp cpp, String name) {

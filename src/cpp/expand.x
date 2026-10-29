@@ -96,7 +96,7 @@ static void _directive(Expander &x, Token token) {
   long index = x.out ? x.out.len() : token - x.in;
   Symbol kind = x.c.cpp_directive(x.cpp, token, x.c.filename);
   if (kind == <open> || (kind && open))
-    x.c.arm_stacks[index] = x.cpp.open_groups();
+    x.c.arm_stacks[index] = _open_groups(x.cpp);
 }
 
 static void _keep(Expander &x, Token token) {

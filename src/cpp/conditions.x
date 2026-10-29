@@ -40,6 +40,17 @@ Symbol Compiler.cpp_directive(Compiler c, Cpp cpp, Token token, String path) {
 
 // conditional groups
 
+/* The open groups, outermost first, as `(id arm state)` rows: the group's
+   number in the source, its current arm counted from 0, and that arm's
+   state, `<taken>`, `<hidden>`, or `<maybe>`. */
+module List _open_groups(Cpp cpp) {
+  Array rows = [];
+  CppGroup *groups = cpp.groups.bytes;
+  for (size_t i = 0; i < cpp.groups.len(); i++)
+    rows.push($(groups[i].id, groups[i].arm, groups[i].state));
+  return rows.list_free();
+}
+
 static void _open(Compiler c, Cpp cpp, Token token) {
   CppGroup group = {.id = ++cpp.serial};
   if (cpp.hidden()) {

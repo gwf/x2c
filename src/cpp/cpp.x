@@ -100,19 +100,6 @@ int Cpp.hidden(Cpp cpp) {
   return depth && ((CppGroup *) cpp.groups.bytes)[depth - 1].state == <hidden>;
 }
 
-/** Returns the open conditional groups, outermost first, as
-    `(id arm state)` rows: the group's number in the source, its current
-    arm counted from 0, and that arm's state, `<taken>`, `<hidden>`, or
-    `<maybe>`.
-*/
-List Cpp.open_groups(Cpp cpp) {
-  Array rows = [];
-  CppGroup *groups = cpp.groups.bytes;
-  for (size_t i = 0; i < cpp.groups.len(); i++)
-    rows.push($(groups[i].id, groups[i].arm, groups[i].state));
-  return rows.list_free();
-}
-
 /** Returns the `(name value)` rows of every macro whose value differs from
     its value in `initial`, sorted by name: what a file exports to the
     files that include it.
@@ -125,13 +112,6 @@ List Cpp.changes(Cpp cpp, Map initial) {
   }
   rows.sort();
   return rows.list_free();
-}
-
-/** Applies the `(name value)` rows `rows` to the macro table, as an
-    `#include` of the file that exports them does.
-*/
-void Cpp.merge(Cpp cpp, List rows) {
-  foreach (List row in rows) _set(cpp, row.car(), row.cadr());
 }
 
 /** Returns a macro table holding the `(name value)` rows `rows`. */

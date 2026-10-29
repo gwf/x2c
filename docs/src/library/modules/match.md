@@ -1248,7 +1248,7 @@ user API.
 <a id="MachineBuilder"></a>
 ### MachineBuilder
 
-`typedef struct MachineBuilder { MachineWord *code; Var *consts; Atom binders[MACHINE_BINDER_MAX]; int length, code_capacity, const_count, const_capacity, binder_count, root; Symbol status, const char *reason; } MachineBuilder`
+`typedef struct MachineBuilder { MachineWord *code; Var *consts; Atom binders[64]; int length, code_capacity, const_count, const_capacity, binder_count, root; Symbol status, const char *reason; } MachineBuilder`
 
 Accumulates a mutable program in the active Scope.
 
@@ -1284,7 +1284,7 @@ Source: `lib/match/match.x`
 <a id="MachineRegs"></a>
 ### MachineRegs
 
-`typedef struct MachineRegs { List cursors[MACHINE_CURSOR_REGS]; int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS]; MachineMark mark; } MachineRegs`
+`typedef struct MachineRegs { List cursors[3]; int distances[3], ints[2]; MachineMark mark; } MachineRegs`
 
 Stores the cursors, integers, and journal mark for one frame depth.
 
@@ -1448,7 +1448,7 @@ Source: `lib/match/cache.x`
 <a id="MatchMachine"></a>
 ### MatchMachine
 
-`typedef struct MatchMachine { MachineView program; int pc, Symbol status, int running; Var value, error; int fp, current_entry_undo, undo_count, slot_count; MachineStats *stats; int (*relation)(void *, int, Var, Var, void *); void *relation_context; Var (*view)(Var); Var *scratch; int scratch_capacity; MatchFrame frames[MACHINE_FRAME_MAX]; MachineRegs regs[MACHINE_FRAME_MAX]; MachineSlot slots[MACHINE_BINDER_MAX]; MachineUndo undo[MACHINE_UNDO_MAX]; } MatchMachine`
+`typedef struct MatchMachine { MachineView program; int pc, Symbol status, int running; Var value, error; int fp, current_entry_undo, undo_count, slot_count; MachineStats *stats; int (*relation)(void *, int, Var, Var, void *); void *relation_context; Var (*view)(Var); Var *scratch; int scratch_capacity; MatchFrame frames[128]; MachineRegs regs[128]; MachineSlot slots[64]; MachineUndo undo[256]; } MatchMachine`
 
 Holds one caller-owned Match-machine invocation.
 
