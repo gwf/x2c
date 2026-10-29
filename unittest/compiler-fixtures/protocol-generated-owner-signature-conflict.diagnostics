@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/protocol-generated-owner-signature-conflict.x:1:1: type: function takes 2 arguments, not 1
+  #include "x2c.x"
+  ^
+
