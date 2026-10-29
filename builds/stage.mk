@@ -249,6 +249,7 @@ $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
 # The build command cannot build itself. Translate it with this stage's newly
 # linked compiler, then use the same native flags and archives as the driver.
 # Other commands reuse this archive and embedded identity from the root Makefile.
+# Keep the default include roots so this stage can replay its interfaces.
 COMMAND_X_FILES = $(wildcard $(ROOT)/commands/build/*.x) $(COMMAND_IDENTITY)
 COMMAND_STEMS = $(notdir $(basename $(COMMAND_X_FILES)))
 COMMAND_C_FILES = $(addprefix $(COMMAND_BUILD)/,$(addsuffix .c,$(COMMAND_STEMS)))
@@ -281,7 +282,6 @@ $(COMMAND_BUILD)/.translated: $(BINARY) $(COMMAND_X_FILES) $(BIN_X_INPUTS) \
 		| $(COMMAND_BUILD) $(OWN_INTERFACES)
 	$(STRICT_X2C_ENV) ./$(BINARY) translate -j $(BUILD_JOBS) \
 		$(STRICT_X2C_FLAGS) $(X2C_FLAGS) --out-dir $(COMMAND_BUILD) \
-		--x-include-dir $(ROOT) --x-include-dir $(BIN_SOURCE) \
 		$(COMMAND_X_FILES)
 	@touch $@
 
