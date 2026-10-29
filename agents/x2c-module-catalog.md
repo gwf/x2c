@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 73
+- Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -1014,6 +1014,21 @@ Public functions:
 `x2c_descriptor_thread_start_begin`, `x2c_descriptor_thread_start_end`,
 `x2c_descriptor_registration_frozen`
 
+### [lib/encoding.x](../lib/encoding.x)
+
+UTF-8 code points and base64, hex, and percent encodings.
+
+Public functions:
+
+`String.is_utf8`, `String.code_point_count`, `String.try_next_code_point`,
+`String.code_points`, `Buffer.write_code_point`, `String.from_code_point`,
+`String.base64_encode`, `Block.base64_encode`, `String.base64_decode`,
+`String.base64_decode_bytes`, `String.base64url_encode`,
+`Block.base64url_encode`, `String.base64url_decode`,
+`String.base64url_decode_bytes`, `String.hex_encode`, `Block.hex_encode`,
+`String.hex_decode`, `String.hex_decode_bytes`, `String.percent_encode`,
+`String.percent_decode`
+
 ### [lib/error-macros.x](../lib/error-macros.x)
 
 shared non-returning Error causes.
@@ -1239,6 +1254,16 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [lib/random.x](../lib/random.x)
+
+pseudorandom numbers, system entropy, and UUIDs.
+
+Public functions:
+
+`Random.new`, `Random.from_entropy`, `Random.next`, `Random.below`,
+`Random.double`, `Random.shuffle`, `Random.choice`, `Random.secure_fill`,
+`Uuid.v4`, `Uuid.parse`, `Uuid.is_valid`
+
 ### [lib/regex.x](../lib/regex.x)
 
 regular expressions over the bytes of a String.
@@ -1370,6 +1395,20 @@ Public functions:
 `x2c_thread_wait_owner`, `x2c_thread_wait_stopped`, `x2c_thread_cancel`,
 `Thread.stop`, `x2c_thread_wait_lock`, `x2c_thread_wait_unlock`,
 `Thread.finish_all`, `Thread.join`, `Thread.free`
+
+### [lib/time.x](../lib/time.x)
+
+clocks, durations, and calendar time.
+
+Public functions:
+
+`Duration.seconds`, `Duration.milliseconds`, `Duration.microseconds`,
+`Duration.total_seconds`, `Duration.total_milliseconds`, `Duration.add`,
+`Duration.sub`, `Duration.neg`, `Duration.scale`, `Duration.compare`,
+`Duration.str`, `Time.now`, `Time.monotonic`, `Time.sleep`, `Time.from_unix`,
+`Time.unix_seconds`, `Time.plus`, `Time.since`, `Time.compare`, `Time.str`,
+`Time.parse`, `Time.format`, `Time.format_local`, `Time.utc`, `Time.local`,
+`DateTime.time`, `DateTime.weekday`, `DateTime.str`
 
 ### [lib/tokenizer.x](../lib/tokenizer.x)
 
@@ -1568,6 +1607,14 @@ Public functions:
 `MapStringInt.var`, `Var.mapstringint`, `MapStringInt.iter`,
 `MapStringInt.keys`, `MapStringInt.enumerate`, `MapStringInt.cleanup`,
 `MapStringInt.add_substr`
+
+### [lib/url.x](../lib/url.x)
+
+URL references and query strings.
+
+Public functions:
+
+`Url.parse`, `Url.str`, `Url.parse_query`, `Url.format_query`
 
 ### [lib/var-adapters.x](../lib/var-adapters.x)
 

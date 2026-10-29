@@ -765,6 +765,10 @@ static const char *evidence_rows[][2] = {
              "(`power/derive`)."},
   {"diff", "`make verify` (`unittest/test-diff.x`)."},
   {"digest", "`make verify` (`unittest/test-digest.x`)."},
+  {"encoding", "`make verify` (`unittest/test-encoding.x`)."},
+  {"random", "`make verify` (`unittest/test-random.x`)."},
+  {"time", "`make verify` (`unittest/test-time.x`)."},
+  {"url", "`make verify` (`unittest/test-url.x`)."},
   {"regex", "`make verify` (`unittest/test-regex.x`)."},
   {"dispatch", "`make verify` (`unittest/test-var.x`)."},
   {"file", "`make verify` (`unittest/test-file.x`) and `make examples` "
