@@ -59,8 +59,13 @@ static List _native_name(NativeSubmission &n, Type type, List binding) {
   Type global_type = NULL;
   List global = name ? n.session.compiler.sym.resolve_global($(name), global_type)
                      : NULL;
-  if (!global || global != binding || !(name in n.session.addresses))
-    return NULL;
+  if (!global || global != binding) return NULL;
+  if (n.session.program) {
+    Map description = n.session.program.descriptions[name];
+    if (description && description["unavailable"] is not void)
+      raise %(repl (reason $("the loaded native library does not provide: " + name)));
+  }
+  if (!(name in n.session.addresses)) return NULL;
   Var stored = n.session.addresses[name];
   Type address = global_type.is_function()
     ? global_type.reference() : type.reference();
