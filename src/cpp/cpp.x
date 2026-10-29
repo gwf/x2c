@@ -105,8 +105,10 @@ int Cpp.hidden(Cpp cpp) {
     its value in `initial`: what a file exports to the
     files that include it.
 */
-List Cpp.changes(Cpp cpp, Map initial) =>
-  Cpp.rows(cpp.exported_macros(initial));
+List Cpp.changes(Cpp cpp, Map initial) {
+  auto Map macros = cpp.exported_macros(initial);
+  return Cpp.rows(macros);
+}
 
 /** Returns an independent table of the macros changed from `initial`. */
 Map Cpp.exported_macros(Cpp cpp, Map initial) {

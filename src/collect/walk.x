@@ -210,7 +210,8 @@ static List _macro_rows(
               ? {} : _runtime_macros(c, query);
   if (query && !query.complete) return NULL;
   Cpp cpp = Cpp.new({});
-  Map visited = {};
+  auto Map visited = {};
+  defer _free_macro_exports(visited);
   MacroReplay replay = {.runtime = runtime, .root = query ? query.root : NULL};
   int complete = _replay_included(
     c, NULL, path, visited, NULL, active, cpp, replay);
@@ -220,6 +221,12 @@ static List _macro_rows(
   }
   Var rows = visited[path];
   return rows is void ? NULL : Cpp.rows(rows.map());
+}
+
+/* These independent snapshots belong only to this replay query. */
+static void _free_macro_exports(Map visited) {
+  foreach (Var (_, exports) in visited)
+    if (exports is <map>) exports.map().cleanup();
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -831,7 +838,8 @@ static int _replay_included(
       if (found is <array>) {
         Array state = found;
         Cpp cpp = (Cpp) state[0].pointer();
-        sink.merge_table(cpp.exported_macros(state[1]));
+        auto Map macros = cpp.exported_macros(state[1]);
+        sink.merge_table(macros);
       }
       else sink.merge_table(found);
     }
