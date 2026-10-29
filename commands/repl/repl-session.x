@@ -274,6 +274,29 @@ static int _file_submission(Compiler c) {
   return 0;
 }
 
+static List _native_top_statements(Compiler c, List statements) {
+  Array result = [];
+  foreach (List anchored, statements) {
+    List node = Ast.without_origin(anchored);
+    if (node.car() == <dstrdecl>) {
+      c.sym.push_new_scope();
+      List lowered = NULL;
+      {
+        defer c.sym.pop_scope();
+        lowered = c.lower_rewrite(
+          <node>, <dstrdecl>, node, <block>, %(void), NULL);
+      }
+      if (!lowered) raise %(repl (reason "destructuring did not lower"));
+      node = lowered;
+    }
+    if (node ~= %(seq *items)) {
+      foreach (List item, _native_top_statements(c, items)) result.push(item);
+    }
+    else result.push(node);
+  }
+  return result.list_free();
+}
+
 static void _submission_objects(ReplSession session, List items,
                                 Array declarations, Array names) {
   Compiler c = session.compiler;
@@ -470,6 +493,8 @@ static ReplResult _submit_native(ReplSession session, String source) {
       if (!body && parsed.car() != <function>)
         raise %(repl (reason "expected an executable submission"));
       syntax = %(block @body);
+      body = _native_top_statements(c, body);
+      syntax = %(block @body);
       _submission_objects(session, body, declarations, names);
       prints = _submission_prints(body);
       c.sym.undefine_global(%("__repl_eval"));
@@ -482,8 +507,11 @@ static ReplResult _submit_native(ReplSession session, String source) {
       session.addresses[name] = published[name];
       session.names[name] = %(value);
     }
-    for (int i = 0; i < names.len(); i++)
-      session.describe(names[i], declarations[i], source);
+    for (int i = 0; i < names.len(); i++) {
+      String name = names[i];
+      if (name.startswith("_x2c_gensym_")) session.internal[name] = 1;
+      else session.describe(name, declarations[i], source);
+    }
     if (function) {
       session.addresses[function] = published[function];
       session.names[function] = %(function (typed $syntax) (execution native));
@@ -536,7 +564,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
 ReplResult ReplSession.inspect_expression(
   ReplSession session, String expression, int depth, int limit) {
   with (session.inspect_depth = depth, session.inspect_limit = limit) {
-    return session.submit(expression.rstrip("; \t\r\n") + ";");
+    return session.submit("(" + expression.rstrip("; \t\r\n") + ");");
   }
 }
 

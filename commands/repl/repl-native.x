@@ -62,9 +62,10 @@ static List _native_name(NativeSubmission &n, Type type, List binding) {
   if (!global || global != binding || !(name in n.session.addresses))
     return NULL;
   Var stored = n.session.addresses[name];
-  Type address = type.reference();
+  Type address = global_type.is_function()
+    ? global_type.reference() : type.reference();
   List captured = _native_capture(n, binding, stored.pointer(), address);
-  return type.is_function() ? captured : %(expr $type (op * $captured));
+  return global_type.is_function() ? captured : %(expr $type (op * $captured));
 }
 
 static Var _native_rewrite(NativeSubmission &n, Var node) {
@@ -181,7 +182,17 @@ static void _native_render(
   expression = _native_rewrite(n, expression);
   Type type = expression.cadr();
   List value = expression;
-  if (!type.is_array()) {
+  if (type.is_array()) {
+    List name = c.sym.introduce(c.fresh_name("repl_array_result"));
+    Type pointer = type.reference();
+    List declaration = pointer.declaration_ast(name);
+    declaration = %(declare $(declaration.cadr()) (bindings
+      (op = $(declaration.caddr().cadr()) (expr $pointer (op & $expression)))));
+    c.sym.bind_identity(NULL, name, declaration);
+    n.body.push(declaration);
+    value = %(expr $type (op * $( _native_expr(c, pointer, name) )));
+  }
+  else {
     List name = c.sym.introduce(c.fresh_name("repl_result"));
     List declaration = type.declaration_ast(name);
     declaration = %(declare $(declaration.cadr()) (bindings
