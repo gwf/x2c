@@ -328,7 +328,10 @@ macro Unit $map.storage.family(
   }
 
   static $map $map.copy_entries($map map) {
-    $map copy = map.new_table(2), result = 0;
+    unsigned capacity = 2;
+    if (map)
+      while (map.used > (unsigned long) capacity * 3 / 4) capacity *= 2;
+    $map copy = map.new_table(capacity), result = 0;
     defer if ((void *) result == 0) copy.free_table();
     _insert_all(copy, map);
     return result = copy;

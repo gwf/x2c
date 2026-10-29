@@ -74,7 +74,7 @@ Scope MapIntInt_scope(MapIntInt _x2c_gensym_macro_map_8);
 
 void MapIntInt_move_to(MapIntInt _x2c_gensym_macro_map_9, Scope * _x2c_gensym_macro_destination_0);
 
-MapIntInt MapIntInt_new_capacity(unsigned _x2c_gensym_macro_capacity_10);
+MapIntInt MapIntInt_new_capacity(unsigned _x2c_gensym_macro_capacity_11);
 
 MapIntInt MapIntInt_new(void);
 
@@ -144,7 +144,7 @@ Scope MapLongDouble_scope(MapLongDouble _x2c_gensym_macro_map_60);
 
 void MapLongDouble_move_to(MapLongDouble _x2c_gensym_macro_map_61, Scope * _x2c_gensym_macro_destination_1);
 
-MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_gensym_macro_capacity_13);
+MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_gensym_macro_capacity_15);
 
 MapLongDouble MapLongDouble_new(void);
 
@@ -214,7 +214,7 @@ Scope MapStringString_scope(MapStringString _x2c_gensym_macro_map_112);
 
 void MapStringString_move_to(MapStringString _x2c_gensym_macro_map_113, Scope * _x2c_gensym_macro_destination_2);
 
-MapStringString MapStringString_new_capacity(unsigned _x2c_gensym_macro_capacity_16);
+MapStringString MapStringString_new_capacity(unsigned _x2c_gensym_macro_capacity_19);
 
 MapStringString MapStringString_new(void);
 
@@ -284,7 +284,7 @@ Scope MapStringInt_scope(MapStringInt _x2c_gensym_macro_map_164);
 
 void MapStringInt_move_to(MapStringInt _x2c_gensym_macro_map_165, Scope * _x2c_gensym_macro_destination_3);
 
-MapStringInt MapStringInt_new_capacity(unsigned _x2c_gensym_macro_capacity_19);
+MapStringInt MapStringInt_new_capacity(unsigned _x2c_gensym_macro_capacity_23);
 
 MapStringInt MapStringInt_new(void);
 
