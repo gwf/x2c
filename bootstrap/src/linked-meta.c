@@ -17985,7 +17985,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _14928 = List_var(_14927);
   _14929 = String_new("src/collect/walk.x");
   _14930 = String_var(_14929);
-  _14931 = String_new("2ce39635");
+  _14931 = String_new("7af6adca");
   _14932 = String_var(_14931);
   _14933 = cons(_14932, NULL);
   _14934 = cons(_14930, _14933);
@@ -18319,7 +18319,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15262 = List_var(_15261);
   _15263 = String_new("src/cpp/cpp.x");
   _15264 = String_var(_15263);
-  _15265 = String_new("d0bb959f");
+  _15265 = String_new("f2986dd0");
   _15266 = String_var(_15265);
   _15267 = cons(_15266, NULL);
   _15268 = cons(_15264, _15267);
