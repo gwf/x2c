@@ -2,9 +2,10 @@
 
     An operation with a `Var` operand that no protocol member resolved
     lowers to the dynamic runtime. A binary operator boxes both operands
-    for `Var.binary`; a compound assignment, increment, or decrement calls
-    the update helper of its target's storage, which takes the target's
-    address once and stores once.
+    for its inline lane in `lib/common.x`, which computes two `<i32>`
+    operands directly, or for `Var.binary`; a compound assignment,
+    increment, or decrement calls the update helper of its target's
+    storage, which takes the target's address once and stores once.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -54,12 +55,25 @@ macro Stmt $fail.operators_operand(
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
+/* The runtime lane computing `op` on two `<i32>` operands inline, or NULL
+   for an operator that only `Var.binary` computes. */
+meta static String _dynamic_lane(Symbol op) {
+  switch (op) {
+    case <+>: return "x2c_var_add_lane";
+    case <->: return "x2c_var_sub_lane";
+    case <*>: return "x2c_var_mul_lane";
+    case </>: return "x2c_var_div_lane";
+    case <%>: return "x2c_var_mod_lane";
+  }
+  return NULL;
+}
+
 $rewrite(%(expr ("Var") (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
-    `Var.binary`, after rejecting an operand that is neither a number nor,
-    for `+` beside text, text. The call is returned lowered, because an
-    operator chain applies this rule once for each term and binding would
-    search the whole remaining chain each time.
+    its runtime lane or `Var.binary`, after rejecting an operand that is
+    neither a number nor, for `+` beside text, text. The call is returned
+    lowered, because an operator chain applies this rule once for each term
+    and binding would search the whole remaining chain each time.
 */
 meta Code dynamic_binary(Code code) {
   if (code ~= %(expr ? (op ?(Symbol op) ?left ?right))) {
@@ -72,6 +86,11 @@ meta Code dynamic_binary(Code code) {
       $fail.operators_numeric_operands(NULL, left_type, right_type, op);
     }
     Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
+    String lane = _dynamic_lane(op);
+    if (lane) {
+      List call = %(call $lane (args $left_var $right_var));
+      return Code.lowered(%(expr ("Var") $call), NULL);
+    }
     return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
   }
   return code;

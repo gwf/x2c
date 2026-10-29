@@ -809,11 +809,12 @@ family for increments, decrements, and unary operators, keyed by each operator
 and `Var`. The transform dispatches an operation to those rules only when an
 operand has `Var` identity, after protocol operators resolved, presents it
 typed `Var`, and normalizes the replacement as it would its own lowering. A
-binary operator returns a `Var.binary` call through `Code.lowered`, so an
-operator chain does not rebind its remaining terms at each level; an update
-returns the lowered call of its storage's update helper with the target's
-address, the form the cleanup walk recognizes as a write. Truthiness stays a
-conversion the transform applies at condition positions, and slices,
+binary operator returns a call of its inline lane in `lib/common.x` or of
+`Var.binary` through `Code.lowered`, so an operator chain does not rebind
+its remaining terms at each level; an update returns the lowered call of
+its storage's update helper with the target's address, the form the
+cleanup walk recognizes as a write. Truthiness stays a conversion the
+transform applies at condition positions, and slices,
 comparisons, and a participant's direct compound update remain in the
 transform. When a rewrite lowers its replacement, the source expressions the
 replacement holds lower outside the active rule, so a store nested in another

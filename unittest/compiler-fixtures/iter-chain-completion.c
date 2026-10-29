@@ -76,15 +76,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static Var double_value(Var value){
-  return Var_binary(value, 54, int_var(2));
+  return x2c_var_mul_lane(value, int_var(2));
 }
 
 static int is_even(Var value){
-  return x2c_var_equal(Var_binary(value, 75, int_var(2)), int_var(0));
+  return x2c_var_equal_lane(x2c_var_mod_lane(value, int_var(2)), int_var(0));
 }
 
 static Var add_pair(Var left, Var right){
-  return Var_add(left, right);
+  return x2c_var_add_lane(left, right);
 }
 
 int main(void){

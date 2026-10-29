@@ -383,6 +383,11 @@ payload readers stay exact.
 operators, and eager direct-call `&&`/`||`. Compiler lowering uses it for
 numeric and String-tagged Var operations, routes comparisons through their
 established helpers, and preserves native C short-circuit control flow.
+Arithmetic and comparison operators call inline lanes in `lib/common.x`
+that compute two immediate `<i32>` operands directly when the native
+result is exact and otherwise call `Var.add` through `Var.mod`,
+`x2c_var_equal`, or `x2c_var_order`. On 2026-10-28 a loop of
+`total = total + x * 3` over 10^8 `Var`s fell from 0.80 s to 0.05 s.
 Integer operands use integer promotion and the common promoted lane;
 arithmetic retains that lane's low bits and signed results use
 two's-complement. Floating arithmetic uses the widest participating floating
@@ -483,9 +488,10 @@ adjacent values above double precision and exact Map key lookup.
 
 Source comparisons with either operand statically typed as `Var` have one
 transform owner, `_comparison`; protocol resolution leaves two `Var`
-operands to it. `==`/`!=` call `x2c_var_equal`, `===`/`!==` call
-`x2c_var_identical`, and relational operators compare `x2c_var_order` with
-zero. Two numbers compare by C's usual arithmetic conversions through the
+operands to it, as it leaves their arithmetic to the dynamic rule.
+`==`/`!=` call `x2c_var_equal_lane`, `===`/`!==` call
+`x2c_var_identical`, and relational operators compare `x2c_var_order_lane`
+with zero; each lane answers two `<i32>` operands inline. Two numbers compare by C's usual arithmetic conversions through the
 ladder `Var.binary` uses; other values reach `Var.equal`, `Var.same`, and
 `Var.compare`. Both operands cross to `Var` exactly once. Without a `Var`
 operand, comparisons remain native C and `===`/`!==` normalize to `==`/`!=`.

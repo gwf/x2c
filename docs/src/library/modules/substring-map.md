@@ -176,6 +176,27 @@ not validate the tag before reading its pointer payload.
 
 Source: `lib/substring-map.x`
 
+## Advanced and interop API
+
+| Function | Summary |
+| --- | --- |
+| [`MapSubInt.new_capacity`](#MapSubInt.new_capacity) | Creates an empty count table with exactly `capacity` buckets in the current Scope. |
+
+### `MapSubInt`
+
+<a id="MapSubInt.new_capacity"></a>
+#### MapSubInt.new_capacity
+
+`MapSubInt MapSubInt.new_capacity(unsigned capacity)`
+
+Creates an empty count table with exactly `capacity` buckets in the
+current Scope. Presizing for the expected number of distinct words
+avoids regrowth; the table still grows past three-quarters full.
+
+**Raises:** `<bad-arg>` unless `capacity` is a power of two of at least two.
+
+Source: `lib/substring-map.x`
+
 ## Public types
 
 | Type | Kind | Summary |

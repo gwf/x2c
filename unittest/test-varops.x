@@ -577,6 +577,40 @@ static void var_operation_edges_and_status(void) {
 }
 
 
+/* Operator syntax reaches the inline `<i32>` lanes, which must give the
+   general operation's result, tag, and failure at every edge. */
+static void var_operator_lanes_match_binary(void) {
+  $test.scoped();
+  Array values = [
+    0, 1, -1, 7, -7, Var.new(<i32>, INT_MAX), Var.new(<i32>, INT_MIN),
+    Var.box_u32(3), Var.box_long(5), 2.5];
+  foreach (Var a in values) {
+    foreach (Var b in values) {
+      EXPECT_TRUE(a + b === Var.binary(a, <+>, b));
+      EXPECT_TRUE(a - b === Var.binary(a, <->, b));
+      EXPECT_TRUE(a * b === Var.binary(a, <*>, b));
+      if (b != 0) EXPECT_TRUE(a / b === Var.binary(a, </>, b));
+      if (b != 0 && a is not <f64> && b is not <f64>)
+        EXPECT_TRUE(a % b === Var.binary(a, <%>, b));
+      EXPECT_INT_EQ(a == b, Var.binary(a, <==>, b).int());
+      EXPECT_INT_EQ(a != b, Var.binary(a, <!=>, b).int());
+      EXPECT_INT_EQ(a < b, Var.binary(a, <"<">, b).int());
+      EXPECT_INT_EQ(a <= b, Var.binary(a, <"<=">, b).int());
+      EXPECT_INT_EQ(a > b, Var.binary(a, <">">, b).int());
+      EXPECT_INT_EQ(a >= b, Var.binary(a, <">=">, b).int());
+    }
+  }
+  Var ten = 10, zero = 0, quotient = 0;
+  int caught = 0;
+  try quotient = ten / zero;
+  catch %(div-zero *): caught++;
+  try quotient = ten % zero;
+  catch %(div-zero *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_TRUE(quotient == 0);
+}
+
+
 static void var_invalid_encoding_status_is_atomic(void) {
   $test.scoped();
   Var malformed_immediate = (Var) { .u64 = 0x8002000800000000ul };
@@ -888,6 +922,7 @@ void varops_suite(void) {
   $test.run(var_all_family_integral_matrix);
   $test.run(var_all_family_comparison_matrix);
   $test.run(var_operation_edges_and_status);
+  $test.run(var_operator_lanes_match_binary);
   $test.run(var_invalid_encoding_status_is_atomic);
   $test.run(var_truth_and_generic_predicates);
   $test.run(var_updates_preserve_tags_and_atomicity);

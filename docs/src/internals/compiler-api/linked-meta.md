@@ -21,7 +21,7 @@ Shipped `meta` code compiled into the compiler.
 | [`destructure_declaration`](#destructure_declaration) | Declares the names of `T (a, b) = source;` and then reads the source into them, or declares each target of `(T1 a, T2 b) = source;` initialized from its element. |
 | [`destructure_statement`](#destructure_statement) | Reads the source of `(a, b) = source;` into its targets in a block. |
 | [`destructure_value`](#destructure_value) | Reads the source of `(a, b) = source` into its targets, and keeps the source in a result local as the expression's value. |
-| [`dynamic_binary`](#dynamic_binary) | Boxes both operands of an arithmetic, shift, or bitwise operator for `Var.binary`, after rejecting an operand that is neither a number nor, for `+` beside text, text. |
+| [`dynamic_binary`](#dynamic_binary) | Boxes both operands of an arithmetic, shift, or bitwise operator for its runtime lane or `Var.binary`, after rejecting an operand that is neither a number nor, for `+` beside text, text. |
 | [`dynamic_change`](#dynamic_change) | Adds or subtracts one through the `Var` update helpers; the postfix forms return the value before the change. |
 | [`dynamic_compound`](#dynamic_compound) | Updates a `Var` or numeric lvalue with a `Var` or numeric operand through the update helper of its storage. |
 | [`dynamic_unary`](#dynamic_unary) | Rejects a unary numeric operator on a `Var`. |
@@ -125,10 +125,10 @@ Source: `src/linked-meta.x`
 `Code dynamic_binary(Code code)`
 
 Boxes both operands of an arithmetic, shift, or bitwise operator for
-`Var.binary`, after rejecting an operand that is neither a number nor,
-for `+` beside text, text. The call is returned lowered, because an
-operator chain applies this rule once for each term and binding would
-search the whole remaining chain each time.
+its runtime lane or `Var.binary`, after rejecting an operand that is
+neither a number nor, for `+` beside text, text. The call is returned
+lowered, because an operator chain applies this rule once for each term
+and binding would search the whole remaining chain each time.
 
 Source: `src/linked-meta.x`
 

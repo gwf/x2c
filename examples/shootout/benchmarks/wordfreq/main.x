@@ -14,10 +14,11 @@ static int _random_state = 42;
 
 int main(int argc, char **argv) {
   if (argc != 3) return 2;
-  String text = _make_text(atoi(argv[1]));
+  int word_count = atoi(argv[1]);
+  String text = _make_text(word_count);
   uint64_t checksum = 0;
   for (int i = 0; i < atoi(argv[2]); i++)
-    checksum = checksum * 33 + _count(text);
+    checksum = checksum * 33 + _count(text, word_count);
   printf("%llu\n", (unsigned long long) checksum);
   return 0;
 }
@@ -41,9 +42,13 @@ static int _next_int(int maximum) {
   return (int) ((int64_t) _random_state * maximum / 139968);
 }
 
-static uint64_t _count(String text) {
+/* Like the reference, size the table at the first power of two of at least
+   twice the word count, so counting never grows it. */
+static uint64_t _count(String text, int word_count) {
   auto {
-    MapSubInt counts = MapSubInt.new();
+    unsigned capacity = 2;
+    while (capacity < (unsigned) word_count * 2) capacity *= 2;
+    MapSubInt counts = MapSubInt.new_capacity(capacity);
     foreach (Substr word in text) counts.increment(word);
 
     uint64_t checksum = 0;

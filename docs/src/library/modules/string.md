@@ -1059,6 +1059,7 @@ Source: `lib/string/cursors.x`
 
 | Function | Summary |
 | --- | --- |
+| [`String.cached_hash`](#String.cached_hash) | Returns the content hash installed in `str`'s header, or zero for the empty `String` and an unfinished `String.malloc` buffer. |
 | [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
 | [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
 | [`String.escape`](#String.escape) | Returns a canonical escaped representation of the bytes in `str`. |
@@ -1082,6 +1083,17 @@ Source: `lib/string/cursors.x`
 | [`String.write_repr`](#String.write_repr) | Appends a quoted escaped representation of `str` to borrowed `out`. |
 
 ### `String`
+
+<a id="String.cached_hash"></a>
+#### String.cached_hash
+
+`inline unsigned String.cached_hash(String str)`
+
+Returns the content hash installed in `str`'s header, or zero for the
+empty `String` and an unfinished `String.malloc` buffer. Unlike
+`String.hash`, this never hashes the bytes.
+
+Source: `lib/string/storage.x`
 
 <a id="String.compare"></a>
 #### String.compare
@@ -1499,6 +1511,28 @@ its backing allocation still belongs to the active pool, and must be
 finalized with `String.intern_free` or released with `String.free`.
 
 Source: `lib/string/string.x`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`StringHeader`](#StringHeader) | struct | The private header before each `String`'s bytes, which only `String` operations read. |
+
+<a id="StringHeader"></a>
+### StringHeader
+
+`typedef struct StringHeader { int length; unsigned hash; } *StringHeader`
+
+The private header before each `String`'s bytes, which only `String`
+operations read. `length` includes the trailing NUL. A zero hash marks
+an unfinished `String.malloc` buffer; canonical nonempty `String`s have
+their content hash installed before entering a pool table.
+
+Source: `lib/string/storage.x`
 
 ## Design notes
 

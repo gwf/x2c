@@ -927,8 +927,10 @@ Public functions:
 `Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
 `Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
 `Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize`,
-`x2c_initialize_protocols`, `x2c_normalize_index`, `x2c_slice_bound`,
-`x2c_normalize_slice`
+`x2c_initialize_protocols`, `x2c_var_i32_pair`, `x2c_var_add_lane`,
+`x2c_var_sub_lane`, `x2c_var_mul_lane`, `x2c_var_div_lane`, `x2c_var_mod_lane`,
+`x2c_var_equal_lane`, `x2c_var_order_lane`, `x2c_normalize_index`,
+`x2c_slice_bound`, `x2c_normalize_slice`
 
 ### [lib/compiler-meta.x](../lib/compiler-meta.x)
 
@@ -1300,8 +1302,8 @@ Public functions:
 
 `MapSubInt.scope`, `MapSubInt.move_to`, `MapSubInt.var`, `Var.mapsubint`,
 `MapSubInt.iter`, `MapSubInt.keys`, `MapSubInt.enumerate`, `MapSubInt.cleanup`,
-`MapSubInt.new`, `MapSubInt.increment`, `MapSubInt.strings`,
-`MapSubInt.try_next`
+`MapSubInt.new`, `MapSubInt.new_capacity`, `MapSubInt.increment`,
+`MapSubInt.strings`, `MapSubInt.try_next`
 
 ### [lib/substring.x](../lib/substring.x)
 
@@ -1808,29 +1810,29 @@ canonical byte strings and core text operations.
 
 Public functions:
 
-`String.len`, `String.hash`, `String.equal`, `String.compare`,
-`String.new_len`, `String.new_in`, `String.intern`, `String.new`,
-`x2c_string_from_bytes`, `String.malloc`, `String.intern_free`, `String.free`,
-`String.promote`, `String.try_own`, `String.is_permanent`, `String.rfind`,
-`String.find_all`, `String.count`, `String.contains`, `String.find`,
-`String.find_within`, `String.startswith`, `String.endswith`, `String.replace`,
-`String.replace_n`, `String.getindex`, `String.getslice`, `String.withindex`,
-`String.add`, `String.repeat`, `String.new_fill`, `String.join`,
-`String.pad_left`, `String.pad_right`, `String.pad_center`, `String.printf`,
-`String.strip`, `String.lstrip`, `String.rstrip`, `String.dedent`,
-`String.remove_prefix`, `String.remove_suffix`, `String.partition`,
-`String.rpartition`, `String.lower`, `String.upper`, `String.capitalize`,
-`String.filter`, `String.map`, `String.keep`, `String.reject`,
-`String.squeeze`, `String.str`, `String.write_str`, `String.symbol`,
-`String.iter`, `String.try_next`, `String.contains_digit`, `String.is_alpha`,
-`String.is_alpha_under`, `String.is_digit`, `String.is_alnum`,
-`String.is_alnum_under`, `String.is_identifier`, `String.is_space`,
-`String.is_lower`, `String.is_lower_under`, `String.is_upper`,
-`String.is_upper_under`, `String.repr`, `String.escape`, `String.write_repr`,
-`String.parse_char`, `String.parse`, `String.unescape`, `String.format`,
-`String.try_long`, `String.try_double`, `Split.var`, `Var.split`,
-`String.split`, `String.split_n`, `String.split_lines`, `String.words`,
-`String.lines`, `String.splits`, `Split.iter`, `Split.try_next`
+`String.len`, `String.cached_hash`, `String.hash`, `String.equal`,
+`String.compare`, `String.new_len`, `String.new_in`, `String.intern`,
+`String.new`, `x2c_string_from_bytes`, `String.malloc`, `String.intern_free`,
+`String.free`, `String.promote`, `String.try_own`, `String.is_permanent`,
+`String.rfind`, `String.find_all`, `String.count`, `String.contains`,
+`String.find`, `String.find_within`, `String.startswith`, `String.endswith`,
+`String.replace`, `String.replace_n`, `String.getindex`, `String.getslice`,
+`String.withindex`, `String.add`, `String.repeat`, `String.new_fill`,
+`String.join`, `String.pad_left`, `String.pad_right`, `String.pad_center`,
+`String.printf`, `String.strip`, `String.lstrip`, `String.rstrip`,
+`String.dedent`, `String.remove_prefix`, `String.remove_suffix`,
+`String.partition`, `String.rpartition`, `String.lower`, `String.upper`,
+`String.capitalize`, `String.filter`, `String.map`, `String.keep`,
+`String.reject`, `String.squeeze`, `String.str`, `String.write_str`,
+`String.symbol`, `String.iter`, `String.try_next`, `String.contains_digit`,
+`String.is_alpha`, `String.is_alpha_under`, `String.is_digit`,
+`String.is_alnum`, `String.is_alnum_under`, `String.is_identifier`,
+`String.is_space`, `String.is_lower`, `String.is_lower_under`,
+`String.is_upper`, `String.is_upper_under`, `String.repr`, `String.escape`,
+`String.write_repr`, `String.parse_char`, `String.parse`, `String.unescape`,
+`String.format`, `String.try_long`, `String.try_double`, `Split.var`,
+`Var.split`, `String.split`, `String.split_n`, `String.split_lines`,
+`String.words`, `String.lines`, `String.splits`, `Split.iter`, `Split.try_next`
 
 ### [lib/var/var.x](../lib/var/var.x)
 

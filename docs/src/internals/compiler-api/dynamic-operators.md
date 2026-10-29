@@ -12,9 +12,10 @@ Dynamic operators.
 
 An operation with a `Var` operand that no protocol member resolved
 lowers to the dynamic runtime. A binary operator boxes both operands
-for `Var.binary`; a compound assignment, increment, or decrement calls
-the update helper of its target's storage, which takes the target's
-address once and stores once.
+for its inline lane in `lib/common.x`, which computes two `<i32>`
+operands directly, or for `Var.binary`; a compound assignment,
+increment, or decrement calls the update helper of its target's
+storage, which takes the target's address once and stores once.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the

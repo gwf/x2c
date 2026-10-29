@@ -14,6 +14,14 @@ The `Var` encoding every runtime module shares.
 | [`x2c_normalize_index`](#x2c_normalize_index) | Normalizes one element index against `length`. |
 | [`x2c_normalize_slice`](#x2c_normalize_slice) | Normalizes slice bounds and returns the resulting element count. |
 | [`x2c_slice_bound`](#x2c_slice_bound) | Returns an explicit slice `bound` that `x2c_normalize_slice` cannot read as omitted. |
+| [`x2c_var_add_lane`](#x2c_var_add_lane) | Returns `Var.add(lhs, rhs)`, adding two `<i32>` operands inline. |
+| [`x2c_var_div_lane`](#x2c_var_div_lane) | Returns `Var.div(lhs, rhs)`, dividing two `<i32>` operands inline. |
+| [`x2c_var_equal_lane`](#x2c_var_equal_lane) | Returns `x2c_var_equal(lhs, rhs)`, comparing two `<i32>` operands inline. |
+| [`x2c_var_i32_pair`](#x2c_var_i32_pair) | Reports whether both operands are immediate `<i32>` values. |
+| [`x2c_var_mod_lane`](#x2c_var_mod_lane) | Returns `Var.mod(lhs, rhs)`, taking two `<i32>` operands' remainder inline. |
+| [`x2c_var_mul_lane`](#x2c_var_mul_lane) | Returns `Var.mul(lhs, rhs)`, multiplying two `<i32>` operands inline. |
+| [`x2c_var_order_lane`](#x2c_var_order_lane) | Returns `x2c_var_order(lhs, rhs)`, ordering two `<i32>` operands inline. |
+| [`x2c_var_sub_lane`](#x2c_var_sub_lane) | Returns `Var.sub(lhs, rhs)`, subtracting two `<i32>` operands inline. |
 | [`Array.var`](#Array.var) | Boxes an `Array` value as `Var`. |
 | [`Block.var`](#Block.var) | Boxes a `Block` value as `Var`. |
 | [`Buffer.var`](#Buffer.var) | Boxes a `Buffer` value as `Var`. |
@@ -151,6 +159,73 @@ Source: `lib/common.x`
 Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
 read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
 shorter than INT_MAX clamps the same way.
+
+Source: `lib/common.x`
+
+#### x2c_var_add_lane
+
+`inline Var x2c_var_add_lane(Var lhs, Var rhs)`
+
+Returns `Var.add(lhs, rhs)`, adding two `<i32>` operands inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_div_lane
+
+`inline Var x2c_var_div_lane(Var lhs, Var rhs)`
+
+Returns `Var.div(lhs, rhs)`, dividing two `<i32>` operands inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_equal_lane
+
+`inline int x2c_var_equal_lane(Var lhs, Var rhs)`
+
+Returns `x2c_var_equal(lhs, rhs)`, comparing two `<i32>` operands
+inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_i32_pair
+
+`inline int x2c_var_i32_pair(Var lhs, Var rhs)`
+
+Reports whether both operands are immediate `<i32>` values.
+
+Source: `lib/common.x`
+
+#### x2c_var_mod_lane
+
+`inline Var x2c_var_mod_lane(Var lhs, Var rhs)`
+
+Returns `Var.mod(lhs, rhs)`, taking two `<i32>` operands' remainder
+inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_mul_lane
+
+`inline Var x2c_var_mul_lane(Var lhs, Var rhs)`
+
+Returns `Var.mul(lhs, rhs)`, multiplying two `<i32>` operands inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_order_lane
+
+`inline double x2c_var_order_lane(Var lhs, Var rhs)`
+
+Returns `x2c_var_order(lhs, rhs)`, ordering two `<i32>` operands
+inline.
+
+Source: `lib/common.x`
+
+#### x2c_var_sub_lane
+
+`inline Var x2c_var_sub_lane(Var lhs, Var rhs)`
+
+Returns `Var.sub(lhs, rhs)`, subtracting two `<i32>` operands inline.
 
 Source: `lib/common.x`
 

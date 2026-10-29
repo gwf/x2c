@@ -765,6 +765,15 @@ printf '%s\n' '#include <stdio.h>' 'int library_value(void);' \
   "$ROOT/builds/0/libx2c.a" -lm -o "$BUILD/direct/consumer"
 [[ $("$BUILD/direct/consumer") == 9 ]] || exit 1
 
+# A native caller compiled against an earlier runtime header still links:
+# exported runtime functions stay exported.
+printf '%s\n' 'extern int String_len(const char *);' \
+  'int main(void) { return String_len((const char *) 0); }' \
+  >"$BUILD/direct/native-caller.c"
+"$host_cc" "$BUILD/direct/native-caller.c" "$ROOT/builds/0/libx2c.a" \
+  -pthread -lm -o "$BUILD/direct/native-caller"
+"$BUILD/direct/native-caller"
+
 retained="$BUILD/direct/retained-link"
 mkdir -p "$retained/first" "$retained/second"
 for value in 1 2 3; do

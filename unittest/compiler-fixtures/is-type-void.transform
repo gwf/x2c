@@ -157,7 +157,7 @@
                                      (at 27 
                                       (call (expr (macro-expr) 
                                              (ident 
-                                              (binding-name "x2c_var_equal"))) 
+                                              (binding-name "x2c_var_equal_lane"))) 
                                        (args (expr ("Var") 
                                               (literal ("Var") "void")) 
                                         (expr ("Var") (literal ("Var") "void")))))))) 
@@ -179,7 +179,7 @@
                                                    (call (expr (macro-expr) 
                                                           (ident 
                                                            (binding-name 
-                                                            "x2c_var_equal"))) 
+                                                            "x2c_var_equal_lane"))) 
                                                     (args (expr ("Var") 
                                                            (literal ("Var") 
                                                             "void")) 
@@ -206,7 +206,7 @@
                                (op ! (expr (macro-expr) 
                                       (call (expr (macro-expr) 
                                              (ident 
-                                              (binding-name "x2c_var_equal"))) 
+                                              (binding-name "x2c_var_equal_lane"))) 
                                        (args (expr ("Var") 
                                               (literal ("Var") "void")) 
                                         (expr ("Var") 
@@ -218,7 +218,8 @@
                             (expr (int) 
                              (op ! (expr (macro-expr) 
                                     (call (expr (macro-expr) 
-                                           (ident (binding-name "x2c_var_equal"))) 
+                                           (ident 
+                                            (binding-name "x2c_var_equal_lane"))) 
                                      (args (expr ("Var") 
                                             (call (expr ((func ((int))) "Var") 
                                                    (ident (binding 12 "int_var"))) 
@@ -254,7 +255,7 @@
                              (expr (int) 
                               (at 35 
                                (call (expr (macro-expr) 
-                                      (ident (binding-name "x2c_var_equal"))) 
+                                      (ident (binding-name "x2c_var_equal_lane"))) 
                                 (args (expr ("Var") (literal ("Var") "void")) 
                                  (expr ("Var") 
                                   (call (expr ((func ((int))) "Var") 
@@ -266,7 +267,7 @@
                            (expr (int) 
                             (at 36 
                              (call (expr (macro-expr) 
-                                    (ident (binding-name "x2c_var_equal"))) 
+                                    (ident (binding-name "x2c_var_equal_lane"))) 
                               (args (expr ("Var") 
                                      (call (expr ((func ((int))) "Var") 
                                             (ident (binding 12 "int_var"))) 
@@ -298,7 +299,8 @@
                            (expr ("Var") (literal ("Var") "void")))))))))))) 
             (expr (int) 
              (at 39 
-              (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+              (call (expr (macro-expr) 
+                     (ident (binding-name "x2c_var_equal_lane"))) 
                (args (expr ("Var") 
                       (parens (expr ("Var") (literal ("Var") "void")))) 
                 (expr ("Var") (literal ("Var") "void")))))))) 

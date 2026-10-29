@@ -131,7 +131,7 @@ int main(void){
           value = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
           List volatile rest;
           rest = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));
-          x2c_var_update_i32(&(total), 56, Var_binary(value, 56, int_var(List_len(rest))));
+          x2c_var_update_i32(&(total), 56, x2c_var_add_lane(value, int_var(List_len(rest))));
         }
         if(_x2c_gensym_macro_selected_0 == 1){
           {
@@ -185,7 +185,7 @@ int main(void){
           {
             Var volatile value;
             value = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
-            partial = Var_int(Var_convert_at(Var_binary(value, 56, int_var(List_len(rest))), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/meta-returned-try.x",.function = "main",.line = 30}; & _x2c_gensym_error_site_2; })));
+            partial = Var_int(Var_convert_at(x2c_var_add_lane(value, int_var(List_len(rest))), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/meta-returned-try.x",.function = "main",.line = 30}; & _x2c_gensym_error_site_2; })));
           }
 
         }
