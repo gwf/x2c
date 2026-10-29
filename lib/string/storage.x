@@ -2,10 +2,12 @@
 
 // representation
 
-/* `length` includes the trailing NUL. A zero hash marks an unfinished
-   String.malloc buffer; canonical nonempty Strings have their content hash
-   installed before entering a pool table. */
-static typedef struct StringHeader {
+/** The private header before each `String`'s bytes, which only `String`
+    operations read. `length` includes the trailing NUL. A zero hash marks
+    an unfinished `String.malloc` buffer; canonical nonempty `String`s have
+    their content hash installed before entering a pool table.
+*/
+typedef struct StringHeader {
   int length;
   unsigned hash;
 } *StringHeader;
@@ -27,11 +29,18 @@ _Static_assert(
 
     The empty `String` is the null pointer, whose length is 0.
 */
-int String.len(String str) {
+inline int String.len(String str) {
   // `!str` also reads the first byte, which a fresh buffer leaves unset.
   if (str == NULL) return 0;
-  return _header(str).length - 1;
+  return ((StringHeader) str - 1).length - 1;
 }
+
+/** Returns the content hash installed in `str`'s header, or zero for the
+    empty `String` and an unfinished `String.malloc` buffer. Unlike
+    `String.hash`, this never hashes the bytes.
+*/
+inline unsigned String.cached_hash(String str) =>
+  str == NULL ? 0 : ((StringHeader) str - 1).hash;
 
 /** Returns the content hash of `str`, or zero for the empty `String`.
     Canonical `String`s use the cached hash; transient buffers are hashed from
@@ -39,8 +48,8 @@ int String.len(String str) {
 */
 meta native unsigned String.hash(String str) {
   if (!str) return 0;
-  StringHeader header = _header(str);
-  return header.hash ? header.hash : _hash_n(str, strlen(str));
+  unsigned hash = str.cached_hash();
+  return hash ? hash : _hash_n(str, strlen(str));
 }
 
 /** Reports whether `x` and `y` contain the same bytes.
@@ -264,8 +273,7 @@ int String.is_permanent(String str) {
   return Pool.is_permanent(str);
 }
 
-static inline StringHeader _header(String str) =>
-  (StringHeader) ((char *) str - sizeof(struct StringHeader));
+static inline StringHeader _header(String str) => (StringHeader) str - 1;
 
 static unsigned _hash_n(const char *str, int length) =>
   x2c_hash_bytes(0, str, (size_t) length);

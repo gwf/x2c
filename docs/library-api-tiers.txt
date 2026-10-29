@@ -49,6 +49,9 @@ lib/common.x|advanced|unsigned.str,unsigned.var,ushort.repr,ushort.str
 lib/common.x|advanced|ushort.var
 lib/common.x|advanced|x2c_initialize,x2c_initialize_protocols
 lib/common.x|advanced|x2c_normalize_index,x2c_normalize_slice,x2c_slice_bound
+lib/common.x|advanced|x2c_var_add_lane,x2c_var_div_lane,x2c_var_equal_lane
+lib/common.x|advanced|x2c_var_i32_pair,x2c_var_mod_lane,x2c_var_mul_lane
+lib/common.x|advanced|x2c_var_order_lane,x2c_var_sub_lane
 lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
 lib/common.x|internal|X2CErrorSite,X2CStatic
 lib/context.x|advanced|Context.move_allocation,Context.owns
@@ -199,6 +202,7 @@ lib/thread.x|internal|x2c_thread_stopping,x2c_thread_wait,x2c_thread_cancel
 lib/string/string.x|advanced|String.escape,String.parse,String.parse_char
 lib/string/string.x|advanced|String.repr,String.write_repr
 lib/string/string.x|advanced|String.try_double,String.try_long
+lib/string/string.x|advanced|String.cached_hash
 lib/string/string.x|advanced|String.compare,String.equal,String.free
 lib/string/string.x|advanced|String.hash,String.intern,String.intern_free
 lib/string/string.x|advanced|String.malloc,String.new_fill,String.new_len
@@ -206,6 +210,7 @@ lib/string/string.x|advanced|String.new_in
 lib/string/string.x|advanced|String.printf,String.promote
 lib/string/string.x|advanced|String.str,String.symbol
 lib/string/string.x|internal|String.is_permanent,String.try_own
+lib/string/string.x|internal|StringHeader
 lib/symbol.x|advanced|Symbol.compare,Symbol.decode,Symbol.first,Symbol.new_len
 lib/symbol.x|advanced|Symbol.parse,Symbol.repr,Symbol.str,Symbol.write_repr
 lib/var/var.x|advanced|Var.box_long_double,Var.box_long_long,Var.box_long

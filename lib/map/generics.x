@@ -11,8 +11,11 @@
 macro Unit $map.var.family(
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid
 ) {
+  /* A canonical `String` key carries its hash in its header, which spares
+     most lookups the calls through `Var.hash` and `String.hash`. */
   static unsigned $hash(Var *key) {
-    return key[0].hash();
+    unsigned cached = key[0].string_payload().cached_hash();
+    return cached ? cached : key[0].hash();
   }
 
   /* Keys compare by `Var.equal`, which agrees with `Var.hash`, so keys of
