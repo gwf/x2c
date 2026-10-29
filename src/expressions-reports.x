@@ -80,12 +80,13 @@ macro Stmt $fail.expressions_index_symbol(Expr $c, Expr $site) =>
     <type>, "Symbol cannot be used as an integer bracket index",
     $site, NULL);
 
-macro Stmt $fail.expressions_method_arity(
-  Expr $c, Expr $origin, Expr $parameters, Expr $arguments) =>
+macro Stmt $fail.expressions_call_arity(
+  Expr $c, Expr $origin, Expr $method, Expr $variadic, Expr $expected,
+  Expr $supplied) =>
   $c.report_error(
-    <type>, %"method takes $(List.len($parameters) - 1) argument$(
-            List.len($parameters) == 2 ? "" : "s"), not $(
-            $arguments.len() - 1)",
+    <type>, %"$($method ? "method" : "function") takes $(
+            $variadic ? "at least " : "")$($expected) argument$(
+            $expected == 1 ? "" : "s"), not $($supplied)",
     $origin, NULL);
 
 macro Stmt $fail.expressions_method_missing(
