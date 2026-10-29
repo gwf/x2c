@@ -412,9 +412,7 @@ static int _header_name(String name) {
 static int _match(List pattern, List path) {
   while (pattern) {
     String segment = pattern.car(); pattern = pattern.cdr();
-    if (segment && segment[0] == '*') {
-      return !pattern;
-    }
+    if (segment && segment[0] == '*') return !pattern;
     if (!path) return 0;
     String value = path.car(); path = path.cdr();
     if (segment && segment[0] == ':') {

@@ -11,6 +11,7 @@
 #include "channel.h"
 #include <ctype.h>
 #include <errno.h>
+#include <strings.h>
 #include <unistd.h>
 typedef struct HttpRequest{
   Symbol method;

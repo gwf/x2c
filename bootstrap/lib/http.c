@@ -7,6 +7,7 @@
 #include "channel.h"
 #include <ctype.h>
 #include <errno.h>
+#include <strings.h>
 #include <unistd.h>
 typedef struct HttpRequest{
   Symbol method;
@@ -18,9 +19,9 @@ typedef struct HttpRequest{
 
 static List _61, _60, _59, _58, _55, _54, _50, _49, _47, _46, _44, _40;
 
-static String _111, _110, _109, _106, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _52, _42, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _111, _110, _109, _108, _105, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _52, _42, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _108, _107, _105, _104, _57, _56, _53, _51, _48, _45, _43, _41, _39, _37;
+static Var _107, _106, _104, _103, _57, _56, _53, _51, _48, _45, _43, _41, _39, _37;
 
 static int _init_guard_ = 0;
 
@@ -68,11 +69,13 @@ static void _query(Map query, String text);
 
 static int _method(String method);
 
-static int _token(String values, String token);
+static int _keep_alive(String values, int keep);
 
 static int _header_name(String name);
 
-static int _match(List pattern, List path, Map captures);
+static int _match(List pattern, List path);
+
+static void _capture(List pattern, List path, Map captures);
 
 static const char * _reason(int code);
 
@@ -226,10 +229,18 @@ static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11);
 
 typedef struct _x2c_gensym_defer_env_12{
   const void * _x2c_gensym_defer_capture_12;
+  const void * _x2c_gensym_defer_capture_13;
 }
 _x2c_gensym_defer_env_12;
 
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12);
+
+typedef struct _x2c_gensym_defer_env_13{
+  const void * _x2c_gensym_defer_capture_14;
+}
+_x2c_gensym_defer_env_13;
+
+static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13);
 
 typedef struct _x2c_gensym_lambda_context_0{
   Var c0;
@@ -240,22 +251,14 @@ static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path director
 
 static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg * _x2c_gensym_lambda_argv_0);
 
-typedef struct _x2c_gensym_defer_env_13{
-  const void * _x2c_gensym_defer_capture_13;
-}
-_x2c_gensym_defer_env_13;
-
-static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13);
-
 typedef struct _x2c_gensym_defer_env_14{
-  const void * _x2c_gensym_defer_capture_14;
+  const void * _x2c_gensym_defer_capture_15;
 }
 _x2c_gensym_defer_env_14;
 
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14);
 
 typedef struct _x2c_gensym_defer_env_15{
-  const void * _x2c_gensym_defer_capture_15;
   const void * _x2c_gensym_defer_capture_16;
 }
 _x2c_gensym_defer_env_15;
@@ -264,52 +267,60 @@ static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15);
 
 typedef struct _x2c_gensym_defer_env_16{
   const void * _x2c_gensym_defer_capture_17;
+  const void * _x2c_gensym_defer_capture_18;
 }
 _x2c_gensym_defer_env_16;
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16);
 
 typedef struct _x2c_gensym_defer_env_17{
-  const void * _x2c_gensym_defer_capture_18;
+  const void * _x2c_gensym_defer_capture_19;
 }
 _x2c_gensym_defer_env_17;
 
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17);
 
 typedef struct _x2c_gensym_defer_env_18{
-  const void * _x2c_gensym_defer_capture_19;
+  const void * _x2c_gensym_defer_capture_20;
 }
 _x2c_gensym_defer_env_18;
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18);
 
 typedef struct _x2c_gensym_defer_env_19{
-  const void * _x2c_gensym_defer_capture_20;
+  const void * _x2c_gensym_defer_capture_21;
 }
 _x2c_gensym_defer_env_19;
 
 static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19);
 
 typedef struct _x2c_gensym_defer_env_20{
-  const void * _x2c_gensym_defer_capture_21;
+  const void * _x2c_gensym_defer_capture_22;
 }
 _x2c_gensym_defer_env_20;
 
 static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20);
 
 typedef struct _x2c_gensym_defer_env_21{
-  const void * _x2c_gensym_defer_capture_22;
+  const void * _x2c_gensym_defer_capture_23;
 }
 _x2c_gensym_defer_env_21;
 
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21);
 
 typedef struct _x2c_gensym_defer_env_22{
-  const void * _x2c_gensym_defer_capture_23;
+  const void * _x2c_gensym_defer_capture_24;
 }
 _x2c_gensym_defer_env_22;
 
 static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22);
+
+typedef struct _x2c_gensym_defer_env_23{
+  const void * _x2c_gensym_defer_capture_25;
+}
+_x2c_gensym_defer_env_23;
+
+static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23);
 
 void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
 
@@ -375,14 +386,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _22 = String_new("body is not text");
   _23 = String_new("incomplete body");
   _24 = String_new("connection");
-  _25 = String_new("keep-alive");
-  _26 = String_new("close");
-  _27 = String_new("\r");
-  _28 = String_new("\n");
-  _29 = String_new("Content-Type");
-  _30 = String_new("text/plain; charset=utf-8");
-  _31 = String_new("application/json");
-  _32 = String_new("%ld");
+  _25 = String_new("\r");
+  _26 = String_new("\n");
+  _27 = String_new("content-type");
+  _28 = String_new("text/plain; charset=utf-8");
+  _29 = String_new("application/json");
+  _30 = String_new("%ld");
+  _31 = String_new("keep-alive");
+  _32 = String_new("close");
   _33 = String_new("HttpResponse.write");
   _34 = String_new("/");
   _35 = String_new("%s%s*rest");
@@ -420,8 +431,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _67 = String_new("NUL in header");
   _68 = String_new("line too large");
   _69 = String_new("CRLF required");
-  _70 = String_new("invalid percent escape");
-  _71 = String_new("invalid URL byte");
+  _70 = String_new("invalid URL byte");
+  _71 = String_new("invalid percent escape");
   _72 = String_new("&");
   _73 = String_new("=");
   _74 = String_new("GET");
@@ -431,37 +442,37 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _78 = String_new("HEAD");
   _79 = String_new("OPTIONS");
   _80 = String_new("PATCH");
-  _81 = String_new(",");
-  _82 = String_new(".html");
-  _83 = String_new("text/html; charset=utf-8");
-  _84 = String_new(".css");
-  _85 = String_new("text/css");
-  _86 = String_new(".js");
-  _87 = String_new("text/javascript");
-  _88 = String_new(".json");
-  _89 = String_new(".txt");
-  _90 = String_new("text/plain");
-  _91 = String_new(".svg");
-  _92 = String_new("image/svg+xml");
-  _93 = String_new(".png");
-  _94 = String_new("image/png");
-  _95 = String_new(".jpg");
-  _96 = String_new("image/jpeg");
-  _97 = String_new(".gif");
-  _98 = String_new("image/gif");
-  _99 = String_new(".ico");
-  _100 = String_new("image/x-icon");
-  _101 = String_new("application/octet-stream");
-  _102 = String_new("error");
-  _103 = String_new("malformed JSON");
-  _104 = Symbol_var(227594);
-  _105 = Symbol_var(280234584);
-  _106 = String_new("internal server error");
-  _107 = Symbol_var(1317119334);
-  _108 = Symbol_var(1051920);
-  _109 = String_new("rest");
-  _110 = String_new("..");
-  _111 = String_new("index.html");
+  _81 = String_new(".html");
+  _82 = String_new("text/html; charset=utf-8");
+  _83 = String_new(".css");
+  _84 = String_new("text/css");
+  _85 = String_new(".js");
+  _86 = String_new("text/javascript");
+  _87 = String_new(".json");
+  _88 = String_new(".txt");
+  _89 = String_new("text/plain");
+  _90 = String_new(".svg");
+  _91 = String_new("image/svg+xml");
+  _92 = String_new(".png");
+  _93 = String_new("image/png");
+  _94 = String_new(".jpg");
+  _95 = String_new("image/jpeg");
+  _96 = String_new(".gif");
+  _97 = String_new("image/gif");
+  _98 = String_new(".ico");
+  _99 = String_new("image/x-icon");
+  _100 = String_new("application/octet-stream");
+  _101 = String_new("error");
+  _102 = String_new("malformed JSON");
+  _103 = Symbol_var(227594);
+  _104 = Symbol_var(280234584);
+  _105 = String_new("internal server error");
+  _106 = Symbol_var(1317119334);
+  _107 = Symbol_var(1051920);
+  _108 = String_new("rest");
+  _109 = String_new("..");
+  _110 = String_new("index.html");
+  _111 = String_new("Content-Type");
 }
 
 HttpRequest HttpRequest_alloc(void);
@@ -1079,7 +1090,7 @@ String HttpServer_repr(HttpServer value){
 
 void Http_fail(int status, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 54,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 55,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 19010664401496, 2, Symbol_var(1317119334), int_var(status), Symbol_var(1218550748), String_var(reason));
   }
 
@@ -1204,48 +1215,49 @@ HttpRequest HttpRequest_read(File input, int body_limit){
     }
 
   }
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_0;
-    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
-    Var _x2c_gensym_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
-      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
-      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
-    x2c_exception_push(& _x2c_gensym_exception_frame_0);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) req -> body = File_readblock(input, length);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
-        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
-        if(_x2c_gensym_macro_selected_0 == 0){
-          Http_fail(400, _22);
+  if(length){
+    {
+      ExceptionFrame _x2c_gensym_exception_frame_0;
+      static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+      Var _x2c_gensym_macro_patterns_0[1];
+      static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+        _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      }
+      ;
+      if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+        _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+      }
+      volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+      x2c_exception_push(& _x2c_gensym_exception_frame_0);
+      if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) req -> body = File_readblock(input, length);
+      else{
+        x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+        if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+          int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+          x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+          x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+          if(_x2c_gensym_macro_selected_0 == 0){
+            Http_fail(400, _22);
+          }
+
+        }
+        else{
+          x2c_error_catch_close(_x2c_gensym_error_handler_0);
+          _x2c_gensym_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+          __builtin_unreachable();
         }
 
       }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_0);
-        _x2c_gensym_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-        __builtin_unreachable();
-      }
-
+      x2c_error_catch_close(_x2c_gensym_error_handler_0);
+      _x2c_gensym_error_handler_0 = NULL;
+      x2c_exception_leave(& _x2c_gensym_exception_frame_0);
     }
-    x2c_error_catch_close(_x2c_gensym_error_handler_0);
-    _x2c_gensym_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+
   }
   if(String_len(req -> body) != length) Http_fail(400, _23);
-  String connection = Map_contains(req -> headers, String_var(_24)) ? String_lower(Var_str(Map_getindex(req -> headers, String_var(_24)))) : NULL;
-  req -> keep_alive = String_equal(version, _3);
-  if(_token(connection, _25)) req -> keep_alive = 1;
-  if(_token(connection, _26)) req -> keep_alive = 0;
+  String connection = Map_contains(req -> headers, String_var(_24)) ? Var_str(Map_getindex(req -> headers, String_var(_24))) : NULL;
+  req -> keep_alive = _keep_alive(connection, String_equal(version, _3));
   return req;
 }
 
@@ -1270,8 +1282,8 @@ String String_join(String, List);
 
 HttpResponse HttpResponse_header(HttpResponse res, String name, String value){
   if(! _init_guard_) _file_init_();
-  if(! _header_name(name) || String_find(value, _27) >= 0 || String_find(value, _28) >= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 141,.runtime = 1};
+  if(! _header_name(name) || String_find(value, _25) >= 0 || String_find(value, _26) >= 0){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 142,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpResponse.header")), NULL))));
     __builtin_unreachable();
   }
@@ -1284,13 +1296,43 @@ Buffer Buffer_clear(Buffer);
 HttpResponse HttpResponse_text(HttpResponse res, String text){
   if(! _init_guard_) _file_init_();
   Buffer_write(Buffer_clear(res -> body), text);
-  return HttpResponse_header(res, _29, _30);
+  Map_setindex(res -> headers, String_var(_27), String_var(_28));
+  return res;
 }
 
 HttpResponse HttpResponse_json(HttpResponse res, Var value){
   if(! _init_guard_) _file_init_();
-  Buffer_write(Buffer_clear(res -> body), Var_json(value));
-  return HttpResponse_header(res, _29, _31);
+  Buffer_clear(res -> body);
+  int written = 0;
+  {
+    _x2c_gensym_defer_env_12 _x2c_gensym_macro_environment_12 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_12 =(const void *) & written;
+    _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_13 =(const void *) & res;
+    X2CCleanup _x2c_gensym_defer_record_12 ={
+      .fn = _x2c_gensym_defer_cleanup_12, .env = & _x2c_gensym_macro_environment_12
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_12);
+    {
+      x2c_json_write(res -> body, value, 0);
+      written = 1;
+      Map_setindex(res -> headers, String_var(_27), String_var(_29));
+      {
+        HttpResponse _x2c_gensym_return_value_12 = res;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_12);
+          return _x2c_gensym_return_value_12;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_12);
+  }
+
 }
 
 void Block_append(Block, const void *, size_t);
@@ -1306,7 +1348,7 @@ void HttpResponse_write(HttpResponse res, File output, int keep_alive){
   _write(res, output, keep_alive, 0);
 }
 
-static Var long_var(long);
+String String_printf(String, ...);
 
 size_t Buffer_len(Buffer);
 
@@ -1320,20 +1362,20 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
   Buffer head = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_0 = head;
   {
-    _x2c_gensym_defer_env_12 _x2c_gensym_macro_environment_12 ={
+    _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_13 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_12._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_12 ={
-      .fn = _x2c_gensym_defer_cleanup_12, .env = & _x2c_gensym_macro_environment_12
+    _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_14 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_13 ={
+      .fn = _x2c_gensym_defer_cleanup_13, .env = & _x2c_gensym_macro_environment_13
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_12);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_13);
     {
       Buffer_printf(head, "HTTP/1.1 %d %s\r\n", res -> code, _reason(res -> code));
-      Map_setindex(res -> headers, String_var(_13), String_var(String_format(_32, cons(long_var((long) Buffer_len(res -> body)), NULL))));
-      Map_setindex(res -> headers, String_var(_24), String_var(keep_alive ? _25 : _26));
+      Map_setindex(res -> headers, String_var(_13), String_var(String_printf(_30, (long) Buffer_len(res -> body))));
+      Map_setindex(res -> headers, String_var(_24), String_var(keep_alive ? _31 : _32));
       {
         Var name, value;
         Map _x2c_gensym_macro_object_0 = res -> headers;
@@ -1352,7 +1394,7 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
       if(! head_only && res -> code != 204 && res -> code != 304) File_write_all(output, res -> body -> content -> bytes, Buffer_len(res -> body));
       if(File_flush(output)) File_path_error(String_var(_33), NULL, errno);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_12);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
   }
 
 }
@@ -1439,10 +1481,11 @@ void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
       entry = _x2c_gensym_macro_cursor_output_3;
       {
         HttpRoute route = Var_pointer(entry);
-        Map captures = Map_new();
-        if(! _match(route -> segments, segments, captures)) continue;
+        if(! _match(route -> segments, segments)) continue;
         found = 1;
         if(route -> method != req -> method) continue;
+        Map captures = Map_new();
+        _capture(route -> segments, segments, captures);
         req -> params = captures;
         ({
           Func _x2c_gensym_macro_function_0 = route -> handler;  FuncArg _x2c_gensym_macro_storage_0[2];  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 0))) _x2c_gensym_macro_storage_0[0] = FuncArg_reference(&(req), _59);  else _x2c_gensym_macro_storage_0[0] = FuncArg_value(HttpRequest_var(req));  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 1))) _x2c_gensym_macro_storage_0[1] = FuncArg_reference(&(res), _61);  else _x2c_gensym_macro_storage_0[1] = FuncArg_value(HttpResponse_var(res));  Func_apply(_x2c_gensym_macro_function_0, 2, _x2c_gensym_macro_storage_0);
@@ -1471,7 +1514,7 @@ HttpServer HttpServer_new(Router router, Map options){
   s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
   s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
   if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 257,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 265,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
     __builtin_unreachable();
   }
@@ -1499,28 +1542,28 @@ void HttpServer_serve(HttpServer s){
   if(! _init_guard_) _file_init_();
   s -> running = 1;
   {
-    _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_15 ={
+    _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_16 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_14 =(const void *) & s;
-    X2CCleanup _x2c_gensym_defer_record_13 ={
-      .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_15
+    _x2c_gensym_macro_environment_16._x2c_gensym_defer_capture_16 =(const void *) & s;
+    X2CCleanup _x2c_gensym_defer_record_14 ={
+      .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_16
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_13);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_14);
     {
       {
-        _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_14 ={
+        _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_15 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_13 =(const void *) & s;
-        X2CCleanup _x2c_gensym_defer_record_14 ={
-          .fn = _x2c_gensym_defer_cleanup_13, .env = & _x2c_gensym_macro_environment_14
+        _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_15 =(const void *) & s;
+        X2CCleanup _x2c_gensym_defer_record_15 ={
+          .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_15
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_14);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_15);
         {
           for(int i = 0;  i < s -> workers;  i ++) Array_push(s -> threads, Var_new(1360144456, Thread_start(_worker, Var_new(3683441, s))));
           for(; ; ){
@@ -1528,32 +1571,32 @@ void HttpServer_serve(HttpServer s){
             if(fd < 0) break;
             int sent = 0;
             {
-              _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_13 ={
+              _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_14 ={
                 0
               }
               ;
-              _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_15 =(const void *) & sent;
-              _x2c_gensym_macro_environment_13._x2c_gensym_defer_capture_16 =(const void *) & fd;
-              X2CCleanup _x2c_gensym_defer_record_15 ={
-                .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_13
+              _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_17 =(const void *) & sent;
+              _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_18 =(const void *) & fd;
+              X2CCleanup _x2c_gensym_defer_record_16 ={
+                .fn = _x2c_gensym_defer_cleanup_16, .env = & _x2c_gensym_macro_environment_14
               }
               ;
-              x2c_cleanup_push(& _x2c_gensym_defer_record_15);
+              x2c_cleanup_push(& _x2c_gensym_defer_record_16);
               {
                 Channel_send(s -> channel, int_var(fd));
                 sent = 1;
               }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_15);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_14);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_15);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_14);
   }
 
 }
@@ -1561,7 +1604,7 @@ void HttpServer_serve(HttpServer s){
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 297,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 305,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1576,20 +1619,20 @@ void HttpServer_stop(HttpServer s){
     Thread thread = s -> acceptor;
     s -> acceptor = NULL;
     {
-      _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_16 ={
+      _x2c_gensym_defer_env_17 _x2c_gensym_macro_environment_17 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_16._x2c_gensym_defer_capture_17 =(const void *) & thread;
-      X2CCleanup _x2c_gensym_defer_record_16 ={
-        .fn = _x2c_gensym_defer_cleanup_16, .env = & _x2c_gensym_macro_environment_16
+      _x2c_gensym_macro_environment_17._x2c_gensym_defer_capture_19 =(const void *) & thread;
+      X2CCleanup _x2c_gensym_defer_record_17 ={
+        .fn = _x2c_gensym_defer_cleanup_17, .env = & _x2c_gensym_macro_environment_17
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_16);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_17);
       {
         Thread_join(thread);
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
     }
 
   }
@@ -1612,16 +1655,16 @@ static String _line(File input, int limit, int status){
   int size = 0;
   flockfile(input);
   {
-    _x2c_gensym_defer_env_17 _x2c_gensym_macro_environment_17 ={
+    _x2c_gensym_defer_env_18 _x2c_gensym_macro_environment_18 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_17._x2c_gensym_defer_capture_18 =(const void *) & input;
-    X2CCleanup _x2c_gensym_defer_record_17 ={
-      .fn = _x2c_gensym_defer_cleanup_17, .env = & _x2c_gensym_macro_environment_17
+    _x2c_gensym_macro_environment_18._x2c_gensym_defer_capture_20 =(const void *) & input;
+    X2CCleanup _x2c_gensym_defer_record_18 ={
+      .fn = _x2c_gensym_defer_cleanup_18, .env = & _x2c_gensym_macro_environment_18
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_17);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
       for(; ; ){
         int byte = getc_unlocked(input);
@@ -1629,10 +1672,10 @@ static String _line(File input, int limit, int status){
           File_readblock(input, 0);
           if(size) Http_fail(400, _66);
           {
-            String _x2c_gensym_return_value_12 = NULL;
+            String _x2c_gensym_return_value_13 = NULL;
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
-              return _x2c_gensym_return_value_12;
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
+              return _x2c_gensym_return_value_13;
             }
 
           }
@@ -1645,54 +1688,7 @@ static String _line(File input, int limit, int status){
       }
       if(size < 2 || bytes[size - 2] != '\r') Http_fail(400, _69);
       {
-        String _x2c_gensym_return_value_13 = String_new_len(bytes, size - 2);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
-          return _x2c_gensym_return_value_13;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
-  }
-
-}
-
-static int scan_ascii_hex_value(int);
-
-Buffer Buffer_write_char(Buffer, char);
-
-static String _decode(String text, int query){
-  Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_2 = out;
-  {
-    _x2c_gensym_defer_env_18 _x2c_gensym_macro_environment_18 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_18._x2c_gensym_defer_capture_19 =(const void *) & _x2c_gensym_macro_acquired_2;
-    X2CCleanup _x2c_gensym_defer_record_18 ={
-      .fn = _x2c_gensym_defer_cleanup_18, .env = & _x2c_gensym_macro_environment_18
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_18);
-    {
-      for(int i = 0;  i < String_len(text);  i ++){
-        int c =(unsigned char) String_getindex(text, i);
-        if(c == '%'){
-          if(i + 2 >= String_len(text)) Http_fail(400, _70);
-          int a = scan_ascii_hex_value(String_getindex(text, ++ i));
-          int b = scan_ascii_hex_value(String_getindex(text, ++ i));
-          if(a < 0 || b < 0) Http_fail(400, _70);
-          c = a * 16 + b;
-        }
-        else if(query && c == '+') c = ' ';
-        if(! c || c == '\r' || c == '\n') Http_fail(400, _71);
-        Buffer_write_char(out, c);
-      }
-      {
-        String _x2c_gensym_return_value_14 = Buffer_str(out);
+        String _x2c_gensym_return_value_14 = String_new_len(bytes, size - 2);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
           return _x2c_gensym_return_value_14;
@@ -1702,6 +1698,61 @@ static String _decode(String text, int query){
 
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
+  }
+
+}
+
+static int scan_ascii_hex_value(int);
+
+Buffer Buffer_write_char(Buffer, char);
+
+static String _decode(String text, int query){
+  int prefix = 0;
+  while(prefix < String_len(text)){
+    int c =(unsigned char) String_getindex(text, prefix);
+    if(c == '%' ||(query && c == '+')) break;
+    if(! c || c == '\r' || c == '\n') Http_fail(400, _70);
+    prefix ++;
+  }
+  if(prefix == String_len(text)) return text;
+  Buffer out = Buffer_new(0);
+  const Buffer _x2c_gensym_macro_acquired_2 = out;
+  {
+    _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_acquired_2;
+    X2CCleanup _x2c_gensym_defer_record_19 ={
+      .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_19
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_19);
+    {
+      for(int i = 0;  i < String_len(text);  i ++){
+        int c =(unsigned char) String_getindex(text, i);
+        if(c == '%'){
+          if(i + 2 >= String_len(text)) Http_fail(400, _71);
+          int a = scan_ascii_hex_value(String_getindex(text, ++ i));
+          int b = scan_ascii_hex_value(String_getindex(text, ++ i));
+          if(a < 0 || b < 0) Http_fail(400, _71);
+          c = a * 16 + b;
+        }
+        else if(query && c == '+') c = ' ';
+        if(! c || c == '\r' || c == '\n') Http_fail(400, _70);
+        Buffer_write_char(out, c);
+      }
+      {
+        String _x2c_gensym_return_value_15 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+          return _x2c_gensym_return_value_15;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
   }
 
 }
@@ -1732,19 +1783,19 @@ static int _method(String method){
   return String_equal(method, _74) || String_equal(method, _75) || String_equal(method, _76) || String_equal(method, _77) || String_equal(method, _78) || String_equal(method, _79) || String_equal(method, _80);
 }
 
-static int _token(String values, String token){
-  {
-    String value;
-    List _x2c_gensym_macro_object_4 = String_split(values, _81);
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_5))){
-      value = Var_as_string(_x2c_gensym_macro_cursor_output_5);
-      if(String_equal(String_strip(value, NULL), token)) return 1;
-    }
-
+static int _keep_alive(String values, int keep){
+  const char * start = values;
+  while(start && * start){
+    const char * comma = strchr(start, ',');
+    const char * end = comma ? comma : start + strlen(start);
+    while(start < end && strchr(" \t\n\v\f\r", (unsigned char) * start)) start ++;
+    while(end > start && strchr(" \t\n\v\f\r", (unsigned char) end[- 1])) end --;
+    size_t size = end - start;
+    if(size == 5 && ! strncasecmp(start, "close", size)) return 0;
+    if(size == 10 && ! strncasecmp(start, "keep-alive", size)) keep = 1;
+    start = comma ? comma + 1 : NULL;
   }
-  return 0;
+  return keep;
 }
 
 static int _header_name(String name){
@@ -1760,25 +1811,37 @@ static Var List_car(List);
 
 static List List_cdr(List);
 
-static int _match(List pattern, List path, Map captures){
+static int _match(List pattern, List path){
   while(List_truth(pattern)){
     String segment = Var_as_string(List_car(pattern));
     pattern = List_cdr(pattern);
     if(String_truth(segment) && String_getindex(segment, 0) == '*'){
-      if(List_truth(pattern)) return 0;
-      Map_setindex(captures, String_var(String_new(segment + 1)), String_var(String_join(_34, path)));
-      return 1;
+      return ! List_truth(pattern);
     }
     if(! List_truth(path)) return 0;
     String value = Var_as_string(List_car(path));
     path = List_cdr(path);
     if(String_truth(segment) && String_getindex(segment, 0) == ':'){
       if(! String_truth(value)) return 0;
-      Map_setindex(captures, String_var(String_new(segment + 1)), String_var(value));
     }
     else if(! String_equal(segment, value)) return 0;
   }
   return ! List_truth(path);
+}
+
+static void _capture(List pattern, List path, Map captures){
+  while(List_truth(pattern)){
+    String segment = Var_as_string(List_car(pattern));
+    pattern = List_cdr(pattern);
+    if(String_truth(segment) && String_getindex(segment, 0) == '*'){
+      Map_setindex(captures, String_var(String_new(segment + 1)), String_var(String_join(_34, path)));
+      return;
+    }
+    String value = Var_as_string(List_car(path));
+    path = List_cdr(path);
+    if(String_truth(segment) && String_getindex(segment, 0) == ':') Map_setindex(captures, String_var(String_new(segment + 1)), String_var(value));
+  }
+
 }
 
 static const char * _reason(int code){
@@ -1802,8 +1865,8 @@ static const char * _reason(int code){
 Map Map_update_n(Map, unsigned, ...);
 
 static String _mime(String ext){
-  Map types = Map_update_n(Map_new(), 10, String_var(_82), String_var(_83), String_var(_84), String_var(_85), String_var(_86), String_var(_87), String_var(_88), String_var(_31), String_var(_89), String_var(_90), String_var(_91), String_var(_92), String_var(_93), String_var(_94), String_var(_95), String_var(_96), String_var(_97), String_var(_98), String_var(_99), String_var(_100));
-  return Map_contains(types, String_var(ext)) ? Var_str(Map_getindex(types, String_var(ext))) : _101;
+  Map types = Map_update_n(Map_new(), 10, String_var(_81), String_var(_82), String_var(_83), String_var(_84), String_var(_85), String_var(_86), String_var(_87), String_var(_29), String_var(_88), String_var(_89), String_var(_90), String_var(_91), String_var(_92), String_var(_93), String_var(_94), String_var(_95), String_var(_96), String_var(_97), String_var(_98), String_var(_99));
+  return Map_contains(types, String_var(ext)) ? Var_str(Map_getindex(types, String_var(ext))) : _100;
 }
 
 static Var _accept(Var value){
@@ -1820,41 +1883,41 @@ static Var _worker(Var value){
   HttpServer s = Var_pointer(value);
   {
     int fd;
-    Iter _x2c_gensym_macro_iterator_5 = Channel_iter(s -> channel, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_4 = Channel_iter(s -> channel, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_5;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 434,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+    Var _x2c_gensym_macro_item_4;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 469,.runtime = 1}; & _x2c_gensym_error_site_4; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_3 = connection;
         {
-          _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
+          _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
             0
           }
           ;
-          _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_acquired_3;
-          X2CCleanup _x2c_gensym_defer_record_19 ={
-            .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
+          _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_acquired_3;
+          X2CCleanup _x2c_gensym_defer_record_20 ={
+            .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
           }
           ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_19);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_20);
           {
             Socket peer = Socket_adopt(fd);
             const Socket _x2c_gensym_macro_acquired_4 = peer;
             {
-              _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
+              _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
                 0
               }
               ;
-              _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_20 =(const void *) & _x2c_gensym_macro_acquired_4;
-              X2CCleanup _x2c_gensym_defer_record_20 ={
-                .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_19
+              _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_acquired_4;
+              X2CCleanup _x2c_gensym_defer_record_21 ={
+                .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
               }
               ;
-              x2c_cleanup_push(& _x2c_gensym_defer_record_20);
+              x2c_cleanup_push(& _x2c_gensym_defer_record_21);
               {
                 Socket_set_timeout(peer, s -> idle_ms);
                 {
@@ -1902,11 +1965,11 @@ static Var _worker(Var value){
                 }
 
               }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
         }
 
       }
@@ -1932,16 +1995,16 @@ static void _connection(HttpServer s, Socket peer){
     Context context = Context_open_isolated_named("request");
     const Context _x2c_gensym_macro_acquired_5 = context;
     {
-      _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
+      _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_acquired_5;
-      X2CCleanup _x2c_gensym_defer_record_21 ={
-        .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
+      _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_acquired_5;
+      X2CCleanup _x2c_gensym_defer_record_22 ={
+        .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_21);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_22);
       {
         HttpResponse volatile res = HttpResponse_new();
         HttpRequest volatile req = NULL;
@@ -1990,7 +2053,7 @@ static void _connection(HttpServer s, Socket peer){
                       x2c_error_catch_close(_x2c_gensym_error_handler_3);
                       _x2c_gensym_error_handler_3 = NULL;
                       x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-                      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
                       return;
                     }
 
@@ -2013,7 +2076,7 @@ static void _connection(HttpServer s, Socket peer){
               x2c_error_catch_close(_x2c_gensym_error_handler_3);
               _x2c_gensym_error_handler_3 = NULL;
               x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
               return;
             }
             keep = req -> keep_alive;
@@ -2032,14 +2095,14 @@ static void _connection(HttpServer s, Socket peer){
                 reason = x2c_error_catch_capture(_x2c_gensym_error_handler_3, 1);
                 {
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, Var_integer(status)), Map_var(Map_update_n(Map_new(), 1, String_var(_102), reason)));
+                  HttpResponse_json(HttpResponse_status(res, Var_integer(status)), Map_var(Map_update_n(Map_new(), 1, String_var(_101), reason)));
                 }
 
               }
               if(_x2c_gensym_macro_selected_3 == 1){
                 {
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, 400), Map_var(Map_update_n(Map_new(), 1, String_var(_102), String_var(_103))));
+                  HttpResponse_json(HttpResponse_status(res, 400), Map_var(Map_update_n(Map_new(), 1, String_var(_101), String_var(_102))));
                 }
 
               }
@@ -2050,11 +2113,11 @@ static void _connection(HttpServer s, Socket peer){
                 detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_3, 1));
                 {
                   Logger_error(s -> logger, 566560, ({
-                    Var _x2c_gensym_literal_part_3 = List_var(cons(_104, cons(code, NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_105, cons(List_var(detail), NULL)));  cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL));
+                    Var _x2c_gensym_literal_part_3 = List_var(cons(_103, cons(code, NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_104, cons(List_var(detail), NULL)));  cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL));
                   }
                   ));
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, 500), Map_var(Map_update_n(Map_new(), 1, String_var(_102), String_var(_106))));
+                  HttpResponse_json(HttpResponse_status(res, 500), Map_var(Map_update_n(Map_new(), 1, String_var(_101), String_var(_105))));
                 }
 
               }
@@ -2074,19 +2137,19 @@ static void _connection(HttpServer s, Socket peer){
         }
         _write(res, peer -> output, keep, req && req -> method == 534600);
         Logger_info(s -> logger, 566560, ({
-          Var _x2c_gensym_literal_part_5 = List_var(cons(_107, cons(int_var(res -> code), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_108, cons(req ? String_var(req -> path) : Var_null(), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL));
+          Var _x2c_gensym_literal_part_5 = List_var(cons(_106, cons(int_var(res -> code), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_107, cons(req ? String_var(req -> path) : Var_null(), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL));
         }
         ));
         x2c_thread_wait_lock();
         int stopped = s -> listener -> stopped;
         x2c_thread_wait_unlock();
         if(! keep || stopped){
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
           return;
         }
 
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
     }
 
   }
@@ -2269,11 +2332,16 @@ static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
   Buffer_free((*(Buffer *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_11));
 }
 
-void Buffer_cleanup(Buffer);
-
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
   _x2c_gensym_defer_env_12 * _x2c_gensym_defer_data_12 =(_x2c_gensym_defer_env_12 *) _x2c_gensym_defer_opaque_12;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_12));
+  if(!(*(int *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_12)) Buffer_clear((*(HttpResponse *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_13) -> body);
+}
+
+void Buffer_cleanup(Buffer);
+
+static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
+  _x2c_gensym_defer_env_13 * _x2c_gensym_defer_data_13 =(_x2c_gensym_defer_env_13 *) _x2c_gensym_defer_opaque_13;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_14));
 }
 
 int String_startswith(String, String);
@@ -2283,7 +2351,7 @@ File File_open(const char *, const char *);
 FileReadStatus File_read_into(File, Block);
 
 static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path directory){
-  String rest = Var_as_string(Map_getindex(req -> params, String_var(_109)));
+  String rest = Var_as_string(Map_getindex(req -> params, String_var(_108)));
   if(String_startswith(rest, _34)) Http_fail(404, _63);
   {
     String segment;
@@ -2292,40 +2360,40 @@ static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path director
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2))){
       segment = Var_as_string(_x2c_gensym_macro_cursor_output_2);
-      if(String_equal(segment, _110)) Http_fail(404, _63);
+      if(String_equal(segment, _109)) Http_fail(404, _63);
     }
 
   }
   Path path = Path_join(directory, rest);
-  if(Path_is_dir(path)) path = Path_join(path, _111);
+  if(Path_is_dir(path)) path = Path_join(path, _110);
   if(! Path_is_file(path)) Http_fail(404, _63);
   File file = File_open(path, "rb");
   const File _x2c_gensym_macro_acquired_1 = file;
   {
-    _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
+    _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_22 ={
-      .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
+    _x2c_gensym_macro_environment_23._x2c_gensym_defer_capture_25 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_23 ={
+      .fn = _x2c_gensym_defer_cleanup_23, .env = & _x2c_gensym_macro_environment_23
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_22);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_23);
     {
       File_read_into(file, res -> body -> content);
-      HttpResponse_header(res, _29, _mime(Path_extension(path)));
+      HttpResponse_header(res, _111, _mime(Path_extension(path)));
       {
-        Var _x2c_gensym_return_value_15 =((void) 0, Void);
+        Var _x2c_gensym_return_value_16 =((void) 0, Void);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
-          return _x2c_gensym_return_value_15;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
+          return _x2c_gensym_return_value_16;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
   }
 
 }
@@ -2341,67 +2409,67 @@ static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg
 
 void Thread_finish_all(Array);
 
-static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
-  _x2c_gensym_defer_env_13 * _x2c_gensym_defer_data_13 =(_x2c_gensym_defer_env_13 *) _x2c_gensym_defer_opaque_13;
-  {
-    Channel_close((*(HttpServer *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_13) -> channel);
-    Thread_finish_all((*(HttpServer *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_13) -> threads);
-  }
-
-}
-
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
   _x2c_gensym_defer_env_14 * _x2c_gensym_defer_data_14 =(_x2c_gensym_defer_env_14 *) _x2c_gensym_defer_opaque_14;
   {
-    Listener_close((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_14) -> listener);
-    (*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_14) -> running = 0;
+    Channel_close((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_15) -> channel);
+    Thread_finish_all((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_15) -> threads);
   }
 
 }
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15){
   _x2c_gensym_defer_env_15 * _x2c_gensym_defer_data_15 =(_x2c_gensym_defer_env_15 *) _x2c_gensym_defer_opaque_15;
-  if(!(*(int *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_15)) close((*(int *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_16));
+  {
+    Listener_close((*(HttpServer *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_16) -> listener);
+    (*(HttpServer *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_16) -> running = 0;
+  }
+
+}
+
+static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){
+  _x2c_gensym_defer_env_16 * _x2c_gensym_defer_data_16 =(_x2c_gensym_defer_env_16 *) _x2c_gensym_defer_opaque_16;
+  if(!(*(int *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_17)) close((*(int *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_18));
 }
 
 void Thread_free(Thread);
 
-static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){
-  _x2c_gensym_defer_env_16 * _x2c_gensym_defer_data_16 =(_x2c_gensym_defer_env_16 *) _x2c_gensym_defer_opaque_16;
-  Thread_free((*(Thread *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_17));
-}
-
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17){
   _x2c_gensym_defer_env_17 * _x2c_gensym_defer_data_17 =(_x2c_gensym_defer_env_17 *) _x2c_gensym_defer_opaque_17;
-  funlockfile((*(File *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_18));
+  Thread_free((*(Thread *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_19));
 }
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){
   _x2c_gensym_defer_env_18 * _x2c_gensym_defer_data_18 =(_x2c_gensym_defer_env_18 *) _x2c_gensym_defer_opaque_18;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_18->_x2c_gensym_defer_capture_19));
+  funlockfile((*(File *) _x2c_gensym_defer_data_18->_x2c_gensym_defer_capture_20));
 }
 
 static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19){
   _x2c_gensym_defer_env_19 * _x2c_gensym_defer_data_19 =(_x2c_gensym_defer_env_19 *) _x2c_gensym_defer_opaque_19;
-  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_20));
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_21));
+}
+
+static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
+  _x2c_gensym_defer_env_20 * _x2c_gensym_defer_data_20 =(_x2c_gensym_defer_env_20 *) _x2c_gensym_defer_opaque_20;
+  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_22));
 }
 
 void Context_cleanup(Context);
 
-static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
-  _x2c_gensym_defer_env_20 * _x2c_gensym_defer_data_20 =(_x2c_gensym_defer_env_20 *) _x2c_gensym_defer_opaque_20;
-  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_21));
-}
-
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21){
   _x2c_gensym_defer_env_21 * _x2c_gensym_defer_data_21 =(_x2c_gensym_defer_env_21 *) _x2c_gensym_defer_opaque_21;
-  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_22));
+  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_23));
+}
+
+static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
+  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
+  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_24));
 }
 
 void File_cleanup(File);
 
-static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
-  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
-  File_cleanup((*(const File *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_23));
+static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23){
+  _x2c_gensym_defer_env_23 * _x2c_gensym_defer_data_23 =(_x2c_gensym_defer_env_23 *) _x2c_gensym_defer_opaque_23;
+  File_cleanup((*(const File *) _x2c_gensym_defer_data_23->_x2c_gensym_defer_capture_25));
 }
 
