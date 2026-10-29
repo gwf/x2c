@@ -15,13 +15,13 @@ Path build = probe_scratch(root, "build-recovery");
 
 /* Fault-inject against a scratch copy of builds/0, not the real one: a
    mid-probe failure or a concurrent build must not corrupt the tracked
-   archive that other targets depend on. stage.mk resolves the compiler and
-   sources relative to the stage directory (../../bin/x2c, ../../etc,
-   ../../src, ../../lib), so the scratch tree mirrors that shape and points
-   back at the real, read-only source and compiler. */
+   archive that other targets depend on. stage.mk resolves the compiler,
+   sources, and source lists relative to the stage directory (../../bin/x2c,
+   ../../etc, ../../src, ../../lib, ../../tools), so the scratch tree mirrors
+   that shape and points back at the real, read-only source and compiler. */
 Path scratch = build.join("scratch");
 scratch.join("builds").make_dirs();
-foreach (String name, %("bin" "etc" "src" "lib"))
+foreach (String name, %("bin" "etc" "src" "lib" "tools"))
   scratch.join(name).symlink_to(root.join(name));
 Path stage = root.join("builds/0"), copy = scratch.join("builds/0");
 %(cp -Rp $stage $copy).job().run();

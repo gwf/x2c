@@ -104,13 +104,38 @@ BIN_OBJECTS  = $(patsubst %.x,$(BIN_BUILD)/%.o,$(BIN_X_NAMES))
 BIN_X_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.d,$(BIN_X_NAMES))
 BIN_C_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.c.d,$(BIN_X_NAMES))
 ###############################################################################
+# Stage 0's batches are translated by the bootstrap compiler, and the
+# interfaces they write carry its identity. Once this stage's compiler is a
+# different executable it can replay none of them, so each of its processes
+# would walk the runtime sources. When `env` reports a prelude it cannot
+# replay, the stage rewrites the library's interfaces with its own compiler,
+# keeping the bootstrap's C. Later stages keep the previous compiler's
+# interfaces, which proof-cold-collection compares with its cold walk.
+ifeq ($(DIRECTORY),0)
+OWN_INTERFACES = $(LIB_BUILD)/.own-interfaces
+endif
+###############################################################################
 # Default action. The build command embeds the compiler identity it was
 # generated from; a stale embedding would surface only when the driver first
 # runs the command, so the stage proves the pair agrees here, keeping both
 # executables on disk if it does not.
-target: $(LIBRARY) $(BINARY) $(BUILD_COMMAND)
+target: $(LIBRARY) $(BINARY) $(BUILD_COMMAND) $(OWN_INTERFACES)
 	@X2C_IDENTITY=`./$(BINARY) env identity` ./$(BUILD_COMMAND) --help \
 	  >/dev/null
+
+ifdef OWN_INTERFACES
+$(OWN_INTERFACES): $(BINARY) $(LIB_BUILD)/.translated
+	@set -e; \
+	  if [ -z "`./$(BINARY) env prelude`" ] || \
+	     [ -n "`./$(BINARY) env prelude_missing`" ]; then \
+	    rm -rf $@.tmp; \
+	    ./$(BINARY) translate -q -j $(BUILD_JOBS) $(X2C_FLAGS) \
+	      --out-dir $@.tmp $(LIB_X_FILES); \
+	    mv $@.tmp/*.xi $(LIB_BUILD)/; \
+	    rm -rf $@.tmp; \
+	  fi
+	@touch $@
+endif
 
 # Generate all headers first
 headers: $(LIB_H_FILES) $(BIN_H_FILES)
@@ -252,7 +277,8 @@ $(COMMAND_BUILD):
 	mkdir -p $@
 
 $(COMMAND_BUILD)/.translated: $(BINARY) $(COMMAND_X_FILES) $(BIN_X_INPUTS) \
-		$(LIB_X_FILES) $(X2C_TRANSLATE_DEPS) ../stage.mk | $(COMMAND_BUILD)
+		$(LIB_X_FILES) $(X2C_TRANSLATE_DEPS) ../stage.mk \
+		| $(COMMAND_BUILD) $(OWN_INTERFACES)
 	$(STRICT_X2C_ENV) ./$(BINARY) translate -j $(BUILD_JOBS) \
 		$(STRICT_X2C_FLAGS) $(X2C_FLAGS) --out-dir $(COMMAND_BUILD) \
 		--x-include-dir $(ROOT) --x-include-dir $(BIN_SOURCE) \

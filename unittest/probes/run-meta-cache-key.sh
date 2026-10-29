@@ -226,8 +226,8 @@ status=0
 grep -q "return 25222;" "$(find bd -name prog.c | head -1)" ||
   fail "meta built with --cc: $(cat out.log)"
 
-# A failed helper build is not reused: a header that was missing is found
-# once it exists.
+# A helper build that failed on a missing header is not reused: the header
+# is found once it exists, even when another header includes it.
 mkdir -p missing
 cat > missing/prog.x <<'EOF'
 #include "config.h"
@@ -235,12 +235,64 @@ cat > missing/prog.x <<'EOF'
 int value(void) { return $answer(); }
 EOF
 printf '#include "config.h"\nmeta int answer(void) => ANSWER;\n' > missing/defs.x
-"$X2C" translate --out-dir missing missing/prog.x >out.log 2>&1 &&
-  fail "a missing header translated"
+echo '#include "inner.h"' > missing/outer.h
+printf '#include "outer.h"\nmeta int nested(void) => INNER;\n' > missing/nested.x
+printf '#include "nested.x"\nint value(void) { return $nested(); }\n' \
+  > missing/uses-nested.x
+for unit in prog uses-nested; do
+  "$X2C" translate --out-dir missing "missing/$unit.x" >out.log 2>&1 &&
+    fail "a missing header translated: $unit"
+done
 echo '#define ANSWER 42' > missing/config.h
+echo '#define INNER 43' > missing/inner.h
 "$X2C" translate --out-dir missing missing/prog.x >out.log 2>&1 ||
   fail "a failed helper build was reused: $(cat out.log)"
 grep -q "return 42;" missing/prog.c || fail "missing header: wrong value"
+"$X2C" translate --out-dir missing missing/uses-nested.x >out.log 2>&1 ||
+  fail "a failed nested-header build was reused: $(cat out.log)"
+grep -q "return 43;" missing/uses-nested.c ||
+  fail "missing nested header: wrong value"
+
+# Any other failed helper build is reused while the files it read are
+# unchanged: it reports the same failure without building again. Editing
+# the meta code builds it again.
+mkdir -p failing
+cat > failing/prog.x <<'EOF'
+meta int broken(void) => undeclared_value;
+int value(void) { return $broken(); }
+EOF
+"$X2C" translate --out-dir failing failing/prog.x >failing/first.log 2>&1 &&
+  fail "an undeclared meta value translated"
+grep -q "undeclared_value" failing/first.log ||
+  fail "failed helper: unexpected report: $(cat failing/first.log)"
+manifest=$(grep -l "$BUILD/failing/prog.x" \
+  "$X2C_CACHE_DIR"/meta/project-*/manifest)
+touch failing/stamp
+"$X2C" translate --out-dir failing failing/prog.x >failing/second.log 2>&1 &&
+  fail "a reused failure translated"
+[ "$manifest" -nt failing/stamp ] &&
+  fail "an unchanged failed helper was built again"
+cmp -s failing/first.log failing/second.log ||
+  fail "a reused failure changed its report: $(cat failing/second.log)"
+sed -i.bak 's/undeclared_value/44/' failing/prog.x
+"$X2C" translate --out-dir failing failing/prog.x >out.log 2>&1 ||
+  fail "an edited failed helper was reused: $(cat out.log)"
+grep -q "return 44;" failing/prog.c || fail "edited failed helper: wrong value"
+
+# A translation without the preprocessor parses its groups without the
+# runtime headers, so it builds a helper of its own, and its failure never
+# answers an ordinary translation.
+mkdir -p nocpp
+printf 'meta int six(void) => 6;\nint value(void) { return $six(); }\n' \
+  > nocpp/prog.x
+X2C_CACHE_DIR="$BUILD/nocpp-cache" "$X2C" translate --no-cpp \
+  --out-dir nocpp nocpp/prog.x >out.log 2>&1 || true
+X2C_CACHE_DIR="$BUILD/nocpp-cache" "$X2C" translate \
+  --out-dir nocpp nocpp/prog.x >out.log 2>&1 ||
+  fail "a --no-cpp helper answered a translation: $(cat out.log)"
+grep -q "return 6;" nocpp/prog.c || fail "no-cpp helper: wrong value"
+[ "$(ls -d "$BUILD"/nocpp-cache/meta/project-* | wc -l)" -eq 2 ] ||
+  fail "--no-cpp shared the ordinary helper"
 
 # A unit whose meta code did not parse is parsed again when a file it read
 # changes: here, a static macro becomes public in an included module.

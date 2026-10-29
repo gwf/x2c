@@ -29,7 +29,8 @@ static macro Stmt $fail.generate_file_write(
     partitions the AST, materializes caches and once-only initialization, and
     writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
     of a collected unit through one `Path.publish_files`, so a failed write
-    replaces none of them. It appends generated bindings and initialization
+    replaces none of them. A file that already holds its text keeps its
+    modification time. It appends generated bindings and initialization
     work to the compiler and is not idempotent. Failures are reported as
     `emit` diagnostics.
 */
@@ -131,13 +132,27 @@ static Array _emit_source(
   return c.emit(_source_unit(c, source), bindings);
 }
 
-/* A failed write reports its file and the host error. */
+/* A failed write reports its file and the host error. A file that already
+   holds its text is left alone, so a build tool that compares modification
+   times rebuilds nothing from a translation that changed nothing. */
 static void _publish_files(Compiler c, List outputs) {
   List failure = NULL;
-  try Path.publish_files(outputs);
+  try Path.publish_files(_changed_files(outputs));
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
   $fail.generate_file_write(c, c.token, failure);
+}
+
+/* The path and text pairs of `outputs` whose file does not hold the text. */
+static List _changed_files(List outputs) {
+  Array changed = [];
+  for (List rest = outputs; rest; rest = rest.cddr()) {
+    String path = rest.car(), text = rest.cadr();
+    if (Path.is_file(path) && Path.read_text(path) == text) continue;
+    changed.push(path);
+    changed.push(text);
+  }
+  return changed.list_free();
 }
 
 

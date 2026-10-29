@@ -84,10 +84,11 @@ them a publication gate. Establish regression thresholds only after at least
 one to two weeks of fixed-host observations. Confirm a suspected regression
 with a same-host rerun before treating it as real.
 
-Compare only converged trees. After an incremental `make build`, the
-compiler's identity no longer matches the prelude interface stage 0 wrote,
-so every translation walks the prelude source; on 2026-09-30 that made two
-good changes look 32% and 50% slower. Run `make bootstrap-refresh && make
+Compare only converged trees. Before 2026-10-28, an incremental `make
+build` left stage 0 with runtime interfaces only the bootstrap compiler
+could replay, so every translation walked the prelude source; on 2026-09-30
+that made two good changes look 32% and 50% slower. Stage 0 now rewrites
+those interfaces with its own compiler. Run `make bootstrap-refresh && make
 build-safe` in each tree and check that `builds/0/x2c env` prints a
 non-empty `prelude` and an empty `prelude_missing`. The report validates
 source and dependency hashes as replay does; a listed stale or missing unit
