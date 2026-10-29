@@ -5,19 +5,19 @@ ideasIntro: "It's C. Plus five ideas."
 ideas:
   - name: One value
     detail: "`Var` is an eight-byte tagged word that holds anything and knows what it holds. Collections store it, `%s` prints it, typed C boundaries convert it."
-    follows: "Strings, Lists, Arrays, Maps, Symbols, lambdas, `is`, `printf` that just works."
+    follows: "`String`, `List`, `Array`, `Map`, `Symbol`, lambdas, `is`, and a `printf` that just works."
   - name: Two kinds of data
-    detail: "Strings, Lists, and Symbols are canonical values: equal content is one object. Arrays and Maps are objects with identity."
-    follows: "Constant-time `==`, free sharing, `===`, anything as a Map key."
+    detail: "`String`, `List`, and `Symbol` are canonical values: equal content is one object. `Array` and `Map` are objects with identity."
+    follows: "Constant-time `==`, free sharing, `===`, and anything as a `Map` key."
   - name: Lifetime by region
     detail: "`auto`, `Scope`, and `defer` free memory when a statement, loop body, or function leaves. No collector. No `free`."
-    follows: "Scopes, Contexts, pools, `class` allocation, cleanup on exceptions."
+    follows: "`Scope`, `Context`, pools, `class` allocation, and cleanup when an exception unwinds."
   - name: Code is a List
-    detail: "`%(...)` quotes it, `match` and `~=` take it apart, `$` and `@` put it back together. Data, pattern, template, and syntax are one type."
-    follows: "Pattern matching, destructuring, error causes, command lines, runtime Lisp."
+    detail: "`%(...)` quotes it, `match` and `~=` take it apart, `$` and `@` put it back together. Data, pattern, template, and syntax are one `List`."
+    follows: "`match`, destructuring, `Error` causes, command lines, and runtime `Lisp`."
   - name: Functions run in the compiler
     detail: "`meta` makes any function callable at translation time. Macros and decorators are typed templates that hand captured code to meta functions."
-    follows: "Generics, `class`, `$derive`, `$test`, autodiff, your own keywords, a self-hosted compiler."
+    follows: "Generics, `class`, `$derive`, `$test`, autodiff, your own `keyword`s, and a self-hosted compiler."
 ---
 
 x2c is a quirky little language that makes programming fun and a bit weird.

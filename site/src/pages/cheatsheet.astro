@@ -2,51 +2,67 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
-import CheatCard from "../components/CheatCard.astro";
+import { inlineMarkdown } from "../lib/inline-markdown";
+import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-const files = import.meta.glob("../content/cheatsheet/*.md", { eager: true });
-const cards = Object.keys(files).sort().map((path) => files[path] as any);
-const groups = ["Start", "Values", "Flow", "Types", "Memory and errors",
-  "Concurrency", "Compile time", "Toolbox"];
+const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
+  Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
+    title: section.title,
+    rows: await Promise.all(section.rows.map(async ([code, note]) =>
+      ({ code, note: await inlineMarkdown(note) }))),
+  })))));
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 ---
 
 <BaseLayout
   title="Cheat sheet - x2c"
-  description="x2c on one page for people who already know C: values, collections, literals, functions, classes, protocols, memory, errors, threads, macros, meta functions, and the command line."
+  description="x2c on one printable page for people who already know C: values, flow, memory, errors, types, concurrency, compile time, and the toolbox."
 >
   <Fragment slot="header"><SiteHeader /></Fragment>
   <div class="cheat-page">
     <header class="cheat-heading">
-      <p class="about-eyebrow">cheat sheet</p>
-      <h1>You know C. Here is the rest.</h1>
+      <div>
+        <p class="about-eyebrow">cheat sheet</p>
+        <h1>You know C. Here is the rest.</h1>
+      </div>
       <p class="cheat-intro">
-        Every section is a complete program or a fragment that compiles.
-        Read the comments, skim the notes, and come back when you need a
-        name. The <a href={local("docs/")}>book</a> has the long version and
-        the <a href={local("playground/")}>playground</a> runs most of it in
-        your browser.
+        One landscape page. Print it, or read the
+        <a href={local("docs/")}>book</a> when a line needs more than a line.
+        <button type="button" class="cheat-print" data-print>Print</button>
       </p>
-      <nav class="cheat-nav" aria-label="Sections">
-        {groups.map((group) => (
-          <a href={`#${group.toLowerCase().replace(/\s+/g, "-")}`}>{group}</a>
-        ))}
-      </nav>
     </header>
-    {groups.map((group) => {
-      const members = cards.filter((card) => card.frontmatter.group === group);
-      if (!members.length) return null;
-      return (
-        <section class="cheat-group" id={group.toLowerCase().replace(/\s+/g, "-")}>
-          <h2>{group}</h2>
-          <div class="cheat-grid">
-            {members.map((card) => <CheatCard card={card} />)}
+    <article class="sheet" aria-label="x2c cheat sheet">
+      <header class="sheet-head">
+        <span class="x2c-wordmark sheet-wordmark">x2c</span>
+        <span class="sheet-title">C, plus five ideas. The syntax on one page.</span>
+        <span class="sheet-site">x2c-lang.dev</span>
+      </header>
+      <div class="sheet-columns">
+        {columns.map((sections) => (
+          <div class="sheet-column">
+            {sections.map((section) => (
+              <section class="sheet-section">
+                <h2>{section.title}</h2>
+                <dl>
+                  {section.rows.map((row) => (
+                    <div class="sheet-row">
+                      <dt><code>{row.code}</code></dt>
+                      <dd set:html={row.note} />
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
           </div>
-        </section>
-      );
-    })}
+        ))}
+      </div>
+    </article>
   </div>
   <SiteFooter />
 </BaseLayout>
+
+<script>
+  document.querySelector("[data-print]")?.addEventListener("click", () => window.print());
+</script>

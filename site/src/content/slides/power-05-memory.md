@@ -8,36 +8,37 @@ title: Free memory by lifetime, not by pointer.
 ```x2c
 ~/* Run with X2C_SCOPE_ACCOUNTING=1 to enable the allocation assertions. */
 ~#include <assert.h>
-~int main(void) {
-~// Prepare the catch before measuring reclaimable working storage.
-~fail_in_scope();
-~size_t before = Scope.stats().live_allocations;
-// Reclaim working storage regularly in a long-running survey.
-size_t total = 0;
-// Each day's file list lives until that survey finishes.
-while (wait_for_day()) auto {
-~  assert(Scope.stats().live_allocations == before);
-  Array files = survey_files();
-~  size_t daily = Scope.stats().live_allocations;
+~
+int main(void) {
+  ~// Prepare the catch before measuring reclaimable working storage.
+  ~fail_in_scope();
+  ~size_t before = Scope.stats().live_allocations;
+  // Reclaim working storage regularly in a long-running survey.
+  size_t total = 0;
+  // Each day's file list lives until that survey finishes.
+  while (wait_for_day()) auto {
+  ~  assert(Scope.stats().live_allocations == before);
+    Array files = survey_files();
+  ~  size_t daily = Scope.stats().live_allocations;
 
-  // Working data is reclaimed after every file.
-  foreach (String path in files) auto {
-~    assert(Scope.stats().live_allocations == daily);
-    Map findings = inspect_file(path);
-    save_findings(path, findings);
-~    assert(Scope.stats().live_allocations > daily);
-    total++;
+    // Working data is reclaimed after every file.
+    foreach (String path in files) auto {
+  ~    assert(Scope.stats().live_allocations == daily);
+      Map findings = inspect_file(path);
+      save_findings(path, findings);
+  ~    assert(Scope.stats().live_allocations > daily);
+      total++;
+    }
+  ~  assert(Scope.stats().live_allocations == daily);
   }
-~  assert(Scope.stats().live_allocations == daily);
+  printf("processed: %zu files\n", total);
+  ~assert(total == 4 && Scope.stats().live_allocations == before);
+  ~assert(return_early() == 2);
+  ~assert(Scope.stats().live_allocations == before);
+  ~fail_in_scope();
+  ~assert(Scope.stats().live_allocations == before);
+  return 0;
 }
-printf("processed: %zu files\n", total);
-~assert(total == 4 && Scope.stats().live_allocations == before);
-~assert(return_early() == 2);
-~assert(Scope.stats().live_allocations == before);
-~fail_in_scope();
-~assert(Scope.stats().live_allocations == before);
-~return 0;
-~}
 
 ~int wait_for_day(void) { static int days = 0; return days++ < 2; }
 
@@ -46,12 +47,12 @@ printf("processed: %zu files\n", total);
 ~  assert(sizes[0] == 12 && findings[<errors>] == 0);
 ~}
 
-~int return_early(void) { {
+~int return_early(void) {
 ~  Scope.retain();
 ~  defer Scope.release();
 ~  Array files = survey_files();
 ~  return files.length;
-~} }
+~}
 
 ~Array survey_files(void) => ["first.dat", "second.dat"];
 

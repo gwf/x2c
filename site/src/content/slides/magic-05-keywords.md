@@ -7,6 +7,7 @@ title: Make a statement. Literally.
 
 ```x2c
 ~#include <assert.h>
+~
 macro Decorator $control.with_lock(Stmt $body, Expr $lock) { {
     Mutex held = $lock;
     held.lock();
@@ -16,18 +17,17 @@ macro Decorator $control.with_lock(Stmt $body, Expr $lock) { {
 
 keyword with_lock $control.with_lock;
 
-~int main(void) {
-Mutex mutex = Mutex.new();
-defer mutex.free();
-try with_lock(mutex) { raise %(oops); }
-catch %(oops):
-~{
-~assert(mutex.try_lock());
-~mutex.unlock();
-  puts("caught, and the lock is already free");
-~}
-~return 0;
-~}
+int main(void) {
+  Mutex mutex = Mutex.new();
+  defer mutex.free();
+  try with_lock(mutex) { raise %(oops); }
+  catch %(oops): {
+    ~assert(mutex.try_lock());
+    ~mutex.unlock();
+    puts("caught, and the lock is already free");
+  }
+  return 0;
+}
 ```
 
 A decorator that takes a block can be given a spelling with `keyword`, and

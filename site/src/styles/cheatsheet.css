@@ -1,28 +1,30 @@
 .cheat-page {
-  width: min(100%, 1240px);
+  width: min(100%, 1400px);
   margin: 0 auto;
-  padding: clamp(42px, 6vw, 72px) clamp(16px, 2.5vw, 36px) 64px;
+  padding: clamp(32px, 4vw, 56px) clamp(16px, 2.5vw, 36px) 56px;
   background: var(--paper);
 }
 
 .cheat-heading {
-  max-width: 820px;
-  margin-bottom: clamp(28px, 4vw, 48px);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin-bottom: 24px;
 }
 
 .cheat-heading h1 {
-  margin: 0 0 18px;
-  font: 400 clamp(44px, 6.2vw, 76px)/0.98 "Instrument Serif", Georgia, serif;
-  letter-spacing: -0.025em;
-  text-wrap: balance;
+  margin: 0;
+  font: 400 clamp(36px, 4.4vw, 56px)/1 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.02em;
 }
 
 .cheat-intro {
-  margin: 0 0 22px;
+  margin: 0;
   color: var(--muted-dark);
-  font-size: clamp(16px, 1.6vw, 18px);
-  line-height: 1.55;
-  text-wrap: pretty;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .cheat-intro a {
@@ -31,148 +33,167 @@
   text-underline-offset: 3px;
 }
 
-.cheat-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 10px;
-}
-
-.cheat-nav a {
-  padding: 6px 11px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+.cheat-print {
+  margin-left: 14px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
   color: var(--dark);
-  font: 500 12px/1.2 "JetBrains Mono", monospace;
+  font: 500 12px/1 "JetBrains Mono", monospace;
+  cursor: pointer;
 }
 
-.cheat-nav a:hover {
-  border-color: var(--dark);
+.cheat-print:hover {
   background: var(--dark);
   color: var(--paper);
 }
 
-.cheat-group {
-  margin-top: clamp(28px, 3.5vw, 44px);
-  scroll-margin-top: var(--landing-header-height, 69px);
+/* The sheet is one landscape page; everything inside scales with its width. */
+.sheet {
+  container-type: inline-size;
+  aspect-ratio: 11 / 8.5;
+  padding: 1.8cqw 2cqw;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.08), 0 12px 32px rgba(23, 23, 23, 0.08);
+  color: var(--dark);
+  font: 0.92cqw/1.28 Archivo, Helvetica, sans-serif;
+  overflow: hidden;
 }
 
-.cheat-group h2 {
-  margin: 0 0 14px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+.sheet code {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 500 0.93em/1 "JetBrains Mono", monospace;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4cqw;
+  margin-bottom: 1.1cqw;
+  padding-bottom: 0.6cqw;
+  border-bottom: 0.18cqw solid var(--red);
+}
+
+.sheet-wordmark {
   color: var(--red-text);
-  font: 500 12px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.04em;
+  font-size: 2cqw;
+}
+
+.sheet-title {
+  font: 400 1.65cqw/1 "Instrument Serif", Georgia, serif;
+}
+
+.sheet-site {
+  margin-left: auto;
+  color: var(--nav-muted);
+  font: 500 0.9cqw/1 "JetBrains Mono", monospace;
+}
+
+.sheet-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1.7cqw;
+}
+
+.sheet-section+.sheet-section {
+  margin-top: 0.8cqw;
+}
+
+.sheet-section h2 {
+  margin: 0 0 0.3cqw;
+  padding-bottom: 0.15cqw;
+  border-bottom: 0.08cqw solid var(--line);
+  color: var(--red-text);
+  font: 600 0.85cqw/1.4 "JetBrains Mono", monospace;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.cheat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
-  gap: 16px;
-}
-
-.cheat-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  background: var(--code);
-  scroll-margin-top: var(--landing-header-height, 69px);
-}
-
-.cheat-card h3 {
+.sheet-section dl {
   margin: 0;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--hairline-on-dark);
-  color: var(--paper);
-  font: 400 20px/1.15 "Instrument Serif", Georgia, serif;
 }
 
-.cheat-card h3 a {
-  color: inherit;
+.sheet-row {
+  padding: 0.12cqw 0;
 }
 
-.cheat-card h3 a:hover {
-  color: var(--coral);
-}
-
-.cheat-code {
-  flex: 1;
-  padding: 14px 18px;
-  color: var(--code-ink);
-  font-family: "JetBrains Mono", monospace;
-}
-
-.cheat-code pre {
+.sheet-row dt,
+.sheet-row dd {
+  display: inline;
   margin: 0;
-  overflow-x: auto;
-  font-size: 11.5px;
-  line-height: 1.65;
 }
 
-.cheat-code pre+pre {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--hairline-on-dark);
+.sheet-row dt code {
+  color: var(--dark);
+  overflow-wrap: anywhere;
 }
 
-.cheat-code pre code {
-  font: inherit;
-}
-
-.cheat-notes {
-  padding: 12px 18px 14px;
-  border-top: 1px solid var(--hairline);
-  background: var(--panel);
+.sheet-row dd {
   color: var(--muted-dark);
-  font-size: 13.5px;
-  line-height: 1.5;
 }
 
-.cheat-notes ul {
-  margin: 0;
-  padding-left: 18px;
+.sheet-row dd::before {
+  content: "\00a0 ";
 }
 
-.cheat-notes li+li {
-  margin-top: 5px;
-}
-
-.cheat-notes code {
-  padding: 0 3px;
-  border: 1px solid var(--code-chip-border);
-  border-radius: 3px;
-  background: var(--code-chip-bg);
+.sheet-row dd code {
   color: var(--code-chip-ink);
-  font-size: 0.92em;
 }
 
-.cheat-notes a {
-  color: var(--red-text);
-}
-
-@media (max-width: 639px) {
-  .cheat-code,
-  .cheat-notes,
-  .cheat-card h3 {
-    padding-inline: 14px;
+@media (max-width: 760px) {
+  .sheet {
+    aspect-ratio: auto;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.4;
   }
+
+  .sheet-head {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom-width: 2px;
+  }
+
+  .sheet-wordmark { font-size: 20px; }
+  .sheet-title { font-size: 18px; }
+  .sheet-site { font-size: 11px; }
+
+  .sheet-columns {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 14px;
+  }
+
+  .sheet-section+.sheet-section { margin-top: 14px; }
+  .sheet-section h2 { margin-bottom: 4px; padding-bottom: 3px; border-bottom-width: 1px; font-size: 11px; }
+  .sheet-row { padding: 3px 0; }
 }
 
 @media print {
+  @page {
+    size: letter landscape;
+    margin: 0.3in;
+  }
+
   .landing-header,
   .landing-footer,
-  .cheat-nav {
+  .cheat-heading {
     display: none;
   }
 
-  .cheat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+  .cheat-page {
+    width: 100%;
+    padding: 0;
+    background: #fff;
   }
 
-  .cheat-card {
+  .sheet {
+    border: 0;
+    box-shadow: none;
     break-inside: avoid;
   }
 }

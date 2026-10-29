@@ -24,11 +24,11 @@ meta static List show_fields(List receiver, TypeInfo type) {
 // The macro captures the expression; the meta function writes the code.
 macro Stmt $show(Expr $value) => $show_fields($value, $value);
 
-~int main(void) {
-Reading noon = { 21, "roof", 12 };
-$show(noon);
-~return 0;
-~}
+int main(void) {
+  Reading noon = { 21, "roof", 12 };
+  $show(noon);
+  return 0;
+}
 ```
 
 A `meta` function with a `TypeInfo` parameter receives the type of the

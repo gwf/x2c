@@ -25,14 +25,14 @@ static double energy(double x, double y, int n) {
   return sin(s) / x - exp(y);
 }
 
-~int main(void) {
-double dx, dy;
-double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
-~double h = 1e-6;
-~double check = (energy(1.0 + h, 2.0, 5) - energy(1.0 - h, 2.0, 5)) / (2 * h);
-~assert(fabs(value - energy(1.0, 2.0, 5)) < 1e-12 && fabs(dx - check) < 1e-5);
-~return 0;
-~}
+int main(void) {
+  double dx, dy;
+  double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
+  ~double h = 1e-6;
+  ~double check = (energy(1.0 + h, 2.0, 5) - energy(1.0 - h, 2.0, 5)) / (2 * h);
+  ~assert(fabs(value - energy(1.0, 2.0, 5)) < 1e-12 && fabs(dx - check) < 1e-5);
+  return 0;
+}
 ```
 
 There is no derivative code in the compiler. `$ad.reverse()` is a decorator

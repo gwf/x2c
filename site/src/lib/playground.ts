@@ -6,7 +6,8 @@ export function setupPlayground() {
   const root = document.querySelector<HTMLElement>("[data-playground]");
   if (!root) return;
   const source = root.querySelector<HTMLTextAreaElement>("textarea")!;
-  const select = root.querySelector<HTMLSelectElement>("select")!;
+  const links = [...root.querySelectorAll<HTMLAnchorElement>("[data-example-list] a")];
+  const sourceName = root.querySelector<HTMLElement>("[data-source-name]")!;
   const run = root.querySelector<HTMLButtonElement>("[data-run]")!;
   const stop = root.querySelector<HTMLButtonElement>("[data-stop]")!;
   const output = root.querySelector<HTMLElement>("[data-output]")!;
@@ -16,7 +17,15 @@ export function setupPlayground() {
   const requested = new URL(location.href).searchParams.get("example");
   const initial = examples.find((entry: { id: string }) => entry.id === requested)
     ?? examples[0];
-  select.value = initial.id;
+  const choose = (id: string) => {
+    for (const link of links) {
+      const active = link.dataset.example === id;
+      if (active) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    }
+    sourceName.textContent = `${id}.x`;
+  };
+  choose(initial.id);
   source.value = initial.source;
   const dark = JSON.parse(root.querySelector("[data-theme]")!.textContent!);
   let highlighter: Awaited<ReturnType<typeof createHighlighterCore>>;
@@ -41,12 +50,15 @@ export function setupPlayground() {
     highlight.scrollTop = source.scrollTop;
     highlight.scrollLeft = source.scrollLeft;
   });
-  select.addEventListener("change", () => {
-    source.value = examples.find((entry: { id: string }) => entry.id === select.value).source;
+  for (const link of links) link.addEventListener("click", (event) => {
+    event.preventDefault();
+    const id = link.dataset.example!;
+    source.value = examples.find((entry: { id: string }) => entry.id === id).source;
     source.scrollTop = source.scrollLeft = 0;
+    choose(id);
     paint();
     const url = new URL(location.href);
-    url.searchParams.set("example", select.value);
+    url.searchParams.set("example", id);
     history.replaceState(null, "", url);
   });
   let outputSize = 0;

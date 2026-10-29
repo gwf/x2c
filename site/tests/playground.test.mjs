@@ -19,9 +19,9 @@ test("the playground renders without a compile service", () => {
     const page = readFileSync(join(destination, "playground/index.html"), "utf8");
     assert.match(page, /data-run hidden/);
     assert.match(page, /Running programs is unavailable in this build/);
-    assert.match(page, /value="love\/values"/);
-    assert.doesNotMatch(page, /value="power\/threads"/);
-    assert.doesNotMatch(page, /value="love\/files"/);
+    assert.match(page, /data-example="love\/values"/);
+    assert.doesNotMatch(page, /data-example="power\/threads"/);
+    assert.doesNotMatch(page, /data-example="love\/files"/);
     const home = readFileSync(join(destination, "index.html"), "utf8");
     assert.match(home, /playground\/\?example=love%2Fvalues/);
   } finally {

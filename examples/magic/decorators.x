@@ -1,4 +1,5 @@
 #include <assert.h>
+
 macro Decorator $trace(Function $function) {
   printf("enter %s\n", $Code.name($function));
   defer printf("leave %s\n", $Code.name($function));
@@ -6,10 +7,10 @@ macro Decorator $trace(Function $function) {
 }
 
 int main(void) {
-// Prints "enter answer", then "leave answer".
-int result = answer();
-assert(result == 42);
-return 0;
+  // Prints "enter answer", then "leave answer".
+  int result = answer();
+  assert(result == 42);
+  return 0;
 }
 
 $trace()

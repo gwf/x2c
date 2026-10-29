@@ -6,24 +6,42 @@ import { playgroundExamples } from "../lib/examples";
 import "../styles/playground.css";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 const service = import.meta.env.PLAYGROUND_URL || "";
+const sections = ["love", "power", "magic"].map((name) => ({
+  name,
+  entries: playgroundExamples.filter((entry) => entry.id.startsWith(`${name}/`)),
+}));
+const title = (id: string) => id.split("/")[1].replaceAll("-", " ");
 ---
 <BaseLayout title="Playground - x2c" description="Edit an x2c program and run it in your browser as WebAssembly.">
   <Fragment slot="header"><SiteHeader /></Fragment>
   <section class="playground plain-editor" data-playground data-service={service}>
-    <p class="about-eyebrow">playground</p>
-    <h1>Try x2c.</h1>
-    <p class="playground-intro">Edit a program. Run it in your browser.</p>
-    <div class="playground-toolbar">
-      <label for="playground-example">Example</label>
-      <select id="playground-example">
-        {playgroundExamples.map((example) => <option value={example.id}>{example.label}</option>)}
-      </select>
-      <button type="button" data-run hidden={!service}>Run</button>
-      <button type="button" data-stop hidden>Stop</button>
-    </div>
+    <header class="playground-bar">
+      <div class="playground-title">
+        <p class="about-eyebrow">playground</p>
+        <h1>Try x2c.</h1>
+      </div>
+      <div class="playground-toolbar">
+        <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still read and edit the examples."}</p>
+        <button type="button" data-run hidden={!service}>Run</button>
+        <button type="button" data-stop hidden>Stop</button>
+      </div>
+    </header>
     <div class="playground-workspace">
+      <nav class="playground-examples" aria-label="Examples" data-example-list>
+        {sections.map(({ name, entries }) => (
+          <div class="playground-section">
+            <h2>{name}</h2>
+            <ul>
+              {entries.map((entry) => (
+                <li><a href={`?example=${encodeURIComponent(entry.id)}`}
+                  data-example={entry.id}>{title(entry.id)}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
       <div class="playground-source">
-        <label for="playground-source">Source</label>
+        <label for="playground-source" data-source-name>{playgroundExamples[0]?.id}.x</label>
         <div class="playground-editor">
           <pre aria-hidden="true" data-highlight></pre>
           <textarea id="playground-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="playground-support">{playgroundExamples[0]?.source}</textarea>
@@ -34,9 +52,11 @@ const service = import.meta.env.PLAYGROUND_URL || "";
         <pre data-output role="log" aria-label="Program output"></pre>
       </div>
     </div>
-    <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still explore and edit the examples."}</p>
-    <p id="playground-support" class="playground-support">Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+). Safari support is checked in your browser. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
-    <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
+    <details class="playground-support" id="playground-support">
+      <summary>How this works and what it cannot do</summary>
+      <p>Source is sent to the compile service, which returns WebAssembly that runs here with a temporary in-memory filesystem. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
+      <p>Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+); Safari support is checked in your browser. Processes, <code>File.popen</code>, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
+    </details>
     <noscript><p>JavaScript is required to select examples and run programs.</p></noscript>
     <script type="application/json" data-theme set:html={JSON.stringify(x2cDarkTheme).replaceAll("<", "\\u003c")} />
     <script type="application/json" data-examples set:html={JSON.stringify(playgroundExamples).replaceAll("<", "\\u003c")} />
