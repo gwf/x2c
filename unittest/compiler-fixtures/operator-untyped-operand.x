@@ -1,10 +1,10 @@
 #include "x2c.x"
 
-// x2c cannot decide __GNUC__, so it leaves MEAN to the C compiler.
-#ifdef __GNUC__
-#define MEAN 0.5
-#else
+// x2c cannot decide the flag, so it leaves MEAN to the C compiler.
+#ifdef FIXTURE_HOST_FLAG
 #define MEAN 0.25
+#else
+#define MEAN 0.5
 #endif
 
 typedef struct Cell {

@@ -165,6 +165,10 @@ module List _type_specifier(Compiler c) {
         syntax = %(self);
         break;
       }
+      if (_typeof_starts(c)) {
+        syntax = _typeof_specifier(c);
+        break;
+      }
       Array words = [];
       _prefix_macro_words(c, 2, words);
       syntax = words.list_free();
@@ -174,6 +178,42 @@ module List _type_specifier(Compiler c) {
       syntax = _primitive_type(c);
   }
   return syntax;
+}
+
+/* GNU C and C23 name a type by its operand, as in `__typeof__(a) _a = (a);`
+   in a macro body. */
+module int _typeof_starts(Compiler c) =>
+  c.peek(0) == <ident> && c.peek(1) == <(> &&
+  (c.token.text == "typeof" || c.token.text == "typeof_unqual" ||
+   c.token.text == "__typeof__" || c.token.text == "__typeof");
+
+/* A type operand names its type, and so does an expression operand x2c
+   types. Any other operand, such as a name only C resolves, leaves the
+   type to C, which `__typeof__` spells. `typeof_unqual` drops the
+   qualifiers of the type it names. */
+static List _typeof_specifier(Compiler c) {
+  int unqualified = c.token.text == "typeof_unqual";
+  c.next();
+  c.expect(<(>);
+  Token operand = c.token;
+  Type type = c.test_declaration() ? c.parse_type_name() : NULL;
+  match (type) case %(?(String name)):
+    if (!c.sym.get($(name))) {
+      c.token = operand;
+      type = NULL;
+    }
+  if (!type) {
+    List value = c.parse_expression();
+    Type known = value.cadr();
+    type = known && known !== %(<macro-expr>)
+      ? known : %("__typeof__" (parens $value));
+  }
+  c.expect(<)>);
+  if (!unqualified) return type;
+  if (type ~= %("__typeof__" *)) return %(unqual @type);
+  while (type.car() is <symbol> && type.car().symbol().is_type_qualifier())
+    type = type.cdr();
+  return type;
 }
 
 static List _primitive_type(Compiler c) {

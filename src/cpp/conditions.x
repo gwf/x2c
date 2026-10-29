@@ -122,7 +122,8 @@ static int _condition(Compiler c, Cpp cpp, Token token) {
 static int _defined(Cpp cpp, Token token) {
   if (!token.is_word()) return -1;
   Var value = cpp.macros[token.text];
-  if (value is <list>) return 1;
+  if (value is <list> || (value is void && token.text == "__GNUC__"))
+    return 1;
   if (value == <undef> || (value is void && _never_defined(token.text)))
     return 0;
   return -1;
@@ -130,7 +131,8 @@ static int _defined(Cpp cpp, Token token) {
 
 static int _negate(int holds) => holds < 0 ? holds : !holds;
 
-/* x2c output is compiled as C by a GNU-style compiler, so `__cplusplus` and
+/* x2c output is compiled as C by a GNU-style compiler, so `__GNUC__` is
+   always defined, though its value is unknown, `__cplusplus` and
    `_MSC_VER` are never defined, and a compiler built for a host other than
    Windows never targets it. */
 static int _never_defined(String name) {

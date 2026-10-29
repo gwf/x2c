@@ -215,6 +215,7 @@ static int _test_declaration_start(
   if (c.object_macros.try_get(c.token.text, definition) &&
       (definition is <list> || definition == <wrapper>))
     return 1;
+  if (_typeof_starts(c)) return 1;
   return _type_name_starts(c, require_declarator);
 }
 
