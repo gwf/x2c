@@ -338,7 +338,7 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 }
 
 /** Returns the current caller's borrowed Thread token, or NULL for an
-    unmanaged or cleanup-masked caller. The token remains caller-local.
+    unmanaged or cleanup-masked caller. Lookup reads only caller-local state.
 */
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
