@@ -99,7 +99,8 @@ Source: `src/linked-meta.x`
 
 Declares the names of `T (a, b) = source;` and then reads the source
 into them, or declares each target of `(T1 a, T2 b) = source;`
-initialized from its element.
+initialized from its element. A `_` target of the first form discards
+its element.
 
 Source: `src/linked-meta.x`
 

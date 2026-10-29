@@ -1192,7 +1192,11 @@ int (start, stop, step) = bounds;
 
 List record = %(7 2.5 "ready");
 (int id, float score, String state) = record;
+Var (_, _, status) = record;
 ```
+
+A `_` target in the shared-type form discards its element and declares
+nothing, so the declaration names only the positions it uses.
 
 Assignment destructuring returns its source unchanged, so one result can feed
 several flat views without another call or copy:
@@ -2585,10 +2589,12 @@ List copy = (first, second) = values;
 The leading declaration specifier in `int (start, stop, step)` applies to
 every name. The parenthesized typed form gives each target a type, written as
 it would be in a parameter declaration. Both forms declare their names in the
-enclosing block. Storage classes and per-target initializers are not accepted
-inside the parentheses. Inside a `%()` `List` literal, use `$(...)` to insert a
-C character expression because the `List` reader reads a bare single quote as
-`quote`.
+enclosing block. In the first form, a target spelled `_` discards its element
+and declares nothing, so `_` may appear more than once: `Var (_, b, _) =
+values;` declares only `b`. Storage classes and per-target initializers are
+not accepted inside the parentheses. Inside a `%()` `List` literal, use
+`$(...)` to insert a C character expression because the `List` reader reads a
+bare single quote as `quote`.
 
 The singleton assignment destructures. It assigns element zero; the left side
 is not a parenthesized scalar assignment.
