@@ -630,7 +630,6 @@ static int _program_has_main(Frontend frontend, String path, String &failure) {
   int opened = frontend.start(path, unit);
   defer unit.close();
   Compiler c = unit.compiler;
-  c.load_source = 1;
   if (opened && Path.is_x2c_source(path))
     opened = unit.collect(frontend) && unit.parse();
   else if (opened) {
