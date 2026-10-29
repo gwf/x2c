@@ -24,6 +24,8 @@ void Compiler_forget_provisional_entries(void);
 
 ModuleSource Compiler_module_source(Compiler c, String path, String text, Tokenizer * plain);
 
+ModuleSource Compiler_discover_module_source(Compiler c, String path, String text, Tokenizer * plain);
+
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
 int Compiler_is_prelude_source(String path);

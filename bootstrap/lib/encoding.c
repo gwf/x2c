@@ -102,10 +102,26 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
 
 typedef struct _x2c_gensym_defer_env_7{
   const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_8;
 }
 _x2c_gensym_defer_env_7;
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
+
+typedef struct _x2c_gensym_defer_env_8{
+  const void * _x2c_gensym_defer_capture_9;
+}
+_x2c_gensym_defer_env_8;
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
+
+typedef struct _x2c_gensym_defer_env_9{
+  const void * _x2c_gensym_defer_capture_10;
+  const void * _x2c_gensym_defer_capture_11;
+}
+_x2c_gensym_defer_env_9;
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9);
 
 #include "exception.h"
 
@@ -541,25 +557,50 @@ Block Block_new(size_t);
 void Block_append(Block, const void *, size_t);
 
 static Block _unbase64(Alphabet a, String text, String operation){
-  Block bytes = Block_new(1);
-  const char * at = text;
-  int length = _unpadded(a, text, operation);
-  for(int i = 0;  i < length;  i += 4){
-    int take = length - i < 4 ? length - i : 4;
-    if(take == 1) _malformed(operation, _10, i);
-    unsigned long group = 0;
-    for(int j = 0;  j < 4;  j ++){
-      int digit = j < take ? _sextet(a, at[i + j]) : 0;
-      if(digit < 0) _malformed(operation, _11, i + j);
-      group = group << 6 | digit;
-    }
-    unsigned char decoded[3] ={
-      (unsigned char)(group >> 16), (unsigned char)(group >> 8), (unsigned char) group
+  Block bytes = Block_new(1), result = NULL;
+  {
+    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+      0
     }
     ;
-    Block_append(bytes, decoded, take - 1);
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & result;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_8 =(const void *) & bytes;
+    X2CCleanup _x2c_gensym_defer_record_7 ={
+      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    {
+      const char * at = text;
+      int length = _unpadded(a, text, operation);
+      for(int i = 0;  i < length;  i += 4){
+        int take = length - i < 4 ? length - i : 4;
+        if(take == 1) _malformed(operation, _10, i);
+        unsigned long group = 0;
+        for(int j = 0;  j < 4;  j ++){
+          int digit = j < take ? _sextet(a, at[i + j]) : 0;
+          if(digit < 0) _malformed(operation, _11, i + j);
+          group = group << 6 | digit;
+        }
+        unsigned char decoded[3] ={
+          (unsigned char)(group >> 16), (unsigned char)(group >> 8), (unsigned char) group
+        }
+        ;
+        Block_append(bytes, decoded, take - 1);
+      }
+      {
+        Block _x2c_gensym_return_value_7 = result = bytes;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+          return _x2c_gensym_return_value_7;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
-  return bytes;
+
 }
 
 static int _unpadded(Alphabet a, String text, String operation){
@@ -587,7 +628,7 @@ static String _text(Block bytes, String operation){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("NUL byte cannot appear in a String")), NULL)));
     Var _x2c_gensym_literal_part_3 = Var_box_long(nul - start);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/encoding.x",.function = "_text",.line = 340,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/encoding.x",.function = "_text",.line = 341,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2, Symbol_var(19800432), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -601,32 +642,32 @@ static String _hex(const unsigned char * bytes, size_t count){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_7 = out;
   {
-    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_acquired_7;
-    X2CCleanup _x2c_gensym_defer_record_7 ={
-      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_acquired_7;
+    X2CCleanup _x2c_gensym_defer_record_8 ={
+      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_8
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
     {
       for(size_t i = 0;  i < count;  i ++){
         Buffer_write_char(out, digits[bytes[i] >> 4]);
         Buffer_write_char(out, digits[bytes[i] & 15]);
       }
       {
-        String _x2c_gensym_return_value_7 = Buffer_str(out);
+        String _x2c_gensym_return_value_8 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-          return _x2c_gensym_return_value_7;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+          return _x2c_gensym_return_value_8;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
   }
 
 }
@@ -636,12 +677,37 @@ static void Block_push(Block, const void *);
 static Block _unhex(String text, String operation){
   int length = String_len(text);
   if(length % 2) _malformed(operation, _13, length);
-  Block bytes = Block_new(1);
-  for(int i = 0;  i < length;  i += 2){
-    unsigned char byte = _byte_at(text, i, operation);
-    Block_push(bytes, & byte);
+  Block bytes = Block_new(1), result = NULL;
+  {
+    _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_10 =(const void *) & result;
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_11 =(const void *) & bytes;
+    X2CCleanup _x2c_gensym_defer_record_9 ={
+      .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_9);
+    {
+      for(int i = 0;  i < length;  i += 2){
+        unsigned char byte = _byte_at(text, i, operation);
+        Block_push(bytes, & byte);
+      }
+      {
+        Block _x2c_gensym_return_value_9 = result = bytes;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
+          return _x2c_gensym_return_value_9;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
   }
-  return bytes;
+
 }
 
 static int _byte_at(String text, int offset, String operation){
@@ -703,8 +769,20 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
 }
 
+void Block_free(Block);
+
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7));
+  if((*(Block *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7) == NULL) Block_free((*(Block *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8));
+}
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
+  _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_9));
+}
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
+  _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_9;
+  if((*(Block *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_10) == NULL) Block_free((*(Block *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_11));
 }
 

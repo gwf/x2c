@@ -811,6 +811,8 @@ static void f7_aliases____declare(Compiler c, AliasHead * head, int collecting);
 
 static void f7_aliases____install(Compiler c, Var key, List entry);
 
+static Map f7_aliases____writable_table(Compiler c);
+
 static void f7_aliases____reveal_bindings(Compiler c, List syntax);
 
 static List f7_aliases____visible(Compiler c, Map table, Var key, List entry, int scope);
@@ -9166,7 +9168,7 @@ static int f7_aliases____same_scope(Compiler c, List entry){
 }
 
 static void f7_aliases____remove(Compiler c, Var key){
-  Map table = Map_copy(f7_aliases____table(c));  List shadowed = f7_aliases____shadowed(Var_list_payload(Map_getindex(table, key)));  if(List_truth(shadowed)) Map_setindex(table, key, List_var(shadowed));  else Map_del(table, key);  Sym_put(c -> sym, c -> macros, Symbol_var(2902118), Map_var(table));
+  Map table = f7_aliases____writable_table(c);  List shadowed = f7_aliases____shadowed(Var_list_payload(Map_getindex(table, key)));  if(List_truth(shadowed)) Map_setindex(table, key, List_var(shadowed));  else Map_del(table, key);  Sym_put(c -> sym, c -> macros, Symbol_var(2902118), Map_var(table));
 }
 
 static List f7_aliases____shadowed(List entry){
@@ -9338,12 +9340,17 @@ static void f7_aliases____declare(Compiler c, AliasHead * head, int collecting){
 }
 
 static void f7_aliases____install(Compiler c, Var key, List entry){
-  Map table = f7_aliases____table(c);
-  table = Map_truth(table) ? Map_copy(table) : Map_new();
+  Map table = f7_aliases____writable_table(c);
   Var shadowed;
   if(Map_try_get(table, key, &(shadowed))) entry = List_append(entry, cons(shadowed, NULL));
   Map_setindex(table, key, List_var(entry));
   Sym_put(c -> sym, c -> macros, Symbol_var(2902118), Map_var(table));
+}
+
+static Map f7_aliases____writable_table(Compiler c){
+  Map table = f7_aliases____table(c);
+  if(! Map_truth(table)) return Map_new();
+  return c -> alias_level || Sym_transacting(c -> sym) ? Map_copy(table) : table;
 }
 
 static void f7_aliases____reveal_bindings(Compiler c, List syntax){
@@ -9406,7 +9413,7 @@ static List f7_aliases____visible(Compiler c, Map table, Var key, List entry, in
     expression = x2c_match_value_1;
     Var _x2c_gensym_match_value_18 = depth;
     {
-      int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_18, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____visible",.line = 459}; & _x2c_gensym_error_site_13; })));
+      int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_18, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____visible",.line = 464}; & _x2c_gensym_error_site_13; })));
       if(depth > scope) return Var_list_payload(expression);
     }
 

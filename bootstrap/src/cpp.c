@@ -171,6 +171,8 @@ static int f6_expand____paren_next(f6_expand___Expander * x, Block stack, int in
 
 static Block f6_expand____call(f6_expand___Expander * x, Block stack, int input, CppToken * name, List definition);
 
+static void f6_expand____free_arguments(Block args);
+
 static int f6_expand____pull(f6_expand___Expander * x, Block stack, int input, CppToken * item);
 
 static int f6_expand____arguments(f6_expand___Expander * x, Block stack, int input, List definition, Block args, CppToken * close);
@@ -265,18 +267,63 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
 typedef struct _x2c_gensym_defer_env_4{
   const void * _x2c_gensym_defer_capture_4;
-  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 typedef struct _x2c_gensym_defer_env_5{
-  const void * _x2c_gensym_defer_capture_6;
+  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_5;
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
+
+typedef struct _x2c_gensym_defer_env_6{
+  const void * _x2c_gensym_defer_capture_6;
+}
+_x2c_gensym_defer_env_6;
+
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
+
+typedef struct _x2c_gensym_defer_env_7{
+  const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_8;
+}
+_x2c_gensym_defer_env_7;
+
+static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
+
+typedef struct _x2c_gensym_defer_env_8{
+  const void * _x2c_gensym_defer_capture_9;
+  const void * _x2c_gensym_defer_capture_10;
+}
+_x2c_gensym_defer_env_8;
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
+
+typedef struct _x2c_gensym_defer_env_9{
+  const void * _x2c_gensym_defer_capture_11;
+  const void * _x2c_gensym_defer_capture_12;
+}
+_x2c_gensym_defer_env_9;
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9);
+
+typedef struct _x2c_gensym_defer_env_10{
+  const void * _x2c_gensym_defer_capture_13;
+  const void * _x2c_gensym_defer_capture_14;
+}
+_x2c_gensym_defer_env_10;
+
+static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10);
+
+typedef struct _x2c_gensym_defer_env_11{
+  const void * _x2c_gensym_defer_capture_15;
+}
+_x2c_gensym_defer_env_11;
+
+static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11);
 
 #include "exception.h"
 
@@ -1107,22 +1154,44 @@ static void f6_expand____rescan(f6_expand___Expander * x, Block stack, Block sin
     if(! List_truth(definition)) Block_push(sink, & item);
     else{
       Block replacement = NULL;
-      if(x2c_var_equal_lane(List_car(definition), Symbol_var(1011493096))){
-        List hide = cons(String_var(item.token.text), item.hide);
-        replacement = f6_expand____substitute(&((* x)), definition, NULL, hide);
+      {
+        _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & replacement;
+        X2CCleanup _x2c_gensym_defer_record_3 ={
+          .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+        {
+          if(x2c_var_equal_lane(List_car(definition), Symbol_var(1011493096))){
+            List hide = cons(String_var(item.token.text), item.hide);
+            replacement = f6_expand____substitute(&((* x)), definition, NULL, hide);
+          }
+          else if(f6_expand____paren_next(&((* x)), stack, input)) replacement = f6_expand____call(&((* x)), stack, input, &(item), definition);
+          else{
+            Block_push(sink, & item);
+            {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+              continue;
+            }
+
+          }
+          if(replacement == NULL){
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+            continue;
+          }
+          if(Block_len(replacement)){
+            ((CppToken *) replacement -> bytes)[0].space = item.space;
+            f6_expand____push_all(stack, replacement);
+          }
+          else space = item.space;
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
       }
-      else if(f6_expand____paren_next(&((* x)), stack, input)) replacement = f6_expand____call(&((* x)), stack, input, &(item), definition);
-      else{
-        Block_push(sink, & item);
-        continue;
-      }
-      if(replacement == NULL) continue;
-      if(Block_len(replacement)){
-        ((CppToken *) replacement -> bytes)[0].space = item.space;
-        f6_expand____push_all(stack, replacement);
-      }
-      else space = item.space;
-      Block_free(replacement);
+
     }
 
   }
@@ -1146,10 +1215,50 @@ static Block f6_expand____call(f6_expand___Expander * x, Block stack, int input,
   CppToken open, close;
   (void) f6_expand____pull(&((* x)), stack, input, &(open));
   Block args = Block_new(sizeof(f6_expand___CppArgument));
-  if(! f6_expand____arguments(&((* x)), stack, input, definition, args, &(close))) return NULL;
-  f6_expand____check_arity(&((* x)), definition, args);
-  List hide = cons(String_var((* name).token.text), f6_expand____meet((* name).hide, close.hide));
-  return f6_expand____substitute(&((* x)), definition, args, hide);
+  {
+    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & args;
+    X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+    {
+      if(! f6_expand____arguments(&((* x)), stack, input, definition, args, &(close))){
+        Block _x2c_gensym_return_value_2 = NULL;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          return _x2c_gensym_return_value_2;
+        }
+
+      }
+      f6_expand____check_arity(&((* x)), definition, args);
+      List hide = cons(String_var((* name).token.text), f6_expand____meet((* name).hide, close.hide));
+      {
+        Block _x2c_gensym_return_value_3 = f6_expand____substitute(&((* x)), definition, args, hide);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+  }
+
+}
+
+static void f6_expand____free_arguments(Block args){
+  f6_expand___CppArgument * items = args -> bytes;
+  for(size_t i = 0;  i < Block_len(args);  i ++){
+    Block_free(items[i].written);
+    Block_free(items[i].expanded);
+  }
+  Block_free(args);
 }
 
 static int f6_expand____pull(f6_expand___Expander * x, Block stack, int input, CppToken * item){
@@ -1178,55 +1287,75 @@ static int f6_expand____arguments(f6_expand___Expander * x, Block stack, int inp
   List params = Var_list_payload(List_getindex(definition, 2));
   int last = Var_truth(List_getindex(definition, 3)) ? List_len(params) - 1 : - 1;
   Block arg = Block_new(sizeof(CppToken));
-  Array closers = NULL;
   {
-    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & closers;
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & arg;
+    X2CCleanup _x2c_gensym_defer_record_5 ={
+      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
-      CppToken item;
-      while(f6_expand____pull(&((* x)), stack, input, &(item))){
-        Symbol type = item.token.type;
-        if(! Array_len(closers) && type == 83){
-          (* close) = item;
-          f6_expand____add_argument(args, arg);
+      Array closers = NULL;
+      {
+        _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & closers;
+        X2CCleanup _x2c_gensym_defer_record_6 ={
+          .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+        {
+          CppToken item;
+          while(f6_expand____pull(&((* x)), stack, input, &(item))){
+            Symbol type = item.token.type;
+            if(! Array_len(closers) && type == 83){
+              (* close) = item;
+              f6_expand____add_argument(args, arg);
+              arg = NULL;
+              {
+                int _x2c_gensym_return_value_4 = 1;
+                {
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+                  return _x2c_gensym_return_value_4;
+                }
+
+              }
+
+            }
+            if(! Array_len(closers) && type == 89 &&(int) Block_len(args) != last){
+              f6_expand____add_argument(args, arg);
+              arg = NULL;
+              arg = Block_new(sizeof(CppToken));
+              continue;
+            }
+            f6_expand____track_group(&(closers), type);
+            Block_push(arg, & item);
+          }
+          if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_35), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_36), NULL)))), (* x).site, cons(_38, cons(String_var(f6_expand____definition_note(definition)), NULL)));
           {
-            int _x2c_gensym_return_value_2 = 1;
+            int _x2c_gensym_return_value_5 = 0;
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-              return _x2c_gensym_return_value_2;
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+              return _x2c_gensym_return_value_5;
             }
 
           }
 
         }
-        if(! Array_len(closers) && type == 89 &&(int) Block_len(args) != last){
-          f6_expand____add_argument(args, arg);
-          arg = Block_new(sizeof(CppToken));
-          continue;
-        }
-        f6_expand____track_group(&(closers), type);
-        Block_push(arg, & item);
-      }
-      if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_35), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_36), NULL)))), (* x).site, cons(_38, cons(String_var(f6_expand____definition_note(definition)), NULL)));
-      {
-        int _x2c_gensym_return_value_3 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_3;
-        }
-
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
   }
 
 }
@@ -1265,7 +1394,8 @@ static void f6_expand____check_arity(f6_expand___Expander * x, List definition, 
   Block first = f6_expand____argument_at(args, 0) -> written;
   if(! count && given == 1 && ! Block_len(first)) return;
   if(Var_truth(List_getindex(definition, 3)) && given == count - 1){
-    f6_expand____add_argument(args, Block_new(sizeof(CppToken)));
+    f6_expand____add_argument(args, NULL);
+    f6_expand____argument_at(args, given) -> written = Block_new(sizeof(CppToken));
     return;
   }
   if(given != count) Compiler_report_error((* x).c, 27335838, ({
@@ -1282,15 +1412,41 @@ static Block f6_expand____substitute(f6_expand___Expander * x, List definition, 
     .definition = definition, .args = args, .out = Block_new(sizeof(CppToken))
   }
   ;
-  if(x2c_var_equal_lane(List_car(definition), Symbol_var(458361162716))){
-    s.function = 1;
-    s.params = Var_list_payload(List_getindex(definition, 2));
-    s.variadic = Var_int(Var_convert_at(List_getindex(definition, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cpp/expand.x",.function = "f6_expand____substitute",.line = 357}; & _x2c_gensym_error_site_0; })));
+  Block result = NULL;
+  {
+    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & result;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_8 =(const void *) & s;
+    X2CCleanup _x2c_gensym_defer_record_7 ={
+      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    {
+      if(x2c_var_equal_lane(List_car(definition), Symbol_var(458361162716))){
+        s.function = 1;
+        s.params = Var_list_payload(List_getindex(definition, 2));
+        s.variadic = Var_int(Var_convert_at(List_getindex(definition, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cpp/expand.x",.function = "f6_expand____substitute",.line = 373}; & _x2c_gensym_error_site_0; })));
+      }
+      Block body = f6_expand____body_tokens(&((* x)), definition);
+      Token first = body -> bytes;
+      f6_expand____replace(&((* x)), &(s), first, first + Block_len(body) - 1);
+      {
+        Block _x2c_gensym_return_value_6 = result = f6_expand____finish(s.out, hide);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+          return _x2c_gensym_return_value_6;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
-  Block body = f6_expand____body_tokens(&((* x)), definition);
-  Token first = body -> bytes;
-  f6_expand____replace(&((* x)), &(s), first, first + Block_len(body) - 1);
-  return f6_expand____finish(s.out, hide);
+
 }
 
 static void f6_expand____replace(f6_expand___Expander * x, f6_expand___Substitution * s, Token token, Token end){
@@ -1373,60 +1529,85 @@ static Token f6_expand____stringized(f6_expand___Substitution * s, Token param){
 static Token f6_expand____pasted(f6_expand___Expander * x, f6_expand___Substitution * s, Token next, Token end){
   int param = f6_expand____param(&((* s)), next);
   Block right = param >= 0 ? f6_expand____argument_at((* s).args, param) -> written : Block_new(sizeof(CppToken));
-  CppToken operand ={
-    .token = * next
-  }
-  , left;
-  Token after = next + 1;
-  if(param < 0){
-    if((* s).variadic && String_equal(next -> text, _44) && Token_skip_trivia(next + 1) -> type == 81){
-      {
-        Block * _x2c_gensym_macro_address_0 = &(* s).out;
-        Block _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
-        {
-          _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
-            0
-          }
-          ;
-          _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_address_0;
-          _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_previous_0;
-          X2CCleanup _x2c_gensym_defer_record_4 ={
-            .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
-          }
-          ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+  {
+    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_9 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_9 =(const void *) & param;
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_10 =(const void *) & right;
+    X2CCleanup _x2c_gensym_defer_record_8 ={
+      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
+    {
+      CppToken operand ={
+        .token = * next
+      }
+      , left;
+      Token after = next + 1;
+      if(param < 0){
+        if((* s).variadic && String_equal(next -> text, _44) && Token_skip_trivia(next + 1) -> type == 81){
           {
-            * _x2c_gensym_macro_address_0 = right;
+            Block * _x2c_gensym_macro_address_0 = &(* s).out;
+            Block _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
             {
-              after = f6_expand____va_opt(&((* x)), &((* s)), next, end);
+              _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_8 ={
+                0
+              }
+              ;
+              _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_address_0;
+              _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_12 =(const void *) & _x2c_gensym_macro_previous_0;
+              X2CCleanup _x2c_gensym_defer_record_9 ={
+                .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_8
+              }
+              ;
+              x2c_cleanup_push(& _x2c_gensym_defer_record_9);
+              {
+                * _x2c_gensym_macro_address_0 = right;
+                {
+                  after = f6_expand____va_opt(&((* x)), &((* s)), next, end);
+                }
+
+              }
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          if(Block_len(right) == 1 &&((CppToken *) right -> bytes)[0].token.type == 11371826) Block_clear(right);
+        }
+        else Block_push(right, & operand);
+      }
+      if(! Block_try_pop((* s).out, & left)) Compiler_report_error((* x).c, 27335838, _43, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
+      CppToken * items = right -> bytes;
+      int comma = left.token.type == 89 &&(* s).variadic && param == List_len((* s).params) - 1;
+      if(left.token.type == 11371826){
+        if(Block_len(right)) items[0].space = left.space;
+        f6_expand____push_raw(&((* s)), right);
+      }
+      else if(comma || ! Block_len(right)){
+        if(! comma || Block_len(right)) Block_push((* s).out, & left);
+        f6_expand____push_block((* s).out, right);
+      }
+      else{
+        CppToken joined = f6_expand____join(&((* x)), &((* s)), &(left), &(items[0]));
+        Block_push((* s).out, & joined);
+        for(size_t i = 1;  i < Block_len(right);  i ++) Block_push((* s).out, & items[i]);
+      }
+      {
+        Token _x2c_gensym_return_value_7 = after;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+          return _x2c_gensym_return_value_7;
         }
 
       }
-      if(Block_len(right) == 1 &&((CppToken *) right -> bytes)[0].token.type == 11371826) Block_clear(right);
+
     }
-    else Block_push(right, & operand);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
   }
-  if(! Block_try_pop((* s).out, & left)) Compiler_report_error((* x).c, 27335838, _43, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
-  CppToken * items = right -> bytes;
-  int comma = left.token.type == 89 &&(* s).variadic && param == List_len((* s).params) - 1;
-  if(left.token.type == 11371826){
-    if(Block_len(right)) items[0].space = left.space;
-    f6_expand____push_raw(&((* s)), right);
-  }
-  else if(comma || ! Block_len(right)){
-    if(! comma || Block_len(right)) Block_push((* s).out, & left);
-    f6_expand____push_block((* s).out, right);
-  }
-  else{
-    CppToken joined = f6_expand____join(&((* x)), &((* s)), &(left), &(items[0]));
-    Block_push((* s).out, & joined);
-    for(size_t i = 1;  i < Block_len(right);  i ++) Block_push((* s).out, & items[i]);
-  }
-  return after;
+
 }
 
 static CppToken f6_expand____join(f6_expand___Expander * x, f6_expand___Substitution * s, CppToken * left, CppToken * right){
@@ -1486,40 +1667,66 @@ static Block f6_expand____finish(Block out, List hide){
 }
 
 static Block f6_expand____expand_alone(f6_expand___Expander * x, Block tokens){
-  Block sink = Block_new(sizeof(CppToken));
-  CppToken * items = tokens -> bytes;
-  size_t count = Block_len(tokens);
-  if(! count ||(count == 1 && ! List_truth(f6_expand____definition(&((* x)), &(items[0]))))){
-    f6_expand____push_block(sink, tokens);
-    return sink;
-  }
-  Block stack = Block_new(sizeof(CppToken));
-  const Block _x2c_gensym_macro_acquired_1 = stack;
+  Block sink = Block_new(sizeof(CppToken)), result = NULL;
   {
-    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+    _x2c_gensym_defer_env_10 _x2c_gensym_macro_environment_11 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_5 ={
-      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_13 =(const void *) & result;
+    _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_14 =(const void *) & sink;
+    X2CCleanup _x2c_gensym_defer_record_10 ={
+      .fn = _x2c_gensym_defer_cleanup_10, .env = & _x2c_gensym_macro_environment_11
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_10);
     {
-      f6_expand____push_all(stack, tokens);
-      f6_expand____rescan(&((* x)), stack, sink, 0);
-      {
-        Block _x2c_gensym_return_value_4 = sink;
+      CppToken * items = tokens -> bytes;
+      size_t count = Block_len(tokens);
+      if(! count ||(count == 1 && ! List_truth(f6_expand____definition(&((* x)), &(items[0]))))){
+        f6_expand____push_block(sink, tokens);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-          return _x2c_gensym_return_value_4;
+          Block _x2c_gensym_return_value_8 = result = sink;
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
+            return _x2c_gensym_return_value_8;
+          }
+
         }
 
       }
+      Block stack = Block_new(sizeof(CppToken));
+      const Block _x2c_gensym_macro_acquired_1 = stack;
+      {
+        _x2c_gensym_defer_env_11 _x2c_gensym_macro_environment_10 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_10._x2c_gensym_defer_capture_15 =(const void *) & _x2c_gensym_macro_acquired_1;
+        X2CCleanup _x2c_gensym_defer_record_11 ={
+          .fn = _x2c_gensym_defer_cleanup_11, .env = & _x2c_gensym_macro_environment_10
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_11);
+        {
+          f6_expand____push_all(stack, tokens);
+          f6_expand____rescan(&((* x)), stack, sink, 0);
+          {
+            Block _x2c_gensym_return_value_9 = result = sink;
+            {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
+              return _x2c_gensym_return_value_9;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
+      }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
   }
 
 }
@@ -1689,16 +1896,46 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Array_free((*(Array *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
+  Block_free((*(Block *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  *(*(Block * *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4) =(*(Block *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5);
+  f6_expand____free_arguments((*(Block *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_6));
+  Array_free((*(Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
+}
+
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
+  _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
+  Block_free((*(Block *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
+}
+
+static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
+  _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
+  if((*(Block *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7) == NULL) Block_free((*(f6_expand___Substitution *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8).out);
+}
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
+  _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
+  if((*(int *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_9) < 0) Block_free((*(Block *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_10));
+}
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
+  _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_9;
+  *(*(Block * *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_11) =(*(Block *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_12);
+}
+
+static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
+  _x2c_gensym_defer_env_10 * _x2c_gensym_defer_data_10 =(_x2c_gensym_defer_env_10 *) _x2c_gensym_defer_opaque_10;
+  if((*(Block *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_13) == NULL) Block_free((*(Block *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_14));
+}
+
+static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
+  _x2c_gensym_defer_env_11 * _x2c_gensym_defer_data_11 =(_x2c_gensym_defer_env_11 *) _x2c_gensym_defer_opaque_11;
+  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_15));
 }
 

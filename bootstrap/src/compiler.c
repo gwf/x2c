@@ -101,6 +101,7 @@ typedef struct Compiler{
   Map object_macros;
   Cpp cpp;
   List command_macros;
+  String macro_export_source;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -872,7 +873,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2293);
+  _295 = int_var(2297);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));

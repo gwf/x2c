@@ -650,11 +650,10 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   if(String_truth(text) && String_startswith(text, _3)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
   c -> text = text;
   c -> include_dirs = frontend -> include_dirs;
-  Compiler_prepare_macro_exports(c, c -> filename);
   {
     ExceptionFrame _x2c_gensym_exception_frame_5;
     x2c_exception_push(& _x2c_gensym_exception_frame_5);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_5.env, 0)) c -> unit_source = Compiler_module_source(c, c -> filename, text, NULL);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_5.env, 0)) c -> unit_source = Compiler_discover_module_source(c, c -> filename, text, NULL);
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_5);
       {
