@@ -399,7 +399,7 @@ static List _bound(
   CallSite &k, List binding, Type signature, List declared,
   List parameters, List returns) {
   k.receiver = _method_bind(k.c, k.receiver, k.type, declared, k.origin);
-  List callee = %(expr ((func $parameters) $returns) (ident $binding));
+  List callee = %(expr ((func $parameters) @returns) (ident $binding));
   return _finish(k, signature.apply(), callee, signature, k.receiver);
 }
 
