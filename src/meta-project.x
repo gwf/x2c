@@ -230,11 +230,14 @@ static int _file(Scan &s, String path) {
   String text = NULL;
   if (!s.request.sources.read(path, text)) return 0;
   s.c.prepare_macro_exports(path);
-  text = _module_text(s, path, text);
-  Tokenizer tokens = Tokenizer.new(text, <x2c>);
-  tokens.layout = Path.is_layout_source(path);
-  tokens.scan();
-  _preprocess(s, path, tokens);
+  Tokenizer tokens = NULL;
+  text = _module_text(s, path, text, tokens);
+  if (!tokens) {
+    tokens = Tokenizer.new(text, <x2c>);
+    tokens.layout = Path.is_layout_source(path);
+    tokens.scan();
+    _preprocess(s, path, tokens);
+  }
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
       (Compiler.is_prelude_source(path) ||
@@ -310,12 +313,13 @@ static int _include(Scan &s, String directive, String directory) {
 
 /* The file's text with its module block spliced. A malformed block leaves
    the text as written, for translation to report. */
-static String _module_text(Scan &s, String path, String text) {
+static String _module_text(
+  Scan &s, String path, String text, Tokenizer &tokens) {
   Compiler c = s.c;
   ModuleSource module = NULL;
   DiagnosticsHold hold = c.diagnostics.hold();
   with (c.recovery_depth = c.recovery_depth + 1) {
-    try module = c.module_source(path, text);
+    try module = c.module_source(path, text, tokens);
     catch %(malformed *): module = NULL;
   }
   c.diagnostics.release(hold, 0);

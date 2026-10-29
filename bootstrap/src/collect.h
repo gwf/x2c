@@ -22,7 +22,7 @@ void Compiler_refresh_source_collections(void);
 
 void Compiler_forget_provisional_entries(void);
 
-ModuleSource Compiler_module_source(Compiler c, String path, String text);
+ModuleSource Compiler_module_source(Compiler c, String path, String text, Tokenizer * plain);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
