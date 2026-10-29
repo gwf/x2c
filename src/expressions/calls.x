@@ -283,12 +283,16 @@ static List _complete_iter_call(
 // calls
 
 static int _parameters_variadic(List parameters) {
-  foreach (Var parameter in parameters) {
-    if (parameter == <...>) return 1;
-    if (parameter is <list> && !parameter.is_nil()) {
-      Type type = parameter;
-      if (type.car() == <...> || type.rest_container()) return 1;
-    }
+  foreach (Var parameter in parameters)
+    if (_parameter_variadic(parameter)) return 1;
+  return 0;
+}
+
+static int _parameter_variadic(Var parameter) {
+  if (parameter == <...>) return 1;
+  if (parameter is <list> && !parameter.is_nil()) {
+    Type type = parameter;
+    return type.car() == <...> || type.rest_container() != NULL;
   }
   return 0;
 }
@@ -411,21 +415,55 @@ static List _finish(
   if (_deferred_call(callee, receiver, arguments))
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
-  if (receiver && result_type !== %(<macro-expr>))
-    _check_arity(k, callee_type, arguments);
+  if (result_type !== %(<macro-expr>))
+    _check_arity(
+      k, callee, callee_type, result_type, arguments, receiver != NULL);
   k.c.check_meta_call(callee, k.origin);
   callee = _discarding_callee(k.c, callee, callee_type, arguments);
   Macro called = $called;
   return k.c.rebuild_expression(result_type, called(callee, arguments));
 }
 
+/* A call supplies every fixed parameter, no more unless the parameters are
+   variadic, and may omit a final `Iter` destination that transform
+   completes. A short call that a call rewrite rule may complete, such as
+   `Thread.run(jobs)`, is left to its rule. A method's receiver is counted
+   on both sides. */
 static void _check_arity(
-  CallSite &k, Type callee_type, List arguments) {
-  match (callee_type)
-    case %((func (!set ?parameters (*))) *):
-      if (!_parameters_variadic(parameters) &&
-          arguments.len() > List.len(parameters))
-        $fail.expressions_method_arity(k.c, k.origin, parameters, arguments);
+  CallSite &k, List callee, Type callee_type, Type result, List arguments,
+  int method) {
+  List parameters = NULL;
+  if (!(callee_type ~= %((func *) *)) ||
+      !callee_type.function_parts(parameters, NULL)) return;
+  int supplied = arguments === %((expr (void) ())) ? 0 : arguments.len();
+  int fixed = _fixed_parameter_count(parameters);
+  int variadic = _parameters_variadic(parameters);
+  if (supplied == fixed || (variadic && supplied > fixed)) return;
+  if (supplied + 1 == fixed && !variadic &&
+      _exact_iter_type(parameters.last()) && _exact_iter_type(result))
+    return;
+  if (supplied < fixed && _call_rewritable(k.c, callee)) return;
+  $fail.expressions_call_arity(
+    k.c, k.origin, method, variadic, fixed - method, supplied - method);
+}
+
+/* Whether a call rewrite rule is registered for the spelling `callee`
+   names. */
+static int _call_rewritable(Compiler c, List callee) {
+  match (callee) case %(expr ? (ident ?binding)):
+    return c.rewrite_rules &&
+           c.has_rewrites(<call>, Ast.binding_spelling(binding));
+  return 0;
+}
+
+/* The parameters before `...` or a rest container. */
+static int _fixed_parameter_count(List parameters) {
+  int count = 0;
+  foreach (Var parameter in parameters) {
+    if (_parameter_variadic(parameter)) break;
+    count++;
+  }
+  return count;
 }
 
 /* A call whose receiver or argument is an unnamed operator temporary goes

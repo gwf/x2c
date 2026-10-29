@@ -16,6 +16,7 @@ Commands:
   remove      Remove an installed package
   list        List installed packages
   help        Show help for x2c or one command
+  bind        Generate a package's raw tier from a C header
   graph       Inspect x2c source graphs
   lint        Inspect x2c source style and idioms
   lsp         Serve editors over the Language Server Protocol

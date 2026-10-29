@@ -42,13 +42,16 @@ meta static Code _destructure_element(Atom values, int index) {
                      (literal (int) $position)));
 }
 
-/* Assigns each of `targets`, typed expressions, its element of `values`. */
+/* Assigns each of `targets`, typed expressions, its element of `values`.
+   A `_` target discards its element. */
 meta static List _destructure_writes(List targets, Atom values) {
   Array writes = [];
   int index = 0;
   foreach (Code target in targets) {
+    int position = index++;
+    if (target ~= %("_")) continue;
     Type type = target.cadr();
-    Code element = _destructure_element(values, index++);
+    Code element = _destructure_element(values, position);
     writes.push(%(stmnt $($!($type){ $target = $element })));
   }
   return writes.list_free();
@@ -65,7 +68,8 @@ meta static Code _destructure_bound(List code, Atom values, Atom result) {
 $rewrite(%(dstrdecl *))
 /** Declares the names of `T (a, b) = source;` and then reads the source
     into them, or declares each target of `(T1 a, T2 b) = source;`
-    initialized from its element.
+    initialized from its element. A `_` target of the first form discards
+    its element.
 */
 meta Code destructure_declaration(Code node) {
   Atom values = Atom.intern("?__destructure");
@@ -81,13 +85,17 @@ meta Code destructure_declaration(Code node) {
       return _destructure_bound(%(seq @(items.list_free())), values, NULL);
     }
     case %(dstrdecl ?(Type type) (targets *names) ?source): {
-      Array declarators = [], targets = [];
+      Array declarators = [], targets = [], declarations = [];
       foreach (List name in names) {
+        if (name ~= %("_")) { targets.push(name); continue; }
         declarators.push(%(bind $name ()));
         targets.push(%(expr $type (ident $name)));
       }
+      if (declarators.len())
+        declarations.push(
+          %(declare $type (bindings @(declarators.list_free()))));
       return _destructure_bound(
-        %(seq (declare $type (bindings @(declarators.list_free())))
+        %(seq @(declarations.list_free())
               $(_destructure_read(values, source))
               @(_destructure_writes(targets.list_free(), values))),
         values, NULL);

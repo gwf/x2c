@@ -219,7 +219,11 @@ int (start, stop, step) = bounds;
 
 List record = %(7 2.5 "ready");
 (int id, float score, String state) = record;
+Var (_, _, status) = record;
 ```
+
+A `_` target in the shared-type form discards its element and declares
+nothing, so the declaration names only the positions it uses.
 
 Assignment destructuring returns its source unchanged, so one result can feed
 several flat views without another call or copy:

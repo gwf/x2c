@@ -180,12 +180,12 @@ grep -q '^evaluation failed: stop failed: the body crashed' "$tmp/err"
 boundary='failed: record values cannot cross the helper boundary'
 grep -qx "evaluation failed: make_pair $boundary" "$tmp/err"
 grep -qx "evaluation failed: pair_x $boundary" "$tmp/err"
-grep -qx 'evaluation failed: main takes 1 argument, not 0: int main(Array)' \
-  "$tmp/err"
-grep -qx 'evaluation failed: none takes 0 arguments, not 1: int none(void)' \
-  "$tmp/err"
-test "$(grep -c '^evaluation failed: ' "$tmp/err")" -eq 5
-if grep -e '<repl>' -e 'macro:' -e 'gensym' -e 'group-' -e 'malformed' \
+# Arity errors stop in the compiler before a helper call.
+grep -qx '<repl>:1:5: type: function takes 1 argument, not 0' "$tmp/err"
+grep -qx '<repl>:1:5: type: function takes 0 arguments, not 1' "$tmp/err"
+test "$(grep -c '^evaluation failed: ' "$tmp/err")" -eq 3
+test "$(grep -c '^<repl>:' "$tmp/err")" -eq 2
+if grep -e 'macro:' -e 'gensym' -e 'group-' -e 'malformed' \
      "$tmp/err"; then
   exit 1
 fi

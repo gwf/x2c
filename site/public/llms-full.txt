@@ -1195,7 +1195,11 @@ int (start, stop, step) = bounds;
 
 List record = %(7 2.5 "ready");
 (int id, float score, String state) = record;
+Var (_, _, status) = record;
 ```
+
+A `_` target in the shared-type form discards its element and declares
+nothing, so the declaration names only the positions it uses.
 
 Assignment destructuring returns its source unchanged, so one result can feed
 several flat views without another call or copy:
@@ -2606,10 +2610,12 @@ List copy = (first, second) = values;
 The leading declaration specifier in `int (start, stop, step)` applies to
 every name. The parenthesized typed form gives each target a type, written as
 it would be in a parameter declaration. Both forms declare their names in the
-enclosing block. Storage classes and per-target initializers are not accepted
-inside the parentheses. Inside a `%()` `List` literal, use `$(...)` to insert a
-C character expression because the `List` reader reads a bare single quote as
-`quote`.
+enclosing block. In the first form, a target spelled `_` discards its element
+and declares nothing, so `_` may appear more than once: `Var (_, b, _) =
+values;` declares only `b`. Storage classes and per-target initializers are
+not accepted inside the parentheses. Inside a `%()` `List` literal, use
+`$(...)` to insert a C character expression because the `List` reader reads a
+bare single quote as `quote`.
 
 The singleton assignment destructures. It assigns element zero; the left side
 is not a parenthesized scalar assignment.
@@ -5124,8 +5130,13 @@ The optional typed families have different indexing rules:
   indices, and it rejects indexed updates as `List` does.
 
 `Array`, `List`, and `String` support `value[start:stop:step]`. Bounds and step
-may be omitted. Negative bounds and reverse steps are normalized consistently.
-A zero step is invalid.
+may be omitted. A zero step is invalid. A negative `start` counts elements
+from the end. A negative `stop` on a forward step counts endpoints from the
+end: -1 is the length, so `value[:-1]` is the whole value and `value[:-2]`
+omits the last element. With a negative step, a negative `stop` names the
+element the slice stops before, so -1 is the last element. The
+[collections guide](https://x2c-lang.dev/docs/guide/collections.html#indexing-and-slicing) shows the
+forward rule shared by `Array.setslice` and `Array.remslice`.
 
 `List` indexed updates and `String` character updates remain unsupported.
 `Array`-level and `Map`-level `+=` are also unsupported; update an element
@@ -7107,9 +7118,9 @@ its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
-programs. The command is experimental and available in checkout builds;
-`make install` does not install it. With no operands, it searches below the
-nearest `x2c.toml`, or the current directory. Discovery selects
+programs. Normal compiler installations include the command, as do checkout
+builds. With no operands, it searches below the nearest `x2c.toml`, or the
+current directory. Discovery selects
 `*_test.x`, `test_*.x`, and `.x` files inside `tests/`, excluding
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
@@ -7127,6 +7138,19 @@ The command returns 2 if filters select no tests across the whole run,
 including when listing tests, or if discovery finds no files. Actual build or
 test failures return 1 even when other files have no matches. See
 [Testing](https://x2c-lang.dev/docs/guide/testing.html) for the test library and assertions.
+
+`x2c bind` writes the mechanical part of a new package from a C header.
+The command is experimental and available in checkout builds; `make install`
+does not install it. Run `x2c help bind` for its options. It names a handle
+type for each opaque struct pointer that a function takes first, forwards
+those functions as inline methods, and adopts `Cleanup` for a release paired
+with an acquisition, such as `close` with `open`. Functions without a handle
+receiver remain C calls through the header. A later run replaces only the
+marked generated region of the package's entry unit. Generated parameters
+are positional, because collection records parameter types without names.
+The command does not write the ordinary x2c surface, Error conversion,
+dependency pins, or license files; see
+[Wrapping a C Library](https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html) for that work.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

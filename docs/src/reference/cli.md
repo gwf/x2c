@@ -829,9 +829,9 @@ its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
-programs. The command is experimental and available in checkout builds;
-`make install` does not install it. With no operands, it searches below the
-nearest `x2c.toml`, or the current directory. Discovery selects
+programs. Normal compiler installations include the command, as do checkout
+builds. With no operands, it searches below the nearest `x2c.toml`, or the
+current directory. Discovery selects
 `*_test.x`, `test_*.x`, and `.x` files inside `tests/`, excluding
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
@@ -849,6 +849,19 @@ The command returns 2 if filters select no tests across the whole run,
 including when listing tests, or if discovery finds no files. Actual build or
 test failures return 1 even when other files have no matches. See
 [Testing](../guide/testing.md) for the test library and assertions.
+
+`x2c bind` writes the mechanical part of a new package from a C header.
+The command is experimental and available in checkout builds; `make install`
+does not install it. Run `x2c help bind` for its options. It names a handle
+type for each opaque struct pointer that a function takes first, forwards
+those functions as inline methods, and adopts `Cleanup` for a release paired
+with an acquisition, such as `close` with `open`. Functions without a handle
+receiver remain C calls through the header. A later run replaces only the
+marked generated region of the package's entry unit. Generated parameters
+are positional, because collection records parameter types without names.
+The command does not write the ordinary x2c surface, Error conversion,
+dependency pins, or license files; see
+[Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

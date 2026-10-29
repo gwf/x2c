@@ -76,6 +76,7 @@ Paths below are relative to `lib/`.
 | `file.x`, `logger.x`, `path.x`, `process.x`, `args.x`, `scripting.x` | System boundaries, argument parsing, and script-unit includes. |
 | `json.x`, `datum.x`, `datum-reader.x` | JSON and Lisp reader text. |
 | `diff.x`, `digest.x`, `regex.x` | Line differences, SHA-256 digests, and regular expressions. |
+| `time.x`, `random.x`, `encoding.x`, `url.x` | Clocks and calendar time, random values and UUIDs, text encodings, and URLs. |
 | `context.x`, `thread.x`, `thread-state.x`, `channel.x`, `mutex.x` | Runtime state, native workers, communication, and coordination. |
 | `scan.x`, `tokenizer.x` | Lexical scanners and the shared tokenizer. |
 | `func/func.x`, `lisp/lisp.x`, `lisp-targets/lisp-targets.x`, `lisp-bindings.x` | Native callable binding, runtime Lisp, and its native operations. |

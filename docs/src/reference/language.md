@@ -1279,10 +1279,12 @@ List copy = (first, second) = values;
 The leading declaration specifier in `int (start, stop, step)` applies to
 every name. The parenthesized typed form gives each target a type, written as
 it would be in a parameter declaration. Both forms declare their names in the
-enclosing block. Storage classes and per-target initializers are not accepted
-inside the parentheses. Inside a `%()` `List` literal, use `$(...)` to insert a
-C character expression because the `List` reader reads a bare single quote as
-`quote`.
+enclosing block. In the first form, a target spelled `_` discards its element
+and declares nothing, so `_` may appear more than once: `Var (_, b, _) =
+values;` declares only `b`. Storage classes and per-target initializers are
+not accepted inside the parentheses. Inside a `%()` `List` literal, use
+`$(...)` to insert a C character expression because the `List` reader reads a
+bare single quote as `quote`.
 
 The singleton assignment destructures. It assigns element zero; the left side
 is not a parenthesized scalar assignment.
@@ -3797,8 +3799,13 @@ The optional typed families have different indexing rules:
   indices, and it rejects indexed updates as `List` does.
 
 `Array`, `List`, and `String` support `value[start:stop:step]`. Bounds and step
-may be omitted. Negative bounds and reverse steps are normalized consistently.
-A zero step is invalid.
+may be omitted. A zero step is invalid. A negative `start` counts elements
+from the end. A negative `stop` on a forward step counts endpoints from the
+end: -1 is the length, so `value[:-1]` is the whole value and `value[:-2]`
+omits the last element. With a negative step, a negative `stop` names the
+element the slice stops before, so -1 is the last element. The
+[collections guide](../guide/collections.md#indexing-and-slicing) shows the
+forward rule shared by `Array.setslice` and `Array.remslice`.
 
 `List` indexed updates and `String` character updates remain unsupported.
 `Array`-level and `Map`-level `+=` are also unsupported; update an element

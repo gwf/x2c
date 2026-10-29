@@ -1,3 +1,4 @@
+bind|experimental|Generate a package's raw tier from a C header
 build|shipped|Build and execute applications and scripts
 graph|experimental|Inspect x2c source graphs
 lint|experimental|Inspect x2c source style and idioms
@@ -5,4 +6,4 @@ lsp|shipped|Serve editors over the Language Server Protocol
 new|shipped|Create a project that builds and runs
 package|shipped|Install, remove, and list packages
 repl|experimental|Evaluate a supported x2c subset
-test|experimental|Build and run project tests
+test|shipped|Build and run project tests

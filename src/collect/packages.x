@@ -153,20 +153,14 @@ module int _in_runtime(String path) =>
    prefixed aggregate crosses with it. Source-node and helper rows carry no C
    spelling of their own. */
 static String _package_key_spelling(List key) {
-  if (key ~= %("function-inline" ?(String name))) return name;
-  Var (head, spelling_value) = key;
-  if (head is <string>) {
-    String spelling = head;
-    if (key.cdr() || spelling == "source-node") return NULL;
-    return spelling == "source-typedef" ? NULL : spelling;
+  match (key) {
+    case %("function-inline" ?(String name)): return name;
+    case %(?(String name)):
+      return name == "source-node" || name == "source-typedef" ? NULL : name;
+    case %(self ?(String name)): return name;
+    case %((!or typedef struct union enum) ?(String name) *): return name;
   }
-  if (head == <self>)
-    return key.cdr() && !key.cddr() && spelling_value is <string>
-         ? spelling_value : NULL;
-  if (head != <typedef> && head != <struct> &&
-      head != <union> && head != <enum>) return NULL;
-  return key.cdr() && spelling_value is <string>
-       ? spelling_value : NULL;
+  return NULL;
 }
 
 /* Protocol declarations and adoptions are keyed by source location, and

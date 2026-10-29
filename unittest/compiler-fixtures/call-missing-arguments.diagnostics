@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/call-missing-arguments.x:9:26: type: function takes 3 arguments, not 1
+    return Survey.signature(value);
+                           ^
+

@@ -2587,9 +2587,8 @@ static void _binding(Emitter * e, List ast){
 List Type_declaration_ast(Type, List);
 
 static List _semantic_type(Emitter * e, Type type){
-  List _, base, bindings;
+  List base, bindings;
   List _x2c_gensym_destructure_6 = Type_declaration_ast(type, NULL);
-  _ = Var_list_payload(List_getindex(_x2c_gensym_destructure_6, 0));
   base = Var_list_payload(List_getindex(_x2c_gensym_destructure_6, 1));
   bindings = Var_list_payload(List_getindex(_x2c_gensym_destructure_6, 2));
   return _tokens(&((* e)), List_var(cons(List_var(base), cons(List_var(bindings), NULL))));
