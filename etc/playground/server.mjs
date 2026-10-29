@@ -74,7 +74,10 @@ export async function compileInContainer(source, { image = 'x2c-playground', tim
       child.on('error', () => { stop(new CompileError(503, 'Compiler container is unavailable.')); });
       child.on('close', code => {
         if (failure) return reject(failure);
-        if (code !== 0) return reject(new CompileError(422, errors.trim() || 'Compilation failed.'));
+        if (code !== 0) {
+          stop(new CompileError(422, errors.trim() || 'Compilation failed.'));
+          return reject(failure);
+        }
         try { resolve(JSON.parse(output)); }
         catch { reject(new CompileError(502, 'Compiler returned an invalid result.')); }
       });

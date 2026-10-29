@@ -90,7 +90,7 @@ build: bootstrap-ready					## Build the runtime and compiler
 META_INPUTS := $(shell find src lib etc -type f \
   \( -name '*.x' -o -name '*.h' -o -name '*.xlisp' \) \
   ! -path src/linked-meta.x ! -path etc/meta-queries.x | LC_ALL=C sort) \
-  bin/x2c-bootstrap tools/gen-linked-meta.sh tools/gen-meta-queries.sh \
+  tools/gen-linked-meta.sh tools/gen-meta-queries.sh \
   tools/sources.sh Makefile
 META_OUTPUTS := src/linked-meta.x etc/meta-queries.x
 .PHONY: meta-generated meta-inputs-force
@@ -104,7 +104,7 @@ endif
 
 debug/meta-inputs.list: meta-inputs-force
 	@mkdir -p debug
-	@cksum $(META_INPUTS) >$@.tmp
+	@cksum $(META_INPUTS) "$$(command -v "$${X2C:-bin/x2c-bootstrap}")" >$@.tmp
 	@if cmp -s $@.tmp $@; then rm $@.tmp; \
 	  else mv $@.tmp $@; rm -f debug/meta-generated.stamp; fi
 

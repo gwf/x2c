@@ -129,6 +129,23 @@ test('container runner supplies isolation flags and removes timed-out containers
   assert.equal(cleanupSettled, false, 'failed removal must hold the slot after client closure');
   await rm(failRemoval);
   await cleanupRejected;
+
+  await writeFile(failRemoval, '');
+  const removals = args => args.split('\n').filter(line => line.startsWith('rm ')).length;
+  const beforeRemovals = removals(await readFile(log, 'utf8'));
+  let startSettled = false;
+  const failedStart = compileInContainer('source').finally(() => { startSettled = true; });
+  const startRejected = assert.rejects(failedStart, error => error.status === 422);
+  try {
+    for (let i = 0; i < 200 && !startSettled &&
+         removals(await readFile(log, 'utf8')) === beforeRemovals; i++)
+      await new Promise(resolve => setTimeout(resolve, 5));
+    assert.equal(startSettled, false, 'natural start failure must await confirmed removal');
+    assert.ok(removals(await readFile(log, 'utf8')) > beforeRemovals);
+  } finally {
+    await rm(failRemoval, { force: true });
+    await startRejected;
+  }
 });
 
 test('cancels only the disconnected compilation and holds its slot through cleanup', async t => {
