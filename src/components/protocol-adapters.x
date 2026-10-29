@@ -93,7 +93,7 @@ meta static Code _protocol_prototype(List name, Type expected) {
 meta static void _protocol_descriptor(List descriptor, List slots) {
   if (descriptor ~= %(?(List methods) ?(String name) ?(Symbol var_tag)
       ?(Symbol area) *explicit)) {
-    Code table = %(expr ("VarMethods") (ident $methods));
+    Code table = $!VarMethods{ $methods };
     List init = %(unit-init $area);
     x2c_place(%(unit-support), $!Unit{ static VarMethods $methods; });
     /* A table with no slots stays zero, which avoids an empty

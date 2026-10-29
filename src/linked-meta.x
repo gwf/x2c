@@ -1238,7 +1238,7 @@ static Code _lambda_bridge(
     fields.push($!( $field ));
   }
   List declared = parameters.list_free(), values = fields.list_free();
-  Code made = %(expr ("FuncAdapter") (ident $adapter));
+  Code made = $!FuncAdapter{ $adapter };
   return $!Unit{
     Func $bridge(@declared) {
       struct $context $record = { @values };
@@ -2310,7 +2310,7 @@ static Code _protocol_prototype(List name, Type expected) {
 static void _protocol_descriptor(List descriptor, List slots) {
   if (descriptor ~= %(?(List methods) ?(String name) ?(Symbol var_tag)
       ?(Symbol area) *explicit)) {
-    Code table = %(expr ("VarMethods") (ident $methods));
+    Code table = $!VarMethods{ $methods };
     List init = %(unit-init $area);
     x2c_place(%(unit-support), $!Unit{ static VarMethods $methods; });
     /* A table with no slots stays zero, which avoids an empty
@@ -2488,14 +2488,13 @@ static Code _string_switch_helper(Type type, List labels) {
   List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
   Array tests = [];
   int index = 0;
-  foreach (List label in labels) {
-    List value = $!int{ $(++index) };
-    tests.push($!{ if ($s == $label) return $value; });
-  }
-  List body = tests.list_free();
+  foreach (List label in labels)
+    tests.push($!{ if ($s == $label) return $(++index); });
   x2c_place(
     %(unit-support $key),
-    $!Unit{ static int $name($type $s) { @body return 0; } });
+    $!Unit{
+      static int $name($type $s) { @(tests.list_free()) return 0; }
+    });
   Type callable = %((func ($type)) int);
   return $!($callable){ $name };
 }

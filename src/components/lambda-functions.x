@@ -440,7 +440,7 @@ meta static Code _lambda_bridge(
     fields.push($!( $field ));
   }
   List declared = parameters.list_free(), values = fields.list_free();
-  Code made = %(expr ("FuncAdapter") (ident $adapter));
+  Code made = $!FuncAdapter{ $adapter };
   return $!Unit{
     Func $bridge(@declared) {
       struct $context $record = { @values };
