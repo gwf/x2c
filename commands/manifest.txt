@@ -1,3 +1,4 @@
+bind|experimental|Generate a package's raw tier from a C header
 build|shipped|Build and execute applications and scripts
 graph|experimental|Inspect x2c source graphs
 lint|experimental|Inspect x2c source style and idioms
