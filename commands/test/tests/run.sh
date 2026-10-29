@@ -64,6 +64,43 @@ grep -Fxq 'files: 0 passed, 1 failed; tests: 0 passed, 1 failed' "$WORK/out"
 run tests/deep --list
 [ "$status" = 0 ]
 grep -Fxq failing "$WORK/out"
+# A fast completion replenishes its slot while reports stay in discovery order.
+mkdir -p "$WORK/scheduling"
+cat >"$WORK/scheduling/a_schedule_test.x" <<FIRST
+#include "path.x"
+int main(void) {
+  Path marker = "$WORK/scheduling/marker";
+  for (int i = 0; i < 3000; i++) {
+    if (marker.read_text() == "third") {
+      puts("first reported");
+      return 0;
+    }
+    usleep(1000);
+  }
+  puts("first blocked third");
+  return 1;
+}
+FIRST
+printf '#include "x2c.x"\nint main(void) { puts("second reported"); return 0; }\n' \
+  >"$WORK/scheduling/b_schedule_test.x"
+cat >"$WORK/scheduling/c_schedule_test.x" <<THIRD
+#include "path.x"
+int main(void) {
+  Path marker = "$WORK/scheduling/marker";
+  marker.write_text("third");
+  puts("third reported");
+  return 0;
+}
+THIRD
+printf third >"$WORK/scheduling/marker"
+run "$WORK/scheduling"
+[ "$status" = 0 ]
+printf waiting >"$WORK/scheduling/marker"
+run -j 2 "$WORK/scheduling"
+[ "$status" = 0 ]
+printf 'first reported\nsecond reported\nthird reported\nfiles: 3 passed, 0 failed; tests: 0 passed, 0 failed\n' \
+  >"$WORK/scheduling/expected"
+cmp "$WORK/scheduling/expected" "$WORK/out"
 # The command recognizes both filename patterns and deduplicates operands.
 cp "$WORK/project/a_test.x" "$WORK/project/test_copy.x"
 run a_test.x test_copy.x a_test.x --quiet

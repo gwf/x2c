@@ -90,16 +90,7 @@ static Array _discover(List operands, Path root) {
       Path base = path == root || path.startswith(root_prefix) ? root : path;
       String prefix = %"$(base.rstrip("/"))/";
       int tests = explicit && path != root && path.basename() == "tests";
-      foreach (Path file in path.walk()) {
-        String relative = file.remove_prefix(prefix);
-        if (!file.is_file() || relative.startswith(".x2c-build/") ||
-            "/.x2c-build/" in relative) continue;
-        String name = file.basename();
-        if (name.endswith("_test.x") ||
-            (name.startswith("test_") && name.endswith(".x")) ||
-            ((tests || relative.startswith("tests/") || "/tests/" in relative) &&
-              name.endswith(".x"))) unique[file] = 1;
-      }
+      _discover_directory(unique, path, prefix, tests);
     }
     else Diagnostics.driver_error(%"test: no such file or directory '$path'");
   }
@@ -107,31 +98,68 @@ static Array _discover(List operands, Path root) {
   return files.sort();
 }
 
-static void _run_files(Run &run, Array files) {
+static void _discover_directory(
+  Map unique, Path directory, String prefix, int tests) {
   Array pending = [];
-  int next = 0;
-  for (int i = 0; i < files.len(); i++) {
+  foreach (String name in directory.list_dir().reverse())
+    pending.push(directory.join(name));
+  while (pending.len()) {
+    Path file = pending.take_last();
+    String relative = file.remove_prefix(prefix);
+    if (relative.startswith(".x2c-build/") ||
+        "/.x2c-build/" in relative || file.basename() == ".x2c-build") continue;
+    if (file.is_file()) {
+      String name = file.basename();
+      if (name.endswith("_test.x") ||
+          (name.startswith("test_") && name.endswith(".x")) ||
+          ((tests || relative.startswith("tests/") || "/tests/" in relative) &&
+            name.endswith(".x"))) unique[file] = 1;
+    }
+    else {
+      struct stat info;
+      if (lstat(file, &info) || !S_ISDIR(info.st_mode) ||
+          access(file, R_OK | X_OK)) continue;
+      foreach (String name in file.list_dir().reverse())
+        pending.push(file.join(name));
+    }
+  }
+}
+
+static void _run_files(Run &run, Array files) {
+  Array pending = [], ordered = [];
+  int next = 0, reported = 0;
+  while (reported < files.len()) {
     while (next < files.len() && pending.len() < run.jobs) {
-      Path file = files[next++];
-      pending.push(_start(run, file));
+      Job job = _start(run, files[next++]);
+      pending.push(job);
+      ordered.push(job);
     }
-    Job job = pending.remove(0);
-    int status = job.status();
-    String output = status ? job.output_text : job.output();
-    List lines = output.split_lines(0);
-    String summary = lines ? lines.reverse().car() : NULL;
-    int passed, failed, skipped;
-    int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
-                                    &passed, &failed, &skipped) == 3;
-    if (run.filtered && status == 2 && counts &&
-        !passed && !failed && !skipped) continue;
-    if (output) fputs(output, stdout);
-    if (status) run.files_failed++;
-    else run.files_passed++;
-    if (counts) {
-      run.tests_passed += passed;
-      run.tests_failed += failed;
+    while (reported < ordered.len()) {
+      Job job = ordered[reported];
+      if (!job.finished) break;
+      _report(run, job);
+      reported++;
     }
+    Job.wait_any(pending);
+  }
+}
+
+static void _report(Run &run, Job job) {
+  int status = job.status();
+  String output = status ? job.output_text : job.output();
+  List lines = output.split_lines(0);
+  String summary = lines ? lines.reverse().car() : NULL;
+  int passed, failed, skipped;
+  int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
+                                  &passed, &failed, &skipped) == 3;
+  if (run.filtered && status == 2 && counts &&
+      !passed && !failed && !skipped) return;
+  if (output) fputs(output, stdout);
+  if (status) run.files_failed++;
+  else run.files_passed++;
+  if (counts) {
+    run.tests_passed += passed;
+    run.tests_failed += failed;
   }
 }
 
