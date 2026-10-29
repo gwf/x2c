@@ -8,7 +8,7 @@ the website also consumes the concise summary when it builds.
 
 The detailed record is derived from tracked files alone, so the same commit
 always produces the same record on any machine. The concise summary measures
-the current src/, lib/, etc/, unittest/, and examples/ files.
+the current src/, lib/, commands/, etc/, unittest/, and examples/ files.
 
     tools/repo-metrics.py                 # human-readable table
     tools/repo-metrics.py --json          # one JSON object
@@ -43,6 +43,7 @@ LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
 SUMMARY_GROUPS = {
     "src": "src/**/*.x",
     "lib": "lib/**/*.x",
+    "commands": "commands/**/*.x",
     "xlisp": "**/*.xlisp",
     "etc": "etc/*.x",
 }
@@ -56,6 +57,7 @@ class Fatal(Exception):
 SOURCE_GROUPS = [
     ("compiler", "src/**/*.x", "module"),
     ("runtime", "lib/**/*.x", "module"),
+    ("commands", "commands/**/*.x", "module"),
     ("support", "etc/*.x", "module"),
     ("lisp", LISP_PATTERNS, "Lisp file"),
     ("tests", "unittest/test-*.x", "suite"),
@@ -335,6 +337,7 @@ def render_summary(record: dict, color: bool) -> str:
         f"{_paint('Source        ', CYAN, color)}  Code  Comments",
     ]
     for name, title in (("src", "src/"), ("lib", "lib/"),
+                        ("commands", "commands/"),
                         ("xlisp", "X Lisp"), ("etc", "etc/")):
         label = _paint(title.ljust(14), CYAN, color)
         lines.append(
