@@ -46,7 +46,7 @@ static List _prepare(Compiler c, int depth, int limit) {
   List syntax = $!Unit{
     String $entry(void) {
       Buffer $output = Buffer.new(0);
-      $type $value = {7, {1, 2, 3}, NULL, 9, 5};
+      $type $value = {7, {1, 2, 3}, NULL, 9, 5, {.first=11}};
       @($(render))
       String result = $buffer;
       $buffer.free();
@@ -78,7 +78,8 @@ int main(int argc, char **argv) {
   Compiler c = unit.compiler;
   List record = _definition(c,
     "typedef struct Probe { int x; int values[3]; int *pointer; "
-    "volatile int watch; unsigned bits:3; } Probe;");
+    "volatile int watch; unsigned bits:3; "
+    "union { int first; long second; } choice; } Probe;");
   ReplSession session = xcalloc(1, sizeof(struct ReplSession));
   session.compiler = c;
   session.names = {};
@@ -91,6 +92,12 @@ int main(int argc, char **argv) {
   _check("pointer: 0x0" in full && "watch: <volatile>" in full,
          %"pointer or volatile field was followed: $full");
   _check("bits: 5" in full, %"bitfield missing: $full");
+  _check("members: first, second" in full,
+         %"union member choices missing: $full");
+  String union_limited = _render(c, $(record), 3, 10);
+  _check("members: first, ..." in union_limited &&
+         !("first, second" in union_limited),
+         %"union choices exceeded the shared entry budget: $union_limited");
   String shallow = _render(c, $(record), 1, 100);
   _check("values: ..." in shallow, %"depth was not bounded: $shallow");
   String bounded = _render(c, $(record), 3, 2);

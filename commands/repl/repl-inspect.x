@@ -448,7 +448,7 @@ static void _render_fields(
     if (!name && !(member_shape ~= %(union *))) continue;
     List selected = name
       ? %(expr $member (op . $expression ($name))) : NULL;
-    List value = !name ? _render_union(c, member_shape, output)
+    List value = !name ? _render_union(c, member_shape, output, remaining)
       : <volatile> in c.sym.normalize_declared_type(member)
         ? _write(output, "<volatile>")
         : _render_value(c, member, selected, output, remaining, depth - 1);
@@ -487,18 +487,31 @@ static List _render_struct(
   };
 }
 
-static List _render_union(Compiler c, Type shape, List output) {
-  Buffer text = auto Buffer.new(0);
-  text.write("{ members: ");
-  int separator = 0;
+static List _render_union(
+  Compiler c, Type shape, List output, List remaining) {
+  Array statements = [];
+  List separator = c.sym.introduce(c.fresh_name("repl_union_separator"));
+  List separated = %(expr (int) (ident $separator));
   foreach (List row in c.sym.field_order(shape).cdr()) {
     String name = row.car();
     if (!name) continue;
-    if (separator++) text.write(", ");
-    text.write(name);
+    statements.push($!{
+      if ($separated) $output.write(", ");
+      if ($remaining <= 0) {
+        $output.write("...");
+        break;
+      }
+      $output.write($name);
+      $separated = 1;
+      $remaining--;
+    });
   }
-  text.write("; select a member to inspect }");
-  return _write(output, text);
+  return $!{
+    $output.write("{ members: ");
+    int $separator = 0;
+    do { @(statements.list_free()) } while (0);
+    $output.write("; select a member to inspect }");
+  };
 }
 
 static List _render_value(
@@ -525,7 +538,7 @@ static List _render_value(
     return _render_array(c, shape, expression, output, remaining, depth);
   if (shape ~= %(struct *))
     return _render_struct(c, shape, expression, output, remaining, depth);
-  if (shape ~= %(union *)) return _render_union(c, shape, output);
+  if (shape ~= %(union *)) return _render_union(c, shape, output, remaining);
   return _write(output, "<unavailable>");
 }
 
