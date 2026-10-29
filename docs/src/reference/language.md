@@ -4669,8 +4669,9 @@ use and adds a note that names the macro and where it is defined.
 `--dump-tokens` prints the expanded tokens and marks each one with the macro
 whose use produced it.
 
-A condition is decided when every name it tests is visible, is known never to
-be defined, or is a literal. `#if` arithmetic is evaluated over `long`, and
+Within signed `long` arithmetic, a condition is decided when every name it
+tests is visible, is known never to be defined, or is a literal. Unsigned
+operands and integer magnitudes outside that range remain undecided.
 `defined NAME` fails after `#undef NAME`. x2c output is compiled as C by a
 GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
 `_MSC_VER` are never defined; a compiler built for a host other than Windows
