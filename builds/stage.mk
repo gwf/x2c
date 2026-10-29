@@ -107,10 +107,10 @@ BIN_C_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.c.d,$(BIN_X_NAMES))
 # Stage 0's batches are translated by the bootstrap compiler, and the
 # interfaces they write carry its identity. Once this stage's compiler is a
 # different executable it can replay none of them, so each of its processes
-# would walk the runtime sources. The stage therefore rewrites the library's
-# interfaces with its own compiler, keeping the bootstrap's C. Later stages
-# keep the previous compiler's interfaces, which proof-cold-collection
-# compares with that compiler's cold walk.
+# would walk the runtime sources. When `env` reports a prelude it cannot
+# replay, the stage rewrites the library's interfaces with its own compiler,
+# keeping the bootstrap's C. Later stages keep the previous compiler's
+# interfaces, which proof-cold-collection compares with its cold walk.
 ifeq ($(DIRECTORY),0)
 OWN_INTERFACES = $(LIB_BUILD)/.own-interfaces
 endif
@@ -125,9 +125,9 @@ target: $(LIBRARY) $(BINARY) $(BUILD_COMMAND) $(OWN_INTERFACES)
 
 ifdef OWN_INTERFACES
 $(OWN_INTERFACES): $(BINARY) $(LIB_BUILD)/.translated
-	@set -e; identity=`./$(BINARY) env identity`; \
-	  if [ "`head -c 31 $(LIB_BUILD)/x2c.xi`" != \
-	       "(interface 6 \"$$identity\"" ]; then \
+	@set -e; \
+	  if [ -z "`./$(BINARY) env prelude`" ] || \
+	     [ -n "`./$(BINARY) env prelude_missing`" ]; then \
 	    rm -rf $@.tmp; \
 	    ./$(BINARY) translate -q -j $(BUILD_JOBS) $(X2C_FLAGS) \
 	      --out-dir $@.tmp $(LIB_X_FILES); \
