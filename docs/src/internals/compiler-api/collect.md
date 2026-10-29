@@ -45,7 +45,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
 | [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
-| [`Compiler.prepare_macro_exports`](#Compiler.prepare_macro_exports) | Prepares a file's macro exports through signature-only collection. |
+| [`Compiler.prepare_macro_exports`](#Compiler.prepare_macro_exports) | Prepares the root's ordered CPP parts for a discovery query. |
 | [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
 | [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
@@ -445,9 +445,9 @@ Source: `src/collect/walk.x`
 
 `void Compiler.prepare_macro_exports(Compiler c, String path)`
 
-Prepares a file's macro exports through signature-only collection.
-The ordinary collector owns include traversal and retains the exports;
-lookahead entries are provisional until ordinary collection replaces them.
+Prepares the root's ordered CPP parts for a discovery query. The same
+file walk owns includes; its temporary parts contain no declarations.
+Other callers retain the existing signature-only collection service.
 
 Source: `src/collect/providers.x`
 

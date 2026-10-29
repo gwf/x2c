@@ -480,8 +480,12 @@ static void _x2c_gensym_macro__insert_all_0(Map _x2c_gensym_macro_map_15, Map _x
   while(f3_map___Map_try_next_entry(_x2c_gensym_macro_other_0, & _x2c_gensym_macro_cursor_1, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3)) f3_map___Map_set_entry(_x2c_gensym_macro_map_15, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3);
 }
 
+int Map_truth(Map _x2c_gensym_macro_map_38);
+
 static Map f3_map___Map_copy_entries(Map _x2c_gensym_macro_map_16){
-  Map _x2c_gensym_macro_copy_0 = f3_map___Map_new_table(_x2c_gensym_macro_map_16, 2), _x2c_gensym_macro_result_0 = 0;
+  unsigned _x2c_gensym_macro_capacity_4 = 2;
+  if(Map_truth(_x2c_gensym_macro_map_16)) while(_x2c_gensym_macro_map_16 -> used >(unsigned long) _x2c_gensym_macro_capacity_4 * 3 / 4) _x2c_gensym_macro_capacity_4 *= 2;
+  Map _x2c_gensym_macro_copy_0 = f3_map___Map_new_table(_x2c_gensym_macro_map_16, _x2c_gensym_macro_capacity_4), _x2c_gensym_macro_result_0 = 0;
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -510,8 +514,6 @@ static Map f3_map___Map_copy_entries(Map _x2c_gensym_macro_map_16){
   }
 
 }
-
-int Map_truth(Map _x2c_gensym_macro_map_38);
 
 static Map f3_map___Map_merge_entries(Map _x2c_gensym_macro_map_17, Map _x2c_gensym_macro_other_1){
   if(! Map_truth(_x2c_gensym_macro_other_1)) return _x2c_gensym_macro_map_17;
@@ -583,13 +585,13 @@ void Map_move_to(Map _x2c_gensym_macro_map_3, Scope * _x2c_gensym_macro_destinat
   Scope_transfer(_x2c_gensym_macro_map_3 -> scope, * _x2c_gensym_macro_destination_0);
 }
 
-Map Map_new_capacity(unsigned _x2c_gensym_macro_capacity_4){
-  if(! f3_map____capacity_valid(_x2c_gensym_macro_capacity_4)){
+Map Map_new_capacity(unsigned _x2c_gensym_macro_capacity_5){
+  if(! f3_map____capacity_valid(_x2c_gensym_macro_capacity_5)){
     if(1){
       Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
         static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/map/map.x",.function = "Map_new_capacity",.line = 84,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_4));
+        x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_5));
         __builtin_unreachable();
       }
 
@@ -597,7 +599,7 @@ Map Map_new_capacity(unsigned _x2c_gensym_macro_capacity_4){
     (void) f3_map____bad_arg(0);
   }
   Map _x2c_gensym_macro_map_22 = 0;
-  return f3_map___Map_new_table(_x2c_gensym_macro_map_22, _x2c_gensym_macro_capacity_4);
+  return f3_map___Map_new_table(_x2c_gensym_macro_map_22, _x2c_gensym_macro_capacity_5);
 }
 
 Map Map_new(void){

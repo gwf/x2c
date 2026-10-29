@@ -102,6 +102,7 @@ typedef struct Compiler{
   Cpp cpp;
   List command_macros;
   String macro_export_source;
+  Map macro_export_parts;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -873,7 +874,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2297);
+  _295 = int_var(2299);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));
@@ -1192,6 +1193,7 @@ static void f9_lifecycle____share_unit(Compiler c, Compiler owner){
   c -> pending_inline_bodies = owner -> pending_inline_bodies;
   c -> collection_native_files = owner -> collection_native_files;
   c -> command_macros = owner -> command_macros;
+  c -> macro_export_parts = owner -> macro_export_parts;
 }
 
 static void f9_lifecycle____own_unit(Compiler c){

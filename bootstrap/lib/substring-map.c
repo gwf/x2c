@@ -464,7 +464,9 @@ static void _x2c_gensym_macro__insert_all_0(MapSubInt _x2c_gensym_macro_map_15, 
 }
 
 static MapSubInt MapSubInt_copy_entries(MapSubInt _x2c_gensym_macro_map_16){
-  MapSubInt _x2c_gensym_macro_copy_0 = MapSubInt_new_table(_x2c_gensym_macro_map_16, 2), _x2c_gensym_macro_result_0 = 0;
+  unsigned _x2c_gensym_macro_capacity_4 = 2;
+  if(_x2c_gensym_macro_map_16) while(_x2c_gensym_macro_map_16 -> used >(unsigned long) _x2c_gensym_macro_capacity_4 * 3 / 4) _x2c_gensym_macro_capacity_4 *= 2;
+  MapSubInt _x2c_gensym_macro_copy_0 = MapSubInt_new_table(_x2c_gensym_macro_map_16, _x2c_gensym_macro_capacity_4), _x2c_gensym_macro_result_0 = 0;
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0

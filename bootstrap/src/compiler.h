@@ -93,6 +93,7 @@ typedef struct Compiler{
   Cpp cpp;
   List command_macros;
   String macro_export_source;
+  Map macro_export_parts;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;

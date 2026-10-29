@@ -17,10 +17,13 @@ The C preprocessing x2c performs before parsing.
 | [`Compiler.expand_macros`](#Compiler.expand_macros) | Expands the visible macros of the scanned token stream and decides its conditional groups. |
 | [`Cpp.changes`](#Cpp.changes) | Returns the `(name value)` rows of every macro whose value differs from its value in `initial`: what a file exports to the files that include it. |
 | [`Cpp.copy`](#Cpp.copy) | Returns an independent copy of `cpp`. |
+| [`Cpp.exported_macros`](#Cpp.exported_macros) | Returns an independent table of the macros changed from `initial`. |
 | [`Cpp.hidden`](#Cpp.hidden) | Reports whether C never takes the arm at this point. |
 | [`Cpp.isolated`](#Cpp.isolated) | Returns a state like `Cpp.new` whose `#include` directives apply no macros. |
 | [`Cpp.merge`](#Cpp.merge) | Applies the `(name value)` macro rows that an included file exports. |
+| [`Cpp.merge_table`](#Cpp.merge_table) | Applies an exported table with the same conditional effects as rows. |
 | [`Cpp.new`](#Cpp.new) | Returns a state with the macro table `macros`, which it takes, and no open conditional group. |
+| [`Cpp.rows`](#Cpp.rows) | Returns canonical `(name value)` rows for the table `macros`. |
 | [`Cpp.table`](#Cpp.table) | Returns a macro table holding the `(name value)` rows `rows`. |
 | [`Token.is_word`](#Token.is_word) | Reports whether `t` is an identifier or a keyword, which a macro can name. |
 | [`Token.spelling`](#Token.spelling) | Returns the text that the tokens from `first` through `last` of one stream spell, with the blanks and comments between them as written. |
@@ -91,6 +94,15 @@ Returns an independent copy of `cpp`.
 
 Source: `src/cpp/cpp.x`
 
+<a id="Cpp.exported_macros"></a>
+#### Cpp.exported_macros
+
+`Map Cpp.exported_macros(Cpp cpp, Map initial)`
+
+Returns an independent table of the macros changed from `initial`.
+
+Source: `src/cpp/cpp.x`
+
 <a id="Cpp.hidden"></a>
 #### Cpp.hidden
 
@@ -121,6 +133,15 @@ Definitions and undefinitions update the current conditional group.
 
 Source: `src/cpp/macros.x`
 
+<a id="Cpp.merge_table"></a>
+#### Cpp.merge_table
+
+`void Cpp.merge_table(Cpp cpp, Map macros)`
+
+Applies an exported table with the same conditional effects as rows.
+
+Source: `src/cpp/macros.x`
+
 <a id="Cpp.new"></a>
 #### Cpp.new
 
@@ -128,6 +149,15 @@ Source: `src/cpp/macros.x`
 
 Returns a state with the macro table `macros`, which it takes, and no
 open conditional group.
+
+Source: `src/cpp/cpp.x`
+
+<a id="Cpp.rows"></a>
+#### Cpp.rows
+
+`List Cpp.rows(Map macros)`
+
+Returns canonical `(name value)` rows for the table `macros`.
 
 Source: `src/cpp/cpp.x`
 

@@ -28,6 +28,14 @@ module typedef struct FileWalk {
   int unit, linkage, line, pos, deferred;
 } FileWalk;
 
+/* One CPP replay's runtime baseline and optional discovery proof. A root
+   requests complete ordinary entries; normal replays leave it null. */
+static typedef struct MacroReplay {
+  Map runtime;
+  String root;
+  int complete;
+} MacroReplay;
+
 // collecting a unit
 
 /** Collects the current translation unit's declarations into `globs`.
@@ -196,13 +204,29 @@ void Compiler.install_included_effects(Compiler c) {
 
 /* Macro effects use the same source-ordered parts as declaration replay.
    A currently collected file contributes only its recorded prefix. */
-static List _macro_rows(Compiler c, String path, Map active) {
-  Map runtime = _inside(path, _canonical_lib()) ? {} : _runtime_macros(c);
+static List _macro_rows(
+  Compiler c, String path, Map active, MacroReplay &?query) {
+  Map runtime = _inside(path, _canonical_lib())
+              ? {} : _runtime_macros(c, query);
+  if (query && !query.complete) return NULL;
   Cpp cpp = Cpp.new({});
-  Map visited = {};
-  _replay_included(c, NULL, path, visited, NULL, active, cpp, runtime);
+  auto Map visited = {};
+  defer _free_macro_exports(visited);
+  MacroReplay replay = {.runtime = runtime, .root = query ? query.root : NULL};
+  int complete = _replay_included(
+    c, NULL, path, visited, NULL, active, cpp, replay);
+  if (query && !complete) {
+    query.complete = 0;
+    return NULL;
+  }
   Var rows = visited[path];
-  return rows is void ? NULL : rows.list();
+  return rows is void ? NULL : Cpp.rows(rows.map());
+}
+
+/* These independent snapshots belong only to this replay query. */
+static void _free_macro_exports(Map visited) {
+  foreach (Var (_, exports) in visited)
+    if (exports is <map>) exports.map().cleanup();
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -234,12 +258,21 @@ List Compiler.included_macros(
   Compiler c, String target, int angle, String dir, Map active) {
   String path = c.sources.resolve_include(c.include_dirs, dir, target, angle);
   if (!path) return NULL;
+  String canonical = _canonical_path(path);
   if (c.macro_export_source) {
+    MacroReplay query = {
+      .root = _canonical_path(c.macro_export_source), .complete = 1};
+    auto {
+      List rows = _macro_rows(c, canonical, active, query);
+      if (query.complete) return rows;
+    }
     String source = c.macro_export_source;
     c.macro_export_source = NULL;
     c.prepare_macro_exports(source);
   }
-  return _macro_rows(c, _canonical_path(path), active);
+  if (c.macro_export_parts != NULL)
+    auto { return _macro_rows(c, canonical, active, NULL); }
+  return _macro_rows(c, canonical, active, NULL);
 }
 
 /** Returns the macro table visible before the first line of the file
@@ -251,20 +284,24 @@ List Compiler.included_macros(
 Map Compiler.initial_macros(Compiler c, String path) {
   if (!path) return {};
   String canonical = _canonical_path(path);
-  Map runtime = _inside(canonical, _canonical_lib()) ? {} : _runtime_macros(c);
-  return _initial_macros(c, canonical, runtime);
+  Map runtime = _inside(canonical, _canonical_lib())
+              ? {} : _runtime_macros(c, NULL);
+  return _initial_macros(c, canonical, runtime, 1);
 }
 
-static Map _runtime_macros(Compiler c) {
+static Map _runtime_macros(Compiler c, MacroReplay &?query) {
   String runtime = %"$(x2c_get_root())/lib/x2c.x";
-  return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL));
+  return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL, query));
 }
 
-/* One replay shares only its immutable runtime baseline. Each file still
-   starts from its own command-line policy, without includer definitions. */
-static Map _initial_macros(Compiler c, String path, Map runtime) {
-  Map macros = _inside(path, _canonical_lib()) ? {} : runtime.copy();
-  if (!_runtime_source(path))
+/* A replay can borrow its immutable baseline; the public initializer owns
+   its table. Command-line policy always gets a separate table. */
+static Map _initial_macros(
+  Compiler c, String path, Map runtime, int own) {
+  if (_inside(path, _canonical_lib())) return {};
+  int commands = !_runtime_source(path) && c.command_macros;
+  Map macros = own || commands ? runtime.copy() : runtime;
+  if (commands)
     macros.merge(Cpp.table(c.command_macros));
   return macros;
 }
@@ -365,18 +402,23 @@ static void _walk_file(
   with (c.collection_native = 0,
         c.kw_aliases = {},
         c.layout = tokenizer.layout) {
+    int cpp_only = c.macro_export_parts != NULL;
     FileWalk w = {
       .c = c, .path = path, .text = text, .dir = dir, .module = module,
-      .globs = globs, .visited = visited, .parts = [], .definitions = {},
-      .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
+      .globs = globs, .visited = visited, .parts = [],
+      .definitions = cpp_only ? NULL : {},
+      .dependencies = cpp_only ? NULL : _cache_map(),
+      .statics = cpp_only ? NULL : {},
+      .hashes = cpp_only ? NULL : _cache_map(),
       .unit = Path.is_x2c_source(path), .line = 1};
-    if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
+    if (!cpp_only && path == _canonical_path(c.filename))
+      c.meta_hashes = w.hashes;
     // Editing a member changes the module's contribution.
-    if (module) {
+    if (module && !cpp_only) {
       _cache_dependencies(w.dependencies, module.members);
       c.merge_translation_dependencies(module.members);
     }
-    if (w.unit) {
+    if (w.unit && !cpp_only) {
       String provider = Compiler.portable_path(path);
       Map metadata = _cache_map();
       // Advertisements share this table while later segments fill it.
@@ -389,6 +431,10 @@ static void _walk_file(
     visited[path] = w.parts;
     _split(w, tokenizer.tokens);
     visited[path] = 1;
+    if (cpp_only) {
+      c.macro_export_parts[path] = w.parts.list_free();
+      return;
+    }
     _add_defaults(w);
     _queue_public_bodies(w);
     _select_public(w);
@@ -401,7 +447,7 @@ static void _walk_file(
    ordered parts retain its own directive events beside its include paths. */
 static void _split(FileWalk &w, Token first) {
   Cpp cpp = Cpp.new(w.c.initial_macros(w.path));
-  w.start = cpp.copy();
+  if (w.c.macro_export_parts == NULL) w.start = cpp.copy();
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
     String directive = Compiler.preproc_directive(token.text);
@@ -410,7 +456,7 @@ static void _split(FileWalk &w, Token first) {
       w.parts.push(_cpp_event(w, token));
     int split = !cpp.hidden() && _directive(w, token);
     w.c.cpp_directive(cpp, token, w.path, w.visited);
-    if (split) w.start = cpp.copy();
+    if (split && w.c.macro_export_parts == NULL) w.start = cpp.copy();
   }
   _flush(w, w.text[w.pos:]);
 }
@@ -438,19 +484,25 @@ static void _include_file(FileWalk &w, String target, int angle) {
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
   if (!path || (covered && !Path.is_x2c_source(path))) return;
   String canonical = _canonical_path(path);
-  w.c.add_translation_dependency(canonical);
+  int cpp_only = w.c.macro_export_parts != NULL;
+  if (!cpp_only) w.c.add_translation_dependency(canonical);
   Var state;
   if (!w.visited.try_get(canonical, state)) {
     w.visited[canonical] = 1;
-    List entry = _collection_entry(w.c, canonical);
-    if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
-    _replay_cached(
-      w.c, entry, canonical, w.globs, w.visited, NULL);
+    if (!cpp_only || !(canonical in w.c.macro_export_parts)) {
+      List entry = cpp_only ? _entry(w.c, canonical)
+                           : _collection_entry(w.c, canonical);
+      if (!entry)
+        entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
+      if (entry || !cpp_only)
+        _replay_cached(w.c, entry, canonical, w.globs, w.visited, NULL);
+    }
   }
-  else if (state is <array>)
+  else if (state is <array> && !cpp_only)
     _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited, NULL, NULL);
-  _cache_dependency(
-    w.dependencies, canonical, _walked_hash(w.c, target, canonical));
+  if (!cpp_only)
+    _cache_dependency(
+      w.dependencies, canonical, _walked_hash(w.c, target, canonical));
   w.parts.push(canonical);
 }
 
@@ -473,7 +525,11 @@ module List _walk_cold(
   Map own_visited = {};
   foreach ((String path, Var state) in visited)
     if (state is <array>) own_visited[path] = state;
-  _walk_apart(file, canonical, text, globs.copy(), own_visited);
+  _walk_apart(
+    file, canonical, text,
+    c.macro_export_parts != NULL ? NULL : globs.copy(),
+    own_visited);
+  if (c.macro_export_parts != NULL) return NULL;
   c.merge_translation_dependencies(file.deps);
   c.declaration_produced |= file.declaration_produced;
   return _process_cache()[canonical];
@@ -500,13 +556,15 @@ module void _replay_cached(
   Array effects) {
   Array prefix = effects != NULL ? NULL : [];
   if (prefix != NULL) visited[path] = prefix;
-  foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
+  if (c.macro_export_parts == NULL)
+    foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
   /* Parsing this file read these macro and embedded-text files. They are
      prerequisites of every unit that reaches it, not only of the one that
      parsed it. */
-  c.merge_translation_dependencies(entry[3]);
+  if (c.macro_export_parts == NULL)
+    c.merge_translation_dependencies(entry[3]);
   foreach (Var part in entry.car()) {
-    if (part is <map>) {
+    if (part is <map> && c.macro_export_parts == NULL) {
       _merge_rows(c, globs, part);
       _replay_package_imports(c, globs, part, effects);
     }
@@ -520,12 +578,15 @@ module void _replay_cached(
 /* An included file replays once per unit, from its entry or a cold walk. */
 static void _replay_include(
   Compiler c, String path, Map globs, Map visited, Array effects) {
-  c.add_translation_dependency(path);
+  if (c.macro_export_parts == NULL) c.add_translation_dependency(path);
   if (path in visited) return;
   visited[path] = 1;
-  List entry = effects != NULL ? _entry(c, path) : _collection_entry(c, path);
+  if (c.macro_export_parts != NULL && path in c.macro_export_parts) return;
+  List entry = effects != NULL || c.macro_export_parts != NULL
+             ? _entry(c, path) : _collection_entry(c, path);
   if (!entry) entry = _walk_cold(c, path, path, globs, visited);
-  _replay_cached(c, entry, path, globs, visited, effects);
+  if (entry || c.macro_export_parts == NULL)
+    _replay_cached(c, entry, path, globs, visited, effects);
 }
 
 /* A directive's `#` follows only whitespace and comments on its line. */
@@ -541,6 +602,7 @@ static int _starts_line(Token first, Token token) {
 
 /* Append one segment's nonempty published rows before the next part. */
 static void _flush(FileWalk &w, String segment) {
+  if (w.c.macro_export_parts != NULL) return;
   if (!segment || !*segment) return;
   Map overlay = _cache_map();
   _parse(w, segment, overlay);
@@ -674,6 +736,7 @@ static int _inside(String path, String dir) =>
 /* Preserve absent candidates and alias identity, not directory timestamps.
    Canonical selected files already carry their ordinary content hashes. */
 static void _include_search_dependency(FileWalk &w, String candidate) {
+  if (w.c.macro_export_parts != NULL) return;
   if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
   if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
       candidate == _canonical_path(candidate)) return;
@@ -794,41 +857,55 @@ static void _publish(FileWalk &w) {
 /* A root query visits each file once. Backedges and repeated includes
    consume that query's current prefix or completed rows, never a closure
    retained from an earlier query's include context. */
-static void _replay_included(
+static int _replay_included(
   Compiler c, Map globs, String path, Map visited, Array exports,
-  Map active, Cpp sink, Map runtime) {
+  Map active, Cpp sink, MacroReplay &?query) {
   Var found;
   if (visited.try_get(path, found)) {
     if (sink) {
       if (found is <array>) {
         Array state = found;
         Cpp cpp = (Cpp) state[0].pointer();
-        sink.merge(cpp.changes(state[1]));
+        auto Map macros = cpp.exported_macros(state[1]);
+        sink.merge_table(macros);
       }
-      else sink.merge(found);
+      else sink.merge_table(found);
     }
-    return;
+    return 1;
   }
   if (!sink) visited[path] = 1;
   Var prefix = active ? active[path] : void;
-  List entry = prefix is <array> ? NULL : _entry(c, path);
-  if (!entry && prefix is not <array>) return;
-  List parts = prefix is <array> ? prefix.array().list() : entry.car();
-  Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
+  Var discovered = c.macro_export_parts != NULL
+                 ? c.macro_export_parts[path] : void;
+  if (query && query.root && discovered is void &&
+      (path == query.root || prefix is <array> ||
+       path in provisional_entries)) return 0;
+  List entry = prefix is <array> || discovered is <list>
+             ? NULL : _entry(c, path);
+  if (!entry && prefix is not <array> && discovered is void)
+    return !query || !query.root;
+  List parts = prefix is <array> ? prefix.array().list()
+             : discovered is <list> ? discovered.list() : entry.car();
+  Map runtime = query ? query.runtime : NULL;
+  Map initial = sink ? _initial_macros(c, path, runtime, 0) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
   // Backedges read the live state; completed visits keep their final rows.
   if (cpp) visited[path] = [(void *) cpp, initial];
   foreach (Var part in parts) {
     if (part is <map> && !cpp)
       _replay_package_imports(c, globs, part, exports);
-    else if (part is <string> && (!cpp || !cpp.hidden()))
-      _replay_included(c, globs, part, visited, exports, active, cpp, runtime);
+    else if (part is <string> && (!cpp || !cpp.hidden())) {
+      if (!_replay_included(
+        c, globs, part, visited, exports, active, cpp, query)) return 0;
+    }
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
-    visited[path] = cpp.changes(initial);
-    sink.merge(visited[path]);
+    Map macros = cpp.exported_macros(initial);
+    visited[path] = macros;
+    sink.merge_table(macros);
   }
+  return 1;
 }
 
 /* The compile-time rows of the syntax prelude's entry in source order. */
