@@ -792,7 +792,14 @@ static void _replay_included(
   Map active, Cpp sink, Map runtime) {
   Var found;
   if (visited.try_get(path, found)) {
-    if (sink) sink.merge(found);
+    if (sink) {
+      if (found is <array>) {
+        Array state = found;
+        Cpp cpp = (Cpp) state[0].pointer();
+        sink.merge(cpp.changes(state[1]));
+      }
+      else sink.merge(found);
+    }
     return;
   }
   if (!sink) visited[path] = 1;
@@ -802,14 +809,13 @@ static void _replay_included(
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
   Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
+  // Backedges read the live state; completed visits keep their final rows.
+  if (cpp) visited[path] = [(void *) cpp, initial];
   foreach (Var part in parts) {
     if (part is <map> && !cpp)
       _replay_package_imports(c, globs, part, exports);
-    else if (part is <string> && (!cpp || !cpp.hidden())) {
-      // Only a recursive include can observe this file's active prefix.
-      if (cpp) visited[path] = cpp.changes(initial);
+    else if (part is <string> && (!cpp || !cpp.hidden()))
       _replay_included(c, globs, part, visited, exports, active, cpp, runtime);
-    }
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
