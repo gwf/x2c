@@ -189,12 +189,11 @@ meta List _derive_row(Type type, List value) {
 
 meta List _derive_from_row(Type type, List value, List row) {
   Array statements = [];
-  int index = 0;
   foreach (List field in _derive_fields(type, <row>)) {
     List name = x2c_ident(field.car());
-    List read = _derive_read(field.cadr(), field.caddr(), $!( $row[$index] ));
+    List read = _derive_read(field.cadr(), field.caddr(), $!( $row.car() ));
     statements.push($!{ $value.$name = $read; });
-    index++;
+    statements.push($!{ $row = $row.cdr(); });
   }
   return statements.list_free();
 }
@@ -215,7 +214,9 @@ static macro Unit $derive.map(Type $type) {
 
 static macro Unit $derive.json(Type $type) {
   using $value, $text, $map;
-  String $type.json($type $value) => ((Var) $value.to_map()).json();
+  String $type.json($type $value) {
+    auto { return ((Var) $value.to_map()).json(); }
+  }
   $type $type.from_json(String $text) {
     Map $map = Json.parse($text).map();
     return $_derive_construct($type, $map);
