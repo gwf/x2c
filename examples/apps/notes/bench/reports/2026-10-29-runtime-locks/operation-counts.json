@@ -1,0 +1,506 @@
+{
+  "off": {
+    "before": {
+      "pool_malloc_1024": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 1056
+      },
+      "initialized_pool_retain": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 7,
+        "malloc_or_calloc_bytes": 604
+      },
+      "unnamed_scope_new": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 56
+      },
+      "scope_bytes": {
+        "Scope_public_bytes": 56,
+        "control_allocator_bytes": 64
+      },
+      "unnamed_scope_destroy": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "named_scope_name": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "filtered_global_log": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 1,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "logger_new": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 4,
+        "malloc_or_calloc_bytes": 191
+      },
+      "unused_channel_free": {
+        "locks": 2,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_send_empty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_send_nonempty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_receive_full": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_receive_notfull": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "descriptor_status": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "thread_poll_main": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "empty_thread_batch": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 2,
+        "malloc_or_calloc_bytes": 120
+      },
+      "listener_stop": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "listener_stopped_poll": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      }
+    },
+    "after": {
+      "pool_malloc_1024": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 1056
+      },
+      "initialized_pool_retain": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 7,
+        "malloc_or_calloc_bytes": 612
+      },
+      "unnamed_scope_new": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 64
+      },
+      "scope_bytes": {
+        "Scope_public_bytes": 56,
+        "control_allocator_bytes": 64
+      },
+      "unnamed_scope_destroy": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "named_scope_name": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "filtered_global_log": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "logger_new": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 4,
+        "malloc_or_calloc_bytes": 199
+      },
+      "unused_channel_free": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_send_empty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_send_nonempty": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_receive_full": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_receive_notfull": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "descriptor_status": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "thread_poll_main": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "empty_thread_batch": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 2,
+        "malloc_or_calloc_bytes": 120
+      },
+      "listener_stop": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "listener_stopped_poll": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      }
+    }
+  },
+  "on": {
+    "before": {
+      "pool_malloc_1024": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 1056
+      },
+      "initialized_pool_retain": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 7,
+        "malloc_or_calloc_bytes": 604
+      },
+      "unnamed_scope_new": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 56
+      },
+      "scope_bytes": {
+        "Scope_public_bytes": 56,
+        "control_allocator_bytes": 64
+      },
+      "unnamed_scope_destroy": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "named_scope_name": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "filtered_global_log": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 1,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "logger_new": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 4,
+        "malloc_or_calloc_bytes": 191
+      },
+      "unused_channel_free": {
+        "locks": 2,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_send_empty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_send_nonempty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_receive_full": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_receive_notfull": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "descriptor_status": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "thread_poll_main": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "empty_thread_batch": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 2,
+        "malloc_or_calloc_bytes": 120
+      },
+      "listener_stop": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "listener_stopped_poll": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      }
+    },
+    "after": {
+      "pool_malloc_1024": {
+        "locks": 2,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 1056
+      },
+      "initialized_pool_retain": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 7,
+        "malloc_or_calloc_bytes": 612
+      },
+      "unnamed_scope_new": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 64
+      },
+      "scope_bytes": {
+        "Scope_public_bytes": 56,
+        "control_allocator_bytes": 64
+      },
+      "unnamed_scope_destroy": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "named_scope_name": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "filtered_global_log": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "logger_new": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 4,
+        "malloc_or_calloc_bytes": 199
+      },
+      "unused_channel_free": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_send_empty": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_send_nonempty": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 1,
+        "malloc_or_calloc_bytes": 24
+      },
+      "buffer_receive_full": {
+        "locks": 1,
+        "broadcasts": 1,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "buffer_receive_notfull": {
+        "locks": 1,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "descriptor_status": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "thread_poll_main": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "empty_thread_batch": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 2,
+        "malloc_or_calloc_bytes": 120
+      },
+      "listener_stop": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      },
+      "listener_stopped_poll": {
+        "locks": 0,
+        "broadcasts": 0,
+        "recursive": 0,
+        "malloc_or_calloc_calls": 0,
+        "malloc_or_calloc_bytes": 0
+      }
+    }
+  }
+}

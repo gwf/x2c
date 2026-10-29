@@ -1,0 +1,1962 @@
+[
+  {
+    "name": "mutex",
+    "round": 0,
+    "sample": {
+      "requests": 229162,
+      "elapsed_s": 5.001638,
+      "requests_per_s": 45817.39,
+      "p50_us": 1113.0,
+      "p99_us": 6807.0,
+      "warmup_requests": 38751,
+      "server_lifetime": {
+        "user_s": 7.419161,
+        "system_s": 7.429752,
+        "max_rss_bytes": 13336576,
+        "wall_s": 6.154298374895006,
+        "log_bytes": 13395718
+      },
+      "load_process": {
+        "user_s": 0.28311,
+        "system_s": 2.333827,
+        "max_rss_bytes": 10043392,
+        "wall_s": 5.021431624889374
+      },
+      "host_load_before": [
+        34.18505859375,
+        23.82763671875,
+        18.5595703125
+      ],
+      "host_load_after": [
+        32.568359375,
+        23.6640625,
+        18.53271484375
+      ]
+    },
+    "profile": [
+      {
+        "thread": "0",
+        "lock_count": "16883",
+        "unlock_count": "16883",
+        "lock_ns": "420750",
+        "unlock_ns": "505833"
+      },
+      {
+        "thread": "1",
+        "lock_count": "17070",
+        "unlock_count": "17070",
+        "lock_ns": "461625",
+        "unlock_ns": "519792"
+      },
+      {
+        "thread": "2",
+        "lock_count": "16554",
+        "unlock_count": "16554",
+        "lock_ns": "472167",
+        "unlock_ns": "486875"
+      },
+      {
+        "thread": "3",
+        "lock_count": "16906",
+        "unlock_count": "16906",
+        "lock_ns": "407458",
+        "unlock_ns": "473875"
+      },
+      {
+        "thread": "4",
+        "lock_count": "16806",
+        "unlock_count": "16806",
+        "lock_ns": "397083",
+        "unlock_ns": "415542"
+      },
+      {
+        "thread": "5",
+        "lock_count": "16886",
+        "unlock_count": "16886",
+        "lock_ns": "401167",
+        "unlock_ns": "573208"
+      },
+      {
+        "thread": "6",
+        "lock_count": "16674",
+        "unlock_count": "16674",
+        "lock_ns": "445708",
+        "unlock_ns": "609333"
+      },
+      {
+        "thread": "7",
+        "lock_count": "16770",
+        "unlock_count": "16770",
+        "lock_ns": "415750",
+        "unlock_ns": "427167"
+      },
+      {
+        "thread": "8",
+        "lock_count": "16246",
+        "unlock_count": "16246",
+        "lock_ns": "381625",
+        "unlock_ns": "435333"
+      },
+      {
+        "thread": "9",
+        "lock_count": "17078",
+        "unlock_count": "17078",
+        "lock_ns": "510042",
+        "unlock_ns": "428167"
+      },
+      {
+        "thread": "10",
+        "lock_count": "16750",
+        "unlock_count": "16750",
+        "lock_ns": "400292",
+        "unlock_ns": "474000"
+      },
+      {
+        "thread": "11",
+        "lock_count": "16938",
+        "unlock_count": "16938",
+        "lock_ns": "390375",
+        "unlock_ns": "514292"
+      },
+      {
+        "thread": "12",
+        "lock_count": "15834",
+        "unlock_count": "15834",
+        "lock_ns": "347708",
+        "unlock_ns": "394333"
+      },
+      {
+        "thread": "13",
+        "lock_count": "17438",
+        "unlock_count": "17438",
+        "lock_ns": "452917",
+        "unlock_ns": "478958"
+      },
+      {
+        "thread": "14",
+        "lock_count": "16750",
+        "unlock_count": "16750",
+        "lock_ns": "435625",
+        "unlock_ns": "621458"
+      },
+      {
+        "thread": "15",
+        "lock_count": "16522",
+        "unlock_count": "16522",
+        "lock_ns": "348333",
+        "unlock_ns": "439333"
+      },
+      {
+        "thread": "16",
+        "lock_count": "16962",
+        "unlock_count": "16962",
+        "lock_ns": "435792",
+        "unlock_ns": "510500"
+      },
+      {
+        "thread": "17",
+        "lock_count": "16626",
+        "unlock_count": "16626",
+        "lock_ns": "383167",
+        "unlock_ns": "487292"
+      },
+      {
+        "thread": "18",
+        "lock_count": "17166",
+        "unlock_count": "17166",
+        "lock_ns": "428875",
+        "unlock_ns": "472625"
+      },
+      {
+        "thread": "19",
+        "lock_count": "16882",
+        "unlock_count": "16882",
+        "lock_ns": "377667",
+        "unlock_ns": "445750"
+      },
+      {
+        "thread": "20",
+        "lock_count": "16642",
+        "unlock_count": "16642",
+        "lock_ns": "414292",
+        "unlock_ns": "484625"
+      },
+      {
+        "thread": "21",
+        "lock_count": "16810",
+        "unlock_count": "16810",
+        "lock_ns": "385083",
+        "unlock_ns": "480875"
+      },
+      {
+        "thread": "22",
+        "lock_count": "17190",
+        "unlock_count": "17190",
+        "lock_ns": "423000",
+        "unlock_ns": "435875"
+      },
+      {
+        "thread": "23",
+        "lock_count": "17046",
+        "unlock_count": "17046",
+        "lock_ns": "384542",
+        "unlock_ns": "464083"
+      },
+      {
+        "thread": "24",
+        "lock_count": "16234",
+        "unlock_count": "16234",
+        "lock_ns": "403500",
+        "unlock_ns": "476042"
+      },
+      {
+        "thread": "25",
+        "lock_count": "16890",
+        "unlock_count": "16890",
+        "lock_ns": "440250",
+        "unlock_ns": "491208"
+      },
+      {
+        "thread": "26",
+        "lock_count": "16678",
+        "unlock_count": "16678",
+        "lock_ns": "438125",
+        "unlock_ns": "502250"
+      },
+      {
+        "thread": "27",
+        "lock_count": "16510",
+        "unlock_count": "16510",
+        "lock_ns": "397583",
+        "unlock_ns": "524000"
+      },
+      {
+        "thread": "28",
+        "lock_count": "16746",
+        "unlock_count": "16746",
+        "lock_ns": "425250",
+        "unlock_ns": "528000"
+      },
+      {
+        "thread": "29",
+        "lock_count": "16922",
+        "unlock_count": "16922",
+        "lock_ns": "408250",
+        "unlock_ns": "542917"
+      },
+      {
+        "thread": "30",
+        "lock_count": "16690",
+        "unlock_count": "16690",
+        "lock_ns": "367458",
+        "unlock_ns": "428542"
+      },
+      {
+        "thread": "31",
+        "lock_count": "16746",
+        "unlock_count": "16746",
+        "lock_ns": "388292",
+        "unlock_ns": "414708"
+      },
+      {
+        "thread": "32",
+        "lock_count": "16506",
+        "unlock_count": "16506",
+        "lock_ns": "357333",
+        "unlock_ns": "417208"
+      },
+      {
+        "thread": "33",
+        "lock_count": "16734",
+        "unlock_count": "16734",
+        "lock_ns": "392250",
+        "unlock_ns": "446375"
+      },
+      {
+        "thread": "34",
+        "lock_count": "16918",
+        "unlock_count": "16918",
+        "lock_ns": "440083",
+        "unlock_ns": "655292"
+      },
+      {
+        "thread": "35",
+        "lock_count": "16498",
+        "unlock_count": "16498",
+        "lock_ns": "416417",
+        "unlock_ns": "549792"
+      },
+      {
+        "thread": "36",
+        "lock_count": "16946",
+        "unlock_count": "16946",
+        "lock_ns": "488500",
+        "unlock_ns": "452125"
+      },
+      {
+        "thread": "37",
+        "lock_count": "16514",
+        "unlock_count": "16514",
+        "lock_ns": "428292",
+        "unlock_ns": "485292"
+      },
+      {
+        "thread": "38",
+        "lock_count": "17114",
+        "unlock_count": "17114",
+        "lock_ns": "372583",
+        "unlock_ns": "378167"
+      },
+      {
+        "thread": "39",
+        "lock_count": "16914",
+        "unlock_count": "16914",
+        "lock_ns": "384875",
+        "unlock_ns": "407292"
+      },
+      {
+        "thread": "40",
+        "lock_count": "16710",
+        "unlock_count": "16710",
+        "lock_ns": "477333",
+        "unlock_ns": "536708"
+      },
+      {
+        "thread": "41",
+        "lock_count": "16858",
+        "unlock_count": "16858",
+        "lock_ns": "379750",
+        "unlock_ns": "504708"
+      },
+      {
+        "thread": "42",
+        "lock_count": "16690",
+        "unlock_count": "16690",
+        "lock_ns": "485125",
+        "unlock_ns": "463625"
+      },
+      {
+        "thread": "43",
+        "lock_count": "16566",
+        "unlock_count": "16566",
+        "lock_ns": "537792",
+        "unlock_ns": "510958"
+      },
+      {
+        "thread": "44",
+        "lock_count": "16654",
+        "unlock_count": "16654",
+        "lock_ns": "393625",
+        "unlock_ns": "552458"
+      },
+      {
+        "thread": "45",
+        "lock_count": "16482",
+        "unlock_count": "16482",
+        "lock_ns": "398917",
+        "unlock_ns": "491083"
+      },
+      {
+        "thread": "46",
+        "lock_count": "16278",
+        "unlock_count": "16278",
+        "lock_ns": "385083",
+        "unlock_ns": "545750"
+      },
+      {
+        "thread": "47",
+        "lock_count": "16914",
+        "unlock_count": "16914",
+        "lock_ns": "350292",
+        "unlock_ns": "484333"
+      },
+      {
+        "thread": "48",
+        "lock_count": "16278",
+        "unlock_count": "16278",
+        "lock_ns": "416917",
+        "unlock_ns": "508792"
+      },
+      {
+        "thread": "49",
+        "lock_count": "16566",
+        "unlock_count": "16566",
+        "lock_ns": "358583",
+        "unlock_ns": "446208"
+      },
+      {
+        "thread": "50",
+        "lock_count": "17054",
+        "unlock_count": "17054",
+        "lock_ns": "406750",
+        "unlock_ns": "566250"
+      },
+      {
+        "thread": "51",
+        "lock_count": "16798",
+        "unlock_count": "16798",
+        "lock_ns": "435667",
+        "unlock_ns": "426583"
+      },
+      {
+        "thread": "52",
+        "lock_count": "16650",
+        "unlock_count": "16650",
+        "lock_ns": "371750",
+        "unlock_ns": "504667"
+      },
+      {
+        "thread": "53",
+        "lock_count": "17138",
+        "unlock_count": "17138",
+        "lock_ns": "441042",
+        "unlock_ns": "482667"
+      },
+      {
+        "thread": "54",
+        "lock_count": "16502",
+        "unlock_count": "16502",
+        "lock_ns": "412250",
+        "unlock_ns": "439625"
+      },
+      {
+        "thread": "55",
+        "lock_count": "16414",
+        "unlock_count": "16414",
+        "lock_ns": "351208",
+        "unlock_ns": "403667"
+      },
+      {
+        "thread": "56",
+        "lock_count": "17106",
+        "unlock_count": "17106",
+        "lock_ns": "393750",
+        "unlock_ns": "509000"
+      },
+      {
+        "thread": "57",
+        "lock_count": "16802",
+        "unlock_count": "16802",
+        "lock_ns": "467292",
+        "unlock_ns": "439042"
+      },
+      {
+        "thread": "58",
+        "lock_count": "17162",
+        "unlock_count": "17162",
+        "lock_ns": "373708",
+        "unlock_ns": "502833"
+      },
+      {
+        "thread": "59",
+        "lock_count": "16614",
+        "unlock_count": "16614",
+        "lock_ns": "420958",
+        "unlock_ns": "411375"
+      },
+      {
+        "thread": "60",
+        "lock_count": "16410",
+        "unlock_count": "16410",
+        "lock_ns": "412792",
+        "unlock_ns": "468583"
+      },
+      {
+        "thread": "61",
+        "lock_count": "17054",
+        "unlock_count": "17054",
+        "lock_ns": "401083",
+        "unlock_ns": "490792"
+      },
+      {
+        "thread": "62",
+        "lock_count": "16718",
+        "unlock_count": "16718",
+        "lock_ns": "388292",
+        "unlock_ns": "477417"
+      },
+      {
+        "thread": "63",
+        "lock_count": "16374",
+        "unlock_count": "16374",
+        "lock_ns": "390958",
+        "unlock_ns": "519958"
+      }
+    ],
+    "explicit_lock_calls": 1071781,
+    "lock_plus_unlock_ns": 57286417.0,
+    "lock_plus_unlock_ns_per_request": 213.82470055577744,
+    "inclusive_lock_wall_as_fraction_of_server_cpu": 0.003857953575457005,
+    "note": "Includes timestamp overhead and waiting wall time; not a subtractable isolated CPU measurement. Server lifetime and profile include startup/warmup/shutdown. Explicit flockfile/funlockfile only; implicit stdio locks are outside this count."
+  },
+  {
+    "name": "database_thread",
+    "round": 0,
+    "sample": {
+      "requests": 271374,
+      "elapsed_s": 5.002466,
+      "requests_per_s": 54248.045,
+      "p50_us": 1024.0,
+      "p99_us": 3165.0,
+      "warmup_requests": 54788,
+      "server_lifetime": {
+        "user_s": 12.152434,
+        "system_s": 12.201684,
+        "max_rss_bytes": 13336576,
+        "wall_s": 6.099875584244728,
+        "log_bytes": 16308168
+      },
+      "load_process": {
+        "user_s": 0.323575,
+        "system_s": 2.730647,
+        "max_rss_bytes": 13402112,
+        "wall_s": 5.022148749791086
+      },
+      "host_load_before": [
+        32.568359375,
+        23.6640625,
+        18.53271484375
+      ],
+      "host_load_after": [
+        31.1611328125,
+        23.52001953125,
+        18.51171875
+      ]
+    },
+    "profile": [
+      {
+        "thread": "0",
+        "lock_count": "20411",
+        "unlock_count": "20411",
+        "lock_ns": "498417",
+        "unlock_ns": "422333"
+      },
+      {
+        "thread": "1",
+        "lock_count": "20438",
+        "unlock_count": "20438",
+        "lock_ns": "482917",
+        "unlock_ns": "430708"
+      },
+      {
+        "thread": "2",
+        "lock_count": "20450",
+        "unlock_count": "20450",
+        "lock_ns": "510458",
+        "unlock_ns": "387042"
+      },
+      {
+        "thread": "3",
+        "lock_count": "20374",
+        "unlock_count": "20374",
+        "lock_ns": "490292",
+        "unlock_ns": "454708"
+      },
+      {
+        "thread": "4",
+        "lock_count": "20318",
+        "unlock_count": "20318",
+        "lock_ns": "564542",
+        "unlock_ns": "470542"
+      },
+      {
+        "thread": "5",
+        "lock_count": "20374",
+        "unlock_count": "20374",
+        "lock_ns": "577958",
+        "unlock_ns": "441708"
+      },
+      {
+        "thread": "6",
+        "lock_count": "20350",
+        "unlock_count": "20350",
+        "lock_ns": "508250",
+        "unlock_ns": "494083"
+      },
+      {
+        "thread": "7",
+        "lock_count": "20354",
+        "unlock_count": "20354",
+        "lock_ns": "519917",
+        "unlock_ns": "391625"
+      },
+      {
+        "thread": "8",
+        "lock_count": "20422",
+        "unlock_count": "20422",
+        "lock_ns": "474458",
+        "unlock_ns": "401542"
+      },
+      {
+        "thread": "9",
+        "lock_count": "20402",
+        "unlock_count": "20402",
+        "lock_ns": "524917",
+        "unlock_ns": "460125"
+      },
+      {
+        "thread": "10",
+        "lock_count": "20322",
+        "unlock_count": "20322",
+        "lock_ns": "493708",
+        "unlock_ns": "459125"
+      },
+      {
+        "thread": "11",
+        "lock_count": "20362",
+        "unlock_count": "20362",
+        "lock_ns": "524417",
+        "unlock_ns": "439208"
+      },
+      {
+        "thread": "12",
+        "lock_count": "20422",
+        "unlock_count": "20422",
+        "lock_ns": "529333",
+        "unlock_ns": "426833"
+      },
+      {
+        "thread": "13",
+        "lock_count": "20374",
+        "unlock_count": "20374",
+        "lock_ns": "507500",
+        "unlock_ns": "389292"
+      },
+      {
+        "thread": "14",
+        "lock_count": "20342",
+        "unlock_count": "20342",
+        "lock_ns": "489417",
+        "unlock_ns": "491958"
+      },
+      {
+        "thread": "15",
+        "lock_count": "20330",
+        "unlock_count": "20330",
+        "lock_ns": "476292",
+        "unlock_ns": "467833"
+      },
+      {
+        "thread": "16",
+        "lock_count": "20394",
+        "unlock_count": "20394",
+        "lock_ns": "566000",
+        "unlock_ns": "408000"
+      },
+      {
+        "thread": "17",
+        "lock_count": "20422",
+        "unlock_count": "20422",
+        "lock_ns": "557417",
+        "unlock_ns": "508500"
+      },
+      {
+        "thread": "18",
+        "lock_count": "20334",
+        "unlock_count": "20334",
+        "lock_ns": "480958",
+        "unlock_ns": "426625"
+      },
+      {
+        "thread": "19",
+        "lock_count": "20378",
+        "unlock_count": "20378",
+        "lock_ns": "500375",
+        "unlock_ns": "505917"
+      },
+      {
+        "thread": "20",
+        "lock_count": "20414",
+        "unlock_count": "20414",
+        "lock_ns": "513125",
+        "unlock_ns": "384125"
+      },
+      {
+        "thread": "21",
+        "lock_count": "20374",
+        "unlock_count": "20374",
+        "lock_ns": "494500",
+        "unlock_ns": "372500"
+      },
+      {
+        "thread": "22",
+        "lock_count": "20322",
+        "unlock_count": "20322",
+        "lock_ns": "500625",
+        "unlock_ns": "401708"
+      },
+      {
+        "thread": "23",
+        "lock_count": "20406",
+        "unlock_count": "20406",
+        "lock_ns": "497958",
+        "unlock_ns": "455583"
+      },
+      {
+        "thread": "24",
+        "lock_count": "20262",
+        "unlock_count": "20262",
+        "lock_ns": "514000",
+        "unlock_ns": "459167"
+      },
+      {
+        "thread": "25",
+        "lock_count": "20334",
+        "unlock_count": "20334",
+        "lock_ns": "521333",
+        "unlock_ns": "436500"
+      },
+      {
+        "thread": "26",
+        "lock_count": "20406",
+        "unlock_count": "20406",
+        "lock_ns": "541458",
+        "unlock_ns": "394000"
+      },
+      {
+        "thread": "27",
+        "lock_count": "20406",
+        "unlock_count": "20406",
+        "lock_ns": "554708",
+        "unlock_ns": "502875"
+      },
+      {
+        "thread": "28",
+        "lock_count": "20486",
+        "unlock_count": "20486",
+        "lock_ns": "466375",
+        "unlock_ns": "432958"
+      },
+      {
+        "thread": "29",
+        "lock_count": "20394",
+        "unlock_count": "20394",
+        "lock_ns": "505875",
+        "unlock_ns": "437083"
+      },
+      {
+        "thread": "30",
+        "lock_count": "20386",
+        "unlock_count": "20386",
+        "lock_ns": "613375",
+        "unlock_ns": "483583"
+      },
+      {
+        "thread": "31",
+        "lock_count": "20462",
+        "unlock_count": "20462",
+        "lock_ns": "578958",
+        "unlock_ns": "430917"
+      },
+      {
+        "thread": "32",
+        "lock_count": "20366",
+        "unlock_count": "20366",
+        "lock_ns": "563292",
+        "unlock_ns": "442500"
+      },
+      {
+        "thread": "33",
+        "lock_count": "20374",
+        "unlock_count": "20374",
+        "lock_ns": "519083",
+        "unlock_ns": "404125"
+      },
+      {
+        "thread": "34",
+        "lock_count": "20454",
+        "unlock_count": "20454",
+        "lock_ns": "510792",
+        "unlock_ns": "387500"
+      },
+      {
+        "thread": "35",
+        "lock_count": "20414",
+        "unlock_count": "20414",
+        "lock_ns": "548167",
+        "unlock_ns": "490542"
+      },
+      {
+        "thread": "36",
+        "lock_count": "20458",
+        "unlock_count": "20458",
+        "lock_ns": "546417",
+        "unlock_ns": "456083"
+      },
+      {
+        "thread": "37",
+        "lock_count": "20354",
+        "unlock_count": "20354",
+        "lock_ns": "504417",
+        "unlock_ns": "404792"
+      },
+      {
+        "thread": "38",
+        "lock_count": "20322",
+        "unlock_count": "20322",
+        "lock_ns": "593292",
+        "unlock_ns": "441667"
+      },
+      {
+        "thread": "39",
+        "lock_count": "20354",
+        "unlock_count": "20354",
+        "lock_ns": "496833",
+        "unlock_ns": "422708"
+      },
+      {
+        "thread": "40",
+        "lock_count": "20470",
+        "unlock_count": "20470",
+        "lock_ns": "564542",
+        "unlock_ns": "387667"
+      },
+      {
+        "thread": "41",
+        "lock_count": "20394",
+        "unlock_count": "20394",
+        "lock_ns": "529958",
+        "unlock_ns": "405875"
+      },
+      {
+        "thread": "42",
+        "lock_count": "20498",
+        "unlock_count": "20498",
+        "lock_ns": "497750",
+        "unlock_ns": "392000"
+      },
+      {
+        "thread": "43",
+        "lock_count": "20430",
+        "unlock_count": "20430",
+        "lock_ns": "506500",
+        "unlock_ns": "408458"
+      },
+      {
+        "thread": "44",
+        "lock_count": "20414",
+        "unlock_count": "20414",
+        "lock_ns": "515125",
+        "unlock_ns": "396417"
+      },
+      {
+        "thread": "45",
+        "lock_count": "20370",
+        "unlock_count": "20370",
+        "lock_ns": "509125",
+        "unlock_ns": "408500"
+      },
+      {
+        "thread": "46",
+        "lock_count": "20394",
+        "unlock_count": "20394",
+        "lock_ns": "506167",
+        "unlock_ns": "407500"
+      },
+      {
+        "thread": "47",
+        "lock_count": "20370",
+        "unlock_count": "20370",
+        "lock_ns": "524042",
+        "unlock_ns": "382708"
+      },
+      {
+        "thread": "48",
+        "lock_count": "20446",
+        "unlock_count": "20446",
+        "lock_ns": "499833",
+        "unlock_ns": "375167"
+      },
+      {
+        "thread": "49",
+        "lock_count": "20362",
+        "unlock_count": "20362",
+        "lock_ns": "544750",
+        "unlock_ns": "465917"
+      },
+      {
+        "thread": "50",
+        "lock_count": "20294",
+        "unlock_count": "20294",
+        "lock_ns": "481958",
+        "unlock_ns": "447833"
+      },
+      {
+        "thread": "51",
+        "lock_count": "20430",
+        "unlock_count": "20430",
+        "lock_ns": "637792",
+        "unlock_ns": "430333"
+      },
+      {
+        "thread": "52",
+        "lock_count": "20378",
+        "unlock_count": "20378",
+        "lock_ns": "465000",
+        "unlock_ns": "423333"
+      },
+      {
+        "thread": "53",
+        "lock_count": "20330",
+        "unlock_count": "20330",
+        "lock_ns": "551458",
+        "unlock_ns": "465417"
+      },
+      {
+        "thread": "54",
+        "lock_count": "20342",
+        "unlock_count": "20342",
+        "lock_ns": "495125",
+        "unlock_ns": "372667"
+      },
+      {
+        "thread": "55",
+        "lock_count": "20470",
+        "unlock_count": "20470",
+        "lock_ns": "504750",
+        "unlock_ns": "420500"
+      },
+      {
+        "thread": "56",
+        "lock_count": "20378",
+        "unlock_count": "20378",
+        "lock_ns": "497083",
+        "unlock_ns": "476208"
+      },
+      {
+        "thread": "57",
+        "lock_count": "20410",
+        "unlock_count": "20410",
+        "lock_ns": "508333",
+        "unlock_ns": "427167"
+      },
+      {
+        "thread": "58",
+        "lock_count": "20378",
+        "unlock_count": "20378",
+        "lock_ns": "553667",
+        "unlock_ns": "431375"
+      },
+      {
+        "thread": "59",
+        "lock_count": "20386",
+        "unlock_count": "20386",
+        "lock_ns": "515875",
+        "unlock_ns": "388917"
+      },
+      {
+        "thread": "60",
+        "lock_count": "20434",
+        "unlock_count": "20434",
+        "lock_ns": "535750",
+        "unlock_ns": "393625"
+      },
+      {
+        "thread": "61",
+        "lock_count": "20326",
+        "unlock_count": "20326",
+        "lock_ns": "490125",
+        "unlock_ns": "389875"
+      },
+      {
+        "thread": "62",
+        "lock_count": "20358",
+        "unlock_count": "20358",
+        "lock_ns": "556333",
+        "unlock_ns": "407083"
+      },
+      {
+        "thread": "63",
+        "lock_count": "20394",
+        "unlock_count": "20394",
+        "lock_ns": "545208",
+        "unlock_ns": "391417"
+      }
+    ],
+    "explicit_lock_calls": 1304777,
+    "lock_plus_unlock_ns": 60812957.0,
+    "lock_plus_unlock_ns_per_request": 186.45015973657263,
+    "inclusive_lock_wall_as_fraction_of_server_cpu": 0.002497029742567561,
+    "note": "Includes timestamp overhead and waiting wall time; not a subtractable isolated CPU measurement. Server lifetime and profile include startup/warmup/shutdown. Explicit flockfile/funlockfile only; implicit stdio locks are outside this count."
+  },
+  {
+    "name": "mutex",
+    "round": 1,
+    "sample": {
+      "requests": 256494,
+      "elapsed_s": 5.001578,
+      "requests_per_s": 51282.615,
+      "p50_us": 1047.0,
+      "p99_us": 6206.0,
+      "warmup_requests": 38039,
+      "server_lifetime": {
+        "user_s": 8.303028,
+        "system_s": 6.976392,
+        "max_rss_bytes": 12959744,
+        "wall_s": 6.113925500307232,
+        "log_bytes": 14726718
+      },
+      "load_process": {
+        "user_s": 0.28620999999999996,
+        "system_s": 1.992808,
+        "max_rss_bytes": 10256384,
+        "wall_s": 5.033348792232573
+      },
+      "host_load_before": [
+        31.1611328125,
+        23.52001953125,
+        18.51171875
+      ],
+      "host_load_after": [
+        29.54052734375,
+        23.43408203125,
+        18.5400390625
+      ]
+    },
+    "profile": [
+      {
+        "thread": "0",
+        "lock_count": "18119",
+        "unlock_count": "18119",
+        "lock_ns": "342667",
+        "unlock_ns": "406583"
+      },
+      {
+        "thread": "1",
+        "lock_count": "18074",
+        "unlock_count": "18074",
+        "lock_ns": "374125",
+        "unlock_ns": "400917"
+      },
+      {
+        "thread": "2",
+        "lock_count": "18370",
+        "unlock_count": "18370",
+        "lock_ns": "415083",
+        "unlock_ns": "420208"
+      },
+      {
+        "thread": "3",
+        "lock_count": "18506",
+        "unlock_count": "18506",
+        "lock_ns": "369292",
+        "unlock_ns": "378500"
+      },
+      {
+        "thread": "4",
+        "lock_count": "18694",
+        "unlock_count": "18694",
+        "lock_ns": "389667",
+        "unlock_ns": "387750"
+      },
+      {
+        "thread": "5",
+        "lock_count": "18086",
+        "unlock_count": "18086",
+        "lock_ns": "359917",
+        "unlock_ns": "361625"
+      },
+      {
+        "thread": "6",
+        "lock_count": "18522",
+        "unlock_count": "18522",
+        "lock_ns": "393250",
+        "unlock_ns": "401750"
+      },
+      {
+        "thread": "7",
+        "lock_count": "18174",
+        "unlock_count": "18174",
+        "lock_ns": "373375",
+        "unlock_ns": "374708"
+      },
+      {
+        "thread": "8",
+        "lock_count": "18166",
+        "unlock_count": "18166",
+        "lock_ns": "335333",
+        "unlock_ns": "397333"
+      },
+      {
+        "thread": "9",
+        "lock_count": "18174",
+        "unlock_count": "18174",
+        "lock_ns": "427000",
+        "unlock_ns": "422833"
+      },
+      {
+        "thread": "10",
+        "lock_count": "18306",
+        "unlock_count": "18306",
+        "lock_ns": "362583",
+        "unlock_ns": "390667"
+      },
+      {
+        "thread": "11",
+        "lock_count": "18674",
+        "unlock_count": "18674",
+        "lock_ns": "351292",
+        "unlock_ns": "452500"
+      },
+      {
+        "thread": "12",
+        "lock_count": "18522",
+        "unlock_count": "18522",
+        "lock_ns": "372167",
+        "unlock_ns": "409000"
+      },
+      {
+        "thread": "13",
+        "lock_count": "18322",
+        "unlock_count": "18322",
+        "lock_ns": "361750",
+        "unlock_ns": "378542"
+      },
+      {
+        "thread": "14",
+        "lock_count": "18070",
+        "unlock_count": "18070",
+        "lock_ns": "410292",
+        "unlock_ns": "373583"
+      },
+      {
+        "thread": "15",
+        "lock_count": "18666",
+        "unlock_count": "18666",
+        "lock_ns": "412208",
+        "unlock_ns": "413417"
+      },
+      {
+        "thread": "16",
+        "lock_count": "18426",
+        "unlock_count": "18426",
+        "lock_ns": "359792",
+        "unlock_ns": "380208"
+      },
+      {
+        "thread": "17",
+        "lock_count": "18706",
+        "unlock_count": "18706",
+        "lock_ns": "399292",
+        "unlock_ns": "397458"
+      },
+      {
+        "thread": "18",
+        "lock_count": "18494",
+        "unlock_count": "18494",
+        "lock_ns": "399000",
+        "unlock_ns": "386125"
+      },
+      {
+        "thread": "19",
+        "lock_count": "18270",
+        "unlock_count": "18270",
+        "lock_ns": "383125",
+        "unlock_ns": "395542"
+      },
+      {
+        "thread": "20",
+        "lock_count": "17922",
+        "unlock_count": "17922",
+        "lock_ns": "344667",
+        "unlock_ns": "346458"
+      },
+      {
+        "thread": "21",
+        "lock_count": "18470",
+        "unlock_count": "18470",
+        "lock_ns": "416667",
+        "unlock_ns": "509167"
+      },
+      {
+        "thread": "22",
+        "lock_count": "18198",
+        "unlock_count": "18198",
+        "lock_ns": "536083",
+        "unlock_ns": "392375"
+      },
+      {
+        "thread": "23",
+        "lock_count": "18334",
+        "unlock_count": "18334",
+        "lock_ns": "413500",
+        "unlock_ns": "343083"
+      },
+      {
+        "thread": "24",
+        "lock_count": "18446",
+        "unlock_count": "18446",
+        "lock_ns": "376042",
+        "unlock_ns": "421625"
+      },
+      {
+        "thread": "25",
+        "lock_count": "18550",
+        "unlock_count": "18550",
+        "lock_ns": "402000",
+        "unlock_ns": "377292"
+      },
+      {
+        "thread": "26",
+        "lock_count": "18182",
+        "unlock_count": "18182",
+        "lock_ns": "381625",
+        "unlock_ns": "409833"
+      },
+      {
+        "thread": "27",
+        "lock_count": "18278",
+        "unlock_count": "18278",
+        "lock_ns": "403917",
+        "unlock_ns": "422708"
+      },
+      {
+        "thread": "28",
+        "lock_count": "18942",
+        "unlock_count": "18942",
+        "lock_ns": "511792",
+        "unlock_ns": "409250"
+      },
+      {
+        "thread": "29",
+        "lock_count": "18494",
+        "unlock_count": "18494",
+        "lock_ns": "364292",
+        "unlock_ns": "395375"
+      },
+      {
+        "thread": "30",
+        "lock_count": "18594",
+        "unlock_count": "18594",
+        "lock_ns": "428625",
+        "unlock_ns": "423875"
+      },
+      {
+        "thread": "31",
+        "lock_count": "18834",
+        "unlock_count": "18834",
+        "lock_ns": "348042",
+        "unlock_ns": "444583"
+      },
+      {
+        "thread": "32",
+        "lock_count": "18330",
+        "unlock_count": "18330",
+        "lock_ns": "367625",
+        "unlock_ns": "404542"
+      },
+      {
+        "thread": "33",
+        "lock_count": "18114",
+        "unlock_count": "18114",
+        "lock_ns": "378750",
+        "unlock_ns": "441750"
+      },
+      {
+        "thread": "34",
+        "lock_count": "18986",
+        "unlock_count": "18986",
+        "lock_ns": "365417",
+        "unlock_ns": "370792"
+      },
+      {
+        "thread": "35",
+        "lock_count": "18866",
+        "unlock_count": "18866",
+        "lock_ns": "631833",
+        "unlock_ns": "331542"
+      },
+      {
+        "thread": "36",
+        "lock_count": "18110",
+        "unlock_count": "18110",
+        "lock_ns": "352250",
+        "unlock_ns": "338125"
+      },
+      {
+        "thread": "37",
+        "lock_count": "18026",
+        "unlock_count": "18026",
+        "lock_ns": "337458",
+        "unlock_ns": "395667"
+      },
+      {
+        "thread": "38",
+        "lock_count": "18482",
+        "unlock_count": "18482",
+        "lock_ns": "385292",
+        "unlock_ns": "367167"
+      },
+      {
+        "thread": "39",
+        "lock_count": "17806",
+        "unlock_count": "17806",
+        "lock_ns": "338667",
+        "unlock_ns": "366458"
+      },
+      {
+        "thread": "40",
+        "lock_count": "18878",
+        "unlock_count": "18878",
+        "lock_ns": "351333",
+        "unlock_ns": "393292"
+      },
+      {
+        "thread": "41",
+        "lock_count": "18438",
+        "unlock_count": "18438",
+        "lock_ns": "377167",
+        "unlock_ns": "428375"
+      },
+      {
+        "thread": "42",
+        "lock_count": "18542",
+        "unlock_count": "18542",
+        "lock_ns": "357583",
+        "unlock_ns": "471583"
+      },
+      {
+        "thread": "43",
+        "lock_count": "18506",
+        "unlock_count": "18506",
+        "lock_ns": "503917",
+        "unlock_ns": "402792"
+      },
+      {
+        "thread": "44",
+        "lock_count": "18422",
+        "unlock_count": "18422",
+        "lock_ns": "382958",
+        "unlock_ns": "331417"
+      },
+      {
+        "thread": "45",
+        "lock_count": "18502",
+        "unlock_count": "18502",
+        "lock_ns": "403708",
+        "unlock_ns": "399500"
+      },
+      {
+        "thread": "46",
+        "lock_count": "18714",
+        "unlock_count": "18714",
+        "lock_ns": "339708",
+        "unlock_ns": "363333"
+      },
+      {
+        "thread": "47",
+        "lock_count": "18222",
+        "unlock_count": "18222",
+        "lock_ns": "376042",
+        "unlock_ns": "389167"
+      },
+      {
+        "thread": "48",
+        "lock_count": "18982",
+        "unlock_count": "18982",
+        "lock_ns": "393875",
+        "unlock_ns": "368542"
+      },
+      {
+        "thread": "49",
+        "lock_count": "18250",
+        "unlock_count": "18250",
+        "lock_ns": "420375",
+        "unlock_ns": "345125"
+      },
+      {
+        "thread": "50",
+        "lock_count": "18534",
+        "unlock_count": "18534",
+        "lock_ns": "396208",
+        "unlock_ns": "369708"
+      },
+      {
+        "thread": "51",
+        "lock_count": "18606",
+        "unlock_count": "18606",
+        "lock_ns": "419375",
+        "unlock_ns": "469875"
+      },
+      {
+        "thread": "52",
+        "lock_count": "18146",
+        "unlock_count": "18146",
+        "lock_ns": "392250",
+        "unlock_ns": "339542"
+      },
+      {
+        "thread": "53",
+        "lock_count": "18578",
+        "unlock_count": "18578",
+        "lock_ns": "362542",
+        "unlock_ns": "439833"
+      },
+      {
+        "thread": "54",
+        "lock_count": "18750",
+        "unlock_count": "18750",
+        "lock_ns": "374083",
+        "unlock_ns": "340167"
+      },
+      {
+        "thread": "55",
+        "lock_count": "18910",
+        "unlock_count": "18910",
+        "lock_ns": "389750",
+        "unlock_ns": "364250"
+      },
+      {
+        "thread": "56",
+        "lock_count": "18374",
+        "unlock_count": "18374",
+        "lock_ns": "347625",
+        "unlock_ns": "355583"
+      },
+      {
+        "thread": "57",
+        "lock_count": "18458",
+        "unlock_count": "18458",
+        "lock_ns": "437708",
+        "unlock_ns": "368958"
+      },
+      {
+        "thread": "58",
+        "lock_count": "18086",
+        "unlock_count": "18086",
+        "lock_ns": "407792",
+        "unlock_ns": "464500"
+      },
+      {
+        "thread": "59",
+        "lock_count": "18202",
+        "unlock_count": "18202",
+        "lock_ns": "345792",
+        "unlock_ns": "422042"
+      },
+      {
+        "thread": "60",
+        "lock_count": "18274",
+        "unlock_count": "18274",
+        "lock_ns": "349833",
+        "unlock_ns": "417708"
+      },
+      {
+        "thread": "61",
+        "lock_count": "18010",
+        "unlock_count": "18010",
+        "lock_ns": "361375",
+        "unlock_ns": "391042"
+      },
+      {
+        "thread": "62",
+        "lock_count": "17902",
+        "unlock_count": "17902",
+        "lock_ns": "347667",
+        "unlock_ns": "377958"
+      },
+      {
+        "thread": "63",
+        "lock_count": "18670",
+        "unlock_count": "18670",
+        "lock_ns": "408833",
+        "unlock_ns": "422833"
+      }
+    ],
+    "explicit_lock_calls": 1178261,
+    "lock_plus_unlock_ns": 50201294.0,
+    "lock_plus_unlock_ns_per_request": 170.44369900826052,
+    "inclusive_lock_wall_as_fraction_of_server_cpu": 0.0032855497132744573,
+    "note": "Includes timestamp overhead and waiting wall time; not a subtractable isolated CPU measurement. Server lifetime and profile include startup/warmup/shutdown. Explicit flockfile/funlockfile only; implicit stdio locks are outside this count."
+  },
+  {
+    "name": "database_thread",
+    "round": 1,
+    "sample": {
+      "requests": 290488,
+      "elapsed_s": 5.001385,
+      "requests_per_s": 58081.511,
+      "p50_us": 941.0,
+      "p99_us": 3546.0,
+      "warmup_requests": 58901,
+      "server_lifetime": {
+        "user_s": 12.403478,
+        "system_s": 12.091789,
+        "max_rss_bytes": 13041664,
+        "wall_s": 6.107902667019516,
+        "log_bytes": 17469518
+      },
+      "load_process": {
+        "user_s": 0.339742,
+        "system_s": 2.833373,
+        "max_rss_bytes": 13434880,
+        "wall_s": 5.028859999962151
+      },
+      "host_load_before": [
+        29.54052734375,
+        23.43408203125,
+        18.5400390625
+      ],
+      "host_load_after": [
+        28.3759765625,
+        23.2939453125,
+        18.51904296875
+      ]
+    },
+    "profile": [
+      {
+        "thread": "0",
+        "lock_count": "21855",
+        "unlock_count": "21855",
+        "lock_ns": "557000",
+        "unlock_ns": "440542"
+      },
+      {
+        "thread": "1",
+        "lock_count": "21906",
+        "unlock_count": "21906",
+        "lock_ns": "570833",
+        "unlock_ns": "466583"
+      },
+      {
+        "thread": "2",
+        "lock_count": "21834",
+        "unlock_count": "21834",
+        "lock_ns": "593250",
+        "unlock_ns": "473125"
+      },
+      {
+        "thread": "3",
+        "lock_count": "21870",
+        "unlock_count": "21870",
+        "lock_ns": "503042",
+        "unlock_ns": "408750"
+      },
+      {
+        "thread": "4",
+        "lock_count": "21882",
+        "unlock_count": "21882",
+        "lock_ns": "556500",
+        "unlock_ns": "414500"
+      },
+      {
+        "thread": "5",
+        "lock_count": "21774",
+        "unlock_count": "21774",
+        "lock_ns": "582625",
+        "unlock_ns": "371667"
+      },
+      {
+        "thread": "6",
+        "lock_count": "21850",
+        "unlock_count": "21850",
+        "lock_ns": "541167",
+        "unlock_ns": "510125"
+      },
+      {
+        "thread": "7",
+        "lock_count": "21882",
+        "unlock_count": "21882",
+        "lock_ns": "548000",
+        "unlock_ns": "404625"
+      },
+      {
+        "thread": "8",
+        "lock_count": "21814",
+        "unlock_count": "21814",
+        "lock_ns": "542833",
+        "unlock_ns": "598292"
+      },
+      {
+        "thread": "9",
+        "lock_count": "21818",
+        "unlock_count": "21818",
+        "lock_ns": "624208",
+        "unlock_ns": "555292"
+      },
+      {
+        "thread": "10",
+        "lock_count": "21854",
+        "unlock_count": "21854",
+        "lock_ns": "538917",
+        "unlock_ns": "408083"
+      },
+      {
+        "thread": "11",
+        "lock_count": "21838",
+        "unlock_count": "21838",
+        "lock_ns": "518875",
+        "unlock_ns": "431708"
+      },
+      {
+        "thread": "12",
+        "lock_count": "21894",
+        "unlock_count": "21894",
+        "lock_ns": "577167",
+        "unlock_ns": "417375"
+      },
+      {
+        "thread": "13",
+        "lock_count": "21882",
+        "unlock_count": "21882",
+        "lock_ns": "570667",
+        "unlock_ns": "451750"
+      },
+      {
+        "thread": "14",
+        "lock_count": "21898",
+        "unlock_count": "21898",
+        "lock_ns": "620083",
+        "unlock_ns": "485583"
+      },
+      {
+        "thread": "15",
+        "lock_count": "21894",
+        "unlock_count": "21894",
+        "lock_ns": "539500",
+        "unlock_ns": "383083"
+      },
+      {
+        "thread": "16",
+        "lock_count": "21762",
+        "unlock_count": "21762",
+        "lock_ns": "534542",
+        "unlock_ns": "399792"
+      },
+      {
+        "thread": "17",
+        "lock_count": "21818",
+        "unlock_count": "21818",
+        "lock_ns": "631292",
+        "unlock_ns": "415125"
+      },
+      {
+        "thread": "18",
+        "lock_count": "21862",
+        "unlock_count": "21862",
+        "lock_ns": "562417",
+        "unlock_ns": "454458"
+      },
+      {
+        "thread": "19",
+        "lock_count": "21770",
+        "unlock_count": "21770",
+        "lock_ns": "545958",
+        "unlock_ns": "458583"
+      },
+      {
+        "thread": "20",
+        "lock_count": "21842",
+        "unlock_count": "21842",
+        "lock_ns": "606375",
+        "unlock_ns": "523958"
+      },
+      {
+        "thread": "21",
+        "lock_count": "21842",
+        "unlock_count": "21842",
+        "lock_ns": "614875",
+        "unlock_ns": "418542"
+      },
+      {
+        "thread": "22",
+        "lock_count": "21818",
+        "unlock_count": "21818",
+        "lock_ns": "631250",
+        "unlock_ns": "454125"
+      },
+      {
+        "thread": "23",
+        "lock_count": "21834",
+        "unlock_count": "21834",
+        "lock_ns": "533708",
+        "unlock_ns": "396958"
+      },
+      {
+        "thread": "24",
+        "lock_count": "21722",
+        "unlock_count": "21722",
+        "lock_ns": "549000",
+        "unlock_ns": "590167"
+      },
+      {
+        "thread": "25",
+        "lock_count": "21858",
+        "unlock_count": "21858",
+        "lock_ns": "509667",
+        "unlock_ns": "460792"
+      },
+      {
+        "thread": "26",
+        "lock_count": "21826",
+        "unlock_count": "21826",
+        "lock_ns": "568125",
+        "unlock_ns": "404375"
+      },
+      {
+        "thread": "27",
+        "lock_count": "21786",
+        "unlock_count": "21786",
+        "lock_ns": "556333",
+        "unlock_ns": "469917"
+      },
+      {
+        "thread": "28",
+        "lock_count": "21822",
+        "unlock_count": "21822",
+        "lock_ns": "616042",
+        "unlock_ns": "448042"
+      },
+      {
+        "thread": "29",
+        "lock_count": "21846",
+        "unlock_count": "21846",
+        "lock_ns": "536708",
+        "unlock_ns": "398000"
+      },
+      {
+        "thread": "30",
+        "lock_count": "21878",
+        "unlock_count": "21878",
+        "lock_ns": "554333",
+        "unlock_ns": "465000"
+      },
+      {
+        "thread": "31",
+        "lock_count": "21814",
+        "unlock_count": "21814",
+        "lock_ns": "513833",
+        "unlock_ns": "408417"
+      },
+      {
+        "thread": "32",
+        "lock_count": "21946",
+        "unlock_count": "21946",
+        "lock_ns": "600375",
+        "unlock_ns": "399208"
+      },
+      {
+        "thread": "33",
+        "lock_count": "21870",
+        "unlock_count": "21870",
+        "lock_ns": "528000",
+        "unlock_ns": "421792"
+      },
+      {
+        "thread": "34",
+        "lock_count": "21742",
+        "unlock_count": "21742",
+        "lock_ns": "549667",
+        "unlock_ns": "422875"
+      },
+      {
+        "thread": "35",
+        "lock_count": "21830",
+        "unlock_count": "21830",
+        "lock_ns": "549208",
+        "unlock_ns": "447458"
+      },
+      {
+        "thread": "36",
+        "lock_count": "21886",
+        "unlock_count": "21886",
+        "lock_ns": "613417",
+        "unlock_ns": "423583"
+      },
+      {
+        "thread": "37",
+        "lock_count": "21810",
+        "unlock_count": "21810",
+        "lock_ns": "638958",
+        "unlock_ns": "415000"
+      },
+      {
+        "thread": "38",
+        "lock_count": "21858",
+        "unlock_count": "21858",
+        "lock_ns": "532000",
+        "unlock_ns": "486667"
+      },
+      {
+        "thread": "39",
+        "lock_count": "21798",
+        "unlock_count": "21798",
+        "lock_ns": "518958",
+        "unlock_ns": "447333"
+      },
+      {
+        "thread": "40",
+        "lock_count": "21910",
+        "unlock_count": "21910",
+        "lock_ns": "623250",
+        "unlock_ns": "416125"
+      },
+      {
+        "thread": "41",
+        "lock_count": "21870",
+        "unlock_count": "21870",
+        "lock_ns": "544292",
+        "unlock_ns": "393833"
+      },
+      {
+        "thread": "42",
+        "lock_count": "21842",
+        "unlock_count": "21842",
+        "lock_ns": "637167",
+        "unlock_ns": "416458"
+      },
+      {
+        "thread": "43",
+        "lock_count": "21890",
+        "unlock_count": "21890",
+        "lock_ns": "612625",
+        "unlock_ns": "457875"
+      },
+      {
+        "thread": "44",
+        "lock_count": "21906",
+        "unlock_count": "21906",
+        "lock_ns": "553583",
+        "unlock_ns": "431583"
+      },
+      {
+        "thread": "45",
+        "lock_count": "21854",
+        "unlock_count": "21854",
+        "lock_ns": "621250",
+        "unlock_ns": "589083"
+      },
+      {
+        "thread": "46",
+        "lock_count": "21826",
+        "unlock_count": "21826",
+        "lock_ns": "536875",
+        "unlock_ns": "427125"
+      },
+      {
+        "thread": "47",
+        "lock_count": "21782",
+        "unlock_count": "21782",
+        "lock_ns": "585667",
+        "unlock_ns": "389833"
+      },
+      {
+        "thread": "48",
+        "lock_count": "21786",
+        "unlock_count": "21786",
+        "lock_ns": "534625",
+        "unlock_ns": "424125"
+      },
+      {
+        "thread": "49",
+        "lock_count": "21802",
+        "unlock_count": "21802",
+        "lock_ns": "581583",
+        "unlock_ns": "420958"
+      },
+      {
+        "thread": "50",
+        "lock_count": "21902",
+        "unlock_count": "21902",
+        "lock_ns": "524417",
+        "unlock_ns": "417958"
+      },
+      {
+        "thread": "51",
+        "lock_count": "21890",
+        "unlock_count": "21890",
+        "lock_ns": "585875",
+        "unlock_ns": "440042"
+      },
+      {
+        "thread": "52",
+        "lock_count": "21810",
+        "unlock_count": "21810",
+        "lock_ns": "565042",
+        "unlock_ns": "395750"
+      },
+      {
+        "thread": "53",
+        "lock_count": "21854",
+        "unlock_count": "21854",
+        "lock_ns": "541000",
+        "unlock_ns": "457042"
+      },
+      {
+        "thread": "54",
+        "lock_count": "21858",
+        "unlock_count": "21858",
+        "lock_ns": "665917",
+        "unlock_ns": "450917"
+      },
+      {
+        "thread": "55",
+        "lock_count": "21830",
+        "unlock_count": "21830",
+        "lock_ns": "564292",
+        "unlock_ns": "459833"
+      },
+      {
+        "thread": "56",
+        "lock_count": "21770",
+        "unlock_count": "21770",
+        "lock_ns": "531958",
+        "unlock_ns": "418792"
+      },
+      {
+        "thread": "57",
+        "lock_count": "21894",
+        "unlock_count": "21894",
+        "lock_ns": "563958",
+        "unlock_ns": "487375"
+      },
+      {
+        "thread": "58",
+        "lock_count": "21806",
+        "unlock_count": "21806",
+        "lock_ns": "574333",
+        "unlock_ns": "462583"
+      },
+      {
+        "thread": "59",
+        "lock_count": "21854",
+        "unlock_count": "21854",
+        "lock_ns": "572292",
+        "unlock_ns": "427583"
+      },
+      {
+        "thread": "60",
+        "lock_count": "21634",
+        "unlock_count": "21634",
+        "lock_ns": "624833",
+        "unlock_ns": "464500"
+      },
+      {
+        "thread": "61",
+        "lock_count": "21838",
+        "unlock_count": "21838",
+        "lock_ns": "504917",
+        "unlock_ns": "392833"
+      },
+      {
+        "thread": "62",
+        "lock_count": "21858",
+        "unlock_count": "21858",
+        "lock_ns": "582458",
+        "unlock_ns": "453625"
+      },
+      {
+        "thread": "63",
+        "lock_count": "21834",
+        "unlock_count": "21834",
+        "lock_ns": "576333",
+        "unlock_ns": "455625"
+      }
+    ],
+    "explicit_lock_calls": 1397685,
+    "lock_plus_unlock_ns": 64790956.0,
+    "lock_plus_unlock_ns_per_request": 185.4407436982847,
+    "inclusive_lock_wall_as_fraction_of_server_cpu": 0.0026450397948305686,
+    "note": "Includes timestamp overhead and waiting wall time; not a subtractable isolated CPU measurement. Server lifetime and profile include startup/warmup/shutdown. Explicit flockfile/funlockfile only; implicit stdio locks are outside this count."
+  }
+]

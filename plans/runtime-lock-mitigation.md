@@ -1,9 +1,10 @@
 # Remove unnecessary runtime synchronization
 
-> Status: active
-> Proposed on 2026-10-29; planning only. Runtime implementation has not started.
-> Covers every candidate from the post-PR628 lock audit. Shared integration
-> owns the final full gate and publication; this session must not run full gates.
+> Status: active - implemented; shared integration pending.
+> Implementation and focused validation completed on 2026-10-29.
+> Sections 1-7 are implemented. Section 8 was measured and retains FILE locks.
+> Author stage-2 passed. Shared integration owns the final full gate and publication.
+> No full gate ran in the implementation session.
 
 ## Result and boundaries
 
@@ -306,3 +307,23 @@ framework. No validators, dedicated diagnostics, or caller-side locking modes
 are added. Test extensions protect actual wakeup, cancellation, ownership,
 identity, accounting and callback behavior. Failure cleanup protects partial
 Scope construction; it does not add downstream checks for valid Scope handles.
+
+## Execution evidence
+
+Implementation started at current `origin/dev`
+`fa1cf22fee3d30e72df6939ef8ba36a60e133269`, after the plan PR merged.
+Three isolated workers completed the listed source groups with private
+handoffs. The combined code head is `493f1a01c`.
+
+The [execution report](../examples/apps/notes/bench/reports/2026-10-29-runtime-locks/README.md)
+records operation counts, actual Scope footprint, both accounting modes,
+combined checks, author stage-2, matched Notes samples, stdio disposition and
+coverage limits. Names remain enabled throughout the Notes comparison.
+Temporary instrumentation remains outside shipped sources.
+
+Scope construction keeps its preinitialization boundary: native allocation
+failures free partial resources before raising, without requiring Error
+cleanup. Listener representation reads the stop flag atomically too.
+Shared integration still owns final generated artifacts, the full gate,
+compiler performance checkpoint and publication. Keep this plan active until
+that delivery is recorded.

@@ -148,7 +148,7 @@ void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
     queue nodes and resources through the same finalizer.
 */
 void Channel.free(Channel channel) {
-  if (channel) { channel.close(); channel.lifetime.destroy(); }
+  if (channel) { channel.closed = 1; channel.lifetime.destroy(); }
 }
 
 /** Ends sends and wakes waiters; accepted messages remain available to drain.
@@ -352,8 +352,7 @@ static int _buffer_send(Channel channel, ChannelMessage message) {
   if (channel.last) channel.last.next = message;
   else channel.first = message;
   channel.last = message;
-  channel.count++;
-  _notify(channel);
+  if (!channel.count++) _notify(channel);
   return 1;
 }
 
@@ -427,9 +426,10 @@ static int _buffer_receive(Channel channel, ChannelMessage &out) {
   ChannelMessage message = channel.first;
   channel.first = message.next;
   if (!channel.first) channel.last = NULL;
+  int was_full = channel.count == channel.capacity;
   channel.count--;
   out = message;
-  _notify(channel);
+  if (was_full) _notify(channel);
   return 1;
 }
 

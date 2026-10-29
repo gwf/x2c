@@ -61,6 +61,21 @@ static void net_timeout_reports_errno(void) {
   EXPECT_STR_EQ(peer.input.readline(), "again\n");
 }
 
+static void net_listener_repr_preserves_fields_and_stop(void) {
+  $test.scoped();
+  Listener listener = auto Listener.bind("127.0.0.1", 0);
+  Buffer expected = auto Buffer.new(0);
+  expected.printf("Listener { fd: %d, host: \"127.0.0.1\", port: %d, stopped: 0 }",
+                  listener.fd, listener.port());
+  EXPECT_STR_EQ(listener.repr(), expected.str());
+  listener.stop();
+  expected.clear();
+  expected.printf("Listener { fd: %d, host: \"127.0.0.1\", port: %d, stopped: 1 }",
+                  listener.fd, listener.port());
+  EXPECT_STR_EQ(listener.repr(), expected.str());
+  EXPECT_STR_EQ(Listener.repr(NULL), Listener.str(NULL));
+}
+
 typedef struct NetAccept { Listener listener; } NetAccept;
 
 static Var _accept_worker(const void *input, size_t size) {
@@ -185,6 +200,7 @@ static void net_descriptor_handoff(void) {
 }
 
 void net_suite(void) {
+  $test.run(net_listener_repr_preserves_fields_and_stop);
   $test.run(net_exchange_and_half_close);
   $test.run(net_timeout_reports_errno);
   $test.run(net_listener_stop_unblocks_accept);

@@ -1,0 +1,73 @@
+{
+  "base": "fa1cf22fee3d30e72df6939ef8ba36a60e133269",
+  "candidate_source_head": "493f1a01cc98b04b8e03f96dab6f308571929c36",
+  "scratch": "/tmp/x2c-runtime-locks-nwm1p4m9",
+  "source_review": "Parent authored-diff review plus independent storage/logging/transport cross-reviews. No additional defect found after unnamed cleanup and Listener repr fixes.",
+  "public_layout": "Scope public source and generated header unchanged; first-member private record requests 64 bytes vs 56. Native allocator rounds both to 64 on this Mac. Pool generated header unchanged. Existing signatures and stop-field integer layouts preserved.",
+  "failure_injection": "Storage worker temporary generated object forces each of record, registry node, copied-name allocations to fail; prior resources freed and later named creation succeeds, accounting off and on.",
+  "stage_2": "make stage-2 passed on code head 493f1a01cc98b04b8e03f96dab6f308571929c36; no local rebootstrap needed (no new compiler capability). Log debug/runtime-lock-stage-2-ready.log. Earlier attempts intentionally interrupted while final source corrections were pending.",
+  "raw_worker_evidence": {
+    "storage": "/tmp/x2c-lock-storage/debug",
+    "transport": "/tmp/x2c-lock-transport/debug",
+    "logging": "/tmp/x2c-lock-logging/.context/runtime-lock-logging.md"
+  },
+  "preinit": "Final Scope construction avoids cleanup-runtime dependency. Existing scope-preinit links against Scope + thread-state only; allocate/shutdown pass. Native failure cleanup uses returning native malloc result at constructor boundary.",
+  "worker_checks": {
+    "transport": {
+      "modes": "accounting off/on",
+      "tests_each": 109,
+      "assertions_each": 820
+    },
+    "logging": {
+      "modes": "accounting off/on",
+      "tests_each": 39,
+      "assertions_each": 204,
+      "error_probes": "passed"
+    },
+    "storage": {
+      "accounting_on": {
+        "tests": 61,
+        "assertions": 672
+      },
+      "accounting_off_pool_context": {
+        "tests": 40,
+        "assertions": 504
+      },
+      "failure_injection": "three allocations, both accounting modes passed"
+    }
+  },
+  "go_control": "Retained unchanged Go binary and current Go source match hashes in committed 2026-10-28 comparison. Same pinned native SQLite static library. Current external API tests pass.",
+  "go_binary_sha256": "b4dbc9c5c8e791ffc938a005d1c652ec7d04ee1be098696ad78207311294add4",
+  "combined_checks": {
+    "accounting_on": {
+      "tests": 197,
+      "assertions": 1741
+    },
+    "accounting_off": {
+      "tests": 176,
+      "assertions": 1573
+    },
+    "scope_and_error_lifecycle": "existing probes passed",
+    "notes": "before and after database-mutex/database-thread API, concurrency, restart, CLI/store checks passed; SQL error/recovery/queued shutdown passed; five-way normalized fixture preflight passed",
+    "examples": "channel-service and channel-word-count matched checked-in outputs after correcting word-count fixture invocation",
+    "layout": "cmp confirms public Scope and Pool headers byte-identical to baseline; native final Scope object has no cleanup symbol dependency",
+    "operation_probes": "all expected counts pass, accounting off/on"
+  },
+  "independent_review": "Storage reviewed logger/dispatch. Logger reviewed combined storage/transport and final native-allocation cleanup correction. Parent reviewed combined authored diff and generated atomics/public layouts. No remaining concrete finding.",
+  "coverage_limits": "Focused concurrency cases do not enumerate every scheduler interleaving. Scope native allocation failures are injected; Pool initialization shutdown-hook allocation failure is not injected. Final publication gate and compiler checkpoint belong to shared integrator.",
+  "archive_comparison": {
+    "members_checked": 78,
+    "changed": [
+      "channel.o",
+      "dispatch.o",
+      "http.o",
+      "logger.o",
+      "net.o",
+      "pool.o",
+      "scope.o",
+      "thread.o"
+    ]
+  },
+  "repeat": "Complete same-host 25-sample repeat, reversed ordering, same binaries/fixture hashes; all first samples retained. The lower first-attempt throughput medians did not repeat. See repeat-comparison.json and README.",
+  "stdio_disposition": "Retain locks: four candidate runs, 170-214 ns/request inclusive explicit lock/unlock time, 0.25-0.39% of server CPU. No File or parser change."
+}

@@ -607,6 +607,7 @@ static void thread_rejects_free_before_join_and_double_join(void) {
 }
 
 static void thread_freezes_late_descriptor_registration(void) {
+  EXPECT_TRUE(x2c_descriptor_registration_frozen());
   int caught = 0, tag_caught = 0;
   try x2c_register_type("too-late-thread-type");
   catch %(bad-state *): caught = 1;
@@ -892,10 +893,31 @@ static void thread_wait_any_leaves_errors_for_join(void) {
   worker.free();
 }
 
+static Var _thread_cancelled_wait(const void *bytes, size_t size) {
+  (void) bytes; (void) size;
+  ThreadWaitInput input = { NULL, 1 };
+  Thread child = Thread.start_raw(_thread_wait_worker, &input, sizeof(input));
+  Array pending = [child];
+  x2c_thread_wait_owner().stop();
+  int cancelled = 0;
+  try Thread.wait_any(pending);
+  catch %(bad-state (operation "Thread.stop") (cancelled 1)): cancelled = 1;
+  int unchanged = pending.len() == 1 && pending[0] == child;
+  Thread.finish_all(pending);
+  return cancelled && unchanged;
+}
+
+static void thread_wait_any_stop_keeps_pending_unchanged(void) {
+  Thread worker = Thread.start_raw(_thread_cancelled_wait, NULL, 0);
+  EXPECT_INT_EQ(worker.join().int(), 1);
+  worker.free();
+}
+
 void thread_wait_any_suite(void) {
   $test.run(thread_wait_any_empty_ready_and_removal);
   $test.run(thread_wait_any_skips_unfinished_workers);
   $test.run(thread_wait_any_leaves_errors_for_join);
+  $test.run(thread_wait_any_stop_keeps_pending_unchanged);
 }
 
 static void thread_finish_all_empty_and_success(void) {

@@ -71,7 +71,14 @@ static int accounting_mode(int enabled) {
   if (Scope.accounting_enabled() != enabled) return 1;
   ScopeStats before = Scope.stats();
   if (!enabled && !zero_stats(before)) return 1;
-  Scope work = Scope.new_named("accounting probe");
+  char name[] = "accounting probe";
+  Scope work = Scope.new_named(name);
+  name[0] = 'x';
+  if (strcmp(work.name(), "accounting probe")) return 1;
+  Scope unnamed = Scope.new(), neighbor = Scope.new_named("neighbor");
+  if (Scope.name(NULL) || unnamed.name()) return 1;
+  unnamed.destroy();
+  neighbor.destroy();
   if (strcmp(work.name(), "accounting probe")) return 1;
   void *ptr = Scope.malloc_finalized_in(&work, 8, accounting_drop);
   ptr = xrealloc(ptr, 16);
@@ -86,8 +93,8 @@ static int accounting_mode(int enabled) {
     if (after.allocation_calls != before.allocation_calls + 1 ||
         after.reallocation_calls != before.reallocation_calls + 1 ||
         after.free_calls != before.free_calls + 1 ||
-        after.scope_creations != before.scope_creations + 1 ||
-        after.scope_destructions != before.scope_destructions + 1 ||
+        after.scope_creations != before.scope_creations + 3 ||
+        after.scope_destructions != before.scope_destructions + 3 ||
         after.requested_bytes != before.requested_bytes + 24 ||
         after.live_requested_bytes != before.live_requested_bytes)
       return 1;
