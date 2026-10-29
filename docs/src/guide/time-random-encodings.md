@@ -150,7 +150,7 @@ each one as an `int`, `String.code_point_count` counts them, and
 ~int main(void) {
 String word = "na\xc3\xafve";
 printf("%d bytes, %d code points\n", word.len(), word.code_point_count());
-foreach (int point in word.code_points()) printf("U+%04X ", point);
+foreach (int point in word.code_points()) printf(" U+%04X", point);
 Buffer out = auto Buffer.new(0);
 out.write_code_point(0x263A);
 printf("\n%s %d\n", out.str().hex_encode(), "\xc0\x80".is_utf8());
@@ -160,7 +160,7 @@ printf("\n%s %d\n", out.str().hex_encode(), "\xc0\x80".is_utf8());
 
 ```text
 6 bytes, 5 code points
-U+006E U+0061 U+00EF U+0076 U+0065 
+ U+006E U+0061 U+00EF U+0076 U+0065
 e298ba 0
 ```
 
