@@ -20,12 +20,15 @@ static typedef struct Splice {
 
 /** Returns the x2c source at `path`, whose own text is `text`, with its
     file-scope `module` block replaced by the text of each member it names,
-    in order, or NULL when the text has no block. Member paths are relative
+    in order, or NULL when the text has no block. `plain` receives the
+    preprocessed tokens of a root without a block. Member paths are relative
     to the file that names them, and their own blocks are spliced in turn.
     A member's quoted include of a file beside it is spelled from the
     entry's directory, so it names the same file there.
 */
-ModuleSource Compiler.module_source(Compiler c, String path, String text) {
+ModuleSource Compiler.module_source(
+  Compiler c, String path, String text, Tokenizer &?plain) {
+  if (plain) plain = NULL;
   Buffer out = auto Buffer.new(0);
   Splice s = {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
@@ -34,7 +37,7 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   s.splicing[Path.absolute(path)] = 1;
   String own = _file_prefix(Path.stem(path));
   s.prefixes[own] = Path.basename(path);
-  if (!_file(s, path, text, NULL, own)) return NULL;
+  if (!_file(s, path, text, NULL, own, plain)) return NULL;
   ModuleSource source = xcalloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
     .text = s.out.str(), .own = text, .markers = s.markers,
@@ -48,7 +51,8 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
    Each file's text is marked as its own, so its rows carry its file
    prefix. Diagnostics locate the block in this file. */
 static int _file(
-  Splice &s, String path, String text, String prefix, String file_prefix) {
+  Splice &s, String path, String text, String prefix, String file_prefix,
+  Tokenizer &?plain) {
   with (s.path = path,
         s.text = text,
         s.prefix = prefix,
@@ -61,6 +65,7 @@ static int _file(
     Token block = _block(s, tokens), close = NULL;
     if (!block) {
       _own(s, 0, text.len(), 1);
+      if (plain) plain = tokens;
       return 0;
     }
     List members = _members(s, block, close);
@@ -98,7 +103,7 @@ static void _member(Splice &s, String spelling, Token site) {
     $fail.collect_module_prefix(s.c, site, spelling, s.prefixes[own]);
   s.prefixes[own] = spelling;
   s.splicing[resolved] = 1;
-  _file(s, path, text, Path.dirname(prefix), own);
+  _file(s, path, text, Path.dirname(prefix), own, NULL);
   s.splicing.del(resolved);
   _end_line(s);
 }

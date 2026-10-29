@@ -476,7 +476,7 @@ module List _walk_cold(
    remain unique across the unit and its pending inline-body parses. */
 module void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
-  ModuleSource module = c.module_source(path, text);
+  ModuleSource module = c.module_source(path, text, NULL);
   with (c.names.counters = {}) {
     _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
   }
