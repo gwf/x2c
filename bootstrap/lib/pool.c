@@ -663,7 +663,7 @@ static void _x2c_gensym_macro__insert_all_0(PoolTable _x2c_gensym_macro_map_13, 
 }
 
 static PoolTable f9_interning___PoolTable_copy_entries(PoolTable _x2c_gensym_macro_map_14){
-  PoolTable _x2c_gensym_macro_copy_0 = f9_interning___PoolTable_new_table(_x2c_gensym_macro_map_14, 2), _x2c_gensym_macro_result_0 = 0; {
+  unsigned _x2c_gensym_macro_capacity_4 = 2;  if(_x2c_gensym_macro_map_14) while(_x2c_gensym_macro_map_14 -> used >(unsigned long) _x2c_gensym_macro_capacity_4 * 3 / 4) _x2c_gensym_macro_capacity_4 *= 2;  PoolTable _x2c_gensym_macro_copy_0 = f9_interning___PoolTable_new_table(_x2c_gensym_macro_map_14, _x2c_gensym_macro_capacity_4), _x2c_gensym_macro_result_0 = 0; {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
