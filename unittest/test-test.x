@@ -111,7 +111,7 @@ static void user_test_selection_and_skip(void) {
   EXPECT_TRUE(output.contains("expected Error to be raised"));
   output = run_tests(%("test" "--list" "--filter" "absent"), status);
   EXPECT_INT_EQ(status, 2);
-  EXPECT_STR_EQ(output, "");
+  EXPECT_STR_EQ(output, "0 passed, 0 failed, 0 skipped\n");
   output = run_tests(%("test"), status);
   EXPECT_INT_EQ(status, 1);
   EXPECT_TRUE(output.endswith("2 passed, 4 failed, 3 skipped\n"));
