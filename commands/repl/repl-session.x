@@ -564,14 +564,14 @@ static ReplResult _submit_native(ReplSession session, String source) {
   }
   catch %(replrun (cause ?cause)): {
     result.status = <failed>;
-    result.cause = cause;
+    result.cause = Error.snapshot(cause);
   }
   catch %(incomplete *): result.status = <incomplete>;
   catch %(malformed *): result.diagnostics = c.diagnostics();
-  catch %(repl (reason ?why)): result.message = why;
+  catch %(repl (reason ?why)): result.message = Error.snapshot(why);
   catch %(?kind *details): {
     result.status = <failed>;
-    result.cause = cons(kind, details);
+    result.cause = Error.snapshot(cons(kind, details));
   }
   result.diagnostics = c.diagnostics();
   return result;
