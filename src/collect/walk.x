@@ -199,8 +199,10 @@ void Compiler.install_included_effects(Compiler c) {
 static List _macro_rows(Compiler c, String path, Map active) {
   Map runtime = _inside(path, _canonical_lib()) ? {} : _runtime_macros(c);
   Cpp cpp = Cpp.new({});
-  _replay_included(c, NULL, path, {}, NULL, active, cpp, runtime);
-  return cpp.changes({});
+  Map visited = {};
+  _replay_included(c, NULL, path, visited, NULL, active, cpp, runtime);
+  Var rows = visited[path];
+  return rows is void ? NULL : rows.list();
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -392,8 +394,7 @@ static void _walk_file(
    and each segment starts from a copy of the state where it begins. The
    ordered parts retain its own directive events beside its include paths. */
 static void _split(FileWalk &w, Token first) {
-  Map initial = w.c.initial_macros(w.path);
-  Cpp cpp = Cpp.new(initial.copy());
+  Cpp cpp = Cpp.new(w.c.initial_macros(w.path));
   w.start = cpp.copy();
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
