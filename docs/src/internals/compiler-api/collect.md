@@ -44,6 +44,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
 | [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
+| [`Compiler.prepare_macro_exports`](#Compiler.prepare_macro_exports) | Prepares a file's macro exports through signature-only collection. |
 | [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
 | [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
@@ -426,6 +427,17 @@ Returns the compiler-owned prelude sources relative to its home. Their
 runtime implementations are already linked into the shipped binaries.
 
 Source: `src/collect/walk.x`
+
+<a id="Compiler.prepare_macro_exports"></a>
+#### Compiler.prepare_macro_exports
+
+`void Compiler.prepare_macro_exports(Compiler c, String path)`
+
+Prepares a file's macro exports through signature-only collection.
+The ordinary collector owns include traversal and retains the exports;
+lookahead entries are provisional until ordinary collection replaces them.
+
+Source: `src/collect/providers.x`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types
