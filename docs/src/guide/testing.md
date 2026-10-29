@@ -68,8 +68,8 @@ test names containing `pop`.
 
 ## Running test files
 
-The command is experimental and available in checkout builds.
-`make install` does not install it.
+`x2c test` ships with normal compiler installations and is also available
+in checkout builds.
 
 `x2c test` finds `*_test.x`, `test_*.x`, and every `.x` file below a
 `tests/` directory. With no operands, it starts at the nearest `x2c.toml`
