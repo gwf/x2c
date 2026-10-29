@@ -157,6 +157,25 @@ static void scope_realloc_updates_any_position(void) {
   Scope.release();
 }
 
+static void scope_name_lifetime_and_registry_removal(void) {
+  Scope first = Scope.new_named("first"), unnamed = Scope.new();
+  Scope middle = Scope.new_named("middle"), last = Scope.new_named("last");
+  EXPECT_NULL(Scope.name(NULL));
+  EXPECT_NULL(unnamed.name());
+  EXPECT_STR_EQ(first.name(), "first");
+  const char *last_name = last.name();
+  middle.destroy();
+  unnamed.destroy();
+  EXPECT_TRUE(last.name() == last_name);
+  EXPECT_STR_EQ(first.name(), "first");
+  first.destroy();
+  EXPECT_STR_EQ(last.name(), "last");
+  last.destroy();
+  Scope null_name = Scope.new_named(NULL);
+  EXPECT_NULL(null_name.name());
+  null_name.destroy();
+}
+
 static void scope_named_direct_allocation(void) {
   ScopeStats before = Scope.stats();
   Scope *active = Scope.top();
@@ -557,6 +576,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
 #include "test-macros.x"
 
 void scope_suite(void) {
+  $test.run(scope_name_lifetime_and_registry_removal);
   $test.run(scope_splice_preserves_owners_and_finalizers);
   $test.run(scope_alloc_release);
   $test.run(scope_push_pop_destroy);

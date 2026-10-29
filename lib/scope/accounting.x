@@ -1,9 +1,5 @@
 /*  accounting.x -- scope accounting */
 
-static typedef struct ScopeName {
-  Scope scope, char *name, struct ScopeName *next;
-} *ScopeName;
-
 /* scope names
 
    Named scopes share one registry, guarded by the metadata mutex. The
@@ -31,7 +27,7 @@ static atomic_size_t scope_peak_live_requested_bytes;
 */
 const char *Scope.name(Scope scope) {
   _require_running();
-  ScopeName node = _find_name(scope);
+  ScopeName node = scope ? ((ScopeRecord) scope).name : NULL;
   return node ? node.name : NULL;
 }
 
@@ -83,14 +79,6 @@ ScopeStats Scope.stats(void) {
   return stats;
 }
 
-static ScopeName _find_name(Scope scope) {
-  _metadata_lock();
-  ScopeName node = scope_names;
-  while (node && node.scope != scope) node = node.next;
-  _metadata_unlock();
-  return node;
-}
-
 static void _metadata_lock(void) {
   if (pthread_mutex_lock(&scope_metadata_mutex))
     _raw_fatal("could not lock metadata");
@@ -101,10 +89,12 @@ static void _metadata_unlock(void) {
     _raw_fatal("could not unlock metadata");
 }
 
-module void _register_name(Scope scope, const char *name) {
-  if (!name) return;
+module ScopeName _register_name(Scope scope, const char *name) {
+  if (!name) return NULL;
   size_t length = strlen(name);
   ScopeName node = _raw_malloc(sizeof(struct ScopeName));
+  int finished = 0;
+  defer if (!finished) _raw_free(node);
   char *copy = _raw_malloc(length + 1);
   memcpy(copy, name, length + 1);
   node.scope = scope;
@@ -113,19 +103,19 @@ module void _register_name(Scope scope, const char *name) {
   node.next = scope_names;
   scope_names = node;
   _metadata_unlock();
+  finished = 1;
+  return node;
 }
 
-module void _unregister_name(Scope scope) {
+module void _unregister_name(ScopeName node) {
+  if (!node) return;
   _metadata_lock();
   ScopeName *link = &scope_names;
-  while (*link && (*link).scope != scope) link = &(*link).next;
-  ScopeName node = *link;
-  if (node) {
-    *link = node.next;
-    _raw_free(node.name);
-    _raw_free(node);
-  }
+  while (*link != node) link = &(*link).next;
+  *link = node.next;
   _metadata_unlock();
+  _raw_free(node.name);
+  _raw_free(node);
 }
 
 module void _record_allocation(size_t size) {

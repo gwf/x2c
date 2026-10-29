@@ -69,6 +69,17 @@ module typedef struct ScopeRetain {
   Scope scope, *slot;
 } ScopeRetain;
 
+module typedef struct ScopeName {
+  Scope scope, char *name, struct ScopeName *next;
+} *ScopeName;
+
+/* Valid handles point to this first member. The immutable name membership
+   stays private, leaving the public Scope layout unchanged. */
+module typedef struct ScopeRecord {
+  struct Scope scope;
+  ScopeName name;
+} *ScopeRecord;
+
 module typedef struct ScopeThreadState {
   Scope root, *active, **stack, int stack_size, stack_capacity;
   ScopeRetain *retains;

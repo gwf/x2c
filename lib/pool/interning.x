@@ -210,7 +210,8 @@ Pool Pool.release(Pool inner) {
   Pool up = inner.up;
   _lock(up);
   if (up) {
-    up.child_capacity = inner.table.capacity;
+    __atomic_store_n(
+      &up.child_capacity, inner.table.capacity, __ATOMIC_RELAXED);
   }
   _release_blocks(inner);
   _unlock(up);
@@ -306,8 +307,5 @@ module PoolTable _root_new_table(unsigned capacity) =>
    table reached. */
 static unsigned _child_capacity(Pool inner) {
   if (!inner) return 2;
-  _lock(inner);
-  unsigned capacity = inner.child_capacity;
-  _unlock(inner);
-  return capacity;
+  return __atomic_load_n(&inner.child_capacity, __ATOMIC_RELAXED);
 }

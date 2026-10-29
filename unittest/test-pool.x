@@ -298,6 +298,29 @@ static void pool_large_promotion_retains_scope_path(void) {
 }
 
 
+static void pool_large_allocation_counts(void) {
+  Pool pool = Pool.retain(NULL);
+  PoolStats before = pool.stats();
+  ScopeStats scope_before = Scope.stats();
+  char *storage = pool.malloc(1024);
+  storage[1023] = 'x';
+  PoolStats after = pool.stats();
+  ScopeStats scope_after = Scope.stats();
+  int accounting = Scope.accounting_enabled();
+  EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls + accounting);
+  EXPECT_INT_EQ(after.requested_bytes,
+                before.requested_bytes + 1024 * accounting);
+  EXPECT_INT_EQ(scope_after.allocation_calls,
+                scope_before.allocation_calls + accounting);
+  EXPECT_INT_EQ(scope_after.live_requested_bytes,
+                scope_before.live_requested_bytes + 1024 * accounting);
+  pool.free(storage);
+  EXPECT_INT_EQ(pool.stats().free_calls, before.free_calls + accounting);
+  EXPECT_INT_EQ(Scope.stats().live_requested_bytes,
+                scope_before.live_requested_bytes);
+  pool.release();
+}
+
 static void pool_release_balances_scope_stats(void) {
   ScopeStats before = Scope.stats();
   Pool root = Pool.retain_named(NULL, "test-balance-root");
@@ -662,6 +685,7 @@ void pool_suite(void) {
   $test.run(pool_promote_tracks_a_full_bitmap);
   $test.run(pool_promote_crosses_multiple_levels);
   $test.run(pool_large_promotion_retains_scope_path);
+  $test.run(pool_large_allocation_counts);
   $test.run(pool_release_balances_scope_stats);
   $test.run(pool_null_owner_failures_are_handleable);
   $test.run(pool_string_bracket_and_wipe);

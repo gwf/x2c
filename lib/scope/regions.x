@@ -318,10 +318,14 @@ static void _record_retain(Scope scope, Scope *slot) {
 }
 
 module Scope _new_scope(const char *name) {
-  Scope scope = _data_malloc(sizeof(struct Scope));
-  *scope = (struct Scope) {0};
-  _register_name(scope, name);
+  ScopeRecord record = _data_malloc(sizeof(struct ScopeRecord));
+  int finished = 0;
+  defer if (!finished) free(record);
+  *record = (struct ScopeRecord) {0};
+  Scope scope = &record.scope;
+  record.name = _register_name(scope, name);
   if (scope_accounting) atomic_fetch_add(&scope_creations, 1);
+  finished = 1;
   return scope;
 }
 
@@ -350,7 +354,7 @@ static void _destroy_chain(Scope scope) {
       else if (alloc) _release(alloc);
       else break;
     }
-    _unregister_name(scope);
+    _unregister_name(((ScopeRecord) scope).name);
     if (scope_accounting) atomic_fetch_add(&scope_destructions, 1);
     free(scope);
     scope = down;

@@ -84,9 +84,11 @@ void *Pool.malloc(Pool inner, size_t size) {
   if (!inner) raise %(bad-arg (operation "Pool.malloc"));
   int class_index = _size_class(size);
   if (class_index >= 0) return _small_malloc(inner, class_index, size);
-  _storage_lock();
-  _record_request(size);
-  _storage_unlock();
+  if (Scope.accounting_enabled()) {
+    _storage_lock();
+    _record_request(size);
+    _storage_unlock();
+  }
   _lock(inner);
   defer _unlock(inner);
   return Scope.malloc_in(&inner.scope, size);
@@ -576,11 +578,12 @@ static int _slot_kept(PoolBlock block, unsigned slot) {
 }
 
 module void _storage_initialize(void) {
+  if (__atomic_load_n(&pool_storage_ready, __ATOMIC_ACQUIRE)) return;
   _storage_lock();
   defer _storage_unlock();
-  if (pool_storage_ready) return;
+  if (__atomic_load_n(&pool_storage_ready, __ATOMIC_ACQUIRE)) return;
   Scope.shutdown_hook(_storage_shutdown);
-  pool_storage_ready = 1;
+  __atomic_store_n(&pool_storage_ready, 1, __ATOMIC_RELEASE);
 }
 
 /* String and List register their pool-release hooks after storage first asks
@@ -603,5 +606,5 @@ static void _storage_shutdown(void) {
   pool_backing_bytes = 0;
   pool_active_blocks = pool_active_bytes = 0;
   pool_depot_blocks = pool_depot_bytes = 0;
-  pool_storage_ready = 0;
+  __atomic_store_n(&pool_storage_ready, 0, __ATOMIC_RELEASE);
 }
