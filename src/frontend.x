@@ -185,15 +185,23 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
     unit.globals = _preprocess_input(frontend, unit);
     if (unit.preprocessor) c.take_diagnostics(unit.preprocessor);
     c.sym.seed_var_tags(unit.globals);
-    // Collection supplies the macros of the unit's includes.
-    c.preprocess_tokens();
   }
   catch %(malformed *): {
     if (unit.preprocessor) c.close_child(unit.preprocessor);
     unit.preprocessor = NULL;
+    _preprocess(c);
     return 0;
   }
-  return !c.error_count();
+  return _preprocess(c) && !c.error_count();
+}
+
+/* Collection supplies the macros of the unit's includes, so the unit's
+   tokens are preprocessed after it, and after a failed collection too,
+   because a caller may still parse what it can. */
+static int _preprocess(Compiler c) {
+  try c.preprocess_tokens();
+  catch %(malformed *): return 0;
+  return 1;
 }
 
 /** Releases the unit after its caller has inspected or exported its

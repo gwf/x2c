@@ -17,7 +17,8 @@ module void _command(Compiler c, Cpp cpp, Token token, String path) {
   else {
     String target = Compiler.preproc_include_target(token.text, angle);
     String dir = path ? Path.dirname(path) : ".";
-    if (target) cpp.merge(c.included_macros(target, angle, dir));
+    if (target && !cpp.isolated)
+      cpp.merge(c.included_macros(target, angle, dir));
   }
 }
 

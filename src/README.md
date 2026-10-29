@@ -87,7 +87,8 @@ linked into the compiler itself.
 | --- | --- |
 | [compiler/](compiler/README.md) | Translation state, parsing orchestration, declaration production, names, origins, and cached literals. |
 | [collect/](collect/README.md) | Source/include walks, module splicing, packages, and declaration/interface caches. |
-| [preprocess.x](preprocess.x) | The directives and conditional arms x2c interprets without running the host preprocessor. |
+| [cpp/](cpp/README.md) | C macro expansion and conditional groups before parsing. |
+| [preprocess.x](preprocess.x) | Hidden arms, layout marks, and the directives before each form. |
 | [parse/](parse/README.md) | Declaration/type/function grammar and binding of constructed syntax. |
 | [parse-reports.x](parse-reports.x) | Package, binding, and alias diagnostics. |
 | [statements.x](statements.x) | Statement grammar and return checking. |

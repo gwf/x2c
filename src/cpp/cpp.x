@@ -25,13 +25,14 @@
     definition List, to `<undef>` after an `#undef`, or to `<cond>` when an
     undecided group changed it or x2c cannot read its body. A definition is
     `(object NAME BODY SITE)` or `(function NAME PARAMETERS VARIADIC BODY
-    SITE)`, where `SITE` is `(FILE LINE)`. The state belongs to the Scope
-    that creates it; `Cpp.copy` makes an independent one.
+    SITE)`, where `SITE` is `(FILE LINE)`. An `isolated` state leaves the
+    table unchanged at an `#include`. The state belongs to the Scope that
+    creates it; `Cpp.copy` makes an independent one.
 */
 module typedef struct Cpp {
   Map macros;
   Block groups;
-  int serial;
+  int serial, isolated;
 } *Cpp;
 
 /* One open conditional group. `state` is the current arm's: `<taken>`,
@@ -69,10 +70,21 @@ Cpp Cpp.new(Map macros) {
   return cpp;
 }
 
+/** Returns a state like `Cpp.new` whose `#include` directives apply no
+    macros. A reading before collection uses one, because which included
+    files have been collected then depends on earlier units.
+*/
+Cpp Cpp.isolated(Map macros) {
+  Cpp cpp = Cpp.new(macros);
+  cpp.isolated = 1;
+  return cpp;
+}
+
 /** Returns an independent copy of `cpp`. */
 Cpp Cpp.copy(Cpp cpp) {
   Cpp copy = Cpp.new(cpp.macros.copy());
   copy.serial = cpp.serial;
+  copy.isolated = cpp.isolated;
   CppGroup *groups = cpp.groups.bytes;
   for (size_t i = 0; i < cpp.groups.len(); i++) {
     CppGroup group = groups[i];

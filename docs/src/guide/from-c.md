@@ -293,10 +293,13 @@ each use of `name`. See [macros](macros.md),
 
 ## Before bringing over a C source file
 
-x2c parses source before host preprocessing, so most conditional branches
-must parse, including ones the native build disables. A C macro that
-supplies missing grammar may need an x2c macro or a rewritten call site. See
-[host preprocessing](../reference/language.md#host-preprocessing).
+x2c expands the macros the file and its project headers define before it
+parses, so a macro may supply grammar. It decides a conditional only when
+every name the condition tests is visible to it, so a branch on a platform
+macro such as `__APPLE__` or a feature a system header defines must parse
+together with the other branches of its group, including ones the native
+build disables. A macro such a branch defines stays for the C compiler. See
+[preprocessing](../reference/language.md#preprocessing).
 
 - Use `(void)` for an ordinary no-argument function declaration. Do not assume
   every C dialect, wide/UTF literal spelling, or identifier spelling is accepted;

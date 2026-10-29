@@ -61,6 +61,7 @@ memory. For each input file the translator runs one pipeline:
 source
   -> tokenizing
   -> shallow parse and global environment discovery
+  -> preprocessing
   -> full parse and type annotation
   -> protocol conformance forms
   -> lowering
@@ -146,8 +147,8 @@ the text to `Tokenizer.new` from `lib/tokenizer.x`, and scans it with the
 allocation-free character recognizers in `lib/scan.x`. Whitespace, comments,
 and preprocessor lines all become tokens. Later phases can therefore report
 positions in the original file, and directives can be re-emitted where they
-were written. `src/preprocess.x` classifies those directive tokens and turns
-the tokens of a conditional arm that C never takes into comments.
+were written. The token array is not parsed until
+[preprocessing](#preprocessing) has expanded its macros.
 
 ```sh
 ./builds/0/x2c translate --dump-tokens greet.x
@@ -252,8 +253,8 @@ binding facts are not exported. Static helpers remain in their provider.
 Each provider has one function-hash table. Its meta advertisements identify
 the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 6 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(DEPENDENCIES...) (INCLUDE-DIRS...))` form in
+`(interface 7 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(DEPENDENCIES...) (INCLUDE-DIRS...) (MACROS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
 identifiers; the reader reads that one form without evaluating it.
 The API reference reads `--dump-definitions` output and joins authored prose
@@ -283,8 +284,9 @@ interface, and requires the stage 1 C, headers, and interfaces byte for
 byte.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
-preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
-child process.
+preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E` as a
+child process, whose line markers give each region of the output its file
+and line.
 Paths stay separate argv elements, and stdout, stderr, and the real child
 status come back independently. A second `Compiler` shallow-parses that
 output instead.
@@ -295,6 +297,26 @@ diagnostics, and emitted C all come from the original positioned token stream.
 `--no-cpp` skips symbol discovery and is a diagnostic aid for C-only source.
 `--dump-symbols` prints the symbol table the compiler ends up with; the
 implicit runtime contributes a few thousand rows, so grep the output.
+
+### Preprocessing
+
+`src/cpp/cpp.x` expands the C macros x2c can see before the parser reads a
+token: those the unit, the files it includes, the runtime, and the command
+line define. `Compiler.expand_macros` walks the scanned array once. It
+applies each directive to a `Cpp` state, the macro table and the open
+conditional groups, and replaces each macro use with its expansion. Every
+expanded token takes the line, column, and position of the use, and the
+tokenizer's `expansions` rows name the macro that produced it, which
+diagnostics turn into a note. `src/cpp/conditions.x` decides each
+conditional group, or leaves it undecided when a name it tests is not
+visible; `src/preprocess.x` then turns the tokens of a hidden arm into
+comments and marks layout attributes. Directives stay in the array.
+
+Collection preprocesses each segment it parses from the state where the
+segment starts. A file's entry records the macros it changed as its
+exported rows, which an includer applies at the `#include`, so a replayed
+interface supplies the macros a cold walk does. The unit's own array is
+preprocessed after collection, when every file it includes has an entry.
 
 ### Full parse and type annotation
 
@@ -567,8 +589,9 @@ module block, so its files share no private scope.
   segment's compile-time state;
 - `src/symtab/symtab.x` -- the symbol table: scopes, bindings, lookup, typedef
   resolution, and semantic transactions;
-- `src/preprocess.x` -- preprocessor directive lines, conditional arms, and
-  the directives before each form;
+- `src/cpp/cpp.x` -- macro expansion and conditional groups before parsing;
+- `src/preprocess.x` -- preprocessor directive lines, hidden arms, layout
+  marks, and the directives before each form;
 - `src/parse/parse.x`, `src/expressions/expressions.x`, `src/statements.x`, `src/literals/literals.x` --
   grammar and AST construction;
 - `src/parse-reports.x`, `src/expressions-reports.x` -- package and

@@ -109,6 +109,7 @@ static Token _block(Splice &s) {
   defer s.c.close_child(scan);
   scan.filename = s.path;
   scan.tokenizer = tokenizer;
+  scan.cpp = Cpp.isolated(scan.initial_macros(s.path));
   scan.preprocess_tokens();
   Token block = NULL, previous = NULL;
   int depth = 0;
