@@ -319,13 +319,15 @@ static void _record_retain(Scope scope, Scope *slot) {
 
 module Scope _new_scope(const char *name) {
   ScopeRecord record = _data_malloc(sizeof(struct ScopeRecord));
-  int finished = 0;
-  defer if (!finished) free(record);
   *record = (struct ScopeRecord) {0};
   Scope scope = &record.scope;
-  record.name = _register_name(scope, name);
+  if (name) {
+    int finished = 0;
+    defer if (!finished) free(record);
+    record.name = _register_name(scope, name);
+    finished = 1;
+  }
   if (scope_accounting) atomic_fetch_add(&scope_creations, 1);
-  finished = 1;
   return scope;
 }
 
