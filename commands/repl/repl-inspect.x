@@ -29,6 +29,18 @@ static Map _description(ReplSession session, String name) {
     if (spelling && session.descriptions.try_get(spelling, entry))
       return entry;
   }
+  int dot = name.rfind(".");
+  if (dot >= 0) {
+    Type receiver = _query_type(session, name[:dot]);
+    if (!receiver) return NULL;
+    Map methods = auto {};
+    _methods(c, receiver, NULL, methods, {});
+    Array rows = methods[name[dot + 1:]];
+    if (rows && rows.len() == 1) {
+      String spelling = Ast.binding_spelling(rows[0].list().car());
+      if (session.descriptions.try_get(spelling, entry)) return entry;
+    }
+  }
   return NULL;
 }
 
@@ -59,6 +71,13 @@ void ReplSession.describe(
     "declaration": _named_declaration(c, name, type, syntax),
     "line": 1, "end_line": source.split("\n").len()
   };
+  foreach (List row in c.definition_rows($(Ast.without_origin(syntax))))
+    match (row) case %(function $name ?display ? ? ?line ?doc *): {
+      Map description = session.descriptions[name];
+      description["display"] = display;
+      description["line"] = line;
+      if (doc is <string>) description["documentation"] = doc;
+    }
 }
 
 static Map _symbol_descriptions(ReplSession session, int all) {
@@ -89,13 +108,18 @@ String ReplSession.symbol_text(
     Map row = descriptions[name];
     Symbol row_kind = row["kind"];
     String origin = row["path"], declaration = row["declaration"];
-    if (prefix && !name.startswith(prefix)) continue;
+    String display = row["display"];
+    if (prefix && !name.startswith(prefix) &&
+        (!display || !display.startswith(prefix))) continue;
     if (kind && row_kind != kind &&
         !(kind == <function> && row_kind == <native>)) continue;
     if (path && origin != path &&
         (!origin || Path.absolute(origin) != Path.absolute(path))) continue;
     out.printf("%-9s %s", row_kind == <native> ? "function" : row_kind.str(),
-               declaration ? declaration : name);
+               display && display != name ? display
+                 : declaration ? declaration : name);
+    if (display && display != name && declaration)
+      out.printf("  %s", declaration);
     if (origin) out.printf("  [%s]", origin);
     out.newline();
   }
@@ -252,6 +276,8 @@ String ReplSession.info(ReplSession session, String text) {
   Buffer out = auto Buffer.new(0);
   if (description) {
     String declaration = description["declaration"], path = description["path"];
+    String display = description["display"], name = description["name"];
+    if (display && display != name) out.printf("%s\n", display);
     out.printf("%s\n", declaration ? declaration : text);
     if (path) {
       out.printf("source: %s", path);
@@ -263,13 +289,19 @@ String ReplSession.info(ReplSession session, String text) {
     if (documentation) out.printf("%s\n", documentation);
     out.write("execution: native\n");
     Type type = description["type"];
-    if (type && !type.is_function()) _field_rows(session.compiler, type, out);
+    if (type && !type.is_function()) {
+      _field_rows(session.compiler, type, out);
+      Map shown = auto {};
+      _method_rows(session.compiler, type, out, shown);
+    }
     return out;
   }
   Type type = _query_type(session, text);
   if (!type) return NULL;
   out.printf("%s\n", _type_text(session.compiler, type));
   _field_rows(session.compiler, type, out);
+  Map shown = auto {};
+  _method_rows(session.compiler, type, out, shown);
   return out;
 }
 
@@ -345,10 +377,6 @@ static int _builtin_value(Compiler c, Type type) {
   return 0;
 }
 
-static List _render_value(
-  Compiler c, Type type, List expression, List output,
-  List remaining, int depth);
-
 static List _render_array(
   Compiler c, Type type, List expression, List output,
   List remaining, int depth) {
@@ -372,23 +400,25 @@ static List _render_array(
   };
 }
 
-static List _render_struct(
+static void _render_fields(
   Compiler c, Type shape, List expression, List output,
-  List remaining, int depth) {
-  List fields = c.sym.field_order(shape);
-  if (!fields) return _write(output, "<opaque>");
-  Array statements = [];
-  List separator = c.sym.introduce(c.fresh_name("repl_separator"));
-  List separated = %(expr (int) (ident $separator));
-  List truncation = c.sym.introduce(c.fresh_name("repl_truncated"));
-  List truncated = %(expr (int) (ident $truncation));
-  foreach (List row in fields.cdr()) {
+  List remaining, int depth, List separated, List truncated, Array statements) {
+  foreach (List row in c.sym.field_order(shape).cdr()) {
     (String name, Type member) = row;
-    if (!name) continue;
-    List selected = %(expr $member (op . $expression ($name)));
-    List value = <volatile> in c.sym.normalize_declared_type(member)
-      ? _write(output, "<volatile>")
-      : _render_value(c, member, selected, output, remaining, depth - 1);
+    Type member_shape = _shape(c, member);
+    if (!name && (member_shape ~= %(struct *))) {
+      _render_fields(c, member_shape, expression, output, remaining, depth,
+                     separated, truncated, statements);
+      continue;
+    }
+    if (!name && !(member_shape ~= %(union *))) continue;
+    List selected = name
+      ? %(expr $member (op . $expression ($name))) : NULL;
+    List value = !name ? _render_union(c, member_shape, output)
+      : <volatile> in c.sym.normalize_declared_type(member)
+        ? _write(output, "<volatile>")
+        : _render_value(c, member, selected, output, remaining, depth - 1);
+    if (!name) name = "<anonymous union>";
     String label = name + ": ";
     statements.push($!{
       if ($remaining > 0) {
@@ -401,6 +431,19 @@ static List _render_struct(
       else $truncated = 1;
     });
   }
+}
+
+static List _render_struct(
+  Compiler c, Type shape, List expression, List output,
+  List remaining, int depth) {
+  if (!c.sym.field_order(shape)) return _write(output, "<opaque>");
+  Array statements = [];
+  List separator = c.sym.introduce(c.fresh_name("repl_separator"));
+  List separated = %(expr (int) (ident $separator));
+  List truncation = c.sym.introduce(c.fresh_name("repl_truncated"));
+  List truncated = %(expr (int) (ident $truncation));
+  _render_fields(c, shape, expression, output, remaining, depth,
+                 separated, truncated, statements);
   return $!{
     $output.write("{ ");
     int $separator = 0, $truncation = 0;
@@ -458,9 +501,10 @@ List repl_render(
   List bound = c.sym.introduce(c.fresh_name("repl_remaining"));
   List remaining = %(expr (int) (ident $bound));
   List body = _render_value(c, type, expression, output, remaining, depth);
+  List writer = c.sym.introduce("repl_inspect_value");
   String label = _type_text(c, type) + " ";
   List written = $!{
-    Buffer repl_inspect_value(Buffer, Var, int, int *);
+    Buffer $writer(Buffer, Var, int, int *);
     int $bound = $limit;
     $output.write($label);
     @($(body))

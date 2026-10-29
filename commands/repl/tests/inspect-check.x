@@ -48,7 +48,7 @@ static List _prepare(Compiler c, int depth, int limit) {
       Buffer $output = Buffer.new(0);
       $type $value = {7, {1, 2, 3}, NULL, 9, 5};
       @($(render))
-      String result = (String) $buffer;
+      String result = $buffer;
       $buffer.free();
       return result;
     }
@@ -112,6 +112,35 @@ int main(int argc, char **argv) {
          "symbol prefix did not filter function");
   _check(session.source("missing_name") == NULL,
          "unknown source returned a definition");
+  String method_source = "int Probe.read(Probe value) { return value.x; }";
+  List method = _definition(c, method_source);
+  session.names["Probe_read"] = %(function);
+  session.describe("Probe_read", method, method_source);
+  _check("Probe.read" in session.info("Probe.read"),
+         "authored method spelling did not resolve");
+  _check(method_source in session.source("Probe.read"),
+         "method source did not resolve");
+  _definition(c, "typedef struct Owner { delegate Probe part; } Owner;");
+  _check("via part" in session.members("Owner"),
+         "delegated method was not described");
+  _check("read" in repl_member_candidates(c, %("Owner")).repr(),
+         "delegated method was not a completion candidate");
+  _definition(c, "Probe create_probe(int x);");
+  _check("create_probe" in session.members("Probe"),
+         "related C constructor was not described");
+  Buffer displayed = auto Buffer.new(0);
+  int remaining = 3;
+  repl_inspect_value(displayed, [1, [2, 3], 4], 3, &remaining);
+  String limited = displayed;
+  _check("..." in limited && !("4" in limited),
+         "nested value entries were not bounded");
+  displayed.unwrite(displayed.content.length);
+  Array cycle = [];
+  cycle.push(cycle);
+  remaining = 100;
+  repl_inspect_value(displayed, cycle, 3, &remaining);
+  String cyclic = displayed;
+  _check("..." in cyclic, "cyclic collection did not reach depth limit");
   if (!failures) puts("native inspection checks passed");
   return failures != 0;
 }
