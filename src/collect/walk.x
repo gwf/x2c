@@ -28,6 +28,14 @@ module typedef struct FileWalk {
   int unit, linkage, line, pos, deferred;
 } FileWalk;
 
+/* One CPP replay's runtime baseline and optional discovery proof. A root
+   requests complete ordinary entries; normal replays leave it null. */
+static typedef struct MacroReplay {
+  Map runtime;
+  String root;
+  int complete;
+} MacroReplay;
+
 // collecting a unit
 
 /** Collects the current translation unit's declarations into `globs`.
@@ -196,11 +204,20 @@ void Compiler.install_included_effects(Compiler c) {
 
 /* Macro effects use the same source-ordered parts as declaration replay.
    A currently collected file contributes only its recorded prefix. */
-static List _macro_rows(Compiler c, String path, Map active) {
-  Map runtime = _inside(path, _canonical_lib()) ? {} : _runtime_macros(c);
+static List _macro_rows(
+  Compiler c, String path, Map active, MacroReplay &?query) {
+  Map runtime = _inside(path, _canonical_lib())
+              ? {} : _runtime_macros(c, query);
+  if (query && !query.complete) return NULL;
   Cpp cpp = Cpp.new({});
   Map visited = {};
-  _replay_included(c, NULL, path, visited, NULL, active, cpp, runtime);
+  MacroReplay replay = {.runtime = runtime, .root = query ? query.root : NULL};
+  int complete = _replay_included(
+    c, NULL, path, visited, NULL, active, cpp, replay);
+  if (query && !complete) {
+    query.complete = 0;
+    return NULL;
+  }
   Var rows = visited[path];
   return rows is void ? NULL : rows.list();
 }
@@ -234,12 +251,19 @@ List Compiler.included_macros(
   Compiler c, String target, int angle, String dir, Map active) {
   String path = c.sources.resolve_include(c.include_dirs, dir, target, angle);
   if (!path) return NULL;
+  String canonical = _canonical_path(path);
   if (c.macro_export_source) {
+    MacroReplay query = {
+      .root = _canonical_path(c.macro_export_source), .complete = 1};
+    auto {
+      List rows = _macro_rows(c, canonical, active, query);
+      if (query.complete) return rows;
+    }
     String source = c.macro_export_source;
     c.macro_export_source = NULL;
     c.prepare_macro_exports(source);
   }
-  return _macro_rows(c, _canonical_path(path), active);
+  return _macro_rows(c, canonical, active, NULL);
 }
 
 /** Returns the macro table visible before the first line of the file
@@ -251,13 +275,14 @@ List Compiler.included_macros(
 Map Compiler.initial_macros(Compiler c, String path) {
   if (!path) return {};
   String canonical = _canonical_path(path);
-  Map runtime = _inside(canonical, _canonical_lib()) ? {} : _runtime_macros(c);
+  Map runtime = _inside(canonical, _canonical_lib())
+              ? {} : _runtime_macros(c, NULL);
   return _initial_macros(c, canonical, runtime);
 }
 
-static Map _runtime_macros(Compiler c) {
+static Map _runtime_macros(Compiler c, MacroReplay &?query) {
   String runtime = %"$(x2c_get_root())/lib/x2c.x";
-  return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL));
+  return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL, query));
 }
 
 /* One replay shares only its immutable runtime baseline. Each file still
@@ -794,9 +819,9 @@ static void _publish(FileWalk &w) {
 /* A root query visits each file once. Backedges and repeated includes
    consume that query's current prefix or completed rows, never a closure
    retained from an earlier query's include context. */
-static void _replay_included(
+static int _replay_included(
   Compiler c, Map globs, String path, Map visited, Array exports,
-  Map active, Cpp sink, Map runtime) {
+  Map active, Cpp sink, MacroReplay &?query) {
   Var found;
   if (visited.try_get(path, found)) {
     if (sink) {
@@ -807,13 +832,16 @@ static void _replay_included(
       }
       else sink.merge(found);
     }
-    return;
+    return 1;
   }
   if (!sink) visited[path] = 1;
   Var prefix = active ? active[path] : void;
+  if (query && query.root && (path == query.root || prefix is <array> ||
+      path in provisional_entries)) return 0;
   List entry = prefix is <array> ? NULL : _entry(c, path);
-  if (!entry && prefix is not <array>) return;
+  if (!entry && prefix is not <array>) return !query || !query.root;
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
+  Map runtime = query ? query.runtime : NULL;
   Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
   // Backedges read the live state; completed visits keep their final rows.
@@ -821,14 +849,17 @@ static void _replay_included(
   foreach (Var part in parts) {
     if (part is <map> && !cpp)
       _replay_package_imports(c, globs, part, exports);
-    else if (part is <string> && (!cpp || !cpp.hidden()))
-      _replay_included(c, globs, part, visited, exports, active, cpp, runtime);
+    else if (part is <string> && (!cpp || !cpp.hidden())) {
+      if (!_replay_included(
+        c, globs, part, visited, exports, active, cpp, query)) return 0;
+    }
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
     visited[path] = cpp.changes(initial);
     sink.merge(visited[path]);
   }
+  return 1;
 }
 
 /* The compile-time rows of the syntax prelude's entry in source order. */
