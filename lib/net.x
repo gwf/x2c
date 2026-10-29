@@ -103,12 +103,19 @@ int x2c_net_accept_fd(Listener listener) {
 /** Returns the actual bound port, including when bind requested port zero. */
 int Listener.port(Listener listener) => listener.port;
 
+/** Writes the listener's fields, reading its stop state atomically. */
+Buffer Listener.write_repr(Listener listener, Buffer out) {
+  if (!listener) return listener.write_str(out);
+  out.printf("Listener { fd: %d, host: ", listener.fd);
+  listener.host.write_repr(out);
+  int stopped = __atomic_load_n(&listener.stopped, __ATOMIC_ACQUIRE);
+  return out.printf(", port: %d, stopped: %d }", listener.port, stopped);
+}
+
 /** Requests stopping from any thread. A blocked accept returns within one
     poll interval. The listener descriptor remains owned until close. */
 void Listener.stop(Listener listener) {
-  x2c_thread_wait_lock();
-  listener.stopped = 1;
-  x2c_thread_wait_unlock();
+  __atomic_store_n(&listener.stopped, 1, __ATOMIC_RELEASE);
 }
 
 /** Releases the listener. Call after its accepting thread has finished.
@@ -229,11 +236,8 @@ static int _bound_port(int fd) {
 }
 
 static int _stopped(Listener listener) {
-  x2c_thread_wait_lock();
-  int stopped = listener.stopped, cancelled = x2c_thread_stopping();
-  x2c_thread_wait_unlock();
-  if (cancelled) x2c_thread_cancel();
-  return stopped;
+  if (x2c_thread_stopping()) x2c_thread_cancel();
+  return __atomic_load_n(&listener.stopped, __ATOMIC_ACQUIRE);
 }
 
 static void _drop_listener(void *ptr) {

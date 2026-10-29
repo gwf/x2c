@@ -229,10 +229,10 @@ Thread Thread.wait_any(Array pending) {
       raise %(bad-state (operation "Thread.wait_any"));
   }
   x2c_thread_wait_lock();
-  Thread selected = _wait_any(pending);
+  int selected = _wait_any(pending);
   x2c_thread_wait_unlock();
-  if (!selected) x2c_thread_cancel();
-  return selected;
+  if (selected < 0) x2c_thread_cancel();
+  return pending.remove(selected);
 }
 
 /** Describes mapping `function` over `source` with at most `workers` Threads.
@@ -320,7 +320,7 @@ Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
 
 // cooperative waits
 
-/** Tests the current wait's pending stop under the internal monitor. */
+/** Tests the current caller's pending stop atomically. */
 int x2c_thread_stopping(void) =>
   x2c_thread_wait_stopped(x2c_thread_wait_owner());
 
@@ -337,15 +337,16 @@ void x2c_thread_wait(pthread_cond_t *condition) {
   if (owner) owner.waiting = NULL;
 }
 
-/** Returns the current wait's borrowed Thread token, or NULL for an unmanaged
-    or cleanup-masked caller. Call while holding the internal monitor.
+/** Returns the current caller's borrowed Thread token, or NULL for an
+    unmanaged or cleanup-masked caller. The token remains caller-local.
 */
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
-/** Tests a borrowed wait token under the internal monitor. A null token has
-    no stop request. Queues use this before committing a rendezvous peer.
+/** Tests a live borrowed wait token atomically. A null token has no stop
+    request. Queues retain the monitor when committing a rendezvous peer.
 */
-int x2c_thread_wait_stopped(Thread owner) => owner && owner.stop_requested;
+int x2c_thread_wait_stopped(Thread owner) =>
+  owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
     have been released. Explicit catches may handle this shared cause.
@@ -363,7 +364,7 @@ void x2c_thread_cancel(void) {
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
-  t.stop_requested = 1;
+  __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
   if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
   x2c_thread_wait_unlock();
 }
@@ -700,15 +701,15 @@ static Var _call_value(const void *input, size_t size) {
   return call.function(call.value);
 }
 
-static Thread _wait_any(Array pending) {
+static int _wait_any(Array pending) {
   while (!x2c_thread_stopping()) {
     for (int i = 0; i < pending.len(); i++) {
       Thread thread = pending[i];
-      if (thread.finished) return pending.remove(i);
+      if (thread.finished) return i;
     }
     x2c_thread_wait(&thread_completion_condition);
   }
-  return NULL;
+  return -1;
 }
 
 /* Export consumes the capture, so a later cleanup join of the same worker
@@ -751,10 +752,7 @@ static void _batch_stop(Array pending) {
 }
 
 static void _batch_check_stop(void) {
-  x2c_thread_wait_lock();
-  int stopped = x2c_thread_stopping();
-  x2c_thread_wait_unlock();
-  if (stopped) x2c_thread_cancel();
+  if (x2c_thread_stopping()) x2c_thread_cancel();
 }
 
 static ParallelMap _parallel_map(

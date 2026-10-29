@@ -124,6 +124,42 @@ static void channel_many_senders_share_bounded_queue(void) {
   EXPECT_INT_EQ(total, 400);
 }
 
+static void _channel_many_producers_and_consumers(Var capacity) {
+  Channel channel = auto Channel.new(capacity);
+  Array jobs = auto [];
+  atomic_int count = 0;
+  int remaining = 4, total = 0;
+  for (int worker = 0; worker < 4; ++worker) {
+    jobs.push(%!(void) => {
+      for (int i = 1; i <= 256; ++i) channel.send(i);
+      return <sender>;
+    });
+    jobs.push(%!(void) using &count => {
+      int sum = 0;
+      foreach (int value in channel) {
+        sum += value;
+        atomic_fetch_add(&count, 1);
+      }
+      return sum;
+    });
+  }
+  Thread.run(jobs, %!(Var completed) using &remaining, &total => {
+    if (completed == <sender>) {
+      if (!--remaining) channel.close();
+    }
+    else total += completed.integer();
+  });
+  EXPECT_INT_EQ(atomic_load(&count), 1024);
+  EXPECT_INT_EQ(total, 4 * 256 * 257 / 2);
+}
+
+static void channel_buffer_transitions_wake_all_waiter_classes(void) {
+  $test.scoped();
+  _channel_many_producers_and_consumers(1);
+  _channel_many_producers_and_consumers(8);
+  _channel_many_producers_and_consumers(<unbounded>);
+}
+
 static atomic_int channel_probe_ready;
 
 static Var _channel_sender(const void *bytes, size_t size) {
@@ -619,6 +655,7 @@ void channel_suite(void) {
   $test.run(channel_unbounded_fifo);
   $test.run(channel_rendezvous_iteration);
   $test.run(channel_many_senders_share_bounded_queue);
+  $test.run(channel_buffer_transitions_wake_all_waiter_classes);
   $test.run(channel_stopped_sender_does_not_enqueue);
   $test.run(channel_stopped_receiver_does_not_consume);
   $test.run(channel_rendezvous_commit_survives_later_stop);

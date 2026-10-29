@@ -501,10 +501,8 @@ static void _connection(HttpServer s, Socket peer) {
     _write(res, peer.output, keep, req && req.method == <head>);
     s.logger.info(
       <http>, %(status $(res.code)), %(path $(req ? req.path : NULL)));
-    x2c_thread_wait_lock();
-    int stopped = s.listener.stopped;
-    x2c_thread_wait_unlock();
-    if (!keep || stopped) return;
+    if (!keep || __atomic_load_n(&s.listener.stopped, __ATOMIC_ACQUIRE))
+      return;
   }
 }
 
