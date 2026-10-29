@@ -109,7 +109,10 @@ static int _selected(String name, List filters) {
 static void _run(TestFunction function) {
   _failures = NULL, _skipped = NULL, _did_skip = 0;
   try function();
-  catch %(test-skip (reason ?reason)): { _skipped = reason; _did_skip = 1; }
+  catch %(test-skip (reason ?reason)): {
+    _skipped = Error.snapshot(reason);
+    _did_skip = 1;
+  }
   catch %(?cause *detail):
     _failures = cons(
       %"uncaught Error $(cause.repr()): $(detail.repr())", _failures);
