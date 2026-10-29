@@ -67,6 +67,8 @@ static Array f6_output____emit_source(Compiler c, List source, Map bindings, Map
 
 static void f6_output____publish_files(Compiler c, List outputs);
 
+static List f6_output____changed_files(List outputs);
+
 static List f6_output____vertical_spacing(List code);
 
 static List f6_output____include_guard(Compiler c, List content);
@@ -610,7 +612,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _158 = List_var(NULL);
   _159 = Symbol_var(39266);
   _160 = Symbol_var(106239471489226);
-  _161 = int_var(1008);
+  _161 = int_var(1023);
   _162 = String_new("");
   _163 = String_var(_162);
   _164 = String_new("x2c.hole");
@@ -1007,7 +1009,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _552 = cons(_549, _551);
   _553 = List_var(_552);
   _554 = Symbol_var(1133019155420);
-  _555 = int_var(36561);
+  _555 = int_var(37212);
   _556 = cons(_555, NULL);
   _557 = cons(_554, _556);
   _558 = List_var(_557);
@@ -1091,7 +1093,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _636 = cons(_635, NULL);
   _637 = cons(_541, _636);
   _638 = List_var(_637);
-  _639 = int_var(36475);
+  _639 = int_var(37126);
   _640 = cons(_639, NULL);
   _641 = cons(_554, _640);
   _642 = List_var(_641);
@@ -1345,7 +1347,7 @@ static void f6_output____publish_files(Compiler c, List outputs){
     }
     volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) Path_publish_files(outputs);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) Path_publish_files(f6_output____changed_files(outputs));
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_0);
       if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
@@ -1373,13 +1375,28 @@ static void f6_output____publish_files(Compiler c, List outputs){
   }
   if(! List_truth(failure)) return;
   {
-    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/generate/output.x",.function = "f6_output____publish_files",.line = 140}; & _x2c_gensym_error_site_0; })))));
+    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/generate/output.x",.function = "f6_output____publish_files",.line = 143}; & _x2c_gensym_error_site_0; })))));
     Compiler_report_error(c, 354920, _10, c -> token, ({
       Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(_11), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(_12), cons(String_var(_x2c_gensym_macro_reason_0), NULL))));  cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL));
     }
     ));
   }
 
+}
+
+int Path_is_file(Path);
+
+String Path_read_text(Path);
+
+static List f6_output____changed_files(List outputs){
+  Array changed = Array_new();
+  for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
+    String path = Var_as_string(List_car(rest)), text = Var_as_string(List_cadr(rest));
+    if(Path_is_file(path) && String_equal(Path_read_text(path), text)) continue;
+    Array_push(changed, String_var(path));
+    Array_push(changed, String_var(text));
+  }
+  return Array_list_free(changed);
 }
 
 static List f6_output____vertical_spacing(List code){
