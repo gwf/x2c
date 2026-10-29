@@ -12,7 +12,7 @@ static typedef struct Run {
   Path root;
   CliRequest project;
   List program_args;
-  int jobs, filtered, listing;
+  int jobs, filtered;
   int files_passed, files_failed, tests_passed, tests_failed;
 } Run;
 
@@ -75,7 +75,7 @@ static Run _configure(Map options) {
   if (options["quiet"].integer()) args.push("--quiet");
   return (Run) {.root = root, .project = project,
     .program_args = args.list(), .jobs = count,
-    .filtered = !!options["filter"].list(), .listing = options["list"].integer()};
+    .filtered = !!options["filter"].list()};
 }
 
 static Array _discover(List operands, Path root) {
@@ -89,10 +89,12 @@ static Array _discover(List operands, Path root) {
     else if (path.is_dir()) {
       Path base = path == root || path.startswith(root_prefix) ? root : path;
       String prefix = %"$(base.rstrip("/"))/";
-      int tests = explicit && path.basename() == "tests";
+      int tests = explicit && path != root && path.basename() == "tests";
       foreach (Path file in path.walk()) {
-        if (!file.is_file() || "/.x2c-build/" in file) continue;
-        String name = file.basename(), relative = file.remove_prefix(prefix);
+        String relative = file.remove_prefix(prefix);
+        if (!file.is_file() || relative.startswith(".x2c-build/") ||
+            "/.x2c-build/" in relative) continue;
+        String name = file.basename();
         if (name.endswith("_test.x") ||
             (name.startswith("test_") && name.endswith(".x")) ||
             ((tests || relative.startswith("tests/") || "/tests/" in relative) &&
@@ -121,8 +123,8 @@ static void _run_files(Run &run, Array files) {
     int passed, failed, skipped;
     int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
                                     &passed, &failed, &skipped) == 3;
-    if (run.filtered && status == 2 && (run.listing ? !output :
-        counts && !passed && !failed && !skipped)) continue;
+    if (run.filtered && status == 2 && counts &&
+        !passed && !failed && !skipped) continue;
     if (output) fputs(output, stdout);
     if (status) run.files_failed++;
     else run.files_passed++;

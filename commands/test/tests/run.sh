@@ -103,6 +103,27 @@ run a_test.x invalid_test.x --filter absent
 [ "$status" = 1 ]
 grep -Fxq 'invalid option' "$WORK/out"
 grep -Fxq 'files: 0 passed, 1 failed; tests: 0 passed, 0 failed' "$WORK/out"
+run a_test.x invalid_test.x --filter absent --list
+[ "$status" = 1 ]
+grep -Fxq 'invalid option' "$WORK/out"
+# Startup output must not turn an unmatched --list result into a failed file.
+cat >"$WORK/project/notice_test.x" <<'NOTICE'
+#include "test.x"
+$test()
+static void notice(void) { $expect(1); }
+int main(int argc, char **argv) {
+  puts("startup notice");
+  return Test.main(argc, argv);
+}
+NOTICE
+run a_test.x notice_test.x --filter pass --list
+[ "$status" = 0 ]
+grep -Fxq passing "$WORK/out"
+! grep -q 'startup notice' "$WORK/out"
+run a_test.x notice_test.x --filter absent --list
+[ "$status" = 2 ]
+grep -Fxq 'files: 0 passed, 0 failed; tests: 0 passed, 0 failed' "$WORK/out"
+! grep -q 'startup notice' "$WORK/out"
 # Build errors count as failed files and do not stop other files.
 printf 'this is not source\n' >"$WORK/project/broken_test.x"
 run -j 2 a_test.x broken_test.x
@@ -156,11 +177,19 @@ static void basic(void) { $expect(1); }
 $test.main();
 BASIC
 cp "$WORK/ordinary-project/basic_test.x" "$WORK/ordinary-project/tests/deep/plain.x"
-mkdir -p "$WORK/ancestor/tests" "$WORK/root-name"
+mkdir -p "$WORK/ancestor/tests" "$WORK/root-name" "$WORK/cache/.x2c-build"
 cp -R "$WORK/ordinary-project" "$WORK/ancestor/tests/nested-project"
 cp -R "$WORK/ordinary-project" "$WORK/root-name/tests"
-for project in ordinary-project ancestor/tests/nested-project root-name/tests; do
+cp -R "$WORK/ordinary-project" "$WORK/cache/.x2c-build/nested-project"
+for project in ordinary-project ancestor/tests/nested-project root-name/tests \
+    cache/.x2c-build/nested-project; do
   "$TOOL" --manifest "$WORK/$project/x2c.toml" >"$WORK/discovery"
+  grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
+  ! grep -q 'APP RAN' "$WORK/discovery"
+  "$TOOL" --manifest "$WORK/$project/x2c.toml" "$WORK/$project" >"$WORK/discovery"
+  grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
+  ! grep -q 'APP RAN' "$WORK/discovery"
+  (cd "$WORK/$project" && "$TOOL" .) >"$WORK/discovery"
   grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
   ! grep -q 'APP RAN' "$WORK/discovery"
 done

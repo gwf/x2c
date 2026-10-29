@@ -94,7 +94,7 @@ int Test.main(int argc, char **argv) {
       if (!quiet) Stdout.printf("ok %s\n", name);
     }
   }
-  if (!list)
+  if (!list || (filters && !matched))
     Stdout.printf(
       "%d passed, %d failed, %d skipped\n", passed, failed, skipped);
   return failed ? 1 : filters && !matched ? 2 : 0;
