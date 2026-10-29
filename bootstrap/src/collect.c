@@ -2300,13 +2300,13 @@ void Compiler_install_included_effects(Compiler c){
 
 }
 
-List Cpp_changes(Cpp, Map);
-
 static List f4_walk____macro_rows(Compiler c, String path, Map active){
   Map runtime = f4_walk____inside(path, _canonical_lib()) ? Map_new() : f4_walk____runtime_macros(c);
   Cpp cpp = Cpp_new(Map_new());
-  f4_walk____replay_included(c, NULL, path, Map_new(), NULL, active, cpp, runtime);
-  return Cpp_changes(cpp, Map_new());
+  Map visited = Map_new();
+  f4_walk____replay_included(c, NULL, path, visited, NULL, active, cpp, runtime);
+  Var rows = Map_getindex(visited, String_var(path));
+  return Var_is_void(rows) ? NULL : Var_list(rows);
 }
 
 String Compiler_token_source(Compiler, Token, int *);
@@ -2379,7 +2379,7 @@ static void f4_walk____replay_cpp(Compiler c, Cpp cpp, List event){
   Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_0, 0));
   String text = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 1));
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
-  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/collect/walk.x",.function = "f4_walk____replay_cpp",.line = 220}; & _x2c_gensym_error_site_0; })));
+  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/collect/walk.x",.function = "f4_walk____replay_cpp",.line = 222}; & _x2c_gensym_error_site_0; })));
   struct Token token ={
     .type = 35579270086, .text = text, .line = line
   }
@@ -2730,8 +2730,7 @@ Symbol Compiler_preproc_conditional_kind(String);
 int Cpp_hidden(Cpp);
 
 static void f4_walk____split(FileWalk * w, Token first){
-  Map initial = Compiler_initial_macros((* w).c, (* w).path);
-  Cpp cpp = Cpp_new(Map_copy(initial));
+  Cpp cpp = Cpp_new(Compiler_initial_macros((* w).c, (* w).path));
   (* w).start = Cpp_copy(cpp);
   for(Token token = first;  token -> type != 11212;  token ++){
     if(token -> type != 35579270086 || ! f4_walk____starts_line(first, token)) continue;
@@ -3289,6 +3288,8 @@ static void f4_walk____publish(FileWalk * w){
 }
 
 void Cpp_merge(Cpp, List);
+
+List Cpp_changes(Cpp, Map);
 
 static void f4_walk____replay_included(Compiler c, Map globs, String path, Map visited, Array exports, Map active, Cpp sink, Map runtime){
   Var found;
