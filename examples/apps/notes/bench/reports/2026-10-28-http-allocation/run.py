@@ -1,0 +1,11 @@
+import pathlib,subprocess,shutil,json,os,importlib.util,types,statistics
+r=pathlib.Path('/Users/gary/.codex/worktrees/216e/x2c');p=pathlib.Path((r/'.context/notes-http-allocation').read_text());before=pathlib.Path((r/'.context/notes-pool-fast-path').read_text());spec=importlib.util.spec_from_file_location('compare',r/'examples/apps/notes/bench/compare.py');c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c);os.environ.pop('X2C_SCOPE_ACCOUNTING',None)
+bins={'mutex_before':before/'mutex','mutex_after':p/'mutex','thread_before':before/'database_thread','thread_after':p/'database_thread','go':pathlib.Path('/tmp/x2c-notes-go-w10r0v0i/notes-go')};args=types.SimpleNamespace(warmup=1,seconds=5);base=list(bins)
+res={'scratch':str(p),'runs':4,'clients':64,'seconds':5,'warmup_s':1,'naming':'disabled in all x2c binaries','accounting':False,'changed_archive_members':['http.o','json.o'],'samples':{k:[]for k in bins},'order':[],'binary_sha256':{k:c.digest(v)for k,v in bins.items()},'fixture_sha256':c.digest(pathlib.Path('/tmp/notes-compare-vlib4wkr/fixture.db'))}
+orders=[['mutex_before','mutex_after','thread_before','thread_after','go'],['thread_after','thread_before','mutex_after','mutex_before','go'],['go','mutex_after','mutex_before','thread_after','thread_before'],['go','thread_before','thread_after','mutex_before','mutex_after']]
+res['host_condition']='Other workspace activity observed; both pair orders used to reduce time-order bias.'
+for i,order in enumerate(orders):
+ res['order'].append(order)
+ for n in order:
+  row=c.measure(bins[n],pathlib.Path('/tmp/notes-compare-vlib4wkr/fixture.db'),args,pathlib.Path('/tmp/notes-compare-vlib4wkr/load'),'lookup',64,p/f'repeat-{i}-{n}');row['server_cpu_us_per_request']=(row['server_lifetime']['user_s']+row['server_lifetime']['system_s'])*1000000/(row['warmup_requests']+row['requests']);res['samples'][n].append(row);(p/'comparison.json').write_text(json.dumps(res,indent=2)+'\n');print(i+1,n,row['requests_per_s'],flush=True)
+res['summary']={n:{**c.summarize(a),'server_cpu_us_per_request':statistics.median(v['server_cpu_us_per_request']for v in a)}for n,a in res['samples'].items()};(p/'comparison.json').write_text(json.dumps(res,indent=2)+'\n');print(json.dumps(res['summary'],indent=2),flush=True)
