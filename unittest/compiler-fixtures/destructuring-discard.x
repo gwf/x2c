@@ -22,7 +22,7 @@ int main(void) {
   Var middle;
   $middle(values(), middle);
   int total = 0;
-  foreach (Var (_, value) in %((1 10) (2 20))) total += value.integer();
+  foreach (Var (_, value) in %((1 10) (2 20))) total += _.integer() + value.integer();
   printf("%ld %d %ld %d %d\n",
          third.integer(), second, middle.integer(), total, calls);
   return 0;

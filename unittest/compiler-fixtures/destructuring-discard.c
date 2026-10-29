@@ -76,7 +76,7 @@ int main(void){
       List _x2c_gensym_macro_pair_0 = Var_list_payload(_x2c_gensym_macro_item_0);
       _ = List_getindex(_x2c_gensym_macro_pair_0, 0);
       value = List_getindex(_x2c_gensym_macro_pair_0, 1);
-      total += Var_integer(value);
+      total += Var_integer(_) + Var_integer(value);
     }
 
   }

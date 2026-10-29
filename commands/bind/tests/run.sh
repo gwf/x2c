@@ -52,6 +52,19 @@ bind_feed "$TOOL" >/dev/null
   diff -u - "$PACKAGE/src/feed.x"
 printf 'edited\n' | diff -u - "$PACKAGE/README.md"
 
+# A closing marker need not have a newline before authored source.
+python3 - "$PACKAGE/src/feed.x" "$WORK/adjacent.x" <<'PYTHON'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+marker = "/* x2c bind: end generated raw tier */"
+prefix = path.read_text().split(marker)[0] + marker
+suffix = "int feed_extra(void) => 1;\n"
+path.write_text(prefix + suffix)
+pathlib.Path(sys.argv[2]).write_text(prefix + "\n" + suffix)
+PYTHON
+bind_feed "$TOOL" >/dev/null
+diff -u "$WORK/adjacent.x" "$PACKAGE/src/feed.x"
+
 # An entry unit without the markers is refused and left unchanged.
 printf 'int other(void) => 0;\n' >"$PACKAGE/src/feed.x"
 status=0

@@ -48,7 +48,8 @@ String Survey.region(Survey s, BindRequest request) {
 String Survey.replace_region(String text, String region) {
   int begin = text.find(bind_begin), end = text.find(bind_end);
   if (begin < 0 || end < begin) return NULL;
-  int after = end + bind_end.len() + 1;
+  int after = end + bind_end.len();
+  if (after < text.len() && text[after] == '\n') after++;
   return %"$(text[:begin])$(region)$(text[after:text.len()])";
 }
 

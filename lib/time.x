@@ -97,8 +97,12 @@ Duration Duration.neg(Duration d) =>
     Raises: `<conv-range>` when the product is not finite or leaves the
     range.
 */
-Duration Duration.scale(Duration d, double factor) =>
-  Duration.new(_from_seconds("Duration.scale", d.total_seconds() * factor));
+Duration Duration.scale(Duration d, double factor) {
+  if (factor >= -0x1p63 && factor < 0x1p63 && trunc(factor) == factor)
+    return Duration.new(_product("Duration.scale", d.nanoseconds,
+                                 (long long) factor));
+  return Duration.new(_from_seconds("Duration.scale", d.total_seconds() * factor));
+}
 
 /** Orders two Durations: negative, zero, or positive as `a` is shorter,
     equal, or longer. `<`, `<=`, `>`, and `>=` call it.
@@ -258,8 +262,7 @@ Time DateTime.time(DateTime d) {
   long long days = _days_from_civil(year, month) + d.day - 1;
   long long seconds = days * 86400 + d.hour * 3600LL + d.minute * 60LL +
                       d.second - d.utc_offset;
-  long long whole = _product("DateTime.time", seconds, NANOS);
-  return Time.new(_sum("DateTime.time", whole, d.nanosecond));
+  return Time.new(_combine_seconds("DateTime.time", seconds, d.nanosecond));
 }
 
 /** Returns the day of the week of `d`, from 0 for Sunday to 6 for
@@ -298,7 +301,23 @@ static long long _from_seconds(String operation, double seconds) {
     raise %(conv-range (operation $operation) (value $seconds));
   long long fraction = (long long) round((seconds - whole) * 1e9);
   long long count = (long long) whole;
-  return _sum(operation, _product(operation, count, NANOS), fraction);
+  return _combine_seconds(operation, count, fraction);
+}
+
+// Align signs before multiplication so a representable boundary stays in range.
+static long long _combine_seconds(
+  String operation, long long seconds, long long fraction) {
+  seconds = _sum(operation, seconds, fraction / NANOS);
+  fraction %= NANOS;
+  if (seconds < 0 && fraction > 0) {
+    seconds++;
+    fraction -= NANOS;
+  }
+  else if (seconds > 0 && fraction < 0) {
+    seconds--;
+    fraction += NANOS;
+  }
+  return _sum(operation, _product(operation, seconds, NANOS), fraction);
 }
 
 static long long _sum(String operation, long long a, long long b) {
@@ -375,7 +394,7 @@ static long long _read_clock(clockid_t clock) {
 static DateTime _fields(Time t, struct tm fields) =>
   DateTime.new(fields.tm_year + 1900, fields.tm_mon + 1, fields.tm_mday,
                fields.tm_hour, fields.tm_min, fields.tm_sec,
-               (int) (t.nanoseconds - _floor_seconds(t) * NANOS),
+               (int) ((t.nanoseconds % NANOS + NANOS) % NANOS),
                (int) fields.tm_gmtoff);
 
 /* The `struct tm` of `t` from `gmtime_r` or `localtime_r`, which convert

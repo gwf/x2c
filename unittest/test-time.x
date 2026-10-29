@@ -62,6 +62,46 @@ static void time_duration_overflow_raises(void) {
   EXPECT_INT_EQ(caught, 4);
 }
 
+static void time_preserves_nanosecond_boundaries(void) {
+  $test.scoped();
+  Time first = Time.parse("1677-09-21T00:12:43.145224192Z");
+  Time last = Time.parse("2262-04-11T23:47:16.854775807Z");
+  EXPECT_TRUE(first.nanoseconds == LLONG_MIN);
+  EXPECT_TRUE(last.nanoseconds == LLONG_MAX);
+  EXPECT_TRUE(first.utc().time() == first);
+  EXPECT_TRUE(last.utc().time() == last);
+  EXPECT_INT_EQ(first.utc().nanosecond, 145224192);
+  EXPECT_INT_EQ(Time.new(-1).utc().nanosecond, 999999999);
+  EXPECT_TRUE(DateTime.new(1970, 1, 1, 0, 0, 1, -1, 0).time() ==
+              Time.new(999999999));
+  EXPECT_TRUE(DateTime.new(1970, 1, 1, 0, 0, -1, 1000000001, 0).time() ==
+              Time.new(1));
+  int caught = 0;
+  try Time.parse("1677-09-21T00:12:43.145224191Z");
+  catch %(conv-range *): caught++;
+  try Time.parse("2262-04-11T23:47:16.854775808Z");
+  catch %(conv-range *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
+static void time_scales_integral_factors_exactly(void) {
+  $test.scoped();
+  Duration first = Duration.new(LLONG_MIN), last = Duration.new(LLONG_MAX);
+  EXPECT_TRUE(first.scale(1) == first);
+  EXPECT_TRUE(last.scale(1) == last);
+  EXPECT_TRUE(last.scale(-1).nanoseconds == -LLONG_MAX);
+  EXPECT_TRUE(first.scale(0).nanoseconds == 0);
+  EXPECT_TRUE(last.scale(0).nanoseconds == 0);
+  EXPECT_TRUE(Duration.new(9007199254740993LL).scale(1).nanoseconds ==
+              9007199254740993LL);
+  int caught = 0;
+  try first.scale(-1);
+  catch %(conv-range *): caught++;
+  try last.scale(2);
+  catch %(conv-range *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
 static void time_duration_boxes_as_a_value(void) {
   $test.scoped();
   Map seen = {};
@@ -192,6 +232,8 @@ void time_suite(void) {
   $test.run(time_duration_prints_go_units);
   $test.run(time_duration_arithmetic_uses_operators);
   $test.run(time_duration_overflow_raises);
+  $test.run(time_preserves_nanosecond_boundaries);
+  $test.run(time_scales_integral_factors_exactly);
   $test.run(time_duration_boxes_as_a_value);
   $test.run(time_clocks_advance);
   $test.run(time_formats_rfc3339_in_utc);

@@ -268,7 +268,8 @@ static List _destructure_declaration(
      multi-binding declaration already supported across `in` in a `for`
      header. */
   if (allow_uninitialized || c.peek(0) == <in>)
-    return %(declare $type (bindings @(_destructure_binds(bindings))));
+    return %(declare $type
+              (bindings @(_destructure_binds(c, bindings, binding_type))));
   if (!c.test(<=>))
     $fail.parse_destructure_init(c, c.token);
   List source = c.parse_assignment();
@@ -305,9 +306,12 @@ static List _destructure_target(Compiler c, List ident, List binding_type) {
 /* Wraps destructuring targets as the binding forms a declaration carries,
    so a foreach binder reaches the transform as a plain declaration of two
    names. */
-static List _destructure_binds(List targets) {
+static List _destructure_binds(Compiler c, List targets, List binding_type) {
   Array binds = [];
-  foreach (List target in targets) binds.push(%(bind $target ()));
+  foreach (List target in targets) {
+    if (target ~= %("_")) target = _destructure_target(c, target, binding_type);
+    binds.push(%(bind $target ()));
+  }
   return binds.list_free();
 }
 
