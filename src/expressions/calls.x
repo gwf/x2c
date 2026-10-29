@@ -399,7 +399,7 @@ static List _bound(
   CallSite &k, List binding, Type signature, List declared,
   List parameters, List returns) {
   k.receiver = _method_bind(k.c, k.receiver, k.type, declared, k.origin);
-  List callee = %(expr ((func $parameters) @returns) (ident $binding));
+  List callee = %(expr ((func $parameters) $returns) (ident $binding));
   return _finish(k, signature.apply(), callee, signature, k.receiver);
 }
 
@@ -416,7 +416,8 @@ static List _finish(
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
   if (result_type !== %(<macro-expr>))
-    _check_arity(k, callee, callee_type, arguments, receiver != NULL);
+    _check_arity(
+      k, callee, callee_type, result_type, arguments, receiver != NULL);
   k.c.check_meta_call(callee, k.origin);
   callee = _discarding_callee(k.c, callee, callee_type, arguments);
   Macro called = $called;
@@ -429,17 +430,17 @@ static List _finish(
    `Thread.run(jobs)`, is left to its rule. A method's receiver is counted
    on both sides. */
 static void _check_arity(
-  CallSite &k, List callee, Type callee_type, List arguments, int method) {
+  CallSite &k, List callee, Type callee_type, Type result, List arguments,
+  int method) {
   List parameters = NULL;
-  Type returns = NULL;
   if (!(callee_type ~= %((func *) *)) ||
-      !callee_type.function_parts(parameters, returns)) return;
+      !callee_type.function_parts(parameters, NULL)) return;
   int supplied = arguments === %((expr (void) ())) ? 0 : arguments.len();
   int fixed = _fixed_parameter_count(parameters);
   int variadic = _parameters_variadic(parameters);
   if (supplied == fixed || (variadic && supplied > fixed)) return;
   if (supplied + 1 == fixed && !variadic &&
-      _exact_iter_type(parameters.last()) && _exact_iter_type(returns))
+      _exact_iter_type(parameters.last()) && _exact_iter_type(result))
     return;
   if (supplied < fixed && _call_rewritable(k.c, callee)) return;
   $fail.expressions_call_arity(
