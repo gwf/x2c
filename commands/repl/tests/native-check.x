@@ -100,6 +100,35 @@ static void _objects(ReplSession session) {
   _value(session, "selectors;", "int 1");
   _expect(session, "enum Choice { RED=3, BLUE=4 };", <defined>, NULL);
   _value(session, "RED==3 && BLUE==4;", "int 1");
+  _expect(session, "int zero;", <executed>, NULL);
+  _value(session, "zero;", "int 0");
+  _expect(session, "int zeros[3];", <executed>, NULL);
+  _value(session, "zeros[0]+zeros[1]+zeros[2];", "int 0");
+  _expect(session, "int inferred[]={2,4,6};", <executed>, NULL);
+  _value(session, "sizeof(inferred)/sizeof(inferred[0])==3;", "int 1");
+  _value(session, "inferred[2];", "int 6");
+  _expect(session, "struct Inline { int x; } inline_value={7};",
+          <executed>, NULL);
+  _value(session, "inline_value.x;", "int 7");
+  _expect(session, "struct { int a; int values[2]; } anonymous={3,{4,5}};",
+          <executed>, NULL);
+  _value(session, "anonymous.a+anonymous.values[1];", "int 8");
+  _expect(session, "Point *locate(void) { return &point; }", <defined>, NULL);
+  _expect(session, "Point *alias=locate();", <executed>, NULL);
+  _expect(session, "alias->x=12;", <executed>, NULL);
+  _value(session, "*field;", "int 12");
+  _expect(session,
+    "Point *heap_point(int n) { Point *p=malloc(sizeof(Point)); "
+    "*p=make_point(n); return p; }", <defined>, NULL);
+  _expect(session, "Point *heap=heap_point(11);", <executed>, NULL);
+  ReplResult heap = session.inspect_expression("*heap", 3, 100);
+  _check(heap.status == <value> && heap.formatted == "Point { x: 11, y: 12 }",
+         "heap-owned record did not survive create-call-inspect");
+  _expect(session, "shift(heap,3);", <executed>, NULL);
+  _value(session, "heap->x;", "int 14");
+  _expect(session, "free(heap);", <executed>, NULL);
+  _expect(session, "heap=NULL;", <executed>, NULL);
+  _value(session, "heap==NULL;", "int 1");
 }
 
 static void _callbacks(ReplSession session) {
@@ -205,6 +234,19 @@ static void _cleanup(ReplSession session) {
   _expect(session, "Managed acquired=auto (Managed)6;", <executed>, NULL);
   _expect(session, "acquired=7;", <executed>, NULL);
   _check(cleanup_count == 1, "managed top-level cleanup ran at submission exit");
+  _expect(session, "{ auto Managed scoped=9; }", <executed>, NULL);
+  _check(cleanup_count == 2 && cleanup_log[1] == 9,
+         "block-managed declaration did not clean at block exit");
+  _check(!session.inspect("scoped"), "block-local resource escaped its scope");
+  _expect(session,
+    "Managed acquire(int n) { if (n<0) raise %(acquire); return (Managed)n; }",
+    <defined>, NULL);
+  _expect(session, "Managed first=auto acquire(8), second=auto acquire(-1);",
+          <failed>, NULL);
+  _check(!session.inspect("first") && !session.inspect("second"),
+         "failed managed declaration published partial names");
+  _check(cleanup_count == 3 && cleanup_log[2] == 8,
+         "failed later acquisition did not release the earlier acquisition");
 }
 
 int main(int argc, char **argv) {
@@ -224,8 +266,8 @@ int main(int argc, char **argv) {
   if (!selected || selected == "cleanup") _cleanup(session);
   session.close();
   if (!selected || selected == "cleanup")
-    _check(cleanup_count == 4 && cleanup_log[1] == 6 &&
-           cleanup_log[2] == 5 && cleanup_log[3] == 2,
+    _check(cleanup_count == 6 && cleanup_log[3] == 6 &&
+           cleanup_log[4] == 5 && cleanup_log[5] == 2,
            "session cleanup did not preserve reverse order and capture meaning");
   unit.close();
   if (!failures) puts("native submission checks passed");
