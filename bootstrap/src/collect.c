@@ -203,7 +203,7 @@ static void f4_walk____replay_cpp(Compiler c, Cpp cpp, List event);
 
 static Map f4_walk____runtime_macros(Compiler c);
 
-static Map f4_walk____initial_macros(Compiler c, String path, Map runtime);
+static Map f4_walk____initial_macros(Compiler c, String path, Map runtime, int own);
 
 static void f4_walk____add_prelude(Compiler c, Map globs, Map visited);
 
@@ -2480,7 +2480,7 @@ Map Compiler_initial_macros(Compiler c, String path){
   if(! String_truth(path)) return Map_new();
   String canonical = _canonical_path(path);
   Map runtime = f4_walk____inside(canonical, _canonical_lib()) ? Map_new() : f4_walk____runtime_macros(c);
-  return f4_walk____initial_macros(c, canonical, runtime);
+  return f4_walk____initial_macros(c, canonical, runtime, 1);
 }
 
 Map Cpp_table(List);
@@ -2490,9 +2490,11 @@ static Map f4_walk____runtime_macros(Compiler c){
   return Cpp_table(f4_walk____macro_rows(c, _canonical_path(runtime), NULL));
 }
 
-static Map f4_walk____initial_macros(Compiler c, String path, Map runtime){
-  Map macros = f4_walk____inside(path, _canonical_lib()) ? Map_new() : Map_copy(runtime);
-  if(! _runtime_source(path)) Map_merge(macros, Cpp_table(c -> command_macros));
+static Map f4_walk____initial_macros(Compiler c, String path, Map runtime, int own){
+  if(f4_walk____inside(path, _canonical_lib())) return Map_new();
+  int commands = ! _runtime_source(path) && List_truth(c -> command_macros);
+  Map macros = own || commands ? Map_copy(runtime) : runtime;
+  if(commands) Map_merge(macros, Cpp_table(c -> command_macros));
   return macros;
 }
 
@@ -3365,7 +3367,7 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
   List entry = Var_is(prefix, 3313778) ? NULL : _entry(c, path);
   if(! List_truth(entry) && ! Var_is(prefix, 3313778)) return;
   List parts = Var_list_payload(Var_is(prefix, 3313778) ? List_var(Array_list(Var_array(prefix))) : List_car(entry));
-  Map initial = sink ? f4_walk____initial_macros(c, path, runtime) : NULL;
+  Map initial = sink ? f4_walk____initial_macros(c, path, runtime, 0) : NULL;
   Cpp cpp = sink ? Cpp_new(Map_copy(initial)) : NULL;
   if(cpp) Map_setindex(visited, String_var(path), Array_var(({
     Var _x2c_gensym_literal_part_33 = Var_new(3683441, (void *) cpp);  Array_update_n(Array_new(), 2, _x2c_gensym_literal_part_33, Map_var(initial));
