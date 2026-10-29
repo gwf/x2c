@@ -520,7 +520,7 @@ int Var.try_export_context(Var value, Context source, Var &?out) {
 void x2c_register_type(String name) {
   _lock();
   defer _unlock();
-  if (descriptor_registration_frozen)
+  if (x2c_descriptor_registration_frozen())
     raise %(bad-state (operation "x2c_register_type"));
   _reserve(name);
 }
@@ -537,7 +537,7 @@ void x2c_register_type(String name) {
 int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods) {
   _lock();
   defer _unlock();
-  if (descriptor_registration_frozen)
+  if (x2c_descriptor_registration_frozen())
     raise %(bad-state (operation "x2c_register_builtin_descriptor"));
   VarDescriptor *descriptor = _tag_row(tag);
   if (!descriptor) return 0;
@@ -577,7 +577,7 @@ void x2c_register_descriptor(String name, VarMethods methods) {
 int x2c_try_register_descriptor(String name, VarMethods methods) {
   _lock();
   defer _unlock();
-  if (descriptor_registration_frozen)
+  if (x2c_descriptor_registration_frozen())
     raise %(bad-state (operation "x2c_try_register_descriptor"));
   VarDescriptor *descriptor = _reserve(name);
   if (!descriptor) return 0;
@@ -611,7 +611,7 @@ int x2c_try_register_tagged_descriptor(
   Symbol tag, String name, VarMethods methods) {
   _lock();
   defer _unlock();
-  if (descriptor_registration_frozen)
+  if (x2c_descriptor_registration_frozen())
     raise %(bad-state (operation "x2c_try_register_tagged_descriptor"));
   VarDescriptor *descriptor = _reserve_tagged(tag, name);
   if (!descriptor) return 0;
@@ -632,17 +632,14 @@ void x2c_descriptor_thread_start_begin(void) {
     leaves it open for another attempt.
 */
 void x2c_descriptor_thread_start_end(int success) {
-  if (success) descriptor_registration_frozen = 1;
+  if (success)
+    __atomic_store_n(&descriptor_registration_frozen, 1, __ATOMIC_RELEASE);
   _unlock();
 }
 
-/** Reports under the descriptor lock whether registration is frozen. */
-int x2c_descriptor_registration_frozen(void) {
-  _lock();
-  int frozen = descriptor_registration_frozen;
-  _unlock();
-  return frozen;
-}
+/** Reports whether successful native worker startup froze registration. */
+int x2c_descriptor_registration_frozen(void) =>
+  __atomic_load_n(&descriptor_registration_frozen, __ATOMIC_ACQUIRE);
 
 static VarDescriptor *_descriptor(Var value) {
   VarDescriptor *descriptor = _row(x2c_var_descriptor_index(value));

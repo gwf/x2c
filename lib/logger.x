@@ -356,7 +356,7 @@ LogSink Logger.add_stderr_sink(Logger logger) =>
 synchronized
 Symbol Logger.error_handler(List errors, Var data) {
   (void) data;
-  Logger logger = log_get_global_logger();
+  Logger logger = global_logger;
   if (!logger || !errors) return <declined>;
   Var newest = errors.last();
   if (newest is not <list>) return <declined>;
@@ -366,7 +366,7 @@ Symbol Logger.error_handler(List errors, Var data) {
   Symbol policy = Error.policy_get(code);
   if (policy != <abort> && policy != <log>) return <declined>;
   if (policy == <abort> && _plain_report(logger)) _report_uncaught(entry);
-  else logger.log(<error>, <err-report>, @entry);
+  else _deliver_fields(logger, <error>, <err-report>, entry);
   Error.note_rendered();
   return <declined>;
 }
@@ -390,7 +390,6 @@ Logger log_get_global_logger(void) => global_logger;
     Raises: `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
     allocated.
 */
-synchronized
 Logger Logger.new(Symbol min_level) {
   if (_level_priority(min_level) < 0) return NULL;
   Logger logger = xcalloc(1, sizeof(struct Logger));
@@ -822,11 +821,16 @@ static int _pool_chain_owns(Pool pool, Var value) {
 
 synchronized
 static void _log_global_fields(Symbol level, Symbol category, List fields) {
-  _log_fields(global_logger, level, category, fields);
+  _deliver_fields(global_logger, level, category, fields);
 }
 
 synchronized
 static void _log_fields(
+  Logger logger, Symbol level, Symbol category, List fields) =>
+  _deliver_fields(logger, level, category, fields);
+
+// The caller holds the logger mutex through selection and delivery.
+static void _deliver_fields(
   Logger logger, Symbol level, Symbol category, List fields) {
   if (!_should_log(logger, level, category)) return;
   long long wall_time, monotonic;
@@ -896,6 +900,7 @@ static String _detail_text(List detail) {
 static void _log_pending(Logger active) {
   Pool.open_named("Logger shutdown errors");
   List pending = Error.since(logger_error_mark);
-  foreach (List entry in pending) active.log(<error>, <err-report>, @entry);
+  foreach (List entry in pending)
+    _deliver_fields(active, <error>, <err-report>, entry);
   Pool.close();
 }

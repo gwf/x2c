@@ -207,7 +207,9 @@ static void logger_recursion_and_locked_sink_list(void) {
   logger.add_sink(order_emit, NULL, Var.new(<p48>, &two));
 
   // An emitter may log again; the inner event finishes inside the outer one.
-  logger.info(<outer>);
+  Logger previous = log_set_global_logger(logger);
+  try log_info(<outer>);
+  finally log_set_global_logger(previous);
   EXPECT_INT_EQ(count, 4);
   EXPECT_INT_EQ(order[0], 1);
   EXPECT_INT_EQ(order[1], 1);
@@ -467,7 +469,13 @@ static void logger_rejected_and_warmed_paths_allocate_nothing(void) {
   CaptureState capture = { 0 };
   filtered.add_sink(capture_emit, NULL, Var.new(<p48>, &capture));
   ScopeStats before_rejected = Scope.stats();
-  for (int i = 0; i < 1000; i++) guarded_dynamic_event(filtered, i);
+  Logger previous = log_set_global_logger(filtered);
+  try {
+    for (int i = 0; i < 1000; i++) {
+      guarded_dynamic_event(filtered, i);
+      log_debug(<hot>);
+    }
+  } finally log_set_global_logger(previous);
   ScopeStats after_rejected = Scope.stats();
   EXPECT_TRUE(after_rejected.allocation_calls ==
               before_rejected.allocation_calls);
