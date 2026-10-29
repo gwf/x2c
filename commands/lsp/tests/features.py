@@ -128,6 +128,21 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         for row in symbols:
             assert selected(named, row["selectionRange"]) == row["name"], row
 
+        # Source positions remain physical UTF-16 positions across CRLF and
+        # supplementary characters, including declarations with shadowed names.
+        positioned = ("/*\U0001f642*/ typedef int Item;\r\n"
+                      "/*\U0001f642*/ int first(void) { int first = 1; return first; }\r\n"
+                      "int second(void) { int first = 2; return first; }\r\n")
+        client.opened(main, positioned)
+        assert client.diagnostics() == []
+        symbols = client.request("textDocument/documentSymbol", {
+            "textDocument": {"uri": main.as_uri()}})["result"]
+        assert [row["name"] for row in symbols] == ["Item", "first", "second"], symbols
+        for row in symbols:
+            assert selected(positioned, row["selectionRange"]) == row["name"], row
+        assert symbols[0]["selectionRange"]["start"] == position(positioned, "Item"), symbols
+        assert symbols[1]["selectionRange"]["start"] == position(positioned, "first"), symbols
+
         member = directory / "member.x"
         member.write_text("typedef int Member;\nint member_function(void) { return 1; }\n")
         module = 'typedef int Main;\nmodule { "member.x", }\n'
