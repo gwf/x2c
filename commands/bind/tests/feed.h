@@ -31,4 +31,9 @@ feed_parser *feed_item_parser(feed_item *item);
 void feed_item_free(feed_item *item);
 const char *feed_strerror(int code);
 
+/* Collection also reads disabled branches; bind leaves this one out. */
+#ifdef FEED_INTERNAL
+int feed_reset(feed_parser *parser);
+#endif
+
 #endif

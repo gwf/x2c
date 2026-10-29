@@ -49,9 +49,10 @@ Survey Survey.new(ParsedUnit &base, ParsedUnit &header, String prefix) {
   Map rows = {};
   foreach (Var (key, value) in header.globals)
     if (!(key in base.globals)) rows[key] = value;
+  Map preprocessed = _identifiers(header.preprocessor_output);
   Array functions = [], enums = [];
   foreach (Var (key, value) in rows) {
-    if (key ~= %(?name) && name is <string> &&
+    if (key ~= %(?name) && name is <string> && name in preprocessed &&
         Survey.signature(value, NULL, NULL))
       functions.push(name);
     else if (key ~= %(enum ?name "enumerators") && name is <string>)
@@ -243,6 +244,26 @@ static Map _releases(Survey s, Map acquired) {
 }
 
 // spelling
+
+/* The identifiers in the host preprocessor's output. Ordinary collection
+   also reads the header without evaluating its conditionals, so a function
+   in a disabled branch, such as a header-only library's implementation,
+   has a row but no identifier here. */
+static Map _identifiers(String text) {
+  Map words = {};
+  int start = -1, length = text.len();
+  for (int i = 0; i <= length; i++) {
+    int c = i < length ? text[i] : 0;
+    if (c == '_' || isalnum(c)) {
+      if (start < 0) start = i;
+    }
+    else if (start >= 0) {
+      words[text[start:i]] = 1;
+      start = -1;
+    }
+  }
+  return words;
+}
 
 /* The longest prefix ending in `_` that every function name shares. */
 static String _common_prefix(Array functions) {

@@ -39,12 +39,13 @@ Collection does not record three things the command would use:
 - Deprecation and availability attributes. Methods are therefore generated
   for deprecated functions; see the inline rule below.
 
-The command also inherits two properties of ordinary collection. The
-compiler's own walk of a quoted include reads the header without evaluating
-`#ifdef`, so a typedef or prototype in a disabled branch can appear among the
-rows. A forwarder to such a prototype calls an undeclared function, which the
-C compiler rejects when the package builds, so the author sees the case at
-the first build and deletes that method.
+Collection also walks the quoted include itself without evaluating
+`#ifdef`, so a typedef or prototype in a disabled branch has a row. The
+command keeps a function only when its name occurs in the host
+preprocessor's output. For the header-only termbox2 2.5, this drops the 52
+static functions of its `TB_IMPL` implementation and keeps its 38 `tb_`
+functions. termbox2 keeps its state in process globals, so its functions take
+no handle and the command generates only the shim for it.
 
 ## Output
 
@@ -52,8 +53,8 @@ The package uses the standard layout in
 [packages/README.md](../../packages/README.md#package-layout):
 
 - `src/STEM-raw.h`, where STEM is the header's name without `.h`, includes
-  the real header with angle brackets and leaves a placeholder for the
-  version check. The generated unit header is `NAME.h`, so the shim needs a
+  the real header with angle brackets and marks where the version check
+  belongs. The generated unit header is `NAME.h`, so the shim needs a
   different name; the author renames it after the pinned version.
 - `src/NAME.x` holds the generated region between
   `/* x2c bind: begin generated raw tier */` and
@@ -108,8 +109,8 @@ Each rule is mechanical, so a later run produces the same text.
    returns a `T *` or fills a `T **`. The pairs are `open`/`close`,
    `new`/`free`, `new`/`delete`, `new`/`destroy`, `create`/`destroy`,
    `create`/`free`, `alloc`/`free`, and `prepare`/`finalize`. The shorter
-   name wins, so `Sqlite3` releases with `close` rather than `close_v2`. The
-   region adopts `Cleanup` with `$cleanup.by(Handle, release)`, as the
+   name wins: `Sqlite3` releases with `close`, and `close_v2` stays a method.
+   The region adopts `Cleanup` with `$cleanup.by(Handle, release)`, as the
    existing packages do, so `Handle h = auto acquire(...);` releases it. A
    handle filled through an out-parameter uses declaration `auto`:
    `auto Sqlite3 db = NULL;` before `sqlite3_open(path, &db)`.
@@ -180,8 +181,9 @@ builds/0/x2c build --package-dir /tmp/bind/packages \
 the generated entry unit, Makefile, and README with `tests/expected/`. It
 builds the package with `package.mk`, links `tests/consumer.x` with the
 fixture's C implementation, and checks the consumer's output. It also checks
-that a rerun keeps text outside the region, that a file without markers is
-refused, and that the driver dispatches `x2c bind` and `x2c help bind`. When
-the host has `sqlite3.h` from the macOS SDK or `/usr/include`, it binds that
-header too and runs `tests/sqlite-consumer.x`; otherwise it prints that the
-SQLite check was skipped.
+that a prototype in a disabled `#ifdef` branch is left out, that a rerun
+keeps text outside the region, that a file without markers is refused, and
+that the driver dispatches `x2c bind` and `x2c help bind`. When the host has
+`sqlite3.h` from the macOS SDK or `/usr/include`, it binds that header too
+and runs `tests/sqlite-consumer.x`; otherwise it prints that the SQLite check
+was skipped.
