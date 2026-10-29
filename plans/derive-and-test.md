@@ -351,7 +351,7 @@ commission another implementation campaign.
 | --- | --- | --- |
 | JSON round trips for Symbol and List fields | Existing JSON conversion loses those tags; the limitation is documented and tested. | Establish a caller that needs those round trips, then decide the representation and compatibility policy before changing it. |
 | Shared assertion implementation | User tests use `lib/test.x`; repository tests keep their existing harness and Scope-balance rules. | Once `test.x` has users, assess whether sharing assertions removes duplication without weakening either contract. |
-| Promote `x2c test` to shipped | The command is experimental and built in checkouts; `make install` excludes it. The library already ships. | Review experience with the public library and runner, then explicitly select promotion and update the command manifest. |
+| Promote `x2c test` to shipped | Gary approved promotion after PR #619 landed. The manifest now marks the command shipped. | Submit the promotion and installation documentation to the shared integrator. |
 
 The two compiler reports were investigated independently:
 
@@ -425,3 +425,16 @@ The stage-two compiler also preserves the complete dynamic skip reason.
 Existing harness contracts and the command's experimental status are unchanged.
 Final generated artifacts and full publication validation belong to the
 shared integrator; no full gate ran in this repair session.
+
+### Shipped test command (2026-10-29)
+
+PR #619 merged with the skip-lifetime, discovery, and global-filter repairs.
+Gary selected promotion after that merge. The command manifest now includes
+`x2c test` in normal installations, and the book describes that availability.
+The existing repository harness remains unchanged.
+
+Focused verification passes in an isolated installed prefix: help discovery,
+derived row/equality methods, local source helpers, two parallel test files,
+mixed-match filters, all-unmatched status 2, and filtered listings. The existing command smoke passes. The normal
+command build reports no warnings. Final generated documentation and publication
+validation remain with the shared integrator.
