@@ -17230,7 +17230,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14194 = cons(_223, _14193);
   _14195 = String_new("src/builtins.x");
   _14196 = String_var(_14195);
-  _14197 = String_new("dc757a21");
+  _14197 = String_new("ed647d0d");
   _14198 = String_var(_14197);
   _14199 = String_new("src/macros/macros.x");
   _14200 = String_var(_14199);
@@ -18273,7 +18273,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15231 = List_var(_15230);
   _15232 = String_new("src/meta-helper-client.x");
   _15233 = String_var(_15232);
-  _15234 = String_new("f18b6f3e");
+  _15234 = String_new("02428898");
   _15235 = String_var(_15234);
   _15236 = cons(_15235, NULL);
   _15237 = cons(_15233, _15236);
@@ -19781,7 +19781,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16730 = List_var(_16729);
   _16731 = String_new("src/toolchain.x");
   _16732 = String_var(_16731);
-  _16733 = String_new("873f08d2");
+  _16733 = String_new("b5c2187c");
   _16734 = String_var(_16733);
   _16735 = cons(_16734, NULL);
   _16736 = cons(_16732, _16735);

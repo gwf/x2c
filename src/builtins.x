@@ -958,16 +958,14 @@ static List _binding_target_row(List row) {
 
 static List _binding_target(String bind_name, String name, String maker) {
   List func = _binding_call(
-    maker,
-    $(
-      _binding_ident(name),
-      MetaContext.literal_list(_binding_name_signature(name))));
+    maker, _binding_ident(name),
+    MetaContext.literal_list(_binding_name_signature(name)));
   return $(
-    _binding_call("String_var", $($!String{ $bind_name })),
-    _binding_call("Func_var", $(func)));
+    _binding_call("String_var", $!String{ $bind_name }),
+    _binding_call("Func_var", func));
 }
 
-static List _binding_call(String name, List arguments) =>
+static List _binding_call(String name, List @arguments) =>
   %(expr () (call $(_binding_ident(name)) (args @arguments)));
 
 static List _binding_ident(String name) =>

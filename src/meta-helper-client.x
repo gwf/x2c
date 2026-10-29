@@ -150,22 +150,20 @@ void Compiler.use_meta_helper(MetaHelper helper) {
     Does not invoke a function or reset native state.
 */
 String MetaHelper.failure(MetaHelper m, String provider) {
-  MetaHelper previous = active;
-  active = m;
-  defer active = previous;
-  return _failure(_table_of(Path.real(provider), 0));
+  with (active = m) {
+    return _failure(_table_of(Path.real(provider), 0));
+  }
 }
 
 /** Selects the table of the unit at `filename` for the calls that follow,
     and resets the unit's `meta static` values before the first one.
 */
 void Compiler.begin_meta_unit(Compiler c, String filename) {
-  MetaHelper previous = active;
-  active = c.meta_helper ? c.meta_helper : primary;
-  defer active = previous;
-  if (!active) return;
-  active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
-  active.reset = 1;
+  with (active = c.meta_helper ? c.meta_helper : primary) {
+    if (!active) return;
+    active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
+    active.reset = 1;
+  }
 }
 
 /** Stops the helper this process runs, which a translation worker does
@@ -173,20 +171,14 @@ void Compiler.begin_meta_unit(Compiler c, String filename) {
 */
 void Compiler.stop_meta_helper(void) {
   if (!primary) return;
-  MetaHelper previous = active;
-  active = primary;
-  defer active = previous;
-  _stop(0);
+  with (active = primary) { _stop(0); }
 }
 
 /** Stops the process while retaining its executable and configuration.
     Its next call starts with fresh native state.
 */
 void MetaHelper.restart(MetaHelper helper) {
-  MetaHelper previous = active;
-  active = helper;
-  defer active = previous;
-  _stop(0);
+  with (active = helper) { _stop(0); }
 }
 
 // the compiler's side of the project meta helper
@@ -194,40 +186,39 @@ void MetaHelper.restart(MetaHelper helper) {
 static Var _call_helper(
   Compiler c, String name, Token site, List arguments, String provider,
   Symbol operation) {
-  MetaHelper previous = active;
-  active = c.meta_helper ? c.meta_helper : primary;
-  defer active = previous;
-  if (!active)
-    c.refuse_meta_call(name, site, "the project meta module was not built");
-  if (c.shallow) c.collection_native = 1;
-  String file = provider ? Path.real(Compiler.absolute_home_path(provider))
-                         : Path.real(c.token_source(site, NULL));
-  Call call = {
-    .compiler = c, .name = name, .site = site, .operation = operation,
-    .table = _table_of(file, active.table)};
-  _check(call);
-  c.refuse_record_meta_call(name, site);
-  _set_deadline(call);
-  if (!_start()) _refuse(call, "the compile-time helper did not start");
-  _send(call, arguments);
-  for (;;) {
-    Var reply = _next_reply(call);
-    match (reply) {
-      case %(warning ?(String message) ?(List notes)):
-        c.report_warning(<macro>, message, site, notes);
-      case %(value ?value): return value;
-      case %(void): return void;
-      case %(error ?(String message) ?(List notes)):
-        c.report_error(<macro>, message, site, notes);
-      case %(error ?(String message) ?(List notes) (at ?node ?category)):
-        c.report_meta_error(node, category, message, site, notes, 1);
-      case %(dependency ?(String path) ?(String hash)):
-        c.deps.merge_translation_dependency(path, hash);
-      case %(query ?(String operation) ?(List operands)):
-        _answer(call, operation, operands);
-      case %(missing): _refuse(call, c.meta_call_missing(name));
-      case %(failure (?code *detail)): Error.raise(code, detail);
-      default: _stopped(call, "the helper sent an unknown reply");
+  with (active = c.meta_helper ? c.meta_helper : primary) {
+    if (!active)
+      c.refuse_meta_call(name, site, "the project meta module was not built");
+    if (c.shallow) c.collection_native = 1;
+    String file = provider ? Path.real(Compiler.absolute_home_path(provider))
+                           : Path.real(c.token_source(site, NULL));
+    Call call = {
+      .compiler = c, .name = name, .site = site, .operation = operation,
+      .table = _table_of(file, active.table)};
+    _check(call);
+    c.refuse_record_meta_call(name, site);
+    _set_deadline(call);
+    if (!_start()) _refuse(call, "the compile-time helper did not start");
+    _send(call, arguments);
+    for (;;) {
+      Var reply = _next_reply(call);
+      match (reply) {
+        case %(warning ?(String message) ?(List notes)):
+          c.report_warning(<macro>, message, site, notes);
+        case %(value ?value): return value;
+        case %(void): return void;
+        case %(error ?(String message) ?(List notes)):
+          c.report_error(<macro>, message, site, notes);
+        case %(error ?(String message) ?(List notes) (at ?node ?category)):
+          c.report_meta_error(node, category, message, site, notes, 1);
+        case %(dependency ?(String path) ?(String hash)):
+          c.deps.merge_translation_dependency(path, hash);
+        case %(query ?(String operation) ?(List operands)):
+          _answer(call, operation, operands);
+        case %(missing): _refuse(call, c.meta_call_missing(name));
+        case %(failure (?code *detail)): Error.raise(code, detail);
+        default: _stopped(call, "the helper sent an unknown reply");
+      }
     }
   }
 }
@@ -548,20 +539,19 @@ static void _drop(void *raw) { _close(raw); }
    A later close is harmless. */
 static void _close(MetaHelper helper) {
   if (!helper || !helper.scope) return;
-  MetaHelper previous = active;
-  active = helper;
-  defer active = previous;
-  _stop(0);
-  if (helper.snapshot) {
-    unlink(%"$(helper.snapshot)/helper");
-    rmdir(helper.snapshot);
-    helper.snapshot = NULL;
+  with (active = helper) {
+    _stop(0);
+    if (helper.snapshot) {
+      unlink(%"$(helper.snapshot)/helper");
+      rmdir(helper.snapshot);
+      helper.snapshot = NULL;
+    }
+    helper.scope.destroy();
+    helper.scope = NULL;
+    helper.path = NULL;
+    helper.failures = helper.units = NULL;
+    helper.input = NULL;
   }
-  helper.scope.destroy();
-  helper.scope = NULL;
-  helper.path = NULL;
-  helper.failures = helper.units = NULL;
-  helper.input = NULL;
 }
 
 static void _shutdown(void) {
