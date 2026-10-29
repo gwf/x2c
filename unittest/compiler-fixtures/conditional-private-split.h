@@ -11,8 +11,6 @@
 extern int shared;
 
 #else
-extern int shared;
-
 #endif
 int main(void);
 

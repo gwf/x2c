@@ -56,9 +56,16 @@ static int *addressed(void) {
   return ({ static int n = make_value(); &n; });
 }
 
+/* GNU C checks the type of the lowered statement expression. x2c cannot
+   decide `__GNUC__`, so it leaves the macro, whose body x2c does not
+   parse, to the C compiler. */
+#ifdef __GNUC__
 #define CHECK_VOID(value) \
   _Static_assert(__builtin_types_compatible_p(__typeof__(value), void), \
                  "statement expression must remain void")
+#else
+#define CHECK_VOID(value) ((void) (value))
+#endif
 static void empty(void) {
   CHECK_VOID(({ static int n = make_value(); }));
   CHECK_VOID(({ static int n = make_value(); ; }));

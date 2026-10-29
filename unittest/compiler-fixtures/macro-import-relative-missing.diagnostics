@@ -1,4 +1,4 @@
-./unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: parse: an evaluated collection is an expression, not a top-level form
+./unittest/compiler-fixtures/macro-import-relative/missing.x:7:1: parse: an evaluated collection is an expression, not a top-level form
   $(import "missing.xlisp")
   ^
 

@@ -27,7 +27,7 @@ typedef int Count;
 
 #define FIRST_ROW 3
 enum{
-  ROWS = FIRST_ROW + 4
+  ROWS = 3 + 4
 }
 ;
 

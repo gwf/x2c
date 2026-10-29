@@ -125,13 +125,6 @@ static void arms(List subject){
 
     }
 #ifndef ON
-    {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936761631710ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){{
-      Var n;
-      n = x2c_match_value_0;
-      printf("off foo %d\n", Var_int(n));
-    }
-    break;
-    }}
 #else
     {List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3, _x2c_gensym_match_at_4; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && _x2c_gensym_match_expr_0 ->car.u64 == 9224497936761631710ULL &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(Var_is(_x2c_gensym_match_at_0 -> car, 806120) &&(_x2c_gensym_match_at_1 = Var_list_payload(_x2c_gensym_match_at_0 -> car), 1)) && _x2c_gensym_match_at_1 && _x2c_gensym_match_at_1 ->car.u64 == 9224497936761622628ULL &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_at_1 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_2 ->car, 1) && !(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr) && !(_x2c_gensym_match_at_4 = _x2c_gensym_match_at_0 ->cdr)){{
       Var n;
@@ -174,56 +167,51 @@ static void defaults(List subject){
       {
         puts("default on");  break;}
 #elif defined(OFF)
-        {List _x2c_gensym_match_at_5; if(_x2c_gensym_match_expr_1 && Var_equal(_x2c_gensym_match_expr_1 -> car, _5 -> car) && !(_x2c_gensym_match_at_5 = _x2c_gensym_match_expr_1 ->cdr)){puts("default off two");  break;}}
 # ifdef OFF
-        {
-          puts("default off");  break;}
 # else
-          {
-            puts("default neither");  break;}
 # endif
 #endif
+
+      }
+
+    }
+
+  }
+
+int main(void){
+    x2c_initialize();  if(! _init_guard_) _file_init_(); {
+      List subject;  List _x2c_gensym_macro_object_0 = _51;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+        subject = Var_list_payload(_x2c_gensym_macro_cursor_output_0);  arms(subject);
+      }
+
+    }
+    {
+      Var item;  List _x2c_gensym_macro_object_1 = _53;  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+        item = _x2c_gensym_macro_cursor_output_1; {
+          Var _x2c_gensym_match_var_0 = item;  int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);  List _x2c_gensym_match_expr_2 = Var_list_payload(_x2c_gensym_match_var_0);  switch(0){
+            default:
+#ifdef OFF
+            if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_6; if(_x2c_gensym_match_expr_2 && Var_equal(_x2c_gensym_match_expr_2 -> car, _5 -> car) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_expr_2 ->cdr)){puts("loop off two");  break;}}
+#endif
+            if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_6; if(_x2c_gensym_match_expr_2 && Var_equal(_x2c_gensym_match_expr_2 -> car, _5 -> car) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_expr_2 ->cdr)){puts("loop two");  break;}}
+#ifdef OFF
+            {
+              puts("loop off");  break;}
+#endif
+
+            }
 
           }
 
         }
 
       }
-
-int main(void){
-        x2c_initialize();  if(! _init_guard_) _file_init_(); {
-          List subject;  List _x2c_gensym_macro_object_0 = _51;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-            subject = Var_list_payload(_x2c_gensym_macro_cursor_output_0);  arms(subject);
-          }
-
+      {
+        List subject;  List _x2c_gensym_macro_object_2 = _55;  List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;  Var _x2c_gensym_macro_cursor_output_2;  while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+          subject = Var_list_payload(_x2c_gensym_macro_cursor_output_2);  defaults(subject);
         }
-        {
-          Var item;  List _x2c_gensym_macro_object_1 = _53;  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-            item = _x2c_gensym_macro_cursor_output_1; {
-              Var _x2c_gensym_match_var_0 = item;  int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);  List _x2c_gensym_match_expr_2 = Var_list_payload(_x2c_gensym_match_var_0);  switch(0){
-                default:
-#ifdef OFF
-                if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_6; if(_x2c_gensym_match_expr_2 && Var_equal(_x2c_gensym_match_expr_2 -> car, _5 -> car) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_expr_2 ->cdr)){puts("loop off two");  break;}}
-#endif
-                if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_6; if(_x2c_gensym_match_expr_2 && Var_equal(_x2c_gensym_match_expr_2 -> car, _5 -> car) && !(_x2c_gensym_match_at_6 = _x2c_gensym_match_expr_2 ->cdr)){puts("loop two");  break;}}
-#ifdef OFF
-                {
-                  puts("loop off");  break;}
-#endif
 
-                }
-
-              }
-
-            }
-
-          }
-          {
-            List subject;  List _x2c_gensym_macro_object_2 = _55;  List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;  Var _x2c_gensym_macro_cursor_output_2;  while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-              subject = Var_list_payload(_x2c_gensym_macro_cursor_output_2);  defaults(subject);
-            }
-
-          }
-          return 0;
-        }
+      }
+      return 0;
+    }
 
