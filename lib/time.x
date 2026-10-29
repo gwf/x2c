@@ -99,8 +99,8 @@ Duration Duration.neg(Duration d) =>
 */
 Duration Duration.scale(Duration d, double factor) {
   if (factor >= -0x1p63 && factor < 0x1p63 && trunc(factor) == factor)
-    return Duration.new(_product("Duration.scale", d.nanoseconds,
-                                 (long long) factor));
+    return Duration.new(
+      _product("Duration.scale", d.nanoseconds, (long long) factor));
   return Duration.new(_from_seconds("Duration.scale", d.total_seconds() * factor));
 }
 
@@ -278,14 +278,16 @@ int DateTime.weekday(DateTime d) {
 */
 String DateTime.str(DateTime d) {
   Buffer out = auto Buffer.new(0);
-  out.printf("%04d-%02d-%02dT%02d:%02d:%02d", d.year, d.month, d.day,
-             d.hour, d.minute, d.second);
+  out.printf(
+    "%04d-%02d-%02dT%02d:%02d:%02d", d.year, d.month, d.day,
+    d.hour, d.minute, d.second);
   _fraction(out, d.nanosecond, NANOS);
   if (!d.utc_offset) out.write_char('Z');
   else {
     int size = abs(d.utc_offset);
-    out.printf("%c%02d:%02d", d.utc_offset < 0 ? '-' : '+', size / 3600,
-               size / 60 % 60);
+    out.printf(
+      "%c%02d:%02d", d.utc_offset < 0 ? '-' : '+', size / 3600,
+      size / 60 % 60);
   }
   return out;
 }
@@ -304,7 +306,7 @@ static long long _from_seconds(String operation, double seconds) {
   return _combine_seconds(operation, count, fraction);
 }
 
-// Align signs before multiplication so a representable boundary stays in range.
+// Align signs before multiplication to keep representable boundaries in range.
 static long long _combine_seconds(
   String operation, long long seconds, long long fraction) {
   seconds = _sum(operation, seconds, fraction / NANOS);
@@ -392,10 +394,11 @@ static long long _read_clock(clockid_t clock) {
 // calendar conversion
 
 static DateTime _fields(Time t, struct tm fields) =>
-  DateTime.new(fields.tm_year + 1900, fields.tm_mon + 1, fields.tm_mday,
-               fields.tm_hour, fields.tm_min, fields.tm_sec,
-               (int) ((t.nanoseconds % NANOS + NANOS) % NANOS),
-               (int) fields.tm_gmtoff);
+  DateTime.new(
+    fields.tm_year + 1900, fields.tm_mon + 1, fields.tm_mday,
+    fields.tm_hour, fields.tm_min, fields.tm_sec,
+    (int) ((t.nanoseconds % NANOS + NANOS) % NANOS),
+    (int) fields.tm_gmtoff);
 
 /* The `struct tm` of `t` from `gmtime_r` or `localtime_r`, which convert
    every second a Time can hold. */
@@ -451,7 +454,7 @@ static int _zone(Reader &r) {
   return (sign == '-' ? -1 : 1) * (hours * 3600 + minutes * 60);
 }
 
-/* Reads an optional `.digits` fraction as nanoseconds. */
+// Keeps the first nine fractional digits and consumes any others.
 static int _nanoseconds(Reader &r) {
   if (r.text[r.at] != '.') return 0;
   r.at++;

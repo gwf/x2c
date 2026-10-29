@@ -83,14 +83,14 @@ int String.try_next_code_point(String text, int &cursor, int &point) {
   return 1;
 }
 
-/** Initializes `dest` as a lazy iterator over the code points of `text`,
-    each yielded as an `int`, so `foreach (int point in text.code_points())`
-    walks them. The iterator borrows `text`.
+/** Initializes `dest` as a lazy iterator over the code points of `s`,
+    each yielded as an `int`, so `foreach (int point in s.code_points())`
+    walks them. The iterator borrows `s`.
     Raises: `<malformed>` from the pull that reaches bytes that are not
     well-formed UTF-8.
 */
-Iter String.code_points(String text, Iter dest) =>
-  dest.init(text, _next_point, 0);
+Iter String.code_points(String s, Iter dest) =>
+  dest.init(s, _next_point, 0);
 
 /** Appends the UTF-8 encoding of `point` to `out` and returns `out`.
     Raises: `<bad-arg>` when `point` is a surrogate, above U+10FFFF, or not
@@ -180,17 +180,17 @@ Block String.base64url_decode_bytes(String text) =>
 
 // hexadecimal
 
-/** Returns the bytes of `text` in lowercase hexadecimal, two digits per
+/** Returns the bytes of `s` in lowercase hexadecimal, two digits per
     byte.
 */
-String String.hex_encode(String text) =>
-  _hex((const unsigned char *) text, text.len());
+String String.hex_encode(String s) =>
+  _hex((const unsigned char *) s, s.len());
 
-/** Returns the bytes of `bytes` in lowercase hexadecimal; each element
+/** Returns the bytes of `b` in lowercase hexadecimal; each element
     contributes all of its bytes.
 */
-String Block.hex_encode(Block bytes) =>
-  _hex(bytes.bytes, bytes.len() * bytes.width);
+String Block.hex_encode(Block b) =>
+  _hex(b.bytes, b.len() * b.width);
 
 /** Returns the text that the hexadecimal `text` encodes, in digits of
     either case.
@@ -213,14 +213,14 @@ Block String.hex_decode_bytes(String text) =>
 
 // percent-encoding
 
-/** Returns `text` with each byte outside the RFC 3986 unreserved set
+/** Returns `s` with each byte outside the RFC 3986 unreserved set
     `A-Z a-z 0-9 - . _ ~` written as `%` and two uppercase hexadecimal
     digits, so the result can be one path segment, query name, or query
     value.
 */
-String String.percent_encode(String text) {
+String String.percent_encode(String s) {
   Buffer out = auto Buffer.new(0);
-  for (const unsigned char *at = (const unsigned char *) text; at && *at;
+  for (const unsigned char *at = (const unsigned char *) s; at && *at;
        at++) {
     if (_unreserved(*at)) out.write_char(*at);
     else out.printf("%%%02X", *at);
@@ -274,7 +274,7 @@ static int _next_point(Iter iter, Var *out) {
   return 1;
 }
 
-// base64 groups
+// encoding triples
 
 static String _base64(Alphabet a, const unsigned char *bytes, size_t count) {
   Buffer out = auto Buffer.new(0);
@@ -366,7 +366,6 @@ static Block _unhex(String text, String operation) {
   return bytes;
 }
 
-/* The byte that the two hexadecimal digits at `offset` spell. */
 static int _byte_at(String text, int offset, String operation) {
   int high = _digit(text, offset, operation);
   int low = _digit(text, offset + 1, operation);
@@ -379,7 +378,7 @@ static int _digit(String text, int offset, String operation) {
   return digit;
 }
 
-// unreserved bytes
+// RFC 3986 character set
 
 static int _unreserved(int byte) =>
   (byte >= 'A' && byte <= 'Z') || (byte >= 'a' && byte <= 'z') ||
