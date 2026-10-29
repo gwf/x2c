@@ -44,6 +44,7 @@ Source: `lib/test.x`
 Runs registered tests, returning 1 on failure or 2 for an unmatched
 filter. `--filter TEXT` is repeatable and selects names containing any
 filter; `--list` prints selected names; `--quiet` omits passing lines.
+Unmatched filters print a zero-test summary, including with `--list`.
 
 Source: `lib/test.x`
 
