@@ -802,17 +802,20 @@ static void _replay_included(
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
   Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
-  if (cpp) visited[path] = cpp.changes(initial);
   foreach (Var part in parts) {
     if (part is <map> && !cpp)
       _replay_package_imports(c, globs, part, exports);
-    else if (part is <string> && (!cpp || !cpp.hidden()))
+    else if (part is <string> && (!cpp || !cpp.hidden())) {
+      // Only a recursive include can observe this file's active prefix.
+      if (cpp) visited[path] = cpp.changes(initial);
       _replay_included(c, globs, part, visited, exports, active, cpp, runtime);
+    }
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
-    if (cpp && (part is <string> || part is <list>))
-      visited[path] = cpp.changes(initial);
   }
-  if (cpp) sink.merge(visited[path]);
+  if (cpp) {
+    visited[path] = cpp.changes(initial);
+    sink.merge(visited[path]);
+  }
 }
 
 /* The compile-time rows of the syntax prelude's entry in source order. */
