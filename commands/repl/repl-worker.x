@@ -44,6 +44,13 @@ typedef struct ReplWorkerStart {
 CliRequest repl_native_request(List arguments);
 
 static volatile sig_atomic_t _worker_interrupted;
+static ReplSession _worker_session;
+
+static void _worker_shutdown(void) {
+  ReplSession session = _worker_session;
+  _worker_session = NULL;
+  if (session) session.close();
+}
 
 /** Marks the active worker request for cancellation by the supervisor. */
 void repl_worker_interrupt(int signal) {
@@ -111,7 +118,13 @@ static void _worker_reap(ReplWorker worker, int force) {
       kill((pid_t) -(long) worker.pid, SIGKILL);
       kill(worker.pid, SIGKILL);
     }
-    while (waitpid(worker.pid, &worker.status, 0) < 0 && errno == EINTR) {}
+    for (;;) {
+      if (_worker_interrupted) {
+        kill((pid_t) -(long) worker.pid, SIGKILL);
+        kill(worker.pid, SIGKILL);
+      }
+      if (waitpid(worker.pid, &worker.status, 0) >= 0 || errno != EINTR) break;
+    }
     worker.pid = 0;
   }
   _worker_descriptors(worker);
@@ -191,6 +204,7 @@ static Map _worker_result(ReplSession session, ReplResult result) {
       session.compiler.print_diagnostic(diagnostic);
   }
   return {status: result.status, formatted: result.formatted ? result.formatted : "",
+          artifact: result.artifact ? result.artifact : "",
           name: result.name ? result.name : "",
           message: result.message ? result.message : "",
           cause: result.cause ? result.cause.repr() : "",
@@ -280,6 +294,7 @@ static void _worker_serve(
   signal(SIGPIPE, SIG_DFL);
   // Native exit hooks run before Context's registered process shutdown.
   Context.open_isolated_named("native REPL worker");
+  Scope.shutdown_hook(_worker_shutdown);
   Frontend.load_support(request);
   Frontend frontend = Frontend.new(request);
   ParsedUnit unit;
@@ -287,9 +302,10 @@ static void _worker_serve(
     foreach (Var diagnostic, unit.compiler.diagnostics())
       unit.compiler.print_diagnostic(diagnostic);
     _worker_send(to, {status: <failed>, message: "could not open compiler session"});
-    _exit(1);
+    exit(1);
   }
   ReplSession session = ReplSession.new(unit.compiler);
+  _worker_session = session;
   session.frontend = frontend;
   ReplProgram program = NULL;
   String failure = NULL;
@@ -298,7 +314,7 @@ static void _worker_serve(
     program = repl_program_build_selected(frontend, roots, requested, failure);
   if (failure) {
     _worker_send(to, {status: <failed>, message: failure});
-    _exit(1);
+    exit(1);
   }
   if (program) {
     repl_program_bind(program, session);
@@ -309,14 +325,14 @@ static void _worker_serve(
                         roots: program ? program.roots : roots,
                         directory: program ? program.directory : ""})) {
     fputs("native program snapshot contains a non-data value\n", stderr);
-    _exit(1);
+    exit(1);
   }
   Buffer pending = Buffer.new(0);
   Var value = void;
   while (_worker_read(from, pending, value)) {
     Map message = value;
     if (message[<operation>] == <quit>) {
-      session.close();
+      session.run_cleanups();
       if (program) repl_program_close(program);
       fflush(NULL);
       exit(0);
@@ -329,7 +345,7 @@ static void _worker_serve(
     fflush(stderr);
     if (!_worker_send(to, result)) break;
   }
-  session.close();
+  session.run_cleanups();
   if (program) repl_program_close(program);
   fflush(NULL);
   exit(0);
@@ -406,7 +422,7 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
   Map ready = _worker_receive(worker, 0);
   if (!ready || ready[<status>] != <ready>) {
     if (ready) worker.failure = ready[<message>];
-    _worker_reap(worker, 1);
+    _worker_reap(worker, ready == NULL);
     return worker;
   }
   worker.snapshot = ready[<snapshot>];

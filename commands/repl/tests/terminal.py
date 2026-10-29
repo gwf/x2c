@@ -142,7 +142,8 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
     bad.write_text("int broken( {\n")
     load = f':load "{source}"\n'
 
-    piped = run(load + "terminal_input();\nterminal_answer();\n",
+    piped = run(load + "terminal_input();\nterminal_answer();\n"
+                ":symbols terminal_no_such_name\n",
                 [], environment)
     require(piped.returncode == 0 and result(piped.stdout, -1) and
             result(piped.stdout, 42), (piped.stdout, piped.stderr))
@@ -150,10 +151,30 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
             (piped.stdout, piped.stderr))
     print("piped native stdin stays separate from source", flush=True)
 
+    dumped = run("1+2;\n", ["--dump"], environment)
+    artifact = re.search(r"native artifacts: ([^\n]+)", dumped.stderr)
+    require(dumped.returncode == 0 and artifact and "typed:" in dumped.stderr,
+            (dumped.stdout, dumped.stderr))
+    require(Path(artifact[1]).is_dir(), artifact[1])
+    print("native dump identifies retained generated artifacts", flush=True)
+
     retired = run(load + "terminal_register_exit();\n:quit\n", [], environment)
     require(retired.returncode == 0 and retired.stdout.count("native closed\n") == 1,
             (retired.stdout, retired.stderr))
     print("orderly native retirement runs C exit hooks once", flush=True)
+
+    late = ("int kept = 42;\n"
+            'defer printf("scope=%d\\n", kept);\n'
+            'void handler(void) { printf("late=%d\\n", kept); }\n'
+            "atexit(handler);\n")
+    for boundary in (":quit\n", ":reset\n:quit\n"):
+        callback = run(late + boundary, [], environment)
+        require(callback.returncode == 0 and
+                callback.stdout.count("late=42\n") == 1 and
+                callback.stdout.count("scope=42\n") == 1 and
+                callback.stdout.index("scope=42\n") < callback.stdout.index("late=42\n"),
+                (callback.stdout, callback.stderr))
+    print("prompt callback environments survive native exit hooks", flush=True)
 
     preserved = run(load + "int kept = 17;\nterminal_counter = 99;\n" +
                     f':load "{bad}"\n' +
@@ -211,6 +232,19 @@ int candidate_value(void) { return 1; }
     require(replayed.returncode == 0 and result(replayed.stdout, 14),
             (replayed.stdout, replayed.stderr))
     print("saved instructions replay in a fresh session", flush=True)
+
+    first_main = directory / "first-main.c"
+    first_main.write_text("int main(int argc, char **argv) { return argc; }\n")
+    second_main = directory / "second-main.x"
+    second_main.write_text("int main(void) { return 7; }\n")
+    mains = run(f':load "{first_main}"\nmain(["program", "argument"]);\n'
+                f':load "{second_main}"\nmain();\n:files\n', [], environment)
+    require(mains.returncode == 0 and result(mains.stdout, 2) and
+            result(mains.stdout, 7), (mains.stdout, mains.stderr))
+    require(f"root: {second_main.resolve()}" in mains.stdout and
+            f"root: {first_main.resolve()}" not in mains.stdout,
+            (mains.stdout, mains.stderr))
+    print("explicit main load replaces the previous program root", flush=True)
 
     terminal = Terminal([str(source)], environment)
     try:

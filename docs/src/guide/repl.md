@@ -221,7 +221,8 @@ normal exit status. Incomplete input at EOF exits with status 1.
 ## Execution details
 
 `:ast NAME` shows a prompt definition's typed AST. `:lowered NAME` explains
-that submissions execute natively. `--dump` prints typed submission syntax;
+that submissions execute natively. `--dump` prints typed submission syntax
+and the retained directory containing native headers, source, and module;
 `--stats` and `--verbose-stats` print worker allocation statistics at exit.
 `:stats [verbose]` reports those statistics during a session.
 

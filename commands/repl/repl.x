@@ -224,6 +224,8 @@ static int _submit(struct ReplClient &client, String source) {
   if (client.options.dump) {
     String syntax = result[<syntax>];
     if (syntax) fprintf(stderr, "typed: %%%s\n", syntax);
+    String artifact = result[<artifact>];
+    if (artifact) fprintf(stderr, "native artifacts: %s\n", artifact);
   }
   if (result[<status>] == <incomplete>) return 2;
   return _show_response(client, result);

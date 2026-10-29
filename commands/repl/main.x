@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   if ("--help" in arguments || "-h" in arguments) {
     puts("usage: x2c repl [OPTIONS] [SOURCES|HEADERS|NATIVE-INPUTS...]\n\n"
          "Start a persistent native library playground. Enter :help for commands.\n\n"
-         "  --dump                 Print typed submission syntax\n"
+         "  --dump                 Print typed syntax and retained native artifacts\n"
          "  --stats                Print worker statistics at exit\n"
          "  --verbose-stats        Print detailed worker statistics at exit\n"
          "  -I DIR                 Add an x2c/C include directory\n"
