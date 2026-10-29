@@ -41,8 +41,6 @@ Buffer Listener_write_str(Listener value, Buffer out);
 
 String Listener_str(Listener value);
 
-Buffer Listener_write_repr(Listener value, Buffer out);
-
 String Listener_repr(Listener value);
 
 typedef struct Socket{
@@ -83,6 +81,8 @@ Socket Listener_accept(Listener listener);
 int x2c_net_accept_fd(Listener listener);
 
 int Listener_port(Listener listener);
+
+Buffer Listener_write_repr(Listener listener, Buffer out);
 
 void Listener_stop(Listener listener);
 

@@ -144,20 +144,13 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
 
 typedef struct _x2c_gensym_defer_env_6{
   const void * _x2c_gensym_defer_capture_6;
+  const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_8;
+  const void * _x2c_gensym_defer_capture_9;
 }
 _x2c_gensym_defer_env_6;
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
-
-typedef struct _x2c_gensym_defer_env_7{
-  const void * _x2c_gensym_defer_capture_7;
-  const void * _x2c_gensym_defer_capture_8;
-  const void * _x2c_gensym_defer_capture_9;
-  const void * _x2c_gensym_defer_capture_10;
-}
-_x2c_gensym_defer_env_7;
-
-static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
 void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
 
@@ -288,47 +281,26 @@ String Listener_str(Listener value){
 
 }
 
-int RenderPath_enter(RenderPath *, const void *);
+Buffer Listener_write_repr(Listener listener, Buffer out);
 
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Var_write_repr(Var, Buffer);
-
-static Var int_var(int);
-
-Buffer String_write_repr(String, Buffer);
-
-Buffer Listener_write_repr(Listener value, Buffer out){
+String Listener_repr(Listener value){
   if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, "<Listener: 0x%012lX>", (long) value);
-  RenderPath _x2c_gensym_macro_path_0;
-  if(! RenderPath_enter(&(_x2c_gensym_macro_path_0), value)) return Buffer_printf(out, "<Listener: 0x%012lX>", (long) value);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_path_0;
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_out_1;
     X2CCleanup _x2c_gensym_defer_record_1 ={
       .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      Buffer_write(out, "Listener { ");
-      Buffer_write(out, "fd: ");
-      Var_write_repr((int_var(value -> fd)), out);
-      Buffer_write(out, ", ");
-      Buffer_write(out, "host: ");
-      String_write_repr(value -> host, out);
-      Buffer_write(out, ", ");
-      Buffer_write(out, "port: ");
-      Var_write_repr((int_var(value -> port)), out);
-      Buffer_write(out, ", ");
-      Buffer_write(out, "stopped: ");
-      Var_write_repr((int_var(value -> stopped)), out);
+      Listener_write_repr(value, _x2c_gensym_macro_out_1);
       {
-        Buffer _x2c_gensym_return_value_1 = Buffer_write(out, " }");
+        String _x2c_gensym_return_value_1 = Buffer_str(_x2c_gensym_macro_out_1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
           return _x2c_gensym_return_value_1;
@@ -338,37 +310,6 @@ Buffer Listener_write_repr(Listener value, Buffer out){
 
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
-String Listener_repr(Listener value){
-  if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
-  {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_out_1;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      Listener_write_repr(value, _x2c_gensym_macro_out_1);
-      {
-        String _x2c_gensym_return_value_2 = Buffer_str(_x2c_gensym_macro_out_1);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
@@ -413,51 +354,61 @@ String Socket_str(Socket value){
   if(! _init_guard_) _file_init_();
   Buffer _x2c_gensym_macro_out_2 = Buffer_new(0);
   {
-    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_out_2;
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_out_2;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       Socket_write_str(value, _x2c_gensym_macro_out_2);
       {
-        String _x2c_gensym_return_value_3 = Buffer_str(_x2c_gensym_macro_out_2);
+        String _x2c_gensym_return_value_2 = Buffer_str(_x2c_gensym_macro_out_2);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-          return _x2c_gensym_return_value_3;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
 
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Var_write_repr(Var, Buffer);
+
+static Var int_var(int);
+
 Buffer File_write_repr(File, Buffer);
+
+Buffer String_write_repr(String, Buffer);
 
 Buffer Socket_write_repr(Socket value, Buffer out){
   if(! _init_guard_) _file_init_();
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<Socket: 0x%012lX>", (long) value);
-  RenderPath _x2c_gensym_macro_path_1;
-  if(! RenderPath_enter(&(_x2c_gensym_macro_path_1), value)) return Buffer_printf(out, "<Socket: 0x%012lX>", (long) value);
+  RenderPath _x2c_gensym_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_gensym_macro_path_0), value)) return Buffer_printf(out, "<Socket: 0x%012lX>", (long) value);
   {
-    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_path_1;
-    X2CCleanup _x2c_gensym_defer_record_4 ={
-      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_path_0;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       Buffer_write(out, "Socket { ");
       Buffer_write(out, "fd: ");
@@ -472,7 +423,38 @@ Buffer Socket_write_repr(Socket value, Buffer out){
       Buffer_write(out, "peer: ");
       String_write_repr(value -> peer, out);
       {
-        Buffer _x2c_gensym_return_value_4 = Buffer_write(out, " }");
+        Buffer _x2c_gensym_return_value_3 = Buffer_write(out, " }");
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+  }
+
+}
+
+String Socket_repr(Socket value){
+  if(! _init_guard_) _file_init_();
+  Buffer _x2c_gensym_macro_out_3 = Buffer_new(0);
+  {
+    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_out_3;
+    X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+    {
+      Socket_write_repr(value, _x2c_gensym_macro_out_3);
+      {
+        String _x2c_gensym_return_value_4 = Buffer_str(_x2c_gensym_macro_out_3);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
           return _x2c_gensym_return_value_4;
@@ -482,37 +464,6 @@ Buffer Socket_write_repr(Socket value, Buffer out){
 
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-  }
-
-}
-
-String Socket_repr(Socket value){
-  if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_3 = Buffer_new(0);
-  {
-    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_out_3;
-    X2CCleanup _x2c_gensym_defer_record_5 ={
-      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
-    {
-      Socket_write_repr(value, _x2c_gensym_macro_out_3);
-      {
-        String _x2c_gensym_return_value_5 = Buffer_str(_x2c_gensym_macro_out_3);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-          return _x2c_gensym_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
   }
 
 }
@@ -559,16 +510,16 @@ Listener Listener_bind(String host, int port){
       }
       if(fd < 0) _io(_0, error);
       {
-        _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
+        _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & fd;
-        X2CCleanup _x2c_gensym_defer_record_6 ={
-          .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
+        _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & fd;
+        X2CCleanup _x2c_gensym_defer_record_5 ={
+          .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_5);
         {
           int bound_port = _bound_port(fd);
           Listener listener = Scope_malloc_finalized(sizeof(struct Listener), _drop_listener);
@@ -578,20 +529,20 @@ Listener Listener_bind(String host, int port){
           ;
           fd = - 1;
           {
-            Listener _x2c_gensym_return_value_6 = listener;
+            Listener _x2c_gensym_return_value_5 = listener;
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
               if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
                 freeaddrinfo(addresses);
               }
               x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-              return _x2c_gensym_return_value_6;
+              return _x2c_gensym_return_value_5;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
       }
 
     }
@@ -654,15 +605,18 @@ int Listener_port(Listener listener){
   return listener -> port;
 }
 
-void x2c_thread_wait_lock(void);
-
-void x2c_thread_wait_unlock(void);
+Buffer Listener_write_repr(Listener listener, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if(! listener) return Listener_write_str(listener, out);
+  Buffer_printf(out, "Listener { fd: %d, host: ", listener -> fd);
+  String_write_repr(listener -> host, out);
+  int stopped = __atomic_load_n(& listener -> stopped, __ATOMIC_ACQUIRE);
+  return Buffer_printf(out, ", port: %d, stopped: %d }", listener -> port, stopped);
+}
 
 void Listener_stop(Listener listener){
   if(! _init_guard_) _file_init_();
-  x2c_thread_wait_lock();
-  listener -> stopped = 1;
-  x2c_thread_wait_unlock();
+  __atomic_store_n(& listener -> stopped, 1, __ATOMIC_RELEASE);
 }
 
 void Listener_close(Listener listener){
@@ -687,7 +641,7 @@ Socket Socket_connect(String host, int port, int timeout_ms){
   if(! _init_guard_) _file_init_();
   _port(port, _2);
   if(! String_truth(host) || timeout_ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 131,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 138,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.connect")), NULL))));
     __builtin_unreachable();
   }
@@ -701,13 +655,13 @@ Socket Socket_connect(String host, int port, int timeout_ms){
       for(struct addrinfo * volatile at = addresses;  at;  at = at -> ai_next){
         int fd = _connect(at, timeout_ms);
         if(fd >= 0){
-          Socket _x2c_gensym_return_value_7 = Socket_adopt(fd);
+          Socket _x2c_gensym_return_value_6 = Socket_adopt(fd);
           {
             if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
               freeaddrinfo(addresses);
             }
             x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-            return _x2c_gensym_return_value_7;
+            return _x2c_gensym_return_value_6;
           }
 
         }
@@ -715,13 +669,13 @@ Socket Socket_connect(String host, int port, int timeout_ms){
       }
       _io(_2, error);
       {
-        Socket _x2c_gensym_return_value_8 = NULL;
+        Socket _x2c_gensym_return_value_7 = NULL;
         {
           if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
             freeaddrinfo(addresses);
           }
           x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-          return _x2c_gensym_return_value_8;
+          return _x2c_gensym_return_value_7;
         }
 
       }
@@ -753,19 +707,19 @@ Socket Socket_adopt(int fd){
   File input = NULL, output = NULL;
   int copy = - 1;
   {
-    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & input;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_8 =(const void *) & fd;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_9 =(const void *) & output;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_10 =(const void *) & copy;
-    X2CCleanup _x2c_gensym_defer_record_7 ={
-      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & input;
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_7 =(const void *) & fd;
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_8 =(const void *) & output;
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_9 =(const void *) & copy;
+    X2CCleanup _x2c_gensym_defer_record_6 ={
+      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
       int enabled = 1;
       if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, & enabled, sizeof(enabled))) _io(_3, errno);
@@ -782,16 +736,16 @@ Socket Socket_adopt(int fd){
       fd = copy = - 1;
       input = output = NULL;
       {
-        Socket _x2c_gensym_return_value_9 = socket;
+        Socket _x2c_gensym_return_value_8 = socket;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-          return _x2c_gensym_return_value_9;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+          return _x2c_gensym_return_value_8;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
   }
 
 }
@@ -799,7 +753,7 @@ Socket Socket_adopt(int fd){
 void Socket_set_timeout(Socket s, int ms){
   if(! _init_guard_) _file_init_();
   if(ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 178,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 185,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.set_timeout")), NULL))));
     __builtin_unreachable();
   }
@@ -851,11 +805,8 @@ int x2c_thread_stopping(void);
 void x2c_thread_cancel(void);
 
 static int _stopped(Listener listener){
-  x2c_thread_wait_lock();
-  int stopped = listener -> stopped, cancelled = x2c_thread_stopping();
-  x2c_thread_wait_unlock();
-  if(cancelled) x2c_thread_cancel();
-  return stopped;
+  if(x2c_thread_stopping()) x2c_thread_cancel();
+  return __atomic_load_n(& listener -> stopped, __ATOMIC_ACQUIRE);
 }
 
 static void _drop_listener(void * ptr){
@@ -927,7 +878,7 @@ static void _drop_socket(void * ptr){
 
 static void _port(int port, String operation){
   if(port < 0 || port > 65535){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 299,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 303,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(1080488), int_var(port));
     __builtin_unreachable();
   }
@@ -948,7 +899,7 @@ static struct addrinfo * _resolve(String host, int port, int flags){
   if(status){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("getaddrinfo")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 313,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 317,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 31862161386376, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(556264), String_var(host));
       __builtin_unreachable();
     }
@@ -966,7 +917,7 @@ static int _failed(int fd){
 
 _Noreturn static void _io(String operation, int error){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 325,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 329,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 20399393368, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -1037,11 +988,9 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
-void RenderPath_leave(RenderPath *);
-
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)));
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
@@ -1049,33 +998,30 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
+void RenderPath_leave(RenderPath *);
+
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
+  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3)));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4)));
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
+  if((*(int *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5) >= 0) close((*(int *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
 }
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  if((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6) >= 0) close((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
-}
-
-static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
-  _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
   {
-    if((*(File *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7)) File_close((*(File *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7));
-    else if((*(int *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8) >= 0) close((*(int *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8));
-    if((*(File *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_9)) File_close((*(File *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_9));
-    else if((*(int *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_10) >= 0) close((*(int *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_10));
+    if((*(File *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6)) File_close((*(File *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
+    else if((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_7) >= 0) close((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_7));
+    if((*(File *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_8)) File_close((*(File *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_8));
+    else if((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9) >= 0) close((*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
   }
 
 }

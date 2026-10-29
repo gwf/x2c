@@ -942,7 +942,7 @@ Pool Pool_release(Pool inner){
   Pool up = inner -> up;
   _lock(up);
   if(up){
-    up -> child_capacity = inner -> table -> capacity;
+    __atomic_store_n(& up -> child_capacity, inner -> table -> capacity, __ATOMIC_RELAXED);
   }
   _release_blocks(inner);
   _unlock(up);
@@ -1062,10 +1062,7 @@ static PoolTable _root_new_table(unsigned capacity){
 
 static unsigned f9_interning____child_capacity(Pool inner){
   if(! inner) return 2;
-  _lock(inner);
-  unsigned capacity = inner -> child_capacity;
-  _unlock(inner);
-  return capacity;
+  return __atomic_load_n(& inner -> child_capacity, __ATOMIC_RELAXED);
 }
 
 void * Pool_malloc(Pool inner, size_t size){
@@ -1077,9 +1074,11 @@ void * Pool_malloc(Pool inner, size_t size){
   }
   int class_index = f7_storage____size_class(size);
   if(class_index >= 0) return f7_storage____small_malloc(inner, class_index, size);
-  _storage_lock();
-  f7_storage____record_request(size);
-  _storage_unlock();
+  if(Scope_accounting_enabled()){
+    _storage_lock();
+    f7_storage____record_request(size);
+    _storage_unlock();
+  }
   _lock(inner);
   {
     _x2c_gensym_defer_env_10 _x2c_gensym_macro_environment_10 ={
@@ -1112,7 +1111,7 @@ void Pool_free(Pool inner, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! alloc) return;
   if(! inner){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/pool/storage.x",.function = "Pool_free",.line = 103,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/pool/storage.x",.function = "Pool_free",.line = 105,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }
@@ -1293,7 +1292,7 @@ static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_in
   f7_storage___PoolBlock fresh = malloc(f7_storage____block_bytes(inner, class_index));
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 262,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 264,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
@@ -1618,6 +1617,7 @@ static int f7_storage____slot_kept(f7_storage___PoolBlock block, unsigned slot){
 }
 
 static void _storage_initialize(void){
+  if(__atomic_load_n(& f7_storage___pool_storage_ready, __ATOMIC_ACQUIRE)) return;
   _storage_lock();
   {
     X2CCleanup _x2c_gensym_defer_record_18 ={
@@ -1626,12 +1626,12 @@ static void _storage_initialize(void){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
-      if(f7_storage___pool_storage_ready){
+      if(__atomic_load_n(& f7_storage___pool_storage_ready, __ATOMIC_ACQUIRE)){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
         return;
       }
       Scope_shutdown_hook(f7_storage____storage_shutdown);
-      f7_storage___pool_storage_ready = 1;
+      __atomic_store_n(& f7_storage___pool_storage_ready, 1, __ATOMIC_RELEASE);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
   }
@@ -1654,7 +1654,7 @@ static void f7_storage____storage_shutdown(void){
   f7_storage___pool_backing_bytes = 0;
   f7_storage___pool_active_blocks = f7_storage___pool_active_bytes = 0;
   f7_storage___pool_depot_blocks = f7_storage___pool_depot_bytes = 0;
-  f7_storage___pool_storage_ready = 0;
+  __atomic_store_n(& f7_storage___pool_storage_ready, 0, __ATOMIC_RELEASE);
 }
 
 void Pool_thread_start(void){

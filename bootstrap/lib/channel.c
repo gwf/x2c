@@ -579,13 +579,11 @@ void Channel_send_owned(Channel c, Var value){
   _send(c, value, 1);
 }
 
-void Channel_close(Channel channel);
-
 void Scope_destroy(Scope);
 
 void Channel_free(Channel channel){
   if(channel){
-    Channel_close(channel);
+    channel -> closed = 1;
     Scope_destroy(channel -> lifetime);
   }
 
@@ -885,8 +883,7 @@ static int _buffer_send(Channel channel, ChannelMessage message){
   if(channel -> last) channel -> last -> next = message;
   else channel -> first = message;
   channel -> last = message;
-  channel -> count ++;
-  _notify(channel);
+  if(! channel -> count ++) _notify(channel);
   return 1;
 }
 
@@ -897,7 +894,7 @@ static void _notify(Channel channel){
 static ChannelMessage _message(Var value, int owned){
   ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if(! message){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 367,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 366,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
@@ -972,9 +969,10 @@ static int _buffer_receive(Channel channel, ChannelMessage * out){
   ChannelMessage message = channel -> first;
   channel -> first = message -> next;
   if(! channel -> first) channel -> last = NULL;
+  int was_full = channel -> count == channel -> capacity;
   channel -> count --;
   (* out) = message;
-  _notify(channel);
+  if(was_full) _notify(channel);
   return 1;
 }
 

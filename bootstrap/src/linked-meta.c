@@ -13910,7 +13910,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10877 = String_var(_10876);
   _10878 = String_new("lib/dispatch.x");
   _10879 = String_var(_10878);
-  _10880 = String_new("54515560");
+  _10880 = String_new("c60846c5");
   _10881 = String_var(_10880);
   _10882 = cons(_10881, NULL);
   _10883 = cons(_10879, _10882);
@@ -13962,7 +13962,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10929 = List_var(_10928);
   _10930 = String_new("lib/scope/scope.x");
   _10931 = String_var(_10930);
-  _10932 = String_new("f3a3264d");
+  _10932 = String_new("6b0f85cd");
   _10933 = String_var(_10932);
   _10934 = cons(_10933, NULL);
   _10935 = cons(_10931, _10934);
@@ -14027,7 +14027,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10994 = cons(_10993, NULL);
   _10995 = cons(_10734, _10994);
   _10996 = cons(_223, _10995);
-  _10997 = String_new("84a648f0");
+  _10997 = String_new("bd36e96e");
   _10998 = String_var(_10997);
   _10999 = String_new("cwd:./pthread.h");
   _11000 = String_var(_10999);
@@ -14051,7 +14051,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11018 = cons(_11017, NULL);
   _11019 = cons(_11015, _11018);
   _11020 = List_var(_11019);
-  _11021 = String_new("9c9656c9");
+  _11021 = String_new("0e5fe8de");
   _11022 = String_var(_11021);
   _11023 = cons(_11022, NULL);
   _11024 = cons(_924, _11023);
@@ -14077,7 +14077,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11044 = cons(_10922, _11043);
   _11045 = cons(_11002, _11044);
   _11046 = List_var(_11045);
-  _11047 = String_new("a541f912");
+  _11047 = String_new("eb0a02cd");
   _11048 = String_var(_11047);
   _11049 = cons(_11048, NULL);
   _11050 = cons(_11046, _11049);
@@ -15234,7 +15234,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12195 = cons(_223, _12194);
   _12196 = String_new("lib/logger.x");
   _12197 = String_var(_12196);
-  _12198 = String_new("fe564e1f");
+  _12198 = String_new("c10f87e1");
   _12199 = String_var(_12198);
   _12200 = String_new("cwd:./assert.h");
   _12201 = String_var(_12200);
@@ -15774,7 +15774,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12732 = List_var(_12731);
   _12733 = String_new("lib/pool/interning.x");
   _12734 = String_var(_12733);
-  _12735 = String_new("3665cddd");
+  _12735 = String_new("e294f2d6");
   _12736 = String_var(_12735);
   _12737 = cons(_12736, NULL);
   _12738 = cons(_12734, _12737);
@@ -15804,7 +15804,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12762 = List_var(_12761);
   _12763 = String_new("lib/pool/storage.x");
   _12764 = String_var(_12763);
-  _12765 = String_new("3891dace");
+  _12765 = String_new("d07c45c1");
   _12766 = String_var(_12765);
   _12767 = cons(_12766, NULL);
   _12768 = cons(_12764, _12767);
@@ -15969,7 +15969,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12924 = List_var(_12923);
   _12925 = String_new("lib/scope/accounting.x");
   _12926 = String_var(_12925);
-  _12927 = String_new("b17e0f9d");
+  _12927 = String_new("d926b3ad");
   _12928 = String_var(_12927);
   _12929 = cons(_12928, NULL);
   _12930 = cons(_12926, _12929);
@@ -15991,7 +15991,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12946 = List_var(_12945);
   _12947 = String_new("lib/scope/regions.x");
   _12948 = String_var(_12947);
-  _12949 = String_new("3a73e731");
+  _12949 = String_new("2e0e6860");
   _12950 = String_var(_12949);
   _12951 = cons(_12950, NULL);
   _12952 = cons(_12948, _12951);
@@ -16391,7 +16391,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13343 = cons(_11002, _13342);
   _13344 = cons(_11269, _13343);
   _13345 = List_var(_13344);
-  _13346 = String_new("92770674");
+  _13346 = String_new("b7650c0f");
   _13347 = String_var(_13346);
   _13348 = cons(_13347, NULL);
   _13349 = cons(_13345, _13348);

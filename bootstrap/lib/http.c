@@ -1984,10 +1984,6 @@ void Logger_error(Logger, Symbol, List);
 
 void Logger_info(Logger, Symbol, List);
 
-void x2c_thread_wait_lock(void);
-
-void x2c_thread_wait_unlock(void);
-
 static void _connection(HttpServer s, Socket peer){
   for(; ; ){
     Context context = Context_open_isolated_named("request");
@@ -2138,10 +2134,7 @@ static void _connection(HttpServer s, Socket peer){
           Var _x2c_gensym_literal_part_5 = List_var(cons(_106, cons(int_var(res -> code), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_107, cons(req ? String_var(req -> path) : Var_null(), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL));
         }
         ));
-        x2c_thread_wait_lock();
-        int stopped = s -> listener -> stopped;
-        x2c_thread_wait_unlock();
-        if(! keep || stopped){
+        if(! keep || __atomic_load_n(& s -> listener -> stopped, __ATOMIC_ACQUIRE)){
           x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
           return;
         }
