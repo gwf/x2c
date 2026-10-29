@@ -241,9 +241,12 @@ static Map _worker_dispatch(ReplSession session, Map message) {
     return {status: <ok>, start: c.start, end: c.end, candidates: candidates.list()};
   }
   String output = NULL;
-  if (operation == <symbols>) output = session.symbol_text(
-    message[<prefix>], message[<kind>], message[<path>], message[<all>]);
-  else if (operation == <info>) output = session.info(text);
+  if (operation == <symbols>) {
+    output = session.symbol_text(
+      message[<prefix>], message[<kind>], message[<path>], message[<all>]);
+    return {status: <ok>, text: output};
+  }
+  if (operation == <info>) output = session.info(text);
   else if (operation == <source>) output = session.source(text);
   else if (operation == <members>) output = session.members(text);
   else if (operation == <stats>) output = _worker_stats(session, message[<verbose>]);
