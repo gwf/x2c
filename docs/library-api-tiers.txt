@@ -69,6 +69,7 @@ lib/dispatch.x|internal|Var.try_export_context
 lib/dispatch.x|internal|x2c_descriptor_registration_frozen
 lib/dispatch.x|internal|x2c_descriptor_thread_start_begin
 lib/dispatch.x|internal|x2c_descriptor_thread_start_end
+lib/encoding.x|advanced|String.try_next_code_point
 lib/error/error.x|advanced|Error.bound,Error.bound_set,Error.count,Error.depth
 lib/error/error.x|advanced|Error.handler_depth,Error.handler_head
 lib/error/error.x|advanced|Error.initialize_raw,Error.note_rendered,Error.restore

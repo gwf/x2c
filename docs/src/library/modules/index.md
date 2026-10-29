@@ -27,6 +27,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/diff.x`](diff.md) | line differences between two texts. |
 | [`lib/digest.x`](digest.md) | SHA-256 digests of Strings and streams. |
 | [`lib/dispatch.x`](dispatch.md) | typed descriptors for runtime `Var` behavior. |
+| [`lib/encoding.x`](encoding.md) | UTF-8 code points and base64, hex, and percent encodings. |
 | [`lib/error/error.x`](error.md) | handler stack and accumulated errors. |
 | [`lib/exception.x`](exception.md) | transfer frames for x2c `Error` unwinding and cleanup. |
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
@@ -49,6 +50,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/pool/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
+| [`lib/random.x`](random.md) | pseudorandom numbers, system entropy, and UUIDs. |
 | [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
 | [`lib/rewrite.x`](rewrite.md) | pattern registration for compiler rewrites. |
 | [`lib/scope/scope.x`](scope.md) | memory allocation scope management. |
@@ -61,10 +63,12 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
 | [`lib/test.x`](test.md) | registered tests and assertions for user programs. |
 | [`lib/thread.x`](thread.md) | native workers with explicit result lifetimes. |
+| [`lib/time.x`](time.md) | clocks, durations, and calendar time. |
 | [`lib/type.x`](type.md) | semantic type values and their structural operations. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
 | [`lib/typed-list.x`](typed-list.md) | typed views over canonical List cells. |
 | [`lib/typed-map.x`](typed-map.md) | typed `Map`s generated from shared storage. |
+| [`lib/url.x`](url.md) | URL references and query strings. |
 | [`lib/var/var.x`](var.md) | variant type for dynamic typing. |
 
 ## Optional x2c modules
@@ -76,6 +80,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/derive.x`](derive.md) - Generated record mappings from struct fields; explicitly include derive.x to use them.
 - [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
+- [`lib/encoding.x`](encoding.md) - UTF-8 code points and base64, hex, and percent encodings of `String`s; explicitly include `encoding.x` to use them.
 - [`lib/http.x`](http.md) - HTTP requests, responses, routing, and a blocking worker-pool server; explicitly include `http.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
@@ -83,6 +88,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/net.x`](net.md) - Blocking TCP sockets and listeners; explicitly include `net.x` to use them.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
+- [`lib/random.x`](random.md) - Seedable pseudorandom numbers, system entropy, and UUIDs; explicitly include `random.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
 - [`lib/rewrite.x`](rewrite.md) - Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
 - [`lib/scripting.x`](scripting.md) - The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
@@ -90,10 +96,12 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/substring.x`](substring.md) - Borrowed immutable String views; explicitly include `substring.x` to use them.
 - [`lib/system-macros.x`](system-macros.md) - Compile-time convenience macros; explicitly include system-macros.x to use them.
 - [`lib/test.x`](test.md) - Test registration, assertions, and a test program entry; explicitly include test.x to use them.
+- [`lib/time.x`](time.md) - Clocks, durations, and RFC 3339 calendar time; explicitly include `time.x` to use them.
 - [`lib/type.x`](type.md) - Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
+- [`lib/url.x`](url.md) - URL references and query strings; explicitly include `url.x` to use them.
 
 ## Runtime-internal
 

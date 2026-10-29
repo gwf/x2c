@@ -49,6 +49,7 @@ allocated objects even when empty.
 [String](modules/string.md) does interpolation, search, split, replace,
 partition, case conversion, padding, escaping, slicing, joining, and checked
 numeric parsing. Its operations work on bytes; they do not decode Unicode.
+For code points, see [Encode text and parse URLs](#encode-text-and-parse-urls).
 
 Use [Buffer](modules/buffer.md) for incremental text:
 
@@ -301,6 +302,59 @@ int limit;
 
 The [module reference](modules/index.md) is generated from runtime source and
 compiler-verified signatures.
+
+## Measure and format time
+
+Explicitly include `time.x`. A `Time` is an instant and a `Duration` a
+span, both in nanoseconds. `Time.now` reads the wall clock,
+`Time.monotonic` measures elapsed time, and `Time.sleep` waits.
+`Time.parse` and `Time.str` read and write RFC 3339 timestamps in UTC, and
+`Time.format` applies `strftime` conversions:
+
+```x2c
+~#include "time.x"
+~int main(void) {
+Time start = Time.parse("2026-10-28T14:05:09Z");
+Time due = start.plus(Duration.seconds(90));
+printf("%s %s\n", due.str(), due.since(start).str());
+~  return 0;
+~}
+```
+
+```text
+2026-10-28T14:06:39Z 1m30s
+```
+
+`Time.local` and `Time.format_local` use the zone `TZ` selects. See
+[Time, Random Values, and Encodings](../guide/time-random-encodings.md).
+
+## Generate random values
+
+Explicitly include `random.x`. `Random.new(seed)` makes a repeatable
+xoshiro256** generator with `next`, `below`, `double`, `shuffle`, and
+`choice`. `Random.secure_fill` reads the operating system's cryptographic
+generator, and `Uuid.v4` returns a random UUID.
+
+## Encode text and parse URLs
+
+Explicitly include `encoding.x` to iterate, count, and write the UTF-8 code
+points of a `String`, and to encode and decode base64, hexadecimal, and
+percent-encoded text. Explicitly include `url.x` to split a URL into its
+components with `Url.parse` and to read and write query strings:
+
+```x2c
+~#include "url.x"
+~int main(void) {
+Url url = Url.parse("https://example.com/search?q=two+words");
+Map query = Url.parse_query(url.query);
+printf("%s %s %s\n", url.host, query["q"], "x2c".base64_encode());
+~  return 0;
+~}
+```
+
+```text
+example.com two words eDJj
+```
 
 ## Open a socket
 
