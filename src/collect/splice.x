@@ -45,6 +45,16 @@ ModuleSource Compiler.module_source(
   return source;
 }
 
+/** Discovers a module after preparing included macros only if its
+    preprocessing needs them. Ordinary collection owns its own include walk.
+*/
+ModuleSource Compiler.discover_module_source(
+  Compiler c, String path, String text, Tokenizer &?plain) {
+  with (c.macro_export_source = path) {
+    return c.module_source(path, text, plain);
+  }
+}
+
 // source collection splice
 
 /* Appends a file with its block spliced and reports whether it had one.
@@ -118,6 +128,7 @@ static Token _block(Splice &s, Tokenizer &tokenizer) {
   Compiler scan = Compiler.new_shared(s.c);
   defer s.c.close_child(scan);
   scan.filename = s.path;
+  scan.macro_export_source = s.c.macro_export_source;
   scan.text = s.text;
   scan.tokenizer = tokenizer;
   scan.cpp = Cpp.new(scan.initial_macros(s.path));

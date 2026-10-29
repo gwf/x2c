@@ -229,7 +229,6 @@ static int _file(Scan &s, String path) {
     return 0;
   String text = NULL;
   if (!s.request.sources.read(path, text)) return 0;
-  s.c.prepare_macro_exports(path);
   Tokenizer tokens = NULL;
   text = _module_text(s, path, text, tokens);
   if (!tokens) {
@@ -319,7 +318,7 @@ static String _module_text(
   ModuleSource module = NULL;
   DiagnosticsHold hold = c.diagnostics.hold();
   with (c.recovery_depth = c.recovery_depth + 1) {
-    try module = c.module_source(path, text, tokens);
+    try module = c.discover_module_source(path, text, tokens);
     catch %(malformed *): module = NULL;
   }
   c.diagnostics.release(hold, 0);

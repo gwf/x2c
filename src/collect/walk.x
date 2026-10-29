@@ -233,7 +233,13 @@ static void _replay_cpp(Compiler c, Cpp cpp, List event) {
 List Compiler.included_macros(
   Compiler c, String target, int angle, String dir, Map active) {
   String path = c.sources.resolve_include(c.include_dirs, dir, target, angle);
-  return path ? _macro_rows(c, _canonical_path(path), active) : NULL;
+  if (!path) return NULL;
+  if (c.macro_export_source) {
+    String source = c.macro_export_source;
+    c.macro_export_source = NULL;
+    c.prepare_macro_exports(source);
+  }
+  return _macro_rows(c, _canonical_path(path), active);
 }
 
 /** Returns the macro table visible before the first line of the file
