@@ -1,4 +1,4 @@
-/*  main.x -- external REPL command
+/*  main.x -- external native playground command
 
     Copyright (c) 2026 Gary William Flake.
 */
@@ -7,43 +7,61 @@
 
 String x2c_embedded_identity(void);
 
+/** Parses native build options with the ordinary build request parser. */
+CliRequest repl_native_request(List arguments) {
+  Array native = ["build"];
+  int operands = 0;
+  foreach (String argument, arguments) {
+    if (!operands && (argument == "--dump" || argument == "--stats" ||
+                      argument == "--verbose-stats")) continue;
+    else {
+      native.push(argument);
+      if (argument == "--") operands = 1;
+    }
+  }
+  CliRequest request = CliRequest.parse_arguments(native);
+  request.sources = SourceView.new();
+  return request;
+}
+
+/** Retains REPL reporting options beside the native request. */
+CliRequest repl_request(List arguments, ReplOptions &options) {
+  options.arguments = arguments;
+  foreach (String argument, arguments) {
+    if (argument == "--dump") options.dump = 1;
+    else if (argument == "--stats") options.stats = 1;
+    else if (argument == "--verbose-stats") options.verbose_stats = 1;
+  }
+  return repl_native_request(arguments);
+}
+
 int main(int argc, char **argv) {
-  x2c_initialize_command_environment(
-    argv[0], x2c_embedded_identity());
-  List args = Args.from_argv(argc, argv);
-  List spec = %(
-    (-h --help (help "Show this help"))
-    (--dump (help "Print typed AST and lowered Lisp"))
-    (--stats (help "Print runtime statistics at exit"))
-    (--verbose-stats (help "Print detailed statistics at exit"))
-    (--native-module (value file) repeated
-      (help "Load a native compile-time module"))
-    (--package-dir (value dir) repeated
-      (help "Add a directory of x2c packages")));
-  if ("-h" in args || "--help" in args) {
-    printf("%s", Args.usage("x2c repl", spec));
+  x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
+  List arguments = Args.from_argv(argc, argv);
+  if ("--help" in arguments || "-h" in arguments) {
+    puts("usage: x2c repl [OPTIONS] [SOURCES|HEADERS|NATIVE-INPUTS...]\n\n"
+         "Start a persistent native library playground. Enter :help for commands.\n\n"
+         "  --dump                 Print typed submission syntax\n"
+         "  --stats                Print worker statistics at exit\n"
+         "  --verbose-stats        Print detailed worker statistics at exit\n"
+         "  -I DIR                 Add an x2c/C include directory\n"
+         "  --x-include-dir DIR    Add an x2c include directory\n"
+         "  --c-include-dir DIR    Add a C include directory\n"
+         "  -D NAME[=VALUE]        Define a preprocessor macro\n"
+         "  -L DIR, -l LIB         Configure native library linkage\n"
+         "  -Xcc ARG, -Wl,ARG      Pass native compiler/linker options\n"
+         "  --package-dir DIR      Add a package directory\n"
+         "  --native-module FILE   Select a compile-time module\n"
+         "  --manifest-path FILE   Use a project manifest\n"
+         "  --target NAME          Select its target\n"
+         "  --profile NAME         Select its build profile\n\n"
+         "Native build options use the same spellings as x2c build.\n"
+         "Successful loading and reloading clear prompt and library state.");
     return 0;
   }
-  Map parsed = NULL;
-  try parsed = Args.parse(args, spec);
-  catch %(bad-arg (operation "Args.parse") (reason ?why) (option ?option)): {
-    Stderr.printf("x2c repl: %s: %s\n", why, option);
-    return 2;
-  }
-  catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
-    Stderr.printf("x2c repl: %s\n", why);
-    return 2;
-  }
-  CliRequest request = CliRequest.new(<repl>);
-  request.native_modules = parsed["native-module"];
-  request.package_dirs = parsed["package-dir"];
-  ReplOptions options = {
-    .dump = parsed["dump"].integer(),
-    .stats = parsed["stats"].integer(),
-    .verbose_stats = parsed["verbose-stats"].integer()
-  };
-  Frontend.load_support(request);
-  Context command = Context.open_isolated_named("repl command");
+  ReplOptions options = {0};
+  CliRequest request = repl_request(arguments, options);
+  Context command = Context.open_isolated_named("REPL supervisor");
   int result = repl_run(request, options);
   command.close();
   return result;

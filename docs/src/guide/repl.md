@@ -1,636 +1,239 @@
-# Experimental REPL
+# Library playground
 
-`x2c repl` is a shipped external command that evaluates a supported subset
-of x2c in a persistent session.
-The command compiles prompt function definitions to native code. Top-level
-initializers, statements, and expressions lower to ordinary Lisp and run in
-the session's evaluator. Compiler macros use native meta compilation and
-helper execution.
+`x2c repl` is a persistent command-line session for experimenting with C and
+x2c libraries. Load a source file, discover its functions, create an object,
+and call operations on that object across successive submissions.
+
+Executable submissions compile through the ordinary compiler. Prompt objects
+and library objects share one native worker process, so native pointers,
+struct values, aliases, and C callbacks retain their ordinary meaning. The
+terminal client stays alive when the worker exits or crashes.
 
 ```sh
 x2c repl
 x2c repl --help
-x2c repl --dump --stats
-x2c repl --package-dir examples/packages
+x2c repl points.c
+x2c repl -I include build/libpoints.a include/points.h
+x2c repl --manifest-path x2c.toml --target core
 ```
 
-No source file or checkout is needed when using an installed development
-build. The command reads standard input and accepts no file operands. It also
-runs directly as `x2c-repl` from the installation's `libexec/x2c` directory.
-An unknown option is an error that names the option.
+Native include, define, compiler, linker, package-directory, and explicit
+manifest options use the same spellings as `x2c build`. A header plus a
+matching native library is sufficient; no generated package or `meta`
+annotation is required. Prepare optional packages before using them. The
+playground does not install missing dependencies.
 
-## Try a session
+## Create, call, and inspect
 
-Enter these submissions in order:
-
-```text
-x2c> int total = 10;
-ok
-x2c> int plus(int x) { return total + x; }
-defined plus
-x2c> plus(3);
-=> 13
-x2c> total = 20;
-ok
-x2c> plus(3);
-=> 23
-```
-
-The function calls display `=> 13` and `=> 23`: later calls read the current
-value of `total`. Definitions display `defined NAME`; initializations and
-statements display `ok`, and a blank or comment-only line displays
-nothing. A final expression displays its value using `Var.repr`, so
-character and unsigned values retain their printed tags.
-
-A function is compiled once, when its complete definition is submitted.
-Compilation needs the matching x2c compiler and host C toolchain. Later calls
-use the compiled code. Prompt variables have shared native storage: both
-compiled functions and interpreted input read and write the same objects.
-Assignment preserves each variable's address, including pointers to record
-fields. `&total` therefore refers to the same object from either path.
-
-Functions can call earlier functions and recurse directly. A saved `Func`
-keeps the same bindings, so changes to shared variables remain visible:
+For example, save this C source as `points.c`:
 
 ```x2c
-~int total = 20;
-~int plus(int x) { return total + x; }
-~int main(void) {
-Func saved = plus;
-total = 30;
-saved(3);  // 33
-~  return 0;
-~}
+#include <stdlib.h>
+
+typedef struct Point { int x; int y; } Point;
+
+Point *point_new(int x, int y) {
+  Point *p = malloc(sizeof(*p));
+  if (!p) return NULL;
+  p->x = x;
+  p->y = y;
+  return p;
+}
+void point_move(Point *p, int dx) { p->x += dx; }
+void point_free(Point *p) { free(p); }
 ```
 
-Submit one declaration or function at a time. Executable input may contain
-several statements. Semicolons are required. Incomplete input continues at
-the `... ` prompt until it forms a complete submission. Put a multiline
-`if`/`else` in a block when necessary: a complete `if` can execute before the
-next line supplies an `else`.
+Start the REPL, then enter these submissions:
 
-Interactive terminals support the arrow keys, Home, End, Backspace, Delete,
-and up/down history recall. History holds the last 100 nonempty commands and
-completed source submissions for the current process; adjacent duplicates are
-stored once, and history is not written to disk. A rejected or failed
-submission remains available for correction.
+```text
+:load "points.c"
+:symbols point
+:info point_move
+:source point_move
+Point *p = point_new(1, 2);
+point_move(p, 5);
+:inspect *p
+p->x;
+point_free(p);
+p = NULL;
+```
 
-Tab completes names from the compiler's live session namespace, offering
-only names that fit the grammar position: type positions offer types and
-type-producing macros, expression positions offer values and callable forms,
-and statement, block, and submission starts offer their legal union plus
-contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
-`finally` where each is legal. Fields and evaluator-callable methods remain
-available on a typed receiver. At a blank primary prompt completion also
-offers colon commands, grouped with keywords, session names, types, and other
-callables. Unsupported REPL declarations and imports are not suggested.
+`p` designates the same allocation on each line. Inspection shows a `Point`
+with `x` equal to `6` and `y` equal to `2`. A function can also return a
+struct by value, accept the address of a prompt variable, fill an
+out-parameter, or call a named prompt function through a C function pointer.
 
-Completion leaves out runtime names that the library reference marks
-internal: names from internal modules, internal types and functions, and
-constants or variables of an internal type. They remain ordinary names, so a
-submission that spells one in full compiles as usual. An internal name is
-offered only when no other name matches the typed prefix. For example,
-`Scope` + Tab offers `Scope` and `ScopeStats`, while `ScopeA` + Tab completes
-the internal `ScopeAlloc`.
+A C library often exposes an opaque handle. Inspect the pointer's declared
+type and use `:members` to find related operations. Use the library's query
+functions to examine its state; an incomplete type does not reveal private
+fields.
 
-A colon-prefixed line completes commands even at a continuation prompt;
-`:ast` and `:lowered` then complete published function names, and `:stats`
-completes `verbose`. A sole match replaces the current name; otherwise Tab
-inserts the common prefix, and another Tab lists compact, grouped choices.
-Completion parses only through the cursor and rolls back its semantic work,
-so it can use locals from pending multiline input without publishing them.
-APIs become candidates when their ordinary declarations and compile-time
-bindings become visible.
+The final expression in a submission displays its result. Declarations and
+statements report `defined NAME` or `ok`. Semicolons are required. Incomplete
+input continues at `... ` until it forms a complete submission. Submit one
+persistent declaration or function definition at a time. Executable input
+can contain several statements.
 
-Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
-inside one editable entry, so a pasted multiline submission can be accepted
-with one Enter. Recalled multiline submissions are also one entry. The editor
-folds these entries for display and moves over the folded range as a unit; it
-does not provide arbitrary cursor movement among every line of a whole
-submission. Typing Enter still submits the current edited entry, and an
-incomplete submission continues at a fresh `... ` prompt.
+## Discover the API
 
-## Inspect and control the session
-
-| Command | Meaning |
+| Command | Result |
 | --- | --- |
-| `:help` | Show session commands. |
-| `:stats [verbose]` | Show concise or detailed runtime statistics. |
-| `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Rebuild all loaded files together, expose this file's public names, and reset loaded native state. |
-| `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
-| `:ast plus` | Show `plus`'s typed x2c AST. |
-| `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
-| `:cancel` | Discard incomplete input. |
-| `:quit` | Exit, discarding incomplete input. |
+| `:help [COMMAND]` | Show commands or one command's arguments. |
+| `:symbols [PREFIX]` | List prompt and selected library declarations with signatures and origins. |
+| `:symbols --all [PREFIX]` | Include visible runtime and dependency names. |
+| `:symbols --kind KIND --file "PATH" [PREFIX]` | Filter by kind, source file, or both. |
+| `:info NAME_OR_EXPRESSION` | Show a declaration or an expression's type without evaluating it. |
+| `:members TYPE_OR_EXPRESSION` | Show fields, methods, and related C functions. |
+| `:source NAME` | Show the captured source definition or available header declaration. |
+| `:files` | Show loaded roots and native build settings. |
 
-For the example above, `:symbols` prints the list template
-`%((function "plus") (value "total"))`. Typed AST output begins with
-`typed: %(`; `:lowered plus` prints
-`compiled: native function; no Lisp body`. Inspection does not execute the
-function, and earlier functions remain inspectable after later submissions.
-Values have symbol entries but no function AST.
+For example, `:info point_move` includes parameter names and their types.
+`:members Point` lists its fields and related C functions. Related C
+functions retain their real names and calling syntax: discovering
+`point_move` does not create an invented `Point.move` method.
 
-`:symbols pl` lists only names beginning with `pl`. `:info plus` prints a
-declaration, `source: prompt`, and `execution: native`. For a loaded function,
-the source is the loaded file's resolved absolute path. Parameter names are
-omitted from the printed declaration; argument and return types remain.
-Tab completion for `:info` includes both prompt functions and loaded functions.
+Declared x2c methods accept their ordinary `Type.method` spelling in
+inspection. Tab completion offers relevant names in their grammar position,
+including fields and methods on a typed receiver. A second Tab lists grouped
+choices. Colon commands complete arguments, including file paths.
 
-Help and inspection commands preserve incomplete input, including when a
-command reports an error. Colon commands are recognized on separate lines
-even inside an incomplete string or comment. Missing names, extra arguments,
-and unknown commands report errors.
+Source lookup shows the source snapshot used to build the running code. An
+edit on disk does not change `:source` until a successful reload. A native
+library without implementation source shows its available header declaration
+and says that the definition is unavailable. Source lookup does not decompile
+binary code.
 
-`--dump` prints each available typed AST and lowered Lisp form to standard
-error. `--stats` prints the concise runtime report at exit, to standard error.
-`--verbose-stats` prints the detailed report and implies exit reporting; when
-both statistics options are present, one verbose report is printed. The
-options can be combined with `--dump`.
-
-The `x2c repl` driver enables allocation accounting before starting the command.
-When invoking `x2c-repl` directly, set `X2C_SCOPE_ACCOUNTING=1` before startup.
-
-The report separates absolute live or retained quantities from activity since
-the REPL opened. Scope allocation objects and live requested bytes are
-process-wide runtime values; requested bytes count public managed payload.
-Pool active and depot bytes partition retained backing capacity. Scope and
-Pool figures overlap and must not be summed. Verbose reports add Scope and
-Pool traffic and capacity details.
-
-## Load functions from a file
-
-Save this source as `numbers.x`:
-
-```x2c
-static int twice(int n) { return 2 * n; }
-static int calls = 0;
-int answer(int n) { calls++; return twice(n + 1); }
-int call_count(void) { return calls; }
-```
-
-Load it and call its functions with ordinary prompt expressions:
+## Inspect objects
 
 ```text
-x2c> :load "numbers.x"
-loaded ("answer" "call_count")
-reset all loaded native state
-x2c> answer(20);
-=> 42
-x2c> call_count();
-=> 1
-x2c> int plus_answer(int n) { return answer(n) + 1; }
-defined plus_answer
-x2c> plus_answer(20);
-=> 43
+:inspect *p
+:inspect --depth 5 --limit 200 *p
+:info p->x
 ```
 
-`:load` builds all loaded files into one native helper program. It uses the
-ordinary include, module, package, and native dependency handling.
-`--package-dir DIR` adds a package directory for every load, with the same
-meaning as for `x2c build` and `x2c run`. As for `x2c run`, build an
-imported package before loading a file that imports it.
-Public functions with bodies in the loaded file become prompt functions,
-including `main`. No `meta` annotation is needed. Static helpers such as
-`twice` remain private. Functions from included files and declaration-only
-functions remain available to the compiled code but are not imported into
-the prompt. Public type declarations accompany the loaded definitions.
-Enumerator constants are not imported. Source macros remain
-with the compiled source; loading does not install them in the prompt.
-
-Public scalar globals are also available without source changes. Reads and
-assignments use the same native storage as the file's functions:
-
-```x2c
-int counter = 10;
-const int limit = 100;
-static int private_counter;
-int read_counter(void) { return counter; }
-```
-
-After loading this file, `counter;` returns `10`. Entering `counter = 20;`
-makes `read_counter();` return `20`. Compound assignments and numeric prefix
-or postfix increments also work. Prompt functions can read and assign these
-globals, including functions saved before a reload. `limit` is read-only,
-and `private_counter` remains private. `:symbols` lists the public globals.
-
-Supported scalar values are numbers, booleans, enums, Strings, and Symbols,
-including typedef aliases. Enum values use the compiler's `int`
-representation. Fixed-size C arrays and structs also expose their scalar
-fields and elements, including nested arrays and structs:
-
-```x2c
-int samples[3] = {10, 20, 30};
-struct Point { int x; int y; };
-struct Point point = {1, 2};
-```
-
-After loading this file, `samples[1];` returns `20`. Assignments such as
-`samples[1] = 99;` and `point.x = 7;` change the file's native storage.
-Compound assignments and increments work too. Array indices are checked
-against the native array's extent and evaluated once per access. These
-operations also work inside compiled prompt functions.
-
-Enter `samples;` or `point;` to inspect the whole object. Arrays display as
-Arrays and structs as Maps keyed by field name. Inspection copies the data
-and visits at most 100 fields or elements, including nested containers;
-`"..."` marks truncated output. Unsupported fields display `"<unavailable>"`.
-Inspection is available for the final expression at the prompt. Native
-arrays and structs are not copied across the helper boundary as ordinary
-values. They can be passed to loaded functions inside the helper, as shown
-below. Assign fields and elements individually.
-
-Static globals stay private. Const objects and const fields are read-only.
-Raw pointers, unions, flexible array members, collections, `Var`, and
-callable globals do not gain accessors. Included globals become visible at
-the prompt when their defining file is explicitly loaded. A loaded object
-can supply a pointer or reference argument to a loaded function; its address
-stays inside the helper. Taking that address as a prompt value is unsupported.
-
-Compilation happens on `:load` and on each prompt function definition,
-including `plus_answer` above. Top-level input stays interpreted. Loading needs
-a matching x2c compiler, the host C compiler, and its runtime. A dependency
-that the project meta builder cannot compile or link makes the load fail.
-An explicit `meta` function remains callable under the same data limits.
-
-The session keeps one helper process and its compiled executable. Native
-globals and static values persist between calls. Each successful `:load`
-replaces the helper and resets all of those values, including when loading
-an additional file or an unchanged file. Prompt variables and functions
-survive. Calls exchange data values:
-numbers, Strings, Symbols, Lists, and independent Arrays and Maps. Arrays
-and Maps are copied across the boundary. Mutating a collection argument in
-the helper does not mutate the prompt's collection; return the changed
-collection to use it. Native pointers and records cannot be returned to the
-prompt. Prompt-owned native objects, callbacks, cycles, and shared mutable
-collection identity cannot cross this boundary. Selecting a loaded object
-as a function argument keeps that object inside the helper.
-
-A failed load publishes no names and preserves earlier functions. Fix a
-rejected file and load it again. Loaded names appear as `native` in
-`:symbols`; `:info` shows their declarations and loaded file. They have no
-prompt AST or lowered Lisp for inspection.
-
-### Use objects and functions from different files
-
-Save this as `objects.x`:
-
-```x2c
-struct Point { int x; int y; };
-int samples[3] = {10, 20, 30};
-struct Point point = {1, 2};
-int first(void) { return samples[0]; }
-```
-
-Save these declarations and functions as `operations.x`. The `extern`
-declaration and function prototype refer to definitions in `objects.x`:
-
-```x2c
-struct Point { int x; int y; };
-extern int samples[3];
-int first(void);
-
-int sum(const int *values, int count) {
-  int total = 0;
-  for (int i = 0; i < count; i++) total += values[i];
-  return total;
-}
-void shift(struct Point *p, int dx) { p->x += dx; }
-int score(struct Point p) { p.x += 100; return p.x + p.y; }
-int advance(void) { samples[0]++; return first(); }
-```
-
-Load both files in the same session, then use their objects and functions:
-
-```text
-:load "objects.x"
-:load "operations.x"
-sum(samples, 3);
-shift(&point, 5);
-point.x;
-score(point);
-point.x;
-advance();
-samples[0];
-```
-
-`sum` returns `60`. `shift` changes `point.x` to `6`. `score` returns `108`
-after changing its own by-value copy; `point.x` remains `6`. `advance`
-returns `11`, and `samples[0]` also reads `11`.
-
-The helper passes its own array and struct to these functions. No native
-address or struct bytes travel to the REPL process. Field and element
-selections also work, such as `sum(&samples[1], 2)`. Repeated selections
-of the same object alias that object. Const restrictions and array bounds
-remain checked. Scalar arguments and indices are evaluated once in source
-order. Compiled prompt functions can make these same calls.
-Call the loaded function by name for object arguments. Saved `Func` values
-retain their existing data-value calling limits.
-
-Use normal includes, prototypes, and `extern` declarations for references
-between source files. Larger programs usually keep common declarations in
-a header. A source dependency has one provider and one instance of its
-public storage. Loading that dependency explicitly exposes its public names
-without adding another instance. Distinct public definitions with the same
-name conflict; file-static declarations retain ordinary C privacy.
-
-### Load a program with main
-
-`:load` also accepts a program with `main`, including a `.c` file. The source
-needs no `meta` annotation or renamed function. Save this as `hello.c`:
-
-```x2c
-#include <stdio.h>
-int main(int argc, char *argv[]) {
-  for (int i = 0; i < argc; i++) printf("%d: %s\n", i, argv[i]);
-  return 0;
-}
-```
-
-Pass an Array of Strings, including the program name as its first element:
-
-```text
-x2c> :load "hello.c"
-loaded ("main")
-reset all loaded native state
-x2c> main(["hello", "world"]);
-0: hello
-1: world
-=> 0
-```
-
-The adapter supplies `argc`, writable copies of the argument strings, and
-the final null pointer at `argv[argc]`. `main([])` passes zero arguments.
-Changes to `argv` do not change the prompt's Array or Strings.
-`:info main` shows the prompt signature `int main(Array);`.
-
-A program with `int main(void)` or `int main()` is called as `main()`.
-Both forms return zero if execution reaches the closing brace. Returning
-from `main` produces a prompt result and leaves the REPL running. Standard
-output and standard error appear on their usual streams, including output
-without a final newline. Loading alone does not execute `main`.
-
-The original function keeps its native calling convention inside the
-compiled program. Its ordinary helpers and references to `main` continue
-to work. Loading does not modify the source file.
-Other C dialect and dependency limitations still apply; loading does not
-provide missing libraries. Calling `exit` ends the helper, as described
-below under interrupted calls.
-
-Reloading the same file follows the replacement rules of other loaded
-functions. Saved function values and compiled prompt callers use the new
-`main`. Changing that file's `main` between the no-argument and argc/argv
-forms requires a new session.
-
-Loading a different file that defines `main` replaces the file that defined
-it, so one session can run several programs. Save this as `goodbye.c`:
-
-```x2c
-#include <stdio.h>
-int main(void) { puts("goodbye"); return 0; }
-```
-
-Load it after `hello.c`:
-
-```text
-x2c> :load "goodbye.c"
-removed ("main") from /home/me/hello.c
-loaded ("main")
-reset all loaded native state
-x2c> main();
-goodbye
-=> 0
-```
-
-The new `main` may use either form. The earlier file leaves the session, and
-the output names it and every public name it removed: its functions and
-globals, and the types that no remaining file publishes. Removal follows the
-rule for [an edited file](#edit-a-loaded-file): if prompt code refers to one
-of those names, the load fails and names that referrer. Other loaded files
-and their globals stay registered, although the successful load resets their
-native state. Only `main` replaces a file; other duplicate public names still
-fail.
-
-### Edit a loaded file
-
-After editing a file, use the same `:load "file.x"` command. A successful
-replacement prints `reloaded`. Calls use the new code, including calls from
-earlier prompt functions. Saved `Func` values use the replacement for calls
-the REPL already supports. Prompt variables and functions remain. All
-registered files are rebuilt from their current contents and dependencies,
-including files other than the one named by the command. Successful loads
-print `reset all loaded native state`: variables in every loaded file and
-dependency start over. Previously returned values remain ordinary prompt
-data.
-
-Existing functions must keep their argument and return types. Parameter
-names may change. Existing public types must keep their definitions. New
-functions, globals, and types are allowed when their names do not
-conflict. Existing globals must keep their declared types and qualifiers,
-including `const`. Changing the type of a function, global, or type
-requires a new session.
-
-A file may remove a function, global, or type when no prompt definition
-refers to it. The load prints `removed ("helper") from` and the file's path.
-The name leaves `:symbols`, a later prompt reference reports an unresolved
-identifier, and a later version may define it again. A prompt function
-refers to the functions it calls, the globals it uses, and the types in its
-declarations. A prompt variable refers to its type and to a function it
-holds as a `Func`; a prompt type refers to the types of its fields. If
-prompt code refers to a removed name, the load fails and names the
-referrer, for example
-`load failed: helper is called by prompt function plus_helper` or
-`load failed: Pair is used by prompt variable kept`. A type that another
-loaded file also publishes stays.
-A refused replacement leaves the whole previous native program and its
-variables intact. This includes a compile, link, or compatibility failure
-in any loaded file, even when the command names a different file.
-Prompt definitions still cannot be redefined.
-
-Relative paths, absolute paths, and symbolic links to the same file identify
-one load. If two loaded files include the same dependency, either load
-rebuilds both files with the dependency's current contents.
-
-For example, copy the autodiff module from a repository checkout:
-
-```sh
-cp packages/autodiff/src/autodiff-macros.x /tmp/autodiff-repl.x
-./x2c repl
-```
-
-At the prompt, load and inspect the copy:
-
-```text
-:load "/tmp/autodiff-repl.x"
-:symbols ad_do
-:info ad_dot
-```
-
-The filtered list contains `ad_dot`. Its declaration is
-`String ad_dot(String);`, followed by the loaded file's absolute path.
-Keep some test data and a prompt function:
-
-```text
-x2c> String label = "loss";
-ok
-x2c> String derive(void) { return ad_dot(label); }
-defined derive
-x2c> derive();
-=> "loss_dot"
-```
-
-Edit the copy's `ad_dot` definition to append `"_derivative"` instead of
-`"_dot"`. Run `:load "/tmp/autodiff-repl.x"` again, then call `derive()`.
-The result is `"loss_derivative"`; the earlier `label` and `derive` still
-work. This module also exposes syntax helpers such as `ad_unbind` and
-`ad_mutates`, which can be called with List values from the prompt.
-
-A native call that exits, crashes, or exceeds `X2C_META_TIMEOUT` fails that
-submission. The next call restarts the shared helper from its retained
-executable, resetting all loaded native state. Ordinary errors raised by a
-function leave the helper and its state running.
-
-## Supported subset
-
-The current subset includes simple variables, function
-definitions, integer arithmetic and narrowing, assignment, conditionals,
-`for` loops, self recursion, and calls to earlier functions. String values
-and length, List literals and indexing, and Array construction, mutation,
-and indexing are exercised by the focused checks. Map and Array elements
-accept compound assignment and `++` and `--`, as in `m["t"] += 1`; the
-receiver and key are evaluated once. Captured `Func` values
-can be called directly or passed to supported native callbacks. A record
-captured by value retains a copy through later submissions.
-Reference captures share the original local or parameter, whose storage
-remains alive until the session ends. Capturing an existing reference parameter
-keeps its caller's alias and does not extend the caller object's lifetime.
-
-An expression lambda can return another captured lambda:
-
-```x2c
-Func factory = %!(int n) => %!() => n;
-Func nested = factory(3);
-nested();  // 3
-```
-
-A returned noncapturing lambda or named function needs a `(Func)` cast,
-as in native code.
-
-The REPL provides `String.format(String fmt, List @values)`. Pass separate
-arguments, or splice an existing List with `@values`:
-
-```x2c
-String text = "%s=%04d".format("answer", 42);
-List values = %("answer" 42);
-String same = "%s=%04d".format(@values);
-```
-
-It supports `%%`, flags `-+ #0`, numeric and `*` width and precision, integer
-conversions `d i o u x X` with `hh h l ll`, floating conversions
-`f F e E g G a A` with default, `l`, or `L`, plus `%c` and `%s`. It converts
-numeric `Var`s and uses `Var.str` for `%s`. Pointer and write-count
-conversions, wide strings and characters, positional formats, and `j z t`
-lengths are rejected. The result follows the process locale, and a failure
-publishes no partial String. Native `String.printf` retains its ordinary C
-varargs contract for compiled code.
-
-A session declares C's `printf` and `puts`, so example code that prints runs
-at the prompt:
-
-```text
-x2c> printf("%s=%04d\n", "answer", 42);
-answer=0042
-=> 12
-x2c> puts("done");
-done
-=> 5
-```
-
-Interpreted `printf` formats with `String.format` and the conversions above,
-and returns the number of bytes written. `puts` writes its String and one
-newline. Compiled prompt functions call the C library's own `printf` and
-`puts`.
-
-REPL sessions also provide `print(String)` and `println(String)`. `print`
-writes the String's bytes; `println` writes those bytes followed by one
-newline. Both are REPL-only, reserve their names in the session, and report
-`ok`. Compiled prompt functions can call them too.
-
-A session accepts C's `assert` and `NULL` without an include. An
-interpreted `assert` that fails stops the submission with an error naming
-its expression, such as `(assert (expression "n > 0"))`. Compiled prompt
-functions use C's own `assert` macro, which aborts the REPL process when it
-fails. A String or List compared with `NULL` follows the compiled
-comparison, which treats an empty String or List as equal to it.
-
-A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
-`Diff.unified` and `Path.basename` evaluate without an include.
-
-Redefinition is disabled; assign to an existing variable to change its value.
-Function replacement and mutually recursive forward declarations are not
-supported. Names beginning `__repl_` are reserved.
-
-Arbitrary C libraries, unions, enums, imports, protocols, user macro/meta
-definitions entered at the prompt, preprocessor directives, and direct Lisp
-input are outside this subset. A bodyless `meta`
-prototype is accepted: it makes a function the compiler links, or one from a
-[native module](meta-functions.md#native-modules) loaded with
-`--native-module`, callable in the session. A variable declared without
-an initializer starts at zero, as a C file-scope variable does, so
-`long q;` and `Var v;` are accepted. A destructuring declaration such as
-`Var (a, b) = pair;` reads its source once and publishes each target as a
-session value. Declarator modifiers, `const`, and `volatile` are rejected.
-Function-local `static`, `extern`, and `threaded` storage remain rejected.
-Top-level statement expressions can contain local declarations followed by
-one value expression, such as `({ int n=3; n+4; })`. Other statement
-expression bodies are declined.
-Reference parameters use the ordinary compiler conversion: pass an
-addressable value, or write `*p` to pass a pointer's object. A pointer itself
-cannot substitute for the referenced object.
-Records, typedefs, addressed locals and pointer reads/writes use native
-storage with layouts derived from compiler types. Record assignment copies
-into existing storage, preserving pointers to its fields. A session
-global scalar or record keeps its address until the session closes. Other
-top-level constructs depend on the existing lowering and may be declined.
-Native function bodies use ordinary compiler semantics; for example, `goto`
-is available there. Loaded public types can be used in prompt functions
-within the same native layout limits as interpreted objects. Interpreted
-code does not distinguish `Var void` from an empty List.
-
-## Failure and lifetime
-
-Rejected submissions leave earlier definitions usable. A declaration
-publishes its names only after all initializers succeed. If a later
-initializer fails, none of that declaration's names become available,
-including through inspection. Effects already made on existing values
-remain, both for failed initialization and failed statements.
-
-Session storage lives until exit. Submission scratch is reclaimed, but
-canonical syntax, compiler caches, and evaluator allocations can accumulate.
-Long sessions do not have a bounded-memory guarantee. Compiled modules stay
-loaded for the process lifetime; captured bindings belong to their session.
-Each submission may make 40 million interpreted Lisp calls, the evaluator's
-default budget. SIGINT (Ctrl-C) during evaluation stops the submission with an
-`(interrupt ...)` evaluation error. Once the budget is exhausted or the
-submission is interrupted, no further interpreted code runs, including pending
-`defer` bodies. Ordinary evaluation failures still run those cleanups. The
-next submission gets a fresh budget. An interrupt cannot stop native callbacks
-or compiled prompt functions; it takes effect at the next interpreted call.
-Compiled function loops do not consume the Lisp budget. Their native crashes
-or nonterminating loops can end or block the REPL process. Loaded files share
-a helper process separate from the REPL, with the timeout behavior described
-above.
-
-EOF exits successfully unless input is incomplete, which exits with status
-1. With piped input, any submission or command error makes the final status
-1, while later input still runs. In an interactive session, recovered errors
-do not change a normal exit's status from 0.
-
-During interactive editing, Ctrl-C clears both the current edit buffer and any
-pending incomplete submission, then returns to the `x2c> ` prompt without a
-diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
-still makes that exit status 1. Terminal canonical mode is restored before a
-submission runs. Ctrl-C during interpreted evaluation stops only that
-submission.
-Terminals without the required escape-sequence support use the basic line
-reader instead. Piped input retains the same output and exit behavior.
+`:inspect` evaluates its expression once. The default view displays at most
+100 entries and descends three levels. Truncation is marked. Select a field
+or element directly, or increase the explicit limits to see more.
+
+Structs display named fields, arrays display their extents and indexed
+contents, and ordinary x2c value types keep their readable representations.
+Prompt objects, loaded globals, and returned records use the same display
+policy.
+
+Pointers display their type, nullness, and address. Inspection never follows
+a raw pointer automatically. Write `:inspect *p` or `:inspect p[2]` when you
+want that native read. A raw `char *` remains a pointer too; use an explicit
+String conversion or a library length/query operation to inspect text.
+
+Unions display their type and member choices. Select a member explicitly to
+read it; the REPL does not guess which member is active. Automatic traversal
+skips volatile fields and labels them. Explicit expressions preserve ordinary
+volatile semantics. Bitfields use native field access.
+
+`:info`, `:members`, and `:source` do not run the inspected expression.
+`:inspect` can have the expression's ordinary effects. A bad native pointer
+read can terminate the worker, just as a bad library call can.
+
+## Load and repeat
+
+| Command | Result |
+| --- | --- |
+| `:load "PATH" ...` | Build a candidate program with these source/header roots. |
+| `:reload` | Rebuild the current roots from current source files. |
+| `:reset` | Start fresh from the last successful program and its declaration snapshot. |
+| `:save "PATH"` | Save successful source submissions, load/reset boundaries, and launch settings. |
+| `:replay "PATH"` | Start fresh and explicitly rerun a saved transcript, stopping at the first failure. |
+
+Every successful load or reload clears **all prompt and library state**.
+This includes loading an additional file or an unchanged file. The REPL
+announces the reset. A failed build, link, or candidate initialization keeps
+the previous session. Ctrl-C during candidate preparation cancels the
+candidate and preserves the active session.
+
+`:reset` uses the exact retained program and declarations. Editing a source
+or header does not change that snapshot. An explicitly linked shared library
+that changed on disk requires `:reload` before a new worker can use it.
+
+Prompt variables can be assigned new values. Duplicate prompt definitions
+remain rejected. To change a function or type, reset or reload and rerun the
+needed submissions. No native object, saved callback, or apparent address
+survives a session replacement.
+
+Saved `.repl` files contain source instructions and their original path base,
+not serialized heap objects. Replay uses current source dependencies and has
+normal side effects. It is always explicit. The terminal never replays calls
+automatically after a load, crash, or interruption. A failed submission can
+leave partial mutations or external effects that a successful-input script
+cannot reproduce.
+
+## Lifetimes and cleanup
+
+The top-level prompt is one session scope. Persistent variables and direct
+top-level `defer` registrations live until orderly quit, reset, or successful
+replacement. Cleanup runs in reverse registration order. Function calls and
+explicit blocks retain their ordinary automatic lifetimes.
+
+The distinction between managed declarations and managed initializers remains:
+
+- `auto T x = ...` cleans `x`'s current value at scope exit.
+- `T x = auto acquire()` saves and cleans the acquired value despite a later
+  reassignment of `x`.
+- `defer release(x)` reads `x` when cleanup runs.
+
+Raw C pointers do not acquire a destructor from their names or types. Release
+library allocations with the library's documented operation. Escaping a
+pointer to an expired automatic object remains an ordinary C lifetime error.
+A forced stop or native crash cannot guarantee cleanup or undo external
+effects.
+
+## Editing and failures
+
+Arrow keys, Home, End, Backspace, Delete, and history recall work at an
+interactive prompt. Bracketed paste and recalled multiline source remain one
+editable entry. History keeps the latest 100 nonempty entries and suppresses
+adjacent duplicates. Interactive history persists under
+`$XDG_STATE_HOME/x2c/repl-history`, or
+`$HOME/.local/state/x2c/repl-history` when that variable is unset.
+
+Ctrl-C while editing clears the current edit and pending incomplete source.
+Ctrl-D exits from an empty edit. `:cancel` discards incomplete input.
+
+During native execution, Ctrl-C terminates the worker and its active job
+process group. The terminal announces lost state and starts a fresh worker
+from the last successful program. Native exit, assertion failure, and crashes
+follow the same recovery rule. There is no short default timeout for ordinary
+library calls. A hanging cleanup can also be stopped explicitly.
+
+Native standard output and standard error retain their usual streams.
+Interactive native standard input uses the terminal while a call runs. With
+piped REPL source, native standard input gets EOF; it cannot consume later
+source submissions.
+
+Syntax, type, and link errors publish no new definitions. A failed
+initializer publishes none of its declaration's new names. Mutations already
+made to older objects and external effects remain. An ordinary caught x2c
+Error can return control to the existing worker.
+
+With piped input, any command or submission error makes the final exit status
+1, while later input continues. Interactive recovered errors do not change a
+normal exit status. Incomplete input at EOF exits with status 1.
+
+## Execution details
+
+`:ast NAME` shows a prompt definition's typed AST. `:lowered NAME` explains
+that submissions execute natively. `--dump` prints typed submission syntax;
+`--stats` and `--verbose-stats` print worker allocation statistics at exit.
+`:stats [verbose]` reports those statistics during a session.
+
+The worker needs the matching x2c compiler, runtime, and configured host C
+toolchain. New executable submissions incur native compilation work; cached
+artifacts avoid compiling identical code again. Earlier submissions and their
+initializers are not rerun to compile the next expression. Native modules may
+remain loaded until the worker retires, so reset provides a reclamation
+boundary.
+
+Use source/header roots for includes, package imports, and user-authored
+macro/meta/protocol surfaces. Live configuration-changing directives and
+incremental definitions of those surfaces are outside this first playground
+scope. The ordinary compiler and host C dialect still determine which native
+libraries and calling conventions the selected toolchain supports.

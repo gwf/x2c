@@ -79,6 +79,8 @@ typedef ReplInputCompletion (*ReplInputComplete)(
 #include <unistd.h>
 
 #include "file.x"
+#include "path.x"
+#include "datum.x"
 #include "scope/scope.x"
 #include "string/string.x"
 
@@ -1155,12 +1157,12 @@ static void _replace_completion(
 }
 
 static String _completion_spelling(Var candidate) {
-  match (candidate) case %(? ?(String spelling)): return spelling;
+  match (candidate) case %(? ?(String spelling) *): return spelling;
   return NULL;
 }
 
 static Symbol _completion_kind(Var candidate) {
-  match (candidate) case %(?(Symbol kind) ?): return kind;
+  match (candidate) case %(?(Symbol kind) ? *): return kind;
   return 0;
 }
 
@@ -1184,6 +1186,8 @@ static int _show_completion_group(
   foreach (Var row, candidates) {
     if (_completion_kind(row) != kind) continue;
     String spelling = _completion_spelling(row);
+    List entry = row;
+    if (entry.len() > 2 && entry.caddr() is <string>) spelling = entry.caddr();
     size_t width = _display_width(spelling, spelling.len());
     if (!found) {
       _write_bytes(l.input.ofd, heading, heading.len());
@@ -1478,6 +1482,44 @@ void ReplInput.remember(ReplInput r, String text) {
     r.history_len--;
   }
   r.history[r.history_len++] = copy;
+}
+
+static Path _history_path(void) {
+  const char *state = getenv("XDG_STATE_HOME");
+  if (state && *state) return %"$state/x2c/repl-history";
+  const char *home = getenv("HOME");
+  return home && *home ? %"$home/.local/state/x2c/repl-history" : NULL;
+}
+
+/** Recalls the previous process's bounded editing history when available. */
+void ReplInput.load_history(ReplInput input) {
+  Path path = _history_path();
+  if (!path || !path.is_file()) return;
+  try {
+    String text = path.read_text();
+    unsigned cursor = 0;
+    Var saved = void;
+    if (text.read_datum(cursor, saved) && saved is <list>)
+      foreach (Var item, saved.list())
+        if (item is <string>) input.remember(item);
+  }
+  catch %((!or io-fail incomplete malformed) *): {}
+}
+
+/** Persists editable source text; no native session value is recorded. */
+void ReplInput.save_history(ReplInput input) {
+  Path path = _history_path();
+  if (!path) return;
+  Array entries = auto [];
+  for (int i = 0; i < input.history_len; i++)
+    entries.push(String.new(input.history[i]));
+  try {
+    path.dirname().make_dirs();
+    Path temporary = %"$path.$((long) getpid())";
+    temporary.write_text(entries.list().repr() + "\n");
+    if (rename(temporary, path)) temporary.remove_file();
+  }
+  catch %(io-fail *): {}
 }
 
 /** Restores the terminal and releases editor-owned history storage. */

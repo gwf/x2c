@@ -1,43 +1,36 @@
 # REPL command
 
-`x2c repl` dispatches to the shipped `x2c-repl` executable. The
-[REPL guide](../../docs/src/guide/repl.md) describes input, commands,
-supported language subset, and limitations.
+`x2c repl` runs a native library playground. The
+[REPL guide](../../docs/src/guide/repl.md) describes its commands, object
+workflow, restart policy, and lifetime rules.
 
-`main.x` owns options and compiler identity. `repl.x` owns terminal output;
-`repl-input.x` owns editing and history. `repl-session.x` provides submissions,
-completion, diagnostics, and inspection without terminal interaction.
-`repl-load.x` builds an independent project meta helper for each loaded file,
-publishes its public function and type declarations, and bridges calls
-through the helper's existing data protocol. Each load retains its executable
-across cache rebuilds. Source collection indexes refresh between loads;
-previously published declarations keep their storage. A repeated load of
-the same resolved path checks existing declarations before replacing its
-helper. Call adapters borrow the file's persistent record, so saved functions
-follow the replacement. `:info` uses compiler declaration formatting;
-`:symbols` optionally filters names by prefix.
-`repl-native.x` compiles prompt functions through session native staging.
-Each function captures shared variable addresses and stable callable handles;
-loaded calls therefore continue through the file's existing reload adapter.
-`repl-native-types.x` reconstructs required loaded type declarations from
-the compiler's canonical symbols. `repl-lower.x` lowers top-level typed
-compiler ASTs to ordinary Lisp; `repl-runtime.x` and its Lisp source provide
-interpreter storage and value operations.
-These command services link against `libx2c-dev.a` for compiler parsing,
-binding, typing, semantic transactions, and completion.
+`main.x` reads REPL reporting options and delegates native build options to
+the ordinary `CliRequest` parser. `repl.x` owns the terminal, command dispatch,
+load/reset/replay state, and saved transcripts. `repl-input.x` owns editing,
+completion display, and persistent text history.
 
-Each `ReplSession` owns its evaluator, lowering counters, and layout cache.
-Call `session.close()` before closing its borrowed compiler unit and after
-finishing all retained results. Native callable values can be borrowed from
-the compiler's bindings; submission globals occupy session-owned native
-storage shared by the evaluator and compiled prompt functions.
-The session closes its loaded helpers before its compiler unit closes.
-Native compiler meta execution and linked built-ins keep their existing
-owners. Shared Lisp evaluation and compiled Match remain in
-`lib/`; the Lisp wordcode engine and AUTO tier remain removed.
+`repl-worker.x` owns the native worker lifecycle and dedicated datum-framed
+control pipes. Only requests, descriptions, diagnostics, completion data,
+and formatted results cross those pipes. Worker standard output and errors
+remain ordinary streams. An interactive worker receives standard input
+through a private terminal while the supervisor relays input; piped source
+uses native EOF. This keeps Ctrl-C under the supervisor's control without
+passing native addresses between processes.
 
-After building the command, run `sh commands/repl/tests/run.sh` for its
-direct API and executable transcript checks. They exercise failure rollback,
-retained results, completion, inspection, source loading and replacement,
-and session teardown. The replacement tests also load and edit a temporary
-copy of the autodiff module.
+A candidate worker builds or restores a program, opens the compiler session,
+and publishes its retained artifact description only when initialization
+succeeds. The supervisor then retires the previous worker. Failed or canceled
+candidate work preserves the current session. Reset and crash recovery restore
+the last successful program description without replaying submitted code.
+
+The session service owns native compilation, typed objects, source snapshots,
+and cleanup. Program loading and exploration use their corresponding command
+modules. These services use the existing compiler frontend, native backend,
+toolchain, and cache rather than an alternate interpreter or foreign object
+protocol.
+
+Run `sh commands/repl/tests/run.sh` after building the command. The complete
+workflow must cover source loading, a header plus native archive, object
+creation and calls, typed inspection, callbacks, failure recovery, and
+snapshot/replay behavior. Focused terminal tests exercise process behavior
+without requiring a desktop handoff.
