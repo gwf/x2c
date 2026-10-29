@@ -172,9 +172,9 @@ static Var String_var(String);
 
 static Var int_var(int);
 
-Iter String_code_points(String text, Iter dest){
+Iter String_code_points(String s, Iter dest){
   if(! _init_guard_) _file_init_();
-  return Iter_init(dest, String_var(text), _next_point, int_var(0));
+  return Iter_init(dest, String_var(s), _next_point, int_var(0));
 }
 
 String String_join(String, List);
@@ -344,12 +344,12 @@ Block String_base64url_decode_bytes(String text){
   return _unbase64(_URL, text, _5);
 }
 
-String String_hex_encode(String text){
-  return _hex((const unsigned char *) text, String_len(text));
+String String_hex_encode(String s){
+  return _hex((const unsigned char *) s, String_len(s));
 }
 
-String Block_hex_encode(Block bytes){
-  return _hex(bytes -> bytes, Block_len(bytes) * bytes -> width);
+String Block_hex_encode(Block b){
+  return _hex(b -> bytes, Block_len(b) * b -> width);
 }
 
 String String_hex_decode(String text){
@@ -391,7 +391,7 @@ Block String_hex_decode_bytes(String text){
 
 Buffer Buffer_printf(Buffer, const char *, ...);
 
-String String_percent_encode(String text){
+String String_percent_encode(String s){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_4 = out;
   {
@@ -406,7 +406,7 @@ String String_percent_encode(String text){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
-      for(const unsigned char * at =(const unsigned char *) text;  at && * at;  at ++){
+      for(const unsigned char * at =(const unsigned char *) s;  at && * at;  at ++){
         if(_unreserved(* at)) Buffer_write_char(out, * at);
         else Buffer_printf(out, "%%%02X", * at);
       }

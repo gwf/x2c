@@ -13,7 +13,7 @@ int String_code_point_count(String text);
 
 int String_try_next_code_point(String text, int * cursor, int * point);
 
-Iter String_code_points(String text, Iter dest);
+Iter String_code_points(String s, Iter dest);
 
 Buffer Buffer_write_code_point(Buffer out, int point);
 
@@ -35,15 +35,15 @@ String String_base64url_decode(String text);
 
 Block String_base64url_decode_bytes(String text);
 
-String String_hex_encode(String text);
+String String_hex_encode(String s);
 
-String Block_hex_encode(Block bytes);
+String Block_hex_encode(Block b);
 
 String String_hex_decode(String text);
 
 Block String_hex_decode_bytes(String text);
 
-String String_percent_encode(String text);
+String String_percent_encode(String s);
 
 String String_percent_decode(String text);
 
