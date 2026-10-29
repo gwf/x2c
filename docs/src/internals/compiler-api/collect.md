@@ -21,6 +21,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.configure_interfaces`](#Compiler.configure_interfaces) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`Compiler.configure_package`](#Compiler.configure_package) | Selects a source file's own package, as its standalone translation does. |
 | [`Compiler.declared_adoptions`](#Compiler.declared_adoptions) | Returns the `(adopt ...)` rows that the current file's collected entry declares, in no particular order. |
+| [`Compiler.discover_module_source`](#Compiler.discover_module_source) | Discovers a module after preparing included macros only if its preprocessing needs them. |
 | [`Compiler.forget_provisional_entries`](#Compiler.forget_provisional_entries) | Drops the entries a meta build collected without declaration defaults or with placeholders for its meta calls. |
 | [`Compiler.include_function_declarations`](#Compiler.include_function_declarations) | Adds the public functions an included unit itself declares. |
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
@@ -166,6 +167,16 @@ declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
 Source: `src/collect/declarations.x`
+
+<a id="Compiler.discover_module_source"></a>
+#### Compiler.discover_module_source
+
+`ModuleSource Compiler.discover_module_source( Compiler c, String path, String text, Tokenizer &?plain)`
+
+Discovers a module after preparing included macros only if its
+preprocessing needs them. Ordinary collection owns its own include walk.
+
+Source: `src/collect/splice.x`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
