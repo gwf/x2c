@@ -235,6 +235,16 @@ void Json.write_file(Var value, Path path) => path.write_text(value.json());
 */
 String Var.json(Var value) => _json(value, 0);
 
+/** Appends JSON to a borrowed output Buffer without interning the result.
+    `pretty` selects the same layout as `Var.pretty_json`. Failure can leave
+    partial output; the caller owns its rollback policy.
+    Raises: the same causes as `Var.json`.
+*/
+void x2c_json_write(Buffer out, Var value, int pretty) {
+  Writer w = {.out = out, .pretty = pretty};
+  _write_value(w, value, 0);
+}
+
 /** Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. */
 meta native JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 
@@ -496,8 +506,7 @@ static void _write_code_point(Buffer out, long point) {
 
 static String _json(Var value, int pretty) {
   Buffer out = auto Buffer.new(0);
-  Writer w = {.out = out, .pretty = pretty};
-  _write_value(w, value, 0);
+  x2c_json_write(out, value, pretty);
   return out;
 }
 
