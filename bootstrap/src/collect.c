@@ -3301,7 +3301,6 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
   List parts = Var_list_payload(Var_is(prefix, 3313778) ? List_var(Array_list(Var_array(prefix))) : List_car(entry));
   Map initial = sink ? f4_walk____initial_macros(c, path, runtime) : NULL;
   Cpp cpp = sink ? Cpp_new(Map_copy(initial)) : NULL;
-  if(cpp) Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
   {
     Var part;
     List _x2c_gensym_macro_object_24 = parts;
@@ -3311,15 +3310,21 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
       part = _x2c_gensym_macro_cursor_output_21;
       {
         if(Var_is(part, 26720) && ! cpp) _replay_package_imports(c, globs, Var_map_payload(part), exports);
-        else if(Var_is_row(part, 11, 7, 1) &&(! cpp || ! Cpp_hidden(cpp))) f4_walk____replay_included(c, globs, Var_as_string(part), visited, exports, active, cpp, runtime);
+        else if(Var_is_row(part, 11, 7, 1) &&(! cpp || ! Cpp_hidden(cpp))){
+          if(cpp) Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
+          f4_walk____replay_included(c, globs, Var_as_string(part), visited, exports, active, cpp, runtime);
+        }
         else if(cpp && Var_is_row(part, 9, 7, 4)) f4_walk____replay_cpp(c, cpp, Var_list_payload(part));
-        if(cpp &&(Var_is_row(part, 11, 7, 1) || Var_is_row(part, 9, 7, 4))) Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
       }
 
     }
 
   }
-  if(cpp) Cpp_merge(sink, Var_list_payload(Map_getindex(visited, String_var(path))));
+  if(cpp){
+    Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
+    Cpp_merge(sink, Var_list_payload(Map_getindex(visited, String_var(path))));
+  }
+
 }
 
 static List f4_walk____syntax_effects(List entry){
