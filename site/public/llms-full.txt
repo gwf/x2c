@@ -7025,9 +7025,9 @@ its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
-programs. The command is experimental and available in checkout builds;
-`make install` does not install it. With no operands, it searches below the
-nearest `x2c.toml`, or the current directory. Discovery selects
+programs. Normal compiler installations include the command, as do checkout
+builds. With no operands, it searches below the nearest `x2c.toml`, or the
+current directory. Discovery selects
 `*_test.x`, `test_*.x`, and `.x` files inside `tests/`, excluding
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
