@@ -40,6 +40,17 @@ static void http_parser(void) {
   EXPECT_TRUE(HttpRequest.read(old_tokens, 100).keep_alive);
   File both = auto _input("GET / HTTP/1.1\r\nHost: x\r\nConnection: keep-alive, close\r\n\r\n");
   EXPECT_FALSE(HttpRequest.read(both, 100).keep_alive);
+  File reversed = auto _input("GET / HTTP/1.0\r\nConnection: , ClOsE , KEEP-ALIVE,\r\n\r\n");
+  EXPECT_FALSE(HttpRequest.read(reversed, 100).keep_alive);
+  File exact = auto _input("GET /plain+path?q=a+b HTTP/1.1\r\nHost: x\r\n"
+    "Connection: xclose, \tkeep-alive\t,\r\n\r\n");
+  HttpRequest plain = HttpRequest.read(exact, 100);
+  EXPECT_STR_EQ(plain.path, "/plain+path");
+  EXPECT_STR_EQ(plain.query["q"].str(), "a b");
+  EXPECT_TRUE(plain.keep_alive);
+  EXPECT_TRUE(plain.body == NULL);
+  EXPECT_TRUE(plain.params != NULL);
+  EXPECT_TRUE(plain.query != NULL);
 }
 
 static void http_parser_rejections(void) {
@@ -50,6 +61,9 @@ static void http_parser_rejections(void) {
   EXPECT_INT_EQ(_rejected("GET / HTTP/1.1\r\nHost: x\r\nBad Name: x\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("BAD / HTTP/1.1\r\nHost: x\r\n\r\n", 100), 405);
   EXPECT_INT_EQ(_rejected("GET /%xx HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
+  EXPECT_INT_EQ(_rejected("GET /plain%00 HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
+  EXPECT_INT_EQ(_rejected("GET /plain%0d HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
+  EXPECT_INT_EQ(_rejected("GET /plain% HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n", 100), 411);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: 101\r\n\r\n", 100), 413);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: -1\r\n\r\n", 100), 400);
@@ -120,6 +134,39 @@ static void http_router_and_response(void) {
   res.bytes(binary);
   EXPECT_INT_EQ(res.body.len(), 3);
   EXPECT_INT_EQ(((char *) res.body.content.bytes)[1], 0);
+}
+
+static void http_route_captures_and_json_failure(void) {
+  $test.scoped();
+  Router routes = Router.new();
+  routes.get("/a/:discard/no", %!(HttpRequest req, HttpResponse res) => res.text("wrong"));
+  routes.post("/a/:wrong", %!(HttpRequest req, HttpResponse res) => res.text("wrong"));
+  routes.get("/a/:id", %!(HttpRequest req, HttpResponse res) => res.json(req.params));
+  routes.get("/files/*rest", %!(HttpRequest req, HttpResponse res) => res.json(req.params));
+  File file = auto _input("GET /a/value HTTP/1.1\r\nHost: x\r\n\r\n");
+  HttpRequest req = HttpRequest.read(file, 100);
+  Map previous = req.params;
+  HttpResponse res = HttpResponse.new();
+  routes.dispatch(req, res);
+  EXPECT_STR_EQ(res.body.str(), "{\"id\":\"value\"}");
+  EXPECT_INT_EQ(previous.len(), 0);
+  EXPECT_TRUE(previous != req.params);
+  EXPECT_INT_EQ(req.params.len(), 1);
+  req.path = "/files/";
+  routes.dispatch(req, res);
+  EXPECT_STR_EQ(req.params["rest"].str(), "");
+
+  res.text("previous body");
+  int failed = 0;
+  try res.json([1, Stdout]);
+  catch %(bad-types *): failed = 1;
+  EXPECT_TRUE(failed);
+  EXPECT_INT_EQ(res.body.len(), 0);
+  EXPECT_STR_EQ(res.headers["content-type"].str(), "text/plain; charset=utf-8");
+  Var value = {"z": [Json.bool(1), "quote\"\n"], "a": {"nested": 2}};
+  res.json(value);
+  EXPECT_STR_EQ(res.body.str(), value.json());
+  EXPECT_STR_EQ(res.headers["content-type"].str(), "application/json");
 }
 
 static String _response(Socket client, int &code) {
@@ -211,5 +258,6 @@ void http_suite(void) {
   $test.run(http_parser_rejections);
   $test.run(http_nul_framing);
   $test.run(http_router_and_response);
+  $test.run(http_route_captures_and_json_failure);
   $test.run(http_loopback);
 }
