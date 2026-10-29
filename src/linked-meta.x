@@ -233,12 +233,11 @@ List _derive_row(Type type, List value) {
 
 List _derive_from_row(Type type, List value, List row) {
   Array statements = [];
-  int index = 0;
   foreach (List field in _derive_fields(type, <row>)) {
     List name = x2c_ident(field.car());
-    List read = _derive_read(field.cadr(), field.caddr(), $!( $row[$index] ));
+    List read = _derive_read(field.cadr(), field.caddr(), $!( $row.car() ));
     statements.push($!{ $value.$name = $read; });
-    index++;
+    statements.push($!{ $row = $row.cdr(); });
   }
   return statements.list_free();
 }
