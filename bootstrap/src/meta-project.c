@@ -83,7 +83,7 @@ static int _package(Scan * s, Tokenizer tokens);
 
 static int _include(Scan * s, String directive, String directory);
 
-static String _module_text(Scan * s, String path, String text);
+static String _module_text(Scan * s, String path, String text, Tokenizer * tokens);
 
 static int _marker(Token token);
 
@@ -773,11 +773,14 @@ static int _file(Scan * s, String path){
   String text = NULL;
   if(! SourceView_read((* s).request -> sources, path, &(text))) return 0;
   Compiler_prepare_macro_exports((* s).c, path);
-  text = _module_text(&((* s)), path, text);
-  Tokenizer tokens = Tokenizer_new(text, 3945159);
-  tokens -> layout = Path_is_layout_source(path);
-  Tokenizer_scan(tokens);
-  _preprocess(&((* s)), path, tokens);
+  Tokenizer tokens = NULL;
+  text = _module_text(&((* s)), path, text, &(tokens));
+  if(! tokens){
+    tokens = Tokenizer_new(text, 3945159);
+    tokens -> layout = Path_is_layout_source(path);
+    Tokenizer_scan(tokens);
+    _preprocess(&((* s)), path, tokens);
+  }
   int meta = _file_scope(&((* s)), tokens, Path_dirname(path));
   if((meta & 1) && _compiler_owns(path) &&(Compiler_is_prelude_source(path) || Compiler_linked_meta_definitions_current((* s).c, path))) meta &= ~ 1;
   Map_setindex((* s).seen, String_var(path), int_var(meta));
@@ -941,9 +944,9 @@ static int _include(Scan * s, String directive, String directory){
   return ! ! meta;
 }
 
-ModuleSource Compiler_module_source(Compiler, String, String);
+ModuleSource Compiler_module_source(Compiler, String, String, Tokenizer *);
 
-static String _module_text(Scan * s, String path, String text){
+static String _module_text(Scan * s, String path, String text, Tokenizer * tokens){
   Compiler c =(* s).c;
   ModuleSource volatile module = NULL;
   DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);
@@ -978,7 +981,7 @@ static String _module_text(Scan * s, String path, String text){
             }
             volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
             x2c_exception_push(& _x2c_gensym_exception_frame_1);
-            if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) module = Compiler_module_source(c, path, text);
+            if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) module = Compiler_module_source(c, path, text, &((* tokens)));
             else{
               x2c_exception_landed(& _x2c_gensym_exception_frame_1);
               if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
@@ -1075,7 +1078,7 @@ static List _group_flags(CliRequest request, Map packages){
     Var _x2c_gensym_macro_cursor_output_10;
     while(Map_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_9), &(_x2c_gensym_macro_cursor_output_10))){
       root = Var_as_string(_x2c_gensym_macro_cursor_output_9);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-project.x",.function = "_group_flags",.line = 368}; & _x2c_gensym_error_site_2; })));
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-project.x",.function = "_group_flags",.line = 372}; & _x2c_gensym_error_site_2; })));
       flags =({
         List _x2c_gensym_literal_part_5 = flags;  Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_22), NULL))));  Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_23), NULL))));  List_append(_x2c_gensym_literal_part_5, cons(String_var(_24), cons(_x2c_gensym_literal_part_6, cons(String_var(_24), cons(_x2c_gensym_literal_part_7, NULL)))));
       }
@@ -1107,7 +1110,7 @@ static void _package_native(Helper * h){
     Var _x2c_gensym_macro_cursor_output_13;
     while(Map_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_12), &(_x2c_gensym_macro_cursor_output_13))){
       root = Var_as_string(_x2c_gensym_macro_cursor_output_12);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_13, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/meta-project.x",.function = "_package_native",.line = 379}; & _x2c_gensym_error_site_3; })));
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_13, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/meta-project.x",.function = "_package_native",.line = 383}; & _x2c_gensym_error_site_3; })));
       {
         String name = Path_basename(root);
         String response = String_join(NULL, cons(String_var(root), cons(String_var(_26), cons(String_var(name), cons(String_var(_27), NULL)))));
@@ -1161,7 +1164,7 @@ static Array _modules(CliRequest request, Map packages){
     Var _x2c_gensym_macro_cursor_output_15;
     while(Map_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_14), &(_x2c_gensym_macro_cursor_output_14), &(_x2c_gensym_macro_cursor_output_15))){
       root = Var_as_string(_x2c_gensym_macro_cursor_output_14);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_15, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-project.x",.function = "_modules",.line = 414}; & _x2c_gensym_error_site_4; })));
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_15, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-project.x",.function = "_modules",.line = 418}; & _x2c_gensym_error_site_4; })));
       {
         String name = Path_basename(root);
         String module = String_join(NULL, cons(String_var(root), cons(String_var(_26), cons(String_var(name), cons(String_var(_36), NULL)))));
@@ -1368,7 +1371,7 @@ static int _package_source(Helper * h, String path){
     Var _x2c_gensym_macro_cursor_output_20;
     while(Map_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_20), &(_x2c_gensym_macro_cursor_output_19), &(_x2c_gensym_macro_cursor_output_20))){
       root = Var_as_string(_x2c_gensym_macro_cursor_output_19);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-project.x",.function = "_package_source",.line = 479}; & _x2c_gensym_error_site_5; })));
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-project.x",.function = "_package_source",.line = 483}; & _x2c_gensym_error_site_5; })));
       if(Compiler_is_package_source(Path_resolved_absolute(root), path)) return 1;
     }
 
@@ -1451,7 +1454,7 @@ static List _loaded_provider(Helper * h, String path, int index){
             Var _x2c_gensym_macro_cursor_output_23;
             while(Map_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_22), &(_x2c_gensym_macro_cursor_output_23))){
               root = Var_as_string(_x2c_gensym_macro_cursor_output_22);
-              _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_23, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/meta-project.x",.function = "_loaded_provider",.line = 497}; & _x2c_gensym_error_site_6; })));
+              _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_23, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/meta-project.x",.function = "_loaded_provider",.line = 501}; & _x2c_gensym_error_site_6; })));
               f -> request -> package_dirs = List_append(f -> request -> package_dirs, cons(String_var(Path_dirname(root)), NULL));
             }
 
@@ -1593,7 +1596,7 @@ static void _parse(Helper * h, String path, int index){
                   Var _x2c_gensym_macro_cursor_output_26;
                   while(Map_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_25), &(_x2c_gensym_macro_cursor_output_25), &(_x2c_gensym_macro_cursor_output_26))){
                     root = Var_as_string(_x2c_gensym_macro_cursor_output_25);
-                    _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/meta-project.x",.function = "_parse",.line = 537}; & _x2c_gensym_error_site_7; })));
+                    _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/meta-project.x",.function = "_parse",.line = 541}; & _x2c_gensym_error_site_7; })));
                     f -> request -> package_dirs = List_append(f -> request -> package_dirs, cons(String_var(Path_dirname(root)), NULL));
                   }
 
@@ -1915,7 +1918,7 @@ static String _tables(Array built, int count){
     int _x2c_gensym_macro_cursor_31 = 0;
     Var _x2c_gensym_macro_cursor_output_33;
     while(Array_try_next(_x2c_gensym_macro_object_31, &(_x2c_gensym_macro_cursor_31), &(_x2c_gensym_macro_cursor_output_33))){
-      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_33, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 743}; & _x2c_gensym_error_site_8; })));
+      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_33, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 747}; & _x2c_gensym_error_site_8; })));
       Buffer_printf(out, "Map x2c_module_targets_%d(void);\n", index);
     }
 
@@ -1927,7 +1930,7 @@ static String _tables(Array built, int count){
     int _x2c_gensym_macro_cursor_32 = 0;
     Var _x2c_gensym_macro_cursor_output_34;
     while(Array_try_next(_x2c_gensym_macro_object_32, &(_x2c_gensym_macro_cursor_32), &(_x2c_gensym_macro_cursor_output_34))){
-      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_34, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 746}; & _x2c_gensym_error_site_9; })));
+      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_34, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 750}; & _x2c_gensym_error_site_9; })));
       Buffer_printf(out, "    case %d: return x2c_module_targets_%d();\n", index, index);
     }
 
@@ -2009,7 +2012,7 @@ static List _digests(Map paths){
     Var _x2c_gensym_macro_cursor_output_36;
     while(Map_try_next(_x2c_gensym_macro_object_33, &(_x2c_gensym_macro_cursor_33), &(_x2c_gensym_macro_cursor_output_35), &(_x2c_gensym_macro_cursor_output_36))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_35);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_36, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/meta-project.x",.function = "_digests",.line = 800}; & _x2c_gensym_error_site_10; })));
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_36, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/meta-project.x",.function = "_digests",.line = 804}; & _x2c_gensym_error_site_10; })));
       {
         String digest = _digest(path);
         if(String_truth(digest)) Array_push(rows, List_var(cons(String_var(path), cons(String_var(digest), NULL))));

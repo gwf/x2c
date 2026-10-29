@@ -654,7 +654,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   {
     ExceptionFrame _x2c_gensym_exception_frame_5;
     x2c_exception_push(& _x2c_gensym_exception_frame_5);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_5.env, 0)) c -> unit_source = Compiler_module_source(c, c -> filename, text);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_5.env, 0)) c -> unit_source = Compiler_module_source(c, c -> filename, text, NULL);
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_5);
       {

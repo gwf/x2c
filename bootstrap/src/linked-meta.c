@@ -17971,7 +17971,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _14914 = List_var(_14913);
   _14915 = String_new("src/collect/splice.x");
   _14916 = String_var(_14915);
-  _14917 = String_new("0849b300");
+  _14917 = String_new("64ab4866");
   _14918 = String_var(_14917);
   _14919 = cons(_14918, NULL);
   _14920 = cons(_14916, _14919);
@@ -17982,7 +17982,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _14925 = List_var(_14924);
   _14926 = String_new("src/collect/walk.x");
   _14927 = String_var(_14926);
-  _14928 = String_new("3596581a");
+  _14928 = String_new("cbb2e4d4");
   _14929 = String_var(_14928);
   _14930 = cons(_14929, NULL);
   _14931 = cons(_14927, _14930);

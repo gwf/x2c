@@ -146,7 +146,7 @@ typedef struct f6_splice___Splice{
 }
 f6_splice___Splice;
 
-static int f6_splice____file(f6_splice___Splice * s, String path, String text, String prefix, String file_prefix);
+static int f6_splice____file(f6_splice___Splice * s, String path, String text, String prefix, String file_prefix, Tokenizer * plain);
 
 static void f6_splice____member(f6_splice___Splice * s, String spelling, Token site);
 
@@ -1519,8 +1519,9 @@ String Path_stem(Path);
 
 Path Path_basename(Path);
 
-ModuleSource Compiler_module_source(Compiler c, String path, String text){
+ModuleSource Compiler_module_source(Compiler c, String path, String text, Tokenizer * plain){
   if(! _init_guard_) _file_init_();
+  if(plain)(* plain) = NULL;
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
@@ -1542,7 +1543,7 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text){
       Map_setindex(s.splicing, String_var(Path_absolute(path)), int_var(1));
       String own = f6_splice____file_prefix(Path_stem(path));
       Map_setindex(s.prefixes, String_var(own), String_var(Path_basename(path)));
-      if(! f6_splice____file(&(s), path, text, NULL, own)){
+      if(! f6_splice____file(&(s), path, text, NULL, own, plain)){
         ModuleSource _x2c_gensym_return_value_2 = NULL;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
@@ -1570,7 +1571,7 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text){
 
 }
 
-static int f6_splice____file(f6_splice___Splice * s, String path, String text, String prefix, String file_prefix){
+static int f6_splice____file(f6_splice___Splice * s, String path, String text, String prefix, String file_prefix, Tokenizer * plain){
   {
     String * _x2c_gensym_macro_address_0 = &(* s).path;
     String _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
@@ -1696,6 +1697,7 @@ static int f6_splice____file(f6_splice___Splice * s, String path, String text, S
                                               Token block = f6_splice____block(&((* s)), &(tokens)), close = NULL;
                                               if(! block){
                                                 f6_splice____own(&((* s)), 0, String_len(text), 1);
+                                                if(plain)(* plain) = tokens;
                                                 {
                                                   int _x2c_gensym_return_value_4 = 0;
                                                   {
@@ -1815,7 +1817,7 @@ static void f6_splice____member(f6_splice___Splice * s, String spelling, Token s
   ), site, _22);
   Map_setindex((* s).prefixes, String_var(own), String_var(spelling));
   Map_setindex((* s).splicing, String_var(resolved), int_var(1));
-  f6_splice____file(&((* s)), path, text, Path_dirname(prefix), own);
+  f6_splice____file(&((* s)), path, text, Path_dirname(prefix), own, NULL);
   Map_del((* s).splicing, String_var(resolved));
   f6_splice____end_line(&((* s)));
 }
@@ -2826,7 +2828,7 @@ static List _walk_cold(Compiler c, String target, String canonical, Map globs, M
 }
 
 static void _walk_apart(Compiler c, String path, String text, Map globs, Map visited){
-  ModuleSource module = Compiler_module_source(c, path, text);
+  ModuleSource module = Compiler_module_source(c, path, text, NULL);
   {
     Map * _x2c_gensym_macro_address_18 = & c -> names -> counters;
     Map _x2c_gensym_macro_previous_18 = * _x2c_gensym_macro_address_18;
