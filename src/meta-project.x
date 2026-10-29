@@ -229,14 +229,7 @@ static int _file(Scan &s, String path) {
     return 0;
   String text = NULL;
   if (!s.request.sources.read(path, text)) return 0;
-  Tokenizer tokens = NULL;
-  text = _module_text(s, path, text, tokens);
-  if (!tokens) {
-    tokens = Tokenizer.new(text, <x2c>);
-    tokens.layout = Path.is_layout_source(path);
-    tokens.scan();
-    _preprocess(s, path, tokens);
-  }
+  Tokenizer tokens = _tokens(s, path, text);
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
       (Compiler.is_prelude_source(path) ||
@@ -245,12 +238,30 @@ static int _file(Scan &s, String path) {
   return meta;
 }
 
-/* Discover the same declarations that parsing sees. Signature lookahead
-   makes included macro exports available without running project meta code. */
+/* A module's second preprocessing pass still needs the discovery exports.
+   Only the parts Map ends here; the returned tokens keep their caller's
+   Scope, as do any module markers and members. */
+static Tokenizer _tokens(Scan &s, String path, String text) {
+  Map parts = auto {};
+  with (s.c.macro_export_parts = parts) {
+    Tokenizer tokens = NULL;
+    text = _module_text(s, path, text, tokens);
+    if (tokens) return tokens;
+    tokens = Tokenizer.new(text, <x2c>);
+    tokens.layout = Path.is_layout_source(path);
+    tokens.scan();
+    _preprocess(s, path, tokens);
+    return tokens;
+  }
+}
+
+/* Discover the same declarations that parsing sees. CPP-only lookahead
+   supplies included macros without running project meta code. */
 static void _preprocess(Scan &s, String path, Tokenizer tokens) {
   Compiler c = Compiler.new_shared(s.c);
   defer s.c.close_child(c);
   c.filename = path;
+  c.macro_export_source = path;
   c.tokenizer = tokens;
   c.text = tokens.text;
   DiagnosticsHold hold = c.diagnostics.hold();

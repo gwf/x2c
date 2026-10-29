@@ -50,7 +50,10 @@ ModuleSource Compiler.module_source(
 */
 ModuleSource Compiler.discover_module_source(
   Compiler c, String path, String text, Tokenizer &?plain) {
-  with (c.macro_export_source = path) {
+  Map parts = auto (c.macro_export_parts == NULL ? Map.new() : NULL);
+  with (c.macro_export_source = path,
+        c.macro_export_parts = parts != NULL ? parts
+                                           : c.macro_export_parts) {
     return c.module_source(path, text, plain);
   }
 }
