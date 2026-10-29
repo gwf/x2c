@@ -37,6 +37,7 @@ copy_runtime_sources() {
 mkdir -p "$BUILD/src"
 cat >"$BUILD/src/bar.x" <<'EOF'
 typedef List Foo;
+#define CACHE_SCALE 3
 EOF
 cat >"$BUILD/src/hdr.x" <<'EOF'
 typedef String Foo;
@@ -49,6 +50,7 @@ typedef struct CacheDelegateOwner {
 Self CacheSelfBase.rest(Self value);
 int CacheDelegatePart.read(CacheDelegatePart value);
 #include "bar.x"
+#define CACHE_SCALED(x) ((x) * CACHE_SCALE)
 EOF
 cat >"$BUILD/src/anon.x" <<'EOF'
 typedef struct { int first; } AnonFirst;
@@ -80,6 +82,7 @@ int probe_delegate(CacheDelegateOwner value) {
 String probe_self(CacheSelfLeaf value) {
   return value.rest().only();
 }
+int probe_macro(int value) { return CACHE_SCALED(value); }
 EOF
 cp "$BUILD/src/unit.x" "$BUILD/src/twin.x"
 
@@ -210,6 +213,9 @@ grep -q 'struct "CacheDelegateOwner" delegate "part"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing delegate field metadata"
 grep -q '"src/bar.x"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing its include placeholder"
+grep -q '("CACHE_SCALED" (function "CACHE_SCALED" ("x")' \
+  "$FAKE/warm/hdr.xi" ||
+  fail "interface is missing the macros its file exports"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir warm src/unit.x)
 cmp -s "$FAKE/cold/unit.c" "$FAKE/warm/unit.c" ||
   fail "interface replay diverged from cold compile"
@@ -221,6 +227,8 @@ grep -q "CacheSelfLeaf_only(CacheSelfBase_rest(value))" \
 grep -q "CacheDelegatePart_read(value.part)" \
   "$FAKE/cold/unit.c" ||
   fail "interface replay lost delegate field lookup"
+grep -q 'return((value) \* 3);' "$FAKE/cold/unit.c" ||
+  fail "an included file's macros did not expand in the includer"
 
 sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/hdr.xi" >"$FAKE/tampered/hdr.xi"
 sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/bar.xi" >"$FAKE/tampered/bar.xi"
