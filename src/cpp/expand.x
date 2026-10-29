@@ -35,7 +35,9 @@ static macro Stmt $fail.cpp_paste_edge(Expr $c, Expr $site, Expr $note) =>
    name of the use being expanded and `next` the index of the input token
    after the ones it has consumed; a directive among its arguments sets
    `retreat`, which leaves the use to the C compiler. `bodies` holds each
-   replacement list's tokens, and `rows` the tokenizer's expansion rows. */
+   replacement list's tokens, and `rows` the tokenizer's expansion rows.
+   `stack` and `sink` are reused between top-level uses; argument rescans
+   have independent buffers. */
 static typedef struct Expander {
   Compiler c, Cpp cpp;
   Token in, site;
@@ -43,18 +45,21 @@ static typedef struct Expander {
   Bytes out;
   Map bodies;
   Array rows;
+  Block stack, sink;
   int retreat;
 } Expander;
 
-/* One substitution of `definition`'s replacement list. `args` holds each
-   argument's tokens as a Block, and `expanded` the fully expanded ones
-   already computed, by parameter index. */
+/* One argument's written tokens and its lazily expanded copy. */
+static typedef struct CppArgument {
+  Block written, expanded;
+} CppArgument;
+
+/* One substitution of `definition`'s replacement list. `args` holds one
+   CppArgument per parameter, fixed before substitution begins. */
 static typedef struct Substitution {
   List definition, params;
   int function, variadic;
-  Array args;
-  Map expanded;
-  Block out;
+  Block args, out;
 } Substitution;
 
 // the pass
@@ -74,6 +79,8 @@ void Compiler.expand_macros(Compiler c) {
   c.arm_stacks = {};
   Expander x = {
     .c = c, .cpp = cpp, .in = c.tokenizer.tokens, .bodies = {}};
+  defer x.stack.free();
+  defer x.sink.free();
   size_t i = 0;
   for (; (x.in + i).type != <eof>; i++) {
     Token token = x.in + i;
@@ -125,19 +132,23 @@ static int _input_paren(Expander &x, size_t i) {
 /* Expands the use whose name is input token `i` and returns the index of
    its last input token. */
 static size_t _expand_use(Expander &x, size_t i) {
-  Block stack = auto Block.new(sizeof(CppToken));
-  Block sink = auto Block.new(sizeof(CppToken));
+  if (x.stack == NULL) {
+    x.stack = Block.new(sizeof(CppToken));
+    x.sink = Block.new(sizeof(CppToken));
+  }
+  x.stack.clear();
+  x.sink.clear();
   x.site = x.in + i;
   x.next = i + 1;
   x.retreat = 0;
   CppToken name = {.token = *x.site};
-  stack.push(&name);
-  _rescan(x, stack, sink, 1);
+  x.stack.push(&name);
+  _rescan(x, x.stack, x.sink, 1);
   if (x.retreat) {
     _keep(x, x.site);
     return i;
   }
-  _place(x, sink, i);
+  _place(x, x.sink, i);
   return x.next - 1;
 }
 
@@ -197,6 +208,7 @@ static void _rescan(Expander &x, Block stack, Block sink, int input) {
         _push_all(stack, replacement);
       }
       else space = item.space;
+      replacement.free();
     }
   }
 }
@@ -223,7 +235,7 @@ static Block _call(
   Expander &x, Block stack, int input, CppToken &name, List definition) {
   CppToken open, close;
   (void) _pull(x, stack, input, open);
-  Array args = [];
+  Block args = Block.new(sizeof(CppArgument));
   if (!_arguments(x, stack, input, definition, args, close)) return NULL;
   _check_arity(x, definition, args);
   List hide = cons(name.token.text, _meet(name.hide, close.hide));
@@ -256,22 +268,23 @@ static int _pull(Expander &x, Block stack, int input, CppToken &item) {
    not separate arguments, because x2c writes Array and Map literals in
    brackets and braces, and the variadic argument keeps its commas. */
 static int _arguments(
-  Expander &x, Block stack, int input, List definition, Array args,
+  Expander &x, Block stack, int input, List definition, Block args,
   CppToken &close) {
   List params = definition[2];
   int last = definition[3] ? params.len() - 1 : -1;
   Block arg = Block.new(sizeof(CppToken));
-  Array closers = auto [];
+  Array closers = NULL;
+  defer closers.free();
   CppToken item;
   while (_pull(x, stack, input, item)) {
     Symbol type = item.token.type;
     if (!closers.len() && type == <)>) {
       close = item;
-      args.push(arg);
+      _add_argument(args, arg);
       return 1;
     }
     if (!closers.len() && type == <,> && (int) args.len() != last) {
-      args.push(arg);
+      _add_argument(args, arg);
       arg = Block.new(sizeof(CppToken));
       continue;
     }
@@ -284,28 +297,43 @@ static int _arguments(
   return 0;
 }
 
-static void _track_group(Array closers, Symbol type) {
+static void _add_argument(Block args, Block tokens) {
+  CppArgument arg = {.written = tokens};
+  args.push(&arg);
+}
+
+static CppArgument *_argument_at(Block args, int param) =>
+  &((CppArgument *) args.bytes)[param];
+
+static void _track_group(Array &closers, Symbol type) {
+  Symbol close;
   switch (type) {
     case <(>: case <"%(">: case <"$(">: case <"@(">: case <"?(">:
-      closers.push(<)>);
+      close = <)>;
       break;
-    case <"[">: case <"%[">: closers.push(<"]">); break;
-    case <"{">: case <"%{">: case <"${">: closers.push(<"}">); break;
-    case <)>: case <"]">: case <"}">:
+    case <"[">: case <"%[">:
+      close = <"]">;
+      break;
+    case <"{">: case <"%{">: case <"${">:
+      close = <"}">;
+      break;
+    default:
       if (closers.len() && closers[-1] == type) closers.take_last();
-      break;
+      return;
   }
+  if (closers == NULL) closers = [];
+  closers.push(close);
 }
 
 /* A variadic macro may omit its variadic argument, and a macro without
    parameters takes one empty argument. */
-static void _check_arity(Expander &x, List definition, Array args) {
+static void _check_arity(Expander &x, List definition, Block args) {
   List params = definition[2];
   int count = params.len(), given = args.len();
-  Block first = args[0];
+  Block first = _argument_at(args, 0).written;
   if (!count && given == 1 && !first.len()) return;
   if (definition[3] && given == count - 1) {
-    args.push(Block.new(sizeof(CppToken)));
+    _add_argument(args, Block.new(sizeof(CppToken)));
     return;
   }
   if (given != count)
@@ -319,7 +347,7 @@ static void _check_arity(Expander &x, List definition, Array args) {
 /* The replacement list with the arguments substituted, each token's hide
    set extended by `hide`. */
 static Block _substitute(
-  Expander &x, List definition, Array args, List hide) {
+  Expander &x, List definition, Block args, List hide) {
   Substitution s = {
     .definition = definition, .args = args,
     .out = Block.new(sizeof(CppToken))};
@@ -327,10 +355,10 @@ static Block _substitute(
     s.function = 1;
     s.params = definition[2];
     s.variadic = definition[3];
-    s.expanded = {};
   }
-  Token body = _body_tokens(x, definition);
-  _replace(x, s, body, _end(body));
+  Block body = _body_tokens(x, definition);
+  Token first = body.bytes;
+  _replace(x, s, first, first + body.len() - 1);
   return _finish(s.out, hide);
 }
 
@@ -374,7 +402,7 @@ static Token _copied(Substitution &s, Token token) {
    elsewhere its argument fully expanded. */
 static Token _argument(
   Expander &x, Substitution &s, int param, int pasted, Token next) {
-  Block arg = s.args[param];
+  Block arg = _argument_at(s.args, param).written;
   if (pasted) _push_raw(s, arg);
   else _push_block(s.out, _expanded(x, s, param));
   return next;
@@ -391,11 +419,9 @@ static void _push_placemarker(Block out) {
 }
 
 static Block _expanded(Expander &x, Substitution &s, int param) {
-  Var cached;
-  if (s.expanded.try_get(param, cached)) return cached;
-  Block expanded = _expand_alone(x, s.args[param]);
-  s.expanded[param] = expanded;
-  return expanded;
+  CppArgument *arg = _argument_at(s.args, param);
+  if (arg.expanded == NULL) arg.expanded = _expand_alone(x, arg.written);
+  return arg.expanded;
 }
 
 /* `#` makes a string literal of an argument as written, its blanks
@@ -403,7 +429,7 @@ static Block _expanded(Expander &x, Substitution &s, int param) {
    character literal, which x2c may scan as several tokens, so each one is
    escaped wherever it stands. */
 static Token _stringized(Substitution &s, Token param) {
-  Block arg = s.args[_param(s, param)];
+  Block arg = _argument_at(s.args, _param(s, param)).written;
   CppToken *items = arg.bytes;
   Array parts = ["\""];
   for (size_t i = 0; i < arg.len(); i++) {
@@ -423,18 +449,20 @@ static Token _stringized(Substitution &s, Token param) {
    both unjoined, and an empty variadic argument removes the comma. */
 static Token _pasted(Expander &x, Substitution &s, Token next, Token end) {
   int param = _param(s, next);
-  Block right = Block.new(sizeof(CppToken));
+  Block right = param >= 0 ? _argument_at(s.args, param).written
+                          : Block.new(sizeof(CppToken));
   CppToken operand = {.token = *next}, left;
   Token after = next + 1;
-  if (param >= 0) right = s.args[param];
-  else if (s.variadic && next.text == "__VA_OPT__" &&
-           Token.skip_trivia(next + 1).type == <(>) {
-    with (s.out = right) { after = _va_opt(x, s, next, end); }
-    if (right.len() == 1 &&
-        ((CppToken *) right.bytes)[0].token.type == <empty>)
-      right.clear();
+  if (param < 0) {
+    if (s.variadic && next.text == "__VA_OPT__" &&
+        Token.skip_trivia(next + 1).type == <(>) {
+      with (s.out = right) { after = _va_opt(x, s, next, end); }
+      if (right.len() == 1 &&
+          ((CppToken *) right.bytes)[0].token.type == <empty>)
+        right.clear();
+    }
+    else right.push(&operand);
   }
-  else right.push(&operand);
   if (!s.out.try_pop(&left))
     $fail.cpp_paste_edge(x.c, x.site, _definition_note(s.definition));
   CppToken *items = right.bytes;
@@ -492,21 +520,29 @@ static int _param(Substitution &s, Token token) {
 
 /* Drops the placemarkers and extends each token's hide set. */
 static Block _finish(Block out, List hide) {
-  Block done = Block.new(sizeof(CppToken));
   CppToken *items = out.bytes;
+  size_t kept = 0;
   for (size_t i = 0; i < out.len(); i++) {
     CppToken item = items[i];
     if (item.token.type == <empty>) continue;
     item.hide = _union(item.hide, hide);
-    done.push(&item);
+    items[kept++] = item;
   }
-  return done;
+  out.truncate(kept);
+  return out;
 }
 
 /* The tokens of a fully expanded argument, which takes nothing after it. */
 static Block _expand_alone(Expander &x, Block tokens) {
-  Block stack = Block.new(sizeof(CppToken));
   Block sink = Block.new(sizeof(CppToken));
+  CppToken *items = tokens.bytes;
+  size_t count = tokens.len();
+  if (!count || (count == 1 && !_definition(x, items[0]))) {
+    // Keep written and expanded arguments independent even without a rescan.
+    _push_block(sink, tokens);
+    return sink;
+  }
+  Block stack = auto Block.new(sizeof(CppToken));
   _push_all(stack, tokens);
   _rescan(x, stack, sink, 0);
   return sink;
@@ -516,19 +552,16 @@ static Block _expand_alone(Expander &x, Block tokens) {
 
 /* A replacement list's tokens, ending in `eof`, with each `#` and `##`
    operator one token. */
-static Token _body_tokens(Expander &x, List definition) {
+static Block _body_tokens(Expander &x, List definition) {
   String body = definition.car() == <object> ? definition[2] : definition[4];
   Var cached;
-  if (x.bodies.try_get(body, cached)) {
-    Block tokens = cached;
-    return tokens.bytes;
-  }
+  if (x.bodies.try_get(body, cached)) return cached;
   Block tokens = Block.new(sizeof(struct Token));
   _scan_body(tokens, body);
   struct Token end = {.type = <eof>, .text = ""};
   tokens.push(&end);
   x.bodies[body] = tokens;
-  return tokens.bytes;
+  return tokens;
 }
 
 /* The x2c tokenizer reads `#` as the start of a directive running to the
@@ -549,19 +582,13 @@ static void _scan_body(Block tokens, String text) {
   }
 }
 
-static Token _end(Token token) {
-  while (token.type != <eof>) token++;
-  return token;
-}
-
 // tokens and hide sets
 
 static CppToken _made(Symbol type, String text) =>
   (CppToken) {.token = {.type = type, .text = text, .len = text.len()}};
 
 static void _push_block(Block out, Block tokens) {
-  CppToken *items = tokens.bytes;
-  for (size_t i = 0; i < tokens.len(); i++) out.push(&items[i]);
+  out.append(tokens.bytes, tokens.len());
 }
 
 /* Pushes `tokens` so that the first is on top. */
@@ -571,11 +598,13 @@ static void _push_all(Block stack, Block tokens) {
 }
 
 static List _union(List set, List names) {
+  if (!set) return names;
   foreach (String name in names) if (!(name in set)) set = cons(name, set);
   return set;
 }
 
 static List _meet(List set, List names) {
+  if (!set || !names) return NULL;
   Array kept = [];
   foreach (String name in set) if (name in names) kept.push(name);
   return kept.list_free();
