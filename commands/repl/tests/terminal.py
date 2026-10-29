@@ -176,6 +176,24 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
                 (callback.stdout, callback.stderr))
     print("prompt callback environments survive native exit hooks", flush=True)
 
+    for cleanup in ("defer terminal_hang();", "atexit(terminal_hang);"):
+        stopping = subprocess.Popen([str(BINARY)], stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    env=environment, cwd=ROOT)
+        try:
+            stopping.stdin.write((load + cleanup + "\n:quit\n").encode())
+            stopping.stdin.flush()
+            before = pipe_until(stopping, b"native waiting\n")
+            stopping.send_signal(signal.SIGINT)
+            after, errors = stopping.communicate(timeout=TIMEOUT)
+            require(stopping.returncode == 0,
+                    ((before + after).decode(), errors.decode()))
+        finally:
+            if stopping.poll() is None:
+                stopping.kill()
+                stopping.wait()
+    print("hanging session cleanup and native exit hooks remain forceable", flush=True)
+
     preserved = run(load + "int kept = 17;\nterminal_counter = 99;\n" +
                     f':load "{bad}"\n' +
                     "kept;\nterminal_counter;\nterminal_answer();\n",
