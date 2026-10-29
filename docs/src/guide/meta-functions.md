@@ -712,7 +712,9 @@ The helper is kept under the cache directory (`$X2C_CACHE_DIR`,
 source paths, the compiler, the C compiler, and the flags, including `-D`
 and `-U`. It is built again when any file its build read changes, x2c
 source or C header; a change to program code alone recompiles the groups
-but keeps the helper when no group object changes. The
+but keeps the helper when no group object changes. A build that failed
+reports the same failure until such a file changes, unless the C compiler
+stopped at a header it could not find; that build runs again each time. The
 shipped meta code of the compiler's own source modules and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
 REPL evaluates its supported submissions through Lisp. It accepts bodyless
