@@ -611,9 +611,14 @@ ReplResult ReplSession.inspect_expression(
   }
 }
 
+/** Runs top-level cleanup while preserving storage for native exit hooks. */
+void ReplSession.run_cleanups(ReplSession session) {
+  auto (&session.storage) _discard_cleanups(session, 0);
+}
+
 /** Runs session cleanups before reclaiming persistent native storage. */
 void ReplSession.close(ReplSession session) {
-  auto (&session.storage) _discard_cleanups(session, 0);
+  session.run_cleanups();
   session.storage.destroy();
   session.storage = NULL;
   session.declarations.free();

@@ -218,3 +218,21 @@ int callback_data(int (*call)(int,void *),void *data) { return call(4,data); }
         finally:
             repl.close()
         print("host SQLite open-prepare-step-read-finalize-close passed", flush=True)
+
+    diagnostics = subprocess.run(
+        [str(BINARY)], input="1 +;\nint available=3;\navailable;\n",
+        text=True, capture_output=True, cwd=ROOT, timeout=TIMEOUT)
+    require(diagnostics.returncode == 1 and "<repl>:1:4" in diagnostics.stderr
+            and "1 +;" in diagnostics.stderr and "=> int 3" in diagnostics.stdout,
+            (diagnostics.stdout, diagnostics.stderr))
+    multiline = subprocess.run(
+        [str(BINARY)], input="int sum(int x) {\nreturn x+2;\n}\nsum(3);\n",
+        text=True, capture_output=True, cwd=ROOT, timeout=TIMEOUT)
+    require(multiline.returncode == 0 and "=> int 5" in multiline.stdout,
+            (multiline.stdout, multiline.stderr))
+    bad_option = subprocess.run([str(BINARY), "--no-such-option"],
+                                input="", text=True, capture_output=True,
+                                cwd=ROOT, timeout=TIMEOUT)
+    require(bad_option.returncode != 0 and "--no-such-option" in bad_option.stderr,
+            (bad_option.stdout, bad_option.stderr))
+    print("diagnostics, continuation and option errors passed", flush=True)

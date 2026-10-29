@@ -123,7 +123,7 @@ policy.
 Pointers display their type, nullness, and address. Inspection never follows
 a raw pointer automatically. Write `:inspect *p` or `:inspect p[2]` when you
 want that native read. A raw `char *` remains a pointer too; use an explicit
-String conversion or a library length/query operation to inspect text.
+`String.new(p)` or a library length/query operation to inspect text.
 
 Unions display their type and member choices. Select a member explicitly to
 read it; the REPL does not guess which member is active. Automatic traversal
