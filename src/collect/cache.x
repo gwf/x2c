@@ -6,9 +6,10 @@
 // the process cache
 
 /* Process cache: canonical path ->
-   `(ordered-parts hash definitions dependencies include-roots)`.
+   `(ordered-parts hash definitions dependencies include-roots macros)`.
    A part is a declaration Map or an included source path. Dependencies
-   map macro and embedded-text paths to a content hash or 1. Entries
+   map macro and embedded-text paths to a content hash or 1, and `macros`
+   holds the C macro rows the file exports. Entries
    outlive per-unit scopes, so every retained key and value belongs to
    process_cache_scope. */
 static Map process_cache = NULL;

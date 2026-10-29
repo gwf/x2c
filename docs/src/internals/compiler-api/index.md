@@ -57,6 +57,7 @@ Functions and types exposed by each compiler module.
 | [`src/components/raise.x`](raise.md) | raise. |
 | [`src/components/string-switch.x`](string-switch.md) | switches on a String. |
 | [`src/components/try-catch.x`](try-catch.md) | try, catch, and finally. |
+| [`src/cpp/cpp.x`](cpp.md) | the C preprocessing x2c performs before parsing. |
 | [`src/emit/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
 | [`src/expressions/expressions.x`](expressions.md) | expression syntax and its resolution. |
 | [`src/generate/generate.x`](generate.md) | the generated header and source of one unit. |

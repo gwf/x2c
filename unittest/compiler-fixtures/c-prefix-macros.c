@@ -37,11 +37,11 @@ static inline int tripled(int value){
   return value * 3;
 }
 
-int weak_value = 5;
+__attribute__((weak)) int weak_value = 5;
 
 static int quintupled(int value);
 
-const static int bound = 6;
+static const int bound = 6;
 
 struct text{
   char * body;
@@ -56,7 +56,7 @@ static void hidden(void){
   printf("hidden\n");
 }
 
-signed int doubled(signed int value){
+int doubled(int value){
   return value * 2;
 }
 
@@ -64,7 +64,7 @@ static int quintupled(int value){
   return value * 5;
 }
 
-const char * label(void){
+__attribute__((visibility("default"))) const char * label(void){
   return "label";
 }
 

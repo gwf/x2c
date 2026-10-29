@@ -2,12 +2,23 @@
 
 // tokenizing
 
-/** Scans source and positions the compiler at its first non-trivia token.
+/** Scans and preprocesses source and positions the compiler at its first
+    non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
     translation finishes.
 */
 void Compiler.tokenize(Compiler c, char *text) {
+  c.scan_source(text);
+  c.preprocess_tokens();
+}
+
+/** Scans source without preprocessing it and positions the compiler at its
+    first non-trivia token. `Compiler.preprocess_tokens` must run before
+    the parser reads the tokens. The compiler borrows `text` as
+    `Compiler.tokenize` does.
+*/
+void Compiler.scan_source(Compiler c, char *text) {
   if (_is_script_file(c)) c.script = c.unit_script;
   c.input_boundary = NULL;
   c.text = text;
@@ -16,10 +27,19 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
   _report_malformed_token(c);
+  c.token = Token.skip_trivia(c.tokenizer.tokens);
+  c.braces.clear();
+}
+
+/** Expands the visible macros of the scanned tokens, hides the conditional
+    arms C never takes, and positions the compiler at the first non-trivia
+    token. An expansion error is reported at the macro use.
+*/
+void Compiler.preprocess_tokens(Compiler c) {
+  c.expand_macros();
   c.scan_conditionals();
   _retag_keywords(c.tokenizer);
   c.token = Token.skip_trivia(c.tokenizer.tokens);
-  c.braces.clear();
 }
 
 // token navigation

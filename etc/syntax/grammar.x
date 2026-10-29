@@ -164,7 +164,19 @@ List syntax_grammar(void) => %(grammar
         (ref aggregate)
         (ref enumeration)
         (ref type-reference)
+        (ref typeof-specifier)
         (ref type-slot)))
+
+    (rule typeof-specifier
+      (seq
+        (choice
+          (token "typeof")
+          (token "typeof_unqual")
+          (token "__typeof__")
+          (token "__typeof"))
+        (token "(")
+        (choice (ref type-name) (ref expression))
+        (token ")")))
 
     (rule scalar-specifiers
       (seq (ref scalar-word) (repeat 0 (ref scalar-word))))

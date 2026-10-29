@@ -17,12 +17,14 @@ static const char syntax_marker[] = "_x2c.syntax.prelude";
 // file walks
 
 /* One cold walk of a file. Each segment of the text ends before an include,
-   and `line` and `pos` locate the current segment's
-   first token. `deferred` marks an entry collected without its declaration
+   and `line` and `pos` locate the current segment's first token and `start`
+   the preprocessor state there. `macros` holds the macro rows the file
+   exports. `deferred` marks an entry collected without its declaration
    defaults. A module's walk reads its spliced text. */
 module typedef struct FileWalk {
   Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
   Array parts, Map definitions, dependencies, statics, hashes;
+  Cpp start, List macros;
   int unit, linkage, line, pos, deferred;
 } FileWalk;
 
@@ -192,6 +194,37 @@ void Compiler.install_included_effects(Compiler c) {
   }
 }
 
+/** Returns the `(name value)` macro rows that the file an `#include` of
+    `target` from the directory `dir` names exports, or NULL when x2c does
+    not read that file or has not collected it.
+*/
+List Compiler.included_macros(
+  Compiler c, String target, int angle, String dir) {
+  String path = c.sources.resolve_include(c.include_dirs, dir, target, angle);
+  List entry = path ? _entry(c, _canonical_path(path)) : NULL;
+  return entry ? entry[5] : NULL;
+}
+
+/** Returns the macro table visible before the first line of the file
+    `path`: the macros the runtime defines, for a file outside `lib/`, and
+    then those of the `-D` and `-U` options, for a file outside the runtime
+    and the compiler's prelude, whose collection the options do not change.
+    A NULL `path` sees neither.
+*/
+Map Compiler.initial_macros(Compiler c, String path) {
+  if (!path) return {};
+  String canonical = _canonical_path(path);
+  Map macros = {};
+  if (!_inside(canonical, _canonical_lib())) {
+    String runtime = %"$(x2c_get_root())/lib/x2c.x";
+    List entry = _entry(c, _canonical_path(runtime));
+    if (entry) macros = Cpp.table(entry[5]);
+  }
+  if (!_runtime_source(canonical))
+    macros.merge(Cpp.table(c.command_macros));
+  return macros;
+}
+
 /** The file the include of `target` from `includer_dir` names, searched as
     collection searches `dirs`, or NULL.
 */
@@ -319,26 +352,35 @@ static void _walk_file(
   }
 }
 
+/* The directives apply to the walk's preprocessor state in source order,
+   and each segment starts from a copy of the state where it begins. The
+   file exports the macros it changed. */
 static void _split(FileWalk &w, Token first) {
-  Array arms = auto [];
+  Map initial = w.c.initial_macros(w.path);
+  Cpp cpp = Cpp.new(initial.copy());
+  w.start = cpp.copy();
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
-    if (!_track_arms(arms, token.text)) _directive(w, token, _hidden(arms));
+    int split = !cpp.hidden() && _directive(w, token);
+    w.c.cpp_directive(cpp, token, w.path);
+    if (split) w.start = cpp.copy();
   }
   _flush(w, w.text[w.pos:]);
+  w.macros = cpp.changes(initial);
 }
 
-/* An include ends the segment unless its conditional arm is never taken. */
-static void _directive(FileWalk &w, Token token, int hidden) {
+/* An include ends the segment; reports whether `token` is one. The caller
+   leaves out an include in an arm C never takes. */
+static int _directive(FileWalk &w, Token token) {
   int angle = 0;
-  String target =
-    hidden ? NULL : Compiler.preproc_include_target(token.text, angle);
-  if (!target) return;
+  String target = Compiler.preproc_include_target(token.text, angle);
+  if (!target) return 0;
   _flush(w, w.text[w.pos:token.pos]);
   _include_file(w, target, angle);
   Token next = token + 1;
   w.line = next.line;
   w.pos = next.pos;
+  return 1;
 }
 
 
@@ -453,23 +495,6 @@ static int _starts_line(Token first, Token token) {
   return 1;
 }
 
-/* Tracks the open conditional groups of a walk, one hidden-arm state each,
-   and reports whether `text` is a conditional directive. */
-static int _track_arms(Array arms, String text) {
-  Symbol kind = Compiler.preproc_conditional_kind(text);
-  if (!kind) return 0;
-  if (kind == <open>) arms.push(Compiler.preproc_open_state(text));
-  else if (kind == <branch> && arms.len())
-    arms[-1] = Compiler.preproc_branch_state(arms[-1]);
-  else if (kind == <close> && arms.len()) arms.take_last();
-  return 1;
-}
-
-static int _hidden(Array arms) {
-  foreach (int state in arms) if (state == 2) return 1;
-  return 0;
-}
-
 // segments
 
 /* Append one segment's nonempty published rows before the next part. */
@@ -513,13 +538,15 @@ static void _prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.builtin_defs = w.c.builtin_defs;
   shadow.open_linkage = w.linkage;
   shadow.take_unit_state(w.c);
-  shadow.tokenize(segment);
+  shadow.cpp = w.start;
+  shadow.scan_source(segment);
   shadow.text = w.text;
   if (w.module) shadow.line_markers = w.module.markers;
   if (w.c.source_facts)
     w.c.source_texts[Path.absolute(w.path)] =
       w.module ? w.module.own : w.text;
   _shift_tokens(shadow.tokenizer, w.line, w.pos);
+  shadow.preprocess_tokens();
 }
 
 static void _shift_tokens(Tokenizer t, int line, int pos) {
@@ -592,6 +619,15 @@ static String _resolve_include(
   }
   return NULL;
 }
+
+/* The runtime and the compiler's prelude are collected once for every
+   unit, so the command line's macros do not reach them. */
+module int _runtime_source(String canonical) =>
+  _inside(canonical, _canonical_lib()) ||
+  Compiler.is_prelude_source(canonical);
+
+static int _inside(String path, String dir) =>
+  path.startswith(dir) && path.len() > dir.len() && path[dir.len()] == '/';
 
 /* Preserve absent candidates and alias identity, not directory timestamps.
    Canonical selected files already carry their ordinary content hashes. */
@@ -698,7 +734,7 @@ static void _publish(FileWalk &w) {
   }
   List definitions = _sorted_names(w.definitions);
   List roots = _interface_include_dirs(w.c, w.path);
-  List entry = $(parts, hash, definitions, w.dependencies, roots);
+  List entry = $(parts, hash, definitions, w.dependencies, roots, w.macros);
   _require_retained(entry.try_own());
   Var prior = _process_cache()[w.path];
   if (prior is <list> && List.equal(prior.list()[4], roots)) return;

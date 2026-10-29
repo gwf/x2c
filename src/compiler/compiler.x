@@ -28,6 +28,11 @@ typedef struct Diagnostics *Diagnostics;
 /** Names a unit's compile-time callables, in `meta-native/bindings.x`. */
 typedef struct MetaBindings *MetaBindings;
 
+/** Names the C preprocessor state at one point of a source, in
+    `cpp/cpp.x`.
+*/
+typedef struct Cpp *Cpp;
+
 /** Describes the `#!` script unit a translation unit was started from: its
     canonical path, its first line as written, and whether it defines `main`
     itself. Every compiler of that unit shares one record, so collection sees
@@ -158,8 +163,15 @@ typedef struct Compiler {
      declaration prefixes: the `List` of specifier words of a body made of
      specifiers and attributes, `<string>` for a string literal,
      `<annotation>` for a function-like attribute macro, `<wrapper>` for one
-     that wraps its parameter in prefixes, else 1. */
+     that wraps its parameter in prefixes, else 1. A name the preprocessor
+     expands never reaches the parser, so only the names it leaves to C
+     are read as prefixes. */
   Map object_macros;
+  /* The preprocessor state the next expansion starts from, or NULL for
+     the macros visible before the file's first line, and the
+     `Compiler.command_macros` rows of the unit's `-D` and `-U` options. */
+  Cpp cpp;
+  List command_macros;
   /* The open conditional groups at the current top-level form, each an
      `(id arm state)` entry, so one function defined in two arms of one `#if`
      is one definition. `arm_stacks` maps each conditional directive's token
@@ -323,6 +335,7 @@ typedef struct SymTxn {
 #include "diagnostics.x"
 #include "symtab/symtab.x"
 #include "preprocess.x"
+#include "cpp/cpp.x"
 
 protocol Var(Compiler) as void *;
 #include "grammar.x"

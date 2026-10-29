@@ -377,7 +377,7 @@ Source: `lib/macrovalue/macrovalue.x`
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
 
-`typedef struct MacroFixedSlots { int count, slots[MACHINE_BINDER_MAX]; int names, name_slots[MACHINE_BINDER_MAX]; } MacroFixedSlots`
+`typedef struct MacroFixedSlots { int count, slots[64]; int names, name_slots[64]; } MacroFixedSlots`
 
 Records fixed-local slots for distinct-identity checks and Name slots
 for member-spelling comparisons during recognition.
@@ -387,7 +387,7 @@ Source: `lib/macrovalue/macrovalue.x`
 <a id="MacroPublishing"></a>
 ### MacroPublishing
 
-`typedef struct MacroPublishing { int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX]; int to[MACHINE_BINDER_MAX]; int count, binders, complete; unsigned long definite; } MacroPublishing`
+`typedef struct MacroPublishing { int from[64], fallback[64]; int to[64]; int count, binders, complete; unsigned long definite; } MacroPublishing`
 
 Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot

@@ -18,9 +18,9 @@ Configured compiler sessions and source units.
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
 | [`Frontend.open_reporting`](#Frontend.open_reporting) | Runs the source stages for a command that reports to stderr. |
 | [`Frontend.open_session`](#Frontend.open_session) | Opens an empty submission unit with the ordinary runtime prelude. |
-| [`Frontend.start`](#Frontend.start) | Tokenizes one input into a fresh unit with its own isolated `Context`. |
+| [`Frontend.start`](#Frontend.start) | Scans one input into a fresh unit with its own isolated `Context`; collection preprocesses its tokens. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
-| [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols and retains preprocessor outputs for adapter inspection. |
+| [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols, retains preprocessor outputs for adapter inspection, and preprocesses the unit's tokens for parsing. |
 | [`ParsedUnit.parse`](#ParsedUnit.parse) | Parses a collected unit, retaining both its AST and unsuccessful reports. |
 
 ### `Frontend`
@@ -98,8 +98,9 @@ Source: `src/frontend.x`
 
 `int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit)`
 
-Tokenizes one input into a fresh unit with its own isolated `Context`.
-The caller must close the unit on either result.
+Scans one input into a fresh unit with its own isolated `Context`;
+collection preprocesses its tokens. The caller must close the unit on
+either result.
 
 Source: `src/frontend.x`
 
@@ -120,8 +121,8 @@ Source: `src/frontend.x`
 
 `int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend)`
 
-Collects symbols and retains preprocessor outputs for adapter
-inspection.
+Collects symbols, retains preprocessor outputs for adapter inspection,
+and preprocesses the unit's tokens for parsing.
 
 Source: `src/frontend.x`
 

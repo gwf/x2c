@@ -25,6 +25,8 @@ Source options:
 
 C compiler options:
       --meta-cc <program>     Use <program> to build meta code, whatever --cc is
+  -D <name>[=<value>]         Define a C preprocessor macro
+  -U <name>                   Undefine a C preprocessor macro
 
 Inspection options:
       --dump-tokens           Print source tokens and stop

@@ -163,9 +163,8 @@ void Compiler.report_error(
 void Compiler.report_problem(
   Compiler c, Symbol code, String message, Token token, List notes) {
   message = message ? message : "compiler error";
-  String expansion = c.macro_expansion_note();
-  if (expansion) notes = notes.append($(expansion));
-  c.diagnostics.report(code, message, _compiler_location(c, token), notes);
+  List location = _compiler_location(c, token);
+  c.diagnostics.report(code, message, location, _notes(c, location, notes));
 }
 
 // reporting
@@ -205,9 +204,8 @@ void Diagnostics.report(
 */
 void Compiler.report_warning(
   Compiler c, Symbol code, String message, Token token, List notes) {
-  String expansion = c.macro_expansion_note();
-  if (expansion) notes = notes.append($(expansion));
-  c.report_warning_at(code, message, _compiler_location(c, token), notes);
+  List location = _compiler_location(c, token);
+  c.report_warning_at(code, message, location, _notes(c, location, notes));
 }
 
 /** Returns the innermost source expansion's definition and input note. */
@@ -227,6 +225,47 @@ String Compiler.macro_expansion_note(Compiler c) {
     return %"in expansion of '$name' defined at $source; input: $shown";
   }
   return NULL;
+}
+
+/** Returns the note that names the C macro whose expansion produced the
+    source at the diagnostic `location`, or NULL when no expansion did. The
+    tokenizer's `expansions` rows record the uses.
+*/
+String Compiler.cpp_note(Compiler c, List location) {
+  Tokenizer tokenizer = c.tokenizer;
+  if (!tokenizer || !tokenizer.expansions || !location) return NULL;
+  int line = location.assoc(<line>), position = location.assoc(<position>);
+  Token tokens = tokenizer.tokens;
+  foreach (List row in tokenizer.expansions) {
+    (long first, long end, String name, List site) = row;
+    Token token = tokens + first;
+    if (first < end && token.pos == position && token.line == line)
+      return Diagnostics.c_macro_note(name, site);
+  }
+  return NULL;
+}
+
+/** Returns the name of the C macro whose expansion produced `token` of the
+    compiler's token stream, or NULL.
+*/
+String Compiler.expanding_macro(Compiler c, Token token) {
+  Tokenizer tokenizer = c.tokenizer;
+  if (!tokenizer || !tokenizer.expansions) return NULL;
+  long index = token - (Token) tokenizer.tokens;
+  foreach (List row in tokenizer.expansions) {
+    (long first, long end, String name, List site) = row;
+    (void) site;
+    if (index >= first && index < end) return name;
+  }
+  return NULL;
+}
+
+/** Formats the note for an expansion of the C macro `name`, which the
+    `(file line)` site defines.
+*/
+String Diagnostics.c_macro_note(String name, List site) {
+  (String file, int line) = site;
+  return %"in expansion of '$name' defined at $file:$line";
 }
 
 /** Removes captured-argument transport and source wrappers for a note. */
@@ -416,14 +455,18 @@ List Diagnostics.entries(Diagnostics diag) {
 
 // debug utilities
 
-/** Prints every non-EOF token with its position and visible content.
-    `Compiler.tokenize` must have populated the compiler's tokenizer.
+/** Prints every non-EOF token with its position and visible content, and
+    the C macro whose expansion produced it. `Compiler.tokenize` or
+    `Compiler.preprocess_tokens` must have populated the compiler's
+    tokenizer.
 */
 void Compiler.dump_tokens(Compiler compiler) {
   Token tokens = compiler.tokenizer.tokens;
   for (Token token = tokens; token.type != <eof>; token++) {
     printf("(%4d, %-3d)\t%-20s", token.line, token.col, token.type.str());
     _pprint(token.text, token.len);
+    String macro = compiler.expanding_macro(token);
+    if (macro) printf("\t(expands %s)", (char *) macro);
     putchar('\n');
   }
 }
@@ -709,6 +752,16 @@ static List _build_entry(
 static void _store(Diagnostics diag, List entry) {
   diag.published.setdefault(entry, diag.entries.len());
   diag.entries.push(entry);
+}
+
+/* A report adds the innermost x2c macro expansion and the C macro
+   expansion at its location. */
+static List _notes(Compiler c, List location, List notes) {
+  String expansion = c.macro_expansion_note();
+  if (expansion) notes = notes.append($(expansion));
+  String macro = c.cpp_note(location);
+  if (macro) notes = notes.append($(macro));
+  return notes;
 }
 
 static List _compiler_location(Compiler compiler, Token token) {

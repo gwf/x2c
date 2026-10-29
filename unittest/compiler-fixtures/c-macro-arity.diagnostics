@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/c-macro-arity.x:7:10: macro: macro 'PAIR' takes 2 arguments
+    return PAIR(1);
+           ^^^^
+  note: given: 1 in expansion of 'PAIR' defined at unittest/compiler-fixtures/c-macro-arity.x:4
+

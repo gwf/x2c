@@ -220,7 +220,9 @@ comma. Meta calls such as `$name(a, b,)` and macro invocations reject it.
 ### E3. Special primaries
 
 `_Generic`, `va_arg`, and `offsetof` are recognized
-by identifier spelling in `_parse_ident_primary`. Adjacent C strings join.
+by identifier spelling in `_parse_ident_primary`. `typeof`, `typeof_unqual`,
+`__typeof__`, and `__typeof` before `(` begin a `typeof-specifier` wherever
+a type specifier can start, by the same spelling test. Adjacent C strings join.
 A following identifier joins that sequence when it is a recorded native
 string macro or is unbound, except `in`; a bound runtime name does not.
 This is the external `native-string-word` recognizer.

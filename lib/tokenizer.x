@@ -24,10 +24,14 @@ typedef struct Token {
    `text` is borrowed through `Tokenizer.scan`; tokens and modes remain live
    until their owning Scope is released. A nonzero `layout` selects the
    indentation syntax; `#pragma indent` before the first line of code sets
-   it during the scan. */
+   it during the scan. When a preprocessor rewrites `tokens`, `expansions`
+   holds one `(first end name site)` row per macro use, in stream order:
+   the tokens from index `first` up to `end` came from that use of the
+   macro `name`, which the `(file line)` site defines. */
 class Tokenizer struct {
   Bytes tokens, char *text, Array modes, struct Token *cursor;
   Symbol scan_status, int line, col, pos, layout;
+  Array expansions;
 } *;
 
 #include "exception.x"

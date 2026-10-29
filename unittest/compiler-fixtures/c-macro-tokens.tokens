@@ -1,0 +1,7 @@
+(   6, 1  )	int                 int
+(   6, 5  )	ident               value
+(   6, 11 )	=                   =
+(   6, 13 )	lit-int             10	(expands ADD)
+(   6, 13 )	+                   +	(expands ADD)
+(   6, 13 )	lit-int             2	(expands ADD)
+(   6, 22 )	;                   ;

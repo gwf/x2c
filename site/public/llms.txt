@@ -162,6 +162,7 @@
 - [src/components/raise.x](https://x2c-lang.dev/docs/internals/compiler-api/raise.html)
 - [src/components/string-switch.x](https://x2c-lang.dev/docs/internals/compiler-api/string-switch.html)
 - [src/components/try-catch.x](https://x2c-lang.dev/docs/internals/compiler-api/try-catch.html)
+- [src/cpp/cpp.x](https://x2c-lang.dev/docs/internals/compiler-api/cpp.html)
 - [src/emit/emit.x](https://x2c-lang.dev/docs/internals/compiler-api/emit.html)
 - [src/expressions/expressions.x](https://x2c-lang.dev/docs/internals/compiler-api/expressions.html)
 - [src/generate/generate.x](https://x2c-lang.dev/docs/internals/compiler-api/generate.html)

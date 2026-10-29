@@ -62,6 +62,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.pattern_binder_declarations`](#Compiler.pattern_binder_declarations) | Builds ordinary declarations from a pattern scope's issued bindings. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
+| [`Compiler.preprocess_tokens`](#Compiler.preprocess_tokens) | Expands the visible macros of the scanned tokens, hides the conditional arms C never takes, and positions the compiler at the first non-trivia token. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
 | [`Compiler.proven_references`](#Compiler.proven_references) | Returns the optional-reference parameters that `condition` proves the caller supplied when it has truth `holds`. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
@@ -73,6 +74,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.require_input`](#Compiler.require_input) | Raises `<incomplete>` when a required grammar item reaches the supplied input boundary. |
 | [`Compiler.restore_reference_presence`](#Compiler.restore_reference_presence) | Restores the optional-reference facts saved before a lexical path. |
 | [`Compiler.return_unit_state`](#Compiler.return_unit_state) | Returns that state to `owner`, so the next segment starts where this one finished and any bindings this segment created stay alive after the shadow is released. |
+| [`Compiler.scan_source`](#Compiler.scan_source) | Scans source without preprocessing it and positions the compiler at its first non-trivia token. |
 | [`Compiler.select_declaration_defaults`](#Compiler.select_declaration_defaults) | Selects the owning file's declaration defaults after all its segments. |
 | [`Compiler.settle_condition`](#Compiler.settle_condition) | Marks the optional references that `condition` proves present after an `if` whose arm for the other outcome cannot fall through. |
 | [`Compiler.shallow_parse`](#Compiler.shallow_parse) | Collects file-scope declarations into `globals` without parsing bodies. |
@@ -85,7 +87,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores exported syntax in the importing unit's parsing lifetime. |
-| [`Compiler.tokenize`](#Compiler.tokenize) | Scans source and positions the compiler at its first non-trivia token. |
+| [`Compiler.tokenize`](#Compiler.tokenize) | Scans and preprocesses source and positions the compiler at its first non-trivia token. |
 | [`Compiler.var`](#Compiler.var) | Boxes a compiler pointer for lambda capture traversal. |
 | [`Map.merge_translation_dependency`](#Map.merge_translation_dependency) | Merges one translation dependency, preserving an existing content hash. |
 | [`Path.real`](#Path.real) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
@@ -623,6 +625,17 @@ not depend on where the home is installed.
 
 Source: `src/compiler/source-files.x`
 
+<a id="Compiler.preprocess_tokens"></a>
+#### Compiler.preprocess_tokens
+
+`void Compiler.preprocess_tokens(Compiler c)`
+
+Expands the visible macros of the scanned tokens, hides the conditional
+arms C never takes, and positions the compiler at the first non-trivia
+token. An expansion error is reported at the macro use.
+
+Source: `src/compiler/parsing/tokens.x`
+
 <a id="Compiler.present_references"></a>
 #### Compiler.present_references
 
@@ -737,6 +750,18 @@ finished and any bindings this segment created stay alive after the
 shadow is released.
 
 Source: `src/compiler/lifecycle.x`
+
+<a id="Compiler.scan_source"></a>
+#### Compiler.scan_source
+
+`void Compiler.scan_source(Compiler c, char *text)`
+
+Scans source without preprocessing it and positions the compiler at its
+first non-trivia token. `Compiler.preprocess_tokens` must run before
+the parser reads the tokens. The compiler borrows `text` as
+`Compiler.tokenize` does.
+
+Source: `src/compiler/parsing/tokens.x`
 
 <a id="Compiler.select_declaration_defaults"></a>
 #### Compiler.select_declaration_defaults
@@ -868,7 +893,8 @@ Source: `src/compiler/declarations/portable-syntax.x`
 
 `void Compiler.tokenize(Compiler c, char *text)`
 
-Scans source and positions the compiler at its first non-trivia token.
+Scans and preprocesses source and positions the compiler at its first
+non-trivia token.
 
 The compiler borrows `text` for diagnostics and macro source capture until
 translation finishes.
@@ -1029,6 +1055,7 @@ Source: `src/compiler/lifecycle.x`
 | --- | --- | --- |
 | [`Ancestor`](#Ancestor) | struct | An enclosing syntax construct returned by `x2c_enclosing`: a function body with its declaration in `node`, and `lowering` set while the transform lowers it, a block item with the token or origin it starts at, or an initialized declarator with its declaration base in `base` and its `(bind ...)` node in `node`. |
 | [`Compiler`](#Compiler) | struct | Holds mutable state for one source translation. |
+| [`Cpp`](#Cpp) | struct | Names the C preprocessor state at one point of a source, in `cpp/cpp.x`. |
 | [`Diagnostics`](#Diagnostics) | struct | Names the positioned diagnostic store routed by a `Compiler`. |
 | [`GenNames`](#GenNames) | struct | Holds scope-owned generated-name state shared by related compilers. |
 | [`MetaBindings`](#MetaBindings) | struct | Names a unit's compile-time callables, in `meta-native/bindings.x`. |
@@ -1057,7 +1084,7 @@ Source: `src/compiler/compiler.x`
 <a id="Compiler"></a>
 ### Compiler
 
-`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; int dump_expansions; SourceView sources; int source_facts, source_primary; Array source_occurrences; Array source_capture; Map source_definitions, source_declarations, source_texts; } *Compiler`
+`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; Cpp cpp; List command_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; int dump_expansions; SourceView sources; int source_facts, source_primary; Array source_occurrences; Array source_capture; Map source_definitions, source_declarations, source_texts; } *Compiler`
 
 Holds mutable state for one source translation.
 
@@ -1065,6 +1092,16 @@ The structure, its state, and its owned compile-time bindings belong to
 the current `Scope`. `Compiler.free_bindings` permits early cleanup;
 otherwise Scope teardown releases them. All their calls must return
 first.
+
+Source: `src/compiler/compiler.x`
+
+<a id="Cpp"></a>
+### Cpp
+
+`typedef struct Cpp *Cpp`
+
+Names the C preprocessor state at one point of a source, in
+`cpp/cpp.x`.
 
 Source: `src/compiler/compiler.x`
 

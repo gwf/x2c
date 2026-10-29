@@ -14,17 +14,17 @@ C preprocessor directives in x2c source.
 | --- | --- |
 | [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
 | [`Compiler.located_preproc`](#Compiler.located_preproc) | Returns preceding directives with source-mapped include locations. |
+| [`Compiler.macro_directive`](#Compiler.macro_directive) | Returns the name token of the `#define` or `#undef` directive `content`, or NULL for any other directive, and sets `undefined` for `#undef`. |
 | [`Compiler.note_object_macro`](#Compiler.note_object_macro) | Records the name of the `#define` line `content` so a bare atom spelled the same way inside a literal can be flagged and a declaration prefix can be read. |
 | [`Compiler.note_preprocessor_macros`](#Compiler.note_preprocessor_macros) | Records object-like `#define` names and removes names after `#undef`. |
-| [`Compiler.preproc_branch_state`](#Compiler.preproc_branch_state) | Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when the group's state was 1, and 0 otherwise. |
 | [`Compiler.preproc_conditional_kind`](#Compiler.preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
 | [`Compiler.preproc_directive`](#Compiler.preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
 | [`Compiler.preproc_include_target`](#Compiler.preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
 | [`Compiler.preproc_marker_file`](#Compiler.preproc_marker_file) | Returns the file that the host preprocessor's line marker `text`, `# N "file" flags`, names and sets `line` to N, or returns `NULL` for any other line. |
-| [`Compiler.preproc_open_state`](#Compiler.preproc_open_state) | Returns the hidden-arm state of the conditional group that `text` opens: 2 when C never takes its first arm, because the condition requires a never-defined name or is `0`; 1 when C never takes the arms after its first `#else`, because the condition is exactly `!defined(NAME)`; and 0 otherwise. |
 | [`Compiler.preproc_track_arms`](#Compiler.preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
 | [`Compiler.preproc_within_arms`](#Compiler.preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `Compiler.preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
-| [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Records the open groups after each conditional directive of the tokenized unit, and marks layout attributes where written or where a macro expands to one. |
+| [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Hides the tokens of each arm that `Compiler.expand_macros` decided C never takes, as `c.arm_stacks` records, and marks layout attributes where written or where a macro x2c leaves to C expands to one. |
+| [`Compiler.scan_directive`](#Compiler.scan_directive) | Returns the first token of `text` scanned as x2c tokens after its continuation lines are joined, as a directive's text is read. |
 
 ### `Compiler`
 
@@ -50,6 +50,19 @@ Source includes reuse the ordinary `at` origin through C emission.
 
 Source: `src/preprocess.x`
 
+<a id="Compiler.macro_directive"></a>
+#### Compiler.macro_directive
+
+`Token Compiler.macro_directive(String content, int &undefined)`
+
+Returns the name token of the `#define` or `#undef` directive
+`content`, or NULL for any other directive, and sets `undefined` for
+`#undef`. The text after `define` or `undef` is scanned by
+`Compiler.scan_directive`, so the tokens after the name are the rest of
+the directive.
+
+Source: `src/preprocess.x`
+
 <a id="Compiler.note_object_macro"></a>
 #### Compiler.note_object_macro
 
@@ -70,16 +83,6 @@ Source: `src/preprocess.x`
 
 Records object-like `#define` names and removes names after `#undef`.
 Source storage determines visibility independently of directives.
-
-Source: `src/preprocess.x`
-
-<a id="Compiler.preproc_branch_state"></a>
-#### Compiler.preproc_branch_state
-
-`int Compiler.preproc_branch_state(int state)`
-
-Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
-the group's state was 1, and 0 otherwise.
 
 Source: `src/preprocess.x`
 
@@ -126,19 +129,6 @@ any other line.
 
 Source: `src/preprocess.x`
 
-<a id="Compiler.preproc_open_state"></a>
-#### Compiler.preproc_open_state
-
-`int Compiler.preproc_open_state(String text)`
-
-Returns the hidden-arm state of the conditional group that `text` opens:
-2 when C never takes its first arm, because the condition requires a
-never-defined name or is `0`; 1 when C never takes the arms after its
-first `#else`, because the condition is exactly `!defined(NAME)`; and 0
-otherwise.
-
-Source: `src/preprocess.x`
-
 <a id="Compiler.preproc_track_arms"></a>
 #### Compiler.preproc_track_arms
 
@@ -166,16 +156,28 @@ Source: `src/preprocess.x`
 
 `void Compiler.scan_conditionals(Compiler c)`
 
-Records the open groups after each conditional directive of the
-tokenized unit, and marks layout attributes where written or where a
-macro expands to one.
+Hides the tokens of each arm that `Compiler.expand_macros` decided C
+never takes, as `c.arm_stacks` records, and marks layout attributes
+where written or where a macro x2c leaves to C expands to one.
+
+Source: `src/preprocess.x`
+
+<a id="Compiler.scan_directive"></a>
+#### Compiler.scan_directive
+
+`Token Compiler.scan_directive(String text)`
+
+Returns the first token of `text` scanned as x2c tokens after its
+continuation lines are joined, as a directive's text is read. The
+tokens end in `eof` and belong to the current Scope.
 
 Source: `src/preprocess.x`
 
 ## Design notes
 
 Preprocessor lines stay in the token stream and become `preproc` nodes,
-so generated C keeps them where they were written. This module owns
-what x2c reads from those lines without running a preprocessor: which
-conditional arms C can reach, and what the directives before each form
-say about layout and the unit's `#define` names.
+so generated C keeps them where they were written. `cpp/cpp.x` expands
+the visible macros and decides the conditional groups; this module
+reads the directives that remain: it hides the arms C never takes,
+marks layout attributes, and records what the directives before each
+form say about the unit's `#define` names.

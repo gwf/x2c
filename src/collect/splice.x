@@ -105,9 +105,12 @@ static Token _block(Splice &s) {
   Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
   tokenizer.layout = Path.is_layout_source(s.path);
   tokenizer.scan();
-  Compiler scan = xcalloc(1, sizeof(struct Compiler));
+  Compiler scan = Compiler.new_shared(s.c);
+  defer s.c.close_child(scan);
+  scan.filename = s.path;
   scan.tokenizer = tokenizer;
-  scan.scan_conditionals();
+  scan.cpp = Cpp.isolated(scan.initial_macros(s.path));
+  scan.preprocess_tokens();
   Token block = NULL, previous = NULL;
   int depth = 0;
   for (Token token = Token.skip_trivia(tokenizer.tokens);

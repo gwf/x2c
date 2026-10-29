@@ -33,6 +33,11 @@ unittest/compiler-fixtures/explicit-converter-warning.x:35:38: conversion: unnec
                                        ^
   note: remove the call; the format converts the value
 
+unittest/compiler-fixtures/explicit-converter-warning.x:50:29: conversion: unnecessary conversion: .str() where ("String") is expected
+    printf(NAMED_FORMAT, v.str());
+                              ^
+  note: remove the call; the format converts the value
+
 unittest/compiler-fixtures/explicit-converter-warning.x:54:39: conversion: unnecessary conversion: .str() where ("String") is expected
     String joined = "%s-%s".printf(v.str(), v.str());
                                         ^

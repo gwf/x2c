@@ -26,6 +26,8 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
 | [`Compiler.included_compile_time_effects`](#Compiler.included_compile_time_effects) | Prepares included compile-time effects after full parsing resets macros. |
+| [`Compiler.included_macros`](#Compiler.included_macros) | Returns the `(name value)` macro rows that the file an `#include` of `target` from the directory `dir` names exports, or NULL when x2c does not read that file or has not collected it. |
+| [`Compiler.initial_macros`](#Compiler.initial_macros) | Returns the macro table visible before the first line of the file `path`: the macros the runtime defines, for a file outside `lib/`, and then those of the `-D` and `-U` options, for a file outside the runtime and the compiler's prelude, whose collection the options do not change. |
 | [`Compiler.install_included_effects`](#Compiler.install_included_effects) | Installs the definitions of each include among the directives before the cursor. |
 | [`Compiler.install_syntax_prelude`](#Compiler.install_syntax_prelude) | Installs the syntax prelude's macros and keyword aliases into `c`'s macro state once. |
 | [`Compiler.interface_text`](#Compiler.interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
@@ -223,6 +225,30 @@ Prepares included compile-time effects after full parsing resets macros.
 The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
+
+Source: `src/collect/walk.x`
+
+<a id="Compiler.included_macros"></a>
+#### Compiler.included_macros
+
+`List Compiler.included_macros( Compiler c, String target, int angle, String dir)`
+
+Returns the `(name value)` macro rows that the file an `#include` of
+`target` from the directory `dir` names exports, or NULL when x2c does
+not read that file or has not collected it.
+
+Source: `src/collect/walk.x`
+
+<a id="Compiler.initial_macros"></a>
+#### Compiler.initial_macros
+
+`Map Compiler.initial_macros(Compiler c, String path)`
+
+Returns the macro table visible before the first line of the file
+`path`: the macros the runtime defines, for a file outside `lib/`, and
+then those of the `-D` and `-U` options, for a file outside the runtime
+and the compiler's prelude, whose collection the options do not change.
+A NULL `path` sees neither.
 
 Source: `src/collect/walk.x`
 

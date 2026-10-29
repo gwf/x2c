@@ -17,7 +17,7 @@ Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
   files and locations), `symtab/symtab.x`, `diagnostics.x`, `sourceview.x`,
   `collect/collect.x`, `report.x`, `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
-  `preprocess.x`, `parse/parse.x`, `expressions/expressions.x`,
+  `cpp/cpp.x`, `preprocess.x`, `parse/parse.x`, `expressions/expressions.x`,
   `initializers/initializers.x`, `statements.x`, `literals/literals.x`,
   `lambdas.x`, `macros/macros.x`, `grammar.x`,
   `ast-rewrite.x`, `ast.x`;

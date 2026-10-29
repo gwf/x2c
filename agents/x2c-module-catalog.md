@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 61
+- Compiler modules: 62
 - Runtime modules: 73
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -81,10 +81,11 @@ Public functions:
 `Diagnostics.reached_limit`, `diagnostics_write_json`, `Compiler.file_prefix`,
 `Compiler.text_source`, `Compiler.report_error`, `Compiler.report_problem`,
 `Diagnostics.report`, `Compiler.report_warning`,
-`Compiler.macro_expansion_note`, `Diagnostics.macro_expansion_input`,
-`Diagnostics.macro_definition_note`, `Compiler.origin_location`,
-`Compiler.token_location`, `Compiler.display_path`, `Compiler.token_source`,
-`Compiler.token_column`, `Compiler.report_warning_at`,
+`Compiler.macro_expansion_note`, `Compiler.cpp_note`,
+`Compiler.expanding_macro`, `Diagnostics.c_macro_note`,
+`Diagnostics.macro_expansion_input`, `Diagnostics.macro_definition_note`,
+`Compiler.origin_location`, `Compiler.token_location`, `Compiler.display_path`,
+`Compiler.token_source`, `Compiler.token_column`, `Compiler.report_warning_at`,
 `Compiler.print_diagnostic`, `Compiler.take_diagnostics`, `Diagnostics.reset`,
 `Compiler.error_count`, `Compiler.diagnostics`, `Diagnostics.entries`,
 `Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
@@ -197,8 +198,8 @@ C preprocessor directives in x2c source.
 Public functions:
 
 `Compiler.preproc_include_target`, `Compiler.preproc_marker_file`,
-`Compiler.scan_conditionals`, `Compiler.preproc_open_state`,
-`Compiler.preproc_branch_state`, `Compiler.leading_preproc`,
+`Compiler.scan_conditionals`, `Compiler.macro_directive`,
+`Compiler.scan_directive`, `Compiler.leading_preproc`,
 `Compiler.located_preproc`, `Compiler.note_preprocessor_macros`,
 `Compiler.note_object_macro`, `Compiler.preproc_track_arms`,
 `Compiler.preproc_conditional_kind`, `Compiler.preproc_directive`,
@@ -351,6 +352,7 @@ Public functions:
 `Compiler.is_prelude_source`, `Compiler.install_syntax_prelude`,
 `Compiler.configure_package`, `Compiler.included_compile_time_effects`,
 `Compiler.prelude_sources`, `Compiler.install_included_effects`,
+`Compiler.included_macros`, `Compiler.initial_macros`,
 `SourceView.resolve_include`, `Compiler.include_typedef_names`,
 `Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
@@ -381,9 +383,10 @@ Public functions:
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
 `_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
-`Compiler.tokenize`, `Compiler.expect`, `Compiler.require_input`,
-`Compiler.test`, `Compiler.take_word`, `Compiler.next`, `Compiler.at_word`,
-`Compiler.peek`, `Token.after_group`, `Token.skip_trivia`, `Token.group_close`,
+`Compiler.tokenize`, `Compiler.scan_source`, `Compiler.preprocess_tokens`,
+`Compiler.expect`, `Compiler.require_input`, `Compiler.test`,
+`Compiler.take_word`, `Compiler.next`, `Compiler.at_word`, `Compiler.peek`,
+`Token.after_group`, `Token.skip_trivia`, `Token.group_close`,
 `Symbol.group_step`, `Compiler.mark_completion`, `_x2c_complete_here`,
 `Compiler.at_completion`, `Compiler.collect_unit_macro`,
 `Compiler.replay_declaration_source`, `Compiler.freeze_declaration_syntax`,
@@ -515,6 +518,16 @@ try, catch, and finally.
 Public functions:
 
 `_x2c_try_catch_patterns`, `_x2c_try_catch_site`, `_x2c_try_landing`
+
+### [src/cpp/cpp.x](../src/cpp/cpp.x)
+
+the C preprocessing x2c performs before parsing.
+
+Public functions:
+
+`Cpp.new`, `Cpp.isolated`, `Cpp.copy`, `Cpp.hidden`, `Cpp.changes`,
+`Cpp.table`, `Token.is_word`, `Token.spelling`, `Compiler.command_macros`,
+`Compiler.cpp_directive`, `Compiler.expand_macros`
 
 ### [src/emit/emit.x](../src/emit/emit.x)
 

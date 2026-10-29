@@ -143,13 +143,16 @@ static List _typedef(Compiler c, List context, int row) {
   return _finish_declaration(c, <typedef>, spec, bindings, 0);
 }
 
-/* Reads the qualifiers, the type specifier, and any storage macro after it,
-   `int LOCAL f(void)`, and returns the declared type and the type its names
-   are bound to. Source specifier text, such as `("_Noreturn")`, is written
-   with the declaration but is no part of the bound type. An aggregate binds
-   its short tag; the declared type keeps the body. */
+/* Reads the qualifiers, the type specifier, and any storage class or
+   storage macro after either, `int LOCAL f(void)`, and returns the declared
+   type and the type its names are bound to. Source specifier text, such as
+   `("_Noreturn")`, is written with the declaration but is no part of the
+   bound type. An aggregate binds its short tag; the declared type keeps the
+   body. */
 module List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
+  Array trailing = [];
+  _late_storage(c, trailing);
   int managed = <auto> in storage;
   List hole = managed ? c.peek_macro_hole() : NULL;
   int inferred = managed &&
@@ -157,9 +160,21 @@ module List _declaration_types(Compiler c, List storage) {
       (c.peek(1) == <=> || c.peek(1) == <;> || c.peek(1) == <,>)) ||
      (hole && hole.assoc(<kind>) == <name>));
   Type spec = inferred ? NULL : _type_specifier(c);
-  Array trailing = [];
-  // C11 6.11.5: a storage class after the type is obsolescent but legal, and
-  // preprocessed source spells an expanded storage macro that way.
+  _late_storage(c, trailing);
+  if (trailing.len()) storage = %( @(trailing.list_free()) @storage );
+  List words = storage.filter(%!(item) => item is <symbol>);
+  Type binding_type = c.sym.local_type(%( @words @quals @spec ));
+  if (spec.is_aggregate_tag_body()) {
+    Var (aggregate, tag, body) = spec;
+    binding_type = $(@words, @quals, aggregate, tag);
+  }
+  return $(c.sym.local_type(%( @storage @quals @spec )), binding_type);
+}
+
+/* C11 6.11.5: a storage class after a qualifier or the type is obsolescent
+   but legal, and the expansion of a storage macro written there spells it
+   that way. */
+static void _late_storage(Compiler c, Array trailing) {
   loop {
     Symbol symbol = c.peek(0);
     if (symbol != <typedef> &&
@@ -170,14 +185,6 @@ module List _declaration_types(Compiler c, List storage) {
     }
     if (!_prefix_macro_words(c, 0, trailing)) break;
   }
-  if (trailing.len()) storage = %( @(trailing.list_free()) @storage );
-  List words = storage.filter(%!(item) => item is <symbol>);
-  Type binding_type = c.sym.local_type(%( @words @quals @spec ));
-  if (spec.is_aggregate_tag_body()) {
-    Var (aggregate, tag, body) = spec;
-    binding_type = $(@words, @quals, aggregate, tag);
-  }
-  return $(c.sym.local_type(%( @storage @quals @spec )), binding_type);
 }
 
 /* A typedef name after a comma is ambiguous: `int i, T;` declares another
@@ -208,6 +215,7 @@ static int _test_declaration_start(
   if (c.object_macros.try_get(c.token.text, definition) &&
       (definition is <list> || definition == <wrapper>))
     return 1;
+  if (_typeof_starts(c)) return 1;
   return _type_name_starts(c, require_declarator);
 }
 

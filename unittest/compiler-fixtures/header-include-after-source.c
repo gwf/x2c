@@ -40,7 +40,7 @@ int read_value(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%d %d\n", saved, read_value());
+  printf("%d %d\n", 11, read_value());
   return 0;
 }
 

@@ -6,8 +6,7 @@
  (block (preproc "#define LOCAL_VALUE 7") 
   (at 1 (declare (int) 
          (bindings 
-          (op = (bind (binding 2 "value") ()) 
-           (expr () (ident (binding 3 "LOCAL_VALUE"))))))) 
+          (op = (bind (binding 2 "value") ()) (expr (int) (literal (int) "7")))))) 
   (preproc "#if LOCAL_VALUE == 7") 
   (at 2 (stmnt 
          (expr (int) 
@@ -15,16 +14,16 @@
            (expr (int) (literal (int) "30")))))) (preproc "#endif") 
   (at 3 (stmnt 
          (expr () 
-          (call (expr () (ident (binding 4 "printf"))) 
+          (call (expr () (ident (binding 3 "printf"))) 
            (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
             (expr (int) (ident (binding 2 "value")))))))) 
   (at 4 (declare (int) 
          (bindings 
-          (op = (bind (binding 5 "result") ()) 
+          (op = (bind (binding 4 "result") ()) 
            (expr (int) 
             (op ? (expr (int) 
                    (op == (expr (int) (ident (binding 2 "value"))) 
                     (expr (int) (literal (int) "37")))) 
              (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1")))))))) 
   (preproc "#undef LOCAL_VALUE") 
-  (at 5 (return (int) (expr (int) (ident (binding 5 "result")))))))
+  (at 5 (return (int) (expr (int) (ident (binding 4 "result")))))))

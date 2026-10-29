@@ -456,14 +456,14 @@ static void _translate_unit(
   Compiler c = unit.compiler;
   if (!started) _fail(c);
   c.own_diagnostics();
-  if (dump == <tokens>) {
-    c.dump_tokens();
-    return;
-  }
   c.dump_expansions = dump == <expansions>;
   int collected = unit.collect(frontend);
   _report_diagnostics(c);
   if (!collected) exit(1);
+  if (dump == <tokens>) {
+    c.dump_tokens();
+    return;
+  }
   if (_inspect_collected(unit, dump)) return;
   if (!unit.parse()) _fail(c);
   c.recovery_depth = 0;

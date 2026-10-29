@@ -44,7 +44,7 @@ int main(void) {
   int width = v.str().len();
   String built = as_text(v);
 
-  // A format the compiler cannot read at translation time converts nothing.
+  // A pointer format converts nothing; an expanded macro's format is read.
   const char *chosen = "%s\n";
   printf(chosen, v.str());
   printf(NAMED_FORMAT, v.str());

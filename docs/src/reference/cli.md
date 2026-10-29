@@ -129,7 +129,9 @@ Inspection modes print an intermediate result and stop translation:
 ./x2c translate --dump-tokens source.x
 ```
 
-- `--dump-tokens` prints source tokens and stops.
+- `--dump-tokens` prints the tokens the parser reads, after macro
+  expansion, and stops. A token that an expansion produced ends with the
+  name of the macro whose use produced it.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-expansions` prints each source macro expansion and stops after
   parsing. Each entry names the invocation and definition sites, then shows
@@ -788,8 +790,10 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 `<home>/builds/0/libx2c.a`, the stage 0 runtime whose headers a source
 checkout's `include/x2c` names.
 
-There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
-and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
+There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
+x2c's own [preprocessing](language.md#preprocessing), for requested host
+preprocessing, and for C compilation; `translate` accepts them too, and the
+C generated with them needs the same options. Optimization, debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
 `-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find

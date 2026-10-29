@@ -46,7 +46,17 @@ declaration-prefix = ( storage | "inline" | "_Noreturn" | attribute | prefix-mac
 trailing-storage = ( storage | "inline" | prefix-macro ) ;
 storage = ( ( "extern" , [ c-string ] ) | "static" | "auto" | "register" | "threaded" ) ;
 qualifier = ( "const" | "restrict" | "volatile" ) ;
-type-specifier = ( scalar-specifiers | "Self" | aggregate | enumeration | type-reference | type-slot ) ;
+type-specifier = ( scalar-specifiers |
+    "Self" |
+    aggregate |
+    enumeration |
+    type-reference |
+    typeof-specifier |
+    type-slot ) ;
+typeof-specifier = ( ( "typeof" | "typeof_unqual" | "__typeof__" | "__typeof" ) ,
+    "(" ,
+    ( type-name | expression ) ,
+    ")" ) ;
 scalar-specifiers = ( scalar-word , { scalar-word } ) ;
 scalar-word = ( "void" | "char" | "short" | "int" | "long" | "float" | "double" | "signed" | "unsigned" ) ;
 type-reference = ( identifier , [ ( "." , identifier ) ] ) ;

@@ -57,7 +57,8 @@ static int *addressed(void) {
 }
 
 #define CHECK_VOID(value) \
-  _Static_assert(__builtin_types_compatible_p(__typeof__(value), void), \
+  _Static_assert(__builtin_types_compatible_p(__typeof__(value), \
+                                             __typeof__((void) 0)), \
                  "statement expression must remain void")
 static void empty(void) {
   CHECK_VOID(({ static int n = make_value(); }));
