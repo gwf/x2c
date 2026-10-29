@@ -178,7 +178,10 @@ meta native Self List.tail(Self list, unsigned count) {
 }
 
 /** Returns every `step`th element from `start` up to exclusive `stop`.
-    Negative bounds count from the end. `step` must be positive.
+    A negative `start` counts elements from the end; a negative `stop`
+    counts endpoints from the end, so -1 is the length and -2 stops before
+    the last element, as in a forward `list[start:stop:step]`. `step` must
+    be positive.
     Raises: `<bad-arg>` when `step` is less than 1, or `<alloc-fail>` while
     constructing the result.
 */
@@ -189,8 +192,13 @@ meta native Self List.subseq(Self list, int start, int stop, int step) {
 }
 
 /** Returns `list[start:stop:step]`.
-    `stop` is exclusive, negative bounds count from the end, and a negative
-    `step` walks backwards. A full forward slice preserves `list` only when its
+    A negative `start` counts elements from the end. A negative `stop` on a
+    forward step counts endpoints from the end: -1 is the length, so
+    `list[:-1]` is all of `list` and `list[:-2]` omits the last element. A
+    negative `step` walks backwards, and its negative `stop` names the
+    element the slice stops before. The
+    [collections guide](../../guide/collections.md#indexing-and-slicing)
+    shows the forward rule. A full forward slice preserves `list` only when its
     identity is canonical in the active pool chain; otherwise it rebuilds the
     cells there so a detached pool cannot escape through the shortcut.
     Raises: `<bad-arg>` when `step` is zero, or `<alloc-fail>` or

@@ -156,7 +156,13 @@ Source: `lib/array/array.x`
 `Array Array.getslice(Array array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
-Negative bounds count from the end and a negative step walks backward.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
 
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
