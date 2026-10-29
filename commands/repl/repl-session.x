@@ -5,6 +5,7 @@
 #pragma once
 #include "repl-types.x"
 #include "repl-native.x"
+#include "repl-prompt-types.x"
 #include "repl-ledgers.x"
 #include "parse/parse.x"
 #include "diagnostics.x"
@@ -14,6 +15,7 @@
 
 void ReplSession.describe(ReplSession session, String name,
                           List syntax, String source);
+List repl_member_candidates(Compiler c, Type type);
 
 static String _eval_head(void);
 static void _tokenize(ReplSession session, String source, Scope scratch);
@@ -178,8 +180,9 @@ ReplCompletion ReplSession.complete(
     transaction = c.begin_semantic_transaction();
   }
   defer transaction.rollback();
-  Symbol kind = 0;
+  Symbol kind = 0, access = 0;
   List rows = NULL, keywords = NULL;
+  Type receiver = NULL;
   try {
     _tokenize(session, marked, scratch);
     if (c.tokenizer.status() != <ok>) return result;
@@ -206,13 +209,23 @@ ReplCompletion ReplSession.complete(
     (void) c.parse_submission(end);
   }
   catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)
-                   (keywords ?found_keywords)): {
+                   (keywords ?found_keywords) *more): {
     kind = found_kind;
     rows = found;
     keywords = found_keywords;
+    foreach (List fact, more) match (fact) {
+      case %(receiver ?type): receiver = type;
+      case %(access ?operator): access = operator;
+    }
   }
   catch %((!or incomplete malformed) *): return result;
-  if (rows || keywords) result.candidates = _completion_filter(
+  if (receiver && access == <.>) {
+    Array candidates = [];
+    foreach (List candidate, repl_member_candidates(c, receiver))
+      if (candidate.cadr().str().startswith(prefix)) candidates.push(candidate);
+    result.candidates = candidates.list_free();
+  }
+  else if (rows || keywords) result.candidates = _completion_filter(
     session, kind, rows, keywords, prefix);
   return result;
 }
@@ -225,16 +238,11 @@ static List _bare(List node) {
 /* Statements run in a function that the submission does not spell. */
 static String _eval_head(void) => "void __repl_eval(void) {\n";
 
-static List _thunk(List items) =>
-  %(function (int)
-    (bind (binding -1 "__repl_eval") ((fnmod (params))))
-    (block @items));
-
 static void _tokenize(ReplSession session, String source, Scope scratch) {
   Compiler c = session.compiler;
   auto (&scratch) {
     Map macros = c.initial_macros(c.filename);
-    // Loaded native headers supply the same macros to parsing and C emission.
+    if (session.program) macros.merge(session.program.macros);
     c.cpp = Cpp.new(macros);
     c.tokenize(source);
   }
@@ -277,7 +285,7 @@ static int _file_submission(Compiler c) {
 static List _native_top_statements(Compiler c, List statements) {
   Array result = [];
   foreach (List anchored, statements) {
-    List node = Ast.without_origin(anchored);
+    List node = Ast.without_origin(anchored), expanded = anchored;
     if (node.car() == <dstrdecl>) {
       c.sym.push_new_scope();
       List lowered = NULL;
@@ -288,11 +296,12 @@ static List _native_top_statements(Compiler c, List statements) {
       }
       if (!lowered) raise %(repl (reason "destructuring did not lower"));
       node = lowered;
+      expanded = Ast.rewrap_origin(anchored, lowered);
     }
     if (node ~= %(seq *items)) {
       foreach (List item, _native_top_statements(c, items)) result.push(item);
     }
-    else result.push(node);
+    else result.push(expanded);
   }
   return result.list_free();
 }
@@ -355,6 +364,16 @@ static void _discard_cleanups(ReplSession session, size_t count) {
     session.cleanups.pop();
     cleanup.apply(0, NULL);
   }
+}
+
+static void _complete_native_array(Compiler c, List declaration, Var extent) {
+  if (extent is void) return;
+  Type type = declaration.type_from_ast().declared();
+  List bound = declaration.caddr().cadr().cadr();
+  String count = extent.str();
+  List dimension = %(dim (expr (int) (literal (int) $count)));
+  Type complete = cons(dimension, type.cdr());
+  c.sym.bind_identity(NULL, bound, complete.declaration_ast(bound));
 }
 
 static void _session_print(String text) {
@@ -436,7 +455,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
   auto (&scratch) c.braces = [];
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
-  Array declarations = auto [], names = auto [];
+  Array declarations = auto [], names = auto [], retained = auto [];
   size_t cleanup_count = session.cleanups.len();
   List syntax = NULL;
   String function = NULL;
@@ -457,15 +476,16 @@ static ReplResult _submit_native(ReplSession session, String source) {
     if (_file_submission(c)) {
       syntax = c.parse_submission(source.len());
       if (_type_only(syntax)) {
-        session.declarations.push(syntax);
         List type = syntax.type_from_ast().base_type();
         if (syntax ~= %(typedef ? (bindings *rows))) {
           foreach (List row, rows) names.push(Ast.binding_spelling(row.cadr()));
         }
         else if (type.len() > 1 && type.cadr() is <string>) names.push(type.cadr());
-        foreach (String name, names) {
+        foreach (String name, names)
           if (name in session.names)
             raise %(repl (reason $("a type cannot be redefined: " + name)));
+        session.declarations.push(syntax);
+        foreach (String name, names) {
           session.names[name] = %(type);
           session.describe(name, syntax, source);
         }
@@ -494,6 +514,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
         raise %(repl (reason "expected an executable submission"));
       syntax = %(block @body);
       body = _native_top_statements(c, body);
+      body = repl_prompt_types(session, body, retained);
       syntax = %(block @body);
       _submission_objects(session, body, declarations, names);
       prints = _submission_prints(body);
@@ -501,9 +522,23 @@ static ReplResult _submit_native(ReplSession session, String source) {
     }
     result.syntax = syntax;
     Map published = NULL;
-    auto (&session.storage)
-      published = repl_native_execute(session, syntax, wrapped, prints);
-    foreach (String name, names) {
+    Array native_declarations = auto session.declarations.copy();
+    foreach (Var declaration, retained) native_declarations.push(declaration);
+    with (session.declarations = native_declarations) {
+      auto (&session.storage)
+        published = repl_native_execute(session, syntax, wrapped, prints);
+    }
+    foreach (List declaration, retained) {
+      session.declarations.push(declaration);
+      Type family = Ast.without_origin(declaration).cadr().type().base_type();
+      if (family.len() < 2 || family.cadr() is not <string>) continue;
+      String name = family.cadr();
+      session.names[name] = %(type);
+      session.describe(name, declaration, source);
+    }
+    for (int i = 0; i < names.len(); i++) {
+      String name = names[i];
+      _complete_native_array(c, declarations[i], published["extent:" + name]);
       session.addresses[name] = published[name];
       session.names[name] = %(value);
     }
@@ -518,7 +553,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
       session.describe(function, syntax, source);
       result.name = function;
     }
-    if (function || names.len()) transaction.commit_transient();
+    if (function || names.len() || retained.len()) transaction.commit_transient();
     if (prints) result.formatted = published["formatted"];
     result.status = function ? <defined> : prints ? <value> : <executed>;
   }

@@ -831,7 +831,8 @@ static List _parse_postfix_arrow(Compiler c, List expr) {
   c.expect(<"->">);
   if (c.at_completion()) {
     List rows = c.postfix_completions(expr.cadr(), <"->">);
-    raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
+    raise %(replcomp (kind <members>) (rows $rows) (keywords ())
+                    (receiver $(expr.cadr())) (access ->));
   }
   Token first = c.token;
   List field = _parse_field_name(c, <"->">, expr);
@@ -850,7 +851,8 @@ static List _parse_postfix_dot(Compiler c, List expr) {
     Type receiver = _is_raw_string_literal(expr)
                   ? %("String") : expr.cadr();
     List rows = c.postfix_completions(receiver, <.>);
-    raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
+    raise %(replcomp (kind <members>) (rows $rows) (keywords ())
+                    (receiver $receiver) (access .));
   }
   Token first = c.token;
   List field = _parse_field_name(c, <.>, expr);

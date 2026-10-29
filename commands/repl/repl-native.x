@@ -135,6 +135,11 @@ static void _native_object(
     memcpy($pointer, (const void *) &$value, sizeof($value));
   }));
   n.body.push(_native_result_set(c, result, name, pointer));
+  if (type.is_array() && !type.car().list().cdr()) {
+    List extent = c.resolve_expression(
+      $!size_t{ sizeof($value) / sizeof($value[0]) }, NULL);
+    n.body.push(_native_result_set(c, result, "extent:" + name, extent));
+  }
 }
 
 static void _native_defer(NativeSubmission &n, List body) {
@@ -181,6 +186,10 @@ static void _native_render(
   Compiler c = n.session.compiler;
   expression = _native_rewrite(n, expression);
   Type type = expression.cadr();
+  if (type.is_bitfield()) {
+    type = type.base_type();
+    expression = %(expr $type (cast $type $expression));
+  }
   List value = expression;
   if (type.is_array()) {
     List name = c.sym.introduce(c.fresh_name("repl_array_result"));
@@ -194,10 +203,9 @@ static void _native_render(
   }
   else {
     List name = c.sym.introduce(c.fresh_name("repl_result"));
-    List declaration = type.declaration_ast(name);
-    declaration = %(declare $(declaration.cadr()) (bindings
-      (op = $(declaration.caddr().cadr()) $expression)));
-    c.sym.bind_identity(NULL, name, declaration);
+    List declaration = %(declare ("__typeof__" (parens $expression))
+      (bindings (op = (bind $name ()) $expression)));
+    c.sym.bind_identity(NULL, name, type);
     n.body.push(declaration);
     value = _native_expr(c, type, name);
   }
