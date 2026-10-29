@@ -12,7 +12,8 @@ static typedef struct Run {
   Path root;
   CliRequest project;
   List program_args;
-  int jobs, files_passed, files_failed, tests_passed, tests_failed;
+  int jobs, filtered;
+  int files_passed, files_failed, tests_passed, tests_failed;
 } Run;
 
 int main(int argc, char **argv) {
@@ -44,7 +45,7 @@ int main(int argc, char **argv) {
   _run_files(run, files);
   printf("files: %d passed, %d failed; tests: %d passed, %d failed\n",
     run.files_passed, run.files_failed, run.tests_passed, run.tests_failed);
-  return run.files_failed ? 1 : 0;
+  return run.files_failed ? 1 : run.filtered && !run.files_passed ? 2 : 0;
 }
 
 static Run _configure(Map options) {
@@ -73,22 +74,31 @@ static Run _configure(Map options) {
   if (options["list"].integer()) args.push("--list");
   if (options["quiet"].integer()) args.push("--quiet");
   return (Run) {.root = root, .project = project,
-    .program_args = args.list(), .jobs = count};
+    .program_args = args.list(), .jobs = count,
+    .filtered = !!options["filter"].list()};
 }
 
 static Array _discover(List operands, Path root) {
   Map unique = {};
+  int explicit = !!operands;
+  String root_prefix = %"$(root.rstrip("/"))/";
   if (!operands) operands = $(root);
   foreach (Path path in operands) {
     path = Path.absolute(path);
     if (path.is_file()) unique[path] = 1;
     else if (path.is_dir()) {
+      Path base = path == root || path.startswith(root_prefix) ? root : path;
+      String prefix = %"$(base.rstrip("/"))/";
+      int tests = explicit && path != root && path.basename() == "tests";
       foreach (Path file in path.walk()) {
-        if (!file.is_file() || "/.x2c-build/" in file) continue;
+        String relative = file.remove_prefix(prefix);
+        if (!file.is_file() || relative.startswith(".x2c-build/") ||
+            "/.x2c-build/" in relative) continue;
         String name = file.basename();
         if (name.endswith("_test.x") ||
             (name.startswith("test_") && name.endswith(".x")) ||
-            ("/tests/" in file && name.endswith(".x"))) unique[file] = 1;
+            ((tests || relative.startswith("tests/") || "/tests/" in relative) &&
+              name.endswith(".x"))) unique[file] = 1;
       }
     }
     else Diagnostics.driver_error(%"test: no such file or directory '$path'");
@@ -108,14 +118,17 @@ static void _run_files(Run &run, Array files) {
     Job job = pending.remove(0);
     int status = job.status();
     String output = status ? job.output_text : job.output();
-    if (output) fputs(output, stdout);
-    if (status) run.files_failed++;
-    else run.files_passed++;
     List lines = output.split_lines(0);
     String summary = lines ? lines.reverse().car() : NULL;
     int passed, failed, skipped;
-    if (summary && sscanf(summary, "%d passed, %d failed, %d skipped",
-                          &passed, &failed, &skipped) == 3) {
+    int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
+                                    &passed, &failed, &skipped) == 3;
+    if (run.filtered && status == 2 && counts &&
+        !passed && !failed && !skipped) continue;
+    if (output) fputs(output, stdout);
+    if (status) run.files_failed++;
+    else run.files_passed++;
+    if (counts) {
       run.tests_passed += passed;
       run.tests_failed += failed;
     }

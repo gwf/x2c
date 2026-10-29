@@ -68,7 +68,8 @@ must still describe that same unit. `dir` must already exist. Generation
 partitions the AST, materializes caches and once-only initialization, and
 writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
 of a collected unit through one `Path.publish_files`, so a failed write
-replaces none of them. It appends generated bindings and initialization
+replaces none of them. A file that already holds its text keeps its
+modification time. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 

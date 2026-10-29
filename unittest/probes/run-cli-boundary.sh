@@ -581,16 +581,24 @@ mtime() {
 } >"$BUILD/deps/Makefile"
 make -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
   default >/dev/null
-root_before=$(mtime "$BUILD/deps/make-out/root.c")
-other_before=$(mtime "$BUILD/deps/make-out/other.c")
+# Touching an included file retranslates only its includer, whose depfile
+# records the translation. Its unchanged C keeps its time, and the next
+# build translates nothing.
+root_before=$(mtime "$BUILD/deps/make-out/root.d")
+root_c_before=$(mtime "$BUILD/deps/make-out/root.c")
+other_before=$(mtime "$BUILD/deps/make-out/other.d")
 sleep 1
 touch "$BUILD/deps/src/leaf.x"
 make -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
   default >/dev/null
-root_after=$(mtime "$BUILD/deps/make-out/root.c")
-other_after=$(mtime "$BUILD/deps/make-out/other.c")
+root_after=$(mtime "$BUILD/deps/make-out/root.d")
+other_after=$(mtime "$BUILD/deps/make-out/other.d")
 [[ $root_after -gt $root_before ]] || exit 1
+[[ $(mtime "$BUILD/deps/make-out/root.c") == "$root_c_before" ]] || exit 1
 [[ $other_after == "$other_before" ]] || exit 1
+make -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
+  default >"$BUILD/deps/make-again.log"
+! grep -q ' translate ' "$BUILD/deps/make-again.log" || exit 1
 
 # A recursive build adds the default job count unless the command line sets
 # a job limit. An option argument holding a j sets none. GNU Make records

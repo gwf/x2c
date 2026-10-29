@@ -71,15 +71,19 @@ $(C_FILES) $(H_FILES): $(BUILD)/.translated
 
 # Included x2c prerequisites live on the generated C/H targets. The stamp
 # still owns clean-build batching; this rule retranslates only a unit whose
-# discovered prerequisite is newer than its generated C. Make computes $?
-# from times read before the batch ran, so the recipe compares them again
-# and skips a unit the batch has just written. A deleted prerequisite counts
-# as changed under GNU Make 4; Make 3.81 leaves it out of $?.
+# discovered prerequisite is newer than its last translation. A translation
+# leaves C and headers that keep their text untouched, so their objects are
+# not rebuilt, and always rewrites the unit's depfile, which therefore
+# records when it ran. Make computes $? from times read before the batch
+# ran, so the recipe compares them with the depfile again and skips a unit
+# the batch has just translated. A deleted prerequisite counts as changed
+# under GNU Make 4; Make 3.81 leaves it out of $?.
 $(BUILD)/%.c: $(SOURCE)/%.x
 	$(if $(filter-out $(BUILD)/.translated,$?), \
-		@for p in $(filter-out $(BUILD)/.translated,$?); do \
+		@translated=$(BUILD)/$*.d; [ -e "$$translated" ] || translated=$@; \
+		for p in $(filter-out $(BUILD)/.translated,$?); do \
 			if [ ! -e "$$p" ] || \
-				[ -n "$$(find "$$p" -newer $@)" ]; then \
+				[ -n "$$(find "$$p" -newer "$$translated")" ]; then \
 				echo '$(X2C) translate $(X2CFLAGS) $<'; \
 				exec $(X2C) translate $(X2CFLAGS) $<; \
 			fi; \

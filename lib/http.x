@@ -9,6 +9,7 @@
 #include "channel.x"
 #include <ctype.h>
 #include <errno.h>
+#include <strings.h>
 #include <unistd.h>
 
 /** One request, allocated in the current request Context. */
@@ -109,14 +110,14 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
       if (length > body_limit) Http.fail(413, "body too large");
     }
   }
-  try req.body = input.readblock(length);
-  catch %(bad-arg *): Http.fail(400, "body is not text");
+  if (length) {
+    try req.body = input.readblock(length);
+    catch %(bad-arg *): Http.fail(400, "body is not text");
+  }
   if (req.body.len() != length) Http.fail(400, "incomplete body");
   String connection = req.headers.contains("connection") ?
-    req.headers["connection"].str().lower() : NULL;
-  req.keep_alive = version == "HTTP/1.1";
-  if (_token(connection, "keep-alive")) req.keep_alive = 1;
-  if (_token(connection, "close")) req.keep_alive = 0;
+    req.headers["connection"].str() : NULL;
+  req.keep_alive = _keep_alive(connection, version == "HTTP/1.1");
   return req;
 }
 
@@ -146,13 +147,19 @@ HttpResponse HttpResponse.header(HttpResponse res, String name, String value) {
 /** Replaces the body with UTF-8 text. */
 HttpResponse HttpResponse.text(HttpResponse res, String text) {
   res.body.clear().write(text);
-  return res.header("Content-Type", "text/plain; charset=utf-8");
+  res.headers["content-type"] = "text/plain; charset=utf-8";
+  return res;
 }
 
 /** Replaces the body with JSON. */
 HttpResponse HttpResponse.json(HttpResponse res, Var value) {
-  res.body.clear().write(value.json());
-  return res.header("Content-Type", "application/json");
+  res.body.clear();
+  int written = 0;
+  defer if (!written) res.body.clear();
+  x2c_json_write(res.body, value, 0);
+  written = 1;
+  res.headers["content-type"] = "application/json";
+  return res;
 }
 
 /** Replaces the body with arbitrary bytes, including embedded NUL. */
@@ -170,7 +177,7 @@ static void _write(
   HttpResponse res, File output, int keep_alive, int head_only) {
   Buffer head = auto Buffer.new(0);
   head.printf("HTTP/1.1 %d %s\r\n", res.code, _reason(res.code));
-  res.headers["content-length"] = String.format("%ld", (long) res.body.len());
+  res.headers["content-length"] = String.printf("%ld", (long) res.body.len());
   res.headers["connection"] = keep_alive ? "keep-alive" : "close";
   foreach (Var (name, value) in res.headers)
     head.printf("%s: %s\r\n", name, value);
@@ -232,10 +239,11 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
   List segments = req.path.split("/");
   foreach (Var entry in router.routes) {
     HttpRoute route = entry.pointer();
-    Map captures = {};
-    if (!_match(route.segments, segments, captures)) continue;
+    if (!_match(route.segments, segments)) continue;
     found = 1;
     if (route.method != req.method) continue;
+    Map captures = {};
+    _capture(route.segments, segments, captures);
     req.params = captures;
     route.handler(req, res);
     return;
@@ -340,6 +348,14 @@ static String _line(File input, int limit, int status) {
 }
 
 static String _decode(String text, int query) {
+  int prefix = 0;
+  while (prefix < text.len()) {
+    int c = (unsigned char) text[prefix];
+    if (c == '%' || (query && c == '+')) break;
+    if (!c || c == '\r' || c == '\n') Http.fail(400, "invalid URL byte");
+    prefix++;
+  }
+  if (prefix == text.len()) return text;
   Buffer out = auto Buffer.new(0);
   for (int i = 0; i < text.len(); i++) {
     int c = (unsigned char) text[i];
@@ -369,10 +385,19 @@ static int _method(String method) =>
   method == "GET" || method == "POST" || method == "PUT" ||
   method == "DELETE" || method == "HEAD" || method == "OPTIONS" || method == "PATCH";
 
-static int _token(String values, String token) {
-  foreach (String value in values.split(","))
-    if (value.strip(NULL) == token) return 1;
-  return 0;
+static int _keep_alive(String values, int keep) {
+  const char *start = values;
+  while (start && *start) {
+    const char *comma = strchr(start, ',');
+    const char *end = comma ? comma : start + strlen(start);
+    while (start < end && strchr(" \t\n\v\f\r", (unsigned char) *start)) start++;
+    while (end > start && strchr(" \t\n\v\f\r", (unsigned char) end[-1])) end--;
+    size_t size = end - start;
+    if (size == 5 && !strncasecmp(start, "close", size)) return 0;
+    if (size == 10 && !strncasecmp(start, "keep-alive", size)) keep = 1;
+    start = comma ? comma + 1 : NULL;
+  }
+  return keep;
 }
 
 static int _header_name(String name) {
@@ -384,23 +409,31 @@ static int _header_name(String name) {
   return 1;
 }
 
-static int _match(List pattern, List path, Map captures) {
+static int _match(List pattern, List path) {
   while (pattern) {
     String segment = pattern.car(); pattern = pattern.cdr();
-    if (segment && segment[0] == '*') {
-      if (pattern) return 0;
-      captures[String.new(segment + 1)] = String.join("/", path);
-      return 1;
-    }
+    if (segment && segment[0] == '*') return !pattern;
     if (!path) return 0;
     String value = path.car(); path = path.cdr();
     if (segment && segment[0] == ':') {
       if (!value) return 0;
-      captures[String.new(segment + 1)] = value;
     }
     else if (segment != value) return 0;
   }
   return !path;
+}
+
+static void _capture(List pattern, List path, Map captures) {
+  while (pattern) {
+    String segment = pattern.car(); pattern = pattern.cdr();
+    if (segment && segment[0] == '*') {
+      captures[String.new(segment + 1)] = String.join("/", path);
+      return;
+    }
+    String value = path.car(); path = path.cdr();
+    if (segment && segment[0] == ':')
+      captures[String.new(segment + 1)] = value;
+  }
 }
 
 static const char *_reason(int code) {

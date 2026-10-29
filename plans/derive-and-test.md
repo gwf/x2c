@@ -212,7 +212,8 @@ the matching driver from `Compiler.driver_executable()`.
 - Discovery: operands are files or directories; with none, the project
   root is the directory of the nearest `x2c.toml` (or the current
   directory). It selects `*_test.x`, `test_*.x`, and `tests/**/*.x`,
-  sorted bytewise, excluding `.x2c-build/`.
+  sorted bytewise, excluding `.x2c-build/`. The `tests/` match is relative
+  to the selected project or search root, not its ancestors.
 - Build and run: for each file it runs `x2c script <file> <program args>`
   with `X2C_CACHE_DIR=<root>/.x2c-build/tests`. The script build owns local
   included modules and its per-script cache directories. The project's
@@ -223,10 +224,14 @@ the matching driver from `Compiler.driver_executable()`.
 - Options: `--filter`, `--list`, and `--quiet` pass through to every test
   program; `-j N` runs files concurrently through `Process` jobs with
   output captured per file and printed in order.
-- Output: each program's lines as they finish, then a summary line
+- Output: each program's complete captured output in file order, then a
+  summary line
   `files: 3 passed, 1 failed; tests: 41 passed, 2 failed`. Exit status is
-  1 when any file fails to build or reports a failure, 2 when no test
-  files were found.
+  1 when any file fails to build or reports a failure. Filtered files with
+  no matching tests are omitted from output and file counts. Exit status is
+  2 when no tests match across the whole filtered run (also with `--list`),
+  or when no test files were found. Real failures take precedence over no
+  matches. Gary selected these filter semantics on 2026-10-28.
 - `unittest/` does not migrate. It keeps `test-support.x`, `test-all.x`,
   and the Scope-balance rules. Sharing the assertion implementation is a
   later candidate once `lib/test.x` has users.
@@ -397,3 +402,26 @@ ordinary package build. This supports another bounded standalone package
 integration test when it covers a real missing path. It does not establish
 that migrating the existing harness or promoting the command would be useful;
 those decisions remain conditional follow-ups.
+
+### Skip lifetimes and test selection (2026-10-28)
+
+The delegated review reproduced two further defects: `Test.skip` retained a
+borrowed catch reason after its owner closed, and discovery treated an
+unrelated ancestor named `tests` as a test directory inside the project.
+The repairs retain the skip reason with the existing `Error.snapshot`
+operation and match test directories relative to the selected search boundary.
+
+Gary also selected global filter behavior: unmatched files are ignored;
+status 2 means nothing matched across the whole run. Actual build or test
+failures still return 1. The library's per-program `Test.main` status remains
+unchanged. No-match `--list` programs emit the same zero-test summary as
+normal no-match runs, so the command can distinguish them from real failures
+even when native warnings or startup output are present. Successful listings
+still print names. Command promotion remains a separate decision.
+
+Combined verification passes: `make stage-2`, `test_suite` (3 tests,
+30 assertions), the command smoke, and six original discovery/filter probes.
+The stage-two compiler also preserves the complete dynamic skip reason.
+Existing harness contracts and the command's experimental status are unchanged.
+Final generated artifacts and full publication validation belong to the
+shared integrator; no full gate ran in this repair session.

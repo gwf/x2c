@@ -28,6 +28,22 @@ static void user_error(void) { raise %(bad-arg); }
 $test()
 static void user_skip(void) { Test.skip("not available"); }
 
+static String long_skip_reason(void) {
+  Buffer reason = auto Buffer.new(0);
+  for (int i = 0; i < 20; i++)
+    reason.printf("dynamic-%02d-abcdefghijklmnop;", i);
+  return reason;
+}
+
+$test()
+static void user_long_skip(void) { Test.skip(long_skip_reason()); }
+
+$test()
+static void user_after_long_skip(void) { $expect(1); }
+
+$test()
+static void user_failed_skip(void) { $expect(0); Test.skip("failure remains"); }
+
 $test()
 static void user_empty_skip(void) { Test.skip(""); $expect(0); }
 
@@ -85,6 +101,7 @@ static void user_test_selection_and_skip(void) {
   EXPECT_INT_EQ(status, 0);
   EXPECT_STR_EQ(output,
     "user_pass\nuser_fail\nuser_error\nuser_skip\n"
+    "user_long_skip\nuser_after_long_skip\nuser_failed_skip\n"
     "user_empty_skip\nuser_no_error_zero\n");
   output = run_tests(%("test" "--filter" "user_empty_skip"), status);
   EXPECT_INT_EQ(status, 0);
@@ -94,13 +111,30 @@ static void user_test_selection_and_skip(void) {
   EXPECT_TRUE(output.contains("expected Error to be raised"));
   output = run_tests(%("test" "--list" "--filter" "absent"), status);
   EXPECT_INT_EQ(status, 2);
-  EXPECT_STR_EQ(output, "");
+  EXPECT_STR_EQ(output, "0 passed, 0 failed, 0 skipped\n");
   output = run_tests(%("test"), status);
   EXPECT_INT_EQ(status, 1);
-  EXPECT_TRUE(output.endswith("1 passed, 3 failed, 2 skipped\n"));
+  EXPECT_TRUE(output.endswith("2 passed, 4 failed, 3 skipped\n"));
+}
+
+static void user_test_skip_reason_survives_catch(void) {
+  $test.scoped();
+  String reason = long_skip_reason();
+  int status;
+  String output = run_tests(%("test" "--filter" "long_skip"), status);
+  EXPECT_INT_EQ(status, 0);
+  String expected = %"skip user_long_skip: $reason\n" +
+    "ok user_after_long_skip\n1 passed, 0 failed, 1 skipped\n";
+  EXPECT_STR_EQ(output, expected);
+  output = run_tests(%("test" "--filter" "user_failed_skip"), status);
+  EXPECT_INT_EQ(status, 1);
+  EXPECT_TRUE(output.contains("FAIL user_failed_skip"));
+  EXPECT_TRUE(output.contains("expected 0"));
+  EXPECT_TRUE(output.endswith("0 passed, 1 failed, 0 skipped\n"));
 }
 
 void test_suite(void) {
   $test.run(user_test_assertions_and_errors);
   $test.run(user_test_selection_and_skip);
+  $test.run(user_test_skip_reason_survives_catch);
 }

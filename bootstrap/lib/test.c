@@ -159,9 +159,9 @@ int Test_main(int argc, char * * argv){
       {
         List _x2c_gensym_destructure_0 = row;
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 0));
-        long function = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/test.x",.function = "Test_main",.line = 77,.runtime = 1}; & _x2c_gensym_error_site_1; })));
+        long function = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/test.x",.function = "Test_main",.line = 78,.runtime = 1}; & _x2c_gensym_error_site_1; })));
         String file = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
-        int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/test.x",.function = "Test_main",.line = 77,.runtime = 1}; & _x2c_gensym_error_site_2; })));
+        int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/test.x",.function = "Test_main",.line = 78,.runtime = 1}; & _x2c_gensym_error_site_2; })));
         if(! _selected(name, filters)) continue;
         matched ++;
         if(list){
@@ -199,7 +199,7 @@ int Test_main(int argc, char * * argv){
     }
 
   }
-  if(! list) File_printf(Stdout, "%d passed, %d failed, %d skipped\n", passed, failed, skipped);
+  if(! list ||(List_truth(filters) && ! matched)) File_printf(Stdout, "%d passed, %d failed, %d skipped\n", passed, failed, skipped);
   return failed ? 1 : List_truth(filters) && ! matched ? 2 : 0;
 }
 
@@ -235,6 +235,8 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+Var Error_snapshot(Var);
+
 String List_repr(List);
 
 void x2c_error_catch_close(ErrorHandler);
@@ -268,7 +270,7 @@ static void _run(TestFunction function){
           Var volatile reason;
           reason = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
           {
-            _skipped = Var_as_string(reason);
+            _skipped = Var_as_string(Error_snapshot(reason));
             _did_skip = 1;
           }
 

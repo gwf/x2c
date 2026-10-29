@@ -60,7 +60,8 @@ Each complete test program accepts:
 A normal run prints `ok NAME` or `FAIL NAME (file:line)` for each test,
 then `N passed, M failed, K skipped`. A skipped test prints its reason.
 The program returns 1 when a test fails, 2 when filters select no tests,
-and 0 otherwise.
+and 0 otherwise. A no-match run prints the zero-test summary even with
+`--list`.
 
 For example, `x2c run tests/stack_test.x -- --filter pop --quiet` selects
 test names containing `pop`.
@@ -73,8 +74,10 @@ The command is experimental and available in checkout builds.
 `x2c test` finds `*_test.x`, `test_*.x`, and every `.x` file below a
 `tests/` directory. With no operands, it starts at the nearest `x2c.toml`
 project directory, or the current directory when there is no manifest.
-Pass files or directories to select a smaller search. Build directories
-under `.x2c-build/` are excluded.
+Pass files or directories to select a smaller search. Matching `tests/`
+directories are inside the selected project or search root; an ancestor
+named `tests` does not change discovery. Build directories under
+`.x2c-build/` are excluded.
 
 The command builds and runs each file through the matching compiler's
 `script` command. Each file is a complete program. The script command
@@ -90,5 +93,8 @@ that include only runtime modules.
 Pass `--filter`, `--list`, and `--quiet` through `x2c test` to every test
 program. Use `-j N` to run files concurrently. The runner captures each
 file's output and prints complete file results in discovery order.
-A final summary counts passing and failing files and tests. The command
-returns 1 if any file fails to build or run, and 2 when it finds no files.
+A final summary counts passing and failing files and tests. Files with no
+tests matching the filters are omitted from output and file counts. The
+command returns 2 when filters select no tests across the entire run,
+including with `--list`. Discovery with no files also returns 2. Build
+errors and test failures return 1 even if other files have no matching tests.

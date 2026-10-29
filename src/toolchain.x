@@ -102,10 +102,8 @@ void ToolAction.as_program(ToolAction action) {
 ToolAction Toolchain.compile_action(
   Toolchain t, String source, String object, String depfile, List gen_dirs) =>
   _action(
-    t, <compile>,
-    $(
-      @(_compile_arguments(t, gen_dirs)), "-MMD", "-MP", "-MF", depfile, "-MT",
-      object, "-c", source, "-o", object));
+    t, <compile>, @(_compile_arguments(t, gen_dirs)),
+    "-MMD", "-MP", "-MF", depfile, "-MT", object, "-c", source, "-o", object);
 
 /** Builds the preprocessor action whose output identifies an object.
     It uses the compilation's native flags and include order and keeps line
@@ -116,8 +114,8 @@ ToolAction Toolchain.compile_action(
 ToolAction Toolchain.preprocess_action(
   Toolchain t, String source, String output, List gen_dirs) =>
   _action(
-    t, <preprocess>,
-    %(@(_compile_arguments(t, gen_dirs)) "-E" $source "-o" $output));
+    t, <preprocess>, @(_compile_arguments(t, gen_dirs)), "-E", source,
+    "-o", output);
 
 /** Builds but does not start an `ar rcs` action in object-list order.
     The action does not remove an existing archive, so callers requiring exact
@@ -127,7 +125,7 @@ ToolAction Toolchain.preprocess_action(
 */
 ToolAction Toolchain.archive_action(
   Toolchain t, String output, List objects) =>
-  _action(t, <archive>, $(t.ar, "rcs", output, @objects));
+  _action(t, <archive>, t.ar, "rcs", output, @objects);
 
 /** Builds but does not start a host-compiler link action.
     Input order is preserved; configured linker arguments, the matching x2c
@@ -137,8 +135,7 @@ ToolAction Toolchain.archive_action(
 */
 ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
   _action(
-    t, <link>,
-    $(t.cc, @inputs, @(t.ld_args), t.runtime_lib, "-lm", "-o", output));
+    t, <link>, t.cc, @inputs, @(t.ld_args), t.runtime_lib, "-lm", "-o", output);
 
 /** Builds but does not start the link of a native module. The module leaves
     the x2c runtime unresolved and uses the loading process's copy. macOS
@@ -152,9 +149,8 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
 ToolAction Toolchain.module_action(
   Toolchain t, String output, List inputs, String loader) =>
   _action(
-    t,
-    <link>,
-    %($(t.cc) @inputs @(t.ld_args) @(_module_shape(loader)) "-o" $output));
+    t, <link>, t.cc, @inputs, @(t.ld_args), @(_module_shape(loader)),
+    "-o", output);
 
 /** Creates a `Scope`-owned action that reports nonzero status by default.
     The action retains `arguments` without copying them.
@@ -356,7 +352,7 @@ static void _layout(Toolchain t) {
 
 // native actions
 
-static ToolAction _action(Toolchain t, Symbol phase, List arguments) =>
+static ToolAction _action(Toolchain t, Symbol phase, List @arguments) =>
   ToolAction.new(phase, arguments, t.verbose, t.dry_run);
 
 static List _compile_arguments(Toolchain t, List gen_dirs) => $(
