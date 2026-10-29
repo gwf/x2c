@@ -509,7 +509,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_descriptor_registration_frozen`](#x2c_descriptor_registration_frozen) | Reports under the descriptor lock whether registration is frozen. |
+| [`x2c_descriptor_registration_frozen`](#x2c_descriptor_registration_frozen) | Reports whether successful native worker startup froze registration. |
 | [`x2c_descriptor_thread_start_begin`](#x2c_descriptor_thread_start_begin) | Locks descriptor registration while a native worker starts. |
 | [`x2c_descriptor_thread_start_end`](#x2c_descriptor_thread_start_end) | Ends a native worker start and unlocks descriptor registration. |
 | [`Var.try_export_context`](#Var.try_export_context) | Calls the registered `Context` exporter for `value` when one exists. |
@@ -520,7 +520,7 @@ for source readers but are not supported as user API.
 
 `int x2c_descriptor_registration_frozen(void)`
 
-Reports under the descriptor lock whether registration is frozen.
+Reports whether successful native worker startup froze registration.
 
 Source: `lib/dispatch.x`
 

@@ -1224,8 +1224,8 @@ blocking TCP sockets backed by File streams.
 Public functions:
 
 `Listener.cleanup`, `Socket.cleanup`, `Listener.bind`, `Listener.accept`,
-`x2c_net_accept_fd`, `Listener.port`, `Listener.stop`, `Listener.close`,
-`Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
+`x2c_net_accept_fd`, `Listener.port`, `Listener.write_repr`, `Listener.stop`,
+`Listener.close`, `Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
 `Socket.shutdown_write`, `Socket.peer`, `Socket.close`
 
 ### [lib/path.x](../lib/path.x)

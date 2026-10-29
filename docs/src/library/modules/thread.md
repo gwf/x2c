@@ -274,11 +274,11 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`x2c_thread_cancel`](#x2c_thread_cancel) | Raises a non-resumable stop outcome after queue locks and wait records have been released. |
-| [`x2c_thread_stopping`](#x2c_thread_stopping) | Tests the current wait's pending stop under the internal monitor. |
+| [`x2c_thread_stopping`](#x2c_thread_stopping) | Tests the current caller's pending stop atomically. |
 | [`x2c_thread_wait`](#x2c_thread_wait) | Waits on condition with the internal monitor held. |
 | [`x2c_thread_wait_lock`](#x2c_thread_wait_lock) | Locks the internal monitor shared by stop publication and queue commits. |
-| [`x2c_thread_wait_owner`](#x2c_thread_wait_owner) | Returns the current wait's borrowed Thread token, or NULL for an unmanaged or cleanup-masked caller. |
-| [`x2c_thread_wait_stopped`](#x2c_thread_wait_stopped) | Tests a borrowed wait token under the internal monitor. |
+| [`x2c_thread_wait_owner`](#x2c_thread_wait_owner) | Returns the current caller's borrowed Thread token, or NULL for an unmanaged or cleanup-masked caller. |
+| [`x2c_thread_wait_stopped`](#x2c_thread_wait_stopped) | Tests a live borrowed wait token atomically. |
 | [`x2c_thread_wait_unlock`](#x2c_thread_wait_unlock) | Unlocks the internal stop/queue monitor. |
 
 ### Functions
@@ -296,7 +296,7 @@ Source: `lib/thread.x`
 
 `int x2c_thread_stopping(void)`
 
-Tests the current wait's pending stop under the internal monitor.
+Tests the current caller's pending stop atomically.
 
 Source: `lib/thread.x`
 
@@ -324,8 +324,8 @@ Source: `lib/thread.x`
 
 `Thread x2c_thread_wait_owner(void)`
 
-Returns the current wait's borrowed Thread token, or NULL for an unmanaged
-or cleanup-masked caller. Call while holding the internal monitor.
+Returns the current caller's borrowed Thread token, or NULL for an
+unmanaged or cleanup-masked caller. Lookup reads only caller-local state.
 
 Source: `lib/thread.x`
 
@@ -333,8 +333,8 @@ Source: `lib/thread.x`
 
 `int x2c_thread_wait_stopped(Thread owner)`
 
-Tests a borrowed wait token under the internal monitor. A null token has
-no stop request. Queues use this before committing a rendezvous peer.
+Tests a live borrowed wait token atomically. A null token has no stop
+request. Queues retain the monitor when committing a rendezvous peer.
 
 Source: `lib/thread.x`
 
