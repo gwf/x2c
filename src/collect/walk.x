@@ -210,7 +210,8 @@ static List _macro_rows(
               ? {} : _runtime_macros(c, query);
   if (query && !query.complete) return NULL;
   Cpp cpp = Cpp.new({});
-  Map visited = {};
+  auto Map visited = {};
+  defer _free_macro_exports(visited);
   MacroReplay replay = {.runtime = runtime, .root = query ? query.root : NULL};
   int complete = _replay_included(
     c, NULL, path, visited, NULL, active, cpp, replay);
@@ -219,7 +220,13 @@ static List _macro_rows(
     return NULL;
   }
   Var rows = visited[path];
-  return rows is void ? NULL : rows.list();
+  return rows is void ? NULL : Cpp.rows(rows.map());
+}
+
+/* These independent snapshots belong only to this replay query. */
+static void _free_macro_exports(Map visited) {
+  foreach (Var (_, exports) in visited)
+    if (exports is <map>) exports.map().cleanup();
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -831,9 +838,10 @@ static int _replay_included(
       if (found is <array>) {
         Array state = found;
         Cpp cpp = (Cpp) state[0].pointer();
-        sink.merge(cpp.changes(state[1]));
+        auto Map macros = cpp.exported_macros(state[1]);
+        sink.merge_table(macros);
       }
-      else sink.merge(found);
+      else sink.merge_table(found);
     }
     return 1;
   }
@@ -859,8 +867,9 @@ static int _replay_included(
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
-    visited[path] = cpp.changes(initial);
-    sink.merge(visited[path]);
+    Map macros = cpp.exported_macros(initial);
+    visited[path] = macros;
+    sink.merge_table(macros);
   }
   return 1;
 }
