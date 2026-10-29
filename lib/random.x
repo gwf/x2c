@@ -175,11 +175,12 @@ static inline uint64_t _rotate(uint64_t x, int n) =>
 // UUID text
 
 static String _canonical(const unsigned char *bytes) {
+  static const char digits[] = "0123456789abcdef";
   char text[36];
   for (int i = 0, at = 0; i < 16; i++) {
     if (i == 4 || i == 6 || i == 8 || i == 10) text[at++] = '-';
-    text[at++] = "0123456789abcdef"[bytes[i] >> 4];
-    text[at++] = "0123456789abcdef"[bytes[i] & 15];
+    text[at++] = digits[bytes[i] >> 4];
+    text[at++] = digits[bytes[i] & 15];
   }
   return String.new_len(text, 36);
 }
