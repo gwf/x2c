@@ -442,8 +442,17 @@ int Cpp_hidden(Cpp cpp){
   return depth &&((CppGroup *) cpp -> groups -> bytes)[depth - 1].state == 556015964;
 }
 
+List Cpp_rows(Map macros);
+
+Map Cpp_exported_macros(Cpp cpp, Map initial);
+
 List Cpp_changes(Cpp cpp, Map initial){
-  Array rows = Array_new();
+  return Cpp_rows(Cpp_exported_macros(cpp, initial));
+}
+
+Map Cpp_exported_macros(Cpp cpp, Map initial){
+  if(! Map_truth(initial)) return Map_copy(cpp -> macros);
+  Map macros = Map_new();
   {
     String name;
     Var value;
@@ -456,9 +465,28 @@ List Cpp_changes(Cpp cpp, Map initial){
       value = _x2c_gensym_macro_cursor_output_1;
       {
         Var before = Map_getindex(initial, String_var(name));
-        if(Var_is_void(before) || ! Var_equal(before, value)) Array_push(rows, List_var(cons(String_var(name), cons(value, NULL))));
+        if(Var_is_void(before) || ! Var_equal(before, value)) Map_setindex(macros, String_var(name), value);
       }
 
+    }
+
+  }
+  return macros;
+}
+
+List Cpp_rows(Map macros){
+  Array rows = Array_new();
+  {
+    String name;
+    Var value;
+    Map _x2c_gensym_macro_object_1 = macros;
+    unsigned _x2c_gensym_macro_cursor_1 = 0;
+    Var _x2c_gensym_macro_cursor_output_2;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+      value = _x2c_gensym_macro_cursor_output_3;
+      Array_push(rows, List_var(cons(String_var(name), cons(value, NULL))));
     }
 
   }
@@ -469,11 +497,11 @@ Map Cpp_table(List rows){
   Map macros = Map_new();
   {
     List row;
-    List _x2c_gensym_macro_object_1 = rows;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_2 = rows;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_4))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
       Map_setindex(macros, List_car(row), List_cadr(row));
     }
 
@@ -551,12 +579,30 @@ static void _set(Cpp cpp, String name, Var value){
 void Cpp_merge(Cpp cpp, List rows){
   {
     List row;
-    List _x2c_gensym_macro_object_2 = rows;
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
+    List _x2c_gensym_macro_object_3 = rows;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_5))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_5);
       _set(cpp, Var_as_string(List_car(row)), List_cadr(row));
+    }
+
+  }
+
+}
+
+void Cpp_merge_table(Cpp cpp, Map macros){
+  {
+    String name;
+    Var value;
+    Map _x2c_gensym_macro_object_4 = macros;
+    unsigned _x2c_gensym_macro_cursor_4 = 0;
+    Var _x2c_gensym_macro_cursor_output_6;
+    Var _x2c_gensym_macro_cursor_output_7;
+    while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+      value = _x2c_gensym_macro_cursor_output_7;
+      _set(cpp, name, value);
     }
 
   }
@@ -712,13 +758,13 @@ static void f10_conditions____close(Cpp cpp){
   if(! Map_truth(group.touched)) return;
   {
     String name;
-    Iter _x2c_gensym_macro_iterator_3 = Map_keys(group.touched, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_5 = Map_keys(group.touched, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_3;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      name = Var_as_string(_x2c_gensym_macro_item_3);
+    Var _x2c_gensym_macro_item_5;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
+      name = Var_as_string(_x2c_gensym_macro_item_5);
       {
         if(group.doubtful) Map_setindex(cpp -> macros, String_var(name), Symbol_var(228232));
         _touch(cpp, name);
@@ -1637,11 +1683,11 @@ static int f6_expand____param(f6_expand___Substitution * s, Token token){
   int index = 0;
   {
     String param;
-    List _x2c_gensym_macro_object_4 =(* s).params;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      param = Var_as_string(_x2c_gensym_macro_cursor_output_4);
+    List _x2c_gensym_macro_object_6 =(* s).params;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_8))){
+      param = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         if(String_equal(param, token -> text)) return index;
         index ++;
@@ -1784,11 +1830,11 @@ static List f6_expand____union(List set, List names){
   if(! List_truth(set)) return names;
   {
     String name;
-    List _x2c_gensym_macro_object_5 = names;
-    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+    List _x2c_gensym_macro_object_7 = names;
+    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_9))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_9);
       if(!(List_contains(set, String_var(name)))) set = cons(String_var(name), set);
     }
 
@@ -1801,11 +1847,11 @@ static List f6_expand____meet(List set, List names){
   Array kept = Array_new();
   {
     String name;
-    List _x2c_gensym_macro_object_6 = set;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_6;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+    List _x2c_gensym_macro_object_8 = set;
+    List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
+    Var _x2c_gensym_macro_cursor_output_10;
+    while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_10))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_10);
       if(List_contains(names, String_var(name))) Array_push(kept, String_var(name));
     }
 

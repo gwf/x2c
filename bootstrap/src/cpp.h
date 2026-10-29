@@ -24,6 +24,10 @@ int Cpp_hidden(Cpp cpp);
 
 List Cpp_changes(Cpp cpp, Map initial);
 
+Map Cpp_exported_macros(Cpp cpp, Map initial);
+
+List Cpp_rows(Map macros);
+
 Map Cpp_table(List rows);
 
 int Token_is_word(Token t);
@@ -31,6 +35,8 @@ int Token_is_word(Token t);
 String Token_spelling(Token first, Token last);
 
 void Cpp_merge(Cpp cpp, List rows);
+
+void Cpp_merge_table(Cpp cpp, Map macros);
 
 List Compiler_command_macros(List args);
 

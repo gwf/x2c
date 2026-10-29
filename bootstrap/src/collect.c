@@ -2357,6 +2357,8 @@ void Compiler_install_included_effects(Compiler c){
 
 }
 
+List Cpp_rows(Map);
+
 static List f4_walk____macro_rows(Compiler c, String path, Map active, f4_walk___MacroReplay * query){
   Map runtime = f4_walk____inside(path, _canonical_lib()) ? Map_new() : f4_walk____runtime_macros(c, query);
   if(query && !(* query).complete) return NULL;
@@ -2372,7 +2374,7 @@ static List f4_walk____macro_rows(Compiler c, String path, Map active, f4_walk__
     return NULL;
   }
   Var rows = Map_getindex(visited, String_var(path));
-  return Var_is_void(rows) ? NULL : Var_list(rows);
+  return Var_is_void(rows) ? NULL : Cpp_rows(Var_map(rows));
 }
 
 String Compiler_token_source(Compiler, Token, int *);
@@ -3398,9 +3400,9 @@ static void f4_walk____publish(FileWalk * w){
 
 }
 
-void Cpp_merge(Cpp, List);
+void Cpp_merge_table(Cpp, Map);
 
-List Cpp_changes(Cpp, Map);
+Map Cpp_exported_macros(Cpp, Map);
 
 static int f4_walk____replay_included(Compiler c, Map globs, String path, Map visited, Array exports, Map active, Cpp sink, f4_walk___MacroReplay * query){
   Var found;
@@ -3409,9 +3411,9 @@ static int f4_walk____replay_included(Compiler c, Map globs, String path, Map vi
       if(Var_is(found, 3313778)){
         Array state = Var_array_payload(found);
         Cpp cpp =(Cpp) Var_pointer(Array_getindex(state, 0));
-        Cpp_merge(sink, Cpp_changes(cpp, Var_map_payload(Array_getindex(state, 1))));
+        Cpp_merge_table(sink, Cpp_exported_macros(cpp, Var_map_payload(Array_getindex(state, 1))));
       }
-      else Cpp_merge(sink, Var_list_payload(found));
+      else Cpp_merge_table(sink, Var_map_payload(found));
     }
     return 1;
   }
@@ -3447,8 +3449,9 @@ static int f4_walk____replay_included(Compiler c, Map globs, String path, Map vi
 
   }
   if(cpp){
-    Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
-    Cpp_merge(sink, Var_list_payload(Map_getindex(visited, String_var(path))));
+    Map macros = Cpp_exported_macros(cpp, initial);
+    Map_setindex(visited, String_var(path), Map_var(macros));
+    Cpp_merge_table(sink, macros);
   }
   return 1;
 }
