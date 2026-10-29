@@ -11,7 +11,8 @@ limited to 64 KiB. Each client address can compile once per five seconds.
 Successful results are cached by source hash, with at most 32 entries.
 The handler allows two active compilations and returns 503 while busy.
 Disconnecting a request cancels its compilation. The slot remains occupied
-until the container and attached client have stopped.
+until the container and attached client have stopped. Pending container
+creation or an unavailable Docker daemon can extend cleanup beyond the deadline.
 It does not run the resulting WebAssembly.
 
 ## Run

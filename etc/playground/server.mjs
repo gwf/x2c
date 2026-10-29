@@ -29,14 +29,21 @@ export async function compileInContainer(source, { image = 'x2c-playground', tim
   signal?.throwIfAborted();
   const name = `x2c-playground-${randomUUID()}`;
   let child, failure, removal;
-  const remove = () => new Promise(resolve => {
-    const cleanup = spawn('docker', ['rm', '-f', name], { stdio: 'ignore' });
-    cleanup.on('error', resolve);
-    cleanup.on('close', code => {
-      if (code === 0) child?.kill('SIGKILL');
-      resolve();
-    });
-  });
+  const remove = async () => {
+    for (;;) {
+      try {
+        await execute('docker', ['rm', '-f', name]);
+        break;
+      } catch {
+        try {
+          const { stdout } = await execute('docker', ['ps', '-aq', '--filter', `name=^${name}$`]);
+          if (!stdout.trim()) break;
+        } catch {}
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    child?.kill('SIGKILL');
+  };
   const stop = error => {
     if (failure) return;
     failure = error;
