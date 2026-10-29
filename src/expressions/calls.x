@@ -416,7 +416,7 @@ static List _finish(
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
   if (result_type !== %(<macro-expr>))
-    _check_arity(k, callee_type, arguments, receiver != NULL);
+    _check_arity(k, callee, callee_type, arguments, receiver != NULL);
   k.c.check_meta_call(callee, k.origin);
   callee = _discarding_callee(k.c, callee, callee_type, arguments);
   Macro called = $called;
@@ -425,9 +425,11 @@ static List _finish(
 
 /* A call supplies every fixed parameter, no more unless the parameters are
    variadic, and may omit a final `Iter` destination that transform
-   completes. A method's receiver is counted on both sides. */
+   completes. A short call that a call rewrite rule may complete, such as
+   `Thread.run(jobs)`, is left to its rule. A method's receiver is counted
+   on both sides. */
 static void _check_arity(
-  CallSite &k, Type callee_type, List arguments, int method) {
+  CallSite &k, List callee, Type callee_type, List arguments, int method) {
   List parameters = NULL;
   Type returns = NULL;
   if (!(callee_type ~= %((func *) *)) ||
@@ -439,8 +441,18 @@ static void _check_arity(
   if (supplied + 1 == fixed && !variadic &&
       _exact_iter_type(parameters.last()) && _exact_iter_type(returns))
     return;
+  if (supplied < fixed && _call_rewritable(k.c, callee)) return;
   $fail.expressions_call_arity(
     k.c, k.origin, method, variadic, fixed - method, supplied - method);
+}
+
+/* Whether a call rewrite rule is registered for the spelling `callee`
+   names. */
+static int _call_rewritable(Compiler c, List callee) {
+  match (callee) case %(expr ? (ident ?binding)):
+    return c.rewrite_rules &&
+           c.has_rewrites(<call>, Ast.binding_spelling(binding));
+  return 0;
 }
 
 /* The parameters before `...` or a rest container. */
