@@ -1,0 +1,594 @@
+{
+  "scratch": "/tmp/notes-root-index-6x_u5kj5",
+  "runs": 3,
+  "clients": 64,
+  "seconds": 5,
+  "warmup_s": 1,
+  "naming": "disabled in all x2c binaries",
+  "accounting": false,
+  "changed_archive_members": [
+    "pool.o",
+    "string.o"
+  ],
+  "samples": {
+    "mutex_before": [
+      {
+        "requests": 329790,
+        "elapsed_s": 5.00132,
+        "requests_per_s": 65940.592,
+        "p50_us": 931.0,
+        "p99_us": 4406.0,
+        "warmup_requests": 67596,
+        "server_lifetime": {
+          "user_s": 9.892822,
+          "system_s": 7.297338,
+          "max_rss_bytes": 11812864,
+          "wall_s": 6.128417749889195,
+          "log_bytes": 19869368
+        },
+        "load_process": {
+          "user_s": 0.343807,
+          "system_s": 1.956407,
+          "max_rss_bytes": 13729792,
+          "wall_s": 5.024422917049378
+        },
+        "host_load_before": [
+          5.70849609375,
+          6.2373046875,
+          9.966796875
+        ],
+        "host_load_after": [
+          5.8115234375,
+          6.24951171875,
+          9.94921875
+        ],
+        "server_cpu_us_per_request": 43.25809162879417
+      },
+      {
+        "requests": 333233,
+        "elapsed_s": 5.001314,
+        "requests_per_s": 66629.09,
+        "p50_us": 934.0,
+        "p99_us": 4304.0,
+        "warmup_requests": 67296,
+        "server_lifetime": {
+          "user_s": 9.751975999999999,
+          "system_s": 7.371165,
+          "max_rss_bytes": 12058624,
+          "wall_s": 6.128558333031833,
+          "log_bytes": 20026518
+        },
+        "load_process": {
+          "user_s": 0.329719,
+          "system_s": 1.957042,
+          "max_rss_bytes": 13762560,
+          "wall_s": 5.028865291271359
+        },
+        "host_load_before": [
+          7.42626953125,
+          6.61767578125,
+          9.89306640625
+        ],
+        "host_load_after": [
+          7.31201171875,
+          6.60693359375,
+          9.8701171875
+        ],
+        "server_cpu_us_per_request": 42.75131388738394
+      },
+      {
+        "requests": 302316,
+        "elapsed_s": 5.001294,
+        "requests_per_s": 60447.556,
+        "p50_us": 936.0,
+        "p99_us": 5262.0,
+        "warmup_requests": 68482,
+        "server_lifetime": {
+          "user_s": 9.281493,
+          "system_s": 7.203358,
+          "max_rss_bytes": 11927552,
+          "wall_s": 6.090330833103508,
+          "log_bytes": 18539968
+        },
+        "load_process": {
+          "user_s": 0.303688,
+          "system_s": 1.860951,
+          "max_rss_bytes": 13369344,
+          "wall_s": 5.027412541676313
+        },
+        "host_load_before": [
+          7.52734375,
+          6.7099609375,
+          9.8310546875
+        ],
+        "host_load_after": [
+          8.92626953125,
+          7.01318359375,
+          9.919921875
+        ],
+        "server_cpu_us_per_request": 44.457766762496014
+      }
+    ],
+    "mutex_after": [
+      {
+        "requests": 344110,
+        "elapsed_s": 5.001253,
+        "requests_per_s": 68804.758,
+        "p50_us": 920.0,
+        "p99_us": 3743.0,
+        "warmup_requests": 67402,
+        "server_lifetime": {
+          "user_s": 9.821628,
+          "system_s": 7.237826,
+          "max_rss_bytes": 12419072,
+          "wall_s": 6.133907083887607,
+          "log_bytes": 20575668
+        },
+        "load_process": {
+          "user_s": 0.345868,
+          "system_s": 1.961439,
+          "max_rss_bytes": 13598720,
+          "wall_s": 5.025309166871011
+        },
+        "host_load_before": [
+          5.8115234375,
+          6.24951171875,
+          9.94921875
+        ],
+        "host_load_after": [
+          5.85888671875,
+          6.24169921875,
+          9.90283203125
+        ],
+        "server_cpu_us_per_request": 41.455544431268116
+      },
+      {
+        "requests": 345984,
+        "elapsed_s": 5.001219,
+        "requests_per_s": 69179.934,
+        "p50_us": 914.0,
+        "p99_us": 3683.0,
+        "warmup_requests": 67195,
+        "server_lifetime": {
+          "user_s": 9.814188,
+          "system_s": 7.218647,
+          "max_rss_bytes": 11632640,
+          "wall_s": 6.073280916083604,
+          "log_bytes": 20659018
+        },
+        "load_process": {
+          "user_s": 0.341644,
+          "system_s": 1.961074,
+          "max_rss_bytes": 13926400,
+          "wall_s": 5.030215582810342
+        },
+        "host_load_before": [
+          7.46337890625,
+          6.611328125,
+          9.91015625
+        ],
+        "host_load_after": [
+          7.42626953125,
+          6.61767578125,
+          9.89306640625
+        ],
+        "server_cpu_us_per_request": 41.22386423317739
+      },
+      {
+        "requests": 342135,
+        "elapsed_s": 5.001173,
+        "requests_per_s": 68410.951,
+        "p50_us": 920.0,
+        "p99_us": 3897.0,
+        "warmup_requests": 69096,
+        "server_lifetime": {
+          "user_s": 9.693942999999999,
+          "system_s": 7.510216,
+          "max_rss_bytes": 11681792,
+          "wall_s": 6.066104541998357,
+          "log_bytes": 20561618
+        },
+        "load_process": {
+          "user_s": 0.33399,
+          "system_s": 1.976024,
+          "max_rss_bytes": 13778944,
+          "wall_s": 5.018922249786556
+        },
+        "host_load_before": [
+          7.71826171875,
+          6.7177734375,
+          9.87109375
+        ],
+        "host_load_after": [
+          7.52734375,
+          6.7099609375,
+          9.8310546875
+        ],
+        "server_cpu_us_per_request": 41.835754113867864
+      }
+    ],
+    "thread_before": [
+      {
+        "requests": 300487,
+        "elapsed_s": 5.001163,
+        "requests_per_s": 60083.425,
+        "p50_us": 1054.0,
+        "p99_us": 1318.0,
+        "warmup_requests": 58644,
+        "server_lifetime": {
+          "user_s": 11.679501,
+          "system_s": 12.273391,
+          "max_rss_bytes": 11927552,
+          "wall_s": 6.062781915999949,
+          "log_bytes": 17956618
+        },
+        "load_process": {
+          "user_s": 0.323301,
+          "system_s": 2.116725,
+          "max_rss_bytes": 13484032,
+          "wall_s": 5.014992292039096
+        },
+        "host_load_before": [
+          5.85888671875,
+          6.24169921875,
+          9.90283203125
+        ],
+        "host_load_after": [
+          6.1103515625,
+          6.287109375,
+          9.8974609375
+        ],
+        "server_cpu_us_per_request": 66.69680979920976
+      },
+      {
+        "requests": 303733,
+        "elapsed_s": 5.001222,
+        "requests_per_s": 60731.757,
+        "p50_us": 1044.0,
+        "p99_us": 1292.0,
+        "warmup_requests": 60889,
+        "server_lifetime": {
+          "user_s": 11.590698,
+          "system_s": 11.93261,
+          "max_rss_bytes": 11583488,
+          "wall_s": 6.085175875108689,
+          "log_bytes": 18231168
+        },
+        "load_process": {
+          "user_s": 0.321998,
+          "system_s": 2.051865,
+          "max_rss_bytes": 13582336,
+          "wall_s": 5.016475583892316
+        },
+        "host_load_before": [
+          7.46826171875,
+          6.58203125,
+          9.939453125
+        ],
+        "host_load_after": [
+          7.46337890625,
+          6.611328125,
+          9.91015625
+        ],
+        "server_cpu_us_per_request": 64.51423117639638
+      },
+      {
+        "requests": 204711,
+        "elapsed_s": 5.001426,
+        "requests_per_s": 40930.527,
+        "p50_us": 1159.0,
+        "p99_us": 7759.0,
+        "warmup_requests": 44643,
+        "server_lifetime": {
+          "user_s": 8.295094,
+          "system_s": 8.4697,
+          "max_rss_bytes": 13631488,
+          "wall_s": 6.126976000145078,
+          "log_bytes": 12467768
+        },
+        "load_process": {
+          "user_s": 0.217466,
+          "system_s": 1.434867,
+          "max_rss_bytes": 9584640,
+          "wall_s": 5.025756249669939
+        },
+        "host_load_before": [
+          9.09228515625,
+          7.0791015625,
+          9.92578125
+        ],
+        "host_load_after": [
+          10.60595703125,
+          7.42626953125,
+          10.03125
+        ],
+        "server_cpu_us_per_request": 67.23290582866127
+      }
+    ],
+    "thread_after": [
+      {
+        "requests": 403205,
+        "elapsed_s": 5.00104,
+        "requests_per_s": 80624.23,
+        "p50_us": 784.0,
+        "p99_us": 973.0,
+        "warmup_requests": 81576,
+        "server_lifetime": {
+          "user_s": 13.881191,
+          "system_s": 11.658576,
+          "max_rss_bytes": 11747328,
+          "wall_s": 6.072985707782209,
+          "log_bytes": 24239118
+        },
+        "load_process": {
+          "user_s": 0.412325,
+          "system_s": 2.796719,
+          "max_rss_bytes": 15253504,
+          "wall_s": 5.019801374990493
+        },
+        "host_load_before": [
+          6.1103515625,
+          6.287109375,
+          9.8974609375
+        ],
+        "host_load_after": [
+          6.58154296875,
+          6.3818359375,
+          9.90966796875
+        ],
+        "server_cpu_us_per_request": 52.68310226679675
+      },
+      {
+        "requests": 397289,
+        "elapsed_s": 5.001075,
+        "requests_per_s": 79440.72,
+        "p50_us": 791.0,
+        "p99_us": 1053.0,
+        "warmup_requests": 81355,
+        "server_lifetime": {
+          "user_s": 13.727709,
+          "system_s": 11.644577,
+          "max_rss_bytes": 11878400,
+          "wall_s": 6.12142779212445,
+          "log_bytes": 23932268
+        },
+        "load_process": {
+          "user_s": 0.408112,
+          "system_s": 2.779455,
+          "max_rss_bytes": 15433728,
+          "wall_s": 5.024961416143924
+        },
+        "host_load_before": [
+          7.33544921875,
+          6.54150390625,
+          9.9453125
+        ],
+        "host_load_after": [
+          7.46826171875,
+          6.58203125,
+          9.939453125
+        ],
+        "server_cpu_us_per_request": 53.00867868394883
+      },
+      {
+        "requests": 388996,
+        "elapsed_s": 5.001026,
+        "requests_per_s": 77783.239,
+        "p50_us": 812.0,
+        "p99_us": 1115.0,
+        "warmup_requests": 76299,
+        "server_lifetime": {
+          "user_s": 13.412769,
+          "system_s": 11.609478,
+          "max_rss_bytes": 11943936,
+          "wall_s": 6.078077250160277,
+          "log_bytes": 23264818
+        },
+        "load_process": {
+          "user_s": 0.403528,
+          "system_s": 2.791044,
+          "max_rss_bytes": 14237696,
+          "wall_s": 5.017677166964859
+        },
+        "host_load_before": [
+          8.92626953125,
+          7.01318359375,
+          9.919921875
+        ],
+        "host_load_after": [
+          9.09228515625,
+          7.0791015625,
+          9.92578125
+        ],
+        "server_cpu_us_per_request": 53.777167173513575
+      }
+    ],
+    "go": [
+      {
+        "requests": 343838,
+        "elapsed_s": 5.001117,
+        "requests_per_s": 68752.241,
+        "p50_us": 1069.0,
+        "p99_us": 2167.0,
+        "warmup_requests": 67012,
+        "server_lifetime": {
+          "user_s": 10.610119,
+          "system_s": 9.752819,
+          "max_rss_bytes": 23887872,
+          "wall_s": 6.0656441249884665,
+          "log_bytes": 25061981
+        },
+        "load_process": {
+          "user_s": 0.32994599999999996,
+          "system_s": 2.275758,
+          "max_rss_bytes": 13762560,
+          "wall_s": 5.016527084168047
+        },
+        "host_load_before": [
+          6.58154296875,
+          6.3818359375,
+          9.90966796875
+        ],
+        "host_load_after": [
+          7.33544921875,
+          6.54150390625,
+          9.9453125
+        ],
+        "server_cpu_us_per_request": 49.56294998174516
+      },
+      {
+        "requests": 298163,
+        "elapsed_s": 5.001534,
+        "requests_per_s": 59614.31,
+        "p50_us": 1093.0,
+        "p99_us": 3544.0,
+        "warmup_requests": 66711,
+        "server_lifetime": {
+          "user_s": 10.221307,
+          "system_s": 9.438291,
+          "max_rss_bytes": 23986176,
+          "wall_s": 6.0785810416564345,
+          "log_bytes": 22257445
+        },
+        "load_process": {
+          "user_s": 0.316656,
+          "system_s": 2.3894159999999998,
+          "max_rss_bytes": 13500416,
+          "wall_s": 5.026850124821067
+        },
+        "host_load_before": [
+          7.31201171875,
+          6.60693359375,
+          9.8701171875
+        ],
+        "host_load_after": [
+          7.60693359375,
+          6.6796875,
+          9.87646484375
+        ],
+        "server_cpu_us_per_request": 53.88051217680624
+      },
+      {
+        "requests": 297971,
+        "elapsed_s": 5.001553,
+        "requests_per_s": 59575.696,
+        "p50_us": 1094.0,
+        "p99_us": 3411.0,
+        "warmup_requests": 67150,
+        "server_lifetime": {
+          "user_s": 10.194852,
+          "system_s": 9.453293,
+          "max_rss_bytes": 23691264,
+          "wall_s": 6.090079459361732,
+          "log_bytes": 22272512
+        },
+        "load_process": {
+          "user_s": 0.310457,
+          "system_s": 2.356743,
+          "max_rss_bytes": 13434880,
+          "wall_s": 5.030188832897693
+        },
+        "host_load_before": [
+          7.60693359375,
+          6.6796875,
+          9.87646484375
+        ],
+        "host_load_after": [
+          7.71826171875,
+          6.7177734375,
+          9.87109375
+        ],
+        "server_cpu_us_per_request": 53.812694969612814
+      }
+    ]
+  },
+  "order": [
+    [
+      "mutex_before",
+      "mutex_after",
+      "thread_before",
+      "thread_after",
+      "go"
+    ],
+    [
+      "thread_after",
+      "thread_before",
+      "mutex_after",
+      "mutex_before",
+      "go"
+    ],
+    [
+      "go",
+      "mutex_after",
+      "mutex_before",
+      "thread_after",
+      "thread_before"
+    ]
+  ],
+  "binary_sha256": {
+    "mutex_before": "14291a40efc99303c1d1584814dd752170c92f04c387f27ecd6d533855930a29",
+    "mutex_after": "93c04d1c87b10be886d7347051217ab3b3d21fdad331439d4320328a5584c50e",
+    "thread_before": "ef21aff392dd6518142327eb98c4eddb325ea8cde2e600838a817a393a0844f8",
+    "thread_after": "805b07d9e08918da1220894c1673790bcd3797e7aece89e90fcc7fadeb772d88",
+    "go": "b4dbc9c5c8e791ffc938a005d1c652ec7d04ee1be098696ad78207311294add4"
+  },
+  "fixture_sha256": "cbb36afe201f9f9b0358c6919771cc0da5365f5c525abc112922ea9bcb32314c",
+  "host_condition": "Other host/workspace activity possible; integrator repair work active, not a confirmed quiet window.",
+  "summary": {
+    "mutex_before": {
+      "requests_per_s": 65940.592,
+      "p50_us": 934.0,
+      "p99_us": 4406.0,
+      "rps_min": 60447.556,
+      "rps_max": 66629.09,
+      "peak_rss_mib": 11.375,
+      "server_cpu_cores": 2.7939916811608585,
+      "client_cpu_cores": 0.4547270343409574,
+      "server_cpu_us_per_request": 43.25809162879417
+    },
+    "mutex_after": {
+      "requests_per_s": 68804.758,
+      "p50_us": 920.0,
+      "p99_us": 3743.0,
+      "rps_min": 68410.951,
+      "rps_max": 69179.934,
+      "peak_rss_mib": 11.140625,
+      "server_cpu_cores": 2.8045524709539924,
+      "client_cpu_cores": 0.45913732337320756,
+      "server_cpu_us_per_request": 41.455544431268116
+    },
+    "thread_before": {
+      "requests_per_s": 60083.425,
+      "p50_us": 1054.0,
+      "p99_us": 1318.0,
+      "rps_min": 40930.527,
+      "rps_max": 60731.757,
+      "peak_rss_mib": 11.375,
+      "server_cpu_cores": 3.865674301415297,
+      "client_cpu_cores": 0.47321330689266594,
+      "server_cpu_us_per_request": 66.69680979920976
+    },
+    "thread_after": {
+      "requests_per_s": 79440.72,
+      "p50_us": 791.0,
+      "p99_us": 1053.0,
+      "rps_min": 77783.239,
+      "rps_max": 80624.23,
+      "peak_rss_mib": 11.328125,
+      "server_cpu_cores": 4.1448313794769955,
+      "client_cpu_cores": 0.6366635185364792,
+      "server_cpu_us_per_request": 53.00867868394883
+    },
+    "go": {
+      "requests_per_s": 59614.31,
+      "p50_us": 1093.0,
+      "p99_us": 3411.0,
+      "rps_min": 59575.696,
+      "rps_max": 68752.241,
+      "peak_rss_mib": 22.78125,
+      "server_cpu_cores": 3.2342413246237958,
+      "client_cpu_cores": 0.5302385434432153,
+      "server_cpu_us_per_request": 53.812694969612814
+    }
+  }
+}

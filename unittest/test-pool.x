@@ -1,9 +1,11 @@
 /*  test-pool.x -- unit tests for nested interning pools */
 
 #include "test-support.x"
+#include "test-macros.x"
 #include <pthread.h>
 #include <stdatomic.h>
 #include <string.h>
+#include <unistd.h>
 
 typedef struct PoolThreadProbe {
   Pool parent;
@@ -28,6 +30,11 @@ static void *_pool_parent_allocator(void *data) {
 }
 
 static int pool_probe_hash_calls;
+static Pool pool_probe_root;
+static int pool_probe_grow, pool_probe_fail;
+
+static String _root_text(Pool pool, const char *bytes) =>
+  String.new_in(pool, bytes, strlen(bytes));
 
 typedef struct PoolProbe {
   long value;
@@ -42,6 +49,16 @@ static unsigned _pool_probe_hash(Var value) {
 
 
 static int _pool_probe_equal(Var a, Var b) {
+  if (pool_probe_grow) {
+    pool_probe_grow = 0;
+    unsigned count = pool_probe_root.table.capacity;
+    for (unsigned i = 0; i < count; i++) {
+      char text[80];
+      snprintf(text, sizeof(text), "root-reentrant-%u-%u", count, i);
+      _root_text(pool_probe_root, text);
+    }
+  }
+  if (pool_probe_fail) raise %(bad-arg (operation "root equality test"));
   PoolProbe *left = a, *right = b;
   return left.value == right.value;
 }
@@ -512,7 +529,127 @@ static void pool_free_from_child_uses_parent_owner(void) {
   Pool.release(child.release());
 }
 
-#include "test-macros.x"
+typedef struct RootIndexTest {
+  Pool root;
+  String seed, *identities;
+  List list;
+  int count, promote;
+  atomic_int started, stop, failed;
+} RootIndexTest;
+
+static void *_root_index_reader(void *data) {
+  RootIndexTest *test = data;
+  while (!atomic_load(&test.stop)) {
+    if (_root_text(test.root, test.seed) !== test.seed ||
+        !test.root.lookup(test.list).same(test.list) ||
+        !test.root.owns(test.seed)) atomic_store(&test.failed, 1);
+    atomic_store(&test.started, 1);
+  }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void *_root_index_writer(void *data) {
+  RootIndexTest *test = data;
+  Pool.thread_initialize();
+  Pool child = test.promote ? test.root.retain() : NULL;
+  Pool previous = child ? x2c_pool_exchange(child) : NULL;
+  for (int i = 0; i < test.count; i++) {
+    char bytes[80];
+    snprintf(bytes, sizeof(bytes), "root-index-%s-%d",
+      test.promote ? "promoted" : "racing", i);
+    String value = _root_text(child ? child : test.root, bytes);
+    if (child) {
+      value.promote();
+      cons(value, NULL).promote();
+    }
+    else test.identities[i] = value;
+  }
+  if (child) { x2c_pool_exchange(previous); child.release(); }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void pool_root_reads_and_concurrent_growth(void) {
+  $test.scoped();
+  Pool root = Pool.current();
+  String seed = _root_text(root, "root-reader-seed");
+  List list = List.cons_in(root, seed, NULL);
+  unsigned capacity = root.table.capacity;
+  int count = capacity / 2 + 32;
+  RootIndexTest reader = {.root = root, .seed = seed, .list = list};
+  pthread_t read_thread, writers[3];
+  Pool.thread_start();
+  pthread_mutex_lock(&root.mutex);
+  int created = pthread_create(&read_thread, NULL, _root_index_reader, &reader);
+  EXPECT_INT_EQ(created, 0);
+  if (created) { pthread_mutex_unlock(&root.mutex); return; }
+  for (int i = 0; i < 1000 && !atomic_load(&reader.started); i++) usleep(1000);
+  int progressed = atomic_load(&reader.started);
+  pthread_mutex_unlock(&root.mutex);
+  EXPECT_TRUE(progressed);
+  String *first = xcalloc(count, sizeof(String));
+  String *second = xcalloc(count, sizeof(String));
+  RootIndexTest jobs[3] = {
+    {.root = root, .count = count, .identities = first},
+    {.root = root, .count = count, .identities = second},
+    {.root = root, .count = count, .promote = 1}
+  };
+  int launched = 0;
+  for (int i = 0; i < 3; i++) {
+    int error = pthread_create(&writers[i], NULL, _root_index_writer, &jobs[i]);
+    EXPECT_INT_EQ(error, 0);
+    if (error) break;
+    launched++;
+  }
+  for (int i = 0; i < launched; i++)
+    EXPECT_INT_EQ(pthread_join(writers[i], NULL), 0);
+  atomic_store(&reader.stop, 1);
+  EXPECT_INT_EQ(pthread_join(read_thread, NULL), 0);
+  EXPECT_FALSE(atomic_load(&reader.failed));
+  EXPECT_TRUE(root.table.capacity > capacity);
+  if (launched >= 2) {
+    int same = 1;
+    for (int i = 0; i < jobs[0].count; i++)
+      if (first[i] !== second[i]) same = 0;
+    EXPECT_TRUE(same);
+  }
+  EXPECT_TRUE(_root_text(root, "root-reader-seed") === seed);
+  EXPECT_TRUE(root.lookup(list).same(list));
+  if (launched == 3) {
+    String promoted = _root_text(root, "root-index-promoted-0");
+    EXPECT_TRUE(root.owns(promoted));
+    EXPECT_TRUE(root.owns(List.cons_in(root, promoted, NULL)));
+  }
+}
+
+static void pool_root_callback_growth_and_error(void) {
+  $test.scoped();
+  Pool root = Pool.current();
+  pool_probe_root = root;
+  PoolProbe *first = root.malloc(sizeof(PoolProbe));
+  first.value = 17;
+  Var original = root.intern_new(Var.new(<pprobe>, first), first);
+  PoolProbe *next = root.malloc(sizeof(PoolProbe));
+  next.value = 17 + (1L << 32);
+  Var candidate = Var.new(<pprobe>, next);
+  unsigned capacity = root.table.capacity;
+  pool_probe_grow = 1;
+  EXPECT_TRUE(root.intern_new(candidate, next).same(candidate));
+  EXPECT_TRUE(root.table.capacity > capacity);
+  EXPECT_TRUE(root.lookup(original).same(original));
+  EXPECT_TRUE(root.lookup(candidate).same(candidate));
+  PoolProbe query = {.value = 17};
+  int failed = 0;
+  pool_probe_fail = 1;
+  try root.lookup(Var.new(<pprobe>, &query));
+  catch %(bad-arg *): failed = 1;
+  finally pool_probe_fail = 0;
+  EXPECT_TRUE(failed);
+  EXPECT_TRUE(root.lookup(original).same(original));
+  String after = _root_text(root, "root-after-callback-error");
+  EXPECT_TRUE(root.owns(after));
+}
 
 void pool_suite(void) {
   $test.run(pool_lookup_shadows_outward);
@@ -536,4 +673,6 @@ void pool_suite(void) {
   $test.run(pool_bracket_requires_an_open_child);
   $test.run(pool_release_and_parent_allocation_do_not_deadlock);
   $test.run(pool_free_from_child_uses_parent_owner);
+  $test.run(pool_root_callback_growth_and_error);
+  $test.run(pool_root_reads_and_concurrent_growth);
 }

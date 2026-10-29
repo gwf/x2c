@@ -490,7 +490,7 @@ static int _promote_level(
   _lock(up);
   defer _unlock(up);
   int inserted;
-  _setdefault(up.table, object, inserted);
+  _setdefault(up, object, inserted);
   if (inserted) up.interned++;
   if (block && block.owner == inner) _mark_slot(block, slot);
   else if (promotion) _push_promotion(inner, promotion);
