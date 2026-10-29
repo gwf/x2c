@@ -99,6 +99,19 @@ This plan begins one deliberately.
    platform conditionals and makes yyjson's `#define bool unsigned char`
    in an untaken `#elif` arm harmless without a special rule.
 
+Rulings during implementation (2026-10-28, orchestrator):
+
+- `defined(__GNUC__)` is true, by the premise that already makes
+  `__cplusplus` and `_MSC_VER` never defined: x2c output is always
+  compiled by a GNU-style compiler. Only `defined`, `#ifdef`, and
+  `#ifndef` decide it; `__GNUC__` used as a value, as in
+  `#if __GNUC__ >= 4`, stays undecided because x2c does not know the
+  version. No other host name is added.
+- `typeof`, `typeof_unqual`, `__typeof__`, and `__typeof` are accepted as
+  type specifiers with a parenthesized type or expression operand, so
+  common GNU macro bodies translate. An operand x2c cannot type gives an
+  unresolved type that C alone types.
+
 Routine choices, settled here:
 
 - Full C99 expansion semantics: object-like and function-like macros,
@@ -197,9 +210,10 @@ One coherent change, in this order, so each step is probe-able with
   integrator owns that refresh; the implementing session performs a local
   rebootstrap only if the seed cannot consume the change, which this plan
   does not expect, and must pass `make stage-2`.
-- A program whose macro use parsed before continues to parse; the
-  expansion is what C would have produced. A program that relied on x2c
-  reading an unexpanded prefix macro keeps working, because an
+- A macro body is x2c source: a body that x2c cannot parse now reports
+  at the use, with the macro note, where C read it before. The `typeof`
+  family is accepted so common GNU bodies translate. A program that relied
+  on x2c reading an unexpanded prefix macro keeps working, because an
   unconditional prefix macro now expands to the same words.
 - Behavior preserved on purpose: platform arms parse both ways, system
   macros pass through, directives stay in the output, `.` reaches members
