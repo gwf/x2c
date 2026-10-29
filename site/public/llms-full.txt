@@ -7039,10 +7039,10 @@ order. Each file runs through
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
 
-The final line reports passed and failed files and tests. With `--filter`,
+The final line reports passed and failed files and tests. With a test-name filter,
 files containing no matching tests are omitted from output and file counts.
 The command returns 2 if filters select no tests across the whole run,
-including with `--list`, or if discovery finds no files. Actual build or
+including when listing tests, or if discovery finds no files. Actual build or
 test failures return 1 even when other files have no matches. See
 [Testing](https://x2c-lang.dev/docs/guide/testing.html) for the test library and assertions.
 
