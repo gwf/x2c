@@ -50,6 +50,7 @@ prefix.
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
+| [`x2c_json_write`](json.md#x2c_json_write) | `lib/json.x` | `void x2c_json_write(Buffer out, Var value, int pretty)` |
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match/match.x` | `void x2c_match_initialize(void)` |
 | [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
@@ -110,4 +111,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 98 functions.
+Total: 99 functions.
