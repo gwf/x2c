@@ -508,13 +508,13 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 Channel Channel_new(Var type, Var capacity){
   if(Var_is_void(capacity)){
-    if(x2c_var_equal(type, Symbol_var(47146907607368)) || ! Var_is(type, 1328354264)){
+    if(x2c_var_equal_lane(type, Symbol_var(47146907607368)) || ! Var_is(type, 1328354264)){
       capacity = type;
       type = Symbol_var(45156);
     }
     else capacity = int_var(0);
   }
-  if(! Var_is(type, 1328354264) ||(! x2c_var_equal(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
+  if(! Var_is(type, 1328354264) ||(! x2c_var_equal_lane(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 93,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
     __builtin_unreachable();
@@ -703,7 +703,7 @@ void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
 
 static size_t _capacity(Var value){
-  if(x2c_var_equal(value, Symbol_var(47146907607368))) return SIZE_MAX;
+  if(x2c_var_equal_lane(value, Symbol_var(47146907607368))) return SIZE_MAX;
   if(Var_is_integer(value)){
     long volatile capacity = - 1;
     {

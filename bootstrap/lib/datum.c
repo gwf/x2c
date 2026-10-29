@@ -291,7 +291,7 @@ List Var_independent_data_problem(Var value, Map marks){
   if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
   if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
   ulong address =(ulong) value.u64;
-  if(Map_contains(marks, ulong_var(address))) return cons(String_var(x2c_var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _10 : _11), _16);
+  if(Map_contains(marks, ulong_var(address))) return cons(String_var(x2c_var_equal_lane(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _10 : _11), _16);
   Map_setindex(marks, ulong_var(address), int_var(1));
   List problem = _items_problem(value, marks);
   if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));

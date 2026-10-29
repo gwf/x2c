@@ -1657,7 +1657,7 @@ static String f12_declarations____member_name(List identity, String participant)
   String name = NULL; {
     List _x2c_gensym_match_expr_10 = identity;  switch(0){
       default:{List _x2c_gensym_match_at_92, _x2c_gensym_match_at_93, _x2c_gensym_match_at_94, _x2c_gensym_match_at_95; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_10 &&((x2c_match_value_0 = _x2c_gensym_match_expr_10 ->car, 1) && Var_is(_x2c_gensym_match_expr_10 -> car, 1318210446) ||(Var_is(_x2c_gensym_match_expr_10 -> car, 806120) &&(_x2c_gensym_match_at_92 = Var_list_payload(_x2c_gensym_match_expr_10 -> car), 1)) && _x2c_gensym_match_at_92 &&(x2c_match_value_0 = _x2c_gensym_match_at_92 ->car, 1) && Var_is(_x2c_gensym_match_at_92 -> car, 1318210446) && !(_x2c_gensym_match_at_93 = _x2c_gensym_match_at_92 ->cdr)) &&(_x2c_gensym_match_at_94 = _x2c_gensym_match_expr_10 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_94 ->car, 1) && Var_is(_x2c_gensym_match_at_94 -> car, 1318210446) && !(_x2c_gensym_match_at_95 = _x2c_gensym_match_at_94 ->cdr)){{
-        Var owner;  owner = x2c_match_value_0;  Var member;  member = x2c_match_value_1;  if(x2c_var_equal(owner, String_var(participant))) name = Var_as_string(member);
+        Var owner;  owner = x2c_match_value_0;  Var member;  member = x2c_match_value_1;  if(x2c_var_equal_lane(owner, String_var(participant))) name = Var_as_string(member);
       }
       break;}}
     }
@@ -2353,7 +2353,7 @@ static Type f10_resolution____method_signature(Compiler c, Type owner, Type part
   signature = f10_resolution____relative_signature(c, binding, signature, participant);
   List parameters = NULL;
   Type result = NULL;
-  if(f10_resolution____function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && x2c_var_equal(List_car(parameters), List_var(owner))){
+  if(f10_resolution____function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && x2c_var_equal_lane(List_car(parameters), List_var(owner))){
     parameters = List_map(parameters, ({
       Var _x2c_gensym_lambda_capture_value_0 = List_var(owner);  Var _x2c_gensym_lambda_capture_value_1 = List_var(participant);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
         _x2c_gensym_lambda_capture_value_0, _x2c_gensym_lambda_capture_value_1
@@ -2518,7 +2518,7 @@ static List f10_resolution____conversion_requirement(ProtocolAdapters * a, Strin
     while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_20))){
       parameter = _x2c_gensym_macro_cursor_output_20;
       {
-        if(x2c_var_equal(parameter, List_var(variable))){
+        if(x2c_var_equal_lane(parameter, List_var(variable))){
           if(! String_truth((fallback ?(* a).forward :(* a).reverse))) return cons(String_var(member), cons(Symbol_var(adapter), cons(Symbol_var(direction), _267)));
         }
         else if(f10_resolution____contents(parameter, (* a).binder) & PROTOCOL_VARIABLE) return cons(String_var(member), cons(Symbol_var(adapter), _269));
@@ -2536,8 +2536,8 @@ static List f10_resolution____conversion_requirement(ProtocolAdapters * a, Strin
 }
 
 static int f10_resolution____contents(Var value, String variable){
-  if(Var_is_row(value, 11, 7, 1)) return x2c_var_equal(value, String_var(variable)) ? PROTOCOL_VARIABLE : 0;
-  if(x2c_var_equal(value, Symbol_var(1519197))) return PROTOCOL_VARIADIC;
+  if(Var_is_row(value, 11, 7, 1)) return x2c_var_equal_lane(value, String_var(variable)) ? PROTOCOL_VARIABLE : 0;
+  if(x2c_var_equal_lane(value, Symbol_var(1519197))) return PROTOCOL_VARIADIC;
   if(! Var_is_row(value, 9, 7, 4)) return 0;
   int contents = 0;
   {
@@ -2569,10 +2569,10 @@ static int f10_resolution____unify(Var pattern, Var actual, Map variables, Map b
       Map_setindex(bindings, String_var(variable), actual);
       return 1;
     }
-    return x2c_var_equal(bound, actual);
+    return x2c_var_equal_lane(bound, actual);
   }
   if(Var_is_row(pattern, 9, 7, 4) != Var_is_row(actual, 9, 7, 4)) return 0;
-  if(! Var_is_row(pattern, 9, 7, 4)) return x2c_var_equal(pattern, actual);
+  if(! Var_is_row(pattern, 9, 7, 4)) return x2c_var_equal_lane(pattern, actual);
   List left = Var_list_payload(pattern), right = Var_list_payload(actual);
   if(! List_truth(left) || ! List_truth(right)) return List_equal(left, right);
   return f10_resolution____unify(List_car(left), List_car(right), variables, bindings) && f10_resolution____unify(List_var(List_cdr(left)), List_var(List_cdr(right)), variables, bindings);
@@ -2629,7 +2629,7 @@ static int f10_resolution____exact_conversion(Type signature, Type parameter, Ty
   List parameters = NULL;
   Type actual_result = NULL;
   if(! f10_resolution____function_parts(signature, &(parameters), &(actual_result))) return 0;
-  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && x2c_var_equal(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
+  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && x2c_var_equal_lane(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
 }
 
 static int f10_resolution____function_parts(Type signature, List * parameters, Type * result){
@@ -2942,7 +2942,7 @@ static int f10_resolution____has_default(List members){
     Var _x2c_gensym_macro_cursor_output_30;
     while(List_try_next(_x2c_gensym_macro_object_28, &(_x2c_gensym_macro_cursor_28), &(_x2c_gensym_macro_cursor_output_30))){
       member = Var_list_payload(_x2c_gensym_macro_cursor_output_30);
-      if(x2c_var_equal(List_cadr(member), Symbol_var(4507969008424))) return 1;
+      if(x2c_var_equal_lane(List_cadr(member), Symbol_var(4507969008424))) return 1;
     }
 
   }
@@ -3280,7 +3280,7 @@ static List f6_lookup____member_row(Compiler c, List protocols, Type participant
             Var _x2c_gensym_macro_cursor_output_41;
             while(List_try_next(_x2c_gensym_macro_object_37, &(_x2c_gensym_macro_cursor_37), &(_x2c_gensym_macro_cursor_output_41))){
               row = Var_list_payload(_x2c_gensym_macro_cursor_output_41);
-              if(x2c_var_equal(List_car(row), String_var(member))) return row;
+              if(x2c_var_equal_lane(List_car(row), String_var(member))) return row;
             }
 
           }
@@ -3442,7 +3442,7 @@ static int f6_lookup____declares_member(List rows, String member){
     Var _x2c_gensym_macro_cursor_output_46;
     while(List_try_next(_x2c_gensym_macro_object_42, &(_x2c_gensym_macro_cursor_42), &(_x2c_gensym_macro_cursor_output_46))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_46);
-      if(x2c_var_equal(List_car(row), String_var(member))) return 1;
+      if(x2c_var_equal_lane(List_car(row), String_var(member))) return 1;
     }
 
   }
@@ -4385,7 +4385,7 @@ static List f8_adapters____default_part(ProtocolAdapters * a, String member, Typ
         storage = x2c_match_value_0;
         {
           String spelling = _member_spelling((* a).participant, member);
-          if(x2c_var_equal(storage, Symbol_var(1317118534))) return cons(List_var(({
+          if(x2c_var_equal_lane(storage, Symbol_var(1317118534))) return cons(List_var(({
             Var _x2c_gensym_literal_part_144 = List_var(Sym_introduce((* a).c -> sym, spelling));  cons(_603, cons(_x2c_gensym_literal_part_144, cons(storage, NULL)));
           }
           )), NULL);
@@ -4758,7 +4758,7 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 }
 
 static Var _x2c_gensym_lambda_0(Var parameter, Type owner, Type participant){
-  return x2c_var_equal(parameter, List_var(owner)) ? List_var(participant) : parameter;
+  return x2c_var_equal_lane(parameter, List_var(owner)) ? List_var(participant) : parameter;
   ;
 }
 

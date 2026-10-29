@@ -388,7 +388,7 @@ static int _hidden_group(Array stack){
     Var _x2c_gensym_macro_cursor_output_4;
     while(Array_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       group = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      if(x2c_var_equal(List_caddr(group), int_var(2))) return 1;
+      if(x2c_var_equal_lane(List_caddr(group), int_var(2))) return 1;
     }
 
   }
@@ -398,7 +398,7 @@ static int _hidden_group(Array stack){
 static size_t _code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
   else if(token -> type == 19147688 && String_equal(token -> text, _29)) return _note_attribute(&((* s)), i);
-  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) _mark_layout(&((* s)), i, x2c_var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
+  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) _mark_layout(&((* s)), i, x2c_var_equal_lane(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
 
@@ -439,7 +439,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 327}; & _x2c_gensym_error_site_1; })));
     if(level > value) value = level;
   }
-  if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
+  if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order_lane(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
 }
 
 static Token _macro_directive(String content, int * undefined){
@@ -478,13 +478,13 @@ static void _note_function_macro(Compiler c, String name, Token params){
   Token first = Token_skip_trivia(params + 1);
   if(first -> type == 19147688 && Token_skip_trivia(first + 1) -> type == 83) param = first -> text;
   Var kind = _macro_prefix(c, after, param);
-  if(x2c_var_equal(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
-  else if(x2c_var_equal(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
+  if(x2c_var_equal_lane(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
+  else if(x2c_var_equal_lane(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
 }
 
 static void _note_prefix_macro(Compiler c, String name, Token body){
   Var definition = _macro_prefix(c, body, NULL), existing;
-  if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(x2c_var_equal(existing, Symbol_var(1318210446)) && ! x2c_var_equal(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
+  if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(x2c_var_equal_lane(existing, Symbol_var(1318210446)) && ! x2c_var_equal_lane(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
 }
 
 static Var _macro_prefix(Compiler c, Token token, String param){
@@ -537,7 +537,7 @@ static int _is_specifier(Symbol type){
 
 static int _is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _29) || String_equal(word, _36) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _29) || String_equal(word, _36) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal_lane(definition, Symbol_var(102150700288988)));
 }
 
 static int _prefix_rank(Var v){

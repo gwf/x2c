@@ -5,7 +5,37 @@
 
 #include "rewrite.h"
 #include "compiler-meta.h"
+static String _4, _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static String _dynamic_lane(Symbol op);
+
 static Symbol _dynamic_operation(Symbol assignment);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("x2c_var_add_lane");
+  _1 = String_new("x2c_var_sub_lane");
+  _2 = String_new("x2c_var_mul_lane");
+  _3 = String_new("x2c_var_div_lane");
+  _4 = String_new("x2c_var_mod_lane");
+}
+
+static String _dynamic_lane(Symbol op){
+  switch(op){
+    case 56 : return _0;
+    case 62 : return _1;
+    case 54 : return _2;
+    case 95 : return _3;
+    case 75 : return _4;
+  }
+  return NULL;
+}
 
 List _x2c_operator_rows(void);
 
@@ -17,7 +47,7 @@ static Symbol _dynamic_operation(Symbol assignment){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      if(Var_truth(List_getindex(row, 2)) && x2c_var_equal(List_getindex(row, 2), Symbol_var(assignment))) return Var_symbol(List_car(row));
+      if(Var_truth(List_getindex(row, 2)) && x2c_var_equal_lane(List_getindex(row, 2), Symbol_var(assignment))) return Var_symbol(List_car(row));
     }
 
   }

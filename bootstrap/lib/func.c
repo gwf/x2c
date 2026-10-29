@@ -504,14 +504,14 @@ static List f4_func____parameter(Func fn, unsigned index){
 }
 
 static int f4_func____is_reference(List parameter){
-  return x2c_var_equal(List_car(parameter), Symbol_var(77)) || x2c_var_equal(List_car(parameter), Symbol_var(33330008396));
+  return x2c_var_equal_lane(List_car(parameter), Symbol_var(77)) || x2c_var_equal_lane(List_car(parameter), Symbol_var(33330008396));
 }
 
 static void * f4_func____reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
   List declared = f4_func____parameter(fn, i), source = argv[i].reference_type;
   int signature_reference = f4_func____is_reference(declared);
   List target = signature_reference ? List_cdr(declared) : NULL;
-  if(! List_truth(source) ||(! argv[i].data.reference && ! x2c_var_equal(List_car(declared), Symbol_var(33330008396))) || ! signature_reference || ! List_truth(want) || ! List_equal(target, declared_target) ||(! f4_func____reference_type_accepts(want, source) && ! f4_func____reference_type_accepts(declared_target, source))){
+  if(! List_truth(source) ||(! argv[i].data.reference && ! x2c_var_equal_lane(List_car(declared), Symbol_var(33330008396))) || ! signature_reference || ! List_truth(want) || ! List_equal(target, declared_target) ||(! f4_func____reference_type_accepts(want, source) && ! f4_func____reference_type_accepts(declared_target, source))){
     List sig = fn ? fn -> sig : NULL;
     {
       static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/func/func.x",.function = "f4_func____reference_argument",.line = 502,.runtime = 1};
@@ -587,15 +587,15 @@ if(context_size > SIZE_MAX - context_offset){
 
 }
 Var last = List_last(params);
-if(x2c_var_equal(last, List_var(_6))) rest = 1;
-else if(x2c_var_equal(last, List_var(_10))) rest = 2;
-else if(rest && ! x2c_var_equal(last, List_var(_5))){
+if(x2c_var_equal_lane(last, List_var(_6))) rest = 1;
+else if(x2c_var_equal_lane(last, List_var(_10))) rest = 2;
+else if(rest && ! x2c_var_equal_lane(last, List_var(_5))){
   static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 552,.runtime = 1};
   x2c_error_raise_n(& _x2c_gensym_error_site_24, 4372535886, 1, Symbol_var(39502), List_var(signature));
   __builtin_unreachable();
 }
 int n = List_len(params);
-int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_12));
+int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal_lane(List_car(params), List_var(_12));
 Func fn = xcalloc(1, context_offset + context_size);
 fn -> sig = signature;
 fn -> params = void_params ? NULL : params;

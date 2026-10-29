@@ -68,7 +68,7 @@ char * Compiler_code_pretty_string(Compiler c, Array code, String output_file){
   ;
   int count = Array_len(code);
   for(int i = 0;  i < count;  i ++){
-    if(x2c_var_equal(Array_getindex(code, i), Symbol_var(1313077352))){
+    if(x2c_var_equal_lane(Array_getindex(code, i), Symbol_var(1313077352))){
       _source_marker(&(p), Array_getindex(code, ++ i));
       continue;
     }

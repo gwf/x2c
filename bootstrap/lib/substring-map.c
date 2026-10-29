@@ -703,6 +703,22 @@ MapSubInt MapSubInt_new(void){
   return MapSubInt_new_table(map, 2);
 }
 
+String String_join(String, List);
+
+MapSubInt MapSubInt_new_capacity(unsigned capacity){
+  if(capacity < 2 || capacity &(capacity - 1)){
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("MapSubInt.new_capacity")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/substring-map.x",.function = "MapSubInt_new_capacity",.line = 48,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), unsigned_var(capacity));
+      __builtin_unreachable();
+    }
+
+  }
+  MapSubInt map = NULL;
+  return MapSubInt_new_table(map, capacity);
+}
+
 void MapSubInt_increment(MapSubInt map, Substr word){
   int one = 1, inserted;
   int * count = MapSubInt_get_or_insert(map, & word, & one, & inserted);

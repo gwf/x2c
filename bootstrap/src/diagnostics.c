@@ -738,7 +738,7 @@ static Var _expansion_note_syntax(Var value, Map caches){
       child = Var_list_payload(_x2c_gensym_macro_item_5);
       _x2c_gensym_macro_value_0 = _expansion_note_syntax(List_var(child), caches);
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_5)){
+    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_5)){
       _x2c_gensym_macro_rewritten_0 = Array_new();
       for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_5);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
     }

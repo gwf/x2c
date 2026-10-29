@@ -288,7 +288,7 @@ static List _from_items(List items, List context){
       child = Var_list_payload(_x2c_gensym_macro_item_0);
       _x2c_gensym_macro_value_0 = List_var(_from_ast(child, context));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_0)){
+    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_0)){
       _x2c_gensym_macro_rewritten_0 = Array_new();
       for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_0);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
     }
@@ -329,7 +329,7 @@ static List _from_fields(List fields, List context){
       field = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       {
         List declaration = Ast_without_origin(field);
-        if(! x2c_var_equal(List_car(declaration), Symbol_var(272838634664))) Array_push(types, List_var(_from_ast(field, context)));
+        if(! x2c_var_equal_lane(List_car(declaration), Symbol_var(272838634664))) Array_push(types, List_var(_from_ast(field, context)));
       }
 
     }

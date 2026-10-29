@@ -1667,7 +1667,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1302 = Symbol_var(15739);
   _1303 = Symbol_var(8571);
   _1304 = Atom_intern(String_new("binding-name"));
-  _1305 = String_new("x2c_var_equal");
+  _1305 = String_new("x2c_var_equal_lane");
   _1306 = String_var(_1305);
   _1307 = cons(_1306, NULL);
   _1308 = cons(_1304, _1307);
@@ -1691,7 +1691,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1326 = cons(_178, _1325);
   _1327 = cons(_24, _1326);
   _1328 = List_var(_1327);
-  _1329 = String_new("x2c_var_order");
+  _1329 = String_new("x2c_var_order_lane");
   _1330 = String_var(_1329);
   _1331 = String_new("0");
   _1332 = String_var(_1331);
@@ -1992,7 +1992,7 @@ static Ast _step(Compiler c, Ast ast){
     if(List_truth(watched)) return watched;
   }
   Var head = List_car(ast);
-  if(! Var_is(head, 1328354264)) return x2c_var_equal(head, String_var(_7)) ? ast : _default_node(c, ast);
+  if(! Var_is(head, 1328354264)) return x2c_var_equal_lane(head, String_var(_7)) ? ast : _default_node(c, ast);
   {
     List _x2c_gensym_match_expr_0 = ast;
     switch(_x2c_gensym_match_expr_0 ? _x2c_gensym_match_expr_0 -> car.u64 : 0){
@@ -2113,7 +2113,7 @@ static Ast f9_traversal____placed(Compiler c, Ast code){
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast _default_node(Compiler c, Ast ast){
   Var head = List_car(ast);
-  if(x2c_var_equal(head, Symbol_var(39266)) || x2c_var_equal(head, Symbol_var(1077029798)) || x2c_var_equal(head, Symbol_var(5011670))) return _finish(c, ast);
+  if(x2c_var_equal_lane(head, Symbol_var(39266)) || x2c_var_equal_lane(head, Symbol_var(1077029798)) || x2c_var_equal_lane(head, Symbol_var(5011670))) return _finish(c, ast);
   return f9_traversal____children(c, ast);
 }
 
@@ -2238,7 +2238,7 @@ static Ast f9_traversal____children(Compiler c, Ast ast){
       child = Var_list_payload(_x2c_gensym_macro_item_1);
       _x2c_gensym_macro_value_0 = List_var(_step(c, child));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_1)){
+    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_1)){
       _x2c_gensym_macro_rewritten_0 = Array_new();
       for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_1);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
     }
@@ -2539,7 +2539,7 @@ static Ast f9_traversal____held_within(Compiler c, Ast node, Map held){
       child = Var_list_payload(_x2c_gensym_macro_item_2);
       _x2c_gensym_macro_value_1 = List_var(f9_traversal____held_within(c, child, held));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_2)){
+    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_2)){
       _x2c_gensym_macro_rewritten_1 = Array_new();
       for(List _x2c_gensym_macro_prefix_1 = _x2c_gensym_macro_original_1;  ! List_equal(_x2c_gensym_macro_prefix_1, _x2c_gensym_macro_cursor_2);  _x2c_gensym_macro_prefix_1 = List_cdr(_x2c_gensym_macro_prefix_1)) Array_push(_x2c_gensym_macro_rewritten_1, List_car(_x2c_gensym_macro_prefix_1));
     }
@@ -2683,7 +2683,7 @@ List Compiler_lambda_param_types(Compiler, List);
 
 List Compiler_lower_lambda_expr(Compiler c, List expression){
   if(! _init_guard_) _file_init_();
-  if(x2c_var_equal(List_car(expression), Symbol_var(104)) || x2c_var_equal(List_car(expression), Symbol_var(40070))) return Ast_rewrite_children(expression, ({
+  if(x2c_var_equal_lane(List_car(expression), Symbol_var(104)) || x2c_var_equal_lane(List_car(expression), Symbol_var(40070))) return Ast_rewrite_children(expression, ({
     Var _x2c_gensym_lambda_capture_value_0 = Compiler_var(c);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
       _x2c_gensym_lambda_capture_value_0
     }
@@ -2706,7 +2706,7 @@ List Compiler_lower_lambda_expr(Compiler c, List expression){
         inner = x2c_match_value_1;
         {
           List lowered = Compiler_lower_lambda_expr(c, Var_list_payload(inner));
-          if(x2c_var_equal(List_var(lowered), inner)) return expression;
+          if(x2c_var_equal_lane(List_var(lowered), inner)) return expression;
           Macro grouped = _373;
           return Compiler_rebuild_expression(c, Var_type(type), Macro_apply(grouped, cons(List_var(lowered), NULL)));
         }
@@ -2862,7 +2862,7 @@ return cons(_24, cons(_418, cons(List_var(cons(_424, cons(_431, cons(List_var(co
 static Ast _expression_node(Compiler c, Ast ast){
   if(_pattern_condition(ast)) return _step(c, _condition_value(c, ast));
   Var content = List_caddr(ast);
-  if(Var_is_row(content, 9, 7, 4) && x2c_var_equal(List_car(Var_list(content)), Symbol_var(45156))) return _step(c, _to_var(c, Var_list_payload(List_cadr(Var_list(content)))));
+  if(Var_is_row(content, 9, 7, 4) && x2c_var_equal_lane(List_car(Var_list(content)), Symbol_var(45156))) return _step(c, _to_var(c, Var_list_payload(List_cadr(Var_list(content)))));
   List rewritten = f11_expressions____expression_rewrite(c, ast);
   if(List_truth(rewritten)) return rewritten;
   Ast expression = Compiler_lower_typed_adapter_expr(c, ast);
@@ -2906,7 +2906,7 @@ static List f11_expressions____expression_rewrite(Compiler c, List expression){
         right = x2c_match_value_3;
         if(Symbol_is_assignment_op(Var_symbol(operator))){
           List target = f11_expressions____access_source(Var_list_payload(left));
-          if(x2c_var_equal(List_var(target), left)) return NULL;
+          if(x2c_var_equal_lane(List_var(target), left)) return NULL;
           kind = operator;
           source =({
             Var _x2c_gensym_literal_part_8 = type;  Var _x2c_gensym_literal_part_9 = List_var(cons(_432, cons(operator, cons(List_var(target), cons(right, NULL)))));  cons(_24, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL)));
@@ -2924,7 +2924,7 @@ static List f11_expressions____expression_rewrite(Compiler c, List expression){
         operand = x2c_match_value_2;
         {
           List target = f11_expressions____access_source(Var_list_payload(operand));
-          if(x2c_var_equal(List_var(target), operand)) return NULL;
+          if(x2c_var_equal_lane(List_var(target), operand)) return NULL;
           kind = Symbol_var(1111831152);
           source =({
             Var _x2c_gensym_literal_part_10 = type;  Var _x2c_gensym_literal_part_11 = List_var(cons(_432, cons(operator, cons(List_var(target), NULL))));  cons(_24, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL)));
@@ -2942,7 +2942,7 @@ static List f11_expressions____expression_rewrite(Compiler c, List expression){
         operand = x2c_match_value_2;
         {
           List target = f11_expressions____access_source(Var_list_payload(operand));
-          if(x2c_var_equal(List_var(target), operand)) return NULL;
+          if(x2c_var_equal_lane(List_var(target), operand)) return NULL;
           kind = Symbol_var(35407540848);
           source =({
             Var _x2c_gensym_literal_part_12 = type;  Var _x2c_gensym_literal_part_13 = List_var(cons(_433, cons(operator, cons(List_var(target), NULL))));  cons(_24, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL)));
@@ -3452,7 +3452,7 @@ for(;  List_truth(a);  p = List_cdr(p), a = List_cdr(a), arg_index ++){
   f11_expressions____require_rest(c, arg);
   List expected = param;
   if(list_varargs && arg_index > 0) expected = _41;
-  if(List_truth(param) && x2c_var_equal(List_car(param), Symbol_var(33656922))) expected = Type_list(List_type_from_ast(param));
+  if(List_truth(param) && x2c_var_equal_lane(List_car(param), Symbol_var(33656922))) expected = Type_list(List_type_from_ast(param));
   arg = Compiler_maybe_adapt_func_arg(c, arg, expected);
   List converted = List_truth(expected) ? Compiler_convert_expression(c, arg, List_type(expected)) : Compiler_lower_lambda_expr(c, arg);
   Array_push(values, List_var(converted));
@@ -3828,7 +3828,7 @@ static List f9_operators____compound(Compiler c, List ast, Symbol op, List lhs, 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List f9_operators____dynamic(Compiler c, Symbol point, Type type, List operation){
-  List kind = x2c_var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_433, cons(List_cadr(operation), _1350)) : cons(List_cadr(operation), _1350);
+  List kind = x2c_var_equal_lane(List_car(operation), Symbol_var(35407540848)) ? cons(_433, cons(List_cadr(operation), _1350)) : cons(List_cadr(operation), _1350);
   List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_24, cons(_1349, cons(List_var(operation), NULL))), 405758822009820, type, NULL);
   return Var_list_payload(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }

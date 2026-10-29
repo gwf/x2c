@@ -1411,7 +1411,7 @@ static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_ty
   List arguments = List_zip_with(params, names, _x2c_gensym_func_handle_1);
   List call = _func_call(c, return_type, target, List_append(leading, arguments));
   Type resolved_result = Sym_resolve_key(c -> sym, return_type);
-  if(List_truth(Type_list(resolved_result)) && x2c_var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = f8_adapters____func_record_call(c, return_type, call);
+  if(List_truth(Type_list(resolved_result)) && x2c_var_equal_lane(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = f8_adapters____func_record_call(c, return_type, call);
   f8_adapters____publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, locals));
   return adapter_binding;
 }
@@ -1508,7 +1508,7 @@ static List f8_adapters____read(f8_adapters___FuncReaders * r, Type parameter_ty
   if(Type_is_reference(parameter_type)) return f8_adapters____reference(&((* r)), parameter_type, index, &((* storage_type)));
   Symbol tag = Sym_var_tag_for_type((* r).c -> sym, parameter_type, NULL);
   Type resolved = Sym_resolve_key((* r).c -> sym, parameter_type);
-  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || x2c_var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))) return f8_adapters____pointer(&((* r)), parameter_type, resolved, index, &((* storage_type)));
+  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || x2c_var_equal_lane(List_car(Type_list(resolved)), Symbol_var(1318234344)))) return f8_adapters____pointer(&((* r)), parameter_type, resolved, index, &((* storage_type)));
   return f8_adapters____value(&((* r)), parameter_type, tag, index, &((* storage_type)));
 }
 
@@ -1657,7 +1657,7 @@ static int _typed_params_variadic(List params){
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       value = _x2c_gensym_macro_cursor_output_4;
       {
-        if(x2c_var_equal(value, Symbol_var(1519197)) ||({
+        if(x2c_var_equal_lane(value, Symbol_var(1519197)) ||({
           int _x2c_gensym_condition_0 = 0; {
             Var _x2c_gensym_match_var_0 = value;  int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);  List _x2c_gensym_match_expr_3 = Var_list_payload(_x2c_gensym_match_var_0);  if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_11; if(_x2c_gensym_match_expr_3 && _x2c_gensym_match_expr_3 ->car.u64 == 9224497936763137629ULL && !(_x2c_gensym_match_at_11 = _x2c_gensym_match_expr_3 ->cdr)){
               _x2c_gensym_condition_0 = 1;
@@ -1877,7 +1877,7 @@ static Type f6_values____func_pointer_value_type(Compiler c, Type type){
   Type resolved = Sym_resolve_key(c -> sym, type);
   if(List_truth(Type_list(resolved))) type = resolved;
   while(List_truth(Type_list(type)) && f6_values____func_type_qualifier(List_car(Type_list(type)))) type = List_cdr(type);
-  if(! List_truth(Type_list(type)) || ! x2c_var_equal(List_car(Type_list(type)), Symbol_var(54))) return NULL;
+  if(! List_truth(Type_list(type)) || ! x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(54))) return NULL;
   List tail = Type_list(List_cdr(type));
   while(List_truth(tail) && f6_values____func_type_qualifier(List_car(tail))) tail = List_cdr(tail);
   Type pointer = List_type(cons(Symbol_var(54), tail));
@@ -1885,7 +1885,7 @@ static Type f6_values____func_pointer_value_type(Compiler c, Type type){
 }
 
 static int f6_values____func_type_qualifier(Var value){
-  return x2c_var_equal(value, Symbol_var(7304424)) || x2c_var_equal(value, Symbol_var(1544849476362)) || x2c_var_equal(value, Symbol_var(1249006209256));
+  return x2c_var_equal_lane(value, Symbol_var(7304424)) || x2c_var_equal_lane(value, Symbol_var(1544849476362)) || x2c_var_equal_lane(value, Symbol_var(1249006209256));
 }
 
 static List f6_values____deref_func_lift(Compiler c, List expression, List payload){
@@ -2169,7 +2169,7 @@ List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type){
         inner = x2c_match_value_0;
         {
           List adapted = Compiler_adapt_lambda_arg(c, Var_list_payload(inner), expected_type);
-          if(x2c_var_equal(List_var(adapted), inner)) return argument;
+          if(x2c_var_equal_lane(List_var(adapted), inner)) return argument;
           Macro grouped = _951;
           return Compiler_rebuild_expression(c, List_type(expected_type), Macro_apply(grouped, cons(List_var(adapted), NULL)));
         }

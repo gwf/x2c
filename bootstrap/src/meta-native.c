@@ -3616,7 +3616,7 @@ Var function, bound;
 if(! Map_try_get(linked, String_var(name), &(function))) return 0;
 if(! _linked_copy(c, name, linked)) return 0;
 if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;
-if(! Compiler_meta_binding(c, name, &(bound)) || ! x2c_var_equal(bound, function)) MetaBindings_set(Compiler_bindings(c), name, function);
+if(! Compiler_meta_binding(c, name, &(bound)) || ! x2c_var_equal_lane(bound, function)) MetaBindings_set(Compiler_bindings(c), name, function);
 if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
 return 1;
 }
@@ -3800,7 +3800,7 @@ static int f6_linked____linked_texts_match(Compiler c, String name, Map linked, 
     List row = Var_list_payload(hash);
     hash = List_car(row);
     names = List_cadr(row);
-    if(! x2c_var_equal(hash, own)) return 0;
+    if(! x2c_var_equal_lane(hash, own)) return 0;
   }
   else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;
   Map_try_get(c -> meta_calls, String_var(name), &(names));
@@ -4907,7 +4907,7 @@ String Compiler_native_meta_module(Compiler c, String name, Type * type){
   if(! String_startswith(path, _1812)) return NULL;
   Var target = Map_getindex((Var_map_payload(Map_getindex(native_modules, String_var(path)))), String_var(name));
   Var bound;
-  if(! Compiler_meta_binding(c, name, &(bound)) || ! x2c_var_equal(bound, target)) return NULL;
+  if(! Compiler_meta_binding(c, name, &(bound)) || ! x2c_var_equal_lane(bound, target)) return NULL;
   (* type) = List_type(Func_signature((Var_pointer(target))));
   return path;
 }
@@ -5160,7 +5160,7 @@ int Compiler_iterator_arity(List signature){
       Var _x2c_gensym_match_value_4 = parameters;
       {
         List parameters = Var_list_payload(_x2c_gensym_match_value_4);
-        if(List_truth(parameters)) if(x2c_var_equal(List_last(parameters), List_var(_414))) return List_len(parameters) - 1;
+        if(List_truth(parameters)) if(x2c_var_equal_lane(List_last(parameters), List_var(_414))) return List_len(parameters) - 1;
       }
 
     }
@@ -5225,7 +5225,7 @@ static int f8_bindings____linked(f8_bindings___NativeBinding * n, Var * function
 static void f8_bindings____check(f8_bindings___NativeBinding * n, Var function){
   Compiler c =(* n).c;
   List suppliers =(* n).suppliers;
-  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, f8_bindings____module_target(&((* n))))) f8_bindings____meta_native_warn_duplicate(c, (* n).marker, &((* n)), suppliers);
+  if(List_truth(List_cdr(suppliers)) && x2c_var_equal_lane(function, f8_bindings____module_target(&((* n))))) f8_bindings____meta_native_warn_duplicate(c, (* n).marker, &((* n)), suppliers);
   if(! Compiler_native_meta_accepts(c, function, (* n).signature)) Compiler_report_error(c, 1362954, _1831, (* n).marker, ({
     Var _x2c_gensym_literal_part_24 = String_var(String_join(NULL, cons(String_var(_1830), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_25 = String_var(String_join(NULL, cons(String_var(_1832), cons(String_var(List_repr((* n).signature)), NULL))));  cons(_x2c_gensym_literal_part_24, cons(_x2c_gensym_literal_part_25, NULL));
   }
@@ -5368,7 +5368,7 @@ static int f8_bindings____native_handle(Compiler c, List type, int parameter){
   }
   Symbol tag = Sym_var_tag_for_type(c -> sym, List_type(type), NULL);  if(tag == 45156 || tag == 1328354264 || tag == 1318210446 || tag == 806120 || tag == 3313778 || tag == 26720 || tag == 437126) return 0;  type = Type_list(Sym_normalize_declared_type(c -> sym, List_type(type))); {
     Var part;  List _x2c_gensym_macro_object_20 = type;  List _x2c_gensym_macro_cursor_21 = _x2c_gensym_macro_object_20;  Var _x2c_gensym_macro_cursor_output_29;  while(List_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_21), &(_x2c_gensym_macro_cursor_output_29))){
-      part = _x2c_gensym_macro_cursor_output_29;  if(! Var_is(part, 1328354264) || x2c_var_equal(part, Symbol_var(54))) return 1;
+      part = _x2c_gensym_macro_cursor_output_29;  if(! Var_is(part, 1328354264) || x2c_var_equal_lane(part, Symbol_var(54))) return 1;
     }
 
   }

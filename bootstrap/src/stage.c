@@ -595,7 +595,7 @@ static Var _constant_leaf(Compiler c, List expr){
     }
 
   }
-  if(List_truth(expr) && x2c_var_equal(List_car(expr), Symbol_var(377892))) return((void) 0, Void);  return List_var(expr);
+  if(List_truth(expr) && x2c_var_equal_lane(List_car(expr), Symbol_var(377892))) return((void) 0, Void);  return List_var(expr);
 }
 
 static Var _cast_constant(Compiler c, Type type, List inner){

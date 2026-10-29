@@ -4493,7 +4493,7 @@ Var lisp_string_append_all(List strings){
 }
 
 static int f10_algorithms____nil(Var value){
-  return x2c_var_equal(value, List_var(NULL));
+  return x2c_var_equal_lane(value, List_var(NULL));
 }
 
 static Var f10_algorithms____append2(Var left, Var right){

@@ -1617,7 +1617,7 @@ List _tag_decode_rows(void){
 
 int _tag_decode_row(List row){
   Var tag = List_getindex(row, 0);
-  return !(x2c_var_equal(tag, Symbol_var(3356265)) || x2c_var_equal(tag, Symbol_var(1328354264)) || x2c_var_equal(tag, Symbol_var(1473096)));
+  return !(x2c_var_equal_lane(tag, Symbol_var(3356265)) || x2c_var_equal_lane(tag, Symbol_var(1328354264)) || x2c_var_equal_lane(tag, Symbol_var(1473096)));
 }
 
 Map Map_new(void);
@@ -1637,7 +1637,7 @@ Map _tag_sibling_counts(List rows){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
       {
         Var top = int_var(_tag_top(row));
-        Map_setindex(counts, top, Var_binary(Map_getdefault(counts, top, int_var(0)), 56, int_var(1)));
+        Map_setindex(counts, top, x2c_var_add_lane(Map_getdefault(counts, top, int_var(0)), int_var(1)));
       }
 
     }

@@ -4459,7 +4459,7 @@ static List _declaration_types(Compiler c, List storage){
   List quals = _type_qualifiers(c);
   int managed = List_contains(storage, Symbol_var(109854));
   List hole = managed ? Compiler_peek_macro_hole(c) : NULL;
-  int inferred = managed &&((Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 123 || Compiler_peek(c, 1) == 119 || Compiler_peek(c, 1) == 89)) ||(List_truth(hole) && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))));
+  int inferred = managed &&((Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 123 || Compiler_peek(c, 1) == 119 || Compiler_peek(c, 1) == 89)) ||(List_truth(hole) && x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))));
   Type spec = inferred ? NULL : List_type(_type_specifier(c));
   Array trailing = Array_new();
   while(1){
@@ -4513,7 +4513,7 @@ static int f12_declarations____test_declaration_start(Compiler c, int require_de
   if(sym != 19147688) return 0;
   if(String_equal(c -> token -> text, _82) && _attribute_starts(c)) return 1;
   Var definition;
-  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || x2c_var_equal(definition, Symbol_var(50603262308)))) return 1;
+  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || x2c_var_equal_lane(definition, Symbol_var(50603262308)))) return 1;
   return f12_declarations____type_name_starts(c, require_declarator);
 }
 
@@ -5370,7 +5370,7 @@ static void f5_types____skip_attributes(Compiler c){
   while(1){
     Var definition;
     if(String_truth(_attribute(c))) continue;
-    if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) || ! x2c_var_equal(definition, List_var(NULL))) return;
+    if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) || ! x2c_var_equal_lane(definition, List_var(NULL))) return;
     Compiler_next(c);
   }
 
@@ -5422,7 +5422,7 @@ static List f5_types____publish_aggregate_type(Compiler c, Symbol tag, Var name,
   if(tag == 1318234344 && packed && c -> source_private >= 0) Compiler_report_error(c, 33658058, _159, first, NULL);
   List type = cons(Symbol_var(tag), cons(name, NULL));
   List body = tag == 357722 ? members : cons(_160, members);
-  if(Var_is_row(name, 9, 7, 4) && x2c_var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(c -> sym, cons(Symbol_var(tag), NULL), Var_list_payload(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));
+  if(Var_is_row(name, 9, 7, 4) && x2c_var_equal_lane(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(c -> sym, cons(Symbol_var(tag), NULL), Var_list_payload(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));
   else Sym_declare_resolved(c -> sym, NULL, type, tag == 357722 ? _162 : cons(Symbol_var(tag), cons(List_var(body), NULL)));
   if(tag != 357722){
     Sym_declare_field_order(c -> sym, List_type(type), members);
@@ -5654,7 +5654,7 @@ static String _attribute(Compiler c){
 
 static int _attribute_starts(Compiler c){
   Var definition;
-  return Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81 &&(String_equal(c -> token -> text, _82) ||(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988))));
+  return Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81 &&(String_equal(c -> token -> text, _82) ||(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) && x2c_var_equal_lane(definition, Symbol_var(102150700288988))));
 }
 
 static int _prefix_macro_words(Compiler c, int rank, Array words){
@@ -5665,7 +5665,7 @@ static int _prefix_macro_words(Compiler c, int rank, Array words){
     Compiler_next(c);
     return 1;
   }
-  if(x2c_var_equal(definition, Symbol_var(50603262308)) && Compiler_peek(c, 1) == 81){
+  if(x2c_var_equal_lane(definition, Symbol_var(50603262308)) && Compiler_peek(c, 1) == 81){
     Token close = Token_group_close(Token_skip_trivia(c -> token + 1));
     if(close -> type != 11212) close -> type = 7477210024;
     Compiler_next(c);
@@ -5941,15 +5941,15 @@ static List _finish_type(Compiler c, List type){
     Array_push(storage, List_car(base));
     base = List_cdr(base);
   }
-  if(! List_equal(base, type) &&(x2c_var_equal(List_car(base), Symbol_var(1318234344)) || x2c_var_equal(List_car(base), Symbol_var(44977116)) || x2c_var_equal(List_car(base), Symbol_var(357722)))) return Type_list(Sym_local_type(c -> sym, List_type(({
+  if(! List_equal(base, type) &&(x2c_var_equal_lane(List_car(base), Symbol_var(1318234344)) || x2c_var_equal_lane(List_car(base), Symbol_var(44977116)) || x2c_var_equal_lane(List_car(base), Symbol_var(357722)))) return Type_list(Sym_local_type(c -> sym, List_type(({
     List _x2c_gensym_literal_part_48 = Array_list_free(storage);  List _x2c_gensym_literal_part_49 = _finish_type(c, base);  List_append(_x2c_gensym_literal_part_48, _x2c_gensym_literal_part_49);
   }
   ))));
   Array_free(storage);
   Var whole = f5_types____finish_type_spec(c, List_var(type));
-  if(! x2c_var_equal(whole, List_var(type)) || x2c_var_equal(List_car(type), Symbol_var(1318234344)) || x2c_var_equal(List_car(type), Symbol_var(44977116)) || x2c_var_equal(List_car(type), Symbol_var(357722))){
+  if(! x2c_var_equal_lane(whole, List_var(type)) || x2c_var_equal_lane(List_car(type), Symbol_var(1318234344)) || x2c_var_equal_lane(List_car(type), Symbol_var(44977116)) || x2c_var_equal_lane(List_car(type), Symbol_var(357722))){
     List constructed = Var_list_payload(whole);
-    Type finished = List_type(x2c_var_equal(List_car(constructed), Symbol_var(39266)) ? List_cdr(constructed) : constructed);
+    Type finished = List_type(x2c_var_equal_lane(List_car(constructed), Symbol_var(39266)) ? List_cdr(constructed) : constructed);
     return Type_list(Sym_local_type(c -> sym, finished));
   }
   Array bound = Array_new();
@@ -5962,7 +5962,7 @@ static List _finish_type(Compiler c, List type){
       spec = _x2c_gensym_macro_cursor_output_25;
       {
         Var finished = f5_types____finish_type_spec(c, spec);
-        if(Var_is_row(finished, 9, 7, 4) && ! Var_is_nil(finished) && x2c_var_equal(Var_car(finished), Symbol_var(39266))){
+        if(Var_is_row(finished, 9, 7, 4) && ! Var_is_nil(finished) && x2c_var_equal_lane(Var_car(finished), Symbol_var(39266))){
           Var item;
           List _x2c_gensym_macro_object_28 = List_cdr(Var_list(finished));
           List _x2c_gensym_macro_cursor_28 = _x2c_gensym_macro_object_28;
@@ -5984,7 +5984,7 @@ static List _finish_type(Compiler c, List type){
 }
 
 static Var f5_types____finish_type_spec(Compiler c, Var spec){
-  int slot = Var_is_row(spec, 9, 7, 4) && ! Var_is_nil(spec) && x2c_var_equal(Var_car(spec), Symbol_var(917238583616488));
+  int slot = Var_is_row(spec, 9, 7, 4) && ! Var_is_nil(spec) && x2c_var_equal_lane(Var_car(spec), Symbol_var(917238583616488));
   spec = Compiler_evaluate_macro_slot(c, spec);
   if(slot && Var_is_row(spec, 9, 7, 4)){
     Type type = Type_canonicalize(Var_type(spec));
@@ -6502,7 +6502,7 @@ static List f11_declarators____literal_method(Compiler c){
 
 static List f11_declarators____hole_method(Compiler c){
   List owner_hole = Compiler_peek_macro_hole(c);
-  if(! List_truth(owner_hole) || ! x2c_var_equal(List_assoc(owner_hole, Symbol_var(740232)), Symbol_var(1362954)) || Compiler_after_hole(c) -> type != 93) return NULL;
+  if(! List_truth(owner_hole) || ! x2c_var_equal_lane(List_assoc(owner_hole, Symbol_var(740232)), Symbol_var(1362954)) || Compiler_after_hole(c) -> type != 93) return NULL;
   List owner = Compiler_try_parse_macro_slot(c, 1362954);
   return cons(_91, cons(List_var(({
     Var _x2c_gensym_literal_part_67 = List_var(cons(List_var(owner), NULL));  Var _x2c_gensym_literal_part_68 = f11_declarators____method_member(c);  cons(_x2c_gensym_literal_part_67, cons(_x2c_gensym_literal_part_68, NULL));
@@ -7568,7 +7568,7 @@ static List f9_functions____collected_function(Compiler c, List declaration, Var
             );
           }
           else{
-            Var source;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_655, cons(binding, NULL))), &(source)) || x2c_var_equal(source, String_var(name))) declaration =({
+            Var source;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_655, cons(binding, NULL))), &(source)) || x2c_var_equal_lane(source, String_var(name))) declaration =({
               Var _x2c_gensym_literal_part_107 = type;  Var _x2c_gensym_literal_part_108 = List_var(cons(_40, cons(List_var(cons(_91, cons(String_var(name), cons(modifiers, NULL)))), NULL)));  cons(_41, cons(_x2c_gensym_literal_part_107, cons(_x2c_gensym_literal_part_108, NULL)));
             }
             );
@@ -8033,7 +8033,7 @@ List Compiler_bind_source_statement(Compiler c){
 
 List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_type){
   if(! _init_guard_) _file_init_();
-  int pending = Var_is_row(syntax, 9, 7, 4) && x2c_var_equal(List_car(Var_list(syntax)), String_var(_712));
+  int pending = Var_is_row(syntax, 9, 7, 4) && x2c_var_equal_lane(List_car(Var_list(syntax)), String_var(_712));
   if(f7_binding____take_staged(c, &(syntax))) return Var_list_payload(syntax);
   syntax = Compiler_evaluate_macro_slot(c, syntax);
   if(f7_binding____take_staged(c, &(syntax))) return Var_list_payload(syntax);
@@ -8071,7 +8071,7 @@ List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_ty
   if(! List_truth(input)) Compiler_report_error(c, 33658058, _729, c -> token, NULL);
   List enumerator = context == 384101446165476 ? f7_binding____bind_enumerator(c, input) : NULL;
   if(List_truth(enumerator)) return enumerator;
-  if(context == 28692473357490 && ! x2c_var_equal(List_car(input), Symbol_var(39266)) && ! x2c_var_equal(List_car(input), Atom_intern(_730))) return Compiler_resolve_map_entry(c, input, c -> token);
+  if(context == 28692473357490 && ! x2c_var_equal_lane(List_car(input), Symbol_var(39266)) && ! x2c_var_equal_lane(List_car(input), Atom_intern(_730))) return Compiler_resolve_map_entry(c, input, c -> token);
   {
     List * _x2c_gensym_macro_address_15 = & c -> return_type;
     List _x2c_gensym_macro_previous_15 = * _x2c_gensym_macro_address_15;
@@ -8887,7 +8887,7 @@ static List f7_binding____bind_statement(Compiler c, Var stmt){
 }
 
 static List f7_binding____bind_item(Compiler c, Var origin, List node){
-  int anchor = x2c_var_equal(origin, Symbol_var(960970177116)) ? c -> origin : Var_int(origin);
+  int anchor = x2c_var_equal_lane(origin, Symbol_var(960970177116)) ? c -> origin : Var_int(origin);
   Compiler_enter(c, (Ancestor){
     .what = 43159332400040, .origin = anchor
   }
@@ -9116,7 +9116,7 @@ static List f7_binding____bind_rows(Compiler c, List cases){
         while(List_try_next(_x2c_gensym_macro_object_51, &(_x2c_gensym_macro_cursor_51), &(_x2c_gensym_macro_cursor_output_46))){
           row = Var_list_payload(_x2c_gensym_macro_cursor_output_46);
           {
-            if(x2c_var_equal(List_car(row), Symbol_var(35579270086))){
+            if(x2c_var_equal_lane(List_car(row), Symbol_var(35579270086))){
               Array_push(bound, List_var(row));
               continue;
             }
@@ -9201,7 +9201,7 @@ static List f7_binding____bind_group(Compiler c, List children){
 }
 
 static void _push_items(Array out, List node){
-  if(x2c_var_equal(List_car(node), Symbol_var(39266))){
+  if(x2c_var_equal_lane(List_car(node), Symbol_var(39266))){
     List item;
     List _x2c_gensym_macro_object_54 = List_cdr(node);
     List _x2c_gensym_macro_cursor_54 = _x2c_gensym_macro_object_54;
@@ -9264,7 +9264,7 @@ static List f7_binding____bind_clause(Compiler c, Var expr){
 SymTxn Compiler_begin_semantic_transaction(Compiler);
 void SymTxn_commit(SymTxn *);
 static List f7_binding____bind_invocation(Compiler c, Var definition, Var arguments, Var invocation, Symbol context, int pending){
-  Token site = Compiler_macro_invocation_site(c, invocation);  if(! x2c_var_equal(invocation, Symbol_var(960560003786))) return Compiler_expand_macro_invocation_node(c, definition, Var_list_payload(arguments), site, context); {
+  Token site = Compiler_macro_invocation_site(c, invocation);  if(! x2c_var_equal_lane(invocation, Symbol_var(960560003786))) return Compiler_expand_macro_invocation_node(c, definition, Var_list_payload(arguments), site, context); {
     int * _x2c_gensym_macro_address_16 = & c -> macro_application;  int _x2c_gensym_macro_previous_16 = * _x2c_gensym_macro_address_16; {
       _x2c_gensym_defer_env_42 _x2c_gensym_macro_environment_43 ={
         0
@@ -9313,7 +9313,7 @@ static List f7_binding____bind_invocation(Compiler c, Var definition, Var argume
 }
 
 static List f7_binding____anchor(Compiler c, Var origin, List bound){
-  Var anchor = x2c_var_equal(origin, Symbol_var(960970177116)) ? int_var(c -> origin) : origin;  return({
+  Var anchor = x2c_var_equal_lane(origin, Symbol_var(960970177116)) ? int_var(c -> origin) : origin;  return({
     Var _x2c_gensym_literal_part_158 = anchor;  Var _x2c_gensym_literal_part_159 = List_var(Ast_lone_item(bound));  cons(_661, cons(_x2c_gensym_literal_part_158, cons(_x2c_gensym_literal_part_159, NULL)));
   }
   );
@@ -9374,7 +9374,7 @@ static void f7_binding____check_binders(Compiler c, List pattern, Token start, S
           while(List_try_next(_x2c_gensym_macro_object_57, &(_x2c_gensym_macro_cursor_57), &(_x2c_gensym_macro_cursor_output_52))){
             other = _x2c_gensym_macro_cursor_output_52;
             {
-              if(x2c_var_equal(other, binder) || ! String_equal(String_getslice(Atom_str(other), 1, (-2147483647 - 1), 1), name)) continue;
+              if(x2c_var_equal_lane(other, binder) || ! String_equal(String_getslice(Atom_str(other), 1, (-2147483647 - 1), 1), name)) continue;
               Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_2062), NULL))), start, cons(_2058, cons(String_var(name), _2065)));
             }
 
@@ -9547,7 +9547,7 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
 }
 
 static Var _x2c_gensym_lambda_1(Var item){
-  return int_var(! x2c_var_equal(item, Symbol_var(387198108)));
+  return int_var(! x2c_var_equal_lane(item, Symbol_var(387198108)));
   ;
 }
 
@@ -9698,7 +9698,7 @@ static void _x2c_gensym_defer_cleanup_32(void * _x2c_gensym_defer_opaque_32){
 }
 
 static Var _x2c_gensym_lambda_2(Var item){
-  return int_var(! x2c_var_equal(item, Symbol_var(109854)));
+  return int_var(! x2c_var_equal_lane(item, Symbol_var(109854)));
   ;
 }
 
@@ -9714,7 +9714,7 @@ static void _x2c_gensym_defer_cleanup_33(void * _x2c_gensym_defer_opaque_33){
 }
 
 static Var _x2c_gensym_lambda_3(Var item){
-  return int_var(! x2c_var_equal(item, Symbol_var(109854)));
+  return int_var(! x2c_var_equal_lane(item, Symbol_var(109854)));
   ;
 }
 

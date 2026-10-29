@@ -23,6 +23,12 @@ typedef char * String;
 #include "func/func.h"
 #include "symbol.h"
 #include "pool/pool.h"
+typedef struct StringHeader{
+  int length;
+  unsigned hash;
+}
+* StringHeader;
+
 #define STRING_STACK_BYTES 256
 #ifndef X2CCPP
 _Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
@@ -38,6 +44,10 @@ _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0),
 #endif
 #define String_c_find strchr
 int String_len(String str);
+static inline unsigned String_cached_hash(String str){
+  return str == NULL ? 0 :((StringHeader) str - 1) -> hash;
+}
+
 unsigned String_hash(String str);
 int String_equal(String x, String y);
 int String_compare(String x, String y);

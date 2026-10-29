@@ -489,12 +489,12 @@ int Type_is_optional_reference(Type t);
 
 int Type_is_reference(Type t){
   if(! _init_guard_) _file_init_();
-  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || Type_is_optional_reference(t);
+  return x2c_var_equal_lane(List_car(Type_list(t)), Symbol_var(77)) || Type_is_optional_reference(t);
 }
 
 int Type_is_optional_reference(Type t){
   if(! _init_guard_) _file_init_();
-  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
+  return x2c_var_equal_lane(List_car(Type_list(t)), Symbol_var(33330008396));
 }
 
 int Type_is_function(Type type){
@@ -748,7 +748,7 @@ int Type_is_threaded(Type type){
 }
 
 int Type_is_typedef(Type type){
-  if(! _init_guard_) _file_init_();  return x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
+  if(! _init_guard_) _file_init_();  return x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(44661285196));
 }
 
 Type Type_canonicalize(Type type){

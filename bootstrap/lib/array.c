@@ -327,14 +327,14 @@ static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, i
 static int f5_array___Array_find_element(Array _x2c_gensym_macro_array_10, Var _x2c_gensym_macro_value_1){
   Var * _x2c_gensym_macro_data_6 =(Var *) _x2c_gensym_macro_array_10 -> bytes;
   int _x2c_gensym_macro_n_6 =(int) _x2c_gensym_macro_array_10 -> length;
-  for(int _x2c_gensym_macro_i_2 = 0;  _x2c_gensym_macro_i_2 < _x2c_gensym_macro_n_6;  _x2c_gensym_macro_i_2 ++) if(x2c_var_equal(_x2c_gensym_macro_data_6[_x2c_gensym_macro_i_2], _x2c_gensym_macro_value_1)) return _x2c_gensym_macro_i_2;
+  for(int _x2c_gensym_macro_i_2 = 0;  _x2c_gensym_macro_i_2 < _x2c_gensym_macro_n_6;  _x2c_gensym_macro_i_2 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_6[_x2c_gensym_macro_i_2], _x2c_gensym_macro_value_1)) return _x2c_gensym_macro_i_2;
   return - 1;
 }
 
 static int f5_array___Array_count_element(Array _x2c_gensym_macro_array_11, Var _x2c_gensym_macro_value_2){
   Var * _x2c_gensym_macro_data_7 =(Var *) _x2c_gensym_macro_array_11 -> bytes;
   int _x2c_gensym_macro_n_7 =(int) _x2c_gensym_macro_array_11 -> length, _x2c_gensym_macro_total_0 = 0;
-  for(int _x2c_gensym_macro_i_3 = 0;  _x2c_gensym_macro_i_3 < _x2c_gensym_macro_n_7;  _x2c_gensym_macro_i_3 ++) if(x2c_var_equal(_x2c_gensym_macro_data_7[_x2c_gensym_macro_i_3], _x2c_gensym_macro_value_2)) _x2c_gensym_macro_total_0 ++;
+  for(int _x2c_gensym_macro_i_3 = 0;  _x2c_gensym_macro_i_3 < _x2c_gensym_macro_n_7;  _x2c_gensym_macro_i_3 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_7[_x2c_gensym_macro_i_3], _x2c_gensym_macro_value_2)) _x2c_gensym_macro_total_0 ++;
   return _x2c_gensym_macro_total_0;
 }
 
@@ -360,7 +360,7 @@ static int f5_array___Array_equal_elements(Array _x2c_gensym_macro_a_1, Array _x
   if(_x2c_gensym_macro_a_1 == NULL || _x2c_gensym_macro_b_1 == NULL || _x2c_gensym_macro_a_1 -> length != _x2c_gensym_macro_b_1 -> length || _x2c_gensym_macro_a_1 -> width != _x2c_gensym_macro_b_1 -> width) return 0;
   Var * _x2c_gensym_macro_adata_0 =(Var *) _x2c_gensym_macro_a_1 -> bytes;
   Var * _x2c_gensym_macro_bdata_0 =(Var *) _x2c_gensym_macro_b_1 -> bytes;
-  for(size_t _x2c_gensym_macro_i_5 = 0;  _x2c_gensym_macro_i_5 < _x2c_gensym_macro_a_1 -> length;  _x2c_gensym_macro_i_5 ++) if(! x2c_var_equal(_x2c_gensym_macro_adata_0[_x2c_gensym_macro_i_5], _x2c_gensym_macro_bdata_0[_x2c_gensym_macro_i_5])) return 0;
+  for(size_t _x2c_gensym_macro_i_5 = 0;  _x2c_gensym_macro_i_5 < _x2c_gensym_macro_a_1 -> length;  _x2c_gensym_macro_i_5 ++) if(! x2c_var_equal_lane(_x2c_gensym_macro_adata_0[_x2c_gensym_macro_i_5], _x2c_gensym_macro_bdata_0[_x2c_gensym_macro_i_5])) return 0;
   return 1;
 }
 

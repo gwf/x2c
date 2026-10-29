@@ -762,7 +762,7 @@ List Compiler_lift_lambda_types(Compiler c, List function){
         Var _x2c_gensym_macro_current_1 = Array_take_last(_x2c_gensym_macro_pending_1);
         if(! Var_is_row(_x2c_gensym_macro_current_1, 9, 7, 4) || Var_is_nil(_x2c_gensym_macro_current_1)) continue;
         node = Var_list_payload(_x2c_gensym_macro_current_1);
-        if(x2c_var_equal(List_car(node), Symbol_var(808259842))) _lambda_needed_types(node, definitions, needed);
+        if(x2c_var_equal_lane(List_car(node), Symbol_var(808259842))) _lambda_needed_types(node, definitions, needed);
         for(List _x2c_gensym_macro_cursor_1 = node;  List_truth(_x2c_gensym_macro_cursor_1);  _x2c_gensym_macro_cursor_1 = List_cdr(_x2c_gensym_macro_cursor_1)) if(Var_is_row(List_car(_x2c_gensym_macro_cursor_1), 9, 7, 4)) Array_push(_x2c_gensym_macro_pending_1, List_car(_x2c_gensym_macro_cursor_1));
       }
       if(! Map_len(needed)){
@@ -1303,13 +1303,13 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public){
   )));  Type base = public ? type : List_type(cons(Symbol_var(1317118534), Type_list(type)));  Code declaration =({
     Var _x2c_gensym_literal_part_12 = List_var(base);  Var _x2c_gensym_literal_part_13 = List_var(cons(_57, cons(List_var(cons(_0, cons(List_var(alias), _2))), NULL)));  cons(_58, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL)));
   }
-  );  if(! x2c_var_equal(List_car(name), Symbol_var(481205850))) Compiler_set_fact(c, List_var(cons(_59, cons(List_var(name), NULL))), String_var(Compiler_fresh_name(c, role)));  if(Type_is_enum(type)){
+  );  if(! x2c_var_equal_lane(List_car(name), Symbol_var(481205850))) Compiler_set_fact(c, List_var(cons(_59, cons(List_var(name), NULL))), String_var(Compiler_fresh_name(c, role)));  if(Type_is_enum(type)){
     List member;  Iter _x2c_gensym_macro_iterator_7 = Var_iter(List_caddr(Type_list(type)), &(struct Iter){
       int_var(0)
     }
     );  Var _x2c_gensym_macro_item_7;  while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
       member = Var_list_payload(_x2c_gensym_macro_item_7); {
-        List binding = Var_list_payload(x2c_var_equal(List_car(member), Symbol_var(992)) ? List_caddr(member) : List_var(member));  Compiler_set_fact(c, List_var(cons(_59, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(c, String_join(NULL, cons(String_var(role), cons(String_var(_60), NULL))))));
+        List binding = Var_list_payload(x2c_var_equal_lane(List_car(member), Symbol_var(992)) ? List_caddr(member) : List_var(member));  Compiler_set_fact(c, List_var(cons(_59, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(c, String_join(NULL, cons(String_var(role), cons(String_var(_60), NULL))))));
       }
 
     }
@@ -1633,7 +1633,7 @@ static void _prescribe(Compiler c, List row, Array prescribed, Array aliases){
             }
 
           }
-          target_type = x2c_var_equal(List_car(Type_list(source)), Symbol_var(77)) ? source : List_type(cons(Symbol_var(77), Type_list(source)));
+          target_type = x2c_var_equal_lane(List_car(Type_list(source)), Symbol_var(77)) ? source : List_type(cons(Symbol_var(77), Type_list(source)));
         }
         if(! String_truth(Ast_binding_spelling(binding))){
           binding = Sym_introduce(c -> sym, _alias_spelling(target, binding));
@@ -1794,7 +1794,7 @@ static List _prescribed_row(Var supplied, List binding, List original){
         {List _x2c_gensym_match_at_80, _x2c_gensym_match_at_81, _x2c_gensym_match_at_82, _x2c_gensym_match_at_83; Var x2c_match_value_0; if(_x2c_gensym_match_expr_18 && _x2c_gensym_match_expr_18 ->car.u64 == 9224497943306087562ULL &&(_x2c_gensym_match_at_80 = _x2c_gensym_match_expr_18 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_80 ->car, 1) &&(_x2c_gensym_match_at_81 = _x2c_gensym_match_at_80 ->cdr) &&(_x2c_gensym_match_at_82 = _x2c_gensym_match_at_81 ->cdr) && !(_x2c_gensym_match_at_83 = _x2c_gensym_match_at_82 ->cdr)){
           Var target;
           target = x2c_match_value_0;
-          if(x2c_var_equal(target, List_var(binding)) || x2c_var_equal(target, List_var(original))) prescribed = row;
+          if(x2c_var_equal_lane(target, List_var(binding)) || x2c_var_equal_lane(target, List_var(original))) prescribed = row;
         }
 
       }
@@ -1852,7 +1852,7 @@ return NULL;
 }
 
 static List _add(Capture * k){
-  Type type =(* k).type, captured_type = x2c_var_equal(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;
+  Type type =(* k).type, captured_type = x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;
   List binding =(* k).binding, expression = Macro_typed(Type_list(type), List_var(binding));
   int reference = List_contains(Var_list((* k).references), List_var((* k).original));
   if(List_truth((* k).prescribed)){
@@ -1866,7 +1866,7 @@ static List _add(Capture * k){
         {
           captured_type = Var_type(target_type);
           expression = _resolve_outside((* k).c, (* k).frame, value);
-          reference = x2c_var_equal(List_car(Type_list(captured_type)), Symbol_var(77));
+          reference = x2c_var_equal_lane(List_car(Type_list(captured_type)), Symbol_var(77));
         }
 
       }
@@ -1878,12 +1878,12 @@ static List _add(Capture * k){
 }
 else if(reference){
   captured_type = List_type(cons(Symbol_var(77), Type_list(captured_type)));
-  if(! x2c_var_equal(List_car(Type_list(type)), Symbol_var(77))) expression =({
+  if(! x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(77))) expression =({
     Var _x2c_gensym_literal_part_24 = List_var(captured_type);  Var _x2c_gensym_literal_part_25 = List_var(cons(_92, cons(_67, cons(Macro_inserted(List_var(expression), 1, 1), NULL))));  cons(_71, cons(_x2c_gensym_literal_part_24, cons(_x2c_gensym_literal_part_25, NULL)));
   }
   );
 }
-else if(x2c_var_equal(List_car(Type_list(type)), Symbol_var(77))) expression =({
+else if(x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(77))) expression =({
   Var _x2c_gensym_literal_part_26 = List_var(captured_type);  Var _x2c_gensym_literal_part_27 = List_var(cons(_92, cons(_42, cons(Macro_inserted(List_var(expression), 1, 1), NULL))));  cons(_71, cons(_x2c_gensym_literal_part_26, cons(_x2c_gensym_literal_part_27, NULL)));
 }
 );
@@ -1893,7 +1893,7 @@ return _record(&((* k)), captured_type, expression, reference);
 
 static List _resolve_outside(Compiler c, List frame, Var value){
   List outside = c -> lambda_scopes;
-  while(! x2c_var_equal(List_car(outside), List_var(frame))) outside = List_cdr(outside);
+  while(! x2c_var_equal_lane(List_car(outside), List_var(frame))) outside = List_cdr(outside);
   {
     List * _x2c_gensym_macro_address_4 = & c -> lambda_scopes;
     List _x2c_gensym_macro_previous_4 = * _x2c_gensym_macro_address_4;

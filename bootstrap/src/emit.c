@@ -849,7 +849,7 @@ static void _emit(Emitter * e, List ast){
     f8_dispatch____sequence(&((* e)), ast);
     return;
   }
-  if(! x2c_var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
+  if(! x2c_var_equal_lane(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
     f8_dispatch____prefix(&((* e)), ast);
     return;
   }
@@ -1502,7 +1502,7 @@ return result;
 }
 
 static List _index_init(Emitter * e, Var index, List value){
-  String assign = x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944)) ? _137 : _138;
+  String assign = x2c_var_equal_lane(List_car(value), Symbol_var(9639129704)) || x2c_var_equal_lane(List_car(value), Symbol_var(20762258403944)) ? _137 : _138;
   return({
     List _x2c_gensym_literal_part_9 = _tokens(&((* e)), index);  Var _x2c_gensym_literal_part_10 = String_var(assign);  List _x2c_gensym_literal_part_11 = _tokens(&((* e)), List_var(value));  cons(_140, List_append(_x2c_gensym_literal_part_9, cons(_142, cons(_x2c_gensym_literal_part_10, _x2c_gensym_literal_part_11))));
   }
@@ -1510,7 +1510,7 @@ static List _index_init(Emitter * e, Var index, List value){
 }
 
 static List _dot_init(Emitter * e, Var field, List value){
-  String assign = x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944)) ? _137 : _21;
+  String assign = x2c_var_equal_lane(List_car(value), Symbol_var(9639129704)) || x2c_var_equal_lane(List_car(value), Symbol_var(20762258403944)) ? _137 : _21;
   return({
     List _x2c_gensym_literal_part_12 = _tokens(&((* e)), field);  Var _x2c_gensym_literal_part_13 = String_var(assign);  List _x2c_gensym_literal_part_14 = _tokens(&((* e)), List_var(value));  cons(_144, List_append(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, _x2c_gensym_literal_part_14)));
   }
@@ -1524,7 +1524,7 @@ Type Type_declared(Type);
 int Type_is_threaded(Type);
 
 static List _local_static(Emitter * e, List declaration, List body){
-  while(x2c_var_equal(List_car(declaration), Symbol_var(104))){
+  while(x2c_var_equal_lane(List_car(declaration), Symbol_var(104))){
     (* e).origin = Var_int(Var_convert_at(List_cadr(declaration), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/emit/initialization.x",.function = "_local_static",.line = 134}; & _x2c_gensym_error_site_2; })));
     declaration = Var_list_payload(List_caddr(declaration));
   }
@@ -1648,7 +1648,7 @@ static void f14_initialization____static_binding(Emitter * e, List binding, Type
   }
   (* e).static_support = 1;
   f14_initialization___StaticRuntime runtime ={
-    .e = &(* e), .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = x2c_var_equal(List_car(Type_list(type)), Symbol_var(8794)) ||({
+    .e = &(* e), .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(8794)) ||({
       int _x2c_gensym_condition_0 = 0; {
         List _x2c_gensym_match_expr_6 = Type_list(type); {List _x2c_gensym_match_at_31, _x2c_gensym_match_at_32; if(_x2c_gensym_match_expr_6 &&(Var_is(_x2c_gensym_match_expr_6 -> car, 806120) &&(_x2c_gensym_match_at_31 = Var_list_payload(_x2c_gensym_match_expr_6 -> car), 1)) && _x2c_gensym_match_at_31 && _x2c_gensym_match_at_31 ->car.u64 == 9224497936761627226ULL && !(_x2c_gensym_match_at_32 = _x2c_gensym_match_at_31 ->cdr)){
           _x2c_gensym_condition_0 = 1;
@@ -2642,7 +2642,7 @@ static List f12_declarations____declarator(Emitter * e, List decl, List mods){
 int Type_is_array(Type);
 
 static List f12_declarations____list_declarator(Emitter * e, List decl, Type mod){
-  if(x2c_var_equal(List_car(Type_list(mod)), Symbol_var(13528008))) return f12_declarations____function_declarator(&((* e)), decl, Var_list_payload(List_cadr(Type_list(mod))));
+  if(x2c_var_equal_lane(List_car(Type_list(mod)), Symbol_var(13528008))) return f12_declarations____function_declarator(&((* e)), decl, Var_list_payload(List_cadr(Type_list(mod))));
   if(Var_is_row(List_car(Type_list(mod)), 11, 7, 1)) return({
     List _x2c_gensym_literal_part_56 = decl;  List _x2c_gensym_literal_part_57 = Type_list(mod);  List_append(_x2c_gensym_literal_part_56, _x2c_gensym_literal_part_57);
   }

@@ -60,7 +60,7 @@ static List _operator_cases(int key, int value, int derived){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
       {
         if(! Var_truth(List_getindex(row, key)) || ! Var_truth(List_getindex(row, value))) continue;
-        if(derived >= 0 && ! x2c_var_equal(List_getindex(row, 4), int_var(derived))) continue;
+        if(derived >= 0 && ! x2c_var_equal_lane(List_getindex(row, 4), int_var(derived))) continue;
         Symbol label = Var_symbol(List_getindex(row, key));
         Var result = List_getindex(row, value);
         Array_push(cases, List_var(Macro_needs_shell(Symbol_var(label)) || Macro_needs_shell(result) ? cons(_1, cons(_2, cons(List_var(({

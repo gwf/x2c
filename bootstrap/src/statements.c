@@ -985,7 +985,7 @@ static void _push_item(Compiler c, Array block, int anchor_items){
   );
   List stmt = Compiler_parse_block_item(c);
   List after = Compiler_leave_item(c);
-  if(Map_truth(c -> macro_holes) &&(x2c_var_equal(List_car(stmt), Symbol_var(917238582496136)) || x2c_var_equal(List_car(stmt), Symbol_var(917238583616488)))){
+  if(Map_truth(c -> macro_holes) &&(x2c_var_equal_lane(List_car(stmt), Symbol_var(917238582496136)) || x2c_var_equal_lane(List_car(stmt), Symbol_var(917238583616488)))){
     Array_push(block, List_var(stmt));
     return;
   }
@@ -998,7 +998,7 @@ static void _push_item(Compiler c, Array block, int anchor_items){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       item = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      Array_push(block, List_var(! anchor_items || x2c_var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
+      Array_push(block, List_var(! anchor_items || x2c_var_equal_lane(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
     }
 
   }
@@ -1013,7 +1013,7 @@ static List _macro_statement(Compiler c){
   List hole = Compiler_peek_macro_hole(c);
   List macro = Compiler_try_parse_macro_target_at(c, 43159332400040);
   if(List_truth(macro)) return macro;
-  List expression = List_truth(hole) && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
+  List expression = List_truth(hole) && x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
   Compiler_expect(c, 119);
   return cons(_107, cons(List_var(expression), NULL));
 }

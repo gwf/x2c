@@ -1844,11 +1844,11 @@ static int f4_plan____compile_child(f4_plan___MatchLower * l, Var pattern){
 }
 
 static int f4_plan____compile_guard(f4_plan___MatchLower * l, Var op, List args){
-  if(x2c_var_equal(op, Symbol_var(62436))) return f4_plan____compile_or(&((* l)), args);
-  if(x2c_var_equal(op, Symbol_var(1995752))) return f4_plan____compile_not(&((* l)), args);
-  if(x2c_var_equal(op, Symbol_var(62054))) return f4_plan____compile_is(&((* l)), args);
-  if(x2c_var_equal(op, Symbol_var(2005352))) return f4_plan____compile_set(&((* l)), args);
-  if(x2c_var_equal(op, Symbol_var(1969032))) return f4_plan____compile_and(&((* l)), args);
+  if(x2c_var_equal_lane(op, Symbol_var(62436))) return f4_plan____compile_or(&((* l)), args);
+  if(x2c_var_equal_lane(op, Symbol_var(1995752))) return f4_plan____compile_not(&((* l)), args);
+  if(x2c_var_equal_lane(op, Symbol_var(62054))) return f4_plan____compile_is(&((* l)), args);
+  if(x2c_var_equal_lane(op, Symbol_var(2005352))) return f4_plan____compile_set(&((* l)), args);
+  if(x2c_var_equal_lane(op, Symbol_var(1969032))) return f4_plan____compile_and(&((* l)), args);
   return f4_plan____compile_quote(&((* l)), args);
 }
 
@@ -2001,7 +2001,7 @@ static int f4_plan____segment_star(f4_plan___MatchLower * l, f4_plan___MatchStar
   if(! List_truth(cell)) return 1;
   Var binder = List_car(cell);
   (* star).tail = List_cdr(cell);
-  if(! x2c_var_equal(binder, Symbol_var(54))){
+  if(! x2c_var_equal_lane(binder, Symbol_var(54))){
     (* star).slot = MachineBuilder_binder(&((* l).b), binder);
     if((* star).slot < 0) return 0;
     (* star).delayed = List_truth((* star).tail) && ! f4_plan____pattern_contains_binder((* star).tail, binder);
@@ -2023,7 +2023,7 @@ static int f4_plan____compile_tail(f4_plan___MatchLower * l, List pattern){
 
 static int f4_plan____compile_binder(f4_plan___MatchLower * l, Var binder){
   int entry =(* l).b.length;
-  if(x2c_var_equal(binder, Symbol_var(58))){
+  if(x2c_var_equal_lane(binder, Symbol_var(58))){
     MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     return f4_plan____stopped(&((* l))) ? - 1 : entry;
   }
@@ -2046,7 +2046,7 @@ static int f4_plan____emit_leaf_value(f4_plan___MatchLower * l, Var pattern){
 }
 
 static int f4_plan____emit_binder(f4_plan___MatchLower * l, Var binder){
-  if(x2c_var_equal(binder, Symbol_var(58))) return 1;
+  if(x2c_var_equal_lane(binder, Symbol_var(58))) return 1;
   int slot = MachineBuilder_binder(&((* l).b), binder);
   if(slot < 0) return 0;
   int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
@@ -2168,10 +2168,10 @@ static int f4_plan____pattern_contains_binder(List pat, Var binder){
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       part = _x2c_gensym_macro_cursor_output_2;
       {
-        if(x2c_var_equal(part, binder)) return 1;
+        if(x2c_var_equal_lane(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
           List nested = Var_list_payload(part);
-          if(List_truth(nested) && ! x2c_var_equal(List_car(nested), Symbol_var(2050325770)) && f4_plan____pattern_contains_binder(nested, binder)) return 1;
+          if(List_truth(nested) && ! x2c_var_equal_lane(List_car(nested), Symbol_var(2050325770)) && f4_plan____pattern_contains_binder(nested, binder)) return 1;
         }
 
       }
@@ -2287,7 +2287,7 @@ static int f4_plan____is_list_literal(List pat){
 }
 
 static int f4_plan____emit_head_leaf(f4_plan___MatchLower * l, Var part, int reg){
-  if(x2c_var_equal(part, Symbol_var(58))) return f4_plan____fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
+  if(x2c_var_equal_lane(part, Symbol_var(58))) return f4_plan____fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
   if(Var_is_atom_binder(part)){
     int slot = MachineBuilder_binder(&((* l).b), part);
     if(slot < 0) return 0;
@@ -2476,8 +2476,8 @@ static int f4_plan____keys(Var pattern, Symbol mode, f4_plan___MatchKeys * keys)
   Var op = List_car(list);
   List args = List_cdr(list);
   if(! Var_is_match_op(op)) return mode != 46228810 && f4_plan____segment_keys(list, mode, &((* keys)));
-  if(x2c_var_equal(op, Symbol_var(2005352)) && f4_plan____set_binds(args)) return f4_plan____keys(List_cadr(args), mode, &((* keys)));
-  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))){
+  if(x2c_var_equal_lane(op, Symbol_var(2005352)) && f4_plan____set_binds(args)) return f4_plan____keys(List_cadr(args), mode, &((* keys)));
+  if(x2c_var_equal_lane(op, Symbol_var(62436)) || x2c_var_equal_lane(op, Symbol_var(2005352))){
     {
       Var arm;
       List _x2c_gensym_macro_object_8 = args;
@@ -2491,7 +2491,7 @@ static int f4_plan____keys(Var pattern, Symbol mode, f4_plan___MatchKeys * keys)
     }
     return args != NULL;
   }
-  if(! x2c_var_equal(op, Symbol_var(1969032))) return 0;
+  if(! x2c_var_equal_lane(op, Symbol_var(1969032))) return 0;
   int count =(* keys).count;
   {
     Var operand;
@@ -3219,14 +3219,14 @@ int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
 }
 
 static List f6_layout____normalize_pattern(List pattern){
-  if(! List_truth(pattern) || x2c_var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
+  if(! List_truth(pattern) || x2c_var_equal_lane(List_car(pattern), Symbol_var(2050325770))) return pattern;
   List normalized = f6_layout____normalize_elements(pattern);
   Var op = List_car(normalized);
   List args = List_cdr(normalized);
-  if(! Var_is_match_op(op) || x2c_var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
+  if(! Var_is_match_op(op) || x2c_var_equal_lane(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
   Var binder = List_car(args);
   List rest = List_cdr(args);
-  if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
+  if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal_lane(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
   return({
     Var _x2c_gensym_literal_part_3 = binder;  Var _x2c_gensym_literal_part_4 = List_var(f6_layout____normalize_pattern(cons(op, rest)));  cons(_0, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
   }
@@ -3259,7 +3259,7 @@ static List f6_layout____normalize_elements(List elements){
       List out = NULL;
       for(size_t i = spine -> length;  i > 0;  i --){
         f6_layout___NormalizedCell row =((f6_layout___NormalizedCell *) spine -> bytes)[i - 1];
-        out = x2c_var_equal(row.head, List_car(row.original)) && List_equal(out, List_cdr(row.original)) ? row.original : cons(row.head, out);
+        out = x2c_var_equal_lane(row.head, List_car(row.original)) && List_equal(out, List_cdr(row.original)) ? row.original : cons(row.head, out);
       }
       {
         List _x2c_gensym_return_value_9 = out;
@@ -3284,13 +3284,13 @@ static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern
   if(Var_is_nil(pattern)) return;
   List list = Var_list_payload(pattern);
   Var head = List_car(list);
-  if(x2c_var_equal(head, Symbol_var(2050325770))) return;
+  if(x2c_var_equal_lane(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = List_cdr(list);
     if(List_truth(args) && Var_is_list_binder(List_car(args)))(* b).leading_list_binder = 1;
   }
-  List parts = x2c_var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
-  int predicate_form = x2c_var_equal(head, Symbol_var(62054));
+  List parts = x2c_var_equal_lane(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
+  int predicate_form = x2c_var_equal_lane(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
     if(predicate_form && ! List_truth(List_cdr(at)) && f6_layout____reserved_predicate(part)) continue;
@@ -3301,13 +3301,13 @@ static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern
 }
 
 static int f6_layout____reserved_predicate(Var atom){
-  return Var_is(atom, 1328354264) &&(x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666)) || x2c_var_equal(atom, Symbol_var(1997882)));
+  return Var_is(atom, 1328354264) &&(x2c_var_equal_lane(atom, Symbol_var(1997793406138)) || x2c_var_equal_lane(atom, Symbol_var(1860354452666)) || x2c_var_equal_lane(atom, Symbol_var(1997882)));
 }
 
 static void f6_layout____atom(f6_layout___MatchLayoutBuilder * b, Var atom){
   int kind = f6_layout____binder_kind(atom);
   if(kind < 0)(* b).malformed_binder = 1;
-  else if(kind && ! x2c_var_equal(atom, Symbol_var(58)) && ! x2c_var_equal(atom, Symbol_var(54)) && f6_layout____add(&((* b)), atom) < 0)(* b).past_capacity = 1;
+  else if(kind && ! x2c_var_equal_lane(atom, Symbol_var(58)) && ! x2c_var_equal_lane(atom, Symbol_var(54)) && f6_layout____add(&((* b)), atom) < 0)(* b).past_capacity = 1;
 }
 
 static int f6_layout____add(f6_layout___MatchLayoutBuilder * b, Atom binder){
@@ -3345,11 +3345,11 @@ static f6_layout___MatchSlots f6_layout____slots(MatchCaptureLayout m, Var patte
   List list = Var_list_payload(pattern);
   Var head = List_car(list);
   List args = List_cdr(list);
-  if(x2c_var_equal(head, Symbol_var(2050325770))) return(f6_layout___MatchSlots){
+  if(x2c_var_equal_lane(head, Symbol_var(2050325770))) return(f6_layout___MatchSlots){
     0, 0
   }
   ;
-  if(x2c_var_equal(head, Symbol_var(1059020478773725))) return(f6_layout___MatchSlots){
+  if(x2c_var_equal_lane(head, Symbol_var(1059020478773725))) return(f6_layout___MatchSlots){
     0, f6_layout____sequence_slots(m, args).possible
   }
   ;
@@ -3358,9 +3358,9 @@ static f6_layout___MatchSlots f6_layout____slots(MatchCaptureLayout m, Var patte
 }
 
 static f6_layout___MatchSlots f6_layout____guard_slots(MatchCaptureLayout m, Var op, List args){
-  if(x2c_var_equal(op, Symbol_var(1969032)) ||(x2c_var_equal(op, Symbol_var(2005352)) && f6_layout____set_capture(args))) return f6_layout____sequence_slots(m, args);
-  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))) return f6_layout____choice_slots(m, args);
-  if(x2c_var_equal(op, Symbol_var(1995752))) return(f6_layout___MatchSlots){
+  if(x2c_var_equal_lane(op, Symbol_var(1969032)) ||(x2c_var_equal_lane(op, Symbol_var(2005352)) && f6_layout____set_capture(args))) return f6_layout____sequence_slots(m, args);
+  if(x2c_var_equal_lane(op, Symbol_var(62436)) || x2c_var_equal_lane(op, Symbol_var(2005352))) return f6_layout____choice_slots(m, args);
+  if(x2c_var_equal_lane(op, Symbol_var(1995752))) return(f6_layout___MatchSlots){
     0, f6_layout____sequence_slots(m, args).possible
   }
   ;
@@ -3416,7 +3416,7 @@ static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, Li
 }
 
 static int _named_binder(Var value){
-  return Var_is_binder(value) && ! x2c_var_equal(value, Symbol_var(58)) && ! x2c_var_equal(value, Symbol_var(54));
+  return Var_is_binder(value) && ! x2c_var_equal_lane(value, Symbol_var(58)) && ! x2c_var_equal_lane(value, Symbol_var(54));
 }
 
 static int f6_layout____set_capture(List args){
@@ -3651,7 +3651,7 @@ static Var _replace(Var input, ReplacementSource * source){
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list_payload(input);
   if(! List_truth(list)) return input;
-  if(x2c_var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
+  if(x2c_var_equal_lane(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
   Block spine = Block_new(sizeof(f9_templates___ReplacementCell));
   const Block _x2c_gensym_macro_acquired_1 = spine;
   {
@@ -3669,12 +3669,12 @@ static Var _replace(Var input, ReplacementSource * source){
       Var tail = List_var((List) NULL);
       for(;  List_truth(list);  list = List_cdr(list)){
         Var head = List_car(list);
-        if(x2c_var_equal(head, Symbol_var(2050325770))){
+        if(x2c_var_equal_lane(head, Symbol_var(2050325770))){
           tail = List_cadr(list);
           break;
         }
         f9_templates___ReplacementCell row ={
-          _replace(head, &((* source))), Var_is_list_binder(head) && ! x2c_var_equal(head, Symbol_var(54)) && ! x2c_var_equal(head, Symbol_var(58))
+          _replace(head, &((* source))), Var_is_list_binder(head) && ! x2c_var_equal_lane(head, Symbol_var(54)) && ! x2c_var_equal_lane(head, Symbol_var(58))
         }
         ;
         Block_push(spine, & row);

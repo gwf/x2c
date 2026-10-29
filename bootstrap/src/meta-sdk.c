@@ -704,7 +704,7 @@ Symbol Type_tag_name(String name){
 List Type_members(Type type){
   if(! _init_guard_) _file_init_();
   Type resolved = Type_resolve(type);
-  if(! x2c_var_equal(List_car(Type_list(resolved)), Symbol_var(357722))) _reject_value(_47, List_var(type));
+  if(! x2c_var_equal_lane(List_car(Type_list(resolved)), Symbol_var(357722))) _reject_value(_47, List_var(type));
   Array rows = Array_new();
   {
     List member;
@@ -795,7 +795,7 @@ List MetaContext_type_description(Var value){
     }
 
   }
-  if(x2c_var_equal(kind, Symbol_var(1318234344)) || x2c_var_equal(kind, Symbol_var(44977116))) fields = Type_fields(type);
+  if(x2c_var_equal_lane(kind, Symbol_var(1318234344)) || x2c_var_equal_lane(kind, Symbol_var(44977116))) fields = Type_fields(type);
   Compiler c = active.expander;
   Array methods = Array_new();
   {
@@ -1623,7 +1623,7 @@ static int f8_rewrites____ground(Var pattern){
 
 static int f8_rewrites____function_hole(Macro shape){
   List parameters = Var_list_payload(List_assoc(shape, Symbol_var(1129338912386214)));
-  if(List_len(parameters) != 1 || ! x2c_var_equal(List_assoc(Var_list(List_car(parameters)), Symbol_var(740232)), Symbol_var(458361162716))) return 0;
+  if(List_len(parameters) != 1 || ! x2c_var_equal_lane(List_assoc(Var_list(List_car(parameters)), Symbol_var(740232)), Symbol_var(458361162716))) return 0;
   {
     Var _x2c_gensym_match_var_1 = List_assoc(shape, Symbol_var(1386033712394));
     int _x2c_gensym_match_none_1 = ! Var_is(_x2c_gensym_match_var_1, 806120);
@@ -1760,7 +1760,7 @@ static List f8_rewrites____unmarked(List holes, Symbol mark){
     Var _x2c_gensym_macro_cursor_output_15;
     while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_15))){
       hole = _x2c_gensym_macro_cursor_output_15;
-      Array_push(kept, x2c_var_equal(hole, List_var(cons(_65, cons(Symbol_var(mark), _24)))) ? List_var(_166) : hole);
+      Array_push(kept, x2c_var_equal_lane(hole, List_var(cons(_65, cons(Symbol_var(mark), _24)))) ? List_var(_166) : hole);
     }
 
   }

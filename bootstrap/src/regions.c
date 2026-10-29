@@ -1241,7 +1241,7 @@ Symbol Compiler_region_result(String name){
 
 int Compiler_region_wrapper(String name){
   if(! _init_guard_) _file_init_();
-  return x2c_var_equal(Map_getindex(f7_runtime___runtime, String_var(name)), List_var(_48));
+  return x2c_var_equal_lane(Map_getindex(f7_runtime___runtime, String_var(name)), List_var(_48));
 }
 
 int Compiler_has_region_row(String name){
@@ -1404,7 +1404,7 @@ static Fact _returned_argument(Walk * w, Var value, List * named){
       row = Var_list_payload(_x2c_gensym_macro_item_1); {
         List _x2c_gensym_destructure_0 = row;  int index = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/regions/values.x",.function = "_returned_argument",.line = 115}; & _x2c_gensym_error_site_0; })));
         Var target = List_getindex(_x2c_gensym_destructure_0, 1);
-        if(! x2c_var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;
+        if(! x2c_var_equal_lane(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;
         Type type = NULL;
         Fact fact = _fact_of(&((* w)), _passed(types, arguments, index, &(type)), named);
         if(fact &&(fact -> param >= 0 || fact -> born || fact -> region || fact -> other || _cleanup(fact -> acquired))) return fact;
@@ -1577,7 +1577,7 @@ static Fact _fact_of(Walk * w, Var expression, List * named){
   }
   List arguments = NULL;
   String callee = _callee_of(inner, &(arguments));
-  if(! String_truth(callee) || ! x2c_var_equal(_effect(&((* w)), callee), List_var(_48))) return NULL;
+  if(! String_truth(callee) || ! x2c_var_equal_lane(_effect(&((* w)), callee), List_var(_48))) return NULL;
   return _fact_of(&((* w)), List_car(arguments), named);
 }
 
@@ -2378,7 +2378,7 @@ static int f4_walk____note_restored(Walk * w, Var body){
           target = x2c_match_value_0;
           {
             Var place = f4_walk____target_place(&((* w)), target);
-            if(x2c_var_equal(place, _unwrap(target))) return 0;
+            if(x2c_var_equal_lane(place, _unwrap(target))) return 0;
             (* w).restored = Map_copy((* w).restored);
             Map_setindex((* w).restored, place, int_var(1));
             return 1;
@@ -2443,8 +2443,8 @@ static void f4_walk____scan(Walk * w, Var value, int deferred){
   Array_push((* w).pending, value);
   while((int) Array_len((* w).pending) > base){
     Var node = Array_take_last((* w).pending);
-    if(x2c_var_equal(node, Symbol_var(951296328)) || x2c_var_equal(node, Symbol_var(1474125078856))){
-      (* w).depth += x2c_var_equal(node, Symbol_var(951296328)) ? 1 : - 1;
+    if(x2c_var_equal_lane(node, Symbol_var(951296328)) || x2c_var_equal_lane(node, Symbol_var(1474125078856))){
+      (* w).depth += x2c_var_equal_lane(node, Symbol_var(951296328)) ? 1 : - 1;
       continue;
     }
     if(f4_walk____scan_call_node(&((* w)), node)) continue;
@@ -2461,7 +2461,7 @@ static void f4_walk____scan(Walk * w, Var value, int deferred){
 
 static int f4_walk____scan_assignment(Walk * w, Var node, Var root){
   List assignment = _source_assignment(node);
-  if(! List_truth(assignment) || x2c_var_equal(_unwrap(node), root)) return 0;
+  if(! List_truth(assignment) || x2c_var_equal_lane(_unwrap(node), root)) return 0;
   List _x2c_gensym_destructure_1 = assignment;
   Var target = List_getindex(_x2c_gensym_destructure_1, 0);
   Var stored = List_getindex(_x2c_gensym_destructure_1, 1);
@@ -2657,7 +2657,7 @@ static void f4_walk____declare_initialized(Walk * w, List name, Var value, Type 
       part = _x2c_gensym_macro_item_11;
       {
         if(! Var_is(part, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(part))) break;
-        if(x2c_var_equal(part, Symbol_var(7304424))) fact -> constant = 1;
+        if(x2c_var_equal_lane(part, Symbol_var(7304424))) fact -> constant = 1;
       }
 
     }
@@ -2743,9 +2743,9 @@ static void f4_walk____scan_call(Walk * w, Var call, String callee, List argumen
         if(index >= count) continue;
         Type type = NULL, holder_type = NULL;
         Var argument = _passed(types, arguments, index, &(type));
-        if(x2c_var_equal(target, Symbol_var(1317118534))) _flow(&((* w)), argument, type, 1317118534, NULL);
-        else if(x2c_var_equal(target, Symbol_var(46060699100))) _flow(&((* w)), argument, type, 534624, NULL);
-        else if(x2c_var_equal(target, Symbol_var(1219734312))){
+        if(x2c_var_equal_lane(target, Symbol_var(1317118534))) _flow(&((* w)), argument, type, 1317118534, NULL);
+        else if(x2c_var_equal_lane(target, Symbol_var(46060699100))) _flow(&((* w)), argument, type, 534624, NULL);
+        else if(x2c_var_equal_lane(target, Symbol_var(1219734312))){
           int born = 0;
           Region other = NULL;
           Acquired acquired = NULL;

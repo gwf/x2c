@@ -506,8 +506,9 @@ static Var * f9_interning____record_value(PoolTable _x2c_gensym_macro_map_1, uns
   struct PoolRecord * _x2c_gensym_macro_records_1 = _x2c_gensym_macro_map_1 -> entries;  return & _x2c_gensym_macro_records_1[_x2c_gensym_macro_index_1].val;
 }
 
+static unsigned String_cached_hash(String);
 static unsigned f9_interning____table_hash(Var * _x2c_gensym_macro_key_0){
-  return Var_hash(_x2c_gensym_macro_key_0[0]);
+  unsigned _x2c_gensym_macro_cached_0 = String_cached_hash(Var_string_payload(_x2c_gensym_macro_key_0[0]));  return _x2c_gensym_macro_cached_0 ? _x2c_gensym_macro_cached_0 : Var_hash(_x2c_gensym_macro_key_0[0]);
 }
 
 static int f9_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0){
@@ -515,7 +516,7 @@ static int f9_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x
 }
 
 static int f9_interning____table_value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1){
-  return x2c_var_equal(_x2c_gensym_macro_a_1[0], _x2c_gensym_macro_b_1[0]);
+  return x2c_var_equal_lane(_x2c_gensym_macro_a_1[0], _x2c_gensym_macro_b_1[0]);
 }
 
 static void f9_interning____table_value_valid(Var * _x2c_gensym_macro_value_0){

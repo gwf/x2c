@@ -39,6 +39,8 @@ void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_21);
 
 MapSubInt MapSubInt_new(void);
 
+MapSubInt MapSubInt_new_capacity(unsigned capacity);
+
 void MapSubInt_increment(MapSubInt map, Substr word);
 
 Map MapSubInt_strings(MapSubInt map);

@@ -709,6 +709,38 @@ static inline int Var_int(Var x){
   if((x.u64 >> 32) ==(VAR_I32_PREFIX >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
 }
 
+static inline int x2c_var_i32_pair(Var lhs, Var rhs){
+  return(lhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32) &&(rhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32);
+}
+
+static inline Var x2c_var_add_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_add_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_add(lhs, rhs);
+}
+
+static inline Var x2c_var_sub_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_sub_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_sub(lhs, rhs);
+}
+
+static inline Var x2c_var_mul_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_mul_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_mul(lhs, rhs);
+}
+
+static inline Var x2c_var_div_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  if(x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == - 1)) return Var_box_i32_bits((unsigned)(a / b));  return Var_div(lhs, rhs);
+}
+
+static inline Var x2c_var_mod_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  if(x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == - 1)) return Var_box_i32_bits((unsigned)(a % b));  return Var_mod(lhs, rhs);
+}
+
+static inline int x2c_var_equal_lane(Var lhs, Var rhs){
+  return x2c_var_i32_pair(lhs, rhs) ? lhs.u64 == rhs.u64 : x2c_var_equal(lhs, rhs);
+}
+
+static inline double x2c_var_order_lane(Var lhs, Var rhs){
+  if(! x2c_var_i32_pair(lhs, rhs)) return x2c_var_order(lhs, rhs);  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  return(a > b) -(a < b);
+}
+
 #include "dispatch.h"
 File Stdin, Stdout, Stderr;
 Var Void =(Var){
@@ -919,7 +951,7 @@ void x2c_initialize_protocols(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 857,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 927,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -932,7 +964,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 882,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 952,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop =(* stop);  if((* start) == INT_MIN)(* start) =(step > 0) ? 0 : length - 1;  if((* stop) == INT_MIN)(* stop) = - 1;  if((* start) < 0){
     (* start) += length;  if((* start) < 0)(* start) =(step < 0) ? - 1 : 0;

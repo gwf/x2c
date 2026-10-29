@@ -3463,7 +3463,7 @@ static void f8_emission____native_lookups(Compiler c, Array units){
 }
 
 static int f8_emission____after_directives(Array units){
-  int after = 0;  while(after <(int) Array_len(units) && x2c_var_equal(List_car(Ast_without_origin(Var_list_payload(Array_getindex(units, after)))), Symbol_var(35579270086))) after ++;  return after;
+  int after = 0;  while(after <(int) Array_len(units) && x2c_var_equal_lane(List_car(Ast_without_origin(Var_list_payload(Array_getindex(units, after)))), Symbol_var(35579270086))) after ++;  return after;
 }
 
 List Compiler_convert_expression(Compiler, List, Type);
@@ -3516,7 +3516,7 @@ for(List _x2c_gensym_macro_cursor_31 = _x2c_gensym_macro_original_0;  List_truth
     child = Var_list_payload(_x2c_gensym_macro_item_30);
     _x2c_gensym_macro_value_0 = List_var(f8_emission____template_calls(c, child, callee));
   }
-  if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_30)){
+  if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_30)){
     _x2c_gensym_macro_rewritten_0 = Array_new();
     for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_31);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
   }
@@ -3566,7 +3566,7 @@ static List f8_emission____native_targets(Compiler c, List node, List lookup){
     Var _x2c_gensym_macro_item_31 = List_car(_x2c_gensym_macro_cursor_32), _x2c_gensym_macro_value_1 = _x2c_gensym_macro_item_31;  if(Var_is_row(_x2c_gensym_macro_item_31, 9, 7, 4)){
       child = Var_list_payload(_x2c_gensym_macro_item_31);  _x2c_gensym_macro_value_1 = List_var(f8_emission____native_targets(c, child, lookup));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_31)){
+    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_31)){
       _x2c_gensym_macro_rewritten_1 = Array_new();  for(List _x2c_gensym_macro_prefix_1 = _x2c_gensym_macro_original_1;  ! List_equal(_x2c_gensym_macro_prefix_1, _x2c_gensym_macro_cursor_32);  _x2c_gensym_macro_prefix_1 = List_cdr(_x2c_gensym_macro_prefix_1)) Array_push(_x2c_gensym_macro_rewritten_1, List_car(_x2c_gensym_macro_prefix_1));
     }
     if((void *) _x2c_gensym_macro_rewritten_1) Array_push(_x2c_gensym_macro_rewritten_1, _x2c_gensym_macro_value_1);
@@ -3621,12 +3621,12 @@ static Map f8_emission____initial_copies(Compiler c, Array units){
                 Var _x2c_gensym_literal_part_177 = spec;  Var _x2c_gensym_literal_part_178 = List_var(cons(_48, cons(bound, NULL)));  cons(_49, cons(_x2c_gensym_literal_part_177, cons(_x2c_gensym_literal_part_178, NULL)));
               }
               )));  if(List_contains(Type_list(type), Symbol_var(7304424))) continue;  if(Type_is_array(type)){
-                List zero = Var_list_payload(f8_emission____braced(initializer) ? List_var(Compiler_zero_initializer(c, Var_list_payload(initializer))) : initializer);  if(c -> meta_build) for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal(Array_getindex(units, i), declaration)) Array_setindex(units, i, List_var(({
+                List zero = Var_list_payload(f8_emission____braced(initializer) ? List_var(Compiler_zero_initializer(c, Var_list_payload(initializer))) : initializer);  if(c -> meta_build) for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal_lane(Array_getindex(units, i), declaration)) Array_setindex(units, i, List_var(({
                   Var _x2c_gensym_literal_part_179 = spec;  Var _x2c_gensym_literal_part_180 = List_var(cons(_48, cons(List_var(cons(_209, cons(_210, cons(bound, cons(List_var(zero), NULL))))), NULL)));  cons(_49, cons(_x2c_gensym_literal_part_179, cons(_x2c_gensym_literal_part_180, NULL)));
                 }
                 )));  continue;
               }
-              int copied = f8_emission____braced(initializer) &&(! c -> meta_build || Var_is_row(List_car(Type_tag(type)), 9, 7, 4));  if(! c -> meta_build && ! copied) continue;  List identity = Var_list_payload(binding);  List copy = copied ? Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_1134), cons(String_var(Var_str(List_last(identity))), NULL)))) : NULL;  for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal(Array_getindex(units, i), declaration)){
+              int copied = f8_emission____braced(initializer) &&(! c -> meta_build || Var_is_row(List_car(Type_tag(type)), 9, 7, 4));  if(! c -> meta_build && ! copied) continue;  List identity = Var_list_payload(binding);  List copy = copied ? Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_1134), cons(String_var(Var_str(List_last(identity))), NULL)))) : NULL;  for(int i = 0;  i <(int) Array_len(units);  i ++) if(x2c_var_equal_lane(Array_getindex(units, i), declaration)){
                 List original = Var_list_payload(c -> meta_build ? bound : List_var(cons(_209, cons(_210, cons(bound, cons(initializer, NULL))))));  List bindings = copied ?({
                   Var _x2c_gensym_literal_part_182 = List_var(original);  Var _x2c_gensym_literal_part_183 = List_var(({
                     Var _x2c_gensym_literal_part_181 = List_var(cons(_16, cons(List_var(copy), cons(mods, NULL))));  cons(_209, cons(_210, cons(_x2c_gensym_literal_part_181, cons(initializer, NULL))));
@@ -3794,7 +3794,7 @@ static List f8_emission____resets(Compiler c, Map initials){
 
 static int f8_emission____braced(Var node){
   if(! Var_is_row(node, 9, 7, 4)) return 0;
-  if(x2c_var_equal(List_car((Var_list_payload(node))), Symbol_var(7656885669130))) return 1;
+  if(x2c_var_equal_lane(List_car((Var_list_payload(node))), Symbol_var(7656885669130))) return 1;
   {
     Var part;
     List _x2c_gensym_macro_object_34 = Var_list_payload(node);

@@ -2333,7 +2333,7 @@ static void _naming(Definition * d){
   }
   else(* d).name = _name(c);
   String spelling = Atom_str((* d).name);
-  if((* d).local && x2c_var_equal((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _16, (* d).start, NULL);
+  if((* d).local && x2c_var_equal_lane((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _16, (* d).start, NULL);
   if(String_startswith(spelling, _17) && ! c -> builtin_defs && ! Compiler_is_prelude_source(Compiler_source_path(c, c -> filename))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_18), cons(String_var(spelling), cons(String_var(_19), NULL)))), (* d).start, _22);
 }
 
@@ -2365,7 +2365,7 @@ static void f19_definitions_reading____take_target(Definition * d, List hole){
   if(! f19_definitions_reading____decorator_target(Var_symbol(List_assoc(hole, Symbol_var(740232))))) Compiler_report_error(c, 33658058, _26, (* d).start, _32);
   if(Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler_report_error(c, 33658058, _33, (* d).start, NULL);
   (* d).target = hole;
-  if(! x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(1405544))) return;
+  if(! x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(1405544))) return;
   Map_setindex(c -> macro_holes, List_var(cons(_34, cons(List_assoc(hole, Symbol_var(154018148)), NULL))), int_var(1));
   Map_setindex(c -> macro_holes, List_var(_36), List_var(hole));
 }
@@ -2942,7 +2942,7 @@ static void f21_definitions_templates____constructed_names(Definition * d, Map b
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       parameter = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      if(x2c_var_equal(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
+      if(x2c_var_equal_lane(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
         Var name = Macro_binder(List_assoc(parameter, Symbol_var(154018148)), _95, 0);
         Map_setindex(bindings, name, List_var(cons(required, cons(name, NULL))));
       }
@@ -3093,7 +3093,7 @@ static Map f21_definitions_templates____binder_uses(List template){
 static List f21_definitions_templates____rebuild_template(Definition * d){
   Map expressions = Map_new(); {
     List hole;  List _x2c_gensym_macro_object_8 =(* d).parameters;  List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_8;  Var _x2c_gensym_macro_cursor_output_8;  while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_8))){
-      hole = Var_list_payload(_x2c_gensym_macro_cursor_output_8);  if(x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(377892))) Map_setindex(expressions, _hole_key(hole, _129), int_var(1));
+      hole = Var_list_payload(_x2c_gensym_macro_cursor_output_8);  if(x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(377892))) Map_setindex(expressions, _hole_key(hole, _129), int_var(1));
     }
 
   }
@@ -3117,7 +3117,7 @@ static Var f21_definitions_templates____rebuild_syntax(Var syntax, Map expressio
     Var _x2c_gensym_macro_item_9 = List_car(_x2c_gensym_macro_cursor_10), _x2c_gensym_macro_value_0 = _x2c_gensym_macro_item_9;  if(Var_is_row(_x2c_gensym_macro_item_9, 9, 7, 4)){
       child = Var_list_payload(_x2c_gensym_macro_item_9);  _x2c_gensym_macro_value_0 = f21_definitions_templates____rebuild_syntax(List_var(child), expressions);
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_9)){
+    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_9)){
       _x2c_gensym_macro_rewritten_0 = Array_new();  for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_10);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
     }
     if((void *) _x2c_gensym_macro_rewritten_0) Array_push(_x2c_gensym_macro_rewritten_0, _x2c_gensym_macro_value_0);
@@ -3256,13 +3256,13 @@ static List f21_definitions_templates____fresh_patterns(List fresh, Map binders)
 }
 
 static List f21_definitions_templates____capture_pattern(List hole, Map binders){
-  Var author = List_assoc(hole, Symbol_var(154018148));  int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/macros/definitions/templates.x",.function = "f21_definitions_templates____capture_pattern",.line = 371}; & _x2c_gensym_error_site_0; })));  Var one = sequence ? Symbol_var(54) : Symbol_var(58);  Var source = f21_definitions_templates____used(binders, hole, _179, one);  Var value = f21_definitions_templates____used(binders, hole, _95, one);  Var expression = f21_definitions_templates____used(binders, hole, _129, one);  Var splice = f21_definitions_templates____used(binders, hole, _180, Symbol_var(54));  if(! sequence && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(458361162716))) value = List_var(({
+  Var author = List_assoc(hole, Symbol_var(154018148));  int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/macros/definitions/templates.x",.function = "f21_definitions_templates____capture_pattern",.line = 371}; & _x2c_gensym_error_site_0; })));  Var one = sequence ? Symbol_var(54) : Symbol_var(58);  Var source = f21_definitions_templates____used(binders, hole, _179, one);  Var value = f21_definitions_templates____used(binders, hole, _95, one);  Var expression = f21_definitions_templates____used(binders, hole, _129, one);  Var splice = f21_definitions_templates____used(binders, hole, _180, Symbol_var(54));  if(! sequence && x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(458361162716))) value = List_var(({
     Var _x2c_gensym_literal_part_32 = value;  Var _x2c_gensym_literal_part_33 = List_var(({
       Var _x2c_gensym_literal_part_30 = f21_definitions_templates____used(binders, hole, _78, Symbol_var(58));  Var _x2c_gensym_literal_part_31 = f21_definitions_templates____used(binders, hole, _79, Symbol_var(58));  cons(_81, cons(_x2c_gensym_literal_part_30, cons(_x2c_gensym_literal_part_31, _182)));
     }
     ));  cons(_183, cons(_x2c_gensym_literal_part_32, cons(_x2c_gensym_literal_part_33, NULL)));
   }
-  ));  List trailing = NULL;  if(x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(1405544))) trailing = f21_definitions_templates____unit_trailing(hole, binders);  return _capture_layout(sequence, ({
+  ));  List trailing = NULL;  if(x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(1405544))) trailing = f21_definitions_templates____unit_trailing(hole, binders);  return _capture_layout(sequence, ({
     Var _x2c_gensym_literal_part_34 = List_var(cons(_34, cons(author, NULL)));  Var _x2c_gensym_literal_part_35 = List_var(cons(_34, cons(source, NULL)));  cons(_183, cons(_x2c_gensym_literal_part_34, cons(_x2c_gensym_literal_part_35, NULL)));
   }
   ), sequence ?({
@@ -3833,8 +3833,8 @@ List Compiler_try_parse_macro_member(Compiler c){
   if(! _init_guard_) _file_init_();
   Token token = c -> token;
   List hole = Compiler_peek_macro_hole(c);
-  if(List_truth(hole) && Var_truth(List_assoc(hole, Symbol_var(740232))) && ! x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))){
-    String _x2c_gensym_macro_kind_0 = x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(377892)) ? _303 : String_join(NULL, cons(String_var(_304), cons(String_var(_kind_spelling(Var_symbol(List_assoc(hole, Symbol_var(740232))))), cons(String_var(_305), NULL))));
+  if(List_truth(hole) && Var_truth(List_assoc(hole, Symbol_var(740232))) && ! x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))){
+    String _x2c_gensym_macro_kind_0 = x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(377892)) ? _303 : String_join(NULL, cons(String_var(_304), cons(String_var(_kind_spelling(Var_symbol(List_assoc(hole, Symbol_var(740232))))), cons(String_var(_305), NULL))));
     String _x2c_gensym_macro_note_1 = _306;
     Compiler_report_error(c, 33658058, ({
       Var _x2c_gensym_literal_part_63 = String_var(Atom_str(_hole_name(hole)));  String_join(NULL, cons(String_var(_307), cons(_x2c_gensym_literal_part_63, cons(String_var(_308), cons(String_var(_x2c_gensym_macro_kind_0), cons(String_var(_309), NULL))))));
@@ -3843,7 +3843,7 @@ List Compiler_try_parse_macro_member(Compiler c){
   }
   List slot = Compiler_try_parse_macro_slot(c, 920394);
   if(List_truth(hole)) hole = _hole_record(c, _hole_name(hole));
-  if(! List_truth(slot) || ! List_truth(hole) || ! x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) || Var_int(List_assoc(hole, Symbol_var(1317592723658)))) return slot;
+  if(! List_truth(slot) || ! List_truth(hole) || ! x2c_var_equal_lane(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) || Var_int(List_assoc(hole, Symbol_var(1317592723658)))) return slot;
   return cons(_82, cons(_hole_key(hole, _310), NULL));
 }
 
@@ -3961,7 +3961,7 @@ List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List argument
     .c = c, .definition = _stored_definition(c, stored, invocation), .input = arguments, .invocation = invocation
   }
   ;
-  int block_scope = x2c_var_equal(List_assoc(x.definition, Symbol_var(740232)), Symbol_var(9147177346020)) && x2c_var_equal(List_assoc(x.definition, Symbol_var(1345468776)), Symbol_var(5011670));
+  int block_scope = x2c_var_equal_lane(List_assoc(x.definition, Symbol_var(740232)), Symbol_var(9147177346020)) && x2c_var_equal_lane(List_assoc(x.definition, Symbol_var(1345468776)), Symbol_var(5011670));
   if(block_scope) Sym_push_new_scope(c -> sym);
   {
     _x2c_gensym_defer_env_12 _x2c_gensym_macro_environment_15 ={
@@ -4072,7 +4072,7 @@ List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List argument
 Token Compiler_macro_invocation_site(Compiler c, Var site){
   if(! _init_guard_) _file_init_();
   if(Var_is_row(site, 11, 7, 5)) return Var_token(site);
-  if(! x2c_var_equal(site, Symbol_var(960560003786)) || ! List_truth(c -> macro_stack)) return NULL;
+  if(! x2c_var_equal_lane(site, Symbol_var(960560003786)) || ! List_truth(c -> macro_stack)) return NULL;
   List active = Var_list_payload(List_car(c -> macro_stack));
   List _x2c_gensym_destructure_4 = active;
   Var definition = List_getindex(_x2c_gensym_destructure_4, 0);
@@ -4126,7 +4126,7 @@ return Var_list_payload(List_truth(definition) ? List_var(definition) : stored);
 
 static void f9_expansion____check(f9_expansion___Expansion * x){
   Compiler c =(* x).c;
-  int leaf = x2c_var_equal(List_assoc((* x).definition, Symbol_var(796748)), int_var(1));
+  int leaf = x2c_var_equal_lane(List_assoc((* x).definition, Symbol_var(796748)), int_var(1));
   if(! leaf){
     List active;
     List _x2c_gensym_macro_object_27 = c -> macro_stack;
@@ -4320,7 +4320,7 @@ static List f9_expansion____member_bindings(Compiler c, List parameters, List in
       {
         List capture = Var_list_payload(List_car(captures));
         captures = List_cdr(captures);
-        if(! x2c_var_equal(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394)) || Var_int(List_assoc(parameter, Symbol_var(1317592723658)))) continue;
+        if(! x2c_var_equal_lane(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394)) || Var_int(List_assoc(parameter, Symbol_var(1317592723658)))) continue;
         Var member = _hole_key(parameter, _310);
         bindings = cons(List_var(({
           Var _x2c_gensym_literal_part_77 = member;  Var _x2c_gensym_literal_part_78 = _member_spelling(c, List_assoc(capture, Symbol_var(46228810)));  cons(_x2c_gensym_literal_part_77, cons(_x2c_gensym_literal_part_78, NULL));
@@ -4389,8 +4389,8 @@ static List f9_expansion____author_bindings(List bindings, List * template_bindi
 static Ast f9_expansion____construct(f9_expansion___Expansion * x, List bindings){
   List definition =(* x).definition;
   Ast constructed = List_replace((* x).template, bindings);
-  if(List_truth(constructed) &&(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) ||((* x).c -> shallow && x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) || x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778)))){
-    List rows = x2c_var_equal(List_car(constructed), Symbol_var(39266)) ? List_cdr(constructed) : cons(List_var(constructed), NULL);
+  if(List_truth(constructed) &&(x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) ||((* x).c -> shallow && x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) || x2c_var_equal_lane(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778)))){
+    List rows = x2c_var_equal_lane(List_car(constructed), Symbol_var(39266)) ? List_cdr(constructed) : cons(List_var(constructed), NULL);
     constructed = cons(_342, cons(List_var(cons(_343, rows)), NULL));
   }
   return constructed;
@@ -4552,7 +4552,7 @@ static void _file_scope_locals(List rows, Map locals){
                 }
                 }}
               }
-              if(x2c_var_equal(kind, Symbol_var(44661285196)) || ! Type_is_static(Var_type(type))) f9_expansion____file_scope_declarators(rows, locals);
+              if(x2c_var_equal_lane(kind, Symbol_var(44661285196)) || ! Type_is_static(Var_type(type))) f9_expansion____file_scope_declarators(rows, locals);
             }
 
           }
@@ -4906,7 +4906,7 @@ int Ast_contains_head(Var, Symbol);
 static Var f8_rewrites____bound_held(Compiler c, SlotWatch held, Symbol kind, Var ast, Symbol position, Type expected, Token site, int lower){
   if(! Ast_contains_head(ast, kind) || f8_rewrites____find_slot(held, Var_list_payload(ast)) >= 0) return ast;
   List node = Var_list_payload(ast);
-  if(x2c_var_equal(List_car(node), Symbol_var(kind))){
+  if(x2c_var_equal_lane(List_car(node), Symbol_var(kind))){
     List rewritten = f8_rewrites____rewrite(c, 948490, Symbol_var(kind), node, position, expected, site, lower);
     return List_var(List_truth(rewritten) ? rewritten : node);
   }
@@ -4919,7 +4919,7 @@ static Var f8_rewrites____bound_held(Compiler c, SlotWatch held, Symbol kind, Va
       child = _x2c_gensym_macro_item_37;
       _x2c_gensym_macro_value_1 = f8_rewrites____bound_held(c, held, kind, child, position, expected, site, lower);
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_37)){
+    if(!(void *) _x2c_gensym_macro_rewritten_1 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_1, _x2c_gensym_macro_item_37)){
       _x2c_gensym_macro_rewritten_1 = Array_new();
       for(List _x2c_gensym_macro_prefix_1 = _x2c_gensym_macro_original_1;  ! List_equal(_x2c_gensym_macro_prefix_1, _x2c_gensym_macro_cursor_39);  _x2c_gensym_macro_prefix_1 = List_cdr(_x2c_gensym_macro_prefix_1)) Array_push(_x2c_gensym_macro_rewritten_1, List_car(_x2c_gensym_macro_prefix_1));
     }
@@ -5045,7 +5045,7 @@ static void f8_rewrites____held_parts(List source, Symbol point, Array found){
         node = Var_list_payload(_x2c_gensym_macro_current_2);
         {
           if(Var_is(List_car(node), 1328354264)) Array_push(found, List_var(node));
-          if(x2c_var_equal(List_car(node), Symbol_var(377892))) continue;
+          if(x2c_var_equal_lane(List_car(node), Symbol_var(377892))) continue;
         }
         for(List _x2c_gensym_macro_cursor_41 = node;  List_truth(_x2c_gensym_macro_cursor_41);  _x2c_gensym_macro_cursor_41 = List_cdr(_x2c_gensym_macro_cursor_41)) if(Var_is_row(List_car(_x2c_gensym_macro_cursor_41), 9, 7, 4)) Array_push(_x2c_gensym_macro_pending_2, List_car(_x2c_gensym_macro_cursor_41));
       }
@@ -5482,7 +5482,7 @@ static void f8_rewrites____expression_nodes(List source, Array found){
         Var _x2c_gensym_macro_current_3 = Array_take_last(_x2c_gensym_macro_pending_3);
         if(! Var_is_row(_x2c_gensym_macro_current_3, 9, 7, 4) || Var_is_nil(_x2c_gensym_macro_current_3)) continue;
         syntax = Var_list_payload(_x2c_gensym_macro_current_3);
-        if(syntax != source && x2c_var_equal(List_car(syntax), Symbol_var(377892))) Array_push(found, List_var(syntax));
+        if(syntax != source && x2c_var_equal_lane(List_car(syntax), Symbol_var(377892))) Array_push(found, List_var(syntax));
         for(List _x2c_gensym_macro_cursor_44 = syntax;  List_truth(_x2c_gensym_macro_cursor_44);  _x2c_gensym_macro_cursor_44 = List_cdr(_x2c_gensym_macro_cursor_44)) if(Var_is_row(List_car(_x2c_gensym_macro_cursor_44), 9, 7, 4)) Array_push(_x2c_gensym_macro_pending_3, List_car(_x2c_gensym_macro_cursor_44));
       }
 
@@ -5528,7 +5528,7 @@ for(List _x2c_gensym_macro_cursor_46 = _x2c_gensym_macro_original_2;  List_truth
     child = _x2c_gensym_macro_item_42;
     _x2c_gensym_macro_value_2 = f8_rewrites____template(c, child, sources, values, &((* refused)));
   }
-  if(!(void *) _x2c_gensym_macro_rewritten_2 && ! x2c_var_equal(_x2c_gensym_macro_value_2, _x2c_gensym_macro_item_42)){
+  if(!(void *) _x2c_gensym_macro_rewritten_2 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_2, _x2c_gensym_macro_item_42)){
     _x2c_gensym_macro_rewritten_2 = Array_new();
     for(List _x2c_gensym_macro_prefix_2 = _x2c_gensym_macro_original_2;  ! List_equal(_x2c_gensym_macro_prefix_2, _x2c_gensym_macro_cursor_46);  _x2c_gensym_macro_prefix_2 = List_cdr(_x2c_gensym_macro_prefix_2)) Array_push(_x2c_gensym_macro_rewritten_2, List_car(_x2c_gensym_macro_prefix_2));
   }
@@ -5606,7 +5606,7 @@ static Var f8_rewrites____slot_shape(Compiler c, Var content){
       break;}} if(! _x2c_gensym_match_none_18){List _x2c_gensym_match_at_88, _x2c_gensym_match_at_89, _x2c_gensym_match_at_90, _x2c_gensym_match_at_91; Var x2c_match_value_0; if(_x2c_gensym_match_expr_26 && _x2c_gensym_match_expr_26 ->car.u64 == 9224497936761619424ULL &&(_x2c_gensym_match_at_88 = _x2c_gensym_match_expr_26 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_88 ->car, 1) &&(_x2c_gensym_match_at_89 = _x2c_gensym_match_at_88 ->cdr) &&(_x2c_gensym_match_at_90 = _x2c_gensym_match_at_89 ->cdr) && !(_x2c_gensym_match_at_91 = _x2c_gensym_match_at_90 ->cdr)){{
         Var operator;
         operator = x2c_match_value_0;
-        return x2c_var_equal(operator, Symbol_var(89)) ?((void) 0, Void) : List_var(cons(_213, cons(operator, NULL)));
+        return x2c_var_equal_lane(operator, Symbol_var(89)) ?((void) 0, Void) : List_var(cons(_213, cons(operator, NULL)));
       }
       break;}}
     }
@@ -5697,7 +5697,7 @@ for(List _x2c_gensym_macro_cursor_51 = _x2c_gensym_macro_original_3;  List_truth
     child = Var_list_payload(_x2c_gensym_macro_item_47);
     _x2c_gensym_macro_value_3 = List_var(f8_rewrites____marked(child, outputs, found, &((* refused))));
   }
-  if(!(void *) _x2c_gensym_macro_rewritten_3 && ! x2c_var_equal(_x2c_gensym_macro_value_3, _x2c_gensym_macro_item_47)){
+  if(!(void *) _x2c_gensym_macro_rewritten_3 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_3, _x2c_gensym_macro_item_47)){
     _x2c_gensym_macro_rewritten_3 = Array_new();
     for(List _x2c_gensym_macro_prefix_3 = _x2c_gensym_macro_original_3;  ! List_equal(_x2c_gensym_macro_prefix_3, _x2c_gensym_macro_cursor_51);  _x2c_gensym_macro_prefix_3 = List_cdr(_x2c_gensym_macro_prefix_3)) Array_push(_x2c_gensym_macro_rewritten_3, List_car(_x2c_gensym_macro_prefix_3));
   }
@@ -5779,7 +5779,7 @@ static List f8_rewrites____fill_values(Compiler c, List prepared, Array values){
 static List f8_rewrites____filled(List syntax, Array lowered){
   if(! List_truth(syntax)) return syntax;
   Var head = List_car(syntax);
-  if(Var_is_row(head, 11, 7, 1) && x2c_var_equal(head, String_var(_427))) return Var_list_payload(Array_getindex(lowered, Var_int(List_cadr(syntax))));
+  if(Var_is_row(head, 11, 7, 1) && x2c_var_equal_lane(head, String_var(_427))) return Var_list_payload(Array_getindex(lowered, Var_int(List_cadr(syntax))));
   List child;
   List _x2c_gensym_macro_original_4 = syntax;
   Array _x2c_gensym_macro_rewritten_4 = NULL;
@@ -5789,7 +5789,7 @@ static List f8_rewrites____filled(List syntax, Array lowered){
       child = Var_list_payload(_x2c_gensym_macro_item_49);
       _x2c_gensym_macro_value_4 = List_var(f8_rewrites____filled(child, lowered));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_4 && ! x2c_var_equal(_x2c_gensym_macro_value_4, _x2c_gensym_macro_item_49)){
+    if(!(void *) _x2c_gensym_macro_rewritten_4 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_4, _x2c_gensym_macro_item_49)){
       _x2c_gensym_macro_rewritten_4 = Array_new();
       for(List _x2c_gensym_macro_prefix_4 = _x2c_gensym_macro_original_4;  ! List_equal(_x2c_gensym_macro_prefix_4, _x2c_gensym_macro_cursor_53);  _x2c_gensym_macro_prefix_4 = List_cdr(_x2c_gensym_macro_prefix_4)) Array_push(_x2c_gensym_macro_rewritten_4, List_car(_x2c_gensym_macro_prefix_4));
     }
@@ -5799,10 +5799,10 @@ static List f8_rewrites____filled(List syntax, Array lowered){
 }
 
 static int f8_rewrites____find_slot(SlotWatch watch, Ast ast){
-  int slot = 0, at = x2c_var_equal(List_car(ast), Symbol_var(104));
+  int slot = 0, at = x2c_var_equal_lane(List_car(ast), Symbol_var(104));
   for(List v = watch -> values;  List_truth(v);  v = List_cdr(v), slot ++){
     List value = Var_list_payload(List_car(v));
-    if(value == ast ||(at && x2c_var_equal(List_car(value), Symbol_var(104)) && x2c_var_equal(List_cadr(value), List_cadr(ast)))) return slot;
+    if(value == ast ||(at && x2c_var_equal_lane(List_car(value), Symbol_var(104)) && x2c_var_equal_lane(List_cadr(value), List_cadr(ast)))) return slot;
   }
   return - 1;
 }
@@ -5936,7 +5936,7 @@ static RewriteRule _rewrite_rule(Symbol point, Var kind, String name, List patte
     NULL, NULL, pattern
   }
   ;
-  if(x2c_var_equal(List_car(pattern), Symbol_var(895740748108))){
+  if(x2c_var_equal_lane(List_car(pattern), Symbol_var(895740748108))){
     Macro shape = pattern;
     matcher = prepared ? Macro_matcher(shape, holes) :(MacroMatcher){
       shape, holes
@@ -6080,12 +6080,12 @@ int Compiler_macro_starts_target_at(Compiler c, Symbol position){
 }
 
 Symbol Compiler_macro_invocation_collection(Compiler c){
-  if(! _init_guard_) _file_init_();  List definition = _peek_invocation(c, 1405544);  if(! List_truth(definition)) return 0;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;  if(x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(1405544))) return 43141448;  if(! x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(! Var_int(List_assoc(definition, Symbol_var(26155096)))) return 1248873517384;  List template = Var_list_payload(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  if(({ static MatchCaptureSite _x2c_gensym_match_site_6;  x2c_match_site_try_search(& _x2c_gensym_match_site_6, template, List_var(_506), &(matched), &(bindings)); })) return 1248873517384;  return 43141448;
+  if(! _init_guard_) _file_init_();  List definition = _peek_invocation(c, 1405544);  if(! List_truth(definition)) return 0;  if(x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || x2c_var_equal_lane(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;  if(x2c_var_equal_lane(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(1405544))) return 43141448;  if(! x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(! Var_int(List_assoc(definition, Symbol_var(26155096)))) return 1248873517384;  List template = Var_list_payload(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  if(({ static MatchCaptureSite _x2c_gensym_match_site_6;  x2c_match_site_try_search(& _x2c_gensym_match_site_6, template, List_var(_506), &(matched), &(bindings)); })) return 1248873517384;  return 43141448;
 }
 
 void Compiler_skip_macro_invocation(Compiler c);
 int Compiler_skip_named_type_declaration(Compiler c){
-  if(! _init_guard_) _file_init_();  List definition = _peek_invocation(c, 1405544);  if(! List_truth(definition) || ! x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 0;  Compiler_skip_macro_invocation(c);  _x2c_skip_shallow_expression(c, 0);  Compiler_expect(c, 119);  return 1;
+  if(! _init_guard_) _file_init_();  List definition = _peek_invocation(c, 1405544);  if(! List_truth(definition) || ! x2c_var_equal_lane(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 0;  Compiler_skip_macro_invocation(c);  _x2c_skip_shallow_expression(c, 0);  Compiler_expect(c, 119);  return 1;
 }
 
 void Compiler_skip_macro_invocation(Compiler c){
@@ -6102,7 +6102,7 @@ static void _record_compile_time_effect(Compiler c, List row, Token start){
 }
 
 static int f23_invocations_recognition____fixed_alias(Compiler c, Atom alias){
-  Var existing;  return ! c -> builtin_defs &&(x2c_var_equal(alias, Symbol_var(1527056)) ||(_try_macro(c, c -> kw_aliases, alias, &(existing)) && Var_int(List_assoc(Var_list(existing), Symbol_var(5723955804)))));
+  Var existing;  return ! c -> builtin_defs &&(x2c_var_equal_lane(alias, Symbol_var(1527056)) ||(_try_macro(c, c -> kw_aliases, alias, &(existing)) && Var_int(List_assoc(Var_list(existing), Symbol_var(5723955804)))));
 }
 
 static Atom _name(Compiler c){
@@ -6145,7 +6145,7 @@ return 1;
 static Var _rebind_imported(Compiler c, Var stored){
   if(! Var_is_row(stored, 9, 7, 4)) return stored;
   List definition = Var_list_payload(stored);
-  if(! x2c_var_equal(List_car(definition), Symbol_var(895740748108))) return List_var(definition);
+  if(! x2c_var_equal_lane(List_car(definition), Symbol_var(895740748108))) return List_var(definition);
   return List_var(_rebind_globals(c, definition));
 }
 
@@ -6250,7 +6250,7 @@ static List _peek_invocation(Compiler c, Symbol position){
 }
 
 static int _bare(Token invocation, List definition){
-  return invocation -> type != 73 && invocation -> type != 129 && x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020)) && ! List_truth(Var_list(List_assoc(definition, Symbol_var(1129338912386214))));
+  return invocation -> type != 73 && invocation -> type != 129 && x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020)) && ! List_truth(Var_list(List_assoc(definition, Symbol_var(1129338912386214))));
 }
 
 static List _take_invocation(Compiler c, Symbol position){
@@ -6742,7 +6742,7 @@ static List _target_at(Compiler c, Symbol position, int open){
   Token invocation = c -> token;
   List definition = _take_invocation(c, position);
   if(! List_truth(definition)) return NULL;
-  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020))) return f19_invocations_targets____decorate(c, definition, invocation, position, open);
+  if(x2c_var_equal_lane(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020))) return f19_invocations_targets____decorate(c, definition, invocation, position, open);
   f19_invocations_targets____check_position(c, definition, invocation, position);
   return f19_invocations_targets____invoke_definition(c, definition, invocation, position, open);
 }
@@ -6948,7 +6948,7 @@ static void f19_invocations_targets____bind_name_arguments(Compiler c, List defi
   List captures = List_cdr(arguments);
   while(List_truth(parameters)){
     List parameter = Var_list_payload(List_car(parameters));
-    if(x2c_var_equal(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
+    if(x2c_var_equal_lane(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
       Var names = List_assoc(Var_list(List_car(captures)), Symbol_var(46228810));
       List values = Var_list_payload(Var_int(List_assoc(parameter, Symbol_var(1317592723658))) ? names : List_var(cons(names, NULL)));
       {
@@ -7071,7 +7071,7 @@ static List f19_invocations_targets____positional_target(Compiler c, Symbol posi
 
 static List f19_invocations_targets____capture(f19_invocations_targets___Decoration * d, List target){
   Compiler c =(* d).c;
-  List targets = x2c_var_equal(List_car(target), Symbol_var(39266)) ? List_cdr(target) : cons(List_var(target), NULL);
+  List targets = x2c_var_equal_lane(List_car(target), Symbol_var(39266)) ? List_cdr(target) : cons(List_var(target), NULL);
   Array captured_targets = Array_new();
   {
     List item;
@@ -7156,7 +7156,7 @@ static List f19_invocations_targets____bind_body(Compiler c, List node, List dec
     }
 
   }
-  List items = x2c_var_equal(List_car(result), Symbol_var(39266)) ? List_cdr(result) : cons(List_var(result), NULL);
+  List items = x2c_var_equal_lane(List_car(result), Symbol_var(39266)) ? List_cdr(result) : cons(List_var(result), NULL);
   {
     List _x2c_gensym_match_expr_42 = decorated;
     {List _x2c_gensym_match_at_153, _x2c_gensym_match_at_154, _x2c_gensym_match_at_155, _x2c_gensym_match_at_156; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_42 && _x2c_gensym_match_expr_42 ->car.u64 == 9224498395122781148ULL &&(_x2c_gensym_match_at_153 = _x2c_gensym_match_expr_42 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_153 ->car, 1) &&(_x2c_gensym_match_at_154 = _x2c_gensym_match_at_153 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_154 ->car, 1) &&(_x2c_gensym_match_at_155 = _x2c_gensym_match_at_154 ->cdr) && !(_x2c_gensym_match_at_156 = _x2c_gensym_match_at_155 ->cdr)){
@@ -7337,7 +7337,7 @@ return argument;
 
 static List f23_invocations_expressions____expression_invocation(Compiler c, List definition, Token invocation){
   Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));
-  if(kind == 9147177346020 && x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(377892))) return f23_invocations_expressions____expression_decorator(c, definition, invocation);
+  if(kind == 9147177346020 && x2c_var_equal_lane(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(377892))) return f23_invocations_expressions____expression_decorator(c, definition, invocation);
   if(c -> meta_body &&(kind == 1405544 || kind == 168163805864282)) return f23_invocations_expressions____template_call(c, definition);
   List arguments = _invocation_arguments(c, definition, invocation);
   if(kind != 405758822009820) f23_invocations_expressions____not_expression(c, definition, invocation);
@@ -7401,15 +7401,15 @@ Var Compiler_evaluate_macro_slot(Compiler c, Var value);
 List Compiler_evaluate_macro_rows(Compiler c, Var value){
   if(! _init_guard_) _file_init_();
   value = Compiler_evaluate_macro_slot(c, value);
-  return Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && x2c_var_equal(List_car(Var_list(value)), Symbol_var(39266)) ? List_cdr(Var_list(value)) : cons(value, NULL);
+  return Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && x2c_var_equal_lane(List_car(Var_list(value)), Symbol_var(39266)) ? List_cdr(Var_list(value)) : cons(value, NULL);
 }
 
 Var Compiler_evaluate_macro_slot(Compiler c, Var value){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(value, 9, 7, 4)) return value;
   List slot = Var_list_payload(value);
-  if(x2c_var_equal(List_car(slot), String_var(_547))) return _helper_result(c, value);
-  if(! x2c_var_equal(List_car(slot), Symbol_var(917238583616488))) return value;
+  if(x2c_var_equal_lane(List_car(slot), String_var(_547))) return _helper_result(c, value);
+  if(! x2c_var_equal_lane(List_car(slot), Symbol_var(917238583616488))) return value;
   if(Map_truth(c -> macro_holes) || ! List_truth(c -> macro_stack)) return value;
   return f9_templates____slot_value(c, slot);
 }
@@ -7883,7 +7883,7 @@ static Var f9_templates____replace_target(Var produced, Var target, Var required
           found = x2c_match_value_0;
           Var native;
           native = x2c_match_value_1;
-          if(x2c_var_equal(found, target)){
+          if(x2c_var_equal_lane(found, target)){
             Array_setindex(items, i, List_var(cons(_567, cons(required, cons(native, NULL)))));
             {
               Var _x2c_gensym_return_value_55 = List_var(Array_list(items));
@@ -8064,7 +8064,7 @@ for(List _x2c_gensym_macro_cursor_71 = _x2c_gensym_macro_original_5;  List_truth
     child = Var_list_payload(_x2c_gensym_macro_item_67);
     _x2c_gensym_macro_value_5 = _helper_result(c, List_var(child));
   }
-  if(!(void *) _x2c_gensym_macro_rewritten_5 && ! x2c_var_equal(_x2c_gensym_macro_value_5, _x2c_gensym_macro_item_67)){
+  if(!(void *) _x2c_gensym_macro_rewritten_5 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_5, _x2c_gensym_macro_item_67)){
     _x2c_gensym_macro_rewritten_5 = Array_new();
     for(List _x2c_gensym_macro_prefix_5 = _x2c_gensym_macro_original_5;  ! List_equal(_x2c_gensym_macro_prefix_5, _x2c_gensym_macro_cursor_71);  _x2c_gensym_macro_prefix_5 = List_cdr(_x2c_gensym_macro_prefix_5)) Array_push(_x2c_gensym_macro_rewritten_5, List_car(_x2c_gensym_macro_prefix_5));
   }
@@ -8121,7 +8121,7 @@ static List f9_templates____rebuild(Compiler c, List application, List target){
   }
 
 }
-if(x2c_var_equal(List_car(application), String_var(_256))) return List_cdr(application);
+if(x2c_var_equal_lane(List_car(application), String_var(_256))) return List_cdr(application);
 List _x2c_gensym_destructure_10 = application;
 Var marker = List_getindex(_x2c_gensym_destructure_10, 0);
 List definition = Var_list_payload(List_getindex(_x2c_gensym_destructure_10, 1));
@@ -8162,7 +8162,7 @@ static List f9_templates____row_bindings(List keys, List row, List bindings){
     while(List_try_next(_x2c_gensym_macro_object_63, &(_x2c_gensym_macro_cursor_73), &(_x2c_gensym_macro_cursor_output_63))){
       binder = _x2c_gensym_macro_cursor_output_63;
       {
-        if(! x2c_var_equal(binder, Symbol_var(58))) bindings =({
+        if(! x2c_var_equal_lane(binder, Symbol_var(58))) bindings =({
           Var _x2c_gensym_literal_part_115 = List_var(({
             Atom _x2c_gensym_literal_part_113 = binder;  Var _x2c_gensym_literal_part_114 = List_car(fields);  cons(_x2c_gensym_literal_part_113, cons(_x2c_gensym_literal_part_114, NULL));
           }
@@ -8229,7 +8229,7 @@ static Var f9_templates____fill_syntax(f9_templates___Landing * l, Var syntax){
         List spliced = NULL;
         int splices = f9_templates____splices(&((* l)), item, &(spliced));
         Var filled = splices ?((void) 0, Void) : f9_templates____fill_syntax(&((* l)), item);
-        if(!(void *) items &&(splices || ! x2c_var_equal(filled, item))){
+        if(!(void *) items &&(splices || ! x2c_var_equal_lane(filled, item))){
           items = Array_new();
           List prior = node;
           for(int i = 0;  i < index;  i ++, prior = List_cdr(prior)) Array_push(items, List_car(prior));
@@ -8253,7 +8253,7 @@ static Var f9_templates____fill_syntax(f9_templates___Landing * l, Var syntax){
 
   }
   Var filled =(void *) items ? List_var(Array_list_free(items)) : syntax;
-  return(* l).retain && x2c_var_equal(List_car(node), Symbol_var(8932560010)) ? List_var(f9_templates____retained_declaration(Var_list_payload(filled))) : filled;
+  return(* l).retain && x2c_var_equal_lane(List_car(node), Symbol_var(8932560010)) ? List_var(f9_templates____retained_declaration(Var_list_payload(filled))) : filled;
 }
 
 static List f9_templates____retained_declaration(List declaration){
@@ -8289,7 +8289,7 @@ static int f9_templates____splices(f9_templates___Landing * l, Var item, List * 
       Var _x2c_gensym_match_value_8 = hole;
       {
         List hole = Var_list_payload(_x2c_gensym_match_value_8);
-        if(x2c_var_equal(projection, Symbol_var(1309427914)) || Var_int(List_assoc(hole, Symbol_var(1317592723658)))){
+        if(x2c_var_equal_lane(projection, Symbol_var(1309427914)) || Var_int(List_assoc(hole, Symbol_var(1317592723658)))){
           (* spliced) = Var_list_payload(f9_templates____project_hole(&((* l)), hole, Var_symbol(projection), value));
           return 1;
         }
@@ -8506,7 +8506,7 @@ Token Compiler_macro_pattern_at(Compiler c, Token at, String * spelling, Var * s
   c -> token = at;
   Token end = _scan_name(c, &((* spelling)));
   c -> token = saved;
-  if(! String_truth((* spelling)) || end -> type != 81 || ! _try_macro(c, c -> macros, Atom_intern((* spelling)), &((* stored))) || ! Var_is_row((* stored), 9, 7, 4) || ! x2c_var_equal(List_car(Var_list((* stored))), Symbol_var(895740748108))) return NULL;
+  if(! String_truth((* spelling)) || end -> type != 81 || ! _try_macro(c, c -> macros, Atom_intern((* spelling)), &((* stored))) || ! Var_is_row((* stored), 9, 7, 4) || ! x2c_var_equal_lane(List_car(Var_list((* stored))), Symbol_var(895740748108))) return NULL;
   return end;
 }
 
@@ -8732,7 +8732,7 @@ static Var _macro_value_names(Var value){
       child = Var_list_payload(_x2c_gensym_macro_item_74);
       _x2c_gensym_macro_value_6 = _macro_value_names(List_var(child));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_6 && ! x2c_var_equal(_x2c_gensym_macro_value_6, _x2c_gensym_macro_item_74)){
+    if(!(void *) _x2c_gensym_macro_rewritten_6 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_6, _x2c_gensym_macro_item_74)){
       _x2c_gensym_macro_rewritten_6 = Array_new();
       for(List _x2c_gensym_macro_prefix_6 = _x2c_gensym_macro_original_6;  ! List_equal(_x2c_gensym_macro_prefix_6, _x2c_gensym_macro_cursor_78);  _x2c_gensym_macro_prefix_6 = List_cdr(_x2c_gensym_macro_prefix_6)) Array_push(_x2c_gensym_macro_rewritten_6, List_car(_x2c_gensym_macro_prefix_6));
     }
@@ -9304,7 +9304,7 @@ static List f7_aliases____wrapped_forms(Compiler c, int skip_body){
     if(Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
     List form = skip_body ? NULL : Compiler_replay_declaration_source(c);
     if(! List_truth(form)) form = Compiler_parse_top_level_mode(c, skip_body);
-    if(List_truth(form) && x2c_var_equal(List_car(form), Symbol_var(39266))){
+    if(List_truth(form) && x2c_var_equal_lane(List_car(form), Symbol_var(39266))){
       List item;
       List _x2c_gensym_macro_object_74 = List_cdr(form);
       List _x2c_gensym_macro_cursor_85 = _x2c_gensym_macro_object_74;

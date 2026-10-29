@@ -921,6 +921,38 @@ float Var_float(Var x);
 double Var_double(Var x);
 void x2c_initialize(void);
 void x2c_initialize_protocols(void);
+static inline int x2c_var_i32_pair(Var lhs, Var rhs){
+  return(lhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32) &&(rhs.u64 >> 32) ==(VAR_I32_PREFIX >> 32);
+}
+
+static inline Var x2c_var_add_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_add_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_add(lhs, rhs);
+}
+
+static inline Var x2c_var_sub_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_sub_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_sub(lhs, rhs);
+}
+
+static inline Var x2c_var_mul_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs), result;  if(x2c_var_i32_pair(lhs, rhs) && ! __builtin_mul_overflow(a, b, & result)) return Var_box_i32_bits((unsigned) result);  return Var_mul(lhs, rhs);
+}
+
+static inline Var x2c_var_div_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  if(x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == - 1)) return Var_box_i32_bits((unsigned)(a / b));  return Var_div(lhs, rhs);
+}
+
+static inline Var x2c_var_mod_lane(Var lhs, Var rhs){
+  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  if(x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == - 1)) return Var_box_i32_bits((unsigned)(a % b));  return Var_mod(lhs, rhs);
+}
+
+static inline int x2c_var_equal_lane(Var lhs, Var rhs){
+  return x2c_var_i32_pair(lhs, rhs) ? lhs.u64 == rhs.u64 : x2c_var_equal(lhs, rhs);
+}
+
+static inline double x2c_var_order_lane(Var lhs, Var rhs){
+  if(! x2c_var_i32_pair(lhs, rhs)) return x2c_var_order(lhs, rhs);  int a =(int) Var_payload32(lhs), b =(int) Var_payload32(rhs);  return(a > b) -(a < b);
+}
+
 int x2c_normalize_index(int index, int length);
 int x2c_slice_bound(int bound);
 int x2c_normalize_slice(int * start, int * stop, int step, int length);

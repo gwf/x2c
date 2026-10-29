@@ -655,7 +655,7 @@ static List _entries(HeaderCache * h, List header, List prelude){
       {
         int replaced = 0;
         node = _cache_refs(node, (* h).bindings, &(replaced));
-        int captured = x2c_var_equal(List_car(node), Symbol_var(1371473464357480));
+        int captured = x2c_var_equal_lane(List_car(node), Symbol_var(1371473464357480));
         List function = Var_list_payload(captured ? List_cadr(node) : List_var(node));
         {
           List _x2c_gensym_match_expr_2 = function;
@@ -719,7 +719,7 @@ static List _cache_refs(List node, Map bindings, int * replaced){
       child = Var_list_payload(_x2c_gensym_macro_item_8);
       _x2c_gensym_macro_value_0 = List_var(_cache_refs(child, bindings, replaced));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_8)){
+    if(!(void *) _x2c_gensym_macro_rewritten_0 && ! x2c_var_equal_lane(_x2c_gensym_macro_value_0, _x2c_gensym_macro_item_8)){
       _x2c_gensym_macro_rewritten_0 = Array_new();
       for(List _x2c_gensym_macro_prefix_0 = _x2c_gensym_macro_original_0;  ! List_equal(_x2c_gensym_macro_prefix_0, _x2c_gensym_macro_cursor_8);  _x2c_gensym_macro_prefix_0 = List_cdr(_x2c_gensym_macro_prefix_0)) Array_push(_x2c_gensym_macro_rewritten_0, List_car(_x2c_gensym_macro_prefix_0));
     }
@@ -903,7 +903,7 @@ static List _defer_binding(Compiler c, List decltype, Ast bound, StaticQueue * q
           List declaration =({
             Var _x2c_gensym_literal_part_11 = List_var(decltype);  Var _x2c_gensym_literal_part_12 = List_var(cons(_26, cons(List_var(cons(_29, cons(name, cons(mods, NULL)))), NULL)));  cons(_22, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL)));
           }
-          );  Type object = Type_declared(List_type_from_ast(declaration));  if(x2c_var_equal(List_car(Type_list(object)), Symbol_var(7304424))){
+          );  Type object = Type_declared(List_type_from_ast(declaration));  if(x2c_var_equal_lane(List_car(Type_list(object)), Symbol_var(7304424))){
             if(! Compiler_static_value_is_runtime(c, Var_list_payload(value), NULL)) return bound;  mods = List_var(_unqualify_const(Var_list_payload(mods)));
           }
           Type declared = Type_canonicalize(object);  Type resolved = Sym_resolve_key(c -> sym, declared);  if((Type_is_array(resolved) ||({
@@ -974,7 +974,7 @@ static List _array_block(Compiler c, List target, Type array, List items){
 
 List Ast_initializer_functions(Ast, List *);
 static List _array_row(Compiler c, List target, List original, List cases){
-  List terminal = original, header = NULL, source = NULL;  while(x2c_var_equal(List_car(terminal), Symbol_var(9639129704)) || x2c_var_equal(List_car(terminal), Symbol_var(20762258403944))) terminal = Var_list_payload(List_caddr(terminal));  List functions = NULL; {
+  List terminal = original, header = NULL, source = NULL;  while(x2c_var_equal_lane(List_car(terminal), Symbol_var(9639129704)) || x2c_var_equal_lane(List_car(terminal), Symbol_var(20762258403944))) terminal = Var_list_payload(List_caddr(terminal));  List functions = NULL; {
     List _x2c_gensym_match_expr_11 = terminal;  switch(_x2c_gensym_match_expr_11 ? _x2c_gensym_match_expr_11 -> car.u64 : 0){
       case 9224497936761996324ULL :{List _x2c_gensym_match_at_40, _x2c_gensym_match_at_41, _x2c_gensym_match_at_42, _x2c_gensym_match_at_43; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_40 = _x2c_gensym_match_expr_11 ->cdr) &&(_x2c_gensym_match_at_41 = _x2c_gensym_match_at_40 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_41 ->car, 1) &&((Var_is(_x2c_gensym_match_at_41 -> car, 806120) &&(_x2c_gensym_match_at_42 = Var_list_payload(_x2c_gensym_match_at_41 -> car), 1)) && _x2c_gensym_match_at_42 && _x2c_gensym_match_at_42 ->car.u64 == 9224497957048725592ULL) && !(_x2c_gensym_match_at_43 = _x2c_gensym_match_at_41 ->cdr)){{
         Var body;  body = x2c_match_value_0; {
@@ -1164,7 +1164,7 @@ static void _queue(StaticQueue * q, Symbol deferred_kind){
 
 static Symbol _visit(StaticQueue * q, List binding){
   Var status = Map_getindex((* q).state, List_var(binding));
-  if(x2c_var_equal(status, Symbol_var(1532451113870))) _report_cycle(&((* q)));
+  if(x2c_var_equal_lane(status, Symbol_var(1532451113870))) _report_cycle(&((* q)));
   if(! Var_is_void(status)) return Var_symbol(status);
   Map_setindex((* q).state, List_var(binding), Symbol_var(1532451113870));
   Array definitions = Var_array_payload(Map_getindex((* q).pending, List_var(binding)));
@@ -1213,7 +1213,7 @@ static int _reaches_kind(Compiler c, List code, Symbol kind){
     Var _x2c_gensym_macro_cursor_output_20;
     while(Array_try_next(_x2c_gensym_macro_object_21, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_20))){
       id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/cache.x",.function = "_reaches_kind",.line = 545}; & _x2c_gensym_error_site_2; })));
-      if(x2c_var_equal(Var_car(Array_getindex(c -> id_keys, id)), Symbol_var(kind))){
+      if(x2c_var_equal_lane(Var_car(Array_getindex(c -> id_keys, id)), Symbol_var(kind))){
         found = 1;
         break;
       }
@@ -1373,7 +1373,7 @@ static void _report_cycle(StaticQueue * q){
       initializer = Var_list_payload(_x2c_gensym_macro_cursor_output_23);
       {
         List binding = Var_list_payload(List_car(initializer));
-        if(! x2c_var_equal(Map_getindex((* q).state, List_var(binding)), Symbol_var(1532451113870))) continue;
+        if(! x2c_var_equal_lane(Map_getindex((* q).state, List_var(binding)), Symbol_var(1532451113870))) continue;
         if(! List_truth(first)) first = binding;
         String name = Ast_binding_spelling(binding);
         if(String_truth(name)) Array_push(notes, String_var(String_join(NULL, cons(String_var(_190), cons(String_var(name), NULL)))));
@@ -1567,7 +1567,7 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 }
 
 static Var _x2c_gensym_lambda_0(Var specifier){
-  return int_var(! x2c_var_equal(specifier, Symbol_var(7304424)));
+  return int_var(! x2c_var_equal_lane(specifier, Symbol_var(7304424)));
   ;
 }
 

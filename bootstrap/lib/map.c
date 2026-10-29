@@ -205,8 +205,11 @@ static Var * f3_map____record_value(Map _x2c_gensym_macro_map_1, unsigned _x2c_g
   return & _x2c_gensym_macro_records_1[_x2c_gensym_macro_index_1].val;
 }
 
+static unsigned String_cached_hash(String);
+
 static unsigned f3_map____key_hash(Var * _x2c_gensym_macro_key_0){
-  return Var_hash(_x2c_gensym_macro_key_0[0]);
+  unsigned _x2c_gensym_macro_cached_0 = String_cached_hash(Var_string_payload(_x2c_gensym_macro_key_0[0]));
+  return _x2c_gensym_macro_cached_0 ? _x2c_gensym_macro_cached_0 : Var_hash(_x2c_gensym_macro_key_0[0]);
 }
 
 static int f3_map____key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0){
@@ -219,7 +222,7 @@ static int f3_map____key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_ma
 }
 
 static int f3_map____value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1){
-  return x2c_var_equal(_x2c_gensym_macro_a_1[0], _x2c_gensym_macro_b_1[0]);
+  return x2c_var_equal_lane(_x2c_gensym_macro_a_1[0], _x2c_gensym_macro_b_1[0]);
 }
 
 static void f3_map____value_valid(Var * _x2c_gensym_macro_value_0){

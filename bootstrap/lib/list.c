@@ -446,7 +446,7 @@ int List_contains(List lst, Var key){
 }
 
 int List_index(List l, Var key){
-  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(x2c_var_equal(l -> car, key)) return index;
+  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(x2c_var_equal_lane(l -> car, key)) return index;
   return - 1;
 }
 
@@ -499,7 +499,7 @@ Var List_assoc(List list, Var key){
         List _x2c_gensym_destructure_0 = pair;
         pair_key = List_getindex(_x2c_gensym_destructure_0, 0);
         value = List_getindex(_x2c_gensym_destructure_0, 1);
-        if(x2c_var_equal(pair_key, key)) return value;
+        if(x2c_var_equal_lane(pair_key, key)) return value;
       }
 
     }

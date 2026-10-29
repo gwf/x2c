@@ -173,7 +173,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static Symbol _match_head(Var value){
   if(! Var_is_row(value, 9, 7, 4) || ! List_truth(Var_list(value))) return 0;
   Var head = List_car(Var_list(value));
-  if(! Var_is(head, 1328354264) || x2c_var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;
+  if(! Var_is(head, 1328354264) || x2c_var_equal_lane(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;
   return Var_symbol(head);
 }
 
@@ -194,7 +194,7 @@ static int _match_slot(List binders, Var binder){
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       name = _x2c_gensym_macro_cursor_output_0;
       {
-        if(x2c_var_equal(name, binder)) return slot;
+        if(x2c_var_equal_lane(name, binder)) return slot;
         slot ++;
       }
 
@@ -207,7 +207,7 @@ static int _match_slot(List binders, Var binder){
 static int _match_names(Var part, Array names){
   if(Var_is_row(part, 9, 7, 4) && ! Var_is_nil(part)){
     List list = Var_list_payload(part);
-    if(x2c_var_equal(List_car(list), Symbol_var(2050325770))) return 1;
+    if(x2c_var_equal_lane(List_car(list), Symbol_var(2050325770))) return 1;
     {
       Var element;
       List _x2c_gensym_macro_object_1 = list;
@@ -221,7 +221,7 @@ static int _match_names(Var part, Array names){
     }
     return 1;
   }
-  if(! Var_is_binder(part) || x2c_var_equal(part, Symbol_var(58)) || x2c_var_equal(part, Symbol_var(54))) return 1;
+  if(! Var_is_binder(part) || x2c_var_equal_lane(part, Symbol_var(58)) || x2c_var_equal_lane(part, Symbol_var(54))) return 1;
   if(Array_contains(names, part)) return ! Var_is_list_binder(part);
   Array_push(names, part);
   return 1;
@@ -237,18 +237,18 @@ static List _match_tests(List value, Array cursors){
 }
 
 static List _match_value(Var part, Var cell, List steps, Array cursors){
-  if(x2c_var_equal(part, Symbol_var(58))) return _7;
+  if(x2c_var_equal_lane(part, Symbol_var(58))) return _7;
   if(Var_is_atom_binder(part)) return cons(_8, cons(cell, cons(part, NULL)));
-  if(Var_is_list_binder(part) || x2c_var_equal(part, Symbol_var(1059020478773725))) return NULL;
+  if(Var_is_list_binder(part) || x2c_var_equal_lane(part, Symbol_var(1059020478773725))) return NULL;
   if(Var_is(part, 1328354264)) return cons(_9, cons(cell, cons(part, NULL)));
   if(! Var_is_row(part, 9, 7, 4) || Var_is_nil(part)) return cons(_10, cons(cell, cons(List_var(steps), NULL)));
   List list = Var_list_payload(part);
   steps = cons(Symbol_var(604), steps);
-  if(x2c_var_equal(List_car(list), Symbol_var(1059020478773725))) return NULL;
+  if(x2c_var_equal_lane(List_car(list), Symbol_var(1059020478773725))) return NULL;
   if(Var_is_match_op(List_car(list))) return _match_guard(List_car(list), List_cdr(list), cell, steps, cursors);
-  if(x2c_var_equal(cell, Symbol_var(42216335592))) return _match_list(list, Symbol_var(1211368), steps, cursors);
+  if(x2c_var_equal_lane(cell, Symbol_var(42216335592))) return _match_list(list, Symbol_var(1211368), steps, cursors);
   Var first = Symbol_var(949130);
-  if(! x2c_var_equal(List_car(list), Symbol_var(54)) || List_truth(List_cdr(list))) first = int_var(_match_fresh(cursors, _12));
+  if(! x2c_var_equal_lane(List_car(list), Symbol_var(54)) || List_truth(List_cdr(list))) first = int_var(_match_fresh(cursors, _12));
   List tests = _match_list(list, first, steps, cursors);
   return List_truth(tests) ?({
     Var _x2c_gensym_literal_part_0 = List_var(cons(_13, cons(cell, cons(first, NULL))));  cons(_14, cons(_x2c_gensym_literal_part_0, cons(List_var(tests), NULL)));
@@ -266,15 +266,15 @@ static List _match_list(List list, Var at, List steps, Array cursors){
     Var part = List_car(list);
     if(Var_is_list_binder(part)){
       if(List_truth(List_cdr(list))) return NULL;
-      if(! x2c_var_equal(part, Symbol_var(54))) Array_push(tests, List_var(cons(_16, cons(at, cons(part, NULL)))));
+      if(! x2c_var_equal_lane(part, Symbol_var(54))) Array_push(tests, List_var(cons(_16, cons(at, cons(part, NULL)))));
       break;
     }
     List test = _match_value(part, at, steps, cursors);
     if(! List_truth(test)) return NULL;
     Array_push(tests, List_var(cons(_17, cons(at, NULL))));
-    if(! x2c_var_equal(List_car(test), Symbol_var(1348938))) Array_push(tests, List_var(test));
+    if(! x2c_var_equal_lane(List_car(test), Symbol_var(1348938))) Array_push(tests, List_var(test));
     List next = List_cdr(list);
-    if(! List_truth(next) || ! x2c_var_equal(List_car(next), Symbol_var(54)) || List_truth(List_cdr(next))) at = int_var(_match_fresh(cursors, cons(_18, cons(at, NULL))));
+    if(! List_truth(next) || ! x2c_var_equal_lane(List_car(next), Symbol_var(54)) || List_truth(List_cdr(next))) at = int_var(_match_fresh(cursors, cons(_18, cons(at, NULL))));
     steps = cons(Symbol_var(6436), steps);
   }
   return cons(_14, Array_list_free(tests));
@@ -282,7 +282,7 @@ static List _match_list(List list, Var at, List steps, Array cursors){
 
 static List _match_guard(Var op, List args, Var cell, List steps, Array cursors){
   steps = cons(Symbol_var(6436), steps);
-  if(x2c_var_equal(op, Symbol_var(2050325770))){
+  if(x2c_var_equal_lane(op, Symbol_var(2050325770))){
     if(! List_truth(args) || List_truth(List_cdr(args))) return NULL;
     return Var_is(List_car(args), 1328354264) ?({
       Var _x2c_gensym_literal_part_1 = cell;  Var _x2c_gensym_literal_part_2 = List_car(args);  cons(_9, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL)));
@@ -292,14 +292,14 @@ static List _match_guard(Var op, List args, Var cell, List steps, Array cursors)
   Array tests = Array_new();
   while(List_truth(args) && Var_is_binder(List_car(args)) && List_truth(List_cdr(args))){
     if(Var_is_list_binder(List_car(args))) return NULL;
-    if(! x2c_var_equal(List_car(args), Symbol_var(58))) Array_push(tests, List_var(({
+    if(! x2c_var_equal_lane(List_car(args), Symbol_var(58))) Array_push(tests, List_var(({
       Var _x2c_gensym_literal_part_3 = cell;  Var _x2c_gensym_literal_part_4 = List_car(args);  cons(_8, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)));
     }
     )));
     args = List_cdr(args);
     steps = cons(Symbol_var(6436), steps);
   }
-  if(x2c_var_equal(op, Symbol_var(62054))){
+  if(x2c_var_equal_lane(op, Symbol_var(62054))){
     List test = _match_is(args, cell);
     if(! List_truth(test)) return NULL;
     Array_push(tests, List_var(test));
@@ -324,9 +324,9 @@ static List _match_guard(Var op, List args, Var cell, List steps, Array cursors)
 
   }
   List choice = cons(_19, Array_list_free(operands));
-  if(x2c_var_equal(op, Symbol_var(1969032))) choice = cons(_14, List_cdr(choice));
-  else if(x2c_var_equal(op, Symbol_var(1995752))) choice = cons(_20, cons(List_var(choice), NULL));
-  else if(! x2c_var_equal(op, Symbol_var(62436)) && ! x2c_var_equal(op, Symbol_var(2005352))) return NULL;
+  if(x2c_var_equal_lane(op, Symbol_var(1969032))) choice = cons(_14, List_cdr(choice));
+  else if(x2c_var_equal_lane(op, Symbol_var(1995752))) choice = cons(_20, cons(List_var(choice), NULL));
+  else if(! x2c_var_equal_lane(op, Symbol_var(62436)) && ! x2c_var_equal_lane(op, Symbol_var(2005352))) return NULL;
   Array_push(tests, List_var(choice));
   return cons(_14, Array_list_free(tests));
 }
@@ -373,7 +373,7 @@ static List _match_is(List args, Var cell){
 
 static int _match_viewable(List test, Array seen){
   Var op = List_car(test);
-  if(x2c_var_equal(op, Symbol_var(996)) || x2c_var_equal(op, Symbol_var(29672)) || x2c_var_equal(op, Symbol_var(740232)) || x2c_var_equal(op, Symbol_var(107482)) || x2c_var_equal(op, Symbol_var(11642968))) return 0;
+  if(x2c_var_equal_lane(op, Symbol_var(996)) || x2c_var_equal_lane(op, Symbol_var(29672)) || x2c_var_equal_lane(op, Symbol_var(740232)) || x2c_var_equal_lane(op, Symbol_var(107482)) || x2c_var_equal_lane(op, Symbol_var(11642968))) return 0;
   {
     List _x2c_gensym_match_expr_1 = test;
     switch(_x2c_gensym_match_expr_1 ? _x2c_gensym_match_expr_1 -> car.u64 : 0){
@@ -525,13 +525,13 @@ static List _match_bits(Var value){
 }
 
 static List _match_cursor(Var cell, List root, Array cursors){
-  if(x2c_var_equal(cell, Symbol_var(1211368))) return root;
+  if(x2c_var_equal_lane(cell, Symbol_var(1211368))) return root;
   List row = Var_list_payload(Array_getindex(cursors, Var_int(cell)));
   return Var_list_payload(List_car(row));
 }
 
 static List _match_held(Var cell, List root, Array cursors){
-  if(x2c_var_equal(cell, Symbol_var(42216335592))) return cons(_59, cons(_60, cons(List_var(cons(_61, cons(List_var(root), NULL))), NULL)));
+  if(x2c_var_equal_lane(cell, Symbol_var(42216335592))) return cons(_59, cons(_60, cons(List_var(cons(_61, cons(List_var(root), NULL))), NULL)));
   return cons(_62, cons(_63, cons(List_var(_match_cursor(cell, root, cursors)), _65)));
 }
 
@@ -544,7 +544,7 @@ static List _match_literal(Code pattern, List steps){
     Var _x2c_gensym_macro_cursor_output_8;
     while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
       step = _x2c_gensym_macro_cursor_output_8;
-      cell = x2c_var_equal(step, Symbol_var(604)) ? cons(_59, cons(_66, cons(List_var(cons(_61, cons(List_var(cons(_62, cons(_63, cons(List_var(cell), _65)))), NULL))), NULL))) : cons(_62, cons(_63, cons(List_var(cell), _67)));
+      cell = x2c_var_equal_lane(step, Symbol_var(604)) ? cons(_59, cons(_66, cons(List_var(cons(_61, cons(List_var(cons(_62, cons(_63, cons(List_var(cell), _65)))), NULL))), NULL))) : cons(_62, cons(_63, cons(List_var(cell), _67)));
     }
 
   }
@@ -662,7 +662,7 @@ static List _match_labels(Var value, Array heads, int * labelling){
             Var _x2c_gensym_macro_cursor_output_18;
             while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_18))){
               alternative = _x2c_gensym_macro_cursor_output_18;
-              if(! Var_is(alternative, 1328354264) || Var_is_binder(alternative) || Var_is_match_op(alternative) || x2c_var_equal(alternative, Symbol_var(1059020478773725))) alternatives = NULL;
+              if(! Var_is(alternative, 1328354264) || Var_is_binder(alternative) || Var_is_match_op(alternative) || x2c_var_equal_lane(alternative, Symbol_var(1059020478773725))) alternatives = NULL;
             }
 
           }

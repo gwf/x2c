@@ -1531,7 +1531,7 @@ static void _parse_source(Helper * h, Frontend f, String path, int index){
           Var _x2c_gensym_macro_cursor_output_27;
           while(List_try_next(_x2c_gensym_macro_object_26, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_27))){
             diagnostic = Var_list_payload(_x2c_gensym_macro_cursor_output_27);
-            if(x2c_var_equal(List_assoc(diagnostic, Symbol_var(1317895556402)), Symbol_var(11703268))){
+            if(x2c_var_equal_lane(List_assoc(diagnostic, Symbol_var(1317895556402)), Symbol_var(11703268))){
               entry = diagnostic;
               break;
             }
@@ -1539,7 +1539,7 @@ static void _parse_source(Helper * h, Frontend f, String path, int index){
           }
 
         }
-        if(List_truth(entry) &&(List_truth((* h).entries) || ! x2c_var_equal(List_assoc(entry, Symbol_var(227594)), Symbol_var(927167433253220)))){
+        if(List_truth(entry) &&(List_truth((* h).entries) || ! x2c_var_equal_lane(List_assoc(entry, Symbol_var(227594)), Symbol_var(927167433253220)))){
           String failure = Compiler_meta_diagnostic_line(entry);
           Path_write_text(String_join(NULL, cons(String_var(_base(&((* h)), index)), cons(String_var(_54), NULL))), String_join(NULL, cons(String_var(_60), cons(String_var(failure), NULL))));
         }
@@ -1642,7 +1642,7 @@ static void _record(Helper * h, int index, String failure){
   else{
     Array_push((* h).built, int_var(index));
     Array_push((* h).objects, String_var(String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL)))));
-    if(! x2c_var_equal(String_var(_digest(String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))))), Map_getindex((* h).before, int_var(index))))(* h).changed = 1;
+    if(! x2c_var_equal_lane(String_var(_digest(String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))))), Map_getindex((* h).before, int_var(index))))(* h).changed = 1;
   }
 
 }

@@ -1570,7 +1570,7 @@ return at;
 }
 
 static int f6_output____is_function(List item){
-  List function = Var_list_payload(x2c_var_equal(List_car(item), Symbol_var(1371473464357480)) ? List_cadr(item) : List_var(item));
+  List function = Var_list_payload(x2c_var_equal_lane(List_car(item), Symbol_var(1371473464357480)) ? List_cadr(item) : List_var(item));
   {
     List _x2c_gensym_match_expr_2 = function;
     {List _x2c_gensym_match_at_4, _x2c_gensym_match_at_5, _x2c_gensym_match_at_6, _x2c_gensym_match_at_7, _x2c_gensym_match_at_8, _x2c_gensym_match_at_9, _x2c_gensym_match_at_10, _x2c_gensym_match_at_11, _x2c_gensym_match_at_12, _x2c_gensym_match_at_13, _x2c_gensym_match_at_14, _x2c_gensym_match_at_15, _x2c_gensym_match_at_16; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224498395122781148ULL &&(_x2c_gensym_match_at_4 = _x2c_gensym_match_expr_2 ->cdr) && Var_is(_x2c_gensym_match_at_4 -> car, 806120) &&(_x2c_gensym_match_at_5 = _x2c_gensym_match_at_4 ->cdr) &&(Var_is(_x2c_gensym_match_at_5 -> car, 806120) &&(_x2c_gensym_match_at_6 = Var_list_payload(_x2c_gensym_match_at_5 -> car), 1)) && _x2c_gensym_match_at_6 && _x2c_gensym_match_at_6 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_7 = _x2c_gensym_match_at_6 ->cdr) &&(Var_is(_x2c_gensym_match_at_7 -> car, 806120) &&(_x2c_gensym_match_at_8 = Var_list_payload(_x2c_gensym_match_at_7 -> car), 1)) && _x2c_gensym_match_at_8 && _x2c_gensym_match_at_8 ->car.u64 == 9224497941690207118ULL &&(_x2c_gensym_match_at_9 = _x2c_gensym_match_at_8 ->cdr) &&(_x2c_gensym_match_at_10 = _x2c_gensym_match_at_9 ->cdr) && !(_x2c_gensym_match_at_11 = _x2c_gensym_match_at_10 ->cdr) &&(_x2c_gensym_match_at_12 = _x2c_gensym_match_at_7 ->cdr) && !(_x2c_gensym_match_at_13 = _x2c_gensym_match_at_12 ->cdr) &&(_x2c_gensym_match_at_14 = _x2c_gensym_match_at_5 ->cdr) &&(Var_is(_x2c_gensym_match_at_14 -> car, 806120) &&(_x2c_gensym_match_at_15 = Var_list_payload(_x2c_gensym_match_at_14 -> car), 1)) && _x2c_gensym_match_at_15 && _x2c_gensym_match_at_15 ->car.u64 == 9224497936766630102ULL && !(_x2c_gensym_match_at_16 = _x2c_gensym_match_at_14 ->cdr)){
@@ -2638,8 +2638,8 @@ static Map f10_projection____filled_groups(List items){
               Var kind;
               kind = x2c_match_value_1;
               {
-                if(x2c_var_equal(kind, Symbol_var(1016156))) Array_push(open, group);
-                else if(x2c_var_equal(kind, Symbol_var(7109834))) Array_take_last(open);
+                if(x2c_var_equal_lane(kind, Symbol_var(1016156))) Array_push(open, group);
+                else if(x2c_var_equal_lane(kind, Symbol_var(7109834))) Array_take_last(open);
                 continue;
               }
 
@@ -3395,7 +3395,7 @@ static List _forward_declarations(Compiler c, List source, int source_includes){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_39);
       {
         node = f12_dependencies____inline_prototype(c, node);
-        if(x2c_var_equal(List_car(node), Symbol_var(44661285196)) && Map_contains(f.declared, List_var(node))) continue;
+        if(x2c_var_equal_lane(List_car(node), Symbol_var(44661285196)) && Map_contains(f.declared, List_var(node))) continue;
         if(source_includes){
           List _x2c_gensym_match_expr_37 = Ast_without_origin(node);
           {List _x2c_gensym_match_at_187, _x2c_gensym_match_at_188; Var x2c_match_value_0; if(_x2c_gensym_match_expr_37 && _x2c_gensym_match_expr_37 ->car.u64 == 9224497972340888518ULL &&(_x2c_gensym_match_at_187 = _x2c_gensym_match_expr_37 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_187 ->car, 1) && Var_is(_x2c_gensym_match_at_187 -> car, 1318210446) && !(_x2c_gensym_match_at_188 = _x2c_gensym_match_at_187 ->cdr)){
@@ -4586,7 +4586,7 @@ static Symbol f11_definitions____type_kind(Token first, List base, List modifier
     {List _x2c_gensym_match_at_320, _x2c_gensym_match_at_321; Var x2c_match_value_0; if(_x2c_gensym_match_expr_63 &&(x2c_match_value_0 = _x2c_gensym_match_expr_63 ->car, 1) &&(_x2c_gensym_match_at_320 = _x2c_gensym_match_expr_63 ->cdr) &&(Var_is(_x2c_gensym_match_at_320 -> car, 806120) &&(_x2c_gensym_match_at_321 = Var_list_payload(_x2c_gensym_match_at_320 -> car), 1)) && _x2c_gensym_match_at_321 && _x2c_gensym_match_at_321 ->car.u64 == 9224497936775146440ULL){
       Var pointer;
       pointer = x2c_match_value_0;
-      if(x2c_var_equal(pointer, Symbol_var(54))) return 209136519382;
+      if(x2c_var_equal_lane(pointer, Symbol_var(54))) return 209136519382;
     }
 
   }
@@ -4675,7 +4675,7 @@ static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncA
 }
 
 static Var _x2c_gensym_lambda_4(Var specifier){
-  return int_var(! x2c_var_equal(specifier, Symbol_var(1317118534)));
+  return int_var(! x2c_var_equal_lane(specifier, Symbol_var(1317118534)));
   ;
 }
 
@@ -4707,7 +4707,7 @@ static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
 }
 
 static Var _x2c_gensym_lambda_7(Var specifier){
-  return int_var(! x2c_var_equal(specifier, Symbol_var(7304424)));
+  return int_var(! x2c_var_equal_lane(specifier, Symbol_var(7304424)));
   ;
 }
 

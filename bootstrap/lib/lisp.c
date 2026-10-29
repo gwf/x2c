@@ -1388,8 +1388,8 @@ static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth){
   if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return expr;
   List form = Var_list_payload(expr);
   Var head = List_car(form);
-  if(x2c_var_equal(head, lsym_quasiquote)) return List_var(Var_cons(head, f8_evaluate____qq_elements(l, List_cdr(form), env, depth + 1)));
-  if(! x2c_var_equal(head, lsym_unquote) && ! x2c_var_equal(head, lsym_splicing)) return List_var(f8_evaluate____qq_elements(l, form, env, depth));
+  if(x2c_var_equal_lane(head, lsym_quasiquote)) return List_var(Var_cons(head, f8_evaluate____qq_elements(l, List_cdr(form), env, depth + 1)));
+  if(! x2c_var_equal_lane(head, lsym_unquote) && ! x2c_var_equal_lane(head, lsym_splicing)) return List_var(f8_evaluate____qq_elements(l, form, env, depth));
   if(List_len(form) != 2){
     Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
@@ -1401,7 +1401,7 @@ static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth){
   }
   if(depth > 0) return List_var(Var_cons(head, f8_evaluate____qq_elements(l, List_cdr(form), env, depth - 1)));
   Var value = f8_evaluate____eval(l, List_cadr(form), env);
-  if(x2c_var_equal(head, lsym_splicing)){
+  if(x2c_var_equal_lane(head, lsym_splicing)){
     Var _x2c_gensym_literal_part_15 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_gensym_literal_part_16 = Symbol_var(Var_kind(expr));
     {
@@ -1907,7 +1907,7 @@ static List f8_evaluate____cond_clause(Var clause){
 Var Var_car(Var);
 
 static int f8_evaluate____is_splice(Var expr){
-  return Var_is_row(expr, 9, 7, 4) && ! Var_is_nil(expr) && x2c_var_equal(Var_car(expr), lsym_splicing);
+  return Var_is_row(expr, 9, 7, 4) && ! Var_is_nil(expr) && x2c_var_equal_lane(Var_car(expr), lsym_splicing);
 }
 
 static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv env, int macro){
@@ -2053,8 +2053,8 @@ static void f8_evaluate____capture_name(f8_evaluate___FreeNames * f, Var name){
 }
 
 static int f8_evaluate____quote_depth(Var head, int depth){
-  if(x2c_var_equal(head, lsym_quasiquote)) return depth + 1;
-  if(x2c_var_equal(head, lsym_unquote) || x2c_var_equal(head, lsym_splicing)) return depth ? depth - 1 : 0;
+  if(x2c_var_equal_lane(head, lsym_quasiquote)) return depth + 1;
+  if(x2c_var_equal_lane(head, lsym_unquote) || x2c_var_equal_lane(head, lsym_splicing)) return depth ? depth - 1 : 0;
   return - 1;
 }
 
@@ -2081,7 +2081,7 @@ static int f8_evaluate____param_has(List params, Var name){
     Var _x2c_gensym_macro_cursor_output_10;
     while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
       param = _x2c_gensym_macro_cursor_output_10;
-      if(x2c_var_equal(param, name)) return 1;
+      if(x2c_var_equal_lane(param, name)) return 1;
     }
 
   }

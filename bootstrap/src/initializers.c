@@ -851,7 +851,7 @@ List Compiler_initializer_slot(Compiler c, List target, List path){
 
 static List f10_subobjects____advance_row(Compiler c, Type root, List original, List target, List * states, int first){
   List value = original;
-  if(x2c_var_equal(List_car(original), Symbol_var(9639129704)) || x2c_var_equal(List_car(original), Symbol_var(20762258403944))){
+  if(x2c_var_equal_lane(List_car(original), Symbol_var(9639129704)) || x2c_var_equal_lane(List_car(original), Symbol_var(20762258403944))){
     List path = f10_subobjects____designated_path(c, root, original, &(value), &(original));
     (* states) = cons(List_var(cons(_0, cons(List_var(path), _6))), NULL);
   }
@@ -1004,7 +1004,7 @@ static List f10_subobjects____named_field_path(Compiler c, Type type, Var name, 
   while(List_truth(fields)){
     List row = Var_list_payload(List_car(fields));
     List path = f10_subobjects____field_path(owner, fields, parent);
-    if(x2c_var_equal(List_car(row), name)) return path;
+    if(x2c_var_equal_lane(List_car(row), name)) return path;
     Type member = Var_type(List_cadr(row));
     if(! Var_truth(List_car(row)) && Type_is_aggregate(f10_subobjects____resolve_shape(c, member))){
       List nested = f10_subobjects____named_field_path(c, member, name, path);
@@ -1131,7 +1131,7 @@ static void f10_subobjects____advance_path(Compiler c, List target, List path, L
     Type type = Var_type(List_getindex(_x2c_gensym_destructure_4, 3));
     List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_4, 4));
     if(kind == 13183752){
-      List next = x2c_var_equal(List_car(Type_list(owner)), Symbol_var(44977116)) ? NULL : f10_subobjects____field_path(owner, rest, parent);
+      List next = x2c_var_equal_lane(List_car(Type_list(owner)), Symbol_var(44977116)) ? NULL : f10_subobjects____field_path(owner, rest, parent);
       if(List_truth(next)){
         Array_push(states, List_var(cons(List_var(condition), cons(List_var(next), _6))));
         return;
@@ -1296,7 +1296,7 @@ static List f10_subobjects____scalar_layout(Compiler c, Type type, List target, 
   }
   );
   if(Type_is_array(owner)) return f10_subobjects____array_layout(c, type, owner, target, string, &((* symbolic)));
-  if(x2c_var_equal(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;
+  if(x2c_var_equal_lane(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;
   return f10_subobjects____record_layout(c, type, owner, target, string, &((* symbolic)));
 }
 
@@ -1790,7 +1790,7 @@ static List f10_conversion____convert_composite_row(Compiler c, List row, List n
   List original = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 0));
   List cases = Var_list_payload(List_getindex(_x2c_gensym_destructure_11, 1));
   List value = original;
-  while(x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944))) value = Var_list_payload(List_caddr(value));
+  while(x2c_var_equal_lane(List_car(value), Symbol_var(9639129704)) || x2c_var_equal_lane(List_car(value), Symbol_var(20762258403944))) value = Var_list_payload(List_caddr(value));
   {
     List _x2c_gensym_match_expr_13 = value;
     {List _x2c_gensym_match_at_171, _x2c_gensym_match_at_172, _x2c_gensym_match_at_173, _x2c_gensym_match_at_174; if(_x2c_gensym_match_expr_13 && _x2c_gensym_match_expr_13 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_171 = _x2c_gensym_match_expr_13 ->cdr) &&(_x2c_gensym_match_at_172 = _x2c_gensym_match_at_171 ->cdr) &&(Var_is(_x2c_gensym_match_at_172 -> car, 806120) &&(_x2c_gensym_match_at_173 = Var_list_payload(_x2c_gensym_match_at_172 -> car), 1)) && _x2c_gensym_match_at_173 && _x2c_gensym_match_at_173 ->car.u64 == 9224497957048725592ULL && !(_x2c_gensym_match_at_174 = _x2c_gensym_match_at_172 ->cdr)){

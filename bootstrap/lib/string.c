@@ -19,13 +19,13 @@ typedef char * String;
 #include "func/func.h"
 #include "symbol.h"
 #include "pool/pool.h"
-typedef struct f7_storage___StringHeader{
+typedef struct StringHeader{
   int length;
   unsigned hash;
 }
-* f7_storage___StringHeader;
+* StringHeader;
 
-_Static_assert(sizeof(struct f7_storage___StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
+_Static_assert(sizeof(struct StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
 #define STRING_STACK_BYTES 256
 #ifndef X2CCPP
 _Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
@@ -43,10 +43,19 @@ _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0),
 static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
-static inline f7_storage___StringHeader f7_storage____header(String str);
+#include "exception.h"
+
+
+
+
+static inline unsigned String_cached_hash(String str){
+  return str == NULL ? 0 :((StringHeader) str - 1) -> hash;
+}
+
+static inline StringHeader f7_storage____header(String str);
 static unsigned f7_storage____hash_n(const char * str, int length);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length);
-static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash);
+static inline String f7_storage____store(StringHeader header, const char * bytes, int length, unsigned hash);
 static String f7_storage____intern_owned(String string);
 static void _free_unchecked(String str);
 static String _finish(String string, int length);
@@ -198,11 +207,6 @@ _x2c_gensym_defer_env_5;
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
 int x2c_register_builtin_descriptor(Symbol, VarMethods);
 void x2c_register_descriptor(String, VarMethods);
-#include "exception.h"
-
-
-
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
     .iter = _x2c_gensym_proto_split_iter_0
@@ -215,7 +219,7 @@ int String_len(String str){
 }
 
 unsigned String_hash(String str){
-  if(! String_truth(str)) return 0;  f7_storage___StringHeader header = f7_storage____header(str);  return header -> hash ? header -> hash : f7_storage____hash_n(str, strlen(str));
+  if(! String_truth(str)) return 0;  unsigned hash = String_cached_hash(str);  return hash ? hash : f7_storage____hash_n(str, strlen(str));
 }
 
 int String_equal(String x, String y){
@@ -249,7 +253,7 @@ String x2c_string_from_bytes(const char * bytes, int length){
 }
 
 String String_malloc(int len){
-  if(len <= 0) return NULL;  if((size_t) len > SIZE_MAX - sizeof(struct f7_storage___StringHeader)) return NULL;  size_t total_len = sizeof(struct f7_storage___StringHeader) +(size_t) len;  Pool pool = Pool_current();  f7_storage___StringHeader header = Pool_malloc(pool, total_len);  header -> length = len;  header -> hash = 0;  return(String)((char *) header + sizeof(struct f7_storage___StringHeader));
+  if(len <= 0) return NULL;  if((size_t) len > SIZE_MAX - sizeof(struct StringHeader)) return NULL;  size_t total_len = sizeof(struct StringHeader) +(size_t) len;  Pool pool = Pool_current();  StringHeader header = Pool_malloc(pool, total_len);  header -> length = len;  header -> hash = 0;  return(String)((char *) header + sizeof(struct StringHeader));
 }
 
 String String_intern_free(String string){
@@ -278,8 +282,8 @@ int String_is_permanent(String str){
   if(! String_truth(str)) return 1;  return Pool_is_permanent(String_var(str));
 }
 
-static inline f7_storage___StringHeader f7_storage____header(String str){
-  return(f7_storage___StringHeader)((char *) str - sizeof(struct f7_storage___StringHeader));
+static inline StringHeader f7_storage____header(String str){
+  return(StringHeader) str - 1;
 }
 
 static unsigned f7_storage____hash_n(const char * str, int length){
@@ -291,15 +295,15 @@ static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int len
   if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
     String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
   }
-  size_t total = sizeof(struct f7_storage___StringHeader) +(size_t) length + 1;  f7_storage___StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
+  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
 }
 
-static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash){
-  header -> length = length + 1;  header -> hash = hash;  String string =(String)((char *) header + sizeof(struct f7_storage___StringHeader));  memcpy(string, bytes, length);  char * out = string;  out[length] = '\0';  return string;
+static inline String f7_storage____store(StringHeader header, const char * bytes, int length, unsigned hash){
+  header -> length = length + 1;  header -> hash = hash;  String string =(String)((char *) header + sizeof(struct StringHeader));  memcpy(string, bytes, length);  char * out = string;  out[length] = '\0';  return string;
 }
 
 static String f7_storage____intern_owned(String string){
-  f7_storage___StringHeader header = f7_storage____header(string);  if(! header -> hash){
+  StringHeader header = f7_storage____header(string);  if(! header -> hash){
     int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
   }
   Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
@@ -316,7 +320,7 @@ static String _finish(String string, int length){
   if(length <= 0){
     _free_unchecked(string);  return NULL;
   }
-  assert(memchr(string, '\0', length) == NULL);  char * out = string;  out[length] = '\0';  f7_storage___StringHeader header = f7_storage____header(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);  return f7_storage____intern_owned(string);
+  assert(memchr(string, '\0', length) == NULL);  char * out = string;  out[length] = '\0';  StringHeader header = f7_storage____header(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);  return f7_storage____intern_owned(string);
 }
 
 static int _is_active_canonical(String str){

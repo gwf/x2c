@@ -864,7 +864,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 static void f8_bindings____claim_class_tag(Sym s, String name, String owner){
   List fact = cons(_15, cons(String_var(String_lower(name)), NULL));
   Var claimed;
-  if(Map_try_get(s -> binding_facts, List_var(fact), &(claimed)) && ! x2c_var_equal(claimed, String_var(owner))) Compiler_report_error(s -> c, 33658058, String_join(NULL, cons(String_var(_16), cons(String_var(name), cons(String_var(_17), NULL)))), s -> c -> token, _23);
+  if(Map_try_get(s -> binding_facts, List_var(fact), &(claimed)) && ! x2c_var_equal_lane(claimed, String_var(owner))) Compiler_report_error(s -> c, 33658058, String_join(NULL, cons(String_var(_16), cons(String_var(name), cons(String_var(_17), NULL)))), s -> c -> token, _23);
   Sym_put(s, s -> binding_facts, List_var(fact), String_var(owner));
 }
 
@@ -1160,7 +1160,7 @@ List Sym_declared_key(Sym s, List context, List key, List ast){
   head = List_getindex(_x2c_gensym_destructure_1, 0);
   tag = List_getindex(_x2c_gensym_destructure_1, 1);
   int plain = Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key));
-  int tagged =(x2c_var_equal(head, Symbol_var(1318234344)) || x2c_var_equal(head, Symbol_var(44977116)) || x2c_var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1);
+  int tagged =(x2c_var_equal_lane(head, Symbol_var(1318234344)) || x2c_var_equal_lane(head, Symbol_var(44977116)) || x2c_var_equal_lane(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1);
   if(plain) f12_declarations____check_module_shadow(s, _55, prefix, Var_as_string(head), ast);
   if(tagged) f12_declarations____check_module_shadow(s, cons(List_var(cons(head, NULL)), NULL), prefix, Var_as_string(tag), ast);
   if(plain && ! List_truth(context) && ! String_truth(prefix) && ! c -> module_declaration){
@@ -1277,7 +1277,7 @@ static String f12_declarations____declared_spelling(List key){
   head = List_getindex(_x2c_gensym_destructure_2, 0);
   tag = List_getindex(_x2c_gensym_destructure_2, 1);
   if(Var_is_row(head, 11, 7, 1)) return Var_as_string(head);
-  if(x2c_var_equal(head, Symbol_var(1318234344)) || x2c_var_equal(head, Symbol_var(44977116)) || x2c_var_equal(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_as_string(tag);
+  if(x2c_var_equal_lane(head, Symbol_var(1318234344)) || x2c_var_equal_lane(head, Symbol_var(44977116)) || x2c_var_equal_lane(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_as_string(tag);
   return NULL;
 }
 
@@ -1418,7 +1418,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
 
           }
           f10_namespaces____record_rows_visibility(c, declaration, Var_symbol(kind), mark, rows);
-          if(x2c_var_equal(kind, Symbol_var(8932560010)) && ! mark) f10_namespaces____record_native_objects(c, Var_type(type), rows);
+          if(x2c_var_equal_lane(kind, Symbol_var(8932560010)) && ! mark) f10_namespaces____record_native_objects(c, Var_type(type), rows);
         }
 
       }
@@ -1503,7 +1503,7 @@ String Compiler_package_spelling(Compiler c, String name){
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token){
   if(! _init_guard_) _file_init_();
   Var bound = Map_getindex(c -> package_aliases, String_var(alias));
-  if(! Var_is_void(bound) && x2c_var_equal(bound, String_var(name))) return;
+  if(! Var_is_void(bound) && x2c_var_equal_lane(bound, String_var(name))) return;
   f10_namespaces____check_package_binding(c, _81, alias, token);
   Map_setindex(c -> package_aliases, String_var(alias), String_var(name));
 }
@@ -1702,7 +1702,7 @@ Type Sym_sole_typedef(Sym s, Type type){
           Var _x2c_gensym_match_value_5 = name;
           {
             String name = Var_as_string(_x2c_gensym_match_value_5);
-            if(x2c_var_equal(target, List_var(type))){
+            if(x2c_var_equal_lane(target, List_var(type))){
               if(String_truth(found) && ! String_equal(found, name)) return NULL;
               found = name;
             }
@@ -1847,7 +1847,7 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
       declaration = Var_list_payload(_x2c_gensym_macro_cursor_output_22);
       {
         declaration = Ast_without_origin(declaration);
-        if(x2c_var_equal(List_car(declaration), Symbol_var(272838634664))) continue;
+        if(x2c_var_equal_lane(List_car(declaration), Symbol_var(272838634664))) continue;
         List bindings = Var_list_payload(List_caddr(declaration));
         {
           List declarator;
@@ -2008,7 +2008,7 @@ int Symbol_is_type_qualifier(Symbol);
 
 static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, int hops){
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
-  while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
+  while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal_lane(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
   if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;
   if(Type_is_typedef_name(key) || Type_is_typedef(key)){
     Type type = f5_types____typedef_target(s, key);
@@ -2075,7 +2075,7 @@ static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops)
   type = Type_declared(type);
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   Type base = Type_base_type(type);
-  if(x2c_var_equal(List_car(Type_list(base)), Symbol_var(1439803480))){
+  if(x2c_var_equal_lane(List_car(Type_list(base)), Symbol_var(1439803480))){
     Type value = f5_types____normalize_chain(s, List_cdr(base), origin, hops + 1);
     while(Var_is(List_car(Type_list(value)), 1328354264) && Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(value))))) value = List_cdr(value);
     return f5_types____replace_type_base(type, base, value);
@@ -2140,7 +2140,7 @@ int SymTxn_local_macros_changed(SymTxn * s){
     SymUndo row = rows[i];
     if(! f12_transactions____same(row.map, after) || Map_contains(seen, row.key)) continue;
     Map_setindex(seen, row.key, int_var(1));
-    if(Var_is_void(row.value) || ! x2c_var_equal(row.value, Map_getindex(after, row.key))) return 1;
+    if(Var_is_void(row.value) || ! x2c_var_equal_lane(row.value, Map_getindex(after, row.key))) return 1;
   }
   return 0;
 }

@@ -2454,8 +2454,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
   if(result.u64 != VAR_VOID_BITS) return result;
   f9_operators____valid_operands(lhs, rhs);
   switch(op){
-    case 15739 : return Var_box_i32_bits((unsigned)(x2c_var_equal(lhs, rhs)));
-    case 8571 : return Var_box_i32_bits((unsigned)(! x2c_var_equal(lhs, rhs)));
+    case 15739 : return Var_box_i32_bits((unsigned)(x2c_var_equal_lane(lhs, rhs)));
+    case 8571 : return Var_box_i32_bits((unsigned)(! x2c_var_equal_lane(lhs, rhs)));
     case 2014587 : return Var_box_i32_bits((unsigned)(x2c_var_identical(lhs, rhs)));
     case 1097083 : return Var_box_i32_bits((unsigned)(! x2c_var_identical(lhs, rhs)));
   }
@@ -2465,10 +2465,10 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     __builtin_unreachable();
   }
   switch(op){
-    case 121 : return f9_operators____predicate(x2c_var_order(lhs, rhs) < 0);
-    case 15483 : return f9_operators____predicate(x2c_var_order(lhs, rhs) <= 0);
-    case 125 : return f9_operators____predicate(x2c_var_order(lhs, rhs) > 0);
-    case 15995 : return f9_operators____predicate(x2c_var_order(lhs, rhs) >= 0);
+    case 121 : return f9_operators____predicate(x2c_var_order_lane(lhs, rhs) < 0);
+    case 15483 : return f9_operators____predicate(x2c_var_order_lane(lhs, rhs) <= 0);
+    case 125 : return f9_operators____predicate(x2c_var_order_lane(lhs, rhs) > 0);
+    case 15995 : return f9_operators____predicate(x2c_var_order_lane(lhs, rhs) >= 0);
     case 9805 : case 31993 : return f9_operators____predicate(f9_operators____logical(lhs, op, rhs));
     case 77 : case 249 : case 189 : case 15481 : case 15997 : return f9_operators____general_numeric_binary(op, lhs, rhs);
   }
