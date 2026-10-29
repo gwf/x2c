@@ -23,7 +23,8 @@ sources=$(awk '/^meta / && !/^meta native / && !seen[FILENAME]++ {
   sed '/^src\/linked-meta\.x$/d' | sort)
 
 tmp="$out.$$"
-dump="$tmp.dump"
+# A caller can retain the dump for the query generator.
+dump=${2:-$tmp.dump}
 trap 'rm -f "$tmp" "$dump"' EXIT
 "$x2c" translate --dump-definitions $sources > "$dump"
 awk -v dump="$dump" '
@@ -165,5 +166,5 @@ if [ -e "$out" ] && cmp -s "$tmp" "$out"; then
 else
   mv "$tmp" "$out"
 fi
-rm -f "$dump"
+if [ "$#" -lt 2 ]; then rm -f "$dump"; fi
 trap - EXIT

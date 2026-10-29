@@ -13,9 +13,12 @@ x2c=${X2C:-$root/bin/x2c-bootstrap}
 cd "$root"
 
 tmp="$out.$$"
-dump="$tmp.dump"
-trap 'rm -f "$tmp" "$dump"' EXIT
-"$x2c" translate --dump-definitions lib/meta.x > "$dump"
+# The linked-meta generator can supply its complete definitions dump.
+dump=${2:-$tmp.dump}
+trap 'rm -f "$tmp"; if [ "$#" -lt 2 ]; then rm -f "$dump"; fi' EXIT
+if [ "$#" -lt 2 ]; then
+  "$x2c" translate --dump-definitions lib/meta.x > "$dump"
+fi
 awk -v dump="$dump" '
 function name_of(text,    name) {
   name = text
@@ -36,7 +39,8 @@ function finish(    signature, linkage) {
   statics[count] = text ~ /^meta static /
 }
 FILENAME == dump {
-  if (match($0, /^\(meta \(name "[^"]*"/))
+  if (match($0, /^\(unit "[^"]*"/)) unit = substr($0, 8, RLENGTH - 8)
+  else if (unit == "lib/meta.x" && match($0, /^\(meta \(name "[^"]*"/))
     comptime[substr($0, 14, RLENGTH - 14)] = ($0 ~ /\(comptime 1\)/)
   next
 }
@@ -92,5 +96,5 @@ if [ -e "$out" ] && cmp -s "$tmp" "$out"; then
 else
   mv "$tmp" "$out"
 fi
-rm -f "$dump"
+if [ "$#" -lt 2 ]; then rm -f "$dump"; fi
 trap - EXIT
