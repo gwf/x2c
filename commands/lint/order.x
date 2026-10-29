@@ -119,17 +119,10 @@ static int _order_span(Compiler c, int start, int end, OrderFunction &fn):
       tokens[end - 1].type == <space> || tokens[end - 1].type == <comment>):
     end--
   if start == end: return 0
-  fn.path = Path.resolved_absolute(c.text_source(tokens[start].pos, fn.start))
-  String last = Path.resolved_absolute(c.text_source(
-    tokens[end - 1].pos + tokens[end - 1].len - 1, fn.end))
+  fn.path = lint_source_position(c, tokens[start].pos, fn.start)
+  String last = lint_source_position(
+    c, tokens[end - 1].pos + tokens[end - 1].len - 1, fn.end)
   fn.end++
-  if c.unit_script && !c.line_markers &&
-      fn.path == Path.resolved_absolute(c.unit_script.path):
-    int newline = c.text.find("\n")
-    int shift = c.unit_script.shebang.len() -
-      (newline < 0 ? c.text.len() : newline)
-    fn.start += shift
-    fn.end += shift
   return fn.path == last && fn.end > fn.start
 
 /* Meta definitions and decorated/generated forms are not ordinary moves.

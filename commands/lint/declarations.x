@@ -377,8 +377,8 @@ static int _source_index(Lint l, Compiler c, int index, int after):
   Token token = tokens + index
   if !token.len: return -1
   int position = token.pos + (after ? token.len - 1 : 0), offset
-  String path = c.text_source(position, offset)
-  if Path.resolved_absolute(path) != Path.resolved_absolute(l.path):
+  String path = lint_source_position(c, position, offset)
+  if path != Path.resolved_absolute(l.path):
     return -1
   offset += after
   if offset < 0 || offset > l.text.len(): return -1

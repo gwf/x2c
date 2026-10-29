@@ -36,8 +36,8 @@ Rule
     not apply. `edits` holds the replacements that fixable findings
     propose, as `(START END TEXT)` byte ranges of `text`, and `functions`
     the authored functions the compiler parsed, as `(NAME START BODY END)`
-    token indexes, for a unit in brace syntax, whose compiler tokens are
-    the tokens `Lint` scanned. `allowances` maps a source line to its
+    raw token indexes mapped from the compiler's physical source spans
+    for a unit in brace syntax. `allowances` maps a source line to its
     `(CODE MATCHED)` Array, updated when that finding is suppressed.
     `unused` holds static definitions without bound references as
     `(NAME DISPLAY EMITTED LINE FIRST-LINE LAST-LINE)` for corpus review.
@@ -209,6 +209,17 @@ int lint_opens(Token t) => lint_code(t) && strchr("([{", t.text[t.len - 1])
 /** Whether `t` closes a bracket. */
 int lint_closes(Token t) =>
   t.type == <")"> || t.type == <"]"> || t.type == <"}">
+
+/** Maps a compiler byte position to its physical source file and offset,
+    including the shebang that script translation replaces. */
+String lint_source_position(Compiler c, int position, int &offset):
+  String path = Path.resolved_absolute(c.text_source(position, offset))
+  if c.unit_script && !c.line_markers &&
+      path == Path.resolved_absolute(c.unit_script.path):
+    int newline = c.text.find("\n")
+    offset += c.unit_script.shebang.len() -
+      (newline < 0 ? c.text.len() : newline)
+  return path
 
 /* The quoting a bracket opens: 1 for a quoted Lisp form, 0 for code, and
    `outer` for a bracket that keeps the enclosing state. */

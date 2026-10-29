@@ -311,8 +311,8 @@ static int _read_parts(Array parts, List stored) {
       parts.push(_canonical_path(Compiler.absolute_home_path(part)));
     else if (part ~= %(cpp ?(String text) ?(String file) ?(int line)))
       parts.push(part);
-    else if (part is not <list>) return 0;
     else {
+      if (part is not <list>) return 0;
       Map rows = _read_rows(part);
       if (rows == NULL) return 0;
       parts.push(rows);
