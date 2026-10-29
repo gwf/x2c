@@ -284,8 +284,7 @@ static String _from_bytes_in(Pool pool, const char *bytes, int length) {
   StringHeader header = pool.malloc(total);
   String string = _store(header, bytes, length, hash);
   if (length > STRING_STACK_BYTES) return pool.intern(string, header);
-  pool.insert(string);
-  return string;
+  return pool.intern_new(string, header);
 }
 
 /* Fills `header` and the `length` bytes after it, with their NUL, and
@@ -316,8 +315,7 @@ static String _intern_owned(String string) {
   String found = x2c_pool_lookup_string(
     pool, string, header.length - 1, header.hash);
   if (!found) {
-    pool.insert(string);
-    return string;
+    return pool.intern_new(string, header);
   }
   if (found !== string) _free_unchecked(string);
   return found;

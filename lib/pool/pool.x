@@ -65,6 +65,7 @@ typedef struct PoolStats {
 #include "map/map.x"
 
 module unsigned long value_epoch;
+module Pool value_root;
 
 /* A process that has never started a worker cannot contend for a pool, and
    the compiler is such a process: locking added a seventh to translation
@@ -80,4 +81,5 @@ module {
   "interning.x",
   "storage.x",
   "threads.x",
+  "root-index.x",
 }

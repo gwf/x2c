@@ -31,6 +31,7 @@ String x2c_pool_lookup_string(
   Pool inner, const char *bytes, int length, unsigned hash) {
   int threads_active = pool_multithreaded;
   for (Pool pool = inner; pool; pool = pool.up) {
+    if (pool == value_root) return _root_string(bytes, length, hash);
     if (threads_active) _lock(pool);
     String found = _get_string(pool.table, bytes, length, hash);
     if (threads_active) _unlock(pool);
@@ -90,7 +91,7 @@ Var Pool.lookup(Pool inner, Var key) {
      measured 3% of a translation's instructions. */
   if (pool_multithreaded) return _lookup_locked(inner, key, key_hash);
   for (Pool pool = inner; pool; pool = pool.up) {
-    Var found = _get_hashed(pool.table, key, key_hash);
+    Var found = _lookup_level(pool, key, key_hash);
     if (found is not void) return found;
   }
   return void;
@@ -132,7 +133,11 @@ void Pool.insert(Pool inner, Var object) {
   if (!inner) raise %(bad-arg (operation "Pool.insert"));
   _lock(inner);
   defer _unlock(inner);
-  inner.table.set_entry(&object, &object);
+  if (inner == value_root) {
+    int inserted;
+    _root_intern(object, inserted);
+  }
+  else inner.table.set_entry(&object, &object);
   inner.interned++;
 }
 
@@ -141,6 +146,10 @@ void Pool.insert(Pool inner, Var object) {
 */
 int Pool.owns(Pool pool, Var key) {
   if (!pool) return 0;
+  if (pool == value_root && _root_native(key)) {
+    Var found = _root_lookup(key, key.hash());
+    return found is not void && found.same(key);
+  }
   _lock(pool);
   defer _unlock(pool);
   return _owns_locked(pool, key);
@@ -208,6 +217,7 @@ Pool Pool.release(Pool inner) {
   _unlock(inner);
   _storage_unlock();
   pthread_mutex_destroy(&inner.mutex);
+  if (inner == value_root) _root_initialize(NULL);
   Scope.destroy(inner.scope);
   return up;
 }
@@ -243,9 +253,11 @@ static Var _lookup_locked(Pool inner, Var key, unsigned key_hash) {
   Pool locked = NULL;
   defer _unlock(locked);
   for (Pool pool = inner; pool; pool = pool.up) {
+    if (pool == value_root && _root_native(key))
+      return _root_lookup(key, key_hash);
     _lock(pool);
     locked = pool;
-    Var found = _get_hashed(pool.table, key, key_hash);
+    Var found = _lookup_level(pool, key, key_hash);
     _unlock(pool);
     locked = NULL;
     if (found is not void) return found;
@@ -260,11 +272,14 @@ static Var _get_hashed(
   return index < 0 ? void : *_record_key(table, (unsigned) index);
 }
 
+static Var _lookup_level(Pool pool, Var key, unsigned hash) =>
+  pool == value_root ? _root_lookup(key, hash) : _get_hashed(pool.table, key, hash);
+
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */
 static Var _intern_locked(Pool inner, Var object, int &discard) {
   int inserted;
-  Var stored = _setdefault(inner.table, object, inserted);
+  Var stored = _setdefault(inner, object, inserted);
   if (inserted) inner.interned++;
   else discard = 1;
   return stored;
@@ -272,14 +287,20 @@ static Var _intern_locked(Pool inner, Var object, int &discard) {
 
 /* The stored value equal to `object`, which is installed when absent. */
 module Var _setdefault(
-  PoolTable table, Var object, int &inserted) {
-  return *table.get_or_insert(&object, &object, &inserted);
+  Pool pool, Var object, int &inserted) {
+  if (pool == value_root) return _root_intern(object, inserted);
+  return *pool.table.get_or_insert(&object, &object, &inserted);
 }
 
 module int _owns_locked(Pool pool, Var key) {
-  Var found = _get_hashed(pool.table, key, key.hash());
+  Var found = _lookup_level(pool, key, key.hash());
   return found is not void && found.same(key);
 }
+
+module int _root_key_equal(Var a, Var b) => _table_key_equal(&a, &b);
+
+module PoolTable _root_new_table(unsigned capacity) =>
+  PoolTable.new_table(NULL, capacity);
 
 /* A child's table starts at the capacity the last released direct child's
    table reached. */
