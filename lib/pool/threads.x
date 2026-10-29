@@ -6,7 +6,6 @@ static typedef struct PoolValueThreadState {
   Pool current;
 } *PoolValueThreadState;
 
-static Pool value_root;
 static threaded struct PoolValueThreadState value_thread;
 
 /* locks
@@ -123,7 +122,10 @@ Pool Pool.current(void) {
 */
 void Pool.initialize(void) {
   if (value_thread.current) return;
-  if (!value_root) value_root = Pool.retain_named(NULL, "canonical values");
+  if (!value_root) {
+    value_root = Pool.retain_named(NULL, "canonical values");
+    _root_initialize(value_root.table);
+  }
   value_thread.current = value_root;
 }
 

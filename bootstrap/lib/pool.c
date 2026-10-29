@@ -86,6 +86,8 @@ PoolStats;
 #include "map/map.h"
 static unsigned long value_epoch;
 
+static Pool value_root;
+
 static int pool_multithreaded;
 
 struct PoolRecord{
@@ -152,11 +154,17 @@ static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash)
 
 static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_hash);
 
+static Var f9_interning____lookup_level(Pool pool, Var key, unsigned hash);
+
 static Var f9_interning____intern_locked(Pool inner, Var object, int * discard);
 
-static Var _setdefault(PoolTable table, Var object, int * inserted);
+static Var _setdefault(Pool pool, Var object, int * inserted);
 
 static int _owns_locked(Pool pool, Var key);
+
+static int _root_key_equal(Var a, Var b);
+
+static PoolTable _root_new_table(unsigned capacity);
 
 static unsigned f9_interning____child_capacity(Pool inner);
 
@@ -392,8 +400,16 @@ typedef struct f7_threads___PoolValueThreadState{
   Pool current;
 }
 * f7_threads___PoolValueThreadState;
-static Pool f7_threads___value_root;
 static _Thread_local struct f7_threads___PoolValueThreadState f7_threads___value_thread;
+static PoolTable f10_root_index___root_index;
+static void _root_initialize(PoolTable table);
+static int _root_native(Var key);
+static String _root_string(const char * bytes, int length, unsigned hash);
+static Var _root_lookup(Var key, unsigned hash);
+static Var f10_root_index____root_find(PoolTable table, Var key, unsigned hash);
+static Var _root_intern(Var object, int * inserted);
+static PoolTable f10_root_index____root_grow(PoolTable previous);
+static void f10_root_index____root_append(PoolTable table, Var object, unsigned hash);
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
 }
@@ -473,6 +489,12 @@ typedef struct _x2c_gensym_defer_env_14{
 _x2c_gensym_defer_env_14;
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17);
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18);
+typedef struct _x2c_gensym_defer_env_15{
+  const void * _x2c_gensym_defer_capture_21;  const void * _x2c_gensym_defer_capture_22;
+}
+_x2c_gensym_defer_env_15;
+static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19);
+static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20);
 #include "error.h"
 
 
@@ -698,7 +720,7 @@ static int f9_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_
 void Pool_initialize(void);
 String x2c_pool_lookup_string(Pool inner, const char * bytes, int length, unsigned hash){
   if(! _init_guard_) Pool_initialize();  int threads_active = pool_multithreaded;  for(Pool pool = inner;  pool;  pool = pool -> up){
-    if(threads_active) _lock(pool);  String found = f9_interning____get_string(pool -> table, bytes, length, hash);  if(threads_active) _unlock(pool);  if(String_truth(found)) return found;
+    if(pool == value_root) return _root_string(bytes, length, hash);  if(threads_active) _lock(pool);  String found = f9_interning____get_string(pool -> table, bytes, length, hash);  if(threads_active) _unlock(pool);  if(String_truth(found)) return found;
   }
   return NULL;
 }
@@ -707,7 +729,7 @@ Var Pool_lookup(Pool inner, Var key);
 void Pool_free(Pool inner, void * alloc);
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();  if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 59,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 60,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));  __builtin_unreachable();
   }
   Var canonical;  int discard = 0; {
     _lock(inner); {
@@ -735,7 +757,7 @@ Var Pool_lookup(Pool inner, Var key){
   unsigned key_hash = Var_hash(key);
   if(pool_multithreaded) return f9_interning____lookup_locked(inner, key, key_hash);
   for(Pool pool = inner;  pool;  pool = pool -> up){
-    Var found = f9_interning____get_hashed(pool -> table, key, key_hash);
+    Var found = f9_interning____lookup_level(pool, key, key_hash);
     if(! Var_is_void(found)) return found;
   }
   return((void) 0, Void);
@@ -744,7 +766,7 @@ Var Pool_lookup(Pool inner, Var key){
 Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 110,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 111,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
@@ -777,7 +799,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 132,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 133,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
@@ -794,7 +816,11 @@ void Pool_insert(Pool inner, Var object){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
-      f9_interning___PoolTable_set_entry(inner -> table, & object, & object);
+      if(inner == value_root){
+        int inserted;
+        _root_intern(object, &(inserted));
+      }
+      else f9_interning___PoolTable_set_entry(inner -> table, & object, & object);
       inner -> interned ++;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
@@ -805,6 +831,10 @@ void Pool_insert(Pool inner, Var object){
 int Pool_owns(Pool pool, Var key){
   if(! _init_guard_) Pool_initialize();
   if(! pool) return 0;
+  if(pool == value_root && _root_native(key)){
+    Var found = _root_lookup(key, Var_hash(key));
+    return ! Var_is_void(found) && Var_same(found, key);
+  }
   _lock(pool);
   {
     _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
@@ -919,6 +949,7 @@ Pool Pool_release(Pool inner){
   _unlock(inner);
   _storage_unlock();
   pthread_mutex_destroy(& inner -> mutex);
+  if(inner == value_root) _root_initialize(NULL);
   Scope_destroy(inner -> scope);
   return up;
 }
@@ -956,26 +987,34 @@ static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash)
     x2c_cleanup_push(& _x2c_gensym_defer_record_10);
     {
       for(Pool pool = inner;  pool;  pool = pool -> up){
-        _lock(pool);
-        locked = pool;
-        Var found = f9_interning____get_hashed(pool -> table, key, key_hash);
-        _unlock(pool);
-        locked = NULL;
-        if(! Var_is_void(found)){
-          Var _x2c_gensym_return_value_4 = found;
+        if(pool == value_root && _root_native(key)){
+          Var _x2c_gensym_return_value_4 = _root_lookup(key, key_hash);
           {
             x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
             return _x2c_gensym_return_value_4;
           }
 
         }
+        _lock(pool);
+        locked = pool;
+        Var found = f9_interning____lookup_level(pool, key, key_hash);
+        _unlock(pool);
+        locked = NULL;
+        if(! Var_is_void(found)){
+          Var _x2c_gensym_return_value_5 = found;
+          {
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
+            return _x2c_gensym_return_value_5;
+          }
+
+        }
 
       }
       {
-        Var _x2c_gensym_return_value_5 =((void) 0, Void);
+        Var _x2c_gensym_return_value_6 =((void) 0, Void);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
-          return _x2c_gensym_return_value_5;
+          return _x2c_gensym_return_value_6;
         }
 
       }
@@ -991,21 +1030,34 @@ static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_has
   return index < 0 ?((void) 0, Void) : * f9_interning____record_key(table, (unsigned) index);
 }
 
+static Var f9_interning____lookup_level(Pool pool, Var key, unsigned hash){
+  return pool == value_root ? _root_lookup(key, hash) : f9_interning____get_hashed(pool -> table, key, hash);
+}
+
 static Var f9_interning____intern_locked(Pool inner, Var object, int * discard){
   int inserted;
-  Var stored = _setdefault(inner -> table, object, &(inserted));
+  Var stored = _setdefault(inner, object, &(inserted));
   if(inserted) inner -> interned ++;
   else(* discard) = 1;
   return stored;
 }
 
-static Var _setdefault(PoolTable table, Var object, int * inserted){
-  return * f9_interning___PoolTable_get_or_insert(table, & object, & object, &(* inserted));
+static Var _setdefault(Pool pool, Var object, int * inserted){
+  if(pool == value_root) return _root_intern(object, &((* inserted)));
+  return * f9_interning___PoolTable_get_or_insert(pool -> table, & object, & object, &(* inserted));
 }
 
 static int _owns_locked(Pool pool, Var key){
-  Var found = f9_interning____get_hashed(pool -> table, key, Var_hash(key));
+  Var found = f9_interning____lookup_level(pool, key, Var_hash(key));
   return ! Var_is_void(found) && Var_same(found, key);
+}
+
+static int _root_key_equal(Var a, Var b){
+  return f9_interning____table_key_equal(& a, & b);
+}
+
+static PoolTable _root_new_table(unsigned capacity){
+  return f9_interning___PoolTable_new_table(NULL, capacity);
 }
 
 static unsigned f9_interning____child_capacity(Pool inner){
@@ -1042,10 +1094,10 @@ void * Pool_malloc(Pool inner, size_t size){
     x2c_cleanup_push(& _x2c_gensym_defer_record_11);
     {
       {
-        void * _x2c_gensym_return_value_6 = Scope_malloc_in(& inner -> scope, size);
+        void * _x2c_gensym_return_value_7 = Scope_malloc_in(& inner -> scope, size);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
-          return _x2c_gensym_return_value_6;
+          return _x2c_gensym_return_value_7;
         }
 
       }
@@ -1155,11 +1207,11 @@ PoolStats Pool_stats(Pool inner){
             stats.promoted = inner -> promoted;
           }
           {
-            PoolStats _x2c_gensym_return_value_7 = stats;
+            PoolStats _x2c_gensym_return_value_8 = stats;
             {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_15);
               x2c_cleanup_leave(& _x2c_gensym_defer_record_14);
-              return _x2c_gensym_return_value_7;
+              return _x2c_gensym_return_value_8;
             }
 
           }
@@ -1440,10 +1492,10 @@ static int f7_storage____promote_level(Pool inner, Var object, void * alloc, f7_
     x2c_cleanup_push(& _x2c_gensym_defer_record_16);
     {
       if(! _owns_locked(inner, object)){
-        int _x2c_gensym_return_value_8 = 0;
+        int _x2c_gensym_return_value_9 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
-          return _x2c_gensym_return_value_8;
+          return _x2c_gensym_return_value_9;
         }
 
       }
@@ -1469,18 +1521,18 @@ static int f7_storage____promote_level(Pool inner, Var object, void * alloc, f7_
         x2c_cleanup_push(& _x2c_gensym_defer_record_17);
         {
           int inserted;
-          _setdefault(up -> table, object, &(inserted));
+          _setdefault(up, object, &(inserted));
           if(inserted) up -> interned ++;
           if(block && block -> owner == inner) f7_storage____mark_slot(block, slot);
           else if(promotion) f7_storage____push_promotion(inner, promotion);
           else Scope_move(alloc, & up -> scope);
           inner -> promoted ++;
           {
-            int _x2c_gensym_return_value_9 = 1;
+            int _x2c_gensym_return_value_10 = 1;
             {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
               x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
-              return _x2c_gensym_return_value_9;
+              return _x2c_gensym_return_value_10;
             }
 
           }
@@ -1622,14 +1674,14 @@ Pool x2c_pool_exchange(Pool pool){
 void Pool_thread_initialize(void){
   if(! _init_guard_) Pool_initialize();
   if(f7_threads___value_thread.current) return;
-  if(! f7_threads___value_root) _fatal("canonical value root is not initialized");
-  f7_threads___value_thread.current = f7_threads___value_root;
+  if(! value_root) _fatal("canonical value root is not initialized");
+  f7_threads___value_thread.current = value_root;
 }
 
 void Pool_shutdown(void){
   if(! _init_guard_) Pool_initialize();
-  while(f7_threads___value_thread.current && f7_threads___value_thread.current != f7_threads___value_root) f7_threads___value_thread.current = Pool_release(f7_threads___value_thread.current);
-  while(f7_threads___value_root) f7_threads___value_root = Pool_release(f7_threads___value_root);
+  while(f7_threads___value_thread.current && f7_threads___value_thread.current != value_root) f7_threads___value_thread.current = Pool_release(f7_threads___value_thread.current);
+  while(value_root) value_root = Pool_release(value_root);
   f7_threads___value_thread.current = NULL;
 }
 
@@ -1650,7 +1702,7 @@ Pool Pool_open_named(const char * name){
 void Pool_close(void){
   if(! _init_guard_) Pool_initialize();
   if(! Pool_current() -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/pool/threads.x",.function = "Pool_close",.line = 86,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/pool/threads.x",.function = "Pool_close",.line = 85,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
@@ -1661,7 +1713,7 @@ Pool Pool_detach(void){
   if(! _init_guard_) Pool_initialize();
   Pool detached = Pool_current();
   if(! detached -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/pool/threads.x",.function = "Pool_detach",.line = 99,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/pool/threads.x",.function = "Pool_detach",.line = 98,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }
@@ -1683,19 +1735,167 @@ void Pool_initialize(void){
   _x2c_gensym_static_initialize_2();
   _x2c_gensym_static_initialize_3();
   if(f7_threads___value_thread.current) return;
-  if(! f7_threads___value_root) f7_threads___value_root = Pool_retain_named(NULL, "canonical values");
-  f7_threads___value_thread.current = f7_threads___value_root;
+  if(! value_root){
+    value_root = Pool_retain_named(NULL, "canonical values");
+    _root_initialize(value_root -> table);
+  }
+  f7_threads___value_thread.current = value_root;
   Scope_shutdown_hook(Pool_shutdown);
 }
 
 int Pool_is_permanent(Var value){
   if(! _init_guard_) Pool_initialize();
-  return f7_threads___value_root && Pool_owns(f7_threads___value_root, value);
+  return value_root && Pool_owns(value_root, value);
 }
 
 unsigned long Pool_epoch(void){
   if(! _init_guard_) Pool_initialize();
   return __atomic_load_n(& value_epoch, __ATOMIC_ACQUIRE);
+}
+
+static void _root_initialize(PoolTable table){
+  __atomic_store_n(& f10_root_index___root_index, table, __ATOMIC_RELEASE);
+}
+
+static int _root_native(Var key){
+  return(void *) Var_string_payload(key) != NULL ||(void *) Var_list_payload(key) != NULL;
+}
+
+int String_len(String);
+
+static String _root_string(const char * bytes, int length, unsigned hash){
+  PoolTable table = __atomic_load_n(& f10_root_index___root_index, __ATOMIC_ACQUIRE);
+  Var * entries = table -> entries;
+  unsigned * hashes = table -> hashes, mask = table -> mask;
+  for(unsigned distance = 0;  distance < table -> capacity;  distance ++){
+    unsigned index =(hash + distance) & mask;
+    unsigned stored = __atomic_load_n(& hashes[index], __ATOMIC_ACQUIRE);
+    if(! stored) return NULL;
+    if(stored == hash){
+      Var entry = entries[index];
+      String string = Var_string_payload(entry);
+      if(String_truth(string) && String_len(string) == length && ! memcmp(string, bytes, length)) return string;
+    }
+
+  }
+  return NULL;
+}
+
+static Var _root_lookup(Var key, unsigned hash){
+  PoolTable table = __atomic_load_n(& f10_root_index___root_index, __ATOMIC_ACQUIRE);
+  return f10_root_index____root_find(table, key, hash);
+}
+
+static Var f10_root_index____root_find(PoolTable table, Var key, unsigned hash){
+  Var * entries = table -> entries;
+  unsigned * hashes = table -> hashes, mask = table -> mask;
+  for(unsigned distance = 0;  distance < table -> capacity;  distance ++){
+    unsigned index =(hash + distance) & mask;
+    unsigned stored = __atomic_load_n(& hashes[index], __ATOMIC_ACQUIRE);
+    if(! stored) return((void) 0, Void);
+    if(stored == hash){
+      Var entry = entries[index];
+      if(_root_key_equal(entry, key)) return entry;
+    }
+
+  }
+  return((void) 0, Void);
+}
+
+static Var _root_intern(Var object, int * inserted){
+  unsigned hash = Var_hash(object);
+  while(1){
+    PoolTable table = value_root -> table;
+    Var found = f10_root_index____root_find(table, object, hash);
+    if(! Var_is_void(found)){
+      (* inserted) = 0;
+      return found;
+    }
+    if(table != value_root -> table) continue;
+    if(table -> used >= table -> capacity / 2 + table -> capacity / 4) table = f10_root_index____root_grow(table);
+    f10_root_index____root_append(table, object, hash);
+    (* inserted) = 1;
+    return object;
+  }
+
+}
+
+static PoolTable f10_root_index____root_grow(PoolTable previous){
+  if(previous -> capacity > ~ 0u / 2){
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Pool root index")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/pool/root-index.x",.function = "f10_root_index____root_grow",.line = 80,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_12, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1265290), unsigned_var(previous -> capacity));
+      __builtin_unreachable();
+    }
+
+  }
+  Scope version = Scope_new();
+  int retained = 0;
+  {
+    _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_15 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_21 =(const void *) & retained;
+    _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_22 =(const void *) & version;
+    X2CCleanup _x2c_gensym_defer_record_19 ={
+      .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_15
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_19);
+    {
+      PoolTable table;
+      {
+        Scope_push(& version);
+        {
+          {
+            X2CCleanup _x2c_gensym_defer_record_20 ={
+              .fn = _x2c_gensym_defer_cleanup_20, .env = 0
+            }
+            ;
+            x2c_cleanup_push(& _x2c_gensym_defer_record_20);
+            {
+              table = _root_new_table(previous -> capacity * 2);
+            }
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
+          }
+
+        }
+
+      }
+      unsigned * hashes = previous -> hashes;
+      Var * entries = previous -> entries;
+      for(unsigned i = 0;  i < previous -> capacity;  i ++){
+        unsigned hash = __atomic_load_n(& hashes[i], __ATOMIC_ACQUIRE);
+        if(hash) f10_root_index____root_append(table, entries[i], hash);
+      }
+      Scope_transfer(version, value_root -> scope);
+      retained = 1;
+      value_root -> table = table;
+      _root_initialize(table);
+      {
+        PoolTable _x2c_gensym_return_value_11 = table;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+          return _x2c_gensym_return_value_11;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+  }
+
+}
+
+static void f10_root_index____root_append(PoolTable table, Var object, unsigned hash){
+  unsigned * hashes = table -> hashes, index = hash & table -> mask;
+  Var * entries = table -> entries;
+  while(__atomic_load_n(& hashes[index], __ATOMIC_ACQUIRE)) index =(index + 1) & table -> mask;
+  entries[index] = object;
+  __atomic_store_n(& hashes[index], hash, __ATOMIC_RELEASE);
+  table -> used ++;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -1791,6 +1991,15 @@ static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17){
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){
   _storage_unlock();
+}
+
+static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19){
+  _x2c_gensym_defer_env_15 * _x2c_gensym_defer_data_15 =(_x2c_gensym_defer_env_15 *) _x2c_gensym_defer_opaque_19;
+  if(!(*(int *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_21)) Scope_destroy((*(Scope *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_22));
+}
+
+static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
+  Scope_pop();
 }
 
 #undef _x2c_gensym_initializer_choice_CBF06E4F_0_expanded
