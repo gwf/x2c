@@ -531,7 +531,7 @@ Source: `lib/string/mapping.x`
 <a id="String.len"></a>
 #### String.len
 
-`inline int String.len(String str)`
+`int String.len(String str)`
 
 Returns the byte length of `str`, excluding the terminating NUL.
 Constant time: the length is cached in the `String`'s private header.

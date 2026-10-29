@@ -29,10 +29,10 @@ _Static_assert(
 
     The empty `String` is the null pointer, whose length is 0.
 */
-inline int String.len(String str) {
+int String.len(String str) {
   // `!str` also reads the first byte, which a fresh buffer leaves unset.
   if (str == NULL) return 0;
-  return ((StringHeader) str - 1).length - 1;
+  return _header(str).length - 1;
 }
 
 /** Returns the content hash installed in `str`'s header, or zero for the
