@@ -59,6 +59,11 @@ void Cpp.merge(Cpp cpp, List rows) {
   foreach (List row in rows) _set(cpp, row.car(), row.cadr());
 }
 
+/** Applies an exported table with the same conditional effects as rows. */
+void Cpp.merge_table(Cpp cpp, Map macros) {
+  foreach ((String name, Var value) in macros) _set(cpp, name, value);
+}
+
 module void _touch(Cpp cpp, String name) {
   size_t depth = cpp.groups.len();
   if (!depth) return;

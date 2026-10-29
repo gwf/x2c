@@ -219,7 +219,7 @@ static List _macro_rows(
     return NULL;
   }
   Var rows = visited[path];
-  return rows is void ? NULL : rows.list();
+  return rows is void ? NULL : Cpp.rows(rows.map());
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -831,9 +831,9 @@ static int _replay_included(
       if (found is <array>) {
         Array state = found;
         Cpp cpp = (Cpp) state[0].pointer();
-        sink.merge(cpp.changes(state[1]));
+        sink.merge_table(cpp.exported_macros(state[1]));
       }
-      else sink.merge(found);
+      else sink.merge_table(found);
     }
     return 1;
   }
@@ -859,8 +859,9 @@ static int _replay_included(
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
-    visited[path] = cpp.changes(initial);
-    sink.merge(visited[path]);
+    Map macros = cpp.exported_macros(initial);
+    visited[path] = macros;
+    sink.merge_table(macros);
   }
   return 1;
 }

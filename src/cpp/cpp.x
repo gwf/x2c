@@ -105,12 +105,24 @@ int Cpp.hidden(Cpp cpp) {
     its value in `initial`: what a file exports to the
     files that include it.
 */
-List Cpp.changes(Cpp cpp, Map initial) {
-  Array rows = [];
+List Cpp.changes(Cpp cpp, Map initial) =>
+  Cpp.rows(cpp.exported_macros(initial));
+
+/** Returns an independent table of the macros changed from `initial`. */
+Map Cpp.exported_macros(Cpp cpp, Map initial) {
+  if (!initial) return cpp.macros.copy();
+  Map macros = {};
   foreach ((String name, Var value) in cpp.macros) {
     Var before = initial[name];
-    if (before is void || !Var.equal(before, value)) rows.push($(name, value));
+    if (before is void || !Var.equal(before, value)) macros[name] = value;
   }
+  return macros;
+}
+
+/** Returns canonical `(name value)` rows for the table `macros`. */
+List Cpp.rows(Map macros) {
+  Array rows = [];
+  foreach ((String name, Var value) in macros) rows.push($(name, value));
   return rows.list_free();
 }
 
