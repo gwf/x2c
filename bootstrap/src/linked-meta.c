@@ -14158,7 +14158,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11140 = List_var(_11139);
   _11141 = String_new("lib/pool/pool.x");
   _11142 = String_var(_11141);
-  _11143 = String_new("963260c0");
+  _11143 = String_new("2635485f");
   _11144 = String_var(_11143);
   _11145 = cons(_11144, NULL);
   _11146 = cons(_11142, _11145);
@@ -15733,7 +15733,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12706 = List_var(_12705);
   _12707 = String_new("lib/pool/interning.x");
   _12708 = String_var(_12707);
-  _12709 = String_new("3103d8e8");
+  _12709 = String_new("2480bded");
   _12710 = String_var(_12709);
   _12711 = cons(_12710, NULL);
   _12712 = cons(_12708, _12711);
@@ -15756,7 +15756,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12729 = List_var(_12728);
   _12730 = String_new("lib/pool/storage.x");
   _12731 = String_var(_12730);
-  _12732 = String_new("30e3f36d");
+  _12732 = String_new("5e4b7110");
   _12733 = String_var(_12732);
   _12734 = cons(_12733, NULL);
   _12735 = cons(_12731, _12734);

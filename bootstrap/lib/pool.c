@@ -349,7 +349,7 @@ static void * f7_storage____small_malloc(Pool inner, int class_index, size_t siz
 static int f7_storage____size_class(size_t size);
 static f7_storage___PoolBlock f7_storage____block_with_room(Pool pool, int class_index);
 static int f7_storage____has_room(f7_storage___PoolBlock block);
-static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index);
+static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index, int accounting);
 static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_index);
 static f7_storage___PoolBlock f7_storage____block_lease(Pool p, int class_index, f7_storage___PoolBlock fresh);
 static unsigned f7_storage____block_bytes(Pool pool, int class_index);
@@ -909,12 +909,12 @@ Pool Pool_release(Pool inner){
   _storage_lock();
   _lock(inner);
   Pool up = inner -> up;
+  _lock(up);
   if(up){
-    _lock(up);
     up -> child_capacity = inner -> table -> capacity;
-    _unlock(up);
   }
   _release_blocks(inner);
+  _unlock(up);
   _unlock(inner);
   _storage_unlock();
   pthread_mutex_destroy(& inner -> mutex);
@@ -1071,21 +1071,22 @@ void Pool_free(Pool inner, void * alloc){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_12);
     {
-      _lock(inner);
+      f7_storage___PoolBlock block = f7_storage____find_block(alloc);
+      Pool owner = block ? block -> owner : inner;
+      _lock(owner);
       {
         _x2c_gensym_defer_env_11 _x2c_gensym_macro_environment_11 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_17 =(const void *) & inner;
+        _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_17 =(const void *) & owner;
         X2CCleanup _x2c_gensym_defer_record_13 ={
           .fn = _x2c_gensym_defer_cleanup_12, .env = & _x2c_gensym_macro_environment_11
         }
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_13);
         {
-          f7_storage___PoolBlock block = f7_storage____find_block(alloc);
-          f7_storage___pool_free_calls ++;
+          if(Scope_accounting_enabled()) f7_storage___pool_free_calls ++;
           if(block) f7_storage____free_slot(block, alloc);
           else xfree(alloc);
         }
@@ -1173,6 +1174,17 @@ PoolStats Pool_stats(Pool inner){
 }
 
 static void * f7_storage____small_malloc(Pool inner, int class_index, size_t size){
+  int accounting = Scope_accounting_enabled();
+  if(! accounting){
+    _lock(inner);
+    f7_storage___PoolBlock block = f7_storage____block_with_room(inner, class_index);
+    if(block){
+      void * slot = f7_storage____take_slot(block, class_index, 0);
+      _unlock(inner);
+      return slot;
+    }
+    _unlock(inner);
+  }
   f7_storage___PoolBlock fresh = NULL;
   while(1){
     _storage_lock();
@@ -1181,7 +1193,7 @@ static void * f7_storage____small_malloc(Pool inner, int class_index, size_t siz
     if(! block) block = f7_storage____block_lease(inner, class_index, fresh);
     if(block){
       if(block == fresh) fresh = NULL;
-      void * slot = f7_storage____take_slot(block, class_index);
+      void * slot = f7_storage____take_slot(block, class_index, accounting);
       f7_storage____record_request(size);
       _unlock(inner);
       _storage_unlock();
@@ -1212,11 +1224,11 @@ static int f7_storage____has_room(f7_storage___PoolBlock block){
   return block -> used + size <= block -> bytes - POOL_BLOCK_DATA_OFFSET;
 }
 
-static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index){
+static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index, int accounting){
   void * slot = block -> free;
   if(slot){
     block -> free = *(void * *) slot;
-    f7_storage___pool_slot_reuses ++;
+    if(accounting) f7_storage___pool_slot_reuses ++;
     return slot;
   }
   slot = f7_storage____data(block) + block -> used;
@@ -1228,7 +1240,7 @@ static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_in
   f7_storage___PoolBlock fresh = malloc(f7_storage____block_bytes(inner, class_index));
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 250,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 262,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
@@ -1364,6 +1376,7 @@ _Noreturn static void _fatal(const char * message){
 }
 
 static void f7_storage____record_request(size_t size){
+  if(! Scope_accounting_enabled()) return;
   f7_storage___pool_allocation_calls ++;
   if(SIZE_MAX - f7_storage___pool_requested_bytes < size) f7_storage___pool_requested_bytes = SIZE_MAX;
   else f7_storage___pool_requested_bytes += size;
@@ -1403,8 +1416,12 @@ static int f7_storage____contains(f7_storage___PoolBlock block, const void * ptr
   if(! block -> owner) return 0;
   const char * data = f7_storage____data(block), * candidate = ptr;
   unsigned size = f7_storage___pool_class_sizes[block -> class_index];
-  if(candidate < data || candidate >= data + block -> used) return 0;
-  return(size_t)(candidate - data) % size == 0;
+  if(candidate < data || candidate >= data + block -> bytes - POOL_BLOCK_DATA_OFFSET ||(size_t)(candidate - data) % size) return 0;
+  Pool owner = block -> owner;
+  _lock(owner);
+  int contains = candidate < data + block -> used;
+  _unlock(owner);
+  return contains;
 }
 
 static int f7_storage____promote_level(Pool inner, Var object, void * alloc, f7_storage___PoolBlock block){
