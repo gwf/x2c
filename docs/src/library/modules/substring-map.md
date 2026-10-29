@@ -16,6 +16,7 @@ Native counts of borrowed String views.
 | [`MapSubInt.keys`](#MapSubInt.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
 | [`MapSubInt.move_to`](#MapSubInt.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapSubInt.new`](#MapSubInt.new) | Creates an empty count table in the current Scope. |
+| [`MapSubInt.new_capacity`](#MapSubInt.new_capacity) | Creates an empty count table with exactly `capacity` buckets in the current Scope. |
 | [`MapSubInt.scope`](#MapSubInt.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`MapSubInt.strings`](#MapSubInt.strings) | Copies counts to a Map with canonical String keys in the active pool. |
 | [`MapSubInt.try_next`](#MapSubInt.try_next) | Yields each unique view and its count without allocating. |
@@ -118,6 +119,19 @@ Source: `lib/substring-map.x`
 `MapSubInt MapSubInt.new(void)`
 
 Creates an empty count table in the current Scope.
+
+Source: `lib/substring-map.x`
+
+<a id="MapSubInt.new_capacity"></a>
+#### MapSubInt.new_capacity
+
+`MapSubInt MapSubInt.new_capacity(unsigned capacity)`
+
+Creates an empty count table with exactly `capacity` buckets in the
+current Scope. Presizing for the expected number of distinct words
+avoids regrowth; the table still grows past three-quarters full.
+
+**Raises:** `<bad-arg>` unless `capacity` is a power of two of at least two.
 
 Source: `lib/substring-map.x`
 

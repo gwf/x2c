@@ -38,6 +38,18 @@ MapSubInt MapSubInt.new(void) {
   return map.new_table(2);
 }
 
+/** Creates an empty count table with exactly `capacity` buckets in the
+    current Scope. Presizing for the expected number of distinct words
+    avoids regrowth; the table still grows past three-quarters full.
+    Raises: `<bad-arg>` unless `capacity` is a power of two of at least two.
+*/
+MapSubInt MapSubInt.new_capacity(unsigned capacity) {
+  if (capacity < 2 || capacity & (capacity - 1))
+    raise %(bad-arg (operation "MapSubInt.new_capacity") (capacity $capacity));
+  MapSubInt map = NULL;
+  return map.new_table(capacity);
+}
+
 /** Adds one occurrence without copying or interning the word's bytes.
     The aggregate count must fit in int.
 */
