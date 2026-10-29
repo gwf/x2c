@@ -1815,9 +1815,7 @@ static int _match(List pattern, List path){
   while(List_truth(pattern)){
     String segment = Var_as_string(List_car(pattern));
     pattern = List_cdr(pattern);
-    if(String_truth(segment) && String_getindex(segment, 0) == '*'){
-      return ! List_truth(pattern);
-    }
+    if(String_truth(segment) && String_getindex(segment, 0) == '*') return ! List_truth(pattern);
     if(! List_truth(path)) return 0;
     String value = Var_as_string(List_car(path));
     path = List_cdr(path);
@@ -1889,7 +1887,7 @@ static Var _worker(Var value){
     );
     Var _x2c_gensym_macro_item_4;
     while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 469,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 467,.runtime = 1}; & _x2c_gensym_error_site_4; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_3 = connection;
