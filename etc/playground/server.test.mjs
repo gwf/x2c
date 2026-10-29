@@ -76,15 +76,77 @@ test('container runner supplies isolation flags and removes timed-out containers
   const directory = await mkdtemp(join(tmpdir(), 'playground-runner-'));
   const oldPath = process.env.PATH;
   const log = join(directory, 'args');
-  await writeFile(join(directory, 'docker'), `#!/bin/sh\nprintf '%s\\n' "$*" >> '${log}'\nif [ "$1" = rm ]; then exit 0; fi\ncat >/dev/null\nif [ "$FAKE_TIMEOUT" = yes ]; then exec sleep 10; fi\nprintf '%s' '{"loader":"export default 1","wasm":"AA=="}'\n`, { mode: 0o755 });
+  await writeFile(join(directory, 'docker'), `#!/bin/sh\nprintf '%s\\n' "$*" >> '${log}'\nif [ "$1" = rm ]; then sleep 0.1; exit 0; fi\nif [ "$1" = create ]; then sleep 0.1; exit 0; fi\ncat >/dev/null\nif [ "$FAKE_OUTPUT" = yes ]; then head -c 9000000 /dev/zero; exec sleep 10; fi\nif [ "$FAKE_TIMEOUT" = yes ]; then exec sleep 10; fi\nprintf '%s' '{"loader":"export default 1","wasm":"AA=="}'\n`, { mode: 0o755 });
   process.env.PATH = `${directory}:${oldPath}`;
-  t.after(async () => { process.env.PATH = oldPath; delete process.env.FAKE_TIMEOUT; await rm(directory, { recursive: true }); });
+  t.after(async () => { process.env.PATH = oldPath; delete process.env.FAKE_TIMEOUT; delete process.env.FAKE_OUTPUT; await rm(directory, { recursive: true }); });
   assert.deepEqual(await compileInContainer('source'), { loader: 'export default 1', wasm: 'AA==' });
   const args = await readFile(log, 'utf8');
   for (const flag of ['--network=none', '--read-only', '--user=65534:65534', '--memory=512m', '--pids-limit=64', '--cap-drop=ALL', '--tmpfs=/tmp:rw,exec,nosuid,nodev,size=128m,mode=1777'])
     assert.ok(args.includes(flag), flag);
+  process.env.FAKE_OUTPUT = 'yes';
+  await assert.rejects(compileInContainer('source'), error => error.status === 422);
+  delete process.env.FAKE_OUTPUT;
   process.env.FAKE_TIMEOUT = 'yes';
-  await assert.rejects(compileInContainer('source', { timeout: 30 }), error => error.status === 504);
+  await assert.rejects(compileInContainer('source', { timeout: 150 }), error => error.status === 504);
   await new Promise(resolve => setTimeout(resolve, 30));
   assert.match(await readFile(log, 'utf8'), /rm -f x2c-playground-/);
+  const runningAbort = new AbortController();
+  let settled = false;
+  const running = compileInContainer('source', { signal: runningAbort.signal }).finally(() => { settled = true; });
+  const runningRejected = assert.rejects(running, { name: 'AbortError' });
+  const starts = args => args.split('\n').filter(line => line.startsWith('start ')).length;
+  const previousStarts = starts(await readFile(log, 'utf8'));
+  for (let i = 0; i < 100 && starts(await readFile(log, 'utf8')) === previousStarts; i++)
+    await new Promise(resolve => setTimeout(resolve, 5));
+  assert.equal(starts(await readFile(log, 'utf8')), previousStarts + 1);
+  runningAbort.abort();
+  await new Promise(resolve => setTimeout(resolve, 30));
+  assert.equal(settled, false, 'must await container removal and client close');
+  await runningRejected;
+  const abort = new AbortController();
+  const cancelled = compileInContainer('source', { signal: abort.signal });
+  const rejected = assert.rejects(cancelled, { name: 'AbortError' });
+  abort.abort();
+  await rejected;
+  const lifecycle = (await readFile(log, 'utf8')).trim().split('\n');
+  assert.match(lifecycle.at(-2), /^create /);
+  assert.match(lifecycle.at(-1), /^rm -f /);
+  assert.equal(lifecycle.at(-2).match(/--name ([^ ]+)/)[1], lifecycle.at(-1).split(' ').at(-1));
+});
+
+test('cancels only the disconnected compilation and holds its slot through cleanup', async t => {
+  const calls = [];
+  const app = await fixture(t, (source, { signal } = {}) => new Promise((resolve, reject) => {
+    const call = { source, signal, resolve, reject };
+    calls.push(call);
+  }));
+  const waitFor = async predicate => {
+    for (let i = 0; i < 100; i++) {
+      if (predicate()) return;
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+    assert.fail('condition did not become true');
+  };
+  const abort = new AbortController();
+  const first = app.request('first', { signal: abort.signal });
+  const firstRejected = assert.rejects(first, { name: 'AbortError' });
+  await waitFor(() => calls.length === 1);
+  app.advance();
+  const second = app.request('second');
+  await waitFor(() => calls.length === 2);
+  abort.abort();
+  await firstRejected;
+  await waitFor(() => calls[0].signal?.aborted);
+  assert.equal(calls[1].signal.aborted, false);
+  app.advance();
+  assert.equal((await app.request('before cleanup')).status, 503);
+  calls[0].reject(calls[0].signal.reason);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  app.advance();
+  const third = app.request('after cleanup');
+  await waitFor(() => calls.length === 3);
+  calls[1].resolve({ loader: 'second', wasm: '' });
+  calls[2].resolve({ loader: 'third', wasm: '' });
+  assert.equal((await second).status, 200);
+  assert.equal((await third).status, 200);
 });
