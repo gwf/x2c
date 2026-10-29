@@ -242,7 +242,8 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers
 # The compiler links every runtime object but the Lisp interpreter and its
 # target table, keeping the export flags; commands link the whole archive.
 COMPILER_RUNTIME = $(filter-out $(LIB_BUILD)/lisp.o $(LIB_BUILD)/lisp-targets.o,$(LIB_OBJECTS))
-$(BINARY): $(BIN_OBJECTS) $(LIBRARY)
+# Start the longest C unit first without changing the linker input order.
+$(BINARY): $(BIN_BUILD)/linked-meta.o $(BIN_OBJECTS) $(LIBRARY)
 	$(CC) $(BIN_OBJECTS) $(COMPILER_RUNTIME) \
 	  $(filter-out $(RUNTIME_LINK),$(LDFLAGS)) -lm -o $(BINARY)
 ###############################################################################
