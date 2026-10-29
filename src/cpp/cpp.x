@@ -102,7 +102,7 @@ int Cpp.hidden(Cpp cpp) {
 }
 
 /** Returns the `(name value)` rows of every macro whose value differs from
-    its value in `initial`, sorted by name: what a file exports to the
+    its value in `initial`: what a file exports to the
     files that include it.
 */
 List Cpp.changes(Cpp cpp, Map initial) {
@@ -111,7 +111,6 @@ List Cpp.changes(Cpp cpp, Map initial) {
     Var before = initial[name];
     if (before is void || !Var.equal(before, value)) rows.push($(name, value));
   }
-  rows.sort();
   return rows.list_free();
 }
 

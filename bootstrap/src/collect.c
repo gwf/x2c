@@ -3291,7 +3291,14 @@ void Cpp_merge(Cpp, List);
 static void f4_walk____replay_included(Compiler c, Map globs, String path, Map visited, Array exports, Map active, Cpp sink, Map runtime){
   Var found;
   if(Map_try_get(visited, String_var(path), &(found))){
-    if(sink) Cpp_merge(sink, Var_list_payload(found));
+    if(sink){
+      if(Var_is(found, 3313778)){
+        Array state = Var_array_payload(found);
+        Cpp cpp =(Cpp) Var_pointer(Array_getindex(state, 0));
+        Cpp_merge(sink, Cpp_changes(cpp, Var_map_payload(Array_getindex(state, 1))));
+      }
+      else Cpp_merge(sink, Var_list_payload(found));
+    }
     return;
   }
   if(! sink) Map_setindex(visited, String_var(path), int_var(1));
@@ -3301,7 +3308,10 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
   List parts = Var_list_payload(Var_is(prefix, 3313778) ? List_var(Array_list(Var_array(prefix))) : List_car(entry));
   Map initial = sink ? f4_walk____initial_macros(c, path, runtime) : NULL;
   Cpp cpp = sink ? Cpp_new(Map_copy(initial)) : NULL;
-  if(cpp) Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
+  if(cpp) Map_setindex(visited, String_var(path), Array_var(({
+    Var _x2c_gensym_literal_part_33 = Var_new(3683441, (void *) cpp);  Array_update_n(Array_new(), 2, _x2c_gensym_literal_part_33, Map_var(initial));
+  }
+  )));
   {
     Var part;
     List _x2c_gensym_macro_object_24 = parts;
@@ -3313,13 +3323,16 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
         if(Var_is(part, 26720) && ! cpp) _replay_package_imports(c, globs, Var_map_payload(part), exports);
         else if(Var_is_row(part, 11, 7, 1) &&(! cpp || ! Cpp_hidden(cpp))) f4_walk____replay_included(c, globs, Var_as_string(part), visited, exports, active, cpp, runtime);
         else if(cpp && Var_is_row(part, 9, 7, 4)) f4_walk____replay_cpp(c, cpp, Var_list_payload(part));
-        if(cpp &&(Var_is_row(part, 11, 7, 1) || Var_is_row(part, 9, 7, 4))) Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
       }
 
     }
 
   }
-  if(cpp) Cpp_merge(sink, Var_list_payload(Map_getindex(visited, String_var(path))));
+  if(cpp){
+    Map_setindex(visited, String_var(path), List_var(Cpp_changes(cpp, initial)));
+    Cpp_merge(sink, Var_list_payload(Map_getindex(visited, String_var(path))));
+  }
+
 }
 
 static List f4_walk____syntax_effects(List entry){
@@ -4153,7 +4166,7 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
                                   binding = Var_list_payload(_x2c_gensym_macro_cursor_output_39);
                                   {
                                     Type type = List_type_from_ast(({
-                                      Var _x2c_gensym_literal_part_33 = base;  Var _x2c_gensym_literal_part_34 = List_var(cons(_144, cons(List_var(binding), NULL)));  cons(_145, cons(_x2c_gensym_literal_part_33, cons(_x2c_gensym_literal_part_34, NULL)));
+                                      Var _x2c_gensym_literal_part_34 = base;  Var _x2c_gensym_literal_part_35 = List_var(cons(_144, cons(List_var(binding), NULL)));  cons(_145, cons(_x2c_gensym_literal_part_34, cons(_x2c_gensym_literal_part_35, NULL)));
                                     }
                                     ));
                                     if(List_truth(Type_list(type))) Map_setindex(types, List_var(type), int_var(1));
@@ -4203,10 +4216,10 @@ static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
                     String path = Compiler_portable_path(Path_absolute(c -> filename));
                     String name = Ast_binding_spelling(Var_list_payload(binding));
                     Map_setindex(rows, List_var(cons(_99, cons(List_var(({
-                      Var _x2c_gensym_literal_part_35 = String_var(path);  Var _x2c_gensym_literal_part_36 = int_var(- 1);  cons(_146, cons(_x2c_gensym_literal_part_35, cons(_x2c_gensym_literal_part_36, cons(String_var(name), NULL))));
+                      Var _x2c_gensym_literal_part_36 = String_var(path);  Var _x2c_gensym_literal_part_37 = int_var(- 1);  cons(_146, cons(_x2c_gensym_literal_part_36, cons(_x2c_gensym_literal_part_37, cons(String_var(name), NULL))));
                     }
                     )), NULL))), List_var(({
-                      Var _x2c_gensym_literal_part_37 = String_var(name);  Var _x2c_gensym_literal_part_38 = List_var(Array_list_free(Array_sort(ordered)));  cons(_146, cons(_x2c_gensym_literal_part_37, cons(_x2c_gensym_literal_part_38, NULL)));
+                      Var _x2c_gensym_literal_part_38 = String_var(name);  Var _x2c_gensym_literal_part_39 = List_var(Array_list_free(Array_sort(ordered)));  cons(_146, cons(_x2c_gensym_literal_part_38, cons(_x2c_gensym_literal_part_39, NULL)));
                     }
                     )));
                     {
@@ -4398,7 +4411,7 @@ static void f12_declarations____publish_inline_dependencies(Compiler c, String p
           }
           List parts = List_append(Var_list(List_car(entry)), cons(Map_var(retained), NULL));
           List updated =({
-            Var _x2c_gensym_literal_part_39 = List_var(parts);  List _x2c_gensym_literal_part_40 = List_cdr(entry);  cons(_x2c_gensym_literal_part_39, _x2c_gensym_literal_part_40);
+            Var _x2c_gensym_literal_part_40 = List_var(parts);  List _x2c_gensym_literal_part_41 = List_cdr(entry);  cons(_x2c_gensym_literal_part_40, _x2c_gensym_literal_part_41);
           }
           );
           _require_retained(List_try_own(updated));
@@ -4979,7 +4992,7 @@ static f12_declarations___Gathered f12_declarations____gather_prelude(Compiler c
     while(List_try_next(_x2c_gensym_macro_object_72, &(_x2c_gensym_macro_cursor_75), &(_x2c_gensym_macro_cursor_output_56))){
       source = Var_as_string(_x2c_gensym_macro_cursor_output_56);
       f12_declarations____gather_declarations(c, _canonical_path(({
-        Var _x2c_gensym_literal_part_41 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_41, cons(String_var(_34), cons(String_var(source), NULL))));
+        Var _x2c_gensym_literal_part_42 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_42, cons(String_var(_34), cons(String_var(source), NULL))));
       }
       )), &(prelude));
     }
@@ -5443,7 +5456,7 @@ void Compiler_name_loaded_provider(Compiler c, String path, int index, List prov
             f9_providers____name_meta_provider(c, name, index);
             type = Type_declared(type);
             Compiler_add_early(c, Var_list_payload(List_cadr(Compiler_rebuild_statement(c, String_truth(type_name_error(Type_list(type))) || Var_equal(car(Var_list_payload(List_var(binding))), _180) ? cons(_182, cons(_183, cons(List_var(cons(_184, cons(List_var(({
-              Var _x2c_gensym_literal_part_42 = List_var(cons(_185, cons(List_var(cons(_187, cons(_201, cons(_202, cons(List_var(type), NULL))))), NULL)));  Var _x2c_gensym_literal_part_43 = List_var(cons(_144, cons(List_var(cons(_203, cons(List_var(cons(_187, cons(_210, cons(_211, cons(List_var(binding), NULL))))), _212))), NULL)));  cons(_145, cons(_x2c_gensym_literal_part_42, cons(_x2c_gensym_literal_part_43, NULL)));
+              Var _x2c_gensym_literal_part_43 = List_var(cons(_185, cons(List_var(cons(_187, cons(_201, cons(_202, cons(List_var(type), NULL))))), NULL)));  Var _x2c_gensym_literal_part_44 = List_var(cons(_144, cons(List_var(cons(_203, cons(List_var(cons(_187, cons(_210, cons(_211, cons(List_var(binding), NULL))))), _212))), NULL)));  cons(_145, cons(_x2c_gensym_literal_part_43, cons(_x2c_gensym_literal_part_44, NULL)));
             }
             )), NULL))), NULL))) : cons(_182, cons(_184, cons(List_var(Macro_declaration(List_type(cons(_185, Type_list(type))), cons(List_var(cons(_203, cons(Macro_declared(List_var(binding)), _212))), NULL))), NULL)))))));
           }
@@ -5492,7 +5505,7 @@ Type Compiler_loaded_call_type(Compiler c, Type type){
 
   }
   return List_type(({
-    Var _x2c_gensym_literal_part_44 = List_var(cons(_213, cons(List_var(Array_list_free(adjusted)), NULL)));  List _x2c_gensym_literal_part_45 = Type_list(result);  cons(_x2c_gensym_literal_part_44, _x2c_gensym_literal_part_45);
+    Var _x2c_gensym_literal_part_45 = List_var(cons(_213, cons(List_var(Array_list_free(adjusted)), NULL)));  List _x2c_gensym_literal_part_46 = Type_list(result);  cons(_x2c_gensym_literal_part_45, _x2c_gensym_literal_part_46);
   }
   ));
 }
@@ -5761,7 +5774,7 @@ static Type f9_providers____loaded_declaration(Compiler c, Type type){
   }
   List args = List_truth(parameters) ? Array_list_free(declared) : _220;
   return Compiler_loaded_call_type(c, List_type(({
-    Var _x2c_gensym_literal_part_46 = List_var(cons(_213, cons(List_var(args), NULL)));  List _x2c_gensym_literal_part_47 = Type_list(Sym_normalize_declared_type(c -> sym, result));  cons(_x2c_gensym_literal_part_46, _x2c_gensym_literal_part_47);
+    Var _x2c_gensym_literal_part_47 = List_var(cons(_213, cons(List_var(args), NULL)));  List _x2c_gensym_literal_part_48 = Type_list(Sym_normalize_declared_type(c -> sym, result));  cons(_x2c_gensym_literal_part_47, _x2c_gensym_literal_part_48);
   }
   )));
 }
@@ -6287,7 +6300,7 @@ String Compiler_interface_text(Compiler c){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_53); {
       List record =({
-        Var _x2c_gensym_literal_part_48 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_49 = f10_interfaces____stored_record(canonical, Var_list_payload(cached));  cons(_297, cons(_298, cons(_x2c_gensym_literal_part_48, _x2c_gensym_literal_part_49)));
+        Var _x2c_gensym_literal_part_49 = String_var(Compiler_identity());  List _x2c_gensym_literal_part_50 = f10_interfaces____stored_record(canonical, Var_list_payload(cached));  cons(_297, cons(_298, cons(_x2c_gensym_literal_part_49, _x2c_gensym_literal_part_50)));
       }
       );  if(! Buffer_write_datum(out, List_var(record), 0)) Compiler_report_error(c, 354920, _312, NULL, NULL);  Buffer_write_char(out, '\n'); {
         String _x2c_gensym_return_value_20 = Buffer_str(out); {
@@ -6307,7 +6320,7 @@ Map Compiler_linked_prelude_records(Compiler c){
     String source;  List _x2c_gensym_macro_object_104 = f10_interfaces____linked_prelude_sources();  List _x2c_gensym_macro_cursor_107 = _x2c_gensym_macro_object_104;  Var _x2c_gensym_macro_cursor_output_84;  while(List_try_next(_x2c_gensym_macro_object_104, &(_x2c_gensym_macro_cursor_107), &(_x2c_gensym_macro_cursor_output_84))){
       source = Var_as_string(_x2c_gensym_macro_cursor_output_84); {
         String canonical = _canonical_path(({
-          Var _x2c_gensym_literal_part_50 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_50, cons(String_var(_34), cons(String_var(source), NULL))));
+          Var _x2c_gensym_literal_part_51 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_51, cons(String_var(_34), cons(String_var(source), NULL))));
         }
         ));  Map_setindex(saved, String_var(canonical), Map_getindex(_process_cache(), String_var(canonical))); (void) Map_del(_process_cache(), String_var(canonical));
       }
@@ -6329,7 +6342,7 @@ Map Compiler_linked_prelude_records(Compiler c){
             String source;  List _x2c_gensym_macro_object_105 = f10_interfaces____linked_prelude_sources();  List _x2c_gensym_macro_cursor_108 = _x2c_gensym_macro_object_105;  Var _x2c_gensym_macro_cursor_output_85;  while(List_try_next(_x2c_gensym_macro_object_105, &(_x2c_gensym_macro_cursor_108), &(_x2c_gensym_macro_cursor_output_85))){
               source = Var_as_string(_x2c_gensym_macro_cursor_output_85); {
                 String path =({
-                  Var _x2c_gensym_literal_part_51 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_51, cons(String_var(_34), cons(String_var(source), NULL))));
+                  Var _x2c_gensym_literal_part_52 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_gensym_literal_part_52, cons(String_var(_34), cons(String_var(source), NULL))));
                 }
                 );  String canonical = _canonical_path(path);  Map visited = Map_new();  Map_setindex(visited, String_var(canonical), int_var(1));  _walk_apart(walker, canonical, _runtime_text(walker, path), Map_new(), visited);  String text = f10_interfaces____record_text(f10_interfaces____stored_record(canonical, Var_list_payload(Map_getindex(_process_cache(), String_var(canonical)))));  if(String_truth(text)) Map_setindex(records, String_var(Compiler_portable_path(canonical)), String_var(text));
               }
@@ -6432,7 +6445,7 @@ static List f10_interfaces____stored_record(String canonical, List entry){
 
   }
   return({
-    Var _x2c_gensym_literal_part_52 = String_var(Compiler_portable_path(canonical));  Var _x2c_gensym_literal_part_53 = hash;  Var _x2c_gensym_literal_part_54 = List_var(Array_list_free(parts));  Var _x2c_gensym_literal_part_55 = List_var(definitions);  Var _x2c_gensym_literal_part_56 = List_var(_stored_dependencies(dependencies));  cons(_x2c_gensym_literal_part_52, cons(_x2c_gensym_literal_part_53, cons(_x2c_gensym_literal_part_54, cons(_x2c_gensym_literal_part_55, cons(_x2c_gensym_literal_part_56, cons(List_var(include_dirs), NULL))))));
+    Var _x2c_gensym_literal_part_53 = String_var(Compiler_portable_path(canonical));  Var _x2c_gensym_literal_part_54 = hash;  Var _x2c_gensym_literal_part_55 = List_var(Array_list_free(parts));  Var _x2c_gensym_literal_part_56 = List_var(definitions);  Var _x2c_gensym_literal_part_57 = List_var(_stored_dependencies(dependencies));  cons(_x2c_gensym_literal_part_53, cons(_x2c_gensym_literal_part_54, cons(_x2c_gensym_literal_part_55, cons(_x2c_gensym_literal_part_56, cons(_x2c_gensym_literal_part_57, cons(List_var(include_dirs), NULL))))));
   }
   );
 }
@@ -6451,7 +6464,7 @@ static List _stored_dependencies(Map dependencies){
   Array rows = Array_new(); {
     String path;  Var hash;  Map _x2c_gensym_macro_object_109 = dependencies;  unsigned _x2c_gensym_macro_cursor_112 = 0;  Var _x2c_gensym_macro_cursor_output_91;  Var _x2c_gensym_macro_cursor_output_92;  while(Map_try_next(_x2c_gensym_macro_object_109, &(_x2c_gensym_macro_cursor_112), &(_x2c_gensym_macro_cursor_output_91), &(_x2c_gensym_macro_cursor_output_92))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_91);  hash = _x2c_gensym_macro_cursor_output_92;  Array_push(rows, List_var(({
-        Var _x2c_gensym_literal_part_57 = String_var(Compiler_portable_path(path));  cons(_x2c_gensym_literal_part_57, cons(hash, NULL));
+        Var _x2c_gensym_literal_part_58 = String_var(Compiler_portable_path(path));  cons(_x2c_gensym_literal_part_58, cons(hash, NULL));
       }
       )));
     }
@@ -6467,7 +6480,7 @@ static List f10_interfaces____renumber_bindings(List node, Map identities){
     List _x2c_gensym_match_expr_38 = node; {List _x2c_gensym_match_at_103, _x2c_gensym_match_at_104, _x2c_gensym_match_at_105; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_38 && Var_equal(_x2c_gensym_match_expr_38 -> car, _321 -> car) &&(_x2c_gensym_match_at_103 = _x2c_gensym_match_expr_38 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_103 ->car, 1) &&(_x2c_gensym_match_at_104 = _x2c_gensym_match_at_103 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_104 ->car, 1) && Var_is(_x2c_gensym_match_at_104 -> car, 26720) && !(_x2c_gensym_match_at_105 = _x2c_gensym_match_at_104 ->cdr)){
       Var provider;  provider = x2c_match_value_0;  Var hashes;  hashes = x2c_match_value_1;  Var _x2c_gensym_match_value_25 = hashes; {
         Map hashes = Var_map_payload(_x2c_gensym_match_value_25);  return({
-          Var _x2c_gensym_literal_part_58 = provider;  Var _x2c_gensym_literal_part_59 = List_var(_stored_meta_hashes(hashes));  cons(_100, cons(_x2c_gensym_literal_part_58, cons(_x2c_gensym_literal_part_59, NULL)));
+          Var _x2c_gensym_literal_part_59 = provider;  Var _x2c_gensym_literal_part_60 = List_var(_stored_meta_hashes(hashes));  cons(_100, cons(_x2c_gensym_literal_part_59, cons(_x2c_gensym_literal_part_60, NULL)));
         }
         );
       }
@@ -6664,7 +6677,7 @@ static List f10_interfaces____interface_entry(Compiler c, String canonical, Stri
 
   }
   List entry =({
-    Var _x2c_gensym_literal_part_60 = List_var(Array_list_free(parts));  cons(_x2c_gensym_literal_part_60, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), tail))));
+    Var _x2c_gensym_literal_part_61 = List_var(Array_list_free(parts));  cons(_x2c_gensym_literal_part_61, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), tail))));
   }
   );
   _retain(String_var(canonical));

@@ -402,7 +402,6 @@ List Cpp_changes(Cpp cpp, Map initial){
     }
 
   }
-  Array_sort(rows);
   return Array_list_free(rows);
 }
 
@@ -575,7 +574,7 @@ List Compiler_command_macros(List args){
     if(String_equal(option, _8)) _set(cpp, value, Symbol_var(44966220));
     else f6_macros____command_define(cpp, value);
   }
-  return Cpp_changes(cpp, Map_new());
+  return List_sort(Cpp_changes(cpp, Map_new()));
 }
 
 static void f6_macros____command_define(Cpp cpp, String value){

@@ -15,7 +15,7 @@ The C preprocessing x2c performs before parsing.
 | [`Compiler.command_macros`](#Compiler.command_macros) | Returns the `(name value)` rows that the `-D` and `-U` options among the command-line arguments `args` define, sorted by name. |
 | [`Compiler.cpp_directive`](#Compiler.cpp_directive) | Applies the directive `token` of the file `path` to `cpp` and returns its conditional kind: `<open>`, `<branch>`, `<close>`, or 0 for another directive. |
 | [`Compiler.expand_macros`](#Compiler.expand_macros) | Expands the visible macros of the scanned token stream and decides its conditional groups. |
-| [`Cpp.changes`](#Cpp.changes) | Returns the `(name value)` rows of every macro whose value differs from its value in `initial`, sorted by name: what a file exports to the files that include it. |
+| [`Cpp.changes`](#Cpp.changes) | Returns the `(name value)` rows of every macro whose value differs from its value in `initial`: what a file exports to the files that include it. |
 | [`Cpp.copy`](#Cpp.copy) | Returns an independent copy of `cpp`. |
 | [`Cpp.hidden`](#Cpp.hidden) | Reports whether C never takes the arm at this point. |
 | [`Cpp.isolated`](#Cpp.isolated) | Returns a state like `Cpp.new` whose `#include` directives apply no macros. |
@@ -77,7 +77,7 @@ Source: `src/cpp/expand.x`
 `List Cpp.changes(Cpp cpp, Map initial)`
 
 Returns the `(name value)` rows of every macro whose value differs from
-its value in `initial`, sorted by name: what a file exports to the
+its value in `initial`: what a file exports to the
 files that include it.
 
 Source: `src/cpp/cpp.x`
