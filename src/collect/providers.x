@@ -211,6 +211,8 @@ static int _linked_provider_current(
     lookahead entries are provisional until ordinary collection replaces them.
 */
 void Compiler.prepare_macro_exports(Compiler c, String path) {
+  size_t origins = c.origins.len();
+  defer c.origins.resize(origins);
   with (c.filename = path) {
     (void) _meta_provider_entry(c, _canonical_path(path));
   }

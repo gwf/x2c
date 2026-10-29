@@ -124,12 +124,10 @@ Map Cpp.table(List rows) {
 
 // tokens
 
-/** Reports whether `token` is an identifier or a keyword, which a macro
-    can name.
+/** Reports whether `t` is an identifier or a keyword, which a macro can name.
 */
-int Token.is_word(Token token) =>
-  token.type == <ident> ||
-  (token.text && scan_keyword_type(token.text, token.text.len()));
+int Token.is_word(Token t) =>
+  t.type == <ident> || (t.text && scan_keyword_type(t.text, t.text.len()));
 
 /** Returns the text that the tokens from `first` through `last` of one
     stream spell, with the blanks and comments between them as written. A

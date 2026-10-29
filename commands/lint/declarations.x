@@ -4,8 +4,8 @@
     A unit's top-level forms, their token spans, and its function
     definitions come from the compiler's parse of the unit, so a declaration
     is what the parser read, never a pattern in the text. The compiler's
-    tokens for a unit in brace syntax are the tokens `Lint` scanned, so a
-    span indexes both.
+    tokens may be expanded; physical source offsets map each written
+    function back into the raw tokens `Lint` scanned.
 */
 #include "generate/generate.x"
 #include "lint.x"
@@ -369,6 +369,40 @@ static void _unused_statics(Lint l, Compiler c, List ast, List rows):
           int first = tokens[start].line, last = tokens[end - 1].line
           l.unused.push($(name, display, absent[name], line, first, last))
 
+/* A compiler token boundary in this file's raw stream. The last boundary
+   follows the token, so a module member's last byte maps in that member. */
+static int _source_index(Lint l, Compiler c, int index, int after):
+  if index < 0 || index >= c.tokenizer.tokens.len(): return -1
+  struct Token *tokens = c.tokenizer.tokens
+  Token token = tokens + index
+  if !token.len: return -1
+  int position = token.pos + (after ? token.len - 1 : 0), offset
+  String path = c.text_source(position, offset)
+  if Path.resolved_absolute(path) != Path.resolved_absolute(l.path):
+    return -1
+  offset += after
+  if offset < 0 || offset > l.text.len(): return -1
+  int low = 0, high = l.count
+  while low < high:
+    int middle = low + (high - low) / 2
+    if l.tokens[middle].pos < offset: low = middle + 1
+    else: high = middle
+  if low == l.count: return after && offset == l.text.len() ? low : -1
+  return l.tokens[low].pos == offset ? low : -1
+
+/* Generated bodies have no matching written opening token. Other C macro
+   expansions can change token counts before a function or inside it. */
+static int _written_function(
+  Lint l, Compiler c, int &start, int &body, int &end):
+  int first = _source_index(l, c, start, 0)
+  int opening = _source_index(l, c, body, 0)
+  int stop = _source_index(l, c, end - 1, 1)
+  if first < 0 || opening < first || stop <= opening: return 0
+  struct Token *tokens = c.tokenizer.tokens
+  if l.tokens[opening].text != tokens[body].text: return 0
+  start = first, body = opening, end = stop
+  return 1
+
 /** Runs the rules that read the compiler's parse of the unit: `ast`, its
     `Compiler.definition_rows` `rows`, and the facts `c` recorded while
     parsing it.
@@ -384,8 +418,7 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast, List rows):
     match row:
       case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))
              (? ?(int end) *)):
-        // A script unit's generated entry points span tokens past the file.
-        if l.layout || end >= l.count: continue
+        if l.layout || !_written_function(l, c, start, body, end): continue
         l.functions.push($(name, start, body, end))
         if "subject-parameter-name" in l.selected:
           _subject(l, start, body, end)
