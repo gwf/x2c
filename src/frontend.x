@@ -320,12 +320,14 @@ static void _tokenize_input(
   if (text && text.startswith("#!"))
     text = _script(c, text, resolved ? String.new(source) : c.filename);
   c.text = text;
-  c.unit_source = c.module_source(c.filename, text);
+  c.include_dirs = frontend.include_dirs;
+  c.prepare_macro_exports(c.filename);
+  try c.unit_source = c.module_source(c.filename, text);
+  finally Compiler.forget_provisional_entries();
   if (c.unit_source) {
     text = c.unit_source.text;
     c.line_markers = c.unit_source.markers;
   }
-  c.include_dirs = frontend.include_dirs;
   unit.source_lines = _source_lines(text);
   c.scan_source(text);
   if (c.script) c.script.defines_main = c.defines_main();

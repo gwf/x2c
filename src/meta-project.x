@@ -229,6 +229,7 @@ static int _file(Scan &s, String path) {
     return 0;
   String text = NULL;
   if (!s.request.sources.read(path, text)) return 0;
+  s.c.prepare_macro_exports(path);
   text = _module_text(s, path, text);
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = Path.is_layout_source(path);
@@ -245,7 +246,6 @@ static int _file(Scan &s, String path) {
 /* Discover the same declarations that parsing sees. Signature lookahead
    makes included macro exports available without running project meta code. */
 static void _preprocess(Scan &s, String path, Tokenizer tokens) {
-  s.c.prepare_macro_exports(path);
   Compiler c = Compiler.new_shared(s.c);
   defer s.c.close_child(c);
   c.filename = path;
