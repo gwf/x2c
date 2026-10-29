@@ -88,7 +88,7 @@ static String probe_row(String name, List rows){
 
 Var twice(Var value){
   if(! _init_guard_) _file_init_();
-  return Var_binary(value, 54, int_var(2));
+  return x2c_var_mul_lane(value, int_var(2));
 }
 
 int heads(int offset){

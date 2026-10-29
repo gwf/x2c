@@ -89,7 +89,7 @@ int main(void){
   Var am = Array_updateindex(array_base(), next_index(2), 62, (Map_getindex(src_map, next_key(_2))));
   Var ma = Map_updateindex(map_base(), next_key(_0), 56, Array_getindex(src_array, next_index(1)));
   Var mm = Map_updateindex(map_base(), next_key(_1), 54, Map_getindex(src_map, next_key(_2)));
-  Var complex = Array_updateindex(array_base(), next_index(3), 56, Var_binary(Array_getindex(src_array, next_index(0)), 54, int_var(2)));
+  Var complex = Array_updateindex(array_base(), next_index(3), 56, x2c_var_mul_lane(Array_getindex(src_array, next_index(0)), int_var(2)));
   Var casted = Array_updateindex(array_base(), next_index(4), 56, Array_getindex(src_array, next_index(1)));
   Var same = Array_updateindex(array_base(), next_index(4), 56, Array_getindex(dst_array, next_index(4)));
   Var prefix = Array_updateindex(array_base(), next_index(5), 56, int_var(1));
@@ -98,7 +98,7 @@ int main(void){
   Var direct_prefix = x2c_var_update_volatile(&(counter), 56, int_var(1));
   Var direct_postfix = x2c_var_postfix_volatile(&(counter), 2046);
   Var dynamic = Var_new(1318210446, _3);
-  Var sum = Var_binary(dynamic, 56, String_var(_4));
+  Var sum = x2c_var_add_lane(dynamic, String_var(_4));
   x2c_var_update_volatile(&(dynamic), 56, String_var(_5));
   Text text = _6;
   _x2c_gensym_proto_string_add_update(&(text), 56, _7);

@@ -40,8 +40,8 @@ int main(void){
   assigned = Var_box_long(precise + 1);
   DynamicAlias argument = pass_alias(Var_box_long(precise)), returned = make_alias(precise);
   long direct = Var_long(Var_convert_at(returned, 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/var-alias-crossings.x",.function = "main",.line = 29}; & _x2c_gensym_error_site_1; }))), through = take_alias(initialized);
-  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n", x2c_var_equal(initialized, long_var(precise)), x2c_var_equal(assigned, long_var(precise + 1)), x2c_var_equal(argument, long_var(precise)), x2c_var_equal(returned, long_var(precise)), direct == precise, through == precise, pass_calls + take_calls);
-  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n", x2c_var_equal(returned, initialized), ! x2c_var_equal(returned, assigned), x2c_var_identical(returned, initialized), ! x2c_var_identical(returned, initialized), x2c_var_order(returned, assigned) < 0, x2c_var_order(returned, initialized) <= 0, x2c_var_order(assigned, returned) > 0, x2c_var_order(initialized, returned) >= 0, x2c_var_equal(argument, long_var(precise)), x2c_var_order(long_var(precise), assigned) < 0);
+  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n", x2c_var_equal_lane(initialized, long_var(precise)), x2c_var_equal_lane(assigned, long_var(precise + 1)), x2c_var_equal_lane(argument, long_var(precise)), x2c_var_equal_lane(returned, long_var(precise)), direct == precise, through == precise, pass_calls + take_calls);
+  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n", x2c_var_equal_lane(returned, initialized), ! x2c_var_equal_lane(returned, assigned), x2c_var_identical(returned, initialized), ! x2c_var_identical(returned, initialized), x2c_var_order_lane(returned, assigned) < 0, x2c_var_order_lane(returned, initialized) <= 0, x2c_var_order_lane(assigned, returned) > 0, x2c_var_order_lane(initialized, returned) >= 0, x2c_var_equal_lane(argument, long_var(precise)), x2c_var_order_lane(long_var(precise), assigned) < 0);
   return 0;
 }
 

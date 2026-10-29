@@ -325,7 +325,7 @@ int main(void){
   int width = 6, height = 7;
   int native = width * height;
   Money total = money_scale(price, 4);
-  Var boxed = Var_binary(plain, 54, int_var(5));
+  Var boxed = x2c_var_mul_lane(plain, int_var(5));
   x2c_var_update_volatile(&(price), 56, int_var(5));
   printf("%d %d %d %d %d\n", native, Var_int(total), Var_int(boxed), Var_int(price), scaled);
   return 0;

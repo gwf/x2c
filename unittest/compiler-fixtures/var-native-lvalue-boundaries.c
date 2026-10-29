@@ -44,6 +44,6 @@ int main(void){
   int pointed = 1;
   register int * pointer = & pointed;
   x2c_var_update_i32(&(pointer[0]), 56, increment);
-  return observed == 3 && x2c_var_equal(dynamic, int_var(2)) && x2c_var_equal(changing, int_var(3)) && native == 2 && pointed == 2 ? 0 : 1;
+  return observed == 3 && x2c_var_equal_lane(dynamic, int_var(2)) && x2c_var_equal_lane(changing, int_var(3)) && native == 2 && pointed == 2 ? 0 : 1;
 }
 

@@ -845,6 +845,76 @@ void x2c_initialize(void) {
 void x2c_initialize_protocols(void) {
 }
 
+// dynamic operator lanes
+
+/* The compiler calls these lanes for a literal arithmetic or comparison
+   operator with a `Var` operand. Two immediate `<i32>` operands compute
+   here when the native result is exact; any other pair, an overflow, a zero
+   divisor, or `INT_MIN / -1` takes the general operation, which owns
+   promotion, wrapping, protocols, and failure. */
+
+/** Reports whether both operands are immediate `<i32>` values. */
+inline int x2c_var_i32_pair(Var lhs, Var rhs) =>
+  (lhs.u64 >> 32) == (VAR_I32_PREFIX >> 32) &&
+  (rhs.u64 >> 32) == (VAR_I32_PREFIX >> 32);
+
+/** Returns `Var.add(lhs, rhs)`, adding two `<i32>` operands inline. */
+inline Var x2c_var_add_lane(Var lhs, Var rhs) {
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32(), result;
+  if (x2c_var_i32_pair(lhs, rhs) && !__builtin_add_overflow(a, b, &result))
+    return Var.box_i32_bits((unsigned) result);
+  return lhs.add(rhs);
+}
+
+/** Returns `Var.sub(lhs, rhs)`, subtracting two `<i32>` operands inline. */
+inline Var x2c_var_sub_lane(Var lhs, Var rhs) {
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32(), result;
+  if (x2c_var_i32_pair(lhs, rhs) && !__builtin_sub_overflow(a, b, &result))
+    return Var.box_i32_bits((unsigned) result);
+  return lhs.sub(rhs);
+}
+
+/** Returns `Var.mul(lhs, rhs)`, multiplying two `<i32>` operands inline. */
+inline Var x2c_var_mul_lane(Var lhs, Var rhs) {
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32(), result;
+  if (x2c_var_i32_pair(lhs, rhs) && !__builtin_mul_overflow(a, b, &result))
+    return Var.box_i32_bits((unsigned) result);
+  return lhs.mul(rhs);
+}
+
+/** Returns `Var.div(lhs, rhs)`, dividing two `<i32>` operands inline. */
+inline Var x2c_var_div_lane(Var lhs, Var rhs) {
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32();
+  if (x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == -1))
+    return Var.box_i32_bits((unsigned) (a / b));
+  return lhs.div(rhs);
+}
+
+/** Returns `Var.mod(lhs, rhs)`, taking two `<i32>` operands' remainder
+    inline.
+*/
+inline Var x2c_var_mod_lane(Var lhs, Var rhs) {
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32();
+  if (x2c_var_i32_pair(lhs, rhs) && b && !(a == INT_MIN && b == -1))
+    return Var.box_i32_bits((unsigned) (a % b));
+  return lhs.mod(rhs);
+}
+
+/** Returns `x2c_var_equal(lhs, rhs)`, comparing two `<i32>` operands
+    inline.
+*/
+inline int x2c_var_equal_lane(Var lhs, Var rhs) =>
+  x2c_var_i32_pair(lhs, rhs) ? lhs.u64 == rhs.u64 : x2c_var_equal(lhs, rhs);
+
+/** Returns `x2c_var_order(lhs, rhs)`, ordering two `<i32>` operands
+    inline.
+*/
+inline double x2c_var_order_lane(Var lhs, Var rhs) {
+  if (!x2c_var_i32_pair(lhs, rhs)) return x2c_var_order(lhs, rhs);
+  int a = (int) lhs.payload32(), b = (int) rhs.payload32();
+  return (a > b) - (a < b);
+}
+
 // index normalization
 
 /** Normalizes one element index against `length`.

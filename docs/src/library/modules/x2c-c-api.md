@@ -86,13 +86,21 @@ prefix.
 | [`x2c_thread_wait_unlock`](thread.md#x2c_thread_wait_unlock) | `lib/thread.x` | `void x2c_thread_wait_unlock(void)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
+| [`x2c_var_add_lane`](common.md#x2c_var_add_lane) | `lib/common.x` | `inline Var x2c_var_add_lane(Var lhs, Var rhs)` |
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
 | [`x2c_var_declare`](var.md#x2c_var_declare) | `lib/var/var.x` | `VarDescriptor *x2c_var_declare(Symbol tag)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var/var.x` | `int x2c_var_descriptor_index(Var value)` |
+| [`x2c_var_div_lane`](common.md#x2c_var_div_lane) | `lib/common.x` | `inline Var x2c_var_div_lane(Var lhs, Var rhs)` |
 | [`x2c_var_equal`](var.md#x2c_var_equal) | `lib/var/var.x` | `int x2c_var_equal(Var a, Var b)` |
+| [`x2c_var_equal_lane`](common.md#x2c_var_equal_lane) | `lib/common.x` | `inline int x2c_var_equal_lane(Var lhs, Var rhs)` |
+| [`x2c_var_i32_pair`](common.md#x2c_var_i32_pair) | `lib/common.x` | `inline int x2c_var_i32_pair(Var lhs, Var rhs)` |
 | [`x2c_var_identical`](var.md#x2c_var_identical) | `lib/var/var.x` | `int x2c_var_identical(Var a, Var b)` |
+| [`x2c_var_mod_lane`](common.md#x2c_var_mod_lane) | `lib/common.x` | `inline Var x2c_var_mod_lane(Var lhs, Var rhs)` |
+| [`x2c_var_mul_lane`](common.md#x2c_var_mul_lane) | `lib/common.x` | `inline Var x2c_var_mul_lane(Var lhs, Var rhs)` |
 | [`x2c_var_order`](var.md#x2c_var_order) | `lib/var/var.x` | `double x2c_var_order(Var a, Var b)` |
+| [`x2c_var_order_lane`](common.md#x2c_var_order_lane) | `lib/common.x` | `inline double x2c_var_order_lane(Var lhs, Var rhs)` |
 | [`x2c_var_postfix_volatile`](var.md#x2c_var_postfix_volatile) | `lib/var/var.x` | `Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)` |
+| [`x2c_var_sub_lane`](common.md#x2c_var_sub_lane) | `lib/common.x` | `inline Var x2c_var_sub_lane(Var lhs, Var rhs)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
 | [`x2c_var_update_f32`](var.md#x2c_var_update_f32) | `lib/var/var.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_f64`](var.md#x2c_var_update_f64) | `lib/var/var.x` | `double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)` |
@@ -110,4 +118,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 98 functions.
+Total: 106 functions.

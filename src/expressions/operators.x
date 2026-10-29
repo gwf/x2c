@@ -386,10 +386,9 @@ static List _resolve_protocol_operator(
     if (!member) member = source;
     derived = source;
     if (!member) return NULL;
-    // `_comparison` lowers a comparison of two `Var` operands.
-    if ((member == <equal> || member == <compare>) &&
-        c.sym.is_var_type(participant))
-      return NULL;
+    /* `_comparison` lowers a comparison of two `Var` operands, and the
+       dynamic rule lowers their arithmetic through its runtime lanes. */
+    if (c.sym.is_var_type(participant)) return NULL;
     if (participant !== rhs_type) {
       participant = _converted_participant(
         c, member, participant, rhs_type, lhs, rhs);

@@ -71,11 +71,11 @@ int main(void){
   x2c_initialize();
   Dynamic a = Var_new(3453797, 40);
   DynamicAlias b = Var_new(3453797, 2);
-  Var sum = Var_binary(a, 56, b);
-  Var product = Var_binary(a, 54, b);
+  Var sum = x2c_var_add_lane(a, b);
+  Var product = x2c_var_mul_lane(a, b);
   Var shifted = Var_binary(a, 15481, b);
   Var bits = Var_binary(a, 249, b);
-  Var quotient = Var_binary(a, 95, double_var(4.0));
+  Var quotient = x2c_var_div_lane(a, double_var(4.0));
   double converted = Var_floating(Var_convert_at(sum, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 49}; & _x2c_gensym_error_site_0; })));
   Var infinity = double_var(1.0 / 0.0), not_number = double_var(0.0 / 0.0);
   double converted_infinity = Var_floating(Var_convert_at(infinity, 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 51}; & _x2c_gensym_error_site_1; })));

@@ -92,9 +92,8 @@
      (op = (bind (binding 21 "sum") ()) 
       (expr ("Var") 
        (at 93 
-        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
+        (call "x2c_var_add_lane" 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") (literal ("Symbol") "+" +)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 96 
    (declare ("Var") 
@@ -102,9 +101,8 @@
      (op = (bind (binding 22 "product") ()) 
       (expr ("Var") 
        (at 95 
-        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
+        (call "x2c_var_mul_lane" 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") (literal ("Symbol") "*" *)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 98 
    (declare ("Var") 
@@ -132,9 +130,8 @@
      (op = (bind (binding 25 "quotient") ()) 
       (expr ("Var") 
        (at 101 
-        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
+        (call "x2c_var_div_lane" 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") (literal ("Symbol") "/" /)) 
           (expr ("Var") 
            (call (expr ((func ((double))) "Var") 
                   (ident (binding 26 "double_var"))) 

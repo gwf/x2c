@@ -102,7 +102,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static Var increment(Var value){
-  return Var_binary(value, 56, int_var(1));
+  return x2c_var_add_lane(value, int_var(1));
 }
 
 static int next_byte(char value){
@@ -156,7 +156,7 @@ static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncA
 }
 
 static Var _x2c_gensym_lambda_0(Var value, int bias){
-  return Var_binary(value, 56, int_var(bias));
+  return x2c_var_add_lane(value, int_var(bias));
   ;
 }
 
