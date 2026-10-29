@@ -94,7 +94,7 @@ void Compiler.expand_macros(Compiler c) {
 static void _directive(Expander &x, Token token) {
   int open = x.cpp.groups.len() > 0;
   long index = x.out != NULL ? x.out.len() : token - x.in;
-  Symbol kind = x.c.cpp_directive(x.cpp, token, x.c.filename);
+  Symbol kind = x.c.cpp_directive(x.cpp, token, x.c.filename, NULL);
   if (kind == <open> || (kind && open))
     x.c.arm_stacks[index] = _open_groups(x.cpp);
 }

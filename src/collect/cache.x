@@ -6,10 +6,10 @@
 // the process cache
 
 /* Process cache: canonical path ->
-   `(ordered-parts hash definitions dependencies include-roots macros)`.
+   `(ordered-parts hash definitions dependencies include-roots)`.
    A part is a declaration Map or an included source path. Dependencies
-   map macro and embedded-text paths to a content hash or 1, and `macros`
-   holds the C macro rows the file exports. Entries
+   map macro and embedded-text paths to a content hash or 1. CPP directives
+   share the ordered parts with declarations and include paths. Entries
    outlive per-unit scopes, so every retained key and value belongs to
    process_cache_scope. */
 static Map process_cache = NULL;

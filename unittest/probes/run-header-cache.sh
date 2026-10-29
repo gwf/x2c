@@ -205,7 +205,7 @@ for out in warm tampered rejected v1; do
   (cd "$FAKE" && ./builds/0/x2c translate --out-dir "$out" \
     src/bar.x src/hdr.x)
 done
-grep -Eq '^\(interface 7 "[0-9a-f]{16}" "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
+grep -Eq '^\(interface 8 "[0-9a-f]{16}" "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing the scratch header entry"
 grep -q '(self "CacheSelfBase_rest")' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing receiver-relative method metadata"
@@ -213,9 +213,9 @@ grep -q 'struct "CacheDelegateOwner" delegate "part"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing delegate field metadata"
 grep -q '"src/bar.x"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing its include placeholder"
-grep -q '("CACHE_SCALED" (function "CACHE_SCALED" ("x")' \
+grep -Fq '(cpp "#define CACHE_SCALED(x) ((x) * CACHE_SCALE)"' \
   "$FAKE/warm/hdr.xi" ||
-  fail "interface is missing the macros its file exports"
+  fail "interface is missing its source-ordered macro definition"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir warm src/unit.x)
 cmp -s "$FAKE/cold/unit.c" "$FAKE/warm/unit.c" ||
   fail "interface replay diverged from cold compile"

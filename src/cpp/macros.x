@@ -9,7 +9,8 @@
 
 /* Applies the `#define`, `#undef`, or `#include` directive `token` of the
    file `path` to `cpp`. Any other directive stays for the C compiler. */
-module void _command(Compiler c, Cpp cpp, Token token, String path) {
+module void _command(
+  Compiler c, Cpp cpp, Token token, String path, Map active) {
   int undefined = 0, angle = 0;
   Token name = Compiler.macro_directive(token.text, undefined);
   if (name && undefined) _set(cpp, name.text, <undef>);
@@ -18,7 +19,7 @@ module void _command(Compiler c, Cpp cpp, Token token, String path) {
     String target = Compiler.preproc_include_target(token.text, angle);
     String dir = path ? Path.dirname(path) : ".";
     if (target && !cpp.isolated)
-      _merge(cpp, c.included_macros(target, angle, dir));
+      cpp.merge(c.included_macros(target, angle, dir, active));
   }
 }
 
@@ -53,7 +54,7 @@ module void _set(Cpp cpp, String name, Var value) {
 
 /* Applies the `(name value)` rows a file exports, as its `#include`
    does. */
-static void _merge(Cpp cpp, List rows) {
+void Cpp.merge(Cpp cpp, List rows) {
   foreach (List row in rows) _set(cpp, row.car(), row.cadr());
 }
 

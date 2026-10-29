@@ -263,3 +263,38 @@ One coherent change, in this order, so each step is probe-able with
 - Size: about 1.2 to 1.8 thousand lines for `src/cpp/`, about 150 lines
   removed from `src/preprocess.x`, about 200 lines in collection and
   interfaces, plus fixtures and book text.
+
+### Integration repair: ordered CPP replay (2026-10-29)
+
+The cold parallel compiler batch omits only the exported
+`X2C_NATIVE_MODULES` row from `meta-project.xi`; solo and serial output
+retain it. A compiler entry first collected while `meta-group` is active
+records that include's prefix before its definition. Flattening transitive
+macro exports freezes that incomplete prefix after the ancestor completes.
+
+The existing ordered declaration/include parts are the authority for CPP
+replay as well. Record own directive events beside those parts and apply
+them through the existing include replay with an optional CPP sink. Preserve
+active prefixes, conditional state, undef, and later overrides. Remove the
+flattened transitive macro tail as an authority, retain the unaffected entry
+prefix, and change the unpublished interface schema explicitly. Add no
+second include graph, walker, or cache. The integrator accepted this owner
+choice before implementation; final integration/publication remain its work.
+
+Two direct replay prototypes repeated cyclic include paths during prelude
+collection. The first used 16.6 GB after 31 seconds; conservative reuse only
+for acyclic results still used about 8.8 GiB after 18 seconds. Both were
+stopped and retained as rejected implementation evidence.
+
+The settled bound is the existing first-visit contract within each root
+query. Its temporary visited map holds current prefix rows while a file is
+active and completed rows after it finishes. Each include occurrence merges
+those rows, including a repeated include after undef, without rewalking its
+children. A subsequent root query gets a fresh map. Active collection-prefix
+arrays do not advance during synchronous macro-only replay. Thus no
+prefix-limited closure persists across operations or into a canonical cache
+entry/interface. Each file still starts independently; one immutable runtime
+baseline is copied per file. This supersedes the overconservative prohibition
+on reusing any prefix-dependent result within one query. No retained cache,
+new graph, or additional context state is added. Hidden include discovery
+remains the declaration collector's existing contract.

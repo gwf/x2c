@@ -28,13 +28,14 @@ static typedef struct CppValue {
     `#include` of a file x2c reads applies the macros that file exports.
     Other directives stay for the C compiler.
 */
-Symbol Compiler.cpp_directive(Compiler c, Cpp cpp, Token token, String path) {
+Symbol Compiler.cpp_directive(
+  Compiler c, Cpp cpp, Token token, String path, Map active) {
   String text = token.text;
   Symbol kind = Compiler.preproc_conditional_kind(text);
   if (kind == <open>) _open(c, cpp, token);
   else if (kind == <branch>) _branch(c, cpp, token);
   else if (kind == <close>) _close(cpp);
-  else if (!cpp.hidden()) _command(c, cpp, token, path);
+  else if (!cpp.hidden()) _command(c, cpp, token, path, active);
   return kind;
 }
 
