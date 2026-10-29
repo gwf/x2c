@@ -110,6 +110,21 @@ int main(int argc, char **argv) {
          "symbol prefix did not find function");
   _check(!("metric" in session.symbol_text("Pr", 0, NULL, 0)),
          "symbol prefix did not filter function");
+  Map metric = session.descriptions["metric"];
+  metric["dependency"] = 1;
+  _check(!("metric" in session.symbol_text("me", 0, NULL, 0)) &&
+         "metric" in session.symbol_text("me", 0, NULL, 1),
+         "dependency browsing did not follow the all filter");
+  _check("distance" in session.info("metric"),
+         "dependency filtering hid explicit information lookup");
+  metric.del("dependency");
+  session.descriptions["SCALE"] = {
+    "name": "SCALE", "kind": <macro>, "type": (List) NULL,
+    "declaration": "#define SCALE 3"
+  };
+  _check("preprocessor macro" in session.info("SCALE") &&
+         !("execution: native" in session.info("SCALE")),
+         "macro information claimed native execution");
   _check(session.source("missing_name") == NULL,
          "unknown source returned a definition");
   String method_source = "int Probe.read(Probe value) { return value.x; }";

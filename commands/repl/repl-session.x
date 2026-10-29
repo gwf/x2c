@@ -109,10 +109,6 @@ static List _completion_filter(
         (type == <typemacro> ||
          (semantic_type && semantic_type.is_typedef()))) continue;
     if (kind == <continue>) continue;
-    if (type is <list>) {
-      Type semantic = type;
-
-    }
     Symbol candidate_kind = <name>;
     if (kind == <members>) candidate_kind = <member>;
     else if (name in session.names) candidate_kind = <session>;
@@ -211,10 +207,11 @@ ReplCompletion ReplSession.complete(
   catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)
                    (keywords ?found_keywords) *more): {
     kind = found_kind;
-    rows = found;
-    keywords = found_keywords;
+    /* Error owns catch captures; retain query values before leaving the arm. */
+    rows = Error.snapshot(found);
+    keywords = Error.snapshot(found_keywords);
     foreach (List fact, more) match (fact) {
-      case %(receiver ?type): receiver = type;
+      case %(receiver ?type): receiver = Error.snapshot(type);
       case %(access ?operator): access = operator;
     }
   }

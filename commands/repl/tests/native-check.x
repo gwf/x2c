@@ -129,6 +129,15 @@ static void _prompt_types(ReplSession session) {
   _expect(session, "struct Inline { int x; } inline_value={7};",
           <executed>, NULL);
   _value(session, "inline_value.x;", "int 7");
+  String inline_symbols = session.symbol_text("Inline", 0, NULL, 0);
+  _check("struct Inline" in inline_symbols && !("_x2c_gensym" in inline_symbols),
+         "inline tag discovery exposed its private native typedef");
+  _check("int x;" in session.info("Inline"),
+         "inline tag information omitted its fields");
+  _check("int x;" in session.members("Inline"),
+         "inline tag name did not resolve for member discovery");
+  _check("inline_value={7}" in session.source("Inline"),
+         "inline tag source omitted its authored declaration");
   _expect(session, "struct Inline later_inline={9};", <executed>, NULL);
   _expect(session,
     "struct Inline inline_sum(struct Inline left,struct Inline right) { "
@@ -143,7 +152,9 @@ static void _prompt_types(ReplSession session) {
   _value(session, "copy_anonymous().values[1];", "int 5");
   ReplResult anonymous = session.inspect_expression("anonymous", 3, 100);
   _check(anonymous.status == <value> && "a: 3" in anonymous.formatted &&
-         "values: [ 4, 5 ]" in anonymous.formatted,
+         "values: [ 4, 5 ]" in anonymous.formatted &&
+         "<anonymous>" in anonymous.formatted &&
+         !("gensym" in anonymous.formatted),
          "anonymous record inspection lost its native field definitions");
   _expect(session,
     "struct Outer { struct Inner { int x; } inner; int y; } nested={{2},3};",
@@ -178,6 +189,7 @@ static int _candidate(ReplSession session, String input, String name) {
   ReplCompletion completed = session.complete(input, input.len());
   foreach (List row, completed.candidates)
     if (row.cadr() == name) return 1;
+  fprintf(stderr, "completion for %s: %s\n", input, completed.candidates.repr());
   return 0;
 }
 
@@ -195,6 +207,10 @@ static void _completion(ReplSession session) {
          "dot completion did not offer a declared field");
   _check(_candidate(session, "complete_object.re", "read"),
          "dot completion did not offer a declared method");
+  ReplCompletion methods = session.complete("complete_object.re", 18);
+  List method = methods.candidates ? methods.candidates.car() : NULL;
+  _check(method && method.len() > 2 && "int read(" in method.caddr().str(),
+         "method completion omitted its signature label");
   _expect(session,
     "typedef struct CompleteOwner { delegate CompleteRecord part; } CompleteOwner;",
     <defined>, NULL);

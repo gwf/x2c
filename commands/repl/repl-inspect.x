@@ -16,8 +16,16 @@ static String _declaration(Compiler c, Type type, List binding) =>
   String.new(c.code_pretty_string(
     c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip(NULL);
 
-static String _type_text(Compiler c, Type type) =>
-  _declaration(c, type.declared(), NULL).rstrip(";");
+static String _type_text(Compiler c, Type type) {
+  type = type.declared();
+  Type base = type.base_type();
+  if (base.is_aggregate_tag() || base.is_enum_tag())
+    match (base.cadr()) case %(gensym *): {
+      Map names = auto {(void *) base: $(base.car(), "<anonymous>")};
+      type = Ast.replace_nodes(type, names);
+    }
+  return _declaration(c, type, NULL).rstrip(";");
+}
 
 static Map _description(ReplSession session, String name) {
   Var entry;
@@ -63,8 +71,19 @@ void ReplSession.describe(
   ReplSession session, String name, List syntax, String source) {
   Compiler c = session.compiler;
   List entry = session.names[name];
+  syntax = Ast.without_origin(syntax);
+  match (syntax) case %(typedef ?(Type spec) (bindings (bind ?alias ()))):
+    if (entry && entry.car() == <type> &&
+        (spec.is_aggregate_tag_body() || spec.is_enum_tag_body()) &&
+        spec.cadr() == name && Ast.binding_spelling(alias) != name)
+      syntax = %(declare $spec (bindings (bind () ())));
   Type type = c.sym.get_exact($(name));
   if (!type) type = c.sym.get_exact(%(typedef $name));
+  if (!type) {
+    Type declared = syntax.cadr().type().base_type();
+    if (declared.is_aggregate_tag_body() || declared.is_enum_tag_body())
+      type = $(declared.car(), declared.cadr());
+  }
   session.descriptions[name] = {
     "name": name, "kind": entry ? entry.car() : <value>, "type": type,
     "path": "prompt", "source": source, "body": source, "syntax": syntax,
@@ -106,6 +125,8 @@ String ReplSession.symbol_text(
   Buffer out = auto Buffer.new(0);
   foreach (String name in names.sort()) {
     Map row = descriptions[name];
+    if (!all && row["dependency"] is not void && row["dependency"].truth())
+      continue;
     Symbol row_kind = row["kind"];
     String origin = row["path"], declaration = row["declaration"];
     String display = row["display"];
@@ -128,6 +149,9 @@ String ReplSession.symbol_text(
 
 static Type _query_type(ReplSession session, String text) {
   Compiler c = session.compiler;
+  Map description = session.descriptions[text];
+  if (description && description["kind"] == <type>)
+    return description["type"];
   if (c.sym.get_exact(%(typedef $text))) return $(text);
   foreach (Symbol tag in %<<struct union enum>>) {
     String prefix = tag.str() + " ";
@@ -230,7 +254,14 @@ List repl_member_candidates(Compiler c, Type type) {
     if (raw.array().len() == 1) names[name] = 1;
   Array sorted = auto [], candidates = [];
   foreach (String name in names.keys()) sorted.push(name);
-  foreach (String name in sorted.sort()) candidates.push(%(member $name));
+  foreach (String name in sorted.sort()) {
+    Array rows = methods[name];
+    if (rows && rows.len() == 1) {
+      Type signature = rows[0].list().cadr();
+      candidates.push(%(member $name $(_declaration(c, signature, $(name)))));
+    }
+    else candidates.push(%(member $name));
+  }
   return candidates.list_free();
 }
 
@@ -287,7 +318,8 @@ String ReplSession.info(ReplSession session, String text) {
     }
     String documentation = description["documentation"];
     if (documentation) out.printf("%s\n", documentation);
-    out.write("execution: native\n");
+    out.write(description["kind"] == <macro>
+      ? "expansion: preprocessor macro\n" : "execution: native\n");
     Type type = description["type"];
     if (type && !type.is_function()) {
       _field_rows(session.compiler, type, out);
