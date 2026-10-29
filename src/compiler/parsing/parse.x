@@ -10,10 +10,22 @@
     and protocol resolution; origins live for the whole unit.
     `generated_symbols` publishes external adapter signatures before parsing.
 */
-List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
+List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) =>
+  _full_parse(c, globs, generated_symbols, 0);
+
+/** Parses host-preprocessed C under the native declaration policy.
+    Native attributes do not establish an x2c-owned record layout. The policy
+    is applied after parser reset, which otherwise restores x2c source policy.
+*/
+List Compiler.full_parse_native(Compiler c, Map globs) =>
+  _full_parse(c, globs, 0, 1);
+
+static List _full_parse(
+  Compiler c, Map globs, int generated_symbols, int native) {
   Array nodes = [];
   c.unit_nodes = nodes;
   _reset_parse(c, globs, generated_symbols);
+  if (native) c.source_private = -1;
   if (c.script) _parse_script(c, nodes);
   else with (c.recovery_depth = c.recovery_depth + 1) {
     _append_preproc(c, nodes);

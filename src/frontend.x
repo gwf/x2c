@@ -195,6 +195,53 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
   return _preprocess(c) && !c.error_count();
 }
 
+/** Collects a C source or header through the configured host preprocessor.
+    Unlike x2c collection, this does not walk native headers as x2c-owned
+    declarations. The preprocessed tokens and line markers stay in the unit;
+    original source text remains available in `source_texts`. Call
+    `Compiler.full_parse_native` for its typed source projection.
+*/
+int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend) {
+  Compiler c = unit.compiler;
+  if (!c.source_texts) c.source_texts = {};
+  c.source_texts[Path.absolute(c.filename)] = c.text;
+  struct Toolchain native = *frontend.toolchain;
+  native.cpp_args = %(@(native.cc_args) @(native.cpp_args));
+  struct Frontend configured = *frontend;
+  configured.toolchain = &native;
+  try {
+    Compiler cpp = _run_cpp(&configured, unit);
+    if (!unit.preprocessor_output) return 0;
+    _tokenize_cpp(cpp, unit.preprocessor_output);
+    unit.globals = {};
+    cpp.shallow_parse(unit.globals);
+    unit.globals = cpp.sym.global_symbols();
+    c.sym.seed_var_tags(unit.globals);
+    c.text = unit.preprocessor_output;
+    c.line_markers = cpp.line_markers;
+    c.source_facts = 0;
+    c.source_private = -1;
+    c.cpp = Cpp.isolated({});
+    c.tokenize(c.text);
+    c.preprocess_tokens();
+    String definitions = NULL, errors = NULL, dependencies = NULL;
+    native.cpp_args = native.cpp_args.append(%("-dM"));
+    int status = Toolchain.preprocess(&native, c.filename,
+      frontend.request.include_dirs, NULL, definitions, errors, dependencies);
+    if (status) $fail.frontend_cpp_failed(c, _first_directive(c), status);
+    Compiler macros = Compiler.new_shared(c);
+    defer c.close_child(macros);
+    macros.filename = c.filename;
+    Cpp state = Cpp.isolated({});
+    macros.cpp = state;
+    macros.tokenize(definitions);
+    macros.preprocess_tokens();
+    c.command_macros = state.changes({});
+  }
+  catch %(malformed *): return 0;
+  return !c.error_count();
+}
+
 /* Collection supplies the macros of the unit's includes, so the unit's
    tokens are preprocessed after it, and after a failed collection too,
    because a caller may still parse what it can. */

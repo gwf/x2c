@@ -60,11 +60,44 @@ static List _program_span(Compiler c, List node) {
   return c.fact(%(definition-span $node));
 }
 
+static String _program_origin(Compiler c, List span, int &line) {
+  if (!span) { line = 1; return Path.absolute(c.filename); }
+  Token tokens = c.tokenizer.tokens;
+  Token first = tokens + span.car().integer();
+  line = first.line;
+  String file = c.token_source(first, line);
+  return Path.absolute(file ? file : c.filename);
+}
+
+static int _program_owned(Compiler c, List node, String path) {
+  int line = 1;
+  return _program_origin(c, _program_span(c, node), line) == path;
+}
+
+static String _program_lines(String text, int first, int after) {
+  int line = 1, begin = 0, end = text.len();
+  for (int i = 0; i < text.len(); i++) {
+    if (line == first) { begin = i; break; }
+    if (text[i] == '\n') line++;
+  }
+  for (int i = begin; i < text.len(); i++)
+    if (text[i] == '\n' && ++line > after) { end = i; break; }
+  return text[begin:end];
+}
+
 static String _program_slice(Compiler c, List span) {
   if (!span) return NULL;
   Token tokens = c.tokenizer.tokens;
   Token first = tokens + span.car().integer();
   Token after = tokens + span.cadr().integer() - 1;
+  if (c.line_markers) {
+    int line = first.line, last = after.line;
+    String file = c.token_source(first, line);
+    if (file != c.token_source(after, last)) return NULL;
+    String source = NULL;
+    if (!c.sources.read(file, source)) return NULL;
+    return _program_lines(source, line, last);
+  }
   return c.text[first.pos:after.pos + after.len];
 }
 
@@ -141,15 +174,23 @@ static void _program_symbol(
 static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
   Compiler c = unit.compiler;
   ReplProgram program = b.program;
-  Map definitions = {};
+  Map definitions = {}, functions = {};
+  foreach (List node, unit.ast)
+    match (node) case %(function ? (bind ?binding ?) ?):
+      functions[Ast.binding_spelling(binding)] = node;
   foreach (List row, c.definition_rows(unit.ast))
     match (row) case %(function ?name ?display ?type ?parameters ?line ?doc
                                  ?private ?origin ?declarator ?span): {
       if (private && !(path.endswith(".h") && ((Type) type).is_inline())) continue;
-      String declaration = _program_slice(c, declarator);
-      if (declaration) declaration = declaration.rstrip(NULL) + ";";
+      int source_line = 1;
+      if (_program_origin(c, span, source_line) != path) continue;
+      List function = functions[name];
+      String declaration = function
+        ? _program_text(c, %(declare $(function.cadr())
+                                  (bindings $(function.caddr())))).strip(NULL)
+        : _program_declaration(c, type, name);
       _program_symbol(b, c, path, name, type, row, declaration,
-                      _program_slice(c, span), line.integer());
+                      _program_slice(c, span), source_line);
       Map description = b.program.descriptions[name];
       description["display"] = display;
       description["parameters"] = parameters;
@@ -157,6 +198,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       definitions[name] = 1;
     }
   foreach (List node, unit.ast) {
+    if (!_program_owned(c, node, path)) continue;
     List spec = NULL, bindings = NULL;
     match (node) {
       case %((!or ?kind typedef declare) ?base (bindings *rows)): {
@@ -175,8 +217,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
         if (!type || (_program_private(c, name, type) &&
                       !(path.endswith(".h") && type.is_inline()))) continue;
         List span = _program_span(c, node);
-        Token first = span ? c.tokenizer.tokens + span.car().integer() : NULL;
-        int line = first ? first.line : 1;
+        int line = 1;
+        (void) _program_origin(c, span, line);
         String declaration = type.is_function() || type.is_typedef()
           ? _program_text(c, node).strip(NULL)
           : _program_declaration(c, type, name);
@@ -214,6 +256,36 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
     }
     program.descriptions[name] = description;
   }
+  foreach (List node, unit.ast) {
+    List spec = NULL;
+    match (node) {
+      case %((!or typedef declare) ?type ?): spec = type;
+      default: continue;
+    }
+    Type base = spec.type().base_type();
+    if (!(base.car() in %<<struct union enum>>) || base.len() < 3 ||
+        base.cadr() is not <string>) continue;
+    String name = base.cadr();
+    List family = $(base.car(), name);
+    if (!(family in program.symbols)) continue;
+    String body = _program_slice(c, _program_span(c, node));
+    if (!body) continue;
+    int line = 1;
+    String file = _program_origin(c, _program_span(c, node), line);
+    Map description = program.descriptions[name];
+    if (!description) description = {"name": name, "kind": <type>, "type": family};
+    description["path"] = file;
+    description["body"] = body;
+    description["declaration"] = body;
+    description["line"] = line;
+    description["end_line"] = line + body.count("\n");
+    String text = NULL;
+    if (c.sources.read(file, text)) {
+      program.sources[file] = text;
+      description["source"] = text;
+    }
+    program.descriptions[name] = description;
+  }
   foreach (Var (key, value), c.sym.unit_symbols()) {
     if (key is not <list> || value is not <list> ||
         !key.list().match(%(?(String name)))) continue;
@@ -234,7 +306,15 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
 static String _program_c_header(Compiler c, List ast) {
   Buffer text = auto Buffer.new(0);
   text.write("#pragma once\n#include \"x2c.h\"\n");
+  String original = NULL;
+  if (c.line_markers && c.sources.read(c.filename, original)) {
+    Tokenizer tokens = auto Tokenizer.new(original, <x2c>);
+    tokens.scan();
+    for (Token token = tokens.tokens; token.type != <eof>; token++)
+      if (token.type == <preproc>) { text.write(token.text); text.write("\n"); }
+  }
   foreach (List node, ast) {
+    if (!_program_owned(c, node, Path.absolute(c.filename))) continue;
     match (node) {
       case %(preproc ?directive): {
         text.write(directive); text.write("\n");
@@ -265,11 +345,8 @@ static String _program_c_header(Compiler c, List ast) {
         String name = Ast.binding_spelling(binding);
         Type type = c.sym.get_exact($(name));
         if (!type || _program_private(c, name, type)) continue;
-        List source = c.fact(%(api-definition $binding));
-        String declaration = source ? _program_slice(c, source.caddr()) : NULL;
-        text.write(declaration ? declaration :
-                   _program_declaration(c, type, name).rstrip(";"));
-        text.write(";\n");
+        text.write(_program_text(c, %(declare $spec (bindings $(node.caddr())))));
+        text.write("\n");
       }
     }
   }
@@ -289,8 +366,14 @@ static String _program_unit(ProgramBuild &b, String path) {
   int opened = Frontend.start(&configured, path, unit);
   defer unit.close();
   Compiler c = unit.compiler;
-  if (!Path.is_x2c_source(path)) c.source_private = -1;
-  if (!(opened && unit.collect(&configured) && unit.parse())) {
+  int native = !Path.is_x2c_source(path);
+  if (opened && native) {
+    opened = unit.collect_native(&configured);
+    if (opened) unit.ast = c.full_parse_native(unit.globals);
+    opened = opened && !c.error_count();
+  }
+  else opened = opened && unit.collect(&configured) && unit.parse();
+  if (!opened) {
     foreach (List diagnostic, c.diagnostics()) c.print_diagnostic(diagnostic);
     return %"$path: x2c could not collect its declarations";
   }
@@ -300,9 +383,22 @@ static String _program_unit(ProgramBuild &b, String path) {
   local.program = &collected;
   local.exports = [];
   local.units = {};
-  collected.sources[path] = c.text;
+  String original = c.source_texts[path];
+  collected.sources[path] = original ? original : c.text;
   foreach (Var (file, text), c.source_texts) collected.sources[file] = text;
   _program_describe(local, unit, path);
+  if (native)
+    foreach (Var (key, value), unit.globals) {
+      if (key is not <list> || value is not <list>) continue;
+      List parts = key;
+      if (parts ~= %(?(String name))) {
+        Type type = value;
+        if (_program_private(c, name, type)) continue;
+        collected.symbols[key] = type.declared();
+      }
+      else if (parts.car() in %<<struct union enum typedef>>)
+        collected.symbols[key] = value;
+    }
   program.symbols.merge(unit.context.export(collected.symbols));
   program.descriptions.merge(unit.context.export(collected.descriptions));
   program.sources.merge(unit.context.export(collected.sources));
@@ -334,7 +430,9 @@ static String _program_unit(ProgramBuild &b, String path) {
                    file.startswith(%"$home/etc/"))) && !(file in b.seen))
       b.roots.push(unit.context.export(file));
   }
-  foreach (List row, c.included_macros(path, 0, Path.dirname(path), NULL))
+  List macros = native ? c.command_macros
+    : c.included_macros(path, 0, Path.dirname(path), NULL);
+  foreach (List row, macros)
     program.macros[unit.context.export(row.car())] =
       unit.context.export(row.cadr());
   return NULL;
@@ -543,6 +641,10 @@ void repl_program_bind(ReplProgram program, ReplSession session) {
   session.frontend.toolchain = Toolchain.new(session.frontend.request);
   foreach (Var (key, value), program.symbols)
     session.compiler.sym.define_global(key, value);
+  foreach (Var (key, value), program.symbols)
+    if (key is <list> && key.list().len() == 1 && value is <list> &&
+        ((Type) value).is_enum() && !(key.list().car() in program.addresses))
+      session.compiler.sym.declare_enumerator(key, <enumerator>);
   foreach (Var (name, description), program.descriptions) {
     session.descriptions[name] = description;
     Symbol kind = description.map()["kind"];
