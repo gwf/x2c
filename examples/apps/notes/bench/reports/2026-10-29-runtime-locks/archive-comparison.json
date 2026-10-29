@@ -1,0 +1,13 @@
+{
+  "members_checked": 78,
+  "changed": [
+    "channel.o",
+    "dispatch.o",
+    "http.o",
+    "logger.o",
+    "net.o",
+    "pool.o",
+    "scope.o",
+    "thread.o"
+  ]
+}
