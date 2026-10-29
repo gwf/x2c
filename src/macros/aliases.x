@@ -311,7 +311,7 @@ static int _same_scope(Compiler c, List entry) {
 }
 
 static void _remove(Compiler c, Var key) {
-  Map table = _table(c).copy();
+  Map table = _writable_table(c);
   List shadowed = _shadowed(table[key]);
   if (shadowed) table[key] = shadowed;
   else table.del(key);
@@ -424,17 +424,22 @@ static void _declare(Compiler c, AliasHead &head, int collecting) {
         $(c.freeze_declaration_syntax(head.expression))), head.start);
 }
 
-/* Entries live in one Map under `<alias>`, which each declaration
-   replaces with a copy, so a body restores its outer entries by restoring
-   the Map it started with. An entry keeps the entry it shadows, so its
-   removal reveals the enclosing meaning before the body ends. */
+/* Bodies restore their starting Map, and semantic transactions restore
+   the Map under `<alias>`. Those boundaries require a copied table;
+   ordinary file-scope writes own their table and can change it in place.
+   An entry keeps the entry it shadows for `unalias`. */
 static void _install(Compiler c, Var key, List entry) {
-  Map table = _table(c);
-  table = table ? table.copy() : {};
+  Map table = _writable_table(c);
   Var shadowed;
   if (table.try_get(key, shadowed)) entry = entry.append($(shadowed));
   table[key] = entry;
   c.sym.put(c.macros, <alias>, table);
+}
+
+static Map _writable_table(Compiler c) {
+  Map table = _table(c);
+  if (!table) return {};
+  return c.alias_level || c.sym.transacting() ? table.copy() : table;
 }
 
 static void _reveal_bindings(Compiler c, List syntax) {

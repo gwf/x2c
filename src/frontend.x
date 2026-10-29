@@ -321,8 +321,7 @@ static void _tokenize_input(
     text = _script(c, text, resolved ? String.new(source) : c.filename);
   c.text = text;
   c.include_dirs = frontend.include_dirs;
-  c.prepare_macro_exports(c.filename);
-  try c.unit_source = c.module_source(c.filename, text, NULL);
+  try c.unit_source = c.discover_module_source(c.filename, text, NULL);
   finally Compiler.forget_provisional_entries();
   if (c.unit_source) {
     text = c.unit_source.text;

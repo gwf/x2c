@@ -82,9 +82,37 @@ configure-packages:					## Report package build prerequisites
 build: bootstrap-ready					## Build the runtime and compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
-	tools/gen-linked-meta.sh
-	tools/gen-meta-queries.sh
+	$(MAKE) meta-generated
 	$(PARALLEL_MAKE) -C builds x2c
+
+# Classification depends on source bodies and the compiler that analyzes them.
+# Content checks also catch provider changes within one Make timestamp tick.
+META_INPUTS := $(shell find src lib etc -type f \
+  \( -name '*.x' -o -name '*.h' -o -name '*.xlisp' \) \
+  ! -path src/linked-meta.x ! -path etc/meta-queries.x | LC_ALL=C sort) \
+  bin/x2c-bootstrap tools/gen-linked-meta.sh tools/gen-meta-queries.sh \
+  tools/sources.sh Makefile
+META_OUTPUTS := src/linked-meta.x etc/meta-queries.x
+.PHONY: meta-generated meta-inputs-force
+meta-generated: debug/meta-inputs.list
+	$(MAKE) debug/meta-generated.stamp
+meta-inputs-force:
+
+ifneq ($(words $(wildcard $(META_OUTPUTS))),2)
+.PHONY: debug/meta-generated.stamp
+endif
+
+debug/meta-inputs.list: meta-inputs-force
+	@mkdir -p debug
+	@cksum $(META_INPUTS) >$@.tmp
+	@if cmp -s $@.tmp $@; then rm $@.tmp; \
+	  else mv $@.tmp $@; rm -f debug/meta-generated.stamp; fi
+
+debug/meta-generated.stamp: $(META_INPUTS)
+	@set -e; dump=$@.dump; trap 'rm -f "$$dump"' EXIT; \
+	  tools/gen-linked-meta.sh src/linked-meta.x "$$dump"; \
+	  tools/gen-meta-queries.sh etc/meta-queries.x "$$dump"; \
+	  touch $@
 
 # Reuse stage zero's runtime C without adding another target to its build.
 WASM_CC ?= emcc

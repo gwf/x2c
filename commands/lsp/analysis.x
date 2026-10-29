@@ -262,18 +262,28 @@ static Array _lsp_definitions(LspWorkspace w) {
   Array rows = [];
   if (!w.parsed) return rows;
   Compiler c = w.unit.compiler;
+  Map locations = {};
+  foreach ((List binding, List location) in c.source_definitions) {
+    List key = $(Ast.binding_spelling(binding), location[0]);
+    if (!(key in locations)) locations[key] = [];
+    locations[key].array().push(location);
+  }
+  foreach ((Var key, Array entries) in locations)
+    entries.sort_by(%!(row) => row.list()[1]);
   foreach (List row in c.definition_rows(w.unit.ast)) match (row) {
     case %(function ?name ?display ? ? ? ? ? ? ? ?span):
-      _lsp_add_definition(w, rows, name, display, 12, span);
+      _lsp_add_definition(w, rows, locations, name, display, 12, span);
     case %(typedef ?name ? ? ?span):
-      _lsp_add_definition(w, rows, name, name, 5, span);
+      _lsp_add_definition(w, rows, locations, name, name, 5, span);
   }
+  _lsp_definition_ranges(w, rows);
   return rows;
 }
 
 /* Token spans count in the combined module text; map both ends to the file. */
 static void _lsp_add_definition(
-  LspWorkspace w, Array rows, String name, String display, int kind, List span) {
+  LspWorkspace w, Array rows, Map locations,
+  String name, String display, int kind, List span) {
   match (span) case %(?(int first) ?(int after) *): {
     Compiler c = w.unit.compiler;
     Token tokens = c.tokenizer.tokens;
@@ -282,26 +292,54 @@ static void _lsp_add_definition(
     String path = Path.resolved_absolute(c.text_source(start, start));
     if (Path.resolved_absolute(c.text_source(end - 1, end)) != path) return;
     end++;
-    String text = w.text(path);
-    Map selection = _lsp_definition_selection(w, name, path, start, end);
+    Array entries = locations[$(name, path)];
+    List selection = _lsp_definition_selection(entries, start, end);
     if (!selection) return;
-    Map range = lsp_range(text, start, end);
     rows.push({"name": name, "display": display, "kind": kind, "file": path,
-               "range": range, "selectionRange": selection});
+               "range": $(start, end),
+               "selectionRange": $(selection[1], selection[2])});
   }
 }
 
-static Map _lsp_definition_selection(
-  LspWorkspace w, String name, String path, int start, int end) {
-  int selected = end;
-  Map range = NULL;
-  foreach ((List binding, List location) in w.unit.compiler.source_definitions) {
-    if (Ast.binding_spelling(binding) != name) continue;
-    String file = location[0];
-    int first = location[1], after = location[2];
-    if (file != path || first < start || after > end || first >= selected) continue;
-    selected = first;
-    range = lsp_range(w.text(path), first, after);
+static List _lsp_definition_selection(Array entries, int start, int end) {
+  int low = 0, high = entries.len();
+  while (low < high) {
+    int middle = low + (high - low) / 2;
+    List location = entries[middle];
+    if (location[1].int() < start) low = middle + 1;
+    else high = middle;
   }
-  return range;
+  for (int i = low; i < entries.len(); i++) {
+    List location = entries[i];
+    if (location[1].int() >= end) break;
+    if (location[2].int() <= end) return location;
+  }
+  return NULL;
+}
+
+static void _lsp_definition_ranges(LspWorkspace w, Array rows) {
+  Map files = {};
+  foreach (Map row in rows) {
+    String path = row["file"];
+    if (!(path in files)) files[path] = {};
+    Map positions = files[path];
+    foreach (String key in $("range", "selectionRange"))
+      foreach (int offset in row[key].list()) positions[offset] = 0;
+  }
+  foreach ((String path, Map positions) in files) {
+    String text = w.text(path);
+    int at = 0, line = 0, column = 0;
+    Array offsets = positions.keys();
+    foreach (int offset in offsets.sort()) {
+      lsp_advance(text, offset, at, line, column);
+      positions[offset] = {line: line, character: column};
+    }
+  }
+  foreach (Map row in rows) {
+    Map positions = files[row["file"]];
+    foreach (String key in $("range", "selectionRange")) {
+      List range = row[key];
+      row[key] = {start: positions[range[0]], end: positions[range[1]]};
+    }
+  }
 }

@@ -76,6 +76,25 @@ static void derive_values_keep_their_types(void) {
   EXPECT_INT_EQ(caught, 1);
 }
 
+static void derive_json_releases_mapping_scratch(void) {
+  $test.scoped();
+  DerivePerson person = { 42, "Ada", 1.5, { 3, 4 }, ["x", 2] };
+  String text = person.json();
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 20; i++) EXPECT_STR_EQ(person.json(), text);
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes);
+  EXPECT_INT_EQ(person.tags.len(), 2);
+  EXPECT_STR_EQ(person.tags[0].string(), "x");
+  Map map = person.to_map();
+  EXPECT_INT_EQ(map["home"].map()["y"].int(), 4);
+  EXPECT_TRUE((void *) map["tags"].array() == (void *) person.tags);
+  DerivePerson copy = DerivePerson.from_json(text);
+  EXPECT_TRUE(person.equal(copy));
+  EXPECT_TRUE((void *) copy.tags != (void *) person.tags);
+}
+
 static void derive_arguments_and_rows_follow_field_order(void) {
   $test.scoped();
   List words = %("--count" "3" "--limit" "4000000000" "--scale" "1.25"
@@ -123,31 +142,34 @@ static void derive_map_and_row_reject_wrong_value_types(void) {
   try DeriveValues.from_row(%(0 <reading> 3 (1)));
   catch %(no-convert *): caught++;
   EXPECT_INT_EQ(caught, 4);
+  try DeriveValues.from_row(%(0 <reading>));
+  catch %(no-convert *): caught++;
+  EXPECT_INT_EQ(caught, 5);
   DerivePerson person = { 1, "Ada", 1, {1, 2}, [] };
   map = person.to_map();
   map["name"] = 9;
   try DerivePerson.from_map(map);
   catch %(no-convert *): caught++;
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 6);
   map["name"] = "Ada";
   map["home"] = 9;
   try DerivePerson.from_map(map);
   catch %(no-convert *): caught++;
-  EXPECT_INT_EQ(caught, 6);
+  EXPECT_INT_EQ(caught, 7);
   map["home"] = {"x": 1, "y": 2};
   map["tags"] = %(1);
   try DerivePerson.from_map(map);
   catch %(no-convert *): caught++;
-  EXPECT_INT_EQ(caught, 7);
+  EXPECT_INT_EQ(caught, 8);
   try DerivePerson.from_json("[]");
   catch %(no-convert *): caught++;
-  EXPECT_INT_EQ(caught, 8);
-  EXPECT_INT_EQ(caught, 8);
+  EXPECT_INT_EQ(caught, 9);
 }
 
 void derive_suite(void) {
   $test.run(derive_nested_records_round_trip);
   $test.run(derive_values_keep_their_types);
+  $test.run(derive_json_releases_mapping_scratch);
   $test.run(derive_arguments_and_rows_follow_field_order);
   $test.run(derive_map_and_row_reject_wrong_value_types);
 }

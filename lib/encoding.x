@@ -293,7 +293,8 @@ static String _base64(Alphabet a, const unsigned char *bytes, size_t count) {
 /* Decodes each group of four characters into three bytes; a final group
    of two or three characters holds one or two. */
 static Block _unbase64(Alphabet a, String text, String operation) {
-  Block bytes = Block.new(1);
+  Block bytes = Block.new(1), result = NULL;
+  defer if (result == NULL) bytes.free();
   const char *at = text;
   int length = _unpadded(a, text, operation);
   for (int i = 0; i < length; i += 4) {
@@ -311,7 +312,7 @@ static Block _unbase64(Alphabet a, String text, String operation) {
     };
     bytes.append(decoded, take - 1);
   }
-  return bytes;
+  return result = bytes;
 }
 
 /* The length of `text` before its padding. The standard alphabet requires
@@ -358,12 +359,13 @@ static String _hex(const unsigned char *bytes, size_t count) {
 static Block _unhex(String text, String operation) {
   int length = text.len();
   if (length % 2) _malformed(operation, "odd number of digits", length);
-  Block bytes = Block.new(1);
+  Block bytes = Block.new(1), result = NULL;
+  defer if (result == NULL) bytes.free();
   for (int i = 0; i < length; i += 2) {
     unsigned char byte = _byte_at(text, i, operation);
     bytes.push(&byte);
   }
-  return bytes;
+  return result = bytes;
 }
 
 static int _byte_at(String text, int offset, String operation) {

@@ -192,6 +192,7 @@ static void _rescan(Expander &x, Block stack, Block sink, int input) {
     if (!definition) sink.push(&item);
     else {
       Block replacement = NULL;
+      defer replacement.free();
       if (definition.car() == <object>) {
         List hide = cons(item.token.text, item.hide);
         replacement = _substitute(x, definition, NULL, hide);
@@ -208,7 +209,6 @@ static void _rescan(Expander &x, Block stack, Block sink, int input) {
         _push_all(stack, replacement);
       }
       else space = item.space;
-      replacement.free();
     }
   }
 }
@@ -236,10 +236,20 @@ static Block _call(
   CppToken open, close;
   (void) _pull(x, stack, input, open);
   Block args = Block.new(sizeof(CppArgument));
+  defer _free_arguments(args);
   if (!_arguments(x, stack, input, definition, args, close)) return NULL;
   _check_arity(x, definition, args);
   List hide = cons(name.token.text, _meet(name.hide, close.hide));
   return _substitute(x, definition, args, hide);
+}
+
+static void _free_arguments(Block args) {
+  CppArgument *items = args.bytes;
+  for (size_t i = 0; i < args.len(); i++) {
+    items[i].written.free();
+    items[i].expanded.free();
+  }
+  args.free();
 }
 
 /* Takes the next token from the stack, else from the input stream after
@@ -273,6 +283,7 @@ static int _arguments(
   List params = definition[2];
   int last = definition[3] ? params.len() - 1 : -1;
   Block arg = Block.new(sizeof(CppToken));
+  defer arg.free();
   Array closers = NULL;
   defer closers.free();
   CppToken item;
@@ -281,10 +292,12 @@ static int _arguments(
     if (!closers.len() && type == <)>) {
       close = item;
       _add_argument(args, arg);
+      arg = NULL;
       return 1;
     }
     if (!closers.len() && type == <,> && (int) args.len() != last) {
       _add_argument(args, arg);
+      arg = NULL;
       arg = Block.new(sizeof(CppToken));
       continue;
     }
@@ -333,7 +346,8 @@ static void _check_arity(Expander &x, List definition, Block args) {
   Block first = _argument_at(args, 0).written;
   if (!count && given == 1 && !first.len()) return;
   if (definition[3] && given == count - 1) {
-    _add_argument(args, Block.new(sizeof(CppToken)));
+    _add_argument(args, NULL);
+    _argument_at(args, given).written = Block.new(sizeof(CppToken));
     return;
   }
   if (given != count)
@@ -351,6 +365,8 @@ static Block _substitute(
   Substitution s = {
     .definition = definition, .args = args,
     .out = Block.new(sizeof(CppToken))};
+  Block result = NULL;
+  defer if (result == NULL) s.out.free();
   if (definition.car() == <function>) {
     s.function = 1;
     s.params = definition[2];
@@ -359,7 +375,7 @@ static Block _substitute(
   Block body = _body_tokens(x, definition);
   Token first = body.bytes;
   _replace(x, s, first, first + body.len() - 1);
-  return _finish(s.out, hide);
+  return result = _finish(s.out, hide);
 }
 
 /* Substitutes the replacement tokens from `token` up to `end`. */
@@ -451,6 +467,7 @@ static Token _pasted(Expander &x, Substitution &s, Token next, Token end) {
   int param = _param(s, next);
   Block right = param >= 0 ? _argument_at(s.args, param).written
                           : Block.new(sizeof(CppToken));
+  defer if (param < 0) right.free();
   CppToken operand = {.token = *next}, left;
   Token after = next + 1;
   if (param < 0) {
@@ -534,18 +551,19 @@ static Block _finish(Block out, List hide) {
 
 /* The tokens of a fully expanded argument, which takes nothing after it. */
 static Block _expand_alone(Expander &x, Block tokens) {
-  Block sink = Block.new(sizeof(CppToken));
+  Block sink = Block.new(sizeof(CppToken)), result = NULL;
+  defer if (result == NULL) sink.free();
   CppToken *items = tokens.bytes;
   size_t count = tokens.len();
   if (!count || (count == 1 && !_definition(x, items[0]))) {
     // Keep written and expanded arguments independent even without a rescan.
     _push_block(sink, tokens);
-    return sink;
+    return result = sink;
   }
   Block stack = auto Block.new(sizeof(CppToken));
   _push_all(stack, tokens);
   _rescan(x, stack, sink, 0);
-  return sink;
+  return result = sink;
 }
 
 // replacement lists

@@ -10,6 +10,9 @@ Errors return `{"error":"diagnostic"}` and a non-200 HTTP status. Source is
 limited to 64 KiB. Each client address can compile once per five seconds.
 Successful results are cached by source hash, with at most 32 entries.
 The handler allows two active compilations and returns 503 while busy.
+Disconnecting a request cancels its compilation. The slot remains occupied
+until the container and attached client have stopped. Pending container
+creation or an unavailable Docker daemon can extend cleanup beyond the deadline.
 It does not run the resulting WebAssembly.
 
 ## Run
@@ -75,7 +78,7 @@ node --test etc/playground/server.test.mjs
 ```
 
 These tests exercise HTTP responses, source policy, CORS, rate limiting,
-cache reuse, diagnostics, timeout reporting, and Docker arguments and cleanup.
+cache reuse, diagnostics, timeout reporting, cancellation, and Docker cleanup.
 The Docker-runner test uses a fake CLI. Test the real image in a deployment
 with a running daemon before exposing the service:
 

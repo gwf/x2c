@@ -136,6 +136,38 @@ static void encoding_hex_round_trips(void) {
   EXPECT_INT_EQ(detail.assoc(<index>).int(), 1);
 }
 
+static void encoding_decoders_release_failed_output(void) {
+  $test.scoped();
+  int caught = 0;
+  for (int pass = 0; pass < 2; pass++) {
+    ScopeStats before = Scope.stats();
+    for (int i = 0; i < 20; i++) {
+      try "Zm9".base64_decode_bytes();
+      catch %(malformed *): caught++;
+      try "Zm9vZm9vZm9vZm=v".base64_decode_bytes();
+      catch %(malformed *): caught++;
+      try "Zm9vZm9vZm9vZ".base64url_decode_bytes();
+      catch %(malformed *): caught++;
+      try "0g".hex_decode_bytes();
+      catch %(malformed *): caught++;
+      try "000102030405060g".hex_decode_bytes();
+      catch %(malformed *): caught++;
+    }
+    if (pass) {
+      EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+      EXPECT_INT_EQ(
+        Scope.stats().live_requested_bytes, before.live_requested_bytes);
+    }
+  }
+  EXPECT_INT_EQ(caught, 200);
+  Block bytes = "AAEC/w==".base64_decode_bytes();
+  EXPECT_STR_EQ(bytes.hex_encode(), "000102ff");
+  bytes.free();
+  bytes = "00ff".hex_decode_bytes();
+  EXPECT_STR_EQ(bytes.base64_encode(), "AP8=");
+  bytes.free();
+}
+
 static void encoding_percent_round_trips(void) {
   $test.scoped();
   EXPECT_STR_EQ("a b&c=d/\xc3\xa9~-._".percent_encode(),
@@ -160,5 +192,6 @@ void encoding_suite(void) {
   $test.run(encoding_base64_round_trips_bytes);
   $test.run(encoding_base64_rejects_invalid_text);
   $test.run(encoding_hex_round_trips);
+  $test.run(encoding_decoders_release_failed_output);
   $test.run(encoding_percent_round_trips);
 }
