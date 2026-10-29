@@ -279,6 +279,21 @@ sed -i.bak 's/undeclared_value/44/' failing/prog.x
   fail "an edited failed helper was reused: $(cat out.log)"
 grep -q "return 44;" failing/prog.c || fail "edited failed helper: wrong value"
 
+# A translation without the preprocessor parses its groups without the
+# runtime headers, so it builds a helper of its own, and its failure never
+# answers an ordinary translation.
+mkdir -p nocpp
+printf 'meta int six(void) => 6;\nint value(void) { return $six(); }\n' \
+  > nocpp/prog.x
+X2C_CACHE_DIR="$BUILD/nocpp-cache" "$X2C" translate --no-cpp \
+  --out-dir nocpp nocpp/prog.x >out.log 2>&1 || true
+X2C_CACHE_DIR="$BUILD/nocpp-cache" "$X2C" translate \
+  --out-dir nocpp nocpp/prog.x >out.log 2>&1 ||
+  fail "a --no-cpp helper answered a translation: $(cat out.log)"
+grep -q "return 6;" nocpp/prog.c || fail "no-cpp helper: wrong value"
+[ "$(ls -d "$BUILD"/nocpp-cache/meta/project-* | wc -l)" -eq 2 ] ||
+  fail "--no-cpp shared the ordinary helper"
+
 # A unit whose meta code did not parse is parsed again when a file it read
 # changes: here, a static macro becomes public in an included module.
 mkdir -p unparsed

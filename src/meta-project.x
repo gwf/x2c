@@ -404,10 +404,13 @@ static Array _modules(CliRequest request, Map packages) {
 /* Everything the helper is built with besides its sources. The helper's
    own source is read at build time, not linked into the compiler, so the
    stamp does not cover it. Native response and archive digests enter the
-   identity because a changed archive leaves the group objects unchanged. */
+   identity because a changed archive leaves the group objects unchanged.
+   A group parsed without the preprocessor reads no runtime headers, so
+   `--no-cpp` builds a helper of its own. */
 static String _identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_text();
-  return %"$stamp\n$compiler\n$(_cc_flags().repr())\n"
+  String cpp = h.frontend.request.no_cpp ? "no-cpp" : "cpp";
+  return %"$stamp\n$compiler\n$cpp\n$(_cc_flags().repr())\n"
     + %"$(h.entries.repr())\n"
     + %"$(h.flags.repr())\n$(h.include)\n$(h.toolchain.runtime_lib)\n"
     + %"$(h.modules.list().repr())\n$(h.toolchain.ld_args.repr())\n"
