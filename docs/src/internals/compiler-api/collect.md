@@ -232,7 +232,7 @@ Source: `src/collect/walk.x`
 <a id="Compiler.included_macros"></a>
 #### Compiler.included_macros
 
-`List Compiler.included_macros( Compiler c, String target, int angle, String dir)`
+`List Compiler.included_macros( Compiler c, String target, int angle, String dir, Map active)`
 
 Returns the `(name value)` macro rows that the file an `#include` of
 `target` from the directory `dir` names exports, or NULL when x2c does

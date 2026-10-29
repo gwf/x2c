@@ -19,9 +19,10 @@ The C preprocessing x2c performs before parsing.
 | [`Cpp.copy`](#Cpp.copy) | Returns an independent copy of `cpp`. |
 | [`Cpp.hidden`](#Cpp.hidden) | Reports whether C never takes the arm at this point. |
 | [`Cpp.isolated`](#Cpp.isolated) | Returns a state like `Cpp.new` whose `#include` directives apply no macros. |
+| [`Cpp.merge`](#Cpp.merge) | Applies the `(name value)` macro rows that an included file exports. |
 | [`Cpp.new`](#Cpp.new) | Returns a state with the macro table `macros`, which it takes, and no open conditional group. |
 | [`Cpp.table`](#Cpp.table) | Returns a macro table holding the `(name value)` rows `rows`. |
-| [`Token.is_word`](#Token.is_word) | Reports whether `token` is an identifier or a keyword, which a macro can name. |
+| [`Token.is_word`](#Token.is_word) | Reports whether `t` is an identifier or a keyword, which a macro can name. |
 | [`Token.spelling`](#Token.spelling) | Returns the text that the tokens from `first` through `last` of one stream spell, with the blanks and comments between them as written. |
 
 ### `Compiler`
@@ -41,7 +42,7 @@ Source: `src/cpp/macros.x`
 <a id="Compiler.cpp_directive"></a>
 #### Compiler.cpp_directive
 
-`Symbol Compiler.cpp_directive(Compiler c, Cpp cpp, Token token, String path)`
+`Symbol Compiler.cpp_directive( Compiler c, Cpp cpp, Token token, String path, Map active)`
 
 Applies the directive `token` of the file `path` to `cpp` and returns
 its conditional kind: `<open>`, `<branch>`, `<close>`, or 0 for another
@@ -110,6 +111,16 @@ files have been collected then depends on earlier units.
 
 Source: `src/cpp/cpp.x`
 
+<a id="Cpp.merge"></a>
+#### Cpp.merge
+
+`void Cpp.merge(Cpp cpp, List rows)`
+
+Applies the `(name value)` macro rows that an included file exports.
+Definitions and undefinitions update the current conditional group.
+
+Source: `src/cpp/macros.x`
+
 <a id="Cpp.new"></a>
 #### Cpp.new
 
@@ -134,10 +145,9 @@ Source: `src/cpp/cpp.x`
 <a id="Token.is_word"></a>
 #### Token.is_word
 
-`int Token.is_word(Token token)`
+`int Token.is_word(Token t)`
 
-Reports whether `token` is an identifier or a keyword, which a macro
-can name.
+Reports whether `t` is an identifier or a keyword, which a macro can name.
 
 Source: `src/cpp/cpp.x`
 

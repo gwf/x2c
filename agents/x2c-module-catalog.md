@@ -527,8 +527,8 @@ the C preprocessing x2c performs before parsing.
 Public functions:
 
 `Cpp.new`, `Cpp.isolated`, `Cpp.copy`, `Cpp.hidden`, `Cpp.changes`,
-`Cpp.table`, `Token.is_word`, `Token.spelling`, `Compiler.command_macros`,
-`Compiler.cpp_directive`, `Compiler.expand_macros`
+`Cpp.table`, `Token.is_word`, `Token.spelling`, `Cpp.merge`,
+`Compiler.command_macros`, `Compiler.cpp_directive`, `Compiler.expand_macros`
 
 ### [src/emit/emit.x](../src/emit/emit.x)
 

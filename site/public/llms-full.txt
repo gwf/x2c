@@ -5986,6 +5986,16 @@ option defines it. The runtime's macros are visible in every unit outside
 resolve, stay for the C compiler, and so do `__FILE__`, `__LINE__`, and the
 other predefined names.
 
+An included file starts with the macro environment of its own standalone
+translation. Definitions made only by its includer do not change that file's
+conditional groups. An include cycle sees the active file's definitions
+before that include.
+
+For each direct include, x2c replays the reached files in source order.
+Within that replay, the first visit fixes each file's contribution; later
+visits reapply it. A later direct include starts a fresh replay, so a
+completed include cannot retain an earlier cycle's incomplete exports.
+
 A use of a visible macro is replaced by its expansion with C99's rules:
 object-like and function-like macros, `#` and `##`, `__VA_ARGS__`, GNU C's
 `, ## __VA_ARGS__`, `__VA_OPT__`, and rescanning, during which a macro does

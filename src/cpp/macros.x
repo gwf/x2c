@@ -52,8 +52,9 @@ module void _set(Cpp cpp, String name, Var value) {
   _touch(cpp, name);
 }
 
-/* Applies the `(name value)` rows a file exports, as its `#include`
-   does. */
+/** Applies the `(name value)` macro rows that an included file exports.
+    Definitions and undefinitions update the current conditional group.
+*/
 void Cpp.merge(Cpp cpp, List rows) {
   foreach (List row in rows) _set(cpp, row.car(), row.cadr());
 }
