@@ -54,14 +54,47 @@ static int _check(ReplProgram program) {
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc < 2) return 2;
-  CliRequest request = CliRequest.new(<build>);
-  Array roots = [];
-  for (int i = 1; i < argc; i++) roots.push(String.new(argv[i]));
+  Array options = ["build"];
+  for (int i = 1; i < argc; i++) options.push(String.new(argv[i]));
+  CliRequest request = CliRequest.parse_arguments(options);
+  List roots = request.inputs;
   Frontend frontend = Frontend.new(request);
   String failure = NULL;
   ReplProgram program = repl_program_build(frontend, roots, failure);
   if (!program) { fprintf(stderr, "%s\n", failure); return 1; }
+  if (!("playground_new" in program.addresses)) {
+    if (!("main" in program.addresses)) return 1;
+    List parameters = NULL;
+    ((Type) program.symbols[%("main")]).function_parts(parameters, NULL);
+    int result;
+    if (parameters) {
+      int (*entry)(Array) = (int (*)(Array)) program.addresses["main"].pointer();
+      result = entry(["demo", "abc"]);
+    }
+    else {
+      int (*entry)(void) = (int (*)(void)) program.addresses["main"].pointer();
+      result = entry();
+    }
+    if (result != (parameters ? 23 : 11)) return 1;
+    String replacement = Env.get("REPL_PROGRAM_REPLACE");
+    if (replacement) {
+      ReplProgram selected = repl_program_build_selected(frontend,
+        roots.append($(replacement)), $(replacement), failure);
+      if (!selected || selected.roots.len() != 1 ||
+          selected.roots.car() != replacement) return 1;
+      int (*entry)(void) = (int (*)(void)) selected.addresses["main"].pointer();
+      if (entry() != 11) return 1;
+      puts("native main root replacement passed");
+    }
+    puts("native main adapter passed");
+    return 0;
+  }
   if (_check(program)) return 1;
+  if ("manifest_value" in program.addresses) {
+    int (*value)(void) =
+      (int (*)(void)) program.addresses["manifest_value"].pointer();
+    if (value() != 17) return 1;
+  }
 
   Map function = program.descriptions["playground_new"];
   if (!("int x" in function["declaration"].str()) ||

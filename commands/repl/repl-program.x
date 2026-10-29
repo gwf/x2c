@@ -490,15 +490,64 @@ static CliRequest _program_request(ProgramBuild &b, String &failure) {
   return command;
 }
 
+/* Main's native signature stays in the program; only the prompt entry takes
+   an Array. The generated ordinary function keeps argument storage native. */
+static String _program_main(ProgramBuild &b) {
+  ReplProgram program = b.program;
+  if (!(%("main") in program.symbols)) return NULL;
+  Compiler c = Compiler.new();
+  c.sym.reset(program.symbols);
+  List parameters = NULL;
+  Type result = NULL;
+  Type type = program.symbols[%("main")];
+  type.function_parts(parameters, result);
+  if (c.sym.normalize_declared_type(result).canonicalize() != %(int))
+    return "loaded main must take void or (int, char **) and return int";
+  if (!parameters) return NULL;
+  if (parameters.len() != 2)
+    return "loaded main must take void or (int, char **) and return int";
+  Type count = c.sym.normalize_declared_type(parameters.car()).canonicalize();
+  Type values = c.sym.normalize_declared_type(parameters.cadr());
+  if (values.is_array()) values = values.dereference().reference();
+  if (count != %(int) || values.canonicalize() != %(* * char))
+    return "loaded main must take void or (int, char **) and return int";
+  String entry = "x2c_repl_program_main";
+  String source = %"$(program.directory)/main-entry.x";
+  Path.write_text(source,
+    "int main(int argc, char **argv);\n"
+    "int x2c_repl_program_main(Array values) {\n"
+    "  int count = values.len();\n"
+    "  char **argv = xcalloc((size_t) count + 1, sizeof(char *));\n"
+    "  for (int i = 0; i < count; i++) {\n"
+    "    String text = values[i];\n"
+    "    size_t size = text.len();\n"
+    "    argv[i] = xcalloc(size + 1, 1);\n"
+    "    if (size) memcpy(argv[i], (char *) text, size);\n"
+    "  }\n"
+    "  return main(count, argv);\n"
+    "}\n");
+  b.objects.push(source);
+  for (int i = 0; i < b.exports.len(); i++)
+    if (b.exports[i].list().car() == "main") b.exports[i] = $("main", entry);
+  Type adapted = %((func (("Array"))) int);
+  program.symbols[%("main")] = adapted;
+  Map description = program.descriptions["main"];
+  description["type"] = adapted;
+  description["declaration"] = "int main(Array values);";
+  description["parameters"] = %("values");
+  return NULL;
+}
+
 static String _program_exports(ProgramBuild &b) {
   ReplProgram program = b.program;
-  Array code = [];
+  Array code = ["#include \"x2c.h\"\n"];
   int index = 0;
   foreach (List pair, b.headers) {
     String header = pair.car(), directory = pair.cadr();
     code.push(%"#include $(header.repr())\n");
     (void) directory;
   }
+  code.push("extern int x2c_repl_program_main(Array values);\n");
   code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
   foreach (List row, b.exports) {
     String name = row.cadr();
@@ -573,8 +622,64 @@ static String _program_open(ReplProgram program) {
   return NULL;
 }
 
-/** Builds the root set as one native program without transporting its values. */
-ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) {
+/* Selection reads declarations before building. Only explicitly added main
+   roots can retire an earlier program root; startup keeps ordinary conflicts. */
+static int _program_has_main(Frontend frontend, String path, String &failure) {
+  if (!(Path.is_x2c_source(path) || path.endswith(".c"))) return 0;
+  ParsedUnit unit;
+  int opened = frontend.start(path, unit);
+  defer unit.close();
+  Compiler c = unit.compiler;
+  c.load_source = 1;
+  if (opened && Path.is_x2c_source(path))
+    opened = unit.collect(frontend) && unit.parse();
+  else if (opened) {
+    opened = unit.collect_native(frontend);
+    if (opened) unit.ast = c.full_parse_native(unit.globals);
+    opened = opened && !c.error_count();
+  }
+  if (!opened) {
+    foreach (List diagnostic, c.diagnostics()) c.print_diagnostic(diagnostic);
+    failure = %"$path: x2c could not collect its declarations";
+    return 0;
+  }
+  foreach (List node, unit.ast)
+    match (node) case %(function ? (bind (binding ? "main") ?) ?):
+      if (_program_owned(c, node, path)) return 1;
+  return 0;
+}
+
+static List _program_select_roots(
+  Frontend frontend, List roots, List requested, String &failure) {
+  Map additions = {};
+  int has_main = 0;
+  foreach (String root, requested) {
+    String path = Path.resolved_absolute(root);
+    additions[path] = 1;
+    has_main |= _program_has_main(frontend, path, failure);
+    if (failure) return NULL;
+  }
+  if (!has_main) return roots;
+  Array selected = [];
+  foreach (String root, roots) {
+    String path = Path.resolved_absolute(root);
+    if (!(path in additions) && _program_has_main(frontend, path, failure))
+      continue;
+    if (failure) return NULL;
+    selected.push(root);
+  }
+  return selected.list_free();
+}
+
+/** Builds roots with ordinary startup conflict rules. */
+ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) =>
+  repl_program_build_selected(frontend, roots, NULL, failure);
+
+/** Builds one native program. Main-bearing `requested` roots replace earlier
+    main-bearing roots; a NULL selection keeps ordinary startup conflicts.
+*/
+ReplProgram repl_program_build_selected(
+  Frontend frontend, List roots, List requested, String &failure) {
   failure = NULL;
   ReplProgram program = xcalloc(1, sizeof(struct ReplProgram));
   *program = (struct ReplProgram) {
@@ -594,6 +699,8 @@ ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) {
     program.ld_args = request.ld_args;
     roots = roots.append(request.inputs);
   }
+  if (requested) roots = _program_select_roots(frontend, roots, requested, failure);
+  if (failure) return NULL;
   Array native = [], source = [];
   foreach (String root, roots) {
     String path = Path.resolved_absolute(root);
@@ -612,6 +719,8 @@ ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) {
     if (failure) return NULL;
     if (!path.endswith(".h") && !(path in source)) source.push(path);
   }
+  failure = _program_main(build);
+  if (failure) return NULL;
   failure = _program_exports(build);
   if (failure) return NULL;
   program.module = %"$(program.directory)/program.module";
