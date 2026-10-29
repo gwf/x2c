@@ -1,3 +1,5 @@
 unittest/compiler-fixtures/module-block-prefix-trailing-underscore.x:4:1: driver: module member 'module-block-prefix-trailing-underscore/foo-.x' takes the static prefix of 'module-block-prefix-trailing-underscore/foo.x'
+  module {
+  ^^^^^^
   note: a file's statics take its path with each non-identifier character made '_' and trailing '_' dropped, then '___'; rename one of the files
 
