@@ -103,9 +103,10 @@ static void _program_family(Map all, Map selected, Type type) {
     }
   }
   if (family.car() == <typedef>) {
+    Type target = found;
     List key = $(family.cadr());
     if (all.try_get(key, found)) selected[key] = found;
-    if (found is <list>) _program_family(all, selected, found);
+    if (target) _program_family(all, selected, target);
   }
   foreach (Var part, type)
     if (part is <list>) _program_family(all, selected, part);
@@ -114,7 +115,9 @@ static void _program_family(Map all, Map selected, Type type) {
 static void _program_symbol(
   ProgramBuild &b, Compiler c, String path, String name, Type type,
   List syntax, String declaration, String body, int line) {
-  if (!name || _program_private(c, name, type)) return;
+  if (!name || (_program_private(c, name, type) &&
+                !(path.endswith(".h") && type.is_inline()))) return;
+  type = type.declared();
   ReplProgram program = b.program;
   Var prior;
   if (program.symbols.try_get($(name), prior) && !prior.equal(type))
@@ -142,7 +145,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
   foreach (List row, c.definition_rows(unit.ast))
     match (row) case %(function ?name ?display ?type ?parameters ?line ?doc
                                  ?private ?origin ?declarator ?span): {
-      if (private) continue;
+      if (private && !(path.endswith(".h") && ((Type) type).is_inline())) continue;
       String declaration = _program_slice(c, declarator);
       if (declaration) declaration = declaration.rstrip(NULL) + ";";
       _program_symbol(b, c, path, name, type, row, declaration,
@@ -169,7 +172,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
         String name = Ast.binding_spelling(binding);
         if (!name || name in definitions) continue;
         Type type = c.sym.get_exact($(name));
-        if (!type || _program_private(c, name, type)) continue;
+        if (!type || (_program_private(c, name, type) &&
+                      !(path.endswith(".h") && type.is_inline()))) continue;
         List span = _program_span(c, node);
         Token first = span ? c.tokenizer.tokens + span.car().integer() : NULL;
         int line = first ? first.line : 1;
@@ -251,7 +255,7 @@ static String _program_c_header(Compiler c, List ast) {
             }
             Type type = c.sym.get_exact($(name));
             if (!type || _program_private(c, name, type)) continue;
-            text.write("extern ");
+            if (!type.is_function() && !type.is_extern()) text.write("extern ");
             text.write(_program_declaration(c, type, name));
             text.write("\n");
           }
@@ -308,7 +312,9 @@ static String _program_unit(ProgramBuild &b, String path) {
       b.exports.push(row);
     }
   String header = %"$(program.directory)/unit-$(b.headers.len()).h";
-  if (Path.is_x2c_source(path)) {
+  if (path.endswith(".h"))
+    Path.write_text(header, %"#pragma once\n#include $(path.repr())\n");
+  else if (Path.is_x2c_source(path)) {
     List code = c.generate_code_text(c.transform(unit.ast),
                                     %"unit-$(b.headers.len())");
     Path.write_text(header, code.cadr());
