@@ -1,4 +1,11 @@
-> Status: active
+> Status: done
+> Published to `dev` on 2026-10-28: phase 1 in PR #603 (merge
+> `a6edf5ac6`); phase 2 and the staging deferral repair in PR #604
+> (`029c4494b`); the void-return check in PR #605 (`6e9f4fdbd`); and the
+> expansion dump with the inspection repair in PR #607 (`26a85905b`). All
+> seven decision 8 fixtures, `Var.convert_at`, and `--no-source-map` are on
+> `dev`. The constructed array-dimension defect in `unittest/STATUS.md`
+> predates this plan and stays outside it.
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`9aeeef265`) from reproduced probes. Implementation started 2026-10-28.
 > The three

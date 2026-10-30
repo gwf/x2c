@@ -1,4 +1,8 @@
-> Status: reference
+> Status: done
+> Published to `dev` on 2026-10-28 through PR #601 (merge `b8173e817`):
+> `x2c env` validates the prelude interfaces it reports, and `run` reuses
+> the script cache. Phase 1 step 1 was declined. The integration
+> checkpoint below records the paired measurements and the passing gate.
 > Drafted 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`9aeeef265`) with `builds/0/x2c` identity `48fd687ab075ad6f`. No
 > implementation had started when drafted. The probe corrected the premise:
@@ -6,8 +10,6 @@
 > the 0.5-0.8 s cold walk is the cost of a stale stage. Gary decided on
 > 2026-10-28: skip the replay floor change (phase 1 step 1), keep the
 > stale-stage visibility in `x2c env`, and do the `run` cache.
-> Implementation is complete locally. Shared-integrator submission owns
-> final generated artifacts, the performance checkpoint, and the full gate.
 
 # Compile startup floor
 

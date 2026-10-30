@@ -55,7 +55,6 @@ were indexed and the delivered ones archived.
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 | [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
-| [Located failures](located-failures.md) | Phases 1 to 3 and the integration repair merged on 2026-10-28 in PRs #603, #604, #605, and #607; the plan's status still reads active. | Record those delivery revisions in its status and archive it. |
 
 ### Research and reference
 
@@ -75,7 +74,6 @@ or establish a useful caller before selecting a candidate.
 | [Remediation evidence](reference/review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
 | [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Coverage of 181 historical study rows, not an active task list. |
 | [Browser playground](browser-playground.md) | Phases 1 and 2 published in PR #596 (`b1584a01f`); phase 3, a fully client-side compiler, remains unscoped. |
-| [Compile startup floor](compile-startup-floor.md) | The `run` cache and stale-prelude reporting merged in PR #601 (`b8173e817`) on 2026-10-28; Gary chose to skip the replay floor change. Its status still says submission is pending. |
 | [Networking and flagship service](networking-and-flagship-service.md) | TCP and HTTP runtime delivered in PR #598; its Notes showcase design is superseded by the [Notes rewrite](archive/notes-rewrite.md). |
 
 Individual quotation adoption and TagId generation remain optional candidates
@@ -104,6 +102,14 @@ Archived 2026-10-30 after checking delivery on `dev`:
 - [Allocation accounting and Notes database ownership](archive/notes-accounting-and-database-thread.md):
   done; opt-in Scope accounting and the database-thread comparison were
   published in PR #611 (`6a190fa5f`) on 2026-10-28.
+- [Located failures](archive/located-failures.md): done; located runtime
+  conversions, mapped native diagnostics, real macro causes, expansion
+  notes, the void-return check, and `--dump-expansions` were published in
+  PRs #603, #604, #605, and #607 on 2026-10-28.
+- [Compile startup floor](archive/compile-startup-floor.md): done; `env`
+  validates the prelude interfaces it reports and `run` reuses the script
+  cache. Published in PR #601 (`b8173e817`) on 2026-10-28; the replay
+  retention change was declined.
 
 - [REPL library playground](archive/repl-library-playground.md): implemented in
   `cdad3ab09` on 2026-10-29. Native sessions, discovery, source/object inspection,
