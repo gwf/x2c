@@ -24,12 +24,15 @@ class Client:
         self.capabilities = initialized["result"]["capabilities"]
         self.send("initialized")
 
-    def send(self, method, params=None, identifier=None):
+    def frame(self, method, params=None, identifier=None):
         message = {"jsonrpc": "2.0", "method": method, "params": params or {}}
         if identifier is not None:
             message["id"] = identifier
         body = json.dumps(message).encode()
-        self.process.stdin.write(f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
+        return f"Content-Length: {len(body)}\r\n\r\n".encode() + body
+
+    def send(self, method, params=None, identifier=None):
+        self.process.stdin.write(self.frame(method, params, identifier))
         self.process.stdin.flush()
 
     def wait(self, key, value):

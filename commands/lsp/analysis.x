@@ -97,10 +97,18 @@ String LspWorkspace.take_notice(LspWorkspace w) {
   return notice;
 }
 
+/** Returns the text whose byte offsets the open unit's source facts use.
+    A script unit's first line there is its rewritten include.
+*/
 String LspWorkspace.text(LspWorkspace w, String path) {
   Var text;
   if (w.unit.context && w.unit.compiler.source_texts.try_get(path, text))
     return text;
+  return w.document(path);
+}
+
+/** Returns the client's text of `path`: its open buffer or the file. */
+String LspWorkspace.document(LspWorkspace w, String path) {
   String source = "";
   w.sources.read(path, source);
   return source;

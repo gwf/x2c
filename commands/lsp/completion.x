@@ -8,7 +8,6 @@
 
 /** Completes a source prefix without publishing the marker or borrowed types. */
 Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
-  path = w.retain(path);
   String source = w.retain(w.text(path));
   w.close_unit();
   if (offset < 0 || offset > source.len()) return [];

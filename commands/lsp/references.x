@@ -27,7 +27,6 @@ Map LspWorkspace.rename(
   if (!new_name.is_identifier() ||
       scan_keyword_type(new_name, new_name.len()))
     return _rename_failure("x2c lsp: the new name must be an identifier");
-  new_name = w.retain(new_name);
   Map query = _reference_query(w, path, offset);
   if (query == NULL)
     return _rename_failure("x2c lsp: this binding has no source range");

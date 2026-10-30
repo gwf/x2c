@@ -231,4 +231,31 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-type-scope-") as temporary:
         assert len(references) == 2, references
     finally:
         client.close()
-print("language server completion, symbols, references, rename, and tokens passed")
+with tempfile.TemporaryDirectory(prefix="x2c-lsp-script-") as temporary:
+    directory = Path(temporary).resolve()
+    script = directory / "tool.x"
+    script_text = "#!/usr/bin/env x2c\nint answer(void) { return 42; }\n"
+    script.write_text(script_text)
+    client = Client(root, directory, ["translate", str(script)])
+    client.opened(script, script_text)
+    assert client.diagnostics() == []
+    # Tokens and saved text keep the script's own first line; compiler
+    # ranges still convert through the text the compiler read.
+    hover = query(client, "hover", script, script_text, "answer")["result"]
+    assert selected(script_text, hover["range"]) == "answer", hover
+    client.send("textDocument/didSave",
+                {"textDocument": {"uri": script.as_uri()}})
+    assert client.diagnostics() == []
+    data = client.request("textDocument/semanticTokens/full", {
+        "textDocument": {"uri": script.as_uri()}})["result"]["data"]
+    assert decoded(data)[0] == (0, 0, len("#!/usr/bin/env x2c"), 6), data
+    # One write queues the change before exit, so no idle point publishes it.
+    client.process.stdin.write(client.frame("textDocument/didChange", {
+        "textDocument": {"uri": script.as_uri(), "version": 2},
+        "contentChanges": [{"text": "int value(\n"}]}) + client.frame("exit"))
+    client.process.stdin.close()
+    remaining = client.process.stdout.read()
+    assert client.process.wait(timeout=20) == 1
+    assert b"publishDiagnostics" not in remaining, remaining
+print("language server completion, symbols, references, rename, tokens, "
+      "scripts, and exit passed")

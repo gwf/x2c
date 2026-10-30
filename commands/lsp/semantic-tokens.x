@@ -19,7 +19,7 @@ Array lsp_token_types(void) =>
 /** Scans the current document without requiring successful compiler analysis. */
 Array LspWorkspace.semantic_tokens(LspWorkspace w, String path) {
   Context request = auto Context.open_isolated_named("language server tokens");
-  SemanticTokens out = {.text = w.text(path), .data = []};
+  SemanticTokens out = {.text = w.document(path), .data = []};
   Tokenizer tokenizer = Tokenizer.new(out.text, <x2c>);
   tokenizer.scan();
   for (Token token = tokenizer.tokens; token.type != <eof>; token++) {

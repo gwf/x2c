@@ -191,7 +191,7 @@ static void _initialize(Server &server, Var id, Map params) {
     textDocumentSync: {openClose: Json.bool(1), change: 1,
                        save: {includeText: Json.bool(1)}},
     definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
-    completionProvider: {triggerCharacters: [".", "$"]},
+    completionProvider: {triggerCharacters: [".", ">", "$"]},
     documentSymbolProvider: Json.bool(1), workspaceSymbolProvider: Json.bool(1),
     referencesProvider: Json.bool(1), renameProvider: Json.bool(1),
     semanticTokensProvider: {full: Json.bool(1),
@@ -232,7 +232,7 @@ static void _save(Server &server, Map params) {
   String path = server.workspace.retain(_document(params));
   if (!path) return;
   String text = params.contains("text") ? params["text"].str()
-                                      : server.workspace.text(path);
+                                      : server.workspace.document(path);
   text = server.workspace.retain(text);
   _affected(server, path);
   server.workspace.change(path, text, 0);
@@ -327,7 +327,7 @@ static void _tokens(Server &server, Var id, Map params) {
 }
 
 static void _publish(Server &server) {
-  if (!server.workspace || server.shutdown) return;
+  if (!server.workspace || server.shutdown || server.exiting) return;
   Array paths = [];
   foreach (String path, server.pending.keys()) paths.push(path);
   paths = server.workspace.retain(paths);
@@ -358,8 +358,7 @@ static void _pending(Server &server, String path, Var version) {
 }
 
 static void _affected(Server &server, String path) {
-  Array affected = server.workspace.retain(server.workspace.affected(path));
-  foreach (String document, affected)
+  foreach (String document, server.workspace.affected(path))
     if (server.documents.contains(document))
       server.pending[document] = server.documents[document];
 }
