@@ -47,7 +47,6 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [REPL library playground](repl-library-playground.md) | Native-worker playground implementation, discovery, source/object inspection, and ordinary C object workflows. | Implementation authorized; complete combined verification and publication. |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
@@ -79,6 +78,10 @@ releases established the recovery baseline. No production promotion is
 selected here.
 
 ### Decisions and completed records
+
+- [REPL library playground](archive/repl-library-playground.md): implemented in
+  `cdad3ab09` on 2026-10-29. Native sessions, discovery, source/object inspection,
+  and restart behavior pass source/archive and host SQLite workflows.
 
 - [Included static meta helper report](archive/compiler-included-static-meta.md):
   rejected as a compiler defect on 2026-10-28. Supported provider-owned calls

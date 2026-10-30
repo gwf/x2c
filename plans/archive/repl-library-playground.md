@@ -1,6 +1,6 @@
-> Status: active
-> Design decisions selected with Gary on 2026-10-29. Implementation complete;
-> final command and documentation publication checks remain pending.
+> Status: done
+> Implemented in `cdad3ab09` on 2026-10-29. Native workflows and publication
+> checks passed, including the final command/documentation consumer checks.
 > Baseline: `804275488c99169294a593bf660f1e178abec70c`.
 
 # REPL library playground
@@ -35,7 +35,7 @@ and an already compiled library. For an opaque handle, inspect its declared
 type and related operations, then use library queries instead of private fields.
 
 This is the native command-line playground. The independent
-[browser playground](browser-playground.md) remains outside this plan.
+[browser playground](../browser-playground.md) remains outside this plan.
 
 ## Selected design
 
@@ -58,8 +58,8 @@ Gary selected these choices during planning:
    guarantee cleanup.
 
 These choices supersede the playground-relevant parts of
-[compiled prompt functions](archive/repl-compiled-prompt-functions.md) and
-[the shared helper](archive/repl-shared-helper.md): interpreted top-level
+[compiled prompt functions](repl-compiled-prompt-functions.md) and
+[the shared helper](repl-shared-helper.md): interpreted top-level
 execution, independent-data transport, and preservation of prompt values
 across library replacement. Those plans correctly record their earlier scope.
 
@@ -505,7 +505,7 @@ tests verify dot and arrow completion with the extended receiver metadata.
 The full publication gate passed on the compiler/runtime tree in `4759917f`:
 1,124 runtime tests, 99,170 assertions, and 1,347 compiler fixtures. Bootstrap,
 stage 0, and stage 1 emitted identical C/H. Final command/documentation checks
-follow the subsequent snapshot transport refinement.
+passed after the snapshot transport refinement, retaining the compiler proof.
 
 One-off observations on this Mac used private caches and loaded C point
 objects. Background activity was not controlled; these are absolute
