@@ -136,7 +136,7 @@ static void _share_unit(Compiler c, Compiler owner) {
                source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
                meta_build, meta_helper, pending_inline_bodies,
-               collection_native_files, command_macros, macro_export_parts);
+               collection_native_files, command_macros, cpp_expansion);
 }
 
 /* The first compiler of a unit creates the state its children share. */

@@ -346,6 +346,8 @@ static uint64_t _translation_options(
   hash = _state_list(hash, request.cc_args);
   hash = _state_tool(hash, Toolchain.meta_cc(request.meta_cc), ok);
   hash = _state_text(hash, request.no_cpp ? "no-cpp" : "cpp");
+  hash = _state_text(
+    hash, request.cpp_expansion && !request.no_cpp ? "expand" : "unexpanded");
   hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
   hash = _state_text(

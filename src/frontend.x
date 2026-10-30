@@ -340,7 +340,9 @@ static Compiler _begin_unit(
   c.source_map = request.source_map;
   c.sources = request.sources;
   c.package_source_dirs = request.package_dirs;
-  c.command_macros = Compiler.command_macros(request.cpp_args);
+  c.cpp_expansion = request.cpp_expansion && !request.no_cpp;
+  if (c.cpp_expansion)
+    c.command_macros = Compiler.command_macros(request.cpp_args);
   c.source_facts = request.source_facts;
   c.source_primary = 1;
   if (c.source_facts) {
@@ -372,8 +374,7 @@ static void _tokenize_input(
     text = _script(c, text, resolved ? String.new(source) : c.filename);
   c.text = text;
   c.include_dirs = frontend.include_dirs;
-  try c.unit_source = c.discover_module_source(c.filename, text, NULL);
-  finally Compiler.forget_provisional_entries();
+  c.unit_source = c.module_source(c.filename, text);
   if (c.unit_source) {
     text = c.unit_source.text;
     c.line_markers = c.unit_source.markers;

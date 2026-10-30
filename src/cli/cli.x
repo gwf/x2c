@@ -30,7 +30,7 @@ typedef struct CliRequest {
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
   // The translation error limit; 0 reports every recoverable error.
   int max_errors;
-  int source_map, source_facts, live_symbols, cpp_symbols;
+  int source_map, source_facts, live_symbols, cpp_symbols, cpp_expansion;
   int force, rebuild, clean;
   // Repository build controls: a warning fails its unit; no .xi is read.
   int fatal_warnings, no_interfaces;
