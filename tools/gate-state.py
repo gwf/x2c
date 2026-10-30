@@ -16,11 +16,13 @@ It exits 0 for valid and 1 for stale, so a shell can branch on it.
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
 corresponding Make target with live output. For a prior agent-pr-check proof,
 Markdown and independent external-command changes run only existing consumer
-checks while retaining compiler proof. It records the resulting exact tree only
-after success, and only when nothing but the gate's own regenerated outputs
-changed while it ran. `check` remains available for direct inspection.
-Records are in untracked `debug/`, so they belong to this workspace and
-never travel with a commit.
+checks while retaining compiler proof. Those checks and doc-check run the
+book's output samples only when a changed page under docs/src has an x2c
+sample; doc-check counts a page as changed unless a record of either gate
+holds it. It records the resulting exact tree only after success, and only
+when nothing but the gate's own regenerated outputs changed while it ran.
+`check` remains available for direct inspection. Records are in untracked
+`debug/`, so they belong to this workspace and never travel with a commit.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import stat
@@ -188,9 +191,11 @@ def build_configuration() -> dict:
     return {"values": values, "tools": identities}
 
 
-# Version 5 captures effective Make configuration and executable identities.
-# Earlier records could be stamped manually and must be validated again.
-FORMAT = 6
+# Version 7 doc-check records also cover the book's output samples. Version 6
+# dropped manual stamping, and version 5 added the effective Make
+# configuration and executable identities. Earlier records must be validated
+# again.
+FORMAT = 7
 
 
 def content_hash(rel: str, mode: int) -> str:
@@ -303,6 +308,58 @@ def differences(old: dict, new: dict) -> list[str] | None:
     return reasons
 
 
+# The book's generated llms files; doc-check compares them with their pages.
+LLMS_FILES = {"site/public/llms.txt", "site/public/llms-full.txt"}
+# doc-outputs runs the x2c samples of book pages; an indented fence counts.
+X2C_FENCE = re.compile(rb"^[ \t]*```x2c", re.MULTILINE)
+
+
+def documentation(path: str) -> bool:
+    """Whether doc-check covers a change to this ordinary, non-executable file.
+
+    Markdown under commands/ is command input, such as an expected-output
+    fixture, so its command tests consume it instead.
+    """
+    return (not path.startswith("commands/") and
+            (path.endswith(".md") or path in LLMS_FILES))
+
+
+def documentation_steps(root: pathlib.Path, paths) -> list[list[str]]:
+    """doc-check, plus doc-outputs when a changed book page has x2c samples.
+
+    Each page is read as it is now; a deleted page has no samples to run.
+    """
+    steps = [["make", "doc-check"]]
+    for path in paths:
+        page = root / path
+        if (path.startswith("docs/src/") and path.endswith(".md") and
+                page.is_file() and X2C_FENCE.search(page.read_bytes())):
+            steps.append(["make", "-o", "build", "doc-outputs"])
+            break
+    return steps
+
+
+def comparable(record: dict, current: dict) -> bool:
+    return (record.get("version") == FORMAT and
+            record.get("configuration") == current["configuration"])
+
+
+def unrecorded(records: dict, current: dict) -> set[str]:
+    """Paths whose current content no comparable record of either gate holds.
+
+    Every record proves the output samples of the pages it holds, so a page
+    that one already holds needs no new run. Without a comparable record,
+    every current path counts as changed.
+    """
+    files = current["files"]
+    held = [record["files"] for record in records.values()
+            if comparable(record, current)]
+    if not held:
+        return set(files)
+    return {path for path in files.keys() | set().union(*held)
+            if all(old.get(path) != files.get(path) for old in held)}
+
+
 def incremental_steps(old: dict, new: dict) -> list[list[str]] | None:
     """Retain compiler proof when only documentation or external commands moved.
 
@@ -310,35 +367,30 @@ def incremental_steps(old: dict, new: dict) -> list[list[str]] | None:
     shared build scripts and the built-in build command outside this boundary.
     None means full validation; an empty list means the proof is unchanged.
     """
-    if (old.get("version") != FORMAT or
-            old.get("configuration") != new["configuration"]):
+    if not comparable(old, new):
         return None
     before, after = old["files"], new["files"]
     paths = {p for p in before.keys() | after.keys()
              if before.get(p) != after.get(p)}
-    docs = book = commands = False
+    docs, commands = [], False
     for path in paths:
         # A symlink or executable documentation file is not ordinary prose.
         modes = [files[path].split(":")[:2]
                  for files in (before, after) if path in files]
         if any(mode[0] != "100000" for mode in modes):
             return None
-        if (all(mode[1] == "0" for mode in modes) and
-                (path.endswith(".md") or path in
-                 {"site/public/llms.txt", "site/public/llms-full.txt"})):
-            docs = True
-            book |= path.startswith("docs/")
-        elif (path.startswith("commands/") and
-              not path.startswith("commands/build/") and
-              (len(path.split("/")) >= 3 or path == "commands/manifest.txt")):
+        if (path.startswith("commands/") and
+                not path.startswith("commands/build/") and
+                (len(path.split("/")) >= 3 or
+                 path == "commands/manifest.txt")):
             commands = True
+        elif all(mode[1] == "0" for mode in modes) and documentation(path):
+            docs.append(path)
         else:
             return None
-    steps = []
-    if docs or commands:
-        steps.append(["make", "doc-check"])
-    if book:
-        steps.append(["make", "-o", "build", "doc-outputs"])
+    if not (docs or commands):
+        return []
+    steps = documentation_steps(ROOT, docs)
     if commands:
         steps.extend([["make", "-o", "build", "commands-check"],
                       ["bash", "unittest/probes/run-cli-boundary.sh"]])
@@ -371,9 +423,14 @@ def cmd_check(gate: str | None) -> int:
     return 1 if stale else 0
 
 
-def run_gate(gate: str) -> int:
-    """Run a Make gate with output attached to the caller's terminal."""
-    return subprocess.run(["make", gate], cwd=ROOT, check=False).returncode
+def run_steps(steps: list[list[str]]) -> int:
+    """Run each step with output attached to the caller's terminal."""
+    for step in steps:
+        print("running " + shlex.join(step), flush=True)
+        result = subprocess.run(step, cwd=ROOT, check=False).returncode
+        if result:
+            return result
+    return 0
 
 
 # Tracked outputs that the gate itself regenerates from digested sources.
@@ -395,31 +452,32 @@ def cmd_ensure(gate: str) -> int:
     if cmd_check(gate) == 0:
         return 0
     before = digest()
-    previous = load().get(gate, {})
-    steps = incremental_steps(previous, before) if gate == "agent-pr-check" else None
-    if steps is None:
-        result = run_gate(gate)
+    records = load()
+    previous = records.get(gate, {})
+    reused = (incremental_steps(previous, before)
+              if gate == "agent-pr-check" else None)
+    if reused is not None:
+        print("retaining compiler validation; checking changed consumers",
+              flush=True)
+        steps = reused
+    elif gate == "doc-check":
+        steps = documentation_steps(ROOT, unrecorded(records, before))
     else:
-        print("retaining compiler validation; checking changed consumers", flush=True)
-        result = 0
-        for step in steps:
-            print("running " + shlex.join(step), flush=True)
-            result = subprocess.run(step, cwd=ROOT, check=False).returncode
-            if result:
-                break
+        steps = [["make", gate]]
+    result = run_steps(steps)
     if result:
         return result
     after = digest()
-    moved = (differences(before, after) if steps is not None else
+    moved = (differences(before, after) if reused is not None else
              differences(sources(before), sources(after)))
     if moved:
         print(f"{gate}: not recorded - the tree moved during the gate: "
               f"{'; '.join(moved)}")
         return 1
     records = load()
-    if steps is not None:
+    if reused is not None:
         after["reused_from_head"] = previous.get("recorded_at_head")
-        after["completed_steps"] = steps
+    after["completed_steps"] = steps
     records[gate] = after
     save(records)
     print(f"recorded {gate} green for this tree")
@@ -427,7 +485,9 @@ def cmd_ensure(gate: str) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     chk = sub.add_parser("check", help="report whether a recorded gate still holds")
     chk.add_argument("gate", nargs="?")
