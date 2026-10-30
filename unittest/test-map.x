@@ -240,6 +240,7 @@ static void map_growth_preserves_entries(void) {
   Map copy = map.copy();
   EXPECT_TRUE(map.equal(copy));
   EXPECT_INT_EQ(map.compare(copy), 0);
+  EXPECT_INT_EQ(copy.capacity, 128);
   Map merged = { extra: 1 };
   merged.merge(map);
   EXPECT_INT_EQ(merged.len(), map.len() + 1);

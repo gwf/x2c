@@ -259,6 +259,27 @@ static void channel_close_rejects_unaccepted_rendezvous_send(void) {
   EXPECT_TRUE(channel.receive() is void);
 }
 
+static void channel_close_rejects_blocked_bounded_send(void) {
+  $test.scoped();
+  Channel channel = auto Channel.new(1);
+  channel.send(12);
+  atomic_store(&channel_probe_ready, 0);
+  Thread sender = Thread.start_raw(_channel_sender, &channel, sizeof(channel));
+  while (!atomic_load(&channel_probe_ready)) sched_yield();
+  channel.close();
+  int rejected = 0;
+  try sender.join();
+  catch %(join-fail (errors ?errors)): {
+    List error = errors.list().car();
+    rejected = error.assoc(<code>) == <bad-state> &&
+               error.assoc(<detail>).list().assoc(<closed>) == 1;
+  }
+  sender.free();
+  EXPECT_TRUE(rejected);
+  EXPECT_INT_EQ(channel.receive().integer(), 12);
+  EXPECT_TRUE(channel.receive() is void);
+}
+
 static void channel_payload_ownership_is_unchanged(void) {
   $test.scoped();
   Channel channel = auto Channel.new(2);
@@ -661,5 +682,6 @@ void channel_suite(void) {
   $test.run(channel_rendezvous_commit_survives_later_stop);
   $test.run(channel_stopped_rendezvous_peer_is_not_matched);
   $test.run(channel_close_rejects_unaccepted_rendezvous_send);
+  $test.run(channel_close_rejects_blocked_bounded_send);
   $test.run(channel_payload_ownership_is_unchanged);
 }

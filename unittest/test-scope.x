@@ -1,7 +1,10 @@
 /*  test-scope.x -- unit tests for scope allocator */
 
 #include "test-support.x"
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -174,6 +177,52 @@ static void scope_name_lifetime_and_registry_removal(void) {
   Scope null_name = Scope.new_named(NULL);
   EXPECT_NULL(null_name.name());
   null_name.destroy();
+}
+
+typedef struct ScopeChurn {
+  Scope shared;
+  int index;
+  atomic_int failed;
+} ScopeChurn;
+
+/* Creates and destroys named and unnamed Scopes while other threads change
+   the name registry, reading a name that the main thread registered. */
+static void *_scope_churn(void *data) {
+  ScopeChurn *churn = data;
+  char name[32];
+  snprintf(name, sizeof(name), "churn-%d", churn.index);
+  for (int i = 0; i < 2000; i++) {
+    Scope named = Scope.new_named(name), unnamed = Scope.new();
+    const char *seen = named.name();
+    if (!seen || strcmp(seen, name) || unnamed.name() ||
+        strcmp(churn.shared.name(), "shared"))
+      atomic_store(&churn.failed, 1);
+    unnamed.destroy();
+    named.destroy();
+  }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void scope_threads_create_and_destroy_named_scopes(void) {
+  Scope shared = Scope.new_named("shared");
+  ScopeChurn churns[4] = {0};
+  pthread_t threads[4];
+  int launched = 0;
+  for (int i = 0; i < 4; i++) {
+    churns[i].shared = shared;
+    churns[i].index = i;
+    int error = pthread_create(&threads[i], NULL, _scope_churn, &churns[i]);
+    EXPECT_INT_EQ(error, 0);
+    if (error) break;
+    launched++;
+  }
+  for (int i = 0; i < launched; i++) {
+    EXPECT_INT_EQ(pthread_join(threads[i], NULL), 0);
+    EXPECT_FALSE(atomic_load(&churns[i].failed));
+  }
+  EXPECT_STR_EQ(shared.name(), "shared");
+  shared.destroy();
 }
 
 static void scope_named_direct_allocation(void) {
@@ -577,6 +626,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
 
 void scope_suite(void) {
   $test.run(scope_name_lifetime_and_registry_removal);
+  $test.run(scope_threads_create_and_destroy_named_scopes);
   $test.run(scope_splice_preserves_owners_and_finalizers);
   $test.run(scope_alloc_release);
   $test.run(scope_push_pop_destroy);
