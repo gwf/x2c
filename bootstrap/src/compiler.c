@@ -875,7 +875,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2308);
+  _295 = int_var(2311);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));
@@ -3352,7 +3352,7 @@ static Var f28_declarations_portable_syntax____freeze_leaf(Var syntax){
 
 static Token f28_declarations_portable_syntax____thaw_token(Var type, Var text, Var line, Var column, Var length, Var position){
   Token token = xcalloc(1, sizeof(struct Token));  * token =(struct Token){
-    .text = Var_as_string(text), .type = Symbol_new(Var_string(type)), .line = Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 159}; & _x2c_gensym_error_site_9; }))), .col = Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 159}; & _x2c_gensym_error_site_10; }))), .len = Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 159}; & _x2c_gensym_error_site_11; }))), .pos = Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 159}; & _x2c_gensym_error_site_12; })))
+    .text = Var_as_string(text), .type = Symbol_new(Var_string(type)), .line = Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 160}; & _x2c_gensym_error_site_9; }))), .col = Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 160}; & _x2c_gensym_error_site_10; }))), .len = Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 160}; & _x2c_gensym_error_site_11; }))), .pos = Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/compiler/declarations/portable-syntax.x",.function = "f28_declarations_portable_syntax____thaw_token",.line = 160}; & _x2c_gensym_error_site_12; })))
   }
   ;  return token;
 }
@@ -3994,8 +3994,8 @@ void Compiler_materialize_source_declaration(Compiler c, List binding, List decl
       {
         List _x2c_gensym_destructure_7 = entry;
         String file = Var_as_string(List_getindex(_x2c_gensym_destructure_7, 0));
-        int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/compiler/source-locations.x",.function = "Compiler_materialize_source_declaration",.line = 121}; & _x2c_gensym_error_site_16; })));
-        int end = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/compiler/source-locations.x",.function = "Compiler_materialize_source_declaration",.line = 121}; & _x2c_gensym_error_site_17; })));
+        int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/compiler/source-locations.x",.function = "Compiler_materialize_source_declaration",.line = 122}; & _x2c_gensym_error_site_16; })));
+        int end = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/compiler/source-locations.x",.function = "Compiler_materialize_source_declaration",.line = 122}; & _x2c_gensym_error_site_17; })));
         List target = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 3));
         Type type = Var_type(List_getindex(_x2c_gensym_destructure_7, 4));
         List key = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 5));
@@ -4516,7 +4516,7 @@ Var Compiler_match_pattern_value(Compiler c, Var node){
   head = List_getindex(_x2c_gensym_destructure_8, 0);
   second = List_getindex(_x2c_gensym_destructure_8, 1);
   third = List_getindex(_x2c_gensym_destructure_8, 2);
-  if(x2c_var_equal_lane(head, Symbol_var(6363658))) return Compiler_match_pattern_value(c, Array_getindex(c -> id_keys, Var_int(Var_convert_at(second, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/compiler/patterns.x",.function = "Compiler_match_pattern_value",.line = 64}; & _x2c_gensym_error_site_20; })))));
+  if(x2c_var_equal_lane(head, Symbol_var(6363658))) return Compiler_match_pattern_value(c, Array_getindex(c -> id_keys, Var_int(Var_convert_at(second, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/compiler/patterns.x",.function = "Compiler_match_pattern_value",.line = 62}; & _x2c_gensym_error_site_20; })))));
   if(x2c_var_equal_lane(head, Symbol_var(377892))){
     {
       List _x2c_gensym_match_expr_48 = ast;

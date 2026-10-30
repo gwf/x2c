@@ -57,6 +57,8 @@ static Context _unit_context(void);
 
 static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context context);
 
+static int _expands_cpp(CliRequest request);
+
 static void _tokenize_session(Frontend frontend, Compiler c, String source);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename);
@@ -328,6 +330,7 @@ int Frontend_load_prelude(Frontend frontend){
   if(! _init_guard_) _file_init_();
   struct CliRequest request = * frontend -> request;
   request.dump = 0;
+  request.cpp_expansion = _expands_cpp(& request);
   request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
   struct Frontend session = * frontend;
   session.request = & request;
@@ -543,7 +546,7 @@ int ParsedUnit_collect_native(ParsedUnit * unit, Frontend frontend){
           macros -> cpp = state;
           Compiler_tokenize(macros, definitions);
           Compiler_preprocess_tokens(macros);
-          c -> command_macros = Cpp_changes(state, Map_new());
+          c -> command_macros = List_sort(Cpp_changes(state, Map_new()));
         }
         x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
       }
@@ -761,7 +764,7 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   c -> source_map = request -> source_map;
   c -> sources = request -> sources;
   c -> package_source_dirs = request -> package_dirs;
-  c -> cpp_expansion = request -> cpp_expansion && ! request -> no_cpp;
+  c -> cpp_expansion = _expands_cpp(request);
   if(c -> cpp_expansion) c -> command_macros = Compiler_command_macros(request -> cpp_args);
   c -> source_facts = request -> source_facts;
   c -> source_primary = 1;
@@ -773,6 +776,10 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   }
   c -> recovery_depth ++;
   return c;
+}
+
+static int _expands_cpp(CliRequest request){
+  return request -> cpp_expansion && ! request -> no_cpp;
 }
 
 static void _tokenize_session(Frontend frontend, Compiler c, String source){
@@ -1072,10 +1079,7 @@ static String _take_line_markers(Compiler cpp, String text){
   return String_join(_23, Array_list_free(kept));
 }
 
-Cpp Cpp_new(Map);
-
 static void _tokenize_cpp(Compiler cpp, String text){
-  cpp -> cpp = Cpp_new(Map_new());
   Compiler_tokenize(cpp, text);
   cpp -> source_facts = 0;
   cpp -> source_private = - 1;

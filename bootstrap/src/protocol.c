@@ -795,7 +795,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _374 = List_var(_373);
   _375 = Symbol_var(39266);
   _376 = Symbol_var(106239471489226);
-  _377 = int_var(2206);
+  _377 = int_var(2194);
   _378 = String_new("");
   _379 = String_var(_378);
   _380 = String_new("x2c.hole");
@@ -939,7 +939,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _515 = cons(_364, _514);
   _516 = cons(_358, _515);
   _517 = List_var(_516);
-  _518 = int_var(2213);
+  _518 = int_var(2201);
   _519 = cons(_431, NULL);
   _520 = cons(_464, _507);
   _521 = cons(_483, _520);
@@ -948,7 +948,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _524 = String_new("discard-helper");
   _525 = String_new("fresh-callee ");
   _526 = Symbol_var(40070);
-  _527 = int_var(2282);
+  _527 = int_var(2268);
   _528 = cons(_405, NULL);
   _529 = cons(_383, _528);
   _530 = List_var(_529);

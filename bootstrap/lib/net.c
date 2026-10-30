@@ -565,17 +565,17 @@ Listener Listener_bind(String host, int port){
 
 }
 
-int x2c_net_accept_fd(Listener listener);
+int _x2c_net_accept_fd(Listener listener);
 
 Socket Socket_adopt(int fd);
 
 Socket Listener_accept(Listener listener){
   if(! _init_guard_) _file_init_();
-  int fd = x2c_net_accept_fd(listener);
+  int fd = _x2c_net_accept_fd(listener);
   return fd < 0 ? NULL : Socket_adopt(fd);
 }
 
-int x2c_net_accept_fd(Listener listener){
+int _x2c_net_accept_fd(Listener listener){
   if(! _init_guard_) _file_init_();
   struct pollfd wait ={
     .fd = listener -> fd, .events = POLLIN
@@ -641,7 +641,7 @@ Socket Socket_connect(String host, int port, int timeout_ms){
   if(! _init_guard_) _file_init_();
   _port(port, _2);
   if(! String_truth(host) || timeout_ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 138,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 140,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.connect")), NULL))));
     __builtin_unreachable();
   }
@@ -668,18 +668,6 @@ Socket Socket_connect(String host, int port, int timeout_ms){
         error = errno;
       }
       _io(_2, error);
-      {
-        Socket _x2c_gensym_return_value_7 = NULL;
-        {
-          if(x2c_exception_claim(& _x2c_gensym_exception_frame_1)){
-            freeaddrinfo(addresses);
-          }
-          x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-          return _x2c_gensym_return_value_7;
-        }
-
-      }
-
     }
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_1);
@@ -736,10 +724,10 @@ Socket Socket_adopt(int fd){
       fd = copy = - 1;
       input = output = NULL;
       {
-        Socket _x2c_gensym_return_value_8 = socket;
+        Socket _x2c_gensym_return_value_7 = socket;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-          return _x2c_gensym_return_value_8;
+          return _x2c_gensym_return_value_7;
         }
 
       }
@@ -753,7 +741,7 @@ Socket Socket_adopt(int fd){
 void Socket_set_timeout(Socket s, int ms){
   if(! _init_guard_) _file_init_();
   if(ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 185,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 186,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.set_timeout")), NULL))));
     __builtin_unreachable();
   }
@@ -878,7 +866,7 @@ static void _drop_socket(void * ptr){
 
 static void _port(int port, String operation){
   if(port < 0 || port > 65535){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 303,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 304,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(1080488), int_var(port));
     __builtin_unreachable();
   }
@@ -899,7 +887,7 @@ static struct addrinfo * _resolve(String host, int port, int flags){
   if(status){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("getaddrinfo")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 317,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 318,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 31862161386376, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(556264), String_var(host));
       __builtin_unreachable();
     }
@@ -917,7 +905,7 @@ static int _failed(int fd){
 
 _Noreturn static void _io(String operation, int error){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 329,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 330,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 20399393368, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }

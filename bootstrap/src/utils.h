@@ -91,5 +91,7 @@ _Noreturn void Diagnostics_driver_error(const char * message);
 
 String Compiler_cache_root(void);
 
+void Compiler_prune_cache(String directory);
+
 
 #endif /* __GUARD_0x0D648550__ */

@@ -573,7 +573,7 @@ List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 189,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 187,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -589,7 +589,7 @@ List List_getslice(List list, int start, int stop, int step){
   if(! step){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 208,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 206,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -723,7 +723,7 @@ static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 305,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 299,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -990,7 +990,7 @@ static List f8_building____concat_va(unsigned n, va_list ap){
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f8_building____concat_va",.line = 149,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f8_building____concat_va",.line = 147,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -1046,7 +1046,7 @@ static List f8_building____list_va(unsigned n, va_list ap){
         if(Var_is_void(value)){
           Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL)));
           {
-            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f8_building____list_va",.line = 159,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f8_building____list_va",.line = 157,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), unsigned_var(i));
             __builtin_unreachable();
           }

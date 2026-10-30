@@ -4340,7 +4340,7 @@ static List f8_literals____ordered_parts(Compiler c, Array values, Array orders)
   int count = f8_literals____ordered_count(orders);
   if(! count) return NULL;
   Array declarations = Array_new();
-  for(int i = 0;  i < count;  i ++) if(Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_parts",.line = 184}; & _x2c_gensym_error_site_1; })))) Array_setindex(values, i, List_var(f8_literals____sequenced(c, f8_literals____passed_as(Var_list_payload(Array_getindex(values, i)), List_type(_41)), _1406, declarations)));
+  for(int i = 0;  i < count;  i ++) if(Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_parts",.line = 182}; & _x2c_gensym_error_site_1; })))) Array_setindex(values, i, List_var(f8_literals____sequenced(c, f8_literals____passed_as(Var_list_payload(Array_getindex(values, i)), List_type(_41)), _1406, declarations)));
   return Array_list_free(declarations);
 }
 
@@ -4349,7 +4349,7 @@ static List f8_literals____ordered_parts(Compiler c, Array values, Array orders)
 static int f8_literals____ordered_count(Array orders){
   int reads = 0, count = 0;
   for(int i = 0;  i < Array_len(orders);  i ++){
-    int order = Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_count",.line = 194}; & _x2c_gensym_error_site_2; })));
+    int order = Var_int(Var_convert_at(Array_getindex(orders, i), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/transform/literals.x",.function = "f8_literals____ordered_count",.line = 192}; & _x2c_gensym_error_site_2; })));
     if(order) reads ++;
     if(order > 1) count = i + 1;
   }

@@ -8,6 +8,7 @@
 #include "net.h"
 #include "json.h"
 #include "path.h"
+#include "url.h"
 #include "channel.h"
 #include <ctype.h>
 #include <errno.h>
@@ -185,12 +186,6 @@ void HttpServer_stop(HttpServer s);
 void HttpServer_close(HttpServer s);
 
 void HttpRequest_init(HttpRequest value);
-
-void HttpResponse_init(HttpResponse value);
-
-void Router_init(Router value);
-
-void HttpServer_init(HttpServer value);
 
 
 #endif /* __GUARD_0x11965B5C__ */

@@ -922,7 +922,7 @@ static List f8_bindings____scope_binding(Sym s, SymScope * scope, List key){
   }
   List _x2c_gensym_destructure_0 = binding;
   Var binding_tag = List_getindex(_x2c_gensym_destructure_0, 0);
-  int identity = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/symtab/bindings.x",.function = "f8_bindings____scope_binding",.line = 264}; & _x2c_gensym_error_site_0; })));
+  int identity = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/symtab/bindings.x",.function = "f8_bindings____scope_binding",.line = 260}; & _x2c_gensym_error_site_0; })));
   String spelling = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
   (void) binding_tag;
   if(!(Map_contains(s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL))), String_var(spelling));
@@ -1556,10 +1556,7 @@ List Compiler_imported_providers(Compiler c, String name){
     while(Map_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_14), &(_x2c_gensym_macro_cursor_output_15))){
       package = Var_as_string(_x2c_gensym_macro_cursor_output_14);
       root = Var_as_string(_x2c_gensym_macro_cursor_output_15);
-      {
-        if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_73), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
-      }
-
+      if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_73), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
     }
 
   }

@@ -184,6 +184,7 @@ typedef struct FileWalk{
   Map globs, visited;
   Array parts;
   Map definitions, dependencies, statics, hashes;
+  Map arms;
   Cpp start;
   int unit, linkage, line, pos, deferred;
 }
@@ -215,7 +216,9 @@ static String _runtime_text(Compiler c, String runtime);
 
 static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSource module, String dir, Map globs, Map visited);
 
-static void f4_walk____split(FileWalk * w, Token first, Map arms);
+static Map f4_walk____arms_by_position(Token first, Map stacks);
+
+static void f4_walk____split(FileWalk * w, Token first);
 
 static int f4_walk____directive(FileWalk * w, Token token);
 
@@ -238,6 +241,8 @@ static void f4_walk____parse(FileWalk * w, String segment, Map overlay);
 static void f4_walk____prepare(FileWalk * w, Compiler shadow, String segment);
 
 static void f4_walk____shift_tokens(Tokenizer t, int line, int pos);
+
+static Map f4_walk____segment_arms(Map arms, Tokenizer tokenizer);
 
 static void f4_walk____merge_file(FileWalk * w, Compiler shadow, Map overlay);
 
@@ -2383,7 +2388,7 @@ static void f4_walk____replay_cpp(Compiler c, Cpp cpp, List event){
   Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_0, 0));
   String text = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 1));
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
-  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/collect/walk.x",.function = "f4_walk____replay_cpp",.line = 231}; & _x2c_gensym_error_site_0; })));
+  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/collect/walk.x",.function = "f4_walk____replay_cpp",.line = 234}; & _x2c_gensym_error_site_0; })));
   struct Token token ={
     .type = 35579270086, .text = text, .line = line
   }
@@ -2650,7 +2655,7 @@ static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSou
       {
         scan -> tokenizer = tokenizer;
         Compiler_scan_conditionals(scan);
-        arms = scan -> arm_stacks;
+        arms = f4_walk____arms_by_position(tokenizer -> tokens, scan -> arm_stacks);
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
     }
@@ -2709,7 +2714,7 @@ static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSou
                     * _x2c_gensym_macro_address_17 = tokenizer -> layout;
                     {
                       FileWalk w ={
-                        .c = c, .path = path, .text = text, .dir = dir, .module = module, .globs = globs, .visited = visited, .parts = Array_new(), .definitions = Map_new(), .dependencies = _cache_map(), .statics = Map_new(), .hashes = _cache_map(), .unit = Path_is_x2c_source(path), .line = 1
+                        .c = c, .path = path, .text = text, .dir = dir, .module = module, .globs = globs, .visited = visited, .parts = Array_new(), .definitions = Map_new(), .dependencies = _cache_map(), .statics = Map_new(), .hashes = _cache_map(), .arms = arms, .unit = Path_is_x2c_source(path), .line = 1
                       }
                       ;
                       if(String_equal(path, _canonical_path(c -> filename))) c -> meta_hashes = w.hashes;
@@ -2725,7 +2730,7 @@ static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSou
                         Map_merge(globs, metadata);
                       }
                       Map_setindex(visited, String_var(path), Array_var(w.parts));
-                      f4_walk____split(&(w), tokenizer -> tokens, arms);
+                      f4_walk____split(&(w), tokenizer -> tokens);
                       Map_setindex(visited, String_var(path), int_var(1));
                       f4_walk____add_defaults(&(w));
                       f4_walk____queue_public_bodies(&(w));
@@ -2753,6 +2758,13 @@ static void f4_walk____walk_file(Compiler c, String path, String text, ModuleSou
 
 }
 
+static Map f4_walk____arms_by_position(Token first, Map stacks){
+  Map arms = Map_new();
+  Var open;
+  for(Token token = first;  token -> type != 11212;  token ++) if(token -> type == 35579270086 && Map_try_get(stacks, long_var((long)(token - first)), &(open))) Map_setindex(arms, long_var((long) token -> pos), open);
+  return arms;
+}
+
 Cpp Cpp_copy(Cpp);
 
 String Compiler_preproc_directive(String);
@@ -2761,14 +2773,14 @@ Symbol Compiler_preproc_conditional_kind(String);
 
 int Cpp_hidden(Cpp);
 
-static void f4_walk____split(FileWalk * w, Token first, Map arms){
+static void f4_walk____split(FileWalk * w, Token first){
   Cpp cpp =(* w).c -> cpp_expansion ? Cpp_new(Compiler_initial_macros((* w).c, (* w).path)) : NULL;
   if(cpp)(* w).start = Cpp_copy(cpp);
   int hidden = 0;
   for(Token token = first;  token -> type != 11212;  token ++){
     if(token -> type != 35579270086 || ! f4_walk____starts_line(first, token)) continue;
     Var open;
-    if(Map_truth(arms) && Map_try_get(arms, long_var((long)(token - first)), &(open))){
+    if(Map_truth((* w).arms) && Map_try_get((* w).arms, long_var((long) token -> pos), &(open))){
       hidden = 0;
       {
         List group;
@@ -3019,6 +3031,7 @@ static void f4_walk____prepare(FileWalk * w, Compiler shadow, String segment){
   if((* w).module) shadow -> line_markers =(* w).module -> markers;
   if((* w).c -> source_facts) Map_setindex((* w).c -> source_texts, String_var(Path_absolute((* w).path)), String_var((* w).module ?(* w).module -> own :(* w).text));
   f4_walk____shift_tokens(shadow -> tokenizer, (* w).line, (* w).pos);
+  if(Map_truth((* w).arms)) shadow -> arm_stacks = f4_walk____segment_arms((* w).arms, shadow -> tokenizer);
   Compiler_preprocess_tokens(shadow);
 }
 
@@ -3029,6 +3042,14 @@ static void f4_walk____shift_tokens(Tokenizer t, int line, int pos){
     token -> pos += pos;
   }
 
+}
+
+static Map f4_walk____segment_arms(Map arms, Tokenizer tokenizer){
+  Map stacks = Map_new();
+  Token first = tokenizer -> tokens;
+  Var open;
+  for(Token token = first;  token -> type != 11212;  token ++) if(token -> type == 35579270086 && Map_try_get(arms, long_var((long) token -> pos), &(open))) Map_setindex(stacks, long_var((long)(token - first)), open);
+  return stacks;
 }
 
 Map Sym_file_statics(Sym);

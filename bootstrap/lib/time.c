@@ -838,7 +838,7 @@ double round(double);
 static long long _from_seconds(String operation, double seconds){
   double whole = floor(seconds);
   if(!(fabs(whole) < 1e10)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/time.x",.function = "_from_seconds",.line = 303,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/time.x",.function = "_from_seconds",.line = 304,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 245103016899018, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(46228810), double_var(seconds));
     __builtin_unreachable();
   }
@@ -886,7 +886,7 @@ _Noreturn static void _out_of_range(String operation){
     Var _x2c_gensym_literal_part_0 = String_var(operation);
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("outside the 64-bit nanosecond range")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/time.x",.function = "_out_of_range",.line = 345,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/time.x",.function = "_out_of_range",.line = 346,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 245103016899018, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1);
       __builtin_unreachable();
     }
@@ -1040,7 +1040,7 @@ _Noreturn static void _malformed(Reader * r, String reason){
     Var _x2c_gensym_literal_part_3 = String_var(reason);
     Var _x2c_gensym_literal_part_4 = int_var((* r).at);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/time.x",.function = "_malformed",.line = 509,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/time.x",.function = "_malformed",.line = 510,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), _x2c_gensym_literal_part_3, Symbol_var(1019648360), _x2c_gensym_literal_part_4);
       __builtin_unreachable();
     }

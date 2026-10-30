@@ -502,7 +502,7 @@ static void _note_function_macro(Compiler c, String name, Token params){
   Token first = Token_skip_trivia(params + 1);
   if(first -> type == 19147688 && Token_skip_trivia(first + 1) -> type == 83) param = first -> text;
   Var kind = _macro_prefix(c, after, param);
-  if(x2c_var_equal_lane(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
+  if(x2c_var_equal_lane(kind, List_var(NULL)) || x2c_var_equal_lane(kind, Symbol_var(3617589472522))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
   else if(x2c_var_equal_lane(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
 }
 
@@ -514,7 +514,7 @@ static void _note_prefix_macro(Compiler c, String name, Token body){
 static Var _macro_prefix(Compiler c, Token token, String param){
   if(token -> type == 27051791223990) return Symbol_var(1318210446);
   Array words = Array_new();
-  int wrapped = 0;
+  int wrapped = 0, attributes = 0;
   while(token -> type != 11212){
     Symbol type = token -> type;
     String word = token -> text;
@@ -526,9 +526,12 @@ static Var _macro_prefix(Compiler c, Token token, String param){
     else if(_is_annotation(c, word)){
       if(next -> type != 81) return int_var(1);
       next = Token_after_group(next);
+      attributes = 1;
     }
     else if(String_truth(param) && String_equal(word, param) && ! wrapped) wrapped = 1;
-    else if(! Map_try_get(c -> object_macros, String_var(word), &(definition)) || ! Var_is_row(definition, 9, 7, 4)) return int_var(1);
+    else if(! Map_try_get(c -> object_macros, String_var(word), &(definition))) return int_var(1);
+    else if(x2c_var_equal_lane(definition, Symbol_var(3617589472522))) attributes = 1;
+    else if(! Var_is_row(definition, 9, 7, 4)) return int_var(1);
     else{
       Symbol item;
       Iter _x2c_gensym_macro_iterator_5 = Var_iter(definition, &(struct Iter){
@@ -544,7 +547,8 @@ static Var _macro_prefix(Compiler c, Token token, String param){
     }
     token = next;
   }
-  return wrapped ? Symbol_var(50603262308) : List_var(Array_list_free(words));
+  if(wrapped) return Symbol_var(50603262308);
+  return attributes && ! Array_len(words) ? Symbol_var(3617589472522) : List_var(Array_list_free(words));
 }
 
 int Symbol_is_storage_class(Symbol);
@@ -565,9 +569,10 @@ static int _is_annotation(Compiler c, String word){
 }
 
 static int _prefix_rank(Var v){
+  if(x2c_var_equal_lane(v, Symbol_var(3617589472522))) return 3;
   if(! Var_is_row(v, 9, 7, 4)) return 0;
   List words = Var_list_payload(v);
-  if(List_contains(words, Symbol_var(1317118534))) return 4;
+  if(List_contains(words, Symbol_var(1317118534))) return 5;
   {
     Symbol word;
     List _x2c_gensym_macro_object_6 = words;
@@ -579,7 +584,7 @@ static int _prefix_rank(Var v){
     }
 
   }
-  return List_truth(words) ? 3 : 2;
+  return List_truth(words) ? 4 : 2;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

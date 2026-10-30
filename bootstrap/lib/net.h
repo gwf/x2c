@@ -78,7 +78,7 @@ Listener Listener_bind(String host, int port);
 
 Socket Listener_accept(Listener listener);
 
-int x2c_net_accept_fd(Listener listener);
+int _x2c_net_accept_fd(Listener listener);
 
 int Listener_port(Listener listener);
 

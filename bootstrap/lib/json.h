@@ -44,7 +44,7 @@ void Json_write_file(Var value, Path path);
 
 String Var_json(Var value);
 
-void x2c_json_write(Buffer out, Var value, int pretty);
+void _x2c_json_write(Buffer out, Var value, int pretty);
 
 JsonBool Var_jsonbool(Var value);
 

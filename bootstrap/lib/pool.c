@@ -766,7 +766,7 @@ Var Pool_lookup(Pool inner, Var key){
 Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 111,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 109,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
@@ -799,7 +799,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 133,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 131,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
@@ -933,24 +933,22 @@ Pool Pool_retain_named(Pool inner, const char * name){
 
 }
 
-Pool Pool_release(Pool inner){
+Pool Pool_release(Pool p){
   if(! _init_guard_) Pool_initialize();
-  if(! inner) return NULL;
+  if(! p) return NULL;
   __atomic_fetch_add(& value_epoch, 1, __ATOMIC_RELEASE);
   _storage_lock();
-  _lock(inner);
-  Pool up = inner -> up;
+  _lock(p);
+  Pool up = p -> up;
   _lock(up);
-  if(up){
-    __atomic_store_n(& up -> child_capacity, inner -> table -> capacity, __ATOMIC_RELAXED);
-  }
-  _release_blocks(inner);
+  if(up) __atomic_store_n(& up -> child_capacity, p -> table -> capacity, __ATOMIC_RELAXED);
+  _release_blocks(p);
   _unlock(up);
-  _unlock(inner);
+  _unlock(p);
   _storage_unlock();
-  pthread_mutex_destroy(& inner -> mutex);
-  if(inner == value_root) _root_initialize(NULL);
-  Scope_destroy(inner -> scope);
+  pthread_mutex_destroy(& p -> mutex);
+  if(p == value_root) _root_initialize(NULL);
+  Scope_destroy(p -> scope);
   return up;
 }
 

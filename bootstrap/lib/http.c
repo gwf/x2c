@@ -4,6 +4,7 @@
 #include "net.h"
 #include "json.h"
 #include "path.h"
+#include "url.h"
 #include "channel.h"
 #include <ctype.h>
 #include <errno.h>
@@ -17,11 +18,11 @@ typedef struct HttpRequest{
 }
 * HttpRequest;
 
-static List _61, _60, _59, _58, _55, _54, _50, _49, _47, _46, _44, _40;
+static List _60, _59, _58, _57, _54, _53, _49, _48, _46, _45, _43, _39;
 
-static String _111, _110, _109, _108, _105, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _52, _42, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _111, _110, _109, _108, _105, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _51, _41, _37, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _107, _106, _104, _103, _57, _56, _53, _51, _48, _45, _43, _41, _39, _37;
+static Var _107, _106, _104, _103, _56, _55, _52, _50, _47, _44, _42, _40, _38, _36;
 
 static int _init_guard_ = 0;
 
@@ -63,9 +64,7 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
 
 static String _line(File input, int limit, int status);
 
-static String _decode(String text, int query);
-
-static void _query(Map query, String text);
+static void _decode_target(HttpRequest req, String target);
 
 static int _method(String method);
 
@@ -315,13 +314,6 @@ _x2c_gensym_defer_env_22;
 
 static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22);
 
-typedef struct _x2c_gensym_defer_env_23{
-  const void * _x2c_gensym_defer_capture_25;
-}
-_x2c_gensym_defer_env_23;
-
-static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23);
-
 void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
 
 static Var Symbol_var(Symbol);
@@ -369,101 +361,101 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = String_new("unsupported HTTP version");
   _6 = String_new("invalid request target");
   _7 = String_new("unsupported method");
-  _8 = String_new("?");
-  _9 = String_new("incomplete headers");
-  _10 = String_new(":");
-  _11 = String_new("malformed header");
-  _12 = String_new("invalid header name");
-  _13 = String_new("content-length");
-  _14 = String_new("duplicate content length");
-  _15 = String_new("%s, %s");
-  _16 = String_new("host");
-  _17 = String_new("Host is required");
-  _18 = String_new("transfer-encoding");
-  _19 = String_new("transfer encoding is unsupported");
-  _20 = String_new("invalid content length");
-  _21 = String_new("body too large");
-  _22 = String_new("body is not text");
-  _23 = String_new("incomplete body");
-  _24 = String_new("connection");
-  _25 = String_new("\r");
-  _26 = String_new("\n");
-  _27 = String_new("content-type");
-  _28 = String_new("text/plain; charset=utf-8");
-  _29 = String_new("application/json");
-  _30 = String_new("%ld");
-  _31 = String_new("keep-alive");
-  _32 = String_new("close");
-  _33 = String_new("HttpResponse.write");
-  _34 = String_new("/");
-  _35 = String_new("%s%s*rest");
-  _36 = String_new("");
-  _37 = Symbol_var(437126);
-  _38 = String_new("HttpRequest");
-  _39 = String_var(_38);
-  _40 = cons(_39, NULL);
-  _41 = List_var(_40);
-  _42 = String_new("HttpResponse");
-  _43 = String_var(_42);
-  _44 = cons(_43, NULL);
-  _45 = List_var(_44);
-  _46 = cons(_45, NULL);
-  _47 = cons(_41, _46);
-  _48 = List_var(_47);
-  _49 = cons(_48, NULL);
-  _50 = cons(_37, _49);
-  _51 = List_var(_50);
-  _52 = String_new("Var");
-  _53 = String_var(_52);
-  _54 = cons(_53, NULL);
-  _55 = cons(_51, _54);
-  _56 = Symbol_var(54);
-  _57 = Symbol_var(1318234344);
-  _58 = cons(_57, _40);
-  _59 = cons(_56, _58);
-  _60 = cons(_57, _44);
-  _61 = cons(_56, _60);
-  _62 = String_new("method not allowed");
-  _63 = String_new("not found");
-  _64 = String_new("::");
-  _65 = String_new("headers too large");
-  _66 = String_new("incomplete line");
-  _67 = String_new("NUL in header");
-  _68 = String_new("line too large");
-  _69 = String_new("CRLF required");
+  _8 = String_new("incomplete headers");
+  _9 = String_new(":");
+  _10 = String_new("malformed header");
+  _11 = String_new("invalid header name");
+  _12 = String_new("content-length");
+  _13 = String_new("duplicate content length");
+  _14 = String_new("%s, %s");
+  _15 = String_new("host");
+  _16 = String_new("Host is required");
+  _17 = String_new("transfer-encoding");
+  _18 = String_new("transfer encoding is unsupported");
+  _19 = String_new("invalid content length");
+  _20 = String_new("body too large");
+  _21 = String_new("body is not text");
+  _22 = String_new("incomplete body");
+  _23 = String_new("connection");
+  _24 = String_new("\r");
+  _25 = String_new("\n");
+  _26 = String_new("content-type");
+  _27 = String_new("text/plain; charset=utf-8");
+  _28 = String_new("application/json");
+  _29 = String_new("%ld");
+  _30 = String_new("keep-alive");
+  _31 = String_new("close");
+  _32 = String_new("HttpResponse.write");
+  _33 = String_new("/");
+  _34 = String_new("%s%s*rest");
+  _35 = String_new("");
+  _36 = Symbol_var(437126);
+  _37 = String_new("HttpRequest");
+  _38 = String_var(_37);
+  _39 = cons(_38, NULL);
+  _40 = List_var(_39);
+  _41 = String_new("HttpResponse");
+  _42 = String_var(_41);
+  _43 = cons(_42, NULL);
+  _44 = List_var(_43);
+  _45 = cons(_44, NULL);
+  _46 = cons(_40, _45);
+  _47 = List_var(_46);
+  _48 = cons(_47, NULL);
+  _49 = cons(_36, _48);
+  _50 = List_var(_49);
+  _51 = String_new("Var");
+  _52 = String_var(_51);
+  _53 = cons(_52, NULL);
+  _54 = cons(_50, _53);
+  _55 = Symbol_var(54);
+  _56 = Symbol_var(1318234344);
+  _57 = cons(_56, _39);
+  _58 = cons(_55, _57);
+  _59 = cons(_56, _43);
+  _60 = cons(_55, _59);
+  _61 = String_new("method not allowed");
+  _62 = String_new("not found");
+  _63 = String_new("::");
+  _64 = String_new("headers too large");
+  _65 = String_new("incomplete line");
+  _66 = String_new("NUL in header");
+  _67 = String_new("line too large");
+  _68 = String_new("CRLF required");
+  _69 = String_new("invalid percent escape in URL");
   _70 = String_new("invalid URL byte");
-  _71 = String_new("invalid percent escape");
-  _72 = String_new("&");
-  _73 = String_new("=");
-  _74 = String_new("GET");
-  _75 = String_new("POST");
-  _76 = String_new("PUT");
-  _77 = String_new("DELETE");
-  _78 = String_new("HEAD");
-  _79 = String_new("OPTIONS");
-  _80 = String_new("PATCH");
-  _81 = String_new(".html");
-  _82 = String_new("text/html; charset=utf-8");
-  _83 = String_new(".css");
-  _84 = String_new("text/css");
-  _85 = String_new(".js");
-  _86 = String_new("text/javascript");
-  _87 = String_new(".json");
-  _88 = String_new(".txt");
-  _89 = String_new("text/plain");
-  _90 = String_new(".svg");
-  _91 = String_new("image/svg+xml");
-  _92 = String_new(".png");
-  _93 = String_new("image/png");
-  _94 = String_new(".jpg");
-  _95 = String_new("image/jpeg");
-  _96 = String_new(".gif");
-  _97 = String_new("image/gif");
-  _98 = String_new(".ico");
-  _99 = String_new("image/x-icon");
-  _100 = String_new("application/octet-stream");
-  _101 = String_new("error");
-  _102 = String_new("malformed JSON");
+  _71 = String_new("?");
+  _72 = String_new("GET");
+  _73 = String_new("POST");
+  _74 = String_new("PUT");
+  _75 = String_new("DELETE");
+  _76 = String_new("HEAD");
+  _77 = String_new("OPTIONS");
+  _78 = String_new("PATCH");
+  _79 = String_new(".html");
+  _80 = String_new("text/html; charset=utf-8");
+  _81 = String_new(".css");
+  _82 = String_new("text/css");
+  _83 = String_new(".js");
+  _84 = String_new("text/javascript");
+  _85 = String_new(".json");
+  _86 = String_new(".txt");
+  _87 = String_new("text/plain");
+  _88 = String_new(".svg");
+  _89 = String_new("image/svg+xml");
+  _90 = String_new(".png");
+  _91 = String_new("image/png");
+  _92 = String_new(".jpg");
+  _93 = String_new("image/jpeg");
+  _94 = String_new(".gif");
+  _95 = String_new("image/gif");
+  _96 = String_new(".ico");
+  _97 = String_new("image/x-icon");
+  _98 = String_new("application/octet-stream");
+  _99 = String_new("Json.parse");
+  _100 = String_new("error");
+  _101 = String_new("malformed JSON");
+  _102 = String_new("malformed request");
   _103 = Symbol_var(227594);
   _104 = Symbol_var(280234584);
   _105 = String_new("internal server error");
@@ -1090,7 +1082,7 @@ String HttpServer_repr(HttpServer value){
 
 void Http_fail(int status, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 55,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 58,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 19010664401496, 2, Symbol_var(1317119334), int_var(status), Symbol_var(1218550748), String_var(reason));
   }
 
@@ -1114,17 +1106,17 @@ Symbol Symbol_new(const char *);
 
 Map Map_new(void);
 
-int String_find(String, String);
-
-String String_new_len(const char *, int);
-
-String String_new(const char *);
-
 int String_len(String);
+
+int String_find(String, String);
 
 String String_lower(String);
 
+String String_new_len(const char *, int);
+
 String String_strip(String, char *);
+
+String String_new(const char *);
 
 int Map_contains(Map, Var);
 
@@ -1173,45 +1165,41 @@ HttpRequest HttpRequest_read(File input, int body_limit){
   HttpRequest req = Scope_calloc(1, sizeof(struct HttpRequest));
   if(! _method(method)) Http_fail(405, _7);
   req -> method = Symbol_new(method);
-  req -> query = Map_new();
   req -> headers = Map_new();
   req -> params = Map_new();
-  int question = String_find(target, _8);
-  String path = question < 0 ? target : String_new_len(target, question);
-  req -> path = _decode(path, 0);
-  if(question >= 0) _query(req -> query, String_new(target + question + 1));
+  _decode_target(req, target);
   int used = 0;
   for(; ; ){
     String line = _line(input, 65536 - used, 431);
     if(! String_truth(line)){
-      if(feof(input)) Http_fail(400, _9);
+      if(feof(input)) Http_fail(400, _8);
       break;
     }
     used += String_len(line) + 2;
-    int colon = String_find(line, _10);
-    if(colon <= 0) Http_fail(400, _11);
+    int colon = String_find(line, _9);
+    if(colon <= 0) Http_fail(400, _10);
     String name = String_lower(String_new_len(line, colon));
-    if(! _header_name(name)) Http_fail(400, _12);
+    if(! _header_name(name)) Http_fail(400, _11);
     String value = String_strip(String_new(line + colon + 1), NULL);
     if(Map_contains(req -> headers, String_var(name))){
-      if(String_equal(name, _13)) Http_fail(400, _14);
-      value = String_format(_15, ({
+      if(String_equal(name, _12)) Http_fail(400, _13);
+      value = String_format(_14, ({
         Var _x2c_gensym_literal_part_0 = String_var(Var_str(Map_getindex(req -> headers, String_var(name))));  cons(_x2c_gensym_literal_part_0, cons(String_var(value), NULL));
       }
       ));
     }
     Map_setindex(req -> headers, String_var(name), String_var(value));
   }
-  if(String_equal(version, _3) &&(! Map_contains(req -> headers, String_var(_16)) || ! String_truth(Var_str(Map_getindex(req -> headers, String_var(_16)))))) Http_fail(400, _17);
-  if(Map_contains(req -> headers, String_var(_18))) Http_fail(411, _19);
+  if(String_equal(version, _3) &&(! Map_contains(req -> headers, String_var(_15)) || ! String_truth(Var_str(Map_getindex(req -> headers, String_var(_15)))))) Http_fail(400, _16);
+  if(Map_contains(req -> headers, String_var(_17))) Http_fail(411, _18);
   long length = 0;
-  if(Map_contains(req -> headers, String_var(_13))){
-    String text = Var_as_string(Map_getindex(req -> headers, String_var(_13)));
-    if(! String_truth(text)) Http_fail(400, _20);
+  if(Map_contains(req -> headers, String_var(_12))){
+    String text = Var_as_string(Map_getindex(req -> headers, String_var(_12)));
+    if(! String_truth(text)) Http_fail(400, _19);
     for(int i = 0;  i < String_len(text);  i ++){
-      if(String_getindex(text, i) < '0' || String_getindex(text, i) > '9') Http_fail(400, _20);
+      if(String_getindex(text, i) < '0' || String_getindex(text, i) > '9') Http_fail(400, _19);
       length = length * 10 + String_getindex(text, i) - '0';
-      if(length > body_limit) Http_fail(413, _21);
+      if(length > body_limit) Http_fail(413, _20);
     }
 
   }
@@ -1237,7 +1225,7 @@ HttpRequest HttpRequest_read(File input, int body_limit){
           x2c_error_catch_detach(_x2c_gensym_error_handler_0);
           x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
           if(_x2c_gensym_macro_selected_0 == 0){
-            Http_fail(400, _22);
+            Http_fail(400, _21);
           }
 
         }
@@ -1255,8 +1243,8 @@ HttpRequest HttpRequest_read(File input, int body_limit){
     }
 
   }
-  if(String_len(req -> body) != length) Http_fail(400, _23);
-  String connection = Map_contains(req -> headers, String_var(_24)) ? Var_str(Map_getindex(req -> headers, String_var(_24))) : NULL;
+  if(String_len(req -> body) != length) Http_fail(400, _22);
+  String connection = Map_contains(req -> headers, String_var(_23)) ? Var_str(Map_getindex(req -> headers, String_var(_23))) : NULL;
   req -> keep_alive = _keep_alive(connection, String_equal(version, _3));
   return req;
 }
@@ -1282,8 +1270,8 @@ String String_join(String, List);
 
 HttpResponse HttpResponse_header(HttpResponse res, String name, String value){
   if(! _init_guard_) _file_init_();
-  if(! _header_name(name) || String_find(value, _25) >= 0 || String_find(value, _26) >= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 142,.runtime = 1};
+  if(! _header_name(name) || String_find(value, _24) >= 0 || String_find(value, _25) >= 0){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 150,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpResponse.header")), NULL))));
     __builtin_unreachable();
   }
@@ -1296,7 +1284,7 @@ Buffer Buffer_clear(Buffer);
 HttpResponse HttpResponse_text(HttpResponse res, String text){
   if(! _init_guard_) _file_init_();
   Buffer_write(Buffer_clear(res -> body), text);
-  Map_setindex(res -> headers, String_var(_27), String_var(_28));
+  Map_setindex(res -> headers, String_var(_26), String_var(_27));
   return res;
 }
 
@@ -1317,9 +1305,9 @@ HttpResponse HttpResponse_json(HttpResponse res, Var value){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_12);
     {
-      x2c_json_write(res -> body, value, 0);
+      _x2c_json_write(res -> body, value, 0);
       written = 1;
-      Map_setindex(res -> headers, String_var(_27), String_var(_29));
+      Map_setindex(res -> headers, String_var(_26), String_var(_28));
       {
         HttpResponse _x2c_gensym_return_value_12 = res;
         {
@@ -1374,8 +1362,8 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
     x2c_cleanup_push(& _x2c_gensym_defer_record_13);
     {
       Buffer_printf(head, "HTTP/1.1 %d %s\r\n", res -> code, _reason(res -> code));
-      Map_setindex(res -> headers, String_var(_13), String_var(String_printf(_30, (long) Buffer_len(res -> body))));
-      Map_setindex(res -> headers, String_var(_24), String_var(keep_alive ? _31 : _32));
+      Map_setindex(res -> headers, String_var(_12), String_var(String_printf(_29, (long) Buffer_len(res -> body))));
+      Map_setindex(res -> headers, String_var(_23), String_var(keep_alive ? _30 : _31));
       {
         Var name, value;
         Map _x2c_gensym_macro_object_0 = res -> headers;
@@ -1392,7 +1380,7 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
       Buffer_write(head, "\r\n");
       File_write_all(output, head -> content -> bytes, Buffer_len(head));
       if(! head_only && res -> code != 204 && res -> code != 304) File_write_all(output, res -> body -> content -> bytes, Buffer_len(res -> body));
-      if(File_flush(output)) File_path_error(String_var(_33), NULL, errno);
+      if(File_flush(output)) File_path_error(String_var(_32), NULL, errno);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
   }
@@ -1413,7 +1401,7 @@ Router Router_route(Router r, Symbol method, String pattern, Func handler){
   if(! _init_guard_) _file_init_();
   HttpRoute route = Scope_calloc(1, sizeof(struct HttpRoute));
   route -> method = method;
-  route -> segments = String_split(pattern, _34);
+  route -> segments = String_split(pattern, _33);
   route -> handler = handler;
   Array_push(r -> routes, Var_new(3683441, route));
   return r;
@@ -1443,15 +1431,15 @@ int String_endswith(String, String);
 
 Router Router_files(Router router, String prefix, Path directory){
   if(! _init_guard_) _file_init_();
-  String pattern = String_format(_35, ({
-    Var _x2c_gensym_literal_part_1 = String_var(prefix);  Var _x2c_gensym_literal_part_2 = String_var(String_endswith(prefix, _34) ? _36 : _34);  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
+  String pattern = String_format(_34, ({
+    Var _x2c_gensym_literal_part_1 = String_var(prefix);  Var _x2c_gensym_literal_part_2 = String_var(String_endswith(prefix, _33) ? _35 : _33);  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
   }
   ));
   return Router_get(router, pattern, ({
     Var _x2c_gensym_lambda_capture_value_0 = String_var(directory);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
       _x2c_gensym_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_gensym_lambda_1, _55, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
+    ;  Func_new_context(_x2c_gensym_lambda_1, _54, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
   }
   ));
 }
@@ -1471,7 +1459,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
   if(! _init_guard_) _file_init_();
   int found = 0;
-  List segments = String_split(req -> path, _34);
+  List segments = String_split(req -> path, _33);
   {
     Var entry;
     Array _x2c_gensym_macro_object_2 = router -> routes;
@@ -1488,7 +1476,7 @@ void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
         _capture(route -> segments, segments, captures);
         req -> params = captures;
         ({
-          Func _x2c_gensym_macro_function_0 = route -> handler;  FuncArg _x2c_gensym_macro_storage_0[2];  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 0))) _x2c_gensym_macro_storage_0[0] = FuncArg_reference(&(req), _59);  else _x2c_gensym_macro_storage_0[0] = FuncArg_value(HttpRequest_var(req));  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 1))) _x2c_gensym_macro_storage_0[1] = FuncArg_reference(&(res), _61);  else _x2c_gensym_macro_storage_0[1] = FuncArg_value(HttpResponse_var(res));  Func_apply(_x2c_gensym_macro_function_0, 2, _x2c_gensym_macro_storage_0);
+          Func _x2c_gensym_macro_function_0 = route -> handler;  FuncArg _x2c_gensym_macro_storage_0[2];  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 0))) _x2c_gensym_macro_storage_0[0] = FuncArg_reference(&(req), _58);  else _x2c_gensym_macro_storage_0[0] = FuncArg_value(HttpRequest_var(req));  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 2, 1))) _x2c_gensym_macro_storage_0[1] = FuncArg_reference(&(res), _60);  else _x2c_gensym_macro_storage_0[1] = FuncArg_value(HttpResponse_var(res));  Func_apply(_x2c_gensym_macro_function_0, 2, _x2c_gensym_macro_storage_0);
         }
         );
         return;
@@ -1497,7 +1485,7 @@ void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
     }
 
   }
-  Http_fail(found ? 405 : 404, found ? _62 : _63);
+  Http_fail(found ? 405 : 404, found ? _61 : _62);
 }
 
 long Var_integer(Var);
@@ -1514,7 +1502,7 @@ HttpServer HttpServer_new(Router router, Map options){
   s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
   s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
   if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 265,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 281,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
     __builtin_unreachable();
   }
@@ -1524,7 +1512,7 @@ HttpServer HttpServer_new(Router router, Map options){
     Logger_add_stderr_sink(s -> logger);
     s -> owns_logger = 1;
   }
-  String host = Map_contains(options, Symbol_var(556264)) ? Var_str(Map_getindex(options, Symbol_var(556264))) : _64;
+  String host = Map_contains(options, Symbol_var(556264)) ? Var_str(Map_getindex(options, Symbol_var(556264))) : _63;
   int port = Map_contains(options, Symbol_var(1080488)) ? Var_integer(Map_getindex(options, Symbol_var(1080488))) : 8080;
   s -> listener = Listener_bind(host, port);
   s -> channel = Channel_new(Symbol_var(3453797), int_var(s -> workers));
@@ -1567,7 +1555,7 @@ void HttpServer_serve(HttpServer s){
         {
           for(int i = 0;  i < s -> workers;  i ++) Array_push(s -> threads, Var_new(1360144456, Thread_start(_worker, Var_new(3683441, s))));
           for(; ; ){
-            int fd = x2c_net_accept_fd(s -> listener);
+            int fd = _x2c_net_accept_fd(s -> listener);
             if(fd < 0) break;
             int sent = 0;
             {
@@ -1604,7 +1592,7 @@ void HttpServer_serve(HttpServer s){
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 305,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 324,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1650,7 +1638,7 @@ void HttpServer_close(HttpServer s){
 }
 
 static String _line(File input, int limit, int status){
-  if(limit < 2) Http_fail(status, _65);
+  if(limit < 2) Http_fail(status, _64);
   char bytes[65536];
   int size = 0;
   flockfile(input);
@@ -1670,7 +1658,7 @@ static String _line(File input, int limit, int status){
         int byte = getc_unlocked(input);
         if(byte == EOF){
           File_readblock(input, 0);
-          if(size) Http_fail(400, _66);
+          if(size) Http_fail(400, _65);
           {
             String _x2c_gensym_return_value_13 = NULL;
             {
@@ -1681,12 +1669,12 @@ static String _line(File input, int limit, int status){
           }
 
         }
-        if(! byte) Http_fail(400, _67);
-        if(size >= limit || size >=(int) sizeof(bytes)) Http_fail(status, _68);
+        if(! byte) Http_fail(400, _66);
+        if(size >= limit || size >=(int) sizeof(bytes)) Http_fail(status, _67);
         bytes[size ++] = byte;
         if(byte == '\n') break;
       }
-      if(size < 2 || bytes[size - 2] != '\r') Http_fail(400, _69);
+      if(size < 2 || bytes[size - 2] != '\r') Http_fail(400, _68);
       {
         String _x2c_gensym_return_value_14 = String_new_len(bytes, size - 2);
         {
@@ -1702,85 +1690,55 @@ static String _line(File input, int limit, int status){
 
 }
 
-static int scan_ascii_hex_value(int);
+String String_percent_decode(String);
 
-Buffer Buffer_write_char(Buffer, char);
-
-static String _decode(String text, int query){
-  int prefix = 0;
-  while(prefix < String_len(text)){
-    int c =(unsigned char) String_getindex(text, prefix);
-    if(c == '%' ||(query && c == '+')) break;
-    if(! c || c == '\r' || c == '\n') Http_fail(400, _70);
-    prefix ++;
-  }
-  if(prefix == String_len(text)) return text;
-  Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_2 = out;
+static void _decode_target(HttpRequest req, String target){
+  String volatile decoded = NULL;
   {
-    _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
-      0
+    ExceptionFrame _x2c_gensym_exception_frame_1;
+    static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
+    Var _x2c_gensym_macro_patterns_1[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_1 ={
+      _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_acquired_2;
-    X2CCleanup _x2c_gensym_defer_record_19 ={
-      .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_19
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
+      _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
     }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_19);
-    {
-      for(int i = 0;  i < String_len(text);  i ++){
-        int c =(unsigned char) String_getindex(text, i);
-        if(c == '%'){
-          if(i + 2 >= String_len(text)) Http_fail(400, _71);
-          int a = scan_ascii_hex_value(String_getindex(text, ++ i));
-          int b = scan_ascii_hex_value(String_getindex(text, ++ i));
-          if(a < 0 || b < 0) Http_fail(400, _71);
-          c = a * 16 + b;
-        }
-        else if(query && c == '+') c = ' ';
-        if(! c || c == '\r' || c == '\n') Http_fail(400, _70);
-        Buffer_write_char(out, c);
-      }
-      {
-        String _x2c_gensym_return_value_15 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
-          return _x2c_gensym_return_value_15;
+    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
+    x2c_exception_push(& _x2c_gensym_exception_frame_1);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) decoded = String_percent_decode(target);
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+        int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_1);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+        if(_x2c_gensym_macro_selected_1 == 0){
+          Http_fail(400, _69);
         }
 
       }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
-  }
-
-}
-
-static int List_try_next(List, List *, Var *);
-
-static void _query(Map query, String text){
-  {
-    String pair;
-    List _x2c_gensym_macro_object_3 = String_split(text, _72);
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_4))){
-      pair = Var_as_string(_x2c_gensym_macro_cursor_output_4);
-      {
-        int equal = String_find(pair, _73);
-        String key = equal < 0 ? pair : String_new_len(pair, equal);
-        Map_setindex(query, String_var(_decode(key, 1)), equal < 0 ? String_var(_36) : String_var(_decode(String_new(pair + equal + 1), 1)));
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_1);
+        _x2c_gensym_error_handler_1 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+        __builtin_unreachable();
       }
 
     }
-
+    x2c_error_catch_close(_x2c_gensym_error_handler_1);
+    _x2c_gensym_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
-
+  if(strpbrk(decoded, "\r\n")) Http_fail(400, _70);
+  int question = String_find(target, _71);
+  req -> path = String_percent_decode((question < 0 ? target : String_getslice(target, (-2147483647 - 1), x2c_slice_bound(question), 1)));
+  req -> query = question < 0 ? Map_new() : Url_parse_query(String_getslice(target, x2c_slice_bound(question + 1), (-2147483647 - 1), 1));
 }
 
 static int _method(String method){
-  return String_equal(method, _74) || String_equal(method, _75) || String_equal(method, _76) || String_equal(method, _77) || String_equal(method, _78) || String_equal(method, _79) || String_equal(method, _80);
+  return String_equal(method, _72) || String_equal(method, _73) || String_equal(method, _74) || String_equal(method, _75) || String_equal(method, _76) || String_equal(method, _77) || String_equal(method, _78);
 }
 
 static int _keep_alive(String values, int keep){
@@ -1832,7 +1790,7 @@ static void _capture(List pattern, List path, Map captures){
     String segment = Var_as_string(List_car(pattern));
     pattern = List_cdr(pattern);
     if(String_truth(segment) && String_getindex(segment, 0) == '*'){
-      Map_setindex(captures, String_var(String_new(segment + 1)), String_var(String_join(_34, path)));
+      Map_setindex(captures, String_var(String_new(segment + 1)), String_var(String_join(_33, path)));
       return;
     }
     String value = Var_as_string(List_car(path));
@@ -1863,8 +1821,8 @@ static const char * _reason(int code){
 Map Map_update_n(Map, unsigned, ...);
 
 static String _mime(String ext){
-  Map types = Map_update_n(Map_new(), 10, String_var(_81), String_var(_82), String_var(_83), String_var(_84), String_var(_85), String_var(_86), String_var(_87), String_var(_29), String_var(_88), String_var(_89), String_var(_90), String_var(_91), String_var(_92), String_var(_93), String_var(_94), String_var(_95), String_var(_96), String_var(_97), String_var(_98), String_var(_99));
-  return Map_contains(types, String_var(ext)) ? Var_str(Map_getindex(types, String_var(ext))) : _100;
+  Map types = Map_update_n(Map_new(), 10, String_var(_79), String_var(_80), String_var(_81), String_var(_82), String_var(_83), String_var(_84), String_var(_85), String_var(_28), String_var(_86), String_var(_87), String_var(_88), String_var(_89), String_var(_90), String_var(_91), String_var(_92), String_var(_93), String_var(_94), String_var(_95), String_var(_96), String_var(_97));
+  return Map_contains(types, String_var(ext)) ? Var_str(Map_getindex(types, String_var(ext))) : _98;
 }
 
 static Var _accept(Var value){
@@ -1881,64 +1839,64 @@ static Var _worker(Var value){
   HttpServer s = Var_pointer(value);
   {
     int fd;
-    Iter _x2c_gensym_macro_iterator_4 = Channel_iter(s -> channel, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_3 = Channel_iter(s -> channel, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_4;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 467,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+    Var _x2c_gensym_macro_item_3;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 469,.runtime = 1}; & _x2c_gensym_error_site_4; })));
       {
         Context connection = Context_open_isolated_named("connection");
-        const Context _x2c_gensym_macro_acquired_3 = connection;
+        const Context _x2c_gensym_macro_acquired_2 = connection;
         {
-          _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
+          _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
             0
           }
           ;
-          _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_acquired_3;
-          X2CCleanup _x2c_gensym_defer_record_20 ={
-            .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
+          _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_acquired_2;
+          X2CCleanup _x2c_gensym_defer_record_19 ={
+            .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
           }
           ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_20);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_19);
           {
             Socket peer = Socket_adopt(fd);
-            const Socket _x2c_gensym_macro_acquired_4 = peer;
+            const Socket _x2c_gensym_macro_acquired_3 = peer;
             {
-              _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
+              _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
                 0
               }
               ;
-              _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_acquired_4;
-              X2CCleanup _x2c_gensym_defer_record_21 ={
-                .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
+              _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_acquired_3;
+              X2CCleanup _x2c_gensym_defer_record_20 ={
+                .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_19
               }
               ;
-              x2c_cleanup_push(& _x2c_gensym_defer_record_21);
+              x2c_cleanup_push(& _x2c_gensym_defer_record_20);
               {
                 Socket_set_timeout(peer, s -> idle_ms);
                 {
-                  ExceptionFrame _x2c_gensym_exception_frame_1;
-                  static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
-                  Var _x2c_gensym_macro_patterns_1[1];
-                  static ErrorCatchSite _x2c_gensym_macro_site_1 ={
-                    _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+                  ExceptionFrame _x2c_gensym_exception_frame_2;
+                  static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
+                  Var _x2c_gensym_macro_patterns_2[1];
+                  static ErrorCatchSite _x2c_gensym_macro_site_2 ={
+                    _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
                   }
                   ;
-                  if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
-                    _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+                  if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
+                    _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
                   }
-                  volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
-                  x2c_exception_push(& _x2c_gensym_exception_frame_1);
-                  if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) _connection(s, peer);
+                  volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
+                  x2c_exception_push(& _x2c_gensym_exception_frame_2);
+                  if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) _connection(s, peer);
                   else{
-                    x2c_exception_landed(& _x2c_gensym_exception_frame_1);
-                    if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
-                      int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
-                      x2c_error_catch_detach(_x2c_gensym_error_handler_1);
-                      x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
-                      if(_x2c_gensym_macro_selected_1 == 0){
+                    x2c_exception_landed(& _x2c_gensym_exception_frame_2);
+                    if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
+                      int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
+                      x2c_error_catch_detach(_x2c_gensym_error_handler_2);
+                      x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
+                      if(_x2c_gensym_macro_selected_2 == 0){
                         {
                           {
 
@@ -1950,24 +1908,24 @@ static Var _worker(Var value){
 
                     }
                     else{
-                      x2c_error_catch_close(_x2c_gensym_error_handler_1);
-                      _x2c_gensym_error_handler_1 = NULL;
-                      x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+                      x2c_error_catch_close(_x2c_gensym_error_handler_2);
+                      _x2c_gensym_error_handler_2 = NULL;
+                      x2c_exception_leave(& _x2c_gensym_exception_frame_2);
                       __builtin_unreachable();
                     }
 
                   }
-                  x2c_error_catch_close(_x2c_gensym_error_handler_1);
-                  _x2c_gensym_error_handler_1 = NULL;
-                  x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+                  x2c_error_catch_close(_x2c_gensym_error_handler_2);
+                  _x2c_gensym_error_handler_2 = NULL;
+                  x2c_exception_leave(& _x2c_gensym_exception_frame_2);
                 }
 
               }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
         }
 
       }
@@ -1987,67 +1945,68 @@ void Logger_info(Logger, Symbol, List);
 static void _connection(HttpServer s, Socket peer){
   for(; ; ){
     Context context = Context_open_isolated_named("request");
-    const Context _x2c_gensym_macro_acquired_5 = context;
+    const Context _x2c_gensym_macro_acquired_4 = context;
     {
-      _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
+      _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_acquired_5;
-      X2CCleanup _x2c_gensym_defer_record_22 ={
-        .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
+      _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_acquired_4;
+      X2CCleanup _x2c_gensym_defer_record_21 ={
+        .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_22);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_21);
       {
         HttpResponse volatile res = HttpResponse_new();
         HttpRequest volatile req = NULL;
         int volatile keep = 0;
         {
-          ExceptionFrame _x2c_gensym_exception_frame_2;
-          static MatchCaptureSite _x2c_gensym_macro_arms_3[3];
-          Var _x2c_gensym_macro_patterns_3[3];
-          static ErrorCatchSite _x2c_gensym_macro_site_3 ={
-            _x2c_gensym_macro_arms_3, -1, 3, ERROR_CATCH_PENDING, - 1
+          ExceptionFrame _x2c_gensym_exception_frame_3;
+          static MatchCaptureSite _x2c_gensym_macro_arms_4[4];
+          Var _x2c_gensym_macro_patterns_4[4];
+          static ErrorCatchSite _x2c_gensym_macro_site_4 ={
+            _x2c_gensym_macro_arms_4, -1, 4, ERROR_CATCH_PENDING, - 1
           }
           ;
-          if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_3)){
-            _x2c_gensym_macro_patterns_3[0] = List_var(cons(Symbol_var(19010664401496), cons(List_var(cons(Symbol_var(1317119334), cons(Symbol_var(63594145126), NULL))), cons(List_var(cons(Symbol_var(1218550748), cons(Symbol_var(63495576540), NULL))), NULL))));
-            _x2c_gensym_macro_patterns_3[1] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
-            _x2c_gensym_macro_patterns_3[2] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL)));
+          if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_4)){
+            _x2c_gensym_macro_patterns_4[0] = List_var(cons(Symbol_var(19010664401496), cons(List_var(cons(Symbol_var(1317119334), cons(Symbol_var(63594145126), NULL))), cons(List_var(cons(Symbol_var(1218550748), cons(Symbol_var(63495576540), NULL))), NULL))));
+            _x2c_gensym_macro_patterns_4[1] = List_var(cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(34096809266140), cons(String_var(_99), NULL))), cons(Symbol_var(54), NULL))));
+            _x2c_gensym_macro_patterns_4[2] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
+            _x2c_gensym_macro_patterns_4[3] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL)));
           }
-          volatile ErrorHandler _x2c_gensym_error_handler_3 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_3, _x2c_gensym_macro_patterns_3);
-          x2c_exception_push(& _x2c_gensym_exception_frame_2);
-          if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)){
+          volatile ErrorHandler _x2c_gensym_error_handler_4 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_4, _x2c_gensym_macro_patterns_4);
+          x2c_exception_push(& _x2c_gensym_exception_frame_3);
+          if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)){
             {
-              ExceptionFrame _x2c_gensym_exception_frame_3;
-              static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
-              Var _x2c_gensym_macro_patterns_2[1];
-              static ErrorCatchSite _x2c_gensym_macro_site_2 ={
-                _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+              ExceptionFrame _x2c_gensym_exception_frame_4;
+              static MatchCaptureSite _x2c_gensym_macro_arms_3[1];
+              Var _x2c_gensym_macro_patterns_3[1];
+              static ErrorCatchSite _x2c_gensym_macro_site_3 ={
+                _x2c_gensym_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
               }
               ;
-              if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
-                _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+              if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_3)){
+                _x2c_gensym_macro_patterns_3[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
               }
-              volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
-              x2c_exception_push(& _x2c_gensym_exception_frame_3);
-              if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)) req = HttpRequest_read(peer -> input, s -> body_limit);
+              volatile ErrorHandler _x2c_gensym_error_handler_3 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_4, & _x2c_gensym_macro_site_3, _x2c_gensym_macro_patterns_3);
+              x2c_exception_push(& _x2c_gensym_exception_frame_4);
+              if(! sigsetjmp(_x2c_gensym_exception_frame_4.env, 0)) req = HttpRequest_read(peer -> input, s -> body_limit);
               else{
-                x2c_exception_landed(& _x2c_gensym_exception_frame_3);
-                if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
-                  int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
-                  x2c_error_catch_detach(_x2c_gensym_error_handler_2);
-                  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
-                  if(_x2c_gensym_macro_selected_2 == 0){
+                x2c_exception_landed(& _x2c_gensym_exception_frame_4);
+                if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_4)){
+                  int _x2c_gensym_macro_selected_3 = x2c_error_catch_selected(_x2c_gensym_error_handler_3);
+                  x2c_error_catch_detach(_x2c_gensym_error_handler_3);
+                  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_4);
+                  if(_x2c_gensym_macro_selected_3 == 0){
                     {
-                      x2c_error_catch_close(_x2c_gensym_error_handler_2);
-                      _x2c_gensym_error_handler_2 = NULL;
-                      x2c_exception_leave(& _x2c_gensym_exception_frame_3);
                       x2c_error_catch_close(_x2c_gensym_error_handler_3);
                       _x2c_gensym_error_handler_3 = NULL;
-                      x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-                      x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+                      x2c_exception_leave(& _x2c_gensym_exception_frame_4);
+                      x2c_error_catch_close(_x2c_gensym_error_handler_4);
+                      _x2c_gensym_error_handler_4 = NULL;
+                      x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
                       return;
                     }
 
@@ -2055,79 +2014,86 @@ static void _connection(HttpServer s, Socket peer){
                   __builtin_unreachable();
                 }
                 else{
-                  x2c_error_catch_close(_x2c_gensym_error_handler_2);
-                  _x2c_gensym_error_handler_2 = NULL;
-                  x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+                  x2c_error_catch_close(_x2c_gensym_error_handler_3);
+                  _x2c_gensym_error_handler_3 = NULL;
+                  x2c_exception_leave(& _x2c_gensym_exception_frame_4);
                   __builtin_unreachable();
                 }
 
               }
-              x2c_error_catch_close(_x2c_gensym_error_handler_2);
-              _x2c_gensym_error_handler_2 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-            }
-            if(! req){
               x2c_error_catch_close(_x2c_gensym_error_handler_3);
               _x2c_gensym_error_handler_3 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+              x2c_exception_leave(& _x2c_gensym_exception_frame_4);
+            }
+            if(! req){
+              x2c_error_catch_close(_x2c_gensym_error_handler_4);
+              _x2c_gensym_error_handler_4 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
               return;
             }
             keep = req -> keep_alive;
             Router_dispatch(s -> router, req, res);
           }
           else{
-            x2c_exception_landed(& _x2c_gensym_exception_frame_2);
-            if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
-              int _x2c_gensym_macro_selected_3 = x2c_error_catch_selected(_x2c_gensym_error_handler_3);
-              x2c_error_catch_detach(_x2c_gensym_error_handler_3);
-              x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
-              if(_x2c_gensym_macro_selected_3 == 0){
+            x2c_exception_landed(& _x2c_gensym_exception_frame_3);
+            if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
+              int _x2c_gensym_macro_selected_4 = x2c_error_catch_selected(_x2c_gensym_error_handler_4);
+              x2c_error_catch_detach(_x2c_gensym_error_handler_4);
+              x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
+              if(_x2c_gensym_macro_selected_4 == 0){
                 Var volatile status;
-                status = x2c_error_catch_capture(_x2c_gensym_error_handler_3, 0);
+                status = x2c_error_catch_capture(_x2c_gensym_error_handler_4, 0);
                 Var volatile reason;
-                reason = x2c_error_catch_capture(_x2c_gensym_error_handler_3, 1);
+                reason = x2c_error_catch_capture(_x2c_gensym_error_handler_4, 1);
                 {
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, Var_integer(status)), Map_var(Map_update_n(Map_new(), 1, String_var(_101), reason)));
+                  HttpResponse_json(HttpResponse_status(res, Var_integer(status)), Map_var(Map_update_n(Map_new(), 1, String_var(_100), reason)));
                 }
 
               }
-              if(_x2c_gensym_macro_selected_3 == 1){
+              if(_x2c_gensym_macro_selected_4 == 1){
                 {
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, 400), Map_var(Map_update_n(Map_new(), 1, String_var(_101), String_var(_102))));
+                  HttpResponse_json(HttpResponse_status(res, 400), Map_var(Map_update_n(Map_new(), 1, String_var(_100), String_var(_101))));
                 }
 
               }
-              if(_x2c_gensym_macro_selected_3 == 2){
+              if(_x2c_gensym_macro_selected_4 == 2){
+                {
+                  res = HttpResponse_new();
+                  HttpResponse_json(HttpResponse_status(res, 400), Map_var(Map_update_n(Map_new(), 1, String_var(_100), String_var(_102))));
+                }
+
+              }
+              if(_x2c_gensym_macro_selected_4 == 3){
                 Var volatile code;
-                code = x2c_error_catch_capture(_x2c_gensym_error_handler_3, 0);
+                code = x2c_error_catch_capture(_x2c_gensym_error_handler_4, 0);
                 List volatile detail;
-                detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_3, 1));
+                detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_4, 1));
                 {
                   Logger_error(s -> logger, 566560, ({
                     Var _x2c_gensym_literal_part_3 = List_var(cons(_103, cons(code, NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_104, cons(List_var(detail), NULL)));  cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL));
                   }
                   ));
                   res = HttpResponse_new();
-                  HttpResponse_json(HttpResponse_status(res, 500), Map_var(Map_update_n(Map_new(), 1, String_var(_101), String_var(_105))));
+                  HttpResponse_json(HttpResponse_status(res, 500), Map_var(Map_update_n(Map_new(), 1, String_var(_100), String_var(_105))));
                 }
 
               }
 
             }
             else{
-              x2c_error_catch_close(_x2c_gensym_error_handler_3);
-              _x2c_gensym_error_handler_3 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+              x2c_error_catch_close(_x2c_gensym_error_handler_4);
+              _x2c_gensym_error_handler_4 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
               __builtin_unreachable();
             }
 
           }
-          x2c_error_catch_close(_x2c_gensym_error_handler_3);
-          _x2c_gensym_error_handler_3 = NULL;
-          x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+          x2c_error_catch_close(_x2c_gensym_error_handler_4);
+          _x2c_gensym_error_handler_4 = NULL;
+          x2c_exception_leave(& _x2c_gensym_exception_frame_3);
         }
         _write(res, peer -> output, keep, req && req -> method == 534600);
         Logger_info(s -> logger, 566560, ({
@@ -2135,12 +2101,12 @@ static void _connection(HttpServer s, Socket peer){
         }
         ));
         if(! keep || __atomic_load_n(& s -> listener -> stopped, __ATOMIC_ACQUIRE)){
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
           return;
         }
 
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
     }
 
   }
@@ -2148,18 +2114,6 @@ static void _connection(HttpServer s, Socket peer){
 }
 
 void HttpRequest_init(HttpRequest value){
-  memset(value, 0, sizeof(* value));
-}
-
-void HttpResponse_init(HttpResponse value){
-  memset(value, 0, sizeof(* value));
-}
-
-void Router_init(Router value){
-  memset(value, 0, sizeof(* value));
-}
-
-void HttpServer_init(HttpServer value){
   memset(value, 0, sizeof(* value));
 }
 
@@ -2337,54 +2291,56 @@ static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
 
 int String_startswith(String, String);
 
+static int List_try_next(List, List *, Var *);
+
 File File_open(const char *, const char *);
 
 FileReadStatus File_read_into(File, Block);
 
 static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path directory){
   String rest = Var_as_string(Map_getindex(req -> params, String_var(_108)));
-  if(String_startswith(rest, _34)) Http_fail(404, _63);
+  if(String_startswith(rest, _33)) Http_fail(404, _62);
   {
     String segment;
-    List _x2c_gensym_macro_object_1 = String_split(rest, _34);
+    List _x2c_gensym_macro_object_1 = String_split(rest, _33);
     List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2))){
       segment = Var_as_string(_x2c_gensym_macro_cursor_output_2);
-      if(String_equal(segment, _109)) Http_fail(404, _63);
+      if(String_equal(segment, _109)) Http_fail(404, _62);
     }
 
   }
   Path path = Path_join(directory, rest);
   if(Path_is_dir(path)) path = Path_join(path, _110);
-  if(! Path_is_file(path)) Http_fail(404, _63);
+  if(! Path_is_file(path)) Http_fail(404, _62);
   File file = File_open(path, "rb");
   const File _x2c_gensym_macro_acquired_1 = file;
   {
-    _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
+    _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_23._x2c_gensym_defer_capture_25 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_23 ={
-      .fn = _x2c_gensym_defer_cleanup_23, .env = & _x2c_gensym_macro_environment_23
+    _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_22 ={
+      .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_23);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_22);
     {
       File_read_into(file, res -> body -> content);
       HttpResponse_header(res, _111, _mime(Path_extension(path)));
       {
-        Var _x2c_gensym_return_value_16 =((void) 0, Void);
+        Var _x2c_gensym_return_value_15 =((void) 0, Void);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
-          return _x2c_gensym_return_value_16;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+          return _x2c_gensym_return_value_15;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
   }
 
 }
@@ -2437,30 +2393,25 @@ static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){
 
 static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19){
   _x2c_gensym_defer_env_19 * _x2c_gensym_defer_data_19 =(_x2c_gensym_defer_env_19 *) _x2c_gensym_defer_opaque_19;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_21));
-}
-
-static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
-  _x2c_gensym_defer_env_20 * _x2c_gensym_defer_data_20 =(_x2c_gensym_defer_env_20 *) _x2c_gensym_defer_opaque_20;
-  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_22));
+  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_21));
 }
 
 void Context_cleanup(Context);
+
+static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
+  _x2c_gensym_defer_env_20 * _x2c_gensym_defer_data_20 =(_x2c_gensym_defer_env_20 *) _x2c_gensym_defer_opaque_20;
+  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_22));
+}
 
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21){
   _x2c_gensym_defer_env_21 * _x2c_gensym_defer_data_21 =(_x2c_gensym_defer_env_21 *) _x2c_gensym_defer_opaque_21;
   Context_cleanup((*(const Context *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_23));
 }
 
-static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
-  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
-  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_24));
-}
-
 void File_cleanup(File);
 
-static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23){
-  _x2c_gensym_defer_env_23 * _x2c_gensym_defer_data_23 =(_x2c_gensym_defer_env_23 *) _x2c_gensym_defer_opaque_23;
-  File_cleanup((*(const File *) _x2c_gensym_defer_data_23->_x2c_gensym_defer_capture_25));
+static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
+  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
+  File_cleanup((*(const File *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_24));
 }
 

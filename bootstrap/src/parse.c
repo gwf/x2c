@@ -237,6 +237,8 @@ static String _attribute(Compiler c);
 
 static int _attribute_starts(Compiler c);
 
+static String f5_types____attribute_macro(Compiler c);
+
 static int _prefix_macro_words(Compiler c, int rank, Array words);
 
 static int f5_types____unseen_prefix(Compiler c);
@@ -1459,7 +1461,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _560 = cons(_559, NULL);
   _561 = cons(_475, _560);
   _562 = List_var(_561);
-  _563 = int_var(694);
+  _563 = int_var(690);
   _564 = cons(_563, NULL);
   _565 = cons(_481, _564);
   _566 = List_var(_565);
@@ -1469,7 +1471,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _570 = List_var(_569);
   _571 = cons(_491, _488);
   _572 = List_var(_571);
-  _573 = int_var(117731);
+  _573 = int_var(118482);
   _574 = cons(_573, NULL);
   _575 = cons(_496, _574);
   _576 = List_var(_575);
@@ -3982,7 +3984,7 @@ static List _bind_api_source(Compiler c, Var line, Var doc, Var syntax){
   line = invocation ? int_var(invocation -> line) : line;
   doc = String_var(String_truth(invocation_doc) ? invocation_doc : f5_units____filled_doc(c, Var_as_string(doc)));
   if(c -> shallow) return cons(_33, cons(line, cons(doc, cons(List_var(bound), NULL))));
-  _definition_source(c, bound, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/parse/units.x",.function = "_bind_api_source",.line = 677}; & _x2c_gensym_error_site_0; }))), Var_as_string(doc), NULL);
+  _definition_source(c, bound, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/parse/units.x",.function = "_bind_api_source",.line = 673}; & _x2c_gensym_error_site_0; }))), Var_as_string(doc), NULL);
   return bound;
 }
 
@@ -4039,8 +4041,8 @@ static Map f5_units____hole_spellings(Compiler c){
               Var _x2c_gensym_match_value_9 = end;
               {
                 String path = Var_as_string(_x2c_gensym_match_value_7);
-                int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 709}; & _x2c_gensym_error_site_1; })));
-                int end = Var_int(Var_convert_at(_x2c_gensym_match_value_9, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 709}; & _x2c_gensym_error_site_2; })));
+                int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 705}; & _x2c_gensym_error_site_1; })));
+                int end = Var_int(Var_convert_at(_x2c_gensym_match_value_9, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 705}; & _x2c_gensym_error_site_2; })));
                 if(String_truth(c -> text)) if(String_equal(path, file)) Map_setindex(written, syntax, String_var(String_new_len(c -> text + begin, end - begin)));
               }
 
@@ -4101,8 +4103,8 @@ static Map f5_units____hole_spellings(Compiler c){
         Var _x2c_gensym_match_value_12 = end;
         {
           String path = Var_as_string(_x2c_gensym_match_value_10);
-          int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_11, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 719}; & _x2c_gensym_error_site_3; })));
-          int end = Var_int(Var_convert_at(_x2c_gensym_match_value_12, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 719}; & _x2c_gensym_error_site_4; })));
+          int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_11, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 715}; & _x2c_gensym_error_site_3; })));
+          int end = Var_int(Var_convert_at(_x2c_gensym_match_value_12, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 715}; & _x2c_gensym_error_site_4; })));
           if(Var_is_void(spelling)) if(String_truth(c -> text)) if(String_equal(path, file)) spelling = String_var(String_new_len(c -> text + begin, end - begin));
         }
 
@@ -4247,7 +4249,7 @@ static List f5_units____bind_inspected_bundle(Compiler c, List rows){
 static void f5_units____finish_inspected_expansion(Compiler c, Array frames, Array projected){
   List _x2c_gensym_destructure_1 = Var_list_payload(Array_take_last(frames));
   List frame = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
-  int first = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/parse/units.x",.function = "f5_units____finish_inspected_expansion",.line = 775}; & _x2c_gensym_error_site_5; })));
+  int first = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/parse/units.x",.function = "f5_units____finish_inspected_expansion",.line = 771}; & _x2c_gensym_error_site_5; })));
   Array range = Array_getslice(projected, x2c_slice_bound(first), (-2147483647 - 1), 1);
   Compiler_print_macro_expansion(c, frame, cons(_56, Array_list_free(range)));
 }
@@ -4534,7 +4536,7 @@ static int f12_declarations____test_declaration_start(Compiler c, int require_de
   if(sym != 19147688) return 0;
   if(String_equal(c -> token -> text, _82) && _attribute_starts(c)) return 1;
   Var definition;
-  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || x2c_var_equal_lane(definition, Symbol_var(50603262308)))) return 1;
+  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || x2c_var_equal_lane(definition, Symbol_var(50603262308)) || x2c_var_equal_lane(definition, Symbol_var(3617589472522)))) return 1;
   if(_typeof_starts(c)) return 1;
   return f12_declarations____type_name_starts(c, require_declarator);
 }
@@ -5501,7 +5503,7 @@ static void f5_types____skip_attributes(Compiler c){
   if(! c -> shallow) return;
   while(1){
     Var definition;
-    if(String_truth(_attribute(c))) continue;
+    if(String_truth(_attribute(c)) || String_truth(f5_types____attribute_macro(c))) continue;
     if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) || ! x2c_var_equal_lane(definition, List_var(NULL))) return;
     Compiler_next(c);
   }
@@ -5750,6 +5752,7 @@ static List _storage_class(Compiler c){
       while(1){
         Symbol symbol = Compiler_peek(c, 0);
         String attribute = _attribute(c);
+        if(! String_truth(attribute)) attribute = f5_types____attribute_macro(c);
         if(String_truth(attribute)) Array_push(text, List_var(cons(String_var(attribute), NULL)));
         else if(Compiler_take_word(c, _192)) Array_push(text, List_var(_195));
         else if(Symbol_is_inline(symbol) ||(symbol == 1392787923272 ? ! seen_threaded ++ : Symbol_is_storage_class(symbol) && ! seen_ordinary ++)){
@@ -5791,6 +5794,13 @@ static int _attribute_starts(Compiler c){
   return Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81 &&(String_equal(c -> token -> text, _82) ||(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) && x2c_var_equal_lane(definition, Symbol_var(102150700288988))));
 }
 
+static String f5_types____attribute_macro(Compiler c){
+  if(Compiler_peek(c, 0) != 19147688 || Compiler_peek(c, 1) == 44661285196 || ! x2c_var_equal_lane(Map_getindex(c -> object_macros, String_var(c -> token -> text)), Symbol_var(3617589472522))) return NULL;
+  String name = c -> token -> text;
+  Compiler_next(c);
+  return name;
+}
+
 static int _prefix_macro_words(Compiler c, int rank, Array words){
   Var definition;
   if(Compiler_peek(c, 0) != 19147688) return 0;
@@ -5803,6 +5813,10 @@ static int _prefix_macro_words(Compiler c, int rank, Array words){
     Token close = Token_group_close(Token_skip_trivia(c -> token + 1));
     if(close -> type != 11212) close -> type = 7477210024;
     Compiler_next(c);
+    Compiler_next(c);
+    return 1;
+  }
+  if(x2c_var_equal_lane(definition, Symbol_var(3617589472522))){
     Compiler_next(c);
     return 1;
   }
@@ -7777,7 +7791,7 @@ void Compiler_place_after(Compiler c, Var code){
 
 void Compiler_close_placements(Compiler c, int first, List result){
   if(! _init_guard_) _file_init_();  for(int i = first;  i <(int) Array_len(c -> placements);  i ++){
-    List _x2c_gensym_destructure_7 = Var_list(Array_getindex(c -> placements, i));  int depth = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/parse/placement.x",.function = "Compiler_close_placements",.line = 114}; & _x2c_gensym_error_site_8; })));
+    List _x2c_gensym_destructure_7 = Var_list(Array_getindex(c -> placements, i));  int depth = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_7, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/parse/placement.x",.function = "Compiler_close_placements",.line = 112}; & _x2c_gensym_error_site_8; })));
     List binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 1));
     List placed = Var_list_payload(List_getindex(_x2c_gensym_destructure_7, 2));
     Var code = List_getindex(_x2c_gensym_destructure_7, 3);

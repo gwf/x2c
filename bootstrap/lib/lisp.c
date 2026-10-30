@@ -3170,7 +3170,7 @@ Var lisp_compare(Var a, Var b){
     Var _x2c_gensym_literal_part_55 = Symbol_var(Var_kind(a));
     Var _x2c_gensym_literal_part_56 = Symbol_var(Var_kind(b));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 147,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 148,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_46, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_54, Symbol_var(26746169281416), _x2c_gensym_literal_part_55, Symbol_var(1286928228633480), _x2c_gensym_literal_part_56);
       __builtin_unreachable();
     }
@@ -3282,7 +3282,7 @@ static int f10_primitives____is_lisp_number(Var value){
 static Var f10_primitives____chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 238,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 239,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_47, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -3291,7 +3291,7 @@ static Var f10_primitives____chain(List values, String operation, int want, int 
     List _x2c_gensym_destructure_5 = p;
     left = List_getindex(_x2c_gensym_destructure_5, 0);
     right = List_getindex(_x2c_gensym_destructure_5, 1);
-    int order = Var_int(Var_convert_at(lisp_compare(left, right), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 241,.runtime = 1}; & _x2c_gensym_error_site_48; })));
+    int order = Var_int(Var_convert_at(lisp_compare(left, right), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 242,.runtime = 1}; & _x2c_gensym_error_site_48; })));
     if(expect ? order != want : order == want) return f10_primitives____bool(0);
   }
   return f10_primitives____bool(1);

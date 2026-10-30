@@ -3288,7 +3288,7 @@ static List f21_definitions_templates____unit_trailing(List hole, Map binders){
 }
 
 static Atom _hole_key(List hole, String projection){
-  return Macro_binder(List_assoc(hole, Symbol_var(154018148)), projection, Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros/definitions/templates.x",.function = "_hole_key",.line = 415}; & _x2c_gensym_error_site_1; }))));
+  return Macro_binder(List_assoc(hole, Symbol_var(154018148)), projection, Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros/definitions/templates.x",.function = "_hole_key",.line = 413}; & _x2c_gensym_error_site_1; }))));
 }
 
 static List _capture_layout(int sequence, List source, List value, List expression, List splice, List trailing){
@@ -4414,7 +4414,7 @@ static String f9_expansion____file_scope_name(Compiler c, Token root, String sou
   }
   );
   Var stored;
-  int count = Var_int(Var_convert_at(Map_try_get(c -> names -> counters, String_var(key), &(stored)) ? stored : int_var(0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/macros/expansion.x",.function = "f9_expansion____file_scope_name",.line = 299}; & _x2c_gensym_error_site_2; })));
+  int count = Var_int(Var_convert_at(Map_try_get(c -> names -> counters, String_var(key), &(stored)) ? stored : int_var(0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/macros/expansion.x",.function = "f9_expansion____file_scope_name",.line = 297}; & _x2c_gensym_error_site_2; })));
   Map_setindex(c -> names -> counters, String_var(key), int_var(count + 1));
   c -> names -> issued ++;
   String digest = String_printf(_373, String_hash(String_join(NULL, cons(String_var(key), cons(String_var(_372), cons(String_var(int_str(count)), NULL))))));
@@ -7770,7 +7770,7 @@ List Compiler_lift_meta_expression(Compiler c, Var value, Token invocation){
 }
 
 static Var f9_templates____slot_value(Compiler c, List slot){
-  int splice = Var_int(Var_convert_at(List_cadr(slot), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/macros/templates.x",.function = "f9_templates____slot_value",.line = 198}; & _x2c_gensym_error_site_6; })));
+  int splice = Var_int(Var_convert_at(List_cadr(slot), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/macros/templates.x",.function = "f9_templates____slot_value",.line = 196}; & _x2c_gensym_error_site_6; })));
   Var form = List_caddr(slot);
   Token invocation = Var_token(List_getindex(Var_list(List_car(c -> macro_stack)), 3));
   Var required = List_assoc(slot, Symbol_var(7659244923112));

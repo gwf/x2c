@@ -52,7 +52,7 @@ static String executable_path, root_path;
 
 static List _41, _40;
 
-static String _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static Var _39, _37;
 
@@ -160,13 +160,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _51 = String_new("XDG_CACHE_HOME");
   _52 = String_new("HOME");
   _53 = String_new("/.cache/x2c");
-  _54 = String_new(".");
-  _55 = String_new("/proc/self/exe");
-  _56 = String_new("include");
-  _57 = String_new("etc/compiler-prelude.x");
-  _58 = String_new("/include/x2c");
-  _59 = String_new("/src");
-  _60 = String_new("/lib");
+  _54 = String_new("/source");
+  _55 = String_new("/lock");
+  _56 = String_new(".");
+  _57 = String_new("/proc/self/exe");
+  _58 = String_new("include");
+  _59 = String_new("etc/compiler-prelude.x");
+  _60 = String_new("/include/x2c");
+  _61 = String_new("/src");
+  _62 = String_new("/lib");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -626,6 +628,74 @@ String Compiler_cache_root(void){
   return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_24), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_53), NULL))) : NULL;
 }
 
+void Compiler_prune_cache(String directory){
+  if(! _init_guard_) _file_init_();
+  if(! Path_is_dir(directory)) return;
+  {
+    String name;
+    List _x2c_gensym_macro_object_5 = Path_list_dir(directory);
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+      {
+        String entry = Path_join(directory, name);
+        Path source = String_join(NULL, cons(String_var(entry), cons(String_var(_54), NULL)));
+        if(! Path_is_file(source) || Path_is_file(Path_read_text(source))) continue;
+        int lock = Path_lock_file(String_join(NULL, cons(String_var(entry), cons(String_var(_55), NULL))), 0);
+        if(lock < 0) continue;
+        {
+          ExceptionFrame _x2c_gensym_exception_frame_1;
+          static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
+          Var _x2c_gensym_macro_patterns_1[1];
+          static ErrorCatchSite _x2c_gensym_macro_site_1 ={
+            _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+          }
+          ;
+          if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
+            _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+          }
+          volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
+          x2c_exception_push(& _x2c_gensym_exception_frame_1);
+          if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) Path_remove_tree(entry);
+          else{
+            x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+            if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+              int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
+              x2c_error_catch_detach(_x2c_gensym_error_handler_1);
+              x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+              if(_x2c_gensym_macro_selected_1 == 0){
+                {
+                  {
+
+                  }
+
+                }
+
+              }
+
+            }
+            else{
+              x2c_error_catch_close(_x2c_gensym_error_handler_1);
+              _x2c_gensym_error_handler_1 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+              __builtin_unreachable();
+            }
+
+          }
+          x2c_error_catch_close(_x2c_gensym_error_handler_1);
+          _x2c_gensym_error_handler_1 = NULL;
+          x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+        }
+        close(lock);
+      }
+
+    }
+
+  }
+
+}
+
 static void _initialize_environment(const char * argv0, String embedded_identity){
   if(String_truth(root_path)) return;
   _default_search_path();
@@ -635,9 +705,9 @@ static void _initialize_environment(const char * argv0, String embedded_identity
   String home = Env_get(_18);
   if(String_truth(home) && ! String_getindex(home, 0)) home = NULL;
   String root = String_truth(home) ? String_rstrip(home, "/") : _locate_home(executable_path);
-  if(! String_truth(root)) root = _locate_home(Path_absolute(_54));
+  if(! String_truth(root)) root = _locate_home(Path_absolute(_56));
   root_found = root != NULL;
-  root_path = Path_absolute(String_truth(root) ? root : _54);
+  root_path = Path_absolute(String_truth(root) ? root : _56);
   _prepare_include_dirs();
 }
 
@@ -661,7 +731,7 @@ static String _executable(const char * argv0){
 }
 
 static String _identity(void){
-  return Path_content_identity(Path_exists(_55) ? _55 : executable_path);
+  return Path_content_identity(Path_exists(_57) ? _57 : executable_path);
 }
 
 static String _locate_home(Path p){
@@ -675,12 +745,12 @@ static String _locate_home(Path p){
 }
 
 static int _is_home(Path p){
-  return Path_is_dir(Path_join(p, _56)) && Path_is_file(Path_join(p, _57));
+  return Path_is_dir(Path_join(p, _58)) && Path_is_file(Path_join(p, _59));
 }
 
 static void _prepare_include_dirs(void){
-  String include_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_58), NULL)));
-  String src_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_59), NULL))), lib_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_60), NULL)));
+  String include_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_60), NULL)));
+  String src_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_61), NULL))), lib_dir = String_join(NULL, cons(String_var(root_path), cons(String_var(_62), NULL)));
   default_includes = cons(String_var(include_dir), NULL);
   cpp_includes = Path_is_dir(src_dir) ? cons(String_var(lib_dir), cons(String_var(src_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }

@@ -504,7 +504,7 @@ static List f12_construction____group(Macro t, List values){
   Array grouped = Array_new(); {
     List hole;  List _x2c_gensym_macro_object_0 = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       hole = Var_list_payload(_x2c_gensym_macro_cursor_output_0); {
-        int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/macrovalue/construction.x",.function = "f12_construction____group",.line = 136,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+        int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/macrovalue/construction.x",.function = "f12_construction____group",.line = 134,.runtime = 1}; & _x2c_gensym_error_site_0; })));
         if(sequence && List_truth(values) && ! List_truth(List_cdr(values)) && Var_is_row(List_car(values), 9, 7, 4) && f12_construction____items(Var_list_payload(List_car(values)))) values = Var_list_payload(List_car(values));
         Array_push(grouped, sequence ? List_var(values) : List_car(values));
         values = sequence ? NULL : List_cdr(values);
