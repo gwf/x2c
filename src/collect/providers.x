@@ -206,39 +206,6 @@ static int _linked_provider_current(
   return 0;
 }
 
-/** Prepares the root's ordered CPP parts for a discovery query. The same
-    file walk owns includes; its temporary parts contain no declarations.
-    Other callers retain the existing signature-only collection service.
-*/
-void Compiler.prepare_macro_exports(Compiler c, String path) {
-  size_t origins = c.origins.len();
-  defer c.origins.resize(origins);
-  with (c.filename = path) {
-    if (c.macro_export_parts != NULL) {
-      auto {
-        DiagnosticsHold hold = c.diagnostics.hold();
-        defer c.diagnostics.release(hold, 0);
-        with (c.meta_build = 1,
-              c.signature_only = 1,
-              c.recovery_depth = c.recovery_depth + 1) {
-          String canonical = _canonical_path(path);
-          try {
-            List entry = _entry(c, canonical);
-            Map visited = {};
-            visited[canonical] = 1;
-            if (entry)
-              _replay_cached(c, entry, canonical, NULL, visited, NULL);
-            else (void) _walk_cold(c, canonical, canonical, NULL, visited);
-          }
-          catch %(malformed *): ;
-        }
-      }
-      return;
-    }
-    (void) _meta_provider_entry(c, _canonical_path(path));
-  }
-}
-
 /* Metadata lookahead reads declarations and hashes without source effects. */
 static List _meta_provider_entry(Compiler c, String canonical) {
   List entry = _entry(c, canonical);

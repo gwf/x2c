@@ -20,15 +20,13 @@ static typedef struct Splice {
 
 /** Returns the x2c source at `path`, whose own text is `text`, with its
     file-scope `module` block replaced by the text of each member it names,
-    in order, or NULL when the text has no block. `plain` receives the
-    preprocessed tokens of a root without a block. Member paths are relative
+    in order, or NULL when the text has no block. Member paths are relative
     to the file that names them, and their own blocks are spliced in turn.
     A member's quoted include of a file beside it is spelled from the
     entry's directory, so it names the same file there.
 */
-ModuleSource Compiler.module_source(
-  Compiler c, String path, String text, Tokenizer &?plain) {
-  if (plain) plain = NULL;
+ModuleSource Compiler.module_source(Compiler c, String path, String text) {
+  if (!_spells_block(text)) return NULL;
   Buffer out = auto Buffer.new(0);
   Splice s = {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
@@ -37,25 +35,12 @@ ModuleSource Compiler.module_source(
   s.splicing[Path.absolute(path)] = 1;
   String own = _file_prefix(Path.stem(path));
   s.prefixes[own] = Path.basename(path);
-  if (!_file(s, path, text, NULL, own, plain)) return NULL;
+  if (!_file(s, path, text, NULL, own)) return NULL;
   ModuleSource source = xcalloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
     .text = s.out.str(), .own = text, .markers = s.markers,
     .members = s.members};
   return source;
-}
-
-/** Discovers a module after preparing included macros only if its
-    preprocessing needs them. Ordinary collection owns its own include walk.
-*/
-ModuleSource Compiler.discover_module_source(
-  Compiler c, String path, String text, Tokenizer &?plain) {
-  Map parts = auto (c.macro_export_parts == NULL ? Map.new() : NULL);
-  with (c.macro_export_source = path,
-        c.macro_export_parts = parts != NULL ? parts
-                                           : c.macro_export_parts) {
-    return c.module_source(path, text, plain);
-  }
 }
 
 // source collection splice
@@ -64,8 +49,7 @@ ModuleSource Compiler.discover_module_source(
    Each file's text is marked as its own, so its rows carry its file
    prefix. Diagnostics locate the block in this file. */
 static int _file(
-  Splice &s, String path, String text, String prefix, String file_prefix,
-  Tokenizer &?plain) {
+  Splice &s, String path, String text, String prefix, String file_prefix) {
   with (s.path = path,
         s.text = text,
         s.prefix = prefix,
@@ -74,25 +58,17 @@ static int _file(
         s.c.text = text,
         s.c.line_markers = NULL) {
     _mark(s, 1, 0);
-    Tokenizer tokens = NULL;
-    Token block = _block(s, tokens), close = NULL;
+    Token block = _block(s), close = NULL;
     if (!block) {
       _own(s, 0, text.len(), 1);
-      if (plain) plain = tokens;
       return 0;
     }
     List members = _members(s, block, close);
-    Token before = _expansion_first(tokens, block);
-    Token after = _expansion_end(tokens, close);
-    int resume = after ? after.pos : close.pos + close.len;
-    int line = after ? after.line : close.line;
     _own(s, 0, block.pos, 1);
-    if (before) _expanded(s, before, block);
     _end_line(s);
     foreach (String spelling in members) _member(s, spelling, block);
-    if (after) _expanded(s, close + 1, after);
-    _mark(s, line, resume);
-    _own(s, resume, text.len(), line);
+    _mark(s, close.line, close.pos + 1);
+    _own(s, close.pos + 1, text.len(), close.line);
     return 1;
   }
 }
@@ -116,7 +92,7 @@ static void _member(Splice &s, String spelling, Token site) {
     $fail.collect_module_prefix(s.c, site, spelling, s.prefixes[own]);
   s.prefixes[own] = spelling;
   s.splicing[resolved] = 1;
-  _file(s, path, text, Path.dirname(prefix), own, NULL);
+  _file(s, path, text, Path.dirname(prefix), own);
   s.splicing.del(resolved);
   _end_line(s);
 }
@@ -124,18 +100,14 @@ static void _member(Splice &s, String spelling, Token site) {
 /* The `module` that opens the file's file-scope block, or NULL. The word
    opens a block where `{` follows it and no word precedes it, so
    `struct module {` declares a tag. */
-static Token _block(Splice &s, Tokenizer &tokenizer) {
-  tokenizer = Tokenizer.new(s.text, <x2c>);
+static Token _block(Splice &s) {
+  if (!_spells_block(s.text)) return NULL;
+  Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
   tokenizer.layout = Path.is_layout_source(s.path);
   tokenizer.scan();
-  Compiler scan = Compiler.new_shared(s.c);
-  defer s.c.close_child(scan);
-  scan.filename = s.path;
-  scan.macro_export_source = s.c.macro_export_source;
-  scan.text = s.text;
+  Compiler scan = xcalloc(1, sizeof(struct Compiler));
   scan.tokenizer = tokenizer;
-  scan.cpp = Cpp.new(scan.initial_macros(s.path));
-  scan.preprocess_tokens();
+  scan.scan_conditionals();
   Token block = NULL, previous = NULL;
   int depth = 0;
   for (Token token = Token.skip_trivia(tokenizer.tokens);
@@ -153,41 +125,13 @@ static Token _block(Splice &s, Tokenizer &tokenizer) {
   return block;
 }
 
+/* The token scan decides whether `module` opens a block, including when
+   comments separate it from its brace. */
+static int _spells_block(const char *text) =>
+  text && strstr(text, "module");
+
 static int _is_word(String text) =>
   isalnum((unsigned char) text[0]) || text[0] == '_';
-
-/* Expansion tokens keep their invocation's diagnostic position. The next
-   token after the recorded expansion resumes the original source after
-   that whole invocation, including a function-like use's arguments. */
-static List _expansion(Tokenizer tokenizer, Token token) {
-  long index = token - (Token) tokenizer.tokens;
-  foreach (List row in tokenizer.expansions)
-    if (index >= row.car().integer() && index < row.cadr().integer())
-      return row;
-  return NULL;
-}
-
-static Token _expansion_first(Tokenizer tokenizer, Token token) {
-  List row = _expansion(tokenizer, token);
-  return row ? (Token) tokenizer.tokens + row.car().integer() : NULL;
-}
-
-static Token _expansion_end(Tokenizer tokenizer, Token token) {
-  List row = _expansion(tokenizer, token);
-  return row ? (Token) tokenizer.tokens + row.cadr().integer() : NULL;
-}
-
-/* Preserve other declarations emitted by the same macro as the module
-   block. Separating tokens keeps neighboring operators from coalescing. */
-static void _expanded(Splice &s, Token first, Token end) {
-  if (first == end) return;
-  _mark(s, first.line, first.pos);
-  for (Token token = first; token < end; token++) {
-    _write(s, token.text, (const char *) token.text + token.text.len());
-    s.out.write_char(' ');
-  }
-  _end_line(s);
-}
 
 /* The member paths of the block `block` opens, whose closing brace becomes
    `close`. */

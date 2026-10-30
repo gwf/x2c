@@ -407,6 +407,7 @@ module List _interface_include_dirs(Compiler c, String canonical) {
     else if (c.owns_package_source(canonical)) package = c.package;
   }
   dirs.push(package ? %(package $package) : %(package));
+  if (c.cpp_expansion) dirs.push(%(cpp-expansion));
   if (c.command_macros && !_runtime_source(canonical))
     dirs.push(%(macros @(c.command_macros)));
   return dirs.list_free();
