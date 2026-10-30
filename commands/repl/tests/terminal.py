@@ -142,6 +142,49 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
     bad.write_text("int broken( {\n")
     load = f':load "{source}"\n'
 
+    missing = directory / "missing.c"
+    missing.write_text("int absent(void); int entry(void) { return absent(); }\n")
+    failed = subprocess.Popen([str(BINARY), str(missing)], stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              env=environment, cwd=ROOT)
+    worker = None
+    try:
+        end = time.monotonic() + TIMEOUT
+        while time.monotonic() < end:
+            processes = subprocess.check_output(
+                ["ps", "-axo", "pid=,ppid="], text=True)
+            children = [int(row.split()[0]) for row in processes.splitlines()
+                        if int(row.split()[1]) == failed.pid]
+            if children:
+                worker = children[0]
+                break
+            time.sleep(.01)
+        require(worker, "candidate worker did not start")
+        failed.send_signal(signal.SIGSTOP)
+        while time.monotonic() < end:
+            state = subprocess.run(["ps", "-p", str(worker), "-o", "stat="],
+                                   text=True, capture_output=True).stdout.strip()
+            if state.startswith("Z"):
+                break
+            time.sleep(.01)
+        require(state.startswith("Z"), "candidate did not finish its failure frame")
+        failed.send_signal(signal.SIGCONT)
+        output, errors = failed.communicate(timeout=TIMEOUT)
+        require(failed.returncode == 1 and b"absent" in errors and
+                b"session unchanged:" in errors and
+                b"native worker exited" not in errors, (output, errors))
+    finally:
+        if failed.poll() is None:
+            failed.send_signal(signal.SIGCONT)
+            if worker:
+                try:
+                    os.killpg(worker, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            failed.kill()
+            failed.wait()
+    print("exited candidates retain their complete linker diagnostics", flush=True)
+
     piped = run(load + "terminal_input();\nterminal_answer();\n"
                 ":symbols terminal_no_such_name\n",
                 [], environment)

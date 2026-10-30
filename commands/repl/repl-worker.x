@@ -150,7 +150,9 @@ static Map _worker_receive(ReplWorker worker, int input) {
     if (waitpid(worker.pid, &worker.status, WNOHANG) == worker.pid) {
       kill((pid_t) -(long) worker.pid, SIGKILL);
       worker.pid = 0;
+      int complete = _worker_read(worker.from, worker.pending, value);
       _worker_descriptors(worker);
+      if (complete) return value;
       worker.failure = _worker_reason(worker);
       return NULL;
     }
