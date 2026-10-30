@@ -63,5 +63,7 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare, String * failure);
 
+List Compiler_emit_session_function(Compiler c, List declarations, Func prepare, String * failure);
+
 
 #endif /* __GUARD_0xF4B7942E__ */

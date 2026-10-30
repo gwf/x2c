@@ -1608,10 +1608,10 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1333 = String_new("/");
   _1334 = String_new(".c");
   _1335 = String_new("native modules are unavailable");
-  _1336 = String_new("x2c_module_reset");
-  _1337 = String_new("native modules need a cache directory and a known compiler");
-  _1338 = String_new("group");
-  _1339 = String_new("");
+  _1336 = String_new("group");
+  _1337 = String_new("");
+  _1338 = String_new("x2c_module_reset");
+  _1339 = String_new("native modules need a cache directory and a known compiler");
   _1340 = String_new("\n");
   _1341 = String_new("/meta/");
   _1342 = String_new("/group.module");
@@ -4009,6 +4009,13 @@ Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare,
   return Compiler_native_module_targets(Compiler_load_native_module(module));
 }
 
+List Compiler_emit_session_function(Compiler c, List declarations, Func prepare, String * failure){
+  if(! _init_guard_) _file_init_();
+  (* failure) = Compiler_groups_meta(c) ? NULL : _1335;
+  if(String_truth((* failure))) return NULL;
+  return _emit_prepared(c, Compiler_module_stamp(), _1336, _1337, declarations, prepare, &((* failure)));
+}
+
 int Compiler_native_meta_accepts(Compiler, Var, List);
 
 void MetaBindings_set(MetaBindings, String, Var);
@@ -4033,7 +4040,7 @@ static String f7_staging____stage(Compiler c, String * failure){
           ;
           x2c_cleanup_push(& _x2c_gensym_defer_record_6);
           {
-            Func_apply((Var_pointer(Map_getindex(targets, String_var(_1336)))), 0, NULL);
+            Func_apply((Var_pointer(Map_getindex(targets, String_var(_1338)))), 0, NULL);
           }
           x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
         }
@@ -4089,10 +4096,10 @@ String String_sha256(String);
 static String f7_staging____module(Compiler c, List declarations, Func prepare, String * failure){
   String root = Compiler_cache_root(), stamp = Compiler_module_stamp();
   if(! String_truth(root) || ! String_truth(stamp)){
-    (* failure) = _1337;
+    (* failure) = _1339;
     return NULL;
   }
-  List code = _emit_prepared(c, stamp, _1338, _1339, declarations, prepare, &((* failure)));
+  List code = _emit_prepared(c, stamp, _1336, _1337, declarations, prepare, &((* failure)));
   if(! List_truth(code)) return NULL;
   List _x2c_gensym_destructure_4 = code;
   String hfile = Var_as_string(List_getindex(_x2c_gensym_destructure_4, 0));

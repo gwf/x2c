@@ -246,6 +246,8 @@ static void f18_parsing_collection____note_function_body(Compiler c, Type type, 
 
 static void f18_parsing_collection____shallow_block(Compiler c);
 
+static List f13_parsing_parse____full_parse(Compiler c, Map globs, int generated_symbols, int native);
+
 static void f13_parsing_parse____reset_parse(Compiler c, Map globs, int generated);
 
 static void f13_parsing_parse____reset_macros(Compiler c);
@@ -874,7 +876,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2299);
+  _295 = int_var(2311);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));
@@ -1511,13 +1513,23 @@ static void f18_parsing_collection____shallow_block(Compiler c){
   Compiler_expect(c, 251);
 }
 
-void Compiler_publish_inline_types(Compiler, List);
-
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
   if(! _init_guard_) _file_init_();
+  return f13_parsing_parse____full_parse(c, globs, generated_symbols, 0);
+}
+
+List Compiler_full_parse_native(Compiler c, Map globs){
+  if(! _init_guard_) _file_init_();
+  return f13_parsing_parse____full_parse(c, globs, 0, 1);
+}
+
+void Compiler_publish_inline_types(Compiler, List);
+
+static List f13_parsing_parse____full_parse(Compiler c, Map globs, int generated_symbols, int native){
   Array nodes = Array_new();
   c -> unit_nodes = nodes;
   f13_parsing_parse____reset_parse(c, globs, generated_symbols);
+  if(native) c -> source_private = - 1;
   if(c -> script) _parse_script(c, nodes);
   else{
     int * _x2c_gensym_macro_address_2 = & c -> recovery_depth;

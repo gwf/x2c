@@ -245,6 +245,8 @@ void _x2c_skip_shallow_expression(Compiler c, int stop_at_comma);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
+List Compiler_full_parse_native(Compiler c, Map globs);
+
 int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_tokenize(Compiler c, char * text);

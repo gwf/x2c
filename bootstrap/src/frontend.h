@@ -50,6 +50,8 @@ int Frontend_load_prelude(Frontend frontend);
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
 
+int ParsedUnit_collect_native(ParsedUnit * unit, Frontend frontend);
+
 void ParsedUnit_close(ParsedUnit * unit);
 
 Frontend Frontend_new(CliRequest request);
