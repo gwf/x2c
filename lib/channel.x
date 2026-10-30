@@ -375,8 +375,7 @@ static int _commit_available(
   else return 2;
 }
 
-static void _prepare_wait(
-  ChannelWait wait, pthread_mutex_t *mutex, pthread_cond_t *condition) {
+static void _prepare_wait(pthread_mutex_t *mutex, pthread_cond_t *condition) {
   int error = pthread_mutex_init(mutex, NULL);
   if (error) raise %(io-fail (operation "pthread_mutex_init") (errno $error));
   error = pthread_cond_init(condition, NULL);
@@ -384,8 +383,6 @@ static void _prepare_wait(
     _native_check(pthread_mutex_destroy(mutex));
     raise %(io-fail (operation "pthread_cond_init") (errno $error));
   }
-  wait.mutex = mutex;
-  wait.condition = condition;
 }
 
 /* Enter sleep with both owners held. Stop and peer notification must take
@@ -438,6 +435,7 @@ static int _communicate(
   *wait = (struct ChannelWait) {
     .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
   };
+  defer { wait.mutex = NULL; wait.condition = NULL; }
   wait.mutex = x2c_thread_channel_mutex(wait.owner);
   wait.condition = x2c_thread_channel_condition(wait.owner);
   pthread_mutex_t local_mutex;
@@ -451,7 +449,9 @@ static int _communicate(
     if (status != 2) break;
     if (!wait.mutex) {
       _unlock(&channel.mutex);
-      _prepare_wait(wait, &local_mutex, &local_condition);
+      _prepare_wait(&local_mutex, &local_condition);
+      wait.mutex = &local_mutex;
+      wait.condition = &local_condition;
       local = 1;
       _lock(&channel.mutex);
       continue;
