@@ -1,6 +1,11 @@
 # Implementation plan: independent Pool and Channel synchronization
 
-> Status: blocked - current implementation fails mandatory performance acceptance.
+> Status: integrating - Gary accepted the reported tradeoff on 2026-10-30.
+> Current delivery decision: retain the measured independent Pool/Channel gains
+> and the corrections that minimized their regressions. The reported residual
+> Channel slowdowns and retained-index memory cost are accepted for this design.
+> Additional reproducible regressions are not approved. The proposed replacement
+> index with a global lookup mutex remains blocked. Earlier holds below are history.
 > Researched against `66a119db5e44723bf7763f603b684b7dd9091ca2` on 2026-10-30.
 > Implementation baseline: `56fd5ecc1518f40ac46f2c21f50936ae4ab53f93`.
 > Pool, Channel, and Thread runtime owners are unchanged between these revisions.

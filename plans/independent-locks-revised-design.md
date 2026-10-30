@@ -1,6 +1,9 @@
 # Revised Pool accounting, index construction, and Channel handoffs
 
-> Status: blocked - implemented locally; revised candidate fails performance acceptance.
+> Status: superseded by the profiled corrections and accepted delivery tradeoff.
+> Gary authorized delivery of the measured wins on 2026-10-30, accepting the
+> reported residual Channel and retained-index costs. This does not authorize
+> additional regressions or the proposed replacement index. Earlier holds are history.
 > Requested 2026-10-30 after the local candidate failed performance acceptance.
 > Source reviewed at `d4a0ccbcc9fb41400992e7cb6dd9f0771d83b62d`.
 > Implemented and measured at `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.

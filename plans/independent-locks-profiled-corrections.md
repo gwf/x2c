@@ -1,12 +1,16 @@
 # Small corrections proposed from the lock profiles
 
-> Status: Pool fast path and Channel changes implemented locally; acceptance fails.
+> Status: integrating sections 1 and 2 after Gary accepted the reported tradeoff.
+> On 2026-10-30 Gary authorized folding in the measured gains while minimizing
+> the reported regressions. The residual Channel slowdowns and retained-index
+> memory cost are accepted for the current measured design. Additional
+> reproducible regressions are not approved. Section 3 remains blocked.
 > Based on the unchanged runtime `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
 > Measured runtime after sections 1 and 2: `360aab57fbf1fa46343ad514514fb3898dc40c5b`.
 > The index proposal explicitly reintroduces a short shared lookup lock.
 > That changes the earlier lock-free classification decision and is not approved.
-> No reproducible regression may merge to dev. Every tradeoff requires Gary's
-> explicit approval; design review is not performance acceptance.
+> No additional reproducible regression may merge to dev without Gary's approval.
+> Design review alone is not performance acceptance.
 > Gary authorized sections 1 and 2 only, with original-baseline measurements.
 > Section 3 is not authorized; retain the current index unchanged.
 
