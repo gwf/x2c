@@ -28,14 +28,15 @@ typedef struct ReplWorker {
   pid_t pid;
   int to, from, terminal, status;
   Buffer pending;
-  List snapshot;
+  String snapshot;
   List roots;
   String directory;
   String failure;
 } *ReplWorker;
 
 typedef struct ReplWorkerStart {
-  List arguments, roots, requested, snapshot;
+  List arguments, roots, requested;
+  String snapshot;
   ReplWorker previous;
   ReplInput input;
   int interactive;
@@ -307,8 +308,21 @@ static Map _worker_dispatch(ReplSession session, Map message) {
   return {status: <failed>, message: %"no visible declaration for $text"};
 }
 
+static String _worker_snapshot(ReplProgram program, String retained) {
+  if (retained || !program) return retained;
+  retained = %"$(program.directory)/program.snapshot";
+  Buffer data = auto Buffer.new(0);
+  if (!data.write_datum(repl_program_snapshot(program), 1)) {
+    fputs("native program snapshot contains a non-data value\n", stderr);
+    exit(1);
+  }
+  File file = auto File.open(retained, "wb");
+  file.write_all(data.content.bytes, data.len());
+  return retained;
+}
+
 static void _worker_serve(
-  CliRequest request, List roots, List requested, List snapshot, int from, int to) {
+  CliRequest request, List roots, List requested, String snapshot, int from, int to) {
   signal(SIGINT, SIG_DFL);
   signal(SIGPIPE, SIG_DFL);
   // Native exit hooks run before Context's registered process shutdown.
@@ -328,7 +342,12 @@ static void _worker_serve(
   session.frontend = frontend;
   ReplProgram program = NULL;
   String failure = NULL;
-  if (snapshot) program = repl_program_restore(snapshot, failure);
+  if (snapshot) {
+    Var state = void;
+    unsigned cursor = 0;
+    Path.read_text(snapshot).read_datum(cursor, state);
+    program = repl_program_restore(state, failure);
+  }
   else if (roots || request.inputs || request.manifest || request.target || request.profile)
     program = repl_program_build_selected(frontend, roots, requested, failure);
   if (failure) {
@@ -339,7 +358,7 @@ static void _worker_serve(
     repl_program_bind(program, session);
     session.program = program;
   }
-  List retained = program ? repl_program_snapshot(program) : NULL;
+  String retained = _worker_snapshot(program, snapshot);
   if (!_worker_send(to, {status: <ready>, snapshot: retained,
                         roots: program ? program.roots : roots,
                         directory: program ? program.directory : ""})) {

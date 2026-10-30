@@ -62,7 +62,8 @@ static struct ReplClient {
   ReplOptions options;
   ReplWorker worker;
   ReplInput input;
-  List roots, snapshot;
+  List roots;
+  String snapshot;
   Array transcript;
   String pending, directory, artifact;
   int interactive, failed, quit, replaying;
@@ -145,7 +146,7 @@ static void _record(struct ReplClient &client, String source) {
 }
 
 static int _replace(
-  struct ReplClient &client, List roots, List snapshot, List requested, int announce) {
+  struct ReplClient &client, List roots, String snapshot, List requested, int announce) {
   ReplWorker candidate = repl_worker_start((ReplWorkerStart) {
     .arguments = client.options.arguments, .roots = roots, .requested = requested,
     .snapshot = snapshot, .interactive = client.interactive,
