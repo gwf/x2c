@@ -1,7 +1,7 @@
 # Coverage probe
 
-The probe counts which lines of `src/*.x` and `lib/*.x` run during the
-repository's own workload. It builds an instrumented compiler and runtime
+The probe counts which lines of the compiler and runtime sources run during
+the repository's own workload. It builds an instrumented compiler and runtime
 whose generated C carries `--source-map` markers, runs the workload, and
 attributes clang source-based coverage to `.x` lines. `llvm-cov` reports
 physical lines of the generated C and ignores `#line` markers, so an awk
@@ -48,15 +48,16 @@ chmod +x "$cov/cc"
 export LLVM_PROFILE_FILE="$cov/prof/%p%c.profraw"
 export X2C_META_CC="$cov/cc" X2C_CACHE_DIR="$cov/cache"
 X2C_CC=false "$x2c" translate --fatal-warnings --out-dir "$cov/lib" \
-  $(ls lib/*.x | grep -v '^lib/x2c\.x$')
-X2C_CC=false "$x2c" translate --fatal-warnings --out-dir "$cov/src" src/*.x
+  $(tools/sources.sh --area lib | grep -v '^lib/x2c.x$')
+X2C_CC=false "$x2c" translate --fatal-warnings --out-dir "$cov/src" \
+  $(tools/sources.sh --area src)
 X2C=$x2c FIXTURE_BUILD=$cov/fixtures FIXTURE_TIMEOUT_SECONDS=600 \
   BUILD_CFLAGS="-L$PWD/builds/9 -fprofile-instr-generate" \
   unittest/compiler-fixtures/run.sh check
 make -C unittest -j"$(getconf _NPROCESSORS_ONLN)" STAGE=9 \
   BUILD="$cov/unittest" BUILD_LDFLAGS='-pthread -fprofile-instr-generate' \
   COMPILER_OBJECTS="$(printf '../builds/9/src/%s.o ' \
-    ast diagnostics report sourceview)" test-all
+    ast operator-ledger diagnostics report sourceview)" test-all
 (cd unittest && ./test-all)
 rm -f unittest/test-all
 unset LLVM_PROFILE_FILE X2C_META_CC X2C_CACHE_DIR

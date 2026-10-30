@@ -21,7 +21,8 @@ For a broad compiler audit, start with values produced by one stage and
 silently rejected by a later consumer:
 
 ```sh
-builds/0/x2c lint --rule silent-shape-guard src/*.x lib/*.x
+builds/0/x2c lint --rule silent-shape-guard $(tools/sources.sh --area src) \
+  $(tools/sources.sh --area lib | grep -v '^lib/x2c.x$')
 ```
 
 Each finding is a structural guard whose failure continues, returns null or
@@ -43,7 +44,8 @@ For a parser, AST, or source-quality audit, list static method matches that
 construct a binding List only to read it locally with `assoc`:
 
 ```sh
-builds/0/x2c lint --rule static-match-capture src/*.x lib/*.x
+builds/0/x2c lint --rule static-match-capture $(tools/sources.sh --area src) \
+  $(tools/sources.sh --area lib | grep -v '^lib/x2c.x$')
 ```
 
 These are candidates for source `match`, not automatic rewrites. Keep method
@@ -56,7 +58,8 @@ binding List crosses the local branch.
 builds/0/x2c lint --rule return-after-report-error --rule return-after-raise \
   --rule fallback-shared-cause --rule fresh-literal-null-guard \
   --rule growth-check --rule shape-diagnostics --rule recursive-validator \
-  --rule validator-diagnostics src/*.x lib/*.x
+  --rule validator-diagnostics $(tools/sources.sh --area src) \
+  $(tools/sources.sh --area lib | grep -v '^lib/x2c.x$')
 ```
 
 A function's reasons are reported when its strongest reason is a
