@@ -19,7 +19,7 @@ static typedef struct ProgramBuild {
   Frontend frontend;
   Compiler documentation;
   Array roots, headers, objects, archives, exports, includes;
-  Map seen, units, fingerprints;
+  Map seen, units, fingerprints, packages;
 } ProgramBuild;
 
 static String _program_command(List words) {
@@ -183,6 +183,10 @@ static void _program_symbol(
   }
 }
 
+static String _program_type_name(List family) =>
+  family.car() == <typedef> ? family.cadr().str()
+                           : %"$(family.car()) $(family.cadr())";
+
 static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
   Compiler c = unit.compiler;
   ReplProgram program = b.program;
@@ -244,8 +248,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
     if (family.len() != 2 ||
         !(family.car() in %<<struct union enum typedef>>) ||
         family.cadr() is not <string>) continue;
-    String name = family.cadr();
-    if (name in program.descriptions) continue;
+    String name = family.cadr(), key = _program_type_name(family);
+    if (key in program.descriptions) continue;
     Type type = family.car() == <typedef> ? c.sym.get_exact($(name)) : family;
     Map description = {
       "name": name, "kind": <type>, "type": type,
@@ -266,7 +270,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       program.sources[file] = text;
       break;
     }
-    program.descriptions[name] = description;
+    program.descriptions[key] = description;
   }
   foreach (List node, unit.ast) {
     List spec = NULL;
@@ -284,7 +288,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
     if (!body) continue;
     int line = 1;
     String file = _program_origin(c, _program_span(c, node), line);
-    Map description = program.descriptions[name];
+    String key = _program_type_name(family);
+    Map description = program.descriptions[key];
     if (!description) description = {"name": name, "kind": <type>, "type": family};
     description["path"] = file;
     description["body"] = body;
@@ -296,7 +301,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       program.sources[file] = text;
       description["source"] = text;
     }
-    program.descriptions[name] = description;
+    program.descriptions[key] = description;
   }
   foreach (Var (key, value), c.sym.unit_symbols()) {
     if (key is not <list> || value is not <list> ||
@@ -394,6 +399,29 @@ static void _program_macro(
     "body": declaration, "dependency": path != root};
 }
 
+/* The ordinary driver links imported package archives. Keep their native
+   client flags and pinned headers for later submissions in the same program. */
+static void _program_packages(ProgramBuild &b, ParsedUnit &unit) {
+  ReplProgram program = b.program;
+  foreach (Var (name, raw), unit.compiler.package_roots) {
+    String root = unit.context.export(raw), response = %"$root/builds/$name.native.rsp";
+    if (root in b.packages) continue;
+    b.packages[root] = 1;
+    foreach (String directory, $(%"$root/builds", %"$root/src"))
+      if (!(directory in b.includes)) b.includes.push(unit.context.export(directory));
+    if (!Path.is_file(response)) continue;
+    CliRequest native = CliRequest.package_options(response, root);
+    program.cc_args = unit.context.export(program.cc_args.append(native.cc_args));
+    program.ld_args = unit.context.export(program.ld_args.append(native.ld_args));
+    String module = %"$root/builds/$name.module";
+    if (Path.is_file(module))
+      program.dependencies[unit.context.export(module)] =
+        unit.context.export(Path.content_identity(module));
+  }
+  b.frontend.toolchain.cc_args = program.cc_args;
+  b.frontend.toolchain.ld_args = program.ld_args;
+}
+
 static String _program_unit(ProgramBuild &b, String path) {
   if (path in b.seen) return NULL;
   b.seen[path] = 1;
@@ -452,6 +480,12 @@ static String _program_unit(ProgramBuild &b, String path) {
       else if (parts.car() in %<<struct union enum typedef>>)
         collected.symbols[key] = value;
     }
+  if (!native) {
+    Array names = [];
+    foreach (List row, local.exports) names.push(row.car());
+    collected.symbols.merge(c.callable_symbols(names));
+    _program_packages(b, unit);
+  }
   program.symbols.merge(unit.context.export(collected.symbols));
   foreach (List row, (Array) unit.context.export(local.exports))
     if (!(row.car() in b.units)) {
@@ -475,7 +509,9 @@ static String _program_unit(ProgramBuild &b, String path) {
       b.fingerprints[unit.context.export(file)] =
         unit.context.export(Path.content_identity(file));
     String home = Compiler.home_dir();
+    String package = Compiler.package_directory(frontend.request.package_roots(), file);
     if (Path.is_x2c_source(file) &&
+        !(package && Compiler.is_package_source(package, file)) &&
         !(home && (file.startswith(%"$home/lib/") ||
                    file.startswith(%"$home/src/") ||
                    file.startswith(%"$home/etc/"))) && !(file in b.seen))
@@ -803,7 +839,7 @@ ReplProgram repl_program_build_selected(
   ProgramBuild build = {
     .program = program, .frontend = frontend, .roots = [], .headers = [],
     .objects = [], .archives = [], .exports = [], .includes = [], .seen = {}, .units = {},
-    .fingerprints = {}};
+    .fingerprints = {}, .packages = {}};
   CliRequest request = _program_request(build, failure);
   if (!request) return NULL;
   if (request != frontend.request) {

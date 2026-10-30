@@ -72,3 +72,18 @@ cat >"$tmp/sqlite-wrapper.h" <<'EOF'
 #include <sqlite3.h>
 EOF
 "$tmp/program-api" "$tmp/sqlite-wrapper.h" -lsqlite3
+
+cat >"$tmp/wrapper.h" <<'EOF'
+#include "playground.h"
+EOF
+"$tmp/program-api" "$tmp/wrapper.h" "$tmp/libplayground.a"
+
+mkdir -p "$tmp/packages"
+cp -R unittest/probes/packages/tally "$tmp/packages/"
+make -s -C "$tmp/packages/tally" build ROOT="$PWD" X2C="$X2C" \
+  >"$tmp/package-build.log" 2>&1
+cat >"$tmp/import-main.x" <<'EOF'
+import "tally";
+int main(void) { return $tally.sum4() + 1; }
+EOF
+"$tmp/program-api" --package-dir "$tmp/packages" "$tmp/import-main.x"

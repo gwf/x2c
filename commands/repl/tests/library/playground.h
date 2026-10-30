@@ -11,6 +11,7 @@ typedef struct PlaygroundHandle PlaygroundHandle;
 enum PlaygroundAxis { PLAYGROUND_X = 1, PLAYGROUND_Y = 2 };
 #define PLAYGROUND_SCALE 3
 
+struct playground_value { int marker; };
 extern int playground_calls;
 /** Allocates a point with the two requested coordinates. */
 PlaygroundPoint *playground_new(int x, int y);

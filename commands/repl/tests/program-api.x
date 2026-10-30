@@ -111,15 +111,18 @@ int main(int argc, char **argv) {
   }
 
   Map function = program.descriptions["playground_new"];
-  if (!("int x" in function["declaration"].str()) ||
-      !("int y" in function["declaration"].str())) return 1;
+  if (function && (!("int x" in function["declaration"].str()) ||
+      !("int y" in function["declaration"].str()))) return 1;
   if (!program.symbols.contains(%(struct "PlaygroundPoint" "field-order")))
     return 1;
   Map macro = program.descriptions["PLAYGROUND_SCALE"];
   if (!macro || macro["kind"] != <macro> ||
       !("#define PLAYGROUND_SCALE 3" in macro["declaration"].str())) return 1;
-  if (roots && roots.car().str().endswith(".h") &&
-      !("requested coordinates" in function["documentation"].str())) return 1;
+  if (function && roots && roots.car().str().endswith(".h")) {
+    if (!("requested coordinates" in function["documentation"].str()) ||
+        !program.descriptions.contains("struct playground_value") ||
+        !program.descriptions.contains("playground_value")) return 1;
+  }
   if (!program.macros.contains("PLAYGROUND_SCALE") ||
       !program.symbols.contains(%("PLAYGROUND_Y")) ||
       !program.symbols.contains(%(enum "PlaygroundAxis" "enumerators")))
