@@ -259,7 +259,8 @@ static void _plain_directive(ArmScan &s, Token token, size_t i) {
 /* State 2 hides the opening arm; state 1 selects it, and state 3 keeps
    every following alternative hidden after a selected arm. */
 static int _plain_open_state(String text) {
-  String line = _plain_directive_line(Compiler.preproc_directive(text)).replace(
+  String line = _plain_directive_line(
+    Compiler.preproc_directive(text)).replace(
     "defined ( <never> )", "defined <never>");
   if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
       line == "if defined <never>" ||
