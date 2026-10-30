@@ -240,7 +240,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
           ? _program_text(c, node).strip(NULL)
           : _program_declaration(c, type, name);
         _program_symbol(b, c, path, name, type, node, declaration,
-                        _program_slice(c, span), line);
+                        type.is_function() ? NULL : _program_slice(c, span), line);
       }
     }
   }

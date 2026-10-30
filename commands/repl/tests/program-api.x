@@ -137,10 +137,15 @@ int main(int argc, char **argv) {
   if (!macro || macro["kind"] != <macro> ||
       !("#define PLAYGROUND_SCALE 3" in macro["declaration"].str())) return 1;
   if (function && roots && roots.car().str().endswith(".h")) {
-    if (!("requested coordinates" in function["documentation"].str()) ||
+    Map inline_function = program.descriptions["playground_inline"];
+    if (function["body"].str().len() || !inline_function ||
+        !("return value + 1" in inline_function["body"].str()) ||
+        !("requested coordinates" in function["documentation"].str()) ||
         !program.descriptions.contains("struct playground_value") ||
         !program.descriptions.contains("playground_value")) return 1;
   }
+  if (function && roots && roots.car().str().endswith(".c") &&
+      !("malloc" in function["body"].str())) return 1;
   if (!program.macros.contains("PLAYGROUND_SCALE") ||
       !program.symbols.contains(%("PLAYGROUND_Y")) ||
       !program.symbols.contains(%(enum "PlaygroundAxis" "enumerators")))
