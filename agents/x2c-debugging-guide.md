@@ -159,11 +159,11 @@ commit. Do not use `git stash`: every worktree shares one stash, so another
 session can pop your entry.
 
 ```sh
-git worktree add --detach /tmp/x2c-probe HEAD  # a tree without the change
-# add the probe under /tmp/x2c-probe/src/, then build its stage 0
-make -C /tmp/x2c-probe build-safe
-/tmp/x2c-probe/builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var/var.x
-git worktree remove --force /tmp/x2c-probe
+git worktree add /tmp/probe-tree HEAD   # a detached tree without the change
+# add the probe under /tmp/probe-tree/src/, then build its stage 0
+make -C /tmp/probe-tree build-safe
+/tmp/probe-tree/builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var/var.x
+git worktree remove -f /tmp/probe-tree
 ```
 
 The same asymmetry explains a diagnostic that looks less informative than the
