@@ -3,11 +3,11 @@
 > Status: active
 > Written 2026-10-30 against `dev` `ae3739230`. Gary selected a remediation
 > plan on 2026-10-30 and accepted the recommendation on every question
-> under "Decisions" the same day. Batches 1 and 2 are implemented and
-> integrated on 2026-10-30; see "Implementation evidence" for what landed,
-> what was scoped, and the follow-ups found. Batches 3 to 6 have not
-> started. Findings and verification are in
-> [the review record](reference/review-2026-10-30.md).
+> under "Decisions" the same day. Batches 1 and 2 were published to `dev`
+> on 2026-10-30 as `fe6b9d4d7` after the full publication gate; see
+> "Implementation evidence" for what landed, what was scoped, and the
+> follow-ups found. Batches 3 to 6 have not started. Findings and
+> verification are in [the review record](reference/review-2026-10-30.md).
 
 ## Result and scope
 
@@ -447,8 +447,9 @@ pointing to the 10-29 runtime-locks repeat.
 
 ## Implementation order and delivery
 
-1. Q1 to Q8 are settled. Batches 1 and 2 started on 2026-10-30 as an
-   orchestrated set of workers in isolated worktrees from `ae3739230`.
+1. Q1 to Q8 are settled. Batches 1 and 2 were implemented on 2026-10-30
+   by orchestrated workers in isolated worktrees from `ae3739230` and
+   published as `fe6b9d4d7`.
 2. Batch 1 and R9 share one authored compiler change and one full gate.
    Probe R10 before touching it. Run the existing performance checkpoint
    only if the `--cpp` default path changes; R1 to R5 do not touch it.
