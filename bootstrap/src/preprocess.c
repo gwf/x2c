@@ -378,7 +378,7 @@ static void _plain_directive(ArmScan * s, Token token, size_t i){
     arm = List_getindex(_x2c_gensym_destructure_0, 1);
     state = List_getindex(_x2c_gensym_destructure_0, 2);
     Array_setindex((* s).stack, - 1, List_var(({
-      Var _x2c_gensym_literal_part_4 = id;  Var _x2c_gensym_literal_part_5 = long_var(Var_integer(arm) + 1);  Var _x2c_gensym_literal_part_6 = int_var(x2c_var_equal_lane(state, int_var(1)) ? 2 : 0);  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL)));
+      Var _x2c_gensym_literal_part_4 = id;  Var _x2c_gensym_literal_part_5 = long_var(Var_integer(arm) + 1);  Var _x2c_gensym_literal_part_6 = int_var(x2c_var_equal_lane(state, int_var(1)) || x2c_var_equal_lane(state, int_var(3)) ? 3 : 0);  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL)));
     }
     )));
   }
@@ -421,7 +421,7 @@ static int _hidden_group(List open){
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       group = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      if(x2c_var_equal_lane(List_caddr(group), Symbol_var(556015964)) || x2c_var_equal_lane(List_caddr(group), int_var(2))) return 1;
+      if(x2c_var_equal_lane(List_caddr(group), Symbol_var(556015964)) || x2c_var_equal_lane(List_caddr(group), int_var(2)) || x2c_var_equal_lane(List_caddr(group), int_var(3))) return 1;
     }
 
   }
@@ -469,7 +469,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     if(token -> type != 19147688) continue;
     int level = 0;
     if(String_equal(token -> text, _34)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 351}; & _x2c_gensym_error_site_0; })));
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 354}; & _x2c_gensym_error_site_0; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order_lane(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));

@@ -2777,7 +2777,7 @@ static void f4_walk____split(FileWalk * w, Token first, Map arms){
         Var _x2c_gensym_macro_cursor_output_12;
         while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_12))){
           group = Var_list_payload(_x2c_gensym_macro_cursor_output_12);
-          if(x2c_var_equal_lane(List_caddr(group), int_var(2))) hidden = 1;
+          if(x2c_var_equal_lane(List_caddr(group), int_var(2)) || x2c_var_equal_lane(List_caddr(group), int_var(3))) hidden = 1;
         }
 
       }
