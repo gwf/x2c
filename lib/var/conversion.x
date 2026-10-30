@@ -19,8 +19,8 @@ static macro Stmt $error.encoding.bad(Expr $bits) {
 }
 
 static macro Stmt $error.convert.void(Expr $target, Expr $site) {
-  Error.raise_at($site, <void-op>,
-    %((operation "Var.convert") (target $($target))));
+  Error.raise_at(
+    $site, <void-op>, %((operation "Var.convert") (target $($target))));
 }
 
 static macro Stmt $error.target.invalid(Expr $target) {
@@ -32,15 +32,15 @@ static macro Stmt $error.source.numeric(
   using $lower;
   {
     List $lower = %(bad-types (source $($source_tag)));
-    Error.raise_at($site, <no-convert>,
-      %((target $($target)) (cause $($lower))));
+    Error.raise_at(
+      $site, <no-convert>, %((target $($target)) (cause $($lower))));
   }
 }
 
 static macro Stmt $error.no_convert(
   Expr $source_tag, Expr $target, Expr $site) {
-  Error.raise_at($site, <no-convert>,
-    %((source $($source_tag)) (target $($target))));
+  Error.raise_at(
+    $site, <no-convert>, %((source $($source_tag)) (target $($target))));
 }
 
 static macro Stmt $error.payload.type(Expr $source_tag, Expr $target) {

@@ -87,8 +87,8 @@ void Compiler.record_source_reference(
     if (c.source_capture == NULL) return;
     List range = _source_range(c, first, after);
     if (range)
-      c.source_capture.push($(@range, binding, type,
-        c.fact(%(src-key $binding))));
+      c.source_capture.push(
+        $(@range, binding, type, c.fact(%(src-key $binding))));
     return;
   }
   List range = _source_range(c, first, after);

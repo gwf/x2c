@@ -93,7 +93,8 @@ module List _auto_declaration(
       .type_from_ast().declared();
     if (type.is_function())
       $fail.parse_auto_storage(c, c.token);
-    c.sym.bind_identity(NULL, binding,
+    c.sym.bind_identity(
+      NULL, binding,
       %(declare $(base.declared()) (bindings (bind $binding $mods))));
     c.set_fact(%(managed $binding), 1);
   }

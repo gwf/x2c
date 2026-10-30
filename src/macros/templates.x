@@ -373,8 +373,7 @@ static List _rebuild(
   List rows = _template_arguments(c, definition, values, c.token, 1).cdr();
   if (target)
     rows = rows.append(
-      $(_capture_row_project(
-          c, definition.assoc(<targetp>), $(target), 1)));
+      $(_capture_row_project(c, definition.assoc(<targetp>), $(target), 1)));
   List bindings = NULL;
   foreach (List row in rows) {
     bindings = _row_bindings(keys.car(), row, bindings);

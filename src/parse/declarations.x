@@ -295,8 +295,8 @@ static List _destructure_targets(Compiler c, List binding_type) {
     if (c.peek(0) != <ident>)
       $fail.parse_destructure_name(c, c.token);
     List ident = c.parse_basic_identifier();
-    targets.push(ident ~= %("_") ? ident
-                 : _destructure_target(c, ident, binding_type));
+    targets.push(
+      ident ~= %("_") ? ident : _destructure_target(c, ident, binding_type));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);

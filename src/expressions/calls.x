@@ -72,8 +72,10 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
     match (argument) case %(expr ? (splice ?value)): {
       int map = c.sym.is_map_type(value.cadr());
       Macro splice = map ? $func_map_splice : $func_splice;
-      prepared.push(splice(function, storage, index,
-        c.convert_expression(value, map ? %("Map") : %("List"))));
+      prepared.push(
+        splice(
+          function, storage, index,
+          c.convert_expression(value, map ? %("Map") : %("List"))));
       continue;
     }
     Type type = argument.cadr();

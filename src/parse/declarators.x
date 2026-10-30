@@ -53,8 +53,8 @@ List Compiler.parse_parameter(Compiler c) {
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);
   if (rest && (declarator.caddr() || c.peek(0) == <,>))
-    c.report_error(<parse>, "rest parameter must be a final name",
-      c.token, NULL);
+    c.report_error(
+      <parse>, "rest parameter must be a final name", c.token, NULL);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
 

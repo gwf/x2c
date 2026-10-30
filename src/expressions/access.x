@@ -103,7 +103,8 @@ static List _method_member(
   if (signature && rejected == 2) {
     String name = %"$(type.base_type().car()).$(field.car())";
     String hidden = %"method '$name' is hidden by an inherited protocol";
-    c.report_error(<type>,
+    c.report_error(
+      <type>,
       hidden + " conformance; adopt the protocol for this type to use it",
       NULL, NULL);
   }

@@ -45,8 +45,8 @@ List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
   if (args ~= %((expr (void) ()))) args = NULL;
   int fixed = params.len() - 1;
   if (args.len() < fixed)
-    c.report_error(<xform>, "too few arguments for rest function",
-      NULL, NULL);
+    c.report_error(
+      <xform>, "too few arguments for rest function", NULL, NULL);
   Array prefix = [];
   for (int i = 0; i < fixed; i++, args = args.cdr()) {
     _require_rest(c, args.car());
@@ -73,8 +73,8 @@ static void _require_rest(Compiler c, List argument) {
 }
 
 static void _entry_without_map(Compiler c) =>
-  c.report_error(<xform>, "key: value argument requires a Map rest parameter",
-    NULL, NULL);
+  c.report_error(
+    <xform>, "key: value argument requires a Map rest parameter", NULL, NULL);
 
 module Ast _slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
@@ -360,8 +360,8 @@ module List _typed_call(
     List native = params[0:arg_index].append($(container));
     Type signature = callee.cadr();
     if (signature.is_pointer())
-      signature = cons(signature.car(),
-        cons(%(func $native), signature.cdr().cdr()));
+      signature = cons(
+        signature.car(), cons(%(func $native), signature.cdr().cdr()));
     else signature = cons(%(func $native), signature.cdr());
     callee = %(expr $signature $(callee.caddr()));
   }

@@ -197,8 +197,8 @@ static int _match_site_call(Emitter &e, Var function, Var arguments) {
   if (args ~= %(args ? ?pattern *) && pattern is <list> &&
       e.match_pattern_is_static(pattern)) {
     String site = e.fresh_name("match_site");
-    _put_all(e, %("({ static MatchCaptureSite " $site ";"
-                  $entry "(&" $site ","));
+    _put_all(
+      e, %("({ static MatchCaptureSite " $site ";" $entry "(&" $site ","));
     _node(e, arguments);
     _put(e, "); })");
     return 1;

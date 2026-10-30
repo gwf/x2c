@@ -649,8 +649,8 @@ static void _check_native_crossing(
   Compiler c, List expr, Type type, Type target,
   Type declared_source, Type declared_target) {
   if (!c.sym.same_rest_convention(type, target))
-    c.report_error(<type>, "incompatible rest calling convention",
-      NULL, NULL);
+    c.report_error(
+      <type>, "incompatible rest calling convention", NULL, NULL);
   String integer = _not_null_pointer_constant(c, expr);
   if (integer && c.sym.resolve_key(target).is_pointer())
     $fail.expressions_pointer_integer(c, NULL, integer, target);

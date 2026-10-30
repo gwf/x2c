@@ -90,14 +90,15 @@ String Compiler.header_guard(Compiler c) {
 // assemble and publish generated files
 
 static List _without_trivia(List ast) =>
-  ast.filter(%!(node) => {
-    match (node.list()) {
-      case %(space *): return 0;
-      case %(comment *): return 0;
-      case %(empty *): return 0;
-    }
-    return 1;
-  });
+  ast.filter(
+    %!(node) => {
+      match (node.list()) {
+        case %(space *): return 0;
+        case %(comment *): return 0;
+        case %(empty *): return 0;
+      }
+      return 1;
+    });
 
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
