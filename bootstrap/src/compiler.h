@@ -272,6 +272,10 @@ void Compiler_next(Compiler c);
 
 int Compiler_at_word(Compiler c, String word);
 
+int Compiler_at_contextual(Compiler c, String word);
+
+int Compiler_with_form_starts(Compiler c);
+
 Symbol Compiler_peek(Compiler c, int steps);
 
 Token Token_after_group(Token t);

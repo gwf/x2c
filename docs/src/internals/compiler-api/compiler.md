@@ -20,6 +20,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
 | [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional references that `condition` proves present for an operand that runs only when `condition` has truth `holds`. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
+| [`Compiler.at_contextual`](#Compiler.at_contextual) | Reports a contextual word unless a visible ordinary binding continues as an expression or declaration. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.attach_source_references`](#Compiler.attach_source_references) | Attaches a completed named-type capture to its existing declaration row. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -90,6 +91,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores exported syntax in the importing unit's parsing lifetime. |
 | [`Compiler.tokenize`](#Compiler.tokenize) | Scans source, applies directive handling and optional C macro expansion, and positions the compiler at its first non-trivia token. |
 | [`Compiler.var`](#Compiler.var) | Boxes a compiler pointer for lambda capture traversal. |
+| [`Compiler.with_form_starts`](#Compiler.with_form_starts) | Reports the complete `with (...) { ... }` statement head. |
 | [`Map.merge_translation_dependency`](#Map.merge_translation_dependency) | Merges one translation dependency, preserving an existing content hash. |
 | [`Path.real`](#Path.real) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
 | [`Path.resolved_absolute`](#Path.resolved_absolute) | Returns `Path.absolute(path)`, resolving an existing file through `Path.real`. |
@@ -185,6 +187,16 @@ Source: `src/compiler/binding-facts.x`
 `int Compiler.at_completion(Compiler c)`
 
 Reports whether the parser is at the private REPL completion marker.
+
+Source: `src/compiler/parsing/tokens.x`
+
+<a id="Compiler.at_contextual"></a>
+#### Compiler.at_contextual
+
+`int Compiler.at_contextual(Compiler c, String word)`
+
+Reports a contextual word unless a visible ordinary binding continues
+as an expression or declaration. Literal tokens retain lexical priority.
 
 Source: `src/compiler/parsing/tokens.x`
 
@@ -924,6 +936,15 @@ Captures store non-reference values as `Var`, so the caller keeps the
 compiler alive while code uses the boxed pointer.
 
 Source: `src/compiler/lifecycle.x`
+
+<a id="Compiler.with_form_starts"></a>
+#### Compiler.with_form_starts
+
+`int Compiler.with_form_starts(Compiler c)`
+
+Reports the complete `with (...) { ... }` statement head.
+
+Source: `src/compiler/parsing/tokens.x`
 
 ### `Map`
 
