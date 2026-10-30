@@ -361,8 +361,8 @@ module List _peek_invocation(Compiler c, Symbol position) {
   /* `with` is not a keyword alias: one would claim `with(41)` in an
      expression, where the book keeps `with` an ordinary name. Only a
      statement begins the built-in decorator. */
-  if (c.at_word("with") && c.peek(1) == <(> &&
-      (position == <statement> || position == <block>))
+  if ((position == <statement> || position == <block>) &&
+      c.with_form_starts())
     return _lookup(c, Atom.intern("x2c.with"), c.token);
   if (c.peek(0) == <$> || c.peek(0) == <@>) {
     String spelling;

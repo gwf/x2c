@@ -135,7 +135,7 @@ static void _head(ProtocolSyntax &p) {
     c.next();
   }
   if (c.test(<static>)) p.storage = <static>;
-  c.expect(<protocol>);
+  c.next();
   p.generated_base = c.macro_holes && c.peek(0) == <$>;
   p.base = c.parse_type_name();
   c.expect(<(>);
@@ -216,7 +216,7 @@ static List _body(ProtocolSyntax &p) {
   type_names[participant] = 1;
   int saw_member = 0;
   while (c.peek(0) != <"}"> && c.peek(0) != <eof>) {
-    if (c.peek(0) == <associated>) {
+    if (c.at_contextual("associated")) {
       if (saw_member)
         $fail.protocol_assoc_order(c, c.token);
       associations.push(_parse_associated(c, type_names));
@@ -240,7 +240,7 @@ static List _body(ProtocolSyntax &p) {
 }
 
 static List _parse_associated(Compiler c, Map names) {
-  c.expect(<associated>);
+  c.next();
   if (c.peek(0) != <ident>)
     $fail.protocol_assoc_expected(c, c.token);
   String name = c.token.text;

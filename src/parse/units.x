@@ -68,14 +68,15 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List macro = skip_body ? NULL : c.try_parse_macro_target_at(<unit>);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
+  if (c.at_contextual("import")) {
+    if (c.signature_only) {
+      _x2c_skip_shallow_expression(c, 0);
+      c.expect(<;>);
+      return NULL;
+    }
+    return _parse_import_declaration(c);
+  }
   switch (c.peek(0)) {
-    case <import>:
-      if (c.signature_only) {
-        _x2c_skip_shallow_expression(c, 0);
-        c.expect(<;>);
-        return NULL;
-      }
-      return _parse_import_declaration(c);
     case <@>:      return _top_level_decorator(c);
     case <$>:
       if ((c.token + 1).type == <(> || (c.token + 1).type == <"{">)
@@ -112,7 +113,7 @@ int Compiler.defines_main(Compiler c) {
 */
 int Compiler.script_statement_executes(Compiler c) =>
   c.script_statement_starts() &&
-  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration() ||
+  (c.peek(0) == <$> || c.with_form_starts() || !c.test_declaration() ||
    c.auto_region_form(<unit>) == <statement>);
 
 /** Reports whether the top-level item at the cursor is one of a script
@@ -124,18 +125,18 @@ int Compiler.script_statement_executes(Compiler c) =>
 */
 int Compiler.script_statement_starts(Compiler c) {
   switch (c.peek(0)) {
-    case <eof>: case <import>: case <protocol>:
+    case <eof>:
     case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
   }
-  if (_module_storage_form(c)) return 0;
+  if (_module_storage_form(c) || c.at_contextual("import")) return 0;
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
       c.macro_form_is_definition() || c.meta_form_is_declaration() ||
       c.protocol_form_starts())
     return 0;
   if (c.peek(0) == <auto>) return c.auto_region_form(<unit>) != <function>;
   if (c.alias_form_starts()) return 0;
-  if (c.at_word("with")) return 1;
+  if (c.with_form_starts()) return 1;
   if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);
 }
@@ -149,7 +150,11 @@ int Compiler.script_statement_starts(Compiler c) {
 int Compiler.protocol_form_starts(Compiler c) {
   int at = c.at_word("meta");
   if (c.peek(at) == <static>) at++;
-  return c.peek(at) == <protocol>;
+  Token head = c.token;
+  while (at-- > 0) c.next();
+  int starts = c.at_contextual("protocol");
+  c.token = head;
+  return starts;
 }
 
 /** Reports whether the cursor begins a contextual top-level `meta`
@@ -217,7 +222,7 @@ List Compiler.finish_foreign_alias(
 static int _static_interface_form(Compiler c) {
   if (c.peek(0) != <static>) return 0;
   Token next = Token.skip_trivia(c.token + 1);
-  return next.type == <typedef> || next.type == <protocol> ||
+  return next.type == <typedef> || c.protocol_form_starts() ||
          next.text == "class";
 }
 
@@ -372,7 +377,7 @@ static Token _take_meta_marker(Compiler c, int &?native) {
 */
 static List _parse_import_declaration(Compiler c) {
   Token start = c.token;
-  c.expect(<import>);
+  c.next();
   String name = _package_name(c), alias = _import_alias(c, name);
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);

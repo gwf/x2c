@@ -19,16 +19,6 @@ static keyword loop $private.loop;
 
 /* statements diagnostics. */
 
-static macro Stmt $fail.statements_with_body(Expr $c, Expr $site) =>
-  $c.report_error(
-    <parse>, "with requires a braced body",
-    $site, NULL);
-
-static macro Stmt $fail.statements_with_header(Expr $c, Expr $site) =>
-  $c.report_error(
-    <parse>, "with requires '(destination = expression, ...)'",
-    $site, %("name an expression with alias"));
-
 static macro Stmt $fail.statements_raise_payload(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
@@ -197,7 +187,8 @@ List Compiler.parse_block_item(Compiler c) {
   if (slot) return slot;
   if (c.local_macro_form_is_definition()) return _local_macro(c);
   if (c.alias_form_starts()) return c.parse_alias_statement(1);
-  if (c.at_word("with")) return _statement(c, <block>);
+  if (c.with_form_starts() || c.at_contextual("try"))
+    return _statement(c, <block>);
   // An identifier naming a visible alias is no macro target.
   List macro =
     c.alias_expression() ? NULL : c.try_parse_macro_target_at(<block>);
@@ -371,15 +362,15 @@ static void _require_list_literal(Compiler c, List pattern, Token start) {
 /* A `try` needs a `catch` or a `finally` after its body. */
 static List _catches(Compiler c) {
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
-  if (c.test(<catch>)) return _catch_cases(c);
-  if (c.peek(0) != <finally>)
+  if (c.take_contextual("catch")) return _catch_cases(c);
+  if (!c.at_contextual("finally"))
     $fail.statements_try_handler(c, c.token);
   return NULL;
 }
 
 static List _finally(Compiler c) {
   _x2c_complete_here(c, <continue>, %("finally"));
-  return c.test(<finally>) ? c.parse_governed(<statement>) : NULL;
+  return c.take_contextual("finally") ? c.parse_governed(<statement>) : NULL;
 }
 
 static List _catch_cases(Compiler c) {
@@ -390,13 +381,13 @@ static List _catch_cases(Compiler c) {
     List hole = c.try_parse_macro_slot(<catch>);
     if (hole) {
       arms.push(hole);
-      if (!c.test(<catch>)) break;
+      if (!c.take_contextual("catch")) break;
       continue;
     }
     int is_default = 0;
     arms.push(_catch_arm(c, is_default, handle));
     if (is_default) saw_default = 1;
-    if (!c.test(<catch>)) break;
+    if (!c.take_contextual("catch")) break;
     if (saw_default)
       $fail.statements_catch_default(c, c.token);
   }
@@ -421,7 +412,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
 static List _catch_body(Compiler c) {
   List body = c.parse_governed(<statement>);
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
-  return c.peek(0) == <catch> || c.peek(0) == <finally>
+  return c.at_contextual("catch") || c.at_contextual("finally")
        ? _continued(c, body) : body;
 }
 
@@ -436,20 +427,23 @@ static List _statement(Compiler c, Symbol position) {
   _x2c_complete_here(c, <statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
-  if (c.at_word("with")) return _with_statement(c, position);
+  List label = _label_statement(c);
+  if (label) return label;
+  if (c.with_form_starts()) return _with_statement(c, position);
   if (c.alias_form_starts())
     return c.parse_alias_statement(position == <block>);
   if (!c.alias_expression() && c.macro_starts_target_at(<statement>))
     return _macro_statement(c);
+  if (c.at_contextual("try")) return c.bind_source_statement(<try>);
+  if (c.at_contextual("raise")) return _raise_statement(c);
   switch (c.peek(0)) {
-    case <if>: case <while>: case <for>: case <do>: case <match>: case <try>:
-      return c.bind_source_statement();
+    case <if>: case <while>: case <for>: case <do>: case <match>:
+      return c.bind_source_statement(c.peek(0));
     case <return>:      return _return_statement(c);
     case <case>:        return _case_statement(c);
     case <break>:       return _break_statement(c);
     case <continue>:    return _continue_statement(c);
     case <goto>:        return _goto_statement(c);
-    case <raise>:       return _raise_statement(c);
     case <defer>:       return _defer_statement(c);
     case <switch>:      return _switch_statement(c);
     case <default>:     return _default_statement(c);
@@ -542,8 +536,6 @@ static List _macro_statement(Compiler c) {
 }
 
 static List _expression_statement(Compiler c, Symbol position) {
-  List label = _label_statement(c);
-  if (label) return label;
   Token start = c.token;
   List expr;
   with (c.meta_statement = start) { expr = c.parse_expression(); }
@@ -572,12 +564,6 @@ static List _label_statement(Compiler c) {
 /* `with (place = value, ...) { ... }` expands the built-in `$x2c.with`
    decorator over its braced body at `position`. */
 static List _with_statement(Compiler c, Symbol position) {
-  Token open = Token.skip_trivia(c.token + 1);
-  if (open.type != <(>)
-    $fail.statements_with_header(c, c.token);
-  Token body = open.after_group();
-  if (body.type != <"{">)
-    $fail.statements_with_body(c, body);
   return c.try_parse_macro_target_at(position);
 }
 
@@ -636,7 +622,7 @@ static List _goto_statement(Compiler c) {
 }
 
 static List _raise_statement(Compiler c) {
-  c.expect(<raise>);
+  c.next();
   if (c.peek(0) != <"%(">)
     $fail.statements_raise_payload(c, c.token);
   List stmt = c.parse_raise_literal();

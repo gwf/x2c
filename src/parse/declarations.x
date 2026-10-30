@@ -175,7 +175,7 @@ module List _declaration_types(Compiler c, List storage) {
    that way. */
 static void _late_storage(Compiler c, Array trailing) {
   loop {
-    Symbol symbol = c.peek(0);
+    Symbol symbol = _storage_keyword(c);
     if (symbol != <typedef> &&
         (symbol.is_storage_class() || symbol.is_inline())) {
       trailing.push(symbol);
@@ -201,7 +201,7 @@ module int _group_comma(Compiler c) {
 
 static int _test_declaration_start(
   Compiler c, int require_declarator) {
-  Symbol sym = c.peek(0);
+  Symbol sym = _storage_keyword(c);
   if (c.macro_holes && sym == <$>) return _hole_starts(c);
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;

@@ -102,6 +102,39 @@ void Compiler.next(Compiler c) {
 int Compiler.at_word(Compiler c, String word) =>
   c.peek(0) == <ident> && c.token.text == word;
 
+/** Reports a contextual word unless a visible ordinary binding continues
+    as an expression or declaration. Literal tokens retain lexical priority.
+*/
+int Compiler.at_contextual(Compiler c, String word) {
+  if (!c.at_word(word)) return 0;
+  Type binding = c.sym.get($(word));
+  if (!binding) return 1;
+  Token next = Token.skip_trivia(c.token + 1);
+  if (next.type.is_assignment_op() || next.type.binary_precedence())
+    return 0;
+  switch (next.type) {
+    case <(>: case <[>: case <.>: case <"->">: case <++>: case <-->:
+    case <?>: case <,>: case <;>: case <:>: case <)>: case <]>:
+      return 0;
+    case <ident>:
+      return !binding.is_typedef() && next.text != "is" && next.text != "in";
+  }
+  return !binding.is_typedef() || !next.type.is_type_qualifier();
+}
+
+/** Consumes an unambiguous or unshadowed contextual keyword when current. */
+int Compiler.take_contextual(Compiler c, String word) {
+  if (!c.at_contextual(word)) return 0;
+  c.next();
+  return 1;
+}
+
+/** Reports the complete `with (...) { ... }` statement head. */
+int Compiler.with_form_starts(Compiler c) {
+  if (!c.at_word("with") || c.peek(1) != <(>) return 0;
+  return Token.skip_trivia(c.token + 1).after_group().type == <"{">;
+}
+
 /** Returns the non-trivia token type `steps` from parser position.
 
     Zero reads the current token; positive and negative steps count forward
@@ -217,7 +250,11 @@ static void _report_malformed_token(Compiler c) {
   }
 }
 
-/* `in` and `match` are C identifiers as often as x2c keywords. `in` stays
+/* Keep raw scanner keyword types through lexing and CPP. The parser owns
+   contextual x2c words; C thread-local spellings stay storage tokens.
+   `in` and `match` retain their existing lexical lookahead.
+
+   `in` and `match` are C identifiers as often as x2c keywords. `in` stays
    the operator where its neighbors plainly end and begin operands, and the
    parser reads it by position everywhere else; `match` is the statement
    only as `match (...)` followed by `case` or `{`. Every other occurrence
@@ -226,6 +263,14 @@ static void _retag_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
        token = Token.skip_trivia(token + 1)) {
+    switch (token.type) {
+      case <try>: case <catch>: case <finally>: case <raise>: case <import>:
+      case <protocol>: case <delegate>: case <associated>:
+        token.type = <ident>; break;
+      case <threaded>:
+        if (token.text == "threaded") token.type = <ident>;
+        break;
+    }
     if (token.type == <in>) {
       Token next = Token.skip_trivia(token + 1);
       if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))

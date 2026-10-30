@@ -396,7 +396,7 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
 static List _field_item(Compiler c, List context) {
   if (c.alias_form_starts())
     return c.parse_alias_member(<field>, context);
-  if (c.test(<delegate>)) return _field(c, context, 1);
+  if (c.take_contextual("delegate")) return _field(c, context, 1);
   return c.parse_field(context);
 }
 
@@ -452,6 +452,18 @@ static List _field_group(Compiler c, List context) {
   return _finish_declaration(c, <declare>, type, binds, 0);
 }
 
+/* `threaded` before another specifier or a declarator is storage. Before
+   a name's suffix (`=`, `(`, `;`, ...) it is the name being declared. */
+module Symbol _storage_keyword(Compiler c) {
+  if (c.at_contextual("threaded")) {
+    Symbol next = c.peek(1);
+    if (next == <ident> || next == <*> || next == <&> ||
+        next.is_builtin_type() || next.is_type_qualifier() ||
+        next.is_storage_class() || next == <inline>) return <threaded>;
+  }
+  return c.peek(0);
+}
+
 /* Declaration specifiers before the qualifiers and type: storage classes
    and `inline` in source order, then `_Noreturn` and attributes as source
    text. The storage words lead, where C places them and where a declared
@@ -463,7 +475,7 @@ module List _storage_class(Compiler c) {
   Array storage = [], text = [], int seen_threaded = 0, seen_ordinary = 0;
   defer { storage.free(); text.free(); }
   loop {
-    Symbol symbol = c.peek(0);
+    Symbol symbol = _storage_keyword(c);
     String attribute = _attribute(c);
     if (!attribute) attribute = _attribute_macro(c);
     if (attribute) text.push($(attribute));
