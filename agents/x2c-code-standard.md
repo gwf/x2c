@@ -1013,9 +1013,8 @@ needs them.
 **LI-1** Write compile-time code in x2c; the compiler does not evaluate
 Lisp. Lisp remains a runtime library: the evaluator core, its initial
 environment, the binding tables that name x2c operations for Lisp, and
-runtime DSLs. A `meta`
-function that needs Lisp runs in the project helper, not in a native module
-the compiler loads.
+runtime DSLs. A `meta` function that needs Lisp runs in the project helper,
+not in a native module the compiler loads.
 
 **LI-2** Include ordinary `.x` modules for shared macros and `meta`
 functions. Call compiler operations by their x2c names, such as

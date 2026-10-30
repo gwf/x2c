@@ -93,7 +93,7 @@ Therefore:
 - Ordinary include collection terminates cycles. Raw `.x` include cycles used
   with `--cpp-symbols` or `--live-symbols` need source guards, as described in
   [source files and visibility](../docs/src/reference/language.md#source-files-and-visibility).
-- Ordinary translation never reads system headers. Only the
+- The compiler never reads system headers itself. Only the
   `--cpp-symbols` and `--live-symbols` modes collect their declarations,
   from the host preprocessor's output. Declare compiler-visible types in
   `.x` source or the runtime library.
