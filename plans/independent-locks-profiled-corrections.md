@@ -1,12 +1,14 @@
 # Small corrections proposed from the lock profiles
 
-> Status: blocked - independently reviewed proposal; awaiting Gary's decision.
+> Status: active for Pool fast path and Channel changes; index change remains blocked.
 > Based on the unchanged runtime `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
 > No runtime code, tests, generated code, or benchmarks changed for this proposal.
 > The index proposal explicitly reintroduces a short shared lookup lock.
 > That changes the earlier lock-free classification decision and is not approved.
 > No reproducible regression may merge to dev. Every tradeoff requires Gary's
 > explicit approval; design review is not performance acceptance.
+> Gary authorized sections 1 and 2 only, with original-baseline measurements.
+> Section 3 is not authorized; retain the current index unchanged.
 
 The [profiles](reference/independent-lock-profile-2026-10-30.md) identified three
 bounded corrections. Keep the working per-Pool counters, separate depot
@@ -238,8 +240,8 @@ above now state the reviewer-requested distinction explicitly.
 ## Implementation order and acceptance after Gary's decision
 
 The independent review is complete. A positive credibility verdict does not
-establish no regressions or authorize the shared-lookup tradeoff. This planning
-request authorizes no implementation of any of the three corrections.
+establish no regressions or authorize the shared-lookup tradeoff. Gary has now
+authorized only corrections 1 and 2. Index work remains blocked.
 
 After Gary's decision, if implementation is authorized:
 
