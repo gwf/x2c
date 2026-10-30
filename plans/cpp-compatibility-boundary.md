@@ -1,4 +1,4 @@
-> Status: active - Gary authorized implementation and shared-integrator submission.
+> Status: active - implemented and development checks passed; awaiting shared integration.
 > Based on published dev f116ed0e1893119973cd2f0c1b7437aaf0e1ee21.
 > This plan supersedes the earlier CPP campaign's broader authoring premise.
 
@@ -79,3 +79,40 @@ cache, or expand CPP support. The source comparison establishes these removal
 targets, not a validated replacement. The principal correctness risks are
 conditional handling currently coupled to expansion, mode-dependent cache
 reuse, and new native REPL consumers. Check those directly during implementation.
+
+## Implementation and retained evidence
+
+Implemented on `517b822e50b384c23d424ae6ab19f86fcbda2dbb`, based on the
+revision above. Full CPP is opt-in, discovery-only CPP machinery is removed,
+and ordinary native constants/directives remain for the C compiler. The
+unchanged native REPL suites pass with explicit imported-macro support.
+
+Development checks passed: stage two; 470-file stage-one/stage-two and
+stage-two/stage-three parity; 470-file cold/warm parity; all 1,344 fixtures
+(2,972 artifacts); header-cache mode switches and suppression; ordinary meta
+source kinds; and the full native REPL test script. Fixture expectations were
+regenerated through the harness and reviewed for the deliberate default change.
+The CPP token fixture still requires expanded tokens with `--cpp`.
+
+Three alternating complete `make stage-3` pairs used 16 jobs, optimization,
+and no LTO. Baseline f116ed0e1: 31.17, 32.31, 33.49 seconds. Candidate:
+21.81, 21.81, 22.02 seconds. Medians: 32.31 and 21.81 seconds. The host was
+shared; these are observations, not isolated timings or a twenty-second result.
+The process monitor matched arguments as well as executable names, so its
+foreign-process counts are not evidence of competing compilation or its absence.
+
+Five alternating seven-source translation samples used populated preludes and
+empty prelude-missing reports. Median retired instructions: 33,657,313,025
+baseline and 29,710,478,724 candidate. These omit native compilation and are
+not complete-build timings. Raw samples, flags, identities, and commands are
+retained under `debug/cpp-boundary-performance/` in the implementation worktree.
+
+The local bootstrap transition used the retained pre-CPP compiler with this
+checkout as X2C_HOME for ordinary source units, and the shipped compiler for
+linked-meta's current intrinsic. The resulting compiler then translated its own
+sources and runtime. `make bootstrap-refresh` regenerated the local seed,
+followed by the ordinary stage-two and stage-three builds above. No generated
+C/H was hand-edited. Canceled old-seed attempts and a wrong-home attempt remain
+in debug logs and are excluded from performance comparisons. Early overlapping
+fixture/build runs encountered recreated header symlinks; the stable rerun
+passed. The integrator owns the full publication gate and final artifacts.
