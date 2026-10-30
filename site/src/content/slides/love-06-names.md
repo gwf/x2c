@@ -33,7 +33,7 @@ int main(void) {
 ```
 
 `<queued>` is a `Symbol`: a 64-bit word that compares in constant time,
-prints its own spelling, and occupies nothing in C's identifier namespace.
+prints its own name, and occupies nothing in C's identifier namespace.
 A `SymbolSet` gives a vocabulary an order and an index, with no runtime
 setup at all.
 

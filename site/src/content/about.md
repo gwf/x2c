@@ -24,11 +24,12 @@ control. Lisp gave me the flexibility to explore ideas quickly. x2c grew
 out of wanting both in one language, and out of a suspicion that the two
 were not as far apart as their fans insist.
 
-The suspicion held up. Code is a List. A value can carry its own type.
-Memory can be freed by lifetime instead of by pointer. A function can run
-inside the compiler as easily as inside the program. None of that needed a
-new runtime or a new syntax for programs; it needed a handful of ideas
-bolted firmly onto C and then left alone.
+The suspicion held up. Every feature can be sugar that lowers to C you can
+predict. One data model can be dynamic and native at once. Memory can be
+freed by scope. A function can run inside the compiler as easily as inside
+the program. None of that needed a new runtime or a new syntax for programs;
+it needed a handful of ideas bolted firmly onto C and then left alone. I
+nearly named the language Sugar.
 
 Writing the x2c compiler in x2c meant living with my own design decisions.
 The best new features made the compiler's source shorter and clearer. Some

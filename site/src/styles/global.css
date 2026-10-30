@@ -1412,7 +1412,7 @@ a.docs-card:hover {
   .footer-top { grid-column: 2; grid-row: 1; }
 }
 
-/* Five ideas: the hero's right-hand panel. */
+/* The ideas: the hero's right-hand panel. */
 .hero-ideas {
   grid-column: 2;
   grid-row: 2;

@@ -1,7 +1,7 @@
 ---
 title: Pull up a chair.
 kicker: x2c for people who already know C, in the order you will trip over it.
-lede: "x2c is a strict superset of C that compiles to C. It adds five ideas, and most of the rest of the language falls out of them. This is how I would get you going if we were sitting across a table: what is different, small code that runs, and no time spent on things you already know."
+lede: "x2c is a strict superset of C that compiles to C. It adds four ideas, and most of the rest of the language falls out of them. This is how I would get you going if we were sitting across a table: what is different, small code that runs, and no time spent on things you already know."
 ---
 
 ## Install it. Run it.
@@ -63,6 +63,12 @@ int main(void) {
 The only x2c in there is `s.port`. A dot reaches through one pointer, so
 you can stop caring which one you need. The arrow still works.
 
+This is the first idea: still C, with less of it. Every x2c feature is
+sugar that lowers to C you can predict. The language was nearly named
+Sugar. It reads like a dynamic language and runs like the static one it is.
+The sugar subtracts: you can drop the arrow, and reference parameters take
+the pointer plumbing out of call sites.
+
 Multiple files work the way you expect. `#include "unit.x"` gives you that
 unit's public names, and `static` keeps a name private to its file, exactly
 as in C. Plain `.c`, `.o`, and `.a` files go on the same command line, and
@@ -79,10 +85,13 @@ this section.
 
 ## One value type
 
-`Var` is the first idea. It is an eight-byte tagged word that holds
-anything and knows what it holds: an integer, a double, a `String`, a
-`List`, a pointer, a value of your own type. Collections store `Var`, `%s`
-prints one, and assigning one to a typed variable converts it.
+This is the second idea: one data model, two speeds. `Var` is an
+eight-byte tagged word that holds anything and knows what it holds: an
+integer, a double, a `String`, a `List`, a pointer, a value of your own
+type. Collections store `Var`, `%s` prints one, and assigning one to a
+typed variable converts it. A `String` is still a C string and an `Array`
+is still a C block, so the dynamic view and the native view are the same
+bytes.
 
 ```x2c
 Var n = 42, name = "Ada";
@@ -129,11 +138,12 @@ always wanted.
 
 ## Lists, Arrays, Maps, and Symbols
 
-This is the second idea: there are two kinds of data. `String`, `List`,
-and `Symbol` are values. Equal content is one object, nothing mutates, and
-sharing is free. `Array` and `Map` are objects. They change in place and
-have identity. `==` compares content for both kinds, and `===` asks whether
-two handles are the same object.
+There are two kinds of data. `String`, `List`, and `Symbol` are values.
+Equal content is one object, nothing mutates, and sharing is free. `Array`
+and `Map` are objects. They change in place and have identity. `==`
+compares content for both kinds, and `===` asks whether two handles are the
+same object. Shared immutable values are the top layer of the third idea,
+which the memory section below explains.
 
 ```x2c
 List tags = %(fast small weird);         // a List: immutable, shared
@@ -228,12 +238,13 @@ int main(void) {
 Define functions in any order you like. There are no prototypes to keep in
 sync, and a `Func` is a first-class value you can store, pass, and return.
 
-## Memory by region
+## Lifetime by scope
 
 This is the third idea. There is no garbage collector, and you will not
-write `free` for x2c values. Memory belongs to a region, and the region
-dies when its statement ends. `auto { ... }` makes one. Put `auto` on a
-loop body and every iteration gets its own region, so working data never
+write `free` for x2c values. You manage memory in the unit you write code
+in: a loop body, a request, a file. Memory belongs to a scope, and the
+scope dies when its statement ends. `auto { ... }` makes one. Put `auto` on
+a loop body and every iteration gets its own scope, so working data never
 piles up. `auto` on a declaration cleans up that one value at block exit.
 `defer` runs any statement at block exit, on `return`, and while an error
 unwinds.
@@ -298,7 +309,7 @@ error nobody catches prints its cause and your file and line, like
 
 `class` writes the struct and the boring methods. A value class gets `new`,
 `==`, a hash, and `repr` from its fields. Add a `*` and you have a pointer
-class, allocated in the current region and compared by identity. Operators
+class, allocated in the current scope and compared by identity. Operators
 are methods: `T.add` gives you `+`, `T.equal` gives `==`, `T.getindex`
 gives `[]`, and `T.str` is what interpolation prints.
 
@@ -396,15 +407,16 @@ reachable underneath. Prebuilt bundles exist for macOS and Linux. See
 
 ## The compiler is yours
 
-This is the part that either delights C programmers or offends them. You
-have already met the fourth idea: code is a List, so the `%(...)` that
-builds data also builds patterns, errors, and syntax. The fifth is that
-functions run in the compiler. Put `meta` in front of a function and the
-compiler can call it: `$fib(20)` runs during translation and leaves a
-constant behind. A `macro` is a typed template that splices syntax trees,
-not text, so `$minutes(1 + 1)` is 120 and the oldest joke in the C
-preprocessor is retired. A `Decorator` receives the function that follows
-it and can rewrite it.
+This is the part that either delights C programmers or offends them. It
+is the fourth idea: x2c is its own metalanguage, and the compiler is user
+space. A code literal is a `List`, so the `%(...)` that builds data also
+builds patterns, errors, and syntax. Put `meta` in front of a function and
+the compiler can call it: `$fib(20)` runs during translation and leaves a
+constant behind. A `macro` is a typed template over syntax trees, so
+`$minutes(1 + 1)` is 120 and the oldest joke in the C preprocessor is
+retired. A `Decorator` receives the function that follows it and can
+rewrite it. Each of `try`, `match`, lambdas, and interpolation is one
+source file, built into the compiler and buildable the same way outside it.
 
 ```x2c
 meta static int fib(int n) => n < 2 ? n : fib(n - 1) + fib(n - 2);

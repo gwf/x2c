@@ -50,10 +50,10 @@ export const sheet: Section[] = [
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
   { column: 1, title: "Memory and cleanup", rows: [
-    ["auto { ... }", "A region, freed at exit."],
-    ["for (...) auto { ... }", "A region per iteration."],
+    ["auto { ... }", "A scope, freed at exit."],
+    ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
-    ["Scope.retain(); defer Scope.release();", "A region by hand."],
+    ["Scope.retain(); defer Scope.release();", "A scope by hand."],
     ["defer f.close();", "At exit, `return`, or a raise."],
     ["xmalloc(n)  xfree(p)", "Allocate in the current scope."],
   ] },

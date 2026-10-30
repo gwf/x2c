@@ -2,7 +2,7 @@
 slug: code-is-data
 section: magic
 tab: code is data
-title: Code is a List. Take it apart.
+title: A code literal is a List. Take it apart.
 ---
 
 ```x2c

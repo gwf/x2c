@@ -30,7 +30,7 @@ int main(void) {
 }
 ```
 
-A decorator that takes a block can be given a spelling with `keyword`, and
+A decorator that takes a block can be given a name with `keyword`, and
 now `with_lock(m) { ... }` is part of the language in this file. The lock
 is evaluated once and released on every exit, including an exception.
 
