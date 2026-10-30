@@ -192,30 +192,28 @@ Pool Pool.retain_named(Pool inner, const char *name) {
 /** Destroys one pool and returns its parent, or returns NULL for NULL input.
     Promoted slots and large allocations survive under the parent with stable
     addresses; other identities, the table, and the control `Scope` become
-    invalid. Children must already be released, and no caller may use `inner`
-    afterward. Use `Pool.close` instead to end a bracket opened with
-    `Pool.open`.
+    invalid. Children must already be released, and no caller may use the
+    destroyed pool afterward. Use `Pool.close` instead to end a bracket opened
+    with `Pool.open`.
 */
-Pool Pool.release(Pool inner) {
-  if (!inner) return NULL;
+Pool Pool.release(Pool p) {
+  if (!p) return NULL;
   /* Published before any storage is freed, so a reader that sees the old
      value has not yet been able to observe a reused address. */
   __atomic_fetch_add(&value_epoch, 1, __ATOMIC_RELEASE);
   _storage_lock();
-  _lock(inner);
-  Pool up = inner.up;
+  _lock(p);
+  Pool up = p.up;
   _lock(up);
-  if (up) {
-    __atomic_store_n(
-      &up.child_capacity, inner.table.capacity, __ATOMIC_RELAXED);
-  }
-  _release_blocks(inner);
+  if (up)
+    __atomic_store_n(&up.child_capacity, p.table.capacity, __ATOMIC_RELAXED);
+  _release_blocks(p);
   _unlock(up);
-  _unlock(inner);
+  _unlock(p);
   _storage_unlock();
-  pthread_mutex_destroy(&inner.mutex);
-  if (inner == value_root) _root_initialize(NULL);
-  Scope.destroy(inner.scope);
+  pthread_mutex_destroy(&p.mutex);
+  if (p == value_root) _root_initialize(NULL);
+  Scope.destroy(p.scope);
   return up;
 }
 
