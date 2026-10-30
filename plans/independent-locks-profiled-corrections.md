@@ -1,6 +1,8 @@
 # Small corrections proposed from the lock profiles
 
-> Status: integrating sections 1 and 2 after Gary accepted the reported tradeoff.
+> Status: blocked - correctness validated; newly measured costs await approval.
+> The [delivery checkpoint](reference/independent-lock-delivery-checkpoint-2026-10-30.md)
+> retains the gains but identifies additional small absolute runtime costs.
 > On 2026-10-30 Gary authorized folding in the measured gains while minimizing
 > the reported regressions. The residual Channel slowdowns and retained-index
 > memory cost are accepted for the current measured design. Additional
