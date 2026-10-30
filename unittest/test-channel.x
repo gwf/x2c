@@ -706,7 +706,36 @@ static void channel_cancelled_waiters_pass_buffered_opportunities(void) {
   }
 }
 
+static void channel_registration_reuses_idle_and_preserves_stop(void) {
+  $test.scoped();
+  Channel first = auto Channel.new(1), second = auto Channel.new(1);
+  int stopped = 0;
+  Thread.run([
+    %!(void) => {
+      for (int i = 0; i < 128; ++i) {
+        first.send(i);
+        if (first.receive() != i) return 0;
+        second.send(i);
+        if (second.receive() != i) return 0;
+      }
+      Thread self = x2c_thread_wait_owner();
+      self.stop();
+      self.stop();
+      int caught = 0;
+      try first.send(999);
+      catch %(bad-state (operation "Thread.stop") (cancelled 1)): caught++;
+      try second.receive();
+      catch %(bad-state (operation "Thread.stop") (cancelled 1)): caught++;
+      return caught;
+    }
+  ], %!(Var result) using &stopped => { stopped = result.integer(); });
+  EXPECT_INT_EQ(stopped, 2);
+  first.send(7);
+  EXPECT_INT_EQ(first.receive().integer(), 7);
+}
+
 void channel_suite(void) {
+  $test.run(channel_registration_reuses_idle_and_preserves_stop);
   $test.run(channel_unmanaged_blocking_calls);
   $test.run(channel_cancelled_waiters_pass_buffered_opportunities);
   $test.run(channel_owned_receive_releases_transport_scope);

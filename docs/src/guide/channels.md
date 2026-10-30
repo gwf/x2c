@@ -140,8 +140,8 @@ process-pool Strings remain borrowable because the pool outlives all jobs.
 
 A Channel's own storage scope, returned by `channel.scope()`, owns its native
 queue mutex. Independent Channels do not share that mutex. Managed Threads
-keep a private wait mutex and condition through join; unmanaged blocking calls
-use temporary native wait resources. Queue nodes use native allocation independently of Scope
+keep a private condition through join; unmanaged blocking calls use a temporary
+condition. Both wait on the Channel queue mutex. Queue nodes use native allocation independently of Scope
 allocation lists. Allocation/tree metadata belongs to exclusive private owners;
 no Scope or replacement tree mutex coordinates senders through a Channel.
 

@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Each queue owns its mutex; participant gates order commitment with stop.
+    Each queue owns its mutex; registered queue monitors order commitment with stop.
     Allocation, Error dispatch, and payload destruction stay outside it.
 */
 
@@ -34,13 +34,12 @@ static typedef struct ChannelMessage {
   int owned;
 } *ChannelMessage;
 
-/* Queue mutex owns membership and commitment; gates protect stop and sleep. */
+/* Queue mutex owns membership, commitment, stop publication, and sleep. */
 static typedef struct ChannelWait {
   Var value;
   Thread owner;
   struct ChannelWait *previous, *next;
   int committed, owned, linked;
-  pthread_mutex_t *mutex;
   pthread_cond_t *condition;
 } *ChannelWait;
 
@@ -320,9 +319,7 @@ static void _remove_wait(ChannelWaits &queue, ChannelWait wait) {
 
 static void _signal(ChannelWait wait) {
   if (!wait) return;
-  _lock(wait.mutex);
   _native_check(pthread_cond_signal(wait.condition));
-  _unlock(wait.mutex);
 }
 
 /* A buffered notification detaches its head, so another opportunity can
@@ -346,17 +343,6 @@ static void _notify_head(ChannelWaits &queue) {
   if (!wait) return;
   _remove_wait(queue, wait);
   _signal(wait);
-}
-
-/* The queue selects a peer before either gate is locked. Integer addresses
-   order distinct participant gates consistently for both arrival directions. */
-static void _gates(ChannelWait caller, ChannelWait peer, int lock) {
-  pthread_mutex_t *first = caller.mutex, *second = peer ? peer.mutex : NULL;
-  if ((uintptr_t) first > (uintptr_t) second) {
-    pthread_mutex_t *swap = first; first = second; second = swap;
-  }
-  if (lock) { _lock(first); _lock(second); }
-  else { _unlock(second); _unlock(first); }
 }
 
 static int _commit_available(
@@ -392,29 +378,10 @@ static int _commit_available(
   else return 2;
 }
 
-static void _prepare_wait(pthread_mutex_t *mutex, pthread_cond_t *condition) {
-  int error = pthread_mutex_init(mutex, NULL);
-  if (error) raise %(io-fail (operation "pthread_mutex_init") (errno $error));
-  error = pthread_cond_init(condition, NULL);
-  if (error) {
-    _native_check(pthread_mutex_destroy(mutex));
-    raise %(io-fail (operation "pthread_cond_init") (errno $error));
-  }
-}
-
-/* Enter sleep with both owners held. Stop and peer notification must take
-   the gate, so neither wake can pass the atomic condition-wait handoff. */
-static void _sleep(Channel channel, ChannelWait wait) {
-  _lock(wait.mutex);
-  if (!x2c_thread_wait_stopped(wait.owner)) {
-    _unlock(&channel.mutex);
-    _native_check(pthread_cond_wait(wait.condition, wait.mutex));
-    _unlock(wait.mutex);
-    _lock(&channel.mutex);
-  }
-  else _unlock(wait.mutex);
-}
-
+/* Stop and peer notification hold this same queue mutex. Condition waiting
+   releases it atomically after the final predicate check. */
+static void _sleep(Channel channel, ChannelWait wait) =>
+  _native_check(pthread_cond_wait(wait.condition, &channel.mutex));
 
 /* A stopped head is removed once, then the queue is released before retry.
    Returning 2 requests sleep; returning 3 requests another locked attempt. */
@@ -423,25 +390,27 @@ static int _attempt(
   ChannelMessage &message, Var &value, int &owned) {
   ChannelWaits *other = sending ? &channel.receivers : &channel.senders;
   ChannelWait peer = !channel.capacity && !channel.closed ? other.first : NULL;
-  _gates(wait, peer, 1);
   if (peer && x2c_thread_wait_stopped(peer.owner)) {
     _remove_wait(*other, peer);
     _native_check(pthread_cond_signal(peer.condition));
-    _gates(wait, peer, 0);
     _unlock(&channel.mutex);
     _lock(&channel.mutex);
     return 3;
   }
   int status = _commit_available(channel, sending, wait, peer, message, value, owned);
-  _gates(wait, peer, 0);
   return status;
 }
 
 static void _finish_wait(Channel channel, int sending, ChannelWait wait) {
   if (sending) _remove_wait(channel.senders, wait);
   else _remove_wait(channel.receivers, wait);
+  int released = x2c_thread_channel_leave(wait.owner, &channel.mutex);
   _notify(channel);
   _unlock(&channel.mutex);
+  if (!released) {
+    x2c_thread_wait_lock();
+    x2c_thread_wait_unlock();
+  }
 }
 
 /* Positive means committed, zero closed, negative stopped. An unmanaged
@@ -452,8 +421,11 @@ static int _communicate(
   *wait = (struct ChannelWait) {
     .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
   };
-  wait.mutex = x2c_thread_channel_mutex(wait.owner);
   _lock(&channel.mutex);
+  if (!x2c_thread_channel_enter(wait.owner, &channel.mutex)) {
+    _unlock(&channel.mutex);
+    return -1;
+  }
   int status = _wait_for_commit(channel, sending, wait, message, value, owned);
   if (status == 2) {
     _unlock(&channel.mutex);
@@ -471,7 +443,7 @@ static int _wait_for_commit(
     if (wait.committed) return 1;
     int status = _attempt(channel, sending, wait, message, value, owned);
     if (status == 3) continue;
-    if (status != 2 || !wait.mutex) return status;
+    if (status != 2 || (!wait.owner && !wait.condition)) return status;
     if (!wait.condition) wait.condition = x2c_thread_channel_condition(wait.owner);
     if (!wait.linked) {
       if (sending) _append_wait(channel.senders, wait);
@@ -484,18 +456,16 @@ static int _wait_for_commit(
 static int _unmanaged_wait(
   Channel channel, int sending, ChannelWait wait,
   ChannelMessage &message, Var &value, int &owned) {
-  pthread_mutex_t mutex;
   pthread_cond_t condition;
-  _prepare_wait(&mutex, &condition);
-  defer { wait.mutex = NULL; wait.condition = NULL; }
-  wait.mutex = &mutex;
+  int error = pthread_cond_init(&condition, NULL);
+  if (error) raise %(io-fail (operation "pthread_cond_init") (errno $error));
+  defer wait.condition = NULL;
   wait.condition = &condition;
   _lock(&channel.mutex);
   int status = _wait_for_commit(channel, sending, wait, message, value, owned);
   if (wait.committed) { value = wait.value; owned = wait.owned; }
   _finish_wait(channel, sending, wait);
   _native_check(pthread_cond_destroy(&condition));
-  _native_check(pthread_mutex_destroy(&mutex));
   return status;
 }
 

@@ -74,7 +74,7 @@ static struct Thread {
   ParallelRun parallel;
   int assigned;
   int stop_requested;
-  pthread_mutex_t channel_mutex;
+  pthread_mutex_t *channel_monitor;
   pthread_cond_t channel_condition;
   pthread_cond_t *waiting;
 };
@@ -90,6 +90,9 @@ static struct ParallelMap {
   int workers;
   Pool pool;
 };
+
+/* An identity only: the stopped registration sentinel is never locked. */
+static pthread_mutex_t stopped_channel_monitor;
 
 static threaded Thread running_thread;
 static threaded int stop_mask;
@@ -345,23 +348,33 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
 /** Tests a live borrowed wait token atomically. A null token has no stop
-    request. Channel commits retain the participant gate while checking this flag.
+    request. Channel stop publication and commitment hold the registered queue mutex.
 */
 int x2c_thread_wait_stopped(Thread owner) =>
   owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
 
-/* Channel gates persist through registration, sleep, and commitment. They
-   never acquire the completion monitor or a Channel queue mutex. */
-pthread_mutex_t *x2c_thread_channel_mutex(Thread owner) =>
-  owner ? &owner.channel_mutex : NULL;
+/* A registered monitor remains borrowed until successful unregister or the
+   caller's completion acknowledgement after releasing that monitor. */
+int x2c_thread_channel_enter(Thread owner, pthread_mutex_t *monitor) {
+  if (!owner) return 1;
+  pthread_mutex_t *idle = NULL;
+  return __atomic_compare_exchange_n(
+    &owner.channel_monitor, &idle, monitor, 0,
+    __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+}
+
+int x2c_thread_channel_leave(Thread owner, pthread_mutex_t *monitor) {
+  if (!owner) return 1;
+  return __atomic_compare_exchange_n(
+    &owner.channel_monitor, &monitor, NULL, 0,
+    __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+}
 
 pthread_cond_t *x2c_thread_channel_condition(Thread owner) =>
   owner ? &owner.channel_condition : NULL;
 
-static void _destroy_channel_wait(Thread thread) {
+static void _destroy_channel_wait(Thread thread) =>
   _completion_check(pthread_cond_destroy(&thread.channel_condition));
-  _completion_check(pthread_mutex_destroy(&thread.channel_mutex));
-}
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
     have been released. Explicit catches may handle this shared cause.
@@ -379,10 +392,16 @@ void x2c_thread_cancel(void) {
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
-  _completion_check(pthread_mutex_lock(&t.channel_mutex));
-  __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
-  _completion_check(pthread_cond_signal(&t.channel_condition));
-  _completion_check(pthread_mutex_unlock(&t.channel_mutex));
+  pthread_mutex_t *monitor = __atomic_exchange_n(
+    &t.channel_monitor, &stopped_channel_monitor, __ATOMIC_ACQ_REL);
+  if (monitor != &stopped_channel_monitor) {
+    if (monitor) _completion_check(pthread_mutex_lock(monitor));
+    __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
+    if (monitor) {
+      _completion_check(pthread_cond_signal(&t.channel_condition));
+      _completion_check(pthread_mutex_unlock(monitor));
+    }
+  }
   if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
   x2c_thread_wait_unlock();
 }
@@ -538,15 +557,8 @@ static Thread _new_handle(
 }
 
 static void _initialize_channel_wait(Thread thread, void *policy) {
-  int error = pthread_mutex_init(&thread.channel_mutex, NULL);
+  int error = pthread_cond_init(&thread.channel_condition, NULL);
   if (error) {
-    Error.policy_release(policy);
-    free(thread);
-    _error("pthread_mutex_init", error);
-  }
-  error = pthread_cond_init(&thread.channel_condition, NULL);
-  if (error) {
-    _completion_check(pthread_mutex_destroy(&thread.channel_mutex));
     Error.policy_release(policy);
     free(thread);
     _error("pthread_cond_init", error);
