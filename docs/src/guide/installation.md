@@ -33,6 +33,90 @@ runnable examples, an empty package directory, and license. With no `PREFIX`,
 `bin/x2c-<branch>`, links `bin/x2c` to that copy, and installs the shipped
 commands under `libexec/x2c/`.
 
+### Upgrading from 0.15.x
+
+Code written for 0.15.x needs these changes:
+
+| 0.15.x | Now |
+| --- | --- |
+| `array.find(value)` | `array.index(value)` |
+| `array.indexof(value)` | `array.index(value)` |
+| `text.try_long(&value)` | `text.try_long(value)` |
+| `Symbol.try_new(text, &symbol)` | `Symbol.try_new(text, symbol)` |
+| `x2c_normalize_slice(&start, &stop, 1, n)` | `x2c_normalize_slice(start, stop, 1, n)` |
+| `pattern.format(values)` | `pattern.format(@values)` |
+| `logger.info(<app>, fields)` | `logger.info(<app>, @fields)` |
+| `statement.bind(values)` in sqlite | `statement.bind(@values)` |
+
+`array.find` now takes a predicate and returns the first accepted element
+as a `Var`, or `void` when none is accepted. `try_double` changes as
+`try_long` does. A bare List passed to `format`, a Logger method, or `bind`
+is now one value, so splice the List with `@` to keep the 0.15.x meaning.
+Of the C prototypes, only Array search changes, so rebuild native code that
+calls `Array_find` or `Array_indexof`.
+
+The compiler no longer evaluates Lisp. Move a compile-time Lisp form into a
+`meta` function and call that function with `$`:
+
+<!-- ignore: a 0.15.x compile-time Lisp form that the compiler now rejects. -->
+```x2c,ignore
+int answer = $(* 6 7);
+```
+
+```x2c
+meta static int product(int a, int b) => a * b;
+
+int answer = $product(6, 7);
+```
+
+A `.xlisp` file that `$(import "file.xlisp")` loaded becomes a `.x` file of
+`meta` functions, which the unit reaches with `#include`. Runtime `Lisp`
+sessions and their `.xlisp` files are unchanged.
+
+The `$switch` decorator is removed. Give each case run of an ordinary
+`switch` its own block and `break`:
+
+<!-- ignore: the 0.15.x $switch decorator, which this release removes. -->
+```x2c,ignore
+$switch(code)
+{
+  case 1:
+  case 2:
+    String shared = "low";
+    reached = shared;
+  default:
+    reached = "other";
+}
+```
+
+```x2c
+~int code = 2;
+~String reached = NULL;
+switch (code) {
+  case 1:
+  case 2: {
+    String shared = "low";
+    reached = shared;
+    break;
+  }
+  default:
+    reached = "other";
+}
+```
+
+A declaration prefixed by an object-like attribute macro, such as
+`#define WEAK __attribute__((weak))`, now keeps the attribute in its unit's
+generated C, so a `WEAK` definition is weak.
+
+`x2c lsp` replaces `x2c editor`. Rebuild and reinstall the VS Code
+extension from `etc/vsc-extension`; it starts `x2c lsp` and needs VS Code
+1.82 or newer. Replace the removed `x2c.semantic.workerPath` setting with
+`x2c.semantic.compilerPath`.
+
+An upgrade removes `x2c repl` from the prefix. The native library
+playground is available only in a source checkout: run `make commands`,
+then `./x2c repl`. See [Library playground](repl.md).
+
 ### Upgrading from 0.14.0
 
 Version 0.15.0 reads package native arguments from `<name>.native.rsp` instead
@@ -49,7 +133,9 @@ and macros.
 The removed `List.pool_*` operations now belong to `Pool`. The removed
 `List.reduce`, `Array.reduce`, and `Iter.reduce` operations have no matching
 method; use `Iter.foldl` when an explicit seed fits. Use `Var.truth` in place
-of `Var.truthy`.
+of `Var.truthy`. `FileReadStatus` is a `Symbol`: compare a raw read's status
+with `<data>`, `<eof>`, and `<error>` in place of `FILE_READ_DATA`,
+`FILE_READ_EOF`, and `FILE_READ_ERROR`.
 
 ## The x2c home
 

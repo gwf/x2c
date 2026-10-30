@@ -972,11 +972,13 @@ compile-time helper build and the runtime build are separate.
 
 ## Meta functions and runtime Lisp
 
-Compile-time code is x2c. The compiler does not evaluate Lisp, and it rejects
-the former `$(...)` and `@(...)` forms with
-`compile-time Lisp forms are not supported`. The builtin macros are ordinary
-x2c in `etc/compiler-prelude.x`, and the operations a macro calls are the
-`meta` prototypes in `lib/meta.x`.
+Compile-time code is x2c. The compiler does not evaluate Lisp. `$(...)` and
+`@(...)` now build and splice
+[evaluated collections](../reference/language.md#evaluated-lists-and-maps),
+so a former Lisp form such as `$(import "file.xlisp")` at file scope reports
+`an evaluated collection is an expression, not a top-level form`. The
+builtin macros are ordinary x2c in `etc/compiler-prelude.x`, and the
+operations a macro calls are the `meta` prototypes in `lib/meta.x`.
 
 A `meta` function can still use runtime
 [Lisp](../library/overview.md#embed-lisp) as a library. A project `meta`

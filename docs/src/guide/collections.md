@@ -983,11 +983,8 @@ printf("%d %d index=%d\n", array.find(over_ten).int(),
 20 20 index=1
 ```
 
-Array value searches formerly written `find(value)` or `indexof(value)` now
-use `index(value)`, including typed Arrays. The old `indexof` name is removed;
-`find` now takes a predicate and returns an element. This changes the native
-signatures, so native consumers must rebuild. There are no compatibility
-aliases. List and Iter `find` calls keep their existing contracts.
+For Array searches written for 0.15.x, see
+[Upgrading from 0.15.x](installation.md#upgrading-from-015x).
 
 Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
 Both preserve the input order of ties. Arrays change in place and return the
