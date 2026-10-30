@@ -222,12 +222,16 @@ static int _level(String op) {
   return 0;
 }
 
-/* `&&` and `||` decide from one known side as C's short circuit does. */
+/* `&&` and `||` decide from one known side as C's short circuit does. A
+   shift by a count outside 0 to 63 and a quotient that does not fit are
+   left to the C compiler, which may evaluate them differently. */
 static CppValue _apply(String op, CppValue left, CppValue right) {
   if (op == "&&") return _logical(left, right, 0);
   if (op == "||") return _logical(left, right, 1);
   if (!left.known || !right.known) return (CppValue) {0};
   long a = left.value, b = right.value;
+  int shifts = (unsigned long) b < 64;
+  int divides = b && !(a == LONG_MIN && b == -1);
   switch (op) {
     case "|": return _known(a | b);
     case "^": return _known(a ^ b);
@@ -238,13 +242,13 @@ static CppValue _apply(String op, CppValue left, CppValue right) {
     case ">": return _known(a > b);
     case "<=": return _known(a <= b);
     case ">=": return _known(a >= b);
-    case "<<": return _known(a << (b & 63));
-    case ">>": return _known(a >> (b & 63));
+    case "<<": return shifts ? _known(a << b) : (CppValue) {0};
+    case ">>": return shifts ? _known(a >> b) : (CppValue) {0};
     case "+": return _known(a + b);
     case "-": return _known(a - b);
     case "*": return _known(a * b);
-    case "/": return b ? _known(a / b) : (CppValue) {0};
-    case "%": return b ? _known(a % b) : (CppValue) {0};
+    case "/": return divides ? _known(a / b) : (CppValue) {0};
+    case "%": return divides ? _known(a % b) : (CppValue) {0};
   }
   return (CppValue) {0};
 }
@@ -313,9 +317,13 @@ static CppValue _number(CppEval &e, String text) {
   return unsupported ? (CppValue) {0} : _known((long) value);
 }
 
+/* Generated C compiles with `-fsigned-char`, so one byte is signed. A NUL
+   unescapes to the empty String. The value of a constant of more than one
+   byte belongs to the C compiler. */
 static CppValue _character(String text) {
-  String inner = text[1:-1].unescape();
-  return _known(inner.len() ? (unsigned char) inner[0] : 0);
+  String inner = text[1:-2].unescape();
+  if (inner.len() > 1) return (CppValue) {0};
+  return _known(inner.len() ? (signed char) inner[0] : 0);
 }
 
 static CppValue _known(long value) => (CppValue) {.value = value, .known = 1};

@@ -168,8 +168,10 @@ typedef struct Compiler {
      parser, so only the names it leaves to C are read as prefixes. */
   Map object_macros;
   /* The preprocessor state the next expansion starts from, or NULL for
-     the macros visible before the file's first line, and the
-     `Compiler.command_macros` rows of the unit's `-D` and `-U` options. */
+     the macros visible before the file's first line, and sorted
+     `(name value)` macro rows: the `Compiler.command_macros` rows of the
+     unit's `-D` and `-U` options, or, after `ParsedUnit.collect_native`,
+     every macro the host preprocessor defined for the native unit. */
   Cpp cpp;
   // Full C macro expansion is opt-in; explicit native CPP state also runs it.
   int cpp_expansion;

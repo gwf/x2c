@@ -8,6 +8,8 @@
 #define SHOW(...) printf("%s\n", #__VA_ARGS__)
 #define FIRST(a, ...) a
 #define OPT(fmt, ...) printf(fmt __VA_OPT__(,) __VA_ARGS__)
+#define COUNT(...) COUNT_AT(__VA_ARGS__, 3, 2, 1, 0)
+#define COUNT_AT(a, b, c, n, ...) n
 int main(void){
   x2c_initialize();
   printf("none" "\n");
@@ -16,6 +18,7 @@ int main(void){
   printf("%d\n", 7);
   printf("opt\n");
   printf("opt %d\n", 5);
+  printf("%d\n", 2);
   return 0;
 }
 

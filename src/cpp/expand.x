@@ -274,34 +274,32 @@ static int _pull(Expander &x, Block stack, int input, CppToken &item) {
 }
 
 /* Collects the arguments after the `(` up to the matching `)`, which it
-   stores in `close`. A comma inside parentheses, brackets, or braces does
-   not separate arguments, because x2c writes Array and Map literals in
-   brackets and braces, and the variadic argument keeps its commas. */
+   stores in `close`. As in C, only parentheses group commas, so a comma
+   inside brackets or braces separates arguments. The variadic argument
+   keeps its commas. */
 static int _arguments(
   Expander &x, Block stack, int input, List definition, Block args,
   CppToken &close) {
   List params = definition[2];
-  int last = definition[3] ? params.len() - 1 : -1;
+  int last = definition[3] ? params.len() - 1 : -1, depth = 0;
   Block arg = Block.new(sizeof(CppToken));
   defer arg.free();
-  Array closers = NULL;
-  defer closers.free();
   CppToken item;
   while (_pull(x, stack, input, item)) {
     Symbol type = item.token.type;
-    if (!closers.len() && type == <)>) {
+    if (!depth && type == <)>) {
       close = item;
       _add_argument(args, arg);
       arg = NULL;
       return 1;
     }
-    if (!closers.len() && type == <,> && (int) args.len() != last) {
+    if (!depth && type == <,> && (int) args.len() != last) {
       _add_argument(args, arg);
       arg = NULL;
       arg = Block.new(sizeof(CppToken));
       continue;
     }
-    _track_group(closers, type);
+    depth += _nesting(type);
     arg.push(&item);
   }
   if (!x.retreat)
@@ -318,24 +316,13 @@ static void _add_argument(Block args, Block tokens) {
 static CppArgument *_argument_at(Block args, int param) =>
   &((CppArgument *) args.bytes)[param];
 
-static void _track_group(Array &closers, Symbol type) {
-  Symbol close;
+/* x2c's `%(`, `$(`, `@(`, and `?(` open parentheses too. */
+static int _nesting(Symbol type) {
   switch (type) {
-    case <(>: case <"%(">: case <"$(">: case <"@(">: case <"?(">:
-      close = <)>;
-      break;
-    case <"[">: case <"%[">:
-      close = <"]">;
-      break;
-    case <"{">: case <"%{">: case <"${">:
-      close = <"}">;
-      break;
-    default:
-      if (closers.len() && closers[-1] == type) closers.take_last();
-      return;
+    case <(>: case <"%(">: case <"$(">: case <"@(">: case <"?(">: return 1;
+    case <)>: return -1;
   }
-  if (closers == NULL) closers = [];
-  closers.push(close);
+  return 0;
 }
 
 /* A variadic macro may omit its variadic argument, and a macro without

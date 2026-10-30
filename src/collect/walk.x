@@ -24,6 +24,9 @@ static const char syntax_marker[] = "_x2c.syntax.prelude";
 module typedef struct FileWalk {
   Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
   Array parts, Map definitions, dependencies, statics, hashes;
+  /* Without expansion, the groups open after each conditional directive,
+     keyed by the directive's position in the file. */
+  Map arms;
   Cpp start;
   int unit, linkage, line, pos, deferred;
 } FileWalk;
@@ -375,7 +378,7 @@ static void _walk_file(
     defer c.close_child(scan);
     scan.tokenizer = tokenizer;
     scan.scan_conditionals();
-    arms = scan.arm_stacks;
+    arms = _arms_by_position(tokenizer.tokens, scan.arm_stacks);
   }
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
@@ -386,7 +389,7 @@ static void _walk_file(
       .c = c, .path = path, .text = text, .dir = dir, .module = module,
       .globs = globs, .visited = visited, .parts = [],
       .definitions = {}, .dependencies = _cache_map(),
-      .statics = {}, .hashes = _cache_map(),
+      .statics = {}, .hashes = _cache_map(), .arms = arms,
       .unit = Path.is_x2c_source(path), .line = 1};
     if (path == _canonical_path(c.filename))
       c.meta_hashes = w.hashes;
@@ -406,7 +409,7 @@ static void _walk_file(
     }
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
-    _split(w, tokenizer.tokens, arms);
+    _split(w, tokenizer.tokens);
     visited[path] = 1;
     _add_defaults(w);
     _queue_public_bodies(w);
@@ -415,10 +418,22 @@ static void _walk_file(
   }
 }
 
+/* Keys the scan's `arm_stacks` by each directive's position, which a
+   segment's tokens keep. */
+static Map _arms_by_position(Token first, Map stacks) {
+  Map arms = {};
+  Var open;
+  for (Token token = first; token.type != <eof>; token++)
+    if (token.type == <preproc> &&
+        stacks.try_get((long) (token - first), open))
+      arms[(long) token.pos] = open;
+  return arms;
+}
+
 /* The directives apply to the walk's preprocessor state in source order,
    and each segment starts from a copy of the state where it begins. The
    ordered parts retain its own directive events beside its include paths. */
-static void _split(FileWalk &w, Token first, Map arms) {
+static void _split(FileWalk &w, Token first) {
   Cpp cpp = w.c.cpp_expansion
           ? Cpp.new(w.c.initial_macros(w.path)) : NULL;
   if (cpp) w.start = cpp.copy();
@@ -426,7 +441,7 @@ static void _split(FileWalk &w, Token first, Map arms) {
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
     Var open;
-    if (arms && arms.try_get((long) (token - first), open)) {
+    if (w.arms && w.arms.try_get((long) token.pos, open)) {
       hidden = 0;
       foreach (List group in open.list())
         if (group.caddr() == 2 || group.caddr() == 3) hidden = 1;
@@ -617,6 +632,7 @@ static void _prepare(FileWalk &w, Compiler shadow, String segment) {
     w.c.source_texts[Path.absolute(w.path)] =
       w.module ? w.module.own : w.text;
   _shift_tokens(shadow.tokenizer, w.line, w.pos);
+  if (w.arms) shadow.arm_stacks = _segment_arms(w.arms, shadow.tokenizer);
   shadow.preprocess_tokens();
 }
 
@@ -626,6 +642,19 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
     token.line += line - 1;
     token.pos += pos;
   }
+}
+
+/* A segment's directives take the groups the file's scan found open after
+   them, so an arm that C never takes stays hidden when its group opened
+   before the segment. */
+static Map _segment_arms(Map arms, Tokenizer tokenizer) {
+  Map stacks = {};
+  Token first = tokenizer.tokens;
+  Var open;
+  for (Token token = first; token.type != <eof>; token++)
+    if (token.type == <preproc> && arms.try_get((long) token.pos, open))
+      stacks[(long) (token - first)] = open;
+  return stacks;
 }
 
 /* The file takes every row the segment declared. Selection after the last

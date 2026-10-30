@@ -89,6 +89,7 @@ Cpp Cpp.copy(Cpp cpp) {
   CppGroup *groups = cpp.groups.bytes;
   for (size_t i = 0; i < cpp.groups.len(); i++) {
     CppGroup group = groups[i];
+    if (group.before) group.before = group.before.copy();
     if (group.touched) group.touched = group.touched.copy();
     copy.groups.push(&group);
   }

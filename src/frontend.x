@@ -150,12 +150,14 @@ int ParsedUnit.parse(ParsedUnit &p) {
 /** Collects the preludes once, in a Context that shares the caller's pool,
     before any unit opens. Units, and the workers a translation forks, then
     replay them from the process cache. The collection runs as an empty
-    unit, whatever dump or symbol mode the request selects. Returns zero
-    after reporting a failure.
+    unit in the expansion mode of the request's units, whatever dump or
+    symbol mode the request selects. Returns zero after reporting a
+    failure.
 */
 int Frontend.load_prelude(Frontend frontend) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
+  request.cpp_expansion = _expands_cpp(&request);
   request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
   struct Frontend session = *frontend;
   session.request = &request;
@@ -198,7 +200,8 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
 /** Collects a C source or header through the configured host preprocessor.
     Unlike x2c collection, this does not walk native headers as x2c-owned
     declarations. The preprocessed tokens and line markers stay in the unit;
-    original source text remains available in `source_texts`. Call
+    original source text remains available in `source_texts`, and
+    `command_macros` holds every macro the host defined. Call
     `Compiler.full_parse_native` for its typed source projection.
 */
 int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend) {
@@ -240,7 +243,7 @@ int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend) {
     macros.cpp = state;
     macros.tokenize(definitions);
     macros.preprocess_tokens();
-    c.command_macros = state.changes({});
+    c.command_macros = state.changes({}).sort();
   }
   catch %(malformed *): return 0;
   return !c.error_count();
@@ -340,7 +343,7 @@ static Compiler _begin_unit(
   c.source_map = request.source_map;
   c.sources = request.sources;
   c.package_source_dirs = request.package_dirs;
-  c.cpp_expansion = request.cpp_expansion && !request.no_cpp;
+  c.cpp_expansion = _expands_cpp(request);
   if (c.cpp_expansion)
     c.command_macros = Compiler.command_macros(request.cpp_args);
   c.source_facts = request.source_facts;
@@ -354,6 +357,10 @@ static Compiler _begin_unit(
   c.recovery_depth++;
   return c;
 }
+
+// `--no-cpp` turns off the expansion that `--cpp` requests.
+static int _expands_cpp(CliRequest request) =>
+  request.cpp_expansion && !request.no_cpp;
 
 static void _tokenize_session(Frontend frontend, Compiler c, String source) {
   c.filename = "<repl>";
@@ -576,9 +583,7 @@ static String _take_line_markers(Compiler cpp, String text) {
   return "\n".join(kept.list_free());
 }
 
-/* The host preprocessor has already expanded every macro. */
 static void _tokenize_cpp(Compiler cpp, String text) {
-  cpp.cpp = Cpp.new({});
   cpp.tokenize(text);
   // Expanded CPP offsets cannot describe the physical input files.
   cpp.source_facts = 0;

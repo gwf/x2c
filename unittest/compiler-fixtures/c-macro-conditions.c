@@ -16,6 +16,21 @@
 #endif
 #if !defined(LEVEL) || LEVEL * 2 != 4 || 'a' != 97
 #endif
+#if '\xff' < 0 && '\0' == 0
+#else
+#endif
+#if 'ab' == 'a'
+#else
+#endif
+#if (1 << 64) == 1
+#else
+#endif
+#if (-9223372036854775807 - 1) / -1 < 0
+#else
+#endif
+#if (-9223372036854775807 - 1) % -1 == 0
+#else
+#endif
 #if LEVEL > 1 && defined(LEVEL)
 int level(void){
   return 1;
@@ -28,9 +43,68 @@ int one(void){
 }
 
 #endif
+#if '\xff' < 0 && '\0' == 0
+int signed_char(void){
+  return 1;
+}
+
+#endif
+#if 'ab' == 'a'
+int two_chars(void){
+  return 1;
+}
+
+#endif
+#if 'ab' == 'a'
+#else
+int two_chars(void){
+  return 2;
+}
+
+#endif
+#if (1 << 64) == 1
+int wide_shift(void){
+  return 1;
+}
+
+#endif
+#if (1 << 64) == 1
+#else
+int wide_shift(void){
+  return 2;
+}
+
+#endif
+#if (-9223372036854775807 - 1) / -1 < 0
+int quotient(void){
+  return 1;
+}
+
+#endif
+#if (-9223372036854775807 - 1) / -1 < 0
+#else
+int quotient(void){
+  return 2;
+}
+
+#endif
+#if (-9223372036854775807 - 1) % -1 == 0
+int modulus(void){
+  return 1;
+}
+
+#endif
+#if (-9223372036854775807 - 1) % -1 == 0
+#else
+int modulus(void){
+  return 2;
+}
+
+#endif
 int main(void){
   x2c_initialize();
   printf("%d %d\n", level(), one());
+  printf("%d %d %d %d %d\n", signed_char(), two_chars(), wide_shift(), quotient(), modulus());
   return 0;
 }
 
