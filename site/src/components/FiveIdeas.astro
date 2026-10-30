@@ -1,7 +1,8 @@
 ---
 import { Code } from "astro:components";
 import { inlineMarkdown } from "../lib/inline-markdown";
-import { x2cLang, x2cLightTheme } from "../../shiki-x2c.mjs";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cLightTheme } from "../../shiki-x2c-theme.mjs";
 
 interface Idea {
   name: string;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 const { intro, ideas } = Astro.props;
+// Bundled as JSON so the prerender does not read the grammar by path.
+const x2cLang = { ...grammar, name: "x2c" };
 const introHtml = await inlineMarkdown(intro);
 const items = await Promise.all(
   ideas.map(async (idea) => ({
