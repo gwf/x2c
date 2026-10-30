@@ -2,8 +2,8 @@
 
 // tokenizing
 
-/** Scans and preprocesses source and positions the compiler at its first
-    non-trivia token.
+/** Scans source, applies directive handling and optional C macro expansion,
+    and positions the compiler at its first non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
     translation finishes.
@@ -21,6 +21,7 @@ void Compiler.tokenize(Compiler c, char *text) {
 void Compiler.scan_source(Compiler c, char *text) {
   if (_is_script_file(c)) c.script = c.unit_script;
   c.input_boundary = NULL;
+  c.arm_stacks = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
   c.tokenizer.layout = c.layout || Path.is_layout_source(c.filename);
@@ -31,12 +32,12 @@ void Compiler.scan_source(Compiler c, char *text) {
   c.braces.clear();
 }
 
-/** Expands the visible macros of the scanned tokens, hides the conditional
-    arms C never takes, and positions the compiler at the first non-trivia
-    token. An expansion error is reported at the macro use.
+/** Applies directive handling and optional C macro expansion, then positions
+    the compiler at its first non-trivia token. Explicit CPP state also
+    enables expansion for native-header and REPL callers.
 */
 void Compiler.preprocess_tokens(Compiler c) {
-  c.expand_macros();
+  if (c.cpp_expansion || c.cpp) c.expand_macros();
   c.scan_conditionals();
   _retag_keywords(c.tokenizer);
   c.token = Token.skip_trivia(c.tokenizer.tokens);

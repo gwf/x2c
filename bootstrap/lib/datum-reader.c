@@ -337,7 +337,7 @@ static Var int_var(int);
 
 
 static int _nested_depth(int depth){
-  if(++ depth >= 1024){
+  if(++ depth >= LISP_READ_DEPTH_MAX){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
     {
       static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 135,.runtime = 1};
@@ -435,7 +435,7 @@ List cons(Var, List);
 Var Array_getindex(Array, int);
 
 static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth){
-  if(depth >= 1024) return 0;
+  if(depth >= LISP_READ_DEPTH_MAX) return 0;
   int first = Array_len(items);
   for((* at) ++; ; ){
     while(_blank(s[(* at)]))(* at) ++;

@@ -100,9 +100,8 @@ typedef struct Compiler{
   List binding_rows, binding_sealed;
   Map object_macros;
   Cpp cpp;
+  int cpp_expansion;
   List command_macros;
-  String macro_export_source;
-  Map macro_export_parts;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -876,7 +875,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _292 = String_var(_291);
   _293 = List_var(NULL);
   _294 = Symbol_var(106239471489226);
-  _295 = int_var(2311);
+  _295 = int_var(2308);
   _296 = String_new("");
   _297 = String_var(_296);
   _298 = Atom_intern(String_new("macro-param"));
@@ -1195,7 +1194,7 @@ static void f9_lifecycle____share_unit(Compiler c, Compiler owner){
   c -> pending_inline_bodies = owner -> pending_inline_bodies;
   c -> collection_native_files = owner -> collection_native_files;
   c -> command_macros = owner -> command_macros;
-  c -> macro_export_parts = owner -> macro_export_parts;
+  c -> cpp_expansion = owner -> cpp_expansion;
 }
 
 static void f9_lifecycle____own_unit(Compiler c){
@@ -2585,6 +2584,7 @@ void Compiler_scan_source(Compiler c, char * text){
   if(! _init_guard_) _file_init_();
   if(f14_parsing_tokens____is_script_file(c)) c -> script = c -> unit_script;
   c -> input_boundary = NULL;
+  c -> arm_stacks = NULL;
   c -> text = String_new(text);
   c -> tokenizer = Tokenizer_new(c -> text, 3945159);
   c -> tokenizer -> layout = c -> layout || Path_is_layout_source(c -> filename);
@@ -2597,7 +2597,7 @@ void Compiler_scan_source(Compiler c, char * text){
 
 void Compiler_preprocess_tokens(Compiler c){
   if(! _init_guard_) _file_init_();
-  Compiler_expand_macros(c);
+  if(c -> cpp_expansion || c -> cpp) Compiler_expand_macros(c);
   Compiler_scan_conditionals(c);
   f14_parsing_tokens____retag_keywords(c -> tokenizer);
   c -> token = Token_skip_trivia(c -> tokenizer -> tokens);
@@ -2618,7 +2618,7 @@ Symbol Compiler_expect(Compiler c, Symbol type){
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 66};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_require_input",.line = 67};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 664344300629258, 0);
     __builtin_unreachable();
   }
@@ -2655,7 +2655,7 @@ Symbol Compiler_peek(Compiler c, int steps){
   if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 113};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/compiler/parsing/tokens.x",.function = "Compiler_peek",.line = 114};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
@@ -2725,7 +2725,7 @@ void _x2c_complete_here(Compiler c, Symbol role, List keywords){
   if(! Compiler_at_completion(c)) return;
   List rows = Sym_visible_symbols(c -> sym);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 190};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/compiler/parsing/tokens.x",.function = "_x2c_complete_here",.line = 191};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 

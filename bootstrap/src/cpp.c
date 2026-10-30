@@ -839,6 +839,7 @@ static int f10_conditions____negate(int holds){
 static int f10_conditions____never_defined(String name){
   if(String_equal(name, _18) || String_equal(name, _19)) return 1;
 #if defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
 #else
   return String_equal(name, _20) || String_equal(name, _21) || String_equal(name, _22);
 #endif

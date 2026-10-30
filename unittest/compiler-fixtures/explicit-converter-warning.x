@@ -44,7 +44,7 @@ int main(void) {
   int width = v.str().len();
   String built = as_text(v);
 
-  // A pointer format converts nothing; an expanded macro's format is read.
+  // Pointer and native macro formats are opaque without CPP expansion.
   const char *chosen = "%s\n";
   printf(chosen, v.str());
   printf(NAMED_FORMAT, v.str());

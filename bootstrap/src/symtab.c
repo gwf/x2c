@@ -1930,7 +1930,7 @@ int Type_is_typedef_name(Type);
 
 Type Sym_next_typedef(Sym s, Type type, int * hops){
   if(! _init_guard_) _file_init_();
-  if(++(* hops) >(2 * 64)) f5_types____typedef_budget_error(s, type);
+  if(++(* hops) > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, type);
   return Type_is_typedef_name(type) || Type_is_typedef(type) ? f5_types____typedef_target(s, type) : List_type(Sym_get(s, Type_list(type)));
 }
 
@@ -2007,7 +2007,7 @@ static Type f5_types____replace_type_base(Type type, Type base, Type replacement
 int Symbol_is_type_qualifier(Symbol);
 
 static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, int hops){
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal_lane(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
   if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;
   if(Type_is_typedef_name(key) || Type_is_typedef(key)){
@@ -2057,7 +2057,7 @@ static Symbol f5_types____var_tag_chain(Sym s, Type type, Type origin, Type * re
     if(resolved)(* resolved) = type;
     return tag;
   }
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   Type next = f5_types____typedef_base_step(s, type, Type_base_type(type));
   if(List_truth(Type_list(next))) return f5_types____var_tag_chain(s, next, origin, resolved, hops + 1);
   if(resolved)(* resolved) = type;
@@ -2073,7 +2073,7 @@ static Type f5_types____typedef_base_step(Sym s, Type type, Type base){
 
 static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops){
   type = Type_declared(type);
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   Type base = Type_base_type(type);
   if(x2c_var_equal_lane(List_car(Type_list(base)), Symbol_var(1439803480))){
     Type value = f5_types____normalize_chain(s, List_cdr(base), origin, hops + 1);

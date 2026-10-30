@@ -3777,7 +3777,7 @@ static void f5_units____store_collected_meta(Compiler c, Var spec, List binding,
 
 static void f5_units____store_meta_hash(Compiler c, String name, Var body, Token first){
   if(! String_truth(name)) return;
-  uint64_t hash = 0xcbf29ce484222325ULL;
+  uint64_t hash = FNV_OFFSET_BASIS;
   for(Token token = first;  token < c -> token;  token ++) if(token -> type != 40896714 && token -> type != 7477210024 && token -> len) hash = fnv_bytes(fnv_bytes(hash, token -> text, String_len(token -> text)), " ", 1);
   Map_setindex(c -> meta_hashes, String_var(name), String_var(String_printf(_42, (unsigned long long) hash)));
   if(Var_is_void(body)) return;

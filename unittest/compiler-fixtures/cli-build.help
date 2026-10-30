@@ -32,6 +32,7 @@ Translation options:
       --package-dir <dir>     Add a directory of x2c packages
       --native-module <file>  Load a native module for compile-time calls
       --extension <dir>       Link a package's compile-time part into a compiler
+      --cpp                   Expand C macros for existing C compatibility
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation

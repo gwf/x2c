@@ -293,9 +293,10 @@ each use of `name`. See [macros](macros.md),
 
 ## Before bringing over a C source file
 
-x2c expands the macros the file and its project headers define before it
-parses, so a macro may supply grammar. It decides a conditional only when
-every name the condition tests is visible to it, so a branch on a platform
+Use `--cpp` when an existing C file needs macros to supply grammar before
+x2c parses it. Expansion is off by default and is a C compatibility bridge,
+not an x2c authoring facility. With the switch, x2c decides a conditional only
+when every name the condition tests is visible to it, so a branch on a platform
 macro such as `__APPLE__` or a feature a system header defines must parse
 together with the other branches of its group, including ones the native
 build disables. A macro such a branch defines stays for the C compiler. See

@@ -26,20 +26,20 @@
 #else
 #define maybe_const
 #endif
-int doubled(int value);
+signed int doubled(signed int value);
 
 static inline int tripled(int value){
   return value * 3;
 }
 
-extern __attribute__((weak)) int weak_value;
+extern int weak_value;
 
 struct text{
   char * body;
 }
 ;
 
-__attribute__((visibility("default"))) const char * label(void);
+const char * label(void);
 
 int main(void);
 

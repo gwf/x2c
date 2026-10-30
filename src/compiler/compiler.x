@@ -171,13 +171,9 @@ typedef struct Compiler {
      the macros visible before the file's first line, and the
      `Compiler.command_macros` rows of the unit's `-D` and `-U` options. */
   Cpp cpp;
+  // Full C macro expansion is opt-in; explicit native CPP state also runs it.
+  int cpp_expansion;
   List command_macros;
-  /* Module discovery prepares its root's included macro exports only when
-     preprocessing first reaches an include. Collection children do not
-     inherit this transient request. */
-  String macro_export_source;
-  // Discovery-only CPP/include parts; never semantic collection entries.
-  Map macro_export_parts;
   /* The open conditional groups at the current top-level form, each an
      `(id arm state)` entry, so one function defined in two arms of one `#if`
      is one definition. `arm_stacks` maps each conditional directive's token
