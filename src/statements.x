@@ -441,7 +441,7 @@ static List _statement(Compiler c, Symbol position) {
   if (slot) return slot;
   List label = _label_statement(c);
   if (label) return label;
-  if (c.with_form_starts()) return _with_statement(c, position);
+  if (c.with_form_starts()) return c.try_parse_macro_target_at(position);
   if (c.alias_form_starts())
     return c.parse_alias_statement(position == <block>);
   if (!c.alias_expression() && c.macro_starts_target_at(<statement>))
@@ -569,14 +569,6 @@ static List _label_statement(Compiler c) {
     c.token = head;
   }
   return NULL;
-}
-
-// with statements
-
-/* `with (place = value, ...) { ... }` expands the built-in `$x2c.with`
-   decorator over its braced body at `position`. */
-static List _with_statement(Compiler c, Symbol position) {
-  return c.try_parse_macro_target_at(position);
 }
 
 static List _keyword_paren_expr(Compiler c, Symbol keyword) {
