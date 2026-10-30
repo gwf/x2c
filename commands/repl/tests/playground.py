@@ -212,24 +212,27 @@ def nbody(directory):
     native = directory / "nbody"
     subprocess.run(["cc", str(source), "-lm", "-o", str(native)], check=True)
     expected = subprocess.check_output([str(native), "1"], text=True).splitlines()
-    repl = Playground([source], directory)
-    try:
-        repl.check(":symbols --kind function", "advance", "energy",
-                   "offset_momentum")
-        repl.check(":source offset_momentum", "static void offset_momentum",
-                   "system[0].vx = -px / SOLAR_MASS;")
-        repl.check(":members Body", "double mass", "advance", "energy")
-        repl.check(":inspect bodies[0]", "x: 0", "vx: 0")
-        repl.check("offset_momentum(BODY_COUNT,bodies);", "ok")
-        repl.value("bodies[0].vx != 0", 1)
-        repl.check('printf("%.9f\\n",energy(BODY_COUNT,bodies));', expected[0])
-        repl.check("double before=bodies[1].x;", "ok")
-        repl.check("advance(BODY_COUNT,bodies,0.01);", "ok")
-        repl.value("bodies[1].x != before", 1)
-        repl.check(":inspect bodies[1]", "x:", "vy:", "mass:")
-        repl.check('printf("%.9f\\n",energy(BODY_COUNT,bodies));', expected[1])
-    finally:
-        repl.close()
+    demo = ROOT / "commands/repl/examples/nbody.repl"
+    completed = subprocess.run([str(BINARY)], input=demo.read_text(), text=True,
+                               capture_output=True, cwd=ROOT, timeout=TIMEOUT,
+                               env=dict(os.environ,
+                                        XDG_STATE_HOME=str(directory / "state")))
+    output = completed.stdout
+    require(completed.returncode == 0 and not completed.stderr,
+            (output, completed.stderr))
+    for declaration in ("static void advance", "static double energy",
+                        "static void offset_momentum"):
+        require(re.search(r"^function +" + declaration, output, re.MULTILINE),
+                output)
+    require("global    Body bodies[5];" in output
+            and "system[0].vx = -px / SOLAR_MASS;" in output
+            and "field    double mass;" in output, output)
+    bodies = re.findall(r"^=> Body \{ (.*) \}$", output, re.MULTILINE)
+    require(len(bodies) == 4, output)
+    states = [dict(re.findall(r"(\w+): ([^, }]+)", body)) for body in bodies]
+    require(float(states[0]["vx"]) == 0 and float(states[1]["vx"]) != 0
+            and states[2]["x"] != states[3]["x"], output)
+    require(re.findall(r"^-0\.\d+$", output, re.MULTILINE) == expected, output)
     require(source.read_bytes() == original, "N-body C source changed")
     print("unchanged C N-body discovery, source, calls and inspection passed",
           flush=True)

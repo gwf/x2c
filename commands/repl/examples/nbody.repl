@@ -1,0 +1,14 @@
+:load "examples/shootout/benchmarks/nbody/main.c"
+:symbols --kind function --file "examples/shootout/benchmarks/nbody/main.c"
+:symbols bodies
+:source offset_momentum
+:members Body
+:inspect bodies[0]
+offset_momentum(BODY_COUNT, bodies);
+:inspect bodies[0]
+printf("%.9f\n", energy(BODY_COUNT, bodies));
+:inspect bodies[1]
+advance(BODY_COUNT, bodies, 0.01);
+:inspect bodies[1]
+printf("%.9f\n", energy(BODY_COUNT, bodies));
+:quit

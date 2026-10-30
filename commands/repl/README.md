@@ -4,6 +4,14 @@
 [REPL guide](../../docs/src/guide/repl.md) describes its commands, object
 workflow, restart policy, and lifetime rules.
 
+The [N-body demo](examples/README.md) loads an unchanged C program and walks
+through function discovery, source inspection, and calls on its static data.
+From the repository root:
+
+```sh
+./x2c repl < commands/repl/examples/nbody.repl
+```
+
 `main.x` reads REPL reporting options and delegates native build options to
 the ordinary `CliRequest` parser. `repl.x` owns the terminal, command dispatch,
 load/reset/replay state, and saved transcripts. `repl-input.x` owns editing,
