@@ -75,6 +75,14 @@ static int _worker_send(int fd, Var value) {
 }
 
 static int _worker_frame(Buffer pending, Var &value) {
+  size_t available = pending.content.length;
+  if (!available) return 0;
+  const char *bytes = (const char *) pending.content.bytes;
+  const char *newline = memchr(bytes, '\n', available);
+  if (!newline || newline == bytes) return 0;
+  size_t header = newline - bytes + 1;
+  size_t length = strtoul(bytes, NULL, 10);
+  if (length > available - header) return 0;
   size_t used = 0;
   String text = pending;
   if (!text.read_datum_frame(used, value)) return 0;
