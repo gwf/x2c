@@ -512,14 +512,3 @@ static void _connection(HttpServer s, Socket peer) {
 
 /** Initializes zeroed HttpRequest storage without acquiring resources. */
 void HttpRequest.init(HttpRequest value) { memset(value, 0, sizeof(*value)); }
-
-/** Initializes zeroed HttpResponse storage without acquiring resources. */
-void HttpResponse.init(HttpResponse value) {
-  memset(value, 0, sizeof(*value));
-}
-
-/** Initializes zeroed Router storage without acquiring resources. */
-void Router.init(Router value) { memset(value, 0, sizeof(*value)); }
-
-/** Initializes zeroed HttpServer storage without acquiring resources. */
-void HttpServer.init(HttpServer value) { memset(value, 0, sizeof(*value)); }
