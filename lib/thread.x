@@ -61,7 +61,9 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
-/* Native Channel wait bridge; the Channel owns both objects together. */
+/** Native Channel wait bridge. The Channel owns its mutex and condition
+    together; a registered Thread borrows the monitor until acknowledgement.
+*/
 typedef struct X2CChannelMonitor {
   pthread_mutex_t mutex;
   pthread_cond_t condition;
