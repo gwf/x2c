@@ -74,6 +74,35 @@ input continues at `... ` until it forms a complete submission. Submit one
 persistent declaration or function definition at a time. Executable input
 can contain several statements.
 
+## Try an installed C library
+
+If your host provides SQLite headers and its native library, create a small
+header that selects the API and start a session:
+
+```sh
+printf '#include <sqlite3.h>\n' > sqlite-api.h
+x2c repl -l sqlite3 sqlite-api.h
+```
+
+The SQLite declarations come from the included header. Use `--all` to browse
+those dependency declarations, then call the ordinary C API:
+
+```text
+:symbols --all sqlite3_open
+:info sqlite3_prepare_v2
+sqlite3 *db = NULL;
+sqlite3_open(":memory:", &db);
+sqlite3_stmt *query = NULL;
+sqlite3_prepare_v2(db, "SELECT 6*7", -1, &query, NULL);
+sqlite3_step(query) == SQLITE_ROW;
+:inspect sqlite3_column_int(query, 0)
+sqlite3_finalize(query);
+sqlite3_close(db);
+```
+
+The inspected column is `int 42`. The database and statement are ordinary
+opaque C handles. They stay alive until the library's explicit release calls.
+
 ## Discover the API
 
 | Command | Result |
