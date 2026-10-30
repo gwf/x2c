@@ -15,7 +15,8 @@ export const unindexedHtmlFiles = new Set([
   "404.html",
   "docs/404.html",
   "docs/print.html",
-  "docs/toc.html"
+  "docs/toc.html",
+  "playground/index.html"
 ]);
 
 export function sitePath(pathname = "/") {

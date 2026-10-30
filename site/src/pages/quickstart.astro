@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { inlineMarkdown } from "../lib/inline-markdown";
+import {
+  Content as QuickstartCopy,
+  frontmatter as quickstart,
+} from "../content/quickstart.md";
+import "../styles/quickstart.css";
+
+const base = import.meta.env.BASE_URL;
+const [titleHtml, kickerHtml, ledeHtml] = await Promise.all([
+  inlineMarkdown(quickstart.title),
+  inlineMarkdown(quickstart.kicker),
+  inlineMarkdown(quickstart.lede),
+]);
+---
+
+<BaseLayout
+  title="Quick start - x2c"
+  description="x2c for expert C programmers: install it, run it, and meet the five ideas in the order you will hit them, with small programs that compile."
+>
+  <Fragment slot="header">
+    <SiteHeader />
+  </Fragment>
+  <div class="landing quickstart-landing">
+    <article class="quickstart-page">
+      <p class="about-eyebrow">quick start</p>
+      <h1 set:html={titleHtml} />
+      <p class="about-kicker quickstart-kicker" set:html={kickerHtml} />
+      <p class="quickstart-lede" set:html={ledeHtml} />
+      <aside class="quickstart-card" aria-labelledby="quickstart-card-title">
+        <p class="quickstart-card-eyebrow">keep this open</p>
+        <h2 id="quickstart-card-title">The whole language on one page.</h2>
+        <p>
+          The syntax on this page and a good deal more, on one letter-sized
+          sheet. Print it and keep it next to your K&amp;R.
+        </p>
+        <div class="quickstart-card-actions">
+          <a class="quickstart-button quickstart-button-primary"
+            href={`${base}cheatsheet/`}>Open the cheat sheet</a>
+          <a class="quickstart-button quickstart-button-secondary"
+            href={`${base}cheatsheet/#print`}>Print it</a>
+        </div>
+      </aside>
+      <div class="quickstart-copy"><QuickstartCopy /></div>
+    </article>
+  </div>
+  <SiteFooter />
+</BaseLayout>

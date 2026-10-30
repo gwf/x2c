@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { exampleEntries, exampleSections } from "../../lib/examples";
+import "../../styles/playground.css";
+import { x2cDarkTheme } from "../../../shiki-x2c-theme.mjs";
+const service = import.meta.env.PLAYGROUND_URL || "";
+const base = import.meta.env.BASE_URL;
+const sections = exampleSections.map((name) => ({
+  name,
+  entries: exampleEntries.filter((entry) => entry.section === name),
+}));
+const [first] = exampleEntries;
+// A slide's prose is everything after its first code block.
+const prose = Object.fromEntries(await Promise.all(exampleEntries
+  .filter((entry) => entry.slide)
+  .map(async (entry) => {
+    const html = await entry.slide!.compiledContent();
+    const at = html.indexOf("</pre>");
+    return [entry.id, at === -1 ? html : html.slice(at + "</pre>".length)];
+  })));
+const examples = exampleEntries.map(({ id, path, source, runnable, output }) =>
+  ({ id, path, source, runnable, output }));
+const json = (value: unknown) => JSON.stringify(value).replaceAll("<", "\\u003c");
+---
+<BaseLayout title="Examples - x2c" description="Read every x2c example in one place, and run the small ones in your browser as WebAssembly.">
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <section class="playground plain-editor" data-playground data-service={service}>
+    <header class="playground-bar">
+      <div class="playground-title">
+        <p class="about-eyebrow">examples</p>
+        <h1>Read it. Run it.</h1>
+      </div>
+      <div class="playground-toolbar">
+        <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still read and edit the examples."}</p>
+        <button type="button" data-run hidden={!service}>Run</button>
+        <button type="button" data-stop hidden>Stop</button>
+      </div>
+    </header>
+    <div class="playground-workspace">
+      <nav class="playground-examples" aria-label="Examples" data-example-list>
+        {sections.map(({ name, entries }) => (
+          <div class="playground-section">
+            <h2>{name}</h2>
+            <ul>
+              {entries.map((entry) => (
+                <li><a href={`?example=${encodeURIComponent(entry.id)}`}
+                  data-example={entry.id}>{entry.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+      <div class="playground-source">
+        <label for="playground-source" data-source-name>{first.path}</label>
+        <div class="playground-editor">
+          <pre aria-hidden="true" data-highlight></pre>
+          <textarea id="playground-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="playground-support">{first.source}</textarea>
+        </div>
+      </div>
+      <div class="playground-result">
+        <section class="playground-about" aria-labelledby="playground-about-title">
+          <h2 id="playground-about-title">About</h2>
+          <div class="playground-about-body" data-about-body>
+            {exampleEntries.map((entry) => (
+              <div data-about={entry.id} hidden={entry !== first}>
+                {entry.slide ? (
+                  <>
+                    <h3>{entry.slide.frontmatter.title}</h3>
+                    <Fragment set:html={prose[entry.id]} />
+                    {entry.slide.frontmatter.links?.length ? (
+                      <p class="playground-links">
+                        {entry.slide.frontmatter.links.map((link: { href: string; label: string }) =>
+                          <a href={link.href}>{link.label}</a>)}
+                      </p>
+                    ) : null}
+                    <p class="playground-local">Run it locally: <code>x2c run {entry.path}</code></p>
+                  </>
+                ) : entry.article ? (
+                  <>
+                    <h3>{entry.article.frontmatter.title}</h3>
+                    <p>{entry.article.frontmatter.description}</p>
+                    <p class="playground-local">Run it locally:</p>
+                    <pre>{entry.recipe}</pre>
+                    <p class="playground-links">
+                      <a href={`${base}examples/${entry.article.frontmatter.slug}/`}>Walkthrough</a>
+                      <a href={`${base}${entry.article.frontmatter.guide}`}>Guide</a>
+                      <a href={`https://github.com/gwf/x2c/blob/main/${entry.path}`}>Source on GitHub</a>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3>{entry.label}</h3>
+                    <p>{entry.description}</p>
+                    <p class="playground-local">Run it locally: <code>x2c run {entry.path}</code></p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+        <section class="playground-output" aria-labelledby="playground-output-title">
+          <h2 id="playground-output-title" data-output-title>{first.output ? "Expected output" : "Output"}</h2>
+          <pre data-output role="log" aria-label="Program output">{first.output}</pre>
+        </section>
+      </div>
+    </div>
+    <details class="playground-support" id="playground-support">
+      <summary>How this works and what it cannot do</summary>
+      <p>Source is sent to the compile service, which returns WebAssembly that runs here with a temporary in-memory filesystem. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
+      <p>Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+); Safari support is checked in your browser. Processes, <code>File.popen</code>, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
+    </details>
+    <noscript><p>JavaScript is required to select examples and run programs.</p></noscript>
+    <script type="application/json" data-theme set:html={json(x2cDarkTheme)} />
+    <script type="application/json" data-examples set:html={json(examples)} />
+  </section>
+  <SiteFooter />
+</BaseLayout>
+<script>
+  import { setupPlayground } from "../../lib/playground";
+  setupPlayground();
+</script>

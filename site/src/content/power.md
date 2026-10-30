@@ -9,4 +9,7 @@ C library without a single name collision. Free memory by lifetime, unwind
 errors as data, and run threads that finish together. Then serve HTTP from
 209 lines, measured against Go.
 
-Reads like Python. Runs like C. Links against everything you already have.
+Reads like Python. Runs like C: in the
+[language shootout](https://github.com/gwf/x2c/blob/main/examples/shootout/README.md),
+fourteen problems written in x2c ran at a median of 1.04 times C's time,
+and Python took 39 times. Links against everything you already have.

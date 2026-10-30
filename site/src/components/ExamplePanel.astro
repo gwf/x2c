@@ -37,7 +37,7 @@ const runnable = playgroundFor(panel.slug);
   data-code-section={section}>
   {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
   <Fragment set:html={left} />
-  {runnable && <a class="playground-link" href={`${base}playground/?example=${encodeURIComponent(runnable.id)}`}>Run in playground <span aria-hidden="true">&rarr;</span></a>}
+  {runnable && <a class="playground-link" href={`${base}examples/?example=${encodeURIComponent(runnable.id)}`}>Run in examples <span aria-hidden="true">&rarr;</span></a>}
 </div>}
 {part !== "code" && <div class="feature-copy" data-annotation-section={section}>
   {panel.status && <small class="feature-status">{panel.status}</small>}

@@ -58,7 +58,7 @@
 .playground-workspace {
   --playground-height: max(560px, calc(100vh - var(--landing-header-height, 69px) - 170px));
   display: grid;
-  grid-template-columns: 170px minmax(0, 1fr) minmax(260px, 0.55fr);
+  grid-template-columns: 190px minmax(0, 1fr) minmax(280px, 0.55fr);
   height: var(--playground-height);
   border: 1px solid var(--line);
   background: var(--line);
@@ -109,8 +109,18 @@
   box-shadow: inset 3px 0 0 var(--red);
 }
 
-.playground-source,
 .playground-result {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 45fr) minmax(0, 55fr);
+  gap: 1px;
+  background: var(--line);
+}
+
+.playground-source,
+.playground-about,
+.playground-output {
   display: flex;
   min-width: 0;
   min-height: 0;
@@ -120,13 +130,81 @@
 }
 
 .playground-source>label,
-.playground-result h2 {
+.playground-about>h2,
+.playground-output>h2 {
   flex: none;
   margin: 0;
   padding: 12px 18px;
   border-bottom: 1px solid var(--hairline-on-dark);
   color: var(--muted-light);
   font: 500 11.5px/1 "JetBrains Mono", monospace;
+}
+
+.playground-about {
+  background: var(--paper);
+  color: var(--muted-dark);
+}
+
+.playground-about>h2 {
+  border-bottom-color: var(--line);
+  color: var(--muted-dark);
+}
+
+.playground-about-body {
+  flex: 1;
+  min-height: 0;
+  padding: 16px 18px 18px;
+  overflow: auto;
+  font: 400 14px/1.6 Archivo, Helvetica, sans-serif;
+}
+
+.playground-about-body h3 {
+  margin: 0 0 10px;
+  color: var(--dark);
+  font: 400 26px/1.08 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.playground-about-body p {
+  margin: 0 0 10px;
+}
+
+.playground-about-body a {
+  color: var(--red-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.playground-about-body code {
+  padding: 0 3px;
+  border: 1px solid var(--code-chip-border);
+  background: var(--code-chip-bg);
+  color: var(--code-chip-ink);
+  font: 12.5px/1.5 "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+
+.playground-about-body pre {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: var(--code);
+  color: var(--code-ink);
+  font: 12px/1.7 "JetBrains Mono", monospace;
+}
+
+.playground-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font: 500 12px/1.6 "JetBrains Mono", monospace;
+}
+
+.playground-local {
+  color: var(--dark);
+  font-weight: 500;
 }
 
 .playground-editor {
@@ -179,7 +257,7 @@
   -webkit-text-fill-color: var(--code-ink);
 }
 
-.playground-result>pre {
+.playground-output>pre {
   flex: 1;
   min-height: 0;
   margin: 0;
@@ -190,7 +268,7 @@
   font: 13px/1.7 "JetBrains Mono", monospace;
 }
 
-.playground-result .stderr {
+.playground-output .stderr {
   color: var(--muted-light);
 }
 
@@ -223,26 +301,30 @@
   }
 
   .playground-examples {
-    display: flex;
-    overflow-x: auto;
-    padding: 10px 8px;
-    gap: 8px;
+    display: grid;
+    padding: 8px 0;
+    gap: 2px;
   }
 
   .playground-section {
     display: flex;
-    flex: none;
+    min-width: 0;
     align-items: center;
   }
 
   .playground-section h2,
   .playground-section+.playground-section h2 {
+    flex: none;
+    width: 92px;
     margin: 0;
-    padding: 0 8px;
+    padding: 0 8px 0 16px;
   }
 
   .playground-section ul {
     display: flex;
+    min-width: 0;
+    padding-right: 8px;
+    overflow-x: auto;
     gap: 4px;
   }
 
@@ -255,11 +337,23 @@
     box-shadow: inset 0 -2px 0 var(--red);
   }
 
+  /* A stacked column has no fixed height to share, so each pane sets its own. */
   .playground-editor {
+    flex: none;
     height: 60vh;
   }
 
-  .playground-result>pre {
+  .playground-result {
+    grid-template-rows: none;
+  }
+
+  .playground-about-body {
+    flex: none;
+    max-height: 50vh;
+  }
+
+  .playground-output>pre {
+    flex: none;
     height: 32vh;
   }
 

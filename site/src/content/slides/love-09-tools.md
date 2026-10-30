@@ -35,4 +35,4 @@ executable. The REPL compiles the functions you type. `x2c lsp` serves a
 resident compiler to VS Code or anything else that speaks the protocol.
 
 When something goes wrong at runtime, the message names your file and your
-line. And the [playground](playground/) does all of it in a browser tab.
+line. And the [examples page](examples/) does all of it in a browser tab.

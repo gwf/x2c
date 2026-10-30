@@ -1,0 +1,184 @@
+/* The quick start page: a narrated prose column with a cheat sheet card
+   near the top and highlighted code between the paragraphs. */
+
+.quickstart-landing {
+  min-height: calc(100vh - 68px);
+}
+
+.quickstart-page {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: clamp(36px, 5vw, 64px) clamp(16px, 3.2vw, 44px) clamp(72px, 9vw, 128px);
+}
+
+.quickstart-page>h1 {
+  margin: 0 0 22px;
+  font:
+    400 clamp(48px, 7vw, 78px) / 0.96 "Instrument Serif",
+    Georgia,
+    serif;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.quickstart-page .quickstart-kicker {
+  margin: 0 0 26px;
+}
+
+.quickstart-lede {
+  max-width: 62ch;
+  margin: 0 0 40px;
+  color: var(--dark);
+  font-size: clamp(18px, 1.9vw, 20px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* The cheat sheet card. */
+
+.quickstart-card {
+  margin: 0 0 64px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid var(--line-strong);
+  border-top: 4px solid var(--red);
+  background: var(--white);
+}
+
+.quickstart-card-eyebrow {
+  margin: 0 0 12px;
+  color: var(--red-text);
+  font:
+    500 12px/1 "JetBrains Mono",
+    monospace;
+}
+
+.quickstart-card h2 {
+  margin: 0 0 12px;
+  font:
+    400 clamp(32px, 4.4vw, 46px) / 1 "Instrument Serif",
+    Georgia,
+    serif;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.quickstart-card p:not(.quickstart-card-eyebrow) {
+  max-width: 56ch;
+  margin: 0 0 22px;
+  color: var(--muted-dark);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.quickstart-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.quickstart-button {
+  display: inline-flex;
+  min-height: 46px;
+  padding-inline: 20px;
+  align-items: center;
+  border: 1px solid transparent;
+  font:
+    500 13px/1 "JetBrains Mono",
+    monospace;
+}
+
+.quickstart-button-primary {
+  border-color: var(--red-text);
+  background: var(--red-text);
+  color: var(--paper);
+}
+
+.quickstart-button-secondary {
+  border-color: var(--line-strong);
+  color: var(--dark);
+}
+
+.quickstart-button:hover {
+  border-color: var(--dark);
+  background: var(--dark);
+  color: var(--paper);
+}
+
+/* The narrated sections. Each heading carries a small section number. */
+
+.quickstart-copy {
+  counter-reset: quickstart-section;
+}
+
+.quickstart-copy h2 {
+  margin: 64px 0 16px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font:
+    400 clamp(30px, 3.6vw, 42px) / 1.04 "Instrument Serif",
+    Georgia,
+    serif;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  counter-increment: quickstart-section;
+}
+
+.quickstart-copy h2::before {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--red-text);
+  font:
+    500 12px/1 "JetBrains Mono",
+    monospace;
+  letter-spacing: 0;
+  content: counter(quickstart-section, decimal-leading-zero);
+}
+
+.quickstart-copy h2:first-child {
+  margin-top: 0;
+}
+
+.quickstart-copy p {
+  max-width: 66ch;
+  margin: 0 0 14px;
+  color: var(--muted-dark);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.quickstart-copy a {
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.quickstart-copy pre {
+  max-width: 100%;
+  margin: 20px 0 22px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  border: 1px solid var(--code);
+  font:
+    400 13px/1.62 "JetBrains Mono",
+    monospace;
+  font-variant-ligatures: none;
+  tab-size: 2;
+}
+
+.quickstart-copy pre code {
+  font: inherit;
+}
+
+@media (max-width: 639px) {
+  .quickstart-copy pre {
+    margin-inline: calc(-1 * clamp(16px, 3.2vw, 44px));
+    max-width: none;
+    padding: 16px;
+    border-inline: 0;
+    font-size: 12px;
+  }
+
+  .quickstart-copy h2 {
+    margin-top: 52px;
+  }
+}

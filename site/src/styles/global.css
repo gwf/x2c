@@ -373,27 +373,6 @@ main:focus {
   margin: 0 0 24px;
 }
 
-.hero-examples {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 24px;
-  margin: 0 0 30px;
-  font: 400 13px / 1.6 "JetBrains Mono", monospace;
-}
-
-.hero-examples span {
-  color: var(--muted-dark);
-}
-
-.hero-examples a {
-  color: var(--muted-dark);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  white-space: nowrap;
-}
-
 .hero-heading p,
 .about-kicker {
   color: var(--red-text);

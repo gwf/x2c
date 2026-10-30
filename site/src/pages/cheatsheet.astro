@@ -6,63 +6,75 @@ import { inlineMarkdown } from "../lib/inline-markdown";
 import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
+// A fragment longer than this many characters would crowd the note column, so
+// it spans both cells and its note sits in the note column underneath.
+const codeColumnLimit = 25;
+
+const columns = await Promise.all([1, 2, 3].map(async (column) =>
   Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
     title: section.title,
-    rows: await Promise.all(section.rows.map(async ([code, note]) =>
-      ({ code, note: await inlineMarkdown(note) }))),
+    rows: await Promise.all(section.rows.map(async ([code, note]) => ({
+      code,
+      note: await inlineMarkdown(note),
+      wide: code.length > codeColumnLimit,
+    }))),
   })))));
+const titleHtml = await inlineMarkdown("x2c on one page.");
 const base = import.meta.env.BASE_URL;
-const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 ---
 
 <BaseLayout
   title="Cheat sheet - x2c"
-  description="x2c on one printable page for people who already know C: values, flow, memory, errors, types, concurrency, compile time, and the toolbox."
+  description="x2c on one printable page for people who already know C: values, flow, memory, errors, types, concurrency, compile time, and the library."
 >
   <Fragment slot="header"><SiteHeader /></Fragment>
   <div class="cheat-page">
     <header class="cheat-heading">
-      <div>
-        <p class="about-eyebrow">cheat sheet</p>
-        <h1>You know C. Here is the rest.</h1>
-      </div>
+      <p class="about-eyebrow">cheat sheet</p>
+      <h1 set:html={titleHtml} />
       <p class="cheat-intro">
-        One landscape page. Print it, or read the
-        <a href={local("docs/")}>book</a> when a line needs more than a line.
-        <button type="button" class="cheat-print" data-print>Print</button>
+        One letter-size page for readers who know C.{" "}
+        <a href={`${base}quickstart/`}>Read the quick start</a> to begin, or
+        the <a href={`${base}docs/`}>book</a> when a line needs more than a line.
+        <button type="button" id="print" class="cheat-print">Print</button>
       </p>
     </header>
-    <article class="sheet" aria-label="x2c cheat sheet">
-      <header class="sheet-head">
-        <span class="x2c-wordmark sheet-wordmark">x2c</span>
-        <span class="sheet-title">C, plus five ideas. The syntax on one page.</span>
-        <span class="sheet-site">x2c-lang.dev</span>
-      </header>
-      <div class="sheet-columns">
-        {columns.map((sections) => (
-          <div class="sheet-column">
-            {sections.map((section) => (
-              <section class="sheet-section">
-                <h2>{section.title}</h2>
-                <dl>
-                  {section.rows.map((row) => (
-                    <div class="sheet-row">
-                      <dt><code>{row.code}</code></dt>
-                      <dd set:html={row.note} />
-                    </div>
-                  ))}
-                </dl>
-              </section>
-            ))}
-          </div>
-        ))}
-      </div>
-    </article>
+    <div class="sheet">
+      <article class="sheet-page" aria-label="x2c cheat sheet">
+        <header class="sheet-head">
+          <span class="x2c-wordmark sheet-wordmark">x2c</span>
+          <span class="sheet-title">C, plus five ideas. The syntax on one page.</span>
+          <span class="sheet-site">x2c-lang.dev</span>
+        </header>
+        <div class="sheet-columns">
+          {columns.map((sections) => (
+            <div class="sheet-column">
+              {sections.map((section) => (
+                <section class="sheet-section">
+                  <h2>{section.title}</h2>
+                  <dl>
+                    {section.rows.map((row) => (
+                      <div class:list={["sheet-row", { wide: row.wide }]}>
+                        <dt><code>{row.code}</code></dt>
+                        <dd set:html={row.note} />
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))}
+            </div>
+          ))}
+        </div>
+        <footer class="sheet-foot">
+          The long version is the book at <span class="sheet-url">x2c-lang.dev/docs</span>.
+          Every x2c fragment above compiles; <code>...</code> marks code you supply.
+        </footer>
+      </article>
+    </div>
   </div>
   <SiteFooter />
 </BaseLayout>
 
 <script>
-  document.querySelector("[data-print]")?.addEventListener("click", () => window.print());
+  document.getElementById("print")?.addEventListener("click", () => window.print());
 </script>

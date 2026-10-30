@@ -35,7 +35,8 @@ import {
 import { Content as TryCopy, frontmatter as tryIt } from "../content/try.md";
 
 const base = import.meta.env.BASE_URL;
-const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+const local = (path: string) =>
+  /^https?:/.test(path) ? path : `${base}${path.replace(/^\/+/, "")}`;
 const statistics = JSON.parse(execFileSync(
   "python3", ["tools/repo-metrics.py", "--summary-json"],
   { cwd: import.meta.env.X2C_REPOSITORY_ROOT, encoding: "utf8" }
@@ -73,6 +74,8 @@ const sections = [
       ["docs/guide/channels.html", "channels"],
       ["docs/guide/networking.html", "sockets and HTTP"],
       ["docs/guide/from-c.html", "from C to x2c"],
+      ["https://github.com/gwf/x2c/blob/main/examples/shootout/README.md",
+        "the language shootout"],
     ] },
   { id: "magic", meta: magic, Copy: MagicCopy, label: "Magic ideas",
     more: [
@@ -98,12 +101,6 @@ const sections = [
       <header class="hero-heading">
         <HeroTitle html={titleHtml} />
         <p set:html={kickerHtml} />
-        <nav class="hero-examples" aria-label="Start here">
-          <span>Start here:</span>
-          <a href={local("playground/")} data-example-action="explore">Run it in your browser</a>
-          <a href={local("cheatsheet/")} data-example-action="explore">The C programmer's cheat sheet</a>
-          <a href="#examples">Programs with a Run button</a>
-        </nav>
       </header>
       <FiveIdeas intro={home.ideasIntro} ideas={home.ideas} />
       <div class="hero-prose">
@@ -142,8 +139,8 @@ const sections = [
         <header class="section-heading install-heading">
           <h2>{tryIt.title}</h2>
           <div class="install-actions">
-            <a class="button button-primary" href={local("playground/")}>
-              Open the playground
+            <a class="button button-primary" href={local("examples/")}>
+              Run it in your browser
             </a>
             <a class="button button-secondary"
               href="https://github.com/gwf/x2c">View on GitHub</a>
@@ -225,32 +222,34 @@ const sections = [
       <div class="docs-grid">
         <header class="docs-copy">
           <small>examples</small>
-          <h2>Programs, with a Run button.</h2>
+          <h2>Every example, one page.</h2>
           <p>
-            Six larger programs with walkthroughs, and every gallery
-            program from the sections above. Anything the browser runtime
-            supports runs in the <a href={local("playground/")}>playground</a>;
-            the rest build from a checkout in one command.
+            The gallery programs from the sections above, six larger
+            programs with walkthroughs, and two tours, each with its full
+            source on the <a href={local("examples/")}>examples page</a>.
+            The small ones run in your browser with a Run button. The big
+            ones come with a recipe.
           </p>
         </header>
         <div class="docs-cards example-cards">
           {articles.map(({ frontmatter: example }) => (
-            <a class="docs-card" href={local(`examples/${example.slug}/`)}
+            <a class="docs-card"
+              href={local(`examples/?example=programs/${example.slug}`)}
               data-example={example.slug} data-surface="hero"
               data-section={sectionOf(example.slide)}
               data-example-action="explore">
-              <small>{sectionOf(example.slide)} / walkthrough</small>
+              <small>{sectionOf(example.slide)} / program</small>
               <h3>{example.title}</h3>
               <p>{example.description}</p>
             </a>
           ))}
           <div class="docs-card runnable-card">
-            <small>playground</small>
-            <h3>Run a gallery program.</h3>
+            <small>run in your browser</small>
+            <h3>Pick a gallery program.</h3>
             <ul class="runnable-list">
               {playgroundExamples.map((entry) => (
                 <li>
-                  <a href={local(`playground/?example=${encodeURIComponent(entry.id)}`)}
+                  <a href={local(`examples/?example=${encodeURIComponent(entry.id)}`)}
                     data-example={entry.slug} data-surface="hero"
                     data-section={entry.id.split("/")[0]}
                     data-example-action="run">{entry.label}</a>
@@ -316,9 +315,9 @@ const sections = [
             <p>showcase examples.</p>
           </div>
           <div class="docs-card stat-card">
-            <small>cheat sheet</small>
-            <strong><a href={local("cheatsheet/")}>One page.</a></strong>
-            <p>The whole language for people who already know C.</p>
+            <small>quick start</small>
+            <strong><a href={local("quickstart/")}>Start here.</a></strong>
+            <p>A fast track for people who already know C, with the one-page cheat sheet.</p>
           </div>
         </div>
       </div>

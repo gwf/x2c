@@ -16,6 +16,6 @@ run: |
   ./x2c run examples/magic/compile-time.x
 ---
 
-The playground compiles x2c to WebAssembly and runs it in your browser tab.
+The examples page compiles x2c to WebAssembly and runs it in your browser tab.
 Nothing to install, nothing to trust. Every gallery program has a Run
 button.

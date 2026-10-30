@@ -367,7 +367,7 @@ function checkBookReturnLinks(relativeFile, html) {
       }
     })
     .filter(Boolean);
-  const required = ["", "#install", "#examples"];
+  const required = ["", "#install"];
 
   for (const hash of required) {
     const expected = new URL(`${sitePath("/")}${hash}`, `${siteUrl}/`);
