@@ -21,7 +21,6 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.configure_interfaces`](#Compiler.configure_interfaces) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`Compiler.configure_package`](#Compiler.configure_package) | Selects a source file's own package, as its standalone translation does. |
 | [`Compiler.declared_adoptions`](#Compiler.declared_adoptions) | Returns the `(adopt ...)` rows that the current file's collected entry declares, in no particular order. |
-| [`Compiler.discover_module_source`](#Compiler.discover_module_source) | Discovers a module after preparing included macros only if its preprocessing needs them. |
 | [`Compiler.forget_provisional_entries`](#Compiler.forget_provisional_entries) | Drops the entries a meta build collected without declaration defaults or with placeholders for its meta calls. |
 | [`Compiler.include_function_declarations`](#Compiler.include_function_declarations) | Adds the public functions an included unit itself declares. |
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
@@ -45,7 +44,6 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
 | [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
-| [`Compiler.prepare_macro_exports`](#Compiler.prepare_macro_exports) | Prepares the root's ordered CPP parts for a discovery query. |
 | [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
 | [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
@@ -167,16 +165,6 @@ declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
 Source: `src/collect/declarations.x`
-
-<a id="Compiler.discover_module_source"></a>
-#### Compiler.discover_module_source
-
-`ModuleSource Compiler.discover_module_source( Compiler c, String path, String text, Tokenizer &?plain)`
-
-Discovers a module after preparing included macros only if its
-preprocessing needs them. Ordinary collection owns its own include walk.
-
-Source: `src/collect/splice.x`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -374,12 +362,11 @@ Source: `src/collect/providers.x`
 <a id="Compiler.module_source"></a>
 #### Compiler.module_source
 
-`ModuleSource Compiler.module_source( Compiler c, String path, String text, Tokenizer &?plain)`
+`ModuleSource Compiler.module_source(Compiler c, String path, String text)`
 
 Returns the x2c source at `path`, whose own text is `text`, with its
 file-scope `module` block replaced by the text of each member it names,
-in order, or NULL when the text has no block. `plain` receives the
-preprocessed tokens of a root without a block. Member paths are relative
+in order, or NULL when the text has no block. Member paths are relative
 to the file that names them, and their own blocks are spliced in turn.
 A member's quoted include of a file beside it is spelled from the
 entry's directory, so it names the same file there.
@@ -439,17 +426,6 @@ Returns the compiler-owned prelude sources relative to its home. Their
 runtime implementations are already linked into the shipped binaries.
 
 Source: `src/collect/walk.x`
-
-<a id="Compiler.prepare_macro_exports"></a>
-#### Compiler.prepare_macro_exports
-
-`void Compiler.prepare_macro_exports(Compiler c, String path)`
-
-Prepares the root's ordered CPP parts for a discovery query. The same
-file walk owns includes; its temporary parts contain no declarations.
-Other callers retain the existing signature-only collection service.
-
-Source: `src/collect/providers.x`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types

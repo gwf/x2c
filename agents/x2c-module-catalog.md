@@ -348,14 +348,13 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
-`Compiler.module_source`, `Compiler.discover_module_source`,
-`Compiler.collect_symbols`, `Compiler.is_prelude_source`,
-`Compiler.install_syntax_prelude`, `Compiler.configure_package`,
-`Compiler.included_compile_time_effects`, `Compiler.prelude_sources`,
-`Compiler.install_included_effects`, `Compiler.included_macros`,
-`Compiler.initial_macros`, `SourceView.resolve_include`,
-`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
-`Compiler.include_function_declarations`,
+`Compiler.module_source`, `Compiler.collect_symbols`,
+`Compiler.is_prelude_source`, `Compiler.install_syntax_prelude`,
+`Compiler.configure_package`, `Compiler.included_compile_time_effects`,
+`Compiler.prelude_sources`, `Compiler.install_included_effects`,
+`Compiler.included_macros`, `Compiler.initial_macros`,
+`SourceView.resolve_include`, `Compiler.include_typedef_names`,
+`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
 `Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
 `Compiler.callable_symbols`, `Compiler.publish_inline_types`,
@@ -365,10 +364,9 @@ Public functions:
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
 `Compiler.name_loaded_provider`, `Compiler.loaded_call_type`,
-`Compiler.prepare_macro_exports`, `Compiler.collect_package`,
-`Compiler.configure_interfaces`, `Compiler.prelude_missing_interfaces`,
-`Compiler.prelude_interface`, `Compiler.interface_text`,
-`Compiler.linked_prelude_records`
+`Compiler.collect_package`, `Compiler.configure_interfaces`,
+`Compiler.prelude_missing_interfaces`, `Compiler.prelude_interface`,
+`Compiler.interface_text`, `Compiler.linked_prelude_records`
 
 ### [src/compiler/compiler.x](../src/compiler/compiler.x)
 
@@ -523,7 +521,7 @@ Public functions:
 
 ### [src/cpp/cpp.x](../src/cpp/cpp.x)
 
-the C preprocessing x2c performs before parsing.
+optional preprocessing for existing C compatibility.
 
 Public functions:
 

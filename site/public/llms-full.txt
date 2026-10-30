@@ -303,9 +303,10 @@ each use of `name`. See [macros](https://x2c-lang.dev/docs/guide/macros.html),
 
 ## Before bringing over a C source file
 
-x2c expands the macros the file and its project headers define before it
-parses, so a macro may supply grammar. It decides a conditional only when
-every name the condition tests is visible to it, so a branch on a platform
+Use `--cpp` when an existing C file needs macros to supply grammar before
+x2c parses it. Expansion is off by default and is a C compatibility bridge,
+not an x2c authoring facility. With the switch, x2c decides a conditional only
+when every name the condition tests is visible to it, so a branch on a platform
 macro such as `__APPLE__` or a feature a system header defines must parse
 together with the other branches of its group, including ones the native
 build disables. A macro such a branch defines stays for the C compiler. See
@@ -1448,16 +1449,12 @@ same-named companion directory is required. A member that is already being
 spliced, an unreadable member, a malformed block, or a second block is a driver
 error at the block.
 
-The block is spliced before the unit is collected, so a preprocessor
-condition does not choose members. x2c skips a block only inside a
-conditional arm that it decides C never takes, as described under
-[Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), from the macros the file defines before the
-block, the runtime's, and the command line's; an included file's macros do
-not count there. After `#define OFF 0`, a block under `#if OFF` is skipped.
-Every arm of an undecided group counts, so blocks in both arms of
-`#ifdef __APPLE__` and `#else` are a second block. The spliced text,
-including each member's own directives, then reaches C as one unit in
-splice order.
+The block is spliced before the unit is collected. Write the block and its
+member paths directly; C macro expansion does not discover module members,
+even with `--cpp`. The limited directive scan can skip an impossible arm
+such as `#if 0`. Other conditional arms count, so blocks in both arms of
+`#ifdef __APPLE__` and `#else` are a second block. The spliced text, including
+each member's own directives, reaches C as one unit in splice order.
 
 The entry's syntax mode applies to all spliced text. In a `.xp` entry every
 member is read with indentation layout, and in a `.x` entry with braces, so
@@ -1800,21 +1797,19 @@ x2c keeps C declarations, expressions, operators, functions, structs, unions,
 enums, pointers, arrays, and control flow. It adds language forms around that
 foundation and keeps C's object model.
 
-Use `#include` to include source and headers. x2c expands the `#define`
-macros it can see before parsing, as described under
-[Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), so their bodies may use x2c syntax and a
-name in a body resolves where the macro is used. Prefer x2c macros for new
-code: their holes bind parsed syntax and their names are private to each
-expansion. A macro that x2c leaves to the C compiler stays text, which does
-not follow renamed or file-private bindings.
+Use `#include` to include source and headers. Use x2c macros and language
+features for new x2c code. C macro expansion is an optional compatibility
+bridge for existing C, enabled with `--cpp`; it is off by default. A macro
+left to the C compiler stays text, which does not follow renamed or
+file-private bindings. See [Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing).
 
 Member access uses `.` wherever x2c parsed the struct, whether the receiver is
 a value or a pointer, and whether the declaration came from x2c source or from
-a C header x2c reads, and in the body of a `#define` macro that x2c expands.
-`->` remains accepted. It is required in two places. One is a pointer to a
-struct whose layout x2c does not read, such as one from a system header or
-an unresolved third-party header. The other is the body of a macro that x2c
-leaves to the C compiler. A member of an anonymous union or struct belongs to its enclosing
+a C header x2c reads. `->` remains accepted. It is required in two places.
+One is a pointer to a struct whose layout x2c does not read, such as one from
+a system header or an unresolved third-party header. The other is the body
+of a macro that x2c leaves to the C compiler. A member of an anonymous union
+or struct belongs to its enclosing
 aggregate, and `.` reaches it through a pointer like any other member. `.`
 reaches through one pointer level, so a pointer to a pointer typedef keeps
 `(*pointer).field`. x2c also recognizes method-style calls such as
@@ -2441,12 +2436,10 @@ Matrix multiplication uses the ordinary `left.matmul(right)` method.
 `Var.matmul` dispatches a registered `matmul` witness. The `@` prefix
 splices macro syntax; `@` and `@=` are not arithmetic operators.
 
-An operand with no x2c type, such as the name of a macro that x2c leaves to
-the C compiler, cannot convert for a participant that implements the
-operator; `images - MEAN` with `MEAN` from a system header is a compile-time
-type error. Cast the macro, `(double) MEAN`, or bind its value to a local. A
-macro x2c expands, such as `#define MEAN 0.1307` in the unit, has the type
-of its expansion.
+An operand with no x2c type, such as a C macro's name, cannot convert for a
+participant that implements the operator; `images - MEAN` with
+`#define MEAN 0.1307` is a compile-time type error in default mode. Cast the
+macro, `(double) MEAN`, or bind its value to a typed local.
 
 A participant may also declare `void T.discard(T)`. The compiler calls it on
 an unnamed temporary it made for one operator, such as the product in
@@ -5958,31 +5951,25 @@ from the source's, because it also passes the same address on unchanged.
 
 ## Preprocessing
 
-x2c expands the C macros it can see before it parses a unit, so a macro may
-supply any grammar, and a macro body is translated like any other source,
-x2c syntax included:
+Ordinary x2c translation does not expand C macros. It retains directives,
+reads the declaration and layout information needed from native macros, and
+leaves their uses to the C compiler. Limited conditional handling hides
+impossible arms such as `#if 0`; it is not a full preprocessor. Source must
+otherwise form syntax that x2c can parse.
 
-```x2c
-#define SQUARE(x) ((x) * (x))
-#define SHOW(n) printf(#n " squared is %d\n", SQUARE(n))
-#define SIZE(items) items.len()
+Use `--cpp` on `translate`, `build`, or `run` when existing C needs macro
+expansion to supply grammar. This enables x2c's C expansion engine before
+declaration collection and parsing. It does not enable discovery of x2c
+module blocks, member paths, imports, or meta declarations inside C macros.
+Write new x2c code with x2c macros and language features instead.
+`--no-cpp` suppresses this expansion as well as symbol collection.
 
-int main(void) {
-  SHOW(7);
-  printf("%d\n", SIZE([1, 2, 3]));
-  return 0;
-}
-```
+### Optional C macro expansion
 
-```text
-7 squared is 49
-3
-```
-
-A macro is visible when the unit defines it, when an `.x` file or a header
-that x2c reads through its own include search defines it, or when a `-D`
-option defines it. The runtime's macros are visible in every unit outside
-`lib/`. The macros of a system header, or of any header x2c does not
+With `--cpp`, a macro is visible when the unit defines it, when an `.x` file
+or a header that x2c reads through its own include search defines it, or when
+a `-D` option defines it. The runtime's macros are visible in every unit
+outside `lib/`. The macros of a system header, or of any header x2c does not
 resolve, stay for the C compiler, and so do `__FILE__`, `__LINE__`, and the
 other predefined names.
 
@@ -5999,16 +5986,15 @@ completed include cannot retain an earlier cycle's incomplete exports.
 A use of a visible macro is replaced by its expansion with C99's rules:
 object-like and function-like macros, `#` and `##`, `__VA_ARGS__`, GNU C's
 `, ## __VA_ARGS__`, `__VA_OPT__`, and rescanning, during which a macro does
-not expand inside its own expansion. A comma inside brackets or braces, as
-in an x2c Array or Map literal, does not separate macro arguments. A name is
-not expanded inside a `%(...)` literal, a Symbol literal, or a string or
-character literal, or after `$` or `@`. The generated C holds the expansion
-where the macro was used, while the `#define`, `#undef`, conditional, and
+not expand inside its own expansion. String and character literals are not
+expanded. The generated C holds the expansion where the macro was used,
+while the `#define`, `#undef`, conditional, and
 `#include` directives stay where they were written. Every token of an
 expansion has the location of the use, so a diagnostic there points at the
 use and adds a note that names the macro and where it is defined.
-`--dump-tokens` prints the expanded tokens and marks each one with the macro
-whose use produced it.
+With `--cpp`, `--dump-tokens` prints the expanded tokens and marks each one
+with the macro whose use produced it. Without the switch, it prints the
+ordinary source tokens.
 
 Within signed `long` arithmetic, a condition is decided when every name it
 tests is visible, is known never to be defined, or is a literal. Unsigned
@@ -6018,10 +6004,10 @@ GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
 `_MSC_VER` are never defined; a compiler built for a host other than Windows
 treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as never defined too. Only
 `defined`, `#ifdef`, and `#ifndef` decide `__GNUC__`: its value is unknown,
-so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group parses: the
-tokens of the other arms are trivia, an `#include` in one is not read, and
-the directives around them stay in place and are emitted. A function defined
-in two arms of one conditional is one definition.
+so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group
+parses: the tokens of the other arms are trivia, and an `#include` in one is
+not read. The directives around them stay in place and are emitted. A
+function defined in two arms of one conditional is one definition.
 
 Any other condition, such as `#ifdef __APPLE__` or a test of a name that a
 system header may define, is undecided, and every arm of its group parses.
@@ -6032,11 +6018,11 @@ unexpanded for the C compiler, which keeps the generated C correct for each
 arm.
 
 `-D NAME`, `-D NAME=VALUE`, and `-U NAME` on `translate`, `build`, and `run`
-define and undefine a macro for x2c as for the C compiler, and so do a
-project profile's defines. They do not change how x2c reads the runtime and
-its prelude. C generated by `translate` with these options needs the same
-options when it is compiled, because the conditions they decide keep their
-directives.
+reach the C compiler and requested host preprocessing. With `--cpp`, they
+also define and undefine macros for x2c's expansion engine, as do a project
+profile's defines. They do not enable expansion themselves or change how
+x2c reads the runtime and its prelude. C generated with these options needs
+the same options when it is compiled, because conditional directives remain.
 
 ### Host preprocessing
 
@@ -6384,13 +6370,20 @@ The depfile options control that `.d` output. They belong to `translate`:
 --no-phony-deps         Omit phony rules for included files
 ```
 
-Symbol collection options apply to `translate`, `build`, and `run`:
+Preprocessing and symbol collection options apply to `translate`, `build`,
+and `run`:
 
 ```text
+--cpp                   Expand C macros for existing C compatibility
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
 ```
+
+C macro expansion is off by default. Use `--cpp` when existing C requires
+macro-generated grammar. It does not discover x2c module or meta constructs
+inside C macros. `--no-cpp` suppresses expansion even when `--cpp` is present.
+The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
 
@@ -7091,9 +7084,10 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
-x2c's own [preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), for requested host
-preprocessing, and for C compilation; `translate` accepts them too, and the
-C generated with them needs the same options. Optimization, debug, and `-Xcc` are compile-only; `-L`,
+x2c's optional [preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing) with `--cpp`, for
+requested host preprocessing, and for C compilation. `translate` accepts them
+too, and the C generated with them needs the same options. Optimization,
+debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
 `-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
