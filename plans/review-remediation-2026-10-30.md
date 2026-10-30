@@ -3,8 +3,10 @@
 > Status: active
 > Written 2026-10-30 against `dev` `ae3739230`. Gary selected a remediation
 > plan on 2026-10-30 and accepted the recommendation on every question
-> under "Decisions" the same day. Batches 1 and 2 are in progress; no batch
-> has been published. Findings and verification are in
+> under "Decisions" the same day. Batches 1 and 2 are implemented and
+> integrated on 2026-10-30; see "Implementation evidence" for what landed,
+> what was scoped, and the follow-ups found. Batches 3 to 6 have not
+> started. Findings and verification are in
 > [the review record](reference/review-2026-10-30.md).
 
 ## Result and scope
@@ -478,3 +480,87 @@ batch's revision here as it lands, and archive this plan with the last.
 - Batch 4: the affected suites and probe scripts under `make verify`.
 - Batches 5 and 6: `tools/gate-state.py ensure doc-check`, plus
   `make doc-outputs` where a checked sample changed.
+
+## Implementation evidence
+
+Batches 1 and 2 were implemented on 2026-10-30 by five parallel workers in
+isolated worktrees from `b7ee4d8e1`, plus one cleanup worker from the
+integrated tree, and integrated by the orchestrating session. Each worker
+ran its focused checks and `make stage-2`; the orchestrator rebuilt the
+integrated tree and reran the changed fixtures, the array, http, net,
+typed-list, map, and json suites, and the repl, lsp, graph, build, and bind
+command scripts before the publication gate.
+
+### Landed as specified
+
+R1, R2, R3, R4, R6, R8, R9, R11, R12, R13, R16, R17, R19, R20 (the cli.md,
+regions.md, and repl.md sentences). R4 also fixed a second defect the
+repair exposed: `_character` sliced a character constant with `[1:-1]`,
+which keeps the closing quote, so `'\0'` evaluated to 39; the slice is now
+`[1:-2]` and the fixture checks `'\0' == 0`.
+
+### Landed with a recorded departure
+
+- R5 took the sort-and-widen option: `collect_native` stores the sorted
+  host macro rows in `command_macros`, and the field comment says so. A
+  separate field would have needed a REPL reader change outside the
+  worker's files.
+- R7 keeps object-like attribute macros only. A function-like wrapper such
+  as `PUBLIC(const char *)` still contributes nothing, because carrying its
+  inner modifier to generation needs a new parse-to-generation fact that
+  roughly doubles the repair. `language.md` states the limit. The header
+  filter reads the unit's final `#define` table; an attribute macro the
+  unit later `#undef`s reaches the header, where the copied `#undef` keeps
+  the C compiling.
+- R10 reproduced (a `#else` arm with C++ text after an include failed the
+  shallow parse), and was repaired by keying the whole-file arm stacks by
+  directive position in `FileWalk.arms` and seeding each segment's
+  `arm_stacks` from them, instead of changing `scan_conditionals`. Forms
+  before a segment's first directive still have no arms for duplicate
+  grouping, as before.
+- R14: the supervisor owns each fresh candidate's directory
+  (`ReplWorkerStart.directory`) and removes it on failure or kill, because
+  a killed candidate sends no failed frame; the build takes the directory
+  as a parameter. `playground.py` and `terminal.py` assert an empty
+  per-run `TMPDIR`.
+- R15: `_prune` moved to `Compiler.prune_cache` in `src/utils.x`; the REPL
+  prunes `repl/` once per session start and records each entry's `source`
+  as the program's first root, or the session's artifact directory when
+  there is no root, so no-program entries are pruned by the next session.
+  The key no longer includes the temporary module path.
+- R18: members are linted as files with their own paths and lines;
+  parse-based findings map through `c.token_source`. The member scan found
+  208 pre-existing violations (173 stacked blank lines, 20 wrapped opening
+  lines, 6 comments restating a name, 4 single-statement brace pairs, 2
+  continuation indents, 2 over-width lines, 1 subject parameter name) in
+  about 70 files, all cleared with behavior-preserving edits; the census is
+  zero with `baseline.txt` unchanged. The `--fix` lint fixture exercises
+  the 10-29 span mapping through a module member, because lint cannot
+  expand C macros now that expansion is opt-in.
+- R17: the LSP serves a script's own text for semantic tokens and the
+  `didSave` fallback through `LspWorkspace.document`; hover and other
+  offset conversions still use the compiler's rewritten text, because the
+  compiler records offsets in it.
+
+### Follow-ups found during repair, not done
+
+- A written attribute before `typedef` miscompiles:
+  `__attribute__((unused)) typedef int count_t;` emits
+  `typedef __attribute__((unused)) int;` then `count_t;`.
+- An attribute macro defined in an included `.h` and used before a unit's
+  own declaration fails to parse (`expected ';', '{', or '=>'`); the
+  shipped bootstrap compiler fails the same way.
+- Script units: the compiler records source ranges in the rewritten text
+  whose first line is `#include "scripting.x"`, so an LSP cursor on a
+  script computed while no unit is open uses raw offsets against rewritten
+  ranges. The repair belongs in `src/collect/walk.x` and
+  `src/compiler/source-locations.x`.
+- Lint `doc-comment-tier` does not apply to module members because
+  `docs/library-manifest.txt` lists entry files; members should inherit
+  their entry's tier.
+- `docs/src/reference/cli.md` describes member checking only for
+  `function-reading-order`; batch 5 extends it.
+- On Linux, GNU ld `--trace` prints `-lfoo (path)` lines that the REPL's
+  shared-library recording skips; not probed on macOS.
+- Other `long` overflow in `#if` evaluation (unary minus of `LONG_MIN`,
+  `+`, `*`) is still evaluated natively.
