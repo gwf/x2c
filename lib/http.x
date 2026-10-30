@@ -497,6 +497,10 @@ static void _connection(HttpServer s, Socket peer) {
       res = HttpResponse.new();
       res.status(400).json({"error": "malformed JSON"});
     }
+    catch %(malformed *): {
+      res = HttpResponse.new();
+      res.status(400).json({"error": "malformed request"});
+    }
     catch %(?code *detail): {
       s.logger.error(<http>, %(code $code), %(detail $detail));
       res = HttpResponse.new();

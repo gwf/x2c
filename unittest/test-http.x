@@ -193,6 +193,9 @@ static void http_loopback(void) {
   routes.post("/notes", %!(HttpRequest req, HttpResponse res) => res.status(201).json(req.json()));
   routes.get("/fail", %!(HttpRequest req, HttpResponse res) => { Http.fail(422, "rejected"); });
   routes.get("/bug", %!(HttpRequest req, HttpResponse res) => { raise %(bad-arg); });
+  routes.get(
+    "/bad-text",
+    %!(HttpRequest req, HttpResponse res) => { raise %(malformed); });
   routes.get("/io-bug", %!(HttpRequest req, HttpResponse res) => {
     res.status(201).text("partial");
     raise %(io-fail (errno 5));
@@ -222,7 +225,11 @@ static void http_loopback(void) {
   EXPECT_STR_EQ(_response(client, code), "{\"error\":\"rejected\"}");
   EXPECT_INT_EQ(code, 422);
   client.output.puts("POST /notes HTTP/1.1\r\nHost: x\r\nContent-Length: 1\r\n\r\nx"); client.output.flush();
-  _response(client, code);
+  EXPECT_STR_EQ(_response(client, code), "{\"error\":\"malformed JSON\"}");
+  EXPECT_INT_EQ(code, 400);
+  client.output.puts("GET /bad-text HTTP/1.1\r\nHost: x\r\n\r\n");
+  client.output.flush();
+  EXPECT_STR_EQ(_response(client, code), "{\"error\":\"malformed request\"}");
   EXPECT_INT_EQ(code, 400);
   client.output.puts("GET //etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
   _response(client, code);
