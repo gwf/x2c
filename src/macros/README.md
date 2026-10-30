@@ -19,6 +19,7 @@ guides describe those parts.
 | [expansion.x](expansion.x) | Matches captures, creates private names, fills templates, checks recursive expansion, and binds the result. |
 | [templates.x](templates.x) | Evaluates `meta` call slots, lifts compile-time results into syntax, rebuilds decorated syntax, and lands quotations with their holes and private names. |
 | [values.x](values.x) | Represents first-class Macro values, captures environments, handles patterns, and binds carried code and effects. |
+| [aliases.x](aliases.x) | Parses `alias` and `unalias` expression aliases, keeps each alias in its function, file, or body scope, and reports file-scope conflicts. |
 | [rewrites.x](rewrites.x) | Registers and selects rewrite rules and binds/lowers replacements while retaining carried values and effects. |
 
 ## Related code
