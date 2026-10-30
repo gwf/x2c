@@ -1,11 +1,12 @@
 # Integrated Pool and Channel delivery checkpoint
 
-> Status: reference - correctness validated; additional measured costs await approval.
+> Status: reference - correctness validated; all listed tradeoffs accepted.
 > Current-dev baseline: `74bc688575f3702ae701639533bbe44eda6c51e7`.
 > Validated and measured candidate: `a596f6cb5d9d0b7f81962e14581faa39d55debfb`.
 > Gary accepted the previously reported Channel and retained-index tradeoff.
 > Broader checks found additional small absolute runtime costs listed below.
-> Nothing has been pushed or merged to dev. The index redesign remains blocked.
+> On 2026-10-30 Gary explicitly accepted the additional costs and authorized
+> merging the validated candidate to dev. The index redesign remains blocked.
 
 ## Integrated result and correctness
 
@@ -124,7 +125,7 @@ Under `.context/lock-contention/`:
 - `delivery-runtime-confirm/`: 50 alternating processes, per-operation raw
   outputs and summaries for the additional runtime costs.
 
-Publication is the remaining action after the acceptance decision and final
-upstream/proof check. The known Channel/index tradeoff was already authorized;
-these newly measured runtime costs were not part of the earlier report. They
-are disclosed separately rather than treated as implicitly waived.
+Gary explicitly accepted these additional runtime costs and authorized merging
+the validated candidate to dev on 2026-10-30. This closes the acceptance hold;
+the final upstream/proof check still precedes publication. The replacement
+index remains blocked. No unmeasured future tradeoff is authorized.

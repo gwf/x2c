@@ -1,7 +1,10 @@
 # Small corrections proposed from the lock profiles
 
-> Status: blocked - correctness validated; newly measured costs await approval.
-> The [delivery checkpoint](reference/independent-lock-delivery-checkpoint-2026-10-30.md)
+> Status: done - sections 1 and 2 validated and approved for dev on 2026-10-30.
+> Final runtime candidate: `a596f6cb5d9d0b7f81962e14581faa39d55debfb`.
+> Gary explicitly accepted the additional measured costs and authorized merging.
+> Section 3 remains blocked and unimplemented; no further index work is authorized.
+> The [delivery checkpoint](../reference/independent-lock-delivery-checkpoint-2026-10-30.md)
 > retains the gains but identifies additional small absolute runtime costs.
 > On 2026-10-30 Gary authorized folding in the measured gains while minimizing
 > the reported regressions. The residual Channel slowdowns and retained-index
@@ -16,7 +19,7 @@
 > Gary authorized sections 1 and 2 only, with original-baseline measurements.
 > Section 3 is not authorized; retain the current index unchanged.
 
-The [profiles](reference/independent-lock-profile-2026-10-30.md) identified three
+The [profiles](../reference/independent-lock-profile-2026-10-30.md) identified three
 bounded corrections. Keep the working per-Pool counters, separate depot
 transfers, immutable block extents, and tested stop/commit lifetime protocol.
 Do not add another synchronization or reclamation framework.
@@ -276,7 +279,7 @@ runtime passed 154 tests and 1,505 assertions in each accounting mode, plus
 controlled refill/failure and Channel stop/commit probes. The Pool common-path
 assembly count fell from 93 to 66 instructions; the original baseline was 72.
 
-[Matched measurements](reference/independent-lock-fastpath-monitor-performance-2026-10-30.md)
+[Matched measurements](../reference/independent-lock-fastpath-monitor-performance-2026-10-30.md)
 cover 640 processes against the original baseline. The one-worker Pool-release
 slowdown did not recur. Independent Pool and Channel gains remain. Shared
 buffered Channel operations remain reproducibly slower, and smaller local

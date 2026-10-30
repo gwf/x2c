@@ -1,6 +1,9 @@
 # Revised Pool accounting, index construction, and Channel handoffs
 
-> Status: superseded by the profiled corrections and accepted delivery tradeoff.
+> Status: done - superseded by the profiled corrections and approved delivery.
+> Final runtime candidate: `a596f6cb5d9d0b7f81962e14581faa39d55debfb`.
+> Gary accepted the additional measured costs and authorized dev publication
+> on 2026-10-30. The proposed replacement index remains unapproved.
 > Gary authorized delivery of the measured wins on 2026-10-30, accepting the
 > reported residual Channel and retained-index costs. This does not authorize
 > additional regressions or the proposed replacement index. Earlier holds are history.
@@ -11,14 +14,14 @@
 > before merging to dev. Every measured tradeoff requires Gary's explicit approval.
 > An independent reviewer answered yes to credibility, without claiming acceptance.
 > Gary authorized implementation and measurement of previously failing workloads first.
-> [Results](reference/independent-lock-redesign-performance-2026-10-30.md):
+> [Results](../reference/independent-lock-redesign-performance-2026-10-30.md):
 > Pool accounting regressions removed; Channel, single-worker Pool release,
 > and retained index memory regressions remain. Nothing pushed or merged to dev.
 
 This revises three mechanisms in the
 [implementation plan](independent-pool-and-channel-locks.md). Its unaffected
 ownership, depot, compatibility, validation, and delivery requirements remain.
-The [measurement report](reference/independent-lock-performance-2026-10-30.md)
+The [measurement report](../reference/independent-lock-performance-2026-10-30.md)
 records the failed candidate and retained raw evidence.
 
 ## What the revision removes

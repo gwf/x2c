@@ -7,7 +7,7 @@
 
 ## Implementation and comparison
 
-The [reviewed design](../independent-locks-revised-design.md) was implemented
+The [reviewed design](../archive/independent-locks-revised-design.md) was implemented
 with private Pool traffic counters, one reserved index builder, and Channel
 monitor registration instead of participant mutexes. Parent review moved Pool
 counter retirement after parent unlock. Independent source review found no

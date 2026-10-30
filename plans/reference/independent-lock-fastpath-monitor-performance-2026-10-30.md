@@ -9,7 +9,7 @@
 ## Delivered scope
 
 Implemented only sections 1 and 2 of
-[the reviewed corrections](../independent-locks-profiled-corrections.md).
+[the reviewed corrections](../archive/independent-locks-profiled-corrections.md).
 Pool allocation hits now avoid refill preparation through a local noinline
 helper. Channel buffering uses dedicated loops and one mutex/condition pair
 per Channel. Registration combines owner lookup with the existing CAS.

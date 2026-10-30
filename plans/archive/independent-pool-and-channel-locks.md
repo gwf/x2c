@@ -1,6 +1,8 @@
 # Implementation plan: independent Pool and Channel synchronization
 
-> Status: integrating - Gary accepted the reported tradeoff on 2026-10-30.
+> Status: done - implementation validated and approved for dev on 2026-10-30.
+> Shipped runtime candidate: `a596f6cb5d9d0b7f81962e14581faa39d55debfb`.
+> Gary also accepted the additional runtime costs in the final delivery checkpoint.
 > Current delivery decision: retain the measured independent Pool/Channel gains
 > and the corrections that minimized their regressions. The reported residual
 > Channel slowdowns and retained-index memory cost are accepted for this design.
@@ -20,7 +22,7 @@
 > below. The original design and execution record remain as failure evidence.
 > Gary authorized the reviewed revision; measure previously failing workloads first.
 > That revision was implemented at `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
-> [Its measurements](reference/independent-lock-redesign-performance-2026-10-30.md)
+> [Its measurements](../reference/independent-lock-redesign-performance-2026-10-30.md)
 > still fail acceptance; the current candidate remains local and blocked.
 
 ## Result and contracts
@@ -507,7 +509,7 @@ A quiet measurement window was requested. No unrelated processes were
 stopped. Both workers are now idle and hold no compute slot.
 
 Gary subsequently supplied the quiet window. The
-[performance evidence](reference/independent-lock-performance-2026-10-30.md)
+[performance evidence](../reference/independent-lock-performance-2026-10-30.md)
 records the full matrix, a narrow Channel follow-up (`bdb8cdbbd`, worker
 `9680cd97a`), and longer confirmation runs. Independent accounting-off paths
 improve, but same-worker/shared Channels and accounting-on Pools regress.
