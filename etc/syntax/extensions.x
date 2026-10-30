@@ -52,8 +52,8 @@ List syntax_extensions(void) => %(
                alias-head alias-name named-alias alias-wrapper
                alias-statement field-alias enumerator-alias unalias)
       (lexical c-tokens)
-      (grammar-note "alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
-      (lexical-note "alias, unalias, and as are contextual words; an alias or unalias needs no comma among enumerators.")
+      (grammar-note "alias name to expression and alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
+      (lexical-note "alias, unalias, as, and to are contextual words; an alias or unalias needs no comma among enumerators.")
       (spellings "alias e as name;" "alias e as name { ... }"
                  "alias e { ... _ ... }" "static alias e as name;"
                  "unalias name;")
@@ -106,9 +106,9 @@ List syntax_extensions(void) => %(
       (summary "Test identity, membership, or type; slice a sequence.")
       (grammar equality relational type-selector postfix-part)
       (lexical c-tokens keyword-retag)
-      (grammar-note "=== and !==, in, is/is not, and [start:stop:step] extend the C expression ladder.")
-      (lexical-note "=== and !== are operator tokens; in is contextually retagged; is and not remain contextual words.")
-      (spellings "===" "!==" "in" "is" "is not"
+      (grammar-note "=== and !==, ~= pattern conditions, in, is/is not, and [start:stop:step] extend the C expression ladder.")
+      (lexical-note "===, !==, and ~= are operator tokens; in is contextually retagged; is and not remain contextual words.")
+      (spellings "===" "!==" "~=" "in" "is" "is not"
                  "[start:stop:step]")
       (reference "../reference/language.md#membership-with-in"))
     (feature iteration-matching

@@ -75,7 +75,10 @@ declarator-suffix = ( ( "[" , [ expression ] , "]" ) |
     ( ":" , primary ) |
     attribute ) ;
 parameter-list = ( parameter , { ( "," , parameter ) } ) ;
-parameter = ( ( { qualifier } , type-specifier , declarator ) | "..." | ( ( "List" | "Map" ) , "@" , [ identifier ] ) | parameter-slot ) ;
+parameter = ( ( { qualifier } , type-specifier , declarator ) |
+    "..." |
+    ( ( "List" | "Map" ) , "@" , [ identifier ] ) |
+    parameter-slot ) ;
 destructuring-targets = ( "(" , identifier , "," , identifier , { ( "," , identifier ) } , ")" ) ;
 typed-destructuring = ( "(" , parameter-list , ")" , "=" , assignment , ";" ) ;
 aggregate = ( ( "struct" | "union" ) ,
@@ -215,7 +218,8 @@ logical-and = ( bitwise-or , { ( "&&" , bitwise-or ) } ) ;
 bitwise-or = ( bitwise-xor , { ( "|" , bitwise-xor ) } ) ;
 bitwise-xor = ( bitwise-and , { ( "^" , bitwise-and ) } ) ;
 bitwise-and = ( equality , { ( "&" , equality ) } ) ;
-equality = ( relational , { ( ( "==" | "!=" | "===" | "!==" ) , relational ) } ) ;
+equality = ( relational ,
+    { ( ( ( "==" | "!=" | "===" | "!==" ) , relational ) | ( "~=" , pattern ) ) } ) ;
 relational = ( shift ,
     { ( ( ( "<" | "<=" | ">" | ">=" | "in" ) , shift ) | ( "is" , [ "not" ] , type-selector ) ) } ) ;
 type-selector = ( type-name | ( "(" , type-name , ")" ) | cast ) ;

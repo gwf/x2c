@@ -259,6 +259,10 @@ List syntax_grammar(void) => %(grammar
           (ref type-specifier)
           (ref declarator))
         (token "...")
+        (seq
+          (choice (token "List") (token "Map"))
+          (token "@")
+          (optional (ref identifier)))
         (ref parameter-slot)))
 
     (rule destructuring-targets
@@ -672,9 +676,11 @@ List syntax_grammar(void) => %(grammar
       (seq
         (ref relational)
         (repeat 0
-          (seq
-            (choice (token "==") (token "!=") (token "===") (token "!=="))
-            (ref relational)))))
+          (choice
+            (seq
+              (choice (token "==") (token "!=") (token "===") (token "!=="))
+              (ref relational))
+            (seq (token "~=") (ref pattern))))))
 
     (rule relational
       (seq

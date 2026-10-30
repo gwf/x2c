@@ -94,7 +94,7 @@ The C operator scanner chooses the longest supported prefix from this set:
 
 ```text
 ... >>= <<= === !==
--> ++ -- << >> <= >= == != && ||
+-> ++ -- << >> <= >= == != ~= && ||
 += -= *= /= %= &= ^= |=
 - , ; : ! ? . ( ) [ ] { } * / & % ^ + < = > | ~ @
 ```

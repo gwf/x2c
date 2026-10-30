@@ -1,6 +1,6 @@
 # What x2c adds to C syntax
 
-For a C reader, x2c adds eleven useful syntax families. Most declarations,
+For a C reader, x2c adds twelve useful syntax families. Most declarations,
 expressions, and control flow keep their familiar shapes. Start with the
 families needed by your program; macros and compile-time code can wait.
 
@@ -23,7 +23,7 @@ reference](../reference/language.md) owns each construct's meaning.
 | [Short functions and lambdas](../reference/language.md#lambdas) | Expression bodies use =>; lambdas permit typed or bare parameters and using captures. | %! is a lambda opener; => remains two tokens; using is contextual. |
 | [Evaluated collections](../reference/language.md#array-and-map-literals) | Bare Array/Map literals, destination-typed brace expressions, void as a value, and trailing ordinary call-argument commas. | No new delimiter tokens: [], {}, commas, colons, and void acquire expression roles. |
 | [Quoted data and text](../reference/language.md#percent-literals-quote-and-unquote) | List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets. | Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning. |
-| [Operators and slices](../reference/language.md#membership-with-in) | === and !==, in, is/is not, and [start:stop:step] extend the C expression ladder. | === and !== are operator tokens; in is contextually retagged; is and not remain contextual words. |
+| [Operators and slices](../reference/language.md#membership-with-in) | === and !==, ~= pattern conditions, in, is/is not, and [start:stop:step] extend the C expression ladder. | ===, !==, and ~= are operator tokens; in is contextually retagged; is and not remain contextual words. |
 | [Iteration and matching](../reference/language.md#statements) | foreach binders and match cases with patterns and optional guards; case/default otherwise remain C forms. | match is contextually retagged; foreach is a shipped keyword alias; pattern sigils are data-mode atom spellings. |
 | [Cleanup and errors](../reference/language.md#errors-and-cleanup) | auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details. | defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode. |
 | [Syntax-producing code](../reference/language.md#compile-time-macros) | Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, and meta/native functions. | $ inserts one result; @ splices a sequence. $! uses ordinary ! after $; macro/keyword/meta/native are contextual. |

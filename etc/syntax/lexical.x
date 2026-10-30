@@ -456,6 +456,7 @@ List syntax_lexical(void) => %(lexical
     (operator "<<=")
     (operator "===")
     (operator "!==")
+    (operator "~=")
     (operator "->")
     (operator "++")
     (operator "--")
