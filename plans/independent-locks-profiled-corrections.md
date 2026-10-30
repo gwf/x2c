@@ -1,8 +1,8 @@
 # Small corrections proposed from the lock profiles
 
-> Status: active for Pool fast path and Channel changes; index change remains blocked.
+> Status: Pool fast path and Channel changes implemented locally; acceptance fails.
 > Based on the unchanged runtime `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
-> No runtime code, tests, generated code, or benchmarks changed for this proposal.
+> Measured runtime after sections 1 and 2: `360aab57fbf1fa46343ad514514fb3898dc40c5b`.
 > The index proposal explicitly reintroduces a short shared lookup lock.
 > That changes the earlier lock-free classification decision and is not approved.
 > No reproducible regression may merge to dev. Every tradeoff requires Gary's
@@ -243,7 +243,7 @@ The independent review is complete. A positive credibility verdict does not
 establish no regressions or authorize the shared-lookup tradeoff. Gary has now
 authorized only corrections 1 and 2. Index work remains blocked.
 
-After Gary's decision, if implementation is authorized:
+Authorized implementation sequence:
 
 1. Restore the Pool allocation path and inspect optimized assembly, then rerun
    the single-worker release workload and both accounting modes.
@@ -262,6 +262,23 @@ samples, host conditions, CPU/instructions, elapsed time, and memory meanings.
 No reproducible regression may merge to dev. Missing or inconclusive evidence
 does not pass. Any measured tradeoff needs Gary's explicit approval; independent
 scaling gains, correctness checks, or reviewer approval do not waive that rule.
+
+## Implementation results
+
+Sections 1 and 2 are implemented and independently reviewed. The combined
+runtime passed 154 tests and 1,505 assertions in each accounting mode, plus
+controlled refill/failure and Channel stop/commit probes. The Pool common-path
+assembly count fell from 93 to 66 instructions; the original baseline was 72.
+
+[Matched measurements](reference/independent-lock-fastpath-monitor-performance-2026-10-30.md)
+cover 640 processes against the original baseline. The one-worker Pool-release
+slowdown did not recur. Independent Pool and Channel gains remain. Shared
+buffered Channel operations remain reproducibly slower, and smaller local
+Channel overhead remains. Retained index memory is unchanged and still blocks
+acceptance. Section 3 remains unimplemented and requires Gary's decision.
+
+Nothing was pushed or merged. No tradeoff was accepted. Publication validation
+was not run for this failing candidate; all changes remain local.
 
 ## Plan review
 
