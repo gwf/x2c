@@ -492,6 +492,12 @@ static ReplResult _submit_native(ReplSession session, String source) {
         foreach (String name, names)
           if (name in session.names)
             raise %(repl (reason $("a type cannot be redefined: " + name)));
+        Array candidate = auto session.declarations.copy();
+        candidate.push(syntax);
+        with (session.declarations = candidate) {
+          auto (&session.storage)
+            (void) repl_native_execute(session, %(block), 0, 0);
+        }
         session.declarations.push(syntax);
         foreach (String name, names) {
           session.names[name] = %(type);

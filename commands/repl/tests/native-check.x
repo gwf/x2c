@@ -304,6 +304,14 @@ static void _collections(ReplSession session) {
 }
 
 static void _rollback(ReplSession session) {
+  _expect(session, "struct InvalidField { void impossible; };", <rejected>, NULL);
+  _check(!session.inspect("struct InvalidField") &&
+         !session.source("struct InvalidField"),
+         "native-invalid type published a name or source");
+  _value(session, "1+2;", "int 3");
+  _expect(session, "struct InvalidField { int valid; };", <defined>, NULL);
+  _expect(session, "struct InvalidField corrected={9};", <executed>, NULL);
+  _value(session, "corrected.valid;", "int 9");
   _expect(session, "int released=0;", <executed>, NULL);
   _expect(session, "void release(int n) { released+=n; }", <defined>, NULL);
   _expect(session, "defer release(5); raise %(repl (reason \"user failure\"));",
