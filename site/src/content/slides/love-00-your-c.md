@@ -1,6 +1,6 @@
 ---
 slug: your-c
-section: power
+section: love
 tab: your C
 title: Your C still works. All of it.
 ---

@@ -61,6 +61,9 @@ const sections = [
       ["docs/guide/symbols.html", "symbols"],
       ["docs/guide/iteration.html", "iteration"],
       ["docs/guide/scripting.html", "files and commands"],
+      ["docs/guide/memory.html", "scopes"],
+      ["docs/guide/exceptions.html", "exceptions"],
+      ["docs/guide/from-c.html", "from C to x2c"],
       ["docs/reference/cli.html", "the command line"],
     ] },
   { id: "power", meta: power, Copy: PowerCopy, label: "Power ideas",
@@ -69,11 +72,8 @@ const sections = [
       ["docs/guide/protocols.html", "protocols"],
       ["docs/guide/deriving-records.html", "derive"],
       ["docs/guide/packages.html", "packages"],
-      ["docs/guide/memory.html", "scopes"],
-      ["docs/guide/exceptions.html", "exceptions"],
       ["docs/guide/channels.html", "channels"],
       ["docs/guide/networking.html", "sockets and HTTP"],
-      ["docs/guide/from-c.html", "from C to x2c"],
       ["https://github.com/gwf/x2c/blob/main/examples/shootout/README.md",
         "the language shootout"],
     ] },
@@ -251,7 +251,7 @@ const sections = [
                 <li>
                   <a href={local(`examples/?example=${encodeURIComponent(entry.id)}`)}
                     data-example={entry.slug} data-surface="hero"
-                    data-section={entry.id.split("/")[0]}
+                    data-section={sectionOf(entry.slug)}
                     data-example-action="run">{entry.label}</a>
                 </li>
               ))}

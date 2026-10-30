@@ -1,6 +1,6 @@
 ---
 slug: memory
-section: power
+section: love
 tab: memory
 title: Free memory by scope.
 ---

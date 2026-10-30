@@ -3,17 +3,17 @@ title: Programming is Dead.<br/>Long Live Programming.
 kicker: "x2c is a language for people who love to code."
 ideasIntro: "It's C. Plus three ideas."
 ideas:
-  - name: Just enough structure
-    detail: "One data model and one lifetime rule, imposed on C, and the chores go: no `->`, no `free`, no `strcmp`, nothing between you and the algorithm. It is still C."
+  - name: C without the rough edges
+    detail: "Every rough edge of C is gone and nothing good is lost: C's speed, portability, and ecosystem stay. What you get back is the list you associate with interpreters: one value type, strings and collections with methods, interpolation, destructuring, lambdas, pattern matching, and memory freed by scope."
     code: |-
       foreach (String word in line.words()) counts[word] += 1;
-  - name: Pieces that fit together
-    detail: "With that structure in place, pattern matching, lambdas, threads, channels, jobs, files, HTTP, and your own types compose as easily as they do in Python, at C speed."
+  - name: Pieces that compound
+    detail: "Classes, protocols, modules, and packages build on one another, so a server, a job pipeline, or a threaded tool is a few lines: written as fast as in Go, Python, or JavaScript, and running at C speed."
     code: |-
       routes.get("/api/notes", %!(HttpRequest req, HttpResponse res) =>
         list_notes(app, req, res));
   - name: A language that extends itself
-    detail: "`meta` runs any function at compile time, a `macro` is a typed template over syntax, and the whole runtime, lambdas included, is available there. `try`, `match`, and `class` are written this way."
+    detail: "`meta` runs any function at compile time and a `macro` is a typed template over syntax, with the whole runtime available there. `try`, `match`, and `class` are written this way, and so is the compiler."
     code: |-
       meta static int fib(int n) => n < 2 ? n : fib(n - 1) + fib(n - 2);
       static const int table[] = { $fib(10), $fib(20) };  // 55, 6765

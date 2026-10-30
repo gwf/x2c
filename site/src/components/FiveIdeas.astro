@@ -1,7 +1,7 @@
 ---
 import { Code } from "astro:components";
 import { inlineMarkdown } from "../lib/inline-markdown";
-import { x2cLang, x2cDarkTheme } from "../../shiki-x2c.mjs";
+import { x2cLang, x2cLightTheme } from "../../shiki-x2c.mjs";
 
 interface Idea {
   name: string;
@@ -35,7 +35,7 @@ const items = await Promise.all(
           <Fragment set:html={idea.detail} />
         </p>
         <div class="idea-code">
-          <Code code={idea.code} lang={x2cLang} theme={x2cDarkTheme} />
+          <Code code={idea.code} lang={x2cLang} theme={x2cLightTheme} />
         </div>
       </li>
     ))}

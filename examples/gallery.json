@@ -1,5 +1,10 @@
 [
   {
+    "slide": "love-00-your-c.md",
+    "example": "power/your-c",
+    "optional": false
+  },
+  {
     "slide": "love-01-one-value.md",
     "example": "love/values",
     "optional": false
@@ -40,7 +45,17 @@
     "optional": false
   },
   {
-    "slide": "love-09-tools.md",
+    "slide": "love-09-memory.md",
+    "example": "power/scopes",
+    "optional": false
+  },
+  {
+    "slide": "love-10-errors.md",
+    "example": "power/exceptions",
+    "optional": false
+  },
+  {
+    "slide": "love-11-tools.md",
     "example": "love/tools.md",
     "language": "sh"
   },
@@ -65,33 +80,18 @@
     "optional": true
   },
   {
-    "slide": "power-05-memory.md",
-    "example": "power/scopes",
-    "optional": false
-  },
-  {
-    "slide": "power-06-errors.md",
-    "example": "power/exceptions",
-    "optional": false
-  },
-  {
-    "slide": "power-07-threads.md",
+    "slide": "power-05-threads.md",
     "example": "power/channels",
     "optional": false
   },
   {
-    "slide": "power-08-service.md",
+    "slide": "power-06-service.md",
     "source": "examples/apps/notes/notes.x",
     "optional": true
   },
   {
-    "slide": "power-09-speed.md",
+    "slide": "power-07-speed.md",
     "example": "power/generics",
-    "optional": false
-  },
-  {
-    "slide": "power-10-your-c.md",
-    "example": "power/your-c",
     "optional": false
   },
   {

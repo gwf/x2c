@@ -46,7 +46,7 @@ const galleryEntries = gallery.flatMap((entry) => {
   const source = read(path);
   const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`))!;
   return [{
-    id: entry.example, section: entry.example.split("/")[0], path, source,
+    id: entry.example, section: slide.frontmatter.section, path, source,
     label: slide.frontmatter.tab
       ?? entry.example.split("/").pop()!.replaceAll("-", " "),
     runnable: !entry.optional && browserSafe(entry.example, source),

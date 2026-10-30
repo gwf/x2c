@@ -1,6 +1,6 @@
 ---
 slug: errors
-section: power
+section: love
 tab: errors
 title: Failures are data that unwind.
 ---

@@ -11,4 +11,4 @@ literal is a `List`, so the tools you use on data rewrite code.
 
 The language extends itself with itself. `try`, `match`, `class`, and
 lambdas are each one source file, built into the compiler and buildable
-outside it the same way. So is the compiler.
+outside it the same way, and so is the compiler.
