@@ -86,6 +86,9 @@ static void typed_list_remaining_receiver_relative_methods(void) {
   EXPECT_INT_EQ(selected.len(), 3);
   EXPECT_INT_EQ(selected.car(), 1);
   EXPECT_INT_EQ(selected.last(), 5);
+  ListInt evens = %(2 4);
+  EXPECT_TRUE(values.find(_typed_list_odd).integer() == 1 &&
+              evens.find(_typed_list_odd) is void);
 
   ListInt flattened = values.flatten();
   ListInt flattened_all = values.flatten_all();

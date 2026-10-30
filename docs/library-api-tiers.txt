@@ -117,7 +117,6 @@ lib/func/func.x|internal|x2c_func_declared_reference_argument,x2c_func_reference
 lib/iter.x|advanced|Iter.init,Iter.unzip
 lib/iter.x|compatibility|Iter.accumulate,Iter.next
 lib/iter.x|internal|UnzipColumn
-lib/json.x|internal|x2c_json_write
 lib/lib.x|advanced|DisjointSet.drop,DisjointSet.find,DisjointSet.init
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union
@@ -253,5 +252,4 @@ lib/match/match.x|internal|MatchMachine.run,MatchMachine.step
 lib/macrovalue/macrovalue.x|internal|Macro.needs_shell
 lib/meta.x|internal|declarator_append_modifiers
 lib/type.x|internal|Macro.declaration,Type.declaration_base
-lib/net.x|internal|x2c_net_accept_fd
 lib/net.x|advanced|Listener.cleanup,Socket.cleanup

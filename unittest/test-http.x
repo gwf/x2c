@@ -64,6 +64,8 @@ static void http_parser_rejections(void) {
   EXPECT_INT_EQ(_rejected("GET /plain%00 HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("GET /plain%0d HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("GET /plain% HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
+  EXPECT_INT_EQ(
+    _rejected("GET /plain?q=%zz HTTP/1.1\r\nHost: x\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n", 100), 411);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: 101\r\n\r\n", 100), 413);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: -1\r\n\r\n", 100), 400);

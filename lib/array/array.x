@@ -128,7 +128,11 @@ Self Array.update_n(Self array, unsigned element_count, ...) {
   return array;
 }
 
-/** Updates one boxed element while preserving its Var tag. */
+/** Updates one boxed element while preserving its Var tag.
+    Raises: `<bad-arg>` for a null `Array` or invalid index, `<size-limit>`
+    when its length cannot be indexed, `<void-op>` for a `void` operand, or
+    any cause from `Var.update`. The element is unchanged on failure.
+*/
 Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
   if (array == NULL) raise %(bad-arg (operation "Array.updateindex"));
   int requested = index, length = _int_length(array);

@@ -48,7 +48,10 @@ static macro Stmt $error.read.text(
           (offset $($offset)) (line $($line)) (column $($column)));
 }
 
-static macro Stmt $error.write.depth() { raise %(size-limit (operation "Var.json") (reason "nesting exceeds 512 levels")); }
+static macro Stmt $error.write.depth() {
+  raise %(size-limit (operation "Var.json")
+          (reason "nesting exceeds 512 levels"));
+}
 
 static macro Stmt $error.write.type(Expr $tag) {
   raise %(bad-types (operation "Var.json") (tag $($tag)));
@@ -64,7 +67,10 @@ static macro Stmt $error.write.duplicate(Expr $text) {
           (name $($text)));
 }
 
-static macro Stmt $error.write.nonfinite() { raise %(conv-range (operation "Var.json") (reason "JSON has no NaN or infinity")); }
+static macro Stmt $error.write.nonfinite() {
+  raise %(conv-range (operation "Var.json")
+          (reason "JSON has no NaN or infinity"));
+}
 
 static macro Stmt $error.read.trailing(Expr $reader) =>
   _fail($reader, "unexpected text after the value");
@@ -235,12 +241,11 @@ void Json.write_file(Var value, Path path) => path.write_text(value.json());
 */
 String Var.json(Var value) => _json(value, 0);
 
-/** Appends JSON to a borrowed output Buffer without interning the result.
-    `pretty` selects the same layout as `Var.pretty_json`. Failure can leave
-    partial output; the caller owns its rollback policy.
-    Raises: the same causes as `Var.json`.
-*/
-void x2c_json_write(Buffer out, Var value, int pretty) {
+/* Appends JSON to a borrowed output Buffer without interning the result.
+   `pretty` selects the same layout as `Var.pretty_json`. Failure can leave
+   partial output; the caller owns its rollback policy. Raises the same
+   causes as `Var.json`. */
+void _x2c_json_write(Buffer out, Var value, int pretty) {
   Writer w = {.out = out, .pretty = pretty};
   _write_value(w, value, 0);
 }
@@ -506,7 +511,7 @@ static void _write_code_point(Buffer out, long point) {
 
 static String _json(Var value, int pretty) {
   Buffer out = auto Buffer.new(0);
-  x2c_json_write(out, value, pretty);
+  _x2c_json_write(out, value, pretty);
   return out;
 }
 

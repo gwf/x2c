@@ -192,7 +192,7 @@ static List _parse_assignment_tail(Compiler c, List lhs) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (!op.is_assignment_op()) return lhs;
-  if (lhs.cadr().car() == <opt-ref>)
+  if (Type.is_optional_reference(lhs.cadr()))
     $fail.expressions_optional_ref_assign(c, origin);
   List targets = op == <=> ? _destructure_targets(c, lhs) : NULL;
   c.next();

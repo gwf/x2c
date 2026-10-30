@@ -6,6 +6,7 @@
 #include "net.x"
 #include "json.x"
 #include "path.x"
+#include "url.x"
 #include "channel.x"
 #include <ctype.h>
 #include <errno.h>
@@ -50,12 +51,18 @@ class HttpServer {
 /** The receiverless owner of Http.fail. */
 typedef Symbol Http;
 
-/** Raises an expected HTTP error before any response bytes are sent. */
+/** Raises an expected HTTP error before any response bytes are sent.
+    Raises: `<http-fail>` with `status` and `reason` details.
+*/
 void Http.fail(int status, String reason) {
   raise %(http-fail (status $status) (reason $reason));
 }
 
-/** Reads one bounded request; clean EOF returns NULL. */
+/** Reads one bounded request; clean EOF returns NULL.
+    Raises: `<http-fail>` with a 4xx `status` for a malformed, oversized, or
+    unsupported request, including an invalid percent escape in the URL, or
+    `<io-fail>` when reading `input` fails.
+*/
 HttpRequest HttpRequest.read(File input, int body_limit) {
   String first = _line(input, 8192, 400);
   if (!first) {
@@ -71,11 +78,8 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
   HttpRequest req = Scope.calloc(1, sizeof(struct HttpRequest));
   if (!_method(method)) Http.fail(405, "unsupported method");
   req.method = Symbol.new(method);
-  req.query = {}; req.headers = {}; req.params = {};
-  int question = target.find("?");
-  String path = question < 0 ? target : String.new_len(target, question);
-  req.path = _decode(path, 0);
-  if (question >= 0) _query(req.query, String.new(target + question + 1));
+  req.headers = {}; req.params = {};
+  _target(req, target);
   int used = 0;
   for (;;) {
     String line = _line(input, 65536 - used, 431);
@@ -105,7 +109,8 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
     String text = req.headers["content-length"];
     if (!text) Http.fail(400, "invalid content length");
     for (int i = 0; i < text.len(); i++) {
-      if (text[i] < '0' || text[i] > '9') Http.fail(400, "invalid content length");
+      if (text[i] < '0' || text[i] > '9')
+        Http.fail(400, "invalid content length");
       length = length * 10 + text[i] - '0';
       if (length > body_limit) Http.fail(413, "body too large");
     }
@@ -136,7 +141,10 @@ HttpResponse HttpResponse.status(HttpResponse res, int code) {
   res.code = code; return res;
 }
 
-/** Sets a response header. Newlines in names or values are rejected. */
+/** Sets a response header.
+    Raises: `<bad-arg>` for a name that is not an HTTP token or a value that
+    contains CR or LF.
+*/
 HttpResponse HttpResponse.header(HttpResponse res, String name, String value) {
   if (!_header_name(name) || value.find("\r") >= 0 || value.find("\n") >= 0)
     raise %(bad-arg (operation "HttpResponse.header"));
@@ -156,7 +164,7 @@ HttpResponse HttpResponse.json(HttpResponse res, Var value) {
   res.body.clear();
   int written = 0;
   defer if (!written) res.body.clear();
-  x2c_json_write(res.body, value, 0);
+  _x2c_json_write(res.body, value, 0);
   written = 1;
   res.headers["content-type"] = "application/json";
   return res;
@@ -207,10 +215,13 @@ Router Router.route(Router r, Symbol method, String pattern, Func handler) {
 
 /** Registers GET. */
 Router Router.get(Router r, String p, Func fn) => r.route(<get>, p, fn);
+
 /** Registers POST. */
 Router Router.post(Router r, String p, Func fn) => r.route(<post>, p, fn);
+
 /** Registers PUT. */
 Router Router.put(Router r, String p, Func fn) => r.route(<put>, p, fn);
+
 /** Registers DELETE. */
 Router Router.delete(Router r, String p, Func fn) => r.route(<delete>, p, fn);
 
@@ -252,7 +263,12 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
 }
 
 /** Binds immediately; port 0 selects an available port.
-    Options use Symbol keys. */
+    Options use Symbol keys.
+    Raises: `<bad-arg>` for fewer than one worker, an idle timeout below one
+    millisecond, a negative body limit, or an invalid port, `<not-found>`
+    when the host does not resolve, or `<io-fail>` on a host failure while
+    binding, as `Listener.bind` does.
+*/
 HttpServer HttpServer.new(Router router, Map options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
   s.router = router;
@@ -291,7 +307,7 @@ void HttpServer.serve(HttpServer s) {
   for (int i = 0; i < s.workers; i++)
     s.threads.push(Thread.start(_worker, Var.new(<p48>, s)));
   for (;;) {
-    int fd = x2c_net_accept_fd(s.listener);
+    int fd = _x2c_net_accept_fd(s.listener);
     if (fd < 0) break;
     int sent = 0;
     defer if (!sent) close(fd);
@@ -299,7 +315,10 @@ void HttpServer.serve(HttpServer s) {
   }
 }
 
-/** Starts serving on a joined background Thread. */
+/** Starts serving on a joined background Thread.
+    Raises: `<bad-state>` when the server is already serving, or the causes
+    of `Thread.start`.
+*/
 void HttpServer.start(HttpServer s) {
   if (s.acceptor || s.running)
     raise %(bad-state (operation "HttpServer.start"));
@@ -347,51 +366,32 @@ static String _line(File input, int limit, int status) {
   return String.new_len(bytes, size - 2);
 }
 
-static String _decode(String text, int query) {
-  int prefix = 0;
-  while (prefix < text.len()) {
-    int c = (unsigned char) text[prefix];
-    if (c == '%' || (query && c == '+')) break;
-    if (!c || c == '\r' || c == '\n') Http.fail(400, "invalid URL byte");
-    prefix++;
-  }
-  if (prefix == text.len()) return text;
-  Buffer out = auto Buffer.new(0);
-  for (int i = 0; i < text.len(); i++) {
-    int c = (unsigned char) text[i];
-    if (c == '%') {
-      if (i + 2 >= text.len()) Http.fail(400, "invalid percent escape");
-      int a = scan_ascii_hex_value(text[++i]);
-      int b = scan_ascii_hex_value(text[++i]);
-      if (a < 0 || b < 0) Http.fail(400, "invalid percent escape");
-      c = a * 16 + b;
-    }
-    else if (query && c == '+') c = ' ';
-    if (!c || c == '\r' || c == '\n') Http.fail(400, "invalid URL byte");
-    out.write_char(c);
-  }
-  return out;
-}
-
-static void _query(Map query, String text) {
-  foreach (String pair in text.split("&")) {
-    int equal = pair.find("=");
-    String key = equal < 0 ? pair : String.new_len(pair, equal);
-    query[_decode(key, 1)] = equal < 0 ? "" : _decode(String.new(pair + equal + 1), 1);
-  }
+/* Decodes the path and query of `target`. Decoded URL text holds no CR or
+   LF, which could split a header or a log line. */
+static void _target(HttpRequest req, String target) {
+  String decoded = NULL;
+  try decoded = target.percent_decode();
+  catch %(malformed *): Http.fail(400, "invalid percent escape in URL");
+  if (strpbrk(decoded, "\r\n")) Http.fail(400, "invalid URL byte");
+  int question = target.find("?");
+  req.path = (question < 0 ? target : target[:question]).percent_decode();
+  req.query = question < 0 ? {} : Url.parse_query(target[question + 1:]);
 }
 
 static int _method(String method) =>
   method == "GET" || method == "POST" || method == "PUT" ||
-  method == "DELETE" || method == "HEAD" || method == "OPTIONS" || method == "PATCH";
+  method == "DELETE" || method == "HEAD" || method == "OPTIONS" ||
+  method == "PATCH";
 
 static int _keep_alive(String values, int keep) {
   const char *start = values;
   while (start && *start) {
     const char *comma = strchr(start, ',');
     const char *end = comma ? comma : start + strlen(start);
-    while (start < end && strchr(" \t\n\v\f\r", (unsigned char) *start)) start++;
-    while (end > start && strchr(" \t\n\v\f\r", (unsigned char) end[-1])) end--;
+    while (start < end && strchr(" \t\n\v\f\r", (unsigned char) *start))
+      start++;
+    while (end > start && strchr(" \t\n\v\f\r", (unsigned char) end[-1]))
+      end--;
     size_t size = end - start;
     if (size == 5 && !strncasecmp(start, "close", size)) return 0;
     if (size == 10 && !strncasecmp(start, "keep-alive", size)) keep = 1;
@@ -450,9 +450,11 @@ static const char *_reason(int code) {
 }
 
 static String _mime(String ext) {
-  Map types = {".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript",
-    ".json": "application/json", ".txt": "text/plain", ".svg": "image/svg+xml",
-    ".png": "image/png", ".jpg": "image/jpeg", ".gif": "image/gif", ".ico": "image/x-icon"};
+  Map types = {
+    ".html": "text/html; charset=utf-8", ".css": "text/css",
+    ".js": "text/javascript", ".json": "application/json",
+    ".txt": "text/plain", ".svg": "image/svg+xml", ".png": "image/png",
+    ".jpg": "image/jpeg", ".gif": "image/gif", ".ico": "image/x-icon"};
   return types.contains(ext) ? types[ext].str() : "application/octet-stream";
 }
 
@@ -488,15 +490,17 @@ static void _connection(HttpServer s, Socket peer) {
       s.router.dispatch(req, res);
     }
     catch %(http-fail (status ?status) (reason ?reason)): {
-      res = HttpResponse.new(); res.status(status.integer()).json({"error": reason});
+      res = HttpResponse.new();
+      res.status(status.integer()).json({"error": reason});
     }
-    catch %(malformed *): {
+    catch %(malformed (operation "Json.parse") *): {
       res = HttpResponse.new();
       res.status(400).json({"error": "malformed JSON"});
     }
     catch %(?code *detail): {
       s.logger.error(<http>, %(code $code), %(detail $detail));
-      res = HttpResponse.new(); res.status(500).json({"error": "internal server error"});
+      res = HttpResponse.new();
+      res.status(500).json({"error": "internal server error"});
     }
     _write(res, peer.output, keep, req && req.method == <head>);
     s.logger.info(

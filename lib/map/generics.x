@@ -501,9 +501,9 @@ macro Unit $map.typed.operations(
   /** Returns the value for `key`, inserting `defval` when absent.
       Insertion copies the native key and value fields and invalidates live
       cursors and iterators; an existing-key read does not mutate the table.
-      Raises: `<bad-arg>` for a null map, or an allocation, size, or invariant
-      cause while inserting. Allocation and size failures leave the table
-      unchanged.
+      Raises: `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+      allocation, size, or invariant cause while inserting. Allocation and
+      size failures leave the table unchanged.
   */
   $value $map.setdefault($map map, $key key, $value defval) {
     if ((void *) map == 0) (void) $bad_arg($owner);
@@ -520,9 +520,9 @@ macro Unit $map.typed.operations(
 
   /** Copies `key` and `val` into the table, replacing an existing value.
       Insertion invalidates live cursors and iterators; replacement does not.
-      Raises: `<bad-arg>` for a null map, or an allocation, size, or invariant
-      cause while inserting. Allocation and size failures leave the table
-      unchanged.
+      Raises: `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+      value, or an allocation, size, or invariant cause while inserting.
+      Allocation and size failures leave the table unchanged.
   */
   void $map.set($map map, $key key, $value val) {
     if ((void *) map == 0) (void) $bad_arg($owner);

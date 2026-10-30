@@ -27,7 +27,7 @@ meta static List _selector_chain(String spelling, List value) {
 static macro Unit $selector.car(Name $name) {
   /** Returns the element that `$name` selects from `value`. */
   inline Var List.$name(List value) => $_selector_chain($name, value);
-  /** Returns the element that `$name` selects from `value` as a `List`. */
+  /** Returns the element that `$name` selects from `value`. */
   inline Var Var.$name(Var value) => $_selector_chain($name, value);
 }
 
