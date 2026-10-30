@@ -248,13 +248,10 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int remove = end - start;
     int insert = values ? (int) values.length : 0;
     int delta = insert - remove;
+    auto $array copied = NULL;
     $array source = values;
-    int copied = 0;
-    if (insert > 0 && values.bytes == array.bytes) {
-      source = values.copy_elements();
-      copied = 1;
-    }
-    defer if (copied) Block_free((Block) source);
+    if (insert > 0 && values.bytes == array.bytes)
+      source = copied = values.copy_elements();
     if (delta > 0) {
       if (delta > INT_MAX - n) {
         size_t size = (size_t) n + (size_t) delta;
@@ -830,9 +827,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
 
   static $array $array.export_context($array array, Context source) {
     if (array == NULL || !source.owns(array)) return array;
-    $array staged = $prepare_export(array, source), committed = NULL;
-    defer if (staged != NULL && committed == NULL)
-      staged.free();
+    auto $array staged = $prepare_export(array, source);
     if (staged == NULL) {
       source.move_block(array);
       return array;
@@ -852,7 +847,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     staged.length = old_length;
     staged.cap = old_cap;
     staged.free();
-    committed = array;
+    staged = NULL;
     return array;
   }
 

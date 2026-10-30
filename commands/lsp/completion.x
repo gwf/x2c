@@ -24,10 +24,9 @@ Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
     return [];
   }
   Frontend frontend = Frontend.new(selected);
-  Context request = Context.open_isolated_named("language server completion");
+  auto Context request = Context.open_isolated_named("language server completion");
   Array items = _lsp_complete(w, frontend, path, source, offset);
   items = request.export(items);
-  request.close();
   return items;
 }
 

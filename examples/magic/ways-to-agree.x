@@ -11,7 +11,7 @@ List constructed = cons(int_var(1),
   cons(int_var(4), cons(int_var(9), NULL)));
 
 // Runtime Lisp will build it on the fly.
-Lisp lisp = Lisp.new(); defer lisp.destroy();
+auto Lisp lisp = Lisp.new();
 List runtime = lisp.eval(%(list (* 1 1) (* 2 2) (* 3 3)));
 
 List ways = $(comptime, literal, constructed, runtime);

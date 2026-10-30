@@ -813,8 +813,7 @@ static List _current(String directory) {
 static String _digest(String path) {
   if (path.startswith("cwd:")) path = path[4:];
   if (!SourceView.exists(NULL, path)) return "search:absent";
-  File input = fopen(path, "rb");
+  auto File input = fopen(path, "rb");
   if (!input) return NULL;
-  defer input.close();
   return %"$(Path.absolute(path)):$(input.sha256())";
 }

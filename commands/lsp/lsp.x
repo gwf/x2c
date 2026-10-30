@@ -395,9 +395,8 @@ static void _checkpoint(Server &server) {
 /* Only exported data crosses exec. No queued request or borrowed compiler
    value is checkpointed; the protocol descriptor remains the same pipe. */
 static void _restart(Server &server) {
-  File saved = tmpfile();
+  auto File saved = tmpfile();
   if (!saved) raise %(lsp-exec (operation "tmpfile"));
-  defer saved.close();
   Map state = {arguments: server.arguments, documents: server.documents,
     overlays: server.workspace.sources.overlays,
     dirty: server.workspace.sources.dirty_paths,

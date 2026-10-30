@@ -11,9 +11,8 @@ import "pcre2" as rx;
 
 ~int main(void) {
 // Compile a pattern with named captures; release it on exit.
-rx.Regexp request = rx.Regexp.compile(
+auto rx.Regexp request = rx.Regexp.compile(
   "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
-defer request.free();
 
 // Sample requests include lines the pattern will ignore.
 String text = %"\
@@ -41,5 +40,5 @@ foreach (String line in text.lines()) {
 `import ... as rx` gives the shipped PCRE2 package a local alias and
 exposes its main type, `rx.Regexp`. `rx.Regexp.compile` builds the pattern;
 `rx.Regexp.match` returns named captures. Indexing and ordinary control
-flow use the results, while a deferred `rx.Regexp.free` releases the
+flow use the results, while `auto` releases the
 compiled pattern.

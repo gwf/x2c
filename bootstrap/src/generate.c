@@ -625,7 +625,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _158 = List_var(NULL);
   _159 = Symbol_var(39266);
   _160 = Symbol_var(106239471489226);
-  _161 = int_var(1028);
+  _161 = int_var(1027);
   _162 = String_new("");
   _163 = String_var(_162);
   _164 = String_new("x2c.hole");
@@ -1022,7 +1022,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _552 = cons(_549, _551);
   _553 = List_var(_552);
   _554 = Symbol_var(1133019155420);
-  _555 = int_var(37677);
+  _555 = int_var(37661);
   _556 = cons(_555, NULL);
   _557 = cons(_554, _556);
   _558 = List_var(_557);
@@ -1106,7 +1106,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _636 = cons(_635, NULL);
   _637 = cons(_541, _636);
   _638 = List_var(_637);
-  _639 = int_var(37591);
+  _639 = int_var(37575);
   _640 = cons(_639, NULL);
   _641 = cons(_554, _640);
   _642 = List_var(_641);
@@ -1283,13 +1283,7 @@ static List f6_output____generated_code(Compiler c, List ast, String basename){
       header = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));
       source = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1));
       String hash = Path_identifier_hash(c -> filename);
-      Map bindings;
-      {
-        List _x2c_gensym_destructure_1 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_4), cons(String_var(hash), cons(String_var(_5), NULL)))), String_join(NULL, cons(String_var(_6), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_7), cons(String_var(hash), NULL))));
-        header = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
-        source = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 1));
-        bindings = Var_map_payload(List_getindex(_x2c_gensym_destructure_1, 2));
-      }
+      Map bindings = NULL;
       {
         _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
           0
@@ -1302,6 +1296,12 @@ static List f6_output____generated_code(Compiler c, List ast, String basename){
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_1);
         {
+          {
+            List _x2c_gensym_destructure_1 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_4), cons(String_var(hash), cons(String_var(_5), NULL)))), String_join(NULL, cons(String_var(_6), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_7), cons(String_var(hash), NULL))));
+            header = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
+            source = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 1));
+            bindings = Var_map_payload(List_getindex(_x2c_gensym_destructure_1, 2));
+          }
           Array hcode = f6_output____emit_header(c, header);
           Array ccode = f6_output____emit_source(c, source, bindings, inline_bodies);
           String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_8), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_9), NULL)));
@@ -1388,7 +1388,7 @@ static void f6_output____publish_files(Compiler c, List outputs){
   }
   if(! List_truth(failure)) return;
   {
-    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/generate/output.x",.function = "f6_output____publish_files",.line = 144}; & _x2c_gensym_error_site_0; })))));
+    String _x2c_gensym_macro_reason_0 = String_new(strerror(Var_int(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/generate/output.x",.function = "f6_output____publish_files",.line = 143}; & _x2c_gensym_error_site_0; })))));
     Compiler_report_error(c, 354920, _10, c -> token, ({
       Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(_11), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(_12), cons(String_var(_x2c_gensym_macro_reason_0), NULL))));  cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL));
     }

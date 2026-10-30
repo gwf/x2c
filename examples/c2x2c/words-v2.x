@@ -28,8 +28,7 @@ int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " FILE");
   Counts counts = {0};
-  File input = File.open(argv[1], "r"); // Open failures raise.
-  defer input.close(); // Close on return.
+  auto File input = File.open(argv[1], "r"); // Open failures raise.
   count_words(counts, input.string());
   print_top_ten(counts);
   return EXIT_SUCCESS; // Root scope frees entries and table.

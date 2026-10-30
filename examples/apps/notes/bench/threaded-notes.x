@@ -193,8 +193,7 @@ static Var request(Notes app, Symbol operation, List arguments) {
 
 static Var database_thread(Var value) {
   Notes app = value.pointer();
-  Database db = NULL;
-  defer if (db) db.close();
+  auto Database db = NULL;
   foreach (Var message in app.requests) {
     Request *job = message.pointer();
     Channel reply = job.reply;

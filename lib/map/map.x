@@ -221,10 +221,8 @@ void Map.export_to(
   /* Stage both arrays without publishing either one. A transfer frees the
      staged Blocks and leaves the original table installed; callback effects
      that happened before it remain the caller's responsibility. */
-  Bytes rebuilt_hashes = Bytes.new(sizeof(unsigned));
-  Bytes rebuilt_entries = Bytes.new(sizeof(struct MapRecord)), int rebuilt = 0;
-  defer if (!rebuilt) rebuilt_hashes.free();
-  defer if (!rebuilt) rebuilt_entries.free();
+  auto Bytes rebuilt_hashes = Bytes.new(sizeof(unsigned));
+  auto Bytes rebuilt_entries = Bytes.new(sizeof(struct MapRecord));
   rebuilt_hashes = rebuilt_hashes.append(NULL, map.capacity);
   rebuilt_entries = rebuilt_entries.append(NULL, map.capacity);
   struct Map exported = *map;
@@ -241,7 +239,6 @@ void Map.export_to(
   map.entries = rebuilt_entries;
   rebuilt_hashes = NULL;
   rebuilt_entries = NULL;
-  rebuilt = 1;
   old_hashes.free();
   old_entries.free();
 

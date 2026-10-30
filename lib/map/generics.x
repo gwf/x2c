@@ -187,11 +187,9 @@ macro Unit $map.storage.family(
     unsigned cap = map.capacity;
     if (cap > ~0u / 2) raise %(size-limit (size $cap));
     unsigned capacity = cap * 2;
-    Bytes staged_hashes = Bytes_new(sizeof($hash_cell));
-    defer staged_hashes.cleanup();
+    auto Bytes staged_hashes = Bytes_new(sizeof($hash_cell));
     staged_hashes = staged_hashes.append(0, capacity);
-    Bytes staged_entries = Bytes_new(sizeof($entry));
-    defer staged_entries.cleanup();
+    auto Bytes staged_entries = Bytes_new(sizeof($entry));
     staged_entries = staged_entries.append(0, capacity);
 
     /* Build both replacement arrays before touching `map`; allocation or
@@ -894,9 +892,7 @@ macro Unit $map.typed.publish(
 
   static $family $family.export_context($family map, Context source) {
     if ((void *) map == 0 || !source.owns(map)) return map;
-    $family staged = $prepare_export(map, source), committed = NULL;
-    defer if ((void *) staged != 0 && (void *) committed == 0)
-      staged.free_table();
+    auto $family staged = $prepare_export(map, source);
 
     if ((void *) staged != 0) {
       Bytes old_hashes = map.hashes, old_entries = map.entries;
@@ -913,12 +909,12 @@ macro Unit $map.typed.publish(
       staged.hashes = 0;
       staged.entries = 0;
       staged.free_table();
+      staged = NULL;
     }
     source.move_allocation(map);
     source.move_block(map.hashes.block());
     source.move_block(map.entries.block());
     source.move_scope(map.scope);
-    committed = map;
     return map;
   }
 

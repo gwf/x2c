@@ -191,8 +191,7 @@ static void _rescan(Expander &x, Block stack, Block sink, int input) {
     List definition = _definition(x, item);
     if (!definition) sink.push(&item);
     else {
-      Block replacement = NULL;
-      defer replacement.free();
+      auto Block replacement = NULL;
       if (definition.car() == <object>) {
         List hide = cons(item.token.text, item.hide);
         replacement = _substitute(x, definition, NULL, hide);
@@ -282,8 +281,7 @@ static int _arguments(
   CppToken &close) {
   List params = definition[2];
   int last = definition[3] ? params.len() - 1 : -1, depth = 0;
-  Block arg = Block.new(sizeof(CppToken));
-  defer arg.free();
+  auto Block arg = Block.new(sizeof(CppToken));
   CppToken item;
   while (_pull(x, stack, input, item)) {
     Symbol type = item.token.type;

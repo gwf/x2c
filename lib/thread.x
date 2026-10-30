@@ -633,8 +633,7 @@ static int _work(Thread thread) {
   try {
     ErrorHandler observer = Error.push(_capture_errors, thread);
     defer Error.pop(observer);
-    Context work = Context.open_named("Thread callback");
-    defer work.close();
+    auto Context work = Context.open_named("Thread callback");
     again = _call(thread);
   }
   catch %(join-fail *): _worker_failed(thread, mark);

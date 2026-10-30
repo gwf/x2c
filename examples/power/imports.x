@@ -4,9 +4,8 @@ import "pcre2" as rx;
 
 int main(void) {
 // Compile a pattern with named captures; release it on exit.
-rx.Regexp request = rx.Regexp.compile(
+auto rx.Regexp request = rx.Regexp.compile(
   "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
-defer request.free();
 
 // Sample requests include lines the pattern will ignore.
 String text = %"\

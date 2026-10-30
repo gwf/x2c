@@ -8,16 +8,14 @@ int main(int argc, char **argv) {
 
     String url = argc > 1 ? String.new(argv[1]) :
       "https://api.github.com/repos/PCRE2Project/pcre2/releases?per_page=5";
-    CurlEasy curl = CurlEasy.new()
+    auto CurlEasy curl = CurlEasy.new()
       .timeouts(3000, 10000)
       .follow_redirects(5)
       .max_body(2 * 1024 * 1024)
       .user_agent("x2c-release-report/1")
       .header("Accept: application/vnd.github+json");
-    defer curl.free();
 
-    CurlResponse response = curl.get(url);
-    defer response.free();
+    auto CurlResponse response = curl.get(url);
     if (response.response_code() != 200) {
       Stderr.printf("HTTP %ld from %s\n", response.response_code(), url);
       return 1;
@@ -52,9 +50,8 @@ int main(int argc, char **argv) {
     */
     Var summary = { "stable": stable, "preview": preview,
                      "assets": assets };
-    CurlResponse posted = curl.body("application/json", summary.json())
+    auto CurlResponse posted = curl.body("application/json", summary.json())
       .request("POST", url + "/summary");
-    defer posted.free();
     Map echoed = Json.parse(posted.text());
     printf("%s", %"posted $(echoed["length"]) bytes as $(echoed["type"])\n");
     return 0;

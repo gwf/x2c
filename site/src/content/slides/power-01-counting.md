@@ -25,8 +25,7 @@ foreach ((String word, int n) in ranked)
 // Files supply lines; each line supplies words.
 Map word_count(String path) {
   Map counts = {};
-  File input = path.open("r");
-  defer input.close();
+  auto File input = path.open("r");
   foreach (String line in input)
     foreach (String word in line.lower().words())
       counts[word] += 1;

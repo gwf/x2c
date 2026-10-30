@@ -1984,7 +1984,6 @@ static String _digest(String path){
   if(String_startswith(path, _102)) path = String_getslice(path, 4, (-2147483647 - 1), 1);
   if(! SourceView_exists(NULL, path)) return _103;
   File input = fopen(path, "rb");
-  if(! input) return NULL;
   {
     _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_13 ={
       0
@@ -1997,14 +1996,22 @@ static String _digest(String path){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_13);
     {
+      if(! input){
+        String _x2c_gensym_return_value_14 = NULL;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
+          return _x2c_gensym_return_value_14;
+        }
+
+      }
       {
-        String _x2c_gensym_return_value_14 =({
+        String _x2c_gensym_return_value_15 =({
           Var _x2c_gensym_literal_part_55 = String_var(Path_absolute(path));  Var _x2c_gensym_literal_part_56 = String_var(File_sha256(input));  String_join(NULL, cons(_x2c_gensym_literal_part_55, cons(String_var(_104), cons(_x2c_gensym_literal_part_56, NULL))));
         }
         );
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
-          return _x2c_gensym_return_value_14;
+          return _x2c_gensym_return_value_15;
         }
 
       }
@@ -2120,7 +2127,7 @@ static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
 
 static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
   _x2c_gensym_defer_env_13 * _x2c_gensym_defer_data_13 =(_x2c_gensym_defer_env_13 *) _x2c_gensym_defer_opaque_13;
-  File_close((*(File *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_17));
+  File_cleanup((*(File *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_17));
 }
 
 #undef _x2c_gensym_initializer_choice_D04FB246_0_expanded

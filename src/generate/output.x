@@ -106,12 +106,11 @@ static List _generated_code(Compiler c, List ast, String basename) {
   Map inline_bodies = auto {};
   List (header, source) = _header_and_source(c, ast, inline_bodies);
   String hash = Path.identifier_hash(c.filename);
-  Map bindings;
+  auto Map bindings = NULL;
   (header, source, bindings) = c.setup_cache_init(
     header, source, %"_x2c_gensym_hcache_$(hash)_",
     %"_x2c_gensym_hcache_guard_$hash",
     %"_x2c_gensym_hcache_init_$hash");
-  defer bindings.cleanup();
   Array hcode = _emit_header(c, header);
   Array ccode = _emit_source(c, source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";

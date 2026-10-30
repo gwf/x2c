@@ -20,12 +20,10 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  auto Lisp lisp = Lisp.new();
   $lisp.install(lisp, policy);
 
-  File program = File.open(argv[1], "r");
-  defer program.close();
+  auto File program = File.open(argv[1], "r");
   Lisp.eval_file(lisp, program);
 
   String role = "editor";

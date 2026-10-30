@@ -145,15 +145,13 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
 
 typedef struct _x2c_gensym_defer_env_6{
   const void * _x2c_gensym_defer_capture_9;
-  const void * _x2c_gensym_defer_capture_10;
 }
 _x2c_gensym_defer_env_6;
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
 
 typedef struct _x2c_gensym_defer_env_7{
-  const void * _x2c_gensym_defer_capture_11;
-  const void * _x2c_gensym_defer_capture_12;
+  const void * _x2c_gensym_defer_capture_10;
 }
 _x2c_gensym_defer_env_7;
 
@@ -990,28 +988,25 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
   if(map == NULL || ! export_value || ! scope) return;
   Bytes old_hashes = map -> hashes, old_entries = map -> entries;
   Bytes rebuilt_hashes = Bytes_new(sizeof(unsigned));
-  Bytes rebuilt_entries = Bytes_new(sizeof(struct MapRecord));
-  int rebuilt = 0;
   {
     _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_11 =(const void *) & rebuilt;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_12 =(const void *) & rebuilt_hashes;
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_10 =(const void *) & rebuilt_hashes;
     X2CCleanup _x2c_gensym_defer_record_6 ={
       .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
+      Bytes rebuilt_entries = Bytes_new(sizeof(struct MapRecord));
       {
         _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_9 =(const void *) & rebuilt;
-        _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_10 =(const void *) & rebuilt_entries;
+        _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_9 =(const void *) & rebuilt_entries;
         X2CCleanup _x2c_gensym_defer_record_7 ={
           .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
         }
@@ -1047,7 +1042,6 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
           map -> entries = rebuilt_entries;
           rebuilt_hashes = NULL;
           rebuilt_entries = NULL;
-          rebuilt = 1;
           Bytes_free(old_hashes);
           Bytes_free(old_entries);
           Scope owner = Scope_owner(map);
@@ -1074,7 +1068,7 @@ static int f3_map____capacity_valid(unsigned n){
 _Noreturn static void f3_map____bad_arg(String owner){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/map/map.x",.function = "f3_map____bad_arg",.line = 263,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/map/map.x",.function = "f3_map____bad_arg",.line = 260,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -1121,11 +1115,11 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  if(!(*(int *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9)) Bytes_free((*(Bytes *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_10));
+  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
-  if(!(*(int *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_11)) Bytes_free((*(Bytes *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_12));
+  Bytes_cleanup((*(Bytes *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_10));
 }
 

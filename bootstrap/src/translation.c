@@ -678,7 +678,6 @@ static int _wait_worker(long * pids, int count, int * status){
 static void _show(Workers * w){
   while((* w).shown <(* w).started && ! _carries(&((* w)), (* w).shown)){
     Block output =(* w).output[(* w).shown ++];
-    if(output == NULL) continue;
     {
       _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
         0
@@ -691,6 +690,10 @@ static void _show(Workers * w){
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_1);
       {
+        if(output == NULL){
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          continue;
+        }
         if(! output -> length){
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
           continue;
@@ -925,12 +928,12 @@ static void _report(Translation * t, unsigned long started_at){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  File_close((*(File *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  File_cleanup((*(File *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Block_free((*(Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Block_cleanup((*(Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
