@@ -11,8 +11,8 @@ first.
 - Replace per-request worker processes and snapshot files with the standard
   VS Code language client. Preserve trusted local workspaces, compiler path
   selection, compiler arguments, and unsaved included files.
-- Require VS Code 1.82 or newer and a compiler checkout with the experimental
-  `lsp` command built. Remove the retired `workerPath` setting; select the
+- Require VS Code 1.82 or newer and a compiler that provides the shipped
+  `x2c lsp` command. Remove the retired `workerPath` setting; select the
   compiler with `compilerPath`.
 
 - Rebuild the package so an interpolated String inside a parenthesized
