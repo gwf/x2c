@@ -1,15 +1,12 @@
 # Repository repairs from the October 30 review
 
-> Status: active
-> Written 2026-10-30 against `dev` `ae3739230`. Gary selected a remediation
-> plan on 2026-10-30 and accepted the recommendation on every question
-> under "Decisions" the same day. Batches 1 and 2 were published to `dev`
-> on 2026-10-30 as `fe6b9d4d7` after the full publication gate; see
-> "Implementation evidence" for what landed, what was scoped, and the
-> follow-ups found. Batches 3 to 6 were implemented the same day and are
-> recorded below; their publication revision is added when it lands.
-> Findings and verification are in
-> [the review record](reference/review-2026-10-30.md).
+> Status: done
+> Written and delivered 2026-10-30. Gary selected the plan and accepted
+> every recommendation under "Decisions" the same day. Batches 1 and 2 were
+> published to `dev` as `fe6b9d4d7`; batches 3 to 6 as `8b3499587`, each
+> after the full publication gate. "Implementation evidence" records what
+> landed, what was scoped, and the follow-ups found. Findings and
+> verification are in [the review record](../reference/review-2026-10-30.md).
 
 ## Result and scope
 
@@ -21,7 +18,7 @@ authoritative sources and regenerate derived artifacts through existing
 targets. This plan adds no recurring gate, test requirement, or planning
 step; the one gate change it proposes is a question for Gary (Q2).
 
-The [language-reference writing plan](review-remediation-2026-10-11.md)
+The [language-reference writing plan](../review-remediation-2026-10-11.md)
 keeps its separate scope. This plan owns only the October 30 findings.
 Items the review marked plausible are repaired only after a probe confirms
 them; the probe is named with the item.

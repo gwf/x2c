@@ -49,7 +49,6 @@ were indexed and the delivered ones archived.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [October 30 review repairs](review-remediation-2026-10-30.md) | Two `--cpp` and REPL code defects, gate and tooling gaps, stale release notes, site, guidance, and plan statuses; evidence in [the review record](reference/review-2026-10-30.md). | Batches 1 and 2 published as `fe6b9d4d7`; batches 3 to 6 (tooling, tests, book and site, guidance and plans) remain. |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
@@ -86,6 +85,9 @@ selected here.
 
 Archived 2026-10-30 after checking delivery on `dev`:
 
+- [October 30 review repairs](archive/review-remediation-2026-10-30.md):
+  all six batches delivered in `fe6b9d4d7` and `8b3499587`; the review
+  record and the follow-ups found are in the plan.
 - [CPP as an optional C compatibility bridge](archive/cpp-compatibility-boundary.md):
   done; ordinary builds skip C macro expansion and `--cpp` enables it.
   Published in PR #641 (`517b822e5`, `3da9a42ea`) on 2026-10-30.
