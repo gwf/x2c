@@ -2684,9 +2684,8 @@ A `meta` body runs as native code, with these consequences:
   compiler continues. A call longer than `X2C_META_TIMEOUT` seconds (60 by
   default) is stopped.
 - A body may use runtime [Lisp](#runtime-lisp) when it runs in the project
-  helper, which links the full runtime, or in the REPL. A native module the
-  compiler loads receives the compiler's core runtime exports, which omit
-  Lisp.
+  helper, which links the full runtime. A native module the compiler loads
+  receives the compiler's core runtime exports, which omit Lisp.
 
 A nonstatic `meta` function in an included `.x` module is callable during
 translation and has an ordinary runtime declaration. Its provider source
@@ -4796,10 +4795,11 @@ stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
 ## Runtime Lisp
 
 x2c programs can embed Lisp sessions for DSLs, configuration, and interactive
-work; the REPL evaluates Lisp the same way. `Lisp.new()` creates a session
-with the standard environment from `etc/init.xlisp`, and `lisp.eval`,
-`Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and `.xlisp` files at
-run time. [Embed Lisp](../library/overview.md#embed-lisp) shows the host API.
+work, as the Lisp shell in `examples/programs/lisp.x` does. `Lisp.new()`
+creates a session with the standard environment from `etc/init.xlisp`, and
+`lisp.eval`, `Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and
+`.xlisp` files at run time.
+[Embed Lisp](../library/overview.md#embed-lisp) shows the host API.
 The compiler itself does not evaluate Lisp; compile-time code is x2c, as
 described under [compile-time calls](#compile-time-calls-and-operations).
 
@@ -4911,7 +4911,7 @@ value, as the library documents.
 An operation whose parameters or result have no `Var` representation is not
 available, which excludes `Iter` cursors, pointer out-parameters, variadic
 entry points, and `char *` parameters. `Lisp.new()` loads these names from
-`etc/init.xlisp` for both the REPL and other embedding programs.
+`etc/init.xlisp` for every program that embeds Lisp.
 
 ## Diagnostics
 

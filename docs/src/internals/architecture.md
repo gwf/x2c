@@ -705,9 +705,10 @@ divisions:
   patterns to plans, `cache.x` retains them, and `machine.x` executes them
   over the wordcode and state definitions in `wordcode.x`;
 - `lib/lisp/lisp.x` owns the embedded Lisp session and evaluator for runtime
-  DSLs and the REPL; the compiler does not link it. Lisp and `lib/datum.x`
-  share the reader grammar in `lib/datum-reader.x`, and the compiler reads
-  `.xi` interfaces with `lib/datum.x`;
+  DSLs and the Lisp shell in `examples/programs/lisp.x`; the compiler does
+  not link it. Lisp and `lib/datum.x` share the reader grammar in
+  `lib/datum-reader.x`, and the compiler reads `.xi` interfaces with
+  `lib/datum.x`;
 - `lib/func/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;

@@ -707,8 +707,7 @@ merely to establish a fact its producer already supplies.
 
 Owners: [Code.bound and Code.lowered][sdk-syntax];
 [Compiler.take_code_value, _code_effects, Compiler.bind_code_value][macro-values];
-[Code constructors][meta-library]. These carriers are also consumed by the
-REPL's compiler calls; they are not a separate REPL AST grammar.
+[Code constructors][meta-library].
 
 ### Retained declaration production
 

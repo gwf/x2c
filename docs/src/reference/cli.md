@@ -136,9 +136,10 @@ Inspection modes print an intermediate result and stop translation:
 ./x2c translate --dump-tokens source.x
 ```
 
-- `--dump-tokens` prints the tokens the parser reads, after macro
-  expansion, and stops. A token that an expansion produced ends with the
-  name of the macro whose use produced it.
+- `--dump-tokens` prints the tokens the parser reads and stops. Without
+  `--cpp` these are the source tokens. With `--cpp` they follow C macro
+  expansion, and a token that an expansion produced ends with the name of
+  the macro whose use produced it.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-expansions` prints each source macro expansion and stops after
   parsing. Each entry names the invocation and definition sites, then shows
@@ -726,7 +727,8 @@ The exceptions are:
 
 `--package-dir <dir>` adds a directory of x2c packages. An `import` statement
 searches those directories for a package that is not beside the source. The
-option applies to `translate`, `build`, and `run`, and repeats like `-I`.
+option applies to `translate`, `build`, `run`, and `repl`, and repeats like
+`-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 

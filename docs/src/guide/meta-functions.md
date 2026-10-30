@@ -463,8 +463,9 @@ x2c run --native-module helpers.so helpers.x main.x
 `$nine()` runs the module's `triple` during translation. The ordinary call
 `triple(5)` uses the copy linked into the program, so `helpers.x` is also
 one of the program's sources. `--native-module` works with `translate`,
-`build`, `run`, and `repl`, and the REPL accepts a bodyless prototype for
-the same function.
+`build`, `run`, and `repl`. In the [library playground](repl.md) it applies
+to the programs that `:load` builds, so the bodyless prototype belongs in a
+loaded source file; the prompt rejects `meta` declarations.
 
 A module function may take or return a handle:
 
@@ -717,12 +718,13 @@ reports the same failure until such a file changes, unless the C compiler
 stopped at a header it could not find; that build runs again each time. The
 shipped meta code of the compiler's own source modules and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
-REPL evaluates its supported submissions through Lisp. It accepts bodyless
-`meta` prototypes for linked or explicitly loaded native functions; user
-`meta` function definitions entered at the prompt are outside its supported
-subset. Its [`:load` command](repl.md#load-functions-from-a-file) compiles a
-source file's public bodied meta functions into a separate project helper
-and makes them callable from interpreted submissions.
+[library playground](repl.md) compiles each submission natively and rejects
+a `meta` declaration at the prompt with
+`load compile-time declarations from a source file`. Its
+[`:load` command](repl.md#load-and-repeat) builds a program from source
+roots with the ordinary compiler, so a loaded file's `meta` functions run
+during that build as they do for `x2c build`. A submission can call such a
+function's runtime form; a `$` call at the prompt is not resolved.
 
 Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code
@@ -1002,8 +1004,8 @@ int main(void) {
 42
 ```
 
-The REPL can call such a function too. A [native module](#native-modules)
-the compiler loads receives only the compiler's core runtime exports, which
-omit Lisp, so a function that needs Lisp belongs in the project helper or the
-REPL. Session rules such as inherited names, closures, and `eval` are in the
+A [native module](#native-modules) the compiler loads receives only the
+compiler's core runtime exports, which omit Lisp, so a function that needs
+Lisp belongs in the project helper. Session rules such as inherited names,
+closures, and `eval` are in the
 [language reference](../reference/language.md#runtime-lisp).

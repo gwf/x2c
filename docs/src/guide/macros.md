@@ -636,7 +636,8 @@ shows each.
 
 Prefer source templates for generated code and meta functions for the
 calculations that supply their arguments. Compile-time code is always x2c.
-Lisp remains a runtime library for DSLs and the REPL.
+Lisp remains a runtime library for DSLs, such as the Lisp shell in
+`examples/programs/lisp.x`.
 
 ### Generate several views from one table
 

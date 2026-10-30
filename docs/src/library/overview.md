@@ -259,8 +259,8 @@ described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
 The same standard environment includes the core `List`, `Array`, `Map`,
 `String`, `Iter`, `Var`, and `Symbol` operations, plus `read-file`,
-`write-file`, `sort`, `fib`, and `subst`. The REPL uses this environment
-through `Lisp.new()`; embedding hosts need no additional standard files.
+`write-file`, `sort`, `fib`, and `subst`. A host that calls `Lisp.new()`
+needs no additional standard files.
 
 [lisp]: ../reference/language.md#runtime-lisp
 
