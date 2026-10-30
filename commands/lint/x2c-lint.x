@@ -10,11 +10,14 @@
     `--rules` prints the table of codes, families, kinds, and standard rule
     IDs. `function-reading-order` requires explicit `--rule` selection;
     `--all` does not select it. Each file is scanned for token rules and
-    parsed by the compiler for declaration and member-arrow rules. The compiler's
-    diagnostics go to standard error; a file that does not parse gets the
-    token rules only and makes the exit status 1. Findings alone leave the
-    exit status 0. An unreadable input reports its path on standard error,
-    makes the exit status 1, and leaves other readable inputs available.
+    parsed by the compiler for declaration and member-arrow rules. The
+    member files a module entry splices are linted with it, each under its
+    own path and lines; a member that several entries splice is linted once.
+    The compiler's diagnostics go to standard error; a unit that does not
+    parse gets the token rules only and makes the exit status 1. Findings
+    alone leave the exit status 0. An unreadable input reports its path on
+    standard error, makes the exit status 1, and leaves other readable
+    inputs available.
     `-` names an ordinary file in both lint and formatting modes.
 
     `--fix` rewrites each file with the proposed fixes of the selected
@@ -48,12 +51,12 @@
 #include <stdio.h>
 #include <string.h>
 
-static void _usage(void):
+static void _usage(File out):
   fputs("usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... "
         "FILE...\n"
         "       x2c-lint --fmt-check [--fmt-diff] FILE...\n"
         "       x2c-lint --rules\n"
-        "function-reading-order requires --rule (excluded from --all).\n", stderr)
+        "function-reading-order requires --rule (excluded from --all).\n", out)
 
 static void _preprocessor_errors(String text):
   fputs(text, stderr)
@@ -71,24 +74,75 @@ static int _read(Path path, String &text):
     return 0
   return 1
 
-/* Parses `path` and runs the rules that read its parse. Returns 0 and
-   prints the compiler's diagnostics when the unit does not parse. */
-static int _parse(Lint l, Frontend frontend, String path, Map order_seen):
+/* The member files that the module block of `path` splices, spelled as the
+   compiler spells them, each once. A malformed block yields none; the
+   unit's parse reports it. */
+static List _members(String path, String text):
+  Context scan = auto Context.open_isolated_named("lint module members")
+  Compiler c = Compiler.new()
+  c.recovery_depth = 1
+  ModuleSource module = NULL
+  try module = c.module_source(path, text)
+  catch %(malformed *): return NULL
+  if !module: return NULL
+  Array members = []
+  Map seen = {(Path.resolved_absolute(path)): 1}
+  foreach List marker in module.markers:
+    String file = marker.caddr(), resolved = Path.resolved_absolute(file)
+    if resolved in seen: continue
+    seen[resolved] = 1
+    members.push(file)
+  return scan.export(members.list_free())
+
+/* Lints the `files` files of one unit, its entry `unit[0]` and members.
+   Returns 0 when the unit does not parse. */
+static int _lint_unit(Lint *unit, int files, Frontend frontend,
+                      Map order_seen):
+  for (int at = 0; at < files; at++):
+    unit[at].token_rules()
+    unit[at].idiom_rules()
+  int parsed = _parse(unit, files, frontend, order_seen)
+  for (int at = 0; at < files; at++):
+    if !parsed: unit[at].comment_rules(NULL, NULL, NULL)
+    unit[at].structure_rules()
+    unit[at].policy_rules()
+  return parsed
+
+/* Parses the unit of `unit[0]` and runs the rules that read its parse over
+   each of its `files` files. Returns 0 and prints the compiler's
+   diagnostics when the unit does not parse. */
+static int _parse(Lint *unit, int files, Frontend frontend, Map order_seen):
   ParsedUnit parsed
-  if !frontend.open_reporting(path, parsed): return 0
-  List rows = parsed.compiler.definition_rows(parsed.ast)
-  l.comment_rules(parsed.compiler, parsed.ast, rows)
-  l.declaration_rules(parsed.compiler, parsed.ast, rows)
-  l.order_rules(parsed.compiler, parsed.ast, rows, order_seen)
-  l.lifetime_rules(parsed.compiler, parsed.ast)
-  l.member_arrows(parsed.compiler, parsed.ast)
-  l.validation_rules(parsed.compiler, parsed.ast)
-  foreach List finding in l.findings: finding.promote()
-  foreach List edit in l.edits: edit.promote()
-  foreach List function in l.functions: function.promote()
-  foreach List function in l.unused: function.promote()
+  if !frontend.open_reporting(unit[0].path, parsed): return 0
+  Compiler c = parsed.compiler
+  List ast = parsed.ast, rows = c.definition_rows(ast)
+  for (int at = 0; at < files; at++):
+    Lint l = unit[at]
+    l.comment_rules(c, ast, rows)
+    l.declaration_rules(c, ast, rows)
+    l.lifetime_rules(c, ast)
+    l.member_arrows(c, ast)
+    l.validation_rules(c, ast)
+  lint_order_rules(unit, files, c, ast, rows, order_seen)
+  for (int at = 0; at < files; at++):
+    Lint l = unit[at]
+    foreach List finding in l.findings: finding.promote()
+    foreach List edit in l.edits: edit.promote()
+    foreach List function in l.functions: function.promote()
+    foreach List function in l.unused: function.promote()
   parsed.close()
   return 1
+
+/* The translate command that proves fixes, without its output directory and
+   input, or NULL when the matching compiler is unavailable. */
+static Array _translate(CliRequest request):
+  String x2c = Compiler.driver_executable()
+  if !x2c: return NULL
+  Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
+  foreach String dir in request.include_dirs:
+    translate.push("-I")
+    translate.push(dir)
+  return translate
 
 /* Reports the files of `inputs` whose spacing formatting would change. */
 static int _format_check(Array inputs, int diff):
@@ -122,13 +176,13 @@ int main(int argc, char **argv):
     (--rule (value CODE) repeated) (-I (value DIR) repeated)
     (inputs repeated)))
   catch %(bad-arg *):
-    _usage()
+    _usage(Stderr)
     return 2
   if options["rules"]:
     Rule.print_table()
     return 0
   if options["help"]:
-    _usage()
+    _usage(Stdout)
     return 0
   Map selected = {}
   foreach String code in options["rule"].list():
@@ -138,7 +192,7 @@ int main(int argc, char **argv):
     selected[code] = 1
   Array inputs = options["inputs"].list()
   if !inputs.len():
-    _usage()
+    _usage(Stderr)
     return 2
   if options["fmt-check"] || options["fmt-diff"]:
     return _format_check(inputs, options["fmt-diff"].int())
@@ -156,28 +210,37 @@ int main(int argc, char **argv):
   catch %((!or not-found io-fail) *detail):
     _input_error(detail)
     return 1
-  Path x2c = Path.dirname(Path.dirname(x2c_get_executable())).join("x2c")
-  Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
-  foreach String dir in request.include_dirs:
-    translate.push("-I")
-    translate.push(dir)
+  Array translate = fix ? _translate(request) : NULL
+  if fix && !translate:
+    fputs("x2c-lint: the matching x2c compiler is unavailable\n", stderr)
+    return 1
   Path work = fix ? Path.temp_dir() : NULL
   int status = 0, count = 0
   Map order_seen = "function-reading-order" in selected ? {} : NULL
-  Lint *lints = xcalloc(inputs.len() + 1, sizeof(Lint))
+  Map owned = {}
+  Lint *lints = NULL
   foreach Path file in inputs:
     String source
     if !_read(file, source):
       status = 1
       continue
-    Lint l = lints[count++] = Lint.new(file, source, selected)
-    l.token_rules()
-    l.idiom_rules()
-    if !_parse(l, frontend, file, order_seen):
-      l.comment_rules(NULL, NULL, NULL)
-      status = 1
-    l.structure_rules()
-    l.policy_rules()
+    List members = _members(file, source)
+    lints = xrealloc(lints, (count + members.len() + 1) * sizeof(Lint))
+    Lint *unit = lints + count
+    int files = 0
+    unit[files++] = Lint.new(file, source, selected)
+    // A member that several entries splice belongs to the first.
+    foreach String member in members:
+      String text, resolved = Path.resolved_absolute(member)
+      if resolved in owned: continue
+      owned[resolved] = 1
+      if !_read(member, text):
+        status = 1
+        continue
+      unit[files] = Lint.new(member, text, selected)
+      unit[files++].entry = file
+    if !_lint_unit(unit, files, frontend, order_seen): status = 1
+    count += files
   lint_corpus_rules(lints, count)
   lint_unused_rules(lints, count)
   for (int at = 0; at < count; at++):

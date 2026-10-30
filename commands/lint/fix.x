@@ -5,7 +5,8 @@
     the file before and after it to byte-identical C and headers. The file
     is rewritten in place for each translation, because its path and
     directory decide its includes and header guard, and it ends with the
-    original text or the proven edits.
+    original text or the proven edits. A module member is proven through
+    the translation of its entry.
 */
 #include "lint.x"
 #include "path.x"
@@ -40,7 +41,7 @@ static int _proves(Lint l, List edits, List translate, Path work,
                    String base):
   Path file = l.path
   file.write_text(_apply(l.text, edits))
-  return _generated(translate, file, work) == base
+  return _generated(translate, l.entry, work) == base
 
 /** Applies to `l`'s file the proposed edits that `translate`, a translate
     command without its output directory and input, proves by comparing
@@ -51,7 +52,7 @@ static int _proves(Lint l, List edits, List translate, Path work,
 int Lint.apply_fixes(Lint l, List translate, Path work):
   Path file = l.path
   List edits = l.edits.list_free().sort()
-  String base = _generated(translate, file, work)
+  String base = _generated(translate, l.entry, work)
   if !edits || !base: return base ? 0 : -1
   List kept = edits
   if !_proves(l, edits, translate, work, base):

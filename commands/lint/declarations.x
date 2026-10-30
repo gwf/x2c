@@ -5,7 +5,8 @@
     definitions come from the compiler's parse of the unit, so a declaration
     is what the parser read, never a pattern in the text. The compiler's
     tokens may be expanded; physical source offsets map each written
-    function back into the raw tokens `Lint` scanned.
+    function back into the raw tokens `Lint` scanned. A module unit holds
+    several files, so each file's rules keep only the forms in that file.
 */
 #include "generate/generate.x"
 #include "lint.x"
@@ -15,17 +16,18 @@
 static const SymbolSet qualifier_words =
   %<<const volatile restrict register struct union enum>>
 
-/* The line of the first `(` among the compiler's tokens `start` to `end`.
-   Returns 0 for a macro invocation, whose declarations are generated, and
-   for a `meta` declaration, which declares a compile-time operation. */
-static int _prototype_line(Compiler c, int start, int end):
+/* The line, in the linted file, of the first `(` among the compiler's
+   tokens `start` to `end`. Returns 0 for a declaration in another file,
+   for a macro invocation, whose declarations are generated, and for a
+   `meta` declaration, which declares a compile-time operation. */
+static int _prototype_line(Lint l, Compiler c, int start, int end):
   struct Token *tokens = c.tokenizer.tokens
   while tokens[start].type == <space> || tokens[start].type == <comment>:
     start++
   if tokens[start].text == "meta" || tokens[start].text[0] == '$': return 0
-  for (int at = start; at < end; at++):
-    if tokens[at].type == <"(">: return tokens[at].line
-  return tokens[start].line
+  int at = start
+  while at < end && tokens[at].type != <"(">: at++
+  return l.unit_line(c, tokens + (at < end ? at : start))
 
 /* Complete-unit collection removes ordinary prototypes. Required separate
    implementation and binding boundaries use explained local allowances;
@@ -58,7 +60,7 @@ static void _prototypes(Lint l, Compiler c, List ast):
     match node:
       case %(declare ?type (bindings *items)):
         Var (start, end) = span.list()
-        int line = _prototype_line(c, start.int(), end.int())
+        int line = _prototype_line(l, c, start.int(), end.int())
         foreach List item in items:
           match item:
             case %(bind ?binding ?):
@@ -285,11 +287,13 @@ static int _alias_arguments(List calls, int index, Map locals):
    variable always supplies and that the body only dereferences. Buffers
    (`char` and `void` pointees), functions used other than by a direct call,
    and functions other units can call keep their pointer spelling. */
-static void _reference_parameters(Lint l, List ast, List rows):
+static void _reference_parameters(Lint l, Compiler c, List ast, List rows):
   Map locals = _plain_locals(ast), lines = {}
   foreach List row in rows:
     match row:
-      case %(function ?name ? ? ? ?line *): lines[name] = line
+      case %(function ?name ? ? ? ?(int line) *):
+        line = l.text_line(c, line)
+        if line: lines[name] = line
   foreach List node in ast:
     match node:
       case %(function ?modifiers
@@ -342,7 +346,9 @@ static void _saved_locals(Lint l, Compiler c, List ast, List rows):
   Map lines = {}
   foreach List row in rows:
     match row:
-      case %(function ?name ? ? ? ?line ? ? source *): lines[name] = line
+      case %(function ?name ? ? ? ?(int line) ? ? source *):
+        line = l.text_line(c, line)
+        if line: lines[name] = line
   foreach List node in ast:
     match node:
       case %(function ? (bind (binding ? ?name) ?) ?body):
@@ -360,13 +366,17 @@ static void _unused_statics(Lint l, Compiler c, List ast, List rows):
           absent[name] = c.emitted_binding_name(%(binding $id $name))
   foreach List row in rows:
     match row:
-      case %(function ?name ?display ? ? ?line ? ? source (?(int start) ?)
-             (? ?(int end) *)):
+      case %(function ?name ?display ? ? ?(int line) ? ? source
+             (?(int start) ?) (? ?(int end) *)):
         if name in absent:
           if start < 0 || end <= start || end >= c.tokenizer.tokens.len():
             continue
+          // A definition lies in one file of the unit.
           struct Token *tokens = c.tokenizer.tokens
-          int first = tokens[start].line, last = tokens[end - 1].line
+          int first = l.unit_line(c, tokens + start)
+          if !first: continue
+          int last = l.unit_line(c, tokens + end - 1)
+          line = l.text_line(c, line)
           l.unused.push($(name, display, absent[name], line, first, last))
 
 /* A compiler token boundary in this file's raw stream. The last boundary
@@ -413,7 +423,7 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast, List rows):
   if "uncalled-static-function" in l.selected:
     _unused_statics(l, c, ast, rows)
   if "reference-parameter" in l.selected:
-    _reference_parameters(l, ast, rows)
+    _reference_parameters(l, c, ast, rows)
   foreach List row in rows:
     match row:
       case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))

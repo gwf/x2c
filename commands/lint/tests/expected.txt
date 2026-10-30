@@ -214,3 +214,14 @@ commands/lint/tests/src/compound-auto.x:48: violation compound-auto LT-1: use on
 commands/lint/tests/src/compound-auto.x:63: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
 commands/lint/tests/src/compound-auto-indent.x:6: violation compound-auto LT-1: use one leading auto for this compound declaration; its bindings keep their acquired values
 exit 0
+# module members written after a C macro
+commands/lint/tests/src/macro-prefix.x:9: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
+commands/lint/tests/src/macro-prefix-member.x:5: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
+commands/lint/tests/src/macro-prefix-member.x:6: violation restates-name CM-2: restates the name prefix_step
+commands/lint/tests/src/macro-prefix-member.x:12: violation subject-parameter-name NM-2: name the Prefix subject p to save 1 line (found written_prefix)
+commands/lint/tests/src/macro-prefix-member.x:17: violation negated-is ST-5: spell the test `is not`
+exit 0
+# a module member's fixes
+./part.x:1: candidate contains-in ST-11: write the membership test with `in`
+./part.x: fixed 1 of 1
+exit 0

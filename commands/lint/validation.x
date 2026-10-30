@@ -69,14 +69,16 @@ static Map _macro_diagnostics(Lint l, Compiler c, List ast):
   for (int at = 0; at < l.count; at++):
     if l.token_is(at, "$"): positions[l.tokens[at].pos] = at
   List report = c.sym.lookup(%("Compiler_report_error"), NULL)
+  String path = Path.resolved_absolute(l.path)
   foreach List hit in ast.search(%(at ?(int origin) ?(List expanded))):
     Ast statement = hit.assoc(<?expanded>)
     List location = c.origin_location(hit.assoc(<?origin>).int())
     Var at
-    if !location ||
-       location.assoc(<file>).string() != c.display_path(c.filename) ||
-       !positions.try_get(location.assoc(<position>), at):
-      continue
+    int offset
+    if !location: continue
+    String file = lint_source_position(
+      c, location.assoc(<position>).int(), offset)
+    if file != path || !positions.try_get(offset, at): continue
     if _raise_terminal(statement) && statement.never_returns():
       diagnostics[at] = <raise>
     match (statement.without_origin()):
