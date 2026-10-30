@@ -63,7 +63,9 @@ static typedef struct PoolIndex {
 
 static PoolIndex pool_index;
 static unsigned pool_index_used;
-static size_t pool_index_version;
+static int pool_index_building;
+static pthread_cond_t pool_index_changed =
+  (pthread_cond_t) PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t pool_index_mutex =
   (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 /* The index establishes absence conclusively only while it holds every
@@ -71,9 +73,21 @@ static pthread_mutex_t pool_index_mutex =
 static int pool_index_complete = 1;
 static PoolBlock pool_depot[POOL_DEPOT_COUNT];
 static int pool_storage_ready;
-static size_t pool_allocation_calls, pool_free_calls, pool_requested_bytes;
+static typedef struct PoolTrafficCounts {
+  size_t allocation_calls, free_calls, requested_bytes, slot_reuses;
+} PoolTrafficCounts;
+
+static typedef struct PoolTraffic {
+  PoolTrafficCounts counts;
+  struct PoolTraffic *previous, *next;
+} *PoolTraffic;
+
+static PoolTraffic pool_traffic;
+static PoolTrafficCounts pool_retired_traffic;
+static pthread_mutex_t pool_traffic_mutex =
+  (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 static size_t pool_block_allocations, pool_block_reuses;
-static size_t pool_slot_reuses, pool_backing_bytes;
+static size_t pool_backing_bytes;
 static size_t pool_active_blocks, pool_active_bytes;
 static size_t pool_depot_blocks, pool_depot_bytes;
 static pthread_mutex_t pool_storage_mutex =
@@ -93,11 +107,9 @@ void *Pool.malloc(Pool inner, size_t size) {
   if (!inner) raise %(bad-arg (operation "Pool.malloc"));
   int class_index = _size_class(size);
   if (class_index >= 0) return _small_malloc(inner, class_index, size);
-  if (Scope.accounting_enabled()) {
-    _record_request(size);
-  }
   _lock(inner);
   defer _unlock(inner);
+  if (Scope.accounting_enabled()) _record_request(inner, size);
   return Scope.malloc_in(&inner.scope, size);
 }
 
@@ -115,7 +127,7 @@ void Pool.free(Pool inner, void *alloc) {
   _lock(owner);
   defer _unlock(owner);
   if (Scope.accounting_enabled())
-    __atomic_fetch_add(&pool_free_calls, 1, __ATOMIC_RELAXED);
+    _increment(&_traffic(owner).counts.free_calls);
   if (block) _free_slot(block, alloc);
   else xfree(alloc);
 }
@@ -176,20 +188,21 @@ int Pool.own(Pool inner, Var object, void *alloc) {
 PoolStats Pool.stats(Pool inner) {
   _lock(inner);
   defer _unlock(inner);
-  _index_lock();
-  defer _index_unlock();
-  _storage_lock();
-  defer _storage_unlock();
-  PoolStats stats = {
-    .allocation_calls = __atomic_load_n(&pool_allocation_calls, __ATOMIC_RELAXED),
-    .free_calls = __atomic_load_n(&pool_free_calls, __ATOMIC_RELAXED),
-    .requested_bytes = __atomic_load_n(&pool_requested_bytes, __ATOMIC_RELAXED),
-    .block_allocations = pool_block_allocations,
-    .block_reuses = pool_block_reuses,
-    .slot_reuses = __atomic_load_n(&pool_slot_reuses, __ATOMIC_RELAXED),
-    .backing_bytes = pool_backing_bytes,
-    .active_blocks = pool_active_blocks, .active_bytes = pool_active_bytes,
-    .depot_blocks = pool_depot_blocks, .depot_bytes = pool_depot_bytes};
+  PoolStats stats = {0};
+  {
+    _index_lock();
+    defer _index_unlock();
+    _storage_lock();
+    defer _storage_unlock();
+    stats.block_allocations = pool_block_allocations;
+    stats.block_reuses = pool_block_reuses;
+    stats.backing_bytes = pool_backing_bytes;
+    stats.active_blocks = pool_active_blocks;
+    stats.active_bytes = pool_active_bytes;
+    stats.depot_blocks = pool_depot_blocks;
+    stats.depot_bytes = pool_depot_bytes;
+  }
+  if (Scope.accounting_enabled()) _traffic_stats(stats);
   for (Pool pool = inner; pool; pool = pool.up) stats.depth++;
   if (inner) {
     stats.interned = inner.interned;
@@ -213,10 +226,10 @@ static void *_small_malloc(Pool inner, int class_index, size_t size) {
       _link(block, inner);
     }
     if (block) {
-      void *slot = _take_slot(block, class_index, accounting);
+      void *slot = _take_slot(inner, block, class_index, accounting);
+      if (accounting) _record_request(inner, size);
       _unlock(inner);
       if (candidate) _return_block(candidate);
-      if (accounting) _record_request(size);
       return slot;
     }
     _unlock(inner);
@@ -243,11 +256,11 @@ static int _has_room(PoolBlock block) {
 }
 
 /* Reuses a freed slot, or else hands out the next slot never used. */
-static void *_take_slot(PoolBlock block, int class_index, int accounting) {
+static void *_take_slot(Pool pool, PoolBlock block, int class_index, int accounting) {
   void *slot = block.free;
   if (slot) {
     block.free = *(void **) slot;
-    if (accounting) __atomic_fetch_add(&pool_slot_reuses, 1, __ATOMIC_RELAXED);
+    if (accounting) _increment(&_traffic(pool).counts.slot_reuses);
     return slot;
   }
   slot = _data(block) + block.used;
@@ -311,32 +324,42 @@ static PoolBlock _depot_pop(unsigned bytes) {
   return block;
 }
 
+/* A reserved builder freezes all registration, not existing allocations. */
 static PoolBlock _registry_add(PoolBlock block, unsigned bytes) {
-  loop {
-    _index_prepare();
-    _index_lock();
-    PoolIndex index = __atomic_load_n(&pool_index, __ATOMIC_ACQUIRE);
-    if (pool_index_complete &&
-        (!index || (pool_index_used + 2) * 2 > index.slots)) {
-      _index_unlock();
-      continue;
-    }
-    block.registry_next = __atomic_load_n(&pool_registry, __ATOMIC_RELAXED);
-    if (pool_index_complete) {
-      uintptr_t first = (uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;
-      uintptr_t last = ((uintptr_t) block + bytes - 1) >> POOL_INDEX_PAGE_SHIFT;
-      for (uintptr_t page = first; page <= last; page++) {
-        _index_place(index.entries, index.slots, page, block);
-        pool_index_used++;
-      }
-    }
-    __atomic_store_n(&pool_registry, block, __ATOMIC_RELEASE);
-    pool_block_allocations++;
-    pool_backing_bytes += bytes;
-    pool_index_version++;
+  _index_lock();
+  while (pool_index_building)
+    if (pthread_cond_wait(&pool_index_changed, &pool_index_mutex))
+      _fatal("could not wait for index builder");
+  PoolIndex index = __atomic_load_n(&pool_index, __ATOMIC_ACQUIRE);
+  int build = pool_index_complete &&
+    (!index || (pool_index_used + 2) * 2 > index.slots);
+  if (build) {
+    pool_index_building = 1;
     _index_unlock();
-    return block;
+    index = _index_build(index);
+    _index_lock();
+    if (index) __atomic_store_n(&pool_index, index, __ATOMIC_RELEASE);
+    else __atomic_store_n(&pool_index_complete, 0, __ATOMIC_RELEASE);
   }
+  block.registry_next = __atomic_load_n(&pool_registry, __ATOMIC_RELAXED);
+  if (pool_index_complete) {
+    uintptr_t first = (uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;
+    uintptr_t last = ((uintptr_t) block + bytes - 1) >> POOL_INDEX_PAGE_SHIFT;
+    for (uintptr_t page = first; page <= last; page++) {
+      _index_place(index.entries, index.slots, page, block);
+      pool_index_used++;
+    }
+  }
+  __atomic_store_n(&pool_registry, block, __ATOMIC_RELEASE);
+  pool_block_allocations++;
+  pool_backing_bytes += bytes;
+  if (build) {
+    pool_index_building = 0;
+    if (pool_multithreaded && pthread_cond_broadcast(&pool_index_changed))
+      _fatal("could not notify index writers");
+  }
+  _index_unlock();
+  return block;
 }
 
 /* Empties `block` under `owner`: no slot handed out or free, and none kept. */
@@ -370,42 +393,24 @@ static inline char *_data(PoolBlock block) =>
 
 // block index
 
-/* Published versions and immutable registry links live until shutdown. */
-static void _index_prepare(void) {
-  loop {
-    _index_lock();
-    PoolIndex previous = __atomic_load_n(&pool_index, __ATOMIC_ACQUIRE);
-    size_t version = pool_index_version;
-    int needed = pool_index_complete &&
-      (!previous || (pool_index_used + 2) * 2 > previous.slots);
-    _index_unlock();
-    if (!needed) return;
-    unsigned slots = !previous ? POOL_INDEX_FIRST_SLOTS :
-      previous.slots <= ~0u / 2 ? previous.slots * 2 : 0;
-    PoolIndex candidate = slots ?
-      calloc(1, sizeof(struct PoolIndex) + slots * sizeof(PoolIndexSlot)) : NULL;
-    if (candidate) {
-      candidate.slots = slots;
-      candidate.previous = previous;
-      if (previous)
-        for (unsigned at = 0; at < previous.slots; at++) {
-          PoolBlock block = __atomic_load_n(
-            &previous.entries[at].block, __ATOMIC_ACQUIRE);
-          if (block) _index_place(candidate.entries, slots,
-            previous.entries[at].page, block);
-        }
+/* The builder reservation keeps `previous` unchanged during this copy.
+   Published versions and immutable registry links live until shutdown. */
+static PoolIndex _index_build(PoolIndex previous) {
+  unsigned slots = !previous ? POOL_INDEX_FIRST_SLOTS :
+    previous.slots <= ~0u / 2 ? previous.slots * 2 : 0;
+  PoolIndex candidate = slots ?
+    calloc(1, sizeof(struct PoolIndex) + slots * sizeof(PoolIndexSlot)) : NULL;
+  if (!candidate) return NULL;
+  candidate.slots = slots;
+  candidate.previous = previous;
+  if (previous)
+    for (unsigned at = 0; at < previous.slots; at++) {
+      PoolBlock block = __atomic_load_n(
+        &previous.entries[at].block, __ATOMIC_ACQUIRE);
+      if (block) _index_place(candidate.entries, slots,
+        previous.entries[at].page, block);
     }
-    _index_lock();
-    int unchanged = version == pool_index_version;
-    if (unchanged) {
-      if (candidate) __atomic_store_n(&pool_index, candidate, __ATOMIC_RELEASE);
-      else __atomic_store_n(&pool_index_complete, 0, __ATOMIC_RELEASE);
-      pool_index_version++;
-    }
-    _index_unlock();
-    if (unchanged) return;
-    free(candidate);
-  }
+  return candidate;
 }
 
 static void _index_place(
@@ -456,16 +461,80 @@ module void _fatal(const char *message) {
   abort();
 }
 
-/* Traffic counters are opt-in and do not acquire a shared mutex. */
-static void _record_request(size_t size) {
+/* Counters share their Pool owner's serialization. Stats reads them without
+   taking that owner; relaxed loads/stores avoid a shared traffic RMW. */
+static void _record_request(Pool pool, size_t size) {
+  PoolTraffic traffic = _traffic(pool);
+  _increment(&traffic.counts.allocation_calls);
+  size_t previous = __atomic_load_n(&traffic.counts.requested_bytes, __ATOMIC_RELAXED);
+  __atomic_store_n(&traffic.counts.requested_bytes,
+    _saturated_add(previous, size), __ATOMIC_RELAXED);
+}
+
+static void _increment(size_t *counter) {
+  size_t previous = __atomic_load_n(counter, __ATOMIC_RELAXED);
+  __atomic_store_n(counter, previous + 1, __ATOMIC_RELAXED);
+}
+
+static size_t _saturated_add(size_t left, size_t right) =>
+  SIZE_MAX - left < right ? SIZE_MAX : left + right;
+
+static PoolTraffic _traffic(Pool pool) =>
+  (PoolTraffic) ((char *) pool + sizeof(struct Pool));
+
+module size_t _control_size(void) =>
+  sizeof(struct Pool) + (Scope.accounting_enabled() ? sizeof(struct PoolTraffic) : 0);
+
+module void _traffic_register(Pool pool) {
   if (!Scope.accounting_enabled()) return;
-  __atomic_fetch_add(&pool_allocation_calls, 1, __ATOMIC_RELAXED);
-  size_t previous = __atomic_load_n(&pool_requested_bytes, __ATOMIC_RELAXED);
-  loop {
-    size_t next = SIZE_MAX - previous < size ? SIZE_MAX : previous + size;
-    if (__atomic_compare_exchange_n(&pool_requested_bytes, &previous, next,
-        1, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) return;
-  }
+  PoolTraffic traffic = _traffic(pool);
+  *traffic = (struct PoolTraffic) {0};
+  _traffic_lock();
+  traffic.next = pool_traffic;
+  if (pool_traffic) pool_traffic.previous = traffic;
+  pool_traffic = traffic;
+  _traffic_unlock();
+}
+
+module void _traffic_retire(Pool pool) {
+  if (!Scope.accounting_enabled()) return;
+  PoolTraffic traffic = _traffic(pool);
+  _traffic_lock();
+  _add_traffic(&pool_retired_traffic, &traffic.counts);
+  if (traffic.previous) traffic.previous.next = traffic.next;
+  else pool_traffic = traffic.next;
+  if (traffic.next) traffic.next.previous = traffic.previous;
+  _traffic_unlock();
+}
+
+static void _traffic_stats(PoolStats &stats) {
+  _traffic_lock();
+  PoolTrafficCounts counts = pool_retired_traffic;
+  for (PoolTraffic traffic = pool_traffic; traffic; traffic = traffic.next)
+    _add_traffic(&counts, &traffic.counts);
+  _traffic_unlock();
+  stats.allocation_calls = counts.allocation_calls;
+  stats.free_calls = counts.free_calls;
+  stats.requested_bytes = counts.requested_bytes;
+  stats.slot_reuses = counts.slot_reuses;
+}
+
+static void _add_traffic(PoolTrafficCounts *sum, PoolTrafficCounts *counts) {
+  sum.allocation_calls += __atomic_load_n(&counts.allocation_calls, __ATOMIC_RELAXED);
+  sum.free_calls += __atomic_load_n(&counts.free_calls, __ATOMIC_RELAXED);
+  sum.requested_bytes = _saturated_add(sum.requested_bytes,
+    __atomic_load_n(&counts.requested_bytes, __ATOMIC_RELAXED));
+  sum.slot_reuses += __atomic_load_n(&counts.slot_reuses, __ATOMIC_RELAXED);
+}
+
+static void _traffic_lock(void) {
+  if (pool_multithreaded && pthread_mutex_lock(&pool_traffic_mutex))
+    _fatal("could not lock accounting registry");
+}
+
+static void _traffic_unlock(void) {
+  if (pool_multithreaded && pthread_mutex_unlock(&pool_traffic_mutex))
+    _fatal("could not unlock accounting registry");
 }
 
 /* The freed slot is reused first, from a block that becomes its class's
@@ -666,7 +735,7 @@ static void _storage_shutdown(void) {
     pool_index = previous;
   }
   pool_index_used = 0;
-  pool_index_version = 0;
+  pool_index_building = 0;
   pool_index_complete = 1;
   for (int i = 0; i < POOL_DEPOT_COUNT; i++) pool_depot[i] = NULL;
   pool_backing_bytes = 0;

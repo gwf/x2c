@@ -724,7 +724,80 @@ static void pool_root_callback_growth_and_error(void) {
   EXPECT_TRUE(root.owns(after));
 }
 
+static void *_pool_traffic_churn(void *data) {
+  atomic_int *finished = data;
+  for (int i = 0; i < 1000; i++) {
+    Pool pool = Pool.retain(NULL);
+    void *slot = pool.malloc(16);
+    pool.free(slot);
+    slot = pool.malloc(16);
+    pool.free(slot);
+    pool.release();
+  }
+  x2c_thread_state_release();
+  atomic_store(finished, 1);
+  return NULL;
+}
+
+static void pool_stats_tracks_concurrent_retirement(void) {
+  atomic_int finished = 0;
+  Pool.thread_start();
+  PoolStats before = Pool.stats(NULL), previous = before;
+  pthread_t worker;
+  int error = pthread_create(&worker, NULL, _pool_traffic_churn, &finished);
+  EXPECT_INT_EQ(error, 0);
+  if (error) return;
+  int monotonic = 1;
+  while (!atomic_load(&finished)) {
+    PoolStats current = Pool.stats(NULL);
+    if (current.allocation_calls < previous.allocation_calls ||
+        current.free_calls < previous.free_calls ||
+        current.requested_bytes < previous.requested_bytes ||
+        current.slot_reuses < previous.slot_reuses) monotonic = 0;
+    previous = current;
+  }
+  EXPECT_INT_EQ(pthread_join(worker, NULL), 0);
+  EXPECT_TRUE(monotonic);
+  PoolStats after = Pool.stats(NULL);
+  int accounting = Scope.accounting_enabled();
+  EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls + 2000 * accounting);
+  EXPECT_INT_EQ(after.free_calls, before.free_calls + 2000 * accounting);
+  EXPECT_INT_EQ(after.requested_bytes, before.requested_bytes + 32000 * accounting);
+  EXPECT_INT_EQ(after.slot_reuses, before.slot_reuses + 1000 * accounting);
+}
+
+static void pool_traffic_survives_all_registry_removal_positions(void) {
+  PoolStats before = Pool.stats(NULL);
+  Pool pools[3];
+  for (int i = 0; i < 3; i++) {
+    pools[i] = Pool.retain(NULL);
+    void *small = pools[i].malloc(16);
+    pools[i].free(small);
+    small = pools[i].malloc(16);
+    void *large = pools[i].malloc(1024);
+    pools[i].free(small);
+    pools[i].free(large);
+  }
+  PoolStats live = Pool.stats(NULL);
+  int accounting = Scope.accounting_enabled();
+  EXPECT_INT_EQ(live.allocation_calls, before.allocation_calls + 9 * accounting);
+  EXPECT_INT_EQ(live.free_calls, before.free_calls + 9 * accounting);
+  EXPECT_INT_EQ(live.requested_bytes, before.requested_bytes + 3168 * accounting);
+  EXPECT_INT_EQ(live.slot_reuses, before.slot_reuses + 3 * accounting);
+  int order[3] = {1, 2, 0};
+  for (int i = 0; i < 3; i++) {
+    pools[order[i]].release();
+    PoolStats retired = Pool.stats(NULL);
+    EXPECT_INT_EQ(retired.allocation_calls, live.allocation_calls);
+    EXPECT_INT_EQ(retired.free_calls, live.free_calls);
+    EXPECT_INT_EQ(retired.requested_bytes, live.requested_bytes);
+    EXPECT_INT_EQ(retired.slot_reuses, live.slot_reuses);
+  }
+}
+
 void pool_suite(void) {
+  $test.run(pool_stats_tracks_concurrent_retirement);
+  $test.run(pool_traffic_survives_all_registry_removal_positions);
   $test.run(pool_storage_concurrent_growth_and_ancestor_free);
   $test.run(pool_lookup_shadows_outward);
   $test.run(pool_intern_uses_one_probe);

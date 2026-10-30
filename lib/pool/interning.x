@@ -176,13 +176,14 @@ Pool Pool.retain_named(Pool inner, const char *name) {
     if (mutex_ready) pthread_mutex_destroy(&pool.mutex);
     scope.destroy();
   }
-  pool = Scope.malloc_in(&scope, sizeof(struct Pool));
+  pool = Scope.malloc_in(&scope, _control_size());
   *pool = (struct Pool) {.scope = scope, .up = inner, .child_capacity = 2};
   Mutex.recursive_initialize(
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
   auto (&pool.scope)
     pool.table = PoolTable.new_table(NULL, capacity);
+  _traffic_register(pool);
   finished = 1;
   return pool;
 }
@@ -206,6 +207,7 @@ Pool Pool.release(Pool p) {
     __atomic_store_n(&up.child_capacity, p.table.capacity, __ATOMIC_RELAXED);
   _release_blocks(p);
   _unlock(up);
+  _traffic_retire(p);
   _unlock(p);
   pthread_mutex_destroy(&p.mutex);
   if (p == value_root) _root_initialize(NULL);
