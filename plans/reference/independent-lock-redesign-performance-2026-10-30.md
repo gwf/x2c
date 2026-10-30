@@ -173,3 +173,7 @@ in `/tmp/x2c-registered-channel/` and the worker's `debug/channel-prune-*` logs.
 
 The candidate remains local and blocked. The results reject this implementation
 under the acceptance rule, not all possible independent synchronization designs.
+
+The [follow-up profile](independent-lock-profile-2026-10-30.md) locates the
+remaining CPU/wait costs and measures index ownership through shutdown.
+That investigation changes no production code or design and accepts no tradeoff.
