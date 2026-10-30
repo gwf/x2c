@@ -523,7 +523,7 @@ prepare missing dependencies through the project's ordinary workflow.
 `status` checks saved dependency fingerprints and source membership. Its JSON
 contains `fresh`, `changed`, `missing`, `added_inputs`, and `removed_inputs`.
 It also reports the retained effective target `configurations`, including
-include paths, compiler arguments, and native modules.
+include paths, compiler arguments, C macro expansion, and native modules.
 If an edited manifest cannot be planned, `membership_checked` is false and
 `membership_error` explains why; recorded dependency changes are still shown.
 Queries continue to read the named snapshot after source edits. Rebuild

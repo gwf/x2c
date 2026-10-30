@@ -2811,7 +2811,7 @@ int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") ||
                     !strcmp(argv[1], "-h"))) {
-    $output.graph.usage(argv[0]);
+    $output.graph.usage(Stdout, argv[0]);
     return 0;
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
@@ -2848,7 +2848,7 @@ int main(int argc, char **argv) {
       raise %(bad-arg);
   }
   catch %(bad-arg *): {
-    $output.graph.usage(argv[0]);
+    $output.graph.usage(Stderr, argv[0]);
     return 2;
   }
   String name = options.getdefault("NAME", NULL);
