@@ -77,6 +77,8 @@ prefix.
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
 | [`x2c_string_from_bytes`](string.md#x2c_string_from_bytes) | `lib/string/string.x` | `String x2c_string_from_bytes(const char *bytes, int length)` |
 | [`x2c_thread_cancel`](thread.md#x2c_thread_cancel) | `lib/thread.x` | `void x2c_thread_cancel(void)` |
+| [`x2c_thread_channel_enter`](thread.md#x2c_thread_channel_enter) | `lib/thread.x` | `int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner)` |
+| [`x2c_thread_channel_leave`](thread.md#x2c_thread_channel_leave) | `lib/thread.x` | `int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor)` |
 | [`x2c_thread_stopping`](thread.md#x2c_thread_stopping) | `lib/thread.x` | `int x2c_thread_stopping(void)` |
 | [`x2c_thread_wait`](thread.md#x2c_thread_wait) | `lib/thread.x` | `void x2c_thread_wait(pthread_cond_t *condition)` |
 | [`x2c_thread_wait_lock`](thread.md#x2c_thread_wait_lock) | `lib/thread.x` | `void x2c_thread_wait_lock(void)` |
@@ -117,4 +119,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 105 functions.
+Total: 107 functions.

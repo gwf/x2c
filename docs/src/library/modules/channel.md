@@ -52,7 +52,7 @@ Source: `lib/channel.x`
 
 Closes and destroys an unused Channel's complete storage scope. Every
 user and waiter must already have finished. Undelivered owned payload
-subtrees are destroyed outside the queue monitor; ordinary payloads are
+subtrees are destroyed outside the queue mutex; ordinary payloads are
 not followed. NULL does nothing. Owner destruction releases these native
 queue nodes and resources through the same finalizer.
 
@@ -81,7 +81,7 @@ Short forms are new(), new(capacity), and new(tag); omitted capacity
 means rendezvous. Queuing does not intern or export message contents.
 
 **Raises:** <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
-for storage, or <io-fail> for native condition initialization.
+for storage, or <io-fail> for native mutex or condition initialization.
 
 Source: `lib/channel.x`
 
@@ -193,7 +193,7 @@ Source: `lib/channel.x`
 
 ## Design notes
 
-Queue commitment and cooperative stop share Thread's internal monitor.
+Each queue owns its mutex; registered queue monitors order commitment with stop.
 Allocation, Error dispatch, and payload destruction stay outside it.
 
 ## Tests and examples
