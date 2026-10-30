@@ -79,7 +79,7 @@ static inline double _typed_list_decode_f64(Var value){
 static inline Var _typed_list_encode_string(String value){
   unsigned long raw =(unsigned long)(uintptr_t) value;
   return(Var){
-    .u64 = 0x000B000000000001ul | raw
+    .u64 = VAR_STRING_PREFIX | raw
   }
   ;
 }
@@ -92,13 +92,13 @@ static inline String _typed_list_decode_string(Var value){
 
 static inline Var _typed_list_encode_symbol(Symbol value){
   return(Var){
-    .u64 = value + 0x8004000000000000ul
+    .u64 = value + VAR_SYMBOL_OFFSET
   }
   ;
 }
 
 static inline Symbol _typed_list_decode_symbol(Var value){
-  return(Symbol)(value.u64 - 0x8004000000000000ul);
+  return(Symbol)(value.u64 - VAR_SYMBOL_OFFSET);
 }
 
 static int List_truth(List);

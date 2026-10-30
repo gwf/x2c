@@ -22,9 +22,7 @@ void Compiler_refresh_source_collections(void);
 
 void Compiler_forget_provisional_entries(void);
 
-ModuleSource Compiler_module_source(Compiler c, String path, String text, Tokenizer * plain);
-
-ModuleSource Compiler_discover_module_source(Compiler c, String path, String text, Tokenizer * plain);
+ModuleSource Compiler_module_source(Compiler c, String path, String text);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
@@ -87,8 +85,6 @@ List Compiler_loaded_provider(Compiler c);
 void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
 
 Type Compiler_loaded_call_type(Compiler c, Type type);
-
-void Compiler_prepare_macro_exports(Compiler c, String path);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 

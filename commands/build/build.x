@@ -1121,7 +1121,7 @@ static Map _script_members(Build b, List candidates) {
   foreach (String path, candidates) {
     String text = NULL;
     if (!c.read_source(path, text)) continue;
-    ModuleSource module = c.module_source(path, text, NULL);
+    ModuleSource module = c.module_source(path, text);
     if (module) members.merge(module.members);
   }
   return members;

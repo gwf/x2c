@@ -222,10 +222,14 @@ run_fixture() {
   done
 
   if has_phase tokens; then
+    token_flags=(--no-cpp)
+    for flag in "${extra_flags[@]}"; do
+      if [[ "$flag" == --cpp ]]; then token_flags=(); fi
+    done
     raw="$case_build/tokens.raw"
     errors="$case_build/tokens.stderr"
     actual="$case_build/tokens.actual"
-    if (cd "$root" && "$x2c" translate --no-cpp --dump-tokens \
+    if (cd "$root" && "$x2c" translate ${token_flags[@]+"${token_flags[@]}"} --dump-tokens \
         ${extra_flags[@]+"${extra_flags[@]}"} "$source_rel") \
         >"$raw" 2>"$errors"; then
       awk -F '\t' \

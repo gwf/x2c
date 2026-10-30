@@ -761,7 +761,8 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   c -> source_map = request -> source_map;
   c -> sources = request -> sources;
   c -> package_source_dirs = request -> package_dirs;
-  c -> command_macros = Compiler_command_macros(request -> cpp_args);
+  c -> cpp_expansion = request -> cpp_expansion && ! request -> no_cpp;
+  if(c -> cpp_expansion) c -> command_macros = Compiler_command_macros(request -> cpp_args);
   c -> source_facts = request -> source_facts;
   c -> source_primary = 1;
   if(c -> source_facts){
@@ -793,26 +794,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   if(String_truth(text) && String_startswith(text, _11)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
   c -> text = text;
   c -> include_dirs = frontend -> include_dirs;
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_6;
-    x2c_exception_push(& _x2c_gensym_exception_frame_6);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_6.env, 0)) c -> unit_source = Compiler_discover_module_source(c, c -> filename, text, NULL);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_6);
-      {
-        if(x2c_exception_claim(& _x2c_gensym_exception_frame_6)){
-          Compiler_forget_provisional_entries();
-        }
-        x2c_exception_leave(& _x2c_gensym_exception_frame_6);
-        __builtin_unreachable();
-      }
-
-    }
-    if(x2c_exception_claim(& _x2c_gensym_exception_frame_6)){
-      Compiler_forget_provisional_entries();
-    }
-    x2c_exception_leave(& _x2c_gensym_exception_frame_6);
-  }
+  c -> unit_source = Compiler_module_source(c, c -> filename, text);
   if(c -> unit_source){
     text = c -> unit_source -> text;
     c -> line_markers = c -> unit_source -> markers;

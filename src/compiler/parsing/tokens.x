@@ -2,8 +2,8 @@
 
 // tokenizing
 
-/** Scans and preprocesses source and positions the compiler at its first
-    non-trivia token.
+/** Scans source, applies directive handling and optional C macro expansion,
+    and positions the compiler at its first non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
     translation finishes.

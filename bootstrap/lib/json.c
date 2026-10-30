@@ -329,7 +329,7 @@ static Var _read_value(Reader * r){
   _space(&((* r)));
   switch(_peek(&((* r)))){
     case '{' : case '[' :{
-      if(++(* r).depth > 512) _fail(&((* r)), _3);
+      if(++(* r).depth > JSON_MAX_DEPTH) _fail(&((* r)), _3);
       Var nested = _peek(&((* r))) == '{' ? _object(&((* r))) : _array(&((* r)));
       (* r).depth --;
       return nested;
@@ -720,7 +720,7 @@ double Var_floating(Var);
 static Map Var_map_payload(Var);
 
 static void _write_value(Writer * w, Var value, int depth){
-  if(depth > 512){
+  if(depth > JSON_MAX_DEPTH){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL)));
     {

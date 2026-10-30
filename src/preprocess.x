@@ -73,7 +73,7 @@ void Compiler.scan_conditionals(Compiler c) {
   Map layout = auto {};
   Array stack = auto (c.arm_stacks == NULL ? Array.new() : NULL);
   ArmScan scan = {.c = c, .layout = layout, .stack = stack};
-  if (stack) c.arm_stacks = {};
+  if (stack != NULL) c.arm_stacks = {};
   c.layout_marks = [];
   c.packed_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -224,7 +224,7 @@ static List _leading_preproc(Compiler c, int located) {
 // conditional branch tracking
 
 static void _directive(ArmScan &s, Token token, size_t i) {
-  if (s.stack) {
+  if (s.stack != NULL) {
     _plain_directive(s, token, i);
     return;
   }
@@ -250,7 +250,7 @@ static void _plain_directive(ArmScan &s, Token token, size_t i) {
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
   if (!conditional) return;
-  s.open = s.stack.list();
+  s.open = s.stack;
   s.c.arm_stacks[(long) i] = s.open;
   s.hidden = _hidden_group(s.open);
 }

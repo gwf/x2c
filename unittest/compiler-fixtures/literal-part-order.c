@@ -114,7 +114,7 @@ int main(void){
   }
   );
   Array native =({
-    Var _x2c_gensym_literal_part_17 = int_var(note(_26));  Var _x2c_gensym_literal_part_18 = int_var(note(_27));  Array_update_n(Array_new(), 2, _x2c_gensym_literal_part_17, _x2c_gensym_literal_part_18);
+    Var _x2c_gensym_literal_part_17 = BOXED(note(_26));  Var _x2c_gensym_literal_part_18 = int_var(note(_27));  Array_update_n(Array_new(), 2, _x2c_gensym_literal_part_17, _x2c_gensym_literal_part_18);
   }
   );
   printf("%s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n", (char *) trail, (long) List_len(inserted), (long) List_len(spliced), (long) String_len(joined), (long) Array_len(quoted), (long) Array_len(bare), (long) Map_len(keyed), (long) Map_len(braced), (long) List_len(nested), (long) List_len(stable), (long) List_len(leading), (long) Array_len(native));

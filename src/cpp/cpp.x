@@ -1,10 +1,10 @@
-/*  cpp.x -- the C preprocessing x2c performs before parsing
+/*  cpp.x -- optional preprocessing for existing C compatibility
 
     Copyright (c) 2026 Gary William Flake.
 
-    x2c expands the C macros it can see and decides the conditional groups
-    it can before the parser reads a token, so a macro body is translated
-    like any other source. A macro is visible when the unit, a file that
+    With --cpp or explicit native/REPL state, x2c expands visible C macros
+    and decides conditional groups before parsing. Ordinary x2c builds do
+    not run this pass. A macro is visible when the unit, a file that
     x2c reads through its own include search, or the command line defines
     it; a system header's macros stay for the C compiler. A condition is
     decided when every name it tests is visible, known never to be defined,

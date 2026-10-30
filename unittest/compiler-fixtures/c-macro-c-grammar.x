@@ -2,7 +2,7 @@
 
 // Reduced grammar shapes from the C compatibility corpus, not full ports.
 #define ARRAY_EACH(index, count) \
-  for ((index) = 0; (index) < (count); (index)++)
+  for (index = 0; (index) < (count); (index)++)
 #define TEST_COND(label, condition) \
   do { (void) (label); if (condition) hits++; } while (0);
 #define UNALIGNED(code) code

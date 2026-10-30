@@ -369,11 +369,13 @@ static void _walk_file(
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
   tokenizer.layout = Path.is_layout_source(path);
   tokenizer.scan();
+  Map arms = NULL;
   if (!c.cpp_expansion) {
     Compiler scan = Compiler.new_shared(c);
     defer c.close_child(scan);
     scan.tokenizer = tokenizer;
     scan.scan_conditionals();
+    arms = scan.arm_stacks;
   }
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
@@ -404,7 +406,7 @@ static void _walk_file(
     }
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
-    _split(w, tokenizer.tokens);
+    _split(w, tokenizer.tokens, arms);
     visited[path] = 1;
     _add_defaults(w);
     _queue_public_bodies(w);
@@ -416,17 +418,24 @@ static void _walk_file(
 /* The directives apply to the walk's preprocessor state in source order,
    and each segment starts from a copy of the state where it begins. The
    ordered parts retain its own directive events beside its include paths. */
-static void _split(FileWalk &w, Token first) {
+static void _split(FileWalk &w, Token first, Map arms) {
   Cpp cpp = w.c.cpp_expansion
           ? Cpp.new(w.c.initial_macros(w.path)) : NULL;
   if (cpp) w.start = cpp.copy();
+  int hidden = 0;
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
+    Var open;
+    if (arms && arms.try_get((long) (token - first), open)) {
+      hidden = 0;
+      foreach (List group in open.list())
+        if (group.caddr() == 2) hidden = 1;
+    }
     String directive = Compiler.preproc_directive(token.text);
     if (Compiler.preproc_conditional_kind(token.text) ||
         directive.startswith("define") || directive.startswith("undef"))
       w.parts.push(_cpp_event(w, token));
-    int split = (!cpp || !cpp.hidden()) && _directive(w, token);
+    int split = !(cpp ? cpp.hidden() : hidden) && _directive(w, token);
     if (cpp) {
       w.c.cpp_directive(cpp, token, w.path, w.visited);
       if (split) w.start = cpp.copy();
