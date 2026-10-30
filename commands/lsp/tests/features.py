@@ -128,6 +128,19 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         for row in symbols:
             assert selected(named, row["selectionRange"]) == row["name"], row
 
+        members = ("typedef struct CompletionProbe { int field_value; int other; } CompletionProbe;\n"
+                   "int read_members(CompletionProbe value,CompletionProbe *pointer) { "
+                   "/*\U0001f642*/ return value.field_value + pointer->field_value; }\n")
+        client.opened(main, members)
+        assert client.diagnostics() == []
+        for needle, inside in (("value.field_value", len("value.fi")),
+                               ("pointer->field_value", len("pointer->fi"))):
+            items = query(client, "completion", main, members, needle, inside)["result"]
+            assert [item["label"] for item in items] == ["field_value"], items
+            item = items[0]
+            assert item["kind"] == 5 and item["textEdit"]["newText"] == "field_value", item
+            assert selected(members, item["textEdit"]["range"]) == "field_value", item
+
         # Source positions remain physical UTF-16 positions across CRLF and
         # supplementary characters, including declarations with shadowed names.
         positioned = ("/*\U0001f642*/ typedef int Item;\r\n"

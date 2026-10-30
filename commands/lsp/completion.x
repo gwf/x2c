@@ -62,9 +62,10 @@ static Array _lsp_complete(
     }
   }
   catch %(replcomp (kind ?(Symbol role)) (rows ?rows)
-                   (keywords ?keywords)):
-    items = _lsp_completion_items(role, rows, keywords, prefix,
-                                 lsp_range(source, start, end));
+                   (keywords ?keywords) *):
+    items = _lsp_completion_items(
+      role, Error.snapshot(rows), Error.snapshot(keywords), prefix,
+      lsp_range(source, start, end));
   catch %((!or incomplete malformed) *): { }
   items = unit.context.export(items);
   unit.close();
@@ -129,9 +130,7 @@ static Array _lsp_completion_items(
   return result;
 }
 
-/* Completion captures borrow the Error record, which closes after the catch. */
 static Map _lsp_completion_item(String name, int kind, Map range) {
-  name = String.new(name);
   return {"label": name, "kind": kind,
           "textEdit": {"range": range, "newText": name}};
 }
