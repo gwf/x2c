@@ -356,8 +356,7 @@ use `make commands` and the matching `builds/0/x2c` compiler. Run `x2c lsp`
 from the workspace root to serve editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
 document synchronization. One process serves one workspace and keeps the
 compiler resident. It provides frontend diagnostics, definition
-navigation, type hover, completion, symbols, references, rename, and lexical
-semantic tokens.
+navigation, type hover, completion, symbols, references, and rename.
 It does not report errors left to the native C compiler, such as unresolved
 C identifiers.
 
@@ -399,8 +398,8 @@ workspace indexing. References and rename analyze the selected target's
 inputs and build dependencies sequentially, using unsaved buffers. Without a
 manifest, they search
 only the current document. Rename requires a physical definition inside the
-workspace. Lexical semantic tokens classify source tokens; they do not infer
-the type or binding of each identifier.
+workspace. Syntax coloring comes from the editor's syntax grammar; the server
+does not override it.
 
 Renaming a type updates related method-owner qualifiers and C spellings.
 A type rename is refused when its defining file is outside the selected source
@@ -422,7 +421,7 @@ Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
 from VSIX**. VS Code 1.82 or newer is required. The extension starts
 `x2c lsp` and uses its standard language client for synchronization,
 diagnostics, definition navigation, hover, completion, symbols, references,
-rename, semantic tokens, and cancellation.
+rename, and cancellation.
 
 Normal compiler installations include the server. To select a particular
 installation or a checkout build, set:

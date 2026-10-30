@@ -1,4 +1,4 @@
-"""Compiler-backed completion, symbols, navigation, and lexical tokens."""
+"""Compiler-backed completion, symbols, and navigation."""
 from pathlib import Path
 import sys
 import tempfile
@@ -26,19 +26,6 @@ def selected(text, source_range):
     return line[first["character"] * 2:last["character"] * 2].decode("utf-16-le")
 
 
-def decoded(data):
-    line, column = 0, 0
-    result = []
-    assert len(data) % 5 == 0, data
-    for at in range(0, len(data), 5):
-        delta_line, delta_column, length, kind, modifiers = data[at:at + 5]
-        line += delta_line
-        column = delta_column if delta_line else column + delta_column
-        assert length > 0 and modifiers == 0
-        result.append((line, column, length, kind))
-    return result
-
-
 root = Path(sys.argv[1]).resolve()
 with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
     directory = Path(temporary).resolve()
@@ -58,6 +45,8 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         '[target.app]\nsources = ["main.x", "other.x"]\n')
     client = Client(root, directory, [])
     try:
+        # Leave coloring to the editor's richer syntax grammar.
+        assert "semanticTokensProvider" not in client.capabilities, client.capabilities
         for source, text in ((main, main_text), (other, other_text)):
             client.opened(source, text)
             assert client.diagnostics() == []
@@ -167,22 +156,6 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         workspace = client.request("workspace/symbol", {"query": "member_function"})["result"]
         assert len(workspace) == 1 and workspace[0]["location"]["uri"] == member.as_uri(), workspace
 
-        lexical = "/* a\r\n\U0001f642z */\r\nint value=12; //tail\r"
-        client.opened(main, lexical)
-        assert client.diagnostics() == []
-        tokens = client.request("textDocument/semanticTokens/full", {
-            "textDocument": {"uri": main.as_uri()}})["result"]["data"]
-        assert decoded(tokens) == [(0, 0, 4, 0), (1, 0, 6, 0),
-            (2, 0, 3, 3), (2, 4, 5, 5), (2, 9, 1, 4),
-            (2, 10, 2, 2), (2, 12, 1, 4), (2, 14, 6, 0)], decoded(tokens)
-        for text, first in (("//tail\r\nint value;\r\n", (0, 0, 6, 0)),
-                            ("#define X 1\r\nint value;\r\n", (0, 0, 11, 6))):
-            client.opened(main, text)
-            assert client.diagnostics() == []
-            data = client.request("textDocument/semanticTokens/full", {
-                "textDocument": {"uri": main.as_uri()}})["result"]["data"]
-            rows = decoded(data)
-            assert rows[0] == first and rows[1] == (1, 0, 3, 3), rows
     finally:
         client.close()
 with tempfile.TemporaryDirectory(prefix="x2c-lsp-dependencies-") as temporary:
@@ -231,4 +204,4 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-type-scope-") as temporary:
         assert len(references) == 2, references
     finally:
         client.close()
-print("language server completion, symbols, references, rename, and tokens passed")
+print("language server completion, symbols, references, and rename passed")

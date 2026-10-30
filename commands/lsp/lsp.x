@@ -8,7 +8,6 @@
 #include "completion.x"
 #include "symbols.x"
 #include "references.x"
-#include "semantic-tokens.x"
 #include "json.x"
 #include <poll.h>
 #include <errno.h>
@@ -171,7 +170,6 @@ static void _dispatch(Server &server, Map message) {
     case "workspace/symbol": _workspace_symbols(server, id, params); return;
     case "textDocument/references": _references(server, id, params); return;
     case "textDocument/rename": _rename(server, id, params); return;
-    case "textDocument/semanticTokens/full": _tokens(server, id, params); return;
     default:
       if (request) _error(server, id, -32601, "Method not found");
       return;
@@ -193,9 +191,7 @@ static void _initialize(Server &server, Var id, Map params) {
     definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
     completionProvider: {triggerCharacters: [".", "$"]},
     documentSymbolProvider: Json.bool(1), workspaceSymbolProvider: Json.bool(1),
-    referencesProvider: Json.bool(1), renameProvider: Json.bool(1),
-    semanticTokensProvider: {full: Json.bool(1),
-      legend: {tokenTypes: lsp_token_types(), tokenModifiers: []}}},
+    referencesProvider: Json.bool(1), renameProvider: Json.bool(1)},
     serverInfo: {name: "x2c"}});
 }
 
@@ -318,12 +314,6 @@ static void _answer(Server &server, Var id, Map answer) {
   else message[<result>] = answer["result"];
   _send(server, message);
   _notice(server);
-}
-
-static void _tokens(Server &server, Var id, Map params) {
-  String path = server.workspace.retain(_document(params));
-  _reply(server, id,
-    {data: path ? server.workspace.semantic_tokens(path) : []});
 }
 
 static void _publish(Server &server) {
