@@ -80,10 +80,9 @@ static void _add(Partition &p, Ast node) {
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): _add_typedef(p, node);
     case %(function (!set ?type (*)) ?declarator (!set ?body (block *))):
-      _add_function(p, type, declarator, body);
-    case %(!set ?decl
-           (declare (!set ?type (*)) (!set ?bindings (bindings *)))):
-      _add_declaration(p, decl, type, bindings);
+      _add_function(p, _header_type(p.c, type), declarator, body);
+    case %(declare (!set ?type (*)) (!set ?bindings (bindings *))):
+      _add_declaration(p, _header_type(p.c, type), bindings);
     case %(!set ?alias (falias (declare (!set ?type (*)) ?) ?)):
       _add_alias(p, alias, type);
     /* The public projection exposes the imported package's types. */
@@ -93,6 +92,16 @@ static void _add(Partition &p, Ast node) {
     default: _publish_node(p, node);
   }
 }
+
+/* The unit's C keeps an attribute macro's name, as in `WEAK int x = 5;`,
+   where its `#define` passes through. The header leaves it out, so its
+   `extern` declaration stays an ordinary reference. */
+static List _header_type(Compiler c, List type) =>
+  type.filter(%!(item) => !_attribute_macro(c, item));
+
+static int _attribute_macro(Compiler c, Var item) =>
+  item is <list> && car(item) is <string> &&
+  c.object_macros[car(item)] == <attribute>;
 
 /* Settle pending includes and conditional groups in the public projection.
    A marker left after promotion leaves its include to the source. */
@@ -274,8 +283,7 @@ static void _forward_tags(Partition &p, List node) {
    an anonymous type. A static aggregate body waits for type promotion.
    A public struct or union declaration puts its tag in the header, so no
    prototype forwards it again. */
-static void _add_declaration(
-  Partition &p, List decl, Type type, List bindings) {
+static void _add_declaration(Partition &p, Type type, List bindings) {
   if (type.is_static()) _add_statics(p, bindings.cdr());
   if (!type.is_static()) {
     Compiler c = p.c;
@@ -285,8 +293,8 @@ static void _add_declaration(
                  !_completed_prototype(c, _declaration_binding(item)));
     if (!public && !_body_tag(type)) return;
     bindings = %(bindings @public);
-    decl = %(declare $type $bindings);
   }
+  List decl = %(declare $type $bindings);
   if ((type.is_static() && !_body_tag(type)) ||
       (_anonymous_body(type) && _declares_object(bindings))) {
     _keep(p);

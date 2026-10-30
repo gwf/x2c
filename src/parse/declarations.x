@@ -212,7 +212,8 @@ static int _test_declaration_start(
      is a declaration wherever it is written. */
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition) &&
-      (definition is <list> || definition == <wrapper>))
+      (definition is <list> || definition == <wrapper> ||
+       definition == <attribute>))
     return 1;
   if (_typeof_starts(c)) return 1;
   return _type_name_starts(c, require_declarator);

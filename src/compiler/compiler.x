@@ -161,11 +161,11 @@ typedef struct Compiler {
   List binding_rows, binding_sealed;
   /* `#define` names this unit has passed, for the literal warning and for
      declaration prefixes: the `List` of specifier words of a body made of
-     specifiers and attributes, `<string>` for a string literal,
-     `<annotation>` for a function-like attribute macro, `<wrapper>` for one
-     that wraps its parameter in prefixes, else 1. A name the preprocessor
-     expands never reaches the parser, so only the names it leaves to C
-     are read as prefixes. */
+     specifiers and attributes, `<attribute>` for attributes alone,
+     `<string>` for a string literal, `<annotation>` for a function-like
+     attribute macro, `<wrapper>` for one that wraps its parameter in
+     prefixes, else 1. A name the preprocessor expands never reaches the
+     parser, so only the names it leaves to C are read as prefixes. */
   Map object_macros;
   /* The preprocessor state the next expansion starts from, or NULL for
      the macros visible before the file's first line, and the

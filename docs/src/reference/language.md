@@ -4738,13 +4738,18 @@ as the linkage name. `extern "C"` before a single declaration is read as
 A macro that x2c leaves to the C compiler, because undecided conditional
 groups define it, may still sit before or among a declaration's specifiers
 in a unit or a collected header. The macro's definitions determine what the
-name contributes: nothing for an empty body or an attribute (`#define RLAPI`,
-`#define WEAK __attribute__((weak))`), its storage class for `static`,
-`extern`, or `inline` (`#define JSMN_API static`), builtin type words for a
-body such as `signed int`, and, for a body that is the name of another prefix
-macro, that macro's reading. A function-like macro whose body is its parameter
+name contributes: nothing for an empty body (`#define RLAPI`), its storage
+class for `static`, `extern`, or `inline` (`#define JSMN_API static`),
+builtin type words for a body such as `signed int`, and, for a body that is
+the name of another prefix macro, that macro's reading. A body of attributes
+alone, as in `#define WEAK __attribute__((weak))`, adds nothing to the type.
+Where such a name stands before a declaration's qualifiers and type, the
+unit's own C keeps it, even when another branch defines it empty:
+`WEAK int weak_value = 5;` keeps `WEAK`, and the generated header declares
+`extern int weak_value;`. A function-like macro whose body is its parameter
 amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
-type is the one inside the parentheses. A macro whose words are a storage
+type is the one inside the parentheses, and the macro contributes nothing even
+when its body holds an attribute. A macro whose words are a storage
 class reads as that storage after the type as well, as in
 `int LOCAL f(void)`. Where a name is defined differently in several
 conditional branches, a `static` definition takes precedence, then any

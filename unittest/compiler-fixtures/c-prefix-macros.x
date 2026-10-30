@@ -23,6 +23,16 @@
 #define maybe_const
 #endif
 
+// The unit's C keeps an attribute macro's name; the header leaves it out. An
+// attribute arm outranks an empty one, whichever comes first.
+#ifdef NO_ATTRIBUTES
+#define USED
+#else
+#define USED __attribute__((used))
+#endif
+#define SPARE __attribute__((unused))
+#define ALSO_SPARE SPARE
+
 static z_const char *greeting = "hi";
 static char *EXPORT z_const farewell;
 
@@ -38,6 +48,10 @@ EXPORT int32 doubled(int32 value) { return value * 2; }
 INLINE int tripled(int value) { return value * 3; }
 
 WEAK int weak_value = 5;
+USED int sextupled(int value) { return value * 6; }
+// Before `typedef`, an attribute macro contributes nothing.
+SPARE typedef int count_t;
+ALSO_SPARE static const count_t spare = 7;
 
 // A storage macro keeps its reading after the type and after a qualifier.
 int HIDE quintupled(int value) { return value * 5; }
@@ -60,5 +74,6 @@ int main(void) {
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
   printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
   printf("%d %d %d %s\n", quintupled(2), bound, held, line.body);
+  printf("%d %d\n", sextupled(2), spare);
   return 0;
 }

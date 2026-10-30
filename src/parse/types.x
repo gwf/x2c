@@ -294,7 +294,7 @@ static void _skip_attributes(Compiler c) {
   if (!c.shallow) return;
   loop {
     Var definition;
-    if (_attribute(c)) continue;
+    if (_attribute(c) || _attribute_macro(c)) continue;
     if (c.peek(0) != <ident> ||
         !c.object_macros.try_get(c.token.text, definition) ||
         definition != %())
@@ -465,6 +465,7 @@ module List _storage_class(Compiler c) {
   loop {
     Symbol symbol = c.peek(0);
     String attribute = _attribute(c);
+    if (!attribute) attribute = _attribute_macro(c);
     if (attribute) text.push($(attribute));
     else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
     else if (symbol.is_inline() ||
@@ -496,6 +497,19 @@ module int _attribute_starts(Compiler c) {
            definition == <annotation>));
 }
 
+/* An object-like attribute macro, `#define WEAK __attribute__((weak))`,
+   before the qualifiers and type is kept as its name, which the unit's C
+   reads through its `#define`. Before `typedef` it contributes nothing,
+   because a typedef keeps no leading specifier text. */
+static String _attribute_macro(Compiler c) {
+  if (c.peek(0) != <ident> || c.peek(1) == <typedef> ||
+      c.object_macros[c.token.text] != <attribute>)
+    return NULL;
+  String name = c.token.text;
+  c.next();
+  return name;
+}
+
 /* A macro the preprocessor leaves to C, because a conditional group
    defines it, still sits in a declaration when its body is declaration
    specifiers and attributes, such as an export annotation. A specifier
@@ -503,7 +517,8 @@ module int _attribute_starts(Compiler c) {
    `inline`, 1 for qualifiers, and 2 for builtin types, leaves a macro with
    words of a later rank to that position; otherwise it consumes the macro
    and takes all of its words into `words`, so `int LOCAL f(void)` keeps the
-   `static` of `#define LOCAL static`. */
+   `static` of `#define LOCAL static`. An attribute macro after the leading
+   specifiers contributes nothing. */
 module int _prefix_macro_words(Compiler c, int rank, Array words) {
   Var definition;
   if (c.peek(0) != <ident>) return 0;
@@ -519,6 +534,10 @@ module int _prefix_macro_words(Compiler c, int rank, Array words) {
     Token close = Token.skip_trivia(c.token + 1).group_close();
     if (close.type != <eof>) close.type = <comment>;
     c.next();
+    c.next();
+    return 1;
+  }
+  if (definition == <attribute>) {
     c.next();
     return 1;
   }

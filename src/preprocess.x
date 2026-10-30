@@ -391,7 +391,7 @@ static void _note_function_macro(Compiler c, String name, Token params) {
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
   Var kind = _macro_prefix(c, after, param);
-  if (kind == %()) c.object_macros[name] = <annotation>;
+  if (kind == %() || kind == <attribute>) c.object_macros[name] = <annotation>;
   else if (kind == <wrapper>) c.object_macros[name] = <wrapper>;
 }
 
@@ -409,12 +409,13 @@ static void _note_prefix_macro(Compiler c, String name, Token body) {
 /* Classifies a macro body, scanned as x2c tokens, by the declaration prefix
    it contributes: the `List` of its specifier words, which are storage
    classes, `inline`, qualifiers, builtin types, and the words of other
-   prefix macros, amid attributes that contribute nothing; `<wrapper>` when
-   a function-like body is its parameter `param` amid prefixes; `<string>`
-   for a string literal; and 1 for any other text. */
+   prefix macros, amid attributes that contribute nothing; `<attribute>`
+   for attributes alone; `<wrapper>` when a function-like body is its
+   parameter `param` amid prefixes; `<string>` for a string literal; and 1
+   for any other text. */
 static Var _macro_prefix(Compiler c, Token token, String param) {
   if (token.type == <lit-char*>) return <string>;
-  Array words = [], int wrapped = 0;
+  Array words = [], int wrapped = 0, attributes = 0;
   while (token.type != <eof>) {
     Symbol type = token.type, String word = token.text;
     Var definition;
@@ -425,15 +426,17 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (_is_annotation(c, word)) {
       if (next.type != <(>) return 1;
       next = next.after_group();
+      attributes = 1;
     }
     else if (param && word == param && !wrapped) wrapped = 1;
-    else if (!c.object_macros.try_get(word, definition) ||
-             definition is not <list>)
-      return 1;
+    else if (!c.object_macros.try_get(word, definition)) return 1;
+    else if (definition == <attribute>) attributes = 1;
+    else if (definition is not <list>) return 1;
     else foreach (Symbol item in definition) words.push(item);
     token = next;
   }
-  return wrapped ? <wrapper> : words.list_free();
+  if (wrapped) return <wrapper>;
+  return attributes && !words.len() ? <attribute> : words.list_free();
 }
 
 static int _is_specifier(Symbol type) =>
@@ -449,14 +452,17 @@ static int _is_annotation(Compiler c, String word) {
 
 /* Ranks prefix classifications so a name defined differently in two
    conditional arms keeps the reading that emits correct C: `static` hides
-   a definition from the header, so it wins; a qualifier that another arm
-   omits, as zlib's `z_const` is `const` or nothing, rejects writes that C
-   accepts in that arm, so it loses to any other prefix; other text loses to
-   any prefix. */
+   a definition from the header, so it wins; specifier words outrank
+   attributes alone, which outrank an empty body, because the name kept for
+   attributes reads correctly in an arm that defines it empty; a qualifier
+   that another arm omits, as zlib's `z_const` is `const` or nothing,
+   rejects writes that C accepts in that arm, so it loses to any other
+   prefix; other text loses to any prefix. */
 static int _prefix_rank(Var v) {
+  if (v == <attribute>) return 3;
   if (v is not <list>) return 0;
   List words = v;
-  if (<static> in words) return 4;
+  if (<static> in words) return 5;
   foreach (Symbol word in words) if (word.is_type_qualifier()) return 1;
-  return words ? 3 : 2;
+  return words ? 4 : 2;
 }
