@@ -391,8 +391,8 @@ static int _commit_available(
 
 /* Stop, notification, and the final predicate check share this mutex. */
 static void _sleep(Channel channel) =>
-  _native_check(pthread_cond_wait(
-    &channel.monitor.condition, &channel.monitor.mutex));
+  _native_check(
+    pthread_cond_wait(&channel.monitor.condition, &channel.monitor.mutex));
 
 /* Remove one stopped head per queue acquisition, then return for a fresh
    commitment check after releasing and reacquiring the mutex. */
