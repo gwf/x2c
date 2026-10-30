@@ -120,6 +120,8 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (_check(program)) return 1;
+  if (roots && roots.car().str().endswith(".h") &&
+      !("playground_inline" in program.addresses)) return 1;
   if ("manifest_value" in program.addresses) {
     int (*value)(void) =
       (int (*)(void)) program.addresses["manifest_value"].pointer();

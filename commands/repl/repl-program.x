@@ -463,19 +463,27 @@ static String _program_unit(ProgramBuild &b, String path) {
   local.documentation = &documentation;
   foreach (Var (file, text), c.source_texts) collected.sources[file] = text;
   _program_describe(local, unit, path);
+  Map inline_bodies = {};
+  if (native && path.endswith(".h"))
+    foreach (List node, unit.ast)
+      match (node) case %(function ?spec (bind ?binding ?) ?):
+        if (spec.type().is_inline()) inline_bodies[Ast.binding_spelling(binding)] = 1;
   if (native)
     foreach (Var (key, value), c.sym.unit_symbols()) {
       if (key is not <list> || value is not <list>) continue;
       List parts = key;
       if (parts ~= %(?(String name))) {
         Type type = value;
-        if (_program_private(c, name, type)) continue;
+        int inline_body = name in inline_bodies;
+        if (_program_private(c, name, type) &&
+            !(path.endswith(".h") && inline_body)) continue;
         collected.symbols[key] = type.declared();
         if (!type.is_typedef() && !c.sym.enumerator_owner($(name)) &&
             !(name in local.units)) {
           local.units[name] = 1;
           String emitted = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-          local.exports.push($(name, emitted ? emitted : name, <dynamic>));
+          local.exports.push(inline_body ? $(name, emitted ? emitted : name)
+            : $(name, emitted ? emitted : name, <dynamic>));
         }
       }
       else if (parts.car() in %<<struct union enum typedef>>)
