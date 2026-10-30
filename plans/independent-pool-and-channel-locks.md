@@ -1,12 +1,13 @@
 # Implementation plan: independent Pool and Channel synchronization
 
-> Status: active - implementation authorized; worker dispatch in preparation.
+> Status: active - implementation integrated locally; performance acceptance pending.
 > Researched against `66a119db5e44723bf7763f603b684b7dd9091ca2` on 2026-10-30.
 > Implementation baseline: `56fd5ecc1518f40ac46f2c21f50936ae4ab53f93`.
 > Pool, Channel, and Thread runtime owners are unchanged between these revisions.
 > Gary authorized monitored implementation and integration on 2026-10-30.
 > Performance measurements and no reproducible regressions are mandatory
 > before merging to dev. Any tradeoff requires Gary's explicit approval.
+> Local runtime candidate: `989978baf`. Nothing from this work has been pushed.
 
 ## Result and contracts
 
@@ -439,3 +440,60 @@ private native-resource growth, and notification handoff in place of Channel
 broadcasts. Owner-lifetime and stop-commit reasoning must survive implementation
 review. A conflict must be resolved here, not repaired by imposing new caller
 obligations. Performance benefits remain hypotheses until measured.
+
+## Execution evidence: 2026-10-30
+
+Two Sol workers implemented isolated, nonoverlapping changes from local plan
+commit `b4c0b48aa`. The orchestrator integrated their private checkpoints:
+
+| Work | Worker checkpoint | Integrated checkpoint |
+| --- | --- | --- |
+| Pool storage and tests | `c27615499` | `7c9852c15` |
+| Channel/Thread, tests, and guide text | `d7fd0f718` | `a18615ad4` |
+| Restore temporary waiter pointers without region warnings | `d4a88e62c` | `989978baf` |
+
+The orchestrator serialized all owned builds, test runs, and native probes.
+Builds used `BUILD_JOBS=2` and `make -j2`. Workers never ran a publication gate,
+performance checkpoint, or push. Source review ran alongside builds without
+starting additional compute jobs.
+
+Baseline runtime `56fd5ecc1` passed the selected Pool, Channel, Thread,
+wait-any, parallel-map, Context, and storage-ownership suites with accounting
+off and on: 119 tests and 1,252 assertions per mode. The final integrated
+candidate passed the same selected suites with the new tests: 122 tests and
+1,352 assertions per mode, with no failures or skips. Final logs in the
+orchestrator worktree are `debug/locks-final-unittest-build.log` and
+`debug/locks-final-focused-{off,on}.log`. The final incremental compiler build
+is recorded in `debug/locks-restored-build.log`.
+
+Pool worker evidence additionally covers forced index allocation failure,
+registry fallback, requested-byte saturation, and a controlled index-version
+change between copy and validation. The retry probe verified one rejected
+candidate free and valid lookup/free for old and newly registered blocks.
+Logs remain under `/tmp/x2c-locks-ec97-pool/debug/` as
+`pool-internals{,-build}.log` and `pool-retry{,-build}.log`.
+
+Channel worker evidence includes 125 tests and 1,030 assertions in its broader
+selected suite set. Temporary native fault probes covered initialization and
+startup failures, unmanaged owned-send rollback, and stop at condition-wait
+entry. Final probe result: `caught=5 mutex_live=0 cond_live=0`. The restored
+pointer form translates without the initial region warnings. Logs remain
+under `/tmp/x2c-locks-ec97-channel/debug/channel-restored-*.log`. Temporary
+instrumentation was not added to shipped source.
+
+Each worker performed a bounded source review of the other's synchronization
+changes. No concrete new protocol defect was found. These source reviews do
+not establish performance acceptance or substitute for the publication gate.
+
+Matched baseline/candidate benchmark binaries and a runner are prepared in
+the orchestrator's `.context/lock-contention/`. Only short baseline harness
+smoke runs have executed; no comparative performance results are claimed.
+Repeated host checks found sustained unrelated system-monitor and VM load.
+A quiet measurement window has been requested. No unrelated processes were
+stopped. Both workers are now idle and hold no compute slot.
+
+Remaining before any dev merge: quiet matched performance/memory runs and
+lock-duration probes; the existing compiler performance checkpoint; resolution
+or Gary's explicit approval of any reproducible regression; current-dev
+integration and final authored/generated review; and the publication gate.
+No full publication gate or push has run. The tested candidate remains local.
