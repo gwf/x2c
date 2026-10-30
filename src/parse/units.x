@@ -61,10 +61,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
       return retained ? retained : c.parse_top_level_mode(skip_body);
     }
   }
-  if (skip_body) {
-    if (c.protocol_form_starts()) return c.parse_protocol_declaration();
-    if (_skip_collected_form(c)) return NULL;
-  }
+  if (skip_body && _skip_collected_form(c)) return NULL;
   List macro = skip_body ? NULL : c.try_parse_macro_target_at(<unit>);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
@@ -113,7 +110,8 @@ int Compiler.defines_main(Compiler c) {
 */
 int Compiler.script_statement_executes(Compiler c) =>
   c.script_statement_starts() &&
-  (c.peek(0) == <$> || c.with_form_starts() || !c.test_declaration() ||
+  (c.peek(0) == <$> || c.with_form_starts() || c.at_contextual("try") ||
+   !c.test_declaration() ||
    c.auto_region_form(<unit>) == <statement>);
 
 /** Reports whether the top-level item at the cursor is one of a script
@@ -138,6 +136,7 @@ int Compiler.script_statement_starts(Compiler c) {
   if (c.alias_form_starts()) return 0;
   if (c.with_form_starts()) return 1;
   if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
+  if (c.at_contextual("try")) return 1;
   return !c.test_declaration() || !_declaration_stays(c);
 }
 

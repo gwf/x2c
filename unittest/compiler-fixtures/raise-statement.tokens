@@ -5,7 +5,7 @@
 (   3, 25 )	void                void
 (   3, 29 )	)                   )
 (   3, 31 )	{                   {
-(   4, 3  )	raise               raise
+(   4, 3  )	ident               raise
 (   4, 9  )	%(                  %(
 (   4, 11 )	lit-atom            raise-prob
 (   4, 21 )	)                   )
@@ -54,7 +54,7 @@
 (  11, 36 )	(                   (
 (  11, 37 )	)                   )
 (  11, 38 )	;                   ;
-(  12, 3  )	raise               raise
+(  12, 3  )	ident               raise
 (  12, 9  )	%(                  %(
 (  12, 11 )	lit-atom            collected
 (  12, 21 )	(                   (
@@ -266,7 +266,7 @@
 (  33, 28 )	void                void
 (  33, 32 )	)                   )
 (  33, 34 )	{                   {
-(  34, 3  )	raise               raise
+(  34, 3  )	ident               raise
 (  34, 9  )	%(                  %(
 (  34, 11 )	lit-atom            bad-arg
 (  34, 18 )	)                   )
@@ -287,7 +287,7 @@
 (  38, 12 )	)                   )
 (  38, 14 )	return              return
 (  38, 20 )	;                   ;
-(  39, 3  )	raise               raise
+(  39, 3  )	ident               raise
 (  39, 9  )	%(                  %(
 (  39, 11 )	lit-atom            bad-arg
 (  39, 18 )	)                   )
@@ -300,15 +300,15 @@
 (  42, 26 )	void                void
 (  42, 30 )	)                   )
 (  42, 32 )	{                   {
-(  43, 3  )	try                 try
+(  43, 3  )	ident               try
 (  43, 7  )	{                   {
-(  44, 5  )	raise               raise
+(  44, 5  )	ident               raise
 (  44, 11 )	%(                  %(
 (  44, 13 )	lit-atom            bad-arg
 (  44, 20 )	)                   )
 (  44, 21 )	;                   ;
 (  45, 3  )	}                   }
-(  46, 3  )	catch               catch
+(  46, 3  )	ident               catch
 (  46, 9  )	%(                  %(
 (  46, 11 )	lit-atom            bad-arg
 (  46, 18 )	)                   )

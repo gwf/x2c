@@ -535,7 +535,7 @@
 ( 127, 8  )	(                   (
 ( 127, 9  )	lit-int             0
 ( 127, 10 )	)                   )
-( 128, 7  )	raise               raise
+( 128, 7  )	ident               raise
 ( 128, 13 )	%(                  %(
 ( 128, 15 )	lit-atom            invariant
 ( 128, 24 )	)                   )
@@ -555,7 +555,7 @@
 ( 134, 8  )	(                   (
 ( 134, 9  )	lit-int             0
 ( 134, 10 )	)                   )
-( 135, 7  )	raise               raise
+( 135, 7  )	ident               raise
 ( 135, 13 )	%(                  %(
 ( 135, 15 )	lit-atom            invariant
 ( 135, 24 )	)                   )

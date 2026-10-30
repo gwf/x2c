@@ -18,7 +18,7 @@ List syntax_extensions(void) => %(
       (grammar import-declaration import-member module-block script-unit type-reference identifier)
       (lexical c-tokens)
       (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, module member text splicing before parsing, and script statements outside an explicit main.")
-      (lexical-note "import is a keyword; a leading shebang is handled before lexing.")
+      (lexical-note "import is contextual; a leading shebang is handled before lexing.")
       (spellings "import" "as" "with" "module" "#!")
       (reference "../reference/language.md#source-files-and-visibility"))
     (feature layout
@@ -39,7 +39,7 @@ List syntax_extensions(void) => %(
                init-declarator)
       (lexical c-tokens)
       (grammar-note "Managed declarations and initializers, mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility.")
-      (lexical-note "delegate and threaded are keywords; Self is contextual. Existing punctuation gains declaration roles.")
+      (lexical-note "delegate, threaded, and Self are contextual. Existing punctuation gains declaration roles.")
       (spellings "auto T a = x, b = y" "T a = auto x" "T.method"
                  "&" "&?" "delegate" "threaded" "Self"
                  "class" "static typedef" "int i, float x"
@@ -64,7 +64,7 @@ List syntax_extensions(void) => %(
       (grammar protocol-form associated-type protocol-member)
       (lexical c-tokens)
       (grammar-note "Protocol definitions/adoptions, associated types, member aliases, and as/tag adoption modifiers.")
-      (lexical-note "protocol and associated are keywords; as and tag are contextual words.")
+      (lexical-note "protocol, associated, as, and tag are contextual words.")
       (spellings "protocol" "associated" "as" "tag")
       (reference "../reference/language.md#protocols"))
     (feature functions
@@ -130,7 +130,7 @@ List syntax_extensions(void) => %(
                catch-detail raise-statement raise-detail)
       (lexical c-tokens percent-forms list-atom)
       (grammar-note "auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details.")
-      (lexical-note "defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode.")
+      (lexical-note "defer stays reserved; try, catch, finally, and raise are contextual; with requires a complete braced head; percent and angle forms keep lexical priority.")
       (spellings "auto { ... }" "auto (destination)"
                  "with (place = value, ...)"
                  "defer" "try" "catch" "finally" "raise")

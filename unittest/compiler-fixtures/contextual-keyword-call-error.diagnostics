@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/contextual-keyword-call-error.x:4:6: type: function takes 1 argument, not 2
+    try(1, 2);
+       ^
+

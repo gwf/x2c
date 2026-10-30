@@ -389,6 +389,9 @@ List syntax_lexical(void) => %(lexical
       (after scan) (hide inactive-branches) (retain conditional-structure))
     (pass keyword-retag
       (ordered
+        (retag (try catch finally raise import protocol delegate associated)
+          ident)
+        (retag threaded ident (when (text "threaded")))
         (retag in ident (unless (and
           (previous-kind-in compiler-operand-end)
           (next-kind-in compiler-operand-start))))

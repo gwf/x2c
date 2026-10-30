@@ -80,7 +80,9 @@ List Compiler.parse_field(Compiler c, List context) {
   if (slot) return slot;
   List macro = _member_macro(c, context, <field>);
   if (macro) return macro;
-  return _field(c, context, 0);
+  int delegated = c.at_contextual("delegate");
+  if (delegated) c.next();
+  return _field(c, context, delegated);
 }
 
 // enumerations
@@ -396,7 +398,6 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
 static List _field_item(Compiler c, List context) {
   if (c.alias_form_starts())
     return c.parse_alias_member(<field>, context);
-  if (c.take_contextual("delegate")) return _field(c, context, 1);
   return c.parse_field(context);
 }
 

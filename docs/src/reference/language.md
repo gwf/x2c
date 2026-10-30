@@ -74,6 +74,52 @@ Optional modules shipped with x2c are outside that prelude. They require an
 explicit source include, such as `#include "typed-array.x"`. Third-party code
 uses the package `import` described below.
 
+### Contextual keywords
+
+C keywords and x2c's `defer` remain reserved. The x2c words `associated`,
+`catch`, `delegate`, `finally`, `import`, `protocol`, `raise`, `threaded`, and
+`try` are contextual. They can name objects, functions, parameters, fields,
+typedefs, and labels outside their keyword forms. C's `thread_local` and
+`_Thread_local` remain storage specifiers.
+
+Each construct recognizes its word at its grammar position. Where an ordinary
+expression or declaration can continue the same prefix, a visible ordinary
+binding wins. Visibility follows normal x2c lookup, including collected
+function declarations and local shadowing. A field or struct tag with the
+same spelling does not shadow an ordinary name. Ordinary parsing does not
+retry the keyword interpretation if the call or declaration has a type error.
+
+For example, `try(args);` calls a visible function named `try`, while
+`try { work(); } finally { finish(); }` retains its exception meaning.
+Likewise, `with(args);` is an ordinary call, and `with (...) { ... }` is a
+[temporary assignment](#temporary-assignments-with-with). A typedef named
+`threaded` begins an ordinary declaration where that form overlaps storage
+syntax. Existing local macros and keyword aliases keep their invocation
+precedence.
+
+There is a lexical exception. The scanner recognizes percent and angle
+literals before name lookup. After the nine words above, an adjacent `%(`,
+`%{`, `%!`, or a `<...>` spelling retains its existing literal interpretation.
+A binding does not change the tokens inside that literal or enable C macro
+expansion there. Parenthesize an ordinary name to select operator syntax:
+
+```x2c
+int remainder(int raise, int a, int b) {
+  return (raise) %(a+b);
+}
+```
+
+Here `%` is modulo and `a+b` is an addition. `raise % (a+b)` also works because
+`%` is separated from `(`. For a comparison that could resemble an angle
+literal, write `(raise) < a`. Without that boundary, `raise %(a+b);` at statement
+start keeps the raise-payload interpretation even if `raise` is an ordinary
+binding. This exception preserves the existing literal and preprocessing
+rules without another tokenization pass.
+
+`in` and `match` retain their existing contextual rules, described under
+[Directives in the generated C](#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
+it cannot call an ordinary function named `defer`.
+
 ### Module blocks
 
 A module block splits one large source file across a directory without
@@ -1391,8 +1437,9 @@ static int scaled_sum(int scale, int value) {
 Its name becomes visible at the definition and remains visible to the end of
 that block and in nested blocks. An inner definition of the same name shadows
 it until the inner block ends. A later definition in the same block replaces
-it for following source. Fixed C and x2c keywords are not identifiers and
-cannot be local macro names; `with` is also reserved because it introduces
+it for following source. Reserved C keywords and `defer` cannot be local
+macro names. The contextual words above can be local macro names; `with`
+remains unavailable as a local macro name because it introduces
 [temporary assignments](#temporary-assignments-with-with).
 
 A bare `name(...)` selects the innermost local macro before a file-local
@@ -1767,8 +1814,8 @@ keyword ALIAS $QUALIFIED_MACRO;
 
 `keyword` is contextual at file scope. It starts this declaration only when
 followed by an identifier and a `$` macro name, and remains an ordinary
-identifier elsewhere. `ALIAS` must be a C identifier. A fixed C or x2c keyword
-does not tokenize as an identifier and cannot be used.
+identifier elsewhere. `ALIAS` must be a C identifier. Reserved C keywords
+and `defer` cannot be used; the contextual x2c words can be used.
 
 The named definition must already be visible. A macro alias keeps the direct
 invocation's parentheses, comma-separated typed arguments, sequence arguments,
@@ -4055,13 +4102,13 @@ outlive the body. Ordinary typing rejects a `const` destination. A bit-field
 is not supported as a destination. Each entry adds an ordinary block and a
 `defer`; `with` adds no runtime state.
 
-`with` is a contextual word. At the start of a statement, `with` always
-begins a temporary assignment, including after a control header such as
-`if (...)`.
-Elsewhere `with` is an ordinary name: `with(41)` in an expression calls a
-function named `with`. A statement that calls such a function uses the
-spelling `(with)(arguments);`. A macro template may contain `with`.
-`import ... with` keeps its meaning.
+`with` is contextual. The complete `with (...) { ... }` head begins a
+temporary assignment, including after a control header such as `if (...)`.
+Other forms use the ordinary name: both `with(41);` and `(with)(41);` call a
+function named `with`, and `with(41)` can occur in an expression. A visible
+function named `with` does not change the meaning of the braced temporary
+assignment. A macro template may contain `with`. `import ... with` keeps its
+meaning.
 
 ### Expression aliases with `alias`
 

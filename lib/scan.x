@@ -161,7 +161,9 @@ int scan_identifier(char *s) {
 /* Reports an ASCII letter without consulting the process locale. */
 inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
 
-/* Returns the keyword Symbol for exactly `n` borrowed bytes, or zero.
+/* Returns the lexical keyword Symbol for exactly `n` borrowed bytes, or zero.
+   The compiler recognizes contextual x2c words after scanning; a lexical
+   keyword is not necessarily a reserved identifier in source grammar.
    The C spellings `thread_local` and `_Thread_local` normalize to `threaded`;
    matching is otherwise case-sensitive. Each length tests its spellings in
    order. With constant lengths the C compiler expands every `memcmp` into

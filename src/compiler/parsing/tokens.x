@@ -107,26 +107,20 @@ int Compiler.at_word(Compiler c, String word) =>
 */
 int Compiler.at_contextual(Compiler c, String word) {
   if (!c.at_word(word)) return 0;
-  Type binding = c.sym.get($(word));
-  if (!binding) return 1;
+  List alias = c.alias_expression();
+  Type binding = alias ? alias.cadr() : c.sym.get($(word));
+  if (!binding && !alias) return 1;
   Token next = Token.skip_trivia(c.token + 1);
   if (next.type.is_assignment_op() || next.type.binary_precedence())
     return 0;
   switch (next.type) {
     case <(>: case <[>: case <.>: case <"->">: case <++>: case <-->:
-    case <?>: case <,>: case <;>: case <:>: case <)>: case <]>:
+    case <?>: case <,>: case <;>: case <)>: case <]>:
       return 0;
     case <ident>:
       return !binding.is_typedef() && next.text != "is" && next.text != "in";
   }
   return !binding.is_typedef() || !next.type.is_type_qualifier();
-}
-
-/** Consumes an unambiguous or unshadowed contextual keyword when current. */
-int Compiler.take_contextual(Compiler c, String word) {
-  if (!c.at_contextual(word)) return 0;
-  c.next();
-  return 1;
 }
 
 /** Reports the complete `with (...) { ... }` statement head. */
@@ -250,16 +244,11 @@ static void _report_malformed_token(Compiler c) {
   }
 }
 
-/* Keep raw scanner keyword types through lexing and CPP. The parser owns
-   contextual x2c words; C thread-local spellings stay storage tokens.
-   `in` and `match` retain their existing lexical lookahead.
-
-   `in` and `match` are C identifiers as often as x2c keywords. `in` stays
-   the operator where its neighbors plainly end and begin operands, and the
-   parser reads it by position everywhere else; `match` is the statement
-   only as `match (...)` followed by `case` or `{`. Every other occurrence
-   is a name, so C that uses them keeps compiling. */
-static void _retag_keywords(Tokenizer tokenizer) {
+/* Retag x2c words after lexical modes and CPP are settled. C thread-local
+   spellings stay storage tokens. `in` retains its operand-neighbor rule;
+   `match` stays a statement token before a group followed by `case` or `{`.
+   The parser owns the other contextual decisions without changing tokens. */
+module void _retag_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
        token = Token.skip_trivia(token + 1)) {

@@ -187,12 +187,12 @@ List Compiler.parse_block_item(Compiler c) {
   if (slot) return slot;
   if (c.local_macro_form_is_definition()) return _local_macro(c);
   if (c.alias_form_starts()) return c.parse_alias_statement(1);
-  if (c.with_form_starts() || c.at_contextual("try"))
-    return _statement(c, <block>);
+  if (c.with_form_starts()) return _statement(c, <block>);
   // An identifier naming a visible alias is no macro target.
   List macro =
     c.alias_expression() ? NULL : c.try_parse_macro_target_at(<block>);
   if (macro) return macro;
+  if (c.at_contextual("try")) return _statement(c, <block>);
   if (c.test_declaration()) return _declaration_item(c);
   return _statement(c, <block>);
 }
@@ -359,18 +359,29 @@ static void _require_list_literal(Compiler c, List pattern, Token start) {
 
 // try statements
 
+/* Only a pending continuation reads these words as handlers. A statement
+   macro at the same position retains its ordinary invocation precedence. */
+static Symbol _handler(Compiler c) {
+  Symbol kind = c.at_contextual("catch") ? <catch>
+              : c.at_contextual("finally") ? <finally> : 0;
+  return kind && !c.macro_starts_target_at(<statement>) ? kind : 0;
+}
+
 /* A `try` needs a `catch` or a `finally` after its body. */
 static List _catches(Compiler c) {
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
-  if (c.take_contextual("catch")) return _catch_cases(c);
-  if (!c.at_contextual("finally"))
+  Symbol handler = _handler(c);
+  if (handler == <catch>) { c.next(); return _catch_cases(c); }
+  if (handler != <finally>)
     $fail.statements_try_handler(c, c.token);
   return NULL;
 }
 
 static List _finally(Compiler c) {
   _x2c_complete_here(c, <continue>, %("finally"));
-  return c.take_contextual("finally") ? c.parse_governed(<statement>) : NULL;
+  if (_handler(c) != <finally>) return NULL;
+  c.next();
+  return c.parse_governed(<statement>);
 }
 
 static List _catch_cases(Compiler c) {
@@ -381,13 +392,15 @@ static List _catch_cases(Compiler c) {
     List hole = c.try_parse_macro_slot(<catch>);
     if (hole) {
       arms.push(hole);
-      if (!c.take_contextual("catch")) break;
+      if (_handler(c) != <catch>) break;
+      c.next();
       continue;
     }
     int is_default = 0;
     arms.push(_catch_arm(c, is_default, handle));
     if (is_default) saw_default = 1;
-    if (!c.take_contextual("catch")) break;
+    if (_handler(c) != <catch>) break;
+    c.next();
     if (saw_default)
       $fail.statements_catch_default(c, c.token);
   }
@@ -412,8 +425,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
 static List _catch_body(Compiler c) {
   List body = c.parse_governed(<statement>);
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
-  return c.at_contextual("catch") || c.at_contextual("finally")
-       ? _continued(c, body) : body;
+  return _handler(c) ? _continued(c, body) : body;
 }
 
 // statements

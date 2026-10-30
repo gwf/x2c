@@ -150,6 +150,12 @@ positions in the original file, and directives can be re-emitted where they
 were written. Ordinary directive scanning precedes parsing; optional
 [preprocessing](#preprocessing) expands C macros only when requested.
 
+After directive handling and optional CPP, the compiler changes contextual
+x2c keyword tokens to identifiers. Parsing then uses the ordinary symbol table
+to distinguish keyword forms from names. The scanner retains its existing
+percent/angle literal choices; retagging does not rescan literal contents.
+C keywords, `defer`, and the two C thread-local spellings stay reserved.
+
 ```sh
 ./builds/0/x2c translate --dump-tokens greet.x
 ```

@@ -68,9 +68,12 @@ associated auto break case catch char const continue default defer delegate
  static struct switch threaded try typedef union unsigned void volatile while
 ```
 
-The scanner emits `in` and `match` as keywords. After scanning, the compiler
-retags each to `ident` unless its context is the operator or statement form;
-see [compiler reclassification](#compiler-reclassification-and-preprocessing).
+The table selects lexical modes, not language-wide identifier reservation.
+After scanning and optional CPP, the compiler retags the nine contextual x2c
+additions to `ident`; `in` and `match` retain their existing lookahead rules.
+C keywords and `defer` stay reserved. Percent and angle literal choices are
+already settled before retagging; see [compiler reclassification](#compiler-reclassification-and-preprocessing)
+and [contextual keywords](../language.md#contextual-keywords).
 
 
 Matching is case-sensitive. The following spellings normalize token type
@@ -360,10 +363,16 @@ examples.
 
 ## Compiler reclassification and preprocessing
 
-After scanning/layout, `Compiler.tokenize` reports malformed tokens, calls
-`scan_conditionals`, then `_retag_keywords`. This last operation differs
-from the raw tokenizer's operand-context predicate.
+After scanning/layout, `Compiler.tokenize` reports malformed tokens, performs
+optional CPP expansion, calls `scan_conditionals`, then `_retag_keywords`.
+This last operation differs from the raw tokenizer's operand-context predicate.
 
+- `try`, `catch`, `finally`, `raise`, `import`, `protocol`, `delegate`, and
+  `associated` become `ident`. The `threaded` token also becomes `ident` when
+  its original text is `threaded`; C's `thread_local` and `_Thread_local`
+  retain their storage token. The parser recognizes contextual forms using
+  ordinary scope lookup and the following syntax. Token contents are not
+  rescanned when a same-named binding is found.
 - An `in` token retains that type only if the preceding significant kind is
   one of `ident`, the six atomic literal kinds, `)`, or `]`, and the next
   kind can begin an operand. That beginning set is `ident`, the six atomic
