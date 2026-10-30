@@ -871,6 +871,8 @@ The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
 
+`x2c lint` is experimental and available in checkout builds; `make install`
+and release payloads do not install it.
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound
 writes, address escapes, and reference arguments before reporting a group.
