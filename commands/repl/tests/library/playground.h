@@ -23,5 +23,6 @@ int playground_apply(PlaygroundPoint *point, int (*combine)(int, int));
 PlaygroundHandle *playground_open(int value);
 int playground_read(PlaygroundHandle *handle);
 void playground_close(PlaygroundHandle *handle);
+static inline int playground_inline(int value) { return value + 1; }
 
 #endif

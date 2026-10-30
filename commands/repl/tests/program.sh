@@ -87,3 +87,18 @@ import "tally";
 int main(void) { return $tally.sum4() + 1; }
 EOF
 "$tmp/program-api" --package-dir "$tmp/packages" "$tmp/import-main.x"
+
+cc -fPIC -fvisibility=hidden -c commands/repl/tests/library/playground.c \
+  -o "$tmp/playground-hidden.o"
+ar rcs "$tmp/libplayground-hidden.a" "$tmp/playground-hidden.o"
+"$tmp/program-api" "$tmp/wrapper.h" "$tmp/libplayground-hidden.a"
+
+printf 'int unavailable_example(int value);\n' >"$tmp/missing.h"
+REPL_PROGRAM_MISSING=unavailable_example "$tmp/program-api" "$tmp/missing.h"
+printf 'int duplicate(void) { return 1; }\n' >"$tmp/duplicate-a.c"
+printf 'int duplicate(void) { return 2; }\n' >"$tmp/duplicate-b.c"
+if "$tmp/program-api" "$tmp/duplicate-a.c" "$tmp/duplicate-b.c" \
+  >"$tmp/duplicate.log" 2>&1; then
+  echo "duplicate native source definitions unexpectedly succeeded" >&2
+  exit 1
+fi

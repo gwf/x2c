@@ -8,7 +8,7 @@
 /** One retained native program and the declarations compiled with it. */
 typedef struct ReplProgram {
   String directory, module, header;
-  List roots, declarations, exports, cc_args, ld_args;
+  List roots, exports, cc_args, ld_args;
   Map symbols, addresses, descriptions, sources, dependencies, macros;
   void *handle;
 } *ReplProgram;

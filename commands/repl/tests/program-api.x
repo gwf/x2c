@@ -44,6 +44,11 @@ static int _check(ReplProgram program) {
   PlaygroundHandle *handle = open(42);
   if (read(handle) != 42) return 1;
   close(handle);
+  if ("playground_inline" in program.addresses) {
+    int (*increment)(int) =
+      (int (*)(int)) program.addresses["playground_inline"].pointer();
+    if (increment(31) != 32) return 1;
+  }
   int *calls = program.addresses["playground_calls"].pointer();
   if (*calls < 1) return 1;
   *calls = 23;
@@ -62,6 +67,14 @@ int main(int argc, char **argv) {
   String failure = NULL;
   ReplProgram program = repl_program_build(frontend, roots, failure);
   if (!program) { fprintf(stderr, "%s\n", failure); return 1; }
+  String missing = Env.get("REPL_PROGRAM_MISSING");
+  if (missing) {
+    Map description = program.descriptions[missing];
+    if (missing in program.addresses || !description ||
+        !description["unavailable"].integer()) return 1;
+    puts("missing header provider remains inspectable and unavailable");
+    return 0;
+  }
   if ("sqlite3_open" in program.addresses) {
     int (*open)(const char *, void **) =
       (int (*)(const char *, void **)) program.addresses["sqlite3_open"].pointer();
@@ -73,6 +86,9 @@ int main(int argc, char **argv) {
     if (open(":memory:", &db) || !db ||
         exec(db, "CREATE TABLE sample(value); INSERT INTO sample VALUES(42)",
              NULL, NULL, NULL) || close(db)) return 1;
+    Buffer encoded = auto Buffer.new(0);
+    if (!encoded.write_datum(repl_program_snapshot(program), 1)) return 1;
+    printf("SQLite snapshot: %zu bytes\n", encoded.len());
     puts("native SQLite wrapper header create/call/close passed");
     return 0;
   }
@@ -131,6 +147,7 @@ int main(int argc, char **argv) {
   if ("#include" in header) return 1;
   Buffer encoded = auto Buffer.new(0);
   if (!encoded.write_datum(repl_program_snapshot(program), 1)) return 1;
+  printf("library snapshot: %zu bytes\n", encoded.len());
   unsigned cursor = 0;
   Var decoded = void;
   if (!encoded.str().read_datum(cursor, decoded)) return 1;

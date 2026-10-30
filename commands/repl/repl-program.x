@@ -158,6 +158,7 @@ static void _program_symbol(
   List syntax, String declaration, String body, int line) {
   if (!name || (_program_private(c, name, type) &&
                 !(path.endswith(".h") && type.is_inline()))) return;
+  int inline_body = type.is_inline();
   type = type.declared();
   ReplProgram program = b.program;
   Var prior;
@@ -177,7 +178,7 @@ static void _program_symbol(
   if (kind != <type> && !(name in b.units)) {
     b.units[name] = 1;
     String native = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-    b.exports.push(path.endswith(".h") && !type.is_inline()
+    b.exports.push(path.endswith(".h") && !inline_body
       ? $(name, native ? native : name, <dynamic>)
       : $(name, native ? native : name));
   }
@@ -544,6 +545,13 @@ static String _program_native_build(
   if (kind == <module>) {
     command.push("-Wl,-t");
     foreach (String option, request.ld_args) command.push(option);
+#ifdef __APPLE__
+    foreach (List row, b.exports)
+      if (row.len() >= 3 && row[2] == <dynamic>) {
+        command.push("-Xlinker"); command.push("-U");
+        command.push("-Xlinker"); command.push("_" + row.cadr().str());
+      }
+#endif
   }
   foreach (String source, sources) {
     if (kind == <module> && source.endswith(".a")) {
@@ -656,12 +664,21 @@ static String _program_exports(ProgramBuild &b) {
     code.push(%"#include $(header.repr())\n");
     (void) directory;
   }
+  foreach (List row, b.exports)
+    if (row.len() >= 3 && row[2] == <dynamic>) {
+      String name = row.cadr();
+#ifdef __APPLE__
+      String attribute = "weak_import";
+#else
+      String attribute = "weak";
+#endif
+      code.push(%"extern __typeof__($name) $name __attribute__(($attribute));\n");
+    }
   code.push("extern int x2c_repl_program_main(Array values);\n");
   code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
   foreach (List row, b.exports) {
     String name = row.cadr();
-    if (row.len() < 3 || row[2] != <dynamic>)
-      code.push(%"    case $index: return (void *) &$name;\n");
+    code.push(%"    case $index: return (void *) &$name;\n");
     index++;
   }
   code.push("  }\n  return 0;\n}\n");
@@ -731,8 +748,7 @@ static String _program_open(ReplProgram program) {
   declarations.sym.reset(program.symbols);
   foreach (List row, program.exports) {
     String name = row.car();
-    void *target = row.len() >= 3 && row[2] == <dynamic>
-      ? dlsym(program.handle, row.cadr().str()) : address(index);
+    void *target = address(index);
     index++;
     if (target) program.addresses[name] = target;
     else {
@@ -924,20 +940,38 @@ String repl_program_changed(ReplProgram program) {
   return NULL;
 }
 
+/* Source files have one snapshot entry; a descriptor's shared in-process
+   source reference must not duplicate that entire file on the wire. */
+static Map _program_snapshot_descriptions(ReplProgram program) {
+  Map descriptions = {};
+  foreach (Var (name, raw), program.descriptions) {
+    Map description = raw.map().copy();
+    description.del("source");
+    descriptions[name] = description;
+  }
+  return descriptions;
+}
+
 /** Exports retained artifacts and descriptions, excluding process addresses. */
 List repl_program_snapshot(ReplProgram p) =>
-  $(p.directory, p.module, p.header, p.roots, p.declarations, p.exports,
-    p.symbols, p.descriptions, p.sources, p.dependencies, p.macros,
+  $(p.directory, p.module, p.header, p.roots, p.exports,
+    p.symbols, _program_snapshot_descriptions(p), p.sources, p.dependencies, p.macros,
     p.cc_args, p.ld_args);
 
 /** Reopens an exact retained native program and recreates its addresses. */
 ReplProgram repl_program_restore(List snapshot, String &failure) {
   ReplProgram p = xcalloc(1, sizeof(struct ReplProgram));
   p.directory = snapshot[0]; p.module = snapshot[1]; p.header = snapshot[2];
-  p.roots = snapshot[3]; p.declarations = snapshot[4]; p.exports = snapshot[5];
-  p.symbols = snapshot[6]; p.descriptions = snapshot[7]; p.sources = snapshot[8];
-  p.dependencies = snapshot[9]; p.macros = snapshot[10];
-  p.cc_args = snapshot[11]; p.ld_args = snapshot[12];
+  p.roots = snapshot[3]; p.exports = snapshot[4];
+  p.symbols = snapshot[5]; p.descriptions = snapshot[6]; p.sources = snapshot[7];
+  p.dependencies = snapshot[8]; p.macros = snapshot[9];
+  p.cc_args = snapshot[10]; p.ld_args = snapshot[11];
+  foreach (Var (name, raw), p.descriptions) {
+    Map description = raw;
+    Var path = description["path"], source;
+    if (path is <string> && p.sources.try_get(path, source))
+      description["source"] = source;
+  }
   failure = repl_program_changed(p);
   if (!failure) failure = _program_open(p);
   return failure ? NULL : p;
