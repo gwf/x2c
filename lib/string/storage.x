@@ -125,8 +125,6 @@ String String.new_in(Pool pool, const char *bytes, int length) {
 */
 meta native Self String.intern(Self string) => string.new();
 
-
-
 /** Returns the canonical `String` holding the bytes of the C string `str`.
     The input is borrowed and copied, so `str` may be a stack buffer and
     mutating it afterwards does not disturb the result. Equal nonempty content

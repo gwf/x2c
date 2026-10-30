@@ -303,8 +303,6 @@ module List _return(Compiler c, List ast) {
   return ast;
 }
 
-
-
 module List _call(Compiler c, List ast) {
   if (ast ~= $($called(?callee, *arguments))) {
     match (callee.cadr()) {

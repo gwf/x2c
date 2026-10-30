@@ -409,8 +409,6 @@ module void _fatal(const char *message) {
   abort();
 }
 
-
-
 /* Accounts for one satisfied request. The caller holds the storage lock, so
    the small-class path takes no lock of its own. */
 static void _record_request(size_t size) {
@@ -431,8 +429,6 @@ static void _push_free(PoolBlock block, void *slot) {
   *(void **) slot = block.free;
   block.free = slot;
 }
-
-
 
 /* The registered block holding `ptr`, or NULL. Storage must be locked. */
 static PoolBlock _find_block(const void *ptr) =>

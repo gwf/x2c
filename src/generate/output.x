@@ -155,8 +155,6 @@ static List _changed_files(List outputs) {
   return changed.list_free();
 }
 
-
-
 static List _vertical_spacing(List code) {
   Array out = [];
   foreach (List node in code) _push_line(out, node);

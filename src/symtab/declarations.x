@@ -77,8 +77,6 @@ Var Compiler.aggregate_name(
   return binding ? binding : s.declare(NULL, type, type);
 }
 
-
-
 /** Analyzes a complete declaration type and installs its stored declared type.
 
     Returns the declared binding. At file scope this also records static

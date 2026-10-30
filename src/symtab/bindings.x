@@ -24,8 +24,6 @@ List Sym.define(Sym s, List key, List type) {
   return _scope_binding(s, *scope, key);
 }
 
-
-
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym s, List key, List type) {
   Map scope = _scope_at(s, -1).symbols;
@@ -250,8 +248,6 @@ module String _var_converter_owner(List key, List type) {
           return spelling == %"$(named)_var" ? named : NULL;
   return NULL;
 }
-
-
 
 static List _scope_binding(Sym s, SymScope &scope, List key) {
   Var found;

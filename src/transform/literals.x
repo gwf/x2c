@@ -37,7 +37,6 @@ List Compiler.call_in_order(Compiler c, List callee, List arguments) {
   return _statement_expression(declarations.list_free(), call);
 }
 
-
 static List _sequenced(
   Compiler c, List value, String stem, Array declarations) {
   Type type = value.cadr();
@@ -150,7 +149,6 @@ static List _spliced(Compiler c, List expr) {
 
 static List _to_list(Compiler c, List expr) =>
   c.convert_expression(expr, %("List"));
-
 
 static int _part_order(Compiler c, Var part) {
   if (part is not <list>) return 0;

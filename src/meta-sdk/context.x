@@ -44,8 +44,6 @@ int x2c_invocation_line(void) =>
 int x2c_invocation_column(void) =>
   MetaContext.invocation_location().assoc(<column>);
 
-
-
 /** Returns the location of the active macro invocation. */
 List MetaContext.invocation_location(void) {
   if (!active.expander || !active.expander.macro_stack || !active.site)

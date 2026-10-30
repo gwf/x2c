@@ -292,8 +292,6 @@ static List _parse_type_test(Compiler c, List lhs) {
                 : test;
 }
 
-
-
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_cast_operand_after_parens(c) && c.test(<(>)) {
@@ -371,8 +369,6 @@ static List _parse_offsetof(Compiler c) {
   c.expect(<)>);
   return %(expr ("size_t") (offsetof $type $member));
 }
-
-
 
 static List _parse_postfix(Compiler c) =>
   _parse_postfix_tail(c, c.parse_primary());

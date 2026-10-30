@@ -378,8 +378,6 @@ static void _publish_func_adapter(
       c.prepend_setup(_helper_body(c, body), setup).cdr()));
 }
 
-
-
 /* The body of an adapter that runs `body`: a block's items and then a
    return of no value, a void expression and then that return, or a return
    of the expression's value as a `Var`. */

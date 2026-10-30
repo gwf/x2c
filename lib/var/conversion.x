@@ -318,8 +318,6 @@ static void _numeric_decode(
   out = decoded;
 }
 
-
-
 /* Integer-to-integer never passes through floating point; it narrows modulo
    the target width. Only floating-to-integer is range checked, and only
    after truncation. */
@@ -352,8 +350,6 @@ static long double _integer_limit(int bits) {
   if (bits == 64) return (long double) (1ull << 63) * 2.0L;
   return (long double) (1ull << bits);
 }
-
-
 
 /* Floating results use host casts, so a wide target gets a new Scope box. */
 static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {

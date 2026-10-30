@@ -57,8 +57,6 @@ List Compiler.convert_segment_to_string(Compiler c, List expr) {
   return %(expr ("String") (call "Var_str" (args $boxed)));
 }
 
-
-
 /** Adds operations to convert a resolved expression AST to `target`.
     The result may contain converter, boxing, unboxing, `Func`, reference, or
     composite-literal operations. Returns the original expression when C
@@ -771,8 +769,6 @@ module int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
   expr ~=
     %(expr ? (ident (binding ? "NULL")));
-
-
 
 /* An explicit converter call, `value.str()` or `value.var()`, is the most
    recent one parsed from source tokens, kept with its spelling and

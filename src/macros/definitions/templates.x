@@ -409,8 +409,6 @@ static List _unit_trailing(List hole, Map binders) {
   return used ? $(construction) : NULL;
 }
 
-
-
 module Atom _hole_key(List hole, String projection) =>
   Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
 

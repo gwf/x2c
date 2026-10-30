@@ -39,8 +39,6 @@ List Compiler.define_pattern_binders(Compiler c, List pattern) {
   return rows.list_free();
 }
 
-
-
 /** Returns definite binders from a typed `Match` pattern AST.
 
     When `possible` is non-null, stores every binder appearing on any path.

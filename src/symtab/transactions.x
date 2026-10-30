@@ -80,8 +80,6 @@ void SymTxn.commit_transient(SymTxn &s) {
   s.counters.merge(counters);
 }
 
-
-
 /** Publishes an active semantic transaction and makes rollback a no-op.
     Its writes are already in the scope maps, so code holding a borrowed
     map observes a committed expansion. An absent or inactive transaction

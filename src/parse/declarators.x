@@ -214,8 +214,6 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
   return type;
 }
 
-
-
 /* Parameter declarations bind into a temporary scope. Whether a body
    follows is not yet determined, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
@@ -296,8 +294,6 @@ static List _array_suffix(Compiler c) {
   c.next();
   return %((dim $expr));
 }
-
-
 
 // Returns NULL for another token, which takes the ordinary identifier path.
 static List _template_declarator(Compiler c, int member) {
@@ -633,8 +629,6 @@ static List _finish_prototype(Compiler c, List parameters) {
   }
   return params.list_free();
 }
-
-
 
 module List _declarator_list(Compiler c, List type, List context, int row) {
   Array bindings = auto [];

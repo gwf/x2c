@@ -245,8 +245,6 @@ static Var _chain(List values, String operation, int want, int expect) {
   return _bool(1);
 }
 
-
-
 /* Orders the four number classes the total order uses:
    -inf < finite < +inf < NaN. The magnitude is the floating value, or zero
    for an integer operand. */

@@ -220,8 +220,6 @@ static void _install_occurrence(
     c, c.token, base, first_location, second_location);
 }
 
-
-
 static List _occurrence(List record, Symbol storage, List location) =>
   $(record, storage, location);
 
@@ -340,8 +338,6 @@ static Symbol _published_storage(AdoptionDraft &a, String spelling) {
 
 static Symbol _occurrence_storage(List occurrence) => occurrence.cadr();
 
-
-
 module String _base_name(Type base) =>
   base.is_bare_typedef_name() ? base.car() : NULL;
 
@@ -424,8 +420,6 @@ module String _canonical_file(Compiler c, List location) {
   }
   return result;
 }
-
-
 
 module String _path(Compiler c) {
   String result = NULL;

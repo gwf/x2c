@@ -334,8 +334,6 @@ int Var.wide_compare(Var a, Var b) {
 meta native long double Var.long_double_value(Var v) =>
   v is <ldouble> ? _wide_box(v).value.long_double_value : 0.0L;
 
-
-
 static Var _new_wide(TagId id, VarWideValue value) {
   VarWideBox box = xmalloc(sizeof(struct VarWideBox));
   box.tag = x2c_var_taginfo[id].tag;

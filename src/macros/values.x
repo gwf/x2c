@@ -97,8 +97,6 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
     %(expr ("Macro") (call $callee (args $literal $rows))), c.token);
 }
 
-
-
 /** Returns the literal expression that carries `value`, a macro definition
     or one of its references, as run-time data.
 */

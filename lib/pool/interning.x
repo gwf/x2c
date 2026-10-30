@@ -75,8 +75,6 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   return canonical;
 }
 
-
-
 /** Returns the first value equal to `key` from `inner` outward, or `void`.
     The returned identity remains owned by the level where it was found.
 */
@@ -162,8 +160,6 @@ int Pool.owns(Pool pool, Var key) {
     `Pool.retain_named`.
 */
 Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
-
-
 
 /** Returns a new named child of `inner` without making it thread-active.
     The child owns its control `Scope`, table, and mutex and must be released

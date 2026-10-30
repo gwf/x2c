@@ -88,8 +88,6 @@ List List.concat_n(unsigned list_count, ...) {
   return out;
 }
 
-
-
 /** Returns the concatenation of `a` and `b`.
     Neither input is modified. `b` becomes the shared tail of the result, so
     only `a`'s cells are rebuilt, O(len(a)) of them. When either side is `nil`

@@ -541,8 +541,6 @@ static void _unlink(MatchCache cache, int slot) {
     cache.lru_head = entry.lru_next == slot ? -1 : entry.lru_next;
 }
 
-
-
 /* Pins `slot` for `lease`, which records the entry's generation. */
 static void _activate(MatchCache m, int slot, MatchLease &lease) {
   MatchCacheEntry *entry = &m.entries[slot];

@@ -234,8 +234,6 @@ static void _add_function(
   if (!type.is_inline()) _keep(p);
 }
 
-
-
 static List _with_attributes(Map facts, List type, Var binding) {
   Var attributes;
   if (!facts.try_get(%(attributes $binding), attributes)) return type;

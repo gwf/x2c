@@ -34,8 +34,6 @@ List Compiler.evaluate_macro_rows(Compiler c, Var value) {
        ? value.list().cdr() : $(value);
 }
 
-
-
 /** Evaluates an active template's `(macro-slot ...)` value, or a pending
     Macro value application into the invocation that expands it.
     Non-slots and slots outside an expansion are returned unchanged. A splice

@@ -421,8 +421,6 @@ static void _cache(Emitter &e, Var id) {
   else _put(e, %"_$id");
 }
 
-
-
 /* Emission writes each C token to `e.out` in order, so no token List is
    built: a form writes its text and emits its children where they stand. */
 module void _put(Emitter &e, Var token) { e.out.push(token); }

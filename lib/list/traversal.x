@@ -123,8 +123,6 @@ Var List.assoc(List list, Var key) {
   return void;
 }
 
-
-
 /** Writes the next element, advances `cursor`, and returns one.
     Initialize the caller-owned cursor to `lst`. A null pointer or an
     exhausted cursor returns zero without changing `cursor` or `out`. The
@@ -217,8 +215,6 @@ meta native Self List.getslice(Self list, int start, int stop, int step) {
   return values;
 }
 
-
-
 /** Returns the number of cells in `lst` in O(n) time. */
 int List.len(List lst) {
   int len = 0;
@@ -261,8 +257,6 @@ int List.unpack_vars_n(List src, unsigned destination_count, ...) {
 
 /** Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`. */
 inline Var  List.car(List lst)     => car(lst);
-
-
 
 /** Returns the head of `x`, or `void` when `x` is `nil`. */
 inline Var  car(List x)  => x ? x.car : void;

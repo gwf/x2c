@@ -43,8 +43,6 @@ List Compiler.parse_macro_pattern_arguments(Compiler c) {
   return patterns.list_free();
 }
 
-
-
 /** Parses a `List` literal beginning at `(` or `%(` and returns its typed
     expression after consuming `)`. Pattern parsing sets and restores
     `match_is`; `runtime_literals` disables stable-cell caching.
@@ -143,8 +141,6 @@ List Compiler.list_expression(Compiler c, Array elements, List tail) {
     tail = c.literal_cell(elements[i], tail);
   return %(expr ("List") $tail);
 }
-
-
 
 /** Conses the element expression `head` onto the cells `tail`, or appends
     the List a `(splice EXPR)` head holds, and folds the cell into the
@@ -279,8 +275,6 @@ static List _cache_if_stable(Compiler c, List elem) {
   return c.cache(%(var $elem));
 }
 
-
-
 static List _parse_splice(Compiler c) {
   if (c.peek(0) == <@>) {
     List expr = _parse_named_reference(c, <@>);
@@ -310,8 +304,6 @@ module List _parse_named_reference(Compiler c, Symbol sigil) {
     $fail.literals_insert_name(c, c.token, sigil);
   return c.parse_variable();
 }
-
-
 
 static List _parse_typed_capture(Compiler c) {
   Token origin = c.token;

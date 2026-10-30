@@ -1,6 +1,5 @@
 /*  rendering.x -- List rendering operations */
 
-
 /* rendering
 
    A List renders flat when it fits in the rest of the line. Otherwise its

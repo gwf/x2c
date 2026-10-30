@@ -50,8 +50,6 @@ List Compiler.try_parse_macro_member(Compiler c) {
   return %(macro-bind $(_hole_key(hole, "member")));
 }
 
-
-
 /** Parses a macro hole or meta call slot for `role` while reading a
     template.
     Returns role-shaped syntax containing `(macro-bind ...)` or

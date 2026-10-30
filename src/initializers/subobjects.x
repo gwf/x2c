@@ -205,8 +205,6 @@ static int _fills_whole(Compiler c, Type type, List value) {
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
-
-
 static Type _path_type(List path, Type root) {
   if (!path) return root;
   List frame = path.car();

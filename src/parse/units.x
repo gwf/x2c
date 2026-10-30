@@ -32,8 +32,6 @@ List Compiler.parse_submission(Compiler c, int end_position) {
 /** Parses one full top-level form through the shared classifier. */
 List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
 
-
-
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, linkage brace, or
     compile-time-only `meta` function only updates compiler state, with the
@@ -436,8 +434,6 @@ static List _import_members(Compiler c, String name) {
   } while (c.test(<,>));
   return members.list_free();
 }
-
-
 
 /* A declaration ends at `;`. A `meta` one installs its compile-time form
    and publishes its prose; an ordinary function prototype keeps its name

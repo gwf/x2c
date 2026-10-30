@@ -781,8 +781,6 @@ static int _exact_conversion(Type signature, Type parameter, Type result) {
          actual_result == result;
 }
 
-
-
 static int _function_parts(Type signature, List &parameters, Type &result) {
   if (signature ~= %((func ?arguments) *return_type)) {
     parameters = arguments;
@@ -821,8 +819,6 @@ static String _recorded_spelling(Compiler c, String name) {
   List binding = c.sym.lookup($(name), NULL);
   return binding ? Ast.binding_spelling(binding) : name;
 }
-
-
 
 /* An ordinary external conformance whose adoption the unit's collected
    entry declares is recorded in the unit's interface as

@@ -266,8 +266,6 @@ module int _is_addressable(Compiler c, List expression) {
   return 0;
 }
 
-
-
 module List _resolve_indexed(
   Compiler c, List receiver, List selector, Token origin) {
   receiver = c.resolve_expression(receiver, origin);

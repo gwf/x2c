@@ -145,8 +145,6 @@ module Fact _slot(Walk &w, Var argument) {
   return fact && fact.points ? fact.points : fact;
 }
 
-
-
 module Fact _base(Walk &w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
@@ -209,8 +207,6 @@ static Fact _borrow(Walk &w, Var place, List &?named) {
   if (through) borrow.param = base.param;
   return borrow;
 }
-
-
 
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument

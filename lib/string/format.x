@@ -328,8 +328,6 @@ static void _fail(Format &f, String reason) {
   _format_error(f.offset, reason);
 }
 
-
-
 static void _format_error(int offset, String reason) {
   raise %(format (offset $offset) (reason $reason));
 }

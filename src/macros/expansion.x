@@ -284,8 +284,6 @@ module List _private_name(Compiler c, String source, Token root) {
   return binding;
 }
 
-
-
 static List _introduced_binding(Compiler c, String source, Token root) =>
   c.sym.introduce(
     root ? _file_scope_name(c, root, source)

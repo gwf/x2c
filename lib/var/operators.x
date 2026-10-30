@@ -247,8 +247,6 @@ Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
   return stored;
 }
 
-
-
 /** Applies a dynamic arithmetic, bitwise, comparison, or logical operator.
     Integers use C-style promotion and wrap to the result type's width;
     shifts use the promoted left operand's type and sign-fill signed right

@@ -9,8 +9,6 @@ Symbol _x2c_indexed_builtin_helper(Compiler c, Type type) {
   return 0;
 }
 
-
-
 // operator types and protocol operations
 
 module List _unary(Resolve &r, Var operator, List operand) {

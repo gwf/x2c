@@ -137,8 +137,6 @@ MatchMachine *MatchMachine.acquire(MachineStats *stats) {
   return m;
 }
 
-
-
 /** Initializes fresh caller-owned storage, leaving unused fixed arrays alone.
     The caller must eventually dispose any materialization scratch.
 */
@@ -450,8 +448,6 @@ static void _eq_head(MatchMachine &m, const MachineWord &w) {
 
 static Var _const(MatchMachine &m, int index) => m.program.consts[index];
 
-
-
 /* A plan selects raw Var bits only where they agree with `Var.equal`. */
 static int _equal(int mode, Var left, Var right) =>
   mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : left.equal(right);
@@ -472,8 +468,6 @@ static void _skip(MatchMachine &m, int reg, List at) {
   *_cursor(m, reg) = at.cdr();
   (*_distance(m, reg))++;
 }
-
-
 
 static List *_cursor(MatchMachine &m, int reg) => &m.regs[m.fp].cursors[reg];
 
