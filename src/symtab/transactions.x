@@ -110,7 +110,8 @@ void SymTxn.rollback(SymTxn &?s) {
   _restore(s);
   if (s.extended) _restore_effects(s);
   if (c.source_facts && c.source_primary) _restore_sources(s);
-  if (s.source_capture != NULL) s.source_capture.resize(s.source_capture_length);
+  if (s.source_capture != NULL)
+    s.source_capture.resize(s.source_capture_length);
   _finish(s);
 }
 

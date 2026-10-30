@@ -127,7 +127,8 @@ static void _aliased(Preserve &p, List body) {
   }
 }
 
-/* Completed declarations, statements, blocks, and child rewrites supply Lists. */
+/* Completed declarations, statements, blocks, and child rewrites supply
+   Lists. */
 module List _preserve_locals(Preserve &p, List node) {
   if (!node) return node;
   // Only declarations and parameters carry a qualifier. A statement

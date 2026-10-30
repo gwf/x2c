@@ -108,7 +108,8 @@ module int _buffer_valid(
   return !layout.binder_count || captures.values != NULL;
 }
 
-/* Callers supply a checked capture-buffer address or their own local buffer. */
+/* Callers supply a checked capture-buffer address or their own local
+   buffer. */
 module int _capture(
   MatchPlan m, Var input, MatchCaptureBuffer &captures,
   MachineStats &?stats) {

@@ -253,7 +253,8 @@ static List _after_declarator(
       <decl>, <init>, %(declare $ordinary (bindings $declarator)), <block>,
       c.return_type, origin);
     if (<auto> in base) {
-      Type type = %(declare $base (bindings (bind $name $mods))).type_from_ast();
+      Type type =
+        %(declare $base (bindings (bind $name $mods))).type_from_ast();
       List release = c.resolve_protocol_member(type, "cleanup")
         ? c.bind_syntax($!{ defer $name.cleanup(); }, <block>, c.return_type)
         : NULL;

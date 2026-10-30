@@ -64,8 +64,8 @@ static Map _linked_hashes(void) {
   return rows;
 }
 
-/* The prelude components' interface records, which `src/collect/collect.x` links
-   into the compiler it is translated into. */
+/* The prelude components' interface records, which `src/collect/collect.x`
+   links into the compiler it is translated into. */
 static Map _linked_prelude(void) {
   _require_expansion("_x2c_prelude_records");
   return active.expander.linked_prelude_records();

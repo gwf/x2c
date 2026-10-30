@@ -867,7 +867,8 @@ static List _parse_postfix_dot(Compiler c, List expr) {
   // Allocate a method identity before parsing its arguments.
   if (c.source_facts) {
     List binding = NULL;
-    List member = c.resolve_postfix_member(expr.cadr(), field, <.>, 1, binding);
+    List member = c.resolve_postfix_member(
+      expr.cadr(), field, <.>, 1, binding);
     c.record_source_reference(binding, member.caddr(), first, after);
   }
   else (void) c.resolve_postfix_member(expr.cadr(), field, <.>, 1, NULL);

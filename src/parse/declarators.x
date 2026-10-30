@@ -368,7 +368,8 @@ module List _finish_parameter(
   declarator = _install_declarator(
     c, base, NULL, declarator,
     method_identity, preserved_self);
-  c.record_source_declaration(declarator.cadr(), source_first, source_after, 0);
+  c.record_source_declaration(
+    declarator.cadr(), source_first, source_after, 0);
   List modifiers = NULL;
   base = Type.declaration_base(base, modifiers);
   declarator = Ast.append_modifiers(declarator, modifiers);
@@ -665,7 +666,8 @@ module List _declarator_init(Compiler c, List type, List context) {
     Type declared = %(declare $type (bindings $bind)).type_from_ast();
     int external = !context && !type.type().is_static() &&
       !c.sym.is_file_static(bind.cadr()) &&
-      (c.sym.at_file_scope() || type.type().is_extern() || declared.is_function());
+      (c.sym.at_file_scope() || type.type().is_extern() ||
+       declared.is_function());
     c.record_source_declaration(bind.cadr(), first, after, external);
   }
   int function_arrow = !c.in_proto && _x2c_at_function_arrow(c) &&

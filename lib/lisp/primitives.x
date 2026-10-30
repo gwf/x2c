@@ -140,7 +140,8 @@ Var lisp_ge_chain(List values) => _chain(values, ">=", -1, 0);
 /** Compares Lisp numbers by value and returns a boxed negative, zero, or
     positive. Integer and floating encodings of one number compare equal.
     Unlike `Var.compare`, numeric comparison does not use representation
-    rank to distinguish equal values. A nonnumeric operand raises `<bad-types>`.
+    rank to distinguish equal values. A nonnumeric operand raises
+    `<bad-types>`.
 */
 Var lisp_compare(Var a, Var b) {
   if (!_is_lisp_number(a) || !_is_lisp_number(b))

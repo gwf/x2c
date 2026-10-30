@@ -274,7 +274,8 @@ static Var _get_hashed(
 }
 
 static Var _lookup_level(Pool pool, Var key, unsigned hash) =>
-  pool == value_root ? _root_lookup(key, hash) : _get_hashed(pool.table, key, hash);
+  pool == value_root ? _root_lookup(key, hash) :
+    _get_hashed(pool.table, key, hash);
 
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */

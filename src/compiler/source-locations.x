@@ -96,7 +96,8 @@ void Compiler.record_source_reference(
 }
 
 /** Attaches a completed named-type capture to its existing declaration row. */
-void Compiler.attach_source_references(Compiler c, List binding, Array capture) {
+void Compiler.attach_source_references(
+  Compiler c, List binding, Array capture) {
   List key = c.fact(%(src-key $binding));
   List declaration = c.source_declarations[key];
   declaration = %(@(declaration[:5]) $capture @(declaration[6:]));

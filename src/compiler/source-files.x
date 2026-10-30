@@ -82,7 +82,9 @@ String Compiler.portable_path(String path) {
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
-/** Returns the absolute path that a `Compiler.portable_path` spelling names. */
+/** Returns the absolute path that a `Compiler.portable_path` spelling
+    names.
+*/
 String Compiler.absolute_home_path(String spelling) =>
   spelling.startswith("/") ? spelling : %"$(x2c_get_root())/$spelling";
 

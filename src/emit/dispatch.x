@@ -280,7 +280,8 @@ module void _emit(Emitter &e, List ast) {
    each String is written as it is, so a lowered carrier can hold C text
    around the nodes it lowers. A Symbol ends the run and heads a node. */
 static void _sequence(Emitter &e, List ast) {
-  for (; ast && ast.car() is not <symbol>; ast = ast.cdr()) _node(e, ast.car());
+  for (; ast && ast.car() is not <symbol>; ast = ast.cdr())
+    _node(e, ast.car());
   _emit(e, ast);
 }
 
