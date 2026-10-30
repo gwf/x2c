@@ -6,8 +6,10 @@
 > under "Decisions" the same day. Batches 1 and 2 were published to `dev`
 > on 2026-10-30 as `fe6b9d4d7` after the full publication gate; see
 > "Implementation evidence" for what landed, what was scoped, and the
-> follow-ups found. Batches 3 to 6 have not started. Findings and
-> verification are in [the review record](reference/review-2026-10-30.md).
+> follow-ups found. Batches 3 to 6 were implemented the same day and are
+> recorded below; their publication revision is added when it lands.
+> Findings and verification are in
+> [the review record](reference/review-2026-10-30.md).
 
 ## Result and scope
 
@@ -565,3 +567,76 @@ which keeps the closing quote, so `'\0'` evaluated to 39; the slice is now
   shared-library recording skips; not probed on macOS.
 - Other `long` overflow in `#if` evaluation (unary minus of `LONG_MIN`,
   `+`, `*`) is still evaluated natively.
+
+## Implementation evidence, batches 3 to 6
+
+Implemented on 2026-10-30 by five parallel workers from `66a119db5`
+(tooling, tests, book and site, examples and packages, guidance and plans),
+integrated by the orchestrating session, and published together.
+
+### Landed as specified
+
+R21, R23, R24, R27 (every item), R28, R29, R30, R31, R32, R34, R35, R36,
+R37. R37 also archived `located-failures.md` and `compile-startup-floor.md`,
+whose scope PRs #603, #604, #605, #607, and #601 had delivered. R33 landed
+except the slug (below). R24's acceptance: a marker appended to
+`src/linked-meta.x` survived `make build` before the change and is
+regenerated after it.
+
+### Landed with a recorded departure
+
+- R22: `ensure doc-check` treats a path as changed unless a record of
+  either gate holds its current content; with no record every page counts,
+  so a fresh worktree's docs-only gate runs `doc-outputs` once (about 17 s).
+  The integrator's candidate has no record either, so its doc-check batches
+  run `doc-outputs` every time; passing the PR range to `ensure` would
+  narrow that and is a follow-up. The record format moved to 7, so older
+  records read as stale once. `commands/build/*.md` now takes the full
+  gate instead of counting as documentation.
+- R25: `agent_context.py` keeps the old `blocked` subcommand because this
+  host's shared `core.hooksPath` is the absolute path of the main
+  checkout's hook, which calls it. Until the main checkout carries the new
+  `pre-push`, `integrate-dev.py context` reports a conflicting hook in any
+  tree with this batch; pulling `dev` in the main checkout, or setting the
+  relative `tools/hooks` value, resolves it.
+- R26: with the relative value each worktree runs its own hook; only the
+  absolute value makes every worktree run one script. The docs state the
+  relative behavior and name the absolute case.
+- R27: `doc-check` depends on `build` instead of recording the compiler
+  hash, because only a build proves the compiler matches the tree.
+- R31: `FileReadStatus` shipped in 0.15.0, so its note sits under 0.15.0
+  and "Upgrading from 0.14.0"; `--cpp` is not a break against 0.15.1, which
+  expanded nothing, so the upgrade section omits it.
+- R33 and Q6: the site has no redirect mechanism (the slug is a home-page
+  fragment), so per the decision the slide keeps its `compile-time-lisp`
+  name and slug and only its prose changed. The `slide: runtime-lisp` line
+  in `site/src/content/examples/notes.md` stays: `site/src/pages/index.astro`
+  reads it for every article, so deleting it breaks the site build.
+- R34: `tools/syntax-spec` cannot run from a checkout, so the regenerated
+  `x2c.ebnf`, `lexical-data.md`, and syntax-map row were produced from a
+  copy outside the home and committed; the checked-in outputs had carried
+  two hand edits (`List @`/`Map @` and `alias ... to`) that are now in the
+  data files too.
+- R35: `.gitignore`'s dead `examples/deprecated` lines were removed by the
+  tooling worker; the Go notes server's reason string changed without a
+  build (`go` is not installed).
+
+### Follow-ups found, not done
+
+- Host hook path: see R25 above; one `git pull` in the main checkout.
+- `etc/vsc-extension/x2c-syntax-0.4.0.vsix` still packages the old
+  changelog sentence; rebuilding it needs the extension's npm toolchain.
+- Under `--cpp`, a literal atom spelled as a C keyword is expanded when a
+  visible macro has that name (`#define volatile changed` breaks
+  `%(WORD volatile)`), because `Token.is_word` accepts keywords. Ordinary
+  literal atoms are not expanded. A defect candidate.
+- `tools/syntax-spec` fails to build from a checkout since 9c00a58be
+  excluded `$root/etc/` from `Build.script_helpers`.
+- `make check-native-modules` (optional) fails at `run-native-modules.sh:320`,
+  which feeds a `meta` prototype the native playground rejects.
+- `examples/packages/http-json-releases` `make run` posts its summary to
+  `api.github.com`, which probably rejects it; inferred from source.
+- `examples/apps/notes/bench/database-thread.md:20-26` still passes the
+  include flags the build no longer needs.
+- The 0.15.0 release notes label their REPL link "Experimental REPL";
+  historical text, left as is.
