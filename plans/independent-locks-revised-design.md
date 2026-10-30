@@ -1,13 +1,16 @@
 # Revised Pool accounting, index construction, and Channel handoffs
 
-> Status: active - reviewed design authorized for implementation.
+> Status: blocked - implemented locally; revised candidate fails performance acceptance.
 > Requested 2026-10-30 after the local candidate failed performance acceptance.
 > Source reviewed at `d4a0ccbcc9fb41400992e7cb6dd9f0771d83b62d`.
-> No implementation, build, or measurement was performed for this revision.
+> Implemented and measured at `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
 > Performance measurements and no reproducible regressions remain mandatory
 > before merging to dev. Every measured tradeoff requires Gary's explicit approval.
 > An independent reviewer answered yes to credibility, without claiming acceptance.
 > Gary authorized implementation and measurement of previously failing workloads first.
+> [Results](reference/independent-lock-redesign-performance-2026-10-30.md):
+> Pool accounting regressions removed; Channel, single-worker Pool release,
+> and retained index memory regressions remain. Nothing pushed or merged to dev.
 
 This revises three mechanisms in the
 [implementation plan](independent-pool-and-channel-locks.md). Its unaffected
@@ -254,6 +257,26 @@ After focused acceptance, complete the existing compiler performance checkpoint,
 review and fix the authored diff, integrate current dev, and perform the existing
 publication validation on the final tree. Remeasure any relevant integrated
 changes. Nothing in this proposal authorizes accepting the failed candidate.
+
+## Implementation result: 2026-10-30
+
+All three replacements were implemented. A follow-up confines Channel TLS waiter
+setup to operations that must block. The final combined focused checks passed
+153 tests and 1473 assertions in each accounting mode. Controlled probes passed
+for counter totals, index builder/fallback behavior, stop/commit, condition wait,
+borrowed-monitor lifetime, and commitment during stopped-peer pruning.
+
+The required failing-workload-first measurements still reject this candidate:
+the final Channel penalties are about 20-26%, the single-worker Pool-release
+penalty is 4.4%, and equal-live diagnostics confirm retained index memory growth.
+The private Pool counters produce substantial improvements in the formerly
+regressing accounting workloads. These gains do not waive the remaining failures.
+See the linked result record for absolute measurements, raw evidence, and limits.
+
+No further architecture change or tradeoff is authorized by these results.
+The candidate stays local. Publication validation, the compiler performance
+checkpoint, and remaining broad measurements were not run for a candidate that
+already fails the mandatory acceptance rule.
 
 ## Plan review
 

@@ -7,13 +7,16 @@
 > Gary authorized monitored implementation and integration on 2026-10-30.
 > Performance measurements and no reproducible regressions are mandatory
 > before merging to dev. Any tradeoff requires Gary's explicit approval.
-> Revised local runtime candidate: `bdb8cdbbd`. Nothing from this work has been pushed.
+> First revised local runtime candidate: `bdb8cdbbd`. Nothing from this work has been pushed.
 > Matched runtime measurements reproduce regressions. No tradeoff is approved.
 > Design revision requested after measurement: see
 > [the revised design](independent-locks-revised-design.md).
 > That proposal replaces the accounting, index-builder, and Channel protocols
 > below. The original design and execution record remain as failure evidence.
 > Gary authorized the reviewed revision; measure previously failing workloads first.
+> That revision was implemented at `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
+> [Its measurements](reference/independent-lock-redesign-performance-2026-10-30.md)
+> still fail acceptance; the current candidate remains local and blocked.
 
 ## Result and contracts
 
