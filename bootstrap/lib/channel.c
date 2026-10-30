@@ -24,11 +24,11 @@ typedef struct ChannelWait{
   Var value;
   Thread owner;
   struct ChannelWait * previous, * next;
-  int committed, owned;
+  int committed, owned, linked;
 }
 * ChannelWait;
 
-static _Thread_local struct ChannelWait rendezvous_wait;
+static _Thread_local struct ChannelWait channel_wait;
 
 typedef struct ChannelWaits{
   ChannelWait first, last;
@@ -41,7 +41,7 @@ struct Channel{
   size_t capacity, count;
   ChannelMessage first, last;
   ChannelWaits senders, receivers;
-  pthread_cond_t changed;
+  X2CChannelMonitor monitor;
   int initialized, closed;
 }
 ;
@@ -64,17 +64,35 @@ static size_t _capacity(Var value);
 
 static void _send(Channel channel, Var value, int owned);
 
-static int _rendezvous_send(Channel channel, Var value, int owned);
+static int _send_owned(Channel channel, ChannelMessage message, Var value);
+
+static void _lock(pthread_mutex_t * mutex);
+
+static void _unlock(pthread_mutex_t * mutex);
 
 static void _append_wait(ChannelWaits * queue, ChannelWait wait);
 
 static void _remove_wait(ChannelWaits * queue, ChannelWait wait);
 
-static ChannelWait _live_wait(ChannelWaits * queue);
+static void _notify(Channel channel);
 
 static int _buffer_send(Channel channel, ChannelMessage message);
 
-static void _notify(Channel channel);
+static int _buffer_receive(Channel channel, ChannelMessage * message);
+
+static int _commit_available(Channel channel, int sending, ChannelWait peer, Var * value, int * owned);
+
+static void _sleep(Channel channel);
+
+static int _attempt(Channel channel, int sending, Var * value, int * owned);
+
+static void _finish(Channel channel, Thread owner);
+
+static int _rendezvous(Channel channel, int sending, Var * value, int * owned);
+
+static int _wait_pending(Channel channel, int sending, Thread owner, Var * value, int * owned);
+
+static int _wait_for_commit(Channel channel, int sending, ChannelWait wait, Var * value, int * owned);
 
 static ChannelMessage _message(Var value, int owned);
 
@@ -83,10 +101,6 @@ static int _container(Var value);
 static Scope _container_contents(Var value);
 
 static void _move_container(Var value, Scope * destination);
-
-static int _rendezvous_receive(Channel channel, Var * out, int * owned);
-
-static int _buffer_receive(Channel channel, ChannelMessage * out);
 
 static int _next(Iter iter, Var * out);
 
@@ -113,6 +127,19 @@ typedef struct _x2c_gensym_defer_env_1{
 _x2c_gensym_defer_env_1;
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
+
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_4;
+  const void * _x2c_gensym_defer_capture_5;
+  const void * _x2c_gensym_defer_capture_6;
+  const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_8;
+  const void * _x2c_gensym_defer_capture_9;
+  const void * _x2c_gensym_defer_capture_10;
+}
+_x2c_gensym_defer_env_2;
+
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
 int x2c_register_builtin_descriptor(Symbol, VarMethods);
 
@@ -228,7 +255,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _93 = cons(_89, _92);
   _94 = List_var(_93);
   _95 = Symbol_var(805770);
-  _96 = int_var(64);
+  _96 = int_var(63);
   _97 = cons(_96, NULL);
   _98 = cons(_95, _97);
   _99 = List_var(_98);
@@ -241,7 +268,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(1789);
+  _109 = int_var(1726);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -436,11 +463,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _301 = cons(_300, NULL);
   _302 = cons(_77, _301);
   _303 = List_var(_302);
-  _304 = int_var(65);
+  _304 = int_var(64);
   _305 = cons(_304, NULL);
   _306 = cons(_95, _305);
   _307 = List_var(_306);
-  _308 = int_var(1845);
+  _308 = int_var(1782);
   _309 = cons(_308, NULL);
   _310 = cons(_108, _309);
   _311 = List_var(_310);
@@ -515,7 +542,7 @@ Channel Channel_new(Var type, Var capacity){
     else capacity = int_var(0);
   }
   if(! Var_is(type, 1328354264) ||(! x2c_var_equal_lane(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 93,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 92,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
     __builtin_unreachable();
   }
@@ -540,17 +567,28 @@ Channel Channel_new(Var type, Var capacity){
       channel -> lifetime = lifetime;
       channel -> type = Var_symbol(type);
       channel -> capacity = limit;
-      int error = pthread_cond_init(& channel -> changed, NULL);
+      int error = pthread_mutex_init(& channel -> monitor.mutex, NULL);
       if(error){
-        Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("pthread_cond_init")), NULL)));
+        Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("pthread_mutex_init")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 105,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 104,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_1, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(11703198), int_var(error));
           __builtin_unreachable();
         }
 
       }
       channel -> initialized = 1;
+      error = pthread_cond_init(& channel -> monitor.condition, NULL);
+      if(error){
+        Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("pthread_cond_init")), NULL)));
+        {
+          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 107,.runtime = 1};
+          x2c_error_raise_n(& _x2c_gensym_error_site_2, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(11703198), int_var(error));
+          __builtin_unreachable();
+        }
+
+      }
+      channel -> initialized = 2;
       ready = 1;
       {
         Channel _x2c_gensym_return_value_0 = channel;
@@ -591,14 +629,14 @@ void Channel_free(Channel channel){
 
 void Channel_close(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 160,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 162,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
     __builtin_unreachable();
   }
-  x2c_thread_wait_lock();
+  _lock(& channel -> monitor.mutex);
   channel -> closed = 1;
   _notify(channel);
-  x2c_thread_wait_unlock();
+  _unlock(& channel -> monitor.mutex);
 }
 
 Var Channel_var(Channel channel){
@@ -607,8 +645,8 @@ Var Channel_var(Channel channel){
 
 Channel Var_channel(Var value){
   if(! Var_is(value, 6982365528)){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 176,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 178,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
     __builtin_unreachable();
   }
   return Var_pointer(value);
@@ -628,8 +666,8 @@ void Scope_transfer(Scope, Scope);
 
 Var Channel_receive(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 196,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 198,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
     __builtin_unreachable();
   }
   Scope * destination = Scope_top();
@@ -637,13 +675,11 @@ Var Channel_receive(Channel channel){
   Var value =((void) 0, Void);
   ChannelMessage message = NULL;
   int owned = 0;
-  x2c_thread_wait_lock();
-  int status = channel -> capacity ? _buffer_receive(channel, &(message)) : _rendezvous_receive(channel, &(value), &(owned));
+  int status = channel -> capacity ? _buffer_receive(channel, &(message)) : _rendezvous(channel, 0, &(value), &(owned));
   if(message){
     value = message -> value;
     owned = message -> owned;
   }
-  x2c_thread_wait_unlock();
   if(message) free(message);
   if(owned){
     Scope transport = Scope_owner(Var_pointer(value));
@@ -669,7 +705,8 @@ static void _drop(void * bytes){
     free(message);
     message = next;
   }
-  if(channel -> initialized) _native_check(pthread_cond_destroy(& channel -> changed));
+  if(channel -> initialized == 2) _native_check(pthread_cond_destroy(& channel -> monitor.condition));
+  if(channel -> initialized) _native_check(pthread_mutex_destroy(& channel -> monitor.mutex));
 }
 
 static void _native_check(int error){
@@ -744,8 +781,8 @@ static size_t _capacity(Var value){
     if(capacity >= 0) return(size_t) capacity;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 250,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 252,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
     __builtin_unreachable();
   }
 
@@ -753,27 +790,25 @@ static size_t _capacity(Var value){
 
 Symbol Var_tag(Var);
 
-Scope Scope_parent(Scope);
-
 static void _send(Channel channel, Var value, int owned){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "_send",.line = 254,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 256,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "_send",.line = 255,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_7, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 257,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(channel -> type != 45156 && Var_tag(value) != channel -> type){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "_send",.line = 257,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "_send",.line = 259,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(owned && ! Var_pointer(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "_send",.line = 259,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "_send",.line = 261,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send_owned")), NULL))));
     __builtin_unreachable();
   }
   ChannelMessage message = NULL;
@@ -792,38 +827,11 @@ static void _send(Channel channel, Var value, int owned){
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       if(channel -> capacity) message = _message(value, owned);
-      int container = owned && _container(value);
-      Scope payload = NULL, previous = NULL;
-      Scope contents = container ? _container_contents(value) : NULL;
-      Scope contents_parent = contents ? Scope_parent(contents) : NULL;
-      if(owned){
-        Scope owner = Scope_owner(Var_pointer(value));
-        previous = container ? owner : Scope_parent(owner);
-        if(container){
-          payload = Scope_new();
-          _move_container(value, & payload);
-        }
-        else{
-          payload = owner;
-          Scope_transfer(payload, NULL);
-        }
-
-      }
-      x2c_thread_wait_lock();
-      status = channel -> capacity ? _buffer_send(channel, message) : _rendezvous_send(channel, value, owned);
-      x2c_thread_wait_unlock();
-      if(status != 1 && owned){
-        if(container){
-          _move_container(value, & previous);
-          if(contents) Scope_transfer(contents, contents_parent);
-          Scope_destroy(payload);
-        }
-        else Scope_transfer(payload, previous);
-      }
+      status = owned ? _send_owned(channel, message, value) : channel -> capacity ? _buffer_send(channel, message) : _rendezvous(channel, 1, &(value), &(owned));
       if(status < 0) x2c_thread_cancel();
       if(! status){
-        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "_send",.line = 293,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
+        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_send",.line = 272,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
         __builtin_unreachable();
       }
 
@@ -833,69 +841,241 @@ static void _send(Channel channel, Var value, int owned){
 
 }
 
-static int _rendezvous_send(Channel channel, Var value, int owned){
-  if(x2c_thread_stopping()) return - 1;
-  if(channel -> closed) return 0;
-  ChannelWait receiver = _live_wait(&(channel -> receivers));
-  if(receiver){
-    receiver -> value = value;
-    receiver -> owned = owned;
-    receiver -> committed = 1;
-    _remove_wait(&(channel -> receivers), receiver);
-    _notify(channel);
-    return 1;
+Scope Scope_parent(Scope);
+
+static int _send_owned(Channel channel, ChannelMessage message, Var value){
+  int container = _container(value), owned = 1, status = 0;
+  Scope owner = Scope_owner(Var_pointer(value));
+  Scope previous = container ? owner : Scope_parent(owner), payload = NULL;
+  Scope contents = container ? _container_contents(value) : NULL;
+  Scope contents_parent = contents ? Scope_parent(contents) : NULL;
+  if(container){
+    payload = Scope_new();
+    _move_container(value, & payload);
   }
-  ChannelWait wait = & rendezvous_wait;
-  * wait =(struct ChannelWait){
-    .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
+  else{
+    payload = owner;
+    Scope_transfer(payload, NULL);
   }
-  ;
-  _append_wait(&(channel -> senders), wait);
-  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait -> committed) return 1;
-  _remove_wait(&(channel -> senders), wait);
-  return x2c_thread_stopping() ? - 1 : 0;
+  {
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & status;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & container;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_6 =(const void *) & value;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_7 =(const void *) & previous;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_8 =(const void *) & contents;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_9 =(const void *) & contents_parent;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_10 =(const void *) & payload;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+    {
+      status = channel -> capacity ? _buffer_send(channel, message) : _rendezvous(channel, 1, &(value), &(owned));
+      {
+        int _x2c_gensym_return_value_1 = status;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+  }
+
+}
+
+static void _lock(pthread_mutex_t * mutex){
+  if(mutex) _native_check(pthread_mutex_lock(mutex));
+}
+
+static void _unlock(pthread_mutex_t * mutex){
+  if(mutex) _native_check(pthread_mutex_unlock(mutex));
 }
 
 static void _append_wait(ChannelWaits * queue, ChannelWait wait){
   wait -> previous =(* queue).last;
+  wait -> next = NULL;
   if((* queue).last)(* queue).last -> next = wait;
   else(* queue).first = wait;
   (* queue).last = wait;
+  wait -> linked = 1;
 }
 
 static void _remove_wait(ChannelWaits * queue, ChannelWait wait){
+  if(! wait -> linked) return;
   if(wait -> previous) wait -> previous -> next = wait -> next;
   else(* queue).first = wait -> next;
   if(wait -> next) wait -> next -> previous = wait -> previous;
   else(* queue).last = wait -> previous;
-}
-
-static ChannelWait _live_wait(ChannelWaits * queue){
-  for(ChannelWait wait =(* queue).first;  wait;  wait = wait -> next) if(! x2c_thread_wait_stopped(wait -> owner)) return wait;
-  return NULL;
-}
-
-static int _buffer_send(Channel channel, ChannelMessage message){
-  while(channel -> count == channel -> capacity && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(x2c_thread_stopping()) return - 1;
-  if(channel -> closed) return 0;
-  if(channel -> last) channel -> last -> next = message;
-  else channel -> first = message;
-  channel -> last = message;
-  if(! channel -> count ++) _notify(channel);
-  return 1;
+  wait -> linked = 0;
 }
 
 static void _notify(Channel channel){
-  _native_check(pthread_cond_broadcast(& channel -> changed));
+  _native_check(pthread_cond_broadcast(& channel -> monitor.condition));
+}
+
+static int _buffer_send(Channel channel, ChannelMessage message){
+  Thread owner = NULL;
+  _lock(& channel -> monitor.mutex);
+  if(! x2c_thread_channel_enter(& channel -> monitor, &(owner))){
+    _unlock(& channel -> monitor.mutex);
+    return - 1;
+  }
+  while(channel -> count == channel -> capacity && ! channel -> closed){
+    _sleep(channel);
+    if(x2c_thread_wait_stopped(owner)){
+      _finish(channel, owner);
+      return - 1;
+    }
+
+  }
+  int status = 0;
+  if(! channel -> closed){
+    if(channel -> last) channel -> last -> next = message;
+    else channel -> first = message;
+    channel -> last = message;
+    if(! channel -> count ++) _notify(channel);
+    status = 1;
+  }
+  _finish(channel, owner);
+  return status;
+}
+
+static int _buffer_receive(Channel channel, ChannelMessage * message){
+  Thread owner = NULL;
+  _lock(& channel -> monitor.mutex);
+  if(! x2c_thread_channel_enter(& channel -> monitor, &(owner))){
+    _unlock(& channel -> monitor.mutex);
+    return - 1;
+  }
+  while(! channel -> count && ! channel -> closed){
+    _sleep(channel);
+    if(x2c_thread_wait_stopped(owner)){
+      _finish(channel, owner);
+      return - 1;
+    }
+
+  }
+  int status = 0;
+  if(channel -> count){
+    (* message) = channel -> first;
+    channel -> first =(* message) -> next;
+    if(! channel -> first) channel -> last = NULL;
+    if(channel -> count -- == channel -> capacity) _notify(channel);
+    status = 1;
+  }
+  _finish(channel, owner);
+  return status;
+}
+
+static int _commit_available(Channel channel, int sending, ChannelWait peer, Var * value, int * owned){
+  if(peer){
+    if(sending){
+      peer -> value =(* value);
+      peer -> owned =(* owned);
+    }
+    else{
+      (* value) = peer -> value;
+      (* owned) = peer -> owned;
+    }
+    peer -> committed = 1;
+    if(sending) _remove_wait(&(channel -> receivers), peer);
+    else _remove_wait(&(channel -> senders), peer);
+    _notify(channel);
+    return 1;
+  }
+  return channel -> closed ? 0 : 2;
+}
+
+static void _sleep(Channel channel){
+  _native_check(pthread_cond_wait(& channel -> monitor.condition, & channel -> monitor.mutex));
+}
+
+static int _attempt(Channel channel, int sending, Var * value, int * owned){
+  ChannelWaits * other = sending ? & channel -> receivers : & channel -> senders;
+  ChannelWait peer = channel -> closed ? NULL : other -> first;
+  if(! peer || ! x2c_thread_wait_stopped(peer -> owner)) return _commit_available(channel, sending, peer, &((* value)), &((* owned)));
+  _remove_wait(&(* other), peer);
+  _unlock(& channel -> monitor.mutex);
+  _lock(& channel -> monitor.mutex);
+  return 3;
+}
+
+static void _finish(Channel channel, Thread owner){
+  int released = x2c_thread_channel_leave(owner, & channel -> monitor);
+  _unlock(& channel -> monitor.mutex);
+  if(! released){
+    x2c_thread_wait_lock();
+    x2c_thread_wait_unlock();
+  }
+
+}
+
+static int _rendezvous(Channel channel, int sending, Var * value, int * owned){
+  Thread owner = NULL;
+  _lock(& channel -> monitor.mutex);
+  if(! x2c_thread_channel_enter(& channel -> monitor, &(owner))){
+    _unlock(& channel -> monitor.mutex);
+    return - 1;
+  }
+  int status = _attempt(channel, sending, &((* value)), &((* owned)));
+  while(status == 3){
+    if(x2c_thread_wait_stopped(owner)){
+      status = - 1;
+      break;
+    }
+    status = _attempt(channel, sending, &((* value)), &((* owned)));
+  }
+  if(status == 2) return _wait_pending(channel, sending, owner, &((* value)), &((* owned)));
+  _finish(channel, owner);
+  return status;
+}
+
+static int _wait_pending(Channel channel, int sending, Thread owner, Var * value, int * owned){
+  ChannelWait wait = & channel_wait;
+  * wait =(struct ChannelWait){
+    .value =(* value), .owner = owner, .owned =(* owned)
+  }
+  ;
+  int status = _wait_for_commit(channel, sending, wait, &((* value)), &((* owned)));
+  if(wait -> committed){
+    (* value) = wait -> value;
+    (* owned) = wait -> owned;
+  }
+  if(sending) _remove_wait(&(channel -> senders), wait);
+  else _remove_wait(&(channel -> receivers), wait);
+  _finish(channel, owner);
+  return status;
+}
+
+static int _wait_for_commit(Channel channel, int sending, ChannelWait wait, Var * value, int * owned){
+  while(1){
+    if(wait -> committed) return 1;
+    if(x2c_thread_wait_stopped(wait -> owner)) return - 1;
+    int status = _attempt(channel, sending, &((* value)), &((* owned)));
+    if(status == 3) continue;
+    if(status != 2) return status;
+    if(! wait -> linked){
+      if(sending) _append_wait(&(channel -> senders), wait);
+      else _append_wait(&(channel -> receivers), wait);
+    }
+    _sleep(channel);
+  }
+
 }
 
 static ChannelMessage _message(Var value, int owned){
   ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if(! message){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "_message",.line = 366,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_11, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/channel.x",.function = "_message",.line = 469,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_12, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   * message =(struct ChannelMessage){
@@ -932,48 +1112,6 @@ static void _move_container(Var value, Scope * destination){
     Block_move_to(array, destination);
   }
 
-}
-
-static int _rendezvous_receive(Channel channel, Var * out, int * owned){
-  if(x2c_thread_stopping()) return - 1;
-  ChannelWait sender = _live_wait(&(channel -> senders));
-  if(sender && ! channel -> closed){
-    (* out) = sender -> value;
-    (* owned) = sender -> owned;
-    sender -> committed = 1;
-    _remove_wait(&(channel -> senders), sender);
-    _notify(channel);
-    return 1;
-  }
-  if(channel -> closed) return 0;
-  ChannelWait wait = & rendezvous_wait;
-  * wait =(struct ChannelWait){
-    .owner = x2c_thread_wait_owner()
-  }
-  ;
-  _append_wait(&(channel -> receivers), wait);
-  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait -> committed){
-    (* out) = wait -> value;
-    (* owned) = wait -> owned;
-    return 1;
-  }
-  _remove_wait(&(channel -> receivers), wait);
-  return x2c_thread_stopping() ? - 1 : 0;
-}
-
-static int _buffer_receive(Channel channel, ChannelMessage * out){
-  while(! channel -> count && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(x2c_thread_stopping()) return - 1;
-  if(! channel -> count) return 0;
-  ChannelMessage message = channel -> first;
-  channel -> first = message -> next;
-  if(! channel -> first) channel -> last = NULL;
-  int was_full = channel -> count == channel -> capacity;
-  channel -> count --;
-  (* out) = message;
-  if(was_full) _notify(channel);
-  return 1;
 }
 
 static int _next(Iter iter, Var * out){
@@ -1035,5 +1173,18 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
   if((*(ChannelMessage *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2) &&(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3) != 1) free((*(ChannelMessage *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2));
+}
+
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
+  if((*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4) != 1){
+    if((*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5)){
+      _move_container((*(Var *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_6), &(*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_7));
+      if((*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_8)) Scope_transfer((*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_8), (*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_9));
+      Scope_destroy((*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_10));
+    }
+    else Scope_transfer((*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_10), (*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_7));
+  }
+
 }
 

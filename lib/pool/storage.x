@@ -277,7 +277,8 @@ static int _has_room(PoolBlock block) {
 }
 
 /* Reuses a freed slot, or else hands out the next slot never used. */
-static void *_take_slot(Pool pool, PoolBlock block, int class_index, int accounting) {
+static void *_take_slot(
+  Pool pool, PoolBlock block, int class_index, int accounting) {
   void *slot = block.free;
   if (slot) {
     block.free = *(void **) slot;
@@ -428,8 +429,8 @@ static PoolIndex _index_build(PoolIndex previous) {
     for (unsigned at = 0; at < previous.slots; at++) {
       PoolBlock block = __atomic_load_n(
         &previous.entries[at].block, __ATOMIC_ACQUIRE);
-      if (block) _index_place(candidate.entries, slots,
-        previous.entries[at].page, block);
+      if (block) _index_place(
+        candidate.entries, slots, previous.entries[at].page, block);
     }
   return candidate;
 }
@@ -487,9 +488,11 @@ module void _fatal(const char *message) {
 static void _record_request(Pool pool, size_t size) {
   PoolTraffic traffic = _traffic(pool);
   _increment(&traffic.counts.allocation_calls);
-  size_t previous = __atomic_load_n(&traffic.counts.requested_bytes, __ATOMIC_RELAXED);
-  __atomic_store_n(&traffic.counts.requested_bytes,
-    _saturated_add(previous, size), __ATOMIC_RELAXED);
+  size_t previous = __atomic_load_n(
+    &traffic.counts.requested_bytes, __ATOMIC_RELAXED);
+  __atomic_store_n(
+    &traffic.counts.requested_bytes, _saturated_add(previous, size),
+    __ATOMIC_RELAXED);
 }
 
 static void _increment(size_t *counter) {
@@ -504,7 +507,8 @@ static PoolTraffic _traffic(Pool pool) =>
   (PoolTraffic) ((char *) pool + sizeof(struct Pool));
 
 module size_t _control_size(void) =>
-  sizeof(struct Pool) + (Scope.accounting_enabled() ? sizeof(struct PoolTraffic) : 0);
+  sizeof(struct Pool) +
+    (Scope.accounting_enabled() ? sizeof(struct PoolTraffic) : 0);
 
 module void _traffic_register(Pool pool) {
   if (!Scope.accounting_enabled()) return;
@@ -541,9 +545,11 @@ static void _traffic_stats(PoolStats &stats) {
 }
 
 static void _add_traffic(PoolTrafficCounts *sum, PoolTrafficCounts *counts) {
-  sum.allocation_calls += __atomic_load_n(&counts.allocation_calls, __ATOMIC_RELAXED);
+  sum.allocation_calls += __atomic_load_n(
+    &counts.allocation_calls, __ATOMIC_RELAXED);
   sum.free_calls += __atomic_load_n(&counts.free_calls, __ATOMIC_RELAXED);
-  sum.requested_bytes = _saturated_add(sum.requested_bytes,
+  sum.requested_bytes = _saturated_add(
+    sum.requested_bytes,
     __atomic_load_n(&counts.requested_bytes, __ATOMIC_RELAXED));
   sum.slot_reuses += __atomic_load_n(&counts.slot_reuses, __ATOMIC_RELAXED);
 }
@@ -588,7 +594,8 @@ static PoolBlock _index_find(PoolIndex index, const void *ptr) {
   uintptr_t page = (uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
   unsigned at = _index_start(page, index.slots);
   PoolBlock block;
-  while ((block = __atomic_load_n(&index.entries[at].block, __ATOMIC_ACQUIRE))) {
+  while ((block = __atomic_load_n(
+    &index.entries[at].block, __ATOMIC_ACQUIRE))) {
     if (index.entries[at].page == page && _contains(block, ptr)) return block;
     at = (at + 1) & (index.slots - 1);
   }
@@ -631,7 +638,8 @@ static int _promote_level(
   int inserted;
   _setdefault(up, object, inserted);
   if (inserted) up.interned++;
-  if (block && __atomic_load_n(&block.owner, __ATOMIC_ACQUIRE) == inner) _mark_slot(block, slot);
+  if (block && __atomic_load_n(&block.owner, __ATOMIC_ACQUIRE) == inner)
+    _mark_slot(block, slot);
   else if (promotion) _push_promotion(inner, promotion);
   else Scope.move(alloc, &up.scope);
   inner.promoted++;

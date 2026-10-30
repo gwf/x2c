@@ -355,13 +355,13 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
 /** Tests a live borrowed wait token atomically. A null token has no stop
-    request. Channel stop publication and commitment hold the registered queue mutex.
+    request. Stop publication and commitment hold the registered queue mutex.
 */
 int x2c_thread_wait_stopped(Thread owner) =>
   owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
 
 /** Registers a Channel monitor for the current caller and returns its borrowed
-    Thread token through owner. Returns false if stop already claimed the token.
+    Thread token through owner. Returns false if stop already claimed it.
     The caller holds the monitor mutex. Its lifetime extends through successful
     unregister or completion acknowledgement after releasing that mutex.
 */

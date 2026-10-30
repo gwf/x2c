@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Each queue owns its mutex; registered queue monitors order commitment with stop.
+    Each queue owns its mutex; registered monitors order commitment with stop.
     Allocation, Error dispatch, and payload destruction stay outside it.
 */
 
@@ -391,7 +391,8 @@ static int _commit_available(
 
 /* Stop, notification, and the final predicate check share this mutex. */
 static void _sleep(Channel channel) =>
-  _native_check(pthread_cond_wait(&channel.monitor.condition, &channel.monitor.mutex));
+  _native_check(pthread_cond_wait(
+    &channel.monitor.condition, &channel.monitor.mutex));
 
 /* Remove one stopped head per queue acquisition, then return for a fresh
    commitment check after releasing and reacquiring the mutex. */
@@ -437,7 +438,8 @@ static int _rendezvous(Channel channel, int sending, Var &value, int &owned) {
 static int _wait_pending(
   Channel channel, int sending, Thread owner, Var &value, int &owned) {
   ChannelWait wait = &channel_wait;
-  *wait = (struct ChannelWait) { .value = value, .owner = owner, .owned = owned };
+  *wait = (struct ChannelWait) {
+    .value = value, .owner = owner, .owned = owned };
   int status = _wait_for_commit(channel, sending, wait, value, owned);
   if (wait.committed) { value = wait.value; owned = wait.owned; }
   if (sending) _remove_wait(channel.senders, wait);

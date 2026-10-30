@@ -200,6 +200,7 @@ lib/scope/scope.x|internal|ScopeAlloc
 lib/substring-map.x|advanced|MapSubInt.new_capacity
 lib/thread.x|internal|x2c_thread_wait_lock,x2c_thread_wait_unlock
 lib/thread.x|internal|x2c_thread_wait_owner,x2c_thread_wait_stopped
+lib/thread.x|internal|X2CChannelMonitor,x2c_thread_channel_enter,x2c_thread_channel_leave
 lib/thread.x|internal|x2c_thread_stopping,x2c_thread_wait,x2c_thread_cancel
 lib/string/string.x|advanced|String.escape,String.parse,String.parse_char
 lib/string/string.x|advanced|String.repr,String.write_repr
