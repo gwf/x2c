@@ -660,6 +660,15 @@ in each direction. A helper that crosses becomes a method of the owner that
 establishes its fact, never a new `x2c_*` export. Never create a file only
 to shorten another.
 
+A large module can instead split into member files listed in its entry's
+`module { ... }` block. Members share one translation unit
+([source guide](../src/README.md#how-the-files-fit-together)), so the split
+assigns each file one responsibility without a new owner or public export.
+A private helper that crosses member files takes `module` storage
+([module blocks](../docs/src/reference/language.md#module-blocks)).
+Propose the member layout with
+[proposed-module-layout](skills/proposed-module-layout/SKILL.md).
+
 **MO-4** Land a split or a reordering as a pure move with no edits inside
 the moved text, then a separate change that settles crossings, header, and
 order.
@@ -862,8 +871,8 @@ with visible definitions. Retain typed helpers for substantial construction.
 See [catalogue conventions](logger-and-diagnostics-guide.md#local-report-catalogues)
 for location arguments, progress output, and generated consumers. Use one
 `$error.<area>.<condition>` macro per runtime, package, or command
-condition in the raising unit or a shared `*-errors.x`, with `$refusal`,
-`$decline`, and `$reason` for those verbs. A short structured raise such as
+condition in the raising unit or a shared `*-errors.x`, and a `$reason`
+macro for reason text. A short structured raise such as
 `raise %(bad-state (operation "Pool.close"));` stays at its call site.
 Never dispatch diagnostics on string keys at compile time.
 
@@ -1002,9 +1011,9 @@ declarations. Put protocol-relevant prototypes before the adoption that
 needs them.
 
 **LI-1** Write compile-time code in x2c; the compiler does not evaluate
-Lisp and rejects `$(...)` and `@(...)` forms. Lisp remains a runtime
-library: the evaluator core, its initial environment, the binding tables
-that name x2c operations for Lisp, runtime DSLs, and the REPL. A `meta`
+Lisp. Lisp remains a runtime library: the evaluator core, its initial
+environment, the binding tables that name x2c operations for Lisp, and
+runtime DSLs. A `meta`
 function that needs Lisp runs in the project helper, not in a native module
 the compiler loads.
 
@@ -1027,13 +1036,14 @@ path.
 
 **AR-1** Keep the pipeline in this order, each phase consuming the
 previous phase's documented AST: tokenize (`lib/tokenizer.x`) -> collect
-declarations (`collect.x`, `.xi` interfaces) -> parse, bind, and type
-(`parse.x`, `expressions.x`, `statements.x`, `literals.x`, `type.x`, with
-macro expansion and compile-time code inside) -> region analysis
-(`regions.x`) -> lowering to a fixed point (`transform.x`, the shipped
-`component-*.x` rules, `callables.x`, `cleanup.x`) -> generation
-(`generate.x`, `cache.x`) -> emission (`emit.x`) -> formatting
-(`format.x`). Put a behavior in the phase whose contract it changes.
+declarations (`src/collect/`, `.xi` interfaces) -> parse, bind, and type
+(`src/parse/`, `src/expressions/`, `src/statements.x`, `src/literals/`,
+`src/type.x`, with macro expansion and compile-time code inside) -> region
+analysis (`src/regions/`) -> lowering to a fixed point (`src/transform/`,
+the shipped `src/components/*.x` rules, `src/callables/`, `src/cleanup/`)
+-> generation (`src/generate/`, `src/cache.x`) -> emission (`src/emit/`)
+-> formatting (`src/format.x`). Put a behavior in the phase whose contract
+it changes.
 
 **AR-2** Parsing preserves source order and attaches types as the tree is
 built: every expression is `(expr TYPE CONTENT)`. Later phases preserve
@@ -1301,10 +1311,10 @@ that is not selected is not checked for a matching finding.
 | `car() == <a> \|\| car() == <b>` chains | MA-7 | `manual-shape-checks` |
 
 Calibrated trust boundaries keep their checks: macro SDK argument checks,
-`Compiler.rebuild_protocols`, the artifact readers in
-`collect.x`, and the transforms that distinguish lowered from unlowered
-forms. A source `match` in a function does not make that function's other
-guards trustworthy.
+`Compiler.rebuild_protocols`, the interface and process-cache readers in
+`src/collect/interfaces.x` and `src/collect/cache.x`, and the transforms
+that distinguish lowered from unlowered forms. A source `match` in a
+function does not make that function's other guards trustworthy.
 
 ### Comment and prose signals
 
@@ -1325,7 +1335,6 @@ guards trustworthy.
 | --- | --- | --- |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
 | new `.xlisp` | LI-1 | none |
-| `$(` or `@(` form in x2c code | LI-1 | compiler diagnostic |
 | literal `report_error(` wording | DG-1 | `literal-report-error` |
 | string-keyed diagnostic dispatch | DG-1 | none |
 | `Var` local with one static type | VT-1 | none |
@@ -1422,6 +1431,10 @@ tweak a rewrite makes, such as `with` now restoring on an error exit.
   [AST patterns](replacing-manual-ast-walks-with-match.md).
 - **Split a large file**: list subjects, count crossings per boundary,
   split only an owner boundary, move first, settle second (MO-3, MO-4).
+  To split one module into member files that share its translation unit,
+  propose the layout with
+  [proposed-module-layout](skills/proposed-module-layout/SKILL.md), give
+  crossing helpers `module` storage, and move first (MO-3, MO-4).
 
 [investigate]: skills/investigate-x2c-overengineering/SKILL.md
 

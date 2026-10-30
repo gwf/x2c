@@ -42,7 +42,7 @@ a compiler-dependent meta body remains direct rather than changing discovery.
 
 These are ordinary compile-time expansions, not runtime message registries or
 catalogue installers. Runtime, package, and command catalogues keep their
-existing action prefixes, including `$refusal` and `$decline` for REPL actions.
+existing action prefixes.
 
 ## Logger contract
 
@@ -218,7 +218,8 @@ which owns the structured parse error and syntax hint.
   failure boundary.
 - `unittest/compiler-fixtures/diagnostic-width.x` fixes filename, one-based
   line and column, token-width carets, notes, limit notice, and exit status.
-- The `parenthesized-{list-unquote,string-unquote,list-splice}` fixtures prove
-  unsupported `$()` and `@()` literal forms exit 1 with positioned parse
-  diagnostics, without an assertion or signal. The braced malformed fixtures
-  cover empty, missing, and mismatched delimiters.
+- The `grouped-unquote-missing`, `grouped-unquote-mismatched`, and
+  `grouped-list-splice-empty` fixtures prove that malformed `$(...)` and
+  `@(...)` literal forms exit 1 with positioned parse diagnostics, without
+  an assertion or signal. They cover missing, mismatched, and empty
+  delimiters.

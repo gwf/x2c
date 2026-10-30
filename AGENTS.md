@@ -130,8 +130,9 @@ commits need not rebuild from their own bootstrap.
   declarations, generated names, lifecycle, binding facts, the literal cache,
   match patterns, and source files and locations; + `symtab`, its symbol
   table, and `fields`, which copies named fields) ->
-  shared runtime `lib/tokenizer.x` (+ `cpp`, which expands C macros and
-  decides conditional groups, and `preprocess`, which reads the directives) ->
+  shared runtime `lib/tokenizer.x` -> `preprocess`, which reads the
+  directives (+ optional `cpp`, enabled by `--cpp`, which expands C macros
+  and decides conditional groups) ->
   `parse` (+ `parse-reports`, package and alias diagnostics)/
   `expressions` (+ `expressions-reports`, typing diagnostics, and
   `initializers`, which converts brace initializers)/`statements`/`macros`
@@ -178,15 +179,16 @@ commits need not rebuild from their own bootstrap.
 - `builds/` - staged toolchains (`builds/0` drives local builds).
 - `commands/` - external commands built against the current compiler;
   `commands/manifest.txt` records maturity and help summaries. `new` owns
-  starter-project creation. `repl` owns
-  terminal interaction, editing, persistent submissions, and inspection.
+  starter-project creation. `repl` supervises a native worker that loads
+  programs, inspects typed objects, and replays saved transcripts on
+  `:replay`.
   `package` owns installation, removal, listing, and project lockfiles.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,
   surfaced through `.agents/skills` for Codex and `.claude/skills` for Claude
   Code).
 - `docs/` - the user-facing book (mdBook); `make doc-build` renders it.
 - `unittest/`, `examples/`, `plans/`; `etc/` holds build tooling, the
-  external Lisp bootstrap, and the compiler syntax prelude.
+  runtime Lisp assets, and the compiler syntax prelude.
 - `packages/` - optional adapters for third-party C libraries; they need
   network-fetched sources and are outside `make check`.
 - `site/` - the public website; `make site-build` renders it with the book

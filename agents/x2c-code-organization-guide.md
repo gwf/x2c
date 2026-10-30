@@ -62,11 +62,13 @@ Paths below are relative to `lib/`.
 | Source | Responsibility |
 | --- | --- |
 | `common.x`, `scope/scope.x`, `pool/pool.x` | Shared representation, allocation lifetimes, and canonical values. |
+| `common-types.x` | `Var`, `List`, and `Mutex`, which the compiler prelude declares before its meta prototypes. |
 | `static-init.x`, `private-keywords.x` | Static initialization and the private loop keyword. |
 | `var/var.x`, `var/conversion.x`, `var/operators.x` | Tagged values, conversions, and operations. |
 | `var-ledger.x`, `var-tags.x`, `var-adapters.x`, `integer-ops.x`, `native-scalar-types.x` | Tag and scalar ledgers, pointer converter templates, and raw integer arithmetic. |
 | `dispatch.x`, `protocols.x`, `cleanup.x` | Dynamic behavior and protocol adoption. |
 | `string/string.x` | Canonical immutable text, classification, numeric parsing, formatting, escaping, splitting, and lazy field cursors. |
+| `substring.x`, `substring-map.x` | Borrowed immutable views of String bytes and a scope-owned count table keyed by them. |
 | `symbol.x`, `symbolset.x`, `atom.x`, `list/list.x`, `list-selectors.x` | Closed vocabularies, canonical Lists, and optional compound List selectors. |
 | `block.x`, `buffer.x`, `array/array.x`, `map/map.x` | Mutable storage and builders. |
 | `array/generics.x`, `map/generics.x`, `typed-array.x`, `typed-map.x`, `typed-list.x` | Collection family generators and typed views. |
@@ -74,6 +76,8 @@ Paths below are relative to `lib/`.
 | `macrovalue/macrovalue.x`, `system-macros.x` | Macros as values and convenience macros. |
 | `error/error.x`, `error_init.x`, `error-macros.x`, `error-private.x`, `func/errors.x`, `exception.x` | Ambient errors, shared causes, transfer layouts, and structured control flow. |
 | `file.x`, `logger.x`, `path.x`, `process.x`, `args.x`, `scripting.x` | System boundaries, argument parsing, and script-unit includes. |
+| `net.x`, `http.x` | Blocking TCP sockets backed by File streams, and HTTP/1.1 routing with a worker-pool service. |
+| `derive.x`, `test.x` | Record mappings generated from declared fields, and registered tests and assertions for user programs. |
 | `json.x`, `datum.x`, `datum-reader.x` | JSON and Lisp reader text. |
 | `diff.x`, `digest.x`, `regex.x` | Line differences, SHA-256 digests, and regular expressions. |
 | `time.x`, `random.x`, `encoding.x`, `url.x` | Clocks and calendar time, random values and UUIDs, text encodings, and URLs. |

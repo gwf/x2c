@@ -82,7 +82,7 @@ captures a value; by itself it does not establish that value's type.
 | Raw stream status and text conversion | verified | `File.*_into`, String adapters | File suite |
 | Lexical scanner contracts | verified | `scan_*`, `Tokenizer` | scanner suite and fixtures |
 | Source declaration collection | verified | `Compiler.collect_symbols`; prelude replay from the runtime `x2c.xi` interface; CPP oracle | raw sweep, process probes, fixtures |
-| Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate/generate.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
+| Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate/initialization.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
 | Typed static callback adaptation | verified | `$x2c.callback.adapt`; compiler-owned typed thunks | callback adapter fixtures and dispatch/runtime suites |
 | Source directive routing | verified | parser, generator, formatter | AST/C/runtime fixtures |
 | Source/generated expression resolution and declaration publication | verified | `Compiler.resolve_expression`; shared declaration helpers in `src/parse/parse.x` | `macro-source-parity` and macro fixture corpus |
@@ -116,8 +116,8 @@ captures a value; by itself it does not establish that value's type.
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
-| Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
-| Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
+| Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect/interfaces.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
+| Batch-compilation memory brackets | partial | the per-unit `Context` (`_unit_context`, closed by `ParsedUnit.close`) in `src/frontend.x`, inside the command `Context` in `src/main.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
 
@@ -602,9 +602,10 @@ installed home, or from one cold walk of `lib/x2c.x` per process.
 The C preprocessor remains the explicit compatibility and parity oracle.
 `Toolchain.preprocess` (`src/toolchain.x`) owns that host process boundary: it passes every source
 and include path as an argv element, captures stdout and stderr separately, and
-returns the real process status. `preprocess_input` owns the compiler response:
-host stderr remains visible, failure becomes a structured driver diagnostic,
-and failed stdout is never consumed.
+returns the real process status. `_preprocess_input` in `src/frontend.x` owns
+the compiler response through `_run_cpp`: host stderr remains visible,
+failure becomes a structured driver diagnostic, and failed stdout is never
+consumed.
 
 Neither declaration stream replaces the user's source. The original positioned
 token stream owns full parsing, diagnostics, and emission. The parser,

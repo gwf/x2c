@@ -36,9 +36,10 @@ it. A plain `make build` after the edit leaves a degraded stage 0 until
 unit costs about 9.2 G instructions, and about twelve dump fixtures differ.
 A plain `make build` after `make bootstrap-refresh`, or a timestamp change
 that leaves the component equal to the bootstrap's, degrades stage 0 the
-same way until `make build-safe`. Run
-`make bootstrap-refresh && make build-safe`, twice, to converge as for any
-compiler change.
+same way until `make build-safe`. To test an edited component locally, run
+`make bootstrap-refresh && make build-safe` twice so stage 0 converges on
+it. This is a local testing step; the publication gate owns the shipped
+bootstrap refresh.
 
 ## Runtime representations
 
@@ -77,9 +78,12 @@ against facts.
 
 ## Preprocessing
 
-x2c does not expand C preprocessor macros. Directives pass to generated C;
-symbol collection stores macro identifiers unexpanded in declaration
-positions. Therefore:
+Ordinary translation does not expand C preprocessor macros. Directives pass
+to generated C; symbol collection stores macro identifiers unexpanded in
+declaration positions. `--cpp` enables expansion only for existing C that
+needs macros to supply grammar; see
+[preprocessing](../docs/src/reference/language.md#preprocessing).
+Therefore:
 
 - Preprocessing must not change top-level declaration structure. Do not wrap
   declarations in `#if` or expand macros into declarations.
@@ -89,7 +93,9 @@ positions. Therefore:
 - Ordinary include collection terminates cycles. Raw `.x` include cycles used
   with `--cpp-symbols` or `--live-symbols` need source guards, as described in
   [source files and visibility](../docs/src/reference/language.md#source-files-and-visibility).
-- The compiler never reads system headers. Declare compiler-visible types in
+- Ordinary translation never reads system headers. Only the
+  `--cpp-symbols` and `--live-symbols` modes collect their declarations,
+  from the host preprocessor's output. Declare compiler-visible types in
   `.x` source or the runtime library.
 
 File-local `static` globals do not enter the runtime prelude; only their own

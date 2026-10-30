@@ -244,8 +244,8 @@ foreach(Var part, parts) if (!_collect(part)) return 0;
 Example:
 
 ```x2c
-if (c.peek() == <eof>)
-  c.report_error(<parse>, "unexpected end of input", token, NULL);
+if (c.peek(0) == <eof>)
+  $fail.compiler_token_eof(c, c.token);
 ```
 
 Avoid:
@@ -851,17 +851,18 @@ See CM-5 in [the standard](x2c-code-standard.md).
 Example:
 
 ```x2c
-/** Returns the number of elements. */
-size_t Array.len(Array a) => Block.len(a);
+/** Returns the number of elements stored in `b`. */
+inline size_t Block.len(Block b) => b != NULL ? b.length : 0;
 ```
 
 Example:
 
 ```x2c
-/** Removes and returns the element at `index`, or `void` when out of range.
-    Negative indexes count from the end. On failure, the Array is unchanged.
+/** Removes and returns the element at normalized `index`.
+    Negative indices count from the end; following elements shift left.
+    Boxed `Array` returns `void` for a null array or out-of-range index.
 */
-Var Array.del(Array a, int index) {
+Var Array.remove(Array array, int index) {
   // ...
 }
 ```
@@ -869,17 +870,16 @@ Var Array.del(Array a, int index) {
 Avoid:
 
 ```x2c
-/** Deletes an element from an Array.
+/** Removes an element from an Array.
 
     Parameters:
-    - a: the Array
+    - array: the Array
     - index: the index
 
-    Returns: the deleted element.
-    Raises: nothing.
+    Returns: the removed element.
     See: Array.
 */
-Var Array.del(Array a, int index) {
+Var Array.remove(Array array, int index) {
   // ...
 }
 ```
