@@ -79,7 +79,7 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
   if (!_method(method)) Http.fail(405, "unsupported method");
   req.method = Symbol.new(method);
   req.headers = {}; req.params = {};
-  _target(req, target);
+  _decode_target(req, target);
   int used = 0;
   for (;;) {
     String line = _line(input, 65536 - used, 431);
@@ -368,7 +368,7 @@ static String _line(File input, int limit, int status) {
 
 /* Decodes the path and query of `target`. Decoded URL text holds no CR or
    LF, which could split a header or a log line. */
-static void _target(HttpRequest req, String target) {
+static void _decode_target(HttpRequest req, String target) {
   String decoded = NULL;
   try decoded = target.percent_decode();
   catch %(malformed *): Http.fail(400, "invalid percent escape in URL");
