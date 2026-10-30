@@ -13,6 +13,7 @@ A unit's meta group, emitted as C.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.bind_meta_group`](#Compiler.bind_meta_group) | Binds the session's group function `name` when it is not bound yet, by staging the group, and reports at `site` a function that cannot run. |
+| [`Compiler.emit_session_function`](#Compiler.emit_session_function) | Emits one session factory without compiling or loading its module. |
 | [`Compiler.finish_meta_functions`](#Compiler.finish_meta_functions) | Closes compile-time-only calls across later meta definitions. |
 | [`Compiler.group_meta_function`](#Compiler.group_meta_function) | Records a native callable body `fn` in the unit's helper group. |
 | [`Compiler.groups_meta`](#Compiler.groups_meta) | Reports whether a `meta` function or value belongs to the unit's group: a parse meets it outside a macro definition while the project meta build parses the unit or a session stages it. |
@@ -43,6 +44,16 @@ A unit's meta group, emitted as C.
 
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
+
+Source: `src/meta-group/staging.x`
+
+<a id="Compiler.emit_session_function"></a>
+#### Compiler.emit_session_function
+
+`List Compiler.emit_session_function( Compiler c, List declarations, Func prepare, String &failure)`
+
+Emits one session factory without compiling or loading its module.
+The caller uses its configured native toolchain and retains the result.
 
 Source: `src/meta-group/staging.x`
 

@@ -21,6 +21,7 @@ Configured compiler sessions and source units.
 | [`Frontend.start`](#Frontend.start) | Scans one input into a fresh unit with its own isolated `Context`; collection preprocesses its tokens. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
 | [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols, retains preprocessor outputs for adapter inspection, and preprocesses the unit's tokens for parsing. |
+| [`ParsedUnit.collect_native`](#ParsedUnit.collect_native) | Collects a C source or header through the configured host preprocessor. |
 | [`ParsedUnit.parse`](#ParsedUnit.parse) | Parses a collected unit, retaining both its AST and unsuccessful reports. |
 
 ### `Frontend`
@@ -123,6 +124,19 @@ Source: `src/frontend.x`
 
 Collects symbols, retains preprocessor outputs for adapter inspection,
 and preprocesses the unit's tokens for parsing.
+
+Source: `src/frontend.x`
+
+<a id="ParsedUnit.collect_native"></a>
+#### ParsedUnit.collect_native
+
+`int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend)`
+
+Collects a C source or header through the configured host preprocessor.
+Unlike x2c collection, this does not walk native headers as x2c-owned
+declarations. The preprocessed tokens and line markers stay in the unit;
+original source text remains available in `source_texts`. Call
+`Compiler.full_parse_native` for its typed source projection.
 
 Source: `src/frontend.x`
 

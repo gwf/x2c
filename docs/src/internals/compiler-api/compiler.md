@@ -41,6 +41,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.freeze_declaration_syntax`](#Compiler.freeze_declaration_syntax) | Retains exported syntax across translation units and cached interfaces. |
 | [`Compiler.fresh_name`](#Compiler.fresh_name) | Allocates the next compiler-private C spelling for `stem`. |
 | [`Compiler.full_parse`](#Compiler.full_parse) | Parses and types the positioned source against `globs`. |
+| [`Compiler.full_parse_native`](#Compiler.full_parse_native) | Parses host-preprocessed C under the native declaration policy. |
 | [`Compiler.gensym`](#Compiler.gensym) | Returns a fresh semantic identity for an anonymous aggregate. |
 | [`Compiler.mark_completion`](#Compiler.mark_completion) | Retags the token beginning at `position` as a private completion marker. |
 | [`Compiler.mark_reference_present`](#Compiler.mark_reference_present) | Records a nonnull optional parameter for the current lexical path. |
@@ -408,6 +409,17 @@ Parses and types the positioned source against `globs`.
 The result is a source-ordered top-level AST. This resets macro state
 and protocol resolution; origins live for the whole unit.
 `generated_symbols` publishes external adapter signatures before parsing.
+
+Source: `src/compiler/parsing/parse.x`
+
+<a id="Compiler.full_parse_native"></a>
+#### Compiler.full_parse_native
+
+`List Compiler.full_parse_native(Compiler c, Map globs)`
+
+Parses host-preprocessed C under the native declaration policy.
+Native attributes do not establish an x2c-owned record layout. The policy
+is applied after parser reset, which otherwise restores x2c source policy.
 
 Source: `src/compiler/parsing/parse.x`
 

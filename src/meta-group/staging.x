@@ -81,8 +81,8 @@ List Compiler.emit_session_function(
   Compiler c, List declarations, Func prepare, String &failure) {
   failure = c.groups_meta() ? NULL : "native modules are unavailable";
   if (failure) return NULL;
-  return _emit_prepared(c, Compiler.module_stamp(), "group", "",
-                        declarations, prepare, failure);
+  return _emit_prepared(
+    c, Compiler.module_stamp(), "group", "", declarations, prepare, failure);
 }
 
 // meta group staging

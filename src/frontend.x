@@ -227,8 +227,9 @@ int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend) {
     c.preprocess_tokens();
     String definitions = NULL, errors = NULL, dependencies = NULL;
     native.cpp_args = native.cpp_args.append(%("-dD"));
-    int status = Toolchain.preprocess(&native, c.filename,
-      frontend.request.include_dirs, NULL, definitions, errors, dependencies);
+    int status = Toolchain.preprocess(
+      &native, c.filename, frontend.request.include_dirs, NULL,
+      definitions, errors, dependencies);
     if (status) $fail.frontend_cpp_failed(c, _first_directive(c), status);
     Compiler macros = Compiler.new_shared(c);
     defer c.close_child(macros);

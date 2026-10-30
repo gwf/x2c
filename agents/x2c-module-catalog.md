@@ -122,8 +122,8 @@ Public functions:
 
 `Frontend.open`, `Frontend.open_reporting`, `Frontend.open_session`,
 `Frontend.start`, `ParsedUnit.parse`, `Frontend.load_prelude`,
-`ParsedUnit.collect`, `ParsedUnit.close`, `Frontend.new`,
-`Frontend.load_support`
+`ParsedUnit.collect`, `ParsedUnit.collect_native`, `ParsedUnit.close`,
+`Frontend.new`, `Frontend.load_support`
 
 ### [src/grammar.x](../src/grammar.x)
 
@@ -384,19 +384,19 @@ Public functions:
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
 `_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
-`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
-`Compiler.tokenize`, `Compiler.scan_source`, `Compiler.preprocess_tokens`,
-`Compiler.expect`, `Compiler.require_input`, `Compiler.test`,
-`Compiler.take_word`, `Compiler.next`, `Compiler.at_word`, `Compiler.peek`,
-`Token.after_group`, `Token.skip_trivia`, `Token.group_close`,
-`Symbol.group_step`, `Compiler.mark_completion`, `_x2c_complete_here`,
-`Compiler.at_completion`, `Compiler.collect_unit_macro`,
-`Compiler.replay_declaration_source`, `Compiler.freeze_declaration_syntax`,
-`Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
-`Compiler.anchor_origin`, `Compiler.record_origin`,
-`Compiler.record_source_declaration`, `Compiler.clear_source_external`,
-`Compiler.record_source_reference`, `Compiler.attach_source_references`,
-`Compiler.materialize_source_declaration`,
+`Compiler.full_parse`, `Compiler.full_parse_native`,
+`Compiler.skip_collected_script_statement`, `Compiler.tokenize`,
+`Compiler.scan_source`, `Compiler.preprocess_tokens`, `Compiler.expect`,
+`Compiler.require_input`, `Compiler.test`, `Compiler.take_word`,
+`Compiler.next`, `Compiler.at_word`, `Compiler.peek`, `Token.after_group`,
+`Token.skip_trivia`, `Token.group_close`, `Symbol.group_step`,
+`Compiler.mark_completion`, `_x2c_complete_here`, `Compiler.at_completion`,
+`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
+`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
+`Compiler.select_declaration_defaults`, `Compiler.anchor_origin`,
+`Compiler.record_origin`, `Compiler.record_source_declaration`,
+`Compiler.clear_source_external`, `Compiler.record_source_reference`,
+`Compiler.attach_source_references`, `Compiler.materialize_source_declaration`,
 `Compiler.merge_source_declarations`, `Compiler.copy_source_declaration`,
 `Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
 `Compiler.add_support`, `Compiler.add_init`, `Pending.reset`, `Pending.area`,
@@ -653,7 +653,8 @@ Public functions:
 `Compiler.refuse_record_meta_call`, `Compiler.meta_call_missing`,
 `Compiler.refuse_meta_call`, `Compiler.meta_diagnostic_line`,
 `Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`
+`Compiler.bind_meta_group`, `Compiler.stage_session_function`,
+`Compiler.emit_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 
