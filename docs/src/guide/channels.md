@@ -139,10 +139,9 @@ scope. Private-pool String keys do not become safe when their Map moves. Shared
 process-pool Strings remain borrowable because the pool outlives all jobs.
 
 A Channel's own storage scope, returned by `channel.scope()`, owns its native
-queue mutex. Independent Channels do not share that mutex. Managed Threads
-keep a private condition through join; unmanaged blocking calls use a temporary
-condition. Both wait on the Channel queue mutex. Queue nodes use native allocation independently of Scope
-allocation lists. Allocation/tree metadata belongs to exclusive private owners;
+mutex and condition. Independent Channels do not share either object.
+All users wait on the Channel's condition using its mutex. Queue nodes use native
+allocation independently of Scope allocation lists. Allocation/tree metadata belongs to exclusive private owners;
 no Scope or replacement tree mutex coordinates senders through a Channel.
 
 Finish every user and waiter before freeing a Channel or destroying its owner.

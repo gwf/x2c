@@ -654,7 +654,7 @@ static void channel_owned_receive_releases_transport_scope(void) {
 }
 
 /* An unmanaged pthread has no Thread token or native-thread cleanup hook.
-   Repeated blocking calls must unlink and destroy their temporary resources. */
+   Repeated blocking calls use the Channel monitor without thread cleanup state. */
 static void *_channel_unmanaged_exchange(void *bytes) {
   Channel channel = bytes;
   Pool.thread_initialize();
@@ -734,7 +734,22 @@ static void channel_registration_reuses_idle_and_preserves_stop(void) {
   EXPECT_INT_EQ(first.receive().integer(), 7);
 }
 
+static void channel_stop_broadcast_keeps_unrelated_receiver_live(void) {
+  $test.scoped();
+  for (int i = 0; i < 16; ++i) {
+    Channel channel = auto Channel.new();
+    Thread stopped = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
+    Thread live = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
+    stopped.stop();
+    channel.send(83);
+    EXPECT_INT_EQ(live.join().integer(), 83);
+    live.free();
+    _channel_expect_stopped(stopped);
+  }
+}
+
 void channel_suite(void) {
+  $test.run(channel_stop_broadcast_keeps_unrelated_receiver_live);
   $test.run(channel_registration_reuses_idle_and_preserves_stop);
   $test.run(channel_unmanaged_blocking_calls);
   $test.run(channel_cancelled_waiters_pass_buffered_opportunities);

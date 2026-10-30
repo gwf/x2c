@@ -61,6 +61,12 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
+/* Native Channel wait bridge; the Channel owns both objects together. */
+typedef struct X2CChannelMonitor {
+  pthread_mutex_t mutex;
+  pthread_cond_t condition;
+} X2CChannelMonitor;
+
 static typedef struct ParallelRun { Array ready; int stopping; } *ParallelRun;
 
 static struct Thread {
@@ -74,8 +80,7 @@ static struct Thread {
   ParallelRun parallel;
   int assigned;
   int stop_requested;
-  pthread_mutex_t *channel_monitor;
-  pthread_cond_t channel_condition;
+  X2CChannelMonitor *channel_monitor;
   pthread_cond_t *waiting;
 };
 
@@ -92,7 +97,7 @@ static struct ParallelMap {
 };
 
 /* An identity only: the stopped registration sentinel is never locked. */
-static pthread_mutex_t stopped_channel_monitor;
+static X2CChannelMonitor stopped_channel_monitor;
 
 static threaded Thread running_thread;
 static threaded int stop_mask;
@@ -355,26 +360,21 @@ int x2c_thread_wait_stopped(Thread owner) =>
 
 /* A registered monitor remains borrowed until successful unregister or the
    caller's completion acknowledgement after releasing that monitor. */
-int x2c_thread_channel_enter(Thread owner, pthread_mutex_t *monitor) {
+int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner) {
+  owner = x2c_thread_wait_owner();
   if (!owner) return 1;
-  pthread_mutex_t *idle = NULL;
+  X2CChannelMonitor *idle = NULL;
   return __atomic_compare_exchange_n(
     &owner.channel_monitor, &idle, monitor, 0,
     __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
 }
 
-int x2c_thread_channel_leave(Thread owner, pthread_mutex_t *monitor) {
+int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor) {
   if (!owner) return 1;
   return __atomic_compare_exchange_n(
     &owner.channel_monitor, &monitor, NULL, 0,
     __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
 }
-
-pthread_cond_t *x2c_thread_channel_condition(Thread owner) =>
-  owner ? &owner.channel_condition : NULL;
-
-static void _destroy_channel_wait(Thread thread) =>
-  _completion_check(pthread_cond_destroy(&thread.channel_condition));
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
     have been released. Explicit catches may handle this shared cause.
@@ -392,14 +392,14 @@ void x2c_thread_cancel(void) {
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
-  pthread_mutex_t *monitor = __atomic_exchange_n(
+  X2CChannelMonitor *monitor = __atomic_exchange_n(
     &t.channel_monitor, &stopped_channel_monitor, __ATOMIC_ACQ_REL);
   if (monitor != &stopped_channel_monitor) {
-    if (monitor) _completion_check(pthread_mutex_lock(monitor));
+    if (monitor) _completion_check(pthread_mutex_lock(&monitor.mutex));
     __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
     if (monitor) {
-      _completion_check(pthread_cond_signal(&t.channel_condition));
-      _completion_check(pthread_mutex_unlock(monitor));
+      _completion_check(pthread_cond_broadcast(&monitor.condition));
+      _completion_check(pthread_mutex_unlock(&monitor.mutex));
     }
   }
   if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
@@ -496,7 +496,6 @@ Var Thread.join(Thread t) {
 void Thread.free(Thread t) {
   if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
     raise %(bad-state (operation "Thread.free"));
-  _destroy_channel_wait(t);
   free(t);
 }
 
@@ -512,12 +511,10 @@ static Thread _start(
   int started = 0;
   defer if (!started) {
     Error.policy_release(thread.policy);
-    _destroy_channel_wait(thread);
     free(thread);
   }
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
-    _destroy_channel_wait(thread);
     free(thread);
     fprintf(stderr, "Thread: could not register shutdown\n");
     abort();
@@ -545,7 +542,6 @@ static Thread _new_handle(
     Error.policy_release(policy);
     raise %(alloc-fail);
   }
-  _initialize_channel_wait(thread, policy);
   thread.policy = policy;
   thread.function = function;
   thread.input_size = input_size;
@@ -554,15 +550,6 @@ static Thread _new_handle(
   __atomic_store_n(&thread.state, <running>, __ATOMIC_SEQ_CST);
   if (input_size) memcpy(_input(thread), input, input_size);
   return thread;
-}
-
-static void _initialize_channel_wait(Thread thread, void *policy) {
-  int error = pthread_cond_init(&thread.channel_condition, NULL);
-  if (error) {
-    Error.policy_release(policy);
-    free(thread);
-    _error("pthread_cond_init", error);
-  }
 }
 
 static void _register_shutdown(void) {

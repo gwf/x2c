@@ -293,8 +293,7 @@ safe completion aborts rather than return with live borrowers.
 
 ## Cooperative stopping
 
-Each managed Thread keeps a private Channel wait condition until its joined
-handle is freed. An operation registers its Channel queue mutex with the Thread.
+An operation registers its Channel mutex and condition with its managed Thread.
 Stop publication takes that mutex, so a stop cannot pass between the final
 stop check and commitment or sleep. If stop has borrowed the registered mutex,
 the operation waits for stop to release it before returning.

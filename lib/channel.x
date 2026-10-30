@@ -40,11 +40,10 @@ static typedef struct ChannelWait {
   Thread owner;
   struct ChannelWait *previous, *next;
   int committed, owned, linked;
-  pthread_cond_t *condition;
 } *ChannelWait;
 
 /* Synchronous waits cannot reenter Channel code. Every exit unlinks before
-   callbacks or Error dispatch; unmanaged native resources remain stack-owned. */
+   callbacks or Error dispatch. Native wait resources belong to the Channel. */
 static threaded struct ChannelWait channel_wait;
 
 static typedef struct ChannelWaits {
@@ -57,7 +56,7 @@ static struct Channel {
   size_t capacity, count;
   ChannelMessage first, last;
   ChannelWaits senders, receivers;
-  pthread_mutex_t mutex;
+  X2CChannelMonitor monitor;
   int initialized, closed;
 };
 
@@ -78,7 +77,7 @@ protocol Iter(Channel);
     Short forms are new(), new(capacity), and new(tag); omitted capacity
     means rendezvous. Queuing does not intern or export message contents.
     Raises: <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
-    for storage, or <io-fail> for native mutex initialization.
+    for storage, or <io-fail> for native mutex or condition initialization.
 */
 Channel Channel.new(Var type, Var capacity) {
   if (capacity is void) {
@@ -101,9 +100,12 @@ Channel Channel.new(Var type, Var capacity) {
   channel.lifetime = lifetime;
   channel.type = type;
   channel.capacity = limit;
-  int error = pthread_mutex_init(&channel.mutex, NULL);
+  int error = pthread_mutex_init(&channel.monitor.mutex, NULL);
   if (error) raise %(io-fail (operation "pthread_mutex_init") (errno $error));
   channel.initialized = 1;
+  error = pthread_cond_init(&channel.monitor.condition, NULL);
+  if (error) raise %(io-fail (operation "pthread_cond_init") (errno $error));
+  channel.initialized = 2;
   ready = 1;
   return channel;
 }
@@ -158,10 +160,10 @@ void Channel.free(Channel channel) {
 */
 void Channel.close(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.close"));
-  _lock(&channel.mutex);
+  _lock(&channel.monitor.mutex);
   channel.closed = 1;
   _notify(channel);
-  _unlock(&channel.mutex);
+  _unlock(&channel.monitor.mutex);
 }
 
 // boxing and iteration
@@ -199,7 +201,8 @@ Var Channel.receive(Channel channel) {
   Var value = void;
   ChannelMessage message = NULL;
   int owned = 0;
-  int status = _communicate(channel, 0, message, value, owned);
+  int status = channel.capacity ? _buffer_receive(channel, message)
+                                : _rendezvous(channel, 0, value, owned);
   if (message) { value = message.value; owned = message.owned; }
   if (message) free(message);
   if (owned) {
@@ -226,8 +229,10 @@ static void _drop(void *bytes) {
     free(message);
     message = next;
   }
+  if (channel.initialized == 2)
+    _native_check(pthread_cond_destroy(&channel.monitor.condition));
   if (channel.initialized)
-    _native_check(pthread_mutex_destroy(&channel.mutex));
+    _native_check(pthread_mutex_destroy(&channel.monitor.mutex));
 }
 
 static void _native_check(int error) {
@@ -261,7 +266,8 @@ static void _send(Channel channel, Var value, int owned) {
   if (channel.capacity) message = _message(value, owned);
 
   status = owned ? _send_owned(channel, message, value)
-                 : _communicate(channel, 1, message, value, owned);
+                 : channel.capacity ? _buffer_send(channel, message)
+                                    : _rendezvous(channel, 1, value, owned);
   if (status < 0) x2c_thread_cancel();
   if (!status) raise %(bad-state (operation "Channel.send") (closed 1));
 }
@@ -285,7 +291,8 @@ static int _send_owned(Channel channel, ChannelMessage message, Var value) {
     }
     else payload.transfer(previous);
   }
-  status = _communicate(channel, 1, message, value, owned);
+  status = channel.capacity ? _buffer_send(channel, message)
+                            : _rendezvous(channel, 1, value, owned);
   return status;
 }
 
@@ -317,168 +324,142 @@ static void _remove_wait(ChannelWaits &queue, ChannelWait wait) {
   wait.linked = 0;
 }
 
-static void _signal(ChannelWait wait) {
-  if (!wait) return;
-  _native_check(pthread_cond_signal(wait.condition));
-}
+static void _notify(Channel channel) =>
+  _native_check(pthread_cond_broadcast(&channel.monitor.condition));
 
-/* A buffered notification detaches its head, so another opportunity can
-   reach another sleeper. A waiter requeues only after losing the opportunity.
-   Rendezvous commitment already signals its exact peer; only close propagates. */
-static void _notify(Channel channel) {
-  if (!channel.capacity) {
-    if (channel.closed) {
-      _signal(channel.receivers.first);
-      _signal(channel.senders.first);
-    }
-    return;
+/* Fresh registration and commitment hold one uninterrupted queue lock.
+   Stop must claim and lock that monitor before publishing the caller flag. */
+static int _buffer_send(Channel channel, ChannelMessage message) {
+  Thread owner = NULL;
+  _lock(&channel.monitor.mutex);
+  if (!x2c_thread_channel_enter(&channel.monitor, owner)) {
+    _unlock(&channel.monitor.mutex);
+    return -1;
   }
-  if (channel.closed || channel.count) _notify_head(channel.receivers);
-  if (channel.closed || channel.count < channel.capacity)
-    _notify_head(channel.senders);
+  while (channel.count == channel.capacity && !channel.closed) {
+    _sleep(channel);
+    if (x2c_thread_wait_stopped(owner)) { _finish(channel, owner); return -1; }
+  }
+  int status = 0;
+  if (!channel.closed) {
+    if (channel.last) channel.last.next = message;
+    else channel.first = message;
+    channel.last = message;
+    if (!channel.count++) _notify(channel);
+    status = 1;
+  }
+  _finish(channel, owner);
+  return status;
 }
 
-static void _notify_head(ChannelWaits &queue) {
-  ChannelWait wait = queue.first;
-  if (!wait) return;
-  _remove_wait(queue, wait);
-  _signal(wait);
+static int _buffer_receive(Channel channel, ChannelMessage &message) {
+  Thread owner = NULL;
+  _lock(&channel.monitor.mutex);
+  if (!x2c_thread_channel_enter(&channel.monitor, owner)) {
+    _unlock(&channel.monitor.mutex);
+    return -1;
+  }
+  while (!channel.count && !channel.closed) {
+    _sleep(channel);
+    if (x2c_thread_wait_stopped(owner)) { _finish(channel, owner); return -1; }
+  }
+  int status = 0;
+  if (channel.count) {
+    message = channel.first;
+    channel.first = message.next;
+    if (!channel.first) channel.last = NULL;
+    if (channel.count-- == channel.capacity) _notify(channel);
+    status = 1;
+  }
+  _finish(channel, owner);
+  return status;
 }
 
 static int _commit_available(
-  Channel channel, int sending, Thread owner, ChannelWait peer,
-  ChannelMessage &message, Var &value, int &owned) {
-  if (x2c_thread_wait_stopped(owner)) return -1;
-  else if (channel.capacity && (sending ? channel.count < channel.capacity &&
-                                        !channel.closed : channel.count != 0)) {
-    if (sending) {
-      if (channel.last) channel.last.next = message;
-      else channel.first = message;
-      channel.last = message;
-      channel.count++;
-    }
-    else {
-      message = channel.first;
-      channel.first = message.next;
-      if (!channel.first) channel.last = NULL;
-      channel.count--;
-    }
-    return 1;
-  }
-  else if (peer) {
+  Channel channel, int sending, ChannelWait peer, Var &value, int &owned) {
+  if (peer) {
     if (sending) { peer.value = value; peer.owned = owned; }
     else { value = peer.value; owned = peer.owned; }
     peer.committed = 1;
     if (sending) _remove_wait(channel.receivers, peer);
     else _remove_wait(channel.senders, peer);
-    _native_check(pthread_cond_signal(peer.condition));
+    _notify(channel);
     return 1;
   }
-  else if (channel.closed) return 0;
-  else return 2;
+  return channel.closed ? 0 : 2;
 }
 
-/* Stop and peer notification hold this same queue mutex. Condition waiting
-   releases it atomically after the final predicate check. */
-static void _sleep(Channel channel, ChannelWait wait) =>
-  _native_check(pthread_cond_wait(wait.condition, &channel.mutex));
+/* Stop, notification, and the final predicate check share this mutex. */
+static void _sleep(Channel channel) =>
+  _native_check(pthread_cond_wait(&channel.monitor.condition, &channel.monitor.mutex));
 
 /* Remove one stopped head per queue acquisition, then return for a fresh
    commitment check after releasing and reacquiring the mutex. */
-static int _attempt(
-  Channel channel, int sending, Thread owner,
-  ChannelMessage &message, Var &value, int &owned) {
+static int _attempt(Channel channel, int sending, Var &value, int &owned) {
   ChannelWaits *other = sending ? &channel.receivers : &channel.senders;
-  ChannelWait peer = !channel.capacity && !channel.closed ? other.first : NULL;
+  ChannelWait peer = channel.closed ? NULL : other.first;
   if (!peer || !x2c_thread_wait_stopped(peer.owner))
-    return _commit_available(channel, sending, owner, peer, message, value, owned);
+    return _commit_available(channel, sending, peer, value, owned);
   _remove_wait(*other, peer);
-  _native_check(pthread_cond_signal(peer.condition));
-  _unlock(&channel.mutex);
-  _lock(&channel.mutex);
+  _unlock(&channel.monitor.mutex);
+  _lock(&channel.monitor.mutex);
   return 3;
 }
 
-static void _finish_wait(
-  Channel channel, int sending, Thread owner, ChannelWait wait) {
-  if (wait) {
-    if (sending) _remove_wait(channel.senders, wait);
-    else _remove_wait(channel.receivers, wait);
-  }
-  int released = x2c_thread_channel_leave(owner, &channel.mutex);
-  _notify(channel);
-  _unlock(&channel.mutex);
+static void _finish(Channel channel, Thread owner) {
+  int released = x2c_thread_channel_leave(owner, &channel.monitor);
+  _unlock(&channel.monitor.mutex);
   if (!released) {
     x2c_thread_wait_lock();
     x2c_thread_wait_unlock();
   }
 }
 
-/* Positive means committed, zero closed, negative stopped. An unmanaged
-   caller first attempts without wait resources and prepares them only to block. */
-static int _communicate(
-  Channel channel, int sending, ChannelMessage &message, Var &value, int &owned) {
-  Thread owner = x2c_thread_wait_owner();
-  _lock(&channel.mutex);
-  if (!x2c_thread_channel_enter(owner, &channel.mutex)) {
-    _unlock(&channel.mutex);
+/* Positive means committed, zero closed, negative stopped. Waiter storage is
+   needed only after the freshly registered immediate attempt cannot commit. */
+static int _rendezvous(Channel channel, int sending, Var &value, int &owned) {
+  Thread owner = NULL;
+  _lock(&channel.monitor.mutex);
+  if (!x2c_thread_channel_enter(&channel.monitor, owner)) {
+    _unlock(&channel.monitor.mutex);
     return -1;
   }
-  int status;
-  do status = _attempt(channel, sending, owner, message, value, owned);
-  while (status == 3);
-  if (status == 2)
-    return _wait_pending(channel, sending, owner, message, value, owned);
-  _finish_wait(channel, sending, owner, NULL);
+  int status = _attempt(channel, sending, value, owned);
+  while (status == 3) {
+    if (x2c_thread_wait_stopped(owner)) { status = -1; break; }
+    status = _attempt(channel, sending, value, owned);
+  }
+  if (status == 2) return _wait_pending(channel, sending, owner, value, owned);
+  _finish(channel, owner);
   return status;
 }
 
 static int _wait_pending(
-  Channel channel, int sending, Thread owner,
-  ChannelMessage &message, Var &value, int &owned) {
+  Channel channel, int sending, Thread owner, Var &value, int &owned) {
   ChannelWait wait = &channel_wait;
   *wait = (struct ChannelWait) { .value = value, .owner = owner, .owned = owned };
-  int status = _wait_for_commit(channel, sending, wait, message, value, owned);
-  if (status == 2) {
-    _unlock(&channel.mutex);
-    return _unmanaged_wait(channel, sending, wait, message, value, owned);
-  }
+  int status = _wait_for_commit(channel, sending, wait, value, owned);
   if (wait.committed) { value = wait.value; owned = wait.owned; }
-  _finish_wait(channel, sending, owner, wait);
+  if (sending) _remove_wait(channel.senders, wait);
+  else _remove_wait(channel.receivers, wait);
+  _finish(channel, owner);
   return status;
 }
 
 static int _wait_for_commit(
-  Channel channel, int sending, ChannelWait wait,
-  ChannelMessage &message, Var &value, int &owned) {
+  Channel channel, int sending, ChannelWait wait, Var &value, int &owned) {
   while (1) {
     if (wait.committed) return 1;
-    int status = _attempt(channel, sending, wait.owner, message, value, owned);
+    if (x2c_thread_wait_stopped(wait.owner)) return -1;
+    int status = _attempt(channel, sending, value, owned);
     if (status == 3) continue;
-    if (status != 2 || (!wait.owner && !wait.condition)) return status;
-    if (!wait.condition) wait.condition = x2c_thread_channel_condition(wait.owner);
+    if (status != 2) return status;
     if (!wait.linked) {
       if (sending) _append_wait(channel.senders, wait);
       else _append_wait(channel.receivers, wait);
     }
-    _sleep(channel, wait);
+    _sleep(channel);
   }
-}
-
-static int _unmanaged_wait(
-  Channel channel, int sending, ChannelWait wait,
-  ChannelMessage &message, Var &value, int &owned) {
-  pthread_cond_t condition;
-  int error = pthread_cond_init(&condition, NULL);
-  if (error) raise %(io-fail (operation "pthread_cond_init") (errno $error));
-  defer wait.condition = NULL;
-  wait.condition = &condition;
-  _lock(&channel.mutex);
-  int status = _wait_for_commit(channel, sending, wait, message, value, owned);
-  if (wait.committed) { value = wait.value; owned = wait.owned; }
-  _finish_wait(channel, sending, wait.owner, wait);
-  _native_check(pthread_cond_destroy(&condition));
-  return status;
 }
 
 /* A sender owns native queue storage until commitment. The queue, then the
