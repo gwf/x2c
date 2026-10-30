@@ -83,6 +83,11 @@ selected here.
 
 ### Decisions and completed records
 
+- [Contextual x2c keywords](archive/contextual-x2c-keywords.md): implemented
+  from `c5ed5ae99` through `234eec5b3` on 2026-10-30. Nine additions are
+  contextual; defer and C keywords remain reserved. Full publication checks
+  passed; percent/angle forms retain documented lexical priority.
+
 Archived 2026-10-30 after checking delivery on `dev`:
 
 - [October 30 review repairs](archive/review-remediation-2026-10-30.md):

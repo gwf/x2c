@@ -1,10 +1,10 @@
 # Contextual x2c keywords
 
-> Status: active, 2026-10-30.
-> Implementation authorized. Gary selected lexical priority for ambiguous
-> percent and angle forms after the feasibility probe exposed the scanner/CPP
-> boundary conflict. Keep `defer` and C keywords reserved. Use ordinary
-> bindings to resolve the remaining ambiguous expression/declaration prefixes.
+> Status: done, 2026-10-30.
+> Implemented in the batch beginning `c5ed5ae99`, through generated-artifact
+> commit `234eec5b3`. The full `agent-pr-check` passed on that tree.
+> Nine additions are contextual; `defer` and C keywords remain reserved.
+> Gary selected lexical priority for ambiguous percent/angle forms.
 
 ## Result and scope
 
@@ -158,6 +158,26 @@ Keep generated artifacts owned by their documented targets.
 Implementation uses the root direct-delivery workflow, publication gate, and
 applicable compiler performance checkpoint. Do not advance main. Archive this
 plan with actual delivery and verification evidence when implementation lands.
+
+## Delivered verification
+
+The final publication gate passed: 1,352 compiler fixtures, 1,126 unit tests
+with 99,192 assertions, bootstrap/self-host and cold-collection proofs,
+command checks, documentation audit, and 136 documentation output samples.
+The temporary native matrix passed all 72 identifier-use cases.
+
+The source review removed duplicate with checks and diagnostics, its forwarding
+function, an obsolete rejection fixture, and the duplicate early protocol
+branch in collection. Shared word recognition reuses the symbol table and
+alias owner. Applicable macro precedence remains with each grammar owner.
+No token representation, parser, cache, registry, or retokenization was added.
+
+A converged baseline at `8a85f6a6b` and candidate `234eec5b3` translated the
+same copied language-tour, scan-hot-paths, and scope-hot-paths sources with
+`-j 1`. Five alternating samples had median retired instructions of
+1,516,494,509 and 1,518,649,957 respectively: +2,155,448 (+0.142%). All six
+C/H outputs were byte-identical. This small difference is close to run
+variation; no performance improvement or full-build result is claimed.
 
 ## Plan review
 
