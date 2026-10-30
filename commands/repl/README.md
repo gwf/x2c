@@ -28,7 +28,9 @@ passing native addresses between processes.
 A candidate worker builds or restores a program, opens the compiler session,
 and publishes its retained artifact description only when initialization
 succeeds. The supervisor then retires the previous worker. Failed or canceled
-candidate work preserves the current session. Reset and crash recovery restore
+candidate work preserves the current session. The supervisor creates each
+fresh candidate's program directory and removes it when the candidate fails,
+even when the candidate was killed. Reset and crash recovery restore
 the last successful program description without replaying submitted code.
 The tagged metadata snapshot stays beside the native module and frozen header.
 The supervisor keeps its filename; a fresh worker reads it for reset or recovery.

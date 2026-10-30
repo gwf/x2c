@@ -52,7 +52,7 @@ static const struct ReplCommand _commands[] = {
   {":save", ":save \"PATH\"", "Save successful submissions and launch settings for replay.", <path>},
   {":replay", ":replay \"PATH\"", "Start fresh and explicitly rerun a saved transcript.", <path>},
   {":stats", ":stats [verbose]", "Show native worker allocation statistics.", <statmode>},
-  {":ast", ":ast NAME", "Show a prompt definition's typed AST.", <name>},
+  {":ast", ":ast NAME", "Show a prompt function's typed AST.", <name>},
   {":lowered", ":lowered NAME", "Explain native submission execution.", <name>},
   {":cancel", ":cancel", "Discard incomplete input.", <none>},
   {":quit", ":quit", "Run session cleanup and leave the playground.", <none>}
@@ -145,16 +145,21 @@ static void _record(struct ReplClient &client, String source) {
   if (!client.replaying) client.transcript.push(source);
 }
 
+/* A restored candidate shares the live artifact. A fresh one gets its own
+   directory here, so this removes it even when the candidate is killed. */
 static int _replace(
   struct ReplClient &client, List roots, String snapshot, List requested, int announce) {
+  String artifact = snapshot ? client.artifact : Path.temp_dir();
   ReplWorker candidate = repl_worker_start((ReplWorkerStart) {
     .arguments = client.options.arguments, .roots = roots, .requested = requested,
-    .snapshot = snapshot, .interactive = client.interactive,
+    .snapshot = snapshot, .directory = artifact,
+    .interactive = client.interactive,
     .previous = client.worker, .input = client.input
   });
   if (candidate.failure) {
     fprintf(stderr, "session unchanged: %s\n", candidate.failure);
     repl_worker_close(candidate);
+    if (artifact != client.artifact) _artifact_remove(artifact);
     return 0;
   }
   ReplWorker previous = client.worker;
@@ -162,7 +167,7 @@ static int _replace(
   client.worker = candidate;
   client.roots = candidate.roots;
   client.snapshot = candidate.snapshot;
-  client.artifact = candidate.directory;
+  client.artifact = artifact;
   client.pending = "";
   if (announce) puts("started fresh session; cleared all prompt and library state");
   if (previous) repl_worker_close(previous);
@@ -173,6 +178,7 @@ static int _replace(
 static int _recover(struct ReplClient &client, String reason) {
   fprintf(stderr, "%s; all live session state was lost\n", reason);
   if (_replace(client, client.roots, client.snapshot, NULL, 0)) {
+    _record(client, ":reset");
     fputs("started fresh session from the last successful program\n", stderr);
     return 1;
   }
@@ -325,13 +331,13 @@ static int _replay(struct ReplClient &client, String argument) {
     client.directory = directory;
     client.transcript.clear();
     client.pending = "";
-    client.replaying = 1;
     int ok = 1;
-    foreach (String source, submissions) {
-      if (!_line(client, source)) { ok = 0; break; }
-      client.transcript.push(source);
+    with (client.replaying = 1) {
+      foreach (String source, submissions) {
+        if (!_line(client, source)) { ok = 0; break; }
+        client.transcript.push(source);
+      }
     }
-    client.replaying = 0;
     return ok;
   }
   fputs("not a saved REPL transcript\n", stderr);

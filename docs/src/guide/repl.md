@@ -2,7 +2,9 @@
 
 `x2c repl` is a persistent command-line session for experimenting with C and
 x2c libraries. Load a source file, discover its functions, create an object,
-and call operations on that object across successive submissions.
+and call operations on that object across successive submissions. The
+command is experimental and available in checkout builds; neither
+`make install` nor a release payload installs it.
 
 Executable submissions compile through the ordinary compiler. Prompt objects
 and library objects share one native worker process, so native pointers,
@@ -191,11 +193,12 @@ read can terminate the worker, just as a bad library call can.
 
 | Command | Result |
 | --- | --- |
-| `:load "PATH" ...` | Build a candidate program with these source/header roots. |
+| `:load "PATH" ...` | Add source/header roots and build a candidate program. |
 | `:reload` | Rebuild the current roots from current source files. |
 | `:reset` | Start fresh from the last successful program and its declaration snapshot. |
 | `:save "PATH"` | Save successful source submissions, load/reset boundaries, and launch settings. |
 | `:replay "PATH"` | Start fresh and explicitly rerun a saved transcript, stopping at the first failure. |
+| `:quit` | Run session cleanup and leave the playground. |
 
 Every successful load or reload clears **all prompt and library state**.
 This includes loading an additional file or an unchanged file. The REPL
@@ -273,7 +276,7 @@ normal exit status. Incomplete input at EOF exits with status 1.
 
 ## Execution details
 
-`:ast NAME` shows a prompt definition's typed AST. `:lowered NAME` explains
+`:ast NAME` shows a prompt function's typed AST. `:lowered NAME` explains
 that submissions execute natively. `--dump` prints typed submission syntax
 and the retained directory containing native headers, source, and module;
 `--stats` and `--verbose-stats` print worker allocation statistics at exit.

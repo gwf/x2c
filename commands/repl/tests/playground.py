@@ -240,6 +240,9 @@ def nbody(directory):
 
 with tempfile.TemporaryDirectory(prefix="x2c-repl-playground-") as temporary:
     directory = Path(temporary)
+    scratch = directory / "tmp"
+    scratch.mkdir()
+    os.environ["TMPDIR"] = str(scratch)
     source_statics(directory)
     nbody(directory)
     fixture = ROOT / "commands/repl/tests/library"
@@ -360,3 +363,5 @@ int callback_data(int (*call)(int,void *),void *data) { return call(4,data); }
     require(bad_option.returncode != 0 and "--no-such-option" in bad_option.stderr,
             (bad_option.stdout, bad_option.stderr))
     print("diagnostics, continuation and option errors passed", flush=True)
+    leftovers = sorted(path.name for path in scratch.iterdir())
+    require(not leftovers, leftovers)

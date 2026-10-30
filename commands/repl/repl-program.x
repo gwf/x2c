@@ -18,7 +18,7 @@ static typedef struct ProgramBuild {
   ReplProgram program;
   Frontend frontend;
   Compiler documentation;
-  Array roots, headers, objects, archives, exports, includes;
+  Array roots, headers, objects, exports, includes;
   Map seen, units, fingerprints, packages;
 } ProgramBuild;
 
@@ -702,9 +702,8 @@ static String _program_exports(ProgramBuild &b) {
   Array code = ["#include \"x2c.h\"\n"];
   int index = 0;
   foreach (List pair, b.headers) {
-    String header = pair.car(), directory = pair.cadr();
+    String header = pair.car();
     code.push(%"#include $(header.repr())\n");
-    (void) directory;
   }
   foreach (List row, b.exports)
     if (_program_static_export(row))
@@ -883,39 +882,39 @@ static List _program_select_roots(
   return selected.list_free();
 }
 
-/** Builds roots with ordinary startup conflict rules. */
-ReplProgram repl_program_build(Frontend frontend, List roots, String &failure) =>
-  repl_program_build_selected(frontend, roots, NULL, failure);
-
-/** Builds one native program. Main-bearing `requested` roots replace earlier
-    main-bearing roots; a NULL selection keeps ordinary startup conflicts.
+/** Builds one native program in `directory`, which the caller creates and
+    removes. Main-bearing `requested` roots replace earlier main-bearing
+    roots; a NULL selection keeps ordinary startup conflicts. The program
+    keeps only these roots; each build derives a manifest's inputs again.
 */
 ReplProgram repl_program_build_selected(
-  Frontend frontend, List roots, List requested, String &failure) {
+  Frontend frontend, String directory, List roots, List requested,
+  String &failure) {
   failure = NULL;
   ReplProgram program = xcalloc(1, sizeof(struct ReplProgram));
   *program = (struct ReplProgram) {
-    .directory = Path.temp_dir(), .symbols = {}, .addresses = {},
+    .directory = directory, .symbols = {}, .addresses = {},
     .descriptions = {}, .sources = {}, .dependencies = {}, .macros = {},
     .cc_args = frontend.request.cc_args, .ld_args = frontend.request.ld_args};
   ProgramBuild build = {
     .program = program, .frontend = frontend, .roots = [], .headers = [],
-    .objects = [], .archives = [], .exports = [], .includes = [], .seen = {}, .units = {},
+    .objects = [], .exports = [], .includes = [], .seen = {}, .units = {},
     .fingerprints = {}, .packages = {}};
   CliRequest request = _program_request(build, failure);
   if (!request) return NULL;
+  List derived = NULL;
   if (request != frontend.request) {
     frontend = Frontend.new(request);
     build.frontend = frontend;
     program.cc_args = request.cc_args;
     program.ld_args = request.ld_args;
-    roots = roots.append(request.inputs);
+    derived = request.inputs;
   }
   _program_native_dependencies(program, request);
   if (requested) roots = _program_select_roots(frontend, roots, requested, failure);
   if (failure) return NULL;
   Array native = [], source = [];
-  foreach (String root, roots) {
+  foreach (String root, roots.append(derived)) {
     String path = Path.resolved_absolute(root);
     if (!Path.is_file(path)) { failure = %"cannot read input file: $root"; return NULL; }
     if (path.endswith(".o") || path.endswith(".a") || path.endswith(".so") ||
@@ -1023,6 +1022,3 @@ ReplProgram repl_program_restore(List snapshot, String &failure) {
   if (!failure) failure = _program_open(p);
   return failure ? NULL : p;
 }
-
-/** Ends a program binding; its code stays mapped until the worker exits. */
-void repl_program_close(ReplProgram program) { (void) program; }

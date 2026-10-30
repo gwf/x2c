@@ -30,13 +30,13 @@ typedef struct ReplWorker {
   Buffer pending;
   String snapshot;
   List roots;
-  String directory;
   String failure;
 } *ReplWorker;
 
+/* A fresh program builds in `directory`; a snapshot restores in its own. */
 typedef struct ReplWorkerStart {
   List arguments, roots, requested;
-  String snapshot;
+  String snapshot, directory;
   ReplWorker previous;
   ReplInput input;
   int interactive;
@@ -196,9 +196,10 @@ static Map _worker_receive(ReplWorker worker, int input) {
 
 /** Sends source or an inspection query to the worker; no native value crosses. */
 Map repl_worker_call(ReplWorker worker, Map message, int input) {
-  if (!worker || worker.pid <= 0) return NULL;
-  _worker_interrupted = 0;
+  if (!worker) return NULL;
   worker.failure = NULL;
+  if (worker.pid <= 0) return NULL;
+  _worker_interrupted = 0;
   if (!_worker_send(worker.to, message)) {
     _worker_reap(worker, 1);
     worker.failure = "native worker disconnected";
@@ -207,13 +208,11 @@ Map repl_worker_call(ReplWorker worker, Map message, int input) {
   return _worker_receive(worker, input);
 }
 
-/** Retires the worker after session cleanup, or kills a failed worker. */
+/** Retires the worker after session cleanup. The worker exits without
+    replying to `<quit>`, and the call reaps it. */
 void repl_worker_close(ReplWorker worker) {
   if (!worker) return;
-  if (worker.pid > 0) {
-    Map reply = repl_worker_call(worker, {operation: <quit>}, 0);
-    _worker_reap(worker, reply == NULL);
-  }
+  (void) repl_worker_call(worker, {operation: <quit>}, 0);
   worker.pending.free();
   xfree(worker);
 }
@@ -322,7 +321,7 @@ static String _worker_snapshot(ReplProgram program, String retained) {
 }
 
 static void _worker_serve(
-  CliRequest request, List roots, List requested, String snapshot, int from, int to) {
+  CliRequest request, ReplWorkerStart start, int from, int to) {
   signal(SIGINT, SIG_DFL);
   signal(SIGPIPE, SIG_DFL);
   // Native exit hooks run before Context's registered process shutdown.
@@ -342,14 +341,16 @@ static void _worker_serve(
   session.frontend = frontend;
   ReplProgram program = NULL;
   String failure = NULL;
-  if (snapshot) {
+  if (start.snapshot) {
     Var state = void;
     unsigned cursor = 0;
-    Path.read_text(snapshot).read_datum(cursor, state);
+    Path.read_text(start.snapshot).read_datum(cursor, state);
     program = repl_program_restore(state, failure);
   }
-  else if (roots || request.inputs || request.manifest || request.target || request.profile)
-    program = repl_program_build_selected(frontend, roots, requested, failure);
+  else if (start.roots || request.inputs || request.manifest ||
+           request.target || request.profile)
+    program = repl_program_build_selected(
+      frontend, start.directory, start.roots, start.requested, failure);
   if (failure) {
     _worker_send(to, {status: <failed>, message: failure});
     exit(1);
@@ -358,10 +359,9 @@ static void _worker_serve(
     repl_program_bind(program, session);
     session.program = program;
   }
-  String retained = _worker_snapshot(program, snapshot);
+  String retained = _worker_snapshot(program, start.snapshot);
   if (!_worker_send(to, {status: <ready>, snapshot: retained,
-                        roots: program ? program.roots : roots,
-                        directory: program ? program.directory : ""})) {
+                        roots: program ? program.roots : start.roots})) {
     fputs("native program snapshot contains a non-data value\n", stderr);
     exit(1);
   }
@@ -371,7 +371,6 @@ static void _worker_serve(
     Map message = value;
     if (message[<operation>] == <quit>) {
       session.run_cleanups();
-      if (program) repl_program_close(program);
       fflush(NULL);
       exit(0);
     }
@@ -384,7 +383,6 @@ static void _worker_serve(
     if (!_worker_send(to, result)) break;
   }
   session.run_cleanups();
-  if (program) repl_program_close(program);
   fflush(NULL);
   exit(0);
 }
@@ -419,34 +417,39 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
     raise %(io-fail (operation "repl worker fork") (errno $error));
   }
   if (!pid) {
-    close(requests[1]);
-    close(replies[0]);
-    if (start.previous) {
-      if (start.previous.to >= 0) close(start.previous.to);
-      if (start.previous.from >= 0) close(start.previous.from);
-      if (start.previous.terminal >= 0) close(start.previous.terminal);
-    }
-    start.input.discard_inherited();
-    setsid();
-    if (master >= 0) {
-      close(master);
-      const char *terminal = ttyname(slave);
-      if (!terminal || !freopen(terminal, "r", stdin)) {
+    // The child inherits the supervisor's catch frames; no raise reaches them.
+    try {
+      close(requests[1]);
+      close(replies[0]);
+      if (start.previous) {
+        if (start.previous.to >= 0) close(start.previous.to);
+        if (start.previous.from >= 0) close(start.previous.from);
+        if (start.previous.terminal >= 0) close(start.previous.terminal);
+      }
+      start.input.discard_inherited();
+      setsid();
+      if (master >= 0) {
+        close(master);
+        const char *terminal = ttyname(slave);
+        if (!terminal || !freopen(terminal, "r", stdin)) {
+          perror("native worker stdin");
+          _exit(1);
+        }
+        ioctl(STDIN_FILENO, TIOCSCTTY, 0);
+        close(slave);
+      }
+      else if (!freopen("/dev/null", "r", stdin)) {
         perror("native worker stdin");
         _exit(1);
       }
-      ioctl(STDIN_FILENO, TIOCSCTTY, 0);
-      close(slave);
+      _worker_serve(
+        repl_native_request(start.arguments), start, requests[0], replies[1]);
     }
-    else {
-      if (!freopen("/dev/null", "r", stdin)) {
-        perror("native worker stdin");
-        _exit(1);
-      }
-    }
-    CliRequest request = repl_native_request(start.arguments);
-    _worker_serve(request, start.roots, start.requested, start.snapshot,
-                  requests[0], replies[1]);
+    catch %(?kind *details):
+      _worker_send(
+        replies[1], {status: <failed>, message: cons(kind, details).repr()});
+    fflush(NULL);
+    _exit(1);
   }
   close(requests[0]);
   close(replies[1]);
@@ -465,6 +468,5 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
   }
   worker.snapshot = ready[<snapshot>];
   worker.roots = ready[<roots>];
-  worker.directory = ready[<directory>];
   return worker;
 }

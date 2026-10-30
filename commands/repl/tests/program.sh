@@ -43,6 +43,18 @@ c-flags = ["-DSELECTED_VALUE=10", "-DDEPENDENCY_VALUE=99"]
 EOF
 "$tmp/program-api" --manifest-path "$tmp/x2c.toml" --target app
 
+printf 'int extra_value(void) { return 5; }\n' >"$tmp/extra.c"
+printf ':load "%s"\n:reload\n:reload\n:files\n%s\n' "$tmp/extra.c" \
+  'manifest_value() + extra_value();' >"$tmp/manifest-reload.repl"
+if ! builds/0/x2c repl --manifest-path "$tmp/x2c.toml" --target app \
+     <"$tmp/manifest-reload.repl" >"$tmp/manifest-reload.log" 2>&1 ||
+   [ "$(grep -c '^root: ' "$tmp/manifest-reload.log")" != 1 ] ||
+   ! grep -q '^=> int 22$' "$tmp/manifest-reload.log"; then
+  cat "$tmp/manifest-reload.log" >&2
+  echo "manifest reload duplicated its roots or failed to link" >&2
+  exit 1
+fi
+
 cat >"$tmp/main-args.c" <<'EOF'
 int main(int argc, char **argv) { return argc * 10 + (argv[1][0] == 'a' ? 3 : 0); }
 EOF

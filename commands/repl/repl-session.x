@@ -127,24 +127,6 @@ static List _completion_filter(
   return (candidates.len() ? candidates : internal).sort().list_free();
 }
 
-/** Returns sorted published session functions matching `prefix`.
-    `native` also includes loaded functions and bound native prototypes. */
-List ReplSession.complete_functions(
-  ReplSession session, String prefix, int native) {
-  (void) native;
-  Array names = auto [], candidates = [];
-  foreach (Var (candidate, stored), session.names) {
-    if (candidate is not <string> || stored is not <list>) continue;
-    String name = candidate;
-    List entry = stored;
-    if ((entry.car() == <function> || (native && entry.car() == <native>)) &&
-        name.startswith(prefix)) names.push(name);
-  }
-  foreach (String name, names.sort())
-    candidates.push(%(<session> $name));
-  return candidates.list_free();
-}
-
 /** Completes the source namespace at byte `cursor` without publishing parse
     state. Invalid or non-code prefixes return no candidates. */
 ReplCompletion ReplSession.complete(
@@ -225,11 +207,6 @@ ReplCompletion ReplSession.complete(
   else if (rows || keywords) result.candidates = _completion_filter(
     session, kind, rows, keywords, prefix);
   return result;
-}
-
-static List _bare(List node) {
-  match (node) case %(at ? ?inner): return inner;
-  return node;
 }
 
 /* Statements run in a function that the submission does not spell. */
@@ -406,17 +383,6 @@ ReplSession ReplSession.new(Compiler compiler) {
   return session;
 }
 
-/** Returns the published names and kinds without evaluating user code. */
-List ReplSession.symbols(ReplSession session) {
-  Array names = auto [], result = [];
-  foreach (Var name, session.names.keys()) names.push(name);
-  foreach (String name, names.sort()) {
-    List entry = session.names[name];
-    result.push($(entry.car(), name));
-  }
-  return result.list_free();
-}
-
 /** Returns a published binding's kind and retained typed syntax. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var value;
@@ -580,7 +546,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
     result.cause = Error.snapshot(cause);
   }
   catch %(incomplete *): result.status = <incomplete>;
-  catch %(malformed *): result.diagnostics = c.diagnostics();
+  catch %(malformed *): {}
   catch %(repl (reason ?why)): result.message = Error.snapshot(why);
   catch %(?kind *details): {
     result.status = <failed>;

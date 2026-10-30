@@ -117,9 +117,11 @@ def pipe_until(process, token):
 
 with tempfile.TemporaryDirectory(prefix="x2c-repl-terminal-") as temporary:
     directory = Path(temporary)
+    scratch = directory / "tmp"
+    scratch.mkdir()
     environment = dict(os.environ, TERM="xterm-256color",
                        XDG_STATE_HOME=str(directory / "state"),
-                       X2C_SCOPE_ACCOUNTING="1")
+                       X2C_SCOPE_ACCOUNTING="1", TMPDIR=str(scratch))
     source = directory / "terminal.c"
     source.write_text("""#include <stdio.h>
 #include <stdlib.h>
@@ -286,6 +288,42 @@ int candidate_value(void) { return 1; }
             (crashed.stdout, crashed.stderr))
     print("native crash leaves the terminal client usable", flush=True)
 
+    recovered = directory / "recovered.repl"
+    session = run(load + "int x = 1;\nterminal_crash();\nint x = 2;\n" +
+                  f':save "{recovered}"\n', [], environment)
+    require(session.returncode == 1 and "state was lost" in session.stderr,
+            (session.stdout, session.stderr))
+    replayed = run(f':replay "{recovered}"\nx;\n', [], environment)
+    require(replayed.returncode == 0 and result(replayed.stdout, 2),
+            (replayed.stdout, replayed.stderr))
+    print("crash recovery is a transcript reset boundary", flush=True)
+
+    snapshotless = subprocess.Popen([str(BINARY)], stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    env=environment, cwd=ROOT)
+    try:
+        snapshotless.stdin.write((load + "int kept = 17;\n"
+                                  'print("loaded\\n");\n').encode())
+        snapshotless.stdin.flush()
+        before = pipe_until(snapshotless, b"loaded\n")
+        snapshots = list(scratch.glob("*/program.snapshot"))
+        require(len(snapshots) == 1, snapshots)
+        snapshots[0].unlink()
+        after, errors = snapshotless.communicate(
+            b":reset\nkept;\nterminal_answer();\n", timeout=TIMEOUT)
+        output = (before + after).decode()
+        require(snapshotless.returncode == 1 and
+                b"session unchanged:" in errors and
+                result(output, 17) and result(output, 42),
+                (output, errors.decode()))
+    finally:
+        if snapshotless.poll() is None:
+            snapshotless.kill()
+            snapshotless.wait()
+    print("a failed candidate startup leaves the live session intact",
+          flush=True)
+
     saved = directory / "saved.repl"
     replayed = run(load + "int kept = 11;\nkept += 3;\n" +
                    f':save "{saved}"\n:reset\n:replay "{saved}"\nkept;\n',
@@ -336,5 +374,7 @@ int candidate_value(void) { return 1; }
             "interactive history was not saved")
     print("native terminal input, forced stop, edit cancellation, and history pass",
           flush=True)
+    leftovers = sorted(path.name for path in scratch.iterdir())
+    require(not leftovers, leftovers)
 
 print("REPL terminal checks passed")

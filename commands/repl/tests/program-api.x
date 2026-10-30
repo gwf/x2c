@@ -65,7 +65,8 @@ int main(int argc, char **argv) {
   List roots = request.inputs;
   Frontend frontend = Frontend.new(request);
   String failure = NULL;
-  ReplProgram program = repl_program_build(frontend, roots, failure);
+  ReplProgram program = repl_program_build_selected(
+    frontend, Path.temp_dir(), roots, NULL, failure);
   if (!program) { fprintf(stderr, "%s\n", failure); return 1; }
   String missing = Env.get("REPL_PROGRAM_MISSING");
   if (missing) {
@@ -108,8 +109,9 @@ int main(int argc, char **argv) {
     if (result != (parameters ? 23 : 11)) return 1;
     String replacement = Env.get("REPL_PROGRAM_REPLACE");
     if (replacement) {
-      ReplProgram selected = repl_program_build_selected(frontend,
-        roots.append($(replacement)), $(replacement), failure);
+      ReplProgram selected = repl_program_build_selected(
+        frontend, Path.temp_dir(), roots.append($(replacement)),
+        $(replacement), failure);
       if (!selected || selected.roots.len() != 1 ||
           selected.roots.car() != replacement) return 1;
       int (*entry)(void) = (int (*)(void)) selected.addresses["main"].pointer();

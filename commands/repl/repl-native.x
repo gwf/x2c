@@ -308,11 +308,15 @@ Map repl_native_execute(ReplSession session, List syntax, int persistent,
   Toolchain toolchain = session.frontend
     ? session.frontend.toolchain
     : Toolchain.for_meta(Compiler.meta_cc(runtime_headers));
+  // Each load builds in a new directory; the entry depends only on content.
+  String content = header + source;
+  ReplProgram program = session.program;
+  if (program)
+    content = (content + Path.read_text(program.header))
+      .replace(program.directory, "");
   String identity = String.sha256(
-    header + source + n.identities.repr() + configuration +
-    (session.program ? session.program.module : "") +
-    Compiler.module_stamp() + Compiler.meta_cc_identity(toolchain.cc) +
-    toolchain.include_dir);
+    content + n.identities.repr() + configuration + Compiler.module_stamp() +
+    Compiler.meta_cc_identity(toolchain.cc) + toolchain.include_dir);
   String directory = %"$(Compiler.cache_root())/repl/$identity";
   String module = %"$directory/group.module";
   if (!Path.is_file(module)) {
