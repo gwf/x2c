@@ -653,7 +653,62 @@ static void channel_owned_receive_releases_transport_scope(void) {
   }
 }
 
+/* An unmanaged pthread has no Thread token or native-thread cleanup hook.
+   Repeated blocking calls must unlink and destroy their temporary resources. */
+static void *_channel_unmanaged_exchange(void *bytes) {
+  Channel channel = bytes;
+  Pool.thread_initialize();
+  for (int i = 0; i < 64; ++i) {
+    channel.send(i);
+    channel.receive();
+  }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void channel_unmanaged_blocking_calls(void) {
+  $test.scoped();
+  Channel channel = auto Channel.new();
+  pthread_t native;
+  Pool.thread_start();
+  EXPECT_INT_EQ(pthread_create(
+    &native, NULL, _channel_unmanaged_exchange, channel), 0);
+  for (int i = 0; i < 64; ++i) {
+    EXPECT_INT_EQ(channel.receive().integer(), i);
+    channel.send(i);
+  }
+  EXPECT_INT_EQ(pthread_join(native, NULL), 0);
+}
+
+static void channel_cancelled_waiters_pass_buffered_opportunities(void) {
+  $test.scoped();
+  for (int sending = 0; sending < 2; ++sending) {
+    Channel channel = auto Channel.new(1);
+    if (sending) channel.send(12);
+    Thread stopped[8];
+    for (int i = 0; i < 8; ++i)
+      stopped[i] = Thread.start_raw(
+        sending ? _channel_sender : _channel_receiver, &channel, sizeof(channel));
+    for (int i = 0; i < 8; ++i) stopped[i].stop();
+    Thread live = Thread.start_raw(
+      sending ? _channel_sender : _channel_receiver, &channel, sizeof(channel));
+    if (sending) {
+      EXPECT_INT_EQ(channel.receive().integer(), 12);
+      EXPECT_INT_EQ(channel.receive().integer(), 71);
+      EXPECT_INT_EQ(live.join().integer(), 1);
+    }
+    else {
+      channel.send(73);
+      EXPECT_INT_EQ(live.join().integer(), 73);
+    }
+    live.free();
+    for (int i = 0; i < 8; ++i) _channel_expect_stopped(stopped[i]);
+  }
+}
+
 void channel_suite(void) {
+  $test.run(channel_unmanaged_blocking_calls);
+  $test.run(channel_cancelled_waiters_pass_buffered_opportunities);
   $test.run(channel_owned_receive_releases_transport_scope);
   $test.run(channel_owned_plain_map_moves_and_grows);
   $test.run(channel_owned_plain_array_moves_and_grows);

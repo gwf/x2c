@@ -74,6 +74,8 @@ static struct Thread {
   ParallelRun parallel;
   int assigned;
   int stop_requested;
+  pthread_mutex_t channel_mutex;
+  pthread_cond_t channel_condition;
   pthread_cond_t *waiting;
 };
 
@@ -343,10 +345,23 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
 /** Tests a live borrowed wait token atomically. A null token has no stop
-    request. Queues retain the monitor when committing a rendezvous peer.
+    request. Channel commits retain the participant gate while checking this flag.
 */
 int x2c_thread_wait_stopped(Thread owner) =>
   owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
+
+/* Channel gates persist through registration, sleep, and commitment. They
+   never acquire the completion monitor or a Channel queue mutex. */
+pthread_mutex_t *x2c_thread_channel_mutex(Thread owner) =>
+  owner ? &owner.channel_mutex : NULL;
+
+pthread_cond_t *x2c_thread_channel_condition(Thread owner) =>
+  owner ? &owner.channel_condition : NULL;
+
+static void _destroy_channel_wait(Thread thread) {
+  _completion_check(pthread_cond_destroy(&thread.channel_condition));
+  _completion_check(pthread_mutex_destroy(&thread.channel_mutex));
+}
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
     have been released. Explicit catches may handle this shared cause.
@@ -364,18 +379,21 @@ void x2c_thread_cancel(void) {
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
+  _completion_check(pthread_mutex_lock(&t.channel_mutex));
   __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
+  _completion_check(pthread_cond_signal(&t.channel_condition));
+  _completion_check(pthread_mutex_unlock(&t.channel_mutex));
   if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
   x2c_thread_wait_unlock();
 }
 
-/** Locks the internal monitor shared by stop publication and queue commits.
+/** Locks the completion monitor shared by stop and completion selection.
     Native synchronization failure aborts without entering Error dispatch.
 */
 void x2c_thread_wait_lock(void) =>
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
 
-/** Unlocks the internal stop/queue monitor. */
+/** Unlocks the internal completion monitor. */
 void x2c_thread_wait_unlock(void) =>
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
 
@@ -459,6 +477,7 @@ Var Thread.join(Thread t) {
 void Thread.free(Thread t) {
   if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
     raise %(bad-state (operation "Thread.free"));
+  _destroy_channel_wait(t);
   free(t);
 }
 
@@ -474,10 +493,12 @@ static Thread _start(
   int started = 0;
   defer if (!started) {
     Error.policy_release(thread.policy);
+    _destroy_channel_wait(thread);
     free(thread);
   }
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
+    _destroy_channel_wait(thread);
     free(thread);
     fprintf(stderr, "Thread: could not register shutdown\n");
     abort();
@@ -505,6 +526,7 @@ static Thread _new_handle(
     Error.policy_release(policy);
     raise %(alloc-fail);
   }
+  _initialize_channel_wait(thread, policy);
   thread.policy = policy;
   thread.function = function;
   thread.input_size = input_size;
@@ -513,6 +535,22 @@ static Thread _new_handle(
   __atomic_store_n(&thread.state, <running>, __ATOMIC_SEQ_CST);
   if (input_size) memcpy(_input(thread), input, input_size);
   return thread;
+}
+
+static void _initialize_channel_wait(Thread thread, void *policy) {
+  int error = pthread_mutex_init(&thread.channel_mutex, NULL);
+  if (error) {
+    Error.policy_release(policy);
+    free(thread);
+    _error("pthread_mutex_init", error);
+  }
+  error = pthread_cond_init(&thread.channel_condition, NULL);
+  if (error) {
+    _completion_check(pthread_mutex_destroy(&thread.channel_mutex));
+    Error.policy_release(policy);
+    free(thread);
+    _error("pthread_cond_init", error);
+  }
 }
 
 static void _register_shutdown(void) {

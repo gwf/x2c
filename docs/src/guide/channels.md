@@ -139,13 +139,15 @@ scope. Private-pool String keys do not become safe when their Map moves. Shared
 process-pool Strings remain borrowable because the pool outlives all jobs.
 
 A Channel's own storage scope, returned by `channel.scope()`, owns its native
-synchronization record. Queue nodes use native allocation independently of Scope
+queue mutex. Independent Channels do not share that mutex. Managed Threads
+keep a private wait mutex and condition through join; unmanaged blocking calls
+use temporary native wait resources. Queue nodes use native allocation independently of Scope
 allocation lists. Allocation/tree metadata belongs to exclusive private owners;
 no Scope or replacement tree mutex coordinates senders through a Channel.
 
 Finish every user and waiter before freeing a Channel or destroying its owner.
 Cleanup explicitly destroys undelivered owned subtrees and frees native queue
-nodes outside the queue monitor. It never destroys ordinary borrowed payloads.
+nodes outside the queue mutex. It never destroys ordinary borrowed payloads.
 Initializer `auto` closes and frees the Channel; it does not join its users. `Thread.run`
 finishes every participant before surrounding Channel cleanup on success or
 failure. Parent-scope destruction uses the same native-resource finalizer.

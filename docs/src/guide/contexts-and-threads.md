@@ -293,6 +293,11 @@ safe completion aborts rather than return with live borrowers.
 
 ## Cooperative stopping
 
+Each managed Thread keeps a private Channel wait mutex and condition until
+its joined handle is freed. Channel commitment takes the participating Thread
+mutexes in a fixed order. Stop publication takes the target Thread mutex, so
+a stop cannot pass between the final stop check and commitment or sleep.
+
 `thread.stop()` records a persistent stop request and wakes the Thread's
 registered Channel or completion wait. It does not close a Channel, transfer
 payload ownership, interrupt arbitrary native I/O, or forcibly terminate code.
