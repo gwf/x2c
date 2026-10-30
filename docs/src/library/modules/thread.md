@@ -9,8 +9,6 @@ Native workers with explicit result lifetimes.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_thread_channel_enter`](#x2c_thread_channel_enter) | Registers a Channel monitor for the current caller and returns its borrowed Thread token through owner. |
-| [`x2c_thread_channel_leave`](#x2c_thread_channel_leave) | Removes the caller's registered Channel monitor while its mutex is held. |
 | [`Iter.parallel_map`](#Iter.parallel_map) | Describes mapping `function` over `source` with at most `workers` Threads. |
 | [`Iter.parallel_map_in`](#Iter.parallel_map_in) | Maps with a borrowed canonical-value pool active inside each callback. |
 | [`ParallelMap.foldl`](#ParallelMap.foldl) | Folds borrowed worker results on the caller in completion order. |
@@ -23,29 +21,6 @@ Native workers with explicit result lifetimes.
 | [`Thread.start_raw`](#Thread.start_raw) | Starts one worker and returns its heap-owned handle. |
 | [`Thread.stop`](#Thread.stop) | Requests cooperative stopping without closing any Channel. |
 | [`Thread.wait_any`](#Thread.wait_any) | Waits for a finished worker, removes its handle from `pending`, and returns it. |
-
-### Functions
-
-#### x2c_thread_channel_enter
-
-`int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner)`
-
-Registers a Channel monitor for the current caller and returns its borrowed
-Thread token through owner. Returns false if stop already claimed the token.
-The caller holds the monitor mutex. Its lifetime extends through successful
-unregister or completion acknowledgement after releasing that mutex.
-
-Source: `lib/thread.x`
-
-#### x2c_thread_channel_leave
-
-`int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor)`
-
-Removes the caller's registered Channel monitor while its mutex is held.
-Returns false if stop borrowed the monitor; the caller must release its
-mutex and acknowledge completion before allowing the monitor to expire.
-
-Source: `lib/thread.x`
 
 ### `Iter`
 
@@ -299,6 +274,8 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`x2c_thread_cancel`](#x2c_thread_cancel) | Raises a non-resumable stop outcome after queue locks and wait records have been released. |
+| [`x2c_thread_channel_enter`](#x2c_thread_channel_enter) | Registers a Channel monitor for the current caller and returns its borrowed Thread token through owner. |
+| [`x2c_thread_channel_leave`](#x2c_thread_channel_leave) | Removes the caller's registered Channel monitor while its mutex is held. |
 | [`x2c_thread_stopping`](#x2c_thread_stopping) | Tests the current caller's pending stop atomically. |
 | [`x2c_thread_wait`](#x2c_thread_wait) | Waits on condition with the internal monitor held. |
 | [`x2c_thread_wait_lock`](#x2c_thread_wait_lock) | Locks the completion monitor shared by stop and completion selection. |
@@ -314,6 +291,27 @@ for source readers but are not supported as user API.
 
 Raises a non-resumable stop outcome after queue locks and wait records
 have been released. Explicit catches may handle this shared cause.
+
+Source: `lib/thread.x`
+
+#### x2c_thread_channel_enter
+
+`int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner)`
+
+Registers a Channel monitor for the current caller and returns its borrowed
+Thread token through owner. Returns false if stop already claimed it.
+The caller holds the monitor mutex. Its lifetime extends through successful
+unregister or completion acknowledgement after releasing that mutex.
+
+Source: `lib/thread.x`
+
+#### x2c_thread_channel_leave
+
+`int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor)`
+
+Removes the caller's registered Channel monitor while its mutex is held.
+Returns false if stop borrowed the monitor; the caller must release its
+mutex and acknowledge completion before allowing the monitor to expire.
 
 Source: `lib/thread.x`
 
@@ -359,7 +357,7 @@ Source: `lib/thread.x`
 `int x2c_thread_wait_stopped(Thread owner)`
 
 Tests a live borrowed wait token atomically. A null token has no stop
-request. Channel stop publication and commitment hold the registered queue mutex.
+request. Stop publication and commitment hold the registered queue mutex.
 
 Source: `lib/thread.x`
 
@@ -379,7 +377,6 @@ Source: `lib/thread.x`
 | [`Thread`](#Thread) | struct | A heap-owned native worker handle with one consuming join. |
 | [`ThreadFn`](#ThreadFn) | callback | Computes a result from borrowed start-input bytes, valid during the call. |
 | [`ThreadValueFn`](#ThreadValueFn) | callback | Computes a result from borrowed Var input. |
-| [`X2CChannelMonitor`](#X2CChannelMonitor) | struct | Native Channel wait bridge. |
 
 <a id="ParallelMap"></a>
 ### ParallelMap
@@ -429,6 +426,16 @@ instead keeps callback storage alive through its reducer, which explicitly
 transfers anything it retains. Input storage stays live through use.
 
 Source: `lib/thread.x`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`X2CChannelMonitor`](#X2CChannelMonitor) | struct | Native Channel wait bridge. |
 
 <a id="X2CChannelMonitor"></a>
 ### X2CChannelMonitor

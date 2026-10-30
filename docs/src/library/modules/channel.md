@@ -193,7 +193,7 @@ Source: `lib/channel.x`
 
 ## Design notes
 
-Each queue owns its mutex; registered queue monitors order commitment with stop.
+Each queue owns its mutex; registered monitors order commitment with stop.
 Allocation, Error dispatch, and payload destruction stay outside it.
 
 ## Tests and examples
