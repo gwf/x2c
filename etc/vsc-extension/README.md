@@ -20,7 +20,7 @@ Native C variadic `...` remains distinct from macro syntax.
 
 With a compatible x2c compiler available, the extension provides compiler
 diagnostics, definition navigation, type hover, completion, symbols,
-references, rename, and lexical semantic tokens. Syntax highlighting works
+references, and rename. The syntax grammar supplies highlighting with or
 without the compiler. The extension does not install tools or collect
 telemetry.
 

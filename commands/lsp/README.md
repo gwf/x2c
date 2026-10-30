@@ -12,7 +12,7 @@ Send ordinary compiler arguments in `initializationOptions.arguments`, for
 example `["build", "--target", "app"]`. An empty list selects the discovered
 project or the current source. Only `build` and `translate` configurations are
 supported. The server supplies compiler frontend diagnostics, definitions,
-hover, completion, symbols, references, rename, and lexical semantic tokens.
+hover, completion, symbols, references, and rename.
 It accepts full-document changes and keeps unsaved source overlays.
 Native CPP symbol modes cannot analyze unsaved source text.
 
@@ -34,9 +34,8 @@ the requested file. Workspace symbols search cached definitions of documents
 already analyzed. References and rename match definitions across selected
 target inputs and their build dependencies; without a manifest they search
 only the current document.
-Rename requires a physical definition inside the workspace. Semantic tokens
-classify the document's lexical tokens, without assigning inferred types to
-identifiers. Their UTF-16 ranges split multiline tokens into physical lines.
+Rename requires a physical definition inside the workspace. Syntax coloring
+comes from the editor's syntax grammar; the server does not override it.
 
 Renaming a type also updates its method-owner qualifiers and coupled C
 spellings. A type rename is refused when its defining file is outside the
