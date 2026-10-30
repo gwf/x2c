@@ -2229,7 +2229,7 @@ through a `Name` hole or an `$x2c_ident` call:
 
 ```x2c
 #include "meta.x"
-macro Unit $handler_type(name $tag) {
+macro Unit $handler_type(Name $tag) {
   struct $tag { int depth; };
   typedef struct $x2c_ident("Frame") { int line; } $x2c_ident("Frame");
 }

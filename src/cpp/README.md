@@ -24,6 +24,8 @@ Start with `cpp.x`, which defines the `Cpp` state, then `expand.x`, whose
 [preprocess.x](../preprocess.x) hides the arms this module decides C never
 takes and reads the directives before each form.
 [Collect](../collect/README.md) threads the state through a file's segments
-and records each file's exported macros in its entry.
+and records each file's directives in its entry as `(cpp TEXT FILE LINE)`
+events, which `_replay_included` replays to recompute the macros the file
+exports.
 
 [Source guide](../README.md)

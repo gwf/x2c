@@ -36,14 +36,16 @@ uses `Compiler.script_statement_starts`, `_declaration_stays`, and
 `defines_main`, defined in `src/parse/units.x`. File-level functions cannot refer
 to script locals.
 
-Module blocks are expanded by `src/collect/collect.x` before `translation-unit`
-parsing. `module-block` is spliced before parsing and is not a `unit-item`. It
-contains quoted member paths, separated by commas, with an optional trailing
-comma. Members are inserted in order from the containing file's companion
-directory, `NAME/` beside `NAME.x`; each path must resolve inside it. Nested
-module blocks are expanded too. Each file permits one file-scope block and
-must use default symbol collection. CPP and live-symbol modes do not support
-member splicing. The `module` storage class is described in D4.
+Module blocks are expanded by `src/collect/splice.x` before
+`translation-unit` parsing. `module-block` is spliced before parsing and is
+not a `unit-item`. It contains quoted member paths, separated by commas, with
+an optional trailing comma. Members are inserted in order. Each path is
+relative to the file that holds the block. Members may be siblings,
+descendants, or files elsewhere; no same-named companion directory is
+required. Nested module blocks are expanded too. Each file permits one
+file-scope block and must use default symbol collection: `--cpp-symbols`,
+`--live-symbols`, and the `--dump-cpp` modes reject a module unit. The
+`module` storage class is described in D4.
 
 ## Declaration contracts
 
@@ -192,7 +194,7 @@ From lowest to highest:
 | Binary 3 | `\|` | Left |
 | Binary 4 | `^` | Left |
 | Binary 5 | `&` | Left |
-| Binary 6 | `== != === !==` | Left |
+| Binary 6 | `== != === !== ~=` | Left |
 | Binary 7 | `< <= > >= in is` (`is not` included) | Left |
 | Binary 8 | `<< >>` | Left |
 | Binary 9 | `+ -` | Left |

@@ -253,19 +253,28 @@ binding facts are not exported. Static helpers remain in their provider.
 Each provider has one function-hash table. Its meta advertisements identify
 the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 7 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(DEPENDENCIES...) (INCLUDE-DIRS...) (MACROS...))` form in
+`(interface 8 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
 identifiers; the reader reads that one form without evaluating it.
+After the compiler identity it stores six fields: the source path, its
+content hash, the ordered parts, the definitions, the dependency hashes,
+and the replay conditions. Each part is an included path, a
+`(cpp TEXT FILE LINE)` event for a conditional, `#define`, or `#undef`
+directive, or a set of declaration rows.
 The API reference reads `--dump-definitions` output and joins authored prose
 to those definitions. Before walking a file's source, collection looks
 for its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only
-when its recorded compiler, path, include search roots, and every hash still
-match; otherwise collection walks the source. Include search roots retain
-their order and distinguish home-relative, absolute, and cwd-relative
-spellings.
+when its recorded compiler, path, and every hash still match and its replay
+conditions equal the current ones; otherwise collection walks the source.
+The replay conditions are the include search roots, then `(package NAME)`
+for a package source or `(package)` otherwise, `(cpp-expansion)` under
+`--cpp`, and, for a file outside the runtime and the compiler's prelude,
+`(macros ROWS...)` with the sorted `(name value)` rows of the `-D` and `-U`
+options. Include search roots retain their order and distinguish
+home-relative, absolute, and cwd-relative spellings.
 Search candidates with cwd-relative spellings are checked in the current
 working directory. The compiler identity is a digest of the
 executable's contents, so a changed compiler never replays rows an earlier
@@ -318,10 +327,14 @@ visible; `src/preprocess.x` then turns the tokens of a hidden arm into
 comments and marks layout attributes. Directives stay in the array.
 
 With `--cpp`, collection preprocesses each segment it parses from the state
-where the segment starts. A file's entry records the macros it changed as its
-exported rows, which an includer applies at the `#include`, so a replayed
-interface supplies the macros a cold walk does. The unit's own array is
-preprocessed after collection, when every file it includes has an entry.
+where the segment starts. In either mode, a file's entry keeps its
+conditional, `#define`, and `#undef` directives among its parts as
+`(cpp TEXT FILE LINE)` events. At an `#include`, `_replay_included` in
+`src/collect/walk.x` replays the included file's events, and those of the
+files it includes, from that file's initial macros and recomputes the macros
+it exports, so a replayed interface supplies the macros a cold walk does.
+The unit's own array is preprocessed after collection, when every file it
+includes has an entry.
 
 ### Full parse and type annotation
 

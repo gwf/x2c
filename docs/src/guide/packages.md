@@ -219,11 +219,12 @@ source:
 ```x2c,ignore
 // src/tally.x
 meta int tally_sum(int n);
-macro Expression $tally.sum4() => tally__tally_sum(4);
+macro Expression $tally.sum4() using tally_sum => tally_sum(4);
 ```
 
 The consumer needs one import:
 
+<!-- ignore: this consumer needs the tally package installed. -->
 ```x2c,ignore
 import "tally";
 meta static int ten(void) => $tally.sum4();

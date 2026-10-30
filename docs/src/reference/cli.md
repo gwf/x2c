@@ -709,7 +709,7 @@ archive is the one the lockfile pinned however the index has changed. Only a
 pin the lockfile does not cover reaches the index. The lockfile is then
 rewritten to the manifest's pins. A version the index cannot supply stops the
 build with an error that includes both versions. A dry run installs nothing
-and writes no lockfile, and the editor adapter never installs.
+and writes no lockfile, and the language server never installs.
 
 ## Include and package directories
 

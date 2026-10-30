@@ -96,9 +96,12 @@ method gives 405. `get`, `post`, `put`, and `delete` register common methods.
 A request holds its method as a lowercase Symbol such as `<get>`, its decoded
 `path`, query and header Maps, body String, and captured `params`. Header
 names are lowercase. `req.json()` parses the body with `Json.parse`.
-Malformed JSON produces a 400 response.
+Malformed JSON produces a 400 response with `{"error":"malformed JSON"}`.
+Any other `<malformed>` Error that escapes a handler produces 400 with
+`{"error":"malformed request"}`.
 
-`res.status(code)` selects a status. `header(name, value)` adds a header.
+`res.status(code)` selects a status. `header(name, value)` sets a header and
+replaces an earlier value for the same name, which compares without case.
 `text`, `json`, and `bytes` fill the response body. JSON responses set
 `Content-Type: application/json`; response framing supplies `Content-Length`.
 The server buffers the body until the handler returns.
@@ -137,22 +140,26 @@ when sharing or copying values across those lifetimes.
 
 `serve` runs the acceptor on the caller. `start` runs it on a Thread and
 returns; `port()` reports the bound port, including a port selected with zero.
-`stop` stops acceptance, closes and drains the Channel, joins workers, and
-closes the listener. Call `close` after serving to release the Channel and
-its default Logger. Workers finish their current connections before joining,
-subject to the socket idle timeout. A started acceptor is joined as well.
+`stop` requests shutdown: it stops the listener's acceptance and, after
+`start`, joins the background acceptor. The acceptor's `serve` then closes
+the Channel, joins the workers, and closes the listener as it exits.
+Workers finish their current connections before joining, subject to the
+socket idle timeout. Call `close` after `serve` returns to release the
+Channel and its default Logger; for a started server, `close` performs
+`stop` first.
 
 ## Serve files and deploy
 
-`routes.files("/", "public")` registers a static-file fallback. The handler
+`routes.files("/", "public")` registers a GET route for every path under its
+prefix. Routes match in registration order, so it hides GET routes
+registered after it under that prefix; register it last. The handler
 rejects `..` path segments, serves `index.html` for a directory, and chooses
-a content type from the file extension. Keep served files in a dedicated
-public directory. File responses are buffered in memory.
+a content type from the file extension. A missing file answers 404. Keep
+served files in a dedicated public directory. File responses are buffered
+in memory.
 
-Core networking supplies plain TCP. Put a TLS reverse proxy in front of an
-HTTP service for deployment. A TLS adapter can instead supply separate
-read and write cookie streams through the Socket's File fields; HTTP uses
-those streams for all I/O. Creating a TLS package is separate work.
+Core networking supplies plain TCP, and `HttpServer` has no TLS hook. Put a
+TLS reverse proxy in front of an HTTP service for deployment.
 
 The [notes service](https://github.com/gwf/x2c/tree/dev/examples/apps/notes)
 serves a page and a JSON API for creating, editing, tagging, and searching

@@ -9,9 +9,10 @@ If opening a `Context` fails, the parts already opened are closed before the
 failure reaches an outer `catch`. A failed open does not change
 `Context.current()` or leave a pool active.
 
-`Thread.start` and `Thread.start_raw` run callbacks in isolated `Context`s on
-native worker threads. `Thread.run` uses the shared process canonical pool
-for its jobs, as described below.
+`Thread.start`, `Thread.start_raw`, and `Thread.run` run each callback on a
+native worker thread inside a `Context` that is not isolated. The callback
+gets fresh `Scope`, `Error`, and `Match` state and uses the shared process
+canonical pool, as described below.
 The worker may read parent values and may access shared mutable objects. The
 program must keep those objects alive and coordinate any access that could
 race.

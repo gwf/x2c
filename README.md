@@ -70,7 +70,7 @@ It covers release installation and building an installed compiler from source.
 x2c is experimental and actively developed. APIs and language details can
 change. It aims to keep C useful inside a higher-level language, but it does
 not accept every C preprocessing pattern unchanged. Read the
-[C compatibility notes](docs/src/reference/language.md#host-preprocessing)
+[C compatibility notes](docs/src/reference/language.md#preprocessing)
 when bringing existing C source into x2c.
 
 The [language reference](docs/src/reference/language.md) documents supported
