@@ -65,7 +65,7 @@ class Playground:
 
     def value(self, expression, number):
         output = self.check(expression + ";")
-        require(re.search(r"=> (?:[^\n]* )?" + str(number) + r"\n", output),
+        require(re.search(r"=> (?:[^\n]* )?" + str(number) + r"[uUlL]*\n", output),
                 (expression, number, output))
 
     def close(self, expected=0):
