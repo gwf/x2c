@@ -73,6 +73,10 @@
       {
         "language": "x2c",
         "scopeName": "source.x2c",
+        "tokenTypes": {
+          "meta.literal.symbol.simple.x2c": "string",
+          "meta.literal.symbol.quoted.x2c": "string"
+        },
         "path": "./syntaxes/x2c.tmLanguage.json"
       },
       {

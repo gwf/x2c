@@ -4361,7 +4361,7 @@
 				},
 				{
 					"name": "meta.literal.symbol.simple.x2c",
-					"begin": "(?<![\\w)\\]}>])<(?=[*?]?[A-Za-z_])",
+					"begin": "(?<![\\w)\\]}>])<(?=[^\\s>\"]+>)",
 					"beginCaptures": {
 						"0": { "name": "punctuation.definition.literal.symbol.begin.x2c" }
 					},
@@ -4370,7 +4370,7 @@
 						"0": { "name": "punctuation.definition.literal.symbol.end.x2c" }
 					},
 					"patterns": [
-						{ "match": "[*?]?[A-Za-z_][A-Za-z0-9_]*", "name": "constant.other.symbol.x2c.simple" }
+						{ "match": "[^\\s>]+", "name": "constant.other.symbol.x2c.simple" }
 					]
 				}
 			]

@@ -266,3 +266,52 @@ test('meta and native receive keyword colors without x2c theme overrides', async
   themedRegistry.dispose();
   await check('meta int native(void);', 'native', 'storage.modifier.native.x2c', false);
 });
+
+
+test('symbol literals keep delimiters inside the literal', async () => {
+  for (const spelling of ['(', ')', '[', ']', '{', '}', ';', ',', '/', '/*',
+    '//', '+', '<', 'foo-bar', 'name', '*name', '?name']) {
+    const literal = `<${spelling}>`;
+    for (const line of [`c.expect(${literal});`,
+      `List entries = c.peek(0) == ${literal} ? NULL : _parse_params(c);`,
+      `List values = %( ${literal} after );`]) {
+      await check(line, literal, 'meta.literal.symbol.simple.x2c');
+      await check(line, spelling, 'constant.other.symbol.x2c.simple', true,
+        line.indexOf(literal) + 1);
+      const after = line.endsWith('after );') ? 'after' : ';';
+      await check(line, after, 'meta.literal.symbol.simple.x2c', false,
+        line.lastIndexOf(after));
+    }
+  }
+  for (const line of ['int value = left < right;', 'int value = left << right;',
+    'int value = left < right > other;', '// <(>', 'char *s = "<)>";'])
+    await check(line, '<', 'meta.literal.symbol.simple.x2c', false);
+});
+
+
+test('symbol punctuation is excluded from editor bracket matching', async () => {
+  const manifest = require('../package.json');
+  const contribution = manifest.contributes.grammars.find(g => g.language === 'x2c');
+  const types = { other: 0, comment: 1, string: 2, regex: 3 };
+  const tokenTypes = Object.fromEntries(Object.entries(contribution.tokenTypes || {})
+    .map(([scope, type]) => [scope, types[type]]));
+  const configuredRegistry = new Registry({ onigLib, loadGrammar: async () => grammarData });
+  const configured = await configuredRegistry.loadGrammarWithConfiguration(
+    'source.x2c', 1, { tokenTypes });
+  for (const literal of ['<(>', '<)>', '<[>', '<]>', '<{>', '<}>', '<"(">', '<")">']) {
+    const line = `c.expect(${literal});`;
+    const tokens = configured.tokenizeLine2(line).tokens;
+    function typeAt(at) {
+      let metadata;
+      for (let i = 0; i < tokens.length; i += 2)
+        if (tokens[i] <= at) metadata = tokens[i + 1];
+      return (metadata >>> 8) & 3;
+    }
+    const start = line.indexOf(literal);
+    for (let at = start; at < start + literal.length; at++)
+      assert.equal(typeAt(at), types.string, `${line}: ${at}`);
+    assert.equal(typeAt(start - 1), types.other, line);
+    assert.equal(typeAt(start + literal.length), types.other, line);
+  }
+  configuredRegistry.dispose();
+});
