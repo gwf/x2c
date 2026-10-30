@@ -9,6 +9,11 @@
 > before merging to dev. Any tradeoff requires Gary's explicit approval.
 > Revised local runtime candidate: `bdb8cdbbd`. Nothing from this work has been pushed.
 > Matched runtime measurements reproduce regressions. No tradeoff is approved.
+> Design revision requested after measurement: see
+> [the revised design](independent-locks-revised-design.md).
+> That proposal replaces the accounting, index-builder, and Channel protocols
+> below. The original design and execution record remain as failure evidence.
+> Gary authorized the reviewed revision; measure previously failing workloads first.
 
 ## Result and contracts
 
