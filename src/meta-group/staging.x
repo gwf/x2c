@@ -61,20 +61,6 @@ void Compiler.bind_meta_group(Compiler c, String name, Token site) {
     c.refuse_meta_call(name, site, c.meta_call_missing(name));
 }
 
-/** Stages one session factory in an isolated native emission. `prepare`
-    receives this compiler and returns the factory's typed definition; it
-    can place supporting functions through the ordinary compiler APIs.
-    `declarations` supplies session types. Returns the loaded module's
-    targets, or NULL with `failure` set. Publishes no evaluator bindings.
-*/
-Map Compiler.stage_session_function(
-  Compiler c, List declarations, Func prepare, String &failure) {
-  failure = c.groups_meta() ? NULL : "native modules are unavailable";
-  String module = failure ? NULL : _module(c, declarations, prepare, failure);
-  if (!module) return NULL;
-  return Compiler.native_module_targets(Compiler.load_native_module(module));
-}
-
 /** Emits one session factory without compiling or loading its module.
     The caller uses its configured native toolchain and retains the result. */
 List Compiler.emit_session_function(
@@ -92,7 +78,7 @@ List Compiler.emit_session_function(
    or NULL with `failure` set when the group does not stage. */
 static String _stage(Compiler c, String &failure) {
   failure = c.groups_meta() ? _unbound(c) : "native modules are unavailable";
-  String module = failure ? NULL : _module(c, NULL, NULL, failure);
+  String module = failure ? NULL : _module(c, failure);
   if (!module) return NULL;
   module = Compiler.load_native_module(module);
   Map targets = Compiler.native_module_targets(module);
@@ -117,15 +103,13 @@ static String _stage(Compiler c, String &failure) {
    runtime headers' directory: one an earlier submission built, or else a
    new build. Returns its path, or NULL with `failure` set when there is no
    cache or the group does not build. */
-static String _module(
-  Compiler c, List declarations, Func prepare, String &failure) {
+static String _module(Compiler c, String &failure) {
   String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
   if (!root || !stamp) {
     failure = "native modules need a cache directory and a known compiler";
     return NULL;
   }
-  List code = _emit_prepared(
-    c, stamp, "group", "", declarations, prepare, failure);
+  List code = _emit(c, stamp, "group", "", failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
   String key = String.sha256(

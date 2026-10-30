@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #include "repl-inspect.x"
-#include "meta-group/meta-group.x"
+#include "repl-native.x"
 #include "utils.x"
 #include <stdio.h>
 
@@ -35,36 +35,14 @@ static List _definition(Compiler c, String text) {
   return c.parse_submission(text.len());
 }
 
-static List _prepare(Compiler c, int depth, int limit) {
-  Type type = %("Probe");
-  List value = c.sym.introduce("__inspect_value");
-  List output = c.sym.introduce("__inspect_output");
-  List entry = c.sym.introduce("__inspect_probe");
-  List expression = %(expr $type (ident $value));
-  List buffer = %(expr ("Buffer") (ident $output));
-  List render = repl_render(c, type, expression, buffer, depth, limit);
-  List syntax = $!Unit{
-    String $entry(void) {
-      Buffer $output = Buffer.new(0);
-      $type $value = {7, {1, 2, 3}, NULL, 9, 5, {.first=11}};
-      @($(render))
-      String result = $buffer;
-      $buffer.free();
-      return result;
-    }
-  };
-  return c.bind_syntax(syntax, <unit>, NULL);
-}
-
-static String _render(Compiler c, List declarations, int depth, int limit) {
-  String failure = NULL;
-  Map targets = c.stage_session_function(declarations,
-    %!(Compiler compiler) =>
-      _prepare(compiler, depth, limit), failure);
-  _check(targets != NULL, failure ? failure : "native renderer did not stage");
-  if (!targets) return "";
-  Func function = targets["__inspect_probe"];
-  return function.apply(0, NULL);
+/* Displays a Probe value through the native submission path. */
+static String _render(ReplSession session, int depth, int limit) {
+  List probe = session.resolve("(Probe){7, {1, 2, 3}, 0, 9, 5, {.first=11}}");
+  with (session.inspect_depth = depth, session.inspect_limit = limit) {
+    Map published = repl_native_execute(
+      session, %(block (stmnt $probe)), 0, 1);
+    return published["formatted"];
+  }
 }
 
 int main(int argc, char **argv) {
@@ -84,9 +62,10 @@ int main(int argc, char **argv) {
   session.compiler = c;
   session.names = {};
   session.descriptions = {};
+  session.declarations = [record];
   session.names["Probe"] = %(type);
   session.describe("Probe", record, "typedef struct Probe { ... } Probe;");
-  String full = _render(c, $(record), 3, 100);
+  String full = _render(session, 3, 100);
   _check("Probe" in full && "x: 7" in full && "values: [ 1, 2, 3 ]" in full,
          %"record values missing: $full");
   _check("pointer: 0x0" in full && "watch: <volatile>" in full,
@@ -94,13 +73,13 @@ int main(int argc, char **argv) {
   _check("bits: 5" in full, %"bitfield missing: $full");
   _check("members: first, second" in full,
          %"union member choices missing: $full");
-  String union_limited = _render(c, $(record), 3, 10);
+  String union_limited = _render(session, 3, 10);
   _check("members: first, ..." in union_limited &&
          !("first, second" in union_limited),
          %"union choices exceeded the shared entry budget: $union_limited");
-  String shallow = _render(c, $(record), 1, 100);
+  String shallow = _render(session, 1, 100);
   _check("values: ..." in shallow, %"depth was not bounded: $shallow");
-  String bounded = _render(c, $(record), 3, 2);
+  String bounded = _render(session, 3, 2);
   _check("..." in bounded && !("bits: 5" in bounded),
          %"entry budget was not bounded: $bounded");
 

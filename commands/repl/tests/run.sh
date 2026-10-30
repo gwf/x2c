@@ -29,7 +29,8 @@ builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --x-include-dir commands/repl --x-include-dir src \
   --c-include-dir builds/0/src \
   commands/repl/tests/inspect-check.x commands/repl/repl-types.x \
-  commands/repl/repl-inspect.x builds/0/libx2c-dev.a
+  commands/repl/repl-inspect.x commands/repl/repl-native.x \
+  builds/0/libx2c-dev.a
 "$tmp/inspect-check"
 
 builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
