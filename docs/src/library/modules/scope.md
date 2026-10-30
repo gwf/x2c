@@ -280,6 +280,7 @@ Source: `lib/scope/regions.x`
 | [`Scope.move`](#Scope.move) | Relinks one allocation onto the scope held by `slot`. |
 | [`Scope.name`](#Scope.name) | Returns the diagnostic name of `scope`, or NULL if it has none. |
 | [`Scope.new_named`](#Scope.new_named) | Creates a detached scope carrying a copy of `name` for diagnostics. |
+| [`Scope.owner`](#Scope.owner) | Returns the `Scope` that currently owns `ptr`. |
 | [`Scope.realloc`](#Scope.realloc) | Resizes one scope-owned allocation and returns the new pointer. |
 | [`Scope.release`](#Scope.release) | Destroys the scope in the active slot and frees everything it owns. |
 | [`Scope.retain`](#Scope.retain) | Opens a new scope in the active slot and makes it the current one. |
@@ -547,6 +548,19 @@ process.
 
 Source: `lib/scope/regions.x`
 
+<a id="Scope.owner"></a>
+#### Scope.owner
+
+`Scope Scope.owner(void *ptr)`
+
+Returns the `Scope` that currently owns `ptr`.
+`ptr` must be a live pointer returned by a `Scope` allocator. `Context`
+uses this to leave ancestor-owned objects where they are while moving
+results out of its own `Scope` chain. Passing any other nonnull pointer is
+undefined behavior, matching `Scope.free` and `Scope.move`.
+
+Source: `lib/scope/allocation.x`
+
 <a id="Scope.realloc"></a>
 #### Scope.realloc
 
@@ -698,7 +712,6 @@ for source readers but are not supported as user API.
 | --- | --- |
 | [`Scope.initialize`](#Scope.initialize) | Initializes the process-wide `Scope` runtime owner. |
 | [`Scope.move_before`](#Scope.move_before) | Moves one allocation immediately before another in its owner's list. |
-| [`Scope.owner`](#Scope.owner) | Returns the `Scope` that currently owns `ptr`. |
 | [`Scope.shutdown_hook`](#Scope.shutdown_hook) | Registers `hook` to run during process-wide `Scope` shutdown. |
 
 ### `Scope`
@@ -724,19 +737,6 @@ Moves one allocation immediately before another in its owner's list.
 Both pointers must name distinct live Scope allocations under exclusive
 access. This internal storage-replacement operation preserves payloads
 and finalizers without allocation, owner lookup, or scope creation.
-
-Source: `lib/scope/allocation.x`
-
-<a id="Scope.owner"></a>
-#### Scope.owner
-
-`Scope Scope.owner(void *ptr)`
-
-Returns the `Scope` that currently owns `ptr`.
-`ptr` must be a live pointer returned by a `Scope` allocator. `Context`
-uses this to leave ancestor-owned objects where they are while moving
-results out of its own `Scope` chain. Passing any other nonnull pointer is
-undefined behavior, matching `Scope.free` and `Scope.move`.
 
 Source: `lib/scope/allocation.x`
 

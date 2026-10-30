@@ -351,7 +351,7 @@ usually supplied by `#include "x2c.x"`.
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `alias` | Contextual grammar | Name a source expression within a scope |
-| `$dedent`, `$assert`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$time` | Shipped, explicit `#include` | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -3561,7 +3561,7 @@ through a `Name` hole or an `$x2c_ident` call:
 
 ```x2c
 #include "meta.x"
-macro Unit $handler_type(name $tag) {
+macro Unit $handler_type(Name $tag) {
   struct $tag { int depth; };
   typedef struct $x2c_ident("Frame") { int line; } $x2c_ident("Frame");
 }
@@ -4016,9 +4016,8 @@ A `meta` body runs as native code, with these consequences:
   compiler continues. A call longer than `X2C_META_TIMEOUT` seconds (60 by
   default) is stopped.
 - A body may use runtime [Lisp](https://x2c-lang.dev/docs/reference/language.html#runtime-lisp) when it runs in the project
-  helper, which links the full runtime, or in the REPL. A native module the
-  compiler loads receives the compiler's core runtime exports, which omit
-  Lisp.
+  helper, which links the full runtime. A native module the compiler loads
+  receives the compiler's core runtime exports, which omit Lisp.
 
 A nonstatic `meta` function in an included `.x` module is callable during
 translation and has an ordinary runtime declaration. Its provider source
@@ -6128,10 +6127,11 @@ stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
 ## Runtime Lisp
 
 x2c programs can embed Lisp sessions for DSLs, configuration, and interactive
-work; the REPL evaluates Lisp the same way. `Lisp.new()` creates a session
-with the standard environment from `etc/init.xlisp`, and `lisp.eval`,
-`Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and `.xlisp` files at
-run time. [Embed Lisp](https://x2c-lang.dev/docs/library/overview.html#embed-lisp) shows the host API.
+work, as the Lisp shell in `examples/programs/lisp.x` does. `Lisp.new()`
+creates a session with the standard environment from `etc/init.xlisp`, and
+`lisp.eval`, `Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and
+`.xlisp` files at run time.
+[Embed Lisp](https://x2c-lang.dev/docs/library/overview.html#embed-lisp) shows the host API.
 The compiler itself does not evaluate Lisp; compile-time code is x2c, as
 described under [compile-time calls](https://x2c-lang.dev/docs/reference/language.html#compile-time-calls-and-operations).
 
@@ -6243,7 +6243,7 @@ value, as the library documents.
 An operation whose parameters or result have no `Var` representation is not
 available, which excludes `Iter` cursors, pointer out-parameters, variadic
 entry points, and `char *` parameters. `Lisp.new()` loads these names from
-`etc/init.xlisp` for both the REPL and other embedding programs.
+`etc/init.xlisp` for every program that embeds Lisp.
 
 ## Diagnostics
 
@@ -6427,9 +6427,10 @@ Inspection modes print an intermediate result and stop translation:
 ./x2c translate --dump-tokens source.x
 ```
 
-- `--dump-tokens` prints the tokens the parser reads, after macro
-  expansion, and stops. A token that an expansion produced ends with the
-  name of the macro whose use produced it.
+- `--dump-tokens` prints the tokens the parser reads and stops. Without
+  `--cpp` these are the source tokens. With `--cpp` they follow C macro
+  expansion, and a token that an expansion produced ends with the name of
+  the macro whose use produced it.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-expansions` prints each source macro expansion and stops after
   parsing. Each entry names the invocation and definition sites, then shows
@@ -6999,7 +7000,7 @@ archive is the one the lockfile pinned however the index has changed. Only a
 pin the lockfile does not cover reaches the index. The lockfile is then
 rewritten to the manifest's pins. A version the index cannot supply stops the
 build with an error that includes both versions. A dry run installs nothing
-and writes no lockfile, and the editor adapter never installs.
+and writes no lockfile, and the language server never installs.
 
 ## Include and package directories
 
@@ -7017,7 +7018,8 @@ The exceptions are:
 
 `--package-dir <dir>` adds a directory of x2c packages. An `import` statement
 searches those directories for a package that is not beside the source. The
-option applies to `translate`, `build`, and `run`, and repeats like `-I`.
+option applies to `translate`, `build`, `run`, and `repl`, and repeats like
+`-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
