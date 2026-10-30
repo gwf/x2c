@@ -1,6 +1,6 @@
 > Status: active
-> Design decisions selected with Gary on 2026-10-29. Implementation authorized
-> and started on 2026-10-29; verification and delivery remain pending.
+> Design decisions selected with Gary on 2026-10-29. Implementation complete;
+> final command and documentation publication checks remain pending.
 > Baseline: `804275488c99169294a593bf660f1e178abec70c`.
 
 # REPL library playground
@@ -480,6 +480,45 @@ submissions, and long sessions separately. Record absolute times and retained
 code/storage; do not describe faster native execution as proof of faster
 interaction. No JIT, second evaluator, or new performance gate is selected.
 
+## Implementation and verification record
+
+Implemented in `cdad3ab09` on 2026-10-29. The native worker owns library state,
+prompt storage, compiled submissions, callbacks, inspection, and cleanup. The
+Lisp REPL evaluator and its crossing restrictions were removed. Shared Lisp
+runtime behavior remains covered by the ordinary compiler/runtime suites.
+
+The retained program directory contains its module, frozen declarations, and
+the existing tagged metadata snapshot. The supervisor carries the snapshot
+filename. Reset and crash recovery read it inside a fresh worker. The file is
+written once before publication; reset and recovery preserve its modification
+time. This keeps multi-megabyte header metadata out of the terminal client.
+
+Focused checks cover C source, direct and wrapper headers with archives,
+hidden archive symbols, named shared libraries, opaque handles, packed struct
+returns, callbacks, aliases, out-parameters, macros, enums, manifest target
+flags, prepared packages, main adapters, and the host SQLite query returning
+42. Prompt tests cover anonymous/nested records, arrays, closures, collections,
+failure atomicity, and managed cleanup. Terminal tests cover native input,
+candidate cancellation, crashes, explicit replay, and forced shutdown. LSP
+tests verify dot and arrow completion with the extended receiver metadata.
+
+The full publication gate passed on the compiler/runtime tree in `4759917f`:
+1,124 runtime tests, 99,170 assertions, and 1,347 compiler fixtures. Bootstrap,
+stage 0, and stage 1 emitted identical C/H. Final command/documentation checks
+follow the subsequent snapshot transport refinement.
+
+One-off observations on this Mac used private caches and loaded C point
+objects. Background activity was not controlled; these are absolute
+observations, with no quiet-host comparison or speedup claim. Before the
+transport refinement, new declarations and expressions took about 66 and 64
+ms; 100 distinct expressions retained 102 native modules totaling 3,660,368
+file bytes. Identical expressions reused their compiled modules. After the
+refinement, seven cached-expression observations had a 5.00 ms median; source
+loads took 1.66-1.80 seconds and reset took 325 ms. Across eight source loads,
+supervisor RSS was 6,880-8,208 KiB, replacing the earlier roughly 11 MiB growth
+per reload. The snapshot file was 2,817,675 bytes. Raw observations remain in
+`.context/repl-playground-performance.*` and `.context/repl-file-*`.
+
 ## Compatibility and scope limits
 
 The runtime ABI, language ownership rules, ordinary macro binding, compiler
@@ -519,8 +558,8 @@ registry, speculative pointer-validity checker, or new recurring process.
 Tests establish observable library behavior and publication boundaries, not
 the preservation of superseded implementation details.
 
-The architecture and restart policy are selected. Native staging and compiler
-services establish the available building blocks; the complete replacement
-backend, its latency, and its platform behavior remain to be implemented and
-verified. No prototype failure from an earlier lifetime arrangement rejects
-the selected architecture as a family.
+The architecture and restart policy were selected before implementation.
+Native staging and compiler services supplied the building blocks for the
+implementation recorded above. The native workflow and terminal behavior were
+verified on this Mac. No prototype failure from an earlier lifetime
+arrangement rejects the selected architecture as a family.

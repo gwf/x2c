@@ -22,6 +22,9 @@ and publishes its retained artifact description only when initialization
 succeeds. The supervisor then retires the previous worker. Failed or canceled
 candidate work preserves the current session. Reset and crash recovery restore
 the last successful program description without replaying submitted code.
+The tagged metadata snapshot stays beside the native module and frozen header.
+The supervisor keeps its filename; a fresh worker reads it for reset or recovery.
+Large header descriptions therefore stay inside the native worker.
 
 The session service owns native compilation, typed objects, source snapshots,
 and cleanup. Program loading and exploration use their corresponding command
