@@ -164,14 +164,14 @@ Source: `lib/pool/storage.x`
 <a id="Pool.release"></a>
 #### Pool.release
 
-`Pool Pool.release(Pool inner)`
+`Pool Pool.release(Pool p)`
 
 Destroys one pool and returns its parent, or returns NULL for NULL input.
 Promoted slots and large allocations survive under the parent with stable
 addresses; other identities, the table, and the control `Scope` become
-invalid. Children must already be released, and no caller may use `inner`
-afterward. Use `Pool.close` instead to end a bracket opened with
-`Pool.open`.
+invalid. Children must already be released, and no caller may use the
+destroyed pool afterward. Use `Pool.close` instead to end a bracket opened
+with `Pool.open`.
 
 Source: `lib/pool/interning.x`
 

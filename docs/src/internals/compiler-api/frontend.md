@@ -34,8 +34,9 @@ Configured compiler sessions and source units.
 Collects the preludes once, in a Context that shares the caller's pool,
 before any unit opens. Units, and the workers a translation forks, then
 replay them from the process cache. The collection runs as an empty
-unit, whatever dump or symbol mode the request selects. Returns zero
-after reporting a failure.
+unit in the expansion mode of the request's units, whatever dump or
+symbol mode the request selects. Returns zero after reporting a
+failure.
 
 Source: `src/frontend.x`
 
@@ -135,7 +136,8 @@ Source: `src/frontend.x`
 Collects a C source or header through the configured host preprocessor.
 Unlike x2c collection, this does not walk native headers as x2c-owned
 declarations. The preprocessed tokens and line markers stay in the unit;
-original source text remains available in `source_texts`. Call
+original source text remains available in `source_texts`, and
+`command_macros` holds every macro the host defined. Call
 `Compiler.full_parse_native` for its typed source projection.
 
 Source: `src/frontend.x`

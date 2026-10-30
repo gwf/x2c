@@ -646,7 +646,7 @@ Source: `src/meta-sdk/types.x`
 <a id="Type.resolve_member"></a>
 #### Type.resolve_member
 
-`List Type.resolve_member(Type type, String name, int call)`
+`List Type.resolve_member(Type t, String name, int call)`
 
 Implements `Type.resolve_member`, declared in `lib/meta.x`.
 

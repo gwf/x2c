@@ -490,9 +490,9 @@ Source: `lib/typed-map.x`
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+value, or an allocation, size, or invariant cause while inserting.
+Allocation and size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -505,9 +505,9 @@ Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
 cursors and iterators; an existing-key read does not mutate the table.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+allocation, size, or invariant cause while inserting. Allocation and
+size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -895,9 +895,9 @@ Source: `lib/typed-map.x`
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+value, or an allocation, size, or invariant cause while inserting.
+Allocation and size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -910,9 +910,9 @@ Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
 cursors and iterators; an existing-key read does not mutate the table.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+allocation, size, or invariant cause while inserting. Allocation and
+size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -1311,9 +1311,9 @@ Source: `lib/typed-map.x`
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+value, or an allocation, size, or invariant cause while inserting.
+Allocation and size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -1326,9 +1326,9 @@ Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
 cursors and iterators; an existing-key read does not mutate the table.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+allocation, size, or invariant cause while inserting. Allocation and
+size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -1716,9 +1716,9 @@ Source: `lib/typed-map.x`
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+value, or an allocation, size, or invariant cause while inserting.
+Allocation and size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 
@@ -1731,9 +1731,9 @@ Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
 cursors and iterators; an existing-key read does not mutate the table.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+allocation, size, or invariant cause while inserting. Allocation and
+size failures leave the table unchanged.
 
 Source: `lib/typed-map.x`
 

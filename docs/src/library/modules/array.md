@@ -193,8 +193,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/array/array.x`
 
@@ -299,8 +299,9 @@ Source: `lib/array/array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/array/array.x`
 
@@ -503,8 +504,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/array/array.x`
 
@@ -514,6 +516,10 @@ Source: `lib/array/array.x`
 `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)`
 
 Updates one boxed element while preserving its Var tag.
+
+**Raises:** `<bad-arg>` for a null `Array` or invalid index, `<size-limit>`
+when its length cannot be indexed, `<void-op>` for a `void` operand, or
+any cause from `Var.update`. The element is unchanged on failure.
 
 Source: `lib/array/array.x`
 

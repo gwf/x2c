@@ -111,7 +111,8 @@ One x2c unit's translation state and its two parses.
 
 `String Compiler.absolute_home_path(String spelling)`
 
-Returns the absolute path that a `Compiler.portable_path` spelling names.
+Returns the absolute path that a `Compiler.portable_path` spelling
+names.
 
 Source: `src/compiler/source-files.x`
 
@@ -201,7 +202,7 @@ Source: `src/compiler/parsing/tokens.x`
 <a id="Compiler.attach_source_references"></a>
 #### Compiler.attach_source_references
 
-`void Compiler.attach_source_references(Compiler c, List binding, Array capture)`
+`void Compiler.attach_source_references( Compiler c, List binding, Array capture)`
 
 Attaches a completed named-type capture to its existing declaration row.
 

@@ -305,7 +305,7 @@ Public functions:
 `Compiler.module_stamp`, `Compiler.identity`, `Path.content_identity`,
 `fnv_file`, `fnv_bytes`, `Path.identifier_hash`, `Path.lock_file`,
 `Path.publish_files`, `Job.decode_wait_status`, `Diagnostics.host_error`,
-`Diagnostics.driver_error`, `Compiler.cache_root`
+`Diagnostics.driver_error`, `Compiler.cache_root`, `Compiler.prune_cache`
 
 ### [src/callables/callables.x](../src/callables/callables.x)
 
@@ -651,8 +651,7 @@ Public functions:
 `Compiler.refuse_record_meta_call`, `Compiler.meta_call_missing`,
 `Compiler.refuse_meta_call`, `Compiler.meta_diagnostic_line`,
 `Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`,
-`Compiler.emit_session_function`
+`Compiler.bind_meta_group`, `Compiler.emit_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 
@@ -1106,7 +1105,7 @@ Public functions:
 `Router.route`, `Router.get`, `Router.post`, `Router.put`, `Router.delete`,
 `Router.files`, `Router.dispatch`, `HttpServer.new`, `HttpServer.port`,
 `HttpServer.serve`, `HttpServer.start`, `HttpServer.stop`, `HttpServer.close`,
-`HttpRequest.init`, `HttpResponse.init`, `Router.init`, `HttpServer.init`
+`HttpRequest.init`
 
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
@@ -1137,7 +1136,7 @@ Public functions:
 
 `JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `JsonBool.export_context`,
 `Json.is_bool`, `Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`,
-`Var.pretty_json`, `Json.write_file`, `Var.json`, `x2c_json_write`,
+`Var.pretty_json`, `Json.write_file`, `Var.json`, `_x2c_json_write`,
 `Var.jsonbool`, `JsonBool.str`
 
 ### [lib/lib.x](../lib/lib.x)
@@ -1225,7 +1224,7 @@ blocking TCP sockets backed by File streams.
 Public functions:
 
 `Listener.cleanup`, `Socket.cleanup`, `Listener.bind`, `Listener.accept`,
-`x2c_net_accept_fd`, `Listener.port`, `Listener.write_repr`, `Listener.stop`,
+`_x2c_net_accept_fd`, `Listener.port`, `Listener.write_repr`, `Listener.stop`,
 `Listener.close`, `Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
 `Socket.shutdown_write`, `Socket.peer`, `Socket.close`
 

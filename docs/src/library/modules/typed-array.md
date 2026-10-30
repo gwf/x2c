@@ -516,8 +516,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -570,8 +570,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -745,8 +746,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -954,8 +956,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1008,8 +1010,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1183,8 +1186,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1390,8 +1394,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1444,8 +1448,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1619,8 +1624,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1826,8 +1832,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -1880,8 +1886,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2055,8 +2062,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2264,8 +2272,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2318,8 +2326,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2493,8 +2502,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2702,8 +2712,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2756,8 +2766,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -2931,8 +2942,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -3140,8 +3152,8 @@ Boxed `Array` returns `void` for a null array or out-of-range index
 without mutation.
 
 **Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<size-limit>` at the integer index limit, or
-`<alloc-fail>` when storage cannot grow.
+index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -3191,8 +3203,9 @@ Source: `lib/typed-array.x`
 Appends `value` and returns it.
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
@@ -3366,8 +3379,9 @@ Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
 Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+when storage cannot grow.
 
 Source: `lib/typed-array.x`
 
