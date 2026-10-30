@@ -155,9 +155,9 @@ and Iter `find` keep their contracts.
 
 ### Fixed defects
 
-- With `--cpp`, a header whose `#include` sits inside an undecided group,
-  such as `#ifdef __APPLE__`, has a later `#ifndef` arm collected as a
-  linear reading of the file decides it.
+- With `--cpp`, collection decides a header's later `#ifndef` arm as a
+  linear reading of the header does, even when an `#include` sits inside an
+  earlier undecided group such as `#ifdef __APPLE__`.
 - With `--cpp`, `#if` reads a character constant as the C compiler does, so
   `'\0' == 0` holds and `'\xff'` is negative; multi-character constants,
   shift counts outside 0 to 63, and `LONG_MIN / -1` stay undecided.
