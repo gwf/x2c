@@ -1,10 +1,12 @@
 ---
+import { Code } from "astro:components";
 import { inlineMarkdown } from "../lib/inline-markdown";
+import { x2cLang, x2cDarkTheme } from "../../shiki-x2c.mjs";
 
 interface Idea {
   name: string;
   detail: string;
-  follows: string;
+  code: string;
 }
 
 interface Props {
@@ -18,19 +20,21 @@ const items = await Promise.all(
   ideas.map(async (idea) => ({
     name: await inlineMarkdown(idea.name),
     detail: await inlineMarkdown(idea.detail),
-    follows: await inlineMarkdown(idea.follows),
+    code: idea.code.trim(),
   }))
 );
 ---
 
-<aside class="hero-ideas" aria-labelledby="five-ideas-title">
-  <h2 id="five-ideas-title" set:html={introHtml} />
+<aside class="hero-ideas" aria-labelledby="ideas-title">
+  <h2 id="ideas-title" set:html={introHtml} />
   <ol class="idea-list">
     {items.map((idea) => (
       <li>
         <h3 set:html={idea.name} />
         <p set:html={idea.detail} />
-        <p class="idea-follows" set:html={idea.follows} />
+        <div class="idea-code">
+          <Code code={idea.code} lang={x2cLang} theme={x2cDarkTheme} />
+        </div>
       </li>
     ))}
   </ol>

@@ -1,20 +1,22 @@
 ---
 title: Programming is Dead.<br/>Long Live Programming.
 kicker: "x2c is a language for people who love to code."
-ideasIntro: "It's C. Plus four ideas."
+ideasIntro: "It's C. Plus three ideas."
 ideas:
-  - name: Still C, with less of it
-    detail: "Every feature is sugar that lowers to C you can predict. Most programs never touch a pointer."
-    follows: "Methods on any type, `class`, and protocols are all sugar, and `x2c translate` shows the C."
-  - name: One data model, two speeds
-    detail: "`Var` is an eight-byte word that holds any value and its type. A `String` is still a C string, so every value is dynamic and native at once."
-    follows: "Collections hold anything, `is` tests the tag, and `printf` prints whatever it is handed."
-  - name: Lifetime by scope
-    detail: "`String`, `List`, and `Symbol` are shared and immutable, so equal content is one object. Everything else is allocated in a scope and freed when the scope ends. No collector, no `free`."
-    follows: "Equality is constant time, sharing across threads is free, and `auto` and `defer` do the rest."
-  - name: Its own metalanguage
-    detail: "The compiler is user space. A code literal `%(...)` is a `List`, and `meta` runs any function at compile time."
-    follows: "try, match, lambdas, and `keyword` were written this way. So was the compiler."
+  - name: Just enough structure
+    detail: "One data model and one lifetime rule, imposed on C, and the chores go: no `->`, no `free`, no `strcmp`, nothing between you and the algorithm. It is still C."
+    code: |-
+      foreach (String word in line.words()) counts[word] += 1;
+  - name: Pieces that fit together
+    detail: "With that structure in place, pattern matching, lambdas, threads, channels, jobs, files, HTTP, and your own types compose as easily as they do in Python, at C speed."
+    code: |-
+      routes.get("/api/notes", %!(HttpRequest req, HttpResponse res) =>
+        list_notes(app, req, res));
+  - name: A language that extends itself
+    detail: "`meta` runs any function at compile time, a `macro` is a typed template over syntax, and the whole runtime, lambdas included, is available there. `try`, `match`, and `class` are written this way."
+    code: |-
+      meta static int fib(int n) => n < 2 ? n : fib(n - 1) + fib(n - 2);
+      static const int table[] = { $fib(10), $fib(20) };  // 55, 6765
 ---
 
 x2c is a quirky little language that makes programming fun and a bit weird.
@@ -27,7 +29,7 @@ optional, so you can adopt x2c one file at a time in code you already have.
 The compiler, the runtime, the language server, and the test runner are all
 written in x2c, and you can read every line.
 
-It looks like a lot. It isn't. Learn the four ideas on the right and the
+It looks like a lot. It isn't. Learn the three ideas on the right and the
 rest of the language follows from them. **Programming is not about making
 computers do things; it's about helping brains think things.** If you code
 for *love*, *power*, or *magic*, this one is for you.

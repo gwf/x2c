@@ -1480,13 +1480,21 @@ a.docs-card:hover {
   line-height: 1.5;
 }
 
-.idea-list .idea-follows {
-  margin-top: 5px;
-  color: var(--nav-muted);
+.idea-list p code {
+  font-size: 0.9em;
 }
 
-.idea-list code {
-  font-size: 0.9em;
+.idea-code {
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.idea-code pre {
+  margin: 0;
+  padding: 8px 10px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 /* Idea sections: a full-width heading row, then a full-width carousel. */

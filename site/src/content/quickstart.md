@@ -1,7 +1,7 @@
 ---
 title: Pull up a chair.
 kicker: x2c for people who already know C, in the order you will trip over it.
-lede: "x2c is a strict superset of C that compiles to C. It adds four ideas, and most of the rest of the language follows from them. This page is the overview I would give you across a table: what is different, with small programs that run."
+lede: "x2c is a strict superset of C that compiles to C. It adds three ideas, and most of the rest of the language follows from them. This page is the overview I would give you across a table: what is different, with small programs that run."
 ---
 
 ## Install it. Run it.
@@ -62,12 +62,13 @@ int main(void) {
 The only x2c in there is `s.port`. A dot reaches through one pointer, so
 `.` works on a struct and on a pointer to one. The arrow still works.
 
-This is the first idea: still C, with less of it. Every x2c feature is
-syntactic sugar for C you could have written, and `x2c translate` shows you
-that C. The language was nearly named Sugar. It reads like a dynamic
-language and runs like the static one it is. Much of the sugar removes
-code: the arrow goes, reference parameters replace `&x` at call sites and
-`*x` inside functions, and most x2c programs have no pointers in them.
+This is the first idea: just enough structure. x2c imposes one data model
+and one lifetime rule on C, and every other feature is syntactic sugar for
+C you could have written; `x2c translate` shows you that C. The language
+was nearly named Sugar. It reads like a dynamic language and runs like the
+static one it is. The sugar removes code: the arrow goes, reference
+parameters replace `&x` at call sites and `*x` inside functions, and most
+x2c programs have no pointers in them.
 
 Multiple files work the way you expect. `#include "unit.x"` gives you that
 unit's public names, and `static` keeps a name private to its file, exactly
@@ -85,9 +86,8 @@ this section.
 
 ## One value type
 
-This is the second idea: one data model, two speeds. `Var` is an
-eight-byte tagged word that holds any value and its type: an
-integer, a double, a `String`, a `List`, a pointer, a value of your own
+`Var` is the data model. It is an eight-byte tagged word that holds any
+value and its type: an integer, a double, a `String`, a `List`, a pointer, a value of your own
 type. Collections store `Var`, `%s` prints one, and assigning one to a
 typed variable converts it. A `String` is still a C string and an `Array`
 is still a C block, so the dynamic view and the native view are the same
@@ -163,7 +163,43 @@ membership in any collection. See
 [collections](../docs/guide/collections.html) and
 [symbols](../docs/guide/symbols.html).
 
+## Lifetime by scope
+
+The lifetime rule is the other half of the first idea. `String`, `List`,
+and `Symbol` values are interned in shared pools, which is why equal content is one object. Everything else
+is allocated in a scope, and the scope is freed when its statement ends.
+You manage memory in the unit you write code in: a loop body, a request, a
+file. `auto { ... }` opens a scope. `auto` on a loop body gives each
+iteration its own scope, so working data is freed every iteration. `auto`
+on a declaration frees that one value at block exit. `defer` runs a
+statement at block exit, on `return`, and while an error unwinds. There is
+no garbage collector and no `free`.
+
+```x2c
+long words = 0;
+for (int day = 0; day < 3; day++) auto {
+  // Everything allocated in here is freed when the iteration ends.
+  List parts = %"day $day: tea and biscuits".split(" ");
+  words += parts.len();
+}
+File scratch = auto tmpfile();       // closed when this block exits
+scratch.puts("no free, no collector\n");
+FILE *sink = fopen("/dev/null", "w");
+defer fclose(sink);                  // runs however the block exits
+fprintf(sink, "%ld words\n", words);
+~assert(words == 15);
+```
+
+When a lifetime does not fit a block, `Scope.retain()` and
+`Scope.release()` do the same job by hand. Your `malloc` and `free` still
+work for C data, and they are still your problem. The details are in
+[memory](../docs/guide/memory.html).
+
 ## Loops and matching
+
+This is the second idea: pieces that fit together. Everything from here to
+the compiler section is built from the pieces above, and each one takes a
+few lines.
 
 `foreach` iterates over anything with elements: a collection, a `File`
 line by line, a `Channel` until it closes. Two typed names unpack a Map's
@@ -233,38 +269,6 @@ int main(void) {
 
 Functions can be defined in any order, with no prototypes. A `Func` is a
 value you can store, pass, and return.
-
-## Lifetime by scope
-
-This is the third idea. `String`, `List`, and `Symbol` values are interned
-in shared pools, which is why equal content is one object. Everything else
-is allocated in a scope, and the scope is freed when its statement ends.
-You manage memory in the unit you write code in: a loop body, a request, a
-file. `auto { ... }` opens a scope. `auto` on a loop body gives each
-iteration its own scope, so working data is freed every iteration. `auto`
-on a declaration frees that one value at block exit. `defer` runs a
-statement at block exit, on `return`, and while an error unwinds. There is
-no garbage collector and no `free`.
-
-```x2c
-long words = 0;
-for (int day = 0; day < 3; day++) auto {
-  // Everything allocated in here is freed when the iteration ends.
-  List parts = %"day $day: tea and biscuits".split(" ");
-  words += parts.len();
-}
-File scratch = auto tmpfile();       // closed when this block exits
-scratch.puts("no free, no collector\n");
-FILE *sink = fopen("/dev/null", "w");
-defer fclose(sink);                  // runs however the block exits
-fprintf(sink, "%ld words\n", words);
-~assert(words == 15);
-```
-
-When a lifetime does not fit a block, `Scope.retain()` and
-`Scope.release()` do the same job by hand. Your `malloc` and `free` still
-work for C data, and they are still your problem. The details are in
-[memory](../docs/guide/memory.html).
 
 ## Errors are data
 
@@ -405,8 +409,7 @@ still available. Prebuilt bundles exist for macOS and Linux. See
 ## The compiler is yours
 
 This is the part that either delights C programmers or offends them. It
-is the fourth idea: x2c is its own metalanguage, and the compiler is user
-space. A code literal is a `List`, so the `%(...)` that builds data also
+is the third idea: a language that extends itself. A code literal is a `List`, so the `%(...)` that builds data also
 builds patterns, errors, and syntax. Put `meta` in front of a function and
 the compiler can call it: `$fib(20)` runs during translation, and its
 result is inserted as a constant. A `macro` is a typed template over syntax trees, so

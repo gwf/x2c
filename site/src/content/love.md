@@ -3,10 +3,12 @@ title: Code is Love
 lede: "The part you touch all day should feel good in the hand."
 ---
 
-C puts nothing between you and the machine. It also leaves you all of the
-housekeeping. x2c keeps the directness and does the housekeeping: one value
-type for any value, literals that look like the data they build, text and
-collections with methods, loops over anything with elements, and a
-toolchain that builds and runs in one command.
+This is the first idea. x2c puts just enough structure on C to tame it:
+one data model, one lifetime rule, and the sugar that follows from them.
+Simple things are simple. You think about the algorithm, the boilerplate
+is gone, and the file is still C. You get to have your cake and eat it.
 
-Nobody ever fell in love with boilerplate. Nine ideas, each one small.
+You do not have to marry x2c, either. Every feature is optional, so you
+can date it one file at a time and keep the rest of your project as it
+was. Nobody ever fell in love with boilerplate. Nine examples, each one
+small.
