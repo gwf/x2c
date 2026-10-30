@@ -245,7 +245,8 @@ static void _plain_directive(ArmScan &s, Token token, size_t i) {
     s.stack.push($(++s.serial, 0, _plain_open_state(token.text)));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
-    s.stack[-1] = $(id, arm.integer() + 1, state == 1 ? 2 : 0);
+    s.stack[-1] = $(id, arm.integer() + 1,
+      state == 1 || state == 3 ? 3 : 0);
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
@@ -255,7 +256,8 @@ static void _plain_directive(ArmScan &s, Token token, size_t i) {
   s.hidden = _hidden_group(s.open);
 }
 
-/* State 2 hides the opening arm; state 1 hides its following alternative. */
+/* State 2 hides the opening arm; state 1 selects it, and state 3 keeps
+   every following alternative hidden after a selected arm. */
 static int _plain_open_state(String text) {
   String line = _plain_directive_line(Compiler.preproc_directive(text)).replace(
     "defined ( <never> )", "defined <never>");
@@ -285,7 +287,8 @@ static int _never_defined(String name) {
 
 static int _hidden_group(List open) {
   foreach (List group in open)
-    if (group.caddr() == <hidden> || group.caddr() == 2) return 1;
+    if (group.caddr() == <hidden> || group.caddr() == 2 ||
+        group.caddr() == 3) return 1;
   return 0;
 }
 

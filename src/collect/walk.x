@@ -429,7 +429,7 @@ static void _split(FileWalk &w, Token first, Map arms) {
     if (arms && arms.try_get((long) (token - first), open)) {
       hidden = 0;
       foreach (List group in open.list())
-        if (group.caddr() == 2) hidden = 1;
+        if (group.caddr() == 2 || group.caddr() == 3) hidden = 1;
     }
     String directive = Compiler.preproc_directive(token.text);
     if (Compiler.preproc_conditional_kind(token.text) ||
