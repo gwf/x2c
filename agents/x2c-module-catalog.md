@@ -1407,9 +1407,10 @@ Public functions:
 `Thread.start_raw`, `Thread.start`, `Thread.run`, `Thread.finish_any`,
 `Thread.wait_any`, `Iter.parallel_map`, `Iter.parallel_map_in`,
 `ParallelMap.foldl`, `x2c_thread_stopping`, `x2c_thread_wait`,
-`x2c_thread_wait_owner`, `x2c_thread_wait_stopped`, `x2c_thread_cancel`,
-`Thread.stop`, `x2c_thread_wait_lock`, `x2c_thread_wait_unlock`,
-`Thread.finish_all`, `Thread.join`, `Thread.free`
+`x2c_thread_wait_owner`, `x2c_thread_wait_stopped`, `x2c_thread_channel_enter`,
+`x2c_thread_channel_leave`, `x2c_thread_cancel`, `Thread.stop`,
+`x2c_thread_wait_lock`, `x2c_thread_wait_unlock`, `Thread.finish_all`,
+`Thread.join`, `Thread.free`
 
 ### [lib/time.x](../lib/time.x)
 

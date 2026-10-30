@@ -358,8 +358,11 @@ Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 int x2c_thread_wait_stopped(Thread owner) =>
   owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
 
-/* A registered monitor remains borrowed until successful unregister or the
-   caller's completion acknowledgement after releasing that monitor. */
+/** Registers a Channel monitor for the current caller and returns its borrowed
+    Thread token through owner. Returns false if stop already claimed the token.
+    The caller holds the monitor mutex. Its lifetime extends through successful
+    unregister or completion acknowledgement after releasing that mutex.
+*/
 int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner) {
   owner = x2c_thread_wait_owner();
   if (!owner) return 1;
@@ -369,6 +372,10 @@ int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner) {
     __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
 }
 
+/** Removes the caller's registered Channel monitor while its mutex is held.
+    Returns false if stop borrowed the monitor; the caller must release its
+    mutex and acknowledge completion before allowing the monitor to expire.
+*/
 int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor) {
   if (!owner) return 1;
   return __atomic_compare_exchange_n(
