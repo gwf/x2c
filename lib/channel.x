@@ -383,21 +383,20 @@ static int _commit_available(
 static void _sleep(Channel channel, ChannelWait wait) =>
   _native_check(pthread_cond_wait(wait.condition, &channel.mutex));
 
-/* Remove one stopped head per queue acquisition, then retry outside the
-   mutex. The ordinary caller needs no waiter record before it must block. */
+/* Remove one stopped head per queue acquisition, then return for a fresh
+   commitment check after releasing and reacquiring the mutex. */
 static int _attempt(
   Channel channel, int sending, Thread owner,
   ChannelMessage &message, Var &value, int &owned) {
-  while (1) {
-    ChannelWaits *other = sending ? &channel.receivers : &channel.senders;
-    ChannelWait peer = !channel.capacity && !channel.closed ? other.first : NULL;
-    if (!peer || !x2c_thread_wait_stopped(peer.owner))
-      return _commit_available(channel, sending, owner, peer, message, value, owned);
-    _remove_wait(*other, peer);
-    _native_check(pthread_cond_signal(peer.condition));
-    _unlock(&channel.mutex);
-    _lock(&channel.mutex);
-  }
+  ChannelWaits *other = sending ? &channel.receivers : &channel.senders;
+  ChannelWait peer = !channel.capacity && !channel.closed ? other.first : NULL;
+  if (!peer || !x2c_thread_wait_stopped(peer.owner))
+    return _commit_available(channel, sending, owner, peer, message, value, owned);
+  _remove_wait(*other, peer);
+  _native_check(pthread_cond_signal(peer.condition));
+  _unlock(&channel.mutex);
+  _lock(&channel.mutex);
+  return 3;
 }
 
 static void _finish_wait(
@@ -425,7 +424,9 @@ static int _communicate(
     _unlock(&channel.mutex);
     return -1;
   }
-  int status = _attempt(channel, sending, owner, message, value, owned);
+  int status;
+  do status = _attempt(channel, sending, owner, message, value, owned);
+  while (status == 3);
   if (status == 2)
     return _wait_pending(channel, sending, owner, message, value, owned);
   _finish_wait(channel, sending, owner, NULL);
@@ -453,6 +454,7 @@ static int _wait_for_commit(
   while (1) {
     if (wait.committed) return 1;
     int status = _attempt(channel, sending, wait.owner, message, value, owned);
+    if (status == 3) continue;
     if (status != 2 || (!wait.owner && !wait.condition)) return status;
     if (!wait.condition) wait.condition = x2c_thread_channel_condition(wait.owner);
     if (!wait.linked) {
