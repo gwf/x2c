@@ -2,7 +2,7 @@
 slug: fields
 section: magic
 tab: reflection
-title: The compiler knows your struct. Ask it.
+title: The compiler has your struct's fields. Use them.
 ---
 
 ```x2c
@@ -33,8 +33,8 @@ int main(void) {
 
 A `meta` function with a `TypeInfo` parameter receives the type of the
 captured expression: its name, its kind, and its fields in declaration
-order. Loop over the fields, quote one statement per field with
-`$!Stmt{ ... }`, splice them together with `@`.
+order. Loop over the fields, build one statement per field with the code
+literal `$!Stmt{ ... }`, and splice them together with `@`.
 
-That is the whole trick behind `$derive`, in twelve lines. Reflection at
-compile time, with nothing left over at run time.
+`$derive` is this, in twelve lines. Reflection at compile time, with
+nothing left at run time.

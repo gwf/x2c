@@ -38,5 +38,5 @@ same braces, same `return`. `$column(1)` runs `column` during translation
 and inserts whatever it returns as code, so one table produces two C arrays
 and changing the table changes both.
 
-This is not a macro language bolted onto the side. It is x2c, running
-inside the compiler, with the whole runtime available.
+Compile-time code is ordinary x2c, running inside the compiler with the
+whole runtime available.

@@ -33,10 +33,9 @@ int main(void) {
 ```
 
 `%(...)` is a List, `[...]` is an Array, `{...}` is a Map, and the
-brackets mean the same thing on the way back out. Lists are the Lisp half
-of the family tree: immutable, shared, happy to be mapped and filtered.
-Arrays and Maps are the workhorses: push, sort, slice, index, update in
-place.
+brackets mean the same thing on the way back out. Lists are immutable and
+shared, with `map` and `filter`. Arrays and Maps are mutable: push, sort,
+slice, index, update in place.
 
-Pick by lifetime and identity, not by what the standard library happened
-to hand you.
+Choose a List when the data is a value and an Array or Map when it has
+identity.

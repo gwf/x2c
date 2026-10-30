@@ -41,9 +41,9 @@ static String label(String item, Map @options) {
 ```
 
 `foreach` walks anything that has elements, Files and Maps included, and a
-List destructures into named parts on the way in. `~=` tests a shape and
-binds its names in the same breath. Lambdas are `%!(x) => ...` and chain
+List destructures into named parts on the way in. `~=` tests a pattern and
+binds its names in one expression. Lambdas are `%!(x) => ...` and chain
 left to right.
 
-Keyword arguments land in a `Map`, so a call reads like a sentence and the
-defaults live in exactly one place.
+Keyword arguments arrive in a `Map`, so a call reads like a sentence and
+the defaults are in one place.

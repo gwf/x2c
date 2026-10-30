@@ -50,7 +50,7 @@ int main(void) {
 
 One literal describes the whole workshop. Bare keys are Symbols, values are
 whatever you typed, and Maps, Arrays, and Lists nest with braces, brackets,
-and parentheses. No parser, no builder, no constructor soup.
+and parentheses. No parser and no builder functions.
 
 The shape on the screen is the shape in memory. Splice a computed value in
 with `$` wherever you need one.

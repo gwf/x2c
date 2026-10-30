@@ -32,5 +32,5 @@ same object, so `==` is a pointer compare and sharing costs nothing.
 Arrays and Maps are *objects*: they have identity, they grow, and two
 handles to one Array are one Array.
 
-`==` asks about content and `===` asks about identity. Values make perfect
-keys because there is only ever one of each.
+`==` compares content and `===` compares identity. Values are good Map keys
+because there is only one of each.

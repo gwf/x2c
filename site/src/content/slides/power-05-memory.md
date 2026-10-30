@@ -2,7 +2,7 @@
 slug: memory
 section: power
 tab: memory
-title: Free memory by lifetime, not by pointer.
+title: Free memory by scope.
 ---
 
 ```x2c
@@ -71,10 +71,10 @@ int main(void) {
 ~Map inspect_file(String path) => {sizes: [12, 24], errors: 0};
 ```
 
-`auto` retains a region around a statement and releases it on every exit,
+`auto` opens a scope around a statement and releases it on every exit,
 including `return` and a raised Error. Put it on a loop body and each
-iteration gets its own region: every file's working data dies before the
-day's file list does.
+iteration gets its own scope: each file's working data is freed before the
+next file is opened.
 
 No garbage collector, no reference counts, no `free`. The translator warns
-when a value could outlive its region, so the rule is checked, not hoped.
+when a value could outlive its scope.

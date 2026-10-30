@@ -41,7 +41,7 @@ static void _draw(
 }
 ```
 
-Conway's Game of Life fills the terminal with a changing world. The
+Conway's Game of Life runs in the terminal. The
 drawing function paints adjacent living cells in one call, then presents
 the frame. The complete program starts with random cells, advances each
 generation, handles resizing, and exits on a keypress.

@@ -37,5 +37,5 @@ joins them all. `Thread.run` takes an Array of lambdas and returns when
 every one has finished. A Channel typed `<string>` carries Strings between
 them, and `foreach` drains it until the sender closes.
 
-Mutexes exist when you want them, and `$lock(m) { ... }` holds one for
-exactly one block, exception or not.
+A `Mutex` is there when you need one, and `$lock(m) { ... }` holds it for
+one block, including while an error unwinds.

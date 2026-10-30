@@ -31,11 +31,11 @@ int main(void) {
 }
 ```
 
-`Var` is the idea the rest of x2c leans on. It is an eight-byte tagged
-word: a number, a `String`, a pointer, a `Symbol`, plus the knowledge of
-which. Every collection stores Vars, every `%s` prints one, and every typed
-C boundary converts one.
+`Var` is the value type the rest of x2c is built on. It is an eight-byte
+tagged word: a number, a `String`, a pointer, a `Symbol`, plus a tag that
+says which. Every collection stores Vars, every `%s` prints one, and every
+typed C boundary converts one.
 
 You get a dynamic language's ergonomics inside a C program, and the static
-types are still right there. The compiler checks what it can; the Var
-checks the rest.
+types are still there. The compiler checks static types; a Var's tag is
+checked at run time.

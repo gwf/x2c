@@ -2,7 +2,7 @@
 slug: decorators
 section: magic
 tab: decorators
-title: A decorator eats the thing after it.
+title: A decorator rewrites the function after it.
 ---
 
 ```x2c
@@ -29,4 +29,5 @@ int answer(void) => 42;
 a function with the same signature. `defer` makes the exit line fire even
 on an early `return`.
 
-Callers never know. Neither does the linker.
+The signature is unchanged, so callers and the linker see the same
+function.

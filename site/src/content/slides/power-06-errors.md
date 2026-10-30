@@ -49,8 +49,8 @@ String read_text(String path) {
 ```
 
 `raise` records a cause and its details, `catch` selects by pattern, and
-`defer` runs on the way out, so the file is closed before anyone decides
-what the failure means. The function that owns the resource owns the
+`defer` runs on the way out, so the file is closed before the handler
+runs. The function that owns the resource owns the
 cleanup. The caller owns the policy.
 
 `catch:` takes whatever is left. No error codes to forget, no `goto fail`.

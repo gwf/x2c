@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
 ```
 
 Read a whole file in one expression or stream it line by line. Either way,
-nobody manages a buffer. `defer` keeps the close next to the open, where
+you manage no buffer. `defer` keeps the close next to the open, where
 you can see it.
 
-`words()` splits a row, destructuring names the fields, and plain `atol`
-finishes the job, because this is still C and C is allowed to help.
+`words()` splits a row, destructuring binds the fields, and plain `atol`
+converts the number, because this is still C.

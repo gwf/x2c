@@ -35,9 +35,9 @@ int main(void) {
 }
 ```
 
-Strings are immutable, canonical, and allergic to bookkeeping. Slice with
+Strings are immutable and canonical. Slice with
 `[a:b]`, strip, split, join, interpolate with `%"..."`, and nothing you
 started with changes. Equal text is one object, so comparison is a pointer
 compare and a `switch` can pick a case by content.
 
-When C wants a `char *`, a String already is one.
+A String is a `char *`, so C functions take one as is.

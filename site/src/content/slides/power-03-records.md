@@ -35,7 +35,7 @@ int main(void) {
 `$derive` reads a struct's fields and writes the methods: Map and JSON
 round trips, equality, `repr`, argument parsing, database rows. No
 reflection runtime, no annotation processor, no code generator in the
-build. `derive.x` is a few hundred lines of ordinary x2c that happen to run
-inside the compiler.
+build. `derive.x` is a few hundred lines of ordinary x2c that run inside the
+compiler.
 
 You could have written it. In the Magic section, you will.

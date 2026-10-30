@@ -16,6 +16,5 @@ run: |
   ./x2c run examples/magic/compile-time.x
 ---
 
-The examples page compiles x2c to WebAssembly and runs it in your browser tab.
-Nothing to install, nothing to trust. Every gallery program has a Run
-button.
+The examples page compiles the small examples to WebAssembly and runs them
+in your browser tab. Nothing to install, nothing to trust.

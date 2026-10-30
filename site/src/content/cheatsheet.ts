@@ -106,7 +106,7 @@ export const sheet: Section[] = [
     ["keyword repeat $ns.repeat;", "Now `repeat (3) stmt` parses."],
     ["meta int f(int n) => ...;", "`$f(3)` runs in the compiler."],
     ["meta List g(TypeInfo t)", "Reads a type's fields, methods."],
-    ["$!( { @items } )  $!Stmt{ ... }", "Quote code; `$` and `@` unquote."],
+    ["$!( { @items } )  $!Stmt{ ... }", "A code literal; `$` and `@` splice."],
   ] },
   { column: 3, title: "Lisp", rows: [
     ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],

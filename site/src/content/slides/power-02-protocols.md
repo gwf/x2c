@@ -2,7 +2,7 @@
 slug: protocols
 section: power
 tab: protocols
-title: Operators are a contract your type signs.
+title: Operators come from a protocol your type adopts.
 ---
 
 ```x2c
@@ -43,9 +43,9 @@ protocol Map(T) { T T.add(T, T); T T.mul(T, T); }
 protocol Map(Set);
 ```
 
-A protocol is a contract a type adopts on purpose. `protocol Map(T)` names
-two operations, `Set` adopts them, and from then on `+` and `*` on Sets are
+A protocol is a set of methods a type adopts explicitly. `protocol Map(T)`
+declares two operations, `Set` adopts them, and from then on `+` and `*` on Sets are
 union and intersection. No vtables, no runtime registry: adoption resolves
 at compile time and the compiler writes the adapters.
 
-The storage is a `Map` wearing a hat. The methods are three one-liners.
+The storage is a `Map` inside a class. The methods are three one-liners.

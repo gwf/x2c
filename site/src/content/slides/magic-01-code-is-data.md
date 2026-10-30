@@ -44,8 +44,8 @@ List simplify(List node) {
 }
 ```
 
-The same `%(...)` that holds your data holds a program, and `match` takes it
-apart by shape: `?name` binds one thing, `*body` binds the rest, `$` and `@`
+The same `%(...)` that holds your data holds a program, and `match` matches
+it by pattern: `?name` binds one thing, `*body` binds the rest, `$` and `@`
 put the pieces back. This little simplifier is the technique the x2c
 compiler uses on itself.
 

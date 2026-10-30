@@ -32,11 +32,11 @@ int main(void) {
 }
 ```
 
-x2c has one flat namespace, exactly like C, and packages are how it stays
-sane. A package's public names carry its prefix, so two packages can both
+x2c has one flat namespace, like C, and packages keep names apart. A
+package's public names carry its prefix, so two packages can both
 export a `Regexp`. `import "pcre2" as rx` gives you a local alias and dotted
 access to the package's types and methods.
 
-Wrapped C libraries come through the same door: PCRE2, SQLite, raylib,
-libcurl, libuv, BLIS, torch. Build once, `import` by name, and the native
-API stays reachable underneath.
+Wrapped C libraries are packages too: PCRE2, SQLite, raylib, libcurl,
+libuv, BLIS, torch. Build once, `import` by name, and the native API is
+still available.

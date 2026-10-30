@@ -28,8 +28,8 @@ int main(void) {
 }
 ```
 
-`$swap` takes two parsed expressions, asks the compiler for their type, and
-writes three statements. `temporary` is hygienic: it cannot collide with
-anything the caller named, however hard they try.
+`$swap` takes two parsed expressions, reads their type from the compiler,
+and writes three statements. `temporary` is hygienic: it cannot collide
+with any name at the call site.
 
 One macro, every type, and not a single `do { } while (0)` in sight.

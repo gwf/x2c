@@ -35,4 +35,4 @@ now `with_lock(m) { ... }` is part of the language in this file. The lock
 is evaluated once and released on every exit, including an exception.
 
 `foreach`, `class`, and `auto` are implemented this way too. The compiler's
-own keywords are not more special than yours.
+own keywords are made the same way as yours.

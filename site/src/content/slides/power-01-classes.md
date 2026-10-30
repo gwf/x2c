@@ -39,8 +39,8 @@ int main(void) {
 ```
 
 Say `class Point { int x; int y; };` and you get `new`, equality, hashing,
-and printing, so a Point can be a Map key or a `%s` argument on the spot.
-Write your own `init`, `repr`, or `drop` and the default steps aside.
+and printing, so a Point can be a Map key or a `%s` argument. Write your
+own `init`, `repr`, or `drop` and it replaces the default.
 
 A pointer class allocates in the current Scope, so `auto` frees it when the
-block ends. The struct is still a struct. C can see every byte.
+block ends. The struct is still a struct, with the same bytes in C.

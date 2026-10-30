@@ -34,5 +34,5 @@ x2c lsp
 executable. The REPL compiles the functions you type. `x2c lsp` serves a
 resident compiler to VS Code or anything else that speaks the protocol.
 
-When something goes wrong at runtime, the message names your file and your
-line. And the [examples page](examples/) does all of it in a browser tab.
+A runtime error message includes your file and line. The
+[examples page](examples/) runs the small examples in a browser tab.
