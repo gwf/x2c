@@ -10,8 +10,8 @@ static threaded struct PoolValueThreadState value_thread;
 
 /* locks
 
-   Operations needing both locks take storage first, then child, then
-   parent. No potentially failing allocation runs while storage is locked. */
+   Owner locks run child to parent. Shared snapshots take index publication
+   before depot; neither shared lock waits for an owner. */
 
 /** Makes `Pool` lock from here on, for a process about to start a worker.
     `Thread.start_raw` calls this before `pthread_create`. It never clears.

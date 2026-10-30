@@ -552,6 +552,56 @@ static void pool_free_from_child_uses_parent_owner(void) {
   Pool.release(child.release());
 }
 
+typedef struct PoolStorageProbe {
+  Pool pool;
+  atomic_int *start;
+  int valid;
+} PoolStorageProbe;
+
+static void *_pool_storage_growth(void *data) {
+  PoolStorageProbe *probe = data;
+  void *allocations[2048];
+  while (!atomic_load(probe.start)) {}
+  probe.valid = 1;
+  for (int i = 0; i < 2048; i++) {
+    allocations[i] = probe.pool.malloc(512);
+    memset(allocations[i], i & 255, 512);
+  }
+  Pool child = probe.pool.retain();
+  for (int i = 0; i < 2048; i++) {
+    unsigned char *bytes = allocations[i];
+    if (bytes[0] != (i & 255) || bytes[511] != (i & 255)) probe.valid = 0;
+    child.free(allocations[i]);
+  }
+  child.release();
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void pool_storage_concurrent_growth_and_ancestor_free(void) {
+  atomic_int start = 0;
+  PoolStorageProbe probes[4];
+  pthread_t workers[4];
+  int created = 0;
+  Pool.thread_start();
+  for (int i = 0; i < 4; i++) {
+    probes[i] = (PoolStorageProbe) {.pool = Pool.retain(NULL), .start = &start};
+    int error = pthread_create(&workers[i], NULL, _pool_storage_growth, &probes[i]);
+    EXPECT_INT_EQ(error, 0);
+    if (error) { probes[i].pool.release(); break; }
+    created++;
+  }
+  atomic_store(&start, 1);
+  for (int i = 0; i < created; i++) {
+    EXPECT_INT_EQ(pthread_join(workers[i], NULL), 0);
+    EXPECT_TRUE(probes[i].valid);
+    probes[i].pool.release();
+  }
+  PoolStats stats = Pool.stats(NULL);
+  EXPECT_INT_EQ(stats.backing_bytes, stats.active_bytes + stats.depot_bytes);
+  EXPECT_INT_EQ(stats.block_allocations, stats.active_blocks + stats.depot_blocks);
+}
+
 typedef struct RootIndexTest {
   Pool root;
   String seed, *identities;
@@ -675,6 +725,7 @@ static void pool_root_callback_growth_and_error(void) {
 }
 
 void pool_suite(void) {
+  $test.run(pool_storage_concurrent_growth_and_ancestor_free);
   $test.run(pool_lookup_shadows_outward);
   $test.run(pool_intern_uses_one_probe);
   $test.run(pool_reuses_child_table_capacity);

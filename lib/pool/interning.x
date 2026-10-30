@@ -114,8 +114,6 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
     defer _unlock(inner);
     canonical = _intern_locked(inner, object, discard);
   }
-  // Pool.free takes storage before the pool. Do not call it while holding
-  // the pool mutex or another worker can complete the opposite lock order.
   if (discard) inner.free(alloc);
   return canonical;
 }
@@ -201,7 +199,6 @@ Pool Pool.release(Pool p) {
   /* Published before any storage is freed, so a reader that sees the old
      value has not yet been able to observe a reused address. */
   __atomic_fetch_add(&value_epoch, 1, __ATOMIC_RELEASE);
-  _storage_lock();
   _lock(p);
   Pool up = p.up;
   _lock(up);
@@ -210,7 +207,6 @@ Pool Pool.release(Pool p) {
   _release_blocks(p);
   _unlock(up);
   _unlock(p);
-  _storage_unlock();
   pthread_mutex_destroy(&p.mutex);
   if (p == value_root) _root_initialize(NULL);
   Scope.destroy(p.scope);
