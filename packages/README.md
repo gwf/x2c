@@ -23,15 +23,8 @@ publishes prebuilt CPU libtorch for those two alone.
 torch links libtorch dynamically, so its programs are not self-contained;
 its README explains the required runtime libraries.
 
-SQLite is prepared and checked separately:
-
-```sh
-make -C packages/sqlite prepare
-make -C packages/sqlite test run run-lisp
-```
-
 From the repository root, build x2c and the standard example executables for
-the external library packages other than SQLite, without running tests:
+the external library packages, without running tests:
 
 ```sh
 make packages
@@ -93,16 +86,16 @@ short-example`, `make example`, and `make lisp-example` build them; `make run`
 runs every standard application for that package.
 
 - [pcre2/examples/parse-log.x](pcre2/examples/parse-log.x): short. Named captures and `Regexp.split`
-  summarize a syslog batch in 35 lines.
+  summarize a syslog batch.
 - [pcre2/examples/request-report.x](pcre2/examples/request-report.x): broad. Compiled expressions, named and
   numbered captures, iteration, aggregation, and replacement.
 - [yyjson/examples/service-health.x](yyjson/examples/service-health.x): short. Reads a JSON file, reports the
-  unhealthy services, and writes the failures back out in 24 lines.
+  unhealthy services, and writes the failures back out.
 - [yyjson/examples/release-catalog.x](yyjson/examples/release-catalog.x): broad. Lossless document views, ordered
   and duplicate object members, exact numeric intent, explicit x2c-value
   conversion, Patch, and serialization.
 - [libcurl/examples/page-titles.x](libcurl/examples/page-titles.x): short. Fetches three pages and prints
-  their titles in 24 lines.
+  their titles.
 - [libcurl/examples/endpoint-report.x](libcurl/examples/endpoint-report.x): broad. Surveys six endpoints with
   GET, HEAD, and POST, then downloads an artifact straight to a file.
 - [termbox2/examples/game-of-life.x](termbox2/examples/game-of-life.x): short. Conway's life on the terminal.

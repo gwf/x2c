@@ -275,8 +275,8 @@ wake the event loop, joins the worker inside the loop callback, and prints
 the result exported by `Thread.join`.
 
 `examples/process-report.x` is the short application (`make short-example`).
-In 28 lines it runs two children on one loop, writes each one's stdin,
-reads their output back as x2c values, and reports their exit statuses.
+It runs two children on one loop, writes each one's stdin, reads their
+output back as x2c values, and reports their exit statuses.
 
 `examples/network-report.x` resolves localhost, accepts three loopback TCP
 clients, exchanges copied payloads containing NUL bytes, observes both sides'

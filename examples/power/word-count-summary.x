@@ -1,4 +1,4 @@
-/*  counting.x -- task-oriented file and collection tutorial */
+/*  word-count-summary.x -- task-oriented file and collection tutorial */
 
 
 int main(int argc, char **argv) {

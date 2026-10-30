@@ -412,7 +412,7 @@ so use a database filename to retain changes between calls. Query results are
 ordinary nested Lists. The complete pinned raw SQLite API and the same native
 handles remain available for advanced operations. See
 `packages/sqlite/README.md` for ownership, the admitted native profile, and
-the executable examples. SQLite is verified on macOS and checked separately:
+the executable examples. SQLite is verified on macOS; to check it alone:
 
 ```sh
 make -C packages/sqlite prepare

@@ -15,7 +15,7 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
-| [8](words-v8.x) | 104 | A Frequencies class with Path.frequencies and top(k); counting and ranking move into a reusable module. Includes frequencies.x. |
+| [8](words-v8.x) | 103 | A Frequencies class with Path.frequencies and top(k); counting and ranking move into a reusable module. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -89,27 +89,25 @@ additions saved with this tutorial; an older installed x2c is insufficient.
 cc -std=gnu11 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
 /tmp/c2x2c-v0 docs/src/index.md
 
-builds/0/x2c build -I lib examples/c2x2c/words-v2.x lib/substring.x \
+builds/0/x2c build -I lib examples/c2x2c/words-v2.x \
   --output /tmp/c2x2c-v2 --build-dir /tmp/c2x2c-v2-build
 /tmp/c2x2c-v2 docs/src/index.md
 
 builds/0/x2c build -I lib examples/c2x2c/words-v5.x \
-  lib/substring.x lib/substring-map.x \
   --output /tmp/c2x2c-v5 --build-dir /tmp/c2x2c-v5-build
 /tmp/c2x2c-v5 docs/src/index.md
 
 builds/0/x2c build -I lib examples/c2x2c/words-v7.x \
-  lib/substring.x lib/substring-map.x \
   --output /tmp/c2x2c-v7 --build-dir /tmp/c2x2c-v7-build
 /tmp/c2x2c-v7 docs/src
 ```
 
-Substitute Version 3 in the Version 2 commands, Version 4 in the Version 5
-commands, or Version 6 in the Version 7 commands. Version 1 needs neither
-Substring source file. Versions 0-5 accept one file; Versions 6-8 accept one
-file or directory. The file input is the book introduction. The directory input covers
-the complete book source tree, including the generated library reference and
-syntax files, without scanning rendered book output.
+Substitute Version 1 or 3 in the Version 2 commands, Version 4 in the
+Version 5 commands, or Version 6 in the Version 7 commands. Versions 0-5
+accept one file; Versions 6-8 accept one file or directory. The file input
+is the book introduction. The directory input covers the complete book
+source tree, including the generated library reference and syntax files,
+without scanning rendered book output.
 
 For a small alternative, `input/sample.txt` and `input/` retain the original
 fixture: one file and one nested file. Versions 0-2 print that file as

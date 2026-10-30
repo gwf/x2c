@@ -1,4 +1,4 @@
-/*  releases.x -- Fetch and summarize a JSON release catalog. */
+/*  http-json-releases.x -- Fetch and summarize a JSON release catalog. */
 
 import "libcurl" with CurlEasy, CurlResponse;
 import "yyjson" with Json;

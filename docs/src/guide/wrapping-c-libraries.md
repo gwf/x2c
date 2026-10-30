@@ -477,8 +477,8 @@ the C API, revise the wrapper around those tasks. Keep exhaustive tests of
 malformed input, limits, and cleanup separate from the examples.
 
 Read the four in this repository in this order:
-`packages/pcre2/examples/parse-log.x` (35 lines),
-`packages/yyjson/examples/service-health.x` (24 lines), then
+`packages/pcre2/examples/parse-log.x` (33 lines),
+`packages/yyjson/examples/service-health.x` (23 lines), then
 `packages/pcre2/examples/request-report.x` and
 `packages/yyjson/examples/release-catalog.x`.
 

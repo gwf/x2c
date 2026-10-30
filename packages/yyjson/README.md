@@ -116,9 +116,9 @@ reshaping happens in Lisp and `json-stringify` takes the result back.
 ## Examples
 
 `examples/service-health.x` is the short application (`make short-example`).
-In 24 lines it reads `examples/services.json`, walks the services, prints
-which are down, and writes the list of failures back out as JSON. It is the
-shape most first uses of a JSON library take.
+It reads `examples/services.json`, walks the services, prints which are
+down, and writes the list of failures back out as JSON. It is the shape most
+first uses of a JSON library take.
 
 `examples/release-catalog.x` (`make example`) parses one release catalog,
 indexes and iterates borrowed views, aggregates exact

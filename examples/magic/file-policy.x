@@ -1,4 +1,4 @@
-/*  runtime.x -- A small policy language inside an ordinary x2c program. */
+/*  file-policy.x -- A small policy language inside an ordinary x2c program. */
 
 $lisp.binding(policy, "role-limit")
 static int role_limit(String role) {

@@ -54,5 +54,4 @@ settings.
 Each package README lists its example commands. The first build may download
 its pinned native dependency; later builds reuse the shared cache. The
 optional `make packages-check` runs the checked adapters listed in
-`packages/Makefile`, outside ordinary `make examples`; SQLite is built and
-checked separately with its own package Makefile.
+`packages/Makefile`, outside ordinary `make examples`.

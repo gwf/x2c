@@ -235,10 +235,10 @@ executed by this suite because it rebuilds and installs the compiler.
 
 Registry entries with `source` name an existing repository-relative program.
 The check verifies its file and slide link without copying the slide over it.
-Autodiff's three-mode example runs through the ordinary manifest; its shorter
-loop slide also remains a runnable documentation sample. Package excerpts
-link to their package-owned examples, whose execution and external setup stay
-in each package's `run` or `verify` targets. `--update` never writes these
+Autodiff's three-mode example runs through `make -C packages/autodiff check`;
+the shorter loop on its slide is not compiled. Package excerpts link to their
+package-owned examples, whose execution and external setup stay in each
+package's `run` or `verify` targets. `--update` never writes these
 independent sources.
 
 The optional PCRE2 Imports program is built, run, and compared with its

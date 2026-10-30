@@ -21,9 +21,8 @@ Map/Array values. Their broader applications, clients, tests, and READMEs
 show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
-`make packages-check` includes the external library packages other than SQLite
-and the dependency-free autodiff package. SQLite is checked separately with
-`make -C packages/sqlite test run run-lisp`.
+`make packages-check` includes all nine library packages and the
+dependency-free autodiff package.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
 API for its admitted build profile. Preserve upstream types, constants,
@@ -189,7 +188,7 @@ package clients. Follow the root instructions for repository-wide validation.
 The package `test` target builds only `tests/test-*.x`, so each package also
 has `run` for applications. Packages with Lisp installers add `run-lisp`;
 those without them do not. The current combined check runs all three for
-pcre2, yyjson, and libcurl, `test run` for termbox2, blis, and libuv,
+pcre2, yyjson, sqlite, and libcurl, `test run` for termbox2, blis, and libuv,
 raylib's `verify` target for headers, application, tests, and rendered PNGs,
 `test run` for torch, and `check` for autodiff.
 
