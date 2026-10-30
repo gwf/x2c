@@ -3076,7 +3076,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(1726);
+  _109 = int_var(1720);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -3270,7 +3270,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _300 = cons(_299, NULL);
   _301 = cons(_95, _300);
   _302 = List_var(_301);
-  _303 = int_var(1782);
+  _303 = int_var(1776);
   _304 = cons(_303, NULL);
   _305 = cons(_108, _304);
   _306 = List_var(_305);
@@ -14030,7 +14030,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10997 = cons(_10996, NULL);
   _10998 = cons(_10737, _10997);
   _10999 = cons(_223, _10998);
-  _11000 = String_new("9c971c72");
+  _11000 = String_new("bca15b22");
   _11001 = String_var(_11000);
   _11002 = String_new("cwd:./pthread.h");
   _11003 = String_var(_11002);
@@ -14054,7 +14054,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11021 = cons(_11020, NULL);
   _11022 = cons(_11018, _11021);
   _11023 = List_var(_11022);
-  _11024 = String_new("2bacfd49");
+  _11024 = String_new("753b7c8f");
   _11025 = String_var(_11024);
   _11026 = cons(_11025, NULL);
   _11027 = cons(_928, _11026);
@@ -15807,7 +15807,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12765 = List_var(_12764);
   _12766 = String_new("lib/pool/storage.x");
   _12767 = String_var(_12766);
-  _12768 = String_new("c91369c1");
+  _12768 = String_new("db7701d7");
   _12769 = String_var(_12768);
   _12770 = cons(_12769, NULL);
   _12771 = cons(_12767, _12770);

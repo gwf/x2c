@@ -1666,7 +1666,7 @@ static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_in
     return fresh;
   }
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 301,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 302,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }

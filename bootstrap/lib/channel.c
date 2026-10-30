@@ -268,7 +268,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(1726);
+  _109 = int_var(1720);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -467,7 +467,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _305 = cons(_304, NULL);
   _306 = cons(_95, _305);
   _307 = List_var(_306);
-  _308 = int_var(1782);
+  _308 = int_var(1776);
   _309 = cons(_308, NULL);
   _310 = cons(_108, _309);
   _311 = List_var(_310);
@@ -1074,7 +1074,7 @@ static int _wait_for_commit(Channel channel, int sending, ChannelWait wait, Var 
 static ChannelMessage _message(Var value, int owned){
   ChannelMessage message = malloc(sizeof(struct ChannelMessage));
   if(! message){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/channel.x",.function = "_message",.line = 469,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/channel.x",.function = "_message",.line = 471,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_12, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
