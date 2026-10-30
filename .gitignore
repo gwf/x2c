@@ -49,8 +49,6 @@ examples/*
 !examples/apps/**
 !examples/c2x2c/
 !examples/c2x2c/**
-!examples/deprecated/
-!examples/deprecated/**
 !examples/README.md
 !examples/check.sh
 !examples/manifest.txt
@@ -88,5 +86,6 @@ etc/vsc-extension/node_modules/
 __pycache__/
 .envrc
 
-# Local build-mode switch written by `make debug` / `make optimize`
+# Local build-mode switch written by `make config-debug` or
+# `make config-optimize`
 etc/build-mode.local

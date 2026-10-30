@@ -1,16 +1,4 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "outputStyle": "x2c",
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cat \"$CLAUDE_PROJECT_DIR/agents/README.md\""
-          }
-        ]
-      }
-    ]
-  }
+  "outputStyle": "x2c"
 }
