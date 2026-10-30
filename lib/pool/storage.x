@@ -211,30 +211,51 @@ PoolStats Pool.stats(Pool inner) {
   return stats;
 }
 
-/* Prepare refill storage without holding an owner or shared lock. */
+/* Existing-block hits use only their owner and the slot primitive. */
 static void *_small_malloc(Pool inner, int class_index, size_t size) {
   int accounting = Scope.accounting_enabled();
-  PoolBlock candidate = NULL;
-  loop {
+  if (!accounting) {
     _lock(inner);
     PoolBlock block = _block_with_room(inner, class_index);
-    if (!block && candidate) {
-      block = candidate;
-      candidate = NULL;
-      _reset(block, inner);
-      block.class_index = class_index;
-      _link(block, inner);
-    }
     if (block) {
-      void *slot = _take_slot(inner, block, class_index, accounting);
-      if (accounting) _record_request(inner, size);
+      void *slot = _take_slot(inner, block, class_index, 0);
       _unlock(inner);
-      if (candidate) _return_block(candidate);
       return slot;
     }
     _unlock(inner);
-    candidate = _prepare_block(inner, class_index);
   }
+  else {
+    _lock(inner);
+    PoolBlock block = _block_with_room(inner, class_index);
+    if (block) {
+      void *slot = _take_slot(inner, block, class_index, 1);
+      _record_request(inner, size);
+      _unlock(inner);
+      return slot;
+    }
+    _unlock(inner);
+  }
+  return _refill_malloc(inner, class_index, size, accounting);
+}
+
+/* Keep index and depot preparation out of existing-block allocation. */
+__attribute__((noinline)) static void *_refill_malloc(
+  Pool inner, int class_index, size_t size, int accounting) {
+  PoolBlock candidate = _prepare_block(inner, class_index);
+  _lock(inner);
+  PoolBlock block = _block_with_room(inner, class_index);
+  if (!block) {
+    block = candidate;
+    candidate = NULL;
+    _reset(block, inner);
+    block.class_index = class_index;
+    _link(block, inner);
+  }
+  void *slot = _take_slot(inner, block, class_index, accounting);
+  if (accounting) _record_request(inner, size);
+  _unlock(inner);
+  if (candidate) _return_block(candidate);
+  return slot;
 }
 
 static int _size_class(size_t size) {
