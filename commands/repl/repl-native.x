@@ -331,6 +331,14 @@ Map repl_native_execute(ReplSession session, List syntax, int persistent,
     failure = Compiler.meta_cc_run(action.arguments, directory);
     if (failure) raise %(repl (reason $failure));
     Path.move_to(output, module);
+    /* `Compiler.prune_cache` removes the entry once `source` names a missing
+       file: the program's first root, or else this session's artifact
+       directory, which is removed after the session, so the next REPL start
+       prunes an entry built without a program root. An entry still building
+       has no `source`, so pruning skips it. */
+    String input = program && program.roots
+      ? Path.absolute(program.roots.car().str()) : session.artifact;
+    if (input) Path.write_text(%"$directory/source", input);
   }
   String loaded = Compiler.load_native_module(module);
   Map targets = Compiler.native_module_targets(loaded);

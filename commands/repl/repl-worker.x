@@ -339,6 +339,7 @@ static void _worker_serve(
   ReplSession session = ReplSession.new(unit.compiler);
   _worker_session = session;
   session.frontend = frontend;
+  session.artifact = start.directory;
   ReplProgram program = NULL;
   String failure = NULL;
   if (start.snapshot) {

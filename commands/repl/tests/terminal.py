@@ -203,6 +203,25 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
     require(Path(artifact[1]).is_dir(), artifact[1])
     print("native dump identifies retained generated artifacts", flush=True)
 
+    cache = directory / "cache" / "repl"
+    cached = dict(environment, X2C_CACHE_DIR=str(cache.parent))
+    root = directory / "cached.c"
+    root.write_text("int cached_value(void) { return 6; }\n")
+    first = run("1+2;\n", [], cached)
+    require(first.returncode == 0 and len(list(cache.iterdir())) == 1,
+            (first.stdout, first.stderr))
+    second = run("cached_value();\n", [str(root)], cached)
+    entries = list(cache.iterdir())
+    require(second.returncode == 0 and len(entries) == 1 and
+            (entries[0] / "source").read_text() == str(root.resolve()),
+            (second.stdout, second.stderr, entries))
+    root.unlink()
+    third = run("", [], cached)
+    require(third.returncode == 0 and not list(cache.iterdir()),
+            (third.stdout, third.stderr))
+    print("REPL start prunes cache entries whose recorded source is gone",
+          flush=True)
+
     retired = run(load + "terminal_register_exit();\n:quit\n", [], environment)
     require(retired.returncode == 0 and retired.stdout.count("native closed\n") == 1,
             (retired.stdout, retired.stderr))

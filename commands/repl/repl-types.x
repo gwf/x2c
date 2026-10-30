@@ -18,6 +18,7 @@ typedef struct ReplSession {
   Compiler compiler;
   Frontend frontend;
   ReplProgram program;
+  String artifact;  // the worker's program directory; removed after it
   Map names, addresses, descriptions, internal;
   Array declarations, cleanups;
   Scope storage;

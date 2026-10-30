@@ -570,6 +570,8 @@ int repl_run(CliRequest request, ReplOptions options) {
     _artifact_remove(client.artifact);
   }
   if (client.interactive) client.input.load_history();
+  String cache = Compiler.cache_root();
+  if (cache) Compiler.prune_cache(%"$cache/repl");
   if (!_replace(client, request.inputs, NULL, NULL, 0)) return 1;
   if (client.interactive) puts("x2c library playground; :help for commands");
   while (!client.quit) {
