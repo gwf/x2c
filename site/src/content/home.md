@@ -16,7 +16,7 @@ features:
   - name: Compound <br/> Literals
     detail: "Arrays, Maps, Lists, and interpolated Strings have literal syntax, so nested data reads the way you wrote it. Splice values and expressions in anywhere."
   - name: Iteration <br/>& Loops
-    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s and `Slice`s."
+    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `String`s, `Map`s, `File`s, and `Channel`s."
   - name: Object <br/>Orientation
     detail: "Namespaced methods, `typedef` inheritance, `protocol`s, delegation, and static or dynamic dispatch."
   - name: Functional <br/>Tools
@@ -37,8 +37,8 @@ features:
     detail: "Hygienic, typed `macro`s generate parsed x2c syntax at compile time, from expressions to entire translation units."
   - name: Semantic <br/> Decorators
     detail: "`Decorator`s transform the expression or source item that follows. Use them to add checks, trace calls, or define new control forms."
-  - name: Lisp <br/>Inside & Out
-    detail: "`$()` runs Lisp at compile time; `Lisp` runs it inside your program. Both use the same bytecode interpreter."
+  - name: Meta & <br/>Lisp
+    detail: "`meta` functions run x2c at compile time; `Lisp` embeds a recursive Lisp evaluator in your running program."
 ---
 
 x2c is a quirky little language that makes programming fun and a bit weird. It
