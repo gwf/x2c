@@ -1,13 +1,14 @@
 # Implementation plan: independent Pool and Channel synchronization
 
-> Status: active - implementation integrated locally; performance acceptance pending.
+> Status: blocked - current implementation fails mandatory performance acceptance.
 > Researched against `66a119db5e44723bf7763f603b684b7dd9091ca2` on 2026-10-30.
 > Implementation baseline: `56fd5ecc1518f40ac46f2c21f50936ae4ab53f93`.
 > Pool, Channel, and Thread runtime owners are unchanged between these revisions.
 > Gary authorized monitored implementation and integration on 2026-10-30.
 > Performance measurements and no reproducible regressions are mandatory
 > before merging to dev. Any tradeoff requires Gary's explicit approval.
-> Local runtime candidate: `989978baf`. Nothing from this work has been pushed.
+> Revised local runtime candidate: `bdb8cdbbd`. Nothing from this work has been pushed.
+> Matched runtime measurements reproduce regressions. No tradeoff is approved.
 
 ## Result and contracts
 
@@ -485,15 +486,23 @@ Each worker performed a bounded source review of the other's synchronization
 changes. No concrete new protocol defect was found. These source reviews do
 not establish performance acceptance or substitute for the publication gate.
 
-Matched baseline/candidate benchmark binaries and a runner are prepared in
+At the first local checkpoint, matched benchmark binaries and a runner were prepared in
 the orchestrator's `.context/lock-contention/`. Only short baseline harness
-smoke runs have executed; no comparative performance results are claimed.
+smoke runs had executed; no comparative performance results were claimed then.
 Repeated host checks found sustained unrelated system-monitor and VM load.
-A quiet measurement window has been requested. No unrelated processes were
+A quiet measurement window was requested. No unrelated processes were
 stopped. Both workers are now idle and hold no compute slot.
 
-Remaining before any dev merge: quiet matched performance/memory runs and
-lock-duration probes; the existing compiler performance checkpoint; resolution
-or Gary's explicit approval of any reproducible regression; current-dev
+Gary subsequently supplied the quiet window. The
+[performance evidence](reference/independent-lock-performance-2026-10-30.md)
+records the full matrix, a narrow Channel follow-up (`bdb8cdbbd`, worker
+`9680cd97a`), and longer confirmation runs. Independent accounting-off paths
+improve, but same-worker/shared Channels and accounting-on Pools regress.
+The growth workload also has a larger peak memory footprint.
+
+Remaining before any dev merge: a revised design and implementation that
+resolve the reproduced regressions, or Gary's explicit approval of each
+measured tradeoff; remaining performance/lock-duration evidence; current-dev
 integration and final authored/generated review; and the publication gate.
-No full publication gate or push has run. The tested candidate remains local.
+No compiler performance checkpoint, full publication gate, or push has run.
+The current implementation remains local and is not accepted for merging.
