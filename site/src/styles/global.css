@@ -1456,7 +1456,7 @@ a.docs-card:hover {
 
 .idea-list>li::before {
   content: counter(idea);
-  grid-row: 1 / span 3;
+  grid-row: 1 / span 2;
   color: var(--red-text);
   font:
     400 26px/1 "Instrument Serif",
@@ -1464,12 +1464,8 @@ a.docs-card:hover {
     serif;
 }
 
-.idea-list h3 {
-  margin: 0 0 3px;
-  font:
-    600 14.5px/1.3 Archivo,
-    Helvetica,
-    sans-serif;
+.idea-list .idea-title {
+  font-weight: 600;
   color: var(--dark);
 }
 
@@ -1491,10 +1487,11 @@ a.docs-card:hover {
 
 .idea-code pre {
   margin: 0;
-  padding: 8px 10px;
+  padding: 7px 10px;
   overflow-x: auto;
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 /* Idea sections: a full-width heading row, then a full-width carousel. */
