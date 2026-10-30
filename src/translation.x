@@ -362,8 +362,7 @@ static void _reap(Workers &w) {
   if (status) w.failed++;
   int index = w.carried[slot];
   List slice = w.slices[index];
-  File capture = w.captures[slot];
-  defer capture.close();
+  auto File capture = w.captures[slot];
   capture.rewind();
   Block output = Block.new(sizeof(char));
   capture.read_into(output);
@@ -411,9 +410,8 @@ static int _wait_worker(long *pids, int count, int &status) {
    live worker carries it. */
 static void _show(Workers &w) {
   while (w.shown < w.started && !_carries(w, w.shown)) {
-    Block output = w.output[w.shown++];
+    auto Block output = w.output[w.shown++];
     if (output == NULL) continue;
-    defer output.free();
     if (!output.length) continue;
     report_suspend();
     File.write_all(stderr, output.bytes, output.length);

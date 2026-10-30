@@ -613,10 +613,9 @@ static void _emit_text(Logger logger, const LogEvent *event, Var data) {
    the caller's transient scope. */
 static void _add_scratch(Logger logger, LogTextSink context) {
   auto (&logger.storage) {
-    Buffer added = Buffer.new(0), int appended = 0;
-    defer if (!appended) added.free();
+    auto Buffer added = Buffer.new(0);
     context.scratch.append(&added, 1);
-    appended = 1;
+    added = NULL;
   }
 }
 

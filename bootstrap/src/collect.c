@@ -7287,7 +7287,7 @@ static void _x2c_gensym_defer_cleanup_52(void * _x2c_gensym_defer_opaque_52){
 
 static void _x2c_gensym_defer_cleanup_53(void * _x2c_gensym_defer_opaque_53){
   _x2c_gensym_defer_env_49 * _x2c_gensym_defer_data_49 =(_x2c_gensym_defer_env_49 *) _x2c_gensym_defer_opaque_53;
-  if(Array_truth((*(Array *) _x2c_gensym_defer_data_49->_x2c_gensym_defer_capture_78))) Array_free((*(Array *) _x2c_gensym_defer_data_49->_x2c_gensym_defer_capture_78));
+  Array_cleanup((*(Array *) _x2c_gensym_defer_data_49->_x2c_gensym_defer_capture_78));
 }
 
 static void _x2c_gensym_defer_cleanup_54(void * _x2c_gensym_defer_opaque_54){

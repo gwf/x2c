@@ -199,11 +199,10 @@ int File.copy_to(File source, File output, size_t &?copied) {
 Iter File.iter(File file, Iter dest) {
   if (dest == NULL) return NULL;
   if (!file) return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
-  Block line = Block.new(sizeof(char)), int keep = 0;
-  defer if (!keep) line.free();
+  auto Block line = Block.new(sizeof(char));
   line.reserve(BUFSIZ);
   dest.init(file, _next_line, line);
-  keep = 1;
+  line = NULL;
   return dest;
 }
 

@@ -969,21 +969,21 @@ static inline int _x2c_gensym_proto_socket_equal_0(Var a0, Var a1){
   return Socket_equal(Var_socket(a0), Var_socket(a1));
 }
 
-void Buffer_free(Buffer);
+void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
 void RenderPath_leave(RenderPath *);
@@ -995,7 +995,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){

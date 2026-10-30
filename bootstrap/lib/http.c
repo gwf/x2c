@@ -2213,11 +2213,11 @@ static inline int _x2c_gensym_proto_router_equal_0(Var a0, Var a1){
   return Router_equal(Var_router(a0), Var_router(a1));
 }
 
-void Buffer_free(Buffer);
+void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 void RenderPath_leave(RenderPath *);
@@ -2229,12 +2229,12 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
@@ -2244,12 +2244,12 @@ static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
 }
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
@@ -2259,12 +2259,12 @@ static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
 
 static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
   _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_8));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_8));
 }
 
 static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
   _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_9;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_9));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_9));
 }
 
 static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
@@ -2274,15 +2274,13 @@ static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
 
 static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
   _x2c_gensym_defer_env_11 * _x2c_gensym_defer_data_11 =(_x2c_gensym_defer_env_11 *) _x2c_gensym_defer_opaque_11;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_11));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_11));
 }
 
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
   _x2c_gensym_defer_env_12 * _x2c_gensym_defer_data_12 =(_x2c_gensym_defer_env_12 *) _x2c_gensym_defer_opaque_12;
   if(!(*(int *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_12)) Buffer_clear((*(HttpResponse *) _x2c_gensym_defer_data_12->_x2c_gensym_defer_capture_13) -> body);
 }
-
-void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
   _x2c_gensym_defer_env_13 * _x2c_gensym_defer_data_13 =(_x2c_gensym_defer_env_13 *) _x2c_gensym_defer_opaque_13;

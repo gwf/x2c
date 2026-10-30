@@ -1141,26 +1141,26 @@ static int _work(Thread thread){
     if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)){
       ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
       {
-        _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+        _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_7 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_10 =(const void *) & observer;
+        _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_9 =(const void *) & observer;
         X2CCleanup _x2c_gensym_defer_record_6 ={
-          .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+          .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_7
         }
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_6);
         {
           Context work = Context_open_named("Thread callback");
           {
-            _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
+            _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_6 ={
               0
             }
             ;
-            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_9 =(const void *) & work;
+            _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_10 =(const void *) & work;
             X2CCleanup _x2c_gensym_defer_record_7 ={
-              .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
+              .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_6
             }
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_7);
@@ -1257,7 +1257,7 @@ static Symbol _capture_errors(List errors, Var data){
   if(Error_policy_get(code) != 2260136) return 285842436424;
   thread -> errors = Error_snapshot_in(List_var(errors), & thread -> error_scope, thread -> error_pool);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 647,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 646,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread callback")), NULL))));
     __builtin_unreachable();
   }
@@ -1294,7 +1294,7 @@ static void _completion_check(int error){
 
 static Thread _start_value(ThreadValueFn function, Var value, ParallelRun parallel, Pool pool){
   if(! function){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "_start_value",.line = 690,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "_start_value",.line = 689,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1353,7 +1353,7 @@ static Var _read_result(Thread t){
     Var errors = Context_export_scope(t -> error_scope, t -> error_pool, t -> errors);
     t -> errors =((void) 0, Void);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 721,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 720,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_16, 23041356991064, 1, Symbol_var(374504614), errors);
       __builtin_unreachable();
     }
@@ -1428,7 +1428,7 @@ static ParallelMap _parallel_map(Iter i, Pool pool, ThreadValueFn function, int 
   if(workers <= 0){
     String operation = pool ? _0 : _1;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 762,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 761,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
       __builtin_unreachable();
     }
@@ -1622,12 +1622,12 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  Context_close((*(Context *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
+  Error_pop((*(ErrorHandler *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
-  Error_pop((*(ErrorHandler *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_10));
+  Context_cleanup((*(Context *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_10));
 }
 
 static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){

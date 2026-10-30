@@ -13,8 +13,7 @@ int main(int argc, char **argv) {
   int lines = 0, words = 0;
 
   try {
-    File input = File.open(argv[1], "r");
-    defer input.close();
+    auto File input = File.open(argv[1], "r");
     foreach(String line in input) {
       lines++;
       foreach(String word in line.lower().words()) {

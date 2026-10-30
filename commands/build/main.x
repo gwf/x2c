@@ -15,9 +15,8 @@ int main(int argc, char **argv) {
          "Use x2c-build <operation> --help for operation options.");
     return 0;
   }
-  Array arguments = CliRequest.command_arguments(argc, argv);
+  auto Array arguments = CliRequest.command_arguments(argc, argv);
   if (!arguments) arguments = CliRequest.read_arguments(argc, argv);
-  defer arguments.free();
   String operation = arguments.len() ? arguments[0] : NULL;
   if (operation != "build" && operation != "run" && operation != "script")
     Diagnostics.driver_error("expected build, run, or script");

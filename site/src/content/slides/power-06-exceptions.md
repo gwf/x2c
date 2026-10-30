@@ -40,14 +40,13 @@ String preview(String path) {
 
 // Close the file on success or while unwinding from a failed read.
 String read_text(String path) {
-  File input = path.open("r");
+  auto File input = path.open("r");
 ~opened_fd = input.fileno();
-  defer input.close();
   return input.string();
 }
 ```
 
-`File.string` rejects embedded NUL bytes, and a deferred `File.close`
-runs before the caller, `preview`, handles that failure. Named `catch`
+`File.string` rejects embedded NUL bytes, and `auto` closes the file
+before the caller, `preview`, handles that failure. Named `catch`
 clauses distinguish invalid text from a missing file; `catch:` handles
 everything else. The loader owns cleanup; its caller chooses how to recover.

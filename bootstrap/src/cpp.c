@@ -1487,7 +1487,7 @@ static Block f6_expand____substitute(f6_expand___Expander * x, List definition, 
       if(x2c_var_equal_lane(List_car(definition), Symbol_var(458361162716))){
         s.function = 1;
         s.params = Var_list_payload(List_getindex(definition, 2));
-        s.variadic = Var_int(Var_convert_at(List_getindex(definition, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cpp/expand.x",.function = "f6_expand____substitute",.line = 360}; & _x2c_gensym_error_site_0; })));
+        s.variadic = Var_int(Var_convert_at(List_getindex(definition, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/cpp/expand.x",.function = "f6_expand____substitute",.line = 358}; & _x2c_gensym_error_site_0; })));
       }
       Block body = f6_expand____body_tokens(&((* x)), definition);
       Token first = body -> bytes;
@@ -1959,7 +1959,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  Block_free((*(Block *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
+  Block_cleanup((*(Block *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
@@ -1969,7 +1969,7 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  Block_free((*(Block *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
+  Block_cleanup((*(Block *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){

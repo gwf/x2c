@@ -331,8 +331,7 @@ static Var _array(Reader &r) {
    presence is tested as a pointer. */
 static String _string(Reader &r) {
   int run = ++r.at;
-  Buffer decoded = NULL;
-  defer decoded.free();
+  auto Buffer decoded = NULL;
   loop {
     int byte = _peek(r);
     if (byte == '"') {

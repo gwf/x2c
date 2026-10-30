@@ -673,8 +673,7 @@ Map graph_snapshot_query(Map snapshot, Map request) =>
 /* Every request owns its parse, reachability cache, Match plan, and reply.
    The session indexes are complete before this isolated lifetime opens. */
 static int _sq_serve_request(SnapshotQuery session) {
-  Context request = Context.open_isolated_named("graph query");
-  defer request.close();
+  auto Context request = Context.open_isolated_named("graph query");
   Map response;
   try {
     String line = Stdin.readline();

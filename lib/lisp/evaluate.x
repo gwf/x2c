@@ -448,8 +448,7 @@ static Var _call_lambda_slots(
    call after this frame is gone. */
 static Var _run_frame(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
-  Scope frame = NULL;
-  defer frame.cleanup();
+  auto Scope frame = NULL;
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding
      cannot change what the body reads. */

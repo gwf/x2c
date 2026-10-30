@@ -9,9 +9,9 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | --- | ---: | --- |
 | [0](words-v0.c) | 183 | Native C: explicit hash table, allocation, sorting, and cleanup. |
 | [1](words-v1.x) | 143 | Scope allocation, required references, pointer member access with dots, and defer. |
-| [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
-| [3](words-v3.x) | 102 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
-| [4](words-v4.x) | 45 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
+| [2](words-v2.x) | 108 | Substr word views and whole-file reading; retain the explicit hash table. |
+| [3](words-v3.x) | 101 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
+| [4](words-v4.x) | 44 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |

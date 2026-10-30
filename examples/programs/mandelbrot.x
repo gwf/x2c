@@ -74,8 +74,7 @@ static ArrayChar _rgb(ArrayDbl pixels) {
 }
 
 static void write_image(String path, ArrayChar rgb) {
-  File output = File.open(path, "wb");
-  defer output.close();
+  auto File output = File.open(path, "wb");
   output.puts(%"P6\n$width $height\n255\n");
   output.write_all(rgb.bytes, rgb.len());
 }

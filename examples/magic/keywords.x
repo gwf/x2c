@@ -9,8 +9,7 @@ macro Decorator $control.with_lock(Stmt $body, Expr $lock) { {
 keyword with_lock $control.with_lock;
 
 int main(void) {
-Mutex mutex = Mutex.new();
-defer mutex.free();
+auto Mutex mutex = Mutex.new();
 try with_lock(mutex) { raise %(oops); }
 catch %(oops):
 {

@@ -186,8 +186,7 @@ static int _package_protocol_row(List key, Var value) {
 */
 module void _replay_package_imports(
   Compiler c, Map globs, Map rows, Array exports) {
-  Array imports = NULL;
-  defer if (imports) imports.free();
+  auto Array imports = NULL;
   foreach (Var (key, value) in rows)
     if (key ~= %("source-node" (? ?path ?position))) {
       if (value is not <list> || !value.list() ||
