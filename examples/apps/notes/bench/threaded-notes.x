@@ -116,7 +116,11 @@ static Router router(Notes app, Path public_dir) {
 static void list_notes(Notes app, HttpRequest req, HttpResponse res) {
   String tag = req.query["tag"] is void ? NULL : req.query["tag"];
   String query = req.query["q"] is void ? NULL : req.query["q"];
-  Regex pattern = query ? Regex.compile(query) : NULL;
+  Regex pattern = NULL;
+  if (query) {
+    try pattern = Regex.compile(query);
+    catch %(malformed *): Http.fail(400, "invalid search pattern");
+  }
   Array rows = request(app, <list>, NULL), notes = [];
   foreach (List row in rows) {
     Map note = note_json(row);

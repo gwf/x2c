@@ -195,7 +195,7 @@ func (a *app) list(w http.ResponseWriter, r *http.Request) {
 	if query != "" {
 		pattern, err = regexp.Compile(query)
 		if err != nil {
-			fail(w, 400, "malformed regular expression")
+			fail(w, 400, "invalid search pattern")
 			return
 		}
 	}

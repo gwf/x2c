@@ -136,6 +136,8 @@ def check_api(port):
     assert [note["id"] for note in request(
         port, "GET", "/api/notes?q=needle")] == [first["id"]]
     assert request(port, "GET", "/api/notes?q=not-present") == []
+    assert request(port, "GET", "/api/notes?q=(", expected=400) == {
+        "error": "invalid search pattern"}
     notes = request(port, "GET", "/api/notes")
     stats = request(port, "GET", "/api/stats")
     assert stats == {
