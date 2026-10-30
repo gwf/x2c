@@ -47,6 +47,7 @@ and status; it does not implement the remaining features.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
+| [October 30 review repairs](review-remediation-2026-10-30.md) | Two `--cpp` and REPL code defects, gate and tooling gaps, stale release notes, site, guidance, and plan statuses; evidence in [the review record](reference/review-2026-10-30.md). | Settle Q1-Q8 with Gary, then land batches 1 and 2 first. |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
