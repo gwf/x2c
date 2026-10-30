@@ -154,6 +154,16 @@ second conditional-compilation evaluator.
 
 ## Loading ordinary libraries
 
+Header declarations resolve against the loaded program. A declaration whose
+native provider is absent remains inspectable; executing it reports the missing
+provider. Loading a header does not require every optional SDK function to be
+available in the installed library.
+
+Load explicit static archives completely into the single program artifact.
+Later submissions must share one instance of archive globals, independent of
+which functions they call first. Archive constructors therefore run during
+program loading. Shared libraries keep their normal native loader behavior.
+
 Support both ways developers already obtain C libraries:
 
 - Source roots, with normal headers, includes, cross-file prototypes, globals,

@@ -443,7 +443,7 @@ List ReplSession.resolve(ReplSession session, String expression) {
 static ReplResult _submit_native(ReplSession session, String source) {
   Compiler c = session.compiler;
   c.diagnostics.reset();
-  ReplResult result = {.status = <rejected>, .value = void, .source = source};
+  ReplResult result = {.status = <rejected>, .source = source};
   Scope scratch = auto Scope.new();
   struct _ParserInput input = _parser_input(c);
   defer _restore_parser_input(c, input);

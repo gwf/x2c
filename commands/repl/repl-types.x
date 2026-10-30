@@ -21,16 +21,14 @@ typedef struct ReplSession {
   Map names, addresses, descriptions, internal;
   Array declarations, cleanups;
   Scope storage;
-  unsigned sequence;
   int inspect_depth, inspect_limit;
 } *ReplSession;
 
 /** A submission result; native values are rendered before leaving their entry. */
 typedef struct ReplResult {
   Symbol status;
-  Var value;
   String name, message, source, formatted, artifact;
-  List diagnostics, cause, syntax, lowered, removed;
+  List diagnostics, cause, syntax;
 } ReplResult;
 
 /** Sorted completion candidates replacing one byte range. */

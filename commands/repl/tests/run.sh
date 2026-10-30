@@ -6,11 +6,16 @@ tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 export X2C="$PWD/builds/0/x2c"
+native_link=
+case "$(uname -s)" in
+  Darwin) native_link=-Wl,-force_load,builds/0/libx2c.a ;;
+  Linux) native_link='-Xlinker -export-dynamic -Wl,--whole-archive,builds/0/libx2c.a,--no-whole-archive' ;;
+esac
 
 builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --build-dir "$tmp/native-cc" --output "$tmp/native-check" \
   --x-include-dir commands/repl --x-include-dir src \
-  --c-include-dir builds/0/src -Wl,-force_load,builds/0/libx2c.a \
+  --c-include-dir builds/0/src $native_link \
   commands/repl/tests/native-check.x commands/repl/repl-types.x \
   commands/repl/repl-session.x commands/repl/repl-native.x \
   commands/repl/repl-inspect.x commands/repl/repl-prompt-types.x \
