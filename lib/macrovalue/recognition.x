@@ -278,7 +278,7 @@ static Var _view(Var value) {
   return parts.list_free();
 }
 
-// Records fixed-local and Name slots in the prepared plan.
+// Records fixed-local and Name slots only from a prepared plan.
 static MacroFixedSlots _fixed_slots(
   Macro t, List names, MatchPlan plan) {
   MacroFixedSlots policy;

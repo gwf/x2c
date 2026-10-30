@@ -308,7 +308,6 @@ static List _read(
   return _value(r, parameter_type, tag, index, storage_type);
 }
 
-/* A rest parameter reaches native code as its container. */
 static Type _native_parameter(Type parameter) {
   Type container = parameter.rest_container();
   return container ? container : parameter;

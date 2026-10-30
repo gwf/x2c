@@ -351,7 +351,6 @@ static int _optional(List item, Map later) {
   return 0;
 }
 
-// Whether `item` declares a name in `reached`.
 static int _declares_reached(List item, Map reached) {
   match (item) case %(declare ? (bindings *rows)):
     foreach (List row in rows) {

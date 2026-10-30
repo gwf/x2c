@@ -220,7 +220,7 @@ int Compiler.iterator_arity(List signature) {
   return -1;
 }
 
-// native meta bindings
+// native function binding
 
 module String _native_meta_name(
   Compiler c, List declaration, Token marker) {
