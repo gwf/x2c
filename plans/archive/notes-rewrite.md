@@ -1,4 +1,5 @@
-> Status: ready for shared integration
+> Status: done
+> Published to `dev` on 2026-10-28 through PR #608 (merge `1f4115f28`).
 > Gary requested a complete task-first rewrite on 2026-10-28. SQLite is the
 > selected store for a comparable complete notes-service workload.
 

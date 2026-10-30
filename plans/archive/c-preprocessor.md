@@ -1,4 +1,14 @@
-> Status: active
+> Status: obsolete
+> Superseded on 2026-10-30 by
+> [CPP as an optional C compatibility bridge](cpp-compatibility-boundary.md)
+> (PR #641), which reversed this plan's always-on premise: expansion runs
+> only with `--cpp`. The engine was published through PR #625 (merge
+> `6ff9552ce`) on 2026-10-29. The routine choice below of no expansion inside
+> `%(...)` literals was never implemented as a rule: `_use_at` in
+> `src/cpp/expand.x` skips only names after `$` or `@`. Ordinary literal
+> atoms stay unexpanded because they scan as `lit-atom` tokens, but an atom
+> spelled as a C keyword that names a visible macro expands (probed with
+> `--cpp` at `66a119db5`).
 > Planned 2026-10-28 against `origin/dev` `25c91608e` from reproduced
 > probes (`builds/0/x2c translate` on the reproducers listed under
 > "Evidence"). Gary funded the work on 2026-10-28 and delegated it to one

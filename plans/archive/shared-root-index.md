@@ -1,9 +1,10 @@
 # Shared-root canonical index
 
-> Status: active
+> Status: done
+> Published to `dev` on 2026-10-29 through PR #628 (merge `a8c3bd36f`).
 > Implemented and focused checks passed on 2026-10-29. The matched Notes
-> benchmark is recorded under examples/apps/notes/bench/reports/2026-10-29-root-index.
-> Pending shared integration, which owns generated artifacts and the full gate.
+> benchmark is recorded under
+> examples/apps/notes/bench/reports/2026-10-29-root-index.
 
 The process root keeps an append-only linear-probe index. Writers retain the
 recursive root mutex and publish a value before its nonzero hash with release

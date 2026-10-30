@@ -1,6 +1,9 @@
-> Status: active - implemented and development checks passed; awaiting shared integration.
-> Based on published dev f116ed0e1893119973cd2f0c1b7437aaf0e1ee21.
-> This plan supersedes the earlier CPP campaign's broader authoring premise.
+> Status: done
+> Published to `dev` on 2026-10-30 through PR #641 (merge `ffe7e2b7a`),
+> authored as `517b822e5` and `3da9a42ea`. Based on published dev
+> f116ed0e1893119973cd2f0c1b7437aaf0e1ee21. This plan supersedes the
+> broader authoring premise of the earlier
+> [CPP campaign](c-preprocessor.md).
 
 # CPP as an optional C compatibility bridge
 

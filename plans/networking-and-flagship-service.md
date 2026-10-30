@@ -1,5 +1,6 @@
 > Status: reference; networking delivered through PR #598
-> The Notes showcase design below is superseded by [Notes rewrite](notes-rewrite.md).
+> The Notes showcase design below is superseded by
+> [Notes rewrite](archive/notes-rewrite.md).
 > The feature list is historical, not a requirement for the current app.
 > Planned 2026-10-28 against `gwf/repo-survey-major-features-933090`
 > (`f5d0eb2fb`). Implementation evidence and differences follow in the

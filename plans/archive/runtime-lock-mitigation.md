@@ -1,10 +1,10 @@
 # Remove unnecessary runtime synchronization
 
-> Status: active - implemented; shared integration pending.
+> Status: done
+> Published to `dev` on 2026-10-29 through PR #631 (merge `21d749b8d`).
 > Implementation and focused validation completed on 2026-10-29.
-> Sections 1-7 are implemented. Section 8 was measured and retains FILE locks.
-> Author stage-2 passed. Shared integration owns the final full gate and publication.
-> No full gate ran in the implementation session.
+> Sections 1-7 are implemented. Section 8 was measured and retains FILE
+> locks. Author stage-2 passed; the shared integrator owned the full gate.
 
 ## Result and boundaries
 
@@ -315,7 +315,7 @@ Implementation started at current `origin/dev`
 Three isolated workers completed the listed source groups with private
 handoffs. The combined code head is `493f1a01c`.
 
-The [execution report](../examples/apps/notes/bench/reports/2026-10-29-runtime-locks/README.md)
+The [execution report](../../examples/apps/notes/bench/reports/2026-10-29-runtime-locks/README.md)
 records operation counts, actual Scope footprint, both accounting modes,
 combined checks, author stage-2, matched Notes samples, stdio disposition and
 coverage limits. Names remain enabled throughout the Notes comparison.

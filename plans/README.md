@@ -41,7 +41,9 @@ as `do not reopen` or `no other candidate` as historical unless current
 Reviewed with Gary on 2026-10-24 against `dev` `7e9fd0178`, using source
 and Git history. Historical runtime probes, performance measurements, and
 live release state were not rechecked. This cleanup changes plan ownership
-and status; it does not implement the remaining features.
+and status; it does not implement the remaining features. On 2026-10-30,
+against `dev` `66a119db5`, the plans added on 2026-10-28 and 2026-10-29
+were indexed and the delivered ones archived.
 
 ### Active work
 
@@ -53,6 +55,7 @@ and status; it does not implement the remaining features.
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
 | [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
+| [Located failures](located-failures.md) | Phases 1 to 3 and the integration repair merged on 2026-10-28 in PRs #603, #604, #605, and #607; the plan's status still reads active. | Record those delivery revisions in its status and archive it. |
 
 ### Research and reference
 
@@ -71,6 +74,9 @@ or establish a useful caller before selecting a candidate.
 | [Harness evidence](reference/harness-evidence-2026-10-05.md) | Dated external runtime incidents; repository repairs landed, external outcomes are not asserted. |
 | [Remediation evidence](reference/review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
 | [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Coverage of 181 historical study rows, not an active task list. |
+| [Browser playground](browser-playground.md) | Phases 1 and 2 published in PR #596 (`b1584a01f`); phase 3, a fully client-side compiler, remains unscoped. |
+| [Compile startup floor](compile-startup-floor.md) | The `run` cache and stale-prelude reporting merged in PR #601 (`b8173e817`) on 2026-10-28; Gary chose to skip the replay floor change. Its status still says submission is pending. |
+| [Networking and flagship service](networking-and-flagship-service.md) | TCP and HTTP runtime delivered in PR #598; its Notes showcase design is superseded by the [Notes rewrite](archive/notes-rewrite.md). |
 
 Individual quotation adoption and TagId generation remain optional candidates
 in the quotation plan. Future releases use [releasing](../agents/releasing.md)
@@ -79,6 +85,25 @@ releases established the recovery baseline. No production promotion is
 selected here.
 
 ### Decisions and completed records
+
+Archived 2026-10-30 after checking delivery on `dev`:
+
+- [CPP as an optional C compatibility bridge](archive/cpp-compatibility-boundary.md):
+  done; ordinary builds skip C macro expansion and `--cpp` enables it.
+  Published in PR #641 (`517b822e5`, `3da9a42ea`) on 2026-10-30.
+- [An x2c-owned C preprocessor](archive/c-preprocessor.md): obsolete. Its
+  engine landed in PR #625; the boundary plan reversed its always-on premise.
+  Its literal-exclusion choice was never implemented as a rule.
+- [Runtime lock mitigation](archive/runtime-lock-mitigation.md): done;
+  unnecessary runtime locks removed in PR #631 (`21d749b8d`) on 2026-10-29.
+- [Shared-root canonical index](archive/shared-root-index.md): done; String
+  and List lookups read the root index without locking. Published in
+  PR #628 (`a8c3bd36f`) on 2026-10-29.
+- [Notes rewrite](archive/notes-rewrite.md): done; the SQLite notes server
+  was published in PR #608 (`1f4115f28`) on 2026-10-28.
+- [Allocation accounting and Notes database ownership](archive/notes-accounting-and-database-thread.md):
+  done; opt-in Scope accounting and the database-thread comparison were
+  published in PR #611 (`6a190fa5f`) on 2026-10-28.
 
 - [REPL library playground](archive/repl-library-playground.md): implemented in
   `cdad3ab09` on 2026-10-29. Native sessions, discovery, source/object inspection,
@@ -100,6 +125,9 @@ Completed work archived on 2026-10-27:
 
 Completed work archived on 2026-10-26:
 
+- [October 26 review repairs](archive/review-remediation-2026-10-26.md):
+  R1-R12 and Q1 implemented and validated on 2026-10-26 through
+  `12705c82e`.
 - [Compiler Lisp independence](archive/compiler-lisp-independence.md):
   the cleanup batch landed as PR #294 (`71088fa33`); the native-compiler
   plan superseded its remaining dependencies and easy-wins limit.

@@ -1,9 +1,10 @@
 # Allocation accounting and Notes database ownership
 
-> Status: active
-> Implementation and focused verification are complete on 2026-10-28.
-> Ready for shared integration and final publication validation. The mutex
-> Notes baseline retains response construction outside the database lock.
+> Status: done
+> Published to `dev` on 2026-10-28 through PR #611 (merge `6a190fa5f`),
+> which carried `8abe19fad`, `54e62019f`, and `d0c88cfdd`. In the mutex
+> Notes baseline, only the lookup route, `get_note`, builds its Map and
+> parses tags outside the database lock.
 
 ## Requested result
 
@@ -26,8 +27,10 @@ The channel topology was explicitly selected by Gary.
   tests that assert counters opt in at process launch. Default-off behavior has
   focused coverage. Disabled automatic leak accounting is documented.
 - The mutex Notes app keeps copied-row acquisition and statement finalization
-  inside the mutex, then performs missing-row handling, Map construction, and
-  tag parsing outside it.
+  inside the mutex. The lookup route, `get_note`, then performs missing-row
+  handling, Map construction, and tag parsing outside it. The list, update,
+  and stats routes still build Maps or parse tags inside the lock; moving
+  that work out is a separate measured change.
 - The database-thread server is an independently executable benchmark variant,
   with the same routes, SQLite schema, SQL, CLI, logging, persistence, and
   prepared-statement policy. Database open/use/close belongs to one thread.
@@ -74,7 +77,7 @@ Review and fix the complete authored diff before submission.
 
 ## Completed comparison
 
-The [dated report](../examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
+The [dated report](../../examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
 retains all fifteen measurements and build provenance. At 64 clients, medians
 were 49,765 requests/s for mutex x2c, 38,650 for database-thread x2c, and 65,858
 for Go. The database-thread variant had lower p99 latency (2.59 ms versus
