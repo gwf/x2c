@@ -17,7 +17,7 @@ BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
 	proof-cold-collection \
-	build-recovery check-native-modules packages-check
+	build-recovery check-native-modules packages-check tools-check
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
 DOC_TARGETS = doc-generate doc-check doc-examples doc-outputs doc-build doc-pdf \
@@ -67,7 +67,7 @@ bootstrap-ready: configure
 	fi
 
 ##@ Getting started
-configure:						## Report core build prerequisites
+configure:						## Report core build prerequisites; set core.hooksPath to tools/hooks in the configuration all worktrees share, if unset
 	@./configure
 	@if git rev-parse --git-dir >/dev/null 2>&1; then \
 	  git config --get core.hooksPath >/dev/null 2>&1; \
@@ -79,7 +79,7 @@ configure:						## Report core build prerequisites
 configure-packages:					## Report package build prerequisites
 	@./configure --packages
 
-build: bootstrap-ready					## Build the runtime and compiler
+build: bootstrap-ready					## Build the runtime and compiler; rewrites stale lib/x2c.x, src/linked-meta.x, and etc/meta-queries.x
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
 	$(MAKE) meta-generated
@@ -87,6 +87,8 @@ build: bootstrap-ready					## Build the runtime and compiler
 
 # Classification depends on source bodies and the compiler that analyzes them.
 # Content checks also catch provider changes within one Make timestamp tick.
+# The stamp holds its outputs' checksums, so an output that a restore or merge
+# replaced is generated again.
 META_INPUTS := $(shell find src lib etc -type f \
   \( -name '*.x' -o -name '*.h' -o -name '*.xlisp' \) \
   ! -path src/linked-meta.x ! -path etc/meta-queries.x | LC_ALL=C sort) \
@@ -107,12 +109,14 @@ debug/meta-inputs.list: meta-inputs-force
 	@cksum $(META_INPUTS) "$$(command -v "$${X2C:-bin/x2c-bootstrap}")" >$@.tmp
 	@if cmp -s $@.tmp $@; then rm $@.tmp; \
 	  else mv $@.tmp $@; rm -f debug/meta-generated.stamp; fi
+	@cksum $(META_OUTPUTS) 2>/dev/null | \
+	  cmp -s - debug/meta-generated.stamp || rm -f debug/meta-generated.stamp
 
 debug/meta-generated.stamp: $(META_INPUTS)
 	@set -e; dump=$@.dump; trap 'rm -f "$$dump"' EXIT; \
 	  tools/gen-linked-meta.sh src/linked-meta.x "$$dump"; \
 	  tools/gen-meta-queries.sh etc/meta-queries.x "$$dump"; \
-	  touch $@
+	  cksum $(META_OUTPUTS) >$@
 
 # Reuse stage zero's runtime C without adding another target to its build.
 WASM_CC ?= emcc
@@ -165,7 +169,7 @@ commands-check: commands				## Run external command smoke tests
 	  done; \
 	  parallel_wait
 
-verify: build						## Build and run unit test suites
+verify: build						## Build, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
 	$(STAGE0_X2C) script unittest/probes/run-suite-coverage
 	$(MAKE) -C unittest clean
 	$(PARALLEL_MAKE) -C unittest test-all
@@ -228,7 +232,7 @@ check-after-precommit:
 # and `-Werror`; a further stage would compile the same C with the same flags.
 # `make stage-3` and `stage-diff-all` run the later rounds on demand, and the
 # nightly snapshot runs them every day.
-precommit: build					## Prepare the final tree for commit
+precommit: build					## Readiness sequence, not a commit prerequisite; rewrites bootstrap/ and stale generated sources
 	$(MAKE) bootstrap-refresh
 # Refresh already compiles the clean bootstrap from the current C/H.
 	$(MAKE) rebuild-from-bootstrap
@@ -244,13 +248,13 @@ precommit: build					## Prepare the final tree for commit
 AGENT_PR_STEPS = doc-check proof-cold-collection verify doc-outputs \
 	commands-check
 
-agent-pr-check:					## Run complete agent PR proof once
+agent-pr-check:					## Run complete agent PR proof once; rewrites bootstrap/ and stale generated sources
 	time $(MAKE) precommit
 	time $(MAKE) commands proof-artifact-atomicity
 	time tools/run-make-steps.sh debug/agent-pr-check \
 		-o build -o stage-1 -o commands -- $(AGENT_PR_STEPS)
 
-sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting
+sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting; rewrites bootstrap/ and stale generated sources
 	$(MAKE) build-safe
 	$(MAKE) stage-3
 
@@ -282,7 +286,7 @@ bootstrap-refresh: build				## Refresh the portable bootstrap
 	$(MAKE) -C bootstrap realclean
 	cp builds/0/lib/*.[ch] bootstrap/lib/
 	cp builds/0/src/*.[ch] bootstrap/src/
-	@for area in lib src; do \
+	@set -e; for area in lib src; do \
 		for directory in builds/0/$$area/*/; do \
 			[ ! -d "$$directory" ] || cp -R "$${directory%/}" bootstrap/$$area/; \
 		done; \
@@ -295,7 +299,7 @@ stage-1: build						## Build through compiler stage 1
 stage-2: build						## Build through compiler stage 2
 	$(PARALLEL_MAKE) -C builds selftest
 
-stage-3: bootstrap-ready				## Build through compiler stage 3
+stage-3: bootstrap-ready				## Clean builds/ and build stages 0 to 3; rewrites no tracked file
 	time $(PARALLEL_MAKE) -C builds stresstest
 
 ##@ Verification and proofs
@@ -326,6 +330,17 @@ proof-conformance: build ## Optional runtime conformance comparison between prel
 check-native-modules: commands			## Build, load, and reject native modules
 	./unittest/probes/run-native-modules.sh
 
+# Optional: no gate runs these offline probes of the Python tools. They build
+# nothing and use temporary directories, stubs, and synthetic records.
+TOOL_TESTS = agent-failure build-scaling build-scaling-history examples \
+	gate-state harness-metrics integrate-dev performance-snapshot
+
+tools-check:						## Run the optional offline probes of the Python tools
+	@set -e; for name in $(TOOL_TESTS); do \
+	  echo "tools/test-$$name.py"; \
+	  python3 "tools/test-$$name.py"; \
+	done
+
 ##@ Stage comparison
 stage-diff-0:						## Compare bootstrap and stage 0
 	./tools/check-generated-stages.sh bootstrap builds/0
@@ -351,11 +366,11 @@ doc-generate:						## Regenerate derived documentation
 	$(STAGE0_X2C) script tools/gen-api-reference --write
 	$(STAGE0_X2C) script tools/gen-llms-txt --write
 
-doc-check:						## Check documentation for drift
+doc-check: build					## Check documentation for drift with the current compiler
 	$(STAGE0_X2C) script tools/check-docs
 	$(STAGE0_X2C) script tools/gen-llms-txt --check
 
-doc-examples: build					## Compile every example in the book
+doc-examples: build					## Build, then compile every example in the book; build rewrites stale generated sources
 	$(STAGE0_X2C) script tools/check-doc-examples
 
 doc-outputs: build					## Run book examples that show output
@@ -446,7 +461,7 @@ define RUN_X2C_BENCHMARK
 endef
 
 define RUN_BENCHMARK_SAMPLES
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./unittest/build/benchmarks/$(1); \
 	done
@@ -486,7 +501,7 @@ bm-logger: build					## Run focused Logger timings
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-optimized
-	@for mode in debug optimized; do \
+	@set -e; for mode in debug optimized; do \
 		for sample in 1 2 3 4 5; do \
 			echo "$$mode-sample,$$sample"; \
 			./unittest/build/benchmarks/logger-hot-paths-$$mode; \

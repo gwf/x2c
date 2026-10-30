@@ -10,7 +10,7 @@ LIB_ENTRIES = $(shell $(ROOT)/tools/sources.sh --root $(ROOT) --area lib)
 all:
 	@mkdir -p $(HEADER_DIR)
 	@find $(HEADER_DIR) -type l -delete
-	@for source in $(LIB_SOURCE)/*.x $(LIB_SOURCE)/*/*.x; do \
+	@set -e; for source in $(LIB_SOURCE)/*.x $(LIB_SOURCE)/*/*.x; do \
 	  relative=$${source#$(LIB_SOURCE)/}; \
 	  directory=$${relative%/*}; prefix=../; \
 	  if [ "$$directory" != "$$relative" ]; then \
@@ -18,7 +18,7 @@ all:
 	  fi; \
 	  ln -sf "$$prefix$$source" "$(HEADER_DIR)/$$relative"; \
 	done
-	@for source in $(LIB_ENTRIES); do \
+	@set -e; for source in $(LIB_ENTRIES); do \
 	  relative=$${source#$(LIB_SOURCE)/}; \
 	  name=$${relative##*/}; name=$${name%.x}.h; \
 	  ln -sf "../$(LIB_BUILD)/$$name" "$(HEADER_DIR)/$$name"; \
