@@ -150,7 +150,16 @@ static Map _worker_receive(ReplWorker worker, int input) {
     if (waitpid(worker.pid, &worker.status, WNOHANG) == worker.pid) {
       kill((pid_t) -(long) worker.pid, SIGKILL);
       worker.pid = 0;
-      int complete = _worker_read(worker.from, worker.pending, value);
+      struct pollfd reply = {.fd = worker.from, .events = POLLIN};
+      while (!_worker_interrupted && poll(&reply, 1, 0) > 0 &&
+             (reply.revents & POLLIN)) {
+        char bytes[4096];
+        ssize_t count = read(worker.from, bytes, sizeof(bytes));
+        if (count > 0) worker.pending.write_len(bytes, count);
+        else if (count < 0 && errno == EINTR) continue;
+        else break;
+      }
+      int complete = _worker_frame(worker.pending, value);
       _worker_descriptors(worker);
       if (complete) return value;
       worker.failure = _worker_reason(worker);
