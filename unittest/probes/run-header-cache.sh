@@ -227,8 +227,34 @@ grep -q "CacheSelfLeaf_only(CacheSelfBase_rest(value))" \
 grep -q "CacheDelegatePart_read(value.part)" \
   "$FAKE/cold/unit.c" ||
   fail "interface replay lost delegate field lookup"
-grep -q 'return((value) \* 3);' "$FAKE/cold/unit.c" ||
-  fail "an included file's macros did not expand in the includer"
+grep -Fq 'return CACHE_SCALED(value);' "$FAKE/cold/unit.c" ||
+  fail "default translation expanded an included C macro"
+
+# Existing C may request expansion. Mode changes must reject incompatible
+# declaration interfaces instead of reusing a previous mode's parsed rows.
+mkdir -p "$FAKE/cpp-cold" "$FAKE/cpp-warm" "$FAKE/cpp-disabled"
+(cd "$FAKE" && ./builds/0/x2c translate --cpp --out-dir cpp-cold src/unit.x)
+(cd "$FAKE" && ./builds/0/x2c translate --cpp --out-dir cpp-warm \
+  src/bar.x src/hdr.x)
+(cd "$FAKE" && ./builds/0/x2c translate --cpp --out-dir cpp-warm src/unit.x)
+cmp -s "$FAKE/cpp-cold/unit.c" "$FAKE/cpp-warm/unit.c" ||
+  fail "CPP interface replay diverged from cold expansion"
+grep -q 'return((value) \* 3);' "$FAKE/cpp-cold/unit.c" ||
+  fail "requested C expansion did not expand an included macro"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cpp-warm src/unit.x)
+cmp -s "$FAKE/cold/unit.c" "$FAKE/cpp-warm/unit.c" ||
+  fail "default translation reused a CPP-mode interface"
+(cd "$FAKE" && ./builds/0/x2c translate --cpp --out-dir warm src/unit.x)
+cmp -s "$FAKE/cpp-cold/unit.c" "$FAKE/warm/unit.c" ||
+  fail "CPP translation reused a default-mode interface"
+cat >"$FAKE/src/constant.x" <<'EOF'
+#define NUMBER 7
+int constant(void) { return NUMBER; }
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate --cpp --no-cpp \
+  --out-dir cpp-disabled src/constant.x)
+grep -Fq 'return NUMBER;' "$FAKE/cpp-disabled/constant.c" ||
+  fail "--no-cpp did not suppress requested expansion"
 
 sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/hdr.xi" >"$FAKE/tampered/hdr.xi"
 sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/bar.xi" >"$FAKE/tampered/bar.xi"

@@ -61,7 +61,7 @@ memory. For each input file the translator runs one pipeline:
 source
   -> tokenizing
   -> shallow parse and global environment discovery
-  -> preprocessing
+  -> directive handling and optional C macro expansion
   -> full parse and type annotation
   -> protocol conformance forms
   -> lowering
@@ -147,8 +147,8 @@ the text to `Tokenizer.new` from `lib/tokenizer.x`, and scans it with the
 allocation-free character recognizers in `lib/scan.x`. Whitespace, comments,
 and preprocessor lines all become tokens. Later phases can therefore report
 positions in the original file, and directives can be re-emitted where they
-were written. The token array is not parsed until
-[preprocessing](#preprocessing) has expanded its macros.
+were written. Ordinary directive scanning precedes parsing; optional
+[preprocessing](#preprocessing) expands C macros only when requested.
 
 ```sh
 ./builds/0/x2c translate --dump-tokens greet.x
@@ -300,9 +300,14 @@ implicit runtime contributes a few thousand rows, so grep the output.
 
 ### Preprocessing
 
-`src/cpp/cpp.x` expands the C macros x2c can see before the parser reads a
-token: those the unit, the files it includes, the runtime, and the command
-line define. `Compiler.expand_macros` walks the scanned array once. It
+`--cpp` enables `src/cpp/cpp.x` for existing C compatibility. Ordinary x2c
+builds skip full expansion and macro-export replay. Module and meta discovery
+read authored syntax in both modes and do not prepare C macro exports to
+find hidden x2c constructs.
+
+When enabled, the engine expands the C macros x2c can see before the parser
+reads a token: those the unit, the files it includes, the runtime, and the
+command line define. `Compiler.expand_macros` walks the scanned array once. It
 applies each directive to a `Cpp` state, the macro table and the open
 conditional groups, and replaces each macro use with its expansion. Every
 expanded token takes the line, column, and position of the use, and the
@@ -312,8 +317,8 @@ conditional group, or leaves it undecided when a name it tests is not
 visible; `src/preprocess.x` then turns the tokens of a hidden arm into
 comments and marks layout attributes. Directives stay in the array.
 
-Collection preprocesses each segment it parses from the state where the
-segment starts. A file's entry records the macros it changed as its
+With `--cpp`, collection preprocesses each segment it parses from the state
+where the segment starts. A file's entry records the macros it changed as its
 exported rows, which an includer applies at the `#include`, so a replayed
 interface supplies the macros a cold walk does. The unit's own array is
 preprocessed after collection, when every file it includes has an entry.

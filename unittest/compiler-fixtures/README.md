@@ -3,8 +3,8 @@
 Each `.x` source has a one-line `.phases` file naming the exact artifacts that
 the fixture checks. Supported phases are:
 
-- `tokens` - non-trivia token types, text, and positions after macro
-  expansion, each expanded token marked with its macro
+- `tokens` - non-trivia token types, text, and positions; with `--cpp`,
+  each expanded token is marked with its C macro
 - `ast` - parsed AST from `--dump-ast`
 - `expansions` - bound macro expansions from `--dump-expansions`
 - `transform` - normalized AST from `--dump-transforms`

@@ -84,13 +84,20 @@ The depfile options control that `.d` output. They belong to `translate`:
 --no-phony-deps         Omit phony rules for included files
 ```
 
-Symbol collection options apply to `translate`, `build`, and `run`:
+Preprocessing and symbol collection options apply to `translate`, `build`,
+and `run`:
 
 ```text
+--cpp                   Expand C macros for existing C compatibility
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
 ```
+
+C macro expansion is off by default. Use `--cpp` when existing C requires
+macro-generated grammar. It does not discover x2c module or meta constructs
+inside C macros. `--no-cpp` suppresses expansion even when `--cpp` is present.
+The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
 
@@ -791,9 +798,10 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
-x2c's own [preprocessing](language.md#preprocessing), for requested host
-preprocessing, and for C compilation; `translate` accepts them too, and the
-C generated with them needs the same options. Optimization, debug, and `-Xcc` are compile-only; `-L`,
+x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
+requested host preprocessing, and for C compilation. `translate` accepts them
+too, and the C generated with them needs the same options. Optimization,
+debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
 `-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
