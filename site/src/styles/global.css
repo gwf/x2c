@@ -1488,7 +1488,6 @@ a.docs-card:hover {
 .idea-code pre {
   margin: 0;
   padding: 11px 13px;
-  border: 1px solid var(--line);
   background: var(--white) !important;
   overflow-x: auto;
   font-size: 11.5px;
