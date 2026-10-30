@@ -126,6 +126,38 @@ static void _objects(ReplSession session) {
 }
 
 static void _prompt_types(ReplSession session) {
+  _expect(session, "struct NamespaceRecord { int payload; };", <defined>, NULL);
+  _expect(session, "int NamespaceRecord=5;", <executed>, NULL);
+  _value(session, "NamespaceRecord;", "int 5");
+  _check("payload" in session.info("struct NamespaceRecord") &&
+         "int NamespaceRecord;" in session.info("NamespaceRecord"),
+         "tag and object information did not preserve their namespaces");
+  _check("payload" in session.members("struct NamespaceRecord") &&
+         !("payload" in session.members("NamespaceRecord")),
+         "tag and object member lookup collided");
+  _check("struct NamespaceRecord" in session.source("struct NamespaceRecord") &&
+         "int NamespaceRecord=5" in session.source("NamespaceRecord"),
+         "tag and object source lookup collided");
+  String tokens = session.symbol_text("NamespaceRecord", 0, NULL, 0);
+  _check("struct NamespaceRecord" in tokens && "int NamespaceRecord;" in tokens,
+         "bare prefix did not find both tag and object rows");
+  _expect(session, "typedef struct NamespaceRecord NamespaceAlias;", <defined>, NULL);
+  _expect(session, "NamespaceAlias tagged={6};", <executed>, NULL);
+  _value(session, "tagged.payload;", "int 6");
+  _expect(session, "int NamespaceReverse=8;", <executed>, NULL);
+  _expect(session, "struct NamespaceReverse { int field; };", <defined>, NULL);
+  _value(session, "NamespaceReverse;", "int 8");
+  _expect(session, "int NamespaceUnion(void) { return 9; }", <defined>, NULL);
+  _expect(session, "union NamespaceUnion { int first; long second; };", <defined>, NULL);
+  _value(session, "NamespaceUnion();", "int 9");
+  _check("first" in session.members("union NamespaceUnion") &&
+         "NamespaceUnion(void)" in session.info("NamespaceUnion"),
+         "union and function information collided");
+  _expect(session, "enum NamespaceEnum { GREEN=4 };", <defined>, NULL);
+  _expect(session, "int NamespaceEnum=7;", <executed>, NULL);
+  _value(session, "NamespaceEnum+GREEN;", "int 11");
+  _check("enum NamespaceEnum" in session.source("enum NamespaceEnum"),
+         "enum tag source was not published in its namespace");
   _expect(session, "struct Inline { int x; } inline_value={7};",
           <executed>, NULL);
   _value(session, "inline_value.x;", "int 7");

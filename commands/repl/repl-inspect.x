@@ -30,6 +30,8 @@ static String _type_text(Compiler c, Type type) {
 static Map _description(ReplSession session, String name) {
   Var entry;
   if (session.descriptions.try_get(name, entry)) return entry;
+  Map tag = _tag_description(session, name);
+  if (tag) return tag;
   Compiler c = session.compiler;
   List expression = session.resolve(name);
   match (expression) case %(expr ? (ident ?binding)): {
@@ -52,6 +54,19 @@ static Map _description(ReplSession session, String name) {
   return NULL;
 }
 
+static Map _tag_description(ReplSession session, String name) {
+  if (name in session.descriptions ||
+      session.compiler.sym.get_exact($(name))) return NULL;
+  Map found = NULL;
+  foreach (Symbol kind in %<<struct union enum>>) {
+    Map row = session.descriptions[kind.str() + " " + name];
+    if (!row) continue;
+    if (found) return NULL;
+    found = row;
+  }
+  return found;
+}
+
 static String _named_declaration(
   Compiler c, String name, Type type, List syntax) {
   syntax = Ast.without_origin(syntax);
@@ -72,20 +87,18 @@ void ReplSession.describe(
   Compiler c = session.compiler;
   List entry = session.names[name];
   syntax = Ast.without_origin(syntax);
-  match (syntax) case %(typedef ?(Type spec) (bindings (bind ?alias ()))):
-    if (entry && entry.car() == <type> &&
-        (spec.is_aggregate_tag_body() || spec.is_enum_tag_body()) &&
-        spec.cadr() == name && Ast.binding_spelling(alias) != name)
+  Type base = syntax.cadr().type().base_type();
+  int tag = (base.is_aggregate_tag() || base.is_aggregate_tag_body() ||
+             base.is_enum_tag() || base.is_enum_tag_body()) &&
+    base.cadr() is <string> && name == base.car().str() + " " + base.cadr().str();
+  match (syntax) case %(typedef ?(Type spec) (bindings (bind ? ()))):
+    if (tag)
       syntax = %(declare $spec (bindings (bind () ())));
-  Type type = c.sym.get_exact($(name));
+  Type type = tag ? $(base.car(), base.cadr()) : c.sym.get_exact($(name));
   if (!type) type = c.sym.get_exact(%(typedef $name));
-  if (!type) {
-    Type declared = syntax.cadr().type().base_type();
-    if (declared.is_aggregate_tag_body() || declared.is_enum_tag_body())
-      type = $(declared.car(), declared.cadr());
-  }
   session.descriptions[name] = {
-    "name": name, "kind": entry ? entry.car() : <value>, "type": type,
+    "name": tag ? base.cadr() : name,
+    "kind": entry ? entry.car() : <value>, "type": type,
     "path": "prompt", "source": source, "body": source, "syntax": syntax,
     "declaration": _named_declaration(c, name, type, syntax),
     "line": 1, "end_line": source.split("\n").len()
@@ -129,8 +142,9 @@ String ReplSession.symbol_text(
       continue;
     Symbol row_kind = row["kind"];
     String origin = row["path"], declaration = row["declaration"];
-    String display = row["display"];
+    String display = row["display"], spelling = row["name"];
     if (prefix && !name.startswith(prefix) &&
+        (!spelling || !spelling.startswith(prefix)) &&
         (!display || !display.startswith(prefix))) continue;
     if (kind && row_kind != kind &&
         !(kind == <function> && row_kind == <native>)) continue;
@@ -152,6 +166,8 @@ static Type _query_type(ReplSession session, String text) {
   Map description = session.descriptions[text];
   if (description && description["kind"] == <type>)
     return description["type"];
+  Map tag = _tag_description(session, text);
+  if (tag) return tag["type"];
   if (c.sym.get_exact(%(typedef $text))) return $(text);
   foreach (Symbol tag in %<<struct union enum>>) {
     String prefix = tag.str() + " ";

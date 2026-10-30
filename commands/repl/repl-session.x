@@ -257,6 +257,12 @@ static int _type_only(List node) {
   return 0;
 }
 
+static String _tag_name(Type type) {
+  match (type) case %((!or ?kind struct union enum) ?(String name) *):
+    return kind.str() + " " + name;
+  return NULL;
+}
+
 static int _file_submission(Compiler c) {
   if (!c.test_declaration()) return 0;
   Token token = c.token;
@@ -475,11 +481,14 @@ static ReplResult _submit_native(ReplSession session, String source) {
     if (_file_submission(c)) {
       syntax = c.parse_submission(source.len());
       if (_type_only(syntax)) {
-        List type = syntax.type_from_ast().base_type();
+        Type type = syntax.cadr().type().base_type();
         if (syntax ~= %(typedef ? (bindings *rows))) {
           foreach (List row, rows) names.push(Ast.binding_spelling(row.cadr()));
         }
-        else if (type.len() > 1 && type.cadr() is <string>) names.push(type.cadr());
+        String tag = _tag_name(type);
+        if (tag && (syntax.car() != <typedef> ||
+                    type.is_aggregate_tag_body() || type.is_enum_tag_body()))
+          names.push(tag);
         foreach (String name, names)
           if (name in session.names)
             raise %(repl (reason $("a type cannot be redefined: " + name)));
@@ -491,7 +500,8 @@ static ReplResult _submit_native(ReplSession session, String source) {
         transaction.commit_transient();
         committed = 1;
         result.status = <defined>;
-        result.name = names.len() ? names[0] : "type";
+        result.name = syntax.car() != <typedef> && tag
+          ? type.cadr() : names.len() ? names[0] : "type";
         result.syntax = syntax;
         return result;
       }
@@ -532,8 +542,8 @@ static ReplResult _submit_native(ReplSession session, String source) {
     foreach (List declaration, retained) {
       session.declarations.push(declaration);
       Type family = Ast.without_origin(declaration).cadr().type().base_type();
-      if (family.len() < 2 || family.cadr() is not <string>) continue;
-      String name = family.cadr();
+      String name = _tag_name(family);
+      if (!name) continue;
       session.names[name] = %(type);
       session.describe(name, declaration, source);
     }
