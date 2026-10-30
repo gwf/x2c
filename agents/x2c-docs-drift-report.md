@@ -4,37 +4,73 @@
 
 ## Mechanically checked surface
 
-`make doc-check` currently verifies:
+`make doc-check` builds the current compiler, then runs two read-only
+scripts with it: `tools/check-docs` and `tools/gen-llms-txt --check`.
+`tools/check-docs` declares the page lists named below.
 
-- the generated module catalog matches live `src/*.x` and `lib/*.x` modules;
-- the generated library reference matches the runtime sources and every row of
+`tools/gen-llms-txt --check` verifies that `site/public/llms.txt` and
+`site/public/llms-full.txt` match the book they are generated from.
+
+`tools/check-docs` verifies that:
+
+- `agents/x2c-module-catalog.md` matches what `tools/gen-module-catalog`
+  generates from the compiler and runtime source units;
+- the API reference that `tools/gen-api-reference` generates, under
+  `docs/src/library/modules/` and `docs/src/internals/compiler-api/` with
+  their `docs/src/SUMMARY.md` sections, matches the sources and every row of
   `docs/library-manifest.txt`;
 - every page under `docs/src/` is reachable from `docs/src/SUMMARY.md`, and
   every SUMMARY entry names a file that exists;
-- no document spells the project name as the drug it is pronounced like;
-- local Markdown links resolve across README and active top-level docs;
-- repository paths in the canonical entry-point set resolve, and a path that
-  cites a line number names a line the file has;
-- compiler flags named by active docs exist in `src/cli/parsing.x`;
-- canonical workflow docs do not reintroduce unsupported `V=1`, missing
-  `OVERVIEW.md`, or bootstrap redirection before creating `debug/`;
-- example compile commands use quote-only runtime-header lookup so generated
-  headers do not shadow system headers;
-- every example cited by the language/library guides is either executable in
-  the manifest harness or labeled with its non-checked manifest category;
-- every stated compiler or runtime module count matches `src/*.x` or
-  `lib/*.x`, and the `src/` module lists in `AGENTS.md` and
-  `docs/src/internals/architecture.md` name exactly those modules;
+- no checked page spells the project name as the drug it is pronounced like;
+- every local Markdown link in the link-checked pages names a file that
+  exists;
+- every repository path cited in the path-audited pages exists, and a path
+  that cites a line number names a line the file has;
+- every compiler flag named in the flag-audited pages is an option in
+  `src/cli/parsing.x`;
+- the workflow-audited pages do not reintroduce unsupported `V=1`, a missing
+  `OVERVIEW.md` entry page, bootstrap output redirected before `debug/`
+  exists, or `cc -I include` instead of quote-only runtime-header lookup;
+- every example that the example-audited pages cite is executable in the
+  manifest harness or labeled with its non-checked manifest category;
+- every stated compiler or runtime module count in a checked page matches the
+  catalog, and the `src/` module lists in `AGENTS.md` and
+  `docs/src/internals/architecture.md` name exactly the compiler units;
 - every section under "Partial contracts and open decisions" in
   `agents/x2c-philosophy.md` names a ledger row that is not yet verified.
 
-The path-audited entry-point set is declared in `tools/check-docs`. Its
-entries include README, the root and `agents/` agent guidance, the philosophy,
-quick start, development guide, code-organization guide, debugging guide,
-module catalog, this report, the canonical diagnostics guide, the adapter and
-AST-walk references, and six book chapters: architecture, the CLI reference,
-the language reference, idioms, the implementation map, and the library
-overview.
+The checked pages are `README.md`, `AGENTS.md`, the Markdown directly in
+`agents/` and `docs/`, and every page below `docs/src/`. The link-checked
+pages add the Markdown below `agents/skills/`, `packages/`, and `plans/`,
+except fetched or built trees such as `deps/` and `node_modules/`. Links are
+resolved without their `#` fragments, so a fragment that names a missing
+heading is not reported. URLs are not fetched. `site/` is absent on purpose:
+its links are URLs on the rendered site, which `make site-check` resolves
+against the built output.
+
+The path-audited entry points are `README.md`, `AGENTS.md`,
+`agents/AGENTS.md`, `agents/x2c-code-standard.md`, the philosophy, quick
+start, development, code-organization, and debugging guides, the module
+catalog, this report, the diagnostics guide, the adapter and AST-walk
+references, and six book chapters: architecture, the CLI reference, the
+language reference, idioms, the implementation map, and the library overview.
+The flag, workflow, and example audits each use a subset of those pages;
+the flag audit also reads the lines that name x2c in `agents/quick-start.md`
+and `docs/src/guide/scripting.md`.
+
+A module count is a number followed by at most three words and `modules`.
+It counts runtime modules when the phrase names `runtime`, or names neither
+`runtime` nor `compiler` and the 40 characters before it name `runtime`;
+otherwise it counts compiler modules. Both counts follow the catalog.
+Compiler modules are the units in `src/` and `src/components/` and each
+`src/<m>/<m>.x`, without the generated `src/linked-meta.x`. Runtime modules
+are the units in `lib/` and each `lib/<m>/<m>.x`, without the generated
+`lib/x2c.x`.
+
+`tools/gate-state.py ensure doc-check` runs `make doc-check`. It also runs
+`make -o build doc-outputs` when a page under `docs/src/` has an `x2c` sample
+and no gate record in the workspace holds its current content, so a broken
+output fence cannot pass as documentation-only.
 
 ## Executable examples surface
 
@@ -50,6 +86,7 @@ supported behavior merely by appearing in the repository.
 - `agents/quick-start.md` owns the shortest verified build/test path.
 - `agents/x2c-development-guide.md` owns less common compiler and build facts;
   the root `AGENTS.md` owns workflow, validation, and publication.
+- `agents/x2c-code-standard.md` owns x2c source style.
 - `agents/x2c-module-catalog.md` is generated from the live module tree.
 - `docs/src/reference/language.md` owns implemented syntax and explicit
   limitations.
