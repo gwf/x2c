@@ -10,7 +10,7 @@
     type, which the compiler computes at the `$` call, so reading the fields
     of a struct asks the compiler nothing. The consuming unit calls only
     `ms_label` at run time, so its definition is the only one in the
-    generated C. See `plans/meta-functions.md`.
+    generated C. See `plans/archive/meta-functions.md`.
 */
 
 /* The named fields of a struct-typed expression, in declaration order. The

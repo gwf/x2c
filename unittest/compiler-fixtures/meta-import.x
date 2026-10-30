@@ -12,7 +12,7 @@
     as its own copies and public `mi_flatten` as the program's one copy,
     exported by `meta-import.h`. `mi_tag` runs only during translation, so
     no definition of it is emitted. `meta-import-second.x` imports the same
-    file and emits a different set. See `plans/meta-functions.md`.
+    file and emits a different set. See `plans/archive/meta-functions.md`.
 */
 
 #include "x2c.x"

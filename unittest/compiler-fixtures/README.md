@@ -11,6 +11,8 @@ the fixture checks. Supported phases are:
 - `emit` - pre-generation emitted tokens from `--dump-code`
 - `symbols` - `--dump-symbols` entries selected by the fixture's required
   `.symbol-filter` text
+- `definitions` - the unit, its module comment, and its authored definition
+  rows from `--dump-definitions`
 - `h`, `c` - final generated files
 - `compile-status`, `diagnostics` - compiler failure status and stderr
 - `stdout`, `stderr`, `status` - generated program behavior

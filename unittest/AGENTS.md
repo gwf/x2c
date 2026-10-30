@@ -40,6 +40,14 @@ Use the [agent directory](../agents/README.md) for task routing and the
   handled in a focused follow-up unless the current goal authorizes the fix.
 - Temporary outputs belong in `unittest/build/` or `/tmp`; never commit them.
 - Update `STATUS.md` when a skip, gap, or harness contract changes.
+- A new probe under `probes/` is either wired into a Make target or
+  labelled optional in its header. `make verify` runs `run-suite-coverage`,
+  `run-scope-shutdown`, `run-error-floor`, and `run-varops-fatal.sh`, and,
+  through the `compiler-fixtures` target, `run-cli-boundary.sh`,
+  `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`,
+  `run-header-cache.sh`, `run-protocol-boundaries.sh`,
+  `run-expression-bodied-functions.sh`, and the four `run-meta-*.sh`
+  scripts.
 
 ## Compiler fixtures
 

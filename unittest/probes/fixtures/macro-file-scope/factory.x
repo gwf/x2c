@@ -1,6 +1,0 @@
-#pragma once
-
-macro Unit $factory(name $public, Expr $value) {
-  int helper(void) { return $value; }
-  int $public(void) { return helper(); }
-}

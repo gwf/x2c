@@ -66,14 +66,24 @@ parity remains a separate follow-up; the expectations were not weakened.
   and cleanup when a later initializer raises.
 
 - Native module probes reuse a constructor's cached Func across isolated
-  units. REPL API checks preserve shared definitions through a second preload.
-- REPL reference-capture checks retain local and parameter storage across
-  submissions, including shared mutations, earlier addresses, fixed arrays,
-  records, nested captures, and exceptions. Session teardown releases the
-  retained allocations; reference parameters remain borrowed aliases.
-- REPL expression-lambda result checks cover returned callables, nested
-  snapshots and reference captures, native callbacks, explicit function
-  conversions, scalar tags, and effect-only results.
+  units.
+- `commands/repl/tests/run.sh` runs the REPL checks. `native-check.x` keeps
+  globals, functions, records, and pointers live across native submissions,
+  separates tag and object namespaces, completes fields and methods, and
+  keeps a Func's reference capture across submissions. Rejected and failed
+  submissions publish no names, and session close runs top-level cleanups
+  in reverse order.
+- `playground.py` creates, calls, and inspects C libraries from source,
+  headers, and archives through the public command, including `:reset`,
+  `:reload`, file-local statics, callbacks with userdata, and an optional
+  host SQLite session. `terminal.py` covers candidate failure and
+  cancellation, crash recovery as a transcript reset, cache pruning, exit
+  hooks, saved-instruction replay, and terminal history. Both assert an
+  empty per-run `TMPDIR`.
+- `program.sh` resolves program addresses from sources, archives, shared
+  libraries, manifest targets, and packages. It checks that `:reload` keeps
+  one copy of each manifest root and that conflicting `main` roots and
+  duplicate definitions fail.
 - Linked extension probes build with parallel translation, so registration
   units collect package-prefixed declarations without a preceding unit cache.
 - Lisp cases cover special-form rebinding after earlier effects or call

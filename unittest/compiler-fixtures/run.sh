@@ -223,7 +223,7 @@ run_fixture() {
 
   if has_phase tokens; then
     token_flags=(--no-cpp)
-    for flag in "${extra_flags[@]}"; do
+    for flag in ${extra_flags[@]+"${extra_flags[@]}"}; do
       if [[ "$flag" == --cpp ]]; then token_flags=(); fi
     done
     raw="$case_build/tokens.raw"

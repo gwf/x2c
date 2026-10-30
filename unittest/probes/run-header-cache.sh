@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Regression probes for the raw symbol collection cache (src/collect.x):
+# Regression probes for the raw symbol collection cache (src/collect/):
 # warm replay -- in-process or through a unit's .xi interface -- must be
 # byte-identical to a cold walk, stale interfaces must be rejected, and
 # unreadable includes must fail loudly.  Each case pins a bug found and

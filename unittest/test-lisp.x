@@ -3,6 +3,7 @@
 #include "test-support.x"
 #include "test-macros.x"
 #include "datum.x"
+#include "path.x"
 
 // reader - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1326,20 +1327,20 @@ static void lisp_direct_function_binds_in_successive_sessions(void) {
 }
 
 static void lisp_eval_file_runs_forms(void) {
-  Lisp lisp = Lisp.kernel();
-  FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
-  if (!EXPECT_NOT_NULL(raw)) return;
-  fputs("(def z 7)\n// comment\nz\n", raw);
-  fclose(raw);
-  File source = File.open("/tmp/x2c-lisp-test.xlisp", "r");
-  EXPECT_INT_EQ(Var.integer(lisp.eval_file(source)), 7);
-  source.close();
-  raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
-  fclose(raw);
-  source = File.open("/tmp/x2c-lisp-test.xlisp", "r");
-  EXPECT_TRUE(lisp.eval_file(source).is_nil());
-  source.close();
-  lisp.destroy();
+  Path dir = Path.temp_dir(), forms = dir.join("forms.xlisp");
+  try {
+    Lisp lisp = Lisp.kernel();
+    forms.write_text("(def z 7)\n// comment\nz\n");
+    File source = File.open(forms, "r");
+    EXPECT_INT_EQ(Var.integer(lisp.eval_file(source)), 7);
+    source.close();
+    forms.write_text("");
+    source = File.open(forms, "r");
+    EXPECT_TRUE(lisp.eval_file(source).is_nil());
+    source.close();
+    lisp.destroy();
+  }
+  finally dir.remove_tree();
 }
 
 
@@ -1695,25 +1696,26 @@ static void lisp_bootstrap_predicates_are_exact(void) {
 }
 
 static void lisp_standard_environment_includes_io(void) {
-  for (int embedded = 0; embedded < 2; embedded++) {
-    Lisp lisp = embedded ? Lisp.new() : _boot_session();
-    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(fib 8)")), 21);
-    EXPECT_VAR_EQ(_ev(lisp, "(sort '(3 1 2))"), _ev(lisp, "'(1 2 3)"));
-    EXPECT_VAR_EQ(_ev(lisp, "(subst 'x 'a '(a (b a)))"),
-                  _ev(lisp, "'(x (b x))"));
-    EXPECT_FALSE(_ev(lisp,
-      "(write-file \"/tmp/x2c-lisp-io.txt\" \"minimal sdk\")").is_nil());
-    EXPECT_STR_EQ(Var.string(_ev(lisp,
-                  "(read-file \"/tmp/x2c-lisp-io.txt\")")),
-                  "minimal sdk");
-    EXPECT_FALSE(_ev(lisp,
-      "(write-file \"/tmp/x2c-lisp-io.txt\" \"\")").is_nil());
-    Var empty = _ev(lisp, "(read-file \"/tmp/x2c-lisp-io.txt\")");
-    EXPECT_TRUE(empty is <string>);
-    EXPECT_NULL(empty.string());
-    remove("/tmp/x2c-lisp-io.txt");
-    lisp.destroy();
+  Path dir = Path.temp_dir(), io = dir.join("io.txt");
+  try {
+    for (int embedded = 0; embedded < 2; embedded++) {
+      Lisp lisp = embedded ? Lisp.new() : _boot_session();
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(fib 8)")), 21);
+      EXPECT_VAR_EQ(_ev(lisp, "(sort '(3 1 2))"), _ev(lisp, "'(1 2 3)"));
+      EXPECT_VAR_EQ(_ev(lisp, "(subst 'x 'a '(a (b a)))"),
+                    _ev(lisp, "'(x (b x))"));
+      EXPECT_FALSE(
+        _ev(lisp, %"(write-file \"$io\" \"minimal sdk\")").is_nil());
+      EXPECT_STR_EQ(Var.string(_ev(lisp, %"(read-file \"$io\")")),
+                    "minimal sdk");
+      EXPECT_FALSE(_ev(lisp, %"(write-file \"$io\" \"\")").is_nil());
+      Var empty = _ev(lisp, %"(read-file \"$io\")");
+      EXPECT_TRUE(empty is <string>);
+      EXPECT_NULL(empty.string());
+      lisp.destroy();
+    }
   }
+  finally dir.remove_tree();
 }
 
 static void lisp_standard_environment_uses_library_operations(void) {
@@ -1874,18 +1876,18 @@ static void lisp_iterator_storage_leaves_with_the_session(void) {
 }
 
 static void lisp_bootstrap_import_uses_current_session(void) {
-  FILE *raw = fopen("/tmp/x2c-lisp-import.xlisp", "w");
-  if (!EXPECT_NOT_NULL(raw)) return;
-  fputs("(def imported 73)\nimported\n", raw);
-  fclose(raw);
-  Lisp lisp = _boot_session();
-  EXPECT_INT_EQ(Var.integer(_ev(lisp,
-                "(import \"/tmp/x2c-lisp-import.xlisp\")")), 73);
-  EXPECT_INT_EQ(Var.integer(_ev(lisp, "imported")), 73);
-  EXPECT_INT_EQ(
-    _raised_code(lisp, "(import \"/tmp/missing-x2c-lisp\")"),
-    <not-found>);
-  lisp.destroy();
+  Path dir = Path.temp_dir(), script = dir.join("import.xlisp");
+  Path missing = dir.join("missing.xlisp");
+  try {
+    script.write_text("(def imported 73)\nimported\n");
+    Lisp lisp = _boot_session();
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, %"(import \"$script\")")), 73);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "imported")), 73);
+    EXPECT_INT_EQ(_raised_code(lisp, %"(import \"$missing\")"),
+                  <not-found>);
+    lisp.destroy();
+  }
+  finally dir.remove_tree();
 }
 
 static void lisp_sessions_release_scopes(void) {

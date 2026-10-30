@@ -11,7 +11,7 @@
     `meta-sdk.c` defines `ms_total` and `ms_label`, which this unit reaches at
     run time, and mentions none of `ms_fields`, `ms_field_reads`, `ms_reads`,
     `ms_total_call`, `ms_names`, `ms_count` or `ms_spelling`.
-    See `plans/meta-functions.md`.
+    See `plans/archive/meta-functions.md`.
 */
 
 #include "x2c.x"
