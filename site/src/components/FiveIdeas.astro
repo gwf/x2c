@@ -30,7 +30,7 @@ const items = await Promise.all(
       <li>
         <h3 set:html={idea.name} />
         <p set:html={idea.detail} />
-        <p class="idea-follows">So you get <Fragment set:html={idea.follows} /></p>
+        <p class="idea-follows" set:html={idea.follows} />
       </li>
     ))}
   </ol>

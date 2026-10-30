@@ -5,16 +5,16 @@ ideasIntro: "It's C. Plus four ideas."
 ideas:
   - name: Still C, with less of it
     detail: "Every feature is sugar that lowers to C you can predict. Most programs never touch a pointer."
-    follows: "methods on any type, `class`, protocols, and C you can read."
+    follows: "Methods on any type, `class`, and protocols are all sugar, and `x2c translate` shows the C."
   - name: One data model, two speeds
     detail: "`Var` is an eight-byte word that holds any value and its type. A `String` is still a C string, so every value is dynamic and native at once."
-    follows: "collections that hold anything, `is`, and a `printf` that prints any of them."
+    follows: "Collections hold anything, `is` tests the tag, and `printf` prints whatever it is handed."
   - name: Lifetime by scope
     detail: "`String`, `List`, and `Symbol` are shared and immutable, so equal content is one object. Everything else is allocated in a scope and freed when the scope ends. No collector, no `free`."
-    follows: "constant-time `==`, free sharing across threads, `auto`, and `defer`."
+    follows: "Equality is constant time, sharing across threads is free, and `auto` and `defer` do the rest."
   - name: Its own metalanguage
     detail: "The compiler is user space. A code literal `%(...)` is a `List`, and `meta` runs any function at compile time."
-    follows: "try, match, lambdas, `keyword`s, and a compiler that compiles itself."
+    follows: "try, match, lambdas, and `keyword` were written this way. So was the compiler."
 ---
 
 x2c is a quirky little language that makes programming fun and a bit weird.
