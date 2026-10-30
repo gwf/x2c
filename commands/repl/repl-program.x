@@ -109,6 +109,13 @@ static int _program_private(Compiler c, String name, Type type) =>
   type.is_static() || $(name) in c.sym.file_statics() ||
   %(function $name) in c.sym.file_statics();
 
+static int _program_visible(Compiler c, String path, String name, Type type) =>
+  !_program_private(c, name, type) || path.endswith(".c") ||
+  (path.endswith(".h") && type.is_inline());
+
+static int _program_static_export(List row) =>
+  row.len() >= 3 && row[2] == <private>;
+
 static void _program_family(Map all, Map selected, Type type) {
   List parameters = NULL;
   Type result = NULL;
@@ -156,8 +163,7 @@ static String _program_documentation(Compiler c, int line) {
 static void _program_symbol(
   ProgramBuild &b, Compiler c, String path, String name, Type type,
   List syntax, String declaration, String body, int line) {
-  if (!name || (_program_private(c, name, type) &&
-                !(path.endswith(".h") && type.is_inline()))) return;
+  int file_static = path.endswith(".c") && _program_private(c, name, type);
   int inline_body = type.is_inline();
   type = type.declared();
   ReplProgram program = b.program;
@@ -178,9 +184,10 @@ static void _program_symbol(
   if (kind != <type> && !(name in b.units)) {
     b.units[name] = 1;
     String native = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-    b.exports.push(path.endswith(".h") && !inline_body
-      ? $(name, native ? native : name, <dynamic>)
-      : $(name, native ? native : name));
+    b.exports.push(file_static ? $(name, native ? native : name, <private>)
+      : path.endswith(".h") && !inline_body
+        ? $(name, native ? native : name, <dynamic>)
+        : $(name, native ? native : name));
   }
 }
 
@@ -197,8 +204,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       functions[Ast.binding_spelling(binding)] = node;
   foreach (List row, c.definition_rows(unit.ast))
     match (row) case %(function ?name ?display ?type ?parameters ?line ?doc
-                                 ?private ?origin ?declarator ?span): {
-      if (private && !(path.endswith(".h") && ((Type) type).is_inline())) continue;
+                                 ? ?origin ?declarator ?span): {
+      if (!_program_visible(c, path, name, type)) continue;
       int source_line = 1;
       if (_program_origin(c, span, source_line) != path) continue;
       List function = functions[name];
@@ -231,8 +238,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
         String name = Ast.binding_spelling(binding);
         if (!name || name in definitions) continue;
         Type type = c.sym.get_exact($(name));
-        if (!type || (_program_private(c, name, type) &&
-                      !(path.endswith(".h") && type.is_inline()))) continue;
+        if (!type || !_program_visible(c, path, name, type)) continue;
         List span = _program_span(c, node);
         int line = 1;
         (void) _program_origin(c, span, line);
@@ -352,9 +358,9 @@ static String _program_c_header(Compiler c, List ast) {
               continue;
             }
             Type type = c.sym.get_exact($(name));
-            if (!type || _program_private(c, name, type)) continue;
-            if (!type.is_function() && !type.is_extern()) text.write("extern ");
-            text.write(_program_declaration(c, type, name));
+            if (!type) continue;
+            if (!type.is_function()) text.write("extern ");
+            text.write(_program_declaration(c, type.declared(), name));
             text.write("\n");
           }
         }
@@ -362,8 +368,8 @@ static String _program_c_header(Compiler c, List ast) {
       case %(function ?spec (bind ?binding ?) ?): {
         String name = Ast.binding_spelling(binding);
         Type type = c.sym.get_exact($(name));
-        if (!type || _program_private(c, name, type)) continue;
-        text.write(_program_text(c, %(declare $spec (bindings $(node.caddr())))));
+        if (!type) continue;
+        text.write(_program_declaration(c, type.declared(), name));
         text.write("\n");
       }
     }
@@ -423,8 +429,26 @@ static void _program_packages(ProgramBuild &b, ParsedUnit &unit) {
   b.frontend.toolchain.ld_args = program.ld_args;
 }
 
-static String _program_unit(ProgramBuild &b, String path) {
-  if (path in b.seen) return NULL;
+/* Getters share the original translation unit, so C retains one instance of
+   each static function, object, and function-local static. */
+static String _program_c_input(
+  String path, Array exports, String directory, int unit) {
+  Array code = [%"#include $(path.repr())\n"];
+  for (int i = 0; i < exports.len(); i++) {
+    List row = exports[i];
+    if (!_program_static_export(row)) continue;
+    String getter = %"x2c_repl_unit_$(unit)_address_$i";
+    code.push(%"void *$getter(void) { return (void *) &$(row.cadr()); }\n");
+    exports[i] = $(row.car(), getter, <private>);
+  }
+  if (code.len() == 1) return path;
+  String source = %"$directory/unit-$unit.c";
+  Path.write_text(source, "".join(code));
+  return source;
+}
+
+static String _program_unit(ProgramBuild &b, String path, String &input) {
+  input = path;
   b.seen[path] = 1;
   ReplProgram program = b.program;
   Frontend frontend = b.frontend;
@@ -495,10 +519,20 @@ static String _program_unit(ProgramBuild &b, String path) {
     collected.symbols.merge(c.callable_symbols(names));
     _program_packages(b, unit);
   }
+  foreach (List row, local.exports) {
+    String name = row.car();
+    List prior = b.units[name];
+    if (prior && (_program_static_export(row) ||
+                  _program_static_export(prior.cadr())))
+      return %"ambiguous file-local name $name: $(prior.car()) and $path";
+  }
+  if (path.endswith(".c"))
+    input = unit.context.export(_program_c_input(
+      path, local.exports, program.directory, b.headers.len()));
   program.symbols.merge(unit.context.export(collected.symbols));
   foreach (List row, (Array) unit.context.export(local.exports))
     if (!(row.car() in b.units)) {
-      b.units[row.car()] = 1;
+      b.units[row.car()] = unit.context.export($(path, row));
       b.exports.push(row);
     }
   String header = %"$(program.directory)/unit-$(b.headers.len()).h";
@@ -673,7 +707,9 @@ static String _program_exports(ProgramBuild &b) {
     (void) directory;
   }
   foreach (List row, b.exports)
-    if (row.len() >= 3 && row[2] == <dynamic>) {
+    if (_program_static_export(row))
+      code.push(%"extern void *$(row.cadr())(void);\n");
+    else if (row.len() >= 3 && row[2] == <dynamic>) {
       String name = row.cadr();
 #ifdef __APPLE__
       String attribute = "weak_import";
@@ -686,7 +722,9 @@ static String _program_exports(ProgramBuild &b) {
   code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
   foreach (List row, b.exports) {
     String name = row.cadr();
-    code.push(%"    case $index: return (void *) &$name;\n");
+    String address = _program_static_export(row)
+      ? %"$name()" : %"(void *) &$name";
+    code.push(%"    case $index: return $address;\n");
     index++;
   }
   code.push("  }\n  return 0;\n}\n");
@@ -889,10 +927,11 @@ ReplProgram repl_program_build_selected(
     else build.roots.push(path);
   }
   for (int i = 0; i < build.roots.len(); i++) {
-    String path = build.roots[i];
-    failure = _program_unit(build, path);
+    String path = build.roots[i], input = NULL;
+    if (path in build.seen) continue;
+    failure = _program_unit(build, path, input);
     if (failure) return NULL;
-    if (!path.endswith(".h") && !(path in source)) source.push(path);
+    if (!path.endswith(".h") && !(input in source)) source.push(input);
   }
   failure = _program_main(build);
   if (failure) return NULL;

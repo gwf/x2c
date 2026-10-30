@@ -116,8 +116,129 @@ def workflow(arguments, directory, implementation):
         repl.close()
 
 
+def source_statics(directory):
+    header = directory / "private-header.h"
+    header.write_text("""static int included_counter = 71;
+static inline int included_read(void) { return included_counter; }
+""")
+    source = directory / "private.c"
+    original = """#include "private-header.h"
+struct Counter { int value; };
+static struct Counter counter = {3};
+static int samples[3] = {2, 4, 6};
+static const int fixed = 9;
+static volatile int watched = 7;
+static int bump(int amount) {
+  static int calls;
+  counter.value += amount;
+  return ++calls;
+}
+static inline int total(void) { return counter.value + samples[1]; }
+int public_read(void) {
+  return counter.value + samples[1] + fixed + watched + included_read();
+}
+int public_bump(int amount) { return bump(amount); }
+"""
+    source.write_text(original)
+    other = directory / "other.c"
+    other.write_text("static struct Other { double value; } counter = {99};\n")
+    repl = Playground([source, source], directory)
+    expected_status = 0
+    try:
+        repl.check(":symbols bump", "bump", str(source))
+        repl.check(":source bump", "static int bump", "static int calls;")
+        repl.check(":source counter", "counter = {3}")
+        repl.check(":inspect counter", "value: 3")
+        repl.check(":inspect samples", "[ 2, 4, 6 ]")
+        repl.value("public_read()", 94)
+        repl.value("bump(5)", 1)
+        repl.value("public_bump(2)", 2)
+        repl.check(":inspect counter", "value: 10")
+        repl.check("counter.value=20; samples[1]=10;", "ok")
+        repl.value("public_read()", 117)
+        repl.value("total()", 30)
+        repl.check(":info fixed", "const int")
+        repl.check(":info watched", "volatile int")
+        require("included_read" not in repl.check(":symbols included_read"),
+                repl.output.decode())
+        require("included_counter" not in repl.check(":symbols included_counter"),
+                repl.output.decode())
+        output, errors = repl.command(f':load "{other}"')
+        expected_status = 1
+        require("ambiguous file-local name counter" in errors
+                and str(source.resolve()) in errors
+                and str(other.resolve()) in errors,
+                (output, errors))
+        repl.value("counter.value", 20)
+        repl.value("bump(1)", 3)
+        source.write_text(original.replace("counter = {3}", "counter = {40}"))
+        repl.check(":source counter", "counter = {3}")
+        repl.check(":reload", "started fresh session")
+        repl.check(":source counter", "counter = {40}")
+        repl.value("counter.value", 40)
+        repl.value("bump(1)", 1)
+    finally:
+        repl.close(expected_status)
+
+    private = directory / "private-function.c"
+    private.write_text("static int hidden(int x) { return x+100; }\n"
+                       "int call_private(void) { return hidden(2); }\n")
+    api = directory / "external-api.h"
+    api.write_text("int hidden(int x);\n")
+    client = directory / "external-client.c"
+    client.write_text('#include "external-api.h"\n'
+                      'int call_external(void) { return hidden(2); }\n')
+    external = directory / "external.c"
+    external.write_text("int hidden(int x) { return x+200; }\n")
+    native = directory / "external.o"
+    subprocess.run(["cc", "-fPIC", "-c", str(external), "-o", str(native)],
+                   check=True)
+    for first, second in ((private, client), (client, private)):
+        failed = subprocess.run([str(BINARY), str(first), str(second), str(native)],
+                                input="", text=True, capture_output=True,
+                                cwd=ROOT, timeout=TIMEOUT)
+        require(failed.returncode != 0
+                and "ambiguous file-local name hidden" in failed.stderr
+                and str(first.resolve()) in failed.stderr
+                and str(second.resolve()) in failed.stderr,
+                (failed.stdout, failed.stderr))
+    print("C source statics, shared identity, header privacy and reload passed",
+          flush=True)
+
+
+def nbody(directory):
+    source = ROOT / "examples/shootout/benchmarks/nbody/main.c"
+    original = source.read_bytes()
+    native = directory / "nbody"
+    subprocess.run(["cc", str(source), "-lm", "-o", str(native)], check=True)
+    expected = subprocess.check_output([str(native), "1"], text=True).splitlines()
+    repl = Playground([source], directory)
+    try:
+        repl.check(":symbols --kind function", "advance", "energy",
+                   "offset_momentum")
+        repl.check(":source offset_momentum", "static void offset_momentum",
+                   "system[0].vx = -px / SOLAR_MASS;")
+        repl.check(":members Body", "double mass", "advance", "energy")
+        repl.check(":inspect bodies[0]", "x: 0", "vx: 0")
+        repl.check("offset_momentum(BODY_COUNT,bodies);", "ok")
+        repl.value("bodies[0].vx != 0", 1)
+        repl.check('printf("%.9f\\n",energy(BODY_COUNT,bodies));', expected[0])
+        repl.check("double before=bodies[1].x;", "ok")
+        repl.check("advance(BODY_COUNT,bodies,0.01);", "ok")
+        repl.value("bodies[1].x != before", 1)
+        repl.check(":inspect bodies[1]", "x:", "vy:", "mass:")
+        repl.check('printf("%.9f\\n",energy(BODY_COUNT,bodies));', expected[1])
+    finally:
+        repl.close()
+    require(source.read_bytes() == original, "N-body C source changed")
+    print("unchanged C N-body discovery, source, calls and inspection passed",
+          flush=True)
+
+
 with tempfile.TemporaryDirectory(prefix="x2c-repl-playground-") as temporary:
     directory = Path(temporary)
+    source_statics(directory)
+    nbody(directory)
     fixture = ROOT / "commands/repl/tests/library"
     source, header = directory / "playground.c", directory / "playground.h"
     shutil.copyfile(fixture / source.name, source)
