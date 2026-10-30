@@ -391,7 +391,8 @@ static void _plain_directive(ArmScan * s, Token token, size_t i){
 }
 
 static int _plain_open_state(String text){
-  String line = String_replace(_plain_directive_line(Compiler_preproc_directive(text)), _17, _18);
+  String line = _plain_directive_line(Compiler_preproc_directive(text));
+  line = String_replace(line, _17, _18);
   if(String_equal(line, _19) || String_equal(line, _20) || String_equal(line, _21) || String_equal(line, _22) ||(String_startswith(line, _23) && !(String_contains(line, _24)))) return 2;
   return String_equal(line, _25) || String_equal(line, _26);
 }
@@ -469,7 +470,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     if(token -> type != 19147688) continue;
     int level = 0;
     if(String_equal(token -> text, _34)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 355}; & _x2c_gensym_error_site_0; })));
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 354}; & _x2c_gensym_error_site_0; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order_lane(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
