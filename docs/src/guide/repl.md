@@ -63,6 +63,37 @@ with `x` equal to `6` and `y` equal to `2`. A function can also return a
 struct by value, accept the address of a prompt variable, fill an
 out-parameter, or call a named prompt function through a C function pointer.
 
+Loading a C source file also exposes its file-scope `static` functions and
+objects. Their native linkage and storage stay unchanged. Calls from the
+prompt and from the program use the same objects, including function-local
+static storage. Static declarations from dependency headers stay private.
+Header-only and binary-library loads keep their ordinary public surface.
+If a file-static name conflicts with a name from another loaded source file,
+the load fails with both paths and preserves the active session. Load those
+files in separate sessions when their private names overlap.
+
+For a complete program, load the unchanged C N-body benchmark from this
+repository:
+
+```text
+:load "examples/shootout/benchmarks/nbody/main.c"
+:symbols --kind function
+:source offset_momentum
+:members Body
+:inspect bodies[0]
+offset_momentum(BODY_COUNT, bodies);
+:inspect bodies[0]
+energy(BODY_COUNT, bodies);
+:inspect bodies[1]
+advance(BODY_COUNT, bodies, 0.01);
+:inspect bodies[1]
+energy(BODY_COUNT, bodies);
+```
+
+The static `bodies` array persists across calls. `offset_momentum` sets the
+Sun's velocity, and `advance` changes the bodies' positions and velocities.
+Source inspection shows the original static function definitions.
+
 A C library often exposes an opaque handle. Inspect the pointer's declared
 type and use `:members` to find related operations. Use the library's query
 functions to examine its state; an incomplete type does not reveal private
