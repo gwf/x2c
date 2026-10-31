@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Optional: native stack geometry/guards and production unsupported fallback.
+# Optional: native stack geometry/guards, ASan UAR, and unsupported fallback.
 # Use an existing supported native build. CC may select another installed target.
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
@@ -9,6 +9,11 @@ ulimit -c 0
 "${CC:-cc}" -g -Wall -Wextra -Werror \
   "$ROOT/unittest/probes/task-stack-layout.c" -o "$BUILD/layout"
 "$BUILD/layout"
+"${CC:-cc}" -g -O1 -Wall -Wextra -Werror -fsigned-char \
+  -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all \
+  "$ROOT/unittest/probes/task-stack-uar.c" -o "$BUILD/uar"
+ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1 \
+  UBSAN_OPTIONS=halt_on_error=1 "$BUILD/uar"
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/probes/task-unsupported.x"
 # Select the existing unsupported branch only in the backend translation unit.

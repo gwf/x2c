@@ -1825,8 +1825,13 @@ mco_result mco_yield(mco_coro* co) {
   /* Asyncify already checks for stack overflow. */
 #else
   /* This check happens when the stack overflow already happened, but better later than never. */
+#if defined(__GNUC__) || defined(__clang__)
+  /* ASan can relocate locals; frame zero stays on the physical stack. */
+  size_t stack_addr = (size_t)__builtin_frame_address(0);
+#else
   volatile size_t dummy;
   size_t stack_addr = (size_t)&dummy;
+#endif
   size_t stack_min = (size_t)co->stack_base;
   size_t stack_max = stack_min + co->stack_size;
   if(co->magic_number != MCO_MAGIC_NUMBER || stack_addr < stack_min || stack_addr > stack_max) { /* Stack overflow. */

@@ -94,7 +94,7 @@ checks, not performance measurements.
 | Full normal unit suite | 1,155 pass, 99,567 assertions | 1,152 pass, 3 fail; 99,567 assertions |
 | Full ASan/UBSan unit suite | 1,155 pass, 99,567 assertions | 1,153 pass, 2 fail; 99,567 assertions |
 | Task suite under ordinary ASan/UBSan | 18 tests, 129 assertions pass | 18 tests, 129 assertions pass |
-| Task suite with GCC ASan use-after-return enabled | Aborts: false overflow | Aborts: false overflow |
+| Task suite with GCC ASan use-after-return enabled, before the focused fix | Aborts: false overflow | Aborts: false overflow |
 | Strict stage-two build and generated-stage comparisons | Pass; stages 0/1 and 1/2 match, 333 C/H files each | Pass; stages 0/1 and 1/2 match, 333 C/H files each |
 
 Linux has three fewer assertions than macOS because the malloc-zone checks
@@ -135,8 +135,10 @@ with the Linux evidence. No authoritative runtime source was instrumented or cha
 
 This is a confirmed false overflow check, not evidence that an 8 MiB stack was
 exhausted. A focused follow-up should make the check inspect the physical
-stack rather than an address ASan can relocate. No fix or waiver is selected
-by this validation task.
+stack rather than an address ASan can relocate. The subsequent authorized
+[focused repair](async-uar-fix-2026-10-31.md) implements that correction and
+passes use-after-return Task suites on all four targets. The table above
+preserves the initial validation results.
 
 ### Linux x86_64 numeric failures
 
@@ -163,6 +165,7 @@ were changed to make this target green.
 
 Rosetta and Docker emulation provide ABI and execution evidence, without
 establishing behavior on physical Intel hardware or performance equivalence.
-The GCC use-after-return finding and Linux x86_64 numeric failures remain open.
+The GCC use-after-return finding is resolved by the focused repair linked
+above. Linux x86_64 numeric failures remain open.
 This follow-up contains no benchmark measurements. Normal benchmark reruns,
 dev/main advancement, and all pushes remain on hold.

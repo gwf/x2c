@@ -25,3 +25,9 @@ ASan adaptation: MCO_EXTERNAL_ASAN lets stack.c pair start/finish fiber
 annotations on opposite sides of each actual stack switch, including native
 caller restoration and final task exit. Upstream's annotations left ASan
 using task-stack bounds on native Error transfers in the instrumented tests.
+
+The yield-time overflow check uses GCC/Clang's physical frame address rather
+than a local variable's address. GCC ASan use-after-return can move that local
+to its fake stack, outside the coroutine mapping. Bounds and metadata checks
+remain active. `unittest/probes/run-task-backend.sh` includes the focused
+sanitizer regression alongside the native layout and fallback probes.

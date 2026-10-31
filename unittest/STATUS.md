@@ -1,16 +1,20 @@
 # Status
 
-## GCC async use-after-return finding on 2026-10-31
+## Resolved GCC async use-after-return finding on 2026-10-31
 
-The optional Task-suite run with
-`ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1` aborts on Linux
-arm64 and x86_64 with GCC 12.2. Minicoro's yield-time overflow check uses the
-address of an automatic local. GCC's ASan fake stack moves that local outside
-the coroutine mapping, so the check reports overflow. An isolated 8 MiB native
-probe confirms that the physical frame remains within bounds and the metadata
-magic is intact. The same probe passes with use-after-return disabled.
-Ordinary ASan/UBSan and normal Linux arm64 suites pass. This production finding
-is recorded for a focused follow-up; no runtime check was changed here.
+Before the fix, the optional Task-suite run with
+`ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1` aborted on Linux
+arm64 and x86_64 with GCC 12.2. Minicoro's yield-time overflow check used the
+address of an automatic local. GCC's ASan fake stack moved that local outside
+the coroutine mapping, so the check reported overflow. An isolated 8 MiB native
+probe confirmed that the physical frame remained within bounds and the metadata
+magic was intact. The same probe passed with use-after-return disabled.
+
+The focused follow-up uses GCC/Clang's physical frame address in the existing
+bounds check. Metadata and bounds rejection remain active. The new optional
+`task-stack-uar.c` regression fails before the fix and passes on all four
+native targets after it. See
+[the repair evidence](../plans/reference/async-uar-fix-2026-10-31.md).
 
 Linux validation also exposed two sanitizer-harness defects. The harness now
 passes the runtime's required `-fsigned-char` flag and links compiler objects
@@ -39,7 +43,8 @@ unmapping, and the production unsupported-backend diagnostic without a new
 runtime API or recurring gate. Focused normal and ordinary sanitizer Task
 checks pass on all four selected native targets. Both macOS targets and Linux
 arm64 pass full normal and ordinary sanitizer suites. Linux x86_64 numeric
-failures and GCC use-after-return failures remain open as recorded above. See
+failures remain open. The GCC use-after-return false overflow is resolved by
+the focused repair recorded above. See
 [the native target report](../plans/reference/async-native-targets-2026-10-31.md).
 
 ## Private async review on 2026-10-31
