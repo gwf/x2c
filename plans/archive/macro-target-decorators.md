@@ -1,8 +1,7 @@
-> Status: active
-> Implementation authorized, 2026-10-31.
+> Status: done
+> Implemented and validated, 2026-10-31, in `f701f2703` and `c84a2828`.
 > Gary selected result-kind preservation and decorator continuation.
-> The keyword is `expand`; implementation and focused validation are complete.
-> Final integrated publication is in progress.
+> The keyword is `expand`; the final integrated publication gate passed.
 
 # Macro-target decorators and mapping code
 
@@ -31,7 +30,7 @@ The anonymous macro introduces no callable name. Its braces delimit its
 template; they do not introduce a block around the generated statements.
 
 Use the existing `keyword NAME $macro;` mechanism for the selected spelling.
-Keep the direct `$NAME(...)` spelling available. Do not reserve a new token.
+Keep the direct `$NAME(...)` spelling available. Keep the spelling contextual.
 Give `expand` a contextual lexical spelling, retagged to `ident` before parsing,
 so an adjacent percent literal enters quoted-data mode. This is the same lexical
 exception as `raise`. The visible alias retains ordinary keyword-alias
