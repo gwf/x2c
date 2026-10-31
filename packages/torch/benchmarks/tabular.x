@@ -483,27 +483,27 @@ static void _memory_churn(String artifacts, Map data, int steps,
     {
       if (pooled) Pool.open();
       defer { if (pooled) Pool.close(); }
-      Scope.retain();
-      defer Scope.release();
-      Torch.inference_mode();
-      foreach (List pair, hoisted ? named : model.named_parameters()) {
-        Tensor parameter = pair[1].tensor();
-        named_elements += parameter.numel();
-        name_bytes += pair[0].str().len();
-      }
-      int count = shapes[(step < 0 ? step + WARMUP : step) % 4];
-      Tensor output = input.narrow(0, 0, count);
-      if (hoisted) {
-        for (int i = 0; i < 3; i++) {
-          output = output.matmul(weights[i].t()) + biases[i];
-          if (i < 2) output = output.relu();
+      auto {
+        Torch.inference_mode();
+        foreach (List pair, hoisted ? named : model.named_parameters()) {
+          Tensor parameter = pair[1].tensor();
+          named_elements += parameter.numel();
+          name_bytes += pair[0].str().len();
         }
+        int count = shapes[(step < 0 ? step + WARMUP : step) % 4];
+        Tensor output = input.narrow(0, 0, count);
+        if (hoisted) {
+          for (int i = 0; i < 3; i++) {
+            output = output.matmul(weights[i].t()) + biases[i];
+            if (i < 2) output = output.relu();
+          }
+        }
+        else output = _forward_explicit(layers, output);
+        List ranked = output.topk(2, 1, 1, 1);
+        Tensor values = ranked[0].tensor(), indices = ranked[1].tensor();
+        values_sum += values.sum().item().double();
+        indices_sum += indices.sum().item().integer();
       }
-      else output = _forward_explicit(layers, output);
-      List ranked = output.topk(2, 1, 1, 1);
-      Tensor values = ranked[0].tensor(), indices = ranked[1].tensor();
-      values_sum += values.sum().item().double();
-      indices_sum += indices.sum().item().integer();
     }
     if (step >= 0 && (step + 1) % every == 0)
       Bench.sample("request", step + 1);

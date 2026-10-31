@@ -19,29 +19,29 @@ class Frequencies MapStringInt;
 */
 Frequencies Path.frequencies(Path root) {
   Frequencies result = Frequencies.new();
-  Scope.retain();
-  Pool work = Pool.open();
   int complete = 0;
-  defer {
-    if (Pool.current() == work) Pool.detach();
-    work.release();
-    Scope.release();
-    if (!complete) result.cleanup();
-  }
+  defer { if (!complete) result.cleanup(); }
+  auto {
+    Pool work = Pool.open();
+    defer {
+      if (Pool.current() == work) Pool.detach();
+      work.release();
+    }
 
-  if (root.is_dir()) {
-    List files = root.walk().filter(Path.is_file);
-    Pool.detach();
-    files.iter().parallel_map_in(work, count_words, 4).foldl(result, accumulate);
+    if (root.is_dir()) {
+      List files = root.walk().filter(Path.is_file);
+      Pool.detach();
+      files.iter().parallel_map_in(work, count_words, 4).foldl(result, accumulate);
+    }
+    else if (root.is_file()) {
+      MapSubInt counts = count_words(root);
+      Pool.detach();
+      accumulate(result, counts);
+    }
+    else
+      raise %(bad-arg (operation "Path.frequencies") (path $root));
+    complete = 1;
   }
-  else if (root.is_file()) {
-    MapSubInt counts = count_words(root);
-    Pool.detach();
-    accumulate(result, counts);
-  }
-  else
-    raise %(bad-arg (operation "Path.frequencies") (path $root));
-  complete = 1;
   return result;
 }
 

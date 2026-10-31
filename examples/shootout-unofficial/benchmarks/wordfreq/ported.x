@@ -45,24 +45,24 @@ static int _next_int(int maximum) {
 }
 
 static uint64_t _count_words(const char *text, int word_count) {
-  Scope.retain();
-  size_t size = 1;
-  while (size < (size_t) word_count * 2) size *= 2;
-  WordCount *table = xcalloc(size, sizeof(WordCount));
-
-  const char *start = text;
-  for (const char *cursor = text;; cursor++) {
-    if (*cursor && !isspace((unsigned char) *cursor)) continue;
-    if (cursor != start)
-      _add_word(table, size - 1, start, (size_t) (cursor - start));
-    if (!*cursor) break;
-    start = cursor + 1;
-  }
-
   uint64_t checksum = 0;
-  for (size_t i = 0; i < size; i++)
-    if (table[i].word) checksum += 1 + table[i].len * (size_t) table[i].count;
-  Scope.release();
+  auto {
+    size_t size = 1;
+    while (size < (size_t) word_count * 2) size *= 2;
+    WordCount *table = xcalloc(size, sizeof(WordCount));
+
+    const char *start = text;
+    for (const char *cursor = text;; cursor++) {
+      if (*cursor && !isspace((unsigned char) *cursor)) continue;
+      if (cursor != start)
+        _add_word(table, size - 1, start, (size_t) (cursor - start));
+      if (!*cursor) break;
+      start = cursor + 1;
+    }
+
+    for (size_t i = 0; i < size; i++)
+      if (table[i].word) checksum += 1 + table[i].len * (size_t) table[i].count;
+  }
   return checksum;
 }
 

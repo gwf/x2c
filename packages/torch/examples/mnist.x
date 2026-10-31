@@ -29,9 +29,7 @@ static double _accuracy(Module model, Tensor images, Tensor targets) {
     Torch.no_grad();
     model.eval();
     long total = images.size(0), correct = 0;
-    for (long start = 0; start < total; start += 1000) {
-      Scope.retain();
-      defer Scope.release();
+    for (long start = 0; start < total; start += 1000) auto {
       long span = total - start < 1000 ? total - start : 1000;
       Tensor batch = images.narrow(0, start, span);
       Tensor predicted = model.forward(batch).argmax(1, 0);
@@ -100,9 +98,7 @@ int main(int argc, char **argv) {
     for (int epoch = 0; epoch < epochs; epoch++) {
       printf("epoch %d of %d\n", epoch + 1, epochs);
       Tensor order = Torch.randperm(rows).to_device(device, XT_INT64, 0, 0);
-      for (long batch = 0; batch < batches; batch++) {
-        Scope.retain();
-        defer Scope.release();
+      for (long batch = 0; batch < batches; batch++) auto {
         Tensor pick = order.narrow(0, batch * BATCH, BATCH);
         adam.zero_grad();
         Tensor loss = Tensor.cross_entropy(

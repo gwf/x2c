@@ -2,10 +2,7 @@
 
 import "blis" with Blis, BlisObject;
 
-int main(void) {
-  Scope.retain();
-  defer Scope.release();
-
+auto int main(void) {
   List pages = %("index" "guide" "reference" "download" "blog");
 
   /*  links[i][j] is page j's share of its outbound links that reach i. */

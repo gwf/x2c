@@ -16,10 +16,8 @@ int main(int argc, char **argv) {
   if (argc != 3) return 2;
   int depth = atoi(argv[1]), iterations = atoi(argv[2]);
   int64_t checksum = 0;
-  for (int item = 0; item < iterations; item++) {
-    Scope.retain();
+  for (int item = 0; item < iterations; item++) auto {
     checksum += _new_tree(item, depth).sum();
-    Scope.release();
   }
   printf("%lld\n", (long long) checksum);
   return 0;

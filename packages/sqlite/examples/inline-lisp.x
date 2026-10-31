@@ -2,9 +2,7 @@
 
 import "sqlite" with SqliteLisp;
 
-int main(void) {
-  Scope.retain();
-  defer Scope.release();
+auto int main(void) {
   Lisp lisp = auto Lisp.new();
   SqliteLisp.install(lisp);
 

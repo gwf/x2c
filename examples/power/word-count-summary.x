@@ -7,34 +7,34 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Scope.retain();
-  defer Scope.release();
-  Map counts = {};
-  int lines = 0, words = 0;
+  auto {
+    Map counts = {};
+    int lines = 0, words = 0;
 
-  try {
-    auto File input = File.open(argv[1], "r");
-    foreach(String line in input) {
-      lines++;
-      foreach(String word in line.lower().words()) {
-        Var old;
-        long count = counts.try_get(word, old) ? old.integer() : 0;
-        counts[word] = count + 1;
-        words++;
+    try {
+      auto File input = File.open(argv[1], "r");
+      foreach(String line in input) {
+        lines++;
+        foreach(String word in line.lower().words()) {
+          Var old;
+          long count = counts.try_get(word, old) ? old.integer() : 0;
+          counts[word] = count + 1;
+          words++;
+        }
       }
     }
-  }
-  catch %(not-found *): {
-    Stderr.printf("cannot open %s\n", argv[1]);
-    return 2;
-  }
-  catch %(io-fail *): {
-    Stderr.printf("cannot read %s\n", argv[1]);
-    return 2;
-  }
+    catch %(not-found *): {
+      Stderr.printf("cannot open %s\n", argv[1]);
+      return 2;
+    }
+    catch %(io-fail *): {
+      Stderr.printf("cannot read %s\n", argv[1]);
+      return 2;
+    }
 
-  Var beta = 0;
-  counts.try_get("beta", beta);
-  printf("lines=%d words=%d beta=%ld\n", lines, words, beta.integer());
-  return 0;
+    Var beta = 0;
+    counts.try_get("beta", beta);
+    printf("lines=%d words=%d beta=%ld\n", lines, words, beta.integer());
+    return 0;
+  }
 }
