@@ -31,8 +31,9 @@ int main(int argc, char **argv) {
 }
 
 static void _repeat(int count) {
+  Buffer line = auto Buffer.new(0);
   for (int start = 0; start < count; start += 60) {
-    Buffer line = auto Buffer.new(0);
+    line.clear();
     int end = start + 60 < count ? start + 60 : count;
     for (int i = start; i < end; i++)
       line.write_char(alu[i % alu.len()]);
@@ -41,13 +42,14 @@ static void _repeat(int count) {
 }
 
 static void _random(String letters, Array probabilities, int count) {
+  Buffer line = auto Buffer.new(0);
   double total = 0;
   for (int i = 0; i < probabilities.len(); i++) {
     total += probabilities[i].double();
     probabilities[i] = total;
   }
   for (int start = 0; start < count; start += 60) {
-    Buffer line = auto Buffer.new(0);
+    line.clear();
     int end = start + 60 < count ? start + 60 : count;
     for (int i = start; i < end; i++) {
       seed = (seed * 3877 + 29573) % 139968;

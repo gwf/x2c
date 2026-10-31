@@ -8,6 +8,7 @@ import "pcre2" with Regexp;
 int main(void) {
   String input = Stdin.string();
   Regexp strip = auto Regexp.compile(">.*\\n|\\n", 0);
+  strip.jit_compile(PCRE2_JIT_COMPLETE);
   String sequence = strip.replace_all(input, "");
   foreach (String pattern in %(
     "agggtaaa|tttaccct"
@@ -21,6 +22,7 @@ int main(void) {
     "agggtaa[cgt]|[acg]ttaccct"))
     auto {
       Regexp regexp = auto Regexp.compile(pattern, 0);
+      regexp.jit_compile(PCRE2_JIT_COMPLETE);
       printf("%s %lu\n", pattern, (ulong) regexp.find_all(sequence).len());
     }
   String replaced = sequence;
@@ -32,6 +34,7 @@ int main(void) {
     ("\\|[^|][^|]*\\|" "-"))) {
     String (pattern, replacement) = substitution;
     Regexp regexp = auto Regexp.compile(pattern, 0);
+    regexp.jit_compile(PCRE2_JIT_COMPLETE);
     replaced = regexp.replace_all(replaced, replacement);
   }
   printf("\n%lu\n%lu\n%lu\n",

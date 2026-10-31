@@ -15,6 +15,7 @@
 
 class Vec3 { double x, y, z; };
 class Body { Vec3 position, velocity; double mass; } *;
+class Pair { Body first, second; } *;
 
 int main(int argc, char **argv) {
   Array bodies = _bodies();
@@ -24,9 +25,15 @@ int main(int argc, char **argv) {
   }
   _offset_momentum(bodies);
   printf("%.9f\n", _energy(bodies));
-  for (int i = atoi(argv[1]); i; i--) _advance(bodies, 0.01);
+  Array pairs = _pairs(bodies);
+  for (int i = atoi(argv[1]); i; i--) _advance(bodies, pairs, 0.01);
   printf("%.9f\n", _energy(bodies));
   return 0;
+}
+
+static void Pair.init(Pair pair, Body first, Body second) {
+  pair.first = first;
+  pair.second = second;
 }
 
 static void Body.init(Body body, Vec3 position, Vec3 velocity, double mass) {
@@ -69,15 +76,22 @@ static inline Vec3 Vec3.scale(Vec3 a, double s) =>
 static inline Vec3 Vec3.add_scaled(Vec3 a, Vec3 b, double s) =>
   Vec3.new(a.x + b.x * s, a.y + b.y * s, a.z + b.z * s);
 
-static void _advance(Array bodies, double dt) {
+static void _advance(Array bodies, Array pairs, double dt) {
+  foreach (Pair pair in pairs) pair.first.attract(pair.second, dt);
+  foreach (Body body in bodies) body.drift(dt);
+}
+
+/* Body identities stay fixed. Resolve the ten interaction pairs once. */
+static Array _pairs(Array bodies) {
+  Array pairs = [];
   for (int i = 0; i < bodies.len(); i++) {
-    Body body = bodies[i];
+    Body first = bodies[i];
     for (int j = i + 1; j < bodies.len(); j++) {
-      Body other = bodies[j];
-      body.attract(other, dt);
+      Body second = bodies[j];
+      pairs.push(Pair.new(first, second));
     }
   }
-  foreach (Body body in bodies) body.drift(dt);
+  return pairs;
 }
 
 static void Body.attract(Body body, Body other, double dt) {
