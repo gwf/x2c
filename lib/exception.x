@@ -52,6 +52,24 @@ static typedef struct ExceptionThreadState {
 
 static threaded struct ExceptionThreadState exception_thread;
 
+/** Allocates empty backing for one execution's native exception heads. */
+void *x2c_exception_execution_new(void) {
+  ExceptionThreadState saved = calloc(1, sizeof(struct ExceptionThreadState));
+  if (!saved) raise %(alloc-fail);
+  return saved;
+}
+
+/** Exchanges heads whose frames remain live on their execution's stack. */
+void x2c_exception_execution_swap(void *backing) {
+  ExceptionThreadState saved = backing;
+  struct ExceptionThreadState previous = exception_thread;
+  exception_thread = *saved;
+  *saved = previous;
+}
+
+/** Releases backing after its execution has left all protected regions. */
+void x2c_exception_execution_free(void *backing) { free(backing); }
+
 /** Holds the address of a local that a `try` body hands to a callee.
     Compiler-generated code stores the address at the local's declaration.
     From then on C must assume any call, `sigsetjmp` and the raise included,

@@ -36,6 +36,17 @@ static typedef struct FreeNames {
    report instead of a crash. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
+static threaded unsigned long execution_stack_low;
+
+/** Installs a task's downward-growing stack bound; zero selects the native
+    thread's stack. No pointer into this installed cell escapes.
+*/
+unsigned long x2c_lisp_stack_exchange(unsigned long low) {
+  unsigned long previous = execution_stack_low;
+  execution_stack_low = low;
+  return previous;
+}
+
 #if defined(__GLIBC__)
 extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
 #endif
@@ -768,25 +779,26 @@ static void _check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
 }
 
 /* Returns the stack evaluator calls starting at `at` may use: four fifths of
-   what the current thread has left below `at`, at most
-   LISP_STACK_BYTES_MAX. Where the thread's stack is unknown it is the
-   maximum. */
+   what the installed task or native thread has left below `at`, at most
+   LISP_STACK_BYTES_MAX. Unknown native bounds use that maximum. */
 static unsigned long _stack_allowance(unsigned long at) {
-  unsigned long low = 0;
+  unsigned long low = execution_stack_low;
+  if (!low) {
 #if defined(__APPLE__)
-  pthread_t self = pthread_self();
-  low = (unsigned long) pthread_get_stackaddr_np(self)
-    - pthread_get_stacksize_np(self);
+    pthread_t self = pthread_self();
+    low = (unsigned long) pthread_get_stackaddr_np(self)
+      - pthread_get_stacksize_np(self);
 #elif defined(__GLIBC__)
-  pthread_attr_t attributes;
-  if (!pthread_getattr_np(pthread_self(), &attributes)) {
-    void *address;
-    size_t size;
-    if (!pthread_attr_getstack(&attributes, &address, &size))
-      low = (unsigned long) address;
-    pthread_attr_destroy(&attributes);
-  }
+    pthread_attr_t attributes;
+    if (!pthread_getattr_np(pthread_self(), &attributes)) {
+      void *address;
+      size_t size;
+      if (!pthread_attr_getstack(&attributes, &address, &size))
+        low = (unsigned long) address;
+      pthread_attr_destroy(&attributes);
+    }
 #endif
+  }
   if (!low || low >= at) return LISP_STACK_BYTES_MAX;
   unsigned long left = at - low;
   left -= left / 5;

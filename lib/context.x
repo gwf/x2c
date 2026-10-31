@@ -219,6 +219,15 @@ Context Context.open_isolated_named(const char *name) => _open(name, 1);
 /** Returns the `Context` currently active on this thread, or NULL. */
 meta native Context Context.current(void) => current_context;
 
+/** Exchanges the installed execution's current Context without opening or
+    closing either chain. Execution boundaries own the borrowed lifetimes.
+*/
+Context x2c_context_exchange(Context context) {
+  Context previous = current_context;
+  current_context = context;
+  return previous;
+}
+
 /** Ends the owned lifetime when a managed local leaves its block. */
 meta native void Context.cleanup(Context value) { value.close(); }
 
