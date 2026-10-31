@@ -75,3 +75,18 @@ oracle, all 55 extra correctness cases, and focused fixture/quick-profile logs.
 The original reverse-complement failed on blank sequence lines; the two
 reproduced failure cases are explicit in results. Timing is the full quiet
 calibration in [run 20261031T134323Z](../runs/20261031T134323Z/README.md), not these oracle tests.
+
+## Fannkuch bulk copy and FASTA Choice records
+
+`fann-fasta/` retains old/new sources, the source diff, probe scripts and raw
+results, focused fixture/quick checks, and the quiet-window runner. FASTA matches
+old/C outputs at eleven sizes; fannkuch matches at three. Paired probes use
+active-desktop timing, not an established quiet window. The full quiet
+calibration is [run 20261031T145604Z](../runs/20261031T145604Z/README.md). The interrupted first
+attempt retains 504 partial samples and its quiet log under `interfered-attempt/`;
+unrelated compiler workers appeared during measurement, so those samples were
+excluded from the final report.
+
+## Ordinary parallel binary-trees
+
+`parallel-trees/` preserves serial and parallel sources, repeated oracle checks, active-desktop preliminary samples, same-compiler quiet paired elapsed/CPU measurements, and scripts. Each worker writes only its distinct Batch.check; the coordinator joins before reading. No custom allocator or shared tree is introduced.

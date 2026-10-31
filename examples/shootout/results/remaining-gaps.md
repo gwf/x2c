@@ -1,36 +1,38 @@
 # Remaining idiomatic x2c performance gaps
 
-Current run `20261031T134323Z`, local profile, measured source
-`d7c7787c7d1c608f86730b1ba5be3f22722c0299` on Apple M4 Max. Values are sixteen-sample median
+Current run `20261031T145604Z`, local profile, measured source
+`e44721497e0004c921ccacec098f330bd2248726` on Apple M4 Max. Values are sixteen-sample median
 elapsed milliseconds. These selected-program differences do not isolate
 language, allocation, or threading overhead. Rows rank absolute excess over C.
 
 | Workload | Idiomatic ms | C ms | Tuned ms | Idiomatic/C | Excess over C ms |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| knucleotide | 164.641 | 18.225 | 72.036 | 9.03 | 146.416 |
-| binarytrees | 109.685 | 23.845 | 110.654 | 4.60 | 85.840 |
-| spectralnorm | 72.368 | 7.105 | 7.346 | 10.19 | 65.263 |
-| fannkuchredux | 55.580 | 15.044 | 12.067 | 3.69 | 40.537 |
-| nbody | 60.950 | 30.934 | 62.403 | 1.97 | 30.017 |
-| fasta | 29.272 | 8.043 | 14.466 | 3.64 | 21.229 |
-| regexredux | 51.923 | 37.750 | 51.300 | 1.38 | 14.173 |
-| pidigits | 268.183 | 256.630 | 255.558 | 1.05 | 11.553 |
-| revcomp | 11.490 | 1.484 | 12.116 | 7.74 | 10.006 |
-| mandelbrot | 9.899 | 8.910 | 8.995 | 1.11 | 0.988 |
+| knucleotide | 171.022 | 18.846 | 74.325 | 9.07 | 152.175 |
+| spectralnorm | 74.236 | 7.119 | 7.226 | 10.43 | 67.116 |
+| nbody | 65.880 | 32.017 | 68.598 | 2.06 | 33.863 |
+| fannkuchredux | 48.507 | 15.397 | 12.439 | 3.15 | 33.110 |
+| regexredux | 53.862 | 39.199 | 53.594 | 1.37 | 14.662 |
+| fasta | 20.625 | 8.244 | 14.981 | 2.50 | 12.380 |
+| pidigits | 274.598 | 263.617 | 261.645 | 1.04 | 10.982 |
+| revcomp | 11.960 | 1.567 | 12.512 | 7.63 | 10.393 |
+| binarytrees | 25.650 | 23.824 | 26.303 | 1.08 | 1.825 |
+| mandelbrot | 9.871 | 8.929 | 8.990 | 1.11 | 0.942 |
 
 ## Completed source changes
 
-The ordinary Node class and fused Buffer reverse-complement rewrite are now
-implemented and validated. The Node class uses ordinary child fields and
-allocates every leaf. The Buffer rewrite removes full-string reverse/upper/map
-passes and generic per-byte callback dispatch, preserves IUPAC complements and
-60-column wrapping, and handles blank sequence lines.
+Fannkuch now copies into its existing working Array with `setslice`. FASTA
+precomputes an Array of ordinary Choice objects, then reads their fields during
+sampling. The cumulative probabilities and random-number steps are unchanged.
+The earlier ordinary Node, reverse-complement Buffer, n-body pair, FASTA Buffer,
+and regex JIT changes remain applied. Binary-trees now uses one ordinary Thread
+per depth batch in both columns.
+The serial source and same-compiler quiet elapsed/CPU comparison are retained.
+No typed containers, SubStrings, raw storage, custom allocators, or
+compiler/runtime changes were introduced.
 
-[This run's comparison](runs/20261031T134323Z/README.md) records before/after medians
+[This run's comparison](runs/20261031T145604Z/README.md) records before/after medians
 alongside C drift. Full runs are separate observations, not alternating pairs.
-The earlier n-body pair precomputation, FASTA Buffer reuse, and regex JIT remain
-applied. No typed containers, SubStrings, raw storage, custom allocators, or
-compiler/runtime changes were introduced by these two rewrites.
+The saved [probe evidence](evidence/README.md) records the paired experiments.
 
 ## Remaining candidates and limits
 
@@ -40,18 +42,16 @@ compiler/runtime changes were introduced by these two rewrites.
   the existing counting loop. Generic dispatch is a hypothesis, not profiled
   attribution; the failed source substitution does not reject all Map work.
 - **Spectral-norm and fannkuch-redux:** generic Array access and Var numeric
-  conversion remain plausible costs. Typed containers are excluded from the
-  idiomatic column. Profile ordinary operations before proposing shared-runtime
-  or compiler specialization; no further compliant source fix is demonstrated.
-- **Binary-trees:** C uses pthread workers, while the x2c entries remain serial.
-  The ordinary Node representation gap to tuned x2c is addressed. Do not call
-  the remaining C ratio pure allocation or language overhead. C++ supplies a
-  useful serial comparison in the per-problem tables.
-- **FASTA and reverse-complement:** ordinary per-line String/output and input
-  handling remain candidates for profiling. The Buffer rewrite is not an
-  in-place typed-storage implementation. Further gains are unmeasured.
+  conversion remain plausible costs after the fannkuch copy improvement.
+  Typed containers are excluded from the idiomatic column. Profile ordinary
+  operations before proposing runtime or compiler specialization.
+- **Binary-trees:** C and both x2c entries use one worker per depth batch.
+  The ordinary Node representation gap to tuned x2c is addressed. The remaining
+  C ratio is not pure allocation or language overhead. The serial source and
+  elapsed/CPU comparison remain archived; see [threading](threading.md).
+- **FASTA and reverse-complement:** allocation, generic operations, and input/output
+  handling remain profiling candidates. The validated records and Buffer work
+  does not demonstrate another compliant source fix.
 
-The [paired-probe evidence](evidence/README.md) and older run archives retain
-the original hypotheses, results, and rejected Map experiment. Current source
-claims follow this latest run rather than silently rewriting older reports.
-Java includes startup/JIT. Canonical-size timing remains unrun.
+Original hypotheses, older results, and the rejected Map experiment remain in
+the immutable archives. Java includes startup/JIT. Canonical-size timing is unrun.

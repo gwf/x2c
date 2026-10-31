@@ -1,0 +1,24 @@
+{
+  "source_sha256": "e3adfbe0f13d043a83c6cdcbbd864436a4cafe783317776e9a5e885f84baeea9",
+  "revision": "e44721497e0004c921ccacec098f330bd2248726",
+  "source_sha256_by_variant": {
+    "serial": "0c33f9c3279589cfce8ccb6a26c5c4136531aca594725d925edb41eedfc7bb14",
+    "parallel": "edc184ed0b9b62c62c6c1503e422aad1e30701832e593741cb855cf4bda8f444"
+  },
+  "workers": {
+    "serial": 0,
+    "parallel": 6
+  },
+  "summary": {
+    "serial": {
+      "median_elapsed_ms": 107.544125,
+      "median_cpu_ms": 107.1105
+    },
+    "parallel": {
+      "median_elapsed_ms": 25.5338955,
+      "median_cpu_ms": 119.674
+    }
+  },
+  "ordering": "alternating serial/parallel and parallel/serial pairs",
+  "limit": "Quiet window precedes measurement; zero background activity throughout measurement is not established."
+}

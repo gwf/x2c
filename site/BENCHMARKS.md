@@ -3,7 +3,7 @@
 The recoverable source of truth is
 [examples/shootout/results/README.md](../examples/shootout/results/README.md).
 All saved chart sets, reports, samples, recipes, and supporting experiments are
-versioned there. The latest public candidate is run `20261031T134323Z`.
+versioned there. The latest public candidate is run `20261031T145604Z`.
 This document prepares integration; it does not add a page, alter site builds,
 or deploy the website.
 
@@ -11,7 +11,7 @@ or deploy the website.
 
 Use one run consistently. For the latest candidate, its directory is:
 
-`examples/shootout/results/runs/20261031T134323Z/`
+`examples/shootout/results/runs/20261031T145604Z/`
 
 - `charts/runtime-source-size.svg`: summary plot; PNG and PDF also available.
 - `charts/implementation-profiles.svg`: individual problem outcomes.
@@ -25,7 +25,7 @@ Use one run consistently. For the latest candidate, its directory is:
 - `current.json`: full audit report; prefer `website.json` for public ingestion.
 
 For a future Astro page, copy the chosen SVG/PNG files, CSVs, and `website.json`
-into `site/public/benchmarks/20261031T134323Z/`. Astro copies `public/` assets
+into `site/public/benchmarks/20261031T145604Z/`. Astro copies `public/` assets
 into the static output. Keep the archive authoritative; do not hand-edit
 numbers in a page or duplicate raw measurement logic in JavaScript. No copy
 step or recurring gate is added now. A future `site/src/pages/benchmarks.astro`
@@ -35,7 +35,7 @@ Respect the existing site base, which defaults to `/x2c/`. In an Astro page,
 build an asset URL with `import.meta.env.BASE_URL` rather than assuming `/`:
 
 ```astro
-<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T134323Z/runtime-source-size.svg`}
+<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T145604Z/runtime-source-size.svg`}
      alt="Local runtime and source size across nine shared Benchmarks Game problems" />
 ```
 
@@ -53,7 +53,7 @@ The curated export includes source and publication revisions for attribution.
   and Java. x2c columns follow the [suite definitions](../examples/shootout/README.md).
 - State Apple M4 Max, local profile, sixteen samples, fresh processes, exact
   measured revision, run ID, and observation time. Run IDs use UTC; the latest
-  observation was 2026-10-31 06:43 PDT / 2026-10-31 13:43 UTC.
+  observation was 2026-10-31 07:56 PDT / 2026-10-31 14:56 UTC.
 - Java includes JVM startup and JIT compilation. A separate process warmup
   does not warm the measured JVM. Do not describe it as steady-state Java.
 - Summary charts use the same nine problems in every column. Per-problem
@@ -67,7 +67,10 @@ The curated export includes source and publication revisions for attribution.
   chart has a known Python source-metric error and must not be promoted as
   the current comparison.
 - Algorithms, dependencies, memory representation, and threading affect the
-  comparison. C binary-trees uses parallel workers. Do not attribute every
+  comparison. C and both x2c binary-trees columns use parallel depth batches.
+  Keep the
+  mixed execution-mode annotation on figures and link the
+  [threading explanation](../examples/shootout/results/threading.md). Do not attribute every
   gap to language overhead or compare program versions as controlled trials.
 - The observed quiet window preceded measurement; zero background activity
   throughout the run was not established. Canonical-size timing is unrun.
@@ -82,3 +85,7 @@ measured changes. Provide run/data/source downloads and the recovery guide.
 When a page is implemented, use the existing `make site-check` and local visual
 review described in [site/README.md](README.md). No new check is required by
 this documentation change, and public deployment remains a separate action.
+
+The latest charts also include `binarytrees-serial-parallel` in PNG/SVG/PDF and
+CSV, with a separate renderer/provenance file. Use this focused elapsed/CPU
+comparison to explain the change. Retain the earlier serial chart sets.
