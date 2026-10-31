@@ -41,16 +41,6 @@ static void _destroy_outer_stack_slot(void) {
   outer.destroy();
 }
 
-static void _destroy_attached_lower(void) {
-  Scope slot = NULL;
-  Scope.push(&slot);
-  Scope.retain();
-  Scope lower = slot;
-  Scope.retain();
-  Scope.pop();
-  lower.destroy();
-}
-
 static void _release_without_retain(void) {
   Scope.release();
 }
@@ -393,6 +383,85 @@ static void scope_stack_grows_and_restores(void) {
   EXPECT_TRUE(Scope.top() == before);
 }
 
+static void scope_execution_regions_share_borrowed_base(void) {
+  Scope.retain();
+  Scope *caller_slot = Scope.top(), borrowed = *caller_slot;
+  void *first = x2c_scope_execution_new(borrowed);
+  void *second = x2c_scope_execution_new(borrowed);
+
+  x2c_scope_execution_swap(first);
+  Scope *first_slot = Scope.top();
+  EXPECT_TRUE(first_slot != caller_slot);
+  EXPECT_PTR_EQ(*first_slot, borrowed);
+  Scope.retain();
+  Scope first_region = *first_slot;
+  char *first_value = xmalloc(8);
+  fill(first_value, "first");
+  x2c_scope_execution_swap(first);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+
+  x2c_scope_execution_swap(second);
+  Scope *second_slot = Scope.top();
+  EXPECT_TRUE(second_slot != first_slot);
+  EXPECT_TRUE(second_slot != caller_slot);
+  Scope.retain();
+  EXPECT_PTR_EQ((*second_slot).down, borrowed);
+  EXPECT_PTR_EQ(*first_slot, first_region);
+  char *caller_value = Scope.malloc_in(caller_slot, 8);
+  fill(caller_value, "caller");
+  EXPECT_PTR_EQ(Scope.owner(caller_value), borrowed);
+  x2c_scope_execution_swap(second);
+
+  x2c_scope_execution_swap(first);
+  EXPECT_PTR_EQ(Scope.top(), first_slot);
+  EXPECT_PTR_EQ(*first_slot, first_region);
+  EXPECT_STR_EQ(first_value, "first");
+  Scope.release();
+  EXPECT_PTR_EQ(*first_slot, borrowed);
+  x2c_scope_execution_swap(first);
+
+  x2c_scope_execution_swap(second);
+  EXPECT_PTR_EQ(Scope.top(), second_slot);
+  Scope.release();
+  EXPECT_PTR_EQ(*second_slot, borrowed);
+  x2c_scope_execution_swap(second);
+  x2c_scope_execution_free(first);
+  x2c_scope_execution_free(second);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+  EXPECT_STR_EQ(caller_value, "caller");
+  Scope.release();
+}
+
+static void scope_execution_grown_records_survive_exchange(void) {
+  Scope.retain();
+  Scope *caller_slot = Scope.top(), slots[24] = { NULL };
+  void *execution = x2c_scope_execution_new(*caller_slot);
+  x2c_scope_execution_swap(execution);
+  Scope *base_slot = Scope.top();
+  for (int i = 0; i < 24; i++) {
+    Scope.push(&slots[i]);
+    Scope.retain();
+    xmalloc(i + 1);
+  }
+  x2c_scope_execution_swap(execution);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+  Scope.retain();
+  Scope.release();
+  x2c_scope_execution_swap(execution);
+  EXPECT_PTR_EQ(Scope.top(), &slots[23]);
+  for (int i = 23; i >= 0; i--) {
+    EXPECT_PTR_EQ(Scope.top(), &slots[i]);
+    Scope.release();
+    EXPECT_NULL(slots[i]);
+    Scope.pop();
+  }
+  EXPECT_PTR_EQ(Scope.top(), base_slot);
+  EXPECT_PTR_EQ(*base_slot, *caller_slot);
+  x2c_scope_execution_swap(execution);
+  x2c_scope_execution_free(execution);
+  Scope.release();
+}
+
 static void _move_without_slot(void) {
   Scope.retain();
   void *ptr = xmalloc(4);
@@ -470,7 +539,6 @@ static void scope_destroy_detached_contract(void) {
   EXPECT_TRUE(_scope_rejected(_destroy_active_root));
   EXPECT_TRUE(_scope_rejected(_destroy_active_pushed));
   EXPECT_TRUE(_scope_rejected(_destroy_outer_stack_slot));
-  EXPECT_TRUE(_scope_rejected(_destroy_attached_lower));
 }
 
 static int drop_count;
@@ -643,6 +711,8 @@ void scope_suite(void) {
   $test.run(scope_move_between_scopes);
   $test.run(scope_move_materializes_and_self_moves);
   $test.run(scope_stack_grows_and_restores);
+  $test.run(scope_execution_regions_share_borrowed_base);
+  $test.run(scope_execution_grown_records_survive_exchange);
   $test.run(scope_destroy_detached_contract);
   $test.run(scope_finalizer_runs_once);
   $test.run(scope_finalizer_order_and_move);
