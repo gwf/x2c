@@ -10,24 +10,44 @@ int main(void) {
       sequence.clear();
       Stdout.puts(line);
     }
-    else sequence.write(line.strip(NULL));
+    else {
+      String text = line.strip(NULL);
+      if (text) sequence.write(text);
+    }
   }
   _write(sequence);
   return 0;
 }
 
 static void _write(String sequence) {
-  String reverse = sequence[::-1].upper().map(%!(int ch) =>
-    _complement(ch));
-  for (int start = 0; start < reverse.len(); start += 60) {
-    int end = start + 60 < reverse.len() ? start + 60 : reverse.len();
-    puts(reverse[start:end]);
+  Buffer line = auto Buffer.new(0);
+  for (int end = sequence.len(); end > 0;) {
+    line.clear();
+    int count = end > 60 ? 60 : end;
+    for (int i = 0; i < count; i++)
+      line.write_char(_complement(sequence[--end]));
+    puts(line.str());
   }
 }
 
 static int _complement(int ch) {
-  String codes = "ACGTUMRWSYKVHDBN", complements = "TGCAAKYWSRMBDHVN";
-  for (int i = 0; i < codes.len(); i++)
-    if (codes[i] == ch) return complements[i];
-  return ch;
+  if (ch >= 'a' && ch <= 'z') ch -= 'a' - 'A';
+  switch (ch) {
+    case 'A': return 'T';
+    case 'C': return 'G';
+    case 'G': return 'C';
+    case 'T': case 'U': return 'A';
+    case 'M': return 'K';
+    case 'R': return 'Y';
+    case 'W': return 'W';
+    case 'S': return 'S';
+    case 'Y': return 'R';
+    case 'K': return 'M';
+    case 'V': return 'B';
+    case 'H': return 'D';
+    case 'D': return 'H';
+    case 'B': return 'V';
+    case 'N': return 'N';
+    default: return ch;
+  }
 }
