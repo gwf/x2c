@@ -153,14 +153,69 @@ static List _bind_expansion(Expansion &x, Symbol position) {
   Ast constructed = matched ? _construct(x, template_bindings) : NULL;
   List result = NULL;
   with (c.origin = expansion_origin) {
-    result = c.bind_syntax(
-      matched ? constructed : void,
-      position, c.return_type);
+    if (matched && (position == <decorator> ||
+                    x.definition.assoc(<target>) == <macro>)) {
+      List value = _producer_value(c, constructed);
+      if (position == <decorator>) result = value;
+      else {
+        List captured = x.input.caddr();
+        List generator = Ast.source_unwrap(captured.assoc(<value>));
+        result = _bind_macro_result(c, generator, value, x.invocation, position);
+      }
+    }
+    else result = c.bind_syntax(
+      matched ? constructed : void, position, c.return_type);
   }
   c.close_placements(placed, result);
   if (c.dump_expansions && x.invocation)
     result = _inspected_expansion(c, result);
   return result;
+}
+
+/* A Macro transformation remains a value or definition. Generated code
+   retains its generator's kind, including empty and declaration results. */
+module List _bind_macro_result(
+  Compiler c, List generator, List value, Token invocation, Symbol position) {
+  if (value.car() == <macrodef>) {
+    if (position == <expression>) value = c.capture_macro_value(value);
+  }
+  else {
+    _check_position(c, generator, invocation, position);
+    value = _declaration_result(c, generator, value);
+    if (position == <expression> && value ~= %(seq *items)) {
+      if (items.len() != 1) $fail.macros_expression_single(c, invocation);
+      value = items.car();
+    }
+  }
+  with (c.token = invocation) {
+    return c.bind_syntax(value, position, c.return_type);
+  }
+}
+
+/* A decorator producer keeps Macro values as values until the parser has
+   decided whether they continue decoration. Other syntax binds normally. */
+static List _producer_value(Compiler c, List syntax) {
+  loop match (syntax) {
+    case %((!or src at) ? ?inner): syntax = inner;
+    case %(seq ?only): syntax = only;
+    case %(expr ? (parens ?inner)): syntax = inner;
+    case %(expr ? (macro-value ?definition)): return definition;
+    case %(expr ? (meta-call *)): {
+      Var value = _helper_result(c, c.evaluate_meta_value(syntax, c.token, 1));
+      return value is <list> ? value : c.lift_meta_expression(value, c.token);
+    }
+    case %(macro-slot ? ? *): return c.evaluate_macro_slot(syntax);
+    case %(expr ? (macro-invoke ?stored ?args ?site)):
+      return c.expand_macro_invocation_node(
+        stored, args, c.macro_invocation_site(site), <decorator>);
+    default: {
+      if (syntax.car() != <expr>) return syntax;
+      List resolved = c.resolve_expression(syntax, c.token);
+      Var value = c.folded_constant(resolved);
+      if (value ~= %(macrodef *)) return value;
+      return resolved;
+    }
+  }
 }
 
 /* Collection retains inspection boundaries with the declaration rows, so
@@ -261,11 +316,14 @@ static List _author_bindings(List bindings, List &template_bindings) {
 /* Declaration results and collected Unit results retain their declarations
    in one bundle, as does a NamedType decorator. */
 static Ast _construct(Expansion &x, List bindings) {
-  List definition = x.definition;
-  Ast constructed = x.template.replace(bindings);
+  return _declaration_result(x.c, x.definition, x.template.replace(bindings));
+}
+
+module List _declaration_result(
+  Compiler c, List definition, List constructed) {
   if (constructed &&
       (definition.assoc(<kind>) == <decl-unit> ||
-       (x.c.shallow && definition.assoc(<kind>) == <unit>) ||
+       (c.shallow && definition.assoc(<kind>) == <unit>) ||
        definition.assoc(<target>) == <named-type>)) {
     List rows = constructed.car() == <seq>
               ? constructed.cdr() : $(constructed);
@@ -335,15 +393,9 @@ module void _file_scope_locals(List rows, Map locals) {
     case %(api-source ? ? ?inner): _file_scope_locals($(inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
     case %(macro-invoke ((!quote !quote) ?(List definition))
-           ?(List input) ?): {
-      Map declared = {};
-      _file_scope_locals($(definition.assoc(<template>)), declared);
-      List bindings = NULL;
-      input.try_match(definition.assoc(<pattern>), bindings);
-      foreach (List pair in bindings)
-        if (pair.car() in declared && pair.cadr().is_binder())
-          locals[pair.cadr()] = 1;
-    }
+           ?(List input) ?): _nested_file_scope_locals(definition, input, locals);
+    case %(macro-invoke (!set ?(List definition) (macrodef *))
+           ?(List input) ?): _nested_file_scope_locals(definition, input, locals);
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
     case %((!or ?kind declare typedef) ?type (bindings *rows)): {
@@ -355,6 +407,16 @@ module void _file_scope_locals(List rows, Map locals) {
         _file_scope_declarators(rows, locals);
     }
   }
+}
+
+static void _nested_file_scope_locals(List definition, List input, Map locals) {
+  Map declared = {};
+  _file_scope_locals($(definition.assoc(<template>)), declared);
+  List bindings = NULL;
+  input.try_match(definition.assoc(<pattern>), bindings);
+  foreach (List pair in bindings)
+    if (pair.car() in declared && pair.cadr().is_binder())
+      locals[pair.cadr()] = 1;
 }
 
 static void _file_scope_declarators(List declarators, Map locals) {

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-expand-arity-short.x:2:3: macro: expand row 1 expects 2 arguments; got 1
+    expand %((1))
+    ^^^^^^
+  note: in expansion of '_x2c_gensym_anonymous_macro_0' defined at etc/compiler-prelude.x:81:3; input: (target (args) (macrodef (name _x2c_gensym_anonymous_macro_0) (kind block-item) (target ) (targetp ()) (parameters ((macro-param (binder ?_x2c_gensym_holes_0...
+

@@ -2556,7 +2556,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1940 = cons(_1939, NULL);
   _1941 = cons(_250, _1940);
   _1942 = List_var(_1941);
-  _1943 = int_var(86400);
+  _1943 = int_var(86385);
   _1944 = cons(_1943, NULL);
   _1945 = cons(_255, _1944);
   _1946 = List_var(_1945);
@@ -2755,7 +2755,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2136 = cons(_2135, NULL);
   _2137 = cons(_242, _2136);
   _2138 = List_var(_2137);
-  _2139 = int_var(86762);
+  _2139 = int_var(86747);
   _2140 = cons(_2139, NULL);
   _2141 = cons(_255, _2140);
   _2142 = List_var(_2141);
@@ -2872,7 +2872,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2253 = cons(_2252, NULL);
   _2254 = cons(_242, _2253);
   _2255 = List_var(_2254);
-  _2256 = int_var(87524);
+  _2256 = int_var(87509);
   _2257 = cons(_2256, NULL);
   _2258 = cons(_255, _2257);
   _2259 = List_var(_2258);
@@ -2970,7 +2970,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2351 = cons(_2350, NULL);
   _2352 = cons(_242, _2351);
   _2353 = List_var(_2352);
-  _2354 = int_var(87608);
+  _2354 = int_var(87593);
   _2355 = cons(_2354, NULL);
   _2356 = cons(_255, _2355);
   _2357 = List_var(_2356);
@@ -3095,7 +3095,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2476 = cons(_2475, NULL);
   _2477 = cons(_242, _2476);
   _2478 = List_var(_2477);
-  _2479 = int_var(87345);
+  _2479 = int_var(87330);
   _2480 = cons(_2479, NULL);
   _2481 = cons(_255, _2480);
   _2482 = List_var(_2481);
@@ -3196,7 +3196,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2574 = cons(_2573, NULL);
   _2575 = cons(_242, _2574);
   _2576 = List_var(_2575);
-  _2577 = int_var(87174);
+  _2577 = int_var(87159);
   _2578 = cons(_2577, NULL);
   _2579 = cons(_255, _2578);
   _2580 = List_var(_2579);
@@ -3424,7 +3424,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2802 = cons(_2801, NULL);
   _2803 = cons(_242, _2802);
   _2804 = List_var(_2803);
-  _2805 = int_var(90190);
+  _2805 = int_var(90175);
   _2806 = cons(_2805, NULL);
   _2807 = cons(_255, _2806);
   _2808 = List_var(_2807);
@@ -3504,7 +3504,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2882 = cons(_2881, NULL);
   _2883 = cons(_242, _2882);
   _2884 = List_var(_2883);
-  _2885 = int_var(87815);
+  _2885 = int_var(87800);
   _2886 = cons(_2885, NULL);
   _2887 = cons(_255, _2886);
   _2888 = List_var(_2887);
@@ -4910,7 +4910,7 @@ static int f6_syntax____statement_expression_follows(Compiler c){
 }
 
 static int f6_syntax____at_map_entry(Compiler c){
-  if(Compiler_macro_starts_target_at(c, 28692473357490)) return 1;  Token token = c -> token;  for(int conditionals = 0; ;  token = Token_after_group(token)){
+  if(Compiler_macro_starts_entry(c)) return 1;  Token token = c -> token;  for(int conditionals = 0; ;  token = Token_after_group(token)){
     switch(token -> type){
       case 11212 : case 119 : case 89 : case 83 : case 187 : case 251 : return 0;  case 58 : conditionals ++;  break;  case 117 : if(! conditionals --) return token != c -> token;
     }

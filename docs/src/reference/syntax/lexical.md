@@ -63,14 +63,15 @@ The initial keyword table is exactly:
 
 ```text
 associated auto break case catch char const continue default defer delegate
- do double else enum extern finally float for goto if import in inline int
+ do double else enum expand extern finally float for goto if import in inline int
  long match protocol raise register restrict return short signed sizeof
  static struct switch threaded try typedef union unsigned void volatile while
 ```
 
 The table selects lexical modes, not language-wide identifier reservation.
 After scanning and optional CPP, the compiler retags the nine contextual x2c
-additions to `ident`; `in` and `match` retain their existing lookahead rules.
+additions and the predefined `expand` alias to `ident`; `in` and `match`
+retain their existing lookahead rules.
 C keywords and `defer` stay reserved. Percent and angle literal choices are
 already settled before retagging; see [compiler reclassification](#compiler-reclassification-and-preprocessing)
 and [contextual keywords](../language.md#contextual-keywords).
@@ -367,8 +368,8 @@ After scanning/layout, `Compiler.tokenize` reports malformed tokens, performs
 optional CPP expansion, calls `scan_conditionals`, then `_retag_keywords`.
 This last operation differs from the raw tokenizer's operand-context predicate.
 
-- `try`, `catch`, `finally`, `raise`, `import`, `protocol`, `delegate`, and
-  `associated` become `ident`. The `threaded` token also becomes `ident` when
+- `try`, `catch`, `finally`, `raise`, `import`, `protocol`, `delegate`,
+  `associated`, and `expand` become `ident`. The `threaded` token also becomes `ident` when
   its original text is `threaded`; C's `thread_local` and `_Thread_local`
   retain their storage token. The parser recognizes contextual forms using
   ordinary scope lookup and the following syntax. Token contents are not

@@ -75,6 +75,7 @@ static void scan_identifiers_and_keywords(void) {
     {"continue", <continue>}, {"default", <default>},
     {"defer", <defer>}, {"do", <do>}, {"double", <double>},
     {"else", <else>}, {"enum", <enum>}, {"extern", <extern>},
+    {"expand", <expand>},
     {"float", <float>}, {"finally", <finally>}, {"for", <for>},
     {"goto", <goto>}, {"if", <if>}, {"in", <in>},
     {"inline", <inline>}, {"match", <match>}, {"int", <int>},

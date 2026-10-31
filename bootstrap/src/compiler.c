@@ -2782,7 +2782,7 @@ static void _retag_keywords(Tokenizer tokenizer){
   Token prev = NULL;
   for(Token token = tokenizer -> tokens;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     switch(token -> type){
-      case 42162 : case 6398160 : case 13518332722 : case 37833930 : case 632323240 : case 1139215899608 : case 286431579402 : case 113488288653640 : token -> type = 19147688;
+      case 42162 : case 6398160 : case 13518332722 : case 37833930 : case 632323240 : case 1139215899608 : case 286431579402 : case 113488288653640 : case 386927496 : token -> type = 19147688;
       break;
       case 1392787923272 : if(String_equal(token -> text, _100)) token -> type = 19147688;
       break;

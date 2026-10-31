@@ -14,7 +14,7 @@ module typedef struct Definition {
   Compiler c, Token start;
   Atom name, Symbol kind;
   List target, parameters, template, fresh, captures, pattern, rebuild, type;
-  List origin, String file, Map locals, Array using;
+  List origin, String file, namespace, Map locals, Array using;
   int anonymous, local, nested, quotation, leaf, storage;
 } Definition;
 

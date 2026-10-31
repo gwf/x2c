@@ -116,6 +116,10 @@ start keeps the raise-payload interpretation even if `raise` is an ordinary
 binding. This exception preserves the existing literal and preprocessing
 rules without another tokenization pass.
 
+`expand` is a predefined keyword alias with the same lexical treatment for
+following literals. It follows keyword-alias invocation precedence rather
+than the ordinary-binding preference of the nine contextual words above.
+
 `in` and `match` retain their existing contextual rules, described under
 [Directives in the generated C](#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
 it cannot call an ordinary function named `defer`.
@@ -1483,6 +1487,7 @@ hole-kind annotations:
 | `Decl` | non-function declaration | `static int value` |
 | `DeclaratorRow` | declarator with optional initializer | `second = first + 2` |
 | `Function` | function definition | `int f(int x) => x;` |
+| `Macro` | one compile-time macro value or definition | `$generator` |
 | `Name` | identifier | `checksum` |
 | `Literal` | one literal | `42` or `<char>` |
 | `Param` | parameter declaration | `const char *name` |
@@ -1772,6 +1777,7 @@ singular, explicitly annotated, and one of:
 | `Field` | one struct or union field | zero or more fields |
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
+| `Macro` | one macro definition or compile-time macro value | generated code of that macro's result kind, or a transformed Macro |
 
 Parameters after the target are explicit invocation arguments. A decorator
 application has no semicolon; that omission pairs it with the following
@@ -1941,6 +1947,87 @@ targets and hygienically private siblings may be rewritten freely.
 target's captured source must participate in the decorator's `Match`
 replacement, and dropping it makes the match fail. Imported decorators work
 without an extra prototype.
+
+### Mapping rows with `expand`
+
+`expand` decorates its following expression, then returns a decorator that
+captures the following macro. The expression must produce a compile-time
+`List`. Each non-List item supplies one argument; each List supplies an
+argument row. A List passed as one argument needs an enclosing one-element
+row. Empty input produces no applications; an empty row invokes a
+zero-argument macro. A trailing sequence parameter receives the row's
+remaining arguments. Incorrect row arity is an error.
+
+```x2c
+int main(void) {
+  int total = 0;
+  expand %((2 3) (4 5))
+  macro Stmt(Expr $left, Expr $right) {
+    total += $left * $right;
+  }
+  printf("%d\n", total);
+  return 0;
+}
+```
+
+```text
+26
+```
+
+The rows are evaluated once. Applications expand in row order, using ordinary
+binding and hygiene at the insertion site. Mapping adds no surrounding block.
+The generator may produce `Stmt`, `Field`, `Enumerator`, `Entry`, `Unit`,
+`Declaration`, or `Expression` output. Its result kind must fit the insertion
+position even when the input is empty. Mapping a `Decorator` is an error
+because its implicit target has not been supplied.
+
+An expression position requires exactly one generated expression. In a
+template sequence slot, `@expand (%(...))` inserts zero or more expressions.
+Parenthesize the List target after the sigiled name; sigiled names retain
+their existing lexical rules. A braced Macro target ends at `}`, without an
+additional semicolon. An arrow Macro target uses the enclosing expression
+delimiter or statement terminator.
+
+### Decorators that return decorators
+
+An expression-target decorator can return an anonymous Decorator literal or
+call a `meta` function declared to return `Macro`. A returned Decorator with
+no explicit parameters immediately decorates the next source target. Its
+target kind selects that target's parser. The chain's final result determines
+placement; an initial `Expr` target does not force expression output. A
+returned decorator with explicit parameters is an error. Use a `meta`
+function when computing which decorator to return.
+
+```x2c
+macro Decorator $project.repeat(Expr $count) =>
+  macro Decorator(Stmt $body) {
+    for (int i = 0; i < $count; i++) $body
+  };
+keyword repeat $project.repeat;
+
+int main(void) {
+  int total = 0;
+  repeat 3 { total++; }
+  return total == 3 ? 0 : 1;
+}
+```
+
+A nested macro can use an enclosing template's holes. Its own holes shadow
+same-spelled enclosing holes. Substitution embeds those values in the returned
+template; it does not make an arbitrary local-data closure.
+
+A `Macro` target and an explicit `Macro` hole accept an anonymous or named
+macro definition, a bare macro value such as `$generator`, or a parenthesized
+compile-time Macro expression. Macro holes are singular. A Macro-target
+decorator has an arrow producer body. Returning ordinary code inserts that
+code using the captured macro's result kind. Returning one bare Macro value
+transforms the macro instead: a named definition target publishes the returned
+definition, and an expression position receives a Macro value.
+
+During decorator application, transforming an anonymous macro into a
+Decorator continues onto its next target. Defining a named decorator does
+not apply it. Constructing or storing a Macro value in ordinary code also
+does not consume following source.
 
 ### Macro values
 

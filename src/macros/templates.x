@@ -197,7 +197,19 @@ static Var _slot_value(Compiler c, List slot) {
   Var form = slot.caddr();
   Token invocation = c.macro_stack.car().list()[3];
   Var required = slot.assoc(<construct>);
-  Var result = _helper_result(c, c.evaluate_meta_value(form, invocation, 1));
+  Var result;
+  if (form ~= %(expr ? (macro-invoke ?stored ?arguments ?site))) {
+    List definition = _stored_definition(c, stored, invocation);
+    if (definition.assoc(<target>) == <macro>) {
+      List captured = arguments.list().caddr();
+      List generator = Ast.source_unwrap(captured.assoc(<value>));
+      _check_position(c, generator, invocation, <expression>);
+    }
+    result = c.expand_macro_invocation_node(
+      definition, arguments, c.macro_invocation_site(site), <decorator>);
+  }
+  else result = c.evaluate_meta_value(form, invocation, 1);
+  result = _helper_result(c, result);
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
@@ -292,6 +304,8 @@ static List _template_arguments(
 static List _hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
   Symbol kind = hole.assoc(<kind>);
+  if (kind == <macro> && !retain_syntax)
+    value = _macro_value_argument(c, value, invocation);
   int lifts = kind == <expr>;
   String error = kind == <type> && value is <list>
                ? type_name_error(value) : NULL;

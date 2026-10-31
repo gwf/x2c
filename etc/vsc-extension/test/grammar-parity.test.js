@@ -112,6 +112,13 @@ test('named, local, static and anonymous macros retain result and hole scopes', 
   }
 });
 
+test('macro targets and expand retain their source scopes', async () => {
+  await check('macro Decorator $m(Macro $target) => $build($target);',
+    'Macro', 'storage.type.macro.hole.x2c');
+  await check('expand %((string "_export_string"))',
+    'expand', 'keyword.control.expand.x2c');
+});
+
 test('meta and native modifiers cover static, qualified and pointer return types', async () => {
   for (const modifier of ['meta', 'meta static', 'meta native', 'meta native static']) {
     for (const result of ['Code build', 'Code Owner.build', 'char *build', 'pkg.Value build']) {

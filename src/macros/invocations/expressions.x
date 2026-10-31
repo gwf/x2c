@@ -114,7 +114,7 @@ static List _meta_argument(Compiler c) {
 static List _expression_invocation(
   Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
-  if (kind == <decorator> && definition.assoc(<target>) == <expr>)
+  if (kind == <decorator> && definition.assoc(<target>) in %<expr macro>)
     return _expression_decorator(c, definition, invocation);
   if (c.meta_body && (kind == <unit> || kind == <block-item>))
     return _template_call(c, definition);
@@ -150,6 +150,8 @@ static void _not_expression(Compiler c, List definition, Token invocation) {
 
 static List _expression_decorator(
   Compiler c, List definition, Token invocation) {
+  if (_producer_decorator(definition))
+    return _decorate(c, definition, invocation, <expression>, 1);
   List arguments = _invocation_arguments(c, definition, invocation);
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
     String spelling = definition.assoc(<name>).str();

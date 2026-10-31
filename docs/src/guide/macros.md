@@ -133,6 +133,7 @@ Every hole has a syntax kind:
 | `Type` | a type |
 | `Param` | a function parameter |
 | `Function` | a complete function definition |
+| `Macro` | one compile-time macro value or definition |
 | `Decl` | one declaration without its trailing semicolon |
 | `Stmt` | one block item |
 | `Field` | one struct or union field |
@@ -600,6 +601,58 @@ swap(left, right);
 A later alias does not reinterpret an earlier macro template. Use
 `static keyword swap $swap;` when the short spelling is private, while the
 qualified macro remains public.
+
+## Map rows into code
+
+Use `expand` when one macro should generate code for each row of a table.
+Write the compile-time List after `expand`, then the macro it should apply:
+
+```x2c
+expand %(("red" 1) ("blue" 2))
+macro Unit(Name $name, Expr $value) {
+  int $name(void) { return $value; }
+}
+
+int main(void) {
+  printf("%d\n", red() + blue());
+  return 0;
+}
+```
+
+```text
+3
+```
+
+Each List item is an argument row. A flat List such as `%(1 2 3)` supplies
+one argument per item. Wrap a List in a one-element row when that List is
+itself one argument. Name holes receive spelling Strings, as above.
+
+The generator's result kind determines where the output belongs. Use `Stmt`
+for block items, `Field` for fields, `Enumerator` for enum entries, `Entry`
+for Map entries, and `Unit` or `Declaration` for file-scope code. `expand`
+adds no block and follows ordinary macro binding and hygiene. Empty input
+generates nothing, but still requires the correct result kind. A braced
+generator ends at `}` without an extra semicolon.
+
+An `Expression` generator produces one expression per row. A scalar
+expression position accepts exactly one result. Inside another template,
+use a sequence splice for several results:
+
+```x2c
+~static int sum(int left, int right) { return left + right; }
+macro Expression $sample.squares() =>
+  sum(@expand (%(2 3)) macro Expression(Expr $value) => $value * $value);
+~int main(void) { return $sample.squares() == 13 ? 0 : 1; }
+```
+
+The parentheses around the List target preserve its literal interpretation
+after the sigiled name. This does not add runtime argument splicing.
+
+`expand` is a decorator that returns another decorator. The first captures
+the rows expression; the second captures a `Macro` target. The mapping itself
+is a meta helper. The same continuation rule lets your decorators return
+decorators for subsequent targets. See
+[decorators that return decorators](../reference/language.md#decorators-that-return-decorators).
 
 ## Compute with meta functions
 

@@ -242,6 +242,7 @@ Symbol scan_keyword_type(const char * s, int n){
     if(! memcmp(s, "extern", 6)) return 387198108;
     if(! memcmp(s, "import", 6)) return 632323240;
     if(! memcmp(s, "inline", 6)) return 634145674;
+    if(! memcmp(s, "expand", 6)) return 386927496;
     if(! memcmp(s, "return", 6)) return 1219800220;
     if(! memcmp(s, "signed", 6)) return 1294430536;
     if(! memcmp(s, "sizeof", 6)) return 1295657932;

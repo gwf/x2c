@@ -161,6 +161,7 @@
 - [src/components/dynamic-operators.x](https://x2c-lang.dev/docs/internals/compiler-api/dynamic-operators.html)
 - [src/components/interpolation.x](https://x2c-lang.dev/docs/internals/compiler-api/interpolation.html)
 - [src/components/lambda-functions.x](https://x2c-lang.dev/docs/internals/compiler-api/lambda-functions.html)
+- [src/components/macro-mapping.x](https://x2c-lang.dev/docs/internals/compiler-api/macro-mapping.html)
 - [src/components/pattern-match.x](https://x2c-lang.dev/docs/internals/compiler-api/pattern-match.html)
 - [src/components/printf-format.x](https://x2c-lang.dev/docs/internals/compiler-api/printf-format.html)
 - [src/components/protocol-adapters.x](https://x2c-lang.dev/docs/internals/compiler-api/protocol-adapters.html)

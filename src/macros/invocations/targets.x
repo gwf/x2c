@@ -12,8 +12,8 @@
    covers a statement and a whole function; `function` holds the function
    then. */
 static typedef struct Decoration {
-  Compiler c, List definition, function, Token invocation, start;
-  Symbol position, Symbol kind, int open;
+  Compiler c, List definition, function, generator, Token invocation, start;
+  Symbol position, Symbol kind, int open, named_macro;
 } Decoration;
 
 /* invocations at syntax positions
@@ -48,7 +48,7 @@ module List _target_at(Compiler c, Symbol position, int open) {
 
 /* A macro's result must fit where it is invoked; a Declaration result also
    fits at file scope. */
-static void _check_position(
+module void _check_position(
   Compiler c, List definition, Token invocation, Symbol position) {
   Symbol kind = definition.assoc(<kind>);
   const MacroPos *place = _position(position);
@@ -78,14 +78,14 @@ static List _invoke_definition(
   return result;
 }
 
-static List _decorate(
+module List _decorate(
   Compiler c, List definition, Token invocation, Symbol position, int open) {
   Decoration d = {
     .c = c, .definition = definition, .invocation = invocation,
     .position = position, .kind = definition.assoc(<target>), .open = open};
+  if (_producer_decorator(definition)) return _decorate_producer(d);
   int deferred = !!c.macro_holes;
-  if (!_on_body(d) && _result_kind(definition) != _position(position).kind)
-    _misplaced(d);
+  _check_decoration_position(d);
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
   int block_scope = !c.macro_holes && d.kind == <block>;
@@ -106,10 +106,110 @@ static List _decorate(
   return result;
 }
 
+/* Expr and Macro producers can return another decorator. Its signature
+   reads the next target; only the terminal result is placed in the program. */
+static List _decorate_producer(Decoration &d) {
+  Compiler c = d.c;
+  SymTxn transaction = c.begin_semantic_transaction();
+  defer transaction.rollback();
+  List arguments = _arguments(d, 0);
+  loop {
+    List node = _decoration_node(d, arguments);
+    if (c.macro_holes && !_returns_decorator(d.definition)) {
+      transaction.commit();
+      return d.position == <expression> ? %(expr (<macro-expr>) $node)
+                                       : %(seq $node);
+    }
+    List value = c.expand_macro_invocation_node(
+      d.definition, node.caddr(), d.invocation, <decorator>);
+    if (value ~= %(macrodef *)) {
+      if (d.named_macro) {
+        List result = c.bind_syntax(value, d.position, c.return_type);
+        transaction.commit();
+        return result;
+      }
+      if (value.assoc(<kind>) == <decorator>) {
+        if (value.assoc(<parameters>).list())
+          $fail.macros_decorator_parameters(c, d.invocation);
+        d.definition = value;
+        d.kind = value.assoc(<target>);
+        arguments = %(args);
+        if (c.peek(0) == <eof> || c.peek(0) == <;>)
+          $fail.macros_decorator_target(
+            c, d.invocation, value.assoc(<name>).str(),
+            Diagnostics.macro_definition_note(value));
+        if (d.kind in %<expr macro>) continue;
+        _check_decoration_position(d);
+        List continued = _decoration_node(d, arguments);
+        List result = c.macro_holes ? %(seq $continued)
+          : _bind_decoration(d, continued);
+        transaction.commit();
+        return result;
+      }
+      if (d.position == <expression>)
+        value = c.capture_macro_value(value);
+      List result = c.bind_syntax(value, d.position, c.return_type);
+      transaction.commit();
+      return result;
+    }
+    if (d.kind == <macro>) {
+      List result = _bind_macro_result(
+        c, d.generator, value, d.invocation, d.position);
+      transaction.commit();
+      return result;
+    }
+    if (d.kind == <expr> && d.position != <expression> &&
+        _previous_source_token(c, c.token).type != <;> && !d.open)
+      c.expect(<;>);
+    if (d.kind == <expr> && d.position in %<block statement>)
+      value = %(stmnt $value);
+    List result = c.macro_holes ? value
+      : c.bind_syntax(value, d.position, c.return_type);
+    transaction.commit();
+    return result;
+  }
+}
+
+module int _producer_decorator(List definition) =>
+  definition.assoc(<kind>) == <decorator> &&
+  (definition.assoc(<target>) == <macro> || _returns_decorator(definition));
+
+static int _returns_decorator(List definition) {
+  match (_producer_body(definition)) {
+    case %(expr ? (macro-value ?macro)):
+      return macro.list().assoc(<kind>) == <decorator>;
+    case %(expr ? (meta-call (expr ?type ?) ?)):
+      return type.list().cdr() == %("Macro");
+    default: return 0;
+  }
+}
+
+module List _literal_decorator(List definition) {
+  match (_producer_body(definition)) {
+    case %(expr ? (macro-value ?macro)):
+      return macro.list().assoc(<kind>) == <decorator> ? macro : NULL;
+    default: return NULL;
+  }
+}
+
+static List _producer_body(List definition) {
+  List body = definition.assoc(<template>);
+  loop match (body) {
+    case %(expr ? (parens ?inner)): body = inner;
+    default: return body;
+  }
+}
+
 static void _misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
   $fail.macros_decorator_position(d.c, d.invocation, spelling, target);
+}
+
+static void _check_decoration_position(Decoration &d) {
+  if (!_on_body(d) &&
+      _result_kind(d.definition) != _position(d.position).kind)
+    _misplaced(d);
 }
 
 static List _arguments(Decoration &d, int block_scope) {
@@ -155,7 +255,10 @@ static void _bind_name_arguments(Compiler c, List definition, List arguments) {
 static List _decoration_node(Decoration &d, List arguments) {
   Compiler c = d.c;
   d.start = c.token;
+  d.named_macro = d.kind == <macro> &&
+    (c.macro_form_is_definition() || c.local_macro_form_is_definition());
   List target = _target(d);
+  if (d.kind == <macro>) d.generator = target;
   if (d.position == <statement>) target = c.anchor_origin(target, d.start);
   List target_capture = _capture(d, target);
   List input = %(
@@ -186,12 +289,15 @@ static Var _stored_reference(Compiler c, List definition) {
   if (definition.assoc(<local>).int() &&
       c.sym.lookup_macro(name) == definition)
     return %(local-macro $name);
-  if (definition.assoc(<template>)) return %(!quote $definition);
+  if (definition.assoc(<template>))
+    return definition.assoc(<local>).int() ? definition : %(!quote $definition);
   return name;
 }
 
 static List _target(Decoration &d) {
   Compiler c = d.c;
+  if (d.kind == <expr>) return c.parse_macro_expression_target();
+  if (d.kind == <macro>) return _macro_argument(c);
   if (_on_body(d)) {
     d.function = c.parse_function_definition();
     if (d.function ~= %(function ? ? ?body)) return body;

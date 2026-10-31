@@ -254,7 +254,7 @@ module void _retag_keywords(Tokenizer tokenizer) {
        token = Token.skip_trivia(token + 1)) {
     switch (token.type) {
       case <try>: case <catch>: case <finally>: case <raise>: case <import>:
-      case <protocol>: case <delegate>: case <associated>:
+      case <protocol>: case <delegate>: case <associated>: case <expand>:
         token.type = <ident>; break;
       case <threaded>:
         if (token.text == "threaded") token.type = <ident>;
