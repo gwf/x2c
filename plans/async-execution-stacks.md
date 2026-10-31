@@ -1,6 +1,7 @@
 # Execution stacks across async suspension
 
-> Status: active - implemented; dev publication authorized on 2026-10-31.
+> Status: active - implementation complete and validated for dev publication.
+> Normal benchmark follow-up remains deferred; no further implementation is pending.
 > Requested 2026-10-30. Records the per-execution stack model discussed with
 > Gary. Scope layout, naming, and boundary state installation are selected.
 > Lifetime decision: rely on borrowed-owner lifetimes; no parked-slot pins,
@@ -1000,9 +1001,13 @@ established. These limits do not claim new supported configurations.
 The earlier dev merge and combined review are complete, with no concrete
 defect remaining from that review. Before publication, dev advanced to
 79841a5f6 with macro-target decorators, code mapping, and a scanner fix.
-These changes are integrated for a fresh combined review and final gate.
-Only generated bootstrap linked-meta C and the module catalog conflicted;
-both are regenerated from their merged authoritative sources.
+These changes were integrated at 5bd30e90f. The bounded overlap review found
+no concrete defect. Only generated bootstrap linked-meta C and the module
+catalog conflicted; both were regenerated from merged authoritative sources.
+The final publication gate passes: 1,158 tests with 99,597 assertions and
+1,376 compiler fixtures with 3,038 artifacts, plus self-host, documentation,
+cold collection, and command checks. The scanner keyword test from dev
+accounts for the two extra assertions over the preceding private validation.
 No additional code repair or mandatory test campaign was identified.
 
 Publication proceeds with these recorded costs and evidence limits:
