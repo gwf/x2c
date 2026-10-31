@@ -9,6 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+class Rows {
+  Array input, output;
+  int first, last, transpose;
+  Thread worker;
+} *;
+
 int main(int argc, char **argv) {
   int n = argc > 1 ? atoi(argv[1]) : 100;
   Array u = [], v = [], scratch = [];
@@ -31,27 +37,52 @@ int main(int argc, char **argv) {
 }
 
 static void _ata_times(Array input, Array output, Array scratch) {
-  _a_times(input, scratch);
-  _at_times(scratch, output);
+  _multiply(input, scratch, 0);
+  _multiply(scratch, output, 1);
 }
 
-static void _a_times(Array input, Array output) {
-  int n = input.len();
-  for (int i = 0; i < n; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _entry(i, j) * input[j].double();
-    output[i] = sum;
+static void _multiply(Array input, Array output, int transpose) {
+  int n = input.len(), workers = n < 6 ? n : 6;
+  auto {
+    if (n < 256) {
+      _calculate_rows(Rows.new(input, output, 0, n, transpose));
+      return;
+    }
+    Array batches = [];
+    for (int worker = 0; worker < workers; worker++) {
+      Rows rows = Rows.new(input, output,
+        n * worker / workers, n * (worker + 1) / workers, transpose);
+      rows.worker = Thread.start(_calculate_rows, rows);
+      batches.push(rows);
+    }
+    foreach (Rows rows in batches) {
+      rows.worker.join();
+      rows.worker.free();
+    }
   }
+}
+
+static void Rows.init(Rows rows, Array input, Array output,
+  int first, int last, int transpose) {
+  rows.input = input;
+  rows.output = output;
+  rows.first = first;
+  rows.last = last;
+  rows.transpose = transpose;
+}
+
+static Var _calculate_rows(Var input) {
+  Rows rows = input;
+  int n = rows.input.len();
+  for (int i = rows.first; i < rows.last; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < n; j++)
+      sum += (rows.transpose ? _entry(j, i) : _entry(i, j)) *
+        rows.input[j].double();
+    rows.output[i] = sum;
+  }
+  return void;
 }
 
 static double _entry(int i, int j) =>
   1.0 / ((i + j) * (i + j + 1) / 2 + i + 1);
-
-static void _at_times(Array input, Array output) {
-  int n = input.len();
-  for (int i = 0; i < n; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _entry(j, i) * input[j].double();
-    output[i] = sum;
-  }
-}

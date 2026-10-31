@@ -35,6 +35,13 @@ Saved serial runs and the latest paired serial/parallel comparison remain in
 [results](results/README.md). Neither threading nor parallel execution requires
 typed containers or a custom allocator.
 
+Idiomatic spectral-norm uses six ordinary `Thread` row batches at N>=256.
+Workers read a fixed input Array and write disjoint existing output slots.
+Every matrix product joins its workers before the next product reads results;
+each row preserves its original summation order. Smaller inputs run serially.
+Tuned spectral-norm retains its serial typed Arrays. The Counter-object
+k-nucleotide probe is preserved as evidence; numeric Map values remain active.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target
