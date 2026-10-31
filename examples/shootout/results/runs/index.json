@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "current_run": "20261031T035446Z",
+  "runs": [
+    {
+      "run_id": "20261031T011256Z",
+      "path": "20261031T011256Z",
+      "publication_revision": "f6cecde7189eeaba665195dacaf27ac16155a4fe",
+      "measured_revision": "e3d702f6de179115cc241c7a9d7d1782dcfaf95d",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "optimized",
+        "python"
+      ],
+      "summary_problem_count": 10,
+      "sample_recovery": "480 compact sample records recovered from committed baseline/current reports; original full JSONL and original build/check receipts unavailable",
+      "historical_source_metric_issue": true
+    },
+    {
+      "run_id": "20261031T024309Z",
+      "path": "20261031T024309Z",
+      "publication_revision": "af87abd76977b6cb7024dd449cb5e57494061b23",
+      "measured_revision": "10ef5112652291ef35ad7bac6820de040c20ccfd",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T031704Z",
+      "path": "20261031T031704Z",
+      "publication_revision": "0a7dbe5f1bd6a8b2b5640251df93d0d086d845f0",
+      "measured_revision": "ba99bc1b4c7e4edc4d765070434d672b51afd711",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T035446Z",
+      "path": "20261031T035446Z",
+      "publication_revision": "f19fdc43acceebfe74b657526f2f03e559866e30",
+      "measured_revision": "68156a1c6b9df92cdcd720aa4cc9735fff2831cf",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    }
+  ]
+}

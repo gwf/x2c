@@ -200,3 +200,11 @@ The old suite's timings are not comparable with these results. Changes to
 specifications, references, profile inputs, or dependency flags require a
 fresh calibration. Machine checks and environment receipts retain the
 existing restrictions on comparisons between hosts.
+
+## Recover results and website materials
+
+The [results archive and recovery guide](results/README.md) preserves all four
+chart sets, saved reports, raw observations and receipts, paired experiments,
+rendering requirements, and checksums on `dev`. The
+[website integration guide](../../site/BENCHMARKS.md) identifies the curated
+public assets and interpretation requirements.

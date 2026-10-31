@@ -150,3 +150,8 @@ assembly must then overlay the selected version, index, candidate metadata and
 installer with candidate-specific defaults before archiving the whole output.
 The site build alone does not produce a publishable candidate installation.
 These options do not activate workflows or change live routing.
+
+## Benchmark comparison materials
+
+[BENCHMARKS.md](BENCHMARKS.md) describes the versioned results/charts archive,
+portable public exports, future Astro integration, and measurement caveats.

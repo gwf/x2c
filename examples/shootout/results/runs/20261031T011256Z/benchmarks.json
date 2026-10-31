@@ -1,0 +1,432 @@
+{
+  "schema": 1,
+  "specification": {
+    "name": "The Computer Language Benchmarks Game",
+    "repository": "https://salsa.debian.org/benchmarksgame-team/benchmarksgame",
+    "revision": "40296663ed350d5fe4a6ab5e367bab61cb77c219",
+    "archive": "public/download/benchmarksgame-sourcecode.zip",
+    "archive_sha256": "aabcf6726cdc14f0f45b99e5daba48584f94bbb48883fd3711a1d040474d1cb4"
+  },
+  "profiles": {
+    "quick": {
+      "nbody": [
+        "10000"
+      ],
+      "spectralnorm": [
+        "100"
+      ],
+      "fannkuchredux": [
+        "7"
+      ],
+      "mandelbrot": [
+        "64"
+      ],
+      "fasta": [
+        "1000"
+      ],
+      "knucleotide": [],
+      "revcomp": [],
+      "binarytrees": [
+        "10"
+      ],
+      "regexredux": [],
+      "pidigits": [
+        "30"
+      ]
+    },
+    "local": {
+      "nbody": [
+        "1000000"
+      ],
+      "spectralnorm": [
+        "500"
+      ],
+      "fannkuchredux": [
+        "9"
+      ],
+      "mandelbrot": [
+        "500"
+      ],
+      "fasta": [
+        "100000"
+      ],
+      "knucleotide": [],
+      "revcomp": [],
+      "binarytrees": [
+        "14"
+      ],
+      "regexredux": [],
+      "pidigits": [
+        "10000"
+      ]
+    },
+    "canonical": {
+      "nbody": [
+        "50000000"
+      ],
+      "spectralnorm": [
+        "5500"
+      ],
+      "fannkuchredux": [
+        "12"
+      ],
+      "mandelbrot": [
+        "16000"
+      ],
+      "fasta": [
+        "25000000"
+      ],
+      "knucleotide": [],
+      "revcomp": [],
+      "binarytrees": [
+        "21"
+      ],
+      "regexredux": [],
+      "pidigits": [
+        "10000"
+      ]
+    }
+  },
+  "benchmarks": [
+    {
+      "name": "nbody",
+      "title": "n-body",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html",
+      "checks": [
+        {
+          "args": [
+            "1000"
+          ],
+          "expected": "expected/1000.out",
+          "comparison": {
+            "kind": "numeric_lines",
+            "absolute_tolerance": 1e-08
+          },
+          "sha256": "76de83d6d51a74f82828547423f516e7815cfe8cfea6290a2831aa173f806de7",
+          "upstream_path": "public/download/nbody-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "nbody/nbody.gcc",
+          "sha256": "6c7a44f4f242b8aafb2e72c1814f67c5568b3815abe0a19a005fe20645a03676"
+        },
+        "main.py": {
+          "path": "nbody/nbody.python3",
+          "sha256": "101f5f50adf87324c426cbd09ce5bc3dd15f61ddeb34fd0a8c3ee2e2f4086ff5"
+        }
+      },
+      "specification": {
+        "path": "specs/nbody.html",
+        "upstream_path": "public/description/nbody.html",
+        "sha256": "ac61ca658bb2b10b792b6e1efbe7f4f06e9563277b33767274972065e8cc9720"
+      }
+    },
+    {
+      "name": "spectralnorm",
+      "title": "spectral norm",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/spectralnorm.html",
+      "checks": [
+        {
+          "args": [
+            "100"
+          ],
+          "expected": "expected/100.out",
+          "sha256": "a95e11fa07f7b196ef488e73f67afbbbc16cf6a2c6de5f8d54ea49821fe604e6",
+          "upstream_path": "public/download/spectralnorm-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "spectralnorm/spectralnorm.gcc-8.gcc",
+          "sha256": "5ae8e0c4d2cb97b744d682e4e974a22b727b5209ecc3293d4d1581ccf86d7574"
+        },
+        "main.py": {
+          "path": "spectralnorm/spectralnorm.python3-6.python3",
+          "sha256": "bc4cf8abdaa4c49e4d95a7e43e536b26c10b930408cb5c22def1121d2dfc4890"
+        }
+      },
+      "specification": {
+        "path": "specs/spectralnorm.html",
+        "upstream_path": "public/description/spectralnorm.html",
+        "sha256": "a882da42691f2e91a4b0dd098673002bed1bfa52efb3d0b3a1acc58bd7d34acf"
+      }
+    },
+    {
+      "name": "fannkuchredux",
+      "title": "fannkuch-redux",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html",
+      "checks": [
+        {
+          "args": [
+            "7"
+          ],
+          "expected": "expected/7.out",
+          "sha256": "2dc0a3cd4a547ba69389f97f3b447bd4d487fe6216c3cacd2f9bf8c908dc127f",
+          "upstream_path": "public/download/fannkuchredux-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "fannkuchredux/fannkuchredux.gcc",
+          "sha256": "d109b20a1ef2dcc601d3fc3dca2b7d06f423b72d3a0fa650afb4cef5fa8e9a18"
+        },
+        "main.py": {
+          "path": "fannkuchredux/fannkuchredux.python3-8.python3",
+          "sha256": "fad3eec38b9b516c4c0e8b49b2466d8f689d912f08b3d72bc558b051721fb2af"
+        }
+      },
+      "specification": {
+        "path": "specs/fannkuchredux.html",
+        "upstream_path": "public/description/fannkuchredux.html",
+        "sha256": "bd9265b28893996018f1a09d7376de11c8b93ba4238449c6af9e5bded768b07b"
+      }
+    },
+    {
+      "name": "mandelbrot",
+      "title": "Mandelbrot bitmap",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/mandelbrot.html",
+      "checks": [
+        {
+          "args": [
+            "200"
+          ],
+          "expected": "expected/200.out",
+          "sha256": "97610473750700638fc63d13cfa49d339b67c18e7f26b3f9c9acb61e746472d5",
+          "upstream_path": "public/download/mandelbrot-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "mandelbrot/mandelbrot.gcc-8.gcc",
+          "sha256": "c785a5031762cb7818d4b3ca595dbce90c68279763aebd5625c0ef4956943246"
+        },
+        "main.py": {
+          "path": "mandelbrot/mandelbrot.python3-8.python3",
+          "sha256": "4fd93dceb9dab51b11ed25821ba93c346b7296b93c2bf73f69a6726d06645601"
+        }
+      },
+      "specification": {
+        "path": "specs/mandelbrot.html",
+        "upstream_path": "public/description/mandelbrot.html",
+        "sha256": "9fe4f47825d9a94412dbeb0806cf61f657412754baf5f2139bf90c0f46f9116d"
+      }
+    },
+    {
+      "name": "fasta",
+      "title": "fasta",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fasta.html",
+      "checks": [
+        {
+          "args": [
+            "1000"
+          ],
+          "expected": "expected/official.out",
+          "sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73",
+          "upstream_path": "public/download/fasta-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "fasta/fasta.gcc",
+          "sha256": "628b37687acb8ae008116ed7dbbaf001308ee46de5367c60eb4743301de596ff"
+        },
+        "main.py": {
+          "path": "fasta/fasta.python3",
+          "sha256": "f8bc35bb3b1c35fed1db20010aaa2abbdcce524e99822ae4a1238c2014e89899"
+        }
+      },
+      "specification": {
+        "path": "specs/fasta.html",
+        "upstream_path": "public/description/fasta.html",
+        "sha256": "137922f22595ca529e0fbb954f1553625303c45539ffecacddf08c21593c0e0c"
+      }
+    },
+    {
+      "name": "knucleotide",
+      "title": "k-nucleotide",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/knucleotide.html",
+      "checks": [
+        {
+          "args": [],
+          "expected": "expected/official.out",
+          "stdin": "input.txt",
+          "sha256": "baa63c46addb89c63e68ea0055952847fbccf450e89997b2b62234c90e66f500",
+          "upstream_path": "public/download/knucleotide-output.txt",
+          "stdin_sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73",
+          "stdin_upstream_path": "public/download/knucleotide-input.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "knucleotide/knucleotide.gcc",
+          "sha256": "25e2d15a0c436f814254ede1bc87342428f28636f6168634db88b63243a15105"
+        },
+        "main.py": {
+          "path": "knucleotide/knucleotide.python3-3.python3",
+          "sha256": "8fcac91a94f0bc55a801d073a4321822ba2a3f40c1dda590da9e6715f3958f11"
+        }
+      },
+      "specification": {
+        "path": "specs/knucleotide.html",
+        "upstream_path": "public/description/knucleotide.html",
+        "sha256": "6dcfc56947203ac9094241f3a84b39a6e19770819a0b9e55a0d25d036df3f7d2"
+      },
+      "stdin_fasta": {
+        "quick": 1000,
+        "local": 100000,
+        "canonical": 25000000
+      },
+      "python_start_method": "fork",
+      "dependencies": {
+        "khash.h": {
+          "repository": "https://github.com/attractivechaos/klib",
+          "revision": "97a0fcb790b43b9e5da8994f4671021fec036f19",
+          "path": "khash.h",
+          "sha256": "4582c7fd4b98f61339ce677bb1daa7a45a53075b112a494a335525c4bda72074"
+        }
+      }
+    },
+    {
+      "name": "revcomp",
+      "title": "reverse-complement",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/revcomp.html",
+      "checks": [
+        {
+          "args": [],
+          "expected": "expected/official.out",
+          "stdin": "input.txt",
+          "sha256": "549dcdcc7df2685145e6cbdfd682469bd9c12ff1beec93c270f8ba447acd4855",
+          "upstream_path": "public/download/revcomp-output.txt",
+          "stdin_sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73",
+          "stdin_upstream_path": "public/download/revcomp-input.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "revcomp/revcomp.gcc-6.gcc",
+          "sha256": "5b48bef2ebbd5d07701722fca4853ca31d949c9362b797770cb31dd7f6217b85"
+        },
+        "main.py": {
+          "path": "revcomp/revcomp.python3",
+          "sha256": "0750e816ae6271b5e188b3af5c46e34858c344e0a741bdfc40ffeb5f43fecb88"
+        }
+      },
+      "specification": {
+        "path": "specs/revcomp.html",
+        "upstream_path": "public/description/revcomp.html",
+        "sha256": "c1d82ef7dec1e11d7969eeb4332579d85d702074070094e6c61212a86949890e"
+      },
+      "stdin_fasta": {
+        "quick": 1000,
+        "local": 100000,
+        "canonical": 25000000
+      }
+    },
+    {
+      "name": "binarytrees",
+      "title": "binary-trees",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/binarytrees.html",
+      "checks": [
+        {
+          "args": [
+            "10"
+          ],
+          "expected": "expected/10.out",
+          "sha256": "b7f92c56b5d8aeb0a4d698842d1d87a57b4909865c3c84e5e10313e16663c3cb",
+          "upstream_path": "public/download/binarytrees-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "binarytrees/binarytrees.gcc-5.gcc",
+          "sha256": "a815e8a0eefd7e09bf92a8025bfb8347eb57e9fa79680dcd672ce1c7fa6479a0"
+        },
+        "main.py": {
+          "path": "binarytrees/binarytrees.python3-2.python3",
+          "sha256": "90069a6b07af6d771b782f9347ae41da290549d2bbd6d8d9d94df2e2ae25abd4"
+        }
+      },
+      "specification": {
+        "path": "specs/binarytrees.html",
+        "upstream_path": "public/description/binarytrees.html",
+        "sha256": "7fff8bc4614ca1ecd42ad1d4e68838cabd5d0675ed8caf2895ba3c43ca9b15dd"
+      },
+      "c_flags": [
+        "-pthread"
+      ]
+    },
+    {
+      "name": "regexredux",
+      "title": "regex-redux",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/regexredux.html",
+      "checks": [
+        {
+          "args": [],
+          "expected": "expected/input.out",
+          "stdin": "input.txt",
+          "sha256": "9f417691b946e86f2a86df4340c17f8b5c7bd5f977df525072c66c89b8a656f1",
+          "upstream_path": "public/download/regexredux-output.txt",
+          "stdin_sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73",
+          "stdin_upstream_path": "public/download/regexredux-input.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "regexredux/regexredux.gcc-5.gcc",
+          "sha256": "297865dbe9b65218f5fbcc5324d63b015109a1c40d57a505a692644f19f4c1d4"
+        },
+        "main.py": {
+          "path": "regexredux/regexredux.python3",
+          "sha256": "955633de90f6d4d45d81aec246ea2c62ef02d9d3bf87c9115017e494b2b0b86b"
+        }
+      },
+      "specification": {
+        "path": "specs/regexredux.html",
+        "upstream_path": "public/description/regexredux.html",
+        "sha256": "c00f9013ec7c6bb4de425bbf6e1e6d1b4b6d9500c2905a207c6aeeec521d066f"
+      },
+      "stdin_fasta": {
+        "quick": 1000,
+        "local": 100000,
+        "canonical": 5000000
+      }
+    },
+    {
+      "name": "pidigits",
+      "title": "pidigits",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/pidigits.html",
+      "checks": [
+        {
+          "args": [
+            "30"
+          ],
+          "expected": "expected/30.out",
+          "sha256": "dbf95cc20ad23ff1a385d30436f0c63b5ae7f41bb1003cf204f5e4888b74a39c",
+          "upstream_path": "public/download/pidigits-output.txt"
+        }
+      ],
+      "references": {
+        "main.c": {
+          "path": "pidigits/pidigits.gcc",
+          "sha256": "f719dddd30aad201aa3ce385b80d48ef3befce29b22c3a12a5aa7e7d743f948e"
+        },
+        "main.py": {
+          "path": "pidigits/pidigits.python3-4.python3",
+          "sha256": "cdfff9f6ad7154f1b7020ff7fae2027653cd113a4913074431a7e9af7f800795"
+        }
+      },
+      "specification": {
+        "path": "specs/pidigits.html",
+        "upstream_path": "public/description/pidigits.html",
+        "sha256": "631c639b397e941609e1df1c43aa10009fa43a53af418a387997102f052f2c81"
+      },
+      "c_link_flags": [
+        "-lgmp"
+      ],
+      "x2c_link_flags": [
+        "-lgmp"
+      ]
+    }
+  ]
+}
