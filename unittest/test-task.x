@@ -542,7 +542,55 @@ static void task_large_batch_completes_and_cleans_partial_startup(void) {
   EXPECT_INT_EQ(completed, 1026);
 }
 
+static void task_configured_stack_sizes_and_invalid_settings(void) {
+  $test.scoped();
+  const char *previous = getenv("X2C_TASK_STACK_BYTES");
+  char *saved = previous ? strdup(previous) : NULL;
+  const char *valid[] = { NULL, "32768", "65536", "65537", "1048576" };
+  const char *invalid[] = {
+    "", "0", "32767", "-32768", "65536x", "18446744073709551615",
+    "18446744073709551616"
+  };
+  try {
+    for (int i = 0; i < 5; i++) {
+      if (valid[i]) setenv("X2C_TASK_STACK_BYTES", valid[i], 1);
+      else unsetenv("X2C_TASK_STACK_BYTES");
+      Channel gate = auto Channel.new();
+      int completed = 0;
+      Task.run([
+        %!(void) => gate.receive(),
+        %!(void) => { gate.send(42); return 7; }
+      ], %!(Var result) using &completed => {
+        if (result == 42 || result == 7) completed++;
+        return void;
+      });
+      EXPECT_INT_EQ(completed, 2);
+    }
+    for (int i = 0; i < 7; i++) {
+      setenv("X2C_TASK_STACK_BYTES", invalid[i], 1);
+      int caught = 0, entered = 0;
+      try Task.run([%!(void) using &entered => { entered++; return void; }]);
+      catch %(bad-arg (operation "Task stack capacity")): caught = 1;
+      EXPECT_INT_EQ(caught, 1);
+      EXPECT_INT_EQ(entered, 0);
+    }
+    setenv("X2C_TASK_STACK_BYTES", "65536", 1);
+    int completed = 0;
+    Func job = %!(void) => 1;
+    Task.run([job], %!(Var value) using &completed => {
+      completed += value.int();
+      return void;
+    });
+    EXPECT_INT_EQ(completed, 1);
+  } finally {
+    if (saved) setenv("X2C_TASK_STACK_BYTES", saved, 1);
+    else unsetenv("X2C_TASK_STACK_BYTES");
+    free(saved);
+  }
+}
+
 void task_suite(void) {
+  $test.run(task_configured_stack_sizes_and_invalid_settings);
   $test.run(task_empty_batch_has_no_completion);
   $test.run(task_request_reply_closes_after_clients_finish);
   $test.run(task_rendezvous_and_buffered_channels_drain);

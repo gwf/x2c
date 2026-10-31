@@ -1,5 +1,16 @@
 # Status
 
+## Private async stack coverage on 2026-10-31
+
+The Task suite covers configured stack sizes, invalid settings, failure before
+job entry, recovery, and restoration of the caller's environment. The optional
+`probes/run-task-backend.sh` checks page rounding, guards, switching, complete
+unmapping, and the production unsupported-backend diagnostic without a new
+runtime API or recurring gate. Normal and sanitizer suites pass on macOS arm64
+and macOS x86_64 through Rosetta. Linux execution remains untested because no
+local runtime or cross-toolchain is available. See
+[the native target report](../plans/reference/async-native-targets-2026-10-31.md).
+
 ## Private async review on 2026-10-31
 
 Two runtime defects were reproduced in the gate-repair review and fixed in
