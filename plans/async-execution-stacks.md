@@ -697,7 +697,7 @@ they do not authorize implementation or unrelated contract changes.
 
 | Item | Constraint and next work |
 | --- | --- |
-| Strict-build lifetime diagnostics | Four conservative region diagnostics remain for manually linked waiter records and batch backing. Resolve them without new lifetime tracking or weakening checks; the strict stage build is not yet established. |
+| Strict-build lifetime diagnostics | The pointer-field provenance bug is fixed locally. Three valid temporary-borrow diagnostics remain at Task._prepare, task notification registration, and Channel rendezvous registration. The analysis boundary proposed below needs a decision before policy changes. |
 | Remaining native targets | Establish Linux arm64/x86_64 and macOS x86_64 ABI, compiler, sanitizer, and Error compatibility. Only macOS arm64 has execution evidence. |
 | Regression coverage | Local Channel and Scope timings are bounded evidence. Network/timer workloads, broader performance checkpoints, and final publication validation remain outstanding. |
 
@@ -811,6 +811,46 @@ or main.
 See [the prototype report](reference/async-task-prototype-2026-10-30.md) for
 commands, test counts, measured workloads, dependency adaptations, and limits.
 This evidence does not lift the delivery hold or accept remaining regressions.
+
+### Lifetime analysis follow-up, 2026-10-31
+
+Independent source review found no runtime borrow-end gap in the four original
+sites. Task.run finishes participants before its frame exits; both waiter
+registrations unlink before their frames return, under the same mutex used
+by native notifiers. No extra runtime allocation or lifetime tracking is
+needed to establish those contracts.
+
+The analyzer did have a provenance bug: indexing through a pointer field
+could inherit the containing record's frame or parameter identity. A local
+fix keeps untracked pointee storage distinct from its containing record.
+Inline arrays and the pointer field's own address retain frame provenance.
+The new region-pointer-fields fixture covers both distinctions. All 1,353
+compiler fixtures pass with this fix alone.
+
+The three remaining diagnostics result from summaries meaning "ever stored"
+rather than "retained after return". Inferring intrusive-list unregistration
+and cleanup would require a broader analysis model. Gary selected defining
+the analysis boundary before adding that machinery.
+
+The following diagnostic policy is proposed, not implemented or selected:
+
+| Case | Ordinary translation | Existing audit mode | Meta functions |
+| --- | --- | --- | --- |
+| Returned frame address or direct static store | Keep warning. | Keep finding. | Keep error. |
+| Known retaining storage and established ended regions | Keep existing checks. | Keep findings. | Keep errors. |
+| Possible frame escape through raw pointer storage whose destination lifetime is unknown | Leave to the owning C lifetime contract. | Keep possible-escape finding. | Keep existing error. |
+
+This reuses the existing ordinary/audit/meta distinction. It adds no borrow
+syntax, runtime state, function allowlist, blanket region-warning disable, or
+general pointer-analysis engine. Known retaining operations must remain
+distinguishable from unknown raw stores, including through helper summaries.
+
+The compatibility cost is real: the existing ordinary warning for
+stored_through_parameter in region-local-escapes would move to audit mode.
+Such stores can still be wrong; ordinary translation would no longer claim
+to determine their lifetime from the store alone. Return/static checks,
+known retaining-storage checks, and meta errors remain protected. This
+diagnostic change requires Gary's decision before implementation.
 
 ## Plan review
 
