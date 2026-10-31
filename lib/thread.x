@@ -61,13 +61,27 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
-/** Native Channel wait bridge. The Channel owns its mutex and condition
-    together; a registered Thread borrows the monitor until acknowledgement.
+/** One task parked on a Channel monitor. Membership is protected by that
+    monitor's mutex; the task and record remain live until removal.
+*/
+typedef struct X2CTaskWait {
+  void *task;
+  struct X2CTaskWait *next;
+} X2CTaskWait;
+
+/** Shared Channel wait bridge. The Channel owns its mutex, native condition,
+    and task wait list. A registered Thread borrows it until acknowledgement.
 */
 typedef struct X2CChannelMonitor {
   pthread_mutex_t mutex;
   pthread_cond_t condition;
+  X2CTaskWait *tasks;
 } X2CChannelMonitor;
+
+void *x2c_task_current(void);
+int x2c_task_stopping(void *task);
+void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner);
+void x2c_task_channel_notify(X2CChannelMonitor *monitor);
 
 static typedef struct ParallelRun { Array ready; int stopping; } *ParallelRun;
 
