@@ -3,6 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
+#include "system-macros.x"
 #include "cli/cli.x"
 #include "repl-types.x"
 #include "repl-input.x"
@@ -97,28 +98,33 @@ static int _help(String command) {
     printf("%s\n  %s\n", row->synopsis, row->description);
     return 1;
   }
-  puts("Enter C or x2c declarations and statements with semicolons.\n"
-       "Each executable submission compiles to native code.\n\n"
-       "Explore");
+  puts($dedent(%"
+    Enter C or x2c declarations and statements with semicolons.
+    Each executable submission compiles to native code.
+
+    Explore"));
   for (size_t i = 0; i < sizeof(_commands) / sizeof(*_commands); i++) {
     if (_commands[i].spelling == ":files") puts("\nLoad and repeat");
     if (_commands[i].spelling == ":stats") puts("\nInspect execution and control input");
     printf("  %-12s %s\n", _commands[i].spelling, _commands[i].description);
   }
-  puts("\nTry a library\n"
-       "  :load \"points.c\"\n"
-       "  :symbols point\n"
-       "  :info point_new\n"
-       "  Point *p = point_new(1, 2);\n"
-       "  point_move(p, 5);\n"
-       "  :inspect *p\n"
-       "  point_free(p);\n\n"
-       "A successful load/reload clears all prompt and library state.\n"
-       "A native crash or Ctrl-C during execution restarts that state.\n"
-       "History survives; source is never replayed automatically.\n\n"
-       "Tab completes names and paths; a second Tab lists choices.\n"
-       "Arrow keys recall history. Ctrl-C cancels an edit; Ctrl-D exits an empty edit.\n"
-       "Use :help COMMAND for its arguments.");
+  puts("\n" + $dedent(%"
+    Try a library
+      :load \"points.c\"
+      :symbols point
+      :info point_new
+      Point *p = point_new(1, 2);
+      point_move(p, 5);
+      :inspect *p
+      point_free(p);
+
+    A successful load/reload clears all prompt and library state.
+    A native crash or Ctrl-C during execution restarts that state.
+    History survives; source is never replayed automatically.
+
+    Tab completes names and paths; a second Tab lists choices.
+    Arrow keys recall history. Ctrl-C cancels an edit; Ctrl-D exits an empty edit.
+    Use :help COMMAND for its arguments."));
   return 1;
 }
 

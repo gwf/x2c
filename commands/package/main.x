@@ -2,6 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 */
+#include "system-macros.x"
 #include "package.x"
 #include "args.x"
 #include "cli/cli.x"
@@ -42,8 +43,9 @@ int main(int argc, char **argv) {
   List args = Args.from_argv(argc, argv);
   String operation = args ? args.car() : "--help";
   if (operation == "--help" || operation == "-h") {
-    puts("usage: x2c package <install|remove|list> [options]\n"
-         "       x2c install, remove, and list are equivalent short forms.");
+    puts($dedent(%"
+      usage: x2c package <install|remove|list> [options]
+             x2c install, remove, and list are equivalent short forms."));
     return 0;
   }
   List spec = _spec(operation);
