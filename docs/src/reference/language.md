@@ -4392,7 +4392,11 @@ Unlike a `match` statement, a pattern condition does not introduce a target
 for `break`. A `break` or `continue` in the true body retains its ordinary
 loop or switch target. Pattern conditions use the existing match lowering:
 simple static patterns become direct C tests; complex patterns can use the
-cached runtime matcher.
+cached runtime matcher. A constant List with no pattern features tries List
+equality first. The empty List and singletons containing a Symbol, Atom,
+narrow integer, or empty List need no further test. Other literal Lists keep
+value matching when equality fails: Strings, boxed numbers, and Lists built
+in independent Pools can have equal contents with different identities.
 
 ### Errors and cleanup
 
