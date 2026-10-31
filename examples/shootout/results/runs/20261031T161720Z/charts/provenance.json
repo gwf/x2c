@@ -1,0 +1,68 @@
+{
+  "report_path": "/Users/gary/.codex/worktrees/f2bc/x2c/examples/shootout/results/runs/20261031T161720Z/current.json",
+  "report_sha256": "8d90774b21d0ae802cdde5c68b9f453dbd9ef5d37b015e72247164b367e5316d",
+  "run_id": "20261031T161720Z",
+  "profile": "local",
+  "measured_revision": "a8d02959e25f6517cdcf189d386c637f587f016e",
+  "quiet_window": {
+    "criterion": "at least 90 percent CPU idle in six consecutive 10-second samples after builds and fixture checks",
+    "evidence": "debug/counter-spectral-quiet-window.jsonl",
+    "orchestration_sha256": "d57a0e38a6c440284b8c60e66ab95d866c28a80c3f5ade99e69c6a8e1be529d7",
+    "samples": [
+      {
+        "captured_at_utc": "2026-10-31T16:16:25.296130+00:00",
+        "idle_percent": 90.76
+      },
+      {
+        "captured_at_utc": "2026-10-31T16:16:36.306666+00:00",
+        "idle_percent": 93.58
+      },
+      {
+        "captured_at_utc": "2026-10-31T16:16:47.324819+00:00",
+        "idle_percent": 94.36
+      },
+      {
+        "captured_at_utc": "2026-10-31T16:16:58.314656+00:00",
+        "idle_percent": 92.95
+      },
+      {
+        "captured_at_utc": "2026-10-31T16:17:09.306746+00:00",
+        "idle_percent": 92.96
+      },
+      {
+        "captured_at_utc": "2026-10-31T16:17:20.297531+00:00",
+        "idle_percent": 92.99
+      }
+    ]
+  },
+  "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
+  "execution_modes": "Mixed serial/parallel contributions; both x2c binary-trees entries parallel; idiomatic spectral-norm parallel at N>=256",
+  "samples": 16,
+  "baseline_sha256": "3a798f74363417e9f0c9e6e3e56620d2319e5937e80961ffcff3d231a3fd01a7",
+  "normalization": "Per-problem minima among available columns; all eight for shared problems",
+  "summary": "Geometric mean of the nine shared normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank source lines after language-aware comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10,
+  "summary_benchmarks": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "binarytrees",
+    "regexredux",
+    "pidigits"
+  ],
+  "unavailable": {
+    "knucleotide": {
+      "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+      "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
+      "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched.",
+      "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+    }
+  }
+}

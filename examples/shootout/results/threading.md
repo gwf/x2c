@@ -44,15 +44,16 @@ allocator, typed container, raw collection storage, or shared mutable tree.
 The callback returns void; its scalar check stays in the caller-owned Batch.
 
 The unchanged [serial source](../benchmarks/binarytrees/serial.x) remains
-executable. Earlier complete serial reports and charts remain immutable. The
-latest run adds sixteen alternating same-compiler serial/parallel pairs at
+executable. Earlier complete serial reports and charts remain immutable.
+Run `20261031T145604Z` adds sixteen alternating serial/parallel pairs at
 depth 14, with one warmup per program and six workers in the parallel version.
 The saved comparison includes elapsed time and total user-plus-system CPU time,
 raw samples, output checks, source and binary hashes, and quiet-window evidence.
 
 Parallelism is independent of the idiomatic/tuned distinction. Both columns use
-the same ordinary threading code here. Other workloads retain their previous
-execution strategies. These charts still compare selected contributions with
+the same ordinary threading code here. Idiomatic spectral-norm also uses
+threads as described below; other workloads retain their execution strategies.
+These charts still compare selected contributions with
 mixed serial and parallel programs, rather than controlled single-core language
 implementations. The
 [official measurement method](https://benchmarksgame-team.pages.debian.net/benchmarksgame/how-programs-are-measured.html)
@@ -60,3 +61,14 @@ also distinguishes elapsed time from CPU time.
 
 The pre-run quiet window does not establish zero background activity throughout
 measurement. Canonical-size timing remains unrun.
+
+## Ordinary parallel spectral-norm
+
+The idiomatic entry uses six ordinary Threads for disjoint output row blocks
+at N>=256. Ordinary Arrays hold all vectors; their lengths remain fixed during
+worker execution. Workers read one input vector and write distinct existing
+output elements. Each row retains the original j-order and double accumulation.
+The coordinator joins every worker before the next matrix product reads the
+output. Per-product Rows objects remain alive through join. Small inputs use
+the same calculation serially. Tuned spectral-norm remains its serial typed-Array
+implementation. This is a change in execution mode, not a single-core speedup.

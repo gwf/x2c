@@ -90,3 +90,11 @@ excluded from the final report.
 ## Ordinary parallel binary-trees
 
 `parallel-trees/` preserves serial and parallel sources, repeated oracle checks, active-desktop preliminary samples, same-compiler quiet paired elapsed/CPU measurements, and scripts. Each worker writes only its distinct Batch.check; the coordinator joins before reading. No custom allocator or shared tree is introduced.
+
+## Counter objects and parallel spectral-norm
+
+`counter-spectral/` retains both baseline/candidate sources, independent
+k-nucleotide input/output oracles, C spectral parity checks, initial and
+cutoff probes, quiet paired samples, build/source/binary hashes, and scripts.
+The Counter experiment was not adopted; the spectral row-batch implementation
+was adopted. Full calibration is [run 20261031T161720Z](../runs/20261031T161720Z/README.md).

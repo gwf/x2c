@@ -1,0 +1,19 @@
+{
+  "run_id": "20261031T161720Z",
+  "forms_reviewed": [
+    "runtime-source-size",
+    "implementation-profiles",
+    "runtime-loc-distributions",
+    "counter-spectral-probes"
+  ],
+  "summary_columns": 8,
+  "common_problems": 9,
+  "checks": [
+    "labels and axes readable without clipping",
+    "idiomatic profile annotation moved away from spokes",
+    "probe horizontal axes use actual numeric N on logarithmic scales",
+    "Counter rejected and spectral adopted explicitly labeled",
+    "all three main chart forms retain the common cohort"
+  ],
+  "render_source": "final reviewed renderers are under runs/20261031T161720Z/charts; the original experiment renderer remains separately archived"
+}
