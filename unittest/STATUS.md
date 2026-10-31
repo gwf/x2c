@@ -5,8 +5,10 @@
 The SymbolSet delimiter migration exposed existing failures that also reproduce
 with the converged compiler at `b75c61da9`:
 
-- `make examples`: `programs/tiny-lisp-min.x:2:110` reports "function takes
-  1 argument, not 0" for `W()` with the `typedef void Z` parameter spelling.
+- Resolved on 2026-10-31: `tiny-lisp-min.x` uses `typedef void Z` in an
+  unnamed parameter list. Parameter binding now normalizes that spelling to
+  the empty-parameter sentinel. The `typedef-void-parameters` fixture covers
+  direct calls, function pointers, and `Func` adapters.
 - `make doc-examples`: the `language.md:106` sample declares `remainder` with
   a signature that conflicts with the C math function. The imports slide also
   requires a built PCRE2 package; that prerequisite is absent in these worktrees.
