@@ -937,6 +937,17 @@ exclude the Lisp interpreter; only its activation cell and pointer exchange
 are provided by the existing lightweight Lisp-bindings unit. The delivery
 hold remains in force.
 
+### Residual memory investigation, 2026-10-31
+
+The [residual memory report](reference/async-residual-memory-2026-10-31.md)
+attributes the large post-batch VM/RSS residual to macOS malloc regions and
+freed-page caching. The batch job allocation is freed and all stack mappings
+are unmapped. Only fixed first-use catch-site Match plans remain live in the
+tested workload. Repeated large batches keep live heap bytes constant, while
+allocator regions can accumulate across magazines: the 1,000-batch probe
+retains about 1.6 GiB additional VM and 33 MiB RSS. No runtime change or
+acceptance decision was made. Normal benchmark reruns and pushing remain held.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
