@@ -1,10 +1,11 @@
 #pragma once
+#include "system-macros.x"
 
 /*  graph-output.x -- command help display */
 
 macro Stmt $output.graph.usage(Expr $out, Expr $program) {
   $out.printf(
-    %"
+    $dedent(%"
     usage: %s snapshot OUTPUT [BUILD_OPTIONS] [FILE...]
            %s status SNAPSHOT
            %s query SNAPSHOT QUERY_FILE
@@ -28,7 +29,7 @@ macro Stmt $output.graph.usage(Expr $out, Expr $program) {
            %s allocation-returns NAME [-I DIR] FILE...
            %s flows PRODUCER CONSUMER [-I DIR] FILE...
            %s compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
-    ".dedent(),
+    "),
     $program, $program, $program, $program,
     $program, $program, $program, $program,
     $program, $program, $program, $program,

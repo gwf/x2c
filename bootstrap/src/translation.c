@@ -155,7 +155,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new(".");
   _1 = String_new("translation input is not an .x file: ");
-  _2 = String_new("\n      x2c: error: inputs produce the same output stem \'%s\'\n        first input: %s\n        other input: %s\n        output: %s/%s.c\n    ");
+  _2 = String_new("x2c: error: inputs produce the same output stem \'%s\'\n  first input: %s\n  other input: %s\n  output: %s/%s.c\n");
   _3 = String_new("output directory is not writable: ");
   _4 = String_new("/builds/");
   _5 = String_new(".module");
@@ -227,7 +227,7 @@ static void _preflight(Translation * t){
 }
 
 _Noreturn static void _stem_collision(String stem, String first, String other, String out_dir){
-  fprintf(stderr, String_dedent(_2), stem, first, other, out_dir, stem);
+  fprintf(stderr, _2, stem, first, other, out_dir, stem);
   exit(2);
 }
 

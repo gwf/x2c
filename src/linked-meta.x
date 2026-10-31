@@ -302,18 +302,12 @@ Code register_rewrite(Code function, Code pattern, List holes) {
 
 /* --- lib/system-macros.x ------------------------------------------------- */
 
-List _dedent_expand(Source text) {
-  String source = Code.source_text(text);
-  int length = source.len(), open = 0;
-  if (length >= 3 && source.startswith("%\""))
-    open = 2;
-  else if (length >= 2 && source.startswith("\""))
-    open = 1;
-  if (open == 0 || !source.endswith("\"") || "\\" in source ||
-      "$" in source)
-    return $!( $(text.assoc(<syntax>)).dedent() );
-  String body = source.getslice(open, length - 1, 1);
-  return $!String{ $(body.dedent()) };
+List _dedent_expand(Code text) {
+  if (text.format()) {
+    String body = text.value();
+    return $!String{ $(body.dedent()) };
+  }
+  return $!( $(text).dedent() );
 }
 
 List _macros_location(void) =>

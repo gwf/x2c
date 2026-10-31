@@ -898,11 +898,13 @@ int main(void) {
 }
 ```
 
-A literal whose spelling carries no escape and no interpolation hole is
-dedented during translation and reaches C as a finished constant. Every other
-form calls `String.dedent` at run time, so an interpolated block means the same
-thing and costs one call. Use `String.dedent` directly on text that arrives
-from a file or an argument.
+A static String literal is dedented during translation and reaches C as a
+finished constant, including escaped literals and literals inside macros.
+Physical CR and CRLF source line endings become LF, as in ordinary String
+literals; explicit `\r\n` escapes remain CRLF.
+Other expressions call `String.dedent` at run time and evaluate their input
+once. An interpolated block therefore means the same thing and costs one call.
+Use `String.dedent` directly on text that arrives from a file or an argument.
 
 ### Report the check you actually wrote
 
