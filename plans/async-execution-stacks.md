@@ -948,6 +948,17 @@ allocator regions can accumulate across magazines: the 1,000-batch probe
 retains about 1.6 GiB additional VM and 33 MiB RSS. No runtime change or
 acceptance decision was made. Normal benchmark reruns and pushing remain held.
 
+### Selected batch-array mitigation
+
+Map the contiguous TaskJob array when its byte size exceeds one native page;
+keep calloc/free for arrays at or below that boundary. Anonymous mappings
+preserve zero initialization. The existing batch cleanup releases the array
+only after every job has finished cleanup, including partial startup failure.
+The native backend selects both paths from the same byte size, with no new
+allocation-kind state, public API, process allocator setting, or per-switch
+operation. This targets medium-region VM retention; smaller native allocator
+caches and their resident footprint remain outside this change.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity

@@ -4,6 +4,11 @@
 #include "test-support.x"
 #include "test-macros.x"
 #include <stdatomic.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#endif
 
 class TaskRenderProbe { Channel gate; int calls; } *;
 
@@ -488,6 +493,55 @@ static void task_render_paths_restore_after_suspension_and_failure(void) {
   }
 }
 
+static void task_job_storage_obeys_page_boundary_and_zeroes(void) {
+  size_t page = sysconf(_SC_PAGESIZE);
+  size_t sizes[] = { page - 1, page, page + 1 };
+  for (int sample = 0; sample < 3; sample++) {
+    size_t size = sizes[sample];
+    unsigned char *storage = x2c_task_jobs_new(size);
+    if (!EXPECT_NOT_NULL(storage)) continue;
+    int zeroed = 1;
+    for (size_t i = 0; i < size; i++)
+      if (storage[i]) zeroed = 0;
+    EXPECT_TRUE(zeroed);
+#ifdef __APPLE__
+    EXPECT_INT_EQ(malloc_zone_from_ptr(storage) == NULL, size > page);
+#endif
+    memset(storage, 0xa5, size);
+    uintptr_t address = (uintptr_t)storage;
+    x2c_task_jobs_free(storage, size);
+    if (size > page)
+      for (size_t offset = 0; offset < size; offset += page) {
+        errno = 0;
+        EXPECT_INT_EQ(mprotect((void *)(address + offset), page,
+                              PROT_READ | PROT_WRITE), -1);
+        EXPECT_INT_EQ(errno, ENOMEM);
+      }
+  }
+}
+
+static void task_large_batch_completes_and_cleans_partial_startup(void) {
+  $test.scoped();
+  Array jobs = [];
+  Func job = %!(void) => 1;
+  for (int i = 0; i < 1025; i++) jobs.push(job);
+  int completed = 0, caught = 0;
+  Task.run(jobs, %!(Var result) using &completed => {
+    if (result == 1) completed++;
+    return void;
+  });
+  EXPECT_INT_EQ(completed, 1025);
+  jobs[1] = Func.var(NULL);
+  try Task.run(jobs, NULL);
+  catch %(bad-arg *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  Task.run([job], %!(Var result) using &completed => {
+    if (result == 1) completed++;
+    return void;
+  });
+  EXPECT_INT_EQ(completed, 1026);
+}
+
 void task_suite(void) {
   $test.run(task_empty_batch_has_no_completion);
   $test.run(task_request_reply_closes_after_clients_finish);
@@ -504,4 +558,6 @@ void task_suite(void) {
   $test.run(task_stop_rolls_back_uncommitted_owned_send);
   $test.run(task_lisp_activations_restore_after_suspension_and_failure);
   $test.run(task_render_paths_restore_after_suspension_and_failure);
+  $test.run(task_job_storage_obeys_page_boundary_and_zeroes);
+  $test.run(task_large_batch_completes_and_cleans_partial_startup);
 }

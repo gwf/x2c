@@ -1,4 +1,4 @@
-/* Native stack switching. Task scheduling and runtime state stay in task.x. */
+/* Native task storage and stack switching. Scheduling stays in task.x. */
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -55,6 +55,20 @@ static void task_stack_entry(mco_coro *co) {
 }
 
 int x2c_task_stack_supported(void) { return 1; }
+
+/* Large batch arrays bypass malloc's retained medium regions. */
+void *x2c_task_jobs_new(size_t size) {
+  if (size <= (size_t)sysconf(_SC_PAGESIZE)) return calloc(1, size);
+  void *jobs = mmap(NULL, size, PROT_READ | PROT_WRITE,
+    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  return jobs == MAP_FAILED ? NULL : jobs;
+}
+
+void x2c_task_jobs_free(void *jobs, size_t size) {
+  if (!jobs) return;
+  if (size <= (size_t)sysconf(_SC_PAGESIZE)) free(jobs);
+  else munmap(jobs, size);
+}
 
 void *x2c_task_stack_new(void (*entry)(void *), void *argument, size_t size) {
   size_t page = (size_t)sysconf(_SC_PAGESIZE);
@@ -134,6 +148,8 @@ void x2c_task_stack_free(void *value) {
 }
 #else
 int x2c_task_stack_supported(void) { return 0; }
+void *x2c_task_jobs_new(size_t size) { (void)size; return NULL; }
+void x2c_task_jobs_free(void *jobs, size_t size) { (void)size; free(jobs); }
 void *x2c_task_stack_new(void (*entry)(void *), void *argument, size_t size) {
   (void)entry; (void)argument; (void)size;
   return NULL;

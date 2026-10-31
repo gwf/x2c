@@ -11,6 +11,8 @@
 typedef struct Task *Task;
 
 extern int x2c_task_stack_supported(void);
+extern void *x2c_task_jobs_new(size_t size);
+extern void x2c_task_jobs_free(void *jobs, size_t size);
 extern void *x2c_task_stack_new(
   void (*entry)(void *), void *argument, size_t size);
 extern void x2c_task_stack_resume(void *stack);
@@ -85,7 +87,7 @@ void Task.run(Array jobs, Func completed) {
   _native_check(pthread_cond_init(&run.monitor.condition, NULL));
   defer _native_check(pthread_cond_destroy(&run.monitor.condition));
   defer _shutdown(&run);
-  run.jobs = calloc(run.count, sizeof(struct TaskJob));
+  run.jobs = x2c_task_jobs_new(run.count * sizeof(struct TaskJob));
   if (!run.jobs) raise %(alloc-fail);
   for (int i = 0; i < run.count; i++) {
     _check_stop();
@@ -314,7 +316,7 @@ static void _shutdown(TaskRun run) {
     if (job.finished) { _release_stack(job); unfinished--; }
   }
   for (int i = 0; i < run.prepared; i++) _free(&run.jobs[i]);
-  free(run.jobs);
+  x2c_task_jobs_free(run.jobs, run.count * sizeof(struct TaskJob));
   if (run.error_scope) run.error_scope.destroy();
 }
 
