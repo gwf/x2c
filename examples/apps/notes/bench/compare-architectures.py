@@ -78,6 +78,7 @@ def main():
         "load_sha256": compare.digest(args.load), "fixture_sha256": compare.digest(fixture),
         "source_sha256": {str(path.relative_to(compare.ROOT)): compare.digest(path) for path in
             [compare.HERE.parent / "notes.x", compare.HERE / "threaded-notes.x",
+             compare.HERE / "notes-database.x",
              compare.HERE / "go/main.go", pathlib.Path(__file__).resolve()]},
         "order": [], "samples": {name: [] for name in binaries}}
     args.output.mkdir(parents=True, exist_ok=True)

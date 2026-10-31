@@ -2,24 +2,13 @@
 
     Copyright (c) 2026 Gary William Flake
 */
-import "sqlite" with Database, Prepared;
+#include "notes-database.x"
 #include "http.x"
 #include "args.x"
 #include "regex.x"
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
-
-class Notes { Channel requests; Thread database; String path; } *;
-
-static typedef struct Request {
-  Symbol operation, cause;
-  List arguments, detail;
-  Var result;
-  Channel reply;
-  Scope output;
-  Pool pool;
-} Request;
 
 static volatile sig_atomic_t stopping;
 
@@ -35,10 +24,6 @@ int main(int argc, char **argv) {
   }
 }
 
-void Notes.init(Notes app) {
-  app.requests = NULL; app.database = NULL; app.path = NULL;
-}
-
 static int run(Map options) {
   if (options["help"]) return 0;
   int port = number(options, "port", 0, 65535);
@@ -47,7 +32,7 @@ static int run(Map options) {
   app.path = options["store"];
   app.requests = Channel.new(<p48>, workers);
   defer app.requests.free();
-  app.database = Thread.start(database_thread, Var.new(<p48>, app));
+  app.database = Thread.start(Notes.database_worker, Var.new(<p48>, app));
   defer {
     app.requests.close();
     app.database.join();
@@ -123,7 +108,7 @@ static void list_notes(Notes app, HttpRequest req, HttpResponse res) {
   }
   Array rows = request(app, <list>, NULL), notes = [];
   foreach (List row in rows) {
-    Map note = note_json(row);
+    Map note = Notes.note_json(row);
     if (tag && !(tag in note["tags"].array())) continue;
     if (pattern && !pattern.match(note["title"]) &&
         !pattern.match(note["body"])) continue;
@@ -135,7 +120,7 @@ static void list_notes(Notes app, HttpRequest req, HttpResponse res) {
 static void get_note(Notes app, HttpRequest req, HttpResponse res) {
   List row = request(app, <get>, $(req.params["id"]));
   if (!row) Http.fail(404, "no such note");
-  res.json(note_json(row));
+  res.json(Notes.note_json(row));
 }
 
 static void create_note(Notes app, HttpRequest req, HttpResponse res) {
@@ -154,7 +139,7 @@ static void update_note(Notes app, HttpRequest req, HttpResponse res) {
   List row = request(app, <update>, $(values["title"], values["body"],
     values["tags"].json(), (long) time(NULL), req.params["id"]));
   if (!row) Http.fail(404, "no such note");
-  res.json(note_json(row));
+  res.json(Notes.note_json(row));
 }
 
 static void delete_note(Notes app, HttpRequest req, HttpResponse res) {
@@ -183,95 +168,12 @@ static void stats(Notes app, HttpResponse res) {
    closing the database queue; it does not cancel a handler's borrow. */
 static Var request(Notes app, Symbol operation, List arguments) {
   Channel reply = auto Channel.new(<symbol>, 1);
-  Request job = {.operation = operation, .arguments = arguments,
+  NotesRequest job = {.operation = operation, .arguments = arguments,
     .reply = reply, .output = Scope.child(), .pool = Pool.current()};
   app.requests.send(Var.new(<p48>, &job));
   reply.receive();
   if (job.cause) Error.raise(job.cause, job.detail);
   return job.result;
-}
-
-static Var database_thread(Var value) {
-  Notes app = value.pointer();
-  auto Database db = NULL;
-  foreach (Var message in app.requests) {
-    Request *job = message.pointer();
-    Channel reply = job.reply;
-    try {
-      if (job.operation == <open>) {
-        db = Database.open(app.path);
-        db.execute("CREATE TABLE IF NOT EXISTS note ("
-          "id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, "
-          "body TEXT NOT NULL, tags TEXT NOT NULL, "
-          "created INTEGER NOT NULL, updated INTEGER NOT NULL)");
-      }
-      else database_request(db, job);
-    }
-    catch %(?cause *detail): {
-      save_failure(job, cause, detail);
-    }
-    try reply.send(<done>);
-    catch %(?cause *detail): {
-      save_failure(job, cause, detail);
-      reply.close();
-    }
-  }
-  return void;
-}
-
-static void save_failure(Request *job, Symbol cause, List detail) {
-  job.cause = cause;
-  job.detail = Error.snapshot_in(detail, &job.output, job.pool);
-}
-
-static void database_request(Database db, Request *job) {
-  Scope.push(&job.output);
-  defer Scope.pop();
-  Pool previous = x2c_pool_exchange(job.pool);
-  defer x2c_pool_exchange(previous);
-  job.result = execute(db, job.operation, job.arguments);
-}
-
-static Var execute(Database db, Symbol operation, List arguments) {
-  switch (operation) {
-    case <list>: return rows(db,
-      "SELECT id, title, body, tags, created, updated FROM note ORDER BY id");
-    case <stats>: return rows(db, "SELECT title, body, tags FROM note");
-    case <get>: {
-      Prepared select = auto db.prepare(
-        "SELECT id, title, body, tags, created, updated FROM note WHERE id = ?");
-      return select.bind(@arguments).next();
-    }
-    case <create>: {
-      Prepared insert = auto db.prepare(
-        "INSERT INTO note (title, body, tags, created, updated) "
-        "VALUES (?, ?, ?, ?, ?) RETURNING id");
-      List row = insert.bind(@arguments).next();
-      insert.execute();
-      return row;
-    }
-    case <update>: {
-      Prepared update = auto db.prepare(
-        "UPDATE note SET title = ?, body = ?, tags = ?, updated = ? "
-        "WHERE id = ? RETURNING id, title, body, tags, created, updated");
-      List row = update.bind(@arguments).next();
-      update.execute();
-      return row;
-    }
-    case <delete>: {
-      Prepared remove = auto db.prepare("DELETE FROM note WHERE id = ?");
-      remove.bind(@arguments).execute();
-      return (long) db.changes();
-    }
-    default: raise %(bad-arg (operation "database request"));
-  }
-}
-
-static Array rows(Database db, String sql) {
-  Prepared select = auto db.prepare(sql);
-  Array result = [];
-  foreach (List row in select) result.push(row);
-  return result;
 }
 
 static Map note_input(HttpRequest req) {
@@ -291,7 +193,3 @@ static Map note_input(HttpRequest req) {
   return {"title": fields["title"],
           "body": fields["body"] is void ? "" : fields["body"], "tags": tags};
 }
-
-static Map note_json(List row) =>
-  {"id": row[0].str(), "title": row[1], "body": row[2],
-   "tags": Json.parse(row[3]), "created": row[4], "updated": row[5]};

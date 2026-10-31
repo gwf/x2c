@@ -23,7 +23,8 @@ SQLITE_PREFIX="$(python3 packages/tools/deps.py path \
 ./builds/0/x2c build -O2 -o /tmp/threaded-notes \
   --package-dir packages --c-include-dir packages/sqlite/src \
   --c-include-dir "$SQLITE_PREFIX/include" \
-  examples/apps/notes/bench/threaded-notes.x
+  examples/apps/notes/bench/threaded-notes.x \
+  examples/apps/notes/bench/notes-database.x
 python3 examples/apps/notes/tests/test_notes.py /tmp/threaded-notes
 python3 examples/apps/notes/bench/test-threaded.py /tmp/threaded-notes
 ```
