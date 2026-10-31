@@ -77,6 +77,10 @@ cache implementation or locking change was made. The sample and initial log
 are retained in debug/async-numeric-fix-x86_64-meta-sample.txt and
 debug/async-numeric-fix-macos-x86_64-cache-lock.log.
 
+The subsequent [cache-path repair](async-cache-path-fix-2026-10-31.md)
+normalizes the cache root at the support-unit comparison. Its cold aliased and
+relative-path regression cases fail before that correction and pass afterward.
+
 The complete local `make agent-pr-check` passes: bootstrap refresh and safe
 rebuild, strict self-host comparisons, 1,357 compiler fixtures (2,999 artifacts),
 documentation, and complete command checks. Its log is

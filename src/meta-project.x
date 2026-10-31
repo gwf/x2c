@@ -168,7 +168,8 @@ static List _build(Helper &h) {
 static int _support_unit(List inputs) {
   if (inputs.len() != 1) return 0;
   String root = Compiler.cache_root();
-  return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
+  return root && Path.absolute(inputs.car()).startswith(
+    %"$(Path.absolute(root))/meta/support-");
 }
 
 /* Each owner with a group calls its table, and a table or a helper that

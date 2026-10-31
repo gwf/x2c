@@ -1,5 +1,18 @@
 # Status
 
+## Resolved helper-cache path deadlock on 2026-10-31
+
+The support-unit guard compared a physical input path with the cache root as
+spelled in the environment. A cold aliased or relative cache could make the
+helper loop attempt to build its own helper and wait on its parent's lock.
+The guard now resolves both sides through Path.absolute. Cache-root selection,
+cache keys, locking, and compiler timeout policy are unchanged.
+
+The existing cache-key probe includes cold absolute and relative symlink cases
+with bounded process-group cleanup. The regression fails before the fix and
+passes afterward. The complete local gate also passes. See
+[the repair evidence](../plans/reference/async-cache-path-fix-2026-10-31.md).
+
 ## Resolved GCC async use-after-return finding on 2026-10-31
 
 Before the fix, the optional Task-suite run with
