@@ -27,6 +27,14 @@ uses the language's more specialized operations while meeting the same
 specification. A program need not use a feature merely to make the two
 versions different. Neither column is a literal C port.
 
+Binary-trees uses one ordinary `Thread` per depth batch in both x2c columns,
+matching the adopted C strategy. Each worker owns its temporary tree scopes;
+the main thread reads its scalar batch result after joining. The unchanged
+`benchmarks/binarytrees/serial.x` preserves the previous serial implementation.
+Saved serial runs and the latest paired serial/parallel comparison remain in
+[results](results/README.md). Neither threading nor parallel execution requires
+typed containers or a custom allocator.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target

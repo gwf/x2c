@@ -15,6 +15,8 @@ static String alu =
   "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC"
   "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
+class Choice { char letter; double cumulative; } *;
+
 int main(int argc, char **argv) {
   int n = argc > 1 ? atoi(argv[1]) : 1000;
   puts(">ONE Homo sapiens alu");
@@ -42,22 +44,34 @@ static void _repeat(int count) {
 }
 
 static void _random(String letters, Array probabilities, int count) {
+  Array choices = _choices(letters, probabilities);
   Buffer line = auto Buffer.new(0);
-  double total = 0;
-  for (int i = 0; i < probabilities.len(); i++) {
-    total += probabilities[i].double();
-    probabilities[i] = total;
-  }
   for (int start = 0; start < count; start += 60) {
     line.clear();
     int end = start + 60 < count ? start + 60 : count;
     for (int i = start; i < end; i++) {
       seed = (seed * 3877 + 29573) % 139968;
       double random = (double) seed / 139968;
-      int choice = 0;
-      while (random >= probabilities[choice].double()) choice++;
-      line.write_char(letters[choice]);
+      int index = 0;
+      Choice choice = choices[index];
+      while (random >= choice.cumulative) choice = choices[++index];
+      line.write_char(choice.letter);
     }
     puts(line.str());
   }
+}
+
+static Array _choices(String letters, Array probabilities) {
+  Array choices = [];
+  double cumulative = 0;
+  for (int i = 0; i < probabilities.len(); i++) {
+    cumulative += probabilities[i].double();
+    choices.push(Choice.new(letters[i], cumulative));
+  }
+  return choices;
+}
+
+static void Choice.init(Choice choice, char letter, double cumulative) {
+  choice.letter = letter;
+  choice.cumulative = cumulative;
 }

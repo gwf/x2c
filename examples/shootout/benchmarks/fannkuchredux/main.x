@@ -23,7 +23,7 @@ static int _fannkuch(int n) {
   }
   int maximum = 0, checksum = 0, permutation_count = 0;
   do {
-    for (int i = 0; i < n; i++) working[i] = permutation[i];
+    working.setslice(0, n, permutation);
     int flips = 0;
     for (int k = working[0].int(); k; k = working[0].int()) {
       for (int i = 0, j = k; i < j; i++, j--) {

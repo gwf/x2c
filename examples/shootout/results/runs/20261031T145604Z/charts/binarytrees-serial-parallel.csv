@@ -1,0 +1,5 @@
+implementation,metric,median_ms,samples,workers
+serial,Elapsed time (ms),107.54412500000001,16,0
+parallel,Elapsed time (ms),25.5338955,16,6
+serial,Total CPU time (ms),107.1105,16,0
+parallel,Total CPU time (ms),119.674,16,6

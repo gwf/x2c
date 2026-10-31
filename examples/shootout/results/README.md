@@ -4,10 +4,10 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current public candidate is [run 20261031T134323Z](runs/20261031T134323Z/README.md),
-measured from clean source revision `d7c7787c7d1c608f86730b1ba5be3f22722c0299` and first
-published with results in `427ee5b3c4176f4bc2dec90fae149bcc68279ea3`. Run identifiers use UTC.
-Observation time: 2026-10-31 06:43 PDT / 2026-10-31 13:43 UTC.
+The current public candidate is [run 20261031T145604Z](runs/20261031T145604Z/README.md),
+measured from clean source revision `e44721497e0004c921ccacec098f330bd2248726` and first
+published with results in `9d070d9a0cf2c13dbebf339f4c708fcbd7354439`. Run identifiers use UTC.
+Observation time: 2026-10-31 07:56 PDT / 2026-10-31 14:56 UTC.
 
 It covers 76 programs, eight columns, and sixteen fresh-process samples per
 program (1,216 observations). All official fixtures and local-profile output
@@ -22,7 +22,8 @@ The four available k-nucleotide programs remain in per-problem tables.
 | [20261031T024309Z](runs/20261031T024309Z/README.md) | 6 | 9 | Rust/C++ adoption; corrected source metrics |
 | [20261031T031704Z](runs/20261031T031704Z/README.md) | 8 | 9 | Go/Java adoption; before idiomatic source changes |
 | [20261031T035446Z](runs/20261031T035446Z/README.md) | 8 | 9 | Quiet-window calibration after the first idiomatic changes |
-| [20261031T134323Z](runs/20261031T134323Z/README.md) | 8 | 9 | Latest: ordinary Node and Buffer rewrites |
+| [20261031T134323Z](runs/20261031T134323Z/README.md) | 8 | 9 | Ordinary Node and Buffer rewrites |
+| [20261031T145604Z](runs/20261031T145604Z/README.md) | 8 | 9 | Latest: fannkuch, FASTA, and parallel trees |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -49,8 +50,8 @@ From a normal clone of `dev`:
 ```sh
 cd examples/shootout/results
 shasum -a 256 -c SHA256SUMS
-gzip -dc runs/20261031T134323Z/baseline.json.gz > /tmp/shootout-baseline.json
-gzip -dc runs/20261031T134323Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
+gzip -dc runs/20261031T145604Z/baseline.json.gz > /tmp/shootout-baseline.json
+gzip -dc runs/20261031T145604Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
 ```
 
 `SHA256SUMS` covers the archived runs, supporting evidence, and pinned chart
@@ -61,7 +62,7 @@ To recover the exact published source corpus, use the publication revision
 in the selected run's README or `runs/index.json`:
 
 ```sh
-git worktree add --detach /tmp/x2c-shootout-source 427ee5b3c4176f4bc2dec90fae149bcc68279ea3
+git worktree add --detach /tmp/x2c-shootout-source 9d070d9a0cf2c13dbebf339f4c708fcbd7354439
 ```
 
 The original absolute paths in machine/build receipts are historical evidence.
@@ -79,8 +80,18 @@ Create an isolated plotting environment, then render the latest saved report:
 ```sh
 python3 -m venv /tmp/x2c-shootout-charts
 /tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T134323Z/charts/render.py examples/shootout/results/runs/20261031T134323Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T145604Z/charts/render.py examples/shootout/results/runs/20261031T145604Z/current.json /tmp/x2c-shootout-figures
 ```
+
+To render the focused serial/parallel comparison from its saved samples:
+
+```sh
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T145604Z/charts/render-comparison.py examples/shootout/results/evidence/parallel-trees/serial-comparison.json.gz /tmp/x2c-shootout-figures
+```
+
+The unchanged serial source is `benchmarks/binarytrees/serial.x`. Its earlier
+complete reports and charts remain in the saved runs. The latest run adds a
+same-compiler comparison of serial and six-worker elapsed and total CPU time.
 
 The renderer creates its output directory. It reads saved measurements and
 does not compile or run benchmark programs. The requirements record the
@@ -106,6 +117,7 @@ and separates observed facts, tested source changes, and unmeasured candidates.
 These are local measurements of selected contributed programs, not official
 website timings or general language rankings. Java includes JVM startup and
 JIT compilation in every fresh-process sample. C binary-trees uses parallel
-workers. Source LOC and compressed source bytes are separate metrics.
+workers, as do both x2c binary-trees entries. The [threading notes](threading.md)
+explain the scope. Source LOC and compressed source bytes are separate metrics.
 Canonical-size timing remains unrun. The recorded quiet observations establish
 the pre-run window, not zero background activity throughout measurement.
