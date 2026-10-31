@@ -1,0 +1,343 @@
+{
+  "archive": {
+    "name": "The Computer Language Benchmarks Game",
+    "repository": "https://salsa.debian.org/benchmarksgame-team/benchmarksgame",
+    "revision": "40296663ed350d5fe4a6ab5e367bab61cb77c219",
+    "archive": "public/download/benchmarksgame-sourcecode.zip",
+    "archive_sha256": "aabcf6726cdc14f0f45b99e5daba48584f94bbb48883fd3711a1d040474d1cb4"
+  },
+  "reference_count": 55,
+  "sources": [
+    {
+      "problem": "nbody",
+      "filename": "main.c",
+      "path": "nbody/nbody.gcc",
+      "sha256": "6c7a44f4f242b8aafb2e72c1814f67c5568b3815abe0a19a005fe20645a03676"
+    },
+    {
+      "problem": "nbody",
+      "filename": "main.py",
+      "path": "nbody/nbody.python3",
+      "sha256": "101f5f50adf87324c426cbd09ce5bc3dd15f61ddeb34fd0a8c3ee2e2f4086ff5"
+    },
+    {
+      "problem": "nbody",
+      "filename": "main.cpp",
+      "path": "nbody/nbody.gpp-9.gpp",
+      "sha256": "d6918ff18f5302c578d6fe122a7392d675c49f4cdd787be64f59958a2d967fc8"
+    },
+    {
+      "problem": "nbody",
+      "filename": "main.rs",
+      "path": "nbody/nbody.rust-6.rust",
+      "sha256": "db959717a6274945296bb8ca2c719b7c410d49f8c78ca8a726bcbda36de7800b"
+    },
+    {
+      "problem": "nbody",
+      "filename": "main.go",
+      "sha256": "a684e611ada6c41073ddf7f4e0d01e35632f4f34b3b67064a811049fbbd86d4b",
+      "path": "nbody/nbody.go-8.go"
+    },
+    {
+      "problem": "nbody",
+      "filename": "main.java",
+      "path": "nbody/nbody.java-2.java",
+      "sha256": "f5a179194d469897ee42c8a794e8a48e3bd7b0e6edd5081db8178ae272ea01c2"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.c",
+      "path": "spectralnorm/spectralnorm.gcc-3.gcc",
+      "sha256": "f51f8f10088748f926530a83e1fe7f36adeae3f2868c090b11b6149245e0460a"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.py",
+      "path": "spectralnorm/spectralnorm.python3-4.python3",
+      "sha256": "34dbcdaeefd8a8a113a91591016b6760b8773da30a77f0a0da2cf8c28853b67d"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.cpp",
+      "path": "spectralnorm/spectralnorm.gpp",
+      "sha256": "2842f77e9fcbdb31f4b722005348c76735b52671ccd99794f2cb780484b127e2"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.rs",
+      "path": "spectralnorm/spectralnorm.rust-5.rust",
+      "sha256": "4ff08e9d0816e172d312741eba6cecd1126e8653c271692102ac4cfcdd6de0d7"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.go",
+      "path": "spectralnorm/spectralnorm.go-4.go",
+      "sha256": "bed1eaba75cc4fe09231497d1f2d3e2a6320f88dfee6f0a3b63ff1af5d8f465e"
+    },
+    {
+      "problem": "spectralnorm",
+      "filename": "main.java",
+      "path": "spectralnorm/spectralnorm.java-8.java",
+      "sha256": "3b9fb7ad8840638e4193e91a6c46209756faa72a14fa0fb5d9aba4dd33f06a7f"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.c",
+      "path": "fannkuchredux/fannkuchredux.gcc-5.gcc",
+      "sha256": "1c716c1a16aeac98da6fb7ac6c80429d0d54f6573dc8d6efca11fee3b39d3b05"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.py",
+      "path": "fannkuchredux/fannkuchredux.python3-4.python3",
+      "sha256": "babb64ef4816fbebb585486eea110c0b9d2a3a8daf01dbecc949866fea42c299"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.cpp",
+      "path": "fannkuchredux/fannkuchredux.gpp",
+      "sha256": "407789d3a4d7629b571390933e018b3c1fc1154bc4b2fae9c1100e3eaf054225"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.rs",
+      "path": "fannkuchredux/fannkuchredux.rust-4.rust",
+      "sha256": "367a0a0187b3ee6744f9a455a170a5b7f0307046a4dd245d5f8678e89ccf2e33"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.go",
+      "path": "fannkuchredux/fannkuchredux.go",
+      "sha256": "5e47620ed3cd6460457728cd43025a72d9293d022ece3b59feb891ff3ae71306"
+    },
+    {
+      "problem": "fannkuchredux",
+      "filename": "main.java",
+      "path": "fannkuchredux/fannkuchredux.java-2.java",
+      "sha256": "f55e671f4aab2ac2881f9ab9ada9a67bb08c72de74fef273fd999d8e47237296"
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.c",
+      "path": "mandelbrot/mandelbrot.gcc-5.gcc",
+      "sha256": "3b59fb6d50e829972aaba9f66354fb488a84764c6a6e4da78c492680a4a95b39"
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.py",
+      "path": "mandelbrot/mandelbrot.python3-5.python3",
+      "sha256": "72f21f55dab03a8d5e1c701c598affcd658653fbae277198f8e5b3d00a156bb3"
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.cpp",
+      "path": "mandelbrot/mandelbrot.gpp-9.gpp",
+      "sha256": "f5263984d2924694c2cdc04cf8dd42e4a28ec3845f2f9fad4007661e7d6a1e84"
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.rs",
+      "path": "mandelbrot/mandelbrot.rust-4.rust",
+      "sha256": "5d7cbf0a4536913670781be454d9fc95817e7f09cacd7082186b176bab08830c",
+      "note": "This contribution rounds dimensions down to a multiple of eight. Every configured profile and official fixture uses a multiple of eight."
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.go",
+      "path": "mandelbrot/mandelbrot.go-6.go",
+      "sha256": "467d0e31d1bfc39fc313925f56bb6a2a76175ba264685450a6b65ea4d2d56a84"
+    },
+    {
+      "problem": "mandelbrot",
+      "filename": "main.java",
+      "path": "mandelbrot/mandelbrot.java-4.java",
+      "sha256": "879fbc28d69659ce9c6d33bd58ed131508bf0c7a312e9ebb44dc9f3e0c2c1696"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.c",
+      "path": "fasta/fasta.gcc-2.gcc",
+      "sha256": "87a7ec3e31cea551e69267780eb802955af566ef2ea76115e576e8c07594c6d2"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.py",
+      "path": "fasta/fasta.python3",
+      "sha256": "f8bc35bb3b1c35fed1db20010aaa2abbdcce524e99822ae4a1238c2014e89899"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.cpp",
+      "path": "fasta/fasta.gpp",
+      "sha256": "56a0ea5221ad0a75efe9819f2a9d31e6d30bef69e1320b522fe82b1d724e4dca"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.rs",
+      "path": "fasta/fasta.rust-4.rust",
+      "sha256": "d7d9c00058423e6976125060581affd80c407ebc7ead5ca6aca1f5e62b18d37a"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.go",
+      "path": "fasta/fasta.go-2.go",
+      "sha256": "49eb4e788bf353e59b1efcfce499d713a9bc453e05786e3afff3c3d8754fb047"
+    },
+    {
+      "problem": "fasta",
+      "filename": "main.java",
+      "path": "fasta/fasta.java-2.java",
+      "sha256": "38a88bdc4c297ac45994c1ec5eabc5a308e01c21b9ab62d506100f879258a67a"
+    },
+    {
+      "problem": "knucleotide",
+      "filename": "main.c",
+      "path": "knucleotide/knucleotide.gcc",
+      "sha256": "25e2d15a0c436f814254ede1bc87342428f28636f6168634db88b63243a15105"
+    },
+    {
+      "problem": "knucleotide",
+      "filename": "main.py",
+      "path": "knucleotide/knucleotide.python3-3.python3",
+      "sha256": "8fcac91a94f0bc55a801d073a4321822ba2a3f40c1dda590da9e6715f3958f11"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.c",
+      "path": "revcomp/revcomp.gcc-6.gcc",
+      "sha256": "5b48bef2ebbd5d07701722fca4853ca31d949c9362b797770cb31dd7f6217b85"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.py",
+      "path": "revcomp/revcomp.python3",
+      "sha256": "0750e816ae6271b5e188b3af5c46e34858c344e0a741bdfc40ffeb5f43fecb88"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.cpp",
+      "path": "revcomp/revcomp.gpp",
+      "sha256": "ca1cfd89c0cb141e50e8d734d7f2b9d96f08432f334edb714c6e198278464b91"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.rs",
+      "path": "revcomp/revcomp.rust-2.rust",
+      "sha256": "a000f1ff5b10f92c9ac7ff49081888f87807634a96529dfb2834c52ba15e4a29"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.go",
+      "sha256": "f1fb6d5a148e917fa5c5395b78ba6fc0734c28c54e8cdc0c09852273ef20d814",
+      "path": "revcomp/revcomp.go-2.go"
+    },
+    {
+      "problem": "revcomp",
+      "filename": "main.java",
+      "path": "revcomp/revcomp.java-5.java",
+      "sha256": "554d9d87ffbab8a872a62dcd102d8bbd33abe6d24588b0df7c88efb9fc21d5e9"
+    },
+    {
+      "problem": "binarytrees",
+      "filename": "main.c",
+      "path": "binarytrees/binarytrees.gcc-5.gcc",
+      "sha256": "a815e8a0eefd7e09bf92a8025bfb8347eb57e9fa79680dcd672ce1c7fa6479a0"
+    },
+    {
+      "problem": "binarytrees",
+      "filename": "main.cpp",
+      "path": "binarytrees/binarytrees.gpp-5.gpp",
+      "sha256": "df5a211f8338cbdbc6b213382993d7b63b33b86344ff551b099e7a680598ffce"
+    },
+    {
+      "problem": "binarytrees",
+      "filename": "main.rs",
+      "path": "binarytrees/binarytrees.rust-2.rust",
+      "sha256": "e8812a78babb260271feb35f8707aa0e0164ad97d7b5a10edd5c47f51d0fbfc5"
+    },
+    {
+      "problem": "binarytrees",
+      "filename": "main.go",
+      "path": "binarytrees/binarytrees.go-5.go",
+      "sha256": "c46127330532363d37205d3e0e7d5973f1f2fa4cdbe7f0d23a75bb3bb519144f"
+    },
+    {
+      "problem": "binarytrees",
+      "filename": "main.java",
+      "path": "binarytrees/binarytrees.java-7.java",
+      "sha256": "c28a0b7f1bfb705b5cf11c523362114e312df69acf531ee6a8a2f1ca86bab57f"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.c",
+      "path": "regexredux/regexredux.gcc-5.gcc",
+      "sha256": "297865dbe9b65218f5fbcc5324d63b015109a1c40d57a505a692644f19f4c1d4"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.py",
+      "path": "regexredux/regexredux.python3-2.python3",
+      "sha256": "dce2a1bfd1dfb236934ce234d24e1ea58db67c322c61df62f1a32436fe9fbb87"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.cpp",
+      "path": "regexredux/regexredux.gpp-6.gpp",
+      "sha256": "08166cada00044e451086fe5842c596ea1f3e99a4079c6ce5fa6dfc59f80e16f"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.rs",
+      "path": "regexredux/regexredux.rust",
+      "sha256": "9e826f38b182de0bff08d52f56277054cd0b3141e3e0fa538f5b42b314bf2a43"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.go",
+      "sha256": "c29142537a4142e0886c8e02979df2740a0c01642974860143567fad3865442b",
+      "path": "regexredux/regexredux.go"
+    },
+    {
+      "problem": "regexredux",
+      "filename": "main.java",
+      "path": "regexredux/regexredux.java-6.java",
+      "sha256": "fb752d4086cd2261bb163108a6e3c63cb9a2fc133196e4f1f778bfd18067ecb0"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.c",
+      "path": "pidigits/pidigits.gcc",
+      "sha256": "f719dddd30aad201aa3ce385b80d48ef3befce29b22c3a12a5aa7e7d743f948e"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.py",
+      "path": "pidigits/pidigits.python3-3.python3",
+      "sha256": "4ac5b12b52aedd5c4cb794d1b685ecbd09e8f5a601f2d441e3b5f45fa316ed4b"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.cpp",
+      "path": "pidigits/pidigits.gpp-4.gpp",
+      "sha256": "e9ea172b053a24a2fc804a0232af6b242b1fbfedc143500a66355446bb251d98"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.rs",
+      "path": "pidigits/pidigits.rust-2.rust",
+      "sha256": "036b3b6e088f68374f15a85ed92578302654431e57c9835de55727f0c5e5e8ad"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.go",
+      "sha256": "05986ab0e5b74a2a892aefd5c49a190844d50e3cc6d625f8deb1419f4c60f718",
+      "path": "pidigits/pidigits.go-7.go"
+    },
+    {
+      "problem": "pidigits",
+      "filename": "main.java",
+      "path": "pidigits/pidigits.java",
+      "sha256": "9d721d35dfb4520a12b1ec118316a277e6ab51ec76d09a8b6015f8bfc1911c1b"
+    }
+  ]
+}

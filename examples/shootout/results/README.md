@@ -4,15 +4,14 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current public candidate is [run 20261031T170749Z](runs/20261031T170749Z/README.md),
-measured from clean source revision `06a81d6535120d6c0c07e320751548075c5d3fc1` and first
-published with results in `4b881e60fd9c4492cea9947a57d072d18e04b5ef`. Run identifiers use UTC.
-Observation time: 2026-10-31 10:07 PDT / 2026-10-31 17:07 UTC.
+The current public candidate is [run 20261031T181939Z](runs/20261031T181939Z/README.md),
+measured from clean source `381673a8d6d51098a44f62a635db98c0c9ca927e` and retained in report checkpoint
+`246938ba64124426a4e9dee6aa09e632582994f3`. Observation: 2026-10-31 11:19 PDT / 2026-10-31 18:19 UTC. Run identifiers use UTC.
 
-It covers 76 programs, eight columns, and sixteen fresh-process samples per
-program (1,216 observations). All official fixtures and local-profile output
-checks passed. Summary charts use the nine problems shared by all columns.
-The four available k-nucleotide programs remain in per-problem tables.
+It covers 75 admitted programs, eight columns and 56 fresh-process samples each
+(4,200 observations). Official fixtures and local output checks pass. Summary
+charts use eight shared problems. Per-problem tables retain all available
+k-nucleotide/binary-trees cells. Earlier nine-problem cohorts remain historical.
 
 ## Saved runs
 
@@ -25,7 +24,8 @@ The four available k-nucleotide programs remain in per-problem tables.
 | [20261031T134323Z](runs/20261031T134323Z/README.md) | 8 | 9 | Ordinary Node and Buffer rewrites |
 | [20261031T145604Z](runs/20261031T145604Z/README.md) | 8 | 9 | Fannkuch, FASTA, and parallel trees |
 | [20261031T161720Z](runs/20261031T161720Z/README.md) | 8 | 9 | Parallel spectral-norm; Counter probe rejected |
-| [20261031T170749Z](runs/20261031T170749Z/README.md) | 8 | 9 | Latest: parallel fannkuch adopted; loop-bound adopted |
+| [20261031T170749Z](runs/20261031T170749Z/README.md) | 8 | 9 | Parallel fannkuch adopted; loop-bound adopted |
+| [20261031T181939Z](runs/20261031T181939Z/README.md) | 8 | 8 | Latest: reference audit and parallel k-nucleotide |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -52,8 +52,8 @@ From a normal clone of `dev`:
 ```sh
 cd examples/shootout/results
 shasum -a 256 -c SHA256SUMS
-gzip -dc runs/20261031T170749Z/baseline.json.gz > /tmp/shootout-baseline.json
-gzip -dc runs/20261031T170749Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
+gzip -dc runs/20261031T181939Z/baseline.json.gz > /tmp/shootout-baseline.json
+gzip -dc runs/20261031T181939Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
 ```
 
 `SHA256SUMS` covers the archived runs, supporting evidence, and pinned chart
@@ -64,7 +64,7 @@ To recover the exact published source corpus, use the publication revision
 in the selected run's README or `runs/index.json`:
 
 ```sh
-git worktree add --detach /tmp/x2c-shootout-source 4b881e60fd9c4492cea9947a57d072d18e04b5ef
+git worktree add --detach /tmp/x2c-shootout-source 246938ba64124426a4e9dee6aa09e632582994f3
 ```
 
 The original absolute paths in machine/build receipts are historical evidence.
@@ -82,7 +82,7 @@ Create an isolated plotting environment, then render the latest saved report:
 ```sh
 python3 -m venv /tmp/x2c-shootout-charts
 /tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T170749Z/charts/render.py examples/shootout/results/runs/20261031T170749Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T181939Z/charts/render.py examples/shootout/results/runs/20261031T181939Z/current.json /tmp/x2c-shootout-figures
 ```
 
 To render the focused serial/parallel comparison from its saved samples:
@@ -101,7 +101,7 @@ To render the earlier Counter/spectral source-probe chart:
 /tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T161720Z/charts/render-probes.py examples/shootout/results/evidence/counter-spectral/results-quiet.json.gz /tmp/x2c-shootout-figures
 ```
 
-To render the latest loop-bound/fannkuch source-probe chart:
+To render the earlier loop-bound/fannkuch source-probe chart:
 
 ```sh
 /tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T170749Z/charts/render-probes.py examples/shootout/results/evidence/bound-fann/results-quiet.json.gz /tmp/x2c-shootout-figures
@@ -135,3 +135,12 @@ workers, as do both x2c binary-trees entries. The [threading notes](threading.md
 explain the scope. Source LOC and compressed source bytes are separate metrics.
 Canonical-size timing remains unrun. The recorded quiet observations establish
 the pre-run window, not zero background activity throughout measurement.
+
+## Reference audit evidence
+
+`evidence/reference-profile/` mirrors all 70 attempted candidate configurations,
+with exact source bytes, commands, diagnostics, outputs, quiet confirmation,
+selection decisions, statistical k-nucleotide stacks/input and unchanged-C
+sanity observations. It includes rejected attempts. Decompress the four probe
+JSON/JSONL files into a temporary directory to rerender the focused chart.
+No executable path stored in a receipt needs to exist for rendering.

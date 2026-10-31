@@ -3,7 +3,7 @@
 The recoverable source of truth is
 [examples/shootout/results/README.md](../examples/shootout/results/README.md).
 All saved chart sets, reports, samples, recipes, and supporting experiments are
-versioned there. The latest public candidate is run `20261031T170749Z`.
+versioned there. The latest public candidate is run `20261031T181939Z`.
 This document prepares integration; it does not add a page, alter site builds,
 or deploy the website.
 
@@ -11,12 +11,12 @@ or deploy the website.
 
 Use one run consistently. For the latest candidate, its directory is:
 
-`examples/shootout/results/runs/20261031T170749Z/`
+`examples/shootout/results/runs/20261031T181939Z/`
 
 - `charts/runtime-source-size.svg`: summary plot; PNG and PDF also available.
 - `charts/implementation-profiles.svg`: individual problem outcomes.
 - `charts/runtime-loc-distributions.svg`: distributions across problems.
-- `charts/measurements.csv`, `charts/summaries.csv`, and `charts/comparison.csv`:
+- `charts/measurements.csv`, `charts/summaries.csv`, and `charts/reference-audit-probes.csv`:
   downloadable values used by those figures.
 - `website.json`: curated portable metadata and measurements, excluding host
   paths and process listings. CSV-derived numbers retain string representation;
@@ -25,7 +25,7 @@ Use one run consistently. For the latest candidate, its directory is:
 - `current.json`: full audit report; prefer `website.json` for public ingestion.
 
 For a future Astro page, copy the chosen SVG/PNG files, CSVs, and `website.json`
-into `site/public/benchmarks/20261031T170749Z/`. Astro copies `public/` assets
+into `site/public/benchmarks/20261031T181939Z/`. Astro copies `public/` assets
 into the static output. Keep the archive authoritative; do not hand-edit
 numbers in a page or duplicate raw measurement logic in JavaScript. No copy
 step or recurring gate is added now. A future `site/src/pages/benchmarks.astro`
@@ -35,8 +35,8 @@ Respect the existing site base, which defaults to `/x2c/`. In an Astro page,
 build an asset URL with `import.meta.env.BASE_URL` rather than assuming `/`:
 
 ```astro
-<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T170749Z/runtime-source-size.svg`}
-     alt="Local runtime and source size across nine shared Benchmarks Game problems" />
+<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T181939Z/runtime-source-size.svg`}
+     alt="Local runtime and source size across eight shared Benchmarks Game problems" />
 ```
 
 Use responsive image width and let readers open the full-size profiles. Supply
@@ -61,13 +61,14 @@ precedents. Earlier serial/probe charts remain historical supporting evidence.
   accepted by the Benchmarks Game, and not a general language ranking.
 - Name all eight columns: C, idiomatic x2c, tuned x2c, Python, Rust, C++, Go,
   and Java. x2c columns follow the [suite definitions](../examples/shootout/README.md).
-- State Apple M4 Max, local profile, sixteen samples, fresh processes, exact
+- State Apple M4 Max, local profile, 56 samples, fresh processes, exact
   measured revision, run ID, and observation time. Run IDs use UTC; the latest
-  observation was 2026-10-31 10:07 PDT / 2026-10-31 17:07 UTC.
+  observation was 2026-10-31 11:19 PDT / 2026-10-31 18:19 UTC.
 - Java includes JVM startup and JIT compilation. A separate process warmup
   does not warm the measured JVM. Do not describe it as steady-state Java.
-- Summary charts use the same nine problems in every column. Per-problem
-  tables cover all ten. Rust/C++/Go/Java k-nucleotide cells are N/A, with
+- Summary charts use the same eight problems in every column. Per-problem
+  tables cover all ten. Rust/C++/Go/Java k-nucleotide and Python binary-trees
+  cells are N/A, with
   [recorded reasons](../examples/shootout/results/reference-coverage.md).
 - Explain per-problem normalization against the fastest/shortest/smallest
   selected program, geometric means in summary scatters, arithmetic centres
@@ -96,9 +97,11 @@ When a page is implemented, use the existing `make site-check` and local visual
 review described in [site/README.md](README.md). No new check is required by
 this documentation change, and public deployment remains a separate action.
 
-The latest run adds `bound-fann-probes` in PNG/SVG/PDF and CSV, with its
-renderer and provenance. Loop-bound candidate: adopted; parallel fannkuch:
-adopted. State the serial cutoff N<9 and unchanged tuned fannkuch strategy.
-The earlier Counter/spectral experiment remains in run `20261031T161720Z`;
-the tree serial/parallel experiment remains in run `20261031T145604Z`.
-Keep those historical comparisons labeled with their actual runs.
+The latest run preserves `reference-audit-probes` in PNG/SVG/PDF/CSV with
+renderer and provenance. It shows the separate eight-round quiet confirmation;
+the full run uses 56 samples/program and 4,200 observations. State the changed
+eight-problem cohort, official-reference substitutions/build settings and
+ordinary seven-Thread k-nucleotide. Do not attribute faster C reference times
+to an x2c regression. Keep Python GMP/PCRE2 dependencies visible in source notes.
+The former Python binary-trees allocation failure and GC-guidance interpretation
+must accompany that N/A cell. Earlier experiments remain labeled by their runs.

@@ -1,41 +1,44 @@
-# Remaining idiomatic x2c performance gaps
+# Remaining local performance gaps
 
-Current run `20261031T170749Z`, local profile, measured source
-`06a81d6535120d6c0c07e320751548075c5d3fc1` on Apple M4 Max. Values are sixteen-sample median
-elapsed milliseconds. Selected-program differences do not isolate language,
-allocation, or threading overhead. Rows rank absolute excess over C; negative
-excess means the selected x2c program ran faster than the selected C program.
+Run `20261031T181939Z`, clean measured source `381673a8d6d51098a44f62a635db98c0c9ca927e`, local profile, 56 samples
+per program. These are measured programs, not general language overhead.
+Canonical-size timing remains unrun. All eight shared problems use the same
+cohort; k-nucleotide and binary-trees stay in per-problem rows.
 
-| Workload | Idiomatic ms | C ms | Tuned ms | Idiomatic/C | Excess over C ms |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| knucleotide | 170.790 | 18.918 | 75.638 | 9.03 | 151.872 |
-| nbody | 67.616 | 32.858 | 68.606 | 2.06 | 34.758 |
-| regexredux | 54.524 | 39.759 | 54.306 | 1.37 | 14.766 |
-| fasta | 21.609 | 8.735 | 15.451 | 2.47 | 12.873 |
-| pidigits | 273.683 | 262.181 | 260.864 | 1.04 | 11.501 |
-| revcomp | 12.249 | 1.539 | 12.724 | 7.96 | 10.710 |
-| spectralnorm | 17.996 | 7.847 | 8.164 | 2.29 | 10.150 |
-| binarytrees | 27.602 | 24.832 | 26.805 | 1.11 | 2.770 |
-| mandelbrot | 11.137 | 9.984 | 10.182 | 1.12 | 1.153 |
-| fannkuchredux | 10.025 | 16.337 | 13.184 | 0.61 | -6.313 |
+| Problem | Idiomatic ms | C ms | Tuned ms | Fastest selected ms | Idiomatic / fastest |
+| --- | ---: | ---: | ---: | --- | ---: |
+| knucleotide | 86.195 | 8.960 | 74.474 | c: 8.960 | 9.62 |
+| binarytrees | 26.277 | 24.384 | 26.077 | rust: 3.249 | 8.09 |
+| revcomp | 11.925 | 1.486 | 12.582 | c: 1.486 | 8.03 |
+| fasta | 20.769 | 3.658 | 14.815 | c: 3.658 | 5.68 |
+| regexredux | 54.444 | 11.887 | 53.784 | rust: 11.184 | 4.87 |
+| mandelbrot | 10.450 | 2.697 | 9.353 | rust: 2.286 | 4.57 |
+| spectralnorm | 17.533 | 4.985 | 7.787 | go: 4.067 | 4.31 |
+| fannkuchredux | 9.835 | 3.287 | 12.979 | cpp: 2.531 | 3.89 |
+| nbody | 65.031 | 31.857 | 65.884 | cpp: 28.916 | 2.25 |
+| pidigits | 271.954 | 261.074 | 259.861 | tuned: 259.861 | 1.05 |
 
-## Latest experiments
+The reference audit changes many baselines. A larger x2c/C ratio can result
+from a faster adopted C program even when x2c is unchanged. Compare absolute
+milliseconds and source identities before attributing changes. Earlier aggregate
+summaries have nine shared problems; the current summaries have eight.
 
-Parallel fannkuch: **adopted**. Cached k-nucleotide loop bound: **adopted**.
-[Run 20261031T170749Z](runs/20261031T170749Z/README.md) preserves the exact decisions, paired elapsed
-and CPU measurements, full-run C drift, candidate sources, and correctness
-checks. The earlier serial fannkuch source and all prior charts remain intact.
-No typed containers, raw collection storage, custom allocators, or runtime or
-compiler changes were introduced by these benchmark changes.
+K-nucleotide profiling finds String slicing/intern-pool lookup and Map work.
+Seven ordinary Threads cut the controlled local median from 163.604 ms to 83.901 ms
+(all 8 paired rounds faster). Every width still builds a full growing Map.
+Counter objects, compound Map assignment and earlier attempted shortcuts remain
+rejected in preserved evidence. Typed Substr maps remain a tuned-only option.
+Further shared-pool runtime changes need a separate design decision, because
+allocation, lifetime and synchronization affect more than this benchmark.
 
-Counter objects and `counts[key] += 1` remain rejected k-nucleotide experiments.
-Their failure does not rule out all Map or representation improvements.
-K-nucleotide slicing, canonical String storage, hashing, and value conversions
-still need profiling. N-body has no further demonstrated idiomatic source fix.
-A regex count-only API is a possible adapter improvement, not an implemented
-benchmark change. Parallel strategies affect elapsed time and CPU consumption;
-these comparisons do not establish single-core language performance.
+Ordinary Thread batches for regex-redux pattern counts and independent
+reverse-complement records may merit later probes. Official C submissions
+provide parallel precedent. Library pools explain part of the fast tree
+reference results, but adopting a specialized allocator is outside the
+idiomatic definition. These findings do not authorize a runtime redesign. That is a candidate, not a
+measured win from this task. Reference audit, k-nucleotide profiling/threading,
+validation, quiet full rerun and charts are this batch's completed scope.
+Source-specific raw C, typed storage or custom allocation is not an idiomatic fix.
 
-Earlier Node, Buffer, pair precomputation, bulk copy, Choice records, regex JIT,
-and parallel tree/spectral changes remain applied. Java includes startup/JIT.
-Canonical-size timing remains unrun.
+See [run evidence](runs/20261031T181939Z/README.md),
+[reference coverage](reference-coverage.md) and [threading](threading.md).

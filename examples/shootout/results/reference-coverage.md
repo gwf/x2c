@@ -88,12 +88,12 @@ T, G, C, A for equal single-letter frequencies. No contribution was patched.
 | Problem | Go archive source |
 | --- | --- |
 | nbody | `nbody/nbody.go-8.go` |
-| spectralnorm | `spectralnorm/spectralnorm.go-8.go` |
-| fannkuchredux | `fannkuchredux/fannkuchredux.go-8.go` |
-| mandelbrot | `mandelbrot/mandelbrot.go-8.go` |
-| fasta | `fasta/fasta.go` |
+| spectralnorm | `spectralnorm/spectralnorm.go-4.go` |
+| fannkuchredux | `fannkuchredux/fannkuchredux.go` |
+| mandelbrot | `mandelbrot/mandelbrot.go-6.go` |
+| fasta | `fasta/fasta.go-2.go` |
 | revcomp | `revcomp/revcomp.go-2.go` |
-| binarytrees | `binarytrees/binarytrees.go` |
+| binarytrees | `binarytrees/binarytrees.go-5.go` |
 | regexredux | `regexredux/regexredux.go` |
 | pidigits | `pidigits/pidigits.go-7.go` |
 
@@ -114,11 +114,11 @@ workloads on native ARM OpenJDK 27. They use only Java standard libraries.
 | nbody | `nbody/nbody.java-2.java` |
 | spectralnorm | `spectralnorm/spectralnorm.java-8.java` |
 | fannkuchredux | `fannkuchredux/fannkuchredux.java-2.java` |
-| mandelbrot | `mandelbrot/mandelbrot.java-8.java` |
+| mandelbrot | `mandelbrot/mandelbrot.java-4.java` |
 | fasta | `fasta/fasta.java-2.java` |
 | revcomp | `revcomp/revcomp.java-5.java` |
-| binarytrees | `binarytrees/binarytrees.java-2.java` |
-| regexredux | `regexredux/regexredux.java` |
+| binarytrees | `binarytrees/binarytrees.java-7.java` |
+| regexredux | `regexredux/regexredux.java-6.java` |
 | pidigits | `pidigits/pidigits.java` |
 
 All six archived Java k-nucleotide contributions were compiled and checked.
