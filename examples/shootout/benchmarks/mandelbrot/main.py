@@ -1,55 +1,50 @@
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-#   
-#     line-by-line from Greg Buchholz's C program
-
-
+#
+# contributed by Tupteq
+# modified by Simon Descarpentries
+# modified by Ivan Baldin
+# 2to3 plus Daniel Nanz fix
 
 import sys
+from array import array
+from multiprocessing import Pool
 
-def main():
+def do_row(fy):
+    local_abs = abs
+    two_over_size = 2.0 / size
+    xr_offs = range(7, -1, -1)
+    xr_iter = range(50)
 
-    w = h = bit_num = 0
-    byte_acc = 0
-    i = 0; iter = 50
-    x = y = limit = 2.0
-    Zr = Zi = Cr = Ci = Tr = Ti = 0.0
+    result = array('B')
+    for x in range(7, size, 8):
+        byte_acc = 0
+        for offset in xr_offs:
+            z = 0j
+            c = two_over_size * (x - offset) + fy
 
-    w = h = int(sys.argv[1])
+            for i in xr_iter:
+                z = z * z + c
+                if local_abs(z) >= 2:
+                    break
+            else:
+                byte_acc += 1 << offset
 
-    sys.stdout.write(f'P4\n{w} {h}\n'); sys.stdout.flush()
+        result.append(byte_acc)
 
-    for y in range(h):
+    if x != size - 1:
+        result.append(byte_acc)
 
-        for x in range(w):
+    return result.tobytes()
 
-            Zr = Zi = Tr = Ti = 0.0 
-            Cr = (2.0 * x / w - 1.5); Ci = (2.0 * y / h - 1.0)  
-           
-            for i in range(iter):             
-                if Tr+Ti <= limit*limit:
-                    Zi = 2.0*Zr*Zi + Ci
-                    Zr = Tr - Ti + Cr
-                    Tr = Zr * Zr
-                    Ti = Zi * Zi
-            
-            
-            byte_acc = byte_acc << 1
-            if Tr+Ti <= limit*limit: byte_acc = byte_acc  | 0x01            
-            
-            bit_num += 1         
+def main(out):
+    out.write(('P4\n%d %d\n' % (size, size)).encode('ASCII'))
 
-            if bit_num == 8:          
-                sys.stdout.buffer.write(bytes([byte_acc]))        
-                byte_acc = 0
-                bit_num = 0
+    pool = Pool()
+    step = 2.0j / size
+    for row in pool.imap(do_row, (step*y-(1.5+1j) for y in range(size))):
+        out.write(row)
 
-
-            elif x == w - 1:
-
-                byte_acc = byte_acc << (8-w%8)   
-                sys.stdout.buffer.write(bytes([byte_acc]))  
-                byte_acc = 0
-                bit_num = 0
-
-main() 
+if __name__ == '__main__':
+    size = int(sys.argv[1])
+    main(sys.stdout.buffer)

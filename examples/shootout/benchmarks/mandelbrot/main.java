@@ -1,59 +1,63 @@
 /* The Computer Language Benchmarks Game
    https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-
-   line-by-line from Greg Buchholz's C program
+   
+   modified by Henco Appel
 */
 
+import java.io.*;
+import java.util.concurrent.atomic.*;
+import java.util.stream.*;
 
-class mandelbrot {
+public final class mandelbrot {
 
-public static void main(String[] args) {   
- 
-    int w, h, bit_num = 0;
-    int byte_acc = 0;
-    int i, iter = 50;    
-    double x, y, limit = 2.0;
-    double Zr, Zi, Cr, Ci, Tr, Ti; 
+   static final byte getByte(final double[] Crb, final double CibY, final int x){
+      int res=0;
+      for(int i=0;i<8;i+=2){
+         double Zr1=Crb[x+i];
+         double Zi1=CibY;
 
-    w = h = Integer.parseInt(args[0]);
+         double Zr2=Crb[x+i+1];
+         double Zi2=CibY;
 
-    System.out.println("P4\n"+ w + " " + h);    
-    
-    for(y=0;y<h;y++) 
-    {
-        for(x=0;x<w;x++)
-        {
-            Zr = Zi = Tr = Ti = 0.0;
-            Cr = (2.0*(double)x/w - 1.5); Ci=(2.0*(double)y/h - 1.0);            
-        
-            for (i=0;i<iter && (Tr+Ti <= limit*limit);++i)
-            {
-                Zi = 2.0*Zr*Zi + Ci;
-                Zr = Tr - Ti + Cr;
-                Tr = Zr * Zr;
-                Ti = Zi * Zi;
-            }
-        
-            byte_acc <<= 1; 
-            if(Tr+Ti <= limit*limit) byte_acc |= 0x01;
-                
-            ++bit_num; 
+         int b=0;
+         int j=49;do{
+            double nZr1=Zr1*Zr1-Zi1*Zi1+Crb[x+i];
+            Zi1=Zr1*Zi1+Zr1*Zi1+CibY;
+            Zr1=nZr1;
 
-            if(bit_num == 8)
-            {                      
-                System.out.write(byte_acc);
-                byte_acc = 0;
-                bit_num = 0;
-            }
-            else if(x == w-1)
-            {
-                byte_acc = byte_acc << (8-w%8);
-                System.out.write(byte_acc);
-                byte_acc = 0;
-                bit_num = 0;
-            }
-        }
-    }	
-    System.out.flush();
+            double nZr2=Zr2*Zr2-Zi2*Zi2+Crb[x+i+1];
+            Zi2=Zr2*Zi2+Zr2*Zi2+CibY;
+            Zr2=nZr2;
+
+            if(Zr1*Zr1+Zi1*Zi1>4){b|=2;if(b==3)break;}
+            if(Zr2*Zr2+Zi2*Zi2>4){b|=1;if(b==3)break;}
+         }while(--j>0);
+         res=(res<<2)+b;
+      }
+      return (byte)(res^-1);
+   }
+
+   public static void main(String[] args) throws Exception {
+      int N=6000;
+      if (args.length>=1)
+		  N=Integer.parseInt(args[0]);
+
+      double[] Crb=new double[N+7];
+      double invN=2.0/N;
+	  for(int i=0;i<N;i++){  Crb[i]=i*invN-1.5; }
+	  int lineLen = (N-1)/8 + 1;
+	  byte[] data = new byte[N*lineLen];
+	  IntStream.range(0,N).parallel().forEach(y -> {
+		  double Ciby = y*invN-1.0;
+		  int offset = y*lineLen;
+		  for(int x=0; x<lineLen; x++)
+			  data[offset+x] = getByte(Crb, Ciby, x*8);
+	  });
+
+      OutputStream stream = new BufferedOutputStream(System.out);
+      stream.write(("P4\n"+N+" "+N+"\n").getBytes());
+      stream.write(data);
+      stream.close();
+   }
 }
-}
+

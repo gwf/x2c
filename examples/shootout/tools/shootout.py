@@ -235,7 +235,7 @@ def load_manifest() -> dict[str, Any]:
   for benchmark in benchmarks:
     name = benchmark["name"]
     source_root = ROOT / "benchmarks" / name
-    for filename in ("main.c", "main.py", *X2C_SOURCES.values()):
+    for filename in ("main.c", *X2C_SOURCES.values()):
       if not (source_root / filename).is_file():
         raise HarnessError(f"{name} is missing {filename}")
     for filename, reference in benchmark["references"].items():
@@ -659,47 +659,48 @@ def build_references(
       "compile_command": c_argv,
     }
 
-    python_source = source_root / "main.py"
-    python_binary = BUILD / name / "python/program"
-    python_binary.parent.mkdir(parents=True)
-    source_text = python_source.read_text(encoding="utf-8")
-    source_lines = source_text.splitlines(keepends=True)
-    if source_lines and source_lines[0].startswith("#!"):
-      source_text = "".join(source_lines[1:])
-    if benchmark.get("python_start_method"):
-      method = benchmark["python_start_method"]
-      source_text = (
-        "import multiprocessing, runpy\n"
-        f"multiprocessing.set_start_method({method!r})\n"
-        f"runpy.run_path({str(python_source)!r}, run_name='__main__')\n"
-      )
-    python_binary.write_text(f"#!{python}\n" + source_text, encoding="utf-8")
-    python_binary.chmod(0o755)
-    cache_root = BUILD / name / "python/cache"
-    python_argv = [
-      python,
-      "-X",
-      f"pycache_prefix={cache_root}",
-      "-m",
-      "py_compile",
-      str(python_source),
-    ]
-    started = time.perf_counter_ns()
-    command(python_argv)
-    compile_ns = time.perf_counter_ns() - started
-    outputs["python"] = {
-      "source": str(python_source.relative_to(ROOT)),
-      "source_metrics": source_metrics(python_source),
-      "binary": str(python_binary.relative_to(BUILD)),
-      "binary_sha256": sha256(python_binary),
-      "binary_bytes": python_binary.stat().st_size,
-      "dynamic_dependencies": None,
-      "compile_ns": compile_ns,
-      "compile_command": python_argv,
-      "interpreter": python,
-      "interpreter_version": command_text([python, "--version"]),
-    }
-    print(f"built {name}: C and Python references", flush=True)
+    if "main.py" in benchmark["references"]:
+      python_source = source_root / "main.py"
+      python_binary = BUILD / name / "python/program"
+      python_binary.parent.mkdir(parents=True)
+      source_text = python_source.read_text(encoding="utf-8")
+      source_lines = source_text.splitlines(keepends=True)
+      if source_lines and source_lines[0].startswith("#!"):
+        source_text = "".join(source_lines[1:])
+      if benchmark.get("python_start_method"):
+        method = benchmark["python_start_method"]
+        source_text = (
+          "import multiprocessing, runpy\n"
+          f"multiprocessing.set_start_method({method!r})\n"
+          f"runpy.run_path({str(python_source)!r}, run_name='__main__')\n"
+        )
+      python_binary.write_text(f"#!{python}\n" + source_text, encoding="utf-8")
+      python_binary.chmod(0o755)
+      cache_root = BUILD / name / "python/cache"
+      python_argv = [
+        python,
+        "-X",
+        f"pycache_prefix={cache_root}",
+        "-m",
+        "py_compile",
+        str(python_source),
+      ]
+      started = time.perf_counter_ns()
+      command(python_argv)
+      compile_ns = time.perf_counter_ns() - started
+      outputs["python"] = {
+        "source": str(python_source.relative_to(ROOT)),
+        "source_metrics": source_metrics(python_source),
+        "binary": str(python_binary.relative_to(BUILD)),
+        "binary_sha256": sha256(python_binary),
+        "binary_bytes": python_binary.stat().st_size,
+        "dynamic_dependencies": None,
+        "compile_ns": compile_ns,
+        "compile_command": python_argv,
+        "interpreter": python,
+        "interpreter_version": command_text([python, "--version"]),
+      }
+    print(f"built {name}: C and available Python references", flush=True)
     if "main.cpp" in benchmark["references"]:
       source = source_root / "main.cpp"
       binary = binary_path(name, "cpp")
@@ -1599,9 +1600,9 @@ def make_current(
     name = benchmark["name"]
     reference = baseline["benchmarks"][name]
     entry = run["benchmarks"][name]
-    python_source = reference["python"]["source"]
     c_median = reference["c"]["statistics"]["median_elapsed_ns"]
-    python_lines = python_source["source_lines"]
+    python_lines = (reference["python"]["source"]["source_lines"]
+                    if "python" in reference else None)
 
     row = {}
     for implementation in REFERENCE_IMPLEMENTATIONS:
@@ -1611,9 +1612,10 @@ def make_current(
       row[f"time_{implementation}_over_c"] = (
         foreign["statistics"]["median_elapsed_ns"] / c_median
       )
-      row[f"sloc_{implementation}_over_python"] = (
-        foreign["source"]["source_lines"] / python_lines
-      )
+      if python_lines is not None:
+        row[f"sloc_{implementation}_over_python"] = (
+          foreign["source"]["source_lines"] / python_lines
+        )
     programs: dict[str, Any] = {}
     for implementation in measured:
       build = build_receipt["benchmarks"][name][implementation]
@@ -1622,9 +1624,10 @@ def make_current(
       row[f"time_{implementation}_over_c"] = (
         result["statistics"]["median_elapsed_ns"] / c_median
       )
-      row[f"sloc_{implementation}_over_python"] = (
-        source["source_lines"] / python_lines
-      )
+      if python_lines is not None:
+        row[f"sloc_{implementation}_over_python"] = (
+          source["source_lines"] / python_lines
+        )
       programs[implementation] = {
         "source": source,
         "statistics": result["statistics"],

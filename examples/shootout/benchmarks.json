@@ -116,12 +116,12 @@
           "sha256": "101f5f50adf87324c426cbd09ce5bc3dd15f61ddeb34fd0a8c3ee2e2f4086ff5"
         },
         "main.cpp": {
-          "path": "nbody/nbody.gpp-3.gpp",
-          "sha256": "b22f8afa7e51850fefdbbf7bf094e630a72a6e9b65f99eff9744f144f18488c3"
+          "path": "nbody/nbody.gpp-9.gpp",
+          "sha256": "d6918ff18f5302c578d6fe122a7392d675c49f4cdd787be64f59958a2d967fc8"
         },
         "main.rs": {
-          "path": "nbody/nbody.rust",
-          "sha256": "1097288b773ff0666c453ad91aa9c04024cff3e12e548565d10435ca4e1980d3"
+          "path": "nbody/nbody.rust-6.rust",
+          "sha256": "db959717a6274945296bb8ca2c719b7c410d49f8c78ca8a726bcbda36de7800b"
         },
         "main.go": {
           "sha256": "a684e611ada6c41073ddf7f4e0d01e35632f4f34b3b67064a811049fbbd86d4b",
@@ -159,25 +159,24 @@
       ],
       "references": {
         "main.c": {
-          "path": "spectralnorm/spectralnorm.gcc-8.gcc",
-          "sha256": "5ae8e0c4d2cb97b744d682e4e974a22b727b5209ecc3293d4d1581ccf86d7574"
+          "path": "spectralnorm/spectralnorm.gcc-3.gcc",
+          "sha256": "f51f8f10088748f926530a83e1fe7f36adeae3f2868c090b11b6149245e0460a"
         },
         "main.py": {
-          "path": "spectralnorm/spectralnorm.python3-6.python3",
-          "sha256": "bc4cf8abdaa4c49e4d95a7e43e536b26c10b930408cb5c22def1121d2dfc4890"
+          "path": "spectralnorm/spectralnorm.python3-4.python3",
+          "sha256": "34dbcdaeefd8a8a113a91591016b6760b8773da30a77f0a0da2cf8c28853b67d"
         },
         "main.cpp": {
           "path": "spectralnorm/spectralnorm.gpp",
           "sha256": "2842f77e9fcbdb31f4b722005348c76735b52671ccd99794f2cb780484b127e2"
         },
         "main.rs": {
-          "path": "spectralnorm/spectralnorm.rust-3.rust",
-          "sha256": "6b8fca569218ac7cff178ce4da8e44cccae1c8668b1e5f0e2d2876e80c7b2424",
-          "note": "This contribution requires even dimensions. Every configured profile and official fixture uses an even dimension."
+          "path": "spectralnorm/spectralnorm.rust-5.rust",
+          "sha256": "4ff08e9d0816e172d312741eba6cecd1126e8653c271692102ac4cfcdd6de0d7"
         },
         "main.go": {
-          "sha256": "8f277cc7c9f4b0cb287c9bd697d047fc8d40562d960030d9c718a948073dd6ab",
-          "path": "spectralnorm/spectralnorm.go-8.go"
+          "path": "spectralnorm/spectralnorm.go-4.go",
+          "sha256": "bed1eaba75cc4fe09231497d1f2d3e2a6320f88dfee6f0a3b63ff1af5d8f465e"
         },
         "main.java": {
           "path": "spectralnorm/spectralnorm.java-8.java",
@@ -193,7 +192,18 @@
         "-std=c++17"
       ],
       "cpp_link_flags": [],
-      "java_main_class": "spectralnorm"
+      "java_main_class": "spectralnorm",
+      "c_flags": [
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include"
+      ],
+      "c_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ],
+      "python_start_method": "fork"
     },
     {
       "name": "fannkuchredux",
@@ -211,24 +221,24 @@
       ],
       "references": {
         "main.c": {
-          "path": "fannkuchredux/fannkuchredux.gcc",
-          "sha256": "d109b20a1ef2dcc601d3fc3dca2b7d06f423b72d3a0fa650afb4cef5fa8e9a18"
+          "path": "fannkuchredux/fannkuchredux.gcc-5.gcc",
+          "sha256": "1c716c1a16aeac98da6fb7ac6c80429d0d54f6573dc8d6efca11fee3b39d3b05"
         },
         "main.py": {
-          "path": "fannkuchredux/fannkuchredux.python3-8.python3",
-          "sha256": "fad3eec38b9b516c4c0e8b49b2466d8f689d912f08b3d72bc558b051721fb2af"
+          "path": "fannkuchredux/fannkuchredux.python3-4.python3",
+          "sha256": "babb64ef4816fbebb585486eea110c0b9d2a3a8daf01dbecc949866fea42c299"
         },
         "main.cpp": {
-          "path": "fannkuchredux/fannkuchredux.gpp-3.gpp",
-          "sha256": "fccf786c37f0ad3939f77727cacc2ce629aed85b6e0963eeab5ae8cb4c12d06f"
+          "path": "fannkuchredux/fannkuchredux.gpp",
+          "sha256": "407789d3a4d7629b571390933e018b3c1fc1154bc4b2fae9c1100e3eaf054225"
         },
         "main.rs": {
-          "path": "fannkuchredux/fannkuchredux.rust-2.rust",
-          "sha256": "9238cf9dd91b245c4b07de2a6985785c7683e40fcd510f8b817076e7c4ba3d1c"
+          "path": "fannkuchredux/fannkuchredux.rust-4.rust",
+          "sha256": "367a0a0187b3ee6744f9a455a170a5b7f0307046a4dd245d5f8678e89ccf2e33"
         },
         "main.go": {
-          "sha256": "b2f253a103bb797863b132e10b522034451f395bca02ec470a3e98c2031f742b",
-          "path": "fannkuchredux/fannkuchredux.go-8.go"
+          "path": "fannkuchredux/fannkuchredux.go",
+          "sha256": "5e47620ed3cd6460457728cd43025a72d9293d022ece3b59feb891ff3ae71306"
         },
         "main.java": {
           "path": "fannkuchredux/fannkuchredux.java-2.java",
@@ -241,10 +251,22 @@
         "sha256": "bd9265b28893996018f1a09d7376de11c8b93ba4238449c6af9e5bded768b07b"
       },
       "cpp_flags": [
-        "-std=c++17"
+        "-std=c++17",
+        "-pthread"
       ],
       "cpp_link_flags": [],
-      "java_main_class": "fannkuchredux"
+      "java_main_class": "fannkuchredux",
+      "c_flags": [
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include"
+      ],
+      "c_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ],
+      "python_start_method": "fork"
     },
     {
       "name": "mandelbrot",
@@ -262,16 +284,16 @@
       ],
       "references": {
         "main.c": {
-          "path": "mandelbrot/mandelbrot.gcc-8.gcc",
-          "sha256": "c785a5031762cb7818d4b3ca595dbce90c68279763aebd5625c0ef4956943246"
+          "path": "mandelbrot/mandelbrot.gcc-5.gcc",
+          "sha256": "3b59fb6d50e829972aaba9f66354fb488a84764c6a6e4da78c492680a4a95b39"
         },
         "main.py": {
-          "path": "mandelbrot/mandelbrot.python3-8.python3",
-          "sha256": "4fd93dceb9dab51b11ed25821ba93c346b7296b93c2bf73f69a6726d06645601"
+          "path": "mandelbrot/mandelbrot.python3-5.python3",
+          "sha256": "72f21f55dab03a8d5e1c701c598affcd658653fbae277198f8e5b3d00a156bb3"
         },
         "main.cpp": {
-          "path": "mandelbrot/mandelbrot.gpp-3.gpp",
-          "sha256": "f09c079e5d619a9797ebc81dea60407f21f176ca76bdc0e0c7f7281b273008ac"
+          "path": "mandelbrot/mandelbrot.gpp-9.gpp",
+          "sha256": "f5263984d2924694c2cdc04cf8dd42e4a28ec3845f2f9fad4007661e7d6a1e84"
         },
         "main.rs": {
           "path": "mandelbrot/mandelbrot.rust-4.rust",
@@ -279,12 +301,12 @@
           "note": "This contribution rounds dimensions down to a multiple of eight. Every configured profile and official fixture uses a multiple of eight."
         },
         "main.go": {
-          "sha256": "5c738174a4d392c995978c4d5121785c738b36347fb75608f70e52a8ca83c157",
-          "path": "mandelbrot/mandelbrot.go-8.go"
+          "path": "mandelbrot/mandelbrot.go-6.go",
+          "sha256": "467d0e31d1bfc39fc313925f56bb6a2a76175ba264685450a6b65ea4d2d56a84"
         },
         "main.java": {
-          "path": "mandelbrot/mandelbrot.java-8.java",
-          "sha256": "8a8d0cb3f7fd0fcaa202ed6bddaf71e08b1e79ea28e12ad6394e7191a9ee5afb"
+          "path": "mandelbrot/mandelbrot.java-4.java",
+          "sha256": "879fbc28d69659ce9c6d33bd58ed131508bf0c7a312e9ebb44dc9f3e0c2c1696"
         }
       },
       "specification": {
@@ -293,10 +315,29 @@
         "sha256": "9fe4f47825d9a94412dbeb0806cf61f657412754baf5f2139bf90c0f46f9116d"
       },
       "cpp_flags": [
-        "-std=c++17"
+        "-std=c++17",
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include"
       ],
-      "cpp_link_flags": [],
-      "java_main_class": "mandelbrot"
+      "cpp_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ],
+      "java_main_class": "mandelbrot",
+      "c_flags": [
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include",
+        "-ffp-contract=off"
+      ],
+      "c_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ],
+      "python_start_method": "fork"
     },
     {
       "name": "fasta",
@@ -314,8 +355,8 @@
       ],
       "references": {
         "main.c": {
-          "path": "fasta/fasta.gcc",
-          "sha256": "628b37687acb8ae008116ed7dbbaf001308ee46de5367c60eb4743301de596ff"
+          "path": "fasta/fasta.gcc-2.gcc",
+          "sha256": "87a7ec3e31cea551e69267780eb802955af566ef2ea76115e576e8c07594c6d2"
         },
         "main.py": {
           "path": "fasta/fasta.python3",
@@ -330,8 +371,8 @@
           "sha256": "d7d9c00058423e6976125060581affd80c407ebc7ead5ca6aca1f5e62b18d37a"
         },
         "main.go": {
-          "sha256": "b7a6d09683ec310b5d9f619383487d345a3435b1d17bf239443fed4ef84107db",
-          "path": "fasta/fasta.go"
+          "path": "fasta/fasta.go-2.go",
+          "sha256": "49eb4e788bf353e59b1efcfce499d713a9bc453e05786e3afff3c3d8754fb047"
         },
         "main.java": {
           "path": "fasta/fasta.java-2.java",
@@ -347,7 +388,9 @@
         "-std=c++17"
       ],
       "cpp_link_flags": [],
-      "java_main_class": "fasta"
+      "java_main_class": "fasta",
+      "c_flags": [],
+      "c_link_flags": []
     },
     {
       "name": "knucleotide",
@@ -398,7 +441,17 @@
         "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits.",
         "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
         "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched."
-      }
+      },
+      "c_flags": [
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include"
+      ],
+      "c_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ]
     },
     {
       "name": "revcomp",
@@ -476,25 +529,21 @@
           "path": "binarytrees/binarytrees.gcc-5.gcc",
           "sha256": "a815e8a0eefd7e09bf92a8025bfb8347eb57e9fa79680dcd672ce1c7fa6479a0"
         },
-        "main.py": {
-          "path": "binarytrees/binarytrees.python3-2.python3",
-          "sha256": "90069a6b07af6d771b782f9347ae41da290549d2bbd6d8d9d94df2e2ae25abd4"
-        },
         "main.cpp": {
-          "path": "binarytrees/binarytrees.gpp-2.gpp",
-          "sha256": "b3f3d3debe2b6c6d7204545daec1d0ada48a440d126ddcaf63d2923969a79182"
+          "path": "binarytrees/binarytrees.gpp-5.gpp",
+          "sha256": "df5a211f8338cbdbc6b213382993d7b63b33b86344ff551b099e7a680598ffce"
         },
         "main.rs": {
-          "path": "binarytrees/binarytrees.rust",
-          "sha256": "2bb471318d836aa874fecbcf2dd3da00c6bedee70ec20c141f9ca02bc25abe07"
+          "path": "binarytrees/binarytrees.rust-2.rust",
+          "sha256": "e8812a78babb260271feb35f8707aa0e0164ad97d7b5a10edd5c47f51d0fbfc5"
         },
         "main.go": {
-          "sha256": "72d31464e6ef9df69c740c364e18099be00dbdca22a12bd04ed919f7e664e6c3",
-          "path": "binarytrees/binarytrees.go"
+          "path": "binarytrees/binarytrees.go-5.go",
+          "sha256": "c46127330532363d37205d3e0e7d5973f1f2fa4cdbe7f0d23a75bb3bb519144f"
         },
         "main.java": {
-          "path": "binarytrees/binarytrees.java-2.java",
-          "sha256": "c6a7202fa3e271d49d0d3a45f75b2b01b687f67698765d04e7e6abbdc93cf0c1"
+          "path": "binarytrees/binarytrees.java-7.java",
+          "sha256": "c28a0b7f1bfb705b5cf11c523362114e312df69acf531ee6a8a2f1ca86bab57f"
         }
       },
       "specification": {
@@ -506,10 +555,14 @@
         "-pthread"
       ],
       "cpp_flags": [
-        "-std=c++17"
+        "-std=c++17",
+        "-pthread"
       ],
       "cpp_link_flags": [],
-      "java_main_class": "binarytrees"
+      "java_main_class": "binarytrees",
+      "unavailable": {
+        "python": "Current archived #2 and base/#4/#5 reuse a constant tuple at leaves, violating the required per-node leaf allocation. #3 allocates fresh list leaves but explicitly disables GC; it is excluded under the pinned default-GC-when-possible guidance. The leaf violation was reproduced; the GC exclusion is an interpretation of that guidance. No official source was patched."
+      }
     },
     {
       "name": "regexredux",
@@ -532,8 +585,8 @@
           "sha256": "297865dbe9b65218f5fbcc5324d63b015109a1c40d57a505a692644f19f4c1d4"
         },
         "main.py": {
-          "path": "regexredux/regexredux.python3",
-          "sha256": "955633de90f6d4d45d81aec246ea2c62ef02d9d3bf87c9115017e494b2b0b86b"
+          "path": "regexredux/regexredux.python3-2.python3",
+          "sha256": "dce2a1bfd1dfb236934ce234d24e1ea58db67c322c61df62f1a32436fe9fbb87"
         },
         "main.cpp": {
           "path": "regexredux/regexredux.gpp-6.gpp",
@@ -548,8 +601,8 @@
           "path": "regexredux/regexredux.go"
         },
         "main.java": {
-          "path": "regexredux/regexredux.java",
-          "sha256": "c8921748621b8ce4b97b8a159a99acbed94526f49c7bf8903bfd468c53134f28"
+          "path": "regexredux/regexredux.java-6.java",
+          "sha256": "fb752d4086cd2261bb163108a6e3c63cb9a2fc133196e4f1f778bfd18067ecb0"
         }
       },
       "specification": {
@@ -577,7 +630,18 @@
           "sha256": "f9551b997518655ab04feae8b84b8e87f742d3c6557dc8c95b11e0368c7c848b"
         }
       },
-      "java_main_class": "regexredux"
+      "java_main_class": "regexredux",
+      "c_flags": [
+        "-Xpreprocessor",
+        "-fopenmp",
+        "-I/opt/homebrew/opt/libomp/include"
+      ],
+      "c_link_flags": [
+        "-L/opt/homebrew/opt/libomp/lib",
+        "-lomp",
+        "-Wl,-rpath,/opt/homebrew/opt/libomp/lib"
+      ],
+      "python_start_method": "fork"
     },
     {
       "name": "pidigits",
@@ -599,16 +663,16 @@
           "sha256": "f719dddd30aad201aa3ce385b80d48ef3befce29b22c3a12a5aa7e7d743f948e"
         },
         "main.py": {
-          "path": "pidigits/pidigits.python3-4.python3",
-          "sha256": "cdfff9f6ad7154f1b7020ff7fae2027653cd113a4913074431a7e9af7f800795"
+          "path": "pidigits/pidigits.python3-3.python3",
+          "sha256": "4ac5b12b52aedd5c4cb794d1b685ecbd09e8f5a601f2d441e3b5f45fa316ed4b"
         },
         "main.cpp": {
           "path": "pidigits/pidigits.gpp-4.gpp",
           "sha256": "e9ea172b053a24a2fc804a0232af6b242b1fbfedc143500a66355446bb251d98"
         },
         "main.rs": {
-          "path": "pidigits/pidigits.rust-4.rust",
-          "sha256": "fb6b33b1bf74612f8ce78d19e70f10f41650b02b72e4c73d2cb0480508fbef65"
+          "path": "pidigits/pidigits.rust-2.rust",
+          "sha256": "036b3b6e088f68374f15a85ed92578302654431e57c9835de55727f0c5e5e8ad"
         },
         "main.go": {
           "sha256": "05986ab0e5b74a2a892aefd5c49a190844d50e3cc6d625f8deb1419f4c60f718",
@@ -637,7 +701,8 @@
         "-lgmpxx",
         "-lgmp"
       ],
-      "java_main_class": "pidigits"
+      "java_main_class": "pidigits",
+      "python_start_method": "fork"
     }
   ],
   "build_inputs": {
