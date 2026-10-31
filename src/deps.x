@@ -20,7 +20,10 @@
 
 static macro Stmt $report.deps_write(Expr $path, Expr $error) =>
   fprintf(
-    stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", $path,
+    stderr, $dedent(%"
+      x2c: error: cannot write dependency file: %s
+      note: %s
+    "), $path,
     strerror($error));
 
 /** Publishes the Make depfile for one completed translation.
