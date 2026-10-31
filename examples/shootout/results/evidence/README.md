@@ -106,3 +106,11 @@ probe scripts, 5,912 permutation-rank/continuation checks, C output parity,
 initial and quiet paired samples, build/source/binary hashes, decisions, and
 quiet observations. The unchanged DNA oracle corpus is in
 `counter-spectral/inputs/`. Full calibration is [run 20261031T170749Z](../runs/20261031T170749Z/README.md).
+
+## Reference audit and k-nucleotide
+
+`reference-profile/` preserves70 source/configuration attempts, all audits,
+failed builds/output checks, quiet before/candidate samples and decisions,
+statistical profiling and input,16 DNA oracle checks, original Python tree
+allocation evidence, and both initial/corrected compiler-flag sanity reports.
+The full calibration is [run 20261031T181939Z](../runs/20261031T181939Z/README.md).

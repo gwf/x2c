@@ -1,67 +1,106 @@
 # The Computer Language Benchmarks Game
-#   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 #
-#   Naive transliteration from Rex Kerr's Scala program
-#   contributed by Isaac Gouy 
-#
+# contributed by Joerg Baumann
+# many thanks to Oleg Mazurov for his helpful description
+
+from sys import argv
+from math import factorial
+from multiprocessing import cpu_count, Pool
+from itertools import islice, starmap
+
+def permutations(n, start, size):
+    p = bytearray(range(n))
+    count = bytearray(n)
+
+    remainder = start
+    for v in range(n - 1, 0, -1):
+        count[v], remainder = divmod(remainder, factorial(v))
+        for _ in range(count[v]):
+            p[:v], p[v] = p[1:v + 1], p[0]
+
+    assert(count[1] == 0)
+    assert(size < 2 or (size % 2 == 0))
+
+    if size < 2:
+        yield p[:]
+    else:
+        rotation_swaps = [None] * n
+        for i in range(1, n):
+            r = list(range(n))
+            for v in range(1, i + 1):
+                r[:v], r[v] = r[1:v + 1], r[0]
+            swaps = []
+            for dst, src in enumerate(r):
+                if dst != src:
+                    swaps.append((dst, src))
+            rotation_swaps[i] = tuple(swaps)
+
+        while True:
+            yield p[:]
+            p[0], p[1] = p[1], p[0]
+            yield p[:]
+            i = 2
+            while count[i] >= i:
+                count[i] = 0
+                i += 1
+            else:
+                count[i] += 1
+                t = p[:]
+                for dst, src in rotation_swaps[i]:
+                    p[dst] = t[src]
+
+def alternating_flips_generator(n, start, size):
+    maximum_flips = 0
+    alternating_factor = 1
+    for permutation in islice(permutations(n, start, size), size):
+        first = permutation[0]
+        if first:
+            flips_count = 1
+            while True:
+                permutation[:first + 1] = permutation[first::-1]
+                first = permutation[0]
+                if not first: break
+                flips_count += 1
+            if maximum_flips < flips_count:
+                maximum_flips = flips_count
+            yield flips_count * alternating_factor
+        else:
+            yield 0
+        alternating_factor = -alternating_factor
+    yield maximum_flips
+
+def task(n, start, size):
+    alternating_flips = alternating_flips_generator(n, start, size)
+    return sum(islice(alternating_flips, size)), next(alternating_flips)
 
 def fannkuch(n):
-   perm1 = [0] * n   
-   for i in range(n): perm1[i] = i      
-   perm = [0] * n
-   count = [0] * n       
-   f = flips = nperm = checksum = j = k = r = 0          
-  
-   r = n
-   while r > 0: 
-      i = 0  
-      while r != 1: count[r-1] = r; r -= 1  
-      while i < n: perm[i] = perm1[i]; i += 1  
-        
-      # Count flips and update max and checksum
-      f = 0
-      k = perm[0]  
-      while k != 0:
-         i = 0  
-         while 2*i < k:          
-            t = perm[i]; perm[i] = perm[k-i]; perm[k-i] = t  
-            i += 1           
+    if n < 0:
+        for data in islice(permutations(-n, 0, factorial(-n)), factorial(-n)):
+            print(''.join(map(lambda n: str(n + 1), data)))
+    else:
+        assert(n > 0)
 
-         k = perm[0]
-         f += 1   
-       
-      if f > flips: flips = f         
-      if (nperm & 0x1) == 0: 
-         checksum += f 
-      else: 
-         checksum -= f
-   
-      # Use incremental change to generate another permutation   
-      more = True
-      while more:  
-         if r == n:
-            print( checksum )                     
-            return flips 
+        task_count = cpu_count()
+        total = factorial(n)
+        task_size = (total + task_count - 1) // task_count
 
-         p0 = perm1[0]
-         i = 0
-         while i < r:
-            j = i + 1
-            perm1[i] = perm1[j]
-            i = j            
+        if task_size < 20000:
+            task_size = total
+            task_count = 1
 
-         perm1[r] = p0 
-         
-         count[r] -= 1        
-         if count[r] > 0: more = False
-         else: r += 1 
+        assert(task_size % 2 == 0)
 
-      nperm += 1
+        task_args = [(n, i * task_size, task_size) for i in range(task_count)]
 
-   return flips      
+        if task_count > 1:
+            with Pool() as pool:
+                checksums, maximums = zip(*pool.starmap(task, task_args))
+        else:
+            checksums, maximums = zip(*starmap(task, task_args))
 
-from sys import argv   
+        checksum, maximum = sum(checksums), max(maximums)
+        print("{0}\nPfannkuchen({1}) = {2}".format(checksum, n, maximum))
 
-n = int(argv[1]) if len(argv) > 1 else 7   
-print("Pfannkuchen(%i) = %i" % (n, fannkuch(n))) 
-
+if __name__ == "__main__":
+    fannkuch(int(argv[1]))

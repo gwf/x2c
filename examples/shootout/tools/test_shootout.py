@@ -93,8 +93,11 @@ let literal = "/* keep this */";
           baseline["benchmarks"][name][reference] = copy.deepcopy(
             baseline["benchmarks"][name]["c"]
           )
+    baseline["benchmarks"]["binarytrees"].pop("python", None)
     first = shootout.make_current(manifest["benchmarks"], baseline, "test", build, run)
-    self.assertEqual(len(first["summary_benchmarks"]), 9)
+    self.assertEqual(len(first["summary_benchmarks"]), 8)
+    self.assertNotIn("binarytrees", first["summary_benchmarks"])
+    self.assertNotIn("sloc_c_over_python", first["benchmarks"]["binarytrees"]["factors"])
     self.assertNotIn("knucleotide", first["summary_benchmarks"])
     self.assertNotIn("time_rust_over_c", first["benchmarks"]["knucleotide"]["factors"])
     run["benchmarks"]["knucleotide"]["implementations"]["idiomatic"] = copy.deepcopy(

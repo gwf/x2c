@@ -1,22 +1,22 @@
-# Added reference coverage
+# Reference coverage
 
-Rust and C++ each contribute nine unchanged programs from the same pinned
-Benchmarks Game source archive as the existing C and Python references.
-All nine selected programs in each language pass the official fixtures and
-the configured local workload checks.
+The current comparison adopts exact contributions from the pinned archive.
+The reference audit screened 70 candidates across all ten problems and six
+reference languages. Selection requires specification compatibility, official
+fixture and local-output checks, and repeatable local quiet-window gains.
 
-| Problem | Rust archive source | C++ archive source |
-| --- | --- | --- |
-| n-body | `nbody/nbody.rust` | `nbody/nbody.gpp-3.gpp` |
-| spectral norm | `spectralnorm/spectralnorm.rust-3.rust` | `spectralnorm/spectralnorm.gpp` |
-| fannkuch-redux | `fannkuchredux/fannkuchredux.rust-2.rust` | `fannkuchredux/fannkuchredux.gpp-3.gpp` |
-| Mandelbrot bitmap | `mandelbrot/mandelbrot.rust-4.rust` | `mandelbrot/mandelbrot.gpp-3.gpp` |
-| fasta | `fasta/fasta.rust-4.rust` | `fasta/fasta.gpp` |
-| k-nucleotide | N/A | N/A |
-| reverse-complement | `revcomp/revcomp.rust-2.rust` | `revcomp/revcomp.gpp` |
-| binary-trees | `binarytrees/binarytrees.rust` | `binarytrees/binarytrees.gpp-2.gpp` |
-| regex-redux | `regexredux/regexredux.rust` | `regexredux/regexredux.gpp-6.gpp` |
-| pidigits | `pidigits/pidigits.rust-4.rust` | `pidigits/pidigits.gpp-4.gpp` |
+| Problem | C | Python | Rust | C++ | Go | Java |
+| --- | --- | --- | --- | --- | --- | --- |
+| n-body | `nbody/nbody.gcc` | `nbody/nbody.python3` | `nbody/nbody.rust-6.rust` | `nbody/nbody.gpp-9.gpp` | `nbody/nbody.go-8.go` | `nbody/nbody.java-2.java` |
+| spectral norm | `spectralnorm/spectralnorm.gcc-3.gcc` | `spectralnorm/spectralnorm.python3-4.python3` | `spectralnorm/spectralnorm.rust-5.rust` | `spectralnorm/spectralnorm.gpp` | `spectralnorm/spectralnorm.go-4.go` | `spectralnorm/spectralnorm.java-8.java` |
+| fannkuch-redux | `fannkuchredux/fannkuchredux.gcc-5.gcc` | `fannkuchredux/fannkuchredux.python3-4.python3` | `fannkuchredux/fannkuchredux.rust-4.rust` | `fannkuchredux/fannkuchredux.gpp` | `fannkuchredux/fannkuchredux.go` | `fannkuchredux/fannkuchredux.java-2.java` |
+| Mandelbrot bitmap | `mandelbrot/mandelbrot.gcc-5.gcc` | `mandelbrot/mandelbrot.python3-5.python3` | `mandelbrot/mandelbrot.rust-4.rust` | `mandelbrot/mandelbrot.gpp-9.gpp` | `mandelbrot/mandelbrot.go-6.go` | `mandelbrot/mandelbrot.java-4.java` |
+| fasta | `fasta/fasta.gcc-2.gcc` | `fasta/fasta.python3` | `fasta/fasta.rust-4.rust` | `fasta/fasta.gpp` | `fasta/fasta.go-2.go` | `fasta/fasta.java-2.java` |
+| k-nucleotide | `knucleotide/knucleotide.gcc` | `knucleotide/knucleotide.python3-3.python3` | N/A | N/A | N/A | N/A |
+| reverse-complement | `revcomp/revcomp.gcc-6.gcc` | `revcomp/revcomp.python3` | `revcomp/revcomp.rust-2.rust` | `revcomp/revcomp.gpp` | `revcomp/revcomp.go-2.go` | `revcomp/revcomp.java-5.java` |
+| binary-trees | `binarytrees/binarytrees.gcc-5.gcc` | N/A | `binarytrees/binarytrees.rust-2.rust` | `binarytrees/binarytrees.gpp-5.gpp` | `binarytrees/binarytrees.go-5.go` | `binarytrees/binarytrees.java-7.java` |
+| regex-redux | `regexredux/regexredux.gcc-5.gcc` | `regexredux/regexredux.python3-2.python3` | `regexredux/regexredux.rust` | `regexredux/regexredux.gpp-6.gpp` | `regexredux/regexredux.go` | `regexredux/regexredux.java-6.java` |
+| pidigits | `pidigits/pidigits.gcc` | `pidigits/pidigits.python3-3.python3` | `pidigits/pidigits.rust-2.rust` | `pidigits/pidigits.gpp-4.gpp` | `pidigits/pidigits.go-7.go` | `pidigits/pidigits.java` |
 
 ## Input constraints
 
@@ -68,9 +68,9 @@ are source findings, not reproduced runtime findings on this host.
 ## Comparison cohort
 
 Per-problem tables show all ten problems and mark unavailable cells N/A.
-Summary rows and charts use only the nine problems shared by all eight columns.
-No missing value is treated as zero, and no nine-problem summary is compared
-with a ten-problem summary.
+Summary rows and charts use only the eight problems shared by all eight columns.
+No missing value is treated as zero. Earlier nine-problem summaries use a
+different cohort and must not be compared as if their membership were unchanged.
 
 All displayed runtime data is measured locally with identical configured
 inputs. No timings from the Benchmarks Game website are substituted.
@@ -88,12 +88,12 @@ T, G, C, A for equal single-letter frequencies. No contribution was patched.
 | Problem | Go archive source |
 | --- | --- |
 | nbody | `nbody/nbody.go-8.go` |
-| spectralnorm | `spectralnorm/spectralnorm.go-8.go` |
-| fannkuchredux | `fannkuchredux/fannkuchredux.go-8.go` |
-| mandelbrot | `mandelbrot/mandelbrot.go-8.go` |
-| fasta | `fasta/fasta.go` |
+| spectralnorm | `spectralnorm/spectralnorm.go-4.go` |
+| fannkuchredux | `fannkuchredux/fannkuchredux.go` |
+| mandelbrot | `mandelbrot/mandelbrot.go-6.go` |
+| fasta | `fasta/fasta.go-2.go` |
 | revcomp | `revcomp/revcomp.go-2.go` |
-| binarytrees | `binarytrees/binarytrees.go` |
+| binarytrees | `binarytrees/binarytrees.go-5.go` |
 | regexredux | `regexredux/regexredux.go` |
 | pidigits | `pidigits/pidigits.go-7.go` |
 
@@ -114,11 +114,11 @@ workloads on native ARM OpenJDK 27. They use only Java standard libraries.
 | nbody | `nbody/nbody.java-2.java` |
 | spectralnorm | `spectralnorm/spectralnorm.java-8.java` |
 | fannkuchredux | `fannkuchredux/fannkuchredux.java-2.java` |
-| mandelbrot | `mandelbrot/mandelbrot.java-8.java` |
+| mandelbrot | `mandelbrot/mandelbrot.java-4.java` |
 | fasta | `fasta/fasta.java-2.java` |
 | revcomp | `revcomp/revcomp.java-5.java` |
-| binarytrees | `binarytrees/binarytrees.java-2.java` |
-| regexredux | `regexredux/regexredux.java` |
+| binarytrees | `binarytrees/binarytrees.java-7.java` |
+| regexredux | `regexredux/regexredux.java-6.java` |
 | pidigits | `pidigits/pidigits.java` |
 
 All six archived Java k-nucleotide contributions were compiled and checked.
@@ -136,3 +136,22 @@ Java measurements launch a fresh JVM for every sample. They include JVM
 startup and JIT compilation. The separate process warmup cannot warm the
 measured JVM; these are whole-program elapsed times, not warmed steady-state
 Java throughput.
+
+## Python binary-trees
+
+The previously adopted #2 returns a constant `(None, None)` tuple at each leaf.
+Compiling its unchanged function and checking object identity confirms shared
+leaves. Base/#4/#5 have the same source pattern. This fails the pinned work
+requirement that leaves receive the same allocation as interior nodes.
+
+The remaining #3 creates fresh list leaves but explicitly calls `gc.disable()`.
+It is excluded under the pinned request to use default GC when possible.
+This is an interpretation of the GC guidance, distinct from the reproduced
+allocation violation. The original source, disassembly, identity evidence,
+and rejected-source discussion are preserved with the reference audit.
+No patched reference replaces either entry.
+
+There are 75 admitted programs. The eight-column common cohort excludes both
+k-nucleotide and binary-trees. Complete Latin rotations for coverage groups of
+8, 7 and 4 programs require 56 samples per program, or 4,200 observations.
+The harness derives the rotation multiple from manifest availability.

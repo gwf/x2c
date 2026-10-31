@@ -27,11 +27,17 @@ The current threaded x2c entries have direct published precedents:
   uses pthread workers. The project also publishes an
   [OpenMP C entry](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-3.html).
 - Spectral-norm: the [adopted Rust contribution](../benchmarks/spectralnorm/main.rs)
-  uses native threads. The project also publishes an
+  uses Rayon workers. The project also publishes an
   [OpenMP C entry](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-3.html).
 - Fannkuch-redux: the [adopted Rust contribution](../benchmarks/fannkuchredux/main.rs)
-  divides permutations among native threads. The official specification also
+  divides permutations among Rayon workers. The official specification also
   describes parallel chunks.
+
+- K-nucleotide: the [adopted C contribution](../benchmarks/knucleotide/main.c)
+  uses OpenMP sections, now enabled in its build. The idiomatic x2c entry uses
+  seven ordinary Threads, one full growing Map per required width. Results
+  print in the specified order after joins. Worker-local collections do not
+  escape; canonical String outputs retain their shared-pool lifetime.
 
 Source identities and unchanged contributed bytes are pinned in
 [benchmarks.json](../benchmarks.json). Historical serial measurements and
@@ -108,3 +114,11 @@ parity determines checksum signs; chunk sums and maxima combine after joining.
 The ranges partition [0,n!) and use 64-bit arithmetic for partition products.
 N<9 runs the same calculation serially. Tuned fannkuch retains its serial
 implementation. Parallel execution is described by the pinned official spec.
+
+## Reference audit update
+
+The selected references include source-specific OpenMP, Rayon, ordinary threads,
+Python multiprocessing, standard-library pools, GMP and PCRE2. Exact choices
+and flags are in the manifest and each immutable run. All remain subject to
+required algorithm/work checks. No matching-core regime or extra column was
+introduced. Python tree exclusion changes the common cohort to eight problems.

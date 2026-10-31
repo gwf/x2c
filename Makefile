@@ -28,7 +28,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler bm-build-scaling \
-	bm-match-cache performance-snapshot performance-runtime
+	bm-match-cache bm-c2x2c performance-snapshot performance-runtime
 SHOOTOUT_TARGETS = shoot-check shoot-run shoot-update shoot-calibrate
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
@@ -523,6 +523,11 @@ bm-varops: build					## Check Var operator fast lanes
 
 bm-map: build						## Compare Map with pinned klib khashl
 	./unittest/benchmarks/hash-table/direct/run.sh
+
+C2X2C_BENCHMARK_ARGS ?=
+
+bm-c2x2c: build					## Compare end-to-end word counts with C
+	CC="$(CC)" python3 tools/c2x2c-benchmark.py $(C2X2C_BENCHMARK_ARGS)
 
 bm-map-standard-smoke: build			## Smoke-test recognized Map suites
 	./unittest/benchmarks/hash-table/run-jackson.sh smoke matched
