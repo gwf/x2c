@@ -45,7 +45,7 @@
         "9"
       ],
       "mandelbrot": [
-        "500"
+        "512"
       ],
       "fasta": [
         "100000"
@@ -114,13 +114,25 @@
         "main.py": {
           "path": "nbody/nbody.python3",
           "sha256": "101f5f50adf87324c426cbd09ce5bc3dd15f61ddeb34fd0a8c3ee2e2f4086ff5"
+        },
+        "main.cpp": {
+          "path": "nbody/nbody.gpp-3.gpp",
+          "sha256": "b22f8afa7e51850fefdbbf7bf094e630a72a6e9b65f99eff9744f144f18488c3"
+        },
+        "main.rs": {
+          "path": "nbody/nbody.rust",
+          "sha256": "1097288b773ff0666c453ad91aa9c04024cff3e12e548565d10435ca4e1980d3"
         }
       },
       "specification": {
         "path": "specs/nbody.html",
         "upstream_path": "public/description/nbody.html",
         "sha256": "ac61ca658bb2b10b792b6e1efbe7f4f06e9563277b33767274972065e8cc9720"
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "spectralnorm",
@@ -144,13 +156,26 @@
         "main.py": {
           "path": "spectralnorm/spectralnorm.python3-6.python3",
           "sha256": "bc4cf8abdaa4c49e4d95a7e43e536b26c10b930408cb5c22def1121d2dfc4890"
+        },
+        "main.cpp": {
+          "path": "spectralnorm/spectralnorm.gpp",
+          "sha256": "2842f77e9fcbdb31f4b722005348c76735b52671ccd99794f2cb780484b127e2"
+        },
+        "main.rs": {
+          "path": "spectralnorm/spectralnorm.rust-3.rust",
+          "sha256": "6b8fca569218ac7cff178ce4da8e44cccae1c8668b1e5f0e2d2876e80c7b2424",
+          "note": "This contribution requires even dimensions. Every configured profile and official fixture uses an even dimension."
         }
       },
       "specification": {
         "path": "specs/spectralnorm.html",
         "upstream_path": "public/description/spectralnorm.html",
         "sha256": "a882da42691f2e91a4b0dd098673002bed1bfa52efb3d0b3a1acc58bd7d34acf"
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "fannkuchredux",
@@ -174,13 +199,25 @@
         "main.py": {
           "path": "fannkuchredux/fannkuchredux.python3-8.python3",
           "sha256": "fad3eec38b9b516c4c0e8b49b2466d8f689d912f08b3d72bc558b051721fb2af"
+        },
+        "main.cpp": {
+          "path": "fannkuchredux/fannkuchredux.gpp-3.gpp",
+          "sha256": "fccf786c37f0ad3939f77727cacc2ce629aed85b6e0963eeab5ae8cb4c12d06f"
+        },
+        "main.rs": {
+          "path": "fannkuchredux/fannkuchredux.rust-2.rust",
+          "sha256": "9238cf9dd91b245c4b07de2a6985785c7683e40fcd510f8b817076e7c4ba3d1c"
         }
       },
       "specification": {
         "path": "specs/fannkuchredux.html",
         "upstream_path": "public/description/fannkuchredux.html",
         "sha256": "bd9265b28893996018f1a09d7376de11c8b93ba4238449c6af9e5bded768b07b"
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "mandelbrot",
@@ -204,13 +241,26 @@
         "main.py": {
           "path": "mandelbrot/mandelbrot.python3-8.python3",
           "sha256": "4fd93dceb9dab51b11ed25821ba93c346b7296b93c2bf73f69a6726d06645601"
+        },
+        "main.cpp": {
+          "path": "mandelbrot/mandelbrot.gpp-3.gpp",
+          "sha256": "f09c079e5d619a9797ebc81dea60407f21f176ca76bdc0e0c7f7281b273008ac"
+        },
+        "main.rs": {
+          "path": "mandelbrot/mandelbrot.rust-4.rust",
+          "sha256": "5d7cbf0a4536913670781be454d9fc95817e7f09cacd7082186b176bab08830c",
+          "note": "This contribution rounds dimensions down to a multiple of eight. Every configured profile and official fixture uses a multiple of eight."
         }
       },
       "specification": {
         "path": "specs/mandelbrot.html",
         "upstream_path": "public/description/mandelbrot.html",
         "sha256": "9fe4f47825d9a94412dbeb0806cf61f657412754baf5f2139bf90c0f46f9116d"
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "fasta",
@@ -234,13 +284,25 @@
         "main.py": {
           "path": "fasta/fasta.python3",
           "sha256": "f8bc35bb3b1c35fed1db20010aaa2abbdcce524e99822ae4a1238c2014e89899"
+        },
+        "main.cpp": {
+          "path": "fasta/fasta.gpp",
+          "sha256": "56a0ea5221ad0a75efe9819f2a9d31e6d30bef69e1320b522fe82b1d724e4dca"
+        },
+        "main.rs": {
+          "path": "fasta/fasta.rust-4.rust",
+          "sha256": "d7d9c00058423e6976125060581affd80c407ebc7ead5ca6aca1f5e62b18d37a"
         }
       },
       "specification": {
         "path": "specs/fasta.html",
         "upstream_path": "public/description/fasta.html",
         "sha256": "137922f22595ca529e0fbb954f1553625303c45539ffecacddf08c21593c0e0c"
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "knucleotide",
@@ -285,6 +347,10 @@
           "path": "khash.h",
           "sha256": "4582c7fd4b98f61339ce677bb1daa7a45a53075b112a494a335525c4bda72074"
         }
+      },
+      "unavailable": {
+        "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+        "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
       }
     },
     {
@@ -310,6 +376,14 @@
         "main.py": {
           "path": "revcomp/revcomp.python3",
           "sha256": "0750e816ae6271b5e188b3af5c46e34858c344e0a741bdfc40ffeb5f43fecb88"
+        },
+        "main.cpp": {
+          "path": "revcomp/revcomp.gpp",
+          "sha256": "ca1cfd89c0cb141e50e8d734d7f2b9d96f08432f334edb714c6e198278464b91"
+        },
+        "main.rs": {
+          "path": "revcomp/revcomp.rust-2.rust",
+          "sha256": "a000f1ff5b10f92c9ac7ff49081888f87807634a96529dfb2834c52ba15e4a29"
         }
       },
       "specification": {
@@ -321,7 +395,11 @@
         "quick": 1000,
         "local": 100000,
         "canonical": 25000000
-      }
+      },
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "binarytrees",
@@ -345,6 +423,14 @@
         "main.py": {
           "path": "binarytrees/binarytrees.python3-2.python3",
           "sha256": "90069a6b07af6d771b782f9347ae41da290549d2bbd6d8d9d94df2e2ae25abd4"
+        },
+        "main.cpp": {
+          "path": "binarytrees/binarytrees.gpp-2.gpp",
+          "sha256": "b3f3d3debe2b6c6d7204545daec1d0ada48a440d126ddcaf63d2923969a79182"
+        },
+        "main.rs": {
+          "path": "binarytrees/binarytrees.rust",
+          "sha256": "2bb471318d836aa874fecbcf2dd3da00c6bedee70ec20c141f9ca02bc25abe07"
         }
       },
       "specification": {
@@ -354,7 +440,11 @@
       },
       "c_flags": [
         "-pthread"
-      ]
+      ],
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": []
     },
     {
       "name": "regexredux",
@@ -379,6 +469,14 @@
         "main.py": {
           "path": "regexredux/regexredux.python3",
           "sha256": "955633de90f6d4d45d81aec246ea2c62ef02d9d3bf87c9115017e494b2b0b86b"
+        },
+        "main.cpp": {
+          "path": "regexredux/regexredux.gpp-6.gpp",
+          "sha256": "08166cada00044e451086fe5842c596ea1f3e99a4079c6ce5fa6dfc59f80e16f"
+        },
+        "main.rs": {
+          "path": "regexredux/regexredux.rust",
+          "sha256": "9e826f38b182de0bff08d52f56277054cd0b3141e3e0fa538f5b42b314bf2a43"
         }
       },
       "specification": {
@@ -390,6 +488,21 @@
         "quick": 1000,
         "local": 100000,
         "canonical": 5000000
+      },
+      "cpp_flags": [
+        "-std=c++17",
+        "-pthread",
+        "-I{source_dir}/vendor"
+      ],
+      "cpp_link_flags": [],
+      "dependencies": {
+        "vendor/boost/noncopyable.hpp": {
+          "repository": "https://github.com/boostorg/utility",
+          "revision": "0def6ea76d6d41da49eca5a7072f591de925ad33",
+          "tag": "boost-1.46.0",
+          "path": "include/boost/noncopyable.hpp",
+          "sha256": "f9551b997518655ab04feae8b84b8e87f742d3c6557dc8c95b11e0368c7c848b"
+        }
       }
     },
     {
@@ -414,6 +527,14 @@
         "main.py": {
           "path": "pidigits/pidigits.python3-4.python3",
           "sha256": "cdfff9f6ad7154f1b7020ff7fae2027653cd113a4913074431a7e9af7f800795"
+        },
+        "main.cpp": {
+          "path": "pidigits/pidigits.gpp-4.gpp",
+          "sha256": "e9ea172b053a24a2fc804a0232af6b242b1fbfedc143500a66355446bb251d98"
+        },
+        "main.rs": {
+          "path": "pidigits/pidigits.rust-4.rust",
+          "sha256": "fb6b33b1bf74612f8ce78d19e70f10f41650b02b72e4c73d2cb0480508fbef65"
         }
       },
       "specification": {
@@ -426,7 +547,22 @@
       ],
       "x2c_link_flags": [
         "-lgmp"
+      ],
+      "cpp_flags": [
+        "-std=c++17"
+      ],
+      "cpp_link_flags": [
+        "-lgmpxx",
+        "-lgmp"
       ]
     }
-  ]
+  ],
+  "build_inputs": {
+    "rust/Cargo.toml": {
+      "sha256": "d46c17611abaf13845b699171015cabd8ddd5316d244dfc033d7653ab80ee721"
+    },
+    "rust/Cargo.lock": {
+      "sha256": "aec507ca3a7ed0a2aae4872b1434186a9bac6251ab041a495f9064551b833b24"
+    }
+  }
 }

@@ -168,7 +168,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     official = {
       "shootout_baseline": "official-a",
       "shootout_median": {
-        "time_idiomatic_over_c": 1.2, "time_optimized_over_c": 1.0,
+        "time_idiomatic_over_c": 1.2, "time_tuned_over_c": 1.0,
       },
     }
     recalibrated = {**official, "shootout_baseline": "official-b"}
@@ -182,7 +182,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     )
     self.assertEqual(
       snapshot.comparable_metrics(official)[
-        "shootout official-a median time_optimized_over_c"
+        "shootout official-a median time_tuned_over_c"
       ], 1.0,
     )
 

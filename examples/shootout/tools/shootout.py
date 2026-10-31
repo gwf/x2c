@@ -28,16 +28,25 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent.parent
 BUILD = ROOT.parent / "build" / "shootout"
+RUST_BUILD = BUILD.parent / "shootout-rust"
 LATEST = BUILD / "latest"
 MANIFEST_PATH = ROOT / "benchmarks.json"
 BASELINE_PATH = ROOT / "baseline.json"
 CURRENT_JSON = ROOT / "results" / "current.json"
 CURRENT_MARKDOWN = ROOT / "results" / "current.md"
 DEFAULT_CFLAGS = "-O2 -DNDEBUG"
-REFERENCE_IMPLEMENTATIONS = ("c", "python")
-X2C_SOURCES = {"idiomatic": "main.x", "optimized": "optimized.x"}
+REFERENCE_SOURCES = {
+  "c": "main.c", "python": "main.py", "rust": "main.rs", "cpp": "main.cpp",
+}
+REFERENCE_IMPLEMENTATIONS = tuple(REFERENCE_SOURCES)
+X2C_SOURCES = {"idiomatic": "main.x", "tuned": "tuned.x"}
 X2C_IMPLEMENTATIONS = tuple(X2C_SOURCES)
-IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python")
+IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python", "rust", "cpp")
+
+
+def available_implementations(benchmark: dict[str, Any]) -> tuple[str, ...]:
+  return tuple(name for name in IMPLEMENTATIONS if name in X2C_SOURCES
+               or REFERENCE_SOURCES[name] in benchmark["references"])
 
 
 class HarnessError(RuntimeError):
@@ -100,6 +109,7 @@ def command(
   timeout: float | None = None,
   check: bool = True,
   stdin_path: Path | None = None,
+  env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[bytes]:
   own_process_group = timeout is not None and os.name == "posix"
   with stdin_path.open("rb") if stdin_path else open(os.devnull, "rb") as input:
@@ -110,6 +120,7 @@ def command(
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
       start_new_session=own_process_group,
+      env=env,
     )
   try:
     stdout, stderr = process.communicate(timeout=timeout)
@@ -201,6 +212,9 @@ def load_manifest() -> dict[str, Any]:
     )
 
   expected_names = set(names)
+  for filename, entry in manifest.get("build_inputs", {}).items():
+    if sha256(ROOT / filename) != entry["sha256"]:
+      raise HarnessError(f"{filename} differs from its pinned build input")
   for profile_name, profile in profiles.items():
     if not isinstance(profile, dict) or set(profile) != expected_names:
       raise HarnessError(
@@ -290,6 +304,10 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
     raise HarnessError(f"C compiler not found: {args.cc}")
   if args.action in ("calibrate", "check") and not python:
     raise HarnessError(f"Python interpreter not found: {args.python}")
+  cxx = shutil.which(os.environ.get("CXX", "clang++"))
+  cargo = shutil.which(os.environ.get("CARGO", "cargo"))
+  if args.action in ("calibrate", "check") and (not cxx or not cargo):
+    raise HarnessError("reference builds require clang++ and cargo")
 
   build_mode_path = REPO / "etc/build-mode"
   build_mode = (
@@ -316,6 +334,9 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
     "include": include,
     "cc": cc,
     "python": python,
+    "cxx": cxx,
+    "cargo": cargo,
+    "dependency_prefix": prefix,
     "cflags": shlex.split(args.cflags),
     "cppflags": shlex.split(os.environ["SHOOTOUT_CPPFLAGS"])
       if "SHOOTOUT_CPPFLAGS" in os.environ else cppflags,
@@ -390,6 +411,17 @@ def machine_receipt(toolchain: dict[str, Any]) -> dict[str, Any]:
     ),
     "cc": toolchain["cc"],
     "cc_version": command_text([toolchain["cc"], "--version"]),
+    "cxx_version": command_text([toolchain["cxx"], "--version"])
+      if toolchain["cxx"] else None,
+    "rustc_version": command_text(["rustc", "--version"])
+      if toolchain["cargo"] else None,
+    "cargo_version": command_text([toolchain["cargo"], "--version"])
+      if toolchain["cargo"] else None,
+    "rust_build_environment": {
+      key: value for key, value in rust_environment(toolchain).items()
+      if key in ("C_INCLUDE_PATH", "LIBRARY_PATH", "RUSTFLAGS",
+                 "CARGO_ENCODED_RUSTFLAGS", "RUSTC_WRAPPER")
+    },
     "cflags": toolchain["cflags"],
     "cppflags": toolchain["cppflags"],
     "ldflags": toolchain["ldflags"],
@@ -647,6 +679,76 @@ def build_references(
       "interpreter_version": command_text([python, "--version"]),
     }
     print(f"built {name}: C and Python references", flush=True)
+    if "main.cpp" in benchmark["references"]:
+      source = source_root / "main.cpp"
+      binary = binary_path(name, "cpp")
+      binary.parent.mkdir(parents=True)
+      cpp_flags = [flag.format(source_dir=source_root, repo=REPO)
+                   for flag in benchmark.get("cpp_flags", [])]
+      argv = [toolchain["cxx"], *toolchain["cflags"], *cpp_flags,
+              *package_cppflags, *toolchain["cppflags"], str(source),
+              *package_ldflags, *toolchain["ldflags"],
+              *benchmark.get("cpp_link_flags", []), "-o", str(binary)]
+      started = time.perf_counter_ns()
+      command(argv)
+      outputs["cpp"] = native_build_receipt(
+        source, binary, argv, time.perf_counter_ns() - started,
+      )
+      print(f"built {name}: C++ reference", flush=True)
+  rust_benchmarks = [b for b in benchmarks if "main.rs" in b["references"]]
+  if rust_benchmarks:
+    argv = [toolchain["cargo"], "build", "--locked", "--release",
+            "--manifest-path", str(ROOT / "rust/Cargo.toml"),
+            "--target-dir", str(RUST_BUILD)]
+    for benchmark in rust_benchmarks:
+      argv.extend(["--bin", benchmark["name"]])
+    environment = rust_environment(toolchain)
+    started = time.perf_counter_ns()
+    command(argv, env=environment)
+    compile_ns = time.perf_counter_ns() - started
+    for benchmark in rust_benchmarks:
+      name = benchmark["name"]
+      binary = binary_path(name, "rust")
+      binary.parent.mkdir(parents=True)
+      shutil.copyfile(RUST_BUILD / "release" / name, binary)
+      binary.chmod(0o755)
+      receipt["benchmarks"][name]["rust"] = {
+        **native_build_receipt(
+          ROOT / "benchmarks" / name / "main.rs", binary, argv, compile_ns,
+        ),
+        "compile_scope": "shared Cargo build of selected reference binaries",
+        "build_environment": {
+          key: environment[key]
+          for key in ("C_INCLUDE_PATH", "LIBRARY_PATH", "RUSTFLAGS")
+        },
+      }
+      print(f"built {name}: Rust reference", flush=True)
+
+
+def native_build_receipt(
+  source: Path, binary: Path, argv: list[str], compile_ns: int,
+) -> dict[str, Any]:
+  return {
+    "source": str(source.relative_to(ROOT)),
+    "source_metrics": source_metrics(source),
+    "binary": str(binary.relative_to(BUILD)),
+    "binary_sha256": sha256(binary), "binary_bytes": binary.stat().st_size,
+    "dynamic_dependencies": dynamic_dependencies(binary),
+    "compile_ns": compile_ns, "compile_command": argv,
+  }
+
+
+def rust_environment(toolchain: dict[str, Any]) -> dict[str, str]:
+  environment = dict(os.environ)
+  prefix = toolchain["dependency_prefix"]
+  for key, directory in (("C_INCLUDE_PATH", "include"), ("LIBRARY_PATH", "lib")):
+    environment[key] = os.pathsep.join(filter(None, [
+      str(prefix / directory), environment.get(key),
+    ]))
+  environment["RUSTFLAGS"] = " ".join(filter(None, [
+    environment.get("RUSTFLAGS"), f"-L native={prefix / 'lib'}",
+  ]))
+  return environment
 
 
 def native_flags(benchmark: dict[str, Any]) -> tuple[list[str], list[str]]:
@@ -776,12 +878,14 @@ def check_programs(
   }
   for benchmark in benchmarks:
     name = benchmark["name"]
+    selected = tuple(i for i in implementations
+                     if i in available_implementations(benchmark))
     for check_case in benchmark["checks"]:
       expected_path = ROOT / "benchmarks" / name / check_case["expected"]
       expected = expected_path.read_bytes()
       outputs: dict[str, bytes] = {}
       comparison = ""
-      for implementation in implementations:
+      for implementation in selected:
         output = run_captured(
           binary_path(name, implementation),
           check_case["args"],
@@ -806,7 +910,7 @@ def check_programs(
         )
       if (
         comparison == "exact"
-        and len(implementations) > 1
+        and len(selected) > 1
         and len(set(outputs.values())) != 1
       ):
         raise HarnessError(
@@ -814,13 +918,23 @@ def check_programs(
         )
       print(
         f"checked {name} {' '.join(check_case['args'])}: "
-        f"{', '.join(implementations)}; {comparison}",
+        f"{', '.join(selected)}; {comparison}",
         flush=True,
       )
   return receipt
 
 
-def strip_c_comments(text: str) -> str:
+def source_quote(text: str, index: int, rust: bool) -> bool:
+  if rust and text[index] == "'":
+    lifetime = re.match(r"'[A-Za-z_]\w*", text[index:])
+    if lifetime:
+      end = index + lifetime.end()
+      if end == len(text) or text[end] != "'":
+        return False
+  return text[index] in ("'", '"')
+
+
+def strip_c_comments(text: str, rust: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -862,14 +976,14 @@ def strip_c_comments(text: str) -> str:
       index += 2
       continue
     output.append(char)
-    if char in ("'", '"'):
+    if source_quote(text, index, rust):
       state = "quote"
       quote = char
     index += 1
   return "".join(output)
 
 
-def collapse_code_whitespace(text: str) -> str:
+def collapse_code_whitespace(text: str, rust: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -896,7 +1010,7 @@ def collapse_code_whitespace(text: str) -> str:
       output.append(" ")
       pending_space = False
     output.append(char)
-    if char in ("'", '"'):
+    if source_quote(text, index, rust):
       state = "quote"
       quote = char
     index += 1
@@ -906,8 +1020,9 @@ def collapse_code_whitespace(text: str) -> str:
 def source_metrics(path: Path) -> dict[str, Any]:
   data = path.read_bytes()
   text = data.decode("utf-8")
-  without_comments = strip_c_comments(text)
-  normalized = collapse_code_whitespace(without_comments).encode("utf-8")
+  rust = path.suffix == ".rs"
+  without_comments = strip_c_comments(text, rust)
+  normalized = collapse_code_whitespace(without_comments, rust).encode("utf-8")
   return {
     "path": str(path.relative_to(ROOT)),
     "physical_lines": len(text.splitlines()),
@@ -1029,6 +1144,7 @@ def calibration_measurements(
   with raw_path.open("w", encoding="utf-8") as raw:
     for benchmark in benchmarks:
       name = benchmark["name"]
+      selected = available_implementations(benchmark)
       program_args = profile[name]
       stdin_path = profile_stdin(benchmark, args.profile, toolchain)
       comparison = profile_comparison(benchmark)
@@ -1037,9 +1153,9 @@ def calibration_measurements(
           binary_path(name, implementation), program_args, args.timeout,
           stdin_path,
         )
-        for implementation in IMPLEMENTATIONS
+        for implementation in selected
       }
-      for implementation in IMPLEMENTATIONS[1:]:
+      for implementation in selected[1:]:
         compare_output(
           name,
           implementation,
@@ -1056,7 +1172,7 @@ def calibration_measurements(
         )
 
       for warmup in range(1, args.warmups + 1):
-        for implementation in IMPLEMENTATIONS:
+        for implementation in selected:
           measure_once(
             measure,
             binary_path(name, implementation),
@@ -1066,10 +1182,10 @@ def calibration_measurements(
           )
         print(f"warmed {name} ({warmup}/{args.warmups})", flush=True)
 
-      records = {implementation: [] for implementation in IMPLEMENTATIONS}
+      records = {implementation: [] for implementation in selected}
       for sample in range(1, args.samples + 1):
-        offset = (sample - 1) % len(IMPLEMENTATIONS)
-        order = IMPLEMENTATIONS[offset:] + IMPLEMENTATIONS[:offset]
+        offset = (sample - 1) % len(selected)
+        order = selected[offset:] + selected[:offset]
         for position, implementation in enumerate(order, start=1):
           measured = measure_once(
             measure,
@@ -1109,7 +1225,7 @@ def calibration_measurements(
             "statistics": summarize(records[implementation]),
             "measurements": compact_records(records[implementation]),
           }
-          for implementation in IMPLEMENTATIONS
+          for implementation in selected
         },
       }
   try:
@@ -1167,7 +1283,7 @@ def make_baseline(
       "execution_ratio": "ratio of implementation and C medians",
       "source_metric": "nonblank lines after C-style comment removal",
       "process_model": "fresh process per warmup and measured sample",
-      "order": "rotating C,idiomatic,optimized,Python Latin order",
+      "order": "rotating available C,idiomatic,tuned,Python,Rust,C++ Latin order",
     },
     "calibration": {
       "run_id": calibration["run_id"],
@@ -1190,21 +1306,17 @@ def make_baseline(
           "stdin_sha256"
         ],
         "checks": expected_receipt(benchmark),
-        "c": {
-          "source": build_receipt["benchmarks"][benchmark["name"]]["c"][
-            "source_metrics"
-          ],
-          **calibration["benchmarks"][benchmark["name"]][
-            "implementations"
-          ]["c"],
-        },
-        "python": {
-          "source": build_receipt["benchmarks"][benchmark["name"]]["python"][
-            "source_metrics"
-          ],
-          **calibration["benchmarks"][benchmark["name"]][
-            "implementations"
-          ]["python"],
+        **{
+          implementation: {
+            "source": build_receipt["benchmarks"][benchmark["name"]][
+              implementation
+            ]["source_metrics"],
+            **calibration["benchmarks"][benchmark["name"]][
+              "implementations"
+            ][implementation],
+          }
+          for implementation in REFERENCE_IMPLEMENTATIONS
+          if implementation in available_implementations(benchmark)
         },
       }
       for benchmark in benchmarks
@@ -1254,7 +1366,9 @@ def load_baseline(
       raise HarnessError(
         f"{name} local arguments changed; run `make shoot-calibrate`"
       )
-    for implementation, filename in (("c", "main.c"), ("python", "main.py")):
+    for implementation, filename in REFERENCE_SOURCES.items():
+      if implementation not in available_implementations(benchmark):
+        continue
       current = source_metrics(ROOT / "benchmarks" / name / filename)
       if current != entry.get(implementation, {}).get("source"):
         raise HarnessError(
@@ -1389,6 +1503,8 @@ def make_current(
 ) -> dict[str, Any]:
   results: dict[str, Any] = {}
   factors: dict[str, list[float]] = {}
+  common = [b["name"] for b in benchmarks
+            if available_implementations(b) == IMPLEMENTATIONS]
   measured = [
     implementation
     for implementation in X2C_IMPLEMENTATIONS
@@ -1406,9 +1522,21 @@ def make_current(
     python_lines = python_source["source_lines"]
 
     row = {
+      "time_c_over_c": 1.0,
       "time_python_over_c": python_median / c_median,
       "sloc_c_over_python": c_source["source_lines"] / python_lines,
+      "sloc_python_over_python": 1.0,
     }
+    for implementation in ("rust", "cpp"):
+      if implementation not in reference:
+        continue
+      foreign = reference[implementation]
+      row[f"time_{implementation}_over_c"] = (
+        foreign["statistics"]["median_elapsed_ns"] / c_median
+      )
+      row[f"sloc_{implementation}_over_python"] = (
+        foreign["source"]["source_lines"] / python_lines
+      )
     programs: dict[str, Any] = {}
     for implementation in measured:
       build = build_receipt["benchmarks"][name][implementation]
@@ -1435,12 +1563,14 @@ def make_current(
           )
         },
       }
-    for key, value in row.items():
-      factors.setdefault(key, []).append(value)
+    if name in common:
+      for key, value in row.items():
+        factors.setdefault(key, []).append(value)
     results[name] = {
       "title": benchmark["title"],
       "args": entry["args"],
       "factors": row,
+      "unavailable": benchmark.get("unavailable", {}),
       **programs,
       "references": {
         implementation: {
@@ -1448,10 +1578,13 @@ def make_current(
           "statistics": reference[implementation]["statistics"],
         }
         for implementation in REFERENCE_IMPLEMENTATIONS
+        if implementation in reference
       },
     }
   return {
-    "schema": 3,
+    "schema": 4,
+    "implementations": list(IMPLEMENTATIONS),
+    "summary_benchmarks": common,
     "specification": baseline["methodology"]["specification"],
     "benchmark_order": [benchmark["name"] for benchmark in benchmarks],
     "x2c_implementations": measured,
@@ -1474,16 +1607,10 @@ def make_current(
 
 
 def render_current(current: dict[str, Any]) -> str:
-  measured = current["x2c_implementations"]
-  columns = [
-    *((f"Time {name}/C", f"time_{name}_over_c") for name in measured),
-    ("Time Python/C", "time_python_over_c"),
-    *(
-      (f"SLOC {name}/Python", f"sloc_{name}_over_python")
-      for name in measured
-    ),
-    ("SLOC C/Python", "sloc_c_over_python"),
-  ]
+  labels = {
+    "c": "C", "idiomatic": "idiomatic x2c", "tuned": "tuned x2c",
+    "python": "Python", "rust": "Rust", "cpp": "C++",
+  }
   lines = [
     "# x2c Benchmarks Game result",
     "",
@@ -1493,26 +1620,42 @@ def render_current(current: dict[str, Any]) -> str:
     f"- Samples: {current['samples']} fresh-process x2c measurements after "
     f"{current['warmups']} warmup(s)",
     "- `idiomatic` is `main.x`, using ordinary x2c collections and APIs.",
-    "  `optimized` is `optimized.x`, using typed containers and other",
+    "  `tuned` is `tuned.x`, using typed containers and other",
     "  x2c optimizations within the same official specification.",
-    "- C and Python are adopted, unmodified contributed programs.",
+    "- C, Python, Rust, and C++ are adopted, unmodified contributed programs.",
     "  These are local measurements, not the official site's timings.",
     "- Time uses C as the implicit 1.00 baseline; SLOC uses Python as the",
     "  implicit 1.00 baseline. Larger values mean more cost.",
+    "- N/A means there is no admitted contribution for that problem.",
+    f"- Summary rows use only the {len(current['summary_benchmarks'])} problems "
+    "shared by every column:",
+    "  " + ", ".join(current["summary_benchmarks"]),
     "",
-    "| Benchmark | " + " | ".join(label for label, _ in columns) + " |",
-    "| --- |" + " ---: |" * len(columns),
   ]
-  for name in current["benchmark_order"]:
-    factors = current["benchmarks"][name]["factors"]
-    cells = " | ".join(f"{factors[key]:.2f}" for _, key in columns)
-    lines.append(f"| {name} | {cells} |")
-  for label, summary in (
-    ("Median", current["median"]),
-    ("Arithmetic mean", current["arithmetic_mean"]),
+  for title, prefix, suffix in (
+    ("Elapsed time / C", "time", "c"),
+    ("Source lines / Python", "sloc", "python"),
   ):
-    cells = " | ".join(f"**{summary[key]:.2f}**" for _, key in columns)
-    lines.append(f"| **{label}** | {cells} |")
+    columns = [(labels[name], f"{prefix}_{name}_over_{suffix}")
+               for name in current["implementations"]]
+    lines.extend([
+      f"## {title}", "",
+      "| Benchmark | " + " | ".join(label for label, _ in columns) + " |",
+      "| --- |" + " ---: |" * len(columns),
+    ])
+    for name in current["benchmark_order"]:
+      factors = current["benchmarks"][name]["factors"]
+      cells = " | ".join(f"{factors[key]:.2f}" if key in factors else "N/A"
+                         for _, key in columns)
+      lines.append(f"| {name} | {cells} |")
+    for label, summary in (
+      ("Median", current["median"]),
+      ("Arithmetic mean", current["arithmetic_mean"]),
+    ):
+      cells = " | ".join(f"**{summary[key]:.2f}**" if key in summary else "N/A"
+                         for _, key in columns)
+      lines.append(f"| **{label}** | {cells} |")
+    lines.append("")
   lines.extend(
     [
       "",
@@ -1653,7 +1796,7 @@ def check(
     expected = run_captured(
       binary_path(name, "c"), program_args, args.timeout, stdin_path,
     )
-    for implementation in (*X2C_IMPLEMENTATIONS, "python"):
+    for implementation in available_implementations(benchmark)[1:]:
       output = run_captured(
         binary_path(name, implementation), program_args, args.timeout,
         stdin_path,
@@ -1661,7 +1804,7 @@ def check(
       compare_output(name, implementation, {
         "args": program_args, "comparison": profile_comparison(benchmark),
       }, expected, output)
-    print(f"checked {name}: {args.profile} profile across all four programs")
+    print(f"checked {name}: {args.profile} profile across available programs")
   write_json(BUILD / "check.json", receipt)
 
 

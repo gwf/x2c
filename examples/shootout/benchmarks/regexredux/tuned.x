@@ -1,5 +1,5 @@
 /* The Computer Language Benchmarks Game: regex-redux.
-   The optimized version JIT-compiles PCRE2 patterns and counts through its
+   The tuned version JIT-compiles PCRE2 patterns and counts through its
    borrowed match-data block instead of materializing capture Lists. */
 
 import "pcre2" with Regexp;

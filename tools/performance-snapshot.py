@@ -350,7 +350,8 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
     if key in {"time_x2c_over_c", "time_ported_over_c",
-               "time_idiomatic_over_c", "time_optimized_over_c"}:
+               "time_idiomatic_over_c", "time_optimized_over_c",
+               "time_tuned_over_c", "time_rust_over_c", "time_cpp_over_c"}:
       baseline = (row.get("shootout_baseline") or "legacy")[:12]
       metrics[f"shootout {baseline} median {key}"] = float(value)
   for item in row.get("runtime_medians") or []:
