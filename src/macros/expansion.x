@@ -61,8 +61,12 @@ void Compiler.print_macro_expansion(Compiler c, List frame, List result) {
   String source = Diagnostics.macro_definition_note(definition)
     .remove_prefix("definition: ");
   printf(
-    "expansion %s:%d:%d %s\n  definition %s\n"
-    "  input %s\n  result\n",
+    $dedent(%"
+      expansion %s:%d:%d %s
+        definition %s
+        input %s
+        result
+    "),
     site.assoc(<file>), site.assoc(<line>).int(),
     site.assoc(<column>).int(), definition.assoc(<name>),
     source, Diagnostics.macro_expansion_input(input).repr());

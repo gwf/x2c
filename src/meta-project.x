@@ -725,7 +725,10 @@ static String _tables(Array built, int count) {
   out.write("#include \"x2c.h\"\n");
   foreach (int index in built)
     out.printf("Map x2c_module_targets_%d(void);\n", index);
-  out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
+  out.write($dedent(%"
+    Map x2c_meta_helper_table(int index) {
+      switch (index) {
+  "));
   foreach (int index in built)
     out.printf("    case %d: return x2c_module_targets_%d();\n", index, index);
   out.write("  }\n  return NULL;\n}\n");
