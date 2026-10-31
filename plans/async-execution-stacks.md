@@ -699,7 +699,7 @@ they do not authorize implementation or unrelated contract changes.
 | Item | Constraint and next work |
 | --- | --- |
 | Strict-build lifetime diagnostics | The pointer-field provenance fix and selected audit boundary are implemented. The merged tree passes the strict stage-two build; the earlier three temporary-borrow diagnostics are resolved. |
-| Remaining native targets | macOS arm64 and macOS x86_64 through Rosetta pass normal and sanitizer unit suites, configured-stack and fallback probes. The x86_64 strict stage-two build and generated-stage comparisons pass. Linux arm64/x86_64 remain untested; no local Linux runtime or cross-toolchain is available. See [native target evidence](reference/async-native-targets-2026-10-31.md). |
+| Native target compatibility | Focused normal and ordinary sanitizer Task checks, configured-stack probes, and fallback probes pass on all four targets, using Rosetta/Docker emulation for x86_64. Both macOS targets and Linux arm64 pass full normal and ordinary sanitizer suites. GCC use-after-return false overflow on both Linux targets and Linux x86_64 numeric failures remain open. See [native target evidence](reference/async-native-targets-2026-10-31.md). |
 | Regression coverage | Local Channel and Scope timings are bounded evidence. Network/timer workloads, broader performance checkpoints, and final publication validation remain outstanding. |
 
 These are consequential choices. The selected stack model does not authorize

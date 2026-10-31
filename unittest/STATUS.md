@@ -1,14 +1,45 @@
 # Status
 
+## GCC async use-after-return finding on 2026-10-31
+
+The optional Task-suite run with
+`ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1` aborts on Linux
+arm64 and x86_64 with GCC 12.2. Minicoro's yield-time overflow check uses the
+address of an automatic local. GCC's ASan fake stack moves that local outside
+the coroutine mapping, so the check reports overflow. An isolated 8 MiB native
+probe confirms that the physical frame remains within bounds and the metadata
+magic is intact. The same probe passes with use-after-return disabled.
+Ordinary ASan/UBSan and normal Linux arm64 suites pass. This production finding
+is recorded for a focused follow-up; no runtime check was changed here.
+
+Linux validation also exposed two sanitizer-harness defects. The harness now
+passes the runtime's required `-fsigned-char` flag and links compiler objects
+before the runtime archive. The repaired harness passes on Linux arm64 and
+both macOS targets. Linux x86_64 completes the sanitizer build and execution,
+with the numeric failures below. See
+[the target report](../plans/reference/async-native-targets-2026-10-31.md).
+
+## Linux x86_64 numeric findings on 2026-10-31
+
+Under GCC 12.2 in the local emulated Debian image, the full normal suite fails
+`string_checked_format_floating`, `var_wide_value_semantics`, and
+`var_all_family_comparison_matrix`. The full ASan/UBSan suite fails the first
+two. The three failures also reproduce when only String and Var suites run,
+without Task tests. Relevant String and Var source is unchanged from the
+pre-async baseline, but that baseline has not been executed in this image.
+The causes and regression status remain unclassified. No numeric runtime or
+expectation was changed during this validation task. Focused Task checks pass.
+
 ## Private async stack coverage on 2026-10-31
 
 The Task suite covers configured stack sizes, invalid settings, failure before
 job entry, recovery, and restoration of the caller's environment. The optional
 `probes/run-task-backend.sh` checks page rounding, guards, switching, complete
 unmapping, and the production unsupported-backend diagnostic without a new
-runtime API or recurring gate. Normal and sanitizer suites pass on macOS arm64
-and macOS x86_64 through Rosetta. Linux execution remains untested because no
-local runtime or cross-toolchain is available. See
+runtime API or recurring gate. Focused normal and ordinary sanitizer Task
+checks pass on all four selected native targets. Both macOS targets and Linux
+arm64 pass full normal and ordinary sanitizer suites. Linux x86_64 numeric
+failures and GCC use-after-return failures remain open as recorded above. See
 [the native target report](../plans/reference/async-native-targets-2026-10-31.md).
 
 ## Private async review on 2026-10-31

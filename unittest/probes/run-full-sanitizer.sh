@@ -23,6 +23,7 @@ if [[ $(uname -s) == Linux ]]; then
   linker_flags+=(-rdynamic)
 fi
 sanitizer_flags=(
+  -fsigned-char
   -g
   -O1
   -fno-omit-frame-pointer
@@ -92,8 +93,8 @@ done
   -o "$test_program" \
   "$test_objects/test-all.o" \
   "${suite_objects[@]}" \
-  "$runtime_archive" \
   "${linked_compiler_objects[@]}" \
+  "$runtime_archive" \
   -lm
 
 (
