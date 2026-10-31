@@ -418,6 +418,9 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_match_execution_free`](#x2c_match_execution_free) | Releases backing after the execution disposed its installed caches. |
+| [`x2c_match_execution_new`](#x2c_match_execution_new) | Allocates empty lazy cache bindings for one independent execution. |
+| [`x2c_match_execution_swap`](#x2c_match_execution_swap) | Exchanges bindings without copying caches, Context records, or leases. |
 | [`MachineBuilder.binder`](#MachineBuilder.binder) | Intern a binder by raw Atom bits and return its fixed-table index. |
 | [`MachineBuilder.cleanup`](#MachineBuilder.cleanup) | Cleanup's value receiver releases the same shallow backing arrays. |
 | [`MachineBuilder.constant`](#MachineBuilder.constant) | Intern a constant by raw Var bits and return its byte-sized index. |
@@ -474,6 +477,32 @@ for source readers but are not supported as user API.
 | [`MatchPlan.try_match`](#MatchPlan.try_match) | Executes prepared `plan` against `input`, writing bindings on success. |
 | [`MatchPlan.try_match_replace`](#MatchPlan.try_match_replace) | Executes `plan` and writes the instantiated `template` on success. |
 | [`MatchPlan.try_search`](#MatchPlan.try_search) | Searches `input` with `plan`, writing the first match and bindings. |
+
+### Functions
+
+#### x2c_match_execution_free
+
+`void x2c_match_execution_free(void *backing)`
+
+Releases backing after the execution disposed its installed caches.
+
+Source: `lib/match/cache.x`
+
+#### x2c_match_execution_new
+
+`void *x2c_match_execution_new(void)`
+
+Allocates empty lazy cache bindings for one independent execution.
+
+Source: `lib/match/cache.x`
+
+#### x2c_match_execution_swap
+
+`void x2c_match_execution_swap(void *backing)`
+
+Exchanges bindings without copying caches, Context records, or leases.
+
+Source: `lib/match/cache.x`
 
 ### `MachineBuilder`
 

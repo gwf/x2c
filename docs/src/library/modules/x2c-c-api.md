@@ -13,6 +13,7 @@ prefix.
 | --- | --- | --- |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
+| [`x2c_context_exchange`](context.md#x2c_context_exchange) | `lib/context.x` | `Context x2c_context_exchange(Context context)` |
 | [`x2c_descriptor_registration_frozen`](dispatch.md#x2c_descriptor_registration_frozen) | `lib/dispatch.x` | `int x2c_descriptor_registration_frozen(void)` |
 | [`x2c_descriptor_thread_start_begin`](dispatch.md#x2c_descriptor_thread_start_begin) | `lib/dispatch.x` | `void x2c_descriptor_thread_start_begin(void)` |
 | [`x2c_descriptor_thread_start_end`](dispatch.md#x2c_descriptor_thread_start_end) | `lib/dispatch.x` | `void x2c_descriptor_thread_start_end(int success)` |
@@ -23,9 +24,15 @@ prefix.
 | [`x2c_error_catch_selected`](error.md#x2c_error_catch_selected) | `lib/error/error.x` | `int x2c_error_catch_selected(ErrorHandler handle)` |
 | [`x2c_error_catch_site_pending`](error.md#x2c_error_catch_site_pending) | `lib/error/error.x` | `int x2c_error_catch_site_pending(ErrorCatchSite *site)` |
 | [`x2c_error_catch_site_push`](error.md#x2c_error_catch_site_push) | `lib/error/error.x` | `ErrorHandler x2c_error_catch_site_push( void *target, ErrorCatchSite *site, Var *patterns)` |
+| [`x2c_error_execution_free`](error.md#x2c_error_execution_free) | `lib/error/error.x` | `void x2c_error_execution_free(void *backing)` |
+| [`x2c_error_execution_new`](error.md#x2c_error_execution_new) | `lib/error/error.x` | `void *x2c_error_execution_new(void)` |
+| [`x2c_error_execution_swap`](error.md#x2c_error_execution_swap) | `lib/error/error.x` | `void x2c_error_execution_swap(void *backing)` |
 | [`x2c_error_raise`](error.md#x2c_error_raise) | `lib/error/error.x` | `void x2c_error_raise(Symbol code, List detail)` |
 | [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error/error.x` | `void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
 | [`x2c_exception_claim`](exception.md#x2c_exception_claim) | `lib/exception.x` | `int x2c_exception_claim(ExceptionFrame *frame)` |
+| [`x2c_exception_execution_free`](exception.md#x2c_exception_execution_free) | `lib/exception.x` | `void x2c_exception_execution_free(void *backing)` |
+| [`x2c_exception_execution_new`](exception.md#x2c_exception_execution_new) | `lib/exception.x` | `void *x2c_exception_execution_new(void)` |
+| [`x2c_exception_execution_swap`](exception.md#x2c_exception_execution_swap) | `lib/exception.x` | `void x2c_exception_execution_swap(void *backing)` |
 | [`x2c_exception_is_error_target`](exception.md#x2c_exception_is_error_target) | `lib/exception.x` | `int x2c_exception_is_error_target(ExceptionFrame *frame)` |
 | [`x2c_exception_landed`](exception.md#x2c_exception_landed) | `lib/exception.x` | `void x2c_exception_landed(ExceptionFrame *frame)` |
 | [`x2c_exception_leave`](exception.md#x2c_exception_leave) | `lib/exception.x` | `void x2c_exception_leave(ExceptionFrame *frame)` |
@@ -50,6 +57,9 @@ prefix.
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
+| [`x2c_match_execution_free`](match.md#x2c_match_execution_free) | `lib/match/match.x` | `void x2c_match_execution_free(void *backing)` |
+| [`x2c_match_execution_new`](match.md#x2c_match_execution_new) | `lib/match/match.x` | `void *x2c_match_execution_new(void)` |
+| [`x2c_match_execution_swap`](match.md#x2c_match_execution_swap) | `lib/match/match.x` | `void x2c_match_execution_swap(void *backing)` |
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match/match.x` | `void x2c_match_initialize(void)` |
 | [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
@@ -72,10 +82,17 @@ prefix.
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
+| [`x2c_scope_execution_free`](scope.md#x2c_scope_execution_free) | `lib/scope/scope.x` | `void x2c_scope_execution_free(void *saved)` |
+| [`x2c_scope_execution_new`](scope.md#x2c_scope_execution_new) | `lib/scope/scope.x` | `void *x2c_scope_execution_new(Scope borrowed)` |
+| [`x2c_scope_execution_swap`](scope.md#x2c_scope_execution_swap) | `lib/scope/scope.x` | `void x2c_scope_execution_swap(void *saved)` |
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
 | [`x2c_string_from_bytes`](string.md#x2c_string_from_bytes) | `lib/string/string.x` | `String x2c_string_from_bytes(const char *bytes, int length)` |
+| [`x2c_task_channel_notify`](task.md#x2c_task_channel_notify) | `lib/task.x` | `void x2c_task_channel_notify(X2CChannelMonitor *monitor)` |
+| [`x2c_task_channel_sleep`](task.md#x2c_task_channel_sleep) | `lib/task.x` | `void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner)` |
+| [`x2c_task_current`](task.md#x2c_task_current) | `lib/task.x` | `void *x2c_task_current(void)` |
+| [`x2c_task_stopping`](task.md#x2c_task_stopping) | `lib/task.x` | `int x2c_task_stopping(void *value)` |
 | [`x2c_thread_cancel`](thread.md#x2c_thread_cancel) | `lib/thread.x` | `void x2c_thread_cancel(void)` |
 | [`x2c_thread_channel_enter`](thread.md#x2c_thread_channel_enter) | `lib/thread.x` | `int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner)` |
 | [`x2c_thread_channel_leave`](thread.md#x2c_thread_channel_leave) | `lib/thread.x` | `int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor)` |
@@ -119,4 +136,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 107 functions.
+Total: 124 functions.

@@ -90,7 +90,7 @@ static Var add_pair(Var left, Var right){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Scope_retain();
+  Scope_open();
   List fluent = Iter_list(Iter_filter(Iter_map(range(1, 4, 1, &(struct Iter){
     int_var(0)
   }
@@ -155,7 +155,7 @@ int main(void){
   Iter filtered = Iter_filter(mapped, _x2c_gensym_func_handle_0, & filter_storage);
   List explicit = Iter_list(filtered);
   printf("%d %d %d %d %d\n", List_len(fluent), Var_int(paired), nested, List_len(mixed), List_len(explicit));
-  Scope_release();
+  Scope_close();
   return 0;
 }
 

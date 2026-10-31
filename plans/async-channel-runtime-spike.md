@@ -1,7 +1,11 @@
 # Asynchronous tasks and loop-owned channels: research spike
 
-> Status: active - plan prepared; spike execution has not started.
-> Requested 2026-10-30. This request commissions the plan, not execution.
+> Status: executed locally - findings and evidence retained; no publication.
+> Requested 2026-10-30; execution authorized 2026-10-30.
+> Results: [dated report](reference/async-channel-runtime-spike-2026-10-30.md).
+> Subsequent design: [execution stacks](async-execution-stacks.md); its
+> semantics supersede unselected prototype choices, not the measured evidence.
+> Gary requires consent before any push to dev.
 > Baseline: the delivered global-lock work at `b75c61da9`, or a newer dev
 > revision with its relevant changes recorded before comparison.
 > Outcome: evidence and a recommendation on asynchronous tasks and later

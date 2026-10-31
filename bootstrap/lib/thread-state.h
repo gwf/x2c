@@ -8,6 +8,10 @@
 #include "common.h"
 extern _Thread_local int x2c_error_runtime_ready;
 
+extern _Thread_local unsigned long x2c_execution_stack_low;
+
+unsigned long x2c_execution_stack_exchange(unsigned long low);
+
 void x2c_thread_state_release(void);
 
 

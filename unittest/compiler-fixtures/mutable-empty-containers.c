@@ -35,7 +35,7 @@ static void box_null_map(void){
 
 int main(void){
   x2c_initialize();
-  Scope_retain();
+  Scope_open();
   Array first_array = Array_new(), second_array = Array_new();
   Map first_map = Map_new(), second_map = Map_new();
   Var boxed_array = Array_var(first_array), boxed_map = Map_var(first_map);
@@ -46,7 +46,7 @@ int main(void){
   int boxes = Array_equal(Var_array(boxed_array), first_array) && Map_equal(Var_map(boxed_map), first_map);
   int rejects = rejected(box_null_array) && rejected(box_null_map);
   printf("%d %d %d %d\n", arrays, maps, boxes, rejects);
-  Scope_release();
+  Scope_close();
   return arrays && maps && boxes && rejects ? 0 : 1;
 }
 

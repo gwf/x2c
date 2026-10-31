@@ -1048,8 +1048,8 @@ auto {
 Avoid:
 
 ```x2c
-Scope.retain();
-defer Scope.release();
+Scope.open();
+defer Scope.close();
 File output = File.open(path, "w");
 defer output.close();
 ```

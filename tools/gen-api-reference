@@ -821,6 +821,8 @@ static const char *evidence_rows[][2] = {
   {"symbolset", "`make verify` (compiler `SymbolSet` fixtures)."},
   {"thread", "`make verify` (`unittest/test-thread.x` and "
              "`unittest/test-thread-batch.x`)."},
+  {"task", "`make verify` (`unittest/test-task.x`) and `make examples` "
+           "(`power/channel-task-service`)."},
   {"typed-array", "`make verify` (`unittest/test-typed-array.x`)."},
   {"typed-list", "`make verify` (`unittest/test-typed-list.x`)."},
   {"typed-map", "`make verify` (`unittest/test-typed-map.x`)."},

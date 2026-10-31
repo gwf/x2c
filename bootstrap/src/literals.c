@@ -1259,7 +1259,7 @@ static int f11_collections____duplicate_index(List values){
 
 static List f11_collections____set_expression(Array symbols){
   {
-    Scope_retain();
+    Scope_open();
     {
       {
         X2CCleanup _x2c_gensym_defer_record_7 ={
@@ -1636,6 +1636,6 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
-  Scope_release();
+  Scope_close();
 }
 

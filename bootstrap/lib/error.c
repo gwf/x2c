@@ -242,6 +242,12 @@ static void f8_handlers____catch_retain(ErrorHandler handle);
 #define ERROR_DEFAULT_BOUND 4096
 static _Thread_local struct ErrorThreadState f7_runtime___error_thread;
 
+typedef struct f7_runtime___ErrorExecutionState{
+  struct ErrorThreadState state;
+  int ready;
+}
+* f7_runtime___ErrorExecutionState;
+
 static ErrorThreadState _thread(void);
 
 static void f7_runtime____reclaim_hidden(ErrorThreadState state);
@@ -1175,6 +1181,33 @@ static void f8_handlers____catch_retain(ErrorHandler handle){
     Block_pop(_thread() -> stack);
   }
   if(pushed) Scope_pop();
+}
+
+void * x2c_error_execution_new(void){
+  if(! _init_guard_) _file_init_();
+  f7_runtime___ErrorExecutionState saved = calloc(1, sizeof(struct f7_runtime___ErrorExecutionState));
+  if(! saved){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/error/runtime.x",.function = "x2c_error_execution_new",.line = 15,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 97614135954008, 0);
+    __builtin_unreachable();
+  }
+  return saved;
+}
+
+void x2c_error_execution_swap(void * backing){
+  if(! _init_guard_) _file_init_();
+  f7_runtime___ErrorExecutionState saved = backing;
+  struct ErrorThreadState previous = f7_runtime___error_thread;
+  int ready = x2c_error_runtime_ready;
+  f7_runtime___error_thread = saved -> state;
+  x2c_error_runtime_ready = saved -> ready;
+  saved -> state = previous;
+  saved -> ready = ready;
+}
+
+void x2c_error_execution_free(void * backing){
+  if(! _init_guard_) _file_init_();
+  free(backing);
 }
 
 int Iter_try_next(Iter, Var *);

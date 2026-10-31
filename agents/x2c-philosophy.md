@@ -712,8 +712,8 @@ results.  Their `*_in` forms target an explicit scope slot without changing
 the active-scope stack.  Named scopes copy diagnostic names but retain the
 published `Scope` representation. `Scope.destroy` accepts only a detached
 scope-chain root; root, stacked, and attached lower scopes remain owned by
-their active lifetime boundary. `Scope.release` closes only a region recorded
-by a matching `Scope.retain` on the same active slot; empty retained scopes
+their active lifetime boundary. `Scope.close` closes only a region recorded
+by a matching `Scope.open` on the same active slot; empty retained scopes
 remain valid, while an extra release cannot destroy the process root or a
 region owned through a different pushed slot. Shutdown hooks may use Scope
 while shutdown is in progress; completed shutdown is terminal and idempotent,

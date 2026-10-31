@@ -4,6 +4,14 @@
 #include "common.h"
 _Thread_local int x2c_error_runtime_ready;
 
+_Thread_local unsigned long x2c_execution_stack_low;
+
+unsigned long x2c_execution_stack_exchange(unsigned long low){
+  unsigned long previous = x2c_execution_stack_low;
+  x2c_execution_stack_low = low;
+  return previous;
+}
+
 void x2c_thread_state_release(void){
   x2c_static_thread_release();
   x2c_match_thread_release();

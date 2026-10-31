@@ -341,6 +341,12 @@ typedef struct MatchLease{
 MatchLease;
 
 #define MATCH_ADMITTED_MEMO 256
+void * x2c_match_execution_new(void);
+
+void x2c_match_execution_swap(void * backing);
+
+void x2c_match_execution_free(void * backing);
+
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
 
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);

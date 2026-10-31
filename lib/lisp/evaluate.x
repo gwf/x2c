@@ -36,16 +36,7 @@ static typedef struct FreeNames {
    report instead of a crash. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
-static threaded unsigned long execution_stack_low;
-
-/** Installs a task's downward-growing stack bound; zero selects the native
-    thread's stack. No pointer into this installed cell escapes.
-*/
-unsigned long x2c_lisp_stack_exchange(unsigned long low) {
-  unsigned long previous = execution_stack_low;
-  execution_stack_low = low;
-  return previous;
-}
+extern threaded unsigned long x2c_execution_stack_low;
 
 #if defined(__GLIBC__)
 extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
@@ -782,7 +773,7 @@ static void _check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
    what the installed task or native thread has left below `at`, at most
    LISP_STACK_BYTES_MAX. Unknown native bounds use that maximum. */
 static unsigned long _stack_allowance(unsigned long at) {
-  unsigned long low = execution_stack_low;
+  unsigned long low = x2c_execution_stack_low;
   if (!low) {
 #if defined(__APPLE__)
     pthread_t self = pthread_self();

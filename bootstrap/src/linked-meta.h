@@ -15,6 +15,7 @@
 #include "native-scalar-types.h"
 #include "rewrite.h"
 #include "system-macros.h"
+#include "task.h"
 #include "test.h"
 #include "thread.h"
 #include "var-tags.h"

@@ -24,7 +24,7 @@ Use the [agent directory](../agents/README.md) for task routing and the
 
 ## Fixtures and lifetimes
 
-- Choose `Scope.retain` by allocation lifetime and guarantee release on every
+- Choose `Scope.open` by allocation lifetime and guarantee release on every
   exit. Lists and interned Strings have long-lived owners; Vars may still hold
   mutable Array or Map values.
 - Restore mutable globals and capture targets in `finally` before freeing their

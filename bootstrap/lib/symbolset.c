@@ -212,7 +212,7 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * table){
   {
-    Scope_retain();
+    Scope_open();
     {
       {
         X2CCleanup _x2c_gensym_defer_record_0 ={
@@ -314,6 +314,6 @@ static void _assign(Graph * g, uint32_t * table){
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
-  Scope_release();
+  Scope_close();
 }
 

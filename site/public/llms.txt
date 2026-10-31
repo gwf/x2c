@@ -110,6 +110,7 @@
 - [lib/symbol.x](https://x2c-lang.dev/docs/library/modules/symbol.html)
 - [lib/symbolset.x](https://x2c-lang.dev/docs/library/modules/symbolset.html)
 - [lib/system-macros.x](https://x2c-lang.dev/docs/library/modules/system-macros.html)
+- [lib/task.x](https://x2c-lang.dev/docs/library/modules/task.html)
 - [lib/test.x](https://x2c-lang.dev/docs/library/modules/test.html)
 - [lib/thread.x](https://x2c-lang.dev/docs/library/modules/thread.html)
 - [lib/time.x](https://x2c-lang.dev/docs/library/modules/time.html)

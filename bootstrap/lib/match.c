@@ -592,11 +592,13 @@ typedef struct f5_cache___MatchContextState{
 }
 * f5_cache___MatchContextState;
 
-static _Thread_local struct{
+typedef struct f5_cache___MatchThreadState{
   MatchCache plan_cache;
   f5_cache___MatchContextState context_top;
 }
-f5_cache___match_thread;
+* f5_cache___MatchThreadState;
+
+static _Thread_local struct f5_cache___MatchThreadState f5_cache___match_thread;
 
 static Symbol f5_cache____transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
 
@@ -2573,6 +2575,30 @@ static int f4_plan____add(f4_plan___MatchKeys * keys, MatchKey key){
   return 1;
 }
 
+void * x2c_match_execution_new(void){
+  if(! _init_guard_) _file_init_();
+  f5_cache___MatchThreadState saved = calloc(1, sizeof(struct f5_cache___MatchThreadState));
+  if(! saved){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match/cache.x",.function = "x2c_match_execution_new",.line = 109,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 97614135954008, 0);
+    __builtin_unreachable();
+  }
+  return saved;
+}
+
+void x2c_match_execution_swap(void * backing){
+  if(! _init_guard_) _file_init_();
+  f5_cache___MatchThreadState saved = backing;
+  struct f5_cache___MatchThreadState previous = f5_cache___match_thread;
+  f5_cache___match_thread = * saved;
+  * saved = previous;
+}
+
+void x2c_match_execution_free(void * backing){
+  if(! _init_guard_) _file_init_();
+  free(backing);
+}
+
 Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
 
 MatchPlan MatchLease_plan(MatchLease * m);
@@ -2815,8 +2841,8 @@ void MatchLease_release(MatchLease * lease){
   if(!(* lease).active) return;
   if((* lease).transient_plan){
     if(!(* lease).cache ||(* lease).cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 239,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 259,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
     MatchPlan_free((* lease).transient_plan);
@@ -2827,8 +2853,8 @@ void MatchLease_release(MatchLease * lease){
   }
   f5_cache___MatchCacheEntry * entry = f5_cache____entry(&((* lease)));
   if(! entry ||(* lease).cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 249,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match/cache.x",.function = "MatchLease_release",.line = 269,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   (* lease).cache -> active_leases --;
@@ -2877,8 +2903,8 @@ void MatchCache_context_close(void * token){
   f5_cache___MatchContextState state = token;
   if(! state) return;
   if(f5_cache___match_thread.context_top != state){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match/cache.x",.function = "MatchCache_context_close",.line = 309,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match/cache.x",.function = "MatchCache_context_close",.line = 329,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
   if(state -> cache) MatchCache_dispose(state -> cache);
@@ -2898,8 +2924,8 @@ MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 341,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), int_var(capacity));
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 361,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
 
@@ -2907,8 +2933,8 @@ MatchCache MatchCache_new(int capacity){
   if(capacity >(INT_MAX - 1) / 2){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 343,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), int_var(capacity));
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/match/cache.x",.function = "MatchCache_new",.line = 363,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
 
@@ -2951,8 +2977,8 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/match/cache.x",.function = "MatchCache_dispose",.line = 369,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/match/cache.x",.function = "MatchCache_dispose",.line = 389,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
   for(int i = 0;  i < cache -> capacity;  i ++){
@@ -3518,8 +3544,8 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/match/execution.x",.function = "MatchPlan_raise_ineligible",.line = 80,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 2, Symbol_var(34096809266140), String_var(site), Symbol_var(12939466), String_var(fence));
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/match/execution.x",.function = "MatchPlan_raise_ineligible",.line = 80,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 2, Symbol_var(34096809266140), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
 

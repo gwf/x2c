@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 62
-- Runtime modules: 77
+- Runtime modules: 78
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -965,7 +965,8 @@ Public functions:
 `Context.export_destination`, `Context.move_allocation`, `Context.move_block`,
 `Context.owns`, `Context.move_scope`, `Context.open`, `Context.open_named`,
 `Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
-`Context.cleanup`, `Context.initialize`, `Context.close`
+`x2c_context_exchange`, `Context.cleanup`, `Context.initialize`,
+`Context.close`
 
 ### [lib/datum-reader.x](../lib/datum-reader.x)
 
@@ -1074,8 +1075,9 @@ transfer frames for x2c `Error` unwinding and cleanup.
 
 Public functions:
 
-`x2c_cleanup_push`, `x2c_cleanup_leave`, `x2c_exception_push`,
-`x2c_exception_landed`, `x2c_exception_unwinding`,
+`x2c_exception_execution_new`, `x2c_exception_execution_swap`,
+`x2c_exception_execution_free`, `x2c_cleanup_push`, `x2c_cleanup_leave`,
+`x2c_exception_push`, `x2c_exception_landed`, `x2c_exception_unwinding`,
 `x2c_exception_is_error_target`, `x2c_exception_claim`,
 `x2c_exception_mark_handled`, `x2c_exception_leave`, `ExceptionFrame.unwind`
 
@@ -1382,6 +1384,15 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [lib/task.x](../lib/task.x)
+
+cooperative Channel jobs on stable native stacks.
+
+Public functions:
+
+`Task.run`, `x2c_task_current`, `x2c_task_stopping`, `x2c_task_channel_notify`,
+`x2c_task_channel_sleep`
+
 ### [lib/test.x](../lib/test.x)
 
 registered tests and assertions for user programs.
@@ -1396,7 +1407,7 @@ native per-thread runtime storage.
 
 Public functions:
 
-`x2c_thread_state_release`
+`x2c_execution_stack_exchange`, `x2c_thread_state_release`
 
 ### [lib/thread.x](../lib/thread.x)
 
@@ -1698,7 +1709,9 @@ Public functions:
 `x2c_error_catch_selected`, `x2c_error_catch_capture`,
 `x2c_error_catch_detach`, `x2c_error_catch_close`, `Error.unwind_head`,
 `Error.restore_landing`, `Error.trim`, `Error.restore`, `Error.handler_depth`,
-`Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
+`x2c_error_execution_new`, `x2c_error_execution_swap`,
+`x2c_error_execution_free`, `Error.initialize_raw`, `Error.shutdown_raw`,
+`Error.ready`
 
 ### [lib/func/func.x](../lib/func/func.x)
 
@@ -1814,7 +1827,8 @@ Public functions:
 `MatchMachine.begin`, `MatchMachine.finish`, `MatchMachine.clean`,
 `MatchMachine.acquire`, `MatchMachine.open`, `MatchMachine.release`,
 `MatchMachine.dispose`, `MatchMachine.release_spares`, `MatchPlan.prepare`,
-`MatchPlan.free`, `MatchCache.try_capture`, `MatchCache.try_match`,
+`MatchPlan.free`, `x2c_match_execution_new`, `x2c_match_execution_swap`,
+`x2c_match_execution_free`, `MatchCache.try_capture`, `MatchCache.try_match`,
 `MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
 `MatchCache.search_replace`, `MatchCache.acquire`, `MatchLease.release`,
 `MatchLease.plan`, `MatchCache.current`, `MatchCache.flush_default`,
@@ -1859,10 +1873,11 @@ Public functions:
 `Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
 `Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
 `Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`,
-`Scope.move_before`, `Scope.realloc`, `Scope.push`, `Scope.pop`,
-`Scope.retain`, `Scope.release`, `Scope.new`, `Scope.child`, `Scope.top`,
-`Scope.parent`, `Scope.transfer`, `Scope.contains`, `Scope.new_named`,
-`Scope.cleanup`, `Scope.destroy`, `x2c_scope_thread_release`, `Scope.name`,
+`Scope.move_before`, `Scope.realloc`, `Scope.push`, `Scope.pop`, `Scope.open`,
+`Scope.close`, `Scope.new`, `Scope.child`, `Scope.top`, `Scope.parent`,
+`Scope.transfer`, `Scope.contains`, `Scope.new_named`, `Scope.cleanup`,
+`Scope.destroy`, `x2c_scope_thread_release`, `x2c_scope_execution_new`,
+`x2c_scope_execution_swap`, `x2c_scope_execution_free`, `Scope.name`,
 `Scope.stats`, `Scope.initialize`, `Scope.accounting_enabled`,
 `Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
 `xfree`, `xmemdup`

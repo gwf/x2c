@@ -97,6 +97,7 @@
     - [lib/symbol.x](library/modules/symbol.md)
     - [lib/symbolset.x](library/modules/symbolset.md)
     - [lib/system-macros.x](library/modules/system-macros.md)
+    - [lib/task.x](library/modules/task.md)
     - [lib/test.x](library/modules/test.md)
     - [lib/thread.x](library/modules/thread.md)
     - [lib/time.x](library/modules/time.md)

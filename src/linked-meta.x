@@ -23,6 +23,7 @@
 #include "native-scalar-types.x"
 #include "rewrite.x"
 #include "system-macros.x"
+#include "task.x"
 #include "test.x"
 #include "thread.x"
 #include "var-tags.x"
@@ -321,6 +322,14 @@ List _macros_location(void) =>
 
 List _macros_source(Source code) =>
   $!String{ $(Code.source_text(code)) };
+
+/* --- lib/task.x ---------------------------------------------------------- */
+
+static Code _task_without_callback(Code code) {
+  if (code ~= $task.run.jobs(?jobs))
+    return $!void{ Task.run($jobs, NULL) };
+  return code;
+}
 
 /* --- lib/test.x ---------------------------------------------------------- */
 
@@ -2732,6 +2741,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_macros_source", _macros_source);
+  $linked.row(rows, "_task_without_callback", _task_without_callback);
   $linked.row(rows, "test_register", test_register);
   $linked.row(rows, "_batch_without_callback", _batch_without_callback);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);

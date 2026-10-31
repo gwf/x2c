@@ -34,14 +34,14 @@ static String suffix(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Scope_retain();
+  Scope_open();
   String left = _1, right = _2;
   String joined = String_add(left, right);
   String mixed = String_add(left, _3);
   String constant = _6;
   _x2c_gensym_proto_string_add_update(&(joined), 56, suffix());
   printf("%s %s %s\n", joined, mixed, constant);
-  Scope_release();
+  Scope_close();
   return 0;
 }
 

@@ -425,10 +425,10 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _139 = Symbol_var(8966673394);
   _140 = cons(_139, NULL);
   _141 = String_new("Scope_cleanup");
-  _142 = String_new("Scope_retain");
+  _142 = String_new("Scope_open");
   _143 = Symbol_var(1016156);
   _144 = cons(_143, _135);
-  _145 = String_new("Scope_release");
+  _145 = String_new("Scope_close");
   _146 = Symbol_var(7109834);
   _147 = cons(_146, _135);
   _148 = String_new("Pool_open");

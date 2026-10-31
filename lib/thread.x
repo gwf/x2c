@@ -64,6 +64,7 @@ typedef struct Thread *Thread;
 /** One task parked on a Channel monitor. Membership is protected by that
     monitor's mutex; the task and record remain live until removal.
 */
+/** Links one borrowed parked task under its Channel monitor mutex. */
 typedef struct X2CTaskWait {
   void *task;
   struct X2CTaskWait *next;

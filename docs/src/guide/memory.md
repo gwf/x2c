@@ -151,10 +151,14 @@ commands, which use these counters for statistics and retained-memory limits.
 When several operations should allocate in the same scope without passing a
 slot to every call, `Scope.push` makes a slot active and `Scope.pop`
 restores the previous one. `Scope.pop` with no push outstanding raises
-`<bad-state>`. `Scope.destroy` raises the same cause when the scope is still
-in use: the active root, a slot still on the pushed stack, or a scope that a
-later `Scope.open` layered another region on top of. The scope is left
+`<bad-state>`. `Scope.destroy` raises the same cause for the current active
+root or a scope named by a slot still on the pushed stack. The scope is left
 intact. Uncaught, `<bad-state>` aborts the program.
+
+The caller must keep a scope alive while retained regions or other users
+borrow it. Destroying an attached lower scope violates that lifetime contract;
+the runtime does not promise to detect it. A popped, detached chain can still
+be destroyed through its head.
 
 To release a region on every exit from a block, write it as `auto` or put
 the release in a `defer`. [Errors and

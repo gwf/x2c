@@ -435,15 +435,25 @@ user API.
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`X2CChannelMonitor`](#X2CChannelMonitor) | struct | Native Channel wait bridge. |
+| [`X2CChannelMonitor`](#X2CChannelMonitor) | struct | Shared Channel wait bridge. |
+| [`X2CTaskWait`](#X2CTaskWait) | struct | Links one borrowed parked task under its Channel monitor mutex. |
 
 <a id="X2CChannelMonitor"></a>
 ### X2CChannelMonitor
 
-`typedef struct X2CChannelMonitor { pthread_mutex_t mutex; pthread_cond_t condition; } X2CChannelMonitor`
+`typedef struct X2CChannelMonitor { pthread_mutex_t mutex; pthread_cond_t condition; X2CTaskWait *tasks; } X2CChannelMonitor`
 
-Native Channel wait bridge. The Channel owns its mutex and condition
-together; a registered Thread borrows the monitor until acknowledgement.
+Shared Channel wait bridge. The Channel owns its mutex, native condition,
+and task wait list. A registered Thread borrows it until acknowledgement.
+
+Source: `lib/thread.x`
+
+<a id="X2CTaskWait"></a>
+### X2CTaskWait
+
+`typedef struct X2CTaskWait { void *task; struct X2CTaskWait *next; } X2CTaskWait`
+
+Links one borrowed parked task under its Channel monitor mutex.
 
 Source: `lib/thread.x`
 

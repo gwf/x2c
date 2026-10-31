@@ -11,6 +11,16 @@
 #include "common.x"
 
 threaded int x2c_error_runtime_ready;
+threaded unsigned long x2c_execution_stack_low;
+
+/* Exchanges the installed downward-growing task stack bound.
+    Zero selects native pthread bounds for stack-aware runtime consumers.
+*/
+unsigned long x2c_execution_stack_exchange(unsigned long low) {
+  unsigned long previous = x2c_execution_stack_low;
+  x2c_execution_stack_low = low;
+  return previous;
+}
 
 /*  Every module keeps its own per-thread state in a `threaded` object.
     Native static storage releases first, then Match disposes its plan cache

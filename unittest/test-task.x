@@ -63,7 +63,7 @@ static void task_rendezvous_and_buffered_channels_drain(void) {
       results.close();
       return void;
     }
-  ], NULL);
+  ]);
   EXPECT_TRUE(results.receive().is_null());
   EXPECT_INT_EQ(results.receive().int(), 41);
   EXPECT_TRUE(results.receive() is void);
@@ -320,6 +320,59 @@ static void task_owner_stop_keeps_committed_owned_payload(void) {
   EXPECT_INT_EQ(atomic_load(&cleaned), 1);
 }
 
+static Var _task_native_producer(const void *bytes, size_t size) {
+  (void) size;
+  Channel values = *(const Channel *)bytes;
+  for (int i = 1; i <= 4000; i++) values.send(i);
+  values.close();
+  return void;
+}
+
+static void task_native_notifications_do_not_repeat_completions(void) {
+  $test.scoped();
+  Channel values = auto Channel.new(1);
+  Thread producer = Thread.start_raw(
+    _task_native_producer, &values, sizeof(values));
+  Array jobs = auto [], totals = auto [];
+  for (int i = 0; i < 4; i++)
+    jobs.push(%!(void) => {
+      int total = 0;
+      foreach (int value in values) total += value;
+      return total;
+    });
+  Task.run(jobs, %!(Var result) => totals.push(result));
+  producer.join();
+  producer.free();
+  int total = 0;
+  foreach (int value in totals) total += value;
+  EXPECT_INT_EQ(totals.len(), 4);
+  EXPECT_INT_EQ(total, 4000 * 4001 / 2);
+}
+
+static void task_stop_rolls_back_uncommitted_owned_send(void) {
+  $test.scoped();
+  Channel ready = auto Channel.new(1), pending = auto Channel.new();
+  Array payload = [97];
+  Scope owner = Scope.owner(payload);
+  int caught = 0;
+  try Task.run([
+    %!(void) => {
+      ready.send(<ready>);
+      pending.send_owned(payload);
+      return void;
+    },
+    %!(void) => {
+      ready.receive();
+      raise %(bad-arg (primary 101));
+      return void;
+    }
+  ], NULL);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_PTR_EQ(Scope.owner(payload), owner);
+  EXPECT_INT_EQ(payload[0].int(), 97);
+}
+
 void task_suite(void) {
   $test.run(task_empty_batch_has_no_completion);
   $test.run(task_request_reply_closes_after_clients_finish);
@@ -332,4 +385,6 @@ void task_suite(void) {
   $test.run(task_resumed_return_runs_nested_cleanup_once);
   $test.run(task_owner_stop_finishes_parked_cleanup);
   $test.run(task_owner_stop_keeps_committed_owned_payload);
+  $test.run(task_native_notifications_do_not_repeat_completions);
+  $test.run(task_stop_rolls_back_uncommitted_owned_send);
 }

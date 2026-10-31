@@ -467,7 +467,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _36 = cons(_19, _35);
   _37 = List_var(_36);
   _38 = Symbol_var(102886);
-  _39 = String_new("Scope_retain");
+  _39 = String_new("Scope_open");
   _40 = String_var(_39);
   _41 = cons(_40, NULL);
   _42 = cons(_25, _41);
@@ -517,7 +517,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _86 = cons(_22, _85);
   _87 = cons(_19, _86);
   _88 = cons(_18, _87);
-  _89 = String_new("Scope_release");
+  _89 = String_new("Scope_close");
   _90 = String_var(_89);
   _91 = cons(_90, NULL);
   _92 = cons(_25, _91);

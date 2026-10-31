@@ -1314,7 +1314,7 @@ List List_sort_by(List lst, Func key){
 List List_unique(List lst){
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   {
-    Scope_retain();
+    Scope_open();
     {
       {
         X2CCleanup _x2c_gensym_defer_record_17 ={
@@ -1827,7 +1827,7 @@ static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){
 }
 
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17){
-  Scope_release();
+  Scope_close();
 }
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){

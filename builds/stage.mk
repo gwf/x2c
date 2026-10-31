@@ -88,6 +88,7 @@ LIB_H_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.h,$(LIB_X_NAMES))
 LIB_C_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.c,$(LIB_X_NAMES))
 LIB_XI_FILES = $(patsubst %.x,$(LIB_BUILD)/%.xi,$(LIB_X_NAMES))
 LIB_OBJECTS  = $(patsubst %.x,$(LIB_BUILD)/%.o,$(LIB_X_NAMES))
+LIB_OBJECTS += $(LIB_BUILD)/task-native.o
 LIB_X_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.d,$(LIB_X_NAMES))
 LIB_C_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.c.d,$(LIB_X_NAMES))
 ###############################################################################
@@ -182,6 +183,14 @@ $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
 LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
+$(LIB_BUILD)/task-native.c: $(LIB_SOURCE)/task/stack.c
+	cp $< $@
+
+$(LIB_BUILD)/minicoro.h: $(LIB_SOURCE)/task/minicoro.h
+	cp $< $@
+
+$(LIB_BUILD)/task-native.o: $(LIB_BUILD)/minicoro.h
+
 $(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -MMD -MP \
 		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@

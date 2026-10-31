@@ -53,7 +53,7 @@
  (block 
   (at 8 (stmnt 
          (expr (void) 
-          (call (expr ((func ((void))) void) (ident (binding 10 "Scope_retain"))) 
+          (call (expr ((func ((void))) void) (ident (binding 10 "Scope_open"))) 
            (args (expr (void) ())))))) 
   (at 44 
    (declare ("List") 
@@ -386,7 +386,7 @@
   (at 35 
    (stmnt 
     (expr (void) 
-     (call (expr ((func ((void))) void) (ident (binding 43 "Scope_release"))) 
+     (call (expr ((func ((void))) void) (ident (binding 43 "Scope_close"))) 
       (args (expr (void) ())))))) 
   (at 52 (return (expr (int) (literal (int) "0"))))))
 
