@@ -1018,17 +1018,17 @@ Public functions:
 `Var.as_string`, `Var.str`, `Var.fallback_str`, `Var.write_str`,
 `Var.fallback_write_str`, `Var.repr`, `Var.fallback_repr`,
 `Var.pointer_string`, `Var.write_repr`, `Var.fallback_write_repr`,
-`Var.write_pointer_repr`, `RenderPath.enter`, `RenderPath.leave`, `Var.hash`,
-`Var.fallback_hash`, `Var.equal`, `Var.fallback_equal`, `Var.same`,
-`Var.compare`, `Var.fallback_compare`, `Var.enumerate`, `Var.iter`,
-`Var.fallback_iter`, `Var.contains`, `Var.getindex`, `Var.setindex`,
-`Var.updateindex`, `Var.postfixindex`, `Var.dispatch_truth`,
-`Var.try_dispatch_binary`, `Var.try_dispatch_unary`, `Var.try_export_context`,
-`x2c_register_type`, `x2c_register_builtin_descriptor`,
-`x2c_register_descriptor`, `x2c_try_register_descriptor`,
-`x2c_register_tagged_descriptor`, `x2c_try_register_tagged_descriptor`,
-`x2c_descriptor_thread_start_begin`, `x2c_descriptor_thread_start_end`,
-`x2c_descriptor_registration_frozen`
+`Var.write_pointer_repr`, `RenderPath.enter`, `RenderPath.leave`,
+`x2c_render_path_exchange`, `Var.hash`, `Var.fallback_hash`, `Var.equal`,
+`Var.fallback_equal`, `Var.same`, `Var.compare`, `Var.fallback_compare`,
+`Var.enumerate`, `Var.iter`, `Var.fallback_iter`, `Var.contains`,
+`Var.getindex`, `Var.setindex`, `Var.updateindex`, `Var.postfixindex`,
+`Var.dispatch_truth`, `Var.try_dispatch_binary`, `Var.try_dispatch_unary`,
+`Var.try_export_context`, `x2c_register_type`,
+`x2c_register_builtin_descriptor`, `x2c_register_descriptor`,
+`x2c_try_register_descriptor`, `x2c_register_tagged_descriptor`,
+`x2c_try_register_tagged_descriptor`, `x2c_descriptor_thread_start_begin`,
+`x2c_descriptor_thread_start_end`, `x2c_descriptor_registration_frozen`
 
 ### [lib/encoding.x](../lib/encoding.x)
 
@@ -1157,7 +1157,7 @@ native functions a Lisp session can call.
 
 Public functions:
 
-None. This module has no non-static function definitions.
+`x2c_lisp_exchange`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 

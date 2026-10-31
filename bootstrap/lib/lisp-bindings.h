@@ -7,5 +7,10 @@
 
 #include "meta.h"
 #include "compiler-meta.h"
+#include "lisp/lisp.h"
+extern _Thread_local Lisp x2c_lisp_active;
+
+Lisp x2c_lisp_exchange(Lisp lisp);
+
 
 #endif /* __GUARD_0x4420A8A1__ */

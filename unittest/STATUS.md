@@ -2,7 +2,8 @@
 
 ## Private async review on 2026-10-31
 
-Two reproduced runtime defects remain outside the gate-repair pass:
+Two runtime defects were reproduced in the gate-repair review and fixed in
+the subsequent authorized runtime follow-up:
 
 - Lisp evaluations that suspend inside native callbacks share `lisp_active`.
   Interleaved callbacks resume with the wrong `Lisp.active()`, and their exit
@@ -10,15 +11,16 @@ Two reproduced runtime defects remain outside the gate-repair pass:
 - Recursive rendering shares `render_path` across tasks. A custom renderer
   that suspends can make another task report a false Array cycle.
 
-Both require saved activation pointers at the existing task boundaries and
-focused regression tests. See
+Both now save their activation pointers at the existing task boundaries.
+Two focused task-suite tests cover interleaved suspension, fresh task state,
+caller restoration, failure, and cancellation cleanup. See
 [the merged review](../plans/reference/async-merged-review-2026-10-31.md).
-Passing the existing suites does not cover these suspension cases.
 
 The full local check also encountered a REPL replay compilation failure:
 `x2c.h` was not found. The terminal check and complete command checks passed
-on subsequent runs without a REPL change. The cause remains unclassified;
-the review records the failed full run and passing follow-ups separately.
+on subsequent runs without a REPL change. After the runtime fixes, the full
+`make agent-pr-check` invocation also passes, including REPL replay. The
+earlier failure's cause remains unclassified; the review retains both results.
 
 ## Optional example checks on 2026-10-30
 

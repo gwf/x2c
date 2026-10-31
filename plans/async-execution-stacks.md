@@ -587,6 +587,7 @@ established initial state of other jobs.
 | Error policies and bound | Copy effective dispositions and the current bound at entry. Later policy changes stay local to the execution making them. |
 | Error records, marks, handlers, and exception/cleanup heads | Start fresh. Install only the task's own outcome boundary and existing observer behavior, not the caller's catch targets or borrowed handler environments. |
 | Match | Start with no inherited Context-state head and an empty lazy default-cache binding. Do not duplicate caller caches or eagerly allocate a task cache. |
+| Lisp callbacks and recursive rendering | Start with no active Lisp session or rendering path. Save and restore these borrowed activation pointers at the existing task boundaries. |
 
 Scope and Pool provide borrowed storage/identity. Context provides mutable
 nesting, export destination, and teardown authority, so sharing its active
@@ -922,11 +923,19 @@ This integration advances only the private branch; no push is authorized.
 
 The [merged review](reference/async-merged-review-2026-10-31.md) records the
 native-file copy repair, four lint corrections, documentation cleanup, and
-two newly reproduced suspension defects. Lisp active-session state and the
-recursive rendering path still need execution-boundary isolation before
-publication. Existing suite success does not cover those cases. The review
-also records the full local check attempt and its follow-up checks. No
-runtime state design was extended during this gate-repair pass.
+two reproduced suspension defects. The subsequent authorized fix exchanges
+Lisp active-session and recursive rendering pointers at the existing task
+boundaries. Two focused tests now cover the missing suspension cases. The
+review records the original gate-repair attempt and the runtime follow-up;
+publication and pushing remain held.
+
+The runtime follow-up passes the full `make agent-pr-check` invocation,
+including the REPL checks. Both ordinary and freshly instrumented ASan/UBSan
+suites pass 1,152 tests and 99,534 assertions. The focused task suite also
+passes with stack-use-after-return detection. The compiler continues to
+exclude the Lisp interpreter; only its activation cell and pointer exchange
+are provided by the existing lightweight Lisp-bindings unit. The delivery
+hold remains in force.
 
 ## Plan review
 

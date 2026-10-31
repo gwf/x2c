@@ -5,6 +5,20 @@
 #include "test-macros.x"
 #include <stdatomic.h>
 
+class TaskRenderProbe { Channel gate; int calls; } *;
+
+void TaskRenderProbe.init(TaskRenderProbe probe, Channel gate) {
+  probe.gate = gate;
+  probe.calls = 0;
+}
+
+String TaskRenderProbe.repr(TaskRenderProbe probe) {
+  if (++probe.calls == 1) {
+    probe.gate.receive();
+  }
+  return "item";
+}
+
 static void task_empty_batch_has_no_completion(void) {
   Array completed = auto [];
   Task.run([], %!(Var result) => completed.push(result));
@@ -373,6 +387,107 @@ static void task_stop_rolls_back_uncommitted_owned_send(void) {
   EXPECT_INT_EQ(payload[0].int(), 97);
 }
 
+static Lisp _task_lisp_session(Channel gate, int fail) {
+  Lisp session = Lisp.kernel();
+  Var expected = Var.new(<p48>, session);
+  session.set_global("pause", Func.var(%!(void) => {
+    EXPECT_PTR_EQ(Lisp.active(), expected.pointer());
+    defer EXPECT_PTR_EQ(Lisp.active(), expected.pointer());
+    gate.receive();
+    EXPECT_PTR_EQ(Lisp.active(), expected.pointer());
+    if (fail) raise %(bad-arg (operation "task Lisp callback"));
+    return void;
+  }));
+  return session;
+}
+
+static void task_lisp_activations_restore_after_suspension_and_failure(void) {
+  $test.scoped();
+  for (int fail = 0; fail < 2; fail++) {
+    Channel a = auto Channel.new(1);
+    Channel b = auto Channel.new(1);
+    Lisp left_session = _task_lisp_session(a, fail);
+    defer left_session.destroy();
+    Lisp right_session = _task_lisp_session(b, 0);
+    defer right_session.destroy();
+    Var left = Var.new(<p48>, left_session);
+    Var right = Var.new(<p48>, right_session);
+    Lisp outer = Lisp.kernel();
+    defer outer.destroy();
+    Var caller = Var.new(<p48>, outer);
+    outer.set_global("batch", Func.var(%!(void) => {
+      int caught = 0;
+      try Task.run([
+        %!(void) => {
+          ((Lisp)left.pointer()).eval_string("(pause)");
+          return void;
+        },
+        %!(void) => {
+          ((Lisp)right.pointer()).eval_string("(pause)");
+          return void;
+        },
+        %!(void) => {
+          EXPECT_PTR_EQ(Lisp.active(), NULL);
+          a.send(1); b.send(1);
+          return void;
+        }
+      ], %!(Var result) => {
+        EXPECT_PTR_EQ(Lisp.active(), caller.pointer());
+        return void;
+      });
+      catch %(join-fail *): caught = 1;
+      EXPECT_INT_EQ(caught, fail);
+      EXPECT_PTR_EQ(Lisp.active(), caller.pointer());
+      return void;
+    }));
+    outer.eval_string("(batch)");
+    EXPECT_PTR_EQ(Lisp.active(), NULL);
+  }
+}
+
+static void _task_expect_caller_render_path(Var shared) {
+  RenderPath duplicate;
+  int entered = duplicate.enter(shared.pointer());
+  if (entered) duplicate.leave();
+  EXPECT_FALSE(entered);
+}
+
+static void task_render_paths_restore_after_suspension_and_failure(void) {
+  $test.scoped();
+  for (int fail = 0; fail < 2; fail++) {
+    Channel gate = auto Channel.new(1);
+    TaskRenderProbe probe = TaskRenderProbe.new(gate);
+    Array array = [probe], outputs = [];
+    Map map = {1: probe};
+    Var shared = fail ? map.var() : array.var();
+    String expected = fail ? "{ 1: item }" : "[ item ]";
+    RenderPath caller;
+    EXPECT_TRUE(caller.enter(shared.pointer()));
+    int caught = 0;
+    try {
+      try Task.run([
+        %!(void) => shared.repr(),
+        %!(void) => shared.repr(),
+        %!(void) => {
+          if (fail) raise %(bad-arg (operation "task renderer"));
+          gate.send(1);
+          return void;
+        }
+      ], %!(Var value) => {
+        if (value is <string>) outputs.push(value);
+        _task_expect_caller_render_path(shared);
+      });
+      catch %(join-fail *): caught = 1;
+      EXPECT_INT_EQ(caught, fail);
+      _task_expect_caller_render_path(shared);
+    }
+    finally caller.leave();
+    if (!fail) EXPECT_INT_EQ(outputs.len(), 2);
+    foreach (String output in outputs) EXPECT_STR_EQ(output, expected);
+    EXPECT_STR_EQ(shared.repr(), expected);
+  }
+}
+
 void task_suite(void) {
   $test.run(task_empty_batch_has_no_completion);
   $test.run(task_request_reply_closes_after_clients_finish);
@@ -387,4 +502,6 @@ void task_suite(void) {
   $test.run(task_owner_stop_keeps_committed_owned_payload);
   $test.run(task_native_notifications_do_not_repeat_completions);
   $test.run(task_stop_rolls_back_uncommitted_owned_send);
+  $test.run(task_lisp_activations_restore_after_suspension_and_failure);
+  $test.run(task_render_paths_restore_after_suspension_and_failure);
 }

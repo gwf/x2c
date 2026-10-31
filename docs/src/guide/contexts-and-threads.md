@@ -312,6 +312,10 @@ cleanup obligations start fresh. Opening a Context inside a job remains
 explicit. An ordinary Array return retains its owner and aliases; no implicit
 export or ownership transfer occurs.
 
+Lisp callback activations and recursive rendering paths also start fresh.
+Suspending either preserves that task's activation. Completion callbacks and
+the caller resume with their own activation restored.
+
 Keep all borrowed owners, Channels, jobs, and captures alive through Task.run.
 The call returns or raises only after all participants finish cleanup. Job or
 completion-callback failure stops unfinished jobs and preserves the primary

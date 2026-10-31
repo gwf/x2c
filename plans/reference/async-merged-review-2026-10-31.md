@@ -3,7 +3,8 @@
 > Status: reference
 > Reviewed the private async branch after merging dev at `ffd915bd0`.
 > Starting private revision: `38e89217b`. No push or shared-branch update.
-> Two reproduced runtime defects remain publication blockers.
+> The two reproduced runtime defects were fixed in the subsequent private
+> runtime follow-up described below. Publication remains held.
 
 ## Repairs and cleanup
 
@@ -116,3 +117,36 @@ Full logs remain in `debug/async-tidy-agent-pr-check.log` and
 `debug/async-tidy-doc-check-after.log`,
 `debug/async-tidy-repl-terminal-rerun.log`, and
 `debug/async-tidy-commands-check-rerun.log`.
+
+## Authorized runtime follow-up
+
+The Lisp and rendering owners now exchange their borrowed activation pointers
+at the existing task boundaries. Each task adds two saved pointers, initialized
+to NULL. The caller's activation is restored after normal completion, Error
+transfer, and cancellation cleanup. No new allocation, lock, ownership rule,
+or state framework was introduced.
+
+The compiler deliberately excludes the Lisp interpreter. Its activation cell
+and exchange function therefore live in the existing lightweight
+`lisp-bindings.x` unit. The interpreter keeps direct TLS reads and writes;
+ordinary evaluation does not add entry calls. The compiler still contains no
+Lisp evaluator or session-construction implementation.
+
+Two focused task-suite tests cover interleaved Lisp callbacks, a caller already
+inside Lisp evaluation, completion callbacks, independent Array rendering,
+cancellation of a suspended Map renderer, and restoration after the batch.
+Both original probes fail before the fix and pass afterward. The focused suite
+passes 15 tests and 96 assertions, including stack-use-after-return detection.
+The fresh full ASan/UBSan suite passes 1,152 tests and 99,534 assertions with
+the existing leak-detection setting disabled.
+
+Build and sanitizer evidence is retained in `debug/async-state-fix-*`.
+The subsequent `make agent-pr-check` invocation passes in full: precommit,
+bootstrap/stage comparisons, artifact atomicity, documentation audit, cold
+collection, verification, documentation outputs, and all command checks.
+Ordinary verification also passes 1,152 tests and 99,534 assertions, plus
+1,357 compiler fixtures and 2,999 artifacts. The REPL replay failure from the
+earlier gate-repair pass did not recur; no REPL source was changed.
+
+No publication receipt or push was requested. Native platform coverage and
+performance/retention acceptance remain subject to the existing delivery hold.

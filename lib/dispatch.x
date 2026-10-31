@@ -198,8 +198,9 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 
 /** Enters an object's recursive rendering, or returns zero for a cycle.
     Keep `path` alive and defer `path.leave()` after a successful entry.
-    Identities are compared only along this thread's active path, so repeated
-    references outside that path render independently. No allocation occurs.
+    Identities are compared only along this execution's active path.
+    Repeated references outside that path render independently. No allocation
+    occurs.
 */
 int RenderPath.enter(RenderPath *path, const void *identity) {
   for (RenderPath *active = render_path; active; active = active.previous)
@@ -210,11 +211,18 @@ int RenderPath.enter(RenderPath *path, const void *identity) {
   return 1;
 }
 
-/** Restores the path after the most recent successful `enter` on this thread.
+/** Restores the path after the last successful entry in this execution.
     Ordinary defer unwinding also restores it when a child renderer raises.
 */
 void RenderPath.leave(RenderPath *path) {
   render_path = path.previous;
+}
+
+/** Exchanges the borrowed rendering path at an execution boundary. */
+RenderPath *x2c_render_path_exchange(RenderPath *path) {
+  RenderPath *previous = render_path;
+  render_path = path;
+  return previous;
 }
 
 // hashing and equality

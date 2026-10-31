@@ -57,6 +57,7 @@ prefix.
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
+| [`x2c_lisp_exchange`](lisp-bindings.md#x2c_lisp_exchange) | `lib/lisp-bindings.x` | `Lisp x2c_lisp_exchange(Lisp lisp)` |
 | [`x2c_match_execution_free`](match.md#x2c_match_execution_free) | `lib/match/match.x` | `void x2c_match_execution_free(void *backing)` |
 | [`x2c_match_execution_new`](match.md#x2c_match_execution_new) | `lib/match/match.x` | `void *x2c_match_execution_new(void)` |
 | [`x2c_match_execution_swap`](match.md#x2c_match_execution_swap) | `lib/match/match.x` | `void x2c_match_execution_swap(void *backing)` |
@@ -82,6 +83,7 @@ prefix.
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
+| [`x2c_render_path_exchange`](dispatch.md#x2c_render_path_exchange) | `lib/dispatch.x` | `RenderPath *x2c_render_path_exchange(RenderPath *path)` |
 | [`x2c_scope_execution_free`](scope.md#x2c_scope_execution_free) | `lib/scope/scope.x` | `void x2c_scope_execution_free(void *saved)` |
 | [`x2c_scope_execution_new`](scope.md#x2c_scope_execution_new) | `lib/scope/scope.x` | `void *x2c_scope_execution_new(Scope borrowed)` |
 | [`x2c_scope_execution_swap`](scope.md#x2c_scope_execution_swap) | `lib/scope/scope.x` | `void x2c_scope_execution_swap(void *saved)` |
@@ -136,4 +138,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 124 functions.
+Total: 126 functions.

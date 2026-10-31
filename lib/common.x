@@ -106,7 +106,7 @@ typedef unsigned long ulong;
 
 // Var descriptors
 
-/** Caller-owned frame in this thread's active recursive rendering path. */
+/** Caller-owned frame in this execution's active recursive rendering path. */
 typedef struct RenderPath {
   const void *identity;
   struct RenderPath *previous;

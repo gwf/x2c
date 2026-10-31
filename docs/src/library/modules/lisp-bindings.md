@@ -5,6 +5,25 @@
 
 Native functions a Lisp session can call.
 
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`x2c_lisp_exchange`](#x2c_lisp_exchange) | Exchanges the borrowed Lisp activation at an execution boundary. |
+
+### Functions
+
+#### x2c_lisp_exchange
+
+`Lisp x2c_lisp_exchange(Lisp lisp)`
+
+Exchanges the borrowed Lisp activation at an execution boundary.
+
+Source: `lib/lisp-bindings.x`
+
 ## Design notes
 
 These macros bind a native function into a runtime `Lisp` session under

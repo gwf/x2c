@@ -2,6 +2,8 @@
 #pragma once
 #include "channel.x"
 #include "thread-state.x"
+#include "lisp/lisp.x"
+#include "dispatch.x"
 #include <errno.h>
 #include <limits.h>
 
@@ -26,6 +28,8 @@ static typedef struct TaskJob {
   void *policy;
   Context context;
   Pool pool;
+  Lisp lisp;
+  RenderPath *render_path;
   X2CChannelMonitor *waiting;
   unsigned long stack_low;
   int stopped, parked, queued, finished;
@@ -51,6 +55,7 @@ macro Expression $task.run.jobs(Expr $jobs) => Task.run($jobs);
     must not wait for participant progress. Results retain ordinary owners.
     Jobs borrow the caller's active Scope and Pool through this call, start
     without a current Context, and copy effective Error policies and bound.
+    Lisp callback and recursive rendering activations start fresh.
     Every exit finishes all jobs; failure stops unfinished participants.
     Thread.stop on the owner requests cooperative batch cancellation.
     Cleanup bodies must not suspend. Blocking native calls block all jobs.
@@ -188,6 +193,8 @@ static void _exchange(TaskJob job) {
   x2c_scope_execution_swap(job.scope_state);
   job.context = x2c_context_exchange(job.context);
   job.pool = x2c_pool_exchange(job.pool);
+  job.lisp = x2c_lisp_exchange(job.lisp);
+  job.render_path = x2c_render_path_exchange(job.render_path);
   x2c_error_execution_swap(job.error_state);
   x2c_exception_execution_swap(job.exception_state);
   x2c_match_execution_swap(job.match_state);

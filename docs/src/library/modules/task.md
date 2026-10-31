@@ -24,6 +24,7 @@ successful result after job cleanup, under restored caller state, and
 must not wait for participant progress. Results retain ordinary owners.
 Jobs borrow the caller's active Scope and Pool through this call, start
 without a current Context, and copy effective Error policies and bound.
+Lisp callback and recursive rendering activations start fresh.
 Every exit finishes all jobs; failure stops unfinished participants.
 Thread.stop on the owner requests cooperative batch cancellation.
 Cleanup bodies must not suspend. Blocking native calls block all jobs.

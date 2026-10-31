@@ -130,7 +130,7 @@ static Iter _iter_init(
   if (!destination) return NULL;
   /* A lazy pull callback outlives this region; Iter retains it in aux. */
   Func callback = _binary_callback_for(callable, "Lisp iterator callback");
-  if (callback) callback.move(&lisp_active.scope);
+  if (callback) callback.move(&x2c_lisp_active.scope);
   destination.init(object, callback ? _iter_next : NULL, state);
   destination.aux = callback;
   return destination;
@@ -246,12 +246,12 @@ static Func _predicate_callback(Var callable) {
    captured as a pointer; its storage still belongs to the session. */
 static void *_callback_owner(Var callable, String operation) {
   if (callable.is_nil()) return NULL;
-  if (!lisp_active) $error.callback.absent(operation);
-  return lisp_active;
+  if (!x2c_lisp_active) $error.callback.absent(operation);
+  return x2c_lisp_active;
 }
 
 static Lisp _callback_session(void *owner, String operation) {
-  if (!lisp_active || lisp_active != owner)
+  if (!x2c_lisp_active || x2c_lisp_active != owner)
     $error.callback.wrong(operation);
   return owner;
 }

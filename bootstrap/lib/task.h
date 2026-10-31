@@ -7,6 +7,8 @@
 
 #include "channel.h"
 #include "thread-state.h"
+#include "lisp/lisp.h"
+#include "dispatch.h"
 #include <errno.h>
 #include <limits.h>
 typedef struct Task * Task;

@@ -51,9 +51,9 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
   if (!lisp) return _bad_session($operation);
   Scope.push(&lisp.user);
   defer Scope.pop();
-  Lisp prior_lisp = lisp_active;
-  lisp_active = lisp;
-  defer lisp_active = prior_lisp;
+  Lisp prior_lisp = x2c_lisp_active;
+  x2c_lisp_active = lisp;
+  defer x2c_lisp_active = prior_lisp;
   @Code.body($function)
 }
 

@@ -119,7 +119,7 @@ struct Lisp{
 }
 ;
 
-_Thread_local static Lisp lisp_active;
+_Thread_local extern Lisp x2c_lisp_active;
 
 #include "var-adapters.h"
 typedef struct LispEnv{
@@ -766,8 +766,8 @@ Var Lisp_eval(Lisp lisp, Var expression){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_0 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_0 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
           0
@@ -812,8 +812,8 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_1 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_1 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
           0
@@ -868,8 +868,8 @@ Var Lisp_eval_string(Lisp lisp, String source){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_2 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_2 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_3 ={
           0
@@ -2444,7 +2444,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 static Iter f6_native____iter_init(Iter destination, Var object, Var callable, Var state){
   if(! Iter_truth(destination)) return NULL;
   Func callback = f6_native____binary_callback_for(callable, _161);
-  if(callback) Func_move(callback, & lisp_active -> scope);
+  if(callback) Func_move(callback, & x2c_lisp_active -> scope);
   Iter_init(destination, object, callback ? f6_native____iter_next : NULL, state);
   destination -> aux = callback;
   return destination;
@@ -2598,7 +2598,7 @@ static Func f6_native____predicate_callback(Var callable){
 
 static void * f6_native____callback_owner(Var callable, String operation){
   if(Var_is_nil(callable)) return NULL;
-  if(! lisp_active){
+  if(! x2c_lisp_active){
     Var _x2c_gensym_literal_part_40 = String_var(operation);
     Var _x2c_gensym_literal_part_41 = String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL)));
     {
@@ -2608,11 +2608,11 @@ static void * f6_native____callback_owner(Var callable, String operation){
     }
 
   }
-  return lisp_active;
+  return x2c_lisp_active;
 }
 
 static Lisp f6_native____callback_session(void * owner, String operation){
-  if(! lisp_active || lisp_active != owner){
+  if(! x2c_lisp_active || x2c_lisp_active != owner){
     Var _x2c_gensym_literal_part_42 = String_var(operation);
     Var _x2c_gensym_literal_part_43 = String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL)));
     {
@@ -2846,7 +2846,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 
 Lisp Lisp_active(void){
   if(! _init_guard_) _file_init_();
-  return lisp_active;
+  return x2c_lisp_active;
 }
 
 Scope * Lisp_storage(Lisp lisp){
@@ -3321,7 +3321,7 @@ static char * f10_primitives____string_charset(Var chars){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0);
 }
 
 void Scope_pop(void);
@@ -3332,7 +3332,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_2;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1);
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
@@ -3341,7 +3341,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_4;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2);
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){

@@ -1112,7 +1112,7 @@ Source: `lib/common.x`
 | [`Iter`](#Iter) | struct | Mutable traversal state whose sources must outlive its iteration. |
 | [`Map`](#Map) | struct | `Scope`-owned mutable table mapping `Var` keys to `Var` values. |
 | [`Pool`](#Pool) | struct | Nested canonicalization table with `Scope`-backed object storage. |
-| [`RenderPath`](#RenderPath) | struct | Caller-owned frame in this thread's active recursive rendering path. |
+| [`RenderPath`](#RenderPath) | struct | Caller-owned frame in this execution's active recursive rendering path. |
 | [`Scope`](#Scope) | struct | Region owner for individually tracked runtime allocations. |
 | [`String`](#String) | alias | Immutable canonical NUL-terminated bytes; NULL is the empty `String`. |
 | [`Symbol`](#Symbol) | alias | Immediate compact name encoding with no allocation ownership. |
@@ -1244,7 +1244,7 @@ Source: `lib/common.x`
 
 `typedef struct RenderPath { const void *identity; struct RenderPath *previous; } RenderPath`
 
-Caller-owned frame in this thread's active recursive rendering path.
+Caller-owned frame in this execution's active recursive rendering path.
 
 Source: `lib/common.x`
 

@@ -162,7 +162,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
 // session storage
 
 /** Borrows the session executing the current native Lisp callback. */
-Lisp Lisp.active(void) => lisp_active;
+Lisp Lisp.active(void) => x2c_lisp_active;
 
 /** Borrows the storage owner for callback state retained by this session. */
 Scope *Lisp.storage(Lisp lisp) => &lisp.scope;

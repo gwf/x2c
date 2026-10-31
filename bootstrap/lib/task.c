@@ -3,6 +3,8 @@
 #define __GUARD_0x25043D19__
 #include "channel.h"
 #include "thread-state.h"
+#include "lisp/lisp.h"
+#include "dispatch.h"
 #include <errno.h>
 #include <limits.h>
 typedef struct Task * Task;
@@ -30,6 +32,8 @@ typedef struct TaskJob{
   void * policy;
   Context context;
   Pool pool;
+  Lisp lisp;
+  RenderPath * render_path;
   X2CChannelMonitor * waiting;
   unsigned long stack_low;
   int stopped, parked, queued, finished;
@@ -314,7 +318,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _163 = cons(_159, _162);
   _164 = List_var(_163);
   _165 = Symbol_var(805770);
-  _166 = int_var(46);
+  _166 = int_var(50);
   _167 = cons(_166, NULL);
   _168 = cons(_165, _167);
   _169 = List_var(_168);
@@ -327,7 +331,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _176 = cons(_173, _175);
   _177 = List_var(_176);
   _178 = Symbol_var(1133019155420);
-  _179 = int_var(1255);
+  _179 = int_var(1340);
   _180 = cons(_179, NULL);
   _181 = cons(_178, _180);
   _182 = List_var(_181);
@@ -423,7 +427,7 @@ void Task_run(Array jobs, Func completed){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Task.run")), NULL)));
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("native task backend unavailable")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/task.x",.function = "Task_run",.line = 65,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/task.x",.function = "Task_run",.line = 70,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1);
       __builtin_unreachable();
     }
@@ -433,7 +437,7 @@ void Task_run(Array jobs, Func completed){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Task.run")), NULL)));
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("nested task batches are unsupported")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/task.x",.function = "Task_run",.line = 68,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/task.x",.function = "Task_run",.line = 73,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -494,7 +498,7 @@ void Task_run(Array jobs, Func completed){
                 {
                   run.jobs = calloc(run.count, sizeof(struct TaskJob));
                   if(! run.jobs){
-                    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/task.x",.function = "Task_run",.line = 84,.runtime = 1};
+                    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/task.x",.function = "Task_run",.line = 89,.runtime = 1};
                     x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 0);
                     __builtin_unreachable();
                   }
@@ -513,7 +517,7 @@ void Task_run(Array jobs, Func completed){
                     if(! Var_is_void(job -> errors)){
                       Var errors = Context_export_scope(run.error_scope, run.pool, job -> errors);
                       {
-                        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/task.x",.function = "Task_run",.line = 99,.runtime = 1};
+                        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/task.x",.function = "Task_run",.line = 104,.runtime = 1};
                         x2c_error_raise_n(& _x2c_gensym_error_site_3, 23041356991064, 1, Symbol_var(374504614), errors);
                         __builtin_unreachable();
                       }
@@ -733,7 +737,7 @@ static Symbol _capture_errors(List errors, Var value){
   if(Error_policy_get(code) != 2260136) return 285842436424;
   job -> errors = Error_snapshot_in(List_var(errors), & job -> run -> error_scope, job -> run -> pool);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/task.x",.function = "_capture_errors",.line = 178,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/task.x",.function = "_capture_errors",.line = 183,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Task callback")), NULL))));
     __builtin_unreachable();
   }
@@ -753,6 +757,8 @@ Context x2c_context_exchange(Context);
 
 Pool x2c_pool_exchange(Pool);
 
+Lisp x2c_lisp_exchange(Lisp);
+
 void x2c_error_execution_swap(void *);
 
 void x2c_exception_execution_swap(void *);
@@ -763,6 +769,8 @@ static void _exchange(TaskJob job){
   x2c_scope_execution_swap(job -> scope_state);
   job -> context = x2c_context_exchange(job -> context);
   job -> pool = x2c_pool_exchange(job -> pool);
+  job -> lisp = x2c_lisp_exchange(job -> lisp);
+  job -> render_path = x2c_render_path_exchange(job -> render_path);
   x2c_error_execution_swap(job -> error_state);
   x2c_exception_execution_swap(job -> exception_state);
   x2c_match_execution_swap(job -> match_state);
@@ -795,7 +803,7 @@ static void _prepare(TaskRun run, TaskJob job, Func function){
   job -> parked = 1;
   run -> prepared ++;
   if(! function){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/task.x",.function = "_prepare",.line = 214,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/task.x",.function = "_prepare",.line = 221,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Task.run")), NULL))));
     __builtin_unreachable();
   }
@@ -810,7 +818,7 @@ static void _prepare(TaskRun run, TaskJob job, Func function){
     {
       Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Task stack")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/task.x",.function = "_prepare",.line = 223,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/task.x",.function = "_prepare",.line = 230,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_6, 97614135954008, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(11703198), int_var(error));
         __builtin_unreachable();
       }
@@ -828,7 +836,7 @@ static size_t _stack_size(void){
   errno = 0;
   unsigned long long size = strtoull(setting, & end, 10);
   if(! * setting || * setting == '-' || * end || errno || size < 32768 || size > SIZE_MAX - 65536){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/task.x",.function = "_stack_size",.line = 236,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/task.x",.function = "_stack_size",.line = 243,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Task stack capacity")), NULL))));
     __builtin_unreachable();
   }
