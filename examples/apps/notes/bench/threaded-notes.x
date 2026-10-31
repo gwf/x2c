@@ -2,6 +2,8 @@
 
     Copyright (c) 2026 Gary William Flake
 */
+#include "system-macros.x"
+
 import "sqlite" with Database, Prepared;
 #include "http.x"
 #include "args.x"
@@ -26,7 +28,10 @@ static volatile sig_atomic_t stopping;
 int main(int argc, char **argv) {
   try return run(options(argc, argv));
   catch %(bad-arg *detail): {
-    Stderr.printf("notes: %s\nTry --help for usage.\n", detail.str());
+    Stderr.printf($dedent(%"
+      notes: %s
+      Try --help for usage.
+    "), detail.str());
     return 2;
   }
   catch %(?cause *detail): {
@@ -200,10 +205,16 @@ static Var database_thread(Var value) {
     try {
       if (job.operation == <open>) {
         db = Database.open(app.path);
-        db.execute("CREATE TABLE IF NOT EXISTS note ("
-          "id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, "
-          "body TEXT NOT NULL, tags TEXT NOT NULL, "
-          "created INTEGER NOT NULL, updated INTEGER NOT NULL)");
+        db.execute($dedent(%"
+          CREATE TABLE IF NOT EXISTS note (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            tags TEXT NOT NULL,
+            created INTEGER NOT NULL,
+            updated INTEGER NOT NULL
+          )
+        "));
       }
       else database_request(db, job);
     }
@@ -244,16 +255,22 @@ static Var execute(Database db, Symbol operation, List arguments) {
     }
     case <create>: {
       Prepared insert = auto db.prepare(
-        "INSERT INTO note (title, body, tags, created, updated) "
-        "VALUES (?, ?, ?, ?, ?) RETURNING id");
+        $dedent(%"
+          INSERT INTO note (title, body, tags, created, updated)
+          VALUES (?, ?, ?, ?, ?)
+          RETURNING id
+        "));
       List row = insert.bind(@arguments).next();
       insert.execute();
       return row;
     }
     case <update>: {
       Prepared update = auto db.prepare(
-        "UPDATE note SET title = ?, body = ?, tags = ?, updated = ? "
-        "WHERE id = ? RETURNING id, title, body, tags, created, updated");
+        $dedent(%"
+          UPDATE note SET title = ?, body = ?, tags = ?, updated = ?
+          WHERE id = ?
+          RETURNING id, title, body, tags, created, updated
+        "));
       List row = update.bind(@arguments).next();
       update.execute();
       return row;

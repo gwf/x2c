@@ -1,22 +1,24 @@
 /* release-catalog.x -- inspect, patch, and publish lossless JSON data. */
 
+#include "system-macros.x"
+
 import "yyjson" as json;
 
 int main(void) {
   Scope.retain();
   defer Scope.release();
 
-  String source = "".join(%(
-    "{\"service\":{\"name\":\"artifact-api\",\"active\":true},"
-    "\"labels\":{\"region\":\"us-west\",\"region\":\"fallback\","
-    "\"tier\":\"edge\"},\"releases\":["
-    "{\"version\":\"2.3.0\",\"channel\":\"stable\","
-    "\"downloads\":1400},"
-    "{\"version\":\"2.4.0-rc1\",\"channel\":\"preview\","
-    "\"downloads\":320},"
-    "{\"version\":\"2.2.7\",\"channel\":\"stable\","
-    "\"downloads\":870}]}"
-  ));
+  String source = $dedent(%"
+    {
+      \"service\": {\"name\": \"artifact-api\", \"active\": true},
+      \"labels\": {\"region\": \"us-west\", \"region\": \"fallback\", \"tier\": \"edge\"},
+      \"releases\": [
+        {\"version\": \"2.3.0\", \"channel\": \"stable\", \"downloads\": 1400},
+        {\"version\": \"2.4.0-rc1\", \"channel\": \"preview\", \"downloads\": 320},
+        {\"version\": \"2.2.7\", \"channel\": \"stable\", \"downloads\": 870}
+      ]
+    }
+  ");
   json.JsonDocument catalog = auto json.JsonDocument.parse(source);
 
   json.JsonObject root = catalog.root().object();

@@ -1,5 +1,6 @@
 /*  process-report.x -- two child processes on one libuv event loop */
 
+#include "system-macros.x"
 import "libuv" with UvLoop, UvProcess;
 
 int main(void) {
@@ -7,10 +8,18 @@ int main(void) {
 
   UvProcess normalized =
     auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
-  normalized.write("alpha\nbeta\ngamma\n").close_stdin();
+  normalized.write($dedent(%"
+    alpha
+    beta
+    gamma
+  ")).close_stdin();
 
   UvProcess counted = auto loop.spawn(%("/usr/bin/wc" "-l"));
-  counted.write("alpha\nbeta\ngamma\n").close_stdin();
+  counted.write($dedent(%"
+    alpha
+    beta
+    gamma
+  ")).close_stdin();
 
   printf("started %d and %d before running the loop\n",
          normalized.pid(), counted.pid());

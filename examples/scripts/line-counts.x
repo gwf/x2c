@@ -1,10 +1,21 @@
 #!/usr/bin/env -S x2c script
 /*  line-counts.x -- count lines with parallel commands and write a report */
 
+#include "system-macros.x"
+
 static void write_sources(Path root) {
   Map sources = {
-    "src/main.x": "int main(void) {\n  return run();\n}\n",
-    "src/run.x": "int run(void) {\n  int total = 0;\n  return total;\n}\n",
+    "src/main.x": $dedent(%"
+      int main(void) {
+        return run();
+      }
+    "),
+    "src/run.x": $dedent(%"
+      int run(void) {
+        int total = 0;
+        return total;
+      }
+    "),
     "lib/text.x": "String greeting(void) => \"hello\";\n",
     "docs/notes.md": "not source\n"
   };

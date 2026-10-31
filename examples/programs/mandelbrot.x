@@ -1,5 +1,6 @@
 /*  mandelbrot.x -- render a deep zoom on native threads */
 
+#include "system-macros.x"
 #include <math.h>
 #include <stdio.h>
 #include "typed-array.x"
@@ -75,6 +76,10 @@ static ArrayChar _rgb(ArrayDbl pixels) {
 
 static void write_image(String path, ArrayChar rgb) {
   auto File output = File.open(path, "wb");
-  output.puts(%"P6\n$width $height\n255\n");
+  output.puts($dedent(%"
+    P6
+    $width $height
+    255
+  "));
   output.write_all(rgb.bytes, rgb.len());
 }

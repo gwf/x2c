@@ -9,6 +9,7 @@
 
 import "libuv" with UvFs, UvLoop, UvProcess, UvSignal, UvTimer, UvWatch;
 
+#include "system-macros.x"
 #include <signal.h>
 #include <sys/stat.h>
 
@@ -79,7 +80,11 @@ static String _sandbox(String work) {
   mkdir(work, 0700);
   mkdir(%"$work/out", 0700);
   File source = File.open(%"$work/release.txt", "w");
-  source.puts("alpha\nbeta\ngamma\n");
+  source.puts($dedent(%"
+    alpha
+    beta
+    gamma
+  "));
   source.close();
   return %"$work/out";
 }

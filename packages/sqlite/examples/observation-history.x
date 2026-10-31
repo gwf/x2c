@@ -1,5 +1,7 @@
 /*  observation-history.x -- Persist a batch and report endpoint history. */
 
+#include "system-macros.x"
+
 import "sqlite" with Database, Prepared;
 
 #include <stdlib.h>
@@ -7,8 +9,10 @@ import "sqlite" with Database, Prepared;
 static void ingest(String filename, String database) {
   File input = auto filename.open("r");
   Database db = auto Database.open(database);
-  db.execute("CREATE TABLE IF NOT EXISTS observation "
-             "(url TEXT, status INTEGER, us INTEGER)");
+  db.execute($dedent(%"
+    CREATE TABLE IF NOT EXISTS observation
+    (url TEXT, status INTEGER, us INTEGER)
+  "));
   Prepared insert =
     auto db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
 
@@ -30,9 +34,13 @@ int main(int argc, char **argv) {
 
   Database db = auto Database.open(filename);
   Prepared report = auto db.prepare(
-    "SELECT url, count(*), sum(status >= 400), "
-    "CAST(avg(us) AS INTEGER), max(us) "
-    "FROM observation GROUP BY url ORDER BY url"
+    $dedent(%"
+      SELECT url, count(*), sum(status >= 400),
+        CAST(avg(us) AS INTEGER), max(us)
+      FROM observation
+      GROUP BY url
+      ORDER BY url
+    ")
   );
   foreach(List row, report)
     printf("%s", %"$(row[0]): $(row[1]) readings, $(row[2]) failures, " +
