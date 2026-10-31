@@ -6,22 +6,36 @@ The official specifications own the required algorithms, inputs, work, and
 output. These are local comparisons against contributed programs, not
 measurements published or accepted by the Benchmarks Game.
 
-Each problem has four implementations:
+The comparison has six columns, with coverage recorded per problem:
 
 | File | Implementation |
 | --- | --- |
 | `main.x` | Idiomatic x2c, using ordinary collections and APIs |
-| `optimized.x` | Optimized x2c, including typed containers and borrowed substrings |
+| `tuned.x` | Tuned x2c, including typed containers and borrowed substrings |
 | `main.c` | An unmodified contributed C program |
 | `main.py` | An unmodified contributed Python program |
+| `main.rs` | An unmodified contributed Rust program, where admitted |
+| `main.cpp` | An unmodified contributed C++ program, where admitted |
 
 Idiomatic x2c uses ordinary `Array`, `List`, `Map`, `String`, `Buffer`,
 classes, and methods where appropriate. It does not use typed containers,
 borrowed substrings, raw collection storage, or custom allocation tricks.
-Native scalar types and value records remain ordinary x2c. Optimized x2c
+Native scalar types and value records remain ordinary x2c. Tuned x2c
 uses the language's more specialized operations while meeting the same
 specification. A program need not use a feature merely to make the two
 versions different. Neither column is a literal C port.
+
+Rust and C++ each have nine admitted contributions. Their k-nucleotide cells
+are `N/A`: the Rust candidates fail required tie ordering, and the C++
+candidates need GNU-only headers absent from the configured toolchain.
+[Reference coverage](results/reference-coverage.md) records the evidence and
+the selected contributions' input constraints. Contributions are not patched
+to conceal these differences.
+
+Summary rows and comparison charts use the nine problems shared by all six
+columns. Individual problem rows still include k-nucleotide for the original
+four implementations. No summary mixes a nine-problem column with a
+ten-problem column.
 
 x2c can also express C directly. That capability is understood and has no
 separate column. The C column measures an actual contributed C program.
@@ -67,7 +81,7 @@ After the normal compiler build:
 make shoot-check
 ```
 
-This optional command builds all four implementations, checks the official
+This optional command builds every available implementation, checks the official
 fixtures, and compares the quick-profile outputs. PBM output is compared as
 binary data. N-body uses the official absolute tolerance of `1e-8`.
 
@@ -79,7 +93,11 @@ python3 examples/shootout/tools/shootout.py check --profile quick \
 ```
 
 PCRE2 uses the existing pinned `packages/pcre2` build and its native response
-file. GMP must be installed for pidigits. On macOS, dependencies default to
+file. GMP must be installed for pidigits. C++ uses the configured `CXX`
+(default `clang++`). Rust uses `CARGO` (default `cargo`), the checked-in
+manifest and lockfile, and the installed stable toolchain. Cargo fetches
+the pinned libraries into its ordinary cache and reuses build outputs under
+ignored `examples/build/shootout-rust/`. On macOS, dependencies default to
 `/opt/homebrew` on arm64 and `/usr/local` on x86_64. Set
 `SHOOTOUT_DEPENDENCY_PREFIX` for another prefix. `SHOOTOUT_CPPFLAGS` and
 `SHOOTOUT_LDFLAGS` override the corresponding default flags. No packages are
@@ -89,6 +107,23 @@ The adopted k-nucleotide Python program assumes multiprocessing `fork`.
 Its launcher selects that start method before executing the unchanged
 source. This preserves its Linux process behavior on macOS.
 
+## Check unchanged C through x2c
+
+```sh
+python3 examples/shootout/tools/check-c-through-x2c.py
+```
+
+This optional check separates `x2c build` of unchanged `.c` inputs from
+actual x2c parsing of byte-identical `.x` copies. It records source hashes,
+commands, diagnostics, fixture checks, and profile-output comparisons under
+ignored `examples/build/shootout-c/`. It continues through every problem and
+returns nonzero if any parser or native-driver check fails. It adds no timing
+column or recurring publication requirement.
+
+The [recorded result](results/c-through-x2c.md) shows all ten native-driver
+checks passing and seven parser checks passing. The three parser rejections
+remain visible; the C references are not rewritten to make them pass.
+
 ## Measure
 
 ```sh
@@ -97,13 +132,13 @@ make shoot-run
 make shoot-update
 ```
 
-Calibration builds, checks, and measures all four implementations together.
+Calibration builds, checks, and measures every available implementation together.
 It rotates their order across twelve fresh-process samples after one
 warmup. It replaces `baseline.json` and `results/current.*` only when every
 build, check, and measurement succeeds. Run calibration in a quiet window.
 
 An ordinary run rebuilds and measures the two x2c programs against the
-pinned C and Python statistics. Update explicitly promotes its report.
+pinned C, Python, Rust, and C++ statistics. Update explicitly promotes its report.
 Raw samples and receipts stay under ignored `examples/build/shootout/`.
 
 The stdin-driven problems receive identical files generated by the adopted
@@ -115,6 +150,9 @@ to `/dev/null` during timing, after output correctness has been checked.
 `quick` and `local` use smaller inputs for development and local measurement.
 `canonical` records the larger inputs specified upstream. Smaller profiles
 do not replace the official output checks and are not official-site scores.
+The local Mandelbrot size is 512, so every admitted contribution receives
+the same dimensions supported by the unchanged Rust program. The official
+fixture size (200) and canonical size (16000) are unchanged.
 To calibrate and run at those official performance sizes, select the profile
 explicitly for both commands:
 

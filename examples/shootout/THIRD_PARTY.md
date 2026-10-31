@@ -1,6 +1,6 @@
 # Third-party notices
 
-The reference C and Python programs are unmodified contributions from the
+The reference C, Python, Rust, and C++ programs are unmodified contributions from the
 Computer Language Benchmarks Game. Their original contributor notices remain
 in each source. The x2c versions adapt the algorithms and constants of those
 contributions while following the pinned official problem specifications.
@@ -46,6 +46,19 @@ Original x2c code and harness changes use the [BSD 3-Clause license](LICENSE).
 - Pidigits uses installed GMP for C and both x2c versions. GMP is separately
   distributed under its upstream LGPLv3+/GPLv2+ terms; it is not vendored here.
   The adopted Python contribution uses Python integers.
+- Rust contributions use the libraries pinned in `rust/Cargo.toml` and
+  `rust/Cargo.lock`: Rayon, typed-arena, regex, Rug, and gmp-mpfr-sys.
+  Cargo retains their upstream licenses with the downloaded packages. Rug
+  uses the installed GMP for the admitted pidigits implementation.
+- C++ pidigits uses the installed GMP C++ interface. C++ regex-redux uses
+  the same pinned PCRE2 dependency and the unmodified Boost 1.46
+  `noncopyable.hpp` header. Its source revision and hash are recorded in
+  `benchmarks.json`; the Boost license is retained under
+  `benchmarks/regexredux/vendor/LICENSE_1_0.txt`.
+
+The added source selections and coverage limits are listed in
+[reference-coverage.md](results/reference-coverage.md). Every admitted source
+path and hash is also recorded in `benchmarks.json`.
 
 These implementations and local measurements do not imply upstream
 acceptance or endorsement. The suite does not reuse timings from the
