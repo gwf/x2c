@@ -887,6 +887,18 @@ An apparent compiler slowdown was traced to unequal compiler-source interface
 caches and withdrawn after a comparable rerun. No regression or retention
 tradeoff has been accepted, and no push is authorized.
 
+### In-process Notes comparison, 2026-10-31
+
+The [Notes Thread.run / Task.run report](../examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
+records five paired samples at 1, 8, and 64 clients. Both modes use one native
+SQLite owner and the same SQL, row conversion, JSON, and logging. At 8 and 64
+clients, Task increases lookup throughput and reduces CPU/request. One client
+is approximately unchanged. Peak RSS is higher for Task at 8 and 64 clients;
+latency storage prevents attributing that difference to stacks alone.
+Response checks, existing HTTP regression checks, and 22 fresh instrumented
+normal/failure checks pass. This is not an HTTP performance result or a new
+runtime implementation. The existing validation, dev/main, and push hold remains.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity

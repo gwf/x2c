@@ -190,3 +190,6 @@ process lifetime high-water mark, including warmup and latency storage.
 Task usable stack reservation is configured capacity, not resident memory;
 guard pages are additional. This probe does not measure native thread stack
 reservation and does not establish end-to-end HTTP performance.
+
+The [2026-10-31 in-process report](reports/2026-10-31-inprocess/interpretation.md)
+records the local comparison and its correctness and memory limitations.
