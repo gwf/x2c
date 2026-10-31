@@ -12,7 +12,8 @@ meta List _x2c_expand_rows(List generator, List input) {
   if (value is not <list>)
     x2c_diagnostic_fail("expand requires a compile-time List", %());
   List rows = value, parameters = generator.assoc(<parameters>);
-  int sequence = parameters && parameters.last().list().assoc(<sequence>).int();
+  int sequence = parameters &&
+    parameters.last().list().assoc(<sequence>).int();
   int required = parameters.len() - sequence;
   Array code = [];
   int index = 0;

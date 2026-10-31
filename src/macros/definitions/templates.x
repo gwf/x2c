@@ -291,9 +291,9 @@ static Atom _local_binder(String scope, Var identity, int tag) {
   int number = 0;
   (void) Ast.try_binding(identity, number, NULL);
   int ordinal = INT_MAX - number;
-  return Atom.intern(scope
-    ? %"?__macro_$(tag ? "tag" : "local")_$(scope)_$ordinal"
-    : %"?__macro_$(tag ? "tag" : "local")_$ordinal");
+  return Atom.intern(
+    scope ? %"?__macro_$(tag ? "tag" : "local")_$(scope)_$ordinal"
+          : %"?__macro_$(tag ? "tag" : "local")_$ordinal");
 }
 
 /* Replaces each binder or binding identity that `bindings` maps. A List

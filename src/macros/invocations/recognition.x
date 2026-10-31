@@ -217,7 +217,8 @@ static int _source_macro_targets_unit(Compiler c) {
   c.skip_macro_invocation();
   while (!(c.peek(0) in %<eof ; "{" "}">)) {
     if (c.at_word("macro")) {
-      const MacroCategory *category = _category(Token.skip_trivia(c.token + 1).text);
+      Token kind = Token.skip_trivia(c.token + 1);
+      const MacroCategory *category = _category(kind.text);
       return category && category.result in %<unit decl-unit>;
     }
     List definition = _peek_invocation(c, <unit>);

@@ -258,7 +258,8 @@ static List _forwarded_hole(Compiler c, Var captured) {
   if (direct is void) return NULL;
   String spelling = direct.str(), prefix = _forwarded_prefix(spelling);
   if (!prefix) return NULL;
-  return _hole_record(c,
+  return _hole_record(
+    c,
     _binder_name(Atom.intern(%"?$(spelling[prefix.len():])")));
 }
 

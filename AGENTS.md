@@ -153,6 +153,7 @@ commits need not rebuild from their own bootstrap.
   `interpolation` joining interpolated Strings,
   `destructuring` lowering List destructuring,
   `lambda-functions` lowering lambdas and their cells,
+  `macro-mapping` applying a macro to compile-time rows,
   `protocol-adapters` writing protocol adapters and Var descriptors, and
   `string-switch` lowering switches on a String)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and

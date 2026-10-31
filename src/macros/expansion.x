@@ -160,7 +160,8 @@ static List _bind_expansion(Expansion &x, Symbol position) {
       else {
         List captured = x.input.caddr();
         List generator = Ast.source_unwrap(captured.assoc(<value>));
-        result = _bind_macro_result(c, generator, value, x.invocation, position);
+        result = _bind_macro_result(
+          c, generator, value, x.invocation, position);
       }
     }
     else result = c.bind_syntax(
@@ -393,9 +394,11 @@ module void _file_scope_locals(List rows, Map locals) {
     case %(api-source ? ? ?inner): _file_scope_locals($(inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
     case %(macro-invoke ((!quote !quote) ?(List definition))
-           ?(List input) ?): _nested_file_scope_locals(definition, input, locals);
+           ?(List input) ?):
+      _nested_file_scope_locals(definition, input, locals);
     case %(macro-invoke (!set ?(List definition) (macrodef *))
-           ?(List input) ?): _nested_file_scope_locals(definition, input, locals);
+           ?(List input) ?):
+      _nested_file_scope_locals(definition, input, locals);
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
     case %((!or ?kind declare typedef) ?type (bindings *rows)): {
@@ -409,7 +412,8 @@ module void _file_scope_locals(List rows, Map locals) {
   }
 }
 
-static void _nested_file_scope_locals(List definition, List input, Map locals) {
+static void _nested_file_scope_locals(
+  List definition, List input, Map locals) {
   Map declared = {};
   _file_scope_locals($(definition.assoc(<template>)), declared);
   List bindings = NULL;

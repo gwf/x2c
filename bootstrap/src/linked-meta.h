@@ -102,6 +102,8 @@ Code lambda_closure(Code node);
 
 Code lambda_cells(Code node);
 
+List _x2c_expand_rows(List generator, List input);
+
 Code match_lowering(Code node);
 
 Code match_condition_lowering(Code node);

@@ -290,7 +290,8 @@ static Var _stored_reference(Compiler c, List definition) {
       c.sym.lookup_macro(name) == definition)
     return %(local-macro $name);
   if (definition.assoc(<template>))
-    return definition.assoc(<local>).int() ? definition : %(!quote $definition);
+    return definition.assoc(<local>).int()
+      ? definition : %(!quote $definition);
   return name;
 }
 
