@@ -19,9 +19,11 @@ find_files() {
 case "$mode" in
   per-file) find_files | xargs -0 -n 1 "$program" ;;
   aggregate)
-    files=()
-    while IFS= read -r -d '' file_path; do files+=("$file_path"); done < <(find_files)
-    exec "$program" "${files[@]}"
+    find_files | (
+      files=()
+      while IFS= read -r -d '' file_path; do files+=("$file_path"); done
+      exec "$program" "${files[@]}"
+    )
     ;;
   *) printf 'Unknown mode: %s\n' "$mode" >&2; exit 1 ;;
 esac
