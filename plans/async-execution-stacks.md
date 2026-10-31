@@ -873,6 +873,16 @@ Validation on macOS arm64:
 No other native target, wider workload, or publication gate is validated by
 this follow-up. The existing dev/main and push hold remains in force.
 
+### Broader validation, 2026-10-31
+
+See [the broader validation report](reference/async-validation-2026-10-31.md)
+for comparison with the full pre-async baseline, synchronous cost probes,
+program footprint, blocked-task memory, stack-capacity checks, and fresh
+instrumented results. The existing full check target exposes a native-file
+copy omission in cold collection and four lint findings. Clean performance
+measurements remain pending a quiet host window. No regression or retention
+tradeoff has been accepted, and no push is authorized.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
