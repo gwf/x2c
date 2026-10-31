@@ -301,7 +301,7 @@ a sample against the pinned Python torch:
 
 Every record here, `Tensor`, `Module`, `Optimizer`, and `Scheduler`, is
 allocated with a `Scope` finalizer, so a value is released with the scope
-that created it. A training step is one `Scope.retain` and `Scope.release`
+that created it. A training step is one `Scope.open` and `Scope.close`
 pair around the forward, backward, and update; the model and optimizer
 live in the enclosing scope. `free` releases a handle early and returns
 NULL.
@@ -332,9 +332,9 @@ previous mode, including the release a `defer` runs while an Error transfers
 out.
 
 ```x2c
-Scope.retain();
+Scope.open();
 {
-  defer Scope.release();
+  defer Scope.close();
   Torch.no_grad();
   parameter.add_(parameter.grad(), -rate);
 }

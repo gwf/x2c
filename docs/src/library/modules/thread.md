@@ -454,6 +454,7 @@ Source: `lib/thread.x`
 `typedef struct X2CTaskWait { void *task; struct X2CTaskWait *next; } X2CTaskWait`
 
 Links one borrowed parked task under its Channel monitor mutex.
+The task and record remain live until removal.
 
 Source: `lib/thread.x`
 

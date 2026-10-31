@@ -697,7 +697,7 @@ they do not authorize implementation or unrelated contract changes.
 
 | Item | Constraint and next work |
 | --- | --- |
-| Strict-build lifetime diagnostics | The pointer-field provenance bug is fixed locally. Three valid temporary-borrow diagnostics remain at Task._prepare, task notification registration, and Channel rendezvous registration. The analysis boundary proposed below needs a decision before policy changes. |
+| Strict-build lifetime diagnostics | The pointer-field provenance fix and selected audit boundary are implemented. The merged tree passes the strict stage-two build; the earlier three temporary-borrow diagnostics are resolved. |
 | Remaining native targets | Establish Linux arm64/x86_64 and macOS x86_64 ABI, compiler, sanitizer, and Error compatibility. Only macOS arm64 has execution evidence. |
 | Regression coverage | Local Channel and Scope timings are bounded evidence. Network/timer workloads, broader performance checkpoints, and final publication validation remain outstanding. |
 
@@ -918,6 +918,16 @@ normal benchmark comparisons remain deferred while that suite develops.
 The final publication gate and remaining publication work are still pending.
 This integration advances only the private branch; no push is authorized.
 
+### Merged-diff review and gate repairs, 2026-10-31
+
+The [merged review](reference/async-merged-review-2026-10-31.md) records the
+native-file copy repair, four lint corrections, documentation cleanup, and
+two newly reproduced suspension defects. Lisp active-session state and the
+recursive rendering path still need execution-boundary isolation before
+publication. Existing suite success does not cover those cases. The review
+also records the full local check attempt and its follow-up checks. No
+runtime state design was extended during this gate-repair pass.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
@@ -968,7 +978,8 @@ cleanup and initial task inheritance are selected. The inheritance contract
 reuses caller-owned storage and identity while keeping mutable activations
 independent; it adds no implicit Context, pool, or eagerly allocated cache.
 The switching dependency and guarded-layout integration are selected and
-implemented privately. The first API has local execution evidence; the strict
-build, remaining target coverage, broader regressions, and publication proof
-remain unresolved. Further architecture, publication, or pushing is not
+implemented privately. The first API and strict build have local execution
+evidence. Remaining target coverage, performance and retention acceptance,
+and final publication proof remain unresolved. Further architecture,
+publication, or pushing is not
 authorized by successful prototype tests. Delivery retains the explicit hold.

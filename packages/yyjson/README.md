@@ -12,8 +12,8 @@ duplicate keys, and signed, unsigned, or real numeric intent.
 import "yyjson" as json;
 
 int main(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   json.JsonDocument document =
     json.JsonDocument.read_file("releases.json");

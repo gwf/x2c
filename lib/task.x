@@ -145,8 +145,6 @@ void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner) {
     __atomic_store_n(&job.stopped, 1, __ATOMIC_RELEASE);
 }
 
-// stack entry and runtime installation
-
 static void _entry(void *value) {
   TaskJob job = value;
   Error.initialize_raw();
@@ -262,8 +260,8 @@ static TaskJob _take(TaskRun run) {
       _native_check(pthread_mutex_unlock(&run.monitor.mutex));
       x2c_thread_cancel();
     }
-    _native_check(pthread_cond_wait(
-      &run.monitor.condition, &run.monitor.mutex));
+    _native_check(
+      pthread_cond_wait(&run.monitor.condition, &run.monitor.mutex));
     int released = run.stopping ||
       x2c_thread_channel_leave(owner, &run.monitor);
     _native_check(pthread_mutex_unlock(&run.monitor.mutex));
@@ -289,8 +287,6 @@ static void _acknowledge(int released) {
   x2c_thread_wait_lock();
   x2c_thread_wait_unlock();
 }
-
-// batch shutdown
 
 static void _shutdown(TaskRun run) {
   run.stopping = 1;

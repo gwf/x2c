@@ -164,6 +164,13 @@ To release a region on every exit from a block, write it as `auto` or put
 the release in a `defer`. [Errors and
 Cleanup](exceptions.md#finally-and-defer) gives the exit rules.
 
+### Migrating existing Scope code
+
+`Scope.open` and `Scope.close` replace `Scope.retain` and `Scope.release`.
+Their region behavior is unchanged; the old names have no compatibility aliases.
+`Scope.up` has been removed without a replacement. Code that inspects the
+Scope layout must be updated and rebuilt with the matching runtime.
+
 ## Bounding temporary canonical Lists
 
 `Pool.open` and `Pool.close` give canonical values a shorter lifetime.
