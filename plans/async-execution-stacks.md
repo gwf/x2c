@@ -1,6 +1,6 @@
 # Execution stacks across async suspension
 
-> Status: active - private prototype implemented; validation hold remains.
+> Status: implemented - dev publication authorized on 2026-10-31; final gate required.
 > Requested 2026-10-30. Records the per-execution stack model discussed with
 > Gary. Scope layout, naming, and boundary state installation are selected.
 > Lifetime decision: rely on borrowed-owner lifetimes; no parked-slot pins,
@@ -19,11 +19,12 @@
 > boundary adaptations recorded in lib/task/README.md.
 > Source baseline: `1355503543801f6565150a00c779668ab1d2d1bb`.
 > Scope: Scope, Context, Pool, Match, Error, and cleanup across suspension.
-> Gary authorized the private prototype after selecting this design.
-> No push or shared-branch advancement is authorized.
-> Implementation stays off dev and main until validated and observed
-> regressions are eliminated or mitigated; remaining tradeoffs need Gary's
-> explicit acceptance. Pushing still requires his consent.
+> Gary authorized final bookkeeping and publication to dev on 2026-10-31,
+> after review of the measured Channel cost, stack reservation, and residual
+> allocator footprint. Normal benchmark reruns remain deferred by instruction.
+> Main advancement and release promotion are not authorized.
+> Dated records below preserve the authorization and evidence at each step;
+> the current publication decision supersedes their earlier delivery holds.
 
 ## Goal and boundary
 
@@ -778,7 +779,11 @@ workloads and raw evidence. No universal speedup is required or claimed.
 Follow existing performance and publication instructions if implementation
 and delivery are later authorized; do not add new gates for this plan.
 
-## Implementation isolation and delivery hold
+## Original implementation isolation and delivery hold
+
+This section records the original private-development boundary. The current
+publication decision below supersedes the dev/push hold, while preserving
+the benchmark deferral and the separate authorization needed for main.
 
 Implement and validate on a private work branch or worktree. Keep the changes
 off dev and main, locally and remotely, until
@@ -976,6 +981,49 @@ including 1,357 compiler fixtures and 1,158 unit tests. The
 review coverage, focused checks, and limitations. Normal benchmark reruns,
 performance and retention acceptance, publication, and pushing remain held.
 
+### Publication decision and current readiness, 2026-10-31
+
+Gary requested final bookkeeping and publication after the remaining costs
+and validation were presented. This authorizes delivery to dev with normal
+benchmark reruns still deferred. It does not authorize a release or main
+advancement. Earlier dated pending/hold statements are historical records.
+
+Completed work includes the Scope representation/API migration, task lifecycle
+and state installation, configured guarded stacks, unsupported-backend tests,
+Lisp/rendering repairs, mapped job arrays, GCC ASan stack-bound repair, numeric
+repairs, cache-path repair, and release/migration documentation. Four native
+targets pass the full normal and ASan/UBSan unit suites and focused
+use-after-return task checks. macOS x86_64 used Rosetta; Linux x86_64 used
+Docker emulation. Physical Intel and broader hardening/TSan coverage were not
+established. These limits do not claim new supported configurations.
+
+The current dev merge and combined review are complete. No concrete defect
+remains from that review. The merged code tree passes the local full gate;
+publication still requires the existing publication gate on the final tree.
+No additional code repair or mandatory test campaign was identified.
+
+Publication proceeds with these recorded costs and evidence limits:
+
+- Earlier macOS arm64 native Channel pairs measured 36.957 ns before versus
+  39.344 ns after, with 1,030.876 versus 1,109.348 million instructions for
+  one million buffered pairs. Scope.top added about two instructions per call;
+  those samples did not show a general allocation-path slowdown.
+- Each task reserves an 8 MiB usable stack by default. Sixty-five jobs reserve
+  520 MiB before guard pages; demand paging keeps reservation distinct from RSS.
+- Mapped job arrays removed the accumulating medium malloc regions. The
+  repeated 1,000-batch, 1,025-job probe still retained 30.984 MiB RSS, versus
+  38.188 MiB before mitigation. Live allocations did not grow across batches.
+- Normal benchmark reruns remain deferred. Imported dev benchmark results do
+  not validate the async branch. Existing focused performance evidence is
+  bounded to its named baselines, workloads, and measurement environments.
+
+The [performance report](reference/async-validation-2026-10-31.md),
+[memory mitigation report](reference/async-mapped-job-arrays-2026-10-31.md),
+[native/numeric validation](reference/async-numeric-fixes-2026-10-31.md), and
+[combined integration report](reference/async-dev-integration-2026-10-31.md)
+retain the detailed evidence. Final delivery records the validated revision;
+passing checks does not imply that deferred performance evidence exists.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
@@ -1027,7 +1075,9 @@ reuses caller-owned storage and identity while keeping mutable activations
 independent; it adds no implicit Context, pool, or eagerly allocated cache.
 The switching dependency and guarded-layout integration are selected and
 implemented privately. The first API and strict build have local execution
-evidence. Remaining target coverage, performance and retention acceptance,
-and final publication proof remain unresolved. Further architecture,
-publication, or pushing is not
-authorized by successful prototype tests. Delivery retains the explicit hold.
+evidence. The subsequent records above establish four-target normal and
+sanitizer coverage and close the reproduced defects. The publication decision
+records the remaining costs and authorizes dev delivery after final validation.
+Normal benchmark reruns remain deferred; no claim of complete performance or
+hardening coverage is made. Further architecture and main promotion require
+separate decisions.
