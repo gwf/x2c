@@ -7,8 +7,8 @@ and `.xp`) and Lisp files (`.xlisp`).
 It highlights x2c list, array, map, string, Symbol, and SymbolSet literals,
 including data-first Array and Map contents and their runtime unquotes;
 pattern variables; runtime unquote and List splice forms; protocols; macros;
-decorators; `with` assignment blocks; `alias` declarations; List
-destructuring; imports; delegate fields; `Self` method types; standalone
+decorators; `with` assignment blocks; name-first and expression-first
+`alias` declarations; List destructuring; imports; delegate fields; `Self` method types; standalone
 Lisp files; and the C-compatible syntax used by the language.
 
 Macro signatures use `$value` for one syntax value and `@items` for a
@@ -17,6 +17,21 @@ quotation holes such as `@(expression)`. Singular `$` unquotes and `$!` source q
 including a standalone `$`. The color settings below make sigils bold. Quoted Lists retain runtime
 `@items` and `@(expression)` splices; Lisp retains `,@` unquote-splicing.
 Native C variadic `...` remains distinct from macro syntax.
+
+Function rest parameters use `List @items` or `Map @options`. Their `@`
+sigils share the bold splice style, and their names use
+`variable.parameter.rest.x2c`. Unnamed `List @` and `Map @` parameters
+are also highlighted in function pointer types. At calls, `@items` and
+`@(expression)` splice arguments; Map rest calls also accept `key: value`.
+
+SymbolSet literals use `%<red blue>`, with one closing `>`. Quoted and
+escaped `>` members remain inside the set. VS Code excludes punctuation
+inside Symbol and SymbolSet literals from code bracket matching, and
+automatically closes `%<` with `>`.
+
+Pattern conditions highlight `~=` as one operator. Evaluated Maps
+`${key: value}` retain code highlighting inside quoted Lists, Arrays, and
+Maps. Runtime expression unquotes and splices use `$(...)` and `@(...)`.
 
 With a compatible x2c compiler available, the extension provides compiler
 diagnostics, definition navigation, type hover, completion, symbols,
@@ -27,7 +42,7 @@ telemetry.
 ## Installation
 
 Run `npm ci && npm run build` in `etc/vsc-extension`, then install the resulting
-0.4.0 VSIX with **Extensions: Install from VSIX**.
+0.4.1 VSIX with **Extensions: Install from VSIX**.
 
 ## Compiler diagnostics, definitions, and hover
 
@@ -296,7 +311,7 @@ x2c form and the ordinary C syntax it could be confused with.
 ## Marketplace identity
 
 The Marketplace publisher is `x2c-lang`, displayed as x2c. The extension ID is
-`x2c-lang.x2c-syntax`. Version 0.4.0 retains the Preview label.
+`x2c-lang.x2c-syntax`. Version 0.4.1 retains the Preview label.
 
 ## License and support
 
