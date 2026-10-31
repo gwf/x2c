@@ -1,0 +1,37 @@
+{
+  "name": "binarytrees",
+  "title": "binary-trees",
+  "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/binarytrees.html",
+  "references": {
+    "main.c": {
+      "archive_path": "binarytrees/binarytrees.gcc-5.gcc",
+      "sha256": "a815e8a0eefd7e09bf92a8025bfb8347eb57e9fa79680dcd672ce1c7fa6479a0"
+    },
+    "main.py": {
+      "archive_path": "binarytrees/binarytrees.python3-2.python3",
+      "sha256": "90069a6b07af6d771b782f9347ae41da290549d2bbd6d8d9d94df2e2ae25abd4"
+    }
+  },
+  "checks": [
+    {
+      "args": [
+        "10"
+      ],
+      "expected": "expected/10.out"
+    }
+  ],
+  "profiles": {
+    "quick": [
+      "10"
+    ],
+    "local": [
+      "16"
+    ],
+    "canonical": [
+      "21"
+    ]
+  },
+  "c_flags": [
+    "-pthread"
+  ]
+}

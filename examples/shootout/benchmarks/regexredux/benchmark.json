@@ -1,0 +1,48 @@
+{
+  "name": "regexredux",
+  "title": "regex-redux",
+  "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/regexredux.html",
+  "references": {
+    "main.c": {
+      "archive_path": "regexredux/regexredux.gcc-5.gcc",
+      "sha256": "297865dbe9b65218f5fbcc5324d63b015109a1c40d57a505a692644f19f4c1d4"
+    },
+    "main.py": {
+      "archive_path": "regexredux/regexredux.python3",
+      "sha256": "955633de90f6d4d45d81aec246ea2c62ef02d9d3bf87c9115017e494b2b0b86b"
+    }
+  },
+  "checks": [
+    {
+      "args": [],
+      "expected": "expected/input.out",
+      "stdin": "input.txt"
+    }
+  ],
+  "profiles": {
+    "quick": [],
+    "local": [],
+    "canonical": []
+  },
+  "stdin": "input.txt",
+  "fasta_sizes": {
+    "quick": 10000,
+    "local": 100000,
+    "canonical": 5000000
+  },
+  "c_flags": [
+    "-I{repo}/packages/pcre2/deps/include"
+  ],
+  "c_link_flags": [
+    "{repo}/packages/pcre2/deps/lib/libpcre2-8.a"
+  ],
+  "x2c_build_args": [
+    "--package-dir",
+    "{repo}/packages",
+    "--c-include-dir",
+    "{repo}/packages/pcre2/deps/include"
+  ],
+  "packages": [
+    "pcre2"
+  ]
+}
