@@ -418,7 +418,15 @@ the region. A value leaves when it is:
   `Array.push`, that stores it in one of those places.
 
 The address of a local or parameter is reported the same way when it
-outlives the function. Two more warnings come from the same check.
+outlives the function. For an address into the current function's frame, a
+raw pointer store with an unknown destination lifetime does not, by itself,
+establish retention after return. Ordinary translation leaves that case to
+the C lifetime contract.
+The optional audit still reports the possible escape, and a `meta` function
+still rejects it. Known retaining stores remain checked through helpers,
+and this boundary does not exempt uses of already ended regions.
+
+Two more warnings come from the same check.
 `after-free` reports a local read after `Scope.free`, `Scope.realloc`, or
 `Array.list_free` consumed it. `bad-free` reports `Scope.free` or
 `Scope.realloc` given a literal, a local's address, or other storage no

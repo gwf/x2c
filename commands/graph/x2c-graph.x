@@ -2226,8 +2226,8 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
 }
 
 static int _certify_sink(Var value) {
-  if (value in %(<return> <result> <static> <unknown>)) return 1;
-  match (value) case %(param ?(int index)): return index >= 0;
+  if (value in %(<return> <result> <static> <unknown> <retained>)) return 1;
+  match (value) case %((!or param raw) ?(int index)): return index >= 0;
   return 0;
 }
 

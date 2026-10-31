@@ -13,7 +13,7 @@ Values that can outlive the region that allocated them.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.audit_regions`](#Compiler.audit_regions) | Computes one unit's region summaries and findings for an optional project audit. |
-| [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
+| [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the region lifetime rule, including a possible frame escape through raw storage. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 | [`Compiler.has_region_row`](#Compiler.has_region_row) | Reports whether the runtime table proves the lifetime effects of the native function `name`. |
 | [`Compiler.region_effect`](#Compiler.region_effect) | The runtime table's effect row for the operation `name`, such as `(open scope)` or `(exit)`, or void when the table has no row. |
@@ -40,9 +40,9 @@ Source: `src/regions/analysis.x`
 
 `void Compiler.check_meta_regions(Compiler c, List fn)`
 
-Rejects a `meta` function whose body breaks the rule
-`Compiler.check_regions` warns about. A compile-time call frees its
-locals when it returns, so an address of one that is returned or stored
+Rejects a `meta` function whose body breaks the region lifetime rule,
+including a possible frame escape through raw storage. A compile-time
+call frees its locals when it returns, so an address returned or stored
 into a static, a parameter's object, or an unknown pointer would read
 freed memory. The first finding is reported as an error. `fn` must be
 the bound and typed definition. The walk reads the summaries of the
@@ -125,6 +125,8 @@ defined, against the summaries of the `meta` functions before it, and a
 finding there is an error, because a compile-time call frees its locals
 when it returns.
 
-The warnings name departures from the lexical pattern. Raw C stores,
-pointer arithmetic, callbacks, and storage the runtime did not allocate
-stay outside them.
+The warnings name departures from the lexical pattern. A raw C store
+into unknown-lifetime storage does not establish frame retention after
+return; only audit and meta walks report that possible escape. Pointer
+arithmetic, callbacks, and storage the runtime did not allocate remain
+outside the model.

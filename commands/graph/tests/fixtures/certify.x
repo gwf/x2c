@@ -66,6 +66,19 @@ void certify_index_escape(int **out) {
   out[0] = xmalloc(sizeof(int));
 }
 
+static void certify_raw_helper(int **out, int *value) { *out = value; }
+
+void certify_frame_store(int **out) {
+  int value = 1;
+  certify_raw_helper(out, &value);
+}
+
+void certify_unknown_frame_store(int **out) {
+  int value = 1;
+  int **target = out + 1;
+  *target = &value;
+}
+
 int certify_safe(int choose) {
   Scope.open();
   defer Scope.close();

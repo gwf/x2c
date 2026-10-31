@@ -70,6 +70,15 @@ pointer cast back from that number is not followed.
 
 ## What the warnings do not cover
 
+For an address into the current function's frame, a raw pointer store into
+an unknown destination or a parameter's object is not an ordinary warning.
+The store may register a temporary borrow that cleanup removes before
+return. The pass does not prove that cleanup; the code must satisfy its C
+lifetime contract. Returned addresses, static stores, known retaining
+operations such as `Array.push`, and already ended regions retain their
+checks. The optional audit keeps the possible-escape finding, and meta
+functions keep the error.
+
 The check covers lexical regions and the storage it tracks. It does not
 cover:
 
@@ -124,6 +133,8 @@ Each function gets one summary of two facts: which of Scope and Pool storage
 its result may use (possibly both), and where each parameter is sunk
 (returned by identity, retained in the fresh result, placed into another
 parameter's object or a static, or stored through an unknown pointer). The
+summary distinguishes raw stores from known retaining operations so helper
+calls preserve the ordinary, audit, and meta diagnostic boundary. The
 summaries of a unit's functions are computed to a fixpoint because a caller's
 facts depend on its callees' facts. Each round walks every
 body with a stack of open regions and a map from each binding to its known

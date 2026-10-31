@@ -832,7 +832,7 @@ rather than "retained after return". Inferring intrusive-list unregistration
 and cleanup would require a broader analysis model. Gary selected defining
 the analysis boundary before adding that machinery.
 
-The following diagnostic policy is proposed, not implemented or selected:
+Gary selected the following diagnostic policy. It is implemented locally:
 
 | Case | Ordinary translation | Existing audit mode | Meta functions |
 | --- | --- | --- | --- |
@@ -842,15 +842,36 @@ The following diagnostic policy is proposed, not implemented or selected:
 
 This reuses the existing ordinary/audit/meta distinction. It adds no borrow
 syntax, runtime state, function allowlist, blanket region-warning disable, or
-general pointer-analysis engine. Known retaining operations must remain
-distinguishable from unknown raw stores, including through helper summaries.
+general pointer-analysis engine. Summaries distinguish raw C stores from
+known retaining operations, including through helper calls. Protocol index
+stores retain their existing checks.
 
 The compatibility cost is real: the existing ordinary warning for
-stored_through_parameter in region-local-escapes would move to audit mode.
-Such stores can still be wrong; ordinary translation would no longer claim
+stored_through_parameter in region-local-escapes moved to audit mode.
+Such stores can still be wrong; ordinary translation no longer claims
 to determine their lifetime from the store alone. Return/static checks,
-known retaining-storage checks, and meta errors remain protected. This
-diagnostic change requires Gary's decision before implementation.
+known retaining-storage checks, and meta errors remain protected. Focused
+strict translation of lib/task.x and lib/channel.x now passes under the
+selected policy. Validation below does not lift the delivery hold.
+
+Validation on macOS arm64:
+
+- All 1,355 compiler fixtures passed, with 2,994 checked artifacts. The only
+  changed existing diagnostic is the selected raw parameter-store warning.
+- New fixtures retain known container warnings through multiple helpers and
+  unknown targets, protocol index-store warnings, ended-region warnings,
+  and meta raw-store errors.
+- The optional graph audit tests passed, including both raw-store findings.
+  Unknown-pointer coverage remains incomplete, as before; its finding is
+  preserved as a review obstacle rather than a proved violation.
+- `make stage-2` passed with the existing fatal x2c and C warning settings.
+  Stage 1 and stage 2 generated identical output across all 333 C/H files.
+- The full ordinary unit suite passed from unittest/: 1,148 tests and 99,489
+  assertions. The stage-two compiler ran the request/reply example and
+  printed FIRST and SECOND. Documentation drift checks passed.
+
+No other native target, wider workload, or publication gate is validated by
+this follow-up. The existing dev/main and push hold remains in force.
 
 ## Plan review
 

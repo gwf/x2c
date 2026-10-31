@@ -49,7 +49,7 @@ Host: macOS 15.7.9 arm64, Apple clang 17.0.0, optimized ordinary build.
 | Instrumented task suite with stack-use-after-return detection | 13 passed, 57 assertions. |
 | Compiler fixture check | 1,352 fixtures passed, 2,988 artifacts, plus the target's existing boundary/meta probes. |
 | Request/reply example | FIRST and SECOND. |
-| Focused strict translation | Fails with the four lifetime diagnostics listed below. |
+| Focused strict translation | Passed in the 2026-10-31 follow-up below. |
 
 The task cases cover Channel request/reply, buffered/rendezvous behavior,
 ordinary Array identity/ownership, service and callback failure, stable Context
@@ -128,7 +128,8 @@ tracked source. Binary/archive hashes are retained in its provenance.json.
 
 ## Remaining limits and delivery hold
 
-The command below fails with four conservative lifetime diagnostics:
+The initial prototype produced four conservative lifetime diagnostics from
+the command below:
 
 ```sh
 ./x2c translate --fatal-warnings --out-dir /tmp/x2c-async-strict-2104 lib/task.x lib/channel.x
@@ -136,11 +137,26 @@ The command below fails with four conservative lifetime diagnostics:
 
 The sites are Task.run's stack-local batch record passed to shutdown and ready
 helpers, its stack-local Channel notification link, and Channel's stack-local
-rendezvous record. Their valid lifetimes are bounded by completion/unlinking;
-the current region analysis does not establish those relationships. Preserve
-this contract rather than adding heap allocations, global lifetime tracking,
-or weaker validation solely to silence the warnings. A strict stage build
-and final publication gate have not passed.
+rendezvous record. Their valid lifetimes are bounded by completion/unlinking.
+
+The 2026-10-31 follow-up fixed pointer-field provenance and applied Gary's
+selected analysis boundary: unknown-lifetime raw stores of frame addresses
+remain audit findings and meta errors, while ordinary translation relies on
+the owning C lifetime contract. Known retaining operations remain checked
+through helper summaries. No runtime lifetime machinery was added.
+
+Focused fatal-warning translation now passes. All 1,355 compiler fixtures
+passed (2,994 artifacts), and the optional graph audit checks passed.
+`make stage-2` passed; stage 1 and stage 2 generated identical output across
+333 C/H files. The final publication gate remains outstanding. See the
+[lifetime follow-up](../async-execution-stacks.md#lifetime-analysis-follow-up-2026-10-31)
+for the selected boundary and compatibility cost.
+
+The ordinary unit suite was rerun from unittest/ and passed all 1,148 tests
+and 99,489 assertions. The stage-two compiler ran the request/reply example
+and printed FIRST and SECOND. Documentation drift checks passed. An initial
+root-directory unit invocation failed to find ../etc/init.xlisp; both the
+preceding checkpoint and this tree pass the Lisp suite from unittest/.
 
 Linux arm64/x86_64 and macOS x86_64 execution, other compiler/ABI/hardening
 combinations, TSan, actual network/timer workloads, and broader performance
@@ -148,6 +164,6 @@ checkpoints remain unvalidated. Cleanup suspension and nested Task.run are
 unsupported by the first API. Explicit Channel operations in cleanup retain
 stop checks; there is no general cancellation-masking API.
 
-This session did not advance dev or main, and no push occurred. Passing these local checks does
-not resolve the strict-build blocker, accept remaining regressions, or lift
-Gary's required consent before any push.
+This session did not advance dev or main, and no push occurred. Passing these
+local checks does not accept remaining regressions or lift Gary's required
+consent before any push.

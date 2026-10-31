@@ -5006,3 +5006,8 @@ it. For calls into another unit, the check uses only a fixed table of runtime
 operations. It does not cover storage from plain `malloc` or a C library,
 raw pointer arithmetic, values reached through a field of a stack `struct`,
 callbacks, or `Context` regions.
+
+Possible frame escapes through raw pointer stores with unknown destination
+lifetimes are reserved for the optional audit and meta-function errors.
+Ordinary translation still checks returned addresses, static stores, known
+retaining storage, and already ended regions, including through helpers.
