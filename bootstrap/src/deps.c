@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "buffer.h"
-static String _5, _4, _3, _2, _1, _0;
+static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -58,10 +58,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("/");
   _1 = String_new(".d");
-  _2 = String_new("search:");
-  _3 = String_new("cwd:");
-  _4 = String_new(".c");
-  _5 = String_new(".h");
+  _2 = String_new("x2c: error: cannot write dependency file: %s\nnote: %s\n");
+  _3 = String_new("search:");
+  _4 = String_new("cwd:");
+  _5 = String_new(".c");
+  _6 = String_new(".h");
 }
 
 String Path_stem(Path);
@@ -116,7 +117,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
         if(_x2c_gensym_macro_selected_0 == 0){
           List volatile failure;
           failure = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0));
-          error = Var_long(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/deps.x",.function = "Compiler_write_depfile",.line = 49}; & _x2c_gensym_error_site_0; })));
+          error = Var_long(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/deps.x",.function = "Compiler_write_depfile",.line = 52}; & _x2c_gensym_error_site_0; })));
         }
 
       }
@@ -132,7 +133,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  fprintf(stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path, strerror(error));
+  fprintf(stderr, _2, path, strerror(error));
   return 0;
 }
 
@@ -204,7 +205,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
               path = Var_as_string(_x2c_gensym_macro_cursor_output_0);
               content_hash = _x2c_gensym_macro_cursor_output_1;
               {
-                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _2)) Array_push(searches, String_var(String_startswith(path, _3) ? String_getslice(path, 4, (-2147483647 - 1), 1) : path));
+                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _3)) Array_push(searches, String_var(String_startswith(path, _4) ? String_getslice(path, 4, (-2147483647 - 1), 1) : path));
                 else Array_push(paths, String_var(path));
               }
 
@@ -300,9 +301,9 @@ static void _write_targets(Buffer out, CliRequest request, String input, String 
     Var _x2c_gensym_literal_part_2 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_0), cons(_x2c_gensym_literal_part_3, NULL))));
   }
   );
-  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
-  Buffer_write_char(out, ' ');
   _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_5), NULL))));
+  Buffer_write_char(out, ' ');
+  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_6), NULL))));
 }
 
 static void _write_phony(Buffer out, Array paths, String primary){

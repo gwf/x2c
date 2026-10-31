@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check and measure x2c against pinned C and Python reference data."""
+"""Check official Benchmarks Game programs and measure both x2c variants."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import base64
 import datetime as dt
 import gzip
 import hashlib
+import io
 import json
 import math
 import os
@@ -21,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tokenize
 from pathlib import Path
 from typing import Any
 
@@ -28,19 +30,30 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent.parent
 BUILD = ROOT.parent / "build" / "shootout"
+RUST_BUILD = BUILD.parent / "shootout-rust"
 LATEST = BUILD / "latest"
 MANIFEST_PATH = ROOT / "benchmarks.json"
 BASELINE_PATH = ROOT / "baseline.json"
 CURRENT_JSON = ROOT / "results" / "current.json"
 CURRENT_MARKDOWN = ROOT / "results" / "current.md"
 DEFAULT_CFLAGS = "-O2 -DNDEBUG"
-REFERENCE_IMPLEMENTATIONS = ("c", "python")
-# Each benchmark carries two x2c programs. `main.x` writes the problem in
-# x2c; `ported.x` keeps the C representation and uses x2c where the C was
-# verbose. Both are checked and measured against the same pinned C median.
-X2C_SOURCES = {"x2c": "main.x", "ported": "ported.x"}
+REFERENCE_SOURCES = {
+  "c": "main.c", "python": "main.py", "rust": "main.rs", "cpp": "main.cpp",
+  "go": "main.go", "java": "main.java",
+}
+REFERENCE_IMPLEMENTATIONS = tuple(REFERENCE_SOURCES)
+X2C_SOURCES = {"idiomatic": "main.x", "tuned": "tuned.x"}
 X2C_IMPLEMENTATIONS = tuple(X2C_SOURCES)
-IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python")
+IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python", "rust", "cpp", "go", "java")
+
+
+def available_implementations(benchmark: dict[str, Any]) -> tuple[str, ...]:
+  return tuple(name for name in IMPLEMENTATIONS if name in X2C_SOURCES
+               or REFERENCE_SOURCES[name] in benchmark["references"])
+
+
+def calibration_sample_multiple(benchmarks: list[dict[str, Any]]) -> int:
+  return math.lcm(*(len(available_implementations(b)) for b in benchmarks))
 
 
 class HarnessError(RuntimeError):
@@ -102,15 +115,20 @@ def command(
   cwd: Path | None = None,
   timeout: float | None = None,
   check: bool = True,
+  stdin_path: Path | None = None,
+  env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[bytes]:
   own_process_group = timeout is not None and os.name == "posix"
-  process = subprocess.Popen(
-    argv,
-    cwd=cwd,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    start_new_session=own_process_group,
-  )
+  with stdin_path.open("rb") if stdin_path else open(os.devnull, "rb") as input:
+    process = subprocess.Popen(
+      argv,
+      cwd=cwd,
+      stdin=input,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      start_new_session=own_process_group,
+      env=env,
+    )
   try:
     stdout, stderr = process.communicate(timeout=timeout)
   except subprocess.TimeoutExpired as error:
@@ -163,14 +181,13 @@ def git_receipt(path: Path) -> dict[str, Any]:
 def validate_program_args(value: Any, owner: str) -> None:
   if (
     not isinstance(value, list)
-    or not value
     or any(
       not isinstance(item, str)
       or re.fullmatch(r"[1-9][0-9]*", item) is None
       for item in value
     )
   ):
-    raise HarnessError(f"{owner} requires positive integer arguments")
+    raise HarnessError(f"{owner} requires a list of positive integer arguments")
 
 
 def load_manifest() -> dict[str, Any]:
@@ -202,6 +219,9 @@ def load_manifest() -> dict[str, Any]:
     )
 
   expected_names = set(names)
+  for filename, entry in manifest.get("build_inputs", {}).items():
+    if sha256(ROOT / filename) != entry["sha256"]:
+      raise HarnessError(f"{filename} differs from its pinned build input")
   for profile_name, profile in profiles.items():
     if not isinstance(profile, dict) or set(profile) != expected_names:
       raise HarnessError(
@@ -218,6 +238,15 @@ def load_manifest() -> dict[str, Any]:
     for filename in ("main.c", "main.py", *X2C_SOURCES.values()):
       if not (source_root / filename).is_file():
         raise HarnessError(f"{name} is missing {filename}")
+    for filename, reference in benchmark["references"].items():
+      if sha256(source_root / filename) != reference["sha256"]:
+        raise HarnessError(f"{name}/{filename} differs from its adopted source")
+    for filename, dependency in benchmark.get("dependencies", {}).items():
+      if sha256(source_root / filename) != dependency["sha256"]:
+        raise HarnessError(f"{name}/{filename} differs from its pinned dependency")
+    specification = benchmark["specification"]
+    if sha256(ROOT / specification["path"]) != specification["sha256"]:
+      raise HarnessError(f"{name} specification differs from its adopted revision")
     checks = benchmark.get("checks")
     if not isinstance(checks, list) or not checks:
       raise HarnessError(f"benchmark {name!r} requires checks")
@@ -233,6 +262,16 @@ def load_manifest() -> dict[str, Any]:
         raise HarnessError(f"invalid expected path for {name!r}")
       if not (source_root / expected_path).is_file():
         raise HarnessError(f"{name} is missing expected output {expected}")
+      if sha256(source_root / expected_path) != check_case["sha256"]:
+        raise HarnessError(f"{name} official expected output changed")
+      if check_case.get("stdin") and not (
+        source_root / check_case["stdin"]
+      ).is_file():
+        raise HarnessError(f"{name} is missing stdin {check_case['stdin']}")
+      if check_case.get("stdin") and sha256(
+        source_root / check_case["stdin"]
+      ) != check_case["stdin_sha256"]:
+        raise HarnessError(f"{name} official stdin changed")
   return manifest
 
 
@@ -256,7 +295,7 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
   runtime = REPO / "builds/0/libx2c.a"
   include = REPO / "include" / "x2c"
   cc = shutil.which(args.cc)
-  python = shutil.which(args.python) if args.action == "calibrate" else None
+  python = shutil.which(args.python) if args.action in ("calibrate", "check") else None
   missing = [
     str(path) for path in (x2c, runtime, include) if not path.exists()
   ]
@@ -270,8 +309,17 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
     raise HarnessError(f"x2c compiler is not executable: {x2c}")
   if not cc:
     raise HarnessError(f"C compiler not found: {args.cc}")
-  if args.action == "calibrate" and not python:
+  if args.action in ("calibrate", "check") and not python:
     raise HarnessError(f"Python interpreter not found: {args.python}")
+  cxx = shutil.which(os.environ.get("CXX", "clang++"))
+  cargo = shutil.which(os.environ.get("CARGO", "cargo"))
+  if args.action in ("calibrate", "check") and (not cxx or not cargo):
+    raise HarnessError("reference builds require clang++ and cargo")
+  go = shutil.which(os.environ.get("GO", "go"))
+  java = shutil.which(os.environ.get("JAVA", "java"))
+  javac = shutil.which(os.environ.get("JAVAC", "javac"))
+  if args.action in ("calibrate", "check") and not all((go, java, javac)):
+    raise HarnessError("reference builds require Go, java, and javac (GO/JAVA/JAVAC)")
 
   build_mode_path = REPO / "etc/build-mode"
   build_mode = (
@@ -286,13 +334,29 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
     )
   if os.environ.get("BUILD_LTO", "0") != "0":
     raise HarnessError("the shootout requires BUILD_LTO=0")
+  prefix = Path(os.environ.get(
+    "SHOOTOUT_DEPENDENCY_PREFIX",
+    "/opt/homebrew" if platform.machine() == "arm64" else "/usr/local",
+  ))
+  cppflags = [f"-I{prefix / 'include'}"] if platform.system() == "Darwin" else []
+  ldflags = [f"-L{prefix / 'lib'}"] if platform.system() == "Darwin" else []
   return {
     "x2c": x2c,
     "runtime": runtime,
     "include": include,
     "cc": cc,
     "python": python,
+    "cxx": cxx,
+    "cargo": cargo,
+    "go": go,
+    "java": java,
+    "javac": javac,
+    "dependency_prefix": prefix,
     "cflags": shlex.split(args.cflags),
+    "cppflags": shlex.split(os.environ["SHOOTOUT_CPPFLAGS"])
+      if "SHOOTOUT_CPPFLAGS" in os.environ else cppflags,
+    "ldflags": shlex.split(os.environ["SHOOTOUT_LDFLAGS"])
+      if "SHOOTOUT_LDFLAGS" in os.environ else ldflags,
     "build_mode": build_mode,
   }
 
@@ -362,7 +426,26 @@ def machine_receipt(toolchain: dict[str, Any]) -> dict[str, Any]:
     ),
     "cc": toolchain["cc"],
     "cc_version": command_text([toolchain["cc"], "--version"]),
+    "cxx_version": command_text([toolchain["cxx"], "--version"])
+      if toolchain["cxx"] else None,
+    "rustc_version": command_text(["rustc", "--version"])
+      if toolchain["cargo"] else None,
+    "cargo_version": command_text([toolchain["cargo"], "--version"])
+      if toolchain["cargo"] else None,
+    "go_version": command_text([toolchain["go"], "version"])
+      if toolchain["go"] else None,
+    "java_version": command_text([toolchain["java"], "--version"])
+      if toolchain["java"] else None,
+    "javac_version": command_text([toolchain["javac"], "-version"])
+      if toolchain["javac"] else None,
+    "rust_build_environment": {
+      key: value for key, value in rust_environment(toolchain).items()
+      if key in ("C_INCLUDE_PATH", "LIBRARY_PATH", "RUSTFLAGS",
+                 "CARGO_ENCODED_RUSTFLAGS", "RUSTC_WRAPPER")
+    },
     "cflags": toolchain["cflags"],
+    "cppflags": toolchain["cppflags"],
+    "ldflags": toolchain["ldflags"],
     "x2c_build_mode": toolchain["build_mode"],
     "x2c_binary_sha256": sha256(toolchain["x2c"]),
     "x2c_runtime_sha256": sha256(toolchain["runtime"]),
@@ -461,6 +544,10 @@ def build_x2c(
   linker_flags = ["-rdynamic"] if platform.system() == "Linux" else []
   for benchmark in benchmarks:
     name = benchmark["name"]
+    package = REPO / "packages/pcre2"
+    if name == "regexredux":
+      command(["make", "-C", str(package), "build"])
+    package_cppflags, package_ldflags = native_flags(benchmark)
     for implementation, filename in X2C_SOURCES.items():
       source = ROOT / "benchmarks" / name / filename
       generated = BUILD / name / implementation / "generated"
@@ -469,6 +556,8 @@ def build_x2c(
       translate_argv = [
         str(toolchain["x2c"]),
         "translate",
+        *(toolchain["cppflags"] if name == "pidigits" else []),
+        "--package-dir", str(REPO / "packages"),
         "--out-dir",
         str(generated),
         str(source),
@@ -482,14 +571,26 @@ def build_x2c(
       compile_argv = [
         toolchain["cc"],
         *toolchain["cflags"],
+        *(["-iquote", str(package / "builds"),
+           "-iquote", str(package / "src")]
+          if name == "regexredux" else []),
+        *package_cppflags,
+        *toolchain["cppflags"],
         *linker_flags,
         "-iquote",
         str(toolchain["include"]),
         str(generated_c),
+        "-iquote",
+        str(source.parent),
+        *([str(package / "builds/libpcre2.a")]
+          if name == "regexredux" else []),
         "-L",
         str(REPO / "builds/0"),
         "-lx2c",
         "-lm",
+        *package_ldflags,
+        *toolchain["ldflags"],
+        *benchmark.get("x2c_link_flags", []),
         "-o",
         str(binary),
       ]
@@ -522,6 +623,7 @@ def build_references(
     raise HarnessError("reference builds require Python")
   for benchmark in benchmarks:
     name = benchmark["name"]
+    package_cppflags, package_ldflags = native_flags(benchmark)
     source_root = ROOT / "benchmarks" / name
     outputs = receipt["benchmarks"].setdefault(name, {})
 
@@ -531,8 +633,15 @@ def build_references(
     c_argv = [
       toolchain["cc"],
       *toolchain["cflags"],
+      *package_cppflags,
+      *toolchain["cppflags"],
+      *benchmark.get("c_flags", []),
+      "-I", str(source_root),
       str(c_source),
       "-lm",
+      *package_ldflags,
+      *toolchain["ldflags"],
+      *benchmark.get("c_link_flags", []),
       "-o",
       str(c_binary),
     ]
@@ -557,9 +666,14 @@ def build_references(
     source_lines = source_text.splitlines(keepends=True)
     if source_lines and source_lines[0].startswith("#!"):
       source_text = "".join(source_lines[1:])
-    python_binary.write_text(
-      f"#!{python}\n" + source_text, encoding="utf-8"
-    )
+    if benchmark.get("python_start_method"):
+      method = benchmark["python_start_method"]
+      source_text = (
+        "import multiprocessing, runpy\n"
+        f"multiprocessing.set_start_method({method!r})\n"
+        f"runpy.run_path({str(python_source)!r}, run_name='__main__')\n"
+      )
+    python_binary.write_text(f"#!{python}\n" + source_text, encoding="utf-8")
     python_binary.chmod(0o755)
     cache_root = BUILD / name / "python/cache"
     python_argv = [
@@ -586,18 +700,174 @@ def build_references(
       "interpreter_version": command_text([python, "--version"]),
     }
     print(f"built {name}: C and Python references", flush=True)
+    if "main.cpp" in benchmark["references"]:
+      source = source_root / "main.cpp"
+      binary = binary_path(name, "cpp")
+      binary.parent.mkdir(parents=True)
+      cpp_flags = [flag.format(source_dir=source_root, repo=REPO)
+                   for flag in benchmark.get("cpp_flags", [])]
+      argv = [toolchain["cxx"], *toolchain["cflags"], *cpp_flags,
+              *package_cppflags, *toolchain["cppflags"], str(source),
+              *package_ldflags, *toolchain["ldflags"],
+              *benchmark.get("cpp_link_flags", []), "-o", str(binary)]
+      started = time.perf_counter_ns()
+      command(argv)
+      outputs["cpp"] = native_build_receipt(
+        source, binary, argv, time.perf_counter_ns() - started,
+      )
+      print(f"built {name}: C++ reference", flush=True)
+    if "main.go" in benchmark["references"]:
+      source = source_root / "main.go"
+      binary = binary_path(name, "go")
+      binary.parent.mkdir(parents=True)
+      argv = [toolchain["go"], "build", "-o", str(binary), str(source)]
+      environment = {**os.environ, "GOENV": "off", "GOTOOLCHAIN": "local",
+                     "GO111MODULE": "off", "CGO_ENABLED": "0"}
+      started = time.perf_counter_ns()
+      command(argv, env=environment)
+      outputs["go"] = {
+        **native_build_receipt(source, binary, argv, time.perf_counter_ns() - started),
+        "build_environment": {
+          key: environment[key] for key in ("GOENV", "GOTOOLCHAIN", "GO111MODULE", "CGO_ENABLED")
+        },
+        "go_environment": command([
+          toolchain["go"], "env", "-json", "GOOS", "GOARCH", "GOARM64",
+          "GOFLAGS", "CGO_ENABLED", "GOVERSION",
+        ], env=environment).stdout.decode(),
+      }
+      print(f"built {name}: Go reference", flush=True)
+    if "main.java" in benchmark["references"]:
+      source = source_root / "main.java"
+      binary = binary_path(name, "java")
+      classes = binary.parent / "classes"
+      classes.mkdir(parents=True)
+      main_class = benchmark["java_main_class"]
+      compile_source = binary.parent / f"{main_class}.java"
+      shutil.copyfile(source, compile_source)
+      argv = [toolchain["javac"], "-d", str(classes), str(compile_source)]
+      started = time.perf_counter_ns()
+      command(argv)
+      compile_ns = time.perf_counter_ns() - started
+      launch = [toolchain["java"], "-cp", str(classes), main_class]
+      binary.write_text("#!/bin/sh\nexec " + shlex.join(launch) + ' "$@"\n')
+      binary.chmod(0o755)
+      outputs["java"] = {
+        "source": str(source.relative_to(ROOT)),
+        "source_metrics": source_metrics(source),
+        "binary": str(binary.relative_to(BUILD)),
+        "binary_sha256": sha256(binary),
+        "binary_bytes": sum(p.stat().st_size for p in classes.rglob("*.class")),
+        "class_sha256": {
+          str(p.relative_to(classes)): sha256(p)
+          for p in sorted(classes.rglob("*.class"))
+        },
+        "dynamic_dependencies": None,
+        "compile_ns": compile_ns, "compile_command": argv,
+        "runtime_command": launch, "runtime_version": command_text([
+          toolchain["java"], "--version",
+        ]),
+        "process_model": "fresh JVM per sample; startup and JIT compilation included",
+      }
+      print(f"built {name}: Java reference", flush=True)
+  rust_benchmarks = [b for b in benchmarks if "main.rs" in b["references"]]
+  if rust_benchmarks:
+    argv = [toolchain["cargo"], "build", "--locked", "--release",
+            "--manifest-path", str(ROOT / "rust/Cargo.toml"),
+            "--target-dir", str(RUST_BUILD)]
+    for benchmark in rust_benchmarks:
+      argv.extend(["--bin", benchmark["name"]])
+    environment = rust_environment(toolchain)
+    started = time.perf_counter_ns()
+    command(argv, env=environment)
+    compile_ns = time.perf_counter_ns() - started
+    for benchmark in rust_benchmarks:
+      name = benchmark["name"]
+      binary = binary_path(name, "rust")
+      binary.parent.mkdir(parents=True)
+      shutil.copyfile(RUST_BUILD / "release" / name, binary)
+      binary.chmod(0o755)
+      receipt["benchmarks"][name]["rust"] = {
+        **native_build_receipt(
+          ROOT / "benchmarks" / name / "main.rs", binary, argv, compile_ns,
+        ),
+        "compile_scope": "shared Cargo build of selected reference binaries",
+        "build_environment": {
+          key: environment[key]
+          for key in ("C_INCLUDE_PATH", "LIBRARY_PATH", "RUSTFLAGS")
+        },
+      }
+      print(f"built {name}: Rust reference", flush=True)
+
+
+def native_build_receipt(
+  source: Path, binary: Path, argv: list[str], compile_ns: int,
+) -> dict[str, Any]:
+  return {
+    "source": str(source.relative_to(ROOT)),
+    "source_metrics": source_metrics(source),
+    "binary": str(binary.relative_to(BUILD)),
+    "binary_sha256": sha256(binary), "binary_bytes": binary.stat().st_size,
+    "dynamic_dependencies": dynamic_dependencies(binary),
+    "compile_ns": compile_ns, "compile_command": argv,
+  }
+
+
+def rust_environment(toolchain: dict[str, Any]) -> dict[str, str]:
+  environment = dict(os.environ)
+  prefix = toolchain["dependency_prefix"]
+  for key, directory in (("C_INCLUDE_PATH", "include"), ("LIBRARY_PATH", "lib")):
+    environment[key] = os.pathsep.join(filter(None, [
+      str(prefix / directory), environment.get(key),
+    ]))
+  environment["RUSTFLAGS"] = " ".join(filter(None, [
+    environment.get("RUSTFLAGS"), f"-L native={prefix / 'lib'}",
+  ]))
+  return environment
+
+
+def native_flags(benchmark: dict[str, Any]) -> tuple[list[str], list[str]]:
+  if benchmark["name"] != "regexredux":
+    return [], []
+  package = REPO / "packages/pcre2"
+  return [
+    "-I", str(package / "deps/include"),
+  ], shlex.split((package / "builds/pcre2.native.rsp").read_text())
 
 
 def binary_path(name: str, implementation: str) -> Path:
   return BUILD / name / implementation / "program"
 
 
+def profile_stdin(
+  benchmark: dict[str, Any], profile: str, toolchain: dict[str, Any],
+) -> Path | None:
+  sizes = benchmark.get("stdin_fasta")
+  if not sizes:
+    return None
+  size = sizes[profile]
+  path = BUILD / "inputs" / f"fasta-{size}.txt"
+  if path.exists():
+    return path
+  generator = BUILD / "tools/fasta-input"
+  if not generator.exists():
+    command([
+      toolchain["cc"], *toolchain["cflags"],
+      str(ROOT / "benchmarks/fasta/main.c"), "-lm", "-o", str(generator),
+    ])
+  path.parent.mkdir(parents=True, exist_ok=True)
+  with path.open("wb") as output:
+    subprocess.run([str(generator), str(size)], stdout=output, check=True)
+  return path
+
+
 def run_captured(
-  binary: Path, program_args: list[str], timeout: float
+  binary: Path, program_args: list[str], timeout: float,
+  stdin_path: Path | None = None,
 ) -> bytes:
   try:
     completed = command(
-      [str(binary), *program_args], timeout=timeout, check=False
+      [str(binary), *program_args], timeout=timeout, check=False,
+      stdin_path=stdin_path,
     )
   except subprocess.TimeoutExpired as error:
     raise HarnessError(
@@ -682,16 +952,20 @@ def check_programs(
   }
   for benchmark in benchmarks:
     name = benchmark["name"]
+    selected = tuple(i for i in implementations
+                     if i in available_implementations(benchmark))
     for check_case in benchmark["checks"]:
       expected_path = ROOT / "benchmarks" / name / check_case["expected"]
       expected = expected_path.read_bytes()
       outputs: dict[str, bytes] = {}
       comparison = ""
-      for implementation in implementations:
+      for implementation in selected:
         output = run_captured(
           binary_path(name, implementation),
           check_case["args"],
           timeout,
+          (ROOT / "benchmarks" / name / check_case["stdin"])
+          if check_case.get("stdin") else None,
         )
         comparison = compare_output(
           name, implementation, check_case, expected, output
@@ -710,7 +984,7 @@ def check_programs(
         )
       if (
         comparison == "exact"
-        and len(implementations) > 1
+        and len(selected) > 1
         and len(set(outputs.values())) != 1
       ):
         raise HarnessError(
@@ -718,13 +992,23 @@ def check_programs(
         )
       print(
         f"checked {name} {' '.join(check_case['args'])}: "
-        f"{', '.join(implementations)}; {comparison}",
+        f"{', '.join(selected)}; {comparison}",
         flush=True,
       )
   return receipt
 
 
-def strip_c_comments(text: str) -> str:
+def source_quote(text: str, index: int, rust: bool, go: bool = False) -> bool:
+  if rust and text[index] == "'":
+    lifetime = re.match(r"'[A-Za-z_]\w*", text[index:])
+    if lifetime:
+      end = index + lifetime.end()
+      if end == len(text) or text[end] != "'":
+        return False
+  return text[index] in ("'", '"') or (go and text[index] == "`")
+
+
+def strip_c_comments(text: str, rust: bool = False, go: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -749,7 +1033,7 @@ def strip_c_comments(text: str) -> str:
       continue
     if state == "quote":
       output.append(char)
-      if char == "\\" and following:
+      if quote != "`" and char == "\\" and following:
         output.append(following)
         index += 2
         continue
@@ -766,14 +1050,14 @@ def strip_c_comments(text: str) -> str:
       index += 2
       continue
     output.append(char)
-    if char in ("'", '"'):
+    if source_quote(text, index, rust, go):
       state = "quote"
       quote = char
     index += 1
   return "".join(output)
 
 
-def collapse_code_whitespace(text: str) -> str:
+def collapse_code_whitespace(text: str, rust: bool = False, go: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -784,7 +1068,7 @@ def collapse_code_whitespace(text: str) -> str:
     following = text[index + 1] if index + 1 < len(text) else ""
     if state == "quote":
       output.append(char)
-      if char == "\\" and following:
+      if quote != "`" and char == "\\" and following:
         output.append(following)
         index += 2
         continue
@@ -800,7 +1084,7 @@ def collapse_code_whitespace(text: str) -> str:
       output.append(" ")
       pending_space = False
     output.append(char)
-    if char in ("'", '"'):
+    if source_quote(text, index, rust, go):
       state = "quote"
       quote = char
     index += 1
@@ -810,8 +1094,17 @@ def collapse_code_whitespace(text: str) -> str:
 def source_metrics(path: Path) -> dict[str, Any]:
   data = path.read_bytes()
   text = data.decode("utf-8")
-  without_comments = strip_c_comments(text)
-  normalized = collapse_code_whitespace(without_comments).encode("utf-8")
+  rust = path.suffix == ".rs"
+  go = path.suffix == ".go"
+  if path.suffix == ".py":
+    tokens = tokenize.generate_tokens(io.StringIO(text).readline)
+    without_comments = tokenize.untokenize(
+      token._replace(string="") if token.type == tokenize.COMMENT else token
+      for token in tokens
+    )
+  else:
+    without_comments = strip_c_comments(text, rust, go)
+  normalized = collapse_code_whitespace(without_comments, rust, go).encode("utf-8")
   return {
     "path": str(path.relative_to(ROOT)),
     "physical_lines": len(text.splitlines()),
@@ -832,12 +1125,14 @@ def measure_once(
   binary: Path,
   program_args: list[str],
   timeout: float,
+  stdin_path: Path | None = None,
 ) -> dict[str, Any]:
   try:
     completed = command(
       [str(measure), str(binary), *program_args],
       timeout=timeout,
       check=False,
+      stdin_path=stdin_path,
     )
   except subprocess.TimeoutExpired as error:
     raise HarnessError(
@@ -931,15 +1226,18 @@ def calibration_measurements(
   with raw_path.open("w", encoding="utf-8") as raw:
     for benchmark in benchmarks:
       name = benchmark["name"]
+      selected = available_implementations(benchmark)
       program_args = profile[name]
+      stdin_path = profile_stdin(benchmark, args.profile, toolchain)
       comparison = profile_comparison(benchmark)
       outputs = {
         implementation: run_captured(
-          binary_path(name, implementation), program_args, args.timeout
+          binary_path(name, implementation), program_args, args.timeout,
+          stdin_path,
         )
-        for implementation in IMPLEMENTATIONS
+        for implementation in selected
       }
-      for implementation in IMPLEMENTATIONS[1:]:
+      for implementation in selected[1:]:
         compare_output(
           name,
           implementation,
@@ -956,25 +1254,27 @@ def calibration_measurements(
         )
 
       for warmup in range(1, args.warmups + 1):
-        for implementation in IMPLEMENTATIONS:
+        for implementation in selected:
           measure_once(
             measure,
             binary_path(name, implementation),
             program_args,
             args.timeout,
+            stdin_path,
           )
         print(f"warmed {name} ({warmup}/{args.warmups})", flush=True)
 
-      records = {implementation: [] for implementation in IMPLEMENTATIONS}
+      records = {implementation: [] for implementation in selected}
       for sample in range(1, args.samples + 1):
-        offset = (sample - 1) % len(IMPLEMENTATIONS)
-        order = IMPLEMENTATIONS[offset:] + IMPLEMENTATIONS[:offset]
+        offset = (sample - 1) % len(selected)
+        order = selected[offset:] + selected[:offset]
         for position, implementation in enumerate(order, start=1):
           measured = measure_once(
             measure,
             binary_path(name, implementation),
             program_args,
             args.timeout,
+            stdin_path,
           )
           record = {
             "schema": 1,
@@ -998,6 +1298,7 @@ def calibration_measurements(
         )
       results[name] = {
         "args": program_args,
+        "stdin_sha256": sha256(stdin_path) if stdin_path else None,
         "comparison": comparison,
         "stdout": base64.b64encode(outputs["c"]).decode("ascii"),
         "stdout_sha256": hashlib.sha256(outputs["c"]).hexdigest(),
@@ -1006,7 +1307,7 @@ def calibration_measurements(
             "statistics": summarize(records[implementation]),
             "measurements": compact_records(records[implementation]),
           }
-          for implementation in IMPLEMENTATIONS
+          for implementation in selected
         },
       }
   try:
@@ -1035,6 +1336,9 @@ def expected_receipt(benchmark: dict[str, Any]) -> list[dict[str, Any]]:
         "comparison": check_case.get("comparison", {"kind": "exact"}),
         "path": str(path.relative_to(ROOT)),
         "sha256": sha256(path),
+        "stdin_sha256": sha256(
+          ROOT / "benchmarks" / name / check_case["stdin"]
+        ) if check_case.get("stdin") else None,
       }
     )
   return result
@@ -1054,10 +1358,16 @@ def make_baseline(
       "samples": args.samples,
       "warmups": args.warmups,
       "cflags": build_receipt["toolchain"]["cflags"],
+      "cppflags": build_receipt["toolchain"]["cppflags"],
+      "ldflags": build_receipt["toolchain"]["ldflags"],
+      "specification": manifest["specification"],
+      "manifest_sha256": sha256(MANIFEST_PATH),
       "execution_ratio": "ratio of implementation and C medians",
-      "source_metric": "nonblank lines after C-style comment removal",
+      "source_metric": "nonblank lines after language-aware comment removal",
+      "source_metrics_harness_sha256": sha256(Path(__file__).resolve()),
       "process_model": "fresh process per warmup and measured sample",
-      "order": "rotating C,x2c,Python Latin order",
+      "order": "rotating available C,idiomatic,tuned,Python,Rust,C++,Go,Java Latin order",
+      "java_process_model": "fresh JVM per sample; startup and JIT compilation included; no in-process warmup",
     },
     "calibration": {
       "run_id": calibration["run_id"],
@@ -1076,22 +1386,21 @@ def make_baseline(
         "stdout_sha256": calibration["benchmarks"][benchmark["name"]][
           "stdout_sha256"
         ],
+        "stdin_sha256": calibration["benchmarks"][benchmark["name"]][
+          "stdin_sha256"
+        ],
         "checks": expected_receipt(benchmark),
-        "c": {
-          "source": build_receipt["benchmarks"][benchmark["name"]]["c"][
-            "source_metrics"
-          ],
-          **calibration["benchmarks"][benchmark["name"]][
-            "implementations"
-          ]["c"],
-        },
-        "python": {
-          "source": build_receipt["benchmarks"][benchmark["name"]]["python"][
-            "source_metrics"
-          ],
-          **calibration["benchmarks"][benchmark["name"]][
-            "implementations"
-          ]["python"],
+        **{
+          implementation: {
+            "source": build_receipt["benchmarks"][benchmark["name"]][
+              implementation
+            ]["source_metrics"],
+            **calibration["benchmarks"][benchmark["name"]][
+              "implementations"
+            ][implementation],
+          }
+          for implementation in REFERENCE_IMPLEMENTATIONS
+          if implementation in available_implementations(benchmark)
         },
       }
       for benchmark in benchmarks
@@ -1120,14 +1429,19 @@ def load_baseline(
       "run `make shoot-calibrate`"
     )
   methodology = baseline.get("methodology", {})
+  if methodology.get("manifest_sha256") != sha256(MANIFEST_PATH):
+    raise HarnessError("benchmark contracts changed; run `make shoot-calibrate`")
   profile_name = methodology.get("profile")
-  if profile_name != "local":
-    raise HarnessError("the pinned baseline must use the local profile")
+  if profile_name not in manifest["profiles"]:
+    raise HarnessError(f"unknown pinned profile: {profile_name}")
   if methodology.get("cflags") != toolchain["cflags"]:
     raise HarnessError(
       "current C flags differ from the calibration; "
       "run `make shoot-calibrate`"
     )
+  for field in ("cppflags", "ldflags"):
+    if methodology.get(field) != toolchain[field]:
+      raise HarnessError(f"{field} changed; run `make shoot-calibrate`")
 
   for benchmark in manifest["benchmarks"]:
     name = benchmark["name"]
@@ -1136,7 +1450,9 @@ def load_baseline(
       raise HarnessError(
         f"{name} local arguments changed; run `make shoot-calibrate`"
       )
-    for implementation, filename in (("c", "main.c"), ("python", "main.py")):
+    for implementation, filename in REFERENCE_SOURCES.items():
+      if implementation not in available_implementations(benchmark):
+        continue
       current = source_metrics(ROOT / "benchmarks" / name / filename)
       if current != entry.get(implementation, {}).get("source"):
         raise HarnessError(
@@ -1173,11 +1489,15 @@ def pinned_measurements(
       name = benchmark["name"]
       program_args = profile[name]
       baseline_entry = baseline["benchmarks"][name]
+      stdin_path = profile_stdin(benchmark, profile_name, toolchain)
+      input_hash = sha256(stdin_path) if stdin_path else None
+      if input_hash != baseline_entry.get("stdin_sha256"):
+        raise HarnessError(f"{name} stdin differs from its calibration")
       expected = base64.b64decode(baseline_entry["stdout"])
       outputs: dict[str, bytes] = {}
       for implementation in X2C_IMPLEMENTATIONS:
         binary = binary_path(name, implementation)
-        output = run_captured(binary, program_args, args.timeout)
+        output = run_captured(binary, program_args, args.timeout, stdin_path)
         compare_output(
           name,
           implementation,
@@ -1190,7 +1510,7 @@ def pinned_measurements(
         )
         outputs[implementation] = output
         for warmup in range(1, args.warmups + 1):
-          measure_once(measure, binary, program_args, args.timeout)
+          measure_once(measure, binary, program_args, args.timeout, stdin_path)
           print(
             f"warmed {name} {implementation} ({warmup}/{args.warmups})",
             flush=True,
@@ -1214,6 +1534,7 @@ def pinned_measurements(
             binary_path(name, implementation),
             program_args,
             args.timeout,
+            stdin_path,
           )
           record = {
             "schema": 1,
@@ -1266,6 +1587,8 @@ def make_current(
 ) -> dict[str, Any]:
   results: dict[str, Any] = {}
   factors: dict[str, list[float]] = {}
+  common = [b["name"] for b in benchmarks
+            if available_implementations(b) == IMPLEMENTATIONS]
   measured = [
     implementation
     for implementation in X2C_IMPLEMENTATIONS
@@ -1276,16 +1599,21 @@ def make_current(
     name = benchmark["name"]
     reference = baseline["benchmarks"][name]
     entry = run["benchmarks"][name]
-    c_source = reference["c"]["source"]
     python_source = reference["python"]["source"]
     c_median = reference["c"]["statistics"]["median_elapsed_ns"]
-    python_median = reference["python"]["statistics"]["median_elapsed_ns"]
     python_lines = python_source["source_lines"]
 
-    row = {
-      "time_python_over_c": python_median / c_median,
-      "sloc_c_over_python": c_source["source_lines"] / python_lines,
-    }
+    row = {}
+    for implementation in REFERENCE_IMPLEMENTATIONS:
+      if implementation not in reference:
+        continue
+      foreign = reference[implementation]
+      row[f"time_{implementation}_over_c"] = (
+        foreign["statistics"]["median_elapsed_ns"] / c_median
+      )
+      row[f"sloc_{implementation}_over_python"] = (
+        foreign["source"]["source_lines"] / python_lines
+      )
     programs: dict[str, Any] = {}
     for implementation in measured:
       build = build_receipt["benchmarks"][name][implementation]
@@ -1312,12 +1640,14 @@ def make_current(
           )
         },
       }
-    for key, value in row.items():
-      factors.setdefault(key, []).append(value)
+    if name in common:
+      for key, value in row.items():
+        factors.setdefault(key, []).append(value)
     results[name] = {
       "title": benchmark["title"],
       "args": entry["args"],
       "factors": row,
+      "unavailable": benchmark.get("unavailable", {}),
       **programs,
       "references": {
         implementation: {
@@ -1325,14 +1655,22 @@ def make_current(
           "statistics": reference[implementation]["statistics"],
         }
         for implementation in REFERENCE_IMPLEMENTATIONS
+        if implementation in reference
       },
     }
   return {
-    "schema": 2,
+    "schema": 4,
+    "implementations": list(IMPLEMENTATIONS),
+    "summary_benchmarks": common,
+    "specification": baseline["methodology"]["specification"],
     "benchmark_order": [benchmark["name"] for benchmark in benchmarks],
     "x2c_implementations": measured,
     "ratio_definition": "ratio of implementation and C medians",
     "source_ratio_definition": "source_lines / Python source_lines",
+    "source_metric": baseline["methodology"].get("source_metric"),
+    "source_metrics_harness_sha256": baseline["methodology"].get(
+      "source_metrics_harness_sha256"
+    ),
     "baseline_sha256": baseline_sha256,
     "run_id": run["run_id"],
     "profile": run["profile"],
@@ -1350,49 +1688,63 @@ def make_current(
 
 
 def render_current(current: dict[str, Any]) -> str:
-  measured = current["x2c_implementations"]
-  columns = [
-    *((f"Time {name}/C", f"time_{name}_over_c") for name in measured),
-    ("Time Python/C", "time_python_over_c"),
-    *(
-      (f"SLOC {name}/Python", f"sloc_{name}_over_python")
-      for name in measured
-    ),
-    ("SLOC C/Python", "sloc_c_over_python"),
-  ]
+  labels = {
+    "c": "C", "idiomatic": "idiomatic x2c", "tuned": "tuned x2c",
+    "python": "Python", "rust": "Rust", "cpp": "C++",
+    "go": "Go", "java": "Java",
+  }
   lines = [
-    "# x2c language shootout result",
+    "# x2c Benchmarks Game result",
     "",
     f"- Run: `{current['run_id']}`",
     f"- Baseline: `{current['baseline_sha256'][:16]}`",
     f"- Profile: `{current['profile']}`",
     f"- Samples: {current['samples']} fresh-process x2c measurements after "
     f"{current['warmups']} warmup(s)",
-    "- `x2c` is each benchmark's `main.x`, which writes the problem in x2c.",
-    "  `ported` is its `ported.x`, which keeps the C representation and uses",
-    "  x2c only where the C was verbose.",
+    "- `idiomatic` is `main.x`, using ordinary x2c collections and APIs.",
+    "  `tuned` is `tuned.x`, using typed containers and other",
+    "  x2c optimizations within the same official specification.",
+    "- C, Python, Rust, C++, Go, and Java are unchanged contributed programs.",
+    "  These are local measurements, not the official site's timings.",
+    "- Java starts a fresh JVM per sample, including startup and JIT compilation.",
+    "  The separate process warmup does not warm the measured JVM.",
     "- Time uses C as the implicit 1.00 baseline; SLOC uses Python as the",
     "  implicit 1.00 baseline. Larger values mean more cost.",
+    "- N/A means there is no admitted contribution for that problem.",
+    f"- Summary rows use only the {len(current['summary_benchmarks'])} problems "
+    "shared by every column:",
+    "  " + ", ".join(current["summary_benchmarks"]),
     "",
-    "| Benchmark | " + " | ".join(label for label, _ in columns) + " |",
-    "| --- |" + " ---: |" * len(columns),
   ]
-  for name in current["benchmark_order"]:
-    factors = current["benchmarks"][name]["factors"]
-    cells = " | ".join(f"{factors[key]:.2f}" for _, key in columns)
-    lines.append(f"| {name} | {cells} |")
-  for label, summary in (
-    ("Median", current["median"]),
-    ("Arithmetic mean", current["arithmetic_mean"]),
+  for title, prefix, suffix in (
+    ("Elapsed time / C", "time", "c"),
+    ("Source lines / Python", "sloc", "python"),
   ):
-    cells = " | ".join(f"**{summary[key]:.2f}**" for _, key in columns)
-    lines.append(f"| **{label}** | {cells} |")
+    columns = [(labels[name], f"{prefix}_{name}_over_{suffix}")
+               for name in current["implementations"]]
+    lines.extend([
+      f"## {title}", "",
+      "| Benchmark | " + " | ".join(label for label, _ in columns) + " |",
+      "| --- |" + " ---: |" * len(columns),
+    ])
+    for name in current["benchmark_order"]:
+      factors = current["benchmarks"][name]["factors"]
+      cells = " | ".join(f"{factors[key]:.2f}" if key in factors else "N/A"
+                         for _, key in columns)
+      lines.append(f"| {name} | {cells} |")
+    for label, summary in (
+      ("Median", current["median"]),
+      ("Arithmetic mean", current["arithmetic_mean"]),
+    ):
+      cells = " | ".join(f"**{summary[key]:.2f}**" if key in summary else "N/A"
+                         for _, key in columns)
+      lines.append(f"| **{label}** | {cells} |")
+    lines.append("")
   lines.extend(
     [
       "",
       "The median and the mean are orientation aids, not composite scores.",
-      "One benchmark dominates the mean, so the median is the more useful",
-      "of the two; read the per-benchmark rows for anything that matters.",
+      "Read individual workloads; these summaries are not a language ranking.",
       "",
     ]
   )
@@ -1513,9 +1865,36 @@ def calibrate(
   print(f"raw results: {LATEST}", flush=True)
 
 
+def check(
+  args: argparse.Namespace, manifest: dict[str, Any],
+  benchmarks: list[dict[str, Any]], toolchain: dict[str, Any],
+) -> None:
+  build_receipt = prepare_build(toolchain)
+  build_x2c(toolchain, benchmarks, build_receipt)
+  build_references(toolchain, benchmarks, build_receipt)
+  receipt = check_programs(benchmarks, IMPLEMENTATIONS, args.timeout)
+  for benchmark in benchmarks:
+    name = benchmark["name"]
+    program_args = manifest["profiles"][args.profile][name]
+    stdin_path = profile_stdin(benchmark, args.profile, toolchain)
+    expected = run_captured(
+      binary_path(name, "c"), program_args, args.timeout, stdin_path,
+    )
+    for implementation in available_implementations(benchmark)[1:]:
+      output = run_captured(
+        binary_path(name, implementation), program_args, args.timeout,
+        stdin_path,
+      )
+      compare_output(name, implementation, {
+        "args": program_args, "comparison": profile_comparison(benchmark),
+      }, expected, output)
+    print(f"checked {name}: {args.profile} profile across available programs")
+  write_json(BUILD / "check.json", receipt)
+
+
 def parse_args() -> argparse.Namespace:
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument("action", choices=("run", "update", "calibrate"))
+  parser.add_argument("action", choices=("check", "run", "update", "calibrate"))
   parser.add_argument("--cc", default=os.environ.get("CC", "cc"))
   parser.add_argument(
     "--python",
@@ -1526,7 +1905,7 @@ def parse_args() -> argparse.Namespace:
     default=os.environ.get("SHOOTOUT_CFLAGS", DEFAULT_CFLAGS),
   )
   parser.add_argument("--profile", default="local")
-  parser.add_argument("--samples", type=int, default=12)
+  parser.add_argument("--samples", type=int)
   parser.add_argument("--warmups", type=int, default=1)
   parser.add_argument("--timeout", type=float, default=3600.0)
   parser.add_argument(
@@ -1540,24 +1919,22 @@ def parse_args() -> argparse.Namespace:
     default=os.environ.get("SHOOTOUT_ALLOW_MACHINE_MISMATCH") == "1",
   )
   args = parser.parse_args()
-  if args.samples < 1:
+  if args.samples is None and args.action != "calibrate":
+    args.samples = 12
+  if args.samples is not None and args.samples < 1:
     parser.error("--samples must be positive")
   if args.warmups < 0:
     parser.error("--warmups must be nonnegative")
   if args.timeout <= 0:
     parser.error("--timeout must be positive")
-  if args.action == "calibrate" and args.samples % len(IMPLEMENTATIONS):
-    parser.error(
-      f"calibration samples must be a multiple of {len(IMPLEMENTATIONS)}"
-    )
   if args.action in ("update", "calibrate") and args.only:
     parser.error(f"{args.action} requires the complete benchmark set")
-  if args.action in ("update", "calibrate") and (
+  if args.action == "update" and (
     args.samples != 12 or args.warmups != 1
   ):
     parser.error(f"{args.action} requires 12 samples and one warmup")
-  if args.action == "calibrate" and args.profile != "local":
-    parser.error("the tracked calibration must use the local profile")
+  if args.action == "calibrate" and args.warmups != 1:
+    parser.error("calibrate requires one warmup")
   return args
 
 
@@ -1572,9 +1949,17 @@ def main() -> int:
     if args.profile not in manifest["profiles"]:
       raise HarnessError(f"unknown profile: {args.profile}")
     benchmarks = selected_benchmarks(manifest, args.only)
+    if args.action == "calibrate":
+      multiple = calibration_sample_multiple(benchmarks)
+      if args.samples is None:
+        args.samples = math.ceil(12 / multiple) * multiple
+      if args.samples % multiple:
+        raise HarnessError(f"calibration samples must be a multiple of {multiple}")
     toolchain = resolve_toolchain(args)
     if args.action == "calibrate":
       calibrate(args, manifest, benchmarks, toolchain)
+    elif args.action == "check":
+      check(args, manifest, benchmarks, toolchain)
     else:
       run_pinned(args, manifest, benchmarks, toolchain)
     return 0

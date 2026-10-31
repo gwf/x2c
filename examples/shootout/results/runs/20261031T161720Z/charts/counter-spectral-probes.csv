@@ -1,0 +1,15 @@
+problem,n,implementation,median_elapsed_ms,median_cpu_ms,candidate_pair_wins,pairs
+knucleotide,20000,knucleotide-before,40.9546665,40.48,0,16
+knucleotide,100000,knucleotide-before,166.104437,165.5245,9,16
+knucleotide,20000,knucleotide-counter,46.5507915,46.1105,0,16
+knucleotide,100000,knucleotide-counter,162.8574795,162.2775,9,16
+spectralnorm,100,spectralnorm-before,4.099854,3.8085,5,16
+spectralnorm,200,spectralnorm-before,12.6271665,12.3505,11,16
+spectralnorm,256,spectralnorm-before,19.990625,19.699,16,16
+spectralnorm,500,spectralnorm-before,73.5284375,73.2085,16,16
+spectralnorm,1000,spectralnorm-before,289.640458,289.246,16,16
+spectralnorm,100,spectralnorm-parallel,4.170729,3.875,5,16
+spectralnorm,200,spectralnorm-parallel,12.5291665,12.2625,11,16
+spectralnorm,256,spectralnorm-parallel,8.386834,31.6325,16,16
+spectralnorm,500,spectralnorm-parallel,17.6409375,86.304,16,16
+spectralnorm,1000,spectralnorm-parallel,55.753354,309.258,16,16

@@ -1,38 +1,55 @@
-#!/usr/bin/env python3
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+#   
+#     line-by-line from Greg Buchholz's C program
+
+
 
 import sys
 
+def main():
 
-def hash_byte(value, byte):
-    return ((value << 5) + value + byte) & 0xFFFFFFFF
+    w = h = bit_num = 0
+    byte_acc = 0
+    i = 0; iter = 50
+    x = y = limit = 2.0
+    Zr = Zi = Cr = Ci = Tr = Ti = 0.0
+
+    w = h = int(sys.argv[1])
+
+    sys.stdout.write(f'P4\n{w} {h}\n'); sys.stdout.flush()
+
+    for y in range(h):
+
+        for x in range(w):
+
+            Zr = Zi = Tr = Ti = 0.0 
+            Cr = (2.0 * x / w - 1.5); Ci = (2.0 * y / h - 1.0)  
+           
+            for i in range(iter):             
+                if Tr+Ti <= limit*limit:
+                    Zi = 2.0*Zr*Zi + Ci
+                    Zr = Tr - Ti + Cr
+                    Tr = Zr * Zr
+                    Ti = Zi * Zi
+            
+            
+            byte_acc = byte_acc << 1
+            if Tr+Ti <= limit*limit: byte_acc = byte_acc  | 0x01            
+            
+            bit_num += 1         
+
+            if bit_num == 8:          
+                sys.stdout.buffer.write(bytes([byte_acc]))        
+                byte_acc = 0
+                bit_num = 0
 
 
-width, height, iterations = map(int, sys.argv[1:])
-checksum = 5381
+            elif x == w - 1:
 
-for _ in range(iterations):
-    for byte in f"P4\n{width} {height}\n".encode("ascii"):
-        checksum = hash_byte(checksum, byte)
+                byte_acc = byte_acc << (8-w%8)   
+                sys.stdout.buffer.write(bytes([byte_acc]))  
+                byte_acc = 0
+                bit_num = 0
 
-    for y in range(height):
-        bit_count = byte = 0
-        for x in range(width):
-            zr = zi = tr = ti = 0.0
-            cr = 2.0 * x / width - 1.5
-            ci = 2.0 * y / height - 1.0
-            i = 0
-            while i < 50 and tr + ti <= 4.0:
-                zi = 2.0 * zr * zi + ci
-                zr = tr - ti + cr
-                tr = zr * zr
-                ti = zi * zi
-                i += 1
-            byte = (byte << 1) | (tr + ti <= 4.0)
-            bit_count += 1
-            if bit_count == 8:
-                checksum = hash_byte(checksum, byte)
-                bit_count = byte = 0
-        if bit_count:
-            checksum = hash_byte(checksum, byte << (8 - bit_count))
-
-print(checksum)
+main() 

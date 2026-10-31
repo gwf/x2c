@@ -1,15 +1,12 @@
-/* Representative run, the shootout `local` profile, from this directory:
+/* The Computer Language Benchmarks Game
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  *
- *   ../../../../builds/0/x2c build -O2 -DNDEBUG \
- *     --output /tmp/fannkuchredux-idiomatic main.x
- *   /tmp/fannkuchredux-idiomatic 10
+ * Adapted from the contributions recorded in ../../benchmarks.json.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
-
-/* SPDX-License-Identifier: BSD-3-Clause */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "typed-array.x"
 
 int main(int argc, char **argv) {
   int n = argc > 1 ? atoi(argv[1]) : 7;
@@ -18,21 +15,19 @@ int main(int argc, char **argv) {
 }
 
 static int _fannkuch(int n) {
-  ArrayInt permutation = ArrayInt.new(), working = ArrayInt.new(),
-           counts = ArrayInt.new();
+  Array permutation = [], working = [], counts = [];
   for (int i = 0; i < n; i++) {
     permutation.push(i);
     working.push(i);
     counts.push(i + 1);
   }
-
   int maximum = 0, checksum = 0, permutation_count = 0;
   do {
-    memcpy(working.bytes, permutation.bytes, (size_t) n * sizeof(int));
+    working.setslice(0, n, permutation);
     int flips = 0;
-    for (int k = working[0]; k; k = working[0]) {
+    for (int k = working[0].int(); k; k = working[0].int()) {
       for (int i = 0, j = k; i < j; i++, j--) {
-        int value = working[i];
+        Var value = working[i];
         working[i] = working[j];
         working[j] = value;
       }
@@ -41,24 +36,19 @@ static int _fannkuch(int n) {
     if (flips > maximum) maximum = flips;
     checksum += permutation_count++ % 2 ? -flips : flips;
   } while (_advance(permutation, counts, n));
-
   printf("%d\n", checksum);
   return maximum;
 }
 
-/* Step to the next permutation: rotate the leading r + 1 entries left, spend
- * one turn of digit r on the count odometer, and carry into a wider rotation
- * when that digit runs out. Refilling the spent digit here is what lets the
- * next round start over at r = 1, so the caller needs no reset loop.
- * Returns 0 once the odometer has wrapped and every permutation is visited. */
-static int _advance(ArrayInt perm, ArrayInt count, int n) {
-  for (int r = 1; r != n; r++) {
-    int first = perm[0];
-    for (int i = 0; i < r; i++) perm[i] = perm[i + 1];
-    perm[r] = first;
-    int remaining = --count[r];
-    if (remaining > 0) return 1;
-    count[r] = r + 1;
+static int _advance(Array permutation, Array counts, int n) {
+  for (int r = 1; r < n; r++) {
+    Var first = permutation[0];
+    for (int i = 0; i < r; i++) permutation[i] = permutation[i + 1];
+    permutation[r] = first;
+    int remaining = counts[r].int() - 1;
+    counts[r] = remaining;
+    if (remaining) return 1;
+    counts[r] = r + 1;
   }
   return 0;
 }

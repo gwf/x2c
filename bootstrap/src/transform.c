@@ -2730,7 +2730,7 @@ List Compiler_lower_lambda_expr(Compiler c, List expression){
 List Compiler_list_expression(Compiler, Array, List);
 List Compiler_pack_rest_arguments(Compiler c, List params, List args){
   if(! _init_guard_) _file_init_(); {
-    List _x2c_gensym_match_expr_10 = args; {List _x2c_gensym_match_at_53, _x2c_gensym_match_at_54, _x2c_gensym_match_at_55, _x2c_gensym_match_at_56, _x2c_gensym_match_at_57, _x2c_gensym_match_at_58, _x2c_gensym_match_at_59; if(_x2c_gensym_match_expr_10 &&(Var_is(_x2c_gensym_match_expr_10 -> car, 806120) &&(_x2c_gensym_match_at_53 = Var_list_payload(_x2c_gensym_match_expr_10 -> car), 1)) && _x2c_gensym_match_at_53 && _x2c_gensym_match_at_53 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_54 = _x2c_gensym_match_at_53 ->cdr) &&(Var_is(_x2c_gensym_match_at_54 -> car, 806120) &&(_x2c_gensym_match_at_55 = Var_list_payload(_x2c_gensym_match_at_54 -> car), 1)) && _x2c_gensym_match_at_55 && _x2c_gensym_match_at_55 ->car.u64 == 9224497936763091528ULL && !(_x2c_gensym_match_at_56 = _x2c_gensym_match_at_55 ->cdr) &&(_x2c_gensym_match_at_57 = _x2c_gensym_match_at_54 ->cdr) && Var_equal(_x2c_gensym_match_at_57 -> car, Var_list_payload(_403 -> car) -> cdr -> cdr -> car) && !(_x2c_gensym_match_at_58 = _x2c_gensym_match_at_57 ->cdr) && !(_x2c_gensym_match_at_59 = _x2c_gensym_match_expr_10 ->cdr)){
+    List _x2c_gensym_match_expr_10 = args; {List _x2c_gensym_match_at_53, _x2c_gensym_match_at_54, _x2c_gensym_match_at_55, _x2c_gensym_match_at_56, _x2c_gensym_match_at_57, _x2c_gensym_match_at_58, _x2c_gensym_match_at_59; if(_x2c_gensym_match_expr_10 == _403 || _x2c_gensym_match_expr_10 &&(Var_is(_x2c_gensym_match_expr_10 -> car, 806120) &&(_x2c_gensym_match_at_53 = Var_list_payload(_x2c_gensym_match_expr_10 -> car), 1)) && _x2c_gensym_match_at_53 && _x2c_gensym_match_at_53 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_54 = _x2c_gensym_match_at_53 ->cdr) &&(Var_is(_x2c_gensym_match_at_54 -> car, 806120) &&(_x2c_gensym_match_at_55 = Var_list_payload(_x2c_gensym_match_at_54 -> car), 1)) && _x2c_gensym_match_at_55 && _x2c_gensym_match_at_55 ->car.u64 == 9224497936763091528ULL && !(_x2c_gensym_match_at_56 = _x2c_gensym_match_at_55 ->cdr) &&(_x2c_gensym_match_at_57 = _x2c_gensym_match_at_54 ->cdr) && Var_equal(_x2c_gensym_match_at_57 -> car, Var_list_payload(_403 -> car) -> cdr -> cdr -> car) && !(_x2c_gensym_match_at_58 = _x2c_gensym_match_at_57 ->cdr) && !(_x2c_gensym_match_at_59 = _x2c_gensym_match_expr_10 ->cdr)){
       args = NULL;
     }
 
@@ -4223,7 +4223,7 @@ static List _ordered_list(Compiler c, List chain){
               }
               int counted =({
                 int _x2c_gensym_condition_1 = 0;  if(! spliced){
-                  List _x2c_gensym_match_expr_47 = node; {List _x2c_gensym_match_at_286; if(_x2c_gensym_match_expr_47 && _x2c_gensym_match_expr_47 ->car.u64 == 9224497936761647704ULL && !(_x2c_gensym_match_at_286 = _x2c_gensym_match_expr_47 ->cdr)){
+                  List _x2c_gensym_match_expr_47 = node; {List _x2c_gensym_match_at_286; if(_x2c_gensym_match_expr_47 == _409 || _x2c_gensym_match_expr_47 && _x2c_gensym_match_expr_47 ->car.u64 == 9224497936761647704ULL && !(_x2c_gensym_match_at_286 = _x2c_gensym_match_expr_47 ->cdr)){
                     _x2c_gensym_condition_1 = 1;
                   }
 

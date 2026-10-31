@@ -3,6 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
+#include "system-macros.x"
 #include "repl-types.x"
 #include "collect/collect.x"
 #include "generate/generate.x"
@@ -329,7 +330,10 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
 /* Native C declarations retain their authored aggregate attributes. */
 static String _program_c_header(Compiler c, List ast) {
   Buffer text = auto Buffer.new(0);
-  text.write("#pragma once\n#include \"x2c.h\"\n");
+  text.write($dedent(%"
+    #pragma once
+    #include \"x2c.h\"
+    "));
   String original = NULL;
   if (c.line_markers && c.sources.read(c.filename, original)) {
     Tokenizer tokens = auto Tokenizer.new(original, <x2c>);
@@ -537,7 +541,10 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
     }
   String header = %"$(program.directory)/unit-$(b.headers.len()).h";
   if (path.endswith(".h"))
-    Path.write_text(header, %"#pragma once\n#include $(path.repr())\n");
+    Path.write_text(header, $dedent(%"
+    #pragma once
+    #include %s
+    ").printf(path.repr()));
   else if (Path.is_x2c_source(path)) {
     List code = c.generate_code_text(c.transform(unit.ast),
                                     %"unit-$(b.headers.len())");
@@ -673,18 +680,20 @@ static String _program_main(ProgramBuild &b) {
   String entry = "x2c_repl_program_main";
   String source = %"$(program.directory)/main-entry.x";
   Path.write_text(source,
-    "int main(int argc, char **argv);\n"
-    "int x2c_repl_program_main(Array values) {\n"
-    "  int count = values.len();\n"
-    "  char **argv = xcalloc((size_t) count + 1, sizeof(char *));\n"
-    "  for (int i = 0; i < count; i++) {\n"
-    "    String text = values[i];\n"
-    "    size_t size = text.len();\n"
-    "    argv[i] = xcalloc(size + 1, 1);\n"
-    "    if (size) memcpy(argv[i], (char *) text, size);\n"
-    "  }\n"
-    "  return main(count, argv);\n"
-    "}\n");
+    $dedent(%"
+    int main(int argc, char **argv);
+    int x2c_repl_program_main(Array values) {
+      int count = values.len();
+      char **argv = xcalloc((size_t) count + 1, sizeof(char *));
+      for (int i = 0; i < count; i++) {
+        String text = values[i];
+        size_t size = text.len();
+        argv[i] = xcalloc(size + 1, 1);
+        if (size) memcpy(argv[i], (char *) text, size);
+      }
+      return main(count, argv);
+    }
+    "));
   b.objects.push(source);
   for (int i = 0; i < b.exports.len(); i++)
     if (b.exports[i].list().car() == "main") b.exports[i] = $("main", entry);
@@ -717,8 +726,11 @@ static String _program_exports(ProgramBuild &b) {
 #endif
       code.push(%"extern __typeof__($name) $name __attribute__(($attribute));\n");
     }
-  code.push("extern int x2c_repl_program_main(Array values);\n");
-  code.push("void *x2c_repl_program_address(unsigned index) {\n  switch(index) {\n");
+  code.push($dedent(%"
+    extern int x2c_repl_program_main(Array values);
+    void *x2c_repl_program_address(unsigned index) {
+      switch(index) {
+    "));
   foreach (List row, b.exports) {
     String name = row.cadr();
     String address = _program_static_export(row)
@@ -757,8 +769,11 @@ static String _program_header(ProgramBuild &b) {
   String source = %"$(program.directory)/declarations.c";
   String expanded = %"$(program.directory)/declarations.i";
   Buffer text = auto Buffer.new(0);
-  text.write("#include \"x2c.h\"\n#include \"meta.h\"\n");
-  text.write("#line 1 \"x2c-repl-declarations\"\n");
+  text.write($dedent(%"
+    #include \"x2c.h\"
+    #include \"meta.h\"
+    #line 1 \"x2c-repl-declarations\"
+    "));
   foreach (List pair, b.headers)
     text.printf("#include %s\n", ((String) pair.car()).repr());
   Path.write_text(source, text);

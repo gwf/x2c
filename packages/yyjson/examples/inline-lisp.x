@@ -2,10 +2,7 @@
 
 import "yyjson" as json;
 
-int main(void) {
-  Scope.open();
-  defer Scope.close();
-
+auto int main(void) {
   Lisp lisp = auto Lisp.new();
   json.JsonLisp.install(lisp);
 

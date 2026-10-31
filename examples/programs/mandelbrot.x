@@ -1,5 +1,6 @@
 /*  mandelbrot.x -- render a deep zoom on native threads */
 
+#include "system-macros.x"
 #include <math.h>
 #include <stdio.h>
 #include "typed-array.x"
@@ -12,23 +13,23 @@ typedef struct Job {
 } *Job;
 
 int main(int argc, char **argv) {
-  Scope.open();
-  String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
-  ArrayDbl pixels = [];
-  pixels.append(NULL, width * height);
-  Array threads = [];
-  for (int worker = 0; worker < nworkers; worker++) {
-    struct Job job = { worker, pixels };
-    threads.push(Thread.start_raw(render, &job, sizeof(job)));
+  auto {
+    String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
+    ArrayDbl pixels = [];
+    pixels.append(NULL, width * height);
+    Array threads = [];
+    for (int worker = 0; worker < nworkers; worker++) {
+      struct Job job = { worker, pixels };
+      threads.push(Thread.start_raw(render, &job, sizeof(job)));
+    }
+    for (int worker = 0; worker < nworkers; worker++) {
+      Thread thread = threads[worker];
+      thread.join();
+      thread.free();
+    }
+    write_image(path, _rgb(pixels));
+    puts(%"wrote $path");
   }
-  for (int worker = 0; worker < nworkers; worker++) {
-    Thread thread = threads[worker];
-    thread.join();
-    thread.free();
-  }
-  write_image(path, _rgb(pixels));
-  puts(%"wrote $path");
-  Scope.close();
   return 0;
 }
 
@@ -75,6 +76,10 @@ static ArrayChar _rgb(ArrayDbl pixels) {
 
 static void write_image(String path, ArrayChar rgb) {
   auto File output = File.open(path, "wb");
-  output.puts(%"P6\n$width $height\n255\n");
+  output.puts($dedent(%"
+    P6
+    $width $height
+    255
+  "));
   output.write_all(rgb.bytes, rgb.len());
 }

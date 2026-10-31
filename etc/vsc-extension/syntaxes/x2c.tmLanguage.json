@@ -27,6 +27,9 @@
 			"include": "#x2c_macro_reference"
 		},
 		{
+			"include": "#x2c_rest_parameter"
+		},
+		{
 			"include": "#x2c_macro_hole"
 		},
 		{
@@ -1218,6 +1221,7 @@
 		},
 		"function-call-innards": {
 			"patterns": [
+				{ "include": "#x2c_rest_parameter" },
 				{
 					"include": "#strings"
 				},
@@ -1296,6 +1300,7 @@
 		},
 		"function-innards": {
 			"patterns": [
+				{ "include": "#x2c_rest_parameter" },
 				{
 					"include": "#strings"
 				},
@@ -1844,6 +1849,7 @@
 		},
 		"operators": {
 			"patterns": [
+				{ "match": "~=", "name": "keyword.operator.pattern-match.x2c" },
 				{
 					"match": "=>",
 					"name": "keyword.operator.arrow.x2c"
@@ -3840,12 +3846,13 @@
 			}
 		},
 		"x2c_alias_declaration": {
-			"begin": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+|(?<=static)[ \\t]+)(alias)\\b(?![ \\t]*(?:[=;,)\\]}?.<>/%|^:]|->|\\+\\+|--|[-+*&!]=|&&))(?=[^;{}]*?(?:\\bas\\b|\\{|:[ \\t]*(?://.*)?$))",
+			"begin": "(?:^[ \\t]*|(?<=\\))[ \\t]*|(?<=[;{}])[ \\t]*|(?<=else)[ \\t]+|(?<=do)[ \\t]+|(?<=static)[ \\t]+)(alias)\\b(?![ \\t]*(?:[=;,)\\]}?.<>/%|^:]|->|\\+\\+|--|[-+*&!]=|&&))(?=[^;{}]*?(?:[A-Za-z_][A-Za-z0-9_]*[ \\t]+to\\b|\\bas\\b|\\{|:[ \\t]*(?://.*)?$))",
 			"beginCaptures": {
 				"1": { "name": "keyword.declaration.alias.x2c" }
 			},
 			"end": "(?=[;{])|(?=:[ \\t]*(?://.*)?$)|$",
 			"patterns": [
+				{ "match": "\\G[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]+(to)\\b", "captures": { "1": { "name": "keyword.declaration.alias.x2c" } } },
 				{
 					"match": "\\b(as)\\b(?=[ \\t]+[A-Za-z_][A-Za-z0-9_]*[ \\t]*(?:[;{]|:?[ \\t]*(?://.*)?$))",
 					"captures": {
@@ -3874,7 +3881,7 @@
 					"name": "keyword.declaration.class.x2c"
 				},
 				{
-					"match": "\\b(_Generic|offsetof|va_arg)\\b(?=\\s*\\()",
+					"match": "(?<![\\w.])(_Generic|offsetof|va_arg|typeof|typeof_unqual|__typeof__|__typeof)\\b(?=\\s*\\()",
 					"name": "keyword.operator.$1.x2c"
 				},
 				{
@@ -3977,6 +3984,31 @@
 				"3": { "name": "entity.name.function.macro.x2c" }
 			}
 		},
+		"x2c_rest_parameter": {
+			"begin": "(?<![\\w.])(List|Map)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "support.type.prelude.x2c"
+				}
+			},
+			"end": "(?=[^ \\t\\r\\n@/])|(?=/(?![/*]))",
+			"patterns": [
+				{
+					"include": "#comments"
+				},
+				{
+					"match": "(@)([A-Za-z_][A-Za-z0-9_]*)?",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.macro.splice.x2c"
+						},
+						"2": {
+							"name": "variable.parameter.rest.x2c"
+						}
+					}
+				}
+			]
+		},
 		"x2c_macro_hole": {
 			"match": "(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*)",
 			"captures": {
@@ -4007,6 +4039,7 @@
 		},
 		"x2c_literals": {
 			"patterns": [
+				{ "include": "#x2c_evaluated_map" },
 				{
 					"match": "(\\$!)(?:[ \\t]*((?i:Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Type|Param))\\b)?",
 					"captures": {
@@ -4038,6 +4071,29 @@
 				}
 			]
 		},
+		"x2c_evaluated_map": {
+			"name": "meta.literal.map.evaluated.x2c",
+			"begin": "(\\$)(\\{)",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.macro.sigil.x2c"
+				},
+				"2": {
+					"name": "punctuation.definition.literal.map.evaluated.begin.x2c"
+				}
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.literal.map.evaluated.end.x2c"
+				}
+			},
+			"patterns": [
+				{
+					"include": "$self"
+				}
+			]
+		},
 		"x2c_current_list_literal": {
 			"name": "meta.literal.list.x2c",
 			"begin": "(^|(?<=[(\\[{=,:;!?~+*/%&|^>\\-])|\\b(?:return|raise|case|catch|defer|in|match))([ \\t]*)(%\\()",
@@ -4056,6 +4112,7 @@
 		},
 		"x2c_current_list_content": {
 			"patterns": [
+				{ "include": "#x2c_evaluated_map" },
 				{ "include": "#x2c_current_typed_capture" },
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_grouped_unquote" },
@@ -4189,6 +4246,7 @@
 		},
 		"x2c_current_collection_content": {
 			"patterns": [
+				{ "include": "#x2c_evaluated_map" },
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_grouped_unquote" },
 				{ "include": "#x2c_current_collection_interpolation" },

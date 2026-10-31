@@ -6,6 +6,8 @@
     model is a sequential root, so its forward is one call.
 */
 
+#include "system-macros.x"
+
 import "torch" with Torch, Tensor, Module, Optimizer, Scheduler;
 
 #include <stdlib.h>
@@ -29,9 +31,7 @@ static double _accuracy(Module model, Tensor images, Tensor targets) {
     Torch.no_grad();
     model.eval();
     long total = images.size(0), correct = 0;
-    for (long start = 0; start < total; start += 1000) {
-      Scope.open();
-      defer Scope.close();
+    for (long start = 0; start < total; start += 1000) auto {
       long span = total - start < 1000 ? total - start : 1000;
       Tensor batch = images.narrow(0, start, span);
       Tensor predicted = model.forward(batch).argmax(1, 0);
@@ -44,18 +44,16 @@ static double _accuracy(Module model, Tensor images, Tensor targets) {
 }
 
 static void _explain(String root) {
-  printf("no MNIST files under %s\n", root);
-  printf("Download the four IDX files and gunzip them into that "
-         "directory:\n");
-  printf("  train-images-idx3-ubyte  train-labels-idx1-ubyte\n");
-  printf("  t10k-images-idx3-ubyte   t10k-labels-idx1-ubyte\n");
-  printf("They are published at https://yann.lecun.com/exdb/mnist/ and "
-         "mirrored at\n");
-  printf("https://ossci-datasets.s3.amazonaws.com/mnist/ as "
-         "train-images-idx3-ubyte.gz\n");
-  printf("and the three matching names. Then pass the directory as an "
-         "argument or\n");
-  printf("set TORCH_MNIST to it.\n");
+  printf($dedent(%"
+    no MNIST files under %s
+    Download the four IDX files and gunzip them into that directory:
+      train-images-idx3-ubyte  train-labels-idx1-ubyte
+      t10k-images-idx3-ubyte   t10k-labels-idx1-ubyte
+    They are published at https://yann.lecun.com/exdb/mnist/ and mirrored at
+    https://ossci-datasets.s3.amazonaws.com/mnist/ as train-images-idx3-ubyte.gz
+    and the three matching names. Then pass the directory as an argument or
+    set TORCH_MNIST to it.
+  "), root);
 }
 
 int main(int argc, char **argv) {
@@ -100,9 +98,7 @@ int main(int argc, char **argv) {
     for (int epoch = 0; epoch < epochs; epoch++) {
       printf("epoch %d of %d\n", epoch + 1, epochs);
       Tensor order = Torch.randperm(rows).to_device(device, XT_INT64, 0, 0);
-      for (long batch = 0; batch < batches; batch++) {
-        Scope.open();
-        defer Scope.close();
+      for (long batch = 0; batch < batches; batch++) auto {
         Tensor pick = order.narrow(0, batch * BATCH, BATCH);
         adam.zero_grad();
         Tensor loss = Tensor.cross_entropy(

@@ -11,6 +11,7 @@
 
 #pragma once
 #include "x2c.x"
+#include "system-macros.x"
 
 /** The receiverless owner of the difference operations. */
 typedef Symbol Diff;
@@ -51,7 +52,11 @@ meta native String Diff.unified(
       at++, old_line++, new_line++;
       continue;
     }
-    if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
+    if (!out.len()) out.printf(
+      $dedent(%"
+        --- %s
+        +++ %s
+      "), old_name, new_name);
     Hunk h = _hunk(edits, at, old_line, new_line);
     _write(h, edits, out);
     at = h.end;

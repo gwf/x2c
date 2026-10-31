@@ -69,6 +69,8 @@ static int _match_nesting(String text);
 
 static List _match_listed(List arm, List none);
 
+static int _match_plain_literal(Var value);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -709,5 +711,25 @@ static List _match_listed(List arm, List none){
     Var _x2c_gensym_literal_part_10 = List_var(cons(_62, cons(_93, cons(List_var(none), NULL))));  cons(_94, cons(_x2c_gensym_literal_part_10, cons(List_var(arm), NULL)));
   }
   );
+}
+
+static int _match_plain_literal(Var value){
+  if(Var_is_row(value, 9, 7, 4)){
+    List list = Var_list_payload(value);
+    if(List_truth(list) && Var_is_match_op(List_car(list))) return 0;
+    {
+      Var part;
+      List _x2c_gensym_macro_object_22 = list;
+      List _x2c_gensym_macro_cursor_22 = _x2c_gensym_macro_object_22;
+      Var _x2c_gensym_macro_cursor_output_22;
+      while(List_try_next(_x2c_gensym_macro_object_22, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_22))){
+        part = _x2c_gensym_macro_cursor_output_22;
+        if(! _match_plain_literal(part)) return 0;
+      }
+
+    }
+    return 1;
+  }
+  return ! Var_is_binder(value) && ! x2c_var_equal_lane(value, Symbol_var(1059020478773725));
 }
 

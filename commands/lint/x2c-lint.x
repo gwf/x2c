@@ -32,6 +32,7 @@
     The command links the compiler's objects through `make commands`.
     `make commands-check` checks its findings on `tests/`.
 */
+#include "system-macros.x"
 #include "frontend.x"
 #include "meta-project.x"
 #include "lint.x"
@@ -52,11 +53,12 @@
 #include <string.h>
 
 static void _usage(File out):
-  fputs("usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... "
-        "FILE...\n"
-        "       x2c-lint --fmt-check [--fmt-diff] FILE...\n"
-        "       x2c-lint --rules\n"
-        "function-reading-order requires --rule (excluded from --all).\n", out)
+  fputs($dedent(%"
+    usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... FILE...
+           x2c-lint --fmt-check [--fmt-diff] FILE...
+           x2c-lint --rules
+    function-reading-order requires --rule (excluded from --all).
+    "), out)
 
 static void _preprocessor_errors(String text):
   fputs(text, stderr)

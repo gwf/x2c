@@ -1,150 +1,225 @@
-# x2c language shootout
+# x2c Computer Language Benchmarks Game
 
-This optional example suite compares fourteen problems written twice in x2c
-against equivalent C and Python references. Every implementation uses the same
-algorithm and inputs, and produces the same output.
+This suite adopts the ten standard [Computer Language Benchmarks Game
+problems](https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/summary.html).
+The official specifications own the required algorithms, inputs, work, and
+output. These are local comparisons against contributed programs, not
+measurements published or accepted by the Benchmarks Game.
 
-Each benchmark directory holds four programs:
+The comparison has eight columns, with coverage recorded per problem:
 
-| File | What it is |
+| File | Implementation |
 | --- | --- |
-| `main.c` | the C reference |
-| `main.py` | the Python reference |
-| `main.x` | the problem written in x2c |
-| `ported.x` | the C ported to x2c, keeping C's representation |
+| `main.x` | Idiomatic x2c, using ordinary collections and APIs |
+| `tuned.x` | Tuned x2c, including typed containers and borrowed substrings |
+| `main.c` | An unmodified contributed C program |
+| `main.py` | An unmodified contributed Python program |
+| `main.rs` | An unmodified contributed Rust program, where admitted |
+| `main.cpp` | An unmodified contributed C++ program, where admitted |
+| `main.go` | An unmodified contributed Go program |
+| `main.java` | An unmodified contributed Java program |
 
-`main.x` uses x2c where it makes the solution shorter or clearer, and keeps
-ordinary C where it already fits. For example, CSV parsing reuses six stack
-doubles, while binary trees use an array literal for each node. `ported.x`
-keeps the C reference's representation and uses x2c where it simplifies the
-code. Neither version needs to use a feature just to demonstrate it.
+Idiomatic x2c uses ordinary `Array`, `List`, `Map`, `String`, `Buffer`,
+classes, and methods where appropriate. It does not use typed containers,
+borrowed substrings, raw collection storage, or custom allocation tricks.
+Native scalar types and value records remain ordinary x2c. Tuned x2c
+uses the language's more specialized operations while meeting the same
+specification. A program need not use a feature merely to make the two
+versions different. Neither column is a literal C port.
 
-The timing difference between the columns reflects their representations,
-allocation patterns, and generated code together; it does not isolate the
-cost of any one language feature.
+Binary-trees uses one ordinary `Thread` per depth batch in both x2c columns,
+matching the adopted C strategy. Each worker owns its temporary tree scopes;
+the main thread reads its scalar batch result after joining. The unchanged
+`benchmarks/binarytrees/serial.x` preserves the previous serial implementation.
+Saved serial runs and the latest paired serial/parallel comparison remain in
+[results](results/README.md). Neither threading nor parallel execution requires
+typed containers or a custom allocator.
 
-The C and Python sources are checked in for review, attribution, and
-occasional recalibration. An ordinary run does not build, import, or execute
-them. It rebuilds x2c incrementally, checks and measures only the two x2c
-programs, then compares their medians with the pinned C and Python statistics
-in `baseline.json`. Those statistics are pinned to the exact bytes of `main.c`
-and `main.py`, so neither reference may be edited, not even to add a comment,
-without a full recalibration.
+Idiomatic spectral-norm uses six ordinary `Thread` row batches at N>=256.
+Workers read a fixed input Array and write disjoint existing output slots.
+Every matrix product joins its workers before the next product reads results;
+each row preserves its original summation order. Smaller inputs run serially.
+Tuned spectral-norm retains its serial typed Arrays. The Counter-object
+k-nucleotide probe is preserved as evidence; numeric Map values remain active.
 
-## Current results
+Rust, C++, Go, and Java each have nine admitted contributions. Their
+k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
+ordering; Java candidates fail ordering, absent-fragment, or uppercase-target
+checks; C++ candidates need GNU-only headers absent from this toolchain.
+[Reference coverage](results/reference-coverage.md) records the evidence and
+the selected contributions' input constraints. Contributions are not patched
+to conceal these differences.
 
-Local measurements from September 6, 2026: twelve fresh-process samples after
-one warmup for each x2c program, compared with the saved C and Python
-references. C and Python were not rerun. Lower ratios are better; C execution
-time and Python source size each have a baseline of 1.00.
+Summary rows and comparison charts use the nine problems shared by all eight
+columns. Individual problem rows still include k-nucleotide for C, Python,
+and the two x2c implementations. No summary mixes a nine-problem column with a
+ten-problem column.
 
-| Benchmark | Time x2c/C | Time ported/C | Time Python/C | SLOC x2c/Python | SLOC ported/Python | SLOC C/Python |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| nbody | 0.95 | 0.95 | 125.24 | 1.11 | 1.15 | 1.43 |
-| spectralnorm | 0.95 | 0.93 | 110.56 | 1.69 | 1.69 | 1.65 |
-| fannkuchredux | 0.76 | 0.74 | 20.13 | 1.29 | 1.46 | 1.74 |
-| binarytrees | 2.28 | 0.94 | 3.84 | 1.53 | 1.65 | 2.53 |
-| brainfuck | 0.97 | 0.97 | 57.75 | 1.29 | 1.33 | 1.60 |
-| wordfreq | 5.22 | 0.99 | 8.22 | 1.60 | 2.80 | 3.24 |
-| mandelbrot | 1.01 | 0.99 | 136.17 | 1.27 | 1.27 | 1.50 |
-| sieve | 1.05 | 1.03 | 20.13 | 1.93 | 1.80 | 1.87 |
-| matmul | 1.02 | 1.00 | 87.73 | 1.73 | 1.93 | 2.00 |
-| gameoflife | 1.07 | 0.98 | 340.56 | 1.52 | 1.43 | 1.38 |
-| quicksort | 1.02 | 1.03 | 16.41 | 1.20 | 1.13 | 1.13 |
-| graphbfs | 1.23 | 2.70 | 3.20 | 1.69 | 1.59 | 1.69 |
-| calculatorast | 11.00 | 0.98 | 77.36 | 1.30 | 2.13 | 1.87 |
-| csvparse | 2.00 | 1.00 | 4.70 | 2.53 | 2.65 | 2.71 |
-| **Median** | **1.04** | **0.99** | **38.94** | **1.53** | **1.62** | **1.72** |
-| **Arithmetic mean** | **2.18** | **1.09** | **72.29** | **1.55** | **1.71** | **1.88** |
+x2c can also express C directly. That capability is understood and has no
+separate column. The C column measures an actual contributed C program.
 
-Every x2c program is faster than its saved Python reference in this run.
-CSV parsing takes 122 ms versus Python's 287 ms (2.35 times faster); binary
-trees takes 66 ms, about 1.68 times faster than Python. These are measurements
-of these programs on this machine, not a general language ranking.
+## Adopted problems
 
-The [full report](results/current.md) and [raw result data](results/current.json)
-record the run and its reference baseline. `make shoot-update` refreshes those
-reports; this README table is a dated snapshot.
+| Problem | Required work |
+| --- | --- |
+| n-body | Advance the prescribed five-body simulation |
+| spectral-norm | Estimate the implicit matrix's spectral norm |
+| fannkuch-redux | Enumerate permutations, flip prefixes, and report checksum and maximum |
+| mandelbrot | Write the actual binary PBM bitmap |
+| fasta | Generate the prescribed DNA sequences with the specified random generator |
+| k-nucleotide | Count all fragments of each required length in growing hash tables |
+| reverse-complement | Read FASTA records and write their reverse complements |
+| binary-trees | Allocate every node, including leaves, with stretch and long-lived trees |
+| regex-redux | Execute the prescribed regular-expression searches and substitutions |
+| pidigits | Generate decimal digits with the prescribed arbitrary-precision spigot |
 
-## Build and run one program
+The separate upstream startup experiment is not one of these ten problems.
+The [former custom suite](../shootout-unofficial/README.md) preserves the
+previous workloads, C-port variants, and historical results. The active
+targets do not run it or mix its measurements with this suite.
 
-After building x2c, run this once from the repository root so the compiler
-is available in subdirectories:
+## Sources and specifications
 
-```sh
-export PATH="$PWD:$PATH"
-```
+`benchmarks.json` records the adopted upstream revision, archive hash,
+reference source paths and hashes, official fixture hashes, profile inputs,
+and specification links. `specs/` contains unchanged snapshots of those
+specifications from the same revision. See [THIRD_PARTY.md](THIRD_PARTY.md)
+for attribution and dependencies.
 
-Each `main.x` and `ported.x` carries its own recipe as a header comment. The
-references have none, because their bytes are pinned. From inside a benchmark
-directory, using the `local` profile arguments that `benchmarks.json` records
-for that benchmark:
+References retain their exact upstream bytes, including original whitespace
+and line endings. The narrow whitespace attributes cover only those
+third-party files. Change an adopted reference only by selecting another
+identified upstream contribution, then recalibrate the suite.
 
-```sh
-cc -O2 -DNDEBUG main.c -lm -o /tmp/bench-c && /tmp/bench-c <args>
-python3 main.py <args>
-x2c run -O2 -DNDEBUG main.x -- <args>
-```
+## Build and check
 
-## Run and update
-
-From the repository root:
-
-```sh
-make shoot-run
-```
-
-The command requires an optimized, non-LTO x2c build. It writes generated C,
-executables, raw samples, and run details beneath the ignored
-`examples/build/shootout/` directory, then prints the normalized table. It
-does not modify tracked files.
-
-After reviewing a run, refresh the checked-in current result explicitly:
+After the normal compiler build:
 
 ```sh
-make shoot-update
+make shoot-check
 ```
 
-Rebuild and measure C, x2c, and Python together only when the reference
-sources, machine, toolchain, or methodology needs a new calibration:
+This optional command builds every available implementation, checks the official
+fixtures, and compares the quick-profile outputs. PBM output is compared as
+binary data. N-body uses the official absolute tolerance of `1e-8`.
+
+To check a subset:
+
+```sh
+python3 examples/shootout/tools/shootout.py check --profile quick \
+  --only mandelbrot --only binarytrees
+```
+
+PCRE2 uses the existing pinned `packages/pcre2` build and its native response
+file. GMP must be installed for pidigits. C++ uses the configured `CXX`
+(default `clang++`). Rust uses `CARGO` (default `cargo`), the checked-in
+manifest and lockfile, and the installed stable toolchain. Cargo fetches
+the pinned libraries into its ordinary cache and reuses build outputs under
+ignored `examples/build/shootout-rust/`. On macOS, dependencies default to
+`/opt/homebrew` on arm64 and `/usr/local` on x86_64. Set
+`SHOOTOUT_DEPENDENCY_PREFIX` for another prefix. `SHOOTOUT_CPPFLAGS` and
+`SHOOTOUT_LDFLAGS` override the corresponding default flags. No packages are
+installed into the host by the harness.
+
+Go and a native JDK must be available for reference builds. Set `GO`, `JAVA`,
+and `JAVAC` to explicit executables when they are not on `PATH`. Go builds
+use `GOENV=off`, `GOTOOLCHAIN=local`, `GO111MODULE=off`, and
+`CGO_ENABLED=0`. The harness does not download modules or compilers. Java compiles a byte-identical
+copy under the contributed main class name and launches its compiled classes.
+
+Java uses a fresh JVM for each sample, matching the suite's fresh-process
+method. Its elapsed time includes JVM startup and JIT compilation. The
+separate warmup process does not warm the measured JVM. These results describe
+whole-program execution, not Java's warmed steady-state throughput. Compiler
+and runtime versions, build commands, class hashes, and Go build settings are
+recorded in the receipts.
+
+The adopted k-nucleotide Python program assumes multiprocessing `fork`.
+Its launcher selects that start method before executing the unchanged
+source. This preserves its Linux process behavior on macOS.
+
+## Check unchanged C through x2c
+
+```sh
+python3 examples/shootout/tools/check-c-through-x2c.py
+```
+
+This optional check separates `x2c build` of unchanged `.c` inputs from
+actual x2c parsing of byte-identical `.x` copies. It records source hashes,
+commands, diagnostics, fixture checks, and profile-output comparisons under
+ignored `examples/build/shootout-c/`. It continues through every problem and
+returns nonzero if any parser or native-driver check fails. It adds no timing
+column or recurring publication requirement.
+
+The [recorded result](results/c-through-x2c.md) shows all ten native-driver
+checks passing and seven parser checks passing. The three parser rejections
+remain visible; the C references are not rewritten to make them pass.
+
+## Measure
 
 ```sh
 make shoot-calibrate
+make shoot-run
+make shoot-update
 ```
 
-Calibration rotates all three implementations through each order position,
-then replaces `baseline.json`, `results/current.json`, and
-`results/current.md` only after every build, correctness check, warmup, and
-measurement succeeds.
+Calibration builds, checks, and measures every available implementation together.
+It rotates their order across complete Latin cycles after one process
+warmup. The default sample count is the smallest balanced count of at least
+twelve samples for every coverage group (16 for eight- and four-column rows).
+It replaces `baseline.json` and `results/current.*` only when every
+build, check, and measurement succeeds. Run calibration in a quiet window.
 
-## What the table means
+An ordinary run rebuilds and measures the two x2c programs against the
+pinned C, Python, Rust, C++, Go, and Java statistics. Update explicitly promotes its report.
+Raw samples and receipts stay under ignored `examples/build/shootout/`.
 
-Execution time uses C as the implicit `1.00` baseline. Source size uses Python
-as the implicit `1.00` baseline:
+The stdin-driven problems receive identical files generated by the adopted
+official FASTA C program before timing begins. Their input hashes are pinned
+in the baseline. Input generation is excluded from every program's time;
+reading stdin and writing the required stdout remain measured. Stdout goes
+to `/dev/null` during timing, after output correctness has been checked.
 
-- `Time x2c/C` is the current `main.x` median divided by the pinned C median.
-- `Time ported/C` is the current `ported.x` median over the same C median.
-- `Time Python/C` is the pinned Python median divided by the pinned C median.
-- `SLOC x2c/Python` is live `main.x` SLOC divided by pinned Python SLOC.
-- `SLOC ported/Python` and `SLOC C/Python` follow the same rule.
+`quick` and `local` use smaller inputs for development and local measurement.
+`canonical` records the larger inputs specified upstream. Smaller profiles
+do not replace the official output checks and are not official-site scores.
+The local Mandelbrot size is 512, so every admitted contribution receives
+the same dimensions supported by the unchanged Rust program. The official
+fixture size (200) and canonical size (16000) are unchanged.
+To calibrate and run at those official performance sizes, select the profile
+explicitly for both commands:
 
-Larger values always mean more cost. The last two rows are the unweighted
-median and arithmetic mean of each displayed factor. One benchmark runs far
-slower than the rest and dominates the mean, so the median is the more useful
-summary; both are orientation aids rather than composite scores.
+```sh
+python3 examples/shootout/tools/shootout.py calibrate --profile canonical
+python3 examples/shootout/tools/shootout.py run --profile canonical
+```
 
-Only the hand-written `main.c`, `main.py`, `main.x`, and `ported.x` are
-counted. SLOC means nonblank lines after C-style comments are removed, so the
-run recipe at the top of each x2c file does not count. Generated C and
-launchers are excluded.
+Calibration replaces the pinned baseline for the selected profile. The
+checked-in baseline uses `local`; the complete canonical run includes the
+much longer Python reference executions.
 
-## Limits
+Execution-time ratios use the selected contributed C program as `1.00`.
+Source-line ratios use the selected contributed Python program as `1.00`.
+Source lines exclude blank and comment-only lines. Python comments are
+removed with Python tokenization, preserving floor division and string
+contents. C, C++, Rust, and x2c use C-style comment removal; Rust lifetimes
+are distinguished from character literals. Go raw strings retain their contents.
+Reports identify both x2c variants; the median and arithmetic mean are
+orientation aids, not language rankings. Raw data also records process CPU
+time, peak RSS, source size, and build information.
 
-The pinned reference timings assume the same machine family and performance
-environment. The harness rejects a CPU-model or architecture mismatch unless
-`SHOOTOUT_ALLOW_MACHINE_MISMATCH=1` is set, and records OS, power, load,
-compiler, repository state, and binary hashes so weaker comparisons remain
-visible. Results are not portable rankings across hosts.
+The [current report](results/current.md) and [raw data](results/current.json)
+identify the calibration and measured profile.
 
-The benchmark families and third-party notices are recorded in
-[`THIRD_PARTY.md`](THIRD_PARTY.md).
+The old suite's timings are not comparable with these results. Changes to
+specifications, references, profile inputs, or dependency flags require a
+fresh calibration. Machine checks and environment receipts retain the
+existing restrictions on comparisons between hosts.
+
+## Recover results and website materials
+
+The [results archive and recovery guide](results/README.md) preserves all saved
+chart sets, saved reports, raw observations and receipts, paired experiments,
+rendering requirements, and checksums on `dev`. The
+[website integration guide](../../site/BENCHMARKS.md) identifies the curated
+public assets and interpretation requirements.

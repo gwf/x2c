@@ -2,6 +2,7 @@
 
 #define __GUARD_0x0A217399__
 #include "x2c.h"
+#include "system-macros.h"
 typedef Symbol Diff;
 
 static const int _LIMIT = 2000;
@@ -21,7 +22,9 @@ typedef struct Hunk{
 }
 Hunk;
 
-static Var _2, _1, _0;
+static String _0;
+
+static Var _3, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -114,9 +117,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(634596520);
-  _1 = Symbol_var(279719178);
-  _2 = Symbol_var(1248074);
+  _0 = String_new("--- %s\n+++ %s\n");
+  _1 = Symbol_var(634596520);
+  _2 = Symbol_var(279719178);
+  _3 = Symbol_var(1248074);
 }
 
 Array List_array(List);
@@ -171,7 +175,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
               at ++, old_line ++, new_line ++;
               continue;
             }
-            if(! Buffer_len(out)) Buffer_printf(out, "--- %s\n+++ %s\n", old_name, new_name);
+            if(! Buffer_len(out)) Buffer_printf(out, _0, old_name, new_name);
             Hunk h = _hunk(edits, at, old_line, new_line);
             _write(&(h), edits, out);
             at = h.end;
@@ -333,8 +337,8 @@ static int _myers(Script * s){
           {
             List _x2c_gensym_destructure_0 = step;
             Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_0, 0));
-            int i = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/diff.x",.function = "_myers",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_0; })));
-            int j = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/diff.x",.function = "_myers",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_1; })));
+            int i = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/diff.x",.function = "_myers",.line = 114,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+            int j = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 2), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/diff.x",.function = "_myers",.line = 114,.runtime = 1}; & _x2c_gensym_error_site_1; })));
             _emit(&((* s)), kind, Var_as_string(kind == 634596520 ? Array_getindex((* s).new, (* s).lo + j) : Array_getindex((* s).old, (* s).lo + i)));
           }
 
@@ -395,7 +399,7 @@ static List _path(Trace trace, int found, int n, int m){
     int mid_x = inserted ? prev_x : prev_x + 1;
     int mid_y = inserted ? prev_y + 1 : prev_y;
     path = _diagonal(path, x, y, mid_x, mid_y);
-    path = cons(List_var(inserted ? cons(_0, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
+    path = cons(List_var(inserted ? cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_2, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
     x = prev_x, y = prev_y;
   }
   return _diagonal(path, x, y, 0, 0);
@@ -403,7 +407,7 @@ static List _path(Trace trace, int found, int n, int m){
 
 static List _diagonal(List path, int x, int y, int to_x, int to_y){
   for(;  x > to_x && y > to_y;  x --, y --) path = cons(List_var(({
-    Var _x2c_gensym_literal_part_0 = int_var(x - 1);  Var _x2c_gensym_literal_part_1 = int_var(y - 1);  cons(_2, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_0 = int_var(x - 1);  Var _x2c_gensym_literal_part_1 = int_var(y - 1);  cons(_3, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   )), path);
   return path;

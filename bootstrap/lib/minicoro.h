@@ -1942,7 +1942,7 @@ static MCO_NO_INLINE mco_coro* _mco_running(void) {
 mco_coro* mco_running(void) {
   /*
   Compilers aggressively optimize the use of TLS by caching loads.
-  Since fiber code can migrate between threads it’s possible for the load to be stale.
+  Since fiber code can migrate between threads it's possible for the load to be stale.
   To prevent this from happening we avoid inline functions.
   */
   mco_coro* (*volatile func)(void) = _mco_running;

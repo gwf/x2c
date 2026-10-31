@@ -2,6 +2,8 @@
 
     Copyright (c) 2026 Gary William Flake
 */
+#include "system-macros.x"
+
 import "sqlite" with Database, Prepared;
 #include "http.x"
 #include "args.x"
@@ -16,7 +18,10 @@ static volatile sig_atomic_t stopping;
 int main(int argc, char **argv) {
   try return run(options(argc, argv));
   catch %(bad-arg *detail): {
-    Stderr.printf("notes: %s\nTry --help for usage.\n", detail.str());
+    Stderr.printf($dedent(%"
+      notes: %s
+      Try --help for usage.
+    "), detail.str());
     return 2;
   }
   catch %(?cause *detail): {
@@ -37,10 +42,16 @@ static int run(Map options) {
   app.mutex = Mutex.new();
   defer app.mutex.free();
   app.db.execute(
-    "CREATE TABLE IF NOT EXISTS note ("
-    "id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, "
-    "body TEXT NOT NULL, tags TEXT NOT NULL, "
-    "created INTEGER NOT NULL, updated INTEGER NOT NULL)");
+    $dedent(%"
+      CREATE TABLE IF NOT EXISTS note (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        tags TEXT NOT NULL,
+        created INTEGER NOT NULL,
+        updated INTEGER NOT NULL
+      )
+    "));
   Router routes = router(app, options["public"]);
   HttpServer server = HttpServer.new(routes,
     {host: options["host"], port: port, workers: workers});
@@ -139,8 +150,11 @@ static void create_note(Notes app, HttpRequest req, HttpResponse res) {
   long now = time(NULL);
   $lock(app.mutex) {
     Prepared insert = auto app.db.prepare(
-      "INSERT INTO note (title, body, tags, created, updated) "
-      "VALUES (?, ?, ?, ?, ?) RETURNING id");
+      $dedent(%"
+        INSERT INTO note (title, body, tags, created, updated)
+        VALUES (?, ?, ?, ?, ?)
+        RETURNING id
+      "));
     List row = insert.bind(note["title"], note["body"],
       note["tags"].json(), now, now).next();
     note["id"] = row[0].str();
@@ -155,8 +169,11 @@ static void update_note(Notes app, HttpRequest req, HttpResponse res) {
   Map values = note_input(req), note;
   $lock(app.mutex) {
     Prepared update = auto app.db.prepare(
-      "UPDATE note SET title = ?, body = ?, tags = ?, updated = ? "
-      "WHERE id = ? RETURNING id, title, body, tags, created, updated");
+      $dedent(%"
+        UPDATE note SET title = ?, body = ?, tags = ?, updated = ?
+        WHERE id = ?
+        RETURNING id, title, body, tags, created, updated
+      "));
     List row = update.bind(values["title"], values["body"],
       values["tags"].json(), (long) time(NULL), req.params["id"]).next();
     if (!row) Http.fail(404, "no such note");

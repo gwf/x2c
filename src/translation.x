@@ -38,8 +38,12 @@ static keyword loop $private.loop;
 static macro Stmt $report.main_stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) =>
   fprintf(
-    stderr, "x2c: error: inputs produce the same output stem '%s'\n"
-    "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
+    stderr, $dedent(%"
+      x2c: error: inputs produce the same output stem '%s'
+        first input: %s
+        other input: %s
+        output: %s/%s.c
+    "),
     $stem, $first, $other, $directory, $stem);
 
 static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>

@@ -2,6 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 */
+#include "system-macros.x"
 #include "repl.x"
 #include "args.x"
 
@@ -28,24 +29,28 @@ int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   List arguments = Args.from_argv(argc, argv);
   if ("--help" in arguments || "-h" in arguments) {
-    puts("usage: x2c repl [OPTIONS] [SOURCES|HEADERS|NATIVE-INPUTS...]\n\n"
-         "Start a persistent native library playground. Enter :help for commands.\n\n"
-         "  --dump                 Print typed syntax and retained native artifacts\n"
-         "  --stats                Print worker statistics at exit\n"
-         "  --verbose-stats        Print detailed worker statistics at exit\n"
-         "  -I DIR                 Add an x2c/C include directory\n"
-         "  --x-include-dir DIR    Add an x2c include directory\n"
-         "  --c-include-dir DIR    Add a C include directory\n"
-         "  -D NAME[=VALUE]        Define a preprocessor macro\n"
-         "  -L DIR, -l LIB         Configure native library linkage\n"
-         "  -Xcc ARG, -Wl,ARG      Pass native compiler/linker options\n"
-         "  --package-dir DIR      Add a package directory\n"
-         "  --native-module FILE   Select a compile-time module\n"
-         "  --manifest-path FILE   Use a project manifest\n"
-         "  --target NAME          Select its target\n"
-         "  --profile NAME         Select its build profile\n\n"
-         "Native build options use the same spellings as x2c build.\n"
-         "Successful loading and reloading clear prompt and library state.");
+    puts($dedent(%"
+      usage: x2c repl [OPTIONS] [SOURCES|HEADERS|NATIVE-INPUTS...]
+
+      Start a persistent native library playground. Enter :help for commands.
+
+        --dump                 Print typed syntax and retained native artifacts
+        --stats                Print worker statistics at exit
+        --verbose-stats        Print detailed worker statistics at exit
+        -I DIR                 Add an x2c/C include directory
+        --x-include-dir DIR    Add an x2c include directory
+        --c-include-dir DIR    Add a C include directory
+        -D NAME[=VALUE]        Define a preprocessor macro
+        -L DIR, -l LIB         Configure native library linkage
+        -Xcc ARG, -Wl,ARG      Pass native compiler/linker options
+        --package-dir DIR      Add a package directory
+        --native-module FILE   Select a compile-time module
+        --manifest-path FILE   Use a project manifest
+        --target NAME          Select its target
+        --profile NAME         Select its build profile
+
+      Native build options use the same spellings as x2c build.
+      Successful loading and reloading clear prompt and library state."));
     return 0;
   }
   ReplOptions options = repl_reporting_options(arguments);

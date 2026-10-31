@@ -303,18 +303,12 @@ Code register_rewrite(Code function, Code pattern, List holes) {
 
 /* --- lib/system-macros.x ------------------------------------------------- */
 
-List _dedent_expand(Source text) {
-  String source = Code.source_text(text);
-  int length = source.len(), open = 0;
-  if (length >= 3 && source.startswith("%\""))
-    open = 2;
-  else if (length >= 2 && source.startswith("\""))
-    open = 1;
-  if (open == 0 || !source.endswith("\"") || "\\" in source ||
-      "$" in source)
-    return $!( $(text.assoc(<syntax>)).dedent() );
-  String body = source.getslice(open, length - 1, 1);
-  return $!String{ $(body.dedent()) };
+List _dedent_expand(Code text) {
+  if (text.format()) {
+    String body = text.value();
+    return $!String{ $(body.dedent()) };
+  }
+  return $!( $(text).dedent() );
 }
 
 List _macros_location(void) =>
@@ -1839,7 +1833,8 @@ static List _match_captures(List binders, List values) {
 }
 
 static List _match_arm(
-  List pattern, Var value, List expr, List finished, Array pool) {
+  List pattern, Var value, List expr, List finished, Array pool,
+  List equal) {
   if (!(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
       value is not <list>)
     return NULL;
@@ -1866,6 +1861,7 @@ static List _match_arm(
     declared.push(%(declare ("List") (bindings @(lists.list_free()))));
   List condition = _match_condition_of(
     test, (Code) pattern, expr, cursors, [], [], locals);
+  if (equal) condition = %(op || $equal $condition);
   declared.push(%(if $condition $finished));
   return %(block @(declared.list_free()));
 }
@@ -2054,7 +2050,8 @@ static Code _match_lowered(Code subject, List rows) {
     }
     List finished = _match_finished(body);
     List arm =
-      otherwise ? finished : _match_arm(pattern, value, expr, finished, pool);
+      otherwise ? finished
+                : _match_arm(pattern, value, expr, finished, pool, NULL);
     if (!arm) {
       List binders = _match_binders(value);
       if (binders.len() > values) values = binders.len();
@@ -2086,13 +2083,30 @@ Code match_lowering(Code node) {
   return node;
 }
 
+static int _match_plain_literal(Var value) {
+  if (value is <list>) {
+    List list = value;
+    if (list && list.car().is_match_op()) return 0;
+    foreach (Var part in list)
+      if (!_match_plain_literal(part)) return 0;
+    return 1;
+  }
+  return !value.is_binder() && value != <x2c-dyn>;
+}
+
 static Code _match_condition(Code subject, List pattern, List body) {
   int viewing = 0, values = -1;
   List frame = _match_frame(subject);
   List (expr, none) = frame;
   Var value = ((Code) pattern).pattern_value();
   Array pool = [];
-  List arm = _match_arm(pattern, value, expr, body, pool);
+  int literal = value is <list> && _match_plain_literal(value) &&
+    (pattern ~= %(expr ? (!or (cache ?) (expr ? (!or (cache ?) (nil)))
+                             (nil))));
+  List equal = literal ? %(op == $expr $pattern) : NULL;
+  List arm = literal && value.is_nil()
+    ? %(if $equal $body)
+    : _match_arm(pattern, value, expr, body, pool, equal);
   if (!arm) {
     List binders = _match_binders(value);
     values = binders.len();
@@ -2863,6 +2877,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_listed", _match_listed);
   $linked.row(rows, "_match_lowered", _match_lowered);
   $linked.row(rows, "match_lowering", match_lowering);
+  $linked.row(rows, "_match_plain_literal", _match_plain_literal);
   $linked.row(rows, "_match_condition", _match_condition);
   $linked.row(rows, "match_condition_lowering", match_condition_lowering);
   $linked.row(rows, "_printf_is_var", _printf_is_var);

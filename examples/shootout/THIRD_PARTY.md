@@ -1,74 +1,70 @@
 # Third-party notices
 
-The C-subset calibration algorithms, output formats, and paired C
-implementations are derived from the [Computer Language Benchmarks
-Game][game]. Their x2c programs are adaptations of the corresponding C
-programs.
+The reference C, Python, Rust, C++, Go, and Java programs are unmodified contributions from the
+Computer Language Benchmarks Game. Their original contributor notices remain
+in each source. The x2c versions adapt the algorithms and constants of those
+contributions while following the pinned official problem specifications.
 
-The Benchmarks Game repository and these program sources are distributed
-under the [BSD 3-Clause License][game-license]. Copyright and contributor
-notices are retained in each `benchmarks/*/{c,x2c}/main.*` file.
+Upstream repository: [benchmarksgame-team/benchmarksgame](https://salsa.debian.org/benchmarksgame-team/benchmarksgame).
+The adopted revision is `40296663ed350d5fe4a6ab5e367bab61cb77c219`.
+All reference programs come from its `public/download/benchmarksgame-sourcecode.zip`.
+The archive SHA-256 is:
 
-Program-specific attribution:
+```text
+aabcf6726cdc14f0f45b99e5daba48584f94bbb48883fd3711a1d040474d1cb4
+```
 
-- `nbody`: copyright Brent Fulgham and Isaac Gouy; C program contributed by
-  Christoph Bauer.
-- `spectralnorm`: based on the program contributed by Sebastien Loisel.
-- `fannkuchredux`: converted to C by Joseph Piche from the Java version by
-  Oleg Mazurov and Isaac Gouy.
+`benchmarks.json` records individual source and fixture hashes. Official
+specifications and input/output fixtures come from that same revision.
 
-The expected-output files encode the results required by the corresponding
-Benchmarks Game specifications:
+| Problem | Contributed C source in archive | Contributed Python source in archive |
+| --- | --- | --- |
+| n-body | `nbody/nbody.gcc` | `nbody/nbody.python3` |
+| spectral norm | `spectralnorm/spectralnorm.gcc-8.gcc` | `spectralnorm/spectralnorm.python3-6.python3` |
+| fannkuch-redux | `fannkuchredux/fannkuchredux.gcc` | `fannkuchredux/fannkuchredux.python3-8.python3` |
+| Mandelbrot bitmap | `mandelbrot/mandelbrot.gcc-8.gcc` | `mandelbrot/mandelbrot.python3-8.python3` |
+| fasta | `fasta/fasta.gcc` | `fasta/fasta.python3` |
+| k-nucleotide | `knucleotide/knucleotide.gcc` | `knucleotide/knucleotide.python3-3.python3` |
+| reverse-complement | `revcomp/revcomp.gcc-6.gcc` | `revcomp/revcomp.python3` |
+| binary-trees | `binarytrees/binarytrees.gcc-5.gcc` | `binarytrees/binarytrees.python3-2.python3` |
+| regex-redux | `regexredux/regexredux.gcc-5.gcc` | `regexredux/regexredux.python3` |
+| pidigits | `pidigits/pidigits.gcc` | `pidigits/pidigits.python3-4.python3` |
 
-- [n-body specification][nbody]
-- [spectral norm specification][spectralnorm]
-- [fannkuch-redux specification][fannkuchredux]
+The upstream BSD notice is retained in [LICENSE.BENCHMARKSGAME](LICENSE.BENCHMARKSGAME).
+The copyright symbol in that license is rendered as ASCII `(c)`. Reference
+sources, specification snapshots, and official fixtures retain their bytes.
+Original x2c code and harness changes use the [BSD 3-Clause license](LICENSE).
 
-[LangArena][langarena] is the workload-family reference and prospective
-integration target. The independently implemented x2c suite uses its
-binary-trees, Brainfuck, `CLBG::Mandelbrot`, and `Etc::Sieve` workload
-families, plus its matrix multiplication, Game of Life, quicksort, graph BFS,
-calculator AST, and CSV parsing families. The word-frequency pair follows
-LangArena's `Etc::Words` deterministic generator parameters and canonical
-50,000-word/360-iteration configuration; its implementations and checksum are
-original to this repository. LangArena is distributed under the MIT License.
+Go and Java contributions use their standard libraries unless a selected
+source records another dependency. Their archive paths and hashes are pinned
+in `benchmarks.json`; Java filenames may change only for compilation, with
+source bytes retained.
 
-All original harness code and documentation in this subtree are covered by
-its [BSD 3-Clause license](LICENSE).
+## Native dependencies
 
-## Benchmarks Game license notice
+- The adopted k-nucleotide C program uses klib `khash.h`, distributed under
+  the MIT license included in that header. Its pinned revision and hash are
+  recorded in `benchmarks.json`. Both x2c variants use existing runtime maps.
+- Regex-redux uses the existing pinned [PCRE2 package](../../packages/pcre2/README.md).
+  C and both x2c versions link the same package dependency. The Python
+  contribution uses its standard `re` engine.
+- Pidigits uses installed GMP for C and both x2c versions. GMP is separately
+  distributed under its upstream LGPLv3+/GPLv2+ terms; it is not vendored here.
+  The adopted Python contribution uses Python integers.
+- Rust contributions use the libraries pinned in `rust/Cargo.toml` and
+  `rust/Cargo.lock`: Rayon, typed-arena, regex, Rug, and gmp-mpfr-sys.
+  Cargo retains their upstream licenses with the downloaded packages. Rug
+  uses the installed GMP for the admitted pidigits implementation.
+- C++ pidigits uses the installed GMP C++ interface. C++ regex-redux uses
+  the same pinned PCRE2 dependency and the unmodified Boost 1.46
+  `noncopyable.hpp` header. Its source revision and hash are recorded in
+  `benchmarks.json`; the Boost license is retained under
+  `benchmarks/regexredux/vendor/LICENSE_1_0.txt`.
 
-Copyright (c) 2004-2008 Brent Fulgham, 2005-2015 Isaac Gouy. All rights
-reserved.
+The added source selections and coverage limits are listed in
+[reference-coverage.md](results/reference-coverage.md). Every admitted source
+path and hash is also recorded in `benchmarks.json`.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-- Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-- Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-- Neither the name of "The Computer Language Benchmarks Game" nor the name of
-  "The Computer Language Shootout Benchmarks" nor the names of its
-  contributors may be used to endorse or promote products derived from this
-  software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-
-[game]: https://salsa.debian.org/benchmarksgame-team/benchmarksgame
-[game-license]: https://salsa.debian.org/benchmarksgame-team/benchmarksgame/-/blob/master/LICENSE.md
-[nbody]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html
-[spectralnorm]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/spectralnorm.html
-[fannkuchredux]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html
-[langarena]: https://github.com/kostya/LangArena
+These implementations and local measurements do not imply upstream
+acceptance or endorsement. The suite does not reuse timings from the
+Benchmarks Game website.

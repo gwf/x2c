@@ -899,6 +899,25 @@ Response checks, existing HTTP regression checks, and 22 fresh instrumented
 normal/failure checks pass. This is not an HTTP performance result or a new
 runtime implementation. The existing validation, dev/main, and push hold remains.
 
+### Private dev integration, 2026-10-31
+
+Merged dev at `ffd915bd0` into the private async branch, starting from
+`d2a9df314`. This incorporates 62 upstream commits, including constant-List
+pattern matching, dedent folding, auto-region simplifications, and benchmark
+development. Upstream auto cleanup supersedes the corresponding explicit
+Scope rename edits. The extracted Notes database worker retains upstream SQL
+formatting without restoring a duplicate worker in the HTTP program.
+
+Bootstrap was regenerated through `make bootstrap-refresh`. The merged tree
+passes `make build-safe`, `make stage-2`, and all 1,150 unit tests with 99,495
+assertions. Constant-List equality and dedent fixtures pass. The task-service
+example and 64-client Notes normal/failure checks pass in both modes.
+The Notes HTTP API, recovery, and queued-shutdown regression checks also pass.
+Earlier performance results describe their recorded pre-merge revisions;
+normal benchmark comparisons remain deferred while that suite develops.
+The final publication gate and remaining publication work are still pending.
+This integration advances only the private branch; no push is authorized.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity

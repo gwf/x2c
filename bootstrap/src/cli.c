@@ -438,7 +438,7 @@ static CliOption cli_options[] ={
 }
 ;
 
-static String _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _164, _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -934,13 +934,13 @@ static TargetKind f8_requests___target_kinds[] ={
 ;
 
 _x2c_gensym_initializer_choice_6D011170_2((0 < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[0])), (f8_requests___target_kinds[0] =(TargetKind){
-  404971770155786, _148, _148, _149, _149
+  404971770155786, _149, _149, _150, _150
 }
 ), (1ULL < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[1ULL])), (f8_requests___target_kinds[1ULL] =(TargetKind){
-  1381098885964356, _150, _151, _152, _124
+  1381098885964356, _151, _152, _153, _124
 }
 ), (2ULL < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[2ULL])), (f8_requests___target_kinds[2ULL] =(TargetKind){
-  904178442, _153, _154, _149, _155
+  904178442, _154, _155, _150, _156
 }
 ), (3ULL < sizeof(f8_requests___target_kinds) / sizeof(f8_requests___target_kinds[3ULL])), (f8_requests___target_kinds[3ULL] =(TargetKind){
   0
@@ -1113,27 +1113,28 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _140 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
   _141 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
   _142 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
-  _143 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
-  _144 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
-  _145 = String_new("/commands.txt");
-  _146 = String_new(", ");
-  _147 = String_new(" ");
-  _148 = String_new("executable");
-  _149 = String_new("");
-  _150 = String_new("static-library");
-  _151 = String_new("static library");
-  _152 = String_new("lib");
-  _153 = String_new("meta-module");
-  _154 = String_new("native module");
-  _155 = String_new(".so");
-  _156 = String_new("shared-library");
-  _157 = String_new("shared-library is not supported by this compiler");
-  _158 = String_new("x2c 0.15.1");
-  _159 = String_new("input is not a regular file: ");
-  _160 = String_new("MAKELEVEL");
-  _161 = String_new("auto");
-  _162 = String_new("always");
-  _163 = String_new("never");
+  _143 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, new, script, repl,\nenv, install, remove, or list.");
+  _144 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
+  _145 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
+  _146 = String_new("/commands.txt");
+  _147 = String_new(", ");
+  _148 = String_new(" ");
+  _149 = String_new("executable");
+  _150 = String_new("");
+  _151 = String_new("static-library");
+  _152 = String_new("static library");
+  _153 = String_new("lib");
+  _154 = String_new("meta-module");
+  _155 = String_new("native module");
+  _156 = String_new(".so");
+  _157 = String_new("shared-library");
+  _158 = String_new("shared-library is not supported by this compiler");
+  _159 = String_new("x2c 0.15.1");
+  _160 = String_new("input is not a regular file: ");
+  _161 = String_new("MAKELEVEL");
+  _162 = String_new("auto");
+  _163 = String_new("always");
+  _164 = String_new("never");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -1737,11 +1738,11 @@ _Noreturn static void _help_exit(Symbol command, int status){
 }
 
 static void f4_help____print_help_usage(void){
-  puts("Usage:\n" "  x2c help [command]\n" "\n" "Show top-level help, or help for translate, build, run, new, script, " "repl,\nenv, install, remove, or list.");
+  puts(_143);
 }
 
 static void f4_help____print_top_help(void){
-  puts(_143);
+  puts(_144);
   for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", Symbol_str(command -> name), command -> description);
   f4_help____print_external_commands();
   f4_help____print_options(0);
@@ -1749,12 +1750,12 @@ static void f4_help____print_top_help(void){
   f4_help____print_help_row("@<file>", "Read additional arguments from a response file", 2);
   f4_help____print_help_row("--", "End option parsing", 2);
   puts("");
-  puts(_144);
+  puts(_145);
 }
 
 static void f4_help____print_external_commands(void){
   String libexec = Compiler_home_libexec();
-  File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_145), NULL))), "r") : NULL;
+  File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_146), NULL))), "r") : NULL;
   if(! manifest) return;
   char * line = NULL;
   size_t capacity = 0;
@@ -1819,12 +1820,12 @@ static void f4_help____print_option(const CliOption * option){
   String spelled;
   if(String_truth((* option).label)) spelled =(* option).label;
   else if(String_truth((* option).alias)) spelled =({
-    Var _x2c_gensym_literal_part_0 = String_var((* option).spelling);  Var _x2c_gensym_literal_part_1 = String_var((* option).alias);  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_146), cons(_x2c_gensym_literal_part_1, NULL))));
+    Var _x2c_gensym_literal_part_0 = String_var((* option).spelling);  Var _x2c_gensym_literal_part_1 = String_var((* option).alias);  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_147), cons(_x2c_gensym_literal_part_1, NULL))));
   }
   );
   else spelled =(* option).spelling;
   String label =(* option).value ?({
-    Var _x2c_gensym_literal_part_2 = String_var(spelled);  Var _x2c_gensym_literal_part_3 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_147), cons(_x2c_gensym_literal_part_3, NULL))));
+    Var _x2c_gensym_literal_part_2 = String_var(spelled);  Var _x2c_gensym_literal_part_3 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_148), cons(_x2c_gensym_literal_part_3, NULL))));
   }
   ) : spelled;
   f4_help____print_help_row(label, (* option).description, String_startswith(label, _97) ? 6 : 2);
@@ -1846,7 +1847,7 @@ static void f4_help____print_help_row(const char * label, const char * descripti
 
 Symbol TargetKind_named(String spelling, String * refusal){
   if(! _init_guard_) _file_init_();
-  (* refusal) = String_equal(spelling, _156) ? _157 : NULL;
+  (* refusal) = String_equal(spelling, _157) ? _158 : NULL;
   for(TargetKind * row = f8_requests___target_kinds;  row -> kind;  row ++) if(String_equal(spelling, row -> spelling)) return row -> kind;
   return 0;
 }
@@ -1870,7 +1871,7 @@ CliRequest CliRequest_new(Symbol command){
 
 String Compiler_version(void){
   if(! _init_guard_) _file_init_();
-  return _158;
+  return _159;
 }
 
 int CliRequest_inspects(CliRequest request){
@@ -1900,7 +1901,7 @@ void CliRequest_require_input(String input){
     fputs("note: pass source files, use a shell wildcard, or define a " "manifest target\n", stderr);
     exit(2);
   }
-  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_159), cons(String_var(input), NULL))));
+  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_160), cons(String_var(input), NULL))));
   fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
   if(strpbrk(input, "*?[")) fputs("note: x2c does not expand wildcard operands\n", stderr);
   exit(2);
@@ -1915,7 +1916,7 @@ static int f8_requests____default_jobs(void){
 String Env_get(String);
 
 static int f8_requests____make_owned(void){
-  String level = Env_get(_160);
+  String level = Env_get(_161);
   return String_is_digit(level) && atol(level) > 0;
 }
 
@@ -1930,9 +1931,9 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 }
 
 static int _x2c_gensym_string_switch_0(String s){
-  if(String_equal(s, _161)) return 1;
-  if(String_equal(s, _162)) return 2;
-  if(String_equal(s, _163)) return 3;
+  if(String_equal(s, _162)) return 1;
+  if(String_equal(s, _163)) return 2;
+  if(String_equal(s, _164)) return 3;
   return 0;
 }
 

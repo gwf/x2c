@@ -6,6 +6,7 @@
 #define __GUARD_0x05826271__
 
 #include "x2c.h"
+#include "system-macros.h"
 typedef Symbol Args;
 
 Map Args_parse(List args, List spec);

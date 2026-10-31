@@ -1,0 +1,35 @@
+{
+  "report_path": "/Users/gary/.codex/worktrees/f2bc/x2c/examples/shootout/results/current.json",
+  "report_sha256": "e17bcbffda7d8dddb2532bdb14291b168a24618d010e23557f746cb8d3908eac",
+  "run_id": "20261031T031704Z",
+  "profile": "local",
+  "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
+  "samples": 16,
+  "baseline_sha256": "d6eb1012997078b80472a28f7477715e108e0ed87dda46480a21203bb4073c5f",
+  "normalization": "Per-problem minima among available columns; all eight for shared problems",
+  "summary": "Geometric mean of the nine shared normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank source lines after language-aware comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10,
+  "summary_benchmarks": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "binarytrees",
+    "regexredux",
+    "pidigits"
+  ],
+  "unavailable": {
+    "knucleotide": {
+      "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+      "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
+      "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched.",
+      "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+    }
+  }
+}

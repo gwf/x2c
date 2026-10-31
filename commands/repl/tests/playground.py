@@ -220,14 +220,14 @@ def nbody(directory):
     output = completed.stdout
     require(completed.returncode == 0 and not completed.stderr,
             (output, completed.stderr))
-    for declaration in ("static void advance", "static double energy",
-                        "static void offset_momentum"):
+    for declaration in ("void advance", "double energy",
+                        "void offset_momentum"):
         require(re.search(r"^function +" + declaration, output, re.MULTILINE),
                 output)
-    require("global    Body bodies[5];" in output
-            and "system[0].vx = -px / SOLAR_MASS;" in output
+    require("global    struct planet bodies[5];" in output
+            and "bodies[0].vx = - px / solar_mass;" in output
             and "field    double mass;" in output, output)
-    bodies = re.findall(r"^=> Body \{ (.*) \}$", output, re.MULTILINE)
+    bodies = re.findall(r"^=> struct planet \{ (.*) \}$", output, re.MULTILINE)
     require(len(bodies) == 4, output)
     states = [dict(re.findall(r"(\w+): ([^, }]+)", body)) for body in bodies]
     require(float(states[0]["vx"]) == 0 and float(states[1]["vx"]) != 0

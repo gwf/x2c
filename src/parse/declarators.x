@@ -358,6 +358,9 @@ module List _finish_parameter(
   Token source_first, Token source_after) {
   List rest = base, container = rest.type().rest_container();
   base = _finish_type(c, container ? container : base);
+  if (!c.macro_holes && declarator === %(bind () ()) &&
+      c.sym.resolve_key(base) === %(void))
+    base = %(void);
   if (<auto> in base && !c.macro_holes && !c.shallow)
     $fail.parse_auto_storage(c, c.token);
   int preserved_self = 0;

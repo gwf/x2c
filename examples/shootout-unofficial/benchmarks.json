@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "specification": {
+    "name": "x2c C Python idiomatic ROI shootout",
+    "repository": "https://github.com/kostya/LangArena",
+    "revision": "workload families reviewed 2026-07-27"
+  },
+  "profiles": {
+    "quick": {
+      "nbody": ["10000"],
+      "spectralnorm": ["100"],
+      "fannkuchredux": ["7"],
+      "binarytrees": ["8", "3"],
+      "brainfuck": ["10"],
+      "wordfreq": ["1000", "1"],
+      "mandelbrot": ["64", "64", "1"],
+      "sieve": ["1000", "1"],
+      "matmul": ["20", "1"],
+      "gameoflife": ["20", "16", "5"],
+      "quicksort": ["1000", "1"],
+      "graphbfs": ["100", "3", "1"],
+      "calculatorast": ["100"],
+      "csvparse": ["100", "1"]
+    },
+    "local": {
+      "nbody": ["5000000"],
+      "spectralnorm": ["2000"],
+      "fannkuchredux": ["10"],
+      "binarytrees": ["12", "100"],
+      "brainfuck": ["100000"],
+      "wordfreq": ["50000", "10"],
+      "mandelbrot": ["500", "500", "1"],
+      "sieve": ["500000", "5"],
+      "matmul": ["180", "4"],
+      "gameoflife": ["192", "128", "100"],
+      "quicksort": ["200000", "10"],
+      "graphbfs": ["50000", "8", "100"],
+      "calculatorast": ["1000000"],
+      "csvparse": ["50000", "10"]
+    },
+    "canonical": {
+      "nbody": ["50000000"],
+      "spectralnorm": ["5500"],
+      "fannkuchredux": ["12"],
+      "binarytrees": ["12", "100"],
+      "brainfuck": ["100000"],
+      "wordfreq": ["50000", "360"],
+      "mandelbrot": ["1000", "1000", "1"],
+      "sieve": ["1000000", "10"],
+      "matmul": ["300", "10"],
+      "gameoflife": ["256", "256", "1000"],
+      "quicksort": ["1000000", "20"],
+      "graphbfs": ["100000", "10", "1000"],
+      "calculatorast": ["10000000"],
+      "csvparse": ["100000", "100"]
+    }
+  },
+  "benchmarks": [
+    {
+      "name": "nbody",
+      "title": "n-body",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html",
+      "checks": [
+        {
+          "args": ["1000"],
+          "expected": "expected/1000.out",
+          "comparison": {
+            "kind": "numeric_lines",
+            "absolute_tolerance": 1e-8
+          }
+        },
+        {
+          "args": ["10000"],
+          "expected": "expected/10000.out",
+          "comparison": {
+            "kind": "numeric_lines",
+            "absolute_tolerance": 1e-8
+          }
+        }
+      ]
+    },
+    {
+      "name": "spectralnorm",
+      "title": "spectral norm",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/spectralnorm.html",
+      "checks": [
+        {"args": ["100"], "expected": "expected/100.out"}
+      ]
+    },
+    {
+      "name": "fannkuchredux",
+      "title": "fannkuch-redux",
+      "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html",
+      "checks": [
+        {"args": ["7"], "expected": "expected/7.out"},
+        {"args": ["10"], "expected": "expected/10.out"}
+      ]
+    },
+    {
+      "name": "binarytrees",
+      "title": "scalar-leaf canonical List binary trees",
+      "description_url": "https://github.com/kostya/LangArena/tree/master/Binarytrees",
+      "checks": [
+        {"args": ["8", "3"], "expected": "expected/8-3.out"}
+      ]
+    },
+    {
+      "name": "brainfuck",
+      "title": "String/Array/List brainfuck interpreter",
+      "description_url": "https://github.com/kostya/LangArena/tree/master/Brainfuck",
+      "checks": [
+        {"args": ["10"], "expected": "expected/10.out"}
+      ]
+    },
+    {
+      "name": "wordfreq",
+      "title": "word frequencies with map and string iteration",
+      "description_url": "https://github.com/kostya/LangArena/tree/master/Etc",
+      "checks": [
+        {"args": ["1000", "1"], "expected": "expected/1000-1.out"},
+        {"args": ["50000", "1"], "expected": "expected/50000-1.out"}
+      ]
+    },
+    {
+      "name": "mandelbrot",
+      "title": "Mandelbrot bitmap checksum",
+      "description_url": "https://github.com/kostya/LangArena",
+      "checks": [
+        {"args": ["16", "10", "1"], "expected": "expected/16-10-1.out"}
+      ]
+    },
+    {
+      "name": "sieve",
+      "title": "Sieve of Eratosthenes",
+      "description_url": "https://github.com/kostya/LangArena",
+      "checks": [
+        {"args": ["100", "1"], "expected": "expected/100-1.out"}
+      ]
+    },
+    {
+      "name": "matmul",
+      "title": "single-threaded matrix multiplication",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/c/src/matmul1t.c",
+      "checks": [
+        {"args": ["20", "1"], "expected": "expected/20-1.out"}
+      ]
+    },
+    {
+      "name": "gameoflife",
+      "title": "toroidal Game of Life",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/c/src/game_of_life.c",
+      "checks": [
+        {"args": ["20", "16", "5"], "expected": "expected/20-16-5.out"}
+      ]
+    },
+    {
+      "name": "quicksort",
+      "title": "in-place quicksort",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/rust/src/benchmarks/sort_quick.rs",
+      "checks": [
+        {"args": ["1000", "1"], "expected": "expected/1000-1.out"}
+      ]
+    },
+    {
+      "name": "graphbfs",
+      "title": "breadth-first graph path",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/c/src/graph_path.c",
+      "checks": [
+        {"args": ["100", "3", "1"], "expected": "expected/100-3-1.out"}
+      ]
+    },
+    {
+      "name": "calculatorast",
+      "title": "persistent calculator AST evaluation",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/c/src/calculator.c",
+      "checks": [
+        {"args": ["100"], "expected": "expected/100.out"}
+      ]
+    },
+    {
+      "name": "csvparse",
+      "title": "quoted CSV parsing",
+      "description_url": "https://github.com/kostya/LangArena/blob/master/c/src/csv.c",
+      "checks": [
+        {"args": ["100", "1"], "expected": "expected/100-1.out"}
+      ]
+    }
+  ]
+}

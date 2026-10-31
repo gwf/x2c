@@ -1,44 +1,67 @@
-#!/usr/bin/env python3
+# The Computer Language Benchmarks Game
+#   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+#
+#   Naive transliteration from Rex Kerr's Scala program
+#   contributed by Isaac Gouy 
+#
 
-import sys
+def fannkuch(n):
+   perm1 = [0] * n   
+   for i in range(n): perm1[i] = i      
+   perm = [0] * n
+   count = [0] * n       
+   f = flips = nperm = checksum = j = k = r = 0          
+  
+   r = n
+   while r > 0: 
+      i = 0  
+      while r != 1: count[r-1] = r; r -= 1  
+      while i < n: perm[i] = perm1[i]; i += 1  
+        
+      # Count flips and update max and checksum
+      f = 0
+      k = perm[0]  
+      while k != 0:
+         i = 0  
+         while 2*i < k:          
+            t = perm[i]; perm[i] = perm[k-i]; perm[k-i] = t  
+            i += 1           
 
+         k = perm[0]
+         f += 1   
+       
+      if f > flips: flips = f         
+      if (nperm & 0x1) == 0: 
+         checksum += f 
+      else: 
+         checksum -= f
+   
+      # Use incremental change to generate another permutation   
+      more = True
+      while more:  
+         if r == n:
+            print( checksum )                     
+            return flips 
 
-def fannkuchredux(n):
-    permutation = list(range(n))
-    working = [0] * n
-    counts = [0] * n
-    maximum = checksum = permutation_count = 0
-    r = n
+         p0 = perm1[0]
+         i = 0
+         while i < r:
+            j = i + 1
+            perm1[i] = perm1[j]
+            i = j            
 
-    while True:
-        while r != 1:
-            counts[r - 1] = r
-            r -= 1
+         perm1[r] = p0 
+         
+         count[r] -= 1        
+         if count[r] > 0: more = False
+         else: r += 1 
 
-        working[:] = permutation
-        flips = 0
-        while working[0] != 0:
-            end = working[0]
-            working[: end + 1] = working[end::-1]
-            flips += 1
+      nperm += 1
 
-        maximum = max(maximum, flips)
-        checksum += flips if permutation_count % 2 == 0 else -flips
+   return flips      
 
-        while True:
-            if r == n:
-                return checksum, maximum
-            first = permutation[0]
-            permutation[:r] = permutation[1 : r + 1]
-            permutation[r] = first
-            counts[r] -= 1
-            if counts[r] > 0:
-                break
-            r += 1
-        permutation_count += 1
+from sys import argv   
 
+n = int(argv[1]) if len(argv) > 1 else 7   
+print("Pfannkuchen(%i) = %i" % (n, fannkuch(n))) 
 
-n = int(sys.argv[1]) if len(sys.argv) > 1 else 7
-checksum, maximum = fannkuchredux(n)
-print(checksum)
-print(f"Pfannkuchen({n}) = {maximum}")
