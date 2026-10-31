@@ -82,7 +82,7 @@ repository root:
 ```
 
 The [input script][nbody-input] loads the unchanged C benchmark, discovers
-its functions, shows a static definition, and inspects the `bodies` array
+its functions, shows a function definition, and inspects the `bodies` array
 before and after calls. The walkthrough also shows how to enter each command
 interactively.
 

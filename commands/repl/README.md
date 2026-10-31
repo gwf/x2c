@@ -5,7 +5,7 @@
 workflow, restart policy, and lifetime rules.
 
 The [N-body demo](examples/README.md) loads an unchanged C program and walks
-through function discovery, source inspection, and calls on its static data.
+through function discovery, source inspection, and calls on its global data.
 From the repository root:
 
 ```sh
