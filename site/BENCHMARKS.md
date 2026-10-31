@@ -3,7 +3,7 @@
 The recoverable source of truth is
 [examples/shootout/results/README.md](../examples/shootout/results/README.md).
 All saved chart sets, reports, samples, recipes, and supporting experiments are
-versioned there. The latest public candidate is run `20261031T161720Z`.
+versioned there. The latest public candidate is run `20261031T170749Z`.
 This document prepares integration; it does not add a page, alter site builds,
 or deploy the website.
 
@@ -11,7 +11,7 @@ or deploy the website.
 
 Use one run consistently. For the latest candidate, its directory is:
 
-`examples/shootout/results/runs/20261031T161720Z/`
+`examples/shootout/results/runs/20261031T170749Z/`
 
 - `charts/runtime-source-size.svg`: summary plot; PNG and PDF also available.
 - `charts/implementation-profiles.svg`: individual problem outcomes.
@@ -25,7 +25,7 @@ Use one run consistently. For the latest candidate, its directory is:
 - `current.json`: full audit report; prefer `website.json` for public ingestion.
 
 For a future Astro page, copy the chosen SVG/PNG files, CSVs, and `website.json`
-into `site/public/benchmarks/20261031T161720Z/`. Astro copies `public/` assets
+into `site/public/benchmarks/20261031T170749Z/`. Astro copies `public/` assets
 into the static output. Keep the archive authoritative; do not hand-edit
 numbers in a page or duplicate raw measurement logic in JavaScript. No copy
 step or recurring gate is added now. A future `site/src/pages/benchmarks.astro`
@@ -35,7 +35,7 @@ Respect the existing site base, which defaults to `/x2c/`. In an Astro page,
 build an asset URL with `import.meta.env.BASE_URL` rather than assuming `/`:
 
 ```astro
-<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T161720Z/runtime-source-size.svg`}
+<img src={`${import.meta.env.BASE_URL}benchmarks/20261031T170749Z/runtime-source-size.svg`}
      alt="Local runtime and source size across nine shared Benchmarks Game problems" />
 ```
 
@@ -45,6 +45,16 @@ optional downloads. Do not copy `raw/`, machine receipts, process snapshots,
 or original path-bearing `charts/provenance.json` directly into public assets.
 The curated export includes source and publication revisions for attribution.
 
+## Parallelism policy
+
+Keep the existing idiomatic/tuned distinction and eight-column comparison.
+Where official submissions for a problem use parallelism, x2c may use it too.
+Where none do, keep x2c serial. Continue to honor each official workload's
+algorithm and work requirements. Do not split the headline charts into serial
+and parallel regimes or impose a separate matching-core comparison. The
+[threading notes](../examples/shootout/results/threading.md) record the current
+precedents. Earlier serial/probe charts remain historical supporting evidence.
+
 ## Content that must accompany the comparison
 
 - These are local selected-program measurements, not results published or
@@ -53,7 +63,7 @@ The curated export includes source and publication revisions for attribution.
   and Java. x2c columns follow the [suite definitions](../examples/shootout/README.md).
 - State Apple M4 Max, local profile, sixteen samples, fresh processes, exact
   measured revision, run ID, and observation time. Run IDs use UTC; the latest
-  observation was 2026-10-31 09:17 PDT / 2026-10-31 16:17 UTC.
+  observation was 2026-10-31 10:07 PDT / 2026-10-31 17:07 UTC.
 - Java includes JVM startup and JIT compilation. A separate process warmup
   does not warm the measured JVM. Do not describe it as steady-state Java.
 - Summary charts use the same nine problems in every column. Per-problem
@@ -86,9 +96,9 @@ When a page is implemented, use the existing `make site-check` and local visual
 review described in [site/README.md](README.md). No new check is required by
 this documentation change, and public deployment remains a separate action.
 
-The latest run adds `counter-spectral-probes` in PNG/SVG/PDF and CSV, with a
-separate renderer and provenance. Counter objects are a rejected experiment,
-not an additional column. Idiomatic spectral-norm uses six worker row batches
-at N>=256 and a serial path below that size. Tuned spectral-norm remains serial.
-The earlier binary-trees focused comparison remains in run `20261031T145604Z`.
-Retain those serial/parallel source and chart sets.
+The latest run adds `bound-fann-probes` in PNG/SVG/PDF and CSV, with its
+renderer and provenance. Loop-bound candidate: adopted; parallel fannkuch:
+adopted. State the serial cutoff N<9 and unchanged tuned fannkuch strategy.
+The earlier Counter/spectral experiment remains in run `20261031T161720Z`;
+the tree serial/parallel experiment remains in run `20261031T145604Z`.
+Keep those historical comparisons labeled with their actual runs.

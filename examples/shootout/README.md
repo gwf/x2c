@@ -48,6 +48,12 @@ range's starting rank, and retain global checksum parity. Smaller inputs run
 serially. Tuned fannkuch retains its serial typed Arrays. K-nucleotide caches
 its immutable sequence-length loop bound and retains ordinary numeric Map values.
 
+Parallelism follows published Benchmarks Game precedent for each problem. If
+other official submissions use it, x2c may use it too; if none do, x2c stays
+serial. Algorithm and workload requirements still apply. This policy operates
+within the existing idiomatic/tuned definitions and adds no comparison columns
+or separate serial/parallel chart regimes.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target

@@ -1,45 +1,41 @@
 # Remaining idiomatic x2c performance gaps
 
-Current run `20261031T161720Z`, local profile, measured source
-`a8d02959e25f6517cdcf189d386c637f587f016e` on Apple M4 Max. Values are sixteen-sample median
-elapsed milliseconds. These selected-program differences do not isolate
-language, allocation, or threading overhead. Rows rank absolute excess over C.
+Current run `20261031T170749Z`, local profile, measured source
+`06a81d6535120d6c0c07e320751548075c5d3fc1` on Apple M4 Max. Values are sixteen-sample median
+elapsed milliseconds. Selected-program differences do not isolate language,
+allocation, or threading overhead. Rows rank absolute excess over C; negative
+excess means the selected x2c program ran faster than the selected C program.
 
 | Workload | Idiomatic ms | C ms | Tuned ms | Idiomatic/C | Excess over C ms |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| knucleotide | 168.942 | 18.502 | 73.807 | 9.13 | 150.440 |
-| fannkuchredux | 48.416 | 15.377 | 12.256 | 3.15 | 33.038 |
-| nbody | 63.562 | 31.775 | 63.533 | 2.00 | 31.788 |
-| regexredux | 53.411 | 38.725 | 52.833 | 1.38 | 14.686 |
-| pidigits | 278.149 | 266.141 | 265.173 | 1.05 | 12.008 |
-| fasta | 19.767 | 7.944 | 14.665 | 2.49 | 11.823 |
-| spectralnorm | 17.591 | 7.139 | 7.393 | 2.46 | 10.452 |
-| revcomp | 11.813 | 1.528 | 12.468 | 7.73 | 10.285 |
-| binarytrees | 28.016 | 24.193 | 27.558 | 1.16 | 3.823 |
-| mandelbrot | 9.885 | 8.942 | 9.018 | 1.11 | 0.943 |
+| knucleotide | 170.790 | 18.918 | 75.638 | 9.03 | 151.872 |
+| nbody | 67.616 | 32.858 | 68.606 | 2.06 | 34.758 |
+| regexredux | 54.524 | 39.759 | 54.306 | 1.37 | 14.766 |
+| fasta | 21.609 | 8.735 | 15.451 | 2.47 | 12.873 |
+| pidigits | 273.683 | 262.181 | 260.864 | 1.04 | 11.501 |
+| revcomp | 12.249 | 1.539 | 12.724 | 7.96 | 10.710 |
+| spectralnorm | 17.996 | 7.847 | 8.164 | 2.29 | 10.150 |
+| binarytrees | 27.602 | 24.832 | 26.805 | 1.11 | 2.770 |
+| mandelbrot | 11.137 | 9.984 | 10.182 | 1.12 | 1.153 |
+| fannkuchredux | 10.025 | 16.337 | 13.184 | 0.61 | -6.313 |
 
-## Adopted and rejected experiments
+## Latest experiments
 
-Idiomatic spectral-norm now uses six ordinary row workers at N>=256 and a
-serial path for smaller inputs. Its Array representation and each row's
-summation order remain unchanged. The previous serial source and full charts
-remain in [run 20261031T145604Z](runs/20261031T145604Z/README.md). Tuned spectral-norm stays serial.
+Parallel fannkuch: **adopted**. Cached k-nucleotide loop bound: **adopted**.
+[Run 20261031T170749Z](runs/20261031T170749Z/README.md) preserves the exact decisions, paired elapsed
+and CPU measurements, full-run C drift, candidate sources, and correctness
+checks. The earlier serial fannkuch source and all prior charts remain intact.
+No typed containers, raw collection storage, custom allocators, or runtime or
+compiler changes were introduced by these benchmark changes.
 
-The ordinary Counter-object Map implementation did not demonstrate a repeatable
-overall gain across the tested k-nucleotide inputs. Keep numeric Map values.
-The source, successful correctness checks, active-desktop results, and quiet
-paired samples remain preserved in [this run](runs/20261031T161720Z/README.md). This rejects
-that implementation rather than all possible Counter or Map improvements.
-The earlier `counts[key] += 1` substitution also regressed and remains rejected.
+Counter objects and `counts[key] += 1` remain rejected k-nucleotide experiments.
+Their failure does not rule out all Map or representation improvements.
+K-nucleotide slicing, canonical String storage, hashing, and value conversions
+still need profiling. N-body has no further demonstrated idiomatic source fix.
+A regex count-only API is a possible adapter improvement, not an implemented
+benchmark change. Parallel strategies affect elapsed time and CPU consumption;
+these comparisons do not establish single-core language performance.
 
-K-nucleotide allocation, short String keys, hashing, and value conversions still
-need profiling. N-body and fannkuch retain collection-access and conversion
-cost candidates without another demonstrated idiomatic source fix. Parallel
-spectral-norm changes elapsed time and CPU consumption; it does not establish a
-single-core improvement. No typed containers, SubStrings, raw storage, custom
-allocators, or compiler/runtime edits were introduced by this source change.
-
-Earlier Node, reverse-complement Buffer, n-body pair, fannkuch bulk copy, FASTA
-Choice records/Buffer, regex JIT, and parallel tree changes remain applied.
-All earlier immutable reports and rejected probes remain recoverable. Java
-includes startup/JIT. Canonical-size timing remains unrun.
+Earlier Node, Buffer, pair precomputation, bulk copy, Choice records, regex JIT,
+and parallel tree/spectral changes remain applied. Java includes startup/JIT.
+Canonical-size timing remains unrun.

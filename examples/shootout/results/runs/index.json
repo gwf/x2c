@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "current_run": "20261031T161720Z",
+  "current_run": "20261031T170749Z",
   "runs": [
     {
       "run_id": "20261031T011256Z",
@@ -115,6 +115,25 @@
       "path": "20261031T161720Z",
       "publication_revision": "d30286d20c4cd89c65d5d68f1bff8efe639e53df",
       "measured_revision": "a8d02959e25f6517cdcf189d386c637f587f016e",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T170749Z",
+      "path": "20261031T170749Z",
+      "publication_revision": "4b881e60fd9c4492cea9947a57d072d18e04b5ef",
+      "measured_revision": "06a81d6535120d6c0c07e320751548075c5d3fc1",
       "implementations": [
         "c",
         "idiomatic",

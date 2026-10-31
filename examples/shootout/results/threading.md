@@ -13,6 +13,31 @@ describes parallel chunks and atomic task scheduling. The
 requires its step-by-step single-threaded algorithm. Therefore, parallelism is
 not a blanket license to change every workload.
 
+## Comparison policy
+
+Parallelism follows published Benchmarks Game precedent for each problem. If
+other official submissions use it, x2c may use it too; if none do, x2c stays
+serial. Algorithm and workload requirements still apply. This policy operates
+within the existing idiomatic/tuned definitions and adds no comparison columns
+or separate serial/parallel chart regimes.
+
+The current threaded x2c entries have direct published precedents:
+
+- Binary-trees: the [adopted C contribution](../benchmarks/binarytrees/main.c)
+  uses pthread workers. The project also publishes an
+  [OpenMP C entry](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-3.html).
+- Spectral-norm: the [adopted Rust contribution](../benchmarks/spectralnorm/main.rs)
+  uses native threads. The project also publishes an
+  [OpenMP C entry](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-3.html).
+- Fannkuch-redux: the [adopted Rust contribution](../benchmarks/fannkuchredux/main.rs)
+  divides permutations among native threads. The official specification also
+  describes parallel chunks.
+
+Source identities and unchanged contributed bytes are pinned in
+[benchmarks.json](../benchmarks.json). Historical serial measurements and
+paired source probes remain supporting evidence. They do not create additional
+headline comparison categories. Thread strategies remain stated in run metadata.
+
 ## What the adopted C binary-trees program does
 
 Our pinned [C source](../benchmarks/binarytrees/main.c) starts one pthread for
@@ -72,3 +97,14 @@ The coordinator joins every worker before the next matrix product reads the
 output. Per-product Rows objects remain alive through join. Small inputs use
 the same calculation serially. Tuned spectral-norm remains its serial typed-Array
 implementation. This is a change in execution mode, not a single-core speedup.
+
+## Ordinary parallel fannkuch-redux
+
+The idiomatic entry uses six ordinary Threads at N>=9. Each Chunk record holds
+its size, global first/last permutation ranks, scalar checksum/maximum, and
+Thread handle. Each worker owns its permutation, working, and countdown Arrays.
+The starting state is derived from factorial rotation digits. Global rank
+parity determines checksum signs; chunk sums and maxima combine after joining.
+The ranges partition [0,n!) and use 64-bit arithmetic for partition products.
+N<9 runs the same calculation serially. Tuned fannkuch retains its serial
+implementation. Parallel execution is described by the pinned official spec.

@@ -98,3 +98,11 @@ k-nucleotide input/output oracles, C spectral parity checks, initial and
 cutoff probes, quiet paired samples, build/source/binary hashes, and scripts.
 The Counter experiment was not adopted; the spectral row-batch implementation
 was adopted. Full calibration is [run 20261031T161720Z](../runs/20261031T161720Z/README.md).
+
+## Cached loop bounds and parallel fannkuch
+
+`bound-fann/` retains baseline/candidate sources, the original and portable
+probe scripts, 5,912 permutation-rank/continuation checks, C output parity,
+initial and quiet paired samples, build/source/binary hashes, decisions, and
+quiet observations. The unchanged DNA oracle corpus is in
+`counter-spectral/inputs/`. Full calibration is [run 20261031T170749Z](../runs/20261031T170749Z/README.md).

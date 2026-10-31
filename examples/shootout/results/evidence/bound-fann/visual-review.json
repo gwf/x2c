@@ -1,0 +1,18 @@
+{
+  "run_id": "20261031T170749Z",
+  "forms_reviewed": [
+    "runtime-source-size",
+    "implementation-profiles",
+    "runtime-loc-distributions",
+    "bound-fann-probes"
+  ],
+  "columns": 8,
+  "common_problems": 9,
+  "checks": [
+    "all series and labels visible without clipping",
+    "summary idiomatic/C++ labels separated",
+    "probe axes use actual numeric input N",
+    "small-N annotation remains inside plot",
+    "standard chart forms retained without separate serial/parallel regimes"
+  ]
+}
