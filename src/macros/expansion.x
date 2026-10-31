@@ -67,8 +67,8 @@ void Compiler.print_macro_expansion(Compiler c, List frame, List result) {
         input %s
         result
     "),
-    site.assoc(<file>), site.assoc(<line>).int(),
-    site.assoc(<column>).int(), definition.assoc(<name>),
+    site.assoc(<file>).str(), site.assoc(<line>).int(),
+    site.assoc(<column>).int(), definition.assoc(<name>).str(),
     source, Diagnostics.macro_expansion_input(input).repr());
   Ast.print_dump($(result));
 }
