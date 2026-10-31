@@ -92,10 +92,13 @@ def check_benchmark(benchmark, manifest, toolchain, directory, args):
   cppflags, ldflags = suite.native_flags(benchmark)
   includes = [*cppflags, *toolchain["cppflags"], "-I", str(source.parent)]
   native = directory / "native-program"
+  compiler_flags = [argument
+                    for flag in benchmark.get("c_flags", [])
+                    for argument in ([flag] if flag == "-pthread" else ["-Xcc", flag])]
   native_argv = [
     str(toolchain["x2c"]), "build", "--cc", toolchain["cc"],
     *toolchain["cflags"], *includes,
-    *benchmark.get("c_flags", []), *ldflags, *toolchain["ldflags"],
+    *compiler_flags, *ldflags, *toolchain["ldflags"],
     *benchmark.get("c_link_flags", []),
     "--build-dir", str(directory / "native-build"),
     "--output", str(native), str(source),

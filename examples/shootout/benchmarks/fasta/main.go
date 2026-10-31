@@ -5,6 +5,7 @@
  * Based on C program by Joern Inge Vestgaarden
  * and Jorge Peixoto de Morais Neto.
  * flag.Arg hack by Isaac Gouy
+ * parallel hack by INADA Naoki
  */
 
 package main
@@ -13,12 +14,11 @@ import (
    "bufio"
    "flag"
    "os"
+   "runtime"
    "strconv"
 )
 
 var out *bufio.Writer
-
-var n = 0
 
 const WIDTH = 60 // Fold lines after WIDTH bytes
 
@@ -62,49 +62,109 @@ func RepeatFasta(s []byte, count int) {
    }
 }
 
-var lastrandom uint32 = 42
-
 const (
    IM = 139968
    IA = 3877
    IC = 29573
 )
 
+var lastrandom uint32 = 42
+
+func generateRandom(buf []float64) {
+   for i := 0; i < len(buf); i++ {
+      lastrandom = (lastrandom*IA + IC) % IM
+      buf[i] = float64(lastrandom) / IM
+   }
+}
+
+// generateDna generates DNA text from random sequence.
 // Each element of genelist is a struct with a character and
 // a floating point number p between 0 and 1.
-// RandomFasta generates a random float r and
+// generateDna takes a random float r and
 // finds the first element such that p >= r.
 // This is a weighted random selection.
+func generateDna(genelist []AminoAcid, rb []float64, wb []byte) int {
+   count := len(rb)
+   i := 0
+   o := 0
+   for count > 0 {
+      line := min(WIDTH, count)
+      count -= line
+      for j := 0; j < line; j++ {
+         r := rb[i]
+         for _, v := range genelist {
+            if v.p >= r {
+               wb[o] = v.c
+               break
+            }
+         }
+         i++
+         o++
+      }
+      wb[o] = '\n'
+      o++
+   }
+   return o
+}
+
+const (
+   RANDOM_BUF_SIZE = WIDTH * 1000
+   OUT_BUF_SIZE    = (WIDTH + 1) * 1000
+
+   // 1 for output, 4 for generateDna, 1 for generateRandom and 2 spaces
+   SLOT = 8
+)
+
 // RandomFasta then prints the character of the array element.
 // This sequence is repeated count times.
 // Between each WIDTH consecutive characters, the function prints a newline.
 func RandomFasta(genelist []AminoAcid, count int) {
-   buf := make([]byte, WIDTH+1)
-   for count > 0 {
-      line := min(WIDTH, count)
-      for pos := 0; pos < line; pos++ {
-         lastrandom = (lastrandom*IA + IC) % IM
-         // Integer to float conversions are faster if the integer is signed.
-         r := float64(int(lastrandom)) / IM
-         for _, v := range genelist {
-            if v.p >= r {
-               buf[pos] = v.c
-               break
-            }
-         }
-      }
-      buf[line] = '\n'
-      out.Write(buf[0 : line+1])
-      count -= line
+   rbufs := make([][]float64, SLOT)
+   wbufs := make([][]byte, SLOT)
+   for i := 0; i < SLOT; i++ {
+      rbufs[i] = make([]float64, RANDOM_BUF_SIZE)
+      wbufs[i] = make([]byte, OUT_BUF_SIZE)
    }
+
+   // Use `chan []byte` as future object. och is queue of future.
+   och := make(chan chan []byte, 4)
+   done := make(chan bool)
+   go func() {
+      for bc := range och {
+         buf := <-bc
+         out.Write(buf)
+      }
+      done <- true
+   }()
+
+   for i := 0; count > 0; i++ {
+      chunk := min(count, RANDOM_BUF_SIZE)
+      count -= chunk
+      rb := rbufs[i%SLOT][:chunk]
+      wb := wbufs[i%SLOT]
+      generateRandom(rb)
+
+      c := make(chan []byte)
+      och <- c
+      go func(rb []float64, wb []byte, c chan []byte) {
+         o := generateDna(genelist, rb, wb)
+         c <- wb[:o]
+      }(rb, wb, c)
+   }
+   close(och)
+   <-done
 }
 
 func main() {
+   runtime.GOMAXPROCS(runtime.NumCPU())
    out = bufio.NewWriter(os.Stdout)
    defer out.Flush()
 
+   n := 0
    flag.Parse()
-   if flag.NArg() > 0 { n,_ = strconv.Atoi( flag.Arg(0) ) }
+   if flag.NArg() > 0 {
+      n, _ = strconv.Atoi(flag.Arg(0))
+   }
 
    iub := []AminoAcid{
       AminoAcid{0.27, 'a'},
@@ -150,4 +210,3 @@ func main() {
    out.WriteString(">THREE Homo sapiens frequency\n")
    RandomFasta(homosapiens, 5*n)
 }
-

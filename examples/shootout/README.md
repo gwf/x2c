@@ -13,7 +13,7 @@ The comparison has eight columns, with coverage recorded per problem:
 | `main.x` | Idiomatic x2c, using ordinary collections and APIs |
 | `tuned.x` | Tuned x2c, including typed containers and borrowed substrings |
 | `main.c` | An unmodified contributed C program |
-| `main.py` | An unmodified contributed Python program |
+| `main.py` | An unmodified contributed Python program, where admitted |
 | `main.rs` | An unmodified contributed Rust program, where admitted |
 | `main.cpp` | An unmodified contributed C++ program, where admitted |
 | `main.go` | An unmodified contributed Go program |
@@ -42,6 +42,21 @@ each row preserves its original summation order. Smaller inputs run serially.
 Tuned spectral-norm retains its serial typed Arrays. The Counter-object
 k-nucleotide probe is preserved as evidence; numeric Map values remain active.
 
+Idiomatic fannkuch-redux uses six ordinary `Thread` permutation ranges at N>=9.
+Workers own their Arrays, initialize the prescribed rotation order at each
+range's starting rank, and retain global checksum parity. Smaller inputs run
+serially. Tuned fannkuch retains its serial typed Arrays. K-nucleotide caches
+its immutable sequence-length loop bound and retains ordinary numeric Map values.
+Seven ordinary Threads count the seven required widths independently. Each
+worker builds a full Map and formats its result; the caller joins and prints
+results in specification order. Shared canonical Strings retain output values.
+
+Parallelism follows published Benchmarks Game precedent for each problem. If
+other official submissions use it, x2c may use it too; if none do, x2c stays
+serial. Algorithm and workload requirements still apply. This policy operates
+within the existing idiomatic/tuned definitions and adds no comparison columns
+or separate serial/parallel chart regimes.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target
@@ -50,10 +65,15 @@ checks; C++ candidates need GNU-only headers absent from this toolchain.
 the selected contributions' input constraints. Contributions are not patched
 to conceal these differences.
 
-Summary rows and comparison charts use the nine problems shared by all eight
-columns. Individual problem rows still include k-nucleotide for C, Python,
-and the two x2c implementations. No summary mixes a nine-problem column with a
-ten-problem column.
+Python binary-trees is also N/A. Its previous constant leaves miss required
+allocations; the fresh-leaf archived alternative disables GC and is excluded
+under the pinned default-GC guidance. The allocation finding is reproduced;
+the GC exclusion is an interpretation recorded in the coverage report.
+
+Summary rows and comparison charts use the eight problems shared by all eight
+columns. Individual rows retain all admitted cells for the other two problems.
+Earlier nine-problem summaries have a different cohort. There are 75 admitted
+programs; 56 samples complete every Latin rotation, giving 4,200 observations.
 
 x2c can also express C directly. That capability is understood and has no
 separate column. The C column measures an actual contributed C program.

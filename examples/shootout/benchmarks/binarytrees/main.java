@@ -1,64 +1,93 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- 
-   contributed by Jarkko Miettinen
-   *reset*
-*/
+/**
+ * The Computer Language Benchmarks Game
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+ *
+ * based on Jarkko Miettinen's Java program
+ * contributed by Tristan Dupont
+ * *reset*
+ */
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class binarytrees {
 
-   private final static int minDepth = 4;
-   
-   public static void main(String[] args){
-      int n = 0;
-      if (args.length > 0) n = Integer.parseInt(args[0]);
-      
-      int maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n;
-      int stretchDepth = maxDepth + 1;
-      
-      int check = (TreeNode.bottomUpTree(stretchDepth)).itemCheck();
-      System.out.println("stretch tree of depth "+stretchDepth+"\t check: " + check);
-      
-      TreeNode longLivedTree = TreeNode.bottomUpTree(maxDepth);
-      
-      for (int depth=minDepth; depth<=maxDepth; depth+=2){
-         int iterations = 1 << (maxDepth - depth + minDepth);
-         check = 0;
-         
-         for (int i=1; i<=iterations; i++){
-            check += (TreeNode.bottomUpTree(depth)).itemCheck();
-         }
-         System.out.println(iterations + "\t trees of depth " + depth + "\t check: " + check);
-      }   
-      System.out.println("long lived tree of depth " + maxDepth + "\t check: "+ longLivedTree.itemCheck());
-   }
-   
-   
-   private static class TreeNode
-   {
-      private TreeNode left, right;
-      
-      private static TreeNode bottomUpTree(int depth){
-         if (depth>0){
-            return new TreeNode(
-                  bottomUpTree(depth-1)
-                  , bottomUpTree(depth-1)
-            );
-         }
-         else {
-            return new TreeNode(null,null);
-         }
-      }
-      
-      TreeNode(TreeNode left, TreeNode right){
-         this.left = left;
-         this.right = right;
-      }
-      
-      private int itemCheck(){
-         // if necessary deallocate here
-         if (left==null) return 1;
-         else return 1 + left.itemCheck() + right.itemCheck();
-      }
-   }
+    private static final int MIN_DEPTH = 4;
+    private static final ExecutorService EXECUTOR_SERVICE = 
+        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    public static void main(final String[] args) throws Exception {
+        int n = 0;
+        if (0 < args.length) {
+            n = Integer.parseInt(args[0]);
+        }
+
+        final int maxDepth = n < (MIN_DEPTH + 2) ? MIN_DEPTH + 2 : n;
+        final int stretchDepth = maxDepth + 1;
+
+        System.out.println("stretch tree of depth " + stretchDepth + "\t check: " 
+           + bottomUpTree( stretchDepth).itemCheck());
+
+        final TreeNode longLivedTree = bottomUpTree(maxDepth);
+
+        final String[] results = new String[(maxDepth - MIN_DEPTH) / 2 + 1];
+
+        for (int d = MIN_DEPTH; d <= maxDepth; d += 2) {
+            final int depth = d;
+            EXECUTOR_SERVICE.execute(() -> {
+                int check = 0;
+
+                final int iterations = 1 << (maxDepth - depth + MIN_DEPTH);
+                for (int i = 1; i <= iterations; ++i) {
+                    final TreeNode treeNode1 = bottomUpTree(depth);
+                    check += treeNode1.itemCheck();
+                }
+                results[(depth - MIN_DEPTH) / 2] = 
+                   iterations + "\t trees of depth " + depth + "\t check: " + check;
+            });
+        }
+
+        EXECUTOR_SERVICE.shutdown();
+        EXECUTOR_SERVICE.awaitTermination(120L, TimeUnit.SECONDS);
+
+        for (final String str : results) {
+            System.out.println(str);
+        }
+
+        System.out.println("long lived tree of depth " + maxDepth + 
+            "\t check: " + longLivedTree.itemCheck());
+    }
+
+    private static TreeNode bottomUpTree(final int depth) {
+        if (0 < depth) {
+            return new TreeNode(bottomUpTree(depth - 1), bottomUpTree(depth - 1));
+        }
+        return new TreeNode();
+    }
+
+    private static final class TreeNode {
+
+        private final TreeNode left;
+        private final TreeNode right;
+
+        private TreeNode(final TreeNode left, final TreeNode right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        private TreeNode() {
+            this(null, null);
+        }
+
+        private int itemCheck() {
+            // if necessary deallocate here
+            if (null == left) {
+                return 1;
+            }
+            return 1 + left.itemCheck() + right.itemCheck();
+        }
+
+    }
+
 }

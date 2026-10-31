@@ -119,6 +119,42 @@ The eight x2c stages use `probe|none` in the existing example manifest.
 This preserves manual tutorial checks without adding recurring build work.
 The native C stage is outside that manifest's `.x`/`.xp` source contract.
 
+## Selectable benchmark
+
+Run `make bm-c2x2c` to compare V4, V6, and V8 with native C. V4 measures
+substring counting, V6 adds sequential directory merging, and V8 exercises
+the reusable parallel API. The file input is `site/public/llms-full.txt`;
+the directory input is `docs`. The runner freezes both inputs before timing.
+The frozen corpus copies file contents, follows file links, preserves ordinary
+directories, and omits child directory links.
+The C baselines and generated drivers use `-O2 -DNDEBUG`; the runtime uses
+the current build configuration. Compilation is outside the measured samples.
+
+The report gives median CPU milliseconds, wall milliseconds, peak RSS MiB,
+and ratios against C for each input. C is 1.00; lower ratios are better.
+Parallel CPU measures total work across workers; wall time measures latency.
+The directory C baseline includes discovery through `bench-directory.sh
+aggregate`; V6 and V8 discover files internally. Each run verifies the top ten
+against independent frequencies, including each stage's ranking rules.
+
+```sh
+make bm-c2x2c
+make bm-c2x2c C2X2C_BENCHMARK_ARGS="--all-versions --samples 7"
+python3 tools/c2x2c-benchmark.py --runtime /tmp/experimental-libx2c.a
+```
+
+`--file`, `--directory`, `--compiler`, and `--output-dir` select alternatives.
+An alternative runtime archive must match the compiler's runtime ABI.
+The default five-sample run saves input snapshots, hashes, build commands,
+binaries, per-process output, and `results.json` under
+`unittest/build/benchmarks/c2x2c/`. Run on a quiet host; this runner does not
+exclude other builds or reserve the machine. Tiny inputs can be dominated by
+process startup, so retain absolute measurements alongside ratios.
+
+The benchmark is selectable. It is outside `bm-all`, the nightly snapshot,
+and correctness gates. The programs print only their top ten; this check
+does not compare every internal count.
+
 ## Manual directory baselines
 
 The directory benchmark has two C baselines, separate from the eight tutorial

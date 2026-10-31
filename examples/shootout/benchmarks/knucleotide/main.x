@@ -2,10 +2,33 @@
  * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  */
 
+class Batch { String sequence, key, output; int width; Thread worker; } *;
+
 int main(void) {
   String sequence = _read();
-  for (int width = 1; width <= 2; width++) auto {
-    Map counts = _count(sequence, width);
+  Array batches = [];
+  foreach (String key in %("A" "AA" "GGT" "GGTA" "GGTATT"
+    "GGTATTTTAATT" "GGTATTTTAATTTATAGT")) {
+    Batch batch = Batch.new();
+    batch.sequence = sequence;
+    batch.key = key;
+    batch.width = key.len();
+    batch.worker = Thread.start(_run, batch);
+    batches.push(batch);
+  }
+  foreach (Batch batch in batches) {
+    batch.worker.join();
+    batch.worker.free();
+    printf("%s", batch.output);
+  }
+  return 0;
+}
+
+static Var _run(Var input) {
+  Batch batch = input;
+  Map counts = _count(batch.sequence, batch.width);
+  Buffer output = auto Buffer.new(0);
+  if (batch.width <= 2) {
     Array keys = [];
     foreach ((String key, Var count) in counts) keys.push(key);
     keys.sort_with(%!(String a, String b) => {
@@ -13,16 +36,13 @@ int main(void) {
       return difference ? difference : a.compare(b);
     });
     foreach (String key in keys)
-      printf("%s %.3f\n", key,
-        100.0 * counts[key].int() / (sequence.len() - width + 1));
-    puts("");
+      output.printf("%s %.3f\n", key,
+        100.0 * counts[key].int() / (batch.sequence.len() - batch.width + 1));
+    output.write("\n");
   }
-  foreach (String key in %(
-    "GGT" "GGTA" "GGTATT" "GGTATTTTAATT" "GGTATTTTAATTTATAGT")) auto {
-    Map counts = _count(sequence, key.len());
-    printf("%d\t%s\n", counts.getdefault(key, 0), key);
-  }
-  return 0;
+  else output.printf("%d\t%s\n", counts.getdefault(batch.key, 0), batch.key);
+  batch.output = output;
+  return void;
 }
 
 static String _read(void) {
@@ -42,9 +62,12 @@ static String _read(void) {
 
 static Map _count(String sequence, int width) {
   Map counts = {};
-  for (int i = 0; i + width <= sequence.len(); i++) {
+  int last = sequence.len() - width;
+  for (int i = 0; i <= last; i++) {
     String key = sequence[i:i + width];
     counts[key] = counts.getdefault(key, 0).int() + 1;
   }
   return counts;
 }
+
+static void Batch.init(Batch batch) {}

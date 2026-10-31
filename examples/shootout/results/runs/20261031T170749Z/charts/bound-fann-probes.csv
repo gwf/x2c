@@ -1,0 +1,11 @@
+problem,n,implementation,median_elapsed_ms,median_cpu_ms,candidate_pair_wins,pairs
+knucleotide,20000,knucleotide-before,43.8408955,42.9265,11,16
+knucleotide,100000,knucleotide-before,166.2331245,165.6085,13,16
+knucleotide,20000,knucleotide-bound,42.313271,41.7395,11,16
+knucleotide,100000,knucleotide-bound,162.7519375,162.1425,13,16
+fannkuchredux,7,fannkuchredux-before,1.9713335,1.6375,10,16
+fannkuchredux,9,fannkuchredux-before,47.7744585,47.459,16,16
+fannkuchredux,10,fannkuchredux-before,558.167063,557.7355,16,16
+fannkuchredux,7,fannkuchredux-parallel,1.895042,1.58,10,16
+fannkuchredux,9,fannkuchredux-parallel,9.895625,49.4245,16,16
+fannkuchredux,10,fannkuchredux-parallel,98.807437,567.895,16,16
