@@ -878,9 +878,8 @@ for (int at = 0; evidence_rows[at][0]; at++):
   evidence[String.new(evidence_rows[at][0])] =
     String.new(evidence_rows[at][1])
 
-String usage = $dedent(%"
-  usage: %s [-h] [--write | --check | --check-path PATH]
-  ").printf(self.basename())
+String usage = %"usage: $(self.basename()) [-h] " +
+               "[--write | --check | --check-path PATH]\n"
 if args.contains("-h") || args.contains("--help"):
   printf($dedent(%"
     %s

@@ -126,6 +126,8 @@ static List _render(void):
     if _full_text().contains(page): chapters.push(page)
 
   (String title, String paragraph) = _book_summary()
+  String chapter_names = String.join(
+    ", ", chapters.map(%!(String page) => entries[page].str()))
   Array index_lines = [$dedent(%"
     # x2c
 
@@ -135,7 +137,7 @@ static List _render(void):
 
     ## Single-file reference
 
-    - [x2c language reference]($site/llms-full.txt): $(String.join(", ", chapters.map(%!(String page) => entries[page].str())))
+    - [x2c language reference]($site/llms-full.txt): $chapter_names
   ")]
   Array optional = []
   foreach List section in sections:
