@@ -92,6 +92,24 @@ and Iter `find` keep their contracts.
 | `int Array_indexof(Array, Var)` | removed |
 | none | `Var Array_find(Array, Func)` |
 
+- `Task.run` runs zero-argument jobs cooperatively on the calling native
+  thread, using existing Channels. Results keep ordinary ownership, and every
+  exit finishes all job cleanup. Blocking native calls block the batch. The
+  guarded-stack backend supports macOS and Linux on arm64 and x86_64. See
+  [Task.run](../library/modules/task.md#Task.run) and
+  [Using cooperative task batches](../guide/installation.md#using-cooperative-task-batches).
+- `Scope.retain` and `Scope.release` are renamed to `Scope.open` and
+  `Scope.close`; both still return `void`. `Scope.up` is removed without a
+  replacement. The native function names and public Scope layout change, so
+  regenerate C and rebuild native code that uses Scope. Pool's retain/release
+  operations and `Pool.up` are unchanged. See
+  [Upgrading from 0.15.x](../guide/installation.md#upgrading-from-015x).
+- Boxed `long double` identity, content hashes, and total ordering exclude
+  x87's six ABI padding bytes. The ten value bytes still preserve precision,
+  signed zero, and NaN payload distinctions. Hash values change on x87
+  targets; recompute stored or precomputed hashes when upgrading. Other
+  long-double formats keep their existing payload widths. See
+  [Long-double hashes](../guide/installation.md#long-double-hashes).
 - `String.try_long`, `String.try_double`, and `Symbol.try_new` take their
   result through an optional reference, `T &?out`, instead of `T *out`.
   Pass the variable itself, as in `text.try_long(value)`; `&value` is now a
