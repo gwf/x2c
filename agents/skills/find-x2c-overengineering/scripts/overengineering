@@ -12,6 +12,7 @@
     findings. `trace-deletion` attributes the parent-side lines a commit
     deleted from `src/` and `lib/` to their last commits.
 */
+#include "system-macros.x"
 #include "json.x"
 #include "../../../../tools/definitions.x"
 #include <ctype.h>
@@ -360,19 +361,25 @@ static int _scan(Path x2c, int budget, Path base):
   run.join("commands.txt").write_text(
     %"agents/skills/find-x2c-overengineering/scripts/overengineering scan " +
     %"--budget $budget --state-root $base\n")
-  Array rows = ["# Overengineering forensic run", "", %"Head: `$head`",
-                %"Source digest: `$(inventory["source_digest"])`", "",
-                "## Selected regions", ""]
+  Array rows = [$dedent(%"
+    # Overengineering forensic run
+
+    Head: `$head`
+    Source digest: `$(inventory["source_digest"])`
+
+    ## Selected regions
+  ")]
   foreach Map item in selected:
     String signals = String.join("; ", item["signals"].array())
     rows.push(%"- `$(item["candidate_id"])` " +
               %"`$(item["path"]):$(item["start"])-$(item["end"])` " +
               %"score $(item["score"]): $signals")
   rows.push("")
-  rows.push("## Reviewed attempts")
-  rows.push("")
-  rows.push("Record each candidate, empty search, or refutation here.")
-  rows.push("")
+  rows.push($dedent(%"
+    ## Reviewed attempts
+
+    Record each candidate, empty search, or refutation here.
+  "))
   run.join("report.md").write_text(String.join("\n", rows))
   printf("%s\n%s\n", run.str(), selection.var().pretty_json().str())
   return 0
@@ -437,8 +444,10 @@ Path self = String.new(argv[0])
 root = self.absolute().dirname().dirname().dirname().dirname().dirname()
 Path x2c = root.join("builds/0/x2c")
 String usage =
-  "usage: overengineering scan [--budget N] [--state-root DIR]\n" +
-  "       overengineering trace-deletion COMMIT\n"
+  $dedent(%"
+    usage: overengineering scan [--budget N] [--state-root DIR]
+           overengineering trace-deletion COMMIT
+  ")
 Array words = []
 foreach Var arg in args: words.push(arg)
 if !words.len() || words[0].string() == "-h" || words[0].string() == "--help":
