@@ -203,7 +203,7 @@ existing restrictions on comparisons between hosts.
 
 ## Recover results and website materials
 
-The [results archive and recovery guide](results/README.md) preserves all four
+The [results archive and recovery guide](results/README.md) preserves all saved
 chart sets, saved reports, raw observations and receipts, paired experiments,
 rendering requirements, and checksums on `dev`. The
 [website integration guide](../../site/BENCHMARKS.md) identifies the curated
