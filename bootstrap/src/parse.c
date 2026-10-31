@@ -1468,7 +1468,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _565 = cons(_564, NULL);
   _566 = cons(_480, _565);
   _567 = List_var(_566);
-  _568 = int_var(690);
+  _568 = int_var(693);
   _569 = cons(_568, NULL);
   _570 = cons(_486, _569);
   _571 = List_var(_570);
@@ -1478,7 +1478,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _575 = List_var(_574);
   _576 = cons(_496, _493);
   _577 = List_var(_576);
-  _578 = int_var(119098);
+  _578 = int_var(119217);
   _579 = cons(_578, NULL);
   _580 = cons(_501, _579);
   _581 = List_var(_580);
@@ -6687,9 +6687,12 @@ static Var f11_declarators____method_member(Compiler c){
   return String_var(member);
 }
 
+Type Sym_resolve_key(Sym, Type);
+
 static List _finish_parameter(Compiler c, List base, List declarator, List method_identity, Token source_first, Token source_after){
   List rest = base, container = Type_list(Type_rest_container(List_type(rest)));
   base = _finish_type(c, List_truth(container) ? container : base);
+  if(! Map_truth(c -> macro_holes) && declarator == _232 && Sym_resolve_key(c -> sym, List_type(base)) == _242) base = _242;
   if(List_contains(base, Symbol_var(109854)) && ! Map_truth(c -> macro_holes) && ! c -> shallow) Compiler_report_error(c, 33658058, _71, c -> token, NULL);
   int preserved_self = 0;
   declarator = _install_declarator(c, base, NULL, declarator, method_identity, &(preserved_self));
