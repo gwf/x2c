@@ -17794,7 +17794,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14740 = List_var(_14739);
   _14741 = String_new("src/cli/help.x");
   _14742 = String_var(_14741);
-  _14743 = String_new("de7e43ee");
+  _14743 = String_new("b9a7e581");
   _14744 = String_var(_14743);
   _14745 = cons(_14744, NULL);
   _14746 = cons(_14742, _14745);
@@ -19744,7 +19744,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16678 = List_var(_16677);
   _16679 = String_new("src/macros/expansion.x");
   _16680 = String_var(_16679);
-  _16681 = String_new("29ee9f34");
+  _16681 = String_new("23cd1b98");
   _16682 = String_var(_16681);
   _16683 = cons(_16682, NULL);
   _16684 = cons(_16680, _16683);

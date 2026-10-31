@@ -36,7 +36,7 @@ typedef struct Translation{
 }
 Translation;
 
-static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -155,23 +155,24 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new(".");
   _1 = String_new("translation input is not an .x file: ");
-  _2 = String_new("output directory is not writable: ");
-  _3 = String_new("/builds/");
-  _4 = String_new(".module");
-  _5 = String_new("/");
-  _6 = String_new(".d");
-  _7 = String_new("{");
-  _8 = String_new("}");
-  _9 = String_new("import");
-  _10 = String_new("could not start a translation worker");
-  _11 = String_new(".c");
-  _12 = String_new(".h");
-  _13 = String_new("file");
-  _14 = String_new("files");
-  _15 = String_new("Translated ");
-  _16 = String_new(" x2c ");
-  _17 = String_new(" to ");
-  _18 = String_new(" in ");
+  _2 = String_new("\n      x2c: error: inputs produce the same output stem \'%s\'\n        first input: %s\n        other input: %s\n        output: %s/%s.c\n    ");
+  _3 = String_new("output directory is not writable: ");
+  _4 = String_new("/builds/");
+  _5 = String_new(".module");
+  _6 = String_new("/");
+  _7 = String_new(".d");
+  _8 = String_new("{");
+  _9 = String_new("}");
+  _10 = String_new("import");
+  _11 = String_new("could not start a translation worker");
+  _12 = String_new(".c");
+  _13 = String_new(".h");
+  _14 = String_new("file");
+  _15 = String_new("files");
+  _16 = String_new("Translated ");
+  _17 = String_new(" x2c ");
+  _18 = String_new(" to ");
+  _19 = String_new(" in ");
 }
 
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed)){
@@ -226,7 +227,7 @@ static void _preflight(Translation * t){
 }
 
 _Noreturn static void _stem_collision(String stem, String first, String other, String out_dir){
-  fprintf(stderr, "x2c: error: inputs produce the same output stem '%s'\n" "  first input: %s\n  other input: %s\n  output: %s/%s.c\n", stem, first, other, out_dir, stem);
+  fprintf(stderr, String_dedent(_2), stem, first, other, out_dir, stem);
   exit(2);
 }
 
@@ -277,7 +278,7 @@ static void _make_out_dir(String out_dir){
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_2), cons(String_var(out_dir), NULL))));
+  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(out_dir), NULL))));
 }
 
 static void _print_command(CliRequest request){
@@ -331,7 +332,7 @@ static void _preload_modules(Translation * t){
       {
         String root = NULL;
         if(! String_truth(SourceView_package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
-        String module = String_join(NULL, cons(String_var(root), cons(String_var(_3), cons(String_var(name), cons(String_var(_4), NULL)))));
+        String module = String_join(NULL, cons(String_var(root), cons(String_var(_4), cons(String_var(name), cons(String_var(_5), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
 
@@ -367,7 +368,7 @@ static Map _package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_gensym_literal_part_0 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_5), cons(_x2c_gensym_literal_part_1, cons(String_var(_6), NULL)))));
+          Var _x2c_gensym_literal_part_0 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_6), cons(_x2c_gensym_literal_part_1, cons(String_var(_7), NULL)))));
         }
         );
         String volatile text = NULL;
@@ -495,9 +496,9 @@ static List _imported_packages(String path){
   Array names = Array_new();
   int depth = 0;
   for(Token token = Tokenizer_next(tokens);  token -> type != 11212;  token = Tokenizer_next(tokens)){
-    if(String_equal(token -> text, _7)) depth ++;
-    else if(String_equal(token -> text, _8)) depth --;
-    else if(! depth && String_equal(token -> text, _9)){
+    if(String_equal(token -> text, _8)) depth ++;
+    else if(String_equal(token -> text, _9)) depth --;
+    else if(! depth && String_equal(token -> text, _10)){
       token = Tokenizer_next(tokens);
       if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, x2c_slice_bound(- 1), 1)));
     }
@@ -582,7 +583,7 @@ static void _start(Workers * w){
   sigprocmask(SIG_SETMASK, & unblocked, NULL);
   if(pid > 0) return;
   if(capture) File_close(capture);
-  report_line(11703268, _10);
+  report_line(11703268, _11);
   (* w).failed ++;
 }
 
@@ -912,8 +913,8 @@ static void _report(Translation * t, unsigned long started_at){
       input = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         String stem = Path_stem(input);
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_11), NULL))))));
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_5), cons(String_var(stem), cons(String_var(_12), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_6), cons(String_var(stem), cons(String_var(_12), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_6), cons(String_var(stem), cons(String_var(_13), NULL))))));
       }
 
     }
@@ -921,8 +922,8 @@ static void _report(Translation * t, unsigned long started_at){
   }
   String duration = report_duration(report_now_us() - started_at);
   int n =(* t).total;
-  String noun = n == 1 ? _13 : _14;
-  report_line(42217975014, String_join(NULL, cons(String_var(_15), cons(String_var(int_str(n)), cons(String_var(_16), cons(String_var(noun), cons(String_var(_17), cons(String_var(out_dir), cons(String_var(_18), cons(String_var(duration), NULL))))))))));
+  String noun = n == 1 ? _14 : _15;
+  report_line(42217975014, String_join(NULL, cons(String_var(_16), cons(String_var(int_str(n)), cons(String_var(_17), cons(String_var(noun), cons(String_var(_18), cons(String_var(out_dir), cons(String_var(_19), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 

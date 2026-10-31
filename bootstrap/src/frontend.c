@@ -137,7 +137,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("void print(String text);\n" "void println(String text);\n" "int printf(const char *format, ...);\n" "int puts(const char *text);\n");
+  _0 = String_new("void print(String text);\nvoid println(String text);\nint printf(const char *format, ...);\nint puts(const char *text);\n");
   _1 = String_new("");
   _2 = String_new("-dD");
   _3 = String_var(_2);
