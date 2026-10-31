@@ -1,30 +1,51 @@
 ---
-// Each letter is a span so the lift below can move a copy of it. The spans
-// are inline, so kerning and the fitted line widths are unchanged.
 const { html } = Astro.props;
-const lines = html.split(/<br\s*\/?>/i).map((line: string) => [...line]);
 ---
 
-<h1 data-lift>{lines.map((chars) =>
-  <span class="hero-title-line">{chars.map((c) =>
-    c === " " ? " " : <span class="ch" data-g={c}>{c}</span>
-  )}</span>
+<h1 data-lift>{html.split(/<br\s*\/?>/i).map((line) =>
+  <span class="hero-title-line" set:html={line} />
 )}</h1>
 
 <script>
   // Lift: letters within 80px of a mouse pointer rise up to 5px and ease
-  // back as it moves. Copies of the letters move; the letters themselves
-  // stay in place, so the layout never changes. Touch and reduced motion
-  // get the static title.
+  // back as it moves. While the pointer is over the title, each letter is
+  // covered by a copy placed at the letter's measured position, and the
+  // copies move; the title's own text never changes layout. Touch and
+  // reduced motion get the static title.
   const title = document.querySelector<HTMLElement>("[data-lift]")!;
+  const lines = [...title.querySelectorAll<HTMLElement>(".hero-title-line")];
   const able = matchMedia(
     "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
-  const chars = [...title.querySelectorAll<HTMLElement>(".ch")];
-  type Spot = { ch: HTMLElement; x: number; top: number; bottom: number; rise: number };
+  type Spot = { copy: HTMLElement; x: number; top: number; bottom: number; rise: number };
   let spots: Spot[] = [];
   let last: PointerEvent | null = null;
   let frame = 0;
   let timer = 0;
+
+  function cover(line: HTMLElement): Spot[] {
+    const made: Spot[] = [];
+    const origin = line.getBoundingClientRect();
+    const range = document.createRange();
+    for (const node of [...line.childNodes]) {
+      if (node.nodeType !== Node.TEXT_NODE) continue;
+      const text = (node as Text).data;
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === " ") continue;
+        range.setStart(node, i);
+        range.setEnd(node, i + 1);
+        const r = range.getBoundingClientRect();
+        const copy = document.createElement("span");
+        copy.className = "lift-copy";
+        copy.setAttribute("aria-hidden", "true");
+        copy.textContent = text[i];
+        copy.style.left = `${r.left - origin.left}px`;
+        line.append(copy);
+        made.push({ copy, x: r.left + r.width / 2 + scrollX,
+          top: r.top + scrollY, bottom: r.bottom + scrollY, rise: 0 });
+      }
+    }
+    return made;
+  }
 
   function place() {
     frame = 0;
@@ -35,19 +56,15 @@ const lines = html.split(/<br\s*\/?>/i).map((line: string) => [...line]);
       const rise = d < 80 ? 2.5 + 2.5 * Math.cos((Math.PI * d) / 80) : 0;
       if (rise !== s.rise) {
         s.rise = rise;
-        s.ch.style.setProperty("--lift", rise.toFixed(2));
+        s.copy.style.setProperty("--lift", rise.toFixed(2));
       }
     }
   }
 
   function enter(e: PointerEvent) {
-    if (e.pointerType !== "mouse" || !able.matches) return;
+    if (e.pointerType !== "mouse" || !able.matches || spots.length) return;
     clearTimeout(timer);
-    spots = chars.map((ch) => {
-      const r = ch.getBoundingClientRect();
-      return { ch, x: r.left + r.width / 2 + scrollX,
-        top: r.top + scrollY, bottom: r.bottom + scrollY, rise: 0 };
-    });
+    spots = lines.flatMap(cover);
     title.classList.add("is-live");
   }
 
@@ -62,9 +79,13 @@ const lines = html.split(/<br\s*\/?>/i).map((line: string) => [...line]);
     if (!spots.length) return;
     cancelAnimationFrame(frame);
     frame = 0;
-    for (const s of spots) s.ch.style.setProperty("--lift", "0");
+    for (const s of spots) s.copy.style.setProperty("--lift", "0");
+    const settled = spots;
     spots = [];
-    timer = window.setTimeout(() => title.classList.remove("is-live"), 340);
+    timer = window.setTimeout(() => {
+      title.classList.remove("is-live");
+      for (const s of settled) s.copy.remove();
+    }, 340);
   }
 
   title.addEventListener("pointerenter", enter);

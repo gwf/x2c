@@ -360,6 +360,7 @@ main:focus {
 
 .hero-title-line {
   display: block;
+  position: relative;
   width: max-content;
   letter-spacing: -0.02em;
 }
@@ -370,33 +371,28 @@ main:focus {
 }
 
 /*
- * Lift: under a mouse pointer, a copy of each nearby letter rises a few
- * pixels. The copy is drawn over the letter from its own text, and the
- * letter turns transparent while copies are shown. --lift is set in pixels
- * by the title's script.
+ * Lift: under a mouse pointer, a copy of each letter is placed over it by
+ * the title's script, and the copies near the pointer rise a few pixels.
+ * The line's own text turns transparent while the copies are shown. A copy
+ * shares the line's font and line height, so at left: <letter> it covers
+ * the letter exactly.
  */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .hero-heading h1 {
     isolation: isolate;
   }
 
-  .hero-title-line .ch::before {
-    content: attr(data-g) / "";
+  .hero-title-line .lift-copy {
     position: absolute;
     top: 0;
     color: var(--dark);
-    visibility: hidden;
     pointer-events: none;
     transform: translateY(calc(var(--lift, 0) * -1px));
     transition: transform 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
   }
 
-  .hero-heading h1.is-live .ch {
+  .hero-heading h1.is-live .hero-title-line {
     color: transparent;
-  }
-
-  .hero-heading h1.is-live .ch::before {
-    visibility: visible;
   }
 }
 
