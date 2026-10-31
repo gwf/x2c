@@ -965,6 +965,17 @@ before/after memory probes. The repeated probe no longer retains medium
 regions; smaller allocator caches remain. Normal benchmark reruns and
 publication acceptance remain held.
 
+### Current dev integration, 2026-10-31
+
+Merged origin/dev b627bb039 into the private branch at e8640be3c. The nine
+incoming commits required no conflict repair and changed no compiler, runtime,
+bootstrap, native build-rule, or unit-test source. The combined review found
+no concrete integration defect. The full local make agent-pr-check passes,
+including 1,357 compiler fixtures and 1,158 unit tests. The
+[integration report](reference/async-dev-integration-2026-10-31.md) records
+review coverage, focused checks, and limitations. Normal benchmark reruns,
+performance and retention acceptance, publication, and pushing remain held.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
