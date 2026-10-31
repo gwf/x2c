@@ -67,3 +67,11 @@ and reverse-complement parser failures were not repaired or hidden. See the
 
 These raw receipts contain historical machine paths and process information.
 Preserve them for audit; publish curated chart/data exports on the website.
+
+## Ordinary Node and Buffer rewrite
+
+`node-buffer/` retains the source diff, old/new source copies, independent
+oracle, all 55 extra correctness cases, and focused fixture/quick-profile logs.
+The original reverse-complement failed on blank sequence lines; the two
+reproduced failure cases are explicit in results. Timing is the full quiet
+calibration in [run 20261031T134323Z](../runs/20261031T134323Z/README.md), not these oracle tests.

@@ -4,16 +4,15 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current public candidate is [run 20261031T035446Z](runs/20261031T035446Z/README.md),
-measured from clean source revision
-`68156a1c6b9df92cdcd720aa4cc9735fff2831cf` and first published with results in
-`f19fdc43acceebfe74b657526f2f03e559866e30`. The run started on October 30, 2026
-at 20:54 PDT (October 31 at 03:54 UTC). Run identifiers use UTC.
+The current public candidate is [run 20261031T134323Z](runs/20261031T134323Z/README.md),
+measured from clean source revision `d7c7787c7d1c608f86730b1ba5be3f22722c0299` and first
+published with results in `427ee5b3c4176f4bc2dec90fae149bcc68279ea3`. Run identifiers use UTC.
+Observation time: 2026-10-31 06:43 PDT / 2026-10-31 13:43 UTC.
 
 It covers 76 programs, eight columns, and sixteen fresh-process samples per
 program (1,216 observations). All official fixtures and local-profile output
 checks passed. Summary charts use the nine problems shared by all columns.
-The four available k-nucleotide programs remain in the per-problem tables.
+The four available k-nucleotide programs remain in per-problem tables.
 
 ## Saved runs
 
@@ -22,7 +21,8 @@ The four available k-nucleotide programs remain in the per-problem tables.
 | [20261031T011256Z](runs/20261031T011256Z/README.md) | 4 | 10 | Historical; Python source metrics have a known comment-accounting error |
 | [20261031T024309Z](runs/20261031T024309Z/README.md) | 6 | 9 | Rust/C++ adoption; corrected source metrics |
 | [20261031T031704Z](runs/20261031T031704Z/README.md) | 8 | 9 | Go/Java adoption; before idiomatic source changes |
-| [20261031T035446Z](runs/20261031T035446Z/README.md) | 8 | 9 | Latest quiet-window calibration after idiomatic source changes |
+| [20261031T035446Z](runs/20261031T035446Z/README.md) | 8 | 9 | Quiet-window calibration after the first idiomatic changes |
+| [20261031T134323Z](runs/20261031T134323Z/README.md) | 8 | 9 | Latest: ordinary Node and Buffer rewrites |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -49,8 +49,8 @@ From a normal clone of `dev`:
 ```sh
 cd examples/shootout/results
 shasum -a 256 -c SHA256SUMS
-gzip -dc runs/20261031T035446Z/baseline.json.gz > /tmp/shootout-baseline.json
-gzip -dc runs/20261031T035446Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
+gzip -dc runs/20261031T134323Z/baseline.json.gz > /tmp/shootout-baseline.json
+gzip -dc runs/20261031T134323Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
 ```
 
 `SHA256SUMS` covers the archived runs, supporting evidence, and pinned chart
@@ -61,7 +61,7 @@ To recover the exact published source corpus, use the publication revision
 in the selected run's README or `runs/index.json`:
 
 ```sh
-git worktree add --detach /tmp/x2c-shootout-source 68156a1c6b9df92cdcd720aa4cc9735fff2831cf
+git worktree add --detach /tmp/x2c-shootout-source 427ee5b3c4176f4bc2dec90fae149bcc68279ea3
 ```
 
 The original absolute paths in machine/build receipts are historical evidence.
@@ -79,7 +79,7 @@ Create an isolated plotting environment, then render the latest saved report:
 ```sh
 python3 -m venv /tmp/x2c-shootout-charts
 /tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T035446Z/charts/render.py examples/shootout/results/runs/20261031T035446Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T134323Z/charts/render.py examples/shootout/results/runs/20261031T134323Z/current.json /tmp/x2c-shootout-figures
 ```
 
 The renderer creates its output directory. It reads saved measurements and
