@@ -20575,7 +20575,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_34(void
   _17503 = List_var(_17502);
   _17504 = String_new("src/parse/declarators.x");
   _17505 = String_var(_17504);
-  _17506 = String_new("1531cd18");
+  _17506 = String_new("f0796daf");
   _17507 = String_var(_17506);
   _17508 = cons(_17507, NULL);
   _17509 = cons(_17505, _17508);
