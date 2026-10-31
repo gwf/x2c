@@ -63,7 +63,7 @@ It covers release installation and building an installed compiler from source.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
 - [Benchmarks Game](examples/shootout/README.md): official problems with
-  idiomatic and tuned x2c, plus contributed C, Python, Rust, and C++ references.
+  idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and Java references.
 
 ## Status and compatibility
 

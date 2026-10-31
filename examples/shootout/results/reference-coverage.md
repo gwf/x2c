@@ -68,9 +68,71 @@ are source findings, not reproduced runtime findings on this host.
 ## Comparison cohort
 
 Per-problem tables show all ten problems and mark unavailable cells N/A.
-Summary rows and charts use only the nine problems shared by all six columns.
+Summary rows and charts use only the nine problems shared by all eight columns.
 No missing value is treated as zero, and no nine-problem summary is compared
 with a ten-problem summary.
 
 All displayed runtime data is measured locally with identical configured
 inputs. No timings from the Benchmarks Game website are substituted.
+
+## Go contributions
+
+Nine unchanged Go contributions pass the official fixtures and local-profile
+checks. They use only the Go standard library. Go k-nucleotide remains N/A:
+all five archived variants violate the required ascending lexical order when
+frequencies tie. Variants #3/#4/#6 sort keys in descending order; #7/#8 compare
+counts only and inherit randomized map iteration. Repeated legal tied-input
+checks demonstrate the failures. An independent parent run of #3 prints
+T, G, C, A for equal single-letter frequencies. No contribution was patched.
+
+| Problem | Go archive source |
+| --- | --- |
+| nbody | `nbody/nbody.go-8.go` |
+| spectralnorm | `spectralnorm/spectralnorm.go-8.go` |
+| fannkuchredux | `fannkuchredux/fannkuchredux.go-8.go` |
+| mandelbrot | `mandelbrot/mandelbrot.go-8.go` |
+| fasta | `fasta/fasta.go` |
+| revcomp | `revcomp/revcomp.go-2.go` |
+| binarytrees | `binarytrees/binarytrees.go` |
+| regexredux | `regexredux/regexredux.go` |
+| pidigits | `pidigits/pidigits.go-7.go` |
+
+Outside configured inputs, the selected Go reverse-complement contribution
+wraps output at 60 columns while the selected C contribution preserves short
+input wrapping. The selected Go pidigits contribution pads and labels its final
+partial group while the selected C contribution omits the final partial-group
+count. The configured pidigits inputs are multiples of ten. These are
+contribution differences, not source patches or failures on configured inputs.
+
+## Java contributions
+
+Nine unchanged Java contributions pass official fixtures and configured local
+workloads on native ARM OpenJDK 27. They use only Java standard libraries.
+
+| Problem | Java archive source |
+| --- | --- |
+| nbody | `nbody/nbody.java-2.java` |
+| spectralnorm | `spectralnorm/spectralnorm.java-8.java` |
+| fannkuchredux | `fannkuchredux/fannkuchredux.java-2.java` |
+| mandelbrot | `mandelbrot/mandelbrot.java-8.java` |
+| fasta | `fasta/fasta.java-2.java` |
+| revcomp | `revcomp/revcomp.java-5.java` |
+| binarytrees | `binarytrees/binarytrees.java-2.java` |
+| regexredux | `regexredux/regexredux.java` |
+| pidigits | `pidigits/pidigits.java` |
+
+All six archived Java k-nucleotide contributions were compiled and checked.
+The base and #8 variants misorder ties; #6 drops tied keys; #4/#5 throw
+`NullPointerException` when requested fragments are absent. Variant #3
+counts uppercase frequencies but returns zero for uppercase present target
+fragments. The specification does not restrict FASTA input to lowercase.
+Java k-nucleotide therefore remains N/A. No contribution was patched.
+
+The selected Java reverse-complement contribution derives output line width
+from the first sequence line. The official fixture and configured inputs
+use 60 columns.
+
+Java measurements launch a fresh JVM for every sample. They include JVM
+startup and JIT compilation. The separate process warmup cannot warm the
+measured JVM; these are whole-program elapsed times, not warmed steady-state
+Java throughput.

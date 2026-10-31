@@ -1,6 +1,6 @@
 # Third-party notices
 
-The reference C, Python, Rust, and C++ programs are unmodified contributions from the
+The reference C, Python, Rust, C++, Go, and Java programs are unmodified contributions from the
 Computer Language Benchmarks Game. Their original contributor notices remain
 in each source. The x2c versions adapt the algorithms and constants of those
 contributions while following the pinned official problem specifications.
@@ -34,6 +34,11 @@ The upstream BSD notice is retained in [LICENSE.BENCHMARKSGAME](LICENSE.BENCHMAR
 The copyright symbol in that license is rendered as ASCII `(c)`. Reference
 sources, specification snapshots, and official fixtures retain their bytes.
 Original x2c code and harness changes use the [BSD 3-Clause license](LICENSE).
+
+Go and Java contributions use their standard libraries unless a selected
+source records another dependency. Their archive paths and hashes are pinned
+in `benchmarks.json`; Java filenames may change only for compilation, with
+source bytes retained.
 
 ## Native dependencies
 

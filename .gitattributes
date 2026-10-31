@@ -20,6 +20,8 @@ examples/shootout/benchmarks/*/main.c -whitespace -text
 examples/shootout/benchmarks/*/main.py -whitespace -text
 examples/shootout/benchmarks/*/main.rs -whitespace -text
 examples/shootout/benchmarks/*/main.cpp -whitespace -text
+examples/shootout/benchmarks/*/main.go -whitespace -text
+examples/shootout/benchmarks/*/main.java -whitespace -text
 examples/shootout/benchmarks/regexredux/vendor/** -whitespace -text
 examples/shootout/benchmarks/knucleotide/khash.h -whitespace -text
 examples/shootout/specs/*.html -whitespace -text

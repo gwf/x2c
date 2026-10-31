@@ -11,6 +11,20 @@ import shootout
 
 
 class ShootoutTests(unittest.TestCase):
+  def test_calibration_balances_every_coverage_group(self):
+    all_references = {name: {} for name in shootout.REFERENCE_SOURCES.values()}
+    sparse = {name: {} for name in ("main.c", "main.py", "main.go", "main.java")}
+    benchmarks = [{"references": all_references}, {"references": sparse}]
+    self.assertEqual(shootout.calibration_sample_multiple(benchmarks), 24)
+
+  def test_go_raw_strings_preserve_comments_and_whitespace(self):
+    source = 'value := `// literal  spaces\n/* literal */\\` // real comment\n'
+    clean = shootout.strip_c_comments(source, go=True)
+    self.assertNotIn("real comment", clean)
+    self.assertIn("// literal  spaces\n/* literal */", clean)
+    collapsed = shootout.collapse_code_whitespace(clean, go=True)
+    self.assertIn("// literal  spaces\n/* literal */", collapsed)
+
   def test_python_comments_and_floor_division_are_distinct(self):
     source = """# attribution
 def divide(x):
@@ -62,6 +76,9 @@ let literal = "/* keep this */";
     run["benchmarks"] = {}
     for benchmark in manifest["benchmarks"]:
       name = benchmark["name"]
+      if name != "knucleotide":
+        for filename in ("main.go", "main.java"):
+          benchmark["references"].setdefault(filename, {})
       original = saved["benchmarks"][name]
       build["benchmarks"][name] = {}
       run["benchmarks"][name] = {"args": original["args"], "implementations": {}}
@@ -71,7 +88,7 @@ let literal = "/* keep this */";
           "source_metrics": program["source"], **program["build"],
         }
         run["benchmarks"][name]["implementations"][implementation] = program
-      for reference in ("rust", "cpp"):
+      for reference in ("rust", "cpp", "go", "java"):
         if reference in shootout.available_implementations(benchmark):
           baseline["benchmarks"][name][reference] = copy.deepcopy(
             baseline["benchmarks"][name]["c"]
@@ -91,7 +108,10 @@ let literal = "/* keep this */";
     self.assertEqual(first["arithmetic_mean"], second["arithmetic_mean"])
     text = shootout.render_current(second)
     row = next(line for line in text.splitlines() if line.startswith("| knucleotide |"))
-    self.assertEqual(row.count("N/A"), 2)
+    missing = len(shootout.IMPLEMENTATIONS) - len(shootout.available_implementations(
+      next(b for b in manifest["benchmarks"] if b["name"] == "knucleotide")
+    ))
+    self.assertEqual(row.count("N/A"), missing)
 
 
 if __name__ == "__main__":

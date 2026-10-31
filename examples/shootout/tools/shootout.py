@@ -39,16 +39,21 @@ CURRENT_MARKDOWN = ROOT / "results" / "current.md"
 DEFAULT_CFLAGS = "-O2 -DNDEBUG"
 REFERENCE_SOURCES = {
   "c": "main.c", "python": "main.py", "rust": "main.rs", "cpp": "main.cpp",
+  "go": "main.go", "java": "main.java",
 }
 REFERENCE_IMPLEMENTATIONS = tuple(REFERENCE_SOURCES)
 X2C_SOURCES = {"idiomatic": "main.x", "tuned": "tuned.x"}
 X2C_IMPLEMENTATIONS = tuple(X2C_SOURCES)
-IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python", "rust", "cpp")
+IMPLEMENTATIONS = ("c", *X2C_IMPLEMENTATIONS, "python", "rust", "cpp", "go", "java")
 
 
 def available_implementations(benchmark: dict[str, Any]) -> tuple[str, ...]:
   return tuple(name for name in IMPLEMENTATIONS if name in X2C_SOURCES
                or REFERENCE_SOURCES[name] in benchmark["references"])
+
+
+def calibration_sample_multiple(benchmarks: list[dict[str, Any]]) -> int:
+  return math.lcm(*(len(available_implementations(b)) for b in benchmarks))
 
 
 class HarnessError(RuntimeError):
@@ -310,6 +315,11 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
   cargo = shutil.which(os.environ.get("CARGO", "cargo"))
   if args.action in ("calibrate", "check") and (not cxx or not cargo):
     raise HarnessError("reference builds require clang++ and cargo")
+  go = shutil.which(os.environ.get("GO", "go"))
+  java = shutil.which(os.environ.get("JAVA", "java"))
+  javac = shutil.which(os.environ.get("JAVAC", "javac"))
+  if args.action in ("calibrate", "check") and not all((go, java, javac)):
+    raise HarnessError("reference builds require Go, java, and javac (GO/JAVA/JAVAC)")
 
   build_mode_path = REPO / "etc/build-mode"
   build_mode = (
@@ -338,6 +348,9 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
     "python": python,
     "cxx": cxx,
     "cargo": cargo,
+    "go": go,
+    "java": java,
+    "javac": javac,
     "dependency_prefix": prefix,
     "cflags": shlex.split(args.cflags),
     "cppflags": shlex.split(os.environ["SHOOTOUT_CPPFLAGS"])
@@ -419,6 +432,12 @@ def machine_receipt(toolchain: dict[str, Any]) -> dict[str, Any]:
       if toolchain["cargo"] else None,
     "cargo_version": command_text([toolchain["cargo"], "--version"])
       if toolchain["cargo"] else None,
+    "go_version": command_text([toolchain["go"], "version"])
+      if toolchain["go"] else None,
+    "java_version": command_text([toolchain["java"], "--version"])
+      if toolchain["java"] else None,
+    "javac_version": command_text([toolchain["javac"], "-version"])
+      if toolchain["javac"] else None,
     "rust_build_environment": {
       key: value for key, value in rust_environment(toolchain).items()
       if key in ("C_INCLUDE_PATH", "LIBRARY_PATH", "RUSTFLAGS",
@@ -697,6 +716,59 @@ def build_references(
         source, binary, argv, time.perf_counter_ns() - started,
       )
       print(f"built {name}: C++ reference", flush=True)
+    if "main.go" in benchmark["references"]:
+      source = source_root / "main.go"
+      binary = binary_path(name, "go")
+      binary.parent.mkdir(parents=True)
+      argv = [toolchain["go"], "build", "-o", str(binary), str(source)]
+      environment = {**os.environ, "GOENV": "off", "GOTOOLCHAIN": "local",
+                     "GO111MODULE": "off", "CGO_ENABLED": "0"}
+      started = time.perf_counter_ns()
+      command(argv, env=environment)
+      outputs["go"] = {
+        **native_build_receipt(source, binary, argv, time.perf_counter_ns() - started),
+        "build_environment": {
+          key: environment[key] for key in ("GOENV", "GOTOOLCHAIN", "GO111MODULE", "CGO_ENABLED")
+        },
+        "go_environment": command([
+          toolchain["go"], "env", "-json", "GOOS", "GOARCH", "GOARM64",
+          "GOFLAGS", "CGO_ENABLED", "GOVERSION",
+        ], env=environment).stdout.decode(),
+      }
+      print(f"built {name}: Go reference", flush=True)
+    if "main.java" in benchmark["references"]:
+      source = source_root / "main.java"
+      binary = binary_path(name, "java")
+      classes = binary.parent / "classes"
+      classes.mkdir(parents=True)
+      main_class = benchmark["java_main_class"]
+      compile_source = binary.parent / f"{main_class}.java"
+      shutil.copyfile(source, compile_source)
+      argv = [toolchain["javac"], "-d", str(classes), str(compile_source)]
+      started = time.perf_counter_ns()
+      command(argv)
+      compile_ns = time.perf_counter_ns() - started
+      launch = [toolchain["java"], "-cp", str(classes), main_class]
+      binary.write_text("#!/bin/sh\nexec " + shlex.join(launch) + ' "$@"\n')
+      binary.chmod(0o755)
+      outputs["java"] = {
+        "source": str(source.relative_to(ROOT)),
+        "source_metrics": source_metrics(source),
+        "binary": str(binary.relative_to(BUILD)),
+        "binary_sha256": sha256(binary),
+        "binary_bytes": sum(p.stat().st_size for p in classes.rglob("*.class")),
+        "class_sha256": {
+          str(p.relative_to(classes)): sha256(p)
+          for p in sorted(classes.rglob("*.class"))
+        },
+        "dynamic_dependencies": None,
+        "compile_ns": compile_ns, "compile_command": argv,
+        "runtime_command": launch, "runtime_version": command_text([
+          toolchain["java"], "--version",
+        ]),
+        "process_model": "fresh JVM per sample; startup and JIT compilation included",
+      }
+      print(f"built {name}: Java reference", flush=True)
   rust_benchmarks = [b for b in benchmarks if "main.rs" in b["references"]]
   if rust_benchmarks:
     argv = [toolchain["cargo"], "build", "--locked", "--release",
@@ -926,17 +998,17 @@ def check_programs(
   return receipt
 
 
-def source_quote(text: str, index: int, rust: bool) -> bool:
+def source_quote(text: str, index: int, rust: bool, go: bool = False) -> bool:
   if rust and text[index] == "'":
     lifetime = re.match(r"'[A-Za-z_]\w*", text[index:])
     if lifetime:
       end = index + lifetime.end()
       if end == len(text) or text[end] != "'":
         return False
-  return text[index] in ("'", '"')
+  return text[index] in ("'", '"') or (go and text[index] == "`")
 
 
-def strip_c_comments(text: str, rust: bool = False) -> str:
+def strip_c_comments(text: str, rust: bool = False, go: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -961,7 +1033,7 @@ def strip_c_comments(text: str, rust: bool = False) -> str:
       continue
     if state == "quote":
       output.append(char)
-      if char == "\\" and following:
+      if quote != "`" and char == "\\" and following:
         output.append(following)
         index += 2
         continue
@@ -978,14 +1050,14 @@ def strip_c_comments(text: str, rust: bool = False) -> str:
       index += 2
       continue
     output.append(char)
-    if source_quote(text, index, rust):
+    if source_quote(text, index, rust, go):
       state = "quote"
       quote = char
     index += 1
   return "".join(output)
 
 
-def collapse_code_whitespace(text: str, rust: bool = False) -> str:
+def collapse_code_whitespace(text: str, rust: bool = False, go: bool = False) -> str:
   output: list[str] = []
   state = "code"
   quote = ""
@@ -996,7 +1068,7 @@ def collapse_code_whitespace(text: str, rust: bool = False) -> str:
     following = text[index + 1] if index + 1 < len(text) else ""
     if state == "quote":
       output.append(char)
-      if char == "\\" and following:
+      if quote != "`" and char == "\\" and following:
         output.append(following)
         index += 2
         continue
@@ -1012,7 +1084,7 @@ def collapse_code_whitespace(text: str, rust: bool = False) -> str:
       output.append(" ")
       pending_space = False
     output.append(char)
-    if source_quote(text, index, rust):
+    if source_quote(text, index, rust, go):
       state = "quote"
       quote = char
     index += 1
@@ -1023,6 +1095,7 @@ def source_metrics(path: Path) -> dict[str, Any]:
   data = path.read_bytes()
   text = data.decode("utf-8")
   rust = path.suffix == ".rs"
+  go = path.suffix == ".go"
   if path.suffix == ".py":
     tokens = tokenize.generate_tokens(io.StringIO(text).readline)
     without_comments = tokenize.untokenize(
@@ -1030,8 +1103,8 @@ def source_metrics(path: Path) -> dict[str, Any]:
       for token in tokens
     )
   else:
-    without_comments = strip_c_comments(text, rust)
-  normalized = collapse_code_whitespace(without_comments, rust).encode("utf-8")
+    without_comments = strip_c_comments(text, rust, go)
+  normalized = collapse_code_whitespace(without_comments, rust, go).encode("utf-8")
   return {
     "path": str(path.relative_to(ROOT)),
     "physical_lines": len(text.splitlines()),
@@ -1293,7 +1366,8 @@ def make_baseline(
       "source_metric": "nonblank lines after language-aware comment removal",
       "source_metrics_harness_sha256": sha256(Path(__file__).resolve()),
       "process_model": "fresh process per warmup and measured sample",
-      "order": "rotating available C,idiomatic,tuned,Python,Rust,C++ Latin order",
+      "order": "rotating available C,idiomatic,tuned,Python,Rust,C++,Go,Java Latin order",
+      "java_process_model": "fresh JVM per sample; startup and JIT compilation included; no in-process warmup",
     },
     "calibration": {
       "run_id": calibration["run_id"],
@@ -1525,19 +1599,12 @@ def make_current(
     name = benchmark["name"]
     reference = baseline["benchmarks"][name]
     entry = run["benchmarks"][name]
-    c_source = reference["c"]["source"]
     python_source = reference["python"]["source"]
     c_median = reference["c"]["statistics"]["median_elapsed_ns"]
-    python_median = reference["python"]["statistics"]["median_elapsed_ns"]
     python_lines = python_source["source_lines"]
 
-    row = {
-      "time_c_over_c": 1.0,
-      "time_python_over_c": python_median / c_median,
-      "sloc_c_over_python": c_source["source_lines"] / python_lines,
-      "sloc_python_over_python": 1.0,
-    }
-    for implementation in ("rust", "cpp"):
+    row = {}
+    for implementation in REFERENCE_IMPLEMENTATIONS:
       if implementation not in reference:
         continue
       foreign = reference[implementation]
@@ -1624,6 +1691,7 @@ def render_current(current: dict[str, Any]) -> str:
   labels = {
     "c": "C", "idiomatic": "idiomatic x2c", "tuned": "tuned x2c",
     "python": "Python", "rust": "Rust", "cpp": "C++",
+    "go": "Go", "java": "Java",
   }
   lines = [
     "# x2c Benchmarks Game result",
@@ -1636,8 +1704,10 @@ def render_current(current: dict[str, Any]) -> str:
     "- `idiomatic` is `main.x`, using ordinary x2c collections and APIs.",
     "  `tuned` is `tuned.x`, using typed containers and other",
     "  x2c optimizations within the same official specification.",
-    "- C, Python, Rust, and C++ are adopted, unmodified contributed programs.",
+    "- C, Python, Rust, C++, Go, and Java are unchanged contributed programs.",
     "  These are local measurements, not the official site's timings.",
+    "- Java starts a fresh JVM per sample, including startup and JIT compilation.",
+    "  The separate process warmup does not warm the measured JVM.",
     "- Time uses C as the implicit 1.00 baseline; SLOC uses Python as the",
     "  implicit 1.00 baseline. Larger values mean more cost.",
     "- N/A means there is no admitted contribution for that problem.",
@@ -1835,7 +1905,7 @@ def parse_args() -> argparse.Namespace:
     default=os.environ.get("SHOOTOUT_CFLAGS", DEFAULT_CFLAGS),
   )
   parser.add_argument("--profile", default="local")
-  parser.add_argument("--samples", type=int, default=12)
+  parser.add_argument("--samples", type=int)
   parser.add_argument("--warmups", type=int, default=1)
   parser.add_argument("--timeout", type=float, default=3600.0)
   parser.add_argument(
@@ -1849,22 +1919,22 @@ def parse_args() -> argparse.Namespace:
     default=os.environ.get("SHOOTOUT_ALLOW_MACHINE_MISMATCH") == "1",
   )
   args = parser.parse_args()
-  if args.samples < 1:
+  if args.samples is None and args.action != "calibrate":
+    args.samples = 12
+  if args.samples is not None and args.samples < 1:
     parser.error("--samples must be positive")
   if args.warmups < 0:
     parser.error("--warmups must be nonnegative")
   if args.timeout <= 0:
     parser.error("--timeout must be positive")
-  if args.action == "calibrate" and args.samples % len(IMPLEMENTATIONS):
-    parser.error(
-      f"calibration samples must be a multiple of {len(IMPLEMENTATIONS)}"
-    )
   if args.action in ("update", "calibrate") and args.only:
     parser.error(f"{args.action} requires the complete benchmark set")
-  if args.action in ("update", "calibrate") and (
+  if args.action == "update" and (
     args.samples != 12 or args.warmups != 1
   ):
     parser.error(f"{args.action} requires 12 samples and one warmup")
+  if args.action == "calibrate" and args.warmups != 1:
+    parser.error("calibrate requires one warmup")
   return args
 
 
@@ -1879,6 +1949,12 @@ def main() -> int:
     if args.profile not in manifest["profiles"]:
       raise HarnessError(f"unknown profile: {args.profile}")
     benchmarks = selected_benchmarks(manifest, args.only)
+    if args.action == "calibrate":
+      multiple = calibration_sample_multiple(benchmarks)
+      if args.samples is None:
+        args.samples = math.ceil(12 / multiple) * multiple
+      if args.samples % multiple:
+        raise HarnessError(f"calibration samples must be a multiple of {multiple}")
     toolchain = resolve_toolchain(args)
     if args.action == "calibrate":
       calibrate(args, manifest, benchmarks, toolchain)

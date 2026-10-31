@@ -122,6 +122,14 @@
         "main.rs": {
           "path": "nbody/nbody.rust",
           "sha256": "1097288b773ff0666c453ad91aa9c04024cff3e12e548565d10435ca4e1980d3"
+        },
+        "main.go": {
+          "sha256": "a684e611ada6c41073ddf7f4e0d01e35632f4f34b3b67064a811049fbbd86d4b",
+          "path": "nbody/nbody.go-8.go"
+        },
+        "main.java": {
+          "path": "nbody/nbody.java-2.java",
+          "sha256": "f5a179194d469897ee42c8a794e8a48e3bd7b0e6edd5081db8178ae272ea01c2"
         }
       },
       "specification": {
@@ -132,7 +140,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "nbody"
     },
     {
       "name": "spectralnorm",
@@ -165,6 +174,14 @@
           "path": "spectralnorm/spectralnorm.rust-3.rust",
           "sha256": "6b8fca569218ac7cff178ce4da8e44cccae1c8668b1e5f0e2d2876e80c7b2424",
           "note": "This contribution requires even dimensions. Every configured profile and official fixture uses an even dimension."
+        },
+        "main.go": {
+          "sha256": "8f277cc7c9f4b0cb287c9bd697d047fc8d40562d960030d9c718a948073dd6ab",
+          "path": "spectralnorm/spectralnorm.go-8.go"
+        },
+        "main.java": {
+          "path": "spectralnorm/spectralnorm.java-8.java",
+          "sha256": "3b9fb7ad8840638e4193e91a6c46209756faa72a14fa0fb5d9aba4dd33f06a7f"
         }
       },
       "specification": {
@@ -175,7 +192,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "spectralnorm"
     },
     {
       "name": "fannkuchredux",
@@ -207,6 +225,14 @@
         "main.rs": {
           "path": "fannkuchredux/fannkuchredux.rust-2.rust",
           "sha256": "9238cf9dd91b245c4b07de2a6985785c7683e40fcd510f8b817076e7c4ba3d1c"
+        },
+        "main.go": {
+          "sha256": "b2f253a103bb797863b132e10b522034451f395bca02ec470a3e98c2031f742b",
+          "path": "fannkuchredux/fannkuchredux.go-8.go"
+        },
+        "main.java": {
+          "path": "fannkuchredux/fannkuchredux.java-2.java",
+          "sha256": "f55e671f4aab2ac2881f9ab9ada9a67bb08c72de74fef273fd999d8e47237296"
         }
       },
       "specification": {
@@ -217,7 +243,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "fannkuchredux"
     },
     {
       "name": "mandelbrot",
@@ -250,6 +277,14 @@
           "path": "mandelbrot/mandelbrot.rust-4.rust",
           "sha256": "5d7cbf0a4536913670781be454d9fc95817e7f09cacd7082186b176bab08830c",
           "note": "This contribution rounds dimensions down to a multiple of eight. Every configured profile and official fixture uses a multiple of eight."
+        },
+        "main.go": {
+          "sha256": "5c738174a4d392c995978c4d5121785c738b36347fb75608f70e52a8ca83c157",
+          "path": "mandelbrot/mandelbrot.go-8.go"
+        },
+        "main.java": {
+          "path": "mandelbrot/mandelbrot.java-8.java",
+          "sha256": "8a8d0cb3f7fd0fcaa202ed6bddaf71e08b1e79ea28e12ad6394e7191a9ee5afb"
         }
       },
       "specification": {
@@ -260,7 +295,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "mandelbrot"
     },
     {
       "name": "fasta",
@@ -292,6 +328,14 @@
         "main.rs": {
           "path": "fasta/fasta.rust-4.rust",
           "sha256": "d7d9c00058423e6976125060581affd80c407ebc7ead5ca6aca1f5e62b18d37a"
+        },
+        "main.go": {
+          "sha256": "b7a6d09683ec310b5d9f619383487d345a3435b1d17bf239443fed4ef84107db",
+          "path": "fasta/fasta.go"
+        },
+        "main.java": {
+          "path": "fasta/fasta.java-2.java",
+          "sha256": "38a88bdc4c297ac45994c1ec5eabc5a308e01c21b9ab62d506100f879258a67a"
         }
       },
       "specification": {
@@ -302,7 +346,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "fasta"
     },
     {
       "name": "knucleotide",
@@ -350,7 +395,9 @@
       },
       "unavailable": {
         "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
-        "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+        "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits.",
+        "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
+        "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched."
       }
     },
     {
@@ -384,6 +431,14 @@
         "main.rs": {
           "path": "revcomp/revcomp.rust-2.rust",
           "sha256": "a000f1ff5b10f92c9ac7ff49081888f87807634a96529dfb2834c52ba15e4a29"
+        },
+        "main.go": {
+          "sha256": "f1fb6d5a148e917fa5c5395b78ba6fc0734c28c54e8cdc0c09852273ef20d814",
+          "path": "revcomp/revcomp.go-2.go"
+        },
+        "main.java": {
+          "path": "revcomp/revcomp.java-5.java",
+          "sha256": "554d9d87ffbab8a872a62dcd102d8bbd33abe6d24588b0df7c88efb9fc21d5e9"
         }
       },
       "specification": {
@@ -399,7 +454,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "revcomp"
     },
     {
       "name": "binarytrees",
@@ -431,6 +487,14 @@
         "main.rs": {
           "path": "binarytrees/binarytrees.rust",
           "sha256": "2bb471318d836aa874fecbcf2dd3da00c6bedee70ec20c141f9ca02bc25abe07"
+        },
+        "main.go": {
+          "sha256": "72d31464e6ef9df69c740c364e18099be00dbdca22a12bd04ed919f7e664e6c3",
+          "path": "binarytrees/binarytrees.go"
+        },
+        "main.java": {
+          "path": "binarytrees/binarytrees.java-2.java",
+          "sha256": "c6a7202fa3e271d49d0d3a45f75b2b01b687f67698765d04e7e6abbdc93cf0c1"
         }
       },
       "specification": {
@@ -444,7 +508,8 @@
       "cpp_flags": [
         "-std=c++17"
       ],
-      "cpp_link_flags": []
+      "cpp_link_flags": [],
+      "java_main_class": "binarytrees"
     },
     {
       "name": "regexredux",
@@ -477,6 +542,14 @@
         "main.rs": {
           "path": "regexredux/regexredux.rust",
           "sha256": "9e826f38b182de0bff08d52f56277054cd0b3141e3e0fa538f5b42b314bf2a43"
+        },
+        "main.go": {
+          "sha256": "c29142537a4142e0886c8e02979df2740a0c01642974860143567fad3865442b",
+          "path": "regexredux/regexredux.go"
+        },
+        "main.java": {
+          "path": "regexredux/regexredux.java",
+          "sha256": "c8921748621b8ce4b97b8a159a99acbed94526f49c7bf8903bfd468c53134f28"
         }
       },
       "specification": {
@@ -503,7 +576,8 @@
           "path": "include/boost/noncopyable.hpp",
           "sha256": "f9551b997518655ab04feae8b84b8e87f742d3c6557dc8c95b11e0368c7c848b"
         }
-      }
+      },
+      "java_main_class": "regexredux"
     },
     {
       "name": "pidigits",
@@ -535,6 +609,14 @@
         "main.rs": {
           "path": "pidigits/pidigits.rust-4.rust",
           "sha256": "fb6b33b1bf74612f8ce78d19e70f10f41650b02b72e4c73d2cb0480508fbef65"
+        },
+        "main.go": {
+          "sha256": "05986ab0e5b74a2a892aefd5c49a190844d50e3cc6d625f8deb1419f4c60f718",
+          "path": "pidigits/pidigits.go-7.go"
+        },
+        "main.java": {
+          "path": "pidigits/pidigits.java",
+          "sha256": "9d721d35dfb4520a12b1ec118316a277e6ab51ec76d09a8b6015f8bfc1911c1b"
         }
       },
       "specification": {
@@ -554,7 +636,8 @@
       "cpp_link_flags": [
         "-lgmpxx",
         "-lgmp"
-      ]
+      ],
+      "java_main_class": "pidigits"
     }
   ],
   "build_inputs": {
