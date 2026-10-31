@@ -405,7 +405,7 @@ static inline unsigned Var_payload32(Var value){
 
 static inline double Var_decode_f64(Var value){
   switch(value.u64){
-    case VAR_NAN_BITS : return 0.0 / 0.0;  case VAR_NEGINF_BITS : return - 1.0 / 0.0;  case VAR_POSINF_BITS : return 1.0 / 0.0;
+    case VAR_NAN_BITS : return __builtin_nan("");  case VAR_NEGINF_BITS : return - 1.0 / 0.0;  case VAR_POSINF_BITS : return 1.0 / 0.0;
   }
   unsigned long raw = value.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : value.u64 - VAR_F64_SHIFT;  double result;  memcpy(& result, & raw, sizeof result);  return result;
 }

@@ -1414,7 +1414,7 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     xfree(box);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "Var_clone_wide",.line = 117,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "Var_clone_wide",.line = 121,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
@@ -1440,7 +1440,7 @@ double Var_floating(Var v){
   switch(Var_tag(v)){
     case 3355493 : return Var_decode_f32(v);
     case 3356265 : return f7_numbers____f64_floating(v);
-    case 28764 : return 0.0 / 0.0;
+    case 28764 : return __builtin_nan("");
     case 2050956 : return - 1.0 / 0.0;
     case 1854348 : return 1.0 / 0.0;
     case 26071077642 : return(double) f7_numbers____wide_box(v) -> value.long_double_value;
@@ -1497,7 +1497,7 @@ unsigned Var_wide_hash(Var v){
     case 44858254 : return f7_numbers____hash_wide(tag, value, sizeof(unsigned long));
     case 25983886 : return f7_numbers____hash_wide(tag, value, sizeof(long long));
     case 1435270030 : return f7_numbers____hash_wide(tag, value, sizeof(unsigned long long));
-    case 26071077642 : return f7_numbers____hash_wide(tag, value, sizeof(long double));
+    case 26071077642 : return f7_numbers____hash_wide(tag, value, (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384 ? 10 : sizeof(long double)));
   }
   return 0;
 }
@@ -1512,7 +1512,7 @@ int Var_wide_equal(Var a, Var b){
     case 44858254 : return abox -> value.ulong_value == bbox -> value.ulong_value;
     case 25983886 : return abox -> value.long_long_value == bbox -> value.long_long_value;
     case 1435270030 : return abox -> value.ulong_long_value == bbox -> value.ulong_long_value;
-    case 26071077642 : return ! memcmp(& abox -> value.long_double_value, & bbox -> value.long_double_value, sizeof(abox -> value.long_double_value));
+    case 26071077642 : return ! memcmp(& abox -> value.long_double_value, & bbox -> value.long_double_value, (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384 ? 10 : sizeof(long double)));
   }
   return 0;
 }
@@ -1529,7 +1529,7 @@ int Var_wide_compare(Var a, Var b){
   long double av = Var_long_double_value(a), bv = Var_long_double_value(b);
   if(av < bv) return - 1;
   if(av > bv) return 1;
-  int cmp = memcmp(& f7_numbers____wide_box(a) -> value.long_double_value, & f7_numbers____wide_box(b) -> value.long_double_value, sizeof(av));
+  int cmp = memcmp(& f7_numbers____wide_box(a) -> value.long_double_value, & f7_numbers____wide_box(b) -> value.long_double_value, (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384 ? 10 : sizeof(long double)));
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
 }
 
@@ -1545,7 +1545,7 @@ static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     xfree(box);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 344,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 350,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }

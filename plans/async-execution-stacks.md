@@ -699,7 +699,7 @@ they do not authorize implementation or unrelated contract changes.
 | Item | Constraint and next work |
 | --- | --- |
 | Strict-build lifetime diagnostics | The pointer-field provenance fix and selected audit boundary are implemented. The merged tree passes the strict stage-two build; the earlier three temporary-borrow diagnostics are resolved. |
-| Native target compatibility | Focused normal and ordinary sanitizer Task checks, configured-stack probes, and fallback probes pass on all four targets, using Rosetta/Docker emulation for x86_64. Both macOS targets and Linux arm64 pass full normal and ordinary sanitizer suites. The GCC use-after-return false overflow has a [focused fix and regression](reference/async-uar-fix-2026-10-31.md). Linux x86_64 numeric failures remain open. See [native target evidence](reference/async-native-targets-2026-10-31.md). |
+| Native target compatibility | Focused normal and ordinary sanitizer Task checks, configured-stack probes, and fallback probes pass on all four targets, using Rosetta/Docker emulation for x86_64. All four targets pass full normal and ordinary sanitizer suites after the [numeric fixes and regressions](reference/async-numeric-fixes-2026-10-31.md). The GCC use-after-return false overflow has a [focused fix and regression](reference/async-uar-fix-2026-10-31.md). See [native target evidence](reference/async-native-targets-2026-10-31.md). |
 | Regression coverage | Local Channel and Scope timings are bounded evidence. Network/timer workloads, broader performance checkpoints, and final publication validation remain outstanding. |
 
 These are consequential choices. The selected stack model does not authorize

@@ -166,6 +166,8 @@ were changed to make this target green.
 Rosetta and Docker emulation provide ABI and execution evidence, without
 establishing behavior on physical Intel hardware or performance equivalence.
 The GCC use-after-return finding is resolved by the focused repair linked
-above. Linux x86_64 numeric failures remain open.
+above. The subsequent [numeric repair](async-numeric-fixes-2026-10-31.md)
+resolves the Linux x86_64 numeric failures. The tables retain the initial
+validation results.
 This follow-up contains no benchmark measurements. Normal benchmark reruns,
 dev/main advancement, and all pushes remain on hold.

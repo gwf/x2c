@@ -492,7 +492,7 @@ inline unsigned Var.payload32(Var value) => (unsigned) value.u64;
 /** Decodes an immediate `<f64>` `Var`. */
 inline double Var.decode_f64(Var value) {
   switch (value.u64) {
-    case VAR_NAN_BITS:    return 0.0 / 0.0;
+    case VAR_NAN_BITS:    return __builtin_nan("");
     case VAR_NEGINF_BITS: return -1.0 / 0.0;
     case VAR_POSINF_BITS: return 1.0 / 0.0;
   }

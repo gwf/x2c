@@ -79,5 +79,6 @@ five-line correction in `bootstrap/lib/minicoro.h`, matching the authoritative
 header exactly. Authored and generated diffs pass review and `git diff --check`.
 
 Normal benchmark reruns, dev/main advancement, and all pushes remain on hold.
-The existing Linux x86_64 numeric failures still require investigation before
-publication.
+The Linux x86_64 numeric failures recorded above were subsequently
+[investigated and repaired](async-numeric-fixes-2026-10-31.md). The table retains
+the results measured during this overflow-check repair.

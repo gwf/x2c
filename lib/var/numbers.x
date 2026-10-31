@@ -18,6 +18,10 @@ static typedef struct VarWideBox {
   VarWideValue value;
 } *VarWideBox;
 
+/* x87 stores ten value bytes followed by ABI padding. */
+static alias _ldouble_bytes to
+  (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384 ? 10 : sizeof(long double));
+
 // wide scalars
 
 /** Boxes a `long` into a scope-owned `<long>` value.
@@ -159,7 +163,7 @@ meta native double Var.floating(Var v) {
   switch (v.tag()) {
     case <f32>:     return v.decode_f32();
     case <f64>:     return _f64_floating(v);
-    case <"nan">:   return  0.0 / 0.0;
+    case <"nan">:   return __builtin_nan("");
     case <"-inf">:  return -1.0 / 0.0;
     case <"+inf">:  return  1.0 / 0.0;
     case <ldouble>: return (double) _wide_box(v).value.long_double_value;
@@ -254,7 +258,9 @@ meta native unsigned long long Var.ulong_long_value(Var v) =>
    than as bytes. The tag seeds the chain, so two boxes with equal bits but
    different tags hash differently. */
 
-/** Returns a supported wide scalar box's content hash, or 0 otherwise. */
+/** Returns a supported wide scalar box's content hash, excluding ABI padding,
+    or 0 otherwise.
+*/
 unsigned Var.wide_hash(Var v) {
   if (!v.is_wide()) return 0;
   VarWideValue *value = &_wide_box(v).value;
@@ -264,7 +270,7 @@ unsigned Var.wide_hash(Var v) {
     case <ulong>:   return _hash_wide(tag, value, sizeof(unsigned long));
     case <llong>:   return _hash_wide(tag, value, sizeof(long long));
     case <ullong>:  return _hash_wide(tag, value, sizeof(unsigned long long));
-    case <ldouble>: return _hash_wide(tag, value, sizeof(long double));
+    case <ldouble>: return _hash_wide(tag, value, _ldouble_bytes);
   }
   return 0;
 }
@@ -273,8 +279,8 @@ unsigned Var.wide_hash(Var v) {
     Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values
     are separate allocations, so bit identity says nothing about their
     contents. This is the payload comparison that `Var.equal` and `===` use
-    for those tags. An `<ldouble>` pair is compared byte for byte, so two NaNs
-    sharing one representation compare equal here.
+    for those tags. An `<ldouble>` pair compares its value bytes, excluding ABI
+    padding, so two NaNs sharing one representation compare equal here.
 
     A 0 result means "not equal as wide boxes". It also covers an argument
     that is not a wide box and a pair whose tags differ. For a general
@@ -295,16 +301,16 @@ int Var.wide_equal(Var a, Var b) {
       return abox.value.ulong_long_value == bbox.value.ulong_long_value;
     case <ldouble>: return !memcmp(
       &abox.value.long_double_value, &bbox.value.long_double_value,
-      sizeof(abox.value.long_double_value));
+      _ldouble_bytes);
   }
   return 0;
 }
 
 /** Orders two wide boxes carrying the same tag, returning -1, 0, or 1.
     Integer families delegate to `Var.integer_compare`. An `<ldouble>` pair
-    compares as `long double` and falls back to a byte comparison when neither
-    operand is less than the other, so distinct NaN representations still
-    order deterministically.
+    compares as `long double` and falls back to a value-byte comparison,
+    excluding ABI padding, when neither operand is less than the other.
+    Distinct NaN representations still order deterministically.
 
     0 means equal, and it is also the result for mismatched tags and for an
     argument that is not a wide box. Check the tags first, or use
@@ -320,7 +326,7 @@ int Var.wide_compare(Var a, Var b) {
   if (av > bv) return 1;
   int cmp = memcmp(
     &_wide_box(a).value.long_double_value,
-    &_wide_box(b).value.long_double_value, sizeof(av));
+    &_wide_box(b).value.long_double_value, _ldouble_bytes);
   return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
 }
 

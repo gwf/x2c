@@ -18,21 +18,24 @@ native targets after it. See
 
 Linux validation also exposed two sanitizer-harness defects. The harness now
 passes the runtime's required `-fsigned-char` flag and links compiler objects
-before the runtime archive. The repaired harness passes on Linux arm64 and
-both macOS targets. Linux x86_64 completes the sanitizer build and execution,
-with the numeric failures below. See
+before the runtime archive. The repaired harness passes on all four native targets
+after the numeric repair below. See
 [the target report](../plans/reference/async-native-targets-2026-10-31.md).
 
-## Linux x86_64 numeric findings on 2026-10-31
+## Resolved Linux x86_64 numeric findings on 2026-10-31
 
-Under GCC 12.2 in the local emulated Debian image, the full normal suite fails
-`string_checked_format_floating`, `var_wide_value_semantics`, and
-`var_all_family_comparison_matrix`. The full ASan/UBSan suite fails the first
-two. The three failures also reproduce when only String and Var suites run,
-without Task tests. Relevant String and Var source is unchanged from the
-pre-async baseline, but that baseline has not been executed in this image.
-The causes and regression status remain unclassified. No numeric runtime or
-expectation was changed during this validation task. Focused Task checks pass.
+A fresh pre-async baseline reproduces the same three numeric test failures as
+this branch before the repair. NaN reconstruction via `0.0 / 0.0` produced a
+negative NaN under GCC. Long-double identity, hashes, and ordering included
+x87's six ABI padding bytes.
+
+The two NaN readers now return a quiet-NaN constant. The three wide-value
+operations use one private payload-byte width that excludes x87 padding and
+preserves other formats. Three focused tests cover nonconstant NaN decoding,
+formatting, differing padding, cloning, Map keys, precision, signed zero, and
+NaN payloads. Full normal and ASan/UBSan suites pass on all four native targets.
+No expectation was weakened. See
+[the repair evidence](../plans/reference/async-numeric-fixes-2026-10-31.md).
 
 ## Private async stack coverage on 2026-10-31
 
@@ -41,10 +44,9 @@ job entry, recovery, and restoration of the caller's environment. The optional
 `probes/run-task-backend.sh` checks page rounding, guards, switching, complete
 unmapping, and the production unsupported-backend diagnostic without a new
 runtime API or recurring gate. Focused normal and ordinary sanitizer Task
-checks pass on all four selected native targets. Both macOS targets and Linux
-arm64 pass full normal and ordinary sanitizer suites. Linux x86_64 numeric
-failures remain open. The GCC use-after-return false overflow is resolved by
-the focused repair recorded above. See
+checks pass on all four selected native targets. All four pass full normal
+and ordinary sanitizer suites after the numeric repair. The GCC use-after-return
+false overflow is resolved by the focused repair recorded above. See
 [the native target report](../plans/reference/async-native-targets-2026-10-31.md).
 
 ## Private async review on 2026-10-31
