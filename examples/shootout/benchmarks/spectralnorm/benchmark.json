@@ -1,0 +1,34 @@
+{
+  "name": "spectralnorm",
+  "title": "spectral norm",
+  "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/spectralnorm.html",
+  "checks": [
+    {
+      "args": [
+        "100"
+      ],
+      "expected": "expected/100.out"
+    }
+  ],
+  "profiles": {
+    "quick": [
+      "100"
+    ],
+    "local": [
+      "2000"
+    ],
+    "canonical": [
+      "5500"
+    ]
+  },
+  "references": {
+    "c": {
+      "path": "spectralnorm/spectralnorm.gcc-8.gcc",
+      "sha256": "5ae8e0c4d2cb97b744d682e4e974a22b727b5209ecc3293d4d1581ccf86d7574"
+    },
+    "python": {
+      "path": "spectralnorm/spectralnorm.python3-6.python3",
+      "sha256": "bc4cf8abdaa4c49e4d95a7e43e536b26c10b930408cb5c22def1121d2dfc4890"
+    }
+  }
+}
