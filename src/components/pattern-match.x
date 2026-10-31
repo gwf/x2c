@@ -859,7 +859,8 @@ meta static Code _match_condition(Code subject, List pattern, List body) {
   Var value = ((Code) pattern).pattern_value();
   Array pool = [];
   int literal = value is <list> && _match_plain_literal(value) &&
-    (pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)) (nil))));
+    (pattern ~= %(expr ? (!or (cache ?) (expr ? (!or (cache ?) (nil)))
+                             (nil))));
   List equal = literal ? %(op == $expr $pattern) : NULL;
   List arm = literal && value.is_nil()
     ? %(if $equal $body)
@@ -869,7 +870,6 @@ meta static Code _match_condition(Code subject, List pattern, List body) {
     values = binders.len();
     frame = _match_capturing(frame);
     arm = _match_fallback(pattern, binders, frame, body, viewing, pool);
-    if (equal) arm = %(if $equal $body $arm);
   }
   if (subject.type().is_named("Var")) arm = _match_listed(arm, none);
   List prologue = _match_prologue(subject, frame, viewing, values);

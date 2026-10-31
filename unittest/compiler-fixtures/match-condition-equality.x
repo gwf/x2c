@@ -9,6 +9,10 @@ static int singleton_list(List value) => value ~= %((alpha 7));
 static int text(List value) => value ~= %(pair "word");
 static int wide(List value) => value ~= %(4294967296l);
 static int dynamic_empty(Var value) => value ~= %();
+meta static List constant_empty(void) => %();
+meta static List constant_pair(void) => %(alpha 7);
+static int meta_empty(List value) => value ~= $constant_empty();
+static int meta_pair(List value) => value ~= $constant_pair();
 
 static int calls;
 static List subject(void) { calls++; return %(alpha 7); }
@@ -54,6 +58,8 @@ int main(void) {
   if (!singleton_list(separate_nested) || separate_nested == %((alpha 7)))
     return 17;
   isolated.release();
+  if (!meta_empty(%()) || meta_empty(%(alpha 7))) return 18;
+  if (!meta_pair(%(alpha 7)) || meta_pair(%())) return 19;
   puts("constant pattern equality passed");
   return 0;
 }
