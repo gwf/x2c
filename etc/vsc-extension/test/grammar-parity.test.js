@@ -298,7 +298,8 @@ test('symbol punctuation is excluded from editor bracket matching', async () => 
   const configuredRegistry = new Registry({ onigLib, loadGrammar: async () => grammarData });
   const configured = await configuredRegistry.loadGrammarWithConfiguration(
     'source.x2c', 1, { tokenTypes });
-  for (const literal of ['<(>', '<)>', '<[>', '<]>', '<{>', '<}>', '<"(">', '<")">']) {
+  for (const literal of ['<(>', '<)>', '<[>', '<]>', '<{>', '<}>', '<"(">', '<")">',
+    '%<( ) [ ] { }>', '%<red <(> blue>']) {
     const line = `c.expect(${literal});`;
     const tokens = configured.tokenizeLine2(line).tokens;
     function typeAt(at) {
@@ -314,4 +315,106 @@ test('symbol punctuation is excluded from editor bracket matching', async () => 
     assert.equal(typeAt(start + literal.length), types.other, line);
   }
   configuredRegistry.dispose();
+});
+
+test('List and Map rest parameters have splice sigils and parameter names', async () => {
+  for (const type of ['List', 'Map']) {
+    for (const source of [
+      `int count(${type} @items);`,
+      `int count(int fixed, ${type} @items) => items.len();`,
+      `int Owner.count(Self self, ${type} @items) { return 0; }`,
+      `typedef int (*Callback)(${type} @items);`,
+      `meta int count(${type} /* tail */ @items) => 0;`
+    ]) {
+      await check(source, type, typeScope);
+      await check(source, '@', 'punctuation.definition.macro.splice.x2c');
+      await check(source, 'items', 'variable.parameter.rest.x2c');
+      await check(source, 'items', 'variable.other.macro.hole.x2c', false);
+    }
+    await check(`typedef int (*Callback)(${type} @);`, '@',
+      'punctuation.definition.macro.splice.x2c');
+  }
+  for (const source of ['consume(1, @items, @(make_items()));',
+    'connect("a", @options, port: 8080, @(make_options()));']) {
+    await check(source, '@', 'punctuation.definition.macro.splice.x2c');
+    await check(source, '@(', 'meta.macro.hole.expression.x2c');
+    await check(source, 'make_', 'constant.other.atom.x2c', false);
+  }
+  await check('macro Expr $m(Expr @items) => 0;', 'items', 'variable.parameter.macro.x2c');
+  await check('int native(int fixed, ...);', '...', 'punctuation.vararg-ellipses.x2c');
+});
+
+test('name-first aliases scope only their separator', async () => {
+  for (const source of ['alias settings to window.settings;',
+    'static alias settings to window.settings;',
+    'alias settings to window.settings { work(); }',
+    'alias settings to window.settings:',
+    'void work(void) { alias settings to window.settings; }']) {
+    await check(source, 'alias', 'keyword.declaration.alias.x2c');
+    await check(source, 'to', 'keyword.declaration.alias.x2c');
+  }
+  for (const source of ['int to = 0;', 'to(value);', 'object.to(value);',
+    'alias object.to as local;', 'alias local to object.to;']) {
+    await check(source, 'to', 'keyword.declaration.alias.x2c', false,
+      source.lastIndexOf('to'));
+  }
+});
+
+test('pattern conditions and typeof spellings use operator scopes', async () => {
+  await check('if (row ~= %(pair ?(int a))) {}', '~=', 'keyword.operator.pattern-match.x2c');
+  for (const word of ['typeof', 'typeof_unqual', '__typeof__', '__typeof']) {
+    await check(`${word}(value) result;`, word, `keyword.operator.${word}.x2c`);
+    await check(`object.${word}(value);`, word, `keyword.operator.${word}.x2c`, false);
+  }
+});
+
+test('evaluated Maps keep code scopes inside quoted collections', async () => {
+  for (const source of ['Map value = ${key: make_value()};',
+    'List value = %(row ${key: make_value()} after);',
+    'Array value = %[${key: make_value()}, after];',
+    'Map value = %{entry: ${key: make_value()}, after: data};']) {
+    await check(source, '${', 'meta.literal.map.evaluated.x2c');
+    await check(source, 'key', 'constant.other.atom.x2c', false);
+    await check(source, 'make_value', 'constant.other.atom.x2c', false);
+    await check(source, ';', 'meta.literal.map.evaluated.x2c', false);
+  }
+});
+
+test('single-angle SymbolSets end at the outer delimiter and preserve punctuation data', async () => {
+  for (const literal of ['%<>', '%<red blue>', '%<red <blue>>', '%<">" \\>>',
+    '%<( ) [ ] { }>', '%<red /* comment */ blue>']) {
+    const source = `SymbolSet value = ${literal}; int after;`;
+    await check(source, '%<', 'punctuation.definition.literal.symbol-set.begin.x2c');
+    await check(source, '>', 'punctuation.definition.literal.symbol-set.end.x2c', true,
+      source.lastIndexOf('>'));
+    await check(source, '; int after;', 'meta.literal.symbol-set.x2c', false);
+  }
+  for (const source of ['int value = left << right;', 'int value = left %<red>;',
+    '// %<red>', 'char *value = "%<red>";'])
+    await check(source, '<', 'meta.literal.symbol-set.x2c', false);
+});
+
+test('rest parameter markers survive comments and line breaks without swallowing ordinary types', async () => {
+  for (const type of ['List', 'Map']) {
+    for (const tail of ['@items', '@']) {
+      let state;
+      for (const line of [`int count(${type} /* tail`, 'continued */', `  ${tail});`]) {
+        const result = (await grammar).tokenizeLine(line, state);
+        state = result.ruleStack;
+        if (!line.includes('@')) continue;
+        const sigil = result.tokens.find(token => token.startIndex <= line.indexOf('@') &&
+          line.indexOf('@') < token.endIndex);
+        assert.ok(sigil.scopes.includes('punctuation.definition.macro.splice.x2c'));
+        if (tail === '@items') {
+          const name = result.tokens.find(token => token.startIndex <= line.indexOf('items') &&
+            line.indexOf('items') < token.endIndex);
+          assert.ok(name.scopes.includes('variable.parameter.rest.x2c'));
+        }
+      }
+      const after = (await grammar).tokenizeLine('int ordinary;', state);
+      assert.ok(after.tokens.every(token => !token.scopes.includes('variable.parameter.rest.x2c')));
+    }
+    await check(`${type} ordinary;`, 'ordinary', 'variable.parameter.rest.x2c', false);
+    await check(`${type}.new();`, 'new', 'entity.name.function.x2c');
+  }
 });
