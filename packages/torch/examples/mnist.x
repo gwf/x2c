@@ -46,8 +46,8 @@ static double _accuracy(Module model, Tensor images, Tensor targets) {
 }
 
 static void _explain(String root) {
-  printf("%s", $dedent(%"
-    no MNIST files under $root
+  printf($dedent(%"
+    no MNIST files under %s
     Download the four IDX files and gunzip them into that directory:
       train-images-idx3-ubyte  train-labels-idx1-ubyte
       t10k-images-idx3-ubyte   t10k-labels-idx1-ubyte
@@ -55,7 +55,7 @@ static void _explain(String root) {
     https://ossci-datasets.s3.amazonaws.com/mnist/ as train-images-idx3-ubyte.gz
     and the three matching names. Then pass the directory as an argument or
     set TORCH_MNIST to it.
-  "));
+  "), root);
 }
 
 int main(int argc, char **argv) {
