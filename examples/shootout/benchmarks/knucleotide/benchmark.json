@@ -1,0 +1,60 @@
+{
+  "name": "knucleotide",
+  "title": "k-nucleotide",
+  "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/knucleotide.html",
+  "checks": [
+    {
+      "args": [],
+      "expected": "expected/official.out",
+      "stdin": "input.txt"
+    }
+  ],
+  "profiles": {
+    "quick": [],
+    "local": [],
+    "canonical": []
+  },
+  "upstream": {
+    "repository": "https://salsa.debian.org/benchmarksgame-team/benchmarksgame",
+    "revision": "40296663ed350d5fe4a6ab5e367bab61cb77c219",
+    "archive": "public/download/benchmarksgame-sourcecode.zip",
+    "sources": {
+      "main.c": {
+        "path": "knucleotide/knucleotide.gcc",
+        "sha256": "25e2d15a0c436f814254ede1bc87342428f28636f6168634db88b63243a15105"
+      },
+      "main.py": {
+        "path": "knucleotide/knucleotide.python3-3.python3",
+        "sha256": "8fcac91a94f0bc55a801d073a4321822ba2a3f40c1dda590da9e6715f3958f11"
+      }
+    },
+    "expected": {
+      "path": "public/download/knucleotide-output.txt",
+      "sha256": "baa63c46addb89c63e68ea0055952847fbccf450e89997b2b62234c90e66f500"
+    },
+    "input": {
+      "path": "public/download/knucleotide-input.txt",
+      "sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73"
+    }
+  },
+  "stdin": true,
+  "input": "input.txt",
+  "input_generator": {
+    "benchmark": "fasta",
+    "quick": 1000,
+    "local": 100000,
+    "canonical": 25000000
+  },
+  "cflags": [
+    "-I{source_dir}"
+  ],
+  "python_start_method": "fork",
+  "dependencies": {
+    "khash.h": {
+      "repository": "https://github.com/attractivechaos/klib",
+      "revision": "97a0fcb790b43b9e5da8994f4671021fec036f19",
+      "path": "khash.h",
+      "sha256": "4582c7fd4b98f61339ce677bb1daa7a45a53075b112a494a335525c4bda72074"
+    }
+  }
+}

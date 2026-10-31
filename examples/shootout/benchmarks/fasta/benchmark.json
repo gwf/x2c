@@ -1,0 +1,43 @@
+{
+  "name": "fasta",
+  "title": "fasta",
+  "description_url": "https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fasta.html",
+  "checks": [
+    {
+      "args": [
+        "1000"
+      ],
+      "expected": "expected/official.out"
+    }
+  ],
+  "profiles": {
+    "quick": [
+      "1000"
+    ],
+    "local": [
+      "100000"
+    ],
+    "canonical": [
+      "25000000"
+    ]
+  },
+  "upstream": {
+    "repository": "https://salsa.debian.org/benchmarksgame-team/benchmarksgame",
+    "revision": "40296663ed350d5fe4a6ab5e367bab61cb77c219",
+    "archive": "public/download/benchmarksgame-sourcecode.zip",
+    "sources": {
+      "main.c": {
+        "path": "fasta/fasta.gcc",
+        "sha256": "628b37687acb8ae008116ed7dbbaf001308ee46de5367c60eb4743301de596ff"
+      },
+      "main.py": {
+        "path": "fasta/fasta.python3",
+        "sha256": "f8bc35bb3b1c35fed1db20010aaa2abbdcce524e99822ae4a1238c2014e89899"
+      }
+    },
+    "expected": {
+      "path": "public/download/fasta-output.txt",
+      "sha256": "62d1e8d0df7938d2aefda9a37887e0389231ea72c099c29a51afb6edca1bdc73"
+    }
+  }
+}
