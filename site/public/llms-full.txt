@@ -3199,8 +3199,8 @@ declaration for the same alias replaces it only for following source.
 Registration and use are source ordered. Expression, statement, field,
 entry, enumerator, and unit macro aliases retain their result positions.
 `Decorator` aliases retain their captured `Expr`, `Function`, `Stmt`,
-`Field`, `Unit`, or `NamedType` target. An invocation in the wrong position
-receives the same result or target diagnostic as its direct spelling.
+`Field`, `Unit`, `NamedType`, or `Macro` target. An invocation in the wrong
+position receives the same result or target diagnostic as its direct spelling.
 
 Aliases do not globally reserve their identifiers. A macro or a decorator with
 explicit arguments is recognized only when the next significant token is `(`.

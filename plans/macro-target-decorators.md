@@ -1,7 +1,8 @@
 > Status: active
 > Implementation authorized, 2026-10-31.
 > Gary selected result-kind preservation and decorator continuation.
-> The keyword is `expand`; implementation and validation are in progress.
+> The keyword is `expand`; implementation and focused validation are complete.
+> Final integrated publication is in progress.
 
 # Macro-target decorators and mapping code
 
@@ -328,3 +329,45 @@ would not establish the requested full result-kind behavior. Returned-Decorator
 continuation is selected in decorator application only; ordinary value and
 definition semantics remain unchanged. No special grammar for `expand` is
 needed beyond general Macro-target capture and decorator continuation.
+
+## Implementation and evidence
+
+Implemented in `f701f2703`, with the final compiler and bootstrap refresh in
+`c84a2828`. The syntax prelude defines the two-stage `$expand` decorator and
+its keyword alias. The meta helper builds ordinary pending applications;
+existing insertion, placement, hygiene, and declaration retention place them.
+The compiler supports Macro capture, scoped nested substitutions, and returned
+Decorator continuation. Named definitions and ordinary Macro values stay inert.
+
+The package bundler's private `expand` function was renamed to
+`expand_variables`, because the selected keyword alias claims that call form.
+No public runtime signature or recurring validation requirement was added.
+
+The complete authored diff and the nested-substitution fix were reviewed.
+Global named definitions retain their quotation boundary. Local captured
+definitions expose scoped templates to existing substitution. Generated
+artifacts were refreshed through repository targets.
+
+Validation on the completed compiler tree:
+
+- `tools/gate-state.py ensure agent-pr-check` passed, including shipped
+  bootstrap and self-host comparisons, cold collection, command/package probes,
+  1,373 compiler fixtures with 3,032 artifacts, and 1,135 unit tests with
+  99,373 assertions.
+- All 138 executable book samples compiled and matched their expected output.
+- Editor grammar and TextMate tests passed. Generated syntax specifications
+  checked with zero stale outputs.
+- The exact export example, all seven result kinds, enclosing row holes,
+  per-row hygiene, once-only declaration generation, native Macro factories,
+  cross-unit interfaces, and script placement have executable coverage.
+
+The compiler checkpoint compared baseline `b627bb039` with candidate
+`7ee0f1b63` on the same Mac. Both trees were rebuilt from refreshed bootstrap;
+both reported a nonempty prelude and no missing prelude units. Five alternating
+runs translated the seven units from the existing compiler benchmark in each
+tree. The workload includes compiling the added parser code. Median retired
+instructions were 29,310,581,784 before and 29,339,694,552 after: an increase
+of 0.10%, within the observed sample variation. This is advisory evidence,
+not a claim about every compiler workload. Raw samples and environment records
+are in `/tmp/x2c-macro-performance-20261031/`; the local run log is
+`debug/macro-target-performance.log`.
