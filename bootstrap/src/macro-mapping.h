@@ -6,6 +6,7 @@
 #define __GUARD_0xC4C46CA9__
 
 #include "x2c.h"
+#include "compiler/compiler.h"
 #include "meta.h"
 
 #endif /* __GUARD_0xC4C46CA9__ */

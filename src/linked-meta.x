@@ -1408,7 +1408,8 @@ Code lambda_cells(Code node) {
 List _x2c_expand_rows(List generator, List input) {
   if (generator.assoc(<kind>) == <decorator>)
     x2c_diagnostic_fail("expand requires a code-producing macro", %());
-  Var value = Code.value(input);
+  Compiler c = Compiler.expanding();
+  Var value = Code.value(c.resolve_expression(input, c.token));
   if (value is not <list>)
     x2c_diagnostic_fail("expand requires a compile-time List", %());
   List rows = value, parameters = generator.assoc(<parameters>);
@@ -2956,7 +2957,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_derive_list", _derive_list);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);
-  $linked.row(rows, "_scalar_access_units", _scalar_access_units);
+  $linked.row(rows, "_scalar_access_rows", _scalar_access_rows);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_tag_info", _tag_info);
   $linked.row(rows, "_tag_info_row", _tag_info_row);
@@ -2997,8 +2998,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_x2c_try_catch_patterns", _x2c_try_catch_patterns);
   $linked.row(rows, "_x2c_try_catch_site", _x2c_try_catch_site);
   $linked.row(rows, "_x2c_try_landing", _x2c_try_landing);
-  $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
-  $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
+  $linked.row(rows, "_x2c_field_rows", _x2c_field_rows);
   $linked.row(rows, "Ast_return_none", Ast_return_none);
   $linked.row(rows, "Ast_lambda_pattern", Ast_lambda_pattern);
   $linked.row(rows, "Ast_declarator_pattern", Ast_declarator_pattern);

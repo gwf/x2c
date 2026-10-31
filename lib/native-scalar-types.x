@@ -21,6 +21,7 @@
 #pragma once
 #include "common.x"
 #include "macrovalue/macrovalue.x"
+#include "compiler-meta.x"
 
 /* Reads one exact C scalar from `bytes`; a wide result is boxed in
    `owner`. */
@@ -60,16 +61,12 @@ meta List _scalar_key(Type type) {
   return key;
 }
 
-/* One template application per row, in sorted order so emission does not
-   depend on hash layout. */
-meta List _scalar_access_units(Macro access) {
-  Array units = [];
-  List rows = native_scalar_types().list().sort();
-  foreach (List row in rows) {
-    Type type = row.car();
-    units.push(access(type));
-  }
-  return units.list_free();
+/* Sorted one-argument rows preserve each complete C type. */
+meta List _scalar_access_rows(void) {
+  Array rows = [];
+  foreach (List entry in native_scalar_types().list().sort())
+    rows.push($(entry.car()));
+  return rows.list_free();
 }
 
 meta Map native_scalar_types(void) => {
@@ -112,7 +109,8 @@ macro Unit $native.scalar.access(Type $type) {
 }
 
 macro Unit $native.scalar.access.all() {
-  @_scalar_access_units($native.scalar.access)
+  expand $_x2c_literal_list($_scalar_access_rows())
+  $native.scalar.access
 }
 
 /* One row of `native_scalar_access`'s lookup: the type to its access
@@ -122,7 +120,8 @@ macro Entry $native.scalar.access.entry(Type $type) {
 }
 
 macro Entry $native.scalar.access.entries() {
-  @_scalar_access_units($native.scalar.access.entry)
+  expand $_x2c_literal_list($_scalar_access_rows())
+  $native.scalar.access.entry
 }
 
 $native.scalar.access.all();

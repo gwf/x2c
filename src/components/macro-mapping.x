@@ -1,6 +1,7 @@
 /*  macro-mapping.x -- maps a source macro over compile-time rows */
 
 #pragma once
+#include "compiler/compiler.x"
 #include "meta.x"
 
 /* The syntax prelude supplies the decorator. This helper returns pending
@@ -8,7 +9,8 @@
 meta List _x2c_expand_rows(List generator, List input) {
   if (generator.assoc(<kind>) == <decorator>)
     x2c_diagnostic_fail("expand requires a code-producing macro", %());
-  Var value = Code.value(input);
+  Compiler c = Compiler.expanding();
+  Var value = Code.value(c.resolve_expression(input, c.token));
   if (value is not <list>)
     x2c_diagnostic_fail("expand requires a compile-time List", %());
   List rows = value, parameters = generator.assoc(<parameters>);

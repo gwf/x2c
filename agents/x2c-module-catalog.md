@@ -104,7 +104,7 @@ statements that copy or set named fields.
 
 Public functions:
 
-`_x2c_field_copies`, `_x2c_field_sets`
+`_x2c_field_rows`
 
 ### [src/format.x](../src/format.x)
 
@@ -1226,7 +1226,7 @@ exact C scalar ledger.
 
 Public functions:
 
-`_scalar_tag`, `_scalar_key`, `_scalar_access_units`, `native_scalar_types`,
+`_scalar_tag`, `_scalar_key`, `_scalar_access_rows`, `native_scalar_types`,
 `native_scalar_access`
 
 ### [lib/net.x](../lib/net.x)

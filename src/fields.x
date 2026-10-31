@@ -2,31 +2,23 @@
 
 #pragma once
 #include "common.x"
+#include "compiler-meta.x"
 
-/* Returns `to.field = from.field;` for each of `fields`. */
-meta List _x2c_field_copies(List to, List from, List fields) {
-  if (!fields) return NULL;
-  Var field = fields.car();
-  return $(
-    $!{ $to.$field = $from.$field; },
-    @(_x2c_field_copies(to, from, fields.cdr())));
-}
-
-/* Returns `to.field = value;` for each of `fields`, evaluating `value`
-    each time. */
-meta List _x2c_field_sets(List to, List value, List fields) {
-  if (!fields) return NULL;
-  Var field = fields.car();
-  return $(
-    $!{ $to.$field = $value; }, @(_x2c_field_sets(to, value, fields.cdr())));
+/* A captured Name can be a binding List; keep it as one argument. */
+meta List _x2c_field_rows(List fields) {
+  Array rows = [];
+  foreach (Var field in fields) rows.push($(field));
+  return rows.list_free();
 }
 
 macro Stmt $copy_fields(Expr $to, Expr $from, Name @fields) {
-  @_x2c_field_copies($to, $from, $fields)
+  expand $_x2c_literal_list($_x2c_field_rows($fields))
+  macro Stmt(Name $field) { $to.$field = $from.$field; }
 }
 
 macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
-  @_x2c_field_sets($to, $value, $fields)
+  expand $_x2c_literal_list($_x2c_field_rows($fields))
+  macro Stmt(Name $field) { $to.$field = $value; }
 }
 
 /* The macro, keyword, and binding state a segment takes from its owner
