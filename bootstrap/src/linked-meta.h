@@ -56,7 +56,7 @@ List _scalar_access_record(Type type);
 
 Code register_rewrite(Code function, Code pattern, List holes);
 
-List _dedent_expand(Source text);
+List _dedent_expand(Code text);
 
 List _macros_location(void);
 
