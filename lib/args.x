@@ -11,6 +11,7 @@
 
 #pragma once
 #include "x2c.x"
+#include "system-macros.x"
 
 /** The receiverless owner of `Args.parse` and the other argument
     operations.
@@ -133,7 +134,10 @@ String Args.usage(String program, List spec) {
   String option_rows = options, operand_rows = operands;
   String words = synopsis;
   out.printf(
-    "Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
+    $dedent(%"
+      Usage:
+        %s%s%s
+    "), program, option_rows ? " [options]" : "",
     words ? words : "");
   if (option_rows) out.printf("\nOptions:\n%s", option_rows);
   if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);

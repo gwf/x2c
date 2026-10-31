@@ -6,6 +6,7 @@
 #define __GUARD_0x0A217399__
 
 #include "x2c.h"
+#include "system-macros.h"
 typedef Symbol Diff;
 
 String Diff_unified(String old, String new, String old_name, String new_name);
