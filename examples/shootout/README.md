@@ -167,6 +167,10 @@ much longer Python reference executions.
 
 Execution-time ratios use the selected contributed C program as `1.00`.
 Source-line ratios use the selected contributed Python program as `1.00`.
+Source lines exclude blank and comment-only lines. Python comments are
+removed with Python tokenization, preserving floor division and string
+contents. C, C++, Rust, and x2c use C-style comment removal; Rust lifetimes
+are distinguished from character literals.
 Reports identify both x2c variants; the median and arithmetic mean are
 orientation aids, not language rankings. Raw data also records process CPU
 time, peak RSS, source size, and build information.

@@ -8,6 +8,7 @@ import base64
 import datetime as dt
 import gzip
 import hashlib
+import io
 import json
 import math
 import os
@@ -21,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tokenize
 from pathlib import Path
 from typing import Any
 
@@ -1021,7 +1023,14 @@ def source_metrics(path: Path) -> dict[str, Any]:
   data = path.read_bytes()
   text = data.decode("utf-8")
   rust = path.suffix == ".rs"
-  without_comments = strip_c_comments(text, rust)
+  if path.suffix == ".py":
+    tokens = tokenize.generate_tokens(io.StringIO(text).readline)
+    without_comments = tokenize.untokenize(
+      token._replace(string="") if token.type == tokenize.COMMENT else token
+      for token in tokens
+    )
+  else:
+    without_comments = strip_c_comments(text, rust)
   normalized = collapse_code_whitespace(without_comments, rust).encode("utf-8")
   return {
     "path": str(path.relative_to(ROOT)),
@@ -1281,7 +1290,8 @@ def make_baseline(
       "specification": manifest["specification"],
       "manifest_sha256": sha256(MANIFEST_PATH),
       "execution_ratio": "ratio of implementation and C medians",
-      "source_metric": "nonblank lines after C-style comment removal",
+      "source_metric": "nonblank lines after language-aware comment removal",
+      "source_metrics_harness_sha256": sha256(Path(__file__).resolve()),
       "process_model": "fresh process per warmup and measured sample",
       "order": "rotating available C,idiomatic,tuned,Python,Rust,C++ Latin order",
     },
@@ -1590,6 +1600,10 @@ def make_current(
     "x2c_implementations": measured,
     "ratio_definition": "ratio of implementation and C medians",
     "source_ratio_definition": "source_lines / Python source_lines",
+    "source_metric": baseline["methodology"].get("source_metric"),
+    "source_metrics_harness_sha256": baseline["methodology"].get(
+      "source_metrics_harness_sha256"
+    ),
     "baseline_sha256": baseline_sha256,
     "run_id": run["run_id"],
     "profile": run["profile"],

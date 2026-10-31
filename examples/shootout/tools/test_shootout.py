@@ -2,12 +2,38 @@
 
 import copy
 import json
+from pathlib import Path
+import tempfile
 import unittest
+from unittest import mock
 
 import shootout
 
 
 class ShootoutTests(unittest.TestCase):
+  def test_python_comments_and_floor_division_are_distinct(self):
+    source = """# attribution
+def divide(x):
+    # implementation comment
+    value = x // 2  # trailing comment
+    literal = "// and # within a string"
+    return value, literal
+"""
+    with tempfile.TemporaryDirectory() as directory:
+      root = Path(directory)
+      path = root / "program.py"
+      path.write_text(source)
+      with mock.patch.object(shootout, "ROOT", root), mock.patch.object(
+        shootout.gzip, "compress", wraps=shootout.gzip.compress,
+      ) as compress:
+        result = shootout.source_metrics(path)
+    self.assertEqual(result["source_lines"], 4)
+    normalized = compress.call_args.args[0]
+    self.assertIn(b"x // 2", normalized)
+    self.assertIn(b'"// and # within a string"', normalized)
+    self.assertNotIn(b"attribution", normalized)
+    self.assertNotIn(b"trailing comment", normalized)
+
   def test_rust_lifetimes_do_not_turn_comments_into_source(self):
     source = """struct Tree<'a> { // node
   child: Option<&'a Tree<'a>>, /* child */
@@ -40,10 +66,7 @@ let literal = "/* keep this */";
       build["benchmarks"][name] = {}
       run["benchmarks"][name] = {"args": original["args"], "implementations": {}}
       for implementation in shootout.X2C_IMPLEMENTATIONS:
-        old_key = implementation
-        if implementation == "tuned" and "tuned" not in original:
-          old_key = "optimized"
-        program = original[old_key]
+        program = original[implementation]
         build["benchmarks"][name][implementation] = {
           "source_metrics": program["source"], **program["build"],
         }
