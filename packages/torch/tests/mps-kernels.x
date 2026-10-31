@@ -7,8 +7,8 @@ int main(void) {
     printf("MPS kernel probe skipped: device unavailable\n");
     return 0;
   }
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Tensor matrix = Torch.eye(2, XT_FLOAT32, "mps");
   int caught = 0;
   try matrix.linalg_eig();

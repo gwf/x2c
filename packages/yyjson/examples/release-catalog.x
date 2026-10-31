@@ -3,8 +3,8 @@
 import "yyjson" as json;
 
 int main(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   String source = "".join(%(
     "{\"service\":{\"name\":\"artifact-api\",\"active\":true},"

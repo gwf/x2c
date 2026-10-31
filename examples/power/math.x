@@ -2,7 +2,7 @@
 
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
 
   printf("odd squares: %d\n", range(1, 10, 1)
     .filter(%!(value) => value % 2 != 0)
@@ -20,6 +20,6 @@ int main(void) {
 
   printf("8 factorial: %d\n", range(1, 8, 1).product().int());
 
-  Scope.release();
+  Scope.close();
   return 0;
 }

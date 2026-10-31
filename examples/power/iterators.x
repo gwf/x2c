@@ -2,7 +2,7 @@
 
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
 
   List seen = %(3 1 3 2 1 4);
   printf("unique: %s\n", seen.iter().unique().list().str());
@@ -28,6 +28,6 @@ int main(void) {
   printf("numbered: %s\n", %(<parse> <compile> <link>).iter()
     .enumerate(1).list().str());
 
-  Scope.release();
+  Scope.close();
   return 0;
 }

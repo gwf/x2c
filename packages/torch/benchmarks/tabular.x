@@ -483,8 +483,8 @@ static void _memory_churn(String artifacts, Map data, int steps,
     {
       if (pooled) Pool.open();
       defer { if (pooled) Pool.close(); }
-      Scope.retain();
-      defer Scope.release();
+      Scope.open();
+      defer Scope.close();
       Torch.inference_mode();
       foreach (List pair, hoisted ? named : model.named_parameters()) {
         Tensor parameter = pair[1].tensor();

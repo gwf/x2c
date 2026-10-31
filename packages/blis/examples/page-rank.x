@@ -3,8 +3,8 @@
 import "blis" with Blis, BlisObject;
 
 int main(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   List pages = %("index" "guide" "reference" "download" "blog");
 

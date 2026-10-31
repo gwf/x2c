@@ -30,7 +30,7 @@ static StringCallback duplicate =
   $x2c.callback.adapt(StringCallback, String.str);
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
   String text = %"typed";
   Var boxed_text = text, alpha = <alpha>, beta = <beta>, raw_null = (Var) {0};
   Array values = %[];
@@ -47,6 +47,6 @@ int main(void) {
          callbacks[0].symbol_compare(alpha, beta),
          callbacks[0].file_equal(raw_null, raw_null),
          advanced ? item.int() : -1);
-  Scope.release();
+  Scope.close();
   return 0;
 }

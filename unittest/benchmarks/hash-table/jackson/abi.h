@@ -24,8 +24,8 @@ unsigned Var_hash( Var value );
 int Var_equal( Var left, Var right );
 unsigned String_hash( String string );
 
-void Scope_retain( void );
-void Scope_release( void );
+void Scope_open( void );
+void Scope_close( void );
 
 Map Map_new( void );
 unsigned Map_len( Map map );

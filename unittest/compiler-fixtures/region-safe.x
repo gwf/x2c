@@ -69,15 +69,15 @@ static int freed_then_cleared(void) {
 
 // A release on an early exit leaves the region open for the fall-through.
 static int early_release(int stop) {
-  Scope.retain();
+  Scope.open();
   Node holder = _fresh_node();
   Node n = _fresh_node();
   if (stop) {
-    Scope.release();
+    Scope.close();
     return 0;
   }
   holder.next = n;
-  Scope.release();
+  Scope.close();
   return 1;
 }
 

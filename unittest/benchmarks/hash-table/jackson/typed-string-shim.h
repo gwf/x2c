@@ -34,7 +34,7 @@ template<> struct x2c_typed_string_map< x2c_string_cstring >
 
   static table_type create_table()
   {
-    Scope_retain();
+    Scope_open();
     return table_type{ MapStringString_new() };
   }
 
@@ -142,7 +142,7 @@ template<> struct x2c_typed_string_map< x2c_string_cstring >
   static void destroy_table( table_type &table )
   {
     table.map = nullptr;
-    Scope_release();
+    Scope_close();
   }
 };
 #endif

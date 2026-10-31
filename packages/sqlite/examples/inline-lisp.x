@@ -3,8 +3,8 @@
 import "sqlite" with SqliteLisp;
 
 int main(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Lisp lisp = auto Lisp.new();
   SqliteLisp.install(lisp);
 

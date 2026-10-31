@@ -38,7 +38,7 @@ static void _add(Edge *graph, int a, int b) {
 }
 
 static int _bfs(Edge *graph, int n) {
-  Scope.retain();
+  Scope.open();
   int *queue = xmalloc(n * sizeof(int));
   int *distance = xmalloc(n * sizeof(int));
   for (int i = 0; i < n; i++) distance[i] = -1;
@@ -53,6 +53,6 @@ static int _bfs(Edge *graph, int n) {
       }
   }
   int result = distance[n - 1];
-  Scope.release();
+  Scope.close();
   return result;
 }

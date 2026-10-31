@@ -86,8 +86,8 @@ static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
   List enter = destinations ? $!( Scope_push(@destinations) )
-                            : $!( Scope_retain() );
-  List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
+                            : $!( Scope_open() );
+  List leave = destinations ? $!( Scope_pop() ) : $!( Scope_close() );
   return $!{ { $enter; { defer $leave; $body } } };
 }
 

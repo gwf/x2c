@@ -107,7 +107,7 @@ Source: `src/regions/runtime.x`
 
 ## Design notes
 
-A region is an `auto` block, a `Scope.retain` and `Scope.release`
+A region is an `auto` block, a `Scope.open` and `Scope.close`
 pair, an `auto (&slot)` push, a `Pool.open` bracket, an initializer `auto`
 local, a Scope local that `Scope.destroy` ends, or the function's own
 storage, which an address taken with `&` borrows. The pass reads the

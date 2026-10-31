@@ -32,8 +32,8 @@ int main(void) {
     Func forward = _swish, backward = _swish_gradient;
     double first = 0, last = 0;
     for (int i = 0; i < 300; i++) {
-      Scope.retain();
-      defer Scope.release();
+      Scope.open();
+      defer Scope.close();
       optimizer.zero_grad();
       Tensor hidden = model.child("hidden").forward(input);
       Tensor active = Tensor.custom(forward, backward, $(hidden));

@@ -12,7 +12,7 @@ typedef struct Job {
 } *Job;
 
 int main(int argc, char **argv) {
-  Scope.retain();
+  Scope.open();
   String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
   ArrayDbl pixels = [];
   pixels.append(NULL, width * height);
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   }
   write_image(path, _rgb(pixels));
   puts(%"wrote $path");
-  Scope.release();
+  Scope.close();
   return 0;
 }
 

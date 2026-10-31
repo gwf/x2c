@@ -92,8 +92,8 @@ static double _accuracy(Module model, Tensor images, Tensor targets) {
     model.eval();
     long total = images.size(0), correct = 0;
     for (long start = 0; start < total; start += 1000) {
-      Scope.retain();
-      defer Scope.release();
+      Scope.open();
+      defer Scope.close();
       long span = total - start < 1000 ? total - start : 1000;
       correct += model.forward(images.narrow(0, start, span)).argmax(1, 0)
         .eq(targets.narrow(0, start, span)).sum().item().integer();
@@ -115,8 +115,8 @@ static void _train(Module model, Optimizer adam, Tensor images,
     long epoch = ((offset + index) / per_epoch) % epochs;
     long start = (long) position * BATCH;
     long span = rows - start < BATCH ? rows - start : BATCH;
-    Scope.retain();
-    defer Scope.release();
+    Scope.open();
+    defer Scope.close();
     Tensor pick = order.select(0, epoch).narrow(0, start, span);
     adam.zero_grad();
     Tensor loss = Tensor.cross_entropy(

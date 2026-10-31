@@ -47,10 +47,10 @@ const char *Scope.name(Scope scope) {
     ```x2c
     ~int main(void) {
     size_t before = Scope.stats().live_allocations;
-    Scope.retain();
+    Scope.open();
     char *scratch = xmalloc(128);
     scratch[0] = 0;
-    Scope.release();
+    Scope.close();
     printf("reclaimed = %d\n", Scope.stats().live_allocations == before);
     ~  return 0;
     ~}

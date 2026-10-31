@@ -2,7 +2,7 @@
 
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
 
   List changes = %(20 -5 10 -25);
   printf("balances: %s\n", changes.iter()
@@ -15,6 +15,6 @@ int main(void) {
   List growth = %(1.05 0.98 1.12);
   printf("growth multiplier: %f\n", growth.iter().product().floating());
 
-  Scope.release();
+  Scope.close();
   return 0;
 }

@@ -11,7 +11,7 @@ static Var add_pair(Var left, Var right) {
 }
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
 
   List fluent = range(1, 4, 1)
     .map(double_value).filter(is_even).list();
@@ -35,6 +35,6 @@ int main(void) {
 
   printf("%d %d %d %d %d\n", fluent.len(), paired.int(), nested,
          mixed.len(), explicit.len());
-  Scope.release();
+  Scope.close();
   return 0;
 }

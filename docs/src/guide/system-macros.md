@@ -281,9 +281,9 @@ The block placement is equivalent to:
 ```x2c
 ~int main(void) {
 {
-  Scope.retain();
+  Scope.open();
   {
-    defer Scope.release();
+    defer Scope.close();
     { Array values = []; values.push(1); }
   }
 }

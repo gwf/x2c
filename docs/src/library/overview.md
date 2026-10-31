@@ -128,7 +128,7 @@ Use [Block](modules/block.md) for fixed-width growable storage and `Buffer` for
 text construction. External resources such as `File`s still close explicitly or
 through `defer`.
 
-Each `Scope.release` must match a `Scope.retain` on the same active slot. See
+Each `Scope.close` must match a `Scope.open` on the same active slot. See
 [scopes and lifetime](../guide/memory.md).
 
 ## Bound temporary work

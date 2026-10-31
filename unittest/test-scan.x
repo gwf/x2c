@@ -99,9 +99,9 @@ static void scan_identifiers_and_keywords(void) {
   EXPECT_INT_EQ(scan_keyword("WHILE"), -1);
   EXPECT_INT_EQ(scan_keyword_type("continue_more", 13), 0);
 
-  Scope.retain();
+  Scope.open();
   EXPECT_INT_EQ(scan_keyword("while"), 5);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(scan_keyword("while"), 5);
 }
 

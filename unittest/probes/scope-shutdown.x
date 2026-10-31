@@ -13,9 +13,9 @@ static int hook_order[2], hook_count;
 
 static void hook_one(void) { hook_order[hook_count++] = 1; }
 static void hook_two(void) {
-  Scope.retain();
+  Scope.open();
   xmalloc(8);
-  Scope.release();
+  Scope.close();
   hook_order[hook_count++] = 2;
 }
 
@@ -110,9 +110,9 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "accounting-on")) return accounting_mode(1);
 
   if (!strcmp(argv[1], "clean")) {
-    Scope.retain();
+    Scope.open();
     xmalloc(8);
-    Scope.release();
+    Scope.close();
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
     return stats.live_scopes || stats.live_allocations ||

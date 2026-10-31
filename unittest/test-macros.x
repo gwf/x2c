@@ -1,8 +1,8 @@
 #pragma once
 
 macro Stmt $test.scoped() {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 }
 
 macro Stmt $test.run(Name $function) {

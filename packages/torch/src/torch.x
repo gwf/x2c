@@ -81,7 +81,7 @@ static struct JitModule {
 };
 
 /* A grad-mode guard lives in the scope that installed it, so the previous
-   mode is restored by Scope.release, including the release a `defer` runs
+   mode is restored by Scope.close, including the release a `defer` runs
    while an Error transfers out. */
 static typedef struct TorchGuard *TorchGuard;
 
@@ -616,7 +616,7 @@ Tensor Tensor.copy_(Tensor a, Tensor src) {
 }
 
 /** Disables gradient recording until the active scope is released. The
-    idiom is a retained scope with `defer Scope.release()`, so the previous
+    idiom is a retained scope with `defer Scope.close()`, so the previous
     mode returns whether the scope ends normally or an Error transfers out
     of it. */
 void Torch.no_grad(void) {

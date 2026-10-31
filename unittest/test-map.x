@@ -693,12 +693,12 @@ static void map_growth_survives_a_nested_region(void) {
   map[anchor] = 42;
   size_t before = Scope.stats().live_allocations;
 
-  Scope.retain();
+  Scope.open();
   for (int i = 0; i < 512; i++) {
     Var key = i + 1000, val = i;
     map[key] = val;
   }
-  Scope.release();
+  Scope.close();
 
   size_t after = Scope.stats().live_allocations;
   EXPECT_INT_EQ(after, before);

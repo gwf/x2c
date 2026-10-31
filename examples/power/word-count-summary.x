@@ -7,8 +7,8 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Map counts = {};
   int lines = 0, words = 0;
 

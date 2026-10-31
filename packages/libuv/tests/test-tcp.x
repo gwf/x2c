@@ -324,7 +324,7 @@ static void _pressure_begin(PressureState *state, Var value) {
 static void _pressure_connected(UvTcp tcp, Var value) {
   PressureState *state = value.pointer();
   state.connected = 1;
-  Scope.retain();
+  Scope.open();
   Bytes source = Bytes.new(1);
   unsigned char byte = 0x5a;
   source = source.append_fill(&byte, 16 * 1024 * 1024);
@@ -332,7 +332,7 @@ static void _pressure_connected(UvTcp tcp, Var value) {
   tcp.write_bytes(source);
   state.queued = tcp.write_queue_size();
   memset(source, 0xa5, source.len());
-  Scope.release();
+  Scope.close();
   _pressure_begin(state, value);
 }
 

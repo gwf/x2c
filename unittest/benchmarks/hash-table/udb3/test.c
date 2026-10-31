@@ -17,7 +17,7 @@ void test_int(
   char add_text[] = "+";
   Symbol add = Symbol_new(add_text);
 
-  Scope_retain();
+  Scope_open();
   Map map = Map_new();
 
   for(j = 0, i = 0, n = n0; j < n_cp; ++j, n += step) {
@@ -45,5 +45,5 @@ void test_int(
     udb_measure(n, Map_len(map), z, &cp[j]);
   }
 
-  Scope_release();
+  Scope_close();
 }

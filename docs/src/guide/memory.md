@@ -79,20 +79,20 @@ allocated by `getline` must use native `free`. Passing that buffer to `xfree`
 or `xrealloc`, or passing managed memory to native `free` or `realloc`, is
 undefined behavior.
 
-`Scope.retain` opens a new region on the currently active scope slot;
-`Scope.release` frees everything allocated inside it. Between them, the
+`Scope.open` opens a new region on the currently active scope slot;
+`Scope.close` frees everything allocated inside it. Between them, the
 allocation calls go into the retained region:
 
 ```x2c
-Scope.retain();
+Scope.open();
 char *line = xmalloc(32);
 snprintf(line, 32, "%d bytes", 32);
 puts(line);
-Scope.release();
+Scope.close();
 ```
 
-Retained regions nest. Each `Scope.retain` must be paired with exactly one
-`Scope.release`. Use a nested region to free temporaries before the
+Retained regions nest. Each `Scope.open` must be paired with exactly one
+`Scope.close`. Use a nested region to free temporaries before the
 surrounding work finishes.
 
 The runtime checks each release against the active slot. An empty retained
@@ -153,7 +153,7 @@ slot to every call, `Scope.push` makes a slot active and `Scope.pop`
 restores the previous one. `Scope.pop` with no push outstanding raises
 `<bad-state>`. `Scope.destroy` raises the same cause when the scope is still
 in use: the active root, a slot still on the pushed stack, or a scope that a
-later `Scope.retain` layered another region on top of. The scope is left
+later `Scope.open` layered another region on top of. The scope is left
 intact. Uncaught, `<bad-state>` aborts the program.
 
 To release a region on every exit from a block, write it as `auto` or put
@@ -240,10 +240,10 @@ it. The pointer does not change:
 
 ```x2c
 Scope keep = Scope.new_named("results");
-Scope.retain();
+Scope.open();
 char *text = xmemdup("survivor", 9);
 Scope.move(text, &keep);
-Scope.release();
+Scope.close();
 puts(text);
 Scope.destroy(keep);
 ```
@@ -276,9 +276,9 @@ Feed Feed.open(void) {
   return feed;
 }
 ~int main(void) {
-~  Scope.retain();
+~  Scope.open();
 ~  Feed feed = Feed.open();
-~  Scope.release();
+~  Scope.close();
 ~  return 0;
 ~}
 ```
@@ -361,14 +361,14 @@ A scope does not prevent dangling pointers:
 
 ```x2c
 static char *leaked_label(void) {
-  Scope.retain();
+  Scope.open();
   char *label = xmemdup("temporary", 10);
-  Scope.release();
+  Scope.close();
   return label;
 }
 ```
 
-`Scope.release` freed that storage. The returned pointer is dangling, and
+`Scope.close` freed that storage. The returned pointer is dangling, and
 every later use of it is undefined behavior. A use can read stale bytes,
 corrupt the allocator, or seem to work for a while.
 `Scope`s make lifetimes explicit and cheap to end. They do not check at
@@ -391,7 +391,7 @@ To avoid dangling pointers:
 
 Every allocation in this chapter belongs to a region: a part of the program
 that owns storage and ends at a known point. Regions are `auto` blocks,
-`Scope.retain` and `Scope.release` pairs, `auto (&slot)` pushes, initializer `auto`
+`Scope.open` and `Scope.close` pairs, `auto (&slot)` pushes, initializer `auto`
 locals, `Scope` locals that `Scope.destroy` ends, `Pool.open` brackets, and
 the function's own locals and parameters.
 

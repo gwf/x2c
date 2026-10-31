@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   String csv = _make_csv(rows);
   double checksum = 0;
   for (int run = 0; run < runs; run++) {
-    Scope.retain();
+    Scope.open();
     char *copy = xmalloc(csv.len() + 1), *line = copy;
     memcpy(copy, csv, csv.len() + 1);
     while (line && *line) {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
       _parse(line, &checksum);
       line = end ? end + 1 : 0;
     }
-    Scope.release();
+    Scope.close();
   }
   printf("%.6f\n", checksum);
   return 0;

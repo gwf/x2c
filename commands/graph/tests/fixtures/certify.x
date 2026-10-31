@@ -6,14 +6,14 @@ int certify_scalar_rows(void) {
 }
 
 long certify_wide_scoped(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   return 42L.var().integer();
 }
 
 Var certify_wide_dangle(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   return 42L.var();
 }
 
@@ -28,15 +28,15 @@ int certify_conditional_alloc(int choose) {
 }
 
 char *certify_conditional_dangle(int choose) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   if (choose) return xmalloc(8);
   return NULL;
 }
 
 void certify_conditional_store(int **out, int choose) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   if (choose) out[0] = xmalloc(sizeof(int));
 }
 
@@ -61,26 +61,26 @@ int certify_dynamic_printf(const char *format) {
 }
 
 void certify_index_escape(int **out) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   out[0] = xmalloc(sizeof(int));
 }
 
 int certify_safe(int choose) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   xmalloc(8);
   if (choose) return 1;
   return 2;
 }
 
 int certify_nested(int choose) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   xmalloc(8);
   {
-    Scope.retain();
-    defer Scope.release();
+    Scope.open();
+    defer Scope.close();
     xmalloc(4);
     if (choose) return 1;
   }
@@ -88,8 +88,8 @@ int certify_nested(int choose) {
 }
 
 char *certify_dangle(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   return xmalloc(8);
 }
 
@@ -112,15 +112,15 @@ int certify_indirect(int (*callback)(void)) {
 }
 
 char *certify_transfer(Scope destination) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   char *result = xmalloc(8);
   Scope.move(result, &destination);
   return result;
 }
 
 int certify_unclosed(void) {
-  Scope.retain();
+  Scope.open();
   xmalloc(8);
   return 1;
 }

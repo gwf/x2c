@@ -17,8 +17,8 @@ static List _gradient(AutogradContext context, Tensor gradient) {
 
 int main(int argc, char **argv) {
   if (argc != 3) return 2;
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Tensor input = Tensor.arange(-4.0, 4.0, 0.125, XT_FLOAT32)
     .to_device(argv[1], XT_FLOAT32, 0, 0).requires_grad_(1);
   Tensor output = Tensor.custom(_swish, _gradient, $(input));

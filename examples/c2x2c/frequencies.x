@@ -19,13 +19,13 @@ class Frequencies MapStringInt;
 */
 Frequencies Path.frequencies(Path root) {
   Frequencies result = Frequencies.new();
-  Scope.retain();
+  Scope.open();
   Pool work = Pool.open();
   int complete = 0;
   defer {
     if (Pool.current() == work) Pool.detach();
     work.release();
-    Scope.release();
+    Scope.close();
     if (!complete) result.cleanup();
   }
 

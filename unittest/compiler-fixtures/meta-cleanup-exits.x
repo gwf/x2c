@@ -78,10 +78,10 @@ meta int let_restores(int n) {
 meta int retained(int n) {
   Array kept = [];
   kept.push(n);
-  Scope.retain();
+  Scope.open();
   Array scratch = [];
   scratch.push(n);
-  Scope.release();
+  Scope.close();
   return (int) kept.len() + n;
 }
 
@@ -179,11 +179,11 @@ meta static long wide = 0;
 meta static Func chosen = NULL;
 
 meta long wide_store(long n) {
-  Scope.retain();
+  Scope.open();
   wide = n * 1000000000L;
   Func f = %!(int a) => a * 3;
   chosen = f;
-  Scope.release();
+  Scope.close();
   Scope work = Scope.new_named("wide");
   Scope.push(&work);
   wide = wide + n;

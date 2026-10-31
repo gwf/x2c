@@ -1,32 +1,32 @@
 static void lifetime_native(char *value);
 
 static char *lifetime_scope_alias(void) {
-  Scope.retain();
+  Scope.open();
   char *original = xmemdup("temporary", 10);
   char *alias = original;
-  Scope.release();
+  Scope.close();
   return alias;
 }
 
 static char *lifetime_scope_deferred(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   return xcalloc(1, 16);
 }
 
 static char *lifetime_scope_moved(Scope destination) {
-  Scope.retain();
+  Scope.open();
   char *result = xmemdup("survivor", 9);
   Scope.move(result, &destination);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *lifetime_unknown(void) {
-  Scope.retain();
+  Scope.open();
   char *result = xmemdup("unknown", 8);
   lifetime_native(result);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
@@ -74,25 +74,25 @@ static String lifetime_context_inherited(void) {
 }
 
 static char *lifetime_indirect(void (*callback)(char *)) {
-  Scope.retain();
+  Scope.open();
   char *result = xmemdup("unknown", 8);
   callback(result);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *lifetime_branch_unknown(int use) {
-  Scope.retain();
+  Scope.open();
   char *result = xmemdup("branch", 7);
   if (use) lifetime_native(result);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *lifetime_branch_assignment(int replace) {
-  Scope.retain();
+  Scope.open();
   char *result = xmemdup("branch", 7);
   if (replace) result = NULL;
-  Scope.release();
+  Scope.close();
   return result;
 }

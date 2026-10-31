@@ -211,7 +211,7 @@ static void print_measurement(
 }
 
 static Measurement x2c_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   Map map = Map_new();
   if (!map) fail("Map_new failed");
   uint64_t start = now_ns();
@@ -219,7 +219,7 @@ static Measurement x2c_grow_insert(const Inputs *inputs) {
     Map_set(map, inputs->keys[i], inputs->values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = Map_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -527,7 +527,7 @@ static Measurement reference_erase_hit(
 }
 
 static Measurement backend_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   KhashlMap map = khashl_map_new();
   if (!map) fail("khashl_map_new failed");
   uint64_t start = now_ns();
@@ -535,7 +535,7 @@ static Measurement backend_grow_insert(const Inputs *inputs) {
     khashl_map_set(map, inputs->keys[i], inputs->values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = khashl_map_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -677,7 +677,7 @@ static Measurement backend_erase_hit(KhashlMap map, const Inputs *inputs) {
 }
 
 static Measurement typed_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   MapIntInt map = MapIntInt_new();
   if (!map) fail("MapIntInt_new failed");
   uint64_t start = now_ns();
@@ -685,7 +685,7 @@ static Measurement typed_grow_insert(const Inputs *inputs) {
     MapIntInt_set(map, inputs->native_keys[i], inputs->native_values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = MapIntInt_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -1009,7 +1009,7 @@ static void run_x2c(
 ) {
   print_measurement(sample, "x2c", inputs, x2c_grow_insert(inputs));
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   Map map = x2c_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c", inputs, measurement);
@@ -1023,7 +1023,7 @@ static void run_x2c(
     x2c_iterate(map, inputs, iteration_repeats)
   );
   print_measurement(sample, "x2c", inputs, x2c_erase_hit(map, inputs));
-  Scope_release();
+  Scope_close();
 }
 
 static void run_reference(
@@ -1062,7 +1062,7 @@ static void run_reference(
 }
 
 static Measurement flat_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   MapFlatIntInt map = MapFlatIntInt_new();
   if (!map) fail("MapFlatIntInt_new failed");
   uint64_t start = now_ns();
@@ -1070,7 +1070,7 @@ static Measurement flat_grow_insert(const Inputs *inputs) {
     MapFlatIntInt_set(map, inputs->native_keys[i], inputs->native_values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = MapFlatIntInt_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -1219,7 +1219,7 @@ static void run_flat(
     sample, "x2c-flat", inputs, flat_grow_insert(inputs)
   );
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   MapFlatIntInt map = flat_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c-flat", inputs, measurement);
@@ -1232,11 +1232,11 @@ static void run_flat(
     sample, "x2c-flat", inputs, flat_iterate(map, inputs, iteration_repeats)
   );
   print_measurement(sample, "x2c-flat", inputs, flat_erase_hit(map, inputs));
-  Scope_release();
+  Scope_close();
 }
 
 static Measurement wide_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   MapWideIntInt map = MapWideIntInt_new();
   if (!map) fail("MapWideIntInt_new failed");
   uint64_t start = now_ns();
@@ -1244,7 +1244,7 @@ static Measurement wide_grow_insert(const Inputs *inputs) {
     MapWideIntInt_set(map, inputs->native_keys[i], inputs->native_values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = MapWideIntInt_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -1393,7 +1393,7 @@ static void run_wide(
     sample, "x2c-wide", inputs, wide_grow_insert(inputs)
   );
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   MapWideIntInt map = wide_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c-wide", inputs, measurement);
@@ -1406,11 +1406,11 @@ static void run_wide(
     sample, "x2c-wide", inputs, wide_iterate(map, inputs, iteration_repeats)
   );
   print_measurement(sample, "x2c-wide", inputs, wide_erase_hit(map, inputs));
-  Scope_release();
+  Scope_close();
 }
 
 static Measurement meta_grow_insert(const Inputs *inputs) {
-  Scope_retain();
+  Scope_open();
   MapMetaIntInt map = MapMetaIntInt_new();
   if (!map) fail("MapMetaIntInt_new failed");
   uint64_t start = now_ns();
@@ -1418,7 +1418,7 @@ static Measurement meta_grow_insert(const Inputs *inputs) {
     MapMetaIntInt_set(map, inputs->native_keys[i], inputs->native_values[i]);
   uint64_t elapsed = now_ns() - start;
   uint64_t checksum = MapMetaIntInt_len(map);
-  Scope_release();
+  Scope_close();
   return (Measurement) {
     "grow-insert", inputs->count, elapsed, checksum
   };
@@ -1567,7 +1567,7 @@ static void run_meta(
     sample, "x2c-meta", inputs, meta_grow_insert(inputs)
   );
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   MapMetaIntInt map = meta_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c-meta", inputs, measurement);
@@ -1580,7 +1580,7 @@ static void run_meta(
     sample, "x2c-meta", inputs, meta_iterate(map, inputs, iteration_repeats)
   );
   print_measurement(sample, "x2c-meta", inputs, meta_erase_hit(map, inputs));
-  Scope_release();
+  Scope_close();
 }
 
 static void run_backend(
@@ -1590,7 +1590,7 @@ static void run_backend(
     sample, "x2c-khashl", inputs, backend_grow_insert(inputs)
   );
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   KhashlMap map = backend_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c-khashl", inputs, measurement);
@@ -1616,7 +1616,7 @@ static void run_backend(
   print_measurement(
     sample, "x2c-khashl", inputs, backend_erase_hit(map, inputs)
   );
-  Scope_release();
+  Scope_close();
 }
 
 static void run_typed(
@@ -1626,7 +1626,7 @@ static void run_typed(
     sample, "x2c-typed", inputs, typed_grow_insert(inputs)
   );
 
-  Scope_retain();
+  Scope_open();
   Measurement measurement;
   MapIntInt map = typed_reserved_insert(inputs, &measurement);
   print_measurement(sample, "x2c-typed", inputs, measurement);
@@ -1652,7 +1652,7 @@ static void run_typed(
   print_measurement(
     sample, "x2c-typed", inputs, typed_erase_hit(map, inputs)
   );
-  Scope_release();
+  Scope_close();
 }
 
 static void run_native_reference(
@@ -1721,7 +1721,7 @@ int main(int argc, char **argv) {
 
   /* Pay lazy runtime and generated-file initialization before either timer. */
   (void) Var_hash(inputs.keys[0]);
-  Scope_retain();
+  Scope_open();
   Map warm_map = Map_new();
   Map_set(warm_map, inputs.keys[0], inputs.values[0]);
   Var warm_value;
@@ -1732,7 +1732,7 @@ int main(int argc, char **argv) {
   int warm_typed_value;
   if (!MapIntInt_try_get(warm_typed, inputs.native_keys[0], &warm_typed_value))
     fail("MapIntInt warmup failed");
-  Scope_release();
+  Scope_close();
 
   if (strcmp(argv[5], "x2c-first") == 0) {
     run_x2c((unsigned) sample_value, &inputs, iteration_repeats);

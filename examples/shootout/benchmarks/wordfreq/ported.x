@@ -45,7 +45,7 @@ static int _next_int(int maximum) {
 }
 
 static uint64_t _count_words(const char *text, int word_count) {
-  Scope.retain();
+  Scope.open();
   size_t size = 1;
   while (size < (size_t) word_count * 2) size *= 2;
   WordCount *table = xcalloc(size, sizeof(WordCount));
@@ -62,7 +62,7 @@ static uint64_t _count_words(const char *text, int word_count) {
   uint64_t checksum = 0;
   for (size_t i = 0; i < size; i++)
     if (table[i].word) checksum += 1 + table[i].len * (size_t) table[i].count;
-  Scope.release();
+  Scope.close();
   return checksum;
 }
 

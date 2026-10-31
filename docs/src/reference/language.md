@@ -737,7 +737,7 @@ the callee's return and is freed when that Scope ends, so the callee may
 read, change, or return it, and a change never reaches a spliced Map. Entry
 values are shared, not copied. A call allocates its Map even for an empty
 tail; repeated calls in a long-lived Scope accumulate one Map each until an
-`auto` block or `Scope.release` ends their region.
+`auto` block or `Scope.close` ends their region.
 
 ### Reference parameters
 

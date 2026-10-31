@@ -72,18 +72,18 @@ meta native void Scope.pop(void) {
     Allocations that follow are charged to the new scope. The scope that was
     there is linked below it and becomes current again on release, so retained
     regions nest. Open a nested region when a group of temporaries should die
-    before the surrounding work does. Each `Scope.retain` must be paired with
-    exactly one `Scope.release`.
+    before the surrounding work does. Each `Scope.open` must be paired with
+    exactly one `Scope.close`.
 
     Pair them with `defer`. `Error` transfer does not release a scope. A raise
-    that jumps past a plain `Scope.release` leaves that region live for the
+    that jumps past a plain `Scope.close` leaves that region live for the
     rest of the process, so use `defer` in any function that both retains and
     can raise.
 
     ```x2c
     ~static void report(int width) {
-    Scope.retain();
-    defer Scope.release();
+    Scope.open();
+    defer Scope.close();
     char *line = xmalloc(width + 1);
     snprintf(line, width + 1, "%d bytes", width);
     puts(line);
@@ -101,7 +101,7 @@ meta native void Scope.pop(void) {
     allocated, or `<size-limit>` when that record cannot grow. Before `Error`
     initialization they terminate at the error floor.
 */
-meta native void Scope.retain(void) {
+meta native void Scope.open(void) {
   _require_running();
   Scope scope = _new_scope(NULL);
   ScopeThreadState state = _thread();
@@ -123,7 +123,7 @@ meta native void Scope.retain(void) {
     survives. Anything owned by another scope or another slot is untouched,
     and memory from plain `malloc` is unaffected.
 
-    The active region must be the one opened by a matching `Scope.retain` on
+    The active region must be the one opened by a matching `Scope.open` on
     this same slot. Releasing an empty slot, a directly allocated root, or a
     region retained on another pushed slot is an imbalance and raises. An
     extra release cannot destroy the surrounding region, and a retained empty
@@ -136,7 +136,7 @@ meta native void Scope.retain(void) {
     failure leaves the active region intact. Before `Error` initialization it
     terminates at the error floor.
 */
-meta native void Scope.release(void) {
+meta native void Scope.close(void) {
   _require_running();
   ScopeThreadState state = _thread();
   alias state.active as active {
@@ -185,7 +185,7 @@ Scope Scope.child(void) {
     name the active slot explicitly. Dereferencing it gives the scope, which
     may be NULL before anything has been allocated into the slot. It names the
     slot that was active at the call; a later `Scope.push`, `Scope.pop`,
-    `Scope.retain`, or `Scope.release` changes which slot is active, so read
+    `Scope.open`, or `Scope.close` changes which slot is active, so read
     it again instead of caching it.
 */
 Scope *Scope.top(void) {

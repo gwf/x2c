@@ -569,8 +569,8 @@ static void filtered_catch_relabels_privately(void) {
 
 
 static void _raise_scoped_wide_value(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   long value = 0x123456789L;
   raise %(invariant (value $value));
 }
@@ -610,7 +610,7 @@ static void filtered_catch_binder_survives_transient_pools(void) {
 static void error_snapshot_survives_catch_and_caller_owners(void) {
   Error.initialize();
   List escaped = NULL;
-  Scope.retain();
+  Scope.open();
   Pool.open_named("snapshot-source-values");
   String text = String.new("snapshot survives");
   Atom atom = Atom.intern(String.new("long snapshot atom survives"));
@@ -624,7 +624,7 @@ static void error_snapshot_survives_catch_and_caller_owners(void) {
     escaped = snapshot;
   }
   Pool.close();
-  Scope.release();
+  Scope.close();
   (String escaped_text, long escaped_number, Atom escaped_atom) = escaped;
   EXPECT_STR_EQ(escaped_text, "snapshot survives");
   EXPECT_INT_EQ(escaped_number, 0x123456789L);

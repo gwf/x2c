@@ -619,8 +619,8 @@ void Image.draw_text(
 }
 
 void Image.draw_polygon(Image image, List points, Color color) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   int count = 0;
   Vector2 *vertices = _raylib_vertices(points, "draw polygon", count);
@@ -629,8 +629,8 @@ void Image.draw_polygon(Image image, List points, Color color) {
 
 void Image.draw_polygon_lines(
   Image image, List points, int thickness, Color color) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   int count = 0;
   Vector2 *vertices = _raylib_vertices(points, "draw polygon lines", count);

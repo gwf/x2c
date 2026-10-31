@@ -9,13 +9,13 @@ static String suffix(void) {
 }
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
   String left = %"con", right = %"cat";
   String joined = left + right;
   String mixed = left + "raw";
   String constant = %"folded " + "pair";
   joined += suffix();
   printf("%s %s %s\n", joined, mixed, constant);
-  Scope.release();
+  Scope.close();
   return 0;
 }

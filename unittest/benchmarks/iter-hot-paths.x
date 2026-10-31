@@ -257,12 +257,12 @@ int main(void) {
     .map(increment).filter(is_even).sum().integer();
   result("map-filter-implicit", now_ns() - start, count);
 
-  Scope.retain();
+  Scope.open();
   benchmark_unzip(10000, 0, &sink);
-  Scope.release();
-  Scope.retain();
+  Scope.close();
+  Scope.open();
   benchmark_unzip(10000, 1, &sink);
-  Scope.release();
+  Scope.close();
 
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);

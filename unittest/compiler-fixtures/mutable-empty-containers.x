@@ -24,7 +24,7 @@ static void box_null_map(void) {
 }
 
 int main(void) {
-  Scope.retain();
+  Scope.open();
   Array first_array = %[], second_array = %[];
   Map first_map = %{}, second_map = %{};
   Var boxed_array = first_array, boxed_map = first_map;
@@ -43,6 +43,6 @@ int main(void) {
               boxed_map.map() == first_map;
   int rejects = rejected(box_null_array) && rejected(box_null_map);
   printf("%d %d %d %d\n", arrays, maps, boxes, rejects);
-  Scope.release();
+  Scope.close();
   return arrays && maps && boxes && rejects ? 0 : 1;
 }

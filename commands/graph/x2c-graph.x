@@ -2631,7 +2631,7 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
         scan.caller = target;
         scan.scope_counts = {};
         _certify_scan(scan, body, 0, 0, 0);
-        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open"))
+        foreach (String open, %("Scope_open" "Scope_push" "Pool_open"))
           match (Compiler.region_effect(open))
             case %(open ?kind)
               if (scan.scope_counts.getdefault(%(open $kind), 0).int() !=
