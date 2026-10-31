@@ -2085,17 +2085,6 @@ static int _match_plain_literal(Var value) {
   return !value.is_binder() && value != <x2c-dyn>;
 }
 
-static int _match_identity_value(Var value) {
-  if (value.is_nil()) return 1;
-  switch (value.tag()) {
-    case <symbol>: case <lsym>:
-    case <i8>: case <u8>: case <i16>: case <u16>:
-    case <i32>: case <u32>: case <i48>: case <u48>:
-      return 1;
-  }
-  return 0;
-}
-
 static Code _match_condition(Code subject, List pattern, List body) {
   int viewing = 0, values = -1;
   List frame = _match_frame(subject);
@@ -2104,12 +2093,10 @@ static Code _match_condition(Code subject, List pattern, List body) {
   Array pool = [];
   int literal = value is <list> && _match_plain_literal(value) &&
     (pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)) (nil))));
-  List list = literal ? value.list() : NULL;
-  int identity = literal &&
-    (!list || (!list.cdr() && _match_identity_value(list.car())));
-  List equal = literal ? %(call List_equal (args $expr $pattern)) : NULL;
-  List arm = identity ? %(if $equal $body)
-                      : _match_arm(pattern, value, expr, body, pool, equal);
+  List equal = literal ? %(op == $expr $pattern) : NULL;
+  List arm = literal && value.is_nil()
+    ? %(if $equal $body)
+    : _match_arm(pattern, value, expr, body, pool, equal);
   if (!arm) {
     List binders = _match_binders(value);
     values = binders.len();
@@ -2881,7 +2868,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_lowered", _match_lowered);
   $linked.row(rows, "match_lowering", match_lowering);
   $linked.row(rows, "_match_plain_literal", _match_plain_literal);
-  $linked.row(rows, "_match_identity_value", _match_identity_value);
   $linked.row(rows, "_match_condition", _match_condition);
   $linked.row(rows, "match_condition_lowering", match_condition_lowering);
   $linked.row(rows, "_printf_is_var", _printf_is_var);

@@ -449,7 +449,7 @@ _x2c_gensym_condition_12;
 )) return 26;
 if(!({
   int _x2c_gensym_condition_13 = 0; {
-    List _x2c_gensym_match_expr_19 = NULL;  if(List_equal(_x2c_gensym_match_expr_19, NULL)){
+    List _x2c_gensym_match_expr_19 = NULL;  if(_x2c_gensym_match_expr_19 == NULL){
       _x2c_gensym_condition_13 = 1;
     }
 
@@ -458,7 +458,7 @@ if(!({
 }
 ) ||({
   int _x2c_gensym_condition_14 = 0; {
-    List _x2c_gensym_match_expr_20 = _24;  if(List_equal(_x2c_gensym_match_expr_20, NULL)){
+    List _x2c_gensym_match_expr_20 = _24;  if(_x2c_gensym_match_expr_20 == NULL){
       _x2c_gensym_condition_14 = 1;
     }
 

@@ -849,22 +849,9 @@ meta static int _match_plain_literal(Var value) {
   return !value.is_binder() && value != <x2c-dyn>;
 }
 
-/* One immediate value has the same equality as its bits. A nested List
-   only does when empty: independent Pools can hold equal-looking tails
-   with different identities. Strings and wide boxes compare by value. */
-meta static int _match_identity_value(Var value) {
-  if (value.is_nil()) return 1;
-  switch (value.tag()) {
-    case <symbol>: case <lsym>:
-    case <i8>: case <u8>: case <i16>: case <u16>:
-    case <i32>: case <u32>: case <i48>: case <u48>:
-      return 1;
-  }
-  return 0;
-}
-
-/* Equality decides an empty or immediate singleton literal. Other literal
-   Lists try equality first, then the ordinary tests for distinct identities. */
+/* Identity decides an empty literal. Other literal Lists try identity
+   first, then the ordinary tests: independent Pools, transient Strings,
+   and wide boxes can give equal contents different identities. */
 meta static Code _match_condition(Code subject, List pattern, List body) {
   int viewing = 0, values = -1;
   List frame = _match_frame(subject);
@@ -873,12 +860,10 @@ meta static Code _match_condition(Code subject, List pattern, List body) {
   Array pool = [];
   int literal = value is <list> && _match_plain_literal(value) &&
     (pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?)) (nil))));
-  List list = literal ? value.list() : NULL;
-  int identity = literal &&
-    (!list || (!list.cdr() && _match_identity_value(list.car())));
-  List equal = literal ? %(call List_equal (args $expr $pattern)) : NULL;
-  List arm = identity ? %(if $equal $body)
-                      : _match_arm(pattern, value, expr, body, pool, equal);
+  List equal = literal ? %(op == $expr $pattern) : NULL;
+  List arm = literal && value.is_nil()
+    ? %(if $equal $body)
+    : _match_arm(pattern, value, expr, body, pool, equal);
   if (!arm) {
     List binders = _match_binders(value);
     values = binders.len();

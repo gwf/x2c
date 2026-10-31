@@ -69,14 +69,7 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (head == <var>) return c.match_pattern_value(second);
   if (head == <string>) return c.match_pattern_value(second);
   if (head == <call>) return _call_value(c, second, third);
-  if (head == <literal>) {
-    Type type = second;
-    if (type.scalar_tag()) {
-      Var value = type.numeric_literal_value(third);
-      if (value is not void) return value;
-    }
-    return ast.last();
-  }
+  if (head == <literal>) return ast.last();
   if (head == <nil>) return %();
   if (head == <cons>) return _cons_value(c, second, third);
   return <x2c-dyn>;
