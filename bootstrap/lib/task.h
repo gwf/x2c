@@ -15,6 +15,10 @@ typedef struct Task * Task;
 
 extern int x2c_task_stack_supported(void);
 
+extern void * x2c_task_jobs_new(size_t size);
+
+extern void x2c_task_jobs_free(void * jobs, size_t size);
+
 extern void * x2c_task_stack_new(void(* entry)(void *), void * argument, size_t size);
 
 extern void x2c_task_stack_resume(void * stack);

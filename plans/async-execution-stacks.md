@@ -959,6 +959,12 @@ allocation-kind state, public API, process allocator setting, or per-switch
 operation. This targets medium-region VM retention; smaller native allocator
 caches and their resident footprint remain outside this change.
 
+The [mapped-array implementation report](reference/async-mapped-job-arrays-2026-10-31.md)
+records the private implementation, focused boundary/lifecycle tests, and
+before/after memory probes. The repeated probe no longer retains medium
+regions; smaller allocator caches remain. Normal benchmark reruns and
+publication acceptance remain held.
+
 ## Plan review
 
 Scope establishes allocation ownership; Pool establishes canonical identity
