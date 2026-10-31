@@ -1,0 +1,70 @@
+{
+  "report_path": "/Users/gary/.codex/worktrees/f2bc/x2c/examples/shootout/results/runs/20261031T211435Z/current.json",
+  "report_sha256": "9c02ec9efef4c3ff711bec0eed5dfa0c8d060fbb1f777898efea80dd137fdcd2",
+  "run_id": "20261031T211435Z",
+  "profile": "local",
+  "measured_revision": "3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a",
+  "quiet_window": {
+    "criterion": "at least90percent CPU idle for six consecutive10-second samples after builds and fixtures",
+    "evidence": "debug/three-idiomatic-quiet-window.jsonl",
+    "orchestration_sha256": "6216c9a9e21f4931562b7b6ca1311cf78ba1c8c9b755e91b7ed6862c576e8af8",
+    "samples": [
+      {
+        "captured_at_utc": "2026-10-31T21:13:40.868225+00:00",
+        "idle_percent": 93.57
+      },
+      {
+        "captured_at_utc": "2026-10-31T21:13:51.827886+00:00",
+        "idle_percent": 92.71
+      },
+      {
+        "captured_at_utc": "2026-10-31T21:14:02.929816+00:00",
+        "idle_percent": 90.62
+      },
+      {
+        "captured_at_utc": "2026-10-31T21:14:13.906326+00:00",
+        "idle_percent": 93.78
+      },
+      {
+        "captured_at_utc": "2026-10-31T21:14:24.905483+00:00",
+        "idle_percent": 93.55
+      },
+      {
+        "captured_at_utc": "2026-10-31T21:14:35.951969+00:00",
+        "idle_percent": 92.26
+      }
+    ]
+  },
+  "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
+  "execution_modes": "Mixed serial/parallel contributions; both x2c binary-trees entries parallel; idiomatic spectral-norm parallel at N>=256; idiomatic fannkuch parallel at N>=9; idiomatic k-nucleotide counts widths in seven Threads ; idiomatic regex-redux parallel at cleaned sequence >=65536 bytes; idiomatic Mandelbrot parallel at N>=256, at most six 16-row batches",
+  "samples": 56,
+  "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+  "normalization": "Per-problem minima among available columns; all eight for shared problems",
+  "summary": "Geometric mean of the eight shared normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank source lines after language-aware comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10,
+  "summary_benchmarks": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "regexredux",
+    "pidigits"
+  ],
+  "unavailable": {
+    "binarytrees": {
+      "python": "Current archived #2 and base/#4/#5 reuse a constant tuple at leaves, violating the required per-node leaf allocation. #3 allocates fresh list leaves but explicitly disables GC; it is excluded under the pinned default-GC-when-possible guidance. The leaf violation was reproduced; the GC exclusion is an interpretation of that guidance. No official source was patched."
+    },
+    "knucleotide": {
+      "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+      "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
+      "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched.",
+      "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+    }
+  }
+}
