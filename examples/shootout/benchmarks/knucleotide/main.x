@@ -42,7 +42,8 @@ static String _read(void) {
 
 static Map _count(String sequence, int width) {
   Map counts = {};
-  for (int i = 0; i + width <= sequence.len(); i++) {
+  int last = sequence.len() - width;
+  for (int i = 0; i <= last; i++) {
     String key = sequence[i:i + width];
     counts[key] = counts.getdefault(key, 0).int() + 1;
   }

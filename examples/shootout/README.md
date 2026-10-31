@@ -42,6 +42,12 @@ each row preserves its original summation order. Smaller inputs run serially.
 Tuned spectral-norm retains its serial typed Arrays. The Counter-object
 k-nucleotide probe is preserved as evidence; numeric Map values remain active.
 
+Idiomatic fannkuch-redux uses six ordinary `Thread` permutation ranges at N>=9.
+Workers own their Arrays, initialize the prescribed rotation order at each
+range's starting rank, and retain global checksum parity. Smaller inputs run
+serially. Tuned fannkuch retains its serial typed Arrays. K-nucleotide caches
+its immutable sequence-length loop bound and retains ordinary numeric Map values.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target
