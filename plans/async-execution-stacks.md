@@ -879,8 +879,12 @@ See [the broader validation report](reference/async-validation-2026-10-31.md)
 for comparison with the full pre-async baseline, synchronous cost probes,
 program footprint, blocked-task memory, stack-capacity checks, and fresh
 instrumented results. The existing full check target exposes a native-file
-copy omission in cold collection and four lint findings. Clean performance
-measurements remain pending a quiet host window. No regression or retention
+copy omission in cold collection and four lint findings. Paired runtime,
+representative translation, and normalized build-cost measurements are now
+complete. Allocation, comparable compiler translation, and whole-build cost
+are close to baseline; native buffered Channels have a local measured cost.
+An apparent compiler slowdown was traced to unequal compiler-source interface
+caches and withdrawn after a comparable rerun. No regression or retention
 tradeoff has been accepted, and no push is authorized.
 
 ## Plan review
