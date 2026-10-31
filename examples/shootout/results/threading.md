@@ -122,3 +122,28 @@ Python multiprocessing, standard-library pools, GMP and PCRE2. Exact choices
 and flags are in the manifest and each immutable run. All remain subject to
 required algorithm/work checks. No matching-core regime or extra column was
 introduced. Python tree exclusion changes the common cohort to eight problems.
+
+## Parallel regex-redux and Mandelbrot
+
+Regex-redux uses nine ordinary Threads for independent counts at cleaned
+sequence lengths of at least 65,536 bytes. Each worker owns its Regexp and
+retains only a scalar count. The main thread runs the ordered substitution
+chain concurrently, joins workers, and prints counts in specification order.
+Smaller inputs use the serial path. No Regexp or match-data block is shared.
+
+Reverse-complement keeps the existing input Buffer through `_write`, instead
+of converting each complete record into a canonical String. A native
+`ptrdiff_t` cursor and the ordinary Buffer.get API avoid narrowing the Buffer
+length to int. Complement rules, output lines and record order are unchanged.
+The output-line Buffer still uses the existing ordinary String conversion.
+
+Mandelbrot uses at most six ordinary Threads on 16-row chunks per wave at
+N>=256. Caller-owned Arrays are filled before startup; each worker replaces
+only existing byte-valued slots in its own Array. Joins precede ordered output.
+The next wave releases the previous wave's storage, bounding retained output
+to 96 rows. Pixel arithmetic and PBM padding are unchanged. Smaller inputs run
+serially. A same-batching serial control separates threading from buffering.
+
+The tuned sources and all 55 foreign reference programs remain unchanged.
+No compiler/runtime/package code, typed container, borrowed substring, raw
+collection access, custom allocator, or literal-C implementation was added.

@@ -19,13 +19,13 @@ int main(void) {
   return 0;
 }
 
-static void _write(String sequence) {
+static void _write(Buffer sequence) {
   Buffer line = auto Buffer.new(0);
-  for (int end = sequence.len(); end > 0;) {
+  for (ptrdiff_t end = sequence.len(); end > 0;) {
     line.clear();
     int count = end > 60 ? 60 : end;
     for (int i = 0; i < count; i++)
-      line.write_char(_complement(sequence[--end]));
+      line.write_char(_complement(sequence.get(--end)));
     puts(line.str());
   }
 }

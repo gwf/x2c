@@ -114,3 +114,10 @@ failed builds/output checks, quiet before/candidate samples and decisions,
 statistical profiling and input,16 DNA oracle checks, original Python tree
 allocation evidence, and both initial/corrected compiler-flag sanity reports.
 The full calibration is [run 20261031T181939Z](../runs/20261031T181939Z/README.md).
+
+## Three idiomatic source experiments
+
+`three-idiomatic/` retains before/candidate/control sources, generated C, inputs,
+142 correctness cases, 93 initial and 372 quiet probe observations, source and
+binary hashes, decisions, Docker pause/restore evidence and rejected full runs.
+Accepted full calibration: [run 20261031T211435Z](../runs/20261031T211435Z/README.md).
