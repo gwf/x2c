@@ -725,7 +725,8 @@ static String _tables(Array built, int count) {
   out.write("#include \"x2c.h\"\n");
   foreach (int index in built)
     out.printf("Map x2c_module_targets_%d(void);\n", index);
-  out.write($dedent(%"
+  out.write(
+    $dedent(%"
     Map x2c_meta_helper_table(int index) {
       switch (index) {
   "));

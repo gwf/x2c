@@ -175,11 +175,11 @@ module void _help_exit(Symbol command, int status) {
 static void _print_help_usage(void) {
   puts(
     $dedent(%"
-      Usage:
-        x2c help [command]
+    Usage:
+      x2c help [command]
 
-      Show top-level help, or help for translate, build, run, new, script, repl,
-      env, install, remove, or list."));
+    Show top-level help, or help for translate, build, run, new, script, repl,
+    env, install, remove, or list."));
 }
 
 static void _print_top_help(void) {
