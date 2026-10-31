@@ -27,7 +27,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent.parent
-BUILD = ROOT.parent / "build" / "shootout"
+BUILD = ROOT.parent / "build" / "shootout-unofficial"
 LATEST = BUILD / "latest"
 MANIFEST_PATH = ROOT / "benchmarks.json"
 BASELINE_PATH = ROOT / "baseline.json"
@@ -1453,7 +1453,7 @@ def run_pinned(
   if args.action == "update":
     promote_current(current)
     print(
-      "updated examples/shootout/results/current.md and current.json",
+      "updated examples/shootout-unofficial/results/current.md and current.json",
       flush=True,
     )
 
@@ -1505,9 +1505,9 @@ def calibrate(
   markdown = render_current(current)
   print()
   print(markdown)
-  print("updated examples/shootout/baseline.json", flush=True)
+  print("updated examples/shootout-unofficial/baseline.json", flush=True)
   print(
-    "updated examples/shootout/results/current.md and current.json",
+    "updated examples/shootout-unofficial/results/current.md and current.json",
     flush=True,
   )
   print(f"raw results: {LATEST}", flush=True)

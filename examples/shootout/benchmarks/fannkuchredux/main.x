@@ -1,7 +1,7 @@
 /* The Computer Language Benchmarks Game
  * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  *
- * Adapted from the contributed implementations recorded in benchmark.json.
+ * Adapted from the contributions recorded in ../../benchmarks.json.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 

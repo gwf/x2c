@@ -301,6 +301,7 @@ def compact_history(summary: dict[str, object]) -> dict[str, object]:
     "build_scaling": summary.get("build_scaling"),
     "runtime_medians": summary.get("runtime_medians"),
     "shootout_median": shootout.get("median"),
+    "shootout_baseline": shootout.get("baseline_sha256"),
     "shootout_arithmetic_mean": shootout.get("arithmetic_mean"),
     "failure": summary.get("failure"),
   }
@@ -348,8 +349,10 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   for key, value in (row.get("compiler_median_seconds") or {}).items():
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
-    if key in {"time_x2c_over_c", "time_ported_over_c"}:
-      metrics[f"shootout median {key}"] = float(value)
+    if key in {"time_x2c_over_c", "time_ported_over_c",
+               "time_idiomatic_over_c", "time_optimized_over_c"}:
+      baseline = (row.get("shootout_baseline") or "legacy")[:12]
+      metrics[f"shootout {baseline} median {key}"] = float(value)
   for item in row.get("runtime_medians") or []:
     mode = f"/{item['mode']}" if item.get("mode") else ""
     key = f"runtime {item['target']}{mode}/{item['metric']}"

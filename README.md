@@ -62,8 +62,8 @@ It covers release installation and building an installed compiler from source.
   networking, parsing, and other native libraries.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
-- [Performance examples](examples/shootout/README.md): programs, measurements,
-  and comparison methods. Results depend on the workload and machine.
+- [Benchmarks Game](examples/shootout/README.md): official problems with
+  idiomatic and optimized x2c, plus contributed C and Python references.
 
 ## Status and compatibility
 

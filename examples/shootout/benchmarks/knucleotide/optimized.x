@@ -28,7 +28,6 @@ int main(void) {
   }
   return 0;
 }
-
 static String _read(void) {
   Buffer sequence = auto Buffer.new(0);
   int found = 0;
@@ -51,6 +50,7 @@ static MapSubInt _count(String sequence, int width) {
   return counts;
 }
 
+/* MapSubInt exposes counts through iteration, without a lookup operation. */
 static int _lookup(MapSubInt counts, Substr query) {
   unsigned cursor = 0;
   Substr key;

@@ -163,6 +163,29 @@ class PerformanceSnapshotTests(unittest.TestCase):
     row = {"build_scaling": {"score": 100.0}}
     self.assertEqual(snapshot.comparable_metrics(row), {})
 
+  def test_shootout_comparisons_keep_different_calibrations_separate(self):
+    old = {"shootout_median": {"time_ported_over_c": 0.99}}
+    official = {
+      "shootout_baseline": "official-a",
+      "shootout_median": {
+        "time_idiomatic_over_c": 1.2, "time_optimized_over_c": 1.0,
+      },
+    }
+    recalibrated = {**official, "shootout_baseline": "official-b"}
+    self.assertFalse(
+      snapshot.comparable_metrics(old).keys()
+      & snapshot.comparable_metrics(official).keys()
+    )
+    self.assertFalse(
+      snapshot.comparable_metrics(official).keys()
+      & snapshot.comparable_metrics(recalibrated).keys()
+    )
+    self.assertEqual(
+      snapshot.comparable_metrics(official)[
+        "shootout official-a median time_optimized_over_c"
+      ], 1.0,
+    )
+
   def test_absolute_cpu_rows_require_compatible_metric_identities(self):
     previous = {"run_id": "old", "commit": "a", "status": "success",
                 "build_scaling": {"cpu_seconds": 12.0,

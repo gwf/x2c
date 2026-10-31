@@ -15,3 +15,8 @@ unittest/compiler-fixtures/*.emit whitespace=-blank-at-eof
 unittest/compiler-fixtures/**/*.c whitespace=-blank-at-eof
 bootstrap/**/*.c whitespace=-blank-at-eof
 *.pdf binary
+# Preserve the exact bytes of adopted Benchmarks Game contributions/specs.
+examples/shootout/benchmarks/*/main.c -whitespace -text
+examples/shootout/benchmarks/*/main.py -whitespace -text
+examples/shootout/benchmarks/knucleotide/khash.h -whitespace -text
+examples/shootout/specs/*.html -whitespace -text

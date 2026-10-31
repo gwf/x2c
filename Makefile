@@ -29,7 +29,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler bm-build-scaling \
 	bm-match-cache performance-snapshot performance-runtime
-SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
+SHOOTOUT_TARGETS = shoot-check shoot-run shoot-update shoot-calibrate
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
 INSTALL_TARGETS = install uninstall dist
@@ -551,7 +551,10 @@ bm-match-cache: stage-1					## Run Match cache acceptance gates
 	./unittest/benchmarks/run-match-cache-benchmark.sh
 
 ##@ Shootout and portable builds
-shoot-run: build					## Run against pinned shootout references
+shoot-check: build				## Check official Benchmarks Game outputs
+	python3 examples/shootout/tools/shootout.py check --profile quick
+
+shoot-run: build					## Run against pinned Benchmarks Game references
 	python3 examples/shootout/tools/shootout.py run
 
 shoot-update: build					## Refresh the tracked shootout table

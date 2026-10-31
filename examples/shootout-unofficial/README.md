@@ -1,4 +1,14 @@
-# x2c language shootout
+# Former custom x2c shootout
+
+This directory preserves the former fourteen-workload suite, its reference
+programs, and its historical measurements. It includes modified workloads
+and locally written references, so it is not a conforming Benchmarks Game
+comparison. Its C-port column is historical and is not part of the current
+comparison.
+
+The active suite is [the official Benchmarks Game suite](../shootout/README.md).
+The root `shoot-*` targets and performance snapshots use that suite only.
+The instructions and dated results below describe the former suite.
 
 This optional example suite compares fourteen problems written twice in x2c
 against equivalent C and Python references. Every implementation uses the same
@@ -91,25 +101,25 @@ x2c run -O2 -DNDEBUG main.x -- <args>
 From the repository root:
 
 ```sh
-make shoot-run
+python3 examples/shootout-unofficial/tools/shootout.py run
 ```
 
 The command requires an optimized, non-LTO x2c build. It writes generated C,
 executables, raw samples, and run details beneath the ignored
-`examples/build/shootout/` directory, then prints the normalized table. It
+`examples/build/shootout-unofficial/` directory, then prints the normalized table. It
 does not modify tracked files.
 
 After reviewing a run, refresh the checked-in current result explicitly:
 
 ```sh
-make shoot-update
+python3 examples/shootout-unofficial/tools/shootout.py update
 ```
 
 Rebuild and measure C, x2c, and Python together only when the reference
 sources, machine, toolchain, or methodology needs a new calibration:
 
 ```sh
-make shoot-calibrate
+python3 examples/shootout-unofficial/tools/shootout.py calibrate
 ```
 
 Calibration rotates all three implementations through each order position,

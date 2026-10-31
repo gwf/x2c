@@ -63,6 +63,8 @@ examples/*
 examples/packages/*/builds/
 !examples/shootout/
 !examples/shootout/**
+!examples/shootout-unofficial/
+!examples/shootout-unofficial/**
 !**/Makefile
 bin/x2c-*
 bootstrap/**/x2c

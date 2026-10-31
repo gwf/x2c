@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="all">
+<meta name="description" content="What the binary-trees benchmarks game programs should do.">
+<title>binary-trees description (Benchmarks Game) </title>
+<style><!-- 
+a{color:black;text-decoration:none}article{padding:0 0 2.9em}article,div,header{margin:auto;max-width:31em;width:92%}body{font:100% Droid Sans, Ubuntu, Verdana, sans-serif;margin:0;-webkit-text-size-adjust:100%}h3, h1, h2, nav li a{font-family:Ubuntu Mono,Consolas,Menlo,monospace}h3{font-size:1.4em;font-weight:bold;margin:0;padding: .4em}h3, h3 a{color:white;background-color:#77216f}h3 small{font-size:0.64em}h1,h2{margin:1.5em 0 0}h1{font-size:1.4em;font-weight:normal}h2{font-size:1.2em}nav li{list-style-type:none;vertical-align:top}nav li a{display:block;font-size:1.2em;margin: .5em .5em 0;padding: .5em .5em .3em}nav p{margin:0 .5em}nav ul{clear:left;margin:-0.3em 0 1.5em;padding-left:0;text-align:center}p{color:#333;line-height:1.4;margin: .3em 0 0}.external{border-bottom:.1em dashed #333}p a,span{border-bottom: .1em solid #333;padding-bottom: .1em}@media only screen and (min-width: 33em){nav li{display:inline-block}nav p{text-align:left;width:17em}}@media only screen and (min-width: 60em){article,div,header{font-size:1.25em}}
+--></style>
+<link rel="shortcut icon" href="../favicon.ico">
+<header>
+  <h3><a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The&nbsp;<small>Computer&nbsp;Language</small><br>25.03 Benchmarks&nbsp;Game</a></h3>
+</header>
+<div>
+  <nav>
+    <ul>
+      <li><a href="./fannkuchredux.html#fannkuchredux"><span>fannkuch-redux</span></a><p>Indexed-access to tiny integer-sequence
+      <li><a href="./nbody.html#nbody"><span>n-body</span></a><p>Double-precision N-body simulation
+      <li><a href="./spectralnorm.html#spectralnorm"><span>spectral-norm</span></a><p>Eigenvalue using the power method
+      <li><a href="./mandelbrot.html#mandelbrot"><span>mandelbrot</span></a><p>Generate Mandelbrot set portable bitmap file
+      <li><a href="./fasta.html#fasta"><span>fasta</span></a><p>Generate and write random DNA sequences
+      <li><a href="./knucleotide.html#knucleotide"><span>k-nucleotide</span></a><p>Hashtable update and k-nucleotide strings
+      <li><a href="./revcomp.html#revcomp"><span>reverse-complement</span></a><p>Read DNA sequences - write their reverse-complement
+    </ul>
+  </nav>
+</div>
+<article>
+  <h1 id="binarytrees">binary-trees description</h1>
+  <aside>
+    <p><a href="../performance/binarytrees.html">program measurements</a>
+  </aside>
+  <section>
+    <p><br>[ Contentious. Different approaches: <a class="external" href="https://news.ycombinator.com/item?id=29323468">HN discussion.</a> ]  
+    <h2>Background</h2>
+    <p>A simplistic adaptation of <a class="external" href="http://hboehm.info/gc/gc_bench/">Hans Boehm's GCBench</a>, which in turn was adapted from a benchmark by John Ellis and Pete Kovac.
+    <p>Thanks to Christophe Troestler and Einar Karttunen for help with this benchmark.
+  </section>
+  <section>
+    <h2>Variance</h2>
+    <p>When possible, use default GC; otherwise use per node allocation or use a library memory pool.
+    <p>As a practical matter, the myriad ways to tune GC will not be accepted.
+    <p>As a practical matter, the myriad ways to custom allocate memory will not be accepted.
+    <p>Please don't implement your own custom <a class="external" href="http://www.stroustrup.com/bs_faq2.html#placement-delete">"arena"</a> or "memory pool" or "free list" - they will not be accepted.
+  </section>
+  <section>
+    <h2>The work</h2>
+    <p>The work is to fully create perfect binary trees - before any tree nodes are GC'd - using at-minimum the number of allocations of <a href="../program/binarytrees-gcc-3.html">Jeremy Zerfas's C program</a>. Don't optimize away the work.
+    <p>Leaf nodes must be the same as interior nodes - the same memory allocation. Don't optimize away the work.
+  </section>
+  <section>
+    <h2>How to implement</h2>
+    <p>We ask that contributed programs not only give the correct result, but also <b>use the same algorithm</b> to calculate that result.
+    <p>Each program should:
+    <ul>
+       <li><p>define a tree node class and methods, or a tree node record and procedures, or an algebraic data type and functions, or&#8230;
+       <li><p>allocate a binary tree to 'stretch' memory, check it exists, and deallocate it
+       <li><p>allocate a long-lived binary tree which will live-on while other trees are allocated and deallocated   
+       <li><p>allocate, walk, and deallocate many bottom-up binary trees
+         <ul>
+           <li><p>allocate a tree
+           <li><p>walk the tree, counting the nodes (and maybe deallocate the nodes)
+           <li><p>deallocate the tree
+         </ul>      
+       <li><p>check that the long-lived binary tree still exists
+    </ul>
+    <p><b>diff</b> program output N = 10 with this 1KB <a href="../download/binarytrees-output.txt">output file</a> to check your program output has the correct format, before you <a href="https://salsa.debian.org/benchmarksgame-team/benchmarksgame/blob/master/README.md">contribute your program</a>.
+    <p>Use a larger command line argument (21) to check program performance.
+  </section>
+  <section>
+    <p>Thanks to Eamon Nerbonne for repeatedly showing what was wrong with the old way of checking these programs, and to Brad Chamberlain for suggesting that a simple check should work.
+  </section>
+
+</article>
+<div>
+  <nav>
+    <ul>
+      <li><a href="./pidigits.html#pidigits"><span>pidigits</span></a><p>Streaming arbitrary-precision arithmetic
+      <li><a href="./regexredux.html#regexredux"><span>regex-redux</span></a><p>Match DNA 8-mers and substitute magic patterns
+    </ul>
+  </nav>
+</div>
+
+<footer>
+  <nav>
+    <ul>
+      <li>&nbsp;
+    </ul>
+  </nav>
+</footer>
+
