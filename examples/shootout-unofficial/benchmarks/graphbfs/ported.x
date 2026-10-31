@@ -38,21 +38,22 @@ static void _add(Edge *graph, int a, int b) {
 }
 
 static int _bfs(Edge *graph, int n) {
-  Scope.retain();
-  int *queue = xmalloc(n * sizeof(int));
-  int *distance = xmalloc(n * sizeof(int));
-  for (int i = 0; i < n; i++) distance[i] = -1;
-  int head = 0, tail = 0;
-  queue[tail++] = 0; distance[0] = 0;
-  while (head < tail) {
-    int v = queue[head++];
-    for (Edge edge = graph[v]; edge; edge = edge.next)
-      if (distance[edge.vertex] < 0) {
-        distance[edge.vertex] = distance[v] + 1;
-        queue[tail++] = edge.vertex;
-      }
+  int result;
+  auto {
+    int *queue = xmalloc(n * sizeof(int));
+    int *distance = xmalloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) distance[i] = -1;
+    int head = 0, tail = 0;
+    queue[tail++] = 0; distance[0] = 0;
+    while (head < tail) {
+      int v = queue[head++];
+      for (Edge edge = graph[v]; edge; edge = edge.next)
+        if (distance[edge.vertex] < 0) {
+          distance[edge.vertex] = distance[v] + 1;
+          queue[tail++] = edge.vertex;
+        }
+    }
+    result = distance[n - 1];
   }
-  int result = distance[n - 1];
-  Scope.release();
   return result;
 }

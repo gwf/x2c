@@ -4,10 +4,7 @@
 
 import "yyjson" as json;
 
-int main(void) {
-  Scope.retain();
-  defer Scope.release();
-
+auto int main(void) {
   String source = $dedent(%"
     {
       \"service\": {\"name\": \"artifact-api\", \"active\": true},

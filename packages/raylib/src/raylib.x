@@ -618,20 +618,14 @@ void Image.draw_text(
   ImageDrawText(&image, text, x, y, size, color);
 }
 
-void Image.draw_polygon(Image image, List points, Color color) {
-  Scope.retain();
-  defer Scope.release();
-
+auto void Image.draw_polygon(Image image, List points, Color color) {
   int count = 0;
   Vector2 *vertices = _raylib_vertices(points, "draw polygon", count);
   ImageDrawTriangleFan(&image, vertices, count, color);
 }
 
-void Image.draw_polygon_lines(
+auto void Image.draw_polygon_lines(
   Image image, List points, int thickness, Color color) {
-  Scope.retain();
-  defer Scope.release();
-
   int count = 0;
   Vector2 *vertices = _raylib_vertices(points, "draw polygon lines", count);
   for (int index = 0; index < count; index++)

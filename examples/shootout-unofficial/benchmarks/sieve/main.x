@@ -17,8 +17,7 @@ int main(int argc, char **argv) {
   int limit = atoi(argv[1]), iterations = atoi(argv[2]);
   uint32_t checksum = 0;
 
-  for (int run = 0; run < iterations; run++) {
-    Scope.retain();
+  for (int run = 0; run < iterations; run++) auto {
     /* One packed byte per number, grown and zeroed once; the Array owns the
        storage and the Scope frees it. The marking passes borrow the buffer
        instead of indexing the Array: a byte store may alias anything, so the
@@ -39,7 +38,6 @@ int main(int argc, char **argv) {
         count++;
       }
     checksum += last + count;
-    Scope.release();
   }
   printf("%u\n", checksum);
   return 0;

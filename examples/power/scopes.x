@@ -38,20 +38,16 @@ void save_findings(String path, Map findings) {
   assert(sizes[0] == 12 && findings[<errors>] == 0);
 }
 
-int return_early(void) { {
-  Scope.retain();
-  defer Scope.release();
+auto int return_early(void) {
   Array files = survey_files();
   return files.length;
-} }
+}
 
 Array survey_files(void) => ["first.dat", "second.dat"];
 
 void fail_in_scope(void) {
   size_t before = Scope.stats().live_allocations;
-  try {
-    Scope.retain();
-    defer Scope.release();
+  try auto {
     Map findings = inspect_file("failure.dat");
     assert(Scope.stats().live_allocations > before);
     raise %(oops);

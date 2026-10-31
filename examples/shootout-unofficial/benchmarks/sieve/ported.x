@@ -16,8 +16,7 @@ int main(int argc, char **argv) {
   int limit = atoi(argv[1]), iterations = atoi(argv[2]);
   uint32_t checksum = 0;
 
-  for (int run = 0; run < iterations; run++) {
-    Scope.retain();
+  for (int run = 0; run < iterations; run++) auto {
     unsigned char *prime = xcalloc((size_t) limit + 1, 1);
     for (int i = 2; i <= limit; i++) prime[i] = 1;
     for (int p = 2; p <= limit / p; p++)
@@ -32,7 +31,6 @@ int main(int argc, char **argv) {
         count++;
       }
     checksum += last + count;
-    Scope.release();
   }
   printf("%u\n", checksum);
   return 0;
