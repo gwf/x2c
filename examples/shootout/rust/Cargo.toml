@@ -1,0 +1,51 @@
+[package]
+name = "x2c-shootout-rust"
+version = "0.1.0"
+edition = "2015"
+publish = false
+
+[dependencies]
+rayon = "=1.10.0"
+typed-arena = "=2.0.2"
+regex = "=1.11.1"
+rug = { version = "=1.27.0", default-features = false, features = ["integer"] }
+gmp-mpfr-sys = { version = "=1.6.4", default-features = false, features = ["use-system-libs"] }
+
+[profile.release]
+opt-level = 2
+
+[[bin]]
+name = "nbody"
+path = "../benchmarks/nbody/main.rs"
+
+[[bin]]
+name = "spectralnorm"
+path = "../benchmarks/spectralnorm/main.rs"
+
+[[bin]]
+name = "fannkuchredux"
+path = "../benchmarks/fannkuchredux/main.rs"
+
+[[bin]]
+name = "mandelbrot"
+path = "../benchmarks/mandelbrot/main.rs"
+
+[[bin]]
+name = "fasta"
+path = "../benchmarks/fasta/main.rs"
+
+[[bin]]
+name = "revcomp"
+path = "../benchmarks/revcomp/main.rs"
+
+[[bin]]
+name = "binarytrees"
+path = "../benchmarks/binarytrees/main.rs"
+
+[[bin]]
+name = "regexredux"
+path = "../benchmarks/regexredux/main.rs"
+
+[[bin]]
+name = "pidigits"
+path = "../benchmarks/pidigits/main.rs"
