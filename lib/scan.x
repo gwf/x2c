@@ -350,11 +350,11 @@ int scan_symbol_literal_status(char *s, Symbol *status) {
   return _simple_literal(s, status);
 }
 
-/* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
-   spelling of `<"...">` without its angle brackets, so `>>` inside the quotes
+/* One atom spelling inside `%<...>`. A leading quote reads the quoted
+   spelling of `<"...">` without its angle brackets, so `>` inside the quotes
    belongs to the atom. Otherwise it shares only whitespace, `$`, `@` and the
    backslash escape with scan_atom: reader punctuation and comment openers are
-   ordinary bytes here, `>>` ends the atom, and the spelling may be empty
+   ordinary bytes here, `>` ends the atom, and the spelling may be empty
    because the caller has not ruled the first byte out. Returns -1 for a
    malformed quoted spelling or trailing backslash. */
 int scan_symbol_set_atom(char *s) {
@@ -362,7 +362,7 @@ int scan_symbol_set_atom(char *s) {
   if (s[0] == '"') return _quoted_spelling(s, NULL);
   int n = 0;
   while (s[n]) {
-    if (s[n] == '>' && s[n + 1] == '>') return n;
+    if (s[n] == '>') return n;
     if (strchr(" \n\t\v\f\r$@", s[n])) return n;
     if (s[n] == '\\' && !s[n + 1]) return -1;
     n += s[n] == '\\' ? 2 : 1;

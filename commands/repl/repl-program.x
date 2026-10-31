@@ -155,7 +155,7 @@ static void _program_family(Map all, Map selected, Type type) {
 
 static String _program_documentation(Compiler c, int line) {
   for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
-    if (token.line >= line && !(token.type in %<<space comment preproc>>))
+    if (token.line >= line && !(token.type in %<space comment preproc>))
       return c.definition_doc(token);
   return NULL;
 }
@@ -253,7 +253,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
   foreach (Var (key, value), program.symbols) {
     List family = key;
     if (family.len() != 2 ||
-        !(family.car() in %<<struct union enum typedef>>) ||
+        !(family.car() in %<struct union enum typedef>) ||
         family.cadr() is not <string>) continue;
     String name = family.cadr(), key = _program_type_name(family);
     if (key in program.descriptions) continue;
@@ -286,7 +286,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       default: continue;
     }
     Type base = spec.type().base_type();
-    if (!(base.car() in %<<struct union enum>>) || base.len() < 3 ||
+    if (!(base.car() in %<struct union enum>) || base.len() < 3 ||
         base.cadr() is not <string>) continue;
     String name = base.cadr();
     List family = $(base.car(), name);
@@ -510,7 +510,7 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
             : $(name, emitted ? emitted : name, <dynamic>));
         }
       }
-      else if (parts.car() in %<<struct union enum typedef>>)
+      else if (parts.car() in %<struct union enum typedef>)
         collected.symbols[key] = value;
     }
   if (!native) {

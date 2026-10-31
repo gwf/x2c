@@ -58,7 +58,7 @@ static Map _tag_description(ReplSession session, String name) {
   if (name in session.descriptions ||
       session.compiler.sym.get_exact($(name))) return NULL;
   Map found = NULL;
-  foreach (Symbol kind in %<<struct union enum>>) {
+  foreach (Symbol kind in %<struct union enum>) {
     Map row = session.descriptions[kind.str() + " " + name];
     if (!row) continue;
     if (found) return NULL;
@@ -169,7 +169,7 @@ static Type _query_type(ReplSession session, String text) {
   Map tag = _tag_description(session, text);
   if (tag) return tag["type"];
   if (c.sym.get_exact(%(typedef $text))) return $(text);
-  foreach (Symbol tag in %<<struct union enum>>) {
+  foreach (Symbol tag in %<struct union enum>) {
     String prefix = tag.str() + " ";
     if (text.startswith(prefix)) {
       Type type = $(tag, text.remove_prefix(prefix).strip(NULL));

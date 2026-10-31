@@ -1,15 +1,15 @@
 /*  slots.x -- macro definition slots */
 
 static const SymbolSet declaration_roles =
-  %<<field enumerator map-entry unit>>;
+  %<field enumerator map-entry unit>;
 
 static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit catch match-row
-     decl-row>>;
+  %<argument block field enumerator map-entry param unit catch match-row
+     decl-row>;
 
-static const SymbolSet untyped_roles = %<<expression argument type>>;
+static const SymbolSet untyped_roles = %<expression argument type>;
 
-static const SymbolSet value_kinds = %<<expr name literal>>;
+static const SymbolSet value_kinds = %<expr name literal>;
 
 /* template holes
 
@@ -110,7 +110,7 @@ static List _meta_call_slot(Compiler c, Symbol role) {
 
 /* A result macro keeps the ordinary position's kind and decorator rules. */
 static Symbol _slot_position(Symbol role) =>
-  role in %<<unit block field enumerator map-entry>> ? role : <expression>;
+  role in %<unit block field enumerator map-entry> ? role : <expression>;
 
 /* A hole fills a slot whose role its kind accepts. A sequence hole of no
    kind takes the slot's kind. */

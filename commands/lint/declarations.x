@@ -14,7 +14,7 @@
 #include <string.h>
 
 static const SymbolSet qualifier_words =
-  %<<const volatile restrict register struct union enum>>
+  %<const volatile restrict register struct union enum>
 
 /* The line, in the linted file, of the first `(` among the compiler's
    tokens `start` to `end`. Returns 0 for a declaration in another file,

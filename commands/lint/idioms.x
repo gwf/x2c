@@ -14,14 +14,14 @@
    operator, so an operand placed between them needs no parentheses. The
    `>` of `=>` is a neighbor before. */
 static const SymbolSet loose_before =
-  %<<"(" "[" "," "=" return "&&" "||" "?" ":" "==" "!=" if while>>
+  %<"(" "[" "," "=" return "&&" "||" "?" ":" "==" "!=" if while>
 static const SymbolSet loose_after =
-  %<<")" "]" "," ";" "&&" "||" "?" ":" "==" "!=">>
+  %<")" "]" "," ";" "&&" "||" "?" ":" "==" "!=">
 
 /* Operators that bind no tighter than `in`, which an operand of `in` must
    not contain outside brackets. */
 static const SymbolSet relational =
-  %<<"<" ">" "<=" ">=" "==" "!=" "^" "|" "&&" "||" "?" ":" in is>>
+  %<"<" ">" "<=" ">=" "==" "!=" "^" "|" "&&" "||" "?" ":" in is>
 
 /* Whether the code tokens from `from` to `to` hold an operator of `in`'s
    precedence or lower outside brackets, or span lines. */

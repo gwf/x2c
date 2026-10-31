@@ -8,11 +8,11 @@
 /* C 6.5.3: `++` and `--` take a unary expression, and the unary operators
    take a cast expression. A primary expression begins with a name, a
    literal, a group, or a macro form. */
-static const SymbolSet increments = %<<"++" "--">>;
-static const SymbolSet unary_operators = %<<"&" "*" "+" "-" "~" "!">>;
+static const SymbolSet increments = %<"++" "--">;
+static const SymbolSet unary_operators = %<"&" "*" "+" "-" "~" "!">;
 static const SymbolSet primary_starts =
-  %<<ident in "$" "$(" "(" "{" "[" "%(" "%<<" "%[" "%{" "%\"" "%!" void
-     lit-char lit-int lit-float lit-char* lit-atom lit-symbol>>;
+  %<ident in "$" "$(" "(" "{" "[" "%(" "%<" "%[" "%{" "%\"" "%!" void
+     lit-char lit-int lit-float lit-char* lit-atom lit-symbol>;
 
 /** Parses the right operand of a pattern test at relational precedence. */
 List Compiler.parse_pattern_operand(Compiler c) =>
@@ -125,7 +125,7 @@ List Compiler.parse_primary(Compiler c) {
     case <"{">:       return _parse_composite(c);
     case <[>:         return _parse_bracket_array(c);
     case <"%(">:      return c.parse_list_literal();
-    case <"%<<">:     return c.parse_symbol_set_literal();
+    case <"%<">:      return c.parse_symbol_set_literal();
     case <"%[">:      return c.parse_array_literal();
     case <"%{">:      return c.parse_map_literal();
     case <"%\"">:     return c.parse_string_literal();

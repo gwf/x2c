@@ -1,3 +1,3 @@
 #include "x2c.x"
 
-SymbolSet values = %<<lossy_set>>;
+SymbolSet values = %<lossy_set>;

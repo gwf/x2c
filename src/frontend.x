@@ -88,7 +88,7 @@ static macro Stmt $fail.frontend_cpp_failed(
 
 // symbol collection
 
-static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
+static const SymbolSet cpp_dumps = %<dump-cpp cpp-tokens dump-csym>;
 
 // source units
 

@@ -1,5 +1,19 @@
 # Status
 
+## Optional example checks on 2026-10-30
+
+The SymbolSet delimiter migration exposed existing failures that also reproduce
+with the converged compiler at `b75c61da9`:
+
+- `make examples`: `programs/tiny-lisp-min.x:2:110` reports "function takes
+  1 argument, not 0" for `W()` with the `typedef void Z` parameter spelling.
+- `make doc-examples`: the `language.md:106` sample declares `remainder` with
+  a signature that conflicts with the C math function. The imports slide also
+  requires a built PCRE2 package; that prerequisite is absent in these worktrees.
+
+These checks remain optional. Their repairs are separate from the delimiter
+migration; no expectations or sample classifications were weakened.
+
 ## Allocation accounting
 
 Unit and compiler-fixture program runners enable `X2C_SCOPE_ACCOUNTING=1`

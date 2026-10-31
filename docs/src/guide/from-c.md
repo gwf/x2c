@@ -155,7 +155,7 @@ The Map's bare keys are Atoms; `{(name): value}` uses a variable as its key.
 | `%(items)` | Whitespace-separated List data; bare names are Atoms |
 | `%[items]`, `%{key: value}` | Array/Map with quoted contents; commas separate entries |
 | `%"text $name $(expression)"` | Interpolated String |
-| `%<<ready busy done>>` | Immutable ordered SymbolSet; literal members only |
+| `%<ready busy done>` | Immutable ordered SymbolSet; literal members only |
 | `$name`, `$(expression)` inside quoted data | Insert one evaluated value |
 | `@name`, `@(expression)` inside a quoted List | Splice a List's elements; Arrays/Maps do not support this splice |
 

@@ -307,7 +307,7 @@ Type Code.type(Code value) {
 /** Implements `x2c_enclosing`, declared in `lib/meta.x`. */
 Code x2c_enclosing(Symbol what) {
   _require_expansion("x2c_enclosing");
-  if (!(what in %<<declarator statement function unit>>))
+  if (!(what in %<declarator statement function unit>))
     $fail.meta_sdk_enclosing_role(what);
   return active.expander.enclosing(what);
 }

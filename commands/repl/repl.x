@@ -249,7 +249,7 @@ static int _symbols(struct ReplClient &client, String argument) {
       String name = _word(argument);
       if (!name) return 0;
       kind = Symbol.new(name);
-      if (!(kind in %<<function native global value type macro constant>>)) return 0;
+      if (!(kind in %<function native global value type macro constant>)) return 0;
     }
     else if (word == "--file") {
       if (argument.startswith("\"")) {

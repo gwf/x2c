@@ -368,7 +368,7 @@ int scan_symbol_set_atom(char * s){
   if(s[0] == '"') return _quoted_spelling(s, NULL);
   int n = 0;
   while(s[n]){
-    if(s[n] == '>' && s[n + 1] == '>') return n;
+    if(s[n] == '>') return n;
     if(strchr(" \n\t\v\f\r$@", s[n])) return n;
     if(s[n] == '\\' && ! s[n + 1]) return - 1;
     n += s[n] == '\\' ? 2 : 1;

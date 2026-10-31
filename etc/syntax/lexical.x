@@ -157,7 +157,7 @@ List syntax_lexical(void) => %(lexical
     (rule set-atom
       (ordered (ref quoted-symbol-spelling)
         (repeat 0 (ordered (ref atom-escape)
-          (except (byte 0) (ref set-boundary) (bytes ">>")))))
+          (except (byte 0) (ref set-boundary) (byte 62)))))
       (emit lit-atom))
     (rule string-segment
       (repeat 1 (ordered
@@ -179,13 +179,12 @@ List syntax_lexical(void) => %(lexical
       (ordered
         (seq (bytes "%\"") (transition percent-string))
         (seq (bytes "%[") (transition percent-array))
-        (seq (bytes "%<<") (transition percent-set))
         (when (not (predicate percent-is-operator))
           (ordered
             (seq (bytes "%(") (transition percent-list))
             (seq (bytes "%{") (transition percent-map))
             (seq (bytes "%!") (emit "%!"))
-            (seq (bytes "%<") (fail malformed))))))
+            (seq (bytes "%<") (transition percent-set))))))
     (rule angle-symbol
       (when (predicate can-start-symbol) (ref symbol))
       (failure malformed))
@@ -236,7 +235,7 @@ List syntax_lexical(void) => %(lexical
     (rule lisp-atom (ref atom) (emit ident))
     (rule symbol-set-tokens
       (ordered
-        (seq (bytes ">>") (transition close-set))
+        (seq (bytes ">") (transition close-set))
         (seq (one-of-bytes "\$@") (emit-spelling))
         (ref symbol) (ref set-atom))
       (failure malformed))
@@ -266,7 +265,7 @@ List syntax_lexical(void) => %(lexical
     (transition percent-list (from x2c x2c-par) (on "%(") (push list))
     (transition percent-array (from x2c x2c-par) (on "%[") (push array))
     (transition percent-map (from x2c x2c-par) (on "%{") (push map))
-    (transition percent-set (from x2c x2c-par) (on "%<<") (push symbol-set))
+    (transition percent-set (from x2c x2c-par) (on "%<") (push symbol-set))
     (transition percent-string (from x2c x2c-par) (on "%\"") (push string))
     (transition code-parenthesis (from x2c-par) (on "(") (push x2c-par))
     (transition close-code-parenthesis (from x2c-par) (on ")") (pop))
@@ -284,7 +283,7 @@ List syntax_lexical(void) => %(lexical
     (transition close-list (from list) (on ")") (pop))
     (transition close-array (from array) (on "]") (pop))
     (transition close-map (from map) (on "}") (pop))
-    (transition close-set (from symbol-set) (on ">>") (pop))
+    (transition close-set (from symbol-set) (on ">") (pop))
     (transition string-code (from string) (on "\$(") (push x2c-par))
     (transition string-brace (from string) (on "\${") (push x2c))
     (transition close-string (from string) (on "\"") (pop)))

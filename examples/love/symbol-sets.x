@@ -1,7 +1,7 @@
 /*  symbol-sets.x -- ordered Symbol sets: membership, index, dispatch */
 
 
-static const SymbolSet lights = %<<green yellow red>>;
+static const SymbolSet lights = %<green yellow red>;
 
 /* The dense index reaches a parallel table; no switch needed. */
 static const char *const advice[] = { "go", "slow", "stop" };

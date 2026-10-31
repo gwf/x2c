@@ -349,7 +349,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _148 = Symbol_var(3313778);
   _149 = Symbol_var(26720);
   _150 = String_new("symbol-set entries must be literal Symbols");
-  _151 = String_new("use %<<foo bar>>");
+  _151 = String_new("use %<foo bar>");
   _152 = String_var(_151);
   _153 = cons(_152, NULL);
   _154 = Symbol_var(213092);
@@ -1149,14 +1149,14 @@ List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
 
 List Compiler_parse_symbol_set_literal(Compiler c){
   if(! _init_guard_) _file_init_();
-  Compiler_expect(c, 1227897);
+  Compiler_expect(c, 9593);
   Array symbols = Array_new(), tokens = Array_new();
-  while(Compiler_peek(c, 0) != 15997){
+  while(Compiler_peek(c, 0) != 125){
     Array_push(symbols, Symbol_var(f11_collections____member_symbol(c)));
     Array_push(tokens, Token_var(c -> token));
     Compiler_next(c);
   }
-  Compiler_expect(c, 15997);
+  Compiler_expect(c, 125);
   int duplicate = - 1;
   List set = Compiler_symbol_set_expression(c, Array_list(symbols), &(duplicate));
   if(duplicate >= 0){

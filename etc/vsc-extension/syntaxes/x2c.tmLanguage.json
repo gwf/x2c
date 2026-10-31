@@ -4306,12 +4306,12 @@
 		},
 		"x2c_current_symbol_set_literal": {
 			"name": "meta.literal.symbol-set.x2c",
-			"begin": "(^|(?<=[(\\[{=,:;!?~+*/%&|^>\\-])|\\b(?:return|raise|case|catch|defer|in|match))([ \\t]*)(%<<)",
+			"begin": "(^|(?<=[(\\[{=,:;!?~+*/%&|^>\\-])|\\b(?:return|raise|case|catch|defer|in|match))([ \\t]*)(%<)",
 			"beginCaptures": {
 				"1": { "name": "keyword.control.x2c" },
 				"3": { "name": "punctuation.definition.literal.symbol-set.begin.x2c" }
 			},
-			"end": ">>",
+			"end": ">",
 			"endCaptures": {
 				"0": { "name": "punctuation.definition.literal.symbol-set.end.x2c" }
 			},
@@ -4327,7 +4327,7 @@
 					]
 				},
 				{ "match": "[$@]", "name": "invalid.illegal.symbol-set.dynamic.x2c" },
-				{ "match": "(?:\\\\.|(?!(?:>>|[$@\\s])).)+", "name": "constant.other.symbol.x2c.symbol-set" }
+				{ "match": "(?:\\\\.|(?!(?:>|[$@\\s])).)+", "name": "constant.other.symbol.x2c.symbol-set" }
 			]
 		},
 		"x2c_lambda_capture_clause": {

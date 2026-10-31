@@ -97,7 +97,7 @@ List syntax_extensions(void) => %(
                octal-integer)
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
       (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
-      (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<<...>>"
+      (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<...>"
                  "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")
       (reference "../reference/language.md#percent-literals-quote-and-unquote"))

@@ -28,8 +28,8 @@ Symbol Compiler.auto_region_form(Compiler c, Symbol position) {
 }
 
 static const SymbolSet _region_statements =
-  %<<"{" "%{" if while for do switch match try return raise defer break
-     continue goto>>;
+  %<"{" "%{" if while for do switch match try return raise defer break
+     continue goto>;
 
 /* Whether `token` begins a declaration that stays at file scope. */
 static int _function_follows(Compiler c, Token token) {

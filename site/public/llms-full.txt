@@ -165,7 +165,7 @@ The Map's bare keys are Atoms; `{(name): value}` uses a variable as its key.
 | `%(items)` | Whitespace-separated List data; bare names are Atoms |
 | `%[items]`, `%{key: value}` | Array/Map with quoted contents; commas separate entries |
 | `%"text $name $(expression)"` | Interpolated String |
-| `%<<ready busy done>>` | Immutable ordered SymbolSet; literal members only |
+| `%<ready busy done>` | Immutable ordered SymbolSet; literal members only |
 | `$name`, `$(expression)` inside quoted data | Insert one evaluated value |
 | `@name`, `@(expression)` inside a quoted List | Splice a List's elements; Arrays/Maps do not support this splice |
 
@@ -4459,13 +4459,14 @@ means a change of parser context. Some percent forms evaluate their contents.
 Binary `%` remains the modulo operator, and `%!` remains the lambda-literal
 prefix.
 
-`%"`, `%[`, and `%<<` open literals after any token. Modulo by a string literal
-is invalid C, and neither `[` nor `<<` begins an expression, so a cast may
+`%"` and `%[` open literals after any token. Modulo by a string literal
+is invalid C, and `[` cannot begin an expression, so a cast may
 precede these literals: `return (Path) %"$base/$name";` quotes. A cast may
 precede a bare `[...]` Array literal as well: `(Var) [1, 2]`.
 
-In `%(`, `%{`, and `%!` after an operand, including a closing parenthesis or
-brace, the `%` is the modulo operator, except where a statement begins:
+In `%(`, `%{`, `%<`, and `%!` after an operand, including a closing
+parenthesis or brace, the `%` is the modulo operator, except where a statement
+begins:
 
 - after the parenthesized condition of `if`, `while`, `for`, or `switch`, so
   `if (dirty) %(git stash).job().run();` quotes;
@@ -4493,7 +4494,7 @@ The collection and string literal forms are:
 | Form | Static type | Element syntax |
 | --- | --- | --- |
 | `%(a b c)` | `List` | quoted values separated by whitespace |
-| `%<<a b c>>` | `SymbolSet` | literal compact `Symbol`s in dense order |
+| `%<a b c>` | `SymbolSet` | literal compact `Symbol`s in dense order |
 | `%[a, b, c]` | `Array` | quoted values separated by commas |
 | `%{a: b, c: d}` | `Map` | quoted key/value pairs |
 | `%"text"` | `String` | quoted text plus unquote |
@@ -4504,7 +4505,7 @@ packed `Map` from `typed-map.x`, or a typed cons chain from `typed-list.x`. The
 literal then builds that representation directly, and an element that does not
 convert raises `<no-convert>`. A null source stays null.
 
-The empty forms are `%()`, `%<<>>`, `%[]`, `%{}`, and `%""`. Each `%[]` or
+The empty forms are `%()`, `%<>`, `%[]`, `%{}`, and `%""`. Each `%[]` or
 `%{}` evaluation creates a fresh allocated object that can be mutated
 immediately; null is not an empty `Array` or `Map`.
 
@@ -4552,8 +4553,12 @@ A `@` followed by whitespace, `)`, or `=` is ordinary `@` or `@=`
 atom data. `%(op @ a b)` remains a List of atoms; it does not authorize
 matrix operator syntax.
 
-`%<<...>>` is an immutable ordered `SymbolSet`. Bare entries are compact
-`Symbol`s rather than `Atom`s, and their source positions are their numeric
+`%<...>` is an immutable ordered `SymbolSet`. An unescaped `>` closes the
+literal unless it belongs to a quoted or angle-form member. For example,
+`%<">" ">=" ">>">` contains three operator Symbols. After an operand,
+`x %<foo>` means modulo by `<foo>`; `%<` opens a set where an operand begins.
+Bare entries are compact `Symbol`s rather than `Atom`s, and their source
+positions are their numeric
 indexes. Entries must be literal spellings; interpolation, splicing, and
 runtime expressions are not accepted. Every entry must survive compact `Symbol`
 encoding exactly. Duplicate encoded `Symbol`s are a
@@ -4590,7 +4595,7 @@ and escape rules. None repeats the `%` sigil, because a bare `%` inside quoted
 collection data is an `Atom`: `%(k %"txt")` reads as the three elements `k`,
 `%`, and `"txt"`. `$("text")` instead inserts an ordinary C string expression.
 Unescaped comma, colon, `]`, and `}` terminate collection Atoms; backslash
-escaping or angle syntax expresses those bytes as data. `%<<...>>` accepts
+escaping or angle syntax expresses those bytes as data. `%<...>` accepts
 literal `Symbol`s only and permits no interpolation or splicing.
 
 Inside a quoted collection, `$($helper(...))` first unquotes into x2c and

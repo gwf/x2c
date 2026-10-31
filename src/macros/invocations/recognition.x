@@ -5,10 +5,10 @@ module typedef struct MacroPos {
 } MacroPos;
 
 static const SymbolSet alias_kinds =
-  %<<expression block-item field enumerator map-entry unit decorator>>;
+  %<expression block-item field enumerator map-entry unit decorator>;
 
 static const SymbolSet macro_positions =
-  %<<unit block field enumerator map-entry statement expression>>;
+  %<unit block field enumerator map-entry statement expression>;
 
 static const MacroPos macro_position_info[] = {
   { <unit>,       "file scope",    1 },

@@ -55,7 +55,7 @@ static enum { FORMAT_LEFT = 1 };
 
 // The length modifiers and their native spellings in the same order.
 static const SymbolSet format_modifiers =
-  %<<none char short long llong ldouble>>;
+  %<none char short long llong ldouble>;
 static const char *const _format_modifiers[] = {"", "hh", "h", "l", "ll", "L"};
 
 /* One pass of `String.format`. The bytes from `literal` to `cursor` are

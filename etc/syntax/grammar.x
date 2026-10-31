@@ -1054,7 +1054,7 @@ List syntax_grammar(void) => %(grammar
         (token "\"")))
 
     (rule symbol-set
-      (seq (token "%<<") (repeat 0 (ref symbol-set-member)) (token ">>")))
+      (seq (token "%<") (repeat 0 (ref symbol-set-member)) (token ">")))
 
     (rule symbol-set-member
       (external "symbol-set-mode lit-atom or lit-symbol"))

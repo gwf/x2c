@@ -494,4 +494,4 @@ module int _extends_expression(Token token) {
 /* After a complete operand, a postfix operator, a brace initializer, the
    conditional, or a comma continues the expression. */
 static const SymbolSet operand_continuations =
-  %<<"[" "(" "{" "->" "." "++" "--" "?" ",">>;
+  %<"[" "(" "{" "->" "." "++" "--" "?" ",">;

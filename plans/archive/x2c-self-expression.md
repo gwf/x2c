@@ -191,7 +191,7 @@ Wave 1 results (submitted as one PR; authored src/lib/commands/etc diff
   step on purpose; check `f().arr[0]`.
 - H3 One `Symbol.binary_precedence` for parser, emitter (+3), and macro
   lookahead; SymbolSets for increments, prefix operators, and primary
-  starts. Probe `%`-token spelling inside `%<<>>`.
+  starts. Probe `%`-token spelling inside `%<>`.
 - H5 Generate etc/lisp-values.xlisp bind rows with a `natives` defmacro over
   the curated name list (15 explicit exceptions) and the selectors with one
   folding macro. Run the warm-load timing tests.

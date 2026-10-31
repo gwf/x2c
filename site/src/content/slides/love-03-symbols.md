@@ -19,7 +19,7 @@ switch (state) {
 }
 
 // An ordered vocabulary, built entirely at compile time.
-SymbolSet stages = %<<queued running done>>;
+SymbolSet stages = %<queued running done>;
 assert(stages.contains(state) && !stages.contains(<failed>));
 state = stages[stages.index(state) + 1];
 assert(state == running);

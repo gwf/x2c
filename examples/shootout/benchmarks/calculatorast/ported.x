@@ -13,7 +13,7 @@
 typedef enum { NUMBER, VARIABLE, ASSIGN, BINARY } Kind;
 typedef enum { ADD, SUBTRACT, MULTIPLY, DIVIDE } Operator;
 
-static SymbolSet _operators = %<<<+> <-> <*> </>>>;
+static SymbolSet _operators = %< <+> <-> <*> </>>;
 
 typedef struct Node *Node;
 struct Node {

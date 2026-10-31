@@ -11,7 +11,7 @@ Four rules apply throughout this chapter:
   identifier key is quoted, as an `Atom`. `$(a, b)` builds a `List` of
   evaluated elements, and `${key: value}` evaluates every key.
 - Percent quotes. The delimiter after `%` selects the literal grammar for
-  the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<<...>>`.
+  the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<...>`.
 - Dollar unquotes. Inside quoted `List`, `String`, `Array`, or `Map`
   content, `$name` or `$(expression)` inserts one ordinary x2c value.
 - `String` and `List` are immutable and canonical: equal values share
@@ -113,11 +113,11 @@ not mean every percent form holds unevaluated symbolic data.
 | --- | --- | --- |
 | `%"text"` | `String` | quoted text, with `$name` / `$(expr)` unquote |
 | `%(a b c)` | `List` | quoted symbolic content; bare names are `Atom`s |
-| `%<<a b c>>` | `SymbolSet` | quoted literal `Symbol`s only |
+| `%<a b c>` | `SymbolSet` | quoted literal `Symbol`s only |
 | `%[a, b, c]` | `Array` | quoted comma-separated values |
 | `%{k: v, k: v}` | `Map` | quoted key/value pairs |
 
-The empty forms are `%""`, `%()`, `%<<>>`, `%[]`, and `%{}`.
+The empty forms are `%""`, `%()`, `%<>`, `%[]`, and `%{}`.
 
 ```x2c
 List codes = %(200 301 404);
@@ -332,11 +332,11 @@ use each.
 
 ### Ordered Symbol sets
 
-`%<<...>>` declares a closed, immutable set of compact `Symbol`s. Its source
+`%<...>` declares a closed, immutable set of compact `Symbol`s. Its source
 order is also its dense numeric order, starting at zero:
 
 ```x2c
-SymbolSet colors = %<<red green blue>>;
+SymbolSet colors = %<red green blue>;
 
 printf("%d %d %d\n",
        colors.index(<green>),
@@ -348,13 +348,13 @@ printf("%d %d %d\n",
 1 1 -1
 ```
 
-Bare entries are `Symbol`s, so write `%<<red green blue>>` rather than
-`%<<<red> <green> <blue>>>`. Angle brackets still spell a `Symbol` explicitly.
+Bare entries are `Symbol`s, so write `%<red green blue>` rather than
+`%< <red> <green> <blue>>`. Angle brackets still spell a `Symbol` explicitly.
 A member whose spelling is not a bare word is quoted, and the quotes may hold
-the `>>` that would otherwise end the literal:
+the `>` that would otherwise end the literal:
 
 ```x2c
-SymbolSet assignments = %<<"+=" "<<=" ">>=">>;
+SymbolSet assignments = %<"+=" "<<=" ">>=">;
 ```
 
 Interpolation and splicing are not supported. Every member must be known
