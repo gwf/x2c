@@ -63,7 +63,10 @@ const { html } = Astro.props;
 
   function enter(e: PointerEvent) {
     if (e.pointerType !== "mouse" || !able.matches || spots.length) return;
+    // Copies from a leave that is still settling go now, or they would
+    // stay under the new ones.
     clearTimeout(timer);
+    for (const old of title.querySelectorAll(".lift-copy")) old.remove();
     spots = lines.flatMap(cover);
     title.classList.add("is-live");
   }
