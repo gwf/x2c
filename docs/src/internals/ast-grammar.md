@@ -678,6 +678,15 @@ Environment identities normally use `(binding-name SPELLING)`, preserving
 references across translation contexts. Rebuild and environment rows are
 descriptor data, not another program production.
 
+`Macro` is a singular hole and decorator target kind. A capture carries the
+canonical Macro value. Nested definitions give their own holes distinct
+binder identities while retaining source spellings for lookup and diagnostics.
+Returning a bare `macrodef` during decoration is a Macro transformation;
+returning a Decorator value continues onto its following target. A generated
+`seq` instead uses the captured macro's result kind. Declaration and collected
+Unit sequences retain the ordinary `declaration-bundle` production, including
+empty output and several mapped applications.
+
 Global definitions bind at unit position; local definitions bind in blocks.
 `imported` is not a current produced descriptor row. The macro registry instead
 has a separate `(imported-macro FROZEN-DEFINITION)` wrapper.

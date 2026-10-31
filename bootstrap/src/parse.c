@@ -1478,7 +1478,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _575 = List_var(_574);
   _576 = cons(_496, _493);
   _577 = List_var(_576);
-  _578 = int_var(119217);
+  _578 = int_var(119261);
   _579 = cons(_578, NULL);
   _580 = cons(_501, _579);
   _581 = List_var(_580);
@@ -5294,7 +5294,7 @@ List Compiler_parse_enumerators(Compiler c, List context){
       _push_items(enumerators, Compiler_parse_alias_member(c, 384101446165476, context));
       continue;
     }
-    if(c -> shallow && Compiler_macro_starts_target_at(c, 384101446165476)) Compiler_skip_macro_invocation(c);
+    if(c -> shallow && Compiler_macro_starts_target_at(c, 384101446165476) && ! Compiler_macro_invocation_collection(c)) Compiler_skip_macro_invocation(c);
     else _push_items(enumerators, Compiler_parse_enumerator(c, List_type(context)));
     if(Compiler_peek(c, 0) == 251) break;
     Compiler_expect(c, 89);
@@ -5597,10 +5597,10 @@ static int f5_types____attribute_since(Compiler c, Token first, Array marks){
   int before = 0, count = Array_len(marks);
   for(int high = count;  before < high; ){
     int middle =(before + high) / 2;
-    if(Var_long(Var_convert_at(Array_getindex(marks, middle), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/parse/types.x",.function = "f5_types____attribute_since",.line = 391}; & _x2c_gensym_error_site_6; }))) < first - base) before = middle + 1;
+    if(Var_long(Var_convert_at(Array_getindex(marks, middle), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/parse/types.x",.function = "f5_types____attribute_since",.line = 392}; & _x2c_gensym_error_site_6; }))) < first - base) before = middle + 1;
     else high = middle;
   }
-  return before % 2 ||(before < count && Var_long(Var_convert_at(Array_getindex(marks, before), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/parse/types.x",.function = "f5_types____attribute_since",.line = 394}; & _x2c_gensym_error_site_7; }))) < c -> token - base);
+  return before % 2 ||(before < count && Var_long(Var_convert_at(Array_getindex(marks, before), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/parse/types.x",.function = "f5_types____attribute_since",.line = 395}; & _x2c_gensym_error_site_7; }))) < c -> token - base);
 }
 
 static List f5_types____field_item(Compiler c, List context){

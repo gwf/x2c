@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-decorator-continuation-arguments.x:5:3: macro: returned decorator requires explicit arguments
+    $bad() 1
+    ^
+  note: a continued decorator must have no explicit parameters
+

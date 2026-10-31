@@ -49,7 +49,7 @@ were indexed and the delivered ones archived.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Async execution stacks](async-execution-stacks.md) | Private Task.run prototype implemented with configurable guarded 8 MiB stacks, selected inheritance, and no migration. Local tests pass; dev/main and push hold remain. | Resolve conservative lifetime diagnostics, validate remaining native targets, and examine broader regressions before a delivery decision. |
+| [Async execution stacks](async-execution-stacks.md) | Task.run, Scope migration, runtime repairs, four-target normal/sanitizer validation, and release/migration notes are complete. Dev publication authorized; normal benchmarks remain deferred. | Finish current-dev integration review and final publication gate, then deliver to dev. Main promotion remains separate. |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
@@ -83,6 +83,11 @@ releases established the recovery baseline. No production promotion is
 selected here.
 
 ### Decisions and completed records
+
+- [Macro-target decorators](archive/macro-target-decorators.md): implemented
+  on 2026-10-31 in `f701f2703` and `c84a2828`. `expand` preserves the generator's
+  result kind; returned decorators consume the following target. Publication
+  validation and the compiler performance checkpoint passed.
 
 - [Contextual x2c keywords](archive/contextual-x2c-keywords.md): implemented
   from `c5ed5ae99` through `234eec5b3` on 2026-10-30. Nine additions are

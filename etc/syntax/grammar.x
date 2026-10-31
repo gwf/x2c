@@ -1189,7 +1189,7 @@ List syntax_grammar(void) => %(grammar
       (external "signature-directed argument sequence; contract M1"))
 
     (rule decorator
-      (external "visible decorator invocation followed by its target; M3"))
+      (external "visible decorator invocation followed by its target; returned zero-argument Decorators continue onto their next target; M3"))
 
     (rule quotation
       (seq
@@ -1240,6 +1240,7 @@ List syntax_grammar(void) => %(grammar
         (token "Unit")
         (token "Function")
         (token "NamedType")
+        (token "Macro")
         (token "Type")
         (token "Decl")
         (token "DeclaratorRow")

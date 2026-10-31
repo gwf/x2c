@@ -388,7 +388,7 @@ List syntax_lexical(void) => %(lexical
       (after scan) (hide inactive-branches) (retain conditional-structure))
     (pass keyword-retag
       (ordered
-        (retag (try catch finally raise import protocol delegate associated)
+        (retag (try catch finally raise import protocol delegate associated expand)
           ident)
         (retag threaded ident (when (text "threaded")))
         (retag in ident (unless (and
@@ -427,6 +427,7 @@ List syntax_lexical(void) => %(lexical
     (keyword "match" match)
     (keyword "protocol" protocol)
     (keyword "raise" raise)
+    (keyword "expand" expand)
     (keyword "register" register)
     (keyword "restrict" restrict)
     (keyword "return" return)

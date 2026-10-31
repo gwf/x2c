@@ -51,6 +51,7 @@ Functions and types exposed by each compiler module.
 | [`src/components/dynamic-operators.x`](dynamic-operators.md) | dynamic operators. |
 | [`src/components/interpolation.x`](interpolation.md) | interpolated Strings. |
 | [`src/components/lambda-functions.x`](lambda-functions.md) | lambda lowering. |
+| [`src/components/macro-mapping.x`](macro-mapping.md) | maps a source macro over compile-time rows. |
 | [`src/components/pattern-match.x`](pattern-match.md) | match statements. |
 | [`src/components/printf-format.x`](printf-format.md) | Var values in printf-family formats. |
 | [`src/components/protocol-adapters.x`](protocol-adapters.md) | protocol adapters and Var descriptors. |

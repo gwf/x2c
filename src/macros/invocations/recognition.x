@@ -139,6 +139,13 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
 int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
   _claims(c, _peek_invocation(c, position), position);
 
+/** Tests for a fixed Entry result before a call argument is read. A
+    decorator with a dynamic result parses as an expression there. */
+int Compiler.macro_starts_entry(Compiler c) {
+  List definition = _peek_invocation(c, <map-entry>);
+  return definition && _result_kind(definition) == <map-entry>;
+}
+
 // shallow collection
 
 /** Returns how collection treats the macro invocation at the cursor.
@@ -153,6 +160,7 @@ Symbol Compiler.macro_invocation_collection(Compiler c) {
   if (definition.assoc(<kind>) == <decl-unit> ||
       definition.assoc(<target>) == <named-type>) return <required>;
   if (definition.assoc(<target>) == <unit>) return <tried>;
+  if (_producer_decorator(definition)) return <required>;
   if (definition.assoc(<kind>) != <unit>) return 0;
   if (!definition.assoc(<local>).int()) return <required>;
   List template = definition.assoc(<template>), bindings;
@@ -192,8 +200,32 @@ void Compiler.skip_macro_invocation(Compiler c) {
 int Compiler.macro_targets_unit(Compiler c) {
   List definition = _peek_invocation(c, <unit>);
   if (!definition) return 0;
+  if (_producer_decorator(definition)) {
+    List next = _literal_decorator(definition);
+    if (next && _result_kind(next) == <unit>) return 1;
+    return _source_macro_targets_unit(c);
+  }
   Symbol kind = _result_kind(definition);
   return kind == <unit> || kind == <decl-unit>;
+}
+
+/* A source generator spells its result kind before its body. Script
+   classification reads that header without running the decorator or rows. */
+static int _source_macro_targets_unit(Compiler c) {
+  Token start = c.token;
+  defer c.token = start;
+  c.skip_macro_invocation();
+  while (!(c.peek(0) in %<eof ; "{" "}">)) {
+    if (c.at_word("macro")) {
+      Token kind = Token.skip_trivia(c.token + 1);
+      const MacroCategory *category = _category(kind.text);
+      return category && category.result in %<unit decl-unit>;
+    }
+    List definition = _peek_invocation(c, <unit>);
+    if (definition && _result_kind(definition) in %<unit decl-unit>) return 1;
+    c.token = c.token.after_group();
+  }
+  return 0;
 }
 
 // macro invocation recognition
@@ -301,6 +333,7 @@ static void _reference_bindings(Compiler c, List syntax, Map replacements) {
 static int _claims(Compiler c, List definition, Symbol position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
   if (kind == _position(position).kind) return 1;
+  if (definition && _producer_decorator(definition)) return 1;
   if (definition && c.peek(0) == <auto> && position == <unit>) return 1;
   if (position == <statement> || position == <map-entry>) return 0;
   if (!definition) {
@@ -368,7 +401,9 @@ module List _peek_invocation(Compiler c, Symbol position) {
     String spelling;
     _scan_name(c, spelling);
     if (!spelling ||
-        !_try_macro(c, c.macros, Atom.intern(spelling), stored))
+        (!_try_macro(c, c.macros, Atom.intern(spelling), stored) &&
+         !(c.peek(0) == <@> &&
+           _try_macro(c, c.kw_aliases, Atom.intern(spelling), stored))))
       return NULL;
     return stored;
   }
@@ -385,7 +420,7 @@ module List _peek_invocation(Compiler c, Symbol position) {
 /* An identifier invoking a decorator without explicit parameters has no
    argument list. */
 module int _bare(Token invocation, List definition) =>
-  invocation.type != <$> && invocation.type != <@> &&
+  invocation.type != <$> &&
   definition.assoc(<kind>) == <decorator> &&
   !definition.assoc(<parameters>).list();
 
@@ -402,6 +437,7 @@ module List _take_invocation(Compiler c, Symbol position) {
   }
   Token invocation = c.token;
   Atom name = _name(c);
+  if (invocation.type == <@>) return definition;
   Var existing;
   if (c.macro_holes && c.peek(0) != <(> &&
       !_try_macro(c, c.macros, name, existing))

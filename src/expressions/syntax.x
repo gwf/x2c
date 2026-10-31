@@ -952,7 +952,7 @@ static int _statement_expression_follows(Compiler c) {
    `:` belongs to no conditional, makes a brace a Map literal and a call
    argument a Map rest entry. */
 static int _at_map_entry(Compiler c) {
-  if (c.macro_starts_target_at(<map-entry>)) return 1;
+  if (c.macro_starts_entry()) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {

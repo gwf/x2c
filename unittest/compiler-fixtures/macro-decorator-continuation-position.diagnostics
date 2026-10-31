@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-decorator-continuation-position.x:5:3: macro: decorator '_x2c_gensym_anonymous_macro_1' targets Unit syntax and cannot be used here
+    $unit() 0
+    ^
+

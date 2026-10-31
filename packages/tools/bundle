@@ -18,7 +18,7 @@ static void fail(String message) {
   raise %(bad-arg (reason $message));
 }
 
-static String expand(String text, Map variables) {
+static String expand_variables(String text, Map variables) {
   Regex hole = Regex.compile("\\{(\\w*)\\}");
   return hole.replace_fn(text, %!(RegexMatch found) => {
     Var value;
@@ -111,11 +111,11 @@ foreach (Map item, distribution.getdefault("copies", [])) {
   String to = item["to"].str();
   if (to.startswith("/") || to.split("/").contains(%".."))
     fail("bundle copy destination must be relative");
-  copy(expand(item["from"].str(), variables), stage.join(to));
+  copy(expand_variables(item["from"].str(), variables), stage.join(to));
 }
 List objects = NULL;
 foreach (String item, distribution.getdefault("archive_objects", []))
-  objects = objects.append($(expand(item, variables)));
+  objects = objects.append($(expand_variables(item, variables)));
 if (objects) {
   String ar = Env.get("AR");
   %($(ar ? ar : "ar") rs $(stage.join("builds").join(archive)) @objects)

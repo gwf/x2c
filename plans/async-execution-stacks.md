@@ -1,6 +1,6 @@
 # Execution stacks across async suspension
 
-> Status: implemented - dev publication authorized on 2026-10-31; final gate required.
+> Status: active - implemented; dev publication authorized on 2026-10-31.
 > Requested 2026-10-30. Records the per-execution stack model discussed with
 > Gary. Scope layout, naming, and boundary state installation are selected.
 > Lifetime decision: rely on borrowed-owner lifetimes; no parked-slot pins,
@@ -997,9 +997,12 @@ use-after-return task checks. macOS x86_64 used Rosetta; Linux x86_64 used
 Docker emulation. Physical Intel and broader hardening/TSan coverage were not
 established. These limits do not claim new supported configurations.
 
-The current dev merge and combined review are complete. No concrete defect
-remains from that review. The merged code tree passes the local full gate;
-publication still requires the existing publication gate on the final tree.
+The earlier dev merge and combined review are complete, with no concrete
+defect remaining from that review. Before publication, dev advanced to
+79841a5f6 with macro-target decorators, code mapping, and a scanner fix.
+These changes are integrated for a fresh combined review and final gate.
+Only generated bootstrap linked-meta C and the module catalog conflicted;
+both are regenerated from their merged authoritative sources.
 No additional code repair or mandatory test campaign was identified.
 
 Publication proceeds with these recorded costs and evidence limits:

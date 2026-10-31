@@ -73,6 +73,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
     if (!kind) return c.parse_assignment();
     switch (kind) {
       case <expr>:       return c.parse_assignment();
+      case <macro>:      return _macro_argument(c);
       case <type>:       return c.parse_type_name();
       case <named-type>: return c.parse_named_type();
       case <decl>:       return c.parse_declaration_argument();
@@ -90,6 +91,27 @@ static Var _parse_argument(Compiler c, Symbol kind) {
     }
     $fail.macros_argument_contract(c, c.token);
   }
+}
+
+/* A definition is read as a value before its caller decides whether to
+   publish it or apply it. A nested definition stays template syntax. */
+module Var _macro_argument(Compiler c) {
+  if (c.at_word("macro") || c.macro_form_is_definition()) {
+    SymTxn transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    List definition = c.parse_macro_definition();
+    return definition;
+  }
+  if (c.macro_holes && c.peek_macro_hole()) return c.parse_assignment();
+  Token site = c.token;
+  List expression = c.parse_assignment();
+  return _macro_value_argument(
+    c, c.meta_argument(expression, %("Macro"), site, NULL), site);
+}
+
+module List _macro_value_argument(Compiler c, Var value, Token site) {
+  if (value ~= %(macrodef *)) return value;
+  $fail.macros_macro_value(c, site);
 }
 
 /* A caller's name is a spelling, resolved where the expansion places it.
@@ -128,7 +150,7 @@ module Var _capture_source(
   return %(src $source $syntax);
 }
 
-static Token _previous_source_token(Compiler c, Token after) {
+module Token _previous_source_token(Compiler c, Token after) {
   Token first = (void *) c.tokenizer.tokens;
   if (!after || after <= first) return NULL;
   Token token = after - 1;
@@ -215,7 +237,7 @@ static List _forwarded_capture(Compiler c, Var captured) {
     return _capture_layout(
       0, %(source $source), %(value $source), %(expression $source),
       %(splice), $(_hole_key(hole, "construction")));
-  if (kind != <expr> && kind != <name>) return NULL;
+  if (kind != <expr> && kind != <name> && kind != <macro>) return NULL;
   return _capture_layout(
     0, %(source $source), %(value $(_hole_key(hole, "value"))),
     %(expression $(_hole_key(hole, "expression"))),
@@ -236,7 +258,9 @@ static List _forwarded_hole(Compiler c, Var captured) {
   if (direct is void) return NULL;
   String spelling = direct.str(), prefix = _forwarded_prefix(spelling);
   if (!prefix) return NULL;
-  return _hole_record(c, Atom.intern(spelling[prefix.len():]));
+  return _hole_record(
+    c,
+    _binder_name(Atom.intern(%"?$(spelling[prefix.len():])")));
 }
 
 static String _forwarded_prefix(String spelling) {

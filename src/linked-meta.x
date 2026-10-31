@@ -1403,6 +1403,34 @@ Code lambda_cells(Code node) {
   return node;
 }
 
+/* --- src/components/macro-mapping.x -------------------------------------- */
+
+List _x2c_expand_rows(List generator, List input) {
+  if (generator.assoc(<kind>) == <decorator>)
+    x2c_diagnostic_fail("expand requires a code-producing macro", %());
+  Var value = Code.value(input);
+  if (value is not <list>)
+    x2c_diagnostic_fail("expand requires a compile-time List", %());
+  List rows = value, parameters = generator.assoc(<parameters>);
+  int sequence = parameters &&
+    parameters.last().list().assoc(<sequence>).int();
+  int required = parameters.len() - sequence;
+  Array code = [];
+  int index = 0;
+  foreach (Var row in rows) {
+    index++;
+    List arguments = row is <list> ? row.list() : $(row);
+    int supplied = arguments.len();
+    if (supplied < required || (!sequence && supplied != required)) {
+      String expected = sequence ? %"at least $required" : required.str();
+      x2c_diagnostic_fail(
+        %"expand row $index expects $expected arguments; got $supplied", %());
+    }
+    code.push(Macro_apply(generator, arguments));
+  }
+  return %(seq @(code.list_free()));
+}
+
 /* --- src/components/pattern-match.x -------------------------------------- */
 
 static Symbol _match_head(Var value) {
@@ -2835,6 +2863,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_designated", _lambda_designated);
   $linked.row(rows, "_lambda_shared", _lambda_shared);
   $linked.row(rows, "lambda_cells", lambda_cells);
+  $linked.row(rows, "_x2c_expand_rows", _x2c_expand_rows);
   $linked.row(rows, "_match_head", _match_head);
   $linked.row(rows, "_match_binders", _match_binders);
   $linked.row(rows, "_match_slot", _match_slot);

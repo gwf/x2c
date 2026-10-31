@@ -209,6 +209,7 @@ Symbol scan_keyword_type(const char *s, int n) {
       if (!memcmp(s, "static", 6)) return <static>;
       if (!memcmp(s, "struct", 6)) return <struct>;
       if (!memcmp(s, "switch", 6)) return <switch>;
+      if (!memcmp(s, "expand", 6)) return <expand>;
       break;
     case 7: if (!memcmp(s, "default", 7)) return <default>;
       if (!memcmp(s, "finally", 7)) return <finally>;

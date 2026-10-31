@@ -3885,7 +3885,7 @@
 					"name": "keyword.operator.$1.x2c"
 				},
 				{
-					"match": "\\b(in|try|catch|finally|defer|raise|match)\\b",
+					"match": "\\b(in|try|catch|finally|defer|raise|match|expand)\\b",
 					"name": "keyword.control.x2c",
 					"captures": {
 						"1": { "name": "keyword.control.$1.x2c" }
@@ -3921,7 +3921,7 @@
 			]
 		},
 		"x2c_prelude_types": {
-			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow|EXPR|EXPRESSION|STMT|FIELD|ENTRY|ENUMERATOR|UNIT|DECLARATION|DECORATOR|FUNCTION|NAMEDTYPE|TYPE|DECL|DECLARATORROW|NAME|LITERAL|PARAM|CATCH|CAPTURES|MATCHROW)\\b",
+			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow|EXPR|EXPRESSION|STMT|FIELD|ENTRY|ENUMERATOR|UNIT|DECLARATION|DECORATOR|FUNCTION|NAMEDTYPE|TYPE|DECL|DECLARATORROW|NAME|LITERAL|PARAM|CATCH|CAPTURES|MATCHROW|MACRO)\\b",
 			"name": "support.type.prelude.x2c"
 		},
 		"x2c_macro_definition": {
@@ -3954,7 +3954,7 @@
 		"x2c_macro_context": {
 			"patterns": [
 				{
-					"match": "\\b((?i:expression|expr|stmt|type|declaratorrow|decl|function|namedtype|name|literal|param|field|entry|enumerator|unit|catch|captures|matchrow))(\\s+)(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*)",
+					"match": "\\b((?i:expression|expr|stmt|type|declaratorrow|decl|function|namedtype|macro|name|literal|param|field|entry|enumerator|unit|catch|captures|matchrow))(\\s+)(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*)",
 					"captures": {
 						"1": { "name": "storage.type.macro.hole.x2c" },
 						"3": { "name": "punctuation.definition.macro.sigil.x2c" },

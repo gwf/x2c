@@ -4,14 +4,14 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current public candidate is [run 20261031T181939Z](runs/20261031T181939Z/README.md),
-measured from clean source `381673a8d6d51098a44f62a635db98c0c9ca927e` and retained in report checkpoint
-`246938ba64124426a4e9dee6aa09e632582994f3`. Observation: 2026-10-31 11:19 PDT / 2026-10-31 18:19 UTC. Run identifiers use UTC.
+The current public candidate is [run 20261031T211435Z](runs/20261031T211435Z/README.md),
+measured from clean source `3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a` and retained in report checkpoint
+`9c8fbbe8bc2976c1e85db7e6259a847e91671374`. Observation: 2026-10-31 14:14 PDT / 2026-10-31 21:14 UTC. Run identifiers use UTC.
 
-It covers 75 admitted programs, eight columns and 56 fresh-process samples each
-(4,200 observations). Official fixtures and local output checks pass. Summary
-charts use eight shared problems. Per-problem tables retain all available
-k-nucleotide/binary-trees cells. Earlier nine-problem cohorts remain historical.
+It covers 75 programs, eight columns and 56 fresh-process samples each
+(4,200 observations). All official fixtures and local output checks pass.
+Summary charts use eight shared problems; complete tables retain all admitted
+k-nucleotide and binary-trees cells. Earlier cohorts remain explicitly historical.
 
 ## Saved runs
 
@@ -25,7 +25,8 @@ k-nucleotide/binary-trees cells. Earlier nine-problem cohorts remain historical.
 | [20261031T145604Z](runs/20261031T145604Z/README.md) | 8 | 9 | Fannkuch, FASTA, and parallel trees |
 | [20261031T161720Z](runs/20261031T161720Z/README.md) | 8 | 9 | Parallel spectral-norm; Counter probe rejected |
 | [20261031T170749Z](runs/20261031T170749Z/README.md) | 8 | 9 | Parallel fannkuch adopted; loop-bound adopted |
-| [20261031T181939Z](runs/20261031T181939Z/README.md) | 8 | 8 | Latest: reference audit and parallel k-nucleotide |
+| [20261031T181939Z](runs/20261031T181939Z/README.md) | 8 | 8 | Reference audit and parallel k-nucleotide |
+| [20261031T211435Z](runs/20261031T211435Z/README.md) | 8 | 8 | Latest: parallel regex/Mandelbrot and reverse-complement Buffer |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -52,8 +53,8 @@ From a normal clone of `dev`:
 ```sh
 cd examples/shootout/results
 shasum -a 256 -c SHA256SUMS
-gzip -dc runs/20261031T181939Z/baseline.json.gz > /tmp/shootout-baseline.json
-gzip -dc runs/20261031T181939Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
+gzip -dc runs/20261031T211435Z/baseline.json.gz > /tmp/shootout-baseline.json
+gzip -dc runs/20261031T211435Z/raw/calibration-raw.jsonl.gz > /tmp/shootout-samples.jsonl
 ```
 
 `SHA256SUMS` covers the archived runs, supporting evidence, and pinned chart
@@ -64,7 +65,7 @@ To recover the exact published source corpus, use the publication revision
 in the selected run's README or `runs/index.json`:
 
 ```sh
-git worktree add --detach /tmp/x2c-shootout-source 246938ba64124426a4e9dee6aa09e632582994f3
+git worktree add --detach /tmp/x2c-shootout-source 9c8fbbe8bc2976c1e85db7e6259a847e91671374
 ```
 
 The original absolute paths in machine/build receipts are historical evidence.
@@ -82,7 +83,7 @@ Create an isolated plotting environment, then render the latest saved report:
 ```sh
 python3 -m venv /tmp/x2c-shootout-charts
 /tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T181939Z/charts/render.py examples/shootout/results/runs/20261031T181939Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T211435Z/charts/render.py examples/shootout/results/runs/20261031T211435Z/current.json /tmp/x2c-shootout-figures
 ```
 
 To render the focused serial/parallel comparison from its saved samples:
@@ -144,3 +145,11 @@ selection decisions, statistical k-nucleotide stacks/input and unchanged-C
 sanity observations. It includes rejected attempts. Decompress the four probe
 JSON/JSONL files into a temporary directory to rerender the focused chart.
 No executable path stored in a receipt needs to exist for rendering.
+
+## Three idiomatic source probes
+
+`evidence/three-idiomatic/` preserves all seven sources, generated C, command
+receipts, 142 correctness cases, 372 quiet observations, active-machine initial
+screen, inputs and Docker restoration evidence, including rejected attempts.
+Decompress the four focused-probe inputs described in
+[run 20261031T211435Z](runs/20261031T211435Z/README.md) to render without executing benchmarks.

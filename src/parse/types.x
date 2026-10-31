@@ -99,7 +99,8 @@ List Compiler.parse_enumerators(Compiler c, List context) {
       _push_items(enumerators, c.parse_alias_member(<enumerator>, context));
       continue;
     }
-    if (c.shallow && c.macro_starts_target_at(<enumerator>))
+    if (c.shallow && c.macro_starts_target_at(<enumerator>) &&
+        !c.macro_invocation_collection())
       c.skip_macro_invocation();
     else _push_items(enumerators, c.parse_enumerator(context));
     if (c.peek(0) == <"}">) break;

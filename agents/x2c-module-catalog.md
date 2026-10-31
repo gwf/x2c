@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 62
+- Compiler modules: 63
 - Runtime modules: 78
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -472,6 +472,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [src/components/macro-mapping.x](../src/components/macro-mapping.x)
+
+maps a source macro over compile-time rows.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/components/pattern-match.x](../src/components/pattern-match.x)
 
 match statements.
@@ -619,23 +627,24 @@ Public functions:
 `Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
-`Compiler.skip_named_type_declaration`, `Compiler.skip_macro_invocation`,
-`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
-`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_rows`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_meta_value`,
-`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
-`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
-`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.land_quotation`, `Compiler.bind_meta_statement`,
-`Compiler.lift_meta_expression`, `Compiler.try_parse_macro_pattern`,
-`Compiler.try_parse_macro_subpattern`, `Compiler.macro_pattern_at`,
-`Compiler.capture_macro_value`, `Compiler.macro_value_literal`,
-`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
-`Compiler.alias_form_starts`, `Compiler.parse_alias_statement`,
-`Compiler.parse_alias_declaration`, `Compiler.parse_alias_member`,
-`Compiler.enter_alias_body`, `Compiler.leave_alias_body`,
-`Compiler.scope_declares_alias`, `Compiler.alias_expression`
+`Compiler.macro_starts_target_at`, `Compiler.macro_starts_entry`,
+`Compiler.macro_invocation_collection`, `Compiler.skip_named_type_declaration`,
+`Compiler.skip_macro_invocation`, `Compiler.macro_targets_unit`,
+`Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
+`Compiler.evaluate_macro_rows`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_meta_value`, `Compiler.evaluate_declaration_recipe`,
+`x2c_template_call`, `Compiler.rebuild_expression`,
+`Compiler.rebuild_statement`, `Compiler.rebuild_unit_function`,
+`Compiler.rebuild_function`, `Compiler.land_quotation`,
+`Compiler.bind_meta_statement`, `Compiler.lift_meta_expression`,
+`Compiler.try_parse_macro_pattern`, `Compiler.try_parse_macro_subpattern`,
+`Compiler.macro_pattern_at`, `Compiler.capture_macro_value`,
+`Compiler.macro_value_literal`, `Compiler.take_code_value`, `Compiler.place`,
+`Compiler.bind_code_value`, `Compiler.alias_form_starts`,
+`Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
+`Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
+`Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 

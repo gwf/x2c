@@ -579,6 +579,7 @@ module block, so its files share no private scope.
   `src/components/interpolation.x` (interpolation),
   `src/components/destructuring.x` (destructuring),
   `src/components/lambda-functions.x` (lambdas),
+  `src/components/macro-mapping.x` (mapping macros over compile-time rows),
   `src/components/protocol-adapters.x` (protocol members and descriptors),
   and `src/components/string-switch.x` (String switches);
 - `src/operator-ledger.x` -- operator precedence, compound assignment,

@@ -394,7 +394,7 @@ See [the lexical specification](lexical.md) for explanations and
   (after scan) (hide inactive-branches) (retain conditional-structure))
  (pass keyword-retag
   (ordered
-   (retag (try catch finally raise import protocol delegate associated)
+   (retag (try catch finally raise import protocol delegate associated expand)
     ident) (retag threaded ident (when (text "threaded")))
    (retag in ident
     (unless
@@ -421,18 +421,19 @@ See [the lexical specification](lexical.md) for explanations and
  (keyword "in" in) (keyword "inline" inline)
  (keyword "int" int) (keyword "long" long)
  (keyword "match" match) (keyword "protocol" protocol)
- (keyword "raise" raise) (keyword "register" register)
- (keyword "restrict" restrict) (keyword "return" return)
- (keyword "short" short) (keyword "signed" signed)
- (keyword "sizeof" sizeof) (keyword "static" static)
- (keyword "struct" struct) (keyword "switch" switch)
- (keyword "threaded" threaded) (keyword "try" try)
- (keyword "typedef" typedef) (keyword "union" union)
- (keyword "unsigned" unsigned) (keyword "void" void)
- (keyword "volatile" volatile) (keyword "while" while)
- (keyword "__inline" inline) (keyword "__inline__" inline)
- (keyword "__restrict" restrict) (keyword "__restrict__" restrict)
- (keyword "thread_local" threaded) (keyword "_Thread_local" threaded))
+ (keyword "raise" raise) (keyword "expand" expand)
+ (keyword "register" register) (keyword "restrict" restrict)
+ (keyword "return" return) (keyword "short" short)
+ (keyword "signed" signed) (keyword "sizeof" sizeof)
+ (keyword "static" static) (keyword "struct" struct)
+ (keyword "switch" switch) (keyword "threaded" threaded)
+ (keyword "try" try) (keyword "typedef" typedef)
+ (keyword "union" union) (keyword "unsigned" unsigned)
+ (keyword "void" void) (keyword "volatile" volatile)
+ (keyword "while" while) (keyword "__inline" inline)
+ (keyword "__inline__" inline) (keyword "__restrict" restrict)
+ (keyword "__restrict__" restrict) (keyword "thread_local" threaded)
+ (keyword "_Thread_local" threaded))
 ```
 
 ## operators

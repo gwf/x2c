@@ -156,6 +156,7 @@
   - [src/components/dynamic-operators.x](internals/compiler-api/dynamic-operators.md)
   - [src/components/interpolation.x](internals/compiler-api/interpolation.md)
   - [src/components/lambda-functions.x](internals/compiler-api/lambda-functions.md)
+  - [src/components/macro-mapping.x](internals/compiler-api/macro-mapping.md)
   - [src/components/pattern-match.x](internals/compiler-api/pattern-match.md)
   - [src/components/printf-format.x](internals/compiler-api/printf-format.md)
   - [src/components/protocol-adapters.x](internals/compiler-api/protocol-adapters.md)

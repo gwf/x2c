@@ -25,6 +25,7 @@ static const MacroCategory macro_categories[] = {
   { "Decorator",     0,            <decorator>,  0, <result> },
   { "Function",      <function>,   0,            1, <hole> },
   { "NamedType",     <named-type>, 0,            1, <hole> },
+  { "Macro",         <macro>,      0,            1, <hole> },
   { "Type",          <type>,       0,            0, <hole> },
   { "Decl",          <decl>,       0,            0, <hole> },
   { "DeclaratorRow", <decl-row>,   0,            0, <hole> },
@@ -56,6 +57,10 @@ List Compiler.parse_macro_definition(Compiler c) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
     if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
+    if (enclosing != NULL || d.anonymous) {
+      d.namespace = c.fresh_name("holes");
+      c.macro_holes[%(namespace)] = d.namespace;
+    }
     d.using = [];
     _signature(d);
     _arrow(d);
@@ -152,7 +157,7 @@ static void _check_signature(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target)
     $fail.macros_decorator_target_kind(c, d.start);
-  if (!d.local) return;
+  if (!d.local || d.anonymous) return;
   if (d.kind == <unit> || d.kind == <decl-unit>) {
     String result_spelling = _kind_spelling(d.kind);
     $fail.macros_local_result(c, d.start, result_spelling);
@@ -235,7 +240,7 @@ static List _read_body(Definition &d) {
 
 static int _has_expression_body(Definition &d) =>
   d.kind == <expression> ||
-  (d.kind == <decorator> && _target_kind(d) == <expr>);
+  (d.kind == <decorator> && _target_kind(d) in %<expr macro>);
 
 /* A Stmt arrow's statement is a Stmt macro or decorator invocation, or else
    an expression statement. An anonymous macro's statement omits its `;`,
@@ -313,6 +318,8 @@ static List _signature_hole(Compiler c) {
   if (c.peek(0) == <ident> && (c.peek(1) == <$> || c.peek(1) == <@>))
     kind = _hole_kind(c);
   int sequence = c.peek(0) == <@>;
+  if (kind == <macro> && sequence)
+    $fail.macros_macro_singular(c, c.token);
   Token token = _hole_name_token(c, sequence ? <@> : <$>);
   return _declare_hole(c, token, kind, sequence);
 }
@@ -337,8 +344,14 @@ static List _parameter_rows(Compiler c, List parameters) {
 }
 
 module Atom _hole_name(List hole) {
-  String binder = hole.assoc(<binder>).str();
-  return Atom.intern(binder[1:]);
+  return _binder_name(hole.assoc(<binder>));
+}
+
+module Atom _binder_name(Atom identity) {
+  String name = identity.str()[1:];
+  if (name.startswith("_x2c_gensym_holes_"))
+    name = name[name.find("__") + 2:];
+  return Atom.intern(name);
 }
 
 module const MacroCategory *_category(String spelling) {
@@ -419,15 +432,18 @@ module Token _hole_name_token(Compiler c, Symbol prefix) {
 static List _declare_hole(
   Compiler c, Token token, Symbol kind, int sequence) {
   String spelling = token.text;
-  if (_hole_record(c, Atom.intern(spelling)))
+  Var existing;
+  if (c.macro_holes.try_get(Atom.intern(spelling), existing))
     $fail.macros_hole_duplicate(c, token, spelling);
   return _record_hole(c, spelling, kind, sequence);
 }
 
 module List _record_hole(
   Compiler c, String spelling, Symbol kind, int sequence) {
+  String scope = c.macro_holes[%(namespace)];
+  String identity = scope ? %"$(scope)__$spelling" : spelling;
   List hole = _hole(
-    Atom.intern(sequence ? %"*$spelling" : %"?$spelling"),
+    Atom.intern(sequence ? %"*$identity" : %"?$identity"),
     kind, sequence);
   c.macro_holes[Atom.intern(spelling)] = hole;
   return hole;
@@ -441,9 +457,18 @@ module List _hole(Atom binder, Symbol kind, int sequence) => %(
   );
 
 module List _hole_record(Compiler c, Atom name) {
+  Map owner = _hole_owner(c, name);
+  return owner != NULL ? owner[name] : NULL;
+}
+
+module Map _hole_owner(Compiler c, Atom name) {
   Var stored;
-  if (!c.macro_holes.try_get(name, stored)) return NULL;
-  return stored;
+  Map holes = c.macro_holes;
+  while (holes != NULL) {
+    if (holes.try_get(name, stored)) return holes;
+    holes = holes[%(enclosing)];
+  }
+  return NULL;
 }
 
 static void _using_names(Compiler c) {
