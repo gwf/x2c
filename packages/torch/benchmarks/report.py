@@ -46,7 +46,8 @@ def write_report(directory, filename, lines):
     text = text.replace("(README.md)", f"({readme.replace(os.sep, '/')})")
     history = ("https://github.com/gwf/x2c/blob/"
                "b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/")
-    for name in ("PILOT.md", "REPORT.md", "MATCHED.md", "SUPPLEMENT.md"):
+    for name in ("PILOT.md", "REPORT.md", "MATCHED.md", "SUPPLEMENT.md",
+                 "HISTORICAL-20260910.md"):
         text = text.replace(f"({name})", f"({history}{name})")
     path = os.path.join(directory, filename)
     with open(path, "w") as handle:
