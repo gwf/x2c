@@ -5,7 +5,8 @@
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is implemented and gated; see its
 > delivery record below. Batches B-E remain open. Batch A also absorbs
-> follow-up F4 from the [October 31 follow-ups](review-followups-2026-10-31.md).
+> follow-up F4 from the
+> [October 31 follow-ups](review-followups-2026-10-31.md).
 
 ## Review scope and baseline
 
