@@ -147,11 +147,8 @@ static void _run_files(Run &run, Array files) {
 static void _report(Run &run, Job job) {
   int status = job.status();
   String output = status ? job.output_text : job.output();
-  List lines = output.split_lines(0);
-  String summary = lines ? lines.reverse().car() : NULL;
   int passed, failed, skipped;
-  int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
-                                  &passed, &failed, &skipped) == 3;
+  int counts = _summary_counts(output, passed, failed, skipped);
   if (run.filtered && status == 2 && counts &&
       !passed && !failed && !skipped) return;
   if (output) fputs(output, stdout);
@@ -161,6 +158,18 @@ static void _report(Run &run, Job job) {
     run.tests_passed += passed;
     run.tests_failed += failed;
   }
+}
+
+static int _summary_counts(
+  String output, int &passed, int &failed, int &skipped) {
+  foreach (String line in output.split_lines(0).reverse()) {
+    if (!line) continue;
+    int end = 0;
+    int fields = sscanf(line, "%d passed, %d failed, %d skipped%n",
+                        &passed, &failed, &skipped, &end);
+    if (fields == 3 && end == line.len()) return 1;
+  }
+  return 0;
 }
 
 static Job _start(Run run, Path file) {

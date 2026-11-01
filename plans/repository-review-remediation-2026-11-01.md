@@ -370,6 +370,8 @@ review, so none is scheduled for speculative removal.
   focused slice/UBSan cases pass, and the five affected unit suites pass:
   125 tests and 1,408 assertions. Generated API documentation remains for
   the parent publication refresh.
-- A, B, D, E, F, and G remain in progress or pending.
+- D implemented privately. The full command smoke script passes with deferred
+  cleanup output on passing and failing test programs.
+- A, B, E, F, and G remain in progress or pending.
 - Final integrated review, generated refresh, applicable performance evidence,
   publication validation, publication, and plan closeout remain with the parent.

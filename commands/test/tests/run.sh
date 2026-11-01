@@ -22,13 +22,19 @@ cat >"$WORK/project/a_test.x" <<'PASS'
 #include "value.x"
 $test()
 static void passing(void) { $expect_eq(test_value(), 42); }
-$test.main();
+int main(int argc, char **argv) {
+  defer puts("cleanup complete");
+  return Test.main(argc, argv);
+}
 PASS
 cat >"$WORK/project/tests/deep/b.x" <<'FAIL'
 #include "test.x"
 $test()
 static void failing(void) { $expect_eq(1, 2); }
-$test.main();
+int main(int argc, char **argv) {
+  defer puts("cleanup complete");
+  return Test.main(argc, argv);
+}
 FAIL
 # Generated build sources and ordinary non-test files are not discovered.
 printf 'this is not source\n' >"$WORK/project/.x2c-build/tests/ignored_test.x"
