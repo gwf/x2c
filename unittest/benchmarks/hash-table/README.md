@@ -49,18 +49,16 @@ cannot favor one layout.
 
 ## Generated typed Map lane
 
-`lib/typed-map.x` generates `MapIntInt` from the same `$map.core.family` and
-`$map.typed.family` expansions that `lib/map/map.x` uses, with `int` keys and
-values stored in the record instead of `Var`. It is shipped runtime code, not
-a benchmark specimen, so it isolates the cost of the `Var` value layer from
-the cost of the table.
+`lib/typed-map.x` generates `MapIntInt` with grouped control bytes and native
+`int` key/value records. Var Map retains Robin Hood storage. Both are shipped
+runtime code. Their ratio compares complete containers, including storage
+and update algorithms as well as the `Var` value layer.
 
 Two lanes measure it:
 
 - The direct runner adds `x2c-typed` and a matched `khashl-typed` reference
   over the same `int` keys and values. `summary.csv` reports both pairs and
-  the `x2c_over_x2c_typed` ratio, which is the `Var` layer's share of each
-  operation.
+  the `x2c_over_x2c_typed` ratio for each operation.
 - udb3 runs `x2c_typed` beside the labeled production `x2c_map` control in the
   standard profile. Both controls use the same driver shape as `udb3/test.c`,
   so their table sizes and checksums match the cohort.

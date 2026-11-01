@@ -1,8 +1,8 @@
 # Adopt grouped storage for typed Maps
 
 > Status: active - 2026-10-31.
-> The complete candidate is tested but remains in ignored experiment directories.
-> This work adopts it into dev; a plan or a benchmark archive is not delivery.
+> The grouped backend is integrated locally with current dev repairs.
+> Publication validation and the coordinated quiet benchmark run remain pending.
 
 ## Result and boundaries
 
@@ -22,7 +22,10 @@ Evidence at 255de641f: 81 focused tests/5,455 assertions and two million
 independent dictionary operations pass in normal, sanitizer and scalar builds.
 The matched integer score is 1.36x Boost versus 2.63x for production typed Map.
 String replacement is 2.2% above the preceding experiment, with overlapping
-sample ranges. MapLongDouble performance and non-ARM execution remain uncovered.
+sample ranges. MapLongDouble performance and Linux/GCC execution remain to be checked.
+Current adoption checks pass 81 tests/5,455 assertions plus two million
+independent operations in normal, forced-scalar, Rosetta x86_64 and sanitizer
+builds. Docker is unavailable; Rosetta is not Linux/GCC evidence.
 
 ## Work sequence
 

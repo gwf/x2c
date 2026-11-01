@@ -348,7 +348,6 @@ macro Unit $map.grouped.typed.updates(
       while inserting. Invalid operations leave an existing value unchanged.
       Allocation and size failures leave the table unchanged.
   */
-
   $value $map.updateindex($map map, $key key, Symbol op, $value rhs) {
     if ((void *) map == 0) (void) $bad_arg($owner);
     if (op != <+>) return _update_other(map, key, op, rhs);

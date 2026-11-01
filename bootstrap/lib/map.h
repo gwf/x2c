@@ -27,9 +27,9 @@ typedef struct Map{
 #include "scope/scope.h"
 #include "block.h"
 #include "buffer.h"
-Scope Map_scope(Map _x2c_gensym_macro_map_2);
+Scope Map_scope(Map _x2c_gensym_macro_map_17);
 
-void Map_move_to(Map _x2c_gensym_macro_map_3, Scope * _x2c_gensym_macro_destination_0);
+void Map_move_to(Map _x2c_gensym_macro_map_18, Scope * _x2c_gensym_macro_destination_0);
 
 Map Map_new_capacity(unsigned _x2c_gensym_macro_capacity_5);
 
