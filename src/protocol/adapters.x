@@ -250,7 +250,7 @@ static List _inherited_part(
   match (decision) {
     case %(owner ? ? ?owner_expected ?): {
       if (!_unify_signature(
-            template, owner_expected, a.variables, a.bindings.copy())) {
+        template, owner_expected, a.variables, a.bindings.copy())) {
         Type expected = _substitute_signature(
           template, a.variables, a.bindings);
         _report_signature_conflict(

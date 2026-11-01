@@ -6769,10 +6769,13 @@ static int f10_interfaces____read_parts(Array parts, List stored){
 
         }
         if(! _x2c_gensym_condition_0){
-          if(! Var_is_row(part, 9, 7, 4)) return 0;
-          Map rows = f10_interfaces____read_rows(Var_list_payload(part));
-          if(rows == NULL) return 0;
-          Array_push(parts, Map_var(rows));
+          {
+            if(! Var_is_row(part, 9, 7, 4)) return 0;
+            Map rows = f10_interfaces____read_rows(Var_list_payload(part));
+            if(rows == NULL) return 0;
+            Array_push(parts, Map_var(rows));
+          }
+
         }
 
       }

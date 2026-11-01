@@ -536,7 +536,7 @@ Map Cpp_table(List rows){
 }
 
 int Token_is_word(Token t){
-  return t -> type == 19147688 ||(String_truth(t -> text) && scan_keyword_type(t -> text, String_len(t -> text)));
+  return t -> type == 19147688 ||(String_truth(t -> text) && t -> type == scan_keyword_type(t -> text, String_len(t -> text)));
 }
 
 String Token_spelling(Token first, Token last){

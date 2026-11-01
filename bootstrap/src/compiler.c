@@ -4323,8 +4323,11 @@ List Compiler_cache_cons_cell(Compiler c, List head, List tail){
 
   }
   if(! _x2c_gensym_condition_0){
-    List _x2c_gensym_match_expr_44 = head; {if(_x2c_gensym_match_expr_44 && _x2c_gensym_match_expr_44 ->car.u64 == 9224497936767982090ULL){
-      head_cache = head;
+    {
+      List _x2c_gensym_match_expr_44 = head; {if(_x2c_gensym_match_expr_44 && _x2c_gensym_match_expr_44 ->car.u64 == 9224497936767982090ULL){
+        head_cache = head;
+      }
+
     }
 
   }
@@ -4348,9 +4351,12 @@ if(! List_truth(head_cache)) return NULL;
 
 }
 if(! _x2c_gensym_condition_1){
-  List _x2c_gensym_match_expr_46 = tail;
-  {List _x2c_gensym_match_at_309; if(_x2c_gensym_match_expr_46 == _405 || _x2c_gensym_match_expr_46 && _x2c_gensym_match_expr_46 ->car.u64 == 9224497936761647704ULL && !(_x2c_gensym_match_at_309 = _x2c_gensym_match_expr_46 ->cdr)){
-    tail_cache = tail;
+  {
+    List _x2c_gensym_match_expr_46 = tail;
+    {List _x2c_gensym_match_at_309; if(_x2c_gensym_match_expr_46 == _405 || _x2c_gensym_match_expr_46 && _x2c_gensym_match_expr_46 ->car.u64 == 9224497936761647704ULL && !(_x2c_gensym_match_at_309 = _x2c_gensym_match_expr_46 ->cdr)){
+      tail_cache = tail;
+    }
+
   }
 
 }

@@ -17582,7 +17582,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14503 = List_var(_14502);
   _14504 = String_new("src/type.x");
   _14505 = String_var(_14504);
-  _14506 = String_new("256e063d");
+  _14506 = String_new("979c20c5");
   _14507 = String_var(_14506);
   _14508 = cons(_14507, NULL);
   _14509 = cons(_14505, _14508);
@@ -18535,7 +18535,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15450 = List_var(_15449);
   _15451 = String_new("src/cpp/cpp.x");
   _15452 = String_var(_15451);
-  _15453 = String_new("d6f636ee");
+  _15453 = String_new("8607ea09");
   _15454 = String_var(_15453);
   _15455 = cons(_15454, NULL);
   _15456 = cons(_15452, _15455);
@@ -20812,7 +20812,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_34(void
   _17715 = List_var(_17714);
   _17716 = String_new("src/parse/declarations.x");
   _17717 = String_var(_17716);
-  _17718 = String_new("676005f8");
+  _17718 = String_new("b18dcffe");
   _17719 = String_var(_17718);
   _17720 = cons(_17719, NULL);
   _17721 = cons(_17717, _17720);
@@ -20964,7 +20964,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_34(void
   _17867 = List_var(_17866);
   _17868 = String_new("src/protocol/adapters.x");
   _17869 = String_var(_17868);
-  _17870 = String_new("3c68691a");
+  _17870 = String_new("f6817bd9");
   _17871 = String_var(_17870);
   _17872 = cons(_17871, NULL);
   _17873 = cons(_17869, _17872);
@@ -21026,7 +21026,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_35(void
   _17926 = List_var(_17925);
   _17927 = String_new("src/protocol/resolution.x");
   _17928 = String_var(_17927);
-  _17929 = String_new("3bed5b07");
+  _17929 = String_new("7c73df23");
   _17930 = String_var(_17929);
   _17931 = cons(_17930, NULL);
   _17932 = cons(_17928, _17931);
@@ -21436,7 +21436,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_35(void
   _18336 = List_var(_18335);
   _18337 = String_new("src/transform/conditions.x");
   _18338 = String_var(_18337);
-  _18339 = String_new("03425175");
+  _18339 = String_new("d269d79f");
   _18340 = String_var(_18339);
   _18341 = cons(_18340, NULL);
   _18342 = cons(_18338, _18341);

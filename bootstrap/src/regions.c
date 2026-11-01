@@ -2262,7 +2262,10 @@ static void f4_walk____walk_expression(Walk * w, Var expression){
     }
 
   }
-  if(! _x2c_gensym_condition_0) f4_walk____scan(&((* w)), expression, 0);
+  if(! _x2c_gensym_condition_0){
+    f4_walk____scan(&((* w)), expression, 0);
+  }
+
 }
 }
 

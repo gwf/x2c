@@ -203,7 +203,7 @@ static List _from_ast(List node, List context){
         source_type = x2c_match_value_0;
         Var bindings;
         bindings = x2c_match_value_1;
-        return _from_declarators(Var_list_payload(source_type), Var_list_payload(bindings));
+        return _from_declarators(_without_leading_text(Var_list_payload(source_type)), Var_list_payload(bindings));
       }
       break;}} case 9224497936761768840ULL :{List _x2c_gensym_match_at_1, _x2c_gensym_match_at_2, _x2c_gensym_match_at_3; Var x2c_match_value_0; if(_x2c_gensym_match_expr_1 && _x2c_gensym_match_expr_1 ->car.u64 == 9224497936761768840ULL &&(_x2c_gensym_match_at_1 = _x2c_gensym_match_expr_1 ->cdr) &&(_x2c_gensym_match_at_2 = _x2c_gensym_match_at_1 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_2 ->car, 1) && !(_x2c_gensym_match_at_3 = _x2c_gensym_match_at_2 ->cdr)){{
         Var mods;
