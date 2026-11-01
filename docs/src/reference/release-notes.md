@@ -71,9 +71,29 @@ the source changes that the breaking entries below require.
   in its unit's own C. With `#define WEAK __attribute__((weak))`,
   `WEAK int weak_value = 5;` stays as written, so the C compiler applies the
   attribute, and the generated header declares `extern int weak_value;`. A
-  function-like wrapper such as `PUBLIC(const char *)` still contributes only
-  its type. See
+  typedef keeps a leading attribute, written or through such a macro, in its
+  C and its header. A function-like wrapper such as `PUBLIC(const char *)`
+  still contributes only its type. See
   [Directives in the generated C](language.md#directives-in-the-generated-c).
+- `SymbolSet` literals are written `%<a b c>`; the 0.15.x `%<<a b c>>`
+  spelling is an invalid token. An unescaped `>` closes the literal unless
+  it belongs to a quoted or angle-form member, so `%<">" ">=" ">>">` holds
+  three operator Symbols, and `x %<foo>` after an operand is still modulo
+  by `<foo>`. See
+  [Percent literals, quote, and unquote](language.md#percent-literals-quote-and-unquote).
+- `associated`, `catch`, `delegate`, `finally`, `import`, `protocol`,
+  `raise`, `threaded`, and `try` are contextual keywords: outside their
+  keyword forms they can name objects, functions, parameters, fields,
+  typedefs, and labels. `defer` and the C keywords remain reserved. See
+  [Contextual keywords](language.md#contextual-keywords).
+- A decorator can take a `Macro` target, and a decorator can return another
+  decorator, which then consumes the next source target. `expand ROWS`
+  before a macro applies that macro once per row of a compile-time List,
+  placing the output by the macro's result kind. `expand` is a predefined
+  keyword alias, so an ordinary object or function can no longer be named
+  `expand`. See [Mapping rows with `expand`](language.md#mapping-rows-with-expand)
+  and
+  [Decorators that return decorators](language.md#decorators-that-return-decorators).
 
 ### Library
 
@@ -110,6 +130,14 @@ and Iter `find` keep their contracts.
   targets; recompute stored or precomputed hashes when upgrading. Other
   long-double formats keep their existing payload widths. See
   [Long-double hashes](../guide/installation.md#long-double-hashes).
+- `Map`, the typed Maps, and `Pool` tables share one grouped hash storage:
+  sixteen one-byte controls per group, compared at once, with full hashes
+  kept beside them for `Map` and `Pool`. Public methods, container layouts,
+  capacity, ownership, and custom hash and equality behavior are unchanged;
+  traversal order changes, as the existing contract allows, so a program
+  that depended on the previous order must sort. See
+  [Working with Maps](../guide/collections.md#working-with-maps) and
+  [Packed typed Maps](../guide/collections.md#packed-typed-maps).
 - `String.try_long`, `String.try_double`, and `Symbol.try_new` take their
   result through an optional reference, `T &?out`, instead of `T *out`.
   Pass the variable itself, as in `text.try_long(value)`; `&value` is now a
@@ -148,6 +176,10 @@ and Iter `find` keep their contracts.
 
 ### Commands and packages
 
+- The experimental `x2c bind` writes the mechanical part of a new package
+  from a C header: handle types, forwarded methods, and `Cleanup` for paired
+  release calls. It is available in checkout builds and not installed. See
+  [Commands](cli.md#commands).
 - The x2c home is now marked by `etc/compiler-prelude.x`, which holds the
   builtin macros, in place of `etc/compiler-sdk.xlisp`.
 - `x2c lsp` serves editors over the Language Server Protocol and replaces
@@ -173,6 +205,15 @@ and Iter `find` keep their contracts.
 
 ### Fixed defects
 
+- A `~=` pattern condition whose false branch continues with `else if` now
+  places that continuation inside a block, so the generated C keeps the
+  branch and compiles without a dangling-else warning.
+- With `--cpp`, a macro whose name is a keyword spelling expands source
+  tokens only; the same spelling stored as a literal atom, as in `%(if)`,
+  is left intact.
+- A generated protocol owner whose signature conflicts with the adopted
+  protocol is reported at the adoption, with the expected and actual
+  signatures, instead of as a bare argument-count error.
 - With `--cpp`, collection decides a header's later `#ifndef` arm as a
   linear reading of the header does, even when an `#include` sits inside an
   earlier undecided group such as `#ifdef __APPLE__`.
