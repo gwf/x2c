@@ -7,9 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Integer { mpz_t value; } Integer;
 typedef struct Spigot {
-  Integer numerator, accumulator, denominator, term, digit;
+  mpz_t numerator, accumulator, denominator, term, digit;
 } Spigot;
 
 $cleanup.by(Spigot, drop);
@@ -19,7 +18,7 @@ int main(int argc, char **argv) {
   auto Spigot spigot = Spigot.new();
   for (ulong k = 1; emitted < count; k++) {
     spigot.advance(k);
-    if (spigot.numerator.greater(spigot.accumulator)) continue;
+    if (mpz_cmp(spigot.numerator, spigot.accumulator) > 0) continue;
     ulong digit = spigot.extract(3);
     if (digit != spigot.extract(4)) continue;
     putchar('0' + digit);
@@ -33,70 +32,40 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-static Integer Integer.new(ulong initial) {
-  Integer number;
-  mpz_init_set_ui(number.value, initial);
-  return number;
-}
-
-static void Integer.drop(Integer &number) => mpz_clear(number.value);
-
-static void Integer.product(Integer &out, Integer &input, ulong scale) =>
-  mpz_mul_ui(out.value, input.value, scale);
-
-static void Integer.add(Integer &out, Integer &other) =>
-  mpz_add(out.value, out.value, other.value);
-
-static void Integer.add_product(
-  Integer &out, Integer &other, ulong scale) =>
-  mpz_addmul_ui(out.value, other.value, scale);
-
-static void Integer.subtract_product(
-  Integer &out, Integer &other, ulong scale) =>
-  mpz_submul_ui(out.value, other.value, scale);
-
-static void Integer.quotient(Integer &out, Integer &a, Integer &b) =>
-  mpz_tdiv_q(out.value, a.value, b.value);
-
-static int Integer.greater(Integer &a, Integer &b) =>
-  mpz_cmp(a.value, b.value) > 0;
-
-static ulong Integer.number(Integer &value) => mpz_get_ui(value.value);
-
 static Spigot Spigot.new(void) {
   Spigot state;
-  state.numerator = Integer.new(1);
-  state.accumulator = Integer.new(0);
-  state.denominator = Integer.new(1);
-  state.term = Integer.new(0);
-  state.digit = Integer.new(0);
+  mpz_init_set_ui(state.numerator, 1);
+  mpz_init_set_ui(state.accumulator, 0);
+  mpz_init_set_ui(state.denominator, 1);
+  mpz_init_set_ui(state.term, 0);
+  mpz_init_set_ui(state.digit, 0);
   return state;
 }
 
 static void Spigot.drop(Spigot &state) {
-  state.numerator.drop();
-  state.accumulator.drop();
-  state.denominator.drop();
-  state.term.drop();
-  state.digit.drop();
+  mpz_clear(state.numerator);
+  mpz_clear(state.accumulator);
+  mpz_clear(state.denominator);
+  mpz_clear(state.term);
+  mpz_clear(state.digit);
 }
 
 static void Spigot.advance(Spigot &state, ulong k) {
-  state.accumulator.add_product(state.numerator, 2);
-  state.accumulator.product(state.accumulator, 2 * k + 1);
-  state.denominator.product(state.denominator, 2 * k + 1);
-  state.numerator.product(state.numerator, k);
+  mpz_addmul_ui(state.accumulator, state.numerator, 2);
+  mpz_mul_ui(state.accumulator, state.accumulator, 2 * k + 1);
+  mpz_mul_ui(state.denominator, state.denominator, 2 * k + 1);
+  mpz_mul_ui(state.numerator, state.numerator, k);
 }
 
 static ulong Spigot.extract(Spigot &state, ulong nth) {
-  state.term.product(state.numerator, nth);
-  state.term.add(state.accumulator);
-  state.digit.quotient(state.term, state.denominator);
-  return state.digit.number();
+  mpz_mul_ui(state.term, state.numerator, nth);
+  mpz_add(state.term, state.term, state.accumulator);
+  mpz_tdiv_q(state.digit, state.term, state.denominator);
+  return mpz_get_ui(state.digit);
 }
 
 static void Spigot.eliminate(Spigot &state, ulong digit) {
-  state.accumulator.subtract_product(state.denominator, digit);
-  state.accumulator.product(state.accumulator, 10);
-  state.numerator.product(state.numerator, 10);
+  mpz_submul_ui(state.accumulator, state.denominator, digit);
+  mpz_mul_ui(state.accumulator, state.accumulator, 10);
+  mpz_mul_ui(state.numerator, state.numerator, 10);
 }
