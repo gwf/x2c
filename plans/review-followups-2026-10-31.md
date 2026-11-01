@@ -23,10 +23,16 @@ not all reproduced as executable failures.
 | F7 | HTTP releases example: `examples/packages/http-json-releases/`. Its default GitHub endpoint does not establish support for the fixture server's `/summary` POST. | Use a local fixture to verify the example's intended flow, then correct the documented/default endpoint behavior. Do not send a live POST merely to investigate. |
 | F8 | Notes database-thread instructions: `examples/apps/notes/bench/database-thread.md`. The documented build still supplies redundant include flags. | Check the ordinary package/source discovery path and remove only arguments it already supplies. |
 | F9 | Documentation gate scope: `tools/gate-state.py` and `tools/integrate-dev.py`. A fresh integrator candidate has no evidence record, so doc-check runs all runnable documentation samples. | Trace the existing PR-range data and determine whether passing that range can reuse the current changed-document check without weakening it. Do not add validation or a recurring requirement. |
-| F10 | Local definitions under Macro-target decorators: `src/macros/invocations/targets.x` and `src/parse/units.x`. In a function, `$keep() macro Decorator guard(Stmt $body) { ... }` followed by `guard() { ... }` reports `expected atomic expression` at the call, on the seed compiler as well as the current one. Recorded as A6 of the [margin repairs](archive/review-repairs-2026-11-01.md). | Trace the returned local definition through `bind_syntax` to see why the bare-name invocation does not find it, decide whether the book's "a macro may generate a local definition" covers decorators, and add the function-scope case to `macro-decorator-continuation` when repaired. |
 
 The main-checkout hook update and the packaged VSIX changelog are resolved.
-They are not pending rows. The site `compile-time-lisp` fragment remains an
+They are not pending rows. F10, local definitions under Macro-target
+decorators (A6 of the [margin repairs](archive/review-repairs-2026-11-01.md)),
+closed on 2026-11-01 without a compiler change: the local is published and
+visible, and the reported `guard() { ... }` failed because a local decorator
+with no explicit parameters is spelled bare, `guard { ... }`, as
+`macro-local` already covers. `macro-decorator-continuation` now holds the
+function-scope case with one and two Macro-target decorators, and the book's
+"Local definitions" names the spelling. The site `compile-time-lisp` fragment remains an
 intentional compatibility choice, not an omitted rename.
 
 ## Other owners

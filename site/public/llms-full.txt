@@ -2785,7 +2785,9 @@ A bare `name(...)` selects the innermost local macro before a file-local
 without parentheses remains an ordinary identifier. `(name)(arguments)` is an
 explicit ordinary call, while `$name(arguments)` selects only a global macro
 or a `meta` function. A local and global definition may therefore share a name
-without ambiguity.
+without ambiguity. A local decorator with no explicit parameters follows the
+[`keyword` alias](https://x2c-lang.dev/docs/reference/language.html#decorators) spelling instead: `name TARGET`, with no
+parentheses, so `name() { ... }` reads `()` as its target.
 
 A local definition follows the [hygiene](https://x2c-lang.dev/docs/reference/language.html#hygiene-and-generated-names) rules
 of every macro. `scale` above reads the parameter of `scaled_sum`, where the
