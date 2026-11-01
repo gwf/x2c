@@ -1,13 +1,15 @@
 # Repairs and mitigations at the margins of the October 31 rounds
 
-> Status: active - recorded 2026-11-01 against `dev` `f12c7619a`.
+> Status: done - all five batches published to `dev` on 2026-11-01;
+> batch E closes the plan at `COMMIT_E`. Recorded 2026-11-01 against `dev`
+> `f12c7619a`. A6 moves to F10 of the follow-ups.
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
 > see its delivery record below. Batch B is delivered in `147ce79ee`,
-> batch C in `0de444adf`, and batch D in `eb8b27496`. Batch E remains open.
+> batch C in `0de444adf`, batch D in `eb8b27496`, and batch E in `COMMIT_E`.
 > Batch A also absorbs follow-up F4 from the
-> [October 31 follow-ups](review-followups-2026-10-31.md).
+> [October 31 follow-ups](../review-followups-2026-10-31.md).
 
 ## Review scope and baseline
 
@@ -174,6 +176,21 @@ All three are within the noise floor.
 | E2 | Nine `plans/reference/async-*.md` records cite evidence under `.context/`, which `.gitignore` excludes, so the cited files cannot be recovered from the repository. | State in each citation that the evidence is workspace-local, and move any excerpt the record relies on into the record. |
 | E3 | `plans/archive/recent-wave-repairs-2026-10-31.md` names `src/parse/types.x` as the typedef repair owner; the second half of that repair is `_without_leading_text` in `src/type.x`. `plans/README.md` lists 122 of 214 archived plans and 10 of 28 reference records without saying the listing is selective; fourteen plans archived since 2026-10-22 and all eleven async records are unlisted. | Correct the owner. Add one sentence to the README saying the completed-records list is selective, and list the records archived since 2026-10-22. |
 | E4 | Follow-up F4 in `review-followups-2026-10-31.md` describes the included-header attribute-macro case; A3 reproduces the adjacent written-source case. | When A3 lands, close F4 or narrow its row to the remaining included-header symptom. |
+
+### Batch E delivery, 2026-11-01
+
+Delivered in `COMMIT_E`, documentation only. The prototype, validation,
+spike, and numeric-fix records carry `> Status: reference` lines dated
+2026-11-01 that record publication at `255de641f` and mark their hold text
+historical. The twelve `.context/` citations in nine async records say the
+evidence is workspace-local and untracked; the integration record states
+that its revisions are already in the text, and the numeric record that its
+failure counts are. The recent-wave archive names `_without_leading_text` in
+`src/type.x` beside the parser owners. The README says its completed list
+is selective, lists the fourteen plans archived since 2026-10-22 and the
+async evidence family, and drops this plan from active work. F4 was narrowed
+to the included-header case when A3 landed, and A6 becomes follow-up F10.
+This plan moves to `archive/` with the batch.
 
 ## Delivery and validation
 

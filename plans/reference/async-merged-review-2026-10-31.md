@@ -63,7 +63,8 @@ a dispatch-owned pointer exchange at existing boundaries and an interleaved
 custom-renderer regression test. Neither fix needs a new framework or allocator.
 
 Both probes were independently reproduced with the merged worktree compiler.
-Sources remain in `.context/async-tidy-review-20261031/`. Build each with
+Sources remain in the workspace-local, untracked
+`.context/async-tidy-review-20261031/`. Build each with
 `builds/0/x2c build -O2 -o /tmp/PROBE PATH_TO_PROBE.x`, then run it.
 Build and execution evidence is in `debug/async-tidy-{lisp,render}-probe-*`.
 These findings are recorded in `unittest/STATUS.md`; runtime fixes are separate

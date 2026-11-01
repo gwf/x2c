@@ -68,8 +68,8 @@ includes 1,357 compiler fixtures (2,999 artifacts) and 1,158 unit tests
 (99,595 assertions), with no failures or skips. No new recurring gate was added.
 
 Evidence is retained in debug/async-dev-integration-*. Starting/fetched/shared
-branch revisions and the merge revision are in
-.context/async-dev-integration-20261031.json. Read-only review workers also
+branch revisions and the merge revision are stated above and also kept in
+the workspace-local, untracked `.context/async-dev-integration-20261031.json`. Read-only review workers also
 ran focused region fixtures; the full gate independently checks those fixture
 expectations. Graph certification was repeated by the primary session.
 

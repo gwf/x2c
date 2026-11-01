@@ -2,7 +2,9 @@
 
 > Status: reference - implemented and validated locally on four native targets.
 > Recorded 2026-10-31. Source baseline: d20d508cf.
-> Normal benchmarks remain on hold. No pushes or dev/main advancement authorized.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-01). The
+> benchmark hold and no-push restriction that applied at the time are
+> historical.
 
 ## Changes and compatibility
 
@@ -48,8 +50,9 @@ Existing expectations were not weakened, and no recurring gate was added.
 
 The earlier fresh pre-async baseline 135550354 and d20d508cf both reproduced
 the same original three failures: 95 passes, three failures, 98 tests, and
-9,572 assertions. The investigation evidence is retained in
-.context/async-numeric-investigation-2026-10-31.md. These were inherited
+9,572 assertions. The investigation evidence is retained in the workspace-local, untracked
+`.context/async-numeric-investigation-2026-10-31.md`; the failure counts
+above are the facts this record relies on. These were inherited
 numeric defects rather than failures introduced by task switching.
 
 ## Validation
@@ -90,9 +93,10 @@ provider source fingerprints in collect.c/linked-meta.c, and the generated Var
 API page. Every delta was reviewed against the authored changes.
 
 Raw platform checks use
-`debug/async-numeric-fix-*`; Linux copies also remain under the directory in
-.context/async-linux-validation-dir. The isolated macOS x86_64 tree is
-recorded in .context/async-native-validation-dir. Both use separate caches.
+`debug/async-numeric-fix-*`; Linux copies also remain under the directory named by the workspace-local,
+untracked `.context/async-linux-validation-dir`. The isolated macOS x86_64
+tree is named by the workspace-local `.context/async-native-validation-dir`.
+Both use separate caches.
 
 ## Delivery boundary
 

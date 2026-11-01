@@ -65,9 +65,9 @@ this repair; no numeric code or expectations were changed.
 
 Full logs use `debug/async-uar-*` and `debug/async-{arm64,amd64}-uar-*`.
 Linux full-check logs and status files are
-also retained under the directory in `.context/async-linux-validation-dir`.
-The reused isolated macOS x86_64 tree is recorded in
-`.context/async-native-validation-dir`.
+also retained under the directory named by the workspace-local, untracked
+`.context/async-linux-validation-dir`. The reused isolated macOS x86_64 tree
+is named by the workspace-local `.context/async-native-validation-dir`.
 
 ## Delivery boundary
 

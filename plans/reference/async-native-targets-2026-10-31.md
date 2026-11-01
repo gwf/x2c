@@ -65,7 +65,7 @@ An initial arm64 invocation from the repository root failed to locate
 needed for that invocation error.
 
 Evidence logs are under `debug/async-stack-*` and
-`debug/async-macos-x86_64-*`. The retained isolated tree is recorded in
+`debug/async-macos-x86_64-*`. The retained isolated tree is named by the workspace-local, untracked
 `.context/async-native-validation-dir`; it uses a separate X2C_CACHE_DIR.
 
 ## Linux follow-up
@@ -81,7 +81,7 @@ Linux kernel 7.0.12-linuxkit. The compiler is GCC 12.2.0
 
 Linux trees start from `74bdfecaa`, plus the sanitizer-harness repair. The
 runtime implementation is the same as the macOS-tested source. Trees and
-logs remain under the directory recorded in
+logs remain under the directory named by the workspace-local, untracked
 `.context/async-linux-validation-dir`. Each container uses its own
 X2C_CACHE_DIR and has four CPUs and a 6 GiB memory limit. These are correctness
 checks, not performance measurements.

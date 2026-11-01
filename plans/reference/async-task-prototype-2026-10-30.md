@@ -1,5 +1,9 @@
 # Private Task.run prototype - 2026-10-30
 
+> Status: reference - noted 2026-11-01. The execution-stack work that
+> grew from this prototype was published to `dev` in `255de641f` on
+> 2026-10-31. The hold and no-push statements below are historical.
+
 Status: testable local prototype on `codex/async-task-prototype`. No push or
 shared-branch integration is authorized. The dev/main validation hold remains.
 The [owning specification](../archive/async-execution-stacks.md) records semantics.
@@ -122,8 +126,8 @@ small regressions. Ordinary allocation still reads the installed TLS slot
 directly. Wider representative performance evidence remains outstanding.
 
 Raw workload source, 45 final samples, earlier exploratory samples, baseline
-Scope log, and medians remain locally in .context/async-task-prototype/.
-That directory is ignored; the executable tests and example are authoritative
+Scope log, and medians remain in the workspace-local, untracked
+`.context/async-task-prototype/`. That directory is ignored; the executable tests and example are authoritative
 tracked source. Binary/archive hashes are retained in its provenance.json.
 
 ## Remaining limits and delivery hold

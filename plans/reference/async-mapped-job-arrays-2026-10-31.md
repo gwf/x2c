@@ -83,7 +83,8 @@ The baseline and candidate were then run to completion with a longer bounded
 diagnostic wait. No throughput result is inferred from those durations.
 
 Raw phase VM maps, heap reports, comparison summaries, binary/source hashes,
-and capture scripts remain in `.context/async-mapped-jobs-20261031/`.
+and capture scripts remain in the workspace-local, untracked
+`.context/async-mapped-jobs-20261031/`.
 `summary.json` records the completed cases. Logs are under
 `debug/async-mapped-jobs-*`. The interrupted case is `mapped-1000`; the
 completed candidate is `mapped-1000-complete`.

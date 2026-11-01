@@ -119,7 +119,7 @@ remove this footprint. Real system memory-pressure behavior was not tested.
 ## Evidence and limits
 
 Sources, compiler/runtime/probe hashes, summaries, full phase heap/VM dumps,
-and allocation/free traces remain in
+and allocation/free traces remain in the workspace-local, untracked
 `.context/async-residual-memory-20261031/`. `summary.json` records the cases
 above. Build and run logs are under `debug/async-residual-memory-*`.
 The source samples and tools changed no tracked runtime file.
