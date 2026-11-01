@@ -113,7 +113,7 @@ struct PoolRecord{
 #include "group-match.h"
 static int _init_guard_ = 0;
 
-_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0);
+_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0);
 
 _Noreturn static void f9_interning____insert_error(unsigned _x2c_gensym_macro_capacity_1);
 
@@ -689,12 +689,12 @@ static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21);
 
 
 
-_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0){
+_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_new("PoolTable.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/pool/interning.x",.function = "f9_interning____reinsert_error",.line = 14,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0));
       __builtin_unreachable();
     }
 
@@ -902,7 +902,7 @@ static void f9_interning___PoolTable_reinsert_unique(PoolTable _x2c_gensym_macro
     }
     _x2c_gensym_macro_group_1 =(_x2c_gensym_macro_group_1 + _x2c_gensym_macro_step_1 + 1) & _x2c_gensym_macro_group_mask_1;
   }
-  (void) f9_interning____reinsert_error(_x2c_gensym_macro_map_9 -> capacity, 0);
+  (void) f9_interning____reinsert_error(_x2c_gensym_macro_map_9 -> capacity);
 }
 
 static void _x2c_gensym_macro__rebuild_0(PoolTable _x2c_gensym_macro_map_10, unsigned _x2c_gensym_macro_capacity_7){
@@ -2452,7 +2452,7 @@ static PoolTable f10_root_index____root_grow(PoolTable previous){
   if(previous -> capacity > ~ 0u / 2){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Pool root index")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/pool/root-index.x",.function = "f10_root_index____root_grow",.line = 80,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/pool/root-index.x",.function = "f10_root_index____root_grow",.line = 82,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1265290), unsigned_var(previous -> capacity));
       __builtin_unreachable();
     }

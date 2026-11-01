@@ -13973,7 +13973,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10915 = List_var(_10914);
   _10916 = String_new("lib/common.x");
   _10917 = String_var(_10916);
-  _10918 = String_new("71c3d7b7");
+  _10918 = String_new("eec5305b");
   _10919 = String_var(_10918);
   _10920 = cons(_10919, NULL);
   _10921 = cons(_10917, _10920);
@@ -14113,7 +14113,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11055 = String_var(_11054);
   _11056 = String_new("lib/dispatch.x");
   _11057 = String_var(_11056);
-  _11058 = String_new("6d362710");
+  _11058 = String_new("bb38231c");
   _11059 = String_var(_11058);
   _11060 = cons(_11059, NULL);
   _11061 = cons(_11057, _11060);
@@ -14391,7 +14391,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11330 = List_var(_11329);
   _11331 = String_new("lib/map/map.x");
   _11332 = String_var(_11331);
-  _11333 = String_new("9aa8f790");
+  _11333 = String_new("c106a854");
   _11334 = String_var(_11333);
   _11335 = cons(_11334, NULL);
   _11336 = cons(_11332, _11335);
@@ -15639,7 +15639,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12572 = List_var(_12571);
   _12573 = String_new("lib/map/generics.x");
   _12574 = String_var(_12573);
-  _12575 = String_new("8830e3b4");
+  _12575 = String_new("05ae5647");
   _12576 = String_var(_12575);
   _12577 = cons(_12576, NULL);
   _12578 = cons(_12574, _12577);
@@ -15653,7 +15653,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12586 = List_var(_12585);
   _12587 = String_new("lib/map/grouped.x");
   _12588 = String_var(_12587);
-  _12589 = String_new("626fe36a");
+  _12589 = String_new("3e430870");
   _12590 = String_var(_12589);
   _12591 = cons(_12590, NULL);
   _12592 = cons(_12588, _12591);
@@ -16034,7 +16034,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12964 = List_var(_12963);
   _12965 = String_new("lib/pool/root-index.x");
   _12966 = String_var(_12965);
-  _12967 = String_new("ffe11c46");
+  _12967 = String_new("88ed4f59");
   _12968 = String_var(_12967);
   _12969 = cons(_12968, NULL);
   _12970 = cons(_12966, _12969);
@@ -16705,7 +16705,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13632 = cons(_223, _13631);
   _13633 = String_new("lib/typed-map.x");
   _13634 = String_var(_13633);
-  _13635 = String_new("c662adf6");
+  _13635 = String_new("a8b14c4a");
   _13636 = String_var(_13635);
   _13637 = cons(_11948, NULL);
   _13638 = cons(_11946, _13637);
