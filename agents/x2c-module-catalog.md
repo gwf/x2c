@@ -1323,11 +1323,11 @@ Public functions:
 `scan_number_typed`, `scan_number_type`, `scan_digital`, `scan_float`,
 `scan_hexponent`, `scan_keyword`, `scan_identifier`, `scan_ascii_alpha`,
 `scan_keyword_type`, `scan_c_operator`, `scan_c_string`,
-`scan_c_string_status`, `scan_c_character`, `scan_string_segment`,
-`scan_symbol_literal`, `scan_symbol_literal_status`, `scan_symbol_set_atom`,
-`scan_atom`, `scan_atom_status`, `scan_escape_sequence`,
-`scan_ascii_hex_value`, `scan_ascii_digit`, `scan_utf8_length`,
-`scan_next_line_col`
+`scan_c_string_status`, `scan_c_character`, `scan_c_escape_value`,
+`scan_string_segment`, `scan_symbol_literal`, `scan_symbol_literal_status`,
+`scan_symbol_set_atom`, `scan_atom`, `scan_atom_status`,
+`scan_escape_sequence`, `scan_ascii_hex_value`, `scan_ascii_digit`,
+`scan_utf8_length`, `scan_next_line_col`
 
 ### [lib/scripting.x](../lib/scripting.x)
 

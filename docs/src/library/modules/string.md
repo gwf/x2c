@@ -372,10 +372,11 @@ and its negative `stop` names the byte the slice stops before. The
 shows the forward rule. Indices are byte positions, so a
 slice can split a multibyte sequence. A full unit-step slice may return
 `s`; other nonempty slices return their canonical `String`.
+An empty range or one that runs the wrong way for its `step` returns
+NULL, the empty `String`.
 
-**Raises:** `<alloc-fail>` while constructing a nonempty result. An empty
-range, a range that runs the wrong way for its `step`, or a `step` of zero
-also returns NULL, the empty `String`, without raising.
+**Raises:** `<bad-arg>` when `step` is zero, including for an empty `s`;
+`<alloc-fail>` while constructing a nonempty result.
 
 Source: `lib/string/editing.x`
 

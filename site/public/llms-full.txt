@@ -1438,7 +1438,7 @@ A binding does not change the tokens inside that literal or enable C macro
 expansion there. Parenthesize an ordinary name to select operator syntax:
 
 ```x2c
-int remainder(int raise, int a, int b) {
+int modulo_sum(int raise, int a, int b) {
   return (raise) %(a+b);
 }
 ```
