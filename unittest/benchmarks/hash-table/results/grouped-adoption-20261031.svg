@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="857" viewBox="0 0 1120 857">
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="Arial, sans-serif" fill="#20252b">
+<text x="24" y="30" font-size="22" font-weight="bold">Matched integer maps: one shared baseline</text>
+<text x="24" y="54" font-size="14">CPU time / khashl. Equal weight for counting and mixed insertion/deletion. Lower is faster.</text>
+<text x="24" y="76" font-size="12">80 million inputs; five fresh processes per table and workload; all sizes/checksums verified.</text>
+<line x1="390.00" y1="97" x2="390.00" y2="772" stroke="#e4e7eb"/>
+<text x="390.00" y="795" text-anchor="middle" font-size="12">0.0x</text>
+<line x1="453.00" y1="97" x2="453.00" y2="772" stroke="#e4e7eb"/>
+<text x="453.00" y="795" text-anchor="middle" font-size="12">0.5x</text>
+<line x1="516.00" y1="97" x2="516.00" y2="772" stroke="#e4e7eb"/>
+<text x="516.00" y="795" text-anchor="middle" font-size="12">1.0x</text>
+<line x1="579.00" y1="97" x2="579.00" y2="772" stroke="#e4e7eb"/>
+<text x="579.00" y="795" text-anchor="middle" font-size="12">1.5x</text>
+<line x1="642.00" y1="97" x2="642.00" y2="772" stroke="#e4e7eb"/>
+<text x="642.00" y="795" text-anchor="middle" font-size="12">2.0x</text>
+<line x1="705.00" y1="97" x2="705.00" y2="772" stroke="#e4e7eb"/>
+<text x="705.00" y="795" text-anchor="middle" font-size="12">2.5x</text>
+<line x1="768.00" y1="97" x2="768.00" y2="772" stroke="#e4e7eb"/>
+<text x="768.00" y="795" text-anchor="middle" font-size="12">3.0x</text>
+<line x1="831.00" y1="97" x2="831.00" y2="772" stroke="#e4e7eb"/>
+<text x="831.00" y="795" text-anchor="middle" font-size="12">3.5x</text>
+<line x1="894.00" y1="97" x2="894.00" y2="772" stroke="#e4e7eb"/>
+<text x="894.00" y="795" text-anchor="middle" font-size="12">4.0x</text>
+<line x1="957.00" y1="97" x2="957.00" y2="772" stroke="#e4e7eb"/>
+<text x="957.00" y="795" text-anchor="middle" font-size="12">4.5x</text>
+<line x1="1020.00" y1="97" x2="1020.00" y2="772" stroke="#e4e7eb"/>
+<text x="1020.00" y="795" text-anchor="middle" font-size="12">5.0x</text>
+<text x="378" y="119" text-anchor="end" font-size="13">Boost unordered_flat_map</text>
+<rect x="390" y="105" width="74.50" height="19" rx="2" fill="#7b8794"/>
+<text x="472.50" y="119" font-size="12">0.59x</text>
+<text x="378" y="147" text-anchor="end" font-size="13">Abseil flat_hash_map</text>
+<rect x="390" y="133" width="80.62" height="19" rx="2" fill="#7b8794"/>
+<text x="478.62" y="147" font-size="12">0.64x</text>
+<text x="378" y="175" text-anchor="end" font-size="13">x2c MapIntInt (production grouped)</text>
+<rect x="390" y="161" width="99.70" height="19" rx="2" fill="#26815d"/>
+<text x="497.70" y="175" font-size="12">0.79x</text>
+<text x="378" y="203" text-anchor="end" font-size="13">Grouped Map before lookup deletion</text>
+<rect x="390" y="189" width="103.51" height="19" rx="2" fill="#7b8794"/>
+<text x="501.51" y="203" font-size="12">0.82x</text>
+<text x="378" y="231" text-anchor="end" font-size="13">CC</text>
+<rect x="390" y="217" width="106.52" height="19" rx="2" fill="#7b8794"/>
+<text x="504.52" y="231" font-size="12">0.85x</text>
+<text x="378" y="259" text-anchor="end" font-size="13">tsl robin_map</text>
+<rect x="390" y="245" width="108.81" height="19" rx="2" fill="#7b8794"/>
+<text x="506.81" y="259" font-size="12">0.86x</text>
+<text x="378" y="287" text-anchor="end" font-size="13">Verstable</text>
+<rect x="390" y="273" width="114.69" height="19" rx="2" fill="#7b8794"/>
+<text x="512.69" y="287" font-size="12">0.91x</text>
+<text x="378" y="315" text-anchor="end" font-size="13">robin_hood unordered_map</text>
+<rect x="390" y="301" width="118.22" height="19" rx="2" fill="#7b8794"/>
+<text x="516.22" y="315" font-size="12">0.94x</text>
+<text x="378" y="343" text-anchor="end" font-size="13">khashl (shared baseline)</text>
+<rect x="390" y="329" width="126.00" height="19" rx="2" fill="#39434f"/>
+<text x="524.00" y="343" font-size="12">1.00x</text>
+<text x="378" y="371" text-anchor="end" font-size="13">Grouped + count update (early)</text>
+<rect x="390" y="357" width="128.48" height="19" rx="2" fill="#7b8794"/>
+<text x="526.48" y="371" font-size="12">1.02x</text>
+<text x="378" y="399" text-anchor="end" font-size="13">ska bytell_hash_map</text>
+<rect x="390" y="385" width="133.28" height="19" rx="2" fill="#7b8794"/>
+<text x="531.28" y="399" font-size="12">1.06x</text>
+<text x="378" y="427" text-anchor="end" font-size="13">STC</text>
+<rect x="390" y="413" width="135.63" height="19" rx="2" fill="#7b8794"/>
+<text x="533.63" y="427" font-size="12">1.08x</text>
+<text x="378" y="455" text-anchor="end" font-size="13">Grouped storage only (early)</text>
+<rect x="390" y="441" width="182.82" height="19" rx="2" fill="#7b8794"/>
+<text x="580.82" y="455" font-size="12">1.45x</text>
+<text x="378" y="483" text-anchor="end" font-size="13">MapIntInt + count update (early)</text>
+<rect x="390" y="469" width="183.13" height="19" rx="2" fill="#7b8794"/>
+<text x="581.13" y="483" font-size="12">1.45x</text>
+<text x="378" y="511" text-anchor="end" font-size="13">x2c meta (experiment)</text>
+<rect x="390" y="497" width="187.17" height="19" rx="2" fill="#7b8794"/>
+<text x="585.17" y="511" font-size="12">1.49x</text>
+<text x="378" y="539" text-anchor="end" font-size="13">x2c MapIntInt (Robin Hood control)</text>
+<rect x="390" y="525" width="197.32" height="19" rx="2" fill="#3778b5"/>
+<text x="595.32" y="539" font-size="12">1.57x</text>
+<text x="378" y="567" text-anchor="end" font-size="13">ankerl unordered_dense</text>
+<rect x="390" y="553" width="206.21" height="19" rx="2" fill="#7b8794"/>
+<text x="604.21" y="567" font-size="12">1.64x</text>
+<text x="378" y="595" text-anchor="end" font-size="13">x2c U32Map (experiment)</text>
+<rect x="390" y="581" width="207.77" height="19" rx="2" fill="#7b8794"/>
+<text x="605.77" y="595" font-size="12">1.65x</text>
+<text x="378" y="623" text-anchor="end" font-size="13">x2c flat (experiment)</text>
+<rect x="390" y="609" width="217.24" height="19" rx="2" fill="#7b8794"/>
+<text x="615.24" y="623" font-size="12">1.72x</text>
+<text x="378" y="651" text-anchor="end" font-size="13">x2c wide (experiment)</text>
+<rect x="390" y="637" width="222.39" height="19" rx="2" fill="#7b8794"/>
+<text x="620.39" y="651" font-size="12">1.76x</text>
+<text x="378" y="679" text-anchor="end" font-size="13">khashl with Var keys/values</text>
+<rect x="390" y="665" width="304.19" height="19" rx="2" fill="#7b8794"/>
+<text x="702.19" y="679" font-size="12">2.41x</text>
+<text x="378" y="707" text-anchor="end" font-size="13">x2c Var Map</text>
+<rect x="390" y="693" width="316.26" height="19" rx="2" fill="#b96e26"/>
+<text x="714.26" y="707" font-size="12">2.51x</text>
+<text x="378" y="735" text-anchor="end" font-size="13">x2c khashl backend (experiment)</text>
+<rect x="390" y="721" width="400.99" height="19" rx="2" fill="#7b8794"/>
+<text x="798.99" y="735" font-size="12">3.18x</text>
+<text x="378" y="763" text-anchor="end" font-size="13">std unordered_map</text>
+<rect x="390" y="749" width="579.08" height="19" rx="2" fill="#7b8794"/>
+<text x="977.08" y="763" font-size="12">4.60x</text>
+<line x1="516.00" y1="97" x2="516.00" y2="772" stroke="#20252b" stroke-dasharray="4 4"/>
+<text x="24" y="829" font-size="12">Revision 9ef736b225a5. O3, non-LTO. Early specimens remain experimental; Robin Hood is the control.</text>
+</g></svg>

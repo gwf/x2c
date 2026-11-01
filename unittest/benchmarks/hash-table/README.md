@@ -2,6 +2,10 @@
 
 > Experimental internal benchmarks, separate from the curated x2c examples.
 
+The [2026-10-31 grouped adoption report](results/grouped-adoption-20261031.md) records
+the full matched comparison, shared-baseline chart, word count, String,
+LongDouble, c2x2c and Notes results for the backend published at `9ef736b22`.
+
 There is no universal hash-table benchmark. These benchmarks use two established,
 reproducible suites with different strengths:
 

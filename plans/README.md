@@ -47,7 +47,6 @@ revisions; this closeout does not commission deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Grouped typed Map adoption](grouped-typed-map-adoption.md) | Adopt the validated grouped backend for typed families; retain Var Map and Pool storage. | Integrate, close portability/performance gaps, then run one coordinated quiet benchmark campaign and publish to dev. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
@@ -78,6 +77,10 @@ Future releases use [releasing](../agents/releasing.md) and
 is selected here.
 
 ### Decisions and completed records
+
+- [Grouped typed Map adoption](archive/grouped-typed-map-adoption.md): all five
+  typed families use grouped storage at `9ef736b22`; the full benchmark report
+  records gains, shared-baseline ratios and remaining coverage limits.
 
 Archived 2026-10-31 after checking delivery and giving residual work explicit owners:
 

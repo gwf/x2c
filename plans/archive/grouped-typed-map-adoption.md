@@ -1,8 +1,14 @@
 # Adopt grouped storage for typed Maps
 
-> Status: active - 2026-10-31.
-> The grouped backend is integrated locally with current dev repairs.
-> Publication validation and the coordinated quiet benchmark run remain pending.
+> Status: done - 2026-10-31.
+> Runtime adoption published to dev at `9ef736b22`, after integrating `d211420b4`.
+> The publication gate and full benchmark campaign passed. Typed Map is 1.34x
+> Boost and Var Map is 3.17x typed on the common integer cohort. The old typed
+> control is 2.65x Boost. All count/checksum oracles pass. See the
+> [full report](../../unittest/benchmarks/hash-table/results/grouped-adoption-20261031.md).
+> Linux/GCC remains untested because Docker was unavailable. Rosetta x86_64,
+> native, forced-scalar and sanitizer focused checks pass. Build cost is
+> higher across the combined revision and is not isolated to Map adoption.
 
 ## Result and boundaries
 
@@ -23,7 +29,7 @@ independent dictionary operations pass in normal, sanitizer and scalar builds.
 The matched integer score is 1.36x Boost versus 2.63x for production typed Map.
 String replacement is 2.2% above the preceding experiment, with overlapping
 sample ranges. MapLongDouble performance and Linux/GCC execution remain to be checked.
-Current adoption checks pass 81 tests/5,455 assertions plus two million
+Adoption checks pass 81 tests/5,455 assertions plus two million
 independent operations in normal, forced-scalar, Rosetta x86_64 and sanitizer
 builds. Docker is unavailable; Rosetta is not Linux/GCC evidence.
 
