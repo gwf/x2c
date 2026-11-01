@@ -47,7 +47,6 @@ revisions; this closeout does not commission deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [November 1 repository review](repository-review-remediation-2026-11-01.md) | Package inputs and ordering, literal/printf values, collection boundaries, test summaries, stale consumers, verification guidance, and historical benchmark cleanup. | Seven coherent changes are planned; String rejection, compact calibration retention, and consumer driver invocation are settled. Implementation has not started. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, documentation gate scope, and local definitions under Macro-target decorators. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
@@ -82,6 +81,12 @@ is selected here.
 
 This list is selective. Every finished plan lives in `archive/` with its own
 status blockquote; only the records most often consulted are listed here.
+
+- [November 1 repository review](archive/repository-review-remediation-2026-11-01.md):
+  all seven changes implemented through `fd924dc61`, including package and
+  runtime repairs, documentation consistency, and removal of tracked benchmark
+  history. Combined publication validation passed; optional validation limits
+  remain explicit in the record.
 
 - [Regex-redux and source size](archive/plso-regex-and-source-size.md): phase
   profiling supports scratch-buffer replacements; pidigits wrappers are removed

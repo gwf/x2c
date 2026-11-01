@@ -1,17 +1,17 @@
 # Repository review repairs and cleanup
 
-> Status: active - implementation authorized, recorded 2026-11-01.
-> Findings were reproduced at `6125e8f693afa84d20be5ca96473360df5140075`,
-> then `origin/dev`. Remote `dev` advanced to `b46aa0e12` during planning;
-> that commit closes a separate decorator follow-up without repairing these
-> findings. Private implementation progress is recorded below.
+> Status: done - all seven changes implemented and validated, 2026-11-01.
+> Findings were reproduced at `6125e8f693afa84d20be5ca96473360df5140075`.
+> Implementation runs from `7179b3879` through `fd924dc61`, with generated
+> artifacts refreshed through the publication workflow. This record accompanies
+> the combined delivery to `dev`; `main` is unchanged.
 
 ## Scope and decisions
 
 Address all twelve findings from the November 1 repository review in the
 seven coherent changes below. Retain current compiler, runtime, package, and
 test interfaces except for the explicitly selected String behavior change.
-The [October 31 follow-ups](review-followups-2026-10-31.md) retain their own
+The [October 31 follow-ups](../review-followups-2026-10-31.md) retain their own
 ownership and completion records.
 
 Settled with Gary:
@@ -48,7 +48,7 @@ archive service, or an additional recurring gate.
 
 ### A. Package build inputs and ordering
 
-Owner: [packages/package.mk](../packages/package.mk). Keep its flat
+Owner: [packages/package.mk](../../packages/package.mk). Keep its flat
 `builds/*.c`, `*.h`, and `*.xi` interface and the native driver's existing
 incremental compilation.
 
@@ -114,10 +114,10 @@ include-search/content freshness remains a separate design.
 
 ### B. Literal values and printf lowering
 
-Owners: [printf-format.x](../src/components/printf-format.x),
-[stage.x](../src/stage.x), [scan.x](../lib/scan.x), and
-[string-switch.x](../src/components/string-switch.x), with static-format
-eligibility in [expressions/calls.x](../src/expressions/calls.x).
+Owners: [printf-format.x](../../src/components/printf-format.x),
+[stage.x](../../src/stage.x), [scan.x](../../lib/scan.x), and
+[string-switch.x](../../src/components/string-switch.x), with static-format
+eligibility in [expressions/calls.x](../../src/expressions/calls.x).
 
 The review reproduced incorrect Var conversion for `"\045d %s"` and
 `"\x25i %s"`. Planning also found that `Compiler.literal_text_value`, reached
@@ -158,9 +158,9 @@ format fixtures retain their contracts.
 
 ### C. Collection bounds and slices
 
-Owners: [List traversal](../lib/list/traversal.x),
-[common slicing](../lib/common.x), [Array generics](../lib/array/generics.x),
-and [String editing](../lib/string/editing.x).
+Owners: [List traversal](../../lib/list/traversal.x),
+[common slicing](../../lib/common.x), [Array generics](../../lib/array/generics.x),
+and [String editing](../../lib/string/editing.x).
 
 - In `List.get`, read an integer-kinded key once with `Var.integer` and
   compare the native `long` with `INT_MIN` and `INT_MAX` before narrowing.
@@ -204,14 +204,14 @@ and missing results without a new helper or caller contract.
 
 ### D. Test command summaries
 
-Owner: [commands/test/main.x](../commands/test/main.x).
+Owner: [commands/test/main.x](../../commands/test/main.x).
 
 Search captured output backwards for the existing complete summary line,
 instead of assuming it is the last line. Preserve the child status as the
 failure authority and the existing zero-match rule. Do not add a wire
 protocol or require test cleanup to be silent.
 
-Extend [the command's tests](../commands/test/tests/run.sh) with a deferred
+Extend [the command's tests](../../commands/test/tests/run.sh) with a deferred
 print after `Test.main`. A passing test must still count as one pass. An
 unmatched filter must still exit 2; a real failing program must still fail.
 Keep ordinary programs without summaries, `--quiet`, `--list`, and ordered
@@ -250,8 +250,8 @@ these intentional changes.
 
 ### F. Beautification verification guidance
 
-Owners: [the source standard](../agents/x2c-code-standard.md) and
-[the beautification skill](../agents/skills/beautify-x2c-source/SKILL.md).
+Owners: [the source standard](../../agents/x2c-code-standard.md) and
+[the beautification skill](../../agents/skills/beautify-x2c-source/SKILL.md).
 
 Keep cadence in the skill: verify one coherent change, including related
 files. Replace the standard's conflicting per-file instruction with a link
@@ -377,43 +377,61 @@ calibration retention, and repeated consumer-build cost are explicitly
 settled. No whole compiler mechanism was established as disposable by this
 review, so none is scheduled for speculative removal.
 
-## Implementation progress
+## Results and verification
 
-- C implemented privately. The unsigned-key probe now returns void, all twelve
-  focused slice/UBSan cases pass, and the five affected unit suites pass:
-  125 tests and 1,408 assertions. Generated API documentation remains for
-  the parent publication refresh.
-- D implemented privately. The full command smoke script passes with deferred
-  cleanup output on passing and failing test programs.
-- E implemented privately. All 66 examples pass with 83 sources classified;
-  autodiff passes 16 tests, 11 fixtures, and both examples. The book/site
-  sweep compiles 441 samples and checks 138 outputs. Gallery sources and
-  mappings follow their existing owners.
-- F implemented privately. Verification cadence has one owner; stage
-  comparisons no longer claim pre-edit preservation. The documentation audit
-  awaits the parent's generated String API refresh from C.
-- A implemented privately. The CLI-boundary script passes, including changed
-  flags/compiler/link inputs and unchanged translation/object timestamps.
-  Cold serial and parallel package consumers and module-link-only changes
-  pass independently and within the native-module probe before its separate
-  REPL failure. Raylib response switching passes without a window.
-- B implemented privately. Escaped printf conversions and native/compile-time
-  String and ordinary character comparisons pass. Eligibility scans quoted
-  pieces without allocating decoded text. Sixteen connected fixtures compile
-  without C warnings, and scanner/String/tokenizer suites pass 58 tests and 989
-  assertions. LF and CRLF continuation probes agree. A normal local build
-  regenerated linked meta code; no bootstrap transition was required.
-- G implemented privately. Removed 1,577 historical output files (66,670,577
-  bytes) and retained one chart renderer with its requirements. Both compact
-  baselines preserve their statistics and provenance; saved-data ratios are
-  identical. Eight shootout tests and the existing performance snapshot,
-  build-scaling, and history tests pass (20, three, and two tests).
-  Promoted reports and Torch reports write to ignored destinations. The full
-  package-install probe passes with ignored history present and an installed
-  example executed. Historical links use the pre-removal upstream commit.
-  Torch report generation passes on saved data. The full optional Torch suite
-  and chart rendering could not run because this Python environment lacks
-  Torch, matplotlib, and numpy; no dependencies were installed.
-- Final generated documentation/bootstrap refresh, performance evidence,
-  publication validation, integration, publication, and plan archive closeout
-  remain with the parent. No worker publication actions were run.
+One sole implementation worker completed A-G. The parent reviewed and
+integrated the changes, regenerated documentation and bootstrap artifacts,
+and validated the combined tree with `agent-pr-check`. No recurring gate or
+new publication requirement was added.
+
+- A: the full CLI-boundary probe passes. Changed compiler, flags, and link
+  arguments take effect while unchanged translation and object timestamps
+  remain stable. Cold serial and parallel consumers, module-link-only changes,
+  and raylib response switching pass. Package preparation and repeated
+  consumer driver calls retain their explicitly accepted cost.
+- B: escaped printf conversions and native/compile-time String and ordinary
+  character values agree. Sixteen connected fixtures compile without C
+  warnings. Scanner, String, and tokenizer suites pass 58 tests with 989
+  assertions; LF and CRLF continuations agree. Eligibility scans avoid an
+  extra decoding allocation.
+- C: wide unsigned indexes return void, and twelve focused slice/UBSan
+  combinations pass. Five affected suites passed 125 tests with 1,408
+  assertions. Final List/index coverage passes 36 tests with 494 assertions
+  across all integer families and signed/unsigned limits. Performance review
+  replaced general comparisons with the existing payload reader, as recorded
+  in C. String step zero now raises `bad-arg`, including on empty input.
+- D: the full test-command smoke script passes, including trailing cleanup
+  output, unmatched filters, real failures, quiet output, and ordered reports.
+- E: 66 executable examples pass with 83 sources classified. Autodiff passes
+  16 tests, 11 fixtures, and both examples. The book/site sample sweep compiled
+  441 samples and checked 138 outputs. Generated documentation was refreshed
+  and the final gate's documentation checks pass.
+- F: the beautification skill owns verification cadence. Stage comparisons
+  describe current-stage agreement and no longer claim pre-edit preservation.
+- G: 1,577 historical files totaling 66,670,577 bytes are untracked and ignored.
+  The active baseline shrank from 3,508,036 to 54,842 bytes; the legacy suite's
+  calibration shrank from 109,453 to 34,209 bytes. Statistics, provenance, and
+  saved-data ratios are unchanged. Eight shootout tests and the existing
+  performance snapshot, build-scaling, and history tests pass (20, three,
+  and two tests). Report writers use ignored destinations. The complete
+  package-install probe excludes deliberately planted local history and
+  executes an installed example. Historical links resolve through the
+  pre-removal upstream commit.
+
+The final performance comparison uses converged, equal-length isolated trees
+against `b46aa0e12`, six identical compiler translation inputs, and four
+collection workloads. The final comparison confirms the List correction recorded in C. The
+six translation medians sum to 43,009,188,528 retired instructions at baseline
+and 43,032,141,695 after repair (+0.05%). The other three collection probes
+also show no instruction-count increase. Raw measurements and scripts
+remain in ignored workspace evidence; no benchmark history was added to Git.
+
+Two optional validation limits remain explicit. The native-module script
+passes the package scenarios, then fails at its separately owned REPL case
+in the [October 31 follow-ups](../review-followups-2026-10-31.md). Torch report
+writers pass on saved data, but the full optional Torch suite and chart
+rendering could not run because the Python environment lacks Torch,
+matplotlib, and numpy. No dependencies were installed.
+
+All twelve findings in this plan are addressed. The separate October 31
+follow-ups and production promotion remain outside this delivery.
