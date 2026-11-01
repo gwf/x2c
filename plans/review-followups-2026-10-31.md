@@ -1,7 +1,7 @@
 # Remaining review follow-ups
 
 > Status: active - follow-up ownership, recorded 2026-10-31 at `2b7a2b422`.
-> The confirmed repair batch has its [own record](recent-wave-repairs-2026-10-31.md).
+> The confirmed repair batch has its [own record](archive/recent-wave-repairs-2026-10-31.md).
 > This plan owns the residual implementation questions below. Recording an
 > owner does not authorize every candidate's implementation or a new gate.
 

@@ -47,7 +47,6 @@ revisions; this closeout does not commission deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Recent-wave repairs](recent-wave-repairs-2026-10-31.md) | Six confirmed integration gaps and this plan closeout. | Complete combined source review and final validation, then deliver to dev. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
@@ -80,6 +79,9 @@ is selected here.
 ### Decisions and completed records
 
 Archived 2026-10-31 after checking delivery and giving residual work explicit owners:
+
+- [Recent-wave repairs](archive/recent-wave-repairs-2026-10-31.md): all six
+  confirmed gaps repaired and validated; the follow-up plan owns the remainder.
 
 - [Execution stacks](archive/async-execution-stacks.md): Task.run and Scope
   migration published as `255de641f`; performance follow-up remains deferred.
