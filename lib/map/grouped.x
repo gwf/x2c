@@ -60,21 +60,6 @@ macro Unit $map.grouped.storage.family(
 
   static inline unsigned *$map.full_hashes($map map) => _deleted(map) + 1;
 
-  static inline unsigned $map.stored_hash($map map, unsigned index) {
-    if ($side_hashes) return map.full_hashes()[index];
-    $entry *entries = map.entries;
-    return $record_hash(&entries[index]);
-  }
-
-  static inline void $map.remember_hash(
-    $map map, unsigned index, unsigned hash) {
-    if ($side_hashes) map.full_hashes()[index] = hash;
-    else {
-      $entry *entries = map.entries;
-      $remember_hash(&entries[index], hash);
-    }
-  }
-
   static void $map.free_table($map map) {
     if ((void *) map == NULL) return;
     if ($owned && map.scope) map.scope.destroy();
@@ -99,15 +84,17 @@ macro Unit $map.grouped.storage.family(
   static long $map.find_hashed($map map, $key *key, unsigned key_hash) {
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned char fingerprint = key_hash >> 25;
     for (unsigned step = 0; step <= group_mask; step++) {
       unsigned start = group * 16;
       unsigned matches = x2c_map_group_match(controls + start, fingerprint);
-      if (matches) __builtin_prefetch(entries + start, 0, 3);
+      if (matches && !$side_hashes) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+        if ($side_hashes) __builtin_prefetch(entries + index, 0, 3);
+        if ((!$side_hashes || full_hashes[index] == key_hash) &&
             $key_equal($key_at(map, index), key)) return (long) index;
         matches &= matches - 1;
       }
@@ -133,6 +120,7 @@ macro Unit $map.grouped.storage.family(
     $map map, unsigned key_hash, const $entry *record) {
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned lanes = _lanes(map.capacity);
     for (unsigned step = 0; step <= group_mask; step++) {
@@ -141,7 +129,8 @@ macro Unit $map.grouped.storage.family(
       if (empty) {
         unsigned index = start + __builtin_ctz(empty);
         entries[index] = *record;
-        map.remember_hash(index, key_hash);
+        if ($side_hashes) full_hashes[index] = key_hash;
+        else $remember_hash(&entries[index], key_hash);
         controls[index] = key_hash >> 25;
         map.used++;
         return;
@@ -155,6 +144,7 @@ macro Unit $map.grouped.storage.family(
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
     unsigned old_capacity = map.capacity;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     auto Bytes staged_hashes = map.new_controls(capacity);
     auto Bytes staged_entries = Bytes_new(sizeof($entry));
     staged_entries = staged_entries.append(0, capacity);
@@ -167,7 +157,9 @@ macro Unit $map.grouped.storage.family(
     $map replacement = ($map) &expanded;
     for (unsigned i = 0; i < old_capacity; i++)
       if (controls[i] < 128)
-        replacement.reinsert_unique(map.stored_hash(i), &entries[i]);
+        replacement.reinsert_unique(
+          $side_hashes ? full_hashes[i] : $record_hash(&entries[i]),
+          &entries[i]);
     Scope_move_before(staged_hashes.block(), map.hashes.block());
     Scope_move_before(
       (unsigned char *) staged_hashes - sizeof(Block),
@@ -200,16 +192,18 @@ macro Unit $map.grouped.storage.family(
     unsigned char fingerprint = key_hash >> 25;
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned lanes = _lanes(map.capacity), available = ~0u;
     for (unsigned step = 0; step <= group_mask; step++) {
       unsigned start = group * 16;
       unsigned matches =
         x2c_map_group_match(controls + start, fingerprint) & lanes;
-      if (matches) __builtin_prefetch(entries + start, 0, 3);
+      if (matches && !$side_hashes) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+        if ($side_hashes) __builtin_prefetch(entries + index, 0, 3);
+        if ((!$side_hashes || full_hashes[index] == key_hash) &&
             $key_equal($key_at(map, index), key)) {
           *inserted = 0;
           return $value_at(map, index);
@@ -237,7 +231,8 @@ macro Unit $map.grouped.storage.family(
         if (controls[available] == 254) (*_deleted(map))--;
         entries[available].key = *key;
         entries[available].val = *value;
-        map.remember_hash(available, key_hash);
+        if ($side_hashes) full_hashes[available] = key_hash;
+        else $remember_hash(&entries[available], key_hash);
         controls[available] = fingerprint;
         map.used++;
         *inserted = 1;
