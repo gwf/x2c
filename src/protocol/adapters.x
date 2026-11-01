@@ -249,6 +249,16 @@ static List _inherited_part(
   List decision = _generated_owner(a.c, a.participant, member);
   match (decision) {
     case %(owner ? ? ?owner_expected ?): {
+      if (!_unify_signature(
+            template, owner_expected, a.variables, a.bindings.copy())) {
+        Type expected = _substitute_signature(
+          template, a.variables, a.bindings);
+        _report_signature_conflict(
+          a.c, a.base, a.participant, member,
+          _member_spelling(a.participant, member), owner_expected, expected,
+          _adoption_location(a.adoption));
+        return NULL;
+      }
       List requirement = _descriptor_requirement(a, member, template);
       if (requirement) _report_requirement(a, requirement);
       else {
