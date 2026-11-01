@@ -39,3 +39,12 @@ and literal replacements; it does not replace the general Regexp API.
 Substring views require canonical String owners, so native byte spans over
 existing typed Block storage express the actual scratch lifetime directly.
 No new allocator, package API, library rule or recurring check is needed.
+
+## Publication finding
+
+The initial gate exposed an intermittent existing symbol-fixture normalizer
+bug: a multiline following key was appended to a selected value depending on
+Map iteration order. An inert raw dump reproduces the failure. A six-line
+filter boundary correction passes all 16 symbol fixtures without changing
+expectations or compiler output. The required gate is repeated after this
+focused repair; failed logs are retained under the campaign debug directory.

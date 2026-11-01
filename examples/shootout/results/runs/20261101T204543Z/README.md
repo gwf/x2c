@@ -44,3 +44,13 @@ Current shared-workload geometric means: tuned elapsed is 1.110x C and 0.946x Ru
 - `sources/` retains old/new sources, intermediate candidates and package/profiling experiments. `charts/` retains SVG/PNG/PDF, CSV, renderer and environment versions.
 
 The other agent completed its gate before the monitored acceptance windows. The monitor records a ten-second clear window and process snapshots throughout accepted comparisons and the full update, with no detected outside compiler. Ordinary desktop activity remained, and snapshots cannot prove zero interference. Canonical-size timings and foreign recalibration remain unrun. Publication validation is recorded in the completed plan. No new recurring gate was introduced.
+
+## Publication fixture repair
+
+The first publication gate exposed an intermittent symbol-fixture filter bug.
+The filter appended a following multiline symbol key to the prior value when
+Map iteration put them next to one another. A deterministic inert dump
+reproduces the exact failure. The existing filter now recognizes the next
+top-level expression boundary. All 16 symbol fixtures pass with unchanged
+expectations. No compiler output, language behavior or recurring check changed.
+The reproduction is archived; full failed logs remain in local debug storage.
