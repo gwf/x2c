@@ -67,8 +67,16 @@ of converting each complete record into a canonical String. A native
 `ptrdiff_t` cursor and the ordinary Buffer.get API avoid narrowing the Buffer
 length to int. Complement rules, output lines and record order are unchanged.
 The output-line Buffer still uses the existing ordinary String conversion.
-The tuned program appends complete input spans to ArrayChar, then retains its
-in-place complement table and bulk output path.
+The tuned program reads 16 KB chunks, appends sequence spans to ArrayChar,
+and retains its in-place complement table. It batches 256 output lines per
+write and preserves headers, CRLF handling and final unterminated lines.
+
+Tuned FASTA copies repeated sequence spans and fills reusable native buffers,
+writing up to 256 lines together. Random symbols use a full scan of cumulative
+probability thresholds with the original boundary rule and random sequence.
+Tuned N-body stores five native value records contiguously and updates them
+through reference methods. Its interaction order and arithmetic grouping are
+unchanged; generic Array iteration and allocated Pair records are removed.
 
 Mandelbrot uses at most six ordinary Threads on 16-row chunks per wave at
 N>=256. Caller-owned Arrays are filled before startup; each worker replaces
