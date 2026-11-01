@@ -1,7 +1,8 @@
 # Split large grouped Map hash storage
 
-> Status: active - 2026-11-01.
-> Gary authorized adopting the measured large-table split policy.
+> Status: done - 2026-11-01.
+> Implemented at `0fce29c16`; regenerated bootstrap at `81c08489f`.
+> The completed tree passes the publication gate.
 
 ## Result
 
@@ -37,3 +38,27 @@ Reuse Block.lifetime rather than adding a third independently managed Block or
 new Context obligations. Keep one probing implementation and one threshold
 policy for side hashes. Native typed families compile away the side-hash path.
 No new allocator, global synchronization, recurring check or backend selector.
+
+## Delivered evidence
+
+- Var Map, typed Maps and ordinary PoolTable still use one grouped generator.
+  Large side-hash caches now use Block-owned storage; native records, public
+  signatures, lazy Map content ownership and root atomics remain unchanged.
+- Native, scalar, ASan/UBSan and Rosetta x86-64 focused checks each pass 206
+  tests and 15,685 assertions, plus a two-million-operation dictionary oracle.
+  Tests cover threshold growth under a foreign Scope, direct owner moves after
+  growth, source Context destruction and concurrent root growth.
+- The existing `agent-pr-check` passes: 1,164 tests, 103,725 assertions,
+  1,380 compiler fixtures and 138 matching book outputs, command checks and
+  bootstrap/stage comparisons. Generated changes received source review.
+- The paired adoption campaign verifies 114 samples plus 28 targeted
+  confirmations. Var counting adjusted RSS falls 1406.6 to 1082.0 MB;
+  mixed falls 714.5 to 579.6 MB. CPU stays close to current grouped storage.
+  Typed mixed confirmation is 2.6% slower and representative compiler CPU
+  about 1% higher; the report retains those costs and timing limits.
+- Both compiler variants generate fourteen byte-identical files. All four
+  measured generated runtime C files also match the final gated files exactly.
+- See the [adoption report](../../unittest/benchmarks/hash-table/results/grouped-split-adoption-20261101.md).
+  Local raw sources, binaries, samples and gate logs remain under the ignored
+  `debug/grouped-split-adoption/`. Full external cohorts, PLSO, Notes and
+  build-cost/c2x2c scaling were not rerun for this allocation-policy change.

@@ -47,7 +47,6 @@ revisions; this closeout does not commission deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Split grouped Map storage](grouped-map-split-storage.md) | Adopt the measured large-table hash allocation policy in the shared generator. | Focused ownership checks, paired performance, publication gate and delivery. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
@@ -78,6 +77,10 @@ Future releases use [releasing](../agents/releasing.md) and
 is selected here.
 
 ### Decisions and completed records
+
+- [Split grouped Map storage](archive/grouped-map-split-storage.md): large Var
+  Map and Pool hash caches use Block-owned storage; peak RSS recovery and
+  retained timing costs are recorded with publication evidence.
 
 - [Robin Hood retirement](archive/retire-robin-hood-map.md): Var Map, typed Maps
   and ordinary PoolTable share grouped storage; paired performance and memory

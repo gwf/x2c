@@ -2,6 +2,10 @@
 
 > Experimental internal benchmarks, separate from the curated x2c examples.
 
+The [2026-11-01 split-storage adoption report](results/grouped-split-adoption-20261101.md)
+records the production large-table allocation policy, recovered peak RSS,
+paired word counts, compiler comparison and remaining timing costs.
+
 The [Robin Hood retirement report](results/robin-hood-retirement-20261031.md)
 records the paired Var Map/Pool migration, word-count results, compiler cost,
 and memory tradeoff. Var and typed Maps now share grouped storage.
