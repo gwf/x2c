@@ -1,13 +1,13 @@
 # Repairs and mitigations at the margins of the October 31 rounds
 
 > Status: done - all five batches published to `dev` on 2026-11-01;
-> batch E closes the plan at `COMMIT_E`. Recorded 2026-11-01 against `dev`
+> batch E closes the plan at `b77c7a44a`. Recorded 2026-11-01 against `dev`
 > `f12c7619a`. A6 moves to F10 of the follow-ups.
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
 > see its delivery record below. Batch B is delivered in `147ce79ee`,
-> batch C in `0de444adf`, batch D in `eb8b27496`, and batch E in `COMMIT_E`.
+> batch C in `0de444adf`, batch D in `eb8b27496`, and batch E in `b77c7a44a`.
 > Batch A also absorbs follow-up F4 from the
 > [October 31 follow-ups](../review-followups-2026-10-31.md).
 
@@ -179,7 +179,7 @@ All three are within the noise floor.
 
 ### Batch E delivery, 2026-11-01
 
-Delivered in `COMMIT_E`, documentation only. The prototype, validation,
+Delivered in `b77c7a44a`, documentation only. The prototype, validation,
 spike, and numeric-fix records carry `> Status: reference` lines dated
 2026-11-01 that record publication at `255de641f` and mark their hold text
 historical. The twelve `.context/` citations in nine async records say the
