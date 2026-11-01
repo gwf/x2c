@@ -54,9 +54,10 @@ cannot favor one layout.
 ## Generated typed Map lane
 
 `lib/typed-map.x` generates `MapIntInt` with grouped control bytes and native
-`int` key/value records. Var Map retains Robin Hood storage. Both are shipped
-runtime code. Their ratio compares complete containers, including storage
-and update algorithms as well as the `Var` value layer.
+`int` key/value records. Var Map uses the same grouped storage with Var
+records and full-hash filtering. Both are shipped runtime code. Their ratio
+compares complete containers, including record widths, hash policy, and
+update dispatch.
 
 Two lanes measure it:
 

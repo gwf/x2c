@@ -101,14 +101,19 @@ static ProbeMapShortLong _probe_prepare_export(
   return NULL;
 }
 
-$map.core.family(
+#include "group-match.h"
+$map.grouped.rehashed.records(
+  struct ProbeMapShortLongRecord, _probe_hash,
+  _probe_record_hash, _probe_remember_hash);
+$map.grouped.core.family(
   ProbeMapShortLong, struct ProbeMapShortLong, short, long,
-  unsigned, struct ProbeMapShortLongRecord,
+  struct ProbeMapShortLongRecord,
   _probe_hash, _probe_key_equal, _probe_value_equal, _probe_value_valid,
   _probe_key, _probe_value,
-  _probe_reinsert_error, _probe_insert_error
+  _probe_reinsert_error, _probe_insert_error,
+  _probe_record_hash, _probe_remember_hash, 1, 1
 );
-$map.typed.family(
+$map.grouped.typed.family(
   ProbeMapShortLong, short, long,
   _probe_update_long, _probe_bad_arg, _probe_bad_op,
   _probe_capacity_valid, _probe_value, probemapshortlong,

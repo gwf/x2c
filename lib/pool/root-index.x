@@ -21,7 +21,7 @@ module int _root_native(Var key) =>
 module String _root_string(const char *bytes, int length, unsigned hash) {
   PoolTable table = __atomic_load_n(&root_index, __ATOMIC_ACQUIRE);
   Var *entries = table.entries;
-  unsigned *hashes = table.hashes, mask = table.mask;
+  unsigned *hashes = _root_hashes(table), mask = table.mask;
   for (unsigned distance = 0; distance < table.capacity; distance++) {
     unsigned index = (hash + distance) & mask;
     unsigned stored = __atomic_load_n(&hashes[index], __ATOMIC_ACQUIRE);
@@ -46,7 +46,7 @@ module Var _root_lookup(Var key, unsigned hash) {
    with a different kind. Readers do not inspect the writer's used count. */
 static Var _root_find(PoolTable table, Var key, unsigned hash) {
   Var *entries = table.entries;
-  unsigned *hashes = table.hashes, mask = table.mask;
+  unsigned *hashes = _root_hashes(table), mask = table.mask;
   for (unsigned distance = 0; distance < table.capacity; distance++) {
     unsigned index = (hash + distance) & mask;
     unsigned stored = __atomic_load_n(&hashes[index], __ATOMIC_ACQUIRE);
@@ -84,7 +84,7 @@ static PoolTable _root_grow(PoolTable previous) {
   PoolTable table;
   auto (&version)
     table = _root_new_table(previous.capacity * 2);
-  unsigned *hashes = previous.hashes;
+  unsigned *hashes = _root_hashes(previous);
   Var *entries = previous.entries;
   for (unsigned i = 0; i < previous.capacity; i++) {
     unsigned hash = __atomic_load_n(&hashes[i], __ATOMIC_ACQUIRE);
@@ -98,7 +98,7 @@ static PoolTable _root_grow(PoolTable previous) {
 }
 
 static void _root_append(PoolTable table, Var object, unsigned hash) {
-  unsigned *hashes = table.hashes, index = hash & table.mask;
+  unsigned *hashes = _root_hashes(table), index = hash & table.mask;
   Var *entries = table.entries;
   while (__atomic_load_n(&hashes[index], __ATOMIC_ACQUIRE))
     index = (index + 1) & table.mask;

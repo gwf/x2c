@@ -21,9 +21,9 @@
 #include "var/var.x"
 
 /** Maps each canonical value of one `Pool` level to itself.
-    A bucket stores the value once, beside its 32-bit hash, so the table costs
-    12 bytes per bucket where a `Map` costs 20. It belongs to the level's
-    `Scope`.
+    A bucket stores one Var, one control byte and one full 32-bit hash:
+    13 bytes where a `Map` costs 21, before Block headers, tiny-table padding
+    and the deleted counter. It belongs to the level's `Scope`.
 */
 typedef struct PoolTable {
   Scope scope, Bytes hashes, entries;

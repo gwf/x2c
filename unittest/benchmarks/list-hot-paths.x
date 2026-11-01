@@ -31,18 +31,6 @@ static List range_list(int count) {
   return result;
 }
 
-static double map_average_psl(Map map) {
-  if (!map.used) return 0.0;
-  assert(map.hashes.block().width == sizeof(unsigned));
-  unsigned *hashes = map.hashes;
-  unsigned long total = 0;
-  for (unsigned index = 0; index < map.capacity; index++) {
-    if (!hashes[index]) continue;
-    unsigned ideal = hashes[index] & map.mask;
-    total += (index - ideal) & map.mask;
-  }
-  return (double) total / map.used;
-}
 
 int main(void) {
   int width = 2048;
@@ -89,7 +77,6 @@ int main(void) {
     keys.push(key);
     map[key] = i + 1;
   }
-  printf("map-average-psl,%.6f\n", map_average_psl(map));
   start = now_ns();
   for (int i = 0; i < hit_count; i++)
     sink += map[keys[i & (key_count - 1)]].integer();

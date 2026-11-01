@@ -2,14 +2,10 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `Map` uses Robin Hood hashing split across two scope-owned `Block`s. The
-    hash `Block` holds one 32-bit hash per bucket, zero for an empty bucket;
-    the entry `Block` holds the `Var` key and value at the same bucket
-    index. Lookups probe the compact hash `Block` and touch an entry only
-    when its hash matches. Capacity is always a power of two and probe
-    distances are computed as needed.
-
-    Deletion back-shifts hashes and entries together to close holes.
+    `Map` uses sixteen-byte control groups and parallel key/value records.
+    Full 32-bit hashes follow the controls and tombstone count in the hash
+    Block, so growth reuses hashes without invoking key callbacks. Deletion
+    marks a reusable slot; insertion cleans tombstones during rebuilding.
     Structural mutation invalidates traversal state. Keys and values are
     stored as `Var` bits; the `Map` does not free pointer-bearing payloads or
     canonical values reachable through them.
@@ -53,9 +49,11 @@ protocol Cleanup(Map);
 
 // buckets
 
-/* A record and its parallel nonzero hash occupy the same bucket. Both Vars are
+/* A record and its cached full hash occupy the same bucket. Both Vars are
    shallow copies; insertion never adopts storage reachable through them. */
 static struct MapRecord {  Var key, val; };
+
+#include "group-match.h"
 
 $map.scaffold(
   Map, struct MapRecord, Var, Var,
@@ -65,22 +63,15 @@ $map.scaffold(
 $map.var.family(
   _key_hash, _key_equal, _value_equal, _value_valid);
 
-/* Var.hash normalizes zero because the hash array reserves it for an empty
-   bucket. Array and Map keys hash and compare by identity, so changing their
-   contents cannot strand a bucket or merge distinct keys. */
-/* Generated growth builds and reinserts into two staged Blocks before changing
-   the Map, so allocation failure leaves the installed table alone. A new entry
-   is not written until hashing, equality, value validation, and any required
-   growth finish. Growth is published before the incoming key's retry probe,
-   so a callback transfer on that retry may leave capacity and bucket order
-   changed. Final Robin Hood displacement writes as it walks; its invariant
-   guard diagnoses a broken table and does not promise rollback. Deletion alone
-   rearranges an installed cluster in place by back-shifting it. */
-$map.core.family(
-  Map, struct Map, Var, Var, unsigned, struct MapRecord,
+/* Full hashes filter lookups and avoid custom callbacks during growth.
+   Rebuilds stage both Blocks; deletion leaves a tombstone. */
+$map.grouped.rehashed.records(
+  struct MapRecord, _key_hash, _record_hash, _remember_hash);
+$map.grouped.core.family(
+  Map, struct Map, Var, Var, struct MapRecord,
   _key_hash, _key_equal, _value_equal, _value_valid,
-  _record_key, _record_value,
-  _reinsert_error, _insert_error);
+  _record_key, _record_value, _reinsert_error, _insert_error,
+  _record_hash, _remember_hash, 1, 1);
 
 $map.typed.operations(Map, Var, Var, _bad_arg, _capacity_valid, void, 0, 1);
 Var Map.updateindex(Map, Var, Symbol, Var);
@@ -222,19 +213,19 @@ void Map.export_to(
   /* Stage both arrays without publishing either one. A transfer frees the
      staged Blocks and leaves the original table installed; callback effects
      that happened before it remain the caller's responsibility. */
-  auto Bytes rebuilt_hashes = Bytes.new(sizeof(unsigned));
+  auto Bytes rebuilt_hashes = map.new_controls(map.capacity);
   auto Bytes rebuilt_entries = Bytes.new(sizeof(struct MapRecord));
-  rebuilt_hashes = rebuilt_hashes.append(NULL, map.capacity);
   rebuilt_entries = rebuilt_entries.append(NULL, map.capacity);
   struct Map exported = *map;
   exported.hashes = rebuilt_hashes;
   exported.entries = rebuilt_entries;
+  exported.used = 0;
   foreach (Var (key, val) in map) {
     struct MapRecord record = {
       .key = export_value(key, source),
       .val = export_value(val, source)
     };
-    ((Map) &exported).reinsert(record.key.hash(), record, 0);
+    ((Map) &exported).reinsert_unique(record.key.hash(), &record);
   }
   map.hashes = rebuilt_hashes;
   map.entries = rebuilt_entries;

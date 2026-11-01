@@ -1,10 +1,11 @@
-/*  grouped.x -- grouped storage for native Map families
+/*  grouped.x -- grouped storage for Map families
 
     Copyright (c) 2026 Gary William Flake
 
     Controls hold seven-bit fingerprints, 128 for empty, and 254 for deleted.
     Tiny tables pad controls to sixteen bytes. An unsigned tombstone count
-    follows the padded controls and moves with that allocation.
+    follows the padded controls. Var Map and Pool keep full hashes after it.
+    Both regions move with the control allocation.
 */
 
 /* Cached families retain the complete key hash for rebuilding. Other families
@@ -34,7 +35,8 @@ macro Unit $map.grouped.storage.family(
   Type $entry,
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
   Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error,
-  Name $record_hash, Name $remember_hash, Literal $grow_tail
+  Name $record_hash, Name $remember_hash, Literal $grow_tail,
+  Literal $side_hashes, Literal $owned
 ) {
   static unsigned _control_count(unsigned capacity) =>
     capacity < 16 ? 16 : capacity;
@@ -45,17 +47,37 @@ macro Unit $map.grouped.storage.family(
   static unsigned _lanes(unsigned capacity) =>
     capacity < 16 ? (1u << capacity) - 1 : 65535u;
 
-  static Bytes _new_controls(unsigned capacity) {
+  static Bytes $map.new_controls($map unused, unsigned capacity) {
+    (void) unused;
     unsigned count = _control_count(capacity);
-    Bytes controls = Bytes_new((size_t) count + sizeof(unsigned));
+    size_t bytes = (size_t) count + sizeof(unsigned);
+    if ($side_hashes) bytes += (size_t) capacity * sizeof(unsigned);
+    Bytes controls = Bytes_new(bytes);
     controls = controls.append(0, 1);
     memset(controls, 128, count);
     return controls;
   }
 
+  static inline unsigned *$map.full_hashes($map map) => _deleted(map) + 1;
+
+  static inline unsigned $map.stored_hash($map map, unsigned index) {
+    if ($side_hashes) return map.full_hashes()[index];
+    $entry *entries = map.entries;
+    return $record_hash(&entries[index]);
+  }
+
+  static inline void $map.remember_hash(
+    $map map, unsigned index, unsigned hash) {
+    if ($side_hashes) map.full_hashes()[index] = hash;
+    else {
+      $entry *entries = map.entries;
+      $remember_hash(&entries[index], hash);
+    }
+  }
+
   static void $map.free_table($map map) {
     if ((void *) map == NULL) return;
-    if (map.scope) map.scope.destroy();
+    if ($owned && map.scope) map.scope.destroy();
     map.hashes.free();
     map.entries.free();
     Scope_free(map);
@@ -64,8 +86,8 @@ macro Unit $map.grouped.storage.family(
   static $map $map.new_table($map unused, unsigned capacity) {
     (void) unused;
     $map map = Scope_malloc(sizeof($storage));
-    map.scope = NULL;
-    map.hashes = _new_controls(capacity);
+    map.scope = $owned ? NULL : *Scope_top();
+    map.hashes = map.new_controls(capacity);
     map.entries = Bytes_new(sizeof($entry));
     map.entries = map.entries.append(0, capacity);
     map.capacity = capacity;
@@ -85,7 +107,8 @@ macro Unit $map.grouped.storage.family(
       if (matches) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ($key_equal($key_at(map, index), key)) return (long) index;
+        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+            $key_equal($key_at(map, index), key)) return (long) index;
         matches &= matches - 1;
       }
       if (x2c_map_group_match(controls + start, 128)) return -1;
@@ -105,9 +128,6 @@ macro Unit $map.grouped.storage.family(
     return 1;
   }
 
-  static $value *$map.get_or_insert(
-    $map map, $key *key, $value *value, int *inserted);
-
   /* Rebuild owns a unique, valid source set and an empty destination. */
   static void $map.reinsert_unique(
     $map map, unsigned key_hash, const $entry *record) {
@@ -121,7 +141,7 @@ macro Unit $map.grouped.storage.family(
       if (empty) {
         unsigned index = start + __builtin_ctz(empty);
         entries[index] = *record;
-        $remember_hash(&entries[index], key_hash);
+        map.remember_hash(index, key_hash);
         controls[index] = key_hash >> 25;
         map.used++;
         return;
@@ -135,7 +155,7 @@ macro Unit $map.grouped.storage.family(
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
     unsigned old_capacity = map.capacity;
-    auto Bytes staged_hashes = _new_controls(capacity);
+    auto Bytes staged_hashes = map.new_controls(capacity);
     auto Bytes staged_entries = Bytes_new(sizeof($entry));
     staged_entries = staged_entries.append(0, capacity);
     $storage expanded = *map;
@@ -147,7 +167,7 @@ macro Unit $map.grouped.storage.family(
     $map replacement = ($map) &expanded;
     for (unsigned i = 0; i < old_capacity; i++)
       if (controls[i] < 128)
-        replacement.reinsert_unique($record_hash(&entries[i]), &entries[i]);
+        replacement.reinsert_unique(map.stored_hash(i), &entries[i]);
     Scope_move_before(staged_hashes.block(), map.hashes.block());
     Scope_move_before(
       (unsigned char *) staged_hashes - sizeof(Block),
@@ -189,7 +209,8 @@ macro Unit $map.grouped.storage.family(
       if (matches) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ($key_equal($key_at(map, index), key)) {
+        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+            $key_equal($key_at(map, index), key)) {
           *inserted = 0;
           return $value_at(map, index);
         }
@@ -216,7 +237,7 @@ macro Unit $map.grouped.storage.family(
         if (controls[available] == 254) (*_deleted(map))--;
         entries[available].key = *key;
         entries[available].val = *value;
-        $remember_hash(&entries[available], key_hash);
+        map.remember_hash(available, key_hash);
         controls[available] = fingerprint;
         map.used++;
         *inserted = 1;
@@ -314,13 +335,14 @@ macro Unit $map.grouped.core.family(
   Type $family, Type $storage, Type $key, Type $value, Type $entry,
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
   Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error,
-  Name $record_hash, Name $remember_hash, Literal $grow_tail
+  Name $record_hash, Name $remember_hash, Literal $grow_tail,
+  Literal $side_hashes
 ) {
   $map.grouped.storage.family(
     $family, $storage, $key, $value, $entry,
     $hash, $key_equal, $value_equal, $value_valid,
     $key_at, $value_at, $reinsert_error, $insert_error,
-    $record_hash, $remember_hash, $grow_tail);
+    $record_hash, $remember_hash, $grow_tail, $side_hashes, 1);
   $map.ownership.family($family);
 }
 

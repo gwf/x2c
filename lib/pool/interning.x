@@ -9,6 +9,8 @@ static keyword loop $private.loop;
 
 static struct PoolRecord { union { Var key, val; }; };
 
+#include "group-match.h"
+
 $map.scaffold(
   PoolTable, struct PoolRecord, Var, Var,
   _record_key, _record_value, _reinsert_error, _insert_error,
@@ -17,10 +19,13 @@ $map.scaffold(
 $map.var.family(
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid);
 
-$map.storage.family(
-  PoolTable, struct PoolTable, Var, Var, unsigned, struct PoolRecord,
+$map.grouped.rehashed.records(
+  struct PoolRecord, _table_hash, _record_hash, _remember_hash);
+$map.grouped.storage.family(
+  PoolTable, struct PoolTable, Var, Var, struct PoolRecord,
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid,
-  _record_key, _record_value, _reinsert_error, _insert_error, 0);
+  _record_key, _record_value, _reinsert_error, _insert_error,
+  _record_hash, _remember_hash, 0, 1, 0);
 
 /** Finds an existing nonempty String from borrowed NUL-free bytes and their
     x2c_hash_bytes content hash, searching inner and its ancestors.
@@ -221,19 +226,25 @@ Pool Pool.release(Pool p) {
    Probe the shared table without boxing a temporary String query. */
 static String _get_string(
   PoolTable table, const char *bytes, int length, unsigned hash) {
-  unsigned *hashes = table.hashes;
-  unsigned mask = table.mask, start = hash & mask, capacity = table.capacity;
-  for (unsigned distance = 0; distance < capacity; distance++) {
-    unsigned index = (start + distance) & mask, stored = hashes[index];
-    if (!stored) break;
-    if (stored == hash) {
-      Var entry = *_record_key(table, index);
-      String string = entry.string_payload();
-      if (string && strncmp(string, bytes, (size_t) length) == 0 &&
-          ((const char *) string)[length] == '\0')
-        return string;
+  unsigned char *controls = table.hashes;
+  unsigned *hashes = table.full_hashes();
+  unsigned group_mask = table.mask >> 4, group = hash & group_mask;
+  unsigned char fingerprint = hash >> 25;
+  for (unsigned step = 0; step <= group_mask; step++) {
+    unsigned start = group * 16;
+    unsigned matches = x2c_map_group_match(controls + start, fingerprint);
+    while (matches) {
+      unsigned index = start + __builtin_ctz(matches);
+      if (hashes[index] == hash) {
+        Var entry = *_record_key(table, index);
+        String string = entry.string_payload();
+        if (string && string.len() == length && !memcmp(string, bytes, length))
+          return string;
+      }
+      matches &= matches - 1;
     }
-    if (((capacity + index - (stored & mask)) & mask) < distance) break;
+    if (x2c_map_group_match(controls + start, 128)) break;
+    group = (group + step + 1) & group_mask;
   }
   return NULL;
 }
@@ -292,6 +303,8 @@ module int _owns_locked(Pool pool, Var key) {
 }
 
 module int _root_key_equal(Var a, Var b) => _table_key_equal(&a, &b);
+
+module inline unsigned *_root_hashes(PoolTable table) => table.full_hashes();
 
 module PoolTable _root_new_table(unsigned capacity) =>
   PoolTable.new_table(NULL, capacity);

@@ -550,14 +550,10 @@ Source: `lib/map/map.x`
 
 ## Design notes
 
-`Map` uses Robin Hood hashing split across two scope-owned `Block`s. The
-hash `Block` holds one 32-bit hash per bucket, zero for an empty bucket;
-the entry `Block` holds the `Var` key and value at the same bucket
-index. Lookups probe the compact hash `Block` and touch an entry only
-when its hash matches. Capacity is always a power of two and probe
-distances are computed as needed.
-
-Deletion back-shifts hashes and entries together to close holes.
+`Map` uses sixteen-byte control groups and parallel key/value records.
+Full 32-bit hashes follow the controls and tombstone count in the hash
+Block, so growth reuses hashes without invoking key callbacks. Deletion
+marks a reusable slot; insertion cleans tombstones during rebuilding.
 Structural mutation invalidates traversal state. Keys and values are
 stored as `Var` bits; the `Map` does not free pointer-bearing payloads or
 canonical values reachable through them.

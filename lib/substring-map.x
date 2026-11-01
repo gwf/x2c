@@ -3,7 +3,6 @@
 #pragma once
 #include "substring.x"
 #include "map/map.x"
-#include "group-match.h"
 #include "context.x"
 
 /** A scope-owned count table that borrows Substr keys. Keep every source
@@ -23,6 +22,8 @@ $map.scaffold(
   _key, _value, _reinsert_error, _insert_error,
   "MapSubInt.reinsert", "MapSubInt.insert");
 
+#include "group-match.h"
+
 $map.grouped.cached.records(
   struct MapSubIntRecord, _record_hash, _remember_hash);
 
@@ -31,7 +32,7 @@ $map.grouped.core.family(
   struct MapSubIntRecord,
   _hash, _equal_key, _equal_value, _valid,
   _key, _value, _reinsert_error, _insert_error,
-  _record_hash, _remember_hash, 0);
+  _record_hash, _remember_hash, 0, 0);
 
 $map.typed.publish(
   MapSubInt, Substr, int, mapsubint, <mapsubint>,

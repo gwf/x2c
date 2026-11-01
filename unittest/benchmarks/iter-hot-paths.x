@@ -219,11 +219,11 @@ int main(void) {
      here to map-try-next is what the call costs. */
   start = now_ns();
   for (int r = 0; r < repeats; r++) {
-    unsigned *hashes = entries.hashes;
+    unsigned char *controls = entries.hashes;
     struct BenchMapRecord *records = entries.entries;
     unsigned capacity = entries.capacity;
     for (unsigned i = 0; i < capacity; i++)
-      if (hashes[i]) sink += records[i].val.integer();
+      if (controls[i] < 128) sink += records[i].val.integer();
   }
   result("map-inline-scan", now_ns() - start, (long) width * repeats);
 

@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "map/map.x"
-#include "group-match.h"
 #include "integer-ops.x"
 #include "substring.x"
 
@@ -103,6 +102,8 @@ $integer.raw(_integer_raw);
 
 // families
 
+#include "group-match.h"
+
 $map.grouped.rehashed.records(
   struct MapIntIntRecord, _hash_int, _int_record_hash, _int_remember_hash);
 
@@ -113,7 +114,7 @@ $map.grouped.core.family(
   _valid_int,
   _int_key, _int_value,
   _int_reinsert_error, _int_insert_error,
-  _int_record_hash, _int_remember_hash, 1);
+  _int_record_hash, _int_remember_hash, 1, 0);
 $map.grouped.typed.family(
   MapIntInt, int, int,
   _update_int, _bad_arg, _bad_op,
@@ -138,7 +139,7 @@ $map.grouped.core.family(
   _valid_double,
   _long_key, _double_value,
   _long_reinsert_error, _long_insert_error,
-  _long_record_hash, _long_remember_hash, 0);
+  _long_record_hash, _long_remember_hash, 0, 0);
 $map.grouped.typed.family(
   MapLongDouble, long, double,
   _update_double, _bad_arg, _bad_op,
@@ -164,7 +165,7 @@ $map.grouped.core.family(
   _valid_string,
   _string_key, _string_value,
   _string_reinsert_error, _string_insert_error,
-  _string_record_hash, _string_remember_hash, 1);
+  _string_record_hash, _string_remember_hash, 1, 0);
 $map.grouped.typed.family(
   MapStringString, String, String,
   _update_string, _bad_arg, _bad_op,
@@ -192,7 +193,7 @@ $map.grouped.core.family(
   _valid_int,
   _string_int_key, _string_int_value,
   _string_int_reinsert_error, _string_int_insert_error,
-  _string_int_record_hash, _string_int_remember_hash, 0);
+  _string_int_record_hash, _string_int_remember_hash, 0, 0);
 $map.grouped.typed.family(
   MapStringInt, String, int,
   _update_int, _bad_arg, _bad_op,
