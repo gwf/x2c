@@ -4,7 +4,8 @@
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
-> see its delivery record below. Batches B-E remain open. Batch A also absorbs
+> see its delivery record below. Batch B is delivered in `147ce79ee`.
+> Batches C-E remain open. Batch A also absorbs
 > follow-up F4 from the
 > [October 31 follow-ups](review-followups-2026-10-31.md).
 
@@ -80,6 +81,21 @@ microbenchmarks were not run; batch A touches no allocation path.
 | B1 | `docs/src/reference/release-notes.md` (Unreleased) has no entry for the `%<<a>>` to `%<a>` SymbolSet literal change (`37e0d8a2b`), which the v0.15.1 book used in five chapters, and the installation upgrade table has no row for it. Also missing: contextual x2c keywords, macro-target decorators and `expand`, grouped and split Map storage, the experimental `x2c bind` command, and the three repair-wave fixes (leading typedef attributes, quoted keyword atoms under `--cpp`, the generated-owner protocol diagnostic). | Add the entries under the existing Language, Library, Commands and Fixed headings, with a breaking-change upgrade row for `%<...>` in `docs/src/guide/installation.md`. Each entry links its book section. |
 | B2 | `lib/task/minicoro.h` (minicoro v0.2.0, Unlicense or MIT-0) is compiled into `libx2c.a` through `builds/stage.mk`, yet `THIRD_PARTY.md`, `NOTICE` and `LICENSES/` do not mention it, and `site/src/content/home.md` still says the compiler, library and runtime have no third-party library dependencies. | Add a vendored-runtime-sources section to `THIRD_PARTY.md` naming minicoro with the pinned revision, digest and license from `lib/task/README.md`, put its license text under `LICENSES/` beside the linenoise text, and qualify the home-page sentence. |
 | B3 | The payload row `("builds/0/lib" ("*.h") ("include/x2c"))` in `etc/x2c-payload.x` installs the patched `minicoro.h` into the public include directory. No generated header includes it; only `task-native.c` does. | Exclude native-private headers from that row, or copy them to a private directory. Confirm with `tar tzf` on a staged payload that `include/x2c/minicoro.h` is absent and `group-match.h` is still present, since generated C includes the latter. |
+
+### Batch B delivery, 2026-11-01
+
+Delivered in `147ce79ee`. The release notes gain the `%<a b>` literal, the
+contextual keywords, Macro-target decorators with `expand`, the shared
+grouped Map storage with its traversal-order note, the experimental
+`x2c bind` command, and three fixed defects; the attribute-macro entry now
+covers typedefs. The installation upgrade table gains rows for `%<<a b>>`
+and for an object or function named `expand`, with a probe confirming that
+a `Type.expand` method still compiles. `THIRD_PARTY.md` gains a vendored
+runtime sources section for minicoro and its LuaCoco-derived assembly, with
+the license text under `LICENSES/`, and the home page qualifies its
+dependency claim. `etc/x2c-payload.x` skips `minicoro.h`; a scratch
+`make install` ships `group-match.h`, `x2c.h`, and the three license files
+and no `minicoro.h`. The documentation audit passes with the new links.
 
 ## Batch C: grouped Map margins
 
