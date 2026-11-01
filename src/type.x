@@ -171,7 +171,7 @@ static List _from_ast(List node, List context) {
     case %(declare ?source_type ?bindings):
       return _from_declarators(_without_leading_text(source_type), bindings);
     case %(typedef ?source_type ?bindings):
-      return _from_declarators(source_type, bindings);
+      return _from_declarators(_without_leading_text(source_type), bindings);
     case %(bind ? ?mods): return _from_bind(mods, context);
     case %(params *items): return _from_items(items, context);
     case %(bindings *items): return _from_items(items, context);
