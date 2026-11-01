@@ -53,7 +53,7 @@ List Compiler.parse_declaration_argument(Compiler c) {
     return %(seq @(declarations.list_free()));
   }
   List storage = _storage_class(c);
-  if (storage === %(typedef))
+  if (<typedef> in storage)
     $fail.parse_decl_typedef(c, c.token);
   List (type, binding_type) = _declaration_types(c, storage);
   if (_destructure_starts(c))
@@ -115,8 +115,9 @@ void Compiler.check_reference_placement(Compiler c, Type type) {
 // declaration rows and initializers
 
 static List _declaration_group(Compiler c, int row) {
+  Token first = c.token;
   List storage = _storage_class(c);
-  if (storage === %(typedef)) return _typedef(c, storage, row);
+  if (<typedef> in storage) return _typedef(c, storage, row, first);
   List (type, binding_type) = _declaration_types(c, storage);
   if (_destructure_starts(c))
     return _destructure_declaration(c, type, binding_type, 0);
@@ -124,14 +125,13 @@ static List _declaration_group(Compiler c, int row) {
   return _finish_declaration(c, <declare>, type, bindings, 0);
 }
 
-static List _typedef(Compiler c, List context, int row) {
-  Token first = c.token;
+static List _typedef(Compiler c, List storage, int row, Token first) {
   // An imported `typedef const char *(*fn)(int)` names a qualified type
   // like an object declaration does, so read the qualifiers first.
   List quals = _type_qualifiers(c);
   List spec = quals.append(_type_specifier(c));
   spec = c.sym.local_type(spec);
-  List bindings = _declarator_list(c, spec, context, row);
+  List bindings = _declarator_list(c, spec, %(typedef), row);
   /* A typedef's own alignment changes every record field that names it,
      even when the record declaration has no attribute of its own. */
   if (_layout_attribute_since(c, first))
@@ -139,7 +139,8 @@ static List _typedef(Compiler c, List context, int row) {
       String name = Ast.binding_spelling(declarator.cadr());
       if (name) c.sym.set(%($name "layout-attribute"), %(unknown));
     }
-  return _finish_declaration(c, <typedef>, spec, bindings, 0);
+  List text = storage.filter(%!(item) => item is <list>);
+  return _finish_declaration(c, <typedef>, %(@text @spec), bindings, 0);
 }
 
 /* Reads the qualifiers, the type specifier, and any storage class or
