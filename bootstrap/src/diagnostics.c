@@ -397,12 +397,19 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
   Compiler_report_warning_at(c, code, message, location, _notes(c, location, notes));
 }
 
+int Diagnostics_anonymous_macro_name(String name){
+  if(! _init_guard_) _file_init_();
+  return String_startswith(name, _1);
+}
+
 String Diagnostics_macro_spelling(List definition, Token invocation){
   if(! _init_guard_) _file_init_();
   Atom name = List_assoc(definition, Symbol_var(920394));
-  if(! String_startswith(Atom_str(name), _1)) return Atom_str(name);
+  if(! Diagnostics_anonymous_macro_name(Atom_str(name))) return Atom_str(name);
   if(invocation -> type != 73) return invocation -> text;
-  return String_add(_2, Token_skip_trivia(invocation + 1) -> text);
+  Token spelled = invocation + 1;
+  while(spelled -> type == 40896714 || spelled -> type == 7477210024) spelled ++;
+  return String_add(_2, spelled -> text);
 }
 
 String Diagnostics_macro_definition_note(List definition);
@@ -447,7 +454,7 @@ String Compiler_cpp_note(Compiler c, List location){
   if(! _init_guard_) _file_init_();
   Tokenizer tokenizer = c -> tokenizer;
   if(! tokenizer || ! Array_truth(tokenizer -> expansions) || ! List_truth(location)) return NULL;
-  int line = Var_int(Var_convert_at(List_assoc(location, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 250}; & _x2c_gensym_error_site_3; }))), position = Var_int(Var_convert_at(List_assoc(location, Symbol_var(1133019155420)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 250}; & _x2c_gensym_error_site_4; })));
+  int line = Var_int(Var_convert_at(List_assoc(location, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 258}; & _x2c_gensym_error_site_3; }))), position = Var_int(Var_convert_at(List_assoc(location, Symbol_var(1133019155420)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 258}; & _x2c_gensym_error_site_4; })));
   Token tokens = tokenizer -> tokens;
   {
     List row;
@@ -458,8 +465,8 @@ String Compiler_cpp_note(Compiler c, List location){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
       {
         List _x2c_gensym_destructure_1 = row;
-        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 253}; & _x2c_gensym_error_site_5; })));
-        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 253}; & _x2c_gensym_error_site_6; })));
+        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 261}; & _x2c_gensym_error_site_5; })));
+        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 261}; & _x2c_gensym_error_site_6; })));
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 2));
         List site = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 3));
         Token token = tokens + first;
@@ -486,8 +493,8 @@ String Compiler_expanding_macro(Compiler c, Token token){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
       {
         List _x2c_gensym_destructure_2 = row;
-        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 269}; & _x2c_gensym_error_site_7; })));
-        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 269}; & _x2c_gensym_error_site_8; })));
+        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 277}; & _x2c_gensym_error_site_7; })));
+        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 277}; & _x2c_gensym_error_site_8; })));
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_2, 2));
         List site = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 3));
         (void) site;
@@ -504,7 +511,7 @@ String Diagnostics_c_macro_note(String name, List site){
   if(! _init_guard_) _file_init_();
   List _x2c_gensym_destructure_3 = site;
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_3, 0));
-  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_3, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_c_macro_note",.line = 280}; & _x2c_gensym_error_site_9; })));
+  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_3, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_c_macro_note",.line = 288}; & _x2c_gensym_error_site_9; })));
   return String_join(NULL, cons(String_var(_6), cons(String_var(name), cons(String_var(_7), cons(String_var(file), cons(String_var(_9), cons(String_var(int_str(line)), NULL)))))));
 }
 
@@ -521,7 +528,7 @@ String Diagnostics_macro_definition_note(List definition){
   if(! _init_guard_) _file_init_();
   List origin = Var_list_payload(List_assoc(definition, Symbol_var(1044986460)));
   String file = Var_as_string(List_assoc(origin, Symbol_var(412426)));
-  int line = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 294}; & _x2c_gensym_error_site_10; }))), column = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(233614172)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 294}; & _x2c_gensym_error_site_11; })));
+  int line = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 302}; & _x2c_gensym_error_site_10; }))), column = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(233614172)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 302}; & _x2c_gensym_error_site_11; })));
   return String_join(NULL, cons(String_var(_20), cons(String_var(file), cons(String_var(_9), cons(String_var(int_str(line)), cons(String_var(_9), cons(String_var(int_str(column)), NULL)))))));
 }
 
@@ -536,7 +543,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
           Var parent;
           parent = x2c_match_value_0;
           {
-            occurrence = Var_int(Var_convert_at(parent, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/diagnostics.x",.function = "Compiler_origin_location",.line = 313}; & _x2c_gensym_error_site_12; })));
+            occurrence = Var_int(Var_convert_at(parent, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/diagnostics.x",.function = "Compiler_origin_location",.line = 321}; & _x2c_gensym_error_site_12; })));
             continue;
           }
 
@@ -606,10 +613,10 @@ String Compiler_token_source(Compiler c, Token token, int * line){
   List region = _token_region(c, token);
   if(! List_truth(region)) return c -> filename;
   List _x2c_gensym_destructure_4 = region;
-  int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 375}; & _x2c_gensym_error_site_13; })));
-  int text_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 375}; & _x2c_gensym_error_site_14; })));
+  int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_13; })));
+  int text_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_14; })));
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_4, 2));
-  int file_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 375}; & _x2c_gensym_error_site_15; })));
+  int file_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_15; })));
   if(line)(* line) = file_line + token -> line - text_line;
   return file;
 }
@@ -626,7 +633,7 @@ int Compiler_token_column(Compiler c, Token token){
       Var _x2c_gensym_match_value_4 = text_line;
       Var _x2c_gensym_match_value_5 = before;
       {
-        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_column",.line = 384}; & _x2c_gensym_error_site_16; })));
+        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_column",.line = 392}; & _x2c_gensym_error_site_16; })));
         String before = Var_as_string(_x2c_gensym_match_value_5);
         if(token -> line == text_line) return String_len(before) + token -> col;
       }
@@ -939,7 +946,7 @@ static void _write_heading(Compiler c, Symbol code, String message, List locatio
         }
         );
         fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
-        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 587}; & _x2c_gensym_error_site_17; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 587}; & _x2c_gensym_error_site_18; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 587}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 587}; & _x2c_gensym_error_site_20; }))));
+        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_17; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_18; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_20; }))));
         return;
       }
 
@@ -966,7 +973,7 @@ static void _show_source_context(Compiler compiler, int line, int column, int le
       Var _x2c_gensym_match_value_6 = text_line;
       Var _x2c_gensym_match_value_7 = before;
       {
-        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 603}; & _x2c_gensym_error_site_21; })));
+        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 611}; & _x2c_gensym_error_site_21; })));
         String before = Var_as_string(_x2c_gensym_match_value_7);
         if(line == text_line) if(String_len(before)){
           String shown =({
@@ -1015,7 +1022,7 @@ static int _text_line(Compiler c, int position){
     int _x2c_gensym_macro_cursor_9 = 0;
     Var _x2c_gensym_macro_cursor_output_10;
     while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_10))){
-      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 630}; & _x2c_gensym_error_site_22; })));
+      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 638}; & _x2c_gensym_error_site_22; })));
       {
         if(start > position) break;
         line ++;

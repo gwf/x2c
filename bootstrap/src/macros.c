@@ -650,7 +650,7 @@ typedef struct f19_invocations_targets___Decoration{
   Token invocation, start;
   Symbol position;
   Symbol kind;
-  int open, named_macro;
+  int open;
 }
 f19_invocations_targets___Decoration;
 
@@ -7316,6 +7316,8 @@ static List _decorate(Compiler c, List definition, Token invocation, Symbol posi
 }
 }
 
+int Diagnostics_anonymous_macro_name(String);
+
 static List f19_invocations_targets____decorate_producer(f19_invocations_targets___Decoration * d){
   Compiler c =(* d).c;
   SymTxn transaction = Compiler_begin_semantic_transaction(c);
@@ -7351,7 +7353,8 @@ static List f19_invocations_targets____decorate_producer(f19_invocations_targets
           List _x2c_gensym_match_expr_43 = value;
           {if(_x2c_gensym_match_expr_43 && _x2c_gensym_match_expr_43 ->car.u64 == 9224498832502366540ULL){
             {
-              if((* d).named_macro){
+              if(! Diagnostics_anonymous_macro_name(Var_str(List_assoc(value, Symbol_var(920394))))){
+                if((* d).position == 405758822009820) value = Compiler_capture_macro_value(c, value);
                 List result = Compiler_bind_syntax(c, List_var(value), (* d).position, List_type(c -> return_type));
                 SymTxn_commit(&(transaction));
                 {
@@ -7520,7 +7523,7 @@ static void f19_invocations_targets____bind_name_arguments(Compiler c, List defi
 }
 
 static List f19_invocations_targets____decoration_node(f19_invocations_targets___Decoration * d, List arguments){
-  Compiler c =(* d).c; (* d).start = c -> token; (* d).named_macro =(* d).kind == 27335838 &&(Compiler_macro_form_is_definition(c) || Compiler_local_macro_form_is_definition(c));  List target = f19_invocations_targets____target(&((* d)));  if((* d).kind == 27335838)(* d).generator = target;  if((* d).position == 43159332400040) target = Compiler_anchor_origin(c, target, (* d).start);  List target_capture = f19_invocations_targets____capture(&((* d)), target);  List input = cons(_38, cons(List_var(arguments), cons(List_var(target_capture), NULL)));  return _invocation_node(c, (* d).definition, input, (* d).invocation);
+  Compiler c =(* d).c; (* d).start = c -> token;  List target = f19_invocations_targets____target(&((* d)));  if((* d).kind == 27335838)(* d).generator = target;  if((* d).position == 43159332400040) target = Compiler_anchor_origin(c, target, (* d).start);  List target_capture = f19_invocations_targets____capture(&((* d)), target);  List input = cons(_38, cons(List_var(arguments), cons(List_var(target_capture), NULL)));  return _invocation_node(c, (* d).definition, input, (* d).invocation);
 }
 
 static List _invocation_node(Compiler c, List definition, List input, Token invocation){

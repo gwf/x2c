@@ -54,6 +54,8 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
 
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);
 
+int Diagnostics_anonymous_macro_name(String name);
+
 String Diagnostics_macro_spelling(List definition, Token invocation);
 
 String Compiler_macro_expansion_note(Compiler c);
