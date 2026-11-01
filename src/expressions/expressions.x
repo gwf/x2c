@@ -11,6 +11,7 @@
 #include "private-keywords.x"
 #include "compiler/compiler.x"
 #include "type.x"
+#include "scan.x"
 
 /** A printf-family function: its spelling, format and first-value argument
     indexes, and whether recognition requires an unresolved callee.

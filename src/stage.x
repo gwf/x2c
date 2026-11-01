@@ -139,7 +139,11 @@ Var Compiler.literal_text_value(String spelling) {
     return text.str();
   }
   if (len >= 3 && spelling[0] == '\'') {
-    String body = String.new_len(spelling + 1, len - 2).unescape();
+    if (scan_c_character(spelling) != len) return void;
+    Buffer text = auto Buffer.new(0);
+    int ended = 0;
+    _literal_piece(text, spelling + 1, len - 2, ended);
+    String body = text.str();
     return (char) (body.len() ? body[0] : 0);
   }
   return void;

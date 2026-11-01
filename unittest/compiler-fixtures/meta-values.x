@@ -35,8 +35,10 @@ meta static int narrowed(double value) => Var.convert(value, <i32>).int();
 meta static int position(List values, Symbol key) => values.index(key);
 
 meta static String literal_value(Code text) => text.value();
+meta static Var character_value(Code text) => text.value();
 meta static int format_known(Code text) => text.format() != NULL;
 macro Expression $decoded(Expr $value) => $literal_value($value);
+macro Expression $character(Expr $value) => $character_value($value);
 macro Expression $known_format(Expr $value) => $format_known($value);
 
 int main(void) {
@@ -57,5 +59,8 @@ continued";
 continued"));
   printf("format known %d %d\n", $known_format(""),
          $known_format("pre" NATIVE_SUFFIX "post"));
+  printf("character values %d %d %d\n",
+         '\x000061' == $character('\x000061'),
+         '\141' == $character('\141'), '\0' == $character('\0'));
   return 0;
 }

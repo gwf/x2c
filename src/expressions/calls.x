@@ -181,7 +181,15 @@ String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
     case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
-      if (Compiler.literal_text_value(spelling) is not <string>) return NULL;
+      int len = spelling.len();
+      if (!len) return NULL;
+      for (int i = 0; i < len;) {
+        if (spelling[i] != '"') return NULL;
+        int size = scan_c_string(spelling + i);
+        if (size < 0) return NULL;
+        i += size;
+        while (i < len && isspace((unsigned char) spelling[i])) i++;
+      }
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
