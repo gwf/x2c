@@ -5,8 +5,8 @@
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
 > see its delivery record below. Batch B is delivered in `147ce79ee`,
-> batch C in `0de444adf`, and batch D in `COMMIT_D`. Batch E remains open. Batch A also absorbs
-> follow-up F4 from the
+> batch C in `0de444adf`, and batch D in `eb8b27496`. Batch E remains open.
+> Batch A also absorbs follow-up F4 from the
 > [October 31 follow-ups](review-followups-2026-10-31.md).
 
 ## Review scope and baseline
@@ -146,7 +146,7 @@ no fixture artifact changed. The probe-copy consolidation stays deferred.
 
 ### Batch D delivery, 2026-11-01
 
-Delivered in `COMMIT_D`. The public Scope prose in `lib/scope/*.x`,
+Delivered in `eb8b27496`. The public Scope prose in `lib/scope/*.x`,
 `lib/context.x`, `docs/src/guide/memory.md`, and `system-macros.md` says
 open and close; `make doc-generate` carried it into `scope.md` and
 `context.md`. The philosophy states the destroy contract as the caller's
