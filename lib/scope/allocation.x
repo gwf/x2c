@@ -39,7 +39,7 @@ static macro Expression $scope.alloc_meta(Expr $a) =>
     The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
     ends its life early, `Scope.move` reassigns its owner, and
     `Scope.close` or `Scope.destroy` reclaims whatever is left. The active
-    scope at the time of allocation owns the result; a later retain or push
+    scope at the time of allocation owns the result; a later open or push
     does not move it.
     Raises: `<size-limit>` when the size would overflow the allocation header,
     or `<alloc-fail>` when the underlying allocation fails. Before `Error`
@@ -53,7 +53,7 @@ meta native void *Scope.malloc(size_t size) {
 /** Allocates `size` uninitialized bytes in the active scope with a finalizer.
     `drop` runs exactly once with the block's pointer when the block is
     reclaimed: by `Scope.free`, by `Scope.realloc` to size zero, by the
-    release or destruction of its scope, or by thread and process shutdown.
+    close or destruction of its scope, or by thread and process shutdown.
     The finalizer follows the block through `Scope.move` and survives
     `Scope.realloc`, which passes `drop` the resized pointer. Blocks are
     reclaimed most recent first, so a finalizer sees older blocks still live.
@@ -135,7 +135,7 @@ void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
 
 /** Copies `size` bytes from `ptr` into a new allocation in the active scope.
     The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
-    release that ends the region. Nothing about the source is remembered, so
+    close that ends the region. Nothing about the source is remembered, so
     duplicating a C string means copying its terminator too:
     `xmemdup(text, strlen(text) + 1)`.
 

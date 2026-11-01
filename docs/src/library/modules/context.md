@@ -59,8 +59,8 @@ Source: `lib/context.x`
 `meta native Var Context.export(Context context, Var value)`
 
 Exports `value` into the parent of the current `Context`.
-Values may belong to a retained region of that `Context`; export them
-while live, before releasing their `Scope` or closing the `Context`.
+Values may belong to an open region of that `Context`; export them
+while live, before closing their `Scope` or the `Context`.
 Built-in movable families preserve identity. A custom exact-descriptor
 exporter defines its returned value, including identity. Private canonical
 immutable built-ins may change, so callers must use the returned value;

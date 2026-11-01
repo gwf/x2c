@@ -28,6 +28,16 @@ static void task_empty_batch_has_no_completion(void) {
   Array completed = auto [];
   Task.run([], %!(Var result) => completed.push(result));
   EXPECT_INT_EQ(completed.len(), 0);
+  int nested = 0;
+  Func inner = %!(void) => 1;
+  Task.run([%!(void) using &nested, &inner => {
+    try Task.run([inner]);
+    catch %(bad-state (operation "Task.run")
+                      (reason "nested task batches are unsupported")):
+      nested = 1;
+    return void;
+  }], NULL);
+  EXPECT_INT_EQ(nested, 1);
 }
 
 static void task_request_reply_closes_after_clients_finish(void) {

@@ -81,7 +81,7 @@ Paths below are relative to `lib/`.
 | `json.x`, `datum.x`, `datum-reader.x` | JSON and Lisp reader text. |
 | `diff.x`, `digest.x`, `regex.x` | Line differences, SHA-256 digests, and regular expressions. |
 | `time.x`, `random.x`, `encoding.x`, `url.x` | Clocks and calendar time, random values and UUIDs, text encodings, and URLs. |
-| `context.x`, `thread.x`, `thread-state.x`, `channel.x`, `mutex.x` | Runtime state, native workers, communication, and coordination. |
+| `context.x`, `thread.x`, `thread-state.x`, `task.x`, `channel.x`, `mutex.x` | Runtime state, native workers, cooperative task batches, communication, and coordination. |
 | `scan.x`, `tokenizer.x` | Lexical scanners and the shared tokenizer. |
 | `func/func.x`, `lisp/lisp.x`, `lisp-targets/lisp-targets.x`, `lisp-bindings.x` | Native callable binding, runtime Lisp, and its native operations. |
 | `meta.x`, `compiler-meta.x`, `type.x`, `rewrite.x` | Public and compiler-private meta operations, structural Type operations, and rewrite registration. |

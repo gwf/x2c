@@ -3,8 +3,8 @@
     Copyright (c) 2025 Gary William Flake
 
     A `Scope` owns a group of individually managed allocations. Callers use
-    the active scope, target an explicit scope slot, or retain and release a
-    nested lifetime. Any block can still be freed, resized, or relinked onto
+    the active scope, target an explicit scope slot, or open and close a
+    nested region. Any block can still be freed, resized, or relinked onto
     another scope without copying.
 
     Public operations initialize the module on first use, so they are safe
@@ -28,7 +28,7 @@ typedef struct ScopeAlloc {
   struct ScopeAlloc *prev, *next;
 } *ScopeAlloc;
 
-/** Handle for a region and any retained regions linked below it.
+/** Handle for a region and any open regions linked below it.
     The layout is public; only `Scope` operations create or mutate valid
     allocation and region links. Callers provide exclusive access to those
     links, including ownership parents, during allocation and lifetime changes.

@@ -66,19 +66,19 @@ meta native void Scope.pop(void) {
                                  : state.base_slot;
 }
 
-// retained regions
+// open regions
 
 /** Opens a new scope in the active slot and makes it the current one.
     Allocations that follow are charged to the new scope. The scope that was
-    there is linked below it and becomes current again on release, so retained
+    there is linked below it and becomes current again on close, so open
     regions nest. Open a nested region when a group of temporaries should die
     before the surrounding work does. Each `Scope.open` must be paired with
     exactly one `Scope.close`.
 
-    Pair them with `defer`. `Error` transfer does not release a scope. A raise
+    Pair them with `defer`. `Error` transfer does not close a region. A raise
     that jumps past a plain `Scope.close` leaves that region live for the
-    rest of the process, so use `defer` in any function that both retains and
-    can raise.
+    rest of the process, so use `defer` in any function that both opens a
+    region and can raise.
 
     ```x2c
     ~static void report(int width) {
@@ -96,8 +96,8 @@ meta native void Scope.pop(void) {
     ```
 
     A scope wrapped around nothing but canonical values does nothing, since
-    those values already outlive it, and adds a release that is easy to omit.
-    Raises: `<alloc-fail>` when the scope or its retain record cannot be
+    those values already outlive it, and adds a close that is easy to omit.
+    Raises: `<alloc-fail>` when the scope or its region record cannot be
     allocated, or `<size-limit>` when that record cannot grow. Before `Error`
     initialization they terminate at the error floor.
 */
@@ -118,21 +118,21 @@ meta native void Scope.open(void) {
     The scope linked below it then becomes active again.
 
     Canonical values are not reclaimed. Interned `String`s, `List` cells, and
-    `Symbol`s built inside the region remain valid after release.
+    `Symbol`s built inside the region remain valid after the close.
     An allocation relinked with `Scope.move` now belongs to its new scope and
     survives. Anything owned by another scope or another slot is untouched,
     and memory from plain `malloc` is unaffected.
 
     The active region must be the one opened by a matching `Scope.open` on
-    this same slot. Releasing an empty slot, a directly allocated root, or a
-    region retained on another pushed slot is an imbalance and raises. An
-    extra release cannot destroy the surrounding region, and a retained empty
-    scope still closes normally.
+    this same slot. Closing an empty slot, a directly allocated root, or a
+    region opened on another pushed slot is an imbalance and raises. An
+    extra close cannot destroy the surrounding region, and an empty open
+    region still closes normally.
 
-    A pointer into a released region is not diagnosed. Neither the compiler
+    A pointer into a closed region is not diagnosed. Neither the compiler
     nor the runtime tracks it, and using it afterwards is undefined behavior.
     With accounting enabled, `Scope.stats` confirms that nothing stays live.
-    Raises: `<bad-state>` when no matching retain owns the active region. The
+    Raises: `<bad-state>` when no matching open owns the active region. The
     failure leaves the active region intact. Before `Error` initialization it
     terminates at the error floor.
 */
@@ -194,7 +194,7 @@ Scope *Scope.top(void) {
 }
 
 /** Returns this scope's lifetime parent, or NULL for a detached scope.
-    This is independent of the active allocation stack and retained regions.
+    This is independent of the active allocation stack and open regions.
 */
 Scope Scope.parent(Scope scope) {
   return scope ? scope.parent : NULL;
@@ -264,8 +264,8 @@ meta native void Scope.cleanup(Scope value) { value.destroy(); }
     scope you hold in a variable, and is the counterpart to
     `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
     discards its name; pointers into it are dangling afterwards, and nothing
-    diagnoses their use. Any regions still linked below it, from retains that
-    were never released, are destroyed with it.
+    diagnoses their use. Any regions still linked below it, opened and never
+    closed, are destroyed with it.
 
     The caller must own the right to destroy the chain and keep borrowed
     owners alive until their users finish. Destroying an attached lower region
@@ -289,7 +289,7 @@ meta native void Scope.destroy(Scope scope) {
   _destroy_chain(scope);
 }
 
-/** Destroys this thread's `Scope` chain and its push and retain stacks.
+/** Destroys this thread's `Scope` chain and its push and region stacks.
     It runs last in `x2c_thread_state_release` and repeats harmlessly; a
     thread that never created a `Scope` has nothing to destroy.
 */
@@ -343,8 +343,7 @@ void x2c_scope_execution_free(void *saved) {
 
 module ScopeThreadState _thread(void) {
   ScopeThreadState state = &scope_thread;
-  if (!state.base_slot) state.base_slot = &scope_root;
-  if (!state.active) state.active = state.base_slot;
+  if (!state.active) state.active = state.base_slot = &scope_root;
   return state;
 }
 

@@ -4,8 +4,8 @@
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
-> see its delivery record below. Batch B is delivered in `147ce79ee` and
-> batch C in `0de444adf`. Batches D and E remain open. Batch A also absorbs
+> see its delivery record below. Batch B is delivered in `147ce79ee`,
+> batch C in `0de444adf`, and batch D in `COMMIT_D`. Batch E remains open. Batch A also absorbs
 > follow-up F4 from the
 > [October 31 follow-ups](review-followups-2026-10-31.md).
 
@@ -143,6 +143,28 @@ no fixture artifact changed. The probe-copy consolidation stays deferred.
 | D2 | `agents/x2c-philosophy.md` still states the withdrawn contract that `Scope.destroy` accepts only a detached root and rejects attached lower scopes; `regions.x` now says destroy rejects the execution base and pushed slots and does not diagnose every invalid destruction. `agents/x2c-code-organization-guide.md` omits `task.x` from the runtime row. `packages/torch/benchmarks/PILOT.md` uses `Scope.retain`/`Scope.release`. `examples/apps/notes/bench/README.md` still says the in-process probe requires the local async prototype. | Restate the destroy paragraph as the caller lifetime contract; add `task.x`; rename the PILOT reproducer; drop the prototype sentence. |
 | D3 | Two owners validate task stack bounds: `lib/task.x` `_stack_size` rejects below 32768 or above `SIZE_MAX - 65536` and raises `bad-arg`; `lib/task/stack.c` `x2c_task_stack_new` rejects below `MCO_MIN_STACK_SIZE` or above `SIZE_MAX - 2 * page` with `EINVAL`. `_thread()` in `regions.x` has two lazy-init tests for fields that are always set together, and `lib/scope/runtime.x` reassigns `active` right after `_thread()` set it. `lib/channel.x` re-tests `task` around `x2c_task_stopping`, which already returns `job && ...`. | Let `task.x` own the bounds and have `stack.c` trust its only caller, keeping the `bad-arg` cause. Set `base_slot` and `active` under one `!active` test and drop the redundant reassignment. Drop one side of the channel null test. |
 | D4 | The nested-batch rejection in `Task.run` (`nested task batches are unsupported`) is documented but untested. The optional backend probe `unittest/probes/run-task-backend.sh`, `task-unsupported.x` and `lib/task/README.md` call the unsupported-target branch a "fallback", which the plan rules out. | Add one assertion to an existing `test-task.x` test. Rename "fallback" to "unsupported target" in those headers. |
+
+### Batch D delivery, 2026-11-01
+
+Delivered in `COMMIT_D`. The public Scope prose in `lib/scope/*.x`,
+`lib/context.x`, `docs/src/guide/memory.md`, and `system-macros.md` says
+open and close; `make doc-generate` carried it into `scope.md` and
+`context.md`. The philosophy states the destroy contract as the caller's
+lifetime obligation, the organization guide lists `task.x`, the PILOT
+reproducer uses `Scope.open`/`Scope.close`, and the Notes bench README no
+longer names the prototype. `lib/task.x` is the only owner of the stack
+bounds; `stack.c` trusts it, and the layout probe drops its two `EINVAL`
+assertions. `_thread()` installs both slots under one test, `_initialize`
+no longer reassigns `active`, and `channel.x` relies on
+`x2c_task_stopping` accepting NULL. The empty-batch test asserts the
+nested-batch `bad-state`, and the optional backend probes say
+"unsupported target". `make verify` passes with 1,164 tests, 103,729
+assertions and 1,383 fixtures; `run-task-backend.sh` passes; check-docs
+passes. Retired-instruction medians of five alternating runs, `-O2`, before
+and after: 100,000 regions destroying 16 allocations 1,838.9 M to 1,833.8 M
+(-0.28%); 1 million malloc/realloc/free cycles 1,830.7 M to 1,829.6 M
+(-0.06%); the Scope hot-path benchmark 2,514.7 M to 2,508.1 M (-0.26%).
+All three are within the noise floor.
 
 ## Batch E: plan and record hygiene
 

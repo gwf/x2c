@@ -49,11 +49,5 @@ int main(void) {
       assert(errno == ENOMEM);
     }
   }
-  errno = 0;
-  assert(!x2c_task_stack_new(entry, NULL, 32767));
-  assert(errno == EINVAL);
-  errno = 0;
-  assert(!x2c_task_stack_new(entry, NULL, SIZE_MAX));
-  assert(errno == EINVAL);
   return 0;
 }

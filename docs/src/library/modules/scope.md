@@ -9,7 +9,7 @@ Memory allocation scope management.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_scope_thread_release`](#x2c_scope_thread_release) | Destroys this thread's `Scope` chain and its push and retain stacks. |
+| [`x2c_scope_thread_release`](#x2c_scope_thread_release) | Destroys this thread's `Scope` chain and its push and region stacks. |
 | [`xcalloc`](#xcalloc) | Allocates zeroed objects in the active scope through `Scope.calloc`. |
 | [`xfree`](#xfree) | Frees scope-owned memory through `Scope.free`; NULL does nothing. |
 | [`xmalloc`](#xmalloc) | Allocates uninitialized bytes in the active scope through `Scope.malloc`. |
@@ -31,7 +31,7 @@ Memory allocation scope management.
 
 `void x2c_scope_thread_release(void)`
 
-Destroys this thread's `Scope` chain and its push and retain stacks.
+Destroys this thread's `Scope` chain and its push and region stacks.
 It runs last in `x2c_thread_state_release` and repeats harmlessly; a
 thread that never created a `Scope` has nothing to destroy.
 
@@ -132,7 +132,7 @@ Source: `lib/scope/regions.x`
 Allocates `size` uninitialized bytes in the active scope with a finalizer.
 `drop` runs exactly once with the block's pointer when the block is
 reclaimed: by `Scope.free`, by `Scope.realloc` to size zero, by the
-release or destruction of its scope, or by thread and process shutdown.
+close or destruction of its scope, or by thread and process shutdown.
 The finalizer follows the block through `Scope.move` and survives
 `Scope.realloc`, which passes `drop` the resized pointer. Blocks are
 reclaimed most recent first, so a finalizer sees older blocks still live.
@@ -190,7 +190,7 @@ Source: `lib/scope/regions.x`
 `Scope Scope.parent(Scope scope)`
 
 Returns this scope's lifetime parent, or NULL for a detached scope.
-This is independent of the active allocation stack and retained regions.
+This is independent of the active allocation stack and open regions.
 
 Source: `lib/scope/regions.x`
 
@@ -295,7 +295,7 @@ Source: `lib/scope/regions.x`
 `void Scope_shutdown(void)`
 
 Releases resources owned by `Scope`.
-`Scope` groups managed allocations by lifetime; balanced retain/release
+`Scope` groups managed allocations by lifetime; balanced open/close
 and push/pop boundaries remain caller responsibilities.
 
 Source: `lib/scope/runtime.x`
@@ -368,22 +368,22 @@ active.
 The scope linked below it then becomes active again.
 
 Canonical values are not reclaimed. Interned `String`s, `List` cells, and
-`Symbol`s built inside the region remain valid after release.
+`Symbol`s built inside the region remain valid after the close.
 An allocation relinked with `Scope.move` now belongs to its new scope and
 survives. Anything owned by another scope or another slot is untouched,
 and memory from plain `malloc` is unaffected.
 
 The active region must be the one opened by a matching `Scope.open` on
-this same slot. Releasing an empty slot, a directly allocated root, or a
-region retained on another pushed slot is an imbalance and raises. An
-extra release cannot destroy the surrounding region, and a retained empty
-scope still closes normally.
+this same slot. Closing an empty slot, a directly allocated root, or a
+region opened on another pushed slot is an imbalance and raises. An
+extra close cannot destroy the surrounding region, and an empty open
+region still closes normally.
 
-A pointer into a released region is not diagnosed. Neither the compiler
+A pointer into a closed region is not diagnosed. Neither the compiler
 nor the runtime tracks it, and using it afterwards is undefined behavior.
 With accounting enabled, `Scope.stats` confirms that nothing stays live.
 
-**Raises:** `<bad-state>` when no matching retain owns the active region. The
+**Raises:** `<bad-state>` when no matching open owns the active region. The
 failure leaves the active region intact. Before `Error` initialization it
 terminates at the error floor.
 
@@ -399,8 +399,8 @@ An adopted scope first detaches from its lifetime parent. This ends a
 scope you hold in a variable, and is the counterpart to
 `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
 discards its name; pointers into it are dangling afterwards, and nothing
-diagnoses their use. Any regions still linked below it, from retains that
-were never released, are destroyed with it.
+diagnoses their use. Any regions still linked below it, opened and never
+closed, are destroyed with it.
 
 The caller must own the right to destroy the chain and keep borrowed
 owners alive until their users finish. Destroying an attached lower region
@@ -445,7 +445,7 @@ Allocates `size` uninitialized bytes in the active scope.
 The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
 ends its life early, `Scope.move` reassigns its owner, and
 `Scope.close` or `Scope.destroy` reclaims whatever is left. The active
-scope at the time of allocation owns the result; a later retain or push
+scope at the time of allocation owns the result; a later open or push
 does not move it.
 
 **Raises:** `<size-limit>` when the size would overflow the allocation header,
@@ -479,7 +479,7 @@ Source: `lib/scope/allocation.x`
 
 Copies `size` bytes from `ptr` into a new allocation in the active scope.
 The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
-release that ends the region. Nothing about the source is remembered, so
+close that ends the region. Nothing about the source is remembered, so
 duplicating a C string means copying its terminator too:
 `xmemdup(text, strlen(text) + 1)`.
 
@@ -591,15 +591,15 @@ Source: `lib/scope/regions.x`
 
 Opens a new scope in the active slot and makes it the current one.
 Allocations that follow are charged to the new scope. The scope that was
-there is linked below it and becomes current again on release, so retained
+there is linked below it and becomes current again on close, so open
 regions nest. Open a nested region when a group of temporaries should die
 before the surrounding work does. Each `Scope.open` must be paired with
 exactly one `Scope.close`.
 
-Pair them with `defer`. `Error` transfer does not release a scope. A raise
+Pair them with `defer`. `Error` transfer does not close a region. A raise
 that jumps past a plain `Scope.close` leaves that region live for the
-rest of the process, so use `defer` in any function that both retains and
-can raise.
+rest of the process, so use `defer` in any function that both opens a
+region and can raise.
 
 ```x2c
 ~static void report(int width) {
@@ -617,9 +617,9 @@ puts(line);
 ```
 
 A scope wrapped around nothing but canonical values does nothing, since
-those values already outlive it, and adds a release that is easy to omit.
+those values already outlive it, and adds a close that is easy to omit.
 
-**Raises:** `<alloc-fail>` when the scope or its retain record cannot be
+**Raises:** `<alloc-fail>` when the scope or its region record cannot be
 allocated, or `<size-limit>` when that record cannot grow. Before `Error`
 initialization they terminate at the error floor.
 
@@ -783,7 +783,7 @@ Source: `lib/scope/allocation.x`
 `void Scope.shutdown_hook(void (*hook)(void))`
 
 Registers `hook` to run during process-wide `Scope` shutdown.
-The function pointer is retained without being invoked. Shutdown invokes
+The function pointer is stored without being invoked. Shutdown invokes
 registrations once in reverse order while `Scope` storage is still
 available, including one registered by a hook that shutdown is already
 running.
@@ -797,7 +797,7 @@ Source: `lib/scope/runtime.x`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Scope`](#Scope) | struct | Handle for a region and any retained regions linked below it. |
+| [`Scope`](#Scope) | struct | Handle for a region and any open regions linked below it. |
 | [`ScopeStats`](#ScopeStats) | struct | Value snapshot of process-wide `Scope` allocation and lifetime counters. |
 
 <a id="Scope"></a>
@@ -805,7 +805,7 @@ Source: `lib/scope/runtime.x`
 
 `typedef struct Scope { ScopeAlloc first; struct Scope *down; struct Scope *parent, *children, *previous, *next; } *Scope`
 
-Handle for a region and any retained regions linked below it.
+Handle for a region and any open regions linked below it.
 The layout is public; only `Scope` operations create or mutate valid
 allocation and region links. Callers provide exclusive access to those
 links, including ownership parents, during allocation and lifetime changes.
@@ -848,8 +848,8 @@ Source: `lib/scope/scope.x`
 ## Design notes
 
 A `Scope` owns a group of individually managed allocations. Callers use
-the active scope, target an explicit scope slot, or retain and release a
-nested lifetime. Any block can still be freed, resized, or relinked onto
+the active scope, target an explicit scope slot, or open and close a
+nested region. Any block can still be freed, resized, or relinked onto
 another scope without copying.
 
 Public operations initialize the module on first use, so they are safe

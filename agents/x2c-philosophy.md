@@ -710,11 +710,12 @@ be manually freed or that no caller ever frees a runtime value.
 The active scope owns `Scope.malloc`, `Scope.calloc`, and `Scope.memdup`
 results.  Their `*_in` forms target an explicit scope slot without changing
 the active-scope stack.  Named scopes copy diagnostic names but retain the
-published `Scope` representation. `Scope.destroy` accepts only a detached
-scope-chain root; root, stacked, and attached lower scopes remain owned by
-their active lifetime boundary. `Scope.close` closes only a region recorded
-by a matching `Scope.open` on the same active slot; empty retained scopes
-remain valid, while an extra release cannot destroy the process root or a
+published `Scope` representation. `Scope.destroy` rejects the current
+execution base and pushed slots; the caller owns the right to destroy a
+chain and keeps borrowed owners alive, and the runtime does not diagnose
+every invalid destruction. `Scope.close` closes only a region recorded
+by a matching `Scope.open` on the same active slot; empty open regions
+close normally, while an extra close cannot destroy the process root or a
 region owned through a different pushed slot. Shutdown hooks may use Scope
 while shutdown is in progress; completed shutdown is terminal and idempotent,
 and only `Scope_shutdown` and `Scope.stats` remain valid afterward. The scope
@@ -857,8 +858,8 @@ translation unit opens its own isolated `Context` (`src/frontend.x`), and
 closing it disposes that cache before the unit's canonical pool is released.
 `run-header-cache.sh` verifies batch-vs-solo output parity, which
 exercises this bracketing incidentally, but no probe directly asserts the
-retain/release discipline itself -- that a unit's transient allocations are
-actually reclaimed at release, or that a leak in one unit's bracket cannot
+open/close discipline itself -- that a unit's transient allocations are
+actually reclaimed at the close, or that a leak in one unit's bracket cannot
 survive into the next. Treat this as executable evidence of output parity,
 not of the memory-bracket contract.
 

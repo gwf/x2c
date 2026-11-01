@@ -234,6 +234,9 @@ static void _prepare(TaskRun run, TaskJob job, Func function) {
   job.stack_low = x2c_task_stack_low(job.stack);
 }
 
+/* The only bounds check on task stack capacity. 32768 is minicoro's
+   minimum stack; the backend rounds up to a page and adds a guard page,
+   which the 65536 of headroom covers for page sizes up to 32 KiB. */
 static size_t _stack_size(void) {
   const char *setting = getenv("X2C_TASK_STACK_BYTES");
   if (!setting) return 8u << 20;

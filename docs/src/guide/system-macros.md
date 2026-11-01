@@ -315,8 +315,8 @@ auto static int distinct(List words) {
 ~int main(void) { return distinct(%("ab" "cd" "ab")) == 2 ? 0 : 1; }
 ```
 
-The `Map` belongs to the retained region, and the region closes on every
-exit, so the `return` releases it. `$lock` decorates a function the same
+The `Map` belongs to the open region, and the region closes on every
+exit, so the `return` frees it. `$lock` decorates a function the same
 way.
 
 With one Scope-pointer argument, region `auto` evaluates the argument once, pushes
@@ -610,7 +610,7 @@ reports when that body returns or a cause transfers out of it.
 
 ## A complete resource-using program
 
-This program collects line lengths from a file. The retained region owns all
+This program collects line lengths from a file. The open region owns all
 allocations; the managed locals close the file and release the mutable history
 before that region ends. The History method makes ownership of its Array
 explicit.
