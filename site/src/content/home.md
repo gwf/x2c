@@ -9,7 +9,7 @@ ideas:
       foreach (String word in line.words())
         counts[word] += 1;
   - name: Pieces that compound
-    detail: "Classes, protocols, and packages stack, so a server is a few lines: written as fast as in Python, running at C speed."
+    detail: "Classes, protocols, and packages stack, so a server is a few lines: written as fast as in Python, running close to C."
     code: |-
       routes.get("/api/notes",
         %!(HttpRequest req, HttpResponse res) =>

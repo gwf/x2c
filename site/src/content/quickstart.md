@@ -470,12 +470,14 @@ int main(void) {
 ```
 
 The
-[shootout](https://github.com/gwf/x2c/blob/main/examples/shootout-unofficial/README.md)
-has fourteen problems written in x2c, C, and Python. The x2c versions ran
-at a median of 1.04 times C's time, and the C ported to x2c ran at 0.99
-times. Python took 39 times C's time. The x2c came in at about 1.5 times
-Python's line count. Those are measurements of those programs on one
-machine, not a ranking.
+[Benchmarks Game suite](https://github.com/gwf/x2c/blob/main/examples/shootout/README.md)
+has ten problems written in x2c twice, once with ordinary collections and
+once tuned with typed containers, beside contributed C, Python, Rust, C++,
+Go, and Java programs. On the eight problems every column covers, idiomatic
+x2c ran at a median of 2.49 times C's time and tuned x2c at 1.66. Python
+took 20 times. The idiomatic x2c came in at 1.26 times Python's line count.
+Those are local measurements of those programs on one machine, not a
+ranking.
 
 ## The toolbox
 
