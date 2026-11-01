@@ -208,6 +208,13 @@ void Compiler.report_warning(
   c.report_warning_at(code, message, location, _notes(c, location, notes));
 }
 
+/** Reports whether `name` is the generated spelling of an anonymous macro
+    definition, which the definition reader mints from the stem
+    `anonymous_macro` and which has no source name.
+*/
+int Diagnostics.anonymous_macro_name(String name) =>
+  name.startswith("_x2c_gensym_anonymous_macro_");
+
 /** Returns the name a diagnostic gives the macro `definition` reached from
     `invocation`. A named definition is spelled as its source names it. An
     anonymous definition has no source name, so the invocation that reached
@@ -215,9 +222,11 @@ void Compiler.report_warning(
 */
 String Diagnostics.macro_spelling(List definition, Token invocation) {
   Atom name = definition.assoc(<name>);
-  if (!Compiler.anonymous_macro_name(name.str())) return name.str();
+  if (!Diagnostics.anonymous_macro_name(name.str())) return name.str();
   if (invocation.type != <$>) return invocation.text;
-  return "$" + Token.skip_trivia(invocation + 1).text;
+  Token spelled = invocation + 1;
+  while (spelled.type == <space> || spelled.type == <comment>) spelled++;
+  return "$" + spelled.text;
 }
 
 /** Returns the innermost source expansion's definition and input note. */

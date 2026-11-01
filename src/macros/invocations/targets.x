@@ -124,7 +124,7 @@ static List _decorate_producer(Decoration &d) {
     if (value ~= %(macrodef *)) {
       /* A named definition is published, or handed to an enclosing Macro
          target as a value; an anonymous Decorator consumes its target. */
-      if (!Compiler.anonymous_macro_name(value.assoc(<name>).str())) {
+      if (!Diagnostics.anonymous_macro_name(value.assoc(<name>).str())) {
         if (d.position == <expression>)
           value = c.capture_macro_value(value);
         List result = c.bind_syntax(value, d.position, c.return_type);
