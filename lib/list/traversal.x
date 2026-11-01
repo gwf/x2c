@@ -103,9 +103,11 @@ meta native Self List.nth_cdr(Self list, int n) {
 */
 Var List.get(List list, Var key) {
   if (key.kind() != <integer>) return list.assoc(key);
-  if (key.integer_compare((int) INT_MIN) < 0 ||
-      key.integer_compare((int) INT_MAX) > 0) return void;
-  return list[key.int()];
+  long index = key.integer();
+  if (index < INT_MIN || index > INT_MAX) return void;
+  /* Var.integer reads unsigned 64-bit payloads above LONG_MAX as negative. */
+  if (index < 0 && (key is <ulong> || key is <ullong>)) return void;
+  return list[(int) index];
 }
 
 /** Returns the second value of the first association whose key equals `key`.

@@ -63,6 +63,32 @@ static void list_builders_and_indexing(void) {
   EXPECT_TRUE(seq.get(largest - 1) is void);
   EXPECT_INT_EQ(seq.get(1ULL).integer(), 2);
   EXPECT_INT_EQ(seq.get(-1).integer(), 4);
+  foreach (Symbol tag, %(<u8> <i8> <u16> <i16> <u32> <i32>
+                         <u48> <i48> <ulong> <long> <ullong> <llong>)) {
+    EXPECT_INT_EQ(seq.get(Var.integer_box(tag, 0)).integer(), 1);
+    EXPECT_INT_EQ(seq.get(Var.integer_box(tag, 1)).integer(), 2);
+    EXPECT_TRUE(seq.get(Var.integer_box(tag, 4)) is void);
+  }
+  foreach (Symbol tag, %(<i8> <i16> <i32> <i48> <long> <llong>)) {
+    EXPECT_INT_EQ(seq.get(Var.integer_box(tag, -1ULL)).integer(), 4);
+    EXPECT_INT_EQ(seq.get(Var.integer_box(tag, -4ULL)).integer(), 1);
+    EXPECT_TRUE(seq.get(Var.integer_box(tag, -5ULL)) is void);
+  }
+  foreach (Var key, $((unsigned char) UCHAR_MAX, (unsigned short) USHRT_MAX,
+                      (unsigned) UINT_MAX, Var.integer_box(<u48>, ULLONG_MAX),
+                      (unsigned long) ULONG_MAX,
+                      (unsigned long) (ULONG_MAX - 1UL),
+                      (unsigned long long) ULLONG_MAX,
+                      (unsigned long long) (ULLONG_MAX - 1ULL),
+                      (unsigned long) (ULONG_MAX - INT_MAX),
+                      (unsigned long long) (ULLONG_MAX - INT_MAX),
+                      Var.integer_box(<i48>, (1ULL << 47) - 1ULL),
+                      Var.integer_box(<i48>, 1ULL << 47),
+                      (long) LONG_MIN, (long) LONG_MAX,
+                      (long long) LLONG_MIN, (long long) LLONG_MAX,
+                      (long) INT_MIN - 1L, (long) INT_MAX + 1L,
+                      (int) INT_MIN, (int) INT_MAX))
+    EXPECT_TRUE(seq.get(key) is void);
   List associations = %((name "x2c"));
   EXPECT_TRUE(associations.get(<name>) == "x2c");
   EXPECT_TRUE(associations.get(<missing>) is void);

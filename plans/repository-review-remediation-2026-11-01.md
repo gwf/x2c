@@ -162,10 +162,13 @@ Owners: [List traversal](../lib/list/traversal.x),
 [common slicing](../lib/common.x), [Array generics](../lib/array/generics.x),
 and [String editing](../lib/string/editing.x).
 
-- In `List.get`, compare integer keys with `INT_MIN` and `INT_MAX` through
-  `Var.integer_compare` before converting. Give limit macros an explicit
-  native type for boxing. `ULLONG_MAX` and
-  `ULLONG_MAX - 1` must return void instead of the last two list values.
+- In `List.get`, read an integer-kinded key once with `Var.integer` and
+  compare the native `long` with `INT_MIN` and `INT_MAX` before narrowing.
+  Reject a negative reading tagged `<ulong>` or `<ullong>`: that reading is
+  an unsigned 64-bit payload above `LONG_MAX`, not a negative index.
+  `lib/common.x` establishes the native integer widths used by this reader.
+  `ULLONG_MAX` and `ULLONG_MAX - 1` must return void instead of the last
+  two list values.
   Keep ordinary negative indexing, non-integer association lookup, and its
   absence result unchanged.
 - Keep normalization in `x2c_normalize_slice`. Widen negative-step magnitude,
@@ -188,6 +191,16 @@ normalizer directly with logical length `INT_MAX`, without a large allocation.
 Preserve public signatures, canonical String identity, and collection
 ownership. Use existing
 performance checkpoints when the final hot-path diff warrants them.
+
+The final performance checkpoint replaced the initial two
+`Var.integer_compare` calls. Five alternating runs of 200,000 `List.get`
+calls over a 32-element List measured medians of 118,854,450 retired
+instructions on the baseline, 172,627,539 with those comparisons, and
+69,238,002 with the single payload read. Probe build flags were the ordinary
+defaults; runtime libraries used the normal optimized build. Each run returned
+the same sum. The narrower check preserves all twelve integer families,
+wide signed negative indexes, out-of-range unsigned keys, association lookup,
+and missing results without a new helper or caller contract.
 
 ### D. Test command summaries
 
