@@ -1,14 +1,15 @@
 # Former custom x2c shootout
 
 This directory preserves the former fourteen-workload suite, its reference
-programs, and its historical measurements. It includes modified workloads
-and locally written references, so it is not a conforming Benchmarks Game
+programs, and compact calibration. Historical measurements remain in Git.
+It includes modified workloads and locally written references, so it is not
+a conforming Benchmarks Game
 comparison. Its C-port column is historical and is not part of the current
 comparison.
 
 The active suite is [the official Benchmarks Game suite](../shootout/README.md).
 The root `shoot-*` targets and performance snapshots use that suite only.
-The instructions and dated results below describe the former suite.
+The instructions below describe the former suite.
 
 This optional example suite compares fourteen problems written twice in x2c
 against equivalent C and Python references. Every implementation uses the same
@@ -41,40 +42,11 @@ in `baseline.json`. Those statistics are pinned to the exact bytes of `main.c`
 and `main.py`, so neither reference may be edited, not even to add a comment,
 without a full recalibration.
 
-## Current results
+## Historical results
 
-Local measurements from September 6, 2026: twelve fresh-process samples after
-one warmup for each x2c program, compared with the saved C and Python
-references. C and Python were not rerun. Lower ratios are better; C execution
-time and Python source size each have a baseline of 1.00.
-
-| Benchmark | Time x2c/C | Time ported/C | Time Python/C | SLOC x2c/Python | SLOC ported/Python | SLOC C/Python |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| nbody | 0.95 | 0.95 | 125.24 | 1.11 | 1.15 | 1.43 |
-| spectralnorm | 0.95 | 0.93 | 110.56 | 1.69 | 1.69 | 1.65 |
-| fannkuchredux | 0.76 | 0.74 | 20.13 | 1.29 | 1.46 | 1.74 |
-| binarytrees | 2.28 | 0.94 | 3.84 | 1.53 | 1.65 | 2.53 |
-| brainfuck | 0.97 | 0.97 | 57.75 | 1.29 | 1.33 | 1.60 |
-| wordfreq | 5.22 | 0.99 | 8.22 | 1.60 | 2.80 | 3.24 |
-| mandelbrot | 1.01 | 0.99 | 136.17 | 1.27 | 1.27 | 1.50 |
-| sieve | 1.05 | 1.03 | 20.13 | 1.93 | 1.80 | 1.87 |
-| matmul | 1.02 | 1.00 | 87.73 | 1.73 | 1.93 | 2.00 |
-| gameoflife | 1.07 | 0.98 | 340.56 | 1.52 | 1.43 | 1.38 |
-| quicksort | 1.02 | 1.03 | 16.41 | 1.20 | 1.13 | 1.13 |
-| graphbfs | 1.23 | 2.70 | 3.20 | 1.69 | 1.59 | 1.69 |
-| calculatorast | 11.00 | 0.98 | 77.36 | 1.30 | 2.13 | 1.87 |
-| csvparse | 2.00 | 1.00 | 4.70 | 2.53 | 2.65 | 2.71 |
-| **Median** | **1.04** | **0.99** | **38.94** | **1.53** | **1.62** | **1.72** |
-| **Arithmetic mean** | **2.18** | **1.09** | **72.29** | **1.55** | **1.71** | **1.88** |
-
-Every x2c program is faster than its saved Python reference in this run.
-CSV parsing takes 122 ms versus Python's 287 ms (2.35 times faster); binary
-trees takes 66 ms, about 1.68 times faster than Python. These are measurements
-of these programs on this machine, not a general language ranking.
-
-The [full report](results/current.md) and [raw result data](results/current.json)
-record the run and its reference baseline. `make shoot-update` refreshes those
-reports; this README table is a dated snapshot.
+The [saved report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout-unofficial/results/current.md) and [raw result data](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout-unofficial/results/current.json)
+remain in Git history. New promoted reports are ignored under
+`examples/build/shootout-unofficial/results/current.*`.
 
 ## Build and run one program
 
@@ -109,7 +81,7 @@ executables, raw samples, and run details beneath the ignored
 `examples/build/shootout-unofficial/` directory, then prints the normalized table. It
 does not modify tracked files.
 
-After reviewing a run, refresh the checked-in current result explicitly:
+After reviewing a run, promote its report explicitly:
 
 ```sh
 python3 examples/shootout-unofficial/tools/shootout.py update
@@ -123,9 +95,11 @@ python3 examples/shootout-unofficial/tools/shootout.py calibrate
 ```
 
 Calibration rotates all three implementations through each order position,
-then replaces `baseline.json`, `results/current.json`, and
-`results/current.md` only after every build, correctness check, warmup, and
-measurement succeeds.
+then replaces `baseline.json` and the ignored promoted reports only after
+every build, correctness check, warmup, and measurement succeeds. The compact
+baseline keeps statistics, source identities, provenance, and correctness
+hashes. Numeric tolerance checks retain their small expected values; raw
+reference samples and exact-output copies stay in ignored run output.
 
 ## What the table means
 

@@ -292,19 +292,19 @@ def main():
     if not os.path.isdir(directory):
         sys.exit(f"no run at {directory}")
     if len(sys.argv) > 3 and sys.argv[2] == "--paired-curves":
-        paired_learning_curves(os.path.dirname(os.path.abspath(__file__)),
+        paired_learning_curves(directory,
                                load(directory, "check.json"), sys.argv[3],
                                directory)
         return 0
     if len(sys.argv) > 2 and sys.argv[2] == "--supplement":
-        window_memory(os.path.dirname(os.path.abspath(__file__)),
+        window_memory(directory,
                       load(directory, "memory.json"))
         return 0
     diagnostics = (os.path.join(root, "debug", "torch-comparison", sys.argv[2])
                    if len(sys.argv) > 2 else directory)
     # Read the raw samples from the run's log directory; write the plots
     # beside REPORT.md, which is what refers to them.
-    out = os.path.dirname(os.path.abspath(__file__))
+    out = directory
     check = load(directory, "check.json")
     if check:
         learning_curves(out, check)

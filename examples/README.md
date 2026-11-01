@@ -198,9 +198,9 @@ threads. [tours/language.x](tours/language.x) is a broader language tour;
 x2c to C programmers one small feature at a time;
 [tours/hello-worlds.x](tours/hello-worlds.x) finds twelve ways to say hello.
 
-The [language shootout](shootout/README.md) keeps fourteen problems, each
-with two x2c implementations and C/Python references. Its optional timing
-suite remains separate from the teaching examples:
+The [language shootout](shootout/README.md) adopts ten Benchmarks Game
+problems, with two x2c variants and up to six contributed reference languages.
+Its optional timing suite remains separate from the teaching examples:
 
 ```sh
 make shoot-run

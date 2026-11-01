@@ -65,7 +65,7 @@ counts; the chart's source-size distinction is explained in the report.
 
 The final full run `20261101T204543Z` checks all twenty x2c programs and records
 240 observations. Across eight shared workloads, tuned elapsed time is 1.110x C
-and 0.946x Rust. The [immutable archive](../../examples/shootout/results/runs/20261101T204543Z/README.md)
+and 0.946x Rust. The [immutable archive](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/runs/20261101T204543Z/README.md)
 retains phase data, accepted/rejected probes, source snapshots, CPU/RSS data,
 quiet monitoring, source audits, CSV and all three figures in SVG/PNG/PDF.
 All 1,544 archive checksums and five harness tests pass.

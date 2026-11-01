@@ -66,6 +66,19 @@ examples/packages/*/builds/
 !examples/shootout-unofficial/
 !examples/shootout-unofficial/**
 !**/Makefile
+# Historical benchmark output is recoverable from Git history.
+examples/shootout/results/
+examples/shootout-unofficial/results/
+unittest/benchmarks/hash-table/results/
+unittest/benchmarks/hash-table/RESEARCH.md
+packages/torch/benchmarks/results/
+packages/torch/benchmarks/*.png
+packages/torch/benchmarks/HISTORICAL-*.md
+packages/torch/benchmarks/MATCHED.md
+packages/torch/benchmarks/PILOT.md
+packages/torch/benchmarks/REMEDIES.md
+packages/torch/benchmarks/REPORT.md
+packages/torch/benchmarks/SUPPLEMENT.md
 bin/x2c-*
 bootstrap/**/x2c
 bootstrap/src/x2c

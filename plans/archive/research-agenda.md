@@ -49,7 +49,7 @@ Combine the unresolved Torch process footprint with the known Pool depot
 retention as two separately measured questions. Do not assume one explains
 or fixes the other.
 
-Evidence: [Torch's report](../../packages/torch/benchmarks/REPORT.md) records
+Evidence: [Torch's report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) records
 stable native/Scope counts and bounded canonical storage in the pooled variant,
 but an unexplained incremental process-peak excess. Historical pool churn is
 not equivalent to a leak. [Pool._block_return](../../lib/pool/pool.x) places

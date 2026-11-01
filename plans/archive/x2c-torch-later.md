@@ -150,10 +150,10 @@ fixtures / 1,443 artifacts.
 succeeded at the same revision; live guide content, search, chapter
 navigation and the Torch example route were verified.
 
-The [matched control](../../packages/torch/benchmarks/MATCHED.md) passes.
-The [stock report](../../packages/torch/benchmarks/REPORT.md) preserves the
+The [matched control](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/MATCHED.md) passes.
+The [stock report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) preserves the
 accepted failed tolerance, and the
-[supplement](../../packages/torch/benchmarks/SUPPLEMENT.md) records remaining
+[supplement](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/SUPPLEMENT.md) records remaining
 phase, memory and timing evidence with their limitations.
 
 Raw evidence is retained outside disposable worktrees under

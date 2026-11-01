@@ -31,8 +31,8 @@ Binary-trees uses one ordinary `Thread` per depth batch in both x2c columns,
 matching the adopted C strategy. Each worker owns its temporary tree scopes;
 the main thread reads its scalar batch result after joining. The unchanged
 `benchmarks/binarytrees/serial.x` preserves the previous serial implementation.
-Saved serial runs and the latest paired serial/parallel comparison remain in
-[results](results/README.md). Neither threading nor parallel execution requires
+Historical serial runs and paired source comparisons remain in
+[Git history](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/README.md). Neither threading nor parallel execution requires
 typed containers or a custom allocator.
 
 Spectral-norm uses six ordinary `Thread` row batches at N>=256 in the
@@ -41,8 +41,8 @@ Workers read a fixed input Array and write disjoint existing output slots.
 Every matrix product joins its workers before the next product reads results;
 each row preserves its original summation order. Smaller inputs run serially.
 Tuned spectral-norm retains typed Arrays and its original small-input kernels.
-The measured threshold avoids worker overhead at smaller sizes. The Counter-object
-k-nucleotide probe is preserved as evidence; numeric Map values remain active.
+The threshold avoids worker overhead at smaller sizes. K-nucleotide uses
+ordinary numeric Map values.
 
 Both fannkuch-redux programs use six ordinary `Thread` permutation ranges at N>=9.
 Workers own their Arrays, initialize the prescribed rotation order at each
@@ -91,22 +91,22 @@ to 96 rows. Pixel arithmetic and PBM padding are unchanged. Smaller inputs run
 serially. A same-batching serial control separates threading from buffering.
 The tuned program uses caller-owned ArrayChar storage and bulk ordered output.
 
-The tuned programs now receive the same ordinary scheduling and buffering
-opportunities while preserving their specialized storage. All 55 foreign
-reference programs and the compiler/runtime/package sources remain unchanged.
-No custom allocator or literal-C implementation was added.
-
 Parallelism follows published Benchmarks Game precedent for each problem. If
 other official submissions use it, x2c may use it too; if none do, x2c stays
 serial. Algorithm and workload requirements still apply. This policy operates
 within the existing idiomatic/tuned definitions and adds no comparison columns
 or separate serial/parallel chart regimes.
 
+The adopted C binary-trees program uses pthread workers, Rust spectral-norm
+and fannkuch-redux use Rayon, and C k-nucleotide uses OpenMP sections.
+The [fannkuch specification](specs/fannkuchredux.html) permits parallel chunks;
+[pidigits](specs/pidigits.html) requires its step-by-step serial algorithm.
+
 Rust, C++, Go, and Java each have nine admitted contributions. Their
 k-nucleotide cells are `N/A`: Rust and Go candidates fail required tie
 ordering; Java candidates fail ordering, absent-fragment, or uppercase-target
 checks; C++ candidates need GNU-only headers absent from this toolchain.
-[Reference coverage](results/reference-coverage.md) records the evidence and
+[Reference coverage](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/reference-coverage.md) records the evidence and
 the selected contributions' input constraints. Contributions are not patched
 to conceal these differences.
 
@@ -117,8 +117,8 @@ the GC exclusion is an interpretation recorded in the coverage report.
 
 Summary rows and comparison charts use the eight problems shared by all eight
 columns. Individual rows retain all admitted cells for the other two problems.
-Earlier nine-problem summaries have a different cohort. There are 75 admitted
-programs; 56 samples complete every Latin rotation, giving 4,200 observations.
+Earlier nine-problem summaries have a different cohort. Reports record their
+actual sample counts and admitted programs.
 
 x2c can also express C directly. That capability is understood and has no
 separate column. The C column measures an actual contributed C program.
@@ -140,8 +140,8 @@ separate column. The C column measures an actual contributed C program.
 
 The separate upstream startup experiment is not one of these ten problems.
 The [former custom suite](../shootout-unofficial/README.md) preserves the
-previous workloads, C-port variants, and historical results. The active
-targets do not run it or mix its measurements with this suite.
+previous workloads and C-port variants, with historical results in Git.
+The active targets do not run it or mix its measurements with this suite.
 
 ## Sources and specifications
 
@@ -216,7 +216,7 @@ ignored `examples/build/shootout-c/`. It continues through every problem and
 returns nonzero if any parser or native-driver check fails. It adds no timing
 column or recurring publication requirement.
 
-The [recorded result](results/c-through-x2c.md) shows all ten native-driver
+The [historical result](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/c-through-x2c.md) records all ten native-driver
 checks passing and seven parser checks passing. The three parser rejections
 remain visible; the C references are not rewritten to make them pass.
 
@@ -232,12 +232,16 @@ Calibration builds, checks, and measures every available implementation together
 It rotates their order across complete Latin cycles after one process
 warmup. The default sample count is the smallest balanced count of at least
 twelve samples for every coverage group (16 for eight- and four-column rows).
-It replaces `baseline.json` and `results/current.*` only when every
+It replaces `baseline.json` and ignored
+`examples/build/shootout/results/current.*` only when every
 build, check, and measurement succeeds. Run calibration in a quiet window.
 
 An ordinary run rebuilds and measures the two x2c programs against the
 pinned C, Python, Rust, C++, Go, and Java statistics. Update explicitly promotes its report.
 Raw samples and receipts stay under ignored `examples/build/shootout/`.
+The tracked calibration keeps reference statistics, identities, provenance,
+and correctness hashes. It omits raw sample arrays and exact-output copies;
+numeric tolerance checks retain their small expected values.
 
 The stdin-driven problems receive identical files generated by the adopted
 official FASTA C program before timing begins. Their input hashes are pinned
@@ -248,7 +252,9 @@ to `/dev/null` during timing, after output correctness has been checked.
 `quick` and `local` use smaller inputs for development and local measurement.
 `canonical` records the larger inputs specified upstream. Smaller profiles
 do not replace the official output checks and are not official-site scores.
-The local Mandelbrot size is 512, so every admitted contribution receives
+Mandelbrot profile dimensions must be multiples of eight for the unchanged
+Rust contribution; spectral-norm dimensions must be even. The local
+Mandelbrot size is 512, so every admitted contribution receives
 the same dimensions supported by the unchanged Rust program. The official
 fixture size (200) and canonical size (16000) are unchanged.
 To calibrate and run at those official performance sizes, select the profile
@@ -273,18 +279,29 @@ Reports identify both x2c variants; the median and arithmetic mean are
 orientation aids, not language rankings. Raw data also records process CPU
 time, peak RSS, source size, and build information.
 
-The [current report](results/current.md) and [raw data](results/current.json)
-identify the calibration and measured profile.
+Promoted reports at `examples/build/shootout/results/current.md` and
+`current.json` identify the calibration and measured profile.
 
 The old suite's timings are not comparable with these results. Changes to
 specifications, references, profile inputs, or dependency flags require a
 fresh calibration. Machine checks and environment receipts retain the
 existing restrictions on comparisons between hosts.
 
-## Recover results and website materials
+## Saved reports and charts
 
-The [results archive and recovery guide](results/README.md) preserves all saved
-chart sets, saved reports, raw observations and receipts, paired experiments,
-rendering requirements, and checksums on `dev`. The
-[website integration guide](../../site/BENCHMARKS.md) identifies the curated
-public assets and interpretation requirements.
+Historical reports, raw observations, paired experiments, and charts remain
+in [Git history](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/README.md). They are not current calibration inputs.
+Use `git show <revision>:<path>` to recover a file into an ignored directory.
+
+One reusable renderer lives in `tools/render-charts.py`; its optional Python
+requirements are in `tools/requirements-charts.txt`. Given an existing report,
+it creates PNG, SVG, PDF, CSV, and provenance files without running benchmarks:
+
+```sh
+python3 examples/shootout/tools/render-charts.py \
+  examples/build/shootout/results/current.json \
+  examples/build/shootout/results/charts
+```
+
+The [website integration guide](../../site/BENCHMARKS.md) describes how to
+select one report and its charts for a future page.

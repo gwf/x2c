@@ -385,10 +385,22 @@ review, so none is scheduled for speculative removal.
   pass independently and within the native-module probe before its separate
   REPL failure. Raylib response switching passes without a window.
 - B implemented privately. Escaped printf conversions and native/compile-time
-  literal comparisons pass. Sixteen connected fixtures compile without C
-  warnings, and scanner/String/tokenizer suites pass 58 tests and 989
+  String and ordinary character comparisons pass. Eligibility scans quoted
+  pieces without allocating decoded text. Sixteen connected fixtures compile
+  without C warnings, and scanner/String/tokenizer suites pass 58 tests and 989
   assertions. LF and CRLF continuation probes agree. A normal local build
   regenerated linked meta code; no bootstrap transition was required.
-- G remains in progress.
-- Final integrated review, generated refresh, applicable performance evidence,
-  publication validation, publication, and plan closeout remain with the parent.
+- G implemented privately. Removed 1,577 historical output files (66,670,577
+  bytes) and retained one chart renderer with its requirements. Both compact
+  baselines preserve their statistics and provenance; saved-data ratios are
+  identical. Eight shootout tests and the existing performance snapshot,
+  build-scaling, and history tests pass (20, three, and two tests).
+  Promoted reports and Torch reports write to ignored destinations. The full
+  package-install probe passes with ignored history present and an installed
+  example executed. Historical links use the pre-removal upstream commit.
+  Torch report generation passes on saved data. The full optional Torch suite
+  and chart rendering could not run because this Python environment lacks
+  Torch, matplotlib, and numpy; no dependencies were installed.
+- Final generated documentation/bootstrap refresh, performance evidence,
+  publication validation, integration, publication, and plan archive closeout
+  remain with the parent. No worker publication actions were run.

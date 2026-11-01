@@ -79,7 +79,7 @@ or corrupted Robin Hood arrays. No new recurring validation target is added.
 - Var live bucket allocation increases 5%; observed counting peak RSS rises
   about 31% because macOS retains freed growth buffers. No allocator changes
   were added. The memory cost remains documented rather than hidden.
-- See the [retirement report](../../unittest/benchmarks/hash-table/results/robin-hood-retirement-20261031.md)
+- See the [retirement report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/robin-hood-retirement-20261031.md)
   for absolute time/memory values and scope. PLSO, Notes, Linux/GCC and the full
   external-table cohort were not rerun for this retirement. The prior full
   benchmark campaign remains historical evidence.

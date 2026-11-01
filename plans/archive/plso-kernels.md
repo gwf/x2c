@@ -48,7 +48,7 @@ The complete run `20261101T161913Z` checks all twenty x2c programs and records
 240 fresh observations against the unchanged foreign calibration. Across eight
 shared problems, tuned elapsed time is 1.242x C and 1.059x Rust, down from
 1.769x and 1.508x. SVG/PNG/PDF figures and their source data are refreshed.
-The [immutable archive](../../examples/shootout/results/runs/20261101T161913Z/README.md)
+The [immutable archive](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/runs/20261101T161913Z/README.md)
 retains paired measurements, intermediate sources, raw receipts, checks and
 rendering provenance. All 1,438 archive checksums pass. The five harness tests
 pass. All 55 foreign source files remain byte-identical.

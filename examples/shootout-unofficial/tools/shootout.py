@@ -31,8 +31,8 @@ BUILD = ROOT.parent / "build" / "shootout-unofficial"
 LATEST = BUILD / "latest"
 MANIFEST_PATH = ROOT / "benchmarks.json"
 BASELINE_PATH = ROOT / "baseline.json"
-CURRENT_JSON = ROOT / "results" / "current.json"
-CURRENT_MARKDOWN = ROOT / "results" / "current.md"
+CURRENT_JSON = BUILD / "results" / "current.json"
+CURRENT_MARKDOWN = BUILD / "results" / "current.md"
 DEFAULT_CFLAGS = "-O2 -DNDEBUG"
 REFERENCE_IMPLEMENTATIONS = ("c", "python")
 # Each benchmark carries two x2c programs. `main.x` writes the problem in
@@ -1047,7 +1047,7 @@ def make_baseline(
   calibration: dict[str, Any],
   args: argparse.Namespace,
 ) -> dict[str, Any]:
-  return {
+  baseline = {
     "schema": 1,
     "methodology": {
       "profile": args.profile,
@@ -1097,6 +1097,14 @@ def make_baseline(
       for benchmark in benchmarks
     },
   }
+
+  for entry in baseline["benchmarks"].values():
+    if entry["comparison"].get("kind", "exact") == "exact":
+      del entry["stdout"]
+    for value in entry.values():
+      if isinstance(value, dict):
+        value.pop("measurements", None)
+  return baseline
 
 
 def load_baseline(
@@ -1151,6 +1159,17 @@ def load_baseline(
   return baseline
 
 
+def compare_pinned_output(
+  name: str, implementation: str, entry: dict[str, Any], output: bytes,
+) -> None:
+  if entry["comparison"].get("kind", "exact") == "exact":
+    if hashlib.sha256(output).hexdigest() != entry["stdout_sha256"]:
+      raise HarnessError(f"{name}/{implementation} output differs from calibration")
+  else:
+    compare_output(name, implementation, entry,
+                   base64.b64decode(entry["stdout"]), output)
+
+
 def pinned_measurements(
   manifest: dict[str, Any],
   benchmarks: list[dict[str, Any]],
@@ -1173,21 +1192,11 @@ def pinned_measurements(
       name = benchmark["name"]
       program_args = profile[name]
       baseline_entry = baseline["benchmarks"][name]
-      expected = base64.b64decode(baseline_entry["stdout"])
       outputs: dict[str, bytes] = {}
       for implementation in X2C_IMPLEMENTATIONS:
         binary = binary_path(name, implementation)
         output = run_captured(binary, program_args, args.timeout)
-        compare_output(
-          name,
-          implementation,
-          {
-            "args": program_args,
-            "comparison": baseline_entry["comparison"],
-          },
-          expected,
-          output,
-        )
+        compare_pinned_output(name, implementation, baseline_entry, output)
         outputs[implementation] = output
         for warmup in range(1, args.warmups + 1):
           measure_once(measure, binary, program_args, args.timeout)
@@ -1453,7 +1462,7 @@ def run_pinned(
   if args.action == "update":
     promote_current(current)
     print(
-      "updated examples/shootout-unofficial/results/current.md and current.json",
+      "updated examples/build/shootout-unofficial/results/current.md and current.json",
       flush=True,
     )
 
@@ -1507,7 +1516,7 @@ def calibrate(
   print(markdown)
   print("updated examples/shootout-unofficial/baseline.json", flush=True)
   print(
-    "updated examples/shootout-unofficial/results/current.md and current.json",
+    "updated examples/build/shootout-unofficial/results/current.md and current.json",
     flush=True,
   )
   print(f"raw results: {LATEST}", flush=True)

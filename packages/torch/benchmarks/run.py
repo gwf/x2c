@@ -961,8 +961,10 @@ def main():
 
     if options.mode == "remedies-report":
         import report
+        if not options.results and not options.run_id:
+            parser.error("remedies-report requires --results or --run-id")
         return report.remedies(options.results or os.path.join(
-            BENCH, "results", "chains-20260911"))
+            common.LOGS, options.run_id))
 
     run = options.run_id or run_id()
     threads = [int(value) for value in options.threads.split(",")]

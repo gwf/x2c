@@ -1,6 +1,10 @@
 """Focused checks for mixed reference coverage and source-size accounting."""
 
+import argparse
+import base64
 import copy
+import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import tempfile
@@ -68,24 +72,24 @@ let literal = "/* keep this */";
   def test_unavailable_problem_does_not_change_shared_summary(self):
     manifest = shootout.load_manifest()
     baseline = json.loads(shootout.BASELINE_PATH.read_text())
-    saved = json.loads(shootout.CURRENT_JSON.read_text())
     build = {"benchmarks": {}}
-    run = {key: saved[key] for key in (
-      "run_id", "profile", "samples", "warmups", "machine",
-    )}
+    run = {"run_id": "synthetic", "profile": "local", "samples": 1,
+           "warmups": 0, "machine": baseline["calibration"]["machine"]}
     run["benchmarks"] = {}
     for benchmark in manifest["benchmarks"]:
       name = benchmark["name"]
       if name != "knucleotide":
         for filename in ("main.go", "main.java"):
           benchmark["references"].setdefault(filename, {})
-      original = saved["benchmarks"][name]
+      original = baseline["benchmarks"][name]
       build["benchmarks"][name] = {}
       run["benchmarks"][name] = {"args": original["args"], "implementations": {}}
       for implementation in shootout.X2C_IMPLEMENTATIONS:
-        program = original[implementation]
+        program = {"statistics": original["c"]["statistics"], "measurements": []}
         build["benchmarks"][name][implementation] = {
-          "source_metrics": program["source"], **program["build"],
+          "source_metrics": original["c"]["source"], "binary_bytes": 1,
+          "binary_sha256": "test", "compile_ns": 1, "translate_ns": 1,
+          "generated_c_sha256": "test",
         }
         run["benchmarks"][name]["implementations"][implementation] = program
       for reference in ("rust", "cpp", "go", "java"):
@@ -115,6 +119,69 @@ let literal = "/* keep this */";
       next(b for b in manifest["benchmarks"] if b["name"] == "knucleotide")
     ))
     self.assertEqual(row.count("N/A"), missing)
+
+
+class CompactBaselineTests(unittest.TestCase):
+  @classmethod
+  def setUpClass(cls):
+    path = shootout.REPO / "examples/shootout-unofficial/tools/shootout.py"
+    spec = importlib.util.spec_from_file_location("unofficial_shootout", path)
+    legacy = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(legacy)
+    cls.harnesses = (shootout, legacy)
+
+  def test_tracked_baselines_load_without_historical_results(self):
+    for harness in self.harnesses:
+      with self.subTest(suite=harness.ROOT.name):
+        saved = json.loads(harness.BASELINE_PATH.read_text())
+        baseline = harness.load_baseline(harness.load_manifest(), saved["methodology"])
+        self.assertEqual(baseline, saved)
+        self.assertEqual(harness.CURRENT_JSON.parent, harness.BUILD / "results")
+        for entry in baseline["benchmarks"].values():
+          self.assertEqual("stdout" in entry, entry["comparison"]["kind"] != "exact")
+          self.assertFalse(any(isinstance(value, dict) and "measurements" in value
+                               for value in entry.values()))
+
+  def test_exact_hash_and_numeric_tolerance(self):
+    for harness in self.harnesses:
+      with self.subTest(suite=harness.ROOT.name):
+        exact = {"comparison": {"kind": "exact"},
+                 "stdout_sha256": hashlib.sha256(b"exact\n").hexdigest()}
+        harness.compare_pinned_output("test", "x2c", exact, b"exact\n")
+        with self.assertRaises(harness.HarnessError):
+          harness.compare_pinned_output("test", "x2c", exact, b"wrong\n")
+        numeric = {"args": [], "comparison": {"kind": "numeric_lines",
+                   "absolute_tolerance": 1e-8},
+                   "stdout": base64.b64encode(b"1.000000000\n").decode()}
+        harness.compare_pinned_output("test", "x2c", numeric, b"1.000000001\n")
+        for output in (b"1.000000020\n", b"1.0\n"):
+          with self.assertRaises(harness.HarnessError):
+            harness.compare_pinned_output("test", "x2c", numeric, output)
+
+  def test_calibration_writes_statistics_without_raw_reference_samples(self):
+    for harness in self.harnesses:
+      with self.subTest(suite=harness.ROOT.name):
+        manifest = harness.load_manifest()
+        saved = json.loads(harness.BASELINE_PATH.read_text())
+        build = {"toolchain": saved["methodology"], "benchmarks": {}}
+        calibration = {"run_id": "synthetic", "machine": saved["calibration"]["machine"],
+                       "benchmarks": {}}
+        for benchmark in manifest["benchmarks"]:
+          name = benchmark["name"]
+          entry = copy.deepcopy(saved["benchmarks"][name])
+          implementations = {key: value for key, value in entry.items()
+                             if isinstance(value, dict) and "statistics" in value}
+          build["benchmarks"][name] = {key: {"source_metrics": value["source"]}
+                                      for key, value in implementations.items()}
+          for value in implementations.values():
+            del value["source"]
+            value["measurements"] = [{"elapsed_ns": 1}]
+          entry["implementations"] = implementations
+          entry.setdefault("stdout", base64.b64encode(b"exact\n").decode())
+          calibration["benchmarks"][name] = entry
+        result = harness.make_baseline(manifest, manifest["benchmarks"], build,
+                  calibration, argparse.Namespace(profile="local", samples=1, warmups=0))
+        self.assertEqual(result["benchmarks"], saved["benchmarks"])
 
 
 if __name__ == "__main__":

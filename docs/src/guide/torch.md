@@ -520,13 +520,13 @@ All measurements used one active desktop CPU system. They do not cover GPU
 performance, `torch.compile`, or workloads beyond these comparisons.
 
 [torch-results]:
-  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REPORT.md
+  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md
 [torch-supplement]:
-  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/SUPPLEMENT.md
+  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/SUPPLEMENT.md
 [torch-remedies]:
-  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REMEDIES.md
+  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REMEDIES.md
 [torch-matched]:
-  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/MATCHED.md
+  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/MATCHED.md
 
 ## Limits
 

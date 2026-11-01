@@ -6,7 +6,7 @@
 > The publication gate and full benchmark campaign passed. Typed Map is 1.34x
 > Boost and Var Map is 3.17x typed on the common integer cohort. The old typed
 > control is 2.65x Boost. All count/checksum oracles pass. See the
-> [full report](../../unittest/benchmarks/hash-table/results/grouped-adoption-20261031.md).
+> [full report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/grouped-adoption-20261031.md).
 > Linux/GCC remains untested because Docker was unavailable. Rosetta x86_64,
 > native, forced-scalar and sanitizer focused checks pass. Build cost is
 > higher across the combined revision and is not isolated to Map adoption.

@@ -32,12 +32,27 @@ Read the correctness results alongside the timings: a measured timing is
 not evidence that a configuration passed. There is no aggregate speedup in
 this report; the workloads and their verdicts are separate.
 
-[Supplemental diagnostics](SUPPLEMENT.md) separately measure startup,
+[Historical supplemental diagnostics](SUPPLEMENT.md) separately measured startup,
 training phases, error-message interning, corrected sequence ownership,
 and all four interop sizes. Its separate MNIST correction supersedes only
 the two original 20-warmup timing rows; all original records remain intact.
 """
 
+
+
+def write_report(directory, filename, lines):
+    text = "\n".join(lines).rstrip() + "\n"
+    readme = os.path.relpath(os.path.join(common.BENCHMARKS, "README.md"), directory)
+    text = text.replace("(README.md)", f"({readme.replace(os.sep, '/')})")
+    history = ("https://github.com/gwf/x2c/blob/"
+               "b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/")
+    for name in ("PILOT.md", "REPORT.md", "MATCHED.md", "SUPPLEMENT.md"):
+        text = text.replace(f"({name})", f"({history}{name})")
+    path = os.path.join(directory, filename)
+    with open(path, "w") as handle:
+        handle.write(text)
+    print(f"wrote {path}")
+    return 0
 
 
 def load(directory, name):
@@ -368,7 +383,7 @@ def write(run, diagnostics_run=None, timing_run=None):
     else:
         lines.append("Python uses stock PyTorch Adam. Its numerical divergence "
                      "is reported below; failed tolerances remain failures.\n")
-        lines.append("[The matched control](MATCHED.md) reports the separate "
+        lines.append("[The historical matched control](MATCHED.md) reports the separate "
                      "libtorch operation-order correctness comparison.\n")
     environment_section(load(directory, "environment.json"), lines)
     checked = load(directory, "check.json")
@@ -415,11 +430,7 @@ def write(run, diagnostics_run=None, timing_run=None):
         lines.append(f"Plots read those same files through "
                      f"`plots.py {arguments}`.\n")
     filename = "MATCHED.md" if optimizer == "matched" else "REPORT.md"
-    path = os.path.join(common.BENCHMARKS, filename)
-    with open(path, "w") as handle:
-        handle.write("\n".join(lines).rstrip() + "\n")
-    print(f"wrote {path}")
-    return 0
+    return write_report(directory, filename, lines)
 
 
 def supplement(run, timing_run=None):
@@ -632,11 +643,7 @@ def supplement(run, timing_run=None):
         "The [README](README.md) gives the commands. "
         "`run.py supplement` and `plots.py --supplement` regenerate this "
         "report and its plot without replacing the primary report/plots.\n"]
-    path = os.path.join(common.BENCHMARKS, "SUPPLEMENT.md")
-    with open(path, "w") as handle:
-        handle.write("\n".join(lines).rstrip() + "\n")
-    print(f"wrote {path}")
-    return 0
+    return write_report(directory, "SUPPLEMENT.md", lines)
 
 
 def chain_evidence(directory):
@@ -796,8 +803,6 @@ def remedies(directory):
                  (json.dumps(exclusions, sort_keys=True) if exclusions
                   else "none; every launched timing pair is retained") +
                  ".\n")
-    relative = os.path.relpath(os.path.abspath(directory), common.BENCHMARKS)
-    evidence = relative.replace(os.sep, "/")
     lines += ["## Scope of the result\n",
         "These measurements compare lifetime choices for this CPU chain. "
         "They do not resolve the separate canonical-pool churn footprint "
@@ -806,10 +811,10 @@ def remedies(directory):
         "not the Python comparison here. The original application results "
         "and [MNIST correction](SUPPLEMENT.md) are separate measurements.\n",
         "## Evidence and reproduction\n",
-        f"- [Every timing pair]({evidence}/timing.json), including order.",
-        f"- [Correctness comparisons]({evidence}/correctness.json).",
-        f"- [Per-process scalar records]({evidence}/records.json).",
-        f"- [Provenance and hashes]({evidence}/provenance.json).",
+        "- [Every timing pair](timing.json), including order.",
+        "- [Correctness comparisons](correctness.json).",
+        "- [Per-process scalar records](records.json).",
+        "- [Provenance and hashes](provenance.json).",
         f"- {provenance.get('archive', 'Full process logs accompany the run.')}",
         "", "Regenerate this report from the saved observations without "
         "running benchmarks:\n", "```sh",
@@ -818,11 +823,7 @@ def remedies(directory):
         "```", "", "The [benchmark README](README.md) describes how to "
         "collect a new run. Regeneration writes only `REMEDIES.md`; it "
         "preserves the original reports.\n"]
-    path = os.path.join(common.BENCHMARKS, "REMEDIES.md")
-    with open(path, "w") as handle:
-        handle.write("\n".join(lines).rstrip() + "\n")
-    print(f"wrote {path}")
-    return 0
+    return write_report(directory, "REMEDIES.md", lines)
 
 
 if __name__ == "__main__":

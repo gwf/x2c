@@ -46,9 +46,9 @@ Scope counts are stable after request cleanup; ordinary canonical storage
 grows, while per-request List pool brackets keep it fixed. Attribution
 also measures the cost of scope length and explicit early release.
 
-[REPORT.md](../../packages/torch/benchmarks/REPORT.md) retains stock failures,
+[REPORT.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) retains stock failures,
 per-workload timing variability, incremental memory peaks and attribution.
-[MATCHED.md](../../packages/torch/benchmarks/MATCHED.md) records the separate
+[MATCHED.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/MATCHED.md) records the separate
 passing control. No threshold was relaxed: stock explicit tabular loss has
 0.223% relative divergence against the 0.1% limit. Counter-enabled and
 sleep-affected prior timings remain historical, not headline measurements.
@@ -68,7 +68,7 @@ Delivered through 1dbf258 on 2026-09-11 after the final agent-pr-check passed.
 [Pages deployment 34605316778](https://github.com/gwf/x2c/actions/runs/34605316778)
 published that revision; the live guide, search, navigation, example and
 reference routes were verified. The
-[supplement](../../packages/torch/benchmarks/SUPPLEMENT.md) records the
+[supplement](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/SUPPLEMENT.md) records the
 additional diagnostics and corrected MNIST timing without replacing the
 original primary artifacts. Publication and live QA receipts remain beside
 the raw measurements in the external evidence root above.
@@ -354,7 +354,7 @@ experiment, not a permanent gate or an automatic redesign mandate.
 
 ## Files, execution, and delivery
 
-Add `packages/torch/benchmarks/` with `README.md`, one small fixed-profile
+Add [packages/torch/benchmarks/](../../packages/torch/benchmarks) with `README.md`, one small fixed-profile
 manifest, paired `tabular.x/.py`, `mnist.x/.py`, `sequence.x/.py`,
 `interop.x/.py/.cpp`, `prepare.py`, `run.py`, and only the common input,
 metrics, and plotting helpers actually shared. Each app runs on its own;
@@ -385,7 +385,7 @@ Implementation sequence:
    excluding dependency preparation/builds; pilot first and record actual
    duration. If this exceeds the budget, split sessions or explicitly
    reduce a common profile, never silently omit a slow/failing language.
-5. Produce `packages/torch/benchmarks/REPORT.md` plus standalone plots:
+5. Produce [packages/torch/benchmarks/REPORT.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) plus standalone plots:
    learning curves, paired throughput, memory versus steps, and peak
    memory versus chain/window length. Include raw-data location/hashes,
    commands, exact builds, correctness tolerances/results, variability,

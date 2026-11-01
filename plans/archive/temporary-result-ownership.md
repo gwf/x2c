@@ -40,7 +40,7 @@ A Tensor return type alone therefore cannot authorize input disposal. The
 native tensor/storage distinction also matters: a new native handle may share
 underlying tensor storage, so wrapper freshness must be traced at the shim.
 
-The existing `packages/torch/benchmarks/REMEDIES.md` already compares explicit
+The existing [packages/torch/benchmarks/REMEDIES.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REMEDIES.md) already compares explicit
 release of replaced named tensors with a Scope per iteration. Those are
 historical measurements, not new timings from this investigation. They are
 independent of the ordinary-call guard: a named variable's assignment lifetime
