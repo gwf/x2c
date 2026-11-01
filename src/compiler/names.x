@@ -17,6 +17,12 @@ String Compiler.fresh_name(Compiler c, String stem) {
   return name;
 }
 
+/** Reports whether `name` is a spelling `fresh_name` issued for an anonymous
+    macro definition, which has no source name.
+*/
+int Compiler.anonymous_macro_name(String name) =>
+  name.startswith("_x2c_gensym_anonymous_macro_");
+
 /** Returns a fresh semantic identity for an anonymous aggregate.
     Identities are scoped to the compiler's current file and numbered per
     file, so every process mints the same sequence for one file and two

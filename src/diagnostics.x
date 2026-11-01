@@ -215,8 +215,7 @@ void Compiler.report_warning(
 */
 String Diagnostics.macro_spelling(List definition, Token invocation) {
   Atom name = definition.assoc(<name>);
-  if (!name.str().startswith("_x2c_gensym_anonymous_macro_"))
-    return name.str();
+  if (!Compiler.anonymous_macro_name(name.str())) return name.str();
   if (invocation.type != <$>) return invocation.text;
   return "$" + Token.skip_trivia(invocation + 1).text;
 }

@@ -13,7 +13,7 @@
    then. */
 static typedef struct Decoration {
   Compiler c, List definition, function, generator, Token invocation, start;
-  Symbol position, Symbol kind, int open, named_macro;
+  Symbol position, Symbol kind, int open;
 } Decoration;
 
 /* invocations at syntax positions
@@ -122,7 +122,11 @@ static List _decorate_producer(Decoration &d) {
     List value = c.expand_macro_invocation_node(
       d.definition, node.caddr(), d.invocation, <decorator>);
     if (value ~= %(macrodef *)) {
-      if (d.named_macro) {
+      /* A named definition is published, or handed to an enclosing Macro
+         target as a value; an anonymous Decorator consumes its target. */
+      if (!Compiler.anonymous_macro_name(value.assoc(<name>).str())) {
+        if (d.position == <expression>)
+          value = c.capture_macro_value(value);
         List result = c.bind_syntax(value, d.position, c.return_type);
         transaction.commit();
         return result;
@@ -251,8 +255,6 @@ static void _bind_name_arguments(Compiler c, List definition, List arguments) {
 static List _decoration_node(Decoration &d, List arguments) {
   Compiler c = d.c;
   d.start = c.token;
-  d.named_macro = d.kind == <macro> &&
-    (c.macro_form_is_definition() || c.local_macro_form_is_definition());
   List target = _target(d);
   if (d.kind == <macro>) d.generator = target;
   if (d.position == <statement>) target = c.anchor_origin(target, d.start);
