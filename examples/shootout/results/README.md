@@ -4,23 +4,28 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current comparison is [run 20261101T161913Z](runs/20261101T161913Z/README.md),
-measured from clean source `b81b82c3065ffcfaf900d6febdd9d874ec179b5a`.
-Both x2c columns were rebuilt and measured with twelve fresh processes per
-program: 240 observations over ten problems. Official fixtures and local
-outputs pass. Foreign contributions retain their pinned calibration timings.
+The current comparison is [run 20261101T204543Z](runs/20261101T204543Z/README.md),
+measured from clean source `fed582d496606c11eb09e4a817f7fa9ddf2a2464` after
+integrating current dev and rebuilding. Both x2c columns were rebuilt and
+measured with twelve fresh processes per program: 240 observations over ten
+problems. Official fixtures and local outputs pass. Foreign calibration stays
+pinned; its programs were not remeasured.
 
-Tuned reverse-complement uses chunk reads and batched output. FASTA fills
-reusable output buffers and scans probability thresholds. N-body uses five
-contiguous native records and reference methods. Twelve-pair comparisons
-against frozen prior binaries retain all three gains, including larger text
-inputs. The archive preserves source probes, output checks and raw data.
+Tuned regex-redux now alternates two typed scratch buffers instead of running
+sizing scans and interning each intermediate substitution. The integrated
+old/new comparison improves local elapsed time from 24.490 to 12.059 ms and
+larger input from 220.580 to 98.205 ms. Source cleanup removes pidigits' private
+Integer forwarding layer without changing its algorithm, cleanup or output.
+Its paired local timings remain flat.
 
-Across eight shared workloads, tuned elapsed-time geometric means are 1.24x C
-and 1.06x Rust, compared with 1.77x and 1.51x in the preceding run. The chart
-also includes unchanged pinned C++, Go, Python and Java references. These
-compare selected programs, not general language performance. All three chart
-forms remain available in SVG/PNG/PDF with CSV and rendering provenance.
+Across eight shared workloads, tuned elapsed-time geometric means are 1.11x C
+and 0.95x Rust. The independent [source-size audit](runs/20261101T204543Z/comparison/source-size-audit.md)
+reproduces all 75 admitted programs' LOC and normalized gzip counts on both
+old and new trees. Tuned has fewer lines than C overall, but more compressed
+bytes. The audit separates redundant wrappers from explicit scheduling and
+measured kernel specialization. These compare selected programs, not general
+language rankings. All three chart forms remain in SVG/PNG/PDF with CSV,
+rendering source, profiling and paired evidence.
 
 ## Saved runs
 
@@ -38,6 +43,7 @@ forms remain available in SVG/PNG/PDF with CSV and rendering provenance.
 | [20261031T211435Z](runs/20261031T211435Z/README.md) | 8 | 8 | Full calibration: parallel idiomatic regex/Mandelbrot and reverse Buffer |
 | [20261101T154144Z](runs/20261101T154144Z/README.md) | 8 | 8 | Tuned scheduling/buffering parity; fresh x2c, pinned foreign measurements |
 | [20261101T161913Z](runs/20261101T161913Z/README.md) | 8 | 8 | Tuned reverse-complement, FASTA and N-body improvements; pinned foreign measurements |
+| [20261101T204543Z](runs/20261101T204543Z/README.md) | 8 | 8 | Tuned regex scratch buffers, pidigits cleanup and independently verified source sizes |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -93,8 +99,8 @@ Use the latest run's recorded plotting environment:
 
 ```sh
 python3.14 -m venv /tmp/x2c-shootout-charts
-/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T161913Z/charts/requirements.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T161913Z/charts/render.py examples/shootout/results/runs/20261101T161913Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T204543Z/charts/requirements.txt
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T204543Z/charts/render.py examples/shootout/results/runs/20261101T204543Z/current.json /tmp/x2c-shootout-figures
 ```
 
 The per-run `render-environment.json` records the versions actually used.
