@@ -44,12 +44,12 @@ List Type.declaration_base(Type t, List &modifiers) {
 // specifier symbols
 
 static const SymbolSet storage_classes =
-  %<<typedef static auto extern register threaded>>;
-static const SymbolSet type_qualifiers = %<<const restrict volatile>>;
-static const SymbolSet type_modifiers = %<<long short signed unsigned>>;
+  %<typedef static auto extern register threaded>;
+static const SymbolSet type_qualifiers = %<const restrict volatile>;
+static const SymbolSet type_modifiers = %<long short signed unsigned>;
 static const SymbolSet number_types =
-  %<<double float char short int long signed unsigned enum>>;
-static const SymbolSet tagged_types = %<<struct union enum>>;
+  %<double float char short int long signed unsigned enum>;
+static const SymbolSet tagged_types = %<struct union enum>;
 
 // scalars
 

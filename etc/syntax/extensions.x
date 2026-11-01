@@ -18,7 +18,7 @@ List syntax_extensions(void) => %(
       (grammar import-declaration import-member module-block script-unit type-reference identifier)
       (lexical c-tokens)
       (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, module member text splicing before parsing, and script statements outside an explicit main.")
-      (lexical-note "import is a keyword; a leading shebang is handled before lexing.")
+      (lexical-note "import is contextual; a leading shebang is handled before lexing.")
       (spellings "import" "as" "with" "module" "#!")
       (reference "../reference/language.md#source-files-and-visibility"))
     (feature layout
@@ -39,7 +39,7 @@ List syntax_extensions(void) => %(
                init-declarator)
       (lexical c-tokens)
       (grammar-note "Managed declarations and initializers, mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility.")
-      (lexical-note "delegate and threaded are keywords; Self is contextual. Existing punctuation gains declaration roles.")
+      (lexical-note "delegate, threaded, and Self are contextual. Existing punctuation gains declaration roles.")
       (spellings "auto T a = x, b = y" "T a = auto x" "T.method"
                  "&" "&?" "delegate" "threaded" "Self"
                  "class" "static typedef" "int i, float x"
@@ -52,8 +52,8 @@ List syntax_extensions(void) => %(
                alias-head alias-name named-alias alias-wrapper
                alias-statement field-alias enumerator-alias unalias)
       (lexical c-tokens)
-      (grammar-note "alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
-      (lexical-note "alias, unalias, and as are contextual words; an alias or unalias needs no comma among enumerators.")
+      (grammar-note "alias name to expression and alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
+      (lexical-note "alias, unalias, as, and to are contextual words; an alias or unalias needs no comma among enumerators.")
       (spellings "alias e as name;" "alias e as name { ... }"
                  "alias e { ... _ ... }" "static alias e as name;"
                  "unalias name;")
@@ -64,7 +64,7 @@ List syntax_extensions(void) => %(
       (grammar protocol-form associated-type protocol-member)
       (lexical c-tokens)
       (grammar-note "Protocol definitions/adoptions, associated types, member aliases, and as/tag adoption modifiers.")
-      (lexical-note "protocol and associated are keywords; as and tag are contextual words.")
+      (lexical-note "protocol, associated, as, and tag are contextual words.")
       (spellings "protocol" "associated" "as" "tag")
       (reference "../reference/language.md#protocols"))
     (feature functions
@@ -97,7 +97,7 @@ List syntax_extensions(void) => %(
                octal-integer)
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
       (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
-      (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<<...>>"
+      (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<...>"
                  "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")
       (reference "../reference/language.md#percent-literals-quote-and-unquote"))
@@ -106,9 +106,9 @@ List syntax_extensions(void) => %(
       (summary "Test identity, membership, or type; slice a sequence.")
       (grammar equality relational type-selector postfix-part)
       (lexical c-tokens keyword-retag)
-      (grammar-note "=== and !==, in, is/is not, and [start:stop:step] extend the C expression ladder.")
-      (lexical-note "=== and !== are operator tokens; in is contextually retagged; is and not remain contextual words.")
-      (spellings "===" "!==" "in" "is" "is not"
+      (grammar-note "=== and !==, ~= pattern conditions, in, is/is not, and [start:stop:step] extend the C expression ladder.")
+      (lexical-note "===, !==, and ~= are operator tokens; in is contextually retagged; is and not remain contextual words.")
+      (spellings "===" "!==" "~=" "in" "is" "is not"
                  "[start:stop:step]")
       (reference "../reference/language.md#membership-with-in"))
     (feature iteration-matching
@@ -130,7 +130,7 @@ List syntax_extensions(void) => %(
                catch-detail raise-statement raise-detail)
       (lexical c-tokens percent-forms list-atom)
       (grammar-note "auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details.")
-      (lexical-note "defer, try, catch, finally, and raise are keywords; with is contextual at statement start; error patterns reuse List mode.")
+      (lexical-note "defer stays reserved; try, catch, finally, and raise are contextual; with requires a complete braced head; percent and angle forms keep lexical priority.")
       (spellings "auto { ... }" "auto (destination)"
                  "with (place = value, ...)"
                  "defer" "try" "catch" "finally" "raise")

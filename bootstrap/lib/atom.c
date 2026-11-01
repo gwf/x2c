@@ -184,7 +184,7 @@ static int _truth(Var value){
 
 static Symbol _exact_7bit(String spelling){
   int length = String_len(spelling);
-  if(length > 7) return 0;
+  if(length > SYMBOL_MAX_7BIT) return 0;
   Symbol result = 0;
   {
     int byte;
@@ -207,7 +207,7 @@ static Symbol _exact_7bit(String spelling){
 
 static int _decodes_to(Symbol compact, String canonical, int length){
   if(! compact) return 0;
-  char text[10 + 1];
+  char text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(compact, text);
   return(int) strlen(text) == length && ! memcmp(text, canonical, length);
 }

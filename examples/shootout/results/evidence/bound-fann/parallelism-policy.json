@@ -1,0 +1,24 @@
+{
+  "policy": "Follow parallelism used in official published submissions for each problem; where none use it, remain serial. Preserve official workload requirements and existing idiomatic/tuned definitions. Keep the eight-column comparison without separate serial/parallel regimes.",
+  "published_precedents_already_in_adopted_corpus": {
+    "binarytrees": {
+      "language": "C",
+      "source": "examples/shootout/benchmarks/binarytrees/main.c",
+      "sha256": "a815e8a0eefd7e09bf92a8025bfb8347eb57e9fa79680dcd672ce1c7fa6479a0"
+    },
+    "spectralnorm": {
+      "language": "Rust",
+      "source": "examples/shootout/benchmarks/spectralnorm/main.rs",
+      "sha256": "6b8fca569218ac7cff178ce4da8e44cccae1c8668b1e5f0e2d2876e80c7b2424"
+    },
+    "fannkuchredux": {
+      "language": "Rust",
+      "source": "examples/shootout/benchmarks/fannkuchredux/main.rs",
+      "sha256": "9238cf9dd91b245c4b07de2a6985785c7683e40fcd510f8b817076e7c4ba3d1c"
+    }
+  },
+  "additional_official_examples": [
+    "https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-3.html",
+    "https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-3.html"
+  ]
+}

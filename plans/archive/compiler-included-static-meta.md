@@ -8,7 +8,7 @@
 
 ## Report and current finding
 
-The [derive campaign](../derive-and-test.md#what-the-probe-established) reported
+The [derive campaign](derive-and-test.md#what-the-probe-established) reported
 `explicit meta call cannot be resolved: no binding for probe_make` from an
 included `meta static` helper at `9aeeef265`. The original failing source
 was not retained, so its exact call form cannot be verified.

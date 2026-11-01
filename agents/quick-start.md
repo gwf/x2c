@@ -32,10 +32,17 @@ These are alternatives, not a sequence. The explicit session instruction
 persists until changed. Set subordinate worker context in its actual worktree
 before it starts. Worker handoffs stay private even when the parent uses PR
 delivery. An independent working session uses `individual`; `worker` is only
-for subordinate private handoffs. Context is ignored worktree-local state in
+for subordinate private handoffs; the context command rejects any other
+delivery for a worker. Context is ignored worktree-local state in
 `debug/agent-context.json`; the common Git hook protects shared branches for
-both providers. Setup checks the effective hook path and executable hook and
-reports incompatible existing configuration instead of overwriting it.
+both providers and refuses every push from a worker. `make configure`, which
+`make build` and `make build-safe` run, sets `core.hooksPath` to the relative
+`tools/hooks` when it is unset, in the repository configuration that every
+worktree shares, so each worktree runs its own checkout's hook. An absolute
+value would make every worktree run that one script. Context setup sets the
+same value when it is unset, then checks the effective hook path and
+executable hook and reports incompatible existing configuration instead of
+overwriting it.
 Canonical instructions and skills are shared through the existing discovery
 links.
 
@@ -190,6 +197,14 @@ required sequence.
 | `make build-recovery` | Check that an interrupted stage build removes partial objects and replaces archives. |
 | `make performance-snapshot` | Record representative build, runtime, shootout, and compiler timings. |
 | `python3 tools/test-configure.py` | Check `./configure` prerequisite reporting and its ordering before the core build. |
+| `python3 tools/test-release-candidate.py` | Offline release checks. |
+| `make tools-check` | Optional offline probes of the Python tools. |
+
+No gate runs the `tools/test-*.py` probes. `make tools-check` runs those of
+the gate, integration, `land-dev`, examples runner, benchmark, metrics, and
+failure-capture tools. Run `tools/test-configure.py` and
+`tools/test-release-candidate.py` by hand; the
+[release operations](../etc/release/README.md) describe the latter.
 
 For an optional focused unit run, build with `make -C unittest test-all`, then
 pass exact suite names, for example

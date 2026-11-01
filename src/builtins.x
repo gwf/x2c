@@ -86,8 +86,8 @@ static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
   List enter = destinations ? $!( Scope_push(@destinations) )
-                            : $!( Scope_retain() );
-  List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
+                            : $!( Scope_open() );
+  List leave = destinations ? $!( Scope_pop() ) : $!( Scope_close() );
   return $!{ { $enter; { defer $leave; $body } } };
 }
 
@@ -793,8 +793,7 @@ static List _field_write(List field) {
 static List _string_method(String owner, String member) {
   String writer = %"write_$(member)";
   List body = $!{
-    Buffer out = Buffer.new(0);
-    defer out.free();
+    auto Buffer out = Buffer.new(0);
     value.$writer(out);
     return out.str();
   };

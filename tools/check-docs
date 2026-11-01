@@ -274,19 +274,27 @@ static void _check_module_counts(void):
       if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
   foreach Path source in root.join("src/*/*.x").glob():
     if source.stem() == source.dirname().basename(): sources.push(source.stem())
-  int src_count = sources.len(), lib_count = 0
+  /* Counts follow agents/x2c-module-catalog.md: entry units and their
+     module directories, without the generated linked-meta and lib/x2c.x. */
+  int src_count = sources.len() - (sources.contains("linked-meta") ? 1 : 0)
+  int lib_count = 0
   foreach String name in root.join("lib").list_dir():
     if name.endswith(".x") && name != "x2c.x": lib_count++
+  foreach Path source in root.join("lib/*/*.x").glob():
+    if source.stem() == source.dirname().basename(): lib_count++
   Regex counted = Regex.compile(
-    "\\b(\\d+|sixteen|eighteen|twenty)([ -]\\w+)*[ -]modules\\b")
+    "\\b(\\d+|sixteen|eighteen|twenty)([ -]\\w+){0,3}[ -]modules\\b")
   foreach String relative in docs:
     String text = _read(relative)
     foreach RegexMatch found in counted.find_all(text):
       int start = _start(found)
-      String word = found[1]
+      String word = found[1], phrase = found[0]
       int count = word == "sixteen" ? 16 : word == "eighteen" ? 18 :
                   word == "twenty" ? 20 : atoi(word)
-      String context = text[start < 40 ? 0 : start - 40:start].lower()
+      /* The phrase names its kind, or the preceding words do. */
+      String context = phrase.lower()
+      if !context.contains("runtime") && !context.contains("compiler"):
+        context = text[start < 40 ? 0 : start - 40:start].lower()
       int expected = context.contains("runtime") ? lib_count : src_count
       if count != expected:
         errors.push(%"$(_where(relative, text, start)): '$(found[0])' says " +

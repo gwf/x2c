@@ -96,6 +96,7 @@ static int count(int limit){
 #if 1
   total -= 100;
 #else
+  total = 0;
 #endif
   do
 #ifndef ONCE

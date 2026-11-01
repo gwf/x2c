@@ -32,7 +32,7 @@ def generated(path: str) -> bool:
     name = Path(path)
     return (path in DOC_FILES or path in SOURCE_FILES or
             (str(name.parent) in DOC_DIRS and name.suffix == ".md") or
-            (str(name.parent) in {"bootstrap/lib", "bootstrap/src"} and
+            (path.startswith(("bootstrap/lib/", "bootstrap/src/")) and
              name.suffix in {".c", ".h"}))
 
 

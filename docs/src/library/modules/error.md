@@ -505,10 +505,39 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_error_execution_free`](#x2c_error_execution_free) | Releases backing after Error.shutdown_raw ran with its state installed. |
+| [`x2c_error_execution_new`](#x2c_error_execution_new) | Allocates empty execution backing. |
+| [`x2c_error_execution_swap`](#x2c_error_execution_swap) | Exchanges mutable Error state and its readiness as one boundary action. |
 | [`Error.context_close`](#Error.context_close) | Closes one `Context` `Error` overlay. |
 | [`Error.context_open`](#Error.context_open) | Opens the `Error` state owned by one `Context`. |
 | [`Error.since_in`](#Error.since_in) | Copies errors at and after `mark` into explicit owners, oldest first. |
 | [`Error.snapshot_in`](#Error.snapshot_in) | Copies one admissible error value into explicit runtime owners. |
+
+### Functions
+
+#### x2c_error_execution_free
+
+`void x2c_error_execution_free(void *backing)`
+
+Releases backing after Error.shutdown_raw ran with its state installed.
+
+Source: `lib/error/runtime.x`
+
+#### x2c_error_execution_new
+
+`void *x2c_error_execution_new(void)`
+
+Allocates empty execution backing. Initialize Error after installing it.
+
+Source: `lib/error/runtime.x`
+
+#### x2c_error_execution_swap
+
+`void x2c_error_execution_swap(void *backing)`
+
+Exchanges mutable Error state and its readiness as one boundary action.
+
+Source: `lib/error/runtime.x`
 
 ### `Error`
 

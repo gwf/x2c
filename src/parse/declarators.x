@@ -53,8 +53,8 @@ List Compiler.parse_parameter(Compiler c) {
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, type, NULL, method, first, after);
   if (rest && (declarator.caddr() || c.peek(0) == <,>))
-    c.report_error(<parse>, "rest parameter must be a final name",
-      c.token, NULL);
+    c.report_error(
+      <parse>, "rest parameter must be a final name", c.token, NULL);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
 
@@ -214,8 +214,6 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
   return type;
 }
 
-
-
 /* Parameter declarations bind into a temporary scope. Whether a body
    follows is not yet determined, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
@@ -297,8 +295,6 @@ static List _array_suffix(Compiler c) {
   return %((dim $expr));
 }
 
-
-
 // Returns NULL for another token, which takes the ordinary identifier path.
 static List _template_declarator(Compiler c, int member) {
   List method = _literal_method(c);
@@ -362,13 +358,17 @@ module List _finish_parameter(
   Token source_first, Token source_after) {
   List rest = base, container = rest.type().rest_container();
   base = _finish_type(c, container ? container : base);
+  if (!c.macro_holes && declarator === %(bind () ()) &&
+      c.sym.resolve_key(base) === %(void))
+    base = %(void);
   if (<auto> in base && !c.macro_holes && !c.shallow)
     $fail.parse_auto_storage(c, c.token);
   int preserved_self = 0;
   declarator = _install_declarator(
     c, base, NULL, declarator,
     method_identity, preserved_self);
-  c.record_source_declaration(declarator.cadr(), source_first, source_after, 0);
+  c.record_source_declaration(
+    declarator.cadr(), source_first, source_after, 0);
   List modifiers = NULL;
   base = Type.declaration_base(base, modifiers);
   declarator = Ast.append_modifiers(declarator, modifiers);
@@ -633,8 +633,6 @@ static List _finish_prototype(Compiler c, List parameters) {
   return params.list_free();
 }
 
-
-
 module List _declarator_list(Compiler c, List type, List context, int row) {
   Array bindings = auto [];
   loop {
@@ -665,7 +663,8 @@ module List _declarator_init(Compiler c, List type, List context) {
     Type declared = %(declare $type (bindings $bind)).type_from_ast();
     int external = !context && !type.type().is_static() &&
       !c.sym.is_file_static(bind.cadr()) &&
-      (c.sym.at_file_scope() || type.type().is_extern() || declared.is_function());
+      (c.sym.at_file_scope() || type.type().is_extern() ||
+       declared.is_function());
     c.record_source_declaration(bind.cadr(), first, after, external);
   }
   int function_arrow = !c.in_proto && _x2c_at_function_arrow(c) &&

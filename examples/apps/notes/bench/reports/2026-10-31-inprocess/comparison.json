@@ -1,0 +1,1259 @@
+{
+  "summary": {
+    "1": {
+      "thread": {
+        "requests_per_s": 56209.395,
+        "cpu_us_per_request": 17.76,
+        "p50_us": 18.0,
+        "p99_us": 27.0,
+        "peak_rss_bytes": 8601600
+      },
+      "task": {
+        "requests_per_s": 55748.155,
+        "cpu_us_per_request": 17.811,
+        "p50_us": 18.0,
+        "p99_us": 23.999,
+        "peak_rss_bytes": 8536064
+      },
+      "task_over_thread": {
+        "requests_per_s": 0.9917942543234988,
+        "cpu_us_per_request": 1.0028716216216216,
+        "p50_us": 1.0,
+        "p99_us": 0.8888518518518518,
+        "peak_rss_bytes": 0.9923809523809524
+      },
+      "task_usable_stack_bytes": 8388608
+    },
+    "8": {
+      "thread": {
+        "requests_per_s": 122380.899,
+        "cpu_us_per_request": 19.279,
+        "p50_us": 65.0,
+        "p99_us": 91.0,
+        "peak_rss_bytes": 15974400
+      },
+      "task": {
+        "requests_per_s": 156240.013,
+        "cpu_us_per_request": 12.506,
+        "p50_us": 49.001,
+        "p99_us": 72.0,
+        "peak_rss_bytes": 21512192
+      },
+      "task_over_thread": {
+        "requests_per_s": 1.276669923792601,
+        "cpu_us_per_request": 0.6486850977747809,
+        "p50_us": 0.7538615384615385,
+        "p99_us": 0.7912087912087912,
+        "peak_rss_bytes": 1.3466666666666667
+      },
+      "task_usable_stack_bytes": 67108864
+    },
+    "64": {
+      "thread": {
+        "requests_per_s": 120760.747,
+        "cpu_us_per_request": 20.512,
+        "p50_us": 521.0,
+        "p99_us": 694.999,
+        "peak_rss_bytes": 20201472
+      },
+      "task": {
+        "requests_per_s": 157296.125,
+        "cpu_us_per_request": 12.509,
+        "p50_us": 399.0,
+        "p99_us": 543.999,
+        "peak_rss_bytes": 25247744
+      },
+      "task_over_thread": {
+        "requests_per_s": 1.3025434912223588,
+        "cpu_us_per_request": 0.6098381435257411,
+        "p50_us": 0.7658349328214972,
+        "p99_us": 0.7827335003359717,
+        "peak_rss_bytes": 1.2497972424979724
+      },
+      "task_usable_stack_bytes": 536870912
+    }
+  },
+  "samples": [
+    {
+      "mode": "thread",
+      "clients": 1,
+      "requests": 279674,
+      "bytes": 28806422,
+      "wall_s": 5.000039,
+      "cpu_s": 5.00573,
+      "requests_per_s": 55934.364,
+      "cpu_us_per_request": 17.898,
+      "p50_us": 18.0,
+      "p99_us": 27.001,
+      "peak_rss_bytes": 8601600,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-1-thread.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "load_after": [
+        8.78466796875,
+        10.45751953125,
+        10.3173828125
+      ],
+      "label": "run-1-1-thread",
+      "run": 1
+    },
+    {
+      "mode": "task",
+      "clients": 1,
+      "requests": 273005,
+      "bytes": 28119515,
+      "wall_s": 5.00002,
+      "cpu_s": 4.98024,
+      "requests_per_s": 54600.782,
+      "cpu_us_per_request": 18.242,
+      "p50_us": 18.0,
+      "p99_us": 29.0,
+      "peak_rss_bytes": 8536064,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-1-task.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        8.78466796875,
+        10.45751953125,
+        10.3173828125
+      ],
+      "load_after": [
+        8.3212890625,
+        10.33349609375,
+        10.2744140625
+      ],
+      "label": "run-1-1-task",
+      "run": 1
+    },
+    {
+      "mode": "thread",
+      "clients": 8,
+      "requests": 608302,
+      "bytes": 62655106,
+      "wall_s": 5.000111001,
+      "cpu_s": 11.922944,
+      "requests_per_s": 121657.699,
+      "cpu_us_per_request": 19.6,
+      "p50_us": 65.0,
+      "p99_us": 98.0,
+      "peak_rss_bytes": 16842752,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-8-thread.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        8.3212890625,
+        10.33349609375,
+        10.2744140625
+      ],
+      "load_after": [
+        7.97509765625,
+        10.22802734375,
+        10.2373046875
+      ],
+      "label": "run-1-8-thread",
+      "run": 1
+    },
+    {
+      "mode": "task",
+      "clients": 8,
+      "requests": 781216,
+      "bytes": 80465248,
+      "wall_s": 5.000101999,
+      "cpu_s": 9.769515,
+      "requests_per_s": 156240.013,
+      "cpu_us_per_request": 12.506,
+      "p50_us": 49.001,
+      "p99_us": 74.0,
+      "peak_rss_bytes": 21512192,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-8-task.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        7.97509765625,
+        10.22802734375,
+        10.2373046875
+      ],
+      "load_after": [
+        7.44384765625,
+        10.0390625,
+        10.169921875
+      ],
+      "label": "run-1-8-task",
+      "run": 1
+    },
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 607529,
+      "bytes": 62575487,
+      "wall_s": 5.000903,
+      "cpu_s": 12.108208,
+      "requests_per_s": 121483.86,
+      "cpu_us_per_request": 19.93,
+      "p50_us": 519.0,
+      "p99_us": 690.0,
+      "peak_rss_bytes": 20168704,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-64-thread.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        7.44384765625,
+        10.0390625,
+        10.169921875
+      ],
+      "load_after": [
+        7.16796875,
+        9.9384765625,
+        10.13330078125
+      ],
+      "label": "run-1-64-thread",
+      "run": 1
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 779139,
+      "bytes": 80251317,
+      "wall_s": 5.000765,
+      "cpu_s": 9.811279,
+      "requests_per_s": 155803.962,
+      "cpu_us_per_request": 12.592,
+      "p50_us": 401.0,
+      "p99_us": 608.999,
+      "peak_rss_bytes": 24133632,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-1-64-task.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        7.16796875,
+        9.9384765625,
+        10.13330078125
+      ],
+      "load_after": [
+        7.154296875,
+        9.8896484375,
+        10.11474609375
+      ],
+      "label": "run-1-64-task",
+      "run": 1
+    },
+    {
+      "mode": "task",
+      "clients": 1,
+      "requests": 278742,
+      "bytes": 28710426,
+      "wall_s": 5.000022001,
+      "cpu_s": 4.960317,
+      "requests_per_s": 55748.155,
+      "cpu_us_per_request": 17.795,
+      "p50_us": 18.0,
+      "p99_us": 23.0,
+      "peak_rss_bytes": 8503296,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-1-task.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        7.154296875,
+        9.8896484375,
+        10.11474609375
+      ],
+      "load_after": [
+        6.7412109375,
+        9.75830078125,
+        10.06689453125
+      ],
+      "label": "run-2-1-task",
+      "run": 2
+    },
+    {
+      "mode": "thread",
+      "clients": 1,
+      "requests": 278679,
+      "bytes": 28703937,
+      "wall_s": 5.000049001,
+      "cpu_s": 4.98601,
+      "requests_per_s": 55735.254,
+      "cpu_us_per_request": 17.892,
+      "p50_us": 18.0,
+      "p99_us": 27.999,
+      "peak_rss_bytes": 8585216,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-1-thread.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        6.7412109375,
+        9.75830078125,
+        10.06689453125
+      ],
+      "load_after": [
+        6.44140625,
+        9.64599609375,
+        10.025390625
+      ],
+      "label": "run-2-1-thread",
+      "run": 2
+    },
+    {
+      "mode": "task",
+      "clients": 8,
+      "requests": 780121,
+      "bytes": 80352463,
+      "wall_s": 5.000107,
+      "cpu_s": 9.767979,
+      "requests_per_s": 156020.861,
+      "cpu_us_per_request": 12.521,
+      "p50_us": 49.001,
+      "p99_us": 72.001,
+      "peak_rss_bytes": 20692992,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-8-task.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        6.44140625,
+        9.64599609375,
+        10.025390625
+      ],
+      "load_after": [
+        5.998046875,
+        9.44384765625,
+        9.94873046875
+      ],
+      "label": "run-2-8-task",
+      "run": 2
+    },
+    {
+      "mode": "thread",
+      "clients": 8,
+      "requests": 607729,
+      "bytes": 62596087,
+      "wall_s": 5.000098,
+      "cpu_s": 11.685788,
+      "requests_per_s": 121543.418,
+      "cpu_us_per_request": 19.229,
+      "p50_us": 65.0,
+      "p99_us": 89.0,
+      "peak_rss_bytes": 17694720,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-8-thread.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        5.998046875,
+        9.44384765625,
+        9.94873046875
+      ],
+      "load_after": [
+        5.837890625,
+        9.35302734375,
+        9.91357421875
+      ],
+      "label": "run-2-8-thread",
+      "run": 2
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 798448,
+      "bytes": 82240144,
+      "wall_s": 5.000775999,
+      "cpu_s": 9.826347,
+      "requests_per_s": 159664.82,
+      "cpu_us_per_request": 12.307,
+      "p50_us": 398.0,
+      "p99_us": 472.001,
+      "peak_rss_bytes": 25313280,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-64-task.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        5.837890625,
+        9.35302734375,
+        9.91357421875
+      ],
+      "load_after": [
+        5.5302734375,
+        9.23046875,
+        9.8671875
+      ],
+      "label": "run-2-64-task",
+      "run": 2
+    },
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 601888,
+      "bytes": 61994464,
+      "wall_s": 5.000806,
+      "cpu_s": 12.486965,
+      "requests_per_s": 120358.198,
+      "cpu_us_per_request": 20.746,
+      "p50_us": 520.0,
+      "p99_us": 797.001,
+      "peak_rss_bytes": 20496384,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-2-64-thread.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        5.5302734375,
+        9.23046875,
+        9.8671875
+      ],
+      "load_after": [
+        5.48779296875,
+        9.16015625,
+        9.83837890625
+      ],
+      "label": "run-2-64-thread",
+      "run": 2
+    },
+    {
+      "mode": "thread",
+      "clients": 1,
+      "requests": 283216,
+      "bytes": 29171248,
+      "wall_s": 5.000029,
+      "cpu_s": 4.993581,
+      "requests_per_s": 56642.871,
+      "cpu_us_per_request": 17.632,
+      "p50_us": 17.0,
+      "p99_us": 27.0,
+      "peak_rss_bytes": 8667136,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-1-thread.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        5.48779296875,
+        9.16015625,
+        9.83837890625
+      ],
+      "load_after": [
+        5.12841796875,
+        9.0244140625,
+        9.7861328125
+      ],
+      "label": "run-3-1-thread",
+      "run": 3
+    },
+    {
+      "mode": "task",
+      "clients": 1,
+      "requests": 280680,
+      "bytes": 28910040,
+      "wall_s": 5.000031,
+      "cpu_s": 4.995913,
+      "requests_per_s": 56135.652,
+      "cpu_us_per_request": 17.799,
+      "p50_us": 18.0,
+      "p99_us": 23.999,
+      "peak_rss_bytes": 8519680,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-1-task.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        5.12841796875,
+        9.0244140625,
+        9.7861328125
+      ],
+      "load_after": [
+        4.72021484375,
+        8.80908203125,
+        9.70068359375
+      ],
+      "label": "run-3-1-task",
+      "run": 3
+    },
+    {
+      "mode": "thread",
+      "clients": 8,
+      "requests": 618021,
+      "bytes": 63656163,
+      "wall_s": 5.000099,
+      "cpu_s": 11.859231,
+      "requests_per_s": 123601.753,
+      "cpu_us_per_request": 19.189,
+      "p50_us": 64.0,
+      "p99_us": 93.0,
+      "peak_rss_bytes": 15450112,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-8-thread.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.72021484375,
+        8.80908203125,
+        9.70068359375
+      ],
+      "load_after": [
+        4.662109375,
+        8.72900390625,
+        9.6669921875
+      ],
+      "label": "run-3-8-thread",
+      "run": 3
+    },
+    {
+      "mode": "task",
+      "clients": 8,
+      "requests": 787441,
+      "bytes": 81106423,
+      "wall_s": 5.000134,
+      "cpu_s": 9.754064,
+      "requests_per_s": 157483.979,
+      "cpu_us_per_request": 12.387,
+      "p50_us": 49.0,
+      "p99_us": 70.999,
+      "peak_rss_bytes": 20987904,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-8-task.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.662109375,
+        8.72900390625,
+        9.6669921875
+      ],
+      "load_after": [
+        4.52880859375,
+        8.6337890625,
+        9.62744140625
+      ],
+      "label": "run-3-8-task",
+      "run": 3
+    },
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 605947,
+      "bytes": 62412541,
+      "wall_s": 5.000815,
+      "cpu_s": 12.247925,
+      "requests_per_s": 121169.649,
+      "cpu_us_per_request": 20.213,
+      "p50_us": 521.0,
+      "p99_us": 674.0,
+      "peak_rss_bytes": 20529152,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-64-thread.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.52880859375,
+        8.6337890625,
+        9.62744140625
+      ],
+      "load_after": [
+        4.646484375,
+        8.58984375,
+        9.60595703125
+      ],
+      "label": "run-3-64-thread",
+      "run": 3
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 786603,
+      "bytes": 81020109,
+      "wall_s": 5.000778,
+      "cpu_s": 9.839838,
+      "requests_per_s": 157296.125,
+      "cpu_us_per_request": 12.509,
+      "p50_us": 400.0,
+      "p99_us": 543.999,
+      "peak_rss_bytes": 25247744,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-3-64-task.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.646484375,
+        8.58984375,
+        9.60595703125
+      ],
+      "load_after": [
+        4.43408203125,
+        8.47998046875,
+        9.56103515625
+      ],
+      "label": "run-3-64-task",
+      "run": 3
+    },
+    {
+      "mode": "task",
+      "clients": 1,
+      "requests": 280479,
+      "bytes": 28889337,
+      "wall_s": 5.000027,
+      "cpu_s": 4.995629,
+      "requests_per_s": 56095.497,
+      "cpu_us_per_request": 17.811,
+      "p50_us": 18.0,
+      "p99_us": 23.999,
+      "peak_rss_bytes": 8634368,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-1-task.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.43408203125,
+        8.47998046875,
+        9.56103515625
+      ],
+      "load_after": [
+        3.9853515625,
+        8.24951171875,
+        9.46630859375
+      ],
+      "label": "run-4-1-task",
+      "run": 4
+    },
+    {
+      "mode": "thread",
+      "clients": 1,
+      "requests": 281049,
+      "bytes": 28948047,
+      "wall_s": 5.000036,
+      "cpu_s": 4.991436,
+      "requests_per_s": 56209.395,
+      "cpu_us_per_request": 17.76,
+      "p50_us": 18.0,
+      "p99_us": 26.0,
+      "peak_rss_bytes": 8568832,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-1-thread.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.9853515625,
+        8.24951171875,
+        9.46630859375
+      ],
+      "load_after": [
+        3.74609375,
+        8.12890625,
+        9.41650390625
+      ],
+      "label": "run-4-1-thread",
+      "run": 4
+    },
+    {
+      "mode": "task",
+      "clients": 8,
+      "requests": 777249,
+      "bytes": 80056647,
+      "wall_s": 5.000111001,
+      "cpu_s": 9.779303,
+      "requests_per_s": 155446.349,
+      "cpu_us_per_request": 12.582,
+      "p50_us": 50.0,
+      "p99_us": 72.0,
+      "peak_rss_bytes": 21692416,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-8-task.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.74609375,
+        8.12890625,
+        9.41650390625
+      ],
+      "load_after": [
+        3.84619140625,
+        8.07666015625,
+        9.390625
+      ],
+      "label": "run-4-8-task",
+      "run": 4
+    },
+    {
+      "mode": "thread",
+      "clients": 8,
+      "requests": 611916,
+      "bytes": 63027348,
+      "wall_s": 5.000094,
+      "cpu_s": 11.835215,
+      "requests_per_s": 122380.899,
+      "cpu_us_per_request": 19.341,
+      "p50_us": 65.0,
+      "p99_us": 91.0,
+      "peak_rss_bytes": 15974400,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-8-thread.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.84619140625,
+        8.07666015625,
+        9.390625
+      ],
+      "load_after": [
+        4.0185546875,
+        8.0419921875,
+        9.37060546875
+      ],
+      "label": "run-4-8-thread",
+      "run": 4
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 795176,
+      "bytes": 81903128,
+      "wall_s": 5.000765,
+      "cpu_s": 9.827249,
+      "requests_per_s": 159010.871,
+      "cpu_us_per_request": 12.359,
+      "p50_us": 398.0,
+      "p99_us": 476.999,
+      "peak_rss_bytes": 25329664,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-64-task.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.0185546875,
+        8.0419921875,
+        9.37060546875
+      ],
+      "load_after": [
+        3.8564453125,
+        7.94140625,
+        9.3271484375
+      ],
+      "label": "run-4-64-task",
+      "run": 4
+    },
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 600045,
+      "bytes": 61804635,
+      "wall_s": 5.000898,
+      "cpu_s": 12.48559,
+      "requests_per_s": 119987.45,
+      "cpu_us_per_request": 20.808,
+      "p50_us": 523.0,
+      "p99_us": 701.0,
+      "peak_rss_bytes": 20021248,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-4-64-thread.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.8564453125,
+        7.94140625,
+        9.3271484375
+      ],
+      "load_after": [
+        4.04443359375,
+        7.84423828125,
+        9.2763671875
+      ],
+      "label": "run-4-64-thread",
+      "run": 4
+    },
+    {
+      "mode": "thread",
+      "clients": 1,
+      "requests": 281958,
+      "bytes": 29041674,
+      "wall_s": 5.000031,
+      "cpu_s": 4.992023,
+      "requests_per_s": 56391.25,
+      "cpu_us_per_request": 17.705,
+      "p50_us": 18.0,
+      "p99_us": 24.999,
+      "peak_rss_bytes": 8650752,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-1-thread.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.04443359375,
+        7.84423828125,
+        9.2763671875
+      ],
+      "load_after": [
+        3.80029296875,
+        7.73046875,
+        9.2275390625
+      ],
+      "label": "run-5-1-thread",
+      "run": 5
+    },
+    {
+      "mode": "task",
+      "clients": 1,
+      "requests": 275501,
+      "bytes": 28376603,
+      "wall_s": 5.000024,
+      "cpu_s": 4.979026,
+      "requests_per_s": 55099.936,
+      "cpu_us_per_request": 18.073,
+      "p50_us": 18.0,
+      "p99_us": 27.0,
+      "peak_rss_bytes": 8536064,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-1-task.db",
+        "1",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.80029296875,
+        7.73046875,
+        9.2275390625
+      ],
+      "load_after": [
+        3.65576171875,
+        7.63525390625,
+        9.18505859375
+      ],
+      "label": "run-5-1-task",
+      "run": 5
+    },
+    {
+      "mode": "thread",
+      "clients": 8,
+      "requests": 613504,
+      "bytes": 63190912,
+      "wall_s": 5.000098,
+      "cpu_s": 11.827809,
+      "requests_per_s": 122698.395,
+      "cpu_us_per_request": 19.279,
+      "p50_us": 65.0,
+      "p99_us": 89.0,
+      "peak_rss_bytes": 15794176,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-8-thread.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.65576171875,
+        7.63525390625,
+        9.18505859375
+      ],
+      "load_after": [
+        3.84326171875,
+        7.60791015625,
+        9.166015625
+      ],
+      "label": "run-5-8-thread",
+      "run": 5
+    },
+    {
+      "mode": "task",
+      "clients": 8,
+      "requests": 786059,
+      "bytes": 80964077,
+      "wall_s": 5.000109999,
+      "cpu_s": 9.783724,
+      "requests_per_s": 157208.341,
+      "cpu_us_per_request": 12.447,
+      "p50_us": 49.0,
+      "p99_us": 72.0,
+      "peak_rss_bytes": 22282240,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-8-task.db",
+        "8",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        3.84326171875,
+        7.60791015625,
+        9.166015625
+      ],
+      "load_after": [
+        4.095703125,
+        7.59765625,
+        9.1533203125
+      ],
+      "label": "run-5-8-task",
+      "run": 5
+    },
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 603903,
+      "bytes": 62202009,
+      "wall_s": 5.000822,
+      "cpu_s": 12.387261,
+      "requests_per_s": 120760.747,
+      "cpu_us_per_request": 20.512,
+      "p50_us": 525.001,
+      "p99_us": 694.999,
+      "peak_rss_bytes": 20201472,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-64-thread.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.095703125,
+        7.59765625,
+        9.1533203125
+      ],
+      "load_after": [
+        4.08056640625,
+        7.478515625,
+        9.0927734375
+      ],
+      "label": "run-5-64-thread",
+      "run": 5
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 783449,
+      "bytes": 80695247,
+      "wall_s": 5.000784,
+      "cpu_s": 9.847017,
+      "requests_per_s": 156665.235,
+      "cpu_us_per_request": 12.569,
+      "p50_us": 399.0,
+      "p99_us": 587.001,
+      "peak_rss_bytes": 21168128,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/run-5-64-task.db",
+        "64",
+        "1",
+        "5"
+      ],
+      "load_before": [
+        4.08056640625,
+        7.478515625,
+        9.0927734375
+      ],
+      "load_after": [
+        3.99365234375,
+        7.40380859375,
+        9.056640625
+      ],
+      "label": "run-5-64-task",
+      "run": 5
+    }
+  ],
+  "checks": [
+    {
+      "mode": "thread",
+      "clients": 64,
+      "requests": 10927,
+      "bytes": 1125481,
+      "wall_s": 0.101015001,
+      "cpu_s": 0.256634,
+      "requests_per_s": 108172.053,
+      "cpu_us_per_request": 23.486,
+      "p50_us": 550.0,
+      "p99_us": 1867.0,
+      "peak_rss_bytes": 7274496,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread",
+        "/tmp/notes-inprocess-26ffc1ga/check-thread.db",
+        "64",
+        "0",
+        "0.1"
+      ],
+      "load_before": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "load_after": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "label": "check-thread"
+    },
+    {
+      "mode": "task",
+      "clients": 64,
+      "requests": 15282,
+      "bytes": 1574046,
+      "wall_s": 0.100797,
+      "cpu_s": 0.198853,
+      "requests_per_s": 151611.655,
+      "cpu_us_per_request": 13.012,
+      "p50_us": 402.0,
+      "p99_us": 655.0,
+      "peak_rss_bytes": 6766592,
+      "sqlite_version": "3.53.4",
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task",
+        "/tmp/notes-inprocess-26ffc1ga/check-task.db",
+        "64",
+        "0",
+        "0.1"
+      ],
+      "load_before": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "load_after": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "label": "check-task"
+    },
+    {
+      "expected_failure": true,
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "thread-fail",
+        "/tmp/notes-inprocess-26ffc1ga/check-thread-fail.db",
+        "64",
+        "0",
+        "0.1"
+      ],
+      "load_before": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "load_after": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "label": "check-thread-fail"
+    },
+    {
+      "expected_failure": true,
+      "command": [
+        "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+        "task-fail",
+        "/tmp/notes-inprocess-26ffc1ga/check-task-fail.db",
+        "64",
+        "0",
+        "0.1"
+      ],
+      "load_before": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "load_after": [
+        9.201171875,
+        10.56689453125,
+        10.35498046875
+      ],
+      "label": "check-task-fail"
+    }
+  ],
+  "fixture": {
+    "rows": 1000,
+    "journal_mode": "delete",
+    "synchronous": 2,
+    "schema": "CREATE TABLE note (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, body TEXT NOT NULL, tags TEXT NOT NULL, created INTEGER NOT NULL, updated INTEGER NOT NULL)",
+    "first_row": [
+      1,
+      "Note 0001",
+      "hello",
+      "[\"work\"]",
+      1700000000,
+      1700000000
+    ]
+  },
+  "fixture_sha256": "f5f3424a921ccfbda583d4485bad4c85d8eb30a59c62771e28f72e09cb4f90f9",
+  "hashes": {
+    "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes": "47b1437ae24ccbfc32a069dc4274e89601dfec3b4af9ae658b7940575f91eea3",
+    "/Users/gary/.codex/worktrees/2104/x2c/builds/0/x2c": "0b3305de36aebc922a9cd818d6a8f8f4bab11125a249f57038a4711931a5446d",
+    "/Users/gary/.codex/worktrees/2104/x2c/builds/0/libx2c.a": "e263f678a0b1f4333c0e6b69c98448add4a256e622049fd68168f9468a062183",
+    "/Users/gary/.codex/worktrees/2104/x2c/packages/sqlite/builds/libsqlite.a": "8fca30a674c3e05b1599ca492c14770deee7c6c59304b0951762445af97f6e42",
+    "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix/lib/libsqlite3.a": "def377ee1367e50a5d905dcac0e25f2ce99bbee113ce8e38343dd424e6cf9ccc",
+    "/Users/gary/.codex/worktrees/2104/x2c/examples/apps/notes/bench/inprocess-notes.x": "65c6321269c35065f5f2e78c8055cda51eb1a1f028f429e3a3c229748a1eaca9",
+    "/Users/gary/.codex/worktrees/2104/x2c/examples/apps/notes/bench/notes-database.x": "b17fea5f3ba512631460516a9d32b1e5e3f1a7b8bf12f66b3cb4aabfb1442fb1",
+    "/Users/gary/.codex/worktrees/2104/x2c/examples/apps/notes/bench/compare-inprocess.py": "152ef00f720c4f36440b836bcfbde5097a6e2a78a45af619bca20251d1fceb9c",
+    "/Users/gary/.codex/worktrees/2104/x2c/examples/apps/notes/bench/threaded-notes.x": "bc93a1a97cb3db73150233c904acdf303ded68b5e4183822e2ccad1af0172184"
+  },
+  "revision": "2636c4f9afac27faa83a46addf1f703ada3178a8",
+  "status": "",
+  "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+  "scratch": "/tmp/notes-inprocess-26ffc1ga",
+  "parameters": {
+    "binary": "/private/tmp/x2c-notes-inprocess-2104/inprocess-notes",
+    "sqlite_prefix": "/Users/gary/Git/x2c/.git/x2c-integrations/entries/sqlite/ce1e69efa2f64069cf806ec48abc9132b2b63b3667de22fcb5361ad90222f7e9/prefix",
+    "fixture": null,
+    "output": "/tmp/x2c-notes-inprocess-2104/comparison.json",
+    "clients": [
+      1,
+      8,
+      64
+    ],
+    "warmup": 1,
+    "seconds": 5,
+    "runs": 5
+  },
+  "logging": "info/http to per-sample regular stderr file",
+  "excluded_environment": [
+    "X2C_SCOPE_ACCOUNTING",
+    "X2C_TASK_STACK_BYTES"
+  ]
+}

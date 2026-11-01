@@ -3,13 +3,13 @@
 #include "test-support.x"
 #include "test-macros.x"
 
-static const SymbolSet colors = %<<red green blue violet>>;
-static const SymbolSet empty_set = %<<>>;
+static const SymbolSet colors = %<red green blue violet>;
+static const SymbolSet empty_set = %<>;
 
 /* Quoted entries spell Symbols a bare entry cannot: reader punctuation is
-   ordinary text and `>>` inside the quotes does not close the literal. */
-static const SymbolSet operators = %<<"|=" "<<=" ">>=" ">>">>;
-static const SymbolSet mixed = %<<plain "a\"b" tail "a\tb">>;
+   ordinary text and `>` inside the quotes does not close the literal. */
+static const SymbolSet operators = %<"|=" "<<=" ">>=" ">>" \> ">=">;
+static const SymbolSet mixed = %<plain "a\"b" tail "a\tb">;
 
 static void symbolset_len_and_index_cover_every_member(void) {
   Symbol members[] = { <red>, <green>, <blue>, <violet> };
@@ -60,7 +60,7 @@ static void symbolset_empty_set_has_no_members(void) {
 }
 
 static void symbolset_quoted_entries_own_reader_punctuation(void) {
-  Symbol members[] = { <"|=">, <"<<=">, <">>=">, <">>"> };
+  Symbol members[] = { <"|=">, <"<<=">, <">>=">, <">>">, <">">, <">="> };
   int count = sizeof(members) / sizeof(members[0]);
 
   EXPECT_INT_EQ(operators.len(), count);

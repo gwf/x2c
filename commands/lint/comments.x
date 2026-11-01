@@ -179,26 +179,34 @@ static String _tier(String path):
   Var tier
   return tiers.try_get(path, tier) ? tier : NULL
 
-/* Parser facts that locate macros, published types, and function templates. */
-static Map _documented_declarations(Compiler c, List ast, List rows):
+/* Parser facts that locate macros, published types, and function templates
+   in `l`'s file, by line. */
+static Map _documented_declarations(Lint l, Compiler c, List ast, List rows):
   Map declarations = {}
   if !c: return declarations
   struct Token *tokens = c.tokenizer.tokens
   foreach List row in rows:
     match row:
       case %(typedef ?name ? ? (?(int start) *)):
-        if c.publishes_typedef(name):
-          declarations[tokens[start].line] = <type>
+        int line = l.unit_line(c, tokens + start)
+        if line && c.publishes_typedef(name): declarations[line] = <type>
+  String path = Path.resolved_absolute(l.path)
   foreach List node in ast:
     if node.car() != <macrodef>: continue
     List origin = node.assoc(<origin>)
+    int offset
+    String file = lint_source_position(
+      c, origin.assoc(<position>).int(), offset)
+    if file != path: continue
     declarations[origin.assoc(<line>)] = <macro>
     if node.assoc(<kind>) != <unit>: continue
     List template = node.assoc(<template>)
     foreach List row in template.search(
       %(api-source ?line ?doc (function ?type *))):
-      if row.assoc(<?doc>) && !(<static> in row.assoc(<?type>).list()):
-        declarations[row.assoc(<?line>)] = <template>
+      int line = l.text_line(c, row.assoc(<?line>).int())
+      if line && row.assoc(<?doc>) &&
+         !(<static> in row.assoc(<?type>).list()):
+        declarations[line] = <template>
   return declarations
 
 /* Rules that read one comment, the line after it, and the next function
@@ -284,7 +292,7 @@ static void _repeated_prose(Lint l, Comment *all, int n):
 /** Runs the comment rules over `l`, with the compiler `c`, `ast`, and its
     `Compiler.definition_rows` `rows` of a parsed unit, or NULLs. */
 void Lint.comment_rules(Lint l, Compiler c, List ast, List rows):
-  Map declarations = _documented_declarations(c, ast, rows)
+  Map declarations = _documented_declarations(l, c, ast, rows)
   Comment *all = xcalloc(l.count + 1, sizeof(Comment))
   int n = _collect(l, all)
   Array lines = l.text.split("\n")

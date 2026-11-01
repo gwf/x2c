@@ -47,8 +47,6 @@ module int _identifier_needs_resolution(Compiler c, List binding) {
      !retained_parameter && !retained_capture);
 }
 
-
-
 module List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
   if (type === %(<macro-expr>)) type = NULL;

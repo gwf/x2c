@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-expand-expression-empty.x:2:15: macro: expression position requires exactly one generated expression
+    int value = expand %() macro Expression(Expr $n) => $n;
+                ^^^^^^
+  note: use a sequence splice to insert zero or more expressions
+

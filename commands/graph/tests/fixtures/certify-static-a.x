@@ -1,6 +1,6 @@
 static char *certify_static(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   return xmalloc(8);
 }
 

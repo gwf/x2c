@@ -41,8 +41,6 @@ int Compiler.enter_function(Compiler c, List declaration, int callback) {
   return depth;
 }
 
-
-
 /** Enters `row` as the innermost syntax `Compiler.enclosing` returns. Its
     owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
     block item.
@@ -253,7 +251,8 @@ static List _after_declarator(
       <decl>, <init>, %(declare $ordinary (bindings $declarator)), <block>,
       c.return_type, origin);
     if (<auto> in base) {
-      Type type = %(declare $base (bindings (bind $name $mods))).type_from_ast();
+      Type type =
+        %(declare $base (bindings (bind $name $mods))).type_from_ast();
       List release = c.resolve_protocol_member(type, "cleanup")
         ? c.bind_syntax($!{ defer $name.cleanup(); }, <block>, c.return_type)
         : NULL;

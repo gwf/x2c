@@ -1,7 +1,9 @@
 # Advisory and manual only. This workflow is an optional Linux/clang signal;
 # it is not part of the local development, build, PR, or commit process. It
-# must never be configured as a required status check. `make check` and
-# `make precommit` are the offline gates that matter.
+# must never be configured as a required status check. The publication gates
+# are local: `tools/gate-state.py ensure agent-pr-check`, or `ensure doc-check`
+# for documentation. `make check` below is not a gate: it never refreshes the
+# bootstrap and omits `commands-check` and `proof-cold-collection`.
 name: check
 
 on:
@@ -40,7 +42,7 @@ jobs:
           echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
       - name: Build trusted stage zero
         run: make build-safe
-      - name: Run complete non-mutating gate
+      - name: Run extended non-mutating checks
         run: make check
 
   sanitizer-leaks:

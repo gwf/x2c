@@ -9,27 +9,27 @@ static macro Stmt $fail.literals_symbol_duplicate(
 static macro Stmt $fail.literals_symbol_literal(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "symbol-set entries must be literal Symbols",
-    $origin, %("use %<<foo bar>>"));
+    $origin, %("use %<foo bar>"));
 
 /* Symbol sets
 
-   `%<<...>>` builds an immutable SymbolSet, one C string that holds a
+   `%<...>` builds an immutable SymbolSet, one C string that holds a
    header, a hash table, and the Symbols in source order. `SymbolSet.encode`
    in `lib/symbolset.x` builds it. */
 
-/** Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
+/** Parses a `%<...>` literal into an immutable ordered `SymbolSet`.
     Entries must be literal compact `Symbol`s; source order defines dense
     indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
 */
 List Compiler.parse_symbol_set_literal(Compiler c) {
-  c.expect(<"%<<">);
+  c.expect(<"%<">);
   Array symbols = [], tokens = [];
-  while (c.peek(0) != <">>">) {
+  while (c.peek(0) != <">">) {
     symbols.push(_member_symbol(c));
     tokens.push(c.token);
     c.next();
   }
-  c.expect(<">>">);
+  c.expect(<">">);
   int duplicate = -1;
   List set = c.symbol_set_expression(symbols, duplicate);
   if (duplicate >= 0) {

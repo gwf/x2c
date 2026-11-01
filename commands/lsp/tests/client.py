@@ -24,17 +24,25 @@ class Client:
         self.capabilities = initialized["result"]["capabilities"]
         self.send("initialized")
 
-    def send(self, method, params=None, identifier=None):
+    def frame(self, method, params=None, identifier=None):
         message = {"jsonrpc": "2.0", "method": method, "params": params or {}}
         if identifier is not None:
             message["id"] = identifier
         body = json.dumps(message).encode()
-        self.process.stdin.write(f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
+        return f"Content-Length: {len(body)}\r\n\r\n".encode() + body
+
+    def send(self, method, params=None, identifier=None):
+        self.process.stdin.write(self.frame(method, params, identifier))
         self.process.stdin.flush()
+
+    # The gate runs the command checks beside parallel compiles, so a
+    # response may take tens of seconds; a hang still fails within a minute.
+    TIMEOUT = 60
 
     def wait(self, key, value):
         while True:
-            assert select.select([self.process.stdout], [], [], 20)[0], "response timeout"
+            assert select.select([self.process.stdout], [], [],
+                                 self.TIMEOUT)[0], "response timeout"
             headers = {}
             while (line := self.process.stdout.readline()) not in (b"\n", b"\r\n"):
                 assert line, (self.process.poll(), self.process.stderr.read())
@@ -43,7 +51,8 @@ class Client:
             remaining = int(headers["content-length"])
             chunks = []
             while remaining:
-                assert select.select([self.process.stdout], [], [], 20)[0], "body timeout"
+                assert select.select([self.process.stdout], [], [],
+                                     self.TIMEOUT)[0], "body timeout"
                 chunk = self.process.stdout.read(remaining)
                 assert chunk, "server closed an incomplete frame"
                 chunks.append(chunk)

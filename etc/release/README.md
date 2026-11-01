@@ -6,12 +6,10 @@ promotes tested archives, `verify.yml` supplies the shared platform checks, and
 `restore-pages.yml` restores a previously verified production site. This
 folder owns their transport helpers and the staging repository's Pages template.
 
-Gary has cleared the fresh-main checkpoint and dev cutover. Everyday integration
-uses dev; main remains the published-release branch. Do not inspect or alter the
-two unrelated lowering/metafunction sessions. Workflow installation does not
-publish a release or supply the staging App credential and domain configuration.
-The legacy `pages.yml` source remains unchanged, but its workflow registration
-is disabled. Retain it until first-release baseline recovery is settled.
+Everyday integration uses dev; main is the published-release branch. Releases
+0.15.0 and 0.15.1 were promoted through these workflows. The legacy
+`pages.yml` source remains unchanged with its workflow registration disabled
+until Gary retires it, as described under "Recovery baseline" below.
 
 The [archived workflow plan](../../plans/archive/public-release-workflow.md)
 records the implementation design and staging history. Current release
@@ -33,13 +31,15 @@ Source `staging-publication` permits dev; `production-publication` permits main
 and requires Gary's review. Production Pages still permits only main and keeps
 its existing `x2c-lang.dev` configuration. Dispatch promotion and restoration
 with `--ref main`, after Gary's separately authorized main advance has carried
-their source there. They cannot run from pre-cutover main, which lacks them.
+their source there. They could not run from pre-cutover main, which lacked
+them.
 
 The legacy tag-driven release and Pages workflow registrations are disabled.
 The legacy Pages source remains unchanged, so Gary can explicitly re-enable it
 for an agreed baseline recovery operation. It is not a callable competing
-publication path while disabled. No production deployment or release was run.
-Disabling a workflow leaves the currently served site intact.
+publication path while disabled. No production deployment or release had run
+when this section was written. Disabling a workflow leaves the currently
+served site intact.
 
 Staging provisioning completed 2026-09-20 through the account settings:
 Name.com CNAME `staging` -> `gwf.github.io` (TTL 300), GitHub Pages HTTPS
@@ -165,7 +165,7 @@ serialize per destination without cancelling running publication.
 `restore-pages.yml` supplies the executable production
 rollback path for a previously promoted candidate. Gary selects its exact
 identity and the currently observed production version, then dispatches from
-the approved trusted workflow ref (dev), for example:
+the approved trusted workflow ref (main), for example:
 
 ```sh
 gh workflow run restore-pages.yml --repo gwf/x2c --ref main \

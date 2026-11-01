@@ -261,8 +261,6 @@ static void _set_profile_field(
   }
 }
 
-
-
 static String _string_value(Project p, int line, String value) {
   char *at = value;
   String text = _parse_string(p, line, &at);
@@ -371,8 +369,6 @@ static ProjectProfile _new_profile(ProjectTarget target, String name) {
 module void _error_name(Project p, int line, String message, String name) {
   _error(p, line, %"$message '$name'");
 }
-
-
 
 module void _error(Project p, int line, String message) {
   String at = line ? ":%d".printf(line) : NULL;

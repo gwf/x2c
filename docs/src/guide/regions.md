@@ -9,7 +9,7 @@ at, or a static), an object owned by an outer or sibling region, and any
 pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
-A region is an `auto` block, a `Scope.retain` and `Scope.release` pair, a
+A region is an `auto` block, a `Scope.open` and `Scope.close` pair, a
 `auto (&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
@@ -70,6 +70,15 @@ pointer cast back from that number is not followed.
 
 ## What the warnings do not cover
 
+For an address into the current function's frame, a raw pointer store into
+an unknown destination or a parameter's object is not an ordinary warning.
+The store may register a temporary borrow that cleanup removes before
+return. The pass does not prove that cleanup; the code must satisfy its C
+lifetime contract. Returned addresses, static stores, known retaining
+operations such as `Array.push`, and already ended regions retain their
+checks. The optional audit keeps the possible-escape finding, and meta
+functions keep the error.
+
 The check covers lexical regions and the storage it tracks. It does not
 cover:
 
@@ -113,6 +122,8 @@ warning or error. A project may provide explicit native effect contracts to
 the audit; they are assumptions of its result and do not change compilation.
 The optional command and its contract format are described in the
 [source graph reference](https://github.com/gwf/x2c/blob/main/commands/graph/README.md#conditional-lifetime-proof).
+The command is experimental and available in checkout builds; `make install`
+and release payloads do not install it.
 The proof concerns scoped ownership and lifetime. It does not establish
 general C memory safety or correctness of emitted code.
 
@@ -122,6 +133,8 @@ Each function gets one summary of two facts: which of Scope and Pool storage
 its result may use (possibly both), and where each parameter is sunk
 (returned by identity, retained in the fresh result, placed into another
 parameter's object or a static, or stored through an unknown pointer). The
+summary distinguishes raw stores from known retaining operations so helper
+calls preserve the ordinary, audit, and meta diagnostic boundary. The
 summaries of a unit's functions are computed to a fixpoint because a caller's
 facts depend on its callees' facts. Each round walks every
 body with a stack of open regions and a map from each binding to its known

@@ -53,7 +53,7 @@ List Compiler.parse_declaration_argument(Compiler c) {
     return %(seq @(declarations.list_free()));
   }
   List storage = _storage_class(c);
-  if (storage === %(typedef))
+  if (<typedef> in storage)
     $fail.parse_decl_typedef(c, c.token);
   List (type, binding_type) = _declaration_types(c, storage);
   if (_destructure_starts(c))
@@ -115,8 +115,9 @@ void Compiler.check_reference_placement(Compiler c, Type type) {
 // declaration rows and initializers
 
 static List _declaration_group(Compiler c, int row) {
+  Token first = c.token;
   List storage = _storage_class(c);
-  if (storage === %(typedef)) return _typedef(c, storage, row);
+  if (<typedef> in storage) return _typedef(c, storage, row, first);
   List (type, binding_type) = _declaration_types(c, storage);
   if (_destructure_starts(c))
     return _destructure_declaration(c, type, binding_type, 0);
@@ -124,14 +125,13 @@ static List _declaration_group(Compiler c, int row) {
   return _finish_declaration(c, <declare>, type, bindings, 0);
 }
 
-static List _typedef(Compiler c, List context, int row) {
-  Token first = c.token;
+static List _typedef(Compiler c, List storage, int row, Token first) {
   // An imported `typedef const char *(*fn)(int)` names a qualified type
   // like an object declaration does, so read the qualifiers first.
   List quals = _type_qualifiers(c);
   List spec = quals.append(_type_specifier(c));
   spec = c.sym.local_type(spec);
-  List bindings = _declarator_list(c, spec, context, row);
+  List bindings = _declarator_list(c, spec, %(typedef), row);
   /* A typedef's own alignment changes every record field that names it,
      even when the record declaration has no attribute of its own. */
   if (_layout_attribute_since(c, first))
@@ -139,7 +139,8 @@ static List _typedef(Compiler c, List context, int row) {
       String name = Ast.binding_spelling(declarator.cadr());
       if (name) c.sym.set(%($name "layout-attribute"), %(unknown));
     }
-  return _finish_declaration(c, <typedef>, spec, bindings, 0);
+  List text = storage.filter(%!(item) => item is <list>);
+  return _finish_declaration(c, <typedef>, %(@text @spec), bindings, 0);
 }
 
 /* Reads the qualifiers, the type specifier, and any storage class or
@@ -175,7 +176,7 @@ module List _declaration_types(Compiler c, List storage) {
    that way. */
 static void _late_storage(Compiler c, Array trailing) {
   loop {
-    Symbol symbol = c.peek(0);
+    Symbol symbol = _storage_keyword(c);
     if (symbol != <typedef> &&
         (symbol.is_storage_class() || symbol.is_inline())) {
       trailing.push(symbol);
@@ -201,7 +202,7 @@ module int _group_comma(Compiler c) {
 
 static int _test_declaration_start(
   Compiler c, int require_declarator) {
-  Symbol sym = c.peek(0);
+  Symbol sym = _storage_keyword(c);
   if (c.macro_holes && sym == <$>) return _hole_starts(c);
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;
@@ -212,7 +213,8 @@ static int _test_declaration_start(
      is a declaration wherever it is written. */
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition) &&
-      (definition is <list> || definition == <wrapper>))
+      (definition is <list> || definition == <wrapper> ||
+       definition == <attribute>))
     return 1;
   if (_typeof_starts(c)) return 1;
   return _type_name_starts(c, require_declarator);
@@ -294,8 +296,8 @@ static List _destructure_targets(Compiler c, List binding_type) {
     if (c.peek(0) != <ident>)
       $fail.parse_destructure_name(c, c.token);
     List ident = c.parse_basic_identifier();
-    targets.push(ident ~= %("_") ? ident
-                 : _destructure_target(c, ident, binding_type));
+    targets.push(
+      ident ~= %("_") ? ident : _destructure_target(c, ident, binding_type));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);

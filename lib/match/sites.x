@@ -199,8 +199,6 @@ static void _prepare(MatchCaptureSite *site, Var pattern) {
   __atomic_store_n(&site.plan, plan, __ATOMIC_RELEASE);
 }
 
-
-
 /* Both borrowing owners walk the same graph and differ on one question: how
    long the borrow lasts. Symbols and narrow immediates have value lifetime,
    and `nil` holds no storage, so no later pattern can reuse its address. A

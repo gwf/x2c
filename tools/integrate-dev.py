@@ -12,6 +12,7 @@ import argparse
 import contextlib
 import datetime as dt
 import fcntl
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -24,12 +25,18 @@ import uuid
 
 from agent_context import read_context, set_context
 
+# gate-state owns the rule for what doc-check covers; gate_for applies it to
+# a batch's PR range.
+_spec = importlib.util.spec_from_file_location(
+    "gate_state", Path(__file__).resolve().with_name("gate-state.py"))
+gate_state = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(gate_state)
+
 READY = "integration-ready"
 START = "<!-- x2c-integration:start -->"
 END = "<!-- x2c-integration:end -->"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 FINAL = {"landed", "parked"}
-GENERATED_DOCS = {"site/public/llms.txt", "site/public/llms-full.txt"}
 
 
 class WaitExpired(Exception):
@@ -572,10 +579,7 @@ class Queue:
             before, after = modes[0][1:], modes[1]
             if not (before in {"000000", "100644"} and
                     after in {"000000", "100644"} and
-                    (path in GENERATED_DOCS or
-                     path in {"AGENTS.md", "README.md"} or
-                     (path.endswith(".md") and
-                      path.startswith(("agents/", "docs/", "plans/"))))):
+                    gate_state.documentation(path)):
                 return "agent-pr-check"
         return "doc-check"
 

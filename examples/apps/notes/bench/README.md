@@ -101,7 +101,7 @@ raw samples; no slow samples were removed.
 
 ## Database thread comparison
 
-[threaded-notes.x](threaded-notes.x) is a standalone comparison server. One
+[threaded-notes.x](threaded-notes.x) is a comparison server. One
 thread opens, uses, and closes SQLite. HTTP workers send a request on one
 shared channel and wait on the reply channel carried by that request. The
 HTTP workers construct note Maps and encode responses after receiving the
@@ -113,11 +113,13 @@ Build both against the same optimized runtime and SQLite adapter:
 prefix="$(python3 packages/tools/deps.py path packages/sqlite/dependency.json prefix)"
 make -C packages/sqlite build \
   "PACKAGE_C_FLAGS=-O2 --c-include-dir src --c-include-dir $prefix/include"
-for variant in notes bench/threaded-notes; do
-  builds/0/x2c build -O2 --package-dir packages \
-    --c-include-dir packages/sqlite/src --c-include-dir "$prefix/include" \
-    -o "/tmp/$(basename "$variant")" "examples/apps/notes/$variant.x"
-done
+builds/0/x2c build -O2 --package-dir packages \
+  --c-include-dir packages/sqlite/src --c-include-dir "$prefix/include" \
+  -o /tmp/notes examples/apps/notes/notes.x
+builds/0/x2c build -O2 --package-dir packages \
+  --c-include-dir packages/sqlite/src --c-include-dir "$prefix/include" \
+  -o /tmp/threaded-notes examples/apps/notes/bench/threaded-notes.x \
+  examples/apps/notes/bench/notes-database.x
 builds/0/x2c build -O2 -o /tmp/notes-load examples/apps/notes/bench/load.x
 ```
 
@@ -143,3 +145,51 @@ The [2026-10-28 architecture comparison](reports/2026-10-28-architectures/interp
 records the default-off accounting results. The database-thread variant has
 lower throughput and lower p99 latency than the mutex variant in all five
 rounds; the report includes CPU, memory, raw samples, and limitations.
+
+## In-process Thread.run / Task.run comparison
+
+This optional probe requires the local async prototype. It runs real Notes
+lookup SQL, SQLite row conversion, tag parsing, and JSON encoding. One native
+database thread receives requests through Channels. The same client functions
+run through either `Thread.run` or `Task.run` in one optimized binary.
+HTTP parsing, sockets, and response writes are outside this workload.
+
+```sh
+builds/0/x2c build -O2 --package-dir packages \
+  --c-include-dir packages/sqlite/src --c-include-dir "$prefix/include" \
+  --build-dir /tmp/notes-inprocess-build -o /tmp/notes-inprocess \
+  -L"$prefix/lib" \
+  examples/apps/notes/bench/inprocess-notes.x \
+  examples/apps/notes/bench/notes-database.x
+python3 examples/apps/notes/bench/compare-inprocess.py \
+  --binary /tmp/notes-inprocess --sqlite-prefix "$prefix" \
+  --output /tmp/notes-inprocess-results.json
+```
+
+Prepare the SQLite adapter as above first. The runner creates a fixed
+1,000-note fixture through the shared database worker. Each sample receives
+an independent copy. Defaults are 1, 8, and 64 clients, one-second warmup,
+five-second measurements, and five rounds with alternating mode order.
+The runner unsets Scope accounting and stack-size overrides. Both modes use
+info-level access logging to separate regular stderr files. The JSON report
+retains every sample, source and binary hashes, host load, and log locations.
+
+Each client reuses one batch-owned request record and buffered reply Channel.
+Every request creates and destroys its own Scope and retained Pool. The batch
+keeps all storage alive until the database queue drains and its thread joins.
+Both modes check every encoded response against the initial lookup. Failure
+preflight checks a database error while other clients can have pending work.
+
+CPU/request measures process CPU during the timed batch, including both
+client and database threads. Throughput includes batch launch, join, and
+request cleanup. Per-request latency includes Scope/Pool creation, queue
+wait, SQLite, conversion, JSON, logging, and cleanup. Latency recording itself
+is outside the per-request clock but inside batch CPU and wall time.
+Reported percentiles are medians of sample percentiles. Peak RSS is the
+process lifetime high-water mark, including warmup and latency storage.
+Task usable stack reservation is configured capacity, not resident memory;
+guard pages are additional. This probe does not measure native thread stack
+reservation and does not establish end-to-end HTTP performance.
+
+The [2026-10-31 in-process report](reports/2026-10-31-inprocess/interpretation.md)
+records the local comparison and its correctness and memory limitations.

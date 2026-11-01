@@ -120,11 +120,11 @@ static void _defer_loop_body(void) {
 }
 
 static void defer_continue_preserves_enclosing_catch(void) {
-  Scope.retain();
+  Scope.open();
   cleanup_catch_survived = 0;
   _defer_loop_body();
   EXPECT_INT_EQ(cleanup_catch_survived, 1);
-  Scope.release();
+  Scope.close();
 }
 
 static int cleanup_switch_order = 0;
@@ -140,11 +140,11 @@ static void _defer_switch_body(void) {
 }
 
 static void defer_switch_break_defers_to_function_exit(void) {
-  Scope.retain();
+  Scope.open();
   cleanup_switch_order = 0;
   _defer_switch_body();
   EXPECT_INT_EQ(cleanup_switch_order, 132);
-  Scope.release();
+  Scope.close();
 }
 
 // break and continue need separate cleanup barriers. A continue inside a
@@ -165,11 +165,11 @@ static void _defer_loop_switch_body(void) {
 }
 
 static void defer_continue_in_switch_targets_enclosing_loop(void) {
-  Scope.retain();
+  Scope.open();
   cleanup_loop_switch_order = 0;
   _defer_loop_switch_body();
   EXPECT_INT_EQ(cleanup_loop_switch_order, 91929);
-  Scope.release();
+  Scope.close();
 }
 
 // The converse nesting: a break inside a loop nested in a switch targets that
@@ -194,11 +194,11 @@ static void _defer_switch_loop_body(void) {
 }
 
 static void defer_break_in_nested_loop_targets_that_loop(void) {
-  Scope.retain();
+  Scope.open();
   cleanup_switch_loop_order = 0;
   _defer_switch_loop_body();
   EXPECT_INT_EQ(cleanup_switch_loop_order, 546);
-  Scope.release();
+  Scope.close();
 }
 
 static void system_scope_loop_lifetimes(void) {

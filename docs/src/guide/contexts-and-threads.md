@@ -9,9 +9,10 @@ If opening a `Context` fails, the parts already opened are closed before the
 failure reaches an outer `catch`. A failed open does not change
 `Context.current()` or leave a pool active.
 
-`Thread.start` and `Thread.start_raw` run callbacks in isolated `Context`s on
-native worker threads. `Thread.run` uses the shared process canonical pool
-for its jobs, as described below.
+`Thread.start`, `Thread.start_raw`, and `Thread.run` run each callback on a
+native worker thread inside a `Context` that is not isolated. The callback
+gets fresh `Scope`, `Error`, and `Match` state and uses the shared process
+canonical pool, as described below.
 The worker may read parent values and may access shared mutable objects. The
 program must keep those objects alive and coordinate any access that could
 race.
@@ -290,7 +291,57 @@ This includes partial startup and nested batches. Cleanup joins cannot be
 interrupted by a pending stop. A native join failure that prevents establishing
 safe completion aborts rather than return with live borrowers.
 
+## Run Channel jobs on one native thread
+
+`Task.run(jobs, completed)` runs a batch on the calling native thread.
+Ordinary Channel waits park the current task so another job can run. Tasks
+keep stable native stacks, Error frames, and cleanup environments across
+suspension. They do not provide CPU parallelism. A blocking native call or
+computation that never waits delays every job in the batch.
+
+Use the same Channel operations and completion callback shape as Thread.run.
+The callback runs after job cleanup, under restored caller state, and must
+not wait for participant progress. The executable
+`examples/power/channel-task-service.x` shows request/reply and closes requests
+after both clients finish.
+
+Each task borrows the caller's active Scope and Pool through the batch. It
+has its own default Scope slot, starts with no current Context, and copies
+effective Error policies and the error bound. Handlers, records, marks, and
+cleanup obligations start fresh. Opening a Context inside a job remains
+explicit. An ordinary Array return retains its owner and aliases; no implicit
+export or ownership transfer occurs.
+
+Lisp callback activations and recursive rendering paths also start fresh.
+Suspending either preserves that task's activation. Completion callbacks and
+the caller resume with their own activation restored.
+
+Keep all borrowed owners, Channels, jobs, and captures alive through Task.run.
+The call returns or raises only after all participants finish cleanup. Job or
+completion-callback failure stops unfinished jobs and preserves the primary
+failure. Escaping job Errors use the existing join-fail representation.
+Thread.stop on the native owner requests batch cancellation. A message already
+committed remains accepted; an uncommitted owned send retains rollback.
+
+Source cleanup must not suspend. Channel.close is suitable for cleanup;
+Channel operations otherwise retain their stop and wait behavior. Stop is
+cooperative, and catching it can delay shutdown. Nested Task.run calls are
+not supported by this first API.
+
+The first backend targets macOS and Linux on arm64 and x86_64. Each task uses
+an 8 MiB usable, demand-paged stack plus a guard page. Set
+`X2C_TASK_STACK_BYTES` before the call to select another capacity of at least
+32 KiB; capacity rounds up to the native page size. Smaller stacks can exhaust
+space sooner. Overflow remains a native failure, without guaranteed cleanup.
+Tasks stay on their original native thread. Other targets retain synchronous
+support; requesting an unavailable task backend raises bad-state.
+
 ## Cooperative stopping
+
+An operation registers its Channel mutex and condition with its managed Thread.
+Stop publication takes that mutex, so a stop cannot pass between the final
+stop check and commitment or sleep. If stop has borrowed the registered mutex,
+the operation waits for stop to release it before returning.
 
 `thread.stop()` records a persistent stop request and wakes the Thread's
 registered Channel or completion wait. It does not close a Channel, transfer

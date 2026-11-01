@@ -74,3 +74,10 @@ macro Decorator $class(NamedType $definition) {
 }
 
 keyword class $class;
+
+meta List _x2c_expand_rows(List, List);
+
+macro Decorator $expand(Expr $rows) =>
+  macro Decorator(Macro $generator) => $_x2c_expand_rows($generator, $rows);
+
+keyword expand $expand;

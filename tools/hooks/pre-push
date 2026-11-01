@@ -1,14 +1,19 @@
 #!/bin/sh
-# pre-push -- shared worktree delivery policy for pushes to dev or main.
+# pre-push -- shared worktree delivery policy for pushes.
 #
-# Explicit roles apply to any worktree name. Legacy agent-* worktrees retain
-# their worker restriction when no delivery context exists.
+# A worker hands its commits to its orchestrator and pushes nothing. Other
+# contexts that do not deliver directly push work branches but not dev or
+# main. Explicit roles apply to any worktree name. Legacy agent-* worktrees
+# retain the dev and main restriction when no delivery context exists.
 root=$(git rev-parse --show-toplevel) || exit 1
-python3 "$root/tools/agent_context.py" blocked --root "$root"
-policy=$?
+policy=$(python3 "$root/tools/agent_context.py" pushes --root "$root")
 case "$policy" in
-  1) exit 0 ;;
-  0) ;;
+  all) exit 0 ;;
+  work) ;;
+  none)
+    echo "pre-push: this worker hands its commits to its orchestrator;" \
+      "it does not push" >&2
+    exit 1 ;;
   *) echo "pre-push: cannot establish worktree delivery policy" >&2; exit 1 ;;
 esac
 while read -r _ _ remote_ref _; do

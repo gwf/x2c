@@ -456,6 +456,24 @@ String Compiler.cache_root(void) {
          home ? %"$home/.cache/x2c" : NULL;
 }
 
+/** Removes each entry of the cache `directory` whose recorded `source`
+    file no longer exists and that no other run holds by its `lock`.
+    An entry without a `source` file stays.
+*/
+void Compiler.prune_cache(String directory) {
+  if (!Path.is_dir(directory)) return;
+  foreach (String name, Path.list_dir(directory)) {
+    String entry = Path.join(directory, name);
+    Path source = %"$entry/source";
+    if (!source.is_file() || Path.is_file(source.read_text())) continue;
+    int lock = Path.lock_file(%"$entry/lock", 0);
+    if (lock < 0) continue;
+    try Path.remove_tree(entry);
+    catch %(io-fail *): {}
+    close(lock);
+  }
+}
+
 // environment helpers
 
 static void _initialize_environment(

@@ -40,6 +40,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.macro_invocation_collection`](#Compiler.macro_invocation_collection) | Returns how collection treats the macro invocation at the cursor. |
 | [`Compiler.macro_invocation_site`](#Compiler.macro_invocation_site) | Resolves a stored macro invocation marker to its source token. |
 | [`Compiler.macro_pattern_at`](#Compiler.macro_pattern_at) | Returns the `(` after a visible macro's `$NAME` at `at`, storing its spelling and definition, or NULL. |
+| [`Compiler.macro_starts_entry`](#Compiler.macro_starts_entry) | Tests for a fixed Entry result before a call argument is read. |
 | [`Compiler.macro_starts_target_at`](#Compiler.macro_starts_target_at) | Returns whether the parser claims the macro invocation at the cursor for `position`. |
 | [`Compiler.macro_tag_name`](#Compiler.macro_tag_name) | Returns a template's local binding for tag `name` of `kind`, or NULL when it names a visible public tag. |
 | [`Compiler.macro_targets_unit`](#Compiler.macro_targets_unit) | Reports whether the macro invocation at the cursor produces file-scope syntax, directly or through the target it decorates. |
@@ -391,6 +392,16 @@ Returns the `(` after a visible macro's `$NAME` at `at`, storing its
 spelling and definition, or NULL. The cursor does not move.
 
 Source: `src/macros/values.x`
+
+<a id="Compiler.macro_starts_entry"></a>
+#### Compiler.macro_starts_entry
+
+`int Compiler.macro_starts_entry(Compiler c)`
+
+Tests for a fixed Entry result before a call argument is read. A
+decorator with a dynamic result parses as an expression there.
+
+Source: `src/macros/invocations/recognition.x`
 
 <a id="Compiler.macro_starts_target_at"></a>
 #### Compiler.macro_starts_target_at

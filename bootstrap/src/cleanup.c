@@ -1073,7 +1073,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _704 = List_var(_703);
   _705 = Symbol_var(1077029798);
   _706 = Symbol_var(106239471489226);
-  _707 = int_var(1247);
+  _707 = int_var(1248);
   _708 = String_new("");
   _709 = String_var(_708);
   _710 = Symbol_var(13528008);
@@ -1081,7 +1081,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _712 = List_var(_572);
   _713 = cons(_504, _572);
   _714 = List_var(_713);
-  _715 = int_var(1254);
+  _715 = int_var(1255);
 }
 
 List Compiler_lower_cleanup(Compiler c, List node){
@@ -2910,7 +2910,7 @@ static List f12_preservation____block(Preserve * p, List statements){
             wrapped = x2c_match_value_1;
             Var _x2c_gensym_match_value_4 = anchor;
             {
-              int anchor = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cleanup/preservation.x",.function = "f12_preservation____block",.line = 161}; & _x2c_gensym_error_site_3; })));
+              int anchor = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cleanup/preservation.x",.function = "f12_preservation____block",.line = 162}; & _x2c_gensym_error_site_3; })));
               {
                 origin = anchor;
                 inner = wrapped;

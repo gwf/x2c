@@ -1,5 +1,7 @@
 /*  observations.x -- Find slow or failed endpoint observations. */
 
+#include "system-macros.x"
+
 import "sqlite" with Database, Prepared;
 
 int main(void) {
@@ -15,8 +17,12 @@ int main(void) {
   )) insert.bind(@reading).execute();
 
   Prepared report = auto db.prepare(
-    "SELECT url, status, us FROM observation "
-    "WHERE status >= 400 OR us > ? ORDER BY us DESC"
+    $dedent(%"
+      SELECT url, status, us
+      FROM observation
+      WHERE status >= 400 OR us > ?
+      ORDER BY us DESC
+    ")
   );
   report.bind(3000000);
   foreach(List row, report)

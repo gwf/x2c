@@ -617,7 +617,49 @@ static void typed_map_failed_conversion_releases_result(void) {
   EXPECT_STR_EQ(source[1].string(), "not numeric");
 }
 
+static void grouped_small_capacities_reuse_and_grow(void) {
+  $test.scoped();
+  for (unsigned capacity = 2; capacity <= 16; capacity *= 2) {
+    MapIntInt map = MapIntInt.new_capacity(capacity);
+    EXPECT_INT_EQ(map.capacity, capacity);
+    EXPECT_INT_EQ(map.mask, capacity - 1);
+    for (int round = 0; round < 40; round++) {
+      for (unsigned i = 0; i < capacity / 2; i++) map[(int) i] = round + i;
+      for (unsigned i = 0; i < capacity / 2; i++) {
+        EXPECT_INT_EQ(map.get((int) i), round + i);
+        EXPECT_INT_EQ(map.del((int) i), round + i);
+      }
+      EXPECT_INT_EQ(map.len(), 0);
+    }
+    for (int i = 0; i < 512; i++) map[i] = i;
+    for (int i = 0; i < 512; i++) EXPECT_INT_EQ(map[i], i);
+  }
+}
+
+static void grouped_collisions_cross_groups_and_reuse_tombstones(void) {
+  $test.scoped();
+  int keys[40], found = 0;
+  for (int key = 0; found < 40; key++) {
+    unsigned hash = x2c_hash_word((unsigned) key);
+    if ((hash & 7) == 0 && (hash >> 25) == 42) keys[found++] = key;
+  }
+  MapIntInt map = MapIntInt.new_capacity(128);
+  for (int i = 0; i < 40; i++) map[keys[i]] = i;
+  for (int i = 0; i < 10; i++) map.del(keys[i]);
+  EXPECT_INT_EQ(map.len(), 30);
+  map[keys[35]] += 100;
+  EXPECT_INT_EQ(map.len(), 30);
+  for (int i = 10; i < 40; i++)
+    EXPECT_INT_EQ(map[keys[i]], i == 35 ? i + 100 : i);
+  map[keys[0]] = 77;
+  EXPECT_INT_EQ(map.len(), 31);
+  EXPECT_INT_EQ(map[keys[0]], 77);
+}
+
 void typed_map_suite(void) {
+  $test.run(grouped_small_capacities_reuse_and_grow);
+  $test.run(grouped_collisions_cross_groups_and_reuse_tombstones);
+
   $test.run(typed_map_failed_conversion_releases_result);
   $test.run(typed_map_iterates_values_keys_and_pairs);
   $test.run(typed_map_empty_brace_is_fresh);

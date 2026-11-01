@@ -61,8 +61,6 @@ List MetaContext.source_description(Var value) {
   return %((text $text) (file $(source.cadr())) (syntax $value));
 }
 
-
-
 /** Implements `Code.source_text`, declared in `lib/meta.x`. */
 String Code.source_text(Var value) {
   match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;

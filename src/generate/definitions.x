@@ -20,8 +20,9 @@ void Compiler.dump_definitions(Compiler c, List ast) {
   }
   foreach (List row in c.meta_definitions)
     if (row ~= %(?(String name) ?line))
-      printf("%s\n", %(meta (name $name) (line $line)
-                        (comptime $(name in c.meta_comptime))).repr());
+      printf(
+        "%s\n", %(meta (name $name) (line $line)
+                   (comptime $(name in c.meta_comptime))).repr());
 }
 
 // definition rows

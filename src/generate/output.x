@@ -90,14 +90,15 @@ String Compiler.header_guard(Compiler c) {
 // assemble and publish generated files
 
 static List _without_trivia(List ast) =>
-  ast.filter(%!(node) => {
-    match (node.list()) {
-      case %(space *): return 0;
-      case %(comment *): return 0;
-      case %(empty *): return 0;
-    }
-    return 1;
-  });
+  ast.filter(
+    %!(node) => {
+      match (node.list()) {
+        case %(space *): return 0;
+        case %(comment *): return 0;
+        case %(empty *): return 0;
+      }
+      return 1;
+    });
 
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
@@ -105,12 +106,11 @@ static List _generated_code(Compiler c, List ast, String basename) {
   Map inline_bodies = auto {};
   List (header, source) = _header_and_source(c, ast, inline_bodies);
   String hash = Path.identifier_hash(c.filename);
-  Map bindings;
+  auto Map bindings = NULL;
   (header, source, bindings) = c.setup_cache_init(
     header, source, %"_x2c_gensym_hcache_$(hash)_",
     %"_x2c_gensym_hcache_guard_$hash",
     %"_x2c_gensym_hcache_init_$hash");
-  defer bindings.cleanup();
   Array hcode = _emit_header(c, header);
   Array ccode = _emit_source(c, source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
@@ -154,8 +154,6 @@ static List _changed_files(List outputs) {
   }
   return changed.list_free();
 }
-
-
 
 static List _vertical_spacing(List code) {
   Array out = [];

@@ -24,6 +24,9 @@ static const char syntax_marker[] = "_x2c.syntax.prelude";
 module typedef struct FileWalk {
   Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
   Array parts, Map definitions, dependencies, statics, hashes;
+  /* Without expansion, the groups open after each conditional directive,
+     keyed by the directive's position in the file. */
+  Map arms;
   Cpp start;
   int unit, linkage, line, pos, deferred;
 } FileWalk;
@@ -196,13 +199,22 @@ void Compiler.install_included_effects(Compiler c) {
 
 /* Macro effects use the same source-ordered parts as declaration replay.
    A currently collected file contributes only its recorded prefix. */
-static List _macro_rows(Compiler c, String path, Map active) {
-  Map runtime = _inside(path, _canonical_lib()) ? {} : _runtime_macros(c);
+static List _macro_rows(
+  Compiler c, String path, Map active) {
+  Map runtime = _inside(path, _canonical_lib())
+              ? {} : _runtime_macros(c);
   Cpp cpp = Cpp.new({});
-  Map visited = {};
+  auto Map visited = {};
+  defer _free_macro_exports(visited);
   _replay_included(c, NULL, path, visited, NULL, active, cpp, runtime);
   Var rows = visited[path];
-  return rows is void ? NULL : rows.list();
+  return rows is void ? NULL : Cpp.rows(rows.map());
+}
+
+/* These independent snapshots belong only to this replay query. */
+static void _free_macro_exports(Map visited) {
+  foreach (Var (_, exports) in visited)
+    if (exports is <map>) exports.map().cleanup();
 }
 
 /* Directives retain their physical definition site across module splicing. */
@@ -234,12 +246,8 @@ List Compiler.included_macros(
   Compiler c, String target, int angle, String dir, Map active) {
   String path = c.sources.resolve_include(c.include_dirs, dir, target, angle);
   if (!path) return NULL;
-  if (c.macro_export_source) {
-    String source = c.macro_export_source;
-    c.macro_export_source = NULL;
-    c.prepare_macro_exports(source);
-  }
-  return _macro_rows(c, _canonical_path(path), active);
+  String canonical = _canonical_path(path);
+  return _macro_rows(c, canonical, active);
 }
 
 /** Returns the macro table visible before the first line of the file
@@ -251,8 +259,9 @@ List Compiler.included_macros(
 Map Compiler.initial_macros(Compiler c, String path) {
   if (!path) return {};
   String canonical = _canonical_path(path);
-  Map runtime = _inside(canonical, _canonical_lib()) ? {} : _runtime_macros(c);
-  return _initial_macros(c, canonical, runtime);
+  Map runtime = _inside(canonical, _canonical_lib())
+              ? {} : _runtime_macros(c);
+  return _initial_macros(c, canonical, runtime, 1);
 }
 
 static Map _runtime_macros(Compiler c) {
@@ -260,11 +269,14 @@ static Map _runtime_macros(Compiler c) {
   return Cpp.table(_macro_rows(c, _canonical_path(runtime), NULL));
 }
 
-/* One replay shares only its immutable runtime baseline. Each file still
-   starts from its own command-line policy, without includer definitions. */
-static Map _initial_macros(Compiler c, String path, Map runtime) {
-  Map macros = _inside(path, _canonical_lib()) ? {} : runtime.copy();
-  if (!_runtime_source(path))
+/* A replay can borrow its immutable baseline; the public initializer owns
+   its table. Command-line policy always gets a separate table. */
+static Map _initial_macros(
+  Compiler c, String path, Map runtime, int own) {
+  if (_inside(path, _canonical_lib())) return {};
+  int commands = !_runtime_source(path) && c.command_macros;
+  Map macros = own || commands ? runtime.copy() : runtime;
+  if (commands)
     macros.merge(Cpp.table(c.command_macros));
   return macros;
 }
@@ -360,6 +372,14 @@ static void _walk_file(
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
   tokenizer.layout = Path.is_layout_source(path);
   tokenizer.scan();
+  Map arms = NULL;
+  if (!c.cpp_expansion) {
+    Compiler scan = Compiler.new_shared(c);
+    defer c.close_child(scan);
+    scan.tokenizer = tokenizer;
+    scan.scan_conditionals();
+    arms = _arms_by_position(tokenizer.tokens, scan.arm_stacks);
+  }
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
   with (c.collection_native = 0,
@@ -367,10 +387,12 @@ static void _walk_file(
         c.layout = tokenizer.layout) {
     FileWalk w = {
       .c = c, .path = path, .text = text, .dir = dir, .module = module,
-      .globs = globs, .visited = visited, .parts = [], .definitions = {},
-      .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
+      .globs = globs, .visited = visited, .parts = [],
+      .definitions = {}, .dependencies = _cache_map(),
+      .statics = {}, .hashes = _cache_map(), .arms = arms,
       .unit = Path.is_x2c_source(path), .line = 1};
-    if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
+    if (path == _canonical_path(c.filename))
+      c.meta_hashes = w.hashes;
     // Editing a member changes the module's contribution.
     if (module) {
       _cache_dependencies(w.dependencies, module.members);
@@ -396,21 +418,43 @@ static void _walk_file(
   }
 }
 
+/* Keys the scan's `arm_stacks` by each directive's position, which a
+   segment's tokens keep. */
+static Map _arms_by_position(Token first, Map stacks) {
+  Map arms = {};
+  Var open;
+  for (Token token = first; token.type != <eof>; token++)
+    if (token.type == <preproc> &&
+        stacks.try_get((long) (token - first), open))
+      arms[(long) token.pos] = open;
+  return arms;
+}
+
 /* The directives apply to the walk's preprocessor state in source order,
    and each segment starts from a copy of the state where it begins. The
    ordered parts retain its own directive events beside its include paths. */
 static void _split(FileWalk &w, Token first) {
-  Cpp cpp = Cpp.new(w.c.initial_macros(w.path));
-  w.start = cpp.copy();
+  Cpp cpp = w.c.cpp_expansion
+          ? Cpp.new(w.c.initial_macros(w.path)) : NULL;
+  if (cpp) w.start = cpp.copy();
+  int hidden = 0;
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
+    Var open;
+    if (w.arms && w.arms.try_get((long) token.pos, open)) {
+      hidden = 0;
+      foreach (List group in open.list())
+        if (group.caddr() == 2 || group.caddr() == 3) hidden = 1;
+    }
     String directive = Compiler.preproc_directive(token.text);
     if (Compiler.preproc_conditional_kind(token.text) ||
         directive.startswith("define") || directive.startswith("undef"))
       w.parts.push(_cpp_event(w, token));
-    int split = !cpp.hidden() && _directive(w, token);
-    w.c.cpp_directive(cpp, token, w.path, w.visited);
-    if (split) w.start = cpp.copy();
+    int split = !(cpp ? cpp.hidden() : hidden) && _directive(w, token);
+    if (cpp) {
+      w.c.cpp_directive(cpp, token, w.path, w.visited);
+      if (split) w.start = cpp.copy();
+    }
   }
   _flush(w, w.text[w.pos:]);
 }
@@ -443,9 +487,9 @@ static void _include_file(FileWalk &w, String target, int angle) {
   if (!w.visited.try_get(canonical, state)) {
     w.visited[canonical] = 1;
     List entry = _collection_entry(w.c, canonical);
-    if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
-    _replay_cached(
-      w.c, entry, canonical, w.globs, w.visited, NULL);
+    if (!entry)
+      entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
+    _replay_cached(w.c, entry, canonical, w.globs, w.visited, NULL);
   }
   else if (state is <array>)
     _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited, NULL, NULL);
@@ -483,7 +527,7 @@ module List _walk_cold(
    remain unique across the unit and its pending inline-body parses. */
 module void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
-  ModuleSource module = c.module_source(path, text, NULL);
+  ModuleSource module = c.module_source(path, text);
   with (c.names.counters = {}) {
     _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
   }
@@ -588,6 +632,7 @@ static void _prepare(FileWalk &w, Compiler shadow, String segment) {
     w.c.source_texts[Path.absolute(w.path)] =
       w.module ? w.module.own : w.text;
   _shift_tokens(shadow.tokenizer, w.line, w.pos);
+  if (w.arms) shadow.arm_stacks = _segment_arms(w.arms, shadow.tokenizer);
   shadow.preprocess_tokens();
 }
 
@@ -597,6 +642,19 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
     token.line += line - 1;
     token.pos += pos;
   }
+}
+
+/* A segment's directives take the groups the file's scan found open after
+   them, so an arm that C never takes stays hidden when its group opened
+   before the segment. */
+static Map _segment_arms(Map arms, Tokenizer tokenizer) {
+  Map stacks = {};
+  Token first = tokenizer.tokens;
+  Var open;
+  for (Token token = first; token.type != <eof>; token++)
+    if (token.type == <preproc> && arms.try_get((long) token.pos, open))
+      stacks[(long) (token - first)] = open;
+  return stacks;
 }
 
 /* The file takes every row the segment declared. Selection after the last
@@ -803,9 +861,10 @@ static void _replay_included(
       if (found is <array>) {
         Array state = found;
         Cpp cpp = (Cpp) state[0].pointer();
-        sink.merge(cpp.changes(state[1]));
+        auto Map macros = cpp.exported_macros(state[1]);
+        sink.merge_table(macros);
       }
-      else sink.merge(found);
+      else sink.merge_table(found);
     }
     return;
   }
@@ -813,8 +872,9 @@ static void _replay_included(
   Var prefix = active ? active[path] : void;
   List entry = prefix is <array> ? NULL : _entry(c, path);
   if (!entry && prefix is not <array>) return;
-  List parts = prefix is <array> ? prefix.array().list() : entry.car();
-  Map initial = sink ? _initial_macros(c, path, runtime) : NULL;
+  List parts = prefix is <array> ? prefix.array().list()
+             : entry.car();
+  Map initial = sink ? _initial_macros(c, path, runtime, 0) : NULL;
   Cpp cpp = sink ? Cpp.new(initial.copy()) : NULL;
   // Backedges read the live state; completed visits keep their final rows.
   if (cpp) visited[path] = [(void *) cpp, initial];
@@ -826,8 +886,9 @@ static void _replay_included(
     else if (cpp && part is <list>) _replay_cpp(c, cpp, part);
   }
   if (cpp) {
-    visited[path] = cpp.changes(initial);
-    sink.merge(visited[path]);
+    Map macros = cpp.exported_macros(initial);
+    visited[path] = macros;
+    sink.merge_table(macros);
   }
 }
 

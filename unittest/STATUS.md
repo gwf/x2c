@@ -1,5 +1,105 @@
 # Status
 
+## Resolved helper-cache path deadlock on 2026-10-31
+
+The support-unit guard compared a physical input path with the cache root as
+spelled in the environment. A cold aliased or relative cache could make the
+helper loop attempt to build its own helper and wait on its parent's lock.
+The guard now resolves both sides through Path.absolute. Cache-root selection,
+cache keys, locking, and compiler timeout policy are unchanged.
+
+The existing cache-key probe includes cold absolute and relative symlink cases
+with bounded process-group cleanup. The regression fails before the fix and
+passes afterward. The complete local gate also passes. See
+[the repair evidence](../plans/reference/async-cache-path-fix-2026-10-31.md).
+
+## Resolved GCC async use-after-return finding on 2026-10-31
+
+Before the fix, the optional Task-suite run with
+`ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1` aborted on Linux
+arm64 and x86_64 with GCC 12.2. Minicoro's yield-time overflow check used the
+address of an automatic local. GCC's ASan fake stack moved that local outside
+the coroutine mapping, so the check reported overflow. An isolated 8 MiB native
+probe confirmed that the physical frame remained within bounds and the metadata
+magic was intact. The same probe passed with use-after-return disabled.
+
+The focused follow-up uses GCC/Clang's physical frame address in the existing
+bounds check. Metadata and bounds rejection remain active. The new optional
+`task-stack-uar.c` regression fails before the fix and passes on all four
+native targets after it. See
+[the repair evidence](../plans/reference/async-uar-fix-2026-10-31.md).
+
+Linux validation also exposed two sanitizer-harness defects. The harness now
+passes the runtime's required `-fsigned-char` flag and links compiler objects
+before the runtime archive. The repaired harness passes on all four native targets
+after the numeric repair below. See
+[the target report](../plans/reference/async-native-targets-2026-10-31.md).
+
+## Resolved Linux x86_64 numeric findings on 2026-10-31
+
+A fresh pre-async baseline reproduces the same three numeric test failures as
+this branch before the repair. NaN reconstruction via `0.0 / 0.0` produced a
+negative NaN under GCC. Long-double identity, hashes, and ordering included
+x87's six ABI padding bytes.
+
+The two NaN readers now return a quiet-NaN constant. The three wide-value
+operations use one private payload-byte width that excludes x87 padding and
+preserves other formats. Three focused tests cover nonconstant NaN decoding,
+formatting, differing padding, cloning, Map keys, precision, signed zero, and
+NaN payloads. Full normal and ASan/UBSan suites pass on all four native targets.
+No expectation was weakened. See
+[the repair evidence](../plans/reference/async-numeric-fixes-2026-10-31.md).
+
+## Private async stack coverage on 2026-10-31
+
+The Task suite covers configured stack sizes, invalid settings, failure before
+job entry, recovery, and restoration of the caller's environment. The optional
+`probes/run-task-backend.sh` checks page rounding, guards, switching, complete
+unmapping, and the production unsupported-backend diagnostic without a new
+runtime API or recurring gate. Focused normal and ordinary sanitizer Task
+checks pass on all four selected native targets. All four pass full normal
+and ordinary sanitizer suites after the numeric repair. The GCC use-after-return
+false overflow is resolved by the focused repair recorded above. See
+[the native target report](../plans/reference/async-native-targets-2026-10-31.md).
+
+## Private async review on 2026-10-31
+
+Two runtime defects were reproduced in the gate-repair review and fixed in
+the subsequent authorized runtime follow-up:
+
+- Lisp evaluations that suspend inside native callbacks share `lisp_active`.
+  Interleaved callbacks resume with the wrong `Lisp.active()`, and their exit
+  can leave the caller's active session overwritten.
+- Recursive rendering shares `render_path` across tasks. A custom renderer
+  that suspends can make another task report a false Array cycle.
+
+Both now save their activation pointers at the existing task boundaries.
+Two focused task-suite tests cover interleaved suspension, fresh task state,
+caller restoration, failure, and cancellation cleanup. See
+[the merged review](../plans/reference/async-merged-review-2026-10-31.md).
+
+The full local check also encountered a REPL replay compilation failure:
+`x2c.h` was not found. The terminal check and complete command checks passed
+on subsequent runs without a REPL change. After the runtime fixes, the full
+`make agent-pr-check` invocation also passes, including REPL replay. The
+earlier failure's cause remains unclassified; the review retains both results.
+
+## Optional example checks on 2026-10-30
+
+The SymbolSet delimiter migration exposed existing failures that also reproduce
+with the converged compiler at `b75c61da9`:
+
+- Resolved on 2026-10-31: `tiny-lisp-min.x` uses `typedef void Z` in an
+  unnamed parameter list. Parameter binding now normalizes that spelling to
+  the empty-parameter sentinel. The `typedef-void-parameters` fixture covers
+  direct calls, function pointers, and `Func` adapters.
+- `make doc-examples`: the `language.md:106` sample declares `remainder` with
+  a signature that conflicts with the C math function. The imports slide also
+  requires a built PCRE2 package; that prerequisite is absent in these worktrees.
+
+These checks remain optional. Their repairs are separate from the delimiter
+migration; no expectations or sample classifications were weakened.
+
 ## Allocation accounting
 
 Unit and compiler-fixture program runners enable `X2C_SCOPE_ACCOUNTING=1`
@@ -66,14 +166,24 @@ parity remains a separate follow-up; the expectations were not weakened.
   and cleanup when a later initializer raises.
 
 - Native module probes reuse a constructor's cached Func across isolated
-  units. REPL API checks preserve shared definitions through a second preload.
-- REPL reference-capture checks retain local and parameter storage across
-  submissions, including shared mutations, earlier addresses, fixed arrays,
-  records, nested captures, and exceptions. Session teardown releases the
-  retained allocations; reference parameters remain borrowed aliases.
-- REPL expression-lambda result checks cover returned callables, nested
-  snapshots and reference captures, native callbacks, explicit function
-  conversions, scalar tags, and effect-only results.
+  units.
+- `commands/repl/tests/run.sh` runs the REPL checks. `native-check.x` keeps
+  globals, functions, records, and pointers live across native submissions,
+  separates tag and object namespaces, completes fields and methods, and
+  keeps a Func's reference capture across submissions. Rejected and failed
+  submissions publish no names, and session close runs top-level cleanups
+  in reverse order.
+- `playground.py` creates, calls, and inspects C libraries from source,
+  headers, and archives through the public command, including `:reset`,
+  `:reload`, file-local statics, callbacks with userdata, and an optional
+  host SQLite session. `terminal.py` covers candidate failure and
+  cancellation, crash recovery as a transcript reset, cache pruning, exit
+  hooks, saved-instruction replay, and terminal history. Both assert an
+  empty per-run `TMPDIR`.
+- `program.sh` resolves program addresses from sources, archives, shared
+  libraries, manifest targets, and packages. It checks that `:reload` keeps
+  one copy of each manifest root and that conflicting `main` roots and
+  duplicate definitions fail.
 - Linked extension probes build with parallel translation, so registration
   units collect package-prefixed declarations without a preceding unit cache.
 - Lisp cases cover special-form rebinding after earlier effects or call

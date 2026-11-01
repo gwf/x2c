@@ -1,4 +1,4 @@
-/*  threads.x -- isolated workers with shared coordinated state */
+/*  shared-threads.x -- isolated workers with shared coordinated state */
 
 #include <stdio.h>
 

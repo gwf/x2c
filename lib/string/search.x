@@ -54,8 +54,6 @@ meta native int String.contains(String str, String sub) {
   return str.find(sub) != -1;
 }
 
-
-
 /** Returns the index of the first occurrence of `sub` in `str`, or -1.
     The search compares bytes, so an index may land inside a multibyte
     sequence. An empty `sub` matches at index 0. Use `String.find_within` to

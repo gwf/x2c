@@ -54,7 +54,7 @@ Type Type_aggregate(Type type);
 
 List Type_marked_fields(Type aggregate, Symbol mark);
 
-List Type_resolve_member(Type type, String name, int call);
+List Type_resolve_member(Type t, String name, int call);
 
 Code Type_protocol_member(Type type, String name);
 

@@ -649,7 +649,7 @@ Source: `lib/var/conversion.x`
 | [`Var.ulong_value`](#Var.ulong_value) | Returns the payload of a `<ulong>` box, or 0 if `v` has a different tag. |
 | [`Var.wide_compare`](#Var.wide_compare) | Orders two wide boxes carrying the same tag, returning -1, 0, or 1. |
 | [`Var.wide_equal`](#Var.wide_equal) | Reports content equality for supported wide scalar boxes. |
-| [`Var.wide_hash`](#Var.wide_hash) | Returns a supported wide scalar box's content hash, or 0 otherwise. |
+| [`Var.wide_hash`](#Var.wide_hash) | Returns a supported wide scalar box's content hash, excluding ABI padding, or 0 otherwise. |
 | [`Var.width_mask`](#Var.width_mask) | Returns a mask containing the low `bits` bits. |
 
 ### Functions
@@ -1452,9 +1452,9 @@ Source: `lib/var/numbers.x`
 
 Orders two wide boxes carrying the same tag, returning -1, 0, or 1.
 Integer families delegate to `Var.integer_compare`. An `<ldouble>` pair
-compares as `long double` and falls back to a byte comparison when neither
-operand is less than the other, so distinct NaN representations still
-order deterministically.
+compares as `long double` and falls back to a value-byte comparison,
+excluding ABI padding, when neither operand is less than the other.
+Distinct NaN representations still order deterministically.
 
 0 means equal, and it is also the result for mismatched tags and for an
 argument that is not a wide box. Check the tags first, or use
@@ -1471,8 +1471,8 @@ Reports content equality for supported wide scalar boxes.
 Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values
 are separate allocations, so bit identity says nothing about their
 contents. This is the payload comparison that `Var.equal` and `===` use
-for those tags. An `<ldouble>` pair is compared byte for byte, so two NaNs
-sharing one representation compare equal here.
+for those tags. An `<ldouble>` pair compares its value bytes, excluding ABI
+padding, so two NaNs sharing one representation compare equal here.
 
 A 0 result means "not equal as wide boxes". It also covers an argument
 that is not a wide box and a pair whose tags differ. For a general
@@ -1486,7 +1486,8 @@ Source: `lib/var/numbers.x`
 
 `unsigned Var.wide_hash(Var v)`
 
-Returns a supported wide scalar box's content hash, or 0 otherwise.
+Returns a supported wide scalar box's content hash, excluding ABI padding,
+or 0 otherwise.
 
 Source: `lib/var/numbers.x`
 

@@ -18,7 +18,7 @@ typedef struct ScopeAlloc{
 
 typedef struct Scope{
   ScopeAlloc first;
-  struct Scope * down, * up;
+  struct Scope * down;
   struct Scope * parent, * children, * previous, * next;
 }
 * Scope;
@@ -65,9 +65,9 @@ void Scope_push(Scope * scope);
 
 void Scope_pop(void);
 
-void Scope_retain(void);
+void Scope_open(void);
 
-void Scope_release(void);
+void Scope_close(void);
 
 Scope Scope_new(void);
 
@@ -88,6 +88,12 @@ void Scope_cleanup(Scope value);
 void Scope_destroy(Scope scope);
 
 void x2c_scope_thread_release(void);
+
+void * x2c_scope_execution_new(Scope borrowed);
+
+void x2c_scope_execution_swap(void * saved);
+
+void x2c_scope_execution_free(void * saved);
 
 const char * Scope_name(Scope scope);
 

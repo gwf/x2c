@@ -24,12 +24,14 @@ static typedef struct OrderGraph:
   char *edges, *reach
 OrderGraph
 
-/** Checks physical source files in each configured view, including members of
-    a parsed module. Member findings keep their own path and suppressions.
-    Missing source/meta spans never become guessed definitions or edges.
+/** Checks the `files` physical source files in `lints` that one parsed unit
+    reads: its entry and its module members. Each finding goes to the file
+    that holds it. Missing source/meta spans never become guessed
+    definitions or edges.
 */
-void Lint.order_rules(Lint l, Compiler c, List ast, List rows, Map seen):
-  if !("function-reading-order" in l.selected): return
+void lint_order_rules(Lint *lints, int files, Compiler c, List ast,
+                      List rows, Map seen):
+  if !("function-reading-order" in lints[0].selected): return
   OrderGraph unit = {0}
   OrderFunction *all = unit.functions =
     xcalloc(ast.len() + 1, sizeof(OrderFunction))
@@ -41,32 +43,14 @@ void Lint.order_rules(Lint l, Compiler c, List ast, List rows, Map seen):
       edges[from * count + to] = all[to].identity in all[from].references
       reach[from * count + to] = from == to || edges[from * count + to]
   _order_closure(reach, count)
-  String own = Path.resolved_absolute(l.path)
-  Map paths = {}
-  paths[own] = 1
-  for (int at = 0; at < count; at++):
-    if all[at].path: paths[all[at].path] = 1
-  foreach List marker in c.line_markers:
-    if marker ~= %(? ? ?(String file) ? ? ? ?):
-      paths[Path.resolved_absolute(file)] = 1
-  Array ordered = []
-  foreach String path in paths.keys(): ordered.push(path)
-  ordered.sort()
-  foreach String path in ordered:
-    int member = path != own
-    Lint target = l
-    if member:
-      target = Lint.new(path, ((Path) path).read_text(),
-                        { "function-reading-order": 1 })
+  for (int file = 0; file < files; file++):
+    String path = Path.resolved_absolute(lints[file].path)
     OrderFunction *functions = xcalloc(count + 1, sizeof(OrderFunction))
     int included = 0
     for (int at = 0; at < count; at++):
       if all[at].path == path && all[at].movable:
         functions[included++] = all[at]
-    _order_findings(target, functions, included, unit, seen)
-    if member:
-      target.suppression_rules()
-      target.print()
+    _order_findings(lints[file], functions, included, unit, seen)
     xfree(functions)
   xfree(edges)
   xfree(reach)

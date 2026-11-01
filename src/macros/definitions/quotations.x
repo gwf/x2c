@@ -1,6 +1,6 @@
 /*  quotations.x -- macro definition quotations */
 
-static const SymbolSet quoted_roles = %<<statement block name param>>;
+static const SymbolSet quoted_roles = %<statement block name param>;
 
 /* quotations
 

@@ -1,0 +1,32 @@
+{
+  "report_path": "/Users/gary/.codex/worktrees/f2bc/x2c/examples/shootout/results/current.json",
+  "report_sha256": "6301abec3c2d5173030d21bbdc1612e36b16c3894268f2fbe89b4c550da8cded",
+  "run_id": "20261031T024309Z",
+  "profile": "local",
+  "samples": 12,
+  "baseline_sha256": "c777007be2f2d389164ac1509d3deacefc39f5bbd1295a5dcbd3be74457293dd",
+  "normalization": "Per-problem minima among available columns; all six for shared problems",
+  "summary": "Geometric mean of the nine shared normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank source lines after language-aware comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10,
+  "summary_benchmarks": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "binarytrees",
+    "regexredux",
+    "pidigits"
+  ],
+  "unavailable": {
+    "knucleotide": {
+      "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+      "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+    }
+  }
+}

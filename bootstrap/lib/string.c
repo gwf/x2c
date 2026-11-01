@@ -292,10 +292,10 @@ static unsigned f7_storage____hash_n(const char * str, int length){
 
 String Var_as_string(Var);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length){
-  if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= 256){
+  if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
     String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
   }
-  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > 256) return Var_as_string(Pool_intern(pool, String_var(string), header));  return Var_as_string(Pool_intern_new(pool, String_var(string), header));
+  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  return Var_as_string(Pool_intern_new(pool, String_var(string), header));
 }
 
 static inline String f7_storage____store(StringHeader header, const char * bytes, int length, unsigned hash){
@@ -306,10 +306,7 @@ static String f7_storage____intern_owned(String string){
   StringHeader header = f7_storage____header(string);  if(! header -> hash){
     int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
   }
-  Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
-    return Var_as_string(Pool_intern_new(pool, String_var(string), header));
-  }
-  if(found != string) _free_unchecked(string);  return found;
+  Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)) return Var_as_string(Pool_intern_new(pool, String_var(string), header));  if(found != string) _free_unchecked(string);  return found;
 }
 
 static void _free_unchecked(String str){
@@ -430,8 +427,8 @@ String String_add(String str, String other){
   if(! String_truth(other)) return str;  if(! String_truth(str)) return other;  int left_len = String_len(str), right_len = String_len(other);  size_t length =(size_t) left_len +(size_t) right_len;  if(length > INT_MAX - 1){
     static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
   }
-  if(length <= 256){
-    char bytes[256];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return x2c_string_from_bytes(bytes, (int) length);
+  if(length <= STRING_STACK_BYTES){
+    char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return x2c_string_from_bytes(bytes, (int) length);
   }
   String string = String_malloc((int) length + 1);  memcpy(string, str, left_len);  memcpy(string + left_len, other, right_len);  return _finish(string, (int) length);
 }
@@ -457,8 +454,8 @@ String String_new_fill(char fill, int count){
 }
 
 String String_join(String sep, List strings){
-  if(! List_truth(strings)) return NULL;  int n = List_len(strings);  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= 256){
-    char bytes[256];  f8_building____join_into(bytes, strings, sep, sep_len);  return x2c_string_from_bytes(bytes, total);
+  if(! List_truth(strings)) return NULL;  int n = List_len(strings);  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= STRING_STACK_BYTES){
+    char bytes[STRING_STACK_BYTES];  f8_building____join_into(bytes, strings, sep, sep_len);  return x2c_string_from_bytes(bytes, total);
   }
   String string = String_malloc(total + 1);  f8_building____join_into(string, strings, sep, sep_len);  return _finish(string, total);
 }
@@ -479,8 +476,8 @@ String String_printf(String fmt, ...){
   if(! String_truth(fmt) || ! * fmt) return NULL;  va_list args, measure;  va_start(args, fmt);  va_copy(measure, args);  int n = vsnprintf(NULL, 0, fmt, measure);  va_end(measure);  if(n < 0){
     va_end(args);  return NULL;
   }
-  if(n <= 256){
-    char bytes[256 + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return x2c_string_from_bytes(bytes, n);
+  if(n <= STRING_STACK_BYTES){
+    char bytes[STRING_STACK_BYTES + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return x2c_string_from_bytes(bytes, n);
   }
   String string = String_malloc(n + 1);  int written = vsnprintf(string, n + 1, fmt, args);  va_end(args);  if(written != n){
     _free_unchecked(string);  return NULL;
@@ -896,7 +893,7 @@ String String_unescape(String str){
   if(f6_escape____unescape_into(string, str) < 0){
     String_free(string);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 124,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 120,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }
@@ -1327,7 +1324,7 @@ static void f6_format____fail(f6_format___Format * f, String reason){
 
 _Noreturn static void f6_format____format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 334,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 332,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
@@ -1339,7 +1336,7 @@ _Noreturn static void f6_format____nested(f6_format___Format * f, String reason,
   {
     Var _x2c_gensym_literal_part_4 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 341,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 339,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_11, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }

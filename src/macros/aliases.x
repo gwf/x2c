@@ -55,8 +55,8 @@ static macro Stmt $fail.macros_alias_governed(Expr $c, Expr $site) =>
     <parse>, "alias declaration cannot be the body of a statement",
     $site, %("give the alias a braced body"));
 
-static const SymbolSet _operand_tails = %<<. -> ++ -- ; , ) ] } ?>>;
-static const SymbolSet _prefix_operators = %<<* & - +>>;
+static const SymbolSet _operand_tails = %<. "->" ++ -- ; , ) ] } ?>;
+static const SymbolSet _prefix_operators = %<* & - +>;
 
 // declarations
 

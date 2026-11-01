@@ -26,7 +26,7 @@ X2c literal parsing.
 | [`Compiler.parse_map_literal`](#Compiler.parse_map_literal) | Parses a quoted Map literal into a typed, source-ordered `(map ...)` node and consumes its closing `}`. |
 | [`Compiler.parse_raise_literal`](#Compiler.parse_raise_literal) | Parses the `%()` payload following `raise` into a `(raise CODE (args ...))` node and consumes its closing `)`. |
 | [`Compiler.parse_string_literal`](#Compiler.parse_string_literal) | Parses a percent `String` literal and returns its typed expression after the closing quote. |
-| [`Compiler.parse_symbol_set_literal`](#Compiler.parse_symbol_set_literal) | Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`. |
+| [`Compiler.parse_symbol_set_literal`](#Compiler.parse_symbol_set_literal) | Parses a `%<...>` literal into an immutable ordered `SymbolSet`. |
 | [`Compiler.symbol_set_expression`](#Compiler.symbol_set_expression) | Builds a typed `SymbolSet` expression from source-ordered `Symbol` values. |
 | [`Compiler.try_parse_macro_pattern_insertion`](#Compiler.try_parse_macro_pattern_insertion) | Parses a pattern's `$($NAME(...))`, where NAME is a macro, into its derived pattern, or returns NULL without consuming tokens. |
 | [`Compiler.typed_match_pattern`](#Compiler.typed_match_pattern) | Applies each typed capture's predicate to every unquoted occurrence. |
@@ -193,7 +193,7 @@ Source: `src/literals/strings.x`
 
 `List Compiler.parse_symbol_set_literal(Compiler c)`
 
-Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
+Parses a `%<...>` literal into an immutable ordered `SymbolSet`.
 Entries must be literal compact `Symbol`s; source order defines dense
 indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
 

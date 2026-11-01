@@ -161,7 +161,9 @@ int scan_identifier(char *s) {
 /* Reports an ASCII letter without consulting the process locale. */
 inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
 
-/* Returns the keyword Symbol for exactly `n` borrowed bytes, or zero.
+/* Returns the lexical keyword Symbol for exactly `n` borrowed bytes, or zero.
+   The compiler recognizes contextual x2c words after scanning; a lexical
+   keyword is not necessarily a reserved identifier in source grammar.
    The C spellings `thread_local` and `_Thread_local` normalize to `threaded`;
    matching is otherwise case-sensitive. Each length tests its spellings in
    order. With constant lengths the C compiler expands every `memcmp` into
@@ -207,6 +209,7 @@ Symbol scan_keyword_type(const char *s, int n) {
       if (!memcmp(s, "static", 6)) return <static>;
       if (!memcmp(s, "struct", 6)) return <struct>;
       if (!memcmp(s, "switch", 6)) return <switch>;
+      if (!memcmp(s, "expand", 6)) return <expand>;
       break;
     case 7: if (!memcmp(s, "default", 7)) return <default>;
       if (!memcmp(s, "finally", 7)) return <finally>;
@@ -348,11 +351,11 @@ int scan_symbol_literal_status(char *s, Symbol *status) {
   return _simple_literal(s, status);
 }
 
-/* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
-   spelling of `<"...">` without its angle brackets, so `>>` inside the quotes
+/* One atom spelling inside `%<...>`. A leading quote reads the quoted
+   spelling of `<"...">` without its angle brackets, so `>` inside the quotes
    belongs to the atom. Otherwise it shares only whitespace, `$`, `@` and the
    backslash escape with scan_atom: reader punctuation and comment openers are
-   ordinary bytes here, `>>` ends the atom, and the spelling may be empty
+   ordinary bytes here, `>` ends the atom, and the spelling may be empty
    because the caller has not ruled the first byte out. Returns -1 for a
    malformed quoted spelling or trailing backslash. */
 int scan_symbol_set_atom(char *s) {
@@ -360,7 +363,7 @@ int scan_symbol_set_atom(char *s) {
   if (s[0] == '"') return _quoted_spelling(s, NULL);
   int n = 0;
   while (s[n]) {
-    if (s[n] == '>' && s[n + 1] == '>') return n;
+    if (s[n] == '>') return n;
     if (strchr(" \n\t\v\f\r$@", s[n])) return n;
     if (s[n] == '\\' && !s[n + 1]) return -1;
     n += s[n] == '\\' ? 2 : 1;

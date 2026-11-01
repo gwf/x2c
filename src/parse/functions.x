@@ -15,8 +15,6 @@ List Compiler.parse_function_target(Compiler c) {
   return Ast.lone_item(macro);
 }
 
-
-
 /** Parses one function declaration and its required compound body.
     The parameter bindings are active while the body is parsed, and the first
     token after the closing brace remains current.

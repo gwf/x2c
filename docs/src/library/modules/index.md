@@ -61,6 +61,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
+| [`lib/task.x`](task.md) | cooperative Channel jobs on stable native stacks. |
 | [`lib/test.x`](test.md) | registered tests and assertions for user programs. |
 | [`lib/thread.x`](thread.md) | native workers with explicit result lifetimes. |
 | [`lib/time.x`](time.md) | clocks, durations, and calendar time. |

@@ -33,6 +33,27 @@ typedef struct Thread * Thread;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+typedef struct X2CTaskWait{
+  void * task;
+  struct X2CTaskWait * next;
+}
+X2CTaskWait;
+
+typedef struct X2CChannelMonitor{
+  pthread_mutex_t mutex;
+  pthread_cond_t condition;
+  X2CTaskWait * tasks;
+}
+X2CChannelMonitor;
+
+void * x2c_task_current(void);
+
+int x2c_task_stopping(void * task);
+
+void x2c_task_channel_sleep(X2CChannelMonitor * monitor, Thread * owner);
+
+void x2c_task_channel_notify(X2CChannelMonitor * monitor);
+
 Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size);
 
 Thread Thread_start(ThreadValueFn function, Var value);
@@ -56,6 +77,10 @@ void x2c_thread_wait(pthread_cond_t * condition);
 Thread x2c_thread_wait_owner(void);
 
 int x2c_thread_wait_stopped(Thread owner);
+
+int x2c_thread_channel_enter(X2CChannelMonitor * monitor, Thread * owner);
+
+int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor * monitor);
 
 _Noreturn void x2c_thread_cancel(void);
 

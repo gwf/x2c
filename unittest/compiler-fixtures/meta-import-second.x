@@ -5,7 +5,7 @@
     generated C defines those two and nothing else. In particular it emits no
     copy of public `mi_flatten`, which `meta-import.x` owns, so the two units
     link together. Its compile-time `mi_count` starts from the initializer,
-    whatever the other unit counted. See `plans/meta-functions.md`.
+    whatever the other unit counted. See `plans/archive/meta-functions.md`.
 */
 
 #include "x2c.x"

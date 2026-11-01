@@ -101,7 +101,8 @@ Duration Duration.scale(Duration d, double factor) {
   if (factor >= -0x1p63 && factor < 0x1p63 && trunc(factor) == factor)
     return Duration.new(
       _product("Duration.scale", d.nanoseconds, (long long) factor));
-  return Duration.new(_from_seconds("Duration.scale", d.total_seconds() * factor));
+  return Duration.new(
+    _from_seconds("Duration.scale", d.total_seconds() * factor));
 }
 
 /** Orders two Durations: negative, zero, or positive as `a` is shorter,

@@ -2,6 +2,18 @@
 
 > Experimental internal benchmarks, separate from the curated x2c examples.
 
+The [2026-11-01 split-storage adoption report](results/grouped-split-adoption-20261101.md)
+records the production large-table allocation policy, recovered peak RSS,
+paired word counts, compiler comparison and remaining timing costs.
+
+The [Robin Hood retirement report](results/robin-hood-retirement-20261031.md)
+records the paired Var Map/Pool migration, word-count results, compiler cost,
+and memory tradeoff. Var and typed Maps now share grouped storage.
+
+The [2026-10-31 grouped adoption report](results/grouped-adoption-20261031.md) records
+the full matched comparison, shared-baseline chart, word count, String,
+LongDouble, c2x2c and Notes results for the backend published at `9ef736b22`.
+
 There is no universal hash-table benchmark. These benchmarks use two established,
 reproducible suites with different strengths:
 
@@ -49,18 +61,17 @@ cannot favor one layout.
 
 ## Generated typed Map lane
 
-`lib/typed-map.x` generates `MapIntInt` from the same `$map.core.family` and
-`$map.typed.family` expansions that `lib/map/map.x` uses, with `int` keys and
-values stored in the record instead of `Var`. It is shipped runtime code, not
-a benchmark specimen, so it isolates the cost of the `Var` value layer from
-the cost of the table.
+`lib/typed-map.x` generates `MapIntInt` with grouped control bytes and native
+`int` key/value records. Var Map uses the same grouped storage with Var
+records and full-hash filtering. Both are shipped runtime code. Their ratio
+compares complete containers, including record widths, hash policy, and
+update dispatch.
 
 Two lanes measure it:
 
 - The direct runner adds `x2c-typed` and a matched `khashl-typed` reference
   over the same `int` keys and values. `summary.csv` reports both pairs and
-  the `x2c_over_x2c_typed` ratio, which is the `Var` layer's share of each
-  operation.
+  the `x2c_over_x2c_typed` ratio for each operation.
 - udb3 runs `x2c_typed` beside the labeled production `x2c_map` control in the
   standard profile. Both controls use the same driver shape as `udb3/test.c`,
   so their table sizes and checksums match the cohort.

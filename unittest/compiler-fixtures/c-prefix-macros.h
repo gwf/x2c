@@ -26,20 +26,31 @@
 #else
 #define maybe_const
 #endif
-int doubled(int value);
+#ifdef NO_ATTRIBUTES
+#define USED
+#else
+#define USED __attribute__((used))
+#endif
+#define SPARE __attribute__((unused))
+#define ALSO_SPARE SPARE
+signed int doubled(signed int value);
 
 static inline int tripled(int value){
   return value * 3;
 }
 
-extern __attribute__((weak)) int weak_value;
+extern int weak_value;
+
+int sextupled(int value);
+
+typedef int count_t;
 
 struct text{
   char * body;
 }
 ;
 
-__attribute__((visibility("default"))) const char * label(void);
+const char * label(void);
 
 int main(void);
 

@@ -40,7 +40,7 @@ static int deep_value(void){
 }
 
 static int inner_total(void){
-  return base + middle + deep_value() + 100;
+  return base + middle + deep_value() + OFFSET;
 }
 
 int main(void){

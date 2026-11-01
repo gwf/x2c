@@ -70,8 +70,6 @@ List Compiler.protocol_discard_helper(
   return c.discard_helper(binding, signature, stem, which);
 }
 
-
-
 /** Returns `(binding signature)` for a generated helper that calls the
     function `binding` of type `signature` and then discards the unnamed
     argument temporaries `which` selects (bit `n` for argument `n`). A

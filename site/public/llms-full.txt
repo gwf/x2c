@@ -165,7 +165,7 @@ The Map's bare keys are Atoms; `{(name): value}` uses a variable as its key.
 | `%(items)` | Whitespace-separated List data; bare names are Atoms |
 | `%[items]`, `%{key: value}` | Array/Map with quoted contents; commas separate entries |
 | `%"text $name $(expression)"` | Interpolated String |
-| `%<<ready busy done>>` | Immutable ordered SymbolSet; literal members only |
+| `%<ready busy done>` | Immutable ordered SymbolSet; literal members only |
 | `$name`, `$(expression)` inside quoted data | Insert one evaluated value |
 | `@name`, `@(expression)` inside a quoted List | Splice a List's elements; Arrays/Maps do not support this splice |
 
@@ -303,9 +303,10 @@ each use of `name`. See [macros](https://x2c-lang.dev/docs/guide/macros.html),
 
 ## Before bringing over a C source file
 
-x2c expands the macros the file and its project headers define before it
-parses, so a macro may supply grammar. It decides a conditional only when
-every name the condition tests is visible to it, so a branch on a platform
+Use `--cpp` when an existing C file needs macros to supply grammar before
+x2c parses it. Expansion is off by default and is a C compatibility bridge,
+not an x2c authoring facility. With the switch, x2c decides a conditional only
+when every name the condition tests is visible to it, so a branch on a platform
 macro such as `__APPLE__` or a feature a system header defines must parse
 together with the other branches of its group, including ones the native
 build disables. A macro such a branch defines stays for the C compiler. See
@@ -350,7 +351,7 @@ usually supplied by `#include "x2c.x"`.
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `alias` | Contextual grammar | Name a source expression within a scope |
-| `$dedent`, `$assert`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$time` | Shipped, explicit `#include` | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -616,9 +617,9 @@ The block placement is equivalent to:
 ```x2c
 int main(void) {
 {
-  Scope.retain();
+  Scope.open();
   {
-    defer Scope.release();
+    defer Scope.close();
     { Array values = []; values.push(1); }
   }
 }
@@ -897,11 +898,13 @@ int main(void) {
 }
 ```
 
-A literal whose spelling carries no escape and no interpolation hole is
-dedented during translation and reaches C as a finished constant. Every other
-form calls `String.dedent` at run time, so an interpolated block means the same
-thing and costs one call. Use `String.dedent` directly on text that arrives
-from a file or an argument.
+A static String literal is dedented during translation and reaches C as a
+finished constant, including escaped literals and literals inside macros.
+Physical CR and CRLF source line endings become LF, as in ordinary String
+literals; explicit `\r\n` escapes remain CRLF.
+Other expressions call `String.dedent` at run time and evaluate their input
+once. An interpolated block therefore means the same thing and costs one call.
+Use `String.dedent` directly on text that arrives from a file or an argument.
 
 ### Report the check you actually wrote
 
@@ -1405,6 +1408,56 @@ Optional modules shipped with x2c are outside that prelude. They require an
 explicit source include, such as `#include "typed-array.x"`. Third-party code
 uses the package `import` described below.
 
+### Contextual keywords
+
+C keywords and x2c's `defer` remain reserved. The x2c words `associated`,
+`catch`, `delegate`, `finally`, `import`, `protocol`, `raise`, `threaded`, and
+`try` are contextual. They can name objects, functions, parameters, fields,
+typedefs, and labels outside their keyword forms. C's `thread_local` and
+`_Thread_local` remain storage specifiers.
+
+Each construct recognizes its word at its grammar position. Where an ordinary
+expression or declaration can continue the same prefix, a visible ordinary
+binding wins. Visibility follows normal x2c lookup, including collected
+function declarations and local shadowing. A field or struct tag with the
+same spelling does not shadow an ordinary name. Ordinary parsing does not
+retry the keyword interpretation if the call or declaration has a type error.
+
+For example, `try(args);` calls a visible function named `try`, while
+`try { work(); } finally { finish(); }` retains its exception meaning.
+Likewise, `with(args);` is an ordinary call, and `with (...) { ... }` is a
+[temporary assignment](https://x2c-lang.dev/docs/reference/language.html#temporary-assignments-with-with). A typedef named
+`threaded` begins an ordinary declaration where that form overlaps storage
+syntax. Existing local macros and keyword aliases keep their invocation
+precedence.
+
+There is a lexical exception. The scanner recognizes percent and angle
+literals before name lookup. After the nine words above, an adjacent `%(`,
+`%{`, `%!`, or a `<...>` spelling retains its existing literal interpretation.
+A binding does not change the tokens inside that literal or enable C macro
+expansion there. Parenthesize an ordinary name to select operator syntax:
+
+```x2c
+int remainder(int raise, int a, int b) {
+  return (raise) %(a+b);
+}
+```
+
+Here `%` is modulo and `a+b` is an addition. `raise % (a+b)` also works because
+`%` is separated from `(`. For a comparison that could resemble an angle
+literal, write `(raise) < a`. Without that boundary, `raise %(a+b);` at statement
+start keeps the raise-payload interpretation even if `raise` is an ordinary
+binding. This exception preserves the existing literal and preprocessing
+rules without another tokenization pass.
+
+`expand` is a predefined keyword alias with the same lexical treatment for
+following literals. It follows keyword-alias invocation precedence rather
+than the ordinary-binding preference of the nine contextual words above.
+
+`in` and `match` retain their existing contextual rules, described under
+[Directives in the generated C](https://x2c-lang.dev/docs/reference/language.html#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
+it cannot call an ordinary function named `defer`.
+
 ### Module blocks
 
 A module block splits one large source file across a directory without
@@ -1448,16 +1501,12 @@ same-named companion directory is required. A member that is already being
 spliced, an unreadable member, a malformed block, or a second block is a driver
 error at the block.
 
-The block is spliced before the unit is collected, so a preprocessor
-condition does not choose members. x2c skips a block only inside a
-conditional arm that it decides C never takes, as described under
-[Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), from the macros the file defines before the
-block, the runtime's, and the command line's; an included file's macros do
-not count there. After `#define OFF 0`, a block under `#if OFF` is skipped.
-Every arm of an undecided group counts, so blocks in both arms of
-`#ifdef __APPLE__` and `#else` are a second block. The spliced text,
-including each member's own directives, then reaches C as one unit in
-splice order.
+The block is spliced before the unit is collected. Write the block and its
+member paths directly; C macro expansion does not discover module members,
+even with `--cpp`. The limited directive scan can skip an impossible arm
+such as `#if 0`. Other conditional arms count, so blocks in both arms of
+`#ifdef __APPLE__` and `#else` are a second block. The spliced text, including
+each member's own directives, reaches C as one unit in splice order.
 
 The entry's syntax mode applies to all spliced text. In a `.xp` entry every
 member is read with indentation layout, and in a `.x` entry with braces, so
@@ -1800,21 +1849,19 @@ x2c keeps C declarations, expressions, operators, functions, structs, unions,
 enums, pointers, arrays, and control flow. It adds language forms around that
 foundation and keeps C's object model.
 
-Use `#include` to include source and headers. x2c expands the `#define`
-macros it can see before parsing, as described under
-[Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), so their bodies may use x2c syntax and a
-name in a body resolves where the macro is used. Prefer x2c macros for new
-code: their holes bind parsed syntax and their names are private to each
-expansion. A macro that x2c leaves to the C compiler stays text, which does
-not follow renamed or file-private bindings.
+Use `#include` to include source and headers. Use x2c macros and language
+features for new x2c code. C macro expansion is an optional compatibility
+bridge for existing C, enabled with `--cpp`; it is off by default. A macro
+left to the C compiler stays text, which does not follow renamed or
+file-private bindings. See [Preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing).
 
 Member access uses `.` wherever x2c parsed the struct, whether the receiver is
 a value or a pointer, and whether the declaration came from x2c source or from
-a C header x2c reads, and in the body of a `#define` macro that x2c expands.
-`->` remains accepted. It is required in two places. One is a pointer to a
-struct whose layout x2c does not read, such as one from a system header or
-an unresolved third-party header. The other is the body of a macro that x2c
-leaves to the C compiler. A member of an anonymous union or struct belongs to its enclosing
+a C header x2c reads. `->` remains accepted. It is required in two places.
+One is a pointer to a struct whose layout x2c does not read, such as one from
+a system header or an unresolved third-party header. The other is the body
+of a macro that x2c leaves to the C compiler. A member of an anonymous union
+or struct belongs to its enclosing
 aggregate, and `.` reaches it through a pointer like any other member. `.`
 reaches through one pointer level, so a pointer to a pointer typedef keeps
 `(*pointer).field`. x2c also recognizes method-style calls such as
@@ -2028,7 +2075,7 @@ the callee's return and is freed when that Scope ends, so the callee may
 read, change, or return it, and a change never reaches a spliced Map. Entry
 values are shared, not copied. A call allocates its Map even for an empty
 tail; repeated calls in a long-lived Scope accumulate one Map each until an
-`auto` block or `Scope.release` ends their region.
+`auto` block or `Scope.close` ends their region.
 
 ### Reference parameters
 
@@ -2441,12 +2488,10 @@ Matrix multiplication uses the ordinary `left.matmul(right)` method.
 `Var.matmul` dispatches a registered `matmul` witness. The `@` prefix
 splices macro syntax; `@` and `@=` are not arithmetic operators.
 
-An operand with no x2c type, such as the name of a macro that x2c leaves to
-the C compiler, cannot convert for a participant that implements the
-operator; `images - MEAN` with `MEAN` from a system header is a compile-time
-type error. Cast the macro, `(double) MEAN`, or bind its value to a local. A
-macro x2c expands, such as `#define MEAN 0.1307` in the unit, has the type
-of its expansion.
+An operand with no x2c type, such as a C macro's name, cannot convert for a
+participant that implements the operator; `images - MEAN` with
+`#define MEAN 0.1307` is a compile-time type error in default mode. Cast the
+macro, `(double) MEAN`, or bind its value to a typed local.
 
 A participant may also declare `void T.discard(T)`. The compiler calls it on
 an unnamed temporary it made for one operator, such as the product in
@@ -2730,8 +2775,9 @@ static int scaled_sum(int scale, int value) {
 Its name becomes visible at the definition and remains visible to the end of
 that block and in nested blocks. An inner definition of the same name shadows
 it until the inner block ends. A later definition in the same block replaces
-it for following source. Fixed C and x2c keywords are not identifiers and
-cannot be local macro names; `with` is also reserved because it introduces
+it for following source. Reserved C keywords and `defer` cannot be local
+macro names. The contextual words above can be local macro names; `with`
+remains unavailable as a local macro name because it introduces
 [temporary assignments](https://x2c-lang.dev/docs/reference/language.html#temporary-assignments-with-with).
 
 A bare `name(...)` selects the innermost local macro before a file-local
@@ -2775,6 +2821,7 @@ hole-kind annotations:
 | `Decl` | non-function declaration | `static int value` |
 | `DeclaratorRow` | declarator with optional initializer | `second = first + 2` |
 | `Function` | function definition | `int f(int x) => x;` |
+| `Macro` | one compile-time macro value or definition | `$generator` |
 | `Name` | identifier | `checksum` |
 | `Literal` | one literal | `42` or `<char>` |
 | `Param` | parameter declaration | `const char *name` |
@@ -3064,6 +3111,7 @@ singular, explicitly annotated, and one of:
 | `Field` | one struct or union field | zero or more fields |
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
+| `Macro` | one macro definition or compile-time macro value | generated code of that macro's result kind, or a transformed Macro |
 
 Parameters after the target are explicit invocation arguments. A decorator
 application has no semicolon; that omission pairs it with the following
@@ -3106,8 +3154,8 @@ keyword ALIAS $QUALIFIED_MACRO;
 
 `keyword` is contextual at file scope. It starts this declaration only when
 followed by an identifier and a `$` macro name, and remains an ordinary
-identifier elsewhere. `ALIAS` must be a C identifier. A fixed C or x2c keyword
-does not tokenize as an identifier and cannot be used.
+identifier elsewhere. `ALIAS` must be a C identifier. Reserved C keywords
+and `defer` cannot be used; the contextual x2c words can be used.
 
 The named definition must already be visible. A macro alias keeps the direct
 invocation's parentheses, comma-separated typed arguments, sequence arguments,
@@ -3151,8 +3199,8 @@ declaration for the same alias replaces it only for following source.
 Registration and use are source ordered. Expression, statement, field,
 entry, enumerator, and unit macro aliases retain their result positions.
 `Decorator` aliases retain their captured `Expr`, `Function`, `Stmt`,
-`Field`, `Unit`, or `NamedType` target. An invocation in the wrong position
-receives the same result or target diagnostic as its direct spelling.
+`Field`, `Unit`, `NamedType`, or `Macro` target. An invocation in the wrong
+position receives the same result or target diagnostic as its direct spelling.
 
 Aliases do not globally reserve their identifiers. A macro or a decorator with
 explicit arguments is recognized only when the next significant token is `(`.
@@ -3233,6 +3281,87 @@ targets and hygienically private siblings may be rewritten freely.
 target's captured source must participate in the decorator's `Match`
 replacement, and dropping it makes the match fail. Imported decorators work
 without an extra prototype.
+
+### Mapping rows with `expand`
+
+`expand` decorates its following expression, then returns a decorator that
+captures the following macro. The expression must produce a compile-time
+`List`. Each non-List item supplies one argument; each List supplies an
+argument row. A List passed as one argument needs an enclosing one-element
+row. Empty input produces no applications; an empty row invokes a
+zero-argument macro. A trailing sequence parameter receives the row's
+remaining arguments. Incorrect row arity is an error.
+
+```x2c
+int main(void) {
+  int total = 0;
+  expand %((2 3) (4 5))
+  macro Stmt(Expr $left, Expr $right) {
+    total += $left * $right;
+  }
+  printf("%d\n", total);
+  return 0;
+}
+```
+
+```text
+26
+```
+
+The rows are evaluated once. Applications expand in row order, using ordinary
+binding and hygiene at the insertion site. Mapping adds no surrounding block.
+The generator may produce `Stmt`, `Field`, `Enumerator`, `Entry`, `Unit`,
+`Declaration`, or `Expression` output. Its result kind must fit the insertion
+position even when the input is empty. Mapping a `Decorator` is an error
+because its implicit target has not been supplied.
+
+An expression position requires exactly one generated expression. In a
+template sequence slot, `@expand (%(...))` inserts zero or more expressions.
+Parenthesize the List target after the sigiled name; sigiled names retain
+their existing lexical rules. A braced Macro target ends at `}`, without an
+additional semicolon. An arrow Macro target uses the enclosing expression
+delimiter or statement terminator.
+
+### Decorators that return decorators
+
+An expression-target decorator can return an anonymous Decorator literal or
+call a `meta` function declared to return `Macro`. A returned Decorator with
+no explicit parameters immediately decorates the next source target. Its
+target kind selects that target's parser. The chain's final result determines
+placement; an initial `Expr` target does not force expression output. A
+returned decorator with explicit parameters is an error. Use a `meta`
+function when computing which decorator to return.
+
+```x2c
+macro Decorator $project.repeat(Expr $count) =>
+  macro Decorator(Stmt $body) {
+    for (int i = 0; i < $count; i++) $body
+  };
+keyword repeat $project.repeat;
+
+int main(void) {
+  int total = 0;
+  repeat 3 { total++; }
+  return total == 3 ? 0 : 1;
+}
+```
+
+A nested macro can use an enclosing template's holes. Its own holes shadow
+same-spelled enclosing holes. Substitution embeds those values in the returned
+template; it does not make an arbitrary local-data closure.
+
+A `Macro` target and an explicit `Macro` hole accept an anonymous or named
+macro definition, a bare macro value such as `$generator`, or a parenthesized
+compile-time Macro expression. Macro holes are singular. A Macro-target
+decorator has an arrow producer body. Returning ordinary code inserts that
+code using the captured macro's result kind. Returning one bare Macro value
+transforms the macro instead: a named definition target publishes the returned
+definition, and an expression position receives a Macro value.
+
+During decorator application, transforming an anonymous macro into a
+Decorator continues onto its next target. Defining a named decorator does
+not apply it. Constructing or storing a Macro value in ordinary code also
+does not consume following source.
 
 ### Macro values
 
@@ -3568,7 +3697,7 @@ through a `Name` hole or an `$x2c_ident` call:
 
 ```x2c
 #include "meta.x"
-macro Unit $handler_type(name $tag) {
+macro Unit $handler_type(Name $tag) {
   struct $tag { int depth; };
   typedef struct $x2c_ident("Frame") { int line; } $x2c_ident("Frame");
 }
@@ -4023,9 +4152,8 @@ A `meta` body runs as native code, with these consequences:
   compiler continues. A call longer than `X2C_META_TIMEOUT` seconds (60 by
   default) is stopped.
 - A body may use runtime [Lisp](https://x2c-lang.dev/docs/reference/language.html#runtime-lisp) when it runs in the project
-  helper, which links the full runtime, or in the REPL. A native module the
-  compiler loads receives the compiler's core runtime exports, which omit
-  Lisp.
+  helper, which links the full runtime. A native module the compiler loads
+  receives the compiler's core runtime exports, which omit Lisp.
 
 A nonstatic `meta` function in an included `.x` module is callable during
 translation and has an ordinary runtime declaration. Its provider source
@@ -4420,13 +4548,14 @@ means a change of parser context. Some percent forms evaluate their contents.
 Binary `%` remains the modulo operator, and `%!` remains the lambda-literal
 prefix.
 
-`%"`, `%[`, and `%<<` open literals after any token. Modulo by a string literal
-is invalid C, and neither `[` nor `<<` begins an expression, so a cast may
+`%"` and `%[` open literals after any token. Modulo by a string literal
+is invalid C, and `[` cannot begin an expression, so a cast may
 precede these literals: `return (Path) %"$base/$name";` quotes. A cast may
 precede a bare `[...]` Array literal as well: `(Var) [1, 2]`.
 
-In `%(`, `%{`, and `%!` after an operand, including a closing parenthesis or
-brace, the `%` is the modulo operator, except where a statement begins:
+In `%(`, `%{`, `%<`, and `%!` after an operand, including a closing
+parenthesis or brace, the `%` is the modulo operator, except where a statement
+begins:
 
 - after the parenthesized condition of `if`, `while`, `for`, or `switch`, so
   `if (dirty) %(git stash).job().run();` quotes;
@@ -4454,7 +4583,7 @@ The collection and string literal forms are:
 | Form | Static type | Element syntax |
 | --- | --- | --- |
 | `%(a b c)` | `List` | quoted values separated by whitespace |
-| `%<<a b c>>` | `SymbolSet` | literal compact `Symbol`s in dense order |
+| `%<a b c>` | `SymbolSet` | literal compact `Symbol`s in dense order |
 | `%[a, b, c]` | `Array` | quoted values separated by commas |
 | `%{a: b, c: d}` | `Map` | quoted key/value pairs |
 | `%"text"` | `String` | quoted text plus unquote |
@@ -4465,7 +4594,7 @@ packed `Map` from `typed-map.x`, or a typed cons chain from `typed-list.x`. The
 literal then builds that representation directly, and an element that does not
 convert raises `<no-convert>`. A null source stays null.
 
-The empty forms are `%()`, `%<<>>`, `%[]`, `%{}`, and `%""`. Each `%[]` or
+The empty forms are `%()`, `%<>`, `%[]`, `%{}`, and `%""`. Each `%[]` or
 `%{}` evaluation creates a fresh allocated object that can be mutated
 immediately; null is not an empty `Array` or `Map`.
 
@@ -4513,8 +4642,12 @@ A `@` followed by whitespace, `)`, or `=` is ordinary `@` or `@=`
 atom data. `%(op @ a b)` remains a List of atoms; it does not authorize
 matrix operator syntax.
 
-`%<<...>>` is an immutable ordered `SymbolSet`. Bare entries are compact
-`Symbol`s rather than `Atom`s, and their source positions are their numeric
+`%<...>` is an immutable ordered `SymbolSet`. An unescaped `>` closes the
+literal unless it belongs to a quoted or angle-form member. For example,
+`%<">" ">=" ">>">` contains three operator Symbols. After an operand,
+`x %<foo>` means modulo by `<foo>`; `%<` opens a set where an operand begins.
+Bare entries are compact `Symbol`s rather than `Atom`s, and their source
+positions are their numeric
 indexes. Entries must be literal spellings; interpolation, splicing, and
 runtime expressions are not accepted. Every entry must survive compact `Symbol`
 encoding exactly. Duplicate encoded `Symbol`s are a
@@ -4551,7 +4684,7 @@ and escape rules. None repeats the `%` sigil, because a bare `%` inside quoted
 collection data is an `Atom`: `%(k %"txt")` reads as the three elements `k`,
 `%`, and `"txt"`. `$("text")` instead inserts an ordinary C string expression.
 Unescaped comma, colon, `]`, and `}` terminate collection Atoms; backslash
-escaping or angle syntax expresses those bytes as data. `%<<...>>` accepts
+escaping or angle syntax expresses those bytes as data. `%<...>` accepts
 literal `Symbol`s only and permits no interpolation or splicing.
 
 Inside a quoted collection, `$($helper(...))` first unquotes into x2c and
@@ -5395,13 +5528,13 @@ outlive the body. Ordinary typing rejects a `const` destination. A bit-field
 is not supported as a destination. Each entry adds an ordinary block and a
 `defer`; `with` adds no runtime state.
 
-`with` is a contextual word. At the start of a statement, `with` always
-begins a temporary assignment, including after a control header such as
-`if (...)`.
-Elsewhere `with` is an ordinary name: `with(41)` in an expression calls a
-function named `with`. A statement that calls such a function uses the
-spelling `(with)(arguments);`. A macro template may contain `with`.
-`import ... with` keeps its meaning.
+`with` is contextual. The complete `with (...) { ... }` head begins a
+temporary assignment, including after a control header such as `if (...)`.
+Other forms use the ordinary name: both `with(41);` and `(with)(41);` call a
+function named `with`, and `with(41)` can occur in an expression. A visible
+function named `with` does not change the meaning of the braced temporary
+assignment. A macro template may contain `with`. `import ... with` keeps its
+meaning.
 
 ### Expression aliases with `alias`
 
@@ -5680,7 +5813,11 @@ Unlike a `match` statement, a pattern condition does not introduce a target
 for `break`. A `break` or `continue` in the true body retains its ordinary
 loop or switch target. Pattern conditions use the existing match lowering:
 simple static patterns become direct C tests; complex patterns can use the
-cached runtime matcher.
+cached runtime matcher. A constant List with no pattern features compares
+List identity first. The empty List needs only a null comparison. Other
+literal Lists keep value matching when identities differ: Strings, boxed
+numbers, and Lists built in independent Pools can have equal contents with
+different identities.
 
 ### Errors and cleanup
 
@@ -5958,31 +6095,25 @@ from the source's, because it also passes the same address on unchanged.
 
 ## Preprocessing
 
-x2c expands the C macros it can see before it parses a unit, so a macro may
-supply any grammar, and a macro body is translated like any other source,
-x2c syntax included:
+Ordinary x2c translation does not expand C macros. It retains directives,
+reads the declaration and layout information needed from native macros, and
+leaves their uses to the C compiler. Limited conditional handling hides
+impossible arms such as `#if 0`; it is not a full preprocessor. Source must
+otherwise form syntax that x2c can parse.
 
-```x2c
-#define SQUARE(x) ((x) * (x))
-#define SHOW(n) printf(#n " squared is %d\n", SQUARE(n))
-#define SIZE(items) items.len()
+Use `--cpp` on `translate`, `build`, or `run` when existing C needs macro
+expansion to supply grammar. This enables x2c's C expansion engine before
+declaration collection and parsing. It does not enable discovery of x2c
+module blocks, member paths, imports, or meta declarations inside C macros.
+Write new x2c code with x2c macros and language features instead.
+`--no-cpp` suppresses this expansion as well as symbol collection.
 
-int main(void) {
-  SHOW(7);
-  printf("%d\n", SIZE([1, 2, 3]));
-  return 0;
-}
-```
+### Optional C macro expansion
 
-```text
-7 squared is 49
-3
-```
-
-A macro is visible when the unit defines it, when an `.x` file or a header
-that x2c reads through its own include search defines it, or when a `-D`
-option defines it. The runtime's macros are visible in every unit outside
-`lib/`. The macros of a system header, or of any header x2c does not
+With `--cpp`, a macro is visible when the unit defines it, when an `.x` file
+or a header that x2c reads through its own include search defines it, or when
+a `-D` option defines it. The runtime's macros are visible in every unit
+outside `lib/`. The macros of a system header, or of any header x2c does not
 resolve, stay for the C compiler, and so do `__FILE__`, `__LINE__`, and the
 other predefined names.
 
@@ -5999,16 +6130,15 @@ completed include cannot retain an earlier cycle's incomplete exports.
 A use of a visible macro is replaced by its expansion with C99's rules:
 object-like and function-like macros, `#` and `##`, `__VA_ARGS__`, GNU C's
 `, ## __VA_ARGS__`, `__VA_OPT__`, and rescanning, during which a macro does
-not expand inside its own expansion. A comma inside brackets or braces, as
-in an x2c Array or Map literal, does not separate macro arguments. A name is
-not expanded inside a `%(...)` literal, a Symbol literal, or a string or
-character literal, or after `$` or `@`. The generated C holds the expansion
-where the macro was used, while the `#define`, `#undef`, conditional, and
+not expand inside its own expansion. String and character literals are not
+expanded. The generated C holds the expansion where the macro was used,
+while the `#define`, `#undef`, conditional, and
 `#include` directives stay where they were written. Every token of an
 expansion has the location of the use, so a diagnostic there points at the
 use and adds a note that names the macro and where it is defined.
-`--dump-tokens` prints the expanded tokens and marks each one with the macro
-whose use produced it.
+With `--cpp`, `--dump-tokens` prints the expanded tokens and marks each one
+with the macro whose use produced it. Without the switch, it prints the
+ordinary source tokens.
 
 Within signed `long` arithmetic, a condition is decided when every name it
 tests is visible, is known never to be defined, or is a literal. Unsigned
@@ -6018,10 +6148,10 @@ GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
 `_MSC_VER` are never defined; a compiler built for a host other than Windows
 treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as never defined too. Only
 `defined`, `#ifdef`, and `#ifndef` decide `__GNUC__`: its value is unknown,
-so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group parses: the
-tokens of the other arms are trivia, an `#include` in one is not read, and
-the directives around them stay in place and are emitted. A function defined
-in two arms of one conditional is one definition.
+so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group
+parses: the tokens of the other arms are trivia, and an `#include` in one is
+not read. The directives around them stay in place and are emitted. A
+function defined in two arms of one conditional is one definition.
 
 Any other condition, such as `#ifdef __APPLE__` or a test of a name that a
 system header may define, is undecided, and every arm of its group parses.
@@ -6032,11 +6162,11 @@ unexpanded for the C compiler, which keeps the generated C correct for each
 arm.
 
 `-D NAME`, `-D NAME=VALUE`, and `-U NAME` on `translate`, `build`, and `run`
-define and undefine a macro for x2c as for the C compiler, and so do a
-project profile's defines. They do not change how x2c reads the runtime and
-its prelude. C generated by `translate` with these options needs the same
-options when it is compiled, because the conditions they decide keep their
-directives.
+reach the C compiler and requested host preprocessing. With `--cpp`, they
+also define and undefine macros for x2c's expansion engine, as do a project
+profile's defines. They do not enable expansion themselves or change how
+x2c reads the runtime and its prelude. C generated with these options needs
+the same options when it is compiled, because conditional directives remain.
 
 ### Host preprocessing
 
@@ -6084,13 +6214,18 @@ as the linkage name. `extern "C"` before a single declaration is read as
 A macro that x2c leaves to the C compiler, because undecided conditional
 groups define it, may still sit before or among a declaration's specifiers
 in a unit or a collected header. The macro's definitions determine what the
-name contributes: nothing for an empty body or an attribute (`#define RLAPI`,
-`#define WEAK __attribute__((weak))`), its storage class for `static`,
-`extern`, or `inline` (`#define JSMN_API static`), builtin type words for a
-body such as `signed int`, and, for a body that is the name of another prefix
-macro, that macro's reading. A function-like macro whose body is its parameter
+name contributes: nothing for an empty body (`#define RLAPI`), its storage
+class for `static`, `extern`, or `inline` (`#define JSMN_API static`),
+builtin type words for a body such as `signed int`, and, for a body that is
+the name of another prefix macro, that macro's reading. A body of attributes
+alone, as in `#define WEAK __attribute__((weak))`, adds nothing to the type.
+Where such a name stands before a declaration's qualifiers and type, the
+unit's own C keeps it, even when another branch defines it empty:
+`WEAK int weak_value = 5;` keeps `WEAK`, and the generated header declares
+`extern int weak_value;`. A function-like macro whose body is its parameter
 amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
-type is the one inside the parentheses. A macro whose words are a storage
+type is the one inside the parentheses, and the macro contributes nothing even
+when its body holds an attribute. A macro whose words are a storage
 class reads as that storage after the type as well, as in
 `int LOCAL f(void)`. Where a name is defined differently in several
 conditional branches, a `static` definition takes precedence, then any
@@ -6137,10 +6272,11 @@ stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
 ## Runtime Lisp
 
 x2c programs can embed Lisp sessions for DSLs, configuration, and interactive
-work; the REPL evaluates Lisp the same way. `Lisp.new()` creates a session
-with the standard environment from `etc/init.xlisp`, and `lisp.eval`,
-`Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and `.xlisp` files at
-run time. [Embed Lisp](https://x2c-lang.dev/docs/library/overview.html#embed-lisp) shows the host API.
+work, as the Lisp shell in `examples/programs/lisp.x` does. `Lisp.new()`
+creates a session with the standard environment from `etc/init.xlisp`, and
+`lisp.eval`, `Lisp.eval_string`, and `Lisp.eval_file` evaluate forms and
+`.xlisp` files at run time.
+[Embed Lisp](https://x2c-lang.dev/docs/library/overview.html#embed-lisp) shows the host API.
 The compiler itself does not evaluate Lisp; compile-time code is x2c, as
 described under [compile-time calls](https://x2c-lang.dev/docs/reference/language.html#compile-time-calls-and-operations).
 
@@ -6252,7 +6388,7 @@ value, as the library documents.
 An operation whose parameters or result have no `Var` representation is not
 available, which excludes `Iter` cursors, pointer out-parameters, variadic
 entry points, and `char *` parameters. `Lisp.new()` loads these names from
-`etc/init.xlisp` for both the REPL and other embedding programs.
+`etc/init.xlisp` for every program that embeds Lisp.
 
 ## Diagnostics
 
@@ -6295,6 +6431,11 @@ it. For calls into another unit, the check uses only a fixed table of runtime
 operations. It does not cover storage from plain `malloc` or a C library,
 raw pointer arithmetic, values reached through a field of a stack `struct`,
 callbacks, or `Context` regions.
+
+Possible frame escapes through raw pointer stores with unknown destination
+lifetimes are reserved for the optional audit and meta-function errors.
+Ordinary translation still checks returned addresses, static stores, known
+retaining storage, and already ended regions, including through helpers.
 
 <!-- https://x2c-lang.dev/docs/reference/cli.html -->
 
@@ -6384,13 +6525,20 @@ The depfile options control that `.d` output. They belong to `translate`:
 --no-phony-deps         Omit phony rules for included files
 ```
 
-Symbol collection options apply to `translate`, `build`, and `run`:
+Preprocessing and symbol collection options apply to `translate`, `build`,
+and `run`:
 
 ```text
+--cpp                   Expand C macros for existing C compatibility
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
 ```
+
+C macro expansion is off by default. Use `--cpp` when existing C requires
+macro-generated grammar. It does not discover x2c module or meta constructs
+inside C macros. `--no-cpp` suppresses expansion even when `--cpp` is present.
+The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
 
@@ -6429,9 +6577,10 @@ Inspection modes print an intermediate result and stop translation:
 ./x2c translate --dump-tokens source.x
 ```
 
-- `--dump-tokens` prints the tokens the parser reads, after macro
-  expansion, and stops. A token that an expansion produced ends with the
-  name of the macro whose use produced it.
+- `--dump-tokens` prints the tokens the parser reads and stops. Without
+  `--cpp` these are the source tokens. With `--cpp` they follow C macro
+  expansion, and a token that an expansion produced ends with the name of
+  the macro whose use produced it.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-expansions` prints each source macro expansion and stops after
   parsing. Each entry names the invocation and definition sites, then shows
@@ -6649,8 +6798,7 @@ use `make commands` and the matching `builds/0/x2c` compiler. Run `x2c lsp`
 from the workspace root to serve editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
 document synchronization. One process serves one workspace and keeps the
 compiler resident. It provides frontend diagnostics, definition
-navigation, type hover, completion, symbols, references, rename, and lexical
-semantic tokens.
+navigation, type hover, completion, symbols, references, and rename.
 It does not report errors left to the native C compiler, such as unresolved
 C identifiers.
 
@@ -6692,8 +6840,8 @@ workspace indexing. References and rename analyze the selected target's
 inputs and build dependencies sequentially, using unsaved buffers. Without a
 manifest, they search
 only the current document. Rename requires a physical definition inside the
-workspace. Lexical semantic tokens classify source tokens; they do not infer
-the type or binding of each identifier.
+workspace. Syntax coloring comes from the editor's syntax grammar; the server
+does not override it.
 
 Renaming a type updates related method-owner qualifiers and C spellings.
 A type rename is refused when its defining file is outside the selected source
@@ -6715,7 +6863,7 @@ Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
 from VSIX**. VS Code 1.82 or newer is required. The extension starts
 `x2c lsp` and uses its standard language client for synchronization,
 diagnostics, definition navigation, hover, completion, symbols, references,
-rename, semantic tokens, and cancellation.
+rename, and cancellation.
 
 Normal compiler installations include the server. To select a particular
 installation or a checkout build, set:
@@ -7002,7 +7150,7 @@ archive is the one the lockfile pinned however the index has changed. Only a
 pin the lockfile does not cover reaches the index. The lockfile is then
 rewritten to the manifest's pins. A version the index cannot supply stops the
 build with an error that includes both versions. A dry run installs nothing
-and writes no lockfile, and the editor adapter never installs.
+and writes no lockfile, and the language server never installs.
 
 ## Include and package directories
 
@@ -7020,7 +7168,8 @@ The exceptions are:
 
 `--package-dir <dir>` adds a directory of x2c packages. An `import` statement
 searches those directories for a package that is not beside the source. The
-option applies to `translate`, `build`, and `run`, and repeats like `-I`.
+option applies to `translate`, `build`, `run`, and `repl`, and repeats like
+`-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
@@ -7091,9 +7240,10 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
-x2c's own [preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing), for requested host
-preprocessing, and for C compilation; `translate` accepts them too, and the
-C generated with them needs the same options. Optimization, debug, and `-Xcc` are compile-only; `-L`,
+x2c's optional [preprocessing](https://x2c-lang.dev/docs/reference/language.html#preprocessing) with `--cpp`, for
+requested host preprocessing, and for C compilation. `translate` accepts them
+too, and the C generated with them needs the same options. Optimization,
+debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
 `-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
@@ -7162,6 +7312,9 @@ are positional, because collection records parameter types without names.
 The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html) for that work.
+
+`x2c lint` is experimental and available in checkout builds; `make install`
+and release payloads do not install it.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

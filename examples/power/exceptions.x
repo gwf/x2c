@@ -33,8 +33,7 @@ String preview(String path) {
 
 // Close the file on success or while unwinding from a failed read.
 String read_text(String path) {
-  File input = path.open("r");
+  auto File input = path.open("r");
   opened_fd = input.fileno();
-  defer input.close();
   return input.string();
 }

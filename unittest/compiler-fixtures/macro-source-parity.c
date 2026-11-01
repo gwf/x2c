@@ -106,7 +106,7 @@ int main(void){
     .integer = generated_record.value
   }
   ;
-  int parity = direct_function(direct_union.integer) + generated_function(generated_union.integer) + direct_inline(0) + generated_inline(0) + generated_global + 1;
+  int parity = direct_function(direct_union.integer) + generated_function(generated_union.integer) + direct_inline(0) + generated_inline(0) + generated_global + GENERATED_SOURCE_FLAG;
   printf("%d %d\n", DirectValue_read(direct), parity);
   return 0;
 }

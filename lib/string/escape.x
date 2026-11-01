@@ -27,8 +27,6 @@ String String.repr(String str) {
   return "\"%s\"".printf(str.escape());
 }
 
-
-
 /** Returns a canonical escaped representation of the bytes in `str`.
     Common control and delimiter bytes use named escapes, printable ASCII is
     copied, and every other byte uses a three-digit octal escape. `Null`
@@ -102,8 +100,6 @@ meta native String String.parse(String str) {
     return String.new_len(str + 1, n - 2).unescape();
   return str.unescape();
 }
-
-
 
 /** Decodes supported backslash escapes in `str` into a canonical `String`.
     Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,

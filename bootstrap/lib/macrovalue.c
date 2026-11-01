@@ -8,14 +8,14 @@
 #include "common.h"
 #include "match/match.h"
 typedef struct MacroFixedSlots{
-  int count, slots[64];
-  int names, name_slots[64];
+  int count, slots[MACHINE_BINDER_MAX];
+  int names, name_slots[MACHINE_BINDER_MAX];
 }
 MacroFixedSlots;
 
 typedef struct MacroPublishing{
-  int from[64], fallback[64];
-  int to[64];
+  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
+  int to[MACHINE_BINDER_MAX];
   int count, binders, complete;
   unsigned long definite;
 }
@@ -504,7 +504,7 @@ static List f12_construction____group(Macro t, List values){
   Array grouped = Array_new(); {
     List hole;  List _x2c_gensym_macro_object_0 = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       hole = Var_list_payload(_x2c_gensym_macro_cursor_output_0); {
-        int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/macrovalue/construction.x",.function = "f12_construction____group",.line = 136,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+        int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/macrovalue/construction.x",.function = "f12_construction____group",.line = 134,.runtime = 1}; & _x2c_gensym_error_site_0; })));
         if(sequence && List_truth(values) && ! List_truth(List_cdr(values)) && Var_is_row(List_car(values), 9, 7, 4) && f12_construction____items(Var_list_payload(List_car(values)))) values = Var_list_payload(List_car(values));
         Array_push(grouped, sequence ? List_var(values) : List_car(values));
         values = sequence ? NULL : List_cdr(values);
@@ -1123,9 +1123,9 @@ return Array_list_free(projected);
 }
 
 static int f11_recognition____pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published){
-  Var values[64];
+  Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured ={
-    values, 0, 64
+    values, 0, MACHINE_BINDER_MAX
   }
   ;
   List internal = f11_recognition____internal_names(t, names, 1);
@@ -1192,9 +1192,9 @@ static List f11_recognition____internal_names(Macro t, List names, int pending){
 }
 
 static int f11_recognition____capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published){
-  Var values[64];
+  Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured ={
-    values, 0, 64
+    values, 0, MACHINE_BINDER_MAX
   }
   ;
   return f11_recognition____case_match(code, plan, &((* policy)), &(captured)) && f11_recognition____publish(&((* route)), &(captured), published);
@@ -1506,7 +1506,7 @@ static MacroPublishing f11_recognition____publishing(Macro t, List pattern, List
 
 static int f11_recognition____publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
   if(!(* route).complete) return 0;
-  Var ordered[64];
+  Var ordered[MACHINE_BINDER_MAX];
   for(int i = 0;  i <(* route).count;  i ++){
     int from = MatchCaptureBuffer_has(&((* captured)), (* route).from[i]) ?(* route).from[i] :(* route).fallback[i];
     if(from < 0 || ! MatchCaptureBuffer_has(&((* captured)), from)) return 0;

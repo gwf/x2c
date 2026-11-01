@@ -84,13 +84,20 @@ The depfile options control that `.d` output. They belong to `translate`:
 --no-phony-deps         Omit phony rules for included files
 ```
 
-Symbol collection options apply to `translate`, `build`, and `run`:
+Preprocessing and symbol collection options apply to `translate`, `build`,
+and `run`:
 
 ```text
+--cpp                   Expand C macros for existing C compatibility
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
 ```
+
+C macro expansion is off by default. Use `--cpp` when existing C requires
+macro-generated grammar. It does not discover x2c module or meta constructs
+inside C macros. `--no-cpp` suppresses expansion even when `--cpp` is present.
+The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
 
@@ -129,9 +136,10 @@ Inspection modes print an intermediate result and stop translation:
 ./x2c translate --dump-tokens source.x
 ```
 
-- `--dump-tokens` prints the tokens the parser reads, after macro
-  expansion, and stops. A token that an expansion produced ends with the
-  name of the macro whose use produced it.
+- `--dump-tokens` prints the tokens the parser reads and stops. Without
+  `--cpp` these are the source tokens. With `--cpp` they follow C macro
+  expansion, and a token that an expansion produced ends with the name of
+  the macro whose use produced it.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-expansions` prints each source macro expansion and stops after
   parsing. Each entry names the invocation and definition sites, then shows
@@ -349,8 +357,7 @@ use `make commands` and the matching `builds/0/x2c` compiler. Run `x2c lsp`
 from the workspace root to serve editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
 document synchronization. One process serves one workspace and keeps the
 compiler resident. It provides frontend diagnostics, definition
-navigation, type hover, completion, symbols, references, rename, and lexical
-semantic tokens.
+navigation, type hover, completion, symbols, references, and rename.
 It does not report errors left to the native C compiler, such as unresolved
 C identifiers.
 
@@ -392,8 +399,8 @@ workspace indexing. References and rename analyze the selected target's
 inputs and build dependencies sequentially, using unsaved buffers. Without a
 manifest, they search
 only the current document. Rename requires a physical definition inside the
-workspace. Lexical semantic tokens classify source tokens; they do not infer
-the type or binding of each identifier.
+workspace. Syntax coloring comes from the editor's syntax grammar; the server
+does not override it.
 
 Renaming a type updates related method-owner qualifiers and C spellings.
 A type rename is refused when its defining file is outside the selected source
@@ -415,7 +422,7 @@ Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
 from VSIX**. VS Code 1.82 or newer is required. The extension starts
 `x2c lsp` and uses its standard language client for synchronization,
 diagnostics, definition navigation, hover, completion, symbols, references,
-rename, semantic tokens, and cancellation.
+rename, and cancellation.
 
 Normal compiler installations include the server. To select a particular
 installation or a checkout build, set:
@@ -702,7 +709,7 @@ archive is the one the lockfile pinned however the index has changed. Only a
 pin the lockfile does not cover reaches the index. The lockfile is then
 rewritten to the manifest's pins. A version the index cannot supply stops the
 build with an error that includes both versions. A dry run installs nothing
-and writes no lockfile, and the editor adapter never installs.
+and writes no lockfile, and the language server never installs.
 
 ## Include and package directories
 
@@ -720,7 +727,8 @@ The exceptions are:
 
 `--package-dir <dir>` adds a directory of x2c packages. An `import` statement
 searches those directories for a package that is not beside the source. The
-option applies to `translate`, `build`, and `run`, and repeats like `-I`.
+option applies to `translate`, `build`, `run`, and `repl`, and repeats like
+`-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
@@ -791,9 +799,10 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
-x2c's own [preprocessing](language.md#preprocessing), for requested host
-preprocessing, and for C compilation; `translate` accepts them too, and the
-C generated with them needs the same options. Optimization, debug, and `-Xcc` are compile-only; `-L`,
+x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
+requested host preprocessing, and for C compilation. `translate` accepts them
+too, and the C generated with them needs the same options. Optimization,
+debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
 `-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
@@ -862,6 +871,9 @@ are positional, because collection records parameter types without names.
 The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
+
+`x2c lint` is experimental and available in checkout builds; `make install`
+and release payloads do not install it.
 
 The style rule `compound-auto` enforces one leading `auto` for compound
 declarations whose bindings keep their acquired values. It checks bound

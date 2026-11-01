@@ -61,7 +61,9 @@ A normal run prints `ok NAME` or `FAIL NAME (file:line)` for each test,
 then `N passed, M failed, K skipped`. A skipped test prints its reason.
 The program returns 1 when a test fails, 2 when filters select no tests,
 and 0 otherwise. A no-match run prints the zero-test summary even with
-`--list`.
+`--list`. An unknown option, or `--filter` without its text, prints
+`test: unknown or incomplete option` with the argument on standard error
+and returns 2 without running tests.
 
 For example, `x2c run tests/stack_test.x -- --filter pop --quiet` selects
 test names containing `pop`.

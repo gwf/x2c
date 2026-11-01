@@ -88,8 +88,6 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
     }, <unit>, NULL);
 }
 
-
-
 /* Parameter arrays have pointer calling conventions, and typedef spellings
    do not change the two standard main signatures. */
 static int _main_arity(Compiler c, Type type) {

@@ -1,10 +1,10 @@
-/*  cpp.x -- the C preprocessing x2c performs before parsing
+/*  cpp.x -- optional preprocessing for existing C compatibility
 
     Copyright (c) 2026 Gary William Flake.
 
-    x2c expands the C macros it can see and decides the conditional groups
-    it can before the parser reads a token, so a macro body is translated
-    like any other source. A macro is visible when the unit, a file that
+    With --cpp or explicit native/REPL state, x2c expands visible C macros
+    and decides conditional groups before parsing. Ordinary x2c builds do
+    not run this pass. A macro is visible when the unit, a file that
     x2c reads through its own include search, or the command line defines
     it; a system header's macros stay for the C compiler. A condition is
     decided when every name it tests is visible, known never to be defined,
@@ -89,6 +89,7 @@ Cpp Cpp.copy(Cpp cpp) {
   CppGroup *groups = cpp.groups.bytes;
   for (size_t i = 0; i < cpp.groups.len(); i++) {
     CppGroup group = groups[i];
+    if (group.before) group.before = group.before.copy();
     if (group.touched) group.touched = group.touched.copy();
     copy.groups.push(&group);
   }
@@ -106,11 +107,25 @@ int Cpp.hidden(Cpp cpp) {
     files that include it.
 */
 List Cpp.changes(Cpp cpp, Map initial) {
-  Array rows = [];
+  auto Map macros = cpp.exported_macros(initial);
+  return Cpp.rows(macros);
+}
+
+/** Returns an independent table of the macros changed from `initial`. */
+Map Cpp.exported_macros(Cpp cpp, Map initial) {
+  if (!initial) return cpp.macros.copy();
+  Map macros = {};
   foreach ((String name, Var value) in cpp.macros) {
     Var before = initial[name];
-    if (before is void || !Var.equal(before, value)) rows.push($(name, value));
+    if (before is void || !Var.equal(before, value)) macros[name] = value;
   }
+  return macros;
+}
+
+/** Returns canonical `(name value)` rows for the table `macros`. */
+List Cpp.rows(Map macros) {
+  Array rows = [];
+  foreach ((String name, Var value) in macros) rows.push($(name, value));
   return rows.list_free();
 }
 
@@ -126,7 +141,8 @@ Map Cpp.table(List rows) {
 /** Reports whether `t` is an identifier or a keyword, which a macro can name.
 */
 int Token.is_word(Token t) =>
-  t.type == <ident> || (t.text && scan_keyword_type(t.text, t.text.len()));
+  t.type == <ident> ||
+  (t.text && t.type == scan_keyword_type(t.text, t.text.len()));
 
 /** Returns the text that the tokens from `first` through `last` of one
     stream spell, with the blanks and comments between them as written. A

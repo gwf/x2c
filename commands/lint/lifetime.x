@@ -89,11 +89,8 @@ void Lint.lifetime_rules(Lint l, Compiler c, List ast):
     while before >= 0 && !_written(tokens + before): before--
     // A later declarator follows a comma; only a group head follows a type.
     if before < 0 || !lint_word(tokens + before): continue
-    if _group(c, bindings, changed, at) < 2: continue
-    int position = tokens[at].pos
-    String path = c.text_source(position, position)
-    if Path.resolved_absolute(path) != Path.resolved_absolute(l.path):
-      continue
-    l.add("compound-auto", tokens[at].line,
+    int line = l.unit_line(c, tokens + at)
+    if !line || _group(c, bindings, changed, at) < 2: continue
+    l.add("compound-auto", line,
           "use one leading auto for this compound declaration; " +
           "its bindings keep their acquired values")

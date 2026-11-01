@@ -13,6 +13,17 @@
 
 #include "meta.x"
 #include "compiler-meta.x"
+#include "lisp/lisp.x"
+
+/* Keep callback activation available without linking the interpreter. */
+Lisp threaded x2c_lisp_active;
+
+/** Exchanges the borrowed Lisp activation at an execution boundary. */
+Lisp x2c_lisp_exchange(Lisp lisp) {
+  Lisp previous = x2c_lisp_active;
+  x2c_lisp_active = lisp;
+  return previous;
+}
 
 /** Binds `function` into the session `lisp` as `name` through a fresh
     `Func` carrying the function's signature.

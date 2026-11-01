@@ -259,6 +259,10 @@ List syntax_grammar(void) => %(grammar
           (ref type-specifier)
           (ref declarator))
         (token "...")
+        (seq
+          (choice (token "List") (token "Map"))
+          (token "@")
+          (optional (ref identifier)))
         (ref parameter-slot)))
 
     (rule destructuring-targets
@@ -672,9 +676,11 @@ List syntax_grammar(void) => %(grammar
       (seq
         (ref relational)
         (repeat 0
-          (seq
-            (choice (token "==") (token "!=") (token "===") (token "!=="))
-            (ref relational)))))
+          (choice
+            (seq
+              (choice (token "==") (token "!=") (token "===") (token "!=="))
+              (ref relational))
+            (seq (token "~=") (ref pattern))))))
 
     (rule relational
       (seq
@@ -1048,7 +1054,7 @@ List syntax_grammar(void) => %(grammar
         (token "\"")))
 
     (rule symbol-set
-      (seq (token "%<<") (repeat 0 (ref symbol-set-member)) (token ">>")))
+      (seq (token "%<") (repeat 0 (ref symbol-set-member)) (token ">")))
 
     (rule symbol-set-member
       (external "symbol-set-mode lit-atom or lit-symbol"))
@@ -1183,7 +1189,7 @@ List syntax_grammar(void) => %(grammar
       (external "signature-directed argument sequence; contract M1"))
 
     (rule decorator
-      (external "visible decorator invocation followed by its target; M3"))
+      (external "visible decorator invocation followed by its target; returned zero-argument Decorators continue onto their next target; M3"))
 
     (rule quotation
       (seq
@@ -1234,6 +1240,7 @@ List syntax_grammar(void) => %(grammar
         (token "Unit")
         (token "Function")
         (token "NamedType")
+        (token "Macro")
         (token "Type")
         (token "Decl")
         (token "DeclaratorRow")

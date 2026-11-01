@@ -1,4 +1,4 @@
-"""Compiler-backed completion, symbols, navigation, and lexical tokens."""
+"""Compiler-backed completion, symbols, and navigation."""
 from pathlib import Path
 import sys
 import tempfile
@@ -26,19 +26,6 @@ def selected(text, source_range):
     return line[first["character"] * 2:last["character"] * 2].decode("utf-16-le")
 
 
-def decoded(data):
-    line, column = 0, 0
-    result = []
-    assert len(data) % 5 == 0, data
-    for at in range(0, len(data), 5):
-        delta_line, delta_column, length, kind, modifiers = data[at:at + 5]
-        line += delta_line
-        column = delta_column if delta_line else column + delta_column
-        assert length > 0 and modifiers == 0
-        result.append((line, column, length, kind))
-    return result
-
-
 root = Path(sys.argv[1]).resolve()
 with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
     directory = Path(temporary).resolve()
@@ -58,6 +45,8 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         '[target.app]\nsources = ["main.x", "other.x"]\n')
     client = Client(root, directory, [])
     try:
+        # Leave coloring to the editor's richer syntax grammar.
+        assert "semanticTokensProvider" not in client.capabilities, client.capabilities
         for source, text in ((main, main_text), (other, other_text)):
             client.opened(source, text)
             assert client.diagnostics() == []
@@ -128,6 +117,19 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         for row in symbols:
             assert selected(named, row["selectionRange"]) == row["name"], row
 
+        members = ("typedef struct CompletionProbe { int field_value; int other; } CompletionProbe;\n"
+                   "int read_members(CompletionProbe value,CompletionProbe *pointer) { "
+                   "/*\U0001f642*/ return value.field_value + pointer->field_value; }\n")
+        client.opened(main, members)
+        assert client.diagnostics() == []
+        for needle, inside in (("value.field_value", len("value.fi")),
+                               ("pointer->field_value", len("pointer->fi"))):
+            items = query(client, "completion", main, members, needle, inside)["result"]
+            assert [item["label"] for item in items] == ["field_value"], items
+            item = items[0]
+            assert item["kind"] == 5 and item["textEdit"]["newText"] == "field_value", item
+            assert selected(members, item["textEdit"]["range"]) == "field_value", item
+
         # Source positions remain physical UTF-16 positions across CRLF and
         # supplementary characters, including declarations with shadowed names.
         positioned = ("/*\U0001f642*/ typedef int Item;\r\n"
@@ -154,22 +156,6 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-features-") as temporary:
         workspace = client.request("workspace/symbol", {"query": "member_function"})["result"]
         assert len(workspace) == 1 and workspace[0]["location"]["uri"] == member.as_uri(), workspace
 
-        lexical = "/* a\r\n\U0001f642z */\r\nint value=12; //tail\r"
-        client.opened(main, lexical)
-        assert client.diagnostics() == []
-        tokens = client.request("textDocument/semanticTokens/full", {
-            "textDocument": {"uri": main.as_uri()}})["result"]["data"]
-        assert decoded(tokens) == [(0, 0, 4, 0), (1, 0, 6, 0),
-            (2, 0, 3, 3), (2, 4, 5, 5), (2, 9, 1, 4),
-            (2, 10, 2, 2), (2, 12, 1, 4), (2, 14, 6, 0)], decoded(tokens)
-        for text, first in (("//tail\r\nint value;\r\n", (0, 0, 6, 0)),
-                            ("#define X 1\r\nint value;\r\n", (0, 0, 11, 6))):
-            client.opened(main, text)
-            assert client.diagnostics() == []
-            data = client.request("textDocument/semanticTokens/full", {
-                "textDocument": {"uri": main.as_uri()}})["result"]["data"]
-            rows = decoded(data)
-            assert rows[0] == first and rows[1] == (1, 0, 3, 3), rows
     finally:
         client.close()
 with tempfile.TemporaryDirectory(prefix="x2c-lsp-dependencies-") as temporary:
@@ -218,4 +204,30 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-type-scope-") as temporary:
         assert len(references) == 2, references
     finally:
         client.close()
-print("language server completion, symbols, references, rename, and tokens passed")
+with tempfile.TemporaryDirectory(prefix="x2c-lsp-script-") as temporary:
+    directory = Path(temporary).resolve()
+    script = directory / "tool.x"
+    script_text = "#!/usr/bin/env x2c\nint answer(void) { return 42; }\n"
+    script.write_text(script_text)
+    client = Client(root, directory, ["translate", str(script)])
+    client.opened(script, script_text)
+    assert client.diagnostics() == []
+    # A save without text keeps the script's own first line as the overlay;
+    # compiler ranges still convert through the text the compiler read.
+    hover = query(client, "hover", script, script_text, "answer")["result"]
+    assert selected(script_text, hover["range"]) == "answer", hover
+    client.send("textDocument/didSave",
+                {"textDocument": {"uri": script.as_uri()}})
+    assert client.diagnostics() == []
+    hover = query(client, "hover", script, script_text, "answer")["result"]
+    assert selected(script_text, hover["range"]) == "answer", hover
+    # One write queues the change before exit, so no idle point publishes it.
+    client.process.stdin.write(client.frame("textDocument/didChange", {
+        "textDocument": {"uri": script.as_uri(), "version": 2},
+        "contentChanges": [{"text": "int value(\n"}]}) + client.frame("exit"))
+    client.process.stdin.close()
+    remaining = client.process.stdout.read()
+    assert client.process.wait(timeout=20) == 1
+    assert b"publishDiagnostics" not in remaining, remaining
+print("language server completion, symbols, references, rename, scripts, "
+      "and exit passed")

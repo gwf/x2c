@@ -288,6 +288,8 @@ static void _store(Walk &w, Var target, Var value) {
     return;
   }
   Symbol sink = _sink_of(base, through, object);
+  // Protocol indexing retains; a native field or pointer store may borrow.
+  if (sink == <heap> && !(_unwrap(target) ~= %(getindex *))) sink = <raw>;
   _flow(w, value, type, sink, object);
 }
 
@@ -416,7 +418,8 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
     Type type = NULL, holder_type = NULL;
     Var argument = _passed(types, arguments, index, type);
     if (target == <static>) _flow(w, argument, type, <static>, NULL);
-    else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
+    else if (target == <unknown>) _flow(w, argument, type, <raw>, NULL);
+    else if (target == <retained>) _flow(w, argument, type, <heap>, NULL);
     else if (target == <result>) {
       int born = 0;
       Region other = NULL;
@@ -427,13 +430,14 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
         .acquired = acquired};
       _flow(w, argument, type, <heap>, &result);
     }
-    else if (target ~= %(param ?other)) {
+    else if (target ~= %((!or param raw) ?other)) {
       if (other.int() >= count) continue;
       Var holder = _passed(types, arguments, other.int(), holder_type);
       int through = 1;
       Fact base = _base(w, _address_of(holder), through), object = NULL;
       if (!base) base = _fact_of(w, holder, NULL);
       Symbol sink = _sink_of(base, through, object);
+      if (sink == <heap> && target.car() == <raw>) sink = <raw>;
       _flow(w, argument, type, sink, object);
     }
   }

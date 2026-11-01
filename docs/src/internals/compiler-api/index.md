@@ -51,13 +51,14 @@ Functions and types exposed by each compiler module.
 | [`src/components/dynamic-operators.x`](dynamic-operators.md) | dynamic operators. |
 | [`src/components/interpolation.x`](interpolation.md) | interpolated Strings. |
 | [`src/components/lambda-functions.x`](lambda-functions.md) | lambda lowering. |
+| [`src/components/macro-mapping.x`](macro-mapping.md) | maps a source macro over compile-time rows. |
 | [`src/components/pattern-match.x`](pattern-match.md) | match statements. |
 | [`src/components/printf-format.x`](printf-format.md) | Var values in printf-family formats. |
 | [`src/components/protocol-adapters.x`](protocol-adapters.md) | protocol adapters and Var descriptors. |
 | [`src/components/raise.x`](raise.md) | raise. |
 | [`src/components/string-switch.x`](string-switch.md) | switches on a String. |
 | [`src/components/try-catch.x`](try-catch.md) | try, catch, and finally. |
-| [`src/cpp/cpp.x`](cpp.md) | the C preprocessing x2c performs before parsing. |
+| [`src/cpp/cpp.x`](cpp.md) | optional preprocessing for existing C compatibility. |
 | [`src/emit/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
 | [`src/expressions/expressions.x`](expressions.md) | expression syntax and its resolution. |
 | [`src/generate/generate.x`](generate.md) | the generated header and source of one unit. |

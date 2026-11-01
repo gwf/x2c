@@ -349,7 +349,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _148 = Symbol_var(3313778);
   _149 = Symbol_var(26720);
   _150 = String_new("symbol-set entries must be literal Symbols");
-  _151 = String_new("use %<<foo bar>>");
+  _151 = String_new("use %<foo bar>");
   _152 = String_var(_151);
   _153 = cons(_152, NULL);
   _154 = Symbol_var(213092);
@@ -917,7 +917,7 @@ static List f9_quotation____pattern_content(Compiler c, List node){
         Var value;  value = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(value));
       }
       break;}} case 9224497936767982090ULL :{List _x2c_gensym_match_at_67, _x2c_gensym_match_at_68; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497936767982090ULL &&(_x2c_gensym_match_at_67 = _x2c_gensym_match_expr_11 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_67 ->car, 1) && !(_x2c_gensym_match_at_68 = _x2c_gensym_match_at_67 ->cdr)){{
-        Var id;  id = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/literals/quotation.x",.function = "f9_quotation____pattern_content",.line = 444}; & _x2c_gensym_error_site_0; }))))));
+        Var id;  id = x2c_match_value_0;  return f9_quotation____pattern_content(c, Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/literals/quotation.x",.function = "f9_quotation____pattern_content",.line = 436}; & _x2c_gensym_error_site_0; }))))));
       }
       break;}} case 9224497936761663588ULL :{List _x2c_gensym_match_at_67, _x2c_gensym_match_at_68; Var x2c_match_value_0; if(_x2c_gensym_match_expr_11 && _x2c_gensym_match_expr_11 ->car.u64 == 9224497936761663588ULL &&(_x2c_gensym_match_at_67 = _x2c_gensym_match_expr_11 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_67 ->car, 1) && !(_x2c_gensym_match_at_68 = _x2c_gensym_match_at_67 ->cdr)){{
         Var value;
@@ -1149,14 +1149,14 @@ List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
 
 List Compiler_parse_symbol_set_literal(Compiler c){
   if(! _init_guard_) _file_init_();
-  Compiler_expect(c, 1227897);
+  Compiler_expect(c, 9593);
   Array symbols = Array_new(), tokens = Array_new();
-  while(Compiler_peek(c, 0) != 15997){
+  while(Compiler_peek(c, 0) != 125){
     Array_push(symbols, Symbol_var(f11_collections____member_symbol(c)));
     Array_push(tokens, Token_var(c -> token));
     Compiler_next(c);
   }
-  Compiler_expect(c, 15997);
+  Compiler_expect(c, 125);
   int duplicate = - 1;
   List set = Compiler_symbol_set_expression(c, Array_list(symbols), &(duplicate));
   if(duplicate >= 0){
@@ -1259,7 +1259,7 @@ static int f11_collections____duplicate_index(List values){
 
 static List f11_collections____set_expression(Array symbols){
   {
-    Scope_retain();
+    Scope_open();
     {
       {
         X2CCleanup _x2c_gensym_defer_record_7 ={
@@ -1636,6 +1636,6 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
-  Scope_release();
+  Scope_close();
 }
 

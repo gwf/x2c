@@ -4,6 +4,11 @@ This module walks sources and includes in source order to collect visible
 declarations. Cold walks, process-cache replay, and stored .xi interfaces
 preserve the same ordering.
 
+C macro expansion and macro-export replay run only for optional `--cpp`
+translation or an explicit native REPL request. Ordinary collection keeps
+directive text without constructing the expansion tables. Module and meta
+discovery use authored syntax, including literal member paths.
+
 Start with `collect.x` and `walk.x`, then read `cache.x` and `interfaces.x`.
 Use `splice.x` for module files and `packages.x` for package imports.
 

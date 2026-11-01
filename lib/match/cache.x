@@ -96,10 +96,30 @@ static typedef struct MatchContextState {
   struct MatchContextState *prev, MatchCache cache;
 } *MatchContextState;
 
-static threaded struct {
+static typedef struct MatchThreadState {
   MatchCache plan_cache;
   MatchContextState context_top;
-} match_thread;
+} *MatchThreadState;
+
+static threaded struct MatchThreadState match_thread;
+
+/** Allocates empty lazy cache bindings for one independent execution. */
+void *x2c_match_execution_new(void) {
+  MatchThreadState saved = calloc(1, sizeof(struct MatchThreadState));
+  if (!saved) raise %(alloc-fail);
+  return saved;
+}
+
+/** Exchanges bindings without copying caches, Context records, or leases. */
+void x2c_match_execution_swap(void *backing) {
+  MatchThreadState saved = backing;
+  struct MatchThreadState previous = match_thread;
+  match_thread = *saved;
+  *saved = previous;
+}
+
+/** Releases backing after the execution disposed its installed caches. */
+void x2c_match_execution_free(void *backing) { free(backing); }
 
 /** Matches through `cache` into caller-owned positional storage.
     Returns 1 only after atomically committing a valid buffer. A miss,
@@ -540,8 +560,6 @@ static void _unlink(MatchCache cache, int slot) {
   if (cache.lru_head == slot)
     cache.lru_head = entry.lru_next == slot ? -1 : entry.lru_next;
 }
-
-
 
 /* Pins `slot` for `lease`, which records the entry's generation. */
 static void _activate(MatchCache m, int slot, MatchLease &lease) {

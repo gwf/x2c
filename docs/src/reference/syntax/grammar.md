@@ -36,14 +36,16 @@ uses `Compiler.script_statement_starts`, `_declaration_stays`, and
 `defines_main`, defined in `src/parse/units.x`. File-level functions cannot refer
 to script locals.
 
-Module blocks are expanded by `src/collect/collect.x` before `translation-unit`
-parsing. `module-block` is spliced before parsing and is not a `unit-item`. It
-contains quoted member paths, separated by commas, with an optional trailing
-comma. Members are inserted in order from the containing file's companion
-directory, `NAME/` beside `NAME.x`; each path must resolve inside it. Nested
-module blocks are expanded too. Each file permits one file-scope block and
-must use default symbol collection. CPP and live-symbol modes do not support
-member splicing. The `module` storage class is described in D4.
+Module blocks are expanded by `src/collect/splice.x` before
+`translation-unit` parsing. `module-block` is spliced before parsing and is
+not a `unit-item`. It contains quoted member paths, separated by commas, with
+an optional trailing comma. Members are inserted in order. Each path is
+relative to the file that holds the block. Members may be siblings,
+descendants, or files elsewhere; no same-named companion directory is
+required. Nested module blocks are expanded too. Each file permits one
+file-scope block and must use default symbol collection: `--cpp-symbols`,
+`--live-symbols`, and the `--dump-cpp` modes reject a module unit. The
+`module` storage class is described in D4.
 
 ## Declaration contracts
 
@@ -192,7 +194,7 @@ From lowest to highest:
 | Binary 3 | `\|` | Left |
 | Binary 4 | `^` | Left |
 | Binary 5 | `&` | Left |
-| Binary 6 | `== != === !==` | Left |
+| Binary 6 | `== != === !== ~=` | Left |
 | Binary 7 | `< <= > >= in is` (`is not` included) | Left |
 | Binary 8 | `<< >>` | Left |
 | Binary 9 | `+ -` | Left |
@@ -349,6 +351,7 @@ After a `Decl` argument, `in` may replace the separating comma, which is how
 | `MatchRow` | One match arm |
 | `Unit` | Top-level item |
 | `Function` | Function definition |
+| `Macro` | Macro definition or compile-time Macro value |
 | `Catch`, `Captures` | Structured template sequence positions; not generic invocation arguments |
 
 Result/argument kind spellings are case-insensitive; EBNF lists their usual
@@ -367,7 +370,7 @@ comma list instead. Anonymous open arrow statements omit that terminator.
 
 A global definition uses a `$` name; a named local definition omits `$`; an
 anonymous macro expression omits the name. An Expression result, or
-expression-target Decorator, requires an arrow expression body. A Stmt result
+expression-target or Macro-target Decorator, requires an arrow producer body. A Stmt result
 uses a braced block-item template or an arrow statement (a Stmt
 macro/decorator invocation or an expression statement). Other results use a
 braced category-specific sequence, optionally preceded by `=>`.  A named
@@ -382,15 +385,19 @@ A braced template can begin with `using` lines terminated by semicolons.
 `using $name` declares fresh names; `using name` retains a file-level binding.
 `body-using` describes those leading lines.
 A signature can also have a `using` clause. Sequence parameters must be last.
-Local definitions cannot produce Unit/Declaration results or decorate
+Named local definitions cannot produce Unit/Declaration results or decorate
 Function/Unit/NamedType targets. These restrictions are enforced by
 `Definition` in `src/macros/macros.x`.
+Anonymous Macro values may carry any code-producing result kind; insertion
+still requires a compatible position. Nested definitions can refer to
+enclosing template holes, and their own holes shadow same-spelled outer holes.
 
 ### M3. Decorators
 
 The first signature parameter is the target; invocation arguments supply the
 remaining parameters and the following source supplies the target category.
-Targets can be Expr, Stmt, Field, Unit, Function, or NamedType. An identifier
+Targets can be Expr, Stmt, Field, Unit, Function, NamedType, or Macro. A Macro
+target reads one definition or compile-time Macro value. An identifier
 alias omits parentheses when there are no ordinary arguments; a `$` invocation
 still has its argument parentheses. Unit/Function/NamedType decorators
 therefore extend file scope as well as block/expression positions. Indentation
@@ -401,7 +408,17 @@ must not end with a semicolon. At file scope, a `Stmt` decorator applied to a
 function definition captures and decorates the function body. This adaptation
 does not permit arbitrary Unit targets for `Stmt` decorators. A naked
 file-scope `@` is rejected. Target placement and alias shadowing follow
-`try_parse_macro_target_at`, .
+`try_parse_macro_target_at`.
+
+A producer that returns a Decorator with no explicit parameters continues by
+reading that decorator's following target. The final result selects placement.
+Expression producers construct a Decorator literal or call a meta function
+declared `Macro`; Macro-target producers use an arrow body and preserve the
+captured generator's result kind when inserting code. Publishing a named
+Decorator does not apply it. A braced anonymous Macro target ends at its
+closing brace without another semicolon. `expand` uses these rules to capture
+an Expr List, then a Macro, and map its rows. See
+[mapping rows](../language.md#mapping-rows-with-expand).
 
 ### M4. Quotations
 

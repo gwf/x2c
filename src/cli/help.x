@@ -52,22 +52,22 @@ static HelpPage help_pages[] = {
       target."),
     "Read additional arguments from a response file", "End option parsing",
     $dedent(%"
-      Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
-      required platform libraries automatically. Directory operands and
-      unexpanded wildcard operands are rejected.
-      Direct builds default to a.out, lib<first-input-stem>.a, or
-      <first-input-stem>.so. Compile-only builds default to <stem>.o in the
-      current directory; a named build directory keeps multiple objects there.
-      Manifest products default to <project>/.x2c-build/<target-product>.
-      One manifest target is selected automatically; several need --target
-      or project.default-target. Profiles apply only when selected.
-      Direct intermediates are temporary. --save-temps retains and reuses them
-      in .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.
-      The last named directory wins. Under Make, jobs default to one;
-      otherwise they default to the online processor count.
-      --debug logs compiler activity; -g emits native debug information.
-      Source mapping is on by default; -g -O0 debugs original x2c sources.
-      --no-source-map uses generated C locations.") },
+    Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
+    required platform libraries automatically. Directory operands and
+    unexpanded wildcard operands are rejected.
+    Direct builds default to a.out, lib<first-input-stem>.a, or
+    <first-input-stem>.so. Compile-only builds default to <stem>.o in the
+    current directory; a named build directory keeps multiple objects there.
+    Manifest products default to <project>/.x2c-build/<target-product>.
+    One manifest target is selected automatically; several need --target
+    or project.default-target. Profiles apply only when selected.
+    Direct intermediates are temporary. --save-temps retains and reuses them
+    in .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.
+    The last named directory wins. Under Make, jobs default to one;
+    otherwise they default to the online processor count.
+    --debug logs compiler activity; -g emits native debug information.
+    Source mapping is on by default; -g -O0 debugs original x2c sources.
+    --no-source-map uses generated C locations.") },
   { <run>,
     $dedent(%"
       Usage:
@@ -174,11 +174,12 @@ module void _help_exit(Symbol command, int status) {
 
 static void _print_help_usage(void) {
   puts(
-    "Usage:\n"
-    "  x2c help [command]\n"
-    "\n"
-    "Show top-level help, or help for translate, build, run, new, script, "
-    "repl,\nenv, install, remove, or list.");
+    $dedent(%"
+    Usage:
+      x2c help [command]
+
+    Show top-level help, or help for translate, build, run, new, script, repl,
+    env, install, remove, or list."));
 }
 
 static void _print_top_help(void) {

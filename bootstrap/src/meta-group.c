@@ -198,7 +198,7 @@ static Scope f7_staging___session_meta_scope;
 _x2c_gensym_initializer_choice_A2A5DA8E_6((f7_staging___session_meta_scope = NULL))
 static String f7_staging____stage(Compiler c, String * failure);
 
-static String f7_staging____module(Compiler c, List declarations, Func prepare, String * failure);
+static String f7_staging____module(Compiler c, String * failure);
 
 static String f7_staging____build_module(String directory, String module, List code);
 
@@ -1608,10 +1608,10 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1333 = String_new("/");
   _1334 = String_new(".c");
   _1335 = String_new("native modules are unavailable");
-  _1336 = String_new("x2c_module_reset");
-  _1337 = String_new("native modules need a cache directory and a known compiler");
-  _1338 = String_new("group");
-  _1339 = String_new("");
+  _1336 = String_new("group");
+  _1337 = String_new("");
+  _1338 = String_new("x2c_module_reset");
+  _1339 = String_new("native modules need a cache directory and a known compiler");
   _1340 = String_new("\n");
   _1341 = String_new("/meta/");
   _1342 = String_new("/group.module");
@@ -2655,7 +2655,7 @@ static void f9_selection____check_runtime_meta_calls(Compiler c, Var root){
                 {
                   Var _x2c_gensym_match_value_5 = origin;
                   {
-                    int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-group/selection.x",.function = "f9_selection____check_runtime_meta_calls",.line = 149}; & _x2c_gensym_error_site_0; })));
+                    int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_5, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-group/selection.x",.function = "f9_selection____check_runtime_meta_calls",.line = 147}; & _x2c_gensym_error_site_0; })));
                     {
                       {
                         int * _x2c_gensym_macro_address_0 = & c -> origin;
@@ -3997,17 +3997,16 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site){
   if(!(Map_contains(c -> meta_group_bound, String_var(name)))) Compiler_refuse_meta_call(c, name, site, Compiler_meta_call_missing(c, name));
 }
 
-Map Compiler_native_module_targets(String);
+List Compiler_emit_session_function(Compiler c, List declarations, Func prepare, String * failure){
+  if(! _init_guard_) _file_init_();
+  (* failure) = Compiler_groups_meta(c) ? NULL : _1335;
+  if(String_truth((* failure))) return NULL;
+  return _emit_prepared(c, Compiler_module_stamp(), _1336, _1337, declarations, prepare, &((* failure)));
+}
 
 String Compiler_load_native_module(String);
 
-Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare, String * failure){
-  if(! _init_guard_) _file_init_();
-  (* failure) = Compiler_groups_meta(c) ? NULL : _1335;
-  String module = String_truth((* failure)) ? NULL : f7_staging____module(c, declarations, prepare, &((* failure)));
-  if(! String_truth(module)) return NULL;
-  return Compiler_native_module_targets(Compiler_load_native_module(module));
-}
+Map Compiler_native_module_targets(String);
 
 int Compiler_native_meta_accepts(Compiler, Var, List);
 
@@ -4017,7 +4016,7 @@ MetaBindings Compiler_bindings(Compiler);
 
 static String f7_staging____stage(Compiler c, String * failure){
   (* failure) = Compiler_groups_meta(c) ? _unbound(c) : _1335;
-  String module = String_truth((* failure)) ? NULL : f7_staging____module(c, NULL, NULL, &((* failure)));
+  String module = String_truth((* failure)) ? NULL : f7_staging____module(c, &((* failure)));
   if(! String_truth(module)) return NULL;
   module = Compiler_load_native_module(module);
   Map targets = Compiler_native_module_targets(module);
@@ -4033,7 +4032,7 @@ static String f7_staging____stage(Compiler c, String * failure){
           ;
           x2c_cleanup_push(& _x2c_gensym_defer_record_6);
           {
-            Func_apply((Var_pointer(Map_getindex(targets, String_var(_1336)))), 0, NULL);
+            Func_apply((Var_pointer(Map_getindex(targets, String_var(_1338)))), 0, NULL);
           }
           x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
         }
@@ -4086,13 +4085,13 @@ return module;
 
 String String_sha256(String);
 
-static String f7_staging____module(Compiler c, List declarations, Func prepare, String * failure){
+static String f7_staging____module(Compiler c, String * failure){
   String root = Compiler_cache_root(), stamp = Compiler_module_stamp();
   if(! String_truth(root) || ! String_truth(stamp)){
-    (* failure) = _1337;
+    (* failure) = _1339;
     return NULL;
   }
-  List code = _emit_prepared(c, stamp, _1338, _1339, declarations, prepare, &((* failure)));
+  List code = _emit(c, stamp, _1336, _1337, &((* failure)));
   if(! List_truth(code)) return NULL;
   List _x2c_gensym_destructure_4 = code;
   String hfile = Var_as_string(List_getindex(_x2c_gensym_destructure_4, 0));

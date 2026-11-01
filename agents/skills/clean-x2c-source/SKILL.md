@@ -46,8 +46,9 @@ Apply CM and FI-2 from the standard. Findings start at a comment's first
 line. To rank files for a comment audit, count findings per file:
 
 ```sh
-builds/0/x2c lint --all src/*.x lib/*.x | cut -d: -f1 | sort | uniq -c |
-  sort -rn | head
+builds/0/x2c lint --all $(tools/sources.sh --area src) \
+  $(tools/sources.sh --area lib | grep -v '^lib/x2c.x$') |
+  cut -d: -f1 | sort | uniq -c | sort -rn | head
 ```
 
 For each leading file, read the comment with its code. Apply CM-1 to CM-8,

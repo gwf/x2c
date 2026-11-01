@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "current_run": "20261031T211435Z",
+  "runs": [
+    {
+      "run_id": "20261031T011256Z",
+      "path": "20261031T011256Z",
+      "publication_revision": "f6cecde7189eeaba665195dacaf27ac16155a4fe",
+      "measured_revision": "e3d702f6de179115cc241c7a9d7d1782dcfaf95d",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "optimized",
+        "python"
+      ],
+      "summary_problem_count": 10,
+      "sample_recovery": "480 compact sample records recovered from committed baseline/current reports; original full JSONL and original build/check receipts unavailable",
+      "historical_source_metric_issue": true
+    },
+    {
+      "run_id": "20261031T024309Z",
+      "path": "20261031T024309Z",
+      "publication_revision": "af87abd76977b6cb7024dd449cb5e57494061b23",
+      "measured_revision": "10ef5112652291ef35ad7bac6820de040c20ccfd",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T031704Z",
+      "path": "20261031T031704Z",
+      "publication_revision": "0a7dbe5f1bd6a8b2b5640251df93d0d086d845f0",
+      "measured_revision": "ba99bc1b4c7e4edc4d765070434d672b51afd711",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T035446Z",
+      "path": "20261031T035446Z",
+      "publication_revision": "f19fdc43acceebfe74b657526f2f03e559866e30",
+      "measured_revision": "68156a1c6b9df92cdcd720aa4cc9735fff2831cf",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T134323Z",
+      "path": "20261031T134323Z",
+      "publication_revision": "427ee5b3c4176f4bc2dec90fae149bcc68279ea3",
+      "measured_revision": "d7c7787c7d1c608f86730b1ba5be3f22722c0299",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T145604Z",
+      "path": "20261031T145604Z",
+      "publication_revision": "9d070d9a0cf2c13dbebf339f4c708fcbd7354439",
+      "measured_revision": "e44721497e0004c921ccacec098f330bd2248726",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T161720Z",
+      "path": "20261031T161720Z",
+      "publication_revision": "d30286d20c4cd89c65d5d68f1bff8efe639e53df",
+      "measured_revision": "a8d02959e25f6517cdcf189d386c637f587f016e",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T170749Z",
+      "path": "20261031T170749Z",
+      "publication_revision": "4b881e60fd9c4492cea9947a57d072d18e04b5ef",
+      "measured_revision": "06a81d6535120d6c0c07e320751548075c5d3fc1",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 9,
+      "sample_recovery": "original full calibration JSONL and receipts, compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T181939Z",
+      "path": "20261031T181939Z",
+      "publication_revision": "246938ba64124426a4e9dee6aa09e632582994f3",
+      "report_revision": "246938ba64124426a4e9dee6aa09e632582994f3",
+      "measured_revision": "381673a8d6d51098a44f62a635db98c0c9ca927e",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 8,
+      "sample_recovery": "original full calibration JSONL and receipts compressed without changing bytes",
+      "historical_source_metric_issue": false
+    },
+    {
+      "run_id": "20261031T211435Z",
+      "path": "20261031T211435Z",
+      "publication_revision": "9c8fbbe8bc2976c1e85db7e6259a847e91671374",
+      "report_revision": "9c8fbbe8bc2976c1e85db7e6259a847e91671374",
+      "measured_revision": "3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a",
+      "implementations": [
+        "c",
+        "idiomatic",
+        "tuned",
+        "python",
+        "rust",
+        "cpp",
+        "go",
+        "java"
+      ],
+      "summary_problem_count": 8,
+      "sample_recovery": "original full calibration JSONL and receipts compressed without changing bytes",
+      "historical_source_metric_issue": false
+    }
+  ]
+}

@@ -17,6 +17,10 @@ cp "$tests/src/doc-tier.x" "$work/lib/scan.x"
 printf '// caf\303\251\n' >"$work/ascii.x"
 # Formatting input that the fixtures would otherwise have to hold.
 printf '/* spacing.x */\nint add(int a,int b) {\n  int total = a + b ;\n\n\n  if(total) return total;\n  for (;;) break;\n  return 0;\n}\n' >"$work/spacing.x"
+# A member's fix is proven through the translation of its entry.
+printf 'module {\n  "part.x",\n}\nint entry(void) => found("x");\n' \
+  >"$work/entry.x"
+printf 'int found(String text) => text.contains("x");\n' >"$work/part.x"
 
 # Generate exact metric boundaries without storing padding in the fixtures.
 for lines in 1500 1501; do
@@ -119,11 +123,18 @@ run() {
   echo "# compound managed declarations"
   run --rule compound-auto "$tests/src/compound-auto.x" \
     "$tests/src/compound-auto-indent.x"
+  echo "# module members written after a C macro"
+  run --rule forward-declaration --rule negated-is \
+    --rule subject-parameter-name --rule restates-name \
+    "$tests/src/macro-prefix.x"
+  echo "# a module member's fixes"
+  (cd "$work" && run --rule contains-in --fix entry.x)
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
 diff -u "$tests/fixed/contains-indent.x" "$work/contains-indent.x"
 cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
+grep -q '=> "x" in text;' "$work/part.x"
 
 # The violation census includes zero-count rules from the current catalog.
 "$tool" --rules >"$work/rules"
@@ -225,7 +236,7 @@ builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
 "$tool" --all "$tests/src/style.x" >"$work/direct"
 cmp "$work/direct" "$work/dispatched"
 
-builds/0/x2c help lint >"$work/help" 2>&1
+builds/0/x2c help lint >"$work/help"
 grep -q '^usage: x2c-lint ' "$work/help"
 
 # The driver exposes the same binding-aware lifetime rule.

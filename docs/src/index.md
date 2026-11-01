@@ -44,7 +44,7 @@ x2c adds these features to C:
   reverse-mode derivative functions with decorators.
 - `import` brings packages into a local namespace, including wrapped C
   libraries and their x2c and Lisp bindings.
-- `Lisp` evaluates code inside a running program, for DSLs and the REPL.
+- `Lisp` evaluates code inside a running program, for DSLs and configuration.
   Compile-time code, by contrast, is ordinary x2c.
 
 A program can use one feature and keep the rest in C.

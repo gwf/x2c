@@ -646,10 +646,9 @@ static int _percent_tokens(Tokenizer t){
     return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
   }
   if(! strchr("([{<\"", next)) return 0;
-  int quoted = next == '"' || next == '[' ||(next == '<' && text[2] == '<');
+  int quoted = next == '"' || next == '[';
   if(! quoted && _percent_is_operator(t)) return _operator(t, 1);
-  if(next == '<' && text[2] != '<') return Tokenizer_error(t);
-  return _operator(t, next == '<' ? 3 : 2);
+  return _operator(t, 2);
 }
 
 int scan_symbol_literal(char *);
@@ -825,7 +824,7 @@ int scan_symbol_set_atom(char *);
 
 static int _symbol_set_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
-  if(text[0] == '>' && text[1] == '>') return _operator(t, 2);
+  if(text[0] == '>') return _operator(t, 1);
   if(text[0] == '$' || text[0] == '@') return _operator(t, 1);
   if(text[0] == '<'){
     int length = scan_symbol_literal(text);
@@ -893,7 +892,7 @@ static int _operator(Tokenizer t, int len){
       break;
       case 9553 : push = 806120;
       break;
-      case 1227897 : push = 1392880402798952;
+      case 9593 : push = 1392880402798952;
       break;
       case 9541 : push = 1318210446;
       break;
@@ -925,7 +924,7 @@ static int _operator(Tokenizer t, int len){
       break;
     }
     break;
-    case 1392880402798952 : if(op == 15997) pop = 1;
+    case 1392880402798952 : if(op == 125) pop = 1;
     break;
     case 1318210446 : switch(op){
       case 9463 : push = 3945159;
@@ -1127,7 +1126,7 @@ static _Layout _layout_open(Tokenizer t){
 static void * _layout_alloc(size_t count, size_t size){
   void * storage = calloc(count, size);
   if(! storage){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 698,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 697,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
     __builtin_unreachable();
   }
@@ -1415,11 +1414,11 @@ static inline int _x2c_gensym_proto_tokenizer_equal_0(Var a0, Var a1){
   return Tokenizer_equal(Var_tokenizer(a0), Var_tokenizer(a1));
 }
 
-void Buffer_free(Buffer);
+void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 void RenderPath_leave(RenderPath *);
@@ -1431,7 +1430,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

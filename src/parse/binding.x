@@ -21,8 +21,7 @@ static struct Token source_clauses[] = {
 /** Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
     cursor through the same binders as constructed syntax.
 */
-List Compiler.bind_source_statement(Compiler c) {
-  Symbol keyword = c.peek(0);
+List Compiler.bind_source_statement(Compiler c, Symbol keyword) {
   c.next();
   switch (keyword) {
     case <if>:

@@ -10,7 +10,7 @@ and validating runtime behaviour. The AST fragments below are illustrative.
 ### 1.1 Var, Symbol, List Basics
 
 `car()` returns a `Var`, which supports direct comparison with a `Symbol`.
-For example, `src/generate/generate.x` tests `declaration.car() == <declare>`.
+For example, `src/macros/templates.x` tests `node.car() == <declare>`.
 
 ```x2c
 #include "list-selectors.x"
@@ -153,13 +153,17 @@ nothing.
 `bin/x2c` takes its compiler logic from the checked-in C under `bootstrap/`,
 which is never hand-edited, so a probe added to `src/` does not reach it at
 all. To probe compiler logic, build a stage-0 compiler on a tree **without**
-the change, then run `./builds/0/x2c` against a tree **with** it:
+the change, then run its `builds/0/x2c` against a tree **with** it. Build
+the probe compiler in a separate worktree, or set the change aside in a WIP
+commit. Do not use `git stash`: every worktree shares one stash, so another
+session can pop your entry.
 
 ```sh
-git stash push -u -m probe-aside   # or copy the changed files aside
-make build                         # builds/0/x2c now carries the probe
-git stash pop                      # restore the change
-./builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var/var.x
+git worktree add /tmp/probe-tree HEAD   # a detached tree without the change
+# add the probe under /tmp/probe-tree/src/, then build its stage 0
+make -C /tmp/probe-tree build-safe
+/tmp/probe-tree/builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var/var.x
+git worktree remove -f /tmp/probe-tree
 ```
 
 The same asymmetry explains a diagnostic that looks less informative than the

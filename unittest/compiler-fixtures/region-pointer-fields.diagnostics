@@ -1,0 +1,15 @@
+unittest/compiler-fixtures/region-pointer-fields.x:25:3: region: an address from 'holder' can outlive the local storage it points into when returned
+    return inline_element(&holder);
+    ^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-pointer-fields.x:30:3: region: an address inside 'holder' can outlive the local storage it points into when stored into a static
+    keep(&holder.inline_items[1]);
+    ^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-pointer-fields.x:36:3: region: an address inside 'holder' can outlive the local storage it points into when returned
+    return &holder.items;
+    ^^^^^^
+  note: local storage ends when the function returns
+

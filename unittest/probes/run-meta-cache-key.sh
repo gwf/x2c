@@ -392,4 +392,42 @@ grep -q "store.x:6:3: xform: .*Var, or String operand" out.log ||
 [ "$(grep -c "error\|xform" out.log)" = 1 ] ||
   fail "edited component: $(cat out.log)"
 
+# A body in the helper loop makes mistaken project discovery recursive.
+# Keep each cache cold: an existing support object would hide the deadlock.
+cat >>home/etc/meta-helper.x <<'EOF'
+meta int cache_path_guard_probe(void) => 17;
+EOF
+mkdir cache-path-real
+ln -s cache-path-real cache-path-alias
+python3 - "$BUILD" <<'PYTHON'
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+
+build = Path(sys.argv[1])
+for label, cache in (("absolute", str(build / "cache-path-alias/absolute")),
+                     ("relative", "cache-path-alias/relative/./")):
+    env = {**os.environ, "X2C_CACHE_DIR": cache}
+    env.pop("X2C_HOME", None)
+    log = build / ("cache-path-" + label + ".log")
+    with log.open("wb") as output:
+        child = subprocess.Popen(
+            [str(build / "home/bin/x2c"), "translate", "--out-dir", "installed",
+             "installed/p.x"], cwd=build, env=env, stdout=output,
+            stderr=subprocess.STDOUT, start_new_session=True)
+        try:
+            status = child.wait(timeout=20)
+        except subprocess.TimeoutExpired:
+            raise AssertionError(label + " cache path exceeded its bound") from None
+        finally:
+            if child.poll() is None:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait()
+    assert status == 0, log.read_text()
+    assert "int n = 1;" in (build / "installed/p.c").read_text()
+    assert any(Path(cache).glob("meta/support-*/meta-helper.o")), label
+PYTHON
+
 echo "meta cache key probes passed"

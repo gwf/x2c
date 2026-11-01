@@ -1,4 +1,19 @@
-# Lint reading order
+# Lint
+
+`x2c lint` reports x2c source that departs from this repository's idiom.
+Each finding names a rule code and the rule ID in
+[the code standard](../../agents/x2c-code-standard.md) that owns it;
+`--rules` prints the table. Language rules run by default, `--all` adds the
+style rules, and `--rule CODE` selects rules. Pass module entry files: lint
+checks each member file that an entry splices under the member's own path
+and lines, and proves a member's fixes through its entry's translation. The
+census in `tests/run.sh` lints the entries that `tools/sources.sh` lists, so
+it covers their members.
+
+The command is experimental. It builds in a checkout with `make commands`;
+`make install` and release payloads do not install it.
+
+## Function reading order
 
 `function-reading-order` is an optional FI-4 style candidate. Select it
 explicitly after building the lint command:
@@ -18,7 +33,7 @@ Normal lint selections and the existing corpus census retain their behavior.
 Findings keep lint's zero exit status; unreadable or unparseable inputs retain
 lint's nonzero status. This candidate creates no edits, including with --fix.
 
-## Checks
+### Checks
 
 - Public placement: the first public definition after private implementation
   in each ordinary function run.
@@ -36,7 +51,7 @@ have public-first placement. Unrelated ties remain valid. Module definitions
 are private implementation for placement. Thematic group fragmentation is
 outside this candidate's scope.
 
-## Coverage and exceptions
+### Coverage and exceptions
 
 Only mapped ordinary authored definitions enter source-order comparisons.
 Comments and whitespace can separate definitions in one checked run. Other

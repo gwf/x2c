@@ -172,10 +172,9 @@ String Compiler.imported_spelling(Compiler c, String name) {
 List Compiler.imported_providers(Compiler c, String name) {
   if (!name || !c.package_roots.len()) return NULL;
   List packages = %();
-  foreach (String (package, root) in c.package_roots) {
+  foreach (String (package, root) in c.package_roots)
     if (c.sym.get_exact(%("$(package)__$name")))
       packages = cons(package, packages);
-  }
   return packages.sort();
 }
 

@@ -48,6 +48,8 @@ Context Context_open_isolated_named(const char * name);
 
 Context Context_current(void);
 
+Context x2c_context_exchange(Context context);
+
 void Context_cleanup(Context value);
 
 void Context_initialize(void);

@@ -3,11 +3,11 @@
     Copyright (c) 2025 Gary William Flake.
 
     Preprocessor lines stay in the token stream and become `preproc` nodes,
-    so generated C keeps them where they were written. `cpp/cpp.x` expands
-    the visible macros and decides the conditional groups; this module
-    reads the directives that remain: it hides the arms C never takes,
-    marks layout attributes, and records what the directives before each
-    form say about the unit's `#define` names.
+    so generated C keeps them where they were written. Optional CPP expansion
+    decides conditional groups for C compatibility; ordinary source retains
+    narrow handling of literal false and impossible host arms. This module
+    hides those arms, marks layout attributes, and records what preceding
+    directives say about the unit's `#define` names.
 */
 #pragma once
 #include "compiler/compiler.x"
@@ -20,13 +20,13 @@
    become comments; the directives around it stay in place, so emission is
    unchanged. */
 
-/* One scan of a unit's expanded tokens. `open` holds the conditional
+/* One scan of a unit's tokens. `open` holds the conditional
    groups open at the scan, as `(id arm state)` rows. `layout` maps each
    macro whose body can change a struct's layout to 1, or to 2 when the
    body packs. */
 static typedef struct ArmScan {
-  Compiler c, List open, Map layout;
-  int hidden;
+  Compiler c, List open, Map layout, Array stack;
+  int hidden, serial;
 } ArmScan;
 
 /* directive lines
@@ -65,13 +65,15 @@ String Compiler.preproc_marker_file(String text, int &line) {
   return rest[1:close + 1].unescape();
 }
 
-/** Hides the tokens of each arm that `Compiler.expand_macros` decided C
-    never takes, as `c.arm_stacks` records, and marks layout attributes
-    where written or where a macro x2c leaves to C expands to one.
+/** Hides literal false and impossible host arms in ordinary source, or the
+    arms decided by optional CPP expansion. Records conditional groups and
+    marks layout attributes without expanding ordinary source macros.
 */
 void Compiler.scan_conditionals(Compiler c) {
   Map layout = auto {};
-  ArmScan scan = {.c = c, .layout = layout};
+  Array stack = auto (c.arm_stacks == NULL ? Array.new() : NULL);
+  ArmScan scan = {.c = c, .layout = layout, .stack = stack};
+  if (stack != NULL) c.arm_stacks = {};
   c.layout_marks = [];
   c.packed_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -222,6 +224,10 @@ static List _leading_preproc(Compiler c, int located) {
 // conditional branch tracking
 
 static void _directive(ArmScan &s, Token token, size_t i) {
+  if (s.stack != NULL) {
+    _plain_directive(s, token, i);
+    return;
+  }
   Var open;
   if (s.c.arm_stacks.try_get((long) i, open)) {
     s.open = open;
@@ -230,8 +236,59 @@ static void _directive(ArmScan &s, Token token, size_t i) {
   else if (!s.hidden) _note_layout_macro(s, token.text);
 }
 
+/* Ordinary source only hides literal false and impossible host arms. It does
+   not evaluate macro definitions or acquire included macro tables. */
+static void _plain_directive(ArmScan &s, Token token, size_t i) {
+  Symbol kind = Compiler.preproc_conditional_kind(token.text);
+  int conditional = kind == <open> || (kind && s.stack.len());
+  if (kind == <open>)
+    s.stack.push($(++s.serial, 0, _plain_open_state(token.text)));
+  else if (kind == <branch> && s.stack.len()) {
+    Var (id, arm, state) = s.stack[-1];
+    s.stack[-1] = $(id, arm.integer() + 1,
+      state == 1 || state == 3 ? 3 : 0);
+  }
+  else if (kind == <close> && s.stack.len()) s.stack.take_last();
+  else if (!s.hidden) _note_layout_macro(s, token.text);
+  if (!conditional) return;
+  s.open = s.stack;
+  s.c.arm_stacks[(long) i] = s.open;
+  s.hidden = _hidden_group(s.open);
+}
+
+/* State 2 hides the opening arm; state 1 selects it, and state 3 keeps
+   every following alternative hidden after a selected arm. */
+static int _plain_open_state(String text) {
+  String line = _plain_directive_line(Compiler.preproc_directive(text));
+  line = line.replace("defined ( <never> )", "defined <never>");
+  if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
+      line == "if defined <never>" ||
+      (line.startswith("if defined <never> && ") && !(" || " in line)))
+    return 2;
+  return line == "ifndef <never>" || line == "if ! defined <never>";
+}
+
+static String _plain_directive_line(String directive) {
+  Token token = Token.skip_trivia(Compiler.scan_directive(directive));
+  Array words = [];
+  for (; token.type != <eof>; token = Token.skip_trivia(token + 1))
+    words.push(_never_defined(token.text) ? "<never>" : token.text);
+  return " ".join(words.list_free());
+}
+
+static int _never_defined(String name) {
+  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
+#if defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
+#else
+  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
+#endif
+}
+
 static int _hidden_group(List open) {
-  foreach (List group in open) if (group.caddr() == <hidden>) return 1;
+  foreach (List group in open)
+    if (group.caddr() == <hidden> || group.caddr() == 2 ||
+        group.caddr() == 3) return 1;
   return 0;
 }
 
@@ -334,7 +391,7 @@ static void _note_function_macro(Compiler c, String name, Token params) {
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
   Var kind = _macro_prefix(c, after, param);
-  if (kind == %()) c.object_macros[name] = <annotation>;
+  if (kind == %() || kind == <attribute>) c.object_macros[name] = <annotation>;
   else if (kind == <wrapper>) c.object_macros[name] = <wrapper>;
 }
 
@@ -352,12 +409,13 @@ static void _note_prefix_macro(Compiler c, String name, Token body) {
 /* Classifies a macro body, scanned as x2c tokens, by the declaration prefix
    it contributes: the `List` of its specifier words, which are storage
    classes, `inline`, qualifiers, builtin types, and the words of other
-   prefix macros, amid attributes that contribute nothing; `<wrapper>` when
-   a function-like body is its parameter `param` amid prefixes; `<string>`
-   for a string literal; and 1 for any other text. */
+   prefix macros, amid attributes that contribute nothing; `<attribute>`
+   for attributes alone; `<wrapper>` when a function-like body is its
+   parameter `param` amid prefixes; `<string>` for a string literal; and 1
+   for any other text. */
 static Var _macro_prefix(Compiler c, Token token, String param) {
   if (token.type == <lit-char*>) return <string>;
-  Array words = [], int wrapped = 0;
+  Array words = [], int wrapped = 0, attributes = 0;
   while (token.type != <eof>) {
     Symbol type = token.type, String word = token.text;
     Var definition;
@@ -368,15 +426,17 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (_is_annotation(c, word)) {
       if (next.type != <(>) return 1;
       next = next.after_group();
+      attributes = 1;
     }
     else if (param && word == param && !wrapped) wrapped = 1;
-    else if (!c.object_macros.try_get(word, definition) ||
-             definition is not <list>)
-      return 1;
+    else if (!c.object_macros.try_get(word, definition)) return 1;
+    else if (definition == <attribute>) attributes = 1;
+    else if (definition is not <list>) return 1;
     else foreach (Symbol item in definition) words.push(item);
     token = next;
   }
-  return wrapped ? <wrapper> : words.list_free();
+  if (wrapped) return <wrapper>;
+  return attributes && !words.len() ? <attribute> : words.list_free();
 }
 
 static int _is_specifier(Symbol type) =>
@@ -392,14 +452,17 @@ static int _is_annotation(Compiler c, String word) {
 
 /* Ranks prefix classifications so a name defined differently in two
    conditional arms keeps the reading that emits correct C: `static` hides
-   a definition from the header, so it wins; a qualifier that another arm
-   omits, as zlib's `z_const` is `const` or nothing, rejects writes that C
-   accepts in that arm, so it loses to any other prefix; other text loses to
-   any prefix. */
+   a definition from the header, so it wins; specifier words outrank
+   attributes alone, which outrank an empty body, because the name kept for
+   attributes reads correctly in an arm that defines it empty; a qualifier
+   that another arm omits, as zlib's `z_const` is `const` or nothing,
+   rejects writes that C accepts in that arm, so it loses to any other
+   prefix; other text loses to any prefix. */
 static int _prefix_rank(Var v) {
+  if (v == <attribute>) return 3;
   if (v is not <list>) return 0;
   List words = v;
-  if (<static> in words) return 4;
+  if (<static> in words) return 5;
   foreach (Symbol word in words) if (word.is_type_qualifier()) return 1;
-  return words ? 3 : 2;
+  return words ? 4 : 2;
 }

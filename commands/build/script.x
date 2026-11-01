@@ -61,8 +61,8 @@ int CliRequest.prepare_script(CliRequest c) {
   // A build of the same script may have finished while this one waited.
   _exec_current(c);
   Path.write_text(%"$(c.build_dir)/source", script);
-  _prune(%"$root/scripts");
-  _prune(%"$root/runs");
+  Compiler.prune_cache(%"$root/scripts");
+  Compiler.prune_cache(%"$root/runs");
   c.output = %"$(c.output).$("%ld".printf((long) getpid()))";
   return 0;
 }
@@ -97,23 +97,6 @@ static String _executable(CliRequest c) => %"$(c.build_dir)/run";
    of this process. */
 static void _exec_current(CliRequest c) {
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
-}
-
-/* Removes each cache entry whose recorded first input no longer
-   exists and that no other run holds.
-*/
-static void _prune(String scripts) {
-  if (!Path.is_dir(scripts)) return;
-  foreach (String name, Path.list_dir(scripts)) {
-    String directory = Path.join(scripts, name);
-    Path source = %"$directory/source";
-    if (!source.is_file() || Path.is_file(source.read_text())) continue;
-    int lock = Path.lock_file(%"$directory/lock", 0);
-    if (lock < 0) continue;
-    try Path.remove_tree(directory);
-    catch %(io-fail *): {}
-    close(lock);
-  }
 }
 
 // running a script

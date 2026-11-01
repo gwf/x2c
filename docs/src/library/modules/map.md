@@ -255,9 +255,9 @@ Source: `lib/map/map.x`
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key or
+value, or an allocation, size, or invariant cause while inserting.
+Allocation and size failures leave the table unchanged.
 
 Source: `lib/map/map.x`
 
@@ -270,9 +270,9 @@ Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
 cursors and iterators; an existing-key read does not mutate the table.
 
-**Raises:** `<bad-arg>` for a null map, or an allocation, size, or invariant
-cause while inserting. Allocation and size failures leave the table
-unchanged.
+**Raises:** `<bad-arg>` for a null map, `<void-op>` for a `void` key, or an
+allocation, size, or invariant cause while inserting. Allocation and
+size failures leave the table unchanged.
 
 Source: `lib/map/map.x`
 
@@ -550,14 +550,11 @@ Source: `lib/map/map.x`
 
 ## Design notes
 
-`Map` uses Robin Hood hashing split across two scope-owned `Block`s. The
-hash `Block` holds one 32-bit hash per bucket, zero for an empty bucket;
-the entry `Block` holds the `Var` key and value at the same bucket
-index. Lookups probe the compact hash `Block` and touch an entry only
-when its hash matches. Capacity is always a power of two and probe
-distances are computed as needed.
-
-Deletion back-shifts hashes and entries together to close holes.
+`Map` uses sixteen-byte control groups and parallel key/value records.
+Full 32-bit hashes share the control Block below 65536 buckets; larger
+tables keep them in that Block's owned storage. Growth reuses hashes
+without invoking key callbacks. Deletion marks a reusable slot;
+insertion cleans tombstones during rebuilding.
 Structural mutation invalidates traversal state. Keys and values are
 stored as `Var` bits; the `Map` does not free pointer-bearing payloads or
 canonical values reachable through them.

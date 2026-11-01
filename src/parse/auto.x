@@ -28,8 +28,8 @@ Symbol Compiler.auto_region_form(Compiler c, Symbol position) {
 }
 
 static const SymbolSet _region_statements =
-  %<<"{" "%{" if while for do switch match try return raise defer break
-     continue goto>>;
+  %<"{" "%{" if while for do switch match try return raise defer break
+     continue goto>;
 
 /* Whether `token` begins a declaration that stays at file scope. */
 static int _function_follows(Compiler c, Token token) {
@@ -93,7 +93,8 @@ module List _auto_declaration(
       .type_from_ast().declared();
     if (type.is_function())
       $fail.parse_auto_storage(c, c.token);
-    c.sym.bind_identity(NULL, binding,
+    c.sym.bind_identity(
+      NULL, binding,
       %(declare $(base.declared()) (bindings (bind $binding $mods))));
     c.set_fact(%(managed $binding), 1);
   }

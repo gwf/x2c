@@ -1,37 +1,66 @@
-#!/usr/bin/env python3
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+#
+# Contributed by Sebastien Loisel
+# Fixed by Isaac Gouy
+# Sped up by Josh Goldfoot
+# Dirtily sped up by Simon Descarpentries
+# Used list comprehension by Vadim Zelenin
+# Concurrency by Jason Stitt
+# Concurrency simplified by Matt Vollrath
+# Optimized math by Adam Beckmeyer
 
+
+from itertools import repeat
 from math import sqrt
-import sys
+from multiprocessing import Pool
+from sys import argv
 
 
-def eval_a(i, j):
+def eval_A(i, j):
     ij = i + j
-    return 1.0 / (ij * (ij + 1) // 2 + i + 1)
+    return ij * (ij + 1) // 2 + i + 1
 
 
-def eval_a_times_u(vector):
-    return [
-        sum(eval_a(i, j) * value for j, value in enumerate(vector))
-        for i in range(len(vector))
-    ]
+def A_sum(u, i):
+    return sum(u_j / eval_A(i, j) for j, u_j in enumerate(u))
 
 
-def eval_at_times_u(vector):
-    return [
-        sum(eval_a(j, i) * value for j, value in enumerate(vector))
-        for i in range(len(vector))
-    ]
+def At_sum(u, i):
+    return sum(u_j / eval_A(j, i) for j, u_j in enumerate(u))
 
 
-def eval_ata_times_u(vector):
-    return eval_at_times_u(eval_a_times_u(vector))
+def multiply_AtAv(u):
+    r = range(len(u))
+
+    tmp = pool.starmap(
+        A_sum,
+        zip(repeat(u), r)
+    )
+    return pool.starmap(
+        At_sum,
+        zip(repeat(tmp), r)
+    )
 
 
-n = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-u = [1.0] * n
-for _ in range(10):
-    v = eval_ata_times_u(u)
-    u = eval_ata_times_u(v)
-v_bv = sum(left * right for left, right in zip(u, v))
-vv = sum(value * value for value in v)
-print(f"{sqrt(v_bv / vv):.9f}")
+def main():
+    n = int(argv[1])
+    u = [1] * n
+
+    for _ in range(10):
+        v = multiply_AtAv(u)
+        u = multiply_AtAv(v)
+
+    vBv = vv = 0
+
+    for ue, ve in zip(u, v):
+        vBv += ue * ve
+        vv  += ve * ve
+
+    result = sqrt(vBv/vv)
+    print("{0:.9f}".format(result))
+
+
+if __name__ == '__main__':
+    with Pool(processes=4) as pool:
+        main()

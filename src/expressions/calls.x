@@ -1,6 +1,5 @@
 /*  calls.x -- call preparation and recognition */
 
-
 /* One call being resolved: its expected result type, the arguments it
    supplies, and its origin. A method call adds the receiver, its type, and
    the member it selects. */
@@ -73,8 +72,10 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
     match (argument) case %(expr ? (splice ?value)): {
       int map = c.sym.is_map_type(value.cadr());
       Macro splice = map ? $func_map_splice : $func_splice;
-      prepared.push(splice(function, storage, index,
-        c.convert_expression(value, map ? %("Map") : %("List"))));
+      prepared.push(
+        splice(
+          function, storage, index,
+          c.convert_expression(value, map ? %("Map") : %("List"))));
       continue;
     }
     Type type = argument.cadr();
@@ -126,8 +127,6 @@ static const PrintfFn printf_family_info[] = {
   { "File_printf",   1, 2, 0 },
   { "Buffer_printf", 1, 2, 0 }
 };
-
-
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
     other expression. `content` is the body of the call's `expr` node. Each
@@ -302,8 +301,6 @@ static int _exact_iter_type(Type type) =>
 
 static List _iter_destination(void) =>
   $!(struct Iter *){ &(struct Iter){ 0 } };
-
-
 
 module List _native(Resolve &r, String callee, List supplied) {
   List arguments = _resolve_call_arguments(r.c, NULL, supplied, r.origin);

@@ -1,3 +1,3 @@
 #pragma once
 
-macro Expression $tally.sum4() => tally__tally_sum(4);
+macro Expression $tally.sum4() using tally_sum => tally_sum(4);

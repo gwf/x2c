@@ -128,6 +128,25 @@ static void var_floating_construction(void) {
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
 }
 
+__attribute__((noinline)) static double decode_volatile_f64(volatile Var &value) {
+  return value.decode_f64();
+}
+
+static void var_nan_readers_reconstruct_canonical_quiet_nan(void) {
+  $test.scoped();
+  double expected = NAN;
+  volatile Var boxed = expected;
+  double raw = decode_volatile_f64(boxed), floating = boxed.floating();
+  EXPECT_TRUE(isnan(raw));
+  EXPECT_TRUE(isnan(floating));
+  EXPECT_INT_EQ(memcmp(&raw, &expected, sizeof(raw)), 0);
+  EXPECT_INT_EQ(memcmp(&floating, &expected, sizeof(floating)), 0);
+  EXPECT_TRUE(boxed.u64 == VAR_NAN_BITS);
+  Var value = boxed;
+  EXPECT_STR_EQ("%f".format(value), "%f".printf(expected));
+  EXPECT_STR_EQ("%F".format(value), "%F".printf(expected));
+}
+
 static void var_float_promotion_quiets_signaling_nan(void) {
   $test.scoped();
   uint32_t patterns[] = {0x3fa00000, 0x7fc00001, 0x7f800001};
@@ -1040,6 +1059,53 @@ static void var_wide_value_semantics(void) {
 }
 
 
+static void var_long_double_identity_ignores_padding(void) {
+  $test.scoped();
+  Var first = Var.box_long_double(1.25L), same = Var.box_long_double(1.25L);
+#if defined(__x86_64__) && __LDBL_MANT_DIG__ == 64 && __LDBL_MAX_EXP__ == 16384
+  /* Inspect the private box only to vary its ABI padding. */
+  typedef struct { Symbol tag; long double value; } WideView;
+  uintptr_t mask = (1ul << 48) - 8;
+  unsigned char *a = (unsigned char *)(uintptr_t)(first.u64 & mask)
+                   + offsetof(WideView, value);
+  unsigned char *b = (unsigned char *)(uintptr_t)(same.u64 & mask)
+                   + offsetof(WideView, value);
+  memset(a + 10, 0xaa, sizeof(long double) - 10);
+  memset(b + 10, 0x55, sizeof(long double) - 10);
+#endif
+  EXPECT_TRUE(first.long_double_value() == same.long_double_value());
+  EXPECT_TRUE(first === same);
+  EXPECT_INT_EQ(first.hash(), same.hash());
+  EXPECT_INT_EQ(first.compare(same), 0);
+  Var clone = first.clone_wide();
+  EXPECT_TRUE(clone === same);
+  EXPECT_INT_EQ(clone.hash(), same.hash());
+  Map keys = {};
+  keys[first] = 73;
+  EXPECT_TRUE(keys[same] is <i32> && keys[same].int() == 73);
+  EXPECT_TRUE(keys[clone] is <i32> && keys[clone].int() == 73);
+}
+
+static void var_long_double_identity_preserves_value_bits(void) {
+  $test.scoped();
+  Var zero = Var.box_long_double(0.0L), negative_zero = Var.box_long_double(-0.0L);
+  Var one = Var.box_long_double(1.0L);
+  Var adjacent = Var.box_long_double(1.0L + LDBL_EPSILON);
+  Var nan = Var.box_long_double(__builtin_nanl("1"));
+  Var same_nan = Var.box_long_double(__builtin_nanl("1"));
+  Var other_nan = Var.box_long_double(__builtin_nanl("2"));
+  EXPECT_TRUE(zero == negative_zero);
+  EXPECT_FALSE(zero === negative_zero);
+  EXPECT_FALSE(one === adjacent);
+  EXPECT_TRUE(one < adjacent);
+  EXPECT_TRUE(nan === same_nan);
+  EXPECT_INT_EQ(nan.hash(), same_nan.hash());
+  EXPECT_INT_EQ(nan.compare(same_nan), 0);
+  EXPECT_FALSE(nan === other_nan);
+  EXPECT_TRUE(nan.compare(other_nan) != 0);
+  EXPECT_FALSE(nan == nan);
+}
+
 /* Each numeric tag used to share a format with a neighbour: <u32> printed as
    a signed int, <i16> hex-printed a sign-widened value, a byte went into the
    text raw, and every floating tag went through %f, which lost the value and
@@ -1524,6 +1590,7 @@ void var_suite(void) {
   $test.run(var_symbol_atom_stream_without_allocating);
   $test.run(var_integer_construction);
   $test.run(var_floating_construction);
+  $test.run(var_nan_readers_reconstruct_canonical_quiet_nan);
   $test.run(var_float_promotion_quiets_signaling_nan);
   $test.run(var_floating_ignores_custom_float_names);
   $test.run(var_terminal_and_f64_escape);
@@ -1554,6 +1621,8 @@ void var_suite(void) {
   $test.run(var_native_numeric_names);
   $test.run(var_system_typedef_roundtrips);
   $test.run(var_wide_value_semantics);
+  $test.run(var_long_double_identity_ignores_padding);
+  $test.run(var_long_double_identity_preserves_value_bits);
   $test.run(var_clone_wide_copies_wide_boxes);
   $test.run(var_clone_wide_returns_void_for_narrow_values);
   $test.run(var_numeric_repr_prints_its_own_value);

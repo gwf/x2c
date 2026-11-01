@@ -42,6 +42,7 @@ magic/rewrite|showcase|run||expected/magic-rewrite.stdout|Gallery: simplify nest
 magic/fields|showcase|run||expected/magic-fields.stdout|Gallery: a meta function generates code from a struct's fields.
 power/bindings|showcase|run||expected/power-bindings.stdout|Delegate fields, Self results, reference parameters, destructuring assignment, and alias.
 power/channel-service|showcase|run||expected/channel-service.stdout|A supervised service and clients with explicit request completion.
+power/channel-task-service|showcase|run||expected/channel-service.stdout|The service and clients share one native thread through Task.run.
 power/channel-word-count|showcase|run|words|expected/channel-word-count.stdout|Bounded channels and a supervised word-count batch using shared canonical Strings.
 power/collection-indexing|showcase|run||expected/indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
 power/contexts|showcase|run||expected/context-lifetime.stdout|Isolated Context cleanup and cyclic result export.
@@ -81,3 +82,4 @@ power/protocols|showcase|run||expected/power-protocols.stdout|Gallery: set union
 power/channels|showcase|run||expected/power-channels.stdout|Gallery: two threads share a bounded channel under Thread.run.
 power/your-c|showcase|run||expected/power-your-c.stdout|Gallery: X-macros, conditional groups, and C strings in an x2c unit.
 apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.
+apps/notes/bench/inprocess-notes|probe|none||-|Optional local Thread.run and Task.run Notes lookup comparison.

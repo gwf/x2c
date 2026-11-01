@@ -33,6 +33,7 @@ System utilities for environment discovery and workers.
 | [`Compiler.is_package_source`](#Compiler.is_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`Compiler.module_stamp`](#Compiler.module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`Compiler.package_directory`](#Compiler.package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
+| [`Compiler.prune_cache`](#Compiler.prune_cache) | Removes each entry of the cache `directory` whose recorded `source` file no longer exists and that no other run holds by its `lock`. |
 | [`Compiler.run_command`](#Compiler.run_command) | Runs an external command with inherited streams and returns its status. |
 | [`Compiler.stage_dir`](#Compiler.stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 | [`Diagnostics.driver_error`](#Diagnostics.driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
@@ -265,6 +266,17 @@ Source: `src/utils.x`
 Returns the package directory that holds `path` below one of `roots`:
 the root's child on the way to `path`, compared by canonical path, when
 that child's name is an identifier. Returns NULL for any other path.
+
+Source: `src/utils.x`
+
+<a id="Compiler.prune_cache"></a>
+#### Compiler.prune_cache
+
+`void Compiler.prune_cache(String directory)`
+
+Removes each entry of the cache `directory` whose recorded `source`
+file no longer exists and that no other run holds by its `lock`.
+An entry without a `source` file stays.
 
 Source: `src/utils.x`
 

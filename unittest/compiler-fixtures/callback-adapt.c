@@ -77,7 +77,7 @@ static String echo(String value){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Scope_retain();
+  Scope_open();
   String text = _0;
   Var boxed_text = String_var(text), alpha = Symbol_var(2916866), beta = Symbol_var(142594), raw_null =(Var){
     0
@@ -91,7 +91,7 @@ int main(void){
   Var item;
   int advanced = Iter_try_next(iter, &(item));
   printf("%d %s %s %d %d %d\n", callbacks[0].owner == duplicate, callbacks[0].owner(boxed_text), callbacks[0].free(boxed_text), callbacks[0].symbol_compare(alpha, beta), callbacks[0].file_equal(raw_null, raw_null), advanced ? Var_int(item) : - 1);
-  Scope_release();
+  Scope_close();
   return 0;
 }
 

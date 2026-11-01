@@ -18,8 +18,12 @@ From the repository root:
 This reports missing core build tools together, with installation guidance.
 It checks the selected `CC` and `AR`, and `X2C_CC` when set. It does not
 compile anything or write a configuration file. `make configure` runs the
-same report. `make build` and `make build-safe` run it automatically before
-bootstrap work or cleaning.
+same report. In a Git checkout whose `core.hooksPath` is unset, it also sets
+`core.hooksPath` to `tools/hooks` in the repository configuration, which
+every worktree of the repository shares. Because the value is relative, each
+worktree runs the `tools/hooks/pre-push` of its own checkout. `make build`
+and `make build-safe` run `make configure` automatically before bootstrap
+work or cleaning.
 
 For optional packages, use `./configure --packages`, or name only the ones
 you intend to build, such as `./configure --packages termbox2`. See the
@@ -53,11 +57,24 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
 
 - Runtime and compiler behavior is written in `.x` sources.
 - Numbered build directories are generated and untracked.
-- The tracked generated outputs are the portable bootstrap C under
-  `bootstrap/`, the runtime aggregator `lib/x2c.x`, and what
-  `make doc-generate` writes: `agents/x2c-module-catalog.md`,
-  `docs/src/internals/compiler-api/`, `docs/src/library/modules/`, and
-  `site/public/llms.txt` with `llms-full.txt`.
+- The tracked generated outputs are:
+  - the portable bootstrap C under `bootstrap/`, which
+    `make bootstrap-refresh` rewrites, as do `make precommit`,
+    `make agent-pr-check`, and `make sanity-check`, which run it;
+  - the runtime aggregator `lib/x2c.x`, the shipped `meta` code compiled
+    into the compiler, `src/linked-meta.x`, and the meta helper's compiler
+    queries, `etc/meta-queries.x`, which `make build` and every target that
+    depends on it rewrite when they are stale;
+  - what `make doc-generate` writes: `agents/x2c-module-catalog.md`,
+    `docs/src/internals/compiler-api/`, `docs/src/library/modules/`, their
+    sections of `docs/src/SUMMARY.md`, and `site/public/llms.txt` with
+    `llms-full.txt`;
+  - `docs/src/reference/syntax/x2c.ebnf` and
+    `docs/src/reference/syntax/lexical-data.md`, which
+    `tools/syntax-spec write` renders from `etc/syntax/`;
+  - `tools/version-viewer/snapshots.js` and its digest in the viewer's
+    `index.html`, which `python3 tools/version-viewer/refresh-snapshots.py`
+    rewrites.
 
 Do not hand-edit any of them; regenerate them with their targets.
 

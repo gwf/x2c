@@ -151,7 +151,7 @@ See [the lexical specification](lexical.md) for explanations and
  (rule set-atom
   (ordered (ref quoted-symbol-spelling)
    (repeat 0
-    (ordered (ref atom-escape) (except (byte 0) (ref set-boundary) (bytes ">>")))))
+    (ordered (ref atom-escape) (except (byte 0) (ref set-boundary) (byte 62)))))
   (emit lit-atom))
  (rule string-segment
   (repeat 1
@@ -171,11 +171,10 @@ See [the lexical specification](lexical.md) for explanations and
  (rule percent-forms
   (ordered (seq (bytes "%\"") (transition percent-string))
    (seq (bytes "%[") (transition percent-array))
-   (seq (bytes "%<<") (transition percent-set))
    (when (not (predicate percent-is-operator))
     (ordered (seq (bytes "%(") (transition percent-list))
      (seq (bytes "%{") (transition percent-map))
-     (seq (bytes "%!") (emit "%!")) (seq (bytes "%<") (fail malformed))))))
+     (seq (bytes "%!") (emit "%!")) (seq (bytes "%<") (transition percent-set))))))
  (rule angle-symbol (when (predicate can-start-symbol) (ref symbol))
   (failure malformed))
  (rule c-tokens
@@ -217,7 +216,7 @@ See [the lexical specification](lexical.md) for explanations and
  (rule list-atom (ref atom) (emit lit-atom))
  (rule lisp-atom (ref atom) (emit ident))
  (rule symbol-set-tokens
-  (ordered (seq (bytes ">>") (transition close-set))
+  (ordered (seq (bytes ">") (transition close-set))
    (seq (one-of-bytes "$@") (emit-spelling))
    (ref symbol) (ref set-atom)) (failure malformed))
  (rule string-tokens
@@ -259,7 +258,7 @@ See [the lexical specification](lexical.md) for explanations and
  (transition percent-map (from x2c x2c-par)
   (on "%{") (push map))
  (transition percent-set (from x2c x2c-par)
-  (on "%<<") (push symbol-set))
+  (on "%<") (push symbol-set))
  (transition percent-string (from x2c x2c-par)
   (on "%\"") (push string))
  (transition code-parenthesis (from x2c-par)
@@ -284,7 +283,7 @@ See [the lexical specification](lexical.md) for explanations and
   (push x2c-par)) (transition close-list (from list) (on ")") (pop))
  (transition close-array (from array) (on "]") (pop))
  (transition close-map (from map) (on "}") (pop))
- (transition close-set (from symbol-set) (on ">>") (pop))
+ (transition close-set (from symbol-set) (on ">") (pop))
  (transition string-code (from string) (on "$(") (push x2c-par))
  (transition string-brace (from string) (on "${") (push x2c))
  (transition close-string (from string) (on "\"") (pop)))
@@ -395,6 +394,8 @@ See [the lexical specification](lexical.md) for explanations and
   (after scan) (hide inactive-branches) (retain conditional-structure))
  (pass keyword-retag
   (ordered
+   (retag (try catch finally raise import protocol delegate associated expand)
+    ident) (retag threaded ident (when (text "threaded")))
    (retag in ident
     (unless
      (and (previous-kind-in compiler-operand-end)
@@ -420,18 +421,19 @@ See [the lexical specification](lexical.md) for explanations and
  (keyword "in" in) (keyword "inline" inline)
  (keyword "int" int) (keyword "long" long)
  (keyword "match" match) (keyword "protocol" protocol)
- (keyword "raise" raise) (keyword "register" register)
- (keyword "restrict" restrict) (keyword "return" return)
- (keyword "short" short) (keyword "signed" signed)
- (keyword "sizeof" sizeof) (keyword "static" static)
- (keyword "struct" struct) (keyword "switch" switch)
- (keyword "threaded" threaded) (keyword "try" try)
- (keyword "typedef" typedef) (keyword "union" union)
- (keyword "unsigned" unsigned) (keyword "void" void)
- (keyword "volatile" volatile) (keyword "while" while)
- (keyword "__inline" inline) (keyword "__inline__" inline)
- (keyword "__restrict" restrict) (keyword "__restrict__" restrict)
- (keyword "thread_local" threaded) (keyword "_Thread_local" threaded))
+ (keyword "raise" raise) (keyword "expand" expand)
+ (keyword "register" register) (keyword "restrict" restrict)
+ (keyword "return" return) (keyword "short" short)
+ (keyword "signed" signed) (keyword "sizeof" sizeof)
+ (keyword "static" static) (keyword "struct" struct)
+ (keyword "switch" switch) (keyword "threaded" threaded)
+ (keyword "try" try) (keyword "typedef" typedef)
+ (keyword "union" union) (keyword "unsigned" unsigned)
+ (keyword "void" void) (keyword "volatile" volatile)
+ (keyword "while" while) (keyword "__inline" inline)
+ (keyword "__inline__" inline) (keyword "__restrict" restrict)
+ (keyword "__restrict__" restrict) (keyword "thread_local" threaded)
+ (keyword "_Thread_local" threaded))
 ```
 
 ## operators
@@ -439,21 +441,22 @@ See [the lexical specification](lexical.md) for explanations and
 ```text
 (operators (selection longest-prefix) (operator "...")
  (operator ">>=") (operator "<<=") (operator "===")
- (operator "!==") (operator "->") (operator "++")
- (operator "--") (operator "<<") (operator ">>")
- (operator "<=") (operator ">=") (operator "==")
- (operator "!=") (operator "&&") (operator "||")
- (operator "+=") (operator "-=") (operator "*=")
- (operator "/=") (operator "%=") (operator "&=")
- (operator "^=") (operator "|=") (operator "-")
- (operator ",") (operator ";") (operator ":")
- (operator "!") (operator "?") (operator ".")
- (operator "(") (operator ")") (operator "[")
- (operator "]") (operator "{") (operator "}")
- (operator "*") (operator "/") (operator "&")
- (operator "%") (operator "^") (operator "+")
- (operator "<") (operator "=") (operator ">")
- (operator "|") (operator "~") (operator "@"))
+ (operator "!==") (operator "~=") (operator "->")
+ (operator "++") (operator "--") (operator "<<")
+ (operator ">>") (operator "<=") (operator ">=")
+ (operator "==") (operator "!=") (operator "&&")
+ (operator "||") (operator "+=") (operator "-=")
+ (operator "*=") (operator "/=") (operator "%=")
+ (operator "&=") (operator "^=") (operator "|=")
+ (operator "-") (operator ",") (operator ";")
+ (operator ":") (operator "!") (operator "?")
+ (operator ".") (operator "(") (operator ")")
+ (operator "[") (operator "]") (operator "{")
+ (operator "}") (operator "*") (operator "/")
+ (operator "&") (operator "%") (operator "^")
+ (operator "+") (operator "<") (operator "=")
+ (operator ">") (operator "|") (operator "~")
+ (operator "@"))
 ```
 
 ## failures

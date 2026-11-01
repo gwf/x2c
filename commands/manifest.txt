@@ -5,5 +5,5 @@ lint|experimental|Inspect x2c source style and idioms
 lsp|shipped|Serve editors over the Language Server Protocol
 new|shipped|Create a project that builds and runs
 package|shipped|Install, remove, and list packages
-repl|experimental|Evaluate a supported x2c subset
+repl|experimental|Explore C and x2c libraries in a native playground
 test|shipped|Build and run project tests

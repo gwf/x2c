@@ -16,9 +16,10 @@ the application and prints its URL. Open <http://127.0.0.1:8080/> to create,
 edit, search, tag, and delete notes. Ctrl-C stops the server and closes the
 database.
 
-The defaults are loopback port 8080, eight workers, `notes.db`, and this
-example's `public` directory. To select another database or address, run the
-built executable from the repository root:
+`make run` keeps the database in `examples/apps/notes/notes.db`. The
+executable's defaults are loopback port 8080, eight workers, `notes.db`, and
+this example's `public` directory. To select another database or address, run
+the built executable from the repository root:
 
 ```sh
 examples/apps/notes/builds/notes --host 127.0.0.1 --port 8081 \
@@ -53,7 +54,8 @@ curl 'http://127.0.0.1:8080/api/notes?tag=work&q=Hello'
 ```
 
 Invalid note fields return status 422 with `{"error":"reason"}`. Malformed
-JSON returns status 400. A missing note returns status 404.
+JSON or an invalid search pattern returns status 400. A missing note returns
+status 404.
 
 ## Source and checks
 

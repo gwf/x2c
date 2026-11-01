@@ -1363,7 +1363,7 @@ List Compiler_origin_location(Compiler, int);
 static List f8_dispatch____site_fields(Emitter * e){
   List location = Compiler_origin_location((* e).c, (* e).origin);
   String file = Var_as_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));
-  int line = Var_int(Var_convert_at(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/emit/dispatch.x",.function = "f8_dispatch____site_fields",.line = 394}; & _x2c_gensym_error_site_1; })));
+  int line = Var_int(Var_convert_at(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/emit/dispatch.x",.function = "f8_dispatch____site_fields",.line = 395}; & _x2c_gensym_error_site_1; })));
   String file_literal = f8_dispatch____c_string_literal(file);
   String function_literal = f8_dispatch____c_string_literal((* e).fn_name);
   List runtime =(* e).c -> runtime_inc ? NULL : _102;

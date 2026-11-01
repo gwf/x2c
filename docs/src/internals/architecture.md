@@ -61,7 +61,7 @@ memory. For each input file the translator runs one pipeline:
 source
   -> tokenizing
   -> shallow parse and global environment discovery
-  -> preprocessing
+  -> directive handling and optional C macro expansion
   -> full parse and type annotation
   -> protocol conformance forms
   -> lowering
@@ -147,8 +147,14 @@ the text to `Tokenizer.new` from `lib/tokenizer.x`, and scans it with the
 allocation-free character recognizers in `lib/scan.x`. Whitespace, comments,
 and preprocessor lines all become tokens. Later phases can therefore report
 positions in the original file, and directives can be re-emitted where they
-were written. The token array is not parsed until
-[preprocessing](#preprocessing) has expanded its macros.
+were written. Ordinary directive scanning precedes parsing; optional
+[preprocessing](#preprocessing) expands C macros only when requested.
+
+After directive handling and optional CPP, the compiler changes contextual
+x2c keyword tokens to identifiers. Parsing then uses the ordinary symbol table
+to distinguish keyword forms from names. The scanner retains its existing
+percent/angle literal choices; retagging does not rescan literal contents.
+C keywords, `defer`, and the two C thread-local spellings stay reserved.
 
 ```sh
 ./builds/0/x2c translate --dump-tokens greet.x
@@ -253,19 +259,28 @@ binding facts are not exported. Static helpers remain in their provider.
 Each provider has one function-hash table. Its meta advertisements identify
 the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 7 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(DEPENDENCIES...) (INCLUDE-DIRS...) (MACROS...))` form in
+`(interface 8 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
 identifiers; the reader reads that one form without evaluating it.
+After the compiler identity it stores six fields: the source path, its
+content hash, the ordered parts, the definitions, the dependency hashes,
+and the replay conditions. Each part is an included path, a
+`(cpp TEXT FILE LINE)` event for a conditional, `#define`, or `#undef`
+directive, or a set of declaration rows.
 The API reference reads `--dump-definitions` output and joins authored prose
 to those definitions. Before walking a file's source, collection looks
 for its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only
-when its recorded compiler, path, include search roots, and every hash still
-match; otherwise collection walks the source. Include search roots retain
-their order and distinguish home-relative, absolute, and cwd-relative
-spellings.
+when its recorded compiler, path, and every hash still match and its replay
+conditions equal the current ones; otherwise collection walks the source.
+The replay conditions are the include search roots, then `(package NAME)`
+for a package source or `(package)` otherwise, `(cpp-expansion)` under
+`--cpp`, and, for a file outside the runtime and the compiler's prelude,
+`(macros ROWS...)` with the sorted `(name value)` rows of the `-D` and `-U`
+options. Include search roots retain their order and distinguish
+home-relative, absolute, and cwd-relative spellings.
 Search candidates with cwd-relative spellings are checked in the current
 working directory. The compiler identity is a digest of the
 executable's contents, so a changed compiler never replays rows an earlier
@@ -300,9 +315,14 @@ implicit runtime contributes a few thousand rows, so grep the output.
 
 ### Preprocessing
 
-`src/cpp/cpp.x` expands the C macros x2c can see before the parser reads a
-token: those the unit, the files it includes, the runtime, and the command
-line define. `Compiler.expand_macros` walks the scanned array once. It
+`--cpp` enables `src/cpp/cpp.x` for existing C compatibility. Ordinary x2c
+builds skip full expansion and macro-export replay. Module and meta discovery
+read authored syntax in both modes and do not prepare C macro exports to
+find hidden x2c constructs.
+
+When enabled, the engine expands the C macros x2c can see before the parser
+reads a token: those the unit, the files it includes, the runtime, and the
+command line define. `Compiler.expand_macros` walks the scanned array once. It
 applies each directive to a `Cpp` state, the macro table and the open
 conditional groups, and replaces each macro use with its expansion. Every
 expanded token takes the line, column, and position of the use, and the
@@ -312,11 +332,15 @@ conditional group, or leaves it undecided when a name it tests is not
 visible; `src/preprocess.x` then turns the tokens of a hidden arm into
 comments and marks layout attributes. Directives stay in the array.
 
-Collection preprocesses each segment it parses from the state where the
-segment starts. A file's entry records the macros it changed as its
-exported rows, which an includer applies at the `#include`, so a replayed
-interface supplies the macros a cold walk does. The unit's own array is
-preprocessed after collection, when every file it includes has an entry.
+With `--cpp`, collection preprocesses each segment it parses from the state
+where the segment starts. In either mode, a file's entry keeps its
+conditional, `#define`, and `#undef` directives among its parts as
+`(cpp TEXT FILE LINE)` events. At an `#include`, `_replay_included` in
+`src/collect/walk.x` replays the included file's events, and those of the
+files it includes, from that file's initial macros and recomputes the macros
+it exports, so a replayed interface supplies the macros a cold walk does.
+The unit's own array is preprocessed after collection, when every file it
+includes has an entry.
 
 ### Full parse and type annotation
 
@@ -555,6 +579,7 @@ module block, so its files share no private scope.
   `src/components/interpolation.x` (interpolation),
   `src/components/destructuring.x` (destructuring),
   `src/components/lambda-functions.x` (lambdas),
+  `src/components/macro-mapping.x` (mapping macros over compile-time rows),
   `src/components/protocol-adapters.x` (protocol members and descriptors),
   and `src/components/string-switch.x` (String switches);
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
@@ -700,9 +725,10 @@ divisions:
   patterns to plans, `cache.x` retains them, and `machine.x` executes them
   over the wordcode and state definitions in `wordcode.x`;
 - `lib/lisp/lisp.x` owns the embedded Lisp session and evaluator for runtime
-  DSLs and the REPL; the compiler does not link it. Lisp and `lib/datum.x`
-  share the reader grammar in `lib/datum-reader.x`, and the compiler reads
-  `.xi` interfaces with `lib/datum.x`;
+  DSLs and the Lisp shell in `examples/programs/lisp.x`; the compiler does
+  not link it. Lisp and `lib/datum.x` share the reader grammar in
+  `lib/datum-reader.x`, and the compiler reads `.xi` interfaces with
+  `lib/datum.x`;
 - `lib/func/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;

@@ -117,6 +117,12 @@ void Error_restore(int handler_depth, int stack_height);
 int Error_handler_depth(void);
 
 #define ERROR_DEFAULT_BOUND 4096
+void * x2c_error_execution_new(void);
+
+void x2c_error_execution_swap(void * backing);
+
+void x2c_error_execution_free(void * backing);
+
 void Error_initialize_raw(void);
 
 void Error_shutdown_raw(void);

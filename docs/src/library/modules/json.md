@@ -186,29 +186,6 @@ Returns `value` as JSON text indented two spaces per level.
 
 Source: `lib/json.x`
 
-## Runtime-internal callables
-
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`x2c_json_write`](#x2c_json_write) | Appends JSON to a borrowed output Buffer without interning the result. |
-
-### Functions
-
-#### x2c_json_write
-
-`void x2c_json_write(Buffer out, Var value, int pretty)`
-
-Appends JSON to a borrowed output Buffer without interning the result.
-`pretty` selects the same layout as `Var.pretty_json`. Failure can leave
-partial output; the caller owns its rollback policy.
-
-**Raises:** the same causes as `Var.json`.
-
-Source: `lib/json.x`
-
 ## Public types
 
 | Type | Kind | Summary |

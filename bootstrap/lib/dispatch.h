@@ -58,6 +58,8 @@ int RenderPath_enter(RenderPath * path, const void * identity);
 
 void RenderPath_leave(RenderPath * path);
 
+RenderPath * x2c_render_path_exchange(RenderPath * path);
+
 unsigned Var_hash(Var v);
 
 unsigned Var_fallback_hash(Var v);

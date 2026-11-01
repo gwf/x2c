@@ -29,11 +29,9 @@ int main(int argc, char **argv) {
     Stderr.puts("usage: tic-tac-toe STRATEGY.xlisp\n");
     return 2;
   }
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  auto Lisp lisp = Lisp.new();
   $lisp.install(lisp, game);
-  File strategy = File.open(argv[1], "r");
-  defer strategy.close();
+  auto File strategy = File.open(argv[1], "r");
   Lisp.eval_file(lisp, strategy);
   puts("You are X. Lisp is O. Enter an empty square, 1-9.");
   _show_board();

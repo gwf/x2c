@@ -9,6 +9,8 @@ static keyword loop $private.loop;
 
 static struct PoolRecord { union { Var key, val; }; };
 
+#include "group-match.h"
+
 $map.scaffold(
   PoolTable, struct PoolRecord, Var, Var,
   _record_key, _record_value, _reinsert_error, _insert_error,
@@ -17,10 +19,13 @@ $map.scaffold(
 $map.var.family(
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid);
 
-$map.storage.family(
-  PoolTable, struct PoolTable, Var, Var, unsigned, struct PoolRecord,
+$map.grouped.rehashed.records(
+  struct PoolRecord, _table_hash, _record_hash, _remember_hash);
+$map.grouped.storage.family(
+  PoolTable, struct PoolTable, Var, Var, struct PoolRecord,
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid,
-  _record_key, _record_value, _reinsert_error, _insert_error, 0);
+  _record_key, _record_value, _reinsert_error, _insert_error,
+  _record_hash, _remember_hash, 0, 1, 0);
 
 /** Finds an existing nonempty String from borrowed NUL-free bytes and their
     x2c_hash_bytes content hash, searching inner and its ancestors.
@@ -75,8 +80,6 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   return canonical;
 }
 
-
-
 /** Returns the first value equal to `key` from `inner` outward, or `void`.
     The returned identity remains owned by the level where it was found.
 */
@@ -116,8 +119,6 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
     defer _unlock(inner);
     canonical = _intern_locked(inner, object, discard);
   }
-  // Pool.free takes storage before the pool. Do not call it while holding
-  // the pool mutex or another worker can complete the opposite lock order.
   if (discard) inner.free(alloc);
   return canonical;
 }
@@ -163,8 +164,6 @@ int Pool.owns(Pool pool, Var key) {
 */
 Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
 
-
-
 /** Returns a new named child of `inner` without making it thread-active.
     The child owns its control `Scope`, table, and mutex and must be released
     before `inner`. Use `Pool.open_named` instead to open a bracket that the
@@ -182,13 +181,14 @@ Pool Pool.retain_named(Pool inner, const char *name) {
     if (mutex_ready) pthread_mutex_destroy(&pool.mutex);
     scope.destroy();
   }
-  pool = Scope.malloc_in(&scope, sizeof(struct Pool));
+  pool = Scope.malloc_in(&scope, _control_size());
   *pool = (struct Pool) {.scope = scope, .up = inner, .child_capacity = 2};
   Mutex.recursive_initialize(
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
   auto (&pool.scope)
     pool.table = PoolTable.new_table(NULL, capacity);
+  _traffic_register(pool);
   finished = 1;
   return pool;
 }
@@ -196,30 +196,27 @@ Pool Pool.retain_named(Pool inner, const char *name) {
 /** Destroys one pool and returns its parent, or returns NULL for NULL input.
     Promoted slots and large allocations survive under the parent with stable
     addresses; other identities, the table, and the control `Scope` become
-    invalid. Children must already be released, and no caller may use `inner`
-    afterward. Use `Pool.close` instead to end a bracket opened with
-    `Pool.open`.
+    invalid. Children must already be released, and no caller may use the
+    destroyed pool afterward. Use `Pool.close` instead to end a bracket opened
+    with `Pool.open`.
 */
-Pool Pool.release(Pool inner) {
-  if (!inner) return NULL;
+Pool Pool.release(Pool p) {
+  if (!p) return NULL;
   /* Published before any storage is freed, so a reader that sees the old
      value has not yet been able to observe a reused address. */
   __atomic_fetch_add(&value_epoch, 1, __ATOMIC_RELEASE);
-  _storage_lock();
-  _lock(inner);
-  Pool up = inner.up;
+  _lock(p);
+  Pool up = p.up;
   _lock(up);
-  if (up) {
-    __atomic_store_n(
-      &up.child_capacity, inner.table.capacity, __ATOMIC_RELAXED);
-  }
-  _release_blocks(inner);
+  if (up)
+    __atomic_store_n(&up.child_capacity, p.table.capacity, __ATOMIC_RELAXED);
+  _release_blocks(p);
   _unlock(up);
-  _unlock(inner);
-  _storage_unlock();
-  pthread_mutex_destroy(&inner.mutex);
-  if (inner == value_root) _root_initialize(NULL);
-  Scope.destroy(inner.scope);
+  _traffic_retire(p);
+  _unlock(p);
+  pthread_mutex_destroy(&p.mutex);
+  if (p == value_root) _root_initialize(NULL);
+  Scope.destroy(p.scope);
   return up;
 }
 
@@ -229,19 +226,25 @@ Pool Pool.release(Pool inner) {
    Probe the shared table without boxing a temporary String query. */
 static String _get_string(
   PoolTable table, const char *bytes, int length, unsigned hash) {
-  unsigned *hashes = table.hashes;
-  unsigned mask = table.mask, start = hash & mask, capacity = table.capacity;
-  for (unsigned distance = 0; distance < capacity; distance++) {
-    unsigned index = (start + distance) & mask, stored = hashes[index];
-    if (!stored) break;
-    if (stored == hash) {
-      Var entry = *_record_key(table, index);
-      String string = entry.string_payload();
-      if (string && strncmp(string, bytes, (size_t) length) == 0 &&
-          ((const char *) string)[length] == '\0')
-        return string;
+  unsigned char *controls = table.hashes;
+  unsigned *hashes = table.full_hashes();
+  unsigned group_mask = table.mask >> 4, group = hash & group_mask;
+  unsigned char fingerprint = hash >> 25;
+  for (unsigned step = 0; step <= group_mask; step++) {
+    unsigned start = group * 16;
+    unsigned matches = x2c_map_group_match(controls + start, fingerprint);
+    while (matches) {
+      unsigned index = start + __builtin_ctz(matches);
+      if (hashes[index] == hash) {
+        Var entry = *_record_key(table, index);
+        String string = entry.string_payload();
+        if (string && string.len() == length && !memcmp(string, bytes, length))
+          return string;
+      }
+      matches &= matches - 1;
     }
-    if (((capacity + index - (stored & mask)) & mask) < distance) break;
+    if (x2c_map_group_match(controls + start, 128)) break;
+    group = (group + step + 1) & group_mask;
   }
   return NULL;
 }
@@ -274,7 +277,8 @@ static Var _get_hashed(
 }
 
 static Var _lookup_level(Pool pool, Var key, unsigned hash) =>
-  pool == value_root ? _root_lookup(key, hash) : _get_hashed(pool.table, key, hash);
+  pool == value_root ? _root_lookup(key, hash) :
+    _get_hashed(pool.table, key, hash);
 
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */
@@ -299,6 +303,8 @@ module int _owns_locked(Pool pool, Var key) {
 }
 
 module int _root_key_equal(Var a, Var b) => _table_key_equal(&a, &b);
+
+module inline unsigned *_root_hashes(PoolTable table) => table.full_hashes();
 
 module PoolTable _root_new_table(unsigned capacity) =>
   PoolTable.new_table(NULL, capacity);

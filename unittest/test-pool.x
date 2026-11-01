@@ -552,6 +552,56 @@ static void pool_free_from_child_uses_parent_owner(void) {
   Pool.release(child.release());
 }
 
+typedef struct PoolStorageProbe {
+  Pool pool;
+  atomic_int *start;
+  int valid;
+} PoolStorageProbe;
+
+static void *_pool_storage_growth(void *data) {
+  PoolStorageProbe *probe = data;
+  void *allocations[2048];
+  while (!atomic_load(probe.start)) {}
+  probe.valid = 1;
+  for (int i = 0; i < 2048; i++) {
+    allocations[i] = probe.pool.malloc(512);
+    memset(allocations[i], i & 255, 512);
+  }
+  Pool child = probe.pool.retain();
+  for (int i = 0; i < 2048; i++) {
+    unsigned char *bytes = allocations[i];
+    if (bytes[0] != (i & 255) || bytes[511] != (i & 255)) probe.valid = 0;
+    child.free(allocations[i]);
+  }
+  child.release();
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void pool_storage_concurrent_growth_and_ancestor_free(void) {
+  atomic_int start = 0;
+  PoolStorageProbe probes[4];
+  pthread_t workers[4];
+  int created = 0;
+  Pool.thread_start();
+  for (int i = 0; i < 4; i++) {
+    probes[i] = (PoolStorageProbe) {.pool = Pool.retain(NULL), .start = &start};
+    int error = pthread_create(&workers[i], NULL, _pool_storage_growth, &probes[i]);
+    EXPECT_INT_EQ(error, 0);
+    if (error) { probes[i].pool.release(); break; }
+    created++;
+  }
+  atomic_store(&start, 1);
+  for (int i = 0; i < created; i++) {
+    EXPECT_INT_EQ(pthread_join(workers[i], NULL), 0);
+    EXPECT_TRUE(probes[i].valid);
+    probes[i].pool.release();
+  }
+  PoolStats stats = Pool.stats(NULL);
+  EXPECT_INT_EQ(stats.backing_bytes, stats.active_bytes + stats.depot_bytes);
+  EXPECT_INT_EQ(stats.block_allocations, stats.active_blocks + stats.depot_blocks);
+}
+
 typedef struct RootIndexTest {
   Pool root;
   String seed, *identities;
@@ -600,6 +650,7 @@ static void pool_root_reads_and_concurrent_growth(void) {
   List list = List.cons_in(root, seed, NULL);
   unsigned capacity = root.table.capacity;
   int count = capacity / 2 + 32;
+  if (count < 32768) count = 32768;
   RootIndexTest reader = {.root = root, .seed = seed, .list = list};
   pthread_t read_thread, writers[3];
   Pool.thread_start();
@@ -674,7 +725,81 @@ static void pool_root_callback_growth_and_error(void) {
   EXPECT_TRUE(root.owns(after));
 }
 
+static void *_pool_traffic_churn(void *data) {
+  atomic_int *finished = data;
+  for (int i = 0; i < 1000; i++) {
+    Pool pool = Pool.retain(NULL);
+    void *slot = pool.malloc(16);
+    pool.free(slot);
+    slot = pool.malloc(16);
+    pool.free(slot);
+    pool.release();
+  }
+  x2c_thread_state_release();
+  atomic_store(finished, 1);
+  return NULL;
+}
+
+static void pool_stats_tracks_concurrent_retirement(void) {
+  atomic_int finished = 0;
+  Pool.thread_start();
+  PoolStats before = Pool.stats(NULL), previous = before;
+  pthread_t worker;
+  int error = pthread_create(&worker, NULL, _pool_traffic_churn, &finished);
+  EXPECT_INT_EQ(error, 0);
+  if (error) return;
+  int monotonic = 1;
+  while (!atomic_load(&finished)) {
+    PoolStats current = Pool.stats(NULL);
+    if (current.allocation_calls < previous.allocation_calls ||
+        current.free_calls < previous.free_calls ||
+        current.requested_bytes < previous.requested_bytes ||
+        current.slot_reuses < previous.slot_reuses) monotonic = 0;
+    previous = current;
+  }
+  EXPECT_INT_EQ(pthread_join(worker, NULL), 0);
+  EXPECT_TRUE(monotonic);
+  PoolStats after = Pool.stats(NULL);
+  int accounting = Scope.accounting_enabled();
+  EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls + 2000 * accounting);
+  EXPECT_INT_EQ(after.free_calls, before.free_calls + 2000 * accounting);
+  EXPECT_INT_EQ(after.requested_bytes, before.requested_bytes + 32000 * accounting);
+  EXPECT_INT_EQ(after.slot_reuses, before.slot_reuses + 1000 * accounting);
+}
+
+static void pool_traffic_survives_all_registry_removal_positions(void) {
+  PoolStats before = Pool.stats(NULL);
+  Pool pools[3];
+  for (int i = 0; i < 3; i++) {
+    pools[i] = Pool.retain(NULL);
+    void *small = pools[i].malloc(16);
+    pools[i].free(small);
+    small = pools[i].malloc(16);
+    void *large = pools[i].malloc(1024);
+    pools[i].free(small);
+    pools[i].free(large);
+  }
+  PoolStats live = Pool.stats(NULL);
+  int accounting = Scope.accounting_enabled();
+  EXPECT_INT_EQ(live.allocation_calls, before.allocation_calls + 9 * accounting);
+  EXPECT_INT_EQ(live.free_calls, before.free_calls + 9 * accounting);
+  EXPECT_INT_EQ(live.requested_bytes, before.requested_bytes + 3168 * accounting);
+  EXPECT_INT_EQ(live.slot_reuses, before.slot_reuses + 3 * accounting);
+  int order[3] = {1, 2, 0};
+  for (int i = 0; i < 3; i++) {
+    pools[order[i]].release();
+    PoolStats retired = Pool.stats(NULL);
+    EXPECT_INT_EQ(retired.allocation_calls, live.allocation_calls);
+    EXPECT_INT_EQ(retired.free_calls, live.free_calls);
+    EXPECT_INT_EQ(retired.requested_bytes, live.requested_bytes);
+    EXPECT_INT_EQ(retired.slot_reuses, live.slot_reuses);
+  }
+}
+
 void pool_suite(void) {
+  $test.run(pool_stats_tracks_concurrent_retirement);
+  $test.run(pool_traffic_survives_all_registry_removal_positions);
+  $test.run(pool_storage_concurrent_growth_and_ancestor_free);
   $test.run(pool_lookup_shadows_outward);
   $test.run(pool_intern_uses_one_probe);
   $test.run(pool_reuses_child_table_capacity);

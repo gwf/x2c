@@ -557,3 +557,16 @@ auto Array left = [], right = [];
 auto Array first = [],
 // <- storage.modifier.auto.x2c
   second = [];
+
+SymbolSet colors = %<red ">" <blue>>;
+//                 ^^ punctuation.definition.literal.symbol-set.begin.x2c
+//                   ^^^ constant.other.symbol.x2c.symbol-set
+//                       ^^^ constant.other.symbol.quoted.x2c.symbol-set
+//                           ^^^^^^ meta.literal.symbol.simple.x2c
+//                                 ^ punctuation.definition.literal.symbol-set.end.x2c
+int remainder = value %<red>;
+//                    ^ - meta.literal.symbol-set.x2c
+//                     ^^^^^ meta.literal.symbol.simple.x2c
+SymbolSet escaped = %<\>>;
+//                    ^^ constant.other.symbol.x2c.symbol-set
+//                      ^ punctuation.definition.literal.symbol-set.end.x2c

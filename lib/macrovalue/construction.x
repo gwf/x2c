@@ -45,8 +45,6 @@ List Macro.typed(List type, Var value) {
   return %(expr $type @(expression.cddr()));
 }
 
-
-
 /** Returns what a typed quotation inserts for one use of a hole whose
     local holds `value`, as a rebuild inserts it. An expression hole
     (`lifts`) takes a number, String, or Symbol as its literal. Where the

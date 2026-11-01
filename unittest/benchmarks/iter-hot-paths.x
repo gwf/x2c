@@ -219,11 +219,11 @@ int main(void) {
      here to map-try-next is what the call costs. */
   start = now_ns();
   for (int r = 0; r < repeats; r++) {
-    unsigned *hashes = entries.hashes;
+    unsigned char *controls = entries.hashes;
     struct BenchMapRecord *records = entries.entries;
     unsigned capacity = entries.capacity;
     for (unsigned i = 0; i < capacity; i++)
-      if (hashes[i]) sink += records[i].val.integer();
+      if (controls[i] < 128) sink += records[i].val.integer();
   }
   result("map-inline-scan", now_ns() - start, (long) width * repeats);
 
@@ -257,12 +257,12 @@ int main(void) {
     .map(increment).filter(is_even).sum().integer();
   result("map-filter-implicit", now_ns() - start, count);
 
-  Scope.retain();
+  Scope.open();
   benchmark_unzip(10000, 0, &sink);
-  Scope.release();
-  Scope.retain();
+  Scope.close();
+  Scope.open();
   benchmark_unzip(10000, 1, &sink);
-  Scope.release();
+  Scope.close();
 
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);

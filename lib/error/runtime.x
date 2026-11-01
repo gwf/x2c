@@ -4,6 +4,32 @@
 
 static threaded struct ErrorThreadState error_thread;
 
+static typedef struct ErrorExecutionState {
+  struct ErrorThreadState state;
+  int ready;
+} *ErrorExecutionState;
+
+/** Allocates empty execution backing. Initialize Error after installing it. */
+void *x2c_error_execution_new(void) {
+  ErrorExecutionState saved = calloc(1, sizeof(struct ErrorExecutionState));
+  if (!saved) raise %(alloc-fail);
+  return saved;
+}
+
+/** Exchanges mutable Error state and its readiness as one boundary action. */
+void x2c_error_execution_swap(void *backing) {
+  ErrorExecutionState saved = backing;
+  struct ErrorThreadState previous = error_thread;
+  int ready = x2c_error_runtime_ready;
+  error_thread = saved.state;
+  x2c_error_runtime_ready = saved.ready;
+  saved.state = previous;
+  saved.ready = ready;
+}
+
+/** Releases backing after Error.shutdown_raw ran with its state installed. */
+void x2c_error_execution_free(void *backing) { free(backing); }
+
 // lifecycle
 
 /** Initializes the current thread's `Error` runtime without lifecycle

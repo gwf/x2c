@@ -80,7 +80,9 @@ List Compiler.parse_field(Compiler c, List context) {
   if (slot) return slot;
   List macro = _member_macro(c, context, <field>);
   if (macro) return macro;
-  return _field(c, context, 0);
+  int delegated = c.at_contextual("delegate");
+  if (delegated) c.next();
+  return _field(c, context, delegated);
 }
 
 // enumerations
@@ -97,7 +99,8 @@ List Compiler.parse_enumerators(Compiler c, List context) {
       _push_items(enumerators, c.parse_alias_member(<enumerator>, context));
       continue;
     }
-    if (c.shallow && c.macro_starts_target_at(<enumerator>))
+    if (c.shallow && c.macro_starts_target_at(<enumerator>) &&
+        !c.macro_invocation_collection())
       c.skip_macro_invocation();
     else _push_items(enumerators, c.parse_enumerator(context));
     if (c.peek(0) == <"}">) break;
@@ -294,7 +297,7 @@ static void _skip_attributes(Compiler c) {
   if (!c.shallow) return;
   loop {
     Var definition;
-    if (_attribute(c)) continue;
+    if (_attribute(c) || _attribute_macro(c)) continue;
     if (c.peek(0) != <ident> ||
         !c.object_macros.try_get(c.token.text, definition) ||
         definition != %())
@@ -396,7 +399,6 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
 static List _field_item(Compiler c, List context) {
   if (c.alias_form_starts())
     return c.parse_alias_member(<field>, context);
-  if (c.test(<delegate>)) return _field(c, context, 1);
   return c.parse_field(context);
 }
 
@@ -452,6 +454,18 @@ static List _field_group(Compiler c, List context) {
   return _finish_declaration(c, <declare>, type, binds, 0);
 }
 
+/* `threaded` before another specifier or a declarator is storage. Before
+   a name's suffix (`=`, `(`, `;`, ...) it is the name being declared. */
+module Symbol _storage_keyword(Compiler c) {
+  if (c.at_contextual("threaded")) {
+    Symbol next = c.peek(1);
+    if (next == <ident> || next == <*> || next == <&> ||
+        next.is_builtin_type() || next.is_type_qualifier() ||
+        next.is_storage_class() || next == <inline>) return <threaded>;
+  }
+  return c.peek(0);
+}
+
 /* Declaration specifiers before the qualifiers and type: storage classes
    and `inline` in source order, then `_Noreturn` and attributes as source
    text. The storage words lead, where C places them and where a declared
@@ -463,8 +477,9 @@ module List _storage_class(Compiler c) {
   Array storage = [], text = [], int seen_threaded = 0, seen_ordinary = 0;
   defer { storage.free(); text.free(); }
   loop {
-    Symbol symbol = c.peek(0);
+    Symbol symbol = _storage_keyword(c);
     String attribute = _attribute(c);
+    if (!attribute) attribute = _attribute_macro(c);
     if (attribute) text.push($(attribute));
     else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
     else if (symbol.is_inline() ||
@@ -496,6 +511,19 @@ module int _attribute_starts(Compiler c) {
            definition == <annotation>));
 }
 
+/* An object-like attribute macro, `#define WEAK __attribute__((weak))`,
+   before the qualifiers and type is kept as its name, which the unit's C
+   reads through its `#define`. Before `typedef` it contributes nothing,
+   because a typedef keeps no leading specifier text. */
+static String _attribute_macro(Compiler c) {
+  if (c.peek(0) != <ident> || c.peek(1) == <typedef> ||
+      c.object_macros[c.token.text] != <attribute>)
+    return NULL;
+  String name = c.token.text;
+  c.next();
+  return name;
+}
+
 /* A macro the preprocessor leaves to C, because a conditional group
    defines it, still sits in a declaration when its body is declaration
    specifiers and attributes, such as an export annotation. A specifier
@@ -503,7 +531,8 @@ module int _attribute_starts(Compiler c) {
    `inline`, 1 for qualifiers, and 2 for builtin types, leaves a macro with
    words of a later rank to that position; otherwise it consumes the macro
    and takes all of its words into `words`, so `int LOCAL f(void)` keeps the
-   `static` of `#define LOCAL static`. */
+   `static` of `#define LOCAL static`. An attribute macro after the leading
+   specifiers contributes nothing. */
 module int _prefix_macro_words(Compiler c, int rank, Array words) {
   Var definition;
   if (c.peek(0) != <ident>) return 0;
@@ -519,6 +548,10 @@ module int _prefix_macro_words(Compiler c, int rank, Array words) {
     Token close = Token.skip_trivia(c.token + 1).group_close();
     if (close.type != <eof>) close.type = <comment>;
     c.next();
+    c.next();
+    return 1;
+  }
+  if (definition == <attribute>) {
     c.next();
     return 1;
   }

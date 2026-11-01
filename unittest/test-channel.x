@@ -259,6 +259,27 @@ static void channel_close_rejects_unaccepted_rendezvous_send(void) {
   EXPECT_TRUE(channel.receive() is void);
 }
 
+static void channel_close_rejects_blocked_bounded_send(void) {
+  $test.scoped();
+  Channel channel = auto Channel.new(1);
+  channel.send(12);
+  atomic_store(&channel_probe_ready, 0);
+  Thread sender = Thread.start_raw(_channel_sender, &channel, sizeof(channel));
+  while (!atomic_load(&channel_probe_ready)) sched_yield();
+  channel.close();
+  int rejected = 0;
+  try sender.join();
+  catch %(join-fail (errors ?errors)): {
+    List error = errors.list().car();
+    rejected = error.assoc(<code>) == <bad-state> &&
+               error.assoc(<detail>).list().assoc(<closed>) == 1;
+  }
+  sender.free();
+  EXPECT_TRUE(rejected);
+  EXPECT_INT_EQ(channel.receive().integer(), 12);
+  EXPECT_TRUE(channel.receive() is void);
+}
+
 static void channel_payload_ownership_is_unchanged(void) {
   $test.scoped();
   Channel channel = auto Channel.new(2);
@@ -632,7 +653,106 @@ static void channel_owned_receive_releases_transport_scope(void) {
   }
 }
 
+/* An unmanaged pthread has no Thread token or native-thread cleanup hook.
+   Repeated blocking calls use the Channel monitor without thread cleanup state. */
+static void *_channel_unmanaged_exchange(void *bytes) {
+  Channel channel = bytes;
+  Pool.thread_initialize();
+  for (int i = 0; i < 64; ++i) {
+    channel.send(i);
+    channel.receive();
+  }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void channel_unmanaged_blocking_calls(void) {
+  $test.scoped();
+  Channel channel = auto Channel.new();
+  pthread_t native;
+  Pool.thread_start();
+  EXPECT_INT_EQ(pthread_create(
+    &native, NULL, _channel_unmanaged_exchange, channel), 0);
+  for (int i = 0; i < 64; ++i) {
+    EXPECT_INT_EQ(channel.receive().integer(), i);
+    channel.send(i);
+  }
+  EXPECT_INT_EQ(pthread_join(native, NULL), 0);
+}
+
+static void channel_cancelled_waiters_pass_buffered_opportunities(void) {
+  $test.scoped();
+  for (int sending = 0; sending < 2; ++sending) {
+    Channel channel = auto Channel.new(1);
+    if (sending) channel.send(12);
+    Thread stopped[8];
+    for (int i = 0; i < 8; ++i)
+      stopped[i] = Thread.start_raw(
+        sending ? _channel_sender : _channel_receiver, &channel, sizeof(channel));
+    for (int i = 0; i < 8; ++i) stopped[i].stop();
+    Thread live = Thread.start_raw(
+      sending ? _channel_sender : _channel_receiver, &channel, sizeof(channel));
+    if (sending) {
+      EXPECT_INT_EQ(channel.receive().integer(), 12);
+      EXPECT_INT_EQ(channel.receive().integer(), 71);
+      EXPECT_INT_EQ(live.join().integer(), 1);
+    }
+    else {
+      channel.send(73);
+      EXPECT_INT_EQ(live.join().integer(), 73);
+    }
+    live.free();
+    for (int i = 0; i < 8; ++i) _channel_expect_stopped(stopped[i]);
+  }
+}
+
+static void channel_registration_reuses_idle_and_preserves_stop(void) {
+  $test.scoped();
+  Channel first = auto Channel.new(1), second = auto Channel.new(1);
+  int stopped = 0;
+  Thread.run([
+    %!(void) => {
+      for (int i = 0; i < 128; ++i) {
+        first.send(i);
+        if (first.receive() != i) return 0;
+        second.send(i);
+        if (second.receive() != i) return 0;
+      }
+      Thread self = x2c_thread_wait_owner();
+      self.stop();
+      self.stop();
+      int caught = 0;
+      try first.send(999);
+      catch %(bad-state (operation "Thread.stop") (cancelled 1)): caught++;
+      try second.receive();
+      catch %(bad-state (operation "Thread.stop") (cancelled 1)): caught++;
+      return caught;
+    }
+  ], %!(Var result) using &stopped => { stopped = result.integer(); });
+  EXPECT_INT_EQ(stopped, 2);
+  first.send(7);
+  EXPECT_INT_EQ(first.receive().integer(), 7);
+}
+
+static void channel_stop_broadcast_keeps_unrelated_receiver_live(void) {
+  $test.scoped();
+  for (int i = 0; i < 16; ++i) {
+    Channel channel = auto Channel.new();
+    Thread stopped = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
+    Thread live = Thread.start_raw(_channel_receiver, &channel, sizeof(channel));
+    stopped.stop();
+    channel.send(83);
+    EXPECT_INT_EQ(live.join().integer(), 83);
+    live.free();
+    _channel_expect_stopped(stopped);
+  }
+}
+
 void channel_suite(void) {
+  $test.run(channel_stop_broadcast_keeps_unrelated_receiver_live);
+  $test.run(channel_registration_reuses_idle_and_preserves_stop);
+  $test.run(channel_unmanaged_blocking_calls);
+  $test.run(channel_cancelled_waiters_pass_buffered_opportunities);
   $test.run(channel_owned_receive_releases_transport_scope);
   $test.run(channel_owned_plain_map_moves_and_grows);
   $test.run(channel_owned_plain_array_moves_and_grows);
@@ -661,5 +781,6 @@ void channel_suite(void) {
   $test.run(channel_rendezvous_commit_survives_later_stop);
   $test.run(channel_stopped_rendezvous_peer_is_not_matched);
   $test.run(channel_close_rejects_unaccepted_rendezvous_send);
+  $test.run(channel_close_rejects_blocked_bounded_send);
   $test.run(channel_payload_ownership_is_unchanged);
 }

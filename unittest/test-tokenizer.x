@@ -98,7 +98,7 @@ static void tokenizer_percent_after_closing_delimiter(void) {
     { "$scope() { } %(a)", "%(" },
     { "with x { } %(a)", "%(" },
     { "case 1: { } %(a)", "%(" },
-    { "switch (x) { } %<<a>>", "%<<" },
+    { "switch (x) { } %<a>", "%<" },
     { "match (x) { } %(a)", "%(" },
     { "if (x > 0) %(a)", "%(" },
     { "while (n > 6) %(a)", "%(" },
@@ -115,7 +115,13 @@ static void tokenizer_percent_after_closing_delimiter(void) {
     { "a[i] %(n)", "%" },
     { "(T) %\"a\"", "%\"" },
     { "(T) %[a]", "%[" },
-    { "(T) %<<a>>", "%<<" }
+    { "(T) %<a>", "%" },
+    { "x %<a>", "%" },
+    { "x % <a>", "%" },
+    { "x /* operand */ %<a>", "%" },
+    { "a[i] %<a>", "%" },
+    { "if (x) %<a>", "%<" },
+    { "return %<a>", "%<" }
   };
   for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
     String source = String.new(cases[i][0]);
@@ -254,12 +260,12 @@ static void tokenizer_list_reader_prefixes(void) {
 
 
 static void tokenizer_symbol_set_quotes_hold_the_terminator(void) {
-  Tokenizer tokenizer = Tokenizer.new("%<<\"|=\" \">>\" plain>>", <x2c>);
+  Tokenizer tokenizer = Tokenizer.new("%<\"|=\" \">>\" plain>", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
-    <"%<<">, <lit-atom>, <lit-atom>, <lit-atom>, <">>">, <eof>
+    <"%<">, <lit-atom>, <lit-atom>, <lit-atom>, <">">, <eof>
   };
-  char *texts[] = { "%<<", "\"|=\"", "\">>\"", "plain", ">>" };
+  char *texts[] = { "%<", "\"|=\"", "\">>\"", "plain", ">" };
   for (int i = 0; i < 6; i++) {
     Token token = tokenizer.next();
     EXPECT_INT_EQ(token.type, expected[i]);
@@ -267,11 +273,11 @@ static void tokenizer_symbol_set_quotes_hold_the_terminator(void) {
   }
   EXPECT_INT_EQ(tokenizer.status(), <ok>);
 
-  // An unterminated entry fails the scan instead of truncating at `>>`.
-  Tokenizer unterminated = Tokenizer.new("%<<\"open>>", <x2c>);
+  // An unterminated entry fails the scan instead of truncating at `>`.
+  Tokenizer unterminated = Tokenizer.new("%<\"open>", <x2c>);
   unterminated.scan();
   EXPECT_INT_EQ(unterminated.status(), <malformed>);
-  EXPECT_INT_EQ(unterminated.next().type, <"%<<">);
+  EXPECT_INT_EQ(unterminated.next().type, <"%<">);
   EXPECT_INT_EQ(unterminated.next().type, <error>);
   EXPECT_INT_EQ(unterminated.next().type, <eof>);
 }

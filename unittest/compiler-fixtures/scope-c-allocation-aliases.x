@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 meta int allocation_aliases(void) {
-  Scope.retain();
+  Scope.open();
   char *copy = xmemdup("copy", 5);
   char *buffer = xmalloc(8);
   memcpy(buffer, copy, 5);
@@ -14,7 +14,7 @@ meta int allocation_aliases(void) {
   xfree(copy);
   xfree(buffer);
   xfree(NULL);
-  Scope.release();
+  Scope.close();
   return result;
 }
 

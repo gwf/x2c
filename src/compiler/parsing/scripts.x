@@ -165,6 +165,7 @@ static void _append_script_main(Compiler c, Array statements) {
   stream = stream.append(tokens, kept);
   Tokenizer template = Tokenizer.new(script_main, <x2c>);
   template.scan();
+  _retag_keywords(template);
   for (Token token = template.tokens; token.type != <eof>; token++) {
     if (token.text == "x2c_script_statements")
       stream = _append_runs(stream, tokens, statements);

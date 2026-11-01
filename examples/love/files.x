@@ -9,8 +9,7 @@ int main(int argc, char **argv) {
   printf("whole file (%d bytes):\n%s", text.len(), text);
 
   // Or stream lines, keeping the close beside the open.
-  File input = path.open("r");
-  defer input.close();
+  auto File input = path.open("r");
   long total = 0;
 
   // Skip blank lines; each remaining row has three valid longs.

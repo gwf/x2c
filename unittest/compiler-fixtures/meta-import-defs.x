@@ -8,7 +8,7 @@
     definitions it reaches, and the storage class written here says what it
     emits. `static` gives that unit its own copy; public names the one copy
     the program links, which the reaching unit's header exports. See
-    `plans/meta-functions.md`.
+    `plans/archive/meta-functions.md`.
 */
 
 #include "meta-import-nested.x"

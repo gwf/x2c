@@ -51,6 +51,32 @@ static void _frame_trim(ExceptionFrame * frame, int unwinding);
 
 static void _cleanup_drain(X2CCleanup * watermark);
 
+#include "error.h"
+
+
+
+
+void * x2c_exception_execution_new(void){
+  ExceptionThreadState saved = calloc(1, sizeof(struct ExceptionThreadState));
+  if(! saved){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/exception.x",.function = "x2c_exception_execution_new",.line = 58,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
+    __builtin_unreachable();
+  }
+  return saved;
+}
+
+void x2c_exception_execution_swap(void * backing){
+  ExceptionThreadState saved = backing;
+  struct ExceptionThreadState previous = exception_thread;
+  exception_thread = * saved;
+  * saved = previous;
+}
+
+void x2c_exception_execution_free(void * backing){
+  free(backing);
+}
+
 void x2c_cleanup_push(X2CCleanup * record){
   if(! record || ! record -> fn) _fatal("invalid cleanup registration");
   ExceptionThreadState state = _thread();

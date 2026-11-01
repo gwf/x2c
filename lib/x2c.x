@@ -32,6 +32,7 @@
 #include "string/string.x"
 #include "symbol.x"
 #include "symbolset.x"
+#include "task.x"
 #include "thread-state.x"
 #include "thread.x"
 #include "tokenizer.x"

@@ -187,26 +187,6 @@ Releases both streams when a managed local leaves its block.
 
 Source: `lib/net.x`
 
-## Runtime-internal callables
-
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`x2c_net_accept_fd`](#x2c_net_accept_fd) | Internal descriptor handoff for the HTTP acceptor. |
-
-### Functions
-
-#### x2c_net_accept_fd
-
-`int x2c_net_accept_fd(Listener listener)`
-
-Internal descriptor handoff for the HTTP acceptor. Returns an owned fd,
-or -1 after Listener.stop, with the same failure behavior as accept.
-
-Source: `lib/net.x`
-
 ## Public types
 
 | Type | Kind | Summary |

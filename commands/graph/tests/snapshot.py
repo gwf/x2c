@@ -338,6 +338,7 @@ dependencies = ["core"]
     assert set(configurations) == {"core", "app"}, configurations
     assert configurations["core"]["cpp_args"] != configurations["app"]["cpp_args"]
     assert configurations["core"]["include_dirs"] != configurations["app"]["include_dirs"]
+    assert configurations["app"]["cpp_expansion"] == 0, configurations
     types = p.find(snapshot, kind="type", name="SnapshotConfigured")["results"]
     assert len(types) == 2 and len({row["id"] for row in types}) == 2, types
     assert {row["domain"]: row["resolved_type"] for row in types} == {

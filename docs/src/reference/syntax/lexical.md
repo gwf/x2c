@@ -63,14 +63,18 @@ The initial keyword table is exactly:
 
 ```text
 associated auto break case catch char const continue default defer delegate
- do double else enum extern finally float for goto if import in inline int
+ do double else enum expand extern finally float for goto if import in inline int
  long match protocol raise register restrict return short signed sizeof
  static struct switch threaded try typedef union unsigned void volatile while
 ```
 
-The scanner emits `in` and `match` as keywords. After scanning, the compiler
-retags each to `ident` unless its context is the operator or statement form;
-see [compiler reclassification](#compiler-reclassification-and-preprocessing).
+The table selects lexical modes, not language-wide identifier reservation.
+After scanning and optional CPP, the compiler retags the nine contextual x2c
+additions and the predefined `expand` alias to `ident`; `in` and `match`
+retain their existing lookahead rules.
+C keywords and `defer` stay reserved. Percent and angle literal choices are
+already settled before retagging; see [compiler reclassification](#compiler-reclassification-and-preprocessing)
+and [contextual keywords](../language.md#contextual-keywords).
 
 
 Matching is case-sensitive. The following spellings normalize token type
@@ -94,13 +98,13 @@ The C operator scanner chooses the longest supported prefix from this set:
 
 ```text
 ... >>= <<= === !==
--> ++ -- << >> <= >= == != && ||
+-> ++ -- << >> <= >= == != ~= && ||
 += -= *= /= %= &= ^= |=
 - , ; : ! ? . ( ) [ ] { } * / & % ^ + < = > | ~ @
 ```
 
 `=>` is two tokens: `=` then `>`. `$`, `$(`, `@(`, `${`, `?(`,
-`%(`, `%[`, `%{`, `%<<`, `%"`, and `%!` are handled by mode dispatch,
+`%(`, `%[`, `%{`, `%<`, `%"`, and `%!` are handled by mode dispatch,
 not by this operator scanner. The same bytes can therefore have different
 roles in different modes.
 
@@ -197,9 +201,9 @@ or a comment opener. Backslash quotes the next byte for boundary recognition;
 a final backslash reports `incomplete`. Quoted Array/Map atoms additionally
 stop before `:`, `]`, or `}`. Comma already ends an atom.
 
-A bare SymbolSet atom stops before whitespace, `$`, `@`, or `>>`.
+A bare SymbolSet atom stops before whitespace, `$`, `@`, or `>`.
 Backslash quotes the next byte. A leading `"` instead scans a quoted Symbol
-spelling without angle brackets, so `>>` inside quotes is content.
+spelling without angle brackets, so `>` inside quotes is content.
 Other punctuation can belong to a bare set atom. Dispatch still claims a
 leading comment, digit, apostrophe, or `#` before the set-atom scanner runs.
 
@@ -221,7 +225,7 @@ a digit, and numbers at `.` followed by a digit.
 | `array`, `map` | Common rules; data prefixes; data punctuation; collection atom as `lit-atom` |
 | `list` | Data prefixes; data punctuation; common rules; atom as `lit-atom` |
 | `lisp` | Lisp `$` reference; reader punctuation/signed number/Symbol; common rules; atom as `ident` |
-| `symbol-set` | Common rules; `>>`; `$`/`@`; angle Symbol; set atom as `lit-atom` |
+| `symbol-set` | Common rules; `>`; `$`/`@`; angle Symbol; set atom as `lit-atom` |
 | `string` | `$(`, `${`, or `$` reference; closing `"`; segment scanner as `segment` |
 
 Data-prefix rules recognize `void` as a keyword only in quoted Array/Map
@@ -260,7 +264,7 @@ Other recognized tokens leave the mode unchanged.
 | --- | --- | --- |
 | Code | `{` | Push `x2c` |
 | Code | `}` | Pop if stack depth exceeds one |
-| Code | `%(`, `%[`, `%{`, `%<<`, `%"` | Push `list`, `array`, `map`, `symbol-set`, `string`, respectively |
+| Code | `%(`, `%[`, `%{`, `%<`, `%"` | Push `list`, `array`, `map`, `symbol-set`, `string`, respectively |
 | Code | `%!` | Emit lambda prefix; remain in code |
 | `x2c-par` | `(` / `)` | Push `x2c-par` / pop |
 | Data (`list`, `array`, `map`) | `(` | Push `list` |
@@ -269,7 +273,7 @@ Other recognized tokens leave the mode unchanged.
 | Data | `${` | Push `x2c` |
 | `list` | `?(` | Push `x2c-par` |
 | `list`, `array`, `map` | Matching `)`, `]`, `}` | Pop corresponding mode |
-| `symbol-set` | `>>` | Pop |
+| `symbol-set` | `>` | Pop |
 | `string` | `$(` / `${` / `"` | Push `x2c-par` / push `x2c` / pop |
 
 Root `lisp` does not pop on `)`. The reader checks list structure.
@@ -286,10 +290,10 @@ ident lit-int lit-float lit-char* lit-char lit-atom lit-symbol
 ) ] } " ++ --
 ```
 
-`%(`, `%{`, and `%!` scan `%` as modulo after an operand, except after a
+`%(`, `%{`, `%<`, and `%!` scan `%` as modulo after an operand, except after a
 control condition, a recognized statement block, or at a layout statement
-start. `%"`, `%[`, and `%<<` open literals regardless of the previous token.
-An eligible `%<` without the second `<` is malformed.
+start. `%"` and `%[` open literals regardless of the previous token.
+Thus `x %<foo>` scans as `x`, `%`, and the Symbol `<foo>`.
 
 A control condition is a `)` whose matching ordinary `(` follows `if`,
 `while`, `for`, or `switch`. A statement block is a `}` whose matching
@@ -360,10 +364,16 @@ examples.
 
 ## Compiler reclassification and preprocessing
 
-After scanning/layout, `Compiler.tokenize` reports malformed tokens, calls
-`scan_conditionals`, then `_retag_keywords`. This last operation differs
-from the raw tokenizer's operand-context predicate.
+After scanning/layout, `Compiler.tokenize` reports malformed tokens, performs
+optional CPP expansion, calls `scan_conditionals`, then `_retag_keywords`.
+This last operation differs from the raw tokenizer's operand-context predicate.
 
+- `try`, `catch`, `finally`, `raise`, `import`, `protocol`, `delegate`,
+  `associated`, and `expand` become `ident`. The `threaded` token also becomes `ident` when
+  its original text is `threaded`; C's `thread_local` and `_Thread_local`
+  retain their storage token. The parser recognizes contextual forms using
+  ordinary scope lookup and the following syntax. Token contents are not
+  rescanned when a same-named binding is found.
 - An `in` token retains that type only if the preceding significant kind is
   one of `ident`, the six atomic literal kinds, `)`, or `]`, and the next
   kind can begin an operand. That beginning set is `ident`, the six atomic

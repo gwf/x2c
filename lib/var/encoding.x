@@ -72,8 +72,6 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
 */
 int Var.is(Var var, Symbol tag) => var.tag() == tag;
 
-
-
 /** Returns the `Symbol` naming the exact family of `v`'s payload.
     The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
     registered custom object tag. Built-in families have one row in the

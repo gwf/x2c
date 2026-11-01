@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #define FORMAT(a, b) __attribute__((format(printf, a, b)))
-__attribute__((format(printf,2,3))) static int note(int level, const char * format, ...);
+FORMAT(2, 3) static int note(int level, const char * format, ...);
 
 static void release(int * value);
 
@@ -32,7 +32,7 @@ __attribute__((format(printf, 1, 2))) int report(const char * format, ...){
   return written;
 }
 
-__attribute__((format(printf,2,3))) static int note(int level, const char * format, ...){
+FORMAT(2, 3) static int note(int level, const char * format, ...){
   va_list args;
   va_start(args, format);
   printf("%d: ", level);

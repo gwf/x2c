@@ -104,8 +104,6 @@ module List _semantic_name(Emitter &e, Type type, String name) {
   return $(_tokens(e, base), @declarator);
 }
 
-
-
 /* Fold one layer at a time; typedef prefixes surround the final result. */
 static List _declarator(Emitter &e, List decl, List mods) {
   int typedefs = 0;

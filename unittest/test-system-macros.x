@@ -58,6 +58,31 @@ static void system_macro_dedent_folds_and_defers(void) {
   EXPECT_TRUE(computed == "left\nright");
 }
 
+macro Expression $dedent_block() => $dedent(%"
+  alpha
+    beta
+");
+
+macro Expression $dedent_forward(Expr $text) => $dedent($text);
+
+static void system_macro_dedent_folds_nested_and_escaped_literals(void) {
+  String nested = $dedent_block();
+  String forwarded = $dedent_forward("\r\n\talpha\r\n\t\tbeta\r\n\t");
+  EXPECT_TRUE(nested == "alpha\n  beta\n");
+  EXPECT_TRUE(forwarded == "alpha\r\n\tbeta\r\n");
+}
+
+static void system_macro_dedent_evaluates_forwarded_text_once(void) {
+  int calls = 0;
+  String input = "  alpha\n    beta\n";
+  String computed = $dedent_forward((calls++, input));
+  EXPECT_TRUE(computed == "alpha\n  beta\n");
+  EXPECT_INT_EQ(calls, 1);
+  String interpolated = $dedent_forward(%"  item $(++calls)\n    beta\n");
+  EXPECT_TRUE(interpolated == "item 2\n  beta\n");
+  EXPECT_INT_EQ(calls, 2);
+}
+
 static void system_macro_assert_reports_the_written_check(void) {
   int limit = 50;
   String check = NULL, site = NULL;
@@ -143,6 +168,8 @@ static void system_macro_type_members_reads_every_initializer(void) {
 
 void system_macros_suite(void) {
   $test.run(system_macro_dedent_folds_and_defers);
+  $test.run(system_macro_dedent_folds_nested_and_escaped_literals);
+  $test.run(system_macro_dedent_evaluates_forwarded_text_once);
   $test.run(system_macro_assert_reports_the_written_check);
   $test.run(system_macro_assert_passes_a_true_check);
   $test.run(system_macro_time_runs_its_target);

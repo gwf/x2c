@@ -91,8 +91,8 @@ typedef struct Compiler{
   List binding_rows, binding_sealed;
   Map object_macros;
   Cpp cpp;
+  int cpp_expansion;
   List command_macros;
-  String macro_export_source;
   List arms;
   Map arm_stacks;
   Array layout_marks, packed_marks;
@@ -244,6 +244,8 @@ void _x2c_skip_shallow_expression(Compiler c, int stop_at_comma);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
+List Compiler_full_parse_native(Compiler c, Map globs);
+
 int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_tokenize(Compiler c, char * text);
@@ -269,6 +271,10 @@ int Compiler_take_word(Compiler c, String word);
 void Compiler_next(Compiler c);
 
 int Compiler_at_word(Compiler c, String word);
+
+int Compiler_at_contextual(Compiler c, String word);
+
+int Compiler_with_form_starts(Compiler c);
 
 Symbol Compiler_peek(Compiler c, int steps);
 

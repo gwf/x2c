@@ -88,7 +88,7 @@ static macro Stmt $fail.frontend_cpp_failed(
 
 // symbol collection
 
-static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
+static const SymbolSet cpp_dumps = %<dump-cpp cpp-tokens dump-csym>;
 
 // source units
 
@@ -121,10 +121,12 @@ int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit) {
 int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
   (Compiler.stage_meta_in_process(), 1) && _start(
     frontend, NULL, unit, _unit_context(),
-    "void print(String text);\n"
-    "void println(String text);\n"
-    "int printf(const char *format, ...);\n"
-    "int puts(const char *text);\n") &&
+    $dedent(%"
+      void print(String text);
+      void println(String text);
+      int printf(const char *format, ...);
+      int puts(const char *text);
+    ")) &&
   unit.collect(frontend) && unit.parse();
 
 /** Scans one input into a fresh unit with its own isolated `Context`;
@@ -150,12 +152,14 @@ int ParsedUnit.parse(ParsedUnit &p) {
 /** Collects the preludes once, in a Context that shares the caller's pool,
     before any unit opens. Units, and the workers a translation forks, then
     replay them from the process cache. The collection runs as an empty
-    unit, whatever dump or symbol mode the request selects. Returns zero
-    after reporting a failure.
+    unit in the expansion mode of the request's units, whatever dump or
+    symbol mode the request selects. Returns zero after reporting a
+    failure.
 */
 int Frontend.load_prelude(Frontend frontend) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
+  request.cpp_expansion = _expands_cpp(&request);
   request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
   struct Frontend session = *frontend;
   session.request = &request;
@@ -193,6 +197,58 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
     return 0;
   }
   return _preprocess(c) && !c.error_count();
+}
+
+/** Collects a C source or header through the configured host preprocessor.
+    Unlike x2c collection, this does not walk native headers as x2c-owned
+    declarations. The preprocessed tokens and line markers stay in the unit;
+    original source text remains available in `source_texts`, and
+    `command_macros` holds every macro the host defined. Call
+    `Compiler.full_parse_native` for its typed source projection.
+*/
+int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend) {
+  Compiler c = unit.compiler;
+  if (!c.source_texts) c.source_texts = {};
+  c.source_texts[Path.absolute(c.filename)] = c.text;
+  struct Toolchain native = *frontend.toolchain;
+  native.keep_system_includes = -1;
+  native.cpp_args = %(@(native.cc_args) @(native.cpp_args));
+  struct Frontend configured = *frontend;
+  configured.toolchain = &native;
+  try {
+    Compiler cpp = _run_cpp(&configured, unit);
+    if (!unit.preprocessor_output) return 0;
+    _tokenize_cpp(cpp, unit.preprocessor_output);
+    unit.globals = {};
+    cpp.shallow_parse(unit.globals);
+    unit.globals = cpp.sym.global_symbols();
+    c.sym.seed_var_tags(unit.globals);
+    c.text = unit.preprocessor_output;
+    c.line_markers = cpp.line_markers;
+    c.source_facts = 0;
+    c.source_private = -1;
+    c.cpp = Cpp.isolated({});
+    c.tokenize(c.text);
+    c.preprocess_tokens();
+    String definitions = NULL, errors = NULL, dependencies = NULL;
+    native.cpp_args = native.cpp_args.append(%("-dD"));
+    int status = Toolchain.preprocess(
+      &native, c.filename, frontend.request.include_dirs, NULL,
+      definitions, errors, dependencies);
+    if (status) $fail.frontend_cpp_failed(c, _first_directive(c), status);
+    Compiler macros = Compiler.new_shared(c);
+    defer c.close_child(macros);
+    macros.filename = "<command-line>";
+    macros.source_facts = 1;
+    definitions = _take_line_markers(macros, definitions);
+    Cpp state = Cpp.isolated({});
+    macros.cpp = state;
+    macros.tokenize(definitions);
+    macros.preprocess_tokens();
+    c.command_macros = state.changes({}).sort();
+  }
+  catch %(malformed *): return 0;
+  return !c.error_count();
 }
 
 /* Collection supplies the macros of the unit's includes, so the unit's
@@ -289,7 +345,9 @@ static Compiler _begin_unit(
   c.source_map = request.source_map;
   c.sources = request.sources;
   c.package_source_dirs = request.package_dirs;
-  c.command_macros = Compiler.command_macros(request.cpp_args);
+  c.cpp_expansion = _expands_cpp(request);
+  if (c.cpp_expansion)
+    c.command_macros = Compiler.command_macros(request.cpp_args);
   c.source_facts = request.source_facts;
   c.source_primary = 1;
   if (c.source_facts) {
@@ -301,6 +359,10 @@ static Compiler _begin_unit(
   c.recovery_depth++;
   return c;
 }
+
+// `--no-cpp` turns off the expansion that `--cpp` requests.
+static int _expands_cpp(CliRequest request) =>
+  request.cpp_expansion && !request.no_cpp;
 
 static void _tokenize_session(Frontend frontend, Compiler c, String source) {
   c.filename = "<repl>";
@@ -321,8 +383,7 @@ static void _tokenize_input(
     text = _script(c, text, resolved ? String.new(source) : c.filename);
   c.text = text;
   c.include_dirs = frontend.include_dirs;
-  try c.unit_source = c.discover_module_source(c.filename, text, NULL);
-  finally Compiler.forget_provisional_entries();
+  c.unit_source = c.module_source(c.filename, text);
   if (c.unit_source) {
     text = c.unit_source.text;
     c.line_markers = c.unit_source.markers;
@@ -524,9 +585,7 @@ static String _take_line_markers(Compiler cpp, String text) {
   return "\n".join(kept.list_free());
 }
 
-/* The host preprocessor has already expanded every macro. */
 static void _tokenize_cpp(Compiler cpp, String text) {
-  cpp.cpp = Cpp.new({});
   cpp.tokenize(text);
   // Expanded CPP offsets cannot describe the physical input files.
   cpp.source_facts = 0;

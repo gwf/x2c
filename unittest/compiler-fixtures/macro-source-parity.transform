@@ -188,7 +188,7 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 37 "parity") ()) 
-      (expr (int) 
+      (expr () 
        (op + (expr (int) 
               (op + (expr (int) 
                      (op + (expr (int) 
@@ -222,11 +222,11 @@
                               (ident (binding 28 "generated_inline"))) 
                         (args (expr (int) (literal (int) "0"))))))) 
                (expr (int) (ident (binding 25 "generated_global"))))) 
-        (expr (int) (literal (int) "1")))))))) 
+        (expr () (ident (binding 38 "GENERATED_SOURCE_FLAG"))))))))) 
   (at 17 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 38 "printf"))) 
+     (call (expr () (ident (binding 39 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) 
         (call (expr ((func (("DirectValue"))) (int)) 

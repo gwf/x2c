@@ -248,13 +248,10 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int remove = end - start;
     int insert = values ? (int) values.length : 0;
     int delta = insert - remove;
+    auto $array copied = NULL;
     $array source = values;
-    int copied = 0;
-    if (insert > 0 && values.bytes == array.bytes) {
-      source = values.copy_elements();
-      copied = 1;
-    }
-    defer if (copied) Block_free((Block) source);
+    if (insert > 0 && values.bytes == array.bytes)
+      source = copied = values.copy_elements();
     if (delta > 0) {
       if (delta > INT_MAX - n) {
         size_t size = (size_t) n + (size_t) delta;
@@ -296,7 +293,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return removed;
   }
 
-  static int $array.find_element($array array, $element value) {
+  static int $array.index_element($array array, $element value) {
     $element *data = ($element *) array.bytes;
     int n = (int) array.length;
     for (int i = 0; i < n; i++) if (data[i] == value) return i;
@@ -393,15 +390,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Appends `value` and returns it.
       Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-      index limit, or `<alloc-fail>` when storage cannot grow.
+      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+      when storage cannot grow.
   */
   $element $array.push($array array, $element value) {
-    if ($boxed && (Var) value is void) raise %(void-op);
     if (array == NULL) {
       if ($boxed) return $zero;
       _bad_operation($owner, <push>);
     }
+    if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
     return value;
@@ -445,15 +443,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   /** Inserts `value` at the front and returns it, shifting elements right.
       This operation is O(n).
       Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<size-limit>` at the integer
-      index limit, or `<alloc-fail>` when storage cannot grow.
+      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
+      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
+      when storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
-    if ($boxed && (Var) value is void) raise %(void-op);
     if (array == NULL) {
       if ($boxed) return $zero;
       _bad_operation($owner, <unshift>);
     }
+    if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array.insert_element(0, value);
     return value;
@@ -465,8 +464,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       Boxed `Array` returns `void` for a null array or out-of-range index
       without mutation.
       Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
-      index, `<size-limit>` at the integer index limit, or
-      `<alloc-fail>` when storage cannot grow.
+      index, `<void-op>` for a `void` value, `<size-limit>` at the integer
+      index limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
     if ($boxed) {
@@ -589,7 +588,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   int $array.index($array array, $element value) {
     if (array == NULL) return -1;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return array.find_element(value);
+    return array.index_element(value);
   }
 
   /** Reports whether a native element equals `value`.
@@ -828,9 +827,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
 
   static $array $array.export_context($array array, Context source) {
     if (array == NULL || !source.owns(array)) return array;
-    $array staged = $prepare_export(array, source), committed = NULL;
-    defer if (staged != NULL && committed == NULL)
-      staged.free();
+    auto $array staged = $prepare_export(array, source);
     if (staged == NULL) {
       source.move_block(array);
       return array;
@@ -850,7 +847,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     staged.length = old_length;
     staged.cap = old_cap;
     staged.free();
-    committed = array;
+    staged = NULL;
     return array;
   }
 

@@ -75,6 +75,7 @@ static void scan_identifiers_and_keywords(void) {
     {"continue", <continue>}, {"default", <default>},
     {"defer", <defer>}, {"do", <do>}, {"double", <double>},
     {"else", <else>}, {"enum", <enum>}, {"extern", <extern>},
+    {"expand", <expand>},
     {"float", <float>}, {"finally", <finally>}, {"for", <for>},
     {"goto", <goto>}, {"if", <if>}, {"in", <in>},
     {"inline", <inline>}, {"match", <match>}, {"int", <int>},
@@ -99,9 +100,9 @@ static void scan_identifiers_and_keywords(void) {
   EXPECT_INT_EQ(scan_keyword("WHILE"), -1);
   EXPECT_INT_EQ(scan_keyword_type("continue_more", 13), 0);
 
-  Scope.retain();
+  Scope.open();
   EXPECT_INT_EQ(scan_keyword("while"), 5);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(scan_keyword("while"), 5);
 }
 

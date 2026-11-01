@@ -244,8 +244,6 @@ String Code.name(Code function) {
   return Code.binding_spelling(identity);
 }
 
-
-
 /** Implements `Code.binding_spelling`, declared in `lib/meta.x`. */
 String Code.binding_spelling(Var syntax) {
   _require_expansion("Code.binding_spelling");
@@ -278,8 +276,6 @@ List Code.native_signature(List syntax) {
   return active.expander.func_signature(Code.type(syntax));
 }
 
-
-
 /** Implements the compiler-backed captured-code type query. */
 Type Code.type(Code value) {
   _require_expansion("Code.type");
@@ -311,7 +307,7 @@ Type Code.type(Code value) {
 /** Implements `x2c_enclosing`, declared in `lib/meta.x`. */
 Code x2c_enclosing(Symbol what) {
   _require_expansion("x2c_enclosing");
-  if (!(what in %<<declarator statement function unit>>))
+  if (!(what in %<declarator statement function unit>))
     $fail.meta_sdk_enclosing_role(what);
   return active.expander.enclosing(what);
 }

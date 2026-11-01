@@ -142,7 +142,7 @@ static Array _local_binders(Definition &d, Map bindings) {
       continue;
     }
     bindings[identity] = _local_binder(
-      identity, %(tag-local $identity) in d.locals);
+      d.namespace, identity, %(tag-local $identity) in d.locals);
     fresh.push(identity);
   }
   return fresh;
@@ -151,7 +151,7 @@ static Array _local_binders(Definition &d, Map bindings) {
 static void _check_kinds(Definition &d) {
   foreach (List hole in d.parameters)
     if (!hole.assoc(<kind>)) {
-      String hole_spelling = hole.assoc(<binder>).str()[1:];
+      String hole_spelling = _hole_name(hole).str();
       $fail.macros_hole_untyped(d.c, d.start, hole_spelling);
     }
 }
@@ -161,11 +161,11 @@ static void _check_kinds(Definition &d) {
 static List _fresh_rows(Definition &d, Array locals) {
   Array fresh = [];
   foreach (Atom binder in d.using.list_free())
-    fresh.push(%($binder $(binder.str()[1:]) 1));
+    fresh.push(%($binder $(_binder_name(binder).str()) 1));
   foreach (List identity in locals) {
     Var spelling = d.locals[identity];
     Atom binder = _local_binder(
-      identity, %(tag-local $identity) in d.locals);
+      d.namespace, identity, %(tag-local $identity) in d.locals);
     fresh.push(%($binder $spelling 0));
   }
   return fresh.list_free();
@@ -287,11 +287,13 @@ module List _definition_node(Definition &d) {
 
 /* A template binder names one lexical declaration, including its namespace.
    Its ordinal keeps same-spelled declarations distinct within a template. */
-static Atom _local_binder(Var identity, int tag) {
+static Atom _local_binder(String scope, Var identity, int tag) {
   int number = 0;
   (void) Ast.try_binding(identity, number, NULL);
   int ordinal = INT_MAX - number;
-  return Atom.intern(%"?__macro_$(tag ? "tag" : "local")_$(ordinal)");
+  return Atom.intern(
+    scope ? %"?__macro_$(tag ? "tag" : "local")_$(scope)_$ordinal"
+          : %"?__macro_$(tag ? "tag" : "local")_$ordinal");
 }
 
 /* Replaces each binder or binding identity that `bindings` maps. A List
@@ -408,8 +410,6 @@ static List _unit_trailing(List hole, Map binders) {
     used |= _hole_key(hole, role) in binders;
   return used ? $(construction) : NULL;
 }
-
-
 
 module Atom _hole_key(List hole, String projection) =>
   Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));

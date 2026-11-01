@@ -183,8 +183,6 @@ static List _macro_slot(Resolve &r, List content) {
     r.c.lift_meta_expression(value, r.origin), r.origin);
 }
 
-
-
 static List _is_type(Resolve &r, List operand, Type target) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
@@ -257,8 +255,6 @@ static List _tadapt(Resolve &r, List target, List source) {
     }
   $fail.expressions_adapter_typedef(r.c, r.origin);
 }
-
-
 
 static List _segments(Resolve &r, List items) {
   Array resolved = [];

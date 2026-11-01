@@ -15,6 +15,7 @@
 #include "native-scalar-types.h"
 #include "rewrite.h"
 #include "system-macros.h"
+#include "task.h"
 #include "test.h"
 #include "thread.h"
 #include "var-tags.h"
@@ -56,7 +57,7 @@ List _scalar_access_record(Type type);
 
 Code register_rewrite(Code function, Code pattern, List holes);
 
-List _dedent_expand(Source text);
+List _dedent_expand(Code text);
 
 List _macros_location(void);
 
@@ -101,6 +102,8 @@ Code lambda_lift(Code node);
 Code lambda_closure(Code node);
 
 Code lambda_cells(Code node);
+
+List _x2c_expand_rows(List generator, List input);
 
 Code match_lowering(Code node);
 

@@ -55,7 +55,7 @@ static enum { FORMAT_LEFT = 1 };
 
 // The length modifiers and their native spellings in the same order.
 static const SymbolSet format_modifiers =
-  %<<none char short long llong ldouble>>;
+  %<none char short long llong ldouble>;
 static const char *const _format_modifiers[] = {"", "hh", "h", "l", "ll", "L"};
 
 /* One pass of `String.format`. The bytes from `literal` to `cursor` are
@@ -327,8 +327,6 @@ static Var _number(Format &f, Var arg, Symbol target) {
 static void _fail(Format &f, String reason) {
   _format_error(f.offset, reason);
 }
-
-
 
 static void _format_error(int offset, String reason) {
   raise %(format (offset $offset) (reason $reason));

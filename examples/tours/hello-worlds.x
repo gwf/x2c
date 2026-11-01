@@ -26,7 +26,7 @@ static void _hello_machine(void) {
   List tail = %("World"), words = %($hi @tail);                 // List + $/@
   Array back = [words[1], words[0]];                            // Array
   Map machine = {parts: back};                                  // Map + Symbol
-  Lisp lisp = Lisp.new(); defer lisp.destroy();                 // RT Lisp
+  auto Lisp lisp = Lisp.new();                                  // RT Lisp
   List parts = machine[<parts>].array();                        // methods
   List order = lisp.eval(%(reverse (quote $parts)));            // code/data
   (String hello, String world) = order;                         // destructure
@@ -127,8 +127,7 @@ static void _iterator_deltas(void) {
 
 /*  hello-world: runtime Lisp  */
 static void _runtime_lisp(void) {
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  auto Lisp lisp = Lisp.new();
   lisp.eval(%(defun greet (name)
     (string-append "Hello, " name "!")));
   String greeting = lisp.eval(%(greet "World"));

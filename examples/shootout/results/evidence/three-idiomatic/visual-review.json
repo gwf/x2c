@@ -1,0 +1,16 @@
+{
+  "run_id": "20261031T211435Z",
+  "forms": [
+    "runtime-source-size",
+    "implementation-profiles",
+    "runtime-loc-distributions",
+    "three-idiomatic-probes"
+  ],
+  "checks": [
+    "8 series and8 shared problems;75per-problem CSVrows;64shared star marks",
+    "labels, logarithmic axes and footer margins visually inspected; no clipping",
+    "focused plot distinguishes elapsed from total CPU and12-source-probe samples from56-full-run samples",
+    "Mandelbrot axis uses64,128,256,512,1024; cutoffs and batched-serial control visible",
+    "allPNG/SVG/PDF and CSV/renderers/provenance retained"
+  ]
+}

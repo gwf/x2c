@@ -1,7 +1,7 @@
 #include "x2c.x"
-// Only the host preprocessor expands the macro: x2c cannot decide the flag.
+// A host-symbol diagnostic retains this included file's source location.
 #ifndef FIXTURE_HOST_FLAG
-#define MISSING $(import "missing.xlisp")
+// The conditional preserves the host-preprocessor line-marker boundary.
 #endif
 
-MISSING
+$(import "missing.xlisp")

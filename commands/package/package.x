@@ -9,6 +9,7 @@
 */
 
 #pragma once
+#include "system-macros.x"
 #include "cli/cli.x"
 #include "compiler/compiler.x"
 
@@ -621,8 +622,10 @@ static List _locked_row(List rows, String name, String version) {
 static void _write_lock(String path, List rows) {
   Buffer out = auto Buffer.new(0);
   out.write(
-    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
-    "# name version kind platform url sha256\n");
+    $dedent(%"
+    # x2c lockfile. Written by x2c build; keep it with the manifest.
+    # name version kind platform url sha256
+    "));
   foreach (List row, rows) {
     out.write(" ".join(row));
     out.write_char('\n');

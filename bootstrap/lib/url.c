@@ -764,14 +764,12 @@ static inline int _x2c_gensym_proto_url_equal_0(Var a0, Var a1){
   return Url_equal(Var_url(a0), Var_url(a1));
 }
 
-void Buffer_free(Buffer);
+void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
-
-void Buffer_cleanup(Buffer);
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;

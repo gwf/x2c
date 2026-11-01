@@ -41,9 +41,11 @@ Rule
     `(CODE MATCHED)` Array, updated when that finding is suppressed.
     `unused` holds static definitions without bound references as
     `(NAME DISPLAY EMITTED LINE FIRST-LINE LAST-LINE)` for corpus review.
+    `entry` is the file whose translation proves fixes: the file itself, or
+    the module entry that splices it.
 */
 typedef struct Lint:
-  String path, text
+  String path, text, entry
   struct Token *tokens
   int count, lines, layout
   int *partner, *first
@@ -221,6 +223,27 @@ String lint_source_position(Compiler c, int position, int &offset):
       (newline < 0 ? c.text.len() : newline)
   return path
 
+/** Returns the line in `l`'s file of the compiler's token `token`, or 0
+    when the token lies in another file of the parsed unit. A module unit's
+    text splices its members' text, so its lines are not each file's. */
+int Lint.unit_line(Lint l, Compiler c, Token token):
+  int line
+  String file = c.token_source(token, line)
+  return Path.resolved_absolute(file) == Path.resolved_absolute(l.path) ?
+    line : 0
+
+/** Returns the line in `l`'s file of line `line` of the compiler's text, or
+    0 when no token starts on it or it lies in another file. */
+int Lint.text_line(Lint l, Compiler c, int line):
+  struct Token *tokens = c.tokenizer.tokens
+  int count = c.tokenizer.tokens.len(), low = 0, high = count
+  while low < high:
+    int middle = low + (high - low) / 2
+    if tokens[middle].line < line: low = middle + 1
+    else: high = middle
+  return low < count && tokens[low].line == line ?
+    l.unit_line(c, tokens + low) : 0
+
 /* The quoting a bracket opens: 1 for a quoted Lisp form, 0 for code, and
    `outer` for a bracket that keeps the enclosing state. */
 static int _quoting(Lint l, int at, int outer):
@@ -261,7 +284,7 @@ Lint Lint.new(String path, String text, Map selected):
   struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1
   Lint l = xcalloc(1, sizeof(struct Lint))
-  l.path = path, l.text = text, l.selected = selected
+  l.path = l.entry = path, l.text = text, l.selected = selected
   l.findings = [], l.edits = [], l.functions = [], l.unused = []
   l.allowances = {}
   l.layout = scanner.layout || path.endswith(".xp")

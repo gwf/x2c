@@ -168,7 +168,8 @@ static List _build(Helper &h) {
 static int _support_unit(List inputs) {
   if (inputs.len() != 1) return 0;
   String root = Compiler.cache_root();
-  return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
+  return root && Path.absolute(inputs.car()).startswith(
+    %"$(Path.absolute(root))/meta/support-");
 }
 
 /* Each owner with a group calls its table, and a table or a helper that
@@ -197,7 +198,6 @@ static void _scan(Helper &h, List inputs) {
   Compiler c = Compiler.new();
   c.sources = h.frontend.request.sources;
   c.include_dirs = h.frontend.include_dirs;
-  c.command_macros = Compiler.command_macros(h.frontend.request.cpp_args);
   foreach (String input in inputs) {
     String path = Path.absolute(input);
     Scan s = {
@@ -229,36 +229,16 @@ static int _file(Scan &s, String path) {
     return 0;
   String text = NULL;
   if (!s.request.sources.read(path, text)) return 0;
-  Tokenizer tokens = NULL;
-  text = _module_text(s, path, text, tokens);
-  if (!tokens) {
-    tokens = Tokenizer.new(text, <x2c>);
-    tokens.layout = Path.is_layout_source(path);
-    tokens.scan();
-    _preprocess(s, path, tokens);
-  }
+  text = _module_text(s, path, text);
+  Tokenizer tokens = Tokenizer.new(text, <x2c>);
+  tokens.layout = Path.is_layout_source(path);
+  tokens.scan();
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
       (Compiler.is_prelude_source(path) ||
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
-}
-
-/* Discover the same declarations that parsing sees. Signature lookahead
-   makes included macro exports available without running project meta code. */
-static void _preprocess(Scan &s, String path, Tokenizer tokens) {
-  Compiler c = Compiler.new_shared(s.c);
-  defer s.c.close_child(c);
-  c.filename = path;
-  c.tokenizer = tokens;
-  c.text = tokens.text;
-  DiagnosticsHold hold = c.diagnostics.hold();
-  with (c.recovery_depth = c.recovery_depth + 1) {
-    try c.preprocess_tokens();
-    catch %(malformed *): {}
-  }
-  c.diagnostics.release(hold, 0);
 }
 
 /* Only file-scope tokens count. Each arm reads the tokens that follow its
@@ -313,12 +293,12 @@ static int _include(Scan &s, String directive, String directory) {
 /* The file's text with its module block spliced. A malformed block leaves
    the text as written, for translation to report. */
 static String _module_text(
-  Scan &s, String path, String text, Tokenizer &tokens) {
+  Scan &s, String path, String text) {
   Compiler c = s.c;
   ModuleSource module = NULL;
   DiagnosticsHold hold = c.diagnostics.hold();
   with (c.recovery_depth = c.recovery_depth + 1) {
-    try module = c.discover_module_source(path, text, tokens);
+    try module = c.module_source(path, text);
     catch %(malformed *): module = NULL;
   }
   c.diagnostics.release(hold, 0);
@@ -431,7 +411,8 @@ static Array _modules(CliRequest request, Map packages) {
    `--no-cpp` builds a helper of its own. */
 static String _identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_text();
-  String cpp = h.frontend.request.no_cpp ? "no-cpp" : "cpp";
+  String cpp = h.frontend.request.no_cpp ? "no-cpp"
+    : h.frontend.request.cpp_expansion ? "expand-cpp" : "source";
   return %"$stamp\n$compiler\n$cpp\n$(_cc_flags().repr())\n"
     + %"$(h.entries.repr())\n"
     + %"$(h.flags.repr())\n$(h.include)\n$(h.toolchain.runtime_lib)\n"
@@ -745,7 +726,11 @@ static String _tables(Array built, int count) {
   out.write("#include \"x2c.h\"\n");
   foreach (int index in built)
     out.printf("Map x2c_module_targets_%d(void);\n", index);
-  out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
+  out.write(
+    $dedent(%"
+    Map x2c_meta_helper_table(int index) {
+      switch (index) {
+  "));
   foreach (int index in built)
     out.printf("    case %d: return x2c_module_targets_%d();\n", index, index);
   out.write("  }\n  return NULL;\n}\n");
@@ -833,8 +818,7 @@ static List _current(String directory) {
 static String _digest(String path) {
   if (path.startswith("cwd:")) path = path[4:];
   if (!SourceView.exists(NULL, path)) return "search:absent";
-  File input = fopen(path, "rb");
+  auto File input = fopen(path, "rb");
   if (!input) return NULL;
-  defer input.close();
   return %"$(Path.absolute(path)):$(input.sha256())";
 }

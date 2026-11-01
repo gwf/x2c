@@ -15,18 +15,24 @@ typedef struct MapSubInt {
   unsigned used, capacity, mask;
 } *MapSubInt;
 
-struct MapSubIntRecord { Substr key; int val; };
+struct MapSubIntRecord { Substr key; int val; unsigned cached_hash; };
 
 $map.scaffold(
   MapSubInt, struct MapSubIntRecord, Substr, int,
   _key, _value, _reinsert_error, _insert_error,
   "MapSubInt.reinsert", "MapSubInt.insert");
 
-$map.core.family(
+#include "group-match.h"
+
+$map.grouped.cached.records(
+  struct MapSubIntRecord, _record_hash, _remember_hash);
+
+$map.grouped.core.family(
   MapSubInt, struct MapSubInt, Substr, int,
-  unsigned, struct MapSubIntRecord,
+  struct MapSubIntRecord,
   _hash, _equal_key, _equal_value, _valid,
-  _key, _value, _reinsert_error, _insert_error);
+  _key, _value, _reinsert_error, _insert_error,
+  _record_hash, _remember_hash, 0, 0);
 
 $map.typed.publish(
   MapSubInt, Substr, int, mapsubint, <mapsubint>,
@@ -92,11 +98,11 @@ static Var _box_value(int count) => count;
 /* Source pointers may change during export, but contents and hashes do not.
    Reuse the table; consecutive views of one text share its export. */
 static MapSubInt _prepare_export(MapSubInt map, Context source) {
-  unsigned *hashes = map.hashes;
+  unsigned char *controls = map.hashes;
   struct MapSubIntRecord *entries = map.entries;
   String previous = NULL, exported = NULL;
   for (unsigned i = 0; i < map.capacity; ++i) {
-    if (!hashes[i]) continue;
+    if (controls[i] >= 128) continue;
     Substr *word = &entries[i].key;
     if (word.source != previous) {
       previous = word.source;

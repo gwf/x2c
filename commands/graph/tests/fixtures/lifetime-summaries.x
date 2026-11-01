@@ -39,58 +39,58 @@ static List _summary_converted(void) {
 }
 
 static char *summary_direct_escape(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_direct();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_transitive_escape(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_transitive();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_static_escape(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_static();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_recursive_seed_escape(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_recursive_seed(0);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_public_escape(void) {
-  Scope.retain();
+  Scope.open();
   char *result = summary_public();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_recursive_unknown(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_recursive();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_indirect_unknown(char *(*callback)(void)) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_indirect(callback);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_mixed_unknown(void) {
-  Scope.retain();
+  Scope.open();
   char *result = _summary_mixed(1);
-  Scope.release();
+  Scope.close();
   return result;
 }
 
@@ -102,16 +102,16 @@ static List summary_conversion_unknown(void) {
 }
 
 static char *summary_ambiguous_unknown(void) {
-  Scope.retain();
+  Scope.open();
   char *result = summary_ambiguous();
-  Scope.release();
+  Scope.close();
   return result;
 }
 
 static char *summary_missing_unknown(void) {
-  Scope.retain();
+  Scope.open();
   char *result = summary_missing();
-  Scope.release();
+  Scope.close();
   return result;
 }
 

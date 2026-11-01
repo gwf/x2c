@@ -119,7 +119,7 @@ struct Lisp{
 }
 ;
 
-_Thread_local static Lisp lisp_active;
+_Thread_local extern Lisp x2c_lisp_active;
 
 #include "var-adapters.h"
 typedef struct LispEnv{
@@ -139,6 +139,8 @@ typedef struct f8_evaluate___FreeNames{
 f8_evaluate___FreeNames;
 
 #define LISP_STACK_BYTES_MAX (6L << 20)
+extern _Thread_local unsigned long x2c_execution_stack_low;
+
 #if defined(__GLIBC__)
 extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
 
@@ -434,11 +436,11 @@ typedef struct _x2c_gensym_defer_env_10{
 }
 _x2c_gensym_defer_env_10;
 static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13);
+static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14);
 typedef struct _x2c_gensym_defer_env_11{
   const void * _x2c_gensym_defer_capture_12;
 }
 _x2c_gensym_defer_env_11;
-static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14);
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15);
 typedef struct _x2c_gensym_defer_env_12{
   const void * _x2c_gensym_defer_capture_13;  const void * _x2c_gensym_defer_capture_14;  const void * _x2c_gensym_defer_capture_15;
@@ -764,8 +766,8 @@ Var Lisp_eval(Lisp lisp, Var expression){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_0 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_0 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
           0
@@ -810,8 +812,8 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_1 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_1 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
           0
@@ -866,8 +868,8 @@ Var Lisp_eval_string(Lisp lisp, String source){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
-      Lisp _x2c_gensym_macro_prior_lisp_2 = lisp_active;
-      lisp_active = lisp;
+      Lisp _x2c_gensym_macro_prior_lisp_2 = x2c_lisp_active;
+      x2c_lisp_active = lisp;
       {
         _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_3 ={
           0
@@ -955,7 +957,7 @@ String String_new_len(const char *, int);
 Var Lisp_eval_file(Lisp l, File source){
   if(! _init_guard_) _file_init_();
   if(! source){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 171,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 173,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
     __builtin_unreachable();
   }
@@ -988,7 +990,7 @@ Var Lisp_eval_file(Lisp l, File source){
           Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
           Var _x2c_gensym_literal_part_1 = Var_box_ulong(size);
           {
-            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 176,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 178,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1265290), _x2c_gensym_literal_part_1, Symbol_var(25782888), int_var(limit));
             __builtin_unreachable();
           }
@@ -1000,7 +1002,7 @@ Var Lisp_eval_file(Lisp l, File source){
         Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
         Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 180,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/lisp/evaluate.x",.function = "Lisp_eval_file",.line = 182,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), _x2c_gensym_literal_part_3);
           __builtin_unreachable();
         }
@@ -1033,7 +1035,7 @@ Var lisp_source_function(Var callable){
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL)));
     Var _x2c_gensym_literal_part_6 = Symbol_var(Var_kind(callable));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/lisp/evaluate.x",.function = "lisp_source_function",.line = 188,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/lisp/evaluate.x",.function = "lisp_source_function",.line = 190,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1510312), _x2c_gensym_literal_part_5, Symbol_var(74754136), _x2c_gensym_literal_part_6);
       __builtin_unreachable();
     }
@@ -1057,14 +1059,14 @@ static List List_cdr(List);
 
 static Var f8_evaluate____eval(Lisp lisp, Var expr, LispEnv env){
   if(Var_is_void(expr)){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____eval",.line = 201,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____eval",.line = 203,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_atom(expr)){
     Var value;
     if(! f8_evaluate____lookup(lisp, env, expr, &(value))){
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____eval",.line = 204,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____eval",.line = 206,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_5, 46041901960, 1, Symbol_var(920394), expr);
       __builtin_unreachable();
     }
@@ -1101,7 +1103,7 @@ void x2c_exception_landed(ExceptionFrame *);
 static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv env){
   if(Var_is_row(callable, 9, 7, 3)) return f8_evaluate____apply_lambda(lisp, Var_lambda(callable), raw, env);
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____apply",.line = 219,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____apply",.line = 221,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }
@@ -1109,8 +1111,8 @@ static Var f8_evaluate____apply(Lisp lisp, Var callable, List raw, LispEnv env){
   Symbol special = f8_evaluate____special_id(lisp, fn);
   if(special) return f8_evaluate____apply_special(lisp, special, raw, env);
   int count = List_len(raw);
-  FuncArg narrow[8];
-  FuncArg * argv = count <= 8 ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
+  FuncArg narrow[LISP_NATIVE_ARG_MAX];
+  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
   {
     ExceptionFrame _x2c_gensym_exception_frame_0;
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
@@ -1170,7 +1172,7 @@ static Var _apply_values(Lisp lisp, Var callable, List values){
     return f8_evaluate____call_lambda(lisp, lambda, values);
   }
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/lisp/evaluate.x",.function = "_apply_values",.line = 241,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/lisp/evaluate.x",.function = "_apply_values",.line = 243,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }
@@ -1214,7 +1216,7 @@ static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env){
     {
       Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 276,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 278,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477439593778, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
         __builtin_unreachable();
       }
@@ -1225,7 +1227,7 @@ static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env){
   if(lisp -> protect_x2c && String_startswith(Var_str(name), _4)){
     Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 279,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 281,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1235,7 +1237,7 @@ static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env){
     Var _x2c_gensym_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 281,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 283,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1245,7 +1247,7 @@ static Var f8_evaluate____special_def(Lisp lisp, List args, LispEnv env){
     Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     Var _x2c_gensym_literal_part_12 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 286,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_def",.line = 288,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(1218550748), _x2c_gensym_literal_part_12, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1270,7 +1272,7 @@ Var lisp_truth(Var value);
 
 static Var f8_evaluate____cond_select(Lisp lisp, List args, LispEnv env){
   if(! List_truth(args)){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_select",.line = 302,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_select",.line = 304,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -1319,7 +1321,7 @@ static Func f8_evaluate____special_bind(Lisp lisp, List args, LispEnv env){
   if(! Var_is_row(signature, 9, 7, 4)){
     Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_bind",.line = 331,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_bind",.line = 333,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372535886, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_13, Symbol_var(46228810), signature);
       __builtin_unreachable();
     }
@@ -1329,7 +1331,7 @@ static Func f8_evaluate____special_bind(Lisp lisp, List args, LispEnv env){
   List native_signature = Var_list_payload(signature);
   Func fn = _native_target(native_name);
   if(! fn){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_bind",.line = 334,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____special_bind",.line = 336,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 31885018076120, 2, Symbol_var(920394), String_var(native_name), Symbol_var(39502), List_var(native_signature));
     __builtin_unreachable();
   }
@@ -1393,7 +1395,7 @@ static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth){
   if(List_len(form) != 2){
     Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____qq",.line = 372,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____qq",.line = 374,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_15, 4477439593778, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_14, Symbol_var(46228810), expr);
       __builtin_unreachable();
     }
@@ -1405,7 +1407,7 @@ static Var f8_evaluate____qq(Lisp l, Var expr, LispEnv env, int depth){
     Var _x2c_gensym_literal_part_15 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_gensym_literal_part_16 = Symbol_var(Var_kind(expr));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____qq",.line = 376,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____qq",.line = 378,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_16, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_15, Symbol_var(74754136), _x2c_gensym_literal_part_16);
       __builtin_unreachable();
     }
@@ -1480,7 +1482,7 @@ static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv env){
   if(List_len(form) != 2){
     Var _x2c_gensym_literal_part_17 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____splice",.line = 394,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____splice",.line = 396,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_17, 4477439593778, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_17, Symbol_var(46228810), expr);
       __builtin_unreachable();
     }
@@ -1491,7 +1493,7 @@ static List f8_evaluate____splice(Lisp lisp, Var expr, LispEnv env){
     Var _x2c_gensym_literal_part_18 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_gensym_literal_part_19 = Symbol_var(Var_kind(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____splice",.line = 397,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____splice",.line = 399,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_18, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_18, Symbol_var(74754136), _x2c_gensym_literal_part_19);
       __builtin_unreachable();
     }
@@ -1654,7 +1656,7 @@ static Var f8_evaluate____run_frame(Lisp lisp, Lambda lambda, const Var * values
     ;
     _x2c_gensym_macro_environment_11._x2c_gensym_defer_capture_12 =(const void *) & frame;
     X2CCleanup _x2c_gensym_defer_record_14 ={
-      .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_11
+      .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_11
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_14);
@@ -1673,7 +1675,7 @@ static Var f8_evaluate____run_frame(Lisp lisp, Lambda lambda, const Var * values
           {
             {
               X2CCleanup _x2c_gensym_defer_record_15 ={
-                .fn = _x2c_gensym_defer_cleanup_15, .env = 0
+                .fn = _x2c_gensym_defer_cleanup_14, .env = 0
               }
               ;
               x2c_cleanup_push(& _x2c_gensym_defer_record_15);
@@ -1818,8 +1820,8 @@ static Var f8_evaluate____tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv 
 
 static Var f8_evaluate____call_native(Lisp lisp, Func fn, List values){
   int count = List_len(values);
-  FuncArg narrow[8];
-  FuncArg * argv = count <= 8 ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
+  FuncArg narrow[LISP_NATIVE_ARG_MAX];
+  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg));
   {
     ExceptionFrame _x2c_gensym_exception_frame_1;
     x2c_exception_push(& _x2c_gensym_exception_frame_1);
@@ -1881,7 +1883,7 @@ static List f8_evaluate____cond_clause(Var clause){
     Var _x2c_gensym_literal_part_21 = clause;
     Var _x2c_gensym_literal_part_22 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_clause",.line = 545,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_clause",.line = 546,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_19, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_20, Symbol_var(46228810), _x2c_gensym_literal_part_21, Symbol_var(1510312), _x2c_gensym_literal_part_22);
       __builtin_unreachable();
     }
@@ -1893,7 +1895,7 @@ static List f8_evaluate____cond_clause(Var clause){
     {
       Var _x2c_gensym_literal_part_23 = String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_clause",.line = 549,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____cond_clause",.line = 550,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_20, 4477439593778, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_23, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
         __builtin_unreachable();
       }
@@ -1914,7 +1916,7 @@ static Var f8_evaluate____make_lambda(Lisp lisp, List args, LispEnv env, int mac
   if(List_len(args) != 2 || ! Var_is_row(List_car(args), 9, 7, 4)){
     Symbol operation = macro ? 27335838 : 808259842;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____make_lambda",.line = 567,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____make_lambda",.line = 568,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372535886, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(46228810), List_var(args));
       __builtin_unreachable();
     }
@@ -2094,7 +2096,7 @@ static List f8_evaluate____value_list(const Var * values, int count){
     if(Var_is_void(values[i])){
       Var _x2c_gensym_literal_part_24 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____value_list",.line = 676,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____value_list",.line = 677,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_22, 48270474208, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_24, Symbol_var(19800432), int_var(i));
         __builtin_unreachable();
       }
@@ -2115,7 +2117,7 @@ static void f8_evaluate____bind_params(Scope * frame, Lambda lambda, List args, 
       if(! List_truth(List_cdr(p))){
         Var _x2c_gensym_literal_part_25 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 690,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 691,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_23, 4372535886, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_25, Symbol_var(46228810), body);
           __builtin_unreachable();
         }
@@ -2127,7 +2129,7 @@ static void f8_evaluate____bind_params(Scope * frame, Lambda lambda, List args, 
     if(! List_truth(args)){
       Var _x2c_gensym_literal_part_26 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 694,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 695,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_24, 4477439593778, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_26, Symbol_var(46228810), body);
         __builtin_unreachable();
       }
@@ -2139,7 +2141,7 @@ static void f8_evaluate____bind_params(Scope * frame, Lambda lambda, List args, 
   if(List_truth(args)){
     Var _x2c_gensym_literal_part_27 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 698,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_params",.line = 699,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_25, 4477439593778, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_27, Symbol_var(46228810), body);
       __builtin_unreachable();
     }
@@ -2152,7 +2154,7 @@ static void f8_evaluate____bind_values(LispEnv local, Lambda lambda, const Var *
   if(count != List_len(lambda -> params)){
     Var _x2c_gensym_literal_part_28 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_values",.line = 704,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bind_values",.line = 705,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_26, 4477439593778, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_28, Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
@@ -2183,7 +2185,7 @@ static int f8_evaluate____local_lookup(LispEnv env, Var name, Var * out){
 static void f8_evaluate____spend_call(Lisp lisp){
   if(lisp -> call_exhausted || ++ lisp -> call_steps > lisp -> call_step_max){
     if(lisp -> interrupted){
-      static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____spend_call",.line = 752,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____spend_call",.line = 753,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_27, 20796606164008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))));
       __builtin_unreachable();
     }
@@ -2192,7 +2194,7 @@ static void f8_evaluate____spend_call(Lisp lisp){
       Var _x2c_gensym_literal_part_29 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       Var _x2c_gensym_literal_part_30 = String_var(String_join(NULL, cons(String_var(String_new("steps")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____spend_call",.line = 754,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____spend_call",.line = 755,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_28, 214157780846806, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_29, Symbol_var(1218550748), _x2c_gensym_literal_part_30);
         __builtin_unreachable();
       }
@@ -2212,7 +2214,7 @@ static void f8_evaluate____check_stack(Lisp lisp, Lambda lambda, unsigned long a
   if(used > lisp -> stack_allowance){
     Var _x2c_gensym_literal_part_31 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____check_stack",.line = 768,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____check_stack",.line = 769,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_29, 214157780846806, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_31, Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
@@ -2222,23 +2224,26 @@ static void f8_evaluate____check_stack(Lisp lisp, Lambda lambda, unsigned long a
 }
 
 static unsigned long f8_evaluate____stack_allowance(unsigned long at){
-  unsigned long low = 0;
+  unsigned long low = x2c_execution_stack_low;
+  if(! low){
 #if defined(__APPLE__)
-  pthread_t self = pthread_self();
-  low =(unsigned long) pthread_get_stackaddr_np(self) - pthread_get_stacksize_np(self);
+    pthread_t self = pthread_self();
+    low =(unsigned long) pthread_get_stackaddr_np(self) - pthread_get_stacksize_np(self);
 #elif defined(__GLIBC__)
-  pthread_attr_t attributes;
-  if(! pthread_getattr_np(pthread_self(), & attributes)){
-    void * address;
-    size_t size;
-    if(! pthread_attr_getstack(& attributes, & address, & size)) low =(unsigned long) address;
-    pthread_attr_destroy(& attributes);
-  }
+    pthread_attr_t attributes;
+    if(! pthread_getattr_np(pthread_self(), & attributes)){
+      void * address;
+      size_t size;
+      if(! pthread_attr_getstack(& attributes, & address, & size)) low =(unsigned long) address;
+      pthread_attr_destroy(& attributes);
+    }
 #endif
-  if(! low || low >= at) return(6L << 20);
+
+  }
+  if(! low || low >= at) return LISP_STACK_BYTES_MAX;
   unsigned long left = at - low;
   left -= left / 5;
-  return left <(6L << 20) ? left :(6L << 20);
+  return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
 }
 
 static void f8_evaluate____open_call_budget(Lisp lisp){
@@ -2250,7 +2255,7 @@ static void f8_evaluate____open_call_budget(Lisp lisp){
 static void f8_evaluate____arity(List args, int expected, String operation){
   int actual = List_len(args);
   if(actual != expected){
-    static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____arity",.line = 812,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____arity",.line = 814,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_30, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(expected), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -2263,7 +2268,7 @@ static void f8_evaluate____string_argument(Var value, String operation){
     Var _x2c_gensym_literal_part_33 = Symbol_var(Var_kind(value));
     Var _x2c_gensym_literal_part_34 = String_var(String_join(NULL, cons(String_var(String_new("String")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____string_argument",.line = 817,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____string_argument",.line = 819,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_31, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_32, Symbol_var(74754136), _x2c_gensym_literal_part_33, Symbol_var(1510312), _x2c_gensym_literal_part_34);
       __builtin_unreachable();
     }
@@ -2278,7 +2283,7 @@ static List f8_evaluate____list_argument(Var values){
     Var _x2c_gensym_literal_part_36 = Symbol_var(Var_kind(values));
     Var _x2c_gensym_literal_part_37 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____list_argument",.line = 823,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____list_argument",.line = 825,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_32, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_35, Symbol_var(74754136), _x2c_gensym_literal_part_36, Symbol_var(1510312), _x2c_gensym_literal_part_37);
       __builtin_unreachable();
     }
@@ -2292,7 +2297,7 @@ _Noreturn static void f8_evaluate____not_procedure(Var callable){
     Var _x2c_gensym_literal_part_38 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     Var _x2c_gensym_literal_part_39 = Symbol_var(Var_kind(callable));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____not_procedure",.line = 828,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____not_procedure",.line = 830,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_33, 995692317464, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_38, Symbol_var(74754136), _x2c_gensym_literal_part_39);
       __builtin_unreachable();
     }
@@ -2303,7 +2308,7 @@ _Noreturn static void f8_evaluate____not_procedure(Var callable){
 
 _Noreturn static Var f8_evaluate____bad_session(String operation){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bad_session",.line = 838,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/lisp/evaluate.x",.function = "f8_evaluate____bad_session",.line = 840,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_34, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
     __builtin_unreachable();
   }
@@ -2439,7 +2444,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 static Iter f6_native____iter_init(Iter destination, Var object, Var callable, Var state){
   if(! Iter_truth(destination)) return NULL;
   Func callback = f6_native____binary_callback_for(callable, _161);
-  if(callback) Func_move(callback, & lisp_active -> scope);
+  if(callback) Func_move(callback, & x2c_lisp_active -> scope);
   Iter_init(destination, object, callback ? f6_native____iter_next : NULL, state);
   destination -> aux = callback;
   return destination;
@@ -2593,7 +2598,7 @@ static Func f6_native____predicate_callback(Var callable){
 
 static void * f6_native____callback_owner(Var callable, String operation){
   if(Var_is_nil(callable)) return NULL;
-  if(! lisp_active){
+  if(! x2c_lisp_active){
     Var _x2c_gensym_literal_part_40 = String_var(operation);
     Var _x2c_gensym_literal_part_41 = String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL)));
     {
@@ -2603,11 +2608,11 @@ static void * f6_native____callback_owner(Var callable, String operation){
     }
 
   }
-  return lisp_active;
+  return x2c_lisp_active;
 }
 
 static Lisp f6_native____callback_session(void * owner, String operation){
-  if(! lisp_active || lisp_active != owner){
+  if(! x2c_lisp_active || x2c_lisp_active != owner){
     Var _x2c_gensym_literal_part_42 = String_var(operation);
     Var _x2c_gensym_literal_part_43 = String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL)));
     {
@@ -2673,7 +2678,7 @@ Lisp Lisp_kernel(void){
           }
           lisp -> scope = session;
           lisp -> user = Scope_new_named("Lisp user");
-          lisp -> call_step_max = 40000000;
+          lisp -> call_step_max = LISP_CALL_STEP_MAX;
           {
             Scope_push(& lisp -> scope);
             {
@@ -2841,7 +2846,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 
 Lisp Lisp_active(void){
   if(! _init_guard_) _file_init_();
-  return lisp_active;
+  return x2c_lisp_active;
 }
 
 Scope * Lisp_storage(Lisp lisp){
@@ -3170,7 +3175,7 @@ Var lisp_compare(Var a, Var b){
     Var _x2c_gensym_literal_part_55 = Symbol_var(Var_kind(a));
     Var _x2c_gensym_literal_part_56 = Symbol_var(Var_kind(b));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 147,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/lisp/primitives.x",.function = "lisp_compare",.line = 148,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_46, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_54, Symbol_var(26746169281416), _x2c_gensym_literal_part_55, Symbol_var(1286928228633480), _x2c_gensym_literal_part_56);
       __builtin_unreachable();
     }
@@ -3282,7 +3287,7 @@ static int f10_primitives____is_lisp_number(Var value){
 static Var f10_primitives____chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 238,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 239,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_47, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -3291,7 +3296,7 @@ static Var f10_primitives____chain(List values, String operation, int want, int 
     List _x2c_gensym_destructure_5 = p;
     left = List_getindex(_x2c_gensym_destructure_5, 0);
     right = List_getindex(_x2c_gensym_destructure_5, 1);
-    int order = Var_int(Var_convert_at(lisp_compare(left, right), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 241,.runtime = 1}; & _x2c_gensym_error_site_48; })));
+    int order = Var_int(Var_convert_at(lisp_compare(left, right), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/lisp/primitives.x",.function = "f10_primitives____chain",.line = 242,.runtime = 1}; & _x2c_gensym_error_site_48; })));
     if(expect ? order != want : order == want) return f10_primitives____bool(0);
   }
   return f10_primitives____bool(1);
@@ -3316,7 +3321,7 @@ static char * f10_primitives____string_charset(Var chars){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0);
 }
 
 void Scope_pop(void);
@@ -3327,7 +3332,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_2;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1);
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
@@ -3336,7 +3341,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_4;
-  lisp_active =(*(Lisp *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2);
+  x2c_lisp_active =(*(Lisp *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2);
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
@@ -3392,12 +3397,12 @@ static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
 }
 
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
-  _x2c_gensym_defer_env_11 * _x2c_gensym_defer_data_11 =(_x2c_gensym_defer_env_11 *) _x2c_gensym_defer_opaque_14;
-  Scope_cleanup((*(Scope *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_12));
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15){
-  Scope_pop();
+  _x2c_gensym_defer_env_11 * _x2c_gensym_defer_data_11 =(_x2c_gensym_defer_env_11 *) _x2c_gensym_defer_opaque_15;
+  Scope_cleanup((*(Scope *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_12));
 }
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){

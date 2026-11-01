@@ -259,8 +259,6 @@ module List _source_initializer(Emitter &e, List function) {
   return _initializer_macro(e, %(input @(inputs.list_free())), emitted);
 }
 
-
-
 /* Native macro arguments expand once before C sees the selected conversion.
    Generated bodies have no source-map directives; the original argument keeps
    its ordinary mapping at the invocation and its original storage scope. */

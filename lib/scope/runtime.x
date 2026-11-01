@@ -68,7 +68,7 @@ static void _initialize(void) {
   const char *accounting = getenv("X2C_SCOPE_ACCOUNTING");
   scope_accounting = accounting && strcmp(accounting, "1") == 0;
   ScopeThreadState state = _thread();
-  state.active = &state.root;
+  state.active = state.base_slot;
   scope_state = <running>;
   if (atexit(Scope_shutdown))
     _raw_fatal("could not register shutdown handler");

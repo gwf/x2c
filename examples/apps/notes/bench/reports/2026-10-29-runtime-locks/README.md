@@ -1,6 +1,6 @@
 # Runtime lock mitigation
 
-The runtime removes the synchronization selected in `plans/runtime-lock-mitigation.md`.
+The runtime removes the synchronization selected in `plans/archive/runtime-lock-mitigation.md`.
 Pool ownership, Channel commitment, Logger callbacks and descriptor registration retain their existing serialization. Public layouts and signatures are unchanged. Scope names remain enabled.
 
 ## Notes lookup comparison

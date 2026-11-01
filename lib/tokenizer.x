@@ -222,12 +222,11 @@ static int _percent_tokens(Tokenizer t) {
     return t.tokenize(2, Symbol.new_len(text, 2));
   }
   if (!strchr("([{<\"", next)) return 0;
-  /* Modulo of a string literal is never valid, and neither `[` nor `<<`
-     begins an operand, so these literals open after any token. */
-  int quoted = next == '"' || next == '[' || (next == '<' && text[2] == '<');
+  /* Modulo of a string literal is never valid, and `[` cannot begin an
+     operand, so these literals open after any token. */
+  int quoted = next == '"' || next == '[';
   if (!quoted && _percent_is_operator(t)) return _operator(t, 1);
-  if (next == '<' && text[2] != '<') return t.error();
-  return _operator(t, next == '<' ? 3 : 2);
+  return _operator(t, 2);
 }
 
 static int _angle_symbol_literal(Tokenizer tokenizer) {
@@ -394,7 +393,7 @@ static int _collection_atom(Tokenizer t) {
 
 static int _symbol_set_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
-  if (text[0] == '>' && text[1] == '>') return _operator(t, 2);
+  if (text[0] == '>') return _operator(t, 1);
   if (text[0] == '$' || text[0] == '@') return _operator(t, 1);
   if (text[0] == '<') {
     int length = scan_symbol_literal(text);
@@ -464,7 +463,7 @@ static int _operator(Tokenizer t, int len) {
         // A stray `}` at file scope is the parser's to diagnose or skip.
         case <"}">:      pop = t.modes.len() > 1; break;
         case <"%(">:    push = <list>; break;
-        case <"%<<">:   push = <symbol-set>; break;
+        case <"%<">:    push = <symbol-set>; break;
         case <"%\"">:   push = <string>; break;
       }
       break;
@@ -482,7 +481,7 @@ static int _operator(Tokenizer t, int len) {
         case <"}">: pop = mode == <map>; break;
       }
       break;
-    case <symbol-set>: if (op == <">>">) pop = 1;
+    case <symbol-set>: if (op == <">">) pop = 1;
       break;
     case <string>:
       switch (op) {

@@ -1,4 +1,5 @@
 /*  language.x -- executable fifteen-minute language tour */
+#include "system-macros.x"
 
 
 int main(void) {
@@ -20,7 +21,10 @@ int main(void) {
            facts[<values>], facts[<name>]);
 
     File input = auto tmpfile();
-    input.puts("alpha beta\nbeta gamma\n");
+    input.puts($dedent(%"
+      alpha beta
+      beta gamma
+    "));
     input.rewind();
     Map counts = {};
     foreach(String line in input)

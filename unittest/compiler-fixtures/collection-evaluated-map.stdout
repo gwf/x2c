@@ -7,7 +7,7 @@ note a
 note b
 note c
 note d
-{ "c": "d", "a": "b" }
+{ "a": "b", "c": "d" }
 { "answer": 2 }
 { "answer": { <key>: 42 }, 42: { "answer": 42 } }
 (row { "answer": 42 } { <key>: <n> })

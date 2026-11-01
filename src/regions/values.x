@@ -145,8 +145,6 @@ module Fact _slot(Walk &w, Var argument) {
   return fact && fact.points ? fact.points : fact;
 }
 
-
-
 module Fact _base(Walk &w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
@@ -182,7 +180,14 @@ module Fact _base(Walk &w, Var place, int &through) {
    local reaches. */
 static Fact _indexed_base(Walk &w, List base, Type type, int &through) {
   Fact fact = _fact_of(w, base, NULL);
-  if (!fact) return _base(w, base, through);
+  if (!fact) {
+    /* An inline array belongs to its containing object. A pointer field
+       names separate storage; its object's identity does not describe the
+       untracked pointee. */
+    if (type.is_array()) return _base(w, base, through);
+    through = 1;
+    return NULL;
+  }
   /* A C array local owns its elements; a parameter is a pointer. */
   through = !type.is_array() || fact.param >= 0;
   return fact;
@@ -209,8 +214,6 @@ static Fact _borrow(Walk &w, Var place, List &?named) {
   if (through) borrow.param = base.param;
   return borrow;
 }
-
-
 
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument

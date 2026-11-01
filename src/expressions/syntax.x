@@ -8,11 +8,11 @@
 /* C 6.5.3: `++` and `--` take a unary expression, and the unary operators
    take a cast expression. A primary expression begins with a name, a
    literal, a group, or a macro form. */
-static const SymbolSet increments = %<<"++" "--">>;
-static const SymbolSet unary_operators = %<<"&" "*" "+" "-" "~" "!">>;
+static const SymbolSet increments = %<"++" "--">;
+static const SymbolSet unary_operators = %<"&" "*" "+" "-" "~" "!">;
 static const SymbolSet primary_starts =
-  %<<ident in "$" "$(" "(" "{" "[" "%(" "%<<" "%[" "%{" "%\"" "%!" void
-     lit-char lit-int lit-float lit-char* lit-atom lit-symbol>>;
+  %<ident in "$" "$(" "(" "{" "[" "%(" "%<" "%[" "%{" "%\"" "%!" void
+     lit-char lit-int lit-float lit-char* lit-atom lit-symbol>;
 
 /** Parses the right operand of a pattern test at relational precedence. */
 List Compiler.parse_pattern_operand(Compiler c) =>
@@ -125,7 +125,7 @@ List Compiler.parse_primary(Compiler c) {
     case <"{">:       return _parse_composite(c);
     case <[>:         return _parse_bracket_array(c);
     case <"%(">:      return c.parse_list_literal();
-    case <"%<<">:     return c.parse_symbol_set_literal();
+    case <"%<">:      return c.parse_symbol_set_literal();
     case <"%[">:      return c.parse_array_literal();
     case <"%{">:      return c.parse_map_literal();
     case <"%\"">:     return c.parse_string_literal();
@@ -192,7 +192,7 @@ static List _parse_assignment_tail(Compiler c, List lhs) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (!op.is_assignment_op()) return lhs;
-  if (lhs.cadr().car() == <opt-ref>)
+  if (Type.is_optional_reference(lhs.cadr()))
     $fail.expressions_optional_ref_assign(c, origin);
   List targets = op == <=> ? _destructure_targets(c, lhs) : NULL;
   c.next();
@@ -292,8 +292,6 @@ static List _parse_type_test(Compiler c, List lhs) {
                 : test;
 }
 
-
-
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_cast_operand_after_parens(c) && c.test(<(>)) {
@@ -371,8 +369,6 @@ static List _parse_offsetof(Compiler c) {
   c.expect(<)>);
   return %(expr ("size_t") (offsetof $type $member));
 }
-
-
 
 static List _parse_postfix(Compiler c) =>
   _parse_postfix_tail(c, c.parse_primary());
@@ -831,7 +827,8 @@ static List _parse_postfix_arrow(Compiler c, List expr) {
   c.expect(<"->">);
   if (c.at_completion()) {
     List rows = c.postfix_completions(expr.cadr(), <"->">);
-    raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
+    raise %(replcomp (kind <members>) (rows $rows) (keywords ())
+                    (receiver $(expr.cadr())) (access ->));
   }
   Token first = c.token;
   List field = _parse_field_name(c, <"->">, expr);
@@ -850,7 +847,8 @@ static List _parse_postfix_dot(Compiler c, List expr) {
     Type receiver = _is_raw_string_literal(expr)
                   ? %("String") : expr.cadr();
     List rows = c.postfix_completions(receiver, <.>);
-    raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
+    raise %(replcomp (kind <members>) (rows $rows) (keywords ())
+                    (receiver $receiver) (access .));
   }
   Token first = c.token;
   List field = _parse_field_name(c, <.>, expr);
@@ -865,7 +863,8 @@ static List _parse_postfix_dot(Compiler c, List expr) {
   // Allocate a method identity before parsing its arguments.
   if (c.source_facts) {
     List binding = NULL;
-    List member = c.resolve_postfix_member(expr.cadr(), field, <.>, 1, binding);
+    List member = c.resolve_postfix_member(
+      expr.cadr(), field, <.>, 1, binding);
     c.record_source_reference(binding, member.caddr(), first, after);
   }
   else (void) c.resolve_postfix_member(expr.cadr(), field, <.>, 1, NULL);
@@ -953,7 +952,7 @@ static int _statement_expression_follows(Compiler c) {
    `:` belongs to no conditional, makes a brace a Map literal and a call
    argument a Map rest entry. */
 static int _at_map_entry(Compiler c) {
-  if (c.macro_starts_target_at(<map-entry>)) return 1;
+  if (c.macro_starts_entry()) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {

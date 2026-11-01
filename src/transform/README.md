@@ -16,6 +16,7 @@ Start with `transform.x` and `traversal.x`. Follow expressions into
 | [traversal.x](traversal.x) | Drives normalization, dispatches lowering rules, handles functions and sequences, and integrates support and cleanup. |
 | [expressions.x](expressions.x) | Rewrites typed expressions, including lambdas, indexing, slicing, casts, declarations, returns, and calls. |
 | [operators.x](operators.x) | Lowers truth tests, dynamic operators, assignments, comparisons, and protocol-based updates. |
+| [conditions.x](conditions.x) | Lowers `if` conditions and predicate values that contain pattern tests, placing each successful continuation inside the scope of its captures. |
 | [literals.x](literals.x) | Lowers collection, List, and interpolation forms and preserves evaluation order for construction, calls, and raises. |
 
 ## Related code

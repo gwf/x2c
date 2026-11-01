@@ -118,6 +118,8 @@ Atom Compiler_parse_keyword_definition(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, Symbol position);
 
+int Compiler_macro_starts_entry(Compiler c);
+
 Symbol Compiler_macro_invocation_collection(Compiler c);
 
 int Compiler_skip_named_type_declaration(Compiler c);

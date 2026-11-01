@@ -35,7 +35,7 @@ typedef struct ScopeAlloc {
 */
 typedef struct Scope {
   ScopeAlloc first;
-  struct Scope *down, *up;
+  struct Scope *down;
   struct Scope *parent, *children, *previous, *next;
 } *Scope;
 
@@ -61,9 +61,9 @@ protocol Cleanup(Scope);
 
 /* scope records
 
-   Each thread owns its root scope, the slot that allocation charges, the
-   stack of pushed slots, and one record per open retain. Named scopes share
-   one process-wide registry. */
+   Each thread installs one execution's base slot, active slot, pushed slots,
+   and open retain records. Its native root cell remains stable across
+   execution switches. Named scopes share one process-wide registry. */
 
 module typedef struct ScopeRetain {
   Scope scope, *slot;
@@ -81,7 +81,7 @@ module typedef struct ScopeRecord {
 } *ScopeRecord;
 
 module typedef struct ScopeThreadState {
-  Scope root, *active, **stack, int stack_size, stack_capacity;
+  Scope *base_slot, *active, **stack, int stack_size, stack_capacity;
   ScopeRetain *retains;
   int retain_count, retain_capacity;
 } *ScopeThreadState;

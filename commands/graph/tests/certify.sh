@@ -27,6 +27,12 @@ certify_check() {
 }
 
 check_regions() {
+  certify_check 1 certify_frame_store "$fixtures/certify.x"
+  grep -q 'violation .*certify_frame_store.*region' \
+    "$tmp/certify-certify_frame_store-line"
+  certify_check 3 certify_unknown_frame_store "$fixtures/certify.x"
+  grep -q 'stored through an unknown pointer' \
+    "$tmp/certify-certify_unknown_frame_store-line"
   certify_check 0 certify_safe "$fixtures/certify.x"
   grep -q '(status proved)' "$tmp/certify-certify_safe-line"
   grep -q '(obstacles)' "$tmp/certify-certify_safe-line"

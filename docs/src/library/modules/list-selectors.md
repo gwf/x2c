@@ -33,17 +33,17 @@ Optional compound `List` selectors.
 | [`List.cdddar`](#List.cdddar) | Returns the tail that `cdddar` selects from `value`. |
 | [`List.cddddr`](#List.cddddr) | Returns the tail that `cddddr` selects from `value`. |
 | [`List.cdddr`](#List.cdddr) | Returns the tail that `cdddr` selects from `value`. |
-| [`Var.caaaar`](#Var.caaaar) | Returns the element that `caaaar` selects from `value` as a `List`. |
-| [`Var.caaadr`](#Var.caaadr) | Returns the element that `caaadr` selects from `value` as a `List`. |
-| [`Var.caaar`](#Var.caaar) | Returns the element that `caaar` selects from `value` as a `List`. |
-| [`Var.caadar`](#Var.caadar) | Returns the element that `caadar` selects from `value` as a `List`. |
-| [`Var.caaddr`](#Var.caaddr) | Returns the element that `caaddr` selects from `value` as a `List`. |
-| [`Var.caadr`](#Var.caadr) | Returns the element that `caadr` selects from `value` as a `List`. |
-| [`Var.cadaar`](#Var.cadaar) | Returns the element that `cadaar` selects from `value` as a `List`. |
-| [`Var.cadadr`](#Var.cadadr) | Returns the element that `cadadr` selects from `value` as a `List`. |
-| [`Var.cadar`](#Var.cadar) | Returns the element that `cadar` selects from `value` as a `List`. |
-| [`Var.caddar`](#Var.caddar) | Returns the element that `caddar` selects from `value` as a `List`. |
-| [`Var.cadddr`](#Var.cadddr) | Returns the element that `cadddr` selects from `value` as a `List`. |
+| [`Var.caaaar`](#Var.caaaar) | Returns the element that `caaaar` selects from `value`. |
+| [`Var.caaadr`](#Var.caaadr) | Returns the element that `caaadr` selects from `value`. |
+| [`Var.caaar`](#Var.caaar) | Returns the element that `caaar` selects from `value`. |
+| [`Var.caadar`](#Var.caadar) | Returns the element that `caadar` selects from `value`. |
+| [`Var.caaddr`](#Var.caaddr) | Returns the element that `caaddr` selects from `value`. |
+| [`Var.caadr`](#Var.caadr) | Returns the element that `caadr` selects from `value`. |
+| [`Var.cadaar`](#Var.cadaar) | Returns the element that `cadaar` selects from `value`. |
+| [`Var.cadadr`](#Var.cadadr) | Returns the element that `cadadr` selects from `value`. |
+| [`Var.cadar`](#Var.cadar) | Returns the element that `cadar` selects from `value`. |
+| [`Var.caddar`](#Var.caddar) | Returns the element that `caddar` selects from `value`. |
+| [`Var.cadddr`](#Var.cadddr) | Returns the element that `cadddr` selects from `value`. |
 | [`Var.cdaaar`](#Var.cdaaar) | Returns the tail that `cdaaar` selects from `value` as a `List`. |
 | [`Var.cdaadr`](#Var.cdaadr) | Returns the tail that `cdaadr` selects from `value` as a `List`. |
 | [`Var.cdaar`](#Var.cdaar) | Returns the tail that `cdaar` selects from `value` as a `List`. |
@@ -283,7 +283,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caaaar(Var value)`
 
-Returns the element that `caaaar` selects from `value` as a `List`.
+Returns the element that `caaaar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -292,7 +292,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caaadr(Var value)`
 
-Returns the element that `caaadr` selects from `value` as a `List`.
+Returns the element that `caaadr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -301,7 +301,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caaar(Var value)`
 
-Returns the element that `caaar` selects from `value` as a `List`.
+Returns the element that `caaar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -310,7 +310,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caadar(Var value)`
 
-Returns the element that `caadar` selects from `value` as a `List`.
+Returns the element that `caadar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -319,7 +319,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caaddr(Var value)`
 
-Returns the element that `caaddr` selects from `value` as a `List`.
+Returns the element that `caaddr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -328,7 +328,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caadr(Var value)`
 
-Returns the element that `caadr` selects from `value` as a `List`.
+Returns the element that `caadr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -337,7 +337,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.cadaar(Var value)`
 
-Returns the element that `cadaar` selects from `value` as a `List`.
+Returns the element that `cadaar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -346,7 +346,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.cadadr(Var value)`
 
-Returns the element that `cadadr` selects from `value` as a `List`.
+Returns the element that `cadadr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -355,7 +355,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.cadar(Var value)`
 
-Returns the element that `cadar` selects from `value` as a `List`.
+Returns the element that `cadar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -364,7 +364,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.caddar(Var value)`
 
-Returns the element that `caddar` selects from `value` as a `List`.
+Returns the element that `caddar` selects from `value`.
 
 Source: `lib/list-selectors.x`
 
@@ -373,7 +373,7 @@ Source: `lib/list-selectors.x`
 
 `Var Var.cadddr(Var value)`
 
-Returns the element that `cadddr` selects from `value` as a `List`.
+Returns the element that `cadddr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 

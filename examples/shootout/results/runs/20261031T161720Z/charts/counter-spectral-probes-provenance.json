@@ -1,0 +1,38 @@
+{
+  "source_sha256": "4765f42770766eaab8f1a3fbfdc8a49dd6fc7075c901d40182fdb0676e4df740",
+  "source_sha256_by_variant": {
+    "knucleotide-before.x": "2ae922a964bb5a6a7258612fd2ac7a46cafcc2a06ab111b96c15286a6bb3ea11",
+    "knucleotide-counter.x": "440e541904423a42334234c1b4cd4423ce42f461e1ba53fe6b02f7f711e2e063",
+    "spectralnorm-before.x": "f46e4ddedccf08038cbb4fee5e5eefe78e6431ca9078b39e3b427697a1c6f411",
+    "spectralnorm-parallel.x": "ab45241a1733afac5fe8ce9a4dfb49613d389f59f73495792b902ffe2ac0d87d"
+  },
+  "revision": "424a35a9e12c44fc52a340c4a6e64d12ed772dd6",
+  "samples": 16,
+  "quiet_window": [
+    {
+      "captured_at_utc": "2026-10-31T16:02:40.960391+00:00",
+      "idle_percent": 92.78
+    },
+    {
+      "captured_at_utc": "2026-10-31T16:02:51.977029+00:00",
+      "idle_percent": 92.98
+    },
+    {
+      "captured_at_utc": "2026-10-31T16:03:03.064316+00:00",
+      "idle_percent": 90.47
+    },
+    {
+      "captured_at_utc": "2026-10-31T16:03:14.040676+00:00",
+      "idle_percent": 93.2
+    },
+    {
+      "captured_at_utc": "2026-10-31T16:03:25.027170+00:00",
+      "idle_percent": 94.99
+    },
+    {
+      "captured_at_utc": "2026-10-31T16:03:36.004698+00:00",
+      "idle_percent": 95.89
+    }
+  ],
+  "limit": "Pre-run quiet window; zero background activity throughout measurement is not established. Not canonical-size timing."
+}

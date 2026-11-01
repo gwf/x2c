@@ -15,7 +15,7 @@ usually supplied by `#include "x2c.x"`.
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `alias` | Contextual grammar | Name a source expression within a scope |
-| `$dedent`, `$assert`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$time` | Shipped, explicit `#include` | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -281,9 +281,9 @@ The block placement is equivalent to:
 ```x2c
 ~int main(void) {
 {
-  Scope.retain();
+  Scope.open();
   {
-    defer Scope.release();
+    defer Scope.close();
     { Array values = []; values.push(1); }
   }
 }
@@ -562,11 +562,13 @@ int main(void) {
 }
 ```
 
-A literal whose spelling carries no escape and no interpolation hole is
-dedented during translation and reaches C as a finished constant. Every other
-form calls `String.dedent` at run time, so an interpolated block means the same
-thing and costs one call. Use `String.dedent` directly on text that arrives
-from a file or an argument.
+A static String literal is dedented during translation and reaches C as a
+finished constant, including escaped literals and literals inside macros.
+Physical CR and CRLF source line endings become LF, as in ordinary String
+literals; explicit `\r\n` escapes remain CRLF.
+Other expressions call `String.dedent` at run time and evaluate their input
+once. An interpolated block therefore means the same thing and costs one call.
+Use `String.dedent` directly on text that arrives from a file or an argument.
 
 ### Report the check you actually wrote
 

@@ -34,7 +34,7 @@ Source: `lib/symbolset.x`
 
 Returns the bytes of a `SymbolSet` holding `symbols` in order, in a new
 byte `Block` owned by the active `Scope`. The compiler emits them for each
-`%<<...>>` literal. Members must be distinct: the table search does not
+`%<...>` literal. Members must be distinct: the table search does not
 end for a repeated `Symbol`.
 
 Source: `lib/symbolset.x`

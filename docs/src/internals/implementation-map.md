@@ -157,8 +157,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Builtin macros and their native prototypes: `etc/compiler-prelude.x`;
   the unit binding table: `src/meta-native/bindings.x`; declaration macros:
   `src/compiler/declarations/production.x`
-- Tests: macro import, template, decorator, and unsupported-Lisp-form
-  compiler fixtures; compile-time-macros and decorators examples
+- Tests: macro import, template, and decorator compiler fixtures;
+  compile-time-macros and decorators examples
 - See also: [compile-time macros](../reference/language.md#compile-time-macros)
 
 ### Package imports and `with` names
@@ -174,23 +174,24 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Module blocks
 
 - Splice the member files into the entry's text: `Compiler.module_source` in
-  `src/collect/collect.x`, called for a unit's text in `src/frontend.x`, for every
-  cold walk of an included file, and for the project `meta` scan in
+  `src/collect/splice.x`, called for a unit's text in `src/frontend.x`, for
+  every cold walk of an included file, and for the project `meta` scan in
   `src/meta-project.x`
 - Member positions: the unit's `line_markers` rows, read by
   `Compiler.token_source`, `Compiler.token_column`, and
   `Compiler.text_source` in `src/diagnostics.x`
 - Member dependencies and the entry's content hash: `FileWalk` in
-  `src/collect/collect.x`
+  `src/collect/walk.x`
 - The `module` storage class: `_module_storage_form` in `src/parse/units.x`
   retypes the word as `static` under `Compiler.module_declaration`
 - File-private statics: each marker row carries its file's prefix from
-  `_file_prefix` in `src/collect/collect.x`; `_declared_key` in `src/symtab/symtab.x`
-  respells a static's key with `Compiler.private_prefix` and
-  `Compiler.declared_spelling`, which records prefixed spellings so derived
-  names keep theirs; `Sym.get` and `_lookup_from` try the current
-  file's key first, and `Compiler.unprefixed` restores the short name for
-  Var tags and descriptors
+  `_file_prefix` in `src/collect/splice.x`; `Sym.declared_key` in
+  `src/symtab/declarations.x` respells a static's key with
+  `Compiler.private_prefix` and `Compiler.declared_spelling` in
+  `src/symtab/namespaces.x`, which records prefixed spellings so derived
+  names keep theirs; `Sym.get` and `_lookup_from` in `src/symtab/bindings.x`
+  try the current file's key from `_file_key` first, and
+  `Compiler.unprefixed` restores the short name for Var tags and descriptors
 - Tests: the `module-block` and `module-storage-class` compiler fixtures
 - See also: [module blocks](../reference/language.md#module-blocks)
 

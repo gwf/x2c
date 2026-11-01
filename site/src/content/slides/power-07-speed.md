@@ -5,7 +5,7 @@ tab: speed
 title: Reads like Python, runs like C.
 links:
   - label: The shootout
-    href: https://github.com/gwf/x2c/blob/main/examples/shootout/README.md
+    href: https://github.com/gwf/x2c/blob/main/examples/shootout-unofficial/README.md
 ---
 
 ```x2c

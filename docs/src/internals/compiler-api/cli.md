@@ -194,7 +194,7 @@ Source: `src/cli/requests.x`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, native_modules, extensions; Map collection_packages; String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, label, state_seed; String cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file, Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols; int force, rebuild, clean; int fatal_warnings, no_interfaces; SourceView sources; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, native_modules, extensions; Map collection_packages; String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, label, state_seed; String cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file, Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols, cpp_expansion; int force, rebuild, clean; int fatal_warnings, no_interfaces; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `CliRequest.parse` preserve CLI order. Copies are

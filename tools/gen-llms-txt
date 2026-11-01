@@ -6,6 +6,8 @@
     core language chapters. Relative links become published URLs and hidden
     sample lines are revealed because their leading `~` is book markup.
 */
+#include "system-macros.x"
+
 static Path root, book, summary, public_dir, index_path, full_path
 static const String site = "https://x2c-lang.dev"
 static const String docs = "https://x2c-lang.dev/docs/"
@@ -124,13 +126,19 @@ static List _render(void):
     if _full_text().contains(page): chapters.push(page)
 
   (String title, String paragraph) = _book_summary()
-  Array index_lines = [
-    "# x2c", "", %"> $paragraph", "",
-    %"[$title]($docs) contains every chapter.", "",
-    "## Single-file reference", "",
-    %"- [x2c language reference]($site/llms-full.txt): " +
-      String.join(", ", chapters.map(%!(String page) => entries[page].str())),
-    ""]
+  String chapter_names = String.join(
+    ", ", chapters.map(%!(String page) => entries[page].str()))
+  Array index_lines = [$dedent(%"
+    # x2c
+
+    > $paragraph
+
+    [$title]($docs) contains every chapter.
+
+    ## Single-file reference
+
+    - [x2c language reference]($site/llms-full.txt): $chapter_names
+  ")]
   Array optional = []
   foreach List section in sections:
     String heading = section.car()
@@ -150,11 +158,14 @@ static List _render(void):
   foreach String item in optional: index_lines.push(item)
   index_lines.push("")
 
-  Array full_lines = [
-    "# x2c language reference", "", %"> $paragraph", "",
-    %"These chapters come from [$title]($docs).",
-    "Each chapter follows a comment naming its published URL. Samples",
-    "include the lines the book hides behind an expander."]
+  Array full_lines = [$dedent(%"
+    # x2c language reference
+
+    > $paragraph
+
+    These chapters come from [$title]($docs).
+    Each chapter follows a comment naming its published URL. Samples
+    include the lines the book hides behind an expander.")]
   foreach String page in chapters:
     full_lines.push("")
     full_lines.push(%"<!-- $(_page_url(page)) -->")
@@ -207,10 +218,13 @@ whitespace = Regex.compile("\\s+")
 
 String usage = %"usage: $(self.basename()) [-h] [--write | --check]\n"
 if args.contains("-h") || args.contains("--help"):
-  printf("%s\noptions:\n"
-         "  -h, --help  show this help message and exit\n"
-         "  --write\n"
-         "  --check\n", usage)
+  printf($dedent(%"
+    %s
+    options:
+      -h, --help  show this help message and exit
+      --write
+      --check
+  "), usage)
   return 0
 List spec = %((--write) (--check))
 Map options = NULL

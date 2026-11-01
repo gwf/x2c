@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    A region is an `auto` block, a `Scope.retain` and `Scope.release`
+    A region is an `auto` block, a `Scope.open` and `Scope.close`
     pair, an `auto (&slot)` push, a `Pool.open` bracket, an initializer `auto`
     local, a Scope local that `Scope.destroy` ends, or the function's own
     storage, which an address taken with `&` borrows. The pass reads the
@@ -20,9 +20,11 @@
     finding there is an error, because a compile-time call frees its locals
     when it returns.
 
-    The warnings name departures from the lexical pattern. Raw C stores,
-    pointer arithmetic, callbacks, and storage the runtime did not allocate
-    stay outside them.
+    The warnings name departures from the lexical pattern. A raw C store
+    into unknown-lifetime storage does not establish frame retention after
+    return; only audit and meta walks report that possible escape. Pointer
+    arithmetic, callbacks, and storage the runtime did not allocate remain
+    outside the model.
 */
 
 #pragma once

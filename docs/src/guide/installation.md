@@ -33,6 +33,146 @@ runnable examples, an empty package directory, and license. With no `PREFIX`,
 `bin/x2c-<branch>`, links `bin/x2c` to that copy, and installs the shipped
 commands under `libexec/x2c/`.
 
+### Upgrading from 0.15.x
+
+Code written for 0.15.x needs these changes:
+
+| 0.15.x | Now |
+| --- | --- |
+| `Scope.retain()` | `Scope.open()` |
+| `Scope.release()` | `Scope.close()` |
+| `array.find(value)` | `array.index(value)` |
+| `array.indexof(value)` | `array.index(value)` |
+| `text.try_long(&value)` | `text.try_long(value)` |
+| `Symbol.try_new(text, &symbol)` | `Symbol.try_new(text, symbol)` |
+| `x2c_normalize_slice(&start, &stop, 1, n)` | `x2c_normalize_slice(start, stop, 1, n)` |
+| `pattern.format(values)` | `pattern.format(@values)` |
+| `logger.info(<app>, fields)` | `logger.info(<app>, @fields)` |
+| `statement.bind(values)` in sqlite | `statement.bind(@values)` |
+
+`array.find` now takes a predicate and returns the first accepted element
+as a `Var`, or `void` when none is accepted. `try_double` changes as
+`try_long` does. A bare List passed to `format`, a Logger method, or `bind`
+is now one value, so splice the List with `@` to keep the 0.15.x meaning.
+Array search changes C prototypes, so rebuild native code that calls
+`Array_find` or `Array_indexof`.
+
+`Scope.open` and `Scope.close` keep the old nested-region behavior and `void`
+return types. Keep each open paired with one close, normally through `defer`.
+In native C, rename `Scope_retain` to `Scope_open` and `Scope_release` to
+`Scope_close`. Apply these changes only to Scope: `Pool.retain`,
+`Pool.release`, and `Pool.up` keep their existing contracts.
+
+`Scope.up` has no replacement field. Revise code that used it to use public
+Scope operations. The public Scope layout has changed; regenerate C and
+rebuild native libraries, extensions, and object files that use Scope against
+matching compiler/runtime headers. See the
+[Scope API](../library/modules/scope.md).
+
+The compiler no longer evaluates Lisp. Move a compile-time Lisp form into a
+`meta` function and call that function with `$`:
+
+<!-- ignore: a 0.15.x compile-time Lisp form that the compiler now rejects. -->
+```x2c,ignore
+int answer = $(* 6 7);
+```
+
+```x2c
+meta static int product(int a, int b) => a * b;
+
+int answer = $product(6, 7);
+```
+
+A `.xlisp` file that `$(import "file.xlisp")` loaded becomes a `.x` file of
+`meta` functions, which the unit reaches with `#include`. Runtime `Lisp`
+sessions and their `.xlisp` files are unchanged.
+
+The `$switch` decorator is removed. Give each case run of an ordinary
+`switch` its own block and `break`:
+
+<!-- ignore: the 0.15.x $switch decorator, which this release removes. -->
+```x2c,ignore
+$switch(code)
+{
+  case 1:
+  case 2:
+    String shared = "low";
+    reached = shared;
+  default:
+    reached = "other";
+}
+```
+
+```x2c
+~int code = 2;
+~String reached = NULL;
+switch (code) {
+  case 1:
+  case 2: {
+    String shared = "low";
+    reached = shared;
+    break;
+  }
+  default:
+    reached = "other";
+}
+```
+
+A declaration prefixed by an object-like attribute macro, such as
+`#define WEAK __attribute__((weak))`, now keeps the attribute in its unit's
+generated C, so a `WEAK` definition is weak.
+
+`x2c lsp` replaces `x2c editor`. Rebuild and reinstall the VS Code
+extension from `etc/vsc-extension`; it starts `x2c lsp` and needs VS Code
+1.82 or newer. Replace the removed `x2c.semantic.workerPath` setting with
+`x2c.semantic.compilerPath`.
+
+An upgrade removes `x2c repl` from the prefix. The native library
+playground is available only in a source checkout: run `make commands`,
+then `./x2c repl`. See [Library playground](repl.md).
+
+#### Long-double hashes
+
+On x87 targets, `Var` identity, content hashing, and total ordering for boxed
+`long double` values now use the ten value bytes and ignore six padding bytes.
+This preserves precision, signed-zero identity, and NaN payload distinctions.
+The box layout is unchanged. Other long-double formats keep their native
+payload width.
+
+Recompute any stored or precomputed hashes of affected values when upgrading.
+Rebuild indexes that reuse those hashes from the original values. See
+[Var.wide_hash](../library/modules/var.md#Var.wide_hash) and
+[Var.wide_equal](../library/modules/var.md#Var.wide_equal).
+
+#### Using cooperative task batches
+
+Use `Task.run` for jobs that can make progress cooperatively through Channel
+operations on one native thread. Use `Thread.run` when jobs need separate
+native threads for parallel computation or blocking native I/O. This choice
+requires reviewing the jobs' waits and ownership before changing a call site.
+
+Pass an Array of zero-argument jobs to `Task.run`. An optional completion
+callback receives successful results after each job's cleanup, under restored
+caller state. It must not wait for participant progress. Jobs borrow the
+caller's active Scope and Pool through the call and start without a current
+Context. Results keep their ordinary owners. Follow the existing
+[Channel ownership rules](channels.md) for payloads shared with other users.
+
+An escaping job Error stops unfinished participants. Every exit finishes all
+job cleanup before `Task.run` returns or raises. `Thread.stop` on the owner
+requests cooperative batch cancellation. Cleanup bodies must not suspend.
+Blocking native calls block the entire batch. `Task.run` calls cannot nest on
+the same native thread.
+
+The first backend supports macOS and Linux on arm64 and x86_64. Jobs keep
+stable, guarded stacks and never migrate between native threads.
+`X2C_TASK_STACK_BYTES` takes a decimal byte count of usable stack capacity per
+job, set before the call. The default is 8 MiB, the minimum is 32 KiB, and
+capacity rounds up to a native page. Stack pages are backed by physical memory
+as they are touched. Unsupported targets raise `bad-state` when `Task.run` is
+called. See
+[Task.run](../library/modules/task.md#Task.run) for the complete contract.
+
 ### Upgrading from 0.14.0
 
 Version 0.15.0 reads package native arguments from `<name>.native.rsp` instead
@@ -49,7 +189,9 @@ and macros.
 The removed `List.pool_*` operations now belong to `Pool`. The removed
 `List.reduce`, `Array.reduce`, and `Iter.reduce` operations have no matching
 method; use `Iter.foldl` when an explicit seed fits. Use `Var.truth` in place
-of `Var.truthy`.
+of `Var.truthy`. `FileReadStatus` is a `Symbol`: compare a raw read's status
+with `<data>`, `<eof>`, and `<error>` in place of `FILE_READ_DATA`,
+`FILE_READ_EOF`, and `FILE_READ_ERROR`.
 
 ## The x2c home
 

@@ -125,8 +125,6 @@ String String.new_in(Pool pool, const char *bytes, int length) {
 */
 meta native Self String.intern(Self string) => string.new();
 
-
-
 /** Returns the canonical `String` holding the bytes of the C string `str`.
     The input is borrowed and copied, so `str` may be a stack buffer and
     mutating it afterwards does not disturb the result. Equal nonempty content
@@ -322,9 +320,7 @@ static String _intern_owned(String string) {
   Pool pool = Pool.current();
   String found = x2c_pool_lookup_string(
     pool, string, header.length - 1, header.hash);
-  if (!found) {
-    return pool.intern_new(string, header);
-  }
+  if (!found) return pool.intern_new(string, header);
   if (found !== string) _free_unchecked(string);
   return found;
 }

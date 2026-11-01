@@ -164,14 +164,14 @@ Source: `lib/pool/storage.x`
 <a id="Pool.release"></a>
 #### Pool.release
 
-`Pool Pool.release(Pool inner)`
+`Pool Pool.release(Pool p)`
 
 Destroys one pool and returns its parent, or returns NULL for NULL input.
 Promoted slots and large allocations survive under the parent with stable
 addresses; other identities, the table, and the control `Scope` become
-invalid. Children must already be released, and no caller may use `inner`
-afterward. Use `Pool.close` instead to end a bracket opened with
-`Pool.open`.
+invalid. Children must already be released, and no caller may use the
+destroyed pool afterward. Use `Pool.close` instead to end a bracket opened
+with `Pool.open`.
 
 Source: `lib/pool/interning.x`
 
@@ -461,9 +461,11 @@ user API.
 `typedef struct PoolTable { Scope scope, Bytes hashes, entries; unsigned used, capacity, mask; } *PoolTable`
 
 Maps each canonical value of one `Pool` level to itself.
-A bucket stores the value once, beside its 32-bit hash, so the table costs
-12 bytes per bucket where a `Map` costs 20. It belongs to the level's
-`Scope`.
+A bucket stores one Var, one control byte and one full 32-bit hash:
+13 bytes where a `Map` costs 21, before Block headers, tiny-table padding
+and the deleted counter. Full hashes share the control Block below 65536
+buckets; larger tables keep them in that Block's owned storage.
+It belongs to the level's `Scope`.
 
 Source: `lib/pool/pool.x`
 

@@ -41,16 +41,15 @@ String preview(String path) {
 
 // Close the file on success or while unwinding from a failed read.
 String read_text(String path) {
-  File input = path.open("r");
+  auto File input = path.open("r");
   ~opened_fd = input.fileno();
-  defer input.close();
   return input.string();
 }
 ```
 
 `raise` records a cause and its details, `catch` selects by pattern, and
-`defer` runs on the way out, so the file is closed before the handler
-runs. The function that owns the resource owns the
-cleanup. The caller owns the policy.
+`auto` closes the file on the way out, before the handler runs. The
+function that owns the resource owns the cleanup. The caller owns the
+policy.
 
 `catch:` takes whatever is left. No error codes to forget, no `goto fail`.

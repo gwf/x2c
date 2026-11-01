@@ -922,7 +922,7 @@ static List f8_bindings____scope_binding(Sym s, SymScope * scope, List key){
   }
   List _x2c_gensym_destructure_0 = binding;
   Var binding_tag = List_getindex(_x2c_gensym_destructure_0, 0);
-  int identity = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/symtab/bindings.x",.function = "f8_bindings____scope_binding",.line = 264}; & _x2c_gensym_error_site_0; })));
+  int identity = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/symtab/bindings.x",.function = "f8_bindings____scope_binding",.line = 260}; & _x2c_gensym_error_site_0; })));
   String spelling = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 2));
   (void) binding_tag;
   if(!(Map_contains(s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_44, cons(int_var(identity), NULL))), String_var(spelling));
@@ -1556,10 +1556,7 @@ List Compiler_imported_providers(Compiler c, String name){
     while(Map_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_14), &(_x2c_gensym_macro_cursor_output_15))){
       package = Var_as_string(_x2c_gensym_macro_cursor_output_14);
       root = Var_as_string(_x2c_gensym_macro_cursor_output_15);
-      {
-        if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_73), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
-      }
-
+      if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_73), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
     }
 
   }
@@ -1930,7 +1927,7 @@ int Type_is_typedef_name(Type);
 
 Type Sym_next_typedef(Sym s, Type type, int * hops){
   if(! _init_guard_) _file_init_();
-  if(++(* hops) >(2 * 64)) f5_types____typedef_budget_error(s, type);
+  if(++(* hops) > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, type);
   return Type_is_typedef_name(type) || Type_is_typedef(type) ? f5_types____typedef_target(s, type) : List_type(Sym_get(s, Type_list(type)));
 }
 
@@ -2007,7 +2004,7 @@ static Type f5_types____replace_type_base(Type type, Type base, Type replacement
 int Symbol_is_type_qualifier(Symbol);
 
 static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, int hops){
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal_lane(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
   if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;
   if(Type_is_typedef_name(key) || Type_is_typedef(key)){
@@ -2057,7 +2054,7 @@ static Symbol f5_types____var_tag_chain(Sym s, Type type, Type origin, Type * re
     if(resolved)(* resolved) = type;
     return tag;
   }
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   Type next = f5_types____typedef_base_step(s, type, Type_base_type(type));
   if(List_truth(Type_list(next))) return f5_types____var_tag_chain(s, next, origin, resolved, hops + 1);
   if(resolved)(* resolved) = type;
@@ -2073,7 +2070,7 @@ static Type f5_types____typedef_base_step(Sym s, Type type, Type base){
 
 static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops){
   type = Type_declared(type);
-  if(hops >(2 * 64)) f5_types____typedef_budget_error(s, origin);
+  if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
   Type base = Type_base_type(type);
   if(x2c_var_equal_lane(List_car(Type_list(base)), Symbol_var(1439803480))){
     Type value = f5_types____normalize_chain(s, List_cdr(base), origin, hops + 1);

@@ -34,6 +34,7 @@
 #include "string/string.h"
 #include "symbol.h"
 #include "symbolset.h"
+#include "task.h"
 #include "thread-state.h"
 #include "thread.h"
 #include "tokenizer.h"

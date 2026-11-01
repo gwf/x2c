@@ -99,7 +99,7 @@ MachineView;
 typedef struct MachineBuilder{
   MachineWord * code;
   Var * consts;
-  Atom binders[64];
+  Atom binders[MACHINE_BINDER_MAX];
   int length, code_capacity, const_count, const_capacity, binder_count, root;
   Symbol status;
   const char * reason;
@@ -137,8 +137,8 @@ typedef struct MatchFrame{
 MatchFrame;
 
 typedef struct MachineRegs{
-  List cursors[3];
-  int distances[3], ints[2];
+  List cursors[MACHINE_CURSOR_REGS];
+  int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS];
   MachineMark mark;
 }
 MachineRegs;
@@ -166,10 +166,10 @@ typedef struct MatchMachine{
   Var(* view)(Var);
   Var * scratch;
   int scratch_capacity;
-  MatchFrame frames[128];
-  MachineRegs regs[128];
-  MachineSlot slots[64];
-  MachineUndo undo[256];
+  MatchFrame frames[MACHINE_FRAME_MAX];
+  MachineRegs regs[MACHINE_FRAME_MAX];
+  MachineSlot slots[MACHINE_BINDER_MAX];
+  MachineUndo undo[MACHINE_UNDO_MAX];
 }
 MatchMachine;
 
@@ -341,6 +341,12 @@ typedef struct MatchLease{
 MatchLease;
 
 #define MATCH_ADMITTED_MEMO 256
+void * x2c_match_execution_new(void);
+
+void x2c_match_execution_swap(void * backing);
+
+void x2c_match_execution_free(void * backing);
+
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
 
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);

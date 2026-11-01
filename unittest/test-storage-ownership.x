@@ -77,7 +77,7 @@ static void storage_maps_grow_under_their_record_owner(void) {
   typed.move_to(&destination);
   Scope temporary = Scope.new();
   Scope.push(&temporary);
-  for (int i = 0; i < 128; i++) {
+  for (int i = 0; i < 50000; i++) {
     map[i] = i + 1;
     typed[i] = i + 2;
   }
@@ -89,10 +89,19 @@ static void storage_maps_grow_under_their_record_owner(void) {
   EXPECT_PTR_EQ(Scope.owner(typed), destination);
   EXPECT_PTR_EQ(Scope.owner(typed.entries.block()), destination);
   EXPECT_NULL(typed.scope);
-  EXPECT_INT_EQ(map[127].int(), 128);
-  EXPECT_INT_EQ(typed[127], 129);
+  EXPECT_INT_EQ(map[49999].int(), 50000);
+  EXPECT_INT_EQ(typed[49999], 50001);
+  Scope cache_owner = map.hashes.block().lifetime;
+  EXPECT_NOT_NULL(cache_owner);
+  EXPECT_PTR_EQ(cache_owner.parent(), destination);
   EXPECT_PTR_EQ(owner.parent(), destination);
+  Scope relocated = Scope.new();
+  map.move_to(&relocated);
   destination.destroy();
+  EXPECT_INT_EQ(map[49999].int(), 50000);
+  EXPECT_PTR_EQ(cache_owner.parent(), relocated);
+  EXPECT_PTR_EQ(owner.parent(), relocated);
+  relocated.destroy();
 }
 
 static void storage_adoption_destroys_cycles_once(void) {
@@ -394,7 +403,31 @@ static void storage_exports_distinct_equal_wide_boxes(void) {
   EXPECT_TRUE(root[1].same(clone));
 }
 
+static void grouped_cleanup_keeps_record_owner(void) {
+  $test.scoped();
+  Scope destination = Scope.new();
+  MapIntInt map = MapIntInt.new_capacity(64);
+  map.move_to(&destination);
+  for (int cycle = 0; cycle < 12; cycle++) {
+    Scope temporary = Scope.new();
+    Scope.push(&temporary);
+    for (int i = 0; i < 40; i++) map[cycle * 100 + i] = i;
+    for (int i = 0; i < 35; i++) map.del(cycle * 100 + i);
+    Scope.pop();
+    temporary.destroy();
+    EXPECT_PTR_EQ(Scope.owner(map.hashes.block()), destination);
+    EXPECT_PTR_EQ(Scope.owner((unsigned char *) map.hashes - sizeof(Block)), destination);
+    EXPECT_PTR_EQ(Scope.owner(map.entries.block()), destination);
+    EXPECT_PTR_EQ(Scope.owner((unsigned char *) map.entries - sizeof(Block)), destination);
+    for (int round = 0; round <= cycle; round++)
+      for (int i = 35; i < 40; i++) EXPECT_INT_EQ(map[round * 100 + i], i);
+  }
+  destination.destroy();
+}
+
 void storage_ownership_suite(void) {
+  $test.run(grouped_cleanup_keeps_record_owner);
+
   $test.run(storage_scope_transfer_preserves_allocations);
   $test.run(storage_arrays_acquire_owned_contents_lazily);
   $test.run(storage_maps_grow_under_their_record_owner);

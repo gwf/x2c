@@ -47,10 +47,10 @@ static typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 // arguments of a `$` call
 
 /* The binary operators a constant argument may apply. */
-static const SymbolSet meta_operators = %<<"+" "-" "*" "/" "%" "<<" ">>"
-  "&" "|" "^" "<" ">" "<=" ">=" "==" "!=">>;
+static const SymbolSet meta_operators = %<"+" "-" "*" "/" "%" "<<" ">>"
+  "&" "|" "^" "<" ">" "<=" ">=" "==" "!=">;
 
-static const SymbolSet meta_comparisons = %<<"<" ">" "<=" ">=" "==" "!=">>;
+static const SymbolSet meta_comparisons = %<"<" ">" "<=" ">=" "==" "!=">;
 
 /** Returns the value the argument expression `node` of a `$` call passes to
     a parameter of type `want`, or of no declared type when `want` is NULL:

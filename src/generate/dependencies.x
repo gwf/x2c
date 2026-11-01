@@ -236,8 +236,6 @@ static List _inline_prototype(Compiler c, List node) {
 static int _inline_binding(Compiler c, List binding) =>
   c.sym.get($("function-inline", Ast.binding_spelling(binding))) != NULL;
 
-
-
 /* Adds to `declared` each binding `value` declares, with each function's
    native spelling and each typedef's spelling. */
 static void _collect_declared(Var value, Map declared) {

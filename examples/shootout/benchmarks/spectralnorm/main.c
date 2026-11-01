@@ -1,58 +1,72 @@
 /* The Computer Language Benchmarks Game
- * https://benchmarksgame-team.pages.debian.net/benchmarksgame/
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
  *
- * Based on the spectral-norm program contributed by Sebastien Loisel.
- * Distributed under the 3-Clause BSD License:
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/-/blob/master/LICENSE.md
- */
+ * Contributed by Mr Ledrug
+ *
+ * Algorithm lifted from Intel Fortran #2 code by Steve Decker et al.
+*/
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-static double eval_a(int i, int j) {
-  int ij = i + j;
-  return 1.0 / (ij * (ij + 1) / 2 + i + 1);
+inline int A(int i, int j) {
+   return ((i+j) * (i+j+1) / 2 + i + 1);
 }
 
-static void eval_a_times_u(int n, const double u[], double out[]) {
-  for (int i = 0; i < n; i++) {
-    out[i] = 0.0;
-    for (int j = 0; j < n; j++)
-      out[i] += eval_a(i, j) * u[j];
-  }
+double dot(double * v, double * u, int n) {
+   int i;
+   double sum = 0;
+   for (i = 0; i < n; i++)
+      sum += v[i] * u[i];
+   return sum;
 }
 
-static void eval_at_times_u(int n, const double u[], double out[]) {
-  for (int i = 0; i < n; i++) {
-    out[i] = 0.0;
-    for (int j = 0; j < n; j++)
-      out[i] += eval_a(j, i) * u[j];
-  }
+void mult_Av(double * v, double * out, const int n) {
+   int i, j;
+   double sum;
+#   pragma omp parallel for private(sum,j)
+   for (i = 0; i < n; i++) {
+      for (sum = j = 0; j < n; j++)
+         sum += v[j] / A(i,j);
+      out[i] = sum;
+   }
 }
 
-static void eval_ata_times_u(int n, const double u[], double out[]) {
-  double tmp[n];
-  eval_a_times_u(n, u, tmp);
-  eval_at_times_u(n, tmp, out);
+void mult_Atv(double * v, double * out, const int n) {
+   int i, j;
+   double sum;
+#   pragma omp parallel for private(sum,j)
+   for (i = 0; i < n; i++) {
+      for (sum = j = 0; j < n; j++)
+         sum += v[j] / A(j,i);
+      out[i] = sum;
+   }
 }
 
-int main(int argc, char **argv) {
-  int n = argc > 1 ? atoi(argv[1]) : 100;
-  double u[n], v[n];
+double *tmp;
+void mult_AtAv(double *v, double *out, const int n) {
+   mult_Av(v, tmp, n);
+   mult_Atv(tmp, out, n);
+}
 
-  for (int i = 0; i < n; i++)
-    u[i] = 1.0;
-  for (int i = 0; i < 10; i++) {
-    eval_ata_times_u(n, u, v);
-    eval_ata_times_u(n, v, u);
-  }
+int main(int argc, char**argv) {
+   int n = atoi(argv[1]);
+   if (n <= 0) n = 2000;
 
-  double v_bv = 0.0, vv = 0.0;
-  for (int i = 0; i < n; i++) {
-    v_bv += u[i] * v[i];
-    vv += v[i] * v[i];
-  }
-  printf("%.9f\n", sqrt(v_bv / vv));
-  return 0;
+   double *u, *v;
+   u = malloc(n * sizeof(double));
+   v = malloc(n * sizeof(double));
+   tmp = malloc(n * sizeof(double));
+
+   int i;
+   for (i = 0; i < n; i++) u[i] = 1;
+   for (i = 0; i < 10; i++) {
+      mult_AtAv(u, v, n);
+      mult_AtAv(v, u, n);
+   }
+
+   printf("%.9f\n", sqrt(dot(u,v, n) / dot(v,v,n)));
+
+   return 0;
 }

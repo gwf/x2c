@@ -1,6 +1,12 @@
 /*  regions.x -- scope regions */
 
+static threaded Scope scope_root;
 static threaded struct ScopeThreadState scope_thread;
+
+static typedef struct ScopeExecution {
+  Scope base;
+  struct ScopeThreadState state;
+} *ScopeExecution;
 
 // the active slot
 
@@ -44,7 +50,7 @@ meta native void Scope.push(Scope *scope) {
 /** Restores the slot that was active before the matching `Scope.push`.
     Popping frees nothing. The popped slot keeps its scope and every
     allocation in it, so you can destroy that scope later or pass it
-    elsewhere. With no pushes outstanding, the process root slot becomes
+    elsewhere. With no pushes outstanding, the execution base slot becomes
     active again.
     Raises: `<bad-state>` when the scope stack is empty, so a mismatched push
     and pop raises instead of redirecting allocations. The failure leaves the
@@ -57,7 +63,7 @@ meta native void Scope.pop(void) {
   if (!state.stack_size) raise %(bad-state);
   state.stack_size--;
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
-                                 : &state.root;
+                                 : state.base_slot;
 }
 
 // retained regions
@@ -66,18 +72,18 @@ meta native void Scope.pop(void) {
     Allocations that follow are charged to the new scope. The scope that was
     there is linked below it and becomes current again on release, so retained
     regions nest. Open a nested region when a group of temporaries should die
-    before the surrounding work does. Each `Scope.retain` must be paired with
-    exactly one `Scope.release`.
+    before the surrounding work does. Each `Scope.open` must be paired with
+    exactly one `Scope.close`.
 
     Pair them with `defer`. `Error` transfer does not release a scope. A raise
-    that jumps past a plain `Scope.release` leaves that region live for the
+    that jumps past a plain `Scope.close` leaves that region live for the
     rest of the process, so use `defer` in any function that both retains and
     can raise.
 
     ```x2c
     ~static void report(int width) {
-    Scope.retain();
-    defer Scope.release();
+    Scope.open();
+    defer Scope.close();
     char *line = xmalloc(width + 1);
     snprintf(line, width + 1, "%d bytes", width);
     puts(line);
@@ -95,15 +101,12 @@ meta native void Scope.pop(void) {
     allocated, or `<size-limit>` when that record cannot grow. Before `Error`
     initialization they terminate at the error floor.
 */
-meta native void Scope.retain(void) {
+meta native void Scope.open(void) {
   _require_running();
   Scope scope = _new_scope(NULL);
   ScopeThreadState state = _thread();
   _record_retain(scope, state.active);
-  if (*state.active) {
-    scope.down = *state.active;
-    (*state.active).up = scope;
-  }
+  scope.down = *state.active;
   *state.active = scope;
 }
 
@@ -120,7 +123,7 @@ meta native void Scope.retain(void) {
     survives. Anything owned by another scope or another slot is untouched,
     and memory from plain `malloc` is unaffected.
 
-    The active region must be the one opened by a matching `Scope.retain` on
+    The active region must be the one opened by a matching `Scope.open` on
     this same slot. Releasing an empty slot, a directly allocated root, or a
     region retained on another pushed slot is an imbalance and raises. An
     extra release cannot destroy the surrounding region, and a retained empty
@@ -133,7 +136,7 @@ meta native void Scope.retain(void) {
     failure leaves the active region intact. Before `Error` initialization it
     terminates at the error floor.
 */
-meta native void Scope.release(void) {
+meta native void Scope.close(void) {
   _require_running();
   ScopeThreadState state = _thread();
   alias state.active as active {
@@ -142,7 +145,7 @@ meta native void Scope.release(void) {
     /* Restore and detach the surviving lower region before destruction, so
        the active slot never names freed storage and `_destroy_chain`
        cannot follow `down` into the surrounding lifetime. */
-    if ((*active = top.down)) (*active).up = NULL;
+    *active = top.down;
     top.down = NULL;
     _destroy_chain(top);
   }
@@ -182,7 +185,7 @@ Scope Scope.child(void) {
     name the active slot explicitly. Dereferencing it gives the scope, which
     may be NULL before anything has been allocated into the slot. It names the
     slot that was active at the call; a later `Scope.push`, `Scope.pop`,
-    `Scope.retain`, or `Scope.release` changes which slot is active, so read
+    `Scope.open`, or `Scope.close` changes which slot is active, so read
     it again instead of caching it.
 */
 Scope *Scope.top(void) {
@@ -264,23 +267,24 @@ meta native void Scope.cleanup(Scope value) { value.destroy(); }
     diagnoses their use. Any regions still linked below it, from retains that
     were never released, are destroyed with it.
 
-    `Scope.destroy` refuses a scope that is still in use: the active root
-    scope, a slot still on the pushed stack (pop it first), and a scope that
-    a later `Scope.retain` layered another region on top of, which the
-    runtime reports as an attached lower scope. The handle is a pointer into
-    the destroyed scope, so destroying it again is undefined behavior.
-    Raises: `<bad-state>` for the active root, a pushed slot, or an attached
-    lower scope. The failure leaves the scope intact. A NULL `scope` does
-    nothing. Before `Error` initialization it terminates at the error floor.
+    The caller must own the right to destroy the chain and keep borrowed
+    owners alive until their users finish. Destroying an attached lower region
+    or any storage still in use violates that lifetime contract.
+    `Scope.destroy` rejects the current execution base and pushed slots, but
+    does not track other executions or diagnose every invalid destruction.
+    The handle points into destroyed storage, so destroying it again is
+    undefined behavior.
+    Raises: `<bad-state>` for the active base or a pushed slot. The failure
+    leaves the scope intact. A NULL `scope` does nothing. Before `Error`
+    initialization it terminates at the error floor.
 */
 meta native void Scope.destroy(Scope scope) {
   if (!scope) return;
   _require_running();
   ScopeThreadState state = _thread();
-  if (scope == state.root) raise %(bad-state);
+  if (scope == *state.base_slot) raise %(bad-state);
   for (int i = 0; i < state.stack_size; i++)
     if (scope == *state.stack[i]) raise %(bad-state);
-  if (scope.up) raise %(bad-state);
   _forget_retains(scope);
   _destroy_chain(scope);
 }
@@ -291,20 +295,56 @@ meta native void Scope.destroy(Scope scope) {
 */
 void x2c_scope_thread_release(void) {
   ScopeThreadState state = &scope_thread;
-  if (state.root) _destroy_chain(state.root);
-  state.root = NULL;
+  if (scope_root) _destroy_chain(scope_root);
+  scope_root = NULL;
   _raw_free(state.stack);
   state.stack = NULL;
   state.stack_size = state.stack_capacity = 0;
   _raw_free(state.retains);
   state.retains = NULL;
   state.retain_count = state.retain_capacity = 0;
-  state.active = &state.root;
+  state.base_slot = state.active = &scope_root;
+}
+
+/** Creates saved allocation bindings for an execution borrowing `borrowed`.
+    The owner must remain live through completion. The stable base cell is
+    separate from the installed TLS record and owns no allocation lifetime.
+*/
+void *x2c_scope_execution_new(Scope borrowed) {
+  _require_running();
+  ScopeExecution execution = _raw_malloc(sizeof(struct ScopeExecution));
+  *execution = (struct ScopeExecution) { .base = borrowed };
+  execution.state.base_slot = execution.state.active = &execution.base;
+  return execution;
+}
+
+/** Exchanges saved and installed bindings at an execution boundary.
+    Both base cells and explicitly pushed caller cells keep their addresses.
+    No allocation or callback occurs during the exchange.
+*/
+void x2c_scope_execution_swap(void *saved) {
+  ScopeExecution execution = saved;
+  ScopeThreadState state = _thread();
+  struct ScopeThreadState previous = *state;
+  *state = execution.state;
+  execution.state = previous;
+}
+
+/** Releases saved execution bindings after restoring the caller's state.
+    The execution has already completed its cleanup. Its borrowed base and
+    ordinary allocations remain owned by their existing lifetimes.
+*/
+void x2c_scope_execution_free(void *saved) {
+  ScopeExecution execution = saved;
+  _raw_free(execution.state.stack);
+  _raw_free(execution.state.retains);
+  _raw_free(execution);
 }
 
 module ScopeThreadState _thread(void) {
   ScopeThreadState state = &scope_thread;
-  if (!state.active) state.active = &state.root;
+  if (!state.base_slot) state.base_slot = &scope_root;
+  if (!state.active) state.active = state.base_slot;
   return state;
 }
 

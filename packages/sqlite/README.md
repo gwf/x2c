@@ -11,22 +11,20 @@ The interface is accepted and verified on macOS.
 import "sqlite" with Database, Prepared;
 
 int main(void) {
-  Database db = Database.open(":memory:");
-  defer db.close();
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE observation(url TEXT, status INTEGER, us INTEGER)");
-  Prepared insert = db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
-  defer insert.free();
+  Prepared insert =
+    auto db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
   foreach (List reading in %(
     ("/guide" 200 12000)
     ("/reference" 503 40000)
     ("/source" 200 3100000)
   )) insert.bind(@reading).execute();
 
-  Prepared report = db.prepare(
+  Prepared report = auto db.prepare(
     "SELECT url, status, us FROM observation "
     "WHERE status >= 400 OR us > ? ORDER BY us DESC"
   );
-  defer report.free();
   report.bind(3000000);
   foreach (List row in report)
     printf("%s", %"$(row[0]): HTTP $(row[1]), $(row[2]) us\n");
@@ -69,15 +67,12 @@ typedef struct Reading { String station; double value; } Reading;
 $derive(Reading, <row>);
 
 int main(void) {
-  Database db = Database.open(":memory:");
-  defer db.close();
+  Database db = auto Database.open(":memory:");
   db.execute("CREATE TABLE reading(station TEXT, value REAL)");
-  Prepared insert = db.prepare("INSERT INTO reading VALUES (?, ?)");
-  defer insert.free();
+  Prepared insert = auto db.prepare("INSERT INTO reading VALUES (?, ?)");
   Reading reading = { "north", 1.5 };
   insert.bind(@(reading.row())).execute();
-  Prepared select = db.prepare("SELECT station, value FROM reading");
-  defer select.free();
+  Prepared select = auto db.prepare("SELECT station, value FROM reading");
   foreach (List row in select) {
     Reading copy = Reading.from_row(row);
     printf("%s %.1f\n", copy.station, copy.value);
@@ -116,10 +111,12 @@ The pilot is optional and adds no build or publication gate.
 `Database.open(path)` opens or creates a database; use `":memory:"` for an
 in-memory one. `open_with(path, flags)` accepts SQLite's own open flags, and
 `busy_timeout(milliseconds)` sets SQLite's lock-wait timeout. `native()`
-returns the same connection for advanced C calls. Release native resources
-with `defer` beside acquisition; free prepared statements before closing the
-connection. Wrapper storage belongs to the active Scope. Use each statement
-and connection on one thread at a time.
+returns the same connection for advanced C calls. Both wrappers adopt
+`Cleanup`, so `Prepared query = auto db.prepare(sql);` frees the statement
+when its block exits. Cleanup runs in reverse order, so a statement declared
+after its connection is freed before the connection closes. Wrapper storage
+belongs to the active Scope. Use each statement and connection on one thread
+at a time.
 
 `prepare(sql)` prepares one statement. `bind(values)` resets the statement,
 clears old parameters, and binds a positional List. `bind_named(values)` does

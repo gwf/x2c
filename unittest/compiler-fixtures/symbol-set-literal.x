@@ -1,13 +1,13 @@
 #include "x2c.x"
 
-static SymbolSet values = %<<foo bar <odd/val> quux>>;
+static SymbolSet values = %<foo bar <odd/val> quux>;
 
 static SymbolSet same_values(void) {
-  return %<<foo bar <odd/val> quux>>;
+  return %<foo bar <odd/val> quux>;
 }
 
 int main(void) {
-  SymbolSet empty = %<<>>;
+  SymbolSet empty = %<>;
   List ordinary = %(foo bar);
   int ordered = values.len() == 4 &&
                 values.index(<foo>) == 0 &&

@@ -7,7 +7,7 @@
 int main(void){
   x2c_initialize();
 #define LOCAL_VALUE 7
-  int value = 7;
+  int value = LOCAL_VALUE;
 #if LOCAL_VALUE == 7
   value += 30;
 #endif

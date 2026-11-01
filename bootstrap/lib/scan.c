@@ -248,6 +248,7 @@ Symbol scan_keyword_type(const char * s, int n){
     if(! memcmp(s, "static", 6)) return 1317118534;
     if(! memcmp(s, "struct", 6)) return 1318234344;
     if(! memcmp(s, "switch", 6)) return 1323933904;
+    if(! memcmp(s, "expand", 6)) return 386927496;
     break;
     case 7 : if(! memcmp(s, "default", 7)) return 8938171176;
     if(! memcmp(s, "finally", 7)) return 13518332722;
@@ -368,7 +369,7 @@ int scan_symbol_set_atom(char * s){
   if(s[0] == '"') return _quoted_spelling(s, NULL);
   int n = 0;
   while(s[n]){
-    if(s[n] == '>' && s[n + 1] == '>') return n;
+    if(s[n] == '>') return n;
     if(strchr(" \n\t\v\f\r$@", s[n])) return n;
     if(s[n] == '\\' && ! s[n + 1]) return - 1;
     n += s[n] == '\\' ? 2 : 1;

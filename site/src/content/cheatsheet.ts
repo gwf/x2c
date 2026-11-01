@@ -53,7 +53,7 @@ export const sheet: Section[] = [
     ["auto { ... }", "A scope, freed at exit."],
     ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
-    ["Scope.retain(); defer Scope.release();", "A scope by hand."],
+    ["Scope.open(); defer Scope.close();", "A scope by hand."],
     ["defer f.close();", "At exit, `return`, or a raise."],
     ["xmalloc(n)  xfree(p)", "Allocate in the current scope."],
   ] },

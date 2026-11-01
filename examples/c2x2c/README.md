@@ -9,13 +9,13 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | --- | ---: | --- |
 | [0](words-v0.c) | 183 | Native C: explicit hash table, allocation, sorting, and cleanup. |
 | [1](words-v1.x) | 143 | Scope allocation, required references, pointer member access with dots, and defer. |
-| [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
-| [3](words-v3.x) | 102 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
-| [4](words-v4.x) | 45 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
+| [2](words-v2.x) | 108 | Substr word views and whole-file reading; retain the explicit hash table. |
+| [3](words-v3.x) | 101 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
+| [4](words-v4.x) | 44 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
-| [8](words-v8.x) | 104 | A Frequencies class with Path.frequencies and top(k); counting and ranking move into a reusable module. Includes frequencies.x. |
+| [8](words-v8.x) | 103 | A Frequencies class with Path.frequencies and top(k); counting and ranking move into a reusable module. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -89,27 +89,25 @@ additions saved with this tutorial; an older installed x2c is insufficient.
 cc -std=gnu11 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
 /tmp/c2x2c-v0 docs/src/index.md
 
-builds/0/x2c build -I lib examples/c2x2c/words-v2.x lib/substring.x \
+builds/0/x2c build -I lib examples/c2x2c/words-v2.x \
   --output /tmp/c2x2c-v2 --build-dir /tmp/c2x2c-v2-build
 /tmp/c2x2c-v2 docs/src/index.md
 
 builds/0/x2c build -I lib examples/c2x2c/words-v5.x \
-  lib/substring.x lib/substring-map.x \
   --output /tmp/c2x2c-v5 --build-dir /tmp/c2x2c-v5-build
 /tmp/c2x2c-v5 docs/src/index.md
 
 builds/0/x2c build -I lib examples/c2x2c/words-v7.x \
-  lib/substring.x lib/substring-map.x \
   --output /tmp/c2x2c-v7 --build-dir /tmp/c2x2c-v7-build
 /tmp/c2x2c-v7 docs/src
 ```
 
-Substitute Version 3 in the Version 2 commands, Version 4 in the Version 5
-commands, or Version 6 in the Version 7 commands. Version 1 needs neither
-Substring source file. Versions 0-5 accept one file; Versions 6-8 accept one
-file or directory. The file input is the book introduction. The directory input covers
-the complete book source tree, including the generated library reference and
-syntax files, without scanning rendered book output.
+Substitute Version 1 or 3 in the Version 2 commands, Version 4 in the
+Version 5 commands, or Version 6 in the Version 7 commands. Versions 0-5
+accept one file; Versions 6-8 accept one file or directory. The file input
+is the book introduction. The directory input covers the complete book
+source tree, including the generated library reference and syntax files,
+without scanning rendered book output.
 
 For a small alternative, `input/sample.txt` and `input/` retain the original
 fixture: one file and one nested file. Versions 0-2 print that file as
@@ -120,6 +118,42 @@ fixture: one file and one nested file. Versions 0-2 print that file as
 The eight x2c stages use `probe|none` in the existing example manifest.
 This preserves manual tutorial checks without adding recurring build work.
 The native C stage is outside that manifest's `.x`/`.xp` source contract.
+
+## Selectable benchmark
+
+Run `make bm-c2x2c` to compare V4, V6, and V8 with native C. V4 measures
+substring counting, V6 adds sequential directory merging, and V8 exercises
+the reusable parallel API. The file input is `site/public/llms-full.txt`;
+the directory input is `docs`. The runner freezes both inputs before timing.
+The frozen corpus copies file contents, follows file links, preserves ordinary
+directories, and omits child directory links.
+The C baselines and generated drivers use `-O2 -DNDEBUG`; the runtime uses
+the current build configuration. Compilation is outside the measured samples.
+
+The report gives median CPU milliseconds, wall milliseconds, peak RSS MiB,
+and ratios against C for each input. C is 1.00; lower ratios are better.
+Parallel CPU measures total work across workers; wall time measures latency.
+The directory C baseline includes discovery through `bench-directory.sh
+aggregate`; V6 and V8 discover files internally. Each run verifies the top ten
+against independent frequencies, including each stage's ranking rules.
+
+```sh
+make bm-c2x2c
+make bm-c2x2c C2X2C_BENCHMARK_ARGS="--all-versions --samples 7"
+python3 tools/c2x2c-benchmark.py --runtime /tmp/experimental-libx2c.a
+```
+
+`--file`, `--directory`, `--compiler`, and `--output-dir` select alternatives.
+An alternative runtime archive must match the compiler's runtime ABI.
+The default five-sample run saves input snapshots, hashes, build commands,
+binaries, per-process output, and `results.json` under
+`unittest/build/benchmarks/c2x2c/`. Run on a quiet host; this runner does not
+exclude other builds or reserve the machine. Tiny inputs can be dominated by
+process startup, so retain absolute measurements alongside ratios.
+
+The benchmark is selectable. It is outside `bm-all`, the nightly snapshot,
+and correctness gates. The programs print only their top ten; this check
+does not compare every internal count.
 
 ## Manual directory baselines
 

@@ -3,6 +3,9 @@
 #define __GUARD_0x4420A8A1__
 #include "meta.h"
 #include "compiler-meta.h"
+#include "lisp/lisp.h"
+_Thread_local Lisp x2c_lisp_active;
+
 static List _6, _4, _3;
 
 static String _1;
@@ -34,6 +37,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _4 = cons(_0, _3);
   _5 = List_var(_4);
   _6 = cons(_5, NULL);
+}
+
+Lisp x2c_lisp_exchange(Lisp lisp){
+  Lisp previous = x2c_lisp_active;
+  x2c_lisp_active = lisp;
+  return previous;
 }
 
 static List _lisp_native_declarations(void){

@@ -1,0 +1,9 @@
+c-macro-conditions.c: warning: multi-character character constant [-Wmultichar]
+c-macro-conditions.c: warning: integer overflow in preprocessor expression
+c-macro-conditions.c: warning: integer overflow in preprocessor expression
+c-macro-conditions.c: warning: multi-character character constant [-Wmultichar]
+c-macro-conditions.c: warning: multi-character character constant [-Wmultichar]
+c-macro-conditions.c: warning: integer overflow in preprocessor expression
+c-macro-conditions.c: warning: integer overflow in preprocessor expression
+c-macro-conditions.c: warning: integer overflow in preprocessor expression
+c-macro-conditions.c: warning: integer overflow in preprocessor expression

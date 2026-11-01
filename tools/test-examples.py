@@ -23,7 +23,8 @@ class ExamplesCheckTests(unittest.TestCase):
         self.examples = self.root / "examples"
         self.examples.mkdir()
         shutil.copy2(CHECKER, self.examples / "check.sh")
-        for name in ("love", "power", "magic", "programs", "scripts", "tours"):
+        for name in ("love", "power", "magic", "programs", "scripts", "tours",
+                     "apps"):
             (self.examples / name).mkdir()
         greet = self.examples / "packages/greet"
         greet.mkdir(parents=True)

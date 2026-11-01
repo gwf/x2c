@@ -15,14 +15,12 @@ Blocking HTTP/1.1 routing and worker-pool service.
 | [`HttpRequest.read`](#HttpRequest.read) | Reads one bounded request; clean EOF returns NULL. |
 | [`HttpResponse.bytes`](#HttpResponse.bytes) | Replaces the body with arbitrary bytes, including embedded NUL. |
 | [`HttpResponse.header`](#HttpResponse.header) | Sets a response header. |
-| [`HttpResponse.init`](#HttpResponse.init) | Initializes zeroed HttpResponse storage without acquiring resources. |
 | [`HttpResponse.json`](#HttpResponse.json) | Replaces the body with JSON. |
 | [`HttpResponse.new`](#HttpResponse.new) | Creates an empty 200 response. |
 | [`HttpResponse.status`](#HttpResponse.status) | Sets the response status and returns the response. |
 | [`HttpResponse.text`](#HttpResponse.text) | Replaces the body with UTF-8 text. |
 | [`HttpResponse.write`](#HttpResponse.write) | Writes a complete response and flushes once. |
 | [`HttpServer.close`](#HttpServer.close) | Stops and releases native resources. |
-| [`HttpServer.init`](#HttpServer.init) | Initializes zeroed HttpServer storage without acquiring resources. |
 | [`HttpServer.new`](#HttpServer.new) | Binds immediately; port 0 selects an available port. |
 | [`HttpServer.port`](#HttpServer.port) | Reports the bound port. |
 | [`HttpServer.serve`](#HttpServer.serve) | Runs on the caller until stop; closes the queue and joins every worker. |
@@ -32,7 +30,6 @@ Blocking HTTP/1.1 routing and worker-pool service.
 | [`Router.dispatch`](#Router.dispatch) | Calls the first matching handler; unmatched paths raise 404 or 405. |
 | [`Router.files`](#Router.files) | Serves files below directory, with index.html for directories. |
 | [`Router.get`](#Router.get) | Registers GET. |
-| [`Router.init`](#Router.init) | Initializes zeroed Router storage without acquiring resources. |
 | [`Router.new`](#Router.new) | Creates a router with no routes. |
 | [`Router.post`](#Router.post) | Registers POST. |
 | [`Router.put`](#Router.put) | Registers PUT. |
@@ -46,6 +43,8 @@ Blocking HTTP/1.1 routing and worker-pool service.
 `void Http.fail(int status, String reason)`
 
 Raises an expected HTTP error before any response bytes are sent.
+
+**Raises:** `<http-fail>` with `status` and `reason` details.
 
 Source: `lib/http.x`
 
@@ -76,6 +75,10 @@ Source: `lib/http.x`
 
 Reads one bounded request; clean EOF returns NULL.
 
+**Raises:** `<http-fail>` with a 4xx `status` for a malformed, oversized, or
+unsupported request, including an invalid percent escape in the URL, or
+`<io-fail>` when reading `input` fails.
+
 Source: `lib/http.x`
 
 ### `HttpResponse`
@@ -94,16 +97,10 @@ Source: `lib/http.x`
 
 `HttpResponse HttpResponse.header(HttpResponse res, String name, String value)`
 
-Sets a response header. Newlines in names or values are rejected.
+Sets a response header.
 
-Source: `lib/http.x`
-
-<a id="HttpResponse.init"></a>
-#### HttpResponse.init
-
-`void HttpResponse.init(HttpResponse value)`
-
-Initializes zeroed HttpResponse storage without acquiring resources.
+**Raises:** `<bad-arg>` for a name that is not an HTTP token or a value that
+contains CR or LF.
 
 Source: `lib/http.x`
 
@@ -164,15 +161,6 @@ Call after synchronous serve returns.
 
 Source: `lib/http.x`
 
-<a id="HttpServer.init"></a>
-#### HttpServer.init
-
-`void HttpServer.init(HttpServer value)`
-
-Initializes zeroed HttpServer storage without acquiring resources.
-
-Source: `lib/http.x`
-
 <a id="HttpServer.new"></a>
 #### HttpServer.new
 
@@ -180,6 +168,11 @@ Source: `lib/http.x`
 
 Binds immediately; port 0 selects an available port.
 Options use Symbol keys.
+
+**Raises:** `<bad-arg>` for fewer than one worker, an idle timeout below one
+millisecond, a negative body limit, or an invalid port, `<not-found>`
+when the host does not resolve, or `<io-fail>` on a host failure while
+binding, as `Listener.bind` does.
 
 Source: `lib/http.x`
 
@@ -207,6 +200,9 @@ Source: `lib/http.x`
 `void HttpServer.start(HttpServer s)`
 
 Starts serving on a joined background Thread.
+
+**Raises:** `<bad-state>` when the server is already serving, or the causes
+of `Thread.start`.
 
 Source: `lib/http.x`
 
@@ -254,15 +250,6 @@ Source: `lib/http.x`
 `Router Router.get(Router r, String p, Func fn)`
 
 Registers GET.
-
-Source: `lib/http.x`
-
-<a id="Router.init"></a>
-#### Router.init
-
-`void Router.init(Router value)`
-
-Initializes zeroed Router storage without acquiring resources.
 
 Source: `lib/http.x`
 

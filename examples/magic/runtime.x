@@ -2,8 +2,7 @@
 
 int main(void) {
   // Expose an ordinary typed function to the runtime interpreter.
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  auto Lisp lisp = Lisp.new();
   $lisp.bind(lisp, "seats-left", seats_left);
 
   // Keep the party together, or admit as many people as fit.

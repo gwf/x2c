@@ -19,7 +19,7 @@ int main(void) {
   volatile uintptr_t sink = 0;
   uint64_t start;
 
-  Scope.retain();
+  Scope.open();
   start = now_ns();
   for (int i = 0; i < count; i++) {
     void *ptr = xmalloc(24);
@@ -27,12 +27,12 @@ int main(void) {
     xfree(ptr);
   }
   result("malloc-free", now_ns() - start, count);
-  Scope.release();
+  Scope.close();
 
   start = now_ns();
   for (int i = 0; i < count; i++) {
-    Scope.retain();
-    Scope.release();
+    Scope.open();
+    Scope.close();
   }
   result("retain-release", now_ns() - start, count);
 

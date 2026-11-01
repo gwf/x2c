@@ -1,8 +1,10 @@
 # C preprocessing
 
-This module expands the C macros x2c can see and decides the conditional
-groups it can, before the parser reads a token. A macro body is therefore
-translated like any other source. The language rules are in
+This module supplies optional C macro expansion for existing C compatibility.
+`--cpp` enables expansion and conditional evaluation before parsing; ordinary
+x2c builds do not use the engine. Explicit native REPL macro processing also
+uses it. Module and meta discovery read authored x2c syntax without this pass.
+The language rules are in
 [Preprocessing](../../docs/src/reference/language.md#preprocessing).
 
 Start with `cpp.x`, which defines the `Cpp` state, then `expand.x`, whose
@@ -22,6 +24,8 @@ Start with `cpp.x`, which defines the `Cpp` state, then `expand.x`, whose
 [preprocess.x](../preprocess.x) hides the arms this module decides C never
 takes and reads the directives before each form.
 [Collect](../collect/README.md) threads the state through a file's segments
-and records each file's exported macros in its entry.
+and records each file's directives in its entry as `(cpp TEXT FILE LINE)`
+events, which `_replay_included` replays to recompute the macros the file
+exports.
 
 [Source guide](../README.md)

@@ -475,7 +475,7 @@ _Noreturn void MetaContext_reject(String message, List notes){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 96};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-sdk/context.x",.function = "MetaContext_reject",.line = 94};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), String_var(message));
       __builtin_unreachable();
     }
@@ -554,10 +554,10 @@ List Type_marked_fields(Type aggregate, Symbol mark){
 
 List Compiler_resolve_postfix_member(Compiler, Type, List, Symbol, int, List *);
 
-List Type_resolve_member(Type type, String name, int call){
+List Type_resolve_member(Type t, String name, int call){
   if(! _init_guard_) _file_init_();
   _require_expansion(_13);
-  return Compiler_resolve_postfix_member(active.expander, type, cons(String_var(name), NULL), 93, call, NULL);
+  return Compiler_resolve_postfix_member(active.expander, t, cons(String_var(name), NULL), 93, call, NULL);
 }
 
 List Compiler_resolve_protocol_member(Compiler, Type, String);
@@ -1821,7 +1821,7 @@ String Code_source_text(Var value){
   Var stored =((void) 0, Void);
   if(! Map_truth(active.captures) || ! Map_try_get(active.captures, ulong_var(((ulong) value.u64)), &(stored))) MetaContext_reject(_174, active.has_bindings ? NULL : cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(Var_repr(value)), NULL)))), NULL));
   List source = Var_list_payload(stored);
-  int begin = Var_int(Var_convert_at(List_caddr(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 75}; & _x2c_gensym_error_site_4; }))), end = Var_int(Var_convert_at(List_last(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 75}; & _x2c_gensym_error_site_5; })));
+  int begin = Var_int(Var_convert_at(List_caddr(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 73}; & _x2c_gensym_error_site_4; }))), end = Var_int(Var_convert_at(List_last(source), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/meta-sdk/sources.x",.function = "Code_source_text",.line = 73}; & _x2c_gensym_error_site_5; })));
   return String_new_len(active.expander -> text + begin, end - begin);
 }
 

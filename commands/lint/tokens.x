@@ -10,9 +10,9 @@
 #include <string.h>
 
 static const SymbolSet type_words =
-  %<<void char short int long float double signed unsigned>>
+  %<void char short int long float double signed unsigned>
 static const SymbolSet qualifier_words =
-  %<<static const unsigned signed long short>>
+  %<static const unsigned signed long short>
 
 /* The style guide spaces binary and assignment operators once. */
 static int _operator(Token t) =>

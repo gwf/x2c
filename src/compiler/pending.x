@@ -29,7 +29,7 @@ void Pending.reset(Pending &p) {
 
 /** Returns the storage of the destination `area`. */
 Array Pending.area(Pending &p, Symbol area) =>
-  p.areas[%<<support protocol prepare statics finish>>.index(area)];
+  p.areas[%<support protocol prepare statics finish>.index(area)];
 
 /** Whether any file initialization area holds a statement. */
 int Pending.initializes(Pending &p) {

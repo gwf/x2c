@@ -407,12 +407,12 @@ static inline int _x2c_gensym_proto_f34_module_block_static_typedef_second___nod
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){

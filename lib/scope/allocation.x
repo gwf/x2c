@@ -38,7 +38,7 @@ static macro Expression $scope.alloc_meta(Expr $a) =>
 /** Allocates `size` uninitialized bytes in the active scope.
     The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
     ends its life early, `Scope.move` reassigns its owner, and
-    `Scope.release` or `Scope.destroy` reclaims whatever is left. The active
+    `Scope.close` or `Scope.destroy` reclaims whatever is left. The active
     scope at the time of allocation owns the result; a later retain or push
     does not move it.
     Raises: `<size-limit>` when the size would overflow the allocation header,
@@ -79,7 +79,7 @@ void *Scope.malloc_finalized(size_t size, void (*drop)(void *)) {
 /** Allocates `size` uninitialized bytes in the scope held by `slot`.
     `slot` is the address of a `Scope` variable; if it holds NULL, a fresh
     unnamed scope is created and stored there. Targeting a slot does not
-    touch the active-scope stack, so an intervening `Scope.retain` or
+    touch the active-scope stack, so an intervening `Scope.open` or
     `Scope.push` cannot redirect the allocation. Pass `Scope.top()` to name
     the active slot explicitly.
     Raises: `<bad-arg>` when `slot` is NULL, `<size-limit>` when the size
@@ -208,10 +208,10 @@ Scope Scope.owner(void *ptr) {
     ```x2c
     ~int main(void) {
     Scope keep = Scope.new_named("results");
-    Scope.retain();
+    Scope.open();
     char *text = xmemdup("survivor", 9);
     Scope.move(text, &keep);
-    Scope.release();
+    Scope.close();
     puts(text);
     Scope.destroy(keep);
     ~  return 0;

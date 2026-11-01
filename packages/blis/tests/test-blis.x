@@ -296,8 +296,8 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
   BlisObject matrix = auto BlisObject.copy_rows(
     %((1.0 2.0 3.0) (4.0 5.0 6.0)), BLIS_DOUBLE
   );
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
 
   Array rows = matrix.to_rows();
   EXPECT_INT_EQ((int) rows.len(), matrix.rows());

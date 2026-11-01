@@ -183,13 +183,13 @@ static int restore_scope_slots(Scope *saved_slot) {
 }
 
 
-// Scope.retain changes the value stored in the active slot.
+// Scope.open changes the value stored in the active slot.
 static int restore_retained_scopes(Scope *saved_slot, Scope saved_scope) {
   int changed = 0;
   if (!scope_chain_contains(*saved_slot, saved_scope)) return -1;
   while (*saved_slot != saved_scope) {
     changed = 1;
-    Scope.release();
+    Scope.close();
   }
   return changed;
 }

@@ -179,6 +179,11 @@ static void map_updateindex_hashes_existing_key_once(void) {
   EXPECT_INT_EQ(map_probe_hash_calls, 1);
   EXPECT_INT_EQ(result.integer(), 13);
   EXPECT_INT_EQ(map[key].integer(), 13);
+  unsigned hash = key.hash();
+  int before = map_probe_hash_calls;
+  EXPECT_INT_EQ(map.get_hashed(key, hash).integer(), 13);
+  EXPECT_TRUE(map.get_hashed(key, hash ^ 1) is void);
+  EXPECT_INT_EQ(map_probe_hash_calls, before);
 }
 
 static void map_update_boundaries_preserve_failure_order(void) {
@@ -200,21 +205,59 @@ static void map_update_boundaries_preserve_failure_order(void) {
   EXPECT_INT_EQ(map[<count>].integer(), 4);
 }
 
-static void map_reports_exhausted_probe_invariant(void) {
+static int map_allowed_hash, map_growth_hash_calls, map_fail_hash;
+
+static unsigned _map_growth_hash(Var value) {
+  MapProbe *probe = value;
+  if (++map_growth_hash_calls == map_fail_hash)
+    raise %(bad-arg (operation "retry hash"));
+  if (map_allowed_hash && probe.value != (unsigned long) map_allowed_hash)
+    raise %(bad-arg (operation "stored-key hash"));
+  return (unsigned) probe.value;
+}
+
+static void map_growth_and_cleanup_reuse_hashes(void) {
   $test.scoped();
-  Map map = {};
-  Var key = <probe-key>;
-  unsigned hash = key.hash(), fake = hash ^ 2;
-  if (!fake) fake = hash ^ 4;
-  unsigned *hashes = map.hashes;
-  unsigned start = hash & map.mask;
-  hashes[start] = fake;
-  hashes[start ^ 1] = fake;
+  VarMethods methods = {.hash = _map_growth_hash, .equal = _map_probe_equal};
+  EXPECT_TRUE(x2c_try_register_descriptor("mgrow", methods));
+  MapProbe probes[49];
+  for (int i = 0; i < 49; i++) probes[i].value = i + 1;
+  Map growing = {};
+  growing[Var.new(<mgrow>, &probes[0])] = 10;
+  try {
+    map_allowed_hash = 2;
+    growing[Var.new(<mgrow>, &probes[1])] = 20;
+  } finally { map_allowed_hash = 0; }
+  EXPECT_INT_EQ(growing.len(), 2);
+  EXPECT_INT_EQ(growing[Var.new(<mgrow>, &probes[0])].integer(), 10);
+
+  Map retry = {};
+  retry[Var.new(<mgrow>, &probes[0])] = 10;
   int caught = 0;
-  try map.set(key, 1);
-  catch %(invariant *): caught = 1;
-  EXPECT_TRUE(caught);
-  EXPECT_INT_EQ(map.len(), 0);
+  try {
+    map_growth_hash_calls = 0;
+    map_fail_hash = 2;
+    retry[Var.new(<mgrow>, &probes[1])] = 20;
+  } catch %(bad-arg *): caught++;
+  finally { map_fail_hash = 0; }
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_TRUE(retry.capacity > 2);
+  EXPECT_INT_EQ(retry.len(), 1);
+  EXPECT_INT_EQ(retry[Var.new(<mgrow>, &probes[0])].integer(), 10);
+  retry[Var.new(<mgrow>, &probes[1])] = 20;
+  EXPECT_INT_EQ(retry.len(), 2);
+
+  Map cleaning = Map.new_capacity(64);
+  for (int i = 0; i < 48; i++) cleaning[Var.new(<mgrow>, &probes[i])] = i;
+  for (int i = 0; i < 32; i++) cleaning.del(Var.new(<mgrow>, &probes[i]));
+  try {
+    map_allowed_hash = 49;
+    cleaning[Var.new(<mgrow>, &probes[48])] = 48;
+  } finally { map_allowed_hash = 0; }
+  EXPECT_INT_EQ(cleaning.capacity, 64);
+  EXPECT_INT_EQ(cleaning.len(), 17);
+  for (int i = 32; i < 49; i++)
+    EXPECT_INT_EQ(cleaning[Var.new(<mgrow>, &probes[i])].integer(), i);
 }
 
 
@@ -240,6 +283,7 @@ static void map_growth_preserves_entries(void) {
   Map copy = map.copy();
   EXPECT_TRUE(map.equal(copy));
   EXPECT_INT_EQ(map.compare(copy), 0);
+  EXPECT_INT_EQ(copy.capacity, 128);
   Map merged = { extra: 1 };
   merged.merge(map);
   EXPECT_INT_EQ(merged.len(), map.len() + 1);
@@ -692,12 +736,12 @@ static void map_growth_survives_a_nested_region(void) {
   map[anchor] = 42;
   size_t before = Scope.stats().live_allocations;
 
-  Scope.retain();
+  Scope.open();
   for (int i = 0; i < 512; i++) {
     Var key = i + 1000, val = i;
     map[key] = val;
   }
-  Scope.release();
+  Scope.close();
 
   size_t after = Scope.stats().live_allocations;
   EXPECT_INT_EQ(after, before);
@@ -732,7 +776,7 @@ void map_suite(void) {
   $test.run(map_update_avoids_growth);
   $test.run(map_updateindex_hashes_existing_key_once);
   $test.run(map_update_boundaries_preserve_failure_order);
-  $test.run(map_reports_exhausted_probe_invariant);
+  $test.run(map_growth_and_cleanup_reuse_hashes);
   $test.run(map_growth_preserves_entries);
   $test.run(map_merge_with_combines_only_collisions);
   $test.run(map_merge_with_handles_null_growth_and_self);

@@ -221,7 +221,7 @@ static void _native_module_shutdown(void) {
   native_module_order = NULL;
 }
 
-/* `path` is absolute, as `_add_native_module` records it. */
+/* `path` must be absolute, as `_add_native_module` records it. */
 module int _native_module_loaded(String path) =>
   (void *) native_modules && path in native_modules;
 

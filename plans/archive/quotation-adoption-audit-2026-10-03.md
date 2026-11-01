@@ -4,7 +4,7 @@
 
 ## Current owner
 
-Continue from the [active plan](../quotation-adoption-audit-2026-10-03.md). The text below retains its dated observations and earlier
+Continue from the [active plan](quotation-adoption-closeout-2026-10-31.md). The text below retains its dated observations and earlier
 decisions; it is not an additional implementation queue.
 
 ## Historical record

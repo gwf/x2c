@@ -75,7 +75,10 @@ declarator-suffix = ( ( "[" , [ expression ] , "]" ) |
     ( ":" , primary ) |
     attribute ) ;
 parameter-list = ( parameter , { ( "," , parameter ) } ) ;
-parameter = ( ( { qualifier } , type-specifier , declarator ) | "..." | ( ( "List" | "Map" ) , "@" , [ identifier ] ) | parameter-slot ) ;
+parameter = ( ( { qualifier } , type-specifier , declarator ) |
+    "..." |
+    ( ( "List" | "Map" ) , "@" , [ identifier ] ) |
+    parameter-slot ) ;
 destructuring-targets = ( "(" , identifier , "," , identifier , { ( "," , identifier ) } , ")" ) ;
 typed-destructuring = ( "(" , parameter-list , ")" , "=" , assignment , ";" ) ;
 aggregate = ( ( "struct" | "union" ) ,
@@ -215,7 +218,8 @@ logical-and = ( bitwise-or , { ( "&&" , bitwise-or ) } ) ;
 bitwise-or = ( bitwise-xor , { ( "|" , bitwise-xor ) } ) ;
 bitwise-xor = ( bitwise-and , { ( "^" , bitwise-and ) } ) ;
 bitwise-and = ( equality , { ( "&" , equality ) } ) ;
-equality = ( relational , { ( ( "==" | "!=" | "===" | "!==" ) , relational ) } ) ;
+equality = ( relational ,
+    { ( ( ( "==" | "!=" | "===" | "!==" ) , relational ) | ( "~=" , pattern ) ) } ) ;
 relational = ( shift ,
     { ( ( ( "<" | "<=" | ">" | ">=" | "in" ) , shift ) | ( "is" , [ "not" ] , type-selector ) ) } ) ;
 type-selector = ( type-name | ( "(" , type-name , ")" ) | cast ) ;
@@ -319,7 +323,7 @@ quoted-map = ( "%{" , [ ( quoted-entry , { ( "," , quoted-entry ) } , [ "," ] ) 
 quoted-entry = ( ( data-element , ":" , data-element ) | entry-extension | quoted-entry-extension ) ;
 quoted-entry-extension = ( "$(" , entry-extension , ")" ) ;
 percent-string = ( "%\"" , { ( string-segment | insertion ) } , "\"" ) ;
-symbol-set = ( "%<<" , { symbol-set-member } , ">>" ) ;
+symbol-set = ( "%<" , { symbol-set-member } , ">" ) ;
 symbol-set-member = ? symbol-set-mode lit-atom or lit-symbol ? ;
 unit-extension = ( class-declaration | unit-macro | decorator ) ;
 class-declaration = ( "class" , named-type ) ;
@@ -347,7 +351,7 @@ meta-call = ( macro-name , "(" , [ ( meta-argument , { ( "," , meta-argument ) }
 meta-argument = ( assignment | meta-value-hole ) ;
 meta-value-hole = ? whole template hole passed as a value, under M5 ? ;
 macro-arguments = ? signature-directed argument sequence; contract M1 ? ;
-decorator = ? visible decorator invocation followed by its target; M3 ? ;
+decorator = ? visible decorator invocation followed by its target; returned zero-argument Decorators continue onto their next target; M3 ? ;
 quotation = ( "$" ,
     "!" ,
     ( ( "(" , expression , ")" ) |
@@ -374,6 +378,7 @@ hole-kind = ( "Expr" |
     "Unit" |
     "Function" |
     "NamedType" |
+    "Macro" |
     "Type" |
     "Decl" |
     "DeclaratorRow" |

@@ -128,6 +128,7 @@ static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
       "native_modules": request.native_modules,
       "extensions": request.extensions, "cc": request.cc,
       "meta_cc": request.meta_cc, "no_cpp": request.no_cpp,
+      "cpp_expansion": request.cpp_expansion,
       "live_symbols": request.live_symbols, "cpp_symbols": request.cpp_symbols};
     foreach (String input, inputs) {
       // Collection cache rows outlive their compiler's source declarations.
@@ -268,7 +269,7 @@ int graph_snapshot_command(int argc, char **argv) {
         return 0;
       }
       if (verb == "status" && argc == 3)
-        result = _snapshot_status(snapshot, Path.absolute(String.new(argv[0])));
+        result = _snapshot_status(snapshot, x2c_get_executable());
       else if (verb == "query" && argc == 4) {
         Var query = Json.read_file(String.new(argv[3]));
         if (query is not <map>) raise %(bad-arg (reason "query object required"));

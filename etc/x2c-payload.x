@@ -6,6 +6,7 @@
     Copies keep their source's permission bits and times, and each tree is
     inventoried in a manifest of FNV-1a digests.
 */
+#include "system-macros.x"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -243,7 +244,10 @@ static void install(Path prefix, Path destdir) {
     copy(root.join("builds/0/libx2c.a"), stage.join("lib/libx2c.a"));
     write_interfaces(stage);
     stage.join("lib/x2c").make_dirs();
-    stage.join("lib/x2c/toolchain").write_text("CC=cc\nAR=ar\n");
+    stage.join("lib/x2c/toolchain").write_text($dedent(%"
+      CC=cc
+      AR=ar
+    "));
     identity = write_manifest(stage, INSTALL_MANIFEST, "x2c-native-v1");
     Map previous = owned_files(target), current = owned_files(stage);
     foreach (String relative,

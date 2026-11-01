@@ -326,8 +326,8 @@ static void file_raw_read_and_write_all(void) {
 
 
 static void file_write_failures_raise_io_error(void) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   unsigned char byte = 'x';
 
   File output = tmpfile();

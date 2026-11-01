@@ -64,8 +64,8 @@ static Map _linked_hashes(void) {
   return rows;
 }
 
-/* The prelude components' interface records, which `src/collect/collect.x` links
-   into the compiler it is translated into. */
+/* The prelude components' interface records, which `src/collect/collect.x`
+   links into the compiler it is translated into. */
 static Map _linked_prelude(void) {
   _require_expansion("_x2c_prelude_records");
   return active.expander.linked_prelude_records();
@@ -90,8 +90,8 @@ static Var _symbol_set(List values) {
    which no C function of that name implements. */
 static List _native_rows(Symbol inventory, List leading, List trailing) {
   Array rows = auto leading;
-  foreach (List row in Compiler.native_meta_targets(
-             NULL, inventory == <runtime>)) {
+  foreach (List row in
+           Compiler.native_meta_targets(NULL, inventory == <runtime>)) {
     String name = row.car();
     int own = name.startswith("x2c_") || name.startswith("Code_") ||
               name.startswith("Type_");

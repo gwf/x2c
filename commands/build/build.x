@@ -346,6 +346,8 @@ static uint64_t _translation_options(
   hash = _state_list(hash, request.cc_args);
   hash = _state_tool(hash, Toolchain.meta_cc(request.meta_cc), ok);
   hash = _state_text(hash, request.no_cpp ? "no-cpp" : "cpp");
+  hash = _state_text(
+    hash, request.cpp_expansion && !request.no_cpp ? "expand" : "unexpanded");
   hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
   hash = _state_text(
@@ -1084,20 +1086,22 @@ void Build.cleanup(Build b, int success) {
     program must translate and link. The script's translation depfile already
     lists every file the translation read, so helpers of helpers appear too.
     Runtime and package sources are excluded; their objects are archived.
-    The compiler's own `etc/` sources, such as its syntax prelude, have
-    none.
+    Compiler support under `etc/` has no program objects. Its `syntax/`
+    directory instead contains ordinary runtime helpers for syntax tools.
 */
 List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
-  List excluded = %("$root/lib/" "$root/include/" "$root/builds/" "$root/etc/")
+  List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   List prelude = Compiler.prelude_sources().map(
     %!(String source) => Path.join(root, source));
+  String support = %"$root/etc/", syntax = %"$root/etc/syntax/";
   String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array candidates = [], helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
     if (path.startswith("search:") || !Path.is_x2c_source(path) ||
         path in candidates || path in prelude) continue;
+    if (path.startswith(support) && !path.startswith(syntax)) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     candidates.push(path);
   }
@@ -1119,7 +1123,7 @@ static Map _script_members(Build b, List candidates) {
   foreach (String path, candidates) {
     String text = NULL;
     if (!c.read_source(path, text)) continue;
-    ModuleSource module = c.module_source(path, text, NULL);
+    ModuleSource module = c.module_source(path, text);
     if (module) members.merge(module.members);
   }
   return members;

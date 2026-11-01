@@ -16,6 +16,7 @@ Checked dynamic storage for fixed-width elements.
 | [`Block.clear`](#Block.clear) | Removes every element from `block` without releasing capacity. |
 | [`Block.free`](#Block.free) | Releases the `Block` and its backing storage, invalidating every alias. |
 | [`Block.len`](#Block.len) | Returns the number of elements stored in `b`. |
+| [`Block.move_to`](#Block.move_to) | Moves `block`, its backing allocation, and owned contents into `scope`. |
 | [`Block.new`](#Block.new) | Allocates an empty `Block` for elements of `width` bytes. |
 | [`Block.pop`](#Block.pop) | Removes the final element of `block` when present. |
 | [`Block.push`](#Block.push) | Appends one copied element; storage and failures follow `Block.append`. |
@@ -114,6 +115,21 @@ Source: `lib/block.x`
 `inline size_t Block.len(Block b)`
 
 Returns the number of elements stored in `b`.
+
+Source: `lib/block.x`
+
+<a id="Block.move_to"></a>
+#### Block.move_to
+
+`void Block.move_to(Block block, Scope *scope)`
+
+Moves `block`, its backing allocation, and owned contents into `scope`.
+This preserves the `Block` and `Bytes` pointers and contents while changing
+which `Scope` ends their lifetime. `Context` export calls this method
+instead of assuming a `Block` is one allocation.
+For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
+`<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
+ownership unchanged.
 
 Source: `lib/block.x`
 
@@ -290,32 +306,6 @@ Source: `lib/block.x`
 `inline int Bytes.try_pop(Bytes bytes, void *out)`
 
 Removes the final element through `bytes` as `Block.try_pop` does.
-
-Source: `lib/block.x`
-
-## Runtime-internal callables
-
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`Block.move_to`](#Block.move_to) | Moves `block`, its backing allocation, and owned contents into `scope`. |
-
-### `Block`
-
-<a id="Block.move_to"></a>
-#### Block.move_to
-
-`void Block.move_to(Block block, Scope *scope)`
-
-Moves `block`, its backing allocation, and owned contents into `scope`.
-This preserves the `Block` and `Bytes` pointers and contents while changing
-which `Scope` ends their lifetime. `Context` export calls this method
-instead of assuming a `Block` is one allocation.
-For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
-`<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
-ownership unchanged.
 
 Source: `lib/block.x`
 

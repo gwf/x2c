@@ -184,12 +184,24 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_context_exchange`](#x2c_context_exchange) | Exchanges the installed execution's current Context without opening or closing either chain. |
 | [`Context.export_destination`](#Context.export_destination) | Returns the borrowed `Scope` slot that receives exports from `c`. |
 | [`Context.export_nested`](#Context.export_nested) | Recursively exports one nested value through an active or sealed `Context`. |
 | [`Context.export_scope`](#Context.export_scope) | Exports a sealed worker result `Scope` into the current `Scope` and pool. |
 | [`Context.initialize`](#Context.initialize) | Registers `Context` cleanup before workers can start. |
 | [`Context.move_block`](#Context.move_block) | Schedules Block storage and nullable owned contents for an exporter. |
 | [`Context.move_scope`](#Context.move_scope) | Schedules custom-exporter storage while preserving explicit adoption. |
+
+### Functions
+
+#### x2c_context_exchange
+
+`Context x2c_context_exchange(Context context)`
+
+Exchanges the installed execution's current Context without opening or
+closing either chain. Execution boundaries own the borrowed lifetimes.
+
+Source: `lib/context.x`
 
 ### `Context`
 

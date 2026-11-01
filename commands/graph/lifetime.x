@@ -277,7 +277,7 @@ static int _lifetime_export_result(Lifetime &lifetime, Var value) {
 
 static int _lifetime_known_call(String name) {
   return name && (
-    name == "Scope_retain" || name == "Scope_release" ||
+    name == "Scope_open" || name == "Scope_close" ||
     name == "Scope_move" || name == "Context_open" ||
     name == "Context_open_named" ||
     name == "Context_open_isolated" ||
@@ -608,7 +608,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
       String name;
       project_call_target(
         lifetime.compiler, lifetime.definitions, cleanup, name, arguments);
-      if (name == "Scope_release")
+      if (name == "Scope_close")
         _lifetime_end_region(lifetime, _lifetime_scope_region(lifetime), 1);
       else if (name == "Context_close" && arguments &&
                arguments.len() > 1) {
@@ -646,12 +646,12 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
       String name;
       project_call_target(
         lifetime.compiler, lifetime.definitions, expression, name, arguments);
-      if (name == "Scope_retain") {
+      if (name == "Scope_open") {
         int id = ++lifetime.next_region;
         lifetime.facts.regions[id] = %(region $id scope 0 1 0 none none);
         return;
       }
-      if (name == "Scope_release") {
+      if (name == "Scope_close") {
         _lifetime_end_region(lifetime, _lifetime_scope_region(lifetime), 0);
         return;
       }

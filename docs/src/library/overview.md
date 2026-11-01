@@ -128,7 +128,7 @@ Use [Block](modules/block.md) for fixed-width growable storage and `Buffer` for
 text construction. External resources such as `File`s still close explicitly or
 through `defer`.
 
-Each `Scope.release` must match a `Scope.retain` on the same active slot. See
+Each `Scope.close` must match a `Scope.open` on the same active slot. See
 [scopes and lifetime](../guide/memory.md).
 
 ## Bound temporary work
@@ -152,11 +152,11 @@ last-opened, first-closed order. See
 
 ## Run work on native threads
 
-[Thread](modules/thread.md) runs a fixed-signature callback in an isolated
-`Context`. It copies the input structure, but pointers inside that structure
-still point into shared process memory. A worker can read parent `String`s and
-`List`s directly. Use [Mutex](modules/mutex.md) when a shared value may be
-written:
+[Thread](modules/thread.md) runs a fixed-signature callback in a `Context`
+that is not isolated, so the callback uses the shared canonical pool. It
+copies the input structure, but pointers inside that structure still point
+into shared process memory. A worker can read parent `String`s and `List`s
+directly. Use [Mutex](modules/mutex.md) when a shared value may be written:
 
 ```x2c
 typedef struct CounterWork {
@@ -191,6 +191,12 @@ int main(void) {
 Every started `Thread` needs one successful `Thread.join`, then
 `Thread.free`. [Contexts and threads](../guide/contexts-and-threads.md#pass-shared-values-to-a-worker)
 gives the sharing and result rules.
+
+A [Channel](modules/channel.md) passes non-void `Var` messages between
+threads. `send` and `receive` block, the sender closes the Channel when no
+more messages will arrive, and `foreach` receives until the closed Channel
+is drained. See [Channels](../guide/channels.md) for capacity, message
+constraints, and storage handoff.
 
 ## Handle absence and failure
 
@@ -259,8 +265,8 @@ described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
 The same standard environment includes the core `List`, `Array`, `Map`,
 `String`, `Iter`, `Var`, and `Symbol` operations, plus `read-file`,
-`write-file`, `sort`, `fib`, and `subst`. The REPL uses this environment
-through `Lisp.new()`; embedding hosts need no additional standard files.
+`write-file`, `sort`, `fib`, and `subst`. A host that calls `Lisp.new()`
+needs no additional standard files.
 
 [lisp]: ../reference/language.md#runtime-lisp
 
@@ -358,8 +364,9 @@ example.com two words eDJj
 
 ## Open a socket
 
-Explicitly include `net.x` for blocking TCP. `Listener.bind` and
-`Listener.accept` create connections; `Socket.connect` opens a client.
+Explicitly include `net.x` for blocking TCP. `Listener.bind` returns a
+listening `Listener`, `Listener.accept` returns each accepted connection as a
+`Socket`, and `Socket.connect` opens a client `Socket`.
 Read and write through the Socket's `input` and `output` Files. Both Socket
 and Listener adopt `Cleanup`. See [Sockets and HTTP](../guide/networking.md)
 for timeouts, half-close, listener stopping, and the process-wide SIGPIPE

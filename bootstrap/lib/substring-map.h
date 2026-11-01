@@ -18,24 +18,25 @@ typedef struct MapSubInt{
 struct MapSubIntRecord{
   Substr key;
   int val;
+  unsigned cached_hash;
 }
 ;
 
-Scope MapSubInt_scope(MapSubInt _x2c_gensym_macro_map_2);
+Scope MapSubInt_scope(MapSubInt _x2c_gensym_macro_map_20);
 
-void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_3, Scope * _x2c_gensym_macro_destination_0);
+void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_21, Scope * _x2c_gensym_macro_destination_0);
 
-Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_19);
+Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_22);
 
-MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_0);
+MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_4);
 
-Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_23, Iter _x2c_gensym_macro_dest_0);
+Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_26, Iter _x2c_gensym_macro_dest_0);
 
-Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_24, Iter _x2c_gensym_macro_dest_1);
+Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_27, Iter _x2c_gensym_macro_dest_1);
 
-Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_25, Iter _x2c_gensym_macro_dest_2);
+Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_28, Iter _x2c_gensym_macro_dest_2);
 
-void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_21);
+void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_24);
 
 MapSubInt MapSubInt_new(void);
 

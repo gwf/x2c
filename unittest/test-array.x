@@ -123,16 +123,13 @@ static void array_void_writes_transfer_before_mutation(void) {
 static void array_null_writes_return_void(void) {
   $test.scoped();
   Array array = NULL;
-  int caught = 0;
 
   EXPECT_TRUE(array.push(1) is void);
   EXPECT_TRUE(array.unshift(1) is void);
   EXPECT_TRUE(array.insert(0, 1) is void);
-  try array.push(void);
-  catch %(void-op *): caught++;
-  try array.unshift(void);
-  catch %(void-op *): caught++;
-  EXPECT_INT_EQ(caught, 2);
+  EXPECT_TRUE(array.push(void) is void);
+  EXPECT_TRUE(array.unshift(void) is void);
+  EXPECT_TRUE(array.insert(0, void) is void);
 }
 
 static void array_absent_elements_return_void(void) {

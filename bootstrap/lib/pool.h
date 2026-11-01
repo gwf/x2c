@@ -64,7 +64,7 @@ Pool Pool_retain(Pool inner);
 
 Pool Pool_retain_named(Pool inner, const char * name);
 
-Pool Pool_release(Pool inner);
+Pool Pool_release(Pool p);
 
 void * Pool_malloc(Pool inner, size_t size);
 

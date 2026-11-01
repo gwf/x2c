@@ -19,9 +19,9 @@ void Compiler.check_regions(Compiler c, List ast) {
   c.origin = origin;
 }
 
-/** Rejects a `meta` function whose body breaks the rule
-    `Compiler.check_regions` warns about. A compile-time call frees its
-    locals when it returns, so an address of one that is returned or stored
+/** Rejects a `meta` function whose body breaks the region lifetime rule,
+    including a possible frame escape through raw storage. A compile-time
+    call frees its locals when it returns, so an address returned or stored
     into a static, a parameter's object, or an unknown pointer would read
     freed memory. The first finding is reported as an error. `fn` must be
     the bound and typed definition. The walk reads the summaries of the
@@ -145,9 +145,11 @@ static void _analyze(Walk &w, List function) {
 
 /* A summary is `(OWNER SINKS)`, where OWNER is a bit set of scoped (1) and
    pooled (2) returned storage. SINKS is a sorted List of `(INDEX TARGET)`
-   pairs and a target is <return>, <result>, <static>, <unknown>, or
-   `(param INDEX)`. <result> retains an argument in fresh result storage;
-   <return> aliases an argument as the result. */
+   pairs and a target is <return>, <result>, <static>, <unknown>, <retained>,
+   `(param INDEX)`, or `(raw INDEX)`. <result> retains an argument in fresh
+   result storage; <return> aliases an argument as the result. <unknown>
+   and `(raw INDEX)` record raw C stores; <retained> and `(param INDEX)`
+   preserve known retention even through helpers. */
 module List _summary(Walk &w, String callee) {
   match (_effect(w, callee)) {
     case %(alloc pool): return %(2 ());

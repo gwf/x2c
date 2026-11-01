@@ -190,7 +190,7 @@
 (  53, 24 )	)                   )
 (  53, 25 )	;                   ;
 (  54, 1  )	}                   }
-(  56, 1  )	protocol            protocol
+(  56, 1  )	ident               protocol
 (  56, 10 )	ident               Var
 (  56, 13 )	(                   (
 (  56, 14 )	ident               IsWidget

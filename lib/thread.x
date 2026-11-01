@@ -61,6 +61,28 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
+/** Links one borrowed parked task under its Channel monitor mutex.
+    The task and record remain live until removal.
+*/
+typedef struct X2CTaskWait {
+  void *task;
+  struct X2CTaskWait *next;
+} X2CTaskWait;
+
+/** Shared Channel wait bridge. The Channel owns its mutex, native condition,
+    and task wait list. A registered Thread borrows it until acknowledgement.
+*/
+typedef struct X2CChannelMonitor {
+  pthread_mutex_t mutex;
+  pthread_cond_t condition;
+  X2CTaskWait *tasks;
+} X2CChannelMonitor;
+
+void *x2c_task_current(void);
+int x2c_task_stopping(void *task);
+void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner);
+void x2c_task_channel_notify(X2CChannelMonitor *monitor);
+
 static typedef struct ParallelRun { Array ready; int stopping; } *ParallelRun;
 
 static struct Thread {
@@ -74,6 +96,7 @@ static struct Thread {
   ParallelRun parallel;
   int assigned;
   int stop_requested;
+  X2CChannelMonitor *channel_monitor;
   pthread_cond_t *waiting;
 };
 
@@ -88,6 +111,9 @@ static struct ParallelMap {
   int workers;
   Pool pool;
 };
+
+/* An identity only: the stopped registration sentinel is never locked. */
+static X2CChannelMonitor stopped_channel_monitor;
 
 static threaded Thread running_thread;
 static threaded int stop_mask;
@@ -343,10 +369,35 @@ void x2c_thread_wait(pthread_cond_t *condition) {
 Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
 
 /** Tests a live borrowed wait token atomically. A null token has no stop
-    request. Queues retain the monitor when committing a rendezvous peer.
+    request. Stop publication and commitment hold the registered queue mutex.
 */
 int x2c_thread_wait_stopped(Thread owner) =>
   owner && __atomic_load_n(&owner.stop_requested, __ATOMIC_ACQUIRE);
+
+/** Registers a Channel monitor for the current caller and returns its borrowed
+    Thread token through owner. Returns false if stop already claimed it.
+    The caller holds the monitor mutex. Its lifetime extends through successful
+    unregister or completion acknowledgement after releasing that mutex.
+*/
+int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner) {
+  owner = x2c_thread_wait_owner();
+  if (!owner) return 1;
+  X2CChannelMonitor *idle = NULL;
+  return __atomic_compare_exchange_n(
+    &owner.channel_monitor, &idle, monitor, 0,
+    __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+}
+
+/** Removes the caller's registered Channel monitor while its mutex is held.
+    Returns false if stop borrowed the monitor; the caller must release its
+    mutex and acknowledge completion before allowing the monitor to expire.
+*/
+int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor) {
+  if (!owner) return 1;
+  return __atomic_compare_exchange_n(
+    &owner.channel_monitor, &monitor, NULL, 0,
+    __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+}
 
 /** Raises a non-resumable stop outcome after queue locks and wait records
     have been released. Explicit catches may handle this shared cause.
@@ -364,18 +415,27 @@ void x2c_thread_cancel(void) {
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
-  __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
+  X2CChannelMonitor *monitor = __atomic_exchange_n(
+    &t.channel_monitor, &stopped_channel_monitor, __ATOMIC_ACQ_REL);
+  if (monitor != &stopped_channel_monitor) {
+    if (monitor) _completion_check(pthread_mutex_lock(&monitor.mutex));
+    __atomic_store_n(&t.stop_requested, 1, __ATOMIC_RELEASE);
+    if (monitor) {
+      _completion_check(pthread_cond_broadcast(&monitor.condition));
+      _completion_check(pthread_mutex_unlock(&monitor.mutex));
+    }
+  }
   if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
   x2c_thread_wait_unlock();
 }
 
-/** Locks the internal monitor shared by stop publication and queue commits.
+/** Locks the completion monitor shared by stop and completion selection.
     Native synchronization failure aborts without entering Error dispatch.
 */
 void x2c_thread_wait_lock(void) =>
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
 
-/** Unlocks the internal stop/queue monitor. */
+/** Unlocks the internal completion monitor. */
 void x2c_thread_wait_unlock(void) =>
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
 
@@ -596,8 +656,7 @@ static int _work(Thread thread) {
   try {
     ErrorHandler observer = Error.push(_capture_errors, thread);
     defer Error.pop(observer);
-    Context work = Context.open_named("Thread callback");
-    defer work.close();
+    auto Context work = Context.open_named("Thread callback");
     again = _call(thread);
   }
   catch %(join-fail *): _worker_failed(thread, mark);

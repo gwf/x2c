@@ -83,7 +83,7 @@ List Compiler.setup_cache_init(
   Array scan = [];
   scan.push(source);
   foreach (List initializer in statics.initializers) scan.push(initializer);
-  foreach (Symbol area in %<<protocol prepare statics finish>>)
+  foreach (Symbol area in %<protocol prepare statics finish>)
     scan.push(c.init_statements(area));
   Array source_ids = _cache_ids(c, scan.list_free());
   if (header_ids)

@@ -5,8 +5,8 @@ import "torch" with Torch, Tensor, Module, Optimizer;
 
 int main(int argc, char **argv) {
   if (argc != 5 && argc != 6) return 2;
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Torch.manual_seed(7);
   Module model = Module.linear(2, 1);
   model.to_dtype(XT_FLOAT64);

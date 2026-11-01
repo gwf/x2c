@@ -6,27 +6,19 @@
 #pragma once
 #include "meta.x"
 
-/* Dedents the literal `text` was written as when its spelling is exact.
-   Escaped, interpolated and computed values keep their meaning by calling
-   String.dedent at run time. */
-meta List _dedent_expand(Source text) {
-  String source = Code.source_text(text);
-  int length = source.len(), open = 0;
-  if (length >= 3 && source.startswith("%\""))
-    open = 2;
-  else if (length >= 2 && source.startswith("\""))
-    open = 1;
-  if (open == 0 || !source.endswith("\"") || "\\" in source ||
-      "$" in source)
-    return $!( $(text.assoc(<syntax>)).dedent() );
-  String body = source.getslice(open, length - 1, 1);
-  return $!String{ $(body.dedent()) };
+/* Folds static String values; other expressions call String.dedent. */
+meta List _dedent_expand(Code text) {
+  if (text.format()) {
+    String body = text.value();
+    return $!String{ $(body.dedent()) };
+  }
+  return $!( $(text).dedent() );
 }
 
 /* Normalizes the indentation a block of text was written with. The literal
-   is dedented during translation when its spelling carries no escape and no
-   interpolation hole; every other form calls String.dedent at run time, so
-   both spellings mean the same thing. */
+   is dedented during translation when its String value is static, including
+   escaped literals and literals inside macros. Other expressions call
+   String.dedent at run time. */
 macro Expression $dedent(Expr $text) => $_dedent_expand($text);
 
 /* Reports how long the following statement took on stderr. The caller

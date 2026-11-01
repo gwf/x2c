@@ -12,6 +12,10 @@ M4 Max, 64 clients/workers, 1,000-note SQLite fixture, GET /api/notes/1.
 Three rounds per binary, one-second warmup and five seconds timed. Before is
 the preserved runtime after the HTTP allocation cleanup. Naming and allocation
 accounting are disabled in every x2c binary. Access logging remains enabled.
+Every x2c binary linked an unshipped name-free Scope object; the
+[complete same-host repeat](../2026-10-29-runtime-locks/README.md#complete-same-host-repeat)
+in the 2026-10-29 runtime-locks report is the shipped-configuration
+measurement.
 
 | Server | Median requests/s | Server CPU cores | CPU us/request | p99 ms |
 | --- | ---: | ---: | ---: | ---: |

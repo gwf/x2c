@@ -1,7 +1,7 @@
 root/child
 (alpha "root" "root/child")
 [ "root", "root/child" ]
-{ <path>: "root/child", <root>: "root" }
+{ <root>: "root", <path>: "root/child" }
 box:root/child
 (boxed "root")
 [ "root/child" ]

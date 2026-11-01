@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-expand-missing-target.x:1:1: macro: decorator '_x2c_gensym_anonymous_macro_0' requires a following target
+  expand %(1 2)
+  ^^^^^^
+  note: definition: etc/compiler-prelude.x:81:3
+

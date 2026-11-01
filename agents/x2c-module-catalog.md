@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 62
-- Runtime modules: 77
+- Compiler modules: 63
+- Runtime modules: 78
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -104,7 +104,7 @@ statements that copy or set named fields.
 
 Public functions:
 
-`_x2c_field_copies`, `_x2c_field_sets`
+`_x2c_field_rows`
 
 ### [src/format.x](../src/format.x)
 
@@ -122,8 +122,8 @@ Public functions:
 
 `Frontend.open`, `Frontend.open_reporting`, `Frontend.open_session`,
 `Frontend.start`, `ParsedUnit.parse`, `Frontend.load_prelude`,
-`ParsedUnit.collect`, `ParsedUnit.close`, `Frontend.new`,
-`Frontend.load_support`
+`ParsedUnit.collect`, `ParsedUnit.collect_native`, `ParsedUnit.close`,
+`Frontend.new`, `Frontend.load_support`
 
 ### [src/grammar.x](../src/grammar.x)
 
@@ -305,7 +305,7 @@ Public functions:
 `Compiler.module_stamp`, `Compiler.identity`, `Path.content_identity`,
 `fnv_file`, `fnv_bytes`, `Path.identifier_hash`, `Path.lock_file`,
 `Path.publish_files`, `Job.decode_wait_status`, `Diagnostics.host_error`,
-`Diagnostics.driver_error`, `Compiler.cache_root`
+`Diagnostics.driver_error`, `Compiler.cache_root`, `Compiler.prune_cache`
 
 ### [src/callables/callables.x](../src/callables/callables.x)
 
@@ -348,14 +348,13 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
-`Compiler.module_source`, `Compiler.discover_module_source`,
-`Compiler.collect_symbols`, `Compiler.is_prelude_source`,
-`Compiler.install_syntax_prelude`, `Compiler.configure_package`,
-`Compiler.included_compile_time_effects`, `Compiler.prelude_sources`,
-`Compiler.install_included_effects`, `Compiler.included_macros`,
-`Compiler.initial_macros`, `SourceView.resolve_include`,
-`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
-`Compiler.include_function_declarations`,
+`Compiler.module_source`, `Compiler.collect_symbols`,
+`Compiler.is_prelude_source`, `Compiler.install_syntax_prelude`,
+`Compiler.configure_package`, `Compiler.included_compile_time_effects`,
+`Compiler.prelude_sources`, `Compiler.install_included_effects`,
+`Compiler.included_macros`, `Compiler.initial_macros`,
+`SourceView.resolve_include`, `Compiler.include_typedef_names`,
+`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
 `Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
 `Compiler.callable_symbols`, `Compiler.publish_inline_types`,
@@ -365,10 +364,9 @@ Public functions:
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
 `Compiler.name_loaded_provider`, `Compiler.loaded_call_type`,
-`Compiler.prepare_macro_exports`, `Compiler.collect_package`,
-`Compiler.configure_interfaces`, `Compiler.prelude_missing_interfaces`,
-`Compiler.prelude_interface`, `Compiler.interface_text`,
-`Compiler.linked_prelude_records`
+`Compiler.collect_package`, `Compiler.configure_interfaces`,
+`Compiler.prelude_missing_interfaces`, `Compiler.prelude_interface`,
+`Compiler.interface_text`, `Compiler.linked_prelude_records`
 
 ### [src/compiler/compiler.x](../src/compiler/compiler.x)
 
@@ -384,19 +382,20 @@ Public functions:
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
 `_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
-`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
-`Compiler.tokenize`, `Compiler.scan_source`, `Compiler.preprocess_tokens`,
-`Compiler.expect`, `Compiler.require_input`, `Compiler.test`,
-`Compiler.take_word`, `Compiler.next`, `Compiler.at_word`, `Compiler.peek`,
-`Token.after_group`, `Token.skip_trivia`, `Token.group_close`,
-`Symbol.group_step`, `Compiler.mark_completion`, `_x2c_complete_here`,
-`Compiler.at_completion`, `Compiler.collect_unit_macro`,
-`Compiler.replay_declaration_source`, `Compiler.freeze_declaration_syntax`,
-`Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
-`Compiler.anchor_origin`, `Compiler.record_origin`,
-`Compiler.record_source_declaration`, `Compiler.clear_source_external`,
-`Compiler.record_source_reference`, `Compiler.attach_source_references`,
-`Compiler.materialize_source_declaration`,
+`Compiler.full_parse`, `Compiler.full_parse_native`,
+`Compiler.skip_collected_script_statement`, `Compiler.tokenize`,
+`Compiler.scan_source`, `Compiler.preprocess_tokens`, `Compiler.expect`,
+`Compiler.require_input`, `Compiler.test`, `Compiler.take_word`,
+`Compiler.next`, `Compiler.at_word`, `Compiler.at_contextual`,
+`Compiler.with_form_starts`, `Compiler.peek`, `Token.after_group`,
+`Token.skip_trivia`, `Token.group_close`, `Symbol.group_step`,
+`Compiler.mark_completion`, `_x2c_complete_here`, `Compiler.at_completion`,
+`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
+`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
+`Compiler.select_declaration_defaults`, `Compiler.anchor_origin`,
+`Compiler.record_origin`, `Compiler.record_source_declaration`,
+`Compiler.clear_source_external`, `Compiler.record_source_reference`,
+`Compiler.attach_source_references`, `Compiler.materialize_source_declaration`,
 `Compiler.merge_source_declarations`, `Compiler.copy_source_declaration`,
 `Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
 `Compiler.add_support`, `Compiler.add_init`, `Pending.reset`, `Pending.area`,
@@ -473,6 +472,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [src/components/macro-mapping.x](../src/components/macro-mapping.x)
+
+maps a source macro over compile-time rows.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/components/pattern-match.x](../src/components/pattern-match.x)
 
 match statements.
@@ -523,13 +530,14 @@ Public functions:
 
 ### [src/cpp/cpp.x](../src/cpp/cpp.x)
 
-the C preprocessing x2c performs before parsing.
+optional preprocessing for existing C compatibility.
 
 Public functions:
 
 `Cpp.new`, `Cpp.isolated`, `Cpp.copy`, `Cpp.hidden`, `Cpp.changes`,
-`Cpp.table`, `Token.is_word`, `Token.spelling`, `Cpp.merge`,
-`Compiler.command_macros`, `Compiler.cpp_directive`, `Compiler.expand_macros`
+`Cpp.exported_macros`, `Cpp.rows`, `Cpp.table`, `Token.is_word`,
+`Token.spelling`, `Cpp.merge`, `Cpp.merge_table`, `Compiler.command_macros`,
+`Compiler.cpp_directive`, `Compiler.expand_macros`
 
 ### [src/emit/emit.x](../src/emit/emit.x)
 
@@ -619,23 +627,24 @@ Public functions:
 `Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
-`Compiler.skip_named_type_declaration`, `Compiler.skip_macro_invocation`,
-`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
-`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_rows`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_meta_value`,
-`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
-`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
-`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.land_quotation`, `Compiler.bind_meta_statement`,
-`Compiler.lift_meta_expression`, `Compiler.try_parse_macro_pattern`,
-`Compiler.try_parse_macro_subpattern`, `Compiler.macro_pattern_at`,
-`Compiler.capture_macro_value`, `Compiler.macro_value_literal`,
-`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
-`Compiler.alias_form_starts`, `Compiler.parse_alias_statement`,
-`Compiler.parse_alias_declaration`, `Compiler.parse_alias_member`,
-`Compiler.enter_alias_body`, `Compiler.leave_alias_body`,
-`Compiler.scope_declares_alias`, `Compiler.alias_expression`
+`Compiler.macro_starts_target_at`, `Compiler.macro_starts_entry`,
+`Compiler.macro_invocation_collection`, `Compiler.skip_named_type_declaration`,
+`Compiler.skip_macro_invocation`, `Compiler.macro_targets_unit`,
+`Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
+`Compiler.evaluate_macro_rows`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_meta_value`, `Compiler.evaluate_declaration_recipe`,
+`x2c_template_call`, `Compiler.rebuild_expression`,
+`Compiler.rebuild_statement`, `Compiler.rebuild_unit_function`,
+`Compiler.rebuild_function`, `Compiler.land_quotation`,
+`Compiler.bind_meta_statement`, `Compiler.lift_meta_expression`,
+`Compiler.try_parse_macro_pattern`, `Compiler.try_parse_macro_subpattern`,
+`Compiler.macro_pattern_at`, `Compiler.capture_macro_value`,
+`Compiler.macro_value_literal`, `Compiler.take_code_value`, `Compiler.place`,
+`Compiler.bind_code_value`, `Compiler.alias_form_starts`,
+`Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
+`Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
+`Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 
@@ -652,7 +661,7 @@ Public functions:
 `Compiler.refuse_record_meta_call`, `Compiler.meta_call_missing`,
 `Compiler.refuse_meta_call`, `Compiler.meta_diagnostic_line`,
 `Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`
+`Compiler.bind_meta_group`, `Compiler.emit_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 
@@ -965,7 +974,8 @@ Public functions:
 `Context.export_destination`, `Context.move_allocation`, `Context.move_block`,
 `Context.owns`, `Context.move_scope`, `Context.open`, `Context.open_named`,
 `Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
-`Context.cleanup`, `Context.initialize`, `Context.close`
+`x2c_context_exchange`, `Context.cleanup`, `Context.initialize`,
+`Context.close`
 
 ### [lib/datum-reader.x](../lib/datum-reader.x)
 
@@ -1017,17 +1027,17 @@ Public functions:
 `Var.as_string`, `Var.str`, `Var.fallback_str`, `Var.write_str`,
 `Var.fallback_write_str`, `Var.repr`, `Var.fallback_repr`,
 `Var.pointer_string`, `Var.write_repr`, `Var.fallback_write_repr`,
-`Var.write_pointer_repr`, `RenderPath.enter`, `RenderPath.leave`, `Var.hash`,
-`Var.fallback_hash`, `Var.equal`, `Var.fallback_equal`, `Var.same`,
-`Var.compare`, `Var.fallback_compare`, `Var.enumerate`, `Var.iter`,
-`Var.fallback_iter`, `Var.contains`, `Var.getindex`, `Var.setindex`,
-`Var.updateindex`, `Var.postfixindex`, `Var.dispatch_truth`,
-`Var.try_dispatch_binary`, `Var.try_dispatch_unary`, `Var.try_export_context`,
-`x2c_register_type`, `x2c_register_builtin_descriptor`,
-`x2c_register_descriptor`, `x2c_try_register_descriptor`,
-`x2c_register_tagged_descriptor`, `x2c_try_register_tagged_descriptor`,
-`x2c_descriptor_thread_start_begin`, `x2c_descriptor_thread_start_end`,
-`x2c_descriptor_registration_frozen`
+`Var.write_pointer_repr`, `RenderPath.enter`, `RenderPath.leave`,
+`x2c_render_path_exchange`, `Var.hash`, `Var.fallback_hash`, `Var.equal`,
+`Var.fallback_equal`, `Var.same`, `Var.compare`, `Var.fallback_compare`,
+`Var.enumerate`, `Var.iter`, `Var.fallback_iter`, `Var.contains`,
+`Var.getindex`, `Var.setindex`, `Var.updateindex`, `Var.postfixindex`,
+`Var.dispatch_truth`, `Var.try_dispatch_binary`, `Var.try_dispatch_unary`,
+`Var.try_export_context`, `x2c_register_type`,
+`x2c_register_builtin_descriptor`, `x2c_register_descriptor`,
+`x2c_try_register_descriptor`, `x2c_register_tagged_descriptor`,
+`x2c_try_register_tagged_descriptor`, `x2c_descriptor_thread_start_begin`,
+`x2c_descriptor_thread_start_end`, `x2c_descriptor_registration_frozen`
 
 ### [lib/encoding.x](../lib/encoding.x)
 
@@ -1074,8 +1084,9 @@ transfer frames for x2c `Error` unwinding and cleanup.
 
 Public functions:
 
-`x2c_cleanup_push`, `x2c_cleanup_leave`, `x2c_exception_push`,
-`x2c_exception_landed`, `x2c_exception_unwinding`,
+`x2c_exception_execution_new`, `x2c_exception_execution_swap`,
+`x2c_exception_execution_free`, `x2c_cleanup_push`, `x2c_cleanup_leave`,
+`x2c_exception_push`, `x2c_exception_landed`, `x2c_exception_unwinding`,
 `x2c_exception_is_error_target`, `x2c_exception_claim`,
 `x2c_exception_mark_handled`, `x2c_exception_leave`, `ExceptionFrame.unwind`
 
@@ -1106,7 +1117,7 @@ Public functions:
 `Router.route`, `Router.get`, `Router.post`, `Router.put`, `Router.delete`,
 `Router.files`, `Router.dispatch`, `HttpServer.new`, `HttpServer.port`,
 `HttpServer.serve`, `HttpServer.start`, `HttpServer.stop`, `HttpServer.close`,
-`HttpRequest.init`, `HttpResponse.init`, `Router.init`, `HttpServer.init`
+`HttpRequest.init`
 
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
@@ -1137,7 +1148,7 @@ Public functions:
 
 `JsonBool.var`, `JsonBool.repr`, `JsonBool.truth`, `JsonBool.export_context`,
 `Json.is_bool`, `Json.boolean`, `Json.parse`, `Json.read_file`, `Json.bool`,
-`Var.pretty_json`, `Json.write_file`, `Var.json`, `x2c_json_write`,
+`Var.pretty_json`, `Json.write_file`, `Var.json`, `_x2c_json_write`,
 `Var.jsonbool`, `JsonBool.str`
 
 ### [lib/lib.x](../lib/lib.x)
@@ -1155,7 +1166,7 @@ native functions a Lisp session can call.
 
 Public functions:
 
-None. This module has no non-static function definitions.
+`x2c_lisp_exchange`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
@@ -1215,7 +1226,7 @@ exact C scalar ledger.
 
 Public functions:
 
-`_scalar_tag`, `_scalar_key`, `_scalar_access_units`, `native_scalar_types`,
+`_scalar_tag`, `_scalar_key`, `_scalar_access_rows`, `native_scalar_types`,
 `native_scalar_access`
 
 ### [lib/net.x](../lib/net.x)
@@ -1225,7 +1236,7 @@ blocking TCP sockets backed by File streams.
 Public functions:
 
 `Listener.cleanup`, `Socket.cleanup`, `Listener.bind`, `Listener.accept`,
-`x2c_net_accept_fd`, `Listener.port`, `Listener.write_repr`, `Listener.stop`,
+`_x2c_net_accept_fd`, `Listener.port`, `Listener.write_repr`, `Listener.stop`,
 `Listener.close`, `Socket.connect`, `Socket.adopt`, `Socket.set_timeout`,
 `Socket.shutdown_write`, `Socket.peer`, `Socket.close`
 
@@ -1382,6 +1393,15 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [lib/task.x](../lib/task.x)
+
+cooperative Channel jobs on stable native stacks.
+
+Public functions:
+
+`Task.run`, `x2c_task_current`, `x2c_task_stopping`, `x2c_task_channel_notify`,
+`x2c_task_channel_sleep`
+
 ### [lib/test.x](../lib/test.x)
 
 registered tests and assertions for user programs.
@@ -1396,7 +1416,7 @@ native per-thread runtime storage.
 
 Public functions:
 
-`x2c_thread_state_release`
+`x2c_execution_stack_exchange`, `x2c_thread_state_release`
 
 ### [lib/thread.x](../lib/thread.x)
 
@@ -1407,9 +1427,10 @@ Public functions:
 `Thread.start_raw`, `Thread.start`, `Thread.run`, `Thread.finish_any`,
 `Thread.wait_any`, `Iter.parallel_map`, `Iter.parallel_map_in`,
 `ParallelMap.foldl`, `x2c_thread_stopping`, `x2c_thread_wait`,
-`x2c_thread_wait_owner`, `x2c_thread_wait_stopped`, `x2c_thread_cancel`,
-`Thread.stop`, `x2c_thread_wait_lock`, `x2c_thread_wait_unlock`,
-`Thread.finish_all`, `Thread.join`, `Thread.free`
+`x2c_thread_wait_owner`, `x2c_thread_wait_stopped`, `x2c_thread_channel_enter`,
+`x2c_thread_channel_leave`, `x2c_thread_cancel`, `Thread.stop`,
+`x2c_thread_wait_lock`, `x2c_thread_wait_unlock`, `Thread.finish_all`,
+`Thread.join`, `Thread.free`
 
 ### [lib/time.x](../lib/time.x)
 
@@ -1697,7 +1718,9 @@ Public functions:
 `x2c_error_catch_selected`, `x2c_error_catch_capture`,
 `x2c_error_catch_detach`, `x2c_error_catch_close`, `Error.unwind_head`,
 `Error.restore_landing`, `Error.trim`, `Error.restore`, `Error.handler_depth`,
-`Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
+`x2c_error_execution_new`, `x2c_error_execution_swap`,
+`x2c_error_execution_free`, `Error.initialize_raw`, `Error.shutdown_raw`,
+`Error.ready`
 
 ### [lib/func/func.x](../lib/func/func.x)
 
@@ -1813,7 +1836,8 @@ Public functions:
 `MatchMachine.begin`, `MatchMachine.finish`, `MatchMachine.clean`,
 `MatchMachine.acquire`, `MatchMachine.open`, `MatchMachine.release`,
 `MatchMachine.dispose`, `MatchMachine.release_spares`, `MatchPlan.prepare`,
-`MatchPlan.free`, `MatchCache.try_capture`, `MatchCache.try_match`,
+`MatchPlan.free`, `x2c_match_execution_new`, `x2c_match_execution_swap`,
+`x2c_match_execution_free`, `MatchCache.try_capture`, `MatchCache.try_match`,
 `MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
 `MatchCache.search_replace`, `MatchCache.acquire`, `MatchLease.release`,
 `MatchLease.plan`, `MatchCache.current`, `MatchCache.flush_default`,
@@ -1858,10 +1882,11 @@ Public functions:
 `Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
 `Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
 `Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`,
-`Scope.move_before`, `Scope.realloc`, `Scope.push`, `Scope.pop`,
-`Scope.retain`, `Scope.release`, `Scope.new`, `Scope.child`, `Scope.top`,
-`Scope.parent`, `Scope.transfer`, `Scope.contains`, `Scope.new_named`,
-`Scope.cleanup`, `Scope.destroy`, `x2c_scope_thread_release`, `Scope.name`,
+`Scope.move_before`, `Scope.realloc`, `Scope.push`, `Scope.pop`, `Scope.open`,
+`Scope.close`, `Scope.new`, `Scope.child`, `Scope.top`, `Scope.parent`,
+`Scope.transfer`, `Scope.contains`, `Scope.new_named`, `Scope.cleanup`,
+`Scope.destroy`, `x2c_scope_thread_release`, `x2c_scope_execution_new`,
+`x2c_scope_execution_swap`, `x2c_scope_execution_free`, `Scope.name`,
 `Scope.stats`, `Scope.initialize`, `Scope.accounting_enabled`,
 `Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
 `xfree`, `xmemdup`

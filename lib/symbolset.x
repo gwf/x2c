@@ -109,7 +109,7 @@ size_t SymbolSet.len(SymbolSet x) => x ? _u32(x, 4) : 0;
 
 /** Returns the bytes of a `SymbolSet` holding `symbols` in order, in a new
     byte `Block` owned by the active `Scope`. The compiler emits them for each
-    `%<<...>>` literal. Members must be distinct: the table search does not
+    `%<...>` literal. Members must be distinct: the table search does not
     end for a repeated `Symbol`.
 */
 Block SymbolSet.encode(Array symbols) {

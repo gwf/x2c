@@ -1,4 +1,4 @@
-/*  imports.x -- consume a package through `import`.
+/*  greet-client.x -- consume a package through `import`.
 
     The alias is resolution-only: `g.Greeting` compiles to the package's own
     `greet__Greeting`, so two packages may both publish a `Greeting`.

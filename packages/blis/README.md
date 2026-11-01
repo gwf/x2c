@@ -11,9 +11,9 @@ import "blis" with Blis, BlisObject;
 
 BlisObject rank = BlisObject.copy_vector(seed, BLIS_DOUBLE);
 for (; shift > 1e-15 && round < 100; round++) {
-  Scope.retain();
+  Scope.open();
   {
-    defer Scope.release();
+    defer Scope.close();
     BlisObject next = links.matmul(rank);
     next = next.scale(1.0 / next.dotv(ones));
     shift = (next - rank).normfv();

@@ -23,7 +23,7 @@ C preprocessor directives in x2c source.
 | [`Compiler.preproc_marker_file`](#Compiler.preproc_marker_file) | Returns the file that the host preprocessor's line marker `text`, `# N "file" flags`, names and sets `line` to N, or returns `NULL` for any other line. |
 | [`Compiler.preproc_track_arms`](#Compiler.preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
 | [`Compiler.preproc_within_arms`](#Compiler.preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `Compiler.preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
-| [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Hides the tokens of each arm that `Compiler.expand_macros` decided C never takes, as `c.arm_stacks` records, and marks layout attributes where written or where a macro x2c leaves to C expands to one. |
+| [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Hides literal false and impossible host arms in ordinary source, or the arms decided by optional CPP expansion. |
 | [`Compiler.scan_directive`](#Compiler.scan_directive) | Returns the first token of `text` scanned as x2c tokens after its continuation lines are joined, as a directive's text is read. |
 
 ### `Compiler`
@@ -156,9 +156,9 @@ Source: `src/preprocess.x`
 
 `void Compiler.scan_conditionals(Compiler c)`
 
-Hides the tokens of each arm that `Compiler.expand_macros` decided C
-never takes, as `c.arm_stacks` records, and marks layout attributes
-where written or where a macro x2c leaves to C expands to one.
+Hides literal false and impossible host arms in ordinary source, or the
+arms decided by optional CPP expansion. Records conditional groups and
+marks layout attributes without expanding ordinary source macros.
 
 Source: `src/preprocess.x`
 
@@ -176,8 +176,8 @@ Source: `src/preprocess.x`
 ## Design notes
 
 Preprocessor lines stay in the token stream and become `preproc` nodes,
-so generated C keeps them where they were written. `cpp/cpp.x` expands
-the visible macros and decides the conditional groups; this module
-reads the directives that remain: it hides the arms C never takes,
-marks layout attributes, and records what the directives before each
-form say about the unit's `#define` names.
+so generated C keeps them where they were written. Optional CPP expansion
+decides conditional groups for C compatibility; ordinary source retains
+narrow handling of literal false and impossible host arms. This module
+hides those arms, marks layout attributes, and records what preceding
+directives say about the unit's `#define` names.

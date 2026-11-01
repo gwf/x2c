@@ -280,7 +280,8 @@ module void _emit(Emitter &e, List ast) {
    each String is written as it is, so a lowered carrier can hold C text
    around the nodes it lowers. A Symbol ends the run and heads a node. */
 static void _sequence(Emitter &e, List ast) {
-  for (; ast && ast.car() is not <symbol>; ast = ast.cdr()) _node(e, ast.car());
+  for (; ast && ast.car() is not <symbol>; ast = ast.cdr())
+    _node(e, ast.car());
   _emit(e, ast);
 }
 
@@ -419,8 +420,6 @@ static void _cache(Emitter &e, Var id) {
   else if (e.cache_bindings) _ident(e, e.cache_bindings[id]);
   else _put(e, %"_$id");
 }
-
-
 
 /* Emission writes each C token to `e.out` in order, so no token List is
    built: a form writes its text and emits its children where they stand. */

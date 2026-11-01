@@ -14,8 +14,12 @@ typedef struct Lisp * Lisp;
 
 void Lisp_cleanup(Lisp _x2c_gensym_macro_value_0);
 
+_Thread_local extern Lisp x2c_lisp_active;
+
 #define LISP_NATIVE_ARG_MAX  8
 #define LISP_STACK_BYTES_MAX (6L << 20)
+extern _Thread_local unsigned long x2c_execution_stack_low;
+
 #if defined(__GLIBC__)
 extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
 

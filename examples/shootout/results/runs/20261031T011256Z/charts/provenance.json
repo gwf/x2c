@@ -1,0 +1,15 @@
+{
+  "report_path": "/Users/gary/.codex/worktrees/f2bc/x2c/examples/shootout/results/current.json",
+  "report_sha256": "59989a79806a664997bee76947f4a9c985fc345c271b62d91a5b7a42fed7f766",
+  "run_id": "20261031T011256Z",
+  "profile": "local",
+  "samples": 12,
+  "baseline_sha256": "d985eacc9290a8a0c79dff46cba8ac252423f87bbdf4225485df249aed538aec",
+  "normalization": "Per-problem minima among C, idiomatic x2c, optimized x2c, Python",
+  "summary": "Geometric mean of the ten normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank hand-authored source lines after C-style comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10
+}

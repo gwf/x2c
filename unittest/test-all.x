@@ -14,6 +14,7 @@ void thread_parallel_map_suite(void);
 void thread_borrowed_pool_suite(void);
 void thread_batch_suite(void);
 void channel_batch_suite(void);
+void task_suite(void);
 void channel_suite(void);
 void storage_ownership_suite(void);
 void static_init_suite(void);
@@ -155,6 +156,7 @@ int main(int argc, char **argv) {
   $test.suite(thread_borrowed_pool_suite);
   $test.suite(thread_batch_suite);
   $test.suite(channel_batch_suite);
+  $test.suite(task_suite);
   $test.suite(channel_suite);
   $test.suite(storage_ownership_suite);
   $test.suite(static_init_suite);

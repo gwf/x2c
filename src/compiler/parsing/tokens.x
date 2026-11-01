@@ -2,8 +2,8 @@
 
 // tokenizing
 
-/** Scans and preprocesses source and positions the compiler at its first
-    non-trivia token.
+/** Scans source, applies directive handling and optional C macro expansion,
+    and positions the compiler at its first non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
     translation finishes.
@@ -21,6 +21,7 @@ void Compiler.tokenize(Compiler c, char *text) {
 void Compiler.scan_source(Compiler c, char *text) {
   if (_is_script_file(c)) c.script = c.unit_script;
   c.input_boundary = NULL;
+  c.arm_stacks = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
   c.tokenizer.layout = c.layout || Path.is_layout_source(c.filename);
@@ -31,12 +32,12 @@ void Compiler.scan_source(Compiler c, char *text) {
   c.braces.clear();
 }
 
-/** Expands the visible macros of the scanned tokens, hides the conditional
-    arms C never takes, and positions the compiler at the first non-trivia
-    token. An expansion error is reported at the macro use.
+/** Applies directive handling and optional C macro expansion, then positions
+    the compiler at its first non-trivia token. Explicit CPP state also
+    enables expansion for native-header and REPL callers.
 */
 void Compiler.preprocess_tokens(Compiler c) {
-  c.expand_macros();
+  if (c.cpp_expansion || c.cpp) c.expand_macros();
   c.scan_conditionals();
   _retag_keywords(c.tokenizer);
   c.token = Token.skip_trivia(c.tokenizer.tokens);
@@ -100,6 +101,33 @@ void Compiler.next(Compiler c) {
 */
 int Compiler.at_word(Compiler c, String word) =>
   c.peek(0) == <ident> && c.token.text == word;
+
+/** Reports a contextual word unless a visible ordinary binding continues
+    as an expression or declaration. Literal tokens retain lexical priority.
+*/
+int Compiler.at_contextual(Compiler c, String word) {
+  if (!c.at_word(word)) return 0;
+  List alias = c.alias_expression();
+  Type binding = alias ? alias.cadr() : c.sym.get($(word));
+  if (!binding && !alias) return 1;
+  Token next = Token.skip_trivia(c.token + 1);
+  if (next.type.is_assignment_op() || next.type.binary_precedence())
+    return 0;
+  switch (next.type) {
+    case <(>: case <[>: case <.>: case <"->">: case <++>: case <-->:
+    case <?>: case <,>: case <;>: case <)>: case <]>:
+      return 0;
+    case <ident>:
+      return !binding.is_typedef() && next.text != "is" && next.text != "in";
+  }
+  return !binding.is_typedef() || !next.type.is_type_qualifier();
+}
+
+/** Reports the complete `with (...) { ... }` statement head. */
+int Compiler.with_form_starts(Compiler c) {
+  if (!c.at_word("with") || c.peek(1) != <(>) return 0;
+  return Token.skip_trivia(c.token + 1).after_group().type == <"{">;
+}
 
 /** Returns the non-trivia token type `steps` from parser position.
 
@@ -216,15 +244,22 @@ static void _report_malformed_token(Compiler c) {
   }
 }
 
-/* `in` and `match` are C identifiers as often as x2c keywords. `in` stays
-   the operator where its neighbors plainly end and begin operands, and the
-   parser reads it by position everywhere else; `match` is the statement
-   only as `match (...)` followed by `case` or `{`. Every other occurrence
-   is a name, so C that uses them keeps compiling. */
-static void _retag_keywords(Tokenizer tokenizer) {
+/* Retag x2c words after lexical modes and CPP are settled. C thread-local
+   spellings stay storage tokens. `in` retains its operand-neighbor rule;
+   `match` stays a statement token before a group followed by `case` or `{`.
+   The parser owns the other contextual decisions without changing tokens. */
+module void _retag_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
        token = Token.skip_trivia(token + 1)) {
+    switch (token.type) {
+      case <try>: case <catch>: case <finally>: case <raise>: case <import>:
+      case <protocol>: case <delegate>: case <associated>: case <expand>:
+        token.type = <ident>; break;
+      case <threaded>:
+        if (token.text == "threaded") token.type = <ident>;
+        break;
+    }
     if (token.type == <in>) {
       Token next = Token.skip_trivia(token + 1);
       if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))

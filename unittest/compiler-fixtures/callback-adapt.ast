@@ -78,7 +78,7 @@
  (block 
   (at 8 (stmnt 
          (expr (void) 
-          (call (expr ((func ((void))) void) (ident (binding 19 "Scope_retain"))) 
+          (call (expr ((func ((void))) void) (ident (binding 19 "Scope_open"))) 
            (args (expr (void) ())))))) 
   (at 9 (declare ("String") 
          (bindings 
@@ -191,6 +191,6 @@
   (at 19 
    (stmnt 
     (expr (void) 
-     (call (expr ((func ((void))) void) (ident (binding 35 "Scope_release"))) 
+     (call (expr ((func ((void))) void) (ident (binding 35 "Scope_close"))) 
       (args (expr (void) ())))))) 
   (at 20 (return (int) (expr (int) (literal (int) "0"))))))

@@ -24,8 +24,8 @@ static long _live(void) {
 
 int main(void) {
   if (!xb_handles_enabled()) return 2;
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   long baseline = _live();
   Func forward = _square, backward = _gradient;
   for (int i = 0; i < 64; i++) {

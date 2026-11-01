@@ -35,12 +35,23 @@ def read_context(root: str | Path) -> dict | None:
     return context
 
 
-def publication_blocked(root: str | Path) -> bool:
+def push_policy(root: str | Path) -> str:
+    """Which branches this worktree may push: `all`, `work`, or `none`.
+
+    A worker hands its commits to its orchestrator, so it pushes nothing.
+    Other contexts that do not deliver directly push only work branches.
+    """
     root = Path(root)
     context = read_context(root)
     if context is None:
-        return root.name.startswith("agent-")
-    return context["role"] == "worker" or context["delivery"] != "direct"
+        return "work" if root.name.startswith("agent-") else "all"
+    if context["role"] == "worker":
+        return "none"
+    return "all" if context["delivery"] == "direct" else "work"
+
+
+def publication_blocked(root: str | Path) -> bool:
+    return push_policy(root) != "all"
 
 
 def _git(root: Path, *arguments: str) -> subprocess.CompletedProcess:
@@ -77,6 +88,9 @@ def _check_hook(root: Path) -> None:
 def set_context(root: str | Path, role: str, delivery: str) -> None:
     if role not in ROLES or delivery not in DELIVERIES:
         raise ValueError("unknown worktree role or delivery mode")
+    if role == "worker" and delivery != "private":
+        raise ValueError("a worker hands its work to its orchestrator; "
+                         "use --delivery private")
     root = Path(root).resolve()
     _check_hook(root)
     path = root / "debug" / "agent-context.json"
@@ -98,7 +112,9 @@ def set_context(root: str | Path, role: str, delivery: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("set", "blocked"):
+    # A hook path that names another checkout's hook can run a copy that still
+    # asks `blocked`.
+    for name in ("set", "pushes", "blocked"):
         command = sub.add_parser(name)
         command.add_argument("--root", type=Path,
                              default=Path(__file__).resolve().parent.parent)
@@ -108,6 +124,9 @@ def main() -> int:
                                  required=True)
     args = parser.parse_args()
     try:
+        if args.command == "pushes":
+            print(push_policy(args.root))
+            return 0
         if args.command == "blocked":
             return 0 if publication_blocked(args.root) else 1
         set_context(args.root, args.role, args.delivery)

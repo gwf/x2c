@@ -161,21 +161,21 @@ typedef struct Compiler {
   List binding_rows, binding_sealed;
   /* `#define` names this unit has passed, for the literal warning and for
      declaration prefixes: the `List` of specifier words of a body made of
-     specifiers and attributes, `<string>` for a string literal,
-     `<annotation>` for a function-like attribute macro, `<wrapper>` for one
-     that wraps its parameter in prefixes, else 1. A name the preprocessor
-     expands never reaches the parser, so only the names it leaves to C
-     are read as prefixes. */
+     specifiers and attributes, `<attribute>` for attributes alone,
+     `<string>` for a string literal, `<annotation>` for a function-like
+     attribute macro, `<wrapper>` for one that wraps its parameter in
+     prefixes, else 1. A name the preprocessor expands never reaches the
+     parser, so only the names it leaves to C are read as prefixes. */
   Map object_macros;
   /* The preprocessor state the next expansion starts from, or NULL for
-     the macros visible before the file's first line, and the
-     `Compiler.command_macros` rows of the unit's `-D` and `-U` options. */
+     the macros visible before the file's first line, and sorted
+     `(name value)` macro rows: the `Compiler.command_macros` rows of the
+     unit's `-D` and `-U` options, or, after `ParsedUnit.collect_native`,
+     every macro the host preprocessor defined for the native unit. */
   Cpp cpp;
+  // Full C macro expansion is opt-in; explicit native CPP state also runs it.
+  int cpp_expansion;
   List command_macros;
-  /* Module discovery prepares its root's included macro exports only when
-     preprocessing first reaches an include. Collection children do not
-     inherit this transient request. */
-  String macro_export_source;
   /* The open conditional groups at the current top-level form, each an
      `(id arm state)` entry, so one function defined in two arms of one `#if`
      is one definition. `arm_stacks` maps each conditional directive's token

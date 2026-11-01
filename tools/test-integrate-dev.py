@@ -90,12 +90,15 @@ sys.exit('unexpected gh endpoint: ' + endpoint)
 '''
 
 GATE = r'''#!/usr/bin/env python3
-import hashlib, json, os, subprocess, sys
+import hashlib, importlib.util, json, os, subprocess, sys
 from pathlib import Path
-root = Path.cwd()
-p = Path(os.environ['PROBE_STATE'])
-s = json.loads(p.read_text())
-def identity():
+# integrate-dev imports gate-state's documentation rule from this file;
+# serve the implementation under test.
+spec = importlib.util.spec_from_file_location('gate_state', os.environ['PROBE_GATE_STATE'])
+real = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(real)
+documentation = real.documentation
+def identity(root):
     names = subprocess.check_output(['git','ls-files','-co','--exclude-standard','-z']).split(b'\0')
     h = hashlib.sha256()
     for name in sorted(set(names)):
@@ -105,31 +108,41 @@ def identity():
         h.update(str(f.stat().st_mode).encode())
         h.update(f.read_bytes())
     return h.hexdigest()
-receipt = root / 'debug' / 'probe-receipt.json'
-command, target = sys.argv[1:3]
-if command == 'check':
-    sys.exit(0 if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity()} else 1)
-if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity()}:
-    print('valid'); sys.exit(0)
-s.setdefault('gates',[]).append({'target':target,'root':str(root)})
-mode = s.get('gate_failure')
-if target == 'agent-pr-check':
-    files = sorted((root/'src').glob('*.x'))
-    (root/'bootstrap'/'src'/'compiled.c').write_text('generated: ' + '|'.join(f.read_text() for f in files))
-if s.get('advance_on_gate'):
-    subprocess.check_call(['git','--git-dir',s['remote'],'update-ref','refs/heads/dev',s.pop('advance_on_gate')])
-if mode == 'ordinary' or mode == 'bootstrap_once':
-    if mode == 'bootstrap_once': s.pop('gate_failure')
+def main():
+    root = Path.cwd()
+    p = Path(os.environ['PROBE_STATE'])
+    s = json.loads(p.read_text())
+    receipt = root / 'debug' / 'probe-receipt.json'
+    command, target = sys.argv[1:3]
+    if command == 'check':
+        sys.exit(0 if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity(root)} else 1)
+    if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity(root)}:
+        print('valid'); sys.exit(0)
+    s.setdefault('gates',[]).append({'target':target,'root':str(root)})
+    mode = s.get('gate_failure')
+    if target == 'agent-pr-check':
+        files = sorted((root/'src').glob('*.x'))
+        (root/'bootstrap'/'src'/'compiled.c').write_text('generated: ' + '|'.join(f.read_text() for f in files))
+        if s.get('module_header'):
+            header = root/'bootstrap'/'src'/'module'/'module.h'
+            header.parent.mkdir(exist_ok=True)
+            header.write_text('generated forwarding header\n')
+    if s.get('advance_on_gate'):
+        subprocess.check_call(['git','--git-dir',s['remote'],'update-ref','refs/heads/dev',s.pop('advance_on_gate')])
+    if mode == 'ordinary' or mode == 'bootstrap_once':
+        if mode == 'bootstrap_once': s.pop('gate_failure')
+        p.write_text(json.dumps(s))
+        print(s.get('gate_error', '[stage-diff-0] Error')
+              if mode == 'bootstrap_once' else 'fixture test failure')
+        sys.exit(1)
+    if s.get('authored_mutation'):
+        (root/'src'/'surprise.x').write_text('unreviewed mutation\n')
+    receipt.parent.mkdir(exist_ok=True)
+    receipt.write_text(json.dumps({'target':target,'identity':identity(root)}))
     p.write_text(json.dumps(s))
-    print(s.get('gate_error', '[stage-diff-0] Error')
-          if mode == 'bootstrap_once' else 'fixture test failure')
-    sys.exit(1)
-if s.get('authored_mutation'):
-    (root/'src'/'surprise.x').write_text('unreviewed mutation\n')
-receipt.parent.mkdir(exist_ok=True)
-receipt.write_text(json.dumps({'target':target,'identity':identity()}))
-p.write_text(json.dumps(s))
-print('valid')
+    print('valid')
+if __name__ == '__main__':
+    main()
 '''
 
 MAKE = r'''#!/usr/bin/env python3
@@ -161,6 +174,7 @@ class IntegrationProbe(unittest.TestCase):
         self.state_path.write_text(json.dumps({'pulls':{},'remote':str(self.remote)}))
         self.env = dict(os.environ, PATH=str(self.bin)+os.pathsep+os.environ['PATH'],
                         PROBE_STATE=str(self.state_path), GIT_TERMINAL_PROMPT='0',
+                        PROBE_GATE_STATE=str(TOOL_ROOT/'tools'/'gate-state.py'),
                         GIT_AUTHOR_NAME='Fixture', GIT_AUTHOR_EMAIL='fixture@example.invalid',
                         GIT_COMMITTER_NAME='Fixture', GIT_COMMITTER_EMAIL='fixture@example.invalid')
         self.write(self.bin/'gh', GH, executable=True)
@@ -766,6 +780,13 @@ class IntegrationProbe(unittest.TestCase):
         self.assertIn('change 1',generated); self.assertIn('change 2',generated)
         self.assertFalse(any(p['labels'] for p in self.state()['pulls'].values()))
 
+    def test_nested_bootstrap_header_is_generated_output(self):
+        self.pr(1); self.state(module_header=True)
+        batch=self.prepare(); self.land(batch)
+        header=self.git('--git-dir',str(self.remote),'show',
+                        'dev:bootstrap/src/module/module.h').stdout
+        self.assertEqual(header,'generated forwarding header\n')
+
     def test_mixed_and_unknown_documentation_paths_use_code_gate(self):
         self.pr(1,'docs/guide.md','new guide\n')
         self.pr(2,'docs/checker.sh','echo executable documentation helper\n')
@@ -777,6 +798,16 @@ class IntegrationProbe(unittest.TestCase):
         batch=self.prepare(); self.land(batch)
         self.assert_ancestor(head)
         self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_gate_selection_uses_gate_state_documentation_rule(self):
+        self.pr(1,'examples/README.md','new example notes\n')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_command_markdown_fixture_uses_code_gate(self):
+        self.pr(1,'commands/bind/tests/expected/README.md','new fixture\n')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['agent-pr-check'])
 
     def test_generated_llms_text_uses_doc_generation_and_doc_gate(self):
         self.pr(1,'site/public/llms.txt','stale generated documentation\n')
@@ -1166,17 +1197,34 @@ if hasattr(lock,'close'): lock.close()
         self.assertEqual(sum('fetch' in call for call in state['git_calls']),1)
 
     def test_provider_neutral_push_guard(self):
-        for role,delivery,blocked in [('worker','direct',True),('individual','pr',True),
-                                      ('orchestrator','pr',True),('individual','direct',False),
-                                      ('integrator','direct',False)]:
+        hook=str(self.root/'tools'/'hooks'/'pre-push')
+        for role,delivery,shared,work in [('worker','private',False,False),
+                                          ('individual','pr',False,True),
+                                          ('orchestrator','pr',False,True),
+                                          ('individual','direct',True,True),
+                                          ('integrator','direct',True,True)]:
             with self.subTest(role=role,delivery=delivery):
                 self.cli('context','--role',role,'--delivery',delivery)
-                hook=self.command([str(self.root/'tools'/'hooks'/'pre-push')],
-                              input='refs/heads/dev '+self.base+' refs/heads/dev '+self.base+'\n',ok=False)
-                self.assertEqual(hook.returncode!=0,blocked)
-                pr_hook=self.command([str(self.root/'tools'/'hooks'/'pre-push')],
-                                input='refs/heads/work '+self.base+' refs/heads/work '+self.base+'\n',ok=False)
-                self.assertEqual(pr_hook.returncode,0,pr_hook.stderr)
+                for branch,allowed in [('dev',shared),('main',shared),('work',work)]:
+                    ref=f'refs/heads/{branch}'
+                    result=self.command([hook],input=f'{ref} {self.base} {ref} {self.base}\n',
+                                        ok=False)
+                    self.assertEqual(result.returncode==0,allowed,branch+': '+result.stderr)
+                # An older shared hook asks only whether dev and main are blocked.
+                older=self.command([sys.executable,str(self.root/'tools'/'agent_context.py'),
+                                    'blocked','--root',str(self.root)],ok=False)
+                self.assertEqual(older.returncode,1 if shared else 0,older.stderr)
+
+    def test_context_rejects_worker_without_private_delivery(self):
+        self.cli('context','--role','worker','--delivery','private')
+        for delivery in ('direct','pr'):
+            with self.subTest(delivery=delivery):
+                result=self.cli('context','--role','worker','--delivery',delivery,ok=False)
+                self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+                self.assertIn('use --delivery private',result.stderr)
+                self.assertEqual(
+                    json.loads((self.root/'debug'/'agent-context.json').read_text()),
+                    {'role':'worker','delivery':'private'})
 
 
 if __name__ == '__main__':

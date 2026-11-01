@@ -2226,8 +2226,8 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
 }
 
 static int _certify_sink(Var value) {
-  if (value in %(<return> <result> <static> <unknown>)) return 1;
-  match (value) case %(param ?(int index)): return index >= 0;
+  if (value in %(<return> <result> <static> <unknown> <retained>)) return 1;
+  match (value) case %((!or param raw) ?(int index)): return index >= 0;
   return 0;
 }
 
@@ -2631,7 +2631,7 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
         scan.caller = target;
         scan.scope_counts = {};
         _certify_scan(scan, body, 0, 0, 0);
-        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open"))
+        foreach (String open, %("Scope_open" "Scope_push" "Pool_open"))
           match (Compiler.region_effect(open))
             case %(open ?kind)
               if (scan.scope_counts.getdefault(%(open $kind), 0).int() !=
@@ -2811,7 +2811,7 @@ int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") ||
                     !strcmp(argv[1], "-h"))) {
-    $output.graph.usage(argv[0]);
+    $output.graph.usage(Stdout, argv[0]);
     return 0;
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
@@ -2848,7 +2848,7 @@ int main(int argc, char **argv) {
       raise %(bad-arg);
   }
   catch %(bad-arg *): {
-    $output.graph.usage(argv[0]);
+    $output.graph.usage(Stderr, argv[0]);
     return 2;
   }
   String name = options.getdefault("NAME", NULL);

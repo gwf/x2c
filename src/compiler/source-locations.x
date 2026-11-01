@@ -87,8 +87,8 @@ void Compiler.record_source_reference(
     if (c.source_capture == NULL) return;
     List range = _source_range(c, first, after);
     if (range)
-      c.source_capture.push($(@range, binding, type,
-        c.fact(%(src-key $binding))));
+      c.source_capture.push(
+        $(@range, binding, type, c.fact(%(src-key $binding))));
     return;
   }
   List range = _source_range(c, first, after);
@@ -96,7 +96,8 @@ void Compiler.record_source_reference(
 }
 
 /** Attaches a completed named-type capture to its existing declaration row. */
-void Compiler.attach_source_references(Compiler c, List binding, Array capture) {
+void Compiler.attach_source_references(
+  Compiler c, List binding, Array capture) {
   List key = c.fact(%(src-key $binding));
   List declaration = c.source_declarations[key];
   declaration = %(@(declaration[:5]) $capture @(declaration[6:]));

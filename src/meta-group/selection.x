@@ -110,8 +110,6 @@ void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
   if (missing.startswith("a struct")) c.refuse_meta_call(name, site, missing);
 }
 
-
-
 /** Returns why the group function `name` has no compile-time entry, from
     its type.
 */
@@ -155,8 +153,6 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
     }
   }
 }
-
-
 
 /* The unit's definitions so far that the group can reach, in source order:
    directives, declarations, included providers, reached functions, and
@@ -355,7 +351,6 @@ static int _optional(List item, Map later) {
   return 0;
 }
 
-// Whether `item` declares a name in `reached`.
 static int _declares_reached(List item, Map reached) {
   match (item) case %(declare ? (bindings *rows)):
     foreach (List row in rows) {

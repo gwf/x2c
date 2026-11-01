@@ -11,7 +11,7 @@ Four rules apply throughout this chapter:
   identifier key is quoted, as an `Atom`. `$(a, b)` builds a `List` of
   evaluated elements, and `${key: value}` evaluates every key.
 - Percent quotes. The delimiter after `%` selects the literal grammar for
-  the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<<...>>`.
+  the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<...>`.
 - Dollar unquotes. Inside quoted `List`, `String`, `Array`, or `Map`
   content, `$name` or `$(expression)` inserts one ordinary x2c value.
 - `String` and `List` are immutable and canonical: equal values share
@@ -113,11 +113,11 @@ not mean every percent form holds unevaluated symbolic data.
 | --- | --- | --- |
 | `%"text"` | `String` | quoted text, with `$name` / `$(expr)` unquote |
 | `%(a b c)` | `List` | quoted symbolic content; bare names are `Atom`s |
-| `%<<a b c>>` | `SymbolSet` | quoted literal `Symbol`s only |
+| `%<a b c>` | `SymbolSet` | quoted literal `Symbol`s only |
 | `%[a, b, c]` | `Array` | quoted comma-separated values |
 | `%{k: v, k: v}` | `Map` | quoted key/value pairs |
 
-The empty forms are `%""`, `%()`, `%<<>>`, `%[]`, and `%{}`.
+The empty forms are `%""`, `%()`, `%<>`, `%[]`, and `%{}`.
 
 ```x2c
 List codes = %(200 301 404);
@@ -332,11 +332,11 @@ use each.
 
 ### Ordered Symbol sets
 
-`%<<...>>` declares a closed, immutable set of compact `Symbol`s. Its source
+`%<...>` declares a closed, immutable set of compact `Symbol`s. Its source
 order is also its dense numeric order, starting at zero:
 
 ```x2c
-SymbolSet colors = %<<red green blue>>;
+SymbolSet colors = %<red green blue>;
 
 printf("%d %d %d\n",
        colors.index(<green>),
@@ -348,13 +348,13 @@ printf("%d %d %d\n",
 1 1 -1
 ```
 
-Bare entries are `Symbol`s, so write `%<<red green blue>>` rather than
-`%<<<red> <green> <blue>>>`. Angle brackets still spell a `Symbol` explicitly.
+Bare entries are `Symbol`s, so write `%<red green blue>` rather than
+`%< <red> <green> <blue>>`. Angle brackets still spell a `Symbol` explicitly.
 A member whose spelling is not a bare word is quoted, and the quotes may hold
-the `>>` that would otherwise end the literal:
+the `>` that would otherwise end the literal:
 
 ```x2c
-SymbolSet assignments = %<<"+=" "<<=" ">>=">>;
+SymbolSet assignments = %<"+=" "<<=" ">>=">;
 ```
 
 Interpolation and splicing are not supported. Every member must be known
@@ -983,11 +983,8 @@ printf("%d %d index=%d\n", array.find(over_ten).int(),
 20 20 index=1
 ```
 
-Array value searches formerly written `find(value)` or `indexof(value)` now
-use `index(value)`, including typed Arrays. The old `indexof` name is removed;
-`find` now takes a predicate and returns an element. This changes the native
-signatures, so native consumers must rebuild. There are no compatibility
-aliases. List and Iter `find` calls keep their existing contracts.
+For Array searches written for 0.15.x, see
+[Upgrading from 0.15.x](installation.md#upgrading-from-015x).
 
 Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
 Both preserve the input order of ties. Arrays change in place and return the
@@ -1156,7 +1153,7 @@ byte stores, bind `array.bytes` to a `char *` and write through that.
 
 ## Working with Maps
 
-A `Map` is a mutable Robin Hood hash table from `Var` keys to `Var` values.
+A `Map` is a mutable grouped hash table from `Var` keys to `Var` values.
 Keys and values are both `Var`, so a `Map` can be heterogeneous.
 
 ```x2c
@@ -1168,7 +1165,7 @@ printf("%s\n", counts.repr());
 ```
 
 ```text
-{ "be": 2, "to": 2, "not": 1, "or": 1 }
+{ "to": 2, "be": 2, "or": 1, "not": 1 }
 ```
 
 Numeric `+=` treats an absent destination as zero, inserts the right-hand
@@ -1200,7 +1197,7 @@ printf("targets is an Array: %d\n", config[<targets>] is Array);
 ```
 
 ```text
-{ <targets>: [ "c" ], <limits>: { <depth>: 8 }, <name>: "x2c" }
+{ <name>: "x2c", <targets>: [ "c" ], <limits>: { <depth>: 8 } }
 targets is an Array: 1
 ```
 
@@ -1248,8 +1245,8 @@ while (ages.try_next(cursor, key, value))
 ```
 
 ```text
-grace -> 45
 ada -> 36
+grace -> 45
 ```
 
 That is the table's order, and it moves when the hash changes. Sort what you
@@ -1277,8 +1274,8 @@ foreach((String key, int value) in ages)
 ```
 
 ```text
-grace -> 45
 ada -> 36
+grace -> 45
 ```
 
 [Iteration](iteration.md#what-you-can-iterate) covers the `Map` iterators
@@ -1294,6 +1291,16 @@ carries the same lookup, defaulting, update, deletion, traversal, `copy`, and
 `merge` operations that `Map` does. A Map literal builds one when that is the
 declared type, converting every key and value to the field type; an entry that
 cannot be converted raises `<no-convert>`.
+
+Typed Maps use grouped hash storage. Each group compares sixteen one-byte
+fingerprints before checking matching keys. Deletion leaves a reusable slot;
+insertion removes accumulated deleted slots when rebuilding the table.
+`MapStringInt` and `MapSubInt` retain complete key hashes for rebuilding.
+Var Map uses the same grouped storage, with full hashes to preserve custom-key
+filtering and avoid hash callbacks during growth. Below 65,536 buckets those
+hashes share the controls allocation. Larger tables allocate the hashes under
+the controls Block's storage owner to improve reuse of freed growth buffers.
+These representations do not change lookup, ownership, or traversal contracts.
 
 ```x2c
 #include "typed-map.x"

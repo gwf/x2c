@@ -190,8 +190,8 @@ fprintf(sink, "%ld words\n", words);
 ~assert(words == 15);
 ```
 
-When a lifetime does not fit a block, `Scope.retain()` and
-`Scope.release()` do the same job by hand. Your `malloc` and `free` still
+When a lifetime does not fit a block, `Scope.open()` and
+`Scope.close()` do the same job by hand. Your `malloc` and `free` still
 work for C data, and they are still your problem. The details are in
 [memory](../docs/guide/memory.html).
 
@@ -391,9 +391,8 @@ name, so two packages can both export a `Regexp`:
 import "pcre2" as rx;
 
 int main(void) {
-  rx.Regexp version =
+  auto rx.Regexp version =
     rx.Regexp.compile("(?<major>\\d+)\\.(?<minor>\\d+)", 0);
-  defer version.free();
   rx.RegexpMatch found = version.match("x2c 0.15.0");
   if (found) puts(%"major $(found[<major>]), minor $(found[<minor>])");
   return 0;
@@ -471,7 +470,7 @@ int main(void) {
 ```
 
 The
-[shootout](https://github.com/gwf/x2c/blob/main/examples/shootout/README.md)
+[shootout](https://github.com/gwf/x2c/blob/main/examples/shootout-unofficial/README.md)
 has fourteen problems written in x2c, C, and Python. The x2c versions ran
 at a median of 1.04 times C's time, and the C ported to x2c ran at 0.99
 times. Python took 39 times C's time. The x2c came in at about 1.5 times

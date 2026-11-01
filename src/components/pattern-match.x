@@ -548,7 +548,8 @@ meta static List _match_captures(List binders, List values) {
    the arm body reads, and its cursors take names from `pool`, which every
    arm of the match shares. */
 meta static List _match_arm(
-  List pattern, Var value, List expr, List finished, Array pool) {
+  List pattern, Var value, List expr, List finished, Array pool,
+  List equal) {
   if (!(pattern ~= %(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
       value is not <list>)
     return NULL;
@@ -575,6 +576,7 @@ meta static List _match_arm(
     declared.push(%(declare ("List") (bindings @(lists.list_free()))));
   List condition = _match_condition_of(
     test, (Code) pattern, expr, cursors, [], [], locals);
+  if (equal) condition = %(op || $equal $condition);
   declared.push(%(if $condition $finished));
   return %(block @(declared.list_free()));
 }
@@ -801,7 +803,8 @@ meta static Code _match_lowered(Code subject, List rows) {
     }
     List finished = _match_finished(body);
     List arm =
-      otherwise ? finished : _match_arm(pattern, value, expr, finished, pool);
+      otherwise ? finished
+                : _match_arm(pattern, value, expr, finished, pool, NULL);
     if (!arm) {
       List binders = _match_binders(value);
       if (binders.len() > values) values = binders.len();
@@ -834,15 +837,34 @@ meta Code match_lowering(Code node) {
   return node;
 }
 
-/* A pattern condition uses the same tests and fallback as an arm, without
-   the switch and implicit break of a match statement. */
+/* A literal List has no binders or operator-headed sublists. */
+meta static int _match_plain_literal(Var value) {
+  if (value is <list>) {
+    List list = value;
+    if (list && list.car().is_match_op()) return 0;
+    foreach (Var part in list)
+      if (!_match_plain_literal(part)) return 0;
+    return 1;
+  }
+  return !value.is_binder() && value != <x2c-dyn>;
+}
+
+/* Identity decides an empty literal. Other literal Lists try identity
+   first, then the ordinary tests: independent Pools, transient Strings,
+   and wide boxes can give equal contents different identities. */
 meta static Code _match_condition(Code subject, List pattern, List body) {
   int viewing = 0, values = -1;
   List frame = _match_frame(subject);
   List (expr, none) = frame;
   Var value = ((Code) pattern).pattern_value();
   Array pool = [];
-  List arm = _match_arm(pattern, value, expr, body, pool);
+  int literal = value is <list> && _match_plain_literal(value) &&
+    (pattern ~= %(expr ? (!or (cache ?) (expr ? (!or (cache ?) (nil)))
+                             (nil))));
+  List equal = literal ? %(op == $expr $pattern) : NULL;
+  List arm = literal && value.is_nil()
+    ? %(if $equal $body)
+    : _match_arm(pattern, value, expr, body, pool, equal);
   if (!arm) {
     List binders = _match_binders(value);
     values = binders.len();

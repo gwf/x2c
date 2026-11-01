@@ -7,7 +7,7 @@
 #include "preprocess-values.h"
 int main(void){
   x2c_initialize();
-  printf("%d\n", 37);
-  return 37 == 37 ? 0 : 1;
+  printf("%d\n", FIXTURE_VALUE);
+  return FIXTURE_VALUE == 37 ? 0 : 1;
 }
 

@@ -21,6 +21,7 @@ Configured compiler sessions and source units.
 | [`Frontend.start`](#Frontend.start) | Scans one input into a fresh unit with its own isolated `Context`; collection preprocesses its tokens. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
 | [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols, retains preprocessor outputs for adapter inspection, and preprocesses the unit's tokens for parsing. |
+| [`ParsedUnit.collect_native`](#ParsedUnit.collect_native) | Collects a C source or header through the configured host preprocessor. |
 | [`ParsedUnit.parse`](#ParsedUnit.parse) | Parses a collected unit, retaining both its AST and unsuccessful reports. |
 
 ### `Frontend`
@@ -33,8 +34,9 @@ Configured compiler sessions and source units.
 Collects the preludes once, in a Context that shares the caller's pool,
 before any unit opens. Units, and the workers a translation forks, then
 replay them from the process cache. The collection runs as an empty
-unit, whatever dump or symbol mode the request selects. Returns zero
-after reporting a failure.
+unit in the expansion mode of the request's units, whatever dump or
+symbol mode the request selects. Returns zero after reporting a
+failure.
 
 Source: `src/frontend.x`
 
@@ -123,6 +125,20 @@ Source: `src/frontend.x`
 
 Collects symbols, retains preprocessor outputs for adapter inspection,
 and preprocesses the unit's tokens for parsing.
+
+Source: `src/frontend.x`
+
+<a id="ParsedUnit.collect_native"></a>
+#### ParsedUnit.collect_native
+
+`int ParsedUnit.collect_native(ParsedUnit &unit, Frontend frontend)`
+
+Collects a C source or header through the configured host preprocessor.
+Unlike x2c collection, this does not walk native headers as x2c-owned
+declarations. The preprocessed tokens and line markers stay in the unit;
+original source text remains available in `source_texts`, and
+`command_macros` holds every macro the host defined. Call
+`Compiler.full_parse_native` for its typed source projection.
 
 Source: `src/frontend.x`
 

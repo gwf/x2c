@@ -32,8 +32,10 @@ class Socket struct { int fd; File input, output; String peer; } *;
 
 protocol Cleanup(Listener);
 protocol Cleanup(Socket);
+
 /** Releases the listener when a managed local leaves its block. */
 void Listener.cleanup(Listener listener) { listener.close(); }
+
 /** Releases both streams when a managed local leaves its block. */
 void Socket.cleanup(Socket socket) { socket.close(); }
 
@@ -73,13 +75,13 @@ Listener Listener.bind(String host, int port) {
     transfers its cooperative cancellation cause, like a Channel wait.
     Raises: `<io-fail>` on a native accept or poll failure. */
 Socket Listener.accept(Listener listener) {
-  int fd = x2c_net_accept_fd(listener);
+  int fd = _x2c_net_accept_fd(listener);
   return fd < 0 ? NULL : Socket.adopt(fd);
 }
 
-/** Internal descriptor handoff for the HTTP acceptor. Returns an owned fd,
-    or -1 after Listener.stop, with the same failure behavior as accept. */
-int x2c_net_accept_fd(Listener listener) {
+/* Internal descriptor handoff for the HTTP acceptor. Returns an owned fd,
+   or -1 after Listener.stop, with the same failure behavior as accept. */
+int _x2c_net_accept_fd(Listener listener) {
   struct pollfd wait = { .fd = listener.fd, .events = POLLIN };
   while (!_stopped(listener)) {
     int ready = poll(&wait, 1, 50);
@@ -146,7 +148,6 @@ Socket Socket.connect(String host, int port, int timeout_ms) {
     error = errno;
   }
   _io("Socket.connect", error);
-  return NULL;
 }
 
 /** Takes ownership of fd, including on failure, and creates separate File

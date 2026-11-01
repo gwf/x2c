@@ -262,8 +262,8 @@ meta String ct_to_array_kind(List ys) { Array xs = ys; return Var.tag(xs); }
 
 meta String ct_to_list_kind(Array xs) { List ys = xs; return Var.tag(ys); }
 
-/* An array literal in an argument position has no destination to read, so
-   lowering it as a Lisp List would hand the callee the wrong container. */
+/* An array literal in an argument position builds a fresh `Array`, the
+   container the callee's parameter declares. */
 meta int ct_takes_array(Array a) => (int) a.len();
 
 meta int ct_array_argument(int n) => ct_takes_array([n, n, n]);
@@ -372,8 +372,8 @@ meta int ct_pair(List pair) {
   return Var.integer(a) * 10 + Var.integer(b);
 }
 
-/* The same declaration with a type on each name. Neither spelling lets the
-   type decide anything, because a Lisp value already is a `Var`. */
+/* The same declaration with a type on each name. Both spellings declare
+   `Var` names, so they read the same pair. */
 meta int ct_pair_typed(List pair) {
   (Var a, Var b) = pair;
   return Var.integer(a) * 10 + Var.integer(b);
@@ -504,10 +504,10 @@ meta int ct_typed_symbol(List form) {
 
 /* --- the library names a call resolves against --------------------------- */
 
-/* A call in a compile-time function resolves against a name in
-   `etc/comptime.xlisp`, and an operation with no binding there declines the
-   whole function. One function below per binding added for `String`,
-   `Array` and `Map`. */
+/* A call in a compile-time function reaches the same runtime operation as
+   an ordinary call, because the unit's staged `meta` group compiles the
+   function as native code. Each function below calls one `String`,
+   `Array`, or `Map` operation. */
 
 meta String ct_str_capitalize(String s) => s.capitalize();
 
@@ -628,10 +628,10 @@ meta static String mt_floats(void) =>
 /* `f(x)` is not a call in the AST. It expands to a stored callee, a
    reference-carrier probe and a boxed `FuncArg` per argument, and
    `Func.apply` last; a call with no arguments needs none of that and is the
-   bare `Func.apply`. A compile-time `Func` is the Lisp lambda this pass
-   lowered, so both spellings collapse back to the application they stand
-   for. One applier per arity, because `src/expressions.x` builds them
-   differently. */
+   bare `Func.apply`. A compile-time `Func` is an ordinary `Func` in the
+   staged native code, so both expansions run as they do at run time. One
+   applier each for zero, one, and two arguments exercises the direct
+   application and the prepared argument array. */
 meta static Var mt_apply0(Func f) => f();
 
 meta static Var mt_apply1(Func f, Var v) => f(v);
@@ -653,8 +653,8 @@ meta static String mt_call_two(int n, String tail) {
   return mt_apply2(join, n, tail);
 }
 
-/* A function named where a value is wanted is the definition this pass
-   installed, so it reaches a `Func` without a lambda around it. */
+/* A function named where a value is wanted converts to a `Func` as it does
+   at run time, without a lambda around it. */
 meta static Var mt_bump(Var x) => x + 1;
 
 meta static int mt_named(int n) {
@@ -662,8 +662,8 @@ meta static int mt_named(int n) {
   return mt_apply1(g, n);
 }
 
-/* The three shapes `etc/init.xlisp` needs, each calling its procedure from
-   inside a loop. */
+/* Map, filter, and left fold, each calling its procedure from inside a
+   loop. */
 meta static List mt_map(List values, Func fn) {
   Array out = [];
   foreach (Var v, values) out.push(fn(v));
@@ -688,8 +688,8 @@ meta static int mt_higher(int seed) {
   return mt_foldl(%!(Var a, Var b) => (int) a + (int) b, seed, big);
 }
 
-/* A `Func` stored in a `Map` and read back: boxing it and reading it back
-   are both the identity, because a Lisp lambda already is a value. */
+/* A `Func` stored in a `Map` and read back: boxing it as a `Var` and
+   converting it back return the same callable. */
 meta static int mt_thunk(String which) {
   Func a = %!() => 1;
   Func b = %!() => 2;
@@ -722,7 +722,7 @@ meta int ct_walk_empty_of(List flat, List xs) =>
 /* A constant reaches a `Var` parameter as its own value. */
 meta String ct_var_repr(Var value) => value.repr();
 
-/* --- the program reports what the pass produced -------------------------- */
+/* --- the program reports what translation computed ----------------------- */
 
 int main(void) {
   printf("gcd          %d\n", $ct_gcd(1071, 462));

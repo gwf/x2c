@@ -1,7 +1,10 @@
 /*  test-scope.x -- unit tests for scope allocator */
 
 #include "test-support.x"
+#include <pthread.h>
+#include <stdatomic.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -21,7 +24,7 @@ static int _scope_rejected(void (*action)(void)) {
 }
 
 static void _destroy_active_root(void) {
-  Scope.retain();
+  Scope.open();
   Scope.destroy(*Scope.top());
 }
 
@@ -38,25 +41,15 @@ static void _destroy_outer_stack_slot(void) {
   outer.destroy();
 }
 
-static void _destroy_attached_lower(void) {
-  Scope slot = NULL;
-  Scope.push(&slot);
-  Scope.retain();
-  Scope lower = slot;
-  Scope.retain();
-  Scope.pop();
-  lower.destroy();
-}
-
 static void _release_without_retain(void) {
-  Scope.release();
+  Scope.close();
 }
 
 static void _release_wrong_slot(void) {
-  Scope.retain();
+  Scope.open();
   Scope slot = NULL;
   Scope.push(&slot);
-  Scope.release();
+  Scope.close();
 }
 
 static void _malloc_overflow(void) {
@@ -77,18 +70,18 @@ static void fill(char *dst, const char *src) {
 }
 
 static void scope_alloc_release(void) {
-  Scope.retain();
+  Scope.open();
   char *buf = xmalloc(8);
   EXPECT_NOT_NULL(buf);
   if (buf) {
     fill(buf, "x2c");
     EXPECT_STR_EQ(buf, "x2c");
   }
-  Scope.release();
+  Scope.close();
 }
 
 static void scope_push_pop_destroy(void) {
-  Scope.retain();
+  Scope.open();
   Scope outer = Scope.new(), inner = Scope.new(), *initial = Scope.top();
   Scope.push(&outer);
   char *outer_mem = xmalloc(6);
@@ -105,11 +98,11 @@ static void scope_push_pop_destroy(void) {
   Scope.pop();
   EXPECT_TRUE(Scope.top() == initial);
   outer.destroy();
-  Scope.release();
+  Scope.close();
 }
 
 static void scope_realloc_grows_and_shrinks(void) {
-  Scope.retain();
+  Scope.open();
   char *buf = xmalloc(8);
   fill(buf, "1234");
   char *bigger = xrealloc(buf, 32);
@@ -122,11 +115,11 @@ static void scope_realloc_grows_and_shrinks(void) {
     EXPECT_STR_EQ(smaller, "1234");
     EXPECT_NULL(xrealloc(smaller, 0));
   }
-  Scope.release();
+  Scope.close();
 }
 
 static void scope_free_unlinks_any_position(void) {
-  Scope.retain();
+  Scope.open();
   char *tail = xmemdup("tail", 5);
   char *middle = xmemdup("middle", 7);
   char *head = xmemdup("head", 5);
@@ -138,11 +131,11 @@ static void scope_free_unlinks_any_position(void) {
   EXPECT_STR_EQ(middle, "middle");
   xfree(middle);
   xfree(NULL);
-  Scope.release();
+  Scope.close();
 }
 
 static void scope_realloc_updates_any_position(void) {
-  Scope.retain();
+  Scope.open();
   char *tail = xmemdup("tail", 5);
   char *middle = xmemdup("middle", 7);
   char *head = xmemdup("head", 5);
@@ -154,7 +147,7 @@ static void scope_realloc_updates_any_position(void) {
   EXPECT_NOT_NULL(head);
   if (head) EXPECT_STR_EQ(head, "head");
   EXPECT_STR_EQ(tail, "tail");
-  Scope.release();
+  Scope.close();
 }
 
 static void scope_name_lifetime_and_registry_removal(void) {
@@ -174,6 +167,52 @@ static void scope_name_lifetime_and_registry_removal(void) {
   Scope null_name = Scope.new_named(NULL);
   EXPECT_NULL(null_name.name());
   null_name.destroy();
+}
+
+typedef struct ScopeChurn {
+  Scope shared;
+  int index;
+  atomic_int failed;
+} ScopeChurn;
+
+/* Creates and destroys named and unnamed Scopes while other threads change
+   the name registry, reading a name that the main thread registered. */
+static void *_scope_churn(void *data) {
+  ScopeChurn *churn = data;
+  char name[32];
+  snprintf(name, sizeof(name), "churn-%d", churn.index);
+  for (int i = 0; i < 2000; i++) {
+    Scope named = Scope.new_named(name), unnamed = Scope.new();
+    const char *seen = named.name();
+    if (!seen || strcmp(seen, name) || unnamed.name() ||
+        strcmp(churn.shared.name(), "shared"))
+      atomic_store(&churn.failed, 1);
+    unnamed.destroy();
+    named.destroy();
+  }
+  x2c_thread_state_release();
+  return NULL;
+}
+
+static void scope_threads_create_and_destroy_named_scopes(void) {
+  Scope shared = Scope.new_named("shared");
+  ScopeChurn churns[4] = {0};
+  pthread_t threads[4];
+  int launched = 0;
+  for (int i = 0; i < 4; i++) {
+    churns[i].shared = shared;
+    churns[i].index = i;
+    int error = pthread_create(&threads[i], NULL, _scope_churn, &churns[i]);
+    EXPECT_INT_EQ(error, 0);
+    if (error) break;
+    launched++;
+  }
+  for (int i = 0; i < launched; i++) {
+    EXPECT_INT_EQ(pthread_join(threads[i], NULL), 0);
+    EXPECT_FALSE(atomic_load(&churns[i].failed));
+  }
+  EXPECT_STR_EQ(shared.name(), "shared");
+  shared.destroy();
 }
 
 static void scope_named_direct_allocation(void) {
@@ -210,7 +249,7 @@ static void scope_named_direct_allocation(void) {
 
 static void scope_allocator_edge_behavior(void) {
   ScopeStats before = Scope.stats();
-  Scope.retain();
+  Scope.open();
   void *zero = xmalloc(0);
   void *zeroed = xcalloc(0, sizeof(int));
   void *from_null = xrealloc(NULL, 8);
@@ -225,7 +264,7 @@ static void scope_allocator_edge_behavior(void) {
   EXPECT_NULL(xrealloc(from_null, 0));
   xfree(zero);
   xfree(zeroed);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes, before.live_requested_bytes);
 }
@@ -238,7 +277,7 @@ static void scope_c_allocation_aliases(void) {
   EXPECT_TRUE(xmemdup == Scope.memdup);
 
   ScopeStats before = Scope.stats();
-  Scope.retain();
+  Scope.open();
   char *outer = xmemdup("outer", 6);
   Scope owner = Scope.owner(outer), pushed = NULL;
   Scope.push(&pushed);
@@ -250,7 +289,7 @@ static void scope_c_allocation_aliases(void) {
   for (int i = 0; i < 3; i++) EXPECT_INT_EQ(zeroes[i], 0);
 
   Scope pushed_owner = pushed;
-  Scope.retain();
+  Scope.open();
   char *inner = xmemdup(buffer, 5);
   EXPECT_TRUE(Scope.owner(inner) == *Scope.top());
   EXPECT_TRUE(Scope.owner(inner) != pushed_owner);
@@ -259,11 +298,11 @@ static void scope_c_allocation_aliases(void) {
   EXPECT_STR_EQ(outer, "outer");
   EXPECT_STR_EQ(inner, "copy");
   xfree(buffer);
-  Scope.release();
+  Scope.close();
   Scope.pop();
   pushed.destroy();
   EXPECT_STR_EQ(outer, "outer");
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
   EXPECT_INT_EQ(
     Scope.stats().live_requested_bytes, before.live_requested_bytes);
@@ -271,7 +310,7 @@ static void scope_c_allocation_aliases(void) {
 
 static void scope_c_allocation_alias_edges(void) {
   ScopeStats before = Scope.stats();
-  Scope.retain();
+  Scope.open();
   void *zero = xmalloc(0), *zeroed = xcalloc(0, sizeof(int));
   void *empty = xcalloc(3, 0), *from_null = xrealloc(NULL, 0);
   EXPECT_NOT_NULL(zero);
@@ -293,7 +332,7 @@ static void scope_c_allocation_alias_edges(void) {
   xfree(zeroed);
   xfree(empty);
   xfree(NULL);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
 }
 
@@ -305,16 +344,16 @@ static void scope_size_limits_are_terminal(void) {
 
 static void scope_nested_stats_restore(void) {
   ScopeStats before = Scope.stats();
-  Scope.retain();
-  Scope.retain();
+  Scope.open();
+  Scope.open();
   xmalloc(16);
   ScopeStats nested = Scope.stats();
   EXPECT_INT_EQ(nested.live_scopes, before.live_scopes + 2);
   EXPECT_INT_EQ(nested.live_allocations, before.live_allocations + 1);
   EXPECT_INT_EQ(
     nested.live_requested_bytes, before.live_requested_bytes + 16);
-  Scope.release();
-  Scope.release();
+  Scope.close();
+  Scope.close();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
@@ -325,8 +364,8 @@ static void scope_release_requires_matching_retain(void) {
   EXPECT_TRUE(_scope_rejected(_release_without_retain));
   EXPECT_TRUE(_scope_rejected(_release_wrong_slot));
   Scope *before = Scope.top();
-  Scope.retain();
-  Scope.release();
+  Scope.open();
+  Scope.close();
   EXPECT_PTR_EQ(Scope.top(), before);
 }
 
@@ -344,8 +383,87 @@ static void scope_stack_grows_and_restores(void) {
   EXPECT_TRUE(Scope.top() == before);
 }
 
+static void scope_execution_regions_share_borrowed_base(void) {
+  Scope.open();
+  Scope *caller_slot = Scope.top(), borrowed = *caller_slot;
+  void *first = x2c_scope_execution_new(borrowed);
+  void *second = x2c_scope_execution_new(borrowed);
+
+  x2c_scope_execution_swap(first);
+  Scope *first_slot = Scope.top();
+  EXPECT_TRUE(first_slot != caller_slot);
+  EXPECT_PTR_EQ(*first_slot, borrowed);
+  Scope.open();
+  Scope first_region = *first_slot;
+  char *first_value = xmalloc(8);
+  fill(first_value, "first");
+  x2c_scope_execution_swap(first);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+
+  x2c_scope_execution_swap(second);
+  Scope *second_slot = Scope.top();
+  EXPECT_TRUE(second_slot != first_slot);
+  EXPECT_TRUE(second_slot != caller_slot);
+  Scope.open();
+  EXPECT_PTR_EQ((*second_slot).down, borrowed);
+  EXPECT_PTR_EQ(*first_slot, first_region);
+  char *caller_value = Scope.malloc_in(caller_slot, 8);
+  fill(caller_value, "caller");
+  EXPECT_PTR_EQ(Scope.owner(caller_value), borrowed);
+  x2c_scope_execution_swap(second);
+
+  x2c_scope_execution_swap(first);
+  EXPECT_PTR_EQ(Scope.top(), first_slot);
+  EXPECT_PTR_EQ(*first_slot, first_region);
+  EXPECT_STR_EQ(first_value, "first");
+  Scope.close();
+  EXPECT_PTR_EQ(*first_slot, borrowed);
+  x2c_scope_execution_swap(first);
+
+  x2c_scope_execution_swap(second);
+  EXPECT_PTR_EQ(Scope.top(), second_slot);
+  Scope.close();
+  EXPECT_PTR_EQ(*second_slot, borrowed);
+  x2c_scope_execution_swap(second);
+  x2c_scope_execution_free(first);
+  x2c_scope_execution_free(second);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+  EXPECT_STR_EQ(caller_value, "caller");
+  Scope.close();
+}
+
+static void scope_execution_grown_records_survive_exchange(void) {
+  Scope.open();
+  Scope *caller_slot = Scope.top(), slots[24] = { NULL };
+  void *execution = x2c_scope_execution_new(*caller_slot);
+  x2c_scope_execution_swap(execution);
+  Scope *base_slot = Scope.top();
+  for (int i = 0; i < 24; i++) {
+    Scope.push(&slots[i]);
+    Scope.open();
+    xmalloc(i + 1);
+  }
+  x2c_scope_execution_swap(execution);
+  EXPECT_PTR_EQ(Scope.top(), caller_slot);
+  Scope.open();
+  Scope.close();
+  x2c_scope_execution_swap(execution);
+  EXPECT_PTR_EQ(Scope.top(), &slots[23]);
+  for (int i = 23; i >= 0; i--) {
+    EXPECT_PTR_EQ(Scope.top(), &slots[i]);
+    Scope.close();
+    EXPECT_NULL(slots[i]);
+    Scope.pop();
+  }
+  EXPECT_PTR_EQ(Scope.top(), base_slot);
+  EXPECT_PTR_EQ(*base_slot, *caller_slot);
+  x2c_scope_execution_swap(execution);
+  x2c_scope_execution_free(execution);
+  Scope.close();
+}
+
 static void _move_without_slot(void) {
-  Scope.retain();
+  Scope.open();
   void *ptr = xmalloc(4);
   Scope.move(ptr, NULL);
 }
@@ -377,11 +495,11 @@ static void scope_move_materializes_and_self_moves(void) {
   ScopeStats before = Scope.stats();
   Scope.move(NULL, NULL);  // NULL pointer is a no-op even without a slot
   Scope slot = NULL;
-  Scope.retain();
+  Scope.open();
   char *a = xmalloc(8);
   fill(a, "kept");
   Scope.move(a, &slot);  // materializes the destination scope
-  Scope.release();
+  Scope.close();
   EXPECT_NOT_NULL(slot);
   EXPECT_STR_EQ(a, "kept");
   Scope.move(a, &slot);  // self-move while at the head
@@ -404,9 +522,9 @@ static void scope_destroy_detached_contract(void) {
 
   Scope slot = NULL;
   Scope.push(&slot);
-  Scope.retain();
+  Scope.open();
   xmalloc(4);
-  Scope.retain();
+  Scope.open();
   xmalloc(8);
   Scope.pop();
   slot.destroy();
@@ -421,7 +539,6 @@ static void scope_destroy_detached_contract(void) {
   EXPECT_TRUE(_scope_rejected(_destroy_active_root));
   EXPECT_TRUE(_scope_rejected(_destroy_active_pushed));
   EXPECT_TRUE(_scope_rejected(_destroy_outer_stack_slot));
-  EXPECT_TRUE(_scope_rejected(_destroy_attached_lower));
 }
 
 static int drop_count;
@@ -476,31 +593,31 @@ static void _scratch_drop(void *ptr) {
 }
 
 static void _finalize_without_drop(void) {
-  Scope.retain();
+  Scope.open();
   Scope.malloc_finalized(8, NULL);
 }
 
 static void scope_finalizer_runs_once(void) {
   ScopeStats before = Scope.stats();
   drop_count = 0;
-  Scope.retain();
+  Scope.open();
   char *a = Scope.malloc_finalized(16, _count_drop);
   fill(a, "finalized");
   EXPECT_INT_EQ(drop_count, 0);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(drop_order[0] == a);
   EXPECT_INT_EQ(drop_live_bytes, before.live_requested_bytes);
 
   drop_count = 0;
-  Scope.retain();
+  Scope.open();
   char *b = Scope.malloc_finalized(16, _count_drop);
   char *c = Scope.malloc_finalized(16, _count_drop);
   xfree(b);
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(xrealloc(c, 0) == NULL);
   EXPECT_INT_EQ(drop_count, 2);
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(drop_count, 2);
 
   ScopeStats after = Scope.stats();
@@ -540,7 +657,7 @@ static void scope_finalizer_order_and_move(void) {
 static void scope_finalizer_realloc_and_scratch(void) {
   ScopeStats before = Scope.stats();
   drop_count = 0;
-  Scope.retain();
+  Scope.open();
   xmalloc(8);
   char *a = Scope.malloc_finalized(8, _count_drop);
   xmalloc(8);
@@ -555,7 +672,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
     Scope.stats().live_requested_bytes,
     before.live_requested_bytes + 24);
   EXPECT_STR_EQ(a, "grow");
-  Scope.release();
+  Scope.close();
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(drop_order[0] == a);
 
@@ -577,6 +694,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
 
 void scope_suite(void) {
   $test.run(scope_name_lifetime_and_registry_removal);
+  $test.run(scope_threads_create_and_destroy_named_scopes);
   $test.run(scope_splice_preserves_owners_and_finalizers);
   $test.run(scope_alloc_release);
   $test.run(scope_push_pop_destroy);
@@ -593,6 +711,8 @@ void scope_suite(void) {
   $test.run(scope_move_between_scopes);
   $test.run(scope_move_materializes_and_self_moves);
   $test.run(scope_stack_grows_and_restores);
+  $test.run(scope_execution_regions_share_borrowed_base);
+  $test.run(scope_execution_grown_records_survive_exchange);
   $test.run(scope_destroy_detached_contract);
   $test.run(scope_finalizer_runs_once);
   $test.run(scope_finalizer_order_and_move);

@@ -3,6 +3,18 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
+## 0.4.1 - 2026-10-31
+
+- Highlight named and unnamed `List @` and `Map @` rest parameters,
+  including function pointers and signatures split across comments and lines.
+  Keep call splices, macro sequence parameters, and C variadics distinct.
+- Cover single-angle `%<...>` SymbolSets and exclude their punctuation data
+  from VS Code bracket matching. Add `%<` automatic closing.
+- Highlight `alias name to expression`, the `~=` pattern condition operator,
+  and the supported `typeof` spellings.
+- Highlight evaluated `${key: value}` Maps as code inside quoted collections.
+  Match `$(...)` and `@(...)` brackets and remove the retired `@{...}` pair.
+
 ## 0.4.0 - 2026-10-28
 
 - Start `x2c lsp` for compiler diagnostics, definitions, hover, completion,
@@ -11,8 +23,8 @@ first.
 - Replace per-request worker processes and snapshot files with the standard
   VS Code language client. Preserve trusted local workspaces, compiler path
   selection, compiler arguments, and unsaved included files.
-- Require VS Code 1.82 or newer and a compiler checkout with the experimental
-  `lsp` command built. Remove the retired `workerPath` setting; select the
+- Require VS Code 1.82 or newer and a compiler that provides the shipped
+  `x2c lsp` command. Remove the retired `workerPath` setting; select the
   compiler with `compilerPath`.
 
 - Rebuild the package so an interpolated String inside a parenthesized

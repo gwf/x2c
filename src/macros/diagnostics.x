@@ -74,7 +74,24 @@ static macro Stmt $fail.macros_decorator_kind(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "decorator first parameter has invalid target kind",
     $origin, %("expected Expression, Function, Stmt, Field, Unit,"
-      "or NamedType"));
+      "NamedType, or Macro"));
+
+static macro Stmt $fail.macros_decorator_parameters(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>, "returned decorator requires explicit arguments", $site,
+    %("a continued decorator must have no explicit parameters"));
+
+static macro Stmt $fail.macros_expression_single(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>, "expression position requires exactly one generated expression",
+    $site, %("use a sequence splice to insert zero or more expressions"));
+
+static macro Stmt $fail.macros_macro_value(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>, "Macro argument requires a compile-time macro value", $site, NULL);
+
+static macro Stmt $fail.macros_macro_singular(Expr $c, Expr $site) =>
+  $c.report_error(<parse>, "Macro holes must be singular", $site, NULL);
 
 static macro Stmt $fail.macros_local_target(
   Expr $c, Expr $origin, Expr $target) =>

@@ -15,12 +15,11 @@ The program is named after its directory, and the Makefile lists
 `examples/packages` first in `--package-dir`. The maintained adapters
 remain under the separate `packages` search root.
 
-This example uses the experimental libcurl package.
-
 ```sh
 make build
 make test
 ```
 
 `make test` runs it against a deterministic local catalog. It does not
-depend on the public network.
+depend on the public network. `make run` contacts `api.github.com`: it fetches
+PCRE2's recent releases and posts the summary to the same host.

@@ -32,7 +32,7 @@ enum Color{
 typedef int Count;
 #define FIRST_ROW 3
 enum{
-  ROWS = 3 + 4
+  ROWS = FIRST_ROW + 4
 }
 ;
 static void _x2c_gensym_static_initialize_0(void);

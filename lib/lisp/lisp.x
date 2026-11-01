@@ -260,7 +260,7 @@ module struct Lisp {
 /* Native value bindings may adapt an interpreted callable to Func. Public
    entries set this thread-local for the whole evaluation. Nested entries
    restore their caller. */
-module Lisp threaded lisp_active;
+extern Lisp threaded x2c_lisp_active;
 #include "var-adapters.x"
 
 module {

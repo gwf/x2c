@@ -438,6 +438,9 @@ walk. A conditional region opening or a close without an unconditional
 lexical `defer` remains an obstacle.
 
 The compiler's built-in region effect table supplies runtime operations.
+The audit also keeps possible frame-escape findings for raw pointer stores
+whose destination lifetime is unknown. Ordinary translation leaves these
+stores to their C lifetime contract; meta functions still reject them.
 For other native calls, `--contracts FILE` reads Lisp data rows using the
 table's existing effect forms:
 
@@ -523,7 +526,7 @@ prepare missing dependencies through the project's ordinary workflow.
 `status` checks saved dependency fingerprints and source membership. Its JSON
 contains `fresh`, `changed`, `missing`, `added_inputs`, and `removed_inputs`.
 It also reports the retained effective target `configurations`, including
-include paths, compiler arguments, and native modules.
+include paths, compiler arguments, C macro expansion, and native modules.
 If an edited manifest cannot be planned, `membership_checked` is false and
 `membership_error` explains why; recorded dependency changes are still shown.
 Queries continue to read the named snapshot after source edits. Rebuild

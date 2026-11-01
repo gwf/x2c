@@ -93,7 +93,7 @@ EXPECT_NEAR(m[mask].sum().item().double(), 7.0, 1e-12);
 Every record here, `Tensor`, `Module`, `Optimizer`, `Scheduler`, and
 `JitModule`, owns one libtorch handle and is allocated with a `Scope`
 finalizer, so a value is released with the scope that created it. A
-training step is one `Scope.retain` and `Scope.release` pair around the
+training step is one `Scope.open` and `Scope.close` pair around the
 forward, backward, and update, with the model and optimizer in the
 enclosing scope. `free` releases a handle early and returns NULL.
 

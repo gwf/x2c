@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/symbol-set-duplicate.x:4:17: parse: duplicate Symbol in symbol set
-    return %<<foo foo>>;
-                  ^^^
+unittest/compiler-fixtures/symbol-set-duplicate.x:4:16: parse: duplicate Symbol in symbol set
+    return %<foo foo>;
+                 ^^^
   note: symbol: <foo>
 

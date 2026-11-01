@@ -1,41 +1,39 @@
 #pragma once
+#include "system-macros.x"
 
 /*  graph-output.x -- command help display */
 
-macro Stmt $output.graph.usage(Expr $program) {
-  Stderr.printf("       %s snapshot OUTPUT [BUILD_OPTIONS] [FILE...]\n", $program);
-  Stderr.printf("       %s status SNAPSHOT\n", $program);
-  Stderr.printf("       %s query SNAPSHOT QUERY_FILE\n", $program);
-  Stderr.printf("       %s serve SNAPSHOT\n", $program);
-  Stderr.printf("       %s diff BEFORE AFTER\n", $program);
-  Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", $program);
-  Stderr.printf(
-    "       %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... "
-    "[-- COMMAND_FILE...]\n",
-    $program);
-  Stderr.printf("       %s architecture [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s structure UNIT [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s between LEFT RIGHT [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s focus NAME [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s field TYPE FIELD [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s field-sites TYPE FIELD [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s sites NAME [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s walks [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s tail-calls [-I DIR] FILE...\n", $program);
-  Stderr.printf(
-    "       %s loop-allocations [--all] [-I DIR] FILE...\n", $program);
-  Stderr.printf("       %s lifetime-escapes [-I DIR] FILE...\n", $program);
-  Stderr.printf(
-    "       %s certify --root NAME [--root NAME ...] "
-    "[--contracts FILE] [-I DIR] FILE...\n", $program
-  );
-  Stderr.printf(
-    "       %s allocation-returns NAME [-I DIR] FILE...\n", $program
-  );
-  Stderr.printf(
-    "       %s flows PRODUCER CONSUMER [-I DIR] FILE...\n", $program);
-  Stderr.printf(
-    "       %s compare LEFT RIGHT TARGET... -- [-I DIR] FILE...\n",
-    $program);
+macro Stmt $output.graph.usage(Expr $out, Expr $program) {
+  $out.printf(
+    $dedent(%"
+    usage: %s snapshot OUTPUT [BUILD_OPTIONS] [FILE...]
+           %s status SNAPSHOT
+           %s query SNAPSHOT QUERY_FILE
+           %s serve SNAPSHOT
+           %s diff BEFORE AFTER
+           %s graph|digest [-I DIR] FILE...
+           %s clones [--min-size N] [-I DIR] FILE...
+           %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... [-- COMMAND_FILE...]
+           %s architecture [-I DIR] FILE...
+           %s structure UNIT [-I DIR] FILE...
+           %s between LEFT RIGHT [-I DIR] FILE...
+           %s focus NAME [-I DIR] FILE...
+           %s field TYPE FIELD [-I DIR] FILE...
+           %s field-sites TYPE FIELD [-I DIR] FILE...
+           %s sites NAME [-I DIR] FILE...
+           %s walks [-I DIR] FILE...
+           %s tail-calls [-I DIR] FILE...
+           %s loop-allocations [--all] [-I DIR] FILE...
+           %s lifetime-escapes [-I DIR] FILE...
+           %s certify --root NAME [--root NAME ...] [--contracts FILE] [-I DIR] FILE...
+           %s allocation-returns NAME [-I DIR] FILE...
+           %s flows PRODUCER CONSUMER [-I DIR] FILE...
+           %s compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
+    "),
+    $program, $program, $program, $program,
+    $program, $program, $program, $program,
+    $program, $program, $program, $program,
+    $program, $program, $program, $program,
+    $program, $program, $program, $program,
+    $program, $program, $program);
 }

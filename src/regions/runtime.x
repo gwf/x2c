@@ -69,7 +69,7 @@ static Map runtime = %{
   "Context_cleanup": (free),         "Scope_free": (free scope),
   "xfree": (free scope),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
-  "Scope_retain": (open scope),      "Scope_release": (close scope),
+  "Scope_open": (open scope),      "Scope_close": (close scope),
   "Pool_open": (open pool),          "Pool_close": (close pool),
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),

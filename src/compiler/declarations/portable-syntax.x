@@ -105,7 +105,8 @@ static Var _thaw_cache_key(Compiler c, Var key) {
       return c.thaw_declaration_syntax(key);
   }
   Array out = [];
-  foreach (Var child in key.list_payload()) out.push(_thaw_cache_key(c, child));
+  foreach (Var child in key.list_payload())
+    out.push(_thaw_cache_key(c, child));
   return out.list_free();
 }
 

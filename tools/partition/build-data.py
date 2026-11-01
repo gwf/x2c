@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Convert x2c-graph datasets to the browser snapshot.
 
-Called by generate.py with REPO_ROOT DATASETS_DIR OUT_JSON.
+Called by generate.py with REPO_ROOT DATASETS_DIR OUT_JSON. OUT_JSON defaults
+to data/graph.json beside this script, generate.py's default output.
 The exporter owns parsing and call resolution; this adapter aggregates its TSVs.
 """
 import csv, glob, hashlib, json, os, subprocess, sys
@@ -35,9 +36,12 @@ def git_revision(root):
     except Exception:
         return ""
 
-root = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
-datasets = sys.argv[2] if len(sys.argv) > 2 else os.path.join(root, "explorer", "data")
-out_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(root, "explorer", "data", "graph.json")
+if len(sys.argv) not in (3, 4):
+    sys.exit("usage: build-data.py REPO_ROOT DATASETS_DIR [OUT_JSON]")
+root = os.path.abspath(sys.argv[1])
+datasets = sys.argv[2]
+out_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data", "graph.json")
 
 # ---- discover units ---------------------------------------------------------
 # Each file is a translation unit; a module unit's member files are spliced

@@ -17,8 +17,7 @@ int main(int argc, char **argv) {
   printf("whole file (%d bytes):\n%s", text.len(), text);
 
   // Or stream lines, keeping the close beside the open.
-  File input = path.open("r");
-  defer input.close();
+  auto File input = path.open("r");
   long total = 0;
 
   // Skip blank lines; each remaining row has three valid longs.
@@ -34,8 +33,8 @@ int main(int argc, char **argv) {
 ```
 
 Read a whole file in one expression or stream it line by line. Either way,
-you manage no buffer. `defer` keeps the close next to the open, where
-you can see it.
+you manage no buffer. `auto` closes the file at block exit, so the cleanup
+sits next to the open, where you can see it.
 
 `words()` splits a row, destructuring binds the fields, and plain `atol`
 converts the number, because this is still C.

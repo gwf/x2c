@@ -255,9 +255,8 @@ static List _forwarder(
   if (!params) params = %((param (void) (bind () ())));
   Type result = c.source_private ? %(static @child) : child;
   List function = $(name), callee = $!($signature){ $binding };
-  return c.rebuild_unit_function($!Unit{
-    $result $function(@params) { return ($child)$callee(@args); }
-  });
+  return c.rebuild_unit_function(
+    $!Unit{ $result $function(@params) { return ($child)$callee(@args); } });
 }
 
 /* The selected rows replace each production's bundle in its part and in

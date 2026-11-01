@@ -445,7 +445,8 @@ Source: `lib/lisp/primitives.x`
 Compares Lisp numbers by value and returns a boxed negative, zero, or
 positive. Integer and floating encodings of one number compare equal.
 Unlike `Var.compare`, numeric comparison does not use representation
-rank to distinguish equal values. A nonnumeric operand raises `<bad-types>`.
+rank to distinguish equal values. A nonnumeric operand raises
+`<bad-types>`.
 
 Source: `lib/lisp/primitives.x`
 

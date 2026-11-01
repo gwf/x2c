@@ -38,7 +38,7 @@ answer = "forty-three";
 printf("answer now: %s\n", answer);
 
 /* Symbols are names; a SymbolSet is a fixed, ordered vocabulary. */
-SymbolSet phases = %<<write compile run>>;
+SymbolSet phases = %<write compile run>;
 Symbol phase = <compile>;
 printf("phase %s: member %d, index %d\n", phase.str(),
        phases.contains(phase), phases.index(phase));

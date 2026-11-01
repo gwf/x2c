@@ -54,13 +54,13 @@ int main(void) {
   for (int i = 0; i < count; i++) sink += Var.compare(one, wide) + 1;
   result("compare-numeric", now_ns() - start, count);
 
-  Scope.retain();
+  Scope.open();
   Map map = {};
   for (int i = 0; i < 1024; i++) map[i] = i + 1;
   start = now_ns();
   for (int i = 0; i < count; i++) sink += map[i & 1023].integer();
   result("map-get", now_ns() - start, count);
-  Scope.release();
+  Scope.close();
 
   if (sink == 0) return 1;
   return 0;

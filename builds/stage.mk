@@ -85,9 +85,11 @@ MAKEFLAGS        += -S
 LIB_X_FILES  := $(shell $(ROOT)/tools/sources.sh --root $(ROOT) --area lib)
 LIB_X_NAMES  = $(sort $(notdir $(LIB_X_FILES)))
 LIB_H_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.h,$(LIB_X_NAMES))
+LIB_NATIVE_HEADERS = $(LIB_BUILD)/group-match.h
 LIB_C_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.c,$(LIB_X_NAMES))
 LIB_XI_FILES = $(patsubst %.x,$(LIB_BUILD)/%.xi,$(LIB_X_NAMES))
 LIB_OBJECTS  = $(patsubst %.x,$(LIB_BUILD)/%.o,$(LIB_X_NAMES))
+LIB_OBJECTS += $(LIB_BUILD)/task-native.o
 LIB_X_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.d,$(LIB_X_NAMES))
 LIB_C_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.c.d,$(LIB_X_NAMES))
 ###############################################################################
@@ -138,7 +140,7 @@ $(OWN_INTERFACES): $(BINARY) $(LIB_BUILD)/.translated
 endif
 
 # Generate all headers first
-headers: $(LIB_H_FILES) $(BIN_H_FILES)
+headers: $(LIB_H_FILES) $(LIB_NATIVE_HEADERS) $(BIN_H_FILES)
 
 # create library build directory
 $(LIB_BUILD):
@@ -182,7 +184,18 @@ $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
 LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
-$(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers
+$(LIB_BUILD)/group-match.h: $(LIB_SOURCE)/map/group-match.h | $(LIB_BUILD)
+	cp $< $@
+
+$(LIB_BUILD)/task-native.c: $(LIB_SOURCE)/task/stack.c
+	cp $< $@
+
+$(LIB_BUILD)/minicoro.h: $(LIB_SOURCE)/task/minicoro.h
+	cp $< $@
+
+$(LIB_BUILD)/task-native.o: $(LIB_BUILD)/minicoro.h
+
+$(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES) $(LIB_NATIVE_HEADERS) $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -MMD -MP \
 		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@
 
@@ -235,14 +248,15 @@ $(eval $(call module_headers,$(LIB_BUILD),$(LIB_SOURCE),$(LIB_H_FILES),$(LIB_X_F
 $(eval $(call module_headers,$(BIN_BUILD),$(BIN_SOURCE),$(BIN_H_FILES),$(BIN_X_FILES)))
 
 # compile binary object files
-$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers $(BIN_BUILD)/.module-headers
+$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(LIB_NATIVE_HEADERS) $(LIB_BUILD)/.module-headers $(BIN_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -iquote $(BIN_BUILD) \
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
 # The compiler links every runtime object but the Lisp interpreter and its
 # target table, keeping the export flags; commands link the whole archive.
 COMPILER_RUNTIME = $(filter-out $(LIB_BUILD)/lisp.o $(LIB_BUILD)/lisp-targets.o,$(LIB_OBJECTS))
-$(BINARY): $(BIN_OBJECTS) $(LIBRARY)
+# Start the longest C unit first without changing the linker input order.
+$(BINARY): $(BIN_BUILD)/linked-meta.o $(BIN_OBJECTS) $(LIBRARY)
 	$(CC) $(BIN_OBJECTS) $(COMPILER_RUNTIME) \
 	  $(filter-out $(RUNTIME_LINK),$(LDFLAGS)) -lm -o $(BINARY)
 ###############################################################################
@@ -295,7 +309,7 @@ endif
 
 $(COMMAND_OBJECTS): $(COMMAND_BUILD)/.translated
 
-$(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES) $(BIN_BUILD)/.module-headers $(LIB_BUILD)/.module-headers
+$(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES) $(LIB_NATIVE_HEADERS) $(BIN_BUILD)/.module-headers $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(COMMAND_BUILD) -iquote $(BIN_BUILD) \
 		-iquote $(LIB_BUILD) -iquote $(ROOT)/include/x2c \
 		-MMD -MP -MF $(COMMAND_BUILD)/$*.c.d -MT $@ -c $< -o $@

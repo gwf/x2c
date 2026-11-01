@@ -23,6 +23,13 @@
 #else
 #define maybe_const
 #endif
+#ifdef NO_ATTRIBUTES
+#define USED
+#else
+#define USED __attribute__((used))
+#endif
+#define SPARE __attribute__((unused))
+#define ALSO_SPARE SPARE
 static const char * greeting = "hi";
 
 static char * const farewell;
@@ -37,11 +44,15 @@ static inline int tripled(int value){
   return value * 3;
 }
 
-__attribute__((weak)) int weak_value = 5;
+WEAK int weak_value = 5;
+
+typedef int count_t;
+
+static ALSO_SPARE const count_t spare = 7;
 
 static int quintupled(int value);
 
-static const int bound = 6;
+const static int bound = 6;
 
 struct text{
   char * body;
@@ -56,15 +67,19 @@ static void hidden(void){
   printf("hidden\n");
 }
 
-int doubled(int value){
+signed int doubled(signed int value){
   return value * 2;
+}
+
+USED int sextupled(int value){
+  return value * 6;
 }
 
 static int quintupled(int value){
   return value * 5;
 }
 
-__attribute__((visibility("default"))) const char * label(void){
+const char * label(void){
   return "label";
 }
 
@@ -79,6 +94,7 @@ int main(void){
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
   printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
   printf("%d %d %d %s\n", quintupled(2), bound, held, line.body);
+  printf("%d %d\n", sextupled(2), spare);
   return 0;
 }
 

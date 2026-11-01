@@ -118,8 +118,6 @@ List Compiler.resolve_protocol_member(
   return $(c.sym.reference($(spelling), NULL), signature);
 }
 
-
-
 /** Returns the resolved conformance for `participant` and `base`, if any.
     Lookup canonicalizes the participant and may use the nearest adopted
     typedef ancestor. Native conformances install their generated bindings

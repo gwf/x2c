@@ -1,15 +1,15 @@
 /*  slots.x -- macro definition slots */
 
 static const SymbolSet declaration_roles =
-  %<<field enumerator map-entry unit>>;
+  %<field enumerator map-entry unit>;
 
 static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit catch match-row
-     decl-row>>;
+  %<argument block field enumerator map-entry param unit catch match-row
+     decl-row>;
 
-static const SymbolSet untyped_roles = %<<expression argument type>>;
+static const SymbolSet untyped_roles = %<expression argument type>;
 
-static const SymbolSet value_kinds = %<<expr name literal>>;
+static const SymbolSet value_kinds = %<expr name literal macro>;
 
 /* template holes
 
@@ -49,8 +49,6 @@ List Compiler.try_parse_macro_member(Compiler c) {
     return slot;
   return %(macro-bind $(_hole_key(hole, "member")));
 }
-
-
 
 /** Parses a macro hole or meta call slot for `role` while reading a
     template.
@@ -104,6 +102,11 @@ static List _meta_call_slot(Compiler c, Symbol role) {
   if (!sequence && (role == <block> || role in declaration_roles))
     return NULL;
   List definition = _peek_invocation(c, _slot_position(role));
+  if (sequence && definition && definition.assoc(<kind>) == <decorator> &&
+      definition.assoc(<target>) in %<expr macro>) {
+    List call = _target_at(c, _slot_position(role), 1);
+    return role == <argument> ? %(macro-slot 1 $call) : call;
+  }
   if (sequence && definition && _result_kind(definition) != <expression>)
     return _target_at(c, _slot_position(role), 1);
   List call = c.try_parse_macro_expression();
@@ -112,7 +115,7 @@ static List _meta_call_slot(Compiler c, Symbol role) {
 
 /* A result macro keeps the ordinary position's kind and decorator rules. */
 static Symbol _slot_position(Symbol role) =>
-  role in %<<unit block field enumerator map-entry>> ? role : <expression>;
+  role in %<unit block field enumerator map-entry> ? role : <expression>;
 
 /* A hole fills a slot whose role its kind accepts. A sequence hole of no
    kind takes the slot's kind. */
@@ -152,7 +155,8 @@ module List _parse_hole(Compiler c, Symbol role) {
   Symbol inferred = _role_kind(role), kind = hole.assoc(<kind>);
   if (!kind) {
     hole = hole.search_replace(%(kind ?prior), %(kind $inferred));
-    c.macro_holes[name] = hole;
+    Map owner = _hole_owner(c, name);
+    owner[name] = hole;
   }
   else if (!_kind_accepts_role(kind, role)) {
     String spelling = name.str();

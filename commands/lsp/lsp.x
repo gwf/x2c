@@ -8,7 +8,6 @@
 #include "completion.x"
 #include "symbols.x"
 #include "references.x"
-#include "semantic-tokens.x"
 #include "json.x"
 #include <poll.h>
 #include <errno.h>
@@ -171,7 +170,6 @@ static void _dispatch(Server &server, Map message) {
     case "workspace/symbol": _workspace_symbols(server, id, params); return;
     case "textDocument/references": _references(server, id, params); return;
     case "textDocument/rename": _rename(server, id, params); return;
-    case "textDocument/semanticTokens/full": _tokens(server, id, params); return;
     default:
       if (request) _error(server, id, -32601, "Method not found");
       return;
@@ -191,11 +189,9 @@ static void _initialize(Server &server, Var id, Map params) {
     textDocumentSync: {openClose: Json.bool(1), change: 1,
                        save: {includeText: Json.bool(1)}},
     definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
-    completionProvider: {triggerCharacters: [".", "$"]},
+    completionProvider: {triggerCharacters: [".", ">", "$"]},
     documentSymbolProvider: Json.bool(1), workspaceSymbolProvider: Json.bool(1),
-    referencesProvider: Json.bool(1), renameProvider: Json.bool(1),
-    semanticTokensProvider: {full: Json.bool(1),
-      legend: {tokenTypes: lsp_token_types(), tokenModifiers: []}}},
+    referencesProvider: Json.bool(1), renameProvider: Json.bool(1)},
     serverInfo: {name: "x2c"}});
 }
 
@@ -232,7 +228,7 @@ static void _save(Server &server, Map params) {
   String path = server.workspace.retain(_document(params));
   if (!path) return;
   String text = params.contains("text") ? params["text"].str()
-                                      : server.workspace.text(path);
+                                      : server.workspace.document(path);
   text = server.workspace.retain(text);
   _affected(server, path);
   server.workspace.change(path, text, 0);
@@ -320,14 +316,8 @@ static void _answer(Server &server, Var id, Map answer) {
   _notice(server);
 }
 
-static void _tokens(Server &server, Var id, Map params) {
-  String path = server.workspace.retain(_document(params));
-  _reply(server, id,
-    {data: path ? server.workspace.semantic_tokens(path) : []});
-}
-
 static void _publish(Server &server) {
-  if (!server.workspace || server.shutdown) return;
+  if (!server.workspace || server.shutdown || server.exiting) return;
   Array paths = [];
   foreach (String path, server.pending.keys()) paths.push(path);
   paths = server.workspace.retain(paths);
@@ -358,8 +348,7 @@ static void _pending(Server &server, String path, Var version) {
 }
 
 static void _affected(Server &server, String path) {
-  Array affected = server.workspace.retain(server.workspace.affected(path));
-  foreach (String document, affected)
+  foreach (String document, server.workspace.affected(path))
     if (server.documents.contains(document))
       server.pending[document] = server.documents[document];
 }
@@ -406,9 +395,8 @@ static void _checkpoint(Server &server) {
 /* Only exported data crosses exec. No queued request or borrowed compiler
    value is checkpointed; the protocol descriptor remains the same pipe. */
 static void _restart(Server &server) {
-  File saved = tmpfile();
+  auto File saved = tmpfile();
   if (!saved) raise %(lsp-exec (operation "tmpfile"));
-  defer saved.close();
   Map state = {arguments: server.arguments, documents: server.documents,
     overlays: server.workspace.sources.overlays,
     dirty: server.workspace.sources.dirty_paths,

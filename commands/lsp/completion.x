@@ -8,7 +8,6 @@
 
 /** Completes a source prefix without publishing the marker or borrowed types. */
 Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
-  path = w.retain(path);
   String source = w.retain(w.text(path));
   w.close_unit();
   if (offset < 0 || offset > source.len()) return [];
@@ -25,10 +24,9 @@ Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
     return [];
   }
   Frontend frontend = Frontend.new(selected);
-  Context request = Context.open_isolated_named("language server completion");
+  auto Context request = Context.open_isolated_named("language server completion");
   Array items = _lsp_complete(w, frontend, path, source, offset);
   items = request.export(items);
-  request.close();
   return items;
 }
 
@@ -62,7 +60,7 @@ static Array _lsp_complete(
     }
   }
   catch %(replcomp (kind ?(Symbol role)) (rows ?rows)
-                   (keywords ?keywords)):
+                   (keywords ?keywords) *):
     items = _lsp_completion_items(role, rows, keywords, prefix,
                                  lsp_range(source, start, end));
   catch %((!or incomplete malformed) *): { }

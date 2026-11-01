@@ -308,7 +308,6 @@ static List _read(
   return _value(r, parameter_type, tag, index, storage_type);
 }
 
-/* A rest parameter reaches native code as its container. */
 static Type _native_parameter(Type parameter) {
   Type container = parameter.rest_container();
   return container ? container : parameter;
@@ -378,8 +377,6 @@ static void _publish_func_adapter(
       c.prepend_setup(_helper_body(c, body), setup).cdr()));
 }
 
-
-
 /* The body of an adapter that runs `body`: a block's items and then a
    return of no value, a void expression and then that return, or a return
    of the expression's value as a `Var`. */
@@ -437,9 +434,8 @@ static List _auto_names(Compiler c, int count) {
 }
 
 module int _typed_params_variadic(List params) {
-  foreach (Var value in params) {
+  foreach (Var value in params)
     if (value == <...> || (value ~= %(...))) return 1;
-  }
   return 0;
 }
 

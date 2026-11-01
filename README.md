@@ -62,15 +62,15 @@ It covers release installation and building an installed compiler from source.
   networking, parsing, and other native libraries.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
-- [Performance examples](examples/shootout/README.md): programs, measurements,
-  and comparison methods. Results depend on the workload and machine.
+- [Benchmarks Game](examples/shootout/README.md): official problems with
+  idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and Java references.
 
 ## Status and compatibility
 
 x2c is experimental and actively developed. APIs and language details can
 change. It aims to keep C useful inside a higher-level language, but it does
 not accept every C preprocessing pattern unchanged. Read the
-[C compatibility notes](docs/src/reference/language.md#host-preprocessing)
+[C compatibility notes](docs/src/reference/language.md#preprocessing)
 when bringing existing C source into x2c.
 
 The [language reference](docs/src/reference/language.md) documents supported

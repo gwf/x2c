@@ -46,7 +46,8 @@ static typedef struct Flow {
 
 /* `value` reaches `sink` through a destination of `type`: <return>,
    <static>, <local> for the local `target`, or <heap> for the storage
-   `target` reaches, or an unknown pointer when `target` is NULL. A canonical
+   `target` reaches, or an unknown pointer when `target` is NULL. <raw>
+   describes a C store without a retaining contract. A canonical
    destination copies. A parameter adds the sink to this function's summary;
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
@@ -80,9 +81,11 @@ module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
 
 static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
   Var row = sink;
-  if (sink == <heap>) {
-    if (!target) row = <unknown>;
-    else if (target.param >= 0) row = %(param $(target.param));
+  if (sink in %(heap raw)) {
+    if (!target) row = sink == <raw> ? <unknown> : <retained>;
+    else if (target.param >= 0)
+      row = sink == <raw> ? %(raw $(target.param))
+                          : %(param $(target.param));
     else if (target.born) row = <result>;
     else row = target.region || target.other ? void : <return>;
   }
@@ -96,7 +99,7 @@ static int _owners(
   for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
     Region owner = choice ? other : region, int kind = born;
     if (born == 3) kind = choice ? 2 : 1;
-    if (owner && target && target.born == 3 && f.sink == <heap>) {
+    if (owner && target && target.born == 3 && f.sink in %(heap raw)) {
       struct Fact pooled = *target;
       pooled.region = target.other;
       pooled.born = 2;
@@ -149,6 +152,11 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
       return target.depth < region.depth
         ? reason_local : NULL;
     default:
+      /* A raw store records possible escape, not retention after return.
+         Audit and meta walks retain the conservative frame finding. */
+      if (f.sink == <raw> && region == f.w.frame &&
+          !f.w.audit && !f.w.meta && (!target || target.param >= 0))
+        return NULL;
       if (!target) return reason_pointer;
       if (target.param >= 0) return reason_parameter;
       if (target.region == region) return NULL;

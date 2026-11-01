@@ -222,7 +222,7 @@ Source: `lib/dispatch.x`
 | [`x2c_try_register_descriptor`](#x2c_try_register_descriptor) | Declares a custom `Var` tag and merges its descriptor callbacks. |
 | [`x2c_try_register_tagged_descriptor`](#x2c_try_register_tagged_descriptor) | Declares custom `tag` under full type `name` and merges descriptor callbacks. |
 | [`RenderPath.enter`](#RenderPath.enter) | Enters an object's recursive rendering, or returns zero for a cycle. |
-| [`RenderPath.leave`](#RenderPath.leave) | Restores the path after the most recent successful `enter` on this thread. |
+| [`RenderPath.leave`](#RenderPath.leave) | Restores the path after the last successful entry in this execution. |
 | [`Var.as_string`](#Var.as_string) | Returns what a `String` destination reads from `Var`: its `String` payload, the display `String` of any other value, or NULL for `void` and for `Null`, the null pointer. |
 | [`Var.compare`](#Var.compare) | Compares `a` and `b` by runtime value group and registered ordering. |
 | [`Var.dispatch_truth`](#Var.dispatch_truth) | Tries the registered truth callback for `value`. |
@@ -344,8 +344,9 @@ Source: `lib/dispatch.x`
 
 Enters an object's recursive rendering, or returns zero for a cycle.
 Keep `path` alive and defer `path.leave()` after a successful entry.
-Identities are compared only along this thread's active path, so repeated
-references outside that path render independently. No allocation occurs.
+Identities are compared only along this execution's active path.
+Repeated references outside that path render independently. No allocation
+occurs.
 
 Source: `lib/dispatch.x`
 
@@ -354,7 +355,7 @@ Source: `lib/dispatch.x`
 
 `void RenderPath.leave(RenderPath *path)`
 
-Restores the path after the most recent successful `enter` on this thread.
+Restores the path after the last successful entry in this execution.
 Ordinary defer unwinding also restores it when a child renderer raises.
 
 Source: `lib/dispatch.x`
@@ -512,6 +513,7 @@ for source readers but are not supported as user API.
 | [`x2c_descriptor_registration_frozen`](#x2c_descriptor_registration_frozen) | Reports whether successful native worker startup froze registration. |
 | [`x2c_descriptor_thread_start_begin`](#x2c_descriptor_thread_start_begin) | Locks descriptor registration while a native worker starts. |
 | [`x2c_descriptor_thread_start_end`](#x2c_descriptor_thread_start_end) | Ends a native worker start and unlocks descriptor registration. |
+| [`x2c_render_path_exchange`](#x2c_render_path_exchange) | Exchanges the borrowed rendering path at an execution boundary. |
 | [`Var.try_export_context`](#Var.try_export_context) | Calls the registered `Context` exporter for `value` when one exists. |
 
 ### Functions
@@ -541,6 +543,14 @@ Source: `lib/dispatch.x`
 Ends a native worker start and unlocks descriptor registration.
 A nonzero `success` permanently freezes subsequent registration; zero
 leaves it open for another attempt.
+
+Source: `lib/dispatch.x`
+
+#### x2c_render_path_exchange
+
+`RenderPath *x2c_render_path_exchange(RenderPath *path)`
+
+Exchanges the borrowed rendering path at an execution boundary.
 
 Source: `lib/dispatch.x`
 

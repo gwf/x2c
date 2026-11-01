@@ -189,14 +189,14 @@ static void net_descriptor_handoff(void) {
   $test.scoped();
   Listener listener = auto Listener.bind(NULL, 0);
   Socket client = auto Socket.connect("127.0.0.1", listener.port(), 1000);
-  int fd = x2c_net_accept_fd(listener);
+  int fd = _x2c_net_accept_fd(listener);
   EXPECT_TRUE(fd >= 0);
   Socket peer = auto Socket.adopt(fd);
   client.output.puts("handoff\n");
   EXPECT_INT_EQ(client.output.flush(), 0);
   EXPECT_STR_EQ(peer.input.readline(), "handoff\n");
   listener.stop();
-  EXPECT_INT_EQ(x2c_net_accept_fd(listener), -1);
+  EXPECT_INT_EQ(_x2c_net_accept_fd(listener), -1);
 }
 
 void net_suite(void) {

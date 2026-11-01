@@ -23,6 +23,7 @@ if [[ $(uname -s) == Linux ]]; then
   linker_flags+=(-rdynamic)
 fi
 sanitizer_flags=(
+  -fsigned-char
   -g
   -O1
   -fno-omit-frame-pointer
@@ -67,8 +68,8 @@ for source in "${test_sources[@]}"; do
   if [[ $(uname -s) == Linux && "$name" == test-logger ]]; then
     test_flags+=(-D_GNU_SOURCE)
   fi
-  "$cc" "${sanitizer_flags[@]}" "${test_flags[@]}" -c "$source" \
-    -o "$test_objects/$name.o"
+  "$cc" "${sanitizer_flags[@]}" ${test_flags[@]+"${test_flags[@]}"} \
+    -c "$source" -o "$test_objects/$name.o"
 done
 
 # The compiler modules the suites link, named once here and matching
@@ -88,12 +89,12 @@ for object in "$test_objects"/test-*.o "$test_objects"/match-recursive.o; do
 done
 
 "$cc" "${sanitizer_flags[@]}" \
-  "${linker_flags[@]}" \
+  ${linker_flags[@]+"${linker_flags[@]}"} \
   -o "$test_program" \
   "$test_objects/test-all.o" \
   "${suite_objects[@]}" \
-  "$runtime_archive" \
   "${linked_compiler_objects[@]}" \
+  "$runtime_archive" \
   -lm
 
 (

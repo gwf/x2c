@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-target-value.x:4:9: macro: Macro argument requires a compile-time macro value
+  $keep() 17;
+          ^^
+

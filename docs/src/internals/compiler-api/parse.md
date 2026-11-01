@@ -155,7 +155,7 @@ Source: `src/parse/declarators.x`
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
 
-`List Compiler.bind_source_statement(Compiler c)`
+`List Compiler.bind_source_statement(Compiler c, Symbol keyword)`
 
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.

@@ -9,7 +9,7 @@
 
 ## Current follow-up owner
 
-The [quotation adoption plan](../quotation-adoption-audit-2026-10-03.md#remaining-work)
+The [quotation adoption plan](quotation-adoption-closeout-2026-10-31.md#remaining-work)
 owns the selected typed `_Alignof` and scalar generator cleanup. The
 [index](../README.md#current-work-and-backlog) owns the current task list.
 The proposals below retain their historical context; they are not a second queue.
@@ -191,7 +191,7 @@ Wave 1 results (submitted as one PR; authored src/lib/commands/etc diff
   step on purpose; check `f().arr[0]`.
 - H3 One `Symbol.binary_precedence` for parser, emitter (+3), and macro
   lookahead; SymbolSets for increments, prefix operators, and primary
-  starts. Probe `%`-token spelling inside `%<<>>`.
+  starts. Probe `%`-token spelling inside `%<>`.
 - H5 Generate etc/lisp-values.xlisp bind rows with a `natives` defmacro over
   the curated name list (15 explicit exceptions) and the selectors with one
   folding macro. Run the warm-load timing tests.

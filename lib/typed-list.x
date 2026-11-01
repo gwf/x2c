@@ -77,6 +77,7 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   $element $list.last($list xs) {
     return xs ? $decode(List.last((List) xs)) : $zero;
   }
+
   /** Returns the first zero-based index of `value`, or -1 when absent. */
   int $list.index($list xs, $element value) {
     return List.index((List) xs, $encode(value));

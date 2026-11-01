@@ -20,6 +20,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
 | [`Compiler.assume_condition`](#Compiler.assume_condition) | Marks the optional references that `condition` proves present for an operand that runs only when `condition` has truth `holds`. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
+| [`Compiler.at_contextual`](#Compiler.at_contextual) | Reports a contextual word unless a visible ordinary binding continues as an expression or declaration. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.attach_source_references`](#Compiler.attach_source_references) | Attaches a completed named-type capture to its existing declaration row. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -41,6 +42,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.freeze_declaration_syntax`](#Compiler.freeze_declaration_syntax) | Retains exported syntax across translation units and cached interfaces. |
 | [`Compiler.fresh_name`](#Compiler.fresh_name) | Allocates the next compiler-private C spelling for `stem`. |
 | [`Compiler.full_parse`](#Compiler.full_parse) | Parses and types the positioned source against `globs`. |
+| [`Compiler.full_parse_native`](#Compiler.full_parse_native) | Parses host-preprocessed C under the native declaration policy. |
 | [`Compiler.gensym`](#Compiler.gensym) | Returns a fresh semantic identity for an anonymous aggregate. |
 | [`Compiler.mark_completion`](#Compiler.mark_completion) | Retags the token beginning at `position` as a private completion marker. |
 | [`Compiler.mark_reference_present`](#Compiler.mark_reference_present) | Records a nonnull optional parameter for the current lexical path. |
@@ -62,7 +64,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.pattern_binder_declarations`](#Compiler.pattern_binder_declarations) | Builds ordinary declarations from a pattern scope's issued bindings. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
-| [`Compiler.preprocess_tokens`](#Compiler.preprocess_tokens) | Expands the visible macros of the scanned tokens, hides the conditional arms C never takes, and positions the compiler at the first non-trivia token. |
+| [`Compiler.preprocess_tokens`](#Compiler.preprocess_tokens) | Applies directive handling and optional C macro expansion, then positions the compiler at its first non-trivia token. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
 | [`Compiler.proven_references`](#Compiler.proven_references) | Returns the optional-reference parameters that `condition` proves the caller supplied when it has truth `holds`. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
@@ -87,8 +89,9 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores exported syntax in the importing unit's parsing lifetime. |
-| [`Compiler.tokenize`](#Compiler.tokenize) | Scans and preprocesses source and positions the compiler at its first non-trivia token. |
+| [`Compiler.tokenize`](#Compiler.tokenize) | Scans source, applies directive handling and optional C macro expansion, and positions the compiler at its first non-trivia token. |
 | [`Compiler.var`](#Compiler.var) | Boxes a compiler pointer for lambda capture traversal. |
+| [`Compiler.with_form_starts`](#Compiler.with_form_starts) | Reports the complete `with (...) { ... }` statement head. |
 | [`Map.merge_translation_dependency`](#Map.merge_translation_dependency) | Merges one translation dependency, preserving an existing content hash. |
 | [`Path.real`](#Path.real) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
 | [`Path.resolved_absolute`](#Path.resolved_absolute) | Returns `Path.absolute(path)`, resolving an existing file through `Path.real`. |
@@ -110,7 +113,8 @@ One x2c unit's translation state and its two parses.
 
 `String Compiler.absolute_home_path(String spelling)`
 
-Returns the absolute path that a `Compiler.portable_path` spelling names.
+Returns the absolute path that a `Compiler.portable_path` spelling
+names.
 
 Source: `src/compiler/source-files.x`
 
@@ -186,6 +190,16 @@ Reports whether the parser is at the private REPL completion marker.
 
 Source: `src/compiler/parsing/tokens.x`
 
+<a id="Compiler.at_contextual"></a>
+#### Compiler.at_contextual
+
+`int Compiler.at_contextual(Compiler c, String word)`
+
+Reports a contextual word unless a visible ordinary binding continues
+as an expression or declaration. Literal tokens retain lexical priority.
+
+Source: `src/compiler/parsing/tokens.x`
+
 <a id="Compiler.at_word"></a>
 #### Compiler.at_word
 
@@ -200,7 +214,7 @@ Source: `src/compiler/parsing/tokens.x`
 <a id="Compiler.attach_source_references"></a>
 #### Compiler.attach_source_references
 
-`void Compiler.attach_source_references(Compiler c, List binding, Array capture)`
+`void Compiler.attach_source_references( Compiler c, List binding, Array capture)`
 
 Attaches a completed named-type capture to its existing declaration row.
 
@@ -408,6 +422,17 @@ Parses and types the positioned source against `globs`.
 The result is a source-ordered top-level AST. This resets macro state
 and protocol resolution; origins live for the whole unit.
 `generated_symbols` publishes external adapter signatures before parsing.
+
+Source: `src/compiler/parsing/parse.x`
+
+<a id="Compiler.full_parse_native"></a>
+#### Compiler.full_parse_native
+
+`List Compiler.full_parse_native(Compiler c, Map globs)`
+
+Parses host-preprocessed C under the native declaration policy.
+Native attributes do not establish an x2c-owned record layout. The policy
+is applied after parser reset, which otherwise restores x2c source policy.
 
 Source: `src/compiler/parsing/parse.x`
 
@@ -630,9 +655,9 @@ Source: `src/compiler/source-files.x`
 
 `void Compiler.preprocess_tokens(Compiler c)`
 
-Expands the visible macros of the scanned tokens, hides the conditional
-arms C never takes, and positions the compiler at the first non-trivia
-token. An expansion error is reported at the macro use.
+Applies directive handling and optional C macro expansion, then positions
+the compiler at its first non-trivia token. Explicit CPP state also
+enables expansion for native-header and REPL callers.
 
 Source: `src/compiler/parsing/tokens.x`
 
@@ -893,8 +918,8 @@ Source: `src/compiler/declarations/portable-syntax.x`
 
 `void Compiler.tokenize(Compiler c, char *text)`
 
-Scans and preprocesses source and positions the compiler at its first
-non-trivia token.
+Scans source, applies directive handling and optional C macro expansion,
+and positions the compiler at its first non-trivia token.
 
 The compiler borrows `text` for diagnostics and macro source capture until
 translation finishes.
@@ -911,6 +936,15 @@ Captures store non-reference values as `Var`, so the caller keeps the
 compiler alive while code uses the boxed pointer.
 
 Source: `src/compiler/lifecycle.x`
+
+<a id="Compiler.with_form_starts"></a>
+#### Compiler.with_form_starts
+
+`int Compiler.with_form_starts(Compiler c)`
+
+Reports the complete `with (...) { ... }` statement head.
+
+Source: `src/compiler/parsing/tokens.x`
 
 ### `Map`
 
@@ -1084,7 +1118,7 @@ Source: `src/compiler/compiler.x`
 <a id="Compiler"></a>
 ### Compiler
 
-`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; Cpp cpp; List command_macros; String macro_export_source; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; int dump_expansions; SourceView sources; int source_facts, source_primary; Array source_occurrences; Array source_capture; Map source_definitions, source_declarations, source_texts; } *Compiler`
+`typedef struct Compiler { String filename, text, root_dir; String package, List package_dirs, package_source_dirs; Map package_roots, package_aliases, package_members, package_effects; Token token; Token input_boundary; Tokenizer tokenizer; Array line_markers; ModuleSource unit_source; List return_type, include_dirs; Map deps; List aggregate_type, macro_stack, Sym sym; int expansion_floor; SymScope params; Map key_ids, macros, kw_aliases; List binding_rows, binding_sealed; Map object_macros; Cpp cpp; int cpp_expansion; List command_macros; List arms; Map arm_stacks; Array layout_marks, packed_marks; Token directives_taken; Map protocols, conforms, protocol_helpers; Map proto_cache; Map adoptions; Map macro_holes; int alias_level; Map local_macro_captures; int macro_application; List lambda_scopes; Array match_types; Map included_effects; Map init_tokens, static_init_deps, fn_defs; Array id_keys; String init_fn, fini_fn; Pending pending, int prelude; Map meta_comptime, meta_regions, meta_hashes, meta_calls; struct MetaHelper *meta_helper; Map native_meta; Map project_meta; Array unit_nodes, meta_group; Array meta_definitions; Map meta_group_bound; int meta_build; int skipped_form; int load_source; int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private; int module_declaration; int replaying_declaration; int public_bodies; int interface_provider, signature_only; int collection_native; Map collection_native_files; Array pending_inline_bodies; int layout; int meta_body; int capture_unit; List active_rewrites; List applying; Map rewrite_rules; Map prepared_rewrites; SlotWatch slot_watch; Token meta_statement; int import_protocols; int in_pattern, match_is, runtime_literals, inline_header; int permanent_literals; int builtin_defs, in_proto, macro_count, recovery_depth; int declaration_produced; int needs_exception; int local_macro_capture_scopes; int open_linkage; String fn_name, Diagnostics diagnostics, Array braces; Block ancestors; Array placements; String lines_text, Array line_starts; ScriptUnit unit_script, script; MetaBindings meta_bindings, int borrowed_bindings; GenNames names; Array origins, int origin, source_map; int dump_expansions; SourceView sources; int source_facts, source_primary; Array source_occurrences; Array source_capture; Map source_definitions, source_declarations, source_texts; } *Compiler`
 
 Holds mutable state for one source translation.
 
