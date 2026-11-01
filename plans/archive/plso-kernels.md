@@ -1,7 +1,7 @@
 # Close tuned PLSO kernel gaps
 
-> Status: active - 2026-11-01.
-> Freeze `f12c7619a`, then measure reverse-complement, FASTA and N-body in order.
+> Status: done - 2026-11-01.
+> Source candidate `b81b82c30`; archive and publication gate pass at `f1a6244cc`.
 
 ## Result and choices
 
@@ -41,3 +41,22 @@ buffering/selection sweeps retain their own frozen source and binary receipts.
 Fifty-eight additional reverse-complement cases cover read/output boundaries.
 A source-only independent review finds no concrete defect. N-body uses a native
 record because nested value classes would require unused equal/hash methods.
+
+## Delivered evidence
+
+The complete run `20261101T161913Z` checks all twenty x2c programs and records
+240 fresh observations against the unchanged foreign calibration. Across eight
+shared problems, tuned elapsed time is 1.242x C and 1.059x Rust, down from
+1.769x and 1.508x. SVG/PNG/PDF figures and their source data are refreshed.
+The [immutable archive](../../examples/shootout/results/runs/20261101T161913Z/README.md)
+retains paired measurements, intermediate sources, raw receipts, checks and
+rendering provenance. All 1,438 archive checksums pass. The five harness tests
+pass. All 55 foreign source files remain byte-identical.
+
+`agent-pr-check` passes: 1,164 tests and 103,725 assertions, compiler fixtures,
+138 matching book outputs, command checks and generated-stage comparisons.
+No compiler/runtime/bootstrap artifact delta remains. Final closeout only
+changes Markdown and reuses the valid compiler proof with doc-check.
+Canonical-size timings and foreign recalibration were not run. Process
+snapshots detected no active outside native compiler; ordinary desktop
+activity remained. No further map or regex change was attempted.
