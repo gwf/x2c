@@ -4,18 +4,23 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current candidate is [run 20261101T154144Z](runs/20261101T154144Z/README.md), measured from clean
-source `19e79b5026679638e63297fc7f839a97b5aac32c`. Both x2c columns were rebuilt
-and measured with twelve fresh processes per program: 240 observations over
-ten problems. Official fixtures and local outputs pass. Foreign contributions
-retain their pinned calibration measurements; they were not remeasured.
+The current comparison is [run 20261101T161913Z](runs/20261101T161913Z/README.md),
+measured from clean source `b81b82c3065ffcfaf900d6febdd9d874ec179b5a`.
+Both x2c columns were rebuilt and measured with twelve fresh processes per
+program: 240 observations over ten problems. Official fixtures and local
+outputs pass. Foreign contributions retain their pinned calibration timings.
 
-The new tuned sources share ordinary threading and buffering opportunities
-while retaining specialized storage. The archive includes old/new source
-comparisons, rejected refinements, raw receipts, and all three chart forms in
-SVG/PNG/PDF. The prior full 56-sample calibration remains historical evidence.
-Summary charts still use eight shared problems; complete tables retain all
-admitted k-nucleotide and binary-trees cells.
+Tuned reverse-complement uses chunk reads and batched output. FASTA fills
+reusable output buffers and scans probability thresholds. N-body uses five
+contiguous native records and reference methods. Twelve-pair comparisons
+against frozen prior binaries retain all three gains, including larger text
+inputs. The archive preserves source probes, output checks and raw data.
+
+Across eight shared workloads, tuned elapsed-time geometric means are 1.24x C
+and 1.06x Rust, compared with 1.77x and 1.51x in the preceding run. The chart
+also includes unchanged pinned C++, Go, Python and Java references. These
+compare selected programs, not general language performance. All three chart
+forms remain available in SVG/PNG/PDF with CSV and rendering provenance.
 
 ## Saved runs
 
@@ -32,6 +37,7 @@ admitted k-nucleotide and binary-trees cells.
 | [20261031T181939Z](runs/20261031T181939Z/README.md) | 8 | 8 | Reference audit and parallel k-nucleotide |
 | [20261031T211435Z](runs/20261031T211435Z/README.md) | 8 | 8 | Full calibration: parallel idiomatic regex/Mandelbrot and reverse Buffer |
 | [20261101T154144Z](runs/20261101T154144Z/README.md) | 8 | 8 | Tuned scheduling/buffering parity; fresh x2c, pinned foreign measurements |
+| [20261101T161913Z](runs/20261101T161913Z/README.md) | 8 | 8 | Tuned reverse-complement, FASTA and N-body improvements; pinned foreign measurements |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -87,8 +93,8 @@ Use the latest run's recorded plotting environment:
 
 ```sh
 python3.14 -m venv /tmp/x2c-shootout-charts
-/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T154144Z/charts/requirements.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T154144Z/charts/render.py examples/shootout/results/runs/20261101T154144Z/current.json /tmp/x2c-shootout-figures
+/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T161913Z/charts/requirements.txt
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T161913Z/charts/render.py examples/shootout/results/runs/20261101T161913Z/current.json /tmp/x2c-shootout-figures
 ```
 
 The per-run `render-environment.json` records the versions actually used.

@@ -4,6 +4,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "typed-array.x"
 
 static int seed = 42;
@@ -32,37 +33,56 @@ int main(int argc, char **argv) {
 }
 
 static void _repeat(int count) {
-  ArrayChar line = auto ArrayChar.new();
-  for (int start = 0; start < count; start += 60) {
-    line.clear();
-    int end = start + 60 < count ? start + 60 : count;
-    for (int i = start; i < end; i++)
-      line.push(alu[i % alu.len()]);
-    line.push('\n');
-    Stdout.write_all(line.bytes, line.len());
+  char output[61 * 256];
+  size_t used = 0, position = 0, length = alu.len();
+  while (count > 0) {
+    int line = count < 60 ? count : 60, remaining = line;
+    while (remaining > 0) {
+      size_t span = length - position;
+      if (span > remaining) span = remaining;
+      memcpy(output + used, (const char *) alu + position, span);
+      used += span;
+      remaining -= span;
+      position += span;
+      if (position == length) position = 0;
+    }
+    output[used++] = '\n';
+    count -= line;
+    if (used == sizeof(output)) {
+      Stdout.write_all(output, used);
+      used = 0;
+    }
   }
+  if (used) Stdout.write_all(output, used);
 }
 
 static void _random(String letters, ArrayDbl probabilities, int count) {
   double total = 0;
-  for (int i = 0; i < probabilities.len(); i++) {
+  int choices = probabilities.len();
+  for (int i = 0; i < choices; i++) {
     total += probabilities[i];
     probabilities[i] = total;
   }
-  ArrayChar line = auto ArrayChar.new();
-  for (int start = 0; start < count; start += 60) {
-    line.clear();
-    int end = start + 60 < count ? start + 60 : count;
-    for (int i = start; i < end; i++) {
+  char output[61 * 256];
+  size_t used = 0;
+  while (count > 0) {
+    int line = count < 60 ? count : 60;
+    for (int i = 0; i < line; i++) {
       seed = (seed * 3877 + 29573) % 139968;
       double random = (double) seed / 139968;
       int choice = 0;
-      while (random >= probabilities[choice]) choice++;
-      line.push(letters[choice]);
+      for (int j = 0; j < choices - 1; j++)
+        choice += random >= probabilities[j];
+      output[used++] = letters[choice];
     }
-    line.push('\n');
-    Stdout.write_all(line.bytes, line.len());
+    output[used++] = '\n';
+    count -= line;
+    if (used == sizeof(output)) {
+      Stdout.write_all(output, used);
+      used = 0;
+    }
   }
+  if (used) Stdout.write_all(output, used);
 }
 
 static ArrayDbl _probabilities(Array values) {

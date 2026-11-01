@@ -79,6 +79,10 @@ is selected here.
 
 ### Decisions and completed records
 
+- [Tuned PLSO kernels](archive/plso-kernels.md): chunk reads, batched sequence
+  output, full threshold scanning and contiguous N-body records retain measured
+  gains. Paired comparisons and the refreshed chart are validated.
+
 - [PLSO tuned parity](archive/plso-tuned-parity.md): six tuned programs receive
   ordinary scheduling/buffering improvements; a full x2c rerun, matched source
   probes, revised tables and figures are archived with publication evidence.
