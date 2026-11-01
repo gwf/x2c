@@ -474,8 +474,8 @@ The
 has ten problems written in x2c twice, once with ordinary collections and
 once tuned with typed containers, beside contributed C, Python, Rust, C++,
 Go, and Java programs. On the eight problems every column covers, idiomatic
-x2c ran at a median of 2.49 times C's time and tuned x2c at 1.66. Python
-took 20 times. The idiomatic x2c came in at 1.26 times Python's line count.
+x2c ran at a median of 2.52 times C's time and tuned x2c at 1.07. Python
+took 20 times. The idiomatic x2c came in at 1.16 times Python's line count.
 Those are local measurements of those programs on one machine, not a
 ranking.
 
