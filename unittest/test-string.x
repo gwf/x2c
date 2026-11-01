@@ -154,6 +154,19 @@ static void string_slice_and_contains(void) {
   EXPECT_TRUE(replaced == "Compiler");
 }
 
+static void string_slice_extreme_steps(void) {
+  String text = "abc", empty = "";
+  EXPECT_TRUE(text.getslice(1, 3, INT_MAX) == "b");
+  EXPECT_TRUE(text.getslice(2, INT_MIN, INT_MIN) == "c");
+  EXPECT_NULL(empty.getslice(0, INT_MIN, INT_MIN));
+  int caught = 0;
+  try text.getslice(0, 3, 0);
+  catch %(bad-arg *): caught++;
+  try empty.getslice(0, 0, 0);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
 static void string_slice_stack_probe_boundaries(void) {
   String text = "abcdef";
   EXPECT_TRUE(text.getslice(0, 6, 1) === text);
@@ -758,6 +771,7 @@ void string_suite(void) {
   $test.run(string_add_and_len);
   $test.run(string_literal_receives_methods);
   $test.run(string_slice_and_contains);
+  $test.run(string_slice_extreme_steps);
   $test.run(string_slice_stack_probe_boundaries);
   $test.run(string_withindex_copies_and_leaves_input_intact);
   $test.run(string_noop_construction_preserves_owner);

@@ -97,6 +97,10 @@ the source changes that the breaking entries below require.
 
 ### Library
 
+- String slicing with a zero step now raises `<bad-arg>`, including on an
+  empty String. It previously returned the empty String. Array, typed Array,
+  List, and String now reject zero steps consistently.
+
 Array value search is now `index(value)`, including on typed Arrays. It
 returns the first equal element's position, or `-1`. `find` now takes a
 predicate and returns the first accepted element as a `Var`, or `void`.

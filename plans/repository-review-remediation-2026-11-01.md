@@ -1,10 +1,10 @@
 # Repository review repairs and cleanup
 
-> Status: active - plan only, recorded 2026-11-01.
+> Status: active - implementation authorized, recorded 2026-11-01.
 > Findings were reproduced at `6125e8f693afa84d20be5ca96473360df5140075`,
 > then `origin/dev`. Remote `dev` advanced to `b46aa0e12` during planning;
 > that commit closes a separate decorator follow-up without repairing these
-> findings. No repair or cleanup in this plan has been implemented.
+> findings. Private implementation progress is recorded below.
 
 ## Scope and decisions
 
@@ -27,8 +27,8 @@ Settled with Gary:
   Gary accepted the repeated preprocessing and executable-link cost described
   in A, under the root `AGENTS.md` process ceiling.
 
-No consequential design decision remains open. These decisions settle the
-plan; they do not start implementation.
+No consequential design decision remains open. Gary subsequently authorized
+implementation by one sole worker.
 
 The other recommendations preserve established contracts. They do not require
 new runtime representations, a package cache, a public build option, an
@@ -349,8 +349,8 @@ checks optional and use the existing focused suites for regression cases.
 The last implementation step for each delivered batch is to review and fix
 the completed authored diff, including deletions and consumer references.
 Then run `git diff --check` and the applicable existing publication validation
-on the final integrated tree. Review generated deltas too. This planning-only
-request stops with the plan and does not authorize repair or publication.
+on the final integrated tree. Review generated deltas too. The worker hands
+private commits to the parent, which owns final integration and publication.
 
 ## Design review
 
@@ -363,3 +363,13 @@ ABI, ownership, and ordinary package layouts. String error behavior, compact
 calibration retention, and repeated consumer-build cost are explicitly
 settled. No whole compiler mechanism was established as disposable by this
 review, so none is scheduled for speculative removal.
+
+## Implementation progress
+
+- C implemented privately. The unsigned-key probe now returns void, all twelve
+  focused slice/UBSan cases pass, and the five affected unit suites pass:
+  125 tests and 1,408 assertions. Generated API documentation remains for
+  the parent publication refresh.
+- A, B, D, E, F, and G remain in progress or pending.
+- Final integrated review, generated refresh, applicable performance evidence,
+  publication validation, publication, and plan closeout remain with the parent.

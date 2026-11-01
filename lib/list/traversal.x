@@ -103,11 +103,9 @@ meta native Self List.nth_cdr(Self list, int n) {
 */
 Var List.get(List list, Var key) {
   if (key.kind() != <integer>) return list.assoc(key);
-  /* Narrowing the key instead would fold an unreachable index onto a real
-     one, so a lookup at 2^32 would return the first element. */
-  long long index = key.long_long();
-  if (index != (int) index) return void;
-  return list[(int) index];
+  if (key.integer_compare((int) INT_MIN) < 0 ||
+      key.integer_compare((int) INT_MAX) > 0) return void;
+  return list[key.int()];
 }
 
 /** Returns the second value of the first association whose key equals `key`.

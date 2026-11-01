@@ -283,6 +283,17 @@ static void array_getslice_variable_steps(void) {
   EXPECT_VAR_EQ(reverse[2], one);
 }
 
+static void array_getslice_extreme_steps(void) {
+  $test.scoped();
+  Array values = [10, 20, 30];
+  EXPECT_TRUE(values.getslice(1, 3, INT_MAX) == [20]);
+  EXPECT_TRUE(values.getslice(2, INT_MIN, INT_MIN) == [30]);
+  EXPECT_INT_EQ(values.getslice(2, 1, INT_MAX).len(), 0);
+  EXPECT_INT_EQ(values.getslice(0, 2, INT_MIN).len(), 0);
+  Array empty = [];
+  EXPECT_INT_EQ(empty.getslice(0, INT_MIN, INT_MIN).len(), 0);
+}
+
 static void array_setslice_and_remslice(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, four = 4, nine = 9, eight = 8;
@@ -761,6 +772,7 @@ void array_suite(void) {
   $test.run(array_setindex_bounds);
   $test.run(array_getslice_unit_step);
   $test.run(array_getslice_variable_steps);
+  $test.run(array_getslice_extreme_steps);
   $test.run(array_setslice_and_remslice);
   $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);

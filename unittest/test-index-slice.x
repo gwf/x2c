@@ -72,6 +72,19 @@ static void collection_index_syntax(void) {
 
 }
 
+static void normalization_extreme_integer_domain(void) {
+  int start = 0, stop = -1;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, 1, INT_MAX), INT_MAX);
+  EXPECT_INT_EQ(start, 0);
+  EXPECT_INT_EQ(stop, INT_MAX);
+  start = INT_MIN; stop = INT_MIN;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, INT_MIN, INT_MAX), 1);
+  EXPECT_INT_EQ(start, INT_MAX - 1);
+  EXPECT_INT_EQ(stop, -1);
+  start = 1; stop = 3;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, INT_MAX, 3), 1);
+}
+
 static void collection_index_boundaries(void) {
   $test.scoped();
 
@@ -186,6 +199,7 @@ static void empty_stepped_slice_is_empty(void) {
 
 void index_slice_suite(void) {
   $test.run(normalization_failures_transfer);
+  $test.run(normalization_extreme_integer_domain);
   $test.run(collection_index_syntax);
   $test.run(collection_index_boundaries);
   $test.run(collection_slice_syntax);

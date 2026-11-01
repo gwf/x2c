@@ -207,14 +207,9 @@ macro Unit $array.core.family(Type $array, Type $element) {
       return slice;
     }
     $element *data = ($element *) array.bytes;
-    if (step < 0) {
-      for (int i = start; i > end; i += step)
-        Block_append((Block) slice, data + i, 1);
-    }
-    else {
-      for (int i = start; i < end; i += step)
-        Block_append((Block) slice, data + i, 1);
-    }
+    long long index = start;
+    for (int i = 0; i < newlen; i++, index += step)
+      Block_append((Block) slice, data + index, 1);
     return slice;
   }
 

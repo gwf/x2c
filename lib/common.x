@@ -964,7 +964,7 @@ int x2c_normalize_slice(int &start, int &stop, int step, int length) {
 
   // normalize negative forward stops against the endpoint after the last item
   if (stop < 0) {
-    if (step > 0) stop += length + 1;
+    if (step > 0) stop = stop + (long long) length + 1;
     else {
       // preserve the default -1 sentinel so a reverse slice includes index 0
       if (orig_stop != INT_MIN)
@@ -977,10 +977,11 @@ int x2c_normalize_slice(int &start, int &stop, int step, int length) {
      truncates toward zero, so an empty or reversed range would otherwise
      count one element and the caller would read a position outside the
      value. */
-  int newlen = 0;
-  if (step < 0 && start > stop) newlen = (start - stop - 1) / (-step) + 1;
+  long long newlen = 0;
+  if (step < 0 && start > stop)
+    newlen = ((long long) start - stop - 1) / -(long long) step + 1;
   else if (step > 0 && start < stop)
-    newlen = (stop - start - 1) / step + 1;
+    newlen = ((long long) stop - start - 1) / step + 1;
   return newlen;
 }
 

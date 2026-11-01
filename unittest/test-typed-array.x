@@ -233,6 +233,17 @@ static void typed_array_copy_slice_and_iteration(void) {
   EXPECT_NULL(missing.iter(NULL));
 }
 
+static void typed_array_extreme_slice_steps(void) {
+  $test.scoped();
+  ArrayInt values = %[10, 20, 30];
+  ArrayInt forward = values.getslice(1, 3, INT_MAX);
+  ArrayInt reverse = values.getslice(2, INT_MIN, INT_MIN);
+  EXPECT_INT_EQ(forward.len(), 1);
+  EXPECT_INT_EQ(forward[0], 20);
+  EXPECT_INT_EQ(reverse.len(), 1);
+  EXPECT_INT_EQ(reverse[0], 30);
+}
+
 static void _expect_typed_array_common(
   Var boxed, Var later, Array ordinary,
   String direct_str, String direct_repr,
@@ -678,6 +689,7 @@ void typed_array_suite(void) {
   $test.run(typed_array_additional_scalar_families);
   $test.run(typed_array_string_family);
   $test.run(typed_array_copy_slice_and_iteration);
+  $test.run(typed_array_extreme_slice_steps);
   $test.run(typed_array_common_capabilities_cover_every_family);
   $test.run(typed_array_common_capabilities_keep_null_and_float_order);
   $test.run(typed_array_int_sequence_mutations);

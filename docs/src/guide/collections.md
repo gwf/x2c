@@ -1401,7 +1401,8 @@ letters[0] = "z";   // xform: type ( List ) does not support bracket
 Slicing is `value[start:stop:step]`, available on `Array`, `List`, and
 `String`. Any of the three parts may be omitted. One shared runtime call
 normalizes negative bounds and negative steps, so the rules are identical
-across the three types. A zero step is invalid.
+across the three types. A zero step raises `<bad-arg>`, including on an empty
+collection.
 
 A slice returns the same type as its receiver. Slicing an `Array` gives a
 new `Array`, a `List` gives a new `List`, and a `String` gives a new `String`.

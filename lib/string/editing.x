@@ -82,19 +82,20 @@ int String.getindex(String str, int index) {
     shows the forward rule. Indices are byte positions, so a
     slice can split a multibyte sequence. A full unit-step slice may return
     `s`; other nonempty slices return their canonical `String`.
-    Raises: `<alloc-fail>` while constructing a nonempty result. An empty
-    range, a range that runs the wrong way for its `step`, or a `step` of zero
-    also returns NULL, the empty `String`, without raising.
+    An empty range or one that runs the wrong way for its `step` returns
+    NULL, the empty `String`.
+    Raises: `<bad-arg>` when `step` is zero, including for an empty `s`;
+    `<alloc-fail>` while constructing a nonempty result.
 */
 meta native String String.getslice(String s, int start, int stop, int step) {
-  if (!s || step == 0) return NULL;
   int n = s.len(), len = x2c_normalize_slice(start, stop, step, n);
   if (len <= 0) return NULL;
   if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
   if (step == 1) return x2c_string_from_bytes(s + start, len);
   String string = String.malloc(len + 1);
   char *out = string, const char *src = s;
-  for (int i = 0, idx = start; i < len; i++, idx += step) out[i] = src[idx];
+  long long index = start;
+  for (int i = 0; i < len; i++, index += step) out[i] = src[index];
   return _finish(string, len);
 }
 

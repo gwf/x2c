@@ -58,6 +58,14 @@ static void list_builders_and_indexing(void) {
   EXPECT_TRUE(seq.get(Var.box_long(4294967296l)) is void);
   EXPECT_TRUE(seq.get(Var.box_long(-4294967296l)) is void);
   EXPECT_INT_EQ(seq.get(Var.box_long(0l)).integer(), 1);
+  unsigned long long largest = ULLONG_MAX;
+  EXPECT_TRUE(seq.get(largest) is void);
+  EXPECT_TRUE(seq.get(largest - 1) is void);
+  EXPECT_INT_EQ(seq.get(1ULL).integer(), 2);
+  EXPECT_INT_EQ(seq.get(-1).integer(), 4);
+  List associations = %((name "x2c"));
+  EXPECT_TRUE(associations.get(<name>) == "x2c");
+  EXPECT_TRUE(associations.get(<missing>) is void);
 }
 
 static void list_counted_values_are_boxed(void) {
@@ -139,6 +147,9 @@ static void list_head_tail_and_slicing(void) {
   expect_list_ints("seq.getslice(2,5,1)", slice, slice_vals, 3);
   expect_list_ints("seq.getslice(5,1,-2)", slice_neg, slice_neg_vals, 2);
   EXPECT_NULL(seq.getslice(1, 4, -1));
+  List values = %(10 20 30);
+  EXPECT_TRUE(values.getslice(1, 3, INT_MAX) == %(20));
+  EXPECT_TRUE(values.getslice(2, INT_MIN, INT_MIN) == %(30));
 }
 
 static void list_full_slice_preserves_active_owner(void) {
