@@ -7,7 +7,6 @@
 
 #include "substring.h"
 #include "map/map.h"
-#include "group-match.h"
 #include "context.h"
 typedef struct MapSubInt{
   Scope scope;
@@ -23,21 +22,21 @@ struct MapSubIntRecord{
 }
 ;
 
-Scope MapSubInt_scope(MapSubInt _x2c_gensym_macro_map_20);
+Scope MapSubInt_scope(MapSubInt _x2c_gensym_macro_map_22);
 
-void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_21, Scope * _x2c_gensym_macro_destination_0);
+void MapSubInt_move_to(MapSubInt _x2c_gensym_macro_map_23, Scope * _x2c_gensym_macro_destination_0);
 
-Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_22);
+Var MapSubInt_var(MapSubInt _x2c_gensym_macro_map_24);
 
-MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_5);
+MapSubInt Var_mapsubint(Var _x2c_gensym_macro_value_4);
 
-Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_26, Iter _x2c_gensym_macro_dest_0);
+Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_28, Iter _x2c_gensym_macro_dest_0);
 
-Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_27, Iter _x2c_gensym_macro_dest_1);
+Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_29, Iter _x2c_gensym_macro_dest_1);
 
-Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_28, Iter _x2c_gensym_macro_dest_2);
+Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_30, Iter _x2c_gensym_macro_dest_2);
 
-void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_24);
+void MapSubInt_cleanup(MapSubInt _x2c_gensym_macro_map_26);
 
 MapSubInt MapSubInt_new(void);
 

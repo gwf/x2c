@@ -1165,7 +1165,7 @@ printf("%s\n", counts.repr());
 ```
 
 ```text
-{ "be": 2, "to": 2, "not": 1, "or": 1 }
+{ "to": 2, "be": 2, "or": 1, "not": 1 }
 ```
 
 Numeric `+=` treats an absent destination as zero, inserts the right-hand
@@ -1197,7 +1197,7 @@ printf("targets is an Array: %d\n", config[<targets>] is Array);
 ```
 
 ```text
-{ <targets>: [ "c" ], <limits>: { <depth>: 8 }, <name>: "x2c" }
+{ <name>: "x2c", <targets>: [ "c" ], <limits>: { <depth>: 8 } }
 targets is an Array: 1
 ```
 
@@ -1245,8 +1245,8 @@ while (ages.try_next(cursor, key, value))
 ```
 
 ```text
-grace -> 45
 ada -> 36
+grace -> 45
 ```
 
 That is the table's order, and it moves when the hash changes. Sort what you
@@ -1274,8 +1274,8 @@ foreach((String key, int value) in ages)
 ```
 
 ```text
-grace -> 45
 ada -> 36
+grace -> 45
 ```
 
 [Iteration](iteration.md#what-you-can-iterate) covers the `Map` iterators
