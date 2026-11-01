@@ -227,8 +227,8 @@ void Map.export_to(
     };
     ((Map) &exported).reinsert_unique(record.key.hash(), &record);
   }
-  map.hashes = rebuilt_hashes;
-  map.entries = rebuilt_entries;
+  map.hashes = exported.hashes;
+  map.entries = exported.entries;
   rebuilt_hashes = NULL;
   rebuilt_entries = NULL;
   old_hashes.free();
