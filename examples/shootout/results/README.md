@@ -83,13 +83,16 @@ instructions remain in Git at each recorded revision.
 
 ## Render saved data without benchmarking
 
-Create an isolated plotting environment, then render the latest saved report:
+Use the latest run's recorded plotting environment:
 
 ```sh
-python3 -m venv /tmp/x2c-shootout-charts
-/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T211435Z/charts/render.py examples/shootout/results/runs/20261031T211435Z/current.json /tmp/x2c-shootout-figures
+python3.14 -m venv /tmp/x2c-shootout-charts
+/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T154144Z/charts/requirements.txt
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T154144Z/charts/render.py examples/shootout/results/runs/20261101T154144Z/current.json /tmp/x2c-shootout-figures
 ```
+
+The per-run `render-environment.json` records the versions actually used.
+Earlier cohorts retain their own provenance and the root pinned chart setup.
 
 To render the focused serial/parallel comparison from its saved samples:
 
