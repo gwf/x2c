@@ -1,46 +1,22 @@
 # Remaining local performance gaps
 
-Run `20261031T211435Z`, clean source `3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a`, local profile, 56 samples per program.
-These are selected-program measurements, not general language overhead.
-Canonical-size timing remains unrun. Eight problems share every column;
-k-nucleotide and binary-trees remain available in per-problem rows.
+Run `20261101T154144Z`, local profile, twelve fresh samples per x2c program. Foreign measurements remain pinned to the prior calibration. These are complete-program results; canonical-size timings remain unrun.
 
-| Problem | Idiomatic ms | C ms | Tuned ms | Fastest selected ms | Idiomatic / fastest |
-| --- | ---: | ---: | ---: | --- | ---: |
-| knucleotide | 90.158 | 9.255 | 75.645 | c: 9.255 | 9.74 |
-| binarytrees | 26.731 | 24.571 | 26.409 | rust: 3.447 | 7.75 |
-| revcomp | 11.618 | 1.580 | 12.857 | c: 1.580 | 7.35 |
-| fasta | 21.084 | 3.817 | 15.114 | c: 3.817 | 5.52 |
-| spectralnorm | 17.689 | 4.995 | 8.099 | go: 4.285 | 4.13 |
-| fannkuchredux | 9.908 | 3.419 | 13.176 | cpp: 2.671 | 3.71 |
-| nbody | 67.953 | 32.841 | 68.064 | cpp: 29.812 | 2.28 |
-| regexredux | 26.100 | 12.218 | 55.446 | rust: 11.559 | 2.26 |
-| mandelbrot | 4.457 | 2.835 | 9.986 | rust: 2.382 | 1.87 |
-| pidigits | 275.527 | 263.393 | 262.694 | tuned: 262.694 | 1.05 |
+| Problem | Idiomatic ms | Tuned ms | Fastest selected | Tuned / fastest |
+|---|---:|---:|---|---:|
+| binarytrees | 25.312 | 25.861 | rust: 3.447 ms | 7.50x |
+| revcomp | 11.644 | 5.930 | c: 1.580 ms | 3.75x |
+| fasta | 19.770 | 14.281 | c: 3.817 ms | 3.74x |
+| nbody | 70.317 | 67.324 | cpp: 29.812 ms | 2.26x |
+| regexredux | 24.550 | 24.586 | rust: 11.559 ms | 2.13x |
+| knucleotide | 90.761 | 16.168 | c: 9.255 ms | 1.75x |
+| mandelbrot | 4.282 | 3.703 | rust: 2.382 ms | 1.55x |
+| spectralnorm | 17.582 | 6.105 | go: 4.285 ms | 1.42x |
+| fannkuchredux | 9.718 | 3.616 | cpp: 2.671 ms | 1.35x |
+| pidigits | 266.781 | 258.184 | tuned: 258.184 ms | 1.00x |
 
-The controlled local source comparisons are:
+The [source-parity comparisons](runs/20261101T154144Z/README.md) establish large gains in all six changed tuned programs at local and larger inputs. Spectral remains serial below500 to avoid measured startup costs, and fannkuch retains native element copying after bulk setslice lost on small inputs. Foreign source bytes and workload profiles remain unchanged.
 
-| Experiment | Input N | Before elapsed ms | Candidate elapsed ms | Before CPU ms | Candidate CPU ms | Paired wins / 12 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| regexredux | 100000 | 50.900 | 24.202 | 50.547 | 56.156 | 12 |
-| revcomp | 100000 | 11.654 | 10.958 | 11.306 | 10.670 | 12 |
-| mandelbrot | 512 | 9.899 | 4.369 | 9.591 | 12.153 | 12 |
+The remaining gaps require program-specific profiling. Reverse-complement and FASTA still include ordinary canonical input handling; regex elapsed time includes the ordered substitution chain even when counts overlap. N-body was unchanged. The fast tree references retain their documented allocator differences. These observations do not establish a compiler/runtime defect or authorize another redesign.
 
-All three changes win every paired local round and also benefit larger inputs.
-Parallelism spends more total CPU for lower elapsed time; the Buffer change
-reduces both metrics. Full-run differences in unchanged programs are not gains
-caused by these source changes. All 55 foreign source bytes, workload profiles
-and compiler/runtime source are unchanged from the source-probe baseline unless
-a separately recorded upstream integration says otherwise.
-
-K-nucleotide still spends substantial time in canonical String slicing/interning
-and Map work. Counter objects and compound Map updates did not help in earlier
-probes; ordinary width-level threading did. Binary-trees is close to C, while
-fast library-arena Rust references remain much faster; a specialized allocator
-is outside the idiomatic boundary. The remaining reverse-complement cost needs
-further profiling before another rewrite. FASTA Choice-record probes did not
-establish a gain; that rejects the tested source, not every record-based design.
-
-No additional compiler/runtime redesign is implied by these benchmark gaps.
-See [recovery](README.md), [threading](threading.md), and the latest run's
-focused experiment and raw receipts.
+Compare workload-matched ratios when summarizing idiomatic versus tuned. The median of each independently sorted C-normalized column is an orientation aid; dividing those two medians is not the median same-workload slowdown.

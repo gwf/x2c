@@ -78,6 +78,10 @@ is selected here.
 
 ### Decisions and completed records
 
+- [PLSO tuned parity](archive/plso-tuned-parity.md): six tuned programs receive
+  ordinary scheduling/buffering improvements; a full x2c rerun, matched source
+  probes, revised tables and figures are archived with publication evidence.
+
 - [Split grouped Map storage](archive/grouped-map-split-storage.md): large Var
   Map and Pool hash caches use Block-owned storage; peak RSS recovery and
   retained timing costs are recorded with publication evidence.

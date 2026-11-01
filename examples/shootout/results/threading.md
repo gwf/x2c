@@ -82,8 +82,8 @@ The saved comparison includes elapsed time and total user-plus-system CPU time,
 raw samples, output checks, source and binary hashes, and quiet-window evidence.
 
 Parallelism is independent of the idiomatic/tuned distinction. Both columns use
-the same ordinary threading code here. Idiomatic spectral-norm also uses
-threads as described below; other workloads retain their execution strategies.
+the same ordinary threading code here. Both columns also use
+the worker strategies described below, with measured thresholds where needed.
 These charts still compare selected contributions with
 mixed serial and parallel programs, rather than controlled single-core language
 implementations. The
@@ -101,8 +101,9 @@ worker execution. Workers read one input vector and write distinct existing
 output elements. Each row retains the original j-order and double accumulation.
 The coordinator joins every worker before the next matrix product reads the
 output. Per-product Rows objects remain alive through join. Small inputs use
-the same calculation serially. Tuned spectral-norm remains its serial typed-Array
-implementation. This is a change in execution mode, not a single-core speedup.
+the same calculation serially. Tuned spectral-norm now uses the same row
+decomposition with typed Arrays at N>=500, retaining its original full-range
+serial kernels below that measured threshold.
 
 ## Ordinary parallel fannkuch-redux
 
@@ -112,8 +113,9 @@ Thread handle. Each worker owns its permutation, working, and countdown Arrays.
 The starting state is derived from factorial rotation digits. Global rank
 parity determines checksum signs; chunk sums and maxima combine after joining.
 The ranges partition [0,n!) and use 64-bit arithmetic for partition products.
-N<9 runs the same calculation serially. Tuned fannkuch retains its serial
-implementation. Parallel execution is described by the pinned official spec.
+N<9 runs the same calculation serially. Tuned fannkuch now shares this
+decomposition with typed integer Arrays and native element copying.
+Parallel execution is described by the pinned official spec.
 
 ## Reference audit update
 
@@ -144,6 +146,9 @@ The next wave releases the previous wave's storage, bounding retained output
 to 96 rows. Pixel arithmetic and PBM padding are unchanged. Smaller inputs run
 serially. A same-batching serial control separates threading from buffering.
 
-The tuned sources and all 55 foreign reference programs remain unchanged.
-No compiler/runtime/package code, typed container, borrowed substring, raw
-collection access, custom allocator, or literal-C implementation was added.
+The tuned versions now share the ordinary scheduling strategies: regex workers
+retain private native PCRE2 state, Mandelbrot uses caller-owned ArrayChar bands,
+and seven k-nucleotide workers retain borrowed MapSubInt keys into the fixed
+sequence. Tuned reverse-complement appends input spans to its typed ArrayChar.
+All joins precede output or storage release. All 55 foreign programs and
+compiler/runtime/package code remain unchanged.

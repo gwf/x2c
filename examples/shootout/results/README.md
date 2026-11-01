@@ -4,14 +4,18 @@ The complete saved comparison materials live in Git on `dev`. No original
 worktree, `/tmp` directory, visualization directory, or chat is required to
 recover the saved results and figures.
 
-The current public candidate is [run 20261031T211435Z](runs/20261031T211435Z/README.md),
-measured from clean source `3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a` and retained in report checkpoint
-`9c8fbbe8bc2976c1e85db7e6259a847e91671374`. Observation: 2026-10-31 14:14 PDT / 2026-10-31 21:14 UTC. Run identifiers use UTC.
+The current candidate is [run 20261101T154144Z](runs/20261101T154144Z/README.md), measured from clean
+source `19e79b5026679638e63297fc7f839a97b5aac32c`. Both x2c columns were rebuilt
+and measured with twelve fresh processes per program: 240 observations over
+ten problems. Official fixtures and local outputs pass. Foreign contributions
+retain their pinned calibration measurements; they were not remeasured.
 
-It covers 75 programs, eight columns and 56 fresh-process samples each
-(4,200 observations). All official fixtures and local output checks pass.
-Summary charts use eight shared problems; complete tables retain all admitted
-k-nucleotide and binary-trees cells. Earlier cohorts remain explicitly historical.
+The new tuned sources share ordinary threading and buffering opportunities
+while retaining specialized storage. The archive includes old/new source
+comparisons, rejected refinements, raw receipts, and all three chart forms in
+SVG/PNG/PDF. The prior full 56-sample calibration remains historical evidence.
+Summary charts still use eight shared problems; complete tables retain all
+admitted k-nucleotide and binary-trees cells.
 
 ## Saved runs
 
@@ -26,7 +30,8 @@ k-nucleotide and binary-trees cells. Earlier cohorts remain explicitly historica
 | [20261031T161720Z](runs/20261031T161720Z/README.md) | 8 | 9 | Parallel spectral-norm; Counter probe rejected |
 | [20261031T170749Z](runs/20261031T170749Z/README.md) | 8 | 9 | Parallel fannkuch adopted; loop-bound adopted |
 | [20261031T181939Z](runs/20261031T181939Z/README.md) | 8 | 8 | Reference audit and parallel k-nucleotide |
-| [20261031T211435Z](runs/20261031T211435Z/README.md) | 8 | 8 | Latest: parallel regex/Mandelbrot and reverse-complement Buffer |
+| [20261031T211435Z](runs/20261031T211435Z/README.md) | 8 | 8 | Full calibration: parallel idiomatic regex/Mandelbrot and reverse Buffer |
+| [20261101T154144Z](runs/20261101T154144Z/README.md) | 8 | 8 | Tuned scheduling/buffering parity; fresh x2c, pinned foreign measurements |
 
 [runs/index.json](runs/index.json) lists immutable run paths and revisions.
 Each run contains its exact report, compressed baseline, benchmark manifest,
@@ -78,13 +83,16 @@ instructions remain in Git at each recorded revision.
 
 ## Render saved data without benchmarking
 
-Create an isolated plotting environment, then render the latest saved report:
+Use the latest run's recorded plotting environment:
 
 ```sh
-python3 -m venv /tmp/x2c-shootout-charts
-/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/requirements-charts.txt
-/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261031T211435Z/charts/render.py examples/shootout/results/runs/20261031T211435Z/current.json /tmp/x2c-shootout-figures
+python3.14 -m venv /tmp/x2c-shootout-charts
+/tmp/x2c-shootout-charts/bin/python -m pip install -r examples/shootout/results/runs/20261101T154144Z/charts/requirements.txt
+/tmp/x2c-shootout-charts/bin/python examples/shootout/results/runs/20261101T154144Z/charts/render.py examples/shootout/results/runs/20261101T154144Z/current.json /tmp/x2c-shootout-figures
 ```
+
+The per-run `render-environment.json` records the versions actually used.
+Earlier cohorts retain their own provenance and the root pinned chart setup.
 
 To render the focused serial/parallel comparison from its saved samples:
 

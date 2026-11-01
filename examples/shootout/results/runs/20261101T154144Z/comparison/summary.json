@@ -1,0 +1,156 @@
+{
+  "matched_tuned_over_idiomatic_median": 0.7934703329424881,
+  "matched_tuned_over_idiomatic_geomean": 0.6647562538999835,
+  "common_workloads": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "regexredux",
+    "pidigits"
+  ],
+  "accepted_changes": [
+    {
+      "problem": "fannkuchredux",
+      "input": "9",
+      "source_results": "paired-refined",
+      "medians": {
+        "before": {
+          "elapsed_ns": 11916500.0,
+          "user_ns": 11126500.0,
+          "system_ns": 516000.0,
+          "max_rss_bytes": 1622016.0
+        },
+        "after": {
+          "elapsed_ns": 3609333.5,
+          "user_ns": 13146500.0,
+          "system_ns": 685500.0,
+          "max_rss_bytes": 2048000.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.3028853690261402
+    },
+    {
+      "problem": "mandelbrot",
+      "input": "512",
+      "source_results": "paired",
+      "medians": {
+        "before": {
+          "elapsed_ns": 9298833.0,
+          "user_ns": 8269000.0,
+          "system_ns": 637000.0,
+          "max_rss_bytes": 1671168.0
+        },
+        "after": {
+          "elapsed_ns": 3789999.5,
+          "user_ns": 9959500.0,
+          "system_ns": 1323000.0,
+          "max_rss_bytes": 2170880.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.40757797241868954
+    },
+    {
+      "problem": "spectralnorm",
+      "input": "500",
+      "source_results": "paired-final-spectral",
+      "medians": {
+        "before": {
+          "elapsed_ns": 7230812.5,
+          "user_ns": 6402500.0,
+          "system_ns": 541000.0,
+          "max_rss_bytes": 1654784.0
+        },
+        "after": {
+          "elapsed_ns": 6248166.5,
+          "user_ns": 11632000.0,
+          "system_ns": 7318500.0,
+          "max_rss_bytes": 2326528.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.8641029621498275
+    },
+    {
+      "problem": "regexredux",
+      "input": "100000",
+      "source_results": "paired",
+      "medians": {
+        "before": {
+          "elapsed_ns": 54156187.5,
+          "user_ns": 52056500.0,
+          "system_ns": 1638000.0,
+          "max_rss_bytes": 9601024.0
+        },
+        "after": {
+          "elapsed_ns": 26067062.5,
+          "user_ns": 55242500.0,
+          "system_ns": 1713500.0,
+          "max_rss_bytes": 10108928.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.481331195996764
+    },
+    {
+      "problem": "knucleotide",
+      "input": "100000",
+      "source_results": "paired",
+      "medians": {
+        "before": {
+          "elapsed_ns": 49049229.0,
+          "user_ns": 45921000.0,
+          "system_ns": 2734500.0,
+          "max_rss_bytes": 18923520.0
+        },
+        "after": {
+          "elapsed_ns": 16363292.0,
+          "user_ns": 46249500.0,
+          "system_ns": 2821000.0,
+          "max_rss_bytes": 32956416.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.33360956601376957
+    },
+    {
+      "problem": "revcomp",
+      "input": "100000",
+      "source_results": "paired",
+      "medians": {
+        "before": {
+          "elapsed_ns": 12205749.5,
+          "user_ns": 10893500.0,
+          "system_ns": 980500.0,
+          "max_rss_bytes": 4603904.0
+        },
+        "after": {
+          "elapsed_ns": 5704187.5,
+          "user_ns": 4576000.0,
+          "system_ns": 823000.0,
+          "max_rss_bytes": 4603904.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.46733611074027037
+    }
+  ],
+  "source_sha256": {
+    "fannkuchredux-before": "b2414463803570ae2bd0c6f10915f343c1213ade6782af8dbf1ad3bbe67aa501",
+    "fannkuchredux-after": "11740a5011dd5c1f12923ebbc6273a374b3f10779ef7ada3eaa18b616eaf5e40",
+    "mandelbrot-before": "42a41853f681fe28cfea3f209ba30059fbd79d29061d7234925f4bc60aac9876",
+    "mandelbrot-after": "3b31987792deca29f6db9760d30174c3556fa1ffd27fe4f36e5f2bce4658813f",
+    "spectralnorm-before": "647e04a5babf3fe17e2398cfbf7945321bfba5e860ef260ecca4b9e2db70a2d3",
+    "spectralnorm-after": "445ed87202734b6b6022663e1a4cf835d71e713962722879274a4581f1a61fe0",
+    "regexredux-before": "8b94b57a94084fc371bdd92d30520466308bd29ff156d038e0039e67479b3dcc",
+    "regexredux-after": "2eaa4f5602b079e67069a173ef9913b160377ed605277beff6f74cc70716e7a7",
+    "knucleotide-before": "c1dad6f90ad9a9ceb9979ea9f3f056ae01a00c72f5b02e70da34b690d5ec2fe3",
+    "knucleotide-after": "d6ab13bdcfd839e3cfea67a2f729a5ba545b70e8fb57cc8a3b14f1bca4aa2c14",
+    "revcomp-before": "494c074cc56d3e735ebcf827449e69e5b46fc98d4e176065c2ff558b5ef906b2",
+    "revcomp-after": "2fc84389894ff7742f8a01abac1382d1df03310965974c35ac83f44efed9b5de"
+  }
+}
