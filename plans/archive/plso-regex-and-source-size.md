@@ -1,7 +1,8 @@
 # Profile regex-redux and audit source size
 
-> Status: active - 2026-11-01.
-> Baseline `36c17924d`; source experiments and focused checks precede acceptance.
+> Status: done - 2026-11-01.
+> Measurements use clean integrated source `fed582d49`; publication gate passes
+> at `26aa308c3` after the focused fixture-filter repair.
 
 ## Result and choices
 
@@ -48,3 +49,34 @@ Map iteration order. An inert raw dump reproduces the failure. A six-line
 filter boundary correction passes all 16 symbol fixtures without changing
 expectations or compiler output. The required gate is repeated after this
 focused repair; failed logs are retained under the campaign debug directory.
+
+## Delivered evidence
+
+The final integrated twelve-pair comparison improves tuned regex-redux from
+24.490 to 12.059 ms at local input and from 220.580 to 98.205 ms at larger
+input. Larger-input peak RSS falls from 69.16 to 53.62 MB. Both paired outputs
+and 80 generated replacement/count cases match. A generic wrapper experiment
+remains unadopted; the package source is byte-identical to the original.
+
+Both pidigits variants remove the Integer layer while retaining Spigot
+ownership, both extracts, init/clear order and padding. Local paired timings
+are flat. Independent audits reproduce all 75 old and all 75 final LOC/gzip
+counts; the chart's source-size distinction is explained in the report.
+
+The final full run `20261101T204543Z` checks all twenty x2c programs and records
+240 observations. Across eight shared workloads, tuned elapsed time is 1.110x C
+and 0.946x Rust. The [immutable archive](../../examples/shootout/results/runs/20261101T204543Z/README.md)
+retains phase data, accepted/rejected probes, source snapshots, CPU/RSS data,
+quiet monitoring, source audits, CSV and all three figures in SVG/PNG/PDF.
+All 1,544 archive checksums and five harness tests pass.
+
+The publication gate passes: 1,164 unit tests and 103,729 assertions, 1,383
+compiler fixtures, 138 matching book outputs, command checks and generated
+stage comparisons. No authored compiler/runtime/bootstrap delta remains.
+The fixture normalizer repair retains all checked-in expectations. Final
+Markdown closeout reuses the valid compiler proof with doc-check.
+
+Canonical-size comparisons and foreign recalibration were not run. Earlier
+contaminated screens remain labeled separately; accepted comparisons wait for
+a clear monitored window. Desktop activity and intervals between snapshots
+remain limitations. No spectral kernel or further Map change was attempted.
