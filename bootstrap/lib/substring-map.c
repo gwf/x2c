@@ -370,12 +370,7 @@ static void _x2c_gensym_macro__rebuild_0(MapSubInt _x2c_gensym_macro_map_10, uns
           _x2c_gensym_macro_expanded_0.mask = _x2c_gensym_macro_capacity_6 - 1;
           _x2c_gensym_macro_expanded_0.used = 0;
           MapSubInt _x2c_gensym_macro_replacement_0 =(MapSubInt) & _x2c_gensym_macro_expanded_0;
-          for(unsigned _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_old_capacity_0;  _x2c_gensym_macro_i_0 ++){
-            if(_x2c_gensym_macro_controls_3[_x2c_gensym_macro_i_0] < 128){
-              MapSubInt_reinsert_unique(_x2c_gensym_macro_replacement_0, _record_hash(& _x2c_gensym_macro_entries_2[_x2c_gensym_macro_i_0]), & _x2c_gensym_macro_entries_2[_x2c_gensym_macro_i_0]);
-            }
-
-          }
+          for(unsigned _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_old_capacity_0;  _x2c_gensym_macro_i_0 ++) if(_x2c_gensym_macro_controls_3[_x2c_gensym_macro_i_0] < 128) MapSubInt_reinsert_unique(_x2c_gensym_macro_replacement_0, _record_hash(& _x2c_gensym_macro_entries_2[_x2c_gensym_macro_i_0]), & _x2c_gensym_macro_entries_2[_x2c_gensym_macro_i_0]);
           Scope_move_before(Bytes_block(_x2c_gensym_macro_staged_hashes_0), Bytes_block(_x2c_gensym_macro_map_10 -> hashes));
           Scope_move_before((unsigned char *) _x2c_gensym_macro_staged_hashes_0 - sizeof(Block), (unsigned char *) _x2c_gensym_macro_map_10 -> hashes - sizeof(Block));
           Scope_move_before(Bytes_block(_x2c_gensym_macro_staged_entries_0), Bytes_block(_x2c_gensym_macro_map_10 -> entries));

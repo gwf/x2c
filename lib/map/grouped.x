@@ -333,8 +333,7 @@ macro Unit $map.grouped.typed.updates(
   $value $map.postfixindex($map, $key, Symbol);
 
   __attribute__((noinline)) static $value _update_other(
-    $map map, $key key, Symbol op, $value rhs
-  ) {
+    $map map, $key key, Symbol op, $value rhs) {
     long index = map.find_index(&key);
     if (index < 0) (void) $bad_arg($owner);
     $value *stored = $value_at(map, (unsigned) index);
