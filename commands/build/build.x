@@ -1086,20 +1086,22 @@ void Build.cleanup(Build b, int success) {
     program must translate and link. The script's translation depfile already
     lists every file the translation read, so helpers of helpers appear too.
     Runtime and package sources are excluded; their objects are archived.
-    The compiler's own `etc/` sources, such as its syntax prelude, have
-    none.
+    Compiler support under `etc/` has no program objects. Its `syntax/`
+    directory instead contains ordinary runtime helpers for syntax tools.
 */
 List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
-  List excluded = %("$root/lib/" "$root/include/" "$root/builds/" "$root/etc/")
+  List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   List prelude = Compiler.prelude_sources().map(
     %!(String source) => Path.join(root, source));
+  String support = %"$root/etc/", syntax = %"$root/etc/syntax/";
   String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array candidates = [], helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
     if (path.startswith("search:") || !Path.is_x2c_source(path) ||
         path in candidates || path in prelude) continue;
+    if (path.startswith(support) && !path.startswith(syntax)) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     candidates.push(path);
   }

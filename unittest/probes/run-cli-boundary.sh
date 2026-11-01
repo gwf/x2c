@@ -2178,6 +2178,11 @@ sed 's/=> 40;/=> 50;/' "$SCRIPT/helpers/lib/inner.x" \
   mv "$SCRIPT/helpers/lib/inner.next" "$SCRIPT/helpers/lib/inner.x"
 [[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 52' ]] || exit 1
 
+# Syntax data under the checkout's etc/ directory supplies runtime helpers.
+run_script "$ROOT/tools/syntax-spec" summary >"$SCRIPT/syntax-summary.stdout"
+grep -q '^grammar: .* rules; entry ' "$SCRIPT/syntax-summary.stdout"
+grep -q '^extensions: .* families; baseline ' "$SCRIPT/syntax-summary.stdout"
+
 # Module members are text in their entry, while an ordinary helper beside
 # them remains a separate unit. Nested member edits still invalidate a run.
 mkdir -p "$SCRIPT/module/app/part"

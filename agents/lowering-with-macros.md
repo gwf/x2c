@@ -300,8 +300,8 @@ examples are excerpts from current source.
 
    ```x2c
    List enter = destinations ? $!( Scope_push(@destinations) )
-                             : $!( Scope_retain() );
-   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
+                             : $!( Scope_open() );
+   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_close() );
    return $!{ { $enter; { defer $leave; $body } } };
    ```
 
