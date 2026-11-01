@@ -1371,15 +1371,15 @@ scope and does not require reshaping or reordering:
 
 ### Proof obligations
 
-Select evidence for the task under its current skill and `AGENTS.md`. The
-per-file stage comparison belongs to the existing beautification workflow;
-this standard does not extend it to all cleanup. Any broader requirement needs
-Gary's approval under the process ceiling.
+Select evidence for the task under its current skill and `AGENTS.md`.
+The [beautification skill](skills/beautify-x2c-source/SKILL.md#verify) owns
+its verification cadence; this standard does not extend it to all cleanup.
+Any broader requirement needs Gary's approval under the process ceiling.
 
 | Change | Proof |
 | --- | --- |
 | Neutral respelling, rename, reorder, receiver, `=>`, `in`, `.` | compare affected generated output before and after where needed; `stage-diff-0` compares bootstrap with stage 0, not the pre-edit tree |
-| Compiler beautification | existing beautify proof: `make stage-1 && make stage-diff-1` once per file; use relevant driver probes |
+| Compiler beautification | follow the [beautification skill](skills/beautify-x2c-source/SKILL.md#verify); use relevant driver probes |
 | A pure move | the multiset of non-blank lines is unchanged except section labels |
 | Adopting `auto`, `with`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
 | Deletion of a check or mechanism | the observable result of valid input is unchanged; invalid input is still rejected before wrong output, corrupt state, or an unsafe crossing |

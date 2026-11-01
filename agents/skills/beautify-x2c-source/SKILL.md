@@ -77,10 +77,11 @@ make stage-1 && make stage-diff-1
 ```
 
 Stage 1 uses the edited compiler to translate the same source as stage 0.
-`make stage-1 && make stage-diff-1` proves the compiler's output is
-unchanged. `make stage-diff-0` against a current bootstrap proves a
-respelling's own generated C is unchanged. Follow the standard's proof
-obligations; never rebaseline a difference to make a rewrite pass. A hot
+`make stage-diff-1` compares those stages; `make stage-diff-0` compares
+bootstrap with stage 0. Neither comparison automatically records the
+pre-edit tree. To establish preservation, use the saved before/after output
+called for by the task. Follow the standard's proof obligations; never
+rebaseline a difference to make a rewrite pass. A hot
 path also follows [performance checkpoints](../../performance-checkpoints.md).
 
 ## Report

@@ -376,6 +376,9 @@ review, so none is scheduled for speculative removal.
   autodiff passes 16 tests, 11 fixtures, and both examples. The book/site
   sweep compiles 441 samples and checks 138 outputs. Gallery sources and
   mappings follow their existing owners.
-- A, B, F, and G remain in progress or pending.
+- F implemented privately. Verification cadence has one owner; stage
+  comparisons no longer claim pre-edit preservation. The documentation audit
+  awaits the parent's generated String API refresh from C.
+- A, B, and G remain in progress or pending.
 - Final integrated review, generated refresh, applicable performance evidence,
   publication validation, publication, and plan closeout remain with the parent.
