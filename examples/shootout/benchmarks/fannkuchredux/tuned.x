@@ -55,17 +55,18 @@ static void Chunk.init(Chunk chunk, int n, long first, long last) {
 
 static Var _run_chunk(Var input) {
   Chunk chunk = input;
+  int n = chunk.n;
   ArrayInt permutation = ArrayInt.new(), working = ArrayInt.new();
   ArrayInt counts = ArrayInt.new();
-  for (int i = 0; i < chunk.n; i++) {
+  for (int i = 0; i < n; i++) {
     permutation.push(i);
     working.push(i);
     counts.push(i + 1);
   }
-  if (chunk.first) _seek(permutation, counts, chunk.n, chunk.first);
+  if (chunk.first) _seek(permutation, counts, n, chunk.first);
   int maximum = 0, checksum = 0;
   for (long index = chunk.first; index < chunk.last; index++) {
-    working.setslice(0, chunk.n, permutation);
+    for (int i = 0; i < n; i++) working[i] = permutation[i];
     int flips = 0;
     for (int k = working[0]; k; k = working[0]) {
       for (int i = 0, j = k; i < j; i++, j--) {
@@ -77,7 +78,7 @@ static Var _run_chunk(Var input) {
     }
     if (flips > maximum) maximum = flips;
     checksum += index % 2 ? -flips : flips;
-    _advance(permutation, counts, chunk.n);
+    _advance(permutation, counts, n);
   }
   chunk.maximum = maximum;
   chunk.checksum = checksum;

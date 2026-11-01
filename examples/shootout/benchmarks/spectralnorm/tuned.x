@@ -43,16 +43,17 @@ static void _ata_times(ArrayDbl input, ArrayDbl output, ArrayDbl scratch) {
 }
 
 static void _multiply(ArrayDbl input, ArrayDbl output, int transpose) {
-  int n = input.len(), workers = n < 6 ? n : 6;
+  int n = input.len();
+  if (n < 500) {
+    if (transpose) _at_rows(input, output, 0, n);
+    else _a_rows(input, output, 0, n);
+    return;
+  }
   auto {
-    if (n < 256) {
-      _calculate_rows(Rows.new(input, output, 0, n, transpose));
-      return;
-    }
     Array batches = [];
-    for (int worker = 0; worker < workers; worker++) {
+    for (int worker = 0; worker < 6; worker++) {
       Rows rows = Rows.new(input, output,
-        n * worker / workers, n * (worker + 1) / workers, transpose);
+        n * worker / 6, n * (worker + 1) / 6, transpose);
       rows.worker = Thread.start(_calculate_rows, rows);
       batches.push(rows);
     }
@@ -74,30 +75,30 @@ static void Rows.init(Rows rows, ArrayDbl input, ArrayDbl output,
 
 static Var _calculate_rows(Var input) {
   Rows rows = input;
-  if (rows.transpose) _at_rows(rows);
-  else _a_rows(rows);
+  if (rows.transpose) _at_rows(rows.input, rows.output, rows.first, rows.last);
+  else _a_rows(rows.input, rows.output, rows.first, rows.last);
   return void;
 }
 
-static void _a_rows(Rows rows) {
-  int n = rows.input.len();
-  for (int i = rows.first; i < rows.last; i++) {
+static void _a_rows(ArrayDbl input, ArrayDbl output, int first, int last) {
+  int n = input.len();
+  for (int i = first; i < last; i++) {
     double sum = 0.0;
     for (int j = 0; j < n; j++)
-      sum += _entry(i, j) * rows.input[j];
-    rows.output[i] = sum;
+      sum += _entry(i, j) * input[j];
+    output[i] = sum;
   }
 }
 
 static double _entry(int i, int j) =>
   1.0 / ((i + j) * (i + j + 1) / 2 + i + 1);
 
-static void _at_rows(Rows rows) {
-  int n = rows.input.len();
-  for (int i = rows.first; i < rows.last; i++) {
+static void _at_rows(ArrayDbl input, ArrayDbl output, int first, int last) {
+  int n = input.len();
+  for (int i = first; i < last; i++) {
     double sum = 0.0;
     for (int j = 0; j < n; j++)
-      sum += _entry(j, i) * rows.input[j];
-    rows.output[i] = sum;
+      sum += _entry(j, i) * input[j];
+    output[i] = sum;
   }
 }
