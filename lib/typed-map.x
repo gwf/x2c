@@ -128,7 +128,8 @@ $map.typed.publish(
   _box_int, _box_int, _prepare_int_export);
 
 $map.grouped.rehashed.records(
-  struct MapLongDoubleRecord, _hash_long, _long_record_hash, _long_remember_hash);
+  struct MapLongDoubleRecord, _hash_long,
+  _long_record_hash, _long_remember_hash);
 
 $map.grouped.core.family(
   MapLongDouble, struct MapLongDouble, long, double,
@@ -153,7 +154,8 @@ $map.typed.publish(
   _prepare_long_export);
 
 $map.grouped.rehashed.records(
-  struct MapStringStringRecord, _hash_string, _string_record_hash, _string_remember_hash);
+  struct MapStringStringRecord, _hash_string,
+  _string_record_hash, _string_remember_hash);
 
 $map.grouped.core.family(
   MapStringString, struct MapStringString, String, String,
@@ -179,7 +181,9 @@ $map.typed.publish(
   _box_string, _box_string,
   _prepare_string_export);
 
-$map.grouped.cached.records(struct MapStringIntRecord, _string_int_record_hash, _string_int_remember_hash);
+$map.grouped.cached.records(
+  struct MapStringIntRecord,
+  _string_int_record_hash, _string_int_remember_hash);
 
 $map.grouped.core.family(
   MapStringInt, struct MapStringInt, String, int,
@@ -238,7 +242,8 @@ int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
     ? (const char *) key.source + key.offset : NULL;
   for (unsigned step = 0; step <= group_mask; step++) {
     unsigned start = group * 16;
-    unsigned matches = x2c_map_group_match(controls + start, fingerprint) & lanes;
+    unsigned matches =
+      x2c_map_group_match(controls + start, fingerprint) & lanes;
     if (matches) __builtin_prefetch(entries + start, 0, 3);
     while (matches) {
       unsigned index = start + __builtin_ctz(matches);

@@ -44,4 +44,5 @@ mkdir "$scratch/lib" "$scratch/src"
 )
 cp lib/task/stack.c "$scratch/lib/task-native.c"
 cp lib/task/minicoro.h "$scratch/lib/minicoro.h"
+cp lib/map/group-match.h "$scratch/lib/group-match.h"
 ./tools/check-generated-stages.sh --interfaces builds/1 "$scratch"

@@ -145,11 +145,9 @@ macro Unit $map.grouped.storage.family(
     expanded.mask = capacity - 1;
     expanded.used = 0;
     $map replacement = ($map) &expanded;
-    for (unsigned i = 0; i < old_capacity; i++) {
-      if (controls[i] < 128) {
+    for (unsigned i = 0; i < old_capacity; i++)
+      if (controls[i] < 128)
         replacement.reinsert_unique($record_hash(&entries[i]), &entries[i]);
-      }
-    }
     Scope_move_before(staged_hashes.block(), map.hashes.block());
     Scope_move_before(
       (unsigned char *) staged_hashes - sizeof(Block),
@@ -186,7 +184,8 @@ macro Unit $map.grouped.storage.family(
     unsigned lanes = _lanes(map.capacity), available = ~0u;
     for (unsigned step = 0; step <= group_mask; step++) {
       unsigned start = group * 16;
-      unsigned matches = x2c_map_group_match(controls + start, fingerprint) & lanes;
+      unsigned matches =
+        x2c_map_group_match(controls + start, fingerprint) & lanes;
       if (matches) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
@@ -333,7 +332,9 @@ macro Unit $map.grouped.typed.updates(
   $value $map.updateindex($map, $key, Symbol, $value);
   $value $map.postfixindex($map, $key, Symbol);
 
-  __attribute__((noinline)) static $value _update_other($map map, $key key, Symbol op, $value rhs) {
+  __attribute__((noinline)) static $value _update_other(
+    $map map, $key key, Symbol op, $value rhs
+  ) {
     long index = map.find_index(&key);
     if (index < 0) (void) $bad_arg($owner);
     $value *stored = $value_at(map, (unsigned) index);
