@@ -366,17 +366,7 @@ macro Unit $map.storage.family(
   }
 }
 
-macro Unit $map.core.family(
-  Type $family, Type $storage, Type $key, Type $value,
-  Type $hash_cell, Type $entry,
-  Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
-  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
-) {
-  $map.storage.family(
-    $family, $storage, $key, $value, $hash_cell, $entry,
-    $hash, $key_equal, $value_equal, $value_valid,
-    $key_at, $value_at, $reinsert_error, $insert_error, 1);
-
+macro Unit $map.ownership.family(Type $family) {
   /** Acquires the Map's scope for explicitly owned contents.
       Created lazily beneath the record's owner, this scope excludes the
       record and backing Blocks. Stored references remain borrowed unless
@@ -405,6 +395,20 @@ macro Unit $map.core.family(
     Scope_move(map, destination);
     map.scope.transfer(*destination);
   }
+}
+
+macro Unit $map.core.family(
+  Type $family, Type $storage, Type $key, Type $value,
+  Type $hash_cell, Type $entry,
+  Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
+  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
+) {
+  $map.storage.family(
+    $family, $storage, $key, $value, $hash_cell, $entry,
+    $hash, $key_equal, $value_equal, $value_valid,
+    $key_at, $value_at, $reinsert_error, $insert_error, 1);
+
+  $map.ownership.family($family);
 }
 
 macro Unit $map.typed.operations(

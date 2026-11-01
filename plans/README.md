@@ -49,6 +49,7 @@ were indexed and the delivered ones archived.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
+| [Grouped typed Map adoption](grouped-typed-map-adoption.md) | Adopt the validated grouped backend for typed families; retain Var Map and Pool storage. | Integrate, close portability/performance gaps, then run one coordinated quiet benchmark campaign and publish to dev. |
 | [Async execution stacks](async-execution-stacks.md) | Task.run, Scope migration, runtime repairs, four-target normal/sanitizer validation, and release/migration notes are complete. Dev publication authorized; normal benchmarks remain deferred. | Implementation, integration review, and final publication gate are complete; dev delivery is authorized. Resume normal benchmark follow-up only when requested. Main promotion remains separate. |
 | [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |

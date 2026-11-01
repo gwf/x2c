@@ -19,6 +19,7 @@
 
 module {
   "generics.x",
+  "grouped.x",
 }
 #include "error-macros.x"
 #include "common.x"

@@ -398,7 +398,48 @@ static void context_exports_long_list_without_c_stack_growth(void) {
 
 #include "test-macros.x"
 
+static void grouped_export_preserves_tombstones(void) {
+  $test.scoped();
+  Context work = Context.open_isolated();
+  MapStringInt map = MapStringInt.new_capacity(64);
+  for (int i = 0; i < 40; i++) map[String.format("key-%d", i)] = i;
+  for (int i = 0; i < 30; i++) map.del(String.format("key-%d", i));
+  map = work.export(map);
+  work.close();
+  for (int i = 30; i < 40; i++) EXPECT_INT_EQ(map[String.format("key-%d", i)], i);
+  for (int i = 40; i < 200; i++) map[String.format("key-%d", i)] = i;
+  for (int i = 30; i < 200; i++) EXPECT_INT_EQ(map[String.format("key-%d", i)], i);
+}
+
+static void grouped_numeric_export_keeps_cleanup_counter_and_owner(void) {
+  $test.scoped();
+  Context work = Context.open_isolated();
+  MapIntInt map = MapIntInt.new_capacity(64);
+  for (int i = 0; i < 48; i++) map[i] = i;
+  for (int i = 0; i < 32; i++) map.del(i);
+  Bytes original = map.hashes;
+  map = work.export(map);
+  work.close();
+  EXPECT_PTR_EQ(map.hashes, original);
+  Scope owner = Scope.owner(map);
+  Scope temporary = Scope.new();
+  Scope.push(&temporary);
+  map[1000] = 1000;
+  Scope.pop();
+  temporary.destroy();
+  EXPECT_FALSE(map.hashes === original);
+  EXPECT_INT_EQ(map.capacity, 64);
+  EXPECT_INT_EQ(map.len(), 17);
+  EXPECT_PTR_EQ(Scope.owner(map.hashes.block()), owner);
+  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), owner);
+  for (int i = 32; i < 48; i++) EXPECT_INT_EQ(map[i], i);
+  EXPECT_INT_EQ(map[1000], 1000);
+}
+
 void context_suite(void) {
+  $test.run(grouped_export_preserves_tombstones);
+  $test.run(grouped_numeric_export_keeps_cleanup_counter_and_owner);
+
   $test.run(context_open_close_restores_scope);
   $test.run(context_restores_error_state);
   $test.run(context_inherited_pools_reuse_ancestor_values);

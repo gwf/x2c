@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "map/map.x"
+#include "group-match.h"
 #include "integer-ops.x"
 #include "substring.x"
 
@@ -76,7 +77,7 @@ typedef struct MapStringInt {
 struct MapIntIntRecord { int key, val; };
 struct MapLongDoubleRecord { long key; double val; };
 struct MapStringStringRecord { String key, val; };
-struct MapStringIntRecord { String key; int val; };
+struct MapStringIntRecord { String key; int val; unsigned cached_hash; };
 
 // storage errors and entry slots
 
@@ -102,14 +103,18 @@ $integer.raw(_integer_raw);
 
 // families
 
-$map.core.family(
+$map.grouped.rehashed.records(
+  struct MapIntIntRecord, _hash_int, _int_record_hash, _int_remember_hash);
+
+$map.grouped.core.family(
   MapIntInt, struct MapIntInt, int, int,
-  unsigned, struct MapIntIntRecord,
+  struct MapIntIntRecord,
   _hash_int, _equal_int, _equal_int,
   _valid_int,
   _int_key, _int_value,
-  _int_reinsert_error, _int_insert_error);
-$map.typed.family(
+  _int_reinsert_error, _int_insert_error,
+  _int_record_hash, _int_remember_hash, 1);
+$map.grouped.typed.family(
   MapIntInt, int, int,
   _update_int, _bad_arg, _bad_op,
   _capacity_valid, _int_value, mapintint,
@@ -122,14 +127,18 @@ $map.typed.publish(
   MapIntInt, int, int, mapintint, <mapintint>,
   _box_int, _box_int, _prepare_int_export);
 
-$map.core.family(
+$map.grouped.rehashed.records(
+  struct MapLongDoubleRecord, _hash_long, _long_record_hash, _long_remember_hash);
+
+$map.grouped.core.family(
   MapLongDouble, struct MapLongDouble, long, double,
-  unsigned, struct MapLongDoubleRecord,
+  struct MapLongDoubleRecord,
   _hash_long, _equal_long, _equal_double,
   _valid_double,
   _long_key, _double_value,
-  _long_reinsert_error, _long_insert_error);
-$map.typed.family(
+  _long_reinsert_error, _long_insert_error,
+  _long_record_hash, _long_remember_hash, 0);
+$map.grouped.typed.family(
   MapLongDouble, long, double,
   _update_double, _bad_arg, _bad_op,
   _capacity_valid, _double_value, maplongdouble,
@@ -143,14 +152,18 @@ $map.typed.publish(
   _box_long, _box_double,
   _prepare_long_export);
 
-$map.core.family(
+$map.grouped.rehashed.records(
+  struct MapStringStringRecord, _hash_string, _string_record_hash, _string_remember_hash);
+
+$map.grouped.core.family(
   MapStringString, struct MapStringString, String, String,
-  unsigned, struct MapStringStringRecord,
+  struct MapStringStringRecord,
   _hash_string, _equal_string, _equal_string,
   _valid_string,
   _string_key, _string_value,
-  _string_reinsert_error, _string_insert_error);
-$map.typed.family(
+  _string_reinsert_error, _string_insert_error,
+  _string_record_hash, _string_remember_hash, 1);
+$map.grouped.typed.family(
   MapStringString, String, String,
   _update_string, _bad_arg, _bad_op,
   _capacity_valid, _string_value, mapstringstring,
@@ -166,14 +179,17 @@ $map.typed.publish(
   _box_string, _box_string,
   _prepare_string_export);
 
-$map.core.family(
+$map.grouped.cached.records(struct MapStringIntRecord, _string_int_record_hash, _string_int_remember_hash);
+
+$map.grouped.core.family(
   MapStringInt, struct MapStringInt, String, int,
-  unsigned, struct MapStringIntRecord,
+  struct MapStringIntRecord,
   _hash_string, _equal_string, _equal_int,
   _valid_int,
   _string_int_key, _string_int_value,
-  _string_int_reinsert_error, _string_int_insert_error);
-$map.typed.family(
+  _string_int_reinsert_error, _string_int_insert_error,
+  _string_int_record_hash, _string_int_remember_hash, 0);
+$map.grouped.typed.family(
   MapStringInt, String, int,
   _update_int, _bad_arg, _bad_op,
   _capacity_valid, _string_int_value, mapstringint,
@@ -213,18 +229,26 @@ int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
   if ((void *) map == NULL) _bad_arg("MapStringInt");
   unsigned hash = key.hash();
   if (!hash) hash = -1;
-  unsigned *hashes = map.hashes;
+  unsigned char *controls = map.hashes;
   struct MapStringIntRecord *entries = map.entries;
-  unsigned capacity = map.capacity, mask = map.mask, start = hash & mask;
+  unsigned group_mask = map.mask >> 4, group = hash & group_mask;
+  unsigned lanes = map.capacity < 16 ? (1u << map.capacity) - 1 : 65535u;
+  unsigned char fingerprint = hash >> 25;
   const char *bytes = key.length
     ? (const char *) key.source + key.offset : NULL;
-  for (unsigned distance = 0; distance < capacity; distance++) {
-    unsigned index = (start + distance) & mask, stored = hashes[index];
-    if (!stored) break;
-    if (stored == hash && entries[index].key.len() == key.length &&
-        (!key.length || memcmp(entries[index].key, bytes, key.length) == 0))
-      return _update_int(&entries[index].val, <+>, count);
-    if (((capacity + index - (stored & mask)) & mask) < distance) break;
+  for (unsigned step = 0; step <= group_mask; step++) {
+    unsigned start = group * 16;
+    unsigned matches = x2c_map_group_match(controls + start, fingerprint) & lanes;
+    if (matches) __builtin_prefetch(entries + start, 0, 3);
+    while (matches) {
+      unsigned index = start + __builtin_ctz(matches);
+      if (entries[index].key.len() == key.length &&
+          (!key.length || memcmp(entries[index].key, bytes, key.length) == 0))
+        return _update_int(&entries[index].val, <+>, count);
+      matches &= matches - 1;
+    }
+    if (x2c_map_group_match(controls + start, 128) & lanes) break;
+    group = (group + step + 1) & group_mask;
   }
   return map.updateindex(key, <+>, count);
 }
@@ -278,10 +302,10 @@ static unsigned _hash_int(int *key) => x2c_hash_word((unsigned) key[0]);
 
 static unsigned _hash_long(long *key) => x2c_hash_word((unsigned long) key[0]);
 
-/* A canonical String caches its content hash, so a lookup reads it instead of
-   walking bytes. Zero marks an empty bucket and the empty String hashes to
-   zero, so that one key borrows the reserved value, as Var.hash does for the
-   same String. */
+/* A canonical String caches its content hash instead of walking bytes.
+   Keep production's zero normalization for identical hash inputs. Grouped
+   occupancy lives in control bytes; the normalized hash itself does not
+   mark an empty slot. */
 static unsigned _hash_string(String *key) {
   unsigned hash = key[0].hash();
   return hash ? hash : -1;

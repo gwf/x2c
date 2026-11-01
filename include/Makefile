@@ -27,6 +27,7 @@ all:
 	    ln -sf "../../$(LIB_BUILD)/$$directory/$$name" "$(HEADER_DIR)/$$directory/$$name"; \
 	  fi; \
 	done
+	@ln -sf "../$(LIB_SOURCE)/map/group-match.h" "$(HEADER_DIR)/group-match.h"
 
 clean:
 	rm -rf $(HEADER_DIR)

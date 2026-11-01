@@ -1292,6 +1292,13 @@ carries the same lookup, defaulting, update, deletion, traversal, `copy`, and
 declared type, converting every key and value to the field type; an entry that
 cannot be converted raises `<no-convert>`.
 
+Typed Maps use grouped hash storage. Each group compares sixteen one-byte
+fingerprints before checking matching keys. Deletion leaves a reusable slot;
+insertion removes accumulated deleted slots when rebuilding the table.
+`MapStringInt` and `MapSubInt` retain complete key hashes for rebuilding.
+The untyped `Map` continues to use Robin Hood storage. These representations
+do not change the lookup, ownership, or traversal contracts.
+
 ```x2c
 #include "typed-map.x"
 
