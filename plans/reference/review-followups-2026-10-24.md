@@ -38,7 +38,7 @@ delivered repairs and a historical cleanup census. Remaining candidates:
 
 The source-form, rewrite, and Lisp explanations belong to the
 [writing plan](../review-remediation-2026-10-11.md). Typed quotation work
-belongs to the [quotation plan](../quotation-adoption-audit-2026-10-03.md).
+belongs to the [quotation plan](../archive/quotation-adoption-closeout-2026-10-31.md).
 
 ## SDK and native types
 

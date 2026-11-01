@@ -1,6 +1,8 @@
 # Remaining quotation adoption
 
-> Status: reference, 2026-10-24.
+> Status: done - selected typed alignment delivered as `e8be27b73`.
+> Archived 2026-10-31. Unselected quotation and TagId candidates have
+> [separate owners C5-C6](../reference/deferred-candidates-2026-10-31.md).
 > The selected typed `_Alignof` follow-up is implemented. Individual
 > adoption and TagId generation remain unselected candidates.
 
@@ -54,10 +56,10 @@ for ordinary Var users. Existing assertions already check their agreement.
 
 ## Delivered work and evidence
 
-The [adoption audit](archive/quotation-adoption-audit-2026-10-03.md) retains
+The [adoption audit](quotation-adoption-audit-2026-10-03.md) retains
 earlier measurements, accepted and declined conversions, and the dropped
 shared ErrorSlot proposal. Current construction guidance is
-[choosing how to build syntax](../agents/lowering-with-macros.md#choosing-how-to-build-syntax).
+[choosing how to build syntax](../../agents/lowering-with-macros.md#choosing-how-to-build-syntax).
 
 ## Plan review
 

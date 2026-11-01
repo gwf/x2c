@@ -9,7 +9,7 @@
 
 ## Current follow-up owner
 
-The [quotation adoption plan](../quotation-adoption-audit-2026-10-03.md#remaining-work)
+The [quotation adoption plan](quotation-adoption-closeout-2026-10-31.md#remaining-work)
 owns the selected typed `_Alignof` and scalar generator cleanup. The
 [index](../README.md#current-work-and-backlog) owns the current task list.
 The proposals below retain their historical context; they are not a second queue.

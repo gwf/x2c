@@ -1,6 +1,8 @@
 # Map and Array rest parameters
 
-> Status: active
+> Status: done - Map rest implemented on 2026-10-27 through `cd209b178`
+> and `6ead2cdde`; archived 2026-10-31. Deferred Array rest and the meta Map
+> boundary have [separate owners C3-C4](../reference/deferred-candidates-2026-10-31.md).
 > Recorded 2026-10-27 after `List @name` replaced the four-dot spelling of
 > List rest parameters. Gary settled the Map questions the same day, and Map
 > rest was implemented on 2026-10-27 as described below. Array rest stays
@@ -12,7 +14,7 @@
 
 A final `List @name` parameter packs the trailing call arguments into one
 ordinary List; see "List rest parameters" in
-[the language reference](../docs/src/reference/language.md#list-rest-parameters).
+[the language reference](../../docs/src/reference/language.md#list-rest-parameters).
 The parser in `Compiler.parse_parameter` reads `@` after a `List` type and
 produced `(param (....) (bind NAME ()))`, now `(.... "List")`. Every later
 owner tests that semantic Type: call typing and lowering, `Compiler.pack_rest_arguments`,

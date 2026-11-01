@@ -8,6 +8,9 @@
 > landed, what was scoped, and the follow-ups found. Findings and
 > verification are in [the review record](../reference/review-2026-10-30.md).
 
+Current follow-up ownership is in the [October 31 follow-up plan](../review-followups-2026-10-31.md).
+Its rows supersede the pending state of the dated lists below.
+
 ## Result and scope
 
 Repair the reproduced defects and the drift the review found in the month
