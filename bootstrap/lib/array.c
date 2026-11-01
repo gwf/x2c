@@ -33,7 +33,7 @@ static Array f5_array___Array_copy_elements(Array _x2c_gensym_macro_array_3);
 
 static Array f5_array___Array_slice_elements(Array _x2c_gensym_macro_array_4, int _x2c_gensym_macro_start_0, int _x2c_gensym_macro_end_0, int _x2c_gensym_macro_step_0);
 
-static inline int _x2c_gensym_macro__normalize_bound_0(Array _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_2);
+static inline int _x2c_gensym_macro__normalize_bound_0(Array _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_3);
 
 static inline void _x2c_gensym_macro__normalize_span_0(Array _x2c_gensym_macro_array_6, int * _x2c_gensym_macro_start_2, int * _x2c_gensym_macro_end_1);
 
@@ -41,7 +41,7 @@ static void f5_array___Array_replace_elements(Array _x2c_gensym_macro_array_7, i
 
 static Array f5_array___Array_cut_elements(Array _x2c_gensym_macro_array_8, int _x2c_gensym_macro_start_4, int _x2c_gensym_macro_end_3);
 
-static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_3, int _x2c_gensym_macro_remove_count_0, Array _x2c_gensym_macro_values_1);
+static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_4, int _x2c_gensym_macro_remove_count_0, Array _x2c_gensym_macro_values_1);
 
 static int f5_array___Array_index_element(Array _x2c_gensym_macro_array_10, Var _x2c_gensym_macro_value_1);
 
@@ -219,18 +219,14 @@ static Array f5_array___Array_slice_elements(Array _x2c_gensym_macro_array_4, in
     return _x2c_gensym_macro_slice_0;
   }
   Var * _x2c_gensym_macro_data_3 =(Var *) _x2c_gensym_macro_array_4 -> bytes;
-  if(_x2c_gensym_macro_step_0 < 0){
-    for(int _x2c_gensym_macro_i_0 = _x2c_gensym_macro_start_0;  _x2c_gensym_macro_i_0 > _x2c_gensym_macro_end_0;  _x2c_gensym_macro_i_0 += _x2c_gensym_macro_step_0) Block_append((Block) _x2c_gensym_macro_slice_0, _x2c_gensym_macro_data_3 + _x2c_gensym_macro_i_0, 1);
-  }
-  else{
-    for(int _x2c_gensym_macro_i_1 = _x2c_gensym_macro_start_0;  _x2c_gensym_macro_i_1 < _x2c_gensym_macro_end_0;  _x2c_gensym_macro_i_1 += _x2c_gensym_macro_step_0) Block_append((Block) _x2c_gensym_macro_slice_0, _x2c_gensym_macro_data_3 + _x2c_gensym_macro_i_1, 1);
-  }
+  long long _x2c_gensym_macro_index_2 = _x2c_gensym_macro_start_0;
+  for(int _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_newlen_0;  _x2c_gensym_macro_i_0 ++, _x2c_gensym_macro_index_2 += _x2c_gensym_macro_step_0) Block_append((Block) _x2c_gensym_macro_slice_0, _x2c_gensym_macro_data_3 + _x2c_gensym_macro_index_2, 1);
   return _x2c_gensym_macro_slice_0;
 }
 
-static inline int _x2c_gensym_macro__normalize_bound_0(Array _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_2){
+static inline int _x2c_gensym_macro__normalize_bound_0(Array _x2c_gensym_macro_array_5, int _x2c_gensym_macro_index_3){
   int _x2c_gensym_macro_length_0 =(int) _x2c_gensym_macro_array_5 -> length;
-  int _x2c_gensym_macro_start_1 = _x2c_gensym_macro_index_2, _x2c_gensym_macro_stop_0 = _x2c_gensym_macro_index_2;
+  int _x2c_gensym_macro_start_1 = _x2c_gensym_macro_index_3, _x2c_gensym_macro_stop_0 = _x2c_gensym_macro_index_3;
   x2c_normalize_slice(&(_x2c_gensym_macro_start_1), &(_x2c_gensym_macro_stop_0), 1, _x2c_gensym_macro_length_0);
   return _x2c_gensym_macro_start_1;
 }
@@ -308,10 +304,10 @@ static Array f5_array___Array_cut_elements(Array _x2c_gensym_macro_array_8, int 
   return _x2c_gensym_macro_removed_0;
 }
 
-static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_3, int _x2c_gensym_macro_remove_count_0, Array _x2c_gensym_macro_values_1){
+static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, int _x2c_gensym_macro_index_4, int _x2c_gensym_macro_remove_count_0, Array _x2c_gensym_macro_values_1){
   if(_x2c_gensym_macro_remove_count_0 < 0) _x2c_gensym_macro_remove_count_0 = 0;
   int _x2c_gensym_macro_n_5 =(int) _x2c_gensym_macro_array_9 -> length;
-  int _x2c_gensym_macro_start_5 = _x2c_gensym_macro__normalize_bound_0(_x2c_gensym_macro_array_9, _x2c_gensym_macro_index_3);
+  int _x2c_gensym_macro_start_5 = _x2c_gensym_macro__normalize_bound_0(_x2c_gensym_macro_array_9, _x2c_gensym_macro_index_4);
   long long _x2c_gensym_macro_target_0 =(long long) _x2c_gensym_macro_start_5 + _x2c_gensym_macro_remove_count_0;
   int _x2c_gensym_macro_end_4 = _x2c_gensym_macro_target_0 > _x2c_gensym_macro_n_5 ? _x2c_gensym_macro_n_5 :(int) _x2c_gensym_macro_target_0;
   Array _x2c_gensym_macro_removed_1 = f5_array___Array_slice_elements(_x2c_gensym_macro_array_9, _x2c_gensym_macro_start_5, _x2c_gensym_macro_end_4, 1);
@@ -322,14 +318,14 @@ static Array f5_array___Array_splice_elements(Array _x2c_gensym_macro_array_9, i
 static int f5_array___Array_index_element(Array _x2c_gensym_macro_array_10, Var _x2c_gensym_macro_value_1){
   Var * _x2c_gensym_macro_data_6 =(Var *) _x2c_gensym_macro_array_10 -> bytes;
   int _x2c_gensym_macro_n_6 =(int) _x2c_gensym_macro_array_10 -> length;
-  for(int _x2c_gensym_macro_i_2 = 0;  _x2c_gensym_macro_i_2 < _x2c_gensym_macro_n_6;  _x2c_gensym_macro_i_2 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_6[_x2c_gensym_macro_i_2], _x2c_gensym_macro_value_1)) return _x2c_gensym_macro_i_2;
+  for(int _x2c_gensym_macro_i_1 = 0;  _x2c_gensym_macro_i_1 < _x2c_gensym_macro_n_6;  _x2c_gensym_macro_i_1 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_6[_x2c_gensym_macro_i_1], _x2c_gensym_macro_value_1)) return _x2c_gensym_macro_i_1;
   return - 1;
 }
 
 static int f5_array___Array_count_element(Array _x2c_gensym_macro_array_11, Var _x2c_gensym_macro_value_2){
   Var * _x2c_gensym_macro_data_7 =(Var *) _x2c_gensym_macro_array_11 -> bytes;
   int _x2c_gensym_macro_n_7 =(int) _x2c_gensym_macro_array_11 -> length, _x2c_gensym_macro_total_0 = 0;
-  for(int _x2c_gensym_macro_i_3 = 0;  _x2c_gensym_macro_i_3 < _x2c_gensym_macro_n_7;  _x2c_gensym_macro_i_3 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_7[_x2c_gensym_macro_i_3], _x2c_gensym_macro_value_2)) _x2c_gensym_macro_total_0 ++;
+  for(int _x2c_gensym_macro_i_2 = 0;  _x2c_gensym_macro_i_2 < _x2c_gensym_macro_n_7;  _x2c_gensym_macro_i_2 ++) if(x2c_var_equal_lane(_x2c_gensym_macro_data_7[_x2c_gensym_macro_i_2], _x2c_gensym_macro_value_2)) _x2c_gensym_macro_total_0 ++;
   return _x2c_gensym_macro_total_0;
 }
 
@@ -342,9 +338,9 @@ static Array f5_array___Array_concat_elements(Array _x2c_gensym_macro_a_0, Array
 static Array f5_array___Array_reverse_elements(Array _x2c_gensym_macro_array_12){
   if(_x2c_gensym_macro_array_12 == NULL || _x2c_gensym_macro_array_12 -> length < 2) return _x2c_gensym_macro_array_12;
   Var * _x2c_gensym_macro_data_8 =(Var *) _x2c_gensym_macro_array_12 -> bytes;
-  for(size_t _x2c_gensym_macro_i_4 = 0, _x2c_gensym_macro_j_0 = _x2c_gensym_macro_array_12 -> length - 1;  _x2c_gensym_macro_i_4 < _x2c_gensym_macro_j_0;  _x2c_gensym_macro_i_4 ++, _x2c_gensym_macro_j_0 --){
-    Var _x2c_gensym_macro_tmp_1 = _x2c_gensym_macro_data_8[_x2c_gensym_macro_i_4];
-    _x2c_gensym_macro_data_8[_x2c_gensym_macro_i_4] = _x2c_gensym_macro_data_8[_x2c_gensym_macro_j_0];
+  for(size_t _x2c_gensym_macro_i_3 = 0, _x2c_gensym_macro_j_0 = _x2c_gensym_macro_array_12 -> length - 1;  _x2c_gensym_macro_i_3 < _x2c_gensym_macro_j_0;  _x2c_gensym_macro_i_3 ++, _x2c_gensym_macro_j_0 --){
+    Var _x2c_gensym_macro_tmp_1 = _x2c_gensym_macro_data_8[_x2c_gensym_macro_i_3];
+    _x2c_gensym_macro_data_8[_x2c_gensym_macro_i_3] = _x2c_gensym_macro_data_8[_x2c_gensym_macro_j_0];
     _x2c_gensym_macro_data_8[_x2c_gensym_macro_j_0] = _x2c_gensym_macro_tmp_1;
   }
   return _x2c_gensym_macro_array_12;
@@ -355,7 +351,7 @@ static int f5_array___Array_equal_elements(Array _x2c_gensym_macro_a_1, Array _x
   if(_x2c_gensym_macro_a_1 == NULL || _x2c_gensym_macro_b_1 == NULL || _x2c_gensym_macro_a_1 -> length != _x2c_gensym_macro_b_1 -> length || _x2c_gensym_macro_a_1 -> width != _x2c_gensym_macro_b_1 -> width) return 0;
   Var * _x2c_gensym_macro_adata_0 =(Var *) _x2c_gensym_macro_a_1 -> bytes;
   Var * _x2c_gensym_macro_bdata_0 =(Var *) _x2c_gensym_macro_b_1 -> bytes;
-  for(size_t _x2c_gensym_macro_i_5 = 0;  _x2c_gensym_macro_i_5 < _x2c_gensym_macro_a_1 -> length;  _x2c_gensym_macro_i_5 ++) if(! x2c_var_equal_lane(_x2c_gensym_macro_adata_0[_x2c_gensym_macro_i_5], _x2c_gensym_macro_bdata_0[_x2c_gensym_macro_i_5])) return 0;
+  for(size_t _x2c_gensym_macro_i_4 = 0;  _x2c_gensym_macro_i_4 < _x2c_gensym_macro_a_1 -> length;  _x2c_gensym_macro_i_4 ++) if(! x2c_var_equal_lane(_x2c_gensym_macro_adata_0[_x2c_gensym_macro_i_4], _x2c_gensym_macro_bdata_0[_x2c_gensym_macro_i_4])) return 0;
   return 1;
 }
 
@@ -424,37 +420,37 @@ Var Array_unshift(Array _x2c_gensym_macro_array_20, Var _x2c_gensym_macro_value_
   return _x2c_gensym_macro_value_6;
 }
 
-Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_4, Var _x2c_gensym_macro_value_7){
+Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_5, Var _x2c_gensym_macro_value_7){
   if(1){
     if(_x2c_gensym_macro_array_21 == NULL) return((void) 0, Void);
     if(_x2c_gensym_macro_array_21 -> length > INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_array_21 -> length);
     int _x2c_gensym_macro_n_8 =(int) _x2c_gensym_macro_array_21 -> length;
-    if(_x2c_gensym_macro_index_4 < 0) _x2c_gensym_macro_index_4 += _x2c_gensym_macro_n_8 + 1;
-    if(_x2c_gensym_macro_index_4 < 0 || _x2c_gensym_macro_index_4 > _x2c_gensym_macro_n_8) return((void) 0, Void);
+    if(_x2c_gensym_macro_index_5 < 0) _x2c_gensym_macro_index_5 += _x2c_gensym_macro_n_8 + 1;
+    if(_x2c_gensym_macro_index_5 < 0 || _x2c_gensym_macro_index_5 > _x2c_gensym_macro_n_8) return((void) 0, Void);
     if(_x2c_gensym_macro_n_8 == INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_n_8);
     if(Var_is_void(_x2c_gensym_macro_value_7)){
       static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/array/array.x",.function = "Array_insert",.line = 58,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 48270474208, 0);
       __builtin_unreachable();
     }
-    f5_array___Array_insert_element(_x2c_gensym_macro_array_21, _x2c_gensym_macro_index_4, _x2c_gensym_macro_value_7);
+    f5_array___Array_insert_element(_x2c_gensym_macro_array_21, _x2c_gensym_macro_index_5, _x2c_gensym_macro_value_7);
     return _x2c_gensym_macro_value_7;
   }
-  if(_x2c_gensym_macro_array_21 == NULL || _x2c_gensym_macro_array_21 -> length >= INT_MAX || ! f5_array___Array_insert_element(_x2c_gensym_macro_array_21, _x2c_gensym_macro_index_4, _x2c_gensym_macro_value_7)){
+  if(_x2c_gensym_macro_array_21 == NULL || _x2c_gensym_macro_array_21 -> length >= INT_MAX || ! f5_array___Array_insert_element(_x2c_gensym_macro_array_21, _x2c_gensym_macro_index_5, _x2c_gensym_macro_value_7)){
     if(Array_truth(_x2c_gensym_macro_array_21) && _x2c_gensym_macro_array_21 -> length >= INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_array_21 -> length);
     size_t _x2c_gensym_macro_size_1 = Array_truth(_x2c_gensym_macro_array_21) ? _x2c_gensym_macro_array_21 -> length : 0;
-    f5_array____bad_index(0, _x2c_gensym_macro_index_4, _x2c_gensym_macro_size_1);
+    f5_array____bad_index(0, _x2c_gensym_macro_index_5, _x2c_gensym_macro_size_1);
   }
   return _x2c_gensym_macro_value_7;
 }
 
-Var Array_remove(Array _x2c_gensym_macro_array_22, int _x2c_gensym_macro_index_5){
+Var Array_remove(Array _x2c_gensym_macro_array_22, int _x2c_gensym_macro_index_6){
   Var _x2c_gensym_macro_value_8 =((void) 0, Void);
-  if(Array_truth(_x2c_gensym_macro_array_22) && _x2c_gensym_macro_array_22 -> length <= INT_MAX && f5_array___Array_remove_element(_x2c_gensym_macro_array_22, _x2c_gensym_macro_index_5, & _x2c_gensym_macro_value_8)) return _x2c_gensym_macro_value_8;
+  if(Array_truth(_x2c_gensym_macro_array_22) && _x2c_gensym_macro_array_22 -> length <= INT_MAX && f5_array___Array_remove_element(_x2c_gensym_macro_array_22, _x2c_gensym_macro_index_6, & _x2c_gensym_macro_value_8)) return _x2c_gensym_macro_value_8;
   if(Array_truth(_x2c_gensym_macro_array_22) && _x2c_gensym_macro_array_22 -> length > INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_array_22 -> length);
   if(1) return((void) 0, Void);
   size_t _x2c_gensym_macro_size_2 = Array_truth(_x2c_gensym_macro_array_22) ? _x2c_gensym_macro_array_22 -> length : 0;
-  f5_array____bad_index(0, _x2c_gensym_macro_index_5, _x2c_gensym_macro_size_2);
+  f5_array____bad_index(0, _x2c_gensym_macro_index_6, _x2c_gensym_macro_size_2);
 }
 
 Array Array_copy(Array _x2c_gensym_macro_array_23){
@@ -483,11 +479,11 @@ Array Array_remslice(Array _x2c_gensym_macro_array_26, int _x2c_gensym_macro_sta
   return f5_array___Array_cut_elements(_x2c_gensym_macro_array_26, _x2c_gensym_macro_start_8, _x2c_gensym_macro_end_7);
 }
 
-Array Array_splice(Array _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_6, int _x2c_gensym_macro_remove_count_1, Array _x2c_gensym_macro_values_3){
+Array Array_splice(Array _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_7, int _x2c_gensym_macro_remove_count_1, Array _x2c_gensym_macro_values_3){
   if(_x2c_gensym_macro_array_27 == NULL) f5_array____bad_operation(0, 1309427914);
   if(_x2c_gensym_macro_array_27 -> length > INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_array_27 -> length);
   if(Array_truth(_x2c_gensym_macro_values_3) && _x2c_gensym_macro_values_3 -> length > INT_MAX) f5_array____size_limit(0, _x2c_gensym_macro_values_3 -> length);
-  return f5_array___Array_splice_elements(_x2c_gensym_macro_array_27, _x2c_gensym_macro_index_6, _x2c_gensym_macro_remove_count_1, _x2c_gensym_macro_values_3);
+  return f5_array___Array_splice_elements(_x2c_gensym_macro_array_27, _x2c_gensym_macro_index_7, _x2c_gensym_macro_remove_count_1, _x2c_gensym_macro_values_3);
 }
 
 int Array_index(Array _x2c_gensym_macro_array_28, Var _x2c_gensym_macro_value_9){
@@ -535,8 +531,8 @@ static int f5_array___Array_compare_elements(Array _x2c_gensym_macro_a_5, Array 
   size_t _x2c_gensym_macro_n_9 = _x2c_gensym_macro_asz_0 < _x2c_gensym_macro_bsz_0 ? _x2c_gensym_macro_asz_0 : _x2c_gensym_macro_bsz_0;
   Var * _x2c_gensym_macro_adata_1 =(Var *) _x2c_gensym_macro_a_5 -> bytes;
   Var * _x2c_gensym_macro_bdata_1 =(Var *) _x2c_gensym_macro_b_5 -> bytes;
-  for(size_t _x2c_gensym_macro_i_6 = 0;  _x2c_gensym_macro_i_6 < _x2c_gensym_macro_n_9;  _x2c_gensym_macro_i_6 ++){
-    int _x2c_gensym_macro_comparison_0 = f5_array____compare_var(_x2c_gensym_macro_adata_1[_x2c_gensym_macro_i_6], _x2c_gensym_macro_bdata_1[_x2c_gensym_macro_i_6]);
+  for(size_t _x2c_gensym_macro_i_5 = 0;  _x2c_gensym_macro_i_5 < _x2c_gensym_macro_n_9;  _x2c_gensym_macro_i_5 ++){
+    int _x2c_gensym_macro_comparison_0 = f5_array____compare_var(_x2c_gensym_macro_adata_1[_x2c_gensym_macro_i_5], _x2c_gensym_macro_bdata_1[_x2c_gensym_macro_i_5]);
     if(_x2c_gensym_macro_comparison_0) return _x2c_gensym_macro_comparison_0;
   }
   if(_x2c_gensym_macro_asz_0 == _x2c_gensym_macro_bsz_0) return 0;
@@ -563,11 +559,11 @@ static Buffer f5_array___Array_write_elements(Array _x2c_gensym_macro_array_37, 
       Var * _x2c_gensym_macro_data_9 = Array_truth(_x2c_gensym_macro_array_37) ?(Var *) _x2c_gensym_macro_array_37 -> bytes : NULL;
       size_t _x2c_gensym_macro_n_10 = Array_truth(_x2c_gensym_macro_array_37) ? _x2c_gensym_macro_array_37 -> length : 0;
       Buffer_write(_x2c_gensym_macro_out_10, "[ ");
-      for(size_t _x2c_gensym_macro_i_7 = 0;  _x2c_gensym_macro_i_7 < _x2c_gensym_macro_n_10;  _x2c_gensym_macro_i_7 ++){
-        Var _x2c_gensym_macro_element_0 = _x2c_gensym_macro_data_9[_x2c_gensym_macro_i_7];
+      for(size_t _x2c_gensym_macro_i_6 = 0;  _x2c_gensym_macro_i_6 < _x2c_gensym_macro_n_10;  _x2c_gensym_macro_i_6 ++){
+        Var _x2c_gensym_macro_element_0 = _x2c_gensym_macro_data_9[_x2c_gensym_macro_i_6];
         if(_x2c_gensym_macro_mode_0 == 40228) Var_write_str(_x2c_gensym_macro_element_0, _x2c_gensym_macro_out_10);
         else Var_write_repr(_x2c_gensym_macro_element_0, _x2c_gensym_macro_out_10);
-        if(_x2c_gensym_macro_i_7 < _x2c_gensym_macro_n_10 - 1) Buffer_write(_x2c_gensym_macro_out_10, ", ");
+        if(_x2c_gensym_macro_i_6 < _x2c_gensym_macro_n_10 - 1) Buffer_write(_x2c_gensym_macro_out_10, ", ");
       }
       {
         Buffer _x2c_gensym_return_value_0 = Buffer_write(_x2c_gensym_macro_out_10, " ]");
@@ -610,11 +606,11 @@ String Array_repr(Array _x2c_gensym_macro_array_36){
 
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_0, Var * _x2c_gensym_macro_out_11){
   Array _x2c_gensym_macro_array_38 = Var_array(_x2c_gensym_macro_iter_0 -> obj);
-  int _x2c_gensym_macro_index_7 = Var_int(_x2c_gensym_macro_iter_0 -> state);
+  int _x2c_gensym_macro_index_8 = Var_int(_x2c_gensym_macro_iter_0 -> state);
   Var _x2c_gensym_macro_element_1;
-  if(! Array_try_next(_x2c_gensym_macro_array_38, &(_x2c_gensym_macro_index_7), &(_x2c_gensym_macro_element_1))) return 0;
+  if(! Array_try_next(_x2c_gensym_macro_array_38, &(_x2c_gensym_macro_index_8), &(_x2c_gensym_macro_element_1))) return 0;
   * _x2c_gensym_macro_out_11 = _x2c_gensym_macro_element_1;
-  _x2c_gensym_macro_iter_0 -> state = int_var(_x2c_gensym_macro_index_7);
+  _x2c_gensym_macro_iter_0 -> state = int_var(_x2c_gensym_macro_index_8);
   return 1;
 }
 

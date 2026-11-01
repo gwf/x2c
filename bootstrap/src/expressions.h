@@ -9,6 +9,7 @@
 #include "private-keywords.h"
 #include "compiler/compiler.h"
 #include "type.h"
+#include "scan.h"
 typedef struct PrintfFn{
   const char * name;
   int fmt_arg, first_arg, unresolved;

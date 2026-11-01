@@ -6,38 +6,7 @@
 #include "rewrite.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
-static String _0;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
-static String _string_case_bytes(String spelling);
-
 static int _string_case_text(Type type);
-
-static String _string_case_key(List label);
-
-static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0);
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("\"");
-}
-
-static String _string_case_bytes(String spelling){
-  const char * p = spelling;
-  String bytes = _0;
-  while((p = strchr(p, '"'))){
-    const char * start = ++ p;
-    while(* p != '"') p += * p == '\\' ? 2 : 1;
-    _x2c_gensym_proto_string_add_update(&(bytes), 56, String_unescape(String_new_len(start, p - start)));
-    p ++;
-  }
-  return String_add(bytes, _0);
-}
 
 static int _string_case_text(Type type){
   return({
@@ -63,37 +32,5 @@ static int _string_case_text(Type type){
 _x2c_gensym_condition_1;
 }
 );
-}
-
-static String _string_case_key(List label){
-  {
-    List _x2c_gensym_match_expr_2 = label;
-    switch(_x2c_gensym_match_expr_2 ? _x2c_gensym_match_expr_2 -> car.u64 : 0){
-      case 9224497936761996324ULL :{List _x2c_gensym_match_at_7, _x2c_gensym_match_at_8, _x2c_gensym_match_at_9, _x2c_gensym_match_at_10, _x2c_gensym_match_at_11, _x2c_gensym_match_at_12, _x2c_gensym_match_at_13, _x2c_gensym_match_at_14, _x2c_gensym_match_at_15, _x2c_gensym_match_at_16, _x2c_gensym_match_at_17, _x2c_gensym_match_at_18, _x2c_gensym_match_at_19; Var x2c_match_value_0; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_7 = _x2c_gensym_match_expr_2 ->cdr) &&(_x2c_gensym_match_at_8 = _x2c_gensym_match_at_7 ->cdr) &&((Var_is(_x2c_gensym_match_at_8 -> car, 806120) &&(_x2c_gensym_match_at_9 = Var_list_payload(_x2c_gensym_match_at_8 -> car), 1)) && _x2c_gensym_match_at_9 && _x2c_gensym_match_at_9 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_10 = _x2c_gensym_match_at_9 ->cdr) &&(_x2c_gensym_match_at_11 = _x2c_gensym_match_at_10 ->cdr) &&(Var_is(_x2c_gensym_match_at_11 -> car, 806120) &&(_x2c_gensym_match_at_12 = Var_list_payload(_x2c_gensym_match_at_11 -> car), 1)) && _x2c_gensym_match_at_12 && _x2c_gensym_match_at_12 ->car.u64 == 9224497937838648230ULL &&(_x2c_gensym_match_at_13 = _x2c_gensym_match_at_12 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_13 ->car, 1) && !(_x2c_gensym_match_at_14 = _x2c_gensym_match_at_13 ->cdr) && !(_x2c_gensym_match_at_15 = _x2c_gensym_match_at_11 ->cdr) ||(Var_is(_x2c_gensym_match_at_8 -> car, 806120) &&(_x2c_gensym_match_at_16 = Var_list_payload(_x2c_gensym_match_at_8 -> car), 1)) && _x2c_gensym_match_at_16 && _x2c_gensym_match_at_16 ->car.u64 == 9224497937838648230ULL &&(_x2c_gensym_match_at_17 = _x2c_gensym_match_at_16 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_17 ->car, 1) && !(_x2c_gensym_match_at_18 = _x2c_gensym_match_at_17 ->cdr)) && !(_x2c_gensym_match_at_19 = _x2c_gensym_match_at_8 ->cdr)){{
-        Var inner;
-        inner = x2c_match_value_0;
-        return _string_case_key(Var_list_payload(inner));
-      }
-      break;}}{List _x2c_gensym_match_at_7, _x2c_gensym_match_at_8, _x2c_gensym_match_at_9, _x2c_gensym_match_at_10, _x2c_gensym_match_at_11, _x2c_gensym_match_at_12, _x2c_gensym_match_at_13; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_2 && _x2c_gensym_match_expr_2 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_7 = _x2c_gensym_match_expr_2 ->cdr) &&(_x2c_gensym_match_at_8 = _x2c_gensym_match_at_7 ->cdr) &&(Var_is(_x2c_gensym_match_at_8 -> car, 806120) &&(_x2c_gensym_match_at_9 = Var_list_payload(_x2c_gensym_match_at_8 -> car), 1)) && _x2c_gensym_match_at_9 && _x2c_gensym_match_at_9 ->car.u64 == 9224497963177709656ULL &&(_x2c_gensym_match_at_10 = _x2c_gensym_match_at_9 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_10 ->car, 1) &&(_x2c_gensym_match_at_11 = _x2c_gensym_match_at_10 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_11 ->car, 1) && !(_x2c_gensym_match_at_12 = _x2c_gensym_match_at_11 ->cdr) && !(_x2c_gensym_match_at_13 = _x2c_gensym_match_at_8 ->cdr)){{
-        Var type;
-        type = x2c_match_value_0;
-        Var text;
-        text = x2c_match_value_1;
-        {
-          String spelling = Var_as_string(text);
-          if(_string_case_text(Var_list_payload(type))) return String_contains(spelling, _0) ? _string_case_bytes(spelling) : spelling;
-        }
-
-      }
-      break;}} default: break;
-    }
-
-  }
-  return NULL;
-}
-
-static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0){
-  _x2c_gensym_macro_lhs_0[0] = String_add(_x2c_gensym_macro_lhs_0[0], _x2c_gensym_macro_rhs_0);
-  return _x2c_gensym_macro_lhs_0[0];
 }
 

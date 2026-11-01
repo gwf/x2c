@@ -970,12 +970,12 @@ int x2c_normalize_slice(int * start, int * stop, int step, int length){
     (* start) += length;  if((* start) < 0)(* start) =(step < 0) ? - 1 : 0;
   }
   else if((* start) >= length)(* start) =(step < 0) ? length - 1 : length;  if((* stop) < 0){
-    if(step > 0)(* stop) += length + 1;  else{
+    if(step > 0)(* stop) =(* stop) +(long long) length + 1;  else{
       if(orig_stop != INT_MIN)(* stop) += length;
     }
 
   }
-  if((* stop) < - 1)(* stop) = - 1;  if((* stop) > length)(* stop) = length;  int newlen = 0;  if(step < 0 &&(* start) >(* stop)) newlen =((* start) -(* stop) - 1) /(- step) + 1;  else if(step > 0 &&(* start) <(* stop)) newlen =((* stop) -(* start) - 1) / step + 1;  return newlen;
+  if((* stop) < - 1)(* stop) = - 1;  if((* stop) > length)(* stop) = length;  long long newlen = 0;  if(step < 0 &&(* start) >(* stop)) newlen =((long long)(* start) -(* stop) - 1) / -(long long) step + 1;  else if(step > 0 &&(* start) <(* stop)) newlen =((long long)(* stop) -(* start) - 1) / step + 1;  return newlen;
 }
 
 Array Var_array(Var);
