@@ -143,7 +143,7 @@ Var Compiler.literal_text_value(String spelling) {
     Buffer text = auto Buffer.new(0);
     int ended = 0;
     _literal_piece(text, spelling + 1, len - 2, ended);
-    String body = text.str();
+    String body = text;
     return (char) (body.len() ? body[0] : 0);
   }
   return void;
