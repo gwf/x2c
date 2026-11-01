@@ -650,6 +650,7 @@ static void pool_root_reads_and_concurrent_growth(void) {
   List list = List.cons_in(root, seed, NULL);
   unsigned capacity = root.table.capacity;
   int count = capacity / 2 + 32;
+  if (count < 32768) count = 32768;
   RootIndexTest reader = {.root = root, .seed = seed, .list = list};
   pthread_t read_thread, writers[3];
   Pool.thread_start();

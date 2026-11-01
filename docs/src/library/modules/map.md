@@ -551,9 +551,10 @@ Source: `lib/map/map.x`
 ## Design notes
 
 `Map` uses sixteen-byte control groups and parallel key/value records.
-Full 32-bit hashes follow the controls and tombstone count in the hash
-Block, so growth reuses hashes without invoking key callbacks. Deletion
-marks a reusable slot; insertion cleans tombstones during rebuilding.
+Full 32-bit hashes share the control Block below 65536 buckets; larger
+tables keep them in that Block's owned storage. Growth reuses hashes
+without invoking key callbacks. Deletion marks a reusable slot;
+insertion cleans tombstones during rebuilding.
 Structural mutation invalidates traversal state. Keys and values are
 stored as `Var` bits; the `Map` does not free pointer-bearing payloads or
 canonical values reachable through them.

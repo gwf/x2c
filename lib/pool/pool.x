@@ -23,7 +23,9 @@
 /** Maps each canonical value of one `Pool` level to itself.
     A bucket stores one Var, one control byte and one full 32-bit hash:
     13 bytes where a `Map` costs 21, before Block headers, tiny-table padding
-    and the deleted counter. It belongs to the level's `Scope`.
+    and the deleted counter. Full hashes share the control Block below 65536
+    buckets; larger tables keep them in that Block's owned storage.
+    It belongs to the level's `Scope`.
 */
 typedef struct PoolTable {
   Scope scope, Bytes hashes, entries;

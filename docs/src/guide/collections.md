@@ -1296,8 +1296,10 @@ Typed Maps use grouped hash storage. Each group compares sixteen one-byte
 fingerprints before checking matching keys. Deletion leaves a reusable slot;
 insertion removes accumulated deleted slots when rebuilding the table.
 `MapStringInt` and `MapSubInt` retain complete key hashes for rebuilding.
-Var Map uses the same grouped storage, with full hashes beside its controls
-to preserve custom-key filtering and avoid hash callbacks during growth.
+Var Map uses the same grouped storage, with full hashes to preserve custom-key
+filtering and avoid hash callbacks during growth. Below 65,536 buckets those
+hashes share the controls allocation. Larger tables allocate the hashes under
+the controls Block's storage owner to improve reuse of freed growth buffers.
 These representations do not change lookup, ownership, or traversal contracts.
 
 ```x2c

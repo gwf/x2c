@@ -4,8 +4,8 @@
 
     Controls hold seven-bit fingerprints, 128 for empty, and 254 for deleted.
     Tiny tables pad controls to sixteen bytes. An unsigned tombstone count
-    follows the padded controls. Var Map and Pool keep full hashes after it.
-    Both regions move with the control allocation.
+    follows the padded controls. Var Map and Pool keep full hashes beside it
+    below 65536 buckets, then in the control Block's owned storage.
 */
 
 /* Cached families retain the complete key hash for rebuilding. Other families
@@ -38,8 +38,13 @@ macro Unit $map.grouped.storage.family(
   Name $record_hash, Name $remember_hash, Literal $grow_tail,
   Literal $side_hashes, Literal $owned
 ) {
+  static struct _HashTrailer { unsigned deleted; unsigned *hashes; };
+
   static unsigned _control_count(unsigned capacity) =>
     capacity < 16 ? 16 : capacity;
+
+  static int _split_hashes(unsigned capacity) =>
+    $side_hashes && capacity >= 65536;
 
   static unsigned *_deleted($map map) =>
     (unsigned *) ((unsigned char *) map.hashes + _control_count(map.capacity));
@@ -51,28 +56,28 @@ macro Unit $map.grouped.storage.family(
     (void) unused;
     unsigned count = _control_count(capacity);
     size_t bytes = (size_t) count + sizeof(unsigned);
-    if ($side_hashes) bytes += (size_t) capacity * sizeof(unsigned);
-    Bytes controls = Bytes_new(bytes);
+    if (_split_hashes(capacity)) bytes = count + sizeof(struct _HashTrailer);
+    else if ($side_hashes) bytes += (size_t) capacity * sizeof(unsigned);
+    auto Bytes controls = Bytes_new(bytes);
     controls = controls.append(0, 1);
     memset(controls, 128, count);
-    return controls;
-  }
-
-  static inline unsigned *$map.full_hashes($map map) => _deleted(map) + 1;
-
-  static inline unsigned $map.stored_hash($map map, unsigned index) {
-    if ($side_hashes) return map.full_hashes()[index];
-    $entry *entries = map.entries;
-    return $record_hash(&entries[index]);
-  }
-
-  static inline void $map.remember_hash(
-    $map map, unsigned index, unsigned hash) {
-    if ($side_hashes) map.full_hashes()[index] = hash;
-    else {
-      $entry *entries = map.entries;
-      $remember_hash(&entries[index], hash);
+    if (_split_hashes(capacity)) {
+      Block block = controls;
+      (void) block.scope();
+      struct _HashTrailer *trailer =
+        (void *) ((unsigned char *) controls + count);
+      trailer.hashes =
+        Scope_calloc_in(&block.lifetime, capacity, sizeof(unsigned));
     }
+    Bytes result = controls;
+    controls = NULL;
+    return result;
+  }
+
+  static inline unsigned *$map.full_hashes($map map) {
+    if (_split_hashes(map.capacity))
+      return ((struct _HashTrailer *) _deleted(map)).hashes;
+    return _deleted(map) + 1;
   }
 
   static void $map.free_table($map map) {
@@ -99,6 +104,7 @@ macro Unit $map.grouped.storage.family(
   static long $map.find_hashed($map map, $key *key, unsigned key_hash) {
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned char fingerprint = key_hash >> 25;
     for (unsigned step = 0; step <= group_mask; step++) {
@@ -107,7 +113,7 @@ macro Unit $map.grouped.storage.family(
       if (matches) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+        if ((!$side_hashes || full_hashes[index] == key_hash) &&
             $key_equal($key_at(map, index), key)) return (long) index;
         matches &= matches - 1;
       }
@@ -133,6 +139,7 @@ macro Unit $map.grouped.storage.family(
     $map map, unsigned key_hash, const $entry *record) {
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned lanes = _lanes(map.capacity);
     for (unsigned step = 0; step <= group_mask; step++) {
@@ -141,7 +148,8 @@ macro Unit $map.grouped.storage.family(
       if (empty) {
         unsigned index = start + __builtin_ctz(empty);
         entries[index] = *record;
-        map.remember_hash(index, key_hash);
+        if ($side_hashes) full_hashes[index] = key_hash;
+        else $remember_hash(&entries[index], key_hash);
         controls[index] = key_hash >> 25;
         map.used++;
         return;
@@ -155,6 +163,7 @@ macro Unit $map.grouped.storage.family(
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
     unsigned old_capacity = map.capacity;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     auto Bytes staged_hashes = map.new_controls(capacity);
     auto Bytes staged_entries = Bytes_new(sizeof($entry));
     staged_entries = staged_entries.append(0, capacity);
@@ -167,7 +176,11 @@ macro Unit $map.grouped.storage.family(
     $map replacement = ($map) &expanded;
     for (unsigned i = 0; i < old_capacity; i++)
       if (controls[i] < 128)
-        replacement.reinsert_unique(map.stored_hash(i), &entries[i]);
+        replacement.reinsert_unique(
+          $side_hashes ? full_hashes[i] : $record_hash(&entries[i]),
+          &entries[i]);
+    if (_split_hashes(capacity))
+      staged_hashes.block().lifetime.transfer(Scope_owner(map.hashes.block()));
     Scope_move_before(staged_hashes.block(), map.hashes.block());
     Scope_move_before(
       (unsigned char *) staged_hashes - sizeof(Block),
@@ -200,6 +213,7 @@ macro Unit $map.grouped.storage.family(
     unsigned char fingerprint = key_hash >> 25;
     unsigned char *controls = map.hashes;
     $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
     unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
     unsigned lanes = _lanes(map.capacity), available = ~0u;
     for (unsigned step = 0; step <= group_mask; step++) {
@@ -209,7 +223,7 @@ macro Unit $map.grouped.storage.family(
       if (matches) __builtin_prefetch(entries + start, 0, 3);
       while (matches) {
         unsigned index = start + __builtin_ctz(matches);
-        if ((!$side_hashes || map.full_hashes()[index] == key_hash) &&
+        if ((!$side_hashes || full_hashes[index] == key_hash) &&
             $key_equal($key_at(map, index), key)) {
           *inserted = 0;
           return $value_at(map, index);
@@ -237,7 +251,8 @@ macro Unit $map.grouped.storage.family(
         if (controls[available] == 254) (*_deleted(map))--;
         entries[available].key = *key;
         entries[available].val = *value;
-        map.remember_hash(available, key_hash);
+        if ($side_hashes) full_hashes[available] = key_hash;
+        else $remember_hash(&entries[available], key_hash);
         controls[available] = fingerprint;
         map.used++;
         *inserted = 1;

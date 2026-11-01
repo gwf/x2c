@@ -1,0 +1,39 @@
+# Split large grouped Map hash storage
+
+> Status: active - 2026-11-01.
+> Gary authorized adopting the measured large-table split policy.
+
+## Result
+
+Implement the successful prototype once in the shared grouped generator.
+Var Map and Pool keep combined controls/full hashes below 65536 buckets.
+Larger tables put an aligned full-hash pointer after the controls and allocate
+the hashes in the controls Block's existing lifetime Scope. Cache the hash
+pointer per probe and rebuild. Preserve native typed layouts, prefetch policy,
+public signatures and structs, key callbacks, and root atomic publication.
+
+Block cleanup, owner moves and Context export already carry Block.lifetime.
+Rebuild must transfer that lifetime before moving staged Block allocations.
+Guard controls construction so allocation failures reclaim staged storage.
+The accepted tradeoff is an internal storage Scope for large tables and the
+prototype's roughly 4% large-hit-lookup cost, with headline CPU flat and peak
+RSS substantially lower. Keep the prior experiment archive as dated evidence.
+
+## Delivery
+
+1. Port storage allocation and pointer caching. Cover the split threshold,
+   foreign allocation regions, Context export and concurrent root growth with
+   focused native/scalar/sanitizer checks. Regenerate affected fixture symbols
+   and API documentation through existing targets.
+2. Review authored changes. Freeze the candidate and compare the same integer,
+   direct-operation, word-count and representative compiler workloads against
+   the retained current grouped control with matching optimization settings.
+3. Integrate current dev, run the existing publication gate, review generated
+   artifacts, publish to dev and archive the completed plan with measurements.
+
+## Design review
+
+Reuse Block.lifetime rather than adding a third independently managed Block or
+new Context obligations. Keep one probing implementation and one threshold
+policy for side hashes. Native typed families compile away the side-hash path.
+No new allocator, global synchronization, recurring check or backend selector.

@@ -174,6 +174,26 @@ static void context_failed_export_restores_container_owner(void) {
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
 }
 
+static void context_exports_large_map_storage(void) {
+  Context outer = Context.open_isolated_named("large Map destination");
+  Context inner = Context.open_isolated_named("large Map source");
+  Map map = {};
+  for (int i = 0; i < 50000; i++) map[i] = i + 1;
+  Map exported = inner.export(map);
+  inner.close();
+
+  int correct = 1;
+  for (int i = 0; i < 50000; i++)
+    if (exported[i].int() != i + 1) correct = 0;
+  EXPECT_PTR_EQ(exported, map);
+  EXPECT_TRUE(correct);
+  Scope cache_owner = exported.hashes.block().lifetime;
+  EXPECT_PTR_EQ(cache_owner.parent(), Scope.owner(exported.hashes.block()));
+  exported[50000] = 50001;
+  EXPECT_INT_EQ(exported[50000].int(), 50001);
+  outer.close();
+}
+
 static void context_exports_owned_storage(void) {
   Context outer = Context.open_isolated_named("storage destination");
   Context inner = Context.open_isolated_named("storage source");
@@ -449,6 +469,7 @@ void context_suite(void) {
   $test.run(context_rehashes_exported_map_keys);
   $test.run(context_exports_registered_object);
   $test.run(context_failed_export_restores_container_owner);
+  $test.run(context_exports_large_map_storage);
   $test.run(context_exports_owned_storage);
   $test.run(context_exports_all_packed_containers);
   $test.run(context_leaves_borrowed_packed_containers_untouched);
