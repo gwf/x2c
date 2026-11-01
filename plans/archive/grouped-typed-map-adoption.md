@@ -1,6 +1,7 @@
 # Adopt grouped storage for typed Maps
 
-> Status: done - 2026-10-31.
+> Status: done - 2026-10-31. Superseded for Var Map and Pool by the
+> [Robin Hood retirement](retire-robin-hood-map.md) on 2026-10-31.
 > Runtime adoption published to dev at `9ef736b22`, after integrating `d211420b4`.
 > The publication gate and full benchmark campaign passed. Typed Map is 1.34x
 > Boost and Var Map is 3.17x typed on the common integer cohort. The old typed

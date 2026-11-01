@@ -364,7 +364,7 @@ static void _find_colliding_keys(
   }
 }
 
-static void map_collision_backshift_and_reuse(void) {
+static void map_collision_tombstone_reuse(void) {
   $test.scoped();
   Var keys[4];
   _find_colliding_keys(keys, 4, 7, 7);
@@ -782,7 +782,7 @@ void map_suite(void) {
   $test.run(map_merge_with_handles_null_growth_and_self);
   $test.run(map_merge_with_callback_failure_keeps_completed_entries);
   $test.run(map_growth_survives_a_nested_region);
-  $test.run(map_collision_backshift_and_reuse);
+  $test.run(map_collision_tombstone_reuse);
   $test.run(map_reference_model_churn);
   $test.run(map_stable_traversal_visits_every_entry);
   $test.run(map_setdefault_behavior);

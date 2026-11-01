@@ -50,9 +50,8 @@ macro Unit $map.scaffold(
   Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error,
   Literal $reinsert_owner, Literal $insert_owner
 ) {
-  static void $reinsert_error(unsigned capacity, int probe) {
-    raise %(invariant (operation $($reinsert_owner)) (capacity $capacity)
-            (probe $probe));
+  static void $reinsert_error(unsigned capacity) {
+    raise %(invariant (operation $($reinsert_owner)) (capacity $capacity));
   }
 
   static void $insert_error(unsigned capacity) {
@@ -295,7 +294,7 @@ macro Unit $map.typed.operations(
   }
 }
 
-/* Native updates share lookup and insertion; Var updates belong to Map. */
+/* Entry comparison, equality, and printing shared by every family. */
 macro Unit $map.core.observe(
   Type $map, Type $key, Type $value, Type $entry,
   Name $box_key, Name $box_value,

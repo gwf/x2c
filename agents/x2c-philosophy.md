@@ -965,9 +965,10 @@ Exemplars endorse a property, not every line in a file:
 - `lib/array/generics.x` - one imported implementation shared by ordinary
   `Array` and six explicitly instantiated packed numeric families; `%[...]`
   remains the ordinary `Var` Array path.
-- `lib/map/generics.x` - one Robin Hood implementation shared by ordinary
-  `Map` and explicitly instantiated native numeric families; hashing, equality,
-  errors, boxing, and iteration remain visible per-family choices.
+- `lib/map/grouped.x` and `lib/map/generics.x` - one grouped storage
+  implementation shared by ordinary `Map`, `Pool` tables, and the explicitly
+  instantiated native families; hashing, equality, errors, boxing, and
+  iteration remain visible per-family choices in `generics.x`.
 - `examples/programs/literate-lisp.x` - the current language written the way
   it is meant to be read: `auto` for lifetimes, `in` and `is`
   for membership and tags, destructuring, `=>` bodies, bare literals, and `.`

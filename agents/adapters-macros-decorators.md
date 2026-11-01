@@ -148,8 +148,8 @@ Current proven shapes include:
   `lib/var-ledger.x` and `src/type-ledger.x`. One row supplies the tag
   tables, the decoder table, the `TagId` check, and the compiler's lookups.
 
-`lib/map/generics.x` also shows how to remove fake adapters without
-discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
+`lib/map/grouped.x` also shows how to remove fake adapters without
+discarding real ones. Its generated storage calls ordinary `Scope`, `Bytes`,
 and `Block` operations directly as `Scope_malloc` and sibling C entries.
 Passing those
 operations through one wrapper per consumer would add no policy or conversion.
@@ -408,23 +408,24 @@ or over-aligned elements, and `%[...]` still constructs ordinary `Array`.
 ### Macro-generated typed map families
 
 Status: proven
-Checked: 2026-08-08 at `f83edbdb`
-Owner: `lib/map/generics.x`, `lib/map/map.x`, and `lib/typed-map.x`
+Checked: 2026-11-01 at `85eb34904`
+Owner: `lib/map/grouped.x`, `lib/map/generics.x`, `lib/map/map.x`, and
+`lib/typed-map.x`
 
-Problem: a second Robin Hood table for native key and value types would
+Problem: a second hash table for native key and value types would
 repeat the probing, record reuse, growth, deletion, and traversal algorithms
 that ordinary `Map` already owns, with the two copies free to drift.
 Direct form: one hand-written module per typed family, each restating the
 whole table algorithm.
-Adapter/macro/decorator form: one imported generator owns scope-backed table
-storage and every algorithm; ordinary `Map` instantiates it with Var hashing
-and equality, and each typed family instantiates the same core with concrete
-key and value operations. Iter and Var publication is a separate opt-in
+Adapter/macro/decorator form: one imported generator in `grouped.x` owns
+scope-backed grouped storage and every algorithm; ordinary `Map` and `Pool`
+tables instantiate it with Var hashing and equality, and each typed family
+instantiates the same core with concrete key and value operations. Iter and Var publication is a separate opt-in
 expansion, so a family that never boxes pays nothing for it.
 Economics: `lib/map/map.x` lost roughly 300 authored lines while gaining three
 typed families; the generated C stays specialized on their record fields.
 Proof: the Map suite checks ordinary Map behavior,
-`unittest/test-typed-map.x` covers all three shipped families including
+`unittest/test-typed-map.x` covers the five shipped families including
 expand unwinding, and the `map-generator-family` compiler fixtures compare
 normal and live symbol collection on an internal family that also exercises
 the publication stage.

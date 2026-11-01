@@ -448,7 +448,8 @@ inline unsigned x2c_hash_bytes(
 }
 
 /** Narrows a mixed word to the nonzero 32-bit hash the tables expect.
-    Zero is reserved to mark an empty bucket, so it maps to all ones.
+    The root Pool index reserves zero for an empty slot, so it maps to all
+    ones; grouped Map storage marks occupancy in control bytes instead.
 */
 inline unsigned x2c_hash_word(unsigned long word) {
   unsigned hash = (unsigned) x2c_mix64(word);

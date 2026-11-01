@@ -1,6 +1,7 @@
 # Retire Robin Hood Map storage
 
-> Status: done - 2026-10-31.
+> Status: done - 2026-10-31. Superseded for tables of 65536 buckets or
+> more by [split storage](grouped-map-split-storage.md) on 2026-11-01.
 > Implemented through `027c1f2b253c2ea5ad5c4c090b432e7dcc56282e`;
 > the final publication gate passes. Var Map, typed Maps and ordinary PoolTable
 > share grouped storage. Runtime Robin Hood storage is removed.
