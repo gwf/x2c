@@ -15351,7 +15351,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12298 = List_var(_12297);
   _12299 = String_new("lib/list/traversal.x");
   _12300 = String_var(_12299);
-  _12301 = String_new("1f2bdcab");
+  _12301 = String_new("60931a4b");
   _12302 = String_var(_12301);
   _12303 = cons(_12302, NULL);
   _12304 = cons(_12300, _12303);
