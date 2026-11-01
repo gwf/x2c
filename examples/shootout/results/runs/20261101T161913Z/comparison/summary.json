@@ -1,0 +1,93 @@
+{
+  "measured_revision": "b81b82c3065ffcfaf900d6febdd9d874ec179b5a",
+  "common_workloads": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "regexredux",
+    "pidigits"
+  ],
+  "tuned_over_baseline_geomean": {
+    "c": 1.2423621453050313,
+    "rust": 1.0593403175371892,
+    "cpp": 0.8035953058821307,
+    "go": 0.6052948520395207,
+    "python": 0.08074457110923937,
+    "idiomatic": 0.4605706490994605
+  },
+  "accepted_changes": [
+    {
+      "problem": "revcomp",
+      "input": "100000",
+      "medians": {
+        "before": {
+          "elapsed_ns": 5244583.0,
+          "user_ns": 4290500.0,
+          "system_ns": 665500.0,
+          "max_rss_bytes": 4603904.0
+        },
+        "after": {
+          "elapsed_ns": 1925000.0,
+          "user_ns": 1105000.0,
+          "system_ns": 523500.0,
+          "max_rss_bytes": 2228224.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.3670453875932557
+    },
+    {
+      "problem": "fasta",
+      "input": "100000",
+      "medians": {
+        "before": {
+          "elapsed_ns": 13895958.5,
+          "user_ns": 13122500.0,
+          "system_ns": 520000.0,
+          "max_rss_bytes": 1703936.0
+        },
+        "after": {
+          "elapsed_ns": 3678604.5,
+          "user_ns": 2926000.0,
+          "system_ns": 473500.0,
+          "max_rss_bytes": 1687552.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.2647247759123633
+    },
+    {
+      "problem": "nbody",
+      "input": "1000000",
+      "medians": {
+        "before": {
+          "elapsed_ns": 65936583.5,
+          "user_ns": 64801000.0,
+          "system_ns": 657500.0,
+          "max_rss_bytes": 1589248.0
+        },
+        "after": {
+          "elapsed_ns": 30027458.0,
+          "user_ns": 29094000.0,
+          "system_ns": 607500.0,
+          "max_rss_bytes": 1572864.0
+        }
+      },
+      "paired_wins": 12,
+      "ratio": 0.4553990577931597
+    }
+  ],
+  "source_sha256": {
+    "before/revcomp": "2fc84389894ff7742f8a01abac1382d1df03310965974c35ac83f44efed9b5de",
+    "before/fasta": "72a0c68b2eb0a4f990e10330c734c46a86ca879903cd491707b5438762a9bcb8",
+    "before/nbody": "19c960c3d31627130665f89ce36967671d685f4b962dcf60a8d4d957284bfe42",
+    "rev-input/revcomp": "4e4a76f430f0f3c0650b141dbbae4af1e101fb56fabf07bf9d69a7d18c04db11",
+    "rev-batched/revcomp": "0b26a39a0a8b7982e7cc72629578e4166ff1b470dd1ca893103faeedf4a8ab9c",
+    "fasta-buffered/fasta": "15d770e4d4065ac47bf506ae874b87a1031761f0fe108100f84f5dbac555263e",
+    "fasta-scan/fasta": "f312396d5f0c7441cc1b03d0a645ee3ef4b9aa42f353a43ba4a351083dd78bd4",
+    "nbody-values/nbody": "2f131d2edecfa613b459d76efc2ee705b8b6c6f52c015c090d38368f7b238dec"
+  }
+}
