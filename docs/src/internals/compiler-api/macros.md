@@ -587,6 +587,8 @@ Source: `src/macros/expansion.x`
 
 Publishes a canonical `macrodef` in source order and returns `node`.
 A later definition with the same name affects only later invocations.
+The write joins any open semantic transaction, so a definition read as
+a Macro target and then consumed is withdrawn with that transaction.
 
 Source: `src/macros/invocations/recognition.x`
 

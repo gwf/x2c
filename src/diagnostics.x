@@ -208,13 +208,26 @@ void Compiler.report_warning(
   c.report_warning_at(code, message, location, _notes(c, location, notes));
 }
 
+/** Returns the name a diagnostic gives the macro `definition` reached from
+    `invocation`. A named definition is spelled as its source names it. An
+    anonymous definition has no source name, so the invocation that reached
+    it, a keyword alias or a `$name` decorator, names it instead.
+*/
+String Diagnostics.macro_spelling(List definition, Token invocation) {
+  Atom name = definition.assoc(<name>);
+  if (!name.str().startswith("_x2c_gensym_anonymous_macro_"))
+    return name.str();
+  if (invocation.type != <$>) return invocation.text;
+  return "$" + Token.skip_trivia(invocation + 1).text;
+}
+
 /** Returns the innermost source expansion's definition and input note. */
 String Compiler.macro_expansion_note(Compiler c) {
   foreach (List active in c.macro_stack) {
     (List definition, List input, Var bindings, Token invocation) = active;
     (void) bindings;
     if (!invocation) continue;
-    String name = definition.assoc(<name>).str();
+    String name = Diagnostics.macro_spelling(definition, invocation);
     String source = Diagnostics.macro_definition_note(definition)
       .remove_prefix("definition: ");
     Var syntax = Diagnostics.macro_expansion_input(input);

@@ -80,7 +80,7 @@ Public functions:
 `Diagnostics.new`, `Diagnostics.hold`, `Diagnostics.release`,
 `Diagnostics.reached_limit`, `diagnostics_write_json`, `Compiler.file_prefix`,
 `Compiler.text_source`, `Compiler.report_error`, `Compiler.report_problem`,
-`Diagnostics.report`, `Compiler.report_warning`,
+`Diagnostics.report`, `Compiler.report_warning`, `Diagnostics.macro_spelling`,
 `Compiler.macro_expansion_note`, `Compiler.cpp_note`,
 `Compiler.expanding_macro`, `Diagnostics.c_macro_note`,
 `Diagnostics.macro_expansion_input`, `Diagnostics.macro_definition_note`,

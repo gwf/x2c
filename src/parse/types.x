@@ -513,11 +513,10 @@ module int _attribute_starts(Compiler c) {
 
 /* An object-like attribute macro, `#define WEAK __attribute__((weak))`,
    before the qualifiers and type is kept as its name, which the unit's C
-   reads through its `#define`. Before `typedef` it contributes nothing,
-   because a typedef keeps no leading specifier text. */
+   reads through its `#define`. A typedef keeps it as leading text the way
+   it keeps a written attribute. */
 static String _attribute_macro(Compiler c) {
-  if (c.peek(0) != <ident> || c.peek(1) == <typedef> ||
-      c.object_macros[c.token.text] != <attribute>)
+  if (c.peek(0) != <ident> || c.object_macros[c.token.text] != <attribute>)
     return NULL;
   String name = c.token.text;
   c.next();

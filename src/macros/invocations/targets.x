@@ -54,10 +54,9 @@ module void _check_position(
   const MacroPos *place = _position(position);
   if (kind == place.kind || (kind == <decl-unit> && position == <unit>))
     return;
-  Atom name = definition.assoc(<name>);
-  String spelling = name.str(), result_kind = _kind_spelling(kind);
   $fail.macros_result_position(
-    c, invocation, spelling, result_kind, place.description);
+    c, invocation, Diagnostics.macro_spelling(definition, invocation),
+    _kind_spelling(kind), place.description);
 }
 
 /* Invocation parsing and expansion share one semantic transaction. Empty
@@ -136,7 +135,7 @@ static List _decorate_producer(Decoration &d) {
         arguments = %(args);
         if (c.peek(0) == <eof> || c.peek(0) == <;>)
           $fail.macros_decorator_target(
-            c, d.invocation, value.assoc(<name>).str(),
+            c, d.invocation, Diagnostics.macro_spelling(value, d.invocation),
             Diagnostics.macro_definition_note(value));
         if (d.kind in %<expr macro>) continue;
         _check_decoration_position(d);
@@ -201,9 +200,9 @@ static List _producer_body(List definition) {
 }
 
 static void _misplaced(Decoration &d) {
-  Atom name = d.definition.assoc(<name>);
-  String spelling = name.str(), target = _kind_spelling(d.kind);
-  $fail.macros_decorator_position(d.c, d.invocation, spelling, target);
+  $fail.macros_decorator_position(
+    d.c, d.invocation, Diagnostics.macro_spelling(d.definition, d.invocation),
+    _kind_spelling(d.kind));
 }
 
 static void _check_decoration_position(Decoration &d) {
@@ -220,13 +219,10 @@ static List _arguments(Decoration &d, int block_scope) {
   if (c.peek(0) == <;>)
     $fail.macros_decorator_semicolon(
       c, d.invocation, Diagnostics.macro_definition_note(definition));
-  if (c.peek(0) == <eof>) {
-    Atom name = definition.assoc(<name>);
-    String spelling = name.str();
+  if (c.peek(0) == <eof>)
     $fail.macros_decorator_target(
-      c, d.invocation, spelling,
+      c, d.invocation, Diagnostics.macro_spelling(definition, d.invocation),
       Diagnostics.macro_definition_note(definition));
-  }
   return arguments;
 }
 

@@ -39,6 +39,7 @@ Compiler diagnostic storage and rendering.
 | [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
 | [`Diagnostics.macro_definition_note`](#Diagnostics.macro_definition_note) | Formats a macro definition's recorded source location. |
 | [`Diagnostics.macro_expansion_input`](#Diagnostics.macro_expansion_input) | Removes captured-argument transport and source wrappers for a note. |
+| [`Diagnostics.macro_spelling`](#Diagnostics.macro_spelling) | Returns the name a diagnostic gives the macro `definition` reached from `invocation`. |
 | [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store that streams through `printer`. |
 | [`Diagnostics.reached_limit`](#Diagnostics.reached_limit) | Returns whether counted reports have reached the positive limit. |
 | [`Diagnostics.release`](#Diagnostics.release) | Restores the streaming saved by `hold`. |
@@ -347,6 +348,18 @@ Source: `src/diagnostics.x`
 `Var Diagnostics.macro_expansion_input(List input)`
 
 Removes captured-argument transport and source wrappers for a note.
+
+Source: `src/diagnostics.x`
+
+<a id="Diagnostics.macro_spelling"></a>
+#### Diagnostics.macro_spelling
+
+`String Diagnostics.macro_spelling(List definition, Token invocation)`
+
+Returns the name a diagnostic gives the macro `definition` reached from
+`invocation`. A named definition is spelled as its source names it. An
+anonymous definition has no source name, so the invocation that reached
+it, a keyword alias or a `$name` decorator, names it instead.
 
 Source: `src/diagnostics.x`
 
