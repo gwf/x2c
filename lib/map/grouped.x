@@ -333,6 +333,13 @@ macro Unit $map.grouped.typed.updates(
   $value $map.updateindex($map, $key, Symbol, $value);
   $value $map.postfixindex($map, $key, Symbol);
 
+  __attribute__((noinline)) static $value _update_other($map map, $key key, Symbol op, $value rhs) {
+    long index = map.find_index(&key);
+    if (index < 0) (void) $bad_arg($owner);
+    $value *stored = $value_at(map, (unsigned) index);
+    return $update(stored, op, rhs);
+  }
+
   /** Applies `op` to the value for `key` and returns the stored result.
       `+` inserts `rhs` when the key is absent; other operations require an
       existing key. Supported operations depend on the generated value type.
@@ -341,12 +348,6 @@ macro Unit $map.grouped.typed.updates(
       while inserting. Invalid operations leave an existing value unchanged.
       Allocation and size failures leave the table unchanged.
   */
-  __attribute__((noinline)) static $value _update_other($map map, $key key, Symbol op, $value rhs) {
-    long index = map.find_index(&key);
-    if (index < 0) (void) $bad_arg($owner);
-    $value *stored = $value_at(map, (unsigned) index);
-    return $update(stored, op, rhs);
-  }
 
   $value $map.updateindex($map map, $key key, Symbol op, $value rhs) {
     if ((void *) map == 0) (void) $bad_arg($owner);

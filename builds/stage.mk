@@ -184,7 +184,7 @@ $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
 LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
-$(LIB_BUILD)/group-match.h: $(LIB_SOURCE)/map/group-match.h
+$(LIB_BUILD)/group-match.h: $(LIB_SOURCE)/map/group-match.h | $(LIB_BUILD)
 	cp $< $@
 
 $(LIB_BUILD)/task-native.c: $(LIB_SOURCE)/task/stack.c
