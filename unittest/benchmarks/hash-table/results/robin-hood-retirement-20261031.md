@@ -57,6 +57,6 @@ Focused verification passes in native, forced scalar, ASan/UBSan, and Rosetta x8
 
 A later candidate cached hash-array pointers and prefetched the candidate record. Its paired counting result regressed from 85.9 to 91.8 ns/input. That candidate was reverted. The failed experiment does not reject other future probe improvements.
 
-The publication gate result and published revision are recorded in the archived retirement plan. PLSO, Notes, the full Jackson profiles, and the complete external-table cohort were not rerun for this retirement. Their previous full-suite report remains historical evidence.
+`tools/gate-state.py ensure agent-pr-check` passes on `027c1f2b253c2ea5ad5c4c090b432e7dcc56282e`: 1,163 tests, 103,716 assertions, 1,380 compiler fixtures, 138 matching book outputs, command checks and bootstrap/stage comparisons. The [archived retirement plan](../../../../plans/archive/retire-robin-hood-map.md) records delivery. PLSO, Notes, the full Jackson profiles, and the complete external-table cohort were not rerun for this retirement. Their previous full-suite report remains historical evidence.
 
 Raw sources, binaries, all samples, compiler logs, and memory diagnostics remain in the local ignored `debug/retire-robin-hood/` archive. The accepted campaign is under `performance/samples-before-probe-cache/`; its compiler results are under `performance/compiler-before-probe-cache/`. A fresh clone does not contain this local archive.

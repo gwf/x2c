@@ -1,8 +1,9 @@
 # Retire Robin Hood Map storage
 
-> Status: active - 2026-10-31.
-> Gary authorized adoption after the grouped Var sanity check. This replaces
-> the remaining runtime Robin Hood families, not the external benchmark tables.
+> Status: done - 2026-10-31.
+> Implemented through `027c1f2b253c2ea5ad5c4c090b432e7dcc56282e`;
+> the final publication gate passes. Var Map, typed Maps and ordinary PoolTable
+> share grouped storage. Runtime Robin Hood storage is removed.
 
 ## Result
 
@@ -55,3 +56,29 @@ boundary. Its unused controls cost one byte per bucket, avoiding a second
 allocator or a change to root synchronization. Review and measure this cost.
 Retain the public failure contracts rather than tests of obsolete displacement
 or corrupted Robin Hood arrays. No new recurring validation target is added.
+
+## Delivered evidence
+
+- Runtime changes are in `258290d23` and the staged export correction in
+  `8f8e0b74e`. `027c1f2b2` refreshes bootstrap, traversal-order examples,
+  three fixture outputs, and the benchmark report. The intervening prefetch
+  experiment is reverted; lookup/update/growth code matches the accepted
+  measured candidate.
+- Native, scalar, ASan/UBSan and Rosetta x86-64 checks each pass 205 tests,
+  15,676 assertions and a two-million-operation differential Map check.
+- `tools/gate-state.py ensure agent-pr-check` passes on the completed tree:
+  1,163 tests, 103,716 assertions, 1,380 compiler fixtures, 138 book outputs,
+  command checks, and bootstrap/stage comparisons. Logs are in the ignored
+  `debug/retire-robin-hood/publication-gate-final.log` and
+  `debug/agent-pr-check/`. Initial gate failures exposed one staged-pointer
+  lifetime warning and traversal-order expectations; both are resolved.
+- The accepted 114-sample paired campaign verifies every checkpoint and word
+  count. Var mixed CPU improves about 25%; counting is roughly flat. The
+  representative source-prelude compiler comparison uses about 13% less CPU.
+- Var live bucket allocation increases 5%; observed counting peak RSS rises
+  about 31% because macOS retains freed growth buffers. No allocator changes
+  were added. The memory cost remains documented rather than hidden.
+- See the [retirement report](../../unittest/benchmarks/hash-table/results/robin-hood-retirement-20261031.md)
+  for absolute time/memory values and scope. PLSO, Notes, Linux/GCC and the full
+  external-table cohort were not rerun for this retirement. The prior full
+  benchmark campaign remains historical evidence.
