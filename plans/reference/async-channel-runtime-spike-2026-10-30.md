@@ -1,6 +1,6 @@
 # Async tasks and loop-owned channels: spike results
 
-> Design succession: [execution stacks](../async-execution-stacks.md) records
+> Design succession: [execution stacks](../archive/async-execution-stacks.md) records
 > the subsequent semantic model. This report remains experimental evidence;
 > private task allocation Scopes are not selected language semantics.
 

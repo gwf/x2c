@@ -2,7 +2,7 @@
 
 Status: testable local prototype on `codex/async-task-prototype`. No push or
 shared-branch integration is authorized. The dev/main validation hold remains.
-The [owning specification](../async-execution-stacks.md) records semantics.
+The [owning specification](../archive/async-execution-stacks.md) records semantics.
 
 ## Implemented behavior
 
@@ -149,7 +149,7 @@ Focused fatal-warning translation now passes. All 1,355 compiler fixtures
 passed (2,994 artifacts), and the optional graph audit checks passed.
 `make stage-2` passed; stage 1 and stage 2 generated identical output across
 333 C/H files. The final publication gate remains outstanding. See the
-[lifetime follow-up](../async-execution-stacks.md#lifetime-analysis-follow-up-2026-10-31)
+[lifetime follow-up](../archive/async-execution-stacks.md#lifetime-analysis-follow-up-2026-10-31)
 for the selected boundary and compatibility cost.
 
 The ordinary unit suite was rerun from unittest/ and passed all 1,148 tests

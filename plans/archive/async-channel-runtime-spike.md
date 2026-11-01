@@ -1,8 +1,10 @@
 # Asynchronous tasks and loop-owned channels: research spike
 
-> Status: executed locally - findings and evidence retained; no publication.
+> Status: done - research completed 2026-10-30; archived 2026-10-31.
+> The execution-stack design superseded this experiment and shipped as
+> `255de641f`. Historical no-push instructions below applied to the spike.
 > Requested 2026-10-30; execution authorized 2026-10-30.
-> Results: [dated report](reference/async-channel-runtime-spike-2026-10-30.md).
+> Results: [dated report](../reference/async-channel-runtime-spike-2026-10-30.md).
 > Subsequent design: [execution stacks](async-execution-stacks.md); its
 > semantics supersede unselected prototype choices, not the measured evidence.
 > Gary requires consent before any push to dev.
@@ -33,8 +35,8 @@ Distinguish three claims throughout the report:
 
 ## Scope and experimental choices
 
-Use [channel-service.x](../examples/power/channel-service.x) as the working
-request/reply example. Reuse the [libuv adapter](../packages/libuv/README.md)
+Use [channel-service.x](../../examples/power/channel-service.x) as the working
+request/reply example. Reuse the [libuv adapter](../../packages/libuv/README.md)
 for an event loop, timers, I/O, and cross-thread wakeup where applicable.
 
 Build one scratch executor with explicit resumable functions and persistent
@@ -94,9 +96,9 @@ building the workload matrix. Exercise a local value that survives suspension,
 independent allocation owners, and completion/failure cleanup.
 
 Inspect the existing owners before deciding what task state must persist:
-[Scope regions](../lib/scope/regions.x), [Context](../lib/context.x),
-[Error runtime](../lib/error/runtime.x), [Exception](../lib/exception.x),
-and [try lowering](../src/components/try-catch.x).
+[Scope regions](../../lib/scope/regions.x), [Context](../../lib/context.x),
+[Error runtime](../../lib/error/runtime.x), [Exception](../../lib/exception.x),
+and [try lowering](../../src/components/try-catch.x).
 
 The current exception landing is a C-stack `sigsetjmp` frame. It cannot remain
 active after its invocation returns. Each resume may use ordinary synchronous

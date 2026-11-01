@@ -19,7 +19,7 @@ module List _condition_else(Compiler c, List condition, List yes, List no) {
   List declaration = _condition_flag(c, value);
   List success = %(block $(_condition_success(value)) $yes);
   return %(block $declaration $(_condition_then(condition, success))
-    (if (expr (int) (op ! $value)) $no));
+    (if (expr (int) (op ! $value)) (block $no)));
 }
 
 /* A predicate used as a value retains short circuit and local captures. */

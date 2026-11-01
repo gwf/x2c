@@ -14,7 +14,7 @@ instead reports that `P` has no method `get`.
 
 The failure reproduces at `282f5bfb8181b73ebfc924d8b77ac00a861a1607`.
 A direct invocation and a deferred String Name argument work on that same
-compiler. The original [derive probe report](../derive-and-test.md#what-the-probe-established)
+compiler. The original [derive probe report](derive-and-test.md#what-the-probe-established)
 at `9aeeef265` is now narrowed to this reproduced identifier-valued Name
 case. The original failing source was not retained, so its exact shape
 cannot be confirmed.

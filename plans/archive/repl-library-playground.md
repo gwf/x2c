@@ -35,7 +35,7 @@ and an already compiled library. For an opaque handle, inspect its declared
 type and related operations, then use library queries instead of private fields.
 
 This is the native command-line playground. The independent
-[browser playground](../browser-playground.md) remains outside this plan.
+[browser playground](browser-playground.md) remains outside this plan.
 
 ## Selected design
 

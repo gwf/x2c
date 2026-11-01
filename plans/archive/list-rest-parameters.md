@@ -5,7 +5,7 @@
 > `.... name` was replaced by `List @name`; the semantic Type `(....)`, call
 > packing, and native List ABI described below are unchanged. Map and Array
 > rest parameters are scoped in
-> [map-and-array-rest-parameters.md](../map-and-array-rest-parameters.md).
+> [map-and-array-rest-parameters.md](map-and-array-rest-parameters.md).
 
 A final `.... name` parameter receives an ordinary List. The compiler packs
 separate trailing arguments at the call site; an absent tail becomes nil.

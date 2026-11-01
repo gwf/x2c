@@ -1,7 +1,9 @@
 # Execution stacks across async suspension
 
-> Status: active - implementation complete and validated for dev publication.
-> Normal benchmark follow-up remains deferred; no further implementation is pending.
+> Status: done - published to dev as `255de641f` on 2026-10-31.
+> Archived 2026-10-31. No further selected implementation is pending.
+> [Async performance follow-up](../reference/async-performance-followup-2026-10-31.md)
+> owns deferred benchmarks and recorded evidence limits.
 > Requested 2026-10-30. Records the per-execution stack model discussed with
 > Gary. Scope layout, naming, and boundary state installation are selected.
 > Lifetime decision: rely on borrowed-owner lifetimes; no parked-slot pins,
@@ -33,7 +35,7 @@ Allow many waiting clients to share one native event-loop thread without
 changing ordinary x2c allocation, borrowing, return, or cleanup semantics.
 Suspension must preserve the logical execution that will later resume.
 
-The [runtime spike](reference/async-channel-runtime-spike-2026-10-30.md)
+The [runtime spike](../reference/async-channel-runtime-spike-2026-10-30.md)
 establishes useful CPU and memory benefits for its explicit resumable model.
 It does not establish general async-function semantics. Its private task
 allocation Scopes and other experimental choices are not language decisions.
@@ -479,9 +481,9 @@ relevant debugging tools. Prefer a small pinned C implementation behind
 private runtime functions, using the selected pin below.
 
 Stack-bound consumers must use the actual executing stack. In particular,
-[Lisp's stack allowance](../lib/lisp/evaluate.x) currently queries pthread
+[Lisp's stack allowance](../../lib/lisp/evaluate.x) currently queries pthread
 bounds. Supply installed task bounds while a task runs and retain the native
-thread path otherwise. Validate [Regex recursion](../lib/regex.x) against the
+thread path otherwise. Validate [Regex recursion](../../lib/regex.x) against the
 selected capacity. Foreign libraries that inspect pthread bounds may require
 specific adaptation or restrictions; a task mapping is not a pthread stack.
 No per-operation task lookup is needed in ordinary allocation or Error paths.
@@ -554,7 +556,7 @@ shutdown requests stop before waiting for completion.
 
 ### First request/reply acceptance example
 
-Reuse [channel-service.x](../examples/power/channel-service.x): a service,
+Reuse [channel-service.x](../../examples/power/channel-service.x): a service,
 two clients, a request Channel, and one reply Channel per client. The caller
 owns all Channels, job captures, and the answers Array through Task.run.
 
@@ -630,7 +632,7 @@ stack without leaving metadata in the overflow path. A narrow layout
 adaptation separates metadata from the guarded stack boundary. The adapter
 also pairs ASan fiber annotations on the actual switch boundaries, including
 return to the native caller and final task exit. Both adaptations are recorded
-in [the dependency notes](../lib/task/README.md).
+in [the dependency notes](../../lib/task/README.md).
 
 Among the reviewed candidates, this is the smallest practical fit for all four
 targets. [libaco](https://github.com/hnes/libaco) documents Intel386/x86_64
@@ -675,13 +677,13 @@ do not alter B's inherited policy values or current Context.
 
 | Owner | Established behavior to reuse | Suspension-related change to design |
 | --- | --- | --- |
-| [Scope state and layout](../lib/scope/scope.x) and [regions](../lib/scope/regions.x) | Allocation ownership, explicit slots, valid region operations, and caller-selected lifetimes. | Remove up, rename the region API, and install active state with a stable base slot; preserve direct TLS allocation and cleanup to the borrowed base. |
-| [Context](../lib/context.x) | Existing records, exports, dependency ownership, close order. | Restore current Context and related active bindings without reconstructing it. |
-| [Pool threads](../lib/pool/threads.x) | Current-Pool exchange, nested levels, explicit lifetime and promotion. | Select the appropriate existing chain for the resumed execution. |
-| [Match cache](../lib/match/cache.x) | Context-local defaults, lazy caches, pinned leases. | Preserve the applicable active Context state and all live leases. |
-| [Error state](../lib/error/error.x), [policy](../lib/error/policy.x), [records](../lib/error/records.x), and [handlers](../lib/error/handlers.x) | Policies, marks, admissible snapshots, matching, registrations. | Separate mutable logical state and preserve registrations across parking. |
-| [Exception runtime](../lib/exception.x), [try lowering](../src/components/try-catch.x), and [cleanup](../src/cleanup/cleanup.x) | Synchronous dispatch, live C landings, cleanup ordering, and captured local addresses. | Retain frames on stable task stacks; exchange exception/cleanup heads and contain escaping task Errors at task entry. |
-| [Thread-state lifecycle](../lib/thread-state.x) and [Logger](../lib/logger.x) | Native-thread release order and existing logging behavior. | Distinguish execution completion from native-thread shutdown; preserve Error observer integration. |
+| [Scope state and layout](../../lib/scope/scope.x) and [regions](../../lib/scope/regions.x) | Allocation ownership, explicit slots, valid region operations, and caller-selected lifetimes. | Remove up, rename the region API, and install active state with a stable base slot; preserve direct TLS allocation and cleanup to the borrowed base. |
+| [Context](../../lib/context.x) | Existing records, exports, dependency ownership, close order. | Restore current Context and related active bindings without reconstructing it. |
+| [Pool threads](../../lib/pool/threads.x) | Current-Pool exchange, nested levels, explicit lifetime and promotion. | Select the appropriate existing chain for the resumed execution. |
+| [Match cache](../../lib/match/cache.x) | Context-local defaults, lazy caches, pinned leases. | Preserve the applicable active Context state and all live leases. |
+| [Error state](../../lib/error/error.x), [policy](../../lib/error/policy.x), [records](../../lib/error/records.x), and [handlers](../../lib/error/handlers.x) | Policies, marks, admissible snapshots, matching, registrations. | Separate mutable logical state and preserve registrations across parking. |
+| [Exception runtime](../../lib/exception.x), [try lowering](../../src/components/try-catch.x), and [cleanup](../../src/cleanup/cleanup.x) | Synchronous dispatch, live C landings, cleanup ordering, and captured local addresses. | Retain frames on stable task stacks; exchange exception/cleanup heads and contain escaping task Errors at task entry. |
+| [Thread-state lifecycle](../../lib/thread-state.x) and [Logger](../../lib/logger.x) | Native-thread release order and existing logging behavior. | Distinguish execution completion from native-thread shutdown; preserve Error observer integration. |
 
 At the source baseline, Scope.retain writes both new.down and previous.up.
 Scope.release clears previous.up, and Scope.destroy tests up. Removing those
@@ -701,7 +703,7 @@ they do not authorize implementation or unrelated contract changes.
 | Item | Constraint and next work |
 | --- | --- |
 | Strict-build lifetime diagnostics | The pointer-field provenance fix and selected audit boundary are implemented. The merged tree passes the strict stage-two build; the earlier three temporary-borrow diagnostics are resolved. |
-| Native target compatibility | Focused normal and ordinary sanitizer Task checks, configured-stack probes, and fallback probes pass on all four targets, using Rosetta/Docker emulation for x86_64. All four targets pass full normal and ordinary sanitizer suites after the [numeric fixes and regressions](reference/async-numeric-fixes-2026-10-31.md). The GCC use-after-return false overflow has a [focused fix and regression](reference/async-uar-fix-2026-10-31.md). See [native target evidence](reference/async-native-targets-2026-10-31.md). |
+| Native target compatibility | Focused normal and ordinary sanitizer Task checks, configured-stack probes, and fallback probes pass on all four targets, using Rosetta/Docker emulation for x86_64. All four targets pass full normal and ordinary sanitizer suites after the [numeric fixes and regressions](../reference/async-numeric-fixes-2026-10-31.md). The GCC use-after-return false overflow has a [focused fix and regression](../reference/async-uar-fix-2026-10-31.md). See [native target evidence](../reference/async-native-targets-2026-10-31.md). |
 | Regression coverage | Local Channel and Scope timings are bounded evidence. Network/timer workloads, broader performance checkpoints, and final publication validation remain outstanding. |
 
 These are consequential choices. The selected stack model does not authorize
@@ -815,7 +817,7 @@ waits, and guarded native adapter are implemented on codex/async-task-prototype.
 The request/reply example is executable. This session has not advanced dev
 or main.
 
-See [the prototype report](reference/async-task-prototype-2026-10-30.md) for
+See [the prototype report](../reference/async-task-prototype-2026-10-30.md) for
 commands, test counts, measured workloads, dependency adaptations, and limits.
 This evidence does not lift the delivery hold or accept remaining regressions.
 
@@ -882,7 +884,7 @@ this follow-up. The existing dev/main and push hold remains in force.
 
 ### Broader validation, 2026-10-31
 
-See [the broader validation report](reference/async-validation-2026-10-31.md)
+See [the broader validation report](../reference/async-validation-2026-10-31.md)
 for comparison with the full pre-async baseline, synchronous cost probes,
 program footprint, blocked-task memory, stack-capacity checks, and fresh
 instrumented results. The existing full check target exposes a native-file
@@ -896,7 +898,7 @@ tradeoff has been accepted, and no push is authorized.
 
 ### In-process Notes comparison, 2026-10-31
 
-The [Notes Thread.run / Task.run report](../examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
+The [Notes Thread.run / Task.run report](../../examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
 records five paired samples at 1, 8, and 64 clients. Both modes use one native
 SQLite owner and the same SQL, row conversion, JSON, and logging. At 8 and 64
 clients, Task increases lookup throughput and reduces CPU/request. One client
@@ -927,7 +929,7 @@ This integration advances only the private branch; no push is authorized.
 
 ### Merged-diff review and gate repairs, 2026-10-31
 
-The [merged review](reference/async-merged-review-2026-10-31.md) records the
+The [merged review](../reference/async-merged-review-2026-10-31.md) records the
 native-file copy repair, four lint corrections, documentation cleanup, and
 two reproduced suspension defects. The subsequent authorized fix exchanges
 Lisp active-session and recursive rendering pointers at the existing task
@@ -945,7 +947,7 @@ hold remains in force.
 
 ### Residual memory investigation, 2026-10-31
 
-The [residual memory report](reference/async-residual-memory-2026-10-31.md)
+The [residual memory report](../reference/async-residual-memory-2026-10-31.md)
 attributes the large post-batch VM/RSS residual to macOS malloc regions and
 freed-page caching. The batch job allocation is freed and all stack mappings
 are unmapped. Only fixed first-use catch-site Match plans remain live in the
@@ -965,7 +967,7 @@ allocation-kind state, public API, process allocator setting, or per-switch
 operation. This targets medium-region VM retention; smaller native allocator
 caches and their resident footprint remain outside this change.
 
-The [mapped-array implementation report](reference/async-mapped-job-arrays-2026-10-31.md)
+The [mapped-array implementation report](../reference/async-mapped-job-arrays-2026-10-31.md)
 records the private implementation, focused boundary/lifecycle tests, and
 before/after memory probes. The repeated probe no longer retains medium
 regions; smaller allocator caches remain. Normal benchmark reruns and
@@ -978,7 +980,7 @@ incoming commits required no conflict repair and changed no compiler, runtime,
 bootstrap, native build-rule, or unit-test source. The combined review found
 no concrete integration defect. The full local make agent-pr-check passes,
 including 1,357 compiler fixtures and 1,158 unit tests. The
-[integration report](reference/async-dev-integration-2026-10-31.md) records
+[integration report](../reference/async-dev-integration-2026-10-31.md) records
 review coverage, focused checks, and limitations. Normal benchmark reruns,
 performance and retention acceptance, publication, and pushing remain held.
 
@@ -1025,10 +1027,10 @@ Publication proceeds with these recorded costs and evidence limits:
   not validate the async branch. Existing focused performance evidence is
   bounded to its named baselines, workloads, and measurement environments.
 
-The [performance report](reference/async-validation-2026-10-31.md),
-[memory mitigation report](reference/async-mapped-job-arrays-2026-10-31.md),
-[native/numeric validation](reference/async-numeric-fixes-2026-10-31.md), and
-[combined integration report](reference/async-dev-integration-2026-10-31.md)
+The [performance report](../reference/async-validation-2026-10-31.md),
+[memory mitigation report](../reference/async-mapped-job-arrays-2026-10-31.md),
+[native/numeric validation](../reference/async-numeric-fixes-2026-10-31.md), and
+[combined integration report](../reference/async-dev-integration-2026-10-31.md)
 retain the detailed evidence. Final delivery records the validated revision;
 passing checks does not imply that deferred performance evidence exists.
 

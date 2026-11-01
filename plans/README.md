@@ -38,52 +38,67 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed with Gary on 2026-10-24 against `dev` `7e9fd0178`, using source
-and Git history. Historical runtime probes, performance measurements, and
-live release state were not rechecked. This cleanup changes plan ownership
-and status; it does not implement the remaining features. On 2026-10-30,
-against `dev` `66a119db5`, the plans added on 2026-10-28 and 2026-10-29
-were indexed and the delivered ones archived.
+Reviewed 2026-10-31 against `dev` `2b7a2b422`. Completed deliveries are
+archived below. Remaining implementation questions and conditional candidates
+have explicit owners. Historical measurements remain evidence for their named
+revisions; this closeout does not commission deferred work or main promotion.
 
 ### Active work
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Grouped typed Map adoption](grouped-typed-map-adoption.md) | Adopt the validated grouped backend for typed families; retain Var Map and Pool storage. | Integrate, close portability/performance gaps, then run one coordinated quiet benchmark campaign and publish to dev. |
-| [Async execution stacks](async-execution-stacks.md) | Task.run, Scope migration, runtime repairs, four-target normal/sanitizer validation, and release/migration notes are complete. Dev publication authorized; normal benchmarks remain deferred. | Implementation, integration review, and final publication gate are complete; dev delivery is authorized. Resume normal benchmark follow-up only when requested. Main promotion remains separate. |
-| [Derive and test follow-ups](derive-and-test.md#remaining-follow-ups) | Implementation delivered in PR #602; JSON tag policy, assertion sharing, and command promotion remain conditional follow-ups. | Select a follow-up only when its stated trigger applies. |
-| [Language-reference writing](review-remediation-2026-10-11.md) | Complete the selected source-form, rewrite, and runtime Lisp explanations. | Identify exact missing coverage in the existing book, then fill it. |
-| [Structured lint findings](x2c-lint-and-format.md) | Approved phase 8 List output and compiler consumption. | Add the optional interface; preserve the experimental distribution and conditional editor integration. |
-| [Detached Channel ownership](detached-channel-ownership.md) | Close out evidence for the correction already present on `dev`. | Recover final benchmark, verification, and delivery/hold records; do not repeat implementation. |
-| [Map and Array rest parameters](map-and-array-rest-parameters.md) | `Map @name` keyword arguments are implemented; `Array @name` is deferred. | Array waits for a caller that needs indexed access to its tail. |
+| [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
+| [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
+| [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
+| [Detached Channel ownership](detached-channel-ownership.md) | Historical benchmark and delivery/hold evidence closeout. | Recover the named records; implementation already landed. |
 
 ### Research and reference
 
-These records do not commission implementation. Reproduce a current problem
-or establish a useful caller before selecting a candidate.
+These records do not commission implementation. Use their stated trigger
+before selecting a candidate.
 
 | Record | Use |
 | --- | --- |
-| [Review follow-ups](reference/review-followups-2026-10-24.md) | Component coverage questions, typed List policy, surviving duplication, dated build-cost evidence, and SDK/native-type candidates. |
-| [Quotation adoption](quotation-adoption-audit-2026-10-03.md) | Typed `_Alignof` and direct scalar-generator adoption are implemented; individual adoption and TagId generation remain optional candidates. |
-| [Compiler ownership](compiler-ownership-investigation.md) | Refresh individual sharing/restoration candidates before selection; module splits do not establish semantic completion. |
-| [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static field inventory at `548b381f`, not a current census. |
-| [Lifetime proof](lifetime-proof-followup.md) | Dormant extension; first name a current program and reproduce its obstacle. |
-| [Prepared formats](prepared-format.md) | Dormant feasibility work; first establish a repeated checked-format workload. |
-| [Overengineering ledger](overengineering-candidates.md) | Current forensic entry point used by the audit skills; no live candidates selected. |
-| [Harness evidence](reference/harness-evidence-2026-10-05.md) | Dated external runtime incidents; repository repairs landed, external outcomes are not asserted. |
+| [Deferred language and library candidates](reference/deferred-candidates-2026-10-31.md) | Conditional JSON/assertion sharing, Array rest, meta Map boundary, quotation/TagId adoption, and browser phase 3. |
+| [Deferred async performance](reference/async-performance-followup-2026-10-31.md) | Accepted Channel/memory costs and evidence limits; normal benchmarks remain deferred until requested. |
+| [Earlier review questions](reference/review-followups-2026-10-24.md) | Dated component, typed List, duplication, SDK/native-type questions. |
+| [Compiler ownership](compiler-ownership-investigation.md) | Refresh one concrete ownership candidate before selection. |
+| [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static inventory at `548b381f`, not a current census. |
+| [Lifetime proof](lifetime-proof-followup.md) | Dormant extension; first name a current blocked program. |
+| [Prepared formats](prepared-format.md) | Dormant feasibility work; first establish a useful repeated-format caller. |
+| [Overengineering ledger](overengineering-candidates.md) | No live candidates selected. |
+| [Harness evidence](reference/harness-evidence-2026-10-05.md) | Historical external incidents; repository repairs landed. |
 | [Remediation evidence](reference/review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
-| [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Coverage of 181 historical study rows, not an active task list. |
-| [Browser playground](browser-playground.md) | Phases 1 and 2 published in PR #596 (`b1584a01f`); phase 3, a fully client-side compiler, remains unscoped. |
-| [Networking and flagship service](networking-and-flagship-service.md) | TCP and HTTP runtime delivered in PR #598; its Notes showcase design is superseded by the [Notes rewrite](archive/notes-rewrite.md). |
+| [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Historical study coverage, not an active task list. |
+| [Benchmark website integration](../site/BENCHMARKS.md) | Future page requirements and saved-data paths; no deployment selected. |
 
-Individual quotation adoption and TagId generation remain optional candidates
-in the quotation plan. Future releases use [releasing](../agents/releasing.md)
-and [deployment operations](../etc/release/README.md); the 0.15.0 and 0.15.1
-releases established the recovery baseline. No production promotion is
-selected here.
+Future releases use [releasing](../agents/releasing.md) and
+[deployment operations](../etc/release/README.md). No production promotion
+is selected here.
 
 ### Decisions and completed records
+
+Archived 2026-10-31 after checking delivery and giving residual work explicit owners:
+
+- [Recent-wave repairs](archive/recent-wave-repairs-2026-10-31.md): all six
+  confirmed gaps repaired and validated; the follow-up plan owns the remainder.
+
+- [Execution stacks](archive/async-execution-stacks.md): Task.run and Scope
+  migration published as `255de641f`; performance follow-up remains deferred.
+- [Async research spike](archive/async-channel-runtime-spike.md): completed
+  experiment, superseded by the shipped execution-stack design.
+- [Derive and test](archive/derive-and-test.md): delivery through PRs #602,
+  #619, and #626; command promotion is complete.
+- [Map rest parameters](archive/map-and-array-rest-parameters.md): delivered
+  through `cd209b178` and `6ead2cdde`; Array rest and meta Map remain deferred.
+- [Quotation closeout](archive/quotation-adoption-closeout-2026-10-31.md):
+  selected typed alignment delivered as `e8be27b73`; adoption remains optional.
+- [Browser playground](archive/browser-playground.md): selected phases 1-2
+  delivered in PR #596; phase 3 remains unscoped.
+- [Networking and flagship service](archive/networking-and-flagship-service.md):
+  networking delivered in PR #598; the Notes rewrite superseded the old app design.
+
 
 - [Macro-target decorators](archive/macro-target-decorators.md): implemented
   on 2026-10-31 in `f701f2703` and `c84a2828`. `expand` preserves the generator's
@@ -187,7 +202,7 @@ Archived 2026-10-24 after checking source and delivery history:
 - Historical [lint implementation](archive/x2c-lint-and-format-implementation.md),
   [remediation](archive/review-remediation-2026-10-11.md), and
   [quotation audit](archive/quotation-adoption-audit-2026-10-03.md): delivered
-  work and earlier decisions retained; their short active plans own the remainder.
+  work and earlier decisions retained; current owners above hold remaining work.
 
 Archived 2026-10-21:
 

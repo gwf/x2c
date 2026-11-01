@@ -29,8 +29,8 @@ Scheduler anneal = Scheduler.cosine(adam, batches, 0.0001);
 
 Tensor order = Torch.randperm(rows);
 for (long batch = 0; batch < batches; batch++) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   Tensor pick = order.narrow(0, batch * BATCH, BATCH);
   adam.zero_grad();
   Tensor loss = Tensor.cross_entropy(

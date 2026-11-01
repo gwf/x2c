@@ -8296,7 +8296,10 @@ static Var f9_templates____slot_value(Compiler c, List slot){
     }
 
   }
-  if(! _x2c_gensym_condition_0) result = Compiler_evaluate_meta_value(c, Var_list_payload(form), invocation, 1);
+  if(! _x2c_gensym_condition_0){
+    result = Compiler_evaluate_meta_value(c, Var_list_payload(form), invocation, 1);
+  }
+
 }
 result = _helper_result(c, result);
 Var construction = List_assoc(slot, Symbol_var(1345468776));

@@ -304,19 +304,24 @@ module String _requirement_detail(Type base, Type participant, List failure) {
 
 static void _report_sig_conflicts(
   Compiler c, Type base, Type participant, List rows, List location) {
-  String owner = _adoption_spelling(base, participant);
-  String declaration_site = _definition_location(c, base);
   foreach (List row in rows)
     if (row ~= %(?(String member) sig-cnflct ?(String binding)
-                  ?(Type expected) ? ?)) {
-      List dedupe = $("protocol-sig-conflict", participant, member);
-      if (dedupe in c.protocol_helpers) continue;
-      c.protocol_helpers[dedupe] = 1;
-      Type actual = _declared(c, binding);
-      $report.protocol_signature_conflict(
-        c, location, member, owner, declaration_site, binding, actual,
-        expected);
-    }
+                  ?(Type expected) ? ?))
+      _report_signature_conflict(
+        c, base, participant, member, binding, _declared(c, binding),
+        expected, location);
+}
+
+module void _report_signature_conflict(
+  Compiler c, Type base, Type participant, String member, String binding,
+  Type actual, Type expected, List location) {
+  List dedupe = $("protocol-sig-conflict", participant, member);
+  if (dedupe in c.protocol_helpers) return;
+  c.protocol_helpers[dedupe] = 1;
+  String owner = _adoption_spelling(base, participant);
+  String declaration_site = _definition_location(c, base);
+  $report.protocol_signature_conflict(
+    c, location, member, owner, declaration_site, binding, actual, expected);
 }
 
 static String _definition_location(Compiler c, Type base) {
@@ -717,7 +722,7 @@ static int _contents(Var value, String variable) {
 
 // signature unification
 
-static int _unify_signature(
+module int _unify_signature(
   Type pattern, Type actual, Map variables, Map bindings) {
   List pattern_parameters = pattern.car().list().cadr();
   List parameters = NULL, Type result = NULL;

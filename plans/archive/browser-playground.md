@@ -1,4 +1,9 @@
-> Status: reference
+> Status: done - selected phases 1 and 2 delivered through PR #596.
+> Archived 2026-10-31. Unscoped phase 3 has
+> [a separate owner C7](../reference/deferred-candidates-2026-10-31.md).
+> The uncompleted service-rewrite promise has separate owner C8 there.
+> Production deployment and Firefox/Safari execution are not established by
+> the retained local delivery evidence.
 > Phases 1 and 2 published to dev on 2026-10-28 through PR #596
 > (`b1584a01fffab7b18eaf80afc23fd5fdb19189c6`). The shared integrator
 > passed the full publication gate. Phase 3 remains unscoped.

@@ -27,8 +27,8 @@ static Tensor forward(Module m, Tensor x) =>
 
 Optimizer adam = Optimizer.adam(model, 0.05);
 for (int step = 0; step < 200; step++) {
-  Scope.retain();
-  defer Scope.release();
+  Scope.open();
+  defer Scope.close();
   adam.zero_grad();
   Tensor.mse_loss(forward(model, x), y).backward();
   adam.step();

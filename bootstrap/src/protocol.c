@@ -200,6 +200,8 @@ static String _requirement_detail(Type base, Type participant, List failure);
 
 static void f10_resolution____report_sig_conflicts(Compiler c, Type base, Type participant, List rows, List location);
 
+static void _report_signature_conflict(Compiler c, Type base, Type participant, String member, String binding, Type actual, Type expected, List location);
+
 static String f10_resolution____definition_location(Compiler c, Type base);
 
 static List f10_resolution____resolve_native(Compiler c, Type base, Type participant, f10_resolution___ProtocolRequirements * requirements, Type participant_definition, List * failure);
@@ -248,7 +250,7 @@ static List f10_resolution____conversion_requirement(ProtocolAdapters * a, Strin
 
 static int f10_resolution____contents(Var value, String variable);
 
-static int f10_resolution____unify_signature(Type pattern, Type actual, Map variables, Map bindings);
+static int _unify_signature(Type pattern, Type actual, Map variables, Map bindings);
 
 static int f10_resolution____unify(Var pattern, Var actual, Map variables, Map bindings);
 
@@ -796,7 +798,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _375 = List_var(_374);
   _376 = Symbol_var(39266);
   _377 = Symbol_var(106239471489226);
-  _378 = int_var(2194);
+  _378 = int_var(2199);
   _379 = String_new("");
   _380 = String_var(_379);
   _381 = String_new("x2c.hole");
@@ -940,7 +942,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _516 = cons(_365, _515);
   _517 = cons(_359, _516);
   _518 = List_var(_517);
-  _519 = int_var(2201);
+  _519 = int_var(2206);
   _520 = cons(_432, NULL);
   _521 = cons(_465, _508);
   _522 = cons(_484, _521);
@@ -949,7 +951,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _525 = String_new("discard-helper");
   _526 = String_new("fresh-callee ");
   _527 = Symbol_var(40070);
-  _528 = int_var(2268);
+  _528 = int_var(2273);
   _529 = cons(_406, NULL);
   _530 = cons(_384, _529);
   _531 = List_var(_530);
@@ -1894,8 +1896,6 @@ static String _requirement_detail(Type base, Type participant, List failure){
 }
 
 static void f10_resolution____report_sig_conflicts(Compiler c, Type base, Type participant, List rows, List location){
-  String owner = _adoption_spelling(base, participant);
-  String declaration_site = f10_resolution____definition_location(c, base);
   {
     List row;
     List _x2c_gensym_macro_object_7 = rows;
@@ -1919,22 +1919,7 @@ static void f10_resolution____report_sig_conflicts(Compiler c, Type base, Type p
             String member = Var_as_string(_x2c_gensym_match_value_11);
             String binding = Var_as_string(_x2c_gensym_match_value_12);
             Type expected = Var_type(_x2c_gensym_match_value_13);
-            {
-              List dedupe = cons(String_var(_221), cons(List_var(participant), cons(String_var(member), NULL)));
-              if(Map_contains(c -> protocol_helpers, List_var(dedupe))) continue;
-              Map_setindex(c -> protocol_helpers, List_var(dedupe), int_var(1));
-              Type actual = f10_resolution____declared(c, binding);
-              {
-                String _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_222), cons(String_var(member), cons(String_var(_223), cons(String_var(owner), NULL)))));
-                if(String_truth(declaration_site)) _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_224), cons(String_var(declaration_site), NULL))));
-                String _x2c_gensym_macro_actual_repr_0 = List_repr(Type_list(actual));
-                String _x2c_gensym_macro_conflict_note_0 = String_join(NULL, cons(String_var(_225), cons(String_var(binding), cons(String_var(_226), cons(String_var(_x2c_gensym_macro_actual_repr_0), NULL)))));
-                String _x2c_gensym_macro_expected_note_0 = String_join(NULL, cons(String_var(_227), cons(String_var(List_repr(Type_list(expected))), NULL)));
-                Diagnostics_report(c -> diagnostics, 1139215899608, String_add(String_join(NULL, cons(String_var(_182), cons(String_var(binding), cons(String_var(_228), NULL)))), String_join(NULL, cons(String_var(_229), cons(String_var(owner), cons(String_var(_230), cons(String_var(member), cons(String_var(_182), NULL))))))), location, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_x2c_gensym_macro_conflict_note_0), cons(String_var(_x2c_gensym_macro_expected_note_0), NULL))));
-              }
-
-            }
-
+            _report_signature_conflict(c, base, participant, member, binding, f10_resolution____declared(c, binding), expected, location);
           }
 
         }
@@ -1946,6 +1931,23 @@ static void f10_resolution____report_sig_conflicts(Compiler c, Type base, Type p
   }
 
 }
+}
+
+static void _report_signature_conflict(Compiler c, Type base, Type participant, String member, String binding, Type actual, Type expected, List location){
+  List dedupe = cons(String_var(_221), cons(List_var(participant), cons(String_var(member), NULL)));
+  if(Map_contains(c -> protocol_helpers, List_var(dedupe))) return;
+  Map_setindex(c -> protocol_helpers, List_var(dedupe), int_var(1));
+  String owner = _adoption_spelling(base, participant);
+  String declaration_site = f10_resolution____definition_location(c, base);
+  {
+    String _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_222), cons(String_var(member), cons(String_var(_223), cons(String_var(owner), NULL)))));
+    if(String_truth(declaration_site)) _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_224), cons(String_var(declaration_site), NULL))));
+    String _x2c_gensym_macro_actual_repr_0 = List_repr(Type_list(actual));
+    String _x2c_gensym_macro_conflict_note_0 = String_join(NULL, cons(String_var(_225), cons(String_var(binding), cons(String_var(_226), cons(String_var(_x2c_gensym_macro_actual_repr_0), NULL)))));
+    String _x2c_gensym_macro_expected_note_0 = String_join(NULL, cons(String_var(_227), cons(String_var(List_repr(Type_list(expected))), NULL)));
+    Diagnostics_report(c -> diagnostics, 1139215899608, String_add(String_join(NULL, cons(String_var(_182), cons(String_var(binding), cons(String_var(_228), NULL)))), String_join(NULL, cons(String_var(_229), cons(String_var(owner), cons(String_var(_230), cons(String_var(member), cons(String_var(_182), NULL))))))), location, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_x2c_gensym_macro_conflict_note_0), cons(String_var(_x2c_gensym_macro_expected_note_0), NULL))));
+  }
+
 }
 
 static String f10_resolution____definition_location(Compiler c, Type base){
@@ -2281,7 +2283,7 @@ static List f10_resolution____select(f10_resolution___MemberResolution * r, List
           Symbol status = 31884573479268;
           if(List_truth(Type_list(actual))){
             Map candidate = Map_copy((* r).bindings);
-            if(f10_resolution____unify_signature(template, actual, (* r).variables, candidate)){
+            if(_unify_signature(template, actual, (* r).variables, candidate)){
               (* r).bindings = candidate;
               status = 647492367624;
             }
@@ -2555,7 +2557,7 @@ static int f10_resolution____contents(Var value, String variable){
   return contents;
 }
 
-static int f10_resolution____unify_signature(Type pattern, Type actual, Map variables, Map bindings){
+static int _unify_signature(Type pattern, Type actual, Map variables, Map bindings){
   List pattern_parameters = Var_list_payload(List_cadr(Var_list(List_car(Type_list(pattern)))));
   List parameters = NULL;
   Type result = NULL;
@@ -4421,6 +4423,11 @@ static List f8_adapters____inherited_part(ProtocolAdapters * a, String member, T
         Var owner_expected;
         owner_expected = x2c_match_value_0;
         {
+          if(! _unify_signature(template, Var_type(owner_expected), (* a).variables, Map_copy((* a).bindings))){
+            Type expected = _substitute_signature(template, (* a).variables, (* a).bindings);
+            _report_signature_conflict((* a).c, (* a).base, (* a).participant, member, _member_spelling((* a).participant, member), Var_type(owner_expected), expected, _adoption_location((* a).adoption));
+            return NULL;
+          }
           List requirement = _descriptor_requirement(&((* a)), member, template);
           if(List_truth(requirement)) f8_adapters____report_requirement(&((* a)), requirement);
           else{
@@ -4574,7 +4581,7 @@ static List f8_adapters____native_aliases(Compiler c, List ast, Type base, Type 
   if(! Map_try_get(c -> protocol_helpers, List_var(cons(String_var(_600), cons(List_car(Type_list(participant)), NULL))), &(stored))) return ast;
   List _x2c_gensym_destructure_18 = Var_list_payload(stored);
   List source = Var_list_payload(List_getindex(_x2c_gensym_destructure_18, 0));
-  int private = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_18, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/protocol/adapters.x",.function = "f8_adapters____native_aliases",.line = 356}; & _x2c_gensym_error_site_1; })));
+  int private = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_18, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/protocol/adapters.x",.function = "f8_adapters____native_aliases",.line = 366}; & _x2c_gensym_error_site_1; })));
   int make_static = _visibility(c, base, participant) == 1317118534;
   Array aliases = Array_new();
   {

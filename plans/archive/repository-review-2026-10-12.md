@@ -17,7 +17,7 @@ This does not establish that every cleanup candidate is resolved.
 [Review follow-ups](../reference/review-followups-2026-10-24.md#repository-review)
 retains typed List conversion policy, surviving duplication, and the dated
 build-cost question. The active [writing plan](../review-remediation-2026-10-11.md)
-and [quotation plan](../quotation-adoption-audit-2026-10-03.md) own their
+and [quotation plan](quotation-adoption-closeout-2026-10-31.md) own their
 remaining scope. No historical runtime or performance probe was rerun here.
 
 The sections below describe their recorded revisions, even where they use

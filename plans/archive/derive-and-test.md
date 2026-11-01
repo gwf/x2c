@@ -1,4 +1,7 @@
-> Status: active
+> Status: done - delivery through PRs #602, #619, and #626.
+> Archived 2026-10-31. PR #626 shipped the test command on 2026-10-29.
+> Conditional JSON-tag and assertion-sharing work belongs to
+> [deferred candidates C1-C2](../reference/deferred-candidates-2026-10-31.md).
 > Implementation delivered on 2026-10-28 in PR #602, merged as
 > `606406d7a347dfcee37559ee457321a18ae001f2`. Remaining follow-ups are
 > listed below; compiler investigation outcomes have separate records.
@@ -46,9 +49,9 @@ All probes ran with `builds/0/x2c run` on `dev` `9aeeef265`.
   losing its C declarator name. Current investigation reproduced the
   identifier-valued Name case and repaired its member projection; direct
   and deferred String Names work. See
-  [Deferred method names](archive/compiler-deferred-method-name.md).
+  [Deferred method names](compiler-deferred-method-name.md).
 - The original include-only `meta static` report was investigated and
-  [closed as misclassified](archive/compiler-included-static-meta.md).
+  [closed as misclassified](compiler-included-static-meta.md).
   Provider-owned private calls work; consumer access to another unit's static
   helper is outside the existing visibility contract. Nonstatic meta helpers
   are available to includers. Shipped `lib/` helpers use linked meta:
@@ -344,21 +347,22 @@ review finds before running the gate.
 
 ## Remaining follow-ups
 
-The implementation is delivered. These items do not block its use or
-commission another implementation campaign.
+The implementation is delivered. [Deferred candidates C1-C2](../reference/deferred-candidates-2026-10-31.md)
+own the remaining JSON-tag and assertion-sharing questions. The table below
+retains their boundaries; command promotion is complete.
 
 | Follow-up | Current boundary | Next action |
 | --- | --- | --- |
 | JSON round trips for Symbol and List fields | Existing JSON conversion loses those tags; the limitation is documented and tested. | Establish a caller that needs those round trips, then decide the representation and compatibility policy before changing it. |
 | Shared assertion implementation | User tests use `lib/test.x`; repository tests keep their existing harness and Scope-balance rules. | Once `test.x` has users, assess whether sharing assertions removes duplication without weakening either contract. |
-| Promote `x2c test` to shipped | Gary approved promotion after PR #619 landed. The manifest now marks the command shipped. | Submit the promotion and installation documentation to the shared integrator. |
+| Promote `x2c test` to shipped | Complete: PR #626 merged on 2026-10-29; the manifest marks the command shipped. | None. |
 
 The two compiler reports were investigated independently:
 
-- [Deferred method names](archive/compiler-deferred-method-name.md): the
+- [Deferred method names](compiler-deferred-method-name.md): the
   identifier-valued method Name case was repaired and published in PR #614.
   Direct and deferred String Names already worked.
-- [Included static meta helpers](archive/compiler-included-static-meta.md):
+- [Included static meta helpers](compiler-included-static-meta.md):
   closed as misclassified. Supported provider-owned calls pass; consumer
   access to private helpers is outside the documented visibility contract.
 

@@ -124,7 +124,10 @@ int main(void){
     }
 
   }
-  if(! _x2c_gensym_condition_1) result = - 1;
+  if(! _x2c_gensym_condition_1){
+    result = - 1;
+  }
+
 }
 if(result != 9 || subjects != 1 || guards != 1 || a != 90) return 1;
 {
@@ -146,7 +149,9 @@ if(result != 9 || subjects != 1 || guards != 1 || a != 90) return 1;
   }
 
 }
-if(! _x2c_gensym_condition_2) if(a != 90) return 3;
+if(! _x2c_gensym_condition_2){
+  if(a != 90) return 3;
+}
 }
 if(guards != 1 || subjects != 2) return 4;
 {
@@ -170,7 +175,9 @@ if(guards != 1 || subjects != 2) return 4;
   }
 
 }
-if(! _x2c_gensym_condition_3) result = a;
+if(! _x2c_gensym_condition_3){
+  result = a;
+}
 }
 if(result != 90) return 6;
 {
@@ -195,7 +202,9 @@ if(result != 90) return 6;
   }
 
 }
-if(! _x2c_gensym_condition_4) return 7;
+if(! _x2c_gensym_condition_4){
+  return 7;
+}
 }
 if(result != 7 || a != 90) return 8;
 {
@@ -230,7 +239,9 @@ if(result != 7 || a != 90) return 8;
   }
 
 }
-if(! _x2c_gensym_condition_5) return 10;
+if(! _x2c_gensym_condition_5){
+  return 10;
+}
 }
 {
   List _x2c_gensym_match_expr_7 = _17;
@@ -279,7 +290,9 @@ if(result != 3) return 12;
 
 }
 }
-if(! _x2c_gensym_condition_6) return 13;
+if(! _x2c_gensym_condition_6){
+  return 13;
+}
 }
 if(result != 11) return 14;
 if(({
@@ -362,7 +375,9 @@ if(visits) return 19;
   }
 
 }
-if(! _x2c_gensym_condition_9) result = - 1;
+if(! _x2c_gensym_condition_9){
+  result = - 1;
+}
 }
 if(result != 4) return 20;
 Var dynamic = int_var(7);
@@ -403,7 +418,9 @@ dynamic = List_var(_28);
   }
 
 }
-if(! _x2c_gensym_condition_10) return 22;
+if(! _x2c_gensym_condition_10){
+  return 22;
+}
 }
 if(result != 8) return 23;
 {
@@ -432,7 +449,9 @@ if(result != 8) return 23;
   }
 
 }
-if(! _x2c_gensym_condition_11) return 24;
+if(! _x2c_gensym_condition_11){
+  return 24;
+}
 }
 if(result != 11) return 25;
 if(!({
