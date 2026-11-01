@@ -3,9 +3,9 @@
 > Status: active - recorded 2026-11-01 against `dev` `f12c7619a`.
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
-> Three defects are reproduced below; the rest is recorded drift. Nothing in
-> this plan is implemented yet. Batch A also absorbs follow-up F4 from the
-> [October 31 follow-ups](review-followups-2026-10-31.md).
+> Batch A (compiler defects A1-A5) is implemented and gated; see its
+> delivery record below. Batches B-E remain open. Batch A also absorbs
+> follow-up F4 from the [October 31 follow-ups](review-followups-2026-10-31.md).
 
 ## Review scope and baseline
 
@@ -50,6 +50,27 @@ stacking checks above. Observed while adding them, and left as recorded
 behavior: a file-scope decoration runs once in collection and once in
 parsing, so a meta helper with side effects sees each file-scope form twice;
 block-scope forms run once. The fixture checks only the first recorded pair.
+
+### Batch A delivery, 2026-11-01
+
+Implemented in `33711ac94` (A1-A4 and their fixtures), the bootstrap
+refresh `f59e16161`, `89908c3a9` (A5 and the adoption that drops
+`$_x2c_literal_list` from `src/fields.x` and `lib/native-scalar-types.x`),
+`800082e80` and `153175515` (the anonymous-name test kept inside
+`src/diagnostics.x`, which the unit-test link carries, with the final
+bootstrap and generated pages). A6 is recorded, not repaired.
+
+`tools/gate-state.py ensure agent-pr-check` passes on the completed tree:
+1,164 unit tests with 103,725 assertions, 1,383 compiler fixtures with 3,052
+artifacts, 138 book samples with matching output, cold collection, command
+checks, and the self-host comparisons. Fixture changes: three new fixtures
+(`macro-expand-consumed-target`, `macro-expand-template-rows`,
+`macro-expand-row-failure`), the extended `leading-attribute-typedef` and
+`macro-decorator-continuation`, eight diagnostics expectations that now name
+`expand` or `$unit` instead of a generated spelling, and `c-prefix-macros`,
+whose typedef now keeps its attribute macro in the C and the header like a
+written attribute. No public runtime signature changed. The D3 allocation
+microbenchmarks were not run; batch A touches no allocation path.
 
 ## Batch B: release notes and distribution
 
