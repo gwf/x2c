@@ -187,6 +187,7 @@ static void context_exports_large_map_storage(void) {
     if (exported[i].int() != i + 1) correct = 0;
   EXPECT_PTR_EQ(exported, map);
   EXPECT_TRUE(correct);
+  EXPECT_TRUE(exported.capacity >= 65536);
   Scope cache_owner = exported.hashes.block().lifetime;
   EXPECT_PTR_EQ(cache_owner.parent(), Scope.owner(exported.hashes.block()));
   exported[50000] = 50001;

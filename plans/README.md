@@ -48,6 +48,7 @@ revisions; this closeout does not commission deferred work or main promotion.
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
 | [Regex-redux and source size](plso-regex-and-source-size.md) | Phase profiling, scratch-buffer comparison and source-size audit. | Retain measured gains and refresh the chart. |
+| [October 31 margin repairs](review-repairs-2026-11-01.md) | Three reproduced compiler defects (consumed Macro targets, template `expand` inputs, attribute macros before `typedef`), missing release notes and third-party notice, and recorded drift in Map, Scope, benchmark, guide, and plan records. | Repair batch A from its reproductions first; deliver the code and documentation batches as the plan records. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |

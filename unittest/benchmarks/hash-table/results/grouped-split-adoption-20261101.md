@@ -6,6 +6,8 @@ Measured candidate: `0fce29c16` (`split cached hashes in large grouped maps`), c
 
 The single grouped generator now separates full hashes from controls at 65,536 buckets for Var Map and PoolTable. Smaller tables retain combined storage. Typed families retain their native records and hash policies. The probing algorithm and prefetch policy are unchanged.
 
+Note added 2026-11-01: this change caches the full-hash pointer once per probe and rebuild. The reverted experiment `ba36836b0` combined that cache with a per-index record prefetch, and the retirement report's regression figure covers the combination, not the cache alone. The two reports' absolute baselines come from separate runs on separate days; compare ratios within a report rather than nanoseconds across reports.
+
 Large caches use the existing controls Block lifetime. The aligned trailer holds the cached-hash pointer. Guarded construction frees staged storage on failure. Rebuild transfers the staged cache lifetime to the old controls owner before publishing the replacement. Existing Block cleanup, owner moves and Context export carry that lifetime. Root Pool retains its existing append-only atomic index and version retention.
 
 This introduces an internal storage Scope and a full-hash allocation for a large table. It preserves the public Map/Pool structs, signatures, lazy Map content ownership and root acquire/release publication. There is no new allocator, global lock or runtime backend selector.

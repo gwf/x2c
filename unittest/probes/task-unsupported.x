@@ -1,4 +1,4 @@
-/* Optional fallback probe; run with run-task-backend.sh. */
+/* Optional unsupported-target probe; run with run-task-backend.sh. */
 #include "x2c.x"
 
 int main(void) {

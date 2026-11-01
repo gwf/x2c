@@ -91,6 +91,7 @@ static void storage_maps_grow_under_their_record_owner(void) {
   EXPECT_NULL(typed.scope);
   EXPECT_INT_EQ(map[49999].int(), 50000);
   EXPECT_INT_EQ(typed[49999], 50001);
+  EXPECT_TRUE(map.capacity >= 65536);
   Scope cache_owner = map.hashes.block().lifetime;
   EXPECT_NOT_NULL(cache_owner);
   EXPECT_PTR_EQ(cache_owner.parent(), destination);

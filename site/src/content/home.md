@@ -55,8 +55,8 @@ as in the finished one, computing values and writing code.
 Everything is optional and works with plain C, so you can adopt x2c one feature
 at a time in code you already have.
 The compiler, library, and runtime are themselves written in x2c, with no
-third-party library dependencies. Read the source to learn the language; edit
-it to change the language. The [repository counts](#source) show how much there
+third-party library dependencies beyond one vendored C coroutine switch.
+Read the source to learn the language; edit it to change the language. The [repository counts](#source) show how much there
 is to read.
 
 Why learn a new language, let alone release one, in a post-AI world?

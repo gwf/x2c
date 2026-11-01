@@ -84,6 +84,9 @@ static void copy_support(Path destination) {
     ("etc" ("*.xlisp" "*.x") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))
     ("." ("LICENSE") ("licenses")));
+  /* The task backend's vendored coroutine header is private to the
+     runtime's own C and is not an x2c include. */
+  List private = %("minicoro.h");
   foreach (List row, rows) {
     (String folder, List patterns, List outputs) = row;
     foreach (Var pattern, patterns) {
@@ -93,10 +96,12 @@ static void copy_support(Path destination) {
           %"no $pattern under $folder; run 'make build' first";
         raise %(not-found (reason $message));
       }
-      foreach (Path source, matches)
+      foreach (Path source, matches) {
+        if (source.basename() in private) continue;
         foreach (Var output, outputs)
           copy(source, destination.join(output)
                          .join(source.basename()));
+      }
     }
   }
   foreach (Path source, root.join("builds/0/lib/*/*.h").glob())

@@ -28,7 +28,8 @@ The existing `make bm-map` remains the quick direct-C regression against
 pinned `khashl`. These external suites answer the broader comparison question.
 
 The direct runner writes a fresh timestamped directory containing its frozen
-binary, exact `map.x`, raw CSV, metadata, and summary. To compare two retained
+binary, the exact `map.x`, `generics.x`, and `grouped.x`, raw CSV, metadata,
+and summary. To compare two retained
 production binaries in rotated order, run:
 
 ```sh
@@ -78,12 +79,12 @@ Two lanes measure it:
 
 ## Runtime-free U32Map lane
 
-`x2c/u32-map.x` is a benchmark-only extraction of the production Map storage
-algorithm for 32-bit keys and values. It keeps eight-byte hash/index slots,
+`x2c/u32-map.x` is a benchmark-only Robin Hood specimen for 32-bit keys and
+values, retained from the Map storage that production used before grouped
+control bytes (`lib/map/grouped.x`). It keeps eight-byte hash/index slots,
 separate eight-byte records, dynamic probe-sequence lengths, Robin Hood
-displacement, back-shift deletion, and record-index reuse. It remains the
-split-layout specimen even though production Map uses parallel hash and
-entry arrays. Its 0.75 load factor matches production Map and khashl.
+displacement, back-shift deletion, and record-index reuse, in a split
+layout. Its 0.75 load factor matches production Map and khashl.
 It replaces `Var`, `Scope`, `Bytes`, and dynamic updates with
 `malloc`/`realloc`/`free` and direct typed value pointers. It does not include
 or depend on `lib/map/map.x`.

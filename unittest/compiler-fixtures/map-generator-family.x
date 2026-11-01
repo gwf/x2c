@@ -16,9 +16,9 @@ struct ProbeMapShortLongRecord { short key; long val; };
 
 static int probe_hash_calls;
 
-static int _probe_reinsert_error(unsigned capacity, int probe) {
+static int _probe_reinsert_error(unsigned capacity) {
   raise %(invariant (operation "ProbeMapShortLong.reinsert")
-          (capacity $capacity) (probe $probe));
+          (capacity $capacity));
 }
 static void _probe_insert_error(unsigned capacity) {
   raise %(invariant (operation "ProbeMapShortLong.insert")

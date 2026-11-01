@@ -23,8 +23,9 @@
 #define maybe_const
 #endif
 
-// The unit's C keeps an attribute macro's name; the header leaves it out. An
-// attribute arm outranks an empty one, whichever comes first.
+// The unit's C keeps an attribute macro's name; the header leaves it out of
+// an object declaration. An attribute arm outranks an empty one, whichever
+// comes first.
 #ifdef NO_ATTRIBUTES
 #define USED
 #else
@@ -49,7 +50,8 @@ INLINE int tripled(int value) { return value * 3; }
 
 WEAK int weak_value = 5;
 USED int sextupled(int value) { return value * 6; }
-// Before `typedef`, an attribute macro contributes nothing.
+// Before `typedef`, an attribute macro stays as leading text, like a written
+// attribute, in the unit's C and its header.
 SPARE typedef int count_t;
 ALSO_SPARE static const count_t spare = 7;
 

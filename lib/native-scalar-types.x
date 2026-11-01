@@ -109,7 +109,7 @@ macro Unit $native.scalar.access(Type $type) {
 }
 
 macro Unit $native.scalar.access.all() {
-  expand $_x2c_literal_list($_scalar_access_rows())
+  expand $_scalar_access_rows()
   $native.scalar.access
 }
 
@@ -120,7 +120,7 @@ macro Entry $native.scalar.access.entry(Type $type) {
 }
 
 macro Entry $native.scalar.access.entries() {
-  expand $_x2c_literal_list($_scalar_access_rows())
+  expand $_scalar_access_rows()
   $native.scalar.access.entry
 }
 

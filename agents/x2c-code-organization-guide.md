@@ -71,7 +71,7 @@ Paths below are relative to `lib/`.
 | `substring.x`, `substring-map.x` | Borrowed immutable views of String bytes and a scope-owned count table keyed by them. |
 | `symbol.x`, `symbolset.x`, `atom.x`, `list/list.x`, `list-selectors.x` | Closed vocabularies, canonical Lists, and optional compound List selectors. |
 | `block.x`, `buffer.x`, `array/array.x`, `map/map.x` | Mutable storage and builders. |
-| `array/generics.x`, `map/generics.x`, `typed-array.x`, `typed-map.x`, `typed-list.x` | Collection family generators and typed views. |
+| `array/generics.x`, `map/generics.x`, `map/grouped.x`, `typed-array.x`, `typed-map.x`, `typed-list.x` | Collection family generators, grouped Map storage, and typed views. |
 | `iter.x`, `match/match.x` | Traversal, pattern matching, plan lowering and caching, and the Match wordcode machine. |
 | `macrovalue/macrovalue.x`, `system-macros.x` | Macros as values and convenience macros. |
 | `error/error.x`, `error_init.x`, `error-macros.x`, `error-private.x`, `func/errors.x`, `exception.x` | Ambient errors, shared causes, transfer layouts, and structured control flow. |
@@ -81,7 +81,7 @@ Paths below are relative to `lib/`.
 | `json.x`, `datum.x`, `datum-reader.x` | JSON and Lisp reader text. |
 | `diff.x`, `digest.x`, `regex.x` | Line differences, SHA-256 digests, and regular expressions. |
 | `time.x`, `random.x`, `encoding.x`, `url.x` | Clocks and calendar time, random values and UUIDs, text encodings, and URLs. |
-| `context.x`, `thread.x`, `thread-state.x`, `channel.x`, `mutex.x` | Runtime state, native workers, communication, and coordination. |
+| `context.x`, `thread.x`, `thread-state.x`, `task.x`, `channel.x`, `mutex.x` | Runtime state, native workers, cooperative task batches, communication, and coordination. |
 | `scan.x`, `tokenizer.x` | Lexical scanners and the shared tokenizer. |
 | `func/func.x`, `lisp/lisp.x`, `lisp-targets/lisp-targets.x`, `lisp-bindings.x` | Native callable binding, runtime Lisp, and its native operations. |
 | `meta.x`, `compiler-meta.x`, `type.x`, `rewrite.x` | Public and compiler-private meta operations, structural Type operations, and rewrite registration. |

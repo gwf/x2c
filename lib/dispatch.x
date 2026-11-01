@@ -773,7 +773,8 @@ static Buffer _write_float_repr(
   return suffix ? out.write(suffix) : out;
 }
 
-/* Map stores a nonzero hash beside each record, so zero becomes all ones. */
+/* The root Pool index reserves hash zero for an empty slot, so zero becomes
+   all ones, as `x2c_hash_word` does (see `lib/pool/root-index.x`). */
 static unsigned _nonzero(unsigned hash) => hash ? hash : -1;
 
 /* A Var is one 64-bit word, so it hashes as one through the shared mixer.

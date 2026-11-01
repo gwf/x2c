@@ -50,8 +50,9 @@ protocol Cleanup(Map);
 
 // buckets
 
-/* A record and its cached full hash occupy the same bucket. Both Vars are
-   shallow copies; insertion never adopts storage reachable through them. */
+/* A record holds the key and value; its full hash sits beside the controls.
+   Both Vars are shallow copies; insertion never adopts storage reachable
+   through them. */
 static struct MapRecord {  Var key, val; };
 
 #include "group-match.h"

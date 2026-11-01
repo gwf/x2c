@@ -403,7 +403,7 @@ void x2c_scope_execution_free(void * saved){
 }
 
 static ScopeThreadState _thread(void){
-  ScopeThreadState state = & f7_regions___scope_thread;  if(! state -> base_slot) state -> base_slot = & f7_regions___scope_root;  if(! state -> active) state -> active = state -> base_slot;  return state;
+  ScopeThreadState state = & f7_regions___scope_thread;  if(! state -> active) state -> active = state -> base_slot = & f7_regions___scope_root;  return state;
 }
 
 static void f7_regions____record_retain(Scope scope, Scope * slot){
@@ -420,7 +420,7 @@ static Scope _new_scope(const char * name){
   ;  Scope scope = & record -> scope;  if(name){
     record -> name = _register_name(scope, name);  if(! record -> name){
       free(record); {
-        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "_new_scope",.line = 368,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 97614135954008, 0);  __builtin_unreachable();
+        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "_new_scope",.line = 367,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 97614135954008, 0);  __builtin_unreachable();
       }
 
     }
@@ -562,7 +562,7 @@ void Scope_shutdown(void){
 
 int strcmp(const char *, const char *);
 static void f7_runtime____initialize(void){
-  if(f7_runtime___scope_state == 40094288782 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");  const char * accounting = getenv("X2C_SCOPE_ACCOUNTING");  scope_accounting = accounting && strcmp(accounting, "1") == 0;  ScopeThreadState state = _thread();  state -> active = state -> base_slot;  f7_runtime___scope_state = 40094288782;  if(atexit(Scope_shutdown)) _raw_fatal("could not register shutdown handler");
+  if(f7_runtime___scope_state == 40094288782 || f7_runtime___scope_state == 1324302486414) return;  if(f7_runtime___scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");  const char * accounting = getenv("X2C_SCOPE_ACCOUNTING");  scope_accounting = accounting && strcmp(accounting, "1") == 0;  f7_runtime___scope_state = 40094288782;  if(atexit(Scope_shutdown)) _raw_fatal("could not register shutdown handler");
 }
 
 _Noreturn static void _raw_fatal(const char * message){
@@ -586,7 +586,7 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 107,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 105,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
     }
     items = f7_runtime____raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
@@ -595,14 +595,14 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
 
 static void * _raw_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 116,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 114,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
   }
   if(scope_accounting) atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
 static void * f7_runtime____raw_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 123,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 121,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
   }
   return result;
 }

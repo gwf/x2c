@@ -22,7 +22,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-_Noreturn static void _reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0);
+_Noreturn static void _reinsert_error(unsigned _x2c_gensym_macro_capacity_0);
 
 _Noreturn static void _insert_error(unsigned _x2c_gensym_macro_capacity_1);
 
@@ -186,19 +186,17 @@ static Var Symbol_var(Symbol);
 
 static Var unsigned_var(unsigned);
 
-static Var int_var(int);
-
 #include "error.h"
 
 
 
 
-_Noreturn static void _reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0){
+_Noreturn static void _reinsert_error(unsigned _x2c_gensym_macro_capacity_0){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_new("MapSubInt.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/substring-map.x",.function = "_reinsert_error",.line = 20,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0));
       __builtin_unreachable();
     }
 
@@ -398,7 +396,7 @@ static void MapSubInt_reinsert_unique(MapSubInt _x2c_gensym_macro_map_9, unsigne
     }
     _x2c_gensym_macro_group_1 =(_x2c_gensym_macro_group_1 + _x2c_gensym_macro_step_1 + 1) & _x2c_gensym_macro_group_mask_1;
   }
-  (void) _reinsert_error(_x2c_gensym_macro_map_9 -> capacity, 0);
+  (void) _reinsert_error(_x2c_gensym_macro_map_9 -> capacity);
 }
 
 void Scope_transfer(Scope, Scope);
@@ -738,6 +736,8 @@ static int _x2c_gensym_macro__enumerate_next_0(Iter _x2c_gensym_macro_iter_3, Va
 }
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
+
+static Var int_var(int);
 
 Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_26, Iter _x2c_gensym_macro_dest_0){
   if((void *) _x2c_gensym_macro_dest_0 == 0) return 0;

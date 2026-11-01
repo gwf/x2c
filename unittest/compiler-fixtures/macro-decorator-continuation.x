@@ -1,3 +1,4 @@
+#include <string.h>
 #include "meta.x"
 
 macro Decorator $repeat(Expr $count) =>
@@ -58,6 +59,18 @@ macro Decorator $as_guard(Macro $action) =>
 
 macro Stmt $hit() { total++; }
 
+/* Macro-target stacking reduces the closest decorator first; the outer one
+   receives the inner result as a Macro. */
+meta static String order = "";
+meta static List mark_a(List target) { order = order + "a"; return target; }
+meta static List mark_b(List target) { order = order + "b"; return target; }
+meta static String read_order(void) { return order; }
+macro Decorator $tally_a(Macro $target) => $mark_a($target);
+macro Decorator $tally_b(Macro $target) => $mark_b($target);
+
+$tally_a() $tally_b()
+macro Decorator $stacked(Stmt $body) { total += 10; $body }
+
 int main(void) {
   int total = 0;
   repeat 3 { total++; }
@@ -88,6 +101,10 @@ int main(void) {
   Macro inert = macro Decorator(Stmt $body) { total = 0; $body };
   (void) inert;
   if (total != 53) return 9;
+  $stacked() { total++; }
+  if (total != 64) return 11;
+  /* File-scope collection and parsing each reduce the pair once. */
+  if (strncmp($read_order(), "ba", 2) != 0) return 12;
   puts("decorator continuation ok");
   return 0;
 }

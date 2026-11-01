@@ -46,7 +46,7 @@ static inline int tripled(int value){
 
 WEAK int weak_value = 5;
 
-typedef int count_t;
+typedef SPARE int count_t;
 
 static ALSO_SPARE const count_t spare = 7;
 

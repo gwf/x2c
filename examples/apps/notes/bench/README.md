@@ -148,8 +148,7 @@ rounds; the report includes CPU, memory, raw samples, and limitations.
 
 ## In-process Thread.run / Task.run comparison
 
-This optional probe requires the local async prototype. It runs real Notes
-lookup SQL, SQLite row conversion, tag parsing, and JSON encoding. One native
+This optional probe runs real Notes lookup SQL, SQLite row conversion, tag parsing, and JSON encoding. One native
 database thread receives requests through Channels. The same client functions
 run through either `Thread.run` or `Task.run` in one optimized binary.
 HTTP parsing, sockets, and response writes are outside this workload.

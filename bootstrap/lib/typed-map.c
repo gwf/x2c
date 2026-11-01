@@ -73,7 +73,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-_Noreturn static void _int_reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0);
+_Noreturn static void _int_reinsert_error(unsigned _x2c_gensym_macro_capacity_0);
 
 _Noreturn static void _int_insert_error(unsigned _x2c_gensym_macro_capacity_1);
 
@@ -81,7 +81,7 @@ static int * _int_key(MapIntInt _x2c_gensym_macro_map_0, unsigned _x2c_gensym_ma
 
 static int * _int_value(MapIntInt _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1);
 
-_Noreturn static void _long_reinsert_error(unsigned _x2c_gensym_macro_capacity_2, int _x2c_gensym_macro_probe_1);
+_Noreturn static void _long_reinsert_error(unsigned _x2c_gensym_macro_capacity_2);
 
 _Noreturn static void _long_insert_error(unsigned _x2c_gensym_macro_capacity_3);
 
@@ -89,7 +89,7 @@ static long * _long_key(MapLongDouble _x2c_gensym_macro_map_2, unsigned _x2c_gen
 
 static double * _double_value(MapLongDouble _x2c_gensym_macro_map_3, unsigned _x2c_gensym_macro_index_3);
 
-_Noreturn static void _string_reinsert_error(unsigned _x2c_gensym_macro_capacity_4, int _x2c_gensym_macro_probe_2);
+_Noreturn static void _string_reinsert_error(unsigned _x2c_gensym_macro_capacity_4);
 
 _Noreturn static void _string_insert_error(unsigned _x2c_gensym_macro_capacity_5);
 
@@ -97,7 +97,7 @@ static String * _string_key(MapStringString _x2c_gensym_macro_map_4, unsigned _x
 
 static String * _string_value(MapStringString _x2c_gensym_macro_map_5, unsigned _x2c_gensym_macro_index_5);
 
-_Noreturn static void _string_int_reinsert_error(unsigned _x2c_gensym_macro_capacity_6, int _x2c_gensym_macro_probe_3);
+_Noreturn static void _string_int_reinsert_error(unsigned _x2c_gensym_macro_capacity_6);
 
 _Noreturn static void _string_int_insert_error(unsigned _x2c_gensym_macro_capacity_7);
 
@@ -942,19 +942,17 @@ static Var Symbol_var(Symbol);
 
 static Var unsigned_var(unsigned);
 
-static Var int_var(int);
-
 #include "error.h"
 
 
 
 
-_Noreturn static void _int_reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0){
+_Noreturn static void _int_reinsert_error(unsigned _x2c_gensym_macro_capacity_0){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_new("MapIntInt.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/typed-map.x",.function = "_int_reinsert_error",.line = 83,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0));
       __builtin_unreachable();
     }
 
@@ -985,12 +983,12 @@ static int * _int_value(MapIntInt _x2c_gensym_macro_map_1, unsigned _x2c_gensym_
   return & _x2c_gensym_macro_records_1[_x2c_gensym_macro_index_1].val;
 }
 
-_Noreturn static void _long_reinsert_error(unsigned _x2c_gensym_macro_capacity_2, int _x2c_gensym_macro_probe_1){
+_Noreturn static void _long_reinsert_error(unsigned _x2c_gensym_macro_capacity_2){
   {
     Var _x2c_gensym_literal_part_2 = String_var(String_new("MapLongDouble.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/typed-map.x",.function = "_long_reinsert_error",.line = 87,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_2), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_1));
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_2));
       __builtin_unreachable();
     }
 
@@ -1021,12 +1019,12 @@ static double * _double_value(MapLongDouble _x2c_gensym_macro_map_3, unsigned _x
   return & _x2c_gensym_macro_records_3[_x2c_gensym_macro_index_3].val;
 }
 
-_Noreturn static void _string_reinsert_error(unsigned _x2c_gensym_macro_capacity_4, int _x2c_gensym_macro_probe_2){
+_Noreturn static void _string_reinsert_error(unsigned _x2c_gensym_macro_capacity_4){
   {
     Var _x2c_gensym_literal_part_4 = String_var(String_new("MapStringString.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/typed-map.x",.function = "_string_reinsert_error",.line = 91,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_4, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_4), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_2));
+      x2c_error_raise_n(& _x2c_gensym_error_site_4, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_4));
       __builtin_unreachable();
     }
 
@@ -1057,12 +1055,12 @@ static String * _string_value(MapStringString _x2c_gensym_macro_map_5, unsigned 
   return & _x2c_gensym_macro_records_5[_x2c_gensym_macro_index_5].val;
 }
 
-_Noreturn static void _string_int_reinsert_error(unsigned _x2c_gensym_macro_capacity_6, int _x2c_gensym_macro_probe_3){
+_Noreturn static void _string_int_reinsert_error(unsigned _x2c_gensym_macro_capacity_6){
   {
     Var _x2c_gensym_literal_part_6 = String_var(String_new("MapStringInt.reinsert"));
     {
       static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/typed-map.x",.function = "_string_int_reinsert_error",.line = 95,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_6, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_6), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_3));
+      x2c_error_raise_n(& _x2c_gensym_error_site_6, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_6));
       __builtin_unreachable();
     }
 
@@ -1311,7 +1309,7 @@ static void MapIntInt_reinsert_unique(MapIntInt _x2c_gensym_macro_map_15, unsign
     }
     _x2c_gensym_macro_group_1 =(_x2c_gensym_macro_group_1 + _x2c_gensym_macro_step_1 + 1) & _x2c_gensym_macro_group_mask_1;
   }
-  (void) _int_reinsert_error(_x2c_gensym_macro_map_15 -> capacity, 0);
+  (void) _int_reinsert_error(_x2c_gensym_macro_map_15 -> capacity);
 }
 
 void Scope_transfer(Scope, Scope);
@@ -1654,6 +1652,8 @@ int MapIntInt_getdefault(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_mac
 }
 
 int Var_is_void(Var);
+
+static Var int_var(int);
 
 int MapIntInt_setdefault(MapIntInt _x2c_gensym_macro_map_38, int _x2c_gensym_macro_key_17, int _x2c_gensym_macro_defval_1){
   if(! _init_guard_) _file_init_();
@@ -2270,7 +2270,7 @@ static void MapLongDouble_reinsert_unique(MapLongDouble _x2c_gensym_macro_map_71
     }
     _x2c_gensym_macro_group_4 =(_x2c_gensym_macro_group_4 + _x2c_gensym_macro_step_4 + 1) & _x2c_gensym_macro_group_mask_4;
   }
-  (void) _long_reinsert_error(_x2c_gensym_macro_map_71 -> capacity, 0);
+  (void) _long_reinsert_error(_x2c_gensym_macro_map_71 -> capacity);
 }
 
 static void _x2c_gensym_macro__rebuild_1(MapLongDouble _x2c_gensym_macro_map_72, unsigned _x2c_gensym_macro_capacity_23){
@@ -3183,7 +3183,7 @@ static void MapStringString_reinsert_unique(MapStringString _x2c_gensym_macro_ma
     }
     _x2c_gensym_macro_group_7 =(_x2c_gensym_macro_group_7 + _x2c_gensym_macro_step_7 + 1) & _x2c_gensym_macro_group_mask_7;
   }
-  (void) _string_reinsert_error(_x2c_gensym_macro_map_127 -> capacity, 0);
+  (void) _string_reinsert_error(_x2c_gensym_macro_map_127 -> capacity);
 }
 
 static void _x2c_gensym_macro__rebuild_2(MapStringString _x2c_gensym_macro_map_128, unsigned _x2c_gensym_macro_capacity_33){
@@ -4091,7 +4091,7 @@ static void MapStringInt_reinsert_unique(MapStringInt _x2c_gensym_macro_map_183,
     }
     _x2c_gensym_macro_group_10 =(_x2c_gensym_macro_group_10 + _x2c_gensym_macro_step_10 + 1) & _x2c_gensym_macro_group_mask_10;
   }
-  (void) _string_int_reinsert_error(_x2c_gensym_macro_map_183 -> capacity, 0);
+  (void) _string_int_reinsert_error(_x2c_gensym_macro_map_183 -> capacity);
 }
 
 static void _x2c_gensym_macro__rebuild_3(MapStringInt _x2c_gensym_macro_map_184, unsigned _x2c_gensym_macro_capacity_43){
@@ -5037,7 +5037,7 @@ static String _update_string(volatile String * slot, Symbol op, String rhs){
 
 _Noreturn static void _bad_op(Symbol op){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/typed-map.x",.function = "_bad_op",.line = 378,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/typed-map.x",.function = "_bad_op",.line = 377,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_37, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }

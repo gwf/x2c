@@ -840,7 +840,7 @@ static size_t _stack_size(void){
   errno = 0;
   unsigned long long size = strtoull(setting, & end, 10);
   if(! * setting || * setting == '-' || * end || errno || size < 32768 || size > SIZE_MAX - 65536){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/task.x",.function = "_stack_size",.line = 245,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/task.x",.function = "_stack_size",.line = 248,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Task stack capacity")), NULL))));
     __builtin_unreachable();
   }
