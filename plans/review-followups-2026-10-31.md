@@ -50,4 +50,4 @@ These rows preserve existing source, lifetime, visibility, and distribution
 contracts. They add no runtime representation, validator, diagnostic, test
 target, or recurring process. Each future repair starts with its named
 reproduction and reuses its existing owner. The current six confirmed fixes
-are delivered separately from these uncompleted follow-ups.
+are tracked separately from these uncompleted follow-ups.

@@ -295,7 +295,7 @@ try {
             }
             break;
     }
-    printf($dedent(%"
+    printf("%s", $dedent(%"
       usage: tools/syntax-spec summary | check | write | ebnf | modes
              tools/syntax-spec dump grammar|lexical|extensions
              tools/syntax-spec uses RULE | graph RULE

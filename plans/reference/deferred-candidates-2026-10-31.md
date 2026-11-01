@@ -13,6 +13,7 @@
 | C5 | Individual quotation adoption | Select one demonstrated simplification that preserves binding, canonical Lists, staging, timing, and ownership. Historical census counts commission no blanket rewrite. | [Quotation closeout](../archive/quotation-adoption-closeout-2026-10-31.md) |
 | C6 | Generate TagId from its rows | Compare `lib/var/var.x` and `lib/var-tags.x`; preserve every ID and name without imposing meta dependencies on ordinary Var users. This remains lower priority. | [Quotation closeout](../archive/quotation-adoption-closeout-2026-10-31.md) |
 | C7 | Fully client-side browser compiler | Scope phase 3 only when requested. Phases 1 and 2 delivered a hybrid service plus browser WASM execution; they did not compile the compiler to WASM. | [Browser playground](../archive/browser-playground.md) |
+| C8 | Playground service rewritten from Node to x2c | The original plan promised a handler rewrite after HTTP shipped. HTTP has shipped, but `etc/playground/server.mjs` still owns the service. Reassess this separate example before selecting implementation; preserve its endpoint and container limits. | [Browser playground](../archive/browser-playground.md#service) |
 
 The networking plan's former Notes architecture has no pending implementation.
 The [Notes rewrite](../archive/notes-rewrite.md) superseded it. Compiler

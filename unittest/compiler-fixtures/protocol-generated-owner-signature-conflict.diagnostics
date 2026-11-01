@@ -1,4 +1,5 @@
-unittest/compiler-fixtures/protocol-generated-owner-signature-conflict.x:1:1: type: function takes 2 arguments, not 1
-  #include "x2c.x"
-  ^
+unittest/compiler-fixtures/protocol-generated-owner-signature-conflict.x:32:1: protocol: 'Item_truth' has a signature incompatible with Var(Item) member 'truth'
+  protocol Var(Item);
+  ^^^^^^^^
+  note: protocol member 'truth' declared by Var(Item) at lib/protocols.x:<line>:<column> conflicting definition 'Item_truth': ((func (("Item") (int))) int) expected: ((func (("Item"))) int)
 
