@@ -16,6 +16,8 @@
 #include "type.x"
 #include "var/var.x"
 #include "string/string.x"
+#include "encoding.x"
+#include "scan.x"
 #include "datum.x"
 #include <limits.h>
 #include <stdio.h>
@@ -117,27 +119,44 @@ Var Compiler.folded_constant(Compiler c, Var node) {
 }
 
 /** Returns the value of a String or character literal from its source
-    `spelling`, quotes included: adjacent pieces are unescaped on their own
-    and joined, as C does, and a character is its code.
+    `spelling`, quotes included. C string pieces decode before joining, and
+    the String ends at its first NUL. Returns void for unresolved native
+    macro words. Character literals retain their ordinary `char` result.
 */
 Var Compiler.literal_text_value(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"') {
-    String text = "";
-    for (int i = 0; i < len; i++) {
-      if (spelling[i] != '"') continue;
-      int start = ++i;
-      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
-      String piece = String.new_len(spelling + start, i - start).unescape();
-      text = %"$text$piece";
+    Buffer text = auto Buffer.new(0);
+    int ended = 0;
+    for (int i = 0; i < len;) {
+      if (spelling[i] != '"') return void;
+      int size = scan_c_string(spelling + i);
+      if (size < 0) return void;
+      _literal_piece(text, spelling + i + 1, size - 2, ended);
+      i += size;
+      while (i < len && isspace((unsigned char) spelling[i])) i++;
     }
-    return text;
+    return text.str();
   }
   if (len >= 3 && spelling[0] == '\'') {
     String body = String.new_len(spelling + 1, len - 2).unescape();
     return (char) (body.len() ? body[0] : 0);
   }
-  return spelling;
+  return void;
+}
+
+static void _literal_piece(Buffer text, char *at, int length, int &ended) {
+  for (int i = 0; i < length;) {
+    int value = (unsigned char) at[i], width = 1;
+    int universal = at[i] == '\\' &&
+      (at[i + 1] == 'u' || at[i + 1] == 'U');
+    if (at[i] == '\\') width = scan_c_escape_value(at + i, value);
+    i += width;
+    if (!value) ended = 1;
+    if (ended || value < 0) continue;
+    if (universal) text.write_code_point(value);
+    else text.write_char(value);
+  }
 }
 
 // values in code

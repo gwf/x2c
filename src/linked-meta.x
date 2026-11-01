@@ -2254,9 +2254,9 @@ static void _printf_conversion(
 
 static void _printf_scan(
   Code call, const char *at, Array arguments, int &next) {
+  if (!at) return;
   while (*at) {
     int ch = *at++;
-    if (ch == '\\' && *at) at++;
     if (ch != '%') continue;
     if (!*at) $fail.printf_incomplete(call);
     if (*at == '%') at++;
@@ -2274,7 +2274,8 @@ static Code _printf_lowered(Code code, Code format, List values) {
   if (code ~= %(expr ?type (call ?callee (args *given)))) {
     Array arguments = given;
     int next = given.len() - values.len();
-    _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
+    String text = format.value();
+    _printf_scan(code, text, arguments, next);
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
         $fail.printf_unused_argument(code);
@@ -2486,18 +2487,6 @@ Code raise_lowering(Code node) {
 
 /* --- src/components/string-switch.x -------------------------------------- */
 
-static String _string_case_bytes(String spelling) {
-  const char *p = spelling;
-  String bytes = "\"";
-  while ((p = strchr(p, '"'))) {
-    const char *start = ++p;
-    while (*p != '"') p += *p == '\\' ? 2 : 1;
-    bytes += String.new_len(start, p - start).unescape();
-    p++;
-  }
-  return bytes + "\"";
-}
-
 static int _string_case_text(Type type) =>
   type ~= %((!or (dim *) (!quote *)) char) ||
   type ~= %((!or (dim *) (!quote *)) const char);
@@ -2507,8 +2496,10 @@ static String _string_case_key(List label) {
     case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
-      if (_string_case_text(type))
-        return "\"" in spelling ? _string_case_bytes(spelling) : spelling;
+      if (_string_case_text(type)) {
+        Code text = %(expr (* char) (literal (* char) $spelling));
+        return text.format() ? text.value().repr() : spelling;
+      }
     }
   }
   return NULL;
@@ -2937,7 +2928,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_raise_immutable", _raise_immutable);
   $linked.row(rows, "_raise_value", _raise_value);
   $linked.row(rows, "raise_lowering", raise_lowering);
-  $linked.row(rows, "_string_case_bytes", _string_case_bytes);
   $linked.row(rows, "_string_case_text", _string_case_text);
   $linked.row(rows, "_string_case_key", _string_case_key);
   $linked.row(rows, "_string_case_index", _string_case_index);

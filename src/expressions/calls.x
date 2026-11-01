@@ -181,9 +181,7 @@ String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
     case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
-      int length = spelling ? spelling.len() : 0;
-      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
-        return NULL;
+      if (Compiler.literal_text_value(spelling) is not <string>) return NULL;
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {

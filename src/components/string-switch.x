@@ -21,19 +21,6 @@ macro Stmt $report.string_switch_case(Expr $site) =>
     $site, <xform>, "a case in a String switch takes a string literal",
     %("compare computed values with an if chain or match"));
 
-/* Adjacent literals join after each decodes its own escapes, as in C. */
-meta static String _string_case_bytes(String spelling) {
-  const char *p = spelling;
-  String bytes = "\"";
-  while ((p = strchr(p, '"'))) {
-    const char *start = ++p;
-    while (*p != '"') p += *p == '\\' ? 2 : 1;
-    bytes += String.new_len(start, p - start).unescape();
-    p++;
-  }
-  return bytes + "\"";
-}
-
 /* Whether `type` is the type of a C string literal. `lib/type.x` spells it
    `Type.is_char_pointer_like`, which a component cannot include; see
    `Compiler.prelude_sources`. */
@@ -49,8 +36,10 @@ meta static String _string_case_key(List label) {
     case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
-      if (_string_case_text(type))
-        return "\"" in spelling ? _string_case_bytes(spelling) : spelling;
+      if (_string_case_text(type)) {
+        Code text = %(expr (* char) (literal (* char) $spelling));
+        return text.format() ? text.value().repr() : spelling;
+      }
     }
   }
   return NULL;

@@ -85,6 +85,22 @@ static int count(String *words, int n) {
   return kept;
 }
 
+#define CASE_WORD "word"
+
+static int escaped_labels(String value) {
+  switch (value) {
+    case "a\0tail": return 1;
+    case "atail": return 2;
+    case "\x025i": return 3;
+    case "\0025i": return 4;
+    case "\u00A9": return 5;
+    case "A9": return 6;
+    case "pre" CASE_WORD "post": return 7;
+    case "prepost": return 8;
+  }
+  return 0;
+}
+
 int main(void) {
   String built = "pl" + "um";
   Stdout.printf("%s %s %s\n", classify("apple"), classify(built),
@@ -99,5 +115,10 @@ int main(void) {
                 nested("c", "q", 0), nested("d", "q", 0));
   String words[] = { "x", "skip", "two!", "", "stop", "z" };
   Stdout.printf("count=%d\n", count(words, 6));
+  printf("escapes=%d %d %d %d %d %d %d %d\n",
+         escaped_labels("a"), escaped_labels("atail"), escaped_labels("%i"),
+         escaped_labels("\0025i"), escaped_labels("\u00A9"),
+         escaped_labels("A9"), escaped_labels("prewordpost"),
+         escaped_labels("prepost"));
   return 0;
 }

@@ -150,13 +150,12 @@ meta static void _printf_conversion(
   arguments[next++] = read;
 }
 
-/* Reads each conversion of the format text `at` in order, stepping over
-   escape sequences and `%%`. */
+/* Reads each conversion of the decoded format text, stepping over `%%`. */
 meta static void _printf_scan(
   Code call, const char *at, Array arguments, int &next) {
+  if (!at) return;
   while (*at) {
     int ch = *at++;
-    if (ch == '\\' && *at) at++;
     if (ch != '%') continue;
     if (!*at) $fail.printf_incomplete(call);
     if (*at == '%') at++;
@@ -177,7 +176,8 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
   if (code ~= %(expr ?type (call ?callee (args *given)))) {
     Array arguments = given;
     int next = given.len() - values.len();
-    _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
+    String text = format.value();
+    _printf_scan(code, text, arguments, next);
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
         $fail.printf_unused_argument(code);

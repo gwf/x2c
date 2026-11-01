@@ -119,6 +119,24 @@ static void scan_operators(void) {
 }
 
 
+static void scan_c_escape_values(void) {
+  int value;
+  EXPECT_INT_EQ(scan_c_escape_value("\\x025i", value), 5);
+  EXPECT_INT_EQ(value, '%');
+  EXPECT_INT_EQ(scan_c_escape_value("\\045i", value), 4);
+  EXPECT_INT_EQ(value, '%');
+  EXPECT_INT_EQ(scan_c_escape_value("\\u00A9", value), 6);
+  EXPECT_INT_EQ(value, 0xA9);
+  EXPECT_INT_EQ(scan_c_escape_value("\\U0001F642", value), 10);
+  EXPECT_INT_EQ(value, 0x1F642);
+  EXPECT_INT_EQ(scan_c_escape_value("\\0tail", value), 2);
+  EXPECT_INT_EQ(value, 0);
+  EXPECT_INT_EQ(scan_c_escape_value("\\\n", value), 2);
+  EXPECT_INT_EQ(value, -1);
+  EXPECT_INT_EQ(scan_c_escape_value("\\\r\n", value), 3);
+  EXPECT_INT_EQ(value, -1);
+}
+
 static void scan_byte_escapes_and_segments(void) {
   EXPECT_INT_EQ(scan_escape_sequence("\\n"), 2);
   EXPECT_INT_EQ(scan_escape_sequence("\\101"), 4);
@@ -292,6 +310,7 @@ void scan_suite(void) {
   $test.run(scan_comments_and_preprocessor);
   $test.run(scan_identifiers_and_keywords);
   $test.run(scan_operators);
+  $test.run(scan_c_escape_values);
   $test.run(scan_byte_escapes_and_segments);
   $test.run(scan_c_literals);
   $test.run(scan_valid_numbers);

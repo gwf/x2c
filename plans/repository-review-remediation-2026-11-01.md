@@ -384,6 +384,11 @@ review, so none is scheduled for speculative removal.
   Cold serial and parallel package consumers and module-link-only changes
   pass independently and within the native-module probe before its separate
   REPL failure. Raylib response switching passes without a window.
-- B and G remain in progress or pending.
+- B implemented privately. Escaped printf conversions and native/compile-time
+  literal comparisons pass. Sixteen connected fixtures compile without C
+  warnings, and scanner/String/tokenizer suites pass 58 tests and 989
+  assertions. LF and CRLF continuation probes agree. A normal local build
+  regenerated linked meta code; no bootstrap transition was required.
+- G remains in progress.
 - Final integrated review, generated refresh, applicable performance evidence,
   publication validation, publication, and plan closeout remain with the parent.

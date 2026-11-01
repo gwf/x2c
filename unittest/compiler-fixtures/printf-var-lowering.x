@@ -26,6 +26,11 @@ int main(void) {
   buffer.printf("buffer:%ld/%g", key, val);
 
   printf("%s\n%s\n%s\n%s\n", first, second, string, buffer.str());
+  printf("octal=\045d %s\n", key, answer);
+  printf("hex=\x025i %s\n", key, answer);
+  printf("joined=\x025" "i %s\n", key, answer);
+  printf("backslash=\\\045i %s\n", key, answer);
+  printf("width=\045*.\x2a" "f %s\n", width, precision, whole, answer);
   buffer.free();
   return 0;
 }
