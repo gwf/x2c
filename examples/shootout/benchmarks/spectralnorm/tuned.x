@@ -45,8 +45,8 @@ static void _ata_times(ArrayDbl input, ArrayDbl output, ArrayDbl scratch) {
 static void _multiply(ArrayDbl input, ArrayDbl output, int transpose) {
   int n = input.len();
   if (n < 500) {
-    if (transpose) _at_rows(input, output, 0, n);
-    else _a_rows(input, output, 0, n);
+    if (transpose) _at_times(input, output);
+    else _a_times(input, output);
     return;
   }
   auto {
@@ -78,6 +78,25 @@ static Var _calculate_rows(Var input) {
   if (rows.transpose) _at_rows(rows.input, rows.output, rows.first, rows.last);
   else _a_rows(rows.input, rows.output, rows.first, rows.last);
   return void;
+}
+
+/* Full-range kernels preserve the inexpensive serial path on small inputs. */
+static void _a_times(ArrayDbl input, ArrayDbl output) {
+  int n = input.len();
+  for (int i = 0; i < n; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < n; j++) sum += _entry(i, j) * input[j];
+    output[i] = sum;
+  }
+}
+
+static void _at_times(ArrayDbl input, ArrayDbl output) {
+  int n = input.len();
+  for (int i = 0; i < n; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < n; j++) sum += _entry(j, i) * input[j];
+    output[i] = sum;
+  }
 }
 
 static void _a_rows(ArrayDbl input, ArrayDbl output, int first, int last) {
