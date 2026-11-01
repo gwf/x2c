@@ -20964,7 +20964,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_34(void
   _17867 = List_var(_17866);
   _17868 = String_new("src/protocol/adapters.x");
   _17869 = String_var(_17868);
-  _17870 = String_new("f6817bd9");
+  _17870 = String_new("b3e2e331");
   _17871 = String_var(_17870);
   _17872 = cons(_17871, NULL);
   _17873 = cons(_17869, _17872);
