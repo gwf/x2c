@@ -200,6 +200,7 @@ x2c to C programmers one small feature at a time;
 
 The [language shootout](shootout/README.md) adopts ten Benchmarks Game
 problems, with two x2c variants and up to six contributed reference languages.
+[Current results and charts](shootout/results/README.md) are tracked in dev.
 Its optional timing suite remains separate from the teaching examples:
 
 ```sh

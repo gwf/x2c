@@ -66,8 +66,19 @@ examples/packages/*/builds/
 !examples/shootout-unofficial/
 !examples/shootout-unofficial/**
 !**/Makefile
-# Historical benchmark output is recoverable from Git history.
-examples/shootout/results/
+# Keep the promoted shootout snapshot; older output stays in Git history.
+examples/shootout/results/*
+!examples/shootout/results/README.md
+!examples/shootout/results/current.json
+!examples/shootout/results/current.md
+!examples/shootout/results/charts/
+examples/shootout/results/charts/*
+!examples/shootout/results/charts/runtime-source-size.*
+!examples/shootout/results/charts/runtime-loc-distributions.*
+!examples/shootout/results/charts/implementation-profiles.*
+!examples/shootout/results/charts/measurements.csv
+!examples/shootout/results/charts/summaries.csv
+!examples/shootout/results/charts/provenance.json
 examples/shootout-unofficial/results/
 unittest/benchmarks/hash-table/results/
 unittest/benchmarks/hash-table/RESEARCH.md

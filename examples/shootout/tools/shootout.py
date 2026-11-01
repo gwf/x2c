@@ -34,8 +34,8 @@ RUST_BUILD = BUILD.parent / "shootout-rust"
 LATEST = BUILD / "latest"
 MANIFEST_PATH = ROOT / "benchmarks.json"
 BASELINE_PATH = ROOT / "baseline.json"
-CURRENT_JSON = BUILD / "results" / "current.json"
-CURRENT_MARKDOWN = BUILD / "results" / "current.md"
+CURRENT_JSON = ROOT / "results" / "current.json"
+CURRENT_MARKDOWN = ROOT / "results" / "current.md"
 DEFAULT_CFLAGS = "-O2 -DNDEBUG"
 REFERENCE_SOURCES = {
   "c": "main.c", "python": "main.py", "rust": "main.rs", "cpp": "main.cpp",
@@ -1817,7 +1817,7 @@ def run_pinned(
   if args.action == "update":
     promote_current(current)
     print(
-      "updated examples/build/shootout/results/current.md and current.json",
+      "updated examples/shootout/results/current.md and current.json",
       flush=True,
     )
 
@@ -1871,7 +1871,7 @@ def calibrate(
   print(markdown)
   print("updated examples/shootout/baseline.json", flush=True)
   print(
-    "updated examples/build/shootout/results/current.md and current.json",
+    "updated examples/shootout/results/current.md and current.json",
     flush=True,
   )
   print(f"raw results: {LATEST}", flush=True)

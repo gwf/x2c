@@ -6,6 +6,9 @@ The official specifications own the required algorithms, inputs, work, and
 output. These are local comparisons against contributed programs, not
 measurements published or accepted by the Benchmarks Game.
 
+[Current results and charts](results/README.md) are preserved in dev, including
+the full table, structured data, figures and plotting provenance.
+
 The comparison has eight columns, with coverage recorded per problem:
 
 | File | Implementation |
@@ -279,7 +282,7 @@ Reports identify both x2c variants; the median and arithmetic mean are
 orientation aids, not language rankings. Raw data also records process CPU
 time, peak RSS, source size, and build information.
 
-Promoted reports at `examples/build/shootout/results/current.md` and
+Promoted reports at `examples/shootout/results/current.md` and
 `current.json` identify the calibration and measured profile.
 
 The old suite's timings are not comparable with these results. Changes to
@@ -289,19 +292,28 @@ existing restrictions on comparisons between hosts.
 
 ## Saved reports and charts
 
-Historical reports, raw observations, paired experiments, and charts remain
-in [Git history](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/README.md). They are not current calibration inputs.
-Use `git show <revision>:<path>` to recover a file into an ignored directory.
+The [current snapshot](results/README.md) is tracked in dev. It includes the
+latest promoted report and all three chart forms in PNG/SVG/PDF, with CSV
+and provenance. A pull brings these files into the checkout.
 
-One reusable renderer lives in `tools/render-charts.py`; its optional Python
-requirements are in `tools/requirements-charts.txt`. Given an existing report,
-it creates PNG, SVG, PDF, CSV, and provenance files without running benchmarks:
+`make shoot-run` keeps scratch output under ignored `examples/build/shootout/`.
+`make shoot-update` promotes its report to tracked `results/current.json` and
+`results/current.md`, outside scratch cleanup. Regenerate charts from that
+report before committing the snapshot:
 
 ```sh
 python3 examples/shootout/tools/render-charts.py \
-  examples/build/shootout/results/current.json \
-  examples/build/shootout/results/charts
+  examples/shootout/results/current.json \
+  examples/shootout/results/charts
 ```
 
-The [website integration guide](../../site/BENCHMARKS.md) describes how to
-select one report and its charts for a future page.
+One reusable renderer lives in `tools/render-charts.py`; optional dependencies
+are pinned in `tools/requirements-charts.txt`. Rendering uses saved data and
+does not rerun benchmarks. Commit report and chart changes together so the
+provenance hash and run ID describe one measurement.
+
+Historical reports and experiments remain in
+[Git history](https://github.com/gwf/x2c/blob/a9aeff5b843878fd102b31402a522d2f0a1d2d6c/examples/shootout/results/README.md).
+Only the current snapshot is retained in the live tree. The
+[website integration guide](../../site/BENCHMARKS.md) describes using the
+snapshot in a future page.

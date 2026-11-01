@@ -120,6 +120,32 @@ let literal = "/* keep this */";
     ))
     self.assertEqual(row.count("N/A"), missing)
 
+  def test_promoted_results_survive_scratch_build_cleanup(self):
+    json_path = shootout.CURRENT_JSON.relative_to(shootout.REPO)
+    markdown_path = shootout.CURRENT_MARKDOWN.relative_to(shootout.REPO)
+    with tempfile.TemporaryDirectory() as directory:
+      repo = Path(directory)
+      current_json, current_markdown = repo / json_path, repo / markdown_path
+      build = repo / shootout.BUILD.relative_to(shootout.REPO)
+      def compile_measure(argv):
+        Path(argv[-1]).write_bytes(b"measure")
+      with mock.patch.multiple(shootout, BUILD=build,
+                               CURRENT_JSON=current_json,
+                               CURRENT_MARKDOWN=current_markdown), \
+           mock.patch.object(shootout, "render_current", return_value="report\n"), \
+           mock.patch.object(shootout, "command", side_effect=compile_measure):
+        shootout.promote_current({"run_id": "preserved"})
+        chart = current_json.parent / "charts" / "runtime-source-size.svg"
+        chart.parent.mkdir(parents=True)
+        chart.write_text("chart\n")
+        build.mkdir(parents=True, exist_ok=True)
+        (build / "stale-output").write_text("scratch")
+        shootout.prepare_build({"cc": "cc"})
+        self.assertEqual(json.loads(current_json.read_text())["run_id"], "preserved")
+        self.assertEqual(current_markdown.read_text(), "report\n")
+        self.assertEqual(chart.read_text(), "chart\n")
+        self.assertFalse((build / "stale-output").exists())
+
 
 class CompactBaselineTests(unittest.TestCase):
   @classmethod
@@ -136,7 +162,6 @@ class CompactBaselineTests(unittest.TestCase):
         saved = json.loads(harness.BASELINE_PATH.read_text())
         baseline = harness.load_baseline(harness.load_manifest(), saved["methodology"])
         self.assertEqual(baseline, saved)
-        self.assertEqual(harness.CURRENT_JSON.parent, harness.BUILD / "results")
         for entry in baseline["benchmarks"].values():
           self.assertEqual("stdout" in entry, entry["comparison"]["kind"] != "exact")
           self.assertFalse(any(isinstance(value, dict) and "measurements" in value

@@ -8,7 +8,9 @@ parallelism, calibration, and measurement instructions.
 ## Select one report
 
 Use one run consistently. `make shoot-update` promotes the selected run to
-ignored `examples/build/shootout/results/current.json` and `current.md`.
+tracked `examples/shootout/results/current.json` and `current.md`.
+The [current results and charts](../examples/shootout/results/README.md) are
+preserved in dev and included in a pull. Scratch run output stays ignored.
 The JSON records source identities, host, profile, sample count, run ID,
 calibration identity, per-problem results, and the shared summary cohort.
 Historical reports and chart sets remain in the
@@ -18,8 +20,8 @@ Render an existing report without running benchmarks:
 
 ```sh
 python3 examples/shootout/tools/render-charts.py \
-  examples/build/shootout/results/current.json \
-  examples/build/shootout/results/charts
+  examples/shootout/results/current.json \
+  examples/shootout/results/charts
 ```
 
 Optional renderer dependencies are pinned in
