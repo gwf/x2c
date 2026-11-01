@@ -4,8 +4,8 @@
 > Source: a read-only review of the grouped Map, execution-stack,
 > macro-decorator, and repair-wave rounds (`9c8fbbe8b` through `f12c7619a`).
 > Batch A (compiler defects A1-A5) is published to `dev` at `e1b2bacbb`;
-> see its delivery record below. Batch B is delivered in `147ce79ee`.
-> Batches C-E remain open. Batch A also absorbs
+> see its delivery record below. Batch B is delivered in `147ce79ee` and
+> batch C in `0de444adf`. Batches D and E remain open. Batch A also absorbs
 > follow-up F4 from the
 > [October 31 follow-ups](review-followups-2026-10-31.md).
 
@@ -118,6 +118,22 @@ and `_prepare_export` in `lib/substring-map.x`. They agree today. Record the
 coupling at the format's owner in `grouped.x` now; consolidate into one
 shared probe only when a format change is selected, since the copies exist
 for allocation-free byte and substring paths.
+
+### Batch C delivery, 2026-11-01
+
+Delivered in `0de444adf`. `$reinsert_error` loses its `probe` parameter in the
+generator, the two generator fixtures, and the invariant cause; the orphaned
+comment is replaced. The nonzero-hash rationale in `lib/dispatch.x`,
+`lib/common.x`, and `lib/typed-map.x` now names the root Pool index, which
+states the reserved value in its header. `grouped.x` describes its three
+hash policies and `map.x` its record. The philosophy exemplars, the adapter
+guide, the organization guide, the benchmark README, and the direct runner's
+provenance name `grouped.x`. The two tombstone-reuse tests are renamed, and
+the threshold tests assert `capacity >= 65536`. The book says "owned
+storage", the two archived plans carry superseded-by lines, and the split
+report reconciles the pointer cache with the reverted experiment. `make
+verify` passes with 1,164 tests and 103,728 assertions and 1,383 fixtures;
+no fixture artifact changed. The probe-copy consolidation stays deferred.
 
 ## Batch D: execution-stack margins
 
