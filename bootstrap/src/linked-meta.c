@@ -14165,7 +14165,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11107 = List_var(_11106);
   _11108 = String_new("lib/scope/scope.x");
   _11109 = String_var(_11108);
-  _11110 = String_new("8cc9e8ae");
+  _11110 = String_new("a86fe611");
   _11111 = String_var(_11110);
   _11112 = cons(_11111, NULL);
   _11113 = cons(_11109, _11112);
@@ -14230,7 +14230,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11172 = cons(_11171, NULL);
   _11173 = cons(_10912, _11172);
   _11174 = cons(_223, _11173);
-  _11175 = String_new("39262da6");
+  _11175 = String_new("2eba8e48");
   _11176 = String_var(_11175);
   _11177 = String_new("cwd:./pthread.h");
   _11178 = String_var(_11177);
@@ -14280,7 +14280,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11222 = cons(_11100, _11221);
   _11223 = cons(_11180, _11222);
   _11224 = List_var(_11223);
-  _11225 = String_new("36d1c26a");
+  _11225 = String_new("78fee628");
   _11226 = String_var(_11225);
   _11227 = cons(_11226, NULL);
   _11228 = cons(_11224, _11227);
@@ -14367,7 +14367,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11306 = cons(_223, _11305);
   _11307 = String_new("lib/context.x");
   _11308 = String_var(_11307);
-  _11309 = String_new("adc6d0bf");
+  _11309 = String_new("df463d3b");
   _11310 = String_var(_11309);
   _11311 = cons(_10802, NULL);
   _11312 = cons(_10800, _11311);
@@ -16222,7 +16222,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13152 = List_var(_13151);
   _13153 = String_new("lib/scope/allocation.x");
   _13154 = String_var(_13153);
-  _13155 = String_new("3135306d");
+  _13155 = String_new("0687accb");
   _13156 = String_var(_13155);
   _13157 = cons(_13156, NULL);
   _13158 = cons(_13154, _13157);
@@ -16237,14 +16237,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13167 = List_var(_13166);
   _13168 = String_new("lib/scope/regions.x");
   _13169 = String_var(_13168);
-  _13170 = String_new("059708fd");
+  _13170 = String_new("68c91a2d");
   _13171 = String_var(_13170);
   _13172 = cons(_13171, NULL);
   _13173 = cons(_13169, _13172);
   _13174 = List_var(_13173);
   _13175 = String_new("lib/scope/runtime.x");
   _13176 = String_var(_13175);
-  _13177 = String_new("5d8fa379");
+  _13177 = String_new("69e1b2fc");
   _13178 = String_var(_13177);
   _13179 = cons(_13178, NULL);
   _13180 = cons(_13176, _13179);
@@ -16572,7 +16572,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13499 = cons(_11300, _13498);
   _13500 = cons(_10782, _13499);
   _13501 = cons(_223, _13500);
-  _13502 = String_new("4d68a042");
+  _13502 = String_new("ed5103f7");
   _13503 = String_var(_13502);
   _13504 = cons(_11176, NULL);
   _13505 = cons(_91, _13504);
