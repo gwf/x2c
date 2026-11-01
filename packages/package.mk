@@ -51,6 +51,9 @@ PACKAGE_GENERATED := $(PACKAGE_SOURCES:src/%.x=builds/%.c)
 PACKAGE_ARCHIVE := builds/lib$(PACKAGE).a
 PACKAGE_RESPONSE := builds/$(PACKAGE).native.rsp
 PACKAGE_MODULE := builds/$(PACKAGE).module
+PACKAGE_TRANSLATION := builds/.translation-invocation
+PACKAGE_COMPILER = $(shell command -v "$(X2C)" 2>/dev/null)
+PACKAGE_CONSUMER_DEPS = $(PACKAGE_ARCHIVE) package-build-force
 PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
@@ -111,6 +114,15 @@ ifneq ($(wildcard licenses.sha256),)
 endif
 endif
 
+$(PACKAGE_GENERATED) $(PACKAGE_HEADERS): \
+  $(PACKAGE_TRANSLATION) $(PACKAGE_COMPILER)
+
+$(PACKAGE_TRANSLATION): package-build-force | builds
+	@set -e; identity=$$("$(X2C)" env identity); \
+	  printf '%s\n' "$(X2C)" "$(PACKAGE_COMPILER)" "$$identity" \
+	    $(PACKAGE_X_FLAGS) >$@.tmp; \
+	  cmp -s $@.tmp $@ || mv $@.tmp $@; rm -f $@.tmp
+
 builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
 	"$(X2C)" translate --out-dir builds $(PACKAGE_X_FLAGS) $<
 
@@ -118,7 +130,8 @@ builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
 # the response file as a prerequisite; otherwise `make run` on a clean
 # builds/ fails with "package is not built".
 $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
-  $(PACKAGE_RESPONSE) package-build-force | $(DEPENDENCY_PREREQUISITE)
+  $(PACKAGE_RESPONSE) package-build-force \
+  | $(DEPENDENCY_PREREQUISITE) $(PACKAGE_MODULE)
 	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
 	  $(PACKAGE_C_FLAGS) $(PACKAGE_GENERATED) $(PACKAGE_NATIVE)
 
@@ -134,19 +147,23 @@ $(PACKAGE_MODULE): $(PACKAGE_GENERATED) package-build-force \
 	else rm -f $@; fi
 
 # One argument per line, the response-file form the compiler reads.
-$(PACKAGE_RESPONSE): Makefile | builds
-	@printf '%s\n' $(PACKAGE_LINK) >$@
+$(PACKAGE_RESPONSE): package-build-force | builds
+	@printf '%s\n' $(PACKAGE_LINK) >$@.tmp
+	@cmp -s $@.tmp $@ || mv $@.tmp $@
+	@rm -f $@.tmp
 
 # --package-dir reads builds/$(PACKAGE).native.rsp, so a consumer never
 # repeats PACKAGE_LINK; passing it again links the dependency twice.
-builds/test-%: tests/test-%.x $(PACKAGE_ARCHIVE) | builds
+# Custom consumer rules use PACKAGE_CONSUMER_DEPS after their source, so
+# $< stays the source and the driver checks current imports and link inputs.
+builds/test-%: tests/test-%.x $(PACKAGE_CONSUMER_DEPS) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$* \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
 	  --x-include-dir $(ROOT)/unittest \
 	  $< $(ROOT)/unittest/test-support.x $(ROOT)/unittest/match-recursive.x \
 	  $(ROOT)/unittest/test-macros.x
 
-builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
+builds/%: examples/%.x $(PACKAGE_CONSUMER_DEPS) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 

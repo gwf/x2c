@@ -23,6 +23,7 @@ run: builds/parse-log builds/request-report builds/gallery-imports
 run-lisp: builds/inline-lisp
 	./builds/inline-lisp
 
-builds/gallery-imports: ../../examples/power/imports.x $(PACKAGE_ARCHIVE) | builds
+builds/gallery-imports: ../../examples/power/imports.x \
+  $(PACKAGE_CONSUMER_DEPS) | builds
 	$(X2C) build --output $@ --build-dir builds/gallery-imports-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<

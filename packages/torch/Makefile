@@ -58,12 +58,12 @@ gen-ops:
 
 # Programs link the native objects directly through PACKAGE_LINK, so a
 # shim change has to relink them; the archive alone does not carry it.
-$(PACKAGE_ARCHIVE): $(NATIVE)
+$(PACKAGE_ARCHIVE) $(PACKAGE_MODULE): $(NATIVE)
 $(patsubst %.x,builds/%,$(notdir $(wildcard examples/*.x tests/*.x))): \
   $(NATIVE)
 
 # tests/ also holds the programs the Python agreement checks run.
-builds/%: tests/%.x $(PACKAGE_ARCHIVE) | builds
+builds/%: tests/%.x $(PACKAGE_CONSUMER_DEPS) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 

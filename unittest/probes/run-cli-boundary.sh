@@ -2231,4 +2231,89 @@ printf '%s\n' '#define WHICH "first"' >"$SCRIPT/search/first/config.h"
 : >"$SCRIPT/search/second/optional.h"
 [[ $(pick) == 'first optional' ]] || exit 1
 
+# Flat package translation and every requested consumer use current inputs.
+python3 - "$ROOT" "$BUILD/package-inputs" "$X2C" <<'PY_PACKAGE_INPUTS'
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+
+root, work, compiler = map(Path, sys.argv[1:])
+package = work / 'demo'
+(package / 'src').mkdir(parents=True, exist_ok=True)
+(package / 'examples').mkdir(exist_ok=True)
+(package / 'Makefile').write_text(
+    'PACKAGE := demo\ninclude $(ROOT)/packages/package.mk\n'
+    'PACKAGE_C_FLAGS := --c-include-dir src\n')
+(package / 'src/native.h').write_text('int dependency(void);\n')
+(package / 'src/demo.x').write_text(
+    '#include "native.h"\nint choice(void) => CHOICE;\n'
+    'int linked(void) => dependency();\n')
+(package / 'examples/sample.x').write_text(
+    'import "demo";\nint main(void) {\n'
+    '  printf("%d %d\\n", demo.choice(), demo.linked()); return 0;\n}\n')
+for number in (11, 22):
+    source = work / f'native-{number}.c'
+    source.write_text(f'int dependency(void) {{ return {number}; }}\n')
+    subprocess.run(['cc', '-c', str(source), '-o', str(source.with_suffix('.o'))],
+                   check=True)
+    subprocess.run(['ar', 'rcs', str(source.with_suffix('.a')),
+                    str(source.with_suffix('.o'))], check=True)
+wrapper = work / 'compiler'
+calls = work / 'calls'
+wrapper.write_text('#!/bin/sh\nif [ "$1" = translate ]; then\n'
+                   f'  echo translate >> {shlex.quote(str(calls))}\nfi\n'
+                   f'exec {shlex.quote(str(compiler))} "$@"\n')
+wrapper.chmod(0o755)
+
+def make(label, choice=7, library=11, tool=wrapper, target='builds/sample',
+         extra=(), good=True):
+    command = ['make', '-s', '-C', str(package), target, f'ROOT={root}',
+               f'X2C={tool}',
+               f'PACKAGE_X_FLAGS=--x-include-dir src --package-dir .. --cpp -DCHOICE={choice}',
+               f'PACKAGE_LINK={work}/native-{library}.a ' +
+               ('-lm' if library == 11 else '-pthread'), *extra]
+    result = subprocess.run(command, text=True, capture_output=True)
+    (work / f'{label}.log').write_text(result.stdout + result.stderr)
+    assert (result.returncode == 0) == good, (label, result.returncode,
+                                            result.stdout, result.stderr)
+
+def output():
+    return subprocess.check_output([str(package / 'builds/sample')],
+                                   text=True).strip()
+
+make('first')
+assert output() == '7 11', output()
+make('changed-flags', choice=9)
+assert output() == '9 11', ('changed flags', output())
+archive = package / 'builds/libdemo.a'
+stamp = archive.stat().st_mtime_ns
+make('changed-link', choice=9, library=22)
+assert output() == '9 22', ('changed link', output())
+assert archive.stat().st_mtime_ns == stamp, 'link-only change rebuilt archive'
+response = package / 'builds/demo.native.rsp'
+assert response.read_text().splitlines() == [str(work / 'native-22.a'), '-pthread']
+tracked = [package / 'builds/demo.c', package / 'builds/demo.h', response,
+           *sorted((package / 'builds/cc').glob('obj/*.o'))]
+stamps = [p.stat().st_mtime_ns for p in tracked]
+translations = calls.read_text()
+make('unchanged', choice=9, library=22)
+assert [p.stat().st_mtime_ns for p in tracked] == stamps
+assert calls.read_text() == translations
+older = work / 'older-compiler'
+older.write_text(wrapper.read_text())
+older.chmod(0o755)
+os.utime(older, (1, 1))
+make('older-compiler', choice=9, library=22, tool=older)
+assert len(calls.read_text()) > len(translations), 'compiler selection reused translation'
+translations = calls.read_text()
+older.write_text(older.read_text() + '# replaced wrapper\n')
+make('replaced-compiler', choice=9, library=22, tool=older)
+assert len(calls.read_text()) > len(translations), 'compiler replacement reused translation'
+make('clean-missing-compiler', tool=work / 'absent', target='clean')
+make('missing-compiler', tool=work / 'absent', good=False)
+print('package translation, link response, consumer freshness, and reuse passed')
+PY_PACKAGE_INPUTS
+
 echo "CLI, dependency, build, run, script, manifest, and state probes passed"

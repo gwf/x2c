@@ -163,6 +163,12 @@ Packages use the following layout:
   `verify-pins` before archiving, and builds `builds/<name>` from each
   `examples/<name>.x`; tests and examples link that archive.
 
+Custom consumer rules put their source first, then `$(PACKAGE_CONSUMER_DEPS)`.
+That shared prerequisite prepares the archive and native module and invokes
+the existing build driver on every request. The driver reuses translations
+and native objects when possible; executable requests still preprocess and
+link so changed package arguments and modules take effect.
+
 Opaque handle declarations and callback signatures are kept only when the C
 ABI requires them. Method declarations are emitted from their x2c definitions;
 packages do not maintain a second hand-written prototype list.

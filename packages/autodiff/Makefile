@@ -31,17 +31,19 @@ run: $(EXAMPLE_PROGRAMS)
 	done
 
 # The test build owns builds/autodiff, so examples build beside it.
-builds/example-%: examples/%.x $(PACKAGE_ARCHIVE) | builds
+builds/example-%: examples/%.x $(PACKAGE_CONSUMER_DEPS) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
 # This example includes the macro module directly and needs no package archive.
-builds/example-autodiff: examples/autodiff.x src/autodiff-macros.x | builds
+builds/example-autodiff: examples/autodiff.x src/autodiff-macros.x \
+  package-build-force | builds
 	"$(X2C)" build --plain --output $@ --build-dir builds/autodiff-build \
 	  --x-include-dir src $(PACKAGE_C_FLAGS) $< src/autodiff-macros.x
 
 benchmark: builds/autodiff-checkpoint
 
-builds/autodiff-checkpoint: benchmarks/autodiff-checkpoint.x | builds
+builds/autodiff-checkpoint: benchmarks/autodiff-checkpoint.x \
+  $(PACKAGE_CONSUMER_DEPS) | builds
 	"$(X2C)" build --output $@ --build-dir builds/benchmark-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<

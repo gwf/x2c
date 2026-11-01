@@ -379,6 +379,11 @@ review, so none is scheduled for speculative removal.
 - F implemented privately. Verification cadence has one owner; stage
   comparisons no longer claim pre-edit preservation. The documentation audit
   awaits the parent's generated String API refresh from C.
-- A, B, and G remain in progress or pending.
+- A implemented privately. The CLI-boundary script passes, including changed
+  flags/compiler/link inputs and unchanged translation/object timestamps.
+  Cold serial and parallel package consumers and module-link-only changes
+  pass independently and within the native-module probe before its separate
+  REPL failure. Raylib response switching passes without a window.
+- B and G remain in progress or pending.
 - Final integrated review, generated refresh, applicable performance evidence,
   publication validation, publication, and plan closeout remain with the parent.
