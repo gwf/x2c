@@ -3,6 +3,7 @@
  */
 
 #include "typed-array.x"
+#include <string.h>
 
 int main(void) {
   ArrayChar sequence = ArrayChar.new();
@@ -19,11 +20,20 @@ int main(void) {
       sequence.clear();
       Stdout.puts(line);
     }
-    else for (int i = 0; i < line.len(); i++)
-      if (line[i] != '\n' && line[i] != '\r') sequence.push(line[i]);
+    else _append(sequence, line);
   }
   _write(sequence, complements);
   return 0;
+}
+
+static void _append(ArrayChar sequence, String line) {
+  const char *cursor = line;
+  while (*cursor) {
+    size_t count = strcspn(cursor, "\r\n");
+    ((Block) sequence).append(cursor, count);
+    cursor += count;
+    while (*cursor == '\r' || *cursor == '\n') cursor++;
+  }
 }
 
 static void _write(ArrayChar sequence, ArrayChar complements) {

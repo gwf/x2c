@@ -4,10 +4,33 @@
 
 #include "substring-map.x"
 
+class Batch { String sequence, key, output; int width; Thread worker; } *;
+
 int main(void) {
   String sequence = _read();
-  for (int width = 1; width <= 2; width++) auto {
-    MapSubInt counts = _count(sequence, width);
+  Array batches = [];
+  foreach (String key in %("A" "AA" "GGT" "GGTA" "GGTATT"
+    "GGTATTTTAATT" "GGTATTTTAATTTATAGT")) {
+    Batch batch = Batch.new();
+    batch.sequence = sequence;
+    batch.key = key;
+    batch.width = key.len();
+    batch.worker = Thread.start(_run, batch);
+    batches.push(batch);
+  }
+  foreach (Batch batch in batches) {
+    batch.worker.join();
+    batch.worker.free();
+    printf("%s", batch.output);
+  }
+  return 0;
+}
+
+static Var _run(Var input) {
+  Batch batch = input;
+  MapSubInt counts = _count(batch.sequence, batch.width);
+  Buffer output = auto Buffer.new(0);
+  if (batch.width <= 2) {
     Map frequencies = counts.strings();
     Array keys = [];
     foreach ((String key, Var count) in frequencies) keys.push(key);
@@ -16,18 +39,18 @@ int main(void) {
       return difference ? difference : a.compare(b);
     });
     foreach (String key in keys)
-      printf("%s %.3f\n", key,
-        100.0 * frequencies[key].int() / (sequence.len() - width + 1));
-    puts("");
+      output.printf("%s %.3f\n", key,
+        100.0 * frequencies[key].int() / (batch.sequence.len() - batch.width + 1));
+    output.write("\n");
   }
-  foreach (String key in %(
-    "GGT" "GGTA" "GGTATT" "GGTATTTTAATT" "GGTATTTTAATTTATAGT")) auto {
-    MapSubInt counts = _count(sequence, key.len());
-    Substr query = key.substring(0, key.len());
-    printf("%d\t%s\n", _lookup(counts, query), key);
+  else {
+    Substr query = batch.key.substring(0, batch.width);
+    output.printf("%d\t%s\n", _lookup(counts, query), batch.key);
   }
-  return 0;
+  batch.output = output;
+  return void;
 }
+
 static String _read(void) {
   Buffer sequence = auto Buffer.new(0);
   int found = 0;
@@ -59,3 +82,5 @@ static int _lookup(MapSubInt counts, Substr query) {
     if (key.equal(query)) return count;
   return 0;
 }
+
+static void Batch.init(Batch batch) {}
