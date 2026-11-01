@@ -125,7 +125,7 @@
   },
   {
     "slide": "power-10-imports.md",
-    "example": "power/imports",
+    "source": "examples/power/imports.x",
     "optional": true
   },
   {

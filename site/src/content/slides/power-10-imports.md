@@ -4,7 +4,8 @@ section: power
 tab: imports
 ---
 
-```x2c
+<!-- ignore: requires the separately built PCRE2 package -->
+```x2c,ignore
 ~#include <assert.h>
 // Import the package under a name you choose.
 import "pcre2" as rx;
@@ -37,6 +38,8 @@ foreach (String line in text.lines()) {
 ~}
 ```
 
+Build the PCRE2 package before running the
+[complete example](https://github.com/gwf/x2c/blob/main/examples/power/imports.x).
 `import ... as rx` gives the shipped PCRE2 package a local alias and
 exposes its main type, `rx.Regexp`. `rx.Regexp.compile` builds the pattern;
 `rx.Regexp.match` returns named captures. Indexing and ordinary control

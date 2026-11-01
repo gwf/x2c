@@ -24,14 +24,15 @@ Var sugar;
 if (stock.try_get("sugar", sugar))
   puts(%"sugar is stocked: $sugar remaining");
 
-// Visit each key and value; traversal order is unspecified.
-foreach ((String item, int quantity) in stock)
-  puts(%"$item: $quantity");
+// Sort the keys to visit each value in a predictable order.
+Array items = auto stock.keys().array().sort();
+foreach (String item in items)
+  puts(%"$item: $(stock[item])");
 ~return 0;
 ~}
 ```
 
 `Map` grows as entries are added, with brackets for reads and updates.
 `Map.getdefault` supplies a fallback without inserting; `Map.try_get`
-distinguishes a missing key from a stored zero. `foreach` unpacks each
-key/value pair. Traversal order is unspecified.
+distinguishes a missing key from a stored zero. Map traversal order is
+unspecified, so this example sorts the keys before printing their values.

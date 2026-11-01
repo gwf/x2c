@@ -17,8 +17,9 @@ Var sugar;
 if (stock.try_get("sugar", sugar))
   puts(%"sugar is stocked: $sugar remaining");
 
-// Visit each key and value; traversal order is unspecified.
-foreach ((String item, int quantity) in stock)
-  puts(%"$item: $quantity");
+// Sort the keys to visit each value in a predictable order.
+Array items = auto stock.keys().array().sort();
+foreach (String item in items)
+  puts(%"$item: $(stock[item])");
 return 0;
 }

@@ -372,6 +372,10 @@ review, so none is scheduled for speculative removal.
   the parent publication refresh.
 - D implemented privately. The full command smoke script passes with deferred
   cleanup output on passing and failing test programs.
-- A, B, E, F, and G remain in progress or pending.
+- E implemented privately. All 66 examples pass with 83 sources classified;
+  autodiff passes 16 tests, 11 fixtures, and both examples. The book/site
+  sweep compiles 441 samples and checks 138 outputs. Gallery sources and
+  mappings follow their existing owners.
+- A, B, F, and G remain in progress or pending.
 - Final integrated review, generated refresh, applicable performance evidence,
   publication validation, publication, and plan closeout remain with the parent.

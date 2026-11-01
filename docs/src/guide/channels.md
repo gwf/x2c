@@ -140,8 +140,10 @@ process-pool Strings remain borrowable because the pool outlives all jobs.
 
 A Channel's own storage scope, returned by `channel.scope()`, owns its native
 mutex and condition. Independent Channels do not share either object.
-All users wait on the Channel's condition using its mutex. Queue nodes use native
-allocation independently of Scope allocation lists. Allocation/tree metadata belongs to exclusive private owners;
+Native threads wait on the Channel's condition using its mutex. Tasks instead
+[park through their scheduler](contexts-and-threads.md#run-channel-jobs-on-one-native-thread).
+Queue nodes use native allocation independently of Scope allocation lists.
+Allocation/tree metadata belongs to exclusive private owners;
 no Scope or replacement tree mutex coordinates senders through a Channel.
 
 Finish every user and waiter before freeing a Channel or destroying its owner.

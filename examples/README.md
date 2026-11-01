@@ -212,8 +212,8 @@ make shoot-run
 separately maintained shootout and package sources. Ordinary examples build
 and run, require a zero exit status and empty stderr, and compare stdout with
 an expected result. Imports is marked optional because it requires PCRE2.
-Map traversal order is unspecified, so its output is compared without
-requiring a particular line order.
+Map traversal order is unspecified. Examples use named lookups or sorted
+keys when their printed output needs a fixed order.
 
 Rows have six pipe-separated fields:
 

@@ -16,7 +16,9 @@ $derive(Person, <json>, <equal>, <repr>);
 int main(void) {
   Person p = { 42, "Ada", 1.5, { 3, 4 }, ["x", 2] };
   Map m = p.to_map();
-  printf("%s\n", m.repr());
+  Map home = m["home"];
+  printf("map age=%s name=%s score=%s home=(%s, %s) tags=%s\n",
+         m["age"], m["name"], m["score"], home["x"], home["y"], m["tags"]);
   Person q = Person.from_map(m);
   printf("%s\n", q.repr().str());
   printf("equal %d\n", p.equal(q));

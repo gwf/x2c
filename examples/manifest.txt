@@ -81,3 +81,4 @@ power/derive|showcase|run||expected/derive.stdout|Generated record mappings, equ
 power/tests/stack_test|probe|none||-|Standalone tests using test.x and its program entry.
 apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.
 apps/notes/bench/inprocess-notes|probe|none||-|Optional local Thread.run and Task.run Notes lookup comparison.
+apps/notes/bench/notes-database|probe|none||-|Shared database support for optional Notes benchmarks.
