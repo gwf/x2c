@@ -1490,7 +1490,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _575 = List_var(_574);
   _576 = cons(_496, _493);
   _577 = List_var(_576);
-  _578 = int_var(119348);
+  _578 = int_var(119297);
   _579 = cons(_578, NULL);
   _580 = cons(_501, _579);
   _581 = List_var(_580);
@@ -5828,7 +5828,7 @@ static int _attribute_starts(Compiler c){
 }
 
 static String f5_types____attribute_macro(Compiler c){
-  if(Compiler_peek(c, 0) != 19147688 || Compiler_peek(c, 1) == 44661285196 || ! x2c_var_equal_lane(Map_getindex(c -> object_macros, String_var(c -> token -> text)), Symbol_var(3617589472522))) return NULL;
+  if(Compiler_peek(c, 0) != 19147688 || ! x2c_var_equal_lane(Map_getindex(c -> object_macros, String_var(c -> token -> text)), Symbol_var(3617589472522))) return NULL;
   String name = c -> token -> text;
   Compiler_next(c);
   return name;
