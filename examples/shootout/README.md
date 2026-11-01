@@ -35,20 +35,24 @@ Saved serial runs and the latest paired serial/parallel comparison remain in
 [results](results/README.md). Neither threading nor parallel execution requires
 typed containers or a custom allocator.
 
-Idiomatic spectral-norm uses six ordinary `Thread` row batches at N>=256.
+Spectral-norm uses six ordinary `Thread` row batches at N>=256 in the
+idiomatic program and N>=500 in the tuned program.
 Workers read a fixed input Array and write disjoint existing output slots.
 Every matrix product joins its workers before the next product reads results;
 each row preserves its original summation order. Smaller inputs run serially.
-Tuned spectral-norm retains its serial typed Arrays. The Counter-object
+Tuned spectral-norm retains typed Arrays and its original small-input kernels.
+The measured threshold avoids worker overhead at smaller sizes. The Counter-object
 k-nucleotide probe is preserved as evidence; numeric Map values remain active.
 
-Idiomatic fannkuch-redux uses six ordinary `Thread` permutation ranges at N>=9.
+Both fannkuch-redux programs use six ordinary `Thread` permutation ranges at N>=9.
 Workers own their Arrays, initialize the prescribed rotation order at each
 range's starting rank, and retain global checksum parity. Smaller inputs run
-serially. Tuned fannkuch retains its serial typed Arrays. K-nucleotide caches
+serially. Tuned fannkuch retains native integer Arrays and their inexpensive
+element-copy loop. K-nucleotide caches
 its immutable sequence-length loop bound and retains ordinary numeric Map values.
 Seven ordinary Threads count the seven required widths independently. Each
-worker builds a full Map and formats its result; the caller joins and prints
+worker builds a full Map (MapSubInt in tuned) and formats its result;
+the caller joins and prints
 results in specification order. Shared canonical Strings retain output values.
 
 Regex-redux uses nine ordinary Threads for independent counts at cleaned
@@ -56,12 +60,15 @@ sequence lengths of at least 65,536 bytes. Each worker owns its Regexp and
 retains only a scalar count. The main thread runs the ordered substitution
 chain concurrently, joins workers, and prints counts in specification order.
 Smaller inputs use the serial path. No Regexp or match-data block is shared.
+The tuned workers count directly through their private native PCRE2 match data.
 
 Reverse-complement keeps the existing input Buffer through `_write`, instead
 of converting each complete record into a canonical String. A native
 `ptrdiff_t` cursor and the ordinary Buffer.get API avoid narrowing the Buffer
 length to int. Complement rules, output lines and record order are unchanged.
 The output-line Buffer still uses the existing ordinary String conversion.
+The tuned program appends complete input spans to ArrayChar, then retains its
+in-place complement table and bulk output path.
 
 Mandelbrot uses at most six ordinary Threads on 16-row chunks per wave at
 N>=256. Caller-owned Arrays are filled before startup; each worker replaces
@@ -69,10 +76,12 @@ only existing byte-valued slots in its own Array. Joins precede ordered output.
 The next wave releases the previous wave's storage, bounding retained output
 to 96 rows. Pixel arithmetic and PBM padding are unchanged. Smaller inputs run
 serially. A same-batching serial control separates threading from buffering.
+The tuned program uses caller-owned ArrayChar storage and bulk ordered output.
 
-The tuned sources and all 55 foreign reference programs remain unchanged.
-No compiler/runtime/package code, typed container, borrowed substring, raw
-collection access, custom allocator, or literal-C implementation was added.
+The tuned programs now receive the same ordinary scheduling and buffering
+opportunities while preserving their specialized storage. All 55 foreign
+reference programs and the compiler/runtime/package sources remain unchanged.
+No custom allocator or literal-C implementation was added.
 
 Parallelism follows published Benchmarks Game precedent for each problem. If
 other official submissions use it, x2c may use it too; if none do, x2c stays
