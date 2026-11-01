@@ -3,15 +3,15 @@
    Regexp and borrowed match-data block rather than capture Lists. */
 
 import "pcre2" with Regexp;
+#include "typed-array.x"
 #include <stdio.h>
 
-class Count { String pattern, sequence; ulong matches; Thread worker; } *;
+class Count { String pattern; ArrayChar sequence; ulong matches; Thread worker; } *;
 
 int main(void) {
   String input = Stdin.string();
-  Regexp strip = auto Regexp.compile(">.*\\n|\\n", 0);
-  strip.jit_compile(PCRE2_JIT_COMPLETE);
-  String sequence = strip.replace_all(input, "");
+  ArrayChar sequence = ArrayChar.new();
+  _replace(">.*\\n|\\n", input, input.len(), NULL, sequence);
   Array counts = [];
   int parallel = sequence.len() >= 65536;
   foreach (String pattern in %(
@@ -25,7 +25,7 @@ int main(void) {
     "agggta[cgt]a|t[acg]taccct"
     "agggtaa[cgt]|[acg]ttaccct"))
     counts.push(Count.new(pattern, sequence, parallel));
-  String replaced = _substitute(sequence);
+  size_t replaced = _substitute(sequence);
   foreach (Count count in counts) {
     if (count.worker) {
       count.worker.join();
@@ -34,11 +34,11 @@ int main(void) {
     printf("%s %lu\n", count.pattern, count.matches);
   }
   printf("\n%lu\n%lu\n%lu\n",
-    (ulong) input.len(), (ulong) sequence.len(), (ulong) replaced.len());
+    (ulong) input.len(), (ulong) sequence.len(), (ulong) replaced);
   return 0;
 }
 
-static void Count.init(Count count, String pattern, String sequence, int parallel) {
+static void Count.init(Count count, String pattern, ArrayChar sequence, int parallel) {
   count.pattern = pattern;
   count.sequence = sequence;
   if (parallel) count.worker = Thread.start(_count, count);
@@ -51,9 +51,13 @@ static Var _count(Var input) {
   regexp.jit_compile(PCRE2_JIT_COMPLETE);
   pcre2_match_data *data = regexp.native_match_data();
   PCRE2_SIZE *bounds = pcre2_get_ovector_pointer(data);
+  pcre2_code *code = regexp.native();
+  pcre2_match_context *context = regexp.native_match_context();
   ulong matches = 0, offset = 0;
-  while (pcre2_jit_match(regexp.native(), (PCRE2_SPTR) count.sequence,
-      count.sequence.len(), offset, 0, data, regexp.native_match_context()) >= 0) {
+  const char *bytes = count.sequence.bytes ? count.sequence.bytes : "";
+  size_t length = count.sequence.len();
+  while (pcre2_jit_match(code, (PCRE2_SPTR) bytes,
+      length, offset, 0, data, context) >= 0) {
     matches++;
     offset = bounds[1];
   }
@@ -61,8 +65,9 @@ static Var _count(Var input) {
   return void;
 }
 
-static String _substitute(String sequence) {
-  String replaced = sequence;
+static size_t _substitute(ArrayChar sequence) {
+  ArrayChar first = auto ArrayChar.new(), second = auto ArrayChar.new();
+  ArrayChar current = sequence, next = first;
   foreach (List substitution in %(
     ("tHa[Nt]" "<4>")
     ("aND|caN|Ha[DS]|WaS" "<3>")
@@ -70,9 +75,35 @@ static String _substitute(String sequence) {
     ("<[^>]*>" "|")
     ("\\|[^|][^|]*\\|" "-"))) {
     String (pattern, replacement) = substitution;
-    Regexp regexp = auto Regexp.compile(pattern, 0);
-    replaced = regexp.jit_compile(PCRE2_JIT_COMPLETE)
-      .replace_all(replaced, replacement);
+    _replace(pattern, current.bytes, current.len(), replacement, next);
+    current = next;
+    next = next == first ? second : first;
   }
-  return replaced;
+  return current.len();
+}
+
+/* All six prescribed patterns consume at least one byte; replacements are
+   literal text. Scratch buffers alternate instead of interning each pass. */
+static void _replace(
+  String pattern, const char *source, size_t length, String replacement,
+  ArrayChar output) {
+  Regexp regexp = auto Regexp.compile(pattern, 0);
+  regexp.jit_compile(PCRE2_JIT_COMPLETE);
+  pcre2_match_data *data = regexp.native_match_data();
+  PCRE2_SIZE *bounds = pcre2_get_ovector_pointer(data);
+  pcre2_code *code = regexp.native();
+  pcre2_match_context *context = regexp.native_match_context();
+  const char *bytes = source ? source : "";
+  size_t offset = 0, size = replacement.len();
+  output.clear();
+  int result;
+  while ((result = pcre2_jit_match(code, (PCRE2_SPTR) bytes, length,
+      offset, 0, data, context)) >= 0) {
+    ((Block) output).append(bytes + offset, bounds[0] - offset);
+    ((Block) output).append(replacement, size);
+    offset = bounds[1];
+  }
+  if (result != PCRE2_ERROR_NOMATCH)
+    raise %(bad-state (library "PCRE2") (operation "replace") (code $result));
+  ((Block) output).append(bytes + offset, length - offset);
 }
