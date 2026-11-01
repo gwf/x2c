@@ -61,6 +61,11 @@ retains only a scalar count. The main thread runs the ordered substitution
 chain concurrently, joins workers, and prints counts in specification order.
 Smaller inputs use the serial path. No Regexp or match-data block is shared.
 The tuned workers count directly through their private native PCRE2 match data.
+Tuned stripping and replacements use the same native JIT matching with literal
+text. Two typed scratch buffers alternate through ordered replacements,
+avoiding preliminary sizing scans and canonical intermediate Strings.
+Pidigits keeps its existing Spigot owner and GMP lifecycle while calling GMP
+directly, without a private Integer forwarding layer.
 
 Reverse-complement keeps the existing input Buffer through `_write`, instead
 of converting each complete record into a canonical String. A native

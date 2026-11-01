@@ -82,6 +82,10 @@ is selected here.
 This list is selective. Every finished plan lives in `archive/` with its own
 status blockquote; only the records most often consulted are listed here.
 
+- [Regex-redux and source size](archive/plso-regex-and-source-size.md): phase
+  profiling supports scratch-buffer replacements; pidigits wrappers are removed
+  with flat timing. Independent counts and refreshed charts are validated.
+
 - [October 31 margin repairs](archive/review-repairs-2026-11-01.md): the
   post-review repair plan; batches A-E repaired three compiler defects,
   release notes, the third-party notice, and Map, Scope, task, guide, and
