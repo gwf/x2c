@@ -168,7 +168,7 @@ static void typed_map_integer_edges_and_failure_atomicity(void) {
   catch: TEST_FAIL("unexpected integer-map error");
 }
 
-static void typed_map_growth_collision_backshift_and_reuse(void) {
+static void typed_map_growth_tombstone_reuse(void) {
   $test.scoped();
   int keys[5];
   _typed_map_colliding_keys(keys, 5, 7, 7);
@@ -670,7 +670,7 @@ void typed_map_suite(void) {
   $test.run(typed_map_lookup_replace_and_defaults);
   $test.run(typed_map_numeric_updates_and_postfix);
   $test.run(typed_map_integer_edges_and_failure_atomicity);
-  $test.run(typed_map_growth_collision_backshift_and_reuse);
+  $test.run(typed_map_growth_tombstone_reuse);
   $test.run(typed_map_traversal_copy_merge_and_equal);
   $test.run(typed_map_missing_and_null_status_paths);
   $test.run(typed_map_errors_transfer);

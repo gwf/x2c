@@ -5,6 +5,8 @@
     in the root Scope until quiescent shutdown. Writers hold the root mutex.
     Native String/List readers need only acquire loads. Other key kinds keep
     their existing callback serialization under the recursive root mutex.
+    A stored hash of zero marks an empty slot; `x2c_hash_word` and the Var
+    hash in `dispatch.x` never produce zero for that reason.
 */
 
 static keyword loop $private.loop;

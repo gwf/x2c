@@ -9,7 +9,7 @@ decide when each allocation is freed. x2c storage is of three kinds:
 - Mutable storage belongs to a *scope*. A scope frees its allocations
   together.
 
-The [system macros](system-macros.md) provide `auto` for a retained
+The [system macros](system-macros.md) provide `auto` for an open
 region, `auto (pointer)` for a temporary destination, and initializer `auto` for an
 explicitly owned local. Classes can also supply early `free` operations.
 The [standard library overview](../library/overview.md) links to the detailed
@@ -62,8 +62,8 @@ puts(word);
 xfree(word);
 ```
 
-New allocations belong to the current active scope. A nested retain or
-pushed scope becomes the destination for new allocations. Resizing an
+New allocations belong to the current active scope. A nested open region
+or pushed scope becomes the destination for new allocations. Resizing an
 existing block preserves its owner. Allocations left in a scope are reclaimed
 when that scope ends; the default root ends at thread or process shutdown.
 
@@ -81,7 +81,7 @@ undefined behavior.
 
 `Scope.open` opens a new region on the currently active scope slot;
 `Scope.close` frees everything allocated inside it. Between them, the
-allocation calls go into the retained region:
+allocation calls go into the open region:
 
 ```x2c
 Scope.open();
@@ -91,19 +91,19 @@ puts(line);
 Scope.close();
 ```
 
-Retained regions nest. Each `Scope.open` must be paired with exactly one
+Open regions nest. Each `Scope.open` must be paired with exactly one
 `Scope.close`. Use a nested region to free temporaries before the
 surrounding work finishes.
 
-The runtime checks each release against the active slot. An empty retained
-region releases normally. An extra release, or a release from a different
+The runtime checks each close against the active slot. An empty open
+region closes normally. An extra close, or a close from a different
 pushed slot, raises `<bad-state>` and leaves the active region intact.
 A matching `catch` can handle the error. Without one, the default policy
 aborts the program.
 
 Storage returned by these calls is managed memory. `Scope.realloc` grows or
-shrinks it in place, and `Scope.free` frees it before the release. Most
-storage does not need `Scope.free`, because the release frees the whole
+shrinks it in place, and `Scope.free` frees it before the close. Most
+storage does not need `Scope.free`, because the close frees the whole
 region. `Scope.malloc_finalized`
 allocates storage that runs a function of your choice when it is reclaimed;
 see [attaching a finalizer](#attaching-a-finalizer).
@@ -155,13 +155,13 @@ restores the previous one. `Scope.pop` with no push outstanding raises
 root or a scope named by a slot still on the pushed stack. The scope is left
 intact. Uncaught, `<bad-state>` aborts the program.
 
-The caller must keep a scope alive while retained regions or other users
+The caller must keep a scope alive while open regions or other users
 borrow it. Destroying an attached lower scope violates that lifetime contract;
 the runtime does not promise to detect it. A popped, detached chain can still
 be destroyed through its head.
 
-To release a region on every exit from a block, write it as `auto` or put
-the release in a `defer`. [Errors and
+To close a region on every exit from a block, write it as `auto` or put
+the close in a `defer`. [Errors and
 Cleanup](exceptions.md#finally-and-defer) gives the exit rules.
 
 ### Migrating existing Scope code
@@ -295,8 +295,8 @@ Feed Feed.open(void) {
 ```
 
 The finalizer runs exactly once with the record's pointer: on `Scope.free`,
-on a `Scope.realloc` to size zero, when the owning scope is released or
-destroyed, or when shutdown releases its owning root region. A detached
+on a `Scope.realloc` to size zero, when the owning scope is closed or
+destroyed, or when shutdown destroys its owning root region. A detached
 `Scope` that is still live at shutdown is reported as a leak, and its
 finalizers do not run. The finalizer follows the record through `Scope.move`,
 and `Scope.realloc` keeps it and passes the resized pointer.
@@ -316,7 +316,7 @@ method clears the native field, the finalizer has nothing left to do.
 `Block` is the fixed-width storage primitive. A `Block` owns a contiguous run
 of elements of one width, chosen at construction, and tracks their length and
 capacity. Its backing store comes from the active scope, so a
-`Block` created inside a retained region is freed when that region ends,
+`Block` created inside an open region is freed when that region ends,
 even if you never call `Block.free`.
 
 ```x2c
@@ -357,7 +357,7 @@ puts(text);
 
 The `String` destination calls `Buffer.str`, which interns the accumulated
 text, so `text` is canonical. It stays valid after the `Buffer` cleanup and
-the region release free every byte the builder used. Most x2c code follows
+the region close free every byte the builder used. Most x2c code follows
 this pattern: mutable storage inside a region, a canonical result outside
 it.
 
@@ -366,7 +366,7 @@ it.
 Free storage when the work that needs it is finished: a request has ended, a
 file has been parsed, or temporary values have been combined into one result.
 Do not wrap a scope around canonical values that already outlive it. That
-scope frees nothing and adds a release you can forget.
+scope frees nothing and adds a close you can forget.
 
 A scope does not prevent dangling pointers:
 
@@ -387,7 +387,7 @@ runtime that a value has stopped being used. The same applies to a boxed wide
 `Var`: if you keep the `Var`, you must keep the scope that allocated the box.
 
 The compiler warns about this example because the escape is visible in the
-source: `label` is allocated between a retain and its release and read after
+source: `label` is allocated between an open and its close and read after
 it.
 
 To avoid dangling pointers:

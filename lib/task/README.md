@@ -30,4 +30,5 @@ The yield-time overflow check uses GCC/Clang's physical frame address rather
 than a local variable's address. GCC ASan use-after-return can move that local
 to its fake stack, outside the coroutine mapping. Bounds and metadata checks
 remain active. `unittest/probes/run-task-backend.sh` includes the focused
-sanitizer regression alongside the native layout and fallback probes.
+sanitizer regression alongside the native layout and unsupported-target
+probes.

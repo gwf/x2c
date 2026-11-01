@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     String reason = String.new(strerror(errno));
     fail(argv[1] + ": " + reason);
   }
-  Counts counts = {0}; // Default root scope needs no retain/release here.
+  Counts counts = {0}; // Default root scope needs no open/close here.
   char *line = NULL;
   defer free(line); // x2c: replaces later free; getline uses native storage.
   size_t capacity = 0;

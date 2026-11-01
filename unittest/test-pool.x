@@ -682,6 +682,7 @@ static void pool_root_reads_and_concurrent_growth(void) {
   EXPECT_INT_EQ(pthread_join(read_thread, NULL), 0);
   EXPECT_FALSE(atomic_load(&reader.failed));
   EXPECT_TRUE(root.table.capacity > capacity);
+  EXPECT_TRUE(root.table.capacity >= 65536);
   if (launched >= 2) {
     int same = 1;
     for (int i = 0; i < jobs[0].count; i++)

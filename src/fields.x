@@ -12,12 +12,12 @@ meta List _x2c_field_rows(List fields) {
 }
 
 macro Stmt $copy_fields(Expr $to, Expr $from, Name @fields) {
-  expand $_x2c_literal_list($_x2c_field_rows($fields))
+  expand $_x2c_field_rows($fields)
   macro Stmt(Name $field) { $to.$field = $from.$field; }
 }
 
 macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
-  expand $_x2c_literal_list($_x2c_field_rows($fields))
+  expand $_x2c_field_rows($fields)
   macro Stmt(Name $field) { $to.$field = $value; }
 }
 

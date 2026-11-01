@@ -43,7 +43,7 @@ extern int weak_value;
 
 int sextupled(int value);
 
-typedef int count_t;
+typedef SPARE int count_t;
 
 struct text{
   char * body;

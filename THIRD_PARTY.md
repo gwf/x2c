@@ -19,6 +19,18 @@ Dependency terms are governed by
 [`packages/LICENSE-POLICY.md`](packages/LICENSE-POLICY.md) and each
 package's README.
 
+## Vendored runtime sources
+
+`lib/task/minicoro.h` is minicoro v0.2.0 by Eduardo Bart, at upstream
+revision `02dad0f8b7cbb12fe6e216ae7a76db15ca55cd7b`, with the local
+adaptations that [`lib/task/README.md`](lib/task/README.md) records. It is
+compiled into the runtime library as the native task-switching backend and
+is offered under either the Unlicense public-domain dedication or the MIT
+No Attribution license, at the user's choice; the text is in
+[`LICENSES/minicoro-02dad0f8-Unlicense-or-MIT-0.txt`](LICENSES/minicoro-02dad0f8-Unlicense-or-MIT-0.txt)
+and remains in the header. Its assembly context switches derive from Mike
+Pall's LuaCoco under the MIT license, whose notice the header also retains.
+
 ## Optional website toolchain
 
 The public website under `site/` is rendered by an npm toolchain pinned in

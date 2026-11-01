@@ -5,12 +5,18 @@
 #include "meta.x"
 
 /* The syntax prelude supplies the decorator. This helper returns pending
-   applications, so ordinary insertion owns their kind, binding and hygiene. */
+   applications, so ordinary insertion owns their kind, binding and hygiene.
+   A meta call's rows are read as its value, since rows of syntax such as
+   names have no lifted expression. A call that returns an expression, and
+   any other input, is read as a constant. */
 meta List _x2c_expand_rows(List generator, List input) {
   if (generator.assoc(<kind>) == <decorator>)
     x2c_diagnostic_fail("expand requires a code-producing macro", %());
   Compiler c = Compiler.expanding();
-  Var value = Code.value(c.resolve_expression(input, c.token));
+  Var value = input ~= %(expr ? (meta-call *))
+    ? c.evaluate_meta_value(input, c.token, 1)
+    : c.resolve_expression(input, c.token);
+  if (value ~= %(expr *)) value = Code.value(value);
   if (value is not <list>)
     x2c_diagnostic_fail("expand requires a compile-time List", %());
   List rows = value, parameters = generator.assoc(<parameters>);
@@ -25,8 +31,9 @@ meta List _x2c_expand_rows(List generator, List input) {
     int supplied = arguments.len();
     if (supplied < required || (!sequence && supplied != required)) {
       String expected = sequence ? %"at least $required" : required.str();
+      String noun = !sequence && required == 1 ? "argument" : "arguments";
       x2c_diagnostic_fail(
-        %"expand row $index expects $expected arguments; got $supplied", %());
+        %"expand row $index expects $expected $noun; got $supplied", %());
     }
     code.push(Macro_apply(generator, arguments));
   }

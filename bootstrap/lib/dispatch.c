@@ -937,7 +937,7 @@ static void _valid_member_operand(Var value, String side){
     {
       Var _x2c_gensym_literal_part_1 = Var_box_ulong(bits);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 884,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 885,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_34, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_1, Symbol_var(1263882), String_var(side));
         __builtin_unreachable();
       }
@@ -946,7 +946,7 @@ static void _valid_member_operand(Var value, String side){
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 886,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 887,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_35, 48270474208, 1, Symbol_var(1263882), String_var(side));
     __builtin_unreachable();
   }
@@ -958,7 +958,7 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
   if(descriptor) return descriptor;
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 893,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 894,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_36, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }

@@ -329,7 +329,7 @@ static void _notify(Channel channel) {
 }
 
 static int _stopped(Thread owner, void *task) =>
-  x2c_thread_wait_stopped(owner) || (task && x2c_task_stopping(task));
+  x2c_thread_wait_stopped(owner) || x2c_task_stopping(task);
 
 static int _begin(Channel channel, Thread &owner, void *&task) {
   task = x2c_task_current();
@@ -338,7 +338,7 @@ static int _begin(Channel channel, Thread &owner, void *&task) {
     _unlock(&channel.monitor.mutex);
     return 0;
   }
-  if (!task || !x2c_task_stopping(task)) return 1;
+  if (!x2c_task_stopping(task)) return 1;
   _finish(channel, owner);
   return 0;
 }

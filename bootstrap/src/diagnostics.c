@@ -43,11 +43,11 @@ DiagnosticsHold;
 #include <unistd.h>
 static int diagnostics_json;
 
-static List _73, _71, _70, _68, _66, _40, _39, _38, _37, _35, _33, _32, _29, _27, _26, _17, _16, _15, _12, _11;
+static List _75, _73, _72, _70, _68, _42, _41, _40, _39, _37, _35, _34, _31, _29, _28, _19, _18, _17, _14, _13;
 
-static String _64, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _42, _41, _24, _18, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _66, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _44, _43, _26, _20, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _72, _69, _67, _65, _63, _62, _61, _60, _59, _58, _43, _36, _34, _31, _30, _28, _25, _23, _22, _21, _20, _19, _14, _13, _10, _9, _8;
+static Var _74, _71, _69, _67, _65, _64, _63, _62, _61, _60, _45, _38, _36, _33, _32, _30, _27, _25, _24, _23, _22, _21, _16, _15, _12, _11, _10;
 
 static int _init_guard_ = 0;
 
@@ -113,14 +113,14 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
 
 static Func _x2c_gensym_func_handle_0;
 
-_x2c_gensym_initializer_choice_B8F5462B_1((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _73)))
+_x2c_gensym_initializer_choice_B8F5462B_1((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _75)))
 static Var _x2c_gensym_lambda_1(Var entry);
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 static Func _x2c_gensym_func_handle_1;
 
-_x2c_gensym_initializer_choice_B8F5462B_2((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _73)))
+_x2c_gensym_initializer_choice_B8F5462B_2((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _75)))
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
 }
@@ -133,79 +133,81 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("compiler error");
-  _1 = String_new("definition: ");
-  _2 = String_new(" ");
-  _3 = String_new("...");
-  _4 = String_new("in expansion of \'");
-  _5 = String_new("\' defined at ");
-  _6 = String_new("; input: ");
-  _7 = String_new(":");
-  _8 = Symbol_var(6544469130);
-  _9 = Symbol_var(1307939018);
-  _10 = Symbol_var(63605481584);
-  _11 = cons(_10, NULL);
-  _12 = cons(_9, _11);
-  _13 = List_var(_12);
-  _14 = Symbol_var(54);
-  _15 = cons(_14, NULL);
-  _16 = cons(_13, _15);
-  _17 = cons(_8, _16);
-  _18 = String_new("definition: ");
-  _19 = Symbol_var(412426);
-  _20 = Symbol_var(805770);
-  _21 = Symbol_var(233614172);
-  _22 = Symbol_var(816725264);
-  _23 = Symbol_var(1133019155420);
-  _24 = String_new("<stdin>");
-  _25 = int_var(1);
-  _26 = cons(_25, NULL);
-  _27 = cons(_20, _26);
-  _28 = List_var(_27);
-  _29 = cons(_21, _26);
+  _1 = String_new("_x2c_gensym_anonymous_macro_");
+  _2 = String_new("$");
+  _3 = String_new("definition: ");
+  _4 = String_new(" ");
+  _5 = String_new("...");
+  _6 = String_new("in expansion of \'");
+  _7 = String_new("\' defined at ");
+  _8 = String_new("; input: ");
+  _9 = String_new(":");
+  _10 = Symbol_var(6544469130);
+  _11 = Symbol_var(1307939018);
+  _12 = Symbol_var(63605481584);
+  _13 = cons(_12, NULL);
+  _14 = cons(_11, _13);
+  _15 = List_var(_14);
+  _16 = Symbol_var(54);
+  _17 = cons(_16, NULL);
+  _18 = cons(_15, _17);
+  _19 = cons(_10, _18);
+  _20 = String_new("definition: ");
+  _21 = Symbol_var(412426);
+  _22 = Symbol_var(805770);
+  _23 = Symbol_var(233614172);
+  _24 = Symbol_var(816725264);
+  _25 = Symbol_var(1133019155420);
+  _26 = String_new("<stdin>");
+  _27 = int_var(1);
+  _28 = cons(_27, NULL);
+  _29 = cons(_22, _28);
   _30 = List_var(_29);
-  _31 = int_var(0);
-  _32 = cons(_31, NULL);
-  _33 = cons(_22, _32);
-  _34 = List_var(_33);
-  _35 = cons(_23, _32);
+  _31 = cons(_23, _28);
+  _32 = List_var(_31);
+  _33 = int_var(0);
+  _34 = cons(_33, NULL);
+  _35 = cons(_24, _34);
   _36 = List_var(_35);
-  _37 = cons(_36, NULL);
-  _38 = cons(_34, _37);
-  _39 = cons(_30, _38);
-  _40 = cons(_28, _39);
-  _41 = String_new("<");
-  _42 = String_new("compiler warning");
-  _43 = Symbol_var(6363658);
-  _44 = String_new("{\"code\":");
-  _45 = String_new(",\"message\":");
-  _46 = String_new(",\"severity\":");
-  _47 = String_new(",\"notes\":");
-  _48 = String_new("}\n");
-  _49 = String_new(",\"file\":");
-  _50 = String_new(",\"line\":");
-  _51 = String_new(",\"column\":");
-  _52 = String_new(",\"length\":");
-  _53 = String_new(",\"position\":");
-  _54 = String_new("/");
-  _55 = String_new(".");
+  _37 = cons(_25, _34);
+  _38 = List_var(_37);
+  _39 = cons(_38, NULL);
+  _40 = cons(_36, _39);
+  _41 = cons(_32, _40);
+  _42 = cons(_30, _41);
+  _43 = String_new("<");
+  _44 = String_new("compiler warning");
+  _45 = Symbol_var(6363658);
+  _46 = String_new("{\"code\":");
+  _47 = String_new(",\"message\":");
+  _48 = String_new(",\"severity\":");
+  _49 = String_new(",\"notes\":");
+  _50 = String_new("}\n");
+  _51 = String_new(",\"file\":");
+  _52 = String_new(",\"line\":");
+  _53 = String_new(",\"column\":");
+  _54 = String_new(",\"length\":");
+  _55 = String_new(",\"position\":");
   _56 = String_new("/");
-  _57 = String_new("too many errors, stopping");
-  _58 = Symbol_var(227594);
-  _59 = Symbol_var(1317895556402);
-  _60 = Symbol_var(28293925322);
-  _61 = Symbol_var(857050729436);
-  _62 = Symbol_var(30384486);
-  _63 = Symbol_var(437126);
-  _64 = String_new("Var");
-  _65 = String_var(_64);
-  _66 = cons(_65, NULL);
-  _67 = List_var(_66);
+  _57 = String_new(".");
+  _58 = String_new("/");
+  _59 = String_new("too many errors, stopping");
+  _60 = Symbol_var(227594);
+  _61 = Symbol_var(1317895556402);
+  _62 = Symbol_var(28293925322);
+  _63 = Symbol_var(857050729436);
+  _64 = Symbol_var(30384486);
+  _65 = Symbol_var(437126);
+  _66 = String_new("Var");
+  _67 = String_var(_66);
   _68 = cons(_67, NULL);
   _69 = List_var(_68);
   _70 = cons(_69, NULL);
-  _71 = cons(_63, _70);
-  _72 = List_var(_71);
-  _73 = cons(_72, _66);
+  _71 = List_var(_70);
+  _72 = cons(_71, NULL);
+  _73 = cons(_65, _72);
+  _74 = List_var(_73);
+  _75 = cons(_74, _68);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -395,6 +397,21 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
   Compiler_report_warning_at(c, code, message, location, _notes(c, location, notes));
 }
 
+int Diagnostics_anonymous_macro_name(String name){
+  if(! _init_guard_) _file_init_();
+  return String_startswith(name, _1);
+}
+
+String Diagnostics_macro_spelling(List definition, Token invocation){
+  if(! _init_guard_) _file_init_();
+  Atom name = List_assoc(definition, Symbol_var(920394));
+  if(! Diagnostics_anonymous_macro_name(Atom_str(name))) return Atom_str(name);
+  if(invocation -> type != 73) return invocation -> text;
+  Token spelled = invocation + 1;
+  while(spelled -> type == 40896714 || spelled -> type == 7477210024) spelled ++;
+  return String_add(_2, spelled -> text);
+}
+
 String Diagnostics_macro_definition_note(List definition);
 
 Var Diagnostics_macro_expansion_input(List input);
@@ -416,13 +433,13 @@ String Compiler_macro_expansion_note(Compiler c){
         Token invocation = Var_token(List_getindex(_x2c_gensym_destructure_0, 3));
         (void) bindings;
         if(! invocation) continue;
-        String name = Var_str(List_assoc(definition, Symbol_var(920394)));
-        String source = String_remove_prefix(Diagnostics_macro_definition_note(definition), _1);
+        String name = Diagnostics_macro_spelling(definition, invocation);
+        String source = String_remove_prefix(Diagnostics_macro_definition_note(definition), _3);
         Var syntax = Diagnostics_macro_expansion_input(input);
         List lines = String_split_lines(Var_repr(_expansion_note_syntax(syntax, Map_new())), 0);
-        String shown = String_join(_2, List_map(lines, _x2c_gensym_func_handle_0));
-        if(String_len(shown) > 160) shown = String_join(NULL, cons(String_var(String_getslice(shown, (-2147483647 - 1), 157, 1)), cons(String_var(_3), NULL)));
-        return String_join(NULL, cons(String_var(_4), cons(String_var(name), cons(String_var(_5), cons(String_var(source), cons(String_var(_6), cons(String_var(shown), NULL)))))));
+        String shown = String_join(_4, List_map(lines, _x2c_gensym_func_handle_0));
+        if(String_len(shown) > 160) shown = String_join(NULL, cons(String_var(String_getslice(shown, (-2147483647 - 1), 157, 1)), cons(String_var(_5), NULL)));
+        return String_join(NULL, cons(String_var(_6), cons(String_var(name), cons(String_var(_7), cons(String_var(source), cons(String_var(_8), cons(String_var(shown), NULL)))))));
       }
 
     }
@@ -437,7 +454,7 @@ String Compiler_cpp_note(Compiler c, List location){
   if(! _init_guard_) _file_init_();
   Tokenizer tokenizer = c -> tokenizer;
   if(! tokenizer || ! Array_truth(tokenizer -> expansions) || ! List_truth(location)) return NULL;
-  int line = Var_int(Var_convert_at(List_assoc(location, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 237}; & _x2c_gensym_error_site_3; }))), position = Var_int(Var_convert_at(List_assoc(location, Symbol_var(1133019155420)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 237}; & _x2c_gensym_error_site_4; })));
+  int line = Var_int(Var_convert_at(List_assoc(location, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 258}; & _x2c_gensym_error_site_3; }))), position = Var_int(Var_convert_at(List_assoc(location, Symbol_var(1133019155420)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 258}; & _x2c_gensym_error_site_4; })));
   Token tokens = tokenizer -> tokens;
   {
     List row;
@@ -448,8 +465,8 @@ String Compiler_cpp_note(Compiler c, List location){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
       {
         List _x2c_gensym_destructure_1 = row;
-        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 240}; & _x2c_gensym_error_site_5; })));
-        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 240}; & _x2c_gensym_error_site_6; })));
+        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 261}; & _x2c_gensym_error_site_5; })));
+        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/diagnostics.x",.function = "Compiler_cpp_note",.line = 261}; & _x2c_gensym_error_site_6; })));
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 2));
         List site = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 3));
         Token token = tokens + first;
@@ -476,8 +493,8 @@ String Compiler_expanding_macro(Compiler c, Token token){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
       {
         List _x2c_gensym_destructure_2 = row;
-        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 256}; & _x2c_gensym_error_site_7; })));
-        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 256}; & _x2c_gensym_error_site_8; })));
+        long first = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 0), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 277}; & _x2c_gensym_error_site_7; })));
+        long end = Var_long(Var_convert_at(List_getindex(_x2c_gensym_destructure_2, 1), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/diagnostics.x",.function = "Compiler_expanding_macro",.line = 277}; & _x2c_gensym_error_site_8; })));
         String name = Var_as_string(List_getindex(_x2c_gensym_destructure_2, 2));
         List site = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 3));
         (void) site;
@@ -494,8 +511,8 @@ String Diagnostics_c_macro_note(String name, List site){
   if(! _init_guard_) _file_init_();
   List _x2c_gensym_destructure_3 = site;
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_3, 0));
-  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_3, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_c_macro_note",.line = 267}; & _x2c_gensym_error_site_9; })));
-  return String_join(NULL, cons(String_var(_4), cons(String_var(name), cons(String_var(_5), cons(String_var(file), cons(String_var(_7), cons(String_var(int_str(line)), NULL)))))));
+  int line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_3, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_c_macro_note",.line = 288}; & _x2c_gensym_error_site_9; })));
+  return String_join(NULL, cons(String_var(_6), cons(String_var(name), cons(String_var(_7), cons(String_var(file), cons(String_var(_9), cons(String_var(int_str(line)), NULL)))))));
 }
 
 Var Ast_source_unwrap(Var);
@@ -503,7 +520,7 @@ Var Ast_source_unwrap(Var);
 Var Diagnostics_macro_expansion_input(List input){
   if(! _init_guard_) _file_init_();
   List captured =({ static MatchCaptureSite _x2c_gensym_match_site_0;
-  x2c_match_site_search_replace(& _x2c_gensym_match_site_0, input, List_var(_17), Symbol_var(63605481584)); });
+  x2c_match_site_search_replace(& _x2c_gensym_match_site_0, input, List_var(_19), Symbol_var(63605481584)); });
   return Ast_source_unwrap(List_var(captured));
 }
 
@@ -511,8 +528,8 @@ String Diagnostics_macro_definition_note(List definition){
   if(! _init_guard_) _file_init_();
   List origin = Var_list_payload(List_assoc(definition, Symbol_var(1044986460)));
   String file = Var_as_string(List_assoc(origin, Symbol_var(412426)));
-  int line = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 281}; & _x2c_gensym_error_site_10; }))), column = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(233614172)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 281}; & _x2c_gensym_error_site_11; })));
-  return String_join(NULL, cons(String_var(_18), cons(String_var(file), cons(String_var(_7), cons(String_var(int_str(line)), cons(String_var(_7), cons(String_var(int_str(column)), NULL)))))));
+  int line = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(805770)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 302}; & _x2c_gensym_error_site_10; }))), column = Var_int(Var_convert_at(List_assoc(origin, Symbol_var(233614172)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/diagnostics.x",.function = "Diagnostics_macro_definition_note",.line = 302}; & _x2c_gensym_error_site_11; })));
+  return String_join(NULL, cons(String_var(_20), cons(String_var(file), cons(String_var(_9), cons(String_var(int_str(line)), cons(String_var(_9), cons(String_var(int_str(column)), NULL)))))));
 }
 
 List Compiler_origin_location(Compiler compiler, int occurrence){
@@ -526,7 +543,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
           Var parent;
           parent = x2c_match_value_0;
           {
-            occurrence = Var_int(Var_convert_at(parent, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/diagnostics.x",.function = "Compiler_origin_location",.line = 300}; & _x2c_gensym_error_site_12; })));
+            occurrence = Var_int(Var_convert_at(parent, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/diagnostics.x",.function = "Compiler_origin_location",.line = 321}; & _x2c_gensym_error_site_12; })));
             continue;
           }
 
@@ -543,7 +560,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
           Var position;
           position = x2c_match_value_4;
           return({
-            Var _x2c_gensym_literal_part_0 = List_var(cons(_19, cons(file, NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_20, cons(line, NULL)));  Var _x2c_gensym_literal_part_2 = List_var(cons(_21, cons(column, NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_22, cons(length, NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_23, cons(position, NULL)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)))));
+            Var _x2c_gensym_literal_part_0 = List_var(cons(_21, cons(file, NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_22, cons(line, NULL)));  Var _x2c_gensym_literal_part_2 = List_var(cons(_23, cons(column, NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_24, cons(length, NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_25, cons(position, NULL)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL)))));
           }
           );
         }
@@ -564,17 +581,17 @@ String Compiler_token_source(Compiler c, Token token, int * line);
 
 List Compiler_token_location(Compiler compiler, Token token){
   if(! _init_guard_) _file_init_();
-  String file = String_truth(compiler -> filename) ? compiler -> filename : _24;
+  String file = String_truth(compiler -> filename) ? compiler -> filename : _26;
   if(! token) token = compiler -> token;
   if(! token){
     if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
-    return cons(List_var(cons(_19, cons(String_var(file), NULL))), _40);
+    return cons(List_var(cons(_21, cons(String_var(file), NULL))), _42);
   }
   int line = token -> line, column = Compiler_token_column(compiler, token);
   if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));
   file = Compiler_display_path(compiler, file);
   return({
-    Var _x2c_gensym_literal_part_5 = List_var(cons(_19, cons(String_var(file), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_20, cons(int_var(line), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_21, cons(int_var(column), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_22, cons(int_var(token -> len), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_23, cons(int_var(token -> pos), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL)))));
+    Var _x2c_gensym_literal_part_5 = List_var(cons(_21, cons(String_var(file), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_22, cons(int_var(line), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_23, cons(int_var(column), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_24, cons(int_var(token -> len), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_25, cons(int_var(token -> pos), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL)))));
   }
   );
 }
@@ -583,7 +600,7 @@ Path Path_absolute(Path);
 
 String Compiler_display_path(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(path) || String_startswith(path, _41)) return path;
+  if(! String_truth(path) || String_startswith(path, _43)) return path;
   if(compiler -> source_facts) return Path_absolute(path);
   String root = compiler -> root_dir;
   if(String_truth(root) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
@@ -596,10 +613,10 @@ String Compiler_token_source(Compiler c, Token token, int * line){
   List region = _token_region(c, token);
   if(! List_truth(region)) return c -> filename;
   List _x2c_gensym_destructure_4 = region;
-  int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 362}; & _x2c_gensym_error_site_13; })));
-  int text_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 362}; & _x2c_gensym_error_site_14; })));
+  int start = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_13; })));
+  int text_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_14; })));
   String file = Var_as_string(List_getindex(_x2c_gensym_destructure_4, 2));
-  int file_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 362}; & _x2c_gensym_error_site_15; })));
+  int file_line = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_4, 3), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_source",.line = 383}; & _x2c_gensym_error_site_15; })));
   if(line)(* line) = file_line + token -> line - text_line;
   return file;
 }
@@ -616,7 +633,7 @@ int Compiler_token_column(Compiler c, Token token){
       Var _x2c_gensym_match_value_4 = text_line;
       Var _x2c_gensym_match_value_5 = before;
       {
-        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_column",.line = 371}; & _x2c_gensym_error_site_16; })));
+        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../src/diagnostics.x",.function = "Compiler_token_column",.line = 392}; & _x2c_gensym_error_site_16; })));
         String before = Var_as_string(_x2c_gensym_match_value_5);
         if(token -> line == text_line) return String_len(before) + token -> col;
       }
@@ -633,7 +650,7 @@ void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, 
   if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
-  message = String_truth(message) ? message : _42;
+  message = String_truth(message) ? message : _44;
   List entry = _build_entry(code ? code : 49497918350, 49497918350, message, location, notes);
   _publish(diag, entry);
 }
@@ -788,7 +805,7 @@ static Var _expansion_note_syntax(Var value, Map caches){
             ordinal = int_var((int) Map_len(caches));
             Map_setindex(caches, id, ordinal);
           }
-          return List_var(cons(_43, cons(ordinal, NULL)));
+          return List_var(cons(_45, cons(ordinal, NULL)));
         }
 
       }
@@ -828,7 +845,7 @@ static void _forget(Diagnostics diag, int from){
 
 static String _note_line(List l){
   List strings = List_filter(l, _x2c_gensym_func_handle_1);
-  return List_truth(strings) ? String_join(_2, strings) : NULL;
+  return List_truth(strings) ? String_join(_4, strings) : NULL;
 }
 
 static void _write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){
@@ -846,11 +863,11 @@ static void _write_json(Compiler c, Symbol code, Symbol severity, String message
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Buffer_write(out, String_join(NULL, cons(String_var(_44), cons(String_var(Var_json(Symbol_var(code))), NULL))));
-      Buffer_write(out, String_join(NULL, cons(String_var(_45), cons(String_var(Var_json(String_var(message))), NULL))));
-      Buffer_write(out, String_join(NULL, cons(String_var(_46), cons(String_var(Var_json(Symbol_var(severity))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_46), cons(String_var(Var_json(Symbol_var(code))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_47), cons(String_var(Var_json(String_var(message))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_48), cons(String_var(Var_json(Symbol_var(severity))), NULL))));
       _write_json_location(c, out, location);
-      Buffer_write(out, String_join(NULL, cons(String_var(_47), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_48), NULL)))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_49), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_50), NULL)))));
       while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
 
       }
@@ -876,13 +893,13 @@ static void _write_json_location(Compiler c, Buffer out, List location){
       Var position;
       position = x2c_match_value_4;
       {
-        Buffer_write(out, String_join(NULL, cons(String_var(_49), cons(String_var(Var_json(String_var(_json_path(c, Var_as_string(file))))), NULL))));
+        Buffer_write(out, String_join(NULL, cons(String_var(_51), cons(String_var(Var_json(String_var(_json_path(c, Var_as_string(file))))), NULL))));
         Buffer_write(out, ({
-          Var _x2c_gensym_literal_part_10 = String_var(Var_str(line));  Var _x2c_gensym_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_50), cons(_x2c_gensym_literal_part_10, cons(String_var(_51), cons(_x2c_gensym_literal_part_11, NULL)))));
+          Var _x2c_gensym_literal_part_10 = String_var(Var_str(line));  Var _x2c_gensym_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_52), cons(_x2c_gensym_literal_part_10, cons(String_var(_53), cons(_x2c_gensym_literal_part_11, NULL)))));
         }
         ));
         Buffer_write(out, ({
-          Var _x2c_gensym_literal_part_12 = String_var(Var_str(length));  Var _x2c_gensym_literal_part_13 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_52), cons(_x2c_gensym_literal_part_12, cons(String_var(_53), cons(_x2c_gensym_literal_part_13, NULL)))));
+          Var _x2c_gensym_literal_part_12 = String_var(Var_str(length));  Var _x2c_gensym_literal_part_13 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_54), cons(_x2c_gensym_literal_part_12, cons(String_var(_55), cons(_x2c_gensym_literal_part_13, NULL)))));
         }
         ));
         return;
@@ -902,10 +919,10 @@ int Path_exists(Path);
 Path Path_join(Path, Path);
 
 static String _json_path(Compiler compiler, String path){
-  if(! String_truth(path) || String_startswith(path, _41)) return path;
-  if(! String_startswith(path, _54) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
+  if(! String_truth(path) || String_startswith(path, _43)) return path;
+  if(! String_startswith(path, _56) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
   path = Path_absolute(path);
-  String directory = String_join(NULL, cons(String_var(Path_absolute(_55)), cons(String_var(_56), NULL)));
+  String directory = String_join(NULL, cons(String_var(Path_absolute(_57)), cons(String_var(_58), NULL)));
   return String_startswith(path, directory) ? String_remove_prefix(path, directory) : path;
 }
 
@@ -925,11 +942,11 @@ static void _write_heading(Compiler c, Symbol code, String message, List locatio
       position = x2c_match_value_4;
       {
         String place =({
-          Var _x2c_gensym_literal_part_14 = String_var(Var_str(file));  Var _x2c_gensym_literal_part_15 = String_var(Var_str(line));  Var _x2c_gensym_literal_part_16 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_gensym_literal_part_14, cons(String_var(_7), cons(_x2c_gensym_literal_part_15, cons(String_var(_7), cons(_x2c_gensym_literal_part_16, NULL))))));
+          Var _x2c_gensym_literal_part_14 = String_var(Var_str(file));  Var _x2c_gensym_literal_part_15 = String_var(Var_str(line));  Var _x2c_gensym_literal_part_16 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_gensym_literal_part_14, cons(String_var(_9), cons(_x2c_gensym_literal_part_15, cons(String_var(_9), cons(_x2c_gensym_literal_part_16, NULL))))));
         }
         );
         fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
-        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 574}; & _x2c_gensym_error_site_17; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 574}; & _x2c_gensym_error_site_18; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 574}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 574}; & _x2c_gensym_error_site_20; }))));
+        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_17; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_18; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 595}; & _x2c_gensym_error_site_20; }))));
         return;
       }
 
@@ -956,7 +973,7 @@ static void _show_source_context(Compiler compiler, int line, int column, int le
       Var _x2c_gensym_match_value_6 = text_line;
       Var _x2c_gensym_match_value_7 = before;
       {
-        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 590}; & _x2c_gensym_error_site_21; })));
+        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 611}; & _x2c_gensym_error_site_21; })));
         String before = Var_as_string(_x2c_gensym_match_value_7);
         if(line == text_line) if(String_len(before)){
           String shown =({
@@ -1005,7 +1022,7 @@ static int _text_line(Compiler c, int position){
     int _x2c_gensym_macro_cursor_9 = 0;
     Var _x2c_gensym_macro_cursor_output_10;
     while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_10))){
-      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 617}; & _x2c_gensym_error_site_22; })));
+      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 638}; & _x2c_gensym_error_site_22; })));
       {
         if(start > position) break;
         line ++;
@@ -1115,7 +1132,7 @@ static int _publish(Diagnostics diag, List entry){
 
 static void _publish_limit_notice(Diagnostics diag){
   if(diag -> limit == 1) return;
-  String note = _57;
+  String note = _59;
   List entry = _build_entry(25782888, 949514, note, NULL, NULL);
   _store(diag, entry);
   _emit_entry(diag, entry);
@@ -1124,7 +1141,7 @@ static void _publish_limit_notice(Diagnostics diag){
 static List _build_entry(Symbol code, Symbol severity, String message, List location, List notes){
   Symbol effective_code = code ? code : 306819428;
   return({
-    Var _x2c_gensym_literal_part_19 = List_var(cons(_58, cons(Symbol_var(effective_code), NULL)));  Var _x2c_gensym_literal_part_20 = List_var(cons(_59, cons(Symbol_var(severity), NULL)));  Var _x2c_gensym_literal_part_21 = List_var(cons(_60, cons(String_var(message), NULL)));  Var _x2c_gensym_literal_part_22 = List_var(cons(_61, cons(List_var(location), NULL)));  Var _x2c_gensym_literal_part_23 = List_var(cons(_62, cons(List_var(notes), NULL)));  cons(_x2c_gensym_literal_part_19, cons(_x2c_gensym_literal_part_20, cons(_x2c_gensym_literal_part_21, cons(_x2c_gensym_literal_part_22, cons(_x2c_gensym_literal_part_23, NULL)))));
+    Var _x2c_gensym_literal_part_19 = List_var(cons(_60, cons(Symbol_var(effective_code), NULL)));  Var _x2c_gensym_literal_part_20 = List_var(cons(_61, cons(Symbol_var(severity), NULL)));  Var _x2c_gensym_literal_part_21 = List_var(cons(_62, cons(String_var(message), NULL)));  Var _x2c_gensym_literal_part_22 = List_var(cons(_63, cons(List_var(location), NULL)));  Var _x2c_gensym_literal_part_23 = List_var(cons(_64, cons(List_var(notes), NULL)));  cons(_x2c_gensym_literal_part_19, cons(_x2c_gensym_literal_part_20, cons(_x2c_gensym_literal_part_21, cons(_x2c_gensym_literal_part_22, cons(_x2c_gensym_literal_part_23, NULL)))));
   }
   );
 }

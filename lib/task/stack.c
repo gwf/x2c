@@ -72,10 +72,6 @@ void x2c_task_jobs_free(void *jobs, size_t size) {
 
 void *x2c_task_stack_new(void (*entry)(void *), void *argument, size_t size) {
   size_t page = (size_t)sysconf(_SC_PAGESIZE);
-  if (size < MCO_MIN_STACK_SIZE || size > SIZE_MAX - 2 * page) {
-    errno = EINVAL;
-    return NULL;
-  }
   size = (size + page - 1) / page * page;
   mco_desc desc = mco_desc_init(task_stack_entry, size);
   /* The stack is external; retain only minicoro's control-record prefix. */

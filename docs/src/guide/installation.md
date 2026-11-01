@@ -39,6 +39,8 @@ Code written for 0.15.x needs these changes:
 
 | 0.15.x | Now |
 | --- | --- |
+| `%<<a b>>` | `%<a b>` |
+| an object or function named `expand` | another name |
 | `Scope.retain()` | `Scope.open()` |
 | `Scope.release()` | `Scope.close()` |
 | `array.find(value)` | `array.index(value)` |
@@ -56,6 +58,12 @@ as a `Var`, or `void` when none is accepted. `try_double` changes as
 is now one value, so splice the List with `@` to keep the 0.15.x meaning.
 Array search changes C prototypes, so rebuild native code that calls
 `Array_find` or `Array_indexof`.
+
+`SymbolSet` literals now use single angles, and `%<<a b>>` is an invalid
+token. An unescaped `>` closes the literal, so write a member that contains
+`>` as a quoted String, as in `%<">" ">=">`. `expand` is a keyword alias
+that maps rows over a macro, so rename an object or function that used that
+name; a `Type.expand` method is unaffected.
 
 `Scope.open` and `Scope.close` keep the old nested-region behavior and `void`
 return types. Keep each open paired with one close, normally through `defer`.

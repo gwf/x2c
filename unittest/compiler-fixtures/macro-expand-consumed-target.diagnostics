@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-expand-consumed-target.x:5:3: parse: unknown or forward-referenced macro 'add'
+    $add(5);
+    ^
+

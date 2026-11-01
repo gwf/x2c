@@ -8,9 +8,10 @@
     below 65536 buckets, then in the control Block's owned storage.
 */
 
-/* Cached families retain the complete key hash for rebuilding. Other families
-   recompute it through their existing key hash. These inline operations let
-   one storage generator serve both record shapes without runtime dispatch. */
+/* A family keeps the complete key hash one of three ways: cached in record
+   padding, beside the controls as side hashes (Var Map and Pool), or
+   recomputed through its existing key hash. These inline operations let one
+   storage generator serve the record shapes without runtime dispatch. */
 macro Unit $map.grouped.rehashed.records(
   Type $record, Name $hash, Name $record_hash, Name $remember_hash
 ) {
@@ -156,7 +157,7 @@ macro Unit $map.grouped.storage.family(
       }
       group = (group + step + 1) & group_mask;
     }
-    (void) $reinsert_error(map.capacity, 0);
+    (void) $reinsert_error(map.capacity);
   }
 
   static void _rebuild($map map, unsigned capacity) {

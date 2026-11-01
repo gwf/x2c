@@ -24,9 +24,11 @@ static const MacroPos macro_position_info[] = {
 
 /** Publishes a canonical `macrodef` in source order and returns `node`.
     A later definition with the same name affects only later invocations.
+    The write joins any open semantic transaction, so a definition read as
+    a Macro target and then consumed is withdrawn with that transaction.
 */
 List Compiler.publish_macro_definition_node(Compiler c, List node) {
-  c.macros[node.assoc(<name>)] = node;
+  c.sym.put(c.macros, node.assoc(<name>), node);
   if (c.shallow && !c.macro_holes &&
       !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
     _record_compile_time_effect(

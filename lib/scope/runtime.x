@@ -23,7 +23,7 @@ int Scope.accounting_enabled(void) {
 }
 
 /** Registers `hook` to run during process-wide `Scope` shutdown.
-    The function pointer is retained without being invoked. Shutdown invokes
+    The function pointer is stored without being invoked. Shutdown invokes
     registrations once in reverse order while `Scope` storage is still
     available, including one registered by a hook that shutdown is already
     running.
@@ -39,7 +39,7 @@ void Scope.shutdown_hook(void (*hook)(void)) {
 }
 
 /** Releases resources owned by `Scope`.
-    `Scope` groups managed allocations by lifetime; balanced retain/release
+    `Scope` groups managed allocations by lifetime; balanced open/close
     and push/pop boundaries remain caller responsibilities.
 */
 void Scope_shutdown(void) {
@@ -67,8 +67,6 @@ static void _initialize(void) {
     _raw_fatal("operation attempted after shutdown");
   const char *accounting = getenv("X2C_SCOPE_ACCOUNTING");
   scope_accounting = accounting && strcmp(accounting, "1") == 0;
-  ScopeThreadState state = _thread();
-  state.active = state.base_slot;
   scope_state = <running>;
   if (atexit(Scope_shutdown))
     _raw_fatal("could not register shutdown handler");

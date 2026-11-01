@@ -162,6 +162,12 @@ run_symbol_dump() {
       header = $0
       next
     }
+    # A new top-level expression after a value starts another key, even
+    # when its closing parentheses and arrow wrap onto a later line.
+    /^\(/ && keep && value != "" {
+      flush()
+      keep = 0
+    }
     keep {
       value = value (value ? " " : "") $0
     }

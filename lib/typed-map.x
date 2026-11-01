@@ -309,9 +309,8 @@ static unsigned _hash_int(int *key) => x2c_hash_word((unsigned) key[0]);
 static unsigned _hash_long(long *key) => x2c_hash_word((unsigned long) key[0]);
 
 /* A canonical String caches its content hash instead of walking bytes.
-   Keep production's zero normalization for identical hash inputs. Grouped
-   occupancy lives in control bytes; the normalized hash itself does not
-   mark an empty slot. */
+   Zero is normalized as `x2c_hash_word` does, so equal inputs hash equally
+   everywhere; grouped occupancy lives in control bytes, not in the hash. */
 static unsigned _hash_string(String *key) {
   unsigned hash = key[0].hash();
   return hash ? hash : -1;

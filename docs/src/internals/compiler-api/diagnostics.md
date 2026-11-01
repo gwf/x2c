@@ -34,11 +34,13 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.token_column`](#Compiler.token_column) | Returns `token`'s column in the file that holds it. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
 | [`Compiler.token_source`](#Compiler.token_source) | Returns the file that the line markers of a merged text give `token`, and sets `line` to the token's line in that file. |
+| [`Diagnostics.anonymous_macro_name`](#Diagnostics.anonymous_macro_name) | Reports whether `name` is the generated spelling of an anonymous macro definition, which the definition reader mints from the stem `anonymous_macro` and which has no source name. |
 | [`Diagnostics.c_macro_note`](#Diagnostics.c_macro_note) | Formats the note for an expansion of the C macro `name`, which the `(file line)` site defines. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
 | [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
 | [`Diagnostics.macro_definition_note`](#Diagnostics.macro_definition_note) | Formats a macro definition's recorded source location. |
 | [`Diagnostics.macro_expansion_input`](#Diagnostics.macro_expansion_input) | Removes captured-argument transport and source wrappers for a note. |
+| [`Diagnostics.macro_spelling`](#Diagnostics.macro_spelling) | Returns the name a diagnostic gives the macro `definition` reached from `invocation`. |
 | [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store that streams through `printer`. |
 | [`Diagnostics.reached_limit`](#Diagnostics.reached_limit) | Returns whether counted reports have reached the positive limit. |
 | [`Diagnostics.release`](#Diagnostics.release) | Restores the streaming saved by `hold`. |
@@ -299,6 +301,17 @@ Source: `src/diagnostics.x`
 
 ### `Diagnostics`
 
+<a id="Diagnostics.anonymous_macro_name"></a>
+#### Diagnostics.anonymous_macro_name
+
+`int Diagnostics.anonymous_macro_name(String name)`
+
+Reports whether `name` is the generated spelling of an anonymous macro
+definition, which the definition reader mints from the stem
+`anonymous_macro` and which has no source name.
+
+Source: `src/diagnostics.x`
+
 <a id="Diagnostics.c_macro_note"></a>
 #### Diagnostics.c_macro_note
 
@@ -347,6 +360,18 @@ Source: `src/diagnostics.x`
 `Var Diagnostics.macro_expansion_input(List input)`
 
 Removes captured-argument transport and source wrappers for a note.
+
+Source: `src/diagnostics.x`
+
+<a id="Diagnostics.macro_spelling"></a>
+#### Diagnostics.macro_spelling
+
+`String Diagnostics.macro_spelling(List definition, Token invocation)`
+
+Returns the name a diagnostic gives the macro `definition` reached from
+`invocation`. A named definition is spelled as its source names it. An
+anonymous definition has no source name, so the invocation that reached
+it, a keyword alias or a `$name` decorator, names it instead.
 
 Source: `src/diagnostics.x`
 

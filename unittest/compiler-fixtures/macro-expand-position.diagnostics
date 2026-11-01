@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-expand-position.x:2:3: macro: macro '_x2c_gensym_anonymous_macro_0' has result kind Field and cannot be invoked at block scope
+unittest/compiler-fixtures/macro-expand-position.x:2:3: macro: macro 'expand' has result kind Field and cannot be invoked at block scope
     expand %()
     ^^^^^^
 

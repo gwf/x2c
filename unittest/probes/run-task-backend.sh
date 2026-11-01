@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Optional: native stack geometry/guards, ASan UAR, and unsupported fallback.
+# Optional: native stack geometry/guards, ASan UAR, and the unsupported target.
 # Use an existing supported native build. CC may select another installed target.
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
