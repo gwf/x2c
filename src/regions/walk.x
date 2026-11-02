@@ -136,13 +136,20 @@ static int _region_call(Walk &w, String callee, List arguments) {
       Fact slot = _slot(w, arguments.cadr());
       Region owner = (fact && fact.empty) || _empty(arguments.car())
         ? _owner(w, slot) : _allocate_in(w, slot);
-      if (fact) _move(fact, owner);
+      if (fact && _moves_whole(w, callee, arguments.car())) _move(fact, owner);
     }
     case %(exit): if (fact) _move(fact, NULL);
     default: return 0;
   }
   return 1;
 }
+
+/* Scope.move relinks the one allocation it is given, so a container keeps
+   its buffers in the region that allocated them; `move_to` moves them
+   all. */
+static int _moves_whole(Walk &w, String callee, Var value) =>
+  callee != "Scope_move" ||
+  _value_class(w, _expression_type(value)) != <container>;
 
 // defers and restored places
 
@@ -298,8 +305,7 @@ static void _store(Walk &w, Var target, Var value) {
    once, and the receiving local does not carry the region further. */
 static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
   _scan(w, value, 0);
-  Fact source = _value_fact(w, value, NULL);
-  if (!source) source = _returned_argument(w, value, NULL);
+  Fact source = _received(w, value, type, NULL);
   int born = 0;
   Region other = source ? source.other : NULL;
   Acquired acquired = NULL;

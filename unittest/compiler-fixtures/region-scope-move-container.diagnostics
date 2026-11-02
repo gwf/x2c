@@ -1,0 +1,15 @@
+unittest/compiler-fixtures/region-scope-move-container.x:8:5: region: 'values' can outlive the region it was allocated in when returned
+      return values;
+      ^^^^^^
+  note: region opened at line 5
+
+unittest/compiler-fixtures/region-scope-move-container.x:17:5: region: 'names' can outlive the region it was allocated in when returned
+      return names;
+      ^^^^^^
+  note: region opened at line 14
+
+unittest/compiler-fixtures/region-scope-move-container.x:26:5: region: 'text' can outlive the region it was allocated in when returned
+      return text;
+      ^^^^^^
+  note: region opened at line 23
+

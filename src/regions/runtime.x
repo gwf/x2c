@@ -12,8 +12,9 @@
    (free scope) also requires Scope storage; (alloc moved) is a Scope
    allocation that ends its first argument; (destroy) ends a Scope local's
    storage; (open KIND) and (close KIND) bracket a region; (move) and
-   (exit) hand their argument to another owner; (summary OWNER SINKS) is a
-   literal summary. */
+   (exit) hand their argument to another owner, though Scope_move hands
+   over only a container's record; (summary OWNER SINKS) is a literal
+   summary. */
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
@@ -24,7 +25,12 @@ static Map runtime = %{
   "String_new_fill": (alloc pool),
   "Block_new": (alloc),              "Bytes_new": (alloc),
   "Array_new": (alloc),              "Map_new": (alloc),
-  "Buffer_new": (alloc),
+  "Buffer_new": (alloc),             "Map_new_capacity": (alloc),
+  "Array_copy": (alloc),             "Array_concat": (alloc),
+  "Array_getslice": (alloc),         "Array_remslice": (alloc),
+  "Array_splice": (alloc),           "Array_map": (alloc),
+  "Array_map2": (alloc),             "Map_copy": (alloc),
+  "List_array": (alloc),
   "Scope_malloc_in": (alloc slot),   "Scope_calloc_in": (alloc slot),
   "Scope_memdup_in": (alloc slot),   "Scope_malloc_finalized_in": (alloc slot),
   "cons": (pool),                    "Var_cons": (pool),
@@ -46,6 +52,9 @@ static Map runtime = %{
   "short_var": (summary 0 ()),        "ushort_var": (summary 0 ()),
   "float_var": (summary 0 ()),        "double_var": (summary 0 ()),
   "long_var": (alloc),                "Var_box_long": (alloc),
+  "ulong_var": (alloc),               "Var_box_ulong": (alloc),
+  "Var_box_long_long": (alloc),       "Var_box_ulong_long": (alloc),
+  "Var_box_long_double": (alloc),     "Var_clone_wide": (alloc),
   "Func_var": (wrap),
   "List_car": (summary 0 ((0 return))),
   "List_cdr": (summary 0 ((0 return))),
@@ -71,8 +80,11 @@ static Map runtime = %{
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_open": (open scope),      "Scope_close": (close scope),
   "Pool_open": (open pool),          "Pool_close": (close pool),
+  "Pool_open_named": (open pool),
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),
+  "Block_move_to": (move),           "Buffer_move_to": (move),
+  "Map_move_to": (move),             "Var_move_wide_to": (move),
   "List_promote": (exit),            "String_promote": (exit),
   "Atom_promote": (exit),
   "Var_as_iter": (wrap),             "Iter_var": (wrap),
@@ -153,12 +165,12 @@ static Map runtime = %{
 };
 
 /* Runtime operations with a pooled result that the pass does not read:
-   the table has no row for most, and the row for Array_list_free is its
-   argument effect. A copy such as String_concat keeps none of its
-   arguments, and Atom_intern may return a value that already exists. */
+   the table has no row for most, and the rows for Array_list_free and
+   String_add state their argument effects. String_add may return an
+   operand unchanged, and Atom_intern a value that already exists. */
 static Map pooled_results = %{
   "Array_list_free": 1, "Atom_intern": 1, "List_append": 1,
-  "String_concat": 1,   "String_join": 1
+  "String_add": 1,      "String_join": 1
 };
 
 /** The owner of the storage the runtime operation `name` returns: `<scope>`
