@@ -155,19 +155,20 @@ List Compiler.func_call_parts(Compiler c, Var content) {
 // Iter chains
 
 /** Completes an eligible resolved `Iter` call chain for immediate consumption.
-    It accepts only a typed identifier call of the form
-    `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
-    the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
-    completed recursively; a call missing only that last formal receives the
-    hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+    It accepts a typed call `(expr R (call (expr F C) (args A)))` whose
+    callee type `F` resolves to a function, or a pointer to one, with formals
+    `P`, where `R` and the last formal in `P` canonicalize to `Iter`. `Iter`
+    arguments are completed recursively; a call missing only that last formal
+    receives the hidden destination. Variadic calls and `Iter_unzip` are
+    returned unchanged.
 */
 List Compiler.complete_iter_chain(Compiler c, List expression) {
+  List parameters = NULL;
   match (expression)
-    case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
-                                      (ident ?binding))),
-                 *arguments):
+    case $called(%(!set ?callee (expr ?type ?)), *arguments)
+        if (c.sym.resolve_key(type).function_parts(parameters, NULL)):
       return _complete_iter_call(
-        c, expression, callee, arguments, parameters, binding);
+        c, expression, callee, arguments, parameters);
   return expression;
 }
 
@@ -252,12 +253,12 @@ static List _slot_statements(List items) {
 
 static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,
-  List parameters, List binding) {
-  Type result = expression.cadr();
-  String name = Ast.binding_spelling(binding);
-  if (!_exact_iter_type(result) || name == "Iter_unzip" ||
+  List parameters) {
+  if (!_exact_iter_type(expression.cadr()) ||
       _parameters_variadic(parameters))
     return expression;
+  match (callee) case %(expr ? (ident ?binding)):
+    if (Ast.binding_spelling(binding) == "Iter_unzip") return expression;
   List formal = parameters, actual = arguments;
   int supplied = arguments.len(), expected = formal.len();
   if (!formal ||
