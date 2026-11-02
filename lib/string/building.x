@@ -34,16 +34,18 @@ String String.add(String str, String other) {
 }
 
 /** Returns a canonical `String` containing `count` copies of `str`.
-    `Null` or empty input, a nonpositive count, or an oversized result returns
-    NULL. A count of one returns `str` when it is already visible in the active
-    pool; a transient buffer is copied and interned instead.
-    Raises: `<alloc-fail>` while constructing a nonempty result.
+    `Null` or empty input, or a nonpositive count, returns NULL. A count of
+    one returns `str` when it is already visible in the active pool; a
+    transient buffer is copied and interned instead.
+    Raises: `<size-limit>` when the result cannot fit a `String`, or
+    `<alloc-fail>` while constructing a nonempty result.
 */
 meta native String String.repeat(String str, int count) {
   if (!str || !*str || count <= 0) return NULL;
   if (count == 1 && _is_active_canonical(str)) return str;
   int n = str.len();
-  if ((size_t) n > (size_t) (INT_MAX - 1) / (size_t) count) return NULL;
+  if ((size_t) n > (size_t) (INT_MAX - 1) / (size_t) count)
+    raise %(size-limit (operation "String.repeat") (count $count));
   size_t length = (size_t) n * (size_t) count;
   String string = String.malloc((int) length + 1), char *dst = string;
   for (int i = 0; i < count; i++) {
@@ -74,18 +76,17 @@ meta native String String.new_fill(char fill, int count) {
     `sep.join(parts)`. A null `sep` joins with nothing between elements.
     Empty elements contribute no bytes but still count as positions, so
     joining a split result with the same separator reproduces the original
-    text, adjacent separators included. `List` elements that are not `String`s
-    convert to the empty `String`.
-    Raises: `<alloc-fail>` when result storage cannot be allocated. A null or
-    empty `List`, or an oversized result, also returns NULL, the empty
-    `String`, without raising.
+    text, adjacent separators included. An element that is not a `String`
+    contributes what a `String` destination reads from it: its display text,
+    rendered once, or nothing for `Null`. A null or empty `List` returns
+    NULL, the empty `String`.
+    Raises: `<size-limit>` when the result cannot fit a `String`,
+    `<alloc-fail>` when result storage cannot be allocated, or a cause from
+    rendering an element.
 */
 meta native String String.join(String sep, List strings) {
-  if (!strings) return NULL;
-  int n = strings.len();
-  int sep_len = sep ? sep.len() : 0;
-  int total = _join_length(strings, n, sep_len);
-  if (total < 0) return NULL;
+  int sep_len = sep.len(), total = _join_length(strings, sep_len);
+  if (total < 0) return _join_rendered(strings, sep);
   if (total <= STRING_STACK_BYTES) {
     char bytes[STRING_STACK_BYTES];
     _join_into(bytes, strings, sep, sep_len);
@@ -155,18 +156,31 @@ String String.printf(String fmt, ...) {
   return _finish(string, n);
 }
 
-/* The joined length of the `n` elements, or -1 when it cannot fit a
-   String. */
-static int _join_length(List strings, int n, int sep_len) {
-  if (sep_len && (size_t) (n - 1) > (size_t) (INT_MAX - 1) / (size_t) sep_len)
-    return -1;
-  size_t total = (size_t) (n - 1) * (size_t) sep_len;
-  foreach (String str in strings) {
-    int length = str.len();
-    if ((size_t) length > (size_t) (INT_MAX - 1) - total) return -1;
-    total += (size_t) length;
+/* The joined length when every element is a `String`, or -1 when an element
+   must be rendered. A `String` is copied, never rendered, so measuring it
+   first cannot disagree with the bytes copied later. */
+static int _join_length(List strings, int sep_len) {
+  size_t total = 0;
+  for (List cell = strings; cell; cell = cell.cdr()) {
+    Var item = cell.car();
+    if (item is not <string>) return -1;
+    total += (size_t) item.string_payload().len();
+    if (cell.cdr()) total += (size_t) sep_len;
+    if (total > INT_MAX - 1) raise %(size-limit (operation "String.join"));
   }
   return (int) total;
+}
+
+/* Renders each element once, so an element contributes exactly the text it
+   rendered, however long that turns out to be. */
+static String _join_rendered(List strings, String sep) {
+  Buffer out = auto Buffer.new(0);
+  for (List cell = strings; cell; cell = cell.cdr()) {
+    Var item = cell.car();
+    if (!item.is_null()) item.write_str(out);
+    if (sep && cell.cdr()) out.write(sep);
+  }
+  return out;
 }
 
 static void _join_into(char *out, List strings, String sep, int sep_len) {
