@@ -195,7 +195,8 @@ static void _preload_modules(Translation &t) {
 static Map _package_names(Translation &t, List roots) {
   Map names = {};
   foreach (String input in t.request.inputs) {
-    foreach (String name in _imported_packages(input)) names[name] = 1;
+    foreach (String name in _imported_packages(t.request.sources, input))
+      names[name] = 1;
     String depfile = %"$(_output_dir(t, input))/$(Path.stem(input)).d";
     String text = NULL;
     try text = Path.read_text(depfile);
@@ -209,11 +210,11 @@ static Map _package_names(Translation &t, List roots) {
 }
 
 /* The packages the top-level `import` declarations of the file at `path`
-   name. A token scan suffices: an import is legal only at file scope. */
-static List _imported_packages(String path) {
+   name. A token scan suffices: an import is legal only at file scope. A
+   file that cannot be read names none; its translation reports it. */
+static List _imported_packages(SourceView sources, String path) {
   String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return NULL;
+  if (!sources.read(path, text)) return NULL;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.scan();
   Array names = [], int depth = 0;

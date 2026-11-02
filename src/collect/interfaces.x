@@ -376,10 +376,7 @@ static String _source_hash(Compiler c, String path) {
   Var cached = source_hashes[path];
   if (cached is not void) return cached;
   String text = NULL;
-  try {
-    if (!c.read_source(path, text)) return NULL;
-  }
-  catch %((!or io-fail bad-arg size-limit) *): return NULL;
+  if (!c.read_source(path, text)) return NULL;
   String hash = _content_hash(text);
   _retain(path);
   _retain(hash);
