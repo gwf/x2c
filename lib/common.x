@@ -196,7 +196,7 @@ typedef struct X2CErrorSite {
   const char *file, *function, int line, runtime;
 } X2CErrorSite;
 
-/* Native source text must reach Error before allocator diagnostics allocate. */
+/* Pass native source text before allocator diagnostics allocate. */
 meta String x2c_invocation_file(void);
 meta int x2c_invocation_line(void);
 
@@ -205,7 +205,6 @@ meta List _error_native_file(void) {
   String literal = x2c_invocation_file().repr();
   return %(expr (* char) (literal (* char) $literal));
 }
-
 
 void x2c_error_raise_operation(
   const X2CErrorSite *site, Symbol code, const char *operation);

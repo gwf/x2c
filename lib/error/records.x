@@ -222,8 +222,8 @@ module void _record_operation(
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  List detail = _field(record.region, <operation>,
-    _site_text(record.region, operation), NULL);
+  List detail = _field(
+    record.region, <operation>, _site_text(record.region, operation), NULL);
   record.entry = _entry(record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
