@@ -1115,14 +1115,15 @@ Packed `Array`s cross a `Context` or `Thread` boundary like other values;
 gives the export rules.
 
 Compound update is native as well. `values[i] += 1`, `values[i] <<= 2`, and
-`values[i]++` compute in the element type and compile to the one instruction
-the operator names. Overflow wraps, a narrow element truncates a result too
-wide for it, and a signed right shift keeps the sign, as C does. Three
-failures are kept, since they turn a hardware trap into something you can
-catch: integer `/= 0` and `%= 0` raise `<div-zero>`, a shift count outside
-the element's width raises `<bad-shift>`, and `%` or a bitwise operator on a
-float element raises `<bad-types>`. Each raises before storing, so a failed
-update leaves the element as it was.
+`values[i]++` compute as C does for the element type and compile to the one
+instruction the operator names. The element promotes, overflow wraps, a
+narrow element truncates a result too wide for it, and a signed right shift
+keeps the sign. Three failures are kept, since they turn a hardware trap
+into something you can catch: integer `/= 0` and `%= 0` raise `<div-zero>`,
+a shift count outside the promoted width (`int`, or `long` for `ArrayLong`)
+raises `<bad-shift>`, and `%` or a bitwise operator on a float element
+raises `<bad-types>`. Each raises before storing, so a failed update leaves
+the element as it was. These are the rules a `Var` update follows.
 
 An `ArrayChar` *store* loop has an extra cost: it cannot keep the element base
 in a register, because a byte store may alias any object, including that base.
