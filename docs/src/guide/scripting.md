@@ -531,7 +531,8 @@ A `Regex` is freed by the scope that made it, like any class value. Matching
 backtracks, so a pattern with nested repetition such as `(a*)*b` can take
 time exponential in the text; write the repetition once. A repeated byte or
 set, such as `\w*`, matches any length, but a repeated group such as
-`(?:ab)*` raises `<size-limit>` past 2,000 repetitions in one match.
+`(?:ab)*` raises `<size-limit>` past 2,000 repetitions in one match, or
+sooner on a smaller stack, such as a small task stack.
 
 ## Comparing text
 

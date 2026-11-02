@@ -171,7 +171,9 @@ static void http_route_captures_and_json_failure(void) {
   EXPECT_STR_EQ(res.headers["content-type"].str(), "application/json");
 }
 
-static String _response(Socket client, int &code) {
+/* Reads one response's status line and headers and returns its content
+   length. */
+static long _head(Socket client, int &code) {
   String status = client.input.readline();
   code = status ? atoi(status + 9) : 0;
   long length = 0;
@@ -180,8 +182,11 @@ static String _response(Socket client, int &code) {
     if (!line || !line.strip(NULL)) break;
     if (line.startswith("content-length:")) length = atol(line + 15);
   }
-  return client.input.readblock(length);
+  return length;
 }
+
+static String _response(Socket client, int &code) =>
+  client.input.readblock(_head(client, code));
 
 static void http_loopback(void) {
   $test.scoped();
@@ -199,6 +204,9 @@ static void http_loopback(void) {
   routes.get("/io-bug", %!(HttpRequest req, HttpResponse res) => {
     res.status(201).text("partial");
     raise %(io-fail (errno 5));
+  });
+  routes.get("/head", %!(HttpRequest req, HttpResponse res) => {
+    res.text("visible");
   });
   routes.route(<head>, "/head", %!(HttpRequest req, HttpResponse res) => res.text("hidden"));
   routes.files("/", directory);
@@ -244,9 +252,15 @@ static void http_loopback(void) {
   EXPECT_STR_EQ(_response(client, code), "{\"error\":\"internal server error\"}");
   EXPECT_INT_EQ(code, 500);
   client.output.puts("HEAD /head HTTP/1.1\r\nHost: x\r\n\r\nGET /notes/two HTTP/1.1\r\nHost: x\r\n\r\n"); client.output.flush();
-  EXPECT_TRUE(client.input.readline().contains("200"));
-  while (client.input.readline().strip(NULL)) { }
+  EXPECT_INT_EQ(_head(client, code), 6);
+  EXPECT_INT_EQ(code, 200);
   EXPECT_STR_EQ(_response(client, code), "{\"id\":\"two\"}");
+  client.output.puts("HEAD /notes/three HTTP/1.1\r\nHost: x\r\n\r\n"
+                     "GET /notes/four HTTP/1.1\r\nHost: x\r\n\r\n");
+  client.output.flush();
+  EXPECT_INT_EQ(_head(client, code), 14);
+  EXPECT_INT_EQ(code, 200);
+  EXPECT_STR_EQ(_response(client, code), "{\"id\":\"four\"}");
   client.output.puts("GET /bug HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n"); client.output.flush();
   EXPECT_STR_EQ(_response(client, code), "{\"error\":\"internal server error\"}");
   EXPECT_INT_EQ(code, 500);
