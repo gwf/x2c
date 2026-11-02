@@ -207,7 +207,7 @@ static Type _update_rhs(Compiler c, Type participant, Type signature) {
    together, as lambda bridges do. */
 static String _helper_name(Compiler c, String stem, int exported) {
   String name = %"_x2c_gensym_$stem";
-  return exported ? %"$(name)_$("%08x".printf(c.filename.hash()))" : name;
+  return exported ? %"$(name)_$(Path.identifier_hash(c.filename))" : name;
 }
 
 static void _publish_update(Compiler c, List helper, List syntax) {
