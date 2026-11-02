@@ -589,9 +589,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Returns the first element accepted by `pred`'s ordinary `Var` truth,
-      or `void` when absent. A null array or predicate returns `void`.
-      Elements are boxed as in iteration; the array and its storage are
-      unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+      or `void` when absent. A null or empty array returns `void` without
+      invoking or checking `pred`. Elements are boxed as in iteration; the
+      array and its storage are unchanged.
+      Raises: `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+      array, or any cause from boxing, `pred`, or its result's truth
       operation.
   */
   Var $array.find($array array, Func pred) {

@@ -233,12 +233,15 @@ meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
 
     The source and its storage, `dest`, and any dynamic or captured `fn` must
     remain valid while the result is used. Constructing the iterator does not
-    invoke `fn`. Pulling may raise whatever `Func.apply`, the source, or `fn`
-    raises, including `<void-op>` when `fn` returns `void` and the iterator
-    rejects it as an element. A null `fn` or `dest` returns NULL.
+    invoke `fn`. A null `fn` raises `<bad-arg>` on the first invocation, after
+    the source element has been consumed. An empty source does not invoke or
+    check `fn`. A null `dest` returns NULL.
+    Raises: whatever the source, `Func.apply`, or `fn` raises while pulling,
+    including `<void-op>` when `fn` returns `void` and the iterator rejects it
+    as an element.
 */
 meta native Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
-  if (!dest || !fn) return NULL;
+  if (!dest) return NULL;
   dest.init(iter, _scan_next, seed);
   dest.aux = fn;
   return dest;
@@ -276,16 +279,19 @@ meta native Iter Iter.zip(Iter left, Iter right, Iter dest) =>
 
 /** Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
     The strict form of `Iter.zip_with`. Behavior is identical, except that a
-    null `fn` returns NULL instead of yielding pairs. Use it when a missing
-    callback should fail at construction instead of changing the element
-    type.
+    null `fn` raises `<bad-arg>` when the first pair forms, after both of its
+    values have been consumed, instead of yielding pairs. Use it when a
+    missing callback should fail instead of changing the element type.
 
-    The sources, destination, callback lifetime, value passing, and pull-time
-    failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
+    The sources, destination, callback lifetime, value passing, and other
+    pull-time failures are those of `Iter.zip_with`, so a pull that forms no
+    pair does not invoke or check `fn`. A null `dest` returns NULL.
 */
 meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
-  if (!fn) return NULL;
-  return left.zip_with(right, fn, dest);
+  if (!dest) return NULL;
+  dest.init(left, _map2_next, right);
+  dest.aux = fn;
+  return dest;
 }
 
 /** Returns a lazy iterator over `fn(left, right)`, applied pairwise.
@@ -494,32 +500,27 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 /** Reports whether any remaining element satisfies `pred`.
     Stops at the first element the predicate accepts, so the iterator is left
     positioned after it and the rest is never pulled. Returns 0 for an empty
-    iterator. Elements are passed as values and the result uses ordinary `Var`
-    truthiness.
-    Raises: whatever the source, `Func.apply`, or `pred` raises. Returns 0 for
-    a null `pred`.
+    iterator without invoking or checking `pred`. Elements are passed as
+    values and the result uses ordinary `Var` truthiness. A null `pred` raises
+    `<bad-arg>` on the first invocation, after the first element has been
+    consumed.
+    Raises: whatever the source, `Func.apply`, or `pred` raises.
 */
 int Iter.any(Iter iter, Func pred) {
-  if (!pred) return 0;
   foreach (Var item in iter) if (pred.apply_value(item)) return 1;
   return 0;
 }
 
 /** Reports whether every remaining element satisfies `pred`.
-    Vacuously true for an empty iterator, decided before `pred` is consulted.
+    Vacuously true for an empty iterator, without invoking or checking `pred`.
     Otherwise it stops at the first element the predicate rejects and returns
     0, leaving the rest unconsumed. Elements are passed as values and the
-    result uses ordinary `Var` truthiness.
-    Raises: whatever the source, `Func.apply`, or `pred` raises. For a null
-    `pred`, returns 1 for an empty iterator and 0 for any other.
+    result uses ordinary `Var` truthiness. A null `pred` raises `<bad-arg>` on
+    the first invocation, after the first element has been consumed.
+    Raises: whatever the source, `Func.apply`, or `pred` raises.
 */
 int Iter.all(Iter iter, Func pred) {
-  Var item;
-  if (!iter.try_next(item)) return 1;
-  if (!pred) return 0;
-  do
-    if (!pred.apply_value(item)) return 0;
-  while (iter.try_next(item));
+  foreach (Var item in iter) if (!pred.apply_value(item)) return 0;
   return 1;
 }
 
@@ -527,11 +528,12 @@ int Iter.all(Iter iter, Func pred) {
     `void`. Stops as soon as it finds one, so the iterator can be pulled
     further for the elements after the match. `void` means "no element
     matched", which is unambiguous because no iterator may yield `void`.
-    Elements are passed as values. Raises: whatever the source, `Func.apply`,
-    or `pred` raises. A null `pred` returns `void`.
+    Elements are passed as values. An empty iterator returns `void` without
+    invoking or checking `pred`; a null `pred` raises `<bad-arg>` on the first
+    invocation, after the first element has been consumed.
+    Raises: whatever the source, `Func.apply`, or `pred` raises.
 */
 Var Iter.find(Iter iter, Func pred) {
-  if (!pred) return void;
   foreach (Var item in iter) if (pred.apply_value(item)) return item;
   return void;
 }
@@ -714,7 +716,6 @@ static int _filter_next(Iter iter, Var *out) {
   return 0;
 }
 
-/* The required callback is installed before the iterator is exposed. */
 static int _scan_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   Var item;
@@ -736,13 +737,26 @@ static int _accumulate_next(Iter iter, Var *out) {
 // pairing stages
 
 static int _zip_with_next(Iter iter, Var *out) {
+  if (iter.aux) return _map2_next(iter, out);
+  Var left, right;
+  if (!_zip_pull(iter, left, right)) return 0;
+  *out = $(left, right);
+  return 1;
+}
+
+/* A null callback raises through Func.apply once a pair forms. */
+static int _map2_next(Iter iter, Var *out) {
+  Var left, right;
+  if (!_zip_pull(iter, left, right)) return 0;
+  *out = iter.aux.apply_values(left, right);
+  return 1;
+}
+
+/* Pulls the left value first; a missing right source pulls neither. */
+static int _zip_pull(Iter iter, Var &left, Var &right) {
   Iter left_iter = iter.obj, right_iter = iter.state;
   if (!right_iter) return 0;
-  Var left, right;
-  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  if (iter.aux) *out = iter.aux.apply_values(left, right);
-  else *out = $(left, right);
-  return 1;
+  return left_iter.try_next(left) && right_iter.try_next(right);
 }
 
 static int _enumerate_next(Iter iter, Var *out) {

@@ -61,13 +61,13 @@ Source: `lib/iter.x`
 `int Iter.all(Iter iter, Func pred)`
 
 Reports whether every remaining element satisfies `pred`.
-Vacuously true for an empty iterator, decided before `pred` is consulted.
+Vacuously true for an empty iterator, without invoking or checking `pred`.
 Otherwise it stops at the first element the predicate rejects and returns
 0, leaving the rest unconsumed. Elements are passed as values and the
-result uses ordinary `Var` truthiness.
+result uses ordinary `Var` truthiness. A null `pred` raises `<bad-arg>` on
+the first invocation, after the first element has been consumed.
 
-**Raises:** whatever the source, `Func.apply`, or `pred` raises. For a null
-`pred`, returns 1 for an empty iterator and 0 for any other.
+**Raises:** whatever the source, `Func.apply`, or `pred` raises.
 
 Source: `lib/iter.x`
 
@@ -79,11 +79,12 @@ Source: `lib/iter.x`
 Reports whether any remaining element satisfies `pred`.
 Stops at the first element the predicate accepts, so the iterator is left
 positioned after it and the rest is never pulled. Returns 0 for an empty
-iterator. Elements are passed as values and the result uses ordinary `Var`
-truthiness.
+iterator without invoking or checking `pred`. Elements are passed as
+values and the result uses ordinary `Var` truthiness. A null `pred` raises
+`<bad-arg>` on the first invocation, after the first element has been
+consumed.
 
-**Raises:** whatever the source, `Func.apply`, or `pred` raises. Returns 0 for
-a null `pred`.
+**Raises:** whatever the source, `Func.apply`, or `pred` raises.
 
 Source: `lib/iter.x`
 
@@ -162,8 +163,11 @@ Returns the first element accepted by `pred`'s `Var` truthiness, else
 `void`. Stops as soon as it finds one, so the iterator can be pulled
 further for the elements after the match. `void` means "no element
 matched", which is unambiguous because no iterator may yield `void`.
-Elements are passed as values. Raises: whatever the source, `Func.apply`,
-or `pred` raises. A null `pred` returns `void`.
+Elements are passed as values. An empty iterator returns `void` without
+invoking or checking `pred`; a null `pred` raises `<bad-arg>` on the first
+invocation, after the first element has been consumed.
+
+**Raises:** whatever the source, `Func.apply`, or `pred` raises.
 
 Source: `lib/iter.x`
 
@@ -251,12 +255,13 @@ Source: `lib/iter.x`
 
 Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
 The strict form of `Iter.zip_with`. Behavior is identical, except that a
-null `fn` returns NULL instead of yielding pairs. Use it when a missing
-callback should fail at construction instead of changing the element
-type.
+null `fn` raises `<bad-arg>` when the first pair forms, after both of its
+values have been consumed, instead of yielding pairs. Use it when a
+missing callback should fail instead of changing the element type.
 
-The sources, destination, callback lifetime, value passing, and pull-time
-failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
+The sources, destination, callback lifetime, value passing, and other
+pull-time failures are those of `Iter.zip_with`, so a pull that forms no
+pair does not invoke or check `fn`. A null `dest` returns NULL.
 
 Source: `lib/iter.x`
 
@@ -365,9 +370,13 @@ That prints 1, 3, 6, and 10; the seed 0 never appears.
 
 The source and its storage, `dest`, and any dynamic or captured `fn` must
 remain valid while the result is used. Constructing the iterator does not
-invoke `fn`. Pulling may raise whatever `Func.apply`, the source, or `fn`
-raises, including `<void-op>` when `fn` returns `void` and the iterator
-rejects it as an element. A null `fn` or `dest` returns NULL.
+invoke `fn`. A null `fn` raises `<bad-arg>` on the first invocation, after
+the source element has been consumed. An empty source does not invoke or
+check `fn`. A null `dest` returns NULL.
+
+**Raises:** whatever the source, `Func.apply`, or `fn` raises while pulling,
+including `<void-op>` when `fn` returns `void` and the iterator rejects it
+as an element.
 
 Source: `lib/iter.x`
 

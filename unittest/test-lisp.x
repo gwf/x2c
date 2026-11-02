@@ -1826,6 +1826,19 @@ static void lisp_standard_environment_uses_library_operations(void) {
     lisp, "(Iter.next (Iter.filter (range 1 3 1) nil))"), <bad-arg>);
   EXPECT_INT_EQ(_raised_code(
     lisp, "(Iter.foldl (range 1 3 1) 0 nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.any '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.all '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.find '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.any (range 1 3 1) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.scan (range 1 3 1) 0 nil))"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.map2 (range 1 3 1) (range 1 3 1) nil))"),
+    <bad-arg>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.any '() nil)")), 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.all '() nil)")), 1);
+  EXPECT_TRUE(_ev(lisp, "(List.find '() nil)") is void);
   EXPECT_INT_EQ(Var.integer(
     _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
@@ -1834,8 +1847,9 @@ static void lisp_standard_environment_uses_library_operations(void) {
     "(Array.find (List.array '(0 20)) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
     "(Array.index (List.array '(0 20)) 20)")), 1);
-  EXPECT_TRUE(_ev(lisp,
-    "(Array.find (List.array '(0 20)) nil)") is void);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Array.find (List.array '(0 20)) nil)"), <bad-arg>);
+  EXPECT_TRUE(_ev(lisp, "(Array.find (List.array '()) nil)") is void);
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),
