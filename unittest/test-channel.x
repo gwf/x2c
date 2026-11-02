@@ -1,6 +1,7 @@
 /*  test-channel.x -- ownership-neutral transport and stop commitment */
 
 #include "test-support.x"
+#include "test.x"
 #include "test-macros.x"
 #include "channel.x"
 #include "typed-array.x"
@@ -84,16 +85,11 @@ static void channel_rejects_invalid_construction(void) {
 static void channel_null_handle_contract(void) {
   Channel channel = NULL;
   String raised = NULL;
-  try channel.scope();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try channel.send(1);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try channel.receive();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try channel.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try channel.free();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, channel.scope());
+  $record_raise(raised, channel.send(1));
+  $record_raise(raised, channel.receive());
+  $record_raise(raised, channel.close());
+  $record_raise(raised, channel.free());
   EXPECT_STR_EQ(
     raised,
     "bad-arg Channel.scope; bad-arg Channel.send; bad-arg Channel.receive; ");

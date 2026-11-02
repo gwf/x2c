@@ -1,6 +1,7 @@
 /*  test-mutex.x -- native Mutex tests */
 
 #include "test-support.x"
+#include "test.x"
 
 static void mutex_lock_try_unlock(void) {
   Mutex mutex = Mutex.new();
@@ -47,16 +48,11 @@ static void mutex_system_lock_failed_acquisition(void) {
 static void mutex_null_handle_contract(void) {
   Mutex mutex = NULL;
   String raised = NULL;
-  try mutex.lock();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try mutex.try_lock();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try mutex.unlock();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try mutex.free();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try mutex.cleanup();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, mutex.lock());
+  $record_raise(raised, mutex.try_lock());
+  $record_raise(raised, mutex.unlock());
+  $record_raise(raised, mutex.free());
+  $record_raise(raised, mutex.cleanup());
   EXPECT_STR_EQ(
     raised,
     "bad-arg Mutex.lock; bad-arg Mutex.try_lock; bad-arg Mutex.unlock; ");

@@ -3,6 +3,7 @@
 #include "typed-array.x"
 #include "typed-map.x"
 #include "test-support.x"
+#include "test.x"
 #include <string.h>
 
 static void context_open_close_restores_scope(void) {
@@ -22,19 +23,13 @@ static void context_open_close_restores_scope(void) {
 static void context_null_handle_contract(void) {
   Context context = NULL;
   String raised = NULL;
-  try context.export(1);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try context.export_destination();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try context.owns(&raised);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try context.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try context.cleanup();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, context.export(1));
+  $record_raise(raised, context.export_destination());
+  $record_raise(raised, context.owns(&raised));
+  $record_raise(raised, context.close());
+  $record_raise(raised, context.cleanup());
   Context outer = Context.open(), inner = Context.open();
-  try outer.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, outer.close());
   inner.close();
   outer.close();
   EXPECT_STR_EQ(

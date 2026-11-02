@@ -3,6 +3,7 @@
 #include "path.x"
 #include "process.x"
 #include "test-support.x"
+#include "test.x"
 #include "test-macros.x"
 #include <errno.h>
 #include <fcntl.h>
@@ -262,34 +263,20 @@ static void process_null_job_contract(void) {
   Array pending = [];
   pending.push(NULL);
   String raised = NULL;
-  try job.pipe(%(cat));
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.options({dir: "/"});
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.live();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.run();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.start();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.status();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.check();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.output();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.lines();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.errors();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.kill(SIGTERM);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.ready();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try Job.wait_any(pending);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try job.cleanup();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, job.pipe(%(cat)));
+  $record_raise(raised, job.options({dir: "/"}));
+  $record_raise(raised, job.live());
+  $record_raise(raised, job.run());
+  $record_raise(raised, job.start());
+  $record_raise(raised, job.status());
+  $record_raise(raised, job.check());
+  $record_raise(raised, job.output());
+  $record_raise(raised, job.lines());
+  $record_raise(raised, job.errors());
+  $record_raise(raised, job.kill(SIGTERM));
+  $record_raise(raised, job.ready());
+  $record_raise(raised, Job.wait_any(pending));
+  $record_raise(raised, job.cleanup());
   EXPECT_STR_EQ(
     raised,
     "bad-arg Job.pipe; bad-arg Job.options; bad-arg Job.live; "

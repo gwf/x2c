@@ -559,12 +559,12 @@ static Thread _new_handle(
   ThreadFn function, const void *input, size_t input_size) {
   size_t input_offset = _input_offset();
   if (input_size > SIZE_MAX - input_offset)
-    raise %(size-limit (operation "Thread.run"));
+    raise %(size-limit (operation "Thread.start_raw"));
   void *policy = Error.policy_capture();
   Thread thread = calloc(1, input_offset + input_size);
   if (!thread) {
     Error.policy_release(policy);
-    raise %(alloc-fail (operation "Thread.run"));
+    raise %(alloc-fail (operation "Thread.start_raw"));
   }
   thread.policy = policy;
   thread.function = function;

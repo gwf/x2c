@@ -1,6 +1,7 @@
 /*  test-http.x -- HTTP parsing, routing, responses, and loopback service */
 #include "http.x"
 #include "test-support.x"
+#include "test.x"
 #include "test-macros.x"
 #include <time.h>
 
@@ -338,16 +339,11 @@ static void http_close_twice_is_harmless(void) {
 static void http_null_server_contract(void) {
   HttpServer server = NULL;
   String raised = NULL;
-  try server.port();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try server.serve();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try server.start();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try server.stop();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try server.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, server.port());
+  $record_raise(raised, server.serve());
+  $record_raise(raised, server.start());
+  $record_raise(raised, server.stop());
+  $record_raise(raised, server.close());
   EXPECT_STR_EQ(
     raised,
     "bad-arg HttpServer.port; bad-arg HttpServer.serve; "

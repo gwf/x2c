@@ -2,6 +2,7 @@
 
 #include "net.x"
 #include "test-support.x"
+#include "test.x"
 #include "test-macros.x"
 #include <errno.h>
 #include <time.h>
@@ -142,26 +143,16 @@ static void net_null_handle_contract(void) {
   Listener listener = NULL;
   Socket socket = NULL;
   String raised = NULL;
-  try listener.accept();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try listener.port();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try listener.stop();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try listener.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try listener.cleanup();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try socket.set_timeout(10);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try socket.shutdown_write();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try socket.peer();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try socket.close();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try socket.cleanup();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, listener.accept());
+  $record_raise(raised, listener.port());
+  $record_raise(raised, listener.stop());
+  $record_raise(raised, listener.close());
+  $record_raise(raised, listener.cleanup());
+  $record_raise(raised, socket.set_timeout(10));
+  $record_raise(raised, socket.shutdown_write());
+  $record_raise(raised, socket.peer());
+  $record_raise(raised, socket.close());
+  $record_raise(raised, socket.cleanup());
   EXPECT_STR_EQ(
     raised,
     "bad-arg Listener.accept; bad-arg Listener.port; "

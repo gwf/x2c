@@ -207,6 +207,10 @@ $map.typed.publish(
   _box_string, _box_int,
   _prepare_string_int_export);
 
+$grouped.finder(
+  MapStringInt, Substr, struct MapStringIntRecord, find_substr,
+  _string_int_key, _equal_substr, 0);
+
 // compile-time conversions
 
 /* Compile-time code reaches the typed-map conversions through these literal
@@ -232,29 +236,16 @@ int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
   if ((void *) map == NULL) _bad_arg("MapStringInt");
   unsigned hash = key.hash();
   if (!hash) hash = -1;
-  unsigned char *controls = map.hashes;
-  struct MapStringIntRecord *entries = map.entries;
-  unsigned group_mask = map.mask >> 4, group = hash & group_mask;
-  unsigned lanes = map.capacity < 16 ? (1u << map.capacity) - 1 : 65535u;
-  unsigned char fingerprint = hash >> 25;
-  const char *bytes = key.length
-    ? (const char *) key.source + key.offset : NULL;
-  for (unsigned step = 0; step <= group_mask; step++) {
-    unsigned start = group * 16;
-    unsigned matches =
-      x2c_map_group_match(controls + start, fingerprint) & lanes;
-    if (matches) __builtin_prefetch(entries + start, 0, 3);
-    while (matches) {
-      unsigned index = start + __builtin_ctz(matches);
-      if (entries[index].key.len() == key.length &&
-          (!key.length || memcmp(entries[index].key, bytes, key.length) == 0))
-        return _update_int(&entries[index].val, <+>, count);
-      matches &= matches - 1;
-    }
-    if (x2c_map_group_match(controls + start, 128) & lanes) break;
-    group = (group + step + 1) & group_mask;
-  }
+  long index = map.find_substr(&key, hash);
+  if (index >= 0)
+    return _update_int(_string_int_value(map, index), <+>, count);
   return map.updateindex(key, <+>, count);
+}
+
+static int _equal_substr(String *stored, Substr *key) {
+  if (stored[0].len() != key.length) return 0;
+  return !key.length ||
+    memcmp(stored[0], (const char *) key.source + key.offset, key.length) == 0;
 }
 
 static void _bad_arg(String owner) {

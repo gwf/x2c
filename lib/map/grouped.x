@@ -8,6 +8,35 @@
     below 65536 buckets, then in the control Block's owned storage.
 */
 
+/* Shares grouped control-byte probing between ordinary native keys and
+   borrowed key views. Equality and record access stay with their owners. */
+macro Unit $grouped.finder(
+  Type $map, Type $key, Type $entry, Name $name, Name $key_at,
+  Name $key_equal, Literal $side_hashes
+) {
+  static long $map.$name($map map, $key *key, unsigned key_hash) {
+    unsigned char *controls = map.hashes;
+    $entry *entries = map.entries;
+    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
+    unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
+    unsigned char fingerprint = key_hash >> 25;
+    for (unsigned step = 0; step <= group_mask; step++) {
+      unsigned start = group * 16;
+      unsigned matches = x2c_map_group_match(controls + start, fingerprint);
+      if (matches) __builtin_prefetch(entries + start, 0, 3);
+      while (matches) {
+        unsigned index = start + __builtin_ctz(matches);
+        if ((!$side_hashes || full_hashes[index] == key_hash) &&
+            $key_equal($key_at(map, index), key)) return (long) index;
+        matches &= matches - 1;
+      }
+      if (x2c_map_group_match(controls + start, 128)) return -1;
+      group = (group + step + 1) & group_mask;
+    }
+    return -1;
+  }
+}
+
 /* A family keeps the complete key hash one of three ways: cached in record
    padding, beside the controls as side hashes (Var Map and Pool), or
    recomputed through its existing key hash. These inline operations let one
@@ -102,27 +131,8 @@ macro Unit $map.grouped.storage.family(
     return map;
   }
 
-  static long $map.find_hashed($map map, $key *key, unsigned key_hash) {
-    unsigned char *controls = map.hashes;
-    $entry *entries = map.entries;
-    unsigned *full_hashes = $side_hashes ? map.full_hashes() : NULL;
-    unsigned group_mask = map.mask >> 4, group = key_hash & group_mask;
-    unsigned char fingerprint = key_hash >> 25;
-    for (unsigned step = 0; step <= group_mask; step++) {
-      unsigned start = group * 16;
-      unsigned matches = x2c_map_group_match(controls + start, fingerprint);
-      if (matches) __builtin_prefetch(entries + start, 0, 3);
-      while (matches) {
-        unsigned index = start + __builtin_ctz(matches);
-        if ((!$side_hashes || full_hashes[index] == key_hash) &&
-            $key_equal($key_at(map, index), key)) return (long) index;
-        matches &= matches - 1;
-      }
-      if (x2c_map_group_match(controls + start, 128)) return -1;
-      group = (group + step + 1) & group_mask;
-    }
-    return -1;
-  }
+  $grouped.finder(
+    $map, $key, $entry, find_hashed, $key_at, $key_equal, $side_hashes);
 
   static long $map.find_index($map map, $key *key) =>
     map.find_hashed(key, $hash(key));

@@ -164,6 +164,16 @@ macro Stmt $expect_raises(Expr $cause, Stmt $statement) {
   }
 }
 
+/** Evaluates `action` and appends a raised cause and operation to `record`.
+    A normal return leaves `record` unchanged. Each error adds
+    `"cause operation; "`, for checking a sequence of call contracts.
+*/
+macro Stmt $record_raise(Name $record, Expr $action) {
+  try $action;
+  catch %(?code (operation ?op) *):
+    $record = %"$($record)$code $op; ";
+}
+
 /** Writes the entry point for a complete test program. */
 macro Unit $test.main() {
   int $x2c_ident("main")(int argc, char **argv) => Test.main(argc, argv);

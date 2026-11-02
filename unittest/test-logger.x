@@ -1,6 +1,7 @@
 /*  test-logger.x -- unit tests for logger filtering and delivery */
 
 #include "test-support.x"
+#include "test.x"
 #include "test-macros.x"
 #include "logger.x"
 
@@ -147,44 +148,25 @@ static void logger_null_handle_contract(void) {
   Logger logger = NULL;
   String raised = NULL;
   List events = NULL;
-  try logger.should_log(<info>, <test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.min_level();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.set_min_level(<info>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.add_sink(capture_emit, NULL, void);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.remove_sink(NULL);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.add_file_sink(stderr);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.add_memory_sink(&events);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.add_stderr_sink();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.sink_count();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.log(<info>, <test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.trace(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.debug(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.info(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.warn(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.error(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.fatal(<test>);
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.clear_sinks();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.flush();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try logger.free();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, logger.should_log(<info>, <test>));
+  $record_raise(raised, logger.min_level());
+  $record_raise(raised, logger.set_min_level(<info>));
+  $record_raise(raised, logger.add_sink(capture_emit, NULL, void));
+  $record_raise(raised, logger.remove_sink(NULL));
+  $record_raise(raised, logger.add_file_sink(stderr));
+  $record_raise(raised, logger.add_memory_sink(&events));
+  $record_raise(raised, logger.add_stderr_sink());
+  $record_raise(raised, logger.sink_count());
+  $record_raise(raised, logger.log(<info>, <test>));
+  $record_raise(raised, logger.trace(<test>));
+  $record_raise(raised, logger.debug(<test>));
+  $record_raise(raised, logger.info(<test>));
+  $record_raise(raised, logger.warn(<test>));
+  $record_raise(raised, logger.error(<test>));
+  $record_raise(raised, logger.fatal(<test>));
+  $record_raise(raised, logger.clear_sinks());
+  $record_raise(raised, logger.flush());
+  $record_raise(raised, logger.free());
   EXPECT_STR_EQ(
     raised,
     "bad-arg Logger.should_log; bad-arg Logger.min_level; "

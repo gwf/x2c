@@ -4,6 +4,7 @@
 #include "typed-map.x"
 #include "regex.x"
 #include "test-support.x"
+#include "test.x"
 #include <sched.h>
 #include <stdatomic.h>
 #include <stdint.h>
@@ -254,8 +255,8 @@ static void thread_input_size_overflow_is_size_limit(void) {
   char input = 0;
   int selected = 0;
   try Thread.start_raw(_thread_aligned_input_worker, &input, SIZE_MAX);
-  catch %(size-limit): selected = 1;
-  catch %(alloc-fail): selected = 2;
+  catch %(size-limit (operation "Thread.start_raw")): selected = 1;
+  catch %(alloc-fail (operation "Thread.start_raw")): selected = 2;
   EXPECT_INT_EQ(selected, 1);
 }
 
@@ -609,12 +610,9 @@ static void thread_rejects_free_before_join_and_double_join(void) {
 static void thread_null_handle_contract(void) {
   Thread thread = NULL;
   String raised = NULL;
-  try thread.join();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try thread.stop();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  try thread.free();
-  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  $record_raise(raised, thread.join());
+  $record_raise(raised, thread.stop());
+  $record_raise(raised, thread.free());
   EXPECT_STR_EQ(raised, "bad-arg Thread.join; bad-arg Thread.stop; ");
 }
 
