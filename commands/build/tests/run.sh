@@ -138,6 +138,16 @@ grep -q 'Generated 1 C file' verbose.log
 grep -q '^x2c: run ' verbose.log
 "$X2C" run --plain -q -v run-output.x >quiet-verbose.out 2>quiet-verbose.log
 if grep -q '^x2c: run ' quiet-verbose.log; then exit 1; fi
+# A verbose build prints each unit's translate command as its dry run does.
+printf 'int one(void) { return 0; }\n' > verbose-one.x
+printf 'int one(void);\nint main(void) { return one(); }\n' > verbose-two.x
+for mode in '-###' -v; do
+  "$X2C" build "$mode" --build-dir verbose-bd -o verbose \
+    verbose-one.x verbose-two.x 2>"verbose$mode.log"
+  grep '^x2c: translate --out-dir' "verbose$mode.log" >"verbose$mode.lines"
+done
+[ "$(wc -l < verbose-v.lines | tr -d ' ')" = 2 ]
+cmp 'verbose-###.lines' verbose-v.lines
 
 # Native warnings use the x2c source unless generated-C locations are asked for.
 printf 'int main(void) { char *raw = "hello"; return raw == "hello"; }\n' > warning.x
