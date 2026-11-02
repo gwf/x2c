@@ -15,9 +15,12 @@ Growable text buffer with indentation support.
 | [`Buffer.move_to`](#Buffer.move_to) | Moves `buf` and both owned `Block`s into `scope`, keeping their identities. |
 | [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` whose `pad` method writes `padding` spaces. |
 | [`Buffer.pop`](#Buffer.pop) | Pops one indentation depth from `buf`'s stack when present. |
+| [`Buffer.printf`](#Buffer.printf) | Appends formatted text to `buf`. |
 | [`Buffer.push`](#Buffer.push) | Pushes the current column as a later indentation depth. |
+| [`Buffer.str`](#Buffer.str) | Returns a canonical copy of `buf`'s text without consuming the `Buffer`. |
 | [`Buffer.truth`](#Buffer.truth) | Returns nonzero when `b` contains at least one byte. |
 | [`Buffer.try_get`](#Buffer.try_get) | Writes the byte at normalized `index` to `out` when it exists. |
+| [`Buffer.write`](#Buffer.write) | Appends NUL-terminated `text` to `buf`. |
 
 ### `Buffer`
 
@@ -82,6 +85,19 @@ Pops one indentation depth from `buf`'s stack when present.
 
 Source: `lib/buffer.x`
 
+<a id="Buffer.printf"></a>
+#### Buffer.printf
+
+`Self Buffer.printf(Self buf, const char *format, ...)`
+
+Appends formatted text to `buf`.
+
+**Raises:** `<format>` when formatting fails, `<alloc-fail>` when staging
+storage cannot be allocated, or a cause from `Buffer.write_len`. Existing
+text is preserved and this call appends nothing on failure.
+
+Source: `lib/buffer.x`
+
 <a id="Buffer.push"></a>
 #### Buffer.push
 
@@ -91,6 +107,20 @@ Pushes the current column as a later indentation depth.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` if the stack cannot grow. Failure
 leaves the stack unchanged.
+
+Source: `lib/buffer.x`
+
+<a id="Buffer.str"></a>
+#### Buffer.str
+
+`String Buffer.str(Buffer buf)`
+
+Returns a canonical copy of `buf`'s text without consuming the `Buffer`.
+A null or empty `Buffer` returns the null `String`. A nonempty result
+remains live until its owning `String` pool is released.
+
+**Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
+`<alloc-fail>` while canonicalizing it.
 
 Source: `lib/buffer.x`
 
@@ -114,6 +144,17 @@ output, or missing byte and leaves `out` unchanged.
 
 Source: `lib/buffer.x`
 
+<a id="Buffer.write"></a>
+#### Buffer.write
+
+`meta native Self Buffer.write(Self buf, const char *text)`
+
+Appends NUL-terminated `text` to `buf`.
+
+**Raises:** the same causes as `Buffer.write_len`.
+
+Source: `lib/buffer.x`
+
 ## Advanced and interop API
 
 | Function | Summary |
@@ -124,14 +165,11 @@ Source: `lib/buffer.x`
 | [`Buffer.newline`](#Buffer.newline) | Appends a newline to `buf`. |
 | [`Buffer.newline_indent`](#Buffer.newline_indent) | Appends a newline followed by current indentation. |
 | [`Buffer.pad`](#Buffer.pad) | Appends the configured number of padding spaces. |
-| [`Buffer.printf`](#Buffer.printf) | Appends formatted text to `buf`. |
 | [`Buffer.repr`](#Buffer.repr) | Returns the readable representation of `Buffer`. |
 | [`Buffer.reserve`](#Buffer.reserve) | Reserves room for at least `minimum` output bytes in `buf`. |
-| [`Buffer.str`](#Buffer.str) | Returns a canonical copy of `buf`'s text without consuming the `Buffer`. |
 | [`Buffer.str_free`](#Buffer.str_free) | Returns `buf.str()` and frees `buf`. |
 | [`Buffer.tabstop`](#Buffer.tabstop) | Returns the indentation depth on top of the stack, or 0 when empty. |
 | [`Buffer.unwrite`](#Buffer.unwrite) | Removes the final `count` bytes from `buf`. |
-| [`Buffer.write`](#Buffer.write) | Appends NUL-terminated `text` to `buf`. |
 | [`Buffer.write_char`](#Buffer.write_char) | Appends the non-NUL byte `value` to `buf`. |
 | [`Buffer.write_len`](#Buffer.write_len) | Appends `length` bytes from `text` to `buf`. |
 | [`Buffer.write_repeat`](#Buffer.write_repeat) | Appends `count` copies of the non-NUL byte `value` to `buf`. |
@@ -192,19 +230,6 @@ Appends the configured number of padding spaces.
 
 Source: `lib/buffer.x`
 
-<a id="Buffer.printf"></a>
-#### Buffer.printf
-
-`Self Buffer.printf(Self buf, const char *format, ...)`
-
-Appends formatted text to `buf`.
-
-**Raises:** `<format>` when formatting fails, `<alloc-fail>` when staging
-storage cannot be allocated, or a cause from `Buffer.write_len`. Existing
-text is preserved and this call appends nothing on failure.
-
-Source: `lib/buffer.x`
-
 <a id="Buffer.repr"></a>
 #### Buffer.repr
 
@@ -227,20 +252,6 @@ change the `Buffer` or content `Block` identity.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when the requested capacity
 cannot be provided.
-
-Source: `lib/buffer.x`
-
-<a id="Buffer.str"></a>
-#### Buffer.str
-
-`String Buffer.str(Buffer buf)`
-
-Returns a canonical copy of `buf`'s text without consuming the `Buffer`.
-A null or empty `Buffer` returns the null `String`. A nonempty result
-remains live until its owning `String` pool is released.
-
-**Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
-`<alloc-fail>` while canonicalizing it.
 
 Source: `lib/buffer.x`
 
@@ -273,17 +284,6 @@ Source: `lib/buffer.x`
 `meta native Self Buffer.unwrite(Self buf, size_t count)`
 
 Removes the final `count` bytes from `buf`.
-
-Source: `lib/buffer.x`
-
-<a id="Buffer.write"></a>
-#### Buffer.write
-
-`meta native Self Buffer.write(Self buf, const char *text)`
-
-Appends NUL-terminated `text` to `buf`.
-
-**Raises:** the same causes as `Buffer.write_len`.
 
 Source: `lib/buffer.x`
 
@@ -362,6 +362,8 @@ unless `Buffer.move_to` transfers them. `content.bytes` is a borrowed,
 non-NUL-terminated view that any growing write may invalidate. `pos` and
 `_indent` describe the current final line; `Buffer.free` invalidates the
 `Buffer` and both backing `Block`s.
+Mutating a null Buffer raises `<bad-arg>`. Reads treat it as empty,
+and release accepts NULL.
 
 Source: `lib/buffer.x`
 

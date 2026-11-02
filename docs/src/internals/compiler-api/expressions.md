@@ -18,6 +18,7 @@ Expression syntax and its resolution.
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
 | [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
 | [`Compiler.is_builtin_converter_call`](#Compiler.is_builtin_converter_call) | The global builtin boxers and scalar formatters only observe their arguments. |
+| [`Compiler.is_operator_temporary`](#Compiler.is_operator_temporary) | Reports whether an operator result needs discard when consumed. |
 | [`Compiler.needs_resolution`](#Compiler.needs_resolution) | True when syntax still needs ordinary binding or macro substitution. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
 | [`Compiler.parse_call_entry`](#Compiler.parse_call_entry) | Parses a `key: value` argument for a Map rest parameter as `(expr ("Map") (map-entry KEY VALUE))`, or returns NULL without consuming an ordinary argument. |
@@ -120,6 +121,15 @@ The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
 Source: `src/expressions/conversions.x`
+
+<a id="Compiler.is_operator_temporary"></a>
+#### Compiler.is_operator_temporary
+
+`int Compiler.is_operator_temporary(Compiler c, List expression)`
+
+Reports whether an operator result needs discard when consumed.
+
+Source: `src/expressions/operators.x`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution

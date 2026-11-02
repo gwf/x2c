@@ -9,6 +9,55 @@ Packed typed `Array`s generated from shared methods.
 
 | Function | Summary |
 | --- | --- |
+| [`ArrayChar_concat`](#ArrayChar_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayChar_copy`](#ArrayChar_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayChar_getslice`](#ArrayChar_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayChar_remslice`](#ArrayChar_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayChar_reverse`](#ArrayChar_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayChar_setslice`](#ArrayChar_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayChar_splice`](#ArrayChar_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayDbl_concat`](#ArrayDbl_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayDbl_copy`](#ArrayDbl_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayDbl_getslice`](#ArrayDbl_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayDbl_remslice`](#ArrayDbl_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayDbl_reverse`](#ArrayDbl_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayDbl_setslice`](#ArrayDbl_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayDbl_splice`](#ArrayDbl_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayFloat_concat`](#ArrayFloat_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayFloat_copy`](#ArrayFloat_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayFloat_getslice`](#ArrayFloat_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayFloat_remslice`](#ArrayFloat_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayFloat_reverse`](#ArrayFloat_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayFloat_setslice`](#ArrayFloat_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayFloat_splice`](#ArrayFloat_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayInt_concat`](#ArrayInt_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayInt_copy`](#ArrayInt_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayInt_getslice`](#ArrayInt_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayInt_remslice`](#ArrayInt_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayInt_reverse`](#ArrayInt_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayInt_setslice`](#ArrayInt_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayInt_splice`](#ArrayInt_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayLong_concat`](#ArrayLong_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayLong_copy`](#ArrayLong_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayLong_getslice`](#ArrayLong_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayLong_remslice`](#ArrayLong_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayLong_reverse`](#ArrayLong_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayLong_setslice`](#ArrayLong_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayLong_splice`](#ArrayLong_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayShort_concat`](#ArrayShort_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayShort_copy`](#ArrayShort_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayShort_getslice`](#ArrayShort_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayShort_remslice`](#ArrayShort_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayShort_reverse`](#ArrayShort_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayShort_setslice`](#ArrayShort_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayShort_splice`](#ArrayShort_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`ArrayString_concat`](#ArrayString_concat) | Returns a fresh array holding `a` followed by `b`. |
+| [`ArrayString_copy`](#ArrayString_copy) | Returns a fresh packed copy, or NULL for a null array. |
+| [`ArrayString_getslice`](#ArrayString_getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
+| [`ArrayString_remslice`](#ArrayString_remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
+| [`ArrayString_reverse`](#ArrayString_reverse) | Reverses `array` in place and returns that same array. |
+| [`ArrayString_setslice`](#ArrayString_setslice) | Replaces the region `array[start:end]` and returns `array`. |
+| [`ArrayString_splice`](#ArrayString_splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`Array.arraychar`](#Array.arraychar) | Packs `values` into a fresh array in source order. |
 | [`Array.arraydbl`](#Array.arraydbl) | Packs `values` into a fresh array in source order. |
 | [`Array.arrayfloat`](#Array.arrayfloat) | Packs `values` into a fresh array in source order. |
@@ -19,14 +68,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.array`](#ArrayChar.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayChar.block`](#ArrayChar.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayChar.compare`](#ArrayChar.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayChar.concat`](#ArrayChar.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayChar.contains`](#ArrayChar.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayChar.copy`](#ArrayChar.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayChar.count`](#ArrayChar.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayChar.equal`](#ArrayChar.equal) | Reports elementwise native equality. |
 | [`ArrayChar.find`](#ArrayChar.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayChar.getindex`](#ArrayChar.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayChar.index`](#ArrayChar.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -34,13 +80,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.postfixindex`](#ArrayChar.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayChar.push`](#ArrayChar.push) | Appends `value` and returns it. |
 | [`ArrayChar.remove`](#ArrayChar.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayChar.remslice`](#ArrayChar.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayChar.repr`](#ArrayChar.repr) | Returns the readable packed-Array representation. |
-| [`ArrayChar.reverse`](#ArrayChar.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayChar.setindex`](#ArrayChar.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayChar.setslice`](#ArrayChar.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayChar.shift`](#ArrayChar.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayChar.splice`](#ArrayChar.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayChar.str`](#ArrayChar.str) | Returns the packed-Array display String. |
 | [`ArrayChar.take_last`](#ArrayChar.take_last) | Removes and returns the last element. |
 | [`ArrayChar.try_get`](#ArrayChar.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -54,14 +96,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.array`](#ArrayDbl.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayDbl.block`](#ArrayDbl.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayDbl.compare`](#ArrayDbl.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayDbl.concat`](#ArrayDbl.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayDbl.contains`](#ArrayDbl.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayDbl.copy`](#ArrayDbl.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayDbl.count`](#ArrayDbl.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayDbl.equal`](#ArrayDbl.equal) | Reports elementwise native equality. |
 | [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayDbl.index`](#ArrayDbl.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -69,13 +108,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.postfixindex`](#ArrayDbl.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayDbl.push`](#ArrayDbl.push) | Appends `value` and returns it. |
 | [`ArrayDbl.remove`](#ArrayDbl.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayDbl.remslice`](#ArrayDbl.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayDbl.repr`](#ArrayDbl.repr) | Returns the readable packed-Array representation. |
-| [`ArrayDbl.reverse`](#ArrayDbl.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayDbl.setindex`](#ArrayDbl.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayDbl.setslice`](#ArrayDbl.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayDbl.shift`](#ArrayDbl.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayDbl.splice`](#ArrayDbl.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayDbl.str`](#ArrayDbl.str) | Returns the packed-Array display String. |
 | [`ArrayDbl.take_last`](#ArrayDbl.take_last) | Removes and returns the last element. |
 | [`ArrayDbl.try_get`](#ArrayDbl.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -89,14 +124,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.array`](#ArrayFloat.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayFloat.block`](#ArrayFloat.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayFloat.compare`](#ArrayFloat.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayFloat.concat`](#ArrayFloat.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayFloat.contains`](#ArrayFloat.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayFloat.copy`](#ArrayFloat.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayFloat.count`](#ArrayFloat.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayFloat.equal`](#ArrayFloat.equal) | Reports elementwise native equality. |
 | [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayFloat.index`](#ArrayFloat.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -104,13 +136,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.postfixindex`](#ArrayFloat.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayFloat.push`](#ArrayFloat.push) | Appends `value` and returns it. |
 | [`ArrayFloat.remove`](#ArrayFloat.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayFloat.remslice`](#ArrayFloat.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayFloat.repr`](#ArrayFloat.repr) | Returns the readable packed-Array representation. |
-| [`ArrayFloat.reverse`](#ArrayFloat.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayFloat.setindex`](#ArrayFloat.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayFloat.setslice`](#ArrayFloat.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayFloat.shift`](#ArrayFloat.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayFloat.splice`](#ArrayFloat.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayFloat.str`](#ArrayFloat.str) | Returns the packed-Array display String. |
 | [`ArrayFloat.take_last`](#ArrayFloat.take_last) | Removes and returns the last element. |
 | [`ArrayFloat.try_get`](#ArrayFloat.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -124,14 +152,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.array`](#ArrayInt.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayInt.block`](#ArrayInt.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayInt.compare`](#ArrayInt.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayInt.concat`](#ArrayInt.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayInt.contains`](#ArrayInt.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayInt.copy`](#ArrayInt.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayInt.count`](#ArrayInt.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayInt.equal`](#ArrayInt.equal) | Reports elementwise native equality. |
 | [`ArrayInt.find`](#ArrayInt.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayInt.getindex`](#ArrayInt.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayInt.index`](#ArrayInt.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -139,13 +164,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.postfixindex`](#ArrayInt.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayInt.push`](#ArrayInt.push) | Appends `value` and returns it. |
 | [`ArrayInt.remove`](#ArrayInt.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayInt.remslice`](#ArrayInt.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayInt.repr`](#ArrayInt.repr) | Returns the readable packed-Array representation. |
-| [`ArrayInt.reverse`](#ArrayInt.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayInt.setindex`](#ArrayInt.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayInt.setslice`](#ArrayInt.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayInt.shift`](#ArrayInt.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayInt.splice`](#ArrayInt.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayInt.str`](#ArrayInt.str) | Returns the packed-Array display String. |
 | [`ArrayInt.take_last`](#ArrayInt.take_last) | Removes and returns the last element. |
 | [`ArrayInt.try_get`](#ArrayInt.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -159,14 +180,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.array`](#ArrayLong.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayLong.block`](#ArrayLong.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayLong.compare`](#ArrayLong.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayLong.concat`](#ArrayLong.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayLong.contains`](#ArrayLong.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayLong.copy`](#ArrayLong.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayLong.count`](#ArrayLong.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayLong.equal`](#ArrayLong.equal) | Reports elementwise native equality. |
 | [`ArrayLong.find`](#ArrayLong.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayLong.getindex`](#ArrayLong.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayLong.index`](#ArrayLong.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -174,13 +192,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.postfixindex`](#ArrayLong.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayLong.push`](#ArrayLong.push) | Appends `value` and returns it. |
 | [`ArrayLong.remove`](#ArrayLong.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayLong.remslice`](#ArrayLong.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayLong.repr`](#ArrayLong.repr) | Returns the readable packed-Array representation. |
-| [`ArrayLong.reverse`](#ArrayLong.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayLong.setindex`](#ArrayLong.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayLong.setslice`](#ArrayLong.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayLong.shift`](#ArrayLong.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayLong.splice`](#ArrayLong.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayLong.str`](#ArrayLong.str) | Returns the packed-Array display String. |
 | [`ArrayLong.take_last`](#ArrayLong.take_last) | Removes and returns the last element. |
 | [`ArrayLong.try_get`](#ArrayLong.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -194,14 +208,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.array`](#ArrayShort.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayShort.block`](#ArrayShort.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayShort.compare`](#ArrayShort.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayShort.concat`](#ArrayShort.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayShort.contains`](#ArrayShort.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayShort.copy`](#ArrayShort.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayShort.count`](#ArrayShort.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayShort.equal`](#ArrayShort.equal) | Reports elementwise native equality. |
 | [`ArrayShort.find`](#ArrayShort.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayShort.getindex`](#ArrayShort.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayShort.index`](#ArrayShort.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -209,13 +220,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.postfixindex`](#ArrayShort.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayShort.push`](#ArrayShort.push) | Appends `value` and returns it. |
 | [`ArrayShort.remove`](#ArrayShort.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayShort.remslice`](#ArrayShort.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayShort.repr`](#ArrayShort.repr) | Returns the readable packed-Array representation. |
-| [`ArrayShort.reverse`](#ArrayShort.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayShort.setindex`](#ArrayShort.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayShort.setslice`](#ArrayShort.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayShort.shift`](#ArrayShort.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayShort.splice`](#ArrayShort.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayShort.str`](#ArrayShort.str) | Returns the packed-Array display String. |
 | [`ArrayShort.take_last`](#ArrayShort.take_last) | Removes and returns the last element. |
 | [`ArrayShort.try_get`](#ArrayShort.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -229,14 +236,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.array`](#ArrayString.array) | Returns a fresh ordinary Array containing boxed elements in source order. |
 | [`ArrayString.block`](#ArrayString.block) | Views `array` as the same underlying `Block` storage. |
 | [`ArrayString.compare`](#ArrayString.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`ArrayString.concat`](#ArrayString.concat) | Returns a fresh array holding `a` followed by `b`. |
 | [`ArrayString.contains`](#ArrayString.contains) | Reports whether an element is `==` to `value`. |
-| [`ArrayString.copy`](#ArrayString.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`ArrayString.count`](#ArrayString.count) | Returns how many elements are `==` to `value`. |
 | [`ArrayString.equal`](#ArrayString.equal) | Reports elementwise native equality. |
 | [`ArrayString.find`](#ArrayString.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`ArrayString.getindex`](#ArrayString.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
-| [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayString.index`](#ArrayString.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
@@ -244,13 +248,9 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.postfixindex`](#ArrayString.postfixindex) | Raises `<bad-op>` because String elements have no postfix operation. |
 | [`ArrayString.push`](#ArrayString.push) | Appends `value` and returns it. |
 | [`ArrayString.remove`](#ArrayString.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayString.remslice`](#ArrayString.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayString.repr`](#ArrayString.repr) | Returns the readable packed-Array representation. |
-| [`ArrayString.reverse`](#ArrayString.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayString.setindex`](#ArrayString.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
-| [`ArrayString.setslice`](#ArrayString.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayString.shift`](#ArrayString.shift) | Removes and returns the first element, shifting the remainder left. |
-| [`ArrayString.splice`](#ArrayString.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayString.str`](#ArrayString.str) | Returns the packed-Array display String. |
 | [`ArrayString.take_last`](#ArrayString.take_last) | Removes and returns the last element. |
 | [`ArrayString.try_get`](#ArrayString.try_get) | Reads normalized `index` into `out` and reports whether it exists. |
@@ -268,6 +268,722 @@ Packed typed `Array`s generated from shared methods.
 | [`Var.arraylong`](#Var.arraylong) | Returns the packed-array pointer carried by `value`. |
 | [`Var.arrayshort`](#Var.arrayshort) | Returns the packed-array pointer carried by `value`. |
 | [`Var.arraystring`](#Var.arraystring) | Returns the packed-array pointer carried by `value`. |
+
+### Functions
+
+<a id="ArrayChar_concat"></a>
+#### ArrayChar_concat
+
+`ArrayChar ArrayChar_concat(ArrayChar a, ArrayChar b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_copy"></a>
+#### ArrayChar_copy
+
+`ArrayChar ArrayChar_copy(ArrayChar array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_getslice"></a>
+#### ArrayChar_getslice
+
+`ArrayChar ArrayChar_getslice(ArrayChar array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_remslice"></a>
+#### ArrayChar_remslice
+
+`ArrayChar ArrayChar_remslice(ArrayChar array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_reverse"></a>
+#### ArrayChar_reverse
+
+`ArrayChar ArrayChar_reverse(ArrayChar array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_setslice"></a>
+#### ArrayChar_setslice
+
+`ArrayChar ArrayChar_setslice(ArrayChar array, int start, int end, ArrayChar values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayChar_splice"></a>
+#### ArrayChar_splice
+
+`ArrayChar ArrayChar_splice(ArrayChar array, int index, int remove_count, ArrayChar values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_concat"></a>
+#### ArrayDbl_concat
+
+`ArrayDbl ArrayDbl_concat(ArrayDbl a, ArrayDbl b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_copy"></a>
+#### ArrayDbl_copy
+
+`ArrayDbl ArrayDbl_copy(ArrayDbl array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_getslice"></a>
+#### ArrayDbl_getslice
+
+`ArrayDbl ArrayDbl_getslice(ArrayDbl array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_remslice"></a>
+#### ArrayDbl_remslice
+
+`ArrayDbl ArrayDbl_remslice(ArrayDbl array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_reverse"></a>
+#### ArrayDbl_reverse
+
+`ArrayDbl ArrayDbl_reverse(ArrayDbl array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_setslice"></a>
+#### ArrayDbl_setslice
+
+`ArrayDbl ArrayDbl_setslice(ArrayDbl array, int start, int end, ArrayDbl values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayDbl_splice"></a>
+#### ArrayDbl_splice
+
+`ArrayDbl ArrayDbl_splice(ArrayDbl array, int index, int remove_count, ArrayDbl values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_concat"></a>
+#### ArrayFloat_concat
+
+`ArrayFloat ArrayFloat_concat(ArrayFloat a, ArrayFloat b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_copy"></a>
+#### ArrayFloat_copy
+
+`ArrayFloat ArrayFloat_copy(ArrayFloat array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_getslice"></a>
+#### ArrayFloat_getslice
+
+`ArrayFloat ArrayFloat_getslice(ArrayFloat array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_remslice"></a>
+#### ArrayFloat_remslice
+
+`ArrayFloat ArrayFloat_remslice(ArrayFloat array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_reverse"></a>
+#### ArrayFloat_reverse
+
+`ArrayFloat ArrayFloat_reverse(ArrayFloat array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_setslice"></a>
+#### ArrayFloat_setslice
+
+`ArrayFloat ArrayFloat_setslice(ArrayFloat array, int start, int end, ArrayFloat values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayFloat_splice"></a>
+#### ArrayFloat_splice
+
+`ArrayFloat ArrayFloat_splice(ArrayFloat array, int index, int remove_count, ArrayFloat values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_concat"></a>
+#### ArrayInt_concat
+
+`ArrayInt ArrayInt_concat(ArrayInt a, ArrayInt b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_copy"></a>
+#### ArrayInt_copy
+
+`ArrayInt ArrayInt_copy(ArrayInt array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_getslice"></a>
+#### ArrayInt_getslice
+
+`ArrayInt ArrayInt_getslice(ArrayInt array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_remslice"></a>
+#### ArrayInt_remslice
+
+`ArrayInt ArrayInt_remslice(ArrayInt array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_reverse"></a>
+#### ArrayInt_reverse
+
+`ArrayInt ArrayInt_reverse(ArrayInt array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_setslice"></a>
+#### ArrayInt_setslice
+
+`ArrayInt ArrayInt_setslice(ArrayInt array, int start, int end, ArrayInt values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayInt_splice"></a>
+#### ArrayInt_splice
+
+`ArrayInt ArrayInt_splice(ArrayInt array, int index, int remove_count, ArrayInt values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_concat"></a>
+#### ArrayLong_concat
+
+`ArrayLong ArrayLong_concat(ArrayLong a, ArrayLong b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_copy"></a>
+#### ArrayLong_copy
+
+`ArrayLong ArrayLong_copy(ArrayLong array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_getslice"></a>
+#### ArrayLong_getslice
+
+`ArrayLong ArrayLong_getslice(ArrayLong array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_remslice"></a>
+#### ArrayLong_remslice
+
+`ArrayLong ArrayLong_remslice(ArrayLong array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_reverse"></a>
+#### ArrayLong_reverse
+
+`ArrayLong ArrayLong_reverse(ArrayLong array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_setslice"></a>
+#### ArrayLong_setslice
+
+`ArrayLong ArrayLong_setslice(ArrayLong array, int start, int end, ArrayLong values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayLong_splice"></a>
+#### ArrayLong_splice
+
+`ArrayLong ArrayLong_splice(ArrayLong array, int index, int remove_count, ArrayLong values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_concat"></a>
+#### ArrayShort_concat
+
+`ArrayShort ArrayShort_concat(ArrayShort a, ArrayShort b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_copy"></a>
+#### ArrayShort_copy
+
+`ArrayShort ArrayShort_copy(ArrayShort array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_getslice"></a>
+#### ArrayShort_getslice
+
+`ArrayShort ArrayShort_getslice(ArrayShort array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_remslice"></a>
+#### ArrayShort_remslice
+
+`ArrayShort ArrayShort_remslice(ArrayShort array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_reverse"></a>
+#### ArrayShort_reverse
+
+`ArrayShort ArrayShort_reverse(ArrayShort array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_setslice"></a>
+#### ArrayShort_setslice
+
+`ArrayShort ArrayShort_setslice(ArrayShort array, int start, int end, ArrayShort values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayShort_splice"></a>
+#### ArrayShort_splice
+
+`ArrayShort ArrayShort_splice(ArrayShort array, int index, int remove_count, ArrayShort values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_concat"></a>
+#### ArrayString_concat
+
+`ArrayString ArrayString_concat(ArrayString a, ArrayString b)`
+
+Returns a fresh array holding `a` followed by `b`.
+Neither input is modified. A null `a` returns NULL, while a null `b`
+produces an independent copy of `a`.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_copy"></a>
+#### ArrayString_copy
+
+`ArrayString ArrayString_copy(ArrayString array)`
+
+Returns a fresh packed copy, or NULL for a null array.
+The result has independent mutable storage containing the same stored
+values.
+
+**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
+represented or allocated.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_getslice"></a>
+#### ArrayString_getslice
+
+`ArrayString ArrayString_getslice(ArrayString array, int start, int end, int step)`
+
+Returns a fresh packed array for normalized `[start:end:step]`.
+A negative `start` counts elements from the end. A negative `end` on a
+forward step counts endpoints from the end: -1 is the length, so
+`[:-1]` is the whole array and `[:-2]` omits the last element. A
+negative `step` walks backward, and its negative `end` names the
+element the slice stops before. The
+[collections guide](../../guide/collections.md#indexing-and-slicing)
+shows the forward rule, which `setslice` and `remslice` share.
+
+**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+the integer index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_remslice"></a>
+#### ArrayString_remslice
+
+`ArrayString ArrayString_remslice(ArrayString array, int start, int end)`
+
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped, and the removed values retain their order.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_reverse"></a>
+#### ArrayString_reverse
+
+`ArrayString ArrayString_reverse(ArrayString array)`
+
+Reverses `array` in place and returns that same array.
+A null or one-element array is returned unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_setslice"></a>
+#### ArrayString_setslice
+
+`ArrayString ArrayString_setslice(ArrayString array, int start, int end, ArrayString values)`
+
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
+Reversed bounds are swapped; null `values` deletes the region. Passing
+`array` itself as `values` is supported and copies before mutation.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` while copying self-aliased values or
+growing storage for the replacement. These failures leave `array`
+unchanged.
+
+Source: `lib/typed-array.x`
+
+<a id="ArrayString_splice"></a>
+#### ArrayString_splice
+
+`ArrayString ArrayString_splice(ArrayString array, int index, int remove_count, ArrayString values)`
+
+Replaces `remove_count` values at normalized `index` and returns them.
+The result is a fresh packed array. A nonpositive count removes nothing;
+null `values` performs deletion, and self-splicing is supported.
+
+**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
+index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/typed-array.x`
 
 ### `Array`
 
@@ -388,20 +1104,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayChar.concat"></a>
-#### ArrayChar.concat
-
-`ArrayChar ArrayChar.concat(ArrayChar a, ArrayChar b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayChar.contains"></a>
 #### ArrayChar.contains
 
@@ -412,20 +1114,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayChar.copy"></a>
-#### ArrayChar.copy
-
-`ArrayChar ArrayChar.copy(ArrayChar array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -477,25 +1165,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayChar.getslice"></a>
-#### ArrayChar.getslice
-
-`ArrayChar ArrayChar.getslice(ArrayChar array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -597,36 +1266,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayChar.remslice"></a>
-#### ArrayChar.remslice
-
-`ArrayChar ArrayChar.remslice(ArrayChar array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayChar.repr"></a>
 #### ArrayChar.repr
 
 `String ArrayChar.repr(ArrayChar array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayChar.reverse"></a>
-#### ArrayChar.reverse
-
-`ArrayChar ArrayChar.reverse(ArrayChar array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -637,23 +1282,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayChar.setslice"></a>
-#### ArrayChar.setslice
-
-`ArrayChar ArrayChar.setslice(ArrayChar array, int start, int end, ArrayChar values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -668,20 +1296,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayChar.splice"></a>
-#### ArrayChar.splice
-
-`ArrayChar ArrayChar.splice(ArrayChar array, int index, int remove_count, ArrayChar values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -834,20 +1448,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayDbl.concat"></a>
-#### ArrayDbl.concat
-
-`ArrayDbl ArrayDbl.concat(ArrayDbl a, ArrayDbl b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayDbl.contains"></a>
 #### ArrayDbl.contains
 
@@ -858,20 +1458,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayDbl.copy"></a>
-#### ArrayDbl.copy
-
-`ArrayDbl ArrayDbl.copy(ArrayDbl array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -923,25 +1509,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayDbl.getslice"></a>
-#### ArrayDbl.getslice
-
-`ArrayDbl ArrayDbl.getslice(ArrayDbl array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -1043,36 +1610,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayDbl.remslice"></a>
-#### ArrayDbl.remslice
-
-`ArrayDbl ArrayDbl.remslice(ArrayDbl array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayDbl.repr"></a>
 #### ArrayDbl.repr
 
 `String ArrayDbl.repr(ArrayDbl array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayDbl.reverse"></a>
-#### ArrayDbl.reverse
-
-`ArrayDbl ArrayDbl.reverse(ArrayDbl array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -1083,23 +1626,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayDbl.setslice"></a>
-#### ArrayDbl.setslice
-
-`ArrayDbl ArrayDbl.setslice(ArrayDbl array, int start, int end, ArrayDbl values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -1114,20 +1640,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayDbl.splice"></a>
-#### ArrayDbl.splice
-
-`ArrayDbl ArrayDbl.splice(ArrayDbl array, int index, int remove_count, ArrayDbl values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -1278,20 +1790,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayFloat.concat"></a>
-#### ArrayFloat.concat
-
-`ArrayFloat ArrayFloat.concat(ArrayFloat a, ArrayFloat b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayFloat.contains"></a>
 #### ArrayFloat.contains
 
@@ -1302,20 +1800,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayFloat.copy"></a>
-#### ArrayFloat.copy
-
-`ArrayFloat ArrayFloat.copy(ArrayFloat array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -1367,25 +1851,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayFloat.getslice"></a>
-#### ArrayFloat.getslice
-
-`ArrayFloat ArrayFloat.getslice(ArrayFloat array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -1487,36 +1952,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayFloat.remslice"></a>
-#### ArrayFloat.remslice
-
-`ArrayFloat ArrayFloat.remslice(ArrayFloat array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayFloat.repr"></a>
 #### ArrayFloat.repr
 
 `String ArrayFloat.repr(ArrayFloat array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayFloat.reverse"></a>
-#### ArrayFloat.reverse
-
-`ArrayFloat ArrayFloat.reverse(ArrayFloat array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -1527,23 +1968,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayFloat.setslice"></a>
-#### ArrayFloat.setslice
-
-`ArrayFloat ArrayFloat.setslice(ArrayFloat array, int start, int end, ArrayFloat values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -1558,20 +1982,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayFloat.splice"></a>
-#### ArrayFloat.splice
-
-`ArrayFloat ArrayFloat.splice(ArrayFloat array, int index, int remove_count, ArrayFloat values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -1722,20 +2132,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayInt.concat"></a>
-#### ArrayInt.concat
-
-`ArrayInt ArrayInt.concat(ArrayInt a, ArrayInt b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayInt.contains"></a>
 #### ArrayInt.contains
 
@@ -1746,20 +2142,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayInt.copy"></a>
-#### ArrayInt.copy
-
-`ArrayInt ArrayInt.copy(ArrayInt array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -1811,25 +2193,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayInt.getslice"></a>
-#### ArrayInt.getslice
-
-`ArrayInt ArrayInt.getslice(ArrayInt array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -1931,36 +2294,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayInt.remslice"></a>
-#### ArrayInt.remslice
-
-`ArrayInt ArrayInt.remslice(ArrayInt array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayInt.repr"></a>
 #### ArrayInt.repr
 
 `String ArrayInt.repr(ArrayInt array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayInt.reverse"></a>
-#### ArrayInt.reverse
-
-`ArrayInt ArrayInt.reverse(ArrayInt array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -1971,23 +2310,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayInt.setslice"></a>
-#### ArrayInt.setslice
-
-`ArrayInt ArrayInt.setslice(ArrayInt array, int start, int end, ArrayInt values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -2002,20 +2324,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayInt.splice"></a>
-#### ArrayInt.splice
-
-`ArrayInt ArrayInt.splice(ArrayInt array, int index, int remove_count, ArrayInt values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -2168,20 +2476,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayLong.concat"></a>
-#### ArrayLong.concat
-
-`ArrayLong ArrayLong.concat(ArrayLong a, ArrayLong b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayLong.contains"></a>
 #### ArrayLong.contains
 
@@ -2192,20 +2486,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayLong.copy"></a>
-#### ArrayLong.copy
-
-`ArrayLong ArrayLong.copy(ArrayLong array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -2257,25 +2537,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayLong.getslice"></a>
-#### ArrayLong.getslice
-
-`ArrayLong ArrayLong.getslice(ArrayLong array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -2377,36 +2638,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayLong.remslice"></a>
-#### ArrayLong.remslice
-
-`ArrayLong ArrayLong.remslice(ArrayLong array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayLong.repr"></a>
 #### ArrayLong.repr
 
 `String ArrayLong.repr(ArrayLong array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayLong.reverse"></a>
-#### ArrayLong.reverse
-
-`ArrayLong ArrayLong.reverse(ArrayLong array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -2417,23 +2654,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayLong.setslice"></a>
-#### ArrayLong.setslice
-
-`ArrayLong ArrayLong.setslice(ArrayLong array, int start, int end, ArrayLong values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -2448,20 +2668,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayLong.splice"></a>
-#### ArrayLong.splice
-
-`ArrayLong ArrayLong.splice(ArrayLong array, int index, int remove_count, ArrayLong values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -2614,20 +2820,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayShort.concat"></a>
-#### ArrayShort.concat
-
-`ArrayShort ArrayShort.concat(ArrayShort a, ArrayShort b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayShort.contains"></a>
 #### ArrayShort.contains
 
@@ -2638,20 +2830,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayShort.copy"></a>
-#### ArrayShort.copy
-
-`ArrayShort ArrayShort.copy(ArrayShort array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -2703,25 +2881,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayShort.getslice"></a>
-#### ArrayShort.getslice
-
-`ArrayShort ArrayShort.getslice(ArrayShort array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -2823,36 +2982,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayShort.remslice"></a>
-#### ArrayShort.remslice
-
-`ArrayShort ArrayShort.remslice(ArrayShort array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayShort.repr"></a>
 #### ArrayShort.repr
 
 `String ArrayShort.repr(ArrayShort array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayShort.reverse"></a>
-#### ArrayShort.reverse
-
-`ArrayShort ArrayShort.reverse(ArrayShort array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -2863,23 +2998,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayShort.setslice"></a>
-#### ArrayShort.setslice
-
-`ArrayShort ArrayShort.setslice(ArrayShort array, int start, int end, ArrayShort values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -2894,20 +3012,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayShort.splice"></a>
-#### ArrayShort.splice
-
-`ArrayShort ArrayShort.splice(ArrayShort array, int index, int remove_count, ArrayShort values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -3060,20 +3164,6 @@ ordering. Identical handles compare equal and NULL sorts first.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayString.concat"></a>
-#### ArrayString.concat
-
-`ArrayString ArrayString.concat(ArrayString a, ArrayString b)`
-
-Returns a fresh array holding `a` followed by `b`.
-Neither input is modified. A null `a` returns NULL, while a null `b`
-produces an independent copy of `a`.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
-represented or allocated.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayString.contains"></a>
 #### ArrayString.contains
 
@@ -3084,20 +3174,6 @@ Elements compare as in `index`, so a boxed `Array` holding `1.0`
 contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayString.copy"></a>
-#### ArrayString.copy
-
-`ArrayString ArrayString.copy(ArrayString array)`
-
-Returns a fresh packed copy, or NULL for a null array.
-The result has independent mutable storage containing the same stored
-values.
-
-**Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
-represented or allocated.
 
 Source: `lib/typed-array.x`
 
@@ -3149,25 +3225,6 @@ Source: `lib/typed-array.x`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayString.getslice"></a>
-#### ArrayString.getslice
-
-`ArrayString ArrayString.getslice(ArrayString array, int start, int end, int step)`
-
-Returns a fresh packed array for normalized `[start:end:step]`.
-A negative `start` counts elements from the end. A negative `end` on a
-forward step counts endpoints from the end: -1 is the length, so
-`[:-1]` is the whole array and `[:-2]` omits the last element. A
-negative `step` walks backward, and its negative `end` names the
-element the slice stops before. The
-[collections guide](../../guide/collections.md#indexing-and-slicing)
-shows the forward rule, which `setslice` and `remslice` share.
-
-**Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
-the integer index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 
@@ -3266,36 +3323,12 @@ Negative indices count from the end; following elements shift left.
 
 Source: `lib/typed-array.x`
 
-<a id="ArrayString.remslice"></a>
-#### ArrayString.remslice
-
-`ArrayString ArrayString.remslice(ArrayString array, int start, int end)`
-
-Removes the region `array[start:end]` and returns a fresh packed array.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped, and the removed values retain their order.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
-
-Source: `lib/typed-array.x`
-
 <a id="ArrayString.repr"></a>
 #### ArrayString.repr
 
 `String ArrayString.repr(ArrayString array)`
 
 Returns the readable packed-Array representation.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayString.reverse"></a>
-#### ArrayString.reverse
-
-`ArrayString ArrayString.reverse(ArrayString array)`
-
-Reverses `array` in place and returns that same array.
-A null or one-element array is returned unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -3306,23 +3339,6 @@ Source: `lib/typed-array.x`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayString.setslice"></a>
-#### ArrayString.setslice
-
-`ArrayString ArrayString.setslice(ArrayString array, int start, int end, ArrayString values)`
-
-Replaces the region `array[start:end]` and returns `array`.
-Bounds normalize as slice bounds, so a negative `end` is a stop.
-Reversed bounds are swapped; null `values` deletes the region. Passing
-`array` itself as `values` is supported and copies before mutation.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` while copying self-aliased values or
-growing storage for the replacement. These failures leave `array`
-unchanged.
 
 Source: `lib/typed-array.x`
 
@@ -3337,20 +3353,6 @@ array.
 
 **Raises:** `<bad-arg>` for a null array or an empty typed array, or
 `<size-limit>` when the length exceeds the integer index domain.
-
-Source: `lib/typed-array.x`
-
-<a id="ArrayString.splice"></a>
-#### ArrayString.splice
-
-`ArrayString ArrayString.splice(ArrayString array, int index, int remove_count, ArrayString values)`
-
-Replaces `remove_count` values at normalized `index` and returns them.
-The result is a fresh packed array. A nonpositive count removes nothing;
-null `values` performs deletion, and self-splicing is supported.
-
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
-index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/typed-array.x`
 

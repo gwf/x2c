@@ -197,7 +197,7 @@ Source: `src/protocol/lookup.x`
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
 
-`String Compiler.protocol_update_helper( Compiler c, Type participant, String member, int postfix)`
+`String Compiler.protocol_update_helper( Compiler c, Type participant, String member, int postfix, int discard_rhs)`
 
 Returns a generated helper for a direct protocol-backed update.
 The resolved member must have exactly `(Participant, RHS) -> Participant`,

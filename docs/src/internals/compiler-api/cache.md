@@ -14,6 +14,7 @@ Cached literal slots and deferred file-static initializers.
 | --- | --- |
 | [`Compiler.initialization_guard`](#Compiler.initialization_guard) | Returns the declaration of the file's initialization `guard`, which starts at zero. |
 | [`Compiler.setup_cache_init`](#Compiler.setup_cache_init) | Materializes cached literals and deferred file-static initialization. |
+| [`Compiler.without_const`](#Compiler.without_const) | Removes const from the C declaration of a runtime-initialized object. |
 | [`Compiler.zero_initializer`](#Compiler.zero_initializer) | Preserves native initializer shape so C infers dimensions and checks designators before cached values are assigned during initialization. |
 
 ### `Compiler`
@@ -43,6 +44,16 @@ maps source cache ids to emitted slots. Appends initialization work
 to the `<prepare>`, `<statics>`, and `<finish>` initialization areas; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
+
+Source: `src/cache.x`
+
+<a id="Compiler.without_const"></a>
+#### Compiler.without_const
+
+`List Compiler.without_const(List specifiers)`
+
+Removes const from the C declaration of a runtime-initialized object.
+Its semantic declared type retains the qualifier for x2c checks.
 
 Source: `src/cache.x`
 

@@ -68,7 +68,7 @@ Canonical byte strings and core text operations.
 | [`String.startswith`](#String.startswith) | Reports whether `str` starts with `prefix`. |
 | [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `negChars` removed. |
 | [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
-| [`String.unescape`](#String.unescape) | Decodes supported backslash escapes in `str` into a canonical `String`. |
+| [`String.unescape`](#String.unescape) | Decodes C backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
 | [`String.words`](#String.words) | Returns a lazy cursor over whitespace-delimited words in `str`. |
@@ -163,8 +163,8 @@ Returns `str` followed by `other`.
 This implements the `add` row of `protocol Var(String)`, so it is what
 `+` on two `String`s lowers to, and because the result is interned, `==`
 on a newly built result is a content comparison. Either operand may be
-the empty `String`, in which case the other pointer is returned unchanged
-with its existing ownership and canonical or transient state.
+the empty `String`, in which case the other input is canonicalized in
+the active pool chain.
 
 Every concatenation interns its result, so building text by repeated
 concatenation in a loop allocates and hashes at every step. Use
@@ -965,15 +965,14 @@ Source: `lib/string/adapters.x`
 
 `meta native String String.unescape(String str)`
 
-Decodes supported backslash escapes in `str` into a canonical `String`.
-Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
-or `U`, and up to three octal digits are consumed. A backslash-newline is
-removed, an unknown escape yields its following byte, and a trailing
-backslash is dropped. `Null` input returns NULL and input without a
-backslash is returned unchanged.
+Decodes C backslash escapes in `str` into a canonical `String`.
+Hexadecimal escapes consume all following hex digits; universal escapes
+consume four digits after `u` or eight after `U` and encode UTF-8.
+Octal escapes consume at most three digits. Line continuations disappear.
+Null input returns NULL. Input without a backslash is canonicalized.
 
-**Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
-a byte, or `<alloc-fail>` while constructing a changed result.
+**Raises:** `<bad-arg>` for a malformed escape or invalid Unicode point,
+or `<alloc-fail>` while constructing a changed result.
 
 Source: `lib/string/escape.x`
 
@@ -1039,7 +1038,7 @@ Source: `lib/string/cursors.x`
 <a id="String.write_str"></a>
 #### String.write_str
 
-`Buffer String.write_str(String str, Buffer out)`
+`Buffer String.write_str(String s, Buffer out)`
 
 Appends `str` to `out` unchanged.
 A `String` is already its own display text, so this writes it directly
@@ -1454,8 +1453,19 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_string_unescape_bytes`](#x2c_string_unescape_bytes) | Decodes x2c byte escapes for percent text, quoted Atoms, and Lisp. |
 | [`String.is_permanent`](#String.is_permanent) | Asks whether `str` already outlives every canonical `String` pool. |
 | [`String.try_own`](#String.try_own) | Proves `str` safe beyond every active canonical `String` pool. |
+
+### Functions
+
+#### x2c_string_unescape_bytes
+
+`String x2c_string_unescape_bytes(String str)`
+
+Decodes x2c byte escapes for percent text, quoted Atoms, and Lisp.
+
+Source: `lib/string/escape.x`
 
 ### `String`
 
@@ -1519,6 +1529,8 @@ pointer. Assignment borrows that pointer; it does not copy or extend the
 owning pool's lifetime. `String.malloc` is the mutable exception;
 its backing allocation still belongs to the active pool, and must be
 finalized with `String.intern_free` or released with `String.free`.
+Operations that return canonical Strings use the active pool chain,
+including no-change shortcuts on a detached input.
 
 Source: `lib/string/string.x`
 

@@ -9,6 +9,19 @@ Optional compound `List` selectors.
 
 | Function | Summary |
 | --- | --- |
+| [`List_cdaaar`](#List_cdaaar) | Returns the tail that `cdaaar` selects from `value`. |
+| [`List_cdaadr`](#List_cdaadr) | Returns the tail that `cdaadr` selects from `value`. |
+| [`List_cdaar`](#List_cdaar) | Returns the tail that `cdaar` selects from `value`. |
+| [`List_cdadar`](#List_cdadar) | Returns the tail that `cdadar` selects from `value`. |
+| [`List_cdaddr`](#List_cdaddr) | Returns the tail that `cdaddr` selects from `value`. |
+| [`List_cdadr`](#List_cdadr) | Returns the tail that `cdadr` selects from `value`. |
+| [`List_cdar`](#List_cdar) | Returns the tail that `cdar` selects from `value`. |
+| [`List_cddaar`](#List_cddaar) | Returns the tail that `cddaar` selects from `value`. |
+| [`List_cddadr`](#List_cddadr) | Returns the tail that `cddadr` selects from `value`. |
+| [`List_cddar`](#List_cddar) | Returns the tail that `cddar` selects from `value`. |
+| [`List_cdddar`](#List_cdddar) | Returns the tail that `cdddar` selects from `value`. |
+| [`List_cddddr`](#List_cddddr) | Returns the tail that `cddddr` selects from `value`. |
+| [`List_cdddr`](#List_cdddr) | Returns the tail that `cdddr` selects from `value`. |
 | [`List.caaaar`](#List.caaaar) | Returns the element that `caaaar` selects from `value`. |
 | [`List.caaadr`](#List.caaadr) | Returns the element that `caaadr` selects from `value`. |
 | [`List.caaar`](#List.caaar) | Returns the element that `caaar` selects from `value`. |
@@ -20,19 +33,6 @@ Optional compound `List` selectors.
 | [`List.cadar`](#List.cadar) | Returns the element that `cadar` selects from `value`. |
 | [`List.caddar`](#List.caddar) | Returns the element that `caddar` selects from `value`. |
 | [`List.cadddr`](#List.cadddr) | Returns the element that `cadddr` selects from `value`. |
-| [`List.cdaaar`](#List.cdaaar) | Returns the tail that `cdaaar` selects from `value`. |
-| [`List.cdaadr`](#List.cdaadr) | Returns the tail that `cdaadr` selects from `value`. |
-| [`List.cdaar`](#List.cdaar) | Returns the tail that `cdaar` selects from `value`. |
-| [`List.cdadar`](#List.cdadar) | Returns the tail that `cdadar` selects from `value`. |
-| [`List.cdaddr`](#List.cdaddr) | Returns the tail that `cdaddr` selects from `value`. |
-| [`List.cdadr`](#List.cdadr) | Returns the tail that `cdadr` selects from `value`. |
-| [`List.cdar`](#List.cdar) | Returns the tail that `cdar` selects from `value`. |
-| [`List.cddaar`](#List.cddaar) | Returns the tail that `cddaar` selects from `value`. |
-| [`List.cddadr`](#List.cddadr) | Returns the tail that `cddadr` selects from `value`. |
-| [`List.cddar`](#List.cddar) | Returns the tail that `cddar` selects from `value`. |
-| [`List.cdddar`](#List.cdddar) | Returns the tail that `cdddar` selects from `value`. |
-| [`List.cddddr`](#List.cddddr) | Returns the tail that `cddddr` selects from `value`. |
-| [`List.cdddr`](#List.cdddr) | Returns the tail that `cdddr` selects from `value`. |
 | [`Var.caaaar`](#Var.caaaar) | Returns the element that `caaaar` selects from `value`. |
 | [`Var.caaadr`](#Var.caaadr) | Returns the element that `caaadr` selects from `value`. |
 | [`Var.caaar`](#Var.caaar) | Returns the element that `caaar` selects from `value`. |
@@ -57,6 +57,125 @@ Optional compound `List` selectors.
 | [`Var.cdddar`](#Var.cdddar) | Returns the tail that `cdddar` selects from `value` as a `List`. |
 | [`Var.cddddr`](#Var.cddddr) | Returns the tail that `cddddr` selects from `value` as a `List`. |
 | [`Var.cdddr`](#Var.cdddr) | Returns the tail that `cdddr` selects from `value` as a `List`. |
+
+### Functions
+
+<a id="List_cdaaar"></a>
+#### List_cdaaar
+
+`List List_cdaaar(List value)`
+
+Returns the tail that `cdaaar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdaadr"></a>
+#### List_cdaadr
+
+`List List_cdaadr(List value)`
+
+Returns the tail that `cdaadr` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdaar"></a>
+#### List_cdaar
+
+`List List_cdaar(List value)`
+
+Returns the tail that `cdaar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdadar"></a>
+#### List_cdadar
+
+`List List_cdadar(List value)`
+
+Returns the tail that `cdadar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdaddr"></a>
+#### List_cdaddr
+
+`List List_cdaddr(List value)`
+
+Returns the tail that `cdaddr` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdadr"></a>
+#### List_cdadr
+
+`List List_cdadr(List value)`
+
+Returns the tail that `cdadr` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdar"></a>
+#### List_cdar
+
+`List List_cdar(List value)`
+
+Returns the tail that `cdar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cddaar"></a>
+#### List_cddaar
+
+`List List_cddaar(List value)`
+
+Returns the tail that `cddaar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cddadr"></a>
+#### List_cddadr
+
+`List List_cddadr(List value)`
+
+Returns the tail that `cddadr` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cddar"></a>
+#### List_cddar
+
+`List List_cddar(List value)`
+
+Returns the tail that `cddar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdddar"></a>
+#### List_cdddar
+
+`List List_cdddar(List value)`
+
+Returns the tail that `cdddar` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cddddr"></a>
+#### List_cddddr
+
+`List List_cddddr(List value)`
+
+Returns the tail that `cddddr` selects from `value`.
+
+Source: `lib/list-selectors.x`
+
+<a id="List_cdddr"></a>
+#### List_cdddr
+
+`List List_cdddr(List value)`
+
+Returns the tail that `cdddr` selects from `value`.
+
+Source: `lib/list-selectors.x`
 
 ### `List`
 
@@ -156,123 +275,6 @@ Source: `lib/list-selectors.x`
 `Var List.cadddr(List value)`
 
 Returns the element that `cadddr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdaaar"></a>
-#### List.cdaaar
-
-`List List.cdaaar(List value)`
-
-Returns the tail that `cdaaar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdaadr"></a>
-#### List.cdaadr
-
-`List List.cdaadr(List value)`
-
-Returns the tail that `cdaadr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdaar"></a>
-#### List.cdaar
-
-`List List.cdaar(List value)`
-
-Returns the tail that `cdaar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdadar"></a>
-#### List.cdadar
-
-`List List.cdadar(List value)`
-
-Returns the tail that `cdadar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdaddr"></a>
-#### List.cdaddr
-
-`List List.cdaddr(List value)`
-
-Returns the tail that `cdaddr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdadr"></a>
-#### List.cdadr
-
-`List List.cdadr(List value)`
-
-Returns the tail that `cdadr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdar"></a>
-#### List.cdar
-
-`List List.cdar(List value)`
-
-Returns the tail that `cdar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cddaar"></a>
-#### List.cddaar
-
-`List List.cddaar(List value)`
-
-Returns the tail that `cddaar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cddadr"></a>
-#### List.cddadr
-
-`List List.cddadr(List value)`
-
-Returns the tail that `cddadr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cddar"></a>
-#### List.cddar
-
-`List List.cddar(List value)`
-
-Returns the tail that `cddar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdddar"></a>
-#### List.cdddar
-
-`List List.cdddar(List value)`
-
-Returns the tail that `cdddar` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cddddr"></a>
-#### List.cddddr
-
-`List List.cddddr(List value)`
-
-Returns the tail that `cddddr` selects from `value`.
-
-Source: `lib/list-selectors.x`
-
-<a id="List.cdddr"></a>
-#### List.cdddr
-
-`List List.cdddr(List value)`
-
-Returns the tail that `cdddr` selects from `value`.
 
 Source: `lib/list-selectors.x`
 

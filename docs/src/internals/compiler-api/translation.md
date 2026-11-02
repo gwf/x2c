@@ -19,7 +19,7 @@ Synchronous compiler translation requests.
 
 #### translate_print_command
 
-`void translate_print_command(String out_dir, List inputs)`
+`void translate_print_command(CliRequest request, String out_dir, List inputs)`
 
 Prints the translate command that writes `inputs` to `out_dir`, as
 verbose and dry-run requests show it, quoted as a dry-run tool action

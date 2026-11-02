@@ -217,7 +217,8 @@ Source: `lib/block.x`
 `inline int Block.try_pop(Block b, void *out)`
 
 Removes the final element of `b`, copying it to `out` when present.
-Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
+Returns zero for an empty `Block` and leaves `out` unchanged.
+Raises `<bad-arg>` for a null Block. A null
 `out` still removes a present element.
 
 Source: `lib/block.x`
@@ -309,6 +310,25 @@ Removes the final element through `bytes` as `Block.try_pop` does.
 
 Source: `lib/block.x`
 
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`x2c_block_bad_arg`](#x2c_block_bad_arg) | Raises `<bad-arg>` for a null handle in an inline Block removal. |
+
+### Functions
+
+#### x2c_block_bad_arg
+
+`void x2c_block_bad_arg(Symbol action)`
+
+Raises `<bad-arg>` for a null handle in an inline Block removal.
+
+Source: `lib/block.x`
+
 ## Public types
 
 | Type | Kind | Summary |
@@ -326,6 +346,8 @@ construction unless `Block.move_to` transfers them. The `Block` handle
 remains stable, but `bytes` is a borrowed base pointer that growth may
 replace. Valid `Block`s have nonzero `width` and `length <= cap`;
 `Block.free` invalidates the handle and every `Bytes` view.
+Mutating a null Block raises `<bad-arg>`. Observations treat it as empty,
+and release accepts NULL.
 
 Source: `lib/block.x`
 

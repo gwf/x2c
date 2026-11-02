@@ -11,7 +11,6 @@
 | --- | --- |
 | [`File.cleanup`](#File.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`File.copy_to`](#File.copy_to) | Copies the remaining bytes from `source` to `output`. |
-| [`File.getw`](#File.getw) | Reads and returns one native `int`, or EOF when a full word is unavailable. |
 | [`File.iter`](#File.iter) | Returns an iterator over `File`. |
 | [`File.open`](#File.open) | Opens `path` with the requested stdio mode. |
 | [`File.path_error`](#File.path_error) | Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise, with `operation`, `path`, and `errno` details. |
@@ -43,17 +42,6 @@ bytes written, including the partial count a catch observes after a
 failure.
 
 **Raises:** `<io-fail>` on a source read or destination write failure.
-
-Source: `lib/file.x`
-
-<a id="File.getw"></a>
-#### File.getw
-
-`inline int File.getw(File file)`
-
-Reads and returns one native `int`, or EOF when a full word is unavailable.
-A stored value equal to EOF is indistinguishable from the sentinel without
-inspecting the stream indicators.
 
 Source: `lib/file.x`
 
@@ -172,6 +160,7 @@ Source: `lib/file.x`
 | [`File.equal`](#File.equal) | Reports whether `x` and `y` are the same native stream handle. |
 | [`File.fdopen`](#File.fdopen) | Wraps an open file descriptor in a `File` stream. |
 | [`File.gets`](#File.gets) | Reads a native line into `str` and returns `str`, or NULL at EOF or error. |
+| [`File.getw`](#File.getw) | Reads and returns one native `int`, or EOF when a full word is unavailable. |
 | [`File.hash`](#File.hash) | Returns a handle-identity hash consistent with `File.equal`. |
 | [`File.popen`](#File.popen) | Opens a process pipe with the requested mode. |
 | [`File.printf`](#File.printf) | Formats values into `file`. |
@@ -224,6 +213,17 @@ Source: `lib/file.x`
 Reads a native line into `str` and returns `str`, or NULL at EOF or error.
 At most `size - 1` bytes are stored followed by NUL, and a newline is kept
 when it fits.
+
+Source: `lib/file.x`
+
+<a id="File.getw"></a>
+#### File.getw
+
+`inline int File.getw(File file)`
+
+Reads and returns one native `int`, or EOF when a full word is unavailable.
+A stored value equal to EOF is indistinguishable from the sentinel without
+inspecting the stream indicators.
 
 Source: `lib/file.x`
 

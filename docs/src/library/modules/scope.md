@@ -9,33 +9,24 @@ Memory allocation scope management.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_scope_thread_release`](#x2c_scope_thread_release) | Destroys this thread's `Scope` chain and its push and region stacks. |
 | [`xcalloc`](#xcalloc) | Allocates zeroed objects in the active scope through `Scope.calloc`. |
 | [`xfree`](#xfree) | Frees scope-owned memory through `Scope.free`; NULL does nothing. |
 | [`xmalloc`](#xmalloc) | Allocates uninitialized bytes in the active scope through `Scope.malloc`. |
 | [`xmemdup`](#xmemdup) | Copies bytes into the active scope through `Scope.memdup`. |
 | [`xrealloc`](#xrealloc) | Resizes scope-owned memory through `Scope.realloc`, preserving its owner. |
 | [`Scope.child`](#Scope.child) | Creates a storage scope owned by the active allocation scope. |
+| [`Scope.close`](#Scope.close) | Destroys the scope in the active slot and frees everything it owns. |
 | [`Scope.contains`](#Scope.contains) | Reports whether `scope` owns `candidate` through lifetime parent links. |
 | [`Scope.malloc_finalized`](#Scope.malloc_finalized) | Allocates `size` uninitialized bytes in the active scope with a finalizer. |
 | [`Scope.malloc_finalized_in`](#Scope.malloc_finalized_in) | Allocates `size` bytes with finalizer `drop` in the scope held by `s`. |
 | [`Scope.new`](#Scope.new) | Creates a detached, unnamed scope and returns it. |
+| [`Scope.open`](#Scope.open) | Opens a new scope in the active slot and makes it the current one. |
 | [`Scope.parent`](#Scope.parent) | Returns this scope's lifetime parent, or NULL for a detached scope. |
 | [`Scope.pop`](#Scope.pop) | Restores the slot that was active before the matching `Scope.push`. |
 | [`Scope.push`](#Scope.push) | Makes the scope in `scope` active until a matching `Scope.pop`. |
 | [`Scope.transfer`](#Scope.transfer) | Reparents this storage scope and its adopted descendants without copying. |
 
 ### Functions
-
-#### x2c_scope_thread_release
-
-`void x2c_scope_thread_release(void)`
-
-Destroys this thread's `Scope` chain and its push and region stacks.
-It runs last in `x2c_thread_state_release` and repeats harmlessly; a
-thread that never created a `Scope` has nothing to destroy.
-
-Source: `lib/scope/regions.x`
 
 #### xcalloc
 
@@ -113,6 +104,40 @@ explicitly transferred or destroyed first. No object graph is traversed.
 
 Source: `lib/scope/regions.x`
 
+<a id="Scope.close"></a>
+#### Scope.close
+
+`meta native void Scope.close(void)`
+
+Destroys the scope in the active slot and frees everything it owns.
+Every allocation charged to that scope is freed: `Scope.malloc`,
+`Scope.calloc`, and `Scope.memdup` results, and the backing storage of the
+`Block`s, `Array`s, `Buffer`s, and boxed wide `Var`s built while it was
+active.
+The scope linked below it then becomes active again.
+
+Canonical values are not reclaimed. Interned `String`s, `List` cells, and
+`Symbol`s built inside the region remain valid after the close.
+An allocation relinked with `Scope.move` now belongs to its new scope and
+survives. Anything owned by another scope or another slot is untouched,
+and memory from plain `malloc` is unaffected.
+
+The active region must be the one opened by a matching `Scope.open` on
+this same slot. Closing an empty slot, a directly allocated root, or a
+region opened on another pushed slot is an imbalance and raises. An
+extra close cannot destroy the surrounding region, and an empty open
+region still closes normally.
+
+A pointer into a closed region is not diagnosed. Neither the compiler
+nor the runtime tracks it, and using it afterwards is undefined behavior.
+With accounting enabled, `Scope.stats` confirms that nothing stays live.
+
+**Raises:** `<bad-state>` when no matching open owns the active region. The
+failure leaves the active region intact. Before `Error` initialization it
+terminates at the error floor.
+
+Source: `lib/scope/regions.x`
+
 <a id="Scope.contains"></a>
 #### Scope.contains
 
@@ -181,6 +206,47 @@ exit-time leak report when accounting is enabled.
 
 **Raises:** `<alloc-fail>` when the scope cannot be allocated. Before `Error`
 initialization it terminates at the error floor.
+
+Source: `lib/scope/regions.x`
+
+<a id="Scope.open"></a>
+#### Scope.open
+
+`meta native void Scope.open(void)`
+
+Opens a new scope in the active slot and makes it the current one.
+Allocations that follow are charged to the new scope. The scope that was
+there is linked below it and becomes current again on close, so open
+regions nest. Open a nested region when a group of temporaries should die
+before the surrounding work does. Each `Scope.open` must be paired with
+exactly one `Scope.close`.
+
+Pair them with `defer`. `Error` transfer does not close a region. A raise
+that jumps past a plain `Scope.close` leaves that region live for the
+rest of the process, so use `defer` in any function that both opens a
+region and can raise.
+
+```x2c
+~static void report(int width) {
+Scope.open();
+defer Scope.close();
+char *line = xmalloc(width + 1);
+snprintf(line, width + 1, "%d bytes", width);
+puts(line);
+~}
+~
+~int main(void) {
+~  report(16);
+~  return 0;
+~}
+```
+
+A scope wrapped around nothing but canonical values does nothing, since
+those values already outlive it, and adds a close that is easy to omit.
+
+**Raises:** `<alloc-fail>` when the scope or its region record cannot be
+allocated, or `<size-limit>` when that record cannot grow. Before `Error`
+initialization they terminate at the error floor.
 
 Source: `lib/scope/regions.x`
 
@@ -271,7 +337,6 @@ Source: `lib/scope/regions.x`
 | [`Scope.calloc`](#Scope.calloc) | Allocates `count` objects of `size` bytes each, zeroed, in the active scope. |
 | [`Scope.calloc_in`](#Scope.calloc_in) | Allocates `count` zeroed objects of `size` bytes in the scope in `slot`. |
 | [`Scope.cleanup`](#Scope.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
-| [`Scope.close`](#Scope.close) | Destroys the scope in the active slot and frees everything it owns. |
 | [`Scope.destroy`](#Scope.destroy) | Destroys a scope and frees its allocations and adopted child scopes. |
 | [`Scope.free`](#Scope.free) | Frees one scope-owned allocation before its scope ends. |
 | [`Scope.malloc`](#Scope.malloc) | Allocates `size` uninitialized bytes in the active scope. |
@@ -281,7 +346,6 @@ Source: `lib/scope/regions.x`
 | [`Scope.move`](#Scope.move) | Relinks one allocation onto the scope held by `slot`. |
 | [`Scope.name`](#Scope.name) | Returns the diagnostic name of `scope`, or NULL if it has none. |
 | [`Scope.new_named`](#Scope.new_named) | Creates a detached scope carrying a copy of `name` for diagnostics. |
-| [`Scope.open`](#Scope.open) | Opens a new scope in the active slot and makes it the current one. |
 | [`Scope.owner`](#Scope.owner) | Returns the `Scope` that currently owns `ptr`. |
 | [`Scope.realloc`](#Scope.realloc) | Resizes one scope-owned allocation and returns the new pointer. |
 | [`Scope.stats`](#Scope.stats) | Returns a snapshot of the allocator's counters. |
@@ -355,44 +419,10 @@ Ends the owned lifetime when a managed local leaves its block.
 
 Source: `lib/scope/regions.x`
 
-<a id="Scope.close"></a>
-#### Scope.close
-
-`meta native void Scope.close(void)`
-
-Destroys the scope in the active slot and frees everything it owns.
-Every allocation charged to that scope is freed: `Scope.malloc`,
-`Scope.calloc`, and `Scope.memdup` results, and the backing storage of the
-`Block`s, `Array`s, `Buffer`s, and boxed wide `Var`s built while it was
-active.
-The scope linked below it then becomes active again.
-
-Canonical values are not reclaimed. Interned `String`s, `List` cells, and
-`Symbol`s built inside the region remain valid after the close.
-An allocation relinked with `Scope.move` now belongs to its new scope and
-survives. Anything owned by another scope or another slot is untouched,
-and memory from plain `malloc` is unaffected.
-
-The active region must be the one opened by a matching `Scope.open` on
-this same slot. Closing an empty slot, a directly allocated root, or a
-region opened on another pushed slot is an imbalance and raises. An
-extra close cannot destroy the surrounding region, and an empty open
-region still closes normally.
-
-A pointer into a closed region is not diagnosed. Neither the compiler
-nor the runtime tracks it, and using it afterwards is undefined behavior.
-With accounting enabled, `Scope.stats` confirms that nothing stays live.
-
-**Raises:** `<bad-state>` when no matching open owns the active region. The
-failure leaves the active region intact. Before `Error` initialization it
-terminates at the error floor.
-
-Source: `lib/scope/regions.x`
-
 <a id="Scope.destroy"></a>
 #### Scope.destroy
 
-`meta native void Scope.destroy(Scope scope)`
+`meta native void Scope.destroy(Scope s)`
 
 Destroys a scope and frees its allocations and adopted child scopes.
 An adopted scope first detaches from its lifetime parent. This ends a
@@ -584,47 +614,6 @@ process.
 
 Source: `lib/scope/regions.x`
 
-<a id="Scope.open"></a>
-#### Scope.open
-
-`meta native void Scope.open(void)`
-
-Opens a new scope in the active slot and makes it the current one.
-Allocations that follow are charged to the new scope. The scope that was
-there is linked below it and becomes current again on close, so open
-regions nest. Open a nested region when a group of temporaries should die
-before the surrounding work does. Each `Scope.open` must be paired with
-exactly one `Scope.close`.
-
-Pair them with `defer`. `Error` transfer does not close a region. A raise
-that jumps past a plain `Scope.close` leaves that region live for the
-rest of the process, so use `defer` in any function that both opens a
-region and can raise.
-
-```x2c
-~static void report(int width) {
-Scope.open();
-defer Scope.close();
-char *line = xmalloc(width + 1);
-snprintf(line, width + 1, "%d bytes", width);
-puts(line);
-~}
-~
-~int main(void) {
-~  report(16);
-~  return 0;
-~}
-```
-
-A scope wrapped around nothing but canonical values does nothing, since
-those values already outlive it, and adds a close that is easy to omit.
-
-**Raises:** `<alloc-fail>` when the scope or its region record cannot be
-allocated, or `<size-limit>` when that record cannot grow. Before `Error`
-initialization they terminate at the error floor.
-
-Source: `lib/scope/regions.x`
-
 <a id="Scope.owner"></a>
 #### Scope.owner
 
@@ -715,6 +704,7 @@ for source readers but are not supported as user API.
 | [`x2c_scope_execution_free`](#x2c_scope_execution_free) | Releases saved execution bindings after restoring the caller's state. |
 | [`x2c_scope_execution_new`](#x2c_scope_execution_new) | Creates saved allocation bindings for an execution borrowing `borrowed`. |
 | [`x2c_scope_execution_swap`](#x2c_scope_execution_swap) | Exchanges saved and installed bindings at an execution boundary. |
+| [`x2c_scope_thread_release`](#x2c_scope_thread_release) | Destroys this thread's `Scope` chain and its push and region stacks. |
 | [`Scope.initialize`](#Scope.initialize) | Initializes the process-wide `Scope` runtime owner. |
 | [`Scope.move_before`](#Scope.move_before) | Moves one allocation immediately before another in its owner's list. |
 | [`Scope.shutdown_hook`](#Scope.shutdown_hook) | Registers `hook` to run during process-wide `Scope` shutdown. |
@@ -748,6 +738,16 @@ Source: `lib/scope/regions.x`
 Exchanges saved and installed bindings at an execution boundary.
 Both base cells and explicitly pushed caller cells keep their addresses.
 No allocation or callback occurs during the exchange.
+
+Source: `lib/scope/regions.x`
+
+#### x2c_scope_thread_release
+
+`void x2c_scope_thread_release(void)`
+
+Destroys this thread's `Scope` chain and its push and region stacks.
+It runs last in `x2c_thread_state_release` and repeats harmlessly; a
+thread that never created a `Scope` has nothing to destroy.
 
 Source: `lib/scope/regions.x`
 

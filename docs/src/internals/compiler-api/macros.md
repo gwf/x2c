@@ -48,6 +48,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.macro_value_literal`](#Compiler.macro_value_literal) | Returns the literal expression that carries `value`, a macro definition or one of its references, as run-time data. |
 | [`Compiler.marked_rewrite`](#Compiler.marked_rewrite) | Matches the member rules registered for each field keyword that `aggregate` declares a field with, as `Compiler.rewrite` matches those keyed by a receiver type. |
 | [`Compiler.meta_call_starts_declaration`](#Compiler.meta_call_starts_declaration) | Returns whether tokens after an explicit meta call continue a declaration. |
+| [`Compiler.named_alias_expression`](#Compiler.named_alias_expression) | Resolves a visible alias by spelling for parsed and constructed names. |
 | [`Compiler.parse_alias_declaration`](#Compiler.parse_alias_declaration) | Parses an alias or its removal at file scope. |
 | [`Compiler.parse_alias_member`](#Compiler.parse_alias_member) | Parses an alias among the members of an aggregate or enum body, where `position` is `<field>` or `<enumerator>` and `context` is the aggregate type. |
 | [`Compiler.parse_alias_statement`](#Compiler.parse_alias_statement) | Parses an alias or its removal in a function body or a template. |
@@ -483,6 +484,15 @@ declaration. The balanced argument group is inspected without moving
 the compiler cursor; a visible source macro retains its own grammar.
 
 Source: `src/macros/definitions/slots.x`
+
+<a id="Compiler.named_alias_expression"></a>
+#### Compiler.named_alias_expression
+
+`List Compiler.named_alias_expression(Compiler c, String name)`
+
+Resolves a visible alias by spelling for parsed and constructed names.
+
+Source: `src/macros/aliases.x`
 
 <a id="Compiler.parse_alias_declaration"></a>
 #### Compiler.parse_alias_declaration

@@ -294,7 +294,7 @@ points those bytes encode, and the byte encodings turn any bytes into
 ASCII text and back. A `String` cannot hold a NUL byte, so a decoder
 that returns a `String` raises `<malformed>` for one, and its `_bytes`
 form returns a `Block` of 1-byte elements instead. Invalid input raises
-`<malformed>` with the operation, a reason, and the byte `offset`.
+`<malformed>` with the operation, a reason, and the input byte `offset`.
 
 ## Tests and examples
 

@@ -40,6 +40,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.meta_provider_hashes`](#Compiler.meta_provider_hashes) | Returns the shared function hashes of an advertised meta provider. |
 | [`Compiler.module_source`](#Compiler.module_source) | Returns the x2c source at `path`, whose own text is `text`, with its file-scope `module` block replaced by the text of each member it names, in order, or NULL when the text has no block. |
 | [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
+| [`Compiler.prelude_dependencies`](#Compiler.prelude_dependencies) | Returns the prelude sources and includes already supplied to every unit. |
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
 | [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
 | [`Compiler.prelude_sources`](#Compiler.prelude_sources) | Returns the compiler-owned prelude sources relative to its home. |
@@ -381,6 +382,16 @@ Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
 Source: `src/collect/providers.x`
+
+<a id="Compiler.prelude_dependencies"></a>
+#### Compiler.prelude_dependencies
+
+`List Compiler.prelude_dependencies(void)`
+
+Returns the prelude sources and includes already supplied to every unit.
+Collection owns the include closure, including cached interface replay.
+
+Source: `src/collect/walk.x`
 
 <a id="Compiler.prelude_interface"></a>
 #### Compiler.prelude_interface

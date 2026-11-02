@@ -102,4 +102,4 @@ Source: `lib/task.x`
 
 ## Tests and examples
 
-`make verify` (`unittest/test-task.x`) and `make examples` (`power/channel-task-service`).
+`make verify` (`unittest/test-task.x`) and `make examples` (`power/channel-service`).

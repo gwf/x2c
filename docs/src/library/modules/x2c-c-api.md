@@ -11,6 +11,7 @@ prefix.
 
 | Function | Source | Signature |
 | --- | --- | --- |
+| [`x2c_block_bad_arg`](block.md#x2c_block_bad_arg) | `lib/block.x` | `void x2c_block_bad_arg(Symbol action)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
 | [`x2c_context_exchange`](context.md#x2c_context_exchange) | `lib/context.x` | `Context x2c_context_exchange(Context context)` |
@@ -94,6 +95,7 @@ prefix.
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
 | [`x2c_string_from_bytes`](string.md#x2c_string_from_bytes) | `lib/string/string.x` | `String x2c_string_from_bytes(const char *bytes, int length)` |
+| [`x2c_string_unescape_bytes`](string.md#x2c_string_unescape_bytes) | `lib/string/string.x` | `String x2c_string_unescape_bytes(String str)` |
 | [`x2c_task_channel_notify`](task.md#x2c_task_channel_notify) | `lib/task.x` | `void x2c_task_channel_notify(X2CChannelMonitor *monitor)` |
 | [`x2c_task_channel_sleep`](task.md#x2c_task_channel_sleep) | `lib/task.x` | `void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner)` |
 | [`x2c_task_current`](task.md#x2c_task_current) | `lib/task.x` | `void *x2c_task_current(void)` |
@@ -141,4 +143,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 129 functions.
+Total: 131 functions.

@@ -142,8 +142,9 @@ Source: `lib/regex.x`
 
 Returns `subject` with every match of `regex` replaced by what `fn`
 returns for its `RegexMatch`, inserted as is.
+A null callback raises `<bad-arg>` when a match invokes it.
 
-**Raises:** whatever `fn` raises.
+**Raises:** whatever `Func.apply` or `fn` raises.
 
 Source: `lib/regex.x`
 
