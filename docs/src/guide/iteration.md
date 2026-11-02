@@ -306,10 +306,11 @@ int main(void) {
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
 the enclosing block. Completion applies only when the chain ends in
-`try_next`, `next`, `done`, `list`, `array`, `foldl`, `any`, `all`, `find`,
-`count`, `sum`, `product`, `min`, `max`, or `foreach`. A `List` or `Array`
-destination ends the chain the same way: it calls `list` or `array` for you,
-which is why the chain above needs no explicit collector.
+`try_next`, `next`, `list`, `array`, `foldl`, `any`, `all`, `find`, `count`,
+`sum`, `product`, `min`, `max`, `parallel_map`, `parallel_map_in`, or
+`foreach`. A `List` or `Array` destination ends the chain the same way: it
+calls `list` or `array` for you, which is why the chain above needs no
+explicit collector.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:
