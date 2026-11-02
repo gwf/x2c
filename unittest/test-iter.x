@@ -655,10 +655,6 @@ static void iter_scan_and_array_collector(void) {
     7, counted_add, &empty_scan_storage);
   Array empty = empty_scan;
   EXPECT_INT_EQ(empty.len(), 0);
-
-  struct Iter null_source_storage, null_scan_storage;
-  EXPECT_TRUE(range(0, 0, 1, &null_source_storage).scan(
-    0, NULL, &null_scan_storage) == NULL);
 }
 
 static void iter_fold_predicates_and_zip_with(void) {
@@ -675,9 +671,6 @@ static void iter_fold_predicates_and_zip_with(void) {
   Iter empty = range(0, 0, 1, &empty_base_storage).head(
     0, &empty_head_storage);
   EXPECT_TRUE(empty.all(greater_than_one));
-  struct Iter head_base_storage, head_storage;
-  EXPECT_TRUE(range(0, 0, 1, &head_base_storage)
-    .head(0, &head_storage).all(NULL));
   struct Iter find_base_storage;
   Iter find_base = range(0, 4, 1, &find_base_storage);
   Var found = find_base.find(greater_than_one);
@@ -685,12 +678,8 @@ static void iter_fold_predicates_and_zip_with(void) {
   EXPECT_INT_EQ(find_base.next().int(), 3);
   struct Iter find_void_base_storage;
   Iter find_void_base = range(0, 1, 1, &find_void_base_storage);
-  EXPECT_TRUE(find_void_base.find(NULL) is void);
-  EXPECT_INT_EQ(find_void_base.next().int(), 0);
   EXPECT_TRUE(find_void_base.find(greater_than_one) is void);
   EXPECT_TRUE(find_void_base.next() is void);
-  struct Iter any_void_base_storage;
-  EXPECT_FALSE(range(0, 1, 1, &any_void_base_storage).any(NULL));
   struct Iter zip_left_storage, zip_right_storage, zip_storage;
   Iter zipped = range(1, 4, 1, &zip_left_storage).zip_with(
     range(10, 13, 1, &zip_right_storage),
@@ -705,51 +694,75 @@ static void iter_fold_predicates_and_zip_with(void) {
     pair_sum, &sum_zip_storage);
   Var sum_first = summed.next();
   EXPECT_INT_EQ(sum_first.int(), 11);
-  struct Iter null_left_storage, null_right_storage, null_zip_storage;
-  EXPECT_TRUE(
-    range(0, 1, 1, &null_left_storage).map2(
-      range(0, 1, 1, &null_right_storage),
-      NULL, &null_zip_storage) == NULL);
 }
 
+/* A null required callback raises through Func when an element first needs
+   it, so each operation consumes only that invocation's inputs. Empty inputs
+   make no call. */
 static void iter_required_callbacks_consume_only_their_inputs(void) {
   $test.scoped();
-  for (int operation = 0; operation < 4; operation++) {
-    struct Iter source_storage, stage_storage;
+  for (int operation = 0; operation < 9; operation++) {
+    struct Iter source_storage, right_storage, stage_storage;
     Iter source = Iter.init(&source_storage, 5, counted_next, 0);
+    Iter right = range(0, 9, 1, &right_storage);
     next_call_count = 0;
     Iter stage = NULL;
     if (operation == 0) stage = source.map(NULL, &stage_storage);
     if (operation == 1) stage = source.filter(NULL, &stage_storage);
+    if (operation == 2) stage = source.scan(0, NULL, &stage_storage);
+    if (operation == 3) stage = source.map2(right, NULL, &stage_storage);
     EXPECT_INT_EQ(next_call_count, 0);
     int missing = 0;
     try {
-      if (stage) stage.next();
-      else source.foldl(operation == 2 ? (Var) 9 : void, NULL);
-    } catch %(bad-arg *): missing++;
+      if (operation < 4) stage.next();
+      if (operation == 4) source.foldl(9, NULL);
+      if (operation == 5) source.foldl(void, NULL);
+      if (operation == 6) source.any(NULL);
+      if (operation == 7) source.all(NULL);
+      if (operation == 8) source.find(NULL);
+    } catch %(bad-arg (operation "Func.apply")): missing++;
     EXPECT_INT_EQ(missing, 1);
-    EXPECT_INT_EQ(next_call_count, operation == 3 ? 2 : 1);
-    if (stage) {
+    EXPECT_INT_EQ(next_call_count, operation == 5 ? 2 : 1);
+    if (operation < 4) {
       try stage.next();
-      catch %(bad-arg *): missing++;
+      catch %(bad-arg (operation "Func.apply")): missing++;
       EXPECT_INT_EQ(missing, 2);
       EXPECT_INT_EQ(next_call_count, 2);
     }
-    EXPECT_INT_EQ(source.next().int(), operation == 2 ? 1 : 2);
+    int consumed = operation < 4 || operation == 5 ? 2 : 1;
+    EXPECT_INT_EQ(source.next().int(), consumed);
   }
 
-  struct Iter empty_storage, map_storage, filter_storage;
+  struct Iter empty_storage, right_storage, stage_storage;
   Iter empty = Iter.init(&empty_storage, -1, counted_next, 0);
-  EXPECT_TRUE(empty.map(NULL, &map_storage).next() is void);
+  Iter right = range(0, 9, 1, &right_storage);
+  EXPECT_TRUE(empty.map(NULL, &stage_storage).next() is void);
   empty.init(-1, counted_next, 0);
-  EXPECT_TRUE(empty.filter(NULL, &filter_storage).next() is void);
+  EXPECT_TRUE(empty.filter(NULL, &stage_storage).next() is void);
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.scan(0, NULL, &stage_storage).next() is void);
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.map2(right, NULL, &stage_storage).next() is void);
   empty.init(-1, counted_next, 0);
   EXPECT_TRUE(empty.foldl(void, NULL) is void);
   empty.init(-1, counted_next, 0);
   EXPECT_TRUE(empty.foldl(7, NULL) == 7);
+  empty.init(-1, counted_next, 0);
+  EXPECT_FALSE(empty.any(NULL));
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.all(NULL));
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.find(NULL) is void);
   struct Iter single_storage;
   Iter single = Iter.init(&single_storage, 0, counted_next, 0);
   EXPECT_TRUE(single.foldl(void, NULL) == 0);
+
+  /* map2 needs its callback only when a pair forms. */
+  struct Iter left_storage, short_storage;
+  Iter left = Iter.init(&left_storage, 5, counted_next, 0);
+  Iter shorter = range(1, 0, 1, &short_storage);
+  EXPECT_TRUE(left.map2(shorter, NULL, &stage_storage).next() is void);
+  EXPECT_INT_EQ(left.next().int(), 1);
 
   struct Iter invalid_storage, invalid_filter_storage;
   Iter invalid = Iter.init(&invalid_storage, void, void_next, void);

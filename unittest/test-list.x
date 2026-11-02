@@ -264,14 +264,11 @@ static void list_fold_and_predicates(void) {
   EXPECT_INT_EQ(sum.integer(), 10);
   EXPECT_TRUE(numbers.any(greater_than_two));
   EXPECT_FALSE(numbers.all(greater_than_two));
-  EXPECT_FALSE(numbers.any(NULL));
   List empty = NULL;
   EXPECT_TRUE(empty.all(greater_than_two));
-  EXPECT_TRUE(empty.all(NULL));
   EXPECT_TRUE(empty.any(greater_than_two) == 0);
   Var found = numbers.find(greater_than_two);
   EXPECT_INT_EQ(found.integer(), 3);
-  EXPECT_TRUE(numbers.find(NULL) is void);
   EXPECT_INT_EQ(numbers.find(_list_truthy_string).int(), 3);
   Func always = %!(Var value) => { (void) value; return 1; };
   EXPECT_INT_EQ((%(0)).find(always).int(), 0);
@@ -281,13 +278,22 @@ static void list_fold_and_predicates(void) {
   EXPECT_TRUE(empty.find(always) is void);
   int missing = 0;
   try numbers.foldl(99, NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try numbers.foldl(void, NULL);
-  catch %(bad-arg *): missing++;
-  EXPECT_INT_EQ(missing, 2);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.any(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.all(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 5);
   EXPECT_INT_EQ(empty.foldl(99, NULL).integer(), 99);
   EXPECT_TRUE(empty.foldl(void, NULL) is void);
   EXPECT_INT_EQ((%(1)).foldl(void, NULL).integer(), 1);
+  EXPECT_FALSE(empty.any(NULL));
+  EXPECT_TRUE(empty.all(NULL));
+  EXPECT_TRUE(empty.find(NULL) is void);
   EXPECT_TRUE(empty.foldl(void, sum_pair) is void);
 }
 

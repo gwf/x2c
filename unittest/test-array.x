@@ -409,7 +409,6 @@ static void array_find_matches_list_and_iter(void) {
   EXPECT_TRUE(zero.find(always) is not void);
   EXPECT_TRUE(falsity.find(always) is not void);
   EXPECT_TRUE(null_value.find(always) is not void);
-  EXPECT_TRUE(values.find(NULL) is void);
   EXPECT_TRUE(values.find(%!(Var value) => value > 99) is void);
   Array empty = [], missing = NULL;
   EXPECT_TRUE(empty.find(always) is void);
@@ -632,16 +631,22 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   EXPECT_TRUE([1].foldl(void, wrong_arity) == 1);
   int missing = 0;
   try values.map(NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try values.map2(values, NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try values.foldl(0, NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try values.foldl(void, NULL);
-  catch %(bad-arg *): missing++;
-  EXPECT_INT_EQ(missing, 3);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try values.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 5);
   EXPECT_INT_EQ(empty.map(NULL).len(), 0);
+  EXPECT_INT_EQ(empty.map2(values, NULL).len(), 0);
   EXPECT_TRUE(empty.foldl(void, NULL) is void);
   EXPECT_TRUE(empty.foldl(7, NULL) == 7);
   EXPECT_TRUE([1].foldl(void, NULL) == 1);
+  EXPECT_TRUE(empty.find(NULL) is void);
 }
 
 
