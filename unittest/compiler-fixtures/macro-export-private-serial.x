@@ -1,5 +1,1 @@
-// Static compile-time definitions stay private to their source file.
-#include "macro-export-lib.x"
-
-int meta = $p_meta(1);
-int expression = $p.value();
+macro-export-private-parallel.x

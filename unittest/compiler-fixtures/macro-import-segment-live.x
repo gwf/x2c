@@ -1,9 +1,1 @@
-#include "macro-import-segment-family.x"
-#include "x2c.x"
-
-$project.imports.segment(imported_segment_answer);
-
-int main(void) {
-  printf("%d\n", imported_segment_answer());
-  return 0;
-}
+macro-import-segment.x
