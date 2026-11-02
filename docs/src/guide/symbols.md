@@ -48,8 +48,10 @@ static const char *explain(Symbol outcome) {
 }
 ```
 
-Zero is the empty symbol. Construction returns it for empty or missing
-input, it is falsy in a condition, and its representation is `<>`.
+Zero is the empty symbol. `Symbol.new` returns it for an empty string, and
+`Symbol.new_len` also returns it for a null pointer. `Symbol.new` requires a
+nonnull pointer. Zero is falsy in a condition, and its representation is
+`<>`.
 
 ## How a Symbol is encoded
 
@@ -79,12 +81,19 @@ Two runtime names can normalize to the same value, so use `Atom.intern`
 when the exact dynamic spelling matters. Keep a closed set of `Symbol`s short
 and spell its decoded names in source.
 
-The encoded integers are not in alphabetical order. Use `Symbol.compare`,
-which compares the decoded text:
+The encoded integers are not in alphabetical order. The relational
+operators on `Symbol` values call `Symbol.compare`, which compares the
+decoded text. A conversion to an integer type exposes the raw order:
 
 ```x2c
-printf("raw integers say b < abc: %d\n", <b> < <abc>);
-printf("Symbol.compare says b > abc: %d\n", <b>.compare(<abc>) > 0);
+unsigned long b = <b>, abc = <abc>;
+printf("raw integers say b < abc: %d\n", b < abc);
+printf("Symbol order says b > abc: %d\n", <b> > <abc>);
+```
+
+```text
+raw integers say b < abc: 1
+Symbol order says b > abc: 1
 ```
 
 `Symbol.str` decodes the value and returns the canonical `String`, so two
@@ -122,8 +131,8 @@ it returns `verylongid`.
 | storage | none; encoded in the value | the canonical `String`, when needed |
 | constant? | yes, usable as a `case` label | no; interned at run time |
 
-`Atom.intern` requires a non-empty spelling. A null or empty spelling is a
-programming error and terminates the process.
+`Atom.intern` requires a non-empty spelling. A null or empty spelling raises
+`<bad-arg>`.
 
 ### How an Atom is stored
 
@@ -177,10 +186,9 @@ Two cautions:
 Choose the type by who wrote the names.
 
 Use a `Symbol` for a closed set of names that you wrote, such as outcome and
-lifecycle values. `Lisp.read` reports `<value>`,
-`<eof>`, `<incomplete>`, or `<malformed>`, and `Error` causes include
-`<bad-sig>`, `<no-symbol>`, `<bad-arity>`, `<bad-types>`, and
-`<bad-result>`. A debugger shows each one by name, where an `enum` constant
+lifecycle values. `Lisp.read` returns `<value>` or `<eof>` and raises
+`<incomplete>` or `<malformed>`, and `Error` causes include `<bad-sig>`,
+`<no-symbol>`, `<bad-arity>`, `<bad-types>`, and `<bad-result>`. A debugger shows each one by name, where an `enum` constant
 prints as `3`. The compiler uses symbols the same way: AST node heads and
 the match operator and predicate names are compact symbols, because the
 compiler chose them.

@@ -237,7 +237,7 @@ auto {
 ~}
 ```
 
-`auto` retains an allocation region around a statement, and initializer
+`auto` opens an allocation region around a statement, and initializer
 `auto` releases the acquired value at block exit. `$lock` and `with` give
 scoped locking and temporary assignment. See
 [classes and system macros](system-macros.md). `defer statement;` runs the
@@ -308,10 +308,12 @@ build disables. A macro such a branch defines stays for the C compiler. See
   records the exact boundaries.
 - `_Static_assert`, designated initializers, `_Generic`, GNU attributes, and
   statement expressions are supported native forms. `_Generic` has no x2c
-  result type until a cast supplies one, so it cannot directly drive boxing
-  or method lookup.
-- `in` and `match` remain ordinary identifiers outside their contextual forms.
-  Other new keywords can collide with C names. Check the
+  result type. Each association converts to a typed destination, such as a
+  `Var` variable, and a cast gives the selection a type for method lookup.
+- Most x2c words, such as `try`, `match`, and `in`, are
+  [contextual](../reference/language.md#contextual-keywords): outside their
+  keyword forms they remain ordinary identifiers. Others, such as `defer`,
+  can collide with C names. Check the
   [keyword inventory](../reference/syntax/lexical-data.md#keywords).
 - Literal printf-family formats can trigger conversions of Var arguments.
   A computed format with a Var argument is rejected. For native arguments,

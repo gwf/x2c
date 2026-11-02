@@ -25,7 +25,8 @@ int main(void) {
 
 Array literals and iteration work alongside ordinary C functions. The runtime
 is available without an explicit include. The [language tour](examples/tours/language.x)
-shows more: maps, matching, memory scopes, exceptions, and macros.
+shows more: dynamic values, destructuring, maps, lambdas, matching, memory
+scopes, and embedded Lisp.
 
 ## Build and run
 

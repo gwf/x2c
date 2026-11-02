@@ -136,8 +136,9 @@ catch %(not-found *):
 ~}
 ```
 
-In a script, a `<cmd-fail>` that nothing catches ends the script with the
-command's status.
+In a script without `main`, a `<cmd-fail>` that nothing catches ends the
+script with the command's status. A script that defines `main` is an
+ordinary program, so an uncaught `<cmd-fail>` aborts it.
 
 Captured output is text. When the captured bytes contain a NUL, `output`,
 `lines`, and `errors` raise `<bad-arg>`, and `status` still reports the run.

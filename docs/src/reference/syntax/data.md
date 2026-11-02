@@ -8,7 +8,7 @@ Three modules under `etc/syntax/` hold the data:
 
 | Module | Accessor | Contents |
 | --- | --- | --- |
-| `grammar.x` | `syntax_grammar()` | Entry point and 187 productions |
+| `grammar.x` | `syntax_grammar()` | Entry point and 201 productions |
 | `lexical.x` | `syntax_lexical()` | Byte patterns, ordered scanning, modes, transitions, predicates, token passes, failures |
 | `extensions.x` | `syntax_extensions()` | Reviewed C11 comparison, feature groups, affected rule names, example spellings, documentation links |
 
@@ -62,8 +62,8 @@ describes in prose. A parser generator would need code for each one.
 ## Lexical model
 
 Character regular expressions cannot describe the lexer. A quoted List, for
-example, changes the significance of punctuation and signed numbers. Braced
-interpolation temporarily returns to code scanning.
+example, changes the significance of punctuation and signed numbers. An
+interpolation such as `$(expr)` temporarily returns to code scanning.
 
 The [generated inventory](lexical-data.md) exposes every record. The
 [lexical specification](lexical.md) explains the operations and boundary cases.

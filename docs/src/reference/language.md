@@ -1271,8 +1271,11 @@ accepts the selected value directly:
 int size = _Generic(sizeof(int), size_t: 1, default: 2);
 ```
 
-A selection does not convert to `Var` or take part in method calls. A cast
-gives it a type: `Var kind = (int)_Generic(text, char *: 1, default: 2);`.
+A selection has no x2c type of its own, so it does not take part in method
+calls. Each association converts to a typed destination, such as an
+initialized variable, an assignment target, or a parameter. So
+`Var kind = _Generic(text, char *: 1, default: 2);` boxes the selected
+value. A cast also gives a selection a type.
 
 An association type is a type name of specifiers, qualifiers, and pointers.
 Name a function-pointer or array type through a typedef.
@@ -2849,10 +2852,9 @@ when its hash matches the copy's. The hash of every unit definition it reaches
 through references must match too. An edited definition, or one that reaches an
 edited definition, is compiled with the unit's group like any other.
 
-A `meta` function that makes an explicit `$` call or uses a source-template
-constructor is also compile-time-only. A run-time call to a compile-time-only
-function is diagnosed where it is written. The diagnostic gives the function
-and the reason.
+A run-time call to a `meta` function that reaches a compiler query or a
+source-template constructor is diagnosed where it is written. The diagnostic
+gives the function and the reason.
 
 Compiler facilities load before a unit's own source, and macro code cannot
 redefine them.
@@ -2976,7 +2978,7 @@ descriptor table's capacity.
 
 ### Allocation regions
 
-`auto { ... }` retains an allocation region and releases it on every exit.
+`auto { ... }` opens an allocation region and closes it on every exit.
 The same prefix can wrap a control statement, such as `auto for (...) ...`,
 or a function definition, such as `auto int f(void) { ... }`. An
 expression-bodied function can use the prefix too. Normal `return`, `break`,
@@ -3023,8 +3025,8 @@ Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.
 
 `$auto(value)` is an ordinary expression macro. Its expansion calls
-`x2c.enclosing` to get the initialized declarator, places a release after that
-declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
+`x2c_enclosing` to get the initialized declarator, places a release after that
+declarator with `x2c_place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer. When
 the declaration finishes, the compiler checks that the result is the
 declarator's complete initializer. Then it binds the release. The release
@@ -4127,8 +4129,8 @@ runtime declaration requirements. Region `auto` uses native syntax; `$lock`
 retains its explicit macro spelling. The compatibility `$scope` decorator
 retains its macro collision policy.
 
-Region `auto` retains one region around its following statement and defers
-release inside an inner block containing that statement. `auto (pointer)`
+Region `auto` opens one region around its following statement and defers its
+close inside an inner block containing that statement. `auto (pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one
@@ -4765,9 +4767,14 @@ from the source's, because it also passes the same address on unchanged.
 
 Ordinary x2c translation does not expand C macros. It retains directives,
 reads the declaration and layout information needed from native macros, and
-leaves their uses to the C compiler. Limited conditional handling hides
-impossible arms such as `#if 0`; it is not a full preprocessor. Source must
-otherwise form syntax that x2c can parse.
+leaves their uses to the C compiler. It hides only a fixed set of arms that C
+never takes. One is the first arm of `#if 0`, or of a group that opens by
+requiring a never-defined name, such as `#ifdef _MSC_VER`. The others follow
+the first arm of a group that opens with `#ifndef` or `#if !defined` of such
+a name. `__cplusplus` and `_MSC_VER` are never defined. A compiler built for a
+host other than Windows also treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as
+never defined. Every other arm parses, including the `#else` arm of `#if 1`,
+so the source must form syntax that x2c can parse.
 
 Use `--cpp` on `translate`, `build`, or `run` when existing C needs macro
 expansion to supply grammar. This enables x2c's C expansion engine before
@@ -4812,9 +4819,8 @@ Within signed `long` arithmetic, a condition is decided when every name it
 tests is visible, is known never to be defined, or is a literal. Unsigned
 operands and integer magnitudes outside that range remain undecided.
 `defined NAME` fails after `#undef NAME`. x2c output is compiled as C by a
-GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
-`_MSC_VER` are never defined; a compiler built for a host other than Windows
-treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as never defined too. Only
+GNU-style compiler, so with `--cpp`, `__GNUC__` is always defined. The
+never-defined names of ordinary translation stay never defined. Only
 `defined`, `#ifdef`, and `#ifndef` decide `__GNUC__`: its value is unknown,
 so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group
 parses: the tokens of the other arms are trivia, and an `#include` in one is
@@ -5089,8 +5095,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `after-free` | A local is read after a call freed it, such as `Scope.free`,
-`Scope.realloc`, `Array.free`, `Array.list_free`, or a `cleanup`. |
+| `after-free` | A local is read after a call freed it, such as `Scope.free`, `Scope.realloc`, `Array.free`, `Array.list_free`, or a `cleanup`. |
 | `bad-free` | `Scope.free` or `Scope.realloc` is given a literal, a local's address, or other storage no Scope allocator returned. |
 
 The check analyzes regions lexically and summarizes each function within its

@@ -8,19 +8,18 @@ archive, and an importing program reaches its names through an alias.
 
 A package is a directory named for the package. Only its `src/` directory
 holds package sources; everything else in the directory consumes it like any
-other program.
+other program. The teaching package in `examples/packages/greet` has the
+whole layout a package with no native dependency needs:
 
 ```text
-packages/greet/
-  Makefile          PACKAGE := greet, then include ../package.mk
+examples/packages/greet/
+  Makefile          PACKAGE := greet, ROOT, and the package.mk include
   src/greet.x       the entry unit; nonstatic definitions are public
-  tests/            consumers that import the package
-  examples/
 ```
 
-That is the whole layout for a package with no native dependency. One that
-wraps a C library adds the pin, license texts, and profile that
-[Wrapping a C Library](wrapping-c-libraries.md) covers.
+A package can also hold `tests/` and `examples/` directories of consumers
+that import it. One that wraps a C library adds the pin, license texts, and
+profile that [Wrapping a C Library](wrapping-c-libraries.md) covers.
 
 The entry unit needs no manifest and no export list:
 
@@ -52,17 +51,29 @@ second package may publish its own `Greeting` in the same program.
 
 ## Building one
 
-`packages/package.mk` holds the recipe. A package Makefile is two lines:
+`packages/package.mk` holds the recipe. A package directly under `packages/`
+needs a two-line Makefile:
 
 ```make
 PACKAGE := greet
 include ../package.mk
 ```
 
+A package elsewhere also sets `ROOT` to the repository root and includes the
+recipe through it, as `examples/packages/greet/Makefile` does with
+`ROOT := ../../..`.
+
+A package with a native dependency sets two more variables after the
+`include`. `PACKAGE_C_FLAGS` holds the native compile options for the
+package's own C, such as `--c-include-dir` for the dependency's headers.
+`PACKAGE_LINK` holds the native arguments a consumer needs to link the
+package, such as the dependency's archives and `-l` libraries.
+
 An explicit `--package-dir`, or a target's `package-dirs` in `x2c.toml`,
 selects package ownership when compiling that package's source files. For
-`packages/greet/src/greet.x`, pass `--package-dir packages`; its public names
-then use the `greet__` prefix. `package.mk` supplies this directory for you.
+`examples/packages/greet/src/greet.x`, pass `--package-dir examples/packages`;
+its public names then use the `greet__` prefix. `package.mk` supplies this
+directory for you.
 The automatic `<home>/packages` search locates imports; source compilation
 uses explicit package directories.
 
@@ -71,8 +82,8 @@ uses explicit package directories.
 ```text
 builds/greet.h           the generated public header
 builds/libgreet.a        the archive a consumer links
-builds/greet.native.rsp  the native arguments a consumer needs, one per
-                         line, empty when none
+builds/greet.native.rsp  PACKAGE_LINK, one argument per line, empty when
+                         none
 builds/greet.module      the compile-time part, only for a package that
                          has one
 ```
@@ -86,7 +97,8 @@ builds the dependency into a shared cache outside the worktree and leaves a
 
 ## Using one
 
-From the repository root, register the directory that holds packages and
+Build the package first with `make -C examples/packages/greet build`. Then,
+from the repository root, register the directory that holds packages and
 import by name. Use `./x2c` to select the current development compiler:
 
 <!-- ignore: an import needs a registered --package-dir root. -->
@@ -101,7 +113,7 @@ int main(void) {
 ```
 
 ```sh
-./x2c build --package-dir packages -o greeter greeter.x
+./x2c build --package-dir examples/packages -o greeter greeter.x
 ```
 
 The driver reads the unit's recorded dependencies, adds the package's `builds`
@@ -377,10 +389,12 @@ make -C packages/torch run
 
 The SQLite package takes SQL text and binds ordinary x2c values.
 `Database.open` creates a file-backed or `":memory:"` connection. Prepare a
-statement once, bind a positional List or a Map of exact parameter names,
-and iterate copied row Lists. Rows preserve column order and duplicate names;
-`Prepared.columns` returns the names separately. Free statements before
-closing their connection, with `defer` beside each acquisition.
+statement once and bind its parameters: `bind(a, b)` binds positional values,
+`bind(@values)` splices a List, and `bind_named` binds a Map of exact
+parameter names. Iterating the statement yields copied row Lists. Rows
+preserve column order and duplicate names; `Prepared.columns` returns the
+names separately. Free statements before closing their connection, with
+`defer` beside each acquisition.
 
 <!-- ignore: an import needs a registered --package-dir root. -->
 ```x2c,ignore
@@ -605,9 +619,10 @@ where `<os>` is `darwin` or `linux` and `<arch>` is the machine name, such as
 `arm64` or `x86_64`.
 
 Accepted options are native include directories (`-I`, `--c-include-dir`,
-`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, archive inputs,
-`-pthread`, and `-framework <name>`. A bundle of shared libraries passes its
-library directory to both `-L` and `--rpath`, under `{package}`.
-Keep native archives in dependency order after the wrapper archive. Options
-that replace the consumer's output, command, or tools and unrestricted
-compiler/linker escape options are not package metadata.
+`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, the linker
+pass-throughs `-Wl,` and `-Xlinker`, archive inputs, `-pthread`, and
+`-framework <name>`. A bundle of shared libraries passes its library
+directory to both `-L` and `--rpath`, under `{package}`. Keep native archives
+in dependency order after the wrapper archive. Options that replace the
+consumer's output, command, or tools are not package metadata, and neither
+are optimization, debug, or `-Xcc` options.

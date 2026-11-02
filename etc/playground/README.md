@@ -21,7 +21,7 @@ Use Node 22 or newer, Docker, and the repository root as the build context:
 
 ```sh
 docker build -f etc/playground/Dockerfile -t x2c-playground .
-PLAYGROUND_ORIGINS=https://x2c.org node etc/playground/server.mjs
+PLAYGROUND_ORIGINS=https://x2c-lang.dev node etc/playground/server.mjs
 ```
 
 The image builds the checked-out x2c compiler and wasm runtime. It prewarms

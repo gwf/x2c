@@ -116,7 +116,8 @@ Choose existing x2c facilities according to their documented meaning:
 The existing packages illustrate two different lifetime choices:
 
 - PCRE2 reuses match data. `Regexp` owns compiled code, match data, and match
-  context; `defer regexp.free()` releases native storage. Results copy capture
+  context. It adopts `Cleanup` with `$cleanup.by(Regexp, free)`, so an `auto`
+  declaration or initializer releases native storage. Results copy capture
   text, names, and offsets into immutable x2c values, so a later match cannot
   alter them. The client supports named/numbered indexing and iteration,
   advances zero-length global matches, grows replacement output internally,

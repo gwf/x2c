@@ -27,7 +27,8 @@ Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
   `protocol/protocol.x`, `operator-ledger.x`, `transform/transform.x`, which
   drives normalization and dispatches to the shipped components,
-  `callables/callables.x`, which lowers only `Func` conversions,
+  `callables/callables.x`, which lowers `Func` conversions and typed
+  callback adapters,
   `cleanup/cleanup.x`, `adapter-memo.x`, `regions/regions.x`;
 - shipped components under `src/components/`, each lowering one language
   feature on the rewrite
@@ -40,7 +41,8 @@ Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
   values in printf-family formats), `protocol-adapters.x` (protocol
   adapters and Var descriptors), `raise.x` (raise),
   `string-switch.x` (switches on a String), and
-  `try-catch.x` (try, catch, and finally);
+  `try-catch.x` (try, catch, and finally), with `macro-mapping.x`, which
+  applies a macro to the rows of `expand`;
 - output: `cache.x`, `generate/generate.x`, `emit/emit.x`, `format.x`;
 - project planning and native primitives: `project/project.x`, `toolchain.x`;
   build/run/script workflows live in `commands/build/`, and the language

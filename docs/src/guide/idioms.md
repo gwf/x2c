@@ -291,7 +291,7 @@ in the result domain and the caller does not need a failure reason.
 
 ## Put cleanup beside acquisition
 
-`Scope` groups allocations by lifetime and `auto` retains one region
+`Scope` groups allocations by lifetime and `auto` opens one region
 around a statement. Initializer `auto` attaches cleanup to the acquired value,
 so the acquisition and its release are one line:
 
