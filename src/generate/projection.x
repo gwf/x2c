@@ -278,16 +278,18 @@ static void _forward_tags(Partition &p, List node) {
 // declarations
 
 /* A nonstatic declaration belongs to the header, apart from an object of
-   an anonymous type. A static aggregate body waits for type promotion.
-   A public struct or union declaration puts its tag in the header, so no
-   prototype forwards it again. */
+   an anonymous type and a declarator that names a static declaration. The
+   header omits initializers, so an initializer may name one. A static
+   aggregate body waits for type promotion. A public struct or union
+   declaration puts its tag in the header, so no prototype forwards it
+   again. */
 static void _add_declaration(Partition &p, Type type, List bindings) {
   if (type.is_static()) _add_statics(p, bindings.cdr());
   if (!type.is_static()) {
     Compiler c = p.c;
     Map statics = p.statics;
     List public = bindings.cdr().filter(
-      %!(item) => !_names_static(item, statics) &&
+      %!(item) => !_names_static(_uninitialized(item), statics) &&
                  !_completed_prototype(c, _declaration_binding(item)));
     if (!public && !_body_tag(type)) return;
     bindings = %(bindings @public);
@@ -460,17 +462,17 @@ static int _anonymous_body(Type type) {
 /* The header form of a declaration: an `extern` declaration without its
    initializers, a tag body alone, or the declaration as written. */
 static List _header_declaration(List node, Type type, List bindings) {
-  if (type.is_extern()) {
-    Array declarators = [];
-    foreach (List declarator in bindings.cdr()) {
-      match (declarator) case %(op = ?bind ?): declarator = bind;
-      declarators.push(declarator);
-    }
-    return %(declare $type (bindings @(declarators.list_free())));
-  }
+  if (type.is_extern())
+    return %(declare $type (bindings @(bindings.cdr().map(_uninitialized))));
   if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
     return %(declare $type (bindings (bind () ())));
   return node;
+}
+
+/* `declarator` without its initializer. */
+static List _uninitialized(List declarator) {
+  match (declarator) case %(op = ?bind ?): return bind;
+  return declarator;
 }
 
 static void _add_alias(Partition &p, List alias, Type type) {
