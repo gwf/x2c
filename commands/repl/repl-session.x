@@ -134,9 +134,7 @@ ReplCompletion ReplSession.complete(
   if (!session || cursor > source.len())
     raise %(bad-arg (operation "ReplSession.complete"));
   size_t start = cursor;
-  while (start && (source[start - 1] == '_' ||
-         scan_ascii_alpha((unsigned char) source[start - 1]) ||
-         scan_ascii_digit((unsigned char) source[start - 1]))) start--;
+  while (start && _x2c_ascii_word((unsigned char) source[start - 1])) start--;
   String prefix = String.new_len(source + start, cursor - start);
   String marker = "__x2c_completion__";
   String marked = String.new_len(source, start) + marker;
@@ -171,10 +169,8 @@ ReplCompletion ReplSession.complete(
     c.mark_completion(marked.len() - marker.len());
     _x2c_complete_here(
       c, <submit>,
-      %("void" "char" "short" "int" "long" "float" "double"
-        "signed" "unsigned" "if" "while" "for" "do" "return"
-        "try" "raise" "defer" "match" "switch" "with" "alias"
-        "unalias"));
+      _x2c_block_keywords().filter(%!(word) =>
+        word not in %("case" "break" "continue" "goto" "default")));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
@@ -568,11 +564,10 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         ?notes): {
         int at = position - _eval_head().len();
         at = at < 0 ? 0 : at > source.len() ? source.len() : at;
-        int line = 1, first = 0;
-        for (int i = 0; i < at; i++)
-          if (source[i] == '\n') { line++; first = i + 1; }
+        int line = 1, column = 1;
+        scan_next_line_col(source, at, line, column);
         entry = %($code $severity $message
-          (location ((file $file) (line $line) (column $(at - first + 1))
+          (location ((file $file) (line $line) (column $column)
             (length $length) (position $at))) $notes);
       }
     entries.push(entry);
