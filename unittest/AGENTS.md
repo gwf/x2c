@@ -5,22 +5,21 @@ Use the [agent directory](../agents/README.md) for task routing and the
 
 ## Harness
 
-- Write suites, tests, assertions, and registrations as
-  [TE-1](../agents/x2c-code-standard.md#tests-examples-and-samples)
-  specifies. Include `test-macros.x` before its first use.
-- The harness fails a test on a failed assertion, zero assertions, or extra
-  pushed/retained scope state. Ambient errors remain with their configured
-  policy owner. `TestHarness_skip` inside a running test makes that test a
-  skip unless it also fails: it needs no assertions and counts once. Outside
-  a test, the call registers one skipped test.
+The [test standard](../agents/x2c-code-standard.md#tests-examples-and-samples)
+owns suite style and fixture boundaries. Include `test-macros.x` before its
+first use.
+
+The harness fails a test on a failed assertion, zero assertions, or extra
+pushed/retained scope state. Ambient errors remain with their configured
+policy owner. `TestHarness_skip` inside a running test makes that test a
+skip unless it also fails: it needs no assertions and counts once. Outside
+a test, the call registers one skipped test.
 
 ## Fixtures and lifetimes
 
 - Choose `Scope.open` by allocation lifetime and guarantee release on every
   exit. Lists and interned Strings have long-lived owners; Vars may still hold
   mutable Array or Map values.
-- Restore mutable globals and capture targets in `finally` before freeing their
-  fixtures.
 - Keep tests deterministic. Close files, free short-lived backing storage, and
   remove `/tmp` artifacts.
 
@@ -43,18 +42,6 @@ Use the [agent directory](../agents/README.md) for task routing and the
 
 ## Compiler fixtures
 
-- Fixtures and checked-in expectations are in `compiler-fixtures/`; generated
-  actual artifacts are in `build/compiler-fixtures/`.
-- Each `.phases` file declares the exact sidecars owned by that fixture.
-- A fixture that runs its program must compile it without a C compiler
-  warning. A fixture whose generated C warns on purpose declares `cc-stderr`
-  and owns the warnings in `<name>.cc-stderr`; every other fixture fails on
-  any warning, in check and update alike, so a new one is declared
-  deliberately. `<name>.cc-stderr` records clang's text; a gcc run checks
-  `<name>.cc-stderr.gcc` instead when it exists, and an update writes that
-  file only when gcc's text differs.
-- `make verify-fixtures` checks expectations and never rewrites them.
-- `make verify-fixtures-update` rewrites declared sidecars. Use it only for
-  an intentional compiler change and review every resulting diff.
-- Keep fixture programs small. Assert only the phase boundaries that the
-  fixture is meant to own.
+The [fixture runner reference](compiler-fixtures/README.md) owns phase files,
+expected and actual artifact paths, native-warning expectations, compiler
+variants, and intentional expectation updates.

@@ -40,13 +40,6 @@ generated layout, side effects, and hot-path cost where applicable. Tests
 written solely for the machinery being removed do not establish an independent
 public requirement.
 
-For AST work, consult
-[the Match guide](../../replacing-manual-ast-walks-with-match.md)
-and trace forms into existing binding, typing, placement, transformation, and
-emission. The optional [source graph commands](../../../commands/graph/README.md)
-`flows` and `compare` investigate unclear parsed-source paths; reachability
-differences require source review, and missing paths do not establish safety.
-
 Apply PR-2, PR-3, FA-3, FA-5, FA-7, FA-8, FA-9, and MA-2 in
 [the standard](../../x2c-code-standard.md). Prototype the connected
 change and run focused translation, generated-C, compilation, or runtime
@@ -74,9 +67,8 @@ fixtures, documentation, generated projections, initialization, and cleanup.
 Keep tests of valid behavior and deliberate public failures. Refresh affected
 artifacts through repository targets after verifying source behavior.
 
-Review and fix the completed authored diff, including the strongest remaining
-opportunity for deletion or reuse. Inspect every generated change and follow
-the root delivery selection; PR submissions use focused checks and the
+Check the strongest remaining opportunity for deletion or reuse. Delivery
+follows the root selection; PR submissions use focused checks and the
 integrator owns the publication gate.
 
 Report the machinery removed, behavior preserved, and focused evidence. If no

@@ -19,9 +19,8 @@ side effects, generated output, tests, documentation, and history. When commit
 provenance points to an agent session, inspect the raw session and distinguish
 what it states from what the code history merely suggests.
 
-Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
-[the standard](../../x2c-code-standard.md) to the purpose test. Present the
-retained behavior and existing owner before counts and the removal hypothesis.
+Present the retained behavior and existing owner before counts and the
+removal hypothesis.
 
 Choose exactly one disposition:
 

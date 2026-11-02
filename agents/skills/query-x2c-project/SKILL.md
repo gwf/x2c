@@ -63,11 +63,8 @@ rename or semantic equivalence.
 
 ## State the result precisely
 
-A recorded path is a static relationship, not proof of runtime execution.
-No recorded path is not proof of absence. Call out unresolved calls, missing
-implementations, unlocated generated syntax, and other material coverage gaps.
-
-Field and type edges do not establish ownership or arbitrary alias effects.
-Use the existing specialized flow/lifetime commands when the question needs
-those bounded analyses. A snapshot query alone does not prove that moving or
-deleting code is safe.
+Apply the command reference's
+[coverage and interpretation limits](../../../commands/graph/README.md#coverage-and-interpretation).
+Report material unresolved calls, missing implementations, unlocated generated
+syntax, and other coverage gaps. Use the specialized flow/lifetime commands
+when the question needs those bounded analyses.

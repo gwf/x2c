@@ -39,18 +39,6 @@ measurement. Keep temporary probes outside tracked source. Record what the
 probe establishes and what it leaves uncertain. If it falsifies the approach,
 revise the design or recommend stopping.
 
-For AST work, use
-[the Match guide](../../replacing-manual-ast-walks-with-match.md)
-to identify the canonical input, structural pattern or template, and ordinary
-operation that binds, types, places, or emits it. The optional
-[source graph commands](../../../commands/graph/README.md) `flows` and
-`compare` can establish parsed-source paths; they do not establish semantic
-equivalence or the absence of runtime paths.
-
-Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
-[the standard](../../x2c-code-standard.md). Trace proposed checks to the
-operation that establishes the relevant fact.
-
 ## Record a decision-complete plan
 
 Follow [plans/README.md](../../../plans/README.md). Describe the result,
@@ -60,8 +48,7 @@ performance measurements when they decide the design; use coherent separate
 changes only when the work needs them. A PR is a delivery choice, not the unit
 of every design.
 
-End with the required short design review. Make the last implementation step
-review and fix the completed authored diff before publication validation.
+End with the short design review described in the plan instructions.
 
 The deliverable is the recommended design, evidence, and any consequential
 question requiring Gary's decision. A planning-only request ends there. If the

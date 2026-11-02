@@ -27,25 +27,15 @@ progressive testing, module guidance, and crash investigation. Test suggested
 causes with focused probes. Use an isolated clean checkout to distinguish a
 pre-existing defect while preserving worktree edits.
 
-For parser, AST, or transform work, consult
-[the Match guide](../../replacing-manual-ast-walks-with-match.md). Reuse the
-existing production and canonical AST operations.
-
 ## Repair and verify
 
 Fix the cause with the smallest coherent change that preserves surrounding
 behavior. Follow necessary work across modules; keep unrelated cleanup
-separate. Apply PR-2, PR-3, PR-4, PR-10, and FA-7 in
-[the standard](../../x2c-code-standard.md).
-
-Apply TE-2 in the standard through the existing suites or fixtures. Cover
-distinct affected behavior with meaningful regression checks.
+separate. Cover distinct affected behavior with meaningful regression checks.
 Prefer actual diagnostics and runtime behavior when those are what failed;
 inspect generated C or ABI details when they are the relevant behavior.
 
-Remove temporary instrumentation. Review and fix the completed authored diff,
-then follow root validation and publication instructions. Routine authorized
-repairs use the session's root delivery selection: ready PR submission with
+Remove temporary instrumentation. Routine authorized repairs use the session's root delivery selection: ready PR submission with
 focused evidence by default, or private handoff when acting as a subordinate
 worker. Requested review stops remain held. A submission uses focused
 evidence, without a publication gate.

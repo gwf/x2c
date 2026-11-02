@@ -29,24 +29,14 @@ the requested design would change compatibility beyond the request.
 ## Implement and verify
 
 Edit authoritative sources and follow the connected changes through callers,
-tests, and documentation. For parser, AST, or transform work, use
-[the Match guide](../../replacing-manual-ast-walks-with-match.md): reuse the
-recursive-descent production, bind canonical fields with source patterns, and
-return rewritten ASTs with visible templates.
+tests, and documentation.
 
 Use focused checks to answer implementation questions and verify what the user
 will observe. Refresh affected symbols, headers, fixtures, and generated docs
-through their documented targets, accepting only reviewed output changes. Let
-the root publication command perform the final bootstrap refresh and build
-sequence. When adopting a new language capability locally, build it and refresh
-bootstrap before compiling its callers; focused probes or stage comparisons
-can check the transition without an intermediate gate or publication. Private
-checkpoint commits may be made at any point under the root local-work policy.
-
-Before publication validation, review and fix the completed authored diff.
-Look for deletion and reuse opportunities, repeated checks of established
-facts, unnecessary machinery, and code that could use x2c more directly.
-Inspect generated changes against the authored changes that explain them.
+through their documented targets, accepting only reviewed output changes. The
+[root work policy](../../../AGENTS.md#work-in-the-repository) owns local
+bootstrap transitions and checkpoint commits. Inspect generated changes
+against the authored changes that explain them.
 
 ## Deliver
 

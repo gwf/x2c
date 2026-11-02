@@ -62,8 +62,8 @@ passing tests support that result rather than replace it.
 
 - Match and literal templates express AST structure. Reuse ordinary compiler
   operations for binding, typing, scope, lifecycle, placement, diagnostics,
-  and emission order. For compiler syntax work, read
-  `agents/replacing-manual-ast-walks-with-match.md`.
+  and emission order. The [Match guide](agents/replacing-manual-ast-walks-with-match.md)
+  owns the procedure for compiler syntax work.
 - Compile-time code may construct any canonical AST List. Ordinary operations
   accept forms by structure and position, without authenticating their origin.
   Preserve this deliberate behavior described under "Macro-visible syntax"
@@ -74,14 +74,9 @@ passing tests support that result rather than replace it.
   `using name`; `using $name` creates a fresh private name. Do not make
   definition-site binding a default. See "Keeping a file-scope name with
   `using`" in `docs/src/reference/language.md`.
-- Treat established contracts as correctness premises. Enforce each guarantee
-  at its owning boundary and rely on it downstream, including ownership,
-  lifetime, access, and failure behavior. Do not add checks, copies, exports,
-  locks, or state to reconstruct guarantees already supplied, or introduce a
-  boundary that discards them and then repairs their loss. A safety or
-  compatibility concern must identify a concrete contract gap or conflict;
-  uncertainty alone does not justify extra machinery. Earlier or more specific
-  rejection alone does not justify another check or fixture.
+- Apply [PR-4](agents/x2c-code-standard.md#principles) to established facts,
+  checks, diagnostics, and fixtures. Preserve guarantees at their owning
+  boundary instead of reconstructing them downstream.
 - Follow `agents/x2c-code-standard.md`, the single definition of x2c source
   style, including ER-4 and ER-5 for shared Error causes and PR-6 for
   representations; `agents/x2c-philosophy.md` holds their facts. Update the
@@ -130,10 +125,8 @@ The integrator runs broad checks once on the completed batch.
 Fresh worktrees, or worktrees that have integrated changed `bootstrap/`, need
 `mkdir -p debug && make build-safe >debug/bootstrap.log 2>&1` before using
 `builds/0`. During implementation, build or probe when it answers a current
-question. A language transition that the checked-in bootstrap cannot consume
-can use focused probes and the existing build and stage targets locally; it
-does not require an intermediate publication or full gate. Ordinary publication
-uses the single command below.
+question. The local bootstrap-transition policy is under
+[Work in the repository](#work-in-the-repository).
 
 Published tips on shared upstream branches must rebuild from their shipped
 bootstrap. The integrator validates the completed integrated tree before
@@ -170,9 +163,7 @@ setup verifies the common Git push hook; stop on a conflicting hook setup
 rather than silently replacing it. These tools and canonical skills work for
 both providers; provider-specific session or messaging APIs are unnecessary.
 
-For shared-integrator delivery, review the authored change and run meaningful
-focused checks. Rebootstrap locally when the seed cannot consume a capability
-needed for development.
+For shared-integrator delivery, run meaningful focused checks.
 Then push a work branch and submit its non-draft PR through
 `tools/integrate-dev.py submit`. Record the starting revision, exact head,
 dependencies, local-rebootstrap evidence when applicable, and focused

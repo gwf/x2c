@@ -82,11 +82,8 @@ under "Validation signals" together with the calibration reference.
 
 ## Check the shape before writing another check
 
-Apply PR-4 and the standard's trust-boundary paragraph to the producer and
-its consumers. For canonical AST construction, consult "Macro-visible
-syntax" in `docs/src/reference/language.md`. Apply EX-9 and MA-7 when a
-shape can be recognized or destructured; apply FA-9 before proposing a
-replacement checker.
+Apply EX-9 and MA-7 when a shape can be recognized or destructured; apply
+FA-9 before proposing a replacement checker.
 
 ## Hand off an authorized deletion
 

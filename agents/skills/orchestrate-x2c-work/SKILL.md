@@ -121,12 +121,9 @@ In direct mode, publish the collected batch:
 
 ## Capabilities
 
-A new native target, `meta` prototype, or compiler behavior can be implemented,
-rebootstrapped, and adopted in one local branch and publication batch. Build the
-capability and refresh bootstrap before compiling callers the old seed cannot
-consume. Use focused probes or stage builds when they answer the transition's
-current question. Give dependent workers the local capability commit as their
-starting revision; no intervening gate or upstream landing is required.
+Follow the [root work policy](../../../AGENTS.md#work-in-the-repository) for
+local bootstrap transitions. Give dependent workers the local capability
+commit as their starting revision.
 
 The final published tip must rebuild from its shipped bootstrap and pass the
 root publication checks. Intermediate private commits and shared-integrator

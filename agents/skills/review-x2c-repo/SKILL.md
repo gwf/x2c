@@ -34,20 +34,6 @@ could affect behavior. Reproduce each finding at current `HEAD` before
 recommending work, and rank it by the observed consequence. Distinguish
 refuted claims and unresolved questions from findings.
 
-Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
-[the standard](../../x2c-code-standard.md), and consult the relevant
-[philosophy](../../x2c-philosophy.md). Canonical AST Lists from
-`meta` functions are accepted by structure, as documented under
-[Macro-visible syntax](../../../docs/src/reference/language.md); their origin
-is not a defect.
-
-For parser, macro, Lisp, Match, transform, generator, or emitter work, consult
-[the Match guide](../../replacing-manual-ast-walks-with-match.md). Trace
-canonical forms into their ordinary semantic operations. The optional
-[source graph commands](../../../commands/graph/README.md) `flows` and
-`compare` expose parsed-source paths worth inspecting; shared paths do not
-establish semantic equivalence, and missing paths do not establish safety.
-
 ## Report or repair as requested
 
 For review-only work, report findings, consequences, recommended repairs, and

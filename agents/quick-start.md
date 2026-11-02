@@ -205,11 +205,9 @@ translates it, and source installs compile it with the host C compiler.
 The option stays out of user builds and `unittest/`, whose suites provoke
 region warnings on purpose.
 
-Private worktree commits may be made whenever useful, with no checks required
-merely to commit. For a language feature followed by adoption, build the
-feature, refresh bootstrap when the seed needs that capability, and try its
-callers locally. The build and stage commands above are available experiments,
-not a required local sequence or a reason to publish the feature separately.
+The [root work policy](../AGENTS.md#work-in-the-repository) owns private
+checkpoints and local bootstrap transitions. The build and stage commands
+above are available experiments, not a required local sequence.
 
 `make precommit` is a publication-readiness target, not a Git commit prerequisite.
 It refreshes bootstrap, rebuilds stage 0 safely, builds through
@@ -232,9 +230,7 @@ performance.
 
 Source changes can leave `stage-diff-0` red until bootstrap is regenerated:
 it compares checked-in bootstrap C/H with stage 0 output. The publication
-command owns the final refresh; inspect its generated diff. A local language
-transition may refresh bootstrap earlier and use individual self-host stage
-comparisons without running the publication gate.
+command owns the final refresh; inspect its generated diff.
 
 Use `x2c translate --dump-conformance <units>` for a per-unit conformance
 table. Run package checks when compiler or runtime changes can affect package

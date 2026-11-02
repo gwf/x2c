@@ -14,9 +14,6 @@ Find connected internal machinery whose removal may simplify the current
 program. Apply PR-10 to public APIs and the standard's "Finding bad code"
 section to mechanical scores.
 
-Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
-[the standard](../../x2c-code-standard.md) when judging a candidate.
-
 ## Start or resume the cumulative audit
 
 From the repository root, run:
