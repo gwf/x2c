@@ -8,10 +8,10 @@ destination metadata and immutable uploads.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 from pathlib import Path
+from agent_context import file_sha256 as digest
 import re
 import shutil
 import subprocess
@@ -37,11 +37,6 @@ SITES = {'staging': 'https://staging.x2c-lang.dev',
 def run(*args, **kwargs):
     return subprocess.run(args, check=True, text=True, capture_output=True,
                           **kwargs).stdout.strip()
-
-
-def digest(path):
-    with Path(path).open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
 def read(path):

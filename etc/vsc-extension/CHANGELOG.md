@@ -5,6 +5,9 @@ first.
 
 ## 0.4.1 - 2026-10-31
 
+- Remove LSP semantic tokens; TextMate grammar owns syntax coloring.
+- Highlight C declaration keywords and `using` in braced macro headers.
+
 - Highlight named and unnamed `List @` and `Map @` rest parameters,
   including function pointers and signatures split across comments and lines.
   Keep call splices, macro sequence parameters, and C variadics distinct.

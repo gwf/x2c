@@ -6,10 +6,10 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import datetime as dt
-import hashlib
 import json
 import os
 from pathlib import Path
+from agent_context import file_sha256 as digest
 import platform
 import shlex
 import shutil
@@ -21,10 +21,6 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent.parent
-
-
-def digest(path: Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def snapshot(source: Path, destination: Path) -> list[Path]:

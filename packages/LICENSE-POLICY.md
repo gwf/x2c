@@ -77,3 +77,13 @@ pinned source when needed. Candidate research keeps concise evidence under
 `plans/`, with completed or rejected investigations in `plans/archive/`, so a
 later review can distinguish a changed upstream profile from a repeated
 investigation.
+
+## Approved libtorch OpenMP exception (2026-11-02)
+
+The project admits the unmodified libgomp runtime in the pinned libtorch
+2.10.0 Linux CPU bundle under GPL-3.0-or-later with the GCC Runtime Library
+Exception 3.1. This exception applies only to that runtime in the recorded
+Torch profile; it does not admit GPL libraries generally. Its GPL text and
+runtime exception travel in `packages/torch/LICENSES/`. The macOS libomp
+runtime retains its LLVM OpenMP terms there too. Upstream runtime terms,
+source-distribution obligations, and required notices remain applicable.

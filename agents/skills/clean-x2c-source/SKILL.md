@@ -79,8 +79,8 @@ batch.
 ## Validate and deliver
 
 Inspect `git diff --check` and the source diff. Use focused behavior checks
-when the edits can affect behavior, then follow root publication validation
-and delivery instructions. Refresh affected generated files only through
+when the edits can affect behavior, then follow the root delivery selection; PR submissions use focused checks and the
+integrator owns the publication gate. Refresh affected generated files only through
 repository targets and inspect their changes.
 
 `builds/0/x2c lint --fmt-diff path/to/file.x` shows the spacing changes

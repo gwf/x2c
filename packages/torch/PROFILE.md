@@ -23,7 +23,16 @@
   IDX reader, and `torch::jit` for pickled checkpoints and TorchScript
   loading. All are headers and the dylibs above; no extra component is
   linked for them.
-- License: BSD-3-Clause, reproduced in `LICENSES/PyTorch-2.10.0-BSD-3-Clause.txt`.
+- Licenses: PyTorch's combined BSD and third-party notices are reproduced in
+  `LICENSES/PyTorch-2.10.0-BSD-3-Clause.txt`. The shipped libgomp uses GPL-3.0
+  with the GCC Runtime Library Exception 3.1; the project approved this narrow
+  exception on 2026-11-02 in `../LICENSE-POLICY.md`. The macOS libomp uses
+  the LLVM OpenMP license. The GPL, exception, and complete LLVM OpenMP terms
+  are retained in `LICENSES/`; the bundler copies that directory.
+  The GPL and exception texts come from GCC's `releases/gcc-11` tree;
+  LLVM's text comes from `release/16.x/openmp/LICENSE.TXT`, matching the
+  bundled macOS runtime's Clang 16 compiler identification. This records
+  notice provenance, not a recovered exact runtime source revision.
 - Vendored source and local patches: none. `src/torch-shim.cpp` is this
   package's C ABI over the C++ API and is compiled against the prefix.
 - Platforms: macOS arm64 CPU/MPS and Linux x86_64 CPU with the C++11 ABI.

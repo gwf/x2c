@@ -28,12 +28,11 @@ SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 	symbol-snapshot-probes \
 	header-cache-probes protocol-probes meta-helper-probes \
 	match-differential-probes \
-	lisp-reader-benchmark clean clobber \
+	lisp-reader-benchmark clean \
 	expression-bodied-function-probes \
 	FORCE
 
-default: test-all compiler-fixtures scope-probes error-probes \
-	varops-probes
+default: all
 all: test-all compiler-fixtures scope-probes error-probes \
 	varops-probes
 
@@ -144,7 +143,6 @@ FORCE:
 clean:
 	rm -rf test-all $(BUILD)
 
-clobber: clean
 
 $(BUILD)/test-all.o: $(BUILD)/test-support.h
 
@@ -155,5 +153,5 @@ $(BUILD)/test-all.o: $(BUILD)/test-support.h
 # after a runtime-only change.
 COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/operator-ledger.o \
 	../builds/0/src/diagnostics.o \
-	../builds/0/src/report.o ../builds/0/src/sourceview.o
+	../builds/0/src/report.o
 test-all: $(COMPILER_OBJECTS) $(X2CPATH)/libx2c.a

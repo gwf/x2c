@@ -2,7 +2,7 @@
 
 > Status: done
 > Shared Channel-scope payload adoption and Scope locking are superseded by
-> [detached Channel ownership](../detached-channel-ownership.md).
+> [detached Channel ownership](detached-channel-ownership.md).
 > Implementation integrated locally on 2026-10-22, including export-order repairs.
 > The combined publication gate and performance checkpoint remain pending.
 > Unified design agreed on 2026-10-22 after Channel, threading, and error-design

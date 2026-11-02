@@ -618,7 +618,7 @@ keeps its last value.
 level, and `Json.write_file` writes the compact form to a file. Object names
 are written in byte order, so equal values always produce the same text, and
 the indented layout is the one Python's `json.dumps` produces with
-`indent=2` and `sort_keys=True`. A bare key in a `{}` literal is a `Symbol`,
+`indent=2` and `sort_keys=True`. A bare key in a `{}` literal is an Atom,
 which is written as a string, and `Json.bool` makes a boolean. A `Map` or
 `Array` variable passes to the writers as a `Var`:
 

@@ -74,7 +74,6 @@ static List _example_audit(void) => %(
 
 /* Each page's `(start end)` markers around its list of src modules. */
 static List _src_module_lists(void) => %(
-  ("AGENTS.md" "- `src/` - the compiler" "- `lib/` -")
   ("docs/src/internals/architecture.md" "## Module ownership"
    "## The runtime boundary"))
 

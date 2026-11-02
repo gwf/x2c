@@ -11,6 +11,7 @@ import argparse
 import fcntl
 import importlib.machinery
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -189,3 +190,12 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+def file_sha256(path: str | Path) -> str:
+    """Hash a file without loading it all into memory."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as source:
+        for block in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()

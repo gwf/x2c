@@ -12,10 +12,10 @@ import argparse
 import csv
 import datetime as dt
 import fcntl
-import hashlib
 import json
 import os
 from pathlib import Path
+from agent_context import file_sha256 as sha256
 import platform
 import shutil
 import signal
@@ -45,7 +45,7 @@ COMMANDS = (
   ]),
   ("build-scaling", ["make", "bm-build-scaling"]),
   ("shootout", ["make", "shoot-run"]),
-  ("runtime", ["make", "performance-runtime"]),
+  ("runtime", ["make", "bm-all"]),
   ("compiler", ["make", "bm-compiler"]),
 )
 
@@ -85,14 +85,6 @@ def previous_success(history: Path) -> dict[str, object] | None:
     if row.get("status") == "success":
       return row
   return None
-
-
-def sha256(path: Path) -> str:
-  digest = hashlib.sha256()
-  with path.open("rb") as source:
-    for block in iter(lambda: source.read(1024 * 1024), b""):
-      digest.update(block)
-  return digest.hexdigest()
 
 
 def run_logged(

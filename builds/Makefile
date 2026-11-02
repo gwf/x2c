@@ -1,6 +1,6 @@
 ###############################################################################
 # Multi-stage recursive build system for X2C unified (.x) files
-# Run with `make N` to build stage N
+# Run `make stage-N` from the repository root to build through stage N
 ###############################################################################
 include ../etc/make-command.mk
 .SUFFIXES:

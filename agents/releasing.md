@@ -63,7 +63,8 @@ verification check against them. A release publishes these packages:
 raylib and SQLite are not released in any form. Build their bundles from a
 checkout with `make -C packages/<name> bundle`. `PACKAGES` in
 `packages/Makefile` is a different list: the packages that `make packages`,
-`make packages-check`, and `release-validation.yml` check.
+`make packages-check` check. The release-validation workflow excludes Torch
+and does not run the notes application.
 
 ## Cut a release
 

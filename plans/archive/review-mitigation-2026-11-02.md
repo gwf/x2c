@@ -1,15 +1,5 @@
-> Status: active - the seven scoped repairs are implemented. PR #648 is
-> held as a draft for direct re-review on 2026-11-02 and is not enrolled.
-> The final boundary correction below supersedes the correction-round
-> constant evaluator and expanded Func admission. Publication remains with
-> the shared integrator after review.
->
-> Gary requested this plan and dispatch to a new SOL 6.1 task on
-> 2026-11-02. Implementation is authorized for the seven findings below.
-> Review and implementation base: `dbcb6c3475732744cff6456880d707087cf79026`.
-> A fresh fetch before implementation found no intervening `origin/dev`
-> changes. Delivery is ready PR submission to the shared integrator,
-> not direct publication to `dev`.
+> Status: done - published through PR #648 at `6f537e429` on 2026-11-02.
+> The review holds below are historical; the final boundary correction governs.
 
 # Repository review mitigation
 

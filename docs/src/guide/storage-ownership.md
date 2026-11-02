@@ -1,6 +1,6 @@
 # Explicit storage ownership
 
-Each thread has a root Scope. Retained regions provide shorter allocation
+Each thread has a root Scope. Explicit regions provide shorter allocation
 lifetimes. A Map or Array record and its backing allocations belong to the
 scope active at construction. Growth replaces buffers under the record's
 current allocation owner without changing the container handle.

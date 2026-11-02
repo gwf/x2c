@@ -425,3 +425,11 @@ test('rest parameter markers survive comments and line breaks without swallowing
     await check(`${type}.new();`, 'new', 'entity.name.function.x2c');
   }
 });
+
+test('C declaration keywords and macro using headers retain keyword scopes', async () => {
+  for (const word of ['_Noreturn', '_Alignas', '_Atomic', '__inline',
+    '__inline__', '__restrict', '__restrict__'])
+    await check(`${word} int value;`, word, 'storage.modifier.x2c');
+  await check('macro Stmt $m(Expr $v) using scale { $v; }', 'using',
+    'keyword.other.macro.using.x2c');
+});

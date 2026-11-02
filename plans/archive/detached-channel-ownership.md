@@ -1,9 +1,8 @@
 # Detached Channel payload ownership
 
-> Status: active - delivery evidence closeout, 2026-10-24.
-> The correction is present in `dev` at `7e9fd0178`. Final benchmark
-> comparison and the resolution of the historical publication hold were
-> not located in the reviewed repository records.
+> Status: done - implementation published at `7e9fd0178`.
+> Historical benchmark and hold records were not recovered; no new performance
+> claim or retroactive publication proof is asserted. Archived 2026-11-02.
 
 ## Current disposition
 

@@ -28,7 +28,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler bm-build-scaling \
-	bm-match-cache bm-c2x2c performance-snapshot performance-runtime
+	bm-match-cache bm-c2x2c performance-snapshot
 SHOOTOUT_TARGETS = shoot-check shoot-run shoot-update shoot-calibrate
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
@@ -210,7 +210,6 @@ check-after-precommit:
 	time $(MAKE) verify
 # Example checks are optional (Gary, 2026-09-01).
 # Run `make examples doc-examples` manually.
-#	$(MAKE) examples
 	time $(MAKE) doc-outputs
 
 # `stage-diff-0` requires the refreshed bootstrap to reproduce stage 0, so the
@@ -241,7 +240,7 @@ agent-pr-check:					## Run complete agent PR proof once; rewrites bootstrap/ and
 		-o build -o stage-1 -o commands -- $(AGENT_PR_STEPS)
 
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting; rewrites bootstrap/ and stale generated sources
-	$(MAKE) build-safe
+# Refresh compiles the clean bootstrap; stage-3 cleans and rebuilds stages 0-3.
 	$(MAKE) stage-3
 
 clean:							## Remove ordinary generated output
@@ -426,9 +425,7 @@ performance-snapshot:					## Record representative performance
 RUNTIME_BENCHMARKS = bm-scan bm-string bm-list bm-block-buffer bm-scope \
 	bm-file bm-logger bm-iter bm-exception bm-var bm-varops
 
-bm-all: $(RUNTIME_BENCHMARKS)				## Run the current runtime timings
-
-performance-runtime: build
+bm-all: build						## Run the current runtime timings
 	@set -e; for target in $(RUNTIME_BENCHMARKS); do \
 		echo "x2c-performance-target,$$target"; \
 		$(MAKE) $$target; \

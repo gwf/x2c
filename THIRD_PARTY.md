@@ -63,3 +63,9 @@ are served remotely; no font binaries are tracked in this repository. The
 website-toolchain notice above does not identify or license those fonts.
 Any future distribution of local font files must retain the notices shipped
 with the selected font versions.
+
+## REPL line editing
+
+`commands/repl/repl-input.x` uses Linenoise. The vendored implementation
+retains its copyright notices, and the BSD 2-Clause terms ship in
+[LICENSES/linenoise-a473823d-BSD-2-Clause.txt](LICENSES/linenoise-a473823d-BSD-2-Clause.txt).

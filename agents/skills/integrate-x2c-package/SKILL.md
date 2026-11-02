@@ -19,17 +19,9 @@ rather than copying changing status into this skill.
 
 ## Start with developer tasks
 
-Identify the ordinary tasks a developer brings to this kind of library before
-judging the existing wrapper. Build the task list from the library's purpose,
-then check whether importing the package makes each task practical with x2c
-values, without vendored headers or hand-written substitutes for missing
-operations. Present an unresolved scope choice to Gary; follow an already
-approved task list directly.
-
-Judge the surface as a client writes it. A handle wrapper that owns native
-storage adopts `protocol Cleanup(T)`, so the client can write
-`T handle = auto T.open(...);`; without participation, `auto` has no cleanup
-operation and the client must arrange the release separately.
+Use the developer-task and surface rules in
+[packages/AGENTS.md](../../../packages/AGENTS.md). Follow an approved task
+list directly; present unresolved scope choices to Gary.
 
 Use source and upstream documentation to form hypotheses, then prove task
 reachability with actual programs. Inspect imported constants and raw options
@@ -39,10 +31,7 @@ real consumer does: Lisp must be able to inspect values returned to it.
 
 ## Design around useful examples
 
-Follow the package instructions for a short application and a broader one;
-review the short example first. Working examples establish usability beyond
-wrapped function counts. When a useful Lisp surface exists, provide it in the
-package unit behind one public installer over ordinary Lisp values.
+The package instructions own the examples and Lisp surface requirements.
 
 Use `plan-x2c-change` for unresolved compiler, runtime, or language design.
 For an already decided package change, use `execute-x2c-plan` to complete the

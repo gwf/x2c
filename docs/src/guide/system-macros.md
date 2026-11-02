@@ -538,8 +538,7 @@ cleans the variable's value at exit. See
 second set ships in `lib/system-macros.x` and becomes available with one
 line:
 
-<!-- ignore: the include illustrates the module name -->
-```x2c,ignore
+```x2c
 #include "system-macros.x"
 ```
 

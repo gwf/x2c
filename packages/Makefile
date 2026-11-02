@@ -1,5 +1,5 @@
-# The packages `make packages`, `make packages-check`, and the
-# release-validation workflow cover. Each package's own `check` target
+# The packages `make packages` and `make packages-check` cover.
+# release-validation excludes torch and the notes application. Each package's own `check` target
 # names what checking it runs; agents/releasing.md lists what releases ship.
 PACKAGES := pcre2 yyjson sqlite libcurl termbox2 blis libuv raylib torch \
   autodiff

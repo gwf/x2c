@@ -109,7 +109,7 @@ class ScopedEvidence(unittest.TestCase):
                                ("examples/README.md", True),
                                ("site/public/llms.txt", True),
                                ("commands/repl/README.md", False),
-                               ("docs/src/syntax/x2c.ebnf", False),
+                               ("docs/src/reference/syntax/x2c.ebnf", False),
                                ("src/emit.x", False)):
             with self.subTest(path=path):
                 self.assertEqual(gate.documentation(path), expected)

@@ -23,7 +23,7 @@ class ExamplesCheckTests(unittest.TestCase):
         self.examples = self.root / "examples"
         self.examples.mkdir()
         shutil.copy2(CHECKER, self.examples / "check.sh")
-        for name in ("love", "power", "magic", "programs", "scripts", "tours",
+        for name in ("c2x2c", "love", "power", "magic", "programs", "scripts", "tours",
                      "apps"):
             (self.examples / name).mkdir()
         greet = self.examples / "packages/greet"
@@ -104,7 +104,7 @@ program.chmod(0o755)
         names = ("love/maps", "a*[b]?", "a*[c]?")
         for name in names:
             self.source(name)
-        manifest = "".join(name + "|legacy|none||-|literal name\n"
+        manifest = "".join(name + "|probe|none||-|literal name\n"
                            for name in names + ("a*[b]?",))
         result = self.run_check(manifest)
         self.assertEqual(result.returncode, 1)

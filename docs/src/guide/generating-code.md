@@ -313,8 +313,7 @@ initializer, expands when the compiler resolves that expression.
 A local declared `Type` fills a type position, which lets a quotation
 declare a variable whose type it computes:
 
-<!-- ignore: a meta function fragment without its includes -->
-```x2c,ignore
+```x2c
 meta static List counter(String name) {
   Type type = %(unsigned);
   return $!{ $type $name = 0; };
@@ -370,8 +369,7 @@ A name that the quotation's body declares is not visible there,
 because the body is code for another place. A `$(...)` hole therefore means
 the same as a local declared just before the quotation and named with `$`:
 
-<!-- ignore: a meta function fragment without its includes -->
-```x2c,ignore
+```x2c
 return $!( $(d.callee)(@(d.arguments)) );
 // means
 List callee = d.callee;
@@ -824,8 +822,7 @@ Two ordinary source files. `shape.x` holds the `meta` functions and the
 macros that call them. `shape_fields` reads the fields from the `TypeInfo` the
 compiler sends. `shape_names` and `shape_reads` turn them into code.
 
-<!-- ignore: shape.x is the external file being illustrated -->
-```x2c,ignore
+```x2c
 #include "meta.x"
 
 /* The named fields of a struct-typed expression, in declaration order. */

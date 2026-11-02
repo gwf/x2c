@@ -13,11 +13,7 @@ sources=(
   src/parse/parse.x
   src/type.x
 )
-if [[ -f "$ROOT/lib/tokenizer.x" ]]; then
-  sources+=(lib/tokenizer.x)
-else
-  sources+=(src/tokenizer.x)
-fi
+sources+=(lib/tokenizer.x)
 
 measure() {
   local stage=$1

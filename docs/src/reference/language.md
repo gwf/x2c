@@ -160,8 +160,7 @@ int main(void) {
 }
 ```
 
-<!-- ignore: This member requires the preceding entry file. -->
-```x2c,ignore
+```x2c
 /* calculations/implementation.x */
 module int counter = 2;
 module int helper(int value) { return value + counter; }
@@ -199,8 +198,7 @@ The `module` storage class declares a file-scope name for every file of the
 module unit. It is written where `static` would be, before an object,
 function, `typedef`, or `class` declaration:
 
-<!-- ignore: This member requires an entry file that lists it. -->
-```x2c,ignore
+```x2c
 /* calculations/state.x */
 module typedef struct Tally { int total; } Tally;
 module Tally tally;
@@ -1169,7 +1167,8 @@ participant that implements the operator; `images - MEAN` with
 `#define MEAN 0.1307` is a compile-time type error in default mode. Cast the
 macro, `(double) MEAN`, or bind its value to a typed local.
 
-A participant may also declare `void T.discard(T)`. The compiler calls it on
+A protocol may declare `void Self.discard(Self)`, which its participant
+implements as `void T.discard(T)`. The compiler calls it on
 an unnamed temporary it made for one operator, such as the product in
 `a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the
 operator that consumes the temporary returns. A value bound to a name is
@@ -4539,7 +4538,8 @@ different identities.
 
 ### Errors and cleanup
 
-`try` requires a following filtered `catch`, `finally`, or both.
+`try` requires a following `catch`, `finally`, or both. A bare `catch:`
+handles every cause; a filtered `catch` handles only matching causes.
 
 `raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY` is
 a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol` or
@@ -5115,7 +5115,8 @@ The Lisp core keeps its own spellings for cons-cell and text work. `car`,
 `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
 `str`, and `repr` are unchanged and reach the same code. Note that Lisp's
 `assoc` returns the matching pair while `List.assoc` returns its second
-value, as the library documents.
+value, as the library documents. Lisp `assoc` and `member` compare with
+`Var.equal`; `List.assoc` and `List.contains` use `==`.
 
 An operation whose parameters or result have no `Var` representation is not
 available, which excludes `Iter` cursors, pointer out-parameters, variadic

@@ -473,11 +473,6 @@ static int _unsupported_terminal(void) {
   return 0;
 }
 
-static void _io_fail(Symbol operation) {
-  int error = errno;
-  raise %(io-fail (operation $operation) (errno $error));
-}
-
 /* The edit buffer never grows past its fixed limit. */
 static void _size_limit(void) {
   int limit = LINENOISE_MAX_LINE;
@@ -490,7 +485,7 @@ static void _write_bytes(int fd, const char *bytes, size_t length) {
     ssize_t count = write(fd, bytes + written, length - written);
     if (count > 0) written += (size_t) count;
     else if (count < 0 && errno == EINTR) continue;
-    else _io_fail(<write>);
+    else x2c_io_fail(<write>, errno);
   }
 }
 
@@ -498,7 +493,7 @@ static void _enable_raw(ReplInput input) {
   struct termios raw;
 
   if (tcgetattr(input.ifd, &input.original) == -1)
-    _io_fail(<tcgetattr>);
+    x2c_io_fail(<tcgetattr>, errno);
   raw = input.original;
   /* input modes: no break, no CR to NL, no parity check, no strip char,
    * no start/stop output control. */
@@ -516,7 +511,7 @@ static void _enable_raw(ReplInput input) {
 
   /* put terminal in raw mode after flushing */
   if (tcsetattr(input.ifd, TCSAFLUSH, &raw) < 0)
-    _io_fail(<tcsetattr>);
+    x2c_io_fail(<tcsetattr>, errno);
   input.raw = 1;
 }
 
@@ -1071,7 +1066,7 @@ static int _read_byte(EditState &l, char &out) {
     ssize_t count = read(l.input.ifd, &out, 1);
     if (count == 1) return 1;
     if (count == 0) return 0;
-    if (errno != EINTR) _io_fail(<read>);
+    if (errno != EINTR) x2c_io_fail(<read>, errno);
   }
 }
 

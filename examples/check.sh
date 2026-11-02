@@ -40,7 +40,7 @@ source_of() {
 
 list_sources() {
   find "$example_dir" -maxdepth 1 -type f \( -name '*.x' -o -name '*.xp' \)
-  find "$example_dir"/{love,power,magic,programs,scripts,tours,apps} \
+  find "$example_dir"/{c2x2c,love,power,magic,programs,scripts,tours,apps} \
     -type f \( -name '*.x' -o -name '*.xp' \)
 }
 
@@ -112,6 +112,9 @@ check_example() {
       cat "$case_build/x2c.stderr" >&2
       record_failure "$name did not translate"
       return 0
+    fi
+    if [[ -s "$case_build/x2c.stderr" ]]; then
+      cat "$case_build/x2c.stderr" >&2
     fi
     if ! "$cc" ${build_cflags[@]+"${build_cflags[@]}"} \
         ${linker_flags[@]+"${linker_flags[@]}"} \
@@ -193,7 +196,7 @@ while IFS= read -r row || [[ -n "$row" ]]; do
   [[ -f "$source" ]] || record_failure "$name has no .x or .xp source"
 
   case "$category" in
-    showcase|optional|external-input|probe|legacy|known-failure) ;;
+    showcase|optional|external-input|probe) ;;
     *) record_failure "$name has unknown category '$category'" ;;
   esac
   case "$action" in

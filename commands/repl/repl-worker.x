@@ -106,11 +106,9 @@ static int _worker_read(int fd, Buffer pending, Var &value) {
 
 static String _worker_reason(ReplWorker worker) {
   if (_worker_interrupted) return "interrupted";
-  int status = worker.status;
-  if (WIFSIGNALED(status))
-    return %"native worker ended with signal $((int) WTERMSIG(status))";
-  if (WIFEXITED(status))
-    return %"native worker exited with status $((int) WEXITSTATUS(status))";
+  int signal = 0, status = Job.decode_wait_status(worker.status, signal);
+  if (signal) return %"native worker ended with signal $signal";
+  if (status >= 0) return %"native worker exited with status $status";
   return "native worker disconnected";
 }
 
@@ -394,12 +392,12 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
   int requests[2], replies[2], master = -1, slave = -1;
   if (pipe(requests) || pipe(replies)) {
     int error = errno;
-    raise %(io-fail (operation "repl worker pipes") (errno $error));
+    x2c_io_fail("repl worker pipes", error);
   }
   if (start.interactive) {
     if (openpty(&master, &slave, NULL, NULL, NULL)) {
       int error = errno;
-      raise %(io-fail (operation "repl worker terminal") (errno $error));
+      x2c_io_fail("repl worker terminal", error);
     }
     struct termios mode;
     if (!tcgetattr(slave, &mode)) {
@@ -415,7 +413,7 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
   pid_t pid = fork();
   if (pid < 0) {
     int error = errno;
-    raise %(io-fail (operation "repl worker fork") (errno $error));
+    x2c_io_fail("repl worker fork", error);
   }
   if (!pid) {
     // The child inherits the supervisor's catch frames; no raise reaches them.

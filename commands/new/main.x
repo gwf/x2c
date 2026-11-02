@@ -83,18 +83,8 @@ int main(int argc, char **argv) {
     CliRequest request = CliRequest.parse_arguments(arguments);
     return _create(request.inputs.car(), request.quiet);
   }
-  List args = Args.from_argv(argc, argv);
-  List spec = %(
-    (-q --quiet (help "Suppress the successful receipt"))
-    (directory required));
-  if (args && (args.car() == "--help" || args.car() == "-h")) {
-    puts("usage: x2c new [-q|--quiet] <directory>");
-    return 0;
-  }
-  Map parsed = NULL;
-  try parsed = Args.parse(args, spec);
-  catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
-    Diagnostics.driver_error(%"new: $why");
-  }
-  return _create(parsed["directory"], parsed["quiet"].integer());
+  arguments = Args.from_argv(argc, argv);
+  arguments.unshift("new");
+  CliRequest request = CliRequest.parse_arguments(arguments);
+  return _create(request.inputs.car(), request.quiet);
 }

@@ -216,7 +216,7 @@ invent a new ordinary gate.
 ## Recovery baseline
 
 The restoration workflow accepts releases produced and verified by this
-pipeline. The 0.15.0 (2026-10-16) and 0.15.1 (2026-10-17) releases were
+pipeline. The 0.15.0 (2026-10-17) and 0.15.1 (2026-10-17) releases were
 promoted through it with their receipts, so recovery restores the newest of
 those receipts. The pre-cutover Pages artifact expired before it was
 captured, and no SHA-256 or deployment ID was recorded, so the site that

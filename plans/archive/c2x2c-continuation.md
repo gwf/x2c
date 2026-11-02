@@ -11,7 +11,7 @@ to borrowed values with reducer-controlled ownership transfer. Public
 Channel and cooperative `Thread.stop` now exist. Use the current
 [thread guide](../../docs/src/guide/contexts-and-threads.md),
 [Channel guide](../../docs/src/guide/channels.md), and
-[ownership closeout](../detached-channel-ownership.md).
+[ownership closeout](detached-channel-ownership.md).
 
 The material below records the original checkpoint. Its automatic export
 description, absent-Channel claim, and publication waiver are historical;

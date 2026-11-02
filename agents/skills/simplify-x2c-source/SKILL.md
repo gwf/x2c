@@ -76,7 +76,8 @@ artifacts through repository targets after verifying source behavior.
 
 Review and fix the completed authored diff, including the strongest remaining
 opportunity for deletion or reuse. Inspect every generated change and follow
-root validation and delivery instructions on the final tree.
+the root delivery selection; PR submissions use focused checks and the
+integrator owns the publication gate.
 
 Report the machinery removed, behavior preserved, and focused evidence. If no
 substantial connected removal was supported, report that result plainly.

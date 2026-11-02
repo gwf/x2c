@@ -286,3 +286,85 @@ Git worktree removal without force. Never delete retained failures merely
 because they are old, or remove records to release holds. Report remaining
 retained candidates and their reasons at handoff. Starting this skill installs
 no daemon or scheduler; stopped sessions leave records for the next integrator.
+
+## Validate publication
+
+Before publishing, fetch and integrate current `origin/dev`, review the
+resulting diff and generated changes, and run `git diff --check`. Commit
+subjects are short, lower-case, and present tense. Choose validation from the
+change being delivered, compared with current `origin/dev`, not from unrelated
+code brought in by that integration. Validate the final tree:
+
+- Code, runtime, build, test, tool, executable-example, or generated-artifact
+  changes: `tools/gate-state.py ensure agent-pr-check`.
+- Documentation-only changes: `tools/gate-state.py ensure doc-check`.
+
+For example, after rebasing a plans-only edit onto a newer `dev` that changed
+compiler code, run `doc-check`; do not run `agent-pr-check` just because the
+worktree now contains those upstream commits. If a merge obscures this
+boundary, replay the authored documentation commit on current `origin/dev`
+and verify that its diff contains only documentation.
+
+The code command reuses valid evidence or runs `precommit` and the remaining
+extended checks. It owns bootstrap refresh, safe rebuild, and self-host
+comparison; do not run its broad components separately merely to publish.
+Review every resulting artifact delta. Edits, regeneration, or integration
+that change the validated tree require ensuring the command again. The helper
+retains compiler validation when only ordinary Markdown or independent external
+commands changed, and runs their applicable existing checks. Upstream movement
+alone is not a reason to repeat compiler validation. Shared build/toolchain,
+compiler, runtime, bootstrap, and built-in build-command changes still require
+the full gate. A commit,
+review, push, or elapsed time does not invalidate an unchanged result.
+
+Performance evidence stays outside these correctness gates. Follow
+[performance checkpoints](../../performance-checkpoints.md) for the
+nightly `dev` snapshot and before publishing a coherent batch that can affect
+compiler throughput, generated-code performance, runtime hot paths, or build
+orchestration. Do not require it for documentation, tests-only work,
+generated-only refreshes, or plainly non-hot-path changes.
+
+A failed required check stops publication. Preserve the changes and full log,
+isolate the cause with focused checks, and report the failing command when
+work cannot continue within scope. Escalate an increase in failures or an
+unresolved consequential design choice rather than hiding it in output.
+
+When Gary explicitly selects direct delivery, the session owns integration
+and publication validation. Network actions needed for the selected delivery
+are authorized by the task. Use the explicit destination:
+
+```sh
+git push origin HEAD:refs/heads/dev
+```
+
+If the push is rejected because `dev` advanced, fetch, integrate, review,
+and validate the new tree before retrying. Never force-push `dev` or `main`.
+Do not advance `main` as ordinary delivery; Gary authorizes production
+promotion separately under [agents/releasing.md](agents/releasing.md).
+
+For a requested draft PR review stop, push the workspace branch to the same-named
+remote branch and use `dev` as the base:
+
+```sh
+branch="$(git branch --show-current)"
+git push -u origin "HEAD:refs/heads/$branch"
+gh pr create --draft --fill --base dev --head "$branch"
+gh pr view --json baseRefName --jq .baseRefName   # must print dev
+```
+
+Keep a requested PR available for review unless merging is also requested.
+Use `dev` as the base even when another workspace has related changes.
+Choose push destinations explicitly; the branch's upstream does not choose
+where either form of delivery goes.
+
+
+## Queue commands
+
+Queue commands are agent responsibilities. The standing skill uses `status`,
+`wait --timeout 60`, `prepare`, `land <batch-id>`, `land <batch-id> --publish`,
+and `park <batch-id>`; Gary need only start the integrator and select it for
+submitting sessions. Records and preserved candidates live under the
+integration checkout's ignored `debug/integration/` directory and survive
+session restarts. Follow the [integration skill](#finish-batches-and-keep-pace)
+for whole-queue selection, failure regrouping, proof recovery, and candidate
+retirement. Selection flags do not exempt a batch from those rules.

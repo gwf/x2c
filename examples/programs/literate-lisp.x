@@ -279,7 +279,7 @@ int main(int argc, char **argv) {                                               
         }
         default: {                                                               // Fallback when no pattern matches.
           Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n",             // Native format string with File I/O.
-                        args[0].str());                                          // Array indexing, then String access.
+                        args[0]      );                                          // Array indexing, then String access.
           return 1;
         }
       }
@@ -714,15 +714,7 @@ static Var _eval_text(Interp &self, String source) {
 
 static Var _import_file(Interp &self, String path) {
   File source = auto path.open("r");                                             // Close File on block exit.
-  Block content = auto Block.new(sizeof(char));                                  // Release Block on block exit.
-  if (source.read_into(content) == <eof>) return %();                            // EOF gives an empty List result.
-  if (content.length > INT_MAX) {                                                // Native C size limit.
-    size_t size = content.length, int limit = INT_MAX;                           // Mixed types in one declaration.
-    $fail(<size-limit>, "Lisp.eval_file", <size>, size, <limit>, limit);         // Integers box into the error List.
-  }
-  if (memchr(content.bytes, '\0', content.length))                               // C library scans the raw bytes.
-    $fail(<bad-arg>, "Lisp.eval_file", <reason>, "embedded NUL");                // Add the reason to the error List.
-  return _eval_text(self, String.new_len(content.bytes, (int) content.length));  // C bytes converted to x2c String.
+  return _eval_text(self, source.string());                                      // File owns decoding and size failures.
 }
 
 /* Name lookup and captured bindings -----------------------------------------------------------------------------------

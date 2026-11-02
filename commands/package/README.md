@@ -1,9 +1,10 @@
 # Package management
 
-`x2c install`, `x2c remove`, and `x2c list` keep their legacy options, help,
-and response files. The driver expands response files once and forwards
-the argument vector to this command for legacy CLI parsing. `x2c package install`, `remove`, and `list` also invoke the
-same operations; like other external commands, they receive literal arguments.
+`x2c install`, `x2c remove`, `x2c list`, and the corresponding
+`x2c package` operations use one `CliRequest` parser for options and help.
+The driver expands response files once before forwarding its short forms.
+Direct package invocation keeps response-file words literal. Dependency
+preparation uses the separate internal `ensure` operation.
 
 The command owns installed package markers, indexes, downloads, digest
 checks, staging, installation locks, source-package builds, and lockfiles.

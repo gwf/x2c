@@ -129,14 +129,8 @@ remain `worker`/`private`. Local-only work stays local. Integration readiness
 requests landing the pinned revision; removing it cancels only if observed
 before push.
 
-Queue commands are agent responsibilities. The standing skill uses `status`,
-`wait --timeout 60`, `prepare`, `land <batch-id>`, `land <batch-id> --publish`,
-and `park <batch-id>`; Gary need only start the integrator and select it for
-submitting sessions. Records and preserved candidates live under the
-integration checkout's ignored `debug/integration/` directory and survive
-session restarts. Follow the [integration skill](skills/integrate-x2c-prs/SKILL.md)
-for whole-queue selection, failure regrouping, proof recovery, and candidate
-retirement. Selection flags do not exempt a batch from those rules.
+Queue management follows the
+[integration skill](skills/integrate-x2c-prs/SKILL.md).
 
 ## Build and validate
 

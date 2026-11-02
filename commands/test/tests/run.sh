@@ -217,14 +217,12 @@ defines = ["PROFILE_VALUE=42"]
 c-flags = ["-Wall"]
 PROFILE
 cat >"$WORK/project/profile_check.x" <<'PROFILE_SOURCE'
-#include "test.x"
-$test()
-static void profile_value(void) { $expect_eq(PROFILE_VALUE, 42); }
-$test.main();
+#include "x2c.x"
+int main(void) { return PROFILE_VALUE != 42; }
 PROFILE_SOURCE
 run --profile checked profile_check.x
-[ "$status" = 0 ]
-grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
+if [ "$status" != 0 ]; then cat "$WORK/out"; exit 1; fi
+grep -Fxq 'files: 1 passed, 0 failed; tests: 0 passed, 0 failed' "$WORK/out"
 run --unknown
 [ "$status" = 2 ]
 grep -Fq "unknown option '--unknown'" "$WORK/out"

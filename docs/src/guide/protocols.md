@@ -180,8 +180,9 @@ gives the full rules, including signature conflicts and `Var(T)`.
 
 Operators call the same members as dot syntax: `+` calls `add`, `==` calls
 `equal`, `<` compares through `compare`, conditions call `truth`, and indexing
-calls `getindex`. A participant may also declare `void T.discard(T)` to
-release each unnamed temporary in an operator chain. The reference lists
+calls `getindex`. A protocol may declare `void Self.discard(Self)`, which
+its participant implements as `void T.discard(T)`, to release unnamed
+temporaries consumed by protocol operations. The reference lists
 [every operator and its member](../reference/language.md#operators), with the
 rules for mixed operands and updates.
 

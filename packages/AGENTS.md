@@ -22,7 +22,8 @@ show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
 `PACKAGES` in `packages/Makefile` lists the packages that `make packages`,
-`make packages-check`, and `release-validation.yml` cover. Add a new package
+`make packages-check` cover. The release-validation workflow excludes
+Torch and does not run the notes application. Add a new package
 there and give its Makefile a `check` target.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
@@ -224,8 +225,7 @@ explicitly; the default is
 A user-level cache may share builds between clones.
 
 Cache entries are keyed by version, admitted profile, host/target, compiler
-identity, and manifest hash. Prepare in a temporary directory, verify source
-and license hashes, atomically rename the completed prefix, and write a
+identity, and manifest hash. Prepare in a temporary directory, verify source hashes, atomically rename the completed prefix, and write a
 completion stamp. Concurrent worktrees use a per-key lock or reuse an already
 completed identical entry.
 

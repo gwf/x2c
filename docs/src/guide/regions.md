@@ -189,7 +189,7 @@ regions part of the type system of a C-like language and checked pointer
 lifetimes against them. From the ML Kit, x2c takes the idea that regions are
 the unit of deallocation; from Cyclone, the idea that a C program can be
 checked against them. The regions are the ones the author wrote with
-region `auto` and the retain and release calls. The check adds nothing to the
+region `auto` and the `Scope.open` and `Scope.close` calls. The check adds nothing to the
 program text and produces only warnings, except in compile-time code.
 
 Rust and Swift put ownership and lifetime in the signature. Every call is

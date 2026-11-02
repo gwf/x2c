@@ -230,7 +230,7 @@
 			"name": "keyword.other.typedef.x2c"
 		},
 		"anon_pattern_3": {
-			"match": "\\b(const|extern|register|restrict|static|volatile|inline)\\b",
+			"match": "\\b(const|extern|register|restrict|static|volatile|inline|_Noreturn|_Alignas|_Atomic|__inline(?:__)?|__restrict(?:__)?)\\b",
 			"name": "storage.modifier.x2c"
 		},
 		"anon_pattern_4": {
@@ -3963,7 +3963,7 @@
 					}
 				},
 				{
-					"match": "\\busing(?=\\s+\\$?[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$?[A-Za-z_][A-Za-z0-9_]*)*\\s*=>|\\s+\\$)",
+					"match": "\\busing(?=\\s+\\$?[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$?[A-Za-z_][A-Za-z0-9_]*)*\\s*(?:=>|\\{)|\\s+\\$)",
 					"name": "keyword.other.macro.using.x2c"
 				}
 			]

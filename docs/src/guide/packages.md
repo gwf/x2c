@@ -174,8 +174,7 @@ function, with a `meta native` definition or a bodyless `meta` prototype. Buildi
 [native module](meta-functions.md#native-modules) from the package's
 sources, `builds/<name>.module`, and importing the package loads it:
 
-<!-- ignore: the sample is the source of a package. -->
-```x2c,ignore
+```x2c
 meta native int tally_sum(int n) => n * (n + 1) / 2;
 ```
 
@@ -227,8 +226,7 @@ native dependency links in this way.
 A package can publish macros beside its compile-time functions in ordinary
 source:
 
-<!-- ignore: this is a source file in a package named tally. -->
-```x2c,ignore
+```x2c
 // src/tally.x
 meta int tally_sum(int n);
 macro Expression $tally.sum4() using tally_sum => tally_sum(4);

@@ -62,7 +62,7 @@ state the limits of the evidence.
 
 Keep these experiments specific to the change rather than adding recurring
 product gates. For implementation, review and fix the authored diff and follow
-root validation and delivery instructions. Update incident status only when
+the root delivery selection. In PR mode the integrator runs the final gate. Update incident status only when
 the validated change actually resolves the corresponding report.
 
 Report the requested result and evidence: recommendations for a review, or the

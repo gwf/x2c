@@ -42,7 +42,7 @@ intentional compatibility choice, not an omitted rename.
   Binding explanations and the AST catalog already exist.
 - [Structured lint findings](x2c-lint-and-format.md) owns the approved optional
   List output and compiler consumer. F3 above owns the separate existing-rule gap.
-- [Detached Channel ownership](detached-channel-ownership.md) owns recovery of
+- [Detached Channel ownership](archive/detached-channel-ownership.md) owns recovery of
   the historical benchmark and delivery-hold decision, not more implementation.
 - [Deferred language and library candidates](reference/deferred-candidates-2026-10-31.md)
   owns conditional JSON/assertion, Array rest, meta Map, quotation, and browser work.

@@ -27,7 +27,7 @@ the source changes that the breaking entries below require.
   [Runtime Lisp](language.md#runtime-lisp).
 - `$(...)` now builds a List from evaluated expressions, `@(...)` splices a
   List or Map into a literal or call, and `${key: value}` builds a Map whose
-  bare identifier keys are Symbols. See
+  bare identifier keys are evaluated. See
   [Evaluated Lists and Maps](language.md#evaluated-lists-and-maps).
 - A final `List @name` parameter packs the trailing call arguments into one
   List, and `List.new(a, b, c)` builds a List the same way. See

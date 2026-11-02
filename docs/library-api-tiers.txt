@@ -20,9 +20,9 @@ lib/block.x|advanced|Bytes.new,Bytes.push,Bytes.reserve,Bytes.try_pop
 lib/block.x|advanced|Block.move_to
 lib/buffer.x|advanced|Buffer.cleanup
 lib/buffer.x|advanced|Buffer.free,Buffer.indent,Buffer.newline
-lib/buffer.x|advanced|Buffer.newline_indent,Buffer.pad,Buffer.printf
-lib/buffer.x|advanced|Buffer.repr,Buffer.reserve,Buffer.str,Buffer.str_free
-lib/buffer.x|advanced|Buffer.tabstop,Buffer.unwrite,Buffer.write
+lib/buffer.x|advanced|Buffer.newline_indent,Buffer.pad
+lib/buffer.x|advanced|Buffer.repr,Buffer.reserve,Buffer.str_free
+lib/buffer.x|advanced|Buffer.tabstop,Buffer.unwrite
 lib/buffer.x|advanced|Buffer.write_char,Buffer.write_len,Buffer.write_repeat
 lib/buffer.x|compatibility|Buffer.get
 lib/common.x|advanced|Array.var,Block.var,Buffer.var,Bytes.var,File.var
@@ -99,7 +99,7 @@ lib/exception.x|advanced|x2c_exception_push
 lib/exception.x|internal|x2c_exception_unwinding
 lib/exception.x|internal|X2CCleanup,X2CCleanupFn
 lib/file.x|advanced|File.equal,File.fdopen,File.gets,File.hash,File.popen
-lib/file.x|advanced|File.printf,File.putc,File.puts,File.putw,File.read
+lib/file.x|advanced|File.printf,File.putc,File.puts,File.putw,File.getw,File.read
 lib/file.x|advanced|File.reopen,File.repr,File.scanf,File.setbuffer
 lib/file.x|advanced|File.setlinebuf,File.stat,File.str,File.string
 lib/file.x|advanced|File.string_close,File.ungetc,File.write,File.write_repr
@@ -192,7 +192,7 @@ lib/scope/scope.x|advanced|Scope.calloc,Scope.calloc_in,Scope.destroy,Scope.free
 lib/scope/scope.x|advanced|Scope.cleanup
 lib/scope/scope.x|advanced|Scope.malloc,Scope.malloc_in,Scope.memdup,Scope.memdup_in
 lib/scope/scope.x|advanced|Scope.accounting_enabled,Scope.move,Scope.name,Scope.new_named,Scope.realloc
-lib/scope/scope.x|advanced|Scope.close,Scope.open,Scope_shutdown,Scope.stats
+lib/scope/scope.x|advanced|Scope_shutdown,Scope.stats
 lib/scope/scope.x|advanced|Scope.top
 lib/scope/scope.x|internal|Scope.initialize,Scope.shutdown_hook
 lib/scope/scope.x|advanced|Scope.owner
@@ -277,3 +277,4 @@ lib/task.x|internal|x2c_task_current
 lib/task.x|internal|x2c_task_stopping
 lib/task.x|internal|x2c_task_channel_sleep
 lib/task.x|internal|x2c_task_channel_notify
+lib/scope/scope.x|internal|x2c_scope_thread_release
