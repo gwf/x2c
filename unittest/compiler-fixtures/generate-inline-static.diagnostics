@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/generate-inline-static.x:7:3: emit: public inline function 'twice' uses unit-private 'helper'
+    int doubled = helper(x);
+    ^^^
+

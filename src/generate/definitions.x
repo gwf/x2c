@@ -87,16 +87,17 @@ static List _function_row(
   }
   Symbol origin = declarator ? <source> : <macro>;
   if (alias) origin = <alias>;
-  return %(function $name $(_display(c, binding, name)) $signature
+  return %(function $name $(_display_name(c, binding)) $signature
            $(_parameter_names(c, modifiers)) $line $doc
            $(type.type().is_static()) $origin $declarator $span);
 }
 
-/* A method displays as `Owner.member`. */
-static String _display(Compiler c, List binding, String name) {
+/* The name `binding` displays: a method as `Owner.member`, and a module
+   file's static without its file prefix. */
+module String _display_name(Compiler c, List binding) {
   if (c.semantic_binding_facts()[%(method $binding)] ~=
       %(?(String owner) ?(String member))) return %"$owner.$member";
-  return c.unprefixed(name);
+  return c.unprefixed(Ast.binding_spelling(binding));
 }
 
 static List _span(Compiler c, List key) =>
