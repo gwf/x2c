@@ -3,6 +3,8 @@
 > Status: reference - local runtime fix and focused regression validation.
 > Recorded 2026-10-31. Normal benchmarks remain on hold; no pushes authorized.
 > Source baseline: e1f4ba26b. The Linux numeric findings are outside this fix.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Failure and correction
 

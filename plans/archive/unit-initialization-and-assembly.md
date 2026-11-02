@@ -2,8 +2,8 @@
 
 > Status: done 2026-10-07 at `0916ff92`.
 > Steps 3 to 6 were delivered; see the delivery record at the end. The
-> deferred memoization section moved to the backlog in
-> [plans/README.md](../README.md) and waits for named evidence.
+> deferred memoization section remains an unselected candidate; no plan owns
+> it, and it waits for named evidence.
 > Formerly `deferred-code-and-memoization.md`.
 
 ## Goal

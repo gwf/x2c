@@ -4,9 +4,9 @@
 > M1, M2 and M5-M8 shipped; M3 and M4 record measured declines. The shared
 > parent, syntax builders and migration follow-ups reached dev through
 > 21775a9d and b4e36b50; generated Lisp migrations continued through 231550b0.
-> The new meta authoring and coverage campaign is active separately. The
-> parked var-tags work and production-promotion boundary remain visible in
-> [the index](../README.md); this archive is not a current execution plan.
+> The [meta authoring and coverage campaign](meta-authoring-and-coverage.md)
+> is archived separately. The var-tags work remains parked and no plan owns
+> it; this archive is not a current execution plan.
 
 ## Original status context
 

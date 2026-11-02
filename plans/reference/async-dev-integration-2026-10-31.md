@@ -2,6 +2,8 @@
 
 > Status: reference - merged locally; combined review complete.
 > Recorded 2026-10-31. Normal benchmarks remain on hold. No pushes authorized.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Revisions and merge
 

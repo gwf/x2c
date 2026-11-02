@@ -4,6 +4,10 @@
 > Measured 2026-10-30 against original baseline `56fd5ecc1518f40ac46f2c21f50936ae4ab53f93`.
 > Final measured runtime: `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
 > Nothing merged or pushed to dev. No performance or memory tradeoff approved.
+> Gary accepted the measured costs, and `a596f6cb5` shipped to `dev` on
+> 2026-10-30 (noted 2026-11-02); see the
+> [delivery checkpoint](independent-lock-delivery-checkpoint-2026-10-30.md).
+> The blocked or failing acceptance in this record is historical.
 
 ## Implementation and comparison
 

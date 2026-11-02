@@ -1,7 +1,7 @@
 # Standalone consolidation worklist
 
-> Status: done; C01-C12 are done or declined. C13 moved to the backlog in
-> [plans/README.md](../README.md). Archived 2026-09-30.
+> Status: done; C01-C12 are done or declined. C13 remains an unselected
+> candidate recorded below; no plan owns it. Archived 2026-09-30.
 >
 > Earlier status: reference
 > Source audit of `f28fc36`, recorded 2026-09-22. These are independent cleanup
