@@ -116,6 +116,38 @@ static void regex_alternation_and_groups(void) {
   EXPECT_TRUE(Regex.compile("()").match("b").capture(1).matched());
 }
 
+static void regex_preserves_nested_capture_order(void) {
+  $test.scoped();
+  Regex re = Regex.compile("(?<outer>(a)(?<optional>b)?)(c)");
+  EXPECT_INT_EQ(re.capture_count(), 4);
+  List names = re.capture_names();
+  EXPECT_INT_EQ(names.len(), 4);
+  EXPECT_STR_EQ(names[0].string(), "outer");
+  EXPECT_NULL(names[1].string());
+  EXPECT_STR_EQ(names[2].string(), "optional");
+  EXPECT_NULL(names[3].string());
+  RegexMatch found = re.match("ac");
+  if (!EXPECT_NOT_NULL(found)) return;
+  EXPECT_INT_EQ(found.len(), 5);
+  int index = 0;
+  foreach (RegexCapture capture in found)
+    EXPECT_INT_EQ(capture.index(), index++);
+  EXPECT_NULL(found.capture(0).name());
+  EXPECT_STR_EQ(found[0], "ac");
+  EXPECT_STR_EQ(found[<outer>], "a");
+  EXPECT_NULL(found.capture(2).name());
+  EXPECT_STR_EQ(found[2], "a");
+  EXPECT_STR_EQ(found.capture(3).name(), "optional");
+  EXPECT_FALSE(found.capture(3).matched());
+  EXPECT_NULL(found[<optional>]);
+  EXPECT_INT_EQ(found.capture(3).start(), -1);
+  EXPECT_INT_EQ(found.capture(3).end(), -1);
+  EXPECT_STR_EQ(found[4], "c");
+  re = Regex.compile("abc");
+  EXPECT_NULL(re.capture_names());
+  EXPECT_INT_EQ(re.match("abc").len(), 1);
+}
+
 static void regex_find_all_split_and_offsets(void) {
   $test.scoped();
   Regex word = Regex.compile("\\w+");
@@ -222,6 +254,7 @@ void regex_suite(void) {
   $test.run(regex_classes_anchors_and_boundaries);
   $test.run(regex_repeats_greedy_and_lazy);
   $test.run(regex_alternation_and_groups);
+  $test.run(regex_preserves_nested_capture_order);
   $test.run(regex_find_all_split_and_offsets);
   $test.run(regex_replaces_and_escapes);
   $test.run(regex_rejects_bad_patterns);
