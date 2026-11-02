@@ -31,7 +31,7 @@ $array.core.family(ProbeArrayInt, int);
 $array.typed.family(ProbeArrayInt, int, 0, "ProbeArrayInt");
 $array.typed.observe(ProbeArrayInt, int, _compare_int);
 $array.typed.box(ProbeArrayInt, int, "ProbeArrayInt");
-$array.typed.update.integer(ProbeArrayInt, int, uint);
+$array.typed.update.integer(ProbeArrayInt, int);
 $array.typed.publish(
   ProbeArrayInt, int, probearrayint, <prbarr>, _prepare_probe_export);
 $array.typed.iterate(ProbeArrayInt, int, probearrayint);
