@@ -7,47 +7,53 @@ static typedef struct DiscardCall {
   String stem;
   List declarations, arguments;
   Array discards;
-  int which, fresh;
+  int which, fresh, exported;
 } DiscardCall;
 
 // update helpers
 
 /** Returns a generated helper for a direct protocol-backed update.
-    The resolved member must have exactly `(Participant, RHS) -> Participant`.
-    A matching helper is emitted once into the unit's pending support;
-    `postfix` selects whether it returns the old or stored value. Returns null
+    The resolved member must have exactly `(Participant, RHS) -> Participant`,
+    where the receiver and result may be any typedef that resolves to the
+    participant's type. A matching helper is emitted once into the unit's
+    pending support; `postfix` selects whether it returns the old or stored
+    value. A public inline body's helper has external linkage. Returns null
     when the member cannot implement this update shape.
 */
 String Compiler.protocol_update_helper(
   Compiler c, Type participant, String member, int postfix) {
-  List key = $("protocol-update-helper", participant, member, postfix);
+  int exported = _exported(c);
+  List key =
+    $("protocol-update-helper", participant, member, postfix, exported);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
 
   List resolved = c.resolve_protocol_member(participant, member);
   if (!resolved) return NULL;
   List (source_binding, source_type) = resolved;
-  Type rhs_type = _update_rhs(participant, source_type);
+  Type rhs_type = _update_rhs(c, participant, source_type);
   if (!rhs_type) return NULL;
 
   String suffix = postfix ? "postfix" : "update";
-  String name =
-    %"_x2c_gensym_proto_$(participant.car().str().lower())_$(member)_$suffix";
+  String name = _helper_name(
+    c, %"proto_$(participant.car().str().lower())_$(member)_$suffix",
+    exported);
   List helper = c.sym.introduce(name);
   List callee = $!($source_type){ $source_binding };
+  Type result = exported ? participant : %(static @participant);
   /* A direct update stores the member's result through `lhs`; the `op`
      parameter keeps the update ABI of the dynamic path. The postfix form
      adds one and returns the value it read first. */
   List update = postfix
     ? $!Unit{
-        static $participant $helper(volatile $participant *lhs, Symbol op) {
+        $result $helper(volatile $participant *lhs, Symbol op) {
           $participant old = lhs[0];
           lhs[0] = $callee(lhs[0], 1);
           return old;
         }
       }
     : $!Unit{
-        static $participant $helper(
+        $result $helper(
             volatile $participant *lhs, Symbol op, $rhs_type rhs) {
           lhs[0] = $callee(lhs[0], rhs);
           return lhs[0];
@@ -75,12 +81,14 @@ List Compiler.protocol_discard_helper(
     argument temporaries `which` selects (bit `n` for argument `n`). A
     discarded argument is one the compiler produced for this call alone, so
     its `discard` member may release what it owns before the enclosing scope
-    ends. Returns null when no selected argument type has a `discard` member,
-    or an ordinary pointer or aggregate result may borrow an argument.
+    ends. A public inline body's helper has external linkage. Returns null
+    when no selected argument type has a `discard` member, or an ordinary
+    pointer or aggregate result may borrow an argument.
 */
 List Compiler.discard_helper(
   Compiler c, List binding, Type signature, String stem, int which) {
-  List key = $("discard-helper", stem, which);
+  int exported = _exported(c);
+  List key = $("discard-helper", stem, which, exported);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
 
@@ -98,7 +106,8 @@ List Compiler.discard_helper(
   DiscardCall call = {
     .c = c, .binding = binding, .key = key, .signature = signature,
     .result = result, .stem = stem, .which = which, .fresh = fresh,
-    .declarations = declarations, .arguments = arguments, .discards = []};
+    .exported = exported, .declarations = declarations,
+    .arguments = arguments, .discards = []};
   _collect(call);
   return call.discards.len() ? _emit(call) : NULL;
 }
@@ -140,11 +149,31 @@ List Compiler.forward_parameters(Compiler c, List types) {
 
 // generated call helpers
 
-static Type _update_rhs(Type participant, Type signature) {
+/* Whether the code being parsed or lowered belongs to a public inline
+   function. The unit's header carries that body too, so a helper it calls
+   needs external linkage. */
+static int _exported(Compiler c) {
+  if (c.enclosing(<function>) ~= %(function ?(Type type) *))
+    return type.is_inline() && !type.is_static();
+  return 0;
+}
+
+/* The generated helper name for `stem`. An `exported` name ends in the hash
+   of the unit's path, so units whose headers call such helpers link
+   together, as lambda bridges do. */
+static String _helper_name(Compiler c, String stem, int exported) {
+  String name = %"_x2c_gensym_$stem";
+  return exported ? %"$(name)_$("%08x".printf(c.filename.hash()))" : name;
+}
+
+/* A typedef of the participant, such as one that inherits its adoption,
+   uses the member its ancestor implements. */
+static Type _update_rhs(Compiler c, Type participant, Type signature) {
   List parameters = signature.car().list().cadr();
-  Type result = signature.cdr();
-  if (parameters ~= %(?receiver ?rhs) &&
-      List.equal(receiver, participant) && result == participant)
+  Type self = c.sym.resolve_key(participant);
+  if (parameters ~= %(?(Type receiver) ?rhs) &&
+      c.sym.resolve_key(receiver) == self &&
+      c.sym.resolve_key(signature.cdr()) == self)
     return rhs;
   return NULL;
 }
@@ -180,8 +209,13 @@ static void _collect(DiscardCall &d) {
   }
 }
 
+/* The helper is a unit-level function, so it binds at file scope whatever
+   local scope is open, as placed unit support does. */
 static List _emit(DiscardCall &d) {
-  String name = %"_x2c_gensym_discard_$(d.stem)_$(d.which)";
+  Block local = d.c.sym.close_local_scopes();
+  defer d.c.sym.reopen_scopes(local);
+  String name =
+    _helper_name(d.c, %"discard_$(d.stem)_$(d.which)", d.exported);
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
   List call = d.c.bind_syntax(
@@ -191,8 +225,9 @@ static List _emit(DiscardCall &d) {
     ? $!{ $call; @drops return; }
     : $!{ $(d.result) $value = $call; @drops return $value; };
   List body = d.c.bind_syntax(shape, <block>, d.result);
+  Type storage = d.exported ? d.result : %(static @(d.result));
   List helper = d.c.wrapper_function(
-    %(static @(d.result)), helper_binding, d.declarations, body.cdr());
+    storage, helper_binding, d.declarations, body.cdr());
   d.c.add_early(helper);
   List entry = $(helper_binding, d.signature);
   d.c.protocol_helpers[d.key] = entry;

@@ -219,18 +219,26 @@ static List _protocol_update(
   String helper = c.protocol_update_helper(type, member_name, !rhs);
   if (!helper) return NULL;
   List spell = _symbol_expression(spelled);
-  if (!rhs) return _update_call(arg, spell, NULL, helper);
+  if (!rhs) return _update_call(c, arg, spell, NULL, helper);
   List value = rhs;
-  return _update_call(arg, spell, value, helper);
+  return _update_call(c, arg, spell, value, helper);
 }
 
 static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "$((unsigned long) value)");
 
+/* A helper with external linkage serves a public inline body, which the
+   unit's header also carries, so its call declares the helper. */
 static List _update_call(
-  List target, List operator, List value, String helper) {
+  Compiler c, List target, List operator, List value, String helper) {
   Type type = target.cadr();
   List address = %(expr $(type.reference()) (op & (parens $target)));
-  return value ? %(call $helper (args $address $operator $value))
-               : %(call $helper (args $address $operator));
+  List call = value ? %(call $helper (args $address $operator $value))
+                    : %(call $helper (args $address $operator));
+  Type declared = NULL;
+  List binding = c.sym.resolve_global($(helper), declared);
+  if (declared.is_static()) return call;
+  List prototype = declared.declaration_ast(binding);
+  return %(parens
+           (block $prototype (stmnt (expr $(declared.apply()) $call))));
 }

@@ -351,8 +351,8 @@ static List _protocol_operator_expression(
   return %(expr (int) (op $op $call $zero));
 }
 
-/* A binary operator whose one operand is a converting participant converts
-   the other operand to that type through its declared converter, so
+/* A binary operator whose one operand is a converting participant resolves
+   that participant's member and converts the other operand for it, so
    `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
    replaces the original through `lhs` and `rhs`. An operand's qualifier
    describes its storage, not the type that adopts the operator, so the
@@ -387,37 +387,51 @@ static List _resolve_protocol_operator(
     /* `_comparison` lowers a comparison of two `Var` operands, and the
        dynamic rule lowers their arithmetic through its runtime lanes. */
     if (c.sym.is_var_type(participant)) return NULL;
-    if (participant !== rhs_type) {
-      participant = _converted_participant(
-        c, member, participant, rhs_type, lhs, rhs);
-      if (!participant) return NULL;
-    }
+    if (participant !== rhs_type)
+      return _converted_member(c, member, participant, rhs_type, lhs, rhs);
   }
   return participant && member
        ? c.resolve_protocol_member(participant, member)
        : NULL;
 }
 
-static Type _converted_participant(
+static List _converted_member(
   Compiler c, Symbol member, Type lhs_type, Type rhs_type,
   List &lhs, List &rhs) {
   if (c.sym.is_var_type(lhs_type) ||
       c.sym.is_var_type(rhs_type)) return NULL;
   Type shared = _shared_participant(c, lhs_type, rhs_type, member);
-  if (shared) return shared;
-  int lhs_member = !!c.resolve_protocol_member(lhs_type, member) &&
-    _converts_operands(c, lhs_type);
-  int rhs_member = !!c.resolve_protocol_member(rhs_type, member) &&
-    _converts_operands(c, rhs_type);
+  if (shared) return c.resolve_protocol_member(shared, member);
+  List lhs_member = _converting_member(c, lhs_type, member);
+  List rhs_member = _converting_member(c, rhs_type, member);
   if (lhs_member && !rhs_member) {
-    List converted = c.converter_call(rhs, rhs_type, lhs_type);
-    if (converted) { rhs = converted; return lhs_type; }
+    List converted = _member_operand(c, lhs_member, rhs, rhs_type, lhs_type);
+    if (converted) { rhs = converted; return lhs_member; }
   }
   else if (rhs_member && !lhs_member) {
     List converted = c.converter_call(lhs, lhs_type, rhs_type);
-    if (converted) { lhs = converted; return rhs_type; }
+    if (converted) { lhs = converted; return rhs_member; }
   }
   return NULL;
+}
+
+/* The member of `type` when `type` converts its operator's other operand. */
+static List _converting_member(Compiler c, Type type, Symbol member) {
+  List resolved = c.resolve_protocol_member(type, member);
+  return resolved && _converts_operands(c, type) ? resolved : NULL;
+}
+
+/* The right operand `rhs` converted for `participant`'s resolved `member`.
+   A member whose operand parameter has another type than its receiver,
+   such as `long` in `T T.add(T, long)`, takes `rhs` as an ordinary
+   argument. Otherwise `rhs` converts through its declared converter to the
+   participant, or the operator stays native C when none exists. */
+static List _member_operand(
+  Compiler c, List member, List rhs, Type rhs_type, Type participant) {
+  if (member ~= %(? ((func (?(Type receiver) ?(Type parameter))) *)) &&
+      parameter.canonicalize() != receiver.canonicalize())
+    return c.convert_expression(rhs, parameter);
+  return c.converter_call(rhs, rhs_type, participant);
 }
 
 /* Two different typedef names that share an ancestor meet at the nearest

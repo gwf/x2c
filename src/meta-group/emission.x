@@ -18,7 +18,7 @@ module List _emit(
 module List _emit_prepared(
   Compiler c, String stamp, String stem, String suffix,
   List declarations, Func prepare, String &failure) {
-  Array units = prepare ? NULL : _units(c);
+  Array units = prepare ? NULL : _units(c, c.pending.area(<support>));
   String provider = c.filename;
   /* The backend reads more of the unit's compiler than a child from
      `Compiler.new_shared` inherits, such as its tokenizer, runtime header
@@ -34,7 +34,7 @@ module List _emit_prepared(
       c.meta_group = [];
       c.unit_nodes = declarations;
       c.group_meta_function(prepare(c));
-      units = _units(c);
+      units = _units(c, []);
     }
     if (c.meta_build) _name_provider_bindings(c, provider, units, saved.deps);
     List lowered = _lower(c, units, stamp, suffix);
