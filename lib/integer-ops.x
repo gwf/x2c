@@ -3,10 +3,10 @@
     Copyright (c) 2026 Gary William Flake
 
     `Var` operators and the compound updates of typed Arrays and typed Maps
-    share these statement templates. They expand inline, so a public inline
-    element update uses them without a call. The update templates end the
-    enclosing function: each returns the stored value or raises before
-    changing the element, with the causes `Var.update` raises.
+    share these templates. The statement templates expand inline, so a
+    public inline element update uses them without a call. The update
+    templates end the enclosing function: each returns the stored value or
+    raises before changing the element, with the causes `Var.update` raises.
 */
 
 #pragma once
@@ -40,8 +40,7 @@ macro Stmt $integer.step(
         long long signed_a = Var.signed_from_bits(a, bits);
         long long signed_b = Var.signed_from_bits(b, bits);
         unsigned long long minimum = 1ull << (bits - 1);
-        if (a == minimum && b == mask)
-          $raw = op == </> ? minimum : 0;
+        if (a == minimum && b == mask) $raw = op == </> ? minimum : 0;
         else $raw = op == </> ? (unsigned long long) (signed_a / signed_b)
                               : (unsigned long long) (signed_a % signed_b);
       }
@@ -55,6 +54,19 @@ macro Stmt $integer.step(
     default: raise %(bad-op (op $op));
   }
   $raw &= mask;
+}
+
+/*  Generates `$name`, which returns the `$integer.step` result for its
+    arguments.
+*/
+macro Unit $integer.raw(Name $name) {
+  static inline unsigned long long $name(
+    Symbol op, unsigned long long a, unsigned long long b,
+    int bits, int unsigned_value) {
+    unsigned long long raw;
+    $integer.step(raw, op, a, b, bits, unsigned_value);
+    return raw;
+  }
 }
 
 /*  Applies integer `$operator` to the signed `$type` element at `$slot`.
