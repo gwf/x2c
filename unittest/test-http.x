@@ -310,7 +310,8 @@ static void http_constructor_failure_releases_owned_resources(void) {
 
 static void http_constructor_failure_preserves_borrowed_logger(void) {
   $test.scoped();
-  Logger logger = auto Logger.new(<info>);
+  Logger logger = Logger.new(<info>);
+  defer logger.free();
   List events = NULL;
   logger.add_memory_sink(&events);
   int caught = 0;

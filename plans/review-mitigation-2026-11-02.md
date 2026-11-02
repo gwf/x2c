@@ -1,10 +1,12 @@
-> Status: active
+> Status: active - implementation complete for all seven findings on
+> 2026-11-02; publication remains with the shared integrator.
 >
 > Gary requested this plan and dispatch to a new SOL 6.1 task on
 > 2026-11-02. Implementation is authorized for the seven findings below.
-> Review baseline: `dbcb6c3475732744cff6456880d707087cf79026`, fetched
-> `origin/dev`. No repairs have been made. Delivery is ready PR submission
-> to the shared integrator, not direct publication to `dev`.
+> Review and implementation base: `dbcb6c3475732744cff6456880d707087cf79026`.
+> A fresh fetch before implementation found no intervening `origin/dev`
+> changes. Delivery is ready PR submission to the shared integrator,
+> not direct publication to `dev`.
 
 # Repository review mitigation
 
@@ -254,3 +256,76 @@ preservation checks. Existing tests gain regression cases instead of another
 validation layer. Duration's portable exact arithmetic is the one bounded
 implementation question requiring cost review if a small repair is not
 available. This plan authorizes the listed work, not broader architecture.
+
+
+## Implementation evidence (2026-11-02)
+
+All seven findings are implemented in the combined submission. The original
+baseline evidence above is historical. No item needs a new design decision.
+
+| Item | Result and focused evidence |
+| --- | --- |
+| 1. Conditional types | Narrow inference now prints `4 4`, then `100000`. Pointer qualifiers combine in either arm order, including typedefs and const/volatile pairs. The new `conditional-result-types` fixture checks runtime/meta parity, null arms, Symbol identity, and baseline-supported inferred String/Label member calls and both empty-string printf fallbacks without native warnings. |
+| 2. Empty glob | The original signal-11 input now returns an empty List; `test-path` retains its existing path-pattern cases. |
+| 3. HTTP ownership | Three warmed invalid-port failures retain zero scopes, allocations, and bytes, against baseline totals of three scopes, twelve allocations, and 432 bytes. Tests cover successful close and a borrowed Logger remaining usable. Acquired Logger, listener, and channel each have rollback until construction succeeds. |
+| 4. Regex captures | Parser names use one transient Array and one List conversion. Match results traverse names once. Named, unnamed, nested, unmatched, and zero-capture cases pass. Paired compile measurements are below. |
+| 5. Retirement | Disposable retirement accepts bootstrap objects/archives, compiler binaries, expected include links, unit products, and example check build directories. Unrelated ignored files, unexpected links/objects, unique commits, pending changes, and unresolved holds keep their refusal paths. |
+| 6. Guidance | PRs #644, #645, and #647 are confirmed merged and their merge commits are ancestors of the implementation base. The earlier plan and index distinguish published batches from the final carried list. Iterator callback decision `14e6fce147` supersedes the old eager rule. Preprocessing guidance links to the reference. |
+| 7. Duration | The reproduced half is `500000000000000001` ns. A 47-line private split-word product/rounding helper keeps exact binary64-factor arithmetic without another type, dependency, or public API. An independent exact-rational oracle on the combined tree matched 15,102 boundary/random pairs. |
+
+Paired Regex compilation medians, elapsed seconds:
+
+| Captures | Baseline | Candidate |
+| ---: | ---: | ---: |
+| 1,000 | 0.011239001 | 0.000099000 |
+| 2,000 | 0.044695000 | 0.000193001 |
+| 4,000 | 0.179978999 | 0.000406001 |
+| 8,000 | 0.748367000 | 0.000848000 |
+
+Each median has 15 samples: three alternating baseline/candidate process
+pairs, each with five iterations. The same Darwin arm64 host, Apple clang
+17, optimized mode, and probe compiled repeated `(a)` patterns in isolated
+Contexts. Only `Regex.compile` was timed. No separate match-result speedup
+is claimed. The optional probe and CSVs remain under `/tmp/regex-capture-*`.
+
+Combined validation:
+
+- `make build` and `make -C unittest test-all` passed.
+- From `unittest/`, `X2C_SCOPE_ACCOUNTING=1 ./test-all` passed 1,205 tests
+  and 104,084 assertions, with no final scope leak report.
+- The seven fixtures `conditional-result-types`, `conditional-arm-types`,
+  `conditional-string-arms`, `meta-destination-conversion`,
+  `function-to-func`, `qualifier-void-pointer`, and
+  `member-qualified-reference` passed without new native warnings.
+- `python3 tools/test-integrate-dev.py` passed all 61 tests. After adding
+  the example-output cases, the two affected disposable retirement tests
+  passed again. The classifier also recognized the coordinator's complete
+  2,807-file ignored inventory before submission notes were added.
+- `make doc-check` passed the documentation and generated-text checks.
+- `git diff --check` passed.
+
+Full logs are retained as `debug/mitigation-*.log` in the coordinator
+worktree. The first full-unit invocation from the repository root aborted
+because the Lisp fixture reads `../etc/init.xlisp`; running from `unittest/`
+fixed the invocation. Combined verification also found and corrected a
+missing `Logger.free` in the new borrowed-Logger test before submission.
+The final documentation check exposed String identity loss in pointer
+joining. The corrected join retains the left typedef only when its full
+normalized pointer type equals the result. Destination conversion continues
+to own arm conversion; eager conversion changed raw C varargs empty-string
+fallbacks, which the combined Diff suite caught. Baseline-supported String
+and Label member calls and both empty-string printf fallbacks now have
+regression coverage.
+
+Authored-diff review confirmed existing numeric/type owners, immediate
+qualifier merging without stripping deeper qualifiers, constructor resource
+transfer, transient Array cleanup, and narrow generated-output recognition.
+The new negative cases preserve existing range failures and retirement's
+file-preservation boundary. No new diagnostic, recurring gate, matching
+policy, public signature, or generated artifact is introduced.
+
+The full compiler fixture suite, native package tests, other hosts, final
+bootstrap regeneration, publication gate, and performance checkpoint were
+not run here. The shared integrator owns the final combined publication
+checks. Existing Regex matching-stack and deep List rendering follow-ups,
+and the earlier plan's final carried findings, remain outside this repair.
