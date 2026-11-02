@@ -2,9 +2,9 @@
 name: improve-x2c-agent-process
 description: >-
   Review or improve x2c's repository agent instructions, skills, commands,
-  defaults, or validation workflow. Use for dedicated
-  agent-process work prompted by session evidence, changed development
-  practices, instruction bloat, routing failures, or a strategic review.
+  defaults, or validation workflow. Use for dedicated agent-process work
+  prompted by session evidence, changed development practices, instruction
+  bloat, routing failures, or a strategic review.
   Do not invoke during ordinary product work merely because it produced a
   lesson.
 ---

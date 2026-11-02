@@ -107,8 +107,8 @@ The bare call shape belongs to the local macro before a file `keyword` alias or
 ordinary function. A use without parentheses is an ordinary identifier, except
 for a local decorator with no explicit parameters. That decorator is applied
 as `name TARGET`, like a keyword alias. `(scaled)(value)` explicitly calls a
-function. `$scaled(value)` uses only a
-global or imported macro, so local and global definitions may share a name.
+function. `$scaled(value)` uses only a global or imported macro, so local and
+global definitions may share a name.
 
 Local expression, statement, field, `Map`-entry, and enumerator generators keep
 their usual result positions. Local decorators are available when their target

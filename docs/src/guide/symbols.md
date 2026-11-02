@@ -186,10 +186,9 @@ Two cautions:
 Choose the type by who wrote the names.
 
 Use a `Symbol` for a closed set of names that you wrote, such as outcome and
-lifecycle values. `Lisp.read` returns `<value>` or
-`<eof>` and raises `<incomplete>` or `<malformed>`, and `Error` causes include
-`<bad-sig>`, `<no-symbol>`, `<bad-arity>`, `<bad-types>`, and
-`<bad-result>`. A debugger shows each one by name, where an `enum` constant
+lifecycle values. `Lisp.read` returns `<value>` or `<eof>` and raises
+`<incomplete>` or `<malformed>`, and `Error` causes include `<bad-sig>`,
+`<no-symbol>`, `<bad-arity>`, `<bad-types>`, and `<bad-result>`. A debugger shows each one by name, where an `enum` constant
 prints as `3`. The compiler uses symbols the same way: AST node heads and
 the match operator and predicate names are compact symbols, because the
 compiler chose them.
