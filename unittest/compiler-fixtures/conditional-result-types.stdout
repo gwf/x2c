@@ -1,8 +1,8 @@
 narrow 100000 100000 100000
 byte 4 100000
 pointers 7 7 7 7 7 7 1 7 1 7
-void null 7 7 7 7
-constant null 7 7 7 7
+void boundary 7 1 7
+constant boundary 7 7 1
 nominal 1 nominal
 symbol ok
 handles 6 1 5

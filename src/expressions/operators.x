@@ -94,23 +94,20 @@ module List _conditional(
   return %(expr $type (op $operator $condition $ontrue $onfalse));
 }
 
-/* C combines the immediate pointee qualifiers of compatible pointers.
-   Typedef expansion must retain those qualifiers before comparing bases. */
+/* Combine compatible non-void pointees without losing their qualifiers.
+   Mixed void pointers retain the existing destination-conversion boundary. */
 static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
   Type left = _conditional_unqualified(
     c.sym.normalize_declared_type(lhs.cadr()));
   Type right = _conditional_unqualified(
     c.sym.normalize_declared_type(rhs.cadr()));
-  if (left.is_pointer() && _null_literal(c, rhs)) return lhs.cadr();
-  if (right.is_pointer() && _null_literal(c, lhs)) return rhs.cadr();
+  if (left.is_pointer() && _null_literal(rhs)) return lhs.cadr();
+  if (right.is_pointer() && _null_literal(lhs)) return rhs.cadr();
   Type lbase = left.dereference(), rbase = right.dereference();
   if (!lbase || !rbase) return NULL;
   Type base = _conditional_unqualified(lbase);
   Type other = _conditional_unqualified(rbase);
-  if (base != other) {
-    if (base === %(void) || other === %(void)) base = %(void);
-    else return NULL;
-  }
+  if (base != other || base === %(void)) return NULL;
   Array qualifiers = [];
   foreach (Type pointee in $(lbase, rbase))
     foreach (Var part in pointee) {
@@ -305,7 +302,7 @@ static void _check_optional_operands(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (!ltype.is_optional_reference() && !rtype.is_optional_reference()) return;
-  int null_test = _null_literal(c, lhs) || _null_literal(c, rhs);
+  int null_test = _null_literal(lhs) || _null_literal(rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)
     $fail.expressions_optional_ref_unchecked(c, c.token);

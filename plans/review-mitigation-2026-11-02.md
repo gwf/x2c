@@ -1,5 +1,8 @@
-> Status: active - implementation complete for all seven findings on
-> 2026-11-02; publication remains with the shared integrator.
+> Status: active - the seven scoped repairs are implemented. PR #648 is
+> held as a draft for direct re-review on 2026-11-02 and is not enrolled.
+> The final boundary correction below supersedes the correction-round
+> constant evaluator and expanded Func admission. Publication remains with
+> the shared integrator after review.
 >
 > Gary requested this plan and dispatch to a new SOL 6.1 task on
 > 2026-11-02. Implementation is authorized for the seven findings below.
@@ -62,9 +65,12 @@ Also, with `int *a` and `const int *b`, `auto p = 0 ? a : b;` rejects
 qualifier loss, while reversing the arms succeeds.
 
 Apply integer promotions and usual arithmetic conversions to ordinary
-numeric conditional arms even when their declared types match. Form the
-proper compatible pointer result with combined pointed-to qualifiers,
-independent of arm order. Reuse existing type owners; do not weaken
+numeric conditional arms even when their declared types match. Combine
+pointed-to qualifiers for matching non-void pointer bases, independent of
+arm order. Mixed void/typed pointers retain the pre-PR first-arm and
+existing destination-conversion behavior; complete C conditional inference
+for those arms is not part of the reproduced repair. Reuse existing type
+owners; do not weaken
 qualifier checking or special-case only `auto`. Preserve deliberate nominal
 results, including Symbol conditionals, and existing Var arm conversion.
 
@@ -455,3 +461,90 @@ this is not a complete C11 integer-constant-expression implementation.
 No presence-proof expansion, runtime library change, publication gate,
 final bootstrap refresh, native package test, or other-host check was added.
 The shared integrator retains final publication ownership.
+
+
+## Final boundary correction and review hold (2026-11-02)
+
+This section supersedes the earlier correction-round evaluator and Func
+assertions. The latest review reproduced an unsound zero proof:
+`(void *)((Byte)256 - 256)` was classified absent even though native C
+computes `-256`. It also reproduced the lost baseline success for
+`(void *)!1`. The arithmetic syntax whitelist and meta decoder did not
+supply C's integer constant-expression semantics. Extending that evaluator
+would enlarge the original requirement.
+
+The agreed repair restores the existing boundary instead:
+
+- `src/expressions/conversions.x` and `src/expressions/calls.x` now match
+  review baseline `dbcb6c347` byte for byte. The shared `_null_literal`
+  again recognizes lexical integer zero and `NULL` only. No new arithmetic
+  evaluator, eligibility predicate, or dynamic Func admission remains.
+- Conditional typing retains the numeric-promotion and nominal-identity
+  repairs. Pointer joining combines qualifiers only for compatible non-void
+  pointees, through the existing qualifier-preserving Type owner.
+- A void pointee does not produce a replacement type. The original first
+  arm and destination conversion remain responsible for mixed void/typed
+  pointer expressions, with native C evaluating the emitted expression.
+  That retains the semantic pointee and nominal method/converter owners
+  wherever the baseline supplied them.
+
+Existing opaque native `typeof` support was inspected and probed. It cannot
+index a pointer whose semantic pointee is unknown. It would also withhold
+that pointee from member, method, and conversion lookup. This rules out that
+existing opaque path for this repair; it does not reject every possible
+future integration of native types. No new type infrastructure was added.
+
+The previous positive assertions for void-cast-first dereferencing and for
+arithmetic/cast arguments becoming absent Func references expanded the
+baseline contract. They are replaced with baseline-backed checks, not
+silently weakened: void-first results retain their baseline `void *` type;
+cast/arithmetic Func arguments raise `<bad-types>`; lexical zero/NULL remain
+absent; an actual reference to a zero-valued variable remains present.
+The nested Byte cast now catches `<bad-types>` and prints native `-256`.
+The unary-null pointer probe again prints `7`.
+
+Systematic optional development evidence:
+
+| Comparison | Result |
+| --- | --- |
+| Mixed void pointer-cast core | 256/256 observations exactly match baseline: 32 scalar families, direct and typedef void-pointer casts, int/const-int pointers, both arm orders. Statuses, values, inferred types, and diagnostic counts match. |
+| Supplementary controls | 150/152 unchanged. The two lexical-zero-first cases now infer the correct typed pointer and compile warning-free, as required by the original repair. |
+| Qualifier-loss translation diagnostics | 36 baseline and 36 candidate cases, including 32 core cases. No new loss path. |
+| Generated-C discarded-const diagnostics | 36 baseline and 36 candidate cases. These pre-existing mixed-void defects remain unchanged. |
+| Safe candidate/native dereferencing | 102 matched pairs, 204 executions, all produce `42` and compile without diagnostics. |
+| Dynamic Func admission | 75 cases have exact baseline/candidate output parity and no native diagnostics. |
+| Optional-reference operator admission | 13 cases preserve baseline acceptance/rejection and observable results. The separate binding-facts presence recognizer is unchanged. |
+| Semantic consumers | Baseline and candidate both print `fields 7 7 7`, `handle 9 9 handle`, and `string 4`, without native diagnostics. This covers field access, dereferencing/indexing, nominal handle methods, and destination conversion. |
+
+The scalar families cover zero/nonzero values, direct and typedef narrowing
+and signed casts, mixed signed/unsigned arithmetic, unary !/~/-/+,
+comparisons, shifts, logical/conditional expressions with invalid inactive
+arms, enum constants, sizeof-derived zero, nested forms, and runtime names
+and calls. Mixed-void baseline asymmetries and differences from native C are
+explicitly retained. Complete C inference is not claimed.
+
+The matrix scripts and all per-case source, native, baseline, and candidate
+results are under `/tmp/pr648-native-baseline-matrix/` and
+`/tmp/pr648-func-admission-matrix/`. Compact reports are copied to the
+coordinator's `.context/pr648-boundary/`. They are focused repair evidence,
+not a recurring gate or a permanent fixture for every matrix cell.
+
+Combined checks:
+
+- `make stage-2` passed with strict compiler stages 1 and 2, without a local
+  rebootstrap (`debug/pr648-boundary-stage-2.log`).
+- Fourteen focused compiler fixtures passed without native warnings,
+  including the two updated conditional fixtures, Number nominal behavior,
+  const/volatile pointer arm orders, String/Label and empty printf cases,
+  and the optional-reference guard/narrowing cases
+  (`debug/pr648-boundary-fixtures.log`).
+- `make -C unittest test-all` completed, and the accounting-enabled full unit
+  run passed 1,205 tests and 104,084 assertions with no final scope leak
+  report (`debug/pr648-boundary-units.log`).
+- `make doc-check` and `git diff --check` passed.
+
+The PR remains held for review, without `integration-ready`. No merge,
+publication gate, final bootstrap generation, or new public semantics is
+claimed. Earlier runtime repairs, retirement tooling, and their focused
+measurements remain unchanged. The integrator retains final publication
+checks after review approval.

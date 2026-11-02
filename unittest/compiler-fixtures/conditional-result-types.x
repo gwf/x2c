@@ -49,16 +49,14 @@ int main(int argc, char **argv) {
     null_left == NULL, *null_right);
   auto void_right = argc ? plain : (void *)0;
   auto void_left = argc - 1 ? (void *)0 : plain;
-  auto qualified_left = argc - 1 ? ((void *)0) : constant;
   auto qualified_right = argc ? constant : (void *)0;
-  printf("void null %d %d %d %d\n",
-    *void_right, *void_left, *qualified_left, *qualified_right);
+  printf("void boundary %d %d %d\n", *void_right,
+    _Generic(void_left, void *: 1, default: 0), *qualified_right);
   auto alias_right = argc ? plain : (VoidPointer)(2 - 2);
-  auto alias_left = argc - 1 ? (VoidPointer)0 : constant;
   auto constant_right = argc ? constant : (void *)(1 - 1);
   auto constant_left = argc - 1 ? (void *)((2 + 2) - 4) : plain;
-  printf("constant null %d %d %d %d\n",
-    *alias_right, *alias_left, *constant_right, *constant_left);
+  printf("constant boundary %d %d %d\n", *alias_right, *constant_right,
+    _Generic(constant_left, void *: 1, default: 0));
   Number first = Number.new(1), second = Number.new(2);
   auto number = argc ? first : second;
   String converted = argc ? first : second;

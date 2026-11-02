@@ -46,7 +46,7 @@ deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [November 2 review mitigation](review-mitigation-2026-11-02.md) | All seven reviewed findings are implemented and locally verified. | Shared-integrator submission and publication; preserve the recorded focused evidence. |
+| [November 2 review mitigation](review-mitigation-2026-11-02.md) | Seven scoped repairs implemented; mixed-void typing and lexical Func null admission retain baseline behavior. | Direct re-review of held draft PR #648; enroll only after approval. |
 | [Deep review remediation](deep-review-remediation-2026-11-01.md) | Only the final "Still carried" findings; batches A, B, C, and the bug batch are published through `dbcb6c347`. | Reproduce each selected follow-up; preserve the superseding invocation-time iterator callback rule. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
