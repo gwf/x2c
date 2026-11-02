@@ -605,9 +605,10 @@ where `<os>` is `darwin` or `linux` and `<arch>` is the machine name, such as
 `arm64` or `x86_64`.
 
 Accepted options are native include directories (`-I`, `--c-include-dir`,
-`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, archive inputs,
-`-pthread`, and `-framework <name>`. A bundle of shared libraries passes its
-library directory to both `-L` and `--rpath`, under `{package}`.
-Keep native archives in dependency order after the wrapper archive. Options
-that replace the consumer's output, command, or tools and unrestricted
-compiler/linker escape options are not package metadata.
+`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, the linker
+pass-throughs `-Wl,` and `-Xlinker`, archive inputs, `-pthread`, and
+`-framework <name>`. A bundle of shared libraries passes its library
+directory to both `-L` and `--rpath`, under `{package}`. Keep native archives
+in dependency order after the wrapper archive. Options that replace the
+consumer's output, command, or tools are not package metadata, and neither
+are optimization, debug, or `-Xcc` options.

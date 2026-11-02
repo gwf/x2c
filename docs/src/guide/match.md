@@ -408,10 +408,12 @@ mismatch.
 conditional group may end with its own `default`, as long as no arm follows
 the group.
 
-A `case` pattern must be a `%(...)` `List` literal. The runtime matcher
-accepts a standalone `Symbol` pattern such as `<?whole>`, but the statement
-form does not. The compiler rejects any other case pattern with a positioned
-x2c diagnostic before generating C.
+A `case` pattern must be a `%(...)` `List` literal or the pattern of a
+[Macro value](../reference/language.md#macro-values), such as
+`$add(?left, ?right)`. The runtime matcher accepts a standalone `Symbol`
+pattern such as `<?whole>`, but the statement form does not. The compiler
+rejects any other case pattern with a positioned x2c diagnostic before
+generating C.
 
 Source guard operators must be literal. Runtime-built patterns may
 interpolate an interned operator `Symbol`, but a source arm needs a literal

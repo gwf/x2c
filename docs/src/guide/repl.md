@@ -4,7 +4,8 @@
 x2c libraries. Load a source file, discover its functions, create an object,
 and call operations on that object across successive submissions. The
 command is experimental and available in checkout builds; neither
-`make install` nor a release payload installs it.
+`make install` nor a release payload installs it. From the root of a
+checkout, run `make commands`, then start it as `./x2c repl`.
 
 Executable submissions compile through the ordinary compiler. Prompt objects
 and library objects share one native worker process, so native pointers,
@@ -12,11 +13,11 @@ struct values, aliases, and C callbacks retain their ordinary meaning. The
 terminal client stays alive when the worker exits or crashes.
 
 ```sh
-x2c repl
-x2c repl --help
-x2c repl points.c
-x2c repl -I include build/libpoints.a include/points.h
-x2c repl --manifest-path x2c.toml --target core
+./x2c repl
+./x2c repl --help
+./x2c repl points.c
+./x2c repl -I include build/libpoints.a include/points.h
+./x2c repl --manifest-path x2c.toml --target core
 ```
 
 Native include, define, compiler, linker, package-directory, and explicit
@@ -107,7 +108,7 @@ header that selects the API and start a session:
 
 ```sh
 printf '#include <sqlite3.h>\n' > sqlite-api.h
-x2c repl -l sqlite3 sqlite-api.h
+./x2c repl -l sqlite3 sqlite-api.h
 ```
 
 The SQLite declarations come from the included header. Use `--all` to browse

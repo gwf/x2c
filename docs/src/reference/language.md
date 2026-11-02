@@ -2978,7 +2978,7 @@ descriptor table's capacity.
 
 ### Allocation regions
 
-`auto { ... }` retains an allocation region and releases it on every exit.
+`auto { ... }` opens an allocation region and closes it on every exit.
 The same prefix can wrap a control statement, such as `auto for (...) ...`,
 or a function definition, such as `auto int f(void) { ... }`. An
 expression-bodied function can use the prefix too. Normal `return`, `break`,
@@ -4129,8 +4129,8 @@ runtime declaration requirements. Region `auto` uses native syntax; `$lock`
 retains its explicit macro spelling. The compatibility `$scope` decorator
 retains its macro collision policy.
 
-Region `auto` retains one region around its following statement and defers
-release inside an inner block containing that statement. `auto (pointer)`
+Region `auto` opens one region around its following statement and defers its
+close inside an inner block containing that statement. `auto (pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one

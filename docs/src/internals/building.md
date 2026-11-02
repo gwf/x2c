@@ -143,10 +143,8 @@ check the playground's support notice before running a program.
 
 ## Contributor checks
 
-`make doc-examples` compiles the book and website samples, including the
-PCRE2 import example. Prepare that optional package first with
-`make -C packages/pcre2 build`; the checker uses its generated headers and
-prepared dependency includes. It does not fetch dependencies itself.
+`make doc-examples` compiles the book and website samples. No checked sample
+imports an optional package, so the check needs no package preparation.
 
 For testing, style, debugging, and bootstrap-refresh instructions, start with
 [`agents/README.md`](https://github.com/gwf/x2c/blob/dev/agents/README.md).

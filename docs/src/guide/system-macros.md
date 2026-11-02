@@ -262,12 +262,12 @@ function. Empty `auto()` is not accepted. A variable declaration such as
 `auto Array values = [];` still manages that variable; initializer `auto`
 still manages the acquired value.
 
-The compatibility decorator `$scope()` retains a region, and
+The compatibility decorator `$scope()` opens a region, and
 `$scope(destination)` selects a destination with the same semantics.
 
-Without an argument, `auto` retains one region around the following
+Without an argument, `auto` opens one region around the following
 statement. Its expansion keeps the body inside the deferred
-release:
+close:
 
 ```x2c
 ~int main(void) {

@@ -844,11 +844,11 @@ rejected abc
 rejected 4x
 ```
 
-`try_long` requires the whole string to be the number. Leading and trailing
-whitespace are allowed, and any other unconsumed character fails, so `4x` is
-rejected instead of read as 4. It accepts a sign and recognizes `0x`, `0o`,
-and `0b` radix prefixes as well as C's leading-zero octal.
-`String.try_double` is the floating counterpart on the same terms.
+`try_long` and `String.try_double` require the whole string, apart from
+surrounding whitespace, to be the number, so `4x` is rejected instead of read
+as 4. [`String.try_long`](../library/modules/string.md#String.try_long) and
+[`String.try_double`](../library/modules/string.md#String.try_double) list
+the signs, radix prefixes, and floating forms each one accepts.
 
 Concatenation with `+` produces a canonical `String`. Comparing a `String`
 with a C string literal using `==` or `!=` promotes the literal to `String`
@@ -874,16 +874,13 @@ promote literals.
 Canonical `String`s are immutable, so repeated `+` in a loop allocates and
 interns at every step. There are two better tools.
 
-`String.malloc` creates a transient mutable buffer in the active
-canonical-value pool. It becomes a canonical `String` only when
-`String.intern_free` finalizes it. Bracket assignment on a `String` is
-rejected, because writing through a canonical `String` would corrupt every
-equal `String` that shares its storage. Bind the buffer to a `char *` to write
-it with native indexing, then finalize it with `String.intern_free`:
-
-The byte count includes room for the terminating NUL, and nothing writes that
-NUL for you. `String.intern_free` measures the buffer with `strlen`, so an
-unterminated buffer is read past its end.
+[`String.malloc`](../library/modules/string.md#String.malloc) creates a
+transient mutable buffer in the active canonical-value pool. It becomes a
+canonical `String` only when `String.intern_free` finalizes it. Bracket
+assignment on a `String` is rejected, because writing through a canonical
+`String` would corrupt every equal `String` that shares its storage. Bind the
+buffer to a `char *` to write it with native indexing, write the terminating
+NUL yourself, then finalize it with `String.intern_free`:
 
 ```x2c
 String buf = String.malloc(6);
@@ -898,19 +895,9 @@ printf("%s %d\n", canonical, canonical == "abcde");
 abcde 1
 ```
 
-Write bytes that way only into such a buffer. On an interned `String` it
-writes through shared canonical storage. To change one byte of a canonical
-`String`, use the copy-producing `String.withindex`:
-
-```x2c
-String word = "hello";
-String capital = word.withindex(0, 'H');
-printf("%s %s\n", word, capital);
-```
-
-```text
-hello Hello
-```
+Write bytes that way only into such a buffer. To change one byte of a
+canonical `String`, use the copy-producing
+[`String.withindex`](../library/modules/string.md#String.withindex).
 
 For anything longer, use `Buffer`. It grows, it tracks indentation, and a
 `String` destination calls `Buffer.str` for the finished canonical `String`.
@@ -1002,18 +989,9 @@ List descending = %(3 1 2).sort_with(
   %!(int left, int right) => right - left);
 ```
 
-`sort_by` evaluates its key once per element, front to back, and compares the
-keys with `Var.compare`. `sort_with` passes two values to its callback and
-converts the result to `int`: negative orders the first value before the
-second, zero ties, and positive orders it after. Comparators must give a
-consistent ordering. Callbacks are borrowed, run synchronously, and must not
-mutate the Array being sorted; they may sort another container. A failing
-`sort_with` callback or `sort_by` key extractor leaves the original element
-order unchanged. Callback side effects are not undone. Comparisons in `sort`
-and `sort_by` run inside libc qsort and must return normally. If an Error or
-other nonlocal exit crosses qsort, cleanup, memory safety, and container state
-are not guaranteed. Empty inputs call neither callback; a singleton calls its
-key once but never calls a comparator.
+[`Array.sort_by`](../library/modules/array.md#Array.sort_by) and
+[`Array.sort_with`](../library/modules/array.md#Array.sort_with) give the
+callback order, the comparator contract, and what a failing callback leaves.
 
 `Array.map`, `Array.map2`, and `Array.foldl` accept the same `Func` values
 as the `List` operations and pass elements by value. `String.filter` and
@@ -1292,15 +1270,9 @@ carries the same lookup, defaulting, update, deletion, traversal, `copy`, and
 declared type, converting every key and value to the field type; an entry that
 cannot be converted raises `<no-convert>`.
 
-Typed Maps use grouped hash storage. Each group compares sixteen one-byte
-fingerprints before checking matching keys. Deletion leaves a reusable slot;
-insertion removes accumulated deleted slots when rebuilding the table.
-`MapStringInt` and `MapSubInt` retain complete key hashes for rebuilding.
-Var Map uses the same grouped storage, with full hashes to preserve custom-key
-filtering and avoid hash callbacks during growth. Below 65,536 buckets those
-hashes share the controls allocation. Larger tables keep the hashes in the
-controls Block's owned storage, which improves reuse of freed growth buffers.
-These representations do not change lookup, ownership, or traversal contracts.
+Typed Maps use the grouped hash storage that the
+[`Map` design notes](../library/modules/map.md#design-notes) describe. The
+representation does not change lookup, ownership, or traversal contracts.
 
 ```x2c
 #include "typed-map.x"

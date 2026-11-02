@@ -237,7 +237,7 @@ auto {
 ~}
 ```
 
-`auto` retains an allocation region around a statement, and initializer
+`auto` opens an allocation region around a statement, and initializer
 `auto` releases the acquired value at block exit. `$lock` and `with` give
 scoped locking and temporary assignment. See
 [classes and system macros](system-macros.md). `defer statement;` runs the
