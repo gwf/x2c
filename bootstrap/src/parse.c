@@ -269,7 +269,7 @@ static List f5_types____enumerator_name(Compiler c, Type context);
 
 static List _publish_enumerator(Compiler c, List input, Type context, Token origin);
 
-static int f5_types____names_alias(Compiler c, String spelling);
+static int _names_alias(Compiler c, String spelling);
 
 static int f5_types____enum_fits_int(List type, List members);
 
@@ -323,7 +323,7 @@ static Var f11_declarators____declared_name(Compiler c, Var name, int * exact_na
 
 static Var f11_declarators____method_spelling(Compiler c, Var name, Type declared_type, List * method, int * exact_name);
 
-static void f11_declarators____check_rebinding(Compiler c, String exact, int exact_name, List declaration);
+static void f11_declarators____check_rebinding(Compiler c, List context, String exact, int exact_name, List declaration);
 
 static void f11_declarators____bind_identity(Compiler c, List context, List binding, List declaration);
 
@@ -1527,7 +1527,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _570 = cons(_569, NULL);
   _571 = cons(_485, _570);
   _572 = List_var(_571);
-  _573 = int_var(695);
+  _573 = int_var(700);
   _574 = cons(_573, NULL);
   _575 = cons(_491, _574);
   _576 = List_var(_575);
@@ -1537,7 +1537,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _580 = List_var(_579);
   _581 = cons(_501, _498);
   _582 = List_var(_581);
-  _583 = int_var(122311);
+  _583 = int_var(122670);
   _584 = cons(_583, NULL);
   _585 = cons(_506, _584);
   _586 = List_var(_585);
@@ -6060,7 +6060,7 @@ static List _publish_enumerator(Compiler c, List input, Type context, Token orig
   List binding = ! String_truth(exact) && Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;
   String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);
   if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _210, origin, NULL);
-  if(String_truth(exact) && f5_types____names_alias(c, exact)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_211), cons(String_var(exact), cons(String_var(_212), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_213), cons(String_var(exact), cons(String_var(_214), NULL))))), NULL));
+  if(String_truth(exact) && _names_alias(c, exact)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_211), cons(String_var(exact), cons(String_var(_212), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_213), cons(String_var(exact), cons(String_var(_214), NULL))))), NULL));
   List key = cons(String_var(spelling), NULL);
   if(String_truth(exact)) key = Sym_declared_key(c -> sym, NULL, key, Type_list(context));
   Symbol prior = Sym_enumerator_owner(c -> sym, key);
@@ -6075,7 +6075,7 @@ static List _publish_enumerator(Compiler c, List input, Type context, Token orig
   return List_truth(initializer) ? cons(_106, cons(_107, cons(List_var(binding), cons(List_var(initializer), NULL)))) : binding;
 }
 
-static int f5_types____names_alias(Compiler c, String spelling){
+static int _names_alias(Compiler c, String spelling){
   for(int level = c -> alias_level;  level >= 0;  level --){
     int * _x2c_gensym_macro_address_9 = & c -> alias_level;
     int _x2c_gensym_macro_previous_9 = * _x2c_gensym_macro_address_9;
@@ -6909,7 +6909,7 @@ static List _install_declarator(Compiler c, List base, List context, List declar
   Type declared_type = List_type(List_append(mods, base));
   name = f11_declarators____method_spelling(c, name, declared_type, &(method), &(exact_name));
   String exact = _syntax_exact_name(name);
-  f11_declarators____check_rebinding(c, exact, exact_name, declaration);
+  f11_declarators____check_rebinding(c, context, exact, exact_name, declaration);
   List binding = String_truth(exact) ? Sym_declare(c -> sym, context, cons(String_var(exact), NULL), Type_list(declared_type)) : Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;
   if(List_truth(binding) && ! String_truth(exact)) f11_declarators____bind_identity(c, context, binding, declaration);
   if(List_truth(binding)) f11_declarators____method_facts(c, binding, method, self_signature, &((* preserved_self)));
@@ -7017,8 +7017,9 @@ Map Compiler_semantic_binding_facts(Compiler);
 
 Map Sym_current_symbols(Sym);
 
-static void f11_declarators____check_rebinding(Compiler c, String exact, int exact_name, List declaration){
-  if(String_truth(exact) && Compiler_scope_declares_alias(c, exact)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_211), cons(String_var(exact), cons(String_var(_212), NULL)))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_213), cons(String_var(exact), cons(String_var(_214), NULL))))), NULL));
+static void f11_declarators____check_rebinding(Compiler c, List context, String exact, int exact_name, List declaration){
+  int field = List_truth(context) && !(context == _81);
+  if(String_truth(exact) &&(field ? Compiler_scope_declares_alias(c, exact) : _names_alias(c, exact))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_211), cons(String_var(exact), cons(String_var(_212), NULL)))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_213), cons(String_var(exact), cons(String_var(_214), NULL))))), NULL));
   List existing = String_truth(exact) ? Sym_current_binding(c -> sym, cons(String_var(exact), NULL)) : NULL;
   if(exact_name ||(List_truth(existing) && Map_contains(Compiler_semantic_binding_facts(c), List_var(cons(_280, cons(List_var(existing), NULL)))))){
     Var prior = List_truth(existing) ? Map_getindex(Sym_current_symbols(c -> sym), List_var(cons(String_var(exact), NULL))) :((void) 0, Void);
@@ -7353,12 +7354,13 @@ Symbol Compiler_auto_region_form(Compiler c, Symbol position){
     Token after = Token_skip_trivia(Token_after_group(next));
     return position == 1405544 && f4_auto____function_follows(c, after) ? 458361162716 : 43159332400040;
   }
-  if(String_equal(next -> text, _621) || String_equal(next -> text, _24) || SymbolSet_contains(f4_auto____region_statements, next -> type) || f4_auto____contextual_statement(c, next)) return 43159332400040;
+  if(SymbolSet_contains(f4_auto____region_statements, next -> type) || f4_auto____contextual_statement(c, next)) return 43159332400040;
   return position == 1405544 && f4_auto____function_follows(c, next) ? 458361162716 : 0;
 }
 
 static int f4_auto____contextual_statement(Compiler c, Token word){
   if(Token_skip_trivia(word + 1) -> type == 123) return 0;
+  if(String_equal(word -> text, _621) || String_equal(word -> text, _24)) return 1;
   Token start = c -> token;
   {
     _x2c_gensym_defer_env_24 _x2c_gensym_macro_environment_24 ={

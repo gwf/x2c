@@ -382,6 +382,8 @@ List Compiler_condition_bindings(List expression);
 
 int Compiler_read_source(Compiler c, String path, String volatile * text);
 
+String Compiler_read_source_text(Compiler c, String path);
+
 int Compiler_owns_package_source(Compiler c, String path);
 
 String Compiler_source_path(Compiler c, String file);

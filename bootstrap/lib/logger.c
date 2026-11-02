@@ -970,7 +970,16 @@ Logger log_get_global_logger(void){
 
 Logger Logger_new(Symbol min_level){
   if(! _init_guard_) Logger_initialize();
-  if(_level_priority(min_level) < 0) return NULL;
+  if(_level_priority(min_level) < 0){
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Logger.new")), NULL)));
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("unknown level")), NULL)));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/logger.x",.function = "Logger_new",.line = 413,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1);
+      __builtin_unreachable();
+    }
+
+  }
   Logger logger = xcalloc(1, sizeof(struct Logger));
   * logger =(struct Logger){
     .min_level = min_level, .owner_scope = * Scope_top(), .pool = Pool_current(), .storage = Scope_new_named("Logger")
@@ -1016,8 +1025,8 @@ void Logger_shutdown(void){
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
   if(! logger){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/logger.x",.function = "Logger_log",.line = 464,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/logger.x",.function = "Logger_log",.line = 465,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
     __builtin_unreachable();
   }
   _log_fields(logger, level, category, fields);
@@ -1064,8 +1073,8 @@ void Logger_clear_sinks(Logger logger){
     x2c_cleanup_push(& _x2c_gensym_defer_record_17);
     {
       if(! logger){
-        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/logger.x",.function = "Logger_clear_sinks",.line = 494,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.clear_sinks")), NULL))));
+        static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/logger.x",.function = "Logger_clear_sinks",.line = 495,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.clear_sinks")), NULL))));
         __builtin_unreachable();
       }
       _require_quiescent(logger, _3);
@@ -1094,8 +1103,8 @@ void Logger_flush(Logger logger){
     x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
       if(! logger){
-        static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/logger.x",.function = "Logger_flush",.line = 512,.runtime = 1};
-        x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.flush")), NULL))));
+        static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/logger.x",.function = "Logger_flush",.line = 513,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.flush")), NULL))));
         __builtin_unreachable();
       }
       {
@@ -1210,8 +1219,8 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 570,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_18, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
+    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 571,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_19, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
 
@@ -1733,12 +1742,12 @@ static void _report_uncaught(List entry){
   String line = String_join(NULL, cons(String_var(_4), cons(String_var(Var_str(List_assoc(entry, Symbol_var(227594)))), cons(String_var(_5), NULL))));
   List location = Var_list_payload(List_assoc(entry, Symbol_var(857050729436)));
   if(List_truth(location) && Var_is(List_assoc(location, Symbol_var(40094681930)), 1473096)) line =({
-    Var _x2c_gensym_literal_part_0 = String_var(line);  Var _x2c_gensym_literal_part_1 = String_var(Var_str(List_assoc(location, Symbol_var(458361162716))));  Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(location, Symbol_var(412426))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(List_assoc(location, Symbol_var(805770))));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_6), cons(_x2c_gensym_literal_part_1, cons(String_var(_7), cons(_x2c_gensym_literal_part_2, cons(String_var(_8), cons(_x2c_gensym_literal_part_3, cons(String_var(_9), NULL)))))))));
+    Var _x2c_gensym_literal_part_2 = String_var(line);  Var _x2c_gensym_literal_part_3 = String_var(Var_str(List_assoc(location, Symbol_var(458361162716))));  Var _x2c_gensym_literal_part_4 = String_var(Var_str(List_assoc(location, Symbol_var(412426))));  Var _x2c_gensym_literal_part_5 = String_var(Var_str(List_assoc(location, Symbol_var(805770))));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_6), cons(_x2c_gensym_literal_part_3, cons(String_var(_7), cons(_x2c_gensym_literal_part_4, cons(String_var(_8), cons(_x2c_gensym_literal_part_5, cons(String_var(_9), NULL)))))))));
   }
   );
   List detail = Var_list_payload(List_assoc(entry, Symbol_var(280234584)));
   if(List_truth(detail)) line =({
-    Var _x2c_gensym_literal_part_4 = String_var(line);  Var _x2c_gensym_literal_part_5 = String_var(_detail_text(detail));  String_join(NULL, cons(_x2c_gensym_literal_part_4, cons(String_var(_10), cons(_x2c_gensym_literal_part_5, NULL))));
+    Var _x2c_gensym_literal_part_6 = String_var(line);  Var _x2c_gensym_literal_part_7 = String_var(_detail_text(detail));  String_join(NULL, cons(_x2c_gensym_literal_part_6, cons(String_var(_10), cons(_x2c_gensym_literal_part_7, NULL))));
   }
   );
   fprintf(stderr, "%s\n", line);
@@ -1758,10 +1767,10 @@ static String _detail_text(List detail){
         Var value = List_cadr(pair);
         String text = Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264) ? Var_str(value) : Var_repr(value);
         parts =({
-          List _x2c_gensym_literal_part_7 = parts;  Var _x2c_gensym_literal_part_8 = String_var(({
-            Var _x2c_gensym_literal_part_6 = String_var(Var_str(pair -> car));  String_join(NULL, cons(_x2c_gensym_literal_part_6, cons(String_var(_11), cons(String_var(text), NULL))));
+          List _x2c_gensym_literal_part_9 = parts;  Var _x2c_gensym_literal_part_10 = String_var(({
+            Var _x2c_gensym_literal_part_8 = String_var(Var_str(pair -> car));  String_join(NULL, cons(_x2c_gensym_literal_part_8, cons(String_var(_11), cons(String_var(text), NULL))));
           }
-          ));  List_append(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL));
+          ));  List_append(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL));
         }
         );
       }

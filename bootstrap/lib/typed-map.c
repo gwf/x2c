@@ -1993,17 +1993,17 @@ static int _x2c_gensym_macro__enumerate_next_0(Iter _x2c_gensym_macro_iter_3, Va
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter MapIntInt_iter(MapIntInt _x2c_gensym_macro_map_61, Iter _x2c_gensym_macro_dest_0){
-  if((void *) _x2c_gensym_macro_dest_0 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_61 == 0) return Iter_init(_x2c_gensym_macro_dest_0, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_0, MapIntInt_var(_x2c_gensym_macro_map_61), _x2c_gensym_macro__next_0, int_var(0));
 }
 
 Iter MapIntInt_keys(MapIntInt _x2c_gensym_macro_map_62, Iter _x2c_gensym_macro_dest_1){
-  if((void *) _x2c_gensym_macro_dest_1 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_62 == 0) return Iter_init(_x2c_gensym_macro_dest_1, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_1, MapIntInt_var(_x2c_gensym_macro_map_62), _x2c_gensym_macro__keys_next_0, int_var(0));
 }
 
 Iter MapIntInt_enumerate(MapIntInt _x2c_gensym_macro_map_63, Iter _x2c_gensym_macro_dest_2){
-  if((void *) _x2c_gensym_macro_dest_2 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_63 == 0) return Iter_init(_x2c_gensym_macro_dest_2, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_2, MapIntInt_var(_x2c_gensym_macro_map_63), _x2c_gensym_macro__enumerate_next_0, int_var(0));
 }
 
@@ -2914,17 +2914,17 @@ static int _x2c_gensym_macro__enumerate_next_1(Iter _x2c_gensym_macro_iter_7, Va
 }
 
 Iter MapLongDouble_iter(MapLongDouble _x2c_gensym_macro_map_117, Iter _x2c_gensym_macro_dest_3){
-  if((void *) _x2c_gensym_macro_dest_3 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_117 == 0) return Iter_init(_x2c_gensym_macro_dest_3, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_3, MapLongDouble_var(_x2c_gensym_macro_map_117), _x2c_gensym_macro__next_1, int_var(0));
 }
 
 Iter MapLongDouble_keys(MapLongDouble _x2c_gensym_macro_map_118, Iter _x2c_gensym_macro_dest_4){
-  if((void *) _x2c_gensym_macro_dest_4 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_118 == 0) return Iter_init(_x2c_gensym_macro_dest_4, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_4, MapLongDouble_var(_x2c_gensym_macro_map_118), _x2c_gensym_macro__keys_next_1, int_var(0));
 }
 
 Iter MapLongDouble_enumerate(MapLongDouble _x2c_gensym_macro_map_119, Iter _x2c_gensym_macro_dest_5){
-  if((void *) _x2c_gensym_macro_dest_5 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_119 == 0) return Iter_init(_x2c_gensym_macro_dest_5, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_5, MapLongDouble_var(_x2c_gensym_macro_map_119), _x2c_gensym_macro__enumerate_next_1, int_var(0));
 }
 
@@ -3823,17 +3823,17 @@ static int _x2c_gensym_macro__enumerate_next_2(Iter _x2c_gensym_macro_iter_11, V
 }
 
 Iter MapStringString_iter(MapStringString _x2c_gensym_macro_map_173, Iter _x2c_gensym_macro_dest_6){
-  if((void *) _x2c_gensym_macro_dest_6 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_173 == 0) return Iter_init(_x2c_gensym_macro_dest_6, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_6, MapStringString_var(_x2c_gensym_macro_map_173), _x2c_gensym_macro__next_2, int_var(0));
 }
 
 Iter MapStringString_keys(MapStringString _x2c_gensym_macro_map_174, Iter _x2c_gensym_macro_dest_7){
-  if((void *) _x2c_gensym_macro_dest_7 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_174 == 0) return Iter_init(_x2c_gensym_macro_dest_7, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_7, MapStringString_var(_x2c_gensym_macro_map_174), _x2c_gensym_macro__keys_next_2, int_var(0));
 }
 
 Iter MapStringString_enumerate(MapStringString _x2c_gensym_macro_map_175, Iter _x2c_gensym_macro_dest_8){
-  if((void *) _x2c_gensym_macro_dest_8 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_175 == 0) return Iter_init(_x2c_gensym_macro_dest_8, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_8, MapStringString_var(_x2c_gensym_macro_map_175), _x2c_gensym_macro__enumerate_next_2, int_var(0));
 }
 
@@ -4730,17 +4730,17 @@ static int _x2c_gensym_macro__enumerate_next_3(Iter _x2c_gensym_macro_iter_15, V
 }
 
 Iter MapStringInt_iter(MapStringInt _x2c_gensym_macro_map_229, Iter _x2c_gensym_macro_dest_9){
-  if((void *) _x2c_gensym_macro_dest_9 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_229 == 0) return Iter_init(_x2c_gensym_macro_dest_9, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_9, MapStringInt_var(_x2c_gensym_macro_map_229), _x2c_gensym_macro__next_3, int_var(0));
 }
 
 Iter MapStringInt_keys(MapStringInt _x2c_gensym_macro_map_230, Iter _x2c_gensym_macro_dest_10){
-  if((void *) _x2c_gensym_macro_dest_10 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_230 == 0) return Iter_init(_x2c_gensym_macro_dest_10, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_10, MapStringInt_var(_x2c_gensym_macro_map_230), _x2c_gensym_macro__keys_next_3, int_var(0));
 }
 
 Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_231, Iter _x2c_gensym_macro_dest_11){
-  if((void *) _x2c_gensym_macro_dest_11 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_231 == 0) return Iter_init(_x2c_gensym_macro_dest_11, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_11, MapStringInt_var(_x2c_gensym_macro_map_231), _x2c_gensym_macro__enumerate_next_3, int_var(0));
 }
 

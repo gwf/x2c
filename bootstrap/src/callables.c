@@ -2196,7 +2196,8 @@ List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type){
 static void f9_callbacks____split(f9_callbacks___Callback * c){
   Type source =(* c).source;
   if(! List_truth((* c).source_binding) || ! List_truth(Type_list(source)) || Type_is_pointer(source) || ! Type_is_function(source)) f9_callbacks____fail(&((* c)), _954, _46);
-  if(! Type_function_parts((* c).target, &((* c).params), &((* c).result))) f9_callbacks____fail(&((* c)), _955, NULL);
+  if(! Type_function_parts((* c).target, &((* c).params), NULL)) f9_callbacks____fail(&((* c)), _955, NULL);
+  (* c).result = Type_apply((* c).target);
   if(! Type_function_parts(source, &((* c).source_params), &((* c).source_result))) f9_callbacks____fail(&((* c)), _956, NULL);
   if(_typed_params_variadic((* c).params) || _typed_params_variadic((* c).source_params)) f9_callbacks____fail(&((* c)), _957, NULL);
 }
@@ -2207,10 +2208,10 @@ static void f9_callbacks____check_signature(f9_callbacks___Callback * cb){
     String _x2c_gensym_macro_detail_0 = String_printf(_958, target_count, source_count);
     f9_callbacks____fail(&((* cb)), _959, cons(String_var(_x2c_gensym_macro_detail_0), NULL));
   }
-  (* cb).result = Type_canonicalize((* cb).result);
-  (* cb).source_result = Type_canonicalize((* cb).source_result);
-  if((* cb).result == _304 ||(* cb).source_result == _304) f9_callbacks____fail(&((* cb)), _960, NULL);
-  if(! List_equal(Type_list((* cb).result), Type_list((* cb).source_result))) f9_callbacks____fail(&((* cb)), _961, NULL);
+  Type result = Type_canonicalize((* cb).result);
+  Type source_result = Type_canonicalize((* cb).source_result);
+  if(result == _304 || source_result == _304) f9_callbacks____fail(&((* cb)), _960, NULL);
+  if(! List_equal(Type_list(result), Type_list(source_result))) f9_callbacks____fail(&((* cb)), _961, NULL);
 }
 
 static void f9_callbacks____check_params(f9_callbacks___Callback * cb){

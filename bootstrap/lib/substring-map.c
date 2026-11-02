@@ -740,17 +740,17 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 static Var int_var(int);
 
 Iter MapSubInt_iter(MapSubInt _x2c_gensym_macro_map_26, Iter _x2c_gensym_macro_dest_0){
-  if((void *) _x2c_gensym_macro_dest_0 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_26 == 0) return Iter_init(_x2c_gensym_macro_dest_0, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_0, MapSubInt_var(_x2c_gensym_macro_map_26), _x2c_gensym_macro__next_0, int_var(0));
 }
 
 Iter MapSubInt_keys(MapSubInt _x2c_gensym_macro_map_27, Iter _x2c_gensym_macro_dest_1){
-  if((void *) _x2c_gensym_macro_dest_1 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_27 == 0) return Iter_init(_x2c_gensym_macro_dest_1, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_1, MapSubInt_var(_x2c_gensym_macro_map_27), _x2c_gensym_macro__keys_next_0, int_var(0));
 }
 
 Iter MapSubInt_enumerate(MapSubInt _x2c_gensym_macro_map_28, Iter _x2c_gensym_macro_dest_2){
-  if((void *) _x2c_gensym_macro_dest_2 == 0) return 0;
+  if((void *) _x2c_gensym_macro_map_28 == 0) return Iter_init(_x2c_gensym_macro_dest_2, ((void) 0, Void), NULL, int_var(0));
   return Iter_init(_x2c_gensym_macro_dest_2, MapSubInt_var(_x2c_gensym_macro_map_28), _x2c_gensym_macro__enumerate_next_0, int_var(0));
 }
 

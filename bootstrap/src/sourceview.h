@@ -46,6 +46,8 @@ int SourceView_is_changed(SourceView sources, String path);
 
 int SourceView_exists(SourceView sources, String path);
 
+String SourceView_read_text(SourceView s, String path);
+
 int SourceView_read(SourceView sources, String path, String volatile * text);
 
 

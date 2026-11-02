@@ -248,9 +248,9 @@ size_t Buffer_len(Buffer buf){
 
 String Buffer_str(Buffer buf){
   if(! Buffer_truth(buf)) return NULL;
-  if(buf -> content -> length > INT_MAX){
+  if(buf -> content -> length > INT_MAX - 1){
     size_t length = buf -> content -> length;
-    int limit = INT_MAX;
+    int limit = INT_MAX - 1;
     {
       Var _x2c_gensym_literal_part_0 = Var_box_ulong(length);
       {

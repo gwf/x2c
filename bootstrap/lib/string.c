@@ -240,17 +240,8 @@ String String_new_len(const char * str, int len){
   if(! str || len <= 0) return NULL;  size_t length = strnlen(str, (size_t) len);  if(length == 0) return NULL;  return x2c_string_from_bytes(str, (int) length);
 }
 
-String String_join(String sep, List strings);
-#include "error.h"
-
-
-
-
 String String_new_in(Pool pool, const char * bytes, int length){
-  if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded) return NULL;  if(bounded > INT_MAX - 1){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/storage.x",.function = "String_new_in",.line = 114,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_in")), NULL))));  __builtin_unreachable();
-  }
-  return f7_storage____from_bytes_in(pool, bytes, (int) bounded);
+  if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded) return NULL;  return f7_storage____from_bytes_in(pool, bytes, (int) bounded);
 }
 
 String String_new(const char * str);
@@ -258,9 +249,15 @@ String String_intern(String string){
   return String_new(string);
 }
 
+String String_join(String sep, List strings);
+#include "error.h"
+
+
+
+
 String String_new(const char * str){
   if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/storage.x",.function = "String_new",.line = 144,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/storage.x",.function = "String_new",.line = 144,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new")), NULL))));  __builtin_unreachable();
   }
   return x2c_string_from_bytes(str, (int) length);
 }
@@ -309,7 +306,10 @@ static unsigned f7_storage____hash_n(const char * str, int length){
 
 String Var_as_string(Var);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length){
-  if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
+  if(! pool || ! bytes || length <= 0) return NULL;  if(length > INT_MAX - 1){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/storage.x",.function = "f7_storage____from_bytes_in",.line = 288,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(1265290), int_var(length));  __builtin_unreachable();
+  }
+  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
     String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
   }
   size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  return Var_as_string(Pool_intern_new(pool, String_var(string), header));
