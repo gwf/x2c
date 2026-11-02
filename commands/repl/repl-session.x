@@ -170,7 +170,7 @@ ReplCompletion ReplSession.complete(
     _x2c_complete_here(
       c, <submit>,
       _x2c_block_keywords().filter(%!(word) =>
-        word not in %("case" "break" "continue" "goto" "default")));
+        !(word in %("case" "break" "continue" "goto" "default"))));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
