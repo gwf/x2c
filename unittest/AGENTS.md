@@ -5,22 +5,12 @@ Use the [agent directory](../agents/README.md) for task routing and the
 
 ## Harness
 
-- Suites are `test-<feature>.x`. Tests are `static void` functions. Include
-  `test-macros.x` before its first use. Use `$test.scoped();` when a test
-  owns one whole-function retained Scope, and `$test.run(function_name)` when
-  the label is the exact function name. Keep intentionally descriptive labels
-  as explicit `TestHarness_run` calls.
-  Register `void <name>_suite(void)` suites in `test-all.x` with
-  `$test.suite(suite_name)`.
-- Call `EXPECT_*` and `TEST_FAIL` as bare statements. Do not return status or
-  thread an `ok` flag.
+- Write suites, tests, assertions, and registrations as
+  [TE-1](../agents/x2c-code-standard.md#tests-examples-and-samples)
+  specifies. Include `test-macros.x` before its first use.
 - The harness fails a test on a failed assertion, zero assertions, or extra
   pushed/retained scope state. Ambient errors remain with their configured
   policy owner.
-- Register deliberate deferrals with `TestHarness_skip(name, reason)` so
-  they remain visible in the results.
-- Guard a dependent dereference with `if (!EXPECT_X(...)) return;` only when
-  continuing would be unsafe.
 
 ## Fixtures and lifetimes
 

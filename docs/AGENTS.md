@@ -58,17 +58,14 @@ the generic templates that own published definitions:
   definition or public type declaration with **no blank line** between. `//`
   and plain `/*` are never doc comments, so implementation notes stay
   private.
-- In `src/`, non-static callables are future-public unless their names begin
-  with `_` or contain `__`; nonstatic types and types required by public
-  declarations are public. The path-scoped compiler audit requires
-  documentation for both. The exact writing standard is in
-  CM-5 in `agents/x2c-code-standard.md`.
+- In `src/`, nonstatic types and types required by public declarations are
+  public. CM-5 in `agents/x2c-code-standard.md` defines future-public
+  callables and the writing standard. The path-scoped compiler audit requires
+  documentation for both.
 - The first sentence becomes the index-table entry and must read on its own.
   Further sentences follow directly; use an empty line only for a real
   paragraph boundary, list, example, or other Markdown block. Sentence
   punctuation inside code spans and ellipses does not end the summary.
-- No `@param` or `@return` tags. Parameter names come from source and types come
-  from the compiler's symbol table, rather than repeated tags.
 - A source-shaped `Unit` macro may own public definitions. Put each callable's
   doc comment directly above its function template; the reference scanner
   substitutes captured invocation arguments and attributes the definition to

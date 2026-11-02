@@ -48,7 +48,7 @@ is carrying real policy and should remain separate.
 
 Calibration for PR-2 in [the standard](../../../x2c-code-standard.md).
 
-Commit `d78c641a` removed 571 net lines of hand-authored production source from
+One change removed 571 net lines of hand-authored production source from
 the protocol implementation. The important change was not shorter syntax. It
 removed duplicate readers, indexes, scans, and reconstructed views after the
 header-symbol artifact became the complete ordered source. The compiler no
@@ -65,7 +65,7 @@ Questions to reuse:
 
 Calibration for FA-3 in [the standard](../../../x2c-code-standard.md).
 
-Commit `d2a51d85` stopped `src/main.x` from copying 18 fields out of a parsed
+One change stopped `src/main.x` from copying 18 fields out of a parsed
 `CliRequest` into file statics. Consumers retained the request they actually
 needed. The copied fields, assignments, and implicit synchronization rule all
 disappeared.
@@ -78,12 +78,12 @@ and lifecycle code.
 
 Calibration for FA-8, FA-9 in [the standard](../../../x2c-code-standard.md).
 
-Commit `d7d9a95e` removed `CliOptionId`, `CliGroup`, and related routing
+One change removed `CliOptionId`, `CliGroup`, and related routing
 machinery. The option spellings already carried the identity callers needed,
 so the extra enum and grouping vocabulary did not describe additional
 behavior. Hand-authored production source fell by 91 lines.
 
-Commit `52bb9891` removed the private AST validator and 734 net production
+Another removed the private AST validator and 734 net production
 lines. The compiler phases already constructed and consumed the supported AST
 shapes; the parallel validator model was another implementation of facts the
 real pipeline owned.
@@ -96,7 +96,7 @@ back into an existing value or operation, delete the private language.
 
 Calibration for PR-2, PR-4 in [the standard](../../../x2c-code-standard.md).
 
-The allocation and size failure work in `97c2a9e1` and `c4fee817` established
+The allocation and size failure work established
 that those failures do not return to the raising call. That made downstream
 null checks and fallback braces unreachable. The useful campaign was the
 repository-wide sweep after the guarantee became true, not one removed check.
@@ -109,12 +109,12 @@ propagation code, tests, and documentation everywhere downstream.
 
 Calibration for FA-5, MA-2 in [the standard](../../../x2c-code-standard.md).
 
-Commit `d2a51d85` used existing compile-time rows and macros to remove 415 net
+One change used existing compile-time rows and macros to remove 415 net
 hand-authored production lines. It generated the 14 native Var update
 functions and the Var tag decoder, and it shared String traversal mechanics.
 One definition replaced real implementation families.
 
-The typed Array and Map work in `66448562` and `7496523b` went further: one
+The typed Array and Map work went further: one
 storage algorithm now serves current typed families while generated C remains
 specialized. These changes added capability as well as source, so their value
 comes from eliminating future parallel implementations and drift, not from a
@@ -299,8 +299,8 @@ stale comment; this is documentation repair, not removed machinery.
 
 Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
 
-Commit `3b2a5dd8` removed 214 net hand-authored production lines by simplifying
-compiler probes across many modules. Commit `d2a51d85` combined generated
+One campaign removed 214 net hand-authored production lines by simplifying
+compiler probes across many modules. Another combined generated
 families with removal of copied request state, four `_path_dir` copies, two
 `Map.copy` reimplementations, and repeated option/operator tests. Neither
 campaign stopped after its first valid edit.

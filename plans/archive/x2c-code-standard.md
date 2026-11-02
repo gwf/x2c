@@ -1451,3 +1451,41 @@ whole-file or whole-campaign conformity.
 - Validators, diagnostics, negative fixtures: D2 and D3 change existing
   raises only. The lint detectors are advisory candidates; only the
   ratchet over existing violation codes fails publication.
+
+## History moved from the standard
+
+These passages left `agents/x2c-code-standard.md` on 2026-11-02 so the
+standard holds rules only.
+
+### One-time approval
+
+Gary approved thirteen reviewed redundant implementation C scope removals
+on 2026-10-05. Prove the complete generated delta removes only those caller
+brace pairs and approved source coordinates. Preserve report-local lifetime,
+operations, quoted AST, causes, details, wording, and origin ancestry.
+
+### Lessons from the 2026-09-17 to 2026-10-04 campaigns
+
+These results set rules in the standard; the evidence is in this record.
+
+- Splitting long functions into named steps on records cut `src/` functions
+  over 40 lines from about 155 to 6, excluding generated `linked-meta.x`, and
+  the stage diff proved each file unchanged. Files grew about 10%. The next
+  review found helpers that scattered complete operations, and a follow-up
+  inlined one-use helpers and shrank records. FN-2 and FA-3 carry both results.
+- Chained sub-dispatchers with a `matched` flag were merged back into one
+  `match` (+53/-119 lines). FN-4 records it.
+- Helpers clang would not fold added instructions on runtime hot paths: +11 per
+  integer read from a fallback `return 0`, and an interning guard on every fast
+  add from a String literal argument. HP-3 records them.
+- An extracted arm with `with` in the recursive transform walk added a C frame
+  per level and was put back inline. HP-4 records it.
+- A string-keyed central diagnostic catalogue raised the clean stage-1 build
+  from 10.04 s to 24.97 s and hid raises from lint. The final form is named
+  report macros near their callers. DG-1 records it.
+- Delegating a List reduction to the general iterator lost its constant-time
+  null case until `62ab2c5f` restored it, and a measured 3x cost on pointer
+  values blocked delegating `Var.fallback_repr`. PR-12 records it.
+- Respellings that leave generated C byte-identical (`in`, `.`, receivers,
+  `=>`, references, renames, reordering) cost nothing downstream; emission
+  changes need a bootstrap refresh first. The proof table records it.

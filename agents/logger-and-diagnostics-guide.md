@@ -7,20 +7,14 @@ entry through one compiler.
 
 ## Local report catalogues
 
-Named diagnostics keep wording and construction with the code that owns the
-condition. A catalogue used by one file stays near its top as static macros.
-Several call sites may share one definition. Actual shared consumers include
-an owner's `*-reports.x` directly; those definitions remain nonstatic.
-A large local catalogue may use a sibling file, but separation is optional.
-Do not share unrelated conditions merely because their wording matches.
-
-Compiler catalogue macros use one dot: `$action.owner_condition`. The owner
-names the responsibility, not the diagnostic category. `$fail` reports and
-transfers or terminates; `$report` records or emits an error and returns;
-`$warn` records or emits a warning. `$note` constructs note text or a notes
-List, and `$reason` constructs a reason String. `$progress` and `$debug`
-distinguish ordinary status and debug output in mixed catalogues. Existing
-structured Error raises retain `$error` and their runtime conventions.
+[DG-1](x2c-code-standard.md#diagnostics-and-messages) places named
+diagnostics with their owner and defines the `$action.owner_condition`
+actions. A large local catalogue may use a sibling file, but separation is
+optional. Do not share unrelated conditions merely because their wording
+matches. The owner names the responsibility, not the diagnostic category.
+`$progress` and `$debug` distinguish ordinary status and debug output in mixed
+catalogues. Existing structured Error raises retain `$error` and their runtime
+conventions.
 
 Arguments are context, explicit source site when applicable, then semantic
 operands. A site may be a Token, recorded location, or analysis origin, as
