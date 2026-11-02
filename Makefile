@@ -448,14 +448,14 @@ performance-runtime: build
 		$(MAKE) $$target; \
 	done
 
-# Shared benchmark steps: translate + compile one focused benchmark
-# ($(1) = source stem, $(2) = target-specific compile flags), and the
-# 5-sample run loop shared by the timing targets.
+# Shared benchmark steps: translate and compile one focused benchmark
+# ($(1) = source stem) with the build's flags, and the 5-sample run loop
+# shared by the timing targets.
 define RUN_X2C_BENCHMARK
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/$(1).x
-	$(CC) $(2) -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -iquote include/x2c \
 		unittest/build/benchmarks/$(1).c \
 		-L builds/0 -lx2c -lm -o unittest/build/benchmarks/$(1)
 endef
@@ -468,36 +468,38 @@ define RUN_BENCHMARK_SAMPLES
 endef
 
 bm-scan: build						## Run focused scanner timings
-	$(call RUN_X2C_BENCHMARK,scan-hot-paths,-O2)
+	$(call RUN_X2C_BENCHMARK,scan-hot-paths)
 	./unittest/build/benchmarks/scan-hot-paths
 
 bm-string: build					## Run focused String timings
-	$(call RUN_X2C_BENCHMARK,string-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,string-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,string-hot-paths)
 
 bm-list: build						## Run focused List timings
 	$(MAKE) -C unittest benchmark-list
 
 bm-block-buffer: build					## Run Block and Buffer timings
-	$(call RUN_X2C_BENCHMARK,block-buffer-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,block-buffer-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,block-buffer-hot-paths)
 
 bm-scope: build						## Run focused Scope timings
 	$(MAKE) -C unittest scope-benchmark
 
 bm-file: build						## Run focused File timings
-	$(call RUN_X2C_BENCHMARK,file-hot-paths,-O2)
+	$(call RUN_X2C_BENCHMARK,file-hot-paths)
 	X2C_SCOPE_ACCOUNTING=1 ./unittest/build/benchmarks/file-hot-paths
 
+# Each Logger copy takes the build's flags and then its own optimization
+# level, which wins.
 bm-logger: build					## Run focused Logger timings
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/logger-hot-paths.x
-	$(CC) -g -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -O0 -g -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-debug
-	$(CC) -O2 -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -O2 -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-optimized
@@ -515,7 +517,7 @@ bm-exception: build					## Run focused exception timings
 	$(MAKE) -C unittest exception-benchmark
 
 bm-var: build						## Run existing Var hot paths
-	$(call RUN_X2C_BENCHMARK,var-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,var-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,var-hot-paths)
 
 bm-varops: build					## Check Var operator fast lanes

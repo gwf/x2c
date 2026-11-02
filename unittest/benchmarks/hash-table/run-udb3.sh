@@ -32,12 +32,7 @@ case "$mode" in
     ;;
 esac
 
-if [ "$(cat "$root/etc/build-mode.local" 2>/dev/null ||
-  cat "$root/etc/build-mode" 2>/dev/null)" != optimize ]; then
-  echo "udb3 benchmark requires the optimized x2c build mode" >&2
-  echo "run 'make config-optimize', clean, and rebuild before benchmarking" >&2
-  exit 2
-fi
+. "$root/unittest/benchmarks/hash-table/require-optimize.sh"
 
 mkdir -p "$campaign_dir" "$results_root"
 if [ ! -d "$source_dir/.git" ]; then
@@ -61,7 +56,9 @@ if [ "$head_commit" != "$suite_commit" ]; then
 fi
 
 x2c_binary="$campaign_dir/run-test-x2c"
-"$cc" -O3 -DNDEBUG -Wall -Wextra \
+# The x2c adapter takes the build's flags, then the suite's.
+# shellcheck disable=SC2086
+"$cc" ${BUILD_CFLAGS:-} -O3 -DNDEBUG -Wall -Wextra \
   -I"$source_dir" -iquote "$root/include/x2c" "$adapter" \
   -L"$root/builds/0" -lx2c -lm -o "$x2c_binary"
 

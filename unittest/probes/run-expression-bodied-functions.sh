@@ -6,6 +6,7 @@ SOURCE="$ROOT/unittest/probes/expression-bodied-functions"
 BUILD="$ROOT/unittest/build/expression-bodied-functions"
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 CC=${CC:-cc}
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/source"
@@ -37,7 +38,8 @@ for mode in snapshot cpp live; do
       >"$out/parity.ast"
     "$X2C" translate "${flags[@]+"${flags[@]}"}" \
       --out-dir "$out" "$source"
-    "$CC" -iquote "$ROOT/include/x2c" "$out/parity.c" \
+    "$CC" ${build_cflags[@]+"${build_cflags[@]}"} \
+      -iquote "$ROOT/include/x2c" "$out/parity.c" \
       -L"$ROOT/builds/0" -lx2c -lm -o "$out/parity"
     "$out/parity" >"$out/parity.stdout"
   done

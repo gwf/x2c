@@ -29,13 +29,16 @@ mkdir -p "$BUILD/benchmarks"
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD/benchmarks" "$SOURCE"
 
 CC=${CC:-cc}
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 common=(-iquote "$ROOT/include/x2c" -iquote "$ROOT/builds/0/src"
         "$BUILD/test-support.c" "$BUILD/match-recursive.c"
         "$BUILD/benchmarks/match-cache-benchmark.c"
         -L"$ROOT/builds/0" -lx2c -lm)
-"$CC" -g -O0 "${common[@]}" -o "$BUILD/mcb-debug"
-"$CC" -O2 "${common[@]}" -o "$BUILD/mcb"
-"$CC" -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
+# Each form takes the build's flags and then its own optimization level.
+compile() { "$CC" ${build_cflags[@]+"${build_cflags[@]}"} "$@"; }
+compile -g -O0 "${common[@]}" -o "$BUILD/mcb-debug"
+compile -O2 "${common[@]}" -o "$BUILD/mcb"
+compile -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
   "${common[@]}" -o "$BUILD/mcb-san"
 
 echo "match-cache: correctness (debug)"
