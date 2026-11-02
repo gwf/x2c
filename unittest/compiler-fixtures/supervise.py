@@ -87,12 +87,12 @@ def main():
     return 2
   try:
     timeout = float(os.environ.get("FIXTURE_TIMEOUT_SECONDS", "60"))
-    jobs = int(os.environ.get("JOBS", os.cpu_count() or 1))
+    jobs = int(os.environ.get("BUILD_JOBS", 1))
     if not math.isfinite(timeout) or timeout <= 0 or jobs <= 0:
       raise ValueError()
   except ValueError:
-    print("FIXTURE_TIMEOUT_SECONDS and JOBS must be positive numbers; "
-          "JOBS must be an integer", file=sys.stderr)
+    print("FIXTURE_TIMEOUT_SECONDS and BUILD_JOBS must be positive numbers; "
+          "BUILD_JOBS must be an integer", file=sys.stderr)
     return 2
 
   script_dir = Path(__file__).resolve().parent

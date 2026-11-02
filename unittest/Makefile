@@ -1,6 +1,8 @@
 SOURCE = .
 BUILD = build
 
+# BUILD_JOBS sets the fixture workers and translation jobs here too.
+include ../etc/make-command.mk
 include ../etc/x2c.mk
 
 X2CFLAGS +=

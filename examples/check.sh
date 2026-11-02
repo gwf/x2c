@@ -224,7 +224,7 @@ done <"$manifest"
 
 if ((${#work[@]})); then
   printf '%s\n' "${work[@]}" | \
-    xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
+    xargs -P "${BUILD_JOBS:-1}" -n 1 \
       "$example_dir/check.sh" "$mode" --one || true
 fi
 
