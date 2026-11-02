@@ -407,16 +407,12 @@ static String _input_name(Compiler c, String filename) {
    runtime headers unless it lies under `lib/`. `source` is the unit's
    resolved path, or NULL. */
 static void _runtime_roles(Compiler c, const char *source) {
-  char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = %"$(x2c_get_root())/lib";
+  char runtime[PATH_MAX];
+  String prelude = %"$(x2c_get_root())/lib/x2c.x";
   c.prelude =
-    !(source && realpath(%"$dir/x2c.x", runtime) && !strcmp(source, runtime));
-  c.runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
-}
-
-static int _inside(const char *path, const char *dir) {
-  size_t n = strlen(dir);
-  return !strncmp(path, dir, n) && path[n] == '/';
+    !(source && realpath(prelude, runtime) && !strcmp(source, runtime));
+  c.runtime_inc =
+    !(source && Compiler.in_runtime_library(String.new(source)));
 }
 
 static String _read_input(Compiler c) {

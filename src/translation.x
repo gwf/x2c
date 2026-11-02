@@ -234,15 +234,12 @@ static List _imported_packages(SourceView sources, String path) {
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.scan();
   Array names = [], int depth = 0;
-  for (Token token = tokens.next(); token.type != <eof>;
-       token = tokens.next()) {
-    if (token.text == "{") depth++;
-    else if (token.text == "}") depth--;
-    else if (!depth && token.text == "import") {
+  for (Token token = Compiler.next_file_scope(tokens, depth);
+       token.type != <eof>; token = Compiler.next_file_scope(tokens, depth))
+    if (token.text == "import") {
       token = tokens.next();
       if (token.type == <lit-char*>) names.push(token.text[1:-1]);
     }
-  }
   return names.list_free();
 }
 

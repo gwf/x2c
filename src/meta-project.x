@@ -60,6 +60,20 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   Compiler.use_meta_helper(_build_meta(f, inputs));
 }
 
+/** Returns the next token of `tokens` at file scope, outside every brace,
+    or the end. `depth` keeps the brace depth between calls, from 0.
+*/
+Token Compiler.next_file_scope(Tokenizer tokens, int &depth) {
+  Token token = tokens.next();
+  for (; token.type != <eof>; token = tokens.next())
+    switch (token.type) {
+      case <"{">: case <"%{">: case <"${">: depth++; break;
+      case <"}">: depth--; break;
+      default: if (!depth) return token;
+    }
+  return token;
+}
+
 // helper build
 
 /* Builds an independent helper for the meta functions `inputs` reach; the
@@ -222,16 +236,9 @@ static int _file(Scan &s, String path) {
    word. */
 static int _file_scope(Scan &s, Tokenizer tokens, String directory) {
   int depth = 0, meta = 0;
-  for (Token token = tokens.next(); token.type != <eof>;
-       token = tokens.next()) {
+  for (Token token = Compiler.next_file_scope(tokens, depth);
+       token.type != <eof>; token = Compiler.next_file_scope(tokens, depth)) {
     String word = token.text;
-    switch (token.type) {
-      case <"{">: case <"%{">: case <"${">:
-        depth++;
-        continue;
-      case <"}">: depth--; continue;
-    }
-    if (depth) continue;
     if (word == "meta") meta |= _marker(token);
     else if (word == "import") meta |= _package(s, tokens) ? 2 : 0;
     else if (token.type == <preproc>)

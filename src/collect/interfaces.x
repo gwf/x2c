@@ -405,7 +405,7 @@ module List _interface_include_dirs(Compiler c, String canonical) {
   }
   dirs.push(package ? %(package $package) : %(package));
   if (c.cpp_expansion) dirs.push(%(cpp-expansion));
-  if (c.command_macros && !_runtime_source(canonical))
+  if (c.command_macros && !Compiler.is_runtime_source(canonical))
     dirs.push(%(macros @(c.command_macros)));
   return dirs.list_free();
 }
