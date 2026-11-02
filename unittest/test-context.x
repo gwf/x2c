@@ -18,8 +18,7 @@ static void context_open_close_restores_scope(void) {
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
 }
 
-/* Operations on a null Context raise; close and cleanup do nothing. A
-   Context that is not current still refuses to close. */
+/* A Context that is not current still refuses to close. */
 static void context_null_handle_contract(void) {
   Context context = NULL;
   String raised = NULL;
@@ -38,7 +37,8 @@ static void context_null_handle_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   inner.close();
   outer.close();
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Context.export; bad-arg Context.export_destination; "
     "bad-arg Context.owns; bad-state Context.close; ");
 }

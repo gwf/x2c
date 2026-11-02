@@ -77,7 +77,6 @@ static void channel_rejects_invalid_construction(void) {
   EXPECT_TRUE(fractional);
 }
 
-/* Operations on a null Channel raise; close and free do nothing. */
 static void channel_null_handle_contract(void) {
   Channel channel = NULL;
   String raised = NULL;
@@ -91,7 +90,8 @@ static void channel_null_handle_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try channel.free();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Channel.scope; bad-arg Channel.send; bad-arg Channel.receive; ");
 }
 

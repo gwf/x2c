@@ -254,9 +254,8 @@ static void process_changes_after_start_raise(void) {
   EXPECT_INT_EQ(caught, 5);
 }
 
-/* Operations on a null Job raise; cleanup does nothing. The result
-   accessors report the Job.start they reach first, and run reports
-   Job.live. */
+/* The result accessors report the Job.start they reach first, and run
+   reports Job.live. */
 static void process_null_job_contract(void) {
   $test.scoped();
   Job job = NULL;
@@ -291,7 +290,8 @@ static void process_null_job_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try job.cleanup();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Job.pipe; bad-arg Job.options; bad-arg Job.live; "
     "bad-arg Job.live; bad-arg Job.start; bad-arg Job.start; "
     "bad-arg Job.start; bad-arg Job.start; bad-arg Job.start; "

@@ -606,7 +606,6 @@ static void thread_rejects_free_before_join_and_double_join(void) {
   thread.free();
 }
 
-/* Operations on a null Thread raise; free does nothing. */
 static void thread_null_handle_contract(void) {
   Thread thread = NULL;
   String raised = NULL;

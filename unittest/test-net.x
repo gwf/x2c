@@ -138,8 +138,6 @@ static void net_invalid_arguments_and_names(void) {
   EXPECT_INT_EQ(missing, 1);
 }
 
-/* Operations on a null Listener or Socket raise; close and cleanup do
-   nothing. */
 static void net_null_handle_contract(void) {
   Listener listener = NULL;
   Socket socket = NULL;
@@ -164,7 +162,8 @@ static void net_null_handle_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try socket.cleanup();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Listener.accept; bad-arg Listener.port; "
     "bad-arg Listener.stop; bad-arg Socket.set_timeout; "
     "bad-arg Socket.shutdown_write; bad-arg Socket.peer; ");

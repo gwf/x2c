@@ -56,7 +56,7 @@ Source: `lib/context.x`
 <a id="Context.export"></a>
 #### Context.export
 
-`meta native Var Context.export(Context context, Var value)`
+`meta native Var Context.export(Context c, Var value)`
 
 Exports `value` into the parent of the current `Context`.
 Values may belong to an open region of that `Context`; export them
@@ -71,7 +71,7 @@ Built-in `Array` and `Map` export restores the container's source ownership
 if recursive export fails, but nested exports already completed are not
 rolled back.
 
-**Raises:** `<bad-arg>` for NULL, `<bad-state>` unless `context` is current,
+**Raises:** `<bad-arg>` for NULL, `<bad-state>` unless `c` is current,
 `<bad-types>` for an unsupported value without a registered exporter, or
 a cause from nested allocation, hashing, equality, or custom export.
 

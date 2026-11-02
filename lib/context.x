@@ -64,15 +64,14 @@ static pthread_once_t context_shutdown_once =
     if recursive export fails, but nested exports already completed are not
     rolled back.
 
-    Raises: `<bad-arg>` for NULL, `<bad-state>` unless `context` is current,
+    Raises: `<bad-arg>` for NULL, `<bad-state>` unless `c` is current,
     `<bad-types>` for an unsupported value without a registered exporter, or
     a cause from nested allocation, hashing, equality, or custom export.
 */
-meta native Var Context.export(Context context, Var value) {
-  if (!context) raise %(bad-arg (operation "Context.export"));
-  if (current_context != context)
-    raise %(bad-state (operation "Context.export"));
-  return _export_root(context, value);
+meta native Var Context.export(Context c, Var value) {
+  if (!c) raise %(bad-arg (operation "Context.export"));
+  if (current_context != c) raise %(bad-state (operation "Context.export"));
+  return _export_root(c, value);
 }
 
 /** Exports a sealed worker result `Scope` into the current `Scope` and pool.

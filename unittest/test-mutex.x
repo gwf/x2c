@@ -44,7 +44,6 @@ static void mutex_system_lock_failed_acquisition(void) {
   EXPECT_STR_EQ(raised, "bad-arg Mutex.lock");
 }
 
-/* Operations on a null Mutex raise; free and cleanup do nothing. */
 static void mutex_null_handle_contract(void) {
   Mutex mutex = NULL;
   String raised = NULL;
@@ -58,7 +57,8 @@ static void mutex_null_handle_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try mutex.cleanup();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Mutex.lock; bad-arg Mutex.try_lock; bad-arg Mutex.unlock; ");
 }
 

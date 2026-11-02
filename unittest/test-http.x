@@ -276,17 +276,15 @@ static void http_loopback(void) {
   EXPECT_INT_EQ(events.len(), 2);
 }
 
-/* A server needs a live Logger; a null one fails before binding. */
 static void http_server_rejects_null_logger(void) {
   $test.scoped();
   String raised = NULL;
-  try HttpServer.new(Router.new(), {
-    host: "127.0.0.1", port: 0, logger: Var.new(<p48>, NULL)});
+  try HttpServer.new(
+    Router.new(), {host: "127.0.0.1", port: 0, logger: Var.new(<p48>, NULL)});
   catch %(?code (operation ?op) *): raised = %"$code $op";
   EXPECT_STR_EQ(raised, "bad-arg HttpServer.new");
 }
 
-/* Operations on a null HttpServer raise; close does nothing. */
 static void http_null_server_contract(void) {
   HttpServer server = NULL;
   String raised = NULL;
@@ -300,7 +298,8 @@ static void http_null_server_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try server.close();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg HttpServer.port; bad-arg HttpServer.serve; "
     "bad-arg HttpServer.start; bad-arg HttpServer.stop; ");
 }

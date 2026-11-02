@@ -138,8 +138,8 @@ static void logger_creation_levels_and_queries(void) {
   logger.free();
 }
 
-/* Operations on a null Logger raise; free does nothing. The level
-   shorthands report the Logger.log they delegate to. */
+/* The level shorthands report Logger.log, whose failure behavior they
+   share. */
 static void logger_null_handle_contract(void) {
   Logger logger = NULL;
   String raised = NULL;
@@ -182,7 +182,8 @@ static void logger_null_handle_contract(void) {
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
   try logger.free();
   catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
-  EXPECT_STR_EQ(raised,
+  EXPECT_STR_EQ(
+    raised,
     "bad-arg Logger.should_log; bad-arg Logger.min_level; "
     "bad-arg Logger.set_min_level; bad-arg Logger.add_sink; "
     "bad-arg Logger.remove_sink; bad-arg Logger.add_file_sink; "
