@@ -329,7 +329,11 @@ static void list_map2_zip_and_sublis(void) {
   List sums = left.map2(right, add_pairwise);
   const int expected_sums[] = { 5, 7, 9 };
   if (!expect_list_ints("left.map2(right)", sums, expected_sums, 3)) return;
-  EXPECT_NULL(left.map2(right, NULL));
+  int missing = 0;
+  try left.map2(right, NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 1);
+  EXPECT_NULL(left.map2(NULL, NULL));
   List zipped = left.zip_with(right, NULL);
   if (!EXPECT_INT_EQ(zipped.len(), 3)) return;
   EXPECT_INT_EQ(zipped.getindex(0).car().integer(), 1);

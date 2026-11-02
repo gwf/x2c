@@ -35,7 +35,7 @@ Linked list with `Var` elements.
 | [`List.len`](#List.len) | Returns the number of cells in `lst` in O(n) time. |
 | [`List.list_n`](#List.list_n) | Builds a `List` from exactly `element_count` `Var` arguments. |
 | [`List.map`](#List.map) | Returns a canonical `List` holding `fn` applied front to back. |
-| [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`. |
+| [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`. |
 | [`List.new`](#List.new) | Returns the List packed from the supplied values and explicit splices. |
 | [`List.reverse`](#List.reverse) | Returns a canonical `List` with `lst`'s elements reversed. |
 | [`List.sort`](#List.sort) | Returns a copy of `lst` ordered by `Var.compare`. |
@@ -413,9 +413,13 @@ Source: `lib/list/transformations.x`
 
 `List List.map2(List a, List b, Func fn)`
 
-Maps `fn` over aligned pairs from `a` and `b`.
-A null callback returns `nil` without examining either `List`; otherwise
-this has the length, order, ownership, and failures of `List.zip_with`.
+Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`.
+The shorter input determines the result length, and an empty input does
+not inspect the callback. `fn` receives the left and right values and is
+invoked front to back. A null `fn` raises `<bad-arg>` from `Func.apply`
+when the first pair forms.
+
+**Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
 Source: `lib/list/transformations.x`
 
@@ -574,9 +578,8 @@ Source: `lib/list/rendering.x`
 `List List.zip_with(List a, List b, Func fn)`
 
 Combines aligned values from two `List`s with `fn`.
-A null `fn` produces two-element pair `List`s. The shorter input determines
-the result length, and an empty input does not inspect the callback. A
-callback receives the left and right values and is invoked front to back.
+A null `fn` produces two-element pair `List`s; otherwise this is
+`List.map2`. The shorter input determines the result length.
 
 **Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 

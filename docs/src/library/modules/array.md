@@ -650,11 +650,11 @@ heap.heap_push(20);
 printf("%s %s\n", heap.heap_pop().repr(), heap.heap_pop().repr());
 ```
 
-**Raises:** `<void-op>` when `val` is `void`, or `<size-limit>` when the heap
-cannot grow within the `Array` index domain, `<alloc-fail>` when storage
-cannot grow, or a cause from element comparison. A value or earlier swap
-may remain when comparison fails; pre-insertion failures leave the heap
-unchanged.
+**Raises:** `<bad-arg>` for a null `heap`, `<void-op>` when `val` is `void`,
+`<size-limit>` when the heap cannot grow within the `Array` index domain,
+`<alloc-fail>` when storage cannot grow, or a cause from element
+comparison. A value or earlier swap may remain when comparison fails;
+pre-insertion failures leave the heap unchanged.
 
 Source: `lib/array/array.x`
 
@@ -716,6 +716,9 @@ Appends exactly `element_count` variadic values to `array`.
 Values appended before a later `<void-op>`, `<size-limit>`, or
 `<alloc-fail>` remain in `array`. The caller must supply that many `Var`
 arguments.
+
+**Raises:** `<bad-arg>` for a null `array` with a positive `element_count`,
+or any cause from `Array.push`.
 
 Source: `lib/array/array.x`
 

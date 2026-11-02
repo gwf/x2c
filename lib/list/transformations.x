@@ -82,28 +82,29 @@ int List.all(List lst, Func pred) {
   return lst.iter(&storage).all(pred);
 }
 
-/** Maps `fn` over aligned pairs from `a` and `b`.
-    A null callback returns `nil` without examining either `List`; otherwise
-    this has the length, order, ownership, and failures of `List.zip_with`.
+/** Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`.
+    The shorter input determines the result length, and an empty input does
+    not inspect the callback. `fn` receives the left and right values and is
+    invoked front to back. A null `fn` raises `<bad-arg>` from `Func.apply`
+    when the first pair forms.
+    Raises: whatever `Func.apply`, `fn`, or result canonicalization raises.
 */
 List List.map2(List a, List b, Func fn) {
-  if (!fn) return NULL;
-  return a.zip_with(b, fn);
+  Array values = auto [];
+  for (; a && b; a = a.cdr(), b = b.cdr())
+    values.push(fn.apply_values(a.car, b.car));
+  return values;
 }
 
 /** Combines aligned values from two `List`s with `fn`.
-    A null `fn` produces two-element pair `List`s. The shorter input determines
-    the result length, and an empty input does not inspect the callback. A
-    callback receives the left and right values and is invoked front to back.
+    A null `fn` produces two-element pair `List`s; otherwise this is
+    `List.map2`. The shorter input determines the result length.
     Raises: whatever `Func.apply`, `fn`, or result canonicalization raises.
 */
 List List.zip_with(List a, List b, Func fn) {
+  if (fn) return a.map2(b, fn);
   Array values = auto [];
-  for (; a && b; a = a.cdr(), b = b.cdr()) {
-    Var left = a.car, right = b.car;
-    if (fn) values.push(fn.apply_values(left, right));
-    else values.push($(left, right));
-  }
+  for (; a && b; a = a.cdr(), b = b.cdr()) values.push($(a.car, b.car));
   return values;
 }
 
