@@ -432,6 +432,24 @@ static void lisp_def_replaces_host_x2c_names(void) {
   lisp.destroy();
 }
 
+static void lisp_null_session_members_raise_bad_arg(void) {
+  Lisp missing = NULL, parent = Lisp.kernel();
+  int budget = 0, adopted = 0, orphan = 0, frozen = 0;
+  try missing.call_budget(5);
+  catch %(bad-arg (operation "Lisp.call_budget")): budget = 1;
+  try missing.adopt(parent);
+  catch %(bad-arg (operation "Lisp.adopt")): adopted = 1;
+  try parent.adopt(missing);
+  catch %(bad-arg (operation "Lisp.adopt")): orphan = 1;
+  try missing.freeze();
+  catch %(bad-arg (operation "Lisp.freeze")): frozen = 1;
+  EXPECT_TRUE(budget);
+  EXPECT_TRUE(adopted);
+  EXPECT_TRUE(orphan);
+  EXPECT_TRUE(frozen);
+  parent.destroy();
+}
+
 static void lisp_transports_void_outside_collections(void) {
   Lisp lisp = _boot_session();
   _install(lisp, "identity", _native_identity,
@@ -2149,6 +2167,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_def_and_globals);
   $test.run(lisp_host_binding_shadows_only_the_child);
   $test.run(lisp_def_replaces_host_x2c_names);
+  $test.run(lisp_null_session_members_raise_bad_arg);
   $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
