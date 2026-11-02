@@ -256,7 +256,7 @@ boxing/cache support, not a source keyword.
 
 An empty percent String is `(expr ("String") (0))`, whose content has an
 integer head. Ordinary String segments are `segvar` for `$name`, `segexp` for a
-braced expression, and cached text. The interpolation component also accepts
+`$(...)` expression, and cached text. The interpolation component also accepts
 `segraw` text; no current parser producer emits that form.
 
 Owners: [Compiler.parse_list_literal, Compiler.literal_cell][quotation-reader];

@@ -29,7 +29,7 @@ List syntax_grammar(void) => %(grammar
         (token "}")))
 
     (rule private-interface
-      (external "static typedef, protocol body, class, or Lisp interface item; D4"))
+      (external "static typedef, protocol body, or class; D4"))
 
     (rule module-declaration
       (external "module before a file-scope declaration, read as static; D4"))
