@@ -4,8 +4,6 @@ module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
-static const SymbolSet alias_kinds =
-  %<expression block-item field enumerator map-entry unit decorator>;
 
 static const SymbolSet macro_positions =
   %<unit block field enumerator map-entry statement expression>;
@@ -113,12 +111,6 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
     $fail.macros_keyword_builtin(c, declaration);
   Token reference = c.token;
   List definition = _lookup(c, _name(c), reference);
-  Symbol kind = definition.assoc(<kind>);
-  if (!(kind in alias_kinds)) {
-    String spelling = _kind_spelling(kind);
-    $fail.macros_keyword_internal(
-      c, declaration, spelling, Diagnostics.macro_definition_note(definition));
-  }
   c.expect(<;>);
   c.kw_aliases[alias] = definition;
   if (!storage)

@@ -199,11 +199,6 @@ static macro Stmt $fail.macros_hole_cardinality(
   }
 }
 
-static macro Stmt $fail.macros_keyword_internal(
-  Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
-  $c.report_error(
-    <macro>, %"keyword alias cannot name internal macro kind '$($spelling)'",
-    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_keyword_builtin(Expr $c, Expr $origin) =>
   $c.report_error(
