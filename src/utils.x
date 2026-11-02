@@ -5,11 +5,12 @@
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the
     compiler's identity, how a file is locked or replaced, and the
-    driver's fatal error line. Host tools run through
+    driver's log level and fatal error line. Host tools run through
     `lib/process.x`.
 */
 
 #pragma once
+#include "logger.x"
 #include "path.x"
 #include "process.x"
 #include "sourceview.x"
@@ -376,10 +377,11 @@ String Path.identifier_hash(String filename) {
 
 /** Locks the file `p`, creating it, and returns a descriptor that holds the
     lock until it is closed or the process exits. Returns -1 when `wait` is
-    zero and another process holds the lock.
+    zero and another process holds the lock or `p` cannot be opened.
 */
 int Path.lock_file(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if (lock < 0 && !wait) return -1;
   if (lock < 0) $fail.utils_lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while (flock(lock, operation)) {
@@ -423,6 +425,14 @@ int Job.decode_wait_status(int raw, int &signal) {
 
 // driver errors
 
+/** Sets the default `Logger`'s minimum level for one command: `<debug>`
+    when `debugging` and `<error>` otherwise. Its stderr sink stays, so an
+    uncaught error always prints its one-line `x2c: uncaught` report.
+*/
+void Compiler.configure_logging(int debugging) {
+  log_get_global_logger().set_min_level(debugging ? <debug> : <error>);
+}
+
 /** Reports a caught `<not-found>` or `<io-fail>` through
     `Diagnostics.driver_error` as its operation, path or program, and system
     reason.
@@ -458,14 +468,16 @@ String Compiler.cache_root(void) {
 
 /** Removes each entry of the cache `directory` whose recorded `source`
     file no longer exists and that no other run holds by its `lock`.
-    An entry without a `source` file stays.
+    An entry without a readable `source` file stays. Another process may
+    prune the same cache, so an entry it removes or locks first is skipped.
 */
 void Compiler.prune_cache(String directory) {
   if (!Path.is_dir(directory)) return;
   foreach (String name, Path.list_dir(directory)) {
-    String entry = Path.join(directory, name);
-    Path source = %"$entry/source";
-    if (!source.is_file() || Path.is_file(source.read_text())) continue;
+    String entry = Path.join(directory, name), script = NULL;
+    try script = Path.read_text(%"$entry/source");
+    catch %((!or not-found io-fail) *): continue;
+    if (Path.is_file(script)) continue;
     int lock = Path.lock_file(%"$entry/lock", 0);
     if (lock < 0) continue;
     try Path.remove_tree(entry);

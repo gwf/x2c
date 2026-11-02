@@ -5,7 +5,6 @@
 #include "system-macros.x"
 #include "workflow.x"
 #include "script.x"
-#include "logger.x"
 
 String x2c_embedded_identity(void);
 
@@ -43,22 +42,11 @@ int main(int argc, char **argv) {
     request.plain, request.color_mode,
     (request.verbose && !running) || request.debugging,
     request.dry_run, request.inspects());
-  _configure_logging(request.debugging);
+  Compiler.configure_logging(request.debugging);
   Frontend.load_support(request);
   Context command = Context.open_isolated_named("compiler command");
   int status = build_request(request, cached);
   command.close();
   if (cached && !status) status = request.run_script();
   return status;
-}
-
-/* Only --debug logs. Without it there is no sink, so log_should_log is
-   false and nothing is rendered or written. */
-static void _configure_logging(int debugging) {
-  Logger logger = log_get_global_logger();
-  if (!logger) return;
-  logger.clear_sinks();
-  if (!debugging) return;
-  logger.set_min_level(<debug>);
-  logger.add_stderr_sink();
 }

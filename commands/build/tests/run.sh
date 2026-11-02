@@ -76,6 +76,21 @@ run_multi --clean run-sources/multi.x run-sources/value.x
 run_multi --clean run-sources/multi.x run-sources/other.x
 "$X2C" run '-###' run-sources/not-created.x >run-logs/dry 2>&1
 [ ! -e run-sources/not-created.x ]
+# Pruning skips a stale entry it cannot lock or whose source it cannot
+# read, as when another run removes that entry first.
+for entry in stale-locked stale-unread; do
+  mkdir "$X2C_CACHE_DIR/runs/$entry"
+  printf '%s' "$BUILD/run-sources/gone.x" >"$X2C_CACHE_DIR/runs/$entry/source"
+done
+chmod 555 "$X2C_CACHE_DIR/runs/stale-locked"
+chmod 000 "$X2C_CACHE_DIR/runs/stale-unread/source"
+status=0
+"$X2C" run -q --rebuild run-sources/main.x >run-logs/out 2>run-logs/stale ||
+  status=$?
+chmod 755 "$X2C_CACHE_DIR/runs/stale-locked"
+chmod 644 "$X2C_CACHE_DIR/runs/stale-unread/source"
+[ "$status" = 0 ]
+[ ! -s run-logs/stale ]
 unset X2C_CACHE_DIR
 # Run keeps one default build receipt, while verbose shows the build phases.
 printf 'int main(void) { puts("program output"); return 0; }\n' > run-output.x

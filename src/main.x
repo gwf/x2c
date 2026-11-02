@@ -8,7 +8,6 @@
 #include "frontend.x"
 #include "translation.x"
 #include "toolchain.x"
-#include "logger.x"
 #include "utils.x"
 
 #include <ctype.h>
@@ -157,7 +156,7 @@ static List _env_rows(CliRequest request) {
 
 /* A translation runs inside the command Context. */
 static int _run_compiler(CliRequest request) {
-  _configure_logging(request.debugging);
+  Compiler.configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot
      invalidate their canonical values. */
   Frontend.load_support(request);
@@ -166,15 +165,4 @@ static int _run_compiler(CliRequest request) {
   int status = translate_request(request, NULL, NULL, NULL);
   command.close();
   return status;
-}
-
-/* Only --debug logs. Without it there is no sink, so log_should_log is
-   false and nothing is rendered or written. */
-static void _configure_logging(int debugging) {
-  Logger logger = log_get_global_logger();
-  if (!logger) return;
-  logger.clear_sinks();
-  if (!debugging) return;
-  logger.set_min_level(<debug>);
-  logger.add_stderr_sink();
 }
