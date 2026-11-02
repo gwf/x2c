@@ -106,7 +106,7 @@ static threaded struct MatchThreadState match_thread;
 /** Allocates empty lazy cache bindings for one independent execution. */
 void *x2c_match_execution_new(void) {
   MatchThreadState saved = calloc(1, sizeof(struct MatchThreadState));
-  if (!saved) raise %(alloc-fail);
+  if (!saved) raise %(alloc-fail (operation "x2c_match_execution_new"));
   return saved;
 }
 
@@ -543,15 +543,8 @@ static void _remove(MatchCache cache, int slot) {
 }
 
 static int _bucket(MatchCache cache, unsigned long key) =>
-  (int) (_cache_mix(key) % (unsigned long) cache.bucket_count);
+  (int) (x2c_mix64(key) % (unsigned long) cache.bucket_count);
 
-static unsigned long _cache_mix(unsigned long key) {
-  key ^= key >> 33;
-  key *= 0xff51afd7ed558ccdUL;
-  key ^= key >> 33;
-  key *= 0xc4ceb9fe1a85ec53UL;
-  return key ^ (key >> 33);
-}
 
 static void _unlink(MatchCache cache, int slot) {
   MatchCacheEntry *entry = &cache.entries[slot];

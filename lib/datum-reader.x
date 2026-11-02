@@ -144,11 +144,12 @@ static Var _atom(LispReader &r, Token token) {
   String text = token.text;
   switch (token.type) {
     case <lit-char*>:
-      return String.new_len(text + 1, token.len - 2).unescape();
+      return x2c_string_unescape_bytes(
+        String.new_len(text + 1, token.len - 2));
     case <lit-int>:    return _integer(r, token);
     case <lit-float>:  return _floating(r, token);
     case <lit-symbol>: return _symbol(r, token);
-    case <ident>:      return Atom.intern(text.unescape());
+    case <ident>:      return Atom.intern(x2c_string_unescape_bytes(text));
   }
   return _malformed_token(r, token);
 }
@@ -172,7 +173,7 @@ static Var _floating(LispReader &r, Token token) {
 static Var _symbol(LispReader &r, Token token) {
   String text = token.text, int n = token.len;
   String inner = text[1] == '"'
-    ? String.new_len(text + 2, n - 4).unescape()
+    ? x2c_string_unescape_bytes(String.new_len(text + 2, n - 4))
     : String.new_len(text + 1, n - 2);
   if (!inner) return _malformed_token(r, token);
   return Symbol.new(inner);
@@ -236,7 +237,7 @@ static int _plain_list(
 static int _plain_string(char *s, unsigned &at, Var &out) {
   int length = scan_lisp_string_status(s + at, NULL);
   if (length < 0 || !_token_end(s[at + length])) return 0;
-  out = String.new_len(s + at + 1, length - 2).unescape();
+  out = x2c_string_unescape_bytes(String.new_len(s + at + 1, length - 2));
   at += length;
   return 1;
 }

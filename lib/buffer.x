@@ -22,6 +22,8 @@
     non-NUL-terminated view that any growing write may invalidate. `pos` and
     `_indent` describe the current final line; `Buffer.free` invalidates the
     `Buffer` and both backing `Block`s.
+    Mutating a null Buffer raises `<bad-arg>`. Reads treat it as empty,
+    and release accepts NULL.
 */
 typedef struct Buffer {
   Block content, indents, size_t padding, pos, _indent;
@@ -48,7 +50,8 @@ static typedef struct _LineState { size_t pos, indent; } _LineState;
     Raises: the same causes as `Buffer.write_len`.
 */
 meta native Self Buffer.write(Self buf, const char *text) {
-  if (!text) raise %(bad-arg);
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.write"));
+  if (!text) raise %(bad-arg (operation "Buffer.write"));
   return buf.write_len(text, strlen(text));
 }
 
@@ -58,20 +61,21 @@ meta native Self Buffer.write(Self buf, const char *text) {
     text is preserved and this call appends nothing on failure.
 */
 Self Buffer.printf(Self buf, const char *format, ...) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.printf"));
   /* Stage the common short case on the stack. Longer output is measured and
      allocated before writing, so formatting never truncates. */
   char stack[160], va_list args;
   va_start(args, format);
   int length = vsnprintf(stack, sizeof stack, format, args);
   va_end(args);
-  if (length < 0) raise %(format);
+  if (length < 0) raise %(format (operation "Buffer.printf"));
   if ((size_t) length < sizeof stack) return buf.write_len(stack, length);
   char *bytes = xmalloc((size_t) length + 1);
   defer xfree(bytes);
   va_start(args, format);
   int written = vsnprintf(bytes, (size_t) length + 1, format, args);
   va_end(args);
-  if (written < 0) raise %(format);
+  if (written < 0) raise %(format (operation "Buffer.printf"));
   return buf.write_len(bytes, length);
 }
 
@@ -83,10 +87,12 @@ Self Buffer.printf(Self buf, const char *format, ...) {
     text and line state unchanged.
 */
 meta native Self Buffer.write_len(Self buf, const char *text, size_t length) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.write_len"));
   if (!length) return buf;
-  if (!text) raise %(bad-arg);
+  if (!text) raise %(bad-arg (operation "Buffer.write_len"));
   if (length == 1) return _write_char(buf, *text);
-  if (memchr(text, '\0', length)) raise %(bad-arg (value 0));
+  if (memchr(text, '\0', length))
+    raise %(bad-arg (operation "Buffer.write_len") (value 0));
   /* The line state is read before the append, which may relocate `text`,
      and stored after it, so a failed append changes nothing. */
   _LineState next = _state_after(buf, text, length);
@@ -98,6 +104,7 @@ meta native Self Buffer.write_len(Self buf, const char *text, size_t length) {
 
 /** Removes the final `count` bytes from `buf`. */
 meta native Self Buffer.unwrite(Self buf, size_t count) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.unwrite"));
   if (count > buf.content.length) count = buf.content.length;
   buf.content.truncate(buf.content.length - count);
   _recompute_line_state(buf);
@@ -107,7 +114,10 @@ meta native Self Buffer.unwrite(Self buf, size_t count) {
 // indentation
 
 /** Appends the configured number of padding spaces. */
-meta native Self Buffer.pad(Self buf) => buf.write_repeat(' ', buf.padding);
+meta native Self Buffer.pad(Self buf) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.pad"));
+  return buf.write_repeat(' ', buf.padding);
+}
 
 /** Appends a newline followed by current indentation. */
 meta native Self Buffer.newline_indent(Self buf) => buf.newline().indent();
@@ -133,8 +143,9 @@ meta native Self Buffer.indent(Self buf) =>
     grow. These failures leave text and line state unchanged.
 */
 meta native Self Buffer.write_repeat(Self buf, char value, size_t count) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.write_repeat"));
   if (!count) return buf;
-  if (!value) raise %(bad-arg (value 0));
+  if (!value) raise %(bad-arg (operation "Buffer.write_repeat") (value 0));
   buf.content.append_fill(&value, count);
   _advance(buf, value, count);
   return buf;
@@ -145,18 +156,21 @@ meta native Self Buffer.write_repeat(Self buf, char value, size_t count) {
     leaves the stack unchanged.
 */
 meta native Self Buffer.push(Self buf) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.push"));
   buf.indents.append(&buf.pos, 1);
   return buf;
 }
 
 /** Pops one indentation depth from `buf`'s stack when present. */
 meta native Self Buffer.pop(Self buf) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.pop"));
   buf.indents.try_pop(NULL);
   return buf;
 }
 
 /** Returns the indentation depth on top of the stack, or 0 when empty. */
 size_t Buffer.tabstop(Buffer buf) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.tabstop"));
   if (!buf.indents) return 0;
   size_t *indents = buf.indents.bytes;
   return indents[buf.indents.length - 1];
@@ -207,7 +221,7 @@ String Buffer.str(Buffer buf) {
   if (!buf) return NULL;
   if (buf.content.length > INT_MAX - 1) {
     size_t length = buf.content.length, int limit = INT_MAX - 1;
-    raise %(size-limit (size $length) (limit $limit));
+    raise %(size-limit (operation "Buffer.str") (size $length) (limit $limit));
   }
   return String.new_len(buf.content.bytes, (int) buf.content.length);
 }
@@ -259,12 +273,14 @@ meta native Buffer Buffer.new(size_t padding) {
     cannot be provided.
 */
 meta native Self Buffer.reserve(Self buf, size_t minimum) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.reserve"));
   buf.content.reserve(minimum);
   return buf;
 }
 
 /** Empties `buf` and its indentation stack without releasing capacity. */
 meta native Self Buffer.clear(Self buf) {
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.clear"));
   buf.content.clear();
   if (buf.indents) buf.indents.clear();
   buf.pos = buf._indent = 0;
@@ -296,7 +312,9 @@ void Buffer.free(Buffer buf) {
 
 /* `Buffer.write_len` also writes a single byte here. */
 static Buffer _write_char(Buffer buf, char value) {
-  if (!value) raise %(bad-arg (value 0));
+  if (buf == NULL) raise %(bad-arg (operation "Buffer.write_char"));
+  if (!value)
+    raise %(bad-arg (operation "Buffer.write_char") (value 0));
   buf.content.append(&value, 1);
   _advance(buf, value, 1);
   return buf;

@@ -29,6 +29,8 @@
     remains stable, but `bytes` is a borrowed base pointer that growth may
     replace. Valid `Block`s have nonzero `width` and `length <= cap`;
     `Block.free` invalidates the handle and every `Bytes` view.
+    Mutating a null Block raises `<bad-arg>`. Observations treat it as empty,
+    and release accepts NULL.
 */
 typedef struct Block {
   Bytes bytes, size_t width, length, cap;
@@ -66,14 +68,15 @@ inline Self Bytes.append_fill(Self bytes, const void *element, size_t count) {
     failures leave the `Block` unchanged.
 */
 void Block.append_fill(Block b, const void *element, size_t count) {
-  if (b == NULL) raise %(bad-arg);
+  if (b == NULL) raise %(bad-arg (operation "Block.append_fill"));
   if (!count) return;
-  if (!element) raise %(bad-arg);
-  if (count > SIZE_MAX - b.length) raise %(size-limit (count $count));
+  if (!element) raise %(bad-arg (operation "Block.append_fill"));
+  if (count > SIZE_MAX - b.length)
+    raise %(size-limit (operation "Block.append_fill") (count $count));
   size_t length = b.length, used = length * b.width;
   size_t offset = _reserved_offset(b, element);
   if (offset != SIZE_MAX && (offset > used || b.width > used - offset))
-    raise %(bad-arg);
+    raise %(bad-arg (operation "Block.append_fill"));
   b.reserve(length + count);
   if (offset != SIZE_MAX) element = (unsigned char *) b.bytes + offset;
   _fill(b, element, count);
@@ -110,7 +113,7 @@ inline Self Bytes.append(Self bytes, const void *source, size_t count) {
     failures leave the `Block` unchanged.
 */
 void Block.append(Block b, const void *source, size_t count) {
-  if (b == NULL) raise %(bad-arg);
+  if (b == NULL) raise %(bad-arg (operation "Block.append"));
   if (!count) return;
   if (count <= b.cap - b.length) _append_in_place(b, source, count);
   else _append_growing(b, source, count);
@@ -137,13 +140,14 @@ inline Self Bytes.reserve(Self bytes, size_t minimum) {
     These failures leave the `Block` unchanged.
 */
 void Block.reserve(Block block, size_t minimum) {
-  if (block == NULL) raise %(bad-arg);
+  if (block == NULL) raise %(bad-arg (operation "Block.reserve"));
   if (minimum <= block.cap) return;
   size_t cap = _grown_capacity(block.cap, minimum);
   size_t size = _allocation_size(block.width, cap);
   if (!size) {
     size_t width = block.width;
-    raise %(size-limit (width $width) (cap $cap));
+    raise %(size-limit (operation "Block.reserve")
+            (width $width) (capacity $cap));
   }
   _attach(block, xrealloc(_allocation(block), size));
   block.cap = cap;
@@ -162,12 +166,14 @@ int Block.truth(Block block) => block != NULL && block.length != 0;
 
 /** Shortens `block` to at most `length` elements. */
 inline void Block.truncate(Block block, size_t length) {
-  if (block != NULL && length < block.length) block.length = length;
+  if (block == NULL) x2c_block_bad_arg(<truncate>);
+  if (length < block.length) block.length = length;
 }
 
 /** Removes every element from `block` without releasing capacity. */
 inline void Block.clear(Block block) {
-  if (block != NULL) block.length = 0;
+  if (block == NULL) x2c_block_bad_arg(<clear>);
+  block.length = 0;
 }
 
 /** Removes the final element through `bytes` as `Block.try_pop` does. */
@@ -188,11 +194,13 @@ inline void Block.pop(Block block) {
 }
 
 /** Removes the final element of `b`, copying it to `out` when present.
-    Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
+    Returns zero for an empty `Block` and leaves `out` unchanged.
+    Raises `<bad-arg>` for a null Block. A null
     `out` still removes a present element.
 */
 inline int Block.try_pop(Block b, void *out) {
-  if (b == NULL || !b.length) return 0;
+  if (b == NULL) x2c_block_bad_arg(<try-pop>);
+  if (!b.length) return 0;
   size_t index = b.length - 1;
   if (out) memmove(out, (unsigned char *) b.bytes + index * b.width, b.width);
   b.length = index;
@@ -229,11 +237,11 @@ Bytes Bytes.new(size_t width) => Block.new(width).bytes;
     fails.
 */
 Block Block.new(size_t width) {
-  if (!width) raise %(bad-arg);
+  if (!width) raise %(bad-arg (operation "Block.new"));
   Block block = xmalloc(sizeof(struct Block));
   *block = (struct Block) {.width = width, .length = 0, .cap = 1};
   size_t size = _allocation_size(width, block.cap);
-  if (!size) raise %(size-limit (width $width));
+  if (!size) raise %(size-limit (operation "Block.new") (width $width));
   _attach(block, xmalloc(size));
   return block;
 }
@@ -326,11 +334,12 @@ static void _append_in_place(Block b, const void *source, size_t count) {
 static void _append_growing(Block b, const void *source, size_t count) {
   if (count > SIZE_MAX - b.length || count > SIZE_MAX / b.width) {
     size_t width = b.width;
-    raise %(size-limit (width $width) (count $count));
+    raise %(size-limit (operation "Block.append")
+            (width $width) (count $count));
   }
   size_t size = count * b.width, offset = _reserved_offset(b, source);
   if (offset != SIZE_MAX && size > b.cap * b.width - offset)
-    raise %(bad-arg (count $count));
+    raise %(bad-arg (operation "Block.append") (count $count));
   size_t length = b.length;
   b.reserve(length + count);
   unsigned char *end = _end(b);
@@ -339,4 +348,11 @@ static void _append_growing(Block b, const void *source, size_t count) {
     memmove(end, (unsigned char *) b.bytes + offset, size);
   else memcpy(end, source, size);
   b.length = length + count;
+}
+
+/* Failure owner for the public inline removal operations. */
+void x2c_block_bad_arg(Symbol action) {
+  String operation = action == <try-pop>
+    ? "Block.try_pop" : "Block." + action.str();
+  raise %(bad-arg (operation $operation));
 }

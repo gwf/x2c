@@ -215,7 +215,9 @@ results come back as return values.
 A null handle is a contract failure, not absence. An operation on a null
 `Thread`, `Channel`, `Mutex`, `Context`, `Logger`, `Job`, `Listener`,
 `Socket`, `HttpServer`, or `Lisp` raises `<bad-arg>`, while `free`, `close`,
-`destroy`, and `cleanup` accept NULL and do nothing.
+`destroy`, and `cleanup` accept NULL and do nothing. `Regex` operations
+also reject NULL. Buffer and Block mutations and Block encoders reject
+NULL; their observations treat NULL as empty, and `free` accepts NULL.
 
 ## Use Error transfer and cleanup
 

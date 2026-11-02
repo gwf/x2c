@@ -17,7 +17,7 @@ String String.strip(String str, char *negChars) {
   int start = 0, end = str.len();
   while (start < end && strchr(negChars, str[start])) start++;
   while (end > start && strchr(negChars, str[end - 1])) end--;
-  if (start == 0 && end == str.len()) return str;
+  if (start == 0 && end == str.len()) return _canonical(str);
   return String.new_len(str + start, end - start);
 }
 
@@ -30,7 +30,7 @@ String String.lstrip(String str, char *negChars) {
   if (!negChars) negChars = " \t\n\v\f\r";
   int beg = 0, length = str.len();
   while (beg < length && strchr(negChars, str[beg])) beg++;
-  if (beg == 0) return str;
+  if (beg == 0) return _canonical(str);
   return String.new(str + beg);
 }
 
@@ -43,7 +43,7 @@ String String.rstrip(String str, char *negChars) {
   if (!negChars) negChars = " \t\n\v\f\r";
   int len = str.len();
   while (len > 0 && strchr(negChars, str[len - 1])) len--;
-  if (len == str.len()) return str;
+  if (len == str.len()) return _canonical(str);
   return String.new_len(str, len);
 }
 
@@ -81,7 +81,7 @@ meta native String String.dedent(String str) {
     Raises: `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.remove_prefix(String str, String prefix) {
-  if (!prefix || !str.startswith(prefix)) return str;
+  if (!prefix || !str.startswith(prefix)) return _canonical(str);
   return String.new_len(str + prefix.len(), str.len() - prefix.len());
 }
 
@@ -91,7 +91,7 @@ meta native String String.remove_prefix(String str, String prefix) {
     Raises: `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.remove_suffix(String str, String suffix) {
-  if (!suffix || !str.endswith(suffix)) return str;
+  if (!suffix || !str.endswith(suffix)) return _canonical(str);
   return String.new_len(str, str.len() - suffix.len());
 }
 

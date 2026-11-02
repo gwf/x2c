@@ -55,7 +55,7 @@ static threaded struct ExceptionThreadState exception_thread;
 /** Allocates empty backing for one execution's native exception heads. */
 void *x2c_exception_execution_new(void) {
   ExceptionThreadState saved = calloc(1, sizeof(struct ExceptionThreadState));
-  if (!saved) raise %(alloc-fail);
+  if (!saved) raise %(alloc-fail (operation "x2c_exception_execution_new"));
   return saved;
 }
 

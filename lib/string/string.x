@@ -25,6 +25,8 @@
     owning pool's lifetime. `String.malloc` is the mutable exception;
     its backing allocation still belongs to the active pool, and must be
     finalized with `String.intern_free` or released with `String.free`.
+    Operations that return canonical Strings use the active pool chain,
+    including no-change shortcuts on a detached input.
 */
 typedef char *String;
 
@@ -56,6 +58,9 @@ protocol const char *(String);
 /* Internal constructor for borrowed spans already known to contain no NUL.
    Callers establish the length; canonicalization uses the active pool. */
 String x2c_string_from_bytes(const char *bytes, int length);
+
+/* Internal decoder for x2c byte escapes in percent and Lisp syntax. */
+String x2c_string_unescape_bytes(String str);
 
 module {
   "storage.x",

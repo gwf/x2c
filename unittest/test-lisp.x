@@ -437,6 +437,31 @@ static void lisp_host_binding_shadows_only_the_child(void) {
   parent.destroy();
 }
 
+static void lisp_remove_global_reveals_ancestor(void) {
+  Lisp parent = Lisp.kernel(), child = Lisp.kernel();
+  defer parent.destroy();
+  defer child.destroy();
+  parent.set_global("inherited", 1);
+  parent.freeze();
+  child.adopt(parent);
+  child.set_global("inherited", 2);
+  Var old = _ev(child, "inherited");
+  child.remove_global("inherited");
+  EXPECT_INT_EQ(old.integer(), 2);
+  EXPECT_INT_EQ(_ev(child, "inherited").integer(), 1);
+  child.remove_global("missing");
+  int caught = 0;
+  try child.remove_global(NULL);
+  catch %(bad-arg (operation "Lisp.remove_global")): caught++;
+  child.freeze();
+  try child.remove_global("inherited");
+  catch %(bad-state (operation "Lisp.remove_global") *): caught++;
+  Lisp absent = NULL;
+  try absent.remove_global("inherited");
+  catch %(bad-arg (operation "Lisp.remove_global")): caught++;
+  EXPECT_INT_EQ(caught, 3);
+}
+
 static void lisp_def_replaces_host_x2c_names(void) {
   Lisp lisp = Lisp.kernel();
   lisp.set_global("x2c.answer", 42);
@@ -2224,6 +2249,7 @@ static void lisp_tail_calls_stay_flat(void) {
 
 
 void lisp_suite(void) {
+  $test.run(lisp_remove_global_reveals_ancestor);
   $test.run(lisp_read_prefixes_without_session);
   $test.run(lisp_canonical_names_outlive_initial_context);
   $test.run(lisp_read_integer_value);

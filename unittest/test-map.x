@@ -23,6 +23,21 @@ static int _map_probe_equal(Var a, Var b) {
   return left.value == right.value;
 }
 
+static void map_null_writes_keep_operation(void) {
+  $test.scoped();
+  Map map = NULL;
+  int caught = 0;
+  try map.set("key", 1);
+  catch %(bad-arg (operation "Map") *): caught++;
+  try map.setdefault("key", 1);
+  catch %(bad-arg (operation "Map") *): caught++;
+  try map.updateindex("key", <+>, 1);
+  catch %(bad-arg (operation "Map.updateindex") *): caught++;
+  try map.postfixindex("key", <++>);
+  catch %(bad-arg (operation "Map.postfixindex") *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+}
+
 static void map_empty_literal_identity(void) {
   $test.scoped();
   Map first = %{}, second = %{};
@@ -195,9 +210,11 @@ static void map_update_boundaries_preserve_failure_order(void) {
   try Map.updateindex(NULL, void, <+>, void);
   catch %(bad-arg *): caught++;
   try map.updateindex(<missing>, <+>, "text");
-  catch %(bad-arg (key missing)): caught++;
+  catch %(bad-arg (operation "Map.updateindex") (key missing)):
+    caught++;
   try map.postfixindex(<missing>, <==>);
-  catch %(bad-arg (key missing)): caught++;
+  catch %(bad-arg (operation "Map.postfixindex") (key missing)):
+    caught++;
   try map.updateindex(<count>, <+>, void);
   catch %(void-op *): caught++;
   EXPECT_INT_EQ(caught, 4);
@@ -774,6 +791,7 @@ static void map_null_iterators_are_exhausted(void) {
 }
 
 void map_suite(void) {
+  $test.run(map_null_writes_keep_operation);
   $test.run(map_iterates_values_keys_and_pairs);
   $test.run(map_boxed_two_name_foreach);
   $test.run(map_empty_literal_identity);

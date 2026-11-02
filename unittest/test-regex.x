@@ -194,6 +194,47 @@ static void regex_replaces_and_escapes(void) {
   EXPECT_STR_EQ(Regex.compile("a.c").pattern(), "a.c");
 }
 
+static void regex_null_callback_fails_only_for_a_match(void) {
+  $test.scoped();
+  Regex regex = Regex.compile("b");
+  EXPECT_STR_EQ(regex.replace_fn("acd", NULL), "acd");
+  int caught = 0;
+  try regex.replace_fn("abc", NULL);
+  catch %(bad-arg (operation ?operation) *): {
+    caught = 1;
+    EXPECT_STR_EQ(operation.string(), "Func.apply");
+  }
+  EXPECT_TRUE(caught);
+  EXPECT_STR_EQ(regex.replace_all("abc", NULL), "ac");
+}
+
+static void regex_null_handle_operations_raise(void) {
+  $test.scoped();
+  Regex regex = NULL;
+  int caught = 0;
+  try regex.pattern();
+  catch %(bad-arg (operation "Regex.pattern") *): caught++;
+  try regex.capture_count();
+  catch %(bad-arg (operation "Regex.capture_count") *): caught++;
+  try regex.capture_names();
+  catch %(bad-arg (operation "Regex.capture_names") *): caught++;
+  try regex.match("text");
+  catch %(bad-arg (operation "Regex.match") *): caught++;
+  try regex.match_from("text", -1);
+  catch %(bad-arg (operation "Regex.match_from") *): caught++;
+  try regex.find_all("text");
+  catch %(bad-arg (operation "Regex.find_all") *): caught++;
+  try regex.split("text");
+  catch %(bad-arg (operation "Regex.split") *): caught++;
+  try regex.replace("text", NULL);
+  catch %(bad-arg (operation "Regex.replace") *): caught++;
+  try regex.replace_all("text", NULL);
+  catch %(bad-arg (operation "Regex.replace_all") *): caught++;
+  try regex.replace_fn("text", NULL);
+  catch %(bad-arg (operation "Regex.replace_fn") *): caught++;
+  EXPECT_INT_EQ(caught, 10);
+}
+
 static void regex_rejects_bad_patterns(void) {
   $test.scoped();
   List cases = %(("(ab" "missing closing parenthesis" 3)
@@ -257,6 +298,8 @@ void regex_suite(void) {
   $test.run(regex_preserves_nested_capture_order);
   $test.run(regex_find_all_split_and_offsets);
   $test.run(regex_replaces_and_escapes);
+  $test.run(regex_null_callback_fails_only_for_a_match);
+  $test.run(regex_null_handle_operations_raise);
   $test.run(regex_rejects_bad_patterns);
   $test.run(regex_compile_bounds_group_nesting);
 }

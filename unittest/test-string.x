@@ -6,6 +6,8 @@
 #include <string.h>
 
 #include "test-support.x"
+#include "test-macros.x"
+#include "encoding.x"
 
 static int _string_test_alpha(char ch) {
   return isalpha((unsigned char) ch);
@@ -84,6 +86,38 @@ static void string_canonical_identity(void) {
   char raw[] = "raw intern input";
   String raw_interned = String.intern(raw);
   EXPECT_TRUE(raw_interned === String.new(raw));
+}
+
+static void string_shortcuts_copy_detached_storage(void) {
+  $test.scoped();
+  Pool.open();
+  String text = "detached-shortcut-%d".printf(987654);
+  Pool detached = Pool.detach();
+  defer detached.release();
+  String canonical = String.new(text);
+  EXPECT_TRUE(text !== canonical);
+  EXPECT_TRUE(text.strip(NULL) === canonical);
+  EXPECT_TRUE(text.lstrip(NULL) === canonical);
+  EXPECT_TRUE(text.rstrip(NULL) === canonical);
+  EXPECT_TRUE(text.remove_prefix("missing") === canonical);
+  EXPECT_TRUE(text.remove_suffix("missing") === canonical);
+  EXPECT_TRUE(text.pad_left(1, ' ') === canonical);
+  EXPECT_TRUE(text.pad_right(1, ' ') === canonical);
+  EXPECT_TRUE(text.pad_center(1, ' ') === canonical);
+  EXPECT_TRUE(text.add(NULL) === canonical);
+  EXPECT_TRUE(String.add(NULL, text) === canonical);
+  EXPECT_TRUE(text.replace("missing", "new") === canonical);
+  EXPECT_TRUE(text.replace_n(NULL, NULL, 0) === canonical);
+  EXPECT_TRUE(text.replace(text, text) === canonical);
+  EXPECT_TRUE(text.withindex(-999, 'X') === canonical);
+  EXPECT_TRUE(text.withindex(0, 'd') === canonical);
+  EXPECT_TRUE(text.unescape() === canonical);
+  EXPECT_TRUE(text.lower() === canonical);
+  EXPECT_TRUE(text.reject(NULL) === canonical);
+  EXPECT_TRUE(text.squeeze(NULL) === canonical);
+  EXPECT_TRUE(text.percent_decode() === canonical);
+  EXPECT_TRUE(text.repeat(1) === canonical);
+  EXPECT_TRUE(text.getslice(0, -1, 1) === canonical);
 }
 
 static void string_empty_is_native_zero(void) {
@@ -343,6 +377,28 @@ static void string_escape_sequences(void) {
 
 /* The String ends after its opening quote. The quote stored past the NUL
    must not complete a character. */
+static void string_c_and_percent_escape_widths(void) {
+  $test.scoped();
+  EXPECT_STR_EQ("\\x000041Z".unescape(), "AZ");
+  EXPECT_STR_EQ("\\u00e9".unescape(), "\303\251");
+  EXPECT_STR_EQ("\\U0001f600".unescape(), "\360\237\230\200");
+  EXPECT_STR_EQ("%\"\\x414\"".parse(), "A4");
+  String percent = %"\u41";
+  EXPECT_STR_EQ(percent, "A");
+  List quoted = %($("\x000041Z") $("\u00e9"));
+  EXPECT_STR_EQ(quoted.car().string(), "AZ");
+  EXPECT_STR_EQ(quoted.cadr().string(), "\303\251");
+  List byte_quoted = %("\x414" "\u41");
+  EXPECT_STR_EQ(byte_quoted.car().string(), "A4");
+  EXPECT_STR_EQ(byte_quoted.cadr().string(), "A");
+  int caught = 0;
+  try "\\u123".unescape();
+  catch %(bad-arg (operation "String.unescape") *): caught++;
+  try "\\xZ".unescape();
+  catch %(bad-arg (operation "String.unescape") *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
 static void string_parse_char_rejects_lone_quote(void) {
   String quote = String.malloc(4);
   memcpy(quote, "'\0'", 4);
@@ -813,6 +869,7 @@ static void string_checked_format_failures(void) {
 
 void string_suite(void) {
   $test.run(string_canonical_identity);
+  $test.run(string_shortcuts_copy_detached_storage);
   $test.run(string_empty_is_native_zero);
   $test.run(string_empty_buffer_equals_the_empty_string);
   $test.run(string_add_and_len);
@@ -825,6 +882,7 @@ void string_suite(void) {
   $test.run(string_invalid_input_transfer);
   $test.run(string_callback_transfer_releases_temporary);
   $test.run(string_escape_sequences);
+  $test.run(string_c_and_percent_escape_widths);
   $test.run(string_parse_char_rejects_lone_quote);
   $test.run(string_multiline_literals);
   $test.run(string_boundary_behavior);

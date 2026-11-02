@@ -5,6 +5,40 @@
 #include <limits.h>
 #include <wchar.h>
 
+static void buffer_null_mutations_raise(void) {
+  $test.scoped();
+  Buffer buf = NULL;
+  int caught = 0;
+  try buf.write("a");
+  catch %(bad-arg (operation "Buffer.write") *): caught++;
+  try buf.write_len(NULL, 0);
+  catch %(bad-arg (operation "Buffer.write_len") *): caught++;
+  try buf.printf("%d", 1);
+  catch %(bad-arg (operation "Buffer.printf") *): caught++;
+  try buf.write_char('x');
+  catch %(bad-arg (operation "Buffer.write_char") *): caught++;
+  try buf.write_repeat('x', 0);
+  catch %(bad-arg (operation "Buffer.write_repeat") *): caught++;
+  try buf.unwrite(0);
+  catch %(bad-arg (operation "Buffer.unwrite") *): caught++;
+  try buf.reserve(0);
+  catch %(bad-arg (operation "Buffer.reserve") *): caught++;
+  try buf.clear();
+  catch %(bad-arg (operation "Buffer.clear") *): caught++;
+  try buf.pad();
+  catch %(bad-arg (operation "Buffer.pad") *): caught++;
+  try buf.push();
+  catch %(bad-arg (operation "Buffer.push") *): caught++;
+  try buf.pop();
+  catch %(bad-arg (operation "Buffer.pop") *): caught++;
+  try buf.tabstop();
+  catch %(bad-arg (operation "Buffer.tabstop") *): caught++;
+  EXPECT_INT_EQ(caught, 12);
+  EXPECT_INT_EQ(buf.len(), 0);
+  EXPECT_NULL(buf.str());
+  buf.free();
+}
+
 static void buffer_bulk_writes_and_exact_string(void) {
   $test.scoped();
   Buffer buf = Buffer.new(2);
@@ -187,6 +221,7 @@ static void buffer_str_rejects_a_length_a_string_cannot_hold(void) {
 }
 
 void buffer_suite(void) {
+  $test.run(buffer_null_mutations_raise);
   $test.run(buffer_formatting_failure_transfers_and_keeps_text);
   $test.run(buffer_str_free_consumes_the_receiver);
   $test.run(buffer_printf_short_and_long);

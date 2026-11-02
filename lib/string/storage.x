@@ -352,7 +352,6 @@ module String _finish(String string, int length) {
   return _intern_owned(string);
 }
 
-/* True when `str` is the canonical `String` visible from the active pool,
-   which an operation that changes nothing may return. */
-module int _is_active_canonical(String str) =>
-  Pool.current().lookup(str) === str;
+/* Canonicalizes a no-change result in the active pool chain. */
+module String _canonical(String str) =>
+  !str || Pool.current().lookup(str) === str ? str : String.new(str);

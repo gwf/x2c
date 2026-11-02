@@ -13,6 +13,23 @@ static List _rejection(Func decode, String text) {
   return NULL;
 }
 
+static void encoding_null_blocks_raise(void) {
+  $test.scoped();
+  Block block = NULL;
+  int caught = 0;
+  try block.base64_encode();
+  catch %(bad-arg (operation "Block.base64_encode") *): caught++;
+  try block.base64url_encode();
+  catch %(bad-arg (operation "Block.base64url_encode") *): caught++;
+  try block.hex_encode();
+  catch %(bad-arg (operation "Block.hex_encode") *): caught++;
+  EXPECT_INT_EQ(caught, 3);
+  Block empty = auto Block.new(1);
+  EXPECT_NULL(empty.base64_encode());
+  EXPECT_NULL(empty.base64url_encode());
+  EXPECT_NULL(empty.hex_encode());
+}
+
 static void encoding_utf8_counts_and_iterates(void) {
   $test.scoped();
   String text = "na\xc3\xafve \xe2\x82\xac\xf0\x9f\x98\x80";
@@ -119,7 +136,7 @@ static void encoding_base64_rejects_invalid_text(void) {
   detail = _rejection(%!(String t) => t.base64_decode(), "AAEC");
   EXPECT_STR_EQ(detail.assoc(<reason>).string(),
                 "NUL byte cannot appear in a String");
-  EXPECT_INT_EQ(detail.assoc(<index>).int(), 0);
+  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 0);
 }
 
 static void encoding_hex_round_trips(void) {
@@ -133,7 +150,7 @@ static void encoding_hex_round_trips(void) {
   detail = _rejection(%!(String t) => t.hex_decode(), "0g");
   EXPECT_INT_EQ(detail.assoc(<offset>).int(), 1);
   detail = _rejection(%!(String t) => t.hex_decode(), "4100");
-  EXPECT_INT_EQ(detail.assoc(<index>).int(), 1);
+  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 1);
 }
 
 static void encoding_decoders_release_failed_output(void) {
@@ -184,6 +201,7 @@ static void encoding_percent_round_trips(void) {
 }
 
 void encoding_suite(void) {
+  $test.run(encoding_null_blocks_raise);
   $test.run(encoding_utf8_counts_and_iterates);
   $test.run(encoding_utf8_cursor_reports_offsets);
   $test.run(encoding_utf8_rejects_ill_formed_bytes);

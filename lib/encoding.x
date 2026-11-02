@@ -130,8 +130,10 @@ String String.base64_encode(String text) =>
 /** Returns the bytes of `bytes` in standard base64 with `=` padding; each
     element contributes all of its bytes.
 */
-String Block.base64_encode(Block bytes) =>
-  _base64(_STANDARD, bytes.bytes, bytes.len() * bytes.width);
+String Block.base64_encode(Block bytes) {
+  if (bytes == NULL) raise %(bad-arg (operation "Block.base64_encode"));
+  return _base64(_STANDARD, bytes.bytes, bytes.len() * bytes.width);
+}
 
 /** Returns the text that the padded standard base64 `text` encodes.
     Raises: `<malformed>` when `text` is not padded standard base64 or
@@ -157,8 +159,10 @@ String String.base64url_encode(String text) =>
   _base64(_URL, (const unsigned char *) text, text.len());
 
 /** Returns the bytes of `bytes` in URL-safe base64 without padding. */
-String Block.base64url_encode(Block bytes) =>
-  _base64(_URL, bytes.bytes, bytes.len() * bytes.width);
+String Block.base64url_encode(Block bytes) {
+  if (bytes == NULL) raise %(bad-arg (operation "Block.base64url_encode"));
+  return _base64(_URL, bytes.bytes, bytes.len() * bytes.width);
+}
 
 /** Returns the text that the URL-safe base64 `text` encodes; `=` padding
     is optional.
@@ -189,8 +193,10 @@ String String.hex_encode(String s) =>
 /** Returns the bytes of `b` in lowercase hexadecimal; each element
     contributes all of its bytes.
 */
-String Block.hex_encode(Block b) =>
-  _hex(b.bytes, b.len() * b.width);
+String Block.hex_encode(Block b) {
+  if (b == NULL) raise %(bad-arg (operation "Block.hex_encode"));
+  return _hex(b.bytes, b.len() * b.width);
+}
 
 /** Returns the text that the hexadecimal `text` encodes, in digits of
     either case.
@@ -235,7 +241,7 @@ String String.percent_encode(String s) {
     it, or for `%00`.
 */
 String String.percent_decode(String text) {
-  if (!text || !strchr(text, '%')) return text;
+  if (!text || !strchr(text, '%')) return String.new(text);
   String operation = "String.percent_decode";
   Buffer out = auto Buffer.new(0);
   for (int i = 0; text[i] > 0; i++) {
@@ -340,7 +346,7 @@ static String _text(Block bytes, String operation) {
   if (nul)
     raise %(malformed (operation $operation)
             (reason "NUL byte cannot appear in a String")
-            (index $(nul - start)));
+            (offset $(nul - start)));
   return String.new_len(start, bytes.len());
 }
 

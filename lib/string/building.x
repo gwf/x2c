@@ -6,8 +6,8 @@
     This implements the `add` row of `protocol Var(String)`, so it is what
     `+` on two `String`s lowers to, and because the result is interned, `==`
     on a newly built result is a content comparison. Either operand may be
-    the empty `String`, in which case the other pointer is returned unchanged
-    with its existing ownership and canonical or transient state.
+    the empty `String`, in which case the other input is canonicalized in
+    the active pool chain.
 
     Every concatenation interns its result, so building text by repeated
     concatenation in a loop allocates and hashes at every step. Use
@@ -16,8 +16,8 @@
     representation. Allocation failures propagate from the owning allocator.
 */
 String String.add(String str, String other) {
-  if (!other) return str;
-  if (!str) return other;
+  if (!other) return _canonical(str);
+  if (!str) return _canonical(other);
   int left_len = str.len(), right_len = other.len();
   size_t length = (size_t) left_len + (size_t) right_len;
   if (length > INT_MAX - 1) raise %(size-limit (operation "String.add"));
@@ -42,7 +42,7 @@ String String.add(String str, String other) {
 */
 meta native String String.repeat(String str, int count) {
   if (!str || !*str || count <= 0) return NULL;
-  if (count == 1 && _is_active_canonical(str)) return str;
+  if (count == 1) return _canonical(str);
   int n = str.len();
   if ((size_t) n > (size_t) (INT_MAX - 1) / (size_t) count)
     raise %(size-limit (operation "String.repeat") (count $count));
@@ -203,7 +203,7 @@ static void _join_into(char *out, List strings, String sep, int sep_len) {
 static String _pad(String str, int width, char fill, int side) {
   if (fill == '\0') raise %(bad-arg (operation "String.pad"));
   int length = str.len();
-  if (width <= length) return str;
+  if (width <= length) return _canonical(str);
   if (width == INT_MAX)
     raise %(size-limit (operation "String.pad") (width $width));
   int padding = width - length, left = side ? padding : 0;

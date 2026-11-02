@@ -5,6 +5,29 @@
 #include <stdint.h>
 #include <string.h>
 
+static void block_null_mutations_raise(void) {
+  $test.scoped();
+  Block block = NULL;
+  int caught = 0;
+  try block.append(NULL, 0);
+  catch %(bad-arg (operation "Block.append") *): caught++;
+  try block.append_fill(NULL, 0);
+  catch %(bad-arg (operation "Block.append_fill") *): caught++;
+  try block.reserve(0);
+  catch %(bad-arg (operation "Block.reserve") *): caught++;
+  try block.truncate(0);
+  catch %(bad-arg (operation "Block.truncate") *): caught++;
+  try block.clear();
+  catch %(bad-arg (operation "Block.clear") *): caught++;
+  try block.try_pop(NULL);
+  catch %(bad-arg (operation "Block.try_pop") *): caught++;
+  EXPECT_INT_EQ(caught, 6);
+  EXPECT_INT_EQ(block.len(), 0);
+  EXPECT_INT_EQ(block.capacity(), 0);
+  EXPECT_FALSE(block.truth());
+  block.free();
+}
+
 static void bytes_append_and_len(void) {
   $test.scoped();
   Bytes bytes = Bytes.new(sizeof(double));
@@ -134,6 +157,7 @@ static void status_pop_preserves_output_on_empty(void) {
 
 
 void block_suite(void) {
+  $test.run(block_null_mutations_raise);
   $test.run(bytes_append_and_len);
   $test.run(reserve_truncate_and_clear);
   $test.run(zero_and_fill_append);

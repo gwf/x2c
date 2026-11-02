@@ -33,6 +33,51 @@ static void _expect_file_read_error(List detail) {
 }
 
 
+static void file_native_words_and_scan(void) {
+  File file = tmpfile();
+  if (!EXPECT_NOT_NULL(file)) return;
+  defer file.close();
+  EXPECT_INT_EQ(file.putw(1234567), 1234567);
+  EXPECT_INT_EQ(file.putw(-7654321), -7654321);
+  rewind(file);
+  EXPECT_INT_EQ(file.getw(), 1234567);
+  EXPECT_INT_EQ(file.getw(), -7654321);
+  EXPECT_INT_EQ(file.getw(), EOF);
+  EXPECT_TRUE(feof(file));
+  rewind(file);
+  file.printf("word 17");
+  rewind(file);
+  char word[8];
+  int value = 0;
+  EXPECT_INT_EQ(file.scanf("%7s %d", word, &value), 2);
+  EXPECT_INT_EQ(strcmp(word, "word"), 0);
+  EXPECT_INT_EQ(value, 17);
+}
+
+static void file_buffering_modes(void) {
+  char storage[BUFSIZ];
+  File buffered = tmpfile(), lines = tmpfile(), raw = tmpfile();
+  defer if (buffered) buffered.close();
+  defer if (lines) lines.close();
+  defer if (raw) raw.close();
+  if (!EXPECT_NOT_NULL(buffered) || !EXPECT_NOT_NULL(lines) ||
+      !EXPECT_NOT_NULL(raw)) return;
+  buffered.setbuffer(storage, sizeof storage);
+  buffered.puts("borrowed buffer");
+  rewind(buffered);
+  EXPECT_STR_EQ(buffered.string(), "borrowed buffer");
+  EXPECT_INT_EQ(lines.setlinebuf(), 0);
+  lines.puts("flushed line\n");
+  char bytes[32] = {0};
+  EXPECT_INT_EQ(pread(fileno(lines), bytes, 31, 0), 13);
+  EXPECT_INT_EQ(strcmp(bytes, "flushed line\n"), 0);
+  raw.setbuffer(NULL, 0);
+  raw.puts("raw");
+  memset(bytes, 0, sizeof bytes);
+  EXPECT_INT_EQ(pread(fileno(raw), bytes, 31, 0), 3);
+  EXPECT_INT_EQ(strcmp(bytes, "raw"), 0);
+}
+
 static void file_write_and_readline(void) {
   File file = tmpfile();
   if (!EXPECT_NOT_NULL(file)) return;
@@ -479,6 +524,8 @@ static void file_identity_is_handle_based(void) {
 
 
 void file_suite(void) {
+  $test.run(file_native_words_and_scan);
+  $test.run(file_buffering_modes);
   $test.run(file_write_and_readline);
   $test.run(file_string_reads_entire_file);
   $test.run(file_readblock_reports_short_read_length);

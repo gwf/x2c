@@ -73,7 +73,7 @@ static List _parse_grouped_segment(Compiler c) {
 static String _decode_segment(String raw) {
   if (!raw) return "";
   raw = _normalize_newlines(raw);
-  if (!("$$" in raw)) return raw.unescape();
+  if (!("$$" in raw)) return x2c_string_unescape_bytes(raw);
   int n = raw.len(), dst = 0;
   char *buf = xmalloc(n + 1);
   for (int i = 0; i < n; i++) {
@@ -85,7 +85,7 @@ static String _decode_segment(String raw) {
   buf[dst] = '\0';
   String text = String.new_len(buf, dst);
   xfree(buf);
-  return text.unescape();
+  return x2c_string_unescape_bytes(text);
 }
 
 /* Text with no line continuation and no CR returns unchanged. */

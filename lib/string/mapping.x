@@ -8,7 +8,7 @@
    itself is returned. */
 static macro Stmt $string.remap(
   Expr $subject, Name $index, Name $byte, Expr $mapped) {
-  if (!$subject || !*$subject) return $subject;
+  if (!$subject || !*$subject) return _canonical($subject);
   int length = $subject.len(), changed = 0;
   String string = String.malloc(length + 1);
   char *out = string;
@@ -20,7 +20,7 @@ static macro Stmt $string.remap(
   }
   if (!changed) {
     _free_unchecked(string);
-    return $subject;
+    return _canonical($subject);
   }
   return _finish(string, length);
 }
@@ -82,7 +82,7 @@ static macro Stmt $string.select(
     operation raises, or `<alloc-fail>` when the result cannot be allocated.
 */
 String String.filter(String str, Func fn) {
-  if (!str || !*str) return str;
+  if (!str || !*str) return _canonical(str);
   $string.select(str, i, ch, fn.apply_value((char) ch));
 }
 
@@ -100,7 +100,7 @@ String String.filter(String str, Func fn) {
     the result cannot be allocated.
 */
 String String.map(String str, Func fn) {
-  if (!str || !*str) return str;
+  if (!str || !*str) return _canonical(str);
   int n = str.len(), done = 0;
   String string = String.malloc(n + 1);
   defer if (!done) string.free();
@@ -120,9 +120,9 @@ String String.map(String str, Func fn) {
     Raises: `<alloc-fail>` while constructing the result.
 */
 meta native String String.keep(String str, String chars) {
-  if (!str) return str;
+  if (!str) return _canonical(str);
   if (!chars) return NULL;
-  if (!*str) return str;
+  if (!*str) return _canonical(str);
   $string.select(str, i, ch, strchr(chars, ch));
 }
 
@@ -131,7 +131,7 @@ meta native String String.keep(String str, String chars) {
     Raises: `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.reject(String str, String chars) {
-  if (!str || !chars || !*str) return str;
+  if (!str || !chars || !*str) return _canonical(str);
   /* strchr also matches the set's terminating NUL. */
   unsigned char excluded[256] = {1};
   const unsigned char *bytes = (const unsigned char *) chars;
@@ -145,7 +145,7 @@ meta native String String.reject(String str, String chars) {
     Raises: `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.squeeze(String str, String chars) {
-  if (!str || !chars || !*str) return str;
+  if (!str || !chars || !*str) return _canonical(str);
   $string.select(
     str, i, ch, !(i && ch == (unsigned char) ((const char *) str)[i - 1] &&
                  strchr(chars, ch)));

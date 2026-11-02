@@ -469,7 +469,7 @@ static void _validate_text(const void *bytes, size_t length) {
 }
 
 static inline void _block_putc(Block block, unsigned char value) {
-  if (block.length == SIZE_MAX) raise %(size-limit);
+  if (block.length == SIZE_MAX) raise %(size-limit (operation "File.block"));
   size_t expected = block.length + 1;
   if (block.length == block.cap) block.reserve(expected);
   ((unsigned char *) block.bytes)[block.length] = value;

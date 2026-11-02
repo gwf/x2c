@@ -13,7 +13,7 @@ The code that first detects a failure raises one structured `Error`:
 
 <!-- ignore: standalone raise-site illustration; requested is supplied by its owner -->
 ```x2c,ignore
-raise %(size-limit (operation "Block.reserve") (bytes $requested));
+raise %(size-limit (operation "Block.reserve") (capacity $requested));
 ```
 
 The first item is a compact `Symbol` naming the cause. The remaining items are
@@ -64,8 +64,8 @@ output.
 try {
   block.reserve(requested);
 }
-catch %(size-limit * (bytes ?count) *): {
-  printf("could not reserve %ld bytes\n", count);
+catch %(size-limit * (capacity ?count) *): {
+  printf("could not reserve %ld elements\n", count);
 }
 catch %(bad-arg *detail):
   report_bad_argument(detail);

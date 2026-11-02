@@ -90,7 +90,7 @@ static List _parse_bare_symbol(
   Token token = c.token;
   if (c.peek(0) != <lit-atom>)
     $fail.literals_symbol_bare(c, token, owner, detail);
-  String text = token.text.unescape();
+  String text = x2c_string_unescape_bytes(token.text);
   Symbol symbol = _exact_symbol(c, token, text);
   c.next();
   return %(expr ("Symbol") (literal ("Symbol") $text $symbol));
@@ -118,7 +118,8 @@ static List _parse_catch_code(Compiler c) {
    two-element pattern. */
 static void _parse_catch_detail(Compiler c, Array elements) {
   Token origin = c.token;
-  if (c.peek(0) == <lit-atom> && c.token.text.unescape()[0] == '*') {
+  if (c.peek(0) == <lit-atom> &&
+      x2c_string_unescape_bytes(c.token.text)[0] == '*') {
     elements.push(_parse_list_head(c));
     return;
   }

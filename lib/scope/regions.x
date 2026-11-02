@@ -39,7 +39,7 @@ static typedef struct ScopeExecution {
 */
 meta native void Scope.push(Scope *scope) {
   _require_running();
-  if (!scope) raise %(bad-arg);
+  if (!scope) raise %(bad-arg (operation "Scope.push"));
   ScopeThreadState state = _thread();
   state.stack = _raw_grow(
     state.stack, state.stack_size, state.stack_capacity,
@@ -60,7 +60,7 @@ meta native void Scope.push(Scope *scope) {
 meta native void Scope.pop(void) {
   _require_running();
   ScopeThreadState state = _thread();
-  if (!state.stack_size) raise %(bad-state);
+  if (!state.stack_size) raise %(bad-state (operation "Scope.pop"));
   state.stack_size--;
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
                                  : state.base_slot;
@@ -140,7 +140,8 @@ meta native void Scope.close(void) {
   _require_running();
   ScopeThreadState state = _thread();
   alias state.active as active {
-    if (!*active || !_forget_retain((*active), active)) raise %(bad-state);
+    if (!*active || !_forget_retain((*active), active))
+      raise %(bad-state (operation "Scope.close"));
     Scope top = *active;
     /* Restore and detach the surviving lower region before destruction, so
        the active slot never names freed storage and `_destroy_chain`
@@ -282,9 +283,11 @@ meta native void Scope.destroy(Scope scope) {
   if (!scope) return;
   _require_running();
   ScopeThreadState state = _thread();
-  if (scope == *state.base_slot) raise %(bad-state);
+  if (scope == *state.base_slot)
+    raise %(bad-state (operation "Scope.destroy"));
   for (int i = 0; i < state.stack_size; i++)
-    if (scope == *state.stack[i]) raise %(bad-state);
+    if (scope == *state.stack[i])
+      raise %(bad-state (operation "Scope.destroy"));
   _forget_retains(scope);
   _destroy_chain(scope);
 }
@@ -364,7 +367,7 @@ module Scope _new_scope(const char *name) {
     record.name = _register_name(scope, name);
     if (!record.name) {
       free(record);
-      raise %(alloc-fail);
+      raise %(alloc-fail (operation "Scope.new"));
     }
   }
   if (scope_accounting) atomic_fetch_add(&scope_creations, 1);

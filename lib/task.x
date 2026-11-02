@@ -88,7 +88,7 @@ void Task.run(Array jobs, Func completed) {
   defer _native_check(pthread_cond_destroy(&run.monitor.condition));
   defer _shutdown(&run);
   run.jobs = x2c_task_jobs_new(run.count * sizeof(struct TaskJob));
-  if (!run.jobs) raise %(alloc-fail);
+  if (!run.jobs) raise %(alloc-fail (operation "Task.run"));
   for (int i = 0; i < run.count; i++) {
     _check_stop();
     _prepare(&run, &run.jobs[i], jobs[i]);

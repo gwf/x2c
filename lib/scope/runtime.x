@@ -33,7 +33,7 @@ int Scope.accounting_enabled(void) {
 */
 void Scope.shutdown_hook(void (*hook)(void)) {
   _require_running();
-  if (!hook) raise %(bad-arg);
+  if (!hook) raise %(bad-arg (operation "Scope.shutdown_hook"));
   hooks = _raw_grow(hooks, hook_count, hook_capacity, sizeof(*hooks));
   hooks[hook_count++] = hook;
 }
@@ -105,7 +105,7 @@ module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
     capacity = 16;
   }
   else if (count == capacity) {
-    if (capacity > INT_MAX / 2) raise %(size-limit);
+    if (capacity > INT_MAX / 2) raise %(size-limit (operation "Scope"));
     items = _raw_realloc(items, capacity * 2 * size);
     capacity *= 2;
   }
@@ -114,14 +114,14 @@ module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
 
 module void *_raw_malloc(size_t size) {
   void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
+  if (!ptr) raise %(alloc-fail (operation "Scope"));
   if (scope_accounting) atomic_fetch_add(&raw_alloc_count, 1);
   return ptr;
 }
 
-static void *_raw_realloc(void *ptr, size_t size) {
+module void *_raw_realloc(void *ptr, size_t size) {
   void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
+  if (!result) raise %(alloc-fail (operation "Scope"));
   return result;
 }
 

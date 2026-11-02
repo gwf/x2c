@@ -65,7 +65,7 @@ String File.sha256(File file) {
     _absorb(sha, bytes, count);
   if (ferror(file)) {
     int error = errno;
-    raise %(io-fail (operation <read>) (errno $error));
+    x2c_io_fail(<read>, error);
   }
   return _finish(sha);
 }

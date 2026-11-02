@@ -117,7 +117,7 @@ void Random.secure_fill(void *bytes, size_t count) {
     if (got >= 0) done += got;
     else if (errno != EINTR) {
       int error = errno;
-      raise %(io-fail (operation "Random.secure_fill") (errno $error));
+      x2c_io_fail("Random.secure_fill", error);
     }
   }
 #endif

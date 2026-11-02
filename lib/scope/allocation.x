@@ -72,7 +72,7 @@ meta native void *Scope.malloc(size_t size) {
 */
 void *Scope.malloc_finalized(size_t size, void (*drop)(void *)) {
   _require_running();
-  if (!drop) raise %(bad-arg);
+  if (!drop) raise %(bad-arg (operation "Scope.malloc_finalized"));
   return _malloc_in(_thread().active, size, drop);
 }
 
@@ -100,7 +100,7 @@ void *Scope.malloc_in(Scope *slot, size_t size) {
 */
 void *Scope.malloc_finalized_in(Scope *s, size_t size, void (*drop)(void *)) {
   _require_running();
-  if (!drop) raise %(bad-arg);
+  if (!drop) raise %(bad-arg (operation "Scope.malloc_finalized_in"));
   return _malloc_in(s, size, drop);
 }
 
@@ -228,7 +228,7 @@ Scope Scope.owner(void *ptr) {
 meta native void Scope.move(void *ptr, Scope *slot) {
   _require_running();
   if (!ptr) return;
-  if (!slot) raise %(bad-arg);
+  if (!slot) raise %(bad-arg (operation "Scope.move"));
   if (!*slot) *slot = _new_scope(NULL);
   ScopeAlloc alloc = $scope.ptr_alloc(ptr);
   _detach(alloc);
@@ -270,8 +270,8 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   ScopeMetadata *old_meta = $scope.alloc_meta(old);
   size_t old_size = old_meta.requested_size;
   if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
-    raise %(size-limit);
-  ScopeMetadata *meta = _data_realloc(
+    raise %(size-limit (operation "Scope.realloc"));
+  ScopeMetadata *meta = _raw_realloc(
     old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
   meta.requested_size = size;
   ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
@@ -281,9 +281,10 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
 }
 
 static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
-  if (!slot) raise %(bad-arg);
+  if (!slot) raise %(bad-arg (operation "Scope.malloc"));
   if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)) {
-    if (x2c_error_runtime_ready) raise %(size-limit);
+    if (x2c_error_runtime_ready)
+      raise %(size-limit (operation "Scope.malloc"));
     _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
@@ -307,13 +308,14 @@ static void _attach(Scope scope, ScopeAlloc alloc) {
 
 module void *_data_malloc(size_t size) {
   void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
+  if (!ptr) raise %(alloc-fail (operation "Scope.malloc"));
   return ptr;
 }
 
 static void *_calloc_in(Scope *slot, size_t count, size_t size) {
   if (count && size > SIZE_MAX / count) {
-    if (x2c_error_runtime_ready) raise %(size-limit);
+    if (x2c_error_runtime_ready)
+      raise %(size-limit (operation "Scope.calloc"));
     _raw_fatal("calloc size overflow");
   }
   size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
@@ -366,10 +368,4 @@ static void _relink(
   alloc.prev = prev;
   if (next) next.prev = alloc;
   _point_to(prev, alloc);
-}
-
-static void *_data_realloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
-  return result;
 }

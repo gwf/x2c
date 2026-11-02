@@ -250,7 +250,7 @@ module List _parse_literal_element(Compiler c) {
 static Symbol _match_operator_head(Compiler c) {
   if (!c.in_pattern) return 0;
   if (c.peek(0) == <lit-atom>) {
-    Atom atom = Atom.intern(c.token.text.unescape());
+    Atom atom = Atom.intern(x2c_string_unescape_bytes(c.token.text));
     return atom is <symbol> ? atom.symbol() : 0;
   }
   if (c.peek(0) != <lit-symbol>) return 0;

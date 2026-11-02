@@ -100,10 +100,10 @@ Channel Channel.new(Var type, Var capacity) {
   channel.type = type;
   channel.capacity = limit;
   int error = pthread_mutex_init(&channel.monitor.mutex, NULL);
-  if (error) raise %(io-fail (operation "pthread_mutex_init") (errno $error));
+  if (error) x2c_io_fail("pthread_mutex_init", error);
   channel.initialized = 1;
   error = pthread_cond_init(&channel.monitor.condition, NULL);
-  if (error) raise %(io-fail (operation "pthread_cond_init") (errno $error));
+  if (error) x2c_io_fail("pthread_cond_init", error);
   channel.initialized = 2;
   ready = 1;
   return channel;

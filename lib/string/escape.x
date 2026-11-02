@@ -16,6 +16,8 @@
 #include "exception.x"
 #include "scan.x"
 
+Buffer Buffer.write_code_point(Buffer out, int point);
+
 // writing escapes
 
 /** Returns a canonical quoted and escaped representation of `str`.
@@ -82,8 +84,9 @@ meta native int String.parse_char(String str) {
   int byte = *at++;
   if (byte == '\\') {
     if (!*at) return -1;
-    byte = _decode_escape(at);
-    if (byte < 0 || byte > 0377) return -1;
+    int width = scan_c_escape_value((char *) at - 1, byte);
+    if (width < 0 || byte < 0 || byte > 0377) return -1;
+    at += width - 1;
   }
   return *at == '\'' ? byte : -1;
 }
@@ -98,25 +101,42 @@ meta native String String.parse(String str) {
   if (!str) return NULL;
   int n = str.len();
   if (str[0] == '%' && str[1] == '"' && str[n - 1] == '"')
-    return String.new_len(str + 2, n - 3).unescape();
+    return x2c_string_unescape_bytes(String.new_len(str + 2, n - 3));
   if (str[0] == '"' && str[n - 1] == '"')
     return String.new_len(str + 1, n - 2).unescape();
   return str.unescape();
 }
 
-/** Decodes supported backslash escapes in `str` into a canonical `String`.
-    Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
-    or `U`, and up to three octal digits are consumed. A backslash-newline is
-    removed, an unknown escape yields its following byte, and a trailing
-    backslash is dropped. `Null` input returns NULL and input without a
-    backslash is returned unchanged.
-    Raises: `<bad-arg>` for an octal escape above `\377`, which does not fit
-    a byte, or `<alloc-fail>` while constructing a changed result.
+/** Decodes C backslash escapes in `str` into a canonical `String`.
+    Hexadecimal escapes consume all following hex digits; universal escapes
+    consume four digits after `u` or eight after `U` and encode UTF-8.
+    Octal escapes consume at most three digits. Line continuations disappear.
+    Null input returns NULL. Input without a backslash is canonicalized.
+    Raises: `<bad-arg>` for a malformed escape or invalid Unicode point,
+    or `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.unescape(String str) {
+  if (!str || !("\\" in str)) return _canonical(str);
+  Buffer out = auto Buffer.new(0);
+  for (int i = 0, length = str.len(); i < length;) {
+    int value = (unsigned char) str[i], width = 1;
+    int universal = str[i] == '\\' &&
+      (str[i + 1] == 'u' || str[i + 1] == 'U');
+    if (str[i] == '\\') width = scan_c_escape_value(str + i, value);
+    if (width < 0) raise %(bad-arg (operation "String.unescape"));
+    i += width;
+    if (value <= 0) continue;
+    if (universal) out.write_code_point(value);
+    else out.write_char((char) value);
+  }
+  return out;
+}
+
+/* Percent strings, quoted Atoms, and Lisp keep x2c's byte escapes. */
+String x2c_string_unescape_bytes(String str) {
   int n = str.len();
   if (n == 0) return NULL;
-  if (!("\\" in str)) return str;
+  if (!("\\" in str)) return _canonical(str);
   String string = String.malloc(n + 1);
   if (_unescape_into(string, str) < 0) {
     string.free();

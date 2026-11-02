@@ -22,6 +22,7 @@ typedef struct DispatchFixture {
 } DispatchFixture;
 
 static int dispatch_truth_calls = 0;
+static int dispatch_hash_calls = 0, dispatch_compare_calls = 0;
 static List var_runtime_errors;
 
 
@@ -54,6 +55,7 @@ static Buffer dispatch_fixture_write_str(Var value, Buffer out) {
 }
 
 static unsigned dispatch_fixture_hash(Var value) {
+  dispatch_hash_calls++;
   DispatchFixture *fixture = value.pointer();
   return fixture.value;
 }
@@ -64,6 +66,7 @@ static int dispatch_fixture_equal(Var a, Var b) {
 }
 
 static int dispatch_fixture_compare(Var a, Var b) {
+  dispatch_compare_calls++;
   DispatchFixture *left = a.pointer(), *right = b.pointer();
   if (left.value == right.value) return 0;
   return left.value < right.value ? -1 : 1;
@@ -1280,6 +1283,21 @@ static void var_streaming_repr_matches_canonical(void) {
 }
 
 
+static void var_fallback_numeric_operations(void) {
+  Var low = 1, high = 2, wide = Var.box_long(9007199254740993L);
+  EXPECT_TRUE(low.fallback_compare(high) < 0);
+  EXPECT_TRUE(high.fallback_compare(low) > 0);
+  EXPECT_INT_EQ(low.fallback_compare(low), 0);
+  EXPECT_INT_EQ(low.fallback_hash(), low.hash());
+  EXPECT_INT_EQ(wide.fallback_hash(), wide.hash());
+  int caught = 0;
+  try void.fallback_hash();
+  catch %(void-op (operation "Var.fallback_hash")): caught++;
+  try low.fallback_compare(void);
+  catch %(void-op (operation "Var.fallback_compare")): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
 static void var_dense_custom_dispatch(void) {
   VarMethods methods = {
     .str = dispatch_fixture_str,
@@ -1301,6 +1319,15 @@ static void var_dense_custom_dispatch(void) {
   Var b = Var.new(<fixture>, &same);
   Var c = Var.new(<fixture>, &greater);
   Var z = Var.new(<fixture>, &zero);
+  int hashes = dispatch_hash_calls, comparisons = dispatch_compare_calls;
+  EXPECT_INT_EQ(a.fallback_compare(a), 0);
+  int order = a.fallback_compare(b);
+  EXPECT_TRUE(order != 0);
+  EXPECT_INT_EQ(b.fallback_compare(a), -order);
+  EXPECT_INT_EQ(a.fallback_hash(), a.fallback_hash());
+  EXPECT_INT_EQ(dispatch_hash_calls, hashes);
+  EXPECT_INT_EQ(dispatch_compare_calls, comparisons);
+
 
   EXPECT_INT_EQ(sizeof(Var), 8);
   EXPECT_TRUE(a.tag() == <fixture>);
@@ -1655,6 +1682,7 @@ static void var_rendering_restores_after_error(void) {
 }
 
 void var_suite(void) {
+  $test.run(var_fallback_numeric_operations);
   $test.run(var_recursive_rendering);
   $test.run(var_write_str_matches_str);
   $test.run(var_nested_write_str_parity);

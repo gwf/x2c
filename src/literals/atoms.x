@@ -70,7 +70,8 @@ static List _number_literal(Compiler c, String text, int floating) {
 
 /* A bare spelling names an Atom, which is a compact Symbol when it fits. */
 module List _atom_literal(Compiler c, String text) {
-  String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
+  String spelling = x2c_string_unescape_bytes(text);
+  Atom atom = Atom.intern(spelling);
   _check_binder(c, atom);
   if (spelling in c.object_macros) _warn_macro_name(c, spelling);
   if (atom is <symbol>) return %(literal ("Symbol") $text $(atom.symbol()));
@@ -113,7 +114,7 @@ static void _check_binder(Compiler c, Atom atom) {
 module String _angle_spelling(String text) {
   int len = text.len();
   if (len >= 4 && text[1] == '"')
-    return String.new_len(text + 2, len - 4).unescape();
+    return x2c_string_unescape_bytes(String.new_len(text + 2, len - 4));
   return String.new_len(text + 1, len - 2);
 }
 

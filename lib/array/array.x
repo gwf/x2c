@@ -106,7 +106,7 @@ Var Array.setindex(Array array, int index, Var value) {
   index = x2c_normalize_index(index, length);
   if (index < 0)
     raise %(bad-arg (operation "Array.setindex") (index $requested));
-  if (value is void) raise %(void-op);
+  if (value is void) raise %(void-op (operation "Array.setindex"));
   return ((Var *) array.bytes)[index] = value;
 }
 

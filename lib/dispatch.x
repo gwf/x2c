@@ -108,7 +108,7 @@ String Var.fallback_str(Var v) {
     recurse.
 */
 Buffer Var.write_str(Var v, Buffer out) {
-  if (out == NULL) return NULL;
+  if (out == NULL) raise %(bad-arg (operation "Var.write_str"));
   VarDescriptor *descriptor = _descriptor(v);
   if (descriptor && descriptor.methods.write_str)
     return descriptor.methods.write_str(v, out);
@@ -163,7 +163,7 @@ String Var.pointer_string(Var v) {
 
 /** Appends the readable representation of `Var` to a `Buffer`. */
 Buffer Var.write_repr(Var v, Buffer out) {
-  if (out == NULL) return NULL;
+  if (out == NULL) raise %(bad-arg (operation "Var.write_repr"));
   VarDescriptor *descriptor = _descriptor(v);
   if (descriptor && descriptor.methods.write_repr)
     return descriptor.methods.write_repr(v, out);
@@ -327,7 +327,7 @@ meta native int Var.compare(Var a, Var b) {
 */
 int Var.fallback_compare(Var a, Var b) {
   if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
-    raise %(void-op (operation "Var.compare"));
+    raise %(void-op (operation "Var.fallback_compare"));
   if (a.u64 == b.u64) return 0;
   Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
   int ag = _group(ak, atag), bg = _group(bk, btag);

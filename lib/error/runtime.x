@@ -12,7 +12,7 @@ static typedef struct ErrorExecutionState {
 /** Allocates empty execution backing. Initialize Error after installing it. */
 void *x2c_error_execution_new(void) {
   ErrorExecutionState saved = calloc(1, sizeof(struct ErrorExecutionState));
-  if (!saved) raise %(alloc-fail);
+  if (!saved) raise %(alloc-fail (operation "x2c_error_execution_new"));
   return saved;
 }
 

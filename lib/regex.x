@@ -134,15 +134,24 @@ static const int _DEPTH_LIMIT = 2000;
 Regex Regex.compile(String pattern) => Regex.new(pattern);
 
 /** Returns the text `regex` was compiled from. */
-String Regex.pattern(Regex regex) => regex.pattern;
+String Regex.pattern(Regex regex) {
+  if (!regex) raise %(bad-arg (operation "Regex.pattern"));
+  return regex.pattern;
+}
 
 /** Returns the number of capturing groups in `regex`. */
-int Regex.capture_count(Regex regex) => regex.capture_count;
+int Regex.capture_count(Regex regex) {
+  if (!regex) raise %(bad-arg (operation "Regex.capture_count"));
+  return regex.capture_count;
+}
 
 /** Returns the names of the capturing groups of `regex` in capture order,
     with NULL for a group without a name.
 */
-List Regex.capture_names(Regex regex) => regex.capture_names;
+List Regex.capture_names(Regex regex) {
+  if (!regex) raise %(bad-arg (operation "Regex.capture_names"));
+  return regex.capture_names;
+}
 
 /** Returns `literal` with every ASCII byte that is not a letter, digit, or
     underscore escaped, so that it matches itself inside a pattern.
@@ -163,16 +172,23 @@ String Regex.escape(String literal) {
 /** Returns the first match of `r` in `subject` at or after the byte
     `offset`, or NULL. An offset beyond the end of `subject` finds nothing.
 */
-RegexMatch Regex.match_from(Regex r, String subject, int offset) =>
-  offset < 0 || offset > subject.len() ? NULL : _search(r, subject, offset);
+RegexMatch Regex.match_from(Regex r, String subject, int offset) {
+  if (!r) raise %(bad-arg (operation "Regex.match_from"));
+  return offset < 0 || offset > subject.len()
+    ? NULL : _search(r, subject, offset);
+}
 
 /** Returns the first match of `r` in `subject`, or NULL. */
-RegexMatch Regex.match(Regex r, String subject) => _search(r, subject, 0);
+RegexMatch Regex.match(Regex r, String subject) {
+  if (!r) raise %(bad-arg (operation "Regex.match"));
+  return _search(r, subject, 0);
+}
 
 /** Returns every non-overlapping match of `r` in `subject`, in order.
     An empty match advances one byte. No match returns an empty `List`.
 */
 List Regex.find_all(Regex r, String subject) {
+  if (!r) raise %(bad-arg (operation "Regex.find_all"));
   Array found = auto [];
   for (RegexMatch next = _search(r, subject, 0); next;
        next = _next(r, subject, next))
@@ -184,6 +200,7 @@ List Regex.find_all(Regex r, String subject) {
     an empty field where two matches touch or a match sits at either end.
 */
 List Regex.split(Regex regex, String subject) {
+  if (!regex) raise %(bad-arg (operation "Regex.split"));
   Array parts = auto [];
   int cursor = 0;
   for (RegexMatch found = _search(regex, subject, 0); found;
@@ -201,21 +218,28 @@ List Regex.split(Regex regex, String subject) {
     `replacement`, `$0` through `$9` and `${name}` insert a capture and `$$`
     is a dollar sign.
 */
-String Regex.replace(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, 0, NULL, replacement);
+String Regex.replace(Regex regex, String subject, String replacement) {
+  if (!regex) raise %(bad-arg (operation "Regex.replace"));
+  return _rebuild(regex, subject, 0, NULL, replacement, 0);
+}
 
 /** Returns `subject` with every match of `regex` replaced, expanding
     `replacement` as `replace` does.
 */
-String Regex.replace_all(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, 1, NULL, replacement);
+String Regex.replace_all(Regex regex, String subject, String replacement) {
+  if (!regex) raise %(bad-arg (operation "Regex.replace_all"));
+  return _rebuild(regex, subject, 1, NULL, replacement, 0);
+}
 
 /** Returns `subject` with every match of `regex` replaced by what `fn`
     returns for its `RegexMatch`, inserted as is.
-    Raises: whatever `fn` raises.
+    A null callback raises `<bad-arg>` when a match invokes it.
+    Raises: whatever `Func.apply` or `fn` raises.
 */
-String Regex.replace_fn(Regex regex, String subject, Func fn) =>
-  _rebuild(regex, subject, 1, fn, NULL);
+String Regex.replace_fn(Regex regex, String subject, Func fn) {
+  if (!regex) raise %(bad-arg (operation "Regex.replace_fn"));
+  return _rebuild(regex, subject, 1, fn, NULL, 1);
+}
 
 // captures
 
@@ -847,13 +871,14 @@ static RegexCapture _whole(RegexMatch found) => found.car();
    replaced by what `fn` returns for the match or else by `replacement`
    with its references expanded. */
 static String _rebuild(
-  Regex r, String subject, int all, Func fn, String replacement) {
+  Regex r, String subject, int all, Func fn, String replacement,
+  int callback) {
   Buffer out = auto Buffer.new(0);
   int cursor = 0;
   for (RegexMatch found = _search(r, subject, 0); found;
        found = all ? _next(r, subject, found) : NULL) {
     subject[cursor:_whole(found).start()].write_str(out);
-    if (fn) fn(found).str().write_str(out);
+    if (callback) fn(found).str().write_str(out);
     else _expand(out, found, replacement);
     cursor = _whole(found).end();
   }

@@ -694,7 +694,7 @@ static _Layout _layout_open(Tokenizer t) {
 /* Layout arrays are raw storage freed by `_close`. */
 static void *_layout_alloc(size_t count, size_t size) {
   void *storage = calloc(count, size);
-  if (!storage) raise %(alloc-fail);
+  if (!storage) raise %(alloc-fail (operation "Tokenizer.layout"));
   return storage;
 }
 

@@ -75,7 +75,8 @@ $map.grouped.core.family(
   _record_key, _record_value, _reinsert_error, _insert_error,
   _record_hash, _remember_hash, 1, 1);
 
-$map.typed.operations(Map, Var, Var, _bad_arg, _capacity_valid, void, 0, 1);
+$map.typed.operations(
+  Map, Var, Var, _bad_arg, _capacity_valid, void, "Map", 1);
 Var Map.updateindex(Map, Var, Symbol, Var);
 Var Map.postfixindex(Map, Var, Symbol);
 meta native Map Map.new_capacity(unsigned);
@@ -123,10 +124,11 @@ Self Map.merge_with(Self map, Self other, Func combine) {
     size, or invariant cause while inserting.
 */
 Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
-  if (map == NULL) raise %(bad-arg);
+  if (map == NULL) raise %(bad-arg (operation "Map.updateindex"));
   X2CVarNumericInfo info;
   int insert = Var.encoding_valid(rhs) && Var.numeric_info(rhs.tag(), info);
-  if (key is void || rhs is void) raise %(void-op);
+  if (key is void || rhs is void)
+    raise %(void-op (operation "Map.updateindex"));
   if (op == <+> && insert) {
     int inserted;
     Var *stored = map.get_or_insert(&key, &rhs, &inserted);
@@ -134,7 +136,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     return Var.update(stored[0], op, rhs);
   }
   long index = map.find_index(&key);
-  if (index < 0) raise %(bad-arg (key $key));
+  if (index < 0) raise %(bad-arg (operation "Map.updateindex") (key $key));
   Var *stored = _record_value(map, (unsigned) index);
   return Var.update(stored[0], op, rhs);
 }
@@ -146,10 +148,10 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     key, or a cause from `Var.postfix` for an unsupported value or operation.
 */
 Var Map.postfixindex(Map map, Var key, Symbol op) {
-  if (map == NULL) raise %(bad-arg);
-  if (key is void) raise %(void-op);
+  if (map == NULL) raise %(bad-arg (operation "Map.postfixindex"));
+  if (key is void) raise %(void-op (operation "Map.postfixindex"));
   long index = map.find_index(&key);
-  if (index < 0) raise %(bad-arg (key $key));
+  if (index < 0) raise %(bad-arg (operation "Map.postfixindex") (key $key));
   Var *stored = _record_value(map, (unsigned) index);
   Var old = stored[0], value = old;
   Var.postfix(value, op);
@@ -250,8 +252,7 @@ meta native void Map.cleanup(Map value) { value.free_table(); }
 static int _capacity_valid(unsigned n) => n >= 2 && !(n & (n - 1));
 
 static void _bad_arg(String owner) {
-  (void) owner;
-  raise %(bad-arg);
+  raise %(bad-arg (operation $owner));
 }
 
 static Var _box_var(Var value) => value;

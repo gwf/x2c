@@ -182,8 +182,7 @@ Scope *Lisp.result_storage(Lisp lisp) =>
 
 static int _initialize(void) {
   if (pthread_once(&lisp_initialize_once, _initialize_once)) {
-    fprintf(stderr, "Lisp: could not initialize canonical names\n");
-    abort();
+    x2c_fatal("Lisp: could not initialize canonical names");
   }
   return lisp_initialize_success;
 }

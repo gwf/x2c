@@ -200,7 +200,7 @@ Symbol Symbol.parse(char *text) {
   if (len >= 3 && text[1] == '"') {
     String inner = String.new_len(text + 2, len - 4);
     if (!inner) return 0;
-    String unquoted = inner.unescape();
+    String unquoted = x2c_string_unescape_bytes(inner);
     if (!unquoted) return 0;
     return Symbol.new(unquoted);
   }

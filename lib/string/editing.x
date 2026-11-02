@@ -27,12 +27,13 @@ meta native String String.replace(
 */
 meta native String String.replace_n(
   String str, String old, String replacement, int max_replacements) {
-  if (!str || !old || !*old || max_replacements == 0) return str;
-  if (old == replacement && _is_active_canonical(str)) return str;
+  if (!str || !old || !*old || max_replacements == 0)
+    return _canonical(str);
+  if (old == replacement) return _canonical(str);
   int str_len = str.len(), old_len = old.len();
   int replacement_len = replacement.len();
   int count = _count_matches(str, old, max_replacements);
-  if (count == 0) return str;
+  if (count == 0) return _canonical(str);
   int length = _replaced_length(str_len, count, old_len, replacement_len);
   if (length < 0) raise %(size-limit (operation "String.replace_n"));
   String string = String.malloc(length + 1);
@@ -89,7 +90,7 @@ int String.getindex(String str, int index) {
 meta native String String.getslice(String s, int start, int stop, int step) {
   int n = s.len(), len = x2c_normalize_slice(start, stop, step, n);
   if (len <= 0) return NULL;
-  if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
+  if (step == 1 && start == 0 && len == n) return _canonical(s);
   if (step == 1) return x2c_string_from_bytes(s + start, len);
   String string = String.malloc(len + 1);
   char *out = string, const char *src = s;
@@ -115,13 +116,13 @@ meta native String String.getslice(String s, int start, int stop, int step) {
     returns `str` unchanged.
 */
 meta native String String.withindex(String str, int index, char value) {
-  if (!str || !*str) return str;
+  if (!str || !*str) return _canonical(str);
   if (value == '\0')
     raise %(bad-arg (operation "String.withindex") (index $index));
   int n = str.len();
   if (index < 0) index += n;
-  if (index < 0 || index >= n) return str;
-  if (str[index] == value && _is_active_canonical(str)) return str;
+  if (index < 0 || index >= n) return _canonical(str);
+  if (str[index] == value) return _canonical(str);
   String string = String.malloc(n + 1);
   memcpy(string, str, n);
   char *out = string;

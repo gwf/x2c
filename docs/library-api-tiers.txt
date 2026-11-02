@@ -278,3 +278,5 @@ lib/task.x|internal|x2c_task_stopping
 lib/task.x|internal|x2c_task_channel_sleep
 lib/task.x|internal|x2c_task_channel_notify
 lib/scope/scope.x|internal|x2c_scope_thread_release
+lib/string/string.x|internal|x2c_string_unescape_bytes
+lib/block.x|internal|x2c_block_bad_arg

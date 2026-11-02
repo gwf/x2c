@@ -38,7 +38,7 @@ macro Unit $map.var.family(
   }
 
   static void $value_valid(Var *value) {
-    if (value[0] is void) raise %(void-op);
+    if (value[0] is void) raise %(void-op (operation "Map"));
   }
 }
 
@@ -198,7 +198,7 @@ macro Unit $map.typed.operations(
   */
   $value $map.setdefault($map map, $key key, $value defval) {
     if ((void *) map == 0) (void) $bad_arg($owner);
-    if ($boxed && (Var) key is void) raise %(void-op);
+    if ($boxed && (Var) key is void) raise %(void-op (operation $owner));
     int inserted;
     $value *stored = map.get_or_insert(&key, &defval, &inserted);
     return stored[0];
@@ -218,7 +218,7 @@ macro Unit $map.typed.operations(
   void $map.set($map map, $key key, $value val) {
     if ((void *) map == 0) (void) $bad_arg($owner);
     if ($boxed && ((Var) key is void || (Var) val is void))
-      raise %(void-op);
+      raise %(void-op (operation $owner));
     map.set_entry(&key, &val);
   }
 

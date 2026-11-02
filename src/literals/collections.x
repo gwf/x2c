@@ -128,8 +128,8 @@ static Symbol _member_symbol(Compiler c) {
 /* A quoted member drops its quotes. */
 static String _member_spelling(String text) {
   if (text && text[0] == '"')
-    return String.new_len(text + 1, text.len() - 2).unescape();
-  return text.unescape();
+    return x2c_string_unescape_bytes(String.new_len(text + 1, text.len() - 2));
+  return x2c_string_unescape_bytes(text);
 }
 
 static int _duplicate_index(List values) {

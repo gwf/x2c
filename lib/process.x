@@ -53,7 +53,9 @@ typedef Symbol Env;
 /* Job launch and result error conditions.
    Reports expand at their existing owners. */
 
-static macro Stmt $error.start.alloc() { raise %(alloc-fail); }
+static macro Stmt $error.start.alloc() {
+  raise %(alloc-fail (operation "Job.start"));
+}
 
 static macro Stmt $error.start.empty() { raise %(bad-arg (operation "Job.start") (reason "empty command")); }
 
