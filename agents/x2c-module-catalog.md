@@ -775,9 +775,10 @@ Public functions:
 `Compiler.resolve_as_declared`, `Compiler.protocol_member_names`,
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
 `Compiler.resolve_protocol_member`, `Compiler.protocol_members_for`,
-`Compiler.protocol_update_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.discard_helper`, `Compiler.wrapper_function`,
-`Compiler.forward_parameters`, `Compiler.generate_protocol_adapters`,
+`Compiler.protocol_update_helper`, `Compiler.protocol_helper_call`,
+`Compiler.protocol_discard_helper`, `Compiler.discard_helper`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
 `Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
 
