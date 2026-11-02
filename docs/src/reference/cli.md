@@ -915,7 +915,9 @@ command treats `-` as an ordinary file name in these modes.
 
 Translation reports each diagnostic on standard error as
 `file:line:column: code: message`, followed by the source line, a caret, and
-any notes. A unit stops after 20 errors. `--max-errors <count>` changes that
+any notes. `file` follows the rule for the JSON `file` field below: relative
+to the working directory for a source inside it and absolute otherwise. A
+unit stops after 20 errors. `--max-errors <count>` changes that
 bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`
 removes it. When the bound is greater than one, a unit that reaches it ends
 with `limit: too many errors, stopping`. With `--max-errors 1`, the unit's

@@ -186,6 +186,7 @@ lib/pool/pool.x|internal|Pool.lookup,Pool.insert,Pool.intern,Pool.malloc
 lib/pool/pool.x|internal|Pool.thread_start,Pool.is_permanent,Pool.owns
 lib/pool/pool.x|internal|PoolTable
 lib/pool/pool.x|internal|x2c_pool_exchange
+lib/process.x|advanced|Job.decode_wait_status
 lib/scope/scope.x|advanced|Scope.calloc,Scope.calloc_in,Scope.destroy,Scope.free
 lib/scope/scope.x|advanced|Scope.cleanup
 lib/scope/scope.x|advanced|Scope.malloc,Scope.malloc_in,Scope.memdup,Scope.memdup_in
