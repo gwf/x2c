@@ -102,7 +102,7 @@ program.chmod(0o755)
 
     def test_successful_translation_keeps_diagnostics_visible(self):
         self.source("plain")
-        self.executable("x2c", "#!/bin/sh\nprintf 'translation warning\\n' >&2\n")
+        self.executable("x2c", "#!/bin/sh\nif [ \"$1\" = translate ]; then\n  printf 'translation warning\\n' >&2\nfi\n")
         result = self.run_check("plain|showcase|run||-|warning\n")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stderr, "translation warning\n")

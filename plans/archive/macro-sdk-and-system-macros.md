@@ -255,7 +255,7 @@ the new macro's expansion and one for its rejection case. Publication uses
 
 `examples/magic/system-macros.x` is the existing showcase for the shipped macro
 set and is registered in `examples/manifest.txt:33`. Phase 3 and Phase 4 extend
-it and update `examples/expected/system-macros.stdout` rather than adding a
+it and update `examples/expected/magic-system-macros.stdout` rather than adding a
 second showcase. `$time` writes a measured duration, so its report gets unit
 coverage instead of an exact-match expectation.
 

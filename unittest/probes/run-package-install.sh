@@ -37,7 +37,7 @@ installed="$BUILD/home/examples"
 [[ -f "$installed/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
 [[ -f "$installed/apps/notes/bench/run.py" ]] || fail "missing benchmark"
 "$x2c" run -q "$BUILD/home/examples/love/basic-literals.x" >"$BUILD/example.out"
-cmp "$BUILD/example.out" "$ROOT/examples/expected/static-test.stdout" || fail "installed example"
+cmp "$BUILD/example.out" "$ROOT/examples/expected/love-basic-literals.stdout" || fail "installed example"
 
 # A project helper and cold collection need the installed module sources.
 mkdir -p "$BUILD/meta"

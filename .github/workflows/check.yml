@@ -75,7 +75,7 @@ jobs:
           node --input-type=module -e \
             'import("file:///tmp/x2c-wasm-tour/language.js").then(m => m.default())' \
             > /tmp/x2c-wasm-tour/stdout
-          diff -u examples/expected/docs-tour.stdout /tmp/x2c-wasm-tour/stdout
+          diff -u examples/expected/tours-language.stdout /tmp/x2c-wasm-tour/stdout
 
   release-validation:
     if: inputs.release_validation

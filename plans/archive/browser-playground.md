@@ -91,7 +91,7 @@ Results:
   Emscripten supplies `pthread`, `fork`, `popen`, and `sigsetjmp` stubs
   or implementations, so nothing needs a source stub.
 - `foreach` prints `v = 1..3`; `examples/tours/language.x` (Map, match,
-  Scope, Lisp, lambda, defer) matches `examples/expected/docs-tour.stdout`
+  Scope, Lisp, lambda, defer) matches `examples/expected/tours-language.stdout`
   byte for byte; a `raise`/`catch`/`finally` probe matches its native run.
 - Sizes: `language.wasm` 1.18 MB at `-O1` with the whole archive, 314 KB
   gzipped; the exception probe is 880 KB at `-Os`. Each program carries the
@@ -232,7 +232,7 @@ modules fail at run time with their documented errors.
 `.github/workflows/check.yml` gains an optional job `wasm-runtime` with the
 same manual trigger: install Emscripten (`mymindstorm/setup-emsdk`), `make
 build-safe`, `make wasm-runtime`, `tools/wasm-build examples/tours/language.x`,
-and `node language.js | diff - examples/expected/docs-tour.stdout`. It is
+and `node language.js | diff - examples/expected/tours-language.stdout`. It is
 advisory like the rest of that workflow and never required.
 
 ### Security
