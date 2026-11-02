@@ -172,6 +172,14 @@ module List _type_specifier(Compiler c) {
         syntax = _typeof_specifier(c);
         break;
       }
+      if (c.token.text == "_Atomic") {
+        syntax = _atomic_type(c);
+        break;
+      }
+      if (c.token.text == "_Complex") {
+        syntax = _primitive_type(c);
+        break;
+      }
       Array words = [];
       _prefix_macro_words(c, 2, words);
       syntax = words.list_free();
@@ -181,6 +189,33 @@ module List _type_specifier(Compiler c) {
       syntax = _primitive_type(c);
   }
   return syntax;
+}
+
+/* C11 reserves `_Atomic`, `_Complex`, and `_Alignas`, so any of them at
+   the cursor begins a declaration. */
+module int _c11_specifier_starts(Compiler c) =>
+  c.at_word("_Atomic") || c.at_word("_Complex") || _alignment_starts(c);
+
+/* C11 names an atomic type `_Atomic(T)`, or `_Atomic T` with the type
+   qualifier. x2c keeps it an opaque C type with that spelling, and C gives
+   it its atomic operations. */
+static List _atomic_type(Compiler c) {
+  Token first = c.token;
+  if (c.peek(1) == <(>) return $(_invocation_text(c));
+  c.next();
+  List specifier = _type_specifier(c);
+  String spelling = _words_spelling(specifier);
+  if (spelling) return $(%"_Atomic $spelling");
+  // A collected C header's atomic aggregate keeps its plain type.
+  if (c.shallow) return specifier;
+  $fail.parse_atomic_type(c, first);
+}
+
+// The C spelling of a specifier made only of words, or NULL.
+static String _words_spelling(List specifier) {
+  foreach (Var word in specifier)
+    if (word is not <symbol> && word is not <string>) return NULL;
+  return " ".join(specifier.map(%!(Var word) => word.str()));
 }
 
 /* GNU C and C23 name a type by its operand, as in `__typeof__(a) _a = (a);`
@@ -219,14 +254,20 @@ static List _typeof_specifier(Compiler c) {
   return type;
 }
 
+/* Scalar words in any order. C11's `_Complex` among them makes an opaque
+   C type, which C gives its complex arithmetic. */
 static List _primitive_type(Compiler c) {
   Token start = c.token;
   Array specs = [];
-  while (_is_scalar_specifier(c.peek(0))) {
-    specs.push(c.peek(0));
+  int complex = 0;
+  loop {
+    if (_is_scalar_specifier(c.peek(0))) specs.push(c.peek(0));
+    else if (c.at_word("_Complex")) complex = 1;
+    else break;
     c.next();
   }
   Type source = specs.list_free(), scalar = source.scalar();
+  if (scalar && complex) return $(%"$(_words_spelling(scalar)) _Complex");
   if (scalar) return scalar;
   // The preprocessed shallow pass only contributes declarations. The full
   // pass over the original source reports source-level type diagnostics.
@@ -467,12 +508,12 @@ module Symbol _storage_keyword(Compiler c) {
 }
 
 /* Declaration specifiers before the qualifiers and type: storage classes
-   and `inline` in source order, then `_Noreturn` and attributes as source
-   text. The storage words lead, where C places them and where a declared
-   type's storage is read. One storage class is allowed, except that
-   `threaded` pairs with another one the way C's thread-local specifier
-   pairs with `static` or `extern`. A second one stops the run, so
-   `static extern` is diagnosed instead of passed to C. */
+   and `inline` in source order, then `_Noreturn`, `_Alignas(...)`, and
+   attributes as source text. The storage words lead, where C places them
+   and where a declared type's storage is read. One storage class is
+   allowed, except that `threaded` pairs with another one the way C's
+   thread-local specifier pairs with `static` or `extern`. A second one
+   stops the run, so `static extern` is diagnosed instead of passed to C. */
 module List _storage_class(Compiler c) {
   Array storage = [], text = [], int seen_threaded = 0, seen_ordinary = 0;
   defer { storage.free(); text.free(); }
@@ -480,6 +521,7 @@ module List _storage_class(Compiler c) {
     Symbol symbol = _storage_keyword(c);
     String attribute = _attribute(c);
     if (!attribute) attribute = _attribute_macro(c);
+    if (!attribute && _alignment_starts(c)) attribute = _invocation_text(c);
     if (attribute) text.push($(attribute));
     else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
     else if (symbol.is_inline() ||
@@ -495,12 +537,20 @@ module List _storage_class(Compiler c) {
   return %( @(storage.list()) @(text.list()) );
 }
 
-module String _attribute(Compiler c) {
-  if (!_attribute_starts(c)) return NULL;
+module String _attribute(Compiler c) =>
+  _attribute_starts(c) ? _invocation_text(c) : NULL;
+
+/* The source text of the name at the cursor through its parenthesized
+   arguments, which the cursor then follows. */
+static String _invocation_text(Compiler c) {
   Token first = c.token, last = Token.skip_trivia(first + 1).group_close();
   c.token = last.after_group();
   return Token.spelling(first, last);
 }
+
+// C11's alignment specifier, `_Alignas(16)` or `_Alignas(double)`.
+static int _alignment_starts(Compiler c) =>
+  c.at_word("_Alignas") && c.peek(1) == <(>;
 
 /* A GNU attribute or an attribute macro is kept as its source text. */
 module int _attribute_starts(Compiler c) {
@@ -617,6 +667,8 @@ module List _publish_enumerator(
   String spelling = exact ? exact : Ast.binding_spelling(binding);
   if (!spelling)
     $fail.parse_syntax_position(c, origin);
+  if (exact && _names_alias(c, exact))
+    $fail.parse_decl_bound(c, origin, exact);
   List key = $(spelling);
   if (exact) key = c.sym.declared_key(NULL, key, context);
   Symbol prior = c.sym.enumerator_owner(key);
@@ -631,6 +683,17 @@ module List _publish_enumerator(
     c.sym.bind_identity(NULL, binding, context.declaration_ast(binding));
   c.sym.declare_enumerator(key, <enumerator>);
   return initializer ? %(op = $binding $initializer) : binding;
+}
+
+/* An enumerator joins the Sym scope around its enum. The bodies between
+   that scope and the enumerator keep their aliases visible there, so an
+   alias that any of them declares already names the enumerator. */
+static int _names_alias(Compiler c, String spelling) {
+  for (int level = c.alias_level; level >= 0; level--)
+    with (c.alias_level = level) {
+      if (c.scope_declares_alias(spelling)) return 1;
+    }
+  return 0;
 }
 
 /* Whether every enumerator of enum `type` fits in int, the width C gives an

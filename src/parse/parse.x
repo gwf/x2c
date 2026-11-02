@@ -178,6 +178,16 @@ static macro Stmt $fail.parse_params_empty(Expr $c, Expr $site) =>
     <parse>, "empty parameter list; use (void)",
     $site, NULL);
 
+static macro Stmt $fail.parse_block_declarator(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "block declarators are not supported",
+    $site, NULL);
+
+static macro Stmt $fail.parse_atomic_type(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>, "expected a scalar, typedef, or tag name after '_Atomic'",
+    $site, NULL);
+
 static macro Stmt $fail.parse_method_member(
   Expr $c, Expr $site, Expr $owner) =>
   $c.report_error(
