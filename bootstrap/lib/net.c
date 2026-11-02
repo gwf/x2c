@@ -44,6 +44,8 @@ static pthread_once_t sigpipe_once;
 
 
 _x2c_gensym_initializer_choice_40A38ABD_0((sigpipe_once =(pthread_once_t) PTHREAD_ONCE_INIT))
+struct addrinfo;
+
 static int _bind(struct addrinfo * address);
 
 static int _bound_port(int fd);

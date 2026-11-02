@@ -757,7 +757,7 @@ static void _error_name(Project p, int line, String message, String name){
 void Diagnostics_driver_error(const char *);
 
 static _Noreturn void _error(Project p, int line, String message){
-  String at = line ? String_printf(_35, line) : NULL;
+  String at = line ? String_printf(_35, line) :(String) NULL;
   if(p && String_truth(p -> path)) message = String_join(NULL, cons(String_var(_36), cons(String_var(p -> path), cons(String_var(_34), cons(String_var(at), cons(String_var(_37), cons(String_var(message), NULL)))))));
   Diagnostics_driver_error(message);
 }

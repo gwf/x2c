@@ -25,6 +25,6 @@ List _x2c_operator_row(Symbol);
 
 static String _dynamic_lane(Symbol op){
   Var member = List_getindex(_x2c_operator_row(op), 3);
-  return Var_truth(member) ? String_join(NULL, cons(String_var(_0), cons(String_var(Symbol_str(Var_symbol(member))), cons(String_var(_1), NULL)))) : NULL;
+  return Var_truth(member) ? String_join(NULL, cons(String_var(_0), cons(String_var(Symbol_str(Var_symbol(member))), cons(String_var(_1), NULL)))) :(String) NULL;
 }
 

@@ -60,6 +60,8 @@ static void _fraction(Buffer out, unsigned long long part, long unit);
 
 static long long _read_clock(clockid_t clock);
 
+struct tm;
+
 static DateTime _fields(Time t, struct tm fields);
 
 static struct tm _broken_down(Time t, struct tm *(* convert)(const time_t *, struct tm *));

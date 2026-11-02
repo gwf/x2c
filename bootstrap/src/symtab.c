@@ -889,7 +889,7 @@ static String _var_converter_owner(List key, List type){
                     Var _x2c_gensym_match_value_2 = spelling;
                     {
                       String spelling = Var_as_string(_x2c_gensym_match_value_2);
-                      return String_equal(spelling, String_join(NULL, cons(String_var(named), cons(String_var(_14), NULL)))) ? named : NULL;
+                      return String_equal(spelling, String_join(NULL, cons(String_var(named), cons(String_var(_14), NULL)))) ? named :(String) NULL;
                     }
 
                   }

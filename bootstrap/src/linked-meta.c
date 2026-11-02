@@ -13333,7 +13333,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10311 = List_var(_10310);
   _10312 = String_new("lib/block.x");
   _10313 = String_var(_10312);
-  _10314 = String_new("3d22e827");
+  _10314 = String_new("ba9f1b42");
   _10315 = String_var(_10314);
   _10316 = cons(_10315, NULL);
   _10317 = cons(_10313, _10316);
@@ -13963,7 +13963,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10938 = cons(_223, _10937);
   _10939 = String_new("lib/encoding.x");
   _10940 = String_var(_10939);
-  _10941 = String_new("badbc0c5");
+  _10941 = String_new("cab747a7");
   _10942 = String_var(_10941);
   _10943 = cons(_10194, _10422);
   _10944 = cons(_10394, _10943);
@@ -15760,7 +15760,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12726 = List_var(_12725);
   _12727 = String_new("lib/string/escape.x");
   _12728 = String_var(_12727);
-  _12729 = String_new("3d201d10");
+  _12729 = String_new("51dd08cc");
   _12730 = String_var(_12729);
   _12731 = cons(_12730, NULL);
   _12732 = cons(_12728, _12731);
@@ -20424,7 +20424,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_33(void
   _17363 = List_var(_17362);
   _17364 = String_new("src/protocol/call-helpers.x");
   _17365 = String_var(_17364);
-  _17366 = String_new("c0adf10b");
+  _17366 = String_new("6e838430");
   _17367 = String_var(_17366);
   _17368 = cons(_17367, NULL);
   _17369 = cons(_17365, _17368);
@@ -23564,7 +23564,7 @@ static int _dynamic_operand(Type type, int text){
 
 static String _dynamic_lane(Symbol op){
   Var member = List_getindex(_x2c_operator_row(op), 3);
-  return Var_truth(member) ? String_join(NULL, cons(String_var(_2115), cons(String_var(Symbol_str(Var_symbol(member))), cons(String_var(_2116), NULL)))) : NULL;
+  return Var_truth(member) ? String_join(NULL, cons(String_var(_2115), cons(String_var(Symbol_str(Var_symbol(member))), cons(String_var(_2116), NULL)))) :(String) NULL;
 }
 
 Code Code_lowered(Code, List);

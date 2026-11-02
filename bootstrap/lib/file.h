@@ -152,6 +152,7 @@ int File_equal(File x, File y);
 String File_repr(File file);
 String File_str(File file);
 String File_string(File file);
+struct stat;
 static inline int File_stat(File file, struct stat * buf){
   return fstat(File_fileno(file), buf);
 }

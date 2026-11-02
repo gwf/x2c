@@ -217,7 +217,7 @@ String Compiler_bootstrap_runtime_dir(void){
   if(! _init_guard_) _file_init_();
   String executable = x2c_get_executable();
   if(! String_truth(executable) || ! String_truth(root_path)) return NULL;
-  return String_equal(Path_basename(executable), _8) && String_equal(Path_dirname(executable), String_join(NULL, cons(String_var(root_path), cons(String_var(_9), NULL)))) ? String_join(NULL, cons(String_var(root_path), cons(String_var(_10), NULL))) : NULL;
+  return String_equal(Path_basename(executable), _8) && String_equal(Path_dirname(executable), String_join(NULL, cons(String_var(root_path), cons(String_var(_9), NULL)))) ? String_join(NULL, cons(String_var(root_path), cons(String_var(_10), NULL))) :(String) NULL;
 }
 
 String x2c_get_executable(void){
@@ -230,7 +230,7 @@ String Compiler_home_dir(void);
 String Compiler_home_packages(void){
   if(! _init_guard_) _file_init_();
   String home = Compiler_home_dir();
-  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_11), NULL))) : NULL;
+  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_11), NULL))) :(String) NULL;
 }
 
 String Compiler_command_path(String name);
@@ -307,7 +307,7 @@ String Compiler_command_path(String name){
   String libexec = Compiler_home_libexec();
   if(! String_truth(libexec)) return NULL;
   String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_14), cons(String_var(name), NULL))));
-  return Path_is_executable(path) ? path : NULL;
+  return Path_is_executable(path) ? path :(String) NULL;
 }
 
 String Compiler_stage_dir(void);
@@ -323,7 +323,7 @@ String Compiler_home_libexec(void){
     String driver = Compiler_driver_executable();
     if(String_truth(driver)) home = Path_dirname(Path_dirname(driver));
   }
-  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_16), NULL))) : NULL;
+  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_16), NULL))) :(String) NULL;
 }
 
 String Compiler_stage_dir(void){
@@ -331,7 +331,7 @@ String Compiler_stage_dir(void){
   String driver = Compiler_driver_executable();
   if(! String_truth(driver)) return NULL;
   String stage = Path_dirname(driver);
-  return String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(root_path), cons(String_var(_17), NULL)))) ? stage : NULL;
+  return String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(root_path), cons(String_var(_17), NULL)))) ? stage :(String) NULL;
 }
 
 String Compiler_identity(void);
@@ -361,12 +361,12 @@ String Compiler_driver_executable(void){
     path = String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(root_path), cons(String_var(_17), NULL)))) ? String_join(NULL, cons(String_var(stage), cons(String_var(_24), NULL))) : String_join(NULL, cons(String_var(prefix), cons(String_var(_25), NULL)));
   }
   path = Path_absolute(path);
-  return String_equal(Path_content_identity(path), active_identity) ? path : NULL;
+  return String_equal(Path_content_identity(path), active_identity) ? path :(String) NULL;
 }
 
 String Compiler_home_dir(void){
   if(! _init_guard_) _file_init_();
-  return root_found ? root_path : NULL;
+  return root_found ? root_path :(String) NULL;
 }
 
 List Compiler_default_include_dirs(void){
@@ -491,7 +491,7 @@ int Compiler_is_package_source(String directory, String path){
 String Compiler_module_stamp(void){
   if(! _init_guard_) _file_init_();
   String identity = Compiler_identity();
-  return String_truth(identity) ? String_join(NULL, cons(String_var(_43), cons(String_var(identity), NULL))) : NULL;
+  return String_truth(identity) ? String_join(NULL, cons(String_var(_43), cons(String_var(identity), NULL))) :(String) NULL;
 }
 
 String Compiler_identity(void){
@@ -506,7 +506,7 @@ String Path_content_identity(String path){
   int ok = path != NULL;
   uint64_t hash = FNV_OFFSET_BASIS;
   if(ok) hash = fnv_file(hash, path, &(ok));
-  return ok ? String_printf(_44, (unsigned long long) hash) : NULL;
+  return ok ? String_printf(_44, (unsigned long long) hash) :(String) NULL;
 }
 
 uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length);
@@ -637,7 +637,7 @@ String Compiler_cache_root(void){
   if(! _init_guard_) _file_init_();
   String explicit = Env_get(_50), xdg = Env_get(_51);
   String home = Env_get(_52);
-  return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_24), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_53), NULL))) : NULL;
+  return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_24), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_53), NULL))) :(String) NULL;
 }
 
 void Compiler_prune_cache(String directory){
@@ -739,7 +739,7 @@ static String _executable(const char * argv0){
   }
   String name = String_new(argv0);
   if(String_truth(name) && !(String_contains(name, _35))) name = Env_find_program(name);
-  return Path_exists(name) ? Path_absolute(name) : NULL;
+  return Path_exists(name) ? Path_absolute(name) :(Path) NULL;
 }
 
 static String _identity(void){

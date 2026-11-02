@@ -2177,7 +2177,7 @@ void Compiler_install_included_effects(Compiler c){
   }
   for(Token token = first;  token < c -> token;  token ++){
     int angle = 0;
-    String target = token -> type == 35579270086 ? Compiler_preproc_include_target(token -> text, &(angle)) : NULL;
+    String target = token -> type == 35579270086 ? Compiler_preproc_include_target(token -> text, &(angle)) :(String) NULL;
     if(! String_truth(target)) continue;
     String path = SourceView_resolve_include(c -> sources, c -> include_dirs, Path_dirname(c -> filename), target, angle);
     if(! String_truth(path)) continue;
@@ -3111,9 +3111,9 @@ static String f4_walk____resolve_include(SourceView sources, List extra_dirs, St
   (* covered) = 0;
   if(String_startswith(target, _34)){
     if(walk) f4_walk____include_search_dependency(&((* walk)), target);
-    return SourceView_exists(sources, target) ? target : NULL;
+    return SourceView_exists(sources, target) ? target :(String) NULL;
   }
-  Array dirs = f4_walk____include_dirs(extra_dirs, angle ? NULL : includer_dir, ! walk);
+  Array dirs = f4_walk____include_dirs(extra_dirs, angle ?(String) NULL : includer_dir, ! walk);
   const Array _x2c_gensym_macro_acquired_3 = dirs;
   {
     _x2c_gensym_defer_env_30 _x2c_gensym_macro_environment_30 ={
@@ -5865,7 +5865,7 @@ static String f8_packages____package_key_spelling(List key){
       break;}}{List _x2c_gensym_match_at_80; Var x2c_match_value_0; if(_x2c_gensym_match_expr_33 &&(x2c_match_value_0 = _x2c_gensym_match_expr_33 ->car, 1) && Var_is(_x2c_gensym_match_expr_33 -> car, 1318210446) && !(_x2c_gensym_match_at_80 = _x2c_gensym_match_expr_33 ->cdr)){{
         Var name;  name = x2c_match_value_0; {
           Var _x2c_gensym_match_value_17 = name; {
-            String name = Var_as_string(_x2c_gensym_match_value_17);  return String_equal(name, _214) || String_equal(name, _215) ? NULL : name;
+            String name = Var_as_string(_x2c_gensym_match_value_17);  return String_equal(name, _214) || String_equal(name, _215) ?(String) NULL : name;
           }
 
         }

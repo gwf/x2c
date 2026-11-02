@@ -1270,7 +1270,7 @@ HttpRequest HttpRequest_read(File input, int body_limit){
 
   }
   if(String_len(req -> body) != length) Http_fail(400, _22);
-  String connection = Map_contains(req -> headers, String_var(_23)) ? Var_str(Map_getindex(req -> headers, String_var(_23))) : NULL;
+  String connection = Map_contains(req -> headers, String_var(_23)) ? Var_str(Map_getindex(req -> headers, String_var(_23))) :(String) NULL;
   req -> keep_alive = _keep_alive(connection, String_equal(version, _3));
   return req;
 }
@@ -2233,7 +2233,7 @@ static void _connection(HttpServer s, Socket peer){
         }
         _write(res, peer -> output, keep, req && req -> method == 534600);
         Logger_info(s -> logger, 566560, ({
-          Var _x2c_gensym_literal_part_5 = List_var(cons(_106, cons(int_var(res -> code), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_107, cons(req ? String_var(req -> path) : Var_null(), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL));
+          Var _x2c_gensym_literal_part_5 = List_var(cons(_106, cons(int_var(res -> code), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_107, cons(String_var(req ? req -> path :(String) NULL), NULL)));  cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL));
         }
         ));
         if(! keep || __atomic_load_n(& s -> listener -> stopped, __ATOMIC_ACQUIRE)){

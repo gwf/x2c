@@ -1086,9 +1086,9 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor = cpp;
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL))) :(String) NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, frontend -> request -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
-  (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
+  (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) :(String) NULL;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status) Compiler_report_error(c, 306819428, _5, _first_directive(c), cons(_7, cons(String_var(String_join(NULL, cons(String_var(_8), cons(String_var(int_str(status)), NULL)))), NULL)));
@@ -1125,7 +1125,7 @@ static String _take_line_markers(Compiler cpp, String text){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       {
         int number = 0;
-        String file = String_startswith(line, _56) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
+        String file = String_startswith(line, _56) ? Compiler_preproc_marker_file(line, &(number)) :(String) NULL;
         if(! String_truth(file)){
           Array_push(kept, String_var(line));
           position += String_len(line) + 1;

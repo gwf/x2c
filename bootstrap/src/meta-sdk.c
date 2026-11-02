@@ -598,7 +598,7 @@ String Type_update_helper(Type type){
   if(! _init_guard_) _file_init_();
   _require_expansion(_17);
   Type scalar = Sym_resolve_numeric_type(active.expander -> sym, type);
-  return List_truth(Type_list(scalar)) ? Type_var_numeric_update_helper(scalar) : NULL;
+  return List_truth(Type_list(scalar)) ? Type_var_numeric_update_helper(scalar) :(String) NULL;
 }
 
 Type Type_dereference(Type);

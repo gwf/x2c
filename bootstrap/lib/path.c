@@ -142,7 +142,7 @@ String Path_extension(Path path){
   if(! _init_guard_) _file_init_();
   String base = Path_basename(path);
   int dot = _extension_dot(base);
-  return dot < 0 ? NULL : String_getslice(base, x2c_slice_bound(dot), (-2147483647 - 1), 1);
+  return dot < 0 ?(String) NULL : String_getslice(base, x2c_slice_bound(dot), (-2147483647 - 1), 1);
 }
 
 String Path_stem(Path path){
@@ -236,7 +236,7 @@ List Path_glob(Path pattern){
   if(! wildcard) return Path_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
   int cut = wildcard -(const char *) text;
   while(cut && String_getindex(text, cut - 1) != '/') cut --;
-  Path base = cut ? String_getslice(text, (-2147483647 - 1), x2c_slice_bound(cut), 1) : NULL, root = String_truth(base) ? base : _3;
+  Path base = cut ? String_getslice(text, (-2147483647 - 1), x2c_slice_bound(cut), 1) :(String) NULL, root = String_truth(base) ? base : _3;
   Array matches = Array_new();
   const Array _x2c_gensym_macro_acquired_0 = matches;
   {

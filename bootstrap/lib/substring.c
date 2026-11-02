@@ -71,7 +71,7 @@ String Substring_string(Substring view){
 }
 
 String Substring_str(Substring view){
-  return view.length ? x2c_string_from_bytes((const char *) view.source + view.offset, view.length) : NULL;
+  return view.length ? x2c_string_from_bytes((const char *) view.source + view.offset, view.length) :(String) NULL;
 }
 
 int Substring_try_next(String source, int * cursor, Substring * out){

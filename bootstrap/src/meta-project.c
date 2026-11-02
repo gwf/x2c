@@ -193,7 +193,7 @@ _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
-static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0);
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String rhs);
 
 typedef struct _x2c_gensym_defer_env_5{
   const void * _x2c_gensym_defer_capture_7;
@@ -617,7 +617,7 @@ static MetaHelper _use(Helper * h, List manifest){
   }
   String failure = Var_as_string(List_assoc(manifest, Symbol_var(12971715722)));
   if(String_len(failure)) Map_setindex(failures, int_var(- 1), String_var(failure));
-  return MetaHelper_new(String_len(failure) ? NULL : String_join(NULL, cons(String_var((* h).directory), cons(String_var(_5), NULL))), failures, units);
+  return MetaHelper_new(String_len(failure) ?(String) NULL : String_join(NULL, cons(String_var((* h).directory), cons(String_var(_5), NULL))), failures, units);
 }
 
 Compiler Compiler_new(void);
@@ -713,7 +713,7 @@ String Path_resolved_absolute(String);
 
 static int _package(Scan * s, Tokenizer tokens){
   String name = _quoted(Tokenizer_next(tokens)), root = NULL;
-  String entry = String_truth(name) ? SourceView_package_entry((* s).request -> sources, CliRequest_package_roots((* s).request), name, &(root)) : NULL;
+  String entry = String_truth(name) ? SourceView_package_entry((* s).request -> sources, CliRequest_package_roots((* s).request), name, &(root)) :(String) NULL;
   if(! String_truth(entry)) return 0;
   Map_setindex((* s).packages, String_var(root), int_var(1));
   int meta = _file(&((* s)), entry);
@@ -845,7 +845,7 @@ static int _marker(Token token){
 }
 
 static String _quoted(Token token){
-  return token -> len >= 2 && String_getindex(token -> text, 0) == '"' ? String_unescape(String_new_len(token -> text + 1, token -> len - 2)) : NULL;
+  return token -> len >= 2 && String_getindex(token -> text, 0) == '"' ? String_unescape(String_new_len(token -> text + 1, token -> len - 2)) :(String) NULL;
 }
 
 static int _compiler_owns(String path){
@@ -1275,7 +1275,7 @@ static String _support(Helper * h, String * failure){
       }
       (* failure) = _compile_support(&((* h)), text, directory, object);
       {
-        String _x2c_gensym_return_value_3 = String_truth((* failure)) ? NULL : object;
+        String _x2c_gensym_return_value_3 = String_truth((* failure)) ?(String) NULL : object;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
           return _x2c_gensym_return_value_3;
@@ -1628,8 +1628,8 @@ static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   close((*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_6));
 }
 
-static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0){
-  _x2c_gensym_macro_lhs_0[0] = String_add(_x2c_gensym_macro_lhs_0[0], _x2c_gensym_macro_rhs_0);
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String rhs){
+  _x2c_gensym_macro_lhs_0[0] = String_add(_x2c_gensym_macro_lhs_0[0], rhs);
   return _x2c_gensym_macro_lhs_0[0];
 }
 

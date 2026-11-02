@@ -3431,7 +3431,7 @@ int Compiler_links_extension(String name){
 
 String Compiler_extension_archive(void){
   if(! _init_guard_) _file_init_();
-  return f7_modules___extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_13), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_14), NULL)))) : NULL;
+  return f7_modules___extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_13), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_14), NULL)))) :(String) NULL;
 }
 
 static void f7_modules____load_compiler_module(void){

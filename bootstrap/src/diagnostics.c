@@ -845,7 +845,7 @@ static void _forget(Diagnostics diag, int from){
 
 static String _note_line(List l){
   List strings = List_filter(l, _x2c_gensym_func_handle_1);
-  return List_truth(strings) ? String_join(_4, strings) : NULL;
+  return List_truth(strings) ? String_join(_4, strings) :(String) NULL;
 }
 
 static void _write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){

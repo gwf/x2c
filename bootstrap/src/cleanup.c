@@ -3397,7 +3397,7 @@ static List f5_defer____callable_defer(Compiler c, List body, List finalizer){
   }
   List opaque = Sym_introduce(c -> sym, Compiler_fresh_name(c, _696));
   List callback = Sym_introduce(c -> sym, Compiler_fresh_name(c, _697));
-  String env_name = List_truth(env_local) ? Ast_binding_spelling(env_local) : NULL;
+  String env_name = List_truth(env_local) ? Ast_binding_spelling(env_local) :(String) NULL;
   List rewritten = String_truth(env_name) ? f5_defer____rewrite_captures(&(d), finalizer, env_name) : finalizer;
   Compiler_add_early(c, f5_defer____defer_callback(c, callback, opaque, env_binding, env_local, rewritten));
   if(String_truth(c -> fn_name)) Compiler_set_fact(c, List_var(cons(_698, cons(List_var(callback), NULL))), String_var(c -> fn_name));

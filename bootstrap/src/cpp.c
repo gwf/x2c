@@ -583,7 +583,7 @@ static void _define(Cpp cpp, Token name, List site){
     int variadic = 0;
     Token close = f6_macros____parameters(after, params, &(variadic));
     List list = Array_list_free(params);
-    String body = close ? f6_macros____body(close + 1) : NULL;
+    String body = close ? f6_macros____body(close + 1) :(String) NULL;
     if(! close) _set(cpp, name -> text, Symbol_var(228232));
     else _set(cpp, name -> text, List_var(cons(_4, cons(String_var(name -> text), cons(List_var(list), cons(int_var(variadic), cons(String_var(body), cons(List_var(site), NULL))))))));
   }

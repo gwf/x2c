@@ -664,7 +664,7 @@ String String_new(const char *);
 
 String Env_get(String name){
   const char * value = getenv(name);
-  return value ? String_new(value) : NULL;
+  return value ? String_new(value) :(String) NULL;
 }
 
 void * Scope_malloc_finalized(size_t, void(*)(void *));

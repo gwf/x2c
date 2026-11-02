@@ -152,6 +152,7 @@ static inline void File_setbuffer(File file, char * buf, int size){
   setbuffer(file, buf, size);
 }
 
+struct stat;
 static inline int File_stat(File file, struct stat * buf){
   return fstat(File_fileno(file), buf);
 }
@@ -225,7 +226,7 @@ String File_readline(File file){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
       Block_reserve(line, BUFSIZ);  FileReadStatus status = File_readline_into(file, line); {
-        String _x2c_gensym_return_value_0 = status == 265474 ? _text(line -> bytes, line -> length) : NULL; {
+        String _x2c_gensym_return_value_0 = status == 265474 ? _text(line -> bytes, line -> length) :(String) NULL; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
         }
 

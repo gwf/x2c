@@ -59,7 +59,7 @@ int Var_is_atom(Var value){
 char Atom_first(Atom atom){
   if(! _init_guard_) Atom_initialize();
   if(Var_is(atom, 1328354264)) return Symbol_first(Var_symbol(atom));
-  String spelling = Var_is(atom, 826970) ?(String) Var_pointer(atom) : NULL;
+  String spelling = Var_is(atom, 826970) ?(String) Var_pointer(atom) :(String) NULL;
   return String_truth(spelling) ? String_getindex(spelling, 0) : '\0';
 }
 

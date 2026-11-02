@@ -1219,7 +1219,7 @@ void Compiler_generate_code(Compiler c, List ast, String dir){
   }
   );
   List outputs = f6_output____generated_code(c, ast, basename);
-  String interface = c -> source_facts ? NULL : Compiler_interface_text(c);
+  String interface = c -> source_facts ?(String) NULL : Compiler_interface_text(c);
   if(String_truth(interface)) outputs = List_append(outputs, ({
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(basename), cons(String_var(_1), NULL))));  cons(_x2c_gensym_literal_part_2, cons(String_var(interface), NULL));
   }
@@ -1281,7 +1281,7 @@ Path Path_absolute(Path);
 String Compiler_header_guard(Compiler c){
   if(! _init_guard_) _file_init_();
   String home = Compiler_home_dir(), name = c -> filename;
-  String path = String_truth(home) ? Path_absolute(name) : NULL;
+  String path = String_truth(home) ? Path_absolute(name) :(Path) NULL;
   if(String_truth(path) && String_startswith(path, String_join(NULL, cons(String_var(home), cons(String_var(_0), NULL))))) name = String_getslice(path, x2c_slice_bound(String_len(home) + 1), (-2147483647 - 1), 1);
   return String_join(NULL, cons(String_var(_2), cons(String_var(Path_identifier_hash(name)), cons(String_var(_3), NULL))));
 }

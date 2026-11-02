@@ -75,6 +75,8 @@ static Array _slices(List inputs, int total, int count);
 
 static int _run_workers(Translation * t, Array slices);
 
+struct sigaction;
+
 static void _forward_stop_signal(int number, struct sigaction * previous);
 
 static void _forward_stop(int number);

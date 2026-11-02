@@ -148,7 +148,7 @@ static inline ListDbl ListDbl_cons(double _x2c_gensym_macro_value_12, ListDbl _x
 }
 
 static inline String ListString_car(ListString _x2c_gensym_macro_xs_25){
-  return List_truth(_x2c_gensym_macro_xs_25) ? _typed_list_decode_string(((List) _x2c_gensym_macro_xs_25) -> car) : NULL;
+  return List_truth(_x2c_gensym_macro_xs_25) ? _typed_list_decode_string(((List) _x2c_gensym_macro_xs_25) -> car) :(String) NULL;
 }
 
 static inline ListString ListString_cons(String _x2c_gensym_macro_value_15, ListString _x2c_gensym_macro_tail_5){
@@ -331,7 +331,7 @@ ListDbl Var_listdbl(Var _x2c_gensym_macro_value_14){
 }
 
 String ListString_last(ListString _x2c_gensym_macro_xs_26){
-  return List_truth(_x2c_gensym_macro_xs_26) ? _typed_list_decode_string(List_last((List) _x2c_gensym_macro_xs_26)) : NULL;
+  return List_truth(_x2c_gensym_macro_xs_26) ? _typed_list_decode_string(List_last((List) _x2c_gensym_macro_xs_26)) :(String) NULL;
 }
 
 int ListString_index(ListString _x2c_gensym_macro_xs_27, String _x2c_gensym_macro_value_16){

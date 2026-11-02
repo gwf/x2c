@@ -86,7 +86,7 @@ char * Compiler_code_pretty_string(Compiler c, Array code, String output_file){
       _directive(&(p), token);
       continue;
     }
-    String next = i + 1 < count ? Var_str(Array_getindex(code, i + 1)) : NULL;
+    String next = i + 1 < count ? Var_str(Array_getindex(code, i + 1)) :(String) NULL;
     _ordinary(&(p), token, next);
   }
   return Buffer_str_free(p.buff);

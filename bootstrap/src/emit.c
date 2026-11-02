@@ -2337,7 +2337,7 @@ return 0;
 }
 
 static String f11_expressions____match_site_entry(String name){
-  return String_truth(name) && List_contains(_323, String_var(name)) ? String_add(_324, String_getslice(name, 5, (-2147483647 - 1), 1)) : NULL;
+  return String_truth(name) && List_contains(_323, String_var(name)) ? String_add(_324, String_getslice(name, 5, (-2147483647 - 1), 1)) :(String) NULL;
 }
 
 int Type_integer_literal_magnitude(Type, String, unsigned long long *);

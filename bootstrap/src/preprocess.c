@@ -160,7 +160,7 @@ String Compiler_preproc_include_target(String text, int * angle){
   (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, (-2147483647 - 1), 1);
   int close = String_find(rest, (* angle) ? _6 : _7);
-  return close > 0 ? String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(close), 1) : NULL;
+  return close > 0 ? String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(close), 1) :(String) NULL;
 }
 
 String Compiler_preproc_marker_file(String text, int * line){

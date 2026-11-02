@@ -788,7 +788,7 @@ int Ast_never_returns(Ast ast){
 
 int Ast_try_binding(List binding, int * identity, String * spelling);
 String Ast_binding_spelling(List binding){
-  if(! _init_guard_) _file_init_();  String spelling = NULL;  return Ast_try_binding(binding, NULL, &(spelling)) ? spelling : NULL;
+  if(! _init_guard_) _file_init_();  String spelling = NULL;  return Ast_try_binding(binding, NULL, &(spelling)) ? spelling :(String) NULL;
 }
 
 int Ast_try_binding(List binding, int * identity, String * spelling){

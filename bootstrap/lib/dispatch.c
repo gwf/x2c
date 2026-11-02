@@ -167,7 +167,7 @@ String Var_as_string(Var v){
   if(! _init_guard_) _file_init_();
   String text = Var_string_payload(v);
   if(String_truth(text) || Var_is_row(v, 11, 7, 1)) return text;
-  return Var_is_void(v) || Var_is_null(v) ? NULL : Var_str(v);
+  return Var_is_void(v) || Var_is_null(v) ?(String) NULL : Var_str(v);
 }
 
 String Var_fallback_str(Var v);

@@ -39,7 +39,7 @@ static int _unpadded(Alphabet a, String text, String operation);
 
 static int _sextet(Alphabet a, int c);
 
-static String _text(Block bytes, String operation);
+static String _text(Block bytes, String operation, int bits);
 
 static String _hex(const unsigned char * bytes, size_t count);
 
@@ -301,7 +301,7 @@ String String_base64_decode(String text){
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       {
-        String _x2c_gensym_return_value_1 = _text(bytes, operation);
+        String _x2c_gensym_return_value_1 = _text(bytes, operation, 6);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
           return _x2c_gensym_return_value_1;
@@ -351,7 +351,7 @@ String String_base64url_decode(String text){
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       {
-        String _x2c_gensym_return_value_2 = _text(bytes, operation);
+        String _x2c_gensym_return_value_2 = _text(bytes, operation, 6);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           return _x2c_gensym_return_value_2;
@@ -401,7 +401,7 @@ String String_hex_decode(String text){
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       {
-        String _x2c_gensym_return_value_3 = _text(bytes, operation);
+        String _x2c_gensym_return_value_3 = _text(bytes, operation, 4);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_3;
@@ -637,19 +637,12 @@ static int _sextet(Alphabet a, int c){
 
 String String_new_len(const char *, int);
 
-static String _text(Block bytes, String operation){
+static String _text(Block bytes, String operation, int bits){
   const char * start =(const char *) bytes -> bytes;
   const char * nul = memchr(start, 0, Block_len(bytes));
   if(nul){
-    Var _x2c_gensym_literal_part_1 = String_var(operation);
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("NUL byte cannot appear in a String")), NULL)));
-    Var _x2c_gensym_literal_part_3 = Var_box_long(nul - start);
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/encoding.x",.function = "_text",.line = 347,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_6, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
-      __builtin_unreachable();
-    }
-
+    int offset =(unsigned long long)(nul - start) * 8 / bits;
+    _malformed(operation, _9, offset);
   }
   return String_new_len(start, Block_len(bytes));
 }

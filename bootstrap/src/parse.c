@@ -4048,7 +4048,7 @@ List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_ty
 static List _bind_api_source(Compiler c, Var line, Var doc, Var syntax){
   List bound = Compiler_bind_syntax(c, syntax, 1405544, List_type(c -> return_type));
   Token invocation = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL;
-  String invocation_doc = invocation ? Compiler_definition_doc(c, invocation) : NULL;
+  String invocation_doc = invocation ? Compiler_definition_doc(c, invocation) :(String) NULL;
   line = invocation ? int_var(invocation -> line) : line;
   doc = String_var(String_truth(invocation_doc) ? invocation_doc : f5_units____filled_doc(c, Var_as_string(doc)));
   if(c -> shallow) return cons(_36, cons(line, cons(doc, cons(List_var(bound), NULL))));
@@ -5905,7 +5905,7 @@ static List _storage_class(Compiler c){
 }
 
 static String _attribute(Compiler c){
-  return _attribute_starts(c) ? f5_types____invocation_text(c) : NULL;
+  return _attribute_starts(c) ? f5_types____invocation_text(c) :(String) NULL;
 }
 
 String Token_spelling(Token, Token);
@@ -6544,7 +6544,7 @@ String Compiler_package_alias_spelling(Compiler c){
   return String_is_identifier(member -> text) ?({
     Var _x2c_gensym_literal_part_54 = String_var(Var_str(package));  String_join(NULL, cons(_x2c_gensym_literal_part_54, cons(String_var(_236), cons(String_var(member -> text), NULL))));
   }
-  ) : NULL;
+  ) :(String) NULL;
 }
 
 List Compiler_parse_optional_identifier(Compiler c){
@@ -7711,8 +7711,8 @@ static List f9_functions____function_body(Compiler c, List declaration, String n
 
 static String f9_functions____prepare_lifecycle(Compiler c, List declaration, List binding, String * initializer_owner, String * shutdown_owner){
   String name = Ast_binding_spelling(binding);
-  (* initializer_owner) = String_truth(name) ? f9_functions____lifecycle_owner(c, binding, _642) : NULL;
-  (* shutdown_owner) = String_truth(name) ? f9_functions____lifecycle_owner(c, binding, _643) : NULL;
+  (* initializer_owner) = String_truth(name) ? f9_functions____lifecycle_owner(c, binding, _642) :(String) NULL;
+  (* shutdown_owner) = String_truth(name) ? f9_functions____lifecycle_owner(c, binding, _643) :(String) NULL;
   if(String_truth((* initializer_owner))){
     f9_functions____require_signature(c, declaration, name, _644);
     if(String_truth(c -> init_fn) && ! String_equal(c -> init_fn, name)) Compiler_report_error(c, 33658058, _645, c -> token, cons(String_var(_646), cons(String_var(name), NULL)));
@@ -7737,7 +7737,7 @@ static String f9_functions____lifecycle_owner(Compiler c, List binding, String m
     switch(0){
       default: if(x2c_match_try_capture(_x2c_gensym_match_expr_57, List_var(cons(_649, cons(String_var(member), NULL))), & _x2c_gensym_match_capture_1)){Var x2c_match_value_0 =(_x2c_gensym_match_values_1[0]);{{
         Var name;  name = x2c_match_value_0; {
-          String owner = Var_as_string(name);  Type owner_type = List_type(Sym_get(c -> sym, cons(String_var(owner), NULL)));  return Type_is_typedef(owner_type) ? owner : NULL;
+          String owner = Var_as_string(name);  Type owner_type = List_type(Sym_get(c -> sym, cons(String_var(owner), NULL)));  return Type_is_typedef(owner_type) ? owner :(String) NULL;
         }
 
       }

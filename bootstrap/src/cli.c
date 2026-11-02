@@ -1502,7 +1502,7 @@ static void f7_parsing____cli_fail_expected_command(String arg){
 }
 
 static void f7_parsing____unknown_option(String arg, Symbol command){
-  String spelling = command == 45220543335690 ? f7_parsing____two_dash(arg) : NULL;
+  String spelling = command == 45220543335690 ? f7_parsing____two_dash(arg) :(String) NULL;
   if(String_truth(spelling)) f7_parsing____cli_fail_one_dash_removed(arg, spelling);
   Diagnostics_driver_error(String_join(NULL, cons(String_var(_117), cons(String_var(arg), cons(String_var(_87), NULL)))));
 }
@@ -1510,7 +1510,7 @@ static void f7_parsing____unknown_option(String arg, Symbol command){
 static String f7_parsing____two_dash(String arg){
   if(String_len(arg) <= 2 || String_getindex(arg, 0) != '-' || String_getindex(arg, 1) == '-') return NULL;
   String spelling = String_join(NULL, cons(String_var(_118), cons(String_var(arg), NULL))), attached;
-  return f7_parsing____find_option(spelling, 45220543335690, &(attached)) ? spelling : NULL;
+  return f7_parsing____find_option(spelling, 45220543335690, &(attached)) ? spelling :(String) NULL;
 }
 
 static CliOption * f7_parsing____find_option(String spelling, Symbol command, String * attached){

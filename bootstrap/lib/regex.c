@@ -707,7 +707,7 @@ String RegexCapture_text(RegexCapture capture);
 
 String RegexMatch_getindex(RegexMatch found, Var key){
   RegexCapture capture = RegexMatch_capture(found, key);
-  return List_truth(capture) && RegexCapture_matched(capture) ? RegexCapture_text(capture) : NULL;
+  return List_truth(capture) && RegexCapture_matched(capture) ? RegexCapture_text(capture) :(String) NULL;
 }
 
 int Var_is_integer(Var);
@@ -728,7 +728,7 @@ String RegexCapture_name(RegexCapture capture);
 
 RegexCapture RegexMatch_capture(RegexMatch found, Var key){
   int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 258,.runtime = 1}; & _x2c_gensym_error_site_10; })));
-  String name = numbered ? NULL : Var_str(key);
+  String name = numbered ?(String) NULL : Var_str(key);
   {
     RegexCapture capture;
     Iter _x2c_gensym_macro_iterator_0 = List_iter(found, &(struct Iter){
@@ -1419,7 +1419,7 @@ static RegexMatch _found(Matcher * m, String subject, int at){
 
 static RegexCapture _capture(Matcher * m, String subject, int i, String name){
   int start =(* m).starts[i], end =(* m).ends[i], matched = start >= 0;
-  String text = matched ? String_getslice(subject, x2c_slice_bound(start), x2c_slice_bound(end), 1) : NULL;
+  String text = matched ? String_getslice(subject, x2c_slice_bound(start), x2c_slice_bound(end), 1) :(String) NULL;
   return cons(int_var(i), cons(String_var(name), cons(int_var(matched), cons(String_var(text), cons(int_var(start), cons(int_var(end), NULL))))));
 }
 

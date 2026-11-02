@@ -354,7 +354,7 @@ int ToolRun_wait(ToolRun execution){
   if(action -> dry_run) return 0;
   Job job = execution -> job;
   int status = job ? Job_status(job) : 127;
-  String output = job ? job -> output_text : NULL;
+  String output = job ? job -> output_text :(String) NULL;
   String errors = job ? job -> errors_text : execution -> start_error;
   report_suspend();
   if(String_truth(output)) fputs(output, stderr);

@@ -1696,7 +1696,7 @@ static String f9_selection____unbound_callee(Compiler c, Var node){
           if(! Var_is_row(name, 11, 7, 1)) break;
           String spelling = Var_as_string(name);
           String unbound = String_join(NULL, cons(String_var(_39), cons(String_var(spelling), cons(String_var(_40), NULL))));
-          return Map_contains(c -> meta_group_bound, String_var(unbound)) ||(Map_contains(c -> native_meta, String_var(spelling)) && ! Compiler_meta_binding(c, spelling, &(bound)) && ! Compiler_bind_native_meta(c, spelling)) ? spelling : NULL;
+          return Map_contains(c -> meta_group_bound, String_var(unbound)) ||(Map_contains(c -> native_meta, String_var(spelling)) && ! Compiler_meta_binding(c, spelling, &(bound)) && ! Compiler_bind_native_meta(c, spelling)) ? spelling :(String) NULL;
         }
 
       }
@@ -2479,7 +2479,7 @@ MetaBindings Compiler_bindings(Compiler);
 
 static String f7_staging____stage(Compiler c, String * failure){
   (* failure) = Compiler_groups_meta(c) ? _unbound(c) : _530;
-  String module = String_truth((* failure)) ? NULL : f7_staging____module(c, &((* failure)));
+  String module = String_truth((* failure)) ?(String) NULL : f7_staging____module(c, &((* failure)));
   if(! String_truth(module)) return NULL;
   module = Compiler_load_native_module(module);
   Map targets = Compiler_native_module_targets(module);
@@ -2569,7 +2569,7 @@ static String f7_staging____module(Compiler c, String * failure){
   String module = String_join(NULL, cons(String_var(directory), cons(String_var(_537), NULL)));
   if(Path_is_file(module)) return module;
   (* failure) = f7_staging____build_module(directory, module, code);
-  return String_truth((* failure)) ? NULL : module;
+  return String_truth((* failure)) ?(String) NULL : module;
 }
 
 void Path_make_dirs(Path);

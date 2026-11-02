@@ -1415,7 +1415,7 @@ static void f18_parsing_collection____shallow_parse_loop(Compiler c){
     Token start = c -> token;
     if(String_truth(c -> package) && Array_truth(c -> line_markers) && c -> source_private < 0){
       int line = start -> line;
-      String package = Compiler_owns_package_source(c, Compiler_token_source(c, start, &(line))) ? c -> package : NULL;
+      String package = Compiler_owns_package_source(c, Compiler_token_source(c, start, &(line))) ? c -> package :(String) NULL;
       {
         String * _x2c_gensym_macro_address_1 = & c -> package;
         String _x2c_gensym_macro_previous_1 = * _x2c_gensym_macro_address_1;

@@ -3260,7 +3260,7 @@ long Var_integer(Var);
 String Var_string(Var);
 
 static char * f10_primitives____string_charset(Var chars){
-  return Var_is_nil(chars) ||(Var_is_integer(chars) && ! Var_integer(chars)) ? NULL : Var_string(chars);
+  return Var_is_nil(chars) ||(Var_is_integer(chars) && ! Var_integer(chars)) ?(String) NULL : Var_string(chars);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
