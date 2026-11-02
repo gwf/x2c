@@ -83,6 +83,8 @@ Source: `lib/process.x`
 
 Sends `signal` to every stage of `job` that is still running.
 
+**Raises:** `<bad-arg>` for NULL.
+
 Source: `lib/process.x`
 
 <a id="Job.lines"></a>
@@ -105,7 +107,7 @@ Source: `lib/process.x`
 Makes `job` pass standard output through instead of capturing it, the
 same as `options({stdout: <inherit>})`, and returns it.
 
-**Raises:** `<bad-arg>` for a job that has started.
+**Raises:** `<bad-arg>` for NULL or a job that has started.
 
 Source: `lib/process.x`
 
@@ -130,7 +132,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 ~}
 ```
 
-**Raises:** `<bad-arg>` for an unknown key or a job that has started.
+**Raises:** `<bad-arg>` for NULL, an unknown key, or a job that has started.
 
 Source: `lib/process.x`
 
@@ -156,7 +158,7 @@ Adds `command` after the last stage of `job`, reading that stage's
 output, and returns the job. A pipeline `command` adds each of its
 stages.
 
-**Raises:** `<bad-arg>` for a job that has started.
+**Raises:** `<bad-arg>` for NULL or a job that has started.
 
 Source: `lib/process.x`
 
@@ -167,6 +169,8 @@ Source: `lib/process.x`
 
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/process.x`
 
@@ -192,7 +196,7 @@ returned unchanged.
 
 **Raises:** `<not-found>` when a program or the `dir` option does not exist,
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
-`<bad-arg>` for an empty command.
+`<bad-arg>` for NULL or an empty command.
 
 Source: `lib/process.x`
 
@@ -217,7 +221,7 @@ Source: `lib/process.x`
 Removes and returns the first job in `jobs` that has finished, waiting
 until one does. An empty `jobs` returns NULL.
 
-**Raises:** `<bad-arg>` when a job in `jobs` has not started.
+**Raises:** `<bad-arg>` when a job in `jobs` is NULL or has not started.
 
 Source: `lib/process.x`
 

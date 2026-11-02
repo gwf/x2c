@@ -137,8 +137,9 @@ Source: `lib/thread.x`
 `void Thread.free(Thread t)`
 
 Frees a `Thread` handle after its consuming join has completed.
+NULL does nothing.
 
-**Raises:** `<bad-state>` for NULL, running, or joining handles.
+**Raises:** `<bad-state>` for running or joining handles.
 
 Source: `lib/thread.x`
 
