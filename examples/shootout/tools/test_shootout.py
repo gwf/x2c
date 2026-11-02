@@ -4,7 +4,6 @@ import argparse
 import base64
 import copy
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
 import tempfile
@@ -158,65 +157,51 @@ let literal = "/* keep this */";
 
 
 class CompactBaselineTests(unittest.TestCase):
-  @classmethod
-  def setUpClass(cls):
-    path = shootout.REPO / "examples/shootout-unofficial/tools/shootout.py"
-    spec = importlib.util.spec_from_file_location("unofficial_shootout", path)
-    legacy = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(legacy)
-    cls.harnesses = (shootout, legacy)
-
-  def test_tracked_baselines_load_without_historical_results(self):
-    for harness in self.harnesses:
-      with self.subTest(suite=harness.ROOT.name):
-        saved = json.loads(harness.BASELINE_PATH.read_text())
-        baseline = harness.load_baseline(harness.load_manifest(), saved["methodology"])
-        self.assertEqual(baseline, saved)
-        for entry in baseline["benchmarks"].values():
-          self.assertEqual("stdout" in entry, entry["comparison"]["kind"] != "exact")
-          self.assertFalse(any(isinstance(value, dict) and "measurements" in value
-                               for value in entry.values()))
+  def test_tracked_baseline_loads_without_historical_results(self):
+    saved = json.loads(shootout.BASELINE_PATH.read_text())
+    baseline = shootout.load_baseline(shootout.load_manifest(), saved["methodology"])
+    self.assertEqual(baseline, saved)
+    for entry in baseline["benchmarks"].values():
+      self.assertEqual("stdout" in entry, entry["comparison"]["kind"] != "exact")
+      self.assertFalse(any(isinstance(value, dict) and "measurements" in value
+                           for value in entry.values()))
 
   def test_exact_hash_and_numeric_tolerance(self):
-    for harness in self.harnesses:
-      with self.subTest(suite=harness.ROOT.name):
-        exact = {"comparison": {"kind": "exact"},
-                 "stdout_sha256": hashlib.sha256(b"exact\n").hexdigest()}
-        harness.compare_pinned_output("test", "x2c", exact, b"exact\n")
-        with self.assertRaises(harness.HarnessError):
-          harness.compare_pinned_output("test", "x2c", exact, b"wrong\n")
-        numeric = {"args": [], "comparison": {"kind": "numeric_lines",
-                   "absolute_tolerance": 1e-8},
-                   "stdout": base64.b64encode(b"1.000000000\n").decode()}
-        harness.compare_pinned_output("test", "x2c", numeric, b"1.000000001\n")
-        for output in (b"1.000000020\n", b"1.0\n"):
-          with self.assertRaises(harness.HarnessError):
-            harness.compare_pinned_output("test", "x2c", numeric, output)
+    exact = {"comparison": {"kind": "exact"},
+             "stdout_sha256": hashlib.sha256(b"exact\n").hexdigest()}
+    shootout.compare_pinned_output("test", "x2c", exact, b"exact\n")
+    with self.assertRaises(shootout.HarnessError):
+      shootout.compare_pinned_output("test", "x2c", exact, b"wrong\n")
+    numeric = {"args": [], "comparison": {"kind": "numeric_lines",
+               "absolute_tolerance": 1e-8},
+               "stdout": base64.b64encode(b"1.000000000\n").decode()}
+    shootout.compare_pinned_output("test", "x2c", numeric, b"1.000000001\n")
+    for output in (b"1.000000020\n", b"1.0\n"):
+      with self.assertRaises(shootout.HarnessError):
+        shootout.compare_pinned_output("test", "x2c", numeric, output)
 
   def test_calibration_writes_statistics_without_raw_reference_samples(self):
-    for harness in self.harnesses:
-      with self.subTest(suite=harness.ROOT.name):
-        manifest = harness.load_manifest()
-        saved = json.loads(harness.BASELINE_PATH.read_text())
-        build = {"toolchain": saved["methodology"], "benchmarks": {}}
-        calibration = {"run_id": "synthetic", "machine": saved["calibration"]["machine"],
-                       "benchmarks": {}}
-        for benchmark in manifest["benchmarks"]:
-          name = benchmark["name"]
-          entry = copy.deepcopy(saved["benchmarks"][name])
-          implementations = {key: value for key, value in entry.items()
-                             if isinstance(value, dict) and "statistics" in value}
-          build["benchmarks"][name] = {key: {"source_metrics": value["source"]}
-                                      for key, value in implementations.items()}
-          for value in implementations.values():
-            del value["source"]
-            value["measurements"] = [{"elapsed_ns": 1}]
-          entry["implementations"] = implementations
-          entry.setdefault("stdout", base64.b64encode(b"exact\n").decode())
-          calibration["benchmarks"][name] = entry
-        result = harness.make_baseline(manifest, manifest["benchmarks"], build,
-                  calibration, argparse.Namespace(profile="local", samples=1, warmups=0))
-        self.assertEqual(result["benchmarks"], saved["benchmarks"])
+    manifest = shootout.load_manifest()
+    saved = json.loads(shootout.BASELINE_PATH.read_text())
+    build = {"toolchain": saved["methodology"], "benchmarks": {}}
+    calibration = {"run_id": "synthetic", "machine": saved["calibration"]["machine"],
+                   "benchmarks": {}}
+    for benchmark in manifest["benchmarks"]:
+      name = benchmark["name"]
+      entry = copy.deepcopy(saved["benchmarks"][name])
+      implementations = {key: value for key, value in entry.items()
+                         if isinstance(value, dict) and "statistics" in value}
+      build["benchmarks"][name] = {key: {"source_metrics": value["source"]}
+                                  for key, value in implementations.items()}
+      for value in implementations.values():
+        del value["source"]
+        value["measurements"] = [{"elapsed_ns": 1}]
+      entry["implementations"] = implementations
+      entry.setdefault("stdout", base64.b64encode(b"exact\n").decode())
+      calibration["benchmarks"][name] = entry
+    result = shootout.make_baseline(manifest, manifest["benchmarks"], build,
+              calibration, argparse.Namespace(profile="local", samples=1, warmups=0))
+    self.assertEqual(result["benchmarks"], saved["benchmarks"])
 
 
 if __name__ == "__main__":

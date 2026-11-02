@@ -15,9 +15,9 @@ fail() { echo "package install: $*" >&2; exit 1; }
 
 mkdir -p "$BUILD/src"
 # Ignored local benchmark history must not enter a native installation.
-for suite in shootout shootout-unofficial; do
-  mkdir -p "$ROOT/examples/$suite/results"
-  history=$(mktemp -d "$ROOT/examples/$suite/results/install-probe.XXXXXX")
+for results in shootout/results apps/notes/bench/results; do
+  mkdir -p "$ROOT/examples/$results"
+  history=$(mktemp -d "$ROOT/examples/$results/install-probe.XXXXXX")
   HISTORY+=("$history")
   printf 'local benchmark output\n' >"$history/report.txt"
 done
@@ -29,11 +29,12 @@ done
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 [[ -z "$("$x2c" env prelude_missing)" ]] || fail "installed prelude is incomplete"
-for suite in shootout shootout-unofficial; do
-  [[ ! -e "$BUILD/home/examples/$suite/results" ]] || fail "installed history"
-  [[ ! -e "$BUILD/home/examples/$suite/baseline.json" ]] || fail "installed calibration"
-  [[ -f "$BUILD/home/examples/$suite/benchmarks/nbody/main.x" ]] || fail "missing example"
+for results in shootout/results apps/notes/bench/results; do
+  [[ ! -e "$BUILD/home/examples/$results" ]] || fail "installed history"
 done
+[[ ! -e "$BUILD/home/examples/shootout/baseline.json" ]] || fail "installed calibration"
+[[ -f "$BUILD/home/examples/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
+[[ -f "$BUILD/home/examples/apps/notes/bench/run.py" ]] || fail "missing benchmark"
 "$x2c" run -q "$BUILD/home/examples/love/basic-literals.x" >"$BUILD/example.out"
 cmp "$BUILD/example.out" "$ROOT/examples/expected/static-test.stdout" || fail "installed example"
 
