@@ -37,6 +37,11 @@ unittest/compiler-fixtures/region-escapes.x:83:5: region: 'a' can outlive the re
       ^^^^^
   note: region opened at line 81
 
+unittest/compiler-fixtures/region-escapes.x:92:5: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+      n = _fresh_node();
+      ^
+  note: region opened at line 91
+
 unittest/compiler-fixtures/region-escapes.x:96:3: region: 'n' is used after the region that allocated it ended
     return n;
     ^^^^^^

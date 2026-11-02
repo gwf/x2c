@@ -322,8 +322,8 @@ static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
     }
     else kept = (owners & 2) || (region && region.kind == <pool>);
   }
-  if (kept && store && source &&
-      (region || other || _cleanup(source.acquired)))
+  if (kept && store &&
+      (region || other || (source && _cleanup(source.acquired))))
     kept = !_flow(w, value, type, <local>, fact);
   if (kept && source && !copies && !source.empty)
     acquired = _acquired(source);
@@ -339,10 +339,12 @@ static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
      not been seen, so the region its previous value formed is not the one
      the next allocation belongs to. */
   fact.owner = NULL;
+  fact.allocation = kept ? (source ? source.allocation : region) : NULL;
   fact.region = kept ? region : NULL;
   fact.other = kept ? other : NULL;
   fact.born = kept ? owners : 0;
   fact.param = kept && source ? source.param : -1;
+  fact.element = kept && source ? source.element : 0;
 }
 
 /* A static or extern local is not the function's storage, so the walk
@@ -419,13 +421,17 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
   int count = arguments.len();
   List types = _parameter_types(call);
   foreach (List row in _summary(w, callee).cadr()) {
-    (int index, Var target) = row;
+    (Var source, Var target) = row;
+    int elements = 0, index = _argument_index(source, elements);
     if (index >= count) continue;
     Type type = NULL, holder_type = NULL;
     Var argument = _passed(types, arguments, index, type);
-    if (target == <static>) _flow(w, argument, type, <static>, NULL);
-    else if (target == <unknown>) _flow(w, argument, type, <raw>, NULL);
-    else if (target == <retained>) _flow(w, argument, type, <heap>, NULL);
+    if (target == <static>)
+      _flow_selected(w, argument, type, <static>, NULL, elements);
+    else if (target == <unknown>)
+      _flow_selected(w, argument, type, <raw>, NULL, elements);
+    else if (target == <retained>)
+      _flow_selected(w, argument, type, <heap>, NULL, elements);
     else if (target == <result>) {
       int born = 0;
       Region other = NULL;
@@ -434,7 +440,7 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
       struct Fact result = {
         .param = -1, .born = born, .region = region, .other = other,
         .acquired = acquired};
-      _flow(w, argument, type, <heap>, &result);
+      _flow_selected(w, argument, type, <heap>, &result, elements);
     }
     else if (target ~= %((!or param raw) ?other)) {
       if (other.int() >= count) continue;
@@ -444,7 +450,7 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
       if (!base) base = _fact_of(w, holder, NULL);
       Symbol sink = _sink_of(base, through, object);
       if (sink == <heap> && target.car() == <raw>) sink = <raw>;
-      _flow(w, argument, type, sink, object);
+      _flow_selected(w, argument, type, sink, object, elements);
     }
   }
 }

@@ -123,20 +123,55 @@ module Fact _received(Walk &w, Var value, Type type, List &?named) {
 static Fact _returned_argument(Walk &w, Var value, List &?named) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
-  if (!callee) return NULL;
   List types = _parameter_types(value);
+  match (_unwrap(value)) {
+    case %(getindex ?base ?index): {
+      Type receiver = _expression_type(base);
+      List resolved = w.c.resolve_protocol_member(receiver, "getindex");
+      if (resolved) {
+        callee = Ast.binding_spelling(resolved.car());
+        arguments = $(base, index);
+        Type signature = resolved.cadr();
+        types = signature.car().list().cadr();
+      }
+    }
+  }
+  if (!callee) return NULL;
   foreach (List row in _summary(w, callee).cadr()) {
-    (int index, Var target) = row;
+    (Var source, Var target) = row;
+    int elements = 0, index = _argument_index(source, elements);
     if (target != <return> || index >= arguments.len()) continue;
     Type type = NULL;
     Var argument = _passed(types, arguments, index, type);
     Fact fact = _boxes(w, type, argument) ? _box(w)
                                           : _fact_of(w, argument, named);
+    if (fact && elements) return _element_fact(w, fact);
     if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
                  _cleanup(fact.acquired)))
       return fact;
   }
   return NULL;
+}
+
+/* Element reads retain the allocation owner, not a deferred release of
+   the container handle. Summaries keep this distinction for parameters. */
+module Fact _element_fact(Walk &w, Fact fact) {
+  if (fact.element) return fact;
+  Fact element = _new_fact(w, NULL, fact.param);
+  *element = *fact;
+  element.element = 1;
+  element.region = fact.allocation;
+  element.acquired = NULL;
+  return element;
+}
+
+/* An element source is one parameter index, never a nested access path. */
+module int _argument_index(Var source, int &elements) {
+  if (source ~= %(element ?index)) {
+    elements = 1;
+    return index;
+  }
+  return source;
 }
 
 /* The box or converted value a destination makes is fresh storage of the
@@ -145,6 +180,7 @@ static Fact _box(Walk &w) {
   Fact box = _new_fact(w, NULL, -1);
   box.born = 1;
   box.region = _active(w);
+  box.allocation = box.region;
   return box;
 }
 
@@ -317,6 +353,7 @@ module int _empty(Var value) {
 
 /* `fact` now belongs to `region`, or to an owner outside this function. */
 module void _move(Fact fact, Region region) {
+  fact.allocation = region;
   fact.region = region;
   fact.other = NULL;
   fact.born = 0;

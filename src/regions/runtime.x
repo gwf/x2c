@@ -14,7 +14,8 @@
    storage; (open KIND) and (close KIND) bracket a region; (move) and
    (exit) hand their argument to another owner, though Scope_move hands
    over only a container's record; (summary OWNER SINKS) is a literal
-   summary. */
+   summary. (element) reads a stored value without inheriting the
+   container handle's deferred free. */
 static Map runtime = _typed_families(
   %{
     "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
@@ -24,6 +25,8 @@ static Map runtime = _typed_families(
     "Scope_realloc": (alloc moved),    "String_malloc": (alloc pool),
     "String_new": (alloc pool),        "String_new_len": (alloc pool),
     "String_new_fill": (alloc pool),
+    "String_printf": (alloc pool),     "String_vprintf": (alloc pool),
+    "MapSubInt_strings": (alloc),
     "Block_new": (alloc),              "Bytes_new": (alloc),
     "Array_new": (alloc),              "Map_new": (alloc),
     "Buffer_new": (alloc),             "Map_new_capacity": (alloc),
@@ -64,6 +67,14 @@ static Map runtime = _typed_families(
     "Func_var": (wrap),
     "List_car": (summary 0 ((0 return))),
     "List_cdr": (summary 0 ((0 return))),
+    "Array_getindex": (element),
+    "Array_shift": (element),
+    "Array_take_last": (element),
+    "Array_remove": (element),
+    "Map_getindex": (element),
+    "Map_get": (element),
+    "Map_del": (element),
+    "Array_block": (wrap),              "Block_array": (wrap),
     "String_lower": (summary 2 ((0 return))),
     "String_upper": (summary 2 ((0 return))),
     "String_capitalize": (summary 2 ((0 return))),
@@ -110,6 +121,16 @@ static Map runtime = _typed_families(
     "String_words": (summary 1 ((0 result))),
     "String_splits": (summary 1 ((0 result) (1 result))),
     "Var_fallback_iter": (summary 0 ((1 return))),
+    "String_write_str": (summary 0 ((1 return))),
+    "String_write_repr": (summary 0 ((1 return))),
+    "List_write_str": (summary 0 ((1 return))),
+    "List_write_repr": (summary 0 ((1 return))),
+    "Var_write_str": (summary 0 ((1 return))),
+    "Var_write_repr": (summary 0 ((1 return))),
+    "Symbol_write_str": (summary 0 ((1 return))),
+    "Symbol_write_repr": (summary 0 ((1 return))),
+    "Atom_write_str": (summary 0 ((1 return))),
+    "Atom_write_repr": (summary 0 ((1 return))),
     "Array_write_str": (summary 0 ((1 return))),
     "Array_write_repr": (summary 0 ((1 return))),
     "Map_write_str": (summary 0 ((1 return))),
@@ -119,6 +140,7 @@ static Map runtime = _typed_families(
     "Buffer_write_len": (summary 0 ((0 return))),
     "Buffer_write": (summary 0 ((0 return))),
     "Buffer_write_char": (summary 0 ((0 return))),
+    "Buffer_write_code_point": (summary 0 ((0 return))),
     "Buffer_write_repeat": (summary 0 ((0 return))),
     "Buffer_unwrite": (summary 0 ((0 return))),
     "Buffer_pad": (summary 0 ((0 return))),
@@ -226,7 +248,8 @@ static Map _typed_families(Map rows) {
   foreach (List family in %(
       ("Array" "ArrayChar" "ArrayShort" "ArrayInt" "ArrayLong" "ArrayFloat"
        "ArrayDbl" "ArrayString")
-      ("Map" "MapIntInt" "MapLongDouble" "MapStringString" "MapStringInt")))
+      ("Map" "MapIntInt" "MapLongDouble" "MapStringString" "MapStringInt"
+       "MapSubInt")))
     foreach (String typed in family.cdr())
       _typed_family(rows, names, family.car(), typed);
   return rows;

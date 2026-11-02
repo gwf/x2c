@@ -149,12 +149,14 @@ static void _analyze(Walk &w, List function) {
    `(param INDEX)`, or `(raw INDEX)`. <result> retains an argument in fresh
    result storage; <return> aliases an argument as the result. <unknown>
    and `(raw INDEX)` record raw C stores; <retained> and `(param INDEX)`
-   preserve known retention even through helpers. */
+   preserve known retention even through helpers. An `(element INDEX)`
+   source selects stored values rather than the parameter handle. */
 module List _summary(Walk &w, String callee) {
   match (_effect(w, callee)) {
     case %(alloc pool): return %(2 ());
     case %(alloc *): return %(1 ());
     case %(pool): return %(2 ((0 result) (1 result)));
+    case %(element): return %(0 (((element 0) return)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
     case %(summary ?owner ?sinks): return $(owner, sinks);
   }

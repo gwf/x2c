@@ -51,14 +51,19 @@ static typedef struct Flow {
    destination copies. A parameter adds the sink to this function's summary;
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
-module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
+module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) =>
+  _flow_selected(w, value, type, sink, target, 0);
+
+module int _flow_selected(
+  Walk &w, Var value, Type type, Symbol sink, Fact target, int elements) {
   if (_number(w, type, value)) return 0;
   match (_unwrap(value))
     case %(op (!quote ?) ? ?yes ?no):
-      return _flow(w, yes, type, sink, target) ||
-             _flow(w, no, type, sink, target);
+      return _flow_selected(w, yes, type, sink, target, elements) ||
+             _flow_selected(w, no, type, sink, target, elements);
   List named = NULL;
   Fact fact = _received(w, value, type, named);
+  if (fact && elements) fact = _element_fact(w, fact);
   int born = 0, Region other = NULL;
   Acquired acquired = fact ? fact.acquired : NULL;
   Region region = fact ? fact.region
@@ -89,7 +94,7 @@ static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
     else row = target.region || target.other ? void : <return>;
   }
   if (sink != <local> && row is not void)
-    w.sinks[$(fact.param, row)] = 1;
+    w.sinks[$(fact.element ? %(element $(fact.param)) : fact.param, row)] = 1;
 }
 
 static int _owners(

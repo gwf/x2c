@@ -1,0 +1,70 @@
+unittest/compiler-fixtures/region-element-readers.x:8:5: region: an address inside 'holder' can outlive the region it was allocated in when returned
+      return holder[0];
+      ^^^^^^
+  note: region opened at line 5
+
+unittest/compiler-fixtures/region-element-readers.x:16:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.getindex(0);
+      ^^^^^^
+  note: region opened at line 13
+
+unittest/compiler-fixtures/region-element-readers.x:24:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.shift();
+      ^^^^^^
+  note: region opened at line 21
+
+unittest/compiler-fixtures/region-element-readers.x:32:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.take_last();
+      ^^^^^^
+  note: region opened at line 29
+
+unittest/compiler-fixtures/region-element-readers.x:40:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.remove(0);
+      ^^^^^^
+  note: region opened at line 37
+
+unittest/compiler-fixtures/region-element-readers.x:49:5: region: an address inside 'holder' can outlive the region it was allocated in when returned
+      return holder["key"];
+      ^^^^^^
+  note: region opened at line 45
+
+unittest/compiler-fixtures/region-element-readers.x:58:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.get("key");
+      ^^^^^^
+  note: region opened at line 54
+
+unittest/compiler-fixtures/region-element-readers.x:67:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return holder.del("key");
+      ^^^^^^
+  note: region opened at line 63
+
+unittest/compiler-fixtures/region-element-readers.x:72:10: region: a fresh allocation can outlive the region it was allocated in when returned
+    auto { return MapSubInt.new(); }
+           ^^^^^^
+  note: region opened at line 72
+
+unittest/compiler-fixtures/region-element-readers.x:76:43: region: a fresh allocation can outlive the region it was allocated in when returned
+    auto { MapSubInt map = MapSubInt.new(); return map.strings(); }
+                                            ^^^^^^
+  note: region opened at line 76
+
+unittest/compiler-fixtures/region-element-readers.x:102:5: region: 'inner' can outlive the region it was allocated in when stored into an object of another region
+      holder.push(inner);
+      ^^^^^^
+  note: region opened at line 99
+
+unittest/compiler-fixtures/region-element-readers.x:103:5: region: an address inside 'holder' can outlive the region it was allocated in when returned
+      return holder[0];
+      ^^^^^^
+  note: region opened at line 99
+
+unittest/compiler-fixtures/region-element-readers.x:110:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+      outer.push(String.printf("%d", 7));
+      ^^^^^
+  note: region opened at line 109
+
+unittest/compiler-fixtures/region-element-readers.x:129:5: region: an address from 'holder' can outlive the region it was allocated in when returned
+      return read_element(holder);
+      ^^^^^^
+  note: region opened at line 126
+

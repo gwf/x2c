@@ -1,0 +1,25 @@
+unittest/compiler-fixtures/region-outer-fresh.x:8:10: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+    auto { literal = [1, 2]; }
+           ^^^^^^^
+  note: region opened at line 8
+
+unittest/compiler-fixtures/region-outer-fresh.x:9:10: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+    auto { constructed = Array.new(); }
+           ^^^^^^^^^^^
+  note: region opened at line 9
+
+unittest/compiler-fixtures/region-outer-fresh.x:10:10: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+    auto { map = {"key": 1}; }
+           ^^^
+  note: region opened at line 10
+
+unittest/compiler-fixtures/region-outer-fresh.x:11:10: region: a closure can outlive the region it was allocated in when assigned to a local declared outside the region
+    auto { closure = %!() => base; }
+           ^^^^^^^
+  note: region opened at line 11
+
+unittest/compiler-fixtures/region-outer-fresh.x:14:5: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+      pooled = String.printf("%d", base);
+      ^^^^^^
+  note: region opened at line 13
+

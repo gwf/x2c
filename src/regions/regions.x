@@ -66,13 +66,17 @@ module typedef struct Region {
    (and the Pool alternative of a mixed result), the region a Scope local's
    own storage forms, and for a pointer taken
    with `&`, the local and place it names. `born` records a scoped or pooled
-   result, including when the allocation has no local region. `constant`
+   result, including when the allocation has no local region. `allocation`
+   keeps its allocating region when a mutable handle's deferred free replaces
+   `region`; freeing a container does not release its borrowed elements.
+   `element` distinguishes a parameter element from the parameter handle
+   when a function summary records its uses. `constant`
    marks a stable cleanup target; `empty` distinguishes a NULL handle from
    the value its slot may later acquire. */
 module typedef struct Fact {
-  int depth, origin, param, born, constant, empty;
+  int depth, origin, param, born, constant, empty, element;
   Symbol dead, ending;
-  struct Region *region, *other, *owner;
+  struct Region *region, *other, *owner, *allocation;
   struct Fact *points;
   List place;
   Acquired acquired;
