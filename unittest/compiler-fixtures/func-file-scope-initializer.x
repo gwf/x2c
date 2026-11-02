@@ -19,8 +19,9 @@ int main(void) {
   printf("%s %s\n", doubled(1).repr(), named(2).repr());
   printf("%s %s\n", private_doubled(3).repr(), private_named(4).repr());
   printf("%s\n", scaled(5).repr());
-  foreach (Func handler in handlers) printf("%s ", handler(6).repr());
-  foreach (Func handler in private_handlers) printf("%s ", handler(7).repr());
+  printf("handlers:");
+  foreach (Func handler in handlers) printf(" %s", handler(6).repr());
+  foreach (Func handler in private_handlers) printf(" %s", handler(7).repr());
   printf("\n");
   return 0;
 }
