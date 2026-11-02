@@ -349,7 +349,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.push($array array, $element value) {
     if (array == NULL) _bad_operation($owner, <push>);
-    if ($boxed && (Var) value is void) raise %(void-op (operation $owner));
+    if ($boxed && (Var) value is void)
+      raise %(void-op (operation "Array.push"));
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
     return value;
@@ -398,7 +399,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.unshift($array array, $element value) {
     if (array == NULL) _bad_operation($owner, <unshift>);
-    if ($boxed && (Var) value is void) raise %(void-op (operation $owner));
+    if ($boxed && (Var) value is void)
+      raise %(void-op (operation "Array.unshift"));
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array.insert_element(0, value);
     return value;
@@ -413,7 +415,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.insert($array array, int index, $element value) {
     if (array == NULL) _bad_index($owner, index, 0);
-    if ($boxed && (Var) value is void) raise %(void-op (operation $owner));
+    if ($boxed && (Var) value is void)
+      raise %(void-op (operation "Array.insert"));
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     if (!array.insert_element(index, value))
       _bad_index($owner, index, array.length);
