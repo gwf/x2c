@@ -1718,17 +1718,17 @@ handler stack and accumulated errors.
 Public functions:
 
 `x2c_error_raise`, `Error.raise`, `Error.raise_at`, `x2c_error_raise_n`,
-`Error.depth`, `Error.note_rendered`, `Error.policy_set`, `Error.policy_get`,
-`Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
-`Error.policy_release`, `Error.context_open`, `Error.bound`,
-`Error.context_close`, `Error.mark`, `Error.since`, `Error.since_in`,
-`Error.count`, `Error.snapshot`, `Error.snapshot_in`, `Error.push`,
-`Error.pop`, `Error.handler_head`, `x2c_error_catch_push`,
-`x2c_error_catch_site_push`, `x2c_error_catch_site_pending`,
-`x2c_error_catch_selected`, `x2c_error_catch_capture`,
-`x2c_error_catch_detach`, `x2c_error_catch_close`, `Error.unwind_head`,
-`Error.restore_landing`, `Error.trim`, `Error.restore`, `Error.handler_depth`,
-`x2c_error_execution_new`, `x2c_error_execution_swap`,
+`x2c_error_raise_operation`, `Error.depth`, `Error.note_rendered`,
+`Error.policy_set`, `Error.policy_get`, `Error.bound_set`,
+`Error.policy_capture`, `Error.policy_adopt`, `Error.policy_release`,
+`Error.context_open`, `Error.bound`, `Error.context_close`, `Error.mark`,
+`Error.since`, `Error.since_in`, `Error.count`, `Error.snapshot`,
+`Error.snapshot_in`, `Error.push`, `Error.pop`, `Error.handler_head`,
+`x2c_error_catch_push`, `x2c_error_catch_site_push`,
+`x2c_error_catch_site_pending`, `x2c_error_catch_selected`,
+`x2c_error_catch_capture`, `x2c_error_catch_detach`, `x2c_error_catch_close`,
+`Error.unwind_head`, `Error.restore_landing`, `Error.trim`, `Error.restore`,
+`Error.handler_depth`, `x2c_error_execution_new`, `x2c_error_execution_swap`,
 `x2c_error_execution_free`, `Error.initialize_raw`, `Error.shutdown_raw`,
 `Error.ready`
 
