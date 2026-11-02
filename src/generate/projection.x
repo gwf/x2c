@@ -470,7 +470,7 @@ static void _add_declared(List node, Map statics) {
 /* Both forms of public object use the qualifiers their C definition keeps. */
 static List _object_header(Partition &p, List decl, Type type, List bindings) {
   if (p.c.static_value_is_runtime(decl, NULL)) {
-    type = _without_const(type);
+    type = Compiler.without_const(type);
     bindings = _runtime_without_const(p.c, bindings);
   }
   return _header_declaration(NULL, %(extern @type), bindings);
@@ -484,14 +484,11 @@ static List _runtime_without_const(Compiler c, List bindings) {
     match (declarator)
       case %(op = (bind ?name (!set ?mods (const *))) ?value)
         if (c.static_value_is_runtime(value, NULL)):
-        declarator = %(bind $name $(_without_const(mods)));
+        declarator = %(bind $name $(Compiler.without_const(mods)));
     declarators.push(declarator);
   }
   return %(bindings @(declarators.list_free()));
 }
-
-static List _without_const(List specifiers) =>
-  specifiers.filter(%!(specifier) => specifier != <const>);
 
 /* Objects and functions have linkage; a bare type declaration does not. */
 static int _declared_bindings(List bindings) {

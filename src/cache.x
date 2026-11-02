@@ -290,7 +290,8 @@ static List _rewrite_static(Compiler c, List decl, StaticQueue &q) {
       return _defer_bindings(c, decltype, bound_list, q);
   match (decl)
     case %(declare ?decltype (bindings *bound_list)):
-      return _defer_bindings(c, _unqualify_const(decltype), bound_list, q);
+      return _defer_bindings(
+        c, Compiler.without_const(decltype), bound_list, q);
   return decl;
 }
 
@@ -311,7 +312,7 @@ static List _defer_binding(
       Type object = declaration.type_from_ast().declared();
       if (object.car() == <const>) {
         if (!c.static_value_is_runtime(value, NULL)) return bound;
-        mods = _unqualify_const(mods);
+        mods = Compiler.without_const(mods);
       }
       Type declared = object.canonicalize();
       Type resolved = c.sym.resolve_key(declared);
@@ -346,10 +347,10 @@ static List _record(StaticQueue &q, List name, List mods, List assign) {
   return %(bind $name $mods);
 }
 
-/* C initializes a const object only in its definition, so a definition whose
-   initializer has to run drops the qualifier. The declared type still carries
-   it everywhere x2c checks the object. */
-static List _unqualify_const(List specifiers) =>
+/** Removes const from the C declaration of a runtime-initialized object.
+    Its semantic declared type retains the qualifier for x2c checks.
+*/
+List Compiler.without_const(List specifiers) =>
   specifiers.filter(%!(specifier) => specifier != <const>);
 
 // static array blocks
