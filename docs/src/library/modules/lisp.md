@@ -371,12 +371,10 @@ their canonical graphs or other owners must outlive the binding or
 session. A host binding may shadow an inherited name in this session;
 it does not change the ancestor. Lisp `def` still rejects inherited
 names, including a name the host has shadowed locally.
-Binding an `x2c.` name protects that namespace from later Lisp
-`def` forms, but direct calls to this function may replace such a
-binding.
 
-**Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-`<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+**Raises:** `<bad-arg>` for a null session or name, `<bad-state>` for a
+frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+canonicalizing or storing the binding.
 
 Source: `lib/lisp/sessions.x`
 
