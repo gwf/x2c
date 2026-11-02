@@ -5,8 +5,8 @@ description: >-
   isolated worktrees, then deliver coherent batches directly or submit PRs to
   a shared integrator when instructed. Use when a session has two or more
   separable changes, a campaign with independent deliverables, or contention
-  on dev from other sessions. Do not use for a single change; use the matching
-  task skill.
+  on dev from other sessions. Also use whenever launching implementation
+  subagents, including one delegated change.
 ---
 
 # Orchestrate and integrate x2c work
