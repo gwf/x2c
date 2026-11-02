@@ -351,7 +351,7 @@ Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_231, Iter _x2c_ge
 
 void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_227);
 
-int MapStringInt_add_substr(MapStringInt map, Substr key, int count);
+int MapStringInt_add_substr(MapStringInt m, Substr key, int count);
 
 
 #endif /* __GUARD_0x095418B9__ */

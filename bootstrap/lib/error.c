@@ -168,6 +168,8 @@ static void _record(const X2CErrorSite * site, Symbol code, List detail);
 
 static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, va_list args);
 
+static void _record_operation(const X2CErrorSite * site, Symbol code, const char * operation);
+
 static List f7_records____counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args);
 
 static List f7_records____entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
@@ -300,6 +302,13 @@ void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_cou
   va_start(args, pair_count);
   _record_n(site, r.code, pair_count, args);
   va_end(args);
+  f8_dispatch____dispatch(r);
+}
+
+void x2c_error_raise_operation(const X2CErrorSite * site, Symbol code, const char * operation){
+  if(! _init_guard_) _file_init_();
+  f8_dispatch___ErrorRaise r = f8_dispatch____raise_enter(code);
+  _record_operation(site, r.code, operation);
   f8_dispatch____dispatch(r);
 }
 
@@ -744,6 +753,20 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
   }
   ;
   List detail = f7_records____counted_detail(&(record.region), code, pair_count, args);
+  record.entry = f7_records____entry(&(record.region), site, code, detail);
+  Block_push(state -> stack, & record);
+  state -> floor_only --;
+}
+
+static void _record_operation(const X2CErrorSite * site, Symbol code, const char * operation){
+  if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  ErrorRecord record ={
+    .region = _region_new()
+  }
+  ;
+  List detail = f7_records____field(&(record.region), Symbol_var(34096809266140), String_var(f7_records____site_text(&(record.region), operation)), NULL);
   record.entry = f7_records____entry(&(record.region), site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;

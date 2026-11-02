@@ -48,6 +48,11 @@ static Code _new_one(Code code) {
 
 /* --- lib/common.x -------------------------------------------------------- */
 
+List _error_native_file(void) {
+  String literal = x2c_invocation_file().repr();
+  return %(expr (* char) (literal (* char) $literal));
+}
+
 static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
 static int _var_tag_bottom(List tag) =>
@@ -2729,6 +2734,7 @@ Map linked_meta_targets(void) {
   Map rows = {};
   $linked.row(rows, "_new_empty", _new_empty);
   $linked.row(rows, "_new_one", _new_one);
+  $linked.row(rows, "_error_native_file", _error_native_file);
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
   $linked.row(rows, "_literal_tag", _literal_tag);

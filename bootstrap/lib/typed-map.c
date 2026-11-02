@@ -4824,14 +4824,14 @@ static long MapStringInt_find_substr(MapStringInt _x2c_gensym_macro_map_232, Sub
   return - 1;
 }
 
-int MapStringInt_add_substr(MapStringInt map, Substr key, int count){
+int MapStringInt_add_substr(MapStringInt m, Substr key, int count){
   if(! _init_guard_) _file_init_();
-  if((void *) map == NULL) _bad_arg(_4);
+  if((void *) m == NULL) _bad_arg(_4);
   unsigned hash = Substring_hash(key);
   if(! hash) hash = - 1;
-  long index = MapStringInt_find_substr(map, & key, hash);
-  if(index >= 0) return _update_int(_string_int_value(map, index), 56, count);
-  return MapStringInt_updateindex(map, Substring_str(key), 56, count);
+  long index = MapStringInt_find_substr(m, & key, hash);
+  if(index >= 0) return _update_int(_string_int_value(m, index), 56, count);
+  return MapStringInt_updateindex(m, Substring_str(key), 56, count);
 }
 
 int String_len(String);

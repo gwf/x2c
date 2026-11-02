@@ -23,6 +23,8 @@
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
+List _error_native_file(void);
+
 String _x2c_public_inline_role(String role);
 
 List _derive_methods(Type type, List kinds, Macro map, Macro json, Macro equal, Macro repr, Macro args, Macro row);

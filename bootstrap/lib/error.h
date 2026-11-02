@@ -49,6 +49,8 @@ void Error_raise_at(const X2CErrorSite * site, Symbol code, List detail);
 
 void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
 
+void x2c_error_raise_operation(const X2CErrorSite * site, Symbol code, const char * operation);
+
 int Error_depth(void);
 
 void Error_note_rendered(void);

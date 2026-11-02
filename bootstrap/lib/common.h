@@ -129,6 +129,12 @@ typedef struct X2CErrorSite{
 }
 X2CErrorSite;
 
+String x2c_invocation_file(void);
+
+int x2c_invocation_line(void);
+
+void x2c_error_raise_operation(const X2CErrorSite * site, Symbol code, const char * operation);
+
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul
