@@ -76,9 +76,11 @@ void Lisp.destroy(Lisp lisp) {
     freezes it with `Lisp.freeze` before the first child runs: a child's
     values belong to a narrower `Context` than the parent's, so nothing a
     child produces may become reachable from the parent.
+    Raises: `<bad-arg>` for a null session or parent, or `<alloc-fail>` or
+    `<size-limit>` while creating the child's reserved `Map`.
 */
 void Lisp.adopt(Lisp lisp, Lisp parent) {
-  if (!lisp || !parent) return;
+  if (!lisp || !parent) $error.entry.null("Lisp.adopt");
   lisp.parent = parent;
   auto (&lisp.scope) lisp.reserved = {};
   for (unsigned i = 0; i < _canonical_count(); i++)
@@ -90,8 +92,12 @@ void Lisp.adopt(Lisp lisp, Lisp parent) {
     A frozen session rejects `def` and `Lisp.set_global`: a value produced
     while a narrower `Context` is current would leave the session holding
     values that die with that `Context`.
+    Raises: `<bad-arg>` for a null session.
 */
-void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
+void Lisp.freeze(Lisp lisp) {
+  if (!lisp) $error.entry.null("Lisp.freeze");
+  lisp.frozen = 1;
+}
 
 // globals
 

@@ -60,9 +60,11 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
     The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
     `Lisp.eval_string` each open one, and a call that runs it out does not
     renew it, so one entry reports a runaway once however many calls follow.
+    Raises: `<bad-arg>` for a null session.
 */
 void Lisp.call_budget(Lisp lisp, long budget) {
-  if (lisp && budget > 0) lisp.call_step_max = budget;
+  if (!lisp) $error.entry.null("Lisp.call_budget");
+  if (budget > 0) lisp.call_step_max = budget;
 }
 
 /** Sets whether evaluation in `lisp` is interrupted. While `interrupted` is
