@@ -97,6 +97,10 @@ static List _truthy_expression(Compiler c, List expr) {
   List resolved = c.resolve_protocol_member(expr.cadr(), "truth");
   if (!resolved) return expr;
   (List binding, Type signature) = resolved;
+  if (c.is_operator_temporary(expr)) {
+    List helper = c.protocol_discard_helper(expr.cadr(), "truth", 1);
+    if (helper) (binding, signature) = helper;
+  }
   List callee = $!($signature){ $binding };
   return $!int{ $callee($expr) };
 }
@@ -216,7 +220,9 @@ static List _protocol_update(
     if (!converted) return NULL;
     rhs = converted;
   }
-  String helper = c.protocol_update_helper(type, member_name, !rhs);
+  int discard_rhs = rhs && c.is_operator_temporary(rhs);
+  String helper =
+    c.protocol_update_helper(type, member_name, !rhs, discard_rhs);
   if (!helper) return NULL;
   List spell = _symbol_expression(spelled), value = NULL;
   if (rhs) value = rhs;

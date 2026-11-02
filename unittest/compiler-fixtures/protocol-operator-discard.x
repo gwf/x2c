@@ -15,6 +15,7 @@ protocol Arith(T) {
   T T.sub(T, T);
   T T.mul(T, T);
   T T.neg(T);
+  int T.truth(T);
   void T.discard(T);
 }
 
@@ -36,6 +37,8 @@ Cell Cell.sub(Cell a, Cell b) => Cell.new(a.value - b.value);
 Cell Cell.mul(Cell a, Cell b) => Cell.new(a.value * b.value);
 
 Cell Cell.neg(Cell a) => Cell.new(-a.value);
+
+int Cell.truth(Cell a) => a.value != 0;
 
 Cell Cell.twice(Cell a) => Cell.new(a.value * 2.0);
 
@@ -85,5 +88,37 @@ int main(void) {
   View view = (a * b).view();
   printf("alias %g view %g\n", alias.storage ? *alias.storage : -1.0,
          view.value.storage ? *view.value.storage : -1.0);
+  Cell zero = Cell.new(0), acc = a;
+  before = discards;
+  acc += b * c;
+  printf("update %g discards %d\n", acc.value, discards - before);
+  before = discards;
+  acc -= b + c;
+  printf("subtract %g discards %d\n", acc.value, discards - before);
+  before = discards;
+  acc += b;
+  printf("named update %g discards %d\n", acc.value, discards - before);
+  before = discards;
+  if (a + b) printf("if discards %d\n", discards - before);
+  before = discards;
+  int inverted = !(a + b);
+  printf("not %d discards %d\n", inverted, discards - before);
+  before = discards;
+  int chosen = (a + b) ? 1 : 0;
+  printf("conditional %d discards %d\n", chosen, discards - before);
+  before = discards;
+  while (a * zero) {}
+  for (; a * zero;) {}
+  do {} while (a * zero);
+  printf("loops discards %d\n", discards - before);
+  before = discards;
+  int both_truth = (a + b) && (a * b);
+  printf("and %d discards %d\n", both_truth, discards - before);
+  before = discards;
+  int one_truth = (a + b) || (a * b);
+  printf("or %d discards %d\n", one_truth, discards - before);
+  before = discards;
+  int skipped = zero && (a * b);
+  printf("skipped %d discards %d\n", skipped, discards - before);
   return 0;
 }

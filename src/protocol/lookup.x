@@ -246,6 +246,9 @@ static List _generated_member(
   Compiler c, List ancestry, String member) {
   foreach (Type current in ancestry) {
     List decision = _generated_owner(c, current, member);
+    match (decision)
+      case %((!or ?kind linkage conflict) ?first ?second *):
+        _report_collision(c, current, member, kind, first, second);
     if (decision ~= %(owner ? ? ?signature ?)) {
       String source = _member_spelling(current, member);
       return $(source, signature);

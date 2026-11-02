@@ -286,7 +286,7 @@ static void _report_requirement(
     _adoption_location(row), NULL);
 }
 
-static void _report_collision(
+module void _report_collision(
   Compiler c, Type participant, String member, Symbol kind, List first,
   List second) {
   (Type first_base, String first_source, Type first_expected) = first.cdr();

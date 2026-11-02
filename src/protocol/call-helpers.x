@@ -21,13 +21,15 @@ static typedef struct DiscardCall {
     when the member cannot implement this update shape.
 */
 String Compiler.protocol_update_helper(
-  Compiler c, Type participant, String member, int postfix) {
+  Compiler c, Type participant, String member, int postfix, int discard_rhs) {
   int exported = _exported(c);
   List key =
-    $("protocol-update-helper", participant, member, postfix, exported);
+    $("protocol-update-helper", participant, member, postfix, discard_rhs,
+      exported);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
-  String name = _update_helper(c, participant, member, postfix, exported);
+  String name =
+    _update_helper(c, participant, member, postfix, discard_rhs, exported);
   if (name) c.protocol_helpers[key] = name;
   return name;
 }
@@ -145,14 +147,17 @@ static int _exported(Compiler c) {
 /* Publishes the update helper of `participant`'s `member` and returns its
    name, or returns NULL when the member cannot implement the update. */
 static String _update_helper(
-  Compiler c, Type participant, String member, int postfix, int exported) {
+  Compiler c, Type participant, String member, int postfix, int discard_rhs,
+  int exported) {
   List resolved = c.resolve_protocol_member(participant, member);
   if (!resolved) return NULL;
   List (source_binding, source_type) = resolved;
   Type rhs_type = _update_rhs(c, participant, source_type);
   if (!rhs_type) return NULL;
 
-  String suffix = postfix ? "postfix" : "update";
+  List discard = discard_rhs
+    ? c.resolve_protocol_member(rhs_type, "discard") : NULL;
+  String suffix = postfix ? "postfix" : discard ? "update_discard" : "update";
   String name = _helper_name(
     c, %"proto_$(participant.car().str().lower())_$(member)_$suffix",
     exported);
@@ -162,6 +167,8 @@ static String _update_helper(
   /* A direct update stores the member's result through `lhs`; the `op`
      parameter keeps the update ABI of the dynamic path. The postfix form
      adds one and returns the value it read first. */
+  List rhs = c.sym.introduce("rhs");
+  List drops = discard ? $($!{ $(discard.car())($rhs); }) : NULL;
   List update = postfix
     ? $!Unit{
         $result $helper(volatile $participant *lhs, Symbol op) {
@@ -172,8 +179,9 @@ static String _update_helper(
       }
     : $!Unit{
         $result $helper(
-            volatile $participant *lhs, Symbol op, $rhs_type rhs) {
-          lhs[0] = $callee(lhs[0], rhs);
+            volatile $participant *lhs, Symbol op, $rhs_type $rhs) {
+          lhs[0] = $callee(lhs[0], $rhs);
+          @drops
           return lhs[0];
         }
       };

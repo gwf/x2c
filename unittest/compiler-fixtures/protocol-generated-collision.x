@@ -40,5 +40,7 @@ protocol FirstTruth(Choice);
 protocol SecondTruth(Choice);
 
 int main(void) {
-  return 0;
+  struct Choice value = {1};
+  Choice choice = &value;
+  return choice.truth();
 }

@@ -2,3 +2,13 @@
 borrowed 6 named-discarded 0
 deep 20 discards 2
 alias 6 view 6
+update 14 discards 1
+subtract 7 discards 1
+named update 10 discards 0
+if discards 1
+not 0 discards 1
+conditional 1 discards 1
+loops discards 3
+and 1 discards 2
+or 1 discards 1
+skipped 0 discards 0
