@@ -30,6 +30,7 @@ prefix.
 | [`x2c_error_execution_swap`](error.md#x2c_error_execution_swap) | `lib/error/error.x` | `void x2c_error_execution_swap(void *backing)` |
 | [`x2c_error_raise`](error.md#x2c_error_raise) | `lib/error/error.x` | `void x2c_error_raise(Symbol code, List detail)` |
 | [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error/error.x` | `void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
+| [`x2c_error_raise_operation`](error.md#x2c_error_raise_operation) | `lib/error/error.x` | `void x2c_error_raise_operation( const X2CErrorSite *site, Symbol code, const char *operation)` |
 | [`x2c_exception_claim`](exception.md#x2c_exception_claim) | `lib/exception.x` | `int x2c_exception_claim(ExceptionFrame *frame)` |
 | [`x2c_exception_execution_free`](exception.md#x2c_exception_execution_free) | `lib/exception.x` | `void x2c_exception_execution_free(void *backing)` |
 | [`x2c_exception_execution_new`](exception.md#x2c_exception_execution_new) | `lib/exception.x` | `void *x2c_exception_execution_new(void)` |
@@ -143,4 +144,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 131 functions.
+Total: 132 functions.

@@ -508,6 +508,7 @@ for source readers but are not supported as user API.
 | [`x2c_error_execution_free`](#x2c_error_execution_free) | Releases backing after Error.shutdown_raw ran with its state installed. |
 | [`x2c_error_execution_new`](#x2c_error_execution_new) | Allocates empty execution backing. |
 | [`x2c_error_execution_swap`](#x2c_error_execution_swap) | Exchanges mutable Error state and its readiness as one boundary action. |
+| [`x2c_error_raise_operation`](#x2c_error_raise_operation) | Raises an internal allocator error with native operation text. |
 | [`Error.context_close`](#Error.context_close) | Closes one `Context` `Error` overlay. |
 | [`Error.context_open`](#Error.context_open) | Opens the `Error` state owned by one `Context`. |
 | [`Error.since_in`](#Error.since_in) | Copies errors at and after `mark` into explicit owners, oldest first. |
@@ -538,6 +539,17 @@ Source: `lib/error/runtime.x`
 Exchanges mutable Error state and its readiness as one boundary action.
 
 Source: `lib/error/runtime.x`
+
+#### x2c_error_raise_operation
+
+`void x2c_error_raise_operation( const X2CErrorSite *site, Symbol code, const char *operation)`
+
+Raises an internal allocator error with native operation text.
+Enters the raw error floor before copying text when Error is unavailable
+or already building a record. Otherwise Error owns the operation String
+and source location before synchronous dispatch, as in Error.raise_at.
+
+Source: `lib/error/dispatch.x`
 
 ### `Error`
 

@@ -1028,7 +1028,7 @@ Source: `lib/typed-map.x`
 <a id="MapStringInt.add_substr"></a>
 #### MapStringInt.add_substr
 
-`int MapStringInt.add_substr(MapStringInt map, Substr key, int count)`
+`int MapStringInt.add_substr(MapStringInt m, Substr key, int count)`
 
 Adds count using borrowed bytes for lookup. Only a missing key is
 converted to a canonical String; the map never retains the view.

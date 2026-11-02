@@ -48,7 +48,6 @@ static Code _new_one(Code code) {
 
 /* --- lib/common.x -------------------------------------------------------- */
 
-/** Builds native source text for internal allocator diagnostics. */
 List _error_native_file(void) {
   String literal = x2c_invocation_file().repr();
   return %(expr (* char) (literal (* char) $literal));
