@@ -275,7 +275,8 @@ static Regex Regex.new(String pattern) {
   regex.pattern = pattern;
   Array names = auto [];
   Parser p = {
-    regex, regex.pattern, 0, regex.pattern.len(), 0, _x2c_stack_floor(), names};
+    regex, regex.pattern, 0, regex.pattern.len(), 0,
+    _x2c_stack_floor(), names};
   _flags(p);
   regex.program = _parse_alternation(p);
   if (p.pos < p.len) _fail(p, reason_unmatched_close);
