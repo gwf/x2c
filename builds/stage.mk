@@ -176,7 +176,12 @@ $(LIB_C_FILES) $(LIB_H_FILES): $(LIB_BUILD)/.translated
 $(LIB_BUILD)/%.c:
 	@:
 
-$(LIB_BUILD)/%.h: $(LIB_BUILD)/%.c
+# An object names a generated header by every path that reaches it, such as
+# src/compiler/../compiler.h, and Make reads a path's time when it first
+# visits the object, before the batch finishes. Running a recipe after the
+# stamp makes Make read the time again, so the object sees the new header.
+$(LIB_BUILD)/%.h: $(LIB_BUILD)/.translated
+	@:
 
 ifneq ($(strip $(LIB_MISSING_GENERATED)),)
 $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
@@ -223,7 +228,8 @@ $(BIN_C_FILES) $(BIN_H_FILES): $(BIN_BUILD)/.translated
 $(BIN_BUILD)/%.c:
 	@:
 
-$(BIN_BUILD)/%.h: $(BIN_BUILD)/%.c
+$(BIN_BUILD)/%.h: $(BIN_BUILD)/.translated
+	@:
 
 ifneq ($(strip $(BIN_MISSING_GENERATED)),)
 $(BIN_BUILD)/.translated: BIN-FORCE-TRANSLATE
