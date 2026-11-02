@@ -215,6 +215,20 @@ module void _record_n(
   state.floor_only--;
 }
 
+module void _record_operation(
+  const X2CErrorSite *site, Symbol code, const char *operation) {
+  if (Error.count() >= Error.bound())
+    _floor(code, "error stack exceeded its bound");
+  ErrorThreadState state = _thread();
+  state.floor_only++;
+  ErrorRecord record = { .region = _region_new() };
+  List detail = _field(record.region, <operation>,
+    _site_text(record.region, operation), NULL);
+  record.entry = _entry(record.region, site, code, detail);
+  state.stack.push(&record);
+  state.floor_only--;
+}
+
 /* Copies `count` key-value arguments into `region` as a detail List in
    argument order. The pairs wait in a Block because the List is built from
    its end. */

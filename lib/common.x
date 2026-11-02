@@ -196,6 +196,32 @@ typedef struct X2CErrorSite {
   const char *file, *function, int line, runtime;
 } X2CErrorSite;
 
+/* Native source text must reach Error before allocator diagnostics allocate. */
+meta String x2c_invocation_file(void);
+meta int x2c_invocation_line(void);
+
+/** Builds native source text for internal allocator diagnostics. */
+meta List _error_native_file(void) {
+  String literal = x2c_invocation_file().repr();
+  return %(expr (* char) (literal (* char) $literal));
+}
+
+
+void x2c_error_raise_operation(
+  const X2CErrorSite *site, Symbol code, const char *operation);
+
+macro Stmt $scope.fail(Expr $code, Expr $operation) {
+  using _error_native_file, x2c_error_raise_operation;
+  using $site;
+  {
+    const X2CErrorSite $site = {
+      .file = $_error_native_file(), .function = __func__,
+      .line = $x2c_invocation_line(), .runtime = 1};
+    x2c_error_raise_operation(&$site, $code, $operation);
+    __builtin_unreachable();
+  }
+}
+
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul

@@ -23,6 +23,15 @@ void x2c_error_raise_n(
   abort();
 }
 
+void x2c_error_raise_operation(
+  const X2CErrorSite *site, Symbol code, const char *operation
+) {
+  (void)site;
+  (void)code;
+  (void)operation;
+  abort();
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) return 2;
 

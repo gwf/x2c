@@ -25,6 +25,7 @@ lib/buffer.x|advanced|Buffer.repr,Buffer.reserve,Buffer.str_free
 lib/buffer.x|advanced|Buffer.tabstop,Buffer.unwrite
 lib/buffer.x|advanced|Buffer.write_char,Buffer.write_len,Buffer.write_repeat
 lib/buffer.x|compatibility|Buffer.get
+lib/common.x|internal|_error_native_file
 lib/common.x|advanced|Array.var,Block.var,Buffer.var,Bytes.var,File.var
 lib/common.x|advanced|Iter.truth,Iter.var,List.truth,List.var,Map.var
 lib/common.x|advanced|String.truth,String.var,Symbol.var,Var.array_payload
@@ -88,6 +89,7 @@ lib/error/error.x|advanced|x2c_error_catch_close,x2c_error_catch_detach
 lib/error/error.x|advanced|x2c_error_catch_push,x2c_error_catch_selected
 lib/error/error.x|advanced|x2c_error_catch_site_pending,x2c_error_catch_site_push
 lib/error/error.x|advanced|x2c_error_raise,x2c_error_raise_n
+lib/error/error.x|internal|x2c_error_raise_operation
 lib/error/error.x|internal|Error.context_close,Error.context_open,Error.since_in
 lib/error/error.x|internal|Error.snapshot_in
 lib/error/error.x|internal|ErrorCatchSite

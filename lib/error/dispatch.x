@@ -74,6 +74,18 @@ void x2c_error_raise_n(
   _dispatch(r);
 }
 
+/** Raises an internal allocator error with native operation text.
+    Enters the raw error floor before copying text when Error is unavailable
+    or already building a record. Otherwise Error owns the operation String
+    and source location before synchronous dispatch, as in Error.raise_at.
+*/
+void x2c_error_raise_operation(
+  const X2CErrorSite *site, Symbol code, const char *operation) {
+  ErrorRaise r = _raise_enter(code);
+  _record_operation(site, r.code, operation);
+  _dispatch(r);
+}
+
 /** Returns the current nested error-dispatch depth.
     This is the nesting depth of error dispatch. `Error.count` returns the
     number of accumulated errors.

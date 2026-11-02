@@ -39,7 +39,7 @@ static typedef struct ScopeExecution {
 */
 meta native void Scope.push(Scope *scope) {
   _require_running();
-  if (!scope) raise %(bad-arg (operation "Scope.push"));
+  if (!scope) $scope.fail(<bad-arg>, "Scope.push");
   ScopeThreadState state = _thread();
   state.stack = _raw_grow(
     state.stack, state.stack_size, state.stack_capacity,
@@ -60,7 +60,7 @@ meta native void Scope.push(Scope *scope) {
 meta native void Scope.pop(void) {
   _require_running();
   ScopeThreadState state = _thread();
-  if (!state.stack_size) raise %(bad-state (operation "Scope.pop"));
+  if (!state.stack_size) $scope.fail(<bad-state>, "Scope.pop");
   state.stack_size--;
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
                                  : state.base_slot;
@@ -141,7 +141,7 @@ meta native void Scope.close(void) {
   ScopeThreadState state = _thread();
   alias state.active as active {
     if (!*active || !_forget_retain((*active), active))
-      raise %(bad-state (operation "Scope.close"));
+      $scope.fail(<bad-state>, "Scope.close");
     Scope top = *active;
     /* Restore and detach the surviving lower region before destruction, so
        the active slot never names freed storage and `_destroy_chain`
@@ -284,10 +284,10 @@ meta native void Scope.destroy(Scope s) {
   _require_running();
   ScopeThreadState state = _thread();
   if (s == *state.base_slot)
-    raise %(bad-state (operation "Scope.destroy"));
+    $scope.fail(<bad-state>, "Scope.destroy");
   for (int i = 0; i < state.stack_size; i++)
     if (s == *state.stack[i])
-      raise %(bad-state (operation "Scope.destroy"));
+      $scope.fail(<bad-state>, "Scope.destroy");
   _forget_retains(s);
   _destroy_chain(s);
 }
@@ -367,7 +367,7 @@ module Scope _new_scope(const char *name) {
     record.name = _register_name(scope, name);
     if (!record.name) {
       free(record);
-      raise %(alloc-fail (operation "Scope.new"));
+      $scope.fail(<alloc-fail>, "Scope.new");
     }
   }
   if (scope_accounting) atomic_fetch_add(&scope_creations, 1);

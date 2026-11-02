@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
     try {
       Scope.push(NULL);
     }
-    catch %(bad-arg *): caught++;
+    catch %(bad-arg (operation "Scope.push")): caught++;
     return caught != 1;
   }
 

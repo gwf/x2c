@@ -292,3 +292,19 @@ by operation metadata. Scope must pass native operation text to Error without
 constructing a String. Error owns its canonical copy after the raw-floor check.
 This preserves String's header contract, the existing counted-raise ABI, and
 the two-object Scope/thread-state probe. No allocator dependency is added.
+
+The native operation entry is a bounded leaf: Scope passes C text and Error
+uses its existing site-text copier and record owner. A meta-only filename
+helper and macro live in common.x, with no added include or runtime storage.
+The unchanged counted-raise interface remains available. The sparse Scope
+probe passes with only scope.o and thread-state.o plus its raw Error stubs;
+the existing null-push mode now also checks the exact operation detail.
+Generated Scope C contains no String_new, String_join, or cons calls, and
+retains regions.x line 42 and runtime=1 for Scope.push.
+
+The new meta helper required the normal capability transition: build it into
+the compiler while retaining the previous Scope calls, restore all 18 native
+calls, build with that compiler, and refresh bootstrap. Final source contains
+all 18 calls. No temporary source substitution is delivered. The complete
+compiler fixture target passes 1,468 cases and 2,452 artifacts after the tag
+projection repair and reviewed expectation updates.
