@@ -11,9 +11,10 @@ String x2c_embedded_identity(void);
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) {
-    puts($dedent(%"
-      usage: x2c-build <build|run|script> [OPTIONS] [INPUTS...]
-      Use x2c-build <operation> --help for operation options."));
+    puts(
+      $dedent(%"
+        usage: x2c-build <build|run|script> [OPTIONS] [INPUTS...]
+        Use x2c-build <operation> --help for operation options."));
     return 0;
   }
   auto Array arguments = CliRequest.command_arguments(argc, argv);

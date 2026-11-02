@@ -440,10 +440,9 @@ static void _link_packages(Build b, String input, String directory) {
    any consumer. */
 static int _package_built_here(Build b, List roots, String package) {
   /* A nonnull target package makes an absent lookup a mismatch. */
-  foreach (String input, b.request.inputs) {
+  foreach (String input, b.request.inputs)
     if (Compiler.package_directory(roots, input) == package &&
         Compiler.is_package_source(package, Path.absolute(input))) return 1;
-  }
   return 0;
 }
 
@@ -845,7 +844,8 @@ static ToolAction _final_action(Build b, String output, List inputs) {
   if (b.request.kind == <static-lib>)
     return b.toolchain.archive_action(output, inputs);
   if (b.request.kind == <module>)
-    return b.toolchain.module_action(output, inputs, Compiler.driver_executable());
+    return b.toolchain.module_action(
+      output, inputs, Compiler.driver_executable());
   return b.toolchain.link_action(output, inputs);
 }
 

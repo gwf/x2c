@@ -107,7 +107,8 @@ static int _translate_units(CliRequest request, Build b, List units) {
     CliRequest translation = xmemdup(request, sizeof(struct CliRequest));
     translation.inputs = inputs;
     translation.out_dir = b.gen_root;
-    if (translate_request(translation, stale, b, _translation_progress)) return 1;
+    if (translate_request(translation, stale, b, _translation_progress))
+      return 1;
   }
   _register_units(request, b, units, stale);
   return 0;
