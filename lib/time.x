@@ -101,8 +101,7 @@ Duration Duration.scale(Duration d, double factor) {
   if (factor >= -0x1p63 && factor < 0x1p63 && trunc(factor) == factor)
     return Duration.new(
       _product("Duration.scale", d.nanoseconds, (long long) factor));
-  return Duration.new(
-    _from_seconds("Duration.scale", d.total_seconds() * factor));
+  return Duration.new(_scale_fraction(d.nanoseconds, factor));
 }
 
 /** Orders two Durations: negative, zero, or positive as `a` is shorter,
@@ -321,6 +320,53 @@ static long long _combine_seconds(
     fraction += NANOS;
   }
   return _sum(operation, _product(operation, seconds, NANOS), fraction);
+}
+
+/* Multiply the integer magnitude by binary64's 53-bit significand in two
+   words, then round once. No integer nanoseconds pass through double. */
+static long long _scale_fraction(long long count, double factor) {
+  if (!isfinite(factor)) _out_of_range("Duration.scale");
+  if (!count || !factor) return 0;
+  int negative = (count < 0) != (factor < 0), exponent;
+  unsigned long long magnitude = count;
+  if (count < 0) magnitude = -magnitude;
+  unsigned long long significand = ldexp(frexp(fabs(factor), &exponent), 53);
+  unsigned long long mask = 0xffffffffULL;
+  unsigned long long low = (magnitude & mask) * (significand & mask);
+  unsigned long long middle = (magnitude >> 32) * (significand & mask) +
+    (low >> 32);
+  unsigned long long high = middle >> 32;
+  middle = (middle & mask) + (magnitude & mask) * (significand >> 32);
+  low = (middle << 32) | (low & mask);
+  high += (magnitude >> 32) * (significand >> 32) + (middle >> 32);
+  unsigned long long limit = negative ? 0x8000000000000000ULL :
+    0x7fffffffffffffffULL;
+  int shift = 53 - exponent, round_up = 0;
+  unsigned long long result;
+  if (shift <= 0) {
+    if (high || -shift >= 64 || low > (limit >> -shift))
+      _out_of_range("Duration.scale");
+    result = low << -shift;
+  }
+  else if (shift < 64) {
+    if (high >> shift) _out_of_range("Duration.scale");
+    result = (high << (64 - shift)) | (low >> shift);
+    round_up = (low >> (shift - 1)) & 1;
+  }
+  else if (shift == 64) {
+    result = high;
+    round_up = low >> 63;
+  }
+  else if (shift <= 128) {
+    result = shift == 128 ? 0 : high >> (shift - 64);
+    round_up = (high >> (shift - 65)) & 1;
+  }
+  else result = 0;
+  if (result > limit || (round_up && result == limit))
+    _out_of_range("Duration.scale");
+  result += round_up;
+  if (!result) return 0;
+  return negative ? -(long long) (result - 1) - 1 : (long long) result;
 }
 
 static long long _sum(String operation, long long a, long long b) {
