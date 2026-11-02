@@ -210,6 +210,26 @@ done
   --target app "$WORK/project/a_test.x") >"$WORK/explicit-manifest"
 grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' \
   "$WORK/explicit-manifest"
+# Profile defines reach both translation and native compilation.
+cat >>"$WORK/project/x2c.toml" <<'PROFILE'
+[target.app.profile.checked]
+defines = ["PROFILE_VALUE=42"]
+c-flags = ["-Wall"]
+PROFILE
+cat >"$WORK/project/profile_check.x" <<'PROFILE_SOURCE'
+#include "test.x"
+$test()
+static void profile_value(void) { $expect_eq(PROFILE_VALUE, 42); }
+$test.main();
+PROFILE_SOURCE
+run --profile checked profile_check.x
+[ "$status" = 0 ]
+grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
+run --unknown
+[ "$status" = 2 ]
+grep -Fq "unknown option '--unknown'" "$WORK/out"
+run --manifest "$WORK/project/x2c.toml"
+[ "$status" = 2 ]
 # Tests also belong to library projects; selecting settings does not run a target.
 cat >"$WORK/project/x2c.toml" <<'LIBRARY'
 [target.app]

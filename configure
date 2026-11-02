@@ -19,15 +19,16 @@ check() {
   fi
 }
 check_command() {
-  set -f
-  set -- $1
-  set +f
-  if [ "$#" -eq 0 ]; then
-    printf 'missing core build tool: empty compiler or archiver command\n' >&2
-    missing=1
-  else
-    check "$1"
-  fi
+  if command -v "$1" >/dev/null 2>&1; then return; fi
+  case "$1" in
+    *[[:space:]]*)
+      printf 'core build tool must be one executable path: %s\n' "$1" >&2
+      missing=1 ;;
+    '')
+      printf 'missing core build tool: empty compiler or archiver command\n' >&2
+      missing=1 ;;
+    *) check "$1" ;;
+  esac
 }
 check make
 if [ "$package_check" -eq 1 ]; then check python3; fi

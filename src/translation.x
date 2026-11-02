@@ -109,8 +109,33 @@ int translate_request(
     verbose and dry-run requests show it, quoted as a dry-run tool action
     prints its arguments.
 */
-void translate_print_command(String out_dir, List inputs) =>
-  ToolAction.new(<translate>, %("--out-dir" $out_dir @inputs), 0, 1).start();
+void translate_print_command(CliRequest request, String out_dir, List inputs) {
+  Array args = auto ["--out-dir", out_dir];
+  if (request.source_map) args.push("--source-map");
+  if (request.cpp_expansion) args.push("--cpp");
+  if (request.live_symbols) args.push("--live-symbols");
+  if (request.cpp_symbols) args.push("--cpp-symbols");
+  if (request.no_cpp) args.push("--no-cpp");
+  foreach (String dir in request.include_dirs) {
+    args.push("--x-include-dir");
+    args.push(dir);
+  }
+  foreach (String dir in request.package_dirs) {
+    args.push("--package-dir");
+    args.push(dir);
+  }
+  foreach (String arg in request.cpp_args) args.push(arg);
+  foreach (String path in request.native_modules) {
+    args.push("--native-module");
+    args.push(path);
+  }
+  if (request.meta_cc) {
+    args.push("--meta-cc");
+    args.push(request.meta_cc);
+  }
+  foreach (String input in inputs) args.push(input);
+  ToolAction.new(<translate>, args, 0, 1).start();
+}
 
 /* Each input must be a regular `.x` file. Units that write to the shared
    `--out-dir` must not share an output stem; inspection writes nothing. */
@@ -143,11 +168,11 @@ static void _make_out_dir(String out_dir) {
    per unit, as its dry run does. */
 static void _print_commands(Translation &t) {
   if (!t.unit_dirs) {
-    translate_print_command(t.request.out_dir, t.request.inputs);
+    translate_print_command(t.request, t.request.out_dir, t.request.inputs);
     return;
   }
   foreach (String input in t.request.inputs)
-    translate_print_command(t.unit_dirs[input], $(input));
+    translate_print_command(t.request, t.unit_dirs[input], $(input));
 }
 
 static void _preprocessor_errors(String text) {

@@ -57,7 +57,8 @@ static BindRequest _request(Map options) {
   request.package = package;
   request.header = Path.absolute(header);
   request.shim = %"$(Path.stem(header))-raw.h";
-  request.out_dir = options.getdefault("o", %"packages/$package");
+  request.out_dir = options["o"];
+  if (!request.out_dir) request.out_dir = %"packages/$package";
   request.include_dirs = options["I"].list().map(
     %!(String dir) => Path.absolute(dir));
   request.libraries = options["l"].list();

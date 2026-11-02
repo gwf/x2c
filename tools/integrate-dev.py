@@ -772,8 +772,8 @@ class Queue:
         if not self.ancestor(head, base) and not (replacement and args.archive_repairs):
             raise ValueError("candidate contains unique unpublished commits; preserve repairs first "
                              "with a landed replacement and --archive-repairs")
-        ignored = git(tree, "ls-files", "--others", "--ignored", "--exclude-standard")
-        unexpected = [p for p in ignored.splitlines()
+        ignored = git(tree, "ls-files", "--others", "--ignored", "--exclude-standard", "-z")
+        unexpected = [p for p in ignored.split("\0") if p
                       if not retirement_build_output(tree, p)]
         if unexpected:
             raise ValueError("preserve ignored files outside build outputs: " + ", ".join(unexpected))

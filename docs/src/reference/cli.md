@@ -103,7 +103,7 @@ The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
 
-`build` and `run` map generated C locations to the original `.x` sources by
+`build`, `run`, and `script` map generated C locations to the original `.x` sources by
 default. Use `--no-source-map` for generated-C locations. `translate` keeps
 generated-C locations by default and accepts `--source-map` to enable the
 map. Combine source mapping with native debug information to set breakpoints,
@@ -524,7 +524,7 @@ the program unchanged, including `--` and words that begin with `-` or `@`.
 A response file given before the script supplies options. `script` accepts
 the include options `-I`, `--x-include-dir`, `--c-include-dir`,
 `--c-system-dir`, and `--package-dir`; the C compiler and linker options of
-`run`; and `-j`, `--source-map`, `--rebuild`, `--clean`, `-v`, `-###`,
+`run`; and `-j`, `--source-map`, `--no-source-map`, `--rebuild`, `--clean`, `-v`, `-###`,
 `--plain`, `--color`, `--debug`, `--max-errors`, and `--diagnostics-file`.
 `x2c help script` lists them. It does not read a project manifest.
 

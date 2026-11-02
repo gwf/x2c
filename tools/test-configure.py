@@ -27,6 +27,14 @@ class ConfigureTests(unittest.TestCase):
     self.assertNotIn("missing core build tool: python3", result.stderr)
     self.assertIn("sudo dnf install", result.stderr)
 
+  def test_multiword_compiler_fails_before_build(self):
+    result = subprocess.run(
+      ["/bin/sh", str(ROOT / "configure")], capture_output=True, text=True,
+      env=dict(os.environ, CC="cc -Wall"),
+    )
+    self.assertNotEqual(result.returncode, 0)
+    self.assertIn("must be one executable path: cc -Wall", result.stderr)
+
   def test_core_does_not_require_package_tools_or_unused_defaults(self):
     with tempfile.TemporaryDirectory() as directory:
       for name in ("make", "selected-cc", "selected-ar"):

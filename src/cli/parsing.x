@@ -83,7 +83,7 @@ module CliOption cli_options[] = {
   { <src-map>, %<translate build run script>, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0,
     CLI_FIELD(<flag>, source_map) },
-  { <no-srcmap>, %<build run>, <output>, "--no-source-map", NULL,
+  { <no-srcmap>, %<build run script>, <output>, "--no-source-map", NULL,
     "Keep generated C locations in native diagnostics", 0 },
   { <no-deps>, %<translate>, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0, CLI_FIELD(<flag>, no_deps) },

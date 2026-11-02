@@ -24,14 +24,16 @@ int main(int argc, char **argv) {
     (--filter (value substring) repeated (help "Select test names containing substring"))
     (--list (help "List matching tests"))
     (-q --quiet (help "Suppress successful test lines"))
-    (--manifest-path --manifest (value file)
+    (--manifest-path (value file)
       (help "Read this project manifest"))
     (--target (value name) (help "Use this manifest target's include directories"))
+    (--profile (value name) (help "Use this manifest profile"))
     (inputs repeated (help "Test files or directories")));
   Map options = NULL;
   try options = Args.parse(Args.from_argv(argc, argv), spec);
-  catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
-    Diagnostics.driver_error(%"test: $why");
+  catch %(bad-arg (operation "Args.parse") (reason ?why) *detail): {
+    String option = detail.assoc(<option>);
+    Diagnostics.driver_error(option ? %"test: $why '$option'" : %"test: $why");
   }
   if (options["help"].integer()) {
     fputs(Args.usage("x2c test", spec), stdout);
@@ -58,7 +60,7 @@ static Run _configure(Map options) {
   CliRequest project = CliRequest.new(<build>);
   project.manifest = options["manifest-path"];
   project.target = options["target"];
-  project.dry_run = 1;
+  project.profile = options["profile"];
   String manifest = project.project_manifest();
   Path root = manifest ? Path.dirname(Path.absolute(manifest)) : Path.absolute(".");
   if (manifest) {
@@ -182,6 +184,15 @@ static Job _start(Run run, Path file) {
   foreach (String dir in run.project.package_dirs) {
     command.push("--package-dir");
     command.push(dir);
+  }
+  foreach (String arg in run.project.cpp_args) command.push(arg);
+  foreach (String arg in run.project.cc_args) {
+    command.push("-Xcc");
+    command.push(arg);
+  }
+  foreach (String arg in run.project.ld_args) {
+    command.push("-Xlinker");
+    command.push(arg);
   }
   command.push(file);
   foreach (String arg in run.program_args) command.push(arg);

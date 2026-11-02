@@ -60,7 +60,7 @@ def default_output_root() -> Path:
   return common.parent / "debug/performance-history"
 
 
-def successful_today(history: Path, local_date: str) -> bool:
+def successful_today(history: Path, local_date: str, commit: str) -> bool:
   if not history.exists():
     return False
   for line in history.read_text(encoding="utf-8").splitlines():
@@ -68,7 +68,8 @@ def successful_today(history: Path, local_date: str) -> bool:
       row = json.loads(line)
     except json.JSONDecodeError:
       continue
-    if row.get("local_date") == local_date and row.get("status") == "success":
+    if (row.get("local_date") == local_date and row.get("status") == "success"
+        and row.get("repository", {}).get("commit") == commit):
       return True
   return False
 
@@ -438,11 +439,11 @@ def run_snapshot_locked(
   history_path = output_root / "history.jsonl"
   prior = previous_success(history_path)
   local_date = dt.datetime.now().astimezone().date().isoformat()
-  if skip_today and successful_today(history_path, local_date):
+  commit = git("rev-parse", "HEAD", root=ROOT).strip()
+  if skip_today and successful_today(history_path, local_date, commit):
     print(f"performance snapshot already succeeded on {local_date}")
     return 0
 
-  commit = git("rev-parse", "HEAD", root=ROOT).strip()
   timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
   run_id = timestamp + "-" + commit[:12]
   run_dir = output_root / "runs" / local_date.replace("-", "/") / run_id

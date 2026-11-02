@@ -178,8 +178,8 @@ static void _print_help_usage(void) {
     Usage:
       x2c help [command]
 
-    Show top-level help, or help for translate, build, run, new, script, repl,
-    env, install, remove, or list."));
+    Show top-level help or help for a command. External commands provide
+    their own help through --help."));
 }
 
 static void _print_top_help(void) {

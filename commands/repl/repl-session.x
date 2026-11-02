@@ -210,7 +210,7 @@ ReplCompletion ReplSession.complete(
 }
 
 /* Statements run in a function that the submission does not spell. */
-static String _eval_head(void) => "void __repl_eval(void) {\n";
+static String _eval_head(void) => "void __repl_eval(void) { ";
 
 static void _tokenize(ReplSession session, String source, Scope scratch) {
   Compiler c = session.compiler;

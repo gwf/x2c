@@ -27,6 +27,13 @@ quietly() {
   fi
 }
 
+# An omitted -o uses packages/NAME under the caller's directory.
+mkdir -p "$WORK/default"
+(cd "$WORK/default" && "$TOOL" --package feed --header "$TESTS/feed.h" \
+  -I "$TESTS") >"$WORK/default-summary"
+diff -u "$TESTS/expected/feed.x" "$WORK/default/packages/feed/src/feed.x"
+[ ! -e "$WORK/default/Makefile" ]
+
 bind_feed "$TOOL" >"$WORK/summary"
 grep -Fxq "x2c bind: $PACKAGE: 2 handles, 9 methods, 2 releases, \
 2 raw functions, 1 not forwarded" "$WORK/summary"

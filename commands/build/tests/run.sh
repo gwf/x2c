@@ -264,3 +264,13 @@ printf 'int main(void) { return 0; }\n' > plain.c
 bare/bin/x2c build -q --output bare/app plain.c
 bare/app
 printf '%s\n' 'external build command probes passed'
+
+# Translation receipts show the flags the translator receives.
+"$X2C" build -### --cpp -D RECEIPT=1 --x-include-dir "receipt include" \
+  --package-dir "receipt packages" -o receipt main.x >receipt.log 2>&1
+grep '^x2c: translate ' receipt.log >receipt.translate
+grep -Fq -- '--source-map' receipt.translate
+grep -Fq -- '--cpp' receipt.translate
+grep -Fq -- '-D RECEIPT=1' receipt.translate
+grep -Fq -- "--x-include-dir 'receipt include'" receipt.translate
+grep -Fq -- "--package-dir 'receipt packages'" receipt.translate

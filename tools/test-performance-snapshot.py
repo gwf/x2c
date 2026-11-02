@@ -88,14 +88,16 @@ class PerformanceSnapshotTests(unittest.TestCase):
         "not json\n"
         + json.dumps({
           "local_date": "2026-09-21", "status": "success",
+          "repository": {"commit": "dev-commit"},
         }) + "\n"
         + json.dumps({
           "local_date": "2026-09-21", "status": "failed",
         }) + "\n",
         encoding="utf-8",
       )
-      self.assertTrue(snapshot.successful_today(path, "2026-09-21"))
-      self.assertFalse(snapshot.successful_today(path, "2026-09-22"))
+      self.assertTrue(snapshot.successful_today(path, "2026-09-21", "dev-commit"))
+      self.assertFalse(snapshot.successful_today(path, "2026-09-22", "dev-commit"))
+      self.assertFalse(snapshot.successful_today(path, "2026-09-21", "candidate"))
 
   def test_write_json_replaces_complete_document(self):
     with tempfile.TemporaryDirectory() as directory:

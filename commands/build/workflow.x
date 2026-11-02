@@ -143,7 +143,7 @@ static void _register_units(
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
-      translate_print_command(directory, $(input));
+      translate_print_command(request, directory, $(input));
       b.end_translation(input, 0);
     }
     else if (input in stale) b.record_translation(input, directory);

@@ -69,6 +69,15 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   return globs;
 }
 
+/** Returns the prelude sources and includes already supplied to every unit.
+    Collection owns the include closure, including cached interface replay.
+*/
+List Compiler.prelude_dependencies(void) {
+  Compiler c = Compiler.new();
+  _add_prelude(c, {}, {});
+  return c.deps.keys();
+}
+
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int Compiler.is_prelude_source(String path) =>
   Compiler.portable_path(path) in Compiler.prelude_sources();

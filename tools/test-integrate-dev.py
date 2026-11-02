@@ -423,7 +423,9 @@ class IntegrationProbe(unittest.TestCase):
                      'bootstrap/src/x2c', 'bin/x2c-bootstrap',
                      'bin/x2c-codex_test', 'bin/x2c-feature+test',
                      'bin/x2c-feature@test', 'unittest/test-all',
-                     'unittest/build/test-all.o', 'examples/build/foreach/foreach',
+                     'unittest/build/test-all.o',
+                     'unittest/build/source "quote\\ and space/test.x',
+                     'examples/build/foreach/foreach',
                      'examples/packages/greet/builds/libgreet.a'):
             self.write(candidate / name, 'generated build product\n')
         (candidate / 'bin/x2c').symlink_to('x2c-feature+test')
