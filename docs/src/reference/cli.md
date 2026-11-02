@@ -853,8 +853,9 @@ current directory. Discovery selects
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
 
-The selected target's include and package directories are forwarded to
-each build. Concurrent runs print each file's captured output in discovery
+`--manifest-path FILE` selects that manifest and `--target NAME` its
+target, as for `build`. The selected target's include and package
+directories are forwarded to each build. Concurrent runs print each file's captured output in discovery
 order. Each file runs through
 `x2c script`, so local `.x` includes compile as helpers. The script cache
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from

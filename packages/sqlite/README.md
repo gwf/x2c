@@ -96,7 +96,7 @@ After building the checkout commands and SQLite package, run from the
 repository root:
 
 ```sh
-builds/0/x2c test --manifest packages/sqlite/tests/derive/x2c.toml
+builds/0/x2c test --manifest-path packages/sqlite/tests/derive/x2c.toml
 ```
 
 The pilot's manifest supplies the package search directory. SQLite's native

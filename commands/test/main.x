@@ -24,7 +24,8 @@ int main(int argc, char **argv) {
     (--filter (value substring) repeated (help "Select test names containing substring"))
     (--list (help "List matching tests"))
     (-q --quiet (help "Suppress successful test lines"))
-    (--manifest-path (value file) (help "Read this project manifest"))
+    (--manifest-path --manifest (value file)
+      (help "Read this project manifest"))
     (--target (value name) (help "Use this manifest target's include directories"))
     (inputs repeated (help "Test files or directories")));
   Map options = NULL;
