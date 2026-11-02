@@ -64,12 +64,20 @@ void Scope_shutdown(void) {
 static void _initialize(void) {
   if (scope_state == <running> || scope_state == <shutting>) return;
   if (scope_state == <shutdown>)
-    x2c_fatal("Scope: operation attempted after shutdown");
+    _raw_fatal("operation attempted after shutdown");
   const char *accounting = getenv("X2C_SCOPE_ACCOUNTING");
   scope_accounting = accounting && strcmp(accounting, "1") == 0;
   scope_state = <running>;
   if (atexit(Scope_shutdown))
-    x2c_fatal("Scope: could not register shutdown handler");
+    _raw_fatal("could not register shutdown handler");
+}
+
+/* Scope links without the rest of the runtime (see the preinit probe in
+   unittest/probes/run-scope-shutdown), so it keeps this report rather than
+   calling `x2c_fatal`. */
+module void _raw_fatal(const char *message) {
+  fprintf(stderr, "Scope: %s\n", message);
+  abort();
 }
 
 /* A hook that registers another runs it next, still newest first. */
@@ -124,5 +132,5 @@ module void _require_running(void) {
 static void _ensure_running(void) {
   if (scope_state == <uninit>) _initialize();
   else if (scope_state == <shutdown>)
-    x2c_fatal("Scope: operation attempted after shutdown");
+    _raw_fatal("operation attempted after shutdown");
 }

@@ -284,7 +284,7 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
   if (!slot) raise %(bad-arg);
   if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)) {
     if (x2c_error_runtime_ready) raise %(size-limit);
-    x2c_fatal("Scope: allocation size overflow");
+    _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
   ScopeMetadata *meta = _data_malloc(
@@ -314,7 +314,7 @@ module void *_data_malloc(size_t size) {
 static void *_calloc_in(Scope *slot, size_t count, size_t size) {
   if (count && size > SIZE_MAX / count) {
     if (x2c_error_runtime_ready) raise %(size-limit);
-    x2c_fatal("Scope: calloc size overflow");
+    _raw_fatal("calloc size overflow");
   }
   size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
   if (total) memset(ptr, 0, total);
