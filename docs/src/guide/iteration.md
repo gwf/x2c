@@ -193,9 +193,10 @@ For a statically typed collection other than `Iter`, the declared loop type
 can supply a native cursor. Foreach first looks for that type's `try_next`
 method. Its first parameter must match the collection type. The output
 assigned to the last loop binding must match that binding's type. A single
-binding receives the final output; two bindings receive the first two outputs. Ordinary member lookup follows typedef
-aliases. The cursor must be integral or have the collection's own type, as
-with collection-owned cursors. A matching cursor needs no `Iter` adoption.
+binding receives the final output; two bindings receive the first two
+outputs. Ordinary member lookup follows typedef aliases. The cursor must be
+integral or have the collection's own type, as with collection-owned
+cursors. A matching cursor needs no `Iter` adoption.
 
 For example, `foreach (Substr word in text)` uses the prototype
 `Substring.try_next(String, int &, Substring &)` declared in `substring.x`.

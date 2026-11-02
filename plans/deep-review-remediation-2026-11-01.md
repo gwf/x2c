@@ -1,9 +1,11 @@
 # Deep review remediation (2026-11-01)
 
-> Status: active - batch A integrated from `dev` `024962818` and
-> submitted to the shared integrator on 2026-11-01 on branch
-> `gwf/repo-review-consistency-waste-f9b49f`; batch B is next;
-> batch C waits for Gary's decisions.
+> Status: active - batch A landed on `dev` as `9d196566f` (PR #643,
+> 2026-11-02); batch B (PR #644, branch `gwf/repo-review-batch-b`) and
+> batch C (PR #645, branch `gwf/review-batch-c-contracts`, Gary's accepted
+> decisions) were integrated from `9d196566f` and submitted to the shared
+> integrator on 2026-11-02; the bug batch below was integrated from
+> `9d196566f` and submitted the same day on branch `gwf/review-bug-batch`.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
@@ -44,20 +46,27 @@ integrator with focused evidence.
   for lifetime checking; the allocator table gains the missing runtime
   rows, including `move_to`.
 
-## Decisions for Gary (batch C, not started)
+## Decisions for batch C (accepted by Gary on 2026-11-02)
 
-1. Boxed `Array` out-of-range and null writes: raise `<bad-arg>` like the
-   compound forms and typed Arrays (recommended), or keep the silent no-op.
-2. `iter.x` null callbacks: raise `<bad-arg>` for a required callback
-   (recommended) instead of five behaviours.
-3. Null handles: `<bad-arg>` for operations and no-op for cleanup-style
-   free/close (recommended, per ER-2), replacing the per-type mix of
-   `<bad-arg>`, `<bad-state>`, and silence.
-4. List and Array search (`index`, `contains`, `count`, `assoc`): keep C
-   `==` and document it (recommended), or switch to `Var.equal` like Map
-   keys and `unique`.
-5. `protect_x2c` in the Lisp runtime: remove (changes documented
-   `Lisp.set_global` behaviour).
+1. Boxed `Array` writes that cannot be performed (`setindex`, `push`,
+   `unshift`, and `insert` on a null array or an out-of-range index) raise
+   `<bad-arg>` like the compound forms and typed Arrays; reads keep
+   returning `void`.
+2. A required `iter.x` callback that is null raises `<bad-arg>` when the
+   operation is called, before any source element is consumed; `zip_with`
+   keeps its documented optional `fn`.
+3. Null handles: an operation on a null handle raises `<bad-arg>`; `free`,
+   `close`, `destroy`, and `cleanup` accept a null handle and do nothing;
+   causes that describe a non-null handle's state stay `<bad-state>`.
+4. List and Array search (`index`, `contains`, `count`, `assoc`) keep `==`,
+   and the doc comments and the book say so; `Map` keys and `unique` use
+   `Var.equal`.
+5. `protect_x2c` leaves the Lisp runtime; `def` of an `x2c.` name follows
+   the ordinary inherited-name and frozen-session rules.
+
+Batch C runs as four workers with disjoint files: collections (1 and 4),
+iter (2), handles (3), and lisp (5, plus the stale compile-time comments
+the review found in `lib/lisp/`).
 
 ## Batch A: bugs (parallel workers, disjoint files)
 
@@ -179,6 +188,100 @@ Waste and drift the workers saw, for this batch:
   check; `cli.md` script-reuse triggers omit `-l`; `packages/pcre2/
   README.md` shows `defer` where the `auto` form is now described;
   `unittest/AGENTS.md` and `STATUS.md` need the skip-inside-a-test rule.
+
+### Batch B outcome (2026-11-02)
+
+Changed:
+
+- REPL loaded-helper chain, `loaded.x`, the `load_source` and
+  `meta_helper` fields, and the five orphaned compiler methods deleted;
+  `-l` relinks the current meta helper instead of rebuilding it.
+- `examples/shootout-unofficial/`, the Notes benchmark reports, and
+  `commands/graph/clones-experiment.md` removed; the installer skips Notes
+  bench results; the VSIX and the version-viewer snapshots are untracked
+  and documented as regenerated.
+- Each package Makefile defines `check`; `packages/Makefile` holds the one
+  list; `tools/release-candidate.py` owns the released set, which
+  `agents/releasing.md` states once; CI shares one clang step, one mdBook
+  step, and one release script.
+- Driver errors go through `Diagnostics.driver_report`, `driver_fail`, and
+  `driver_error`; stderr and JSON name a source by the same rule;
+  `TargetKind.product` names products.
+- The operator ledger supplies bracket-access, dynamic-operator, stage,
+  and String comparison facts; one public-inline role helper.
+- Shared runtime `x2c_fatal`, `x2c_native_check`, and `x2c_io_fail`;
+  typed compound updates share the integer, floating, and String rules of
+  `Var` (`MapLongDouble %=` now raises `<bad-types>`, an `ArrayChar` shift
+  promotes like C); JSON, Lisp file reading, and the datum reader reuse
+  their owners.
+- Front-end duplicates (`never_defined`, `hidden_group`, the runtime
+  source test, the import scanner), driver duplicates (`_valid_utf8`,
+  response-file reading, `Job.decode_wait_status`), test and tool helpers
+  have one owner each; `BUILD_JOBS` is the only parallelism knob;
+  `make verify` builds the commands its CLI probes run; `x2c test` accepts
+  `--manifest-path` and keeps `--manifest` as a second spelling.
+- Guidance: the code standard's restatements, the duplicated module map,
+  unresolvable commit hashes, plans/README.md drift, the split plan name
+  (now `language-reference-writing.md`), and twelve reference holds.
+- Book: the carried items above, plus the promoted-width rule for typed
+  compound updates.
+
+Declined, with the reason:
+
+- One pool-copy owner for Context, Logger, and Error: a shared owner needs
+  a policy record and a callback for a net saving of two lines, and the
+  Error copy keeps its snapshot and raise-time rules.
+- Scope keeps its own fatal report: the preinit probe links `scope.o`
+  without `common.o`.
+- The `$rewrite` operator lists and `_is_comparison` stay: generating them
+  needs a decorator and a meta function that cost more than they remove.
+- torch stays out of the release-validation matrix: adding it expands a
+  recurring CI check (root AGENTS.md "Process ceiling").
+- The two dated 2026-10-05 approvals stay in the code standard because its
+  proof rule depends on them; the root "established contracts" bullet
+  states clauses the standard does not.
+- Fixture copies of `rejected()` stay: fixtures are standalone programs.
+
+Still open for a later bug batch, besides the carried defects above:
+
+- `-v` and `-###` translate lines are not shell-quoted (K7).
+- `SymTxn.rollback` and `_speculate` do not restore `protocol_helpers`
+  (latent; not reproduced).
+- `(m["a"]) += 4` emits invalid C.
+- The Var conversion check misses struct-tag destinations
+  (`struct Point p = v;` passes x2c and fails in clang).
+- The first `make build` after a `Compiler` field change can segfault in
+  `lib/.own-interfaces`; a second build succeeds (stage build graph).
+### Carried from the batch C handoffs
+
+Defects and drift the batch C workers reproduced or read outside their
+items, for a later batch:
+
+- `Logger.new` returns NULL for an invalid level, so the NULL now fails at
+  its first use instead of the constructor raising (ER-1).
+- `Lisp.call_budget` ignores a nonpositive budget silently although its
+  doc says the budget must be positive; the `Lisp.bind` doc omits the
+  `<bad-state>` a frozen session raises after the `Func` has moved;
+  `Lisp.try_get` and `Lisp.read` document their own null-session
+  behaviour, outside the handle rule.
+- `lisp_source_function`, `Lisp.automatic_storage`, and
+  `Lisp.result_storage` have no callers outside `lib/lisp` and its test:
+  candidates for deletion.
+- `Array.take_last`, `shift`, and `remove` return `void` on a null array or
+  an index outside the elements (the decision covered writes only);
+  `Array.getindex` dereferences a null array under its documented
+  non-null precondition.
+- `Iter.parallel_map` and `parallel_map_in` take a `ThreadValueFn`; their
+  null-function behaviour was not checked.
+- `lib/channel.x` uses an `argument` detail key that DG-7 does not list;
+  `Listener.write_repr` formats a null handle's text.
+- Not audited for null-handle sites: `lib/match`, `lib/dispatch.x`,
+  `lib/static-init.x`, `lib/var`, `lib/pool`.
+- Lines over 79 columns that predate the batch: `lib/lisp/lisp.x` (five,
+  deliberate one-line error macros) and `lib/process.x` (three) from the
+  compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
+  `docs/src/guide/iteration.md`, and `collections.md`; translating
+  `test-lisp.x` reports four unnecessary `.str()` conversions.
 
 ## Validation and delivery
 
