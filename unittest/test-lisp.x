@@ -420,6 +420,18 @@ static void lisp_host_binding_shadows_only_the_child(void) {
   parent.destroy();
 }
 
+static void lisp_def_replaces_host_x2c_names(void) {
+  Lisp lisp = Lisp.kernel();
+  lisp.set_global("x2c.answer", 42);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.answer 43)"), 0);
+  EXPECT_INT_EQ(_ev(lisp, "x2c.answer").integer(), 43);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.other 1)"), 0);
+  Var stored = void;
+  EXPECT_TRUE(lisp.try_get("x2c.other", stored));
+  EXPECT_INT_EQ(stored.integer(), 1);
+  lisp.destroy();
+}
+
 static void lisp_transports_void_outside_collections(void) {
   Lisp lisp = _boot_session();
   _install(lisp, "identity", _native_identity,
@@ -2136,6 +2148,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_self_and_quote);
   $test.run(lisp_eval_def_and_globals);
   $test.run(lisp_host_binding_shadows_only_the_child);
+  $test.run(lisp_def_replaces_host_x2c_names);
   $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
