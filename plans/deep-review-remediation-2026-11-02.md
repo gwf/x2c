@@ -1,12 +1,10 @@
 # Deep review remediation (2026-11-02, second pass)
 
-> Status: active - plan written; no batch has started. Review baseline
-> `dev` 6f537e429 (PR #648 merged). The review record is workspace-local
-> (`.context/review-2026-11-02/REPORT.md` with ten per-area files in
-> worktree `interesting-northcutt-0886af`); this plan carries the
-> decisions and the batch map. Delivery follows the root `AGENTS.md`
-> default (ready PRs to the shared integrator) unless Gary selects
-> otherwise.
+> Status: active - implementation and combined review underway on 2026-11-02.
+> Gary selected direct delivery to `dev`. Starting revision:
+> `87ced5324f15a2098bca98cee7500bb1a0f5b3b4`; review baseline:
+> `6f537e429`. Worker repairs are collected on `codex/remediation-20261102`.
+> Final publication evidence is recorded below when complete.
 
 ## Requested behavior
 
@@ -33,8 +31,9 @@ waste and settle the contracts the review found applied several ways.
   consumes, including `truth` in conditions and compound updates.
 - `Regex.replace_fn` with a null `Func` follows the 2026-11-02 callback
   rule: it raises through `Func.apply` when a match needs it.
-- `String.unescape` and the quoted-literal reader use the C escape rules
-  that `scan_c_escape_value` implements; the x2c rule stays for `%()`.
+- `String.unescape` uses the C escape rules that `scan_c_escape_value`
+  implements. Percent strings, Symbols, Lisp source, and strings nested in
+  quoted collections retain their documented byte escape rules.
 - A conditional whose arms are a String and a null literal boxes as a
   null String, not a pointer.
 - Generated headers emit `struct tag;` before a public prototype that
@@ -52,30 +51,30 @@ waste and settle the contracts the review found applied several ways.
   other package fixtures are (top-level link), and the runner's README
   says only top-level `.phases` run.
 
-## Decisions for Gary
+## Decisions approved by Gary (2026-11-02)
 
-1. Torch bundles ship `libgomp` (Linux) and `libomp` (macOS) with no
-   license text; `packages/LICENSE-POLICY.md` rejects GPL by default.
-   Record an exception for libgomp (GPL-3 with the GCC runtime exception)
-   and add both license texts, or drop libgomp from the Linux bundle.
-2. `plans/archive`: 38 plans (6,107 lines) with no inbound reference and
-   38 more (8,083 lines) referenced only from inside the archive. The
-   README forbids deletion. Keep, or amend the rule and delete.
-3. `plans/README.md` completed-records index (398 lines, 115 rows that
-   repeat archive status headers): cut to the active and reference
-   tables, or keep.
-4. `typesafe-ai` skill (170 lines plus LICENSE, unrelated to x2c): keep or
-   remove.
-5. Public runtime surface with zero callers and no tests: `File.putw`,
-   `getw`, `setlinebuf`, `setbuffer`, `scanf`, `Lisp.remove_global`,
-   `Var.fallback_compare`, `Var.fallback_hash`. Remove, or keep and test.
-6. `sanity-check` compiles the bootstrap twice and stage 0 three times
-   (about 7 s); changing it is under the process ceiling.
-7. Root `AGENTS.md:49` says a session that launches implementation
-   subagents loads `orchestrate-x2c-work`; the skill says not for a single
-   change. Which rule stands for one delegated change.
-8. Legacy second argument parsers in `x2c-new` and `x2c-package` (two
-   help texts, two error texts each): remove or keep.
+1. Admit the pinned libtorch Linux libgomp runtime under a narrow project
+   exception. Retain the GPL, GCC Runtime Library Exception, and LLVM OpenMP
+   license texts in the Torch bundle.
+2. Keep archived plans and their historical evidence.
+3. Remove the completed-records index; retain active and reference tables.
+4. Keep the `typesafe-ai` skill.
+5. Keep and test the listed public File, Lisp, and Var operations.
+6. Remove redundant `sanity-check` builds while preserving bootstrap recovery
+   and stages 0 through 3.
+7. Require `orchestrate-x2c-work` whenever implementation subagents launch,
+   including one delegated change.
+8. Use one public command parser for each of `new` and package operations.
+   Preserve direct invocation's literal response-file words. Package `ensure`
+   remains a distinct internal dependency operation.
+
+Gary also approved element provenance for the region analysis. The repair
+preserves a container's actual allocation owner separately from its deferred
+handle cleanup. Element access and helper summaries use that distinction.
+It adds one pointer and one integer to `Fact`: 88 to 104 bytes on arm64.
+It creates a transient Fact for an element read under the existing allocator;
+compiled programs gain no state. The check remains conservative when an
+explicitly region-born container holds only borrowed outer values.
 
 ## Batch A: bugs (parallel workers, disjoint files)
 
@@ -156,13 +155,69 @@ to the orchestrator. Workers never merge `dev`, gate, or push.
   the check-docs module audit); TE-1/TE-3 text out of unittest/AGENTS.md;
   integrate-x2c-package restatement out; skills that say "follow root
   publication validation" say the integrator gates in PR mode.
-- Items 1 to 8 above as Gary decides them.
+- Apply the eight approved decisions above.
 
 ## Validation and delivery
 
-Workers: focused checks only. Orchestrator: combined focused checks,
-`make stage-1` on the integrated batch, lint census on changed entry
-units, `git diff --check`, then `tools/integrate-dev.py submit` with the
-focused evidence. The integrator owns the publication gate and `dev`.
-Batch A's first commit is the lib/regex.x rewrap so the census is green
-before anything else lands.
+Workers run focused checks and hand private commits to the orchestrator.
+Gary selected direct delivery for this execution. The orchestrator owns the
+combined review, generated artifacts, performance checkpoint, publication
+gate, and explicit push to `dev`. The first authored commit rewraps the
+Regex initializer. No `main` or release promotion is authorized.
+
+## Execution record
+
+The combined change repairs every selected Batch A finding. A second source
+review found additional parenthesized-call, qualified character-array, and
+const-destructuring paths; those repairs remain pending final worker evidence.
+
+Scope corrections established while implementing:
+
+- A8's quoted-collection subclaim is refuted by the book's nested String
+  grammar and the tokenizer's deliberate percent-string token. Its behavior
+  stays byte-oriented. Ordinary C text and runtime `String.unescape` consume
+  C escape widths. No new C overflow policy was introduced.
+- A19 retains the book's file-scope aliases. An alias that refers to a script
+  local gets the existing script-local diagnostic, instead of invalid C.
+  Aliases of static script variables remain valid.
+- A21 preserves documented null observations such as Buffer length and
+  Block truth. Mutations, required Regex operations, and Block encoders raise;
+  release operations accept null. The book states these distinctions.
+- String.printf allocates in Pool. A Scope-only `auto` does not end its
+  result; the regression uses a nested Pool. Existing Scope behavior stays.
+- The REPL repair corrects native diagnostic line numbers. Native compiler
+  columns still describe the generated C; source-column reconstruction is
+  not claimed.
+
+The following Batch B deletion proposals were tested or traced and retained:
+
+| Proposal | Evidence and disposition |
+| --- | --- |
+| Replace decimal parsers with String.try_long | `010` is decimal 10 at the command boundary but 8 through try_long; `08` is accepted only by decimal parsing; `0x10` and trailing whitespace are accepted only by try_long. Task uses unsigned capacities beyond LONG_MAX. Direct replacement changes syntax or range. Keep existing libc readers. |
+| One packages-wide live guard | PCRE2 requires three native handles; SQLite statements depend on their database; BLIS views depend on their owner; Raylib checks native window state; libuv checks its loop and closing state. Causes and return contracts also differ. A shared include would add a bundle dependency without removing these predicates. Keep the existing owners. |
+| One host-platform implementation | Native code uses uname and its diagnostic; shell installers must work standalone; Python dependency selection has its own platform API. No shared C/shell/Python owner exists without another process or bootstrap dependency. Retain local primitives. Release policy and verification matrices now use PLATFORMS. |
+
+These decisions reject the proposed substitutions, not every future shared
+implementation. They preserve the existing contracts without introducing a
+new runtime API solely to wrap libc or a new package distribution dependency.
+
+Completed focused evidence so far:
+
+- All reported compiler regressions were reproduced before repair. Worker
+  builds and strict stage-1 builds pass; their focused fixtures and unit
+  suites are recorded in the workspace handoffs.
+- The independent Lisp comparison passes 200/200 cases, with byte-for-byte
+  exit, stdout, and stderr comparisons. File.string owns reading and NUL
+  rejection; the interpreter owns apply's void-argument error and index.
+- The integration tool's 61 offline tests pass, including quoted-path
+  retirement. Configure's nine tests, six example-runner tests, 20 snapshot
+  tests, and 14 release-helper tests pass.
+- The VS Code Node and grammar checks pass. The common keyword tables gain
+  parity coverage in the existing scanner suite.
+- The 769 default-only fixture sidecars are removed without removing their
+  runner failure conditions. Eleven identical flag variants share source
+  files through relative symlinks. Thirty-five example output names follow
+  their source names. One service example checks both schedulers.
+
+Combined final validation and publication are pending. Host coverage remains
+macOS arm64; no Linux or native Torch execution is claimed.

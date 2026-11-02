@@ -46,7 +46,7 @@ deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Deep review remediation, second pass](deep-review-remediation-2026-11-02.md) | Batch A bugs, batch B partial landings, contracts, waste, and guidance; eight decisions for Gary. | Rewrap lib/regex.x:278 first; start batch A workers from the record's probes. |
+| [Deep review remediation, second pass](deep-review-remediation-2026-11-02.md) | Batch A repairs and batch B cleanup; all eight decisions approved. | Complete combined review and direct publication validation. |
 | [Deep review remediation](deep-review-remediation-2026-11-01.md) | Only the final "Still carried" findings; batches A, B, C, and the bug batch are published through `dbcb6c347`. | Reproduce each selected follow-up; preserve the superseding invocation-time iterator callback rule. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |

@@ -33,7 +33,18 @@ class ConfigureTests(unittest.TestCase):
       env=dict(os.environ, CC="cc -Wall"),
     )
     self.assertNotEqual(result.returncode, 0)
-    self.assertIn("must be one executable path: cc -Wall", result.stderr)
+    self.assertIn("must be one executable path without whitespace: cc -Wall", result.stderr)
+
+  def test_existing_executable_with_whitespace_is_rejected(self):
+    with tempfile.TemporaryDirectory() as directory:
+      compiler = Path(directory) / "cc tool"
+      compiler.symlink_to(shutil.which("true"))
+      result = subprocess.run(
+        ["/bin/sh", str(ROOT / "configure")], capture_output=True, text=True,
+        env=dict(os.environ, CC=str(compiler)),
+      )
+    self.assertNotEqual(result.returncode, 0)
+    self.assertIn("without whitespace", result.stderr)
 
   def test_core_does_not_require_package_tools_or_unused_defaults(self):
     with tempfile.TemporaryDirectory() as directory:

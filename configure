@@ -19,10 +19,9 @@ check() {
   fi
 }
 check_command() {
-  if command -v "$1" >/dev/null 2>&1; then return; fi
   case "$1" in
     *[[:space:]]*)
-      printf 'core build tool must be one executable path: %s\n' "$1" >&2
+      printf 'core build tool must be one executable path without whitespace: %s\n' "$1" >&2
       missing=1 ;;
     '')
       printf 'missing core build tool: empty compiler or archiver command\n' >&2
