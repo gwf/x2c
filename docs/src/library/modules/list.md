@@ -141,10 +141,11 @@ Source: `lib/list/building.x`
 `int List.all(List lst, Func pred)`
 
 True when every element satisfies `pred` by ordinary `Var` truthiness.
-Stops at the first rejection. Nil is true; a null `pred` is false for a
-nonempty `List`.
+Stops at the first rejection. Nil is true without invoking or checking
+`pred`.
 
-Any cause raised by `pred` or its result's truth operation propagates.
+Any cause raised by `pred` or its result's truth operation propagates. A
+null `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 
@@ -154,10 +155,11 @@ Source: `lib/list/transformations.x`
 `int List.any(List lst, Func pred)`
 
 True when at least one element satisfies `pred` by ordinary `Var`
-truthiness. Stops at the first accepted element. Nil and a null `pred` are
-false.
+truthiness. Stops at the first accepted element. Nil is false without
+invoking or checking `pred`.
 
-Any cause raised by `pred` or its result's truth operation propagates.
+Any cause raised by `pred` or its result's truth operation propagates. A
+null `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 
@@ -251,8 +253,9 @@ Source: `lib/list/transformations.x`
 Returns the first element `pred` accepts by ordinary `Var` truthiness, or
 `void`.
 
-Any cause raised by `pred` or its result's truth operation propagates. A
-null `pred` returns `void`.
+Searching `nil` returns `void` without invoking or checking `pred`. Any
+cause raised by `pred` or its result's truth operation propagates. A null
+`pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 

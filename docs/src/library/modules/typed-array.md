@@ -456,9 +456,12 @@ Source: `lib/typed-array.x`
 `Var ArrayChar.find(ArrayChar array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -896,9 +899,12 @@ Source: `lib/typed-array.x`
 `Var ArrayDbl.find(ArrayDbl array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -1334,9 +1340,12 @@ Source: `lib/typed-array.x`
 `Var ArrayFloat.find(ArrayFloat array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -1772,9 +1781,12 @@ Source: `lib/typed-array.x`
 `Var ArrayInt.find(ArrayInt array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -2212,9 +2224,12 @@ Source: `lib/typed-array.x`
 `Var ArrayLong.find(ArrayLong array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -2652,9 +2667,12 @@ Source: `lib/typed-array.x`
 `Var ArrayShort.find(ArrayShort array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
@@ -3092,9 +3110,12 @@ Source: `lib/typed-array.x`
 `Var ArrayString.find(ArrayString array, Func pred)`
 
 Returns the first element accepted by `pred`'s ordinary `Var` truth,
-or `void` when absent. A null array or predicate returns `void`.
-Elements are boxed as in iteration; the array and its storage are
-unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+or `void` when absent. A null or empty array returns `void` without
+invoking or checking `pred`. Elements are boxed as in iteration; the
+array and its storage are unchanged.
+
+**Raises:** `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+array, or any cause from boxing, `pred`, or its result's truth
 operation.
 
 Source: `lib/typed-array.x`
