@@ -108,13 +108,13 @@ static void array_void_writes_transfer_before_mutation(void) {
   int caught = 0;
 
   try array.setindex(0, void);
-  catch %(void-op *): caught++;
+  catch %(void-op (operation "Array.setindex")): caught++;
   try array.push(void);
-  catch %(void-op *): caught++;
+  catch %(void-op (operation "Array.push")): caught++;
   try array.unshift(void);
-  catch %(void-op *): caught++;
+  catch %(void-op (operation "Array.unshift")): caught++;
   try array.insert(0, void);
-  catch %(void-op *): caught++;
+  catch %(void-op (operation "Array.insert")): caught++;
   EXPECT_INT_EQ(caught, 4);
   EXPECT_INT_EQ(array.len(), 1);
   EXPECT_INT_EQ(array[0].int(), 1);
