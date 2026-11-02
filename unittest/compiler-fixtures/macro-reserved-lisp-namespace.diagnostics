@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-reserved-lisp-namespace.x:6:1: parse: macro name 'lisp.install' is reserved
+  macro Stmt $lisp.install(Expr $lisp, Name $group) { puts("replaced"); }
+  ^^^^^
+  note: lisp.* is reserved for compiler facilities
+

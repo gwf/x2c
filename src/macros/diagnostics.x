@@ -45,10 +45,14 @@ static macro Stmt $fail.macros_macro_unknown_kind(
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_reserved(
-  Expr $c, Expr $origin, Expr $spelling) =>
-  $c.report_error(
-    <parse>, %"macro name '$($spelling)' is reserved",
-    $origin, %("x2c.* is reserved for compiler facilities"));
+  Expr $c, Expr $origin, Expr $spelling) {
+  {
+    String space = $spelling[:$spelling.find(".")];
+    $c.report_error(
+      <parse>, %"macro name '$($spelling)' is reserved",
+      $origin, $(%"$(space).* is reserved for compiler facilities"));
+  }
+}
 
 static macro Stmt $fail.macros_name_with(Expr $c, Expr $origin) =>
   $c.report_error(
