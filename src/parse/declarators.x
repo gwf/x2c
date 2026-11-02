@@ -244,10 +244,14 @@ static List _function_parameters(Compiler c, int loaded_main) {
   return params;
 }
 
+/* The C that x2c emits cannot spell a block declarator, so x2c source
+   cannot write one. Collection also reads C headers, which C compiles. */
 module List _pointer(Compiler c) {
   List ptr = NULL;
   loop {
     Symbol symbol = c.peek(0);
+    if (symbol == <^> && !c.shallow)
+      $fail.parse_block_declarator(c, c.token);
     if (symbol == <*> || symbol == <^> || symbol == <&> ||
         symbol.is_type_qualifier()) {
       c.next();

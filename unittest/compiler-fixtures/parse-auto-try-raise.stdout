@@ -1,0 +1,4 @@
+finally 0
+after try 1
+caught 4 after 5
+locals 5 6
