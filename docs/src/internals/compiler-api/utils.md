@@ -23,6 +23,7 @@ System utilities for environment discovery and workers.
 | [`Compiler.cache_root`](#Compiler.cache_root) | Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`, whichever is set first, or NULL when none is. |
 | [`Compiler.command_environment`](#Compiler.command_environment) | Returns the home, driver, and identity supplied to an external command. |
 | [`Compiler.command_path`](#Compiler.command_path) | Returns an executable command in this compiler's libexec, or NULL. |
+| [`Compiler.configure_logging`](#Compiler.configure_logging) | Sets the default `Logger`'s minimum level for one command: `<debug>` when `debugging` and `<error>` otherwise. |
 | [`Compiler.cpp_include_dirs`](#Compiler.cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`. |
 | [`Compiler.default_include_dirs`](#Compiler.default_include_dirs) | Returns the borrowed default include `List`, `<root>/include/x2c`. |
 | [`Compiler.driver_executable`](#Compiler.driver_executable) | Returns the matching compiler executable for a recursive translation. |
@@ -166,6 +167,17 @@ Returns an executable command in this compiler's libexec, or NULL.
 
 Source: `src/utils.x`
 
+<a id="Compiler.configure_logging"></a>
+#### Compiler.configure_logging
+
+`void Compiler.configure_logging(int debugging)`
+
+Sets the default `Logger`'s minimum level for one command: `<debug>`
+when `debugging` and `<error>` otherwise. Its stderr sink stays, so an
+uncaught error always prints its one-line `x2c: uncaught` report.
+
+Source: `src/utils.x`
+
 <a id="Compiler.cpp_include_dirs"></a>
 #### Compiler.cpp_include_dirs
 
@@ -276,7 +288,8 @@ Source: `src/utils.x`
 
 Removes each entry of the cache `directory` whose recorded `source`
 file no longer exists and that no other run holds by its `lock`.
-An entry without a `source` file stays.
+An entry without a readable `source` file stays. Another process may
+prune the same cache, so an entry it removes or locks first is skipped.
 
 Source: `src/utils.x`
 
@@ -400,7 +413,7 @@ Source: `src/utils.x`
 
 Locks the file `p`, creating it, and returns a descriptor that holds the
 lock until it is closed or the process exits. Returns -1 when `wait` is
-zero and another process holds the lock.
+zero and another process holds the lock or `p` cannot be opened.
 
 Source: `src/utils.x`
 
@@ -463,5 +476,5 @@ Source: `src/utils.x`
 Owns the environment the driver modules share: where the executable,
 home, stage, and packages are, which files are x2c source, the
 compiler's identity, how a file is locked or replaced, and the
-driver's fatal error line. Host tools run through
+driver's log level and fatal error line. Host tools run through
 `lib/process.x`.

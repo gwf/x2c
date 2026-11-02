@@ -34,6 +34,9 @@ Variant type for dynamic typing.
 | [`Var.is_pointer`](#Var.is_pointer) | Reports whether `v` holds a native pointer. |
 | [`Var.is_reference`](#Var.is_reference) | Reports whether `v` holds a pointer to a boxed handle. |
 | [`Var.is_void`](#Var.is_void) | Reports whether `v` is the absence sentinel `void`. |
+| [`Var.long_at`](#Var.long_at) | Returns `value` as a native `long` under the `Var.convert` rules. |
+| [`Var.long_double_at`](#Var.long_double_at) | Returns `value` as a native `long double` under the `Var.convert` rules. |
+| [`Var.long_long_at`](#Var.long_long_at) | Returns `value` as a native `long long` under the `Var.convert` rules. |
 | [`Var.matmul`](#Var.matmul) | Multiplies matrices through a registered `matmul` behavior. |
 | [`Var.mod`](#Var.mod) | Computes dynamic remainder through integer or registered `mod` behavior. |
 | [`Var.mul`](#Var.mul) | Multiplies dynamic values through numeric or registered `mul` behavior. |
@@ -45,6 +48,8 @@ Variant type for dynamic typing.
 | [`Var.tag_bottom`](#Var.tag_bottom) | Returns the bottom encoding field of built-in `tag`. |
 | [`Var.tag_top`](#Var.tag_top) | Returns the top encoding field of built-in `tag`. |
 | [`Var.truth`](#Var.truth) | Returns dynamic truthiness through registered dispatch or built-in rules. |
+| [`Var.ulong_at`](#Var.ulong_at) | Returns `value` as a native `ulong` under the `Var.convert` rules. |
+| [`Var.ulong_long_at`](#Var.ulong_long_at) | Returns `value` as a native `unsigned long long` under the `Var.convert` rules. |
 | [`Var.update`](#Var.update) | Applies a failure-atomic dynamic compound update and returns the new value. |
 | [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
 | [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
@@ -390,6 +395,47 @@ This is the test that accepts a `void` argument.
 
 Source: `lib/var/encoding.x`
 
+<a id="Var.long_at"></a>
+#### Var.long_at
+
+`long Var.long_at(Var value, const X2CErrorSite *site)`
+
+Returns `value` as a native `long` under the `Var.convert` rules.
+Unlike `Var.convert_at`, it never boxes the result, so it allocates
+nothing. A failure records `site` as `Var.convert_at` does, and a null
+`site` records no source location. Compiler-inserted conversions to
+`long` call it.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.long_double_at"></a>
+#### Var.long_double_at
+
+`long double Var.long_double_at(Var value, const X2CErrorSite *site)`
+
+Returns `value` as a native `long double` under the `Var.convert` rules.
+Like `Var.long_at`, it never boxes and records `site` on failure.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
+invalidly encoded.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.long_long_at"></a>
+#### Var.long_long_at
+
+`long long Var.long_long_at(Var value, const X2CErrorSite *site)`
+
+Returns `value` as a native `long long` under the `Var.convert` rules.
+Like `Var.long_at`, it never boxes and records `site` on failure.
+
+**Raises:** the same causes as `Var.long_at`.
+
+Source: `lib/var/conversion.x`
+
 <a id="Var.matmul"></a>
 #### Var.matmul
 
@@ -543,6 +589,31 @@ return false independently of object state. The call does not retain
 selected descriptor callback.
 
 Source: `lib/var/operators.x`
+
+<a id="Var.ulong_at"></a>
+#### Var.ulong_at
+
+`ulong Var.ulong_at(Var value, const X2CErrorSite *site)`
+
+Returns `value` as a native `ulong` under the `Var.convert` rules.
+Like `Var.long_at`, it never boxes and records `site` on failure.
+
+**Raises:** the same causes as `Var.long_at`.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.ulong_long_at"></a>
+#### Var.ulong_long_at
+
+`unsigned long long Var.ulong_long_at(Var value, const X2CErrorSite *site)`
+
+Returns `value` as a native `unsigned long long` under the `Var.convert`
+rules.
+Like `Var.long_at`, it never boxes and records `site` on failure.
+
+**Raises:** the same causes as `Var.long_at`.
+
+Source: `lib/var/conversion.x`
 
 <a id="Var.update"></a>
 #### Var.update

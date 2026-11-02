@@ -1534,4 +1534,4 @@ share: the eight-byte `Var` encoding and its immediate boxing, and the
 declarations through which modules name each other's types and
 operations without an include cycle. Pointer-shaped `Var` extractors are
 ABI crossings whose callers establish the source kind; scalar readers
-convert other numeric tags through `Var.convert`.
+convert other numeric tags under the `Var.convert` rules.

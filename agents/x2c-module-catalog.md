@@ -267,7 +267,7 @@ synchronous compiler translation requests.
 
 Public functions:
 
-`translate_request`
+`translate_request`, `translate_print_command`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 
@@ -305,8 +305,9 @@ Public functions:
 `SourceView.package_entry`, `Compiler.is_package_source`,
 `Compiler.module_stamp`, `Compiler.identity`, `Path.content_identity`,
 `fnv_file`, `fnv_bytes`, `Path.identifier_hash`, `Path.lock_file`,
-`Path.publish_files`, `Job.decode_wait_status`, `Diagnostics.host_error`,
-`Diagnostics.driver_error`, `Compiler.cache_root`, `Compiler.prune_cache`
+`Path.publish_files`, `Job.decode_wait_status`, `Compiler.configure_logging`,
+`Diagnostics.host_error`, `Diagnostics.driver_error`, `Compiler.cache_root`,
+`Compiler.prune_cache`
 
 ### [src/callables/callables.x](../src/callables/callables.x)
 
@@ -1944,12 +1945,13 @@ Public functions:
 `Var.integer_compare`, `Var.integer_floating_compare`, `Var.string`,
 `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`,
 `Var.list`, `Var.map`, `Var.convert`, `Var.convert_at`, `Var.numeric_decode`,
-`Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
-`X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`, `Var.signed_from_bits`,
-`Var.width_mask`, `x2c_var_update_i8`, `x2c_var_update_schar`,
-`x2c_var_update_u8`, `x2c_var_update_i16`, `x2c_var_update_u16`,
-`x2c_var_update_i32`, `x2c_var_update_u32`, `x2c_var_update_long`,
-`x2c_var_update_ulong`, `x2c_var_update_long_long`,
+`Var.long_at`, `Var.ulong_at`, `Var.long_long_at`, `Var.ulong_long_at`,
+`Var.long_double_at`, `Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`,
+`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`,
+`Var.signed_from_bits`, `Var.width_mask`, `x2c_var_update_i8`,
+`x2c_var_update_schar`, `x2c_var_update_u8`, `x2c_var_update_i16`,
+`x2c_var_update_u16`, `x2c_var_update_i32`, `x2c_var_update_u32`,
+`x2c_var_update_long`, `x2c_var_update_ulong`, `x2c_var_update_long_long`,
 `x2c_var_update_ulong_long`, `x2c_var_update_f32`, `x2c_var_update_f64`,
 `x2c_var_update_long_double`, `Var.matmul`, `Var.neg`, `x2c_var_equal`,
 `x2c_var_identical`, `x2c_var_order`, `Var.truth`, `Var.fallback_truth`,
