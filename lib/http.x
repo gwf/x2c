@@ -272,9 +272,9 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
 /** Binds immediately; port 0 selects an available port.
     Options use Symbol keys.
     Raises: `<bad-arg>` for fewer than one worker, an idle timeout below one
-    millisecond, a negative body limit, or an invalid port, `<not-found>`
-    when the host does not resolve, or `<io-fail>` on a host failure while
-    binding, as `Listener.bind` does.
+    millisecond, a negative body limit, a NULL `logger`, or an invalid port,
+    `<not-found>` when the host does not resolve, or `<io-fail>` on a host
+    failure while binding, as `Listener.bind` does.
 */
 HttpServer HttpServer.new(Router router, Map options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
@@ -292,6 +292,7 @@ HttpServer HttpServer.new(Router router, Map options) {
     s.logger.add_stderr_sink();
     s.owns_logger = 1;
   }
+  if (!s.logger) raise %(bad-arg (operation "HttpServer.new"));
   String host = options.contains(<host>) ? options[<host>].str() : "::";
   int port = options.contains(<port>) ? options[<port>].integer() : 8080;
   s.listener = Listener.bind(host, port);
@@ -300,11 +301,19 @@ HttpServer HttpServer.new(Router router, Map options) {
   return s;
 }
 
-/** Reports the bound port. */
-int HttpServer.port(HttpServer s) => s.listener.port();
+/** Reports the bound port.
+    Raises: `<bad-arg>` for NULL.
+*/
+int HttpServer.port(HttpServer s) {
+  if (!s) raise %(bad-arg (operation "HttpServer.port"));
+  return s.listener.port();
+}
 
-/** Runs on the caller until stop; closes the queue and joins every worker. */
+/** Runs on the caller until stop; closes the queue and joins every worker.
+    Raises: `<bad-arg>` for NULL.
+*/
 void HttpServer.serve(HttpServer s) {
+  if (!s) raise %(bad-arg (operation "HttpServer.serve"));
   s.running = 1;
   defer { s.listener.close(); s.running = 0; }
   defer {
@@ -323,17 +332,21 @@ void HttpServer.serve(HttpServer s) {
 }
 
 /** Starts serving on a joined background Thread.
-    Raises: `<bad-state>` when the server is already serving, or the causes
-    of `Thread.start`.
+    Raises: `<bad-arg>` for NULL, `<bad-state>` when the server is already
+    serving, or the causes of `Thread.start`.
 */
 void HttpServer.start(HttpServer s) {
+  if (!s) raise %(bad-arg (operation "HttpServer.start"));
   if (s.acceptor || s.running)
     raise %(bad-state (operation "HttpServer.start"));
   s.acceptor = Thread.start(_accept, Var.new(<p48>, s));
 }
 
-/** Stops accepting and joins the background acceptor when one was started. */
+/** Stops accepting and joins the background acceptor when one was started.
+    Raises: `<bad-arg>` for NULL.
+*/
 void HttpServer.stop(HttpServer s) {
+  if (!s) raise %(bad-arg (operation "HttpServer.stop"));
   s.listener.stop();
   if (s.acceptor) {
     Thread thread = s.acceptor; s.acceptor = NULL;
@@ -343,10 +356,10 @@ void HttpServer.stop(HttpServer s) {
 }
 
 /** Stops and releases native resources.
-    Call after synchronous serve returns. */
+    Call after synchronous serve returns. Repeated close is harmless. */
 void HttpServer.close(HttpServer s) {
-  if (!s) return;
-  s.stop(); s.listener.close(); s.channel.free();
+  if (!s || !s.channel) return;
+  s.stop(); s.listener.close(); s.channel.free(); s.channel = NULL;
   if (s.owns_logger) s.logger.free();
 }
 

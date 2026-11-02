@@ -18,6 +18,31 @@ static void context_open_close_restores_scope(void) {
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
 }
 
+/* A Context that is not current still refuses to close. */
+static void context_null_handle_contract(void) {
+  Context context = NULL;
+  String raised = NULL;
+  try context.export(1);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try context.export_destination();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try context.owns(&raised);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try context.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try context.cleanup();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  Context outer = Context.open(), inner = Context.open();
+  try outer.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  inner.close();
+  outer.close();
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg Context.export; bad-arg Context.export_destination; "
+    "bad-arg Context.owns; bad-state Context.close; ");
+}
+
 static void context_restores_error_state(void) {
   int count = Error.count(), bound = Error.bound();
   EXPECT_TRUE(Error.policy_get(<context-no>) == <abort>);
@@ -478,4 +503,5 @@ void context_suite(void) {
   $test.run(context_string_map_collapse_uses_later_bucket);
   $test.run(context_exports_void_unchanged);
   $test.run(context_exports_long_list_without_c_stack_growth);
+  $test.run(context_null_handle_contract);
 }

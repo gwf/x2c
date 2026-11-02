@@ -503,12 +503,16 @@ static void typed_array_find_boxes_matches(void) {
   EXPECT_INT_EQ(floats.index(2.5f), 1);
   EXPECT_INT_EQ(doubles.index(3.5), 1);
   EXPECT_INT_EQ(strings.index("match"), 1);
-  EXPECT_TRUE(ints.find(NULL) is void);
+  int rejected = 0;
+  try ints.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): rejected++;
+  EXPECT_INT_EQ(rejected, 1);
   EXPECT_TRUE(ints.find(%!(Var value) => value > 999) is void);
   EXPECT_INT_EQ(ints[0], 0);
   EXPECT_INT_EQ(ints[1], 200);
   ArrayInt empty = ArrayInt.new(), missing = NULL;
   EXPECT_TRUE(empty.find(accept) is void);
+  EXPECT_TRUE(empty.find(NULL) is void);
   EXPECT_TRUE(missing.find(accept) is void);
 }
 

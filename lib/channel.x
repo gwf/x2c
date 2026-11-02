@@ -111,9 +111,13 @@ Channel Channel.new(Var type, Var capacity) {
 
 /** Returns the Channel's own storage scope. Owned queued payloads stay
     detached; ordinary messages remain borrowed. This scope is not a shared
-    adoption destination for concurrent senders. NULL returns NULL.
+    adoption destination for concurrent senders.
+    Raises: <bad-arg> for NULL.
 */
-Scope Channel.scope(Channel channel) => channel ? channel.lifetime : NULL;
+Scope Channel.scope(Channel channel) {
+  if (!channel) raise %(bad-arg (operation "Channel.scope"));
+  return channel.lifetime;
+}
 
 // communication
 
@@ -153,12 +157,11 @@ void Channel.free(Channel channel) {
 }
 
 /** Ends sends and wakes waiters; accepted messages remain available to drain.
-    Repeated close is harmless. Closing does not stop Thread users, free
-    payloads, or acknowledge completion of a borrow.
-    Raises: <bad-arg> for NULL.
+    Repeated close is harmless, and NULL does nothing. Closing does not stop
+    Thread users, free payloads, or acknowledge completion of a borrow.
 */
 void Channel.close(Channel channel) {
-  if (!channel) raise %(bad-arg (operation "Channel.close"));
+  if (!channel) return;
   _lock(&channel.monitor.mutex);
   channel.closed = 1;
   _notify(channel);

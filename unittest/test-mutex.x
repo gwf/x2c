@@ -36,15 +36,30 @@ static void mutex_system_lock_evaluation_and_transfer(void) {
 }
 
 static void mutex_system_lock_failed_acquisition(void) {
-  int caught = 0;
+  String raised = NULL;
   try {
     $lock((Mutex) NULL) { TEST_FAIL("failed lock entered body"); }
   }
-  catch %(bad-state (operation ?owner)): {
-    EXPECT_STR_EQ(owner.str(), "Mutex.lock");
-    caught = 1;
-  }
-  EXPECT_INT_EQ(caught, 1);
+  catch %(?code (operation ?op) *): raised = %"$code $op";
+  EXPECT_STR_EQ(raised, "bad-arg Mutex.lock");
+}
+
+static void mutex_null_handle_contract(void) {
+  Mutex mutex = NULL;
+  String raised = NULL;
+  try mutex.lock();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try mutex.try_lock();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try mutex.unlock();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try mutex.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try mutex.cleanup();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg Mutex.lock; bad-arg Mutex.try_lock; bad-arg Mutex.unlock; ");
 }
 
 #include "test-macros.x"
@@ -53,4 +68,5 @@ void mutex_suite(void) {
   $test.run(mutex_system_lock_evaluation_and_transfer);
   $test.run(mutex_system_lock_failed_acquisition);
   $test.run(mutex_lock_try_unlock);
+  $test.run(mutex_null_handle_contract);
 }

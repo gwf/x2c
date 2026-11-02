@@ -32,13 +32,13 @@ static typedef struct FreeNames {
 
 /* C stack evaluator calls may use below the outermost one. Threads get 8 MB
    (lib/thread.x) and so does a default main thread; the rest is left for the
-   compiler and native calls, so a runaway ends in an error the compiler can
-   report instead of a crash. Tail calls use none. */
+   host program and native calls, so a runaway raises `<call-stack>` instead
+   of crashing. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
-/* Calls one compile-time evaluation may make before it is stopped. A loop
-   that never ends makes calls without nesting any, so the stack limit never
-   sees it. */
+/* Calls one evaluation may make before it is stopped, unless
+   `Lisp.call_budget` sets another budget. A loop that never ends makes calls
+   without nesting any, so the stack limit never sees it. */
 #define LISP_CALL_STEP_MAX 40000000
 
 static macro Decorator $lisp.entry(Function $function, Expr $operation) {
@@ -60,9 +60,11 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
     The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
     `Lisp.eval_string` each open one, and a call that runs it out does not
     renew it, so one entry reports a runaway once however many calls follow.
+    Raises: `<bad-arg>` for a null session.
 */
 void Lisp.call_budget(Lisp lisp, long budget) {
-  if (lisp && budget > 0) lisp.call_step_max = budget;
+  if (!lisp) $error.entry.null("Lisp.call_budget");
+  if (budget > 0) lisp.call_step_max = budget;
 }
 
 /** Sets whether evaluation in `lisp` is interrupted. While `interrupted` is
@@ -271,8 +273,6 @@ static Var _special_def(Lisp lisp, List args, LispEnv env) {
     int actual = args.len();
     $error.def.arity(actual, args);
   }
-  if (lisp.protect_x2c && name.str().startswith("x2c."))
-    $error.def.protected(name);
   if (_inherited(lisp, name))
     $error.def.inherited(name);
   /* A frozen session is complete, and a value produced now belongs to a

@@ -138,6 +138,63 @@ static void logger_creation_levels_and_queries(void) {
   logger.free();
 }
 
+/* The level shorthands report Logger.log, whose failure behavior they
+   share. */
+static void logger_null_handle_contract(void) {
+  Logger logger = NULL;
+  String raised = NULL;
+  List events = NULL;
+  try logger.should_log(<info>, <test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.min_level();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.set_min_level(<info>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.add_sink(capture_emit, NULL, void);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.remove_sink(NULL);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.add_file_sink(stderr);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.add_memory_sink(&events);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.add_stderr_sink();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.sink_count();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.log(<info>, <test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.trace(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.debug(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.info(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.warn(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.error(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.fatal(<test>);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.clear_sinks();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.flush();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try logger.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg Logger.should_log; bad-arg Logger.min_level; "
+    "bad-arg Logger.set_min_level; bad-arg Logger.add_sink; "
+    "bad-arg Logger.remove_sink; bad-arg Logger.add_file_sink; "
+    "bad-arg Logger.add_memory_sink; bad-arg Logger.add_stderr_sink; "
+    "bad-arg Logger.sink_count; bad-arg Logger.log; bad-arg Logger.log; "
+    "bad-arg Logger.log; bad-arg Logger.log; bad-arg Logger.log; "
+    "bad-arg Logger.log; bad-arg Logger.log; bad-arg Logger.clear_sinks; "
+    "bad-arg Logger.flush; ");
+  EXPECT_NULL(events);
+}
+
 static void logger_threshold_and_metadata(void) {
   $test.scoped();
   Logger logger = Logger.new(<warn>);
@@ -514,4 +571,5 @@ void logger_suite(void) {
   $test.run(logger_error_handler_renders_only_selected_newest);
   $test.run(logger_rejected_and_warmed_paths_allocate_nothing);
   $test.run(logger_global_replacement_and_shutdown);
+  $test.run(logger_null_handle_contract);
 }

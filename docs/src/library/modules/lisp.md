@@ -113,6 +113,9 @@ freezes it with `Lisp.freeze` before the first child runs: a child's
 values belong to a narrower `Context` than the parent's, so nothing a
 child produces may become reachable from the parent.
 
+**Raises:** `<bad-arg>` for a null session or parent, or `<alloc-fail>` or
+`<size-limit>` while creating the child's reserved `Map`.
+
 Source: `lib/lisp/sessions.x`
 
 <a id="Lisp.apply"></a>
@@ -165,6 +168,8 @@ reach it quickly.
 The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
+
+**Raises:** `<bad-arg>` for a null session.
 
 Source: `lib/lisp/evaluate.x`
 
@@ -228,6 +233,8 @@ Marks `lisp` complete, so nothing produced later may reach it.
 A frozen session rejects `def` and `Lisp.set_global`: a value produced
 while a narrower `Context` is current would leave the session holding
 values that die with that `Context`.
+
+**Raises:** `<bad-arg>` for a null session.
 
 Source: `lib/lisp/sessions.x`
 
@@ -362,7 +369,7 @@ Source: `lib/lisp/sessions.x`
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
 
-`void Lisp.set_global(Lisp lisp, String name, Var value)`
+`void Lisp.set_global(Lisp l, String name, Var value)`
 
 Binds `name` to `value` in the embedded Lisp global environment.
 The session stores the value in a raw slot, so `void` remains distinct
@@ -371,12 +378,10 @@ their canonical graphs or other owners must outlive the binding or
 session. A host binding may shadow an inherited name in this session;
 it does not change the ancestor. Lisp `def` still rejects inherited
 names, including a name the host has shadowed locally.
-Binding an `x2c.` name protects that namespace from later Lisp
-`def` forms, but direct calls to this function may replace such a
-binding.
 
-**Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-`<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+**Raises:** `<bad-arg>` for a null session or name, `<bad-state>` for a
+frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+canonicalizing or storing the binding.
 
 Source: `lib/lisp/sessions.x`
 

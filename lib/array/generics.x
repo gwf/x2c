@@ -384,16 +384,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Appends `value` and returns it.
-      Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-      when storage cannot grow.
+      Raises: `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+      `<size-limit>` at the integer index limit, or `<alloc-fail>` when
+      storage cannot grow.
   */
   $element $array.push($array array, $element value) {
-    if (array == NULL) {
-      if ($boxed) return $zero;
-      _bad_operation($owner, <push>);
-    }
+    if (array == NULL) _bad_operation($owner, <push>);
     if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
@@ -437,16 +433,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Inserts `value` at the front and returns it, shifting elements right.
       This operation is O(n).
-      Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-      when storage cannot grow.
+      Raises: `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+      `<size-limit>` at the integer index limit, or `<alloc-fail>` when
+      storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
-    if (array == NULL) {
-      if ($boxed) return $zero;
-      _bad_operation($owner, <unshift>);
-    }
+    if (array == NULL) _bad_operation($owner, <unshift>);
     if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array.insert_element(0, value);
@@ -456,31 +448,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   /** Inserts `value` at normalized `index` and returns it.
       The accepted range includes the position after the last element;
       negative indices are normalized against that wider range.
-      Boxed `Array` returns `void` for a null array or out-of-range index
-      without mutation.
-      Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
-      index, `<void-op>` for a `void` value, `<size-limit>` at the integer
-      index limit, or `<alloc-fail>` when storage cannot grow.
+      Raises: `<bad-arg>` for a null array or an index outside that range,
+      `<void-op>` for a `void` value, `<size-limit>` at the integer index
+      limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
-    if ($boxed) {
-      if (array == NULL) return $zero;
-      if (array.length > INT_MAX) _size_limit($owner, array.length);
-      int n = (int) array.length;
-      if (index < 0) index += n + 1;
-      if (index < 0 || index > n) return $zero;
-      if (n == INT_MAX) _size_limit($owner, n);
-      if ((Var) value is void) raise %(void-op);
-      array.insert_element(index, value);
-      return value;
-    }
-    if (array == NULL || array.length >= INT_MAX ||
-        !array.insert_element(index, value)) {
-      if (array && array.length >= INT_MAX)
-        _size_limit($owner, array.length);
-      size_t size = array ? array.length : 0;
-      _bad_index($owner, index, size);
-    }
+    if (array == NULL) _bad_index($owner, index, 0);
+    if ($boxed && (Var) value is void) raise %(void-op);
+    if (array.length >= INT_MAX) _size_limit($owner, array.length);
+    if (!array.insert_element(index, value))
+      _bad_index($owner, index, array.length);
     return value;
   }
 
@@ -576,8 +553,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.splice_elements(index, remove_count, values);
   }
 
-  /** Returns the first index whose native element equals `value`, or -1.
-      A null array returns -1; the scan is linear and preserves source order.
+  /** Returns the first index whose element is `==` to `value`, or -1.
+      On a boxed `Array`, `==` compares two numbers as their native values
+      do in C, so `1`, `1.0`, and `1L` match; `Map` keys and `List.unique`
+      compare with `Var.equal` instead, which keeps those types apart. A
+      packed element uses its own type's `==`. A null array returns -1; the
+      scan is linear and preserves source order.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.index($array array, $element value) {
@@ -586,16 +567,19 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.index_element(value);
   }
 
-  /** Reports whether a native element equals `value`.
-      The scan is linear. Raises: `<size-limit>` when the length exceeds the
-      integer index domain.
+  /** Reports whether an element is `==` to `value`.
+      Elements compare as in `index`, so a boxed `Array` holding `1.0`
+      contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.contains($array array, $element value) {
     return array.index(value) != -1;
   }
 
-  /** Returns how many native elements equal `value`.
-      A null array returns zero; the scan is linear.
+  /** Returns how many elements are `==` to `value`.
+      Elements compare as in `index`, so the boxed `Array` `[1, 1.0, 1L]`
+      counts three matches of `1`, while `List.unique` keeps all three. A
+      null array returns zero; the scan is linear.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.count($array array, $element value) {
@@ -605,9 +589,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Returns the first element accepted by `pred`'s ordinary `Var` truth,
-      or `void` when absent. A null array or predicate returns `void`.
-      Elements are boxed as in iteration; the array and its storage are
-      unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+      or `void` when absent. A null or empty array returns `void` without
+      invoking or checking `pred`. Elements are boxed as in iteration; the
+      array and its storage are unchanged.
+      Raises: `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+      array, or any cause from boxing, `pred`, or its result's truth
       operation.
   */
   Var $array.find($array array, Func pred) {

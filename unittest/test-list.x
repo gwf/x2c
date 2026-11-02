@@ -264,14 +264,11 @@ static void list_fold_and_predicates(void) {
   EXPECT_INT_EQ(sum.integer(), 10);
   EXPECT_TRUE(numbers.any(greater_than_two));
   EXPECT_FALSE(numbers.all(greater_than_two));
-  EXPECT_FALSE(numbers.any(NULL));
   List empty = NULL;
   EXPECT_TRUE(empty.all(greater_than_two));
-  EXPECT_TRUE(empty.all(NULL));
   EXPECT_TRUE(empty.any(greater_than_two) == 0);
   Var found = numbers.find(greater_than_two);
   EXPECT_INT_EQ(found.integer(), 3);
-  EXPECT_TRUE(numbers.find(NULL) is void);
   EXPECT_INT_EQ(numbers.find(_list_truthy_string).int(), 3);
   Func always = %!(Var value) => { (void) value; return 1; };
   EXPECT_INT_EQ((%(0)).find(always).int(), 0);
@@ -281,13 +278,22 @@ static void list_fold_and_predicates(void) {
   EXPECT_TRUE(empty.find(always) is void);
   int missing = 0;
   try numbers.foldl(99, NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try numbers.foldl(void, NULL);
-  catch %(bad-arg *): missing++;
-  EXPECT_INT_EQ(missing, 2);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.any(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.all(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try numbers.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 5);
   EXPECT_INT_EQ(empty.foldl(99, NULL).integer(), 99);
   EXPECT_TRUE(empty.foldl(void, NULL) is void);
   EXPECT_INT_EQ((%(1)).foldl(void, NULL).integer(), 1);
+  EXPECT_FALSE(empty.any(NULL));
+  EXPECT_TRUE(empty.all(NULL));
+  EXPECT_TRUE(empty.find(NULL) is void);
   EXPECT_TRUE(empty.foldl(void, sum_pair) is void);
 }
 
@@ -323,7 +329,11 @@ static void list_map2_zip_and_sublis(void) {
   List sums = left.map2(right, add_pairwise);
   const int expected_sums[] = { 5, 7, 9 };
   if (!expect_list_ints("left.map2(right)", sums, expected_sums, 3)) return;
-  EXPECT_NULL(left.map2(right, NULL));
+  int missing = 0;
+  try left.map2(right, NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 1);
+  EXPECT_NULL(left.map2(NULL, NULL));
   List zipped = left.zip_with(right, NULL);
   if (!EXPECT_INT_EQ(zipped.len(), 3)) return;
   EXPECT_INT_EQ(zipped.getindex(0).car().integer(), 1);
@@ -503,6 +513,20 @@ static void list_assoc_hash_equal(void) {
   keyed[assoc] = 77;
   EXPECT_INT_EQ(keyed[assoc_copy].integer(), 77);
   EXPECT_INT_EQ(assoc.hash(), assoc_copy.hash());
+}
+
+/* Search compares with `==`, so numbers of different types match by value.
+   `unique` compares with `Var.equal` and keeps the types apart. */
+static void list_search_matches_numbers_by_value(void) {
+  List numbers = %(1 1.0 2);
+  EXPECT_INT_EQ(numbers.index(1.0), 0);
+  EXPECT_INT_EQ(numbers.index(1L), 0);
+  EXPECT_TRUE(numbers.contains(2L));
+  EXPECT_TRUE(numbers.unique() == numbers);
+
+  List alist = %((1 one) (2 two));
+  EXPECT_TRUE(alist.assoc(1.0) == <one>);
+  EXPECT_TRUE(alist.assoc(2L) == <two>);
 }
 
 static void list_array_conversion_boundaries(void) {
@@ -703,6 +727,7 @@ void list_suite(void) {
   $test.run(list_literal_integers);
   $test.run(list_literal_nested_collections);
   $test.run(list_assoc_hash_equal);
+  $test.run(list_search_matches_numbers_by_value);
   $test.run(list_array_conversion_boundaries);
   $test.run(list_array_list_free_consumes_the_receiver);
   $test.run(list_sort_orders_values);

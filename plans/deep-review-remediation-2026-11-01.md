@@ -1,9 +1,9 @@
 # Deep review remediation (2026-11-01)
 
-> Status: active - batch A integrated from `dev` `024962818` and
-> submitted to the shared integrator on 2026-11-01 on branch
-> `gwf/repo-review-consistency-waste-f9b49f`; batch B is next;
-> batch C waits for Gary's decisions.
+> Status: active - batch A published on `dev` as `9d196566f` (PR #643,
+> 2026-11-02); batch B runs in its own session; batch C integrated from
+> `dev` `9d196566f` and submitted to the shared integrator on 2026-11-02 on
+> branch `gwf/review-batch-c-contracts`, with the decisions below.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
@@ -44,20 +44,27 @@ integrator with focused evidence.
   for lifetime checking; the allocator table gains the missing runtime
   rows, including `move_to`.
 
-## Decisions for Gary (batch C, not started)
+## Decisions for batch C (accepted by Gary on 2026-11-02)
 
-1. Boxed `Array` out-of-range and null writes: raise `<bad-arg>` like the
-   compound forms and typed Arrays (recommended), or keep the silent no-op.
-2. `iter.x` null callbacks: raise `<bad-arg>` for a required callback
-   (recommended) instead of five behaviours.
-3. Null handles: `<bad-arg>` for operations and no-op for cleanup-style
-   free/close (recommended, per ER-2), replacing the per-type mix of
-   `<bad-arg>`, `<bad-state>`, and silence.
-4. List and Array search (`index`, `contains`, `count`, `assoc`): keep C
-   `==` and document it (recommended), or switch to `Var.equal` like Map
-   keys and `unique`.
-5. `protect_x2c` in the Lisp runtime: remove (changes documented
-   `Lisp.set_global` behaviour).
+1. Boxed `Array` writes that cannot be performed (`setindex`, `push`,
+   `unshift`, and `insert` on a null array or an out-of-range index) raise
+   `<bad-arg>` like the compound forms and typed Arrays; reads keep
+   returning `void`.
+2. A required `iter.x` callback that is null raises `<bad-arg>` when the
+   operation is called, before any source element is consumed; `zip_with`
+   keeps its documented optional `fn`.
+3. Null handles: an operation on a null handle raises `<bad-arg>`; `free`,
+   `close`, `destroy`, and `cleanup` accept a null handle and do nothing;
+   causes that describe a non-null handle's state stay `<bad-state>`.
+4. List and Array search (`index`, `contains`, `count`, `assoc`) keep `==`,
+   and the doc comments and the book say so; `Map` keys and `unique` use
+   `Var.equal`.
+5. `protect_x2c` leaves the Lisp runtime; `def` of an `x2c.` name follows
+   the ordinary inherited-name and frozen-session rules.
+
+Batch C runs as four workers with disjoint files: collections (1 and 4),
+iter (2), handles (3), and lisp (5, plus the stale compile-time comments
+the review found in `lib/lisp/`).
 
 ## Batch A: bugs (parallel workers, disjoint files)
 
@@ -179,6 +186,37 @@ Waste and drift the workers saw, for this batch:
   check; `cli.md` script-reuse triggers omit `-l`; `packages/pcre2/
   README.md` shows `defer` where the `auto` form is now described;
   `unittest/AGENTS.md` and `STATUS.md` need the skip-inside-a-test rule.
+
+### Carried from the batch C handoffs
+
+Defects and drift the batch C workers reproduced or read outside their
+items, for a later batch:
+
+- `Logger.new` returns NULL for an invalid level, so the NULL now fails at
+  its first use instead of the constructor raising (ER-1).
+- `Lisp.call_budget` ignores a nonpositive budget silently although its
+  doc says the budget must be positive; the `Lisp.bind` doc omits the
+  `<bad-state>` a frozen session raises after the `Func` has moved;
+  `Lisp.try_get` and `Lisp.read` document their own null-session
+  behaviour, outside the handle rule.
+- `lisp_source_function`, `Lisp.automatic_storage`, and
+  `Lisp.result_storage` have no callers outside `lib/lisp` and its test:
+  candidates for deletion.
+- `Array.take_last`, `shift`, and `remove` return `void` on a null array or
+  an index outside the elements (the decision covered writes only);
+  `Array.getindex` dereferences a null array under its documented
+  non-null precondition.
+- `Iter.parallel_map` and `parallel_map_in` take a `ThreadValueFn`; their
+  null-function behaviour was not checked.
+- `lib/channel.x` uses an `argument` detail key that DG-7 does not list;
+  `Listener.write_repr` formats a null handle's text.
+- Not audited for null-handle sites: `lib/match`, `lib/dispatch.x`,
+  `lib/static-init.x`, `lib/var`, `lib/pool`.
+- Lines over 79 columns that predate the batch: `lib/lisp/lisp.x` (five,
+  deliberate one-line error macros) and `lib/process.x` (three) from the
+  compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
+  `docs/src/guide/iteration.md`, and `collections.md`; translating
+  `test-lisp.x` reports four unnecessary `.str()` conversions.
 
 ## Validation and delivery
 

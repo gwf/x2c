@@ -21,7 +21,7 @@ Linked list with `Var` elements.
 | [`List.array`](#List.array) | Returns a new `Array` holding the elements of `lst` in order. |
 | [`List.concat`](#List.concat) | Returns the concatenation of the List arguments in order. |
 | [`List.concat_n`](#List.concat_n) | Returns the concatenation of exactly `list_count` `List` arguments. |
-| [`List.contains`](#List.contains) | Reports whether `lst` contains `key` by `Var` equality. |
+| [`List.contains`](#List.contains) | Reports whether `lst` holds an element `==` to `key`. |
 | [`List.filter`](#List.filter) | Returns the elements `pred` accepts by ordinary `Var` truthiness. |
 | [`List.find`](#List.find) | Returns the first element `pred` accepts by ordinary `Var` truthiness, or `void`. |
 | [`List.foldl`](#List.foldl) | Folds `fn` over the elements of `lst` from the left, starting at `seed`. |
@@ -29,13 +29,13 @@ Linked list with `Var` elements.
 | [`List.getindex`](#List.getindex) | Returns `list[index]`, or `void` when out of range. |
 | [`List.getslice`](#List.getslice) | Returns `list[start:stop:step]`. |
 | [`List.head`](#List.head) | Returns the first `count` elements of `list`. |
-| [`List.index`](#List.index) | Returns the first index of `key`, or -1 when absent. |
+| [`List.index`](#List.index) | Returns the first index of an element `==` to `key`, or -1 when absent. |
 | [`List.iter`](#List.iter) | Initializes caller-owned `dest` as a forward iterator over `lst`. |
 | [`List.last`](#List.last) | Returns the last value in `lst`, or `void` when it is empty. |
 | [`List.len`](#List.len) | Returns the number of cells in `lst` in O(n) time. |
 | [`List.list_n`](#List.list_n) | Builds a `List` from exactly `element_count` `Var` arguments. |
 | [`List.map`](#List.map) | Returns a canonical `List` holding `fn` applied front to back. |
-| [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`. |
+| [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`. |
 | [`List.new`](#List.new) | Returns the List packed from the supplied values and explicit splices. |
 | [`List.reverse`](#List.reverse) | Returns a canonical `List` with `lst`'s elements reversed. |
 | [`List.sort`](#List.sort) | Returns a copy of `lst` ordered by `Var.compare`. |
@@ -141,10 +141,11 @@ Source: `lib/list/building.x`
 `int List.all(List lst, Func pred)`
 
 True when every element satisfies `pred` by ordinary `Var` truthiness.
-Stops at the first rejection. Nil is true; a null `pred` is false for a
-nonempty `List`.
+Stops at the first rejection. Nil is true without invoking or checking
+`pred`.
 
-Any cause raised by `pred` or its result's truth operation propagates.
+Any cause raised by `pred` or its result's truth operation propagates. A
+null `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 
@@ -154,10 +155,11 @@ Source: `lib/list/transformations.x`
 `int List.any(List lst, Func pred)`
 
 True when at least one element satisfies `pred` by ordinary `Var`
-truthiness. Stops at the first accepted element. Nil and a null `pred` are
-false.
+truthiness. Stops at the first accepted element. Nil is false without
+invoking or checking `pred`.
 
-Any cause raised by `pred` or its result's truth operation propagates.
+Any cause raised by `pred` or its result's truth operation propagates. A
+null `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 
@@ -224,7 +226,9 @@ Source: `lib/list/building.x`
 
 `int List.contains(List lst, Var key)`
 
-Reports whether `lst` contains `key` by `Var` equality.
+Reports whether `lst` holds an element `==` to `key`.
+Elements compare as in `List.index`, so `%(1.0)` contains `1`, while a
+`Map` keyed by `1.0` does not.
 
 Source: `lib/list/traversal.x`
 
@@ -251,8 +255,9 @@ Source: `lib/list/transformations.x`
 Returns the first element `pred` accepts by ordinary `Var` truthiness, or
 `void`.
 
-Any cause raised by `pred` or its result's truth operation propagates. A
-null `pred` returns `void`.
+Searching `nil` returns `void` without invoking or checking `pred`. Any
+cause raised by `pred` or its result's truth operation propagates. A null
+`pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
 Source: `lib/list/transformations.x`
 
@@ -335,7 +340,11 @@ Source: `lib/list/traversal.x`
 
 `meta native int List.index(List l, Var key)`
 
-Returns the first index of `key`, or -1 when absent.
+Returns the first index of an element `==` to `key`, or -1 when absent.
+`==` compares two numbers as their native values do in C, so `1`, `1.0`,
+and `1L` match, and it compares other values with `Var.equal`. `Map`
+keys and `List.unique` use `Var.equal` for numbers too, which keeps those
+types apart.
 
 Source: `lib/list/traversal.x`
 
@@ -404,9 +413,13 @@ Source: `lib/list/transformations.x`
 
 `List List.map2(List a, List b, Func fn)`
 
-Maps `fn` over aligned pairs from `a` and `b`.
-A null callback returns `nil` without examining either `List`; otherwise
-this has the length, order, ownership, and failures of `List.zip_with`.
+Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`.
+The shorter input determines the result length, and an empty input does
+not inspect the callback. `fn` receives the left and right values and is
+invoked front to back. A null `fn` raises `<bad-arg>` from `Func.apply`
+when the first pair forms.
+
+**Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
 Source: `lib/list/transformations.x`
 
@@ -565,9 +578,8 @@ Source: `lib/list/rendering.x`
 `List List.zip_with(List a, List b, Func fn)`
 
 Combines aligned values from two `List`s with `fn`.
-A null `fn` produces two-element pair `List`s. The shorter input determines
-the result length, and an empty input does not inspect the callback. A
-callback receives the left and right values and is invoked front to back.
+A null `fn` produces two-element pair `List`s; otherwise this is
+`List.map2`. The shorter input determines the result length.
 
 **Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
@@ -631,8 +643,10 @@ Source: `lib/list/building.x`
 `Var List.assoc(List list, Var key)`
 
 Returns the second value of the first association whose key equals `key`.
-Nil entries are skipped. A missing association and a missing second value
-both return `void`, so the two cases look the same here.
+Keys compare with `==` as in `List.index`, so `1.0` finds the association
+keyed by `1`, which a `Map` lookup would miss. Nil entries are skipped. A
+missing association and a missing second value both return `void`, so the
+two cases look the same here.
 
 Source: `lib/list/traversal.x`
 
