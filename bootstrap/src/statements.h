@@ -35,5 +35,7 @@ List Compiler_parse_block_items(Compiler c, int anchor_items);
 
 List Compiler_finish_return_statement(Compiler c, List expr);
 
+List _x2c_block_keywords(void);
+
 
 #endif /* __GUARD_0x5ACF8839__ */

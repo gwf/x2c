@@ -16,7 +16,7 @@ typedef Symbol Uuid;
 #else
 #include <sys/random.h>
 #endif
-static String _2, _1, _0;
+static String _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -38,9 +38,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("unexpected text after the UUID");
-  _1 = String_new("expected '-'");
-  _2 = String_new("expected a hexadecimal digit");
+  _0 = String_new("Random.secure_fill");
+  _1 = String_new("unexpected text after the UUID");
+  _2 = String_new("expected '-'");
+  _3 = String_new("expected a hexadecimal digit");
 }
 
 Random Random_new(uint64_t seed){
@@ -52,6 +53,7 @@ Random Random_new(uint64_t seed){
 void Random_secure_fill(void * bytes, size_t count);
 
 Random Random_from_entropy(void){
+  if(! _init_guard_) _file_init_();
   uint64_t seed;
   Random_secure_fill(& seed, sizeof seed);
   return Random_new(seed);
@@ -131,9 +133,10 @@ Var Random_choice(Random * r, Array items){
   return Array_getindex(items, Random_below(&((* r)), Array_len(items)));
 }
 
-static Var int_var(int);
+void x2c_io_fail(Var, int);
 
 void Random_secure_fill(void * bytes, size_t count){
+  if(! _init_guard_) _file_init_();
 #ifdef __APPLE__
   arc4random_buf(bytes, count);
 #else
@@ -142,16 +145,7 @@ void Random_secure_fill(void * bytes, size_t count){
     if(got >= 0) done += got;
     else if(errno != EINTR){
       int error = errno;
-      {
-        Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Random.secure_fill")), NULL)));
-        {
-          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/random.x",.function = "Random_secure_fill",.line = 120,.runtime = 1};
-          x2c_error_raise_n(& _x2c_gensym_error_site_2, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(11703198), int_var(error));
-          __builtin_unreachable();
-        }
-
-      }
-
+      x2c_io_fail(String_var(_0), error);
     }
 
   }
@@ -160,6 +154,7 @@ void Random_secure_fill(void * bytes, size_t count){
 }
 
 String Uuid_v4(void){
+  if(! _init_guard_) _file_init_();
   unsigned char bytes[16];
   Random_secure_fill(bytes, sizeof bytes);
   bytes[6] =(bytes[6] & 0x0f) | 0x40;
@@ -167,16 +162,18 @@ String Uuid_v4(void){
   return _canonical(bytes);
 }
 
+static Var int_var(int);
+
 String Uuid_parse(String text){
   if(! _init_guard_) _file_init_();
   unsigned char bytes[16];
   int offset = _decode(text, bytes);
   if(offset >= 0){
-    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Uuid.parse")), NULL)));
-    Var _x2c_gensym_literal_part_5 = String_var(_reason(offset));
+    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Uuid.parse")), NULL)));
+    Var _x2c_gensym_literal_part_4 = String_var(_reason(offset));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/random.x",.function = "Uuid_parse",.line = 150,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1218550748), _x2c_gensym_literal_part_5, Symbol_var(1019648360), int_var(offset));
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/random.x",.function = "Uuid_parse",.line = 150,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), _x2c_gensym_literal_part_4, Symbol_var(1019648360), int_var(offset));
       __builtin_unreachable();
     }
 
@@ -233,8 +230,8 @@ static int _decode(String text, unsigned char * bytes){
 }
 
 static String _reason(int offset){
-  if(offset == 36) return _0;
-  return _hyphen_at(offset) ? _1 : _2;
+  if(offset == 36) return _1;
+  return _hyphen_at(offset) ? _2 : _3;
 }
 
 static int _hyphen_at(int i){

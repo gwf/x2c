@@ -703,7 +703,7 @@ static List _parse_literal_element(Compiler c){
 
 static Symbol f9_quotation____match_operator_head(Compiler c){
   if(! c -> in_pattern) return 0;  if(Compiler_peek(c, 0) == 845368370138){
-    Atom atom = Atom_intern(String_unescape(c -> token -> text));  return Var_is(atom, 1328354264) ? Var_symbol(atom) : 0;
+    Atom atom = Atom_intern(x2c_string_unescape_bytes(c -> token -> text));  return Var_is(atom, 1328354264) ? Var_symbol(atom) : 0;
   }
   if(Compiler_peek(c, 0) != 865658429314008) return 0;  Token token = c -> token;  return _exact_symbol(c, token, _angle_spelling(token -> text));
 }
@@ -1104,7 +1104,7 @@ static List f8_payloads____parse_bare_symbol(Compiler c, Symbol owner, int detai
     String _x2c_gensym_macro_hint_1 = owner == 37833930 ? _137 : _138;
     Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_x2c_gensym_macro_label_0), cons(String_var(_139), cons(String_var(_x2c_gensym_macro_role_0), cons(String_var(_140), NULL))))), token, cons(String_var(_x2c_gensym_macro_hint_1), NULL));
   }
-  String text = String_unescape(token -> text);
+  String text = x2c_string_unescape_bytes(token -> text);
   Symbol symbol = _exact_symbol(c, token, text);
   Compiler_next(c);
   return cons(_0, cons(_97, cons(List_var(cons(_102, cons(_97, cons(String_var(text), cons(Symbol_var(symbol), NULL))))), NULL)));
@@ -1148,7 +1148,7 @@ static List f8_payloads____parse_catch_code(Compiler c){
 
 static void f8_payloads____parse_catch_detail(Compiler c, Array elements){
   Token origin = c -> token;
-  if(Compiler_peek(c, 0) == 845368370138 && String_getindex(String_unescape(c -> token -> text), 0) == '*'){
+  if(Compiler_peek(c, 0) == 845368370138 && String_getindex(x2c_string_unescape_bytes(c -> token -> text), 0) == '*'){
     Array_push(elements, List_var(_parse_list_head(c)));
     return;
   }
@@ -1246,8 +1246,8 @@ static Symbol f11_collections____member_symbol(Compiler c){
 }
 
 static String f11_collections____member_spelling(String text){
-  if(String_truth(text) && String_getindex(text, 0) == '"') return String_unescape(String_new_len(text + 1, String_len(text) - 2));
-  return String_unescape(text);
+  if(String_truth(text) && String_getindex(text, 0) == '"') return x2c_string_unescape_bytes(String_new_len(text + 1, String_len(text) - 2));
+  return x2c_string_unescape_bytes(text);
 }
 
 static int f11_collections____duplicate_index(List values){
@@ -1474,7 +1474,7 @@ static List f7_strings____parse_grouped_segment(Compiler c){
 static String f7_strings____decode_segment(String raw){
   if(! String_truth(raw)) return _205;
   raw = f7_strings____normalize_newlines(raw);
-  if(!(String_contains(raw, _206))) return String_unescape(raw);
+  if(!(String_contains(raw, _206))) return x2c_string_unescape_bytes(raw);
   int n = String_len(raw), dst = 0;
   char * buf = xmalloc(n + 1);
   for(int i = 0;  i < n;  i ++){
@@ -1486,7 +1486,7 @@ static String f7_strings____decode_segment(String raw){
   buf[dst] = '\0';
   String text = String_new_len(buf, dst);
   xfree(buf);
-  return String_unescape(text);
+  return x2c_string_unescape_bytes(text);
 }
 
 static String f7_strings____normalize_newlines(String raw){
@@ -1565,7 +1565,7 @@ static List f5_atoms____number_literal(Compiler c, String text, int floating){
 }
 
 static List _atom_literal(Compiler c, String text){
-  String spelling = String_unescape(text);
+  String spelling = x2c_string_unescape_bytes(text);
   Atom atom = Atom_intern(spelling);
   f5_atoms____check_binder(c, atom);
   if(Map_contains(c -> object_macros, String_var(spelling))) f5_atoms____warn_macro_name(c, spelling);
@@ -1601,7 +1601,7 @@ static void f5_atoms____check_binder(Compiler c, Atom atom){
 
 static String _angle_spelling(String text){
   int len = String_len(text);
-  if(len >= 4 && String_getindex(text, 1) == '"') return String_unescape(String_new_len(text + 2, len - 4));
+  if(len >= 4 && String_getindex(text, 1) == '"') return x2c_string_unescape_bytes(String_new_len(text + 2, len - 4));
   return String_new_len(text + 1, len - 2);
 }
 

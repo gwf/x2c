@@ -192,5 +192,7 @@ void Compiler_check_included_names(Compiler c, List names, Map globs, Token site
 
 List Compiler_alias_expression(Compiler c);
 
+List Compiler_named_alias_expression(Compiler c, String name);
+
 
 #endif /* __GUARD_0x8374A72E__ */

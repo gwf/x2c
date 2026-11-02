@@ -25,5 +25,7 @@ List Compiler_zero_initializer(Compiler c, List value);
 
 List Compiler_initialization_guard(Compiler c, List guard);
 
+List Compiler_without_const(List specifiers);
+
 
 #endif /* __GUARD_0x3471B3E1__ */

@@ -493,7 +493,7 @@ _x2c_gensym_initializer_choice_6D011170_0((0 < sizeof(cli_options) / sizeof(cli_
   42018498656, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _17, NULL, "Map generated C locations to original x2c sources", 0, CLI_FIELD(417870, source_map)
 }
 ), (14ULL < sizeof(cli_options) / sizeof(cli_options[14ULL])), (cli_options[14ULL] =(CliOption){
-  31885002762336, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _18, NULL, "Keep generated C locations in native diagnostics", 0
+  31885002762336, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _18, NULL, "Keep generated C locations in native diagnostics", 0
 }
 ), (15ULL < sizeof(cli_options) / sizeof(cli_options[15ULL])), (cli_options[15ULL] =(CliOption){
   31136689190, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 1052018024, _19, NULL, "Do not write x2c dependency files", 0, CLI_FIELD(417870, no_deps)
@@ -1109,7 +1109,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _141 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
   _142 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
   _143 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
-  _144 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, new, script, repl,\nenv, install, remove, or list.");
+  _144 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help or help for a command. External commands provide\ntheir own help through --help.");
   _145 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
   _146 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
   _147 = String_new("/commands.txt");
@@ -1892,7 +1892,7 @@ CliRequest CliRequest_new(Symbol command){
   if(! _init_guard_) _file_init_();
   CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request -> command = command;
-  request -> source_map = SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", command);
+  request -> source_map = SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", command);
   request -> jobs = f8_requests____default_jobs();
   request -> max_errors = 20;
   if(SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", command)) request -> kind = 404971770155786;

@@ -503,7 +503,7 @@ void Task_run(Array jobs, Func completed){
                   run.jobs = x2c_task_jobs_new(run.count * sizeof(struct TaskJob));
                   if(! run.jobs){
                     static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/task.x",.function = "Task_run",.line = 91,.runtime = 1};
-                    x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 0);
+                    x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Task.run")), NULL))));
                     __builtin_unreachable();
                   }
                   for(int i = 0;  i < run.count;  i ++){

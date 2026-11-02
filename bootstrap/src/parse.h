@@ -68,6 +68,8 @@ List Compiler_parse_enumerators(Compiler c, List context);
 
 List Compiler_parse_enumerator(Compiler c, Type context);
 
+List _x2c_type_keywords(void);
+
 List Compiler_parse_declarator_argument(Compiler c);
 
 List Compiler_parse_parameter_list(Compiler c);

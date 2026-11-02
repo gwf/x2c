@@ -230,6 +230,7 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 List Path_glob(Path pattern){
   if(! _init_guard_) _file_init_();
+  if(! String_truth(pattern)) return NULL;
   String text = pattern;
   const char * wildcard = strpbrk(text, "*?[\\");
   if(! wildcard) return Path_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
@@ -316,7 +317,7 @@ void Path_remove_tree(Path path){
   if(String_truth(failed)){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 186,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 187,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 20399393368, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
       __builtin_unreachable();
     }

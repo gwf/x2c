@@ -67,6 +67,28 @@ static inline Type Var_type(Var x){
   return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
 
+static inline Type _x2c_type_unqualified(Type type){
+  _x2c_type_qualifiers(&(type));
+  return type;
+}
+
+int Var_is(Var, Symbol);
+
+int Symbol_is_type_qualifier(Symbol sym);
+
+static Symbol Var_symbol(Var);
+
+int Symbol_is_storage_class(Symbol sym);
+
+static inline Type _x2c_type_specifier_tail(Type type){
+  while(Var_is(List_car(Type_list(type)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(type)))) || Symbol_is_storage_class(Var_symbol(List_car(Type_list(type)))))) type = List_cdr(type);
+  return type;
+}
+
+static inline int _x2c_type_const(Type type){
+  return _x2c_type_qualifiers(&(type)) & 1;
+}
+
 static int _is_number_type(Symbol sym);
 
 static int _is_tag_keyword(Symbol sym);
@@ -82,8 +104,6 @@ static Type _canonical(Type type, int keep_qualifiers);
 static int _kept(Var item, int keep_qualifiers);
 
 static int _omit_specifier(Symbol first, int keep_qualifiers);
-
-static unsigned _qualifiers(Type * cursor);
 
 static int _is_tagged(Type type);
 
@@ -287,10 +307,6 @@ Type Type_declared(Type type);
 static int List_truth(List);
 
 void x2c_cleanup_leave(X2CCleanup *);
-
-int Var_is(Var, Symbol);
-
-int Symbol_is_storage_class(Symbol sym);
 
 int Symbol_is_inline(Symbol sym);
 
@@ -591,7 +607,7 @@ Type Type_qualify(Type type, Type source);
 Type Type_dereference(Type type){
   if(! _init_guard_) _file_init_();
   Type declared = type;
-  _qualifiers(&(type));
+  _x2c_type_qualifiers(&(type));
   if(Type_is_array(type)) return Type_qualify(List_type(cdr(Type_list(type))), declared);
   if(Type_is_pointer(type)) return List_type(cdr(Type_list(type)));
   return NULL;
@@ -617,10 +633,6 @@ int Type_is_array(Type type){
   if(! _init_guard_) _file_init_();
   return _declarator_kind(type) == 8794;
 }
-
-int Symbol_is_type_qualifier(Symbol sym);
-
-static Symbol Var_symbol(Var);
 
 Type Type_qualify(Type type, Type source){
   if(! _init_guard_) _file_init_();
@@ -760,8 +772,8 @@ Type Type_declared(Type type){
 }
 
 int Type_discards_qualifiers(Type source, Type target){
-  if(! _init_guard_) _file_init_();  _qualifiers(&(source));  _qualifiers(&(target));  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
-    source = List_cdr(source);  target = List_cdr(target);  unsigned wanted = _qualifiers(&(source)), offered = _qualifiers(&(target));  if(wanted & ~ offered) return 1;  if(target == _132) return 0;
+  if(! _init_guard_) _file_init_();  _x2c_type_qualifiers(&(source));  _x2c_type_qualifiers(&(target));  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
+    source = List_cdr(source);  target = List_cdr(target);  unsigned wanted = _x2c_type_qualifiers(&(source)), offered = _x2c_type_qualifiers(&(target));  if(wanted & ~ offered) return 1;  if(target == _132) return 0;
   }
   return 0;
 }
@@ -1052,26 +1064,6 @@ static int _kept(Var item, int keep_qualifiers){
 
 static int _omit_specifier(Symbol first, int keep_qualifiers){
   return(Symbol_is_storage_class(first) ||(! keep_qualifiers &&(Symbol_is_type_qualifier(first) || first == 1439803480)) || Symbol_is_inline(first)) && first != 44661285196;
-}
-
-static unsigned _qualifiers(Type * cursor){
-  unsigned found = 0;
-  Type type =(* cursor);
-  while(Var_is(List_car(Type_list(type)), 1328354264)){
-    Symbol head = Var_symbol(List_car(Type_list(type)));
-    if(! Symbol_is_type_qualifier(head)) break;
-    switch(head){
-      case 7304424 : found |= 1;
-      break;
-      case 1544849476362 : found |= 2;
-      break;
-      case 1249006209256 : found |= 4;
-      break;
-    }
-    type = List_cdr(type);
-  }
-  (* cursor) = type;
-  return found;
 }
 
 static int _is_tagged(Type type){

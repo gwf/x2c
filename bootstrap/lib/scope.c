@@ -90,7 +90,6 @@ static void _detach(ScopeAlloc alloc);
 static void f10_allocation____point_to(ScopeAlloc prev, ScopeAlloc alloc);
 static void _release(ScopeAlloc alloc);
 static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next);
-static void * f10_allocation____data_realloc(void * ptr, size_t size);
 static _Thread_local Scope f7_regions___scope_root;
 static _Thread_local struct ScopeThreadState f7_regions___scope_thread;
 typedef struct f7_regions___ScopeExecution{
@@ -135,7 +134,7 @@ static void f7_runtime____run_hooks(void);
 static void _raw_free(void * ptr);
 static void * _raw_grow(void * items, int count, int * capacity, size_t size);
 static void * _raw_malloc(size_t size);
-static void * f7_runtime____raw_realloc(void * ptr, size_t size);
+static void * _raw_realloc(void * ptr, size_t size);
 static void _require_running(void);
 static void f7_runtime____ensure_running(void);
 void * Scope_malloc(size_t size);
@@ -175,7 +174,7 @@ void * Scope_malloc(size_t size){
 
 void * Scope_malloc_finalized(size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! drop){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/scope/allocation.x",.function = "Scope_malloc_finalized",.line = 75,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/scope/allocation.x",.function = "Scope_malloc_finalized",.line = 75,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.malloc_finalized")), NULL))));  __builtin_unreachable();
   }
   return f10_allocation____malloc_in(_thread() -> active, size, drop);
 }
@@ -186,7 +185,7 @@ void * Scope_malloc_in(Scope * slot, size_t size){
 
 void * Scope_malloc_finalized_in(Scope * s, size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! drop){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/scope/allocation.x",.function = "Scope_malloc_finalized_in",.line = 103,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/scope/allocation.x",.function = "Scope_malloc_finalized_in",.line = 103,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.malloc_finalized_in")), NULL))));  __builtin_unreachable();
   }
   return f10_allocation____malloc_in(s, size, drop);
 }
@@ -217,7 +216,7 @@ Scope Scope_owner(void * ptr){
 
 void Scope_move(void * ptr, Scope * slot){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  if(! slot){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/scope/allocation.x",.function = "Scope_move",.line = 231,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/scope/allocation.x",.function = "Scope_move",.line = 231,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.move")), NULL))));  __builtin_unreachable();
   }
   if(! * slot) * slot = _new_scope(NULL);  ScopeAlloc alloc =((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc)));  _detach(alloc);  f10_allocation____attach((* slot), alloc);
 }
@@ -231,18 +230,18 @@ void * Scope_realloc(void * ptr, size_t size){
     f10_allocation____free(((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))));  return NULL;
   }
   ScopeAlloc old =((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))), next = old -> next, prev = old -> prev;  f10_allocation___ScopeMetadata * old_meta =(((f10_allocation___ScopeMetadata *)(old)) - 1);  size_t old_size = old_meta -> requested_size;  if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/scope/allocation.x",.function = "Scope_realloc",.line = 273,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/scope/allocation.x",.function = "Scope_realloc",.line = 273,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.realloc")), NULL))));  __builtin_unreachable();
   }
-  f10_allocation___ScopeMetadata * meta = f10_allocation____data_realloc(old_meta, sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  ScopeAlloc replacement =(ScopeAlloc)(meta + 1);  f10_allocation____relink(replacement, prev, next);  _record_resize(old_size, size);  return((void *)((char *)(replacement) + sizeof(struct ScopeAlloc)));
+  f10_allocation___ScopeMetadata * meta = _raw_realloc(old_meta, sizeof(f10_allocation___ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  ScopeAlloc replacement =(ScopeAlloc)(meta + 1);  f10_allocation____relink(replacement, prev, next);  _record_resize(old_size, size);  return((void *)((char *)(replacement) + sizeof(struct ScopeAlloc)));
 }
 
 static void * f10_allocation____malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
   if(! slot){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 284,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 284,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.malloc")), NULL))));  __builtin_unreachable();
   }
   if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
     if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 286,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____malloc_in",.line = 287,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.malloc")), NULL))));  __builtin_unreachable();
     }
     _raw_fatal("allocation size overflow");
   }
@@ -255,7 +254,7 @@ static void f10_allocation____attach(Scope scope, ScopeAlloc alloc){
 
 static void * _data_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/scope/allocation.x",.function = "_data_malloc",.line = 310,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/scope/allocation.x",.function = "_data_malloc",.line = 311,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.malloc")), NULL))));  __builtin_unreachable();
   }
   return ptr;
 }
@@ -263,7 +262,7 @@ static void * _data_malloc(size_t size){
 static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t size){
   if(count && size > SIZE_MAX / count){
     if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____calloc_in",.line = 316,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____calloc_in",.line = 318,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.calloc")), NULL))));  __builtin_unreachable();
     }
     _raw_fatal("calloc size overflow");
   }
@@ -297,23 +296,16 @@ static void f10_allocation____relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAll
   alloc -> next = next;  alloc -> prev = prev;  if(next) next -> prev = alloc;  f10_allocation____point_to(prev, alloc);
 }
 
-static void * f10_allocation____data_realloc(void * ptr, size_t size){
-  void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/scope/allocation.x",.function = "f10_allocation____data_realloc",.line = 373,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 97614135954008, 0);  __builtin_unreachable();
-  }
-  return result;
-}
-
 void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! scope){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/scope/regions.x",.function = "Scope_push",.line = 42,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/scope/regions.x",.function = "Scope_push",.line = 42,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.push")), NULL))));  __builtin_unreachable();
   }
   ScopeThreadState state = _thread();  state -> stack = _raw_grow(state -> stack, state -> stack_size, &(state -> stack_capacity), sizeof(* state -> stack));  state -> active = state -> stack[state -> stack_size ++] = scope;
 }
 
 void Scope_pop(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread();  if(! state -> stack_size){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope/regions.x",.function = "Scope_pop",.line = 63,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/scope/regions.x",.function = "Scope_pop",.line = 63,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.pop")), NULL))));  __builtin_unreachable();
   }
   state -> stack_size --;  state -> active = state -> stack_size ? state -> stack[state -> stack_size - 1] : state -> base_slot;
 }
@@ -325,7 +317,7 @@ void Scope_open(void){
 void Scope_close(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread(); {
     if(! * state -> active || ! f7_regions____forget_retain((* state -> active), state -> active)){
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope/regions.x",.function = "Scope_close",.line = 143,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope/regions.x",.function = "Scope_close",.line = 144,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.close")), NULL))));  __builtin_unreachable();
     }
     Scope top = * state -> active;  * state -> active = top -> down;  top -> down = NULL;  f7_regions____destroy_chain(top);
   }
@@ -368,19 +360,19 @@ Scope Scope_new_named(const char * name){
   if(! _init_guard_) Scope_initialize();  _require_running();  return _new_scope(name);
 }
 
-void Scope_destroy(Scope scope);
+void Scope_destroy(Scope s);
 void Scope_cleanup(Scope value){
   if(! _init_guard_) Scope_initialize();  Scope_destroy(value);
 }
 
-void Scope_destroy(Scope scope){
-  if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == * state -> base_slot){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 285,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
+void Scope_destroy(Scope s){
+  if(! _init_guard_) Scope_initialize();  if(! s) return;  _require_running();  ScopeThreadState state = _thread();  if(s == * state -> base_slot){
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 287,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.destroy")), NULL))));  __builtin_unreachable();
   }
-  for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 287,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 0);  __builtin_unreachable();
+  for(int i = 0;  i < state -> stack_size;  i ++) if(s == * state -> stack[i]){
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope/regions.x",.function = "Scope_destroy",.line = 290,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.destroy")), NULL))));  __builtin_unreachable();
   }
-  f7_regions____forget_retains(scope);  f7_regions____destroy_chain(scope);
+  f7_regions____forget_retains(s);  f7_regions____destroy_chain(s);
 }
 
 void x2c_scope_thread_release(void){
@@ -420,7 +412,7 @@ static Scope _new_scope(const char * name){
   ;  Scope scope = & record -> scope;  if(name){
     record -> name = _register_name(scope, name);  if(! record -> name){
       free(record); {
-        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/regions.x",.function = "_new_scope",.line = 367,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 97614135954008, 0);  __builtin_unreachable();
+        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope/regions.x",.function = "_new_scope",.line = 370,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.new")), NULL))));  __builtin_unreachable();
       }
 
     }
@@ -548,7 +540,7 @@ int Scope_accounting_enabled(void){
 
 void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 36,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope/runtime.x",.function = "Scope_shutdown_hook",.line = 36,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope.shutdown_hook")), NULL))));  __builtin_unreachable();
   }
   f7_runtime___hooks = _raw_grow(f7_runtime___hooks, f7_runtime___hook_count, &(f7_runtime___hook_capacity), sizeof(* f7_runtime___hooks));  f7_runtime___hooks[f7_runtime___hook_count ++] = hook;
 }
@@ -586,23 +578,23 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 108,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 108,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope")), NULL))));  __builtin_unreachable();
     }
-    items = f7_runtime____raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
+    items = _raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
   return items;
 }
 
 static void * _raw_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 117,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 117,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope")), NULL))));  __builtin_unreachable();
   }
   if(scope_accounting) atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
-static void * f7_runtime____raw_realloc(void * ptr, size_t size){
+static void * _raw_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 124,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_realloc",.line = 124,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Scope")), NULL))));  __builtin_unreachable();
   }
   return result;
 }

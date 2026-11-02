@@ -70,6 +70,34 @@ static inline Type Var_type(Var x){
   return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
 
+static unsigned _x2c_type_qualifiers(Type *);
+
+static inline Type _x2c_type_unqualified(Type type){
+  _x2c_type_qualifiers(&(type));
+  return type;
+}
+
+int Var_is(Var, Symbol);
+
+static Var List_car(List);
+
+int Symbol_is_type_qualifier(Symbol);
+
+static Symbol Var_symbol(Var);
+
+int Symbol_is_storage_class(Symbol);
+
+static List List_cdr(List);
+
+static inline Type _x2c_type_specifier_tail(Type type){
+  while(Var_is(List_car(Type_list(type)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(type)))) || Symbol_is_storage_class(Var_symbol(List_car(Type_list(type)))))) type = List_cdr(type);
+  return type;
+}
+
+static inline int _x2c_type_const(Type type){
+  return _x2c_type_qualifiers(&(type)) & 1;
+}
+
 Type Type_qualify(Type type, Type source);
 
 Type Type_rest_container(Type type);

@@ -628,8 +628,6 @@ static void f5_cache____remove(MatchCache cache, int slot);
 
 static int f5_cache____bucket(MatchCache cache, unsigned long key);
 
-static unsigned long f5_cache____cache_mix(unsigned long key);
-
 static void f5_cache____unlink(MatchCache cache, int slot);
 
 static void f5_cache____activate(MatchCache m, int slot, MatchLease * lease);
@@ -2578,7 +2576,7 @@ void * x2c_match_execution_new(void){
   f5_cache___MatchThreadState saved = calloc(1, sizeof(struct f5_cache___MatchThreadState));
   if(! saved){
     static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match/cache.x",.function = "x2c_match_execution_new",.line = 109,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 97614135954008, 0);
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_match_execution_new")), NULL))));
     __builtin_unreachable();
   }
   return saved;
@@ -3131,15 +3129,7 @@ static void f5_cache____remove(MatchCache cache, int slot){
 }
 
 static int f5_cache____bucket(MatchCache cache, unsigned long key){
-  return(int)(f5_cache____cache_mix(key) %(unsigned long) cache -> bucket_count);
-}
-
-static unsigned long f5_cache____cache_mix(unsigned long key){
-  key ^= key >> 33;
-  key *= 0xff51afd7ed558ccdUL;
-  key ^= key >> 33;
-  key *= 0xc4ceb9fe1a85ec53UL;
-  return key ^(key >> 33);
+  return(int)(x2c_mix64(key) %(unsigned long) cache -> bucket_count);
 }
 
 static void f5_cache____unlink(MatchCache cache, int slot){

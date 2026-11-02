@@ -275,6 +275,11 @@ String String_base64_encode(String text){
 static size_t Block_len(Block);
 
 String Block_base64_encode(Block bytes){
+  if(bytes == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/encoding.x",.function = "Block_base64_encode",.line = 134,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Block.base64_encode")), NULL))));
+    __builtin_unreachable();
+  }
   return _base64(_STANDARD, bytes -> bytes, Block_len(bytes) * bytes -> width);
 }
 
@@ -320,6 +325,11 @@ String String_base64url_encode(String text){
 }
 
 String Block_base64url_encode(Block bytes){
+  if(bytes == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/encoding.x",.function = "Block_base64url_encode",.line = 163,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Block.base64url_encode")), NULL))));
+    __builtin_unreachable();
+  }
   return _base64(_URL, bytes -> bytes, Block_len(bytes) * bytes -> width);
 }
 
@@ -365,6 +375,11 @@ String String_hex_encode(String s){
 }
 
 String Block_hex_encode(Block b){
+  if(b == NULL){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/encoding.x",.function = "Block_hex_encode",.line = 197,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Block.hex_encode")), NULL))));
+    __builtin_unreachable();
+  }
   return _hex(b -> bytes, Block_len(b) * b -> width);
 }
 
@@ -443,11 +458,13 @@ String String_percent_encode(String s){
 
 static int String_truth(String);
 
+String String_new(const char *);
+
 int String_getindex(String, int);
 
 String String_percent_decode(String text){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(text) || ! strchr(text, '%')) return text;
+  if(! String_truth(text) || ! strchr(text, '%')) return String_new(text);
   String operation = _8;
   Buffer out = Buffer_new(0);
   const Buffer _x2c_gensym_macro_acquired_5 = out;
@@ -497,8 +514,8 @@ static int _decode_point(const unsigned char * at, int length){
 
 _Noreturn static void _malformed(String operation, String reason, int offset){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/encoding.x",.function = "_malformed",.line = 265,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(1218550748), String_var(reason), Symbol_var(1019648360), int_var(offset));
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/encoding.x",.function = "_malformed",.line = 271,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 28682226919752, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(1218550748), String_var(reason), Symbol_var(1019648360), int_var(offset));
     __builtin_unreachable();
   }
 
@@ -507,7 +524,7 @@ _Noreturn static void _malformed(String operation, String reason, int offset){
 String Var_as_string(Var);
 
 static int _next_point(Iter iter, Var * out){
-  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/encoding.x",.function = "_next_point",.line = 270,.runtime = 1}; & _x2c_gensym_error_site_2; }))), point;
+  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/encoding.x",.function = "_next_point",.line = 276,.runtime = 1}; & _x2c_gensym_error_site_5; }))), point;
   if(! String_try_next_code_point(Var_as_string(iter -> obj), &(cursor), &(point))) return 0;
   iter -> state = int_var(cursor);
   * out = int_var(point);
@@ -628,8 +645,8 @@ static String _text(Block bytes, String operation){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("NUL byte cannot appear in a String")), NULL)));
     Var _x2c_gensym_literal_part_3 = Var_box_long(nul - start);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/encoding.x",.function = "_text",.line = 341,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2, Symbol_var(19800432), _x2c_gensym_literal_part_3);
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/encoding.x",.function = "_text",.line = 347,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_6, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
 

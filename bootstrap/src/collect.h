@@ -26,6 +26,8 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
+List Compiler_prelude_dependencies(void);
+
 int Compiler_is_prelude_source(String path);
 
 int Compiler_in_runtime_library(String path);

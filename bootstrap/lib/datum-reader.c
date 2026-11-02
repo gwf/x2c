@@ -353,18 +353,18 @@ static int _nested_depth(LispReader * r, int depth){
   return depth;
 }
 
-String String_unescape(String);
+String x2c_string_unescape_bytes(String);
 
 String String_new_len(const char *, int);
 
 static Var _atom(LispReader * r, Token token){
   String text = token -> text;
   switch(token -> type){
-    case 27051791223990 : return String_var(String_unescape(String_new_len(text + 1, token -> len - 2)));
+    case 27051791223990 : return String_var(x2c_string_unescape_bytes(String_new_len(text + 1, token -> len - 2)));
     case 26417777576 : return _integer(&((* r)), token);
     case 27051797805160 : return _floating(&((* r)), token);
     case 865658429314008 : return _symbol(&((* r)), token);
-    case 19147688 : return Atom_intern(String_unescape(text));
+    case 19147688 : return Atom_intern(x2c_string_unescape_bytes(text));
   }
   return _malformed_token(&((* r)), token);
 }
@@ -397,7 +397,7 @@ Symbol Symbol_new(const char *);
 static Var _symbol(LispReader * r, Token token){
   String text = token -> text;
   int n = token -> len;
-  String inner = String_getindex(text, 1) == '"' ? String_unescape(String_new_len(text + 2, n - 4)) : String_new_len(text + 1, n - 2);
+  String inner = String_getindex(text, 1) == '"' ? x2c_string_unescape_bytes(String_new_len(text + 2, n - 4)) : String_new_len(text + 1, n - 2);
   if(! String_truth(inner)) return _malformed_token(&((* r)), token);
   return Symbol_var(Symbol_new(inner));
 }
@@ -408,7 +408,7 @@ _Noreturn static Var _malformed_token(LispReader * r, Token token){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 186,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 187,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -419,7 +419,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 192,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 193,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -459,7 +459,7 @@ static int _plain_list(char * s, unsigned * at, Var * out, Array items, int dept
 static int _plain_string(char * s, unsigned * at, Var * out){
   int length = scan_lisp_string_status(s +(* at), NULL);
   if(length < 0 || ! _token_end(s[(* at) + length])) return 0;
-  (* out) = String_var(String_unescape(String_new_len(s +(* at) + 1, length - 2)));
+  (* out) = String_var(x2c_string_unescape_bytes(String_new_len(s +(* at) + 1, length - 2)));
   (* at) += length;
   return 1;
 }

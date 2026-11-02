@@ -75,12 +75,16 @@ static inline size_t Block_capacity(Block b){
 
 int Block_truth(Block block);
 
+void x2c_block_bad_arg(Symbol);
+
 static inline void Block_truncate(Block block, size_t length){
-  if(block != NULL && length < block -> length) block -> length = length;
+  if(block == NULL) x2c_block_bad_arg(1414483086602);
+  if(length < block -> length) block -> length = length;
 }
 
 static inline void Block_clear(Block block){
-  if(block != NULL) block -> length = 0;
+  if(block == NULL) x2c_block_bad_arg(7088228);
+  block -> length = 0;
 }
 
 static inline int Block_try_pop(Block b, void * out);
@@ -100,7 +104,8 @@ static inline void Block_pop(Block block){
 }
 
 static inline int Block_try_pop(Block b, void * out){
-  if(b == NULL || ! b -> length) return 0;
+  if(b == NULL) x2c_block_bad_arg(44212126688);
+  if(! b -> length) return 0;
   size_t index = b -> length - 1;
   if(out) memmove(out, (unsigned char *) b -> bytes + index * b -> width, b -> width);
   b -> length = index;
@@ -116,6 +121,8 @@ Block Block_new(size_t width);
 void Block_free(Block b);
 
 void Block_move_to(Block block, Scope * scope);
+
+_Noreturn void x2c_block_bad_arg(Symbol action);
 
 void Bytes_clear(Bytes a0);
 

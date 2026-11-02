@@ -6,6 +6,7 @@
 #define __GUARD_0x874D0B13__
 
 #include "compiler-meta.h"
+#include "native-scalar-types.h"
 List _tag_info(void);
 
 List _tag_info_row(List row);
@@ -62,7 +63,7 @@ int _tag_group_mask(int count);
 
 String _tag_id(List row);
 
-Map _tag_types(List native);
+Map _tag_types(void);
 
 List _tag_rows(void);
 

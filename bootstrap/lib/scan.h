@@ -38,6 +38,12 @@ static inline int scan_ascii_alpha(int c){
   return(unsigned)((c | 32) - 'a') < 26;
 }
 
+static inline int scan_ascii_digit(int c);
+
+static inline int _x2c_ascii_word(int c){
+  return scan_ascii_alpha(c) || scan_ascii_digit(c) || c == '_';
+}
+
 Symbol scan_keyword_type(const char * s, int n);
 
 int scan_c_operator(char * s);
@@ -65,8 +71,6 @@ int scan_atom(char * s);
 int scan_atom_status(char * s, Symbol * status);
 
 int scan_escape_sequence(char * s);
-
-static inline int scan_ascii_digit(int c);
 
 static inline int scan_ascii_hex_value(int c){
   if(scan_ascii_digit(c)) return c - '0';

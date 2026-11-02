@@ -146,7 +146,7 @@ Symbol Symbol_parse(char * text){
   if(len >= 3 && text[1] == '"'){
     String inner = String_new_len(text + 2, len - 4);
     if(! String_truth(inner)) return 0;
-    String unquoted = String_unescape(inner);
+    String unquoted = x2c_string_unescape_bytes(inner);
     if(! String_truth(unquoted)) return 0;
     return Symbol_new(unquoted);
   }

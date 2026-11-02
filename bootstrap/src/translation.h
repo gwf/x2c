@@ -31,7 +31,7 @@
 #include "protocol/protocol.h"
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed));
 
-void translate_print_command(String out_dir, List inputs);
+void translate_print_command(CliRequest request, String out_dir, List inputs);
 
 
 #endif /* __GUARD_0x0E6DB390__ */

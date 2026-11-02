@@ -10,6 +10,10 @@ static inline int scan_ascii_alpha(int c){
 
 static inline int scan_ascii_digit(int c);
 
+static inline int _x2c_ascii_word(int c){
+  return scan_ascii_alpha(c) || scan_ascii_digit(c) || c == '_';
+}
+
 static inline int scan_ascii_hex_value(int c){
   if(scan_ascii_digit(c)) return c - '0';
   c |= 32;
@@ -51,8 +55,6 @@ static inline int _is_l(int c);
 static inline int _is_u(int c);
 
 static int _float_suffix(char * s);
-
-static inline int _token_break(int c);
 
 static int _c_escape_status(char * s, Symbol * status, int * value);
 
@@ -207,7 +209,7 @@ int scan_identifier(char * s){
     __builtin_unreachable();
   }
   int n = 1;
-  while(! _token_break((unsigned char) s[n])) n ++;
+  while(_x2c_ascii_word((unsigned char) s[n])) n ++;
   return n;
 }
 
@@ -587,7 +589,7 @@ static int _int_suffix(char * s){
     case 'l' : case 'L' : n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
     break;
   }
-  return _token_break(s[n]) ? n : - 1;
+  return ! _x2c_ascii_word(s[n]) ? n : - 1;
 }
 
 static int _longs(char * s){
@@ -608,11 +610,7 @@ static int _float_suffix(char * s){
     case 'f' : case 'F' : case 'l' : case 'L' : n ++;
     break;
   }
-  return _token_break(s[n]) ? n : - 1;
-}
-
-static inline int _token_break(int c){
-  return !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
+  return ! _x2c_ascii_word(s[n]) ? n : - 1;
 }
 
 static int _c_escape_status(char * s, Symbol * status, int * value){

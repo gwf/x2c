@@ -1450,7 +1450,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _16 = String_new("expected macro result kind before '$'");
   _17 = String_new("unknown macro result kind \'");
   _18 = String_new("anonymous_macro");
-  _19 = String_new("'with' cannot be a local macro name");
+  _19 = String_new("\' cannot be a local macro name");
   _20 = String_new("x2c.");
   _21 = String_new("lisp.");
   _22 = String_new(".");
@@ -2443,7 +2443,7 @@ static void f19_definitions_reading____head(Definition * d){
   Compiler c =(* d).c;
   if(Compiler_peek(c, 0) == 73) Compiler_report_error(c, 33658058, _12, c -> token, _15);
   (* d).anonymous = Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81;
-  (* d).local =(* d).anonymous ||(Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 19147688 && Compiler_peek(c, 2) == 81);
+  (* d).local =(* d).anonymous ||(Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 19147688 || SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\001\000\000\000\144\061\205\000\000\000\000\000\012\113\350\002\000\000\000\000", Compiler_peek(c, 1))) && Compiler_peek(c, 2) == 81);
   if(Compiler_peek(c, 0) != 19147688 ||(!(* d).local && Compiler_peek(c, 1) != 73)) Compiler_report_error(c, 33658058, _16, c -> token, NULL);
   Token token = c -> token;
   Compiler_next(c);
@@ -2467,7 +2467,7 @@ static void _naming(Definition * d){
   }
   else(* d).name = _name(c);
   String spelling = Atom_str((* d).name);
-  if((* d).local && x2c_var_equal_lane((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _19, (* d).start, NULL);
+  if((* d).local && SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\003\000\001\000\020\115\027\000\000\000\000\000\144\061\205\000\000\000\000\000\012\113\350\002\000\000\000\000", Var_symbol((* d).name))) Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_19), NULL)))), (* d).start, NULL);
   if((String_startswith(spelling, _20) || String_startswith(spelling, _21)) && ! c -> builtin_defs && ! Compiler_is_runtime_source(Compiler_source_path(c, c -> filename))){
     String _x2c_gensym_macro_space_0 = String_getslice(spelling, (-2147483647 - 1), x2c_slice_bound(String_find(spelling, _22)), 1);
     Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_23), cons(String_var(spelling), cons(String_var(_24), NULL)))), (* d).start, cons(String_var(String_join(NULL, cons(String_var(_x2c_gensym_macro_space_0), cons(String_var(_25), NULL)))), NULL));
@@ -5255,8 +5255,7 @@ static MacroMatcher * f8_rewrites____prepared_matcher(RewriteRule rule){
 
 static void _require_owned(int owned){
   if(owned) return;
-  fprintf(stderr, "x2c: could not retain a shipped rewrite rule\n");
-  abort();
+  x2c_fatal("x2c: could not retain a shipped rewrite rule");
 }
 
 static List f8_rewrites____rewrite_candidates(Compiler c, Symbol point, Var kind){
@@ -5955,7 +5954,7 @@ static List f8_rewrites____skeleton(List lowered, Array outputs){
       }
       int refused = 0;  List skeleton = f8_rewrites____marked(lowered, outputs, found, &(refused)); {
         int count;  Array _x2c_gensym_macro_object_43 = found;  int _x2c_gensym_macro_cursor_50 = 0;  Var _x2c_gensym_macro_cursor_output_43;  while(Array_try_next(_x2c_gensym_macro_object_43, &(_x2c_gensym_macro_cursor_50), &(_x2c_gensym_macro_cursor_output_43))){
-          count = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_43, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/macros/rewrites.x",.function = "f8_rewrites____skeleton",.line = 583}; & _x2c_gensym_error_site_3; })));  if(count != 1) refused = 1;
+          count = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_43, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/macros/rewrites.x",.function = "f8_rewrites____skeleton",.line = 582}; & _x2c_gensym_error_site_3; })));  if(count != 1) refused = 1;
         }
 
       }
@@ -6044,7 +6043,7 @@ static List f8_rewrites____fill_values(Compiler c, List prepared, Array values){
                 List _x2c_gensym_macro_cursor_52 = _x2c_gensym_macro_object_44;
                 Var _x2c_gensym_macro_cursor_output_44;
                 while(List_try_next(_x2c_gensym_macro_object_44, &(_x2c_gensym_macro_cursor_52), &(_x2c_gensym_macro_cursor_output_44))){
-                  slot = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_44, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/macros/rewrites.x",.function = "f8_rewrites____fill_values",.line = 607}; & _x2c_gensym_error_site_4; })));
+                  slot = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_44, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/macros/rewrites.x",.function = "f8_rewrites____fill_values",.line = 606}; & _x2c_gensym_error_site_4; })));
                   Array_setindex(lowered, slot, List_var(Compiler_normalize(c, Var_list_payload(Array_getindex(values, slot)))));
                 }
 
@@ -6355,7 +6354,7 @@ int Compiler_macro_form_is_definition(Compiler c){
 }
 
 int Compiler_local_macro_form_is_definition(Compiler c){
-  if(! _init_guard_) _file_init_();  return Compiler_at_word(c, _536) && Compiler_peek(c, 1) == 19147688 && Compiler_peek(c, 2) == 19147688 && Compiler_peek(c, 3) == 81;
+  if(! _init_guard_) _file_init_();  return Compiler_at_word(c, _536) && Compiler_peek(c, 1) == 19147688 &&(Compiler_peek(c, 2) == 19147688 || SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\001\000\000\000\144\061\205\000\000\000\000\000\012\113\350\002\000\000\000\000", Compiler_peek(c, 2))) && Compiler_peek(c, 3) == 81;
 }
 
 int Compiler_keyword_form_is_definition(Compiler c){
@@ -6638,10 +6637,7 @@ static List _invocation_arguments(Compiler c, List definition, Token invocation)
         Array_push(arguments, List_var(f20_invocations_captures____argument_row(c, hole, kind)));
         if(List_truth(List_cdr(nodes)) && Compiler_peek(c, 0) != 83) f20_invocations_captures____argument_separator(c, kind);
       }
-      if(Compiler_peek(c, 0) != 83){
-        if(Compiler_peek(c, 0) == 89) Compiler_next(c);
-        Compiler_report_error(c, 33658058, _560, c -> token, NULL);
-      }
+      if(Compiler_test(c, 89)) Compiler_report_error(c, 33658058, _560, c -> token, NULL);
       Compiler_expect(c, 83);
       {
         List _x2c_gensym_return_value_35 = cons(_185, Array_list_free(arguments));
@@ -6659,7 +6655,7 @@ static List _invocation_arguments(Compiler c, List definition, Token invocation)
 }
 
 static List f20_invocations_captures____argument_row(Compiler c, List hole, Symbol kind){
-  int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/macros/invocations/captures.x",.function = "f20_invocations_captures____argument_row",.line = 40}; & _x2c_gensym_error_site_5; })));
+  int sequence = Var_int(Var_convert_at(List_assoc(hole, Symbol_var(1317592723658)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/macros/invocations/captures.x",.function = "f20_invocations_captures____argument_row",.line = 38}; & _x2c_gensym_error_site_5; })));
   Array captured = Array_new();
   if(Compiler_peek(c, 0) == 83 && ! sequence) Compiler_report_error(c, 33658058, _561, c -> token, NULL);
   if(Compiler_peek(c, 0) != 83) while(1){
@@ -9678,11 +9674,19 @@ void Compiler_check_included_names(Compiler c, List names, Map globs, Token site
 
 }
 
+List Compiler_named_alias_expression(Compiler c, String name);
+List Compiler_alias_expression(Compiler c){
+  if(! _init_guard_) _file_init_();  return Compiler_peek(c, 0) == 19147688 ? Compiler_named_alias_expression(c, c -> token -> text) : NULL;
+}
+
 int Sym_has_aliases(Sym);
 int Sym_declaring_scope(Sym, List);
 int Sym_base_scope_count(Sym);
-List Compiler_alias_expression(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) != 19147688) return NULL;  Map table = f7_aliases____table(c);  if(! Map_truth(table) && ! Sym_has_aliases(c -> sym)) return NULL;  String name = c -> token -> text;  List symbol = cons(String_var(name), NULL);  int scope = Sym_declaring_scope(c -> sym, symbol);  Var key;  List entry = f7_aliases____entry(c, name, &(key)), expression = NULL;  if(List_truth(entry)) expression = f7_aliases____visible(c, table, key, entry, scope);  if(! List_truth(expression) && Sym_has_aliases(c -> sym) && scope >= Sym_base_scope_count(c -> sym)) expression = Compiler_fact(c, List_var(cons(_523, cons(List_var(Sym_lookup(c -> sym, symbol, NULL)), NULL))));  if(List_truth(expression) && ! Map_truth(c -> macro_holes)) f7_aliases____reveal_bindings(c, expression);  return expression;
+List Compiler_named_alias_expression(Compiler c, String name){
+  if(! _init_guard_) _file_init_();  Map table = f7_aliases____table(c);  if(! Map_truth(table) && ! Sym_has_aliases(c -> sym)) return NULL;  List symbol = cons(String_var(name), NULL);  int scope = Sym_declaring_scope(c -> sym, symbol);  Var key;  List entry = f7_aliases____entry(c, name, &(key)), expression = NULL;  if(List_truth(entry)) expression = f7_aliases____visible(c, table, key, entry, scope);  if(! List_truth(expression) && Sym_has_aliases(c -> sym) && scope >= Sym_base_scope_count(c -> sym)) expression = Compiler_fact(c, List_var(cons(_523, cons(List_var(Sym_lookup(c -> sym, symbol, NULL)), NULL))));  if(List_truth(expression) && ! Map_truth(c -> macro_holes)){
+    f7_aliases____reveal_bindings(c, expression);  if(List_truth(c -> lambda_scopes)) expression = Compiler_resolve_expression(c, expression, c -> token);
+  }
+  return expression;
 }
 
 static int f7_aliases____unalias_starts(Compiler c){
@@ -9743,7 +9747,7 @@ static int f7_aliases____same_scope(Compiler c, List entry){
       case 9224498584260616520ULL :{if(_x2c_gensym_match_expr_76 && _x2c_gensym_match_expr_76 ->car.u64 == 9224498584260616520ULL){return ! c -> alias_level && Sym_at_file_scope(c -> sym);  break;}} case 9224498222603538760ULL :{List _x2c_gensym_match_at_292, _x2c_gensym_match_at_293; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_76 && _x2c_gensym_match_expr_76 ->car.u64 == 9224498222603538760ULL &&(_x2c_gensym_match_at_292 = _x2c_gensym_match_expr_76 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_292 ->car, 1) && Var_is(_x2c_gensym_match_at_292 -> car, 3453797) &&(_x2c_gensym_match_at_293 = _x2c_gensym_match_at_292 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_293 ->car, 1) && Var_is(_x2c_gensym_match_at_293 -> car, 3453797)){{
         Var depth;  depth = x2c_match_value_0;  Var level;  level = x2c_match_value_1; {
           Var _x2c_gensym_match_value_14 = depth;  Var _x2c_gensym_match_value_15 = level; {
-            int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_14, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____same_scope",.line = 340}; & _x2c_gensym_error_site_7; })));  int level = Var_int(Var_convert_at(_x2c_gensym_match_value_15, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____same_scope",.line = 340}; & _x2c_gensym_error_site_8; })));  return depth == Sym_scope_count(c -> sym) && level == c -> alias_level;
+            int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_14, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____same_scope",.line = 348}; & _x2c_gensym_error_site_7; })));  int level = Var_int(Var_convert_at(_x2c_gensym_match_value_15, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____same_scope",.line = 348}; & _x2c_gensym_error_site_8; })));  return depth == Sym_scope_count(c -> sym) && level == c -> alias_level;
           }
 
         }
@@ -9808,8 +9812,8 @@ static int f7_aliases____inner_entry(List inner, List outer){
       Var _x2c_gensym_match_value_16 = depth;
       Var _x2c_gensym_match_value_17 = level;
       {
-        int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_16, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 395}; & _x2c_gensym_error_site_9; })));
-        int level = Var_int(Var_convert_at(_x2c_gensym_match_value_17, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 395}; & _x2c_gensym_error_site_10; })));
+        int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_16, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 403}; & _x2c_gensym_error_site_9; })));
+        int level = Var_int(Var_convert_at(_x2c_gensym_match_value_17, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 403}; & _x2c_gensym_error_site_10; })));
         {
           List _x2c_gensym_match_expr_79 = outer;
           {List _x2c_gensym_match_at_301, _x2c_gensym_match_at_302; Var x2c_match_value_0, x2c_match_value_1; if(_x2c_gensym_match_expr_79 && _x2c_gensym_match_expr_79 ->car.u64 == 9224498222603538760ULL &&(_x2c_gensym_match_at_301 = _x2c_gensym_match_expr_79 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_301 ->car, 1) && Var_is(_x2c_gensym_match_at_301 -> car, 3453797) &&(_x2c_gensym_match_at_302 = _x2c_gensym_match_at_301 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_302 ->car, 1) && Var_is(_x2c_gensym_match_at_302 -> car, 3453797)){
@@ -9820,8 +9824,8 @@ static int f7_aliases____inner_entry(List inner, List outer){
             Var _x2c_gensym_match_value_18 = prior_depth;
             Var _x2c_gensym_match_value_19 = prior_level;
             {
-              int prior_depth = Var_int(Var_convert_at(_x2c_gensym_match_value_18, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 395}; & _x2c_gensym_error_site_11; })));
-              int prior_level = Var_int(Var_convert_at(_x2c_gensym_match_value_19, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 395}; & _x2c_gensym_error_site_12; })));
+              int prior_depth = Var_int(Var_convert_at(_x2c_gensym_match_value_18, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 403}; & _x2c_gensym_error_site_11; })));
+              int prior_level = Var_int(Var_convert_at(_x2c_gensym_match_value_19, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____inner_entry",.line = 403}; & _x2c_gensym_error_site_12; })));
               return depth > prior_depth ||(depth == prior_depth && level > prior_level);
             }
 
@@ -10002,7 +10006,7 @@ static List f7_aliases____visible(Compiler c, Map table, Var key, List entry, in
     expression = x2c_match_value_1;
     Var _x2c_gensym_match_value_20 = depth;
     {
-      int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____visible",.line = 499}; & _x2c_gensym_error_site_13; })));
+      int depth = Var_int(Var_convert_at(_x2c_gensym_match_value_20, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../src/macros/aliases.x",.function = "f7_aliases____visible",.line = 507}; & _x2c_gensym_error_site_13; })));
       if(depth > scope) return Var_list_payload(expression);
     }
 

@@ -60,7 +60,7 @@ void * x2c_exception_execution_new(void){
   ExceptionThreadState saved = calloc(1, sizeof(struct ExceptionThreadState));
   if(! saved){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/exception.x",.function = "x2c_exception_execution_new",.line = 58,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_exception_execution_new")), NULL))));
     __builtin_unreachable();
   }
   return saved;

@@ -36,9 +36,7 @@ typedef struct Translation{
 }
 Translation;
 
-static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _1, _0;
-
-static Var _2;
+static String _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -144,6 +142,13 @@ _x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
+typedef struct _x2c_gensym_defer_env_3{
+  const void * _x2c_gensym_defer_capture_3;
+}
+_x2c_gensym_defer_env_3;
+
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
+
 #include "exception.h"
 
 
@@ -155,26 +160,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new(".");
   _1 = String_new("--out-dir");
-  _2 = String_var(_1);
-  _3 = String_new("translation input is not an .x file: ");
-  _4 = String_new("\n      inputs produce the same output stem \'");
-  _5 = String_new("\'\n        first input: ");
-  _6 = String_new("\n        other input: ");
-  _7 = String_new("\n        output: ");
-  _8 = String_new("/");
-  _9 = String_new(".c");
-  _10 = String_new("output directory is not writable: ");
-  _11 = String_new("/builds/");
-  _12 = String_new(".module");
-  _13 = String_new(".d");
-  _14 = String_new("import");
-  _15 = String_new(".h");
-  _16 = String_new("file");
-  _17 = String_new("files");
-  _18 = String_new("Translated ");
-  _19 = String_new(" x2c ");
-  _20 = String_new(" to ");
-  _21 = String_new(" in ");
+  _2 = String_new("--source-map");
+  _3 = String_new("--cpp");
+  _4 = String_new("--live-symbols");
+  _5 = String_new("--cpp-symbols");
+  _6 = String_new("--no-cpp");
+  _7 = String_new("--x-include-dir");
+  _8 = String_new("--package-dir");
+  _9 = String_new("--native-module");
+  _10 = String_new("--meta-cc");
+  _11 = String_new("translation input is not an .x file: ");
+  _12 = String_new("\n      inputs produce the same output stem \'");
+  _13 = String_new("\'\n        first input: ");
+  _14 = String_new("\n        other input: ");
+  _15 = String_new("\n        output: ");
+  _16 = String_new("/");
+  _17 = String_new(".c");
+  _18 = String_new("output directory is not writable: ");
+  _19 = String_new("/builds/");
+  _20 = String_new(".module");
+  _21 = String_new(".d");
+  _22 = String_new("import");
+  _23 = String_new(".h");
+  _24 = String_new("file");
+  _25 = String_new("files");
+  _26 = String_new("Translated ");
+  _27 = String_new(" x2c ");
+  _28 = String_new(" to ");
+  _29 = String_new(" in ");
 }
 
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed)){
@@ -200,9 +213,103 @@ int translate_request(CliRequest request, Map unit_dirs, void * context, void(* 
   return 0;
 }
 
-void translate_print_command(String out_dir, List inputs){
+void translate_print_command(CliRequest request, String out_dir, List inputs){
   if(! _init_guard_) _file_init_();
-  ToolAction_start(ToolAction_new(45220543335690, cons(_2, cons(String_var(out_dir), inputs)), 0, 1));
+  Array args = Array_update_n(Array_new(), 2, String_var(_1), String_var(out_dir));
+  const Array _x2c_gensym_macro_acquired_0 = args;
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      if(request -> source_map) Array_push(args, String_var(_2));
+      if(request -> cpp_expansion) Array_push(args, String_var(_3));
+      if(request -> live_symbols) Array_push(args, String_var(_4));
+      if(request -> cpp_symbols) Array_push(args, String_var(_5));
+      if(request -> no_cpp) Array_push(args, String_var(_6));
+      {
+        String dir;
+        List _x2c_gensym_macro_object_0 = request -> include_dirs;
+        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+        Var _x2c_gensym_macro_cursor_output_0;
+        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+          dir = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+          {
+            Array_push(args, String_var(_7));
+            Array_push(args, String_var(dir));
+          }
+
+        }
+
+      }
+      {
+        String dir;
+        List _x2c_gensym_macro_object_1 = request -> package_dirs;
+        List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+        Var _x2c_gensym_macro_cursor_output_1;
+        while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+          dir = Var_as_string(_x2c_gensym_macro_cursor_output_1);
+          {
+            Array_push(args, String_var(_8));
+            Array_push(args, String_var(dir));
+          }
+
+        }
+
+      }
+      {
+        String arg;
+        List _x2c_gensym_macro_object_2 = request -> cpp_args;
+        List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+        Var _x2c_gensym_macro_cursor_output_2;
+        while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+          arg = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+          Array_push(args, String_var(arg));
+        }
+
+      }
+      {
+        String path;
+        List _x2c_gensym_macro_object_3 = request -> native_modules;
+        List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+        Var _x2c_gensym_macro_cursor_output_3;
+        while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+          path = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+          {
+            Array_push(args, String_var(_9));
+            Array_push(args, String_var(path));
+          }
+
+        }
+
+      }
+      if(String_truth(request -> meta_cc)){
+        Array_push(args, String_var(_10));
+        Array_push(args, String_var(request -> meta_cc));
+      }
+      {
+        String input;
+        List _x2c_gensym_macro_object_4 = inputs;
+        List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+        Var _x2c_gensym_macro_cursor_output_4;
+        while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+          input = Var_as_string(_x2c_gensym_macro_cursor_output_4);
+          Array_push(args, String_var(input));
+        }
+
+      }
+      ToolAction_start(ToolAction_new(45220543335690, Array_list(args), 0, 1));
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
 }
 
 String Path_stem(Path);
@@ -213,18 +320,18 @@ static void _preflight(Translation * t){
   Map stems = shared ? Map_new() : NULL;
   {
     String input;
-    List _x2c_gensym_macro_object_0 = request -> inputs;
-    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+    List _x2c_gensym_macro_object_5 = request -> inputs;
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_5);
       {
         CliRequest_require_input(input);
-        if(! Path_is_x2c_source(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(input), NULL))));
+        if(! Path_is_x2c_source(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(input), NULL))));
         if(! shared) continue;
         String stem = Path_stem(input);
         if(Map_contains(stems, String_var(stem))) Diagnostics_driver_error(String_dedent(({
-          Var _x2c_gensym_literal_part_0 = String_var(stem);  Var _x2c_gensym_literal_part_1 = String_var(Var_str(Map_getindex(stems, String_var(stem))));  String_join(NULL, cons(String_var(_4), cons(_x2c_gensym_literal_part_0, cons(String_var(_5), cons(_x2c_gensym_literal_part_1, cons(String_var(_6), cons(String_var(input), cons(String_var(_7), cons(String_var(request -> out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_9), NULL))))))))))));
+          Var _x2c_gensym_literal_part_0 = String_var(stem);  Var _x2c_gensym_literal_part_1 = String_var(Var_str(Map_getindex(stems, String_var(stem))));  String_join(NULL, cons(String_var(_12), cons(_x2c_gensym_literal_part_0, cons(String_var(_13), cons(_x2c_gensym_literal_part_1, cons(String_var(_14), cons(String_var(input), cons(String_var(_15), cons(String_var(request -> out_dir), cons(String_var(_16), cons(String_var(stem), cons(String_var(_17), NULL))))))))))));
         }
         )));
         Map_setindex(stems, String_var(stem), String_var(input));
@@ -283,22 +390,22 @@ static void _make_out_dir(String out_dir){
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(out_dir), NULL))));
+  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_18), cons(String_var(out_dir), NULL))));
 }
 
 static void _print_commands(Translation * t){
   if(! Map_truth((* t).unit_dirs)){
-    translate_print_command((* t).request -> out_dir, (* t).request -> inputs);
+    translate_print_command((* t).request, (* t).request -> out_dir, (* t).request -> inputs);
     return;
   }
   {
     String input;
-    List _x2c_gensym_macro_object_1 =(* t).request -> inputs;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_1);
-      translate_print_command(Var_as_string(Map_getindex((* t).unit_dirs, String_var(input))), cons(String_var(input), NULL));
+    List _x2c_gensym_macro_object_6 =(* t).request -> inputs;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+      translate_print_command((* t).request, Var_as_string(Map_getindex((* t).unit_dirs, String_var(input))), cons(String_var(input), NULL));
     }
 
   }
@@ -329,17 +436,17 @@ static void _preload_modules(Translation * t){
   if(! List_truth(roots)) return;
   {
     String name;
-    Iter _x2c_gensym_macro_iterator_2 = Map_keys(_package_names(&((* t)), roots), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_7 = Map_keys(_package_names(&((* t)), roots), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_2;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
-      name = Var_as_string(_x2c_gensym_macro_item_2);
+    Var _x2c_gensym_macro_item_7;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
+      name = Var_as_string(_x2c_gensym_macro_item_7);
       {
         String root = NULL;
         if(! String_truth(SourceView_package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
-        String module = String_join(NULL, cons(String_var(root), cons(String_var(_11), cons(String_var(name), cons(String_var(_12), NULL)))));
+        String module = String_join(NULL, cons(String_var(root), cons(String_var(_19), cons(String_var(name), cons(String_var(_20), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
 
@@ -357,36 +464,36 @@ static Map _package_names(Translation * t, List roots){
   Map names = Map_new();
   {
     String input;
-    List _x2c_gensym_macro_object_5 =(* t).request -> inputs;
-    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_4))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_4);
+    List _x2c_gensym_macro_object_10 =(* t).request -> inputs;
+    List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_9))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_9);
       {
         {
           String name;
-          List _x2c_gensym_macro_object_3 = _imported_packages((* t).request -> sources, input);
-          List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-          Var _x2c_gensym_macro_cursor_output_2;
-          while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_2))){
-            name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+          List _x2c_gensym_macro_object_8 = _imported_packages((* t).request -> sources, input);
+          List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
+          Var _x2c_gensym_macro_cursor_output_7;
+          while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_7))){
+            name = Var_as_string(_x2c_gensym_macro_cursor_output_7);
             Map_setindex(names, String_var(name), int_var(1));
           }
 
         }
         String depfile =({
-          Var _x2c_gensym_literal_part_2 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_8), cons(_x2c_gensym_literal_part_3, cons(String_var(_13), NULL)))));
+          Var _x2c_gensym_literal_part_2 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_16), cons(_x2c_gensym_literal_part_3, cons(String_var(_21), NULL)))));
         }
         );
         String text = NULL;
         if(! SourceView_read(NULL, depfile, &(text))) continue;
         {
           String dependency;
-          List _x2c_gensym_macro_object_4 = translation_depfile_parse(text);
-          List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-          Var _x2c_gensym_macro_cursor_output_3;
-          while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_3))){
-            dependency = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+          List _x2c_gensym_macro_object_9 = translation_depfile_parse(text);
+          List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
+          Var _x2c_gensym_macro_cursor_output_8;
+          while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_8))){
+            dependency = Var_as_string(_x2c_gensym_macro_cursor_output_8);
             {
               String package = Compiler_package_directory(roots, dependency);
               if(String_truth(package)) Map_setindex(names, String_var(Path_basename(package)), int_var(1));
@@ -411,7 +518,7 @@ static List _imported_packages(SourceView sources, String path){
   Tokenizer_scan(tokens);
   Array names = Array_new();
   int depth = 0;
-  for(Token token = Compiler_next_file_scope(tokens, &(depth));  token -> type != 11212;  token = Compiler_next_file_scope(tokens, &(depth))) if(String_equal(token -> text, _14)){
+  for(Token token = Compiler_next_file_scope(tokens, &(depth));  token -> type != 11212;  token = Compiler_next_file_scope(tokens, &(depth))) if(String_equal(token -> text, _22)){
     token = Tokenizer_next(tokens);
     if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, x2c_slice_bound(- 1), 1)));
   }
@@ -509,11 +616,11 @@ void Compiler_stop_meta_helper(void);
 static void _work(Translation * t, List slice){
   {
     String input;
-    List _x2c_gensym_macro_object_6 = slice;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_5))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+    List _x2c_gensym_macro_object_11 = slice;
+    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
+    Var _x2c_gensym_macro_cursor_output_10;
+    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_10))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_10);
       _translate(&((* t)), input);
     }
 
@@ -534,16 +641,16 @@ static void _reap(Workers * w){
   List slice = Var_list_payload(Array_getindex((* w).slices, index));
   File capture =(* w).captures[slot];
   {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & capture;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & capture;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       File_rewind(capture);
       Block output = Block_new(sizeof(char));
@@ -559,7 +666,7 @@ static void _reap(Workers * w){
       sigprocmask(SIG_SETMASK, & unblocked, NULL);
       if(!(* w).t -> progress) report_progress(45220543335690, (* w).done, (* w).t -> total, NULL);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
@@ -593,29 +700,29 @@ static void _show(Workers * w){
   while((* w).shown <(* w).started && ! _carries(&((* w)), (* w).shown)){
     Block output =(* w).output[(* w).shown ++];
     {
-      _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+      _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & output;
-      X2CCleanup _x2c_gensym_defer_record_1 ={
-        .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+      _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & output;
+      X2CCleanup _x2c_gensym_defer_record_2 ={
+        .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_2);
       {
         if(output == NULL){
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           continue;
         }
         if(! output -> length){
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           continue;
         }
         report_suspend();
         File_write_all(stderr, output -> bytes, output -> length);
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
     }
 
   }
@@ -631,11 +738,11 @@ static void _translate_serial(Translation * t){
   int done = 0;
   {
     String input;
-    List _x2c_gensym_macro_object_7 =(* t).request -> inputs;
-    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
-    Var _x2c_gensym_macro_cursor_output_6;
-    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_6))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+    List _x2c_gensym_macro_object_12 =(* t).request -> inputs;
+    List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;
+    Var _x2c_gensym_macro_cursor_output_11;
+    while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_11))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_11);
       {
         if((* t).progress)(* t).progress((* t).context, input, 0);
         else report_progress(45220543335690, done, (* t).total, input);
@@ -665,16 +772,16 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
   ParsedUnit unit;
   int started = Frontend_start(frontend, filename, &(unit));
   {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & unit;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & unit;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       Compiler c = unit.compiler;
       if(! started) _fail(c);
@@ -686,31 +793,31 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
       if(dump == 1374366630){
         Compiler_dump_tokens(c);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return;
         }
 
       }
       if(_inspect_collected(&(unit), dump)){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
         return;
       }
       if(! ParsedUnit_parse(&(unit))) _fail(c);
       c -> recovery_depth = 0;
       if(_inspect_parsed(&(unit), filename, dump)){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
         return;
       }
       List ast = _transform_ast(c, Compiler_generate_protocol_adapters(c, unit.ast));
       if(_inspect_transformed(c, ast, dump)){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
         return;
       }
       Compiler_generate_code(c, ast, output_dir);
       if(! Compiler_write_depfile(c, request, filename, output_dir)) exit(1);
       if(request -> fatal_warnings && List_truth(Compiler_diagnostics(c))) exit(1);
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
 }
@@ -783,11 +890,11 @@ static void _report_diagnostics(Compiler c){
   if(List_truth(entries)) report_suspend();
   {
     List entry;
-    List _x2c_gensym_macro_object_8 = entries;
-    List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
-    Var _x2c_gensym_macro_cursor_output_7;
-    while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_7))){
-      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
+    List _x2c_gensym_macro_object_13 = entries;
+    List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
+    Var _x2c_gensym_macro_cursor_output_12;
+    while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_12))){
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_12);
       Compiler_print_diagnostic(c, entry);
     }
 
@@ -819,15 +926,15 @@ static void _report(Translation * t, unsigned long started_at){
   unsigned long long bytes = 0;
   {
     String input;
-    List _x2c_gensym_macro_object_9 =(* t).request -> inputs;
-    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
-    Var _x2c_gensym_macro_cursor_output_8;
-    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_8))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_8);
+    List _x2c_gensym_macro_object_14 =(* t).request -> inputs;
+    List _x2c_gensym_macro_cursor_14 = _x2c_gensym_macro_object_14;
+    Var _x2c_gensym_macro_cursor_output_13;
+    while(List_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_14), &(_x2c_gensym_macro_cursor_output_13))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_13);
       {
         String stem = Path_stem(input);
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_9), NULL))))));
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_15), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_16), cons(String_var(stem), cons(String_var(_17), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_16), cons(String_var(stem), cons(String_var(_23), NULL))))));
       }
 
     }
@@ -835,23 +942,28 @@ static void _report(Translation * t, unsigned long started_at){
   }
   String duration = report_duration(report_now_us() - started_at);
   int n =(* t).total;
-  String noun = n == 1 ? _16 : _17;
-  report_line(42217975014, String_join(NULL, cons(String_var(_18), cons(String_var(int_str(n)), cons(String_var(_19), cons(String_var(noun), cons(String_var(_20), cons(String_var(out_dir), cons(String_var(_21), cons(String_var(duration), NULL))))))))));
+  String noun = n == 1 ? _24 : _25;
+  report_line(42217975014, String_join(NULL, cons(String_var(_26), cons(String_var(int_str(n)), cons(String_var(_27), cons(String_var(noun), cons(String_var(_28), cons(String_var(out_dir), cons(String_var(_29), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  File_cleanup((*(File *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  Block_cleanup((*(Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
+  File_cleanup((*(File *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2)));
+  Block_cleanup((*(Block *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+}
+
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
+  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3)));
 }
 

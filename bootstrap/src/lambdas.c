@@ -18,11 +18,11 @@ typedef struct Capture{
 }
 Capture;
 
-static List _444, _443, _442, _441, _438, _437, _435, _434, _427, _426, _425, _424, _423, _422, _421, _420, _419, _418, _417, _416, _415, _413, _412, _410, _409, _408, _407, _406, _404, _403, _400, _399, _396, _395, _393, _392, _390, _388, _387, _385, _384, _383, _381, _380, _378, _377, _375, _374, _372, _371, _369, _367, _366, _364, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _346, _343, _340, _337, _336, _334, _333, _332, _331, _330, _328, _327, _323, _322, _318, _315, _314, _310, _309, _303, _300, _299, _297, _296, _294, _293, _292, _290, _289, _288, _287, _285, _284, _283, _282, _280, _279, _278, _277, _276, _273, _272, _270, _269, _268, _266, _265, _264, _262, _260, _256, _252, _251, _249, _248, _247, _246, _244, _243, _242, _240, _239, _238, _237, _235, _234, _231, _229, _228, _227, _225, _223, _221, _220, _219, _218, _217, _215, _214, _211, _209, _208, _206, _204, _203, _202, _201, _200, _198, _195, _194, _191, _188, _187, _186, _184, _183, _181, _175, _173, _170, _169, _167, _166, _165, _163, _162, _161, _160, _158, _157, _154, _153, _150, _149, _146, _145, _144, _142, _141, _138, _137, _134, _133, _132, _131, _129, _128, _124, _123, _121, _120, _114, _113, _109, _108, _104, _103, _99, _98, _91, _90, _89, _87, _86, _84, _83, _81, _80, _79, _78, _70, _69, _53, _52, _48, _47, _46, _44, _43, _40, _39, _38, _37, _36, _29, _27, _25, _22, _21, _17, _16, _14, _12, _8, _6, _4, _3, _2;
+static List _445, _444, _443, _442, _439, _438, _436, _435, _427, _426, _425, _424, _423, _422, _421, _420, _419, _418, _417, _416, _415, _413, _412, _410, _409, _408, _407, _406, _404, _403, _400, _399, _396, _395, _393, _392, _390, _388, _387, _385, _384, _383, _381, _380, _378, _377, _375, _374, _372, _371, _369, _367, _366, _364, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _346, _343, _340, _337, _336, _334, _333, _332, _331, _330, _328, _327, _323, _322, _318, _315, _314, _310, _309, _303, _300, _299, _297, _296, _294, _293, _292, _290, _289, _288, _287, _285, _284, _283, _282, _280, _279, _278, _277, _276, _273, _272, _270, _269, _268, _266, _265, _264, _262, _260, _256, _252, _251, _249, _248, _247, _246, _244, _243, _242, _240, _239, _238, _237, _235, _234, _231, _229, _228, _227, _225, _223, _221, _220, _219, _218, _217, _215, _214, _211, _209, _208, _206, _204, _203, _202, _201, _200, _198, _195, _194, _191, _188, _187, _186, _184, _183, _181, _175, _173, _170, _169, _167, _166, _165, _163, _162, _161, _160, _158, _157, _154, _153, _150, _149, _146, _145, _144, _142, _141, _138, _137, _134, _133, _132, _131, _129, _128, _124, _123, _121, _120, _114, _113, _109, _108, _104, _103, _99, _98, _91, _90, _89, _87, _86, _84, _83, _81, _80, _79, _78, _70, _69, _53, _52, _48, _47, _46, _44, _43, _40, _39, _38, _37, _36, _29, _27, _25, _22, _21, _17, _16, _14, _12, _8, _6, _4, _3, _2;
 
-static String _445, _431, _430, _429, _307, _94, _93, _66, _62, _60, _55, _54, _30, _23, _19, _10;
+static String _446, _432, _431, _430, _429, _307, _94, _93, _66, _62, _60, _55, _54, _30, _23, _19, _10;
 
-static Var _446, _440, _439, _436, _433, _432, _428, _414, _411, _405, _402, _401, _398, _397, _394, _391, _389, _386, _382, _379, _376, _373, _370, _368, _365, _347, _345, _344, _342, _341, _339, _338, _335, _329, _326, _325, _324, _321, _320, _319, _317, _316, _313, _312, _311, _308, _306, _305, _304, _302, _301, _298, _295, _291, _286, _281, _275, _274, _271, _267, _263, _261, _259, _258, _257, _255, _254, _253, _250, _245, _241, _236, _233, _232, _230, _226, _224, _222, _216, _213, _212, _210, _207, _205, _199, _197, _196, _193, _192, _190, _189, _185, _182, _180, _179, _178, _177, _176, _174, _172, _171, _168, _164, _159, _156, _155, _152, _151, _148, _147, _143, _140, _139, _136, _135, _130, _127, _126, _125, _122, _119, _118, _117, _116, _115, _112, _111, _110, _107, _106, _105, _102, _101, _100, _97, _96, _95, _92, _88, _85, _82, _77, _76, _75, _74, _73, _72, _71, _68, _67, _65, _64, _63, _61, _59, _58, _57, _56, _51, _50, _49, _45, _42, _41, _35, _34, _33, _32, _31, _28, _26, _24, _20, _18, _15, _13, _11, _9, _7, _5, _1, _0;
+static Var _447, _441, _440, _437, _434, _433, _428, _414, _411, _405, _402, _401, _398, _397, _394, _391, _389, _386, _382, _379, _376, _373, _370, _368, _365, _347, _345, _344, _342, _341, _339, _338, _335, _329, _326, _325, _324, _321, _320, _319, _317, _316, _313, _312, _311, _308, _306, _305, _304, _302, _301, _298, _295, _291, _286, _281, _275, _274, _271, _267, _263, _261, _259, _258, _257, _255, _254, _253, _250, _245, _241, _236, _233, _232, _230, _226, _224, _222, _216, _213, _212, _210, _207, _205, _199, _197, _196, _193, _192, _190, _189, _185, _182, _180, _179, _178, _177, _176, _174, _172, _171, _168, _164, _159, _156, _155, _152, _151, _148, _147, _143, _140, _139, _136, _135, _130, _127, _126, _125, _122, _119, _118, _117, _116, _115, _112, _111, _110, _107, _106, _105, _102, _101, _100, _97, _96, _95, _92, _88, _85, _82, _77, _76, _75, _74, _73, _72, _71, _68, _67, _65, _64, _63, _61, _59, _58, _57, _56, _51, _50, _49, _45, _42, _41, _35, _34, _33, _32, _31, _28, _26, _24, _20, _18, _15, _13, _11, _9, _7, _5, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -59,6 +59,8 @@ static void _check_lambda_captures(Compiler c, List ast);
 static void _require_reference_arguments(Compiler c, Type callee_type, List arguments);
 
 static void _require_capture_lvalue(Compiler c, List target);
+
+static void _require_capture_write(Compiler c, List target);
 
 static void _prescribe(Compiler c, List row, Array prescribed, Array aliases);
 
@@ -624,22 +626,23 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _428 = Atom_intern(String_new("lambda-snapshot"));
   _429 = String_new("captured value requires 'using &name' for reference access");
   _430 = String_new("binding: ");
-  _431 = String_new("x2c.ident");
-  _432 = String_var(_431);
-  _433 = Symbol_var(61737802);
-  _434 = cons(_433, _79);
-  _435 = cons(_75, _434);
-  _436 = List_var(_435);
-  _437 = cons(_436, NULL);
-  _438 = cons(_432, _437);
-  _439 = Atom_intern(String_new("lambda-depth"));
-  _440 = Atom_intern(String_new("?references"));
-  _441 = cons(_440, _36);
-  _442 = cons(_34, _441);
-  _443 = cons(_45, _442);
-  _444 = cons(_31, _443);
-  _445 = String_new("reference capture requires an enclosing reference capture");
-  _446 = Atom_intern(String_new("reference-param"));
+  _431 = String_new("cannot write a const object in a lambda");
+  _432 = String_new("x2c.ident");
+  _433 = String_var(_432);
+  _434 = Symbol_var(61737802);
+  _435 = cons(_434, _79);
+  _436 = cons(_75, _435);
+  _437 = List_var(_436);
+  _438 = cons(_437, NULL);
+  _439 = cons(_433, _438);
+  _440 = Atom_intern(String_new("lambda-depth"));
+  _441 = Atom_intern(String_new("?references"));
+  _442 = cons(_441, _36);
+  _443 = cons(_34, _442);
+  _444 = cons(_45, _443);
+  _445 = cons(_31, _444);
+  _446 = String_new("reference capture requires an enclosing reference capture");
+  _447 = Atom_intern(String_new("reference-param"));
 }
 
 int Ast_contains_head(Var, Symbol);
@@ -1172,7 +1175,7 @@ int Compiler_lambda_capture_required(Compiler c, List binding){
       depth = x2c_match_value_0;
       Var supplied;
       supplied = x2c_match_value_1;
-      return List_truth(_prescribed_row(supplied, binding, binding)) || _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/lambdas.x",.function = "Compiler_lambda_capture_required",.line = 245}; & _x2c_gensym_error_site_0; }))));
+      return List_truth(_prescribed_row(supplied, binding, binding)) || _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/lambdas.x",.function = "Compiler_lambda_capture_required",.line = 249}; & _x2c_gensym_error_site_0; }))));
     }
 
   }
@@ -1559,7 +1562,7 @@ static void _check_lambda_captures(Compiler c, List ast){
                 Var _x2c_gensym_macro_cursor_output_8;
                 while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_8))){
                   target = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
-                  _require_capture_lvalue(c, target);
+                  _require_capture_write(c, target);
                 }
 
               }
@@ -1572,7 +1575,7 @@ static void _check_lambda_captures(Compiler c, List ast){
               arguments = x2c_match_list_1;
               _require_reference_arguments(c, Var_type(callee_type), arguments);
             }
-            break;}} default:{_require_capture_lvalue(c, Ast_written_operand(node));
+            break;}} default:{_require_capture_write(c, Ast_written_operand(node));
             break;}
           }
 
@@ -1605,6 +1608,15 @@ String Ast_binding_spelling(List);
 static void _require_capture_lvalue(Compiler c, List target){
   List binding = Ast_lvalue_binding(target);
   if(List_truth(binding) && Map_contains(Compiler_semantic_binding_facts(c), List_var(cons(_428, cons(List_var(binding), NULL))))) Compiler_report_error(c, 1362954, _429, c -> token, cons(String_var(String_join(NULL, cons(String_var(_430), cons(String_var(Ast_binding_spelling(binding)), NULL)))), NULL));
+}
+
+static int _x2c_type_const(Type);
+
+static void _require_capture_write(Compiler c, List target){
+  if(! List_truth(target)) return;
+  _require_capture_lvalue(c, target);
+  Type type = Sym_normalize_declared_type(c -> sym, Var_type(List_cadr(target)));
+  if(_x2c_type_const(type)) Compiler_report_error(c, 1362954, _431, c -> token, NULL);
 }
 
 List Sym_resolve_global(Sym, List, Type *);
@@ -1667,7 +1679,7 @@ static String _alias_spelling(Var target, List binding){
         }
 
       }
-      break;}}{List _x2c_gensym_match_at_68, _x2c_gensym_match_at_69; Var x2c_match_value_0; if(_x2c_gensym_match_expr_14 && Var_equal(_x2c_gensym_match_expr_14 -> car, _438 -> car) &&(_x2c_gensym_match_at_68 = _x2c_gensym_match_expr_14 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_68 ->car, 1) && Var_is(_x2c_gensym_match_at_68 -> car, 1318210446) && !(_x2c_gensym_match_at_69 = _x2c_gensym_match_at_68 ->cdr)){{
+      break;}}{List _x2c_gensym_match_at_68, _x2c_gensym_match_at_69; Var x2c_match_value_0; if(_x2c_gensym_match_expr_14 && Var_equal(_x2c_gensym_match_expr_14 -> car, _439 -> car) &&(_x2c_gensym_match_at_68 = _x2c_gensym_match_expr_14 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_68 ->car, 1) && Var_is(_x2c_gensym_match_at_68 -> car, 1318210446) && !(_x2c_gensym_match_at_69 = _x2c_gensym_match_at_68 ->cdr)){{
         Var name;
         name = x2c_match_value_0;
         {
@@ -1812,14 +1824,14 @@ int Sym_binding_is_local_before(Sym, List, int);
 static int _declared_outside(Compiler c, List binding, int depth){
   Var captured_depth;
   Map facts = Compiler_semantic_binding_facts(c);
-  if(Map_try_get(facts, List_var(cons(_439, cons(List_var(binding), NULL))), &(captured_depth))) return Var_integer(captured_depth) < depth;
+  if(Map_try_get(facts, List_var(cons(_440, cons(List_var(binding), NULL))), &(captured_depth))) return Var_integer(captured_depth) < depth;
   return Map_contains(facts, List_var(cons(_64, cons(List_var(binding), NULL)))) && Sym_binding_is_local_before(c -> sym, binding, depth);
 }
 
 static List _frame_capture(Compiler c, List frame, List binding, List original, Type type){
   {
     List _x2c_gensym_match_expr_19 = frame;
-    {List _x2c_gensym_match_at_84, _x2c_gensym_match_at_85, _x2c_gensym_match_at_86, _x2c_gensym_match_at_87, _x2c_gensym_match_at_88; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2, x2c_match_value_3; if(_x2c_gensym_match_expr_19 && Var_equal(_x2c_gensym_match_expr_19 -> car, _444 -> car) &&(_x2c_gensym_match_at_84 = _x2c_gensym_match_expr_19 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_84 ->car, 1) &&(_x2c_gensym_match_at_85 = _x2c_gensym_match_at_84 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_85 ->car, 1) &&(_x2c_gensym_match_at_86 = _x2c_gensym_match_at_85 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_86 ->car, 1) &&(_x2c_gensym_match_at_87 = _x2c_gensym_match_at_86 ->cdr) &&(x2c_match_value_3 = _x2c_gensym_match_at_87 ->car, 1) && !(_x2c_gensym_match_at_88 = _x2c_gensym_match_at_87 ->cdr)){
+    {List _x2c_gensym_match_at_84, _x2c_gensym_match_at_85, _x2c_gensym_match_at_86, _x2c_gensym_match_at_87, _x2c_gensym_match_at_88; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2, x2c_match_value_3; if(_x2c_gensym_match_expr_19 && Var_equal(_x2c_gensym_match_expr_19 -> car, _445 -> car) &&(_x2c_gensym_match_at_84 = _x2c_gensym_match_expr_19 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_84 ->car, 1) &&(_x2c_gensym_match_at_85 = _x2c_gensym_match_at_84 ->cdr) &&(x2c_match_value_1 = _x2c_gensym_match_at_85 ->car, 1) &&(_x2c_gensym_match_at_86 = _x2c_gensym_match_at_85 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_86 ->car, 1) &&(_x2c_gensym_match_at_87 = _x2c_gensym_match_at_86 ->cdr) &&(x2c_match_value_3 = _x2c_gensym_match_at_87 ->car, 1) && !(_x2c_gensym_match_at_88 = _x2c_gensym_match_at_87 ->cdr)){
       Var scope;
       scope = x2c_match_value_0;
       Var depth;
@@ -1830,7 +1842,7 @@ static List _frame_capture(Compiler c, List frame, List binding, List original, 
       supplied = x2c_match_value_3;
       {
         List prescribed = _prescribed_row(supplied, binding, original);
-        if(! List_truth(prescribed) && ! _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/lambdas.x",.function = "_frame_capture",.line = 588}; & _x2c_gensym_error_site_1; }))))) return NULL;
+        if(! List_truth(prescribed) && ! _declared_outside(c, binding, Var_int(Var_convert_at(depth, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/lambdas.x",.function = "_frame_capture",.line = 599}; & _x2c_gensym_error_site_1; }))))) return NULL;
         if(Type_is_static(type)) return NULL;
         Map facts = Compiler_semantic_binding_facts(c);
         List key = cons(_49, cons(scope, cons(List_var(binding), NULL)));
@@ -1887,7 +1899,7 @@ else if(x2c_var_equal_lane(List_car(Type_list(type)), Symbol_var(77))) expressio
   Var _x2c_gensym_literal_part_26 = List_var(captured_type);  Var _x2c_gensym_literal_part_27 = List_var(cons(_92, cons(_42, cons(Macro_inserted(List_var(expression), 1, 1), NULL))));  cons(_71, cons(_x2c_gensym_literal_part_26, cons(_x2c_gensym_literal_part_27, NULL)));
 }
 );
-if(reference && Map_contains((* k).facts, List_var(cons(_428, cons(List_var(binding), NULL))))) Compiler_report_error((* k).c, 1362954, _445, (* k).c -> token, cons(String_var(String_join(NULL, cons(String_var(_430), cons(String_var(Ast_binding_spelling((* k).original)), NULL)))), NULL));
+if(reference && Map_contains((* k).facts, List_var(cons(_428, cons(List_var(binding), NULL))))) Compiler_report_error((* k).c, 1362954, _446, (* k).c -> token, cons(String_var(String_join(NULL, cons(String_var(_430), cons(String_var(Ast_binding_spelling((* k).original)), NULL)))), NULL));
 return _record(&((* k)), captured_type, expression, reference);
 }
 
@@ -1938,9 +1950,9 @@ static List _record(Capture * k, Type captured_type, List expression, int refere
   Compiler_set_fact(c, List_var((* k).key), List_var(row));
   Compiler_set_fact(c, List_var(cons(_64, cons(List_var(captured), NULL))), int_var(1));
   Compiler_set_fact(c, List_var(cons(_65, cons(List_var(captured), NULL))), List_var(captured_type));
-  Compiler_set_fact(c, List_var(cons(_439, cons(List_var(captured), NULL))), (* k).depth);
+  Compiler_set_fact(c, List_var(cons(_440, cons(List_var(captured), NULL))), (* k).depth);
   _inherit_spelling(c, (* k).binding, captured);
-  if(reference) Compiler_set_fact(c, List_var(cons(_446, cons(List_var(captured), NULL))), int_var(1));
+  if(reference) Compiler_set_fact(c, List_var(cons(_447, cons(List_var(captured), NULL))), int_var(1));
   else Compiler_set_fact(c, List_var(cons(_428, cons(List_var(captured), NULL))), int_var(1));
   List order = cons(_32, cons((* k).scope, NULL));
   Compiler_set_fact(c, List_var(order), List_var(cons(List_var(row), Var_list_payload(Map_getdefault((* k).facts, List_var(order), List_var(NULL))))));

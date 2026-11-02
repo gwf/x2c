@@ -44,6 +44,7 @@ typedef struct Parser{
   const char * text;
   int pos, len, depth;
   unsigned long floor;
+  Array capture_names;
 }
 Parser;
 
@@ -120,8 +121,6 @@ static _RegexNode _node(Symbol kind);
 
 static void _add_class(_RegexNode node, int letter);
 
-static int _is_word(int byte);
-
 static void _add_range(_RegexNode node, int low, int high);
 
 static void _fold(_RegexNode node);
@@ -162,13 +161,13 @@ _Noreturn static void _too_deep(Matcher * m);
 
 static RegexMatch _found(Matcher * m, String subject, int at);
 
-static RegexCapture _capture(Matcher * m, String subject, int i);
+static RegexCapture _capture(Matcher * m, String subject, int i, String name);
 
 static RegexMatch _next(Regex r, String subject, RegexMatch previous);
 
 static RegexCapture _whole(RegexMatch found);
 
-static String _rebuild(Regex r, String subject, int all, Func fn, String replacement);
+static String _rebuild(Regex r, String subject, int all, Func fn, String replacement, int callback);
 
 static void _expand(Buffer out, RegexMatch found, String replacement);
 
@@ -243,6 +242,20 @@ typedef struct _x2c_gensym_defer_env_7{
 _x2c_gensym_defer_env_7;
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
+
+typedef struct _x2c_gensym_defer_env_8{
+  const void * _x2c_gensym_defer_capture_8;
+}
+_x2c_gensym_defer_env_8;
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
+
+typedef struct _x2c_gensym_defer_env_9{
+  const void * _x2c_gensym_defer_capture_9;
+}
+_x2c_gensym_defer_env_9;
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9);
 
 void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
 
@@ -469,21 +482,45 @@ Regex Regex_compile(String pattern){
   return Regex_new(pattern);
 }
 
+String String_join(String, List);
+
+#include "error.h"
+
+
+
+
 String Regex_pattern(Regex regex){
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "Regex_pattern",.line = 138,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.pattern")), NULL))));
+    __builtin_unreachable();
+  }
   return regex -> pattern;
 }
 
 int Regex_capture_count(Regex regex){
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "Regex_capture_count",.line = 144,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.capture_count")), NULL))));
+    __builtin_unreachable();
+  }
   return regex -> capture_count;
 }
 
 List Regex_capture_names(Regex regex){
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "Regex_capture_names",.line = 152,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.capture_names")), NULL))));
+    __builtin_unreachable();
+  }
   return regex -> capture_names;
 }
 
 int String_len(String);
 
 int String_getindex(String, int);
+
+static int _x2c_ascii_word(int);
 
 Buffer Buffer_write_char(Buffer, char);
 
@@ -505,7 +542,7 @@ String Regex_escape(String literal){
       int n = String_len(literal);
       for(int i = 0;  i < n;  i ++){
         int byte =(unsigned char) String_getindex(literal, i);
-        if(byte < 128 && ! _is_word(byte)) Buffer_write_char(out, '\\');
+        if(byte < 128 && ! _x2c_ascii_word(byte)) Buffer_write_char(out, '\\');
         Buffer_write_char(out, (char) byte);
       }
       {
@@ -524,10 +561,20 @@ String Regex_escape(String literal){
 }
 
 RegexMatch Regex_match_from(Regex r, String subject, int offset){
+  if(! r){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/regex.x",.function = "Regex_match_from",.line = 176,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match_from")), NULL))));
+    __builtin_unreachable();
+  }
   return offset < 0 || offset > String_len(subject) ? NULL : _search(r, subject, offset);
 }
 
 RegexMatch Regex_match(Regex r, String subject){
+  if(! r){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/regex.x",.function = "Regex_match",.line = 183,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))));
+    __builtin_unreachable();
+  }
   return _search(r, subject, 0);
 }
 
@@ -542,6 +589,11 @@ static Var List_var(List);
 List Array_list(Array);
 
 List Regex_find_all(Regex r, String subject){
+  if(! r){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/regex.x",.function = "Regex_find_all",.line = 191,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.find_all")), NULL))));
+    __builtin_unreachable();
+  }
   Array found = Array_new();
   const Array _x2c_gensym_macro_acquired_1 = found;
   {
@@ -577,6 +629,11 @@ int RegexCapture_start(RegexCapture capture);
 int RegexCapture_end(RegexCapture capture);
 
 List Regex_split(Regex regex, String subject){
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/regex.x",.function = "Regex_split",.line = 203,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.split")), NULL))));
+    __builtin_unreachable();
+  }
   Array parts = Array_new();
   const Array _x2c_gensym_macro_acquired_2 = parts;
   {
@@ -614,17 +671,32 @@ List Regex_split(Regex regex, String subject){
 
 String Regex_replace(Regex regex, String subject, String replacement){
   if(! _init_guard_) _file_init_();
-  return _rebuild(regex, subject, 0, NULL, replacement);
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/regex.x",.function = "Regex_replace",.line = 222,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.replace")), NULL))));
+    __builtin_unreachable();
+  }
+  return _rebuild(regex, subject, 0, NULL, replacement, 0);
 }
 
 String Regex_replace_all(Regex regex, String subject, String replacement){
   if(! _init_guard_) _file_init_();
-  return _rebuild(regex, subject, 1, NULL, replacement);
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/regex.x",.function = "Regex_replace_all",.line = 230,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.replace_all")), NULL))));
+    __builtin_unreachable();
+  }
+  return _rebuild(regex, subject, 1, NULL, replacement, 0);
 }
 
 String Regex_replace_fn(Regex regex, String subject, Func fn){
   if(! _init_guard_) _file_init_();
-  return _rebuild(regex, subject, 1, fn, NULL);
+  if(! regex){
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/regex.x",.function = "Regex_replace_fn",.line = 240,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.replace_fn")), NULL))));
+    __builtin_unreachable();
+  }
+  return _rebuild(regex, subject, 1, fn, NULL, 1);
 }
 
 RegexCapture RegexMatch_capture(RegexMatch found, Var key);
@@ -655,7 +727,7 @@ int String_equal(String, String);
 String RegexCapture_name(RegexCapture capture);
 
 RegexCapture RegexMatch_capture(RegexMatch found, Var key){
-  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 233,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 258,.runtime = 1}; & _x2c_gensym_error_site_10; })));
   String name = numbered ? NULL : Var_str(key);
   {
     RegexCapture capture;
@@ -726,14 +798,41 @@ unsigned long _x2c_stack_floor(void);
 static Regex Regex_new(String pattern){
   Regex regex = xcalloc(1, sizeof(struct Regex));
   regex -> pattern = pattern;
-  Parser p ={
-    regex, regex -> pattern, 0, String_len(regex -> pattern), 0, _x2c_stack_floor()
+  Array names = Array_new();
+  const Array _x2c_gensym_macro_acquired_3 = names;
+  {
+    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_acquired_3;
+    X2CCleanup _x2c_gensym_defer_record_6 ={
+      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+    {
+      Parser p ={
+        regex, regex -> pattern, 0, String_len(regex -> pattern), 0, _x2c_stack_floor(), names
+      }
+      ;
+      _flags(&(p));
+      regex -> program = _parse_alternation(&(p));
+      if(p.pos < p.len) _fail(&(p), _0);
+      regex -> capture_names = Array_list(names);
+      {
+        Regex _x2c_gensym_return_value_6 = regex;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+          return _x2c_gensym_return_value_6;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
   }
-  ;
-  _flags(&(p));
-  regex -> program = _parse_alternation(&(p));
-  if(p.pos < p.len) _fail(&(p), _0);
-  return regex;
+
 }
 
 static void _flags(Parser * p){
@@ -828,7 +927,7 @@ static int scan_ascii_digit(int);
 
 static String _name(Parser * p){
   int start =(* p).pos;
-  while(_is_word(_peek(&((* p)))))(* p).pos ++;
+  while(_x2c_ascii_word(_peek(&((* p)))))(* p).pos ++;
   if((* p).pos == start || scan_ascii_digit((* p).text[start]) || _peek(&((* p))) != '>'){
     (* p).pos = start;
     _fail(&((* p)), _4);
@@ -838,11 +937,9 @@ static String _name(Parser * p){
   return name;
 }
 
-List List_append(List, List);
-
 static int _add_capture(Parser * p, String name){
   int index = ++(* p).regex -> capture_count;
-  (* p).regex -> capture_names = List_append((* p).regex -> capture_names, cons(String_var(name), NULL));
+  Array_push((* p).capture_names, String_var(name));
   return index;
 }
 
@@ -989,7 +1086,7 @@ static int _escape(Parser * p){
     case '0' : return 0;
     case 'd' : case 'D' : case 'w' : case 'W' : case 's' : case 'S' : return - byte;
   }
-  if(! _is_word(byte) && byte < 128) return byte;
+  if(! _x2c_ascii_word(byte) && byte < 128) return byte;
   (* p).pos --;
   _fail(&((* p)), _10);
 }
@@ -1006,13 +1103,6 @@ static int _peek(Parser * p){
   return(* p).pos <(* p).len ?(unsigned char)(* p).text[(* p).pos] : - 1;
 }
 
-String String_join(String, List);
-
-#include "error.h"
-
-
-
-
 _Noreturn static void _fail(Parser * p, String why){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL)));
@@ -1020,8 +1110,8 @@ _Noreturn static void _fail(Parser * p, String why){
     Var _x2c_gensym_literal_part_2 = String_var((* p).regex -> pattern);
     Var _x2c_gensym_literal_part_3 = int_var((* p).pos);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "_fail",.line = 586,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1, Symbol_var(34470112412), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/regex.x",.function = "_fail",.line = 614,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_11, 28682226919752, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1, Symbol_var(34470112412), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
 
@@ -1036,8 +1126,8 @@ _Noreturn static void _too_nested(Parser * p){
     Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group nested more deeply than one pattern allows")), NULL)));
     Var _x2c_gensym_literal_part_7 = int_var((* p).depth);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "_too_nested",.line = 590,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), _x2c_gensym_literal_part_7);
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/regex.x",.function = "_too_nested",.line = 618,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_12, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), _x2c_gensym_literal_part_7);
       __builtin_unreachable();
     }
 
@@ -1060,18 +1150,12 @@ static void _add_class(_RegexNode node, int letter){
   int negate = letter == 'D' || letter == 'W' || letter == 'S';
   if(negate) letter += 'a' - 'A';
   if(letter == 'd') _add_range(bytes, '0', '9');
-  if(letter == 'w') for(int byte = 0;  byte < 256;  byte ++) if(_is_word(byte)) _add(bytes, byte);
+  if(letter == 'w') for(int byte = 0;  byte < 256;  byte ++) if(_x2c_ascii_word(byte)) _add(bytes, byte);
   if(letter == 's'){
     _add(bytes, ' ');
     _add_range(bytes, '\t', '\r');
   }
   for(int i = 0;  i < 32;  i ++) node -> set[i] |= negate ?(unsigned char) ~ members.set[i] : members.set[i];
-}
-
-static int scan_ascii_alpha(int);
-
-static int _is_word(int byte){
-  return byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
 }
 
 static void _add_range(_RegexNode node, int low, int high){
@@ -1102,16 +1186,16 @@ static RegexMatch _search(Regex regex, String subject, int offset){
   int count = regex -> capture_count + 1;
   int * starts = xcalloc(2 * count, sizeof(int)), * ends = starts + count;
   {
-    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
+    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_6 =(const void *) & starts;
-    X2CCleanup _x2c_gensym_defer_record_6 ={
-      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
+    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & starts;
+    X2CCleanup _x2c_gensym_defer_record_7 ={
+      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
       Matcher m ={
         regex, subject, String_len(subject), 0, 0, starts, ends, _x2c_stack_floor()
@@ -1120,26 +1204,26 @@ static RegexMatch _search(Regex regex, String subject, int offset){
       for(int at = offset;  at <= m.len;  at ++){
         for(int i = 0;  i < count;  i ++) starts[i] = ends[i] = - 1;
         if(_run(&(m), regex -> program, at, NULL)){
-          RegexMatch _x2c_gensym_return_value_6 = _found(&(m), subject, at);
+          RegexMatch _x2c_gensym_return_value_7 = _found(&(m), subject, at);
           {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-            return _x2c_gensym_return_value_6;
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+            return _x2c_gensym_return_value_7;
           }
 
         }
 
       }
       {
-        RegexMatch _x2c_gensym_return_value_7 = NULL;
+        RegexMatch _x2c_gensym_return_value_8 = NULL;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
-          return _x2c_gensym_return_value_7;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+          return _x2c_gensym_return_value_8;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
 
 }
@@ -1265,8 +1349,8 @@ static int _at_line_end(Matcher * m, int pos){
 }
 
 static int _at_boundary(Matcher * m, int pos){
-  int before = pos > 0 && _is_word((unsigned char)(* m).text[pos - 1]);
-  int after = pos <(* m).len && _is_word((unsigned char)(* m).text[pos]);
+  int before = pos > 0 && _x2c_ascii_word((unsigned char)(* m).text[pos - 1]);
+  int after = pos <(* m).len && _x2c_ascii_word((unsigned char)(* m).text[pos]);
   return before != after;
 }
 
@@ -1277,8 +1361,8 @@ _Noreturn static void _too_deep(Matcher * m){
     Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
     Var _x2c_gensym_literal_part_11 = int_var((* m).depth);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 805,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(34470112412), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(25782888), _x2c_gensym_literal_part_11);
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 830,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_13, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(34470112412), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(25782888), _x2c_gensym_literal_part_11);
       __builtin_unreachable();
     }
 
@@ -1286,17 +1370,55 @@ _Noreturn static void _too_deep(Matcher * m){
 
 }
 
+static int List_try_next(List, List *, Var *);
+
 static RegexMatch _found(Matcher * m, String subject, int at){
   (* m).starts[0] = at;
   (* m).ends[0] =(* m).end;
-  List captures = NULL;
-  for(int i =(* m).regex -> capture_count;  i >= 0;  i --) captures = cons(List_var(_capture(&((* m)), subject, i)), captures);
-  return(RegexMatch) captures;
+  Array captures = Array_new();
+  const Array _x2c_gensym_macro_acquired_4 = captures;
+  {
+    _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_8._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_acquired_4;
+    X2CCleanup _x2c_gensym_defer_record_8 ={
+      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_8
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
+    {
+      Array_push(captures, List_var(_capture(&((* m)), subject, 0, NULL)));
+      int index = 0;
+      {
+        String name;
+        List _x2c_gensym_macro_object_1 =(* m).regex -> capture_names;
+        List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+        Var _x2c_gensym_macro_cursor_output_0;
+        while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_0))){
+          name = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+          Array_push(captures, List_var(_capture(&((* m)), subject, ++ index, name)));
+        }
+
+      }
+      {
+        RegexMatch _x2c_gensym_return_value_9 =(RegexMatch) Array_list(captures);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+          return _x2c_gensym_return_value_9;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+  }
+
 }
 
-static RegexCapture _capture(Matcher * m, String subject, int i){
+static RegexCapture _capture(Matcher * m, String subject, int i, String name){
   int start =(* m).starts[i], end =(* m).ends[i], matched = start >= 0;
-  String name = i ? Var_as_string(List_getindex((* m).regex -> capture_names, i - 1)) : NULL;
   String text = matched ? String_getslice(subject, x2c_slice_bound(start), x2c_slice_bound(end), 1) : NULL;
   return cons(int_var(i), cons(String_var(name), cons(int_var(matched), cons(String_var(text), cons(int_var(start), cons(int_var(end), NULL))))));
 }
@@ -1322,25 +1444,25 @@ static FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
 
-static String _rebuild(Regex r, String subject, int all, Func fn, String replacement){
+static String _rebuild(Regex r, String subject, int all, Func fn, String replacement, int callback){
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_3 = out;
+  const Buffer _x2c_gensym_macro_acquired_5 = out;
   {
-    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
+    _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_acquired_3;
-    X2CCleanup _x2c_gensym_defer_record_7 ={
-      .fn = _x2c_gensym_defer_cleanup_7, .env = & _x2c_gensym_macro_environment_7
+    _x2c_gensym_macro_environment_9._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_acquired_5;
+    X2CCleanup _x2c_gensym_defer_record_9 ={
+      .fn = _x2c_gensym_defer_cleanup_9, .env = & _x2c_gensym_macro_environment_9
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_9);
     {
       int cursor = 0;
       for(RegexMatch found = _search(r, subject, 0);  List_truth(found);  found = all ? _next(r, subject, found) : NULL){
         String_write_str(String_getslice(subject, x2c_slice_bound(cursor), x2c_slice_bound(RegexCapture_start(_whole(found))), 1), out);
-        if(fn) String_write_str(Var_str(({
+        if(callback) String_write_str(Var_str(({
           Func _x2c_gensym_macro_function_0 = fn;  FuncArg _x2c_gensym_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_gensym_macro_function_0, 1, 0))) _x2c_gensym_macro_storage_0[0] = FuncArg_reference(&(found), _17);  else _x2c_gensym_macro_storage_0[0] = FuncArg_value(List_var(found));  Func_apply(_x2c_gensym_macro_function_0, 1, _x2c_gensym_macro_storage_0);
         }
         )), out);
@@ -1349,16 +1471,16 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
       }
       String_write_str(String_getslice(subject, x2c_slice_bound(cursor), (-2147483647 - 1), 1), out);
       {
-        String _x2c_gensym_return_value_8 = Buffer_str(out);
+        String _x2c_gensym_return_value_10 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-          return _x2c_gensym_return_value_8;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
+          return _x2c_gensym_return_value_10;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_9);
   }
 
 }
@@ -1454,15 +1576,25 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   Array_cleanup((*(const Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
 }
 
-void xfree(void *);
-
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  xfree((*(int * *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_6));
 }
+
+void xfree(void *);
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_7;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7));
+  xfree((*(int * *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_7));
+}
+
+static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
+  _x2c_gensym_defer_env_8 * _x2c_gensym_defer_data_8 =(_x2c_gensym_defer_env_8 *) _x2c_gensym_defer_opaque_8;
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_8->_x2c_gensym_defer_capture_8));
+}
+
+static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
+  _x2c_gensym_defer_env_9 * _x2c_gensym_defer_data_9 =(_x2c_gensym_defer_env_9 *) _x2c_gensym_defer_opaque_9;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_9->_x2c_gensym_defer_capture_9));
 }
 

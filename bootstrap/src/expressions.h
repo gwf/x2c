@@ -70,6 +70,8 @@ String Compiler_printf_static_format(Compiler c, Var format);
 
 Symbol _x2c_indexed_builtin_helper(Compiler c, Type type);
 
+int Compiler_is_operator_temporary(Compiler c, List expression);
+
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
 
 List Compiler_promote_string_literal(Compiler c, List expr);

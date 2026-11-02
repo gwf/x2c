@@ -1188,7 +1188,7 @@ void * x2c_error_execution_new(void){
   f7_runtime___ErrorExecutionState saved = calloc(1, sizeof(struct f7_runtime___ErrorExecutionState));
   if(! saved){
     static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/error/runtime.x",.function = "x2c_error_execution_new",.line = 15,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 97614135954008, 0);
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_error_execution_new")), NULL))));
     __builtin_unreachable();
   }
   return saved;

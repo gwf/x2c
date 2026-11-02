@@ -43,14 +43,9 @@ String String_sha256(String text){
   return _finish(&(sha));
 }
 
+void x2c_io_fail(Var, int);
+
 static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-#include "error.h"
-
-
-
 
 String File_sha256(File file){
   _Sha256 sha = _INITIAL;
@@ -59,12 +54,7 @@ String File_sha256(File file){
   while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _absorb(&(sha), bytes, count);
   if(ferror(file)){
     int error = errno;
-    {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/digest.x",.function = "File_sha256",.line = 68,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(1189960), Symbol_var(11703198), int_var(error));
-      __builtin_unreachable();
-    }
-
+    x2c_io_fail(Symbol_var(1189960), error);
   }
   return _finish(&(sha));
 }

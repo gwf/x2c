@@ -17,6 +17,32 @@ typedef List Macro;
 
 typedef List Type;
 
+int Symbol_is_type_qualifier(Symbol symbol);
+
+int Var_is(Var, Symbol);
+
+static Var List_car(List);
+
+static List List_cdr(List);
+
+static inline unsigned _x2c_type_qualifiers(Type * cursor){
+  unsigned found = 0;
+  while(Var_is(List_car((* cursor)), 1328354264)){
+    Symbol head = Var_symbol(List_car((* cursor)));
+    switch(head){
+      case 7304424 : found |= 1;
+      break;
+      case 1544849476362 : found |= 2;
+      break;
+      case 1249006209256 : found |= 4;
+      break;
+      default: return found;
+    }
+    (* cursor) = List_cdr((* cursor));
+  }
+  return found;
+}
+
 typedef List Code;
 
 typedef List TypeInfo;

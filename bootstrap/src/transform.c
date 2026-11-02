@@ -2013,6 +2013,15 @@ static List f9_operators____truthy_expression(Compiler c, List expr){
   List _x2c_gensym_destructure_1 = resolved;
   List binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
   Type signature = Var_type(List_getindex(_x2c_gensym_destructure_1, 1));
+  if(Compiler_is_operator_temporary(c, expr)){
+    List helper = Compiler_protocol_discard_helper(c, Var_type(List_cadr(expr)), _1293, 1);
+    if(List_truth(helper)){
+      List _x2c_gensym_destructure_2 = helper;
+      binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 0));
+      signature = Var_type(List_getindex(_x2c_gensym_destructure_2, 1));
+    }
+
+  }
   List callee = Macro_typed(Type_list(signature), List_var(binding));
   return cons(_24, cons(_418, cons(List_var(({
     Var _x2c_gensym_literal_part_39 = Macro_inserted(List_var(callee), 1, 1);  Var _x2c_gensym_literal_part_40 = List_var(cons(_114, cons(Macro_inserted(List_var(expr), 1, 1), NULL)));  cons(_424, cons(_x2c_gensym_literal_part_39, cons(_x2c_gensym_literal_part_40, NULL)));
@@ -2134,7 +2143,8 @@ static List f9_operators____protocol_update(Compiler c, Type type, Symbol op, Li
   if(! List_truth(converted)) return NULL;
   (* rhs) = converted;
 }
-String helper = Compiler_protocol_update_helper(c, type, member_name, ! rhs);
+int discard_rhs = rhs && Compiler_is_operator_temporary(c, (* rhs));
+String helper = Compiler_protocol_update_helper(c, type, member_name, ! rhs, discard_rhs);
 if(! String_truth(helper)) return NULL;
 List spell = f9_operators____symbol_expression(spelled), value = NULL;
 if(rhs) value =(* rhs);
@@ -2488,7 +2498,7 @@ static List _ordered_list(Compiler c, List chain){
             }
             ;  x2c_cleanup_push(& _x2c_gensym_defer_record_15); {
               List node = chain;  int spliced = 0;  for(List cell = f8_literals____list_cell(node);  List_truth(cell);  cell = f8_literals____list_cell(node)){
-                List _x2c_gensym_destructure_2 = cell;  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_2, 0));  List part = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 2));  if(kind != 228262) spliced = 1;  List value = kind == 228262 ? _to_var(c, part) : f8_literals____passed_as(f8_literals____spliced(c, part), List_type(_32));  value = _step(c, value);  Array_push(kinds, Symbol_var(kind));  Array_push(values, List_var(value));  Array_push(orders, int_var(f8_literals____part_order(c, List_var(value))));  node = rest;
+                List _x2c_gensym_destructure_3 = cell;  Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_3, 0));  List part = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));  List rest = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 2));  if(kind != 228262) spliced = 1;  List value = kind == 228262 ? _to_var(c, part) : f8_literals____passed_as(f8_literals____spliced(c, part), List_type(_32));  value = _step(c, value);  Array_push(kinds, Symbol_var(kind));  Array_push(values, List_var(value));  Array_push(orders, int_var(f8_literals____part_order(c, List_var(value))));  node = rest;
               }
               int counted =({
                 int _x2c_gensym_condition_1 = 0;  if(! spliced){

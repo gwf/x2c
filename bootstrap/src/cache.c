@@ -67,8 +67,6 @@ static List _defer_binding(Compiler c, List decltype, Ast bound, StaticQueue * q
 
 static List _record(StaticQueue * q, List name, List mods, List assign);
 
-static List _unqualify_const(List specifiers);
-
 static List _array_block(Compiler c, List target, Type array, List items);
 
 static List _array_row(Compiler c, List target, List original, List cases);
@@ -851,6 +849,8 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue * q){
   return Array_list_free(output);
 }
 
+List Compiler_without_const(List specifiers);
+
 static List _rewrite_static(Compiler c, List decl, StaticQueue * q){
   {
     List _x2c_gensym_match_expr_5 = decl;
@@ -882,7 +882,7 @@ static List _rewrite_static(Compiler c, List decl, StaticQueue * q){
   {
     List _x2c_gensym_match_expr_7 = decl;  switch(_x2c_gensym_match_expr_7 ? _x2c_gensym_match_expr_7 -> car.u64 : 0){
       case 9224497945694178442ULL :{List _x2c_gensym_match_at_17, _x2c_gensym_match_at_18, _x2c_gensym_match_at_19, _x2c_gensym_match_at_20, _x2c_gensym_match_at_21; Var x2c_match_value_0; List x2c_match_list_1; if(_x2c_gensym_match_expr_7 && _x2c_gensym_match_expr_7 ->car.u64 == 9224497945694178442ULL &&(_x2c_gensym_match_at_17 = _x2c_gensym_match_expr_7 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_17 ->car, 1) &&(_x2c_gensym_match_at_18 = _x2c_gensym_match_at_17 ->cdr) &&(Var_is(_x2c_gensym_match_at_18 -> car, 806120) &&(_x2c_gensym_match_at_19 = Var_list_payload(_x2c_gensym_match_at_18 -> car), 1)) && _x2c_gensym_match_at_19 && _x2c_gensym_match_at_19 ->car.u64 == 9224498094476456422ULL &&(_x2c_gensym_match_at_20 = _x2c_gensym_match_at_19 ->cdr, 1) &&(x2c_match_list_1 = _x2c_gensym_match_at_20, 1) && !(_x2c_gensym_match_at_21 = _x2c_gensym_match_at_18 ->cdr)){{
-        Var decltype;  decltype = x2c_match_value_0;  List bound_list;  bound_list = x2c_match_list_1;  return _defer_bindings(c, _unqualify_const(Var_list_payload(decltype)), bound_list, &((* q)));
+        Var decltype;  decltype = x2c_match_value_0;  List bound_list;  bound_list = x2c_match_list_1;  return _defer_bindings(c, Compiler_without_const(Var_list_payload(decltype)), bound_list, &((* q)));
       }
       break;}} default: break;
     }
@@ -917,7 +917,7 @@ static List _defer_binding(Compiler c, List decltype, Ast bound, StaticQueue * q
             Var _x2c_gensym_literal_part_11 = List_var(decltype);  Var _x2c_gensym_literal_part_12 = List_var(cons(_26, cons(List_var(cons(_29, cons(name, cons(mods, NULL)))), NULL)));  cons(_22, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL)));
           }
           );  Type object = Type_declared(List_type_from_ast(declaration));  if(x2c_var_equal_lane(List_car(Type_list(object)), Symbol_var(7304424))){
-            if(! Compiler_static_value_is_runtime(c, Var_list_payload(value), NULL)) return bound;  mods = List_var(_unqualify_const(Var_list_payload(mods)));
+            if(! Compiler_static_value_is_runtime(c, Var_list_payload(value), NULL)) return bound;  mods = List_var(Compiler_without_const(Var_list_payload(mods)));
           }
           Type declared = Type_canonicalize(object);  Type resolved = Sym_resolve_key(c -> sym, declared);  if((Type_is_array(resolved) ||({
             int _x2c_gensym_condition_0 = 0;  if(Type_is_aggregate(resolved)){
@@ -967,8 +967,8 @@ static List _record(StaticQueue * q, List name, List mods, List assign){
   );  Array_push((* q).initializers, List_var(initializer));  Array_push(Var_array(Map_setdefault((* q).pending, List_var(name), Array_var(Array_new()))), List_var(initializer));  return cons(_29, cons(List_var(name), cons(List_var(mods), NULL)));
 }
 
-static List _unqualify_const(List specifiers){
-  return List_filter(specifiers, _x2c_gensym_func_handle_0);
+List Compiler_without_const(List specifiers){
+  if(! _init_guard_) _file_init_();  return List_filter(specifiers, _x2c_gensym_func_handle_0);
 }
 
 List Compiler_initializer_rows(Compiler, Type, List, List);
@@ -1243,7 +1243,7 @@ static int _deferred(StaticQueue * q, Array definitions){
 static int _reaches_kind(Compiler c, List code, Symbol kind){
   Array dependencies = _cache_ids(c, code);  if(! Array_truth(dependencies)) return 0;  int found = 0; {
     int id;  Array _x2c_gensym_macro_object_23 = dependencies;  int _x2c_gensym_macro_cursor_24 = 0;  Var _x2c_gensym_macro_cursor_output_22;  while(Array_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_22))){
-      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_22, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/cache.x",.function = "_reaches_kind",.line = 560}; & _x2c_gensym_error_site_2; })));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_22, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/cache.x",.function = "_reaches_kind",.line = 561}; & _x2c_gensym_error_site_2; })));
       if(x2c_var_equal_lane(Var_car(Array_getindex(c -> id_keys, id)), Symbol_var(kind))){
         found = 1;
         break;
@@ -1323,7 +1323,7 @@ static void _collect_ids(Compiler c, List value, List * seen, Array ids){
                   Var captured_id;
                   captured_id = x2c_match_value_0;
                   {
-                    int id = Var_int(Var_convert_at(captured_id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cache.x",.function = "_collect_ids",.line = 608}; & _x2c_gensym_error_site_3; })));
+                    int id = Var_int(Var_convert_at(captured_id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/cache.x",.function = "_collect_ids",.line = 609}; & _x2c_gensym_error_site_3; })));
                     if(! Var_is_null(Array_getindex(marked, id))) continue;
                     Array_setindex(marked, id, int_var(1));
                     Array_push(pending, int_var(id));
@@ -1431,7 +1431,7 @@ static Map _cache_bindings(Compiler c, Array ids, String prefix){
     int _x2c_gensym_macro_cursor_28 = 0;
     Var _x2c_gensym_macro_cursor_output_26;
     while(Array_try_next(_x2c_gensym_macro_object_27, &(_x2c_gensym_macro_cursor_28), &(_x2c_gensym_macro_cursor_output_26))){
-      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/cache.x",.function = "_cache_bindings",.line = 665}; & _x2c_gensym_error_site_4; })));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/cache.x",.function = "_cache_bindings",.line = 666}; & _x2c_gensym_error_site_4; })));
       {
         String name = String_truth(prefix) ? String_join(NULL, cons(String_var(prefix), cons(String_var(int_str(slot)), NULL))) : String_join(NULL, cons(String_var(_203), cons(String_var(int_str(slot)), NULL)));
         Map_setindex(bindings, int_var(id), List_var(Sym_reference(c -> sym, cons(String_var(name), NULL), NULL)));
@@ -1452,7 +1452,7 @@ static List _slot_declarations(Compiler c, Array ids, Map bindings){
     int _x2c_gensym_macro_cursor_29 = 0;
     Var _x2c_gensym_macro_cursor_output_27;
     while(Array_try_next(_x2c_gensym_macro_object_28, &(_x2c_gensym_macro_cursor_29), &(_x2c_gensym_macro_cursor_output_27))){
-      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_27, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/cache.x",.function = "_slot_declarations",.line = 677}; & _x2c_gensym_error_site_5; })));
+      id = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_27, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/cache.x",.function = "_slot_declarations",.line = 678}; & _x2c_gensym_error_site_5; })));
       {
         List binding = Var_list_payload(Map_getindex(bindings, int_var(id)));
         List bound = cons(_29, cons(List_var(binding), _158));
@@ -1566,7 +1566,7 @@ static List _cache_value(Compiler c, List expr, Map bindings){
         Var id;
         id = x2c_match_value_0;
         {
-          List val = Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/cache.x",.function = "_cache_value",.line = 736}; & _x2c_gensym_error_site_6; }))))), reference = expr;
+          List val = Var_list_payload(Array_getindex(c -> id_keys, Var_int(Var_convert_at(id, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../src/cache.x",.function = "_cache_value",.line = 737}; & _x2c_gensym_error_site_6; }))))), reference = expr;
           if(Map_truth(bindings)){
             List binding = Var_list_payload(Map_getindex(bindings, id));
             reference = cons(_61, cons(List_var(binding), NULL));

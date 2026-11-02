@@ -230,6 +230,10 @@ static void _write_indent(Buffer buff, int indent){
 }
 
 static void _write_token(Buffer buff, String token, int source_line){
+  if(String_truth(token) && scan_white_space((char *) token) == 0){
+    Buffer_write(buff, token);
+    return;
+  }
   const char * start = token;
   while(start && * start){
     const char * newline = strchr(start, '\n');

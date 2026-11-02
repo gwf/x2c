@@ -2809,11 +2809,10 @@ Scope * Lisp_result_storage(Lisp lisp){
   return lisp -> result_owner ? lisp -> result_owner : & lisp -> scope;
 }
 
+void x2c_fatal(const char *);
+
 static int f8_sessions____initialize(void){
-  if(pthread_once(& f8_sessions___lisp_initialize_once, f8_sessions____initialize_once)){
-    fprintf(stderr, "Lisp: could not initialize canonical names\n");
-    abort();
-  }
+  if(pthread_once(& f8_sessions___lisp_initialize_once, f8_sessions____initialize_once)) x2c_fatal("Lisp: could not initialize canonical names");
   return f8_sessions___lisp_initialize_success;
 }
 

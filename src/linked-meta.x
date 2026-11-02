@@ -1038,6 +1038,8 @@ static Var _lambda_rebuild(Var ast, List none, Map cells, Map declaring) {
             rebuilt.cdr(), node.cdr(), declaring);
           result = cons(<block>, kept);
         }
+        if (result ~= %(expr ? (parens (!set ?block (block *)))))
+          result = %(expr () (parens $block));
         declaring[result] = 1;
       }
       done.push(result);
@@ -1189,6 +1191,9 @@ static Code _lambda_adapter(
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
                     (op -> $record $(_lambda_member(index++))));
+    Type resolved = type.resolve();
+    if (resolved ~= %((dim *) *) && resolved.is_text())
+      field = field.convert(%("String"));
     arguments.push(
       type.car() == <&> ? %(expr $(type.cdr()) (op * $field)) : field);
   }

@@ -104,9 +104,7 @@ static int f4_func____is_reference(List parameter);
 
 static void * f4_func____reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
 
-static int f4_func____reference_type_accepts(List target, List source);
-
-static unsigned f4_func____type_qualifiers(List * cursor);
+static int f4_func____reference_type_accepts(Type target, Type source);
 
 static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size);
 
@@ -523,33 +521,15 @@ static void * f4_func____reference_argument(Func fn, const FuncArg * argv, unsig
   return(void *) argv[i].data.reference;
 }
 
-static int f4_func____reference_type_accepts(List target, List source){
-  unsigned target_qualifiers = f4_func____type_qualifiers(&(target));
-  unsigned source_qualifiers = f4_func____type_qualifiers(&(source));
+static int f4_func____reference_type_accepts(Type target, Type source){
+  unsigned target_qualifiers = _x2c_type_qualifiers(&(target));
+  unsigned source_qualifiers = _x2c_type_qualifiers(&(source));
   return !(source_qualifiers & ~ target_qualifiers) && List_equal(target, source);
-}
-
-static unsigned f4_func____type_qualifiers(List * cursor){
-  unsigned qualifiers = 0;
-  while(Var_is(List_car((* cursor)), 1328354264)){
-    Symbol head = Var_symbol(List_car((* cursor)));
-    switch(head){
-      case 7304424 : qualifiers |= 1;
-      break;
-      case 1544849476362 : qualifiers |= 2;
-      break;
-      case 1249006209256 : qualifiers |= 4;
-      break;
-      default: return qualifiers;
-    }
-    (* cursor) = List_cdr((* cursor));
-  }
-  return qualifiers;
 }
 
 static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(! adapter){
-    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 538,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 523,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_20, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
@@ -566,12 +546,12 @@ static Func f4_func____new(FuncAdapter adapter, List signature, int rest, const 
 
 }
 if(! List_truth(params)){
-  static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 542,.runtime = 1};
+  static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 527,.runtime = 1};
   x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372535886, 1, Symbol_var(39502), List_var(signature));
   __builtin_unreachable();
 }
 if(context_size && ! context){
-  static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 544,.runtime = 1};
+  static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 529,.runtime = 1};
   x2c_error_raise_n(& _x2c_gensym_error_site_22, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));
   __builtin_unreachable();
 }
@@ -580,7 +560,7 @@ if(context_size > SIZE_MAX - context_offset){
   Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL)));
   Var _x2c_gensym_literal_part_11 = Var_box_ulong(context_size);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 547,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 532,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_23, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_10, Symbol_var(1265290), _x2c_gensym_literal_part_11);
     __builtin_unreachable();
   }
@@ -590,7 +570,7 @@ Var last = List_last(params);
 if(x2c_var_equal_lane(last, List_var(_6))) rest = 1;
 else if(x2c_var_equal_lane(last, List_var(_10))) rest = 2;
 else if(rest && ! x2c_var_equal_lane(last, List_var(_5))){
-  static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 552,.runtime = 1};
+  static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/func/func.x",.function = "f4_func____new",.line = 537,.runtime = 1};
   x2c_error_raise_n(& _x2c_gensym_error_site_24, 4372535886, 1, Symbol_var(39502), List_var(signature));
   __builtin_unreachable();
 }

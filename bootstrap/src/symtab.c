@@ -2001,11 +2001,12 @@ static Type f5_types____replace_type_base(Type type, Type base, Type replacement
   return List_type(cons(List_car(Type_list(type)), Type_list(f5_types____replace_type_base(List_cdr(type), base, replacement))));
 }
 
-int Symbol_is_type_qualifier(Symbol);
+static Type _x2c_type_unqualified(Type);
 
 static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, int hops){
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
-  while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal_lane(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
+  key = _x2c_type_unqualified(key);
+  while(x2c_var_equal_lane(List_car(Type_list(key)), Symbol_var(1439803480))) key = _x2c_type_unqualified(List_cdr(key));
   if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;
   if(Type_is_typedef_name(key) || Type_is_typedef(key)){
     Type type = f5_types____typedef_target(s, key);
@@ -2074,7 +2075,7 @@ static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops)
   Type base = Type_base_type(type);
   if(x2c_var_equal_lane(List_car(Type_list(base)), Symbol_var(1439803480))){
     Type value = f5_types____normalize_chain(s, List_cdr(base), origin, hops + 1);
-    while(Var_is(List_car(Type_list(value)), 1328354264) && Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(value))))) value = List_cdr(value);
+    value = _x2c_type_unqualified(value);
     return f5_types____replace_type_base(type, base, value);
   }
   Type next = f5_types____typedef_base_step(s, type, base);

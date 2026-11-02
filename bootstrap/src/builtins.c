@@ -3089,7 +3089,7 @@ static List _value_type(List type){
     while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
       item = _x2c_gensym_macro_cursor_output_12;
       {
-        if(x2c_var_equal_lane(item, Symbol_var(7304424)) || x2c_var_equal_lane(item, Symbol_var(1544849476362)) || x2c_var_equal_lane(item, Symbol_var(1249006209256))) continue;
+        if(Var_is(item, 1328354264) && Symbol_is_type_qualifier(Var_symbol(item))) continue;
         {
           Var _x2c_gensym_match_var_1 = item;
           int _x2c_gensym_match_none_1 = ! Var_is(_x2c_gensym_match_var_1, 806120);

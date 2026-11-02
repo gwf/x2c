@@ -1129,7 +1129,7 @@ static void * _layout_alloc(size_t count, size_t size){
   void * storage = calloc(count, size);
   if(! storage){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/tokenizer.x",.function = "_layout_alloc",.line = 697,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 0);
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Tokenizer.layout")), NULL))));
     __builtin_unreachable();
   }
   return storage;

@@ -254,67 +254,91 @@ static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg
 
 typedef struct _x2c_gensym_defer_env_14{
   const void * _x2c_gensym_defer_capture_15;
+  const void * _x2c_gensym_defer_capture_16;
 }
 _x2c_gensym_defer_env_14;
 
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14);
 
 typedef struct _x2c_gensym_defer_env_15{
-  const void * _x2c_gensym_defer_capture_16;
+  const void * _x2c_gensym_defer_capture_17;
+  const void * _x2c_gensym_defer_capture_18;
 }
 _x2c_gensym_defer_env_15;
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15);
 
 typedef struct _x2c_gensym_defer_env_16{
-  const void * _x2c_gensym_defer_capture_17;
-  const void * _x2c_gensym_defer_capture_18;
+  const void * _x2c_gensym_defer_capture_19;
+  const void * _x2c_gensym_defer_capture_20;
 }
 _x2c_gensym_defer_env_16;
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16);
 
 typedef struct _x2c_gensym_defer_env_17{
-  const void * _x2c_gensym_defer_capture_19;
+  const void * _x2c_gensym_defer_capture_21;
 }
 _x2c_gensym_defer_env_17;
 
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17);
 
 typedef struct _x2c_gensym_defer_env_18{
-  const void * _x2c_gensym_defer_capture_20;
+  const void * _x2c_gensym_defer_capture_22;
 }
 _x2c_gensym_defer_env_18;
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18);
 
 typedef struct _x2c_gensym_defer_env_19{
-  const void * _x2c_gensym_defer_capture_21;
+  const void * _x2c_gensym_defer_capture_23;
+  const void * _x2c_gensym_defer_capture_24;
 }
 _x2c_gensym_defer_env_19;
 
 static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19);
 
 typedef struct _x2c_gensym_defer_env_20{
-  const void * _x2c_gensym_defer_capture_22;
+  const void * _x2c_gensym_defer_capture_25;
 }
 _x2c_gensym_defer_env_20;
 
 static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20);
 
 typedef struct _x2c_gensym_defer_env_21{
-  const void * _x2c_gensym_defer_capture_23;
+  const void * _x2c_gensym_defer_capture_26;
 }
 _x2c_gensym_defer_env_21;
 
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21);
 
 typedef struct _x2c_gensym_defer_env_22{
-  const void * _x2c_gensym_defer_capture_24;
+  const void * _x2c_gensym_defer_capture_27;
 }
 _x2c_gensym_defer_env_22;
 
 static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22);
+
+typedef struct _x2c_gensym_defer_env_23{
+  const void * _x2c_gensym_defer_capture_28;
+}
+_x2c_gensym_defer_env_23;
+
+static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23);
+
+typedef struct _x2c_gensym_defer_env_24{
+  const void * _x2c_gensym_defer_capture_29;
+}
+_x2c_gensym_defer_env_24;
+
+static void _x2c_gensym_defer_cleanup_24(void * _x2c_gensym_defer_opaque_24);
+
+typedef struct _x2c_gensym_defer_env_25{
+  const void * _x2c_gensym_defer_capture_30;
+}
+_x2c_gensym_defer_env_25;
+
+static void _x2c_gensym_defer_cleanup_25(void * _x2c_gensym_defer_opaque_25);
 
 void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
 
@@ -1501,101 +1525,85 @@ LogSink Logger_add_stderr_sink(Logger);
 HttpServer HttpServer_new(Router router, Map options){
   if(! _init_guard_) _file_init_();
   HttpServer s = Scope_calloc(1, sizeof(struct HttpServer));
-  s -> router = router;
-  s -> workers = Map_contains(options, Symbol_var(50437237926)) ? Var_integer(Map_getindex(options, Symbol_var(50437237926))) : 8;
-  s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
-  s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
-  if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 288,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
-    __builtin_unreachable();
-  }
-  s -> logger = Map_contains(options, Symbol_var(837237092)) ? Var_pointer(Map_getindex(options, Symbol_var(837237092))) : NULL;
-  if(! Map_contains(options, Symbol_var(837237092))){
-    s -> logger = Logger_new(618910);
-    Logger_add_stderr_sink(s -> logger);
-    s -> owns_logger = 1;
-  }
-  if(! s -> logger){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 295,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
-    __builtin_unreachable();
-  }
-  String host = Map_contains(options, Symbol_var(556264)) ? Var_str(Map_getindex(options, Symbol_var(556264))) : _63;
-  int port = Map_contains(options, Symbol_var(1080488)) ? Var_integer(Map_getindex(options, Symbol_var(1080488))) : 8080;
-  s -> listener = Listener_bind(host, port);
-  s -> channel = Channel_new(Symbol_var(3453797), int_var(s -> workers));
-  s -> threads = Array_new();
-  return s;
-}
-
-int HttpServer_port(HttpServer s){
-  if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "HttpServer_port",.line = 308,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.port")), NULL))));
-    __builtin_unreachable();
-  }
-  return Listener_port(s -> listener);
-}
-
-Thread Thread_start(ThreadValueFn, Var);
-
-void HttpServer_serve(HttpServer s){
-  if(! _init_guard_) _file_init_();
-  if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/http.x",.function = "HttpServer_serve",.line = 316,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.serve")), NULL))));
-    __builtin_unreachable();
-  }
-  s -> running = 1;
+  int ready = 0;
   {
-    _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_16 ={
+    _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_16 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_16._x2c_gensym_defer_capture_16 =(const void *) & s;
+    _x2c_gensym_macro_environment_16._x2c_gensym_defer_capture_19 =(const void *) & ready;
+    _x2c_gensym_macro_environment_16._x2c_gensym_defer_capture_20 =(const void *) & s;
     X2CCleanup _x2c_gensym_defer_record_14 ={
-      .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_16
+      .fn = _x2c_gensym_defer_cleanup_16, .env = & _x2c_gensym_macro_environment_16
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_14);
     {
+      s -> router = router;
+      s -> workers = Map_contains(options, Symbol_var(50437237926)) ? Var_integer(Map_getindex(options, Symbol_var(50437237926))) : 8;
+      s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
+      s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
+      if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
+        static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 290,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
+        __builtin_unreachable();
+      }
+      s -> logger = Map_contains(options, Symbol_var(837237092)) ? Var_pointer(Map_getindex(options, Symbol_var(837237092))) : NULL;
+      if(! Map_contains(options, Symbol_var(837237092))){
+        s -> logger = Logger_new(618910);
+        s -> owns_logger = 1;
+        Logger_add_stderr_sink(s -> logger);
+      }
+      if(! s -> logger){
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 297,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
+        __builtin_unreachable();
+      }
+      String host = Map_contains(options, Symbol_var(556264)) ? Var_str(Map_getindex(options, Symbol_var(556264))) : _63;
+      int port = Map_contains(options, Symbol_var(1080488)) ? Var_integer(Map_getindex(options, Symbol_var(1080488))) : 8080;
+      s -> listener = Listener_bind(host, port);
       {
-        _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_15 ={
+        _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_15 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_15 =(const void *) & s;
+        _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_17 =(const void *) & ready;
+        _x2c_gensym_macro_environment_15._x2c_gensym_defer_capture_18 =(const void *) & s;
         X2CCleanup _x2c_gensym_defer_record_15 ={
-          .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_15
+          .fn = _x2c_gensym_defer_cleanup_15, .env = & _x2c_gensym_macro_environment_15
         }
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_15);
         {
-          for(int i = 0;  i < s -> workers;  i ++) Array_push(s -> threads, Var_new(1360144456, Thread_start(_worker, Var_new(3683441, s))));
-          for(; ; ){
-            int fd = _x2c_net_accept_fd(s -> listener);
-            if(fd < 0) break;
-            int sent = 0;
-            {
-              _x2c_gensym_defer_env_16 _x2c_gensym_macro_environment_14 ={
-                0
-              }
-              ;
-              _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_17 =(const void *) & sent;
-              _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_18 =(const void *) & fd;
-              X2CCleanup _x2c_gensym_defer_record_16 ={
-                .fn = _x2c_gensym_defer_cleanup_16, .env = & _x2c_gensym_macro_environment_14
-              }
-              ;
-              x2c_cleanup_push(& _x2c_gensym_defer_record_16);
-              {
-                Channel_send(s -> channel, int_var(fd));
-                sent = 1;
-              }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
+          s -> channel = Channel_new(Symbol_var(3453797), int_var(s -> workers));
+          {
+            _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_14 ={
+              0
             }
+            ;
+            _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_15 =(const void *) & ready;
+            _x2c_gensym_macro_environment_14._x2c_gensym_defer_capture_16 =(const void *) & s;
+            X2CCleanup _x2c_gensym_defer_record_16 ={
+              .fn = _x2c_gensym_defer_cleanup_14, .env = & _x2c_gensym_macro_environment_14
+            }
+            ;
+            x2c_cleanup_push(& _x2c_gensym_defer_record_16);
+            {
+              s -> threads = Array_new();
+              ready = 1;
+              {
+                HttpServer _x2c_gensym_return_value_13 = s;
+                {
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_15);
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_14);
+                  return _x2c_gensym_return_value_13;
+                }
 
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_16);
           }
 
         }
@@ -1608,15 +1616,94 @@ void HttpServer_serve(HttpServer s){
 
 }
 
+int HttpServer_port(HttpServer s){
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "HttpServer_port",.line = 313,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.port")), NULL))));
+    __builtin_unreachable();
+  }
+  return Listener_port(s -> listener);
+}
+
+Thread Thread_start(ThreadValueFn, Var);
+
+void HttpServer_serve(HttpServer s){
+  if(! _init_guard_) _file_init_();
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/http.x",.function = "HttpServer_serve",.line = 321,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.serve")), NULL))));
+    __builtin_unreachable();
+  }
+  s -> running = 1;
+  {
+    _x2c_gensym_defer_env_18 _x2c_gensym_macro_environment_19 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_22 =(const void *) & s;
+    X2CCleanup _x2c_gensym_defer_record_17 ={
+      .fn = _x2c_gensym_defer_cleanup_18, .env = & _x2c_gensym_macro_environment_19
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_17);
+    {
+      {
+        _x2c_gensym_defer_env_17 _x2c_gensym_macro_environment_18 ={
+          0
+        }
+        ;
+        _x2c_gensym_macro_environment_18._x2c_gensym_defer_capture_21 =(const void *) & s;
+        X2CCleanup _x2c_gensym_defer_record_18 ={
+          .fn = _x2c_gensym_defer_cleanup_17, .env = & _x2c_gensym_macro_environment_18
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_18);
+        {
+          for(int i = 0;  i < s -> workers;  i ++) Array_push(s -> threads, Var_new(1360144456, Thread_start(_worker, Var_new(3683441, s))));
+          for(; ; ){
+            int fd = _x2c_net_accept_fd(s -> listener);
+            if(fd < 0) break;
+            int sent = 0;
+            {
+              _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_17 ={
+                0
+              }
+              ;
+              _x2c_gensym_macro_environment_17._x2c_gensym_defer_capture_23 =(const void *) & sent;
+              _x2c_gensym_macro_environment_17._x2c_gensym_defer_capture_24 =(const void *) & fd;
+              X2CCleanup _x2c_gensym_defer_record_19 ={
+                .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_17
+              }
+              ;
+              x2c_cleanup_push(& _x2c_gensym_defer_record_19);
+              {
+                Channel_send(s -> channel, int_var(fd));
+                sent = 1;
+              }
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
+  }
+
+}
+
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 339,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 344,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 341,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 346,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1627,7 +1714,7 @@ Var Thread_join(Thread);
 
 void HttpServer_stop(HttpServer s){
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/http.x",.function = "HttpServer_stop",.line = 349,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/http.x",.function = "HttpServer_stop",.line = 354,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.stop")), NULL))));
     __builtin_unreachable();
   }
@@ -1636,20 +1723,20 @@ void HttpServer_stop(HttpServer s){
     Thread thread = s -> acceptor;
     s -> acceptor = NULL;
     {
-      _x2c_gensym_defer_env_17 _x2c_gensym_macro_environment_17 ={
+      _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_17._x2c_gensym_defer_capture_19 =(const void *) & thread;
-      X2CCleanup _x2c_gensym_defer_record_17 ={
-        .fn = _x2c_gensym_defer_cleanup_17, .env = & _x2c_gensym_macro_environment_17
+      _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_25 =(const void *) & thread;
+      X2CCleanup _x2c_gensym_defer_record_20 ={
+        .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_17);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_20);
       {
         Thread_join(thread);
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
     }
 
   }
@@ -1673,16 +1760,16 @@ static String _line(File input, int limit, int status){
   int size = 0;
   flockfile(input);
   {
-    _x2c_gensym_defer_env_18 _x2c_gensym_macro_environment_18 ={
+    _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_18._x2c_gensym_defer_capture_20 =(const void *) & input;
-    X2CCleanup _x2c_gensym_defer_record_18 ={
-      .fn = _x2c_gensym_defer_cleanup_18, .env = & _x2c_gensym_macro_environment_18
+    _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_26 =(const void *) & input;
+    X2CCleanup _x2c_gensym_defer_record_21 ={
+      .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_18);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_21);
     {
       for(; ; ){
         int byte = getc_unlocked(input);
@@ -1690,10 +1777,10 @@ static String _line(File input, int limit, int status){
           File_readblock(input, 0);
           if(size) Http_fail(400, _65);
           {
-            String _x2c_gensym_return_value_13 = NULL;
+            String _x2c_gensym_return_value_14 = NULL;
             {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
-              return _x2c_gensym_return_value_13;
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+              return _x2c_gensym_return_value_14;
             }
 
           }
@@ -1706,16 +1793,16 @@ static String _line(File input, int limit, int status){
       }
       if(size < 2 || bytes[size - 2] != '\r') Http_fail(400, _68);
       {
-        String _x2c_gensym_return_value_14 = String_new_len(bytes, size - 2);
+        String _x2c_gensym_return_value_15 = String_new_len(bytes, size - 2);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
-          return _x2c_gensym_return_value_14;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+          return _x2c_gensym_return_value_15;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
   }
 
 }
@@ -1894,35 +1981,35 @@ static Var _worker(Var value){
     );
     Var _x2c_gensym_macro_item_4;
     while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/http.x",.function = "_worker",.line = 498,.runtime = 1}; & _x2c_gensym_error_site_9; })));
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/http.x",.function = "_worker",.line = 503,.runtime = 1}; & _x2c_gensym_error_site_9; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_2 = connection;
         {
-          _x2c_gensym_defer_env_20 _x2c_gensym_macro_environment_20 ={
+          _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
             0
           }
           ;
-          _x2c_gensym_macro_environment_20._x2c_gensym_defer_capture_22 =(const void *) & _x2c_gensym_macro_acquired_2;
-          X2CCleanup _x2c_gensym_defer_record_19 ={
-            .fn = _x2c_gensym_defer_cleanup_20, .env = & _x2c_gensym_macro_environment_20
+          _x2c_gensym_macro_environment_23._x2c_gensym_defer_capture_28 =(const void *) & _x2c_gensym_macro_acquired_2;
+          X2CCleanup _x2c_gensym_defer_record_22 ={
+            .fn = _x2c_gensym_defer_cleanup_23, .env = & _x2c_gensym_macro_environment_23
           }
           ;
-          x2c_cleanup_push(& _x2c_gensym_defer_record_19);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_22);
           {
             Socket peer = Socket_adopt(fd);
             const Socket _x2c_gensym_macro_acquired_3 = peer;
             {
-              _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
+              _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
                 0
               }
               ;
-              _x2c_gensym_macro_environment_19._x2c_gensym_defer_capture_21 =(const void *) & _x2c_gensym_macro_acquired_3;
-              X2CCleanup _x2c_gensym_defer_record_20 ={
-                .fn = _x2c_gensym_defer_cleanup_19, .env = & _x2c_gensym_macro_environment_19
+              _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_27 =(const void *) & _x2c_gensym_macro_acquired_3;
+              X2CCleanup _x2c_gensym_defer_record_23 ={
+                .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
               }
               ;
-              x2c_cleanup_push(& _x2c_gensym_defer_record_20);
+              x2c_cleanup_push(& _x2c_gensym_defer_record_23);
               {
                 Socket_set_timeout(peer, s -> idle_ms);
                 {
@@ -1970,11 +2057,11 @@ static Var _worker(Var value){
                 }
 
               }
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_23);
             }
 
           }
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_19);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
         }
 
       }
@@ -1996,16 +2083,16 @@ static void _connection(HttpServer s, Socket peer){
     Context context = Context_open_isolated_named("request");
     const Context _x2c_gensym_macro_acquired_4 = context;
     {
-      _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
+      _x2c_gensym_defer_env_24 _x2c_gensym_macro_environment_24 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_21._x2c_gensym_defer_capture_23 =(const void *) & _x2c_gensym_macro_acquired_4;
-      X2CCleanup _x2c_gensym_defer_record_21 ={
-        .fn = _x2c_gensym_defer_cleanup_21, .env = & _x2c_gensym_macro_environment_21
+      _x2c_gensym_macro_environment_24._x2c_gensym_defer_capture_29 =(const void *) & _x2c_gensym_macro_acquired_4;
+      X2CCleanup _x2c_gensym_defer_record_24 ={
+        .fn = _x2c_gensym_defer_cleanup_24, .env = & _x2c_gensym_macro_environment_24
       }
       ;
-      x2c_cleanup_push(& _x2c_gensym_defer_record_21);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_24);
       {
         HttpResponse volatile res = HttpResponse_new();
         HttpRequest volatile req = NULL;
@@ -2055,7 +2142,7 @@ static void _connection(HttpServer s, Socket peer){
                       x2c_error_catch_close(_x2c_gensym_error_handler_4);
                       _x2c_gensym_error_handler_4 = NULL;
                       x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-                      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+                      x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
                       return;
                     }
 
@@ -2078,7 +2165,7 @@ static void _connection(HttpServer s, Socket peer){
               x2c_error_catch_close(_x2c_gensym_error_handler_4);
               _x2c_gensym_error_handler_4 = NULL;
               x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
               return;
             }
             keep = req -> keep_alive;
@@ -2150,12 +2237,12 @@ static void _connection(HttpServer s, Socket peer){
         }
         ));
         if(! keep || __atomic_load_n(& s -> listener -> stopped, __ATOMIC_ACQUIRE)){
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
           return;
         }
 
       }
-      x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_24);
     }
 
   }
@@ -2364,30 +2451,30 @@ static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path director
   File file = File_open(path, "rb");
   const File _x2c_gensym_macro_acquired_1 = file;
   {
-    _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
+    _x2c_gensym_defer_env_25 _x2c_gensym_macro_environment_25 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_22._x2c_gensym_defer_capture_24 =(const void *) & _x2c_gensym_macro_acquired_1;
-    X2CCleanup _x2c_gensym_defer_record_22 ={
-      .fn = _x2c_gensym_defer_cleanup_22, .env = & _x2c_gensym_macro_environment_22
+    _x2c_gensym_macro_environment_25._x2c_gensym_defer_capture_30 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_25 ={
+      .fn = _x2c_gensym_defer_cleanup_25, .env = & _x2c_gensym_macro_environment_25
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_22);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_25);
     {
       File_read_into(file, res -> body -> content);
       HttpResponse_header(res, _111, _mime(Path_extension(path)));
       {
-        Var _x2c_gensym_return_value_15 =((void) 0, Void);
+        Var _x2c_gensym_return_value_16 =((void) 0, Void);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
-          return _x2c_gensym_return_value_15;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_25);
+          return _x2c_gensym_return_value_16;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_25);
   }
 
 }
@@ -2401,64 +2488,79 @@ static Var _x2c_gensym_lambda_1(Func _x2c_gensym_lambda_closure_0, const FuncArg
   return _x2c_gensym_lambda_0(a0, a1, Var_as_string(record -> c0));
 }
 
-void Thread_finish_all(Array);
-
 static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
   _x2c_gensym_defer_env_14 * _x2c_gensym_defer_data_14 =(_x2c_gensym_defer_env_14 *) _x2c_gensym_defer_opaque_14;
-  {
-    Channel_close((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_15) -> channel);
-    Thread_finish_all((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_15) -> threads);
-  }
-
+  if(!(*(int *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_15)) Channel_free((*(HttpServer *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_16) -> channel);
 }
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15){
   _x2c_gensym_defer_env_15 * _x2c_gensym_defer_data_15 =(_x2c_gensym_defer_env_15 *) _x2c_gensym_defer_opaque_15;
-  {
-    Listener_close((*(HttpServer *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_16) -> listener);
-    (*(HttpServer *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_16) -> running = 0;
-  }
-
+  if(!(*(int *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_17)) Listener_close((*(HttpServer *) _x2c_gensym_defer_data_15->_x2c_gensym_defer_capture_18) -> listener);
 }
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){
   _x2c_gensym_defer_env_16 * _x2c_gensym_defer_data_16 =(_x2c_gensym_defer_env_16 *) _x2c_gensym_defer_opaque_16;
-  if(!(*(int *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_17)) close((*(int *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_18));
+  if(!(*(int *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_19) &&(*(HttpServer *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_20) -> owns_logger) Logger_free((*(HttpServer *) _x2c_gensym_defer_data_16->_x2c_gensym_defer_capture_20) -> logger);
 }
 
-void Thread_free(Thread);
+void Thread_finish_all(Array);
 
 static void _x2c_gensym_defer_cleanup_17(void * _x2c_gensym_defer_opaque_17){
   _x2c_gensym_defer_env_17 * _x2c_gensym_defer_data_17 =(_x2c_gensym_defer_env_17 *) _x2c_gensym_defer_opaque_17;
-  Thread_free((*(Thread *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_19));
+  {
+    Channel_close((*(HttpServer *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_21) -> channel);
+    Thread_finish_all((*(HttpServer *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_21) -> threads);
+  }
+
 }
 
 static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){
   _x2c_gensym_defer_env_18 * _x2c_gensym_defer_data_18 =(_x2c_gensym_defer_env_18 *) _x2c_gensym_defer_opaque_18;
-  funlockfile((*(File *) _x2c_gensym_defer_data_18->_x2c_gensym_defer_capture_20));
+  {
+    Listener_close((*(HttpServer *) _x2c_gensym_defer_data_18->_x2c_gensym_defer_capture_22) -> listener);
+    (*(HttpServer *) _x2c_gensym_defer_data_18->_x2c_gensym_defer_capture_22) -> running = 0;
+  }
+
 }
 
 static void _x2c_gensym_defer_cleanup_19(void * _x2c_gensym_defer_opaque_19){
   _x2c_gensym_defer_env_19 * _x2c_gensym_defer_data_19 =(_x2c_gensym_defer_env_19 *) _x2c_gensym_defer_opaque_19;
-  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_21));
+  if(!(*(int *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_23)) close((*(int *) _x2c_gensym_defer_data_19->_x2c_gensym_defer_capture_24));
 }
 
-void Context_cleanup(Context);
+void Thread_free(Thread);
 
 static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20){
   _x2c_gensym_defer_env_20 * _x2c_gensym_defer_data_20 =(_x2c_gensym_defer_env_20 *) _x2c_gensym_defer_opaque_20;
-  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_22));
+  Thread_free((*(Thread *) _x2c_gensym_defer_data_20->_x2c_gensym_defer_capture_25));
 }
 
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21){
   _x2c_gensym_defer_env_21 * _x2c_gensym_defer_data_21 =(_x2c_gensym_defer_env_21 *) _x2c_gensym_defer_opaque_21;
-  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_23));
+  funlockfile((*(File *) _x2c_gensym_defer_data_21->_x2c_gensym_defer_capture_26));
+}
+
+static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
+  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
+  Socket_cleanup((*(const Socket *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_27));
+}
+
+void Context_cleanup(Context);
+
+static void _x2c_gensym_defer_cleanup_23(void * _x2c_gensym_defer_opaque_23){
+  _x2c_gensym_defer_env_23 * _x2c_gensym_defer_data_23 =(_x2c_gensym_defer_env_23 *) _x2c_gensym_defer_opaque_23;
+  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_23->_x2c_gensym_defer_capture_28));
+}
+
+static void _x2c_gensym_defer_cleanup_24(void * _x2c_gensym_defer_opaque_24){
+  _x2c_gensym_defer_env_24 * _x2c_gensym_defer_data_24 =(_x2c_gensym_defer_env_24 *) _x2c_gensym_defer_opaque_24;
+  Context_cleanup((*(const Context *) _x2c_gensym_defer_data_24->_x2c_gensym_defer_capture_29));
 }
 
 void File_cleanup(File);
 
-static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
-  _x2c_gensym_defer_env_22 * _x2c_gensym_defer_data_22 =(_x2c_gensym_defer_env_22 *) _x2c_gensym_defer_opaque_22;
-  File_cleanup((*(const File *) _x2c_gensym_defer_data_22->_x2c_gensym_defer_capture_24));
+static void _x2c_gensym_defer_cleanup_25(void * _x2c_gensym_defer_opaque_25){
+  _x2c_gensym_defer_env_25 * _x2c_gensym_defer_data_25 =(_x2c_gensym_defer_env_25 *) _x2c_gensym_defer_opaque_25;
+  File_cleanup((*(const File *) _x2c_gensym_defer_data_25->_x2c_gensym_defer_capture_30));
 }
 

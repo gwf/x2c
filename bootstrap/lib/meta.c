@@ -13,6 +13,36 @@ typedef List Macro;
 
 typedef List Type;
 
+int Symbol_is_type_qualifier(Symbol symbol);
+
+static List _3;
+
+static String _1, _0;
+
+static Var _9, _8, _7, _6, _5, _4, _2;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static inline unsigned _x2c_type_qualifiers(Type * cursor){
+  unsigned found = 0;
+  while(Var_is(List_car((* cursor)), 1328354264)){
+    Symbol head = Var_symbol(List_car((* cursor)));
+    switch(head){
+      case 7304424 : found |= 1;
+      break;
+      case 1544849476362 : found |= 2;
+      break;
+      case 1249006209256 : found |= 4;
+      break;
+      default: return found;
+    }
+    (* cursor) = List_cdr((* cursor));
+  }
+  return found;
+}
+
 typedef List Code;
 
 typedef List TypeInfo;
@@ -129,19 +159,7 @@ void x2c_diagnostic_warn(String message, List notes);
 
 Map x2c_meta_definition_hashes(void);
 
-static List _3;
-
-static String _1, _0;
-
-static Var _9, _8, _7, _6, _5, _4, _2;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
 static int _base_keyword(Symbol symbol);
-
-static int _type_qualifier(Symbol symbol);
 
 static Var _modifier_syntax(Var modifier);
 
@@ -168,7 +186,7 @@ String type_name_error(List type){
   Var name = List_last(type);
   if(Var_is_row(name, 11, 7, 1)) return NULL;
   Symbol symbol = Var_symbol(name);
-  if(symbol &&(symbol == 54 || _base_keyword(symbol) || _type_qualifier(symbol))) return NULL;
+  if(symbol &&(symbol == 54 || _base_keyword(symbol) || Symbol_is_type_qualifier(symbol))) return NULL;
   if(! Var_is(name, 826970) && ! Var_is(name, 1328354264)) return NULL;
   Array fixed = Array_new();
   for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));
@@ -197,7 +215,7 @@ List base = type_base_suffix(type);
 if(! List_truth(base)) return cons(List_var(type), _3);
 List reversed = NULL, qualifiers = NULL;
 for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);
-while(List_truth(reversed) && _type_qualifier(Var_symbol(List_car(reversed)))){
+while(List_truth(reversed) && Symbol_is_type_qualifier(Var_symbol(List_car(reversed)))){
   qualifiers = cons(List_car(reversed), qualifiers);
   reversed = List_cdr(reversed);
 }
@@ -233,10 +251,6 @@ static int _base_keyword(Symbol symbol){
     default: return 0;
   }
 
-}
-
-static int _type_qualifier(Symbol symbol){
-  return symbol == 7304424 || symbol == 1249006209256 || symbol == 1544849476362;
 }
 
 static Var _modifier_syntax(Var modifier){

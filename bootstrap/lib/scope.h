@@ -85,7 +85,7 @@ Scope Scope_new_named(const char * name);
 
 void Scope_cleanup(Scope value);
 
-void Scope_destroy(Scope scope);
+void Scope_destroy(Scope s);
 
 void x2c_scope_thread_release(void);
 

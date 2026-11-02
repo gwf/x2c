@@ -480,7 +480,7 @@ static void _validate_text(const void * bytes, size_t length){
 
 static inline void _block_putc(Block block, unsigned char value){
   if(block -> length == SIZE_MAX){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/file.x",.function = "_block_putc",.line = 472,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/file.x",.function = "_block_putc",.line = 472,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("File.block")), NULL))));  __builtin_unreachable();
   }
   size_t expected = block -> length + 1;  if(block -> length == block -> cap) Block_reserve(block, expected); ((unsigned char *) block -> bytes)[block -> length] = value;  block -> length = expected;
 }

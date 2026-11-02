@@ -44,7 +44,7 @@ List Compiler_resolve_protocol_member(Compiler c, Type participant, String membe
 
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
-String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
+String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix, int discard_rhs);
 
 List Compiler_protocol_helper_call(Compiler c, String name, List call);
 
