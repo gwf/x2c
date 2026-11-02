@@ -2896,9 +2896,8 @@ gives the function and the reason.
 
 Compiler facilities load before a unit's own source. A unit cannot define a
 macro in the reserved `x2c.*` or `lisp.*` namespace. The other prelude
-macros, such as `$scope`, `$auto`, and `$lock`, follow the ordinary
-definition rules, so a later definition of the same name shadows one for
-later invocations.
+macros, such as `$scope` and `$lock`, follow the ordinary definition rules,
+so a later definition of the same name shadows one for later invocations.
 
 ### Macro-visible syntax
 
