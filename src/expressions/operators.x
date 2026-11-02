@@ -405,7 +405,7 @@ static List _converted_member(
   List lhs_member = _converting_member(c, lhs_type, member);
   List rhs_member = _converting_member(c, rhs_type, member);
   if (lhs_member && !rhs_member) {
-    List converted = _member_operand(c, lhs_member, rhs, rhs_type, lhs_type);
+    List converted = _member_operand(c, lhs_member, rhs, lhs_type);
     if (converted) { rhs = converted; return lhs_member; }
   }
   else if (rhs_member && !lhs_member) {
@@ -421,17 +421,18 @@ static List _converting_member(Compiler c, Type type, Symbol member) {
   return resolved && _converts_operands(c, type) ? resolved : NULL;
 }
 
-/* The right operand `rhs` converted for `participant`'s resolved `member`.
-   A member whose operand parameter has another type than its receiver,
-   such as `long` in `T T.add(T, long)`, takes `rhs` as an ordinary
-   argument. Otherwise `rhs` converts through its declared converter to the
-   participant, or the operator stays native C when none exists. */
+/* The right operand `rhs` converted for `participant`'s resolved `member`,
+   or NULL. A member whose operand parameter has another type than its
+   receiver, such as `long` in `T T.add(T, long)`, takes `rhs` as an
+   ordinary argument. Otherwise `rhs` converts to the participant through
+   its declared converter, and without one the operator stays native C. */
 static List _member_operand(
-  Compiler c, List member, List rhs, Type rhs_type, Type participant) {
+  Compiler c, List member, List rhs, Type participant) {
   if (member ~= %(? ((func (?(Type receiver) ?(Type parameter))) *)) &&
       parameter.canonicalize() != receiver.canonicalize())
     return c.convert_expression(rhs, parameter);
-  return c.converter_call(rhs, rhs_type, participant);
+  Type type = rhs.cadr();
+  return c.converter_call(rhs, type.canonicalize(), participant);
 }
 
 /* Two different typedef names that share an ancestor meet at the nearest

@@ -158,7 +158,8 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
    directives, declarations, included providers, reached functions, and
    compile-time-only functions that the unit itself never emits. The
    `support` the parse queued for the unit, such as a helper that discards
-   an operator's temporaries, follows them where the group reaches it. */
+   an operator's temporaries, joins the later definitions, which the group
+   keeps only where it reaches them. */
 module Array _units(Compiler c, Array support) {
   String lib = %"$(x2c_get_root())/lib/";
   Array ordered = _runtime_includes(c, lib);

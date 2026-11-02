@@ -34,6 +34,7 @@ module List _emit_prepared(
       c.meta_group = [];
       c.unit_nodes = declarations;
       c.group_meta_function(prepare(c));
+      // The isolated pending support is the group's own; it lowers below.
       units = _units(c, []);
     }
     if (c.meta_build) _name_provider_bindings(c, provider, units, saved.deps);

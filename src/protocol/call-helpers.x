@@ -64,8 +64,8 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
-/** Returns `call`, a call of the generated protocol helper `name` from the
-    code being parsed or lowered. A public inline body's helper has external
+/** Returns `call`, which calls the generated protocol helper `name` from
+    the code being lowered. A public inline body's helper has external
     linkage, and the unit's header carries that body too, so there the call
     declares the helper first.
 */
@@ -179,8 +179,9 @@ static String _helper_name(Compiler c, String stem, int exported) {
   return exported ? %"$(name)_$("%08x".printf(c.filename.hash()))" : name;
 }
 
-/* A typedef of the participant, such as one that inherits its adoption,
-   uses the member its ancestor implements. */
+/* The `RHS` of a member `(Participant, RHS) -> Participant`, or NULL. Its
+   receiver and result may be any typedef that resolves to the participant's
+   type, as the member an inherited adoption selects is. */
 static Type _update_rhs(Compiler c, Type participant, Type signature) {
   List parameters = signature.car().list().cadr();
   Type self = c.sym.resolve_key(participant);

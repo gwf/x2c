@@ -218,20 +218,19 @@ static List _protocol_update(
   }
   String helper = c.protocol_update_helper(type, member_name, !rhs);
   if (!helper) return NULL;
-  List spell = _symbol_expression(spelled);
-  if (!rhs) return _update_call(c, arg, spell, NULL, helper);
-  List value = rhs;
-  return _update_call(c, arg, spell, value, helper);
+  List spell = _symbol_expression(spelled), value = NULL;
+  if (rhs) value = rhs;
+  List call = _update_call(arg, spell, value, helper);
+  return c.protocol_helper_call(helper, call);
 }
 
 static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "$((unsigned long) value)");
 
 static List _update_call(
-  Compiler c, List target, List operator, List value, String helper) {
+  List target, List operator, List value, String helper) {
   Type type = target.cadr();
   List address = %(expr $(type.reference()) (op & (parens $target)));
-  List call = value ? %(call $helper (args $address $operator $value))
-                    : %(call $helper (args $address $operator));
-  return c.protocol_helper_call(helper, call);
+  return value ? %(call $helper (args $address $operator $value))
+               : %(call $helper (args $address $operator));
 }
