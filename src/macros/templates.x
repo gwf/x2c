@@ -285,8 +285,8 @@ static List _sdk_template_call(Var stored, List values) {
     m-invoke);
 }
 
-/* The capture rows of a template call's values. A scalar value in an Expr
-   or Literal hole lifts to an expression first. */
+/* The capture rows of a template call's values, which `_hole_row`
+   converts for their holes. */
 static List _template_arguments(
   Compiler c, List definition, List values, Token invocation,
   int retain_syntax) {
@@ -318,30 +318,29 @@ static List _hole_row(
   return _capture_row_project(c, hole, sources, retain_syntax);
 }
 
-/* `value` as a hole of `kind` holds it. In an Expr or Literal hole, a
-   number, String, or Symbol becomes the literal expression that holds it,
-   and in a Name hole an Atom becomes its spelling. A Type hole takes type
-   syntax, which names its type with a String. */
+/* `value` as a hole of `kind` holds it: a scalar in an Expr or Literal
+   hole lifts, and an Atom in a Name hole becomes its spelling. */
 static Var _converted(Compiler c, Symbol kind, Var value, Token invocation) {
   switch (kind) {
-    case <expr>: case <literal>:
-      return value.is_integer() || value.is_floating() ||
-             value is <string> || value is <symbol>
-           ? c.lift_meta_expression(value, invocation) : value;
+    case <expr>: case <literal>: return _lifted(c, value, invocation);
     case <name>: return value.is_atom() ? ((Atom) value).str() : value;
-    case <type>: {
-      String error = _type_syntax_error(value);
-      if (error) $fail.macros_type_name(c, invocation, error);
-    }
+    case <type>: _require_type_syntax(c, value, invocation); break;
   }
   return value;
 }
 
-/* Why `value` cannot fill a Type hole, or NULL. */
-static String _type_syntax_error(Var value) {
-  if (value is <list> && !value.is_nil()) return type_name_error(value);
-  String found = value.repr();
-  return %"a Type hole takes type syntax such as %(long), not $found";
+/* A number, String, or Symbol becomes the literal expression that holds
+   it; other values are already syntax. */
+static Var _lifted(Compiler c, Var value, Token invocation) =>
+  value.is_integer() || value.is_floating() || value is <string> ||
+  value is <symbol> ? c.lift_meta_expression(value, invocation) : value;
+
+/* A Type hole takes type syntax, which names its type with a String. */
+static void _require_type_syntax(Compiler c, Var value, Token invocation) {
+  String error = value is <list> && !value.is_nil()
+    ? type_name_error(value)
+    : %"a Type hole takes type syntax such as %(long), not $(value.repr())";
+  if (error) $fail.macros_type_name(c, invocation, error);
 }
 
 /* A helper's result with each template call the helper left for the
