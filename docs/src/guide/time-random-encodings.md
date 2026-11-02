@@ -12,7 +12,7 @@ protocols and file formats use. Include the ones a file uses:
 
 `url.x` includes `encoding.x`. Each module raises the shared
 [Error causes](exceptions.md): `<malformed>` for text it cannot read, with
-`reason` and byte `offset` details, `<conv-range>` for a time outside the
+`reason` and input-byte `offset` details, `<conv-range>` for a time outside the
 64-bit range, and `<bad-arg>` for an invalid argument.
 
 ## Durations and clocks
@@ -168,7 +168,7 @@ Ill-formed UTF-8 raises `<malformed>` at the offset of the first bad byte.
 
 Base64, hexadecimal, and percent-encoding turn bytes into ASCII text and
 back. Each decoder checks its input and raises `<malformed>` with the
-offset where decoding stopped. A `String` cannot hold a NUL byte, so the
+input offset where decoding stopped. A `String` cannot hold a NUL byte, so the
 decoders that return text reject one; the `_bytes` forms return a `Block`
 of bytes instead, and the `Block` encoders take one:
 

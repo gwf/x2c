@@ -132,7 +132,7 @@ meta native String String.unescape(String str) {
   return out;
 }
 
-/* Percent strings, quoted Atoms, and Lisp keep x2c's byte escapes. */
+/** Decodes x2c byte escapes for percent text, quoted Atoms, and Lisp. */
 String x2c_string_unescape_bytes(String str) {
   int n = str.len();
   if (n == 0) return NULL;

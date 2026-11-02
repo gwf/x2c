@@ -7,7 +7,7 @@
     ASCII text and back. A `String` cannot hold a NUL byte, so a decoder
     that returns a `String` raises `<malformed>` for one, and its `_bytes`
     form returns a `Block` of 1-byte elements instead. Invalid input raises
-    `<malformed>` with the operation, a reason, and the byte `offset`.
+    `<malformed>` with the operation, a reason, and the input byte `offset`.
 */
 
 #pragma once
@@ -142,7 +142,7 @@ String Block.base64_encode(Block bytes) {
 String String.base64_decode(String text) {
   String operation = "String.base64_decode";
   Block bytes = auto _unbase64(_STANDARD, text, operation);
-  return _text(bytes, operation);
+  return _text(bytes, operation, 6);
 }
 
 /** Returns the bytes that the padded standard base64 `text` encodes, as a
@@ -172,7 +172,7 @@ String Block.base64url_encode(Block bytes) {
 String String.base64url_decode(String text) {
   String operation = "String.base64url_decode";
   Block bytes = auto _unbase64(_URL, text, operation);
-  return _text(bytes, operation);
+  return _text(bytes, operation, 6);
 }
 
 /** Returns the bytes that the URL-safe base64 `text` encodes, as a `Block`
@@ -206,7 +206,7 @@ String Block.hex_encode(Block b) {
 String String.hex_decode(String text) {
   String operation = "String.hex_decode";
   Block bytes = auto _unhex(text, operation);
-  return _text(bytes, operation);
+  return _text(bytes, operation, 4);
 }
 
 /** Returns the bytes that the hexadecimal `text` encodes, as a `Block` of
@@ -339,14 +339,15 @@ static int _sextet(Alphabet a, int c) {
   return c == a.digits[63] ? 63 : -1;
 }
 
-/* The decoded `bytes` as a String, which cannot hold a NUL byte. */
-static String _text(Block bytes, String operation) {
+/* The decoded bytes as a String. Each input character carries `bits` bits;
+   report a NUL at the first input character that contributes to it. */
+static String _text(Block bytes, String operation, int bits) {
   const char *start = (const char *) bytes.bytes;
   const char *nul = memchr(start, 0, bytes.len());
-  if (nul)
-    raise %(malformed (operation $operation)
-            (reason "NUL byte cannot appear in a String")
-            (offset $(nul - start)));
+  if (nul) {
+    int offset = (unsigned long long) (nul - start) * 8 / bits;
+    _malformed(operation, "NUL byte cannot appear in a String", offset);
+  }
   return String.new_len(start, bytes.len());
 }
 

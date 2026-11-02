@@ -266,3 +266,10 @@ found and corrected the incomplete expression/capture cases, a missed recovery
 workflow input, a stale generated-documentation example input, and configure's
 whitespace-path acceptance. The final publication command regenerates artifacts
 through their existing owners and checks self-host convergence.
+
+Artifact generation found a missing doc comment on the internal Block error
+helper; it is corrected. Combined review also checked decoder error positions
+with a NUL after preceding decoded bytes. Hex input `610062` previously
+reported decoded index 1, and base64 `YWJjAA==` reported 3. The shared String
+conversion now maps that position to the input coordinates, 2 and 4, through
+the existing malformed-error owner. Byte-returning decoders remain unchanged.

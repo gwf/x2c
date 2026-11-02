@@ -350,7 +350,7 @@ static void _append_growing(Block b, const void *source, size_t count) {
   b.length = length + count;
 }
 
-/* Failure owner for the public inline removal operations. */
+/** Raises `<bad-arg>` for a null handle in an inline Block removal. */
 void x2c_block_bad_arg(Symbol action) {
   String operation = action == <try-pop>
     ? "Block.try_pop" : "Block." + action.str();

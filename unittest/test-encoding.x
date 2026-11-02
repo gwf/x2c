@@ -137,6 +137,10 @@ static void encoding_base64_rejects_invalid_text(void) {
   EXPECT_STR_EQ(detail.assoc(<reason>).string(),
                 "NUL byte cannot appear in a String");
   EXPECT_INT_EQ(detail.assoc(<offset>).int(), 0);
+  detail = _rejection(%!(String t) => t.base64_decode(), "YWJjAA==");
+  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 4);
+  detail = _rejection(%!(String t) => t.base64url_decode(), "YWJjAA");
+  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 4);
 }
 
 static void encoding_hex_round_trips(void) {
@@ -150,7 +154,7 @@ static void encoding_hex_round_trips(void) {
   detail = _rejection(%!(String t) => t.hex_decode(), "0g");
   EXPECT_INT_EQ(detail.assoc(<offset>).int(), 1);
   detail = _rejection(%!(String t) => t.hex_decode(), "4100");
-  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 1);
+  EXPECT_INT_EQ(detail.assoc(<offset>).int(), 2);
 }
 
 static void encoding_decoders_release_failed_output(void) {
