@@ -245,7 +245,7 @@ static List _function_parameters(Compiler c, int loaded_main) {
 }
 
 /* The C that x2c emits cannot spell a block declarator, so x2c source
-   cannot write one. Collection also reads C headers, which C compiles. */
+   cannot write one. Collection accepts one in a C header, which C reads. */
 module List _pointer(Compiler c) {
   List ptr = NULL;
   loop {

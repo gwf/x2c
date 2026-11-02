@@ -191,13 +191,13 @@ module List _type_specifier(Compiler c) {
   return syntax;
 }
 
-/* C11 reserves `_Atomic`, `_Complex`, and `_Alignas`, so each begins
-   declaration specifiers wherever it appears. */
+/* C11 reserves `_Atomic`, `_Complex`, and `_Alignas`, so any of them at
+   the cursor begins a declaration. */
 module int _c11_specifier_starts(Compiler c) =>
   c.at_word("_Atomic") || c.at_word("_Complex") || _alignment_starts(c);
 
 /* C11 names an atomic type `_Atomic(T)`, or `_Atomic T` with the type
-   qualifier. x2c keeps it an opaque C type spelled as written, and C gives
+   qualifier. x2c keeps it an opaque C type with that spelling, and C gives
    it its atomic operations. */
 static List _atomic_type(Compiler c) {
   Token first = c.token;
@@ -206,6 +206,7 @@ static List _atomic_type(Compiler c) {
   List specifier = _type_specifier(c);
   String spelling = _words_spelling(specifier);
   if (spelling) return $(%"_Atomic $spelling");
+  // A collected C header's atomic aggregate keeps its plain type.
   if (c.shallow) return specifier;
   $fail.parse_atomic_type(c, first);
 }
