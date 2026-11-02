@@ -22,8 +22,6 @@ List Compiler_capture_environment(Compiler c, List name, List fields);
 
 List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
 
-List Compiler_context_func_adapter(Compiler c, Type type, List target);
-
 List Compiler_prepend_setup(Compiler c, List body, List setup);
 
 List Compiler_func_parameters(Compiler c, List entries, List fn, List argv);

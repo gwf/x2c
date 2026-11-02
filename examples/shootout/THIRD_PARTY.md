@@ -64,7 +64,7 @@ source bytes retained.
   `benchmarks/regexredux/vendor/LICENSE_1_0.txt`.
 
 The added source selections and coverage limits are listed in
-[reference-coverage.md](results/reference-coverage.md). Every admitted source
+[reference-coverage.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/reference-coverage.md). Every admitted source
 path and hash is also recorded in `benchmarks.json`.
 
 These implementations and local measurements do not imply upstream

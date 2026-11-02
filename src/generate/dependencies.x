@@ -46,14 +46,20 @@ module List _forward_declarations(
    Ordinary function bodies follow the file's declarations and directives,
    preserving their existing access to later private includes and macros,
    but precede a later `#undef` and any conditional group containing one,
-   as C requires of a body that uses the macro. Source initializer helpers
-   stay at their capture positions. */
+   as C requires of a body that uses the macro. C decides the groups
+   reopened around a body where the body lands, so a body written under
+   conditional arms also precedes a later `#define` or `#include` and any
+   group containing one, and stays in its arm of a group that contains any
+   of the three. Source initializer helpers stay at their capture
+   positions. */
 module List _move_bodies(List source, Map inline_bodies) {
   Array out = [], bodies = auto [];
-  Map undefs = auto _undef_positions(source), List arms = NULL;
+  Map placements = auto _placements(source), List arms = NULL;
   int position = 0;
   foreach (List node in source) {
-    if (position in undefs) _place_bodies(out, bodies, arms);
+    Var fewest;
+    if (placements.try_get(position, fewest))
+      _place_bodies(out, bodies, arms, fewest);
     position++;
     match (node)
       case %(function ?type (!set ?signature (bind ?binding *)) ?): {
@@ -70,38 +76,60 @@ module List _move_bodies(List source, Map inline_bodies) {
       arms = Compiler.preproc_track_arms(arms, content);
     out.push(node);
   }
-  _place_bodies(out, bodies, NULL);
+  _place_bodies(out, bodies, NULL, 0);
   return out.list_free();
 }
 
-/* The positions in `source` of each `#undef` and of the directive opening
-   each conditional group that contains one. */
-static Map _undef_positions(List source) {
-  Map positions = {};
+/* The positions in `source` before which pending bodies are placed, each
+   with the fewest groups a body placed there reopens: 0 at an `#undef`, 1
+   at a `#define` or `#include`, the least of those at the directive
+   opening each conditional group containing one, and 0 at each directive
+   that ends an arm of such a group. An open group lists the positions of
+   its directives so far, its opening first. */
+static Map _placements(List source) {
+  Map placements = {};
   Array open = auto [], int position = 0;
   foreach (List node in source) {
-    if (node ~= %(preproc ?(String content))) {
+    if (Ast.without_origin(node) ~= %(preproc ?(String content))) {
       Symbol kind = Compiler.preproc_conditional_kind(content);
-      if (kind == <open>) open.push(position);
-      else if (kind == <close> && open.len()) open.take_last();
-      else if (Compiler.preproc_directive(content).startswith("undef")) {
-        positions[position] = 1;
-        foreach (int group in open) positions[group] = 1;
+      if (kind == <open>) open.push(%($position));
+      else if (kind && open.len()) {
+        List group = open.take_last();
+        if (group.car() in placements) placements[position] = 0;
+        if (kind == <branch>) open.push(group.append($(position)));
       }
+      else _mark_change(placements, open, position, content);
     }
     position++;
   }
-  return positions;
+  return placements;
 }
 
-/* Moves to `out` each pending body written under the open `arms`,
-   reopening the groups it was written in beyond those. A body from another
-   arm stays pending. */
-static void _place_bodies(Array out, Array bodies, List arms) {
+/* Marks a `#define`, `#undef`, or `#include` at `position`, the openings
+   of the `open` groups around it, and the arm ends they have passed. */
+static void _mark_change(
+  Map placements, Array open, int position, String content) {
+  String directive = Compiler.preproc_directive(content);
+  int fewest = directive.startswith("undef") ? 0 : 1;
+  if (fewest && !directive.startswith("define") &&
+      !directive.startswith("include"))
+    return;
+  placements[position] = fewest;
+  foreach (List group in open) {
+    if (!fewest || !(group.car() in placements))
+      placements[group.car()] = fewest;
+    foreach (int end in group.cdr()) placements[end] = 0;
+  }
+}
+
+/* Moves to `out` each pending body written under the open `arms` that
+   reopens at least `fewest` groups beyond them, reopening the groups it
+   was written in beyond those. A body from another arm stays pending. */
+static void _place_bodies(Array out, Array bodies, List arms, int fewest) {
   size_t kept = 0, unsigned open = arms.len();
   foreach (List pending in bodies) {
     List written = pending.cdr();
-    if (written.tail(open) != arms) {
+    if (written.len() < open + fewest || written.tail(open) != arms) {
       bodies[kept++] = pending;
       continue;
     }

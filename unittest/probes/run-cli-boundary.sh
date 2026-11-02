@@ -388,6 +388,42 @@ grep -Fq "inputs produce the same output stem 'item'" \
 [[ ! -e "$BUILD/inspect-out" ]] || exit 1
 grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
+# Each shown translate command reads back in a shell as the words it names,
+# with its arguments quoted as the native actions' are.
+printf 'int main(void) { return 0; }\n' >"$BUILD/space dir/a b.x"
+"$X2C" translate -### --out-dir "$BUILD/space out" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-translate.stderr"
+"$X2C" build -### --output "$BUILD/space dir/ab" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-dry.stderr"
+"$X2C" build -v --output "$BUILD/space dir/ab" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-verbose.stderr"
+translate_words() {
+  local input=$2 line
+  line=$(grep '^x2c: translate ' "$1")
+  eval "set -- ${line#x2c: translate }"
+  [[ $# == 3 && $1 == --out-dir && $3 == "$input" ]]
+}
+for log in space-translate space-dry space-verbose; do
+  translate_words "$BUILD/$log.stderr" "$BUILD/space dir/a b.x"
+done
+quoted="--out-dir '$BUILD/space out' '$BUILD/space dir/a b.x'"
+grep -Fqx "x2c: translate $quoted" "$BUILD/space-translate.stderr"
+
+# An input the driver may not open names the system's reason.
+if [[ $(id -u) != 0 ]]; then
+  mkdir -p "$BUILD/denied"
+  printf 'int main(void) { return 0; }\n' >"$BUILD/denied/input.x"
+  chmod 000 "$BUILD/denied/input.x"
+  set +e
+  "$X2C" translate --out-dir "$BUILD/denied" "$BUILD/denied/input.x" \
+    >/dev/null 2>"$BUILD/denied/input.stderr"
+  denied_status=$?
+  set -e
+  chmod 644 "$BUILD/denied/input.x"
+  [[ $denied_status == 1 ]] || exit 1
+  grep -Fq 'reason: Permission denied' "$BUILD/denied/input.stderr"
+fi
+
 # An inspection covers every input, so a later input's error fails it.
 printf 'int broken(void) { return 1 +; }\n' >"$BUILD/b/broken.x"
 set +e
@@ -1773,6 +1809,41 @@ for run in first second; do
   [[ -s "$nostate/out.o" ]] || exit 1
 done
 
+# A state record, depfile, or script record that is not text is out of date,
+# as a missing one is, so the next build runs. Pruning keeps a cache entry
+# whose recorded source is not text, as it keeps an unreadable one.
+corrupt="$BUILD/corrupt-state"
+mkdir -p "$corrupt"
+printf 'int main(void) { printf("built\\n"); return 0; }\n' >"$corrupt/c.x"
+corrupt_build() {
+  "$X2C" build -q --build-dir "$corrupt/bd" --output "$corrupt/c" \
+    "$corrupt/c.x"
+  [[ $("$corrupt/c") == built ]]
+}
+corrupt_build
+for record in "$corrupt"/bd/.x2c-state/* "$corrupt"/bd/gen/*/c.d; do
+  printf '\0' >>"$record"
+  corrupt_build
+done
+corrupt_script() {
+  local output
+  output=$(X2C_CACHE_DIR="$corrupt/cache" "$X2C" script "$@" "$corrupt/c.x")
+  [[ $output == built ]]
+}
+corrupt_script
+mkdir "$corrupt/cache/scripts/stale"
+printf '%s\0' "$corrupt/gone.x" >"$corrupt/cache/scripts/stale/source"
+corrupt_script --rebuild
+[[ -d "$corrupt/cache/scripts/stale" ]] || exit 1
+printf '\0' >>"$(echo "$corrupt"/cache/scripts/c-*/.x2c-state/script)"
+corrupt_script
+printf 'int one(void) => 1;\n' >"$corrupt/one.x"
+printf 'int two(void) => 2;\n' >"$corrupt/two.x"
+"$X2C" translate -q --out-dir "$corrupt/out" "$corrupt/one.x"
+printf '\0' >>"$corrupt/out/one.d"
+"$X2C" translate -q -j 2 --out-dir "$corrupt/out" "$corrupt/one.x" \
+  "$corrupt/two.x"
+
 # A path holding a percent is a path, not a format.
 percent="$BUILD/percent"
 mkdir -p "$percent"
@@ -2230,5 +2301,90 @@ printf '%s\n' '#define WHICH "first"' >"$SCRIPT/search/first/config.h"
 [[ $(pick) == 'first plain' ]] || exit 1
 : >"$SCRIPT/search/second/optional.h"
 [[ $(pick) == 'first optional' ]] || exit 1
+
+# Flat package translation and every requested consumer use current inputs.
+python3 - "$ROOT" "$BUILD/package-inputs" "$X2C" <<'PY_PACKAGE_INPUTS'
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+
+root, work, compiler = map(Path, sys.argv[1:])
+package = work / 'demo'
+(package / 'src').mkdir(parents=True, exist_ok=True)
+(package / 'examples').mkdir(exist_ok=True)
+(package / 'Makefile').write_text(
+    'PACKAGE := demo\ninclude $(ROOT)/packages/package.mk\n'
+    'PACKAGE_C_FLAGS := --c-include-dir src\n')
+(package / 'src/native.h').write_text('int dependency(void);\n')
+(package / 'src/demo.x').write_text(
+    '#include "native.h"\nint choice(void) => CHOICE;\n'
+    'int linked(void) => dependency();\n')
+(package / 'examples/sample.x').write_text(
+    'import "demo";\nint main(void) {\n'
+    '  printf("%d %d\\n", demo.choice(), demo.linked()); return 0;\n}\n')
+for number in (11, 22):
+    source = work / f'native-{number}.c'
+    source.write_text(f'int dependency(void) {{ return {number}; }}\n')
+    subprocess.run(['cc', '-c', str(source), '-o', str(source.with_suffix('.o'))],
+                   check=True)
+    subprocess.run(['ar', 'rcs', str(source.with_suffix('.a')),
+                    str(source.with_suffix('.o'))], check=True)
+wrapper = work / 'compiler'
+calls = work / 'calls'
+wrapper.write_text('#!/bin/sh\nif [ "$1" = translate ]; then\n'
+                   f'  echo translate >> {shlex.quote(str(calls))}\nfi\n'
+                   f'exec {shlex.quote(str(compiler))} "$@"\n')
+wrapper.chmod(0o755)
+
+def make(label, choice=7, library=11, tool=wrapper, target='builds/sample',
+         extra=(), good=True):
+    command = ['make', '-s', '-C', str(package), target, f'ROOT={root}',
+               f'X2C={tool}',
+               f'PACKAGE_X_FLAGS=--x-include-dir src --package-dir .. --cpp -DCHOICE={choice}',
+               f'PACKAGE_LINK={work}/native-{library}.a ' +
+               ('-lm' if library == 11 else '-pthread'), *extra]
+    result = subprocess.run(command, text=True, capture_output=True)
+    (work / f'{label}.log').write_text(result.stdout + result.stderr)
+    assert (result.returncode == 0) == good, (label, result.returncode,
+                                            result.stdout, result.stderr)
+
+def output():
+    return subprocess.check_output([str(package / 'builds/sample')],
+                                   text=True).strip()
+
+make('first')
+assert output() == '7 11', output()
+make('changed-flags', choice=9)
+assert output() == '9 11', ('changed flags', output())
+archive = package / 'builds/libdemo.a'
+stamp = archive.stat().st_mtime_ns
+make('changed-link', choice=9, library=22)
+assert output() == '9 22', ('changed link', output())
+assert archive.stat().st_mtime_ns == stamp, 'link-only change rebuilt archive'
+response = package / 'builds/demo.native.rsp'
+assert response.read_text().splitlines() == [str(work / 'native-22.a'), '-pthread']
+tracked = [package / 'builds/demo.c', package / 'builds/demo.h', response,
+           *sorted((package / 'builds/cc').glob('obj/*.o'))]
+stamps = [p.stat().st_mtime_ns for p in tracked]
+translations = calls.read_text()
+make('unchanged', choice=9, library=22)
+assert [p.stat().st_mtime_ns for p in tracked] == stamps
+assert calls.read_text() == translations
+older = work / 'older-compiler'
+older.write_text(wrapper.read_text())
+older.chmod(0o755)
+os.utime(older, (1, 1))
+make('older-compiler', choice=9, library=22, tool=older)
+assert len(calls.read_text()) > len(translations), 'compiler selection reused translation'
+translations = calls.read_text()
+older.write_text(older.read_text() + '# replaced wrapper\n')
+make('replaced-compiler', choice=9, library=22, tool=older)
+assert len(calls.read_text()) > len(translations), 'compiler replacement reused translation'
+make('clean-missing-compiler', tool=work / 'absent', target='clean')
+make('missing-compiler', tool=work / 'absent', good=False)
+print('package translation, link response, consumer freshness, and reuse passed')
+PY_PACKAGE_INPUTS
 
 echo "CLI, dependency, build, run, script, manifest, and state probes passed"

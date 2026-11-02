@@ -79,9 +79,13 @@ $var.tag.exact(Iter, as_iter, iter_payload, <iter>, "Iter");
 $var.tag.exact(List, list, list_payload, <list>, "List");
 $var.tag.exact(Map, map, map_payload, <map>, "Map");
 
-static macro Stmt $error.decode.output() { raise %(bad-arg (operation "Var.numeric_decode")); }
+static macro Stmt $error.decode.output() {
+  raise %(bad-arg (operation "Var.numeric_decode"));
+}
 
-static macro Stmt $error.decode.void() { raise %(void-op (operation "Var.numeric_decode")); }
+static macro Stmt $error.decode.void() {
+  raise %(void-op (operation "Var.numeric_decode"));
+}
 
 static macro Stmt $error.decode.type(Expr $tag) {
   raise %(bad-types (source $($tag)));
@@ -134,29 +138,21 @@ meta native Var Var.convert(Var value, Symbol target) =>
     during the call; conversion and result ownership follow `Var.convert`.
 */
 Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site) {
-  if (!value.encoding_valid()) {
-    unsigned long bits = value.u64;
-    $error.encoding.bad(bits);
-  }
-  if (value is void) $error.convert.void(target, site);
+  Symbol source_tag = _source_tag(value, target, site);
   if (!target || !Var.known_tag(target) || target == <void> ||
       target == <nan> || target == <-inf> || target == <+inf>)
     $error.target.invalid(target);
-  Symbol source_tag = value.tag();
   if (source_tag == target) return value;
   if ((source_tag == <nan> || source_tag == <-inf> ||
        source_tag == <+inf>) && target == <f64>)
     return value;
+  X2CVarNumeric source = _numeric_source(value, source_tag, target, site);
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(source_tag, info))
-    $error.source.numeric(source_tag, target, site);
-  X2CVarNumeric source;
-  _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
     $error.no_convert(source_tag, target, site);
-  return info.floating
-       ? _convert_to_float(source, target)
-       : _convert_to_integer(source, target, info.unsigned_value, info.bits);
+  if (info.floating) return _convert_to_float(source, target);
+  return Var.integer_box(
+    target, _integer_bits(source, target, info.unsigned_value, info.bits));
 }
 
 /** Decodes a numeric `value` into caller-owned `out` storage.
@@ -177,6 +173,63 @@ void Var.numeric_decode(Var value, X2CVarNumeric &?out) {
   Symbol tag = value.tag();
   if (!Var.numeric_info(tag, info)) $error.decode.type(tag);
   _numeric_decode(value, info, out);
+}
+
+// native readers
+
+/* `Var.convert` boxes a wide result, so these readers stop at the unboxed
+   step. Every integer family reads directly: `Var.integer` returns the low
+   64 bits that a 64-bit target keeps. */
+
+/** Returns `value` as a native `long` under the `Var.convert` rules.
+    Unlike `Var.convert_at`, it never boxes the result, so it allocates
+    nothing. A failure records `site` as `Var.convert_at` does, and a null
+    `site` records no source location. Compiler-inserted conversions to
+    `long` call it.
+    Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
+    of floating range, or invalidly encoded.
+*/
+long Var.long_at(Var value, const X2CErrorSite *site) {
+  if (value.kind() == <integer>) return value.integer();
+  return (long) _integer_at(value, <long>, site);
+}
+
+/** Returns `value` as a native `ulong` under the `Var.convert` rules.
+    Like `Var.long_at`, it never boxes and records `site` on failure.
+    Raises: the same causes as `Var.long_at`.
+*/
+ulong Var.ulong_at(Var value, const X2CErrorSite *site) {
+  if (value.kind() == <integer>) return (ulong) value.integer();
+  return (ulong) _integer_at(value, <ulong>, site);
+}
+
+/** Returns `value` as a native `long long` under the `Var.convert` rules.
+    Like `Var.long_at`, it never boxes and records `site` on failure.
+    Raises: the same causes as `Var.long_at`.
+*/
+long long Var.long_long_at(Var value, const X2CErrorSite *site) {
+  if (value.kind() == <integer>) return value.integer();
+  return (long long) _integer_at(value, <llong>, site);
+}
+
+/** Returns `value` as a native `unsigned long long` under the `Var.convert`
+    rules.
+    Like `Var.long_at`, it never boxes and records `site` on failure.
+    Raises: the same causes as `Var.long_at`.
+*/
+unsigned long long Var.ulong_long_at(Var value, const X2CErrorSite *site) {
+  if (value.kind() == <integer>) return (unsigned long long) value.integer();
+  return _integer_at(value, <ullong>, site);
+}
+
+/** Returns `value` as a native `long double` under the `Var.convert` rules.
+    Like `Var.long_at`, it never boxes and records `site` on failure.
+    Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
+    invalidly encoded.
+*/
+long double Var.long_double_at(Var value, const X2CErrorSite *site) {
+  X2CVarNumeric source = _numeric_at(value, <ldouble>, site);
+  return source.ldouble();
 }
 
 // integer targets
@@ -290,6 +343,28 @@ unsigned long long Var.width_mask(int bits) =>
   bits >= (int) (sizeof(unsigned long long) * CHAR_BIT)
        ? ULLONG_MAX : (1ull << bits) - 1ull;
 
+/* The tag of a conversion source whose encoding is valid and that is not
+   `void`. */
+static Symbol _source_tag(Var value, Symbol target, const X2CErrorSite *site) {
+  if (!value.encoding_valid()) {
+    unsigned long bits = value.u64;
+    $error.encoding.bad(bits);
+  }
+  if (value is void) $error.convert.void(target, site);
+  return value.tag();
+}
+
+/* Decodes a numeric conversion source; another tag cannot convert. */
+static X2CVarNumeric _numeric_source(
+  Var value, Symbol source_tag, Symbol target, const X2CErrorSite *site) {
+  X2CVarNumericInfo info;
+  if (!Var.numeric_info(source_tag, info))
+    $error.source.numeric(source_tag, target, site);
+  X2CVarNumeric source;
+  _numeric_decode(value, info, source);
+  return source;
+}
+
 /* Both callers establish valid numeric encoding and family metadata before
    payload extraction; the public decoder still owns its argument checks.
    One switch covers all fifteen families. Split by the floating flag, the
@@ -318,27 +393,26 @@ static void _numeric_decode(
   out = decoded;
 }
 
-/* Integer-to-integer never passes through floating point; it narrows modulo
-   the target width. Only floating-to-integer is range checked, and only
-   after truncation. */
-static Var _convert_to_integer(
+/* The unboxed integer step: the source's two's-complement bits, which the
+   boxing step or a native cast narrows to the target width. Integer-to-integer
+   never passes through floating point. Only floating-to-integer is range
+   checked, and only after truncation. */
+static unsigned long long _integer_bits(
   X2CVarNumeric &source, Symbol target, int unsigned_target, int bits) {
-  if (!source.floating) {
-    unsigned long long raw = source.unsigned_value ? source.raw
-                           : (unsigned long long)
-                             Var.signed_from_bits(source.raw, source.bits);
-    return Var.integer_box(target, raw);
-  }
+  if (!source.floating)
+    return source.unsigned_value
+         ? source.raw
+         : (unsigned long long) Var.signed_from_bits(source.raw, source.bits);
   long double truncated = truncl(source.floating_value);
   if (!isfinite(source.floating_value)) _out_of_range(source, target);
   if (unsigned_target) {
     if (truncated < 0.0L || truncated >= _integer_limit(bits))
       _out_of_range(source, target);
-    return Var.integer_box(target, (unsigned long long) truncated);
+    return (unsigned long long) truncated;
   }
   long double limit = _integer_limit(bits - 1);
   if (truncated < -limit || truncated >= limit) _out_of_range(source, target);
-  return Var.integer_box(target, (unsigned long long) (long long) truncated);
+  return (unsigned long long) (long long) truncated;
 }
 
 static void _out_of_range(X2CVarNumeric &source, Symbol target) {
@@ -359,4 +433,19 @@ static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
     case <ldouble>: return Var.box_long_double(source.ldouble());
     default: $error.target.invalid(target);
   }
+}
+
+/* The unboxed step of a conversion to the numeric `target`: the source,
+   checked and decoded as `Var.convert_at` checks and decodes it. */
+static X2CVarNumeric _numeric_at(
+  Var value, Symbol target, const X2CErrorSite *site) =>
+  _numeric_source(value, _source_tag(value, target, site), target, site);
+
+/* The bits of `value` converted to the integer `target`, without a box. */
+static unsigned long long _integer_at(
+  Var value, Symbol target, const X2CErrorSite *site) {
+  X2CVarNumeric source = _numeric_at(value, target, site);
+  X2CVarNumericInfo info;
+  Var.numeric_info(target, info);
+  return _integer_bits(source, target, info.unsigned_value, info.bits);
 }

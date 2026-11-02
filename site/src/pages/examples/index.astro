@@ -75,7 +75,7 @@ const json = (value: unknown) => JSON.stringify(value).replaceAll("<", "\\u003c"
                           <a href={link.href}>{link.label}</a>)}
                       </p>
                     ) : null}
-                    <p class="playground-local">Run it locally: <code>x2c run {entry.path}</code></p>
+                    <p class="playground-local">Run it locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>
                   </>
                 ) : entry.article ? (
                   <>
@@ -93,7 +93,7 @@ const json = (value: unknown) => JSON.stringify(value).replaceAll("<", "\\u003c"
                   <>
                     <h3>{entry.label}</h3>
                     <p>{entry.description}</p>
-                    <p class="playground-local">Run it locally: <code>x2c run {entry.path}</code></p>
+                    <p class="playground-local">Run it locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>
                   </>
                 )}
               </div>

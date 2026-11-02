@@ -17,6 +17,9 @@ This document separates the design we want from the behavior the repository
 currently proves.  That distinction is essential: an aspiration is not
 permission to delete a check.
 
+The [code standard](x2c-code-standard.md) owns the rules for writing code;
+this document records the facts those rules rely on.
+
 ## How to read the ledger
 
 Every contract that current code relies on has one of four statuses:
@@ -862,83 +865,6 @@ open/close discipline itself -- that a unit's transient allocations are
 actually reclaimed at the close, or that a leak in one unit's bracket cannot
 survive into the next. Treat this as executable evidence of output parity,
 not of the memory-bracket contract.
-
-## Working rules
-
-### Trust what was actually established
-
-- Do not re-check a precondition already established by a type, constructor,
-  canonicalizer, or typed match constraint.
-- Do check external input and legitimate optional states at their owner.
-- Do not treat a binder, warning-only conversion, or undocumented convention
-  as proof of a stronger invariant.
-- When the same check appears repeatedly, find the missing owner before
-  deleting the copies.
-
-### Use the language
-
-- Prefer compiler-inserted conversions where the source/target pair and
-  context are supported.  Do not manually unbox merely to reproduce a proven
-  conversion, and do not assume an unsupported conversion exists.
-- Prefer current source forms such as `value is not Type`, receiver methods,
-  literals, and direct patterns when they express the operation directly.
-- Prefer `match`, `match_replace`, foreach, and List/Iter folds when they state
-  the transformation directly.
-- Use explicit traversal when order, state, ownership, or performance makes it
-  clearer.  Pattern matching and traversal compose; they are not alternatives.
-- Choose scopes by lifetime.  Write an inner region as `auto`, which is
-  the retain and its guaranteed release in one construct.  Do not create a
-  scope solely to hold values whose existing owner already provides the
-  required lifetime.
-
-### Keep the surface honest
-
-- Avoid trivial getters, setters, and wrappers that own no invariant.  Use an
-  accessor when it is the enforcement site or protects representation.
-- Delete a protocol, macro, or adapter family when it only regenerates
-  forwarding calls to an existing conversion and operation.
-- Delete dead code; Git is the archive.
-- Do not commit debug/watch scaffolding or fallback behavior that bypasses a
-  contract failure.
-- Comments explain intent, ownership, or a non-obvious constraint.  They do
-  not restate the next line or maintain a second catalog of the module.
-- Do not broaden a public contract or resolve a ledger decision without author
-  approval and tests that make the new rule executable.
-
-## The bloat test
-
-Compactness is an architectural result, not a line-count contest.  The best
-changes usually reduce one or more of:
-
-- independent invariant owners,
-- branches and fallback paths,
-- representations of the same concept,
-- manual conversions or cleanup sites,
-- code needed to express a transformation.
-
-The practical value of a strong contract is the work its consumers no longer
-perform. If every consumer still validates, translates, mirrors, or repairs
-the same fact, either the contract is not yet verified or the consumers are
-not using it. Strengthen the existing owner and its proof first; then delete
-the repeated work. Do not add a second owner to make the first one easier to
-ignore.
-
-Look first for a whole path that can disappear through current language
-syntax or an existing owner. Do not force unlike loops through one callback or
-mode merely because their control tokens look similar; an unchanged audit
-score is correct when the behaviors differ.
-
-Compile-time generation should share an implementation or project fixed facts,
-not conceal policy differences. Count the generator, ledger, adapters, and
-invocations as authored source, and inspect the generated C and public symbols
-as part of the result. A generated family is worth its size when several
-current families obey the same operation, failure, representation, and lifetime
-rules; one speculative future consumer does not.
-
-Report lines added and removed as useful evidence, but preserve or increase
-behavioral coverage.  A net-negative diff that erases a distinction or a test
-is not simplification.  A small net-positive diff that establishes one owner
-and deletes downstream boilerplate over time may be.
 
 ## Exemplars
 

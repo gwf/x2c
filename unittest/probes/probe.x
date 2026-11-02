@@ -2,7 +2,8 @@
 
     A probe runs from any directory. Its repository root comes from the
     probe's own path, and `X2C`, `CC`, and `AR` in the environment replace
-    the stage compiler and host tools.
+    the stage compiler and host tools. Make runs the gate probes and
+    exports `BUILD_CFLAGS`, the C flags of the build.
 */
 #include "path.x"
 #include "process.x"
@@ -23,18 +24,13 @@ void probe_fail(String message) {
   exit(1);
 }
 
-/** Returns the C compiler flags for the build mode: `etc/build-mode.local`
-    when present, else `etc/build-mode`, else `debug`. An unknown mode ends
-    the probe with status 2.
+/** Returns the words of `BUILD_CFLAGS`: the build mode's flags and
+    `-fsigned-char`, which generated C assumes. None outside make.
 */
-List probe_mode_flags(Path root) {
-  Path file = root.join("etc/build-mode.local");
-  if (!file.exists()) file = root.join("etc/build-mode");
-  String mode = file.exists() ? file.read_text().strip(NULL) : "debug";
-  if (mode == "debug") return %("-g");
-  if (mode == "optimize") return %("-O2");
-  Stderr.printf("unknown build mode: %s\n", mode);
-  exit(2);
+List probe_cflags(void) {
+  Array flags = [];
+  foreach (String flag, Env.get("BUILD_CFLAGS").words()) flags.push(flag);
+  return flags.list_free();
 }
 
 /** Returns an empty scratch directory `unittest/build/<name>`. */

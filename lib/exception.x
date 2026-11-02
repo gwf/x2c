@@ -235,7 +235,7 @@ static ExceptionThreadState _thread(void) => &exception_thread;
 
 static void _fatal(const char *message) {
   fprintf(stderr, "Fatal: uncaught exception %s\n", message);
-  exit(1);
+  abort();
 }
 
 /* The innermost frame that can still land. Frames running their own finalizer

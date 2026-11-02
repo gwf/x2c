@@ -7,12 +7,20 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD=$(mktemp -d "${TMPDIR:-/tmp}/x2c-package-install.XXXXXX")
 BUILD=$(cd "$BUILD" && pwd -P)
-trap 'rm -rf "$BUILD"' EXIT
+HISTORY=()
+trap 'rm -rf "$BUILD" "${HISTORY[@]}"' EXIT
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
 fail() { echo "package install: $*" >&2; exit 1; }
 
 mkdir -p "$BUILD/src"
+# Ignored local benchmark history must not enter a native installation.
+for results in shootout/results apps/notes/bench/results; do
+  mkdir -p "$ROOT/examples/$results"
+  history=$(mktemp -d "$ROOT/examples/$results/install-probe.XXXXXX")
+  HISTORY+=("$history")
+  printf 'local benchmark output\n' >"$history/report.txt"
+done
 "$X2C" script "$ROOT/etc/x2c-payload.x" install --prefix "$BUILD/home" \
   >"$BUILD/prefix-install.log" 2>&1 || {
     cat "$BUILD/prefix-install.log" >&2
@@ -21,6 +29,15 @@ mkdir -p "$BUILD/src"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 [[ -z "$("$x2c" env prelude_missing)" ]] || fail "installed prelude is incomplete"
+for results in shootout/results apps/notes/bench/results; do
+  [[ ! -e "$BUILD/home/examples/$results" ]] || fail "installed history"
+done
+installed="$BUILD/home/examples"
+[[ ! -e "$installed/shootout/baseline.json" ]] || fail "installed calibration"
+[[ -f "$installed/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
+[[ -f "$installed/apps/notes/bench/run.py" ]] || fail "missing benchmark"
+"$x2c" run -q "$BUILD/home/examples/love/basic-literals.x" >"$BUILD/example.out"
+cmp "$BUILD/example.out" "$ROOT/examples/expected/static-test.stdout" || fail "installed example"
 
 # A project helper and cold collection need the installed module sources.
 mkdir -p "$BUILD/meta"
@@ -278,7 +295,7 @@ mkdir -p "$BUILD/home/packages/greet.previous"
 rm -rf "$BUILD/home/packages/greet.previous"
 
 # A removal waits while another process holds the home's packages lock.
-trap 'touch "$BUILD/release"' EXIT
+trap 'touch "$BUILD/release"; wait; rm -rf "$BUILD" "${HISTORY[@]}"' EXIT
 python3 - "$BUILD/home/packages/.lock" "$BUILD/release" <<'PY' &
 import fcntl, os, sys, time
 lock = open(sys.argv[1], "a")
@@ -380,8 +397,8 @@ PYTHON
 done
 
 # A nonempty native response still requires explicit distribution data.
-printf '%s\n' '-lm' >"$directory/builds/mixed.native.rsp"
-if make -C "$directory" bundle >"$BUILD/native-without-manifest.log" 2>&1; then
+if make -C "$directory" bundle PACKAGE_LINK=-lm \
+  >"$BUILD/native-without-manifest.log" 2>&1; then
   fail "native inputs bundled without distribution data"
 fi
 grep -q 'native link inputs require distribution data' \
@@ -390,7 +407,8 @@ cat >"$BUILD/dependency.json" <<'MANIFEST'
 {"schema":1,"name":"inert","sources":[{}],"version":"1.0",
  "profile":"test","distribution":{"native_args":["-lm"]}}
 MANIFEST
-make -C "$directory" bundle DEPENDENCY_MANIFEST="$BUILD/dependency.json" \
+make -C "$directory" bundle PACKAGE_LINK=-lm \
+  DEPENDENCY_MANIFEST="$BUILD/dependency.json" \
   >"$BUILD/manifest-bundle.log" 2>&1 || fail "manifest-backed bundle"
 python3 - "$bundle/BUNDLE.json" <<'PYTHON'
 import json, sys

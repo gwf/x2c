@@ -12,7 +12,9 @@ endif
 PACKAGE_LINK :=
 PACKAGE_TEST_COMMAND := expect tests/run-test.expect
 
-.PHONY: example short-example run run-interactive run-life-interactive
+.PHONY: run run-interactive run-life-interactive
+
+check: test run
 
 example: builds/incident-filter
 
@@ -33,7 +35,7 @@ builds/incident-filter: examples/incidents.log
 # The termbox suite needs the deterministic tty and signal helper, which is
 # test-only C and therefore stays out of the package archive.
 builds/test-termbox: tests/test-termbox.x tests/terminal-test-helper.c \
-		tests/terminal-test-helper.h $(PACKAGE_ARCHIVE) | builds
+		tests/terminal-test-helper.h $(PACKAGE_CONSUMER_DEPS) | builds
 	$(X2C) build --output $@ --build-dir builds/termbox \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) --c-include-dir tests \
 	  --x-include-dir $(ROOT)/unittest \

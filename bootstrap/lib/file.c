@@ -160,7 +160,6 @@ static String _text(const void * bytes, size_t length);
 static int _string_allocation(size_t length);
 static void _validate_text(const void * bytes, size_t length);
 static inline void _block_putc(Block block, unsigned char value);
-_Noreturn static void _io_error(Symbol operation, int error);
 static String _finish_text(String text, size_t length);
 static void _check_read(File file);
 static String _regular_text(File file, size_t requested);
@@ -353,7 +352,7 @@ FileReadStatus File_readline_into(File f, Block dest){
     }
 
   }
-  if(failed) _io_error(1189960, error);  return dest -> length ? 265474 : 11212;
+  if(failed) x2c_io_fail(Symbol_var(1189960), error);  return dest -> length ? 265474 : 11212;
 }
 
 int File_printf(File file, const char * format, ...){
@@ -426,7 +425,7 @@ File File_fdopen(int fildes, const char * mode){
   if(! _init_guard_) File_initialize();  if(! mode){
     static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/file.x",.function = "File_fdopen",.line = 395,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(412057948));  __builtin_unreachable();
   }
-  File file = fdopen(fildes, mode);  if(file) return file;  int error = errno;  _io_error(412057948, error);
+  File file = fdopen(fildes, mode);  if(file) return file;  int error = errno;  x2c_io_fail(Symbol_var(412057948), error);
 }
 
 _Noreturn void File_path_error(Var operation, String path, int error);
@@ -486,19 +485,12 @@ static inline void _block_putc(Block block, unsigned char value){
   size_t expected = block -> length + 1;  if(block -> length == block -> cap) Block_reserve(block, expected); ((unsigned char *) block -> bytes)[block -> length] = value;  block -> length = expected;
 }
 
-_Noreturn static void _io_error(Symbol operation, int error){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/file.x",.function = "_io_error",.line = 480,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));  __builtin_unreachable();
-  }
-
-}
-
 static String _finish_text(String text, size_t length){
   _validate_text(text, length);  char * out = text;  out[length] = '\0';  return String_intern_free(text);
 }
 
 static void _check_read(File file){
-  if(! ferror(file)) return;  int error = errno;  _io_error(1189960, error);
+  if(! ferror(file)) return;  int error = errno;  x2c_io_fail(Symbol_var(1189960), error);
 }
 
 static String _regular_text(File file, size_t requested){
@@ -520,7 +512,7 @@ static String _regular_text(File file, size_t requested){
 
       }
       content = Block_new(sizeof(char));  if(count >= INT_MAX - 1){
-        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 516,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));  __builtin_unreachable();
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 512,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));  __builtin_unreachable();
       }
       _append_text(content, first, count);  String_free(first);  first = NULL;  _block_putc(content, (unsigned char) next);  _append_rest(content, file); {
         String _x2c_gensym_return_value_6 = _text(content -> bytes, content -> length); {
@@ -546,7 +538,7 @@ static void _append_rest(Block content, File file){
 static void _append_text(Block content, const void * bytes, size_t count){
   if(count >= INT_MAX - content -> length){
     size_t size = content -> length + count; {
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/file.x",.function = "_append_text",.line = 541,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/file.x",.function = "_append_text",.line = 537,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));  __builtin_unreachable();
     }
 
   }
@@ -558,7 +550,7 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
     ExceptionFrame _x2c_gensym_exception_frame_0;  x2c_exception_push(& _x2c_gensym_exception_frame_0);  if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       while(offset < size){
         size_t count = fwrite(bytes + offset, 1, size - offset, file);  if(! count){
-          int error = errno;  _io_error(49433866, error);
+          int error = errno;  x2c_io_fail(Symbol_var(49433866), error);
         }
         offset += count;
       }
@@ -611,7 +603,7 @@ static int _next_line(Iter iter, Var * out){
 
 static File _open_path(const char * path, const char * mode, Symbol op){
   if(! path || ! mode){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/file.x",.function = "_open_path",.line = 581,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(op));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/file.x",.function = "_open_path",.line = 577,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(op));  __builtin_unreachable();
   }
   File file = fopen(path, mode);  if(file) return file;  int error = errno;  File_path_error(Symbol_var(op), String_new(path), error);
 }

@@ -4,6 +4,10 @@
 > Investigated local revision `fdb707da4` on macOS 15.7.9 arm64, Apple M4 Max.
 > Runtime source is unchanged. Normal benchmark reruns remain on hold.
 > Retention is attributed; acceptance or mitigation remains undecided.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02). The
+> [async follow-up](async-performance-followup-2026-10-31.md) records the
+> retention as an accepted cost; the hold and undecided acceptance in this
+> record are historical.
 
 The large residual comes from macOS malloc retaining allocation regions and
 freed pages. Task shutdown frees the batch allocations and unmaps the stacks.
@@ -119,7 +123,7 @@ remove this footprint. Real system memory-pressure behavior was not tested.
 ## Evidence and limits
 
 Sources, compiler/runtime/probe hashes, summaries, full phase heap/VM dumps,
-and allocation/free traces remain in
+and allocation/free traces remain in the workspace-local, untracked
 `.context/async-residual-memory-20261031/`. `summary.json` records the cases
 above. Build and run logs are under `debug/async-residual-memory-*`.
 The source samples and tools changed no tracked runtime file.

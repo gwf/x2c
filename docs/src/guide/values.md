@@ -133,7 +133,9 @@ either has that tag or it does not. Assigning to `List`, `Map`, `Array`,
 `Symbol`, or a type with a declared `protocol Var(T)` conversion uses that
 type's exact reader, and a wrong tag yields NULL. An alias of such a type,
 declared with `class` or `typedef`, uses the reader of its nearest ancestor
-that has one. A `String` destination reads a `String` payload as itself,
+that has one, and a destination spelled `struct T` or `union T` uses the
+reader of the typedef that names that aggregate. A `String` destination
+reads a `String` payload as itself,
 displays any other value through `.str()`, and reads `void` and `Null` as NULL.
 The explicit readers `.list()`, `.map()`, `.array()`, `.block()`, `.buffer()`,
 `.bytes()`, `.file()`, `.as_iter()`, and `.string()` extract their payload and
@@ -338,8 +340,25 @@ Expressions with no `Var` operand stay native C and make no runtime calls.
 Integer operands use integer promotion; arithmetic keeps the promoted type's
 low bits, so overflow wraps to that type's width. Floating operands work in
 the widest participating floating family with host behavior. Remainder, the
-shifts, and the bitwise operators reject a floating operand. There is no
-dynamic unary numeric operator, and no dynamic `++` or `--`.
+shifts, and the bitwise operators reject a floating operand.
+
+A `Var` variable also takes prefix and postfix `++` and `--`, and unary `-`
+negates a `Var`. A prefix form returns the updated value, and a postfix form
+returns the original value. Unary `+` and `~` on a `Var` are compile-time
+errors.
+
+```x2c
+Var x = 5;
+x++;
+++x;
+Var y = -x;
+Var z = x--;
+printf("x=%s y=%s z=%s\n", x, y, z);
+```
+
+```text
+x=6 y=-7 z=7
+```
 
 A statically nonnumeric peer is a compile-time error:
 
@@ -347,12 +366,14 @@ A statically nonnumeric peer is a compile-time error:
 ```x2c,ignore
 Var count = 10;
 String label = "items";
-Var bad = count + label;   /* xform: dynamic numeric operators require
+Var bad = count * label;   /* xform: dynamic numeric operators require
                               numeric operands */
 ```
 
-A `Var` that *happens* to hold a `String` passes the static check and fails
-at run time instead.
+`+` is different, because it also joins text. `count + label` compiles, and
+it fails at run time with `<bad-types>` because `count` holds a number. A
+`Var` that *happens* to hold a `String` also passes the static check, and an
+operator that needs a number fails at run time.
 
 Comparisons have their own rule. A comparison of two numeric `Var`s behaves
 as the same comparison between their native values in C, after the usual

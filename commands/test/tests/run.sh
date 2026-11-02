@@ -22,13 +22,19 @@ cat >"$WORK/project/a_test.x" <<'PASS'
 #include "value.x"
 $test()
 static void passing(void) { $expect_eq(test_value(), 42); }
-$test.main();
+int main(int argc, char **argv) {
+  defer puts("cleanup complete");
+  return Test.main(argc, argv);
+}
 PASS
 cat >"$WORK/project/tests/deep/b.x" <<'FAIL'
 #include "test.x"
 $test()
 static void failing(void) { $expect_eq(1, 2); }
-$test.main();
+int main(int argc, char **argv) {
+  defer puts("cleanup complete");
+  return Test.main(argc, argv);
+}
 FAIL
 # Generated build sources and ordinary non-test files are not discovered.
 printf 'this is not source\n' >"$WORK/project/.x2c-build/tests/ignored_test.x"
@@ -181,13 +187,26 @@ run native_test.x
 [ "$status" = 1 ]
 grep -Fq 'native-build-diagnostic' "$WORK/out"
 grep -Fxq 'files: 0 passed, 1 failed; tests: 0 passed, 0 failed' "$WORK/out"
+# A target's include directories reach the C compiler as well as x2c.
+printf 'static inline int native_value(void) { return 42; }\n' \
+  >"$WORK/project/include/native-value.h"
+cat >"$WORK/project/native_header_check.x" <<'HEADER'
+#include "test.x"
+#include "native-value.h"
+$test()
+static void native_header(void) { $expect_eq(native_value(), 42); }
+$test.main();
+HEADER
+run native_header_check.x
+[ "$status" = 0 ]
+grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
 run "$WORK/empty"
 [ "$status" = 2 ]
 for jobs in 0 -1 nope ''; do
   run -j "$jobs"
   [ "$status" = 2 ]
 done
-(cd "$WORK/empty" && "$TOOL" --manifest "$WORK/project/x2c.toml" \
+(cd "$WORK/empty" && "$TOOL" --manifest-path "$WORK/project/x2c.toml" \
   --target app "$WORK/project/a_test.x") >"$WORK/explicit-manifest"
 grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' \
   "$WORK/explicit-manifest"
@@ -220,10 +239,10 @@ cp -R "$WORK/ordinary-project" "$WORK/root-name/tests"
 cp -R "$WORK/ordinary-project" "$WORK/cache/.x2c-build/nested-project"
 for project in ordinary-project ancestor/tests/nested-project root-name/tests \
     cache/.x2c-build/nested-project; do
-  "$TOOL" --manifest "$WORK/$project/x2c.toml" >"$WORK/discovery"
+  "$TOOL" --manifest-path "$WORK/$project/x2c.toml" >"$WORK/discovery"
   grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
   ! grep -q 'APP RAN' "$WORK/discovery"
-  "$TOOL" --manifest "$WORK/$project/x2c.toml" "$WORK/$project" >"$WORK/discovery"
+  "$TOOL" --manifest-path "$WORK/$project/x2c.toml" "$WORK/$project" >"$WORK/discovery"
   grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
   ! grep -q 'APP RAN' "$WORK/discovery"
   (cd "$WORK/$project" && "$TOOL" .) >"$WORK/discovery"

@@ -210,6 +210,7 @@ An installed prefix and a source checkout share one layout, the x2c home:
 <home>/include/x2c/      runtime sources and generated headers
 <home>/lib/              the runtime archive and unit interfaces
 <home>/etc/              compiler prelude and runtime Lisp assets
+<home>/libexec/x2c/      external commands (installed prefix)
 <home>/packages/         installed packages, one directory each
 <home>/examples/         runnable examples (installed prefix)
 <home>/src/              language component sources (installed prefix);
@@ -226,9 +227,9 @@ after the explicit `--package-dir` and manifest directories, so a package
 placed there needs no build flags.
 
 `PREFIX` must be absolute and dedicated to x2c. Move or rename the complete
-prefix to relocate it. Keep `bin`, `include`, `lib`, `etc`, `packages`, and
-`licenses` together. Paths may contain spaces. Quote the compiler path when
-invoking it:
+prefix to relocate it. Keep `bin`, `include`, `lib`, `libexec`, `etc`, `src`,
+`packages`, and `licenses` together. Paths may contain spaces. Quote the
+compiler path when invoking it:
 
 ```sh
 "/path with spaces/x2c/bin/x2c" build hello.x -o hello

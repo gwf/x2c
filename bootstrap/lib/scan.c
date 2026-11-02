@@ -54,15 +54,19 @@ static int _float_suffix(char * s);
 
 static inline int _token_break(int c);
 
-static int _c_escape_status(char * s, Symbol * status);
+static int _c_escape_status(char * s, Symbol * status, int * value);
+
+static int _decoded_escape(int length, int code, int * value);
 
 static int _crlf_escape(char * s, Symbol * status);
 
-static int _octal_escape(char * s, Symbol * status);
+static int _octal_escape(char * s, Symbol * status, int * value);
 
-static int _hex_escape(char * s, Symbol * status);
+static int _hex_escape(char * s, Symbol * status, int * value);
 
-static int _universal_escape(char * s, int count, Symbol * status);
+static int _universal_escape(char * s, int count, Symbol * status, int * value);
+
+static unsigned _escape_digits(char * s, int count, int base);
 
 static int _escape_status(char * s, Symbol * status);
 
@@ -305,7 +309,23 @@ int scan_c_string_status(char * s, Symbol * status){
   int n = 1;
   while(s[n]){
     if(s[n] == '\\'){
-      int m = _c_escape_status(s + n, status);
+      int m = _c_escape_status(s + n, status, NULL);
+      if(m < 0) return - 1;
+      n += m;
+    }
+    else if(s[n] == '"') return n + 1;
+    else if(s[n] == '\n' || s[n] == '\r') return _fail(status, 28682226919752);
+    else n ++;
+  }
+  return _fail(status, 664344300629258);
+}
+
+int scan_lisp_string_status(char * s, Symbol * status){
+  if(status) * status = 982;
+  int n = 1;
+  while(s[n]){
+    if(s[n] == '\\'){
+      int m = _escape_status(s + n, status);
       if(m < 0) return - 1;
       n += m;
     }
@@ -319,13 +339,17 @@ int scan_c_string_status(char * s, Symbol * status){
 int scan_c_character(char * s){
   int n = 1;
   if(s[n] == '\\'){
-    int m = _c_escape_status(s + n, NULL);
+    int m = _c_escape_status(s + n, NULL, NULL);
     if(m < 0) return - 1;
     n += m;
   }
   else if(! s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return - 1;
   else n ++;
   return s[n] == '\'' ? n + 1 : - 1;
+}
+
+int scan_c_escape_value(char * s, int * value){
+  return _c_escape_status(s, NULL, &(* value));
 }
 
 int scan_escape_sequence(char * s);
@@ -591,17 +615,30 @@ static inline int _token_break(int c){
   return !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 }
 
-static int _c_escape_status(char * s, Symbol * status){
+static int _c_escape_status(char * s, Symbol * status, int * value){
   switch(s[1]){
     case '\0' : return _fail(status, 664344300629258);
-    case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return 2;
-    case '\r' : return _crlf_escape(s, status);
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status);
-    case 'x' : case 'X' : return _hex_escape(s, status);
-    case 'u' : return _universal_escape(s, 4, status);
-    case 'U' : return _universal_escape(s, 8, status);
+    case 'a' : return _decoded_escape(2, '\a', value);
+    case 'b' : return _decoded_escape(2, '\b', value);
+    case 'f' : return _decoded_escape(2, '\f', value);
+    case 'n' : return _decoded_escape(2, '\n', value);
+    case 'r' : return _decoded_escape(2, '\r', value);
+    case 't' : return _decoded_escape(2, '\t', value);
+    case 'v' : return _decoded_escape(2, '\v', value);
+    case '\n' : return _decoded_escape(2, - 1, value);
+    case '\'' : case '"' : case '?' : case '\\' : return _decoded_escape(2, s[1], value);
+    case '\r' : return _decoded_escape(_crlf_escape(s, status), - 1, value);
+    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status, value);
+    case 'x' : case 'X' : return _hex_escape(s, status, value);
+    case 'u' : return _universal_escape(s, 4, status, value);
+    case 'U' : return _universal_escape(s, 8, status, value);
   }
   return _fail(status, 28682226919752);
+}
+
+static int _decoded_escape(int length, int code, int * value){
+  if(value) * value = code;
+  return length;
 }
 
 static int _crlf_escape(char * s, Symbol * status){
@@ -609,25 +646,36 @@ static int _crlf_escape(char * s, Symbol * status){
   return s[2] == '\n' ? 3 : _fail(status, 28682226919752);
 }
 
-static int _octal_escape(char * s, Symbol * status){
+static int _octal_escape(char * s, Symbol * status, int * value){
   int n = 2;
   if(s[n] >= '0' && s[n] <= '7') n ++;
   if(s[n] >= '0' && s[n] <= '7') n ++;
-  return n < 4 || s[1] <= '3' ? n : _fail(status, 28682226919752);
+  if(n == 4 && s[1] > '3') return _fail(status, 28682226919752);
+  if(value) * value = _escape_digits(s + 1, n - 1, 8);
+  return n;
 }
 
-static int _hex_escape(char * s, Symbol * status){
+static int _hex_escape(char * s, Symbol * status, int * value){
   if(! s[2]) return _fail(status, 664344300629258);
   int digits = _digits(s + 2, 16);
-  return digits ? 2 + digits : _fail(status, 28682226919752);
+  if(! digits) return _fail(status, 28682226919752);
+  if(value) * value =(unsigned char) _escape_digits(s + 2, digits, 16);
+  return 2 + digits;
 }
 
-static int _universal_escape(char * s, int count, Symbol * status){
+static int _universal_escape(char * s, int count, Symbol * status, int * value){
   for(int n = 2;  n < 2 + count;  n ++){
     if(! s[n]) return _fail(status, 664344300629258);
     if(! _ascii_hex((unsigned char) s[n])) return _fail(status, 28682226919752);
   }
+  if(value) * value = _escape_digits(s + 2, count, 16);
   return 2 + count;
+}
+
+static unsigned _escape_digits(char * s, int count, int base){
+  unsigned value = 0;
+  for(int i = 0;  i < count;  i ++) value = value * base + scan_ascii_hex_value(s[i]);
+  return value;
 }
 
 static int _escape_status(char * s, Symbol * status){
@@ -636,7 +684,7 @@ static int _escape_status(char * s, Symbol * status){
     case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return 2;
     case '\r' : return _crlf_escape(s, status);
     case 'x' : case 'X' : case 'u' : case 'U' : return _byte_escape(s, status);
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status);
+    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status, NULL);
   }
   return _fail(status, 28682226919752);
 }

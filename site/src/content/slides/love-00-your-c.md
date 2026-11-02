@@ -5,7 +5,8 @@ tab: your C
 title: Your C still works. All of it.
 ---
 
-```x2c
+<!-- ignore: requires --cpp; the complete example is checked with that option -->
+```x2c,ignore
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -39,9 +40,16 @@ return 0;
 }
 ```
 
+Run the [complete example](https://github.com/gwf/x2c/blob/main/examples/power/your-c.x)
+with C macro expansion enabled:
+
+```sh
+x2c run --cpp examples/power/your-c.x
+```
+
 Not "mostly works". X-macros expand, `#ifdef __GNUC__` gets decided, token
-pasting pastes, and a `struct` is the same bytes it always was. x2c runs
-its own C preprocessor, so a macro that supplies grammar parses like the
+pasting pastes, and a `struct` is the same bytes it always was. With
+`--cpp`, x2c runs its own C preprocessor, so a macro that supplies grammar parses like the
 grammar it supplies.
 
 `.` reaches through one pointer; `->` is still there if you miss it.

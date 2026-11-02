@@ -376,10 +376,7 @@ static String _source_hash(Compiler c, String path) {
   Var cached = source_hashes[path];
   if (cached is not void) return cached;
   String text = NULL;
-  try {
-    if (!c.read_source(path, text)) return NULL;
-  }
-  catch %((!or io-fail bad-arg size-limit) *): return NULL;
+  if (!c.read_source(path, text)) return NULL;
   String hash = _content_hash(text);
   _retain(path);
   _retain(hash);
@@ -408,7 +405,7 @@ module List _interface_include_dirs(Compiler c, String canonical) {
   }
   dirs.push(package ? %(package $package) : %(package));
   if (c.cpp_expansion) dirs.push(%(cpp-expansion));
-  if (c.command_macros && !_runtime_source(canonical))
+  if (c.command_macros && !Compiler.is_runtime_source(canonical))
     dirs.push(%(macros @(c.command_macros)));
   return dirs.list_free();
 }

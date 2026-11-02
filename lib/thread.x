@@ -268,8 +268,8 @@ Thread Thread.wait_any(Array pending) {
     Source values follow `Thread.start` borrowing: their input graphs must
     remain live and read-only while outstanding workers use them. A source
     must not mutate or recycle an outstanding input's storage.
-    Raises: `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
-    descriptor storage.
+    Raises: `<bad-arg>` for a null `function` or a nonpositive worker count,
+    or `<alloc-fail>` for descriptor storage.
 */
 ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
   return _parallel_map(i, NULL, function, workers);
@@ -279,7 +279,8 @@ ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
     The pool and its ancestors must stay live until foldl finishes. The caller
     retains ownership; workers restore their previous pool without releasing
     the borrowed pool. Source traversal and accumulation use the caller's pool.
-    Raises: bad-arg for a null pool or nonpositive worker count, or alloc-fail.
+    Raises: `<bad-arg>` for a null pool or `function` or a nonpositive worker
+    count, or `<alloc-fail>` for descriptor storage.
 */
 ParallelMap Iter.parallel_map_in(
   Iter i, Pool pool, ThreadValueFn function, int workers) {
@@ -505,7 +506,7 @@ Var Thread.join(Thread t) {
   int error = pthread_join(t.native, NULL);
   if (error) {
     __atomic_store_n(&t.state, <running>, __ATOMIC_SEQ_CST);
-    _error("pthread_join", error);
+    x2c_io_fail("pthread_join", error);
   }
 
   __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
@@ -514,10 +515,12 @@ Var Thread.join(Thread t) {
 }
 
 /** Frees a `Thread` handle after its consuming join has completed.
-    Raises: `<bad-state>` for NULL, running, or joining handles.
+    NULL does nothing.
+    Raises: `<bad-state>` for running or joining handles.
 */
 void Thread.free(Thread t) {
-  if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
+  if (!t) return;
+  if (__atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
     raise %(bad-state (operation "Thread.free"));
   free(t);
 }
@@ -536,18 +539,15 @@ static Thread _start(
     Error.policy_release(thread.policy);
     free(thread);
   }
-  if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
-    Error.policy_release(thread.policy);
-    free(thread);
-    fprintf(stderr, "Thread: could not register shutdown\n");
-    abort();
-  }
+  x2c_native_check(
+    pthread_once(&thread_shutdown_once, _register_shutdown),
+    "Thread: could not register shutdown");
   __atomic_fetch_add(&thread_live_count, 1, __ATOMIC_SEQ_CST);
   Pool.thread_start();
   int error = _create_native(thread);
   if (error) {
     __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-    _error("pthread_create", error);
+    x2c_io_fail("pthread_create", error);
   }
   started = 1;
   return thread;
@@ -607,15 +607,8 @@ static int _create_native(Thread thread) {
 
 static void _stack_attributes(pthread_attr_t *attributes) {
   if (pthread_attr_init(attributes) ||
-      pthread_attr_setstacksize(attributes, _STACK_BYTES)) {
-    fprintf(stderr, "Thread: could not size the worker stack\n");
-    abort();
-  }
-}
-
-static void _error(const char *operation, int error) {
-  String name = operation;
-  raise %(io-fail (operation $name) (errno $error));
+      pthread_attr_setstacksize(attributes, _STACK_BYTES))
+    x2c_fatal("Thread: could not size the worker stack");
 }
 
 // running the callback
@@ -738,11 +731,8 @@ static int _parallel_park(Thread thread) {
   return again;
 }
 
-static void _completion_check(int error) {
-  if (!error) return;
-  fprintf(stderr, "Thread: completion synchronization failed (%d)\n", error);
-  abort();
-}
+static void _completion_check(int error) =>
+  x2c_native_check(error, "Thread: completion synchronization failed");
 
 static Thread _start_value(
   ThreadValueFn function, Var value, ParallelRun parallel, Pool pool) {
@@ -803,10 +793,8 @@ static void _batch_stop(Array pending) {
   stop_mask++;
   defer --stop_mask;
   foreach (Thread worker in pending) worker.stop();
-  defer if (pending.len()) {
-    fprintf(stderr, "Thread.run: cleanup left unjoined workers\n");
-    abort();
-  }
+  defer if (pending.len())
+    x2c_fatal("Thread.run: cleanup left unjoined workers");
   Thread.finish_all(pending);
 }
 
@@ -816,7 +804,7 @@ static void _batch_check_stop(void) {
 
 static ParallelMap _parallel_map(
   Iter i, Pool pool, ThreadValueFn function, int workers) {
-  if (workers <= 0) {
+  if (!function || workers <= 0) {
     String operation = pool ? "Iter.parallel_map_in" : "Iter.parallel_map";
     raise %(bad-arg (operation $operation));
   }
@@ -854,10 +842,8 @@ static void _parallel_stop(ParallelRun run, Array workers) {
   defer xfree(run);
   defer workers.cleanup();
   defer run.ready.cleanup();
-  defer if (workers.len()) {
-    fprintf(stderr, "ParallelMap: cleanup left unjoined workers\n");
-    abort();
-  }
+  defer if (workers.len())
+    x2c_fatal("ParallelMap: cleanup left unjoined workers");
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
   run.stopping = 1;
   _completion_check(pthread_cond_broadcast(&thread_completion_condition));

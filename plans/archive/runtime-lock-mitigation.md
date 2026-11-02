@@ -315,7 +315,7 @@ Implementation started at current `origin/dev`
 Three isolated workers completed the listed source groups with private
 handoffs. The combined code head is `493f1a01c`.
 
-The [execution report](../../examples/apps/notes/bench/reports/2026-10-29-runtime-locks/README.md)
+The [execution report](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-29-runtime-locks/README.md)
 records operation counts, actual Scope footprint, both accounting modes,
 combined checks, author stage-2, matched Notes samples, stdio disposition and
 coverage limits. Names remain enabled throughout the Notes comparison.

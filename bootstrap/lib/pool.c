@@ -461,8 +461,6 @@ static void _lock(Pool pool);
 
 static void _unlock(Pool pool);
 
-_Noreturn static void _fatal(const char * message);
-
 static void f7_storage____record_request(Pool pool, size_t size);
 
 static void f7_storage____increment(size_t * counter);
@@ -1790,7 +1788,7 @@ static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_in
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
-  _fatal("backing block allocation failed");
+  x2c_fatal("Pool: backing block allocation failed");
 }
 
 static f7_storage___PoolBlock f7_storage____prepare_block(Pool pool, int class_index){
@@ -1836,7 +1834,7 @@ static f7_storage___PoolBlock f7_storage____depot_pop(unsigned bytes){
 
 static f7_storage___PoolBlock f7_storage____registry_add(f7_storage___PoolBlock block, unsigned bytes){
   f7_storage____index_lock();
-  while(f7_storage___pool_index_building) if(pthread_cond_wait(& f7_storage___pool_index_changed, & f7_storage___pool_index_mutex)) _fatal("could not wait for index builder");
+  while(f7_storage___pool_index_building) if(pthread_cond_wait(& f7_storage___pool_index_changed, & f7_storage___pool_index_mutex)) x2c_fatal("Pool: could not wait for index builder");
   f7_storage___PoolIndex index = __atomic_load_n(& f7_storage___pool_index, __ATOMIC_ACQUIRE);
   int build = f7_storage___pool_index_complete &&(! index ||(f7_storage___pool_index_used + 2) * 2 > index -> slots);
   if(build){
@@ -1862,7 +1860,7 @@ static f7_storage___PoolBlock f7_storage____registry_add(f7_storage___PoolBlock 
   f7_storage___pool_backing_bytes += bytes;
   if(build){
     f7_storage___pool_index_building = 0;
-    if(pool_multithreaded && pthread_cond_broadcast(& f7_storage___pool_index_changed)) _fatal("could not notify index writers");
+    if(pool_multithreaded && pthread_cond_broadcast(& f7_storage___pool_index_changed)) x2c_fatal("Pool: could not notify index writers");
   }
   f7_storage____index_unlock();
   return block;
@@ -1922,32 +1920,27 @@ static unsigned f7_storage____index_start(uintptr_t page, unsigned slots){
 }
 
 static void f7_storage____index_lock(void){
-  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_index_mutex)) _fatal("could not lock index mutex");
+  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_index_mutex)) x2c_fatal("Pool: could not lock index mutex");
 }
 
 static void f7_storage____index_unlock(void){
-  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_index_mutex)) _fatal("could not unlock index mutex");
+  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_index_mutex)) x2c_fatal("Pool: could not unlock index mutex");
 }
 
 static void _storage_lock(void){
-  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_storage_mutex)) _fatal("could not lock storage mutex");
+  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_storage_mutex)) x2c_fatal("Pool: could not lock storage mutex");
 }
 
 static void _storage_unlock(void){
-  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_storage_mutex)) _fatal("could not unlock storage mutex");
+  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_storage_mutex)) x2c_fatal("Pool: could not unlock storage mutex");
 }
 
 static void _lock(Pool pool){
-  if(pool_multithreaded && pool && pthread_mutex_lock(& pool -> mutex)) _fatal("could not lock branch mutex");
+  if(pool_multithreaded && pool && pthread_mutex_lock(& pool -> mutex)) x2c_fatal("Pool: could not lock branch mutex");
 }
 
 static void _unlock(Pool pool){
-  if(pool_multithreaded && pool && pthread_mutex_unlock(& pool -> mutex)) _fatal("could not unlock branch mutex");
-}
-
-_Noreturn static void _fatal(const char * message){
-  fprintf(stderr, "Pool: %s\n", message);
-  abort();
+  if(pool_multithreaded && pool && pthread_mutex_unlock(& pool -> mutex)) x2c_fatal("Pool: could not unlock branch mutex");
 }
 
 static void f7_storage____record_request(Pool pool, size_t size){
@@ -2018,11 +2011,11 @@ static void f7_storage____add_traffic(f7_storage___PoolTrafficCounts * sum, f7_s
 }
 
 static void f7_storage____traffic_lock(void){
-  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_traffic_mutex)) _fatal("could not lock accounting registry");
+  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_traffic_mutex)) x2c_fatal("Pool: could not lock accounting registry");
 }
 
 static void f7_storage____traffic_unlock(void){
-  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_traffic_mutex)) _fatal("could not unlock accounting registry");
+  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_traffic_mutex)) x2c_fatal("Pool: could not unlock accounting registry");
 }
 
 static void f7_storage____free_slot(f7_storage___PoolBlock block, void * ptr){
@@ -2301,7 +2294,7 @@ Pool x2c_pool_exchange(Pool pool){
 void Pool_thread_initialize(void){
   if(! _init_guard_) Pool_initialize();
   if(f7_threads___value_thread.current) return;
-  if(! value_root) _fatal("canonical value root is not initialized");
+  if(! value_root) x2c_fatal("Pool: canonical value root is not initialized");
   f7_threads___value_thread.current = value_root;
 }
 

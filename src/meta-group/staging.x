@@ -16,11 +16,9 @@ static Scope session_meta_scope = NULL;
 /** Directs each provider group into `directory`, using `owners` to name
     their headers by table, or stops that when `directory` is NULL.
 */
-void Compiler.use_meta_build_directory(
-  String directory, Array owners, Map providers) {
+void Compiler.use_meta_build_directory(String directory, Array owners) {
   meta_build_directory = directory;
   meta_build_tables = {};
-  meta_build_providers = providers;
   int index = 1;
   foreach (String owner in owners) meta_build_tables[owner] = index++;
 }

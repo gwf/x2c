@@ -1,6 +1,8 @@
 SOURCE = .
 BUILD = build
 
+# BUILD_JOBS sets the fixture workers and translation jobs here too.
+include ../etc/make-command.mk
 include ../etc/x2c.mk
 
 X2CFLAGS +=
@@ -111,7 +113,7 @@ $(BUILD)/list-hot-paths: benchmarks/list-hot-paths.x FORCE | $(BUILD)
 	$(CC) $(CFLAGS) -o $@ $(BUILD)/list-hot-paths.c $(LDFLAGS) $(LDLIBS)
 
 benchmark-list: $(BUILD)/list-hot-paths
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/list-hot-paths; \
 	done
@@ -122,7 +124,7 @@ $(BUILD)/lisp-reader-stream: benchmarks/lisp-reader-stream.x FORCE | $(BUILD)
 		$(LDFLAGS) $(LDLIBS)
 
 lisp-reader-benchmark: $(BUILD)/lisp-reader-stream
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/lisp-reader-stream; \
 	done
@@ -132,7 +134,7 @@ $(BUILD)/exception-hot-paths: benchmarks/exception-hot-paths.x FORCE | $(BUILD)
 	$(CC) $(CFLAGS) -o $@ $(BUILD)/exception-hot-paths.c $(LDFLAGS) $(LDLIBS)
 
 exception-benchmark: $(BUILD)/exception-hot-paths
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/exception-hot-paths; \
 	done
@@ -148,8 +150,10 @@ $(BUILD)/test-all.o: $(BUILD)/test-support.h
 
 # Compiler objects under test link through $^, not LDLIBS, so make
 # sees them as prerequisites; builds/stage.mk owns building them and
-# the top-level unittest target depends on x2c for freshness.
+# the top-level unittest target depends on x2c for freshness. The runtime
+# library links through LDFLAGS, so it is named here to relink test-all
+# after a runtime-only change.
 COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/operator-ledger.o \
 	../builds/0/src/diagnostics.o \
 	../builds/0/src/report.o ../builds/0/src/sourceview.o
-test-all: $(COMPILER_OBJECTS)
+test-all: $(COMPILER_OBJECTS) $(X2CPATH)/libx2c.a

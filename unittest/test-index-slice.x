@@ -72,10 +72,23 @@ static void collection_index_syntax(void) {
 
 }
 
+static void normalization_extreme_integer_domain(void) {
+  int start = 0, stop = -1;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, 1, INT_MAX), INT_MAX);
+  EXPECT_INT_EQ(start, 0);
+  EXPECT_INT_EQ(stop, INT_MAX);
+  start = INT_MIN; stop = INT_MIN;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, INT_MIN, INT_MAX), 1);
+  EXPECT_INT_EQ(start, INT_MAX - 1);
+  EXPECT_INT_EQ(stop, -1);
+  start = 1; stop = 3;
+  EXPECT_INT_EQ(x2c_normalize_slice(start, stop, INT_MAX, 3), 1);
+}
+
 static void collection_index_boundaries(void) {
   $test.scoped();
 
-  Array array = [10, 20, 30];
+  Array array = [10, 20, 30], missing = NULL;
   List list = %(10 20 30);
   String string = "abc";
 
@@ -91,6 +104,8 @@ static void collection_index_boundaries(void) {
   EXPECT_INT_EQ(array[-3].int(), 10);
   EXPECT_TRUE(array[-4] is void);
   EXPECT_TRUE(array[3] is void);
+  EXPECT_TRUE(missing[0] is void);
+  EXPECT_TRUE(missing[-1] is void);
 
   EXPECT_INT_EQ(list[0].int(), 10);
   EXPECT_INT_EQ(list[-3].int(), 10);
@@ -102,6 +117,34 @@ static void collection_index_boundaries(void) {
   EXPECT_INT_EQ(string[-4], -1);
   EXPECT_INT_EQ(string[3], -1);
 
+}
+
+/* An Array write outside the elements raises `<bad-arg>`, as the compound
+   updates do, while a read there returns `void`. */
+static void array_index_write_bounds(void) {
+  $test.scoped();
+  Array array = [10, 20, 30], missing = NULL;
+  int caught = 0;
+
+  try array[5] = 9;
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 5);
+  }
+  try array[-9] = 9;
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -9);
+  }
+  try array[5] += 1;
+  catch %(bad-arg *): caught++;
+  try array[-9]++;
+  catch %(bad-arg *): caught++;
+  try missing[0] = 9;
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 5);
+  EXPECT_STR_EQ(array.repr(), "[ 10, 20, 30 ]");
+  EXPECT_TRUE(array[5] is void);
 }
 
 static void collection_slice_syntax(void) {
@@ -186,8 +229,10 @@ static void empty_stepped_slice_is_empty(void) {
 
 void index_slice_suite(void) {
   $test.run(normalization_failures_transfer);
+  $test.run(normalization_extreme_integer_domain);
   $test.run(collection_index_syntax);
   $test.run(collection_index_boundaries);
+  $test.run(array_index_write_bounds);
   $test.run(collection_slice_syntax);
   $test.run(slice_stop_beyond_length_clamps);
   $test.run(slice_negative_step_at_length);

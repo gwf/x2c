@@ -232,7 +232,7 @@ FileReadStatus File.readline_into(File f, Block dest) {
     failed = ferror(f);
     error = failed ? errno : 0;
   }
-  if (failed) _io_error(<read>, error);
+  if (failed) x2c_io_fail(<read>, error);
   return dest.length ? <data> : <eof>;
 }
 
@@ -396,7 +396,7 @@ File File.fdopen(int fildes, const char *mode) {
   File file = fdopen(fildes, mode);
   if (file) return file;
   int error = errno;
-  _io_error(<fdopen>, error);
+  x2c_io_fail(<fdopen>, error);
 }
 
 /** Opens a process pipe with the requested mode.
@@ -476,10 +476,6 @@ static inline void _block_putc(Block block, unsigned char value) {
   block.length = expected;
 }
 
-static void _io_error(Symbol operation, int error) {
-  raise %(io-fail (operation $operation) (errno $error));
-}
-
 /* Validates and canonicalizes an owned text buffer. `intern_free` consumes
    the temporary allocation and returns the canonical String. */
 static String _finish_text(String text, size_t length) {
@@ -492,7 +488,7 @@ static String _finish_text(String text, size_t length) {
 static void _check_read(File file) {
   if (!ferror(file)) return;
   int error = errno;
-  _io_error(<read>, error);
+  x2c_io_fail(<read>, error);
 }
 
 /* A regular file's observed extent is a sizing hint. After reading that many
@@ -554,7 +550,7 @@ static void _write_bytes(
     size_t count = fwrite(bytes + offset, 1, size - offset, file);
     if (!count) {
       int error = errno;
-      _io_error(<write>, error);
+      x2c_io_fail(<write>, error);
     }
     offset += count;
   }

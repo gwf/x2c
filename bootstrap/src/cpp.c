@@ -34,9 +34,9 @@ CppToken;
 
 static List _16, _15;
 
-static String _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _12, _11, _10, _9, _8, _7, _6, _5, _2, _1, _0;
+static String _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _12, _11, _10, _9, _8, _7, _6, _5, _2, _1, _0;
 
-static Var _38, _14, _13, _4, _3;
+static Var _33, _14, _13, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -93,8 +93,6 @@ static int f10_conditions____condition(Compiler c, Cpp cpp, Token token);
 static int f10_conditions____defined(Cpp cpp, Token token);
 
 static int f10_conditions____negate(int holds);
-
-static int f10_conditions____never_defined(String name);
 
 static int f10_conditions____evaluate(Compiler c, Cpp cpp, Token site, Token first);
 
@@ -352,63 +350,58 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _15 = cons(_14, NULL);
   _16 = cons(_13, _15);
   _17 = String_new("__GNUC__");
-  _18 = String_new("__cplusplus");
-  _19 = String_new("_MSC_VER");
-  _20 = String_new("_WIN32");
-  _21 = String_new("_WIN64");
-  _22 = String_new("__CYGWIN__");
-  _23 = String_new("defined");
-  _24 = String_new("1");
-  _25 = String_new("0");
-  _26 = String_new("?");
-  _27 = String_new(":");
-  _28 = String_new("&&");
-  _29 = String_new("||");
-  _30 = String_new("!");
-  _31 = String_new("-");
-  _32 = String_new("+");
-  _33 = String_new("~");
-  _34 = String_new(")");
-  _35 = String_new("unterminated use of macro \'");
-  _36 = String_new("\'");
-  _37 = String_new("expected \')\' before the end of the file");
-  _38 = String_var(_37);
-  _39 = String_new("macro \'");
-  _40 = String_new("\' takes ");
-  _41 = String_new(" arguments");
-  _42 = String_new("given: ");
-  _43 = String_new("'##' needs a token on each side");
-  _44 = String_new("__VA_OPT__");
-  _45 = String_new("\"");
-  _46 = String_new("\\");
-  _47 = String_new("\\\\");
-  _48 = String_new("\\\"");
-  _49 = String_new("pasting \'");
-  _50 = String_new("\' and \'");
-  _51 = String_new("\' does not give one token");
-  _52 = String_new("##");
-  _53 = String_new("#");
-  _54 = String_new("if");
-  _55 = String_new("elif");
-  _56 = String_new("ifdef");
-  _57 = String_new("elifdef");
-  _58 = String_new("ifndef");
-  _59 = String_new("elifndef");
-  _60 = String_new("else");
-  _61 = String_new("|");
-  _62 = String_new("^");
-  _63 = String_new("&");
-  _64 = String_new("==");
-  _65 = String_new("!=");
-  _66 = String_new("<");
-  _67 = String_new(">");
-  _68 = String_new("<=");
-  _69 = String_new(">=");
-  _70 = String_new("<<");
-  _71 = String_new(">>");
-  _72 = String_new("*");
-  _73 = String_new("/");
-  _74 = String_new("%");
+  _18 = String_new("defined");
+  _19 = String_new("1");
+  _20 = String_new("0");
+  _21 = String_new("?");
+  _22 = String_new(":");
+  _23 = String_new("&&");
+  _24 = String_new("||");
+  _25 = String_new("!");
+  _26 = String_new("-");
+  _27 = String_new("+");
+  _28 = String_new("~");
+  _29 = String_new(")");
+  _30 = String_new("unterminated use of macro \'");
+  _31 = String_new("\'");
+  _32 = String_new("expected \')\' before the end of the file");
+  _33 = String_var(_32);
+  _34 = String_new("macro \'");
+  _35 = String_new("\' takes ");
+  _36 = String_new(" arguments");
+  _37 = String_new("given: ");
+  _38 = String_new("'##' needs a token on each side");
+  _39 = String_new("__VA_OPT__");
+  _40 = String_new("\"");
+  _41 = String_new("\\");
+  _42 = String_new("\\\\");
+  _43 = String_new("\\\"");
+  _44 = String_new("pasting \'");
+  _45 = String_new("\' and \'");
+  _46 = String_new("\' does not give one token");
+  _47 = String_new("##");
+  _48 = String_new("#");
+  _49 = String_new("if");
+  _50 = String_new("elif");
+  _51 = String_new("ifdef");
+  _52 = String_new("elifdef");
+  _53 = String_new("ifndef");
+  _54 = String_new("elifndef");
+  _55 = String_new("else");
+  _56 = String_new("|");
+  _57 = String_new("^");
+  _58 = String_new("&");
+  _59 = String_new("==");
+  _60 = String_new("!=");
+  _61 = String_new("<");
+  _62 = String_new(">");
+  _63 = String_new("<=");
+  _64 = String_new(">=");
+  _65 = String_new("<<");
+  _66 = String_new(">>");
+  _67 = String_new("*");
+  _68 = String_new("/");
+  _69 = String_new("%");
 }
 
 Cpp Cpp_new(Map macros){
@@ -818,26 +811,18 @@ static int f10_conditions____condition(Compiler c, Cpp cpp, Token token){
   return - 1;
 }
 
+int Compiler_never_defined(String);
+
 static int f10_conditions____defined(Cpp cpp, Token token){
   if(! Token_is_word(token)) return - 1;
   Var value = Map_getindex(cpp -> macros, String_var(token -> text));
   if(Var_is_row(value, 9, 7, 4) ||(Var_is_void(value) && String_equal(token -> text, _17))) return 1;
-  if(x2c_var_equal_lane(value, Symbol_var(44966220)) ||(Var_is_void(value) && f10_conditions____never_defined(token -> text))) return 0;
+  if(x2c_var_equal_lane(value, Symbol_var(44966220)) ||(Var_is_void(value) && Compiler_never_defined(token -> text))) return 0;
   return - 1;
 }
 
 static int f10_conditions____negate(int holds){
   return holds < 0 ? holds : ! holds;
-}
-
-static int f10_conditions____never_defined(String name){
-  if(String_equal(name, _18) || String_equal(name, _19)) return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return String_equal(name, _20) || String_equal(name, _21) || String_equal(name, _22);
-#endif
-
 }
 
 static int f10_conditions____evaluate(Compiler c, Cpp cpp, Token site, Token first){
@@ -890,7 +875,7 @@ static Token f10_conditions____operand(Cpp cpp, Block items, Token token){
     .token = * token
   }
   ;
-  if(! String_equal(token -> text, _23)){
+  if(! String_equal(token -> text, _18)){
     Block_push(items, & item);
     return token;
   }
@@ -901,16 +886,16 @@ static Token f10_conditions____operand(Cpp cpp, Block items, Token token){
   }
   int holds = f10_conditions____defined(cpp, name);
   item.token.type = holds < 0 ? 46060699100 : 26417777576;
-  item.token.text = holds > 0 ? _24 : _25;
+  item.token.text = holds > 0 ? _19 : _20;
   Block_push(items, & item);
   return last -> type == 11212 ? last - 1 : last;
 }
 
 static f10_conditions___CppValue f10_conditions____ternary(f10_conditions___CppEval * e){
   f10_conditions___CppValue test = f10_conditions____binary(&((* e)), 1);
-  if(! f10_conditions____take(&((* e)), _26)) return test;
+  if(! f10_conditions____take(&((* e)), _21)) return test;
   f10_conditions___CppValue yes = f10_conditions____ternary(&((* e)));
-  if(! f10_conditions____take(&((* e)), _27))(* e).failed = 1;
+  if(! f10_conditions____take(&((* e)), _22))(* e).failed = 1;
   f10_conditions___CppValue no = f10_conditions____ternary(&((* e)));
   if(test.known) return test.value ? yes : no;
   if(yes.known && no.known && yes.value == no.value) return yes;
@@ -948,8 +933,8 @@ static int f10_conditions____level(String op){
 }
 
 static f10_conditions___CppValue f10_conditions____apply(String op, f10_conditions___CppValue left, f10_conditions___CppValue right){
-  if(String_equal(op, _28)) return f10_conditions____logical(left, right, 0);
-  if(String_equal(op, _29)) return f10_conditions____logical(left, right, 1);
+  if(String_equal(op, _23)) return f10_conditions____logical(left, right, 0);
+  if(String_equal(op, _24)) return f10_conditions____logical(left, right, 1);
   if(! left.known || ! right.known) return(f10_conditions___CppValue){
     0
   }
@@ -1011,7 +996,7 @@ static f10_conditions___CppValue f10_conditions____unary(f10_conditions___CppEva
     ;
   }
   String op = f10_conditions____text(&((* e)));
-  if(! String_equal(op, _30) && ! String_equal(op, _31) && ! String_equal(op, _32) && ! String_equal(op, _33)) return f10_conditions____primary(&((* e)));
+  if(! String_equal(op, _25) && ! String_equal(op, _26) && ! String_equal(op, _27) && ! String_equal(op, _28)) return f10_conditions____primary(&((* e)));
   (* e).at ++;
   f10_conditions___CppValue operand = f10_conditions____unary(&((* e)));
   if(! operand.known) return operand;
@@ -1028,7 +1013,7 @@ static f10_conditions___CppValue f10_conditions____primary(f10_conditions___CppE
   switch(token -> type){
     case 81 :{
       f10_conditions___CppValue inner = f10_conditions____ternary(&((* e)));
-      if(! f10_conditions____take(&((* e)), _34))(* e).failed = 1;
+      if(! f10_conditions____take(&((* e)), _29))(* e).failed = 1;
       return inner;
     }
     case 26417777576 : return f10_conditions____number(&((* e)), token -> text);
@@ -1041,7 +1026,7 @@ static f10_conditions___CppValue f10_conditions____primary(f10_conditions___CppE
   if(! Token_is_word(token))(* e).failed = 1;
   else{
     Var value = Map_getindex((* e).cpp -> macros, String_var(token -> text));
-    if(Var_is_row(value, 9, 7, 4) || x2c_var_equal_lane(value, Symbol_var(44966220)) ||(Var_is_void(value) && f10_conditions____never_defined(token -> text))) return f10_conditions____known(0);
+    if(Var_is_row(value, 9, 7, 4) || x2c_var_equal_lane(value, Symbol_var(44966220)) ||(Var_is_void(value) && Compiler_never_defined(token -> text))) return f10_conditions____known(0);
   }
   return(f10_conditions___CppValue){
     0
@@ -1410,7 +1395,7 @@ static int f6_expand____arguments(f6_expand___Expander * x, Block stack, int inp
         depth += f6_expand____nesting(type);
         Block_push(arg, & item);
       }
-      if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_35), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_36), NULL)))), (* x).site, cons(_38, cons(String_var(f6_expand____definition_note(definition)), NULL)));
+      if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_30), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_31), NULL)))), (* x).site, cons(_33, cons(String_var(f6_expand____definition_note(definition)), NULL)));
       {
         int _x2c_gensym_return_value_6 = 0;
         {
@@ -1457,10 +1442,10 @@ static void f6_expand____check_arity(f6_expand___Expander * x, List definition, 
     return;
   }
   if(given != count) Compiler_report_error((* x).c, 27335838, ({
-    Var _x2c_gensym_literal_part_10 = String_var(Var_str(List_cadr(definition)));  String_join(NULL, cons(String_var(_39), cons(_x2c_gensym_literal_part_10, cons(String_var(_40), cons(String_var(int_str(count)), cons(String_var(_41), NULL))))));
+    Var _x2c_gensym_literal_part_10 = String_var(Var_str(List_cadr(definition)));  String_join(NULL, cons(String_var(_34), cons(_x2c_gensym_literal_part_10, cons(String_var(_35), cons(String_var(int_str(count)), cons(String_var(_36), NULL))))));
   }
   ), (* x).site, ({
-    Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(_42), cons(String_var(int_str(given)), NULL))));  Var _x2c_gensym_literal_part_12 = String_var(f6_expand____definition_note(definition));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
+    Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(_37), cons(String_var(int_str(given)), NULL))));  Var _x2c_gensym_literal_part_12 = String_var(f6_expand____definition_note(definition));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
   }
   ));
 }
@@ -1521,9 +1506,9 @@ static void f6_expand____replace(f6_expand___Expander * x, f6_expand___Substitut
     size_t first = Block_len((* s).out);
     if((* s).function && token -> type == 71 && after && f6_expand____param(&((* s)), next) >= 0) token = f6_expand____stringized(&((* s)), next);
     else if(pasting && after) token = f6_expand____pasted(&((* x)), &((* s)), next, end);
-    else if(pasting) Compiler_report_error((* x).c, 27335838, _43, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
+    else if(pasting) Compiler_report_error((* x).c, 27335838, _38, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
     else if(param >= 0) token = f6_expand____argument(&((* x)), &((* s)), param, after && next -> type == 9031, token + 1);
-    else if((* s).variadic && String_equal(token -> text, _44) && after && next -> type == 81) token = f6_expand____va_opt(&((* x)), &((* s)), token, end);
+    else if((* s).variadic && String_equal(token -> text, _39) && after && next -> type == 81) token = f6_expand____va_opt(&((* x)), &((* s)), token, end);
     else token = f6_expand____copied(&((* s)), token);
     if(! pasting && Block_len((* s).out) > first)((CppToken *)(* s).out -> bytes)[first].space = space;
     if(pasting || Block_len((* s).out) > first) space = 0;
@@ -1572,13 +1557,13 @@ static Block f6_expand____expanded(f6_expand___Expander * x, f6_expand___Substit
 static Token f6_expand____stringized(f6_expand___Substitution * s, Token param){
   Block arg = f6_expand____argument_at((* s).args, f6_expand____param(&((* s)), param)) -> written;
   CppToken * items = arg -> bytes;
-  Array parts = Array_update_n(Array_new(), 1, String_var(_45));
+  Array parts = Array_update_n(Array_new(), 1, String_var(_40));
   for(size_t i = 0;  i < Block_len(arg);  i ++){
     String text = items[i].token.text;
     if(i && items[i].space) Array_push(parts, String_var(_0));
-    Array_push(parts, String_var(String_replace(String_replace(text, _46, _47), _45, _48)));
+    Array_push(parts, String_var(String_replace(String_replace(text, _41, _42), _40, _43)));
   }
-  Array_push(parts, String_var(_45));
+  Array_push(parts, String_var(_40));
   CppToken item = f6_expand____made(27051791223990, String_join(_1, Array_list_free(parts)));
   Block_push((* s).out, & item);
   return param + 1;
@@ -1606,7 +1591,7 @@ static Token f6_expand____pasted(f6_expand___Expander * x, f6_expand___Substitut
       , left;
       Token after = next + 1;
       if(param < 0){
-        if((* s).variadic && String_equal(next -> text, _44) && Token_skip_trivia(next + 1) -> type == 81){
+        if((* s).variadic && String_equal(next -> text, _39) && Token_skip_trivia(next + 1) -> type == 81){
           {
             Block * _x2c_gensym_macro_address_0 = &(* s).out;
             Block _x2c_gensym_macro_previous_0 = * _x2c_gensym_macro_address_0;
@@ -1637,7 +1622,7 @@ static Token f6_expand____pasted(f6_expand___Expander * x, f6_expand___Substitut
         }
         else Block_push(right, & operand);
       }
-      if(! Block_try_pop((* s).out, & left)) Compiler_report_error((* x).c, 27335838, _43, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
+      if(! Block_try_pop((* s).out, & left)) Compiler_report_error((* x).c, 27335838, _38, (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
       CppToken * items = right -> bytes;
       int comma = left.token.type == 89 &&(* s).variadic && param == List_len((* s).params) - 1;
       if(left.token.type == 11371826){
@@ -1672,7 +1657,7 @@ static CppToken f6_expand____join(f6_expand___Expander * x, f6_expand___Substitu
   String text = String_add((* left).token.text, (* right).token.text);
   Token token = Compiler_scan_directive(text);
   if(token -> len != String_len(text) ||(token + 1) -> type != 11212) Compiler_report_error((* x).c, 27335838, ({
-    Var _x2c_gensym_literal_part_13 = String_var((* left).token.text);  Var _x2c_gensym_literal_part_14 = String_var((* right).token.text);  String_join(NULL, cons(String_var(_49), cons(_x2c_gensym_literal_part_13, cons(String_var(_50), cons(_x2c_gensym_literal_part_14, cons(String_var(_51), NULL))))));
+    Var _x2c_gensym_literal_part_13 = String_var((* left).token.text);  Var _x2c_gensym_literal_part_14 = String_var((* right).token.text);  String_join(NULL, cons(String_var(_44), cons(_x2c_gensym_literal_part_13, cons(String_var(_45), cons(_x2c_gensym_literal_part_14, cons(String_var(_46), NULL))))));
   }
   ), (* x).site, cons(String_var(f6_expand____definition_note((* s).definition)), NULL));
   return(CppToken){
@@ -1810,8 +1795,8 @@ static void f6_expand____scan_body(Block tokens, String text){
       Block_push(tokens, token);
       continue;
     }
-    int pasting = String_startswith(token -> text, _52), skip = pasting ? 2 : 1;
-    CppToken mark = f6_expand____made(pasting ? 9031 : 71, pasting ? _52 : _53);
+    int pasting = String_startswith(token -> text, _47), skip = pasting ? 2 : 1;
+    CppToken mark = f6_expand____made(pasting ? 9031 : 71, pasting ? _47 : _48);
     Block_push(tokens, & mark.token);
     f6_expand____scan_body(tokens, String_getslice(token -> text, x2c_slice_bound(skip), (-2147483647 - 1), 1));
     return;
@@ -1883,13 +1868,13 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 }
 
 static int _x2c_gensym_string_switch_0(String s){
-  if(String_equal(s, _54)) return 1;
-  if(String_equal(s, _55)) return 2;
-  if(String_equal(s, _56)) return 3;
-  if(String_equal(s, _57)) return 4;
-  if(String_equal(s, _58)) return 5;
-  if(String_equal(s, _59)) return 6;
-  if(String_equal(s, _60)) return 7;
+  if(String_equal(s, _49)) return 1;
+  if(String_equal(s, _50)) return 2;
+  if(String_equal(s, _51)) return 3;
+  if(String_equal(s, _52)) return 4;
+  if(String_equal(s, _53)) return 5;
+  if(String_equal(s, _54)) return 6;
+  if(String_equal(s, _55)) return 7;
   return 0;
 }
 
@@ -1899,51 +1884,51 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 }
 
 static int _x2c_gensym_string_switch_1(String s){
-  if(String_equal(s, _29)) return 1;
-  if(String_equal(s, _28)) return 2;
-  if(String_equal(s, _61)) return 3;
-  if(String_equal(s, _62)) return 4;
-  if(String_equal(s, _63)) return 5;
-  if(String_equal(s, _64)) return 6;
-  if(String_equal(s, _65)) return 7;
-  if(String_equal(s, _66)) return 8;
-  if(String_equal(s, _67)) return 9;
-  if(String_equal(s, _68)) return 10;
-  if(String_equal(s, _69)) return 11;
-  if(String_equal(s, _70)) return 12;
-  if(String_equal(s, _71)) return 13;
-  if(String_equal(s, _32)) return 14;
-  if(String_equal(s, _31)) return 15;
-  if(String_equal(s, _72)) return 16;
-  if(String_equal(s, _73)) return 17;
-  if(String_equal(s, _74)) return 18;
+  if(String_equal(s, _24)) return 1;
+  if(String_equal(s, _23)) return 2;
+  if(String_equal(s, _56)) return 3;
+  if(String_equal(s, _57)) return 4;
+  if(String_equal(s, _58)) return 5;
+  if(String_equal(s, _59)) return 6;
+  if(String_equal(s, _60)) return 7;
+  if(String_equal(s, _61)) return 8;
+  if(String_equal(s, _62)) return 9;
+  if(String_equal(s, _63)) return 10;
+  if(String_equal(s, _64)) return 11;
+  if(String_equal(s, _65)) return 12;
+  if(String_equal(s, _66)) return 13;
+  if(String_equal(s, _27)) return 14;
+  if(String_equal(s, _26)) return 15;
+  if(String_equal(s, _67)) return 16;
+  if(String_equal(s, _68)) return 17;
+  if(String_equal(s, _69)) return 18;
   return 0;
 }
 
 static int _x2c_gensym_string_switch_2(String s){
-  if(String_equal(s, _61)) return 1;
-  if(String_equal(s, _62)) return 2;
-  if(String_equal(s, _63)) return 3;
-  if(String_equal(s, _64)) return 4;
-  if(String_equal(s, _65)) return 5;
-  if(String_equal(s, _66)) return 6;
-  if(String_equal(s, _67)) return 7;
-  if(String_equal(s, _68)) return 8;
-  if(String_equal(s, _69)) return 9;
-  if(String_equal(s, _70)) return 10;
-  if(String_equal(s, _71)) return 11;
-  if(String_equal(s, _32)) return 12;
-  if(String_equal(s, _31)) return 13;
-  if(String_equal(s, _72)) return 14;
-  if(String_equal(s, _73)) return 15;
-  if(String_equal(s, _74)) return 16;
+  if(String_equal(s, _56)) return 1;
+  if(String_equal(s, _57)) return 2;
+  if(String_equal(s, _58)) return 3;
+  if(String_equal(s, _59)) return 4;
+  if(String_equal(s, _60)) return 5;
+  if(String_equal(s, _61)) return 6;
+  if(String_equal(s, _62)) return 7;
+  if(String_equal(s, _63)) return 8;
+  if(String_equal(s, _64)) return 9;
+  if(String_equal(s, _65)) return 10;
+  if(String_equal(s, _66)) return 11;
+  if(String_equal(s, _27)) return 12;
+  if(String_equal(s, _26)) return 13;
+  if(String_equal(s, _67)) return 14;
+  if(String_equal(s, _68)) return 15;
+  if(String_equal(s, _69)) return 16;
   return 0;
 }
 
 static int _x2c_gensym_string_switch_3(String s){
-  if(String_equal(s, _30)) return 1;
-  if(String_equal(s, _31)) return 2;
-  if(String_equal(s, _33)) return 3;
+  if(String_equal(s, _25)) return 1;
+  if(String_equal(s, _26)) return 2;
+  if(String_equal(s, _28)) return 3;
   return 0;
 }
 

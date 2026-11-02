@@ -39,11 +39,11 @@ ParsedUnit;
 #include "utils.h"
 static const SymbolSet cpp_dumps =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\000\000\000\001\002\040\034\037\266\112\000\000\000\246\053\353\321\017\341\000\000\132\236\343\303\126\011\000\000";
 
-static List _74, _73, _69, _68, _66, _64, _57, _56, _55, _47, _46, _40, _39, _38, _29, _28, _22, _4;
+static List _71, _70, _66, _65, _63, _61, _55, _54, _53, _45, _44, _38, _37, _36, _27, _26, _4;
 
-static String _71, _62, _60, _59, _58, _53, _51, _49, _48, _44, _42, _41, _36, _34, _32, _31, _25, _24, _23, _20, _19, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _2, _1, _0;
+static String _68, _59, _57, _56, _51, _49, _47, _46, _42, _40, _39, _34, _32, _30, _29, _23, _22, _21, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _2, _1, _0;
 
-static Var _72, _70, _67, _65, _63, _61, _54, _52, _50, _45, _43, _37, _35, _33, _30, _27, _26, _21, _18, _7, _3;
+static Var _69, _67, _64, _62, _60, _58, _52, _50, _48, _43, _41, _35, _33, _31, _28, _25, _24, _20, _7, _3;
 
 static int _init_guard_ = 0;
 
@@ -67,9 +67,9 @@ static String _input_name(Compiler c, String filename);
 
 static void _runtime_roles(Compiler c, const char * source);
 
-static int _inside(const char * path, const char * dir);
-
 static String _read_input(Compiler c);
+
+static String _unreadable(Compiler c, String filename, Symbol cause, List detail);
 
 static String _script(Compiler c, String text, String path);
 
@@ -116,7 +116,7 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _74)))
+_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _71)))
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_3;
   const void * _x2c_gensym_defer_capture_4;
@@ -151,67 +151,64 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _11 = String_new("#!");
   _12 = String_new("/");
   _13 = String_new("/");
-  _14 = String_new("/lib");
-  _15 = String_new("/x2c.x");
+  _14 = String_new("/lib/x2c.x");
+  _15 = String_new("too large for a String");
   _16 = String_new("cannot read input file");
-  _17 = String_new("stage: driver");
-  _18 = String_var(_17);
-  _19 = String_new("file: ");
-  _20 = String_new("reason: cannot open");
-  _21 = String_var(_20);
-  _22 = cons(_21, NULL);
-  _23 = String_new("\n");
-  _24 = String_new("#include \"scripting.x\"");
-  _25 = String_new("unit-static");
-  _26 = String_var(_25);
-  _27 = Symbol_var(61737802);
-  _28 = cons(_27, NULL);
-  _29 = cons(_26, _28);
-  _30 = Symbol_var(1256204);
-  _31 = String_new("indented units use the default symbol collection");
-  _32 = String_new("the host preprocessor does not keep the indentation, so");
+  _17 = String_new("file: ");
+  _18 = String_new("reason: ");
+  _19 = String_new("stage: driver");
+  _20 = String_var(_19);
+  _21 = String_new("\n");
+  _22 = String_new("#include \"scripting.x\"");
+  _23 = String_new("unit-static");
+  _24 = String_var(_23);
+  _25 = Symbol_var(61737802);
+  _26 = cons(_25, NULL);
+  _27 = cons(_24, _26);
+  _28 = Symbol_var(1256204);
+  _29 = String_new("indented units use the default symbol collection");
+  _30 = String_new("the host preprocessor does not keep the indentation, so");
+  _31 = String_var(_30);
+  _32 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
   _33 = String_var(_32);
-  _34 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
+  _34 = String_new("an indented unit");
   _35 = String_var(_34);
-  _36 = String_new("an indented unit");
-  _37 = String_var(_36);
-  _38 = cons(_37, NULL);
-  _39 = cons(_35, _38);
-  _40 = cons(_33, _39);
-  _41 = String_new("script units use the default symbol collection");
-  _42 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
+  _36 = cons(_35, NULL);
+  _37 = cons(_33, _36);
+  _38 = cons(_31, _37);
+  _39 = String_new("script units use the default symbol collection");
+  _40 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
+  _41 = String_var(_40);
+  _42 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
   _43 = String_var(_42);
-  _44 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
-  _45 = String_var(_44);
-  _46 = cons(_45, NULL);
-  _47 = cons(_43, _46);
-  _48 = String_new("module units use the default symbol collection");
-  _49 = String_new("the host preprocessor reads a module block as C, so");
+  _44 = cons(_43, NULL);
+  _45 = cons(_41, _44);
+  _46 = String_new("module units use the default symbol collection");
+  _47 = String_new("the host preprocessor reads a module block as C, so");
+  _48 = String_var(_47);
+  _49 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a");
   _50 = String_var(_49);
-  _51 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a");
+  _51 = String_new("module");
   _52 = String_var(_51);
-  _53 = String_new("module");
-  _54 = String_var(_53);
-  _55 = cons(_54, NULL);
-  _56 = cons(_52, _55);
-  _57 = cons(_50, _56);
-  _58 = String_new("/lib/x2c.x");
-  _59 = String_new("#");
-  _60 = String_new("<");
-  _61 = Symbol_var(437126);
-  _62 = String_new("String");
-  _63 = String_var(_62);
-  _64 = cons(_63, NULL);
-  _65 = List_var(_64);
-  _66 = cons(_65, NULL);
+  _53 = cons(_52, NULL);
+  _54 = cons(_50, _53);
+  _55 = cons(_48, _54);
+  _56 = String_new("#");
+  _57 = String_new("<");
+  _58 = Symbol_var(437126);
+  _59 = String_new("String");
+  _60 = String_var(_59);
+  _61 = cons(_60, NULL);
+  _62 = List_var(_61);
+  _63 = cons(_62, NULL);
+  _64 = List_var(_63);
+  _65 = cons(_64, NULL);
+  _66 = cons(_58, _65);
   _67 = List_var(_66);
-  _68 = cons(_67, NULL);
-  _69 = cons(_61, _68);
-  _70 = List_var(_69);
-  _71 = String_new("Var");
-  _72 = String_var(_71);
-  _73 = cons(_72, NULL);
-  _74 = cons(_70, _73);
+  _68 = String_new("Var");
+  _69 = String_var(_68);
+  _70 = cons(_69, NULL);
+  _71 = cons(_67, _70);
   _x2c_gensym_static_initialize_0();
 }
 
@@ -825,30 +822,95 @@ static String _input_name(Compiler c, String filename){
 }
 
 static void _runtime_roles(Compiler c, const char * source){
-  char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL)));
-  c -> prelude = !(source && realpath(String_join(NULL, cons(String_var(dir), cons(String_var(_15), NULL))), runtime) && ! strcmp(source, runtime));
-  c -> runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
-}
-
-static int _inside(const char * path, const char * dir){
-  size_t n = strlen(dir);
-  return ! strncmp(path, dir, n) && path[n] == '/';
+  char runtime[PATH_MAX];
+  String prelude = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL)));
+  c -> prelude = !(source && realpath(prelude, runtime) && ! strcmp(source, runtime));
+  c -> runtime_inc = !(source && Compiler_in_runtime_library(String_new(source)));
 }
 
 static String _read_input(Compiler c){
-  String filename = c -> filename, text = NULL;
-  if(Compiler_read_source(c, filename, &(text))) return text;
-  Compiler_report_error(c, 306819428, _16, NULL, cons(_18, cons(String_var(String_join(NULL, cons(String_var(_19), cons(String_var(filename), NULL)))), _22)));
+  String filename = c -> filename;
+  {
+    ExceptionFrame _x2c_gensym_exception_frame_6;
+    static MatchCaptureSite _x2c_gensym_macro_arms_5[1];
+    Var _x2c_gensym_macro_patterns_5[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_5 ={
+      _x2c_gensym_macro_arms_5, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_5)){
+      _x2c_gensym_macro_patterns_5[0] = List_var(cons(List_var(cons(Symbol_var(2005352), cons(Symbol_var(1952558282), cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), cons(Symbol_var(4372499598), cons(Symbol_var(1358596898646632), NULL)))))), NULL)))), cons(Symbol_var(58262293080), NULL)));
+    }
+    volatile ErrorHandler _x2c_gensym_error_handler_5 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_6, & _x2c_gensym_macro_site_5, _x2c_gensym_macro_patterns_5);
+    x2c_exception_push(& _x2c_gensym_exception_frame_6);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_6.env, 0)){
+      String _x2c_gensym_return_value_7 = Compiler_read_source_text(c, filename);
+      {
+        x2c_error_catch_close(_x2c_gensym_error_handler_5);
+        _x2c_gensym_error_handler_5 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_6);
+        return _x2c_gensym_return_value_7;
+      }
+
+    }
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_6);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_6)){
+        int _x2c_gensym_macro_selected_5 = x2c_error_catch_selected(_x2c_gensym_error_handler_5);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_5);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_6);
+        if(_x2c_gensym_macro_selected_5 == 0){
+          Var volatile cause;
+          cause = x2c_error_catch_capture(_x2c_gensym_error_handler_5, 0);
+          List volatile detail;
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_5, 1));
+          {
+            String _x2c_gensym_return_value_8 = _unreadable(c, filename, Var_symbol(cause), detail);
+            {
+              x2c_error_catch_close(_x2c_gensym_error_handler_5);
+              _x2c_gensym_error_handler_5 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_6);
+              return _x2c_gensym_return_value_8;
+            }
+
+          }
+
+        }
+        __builtin_unreachable();
+      }
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_5);
+        _x2c_gensym_error_handler_5 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_6);
+        __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_gensym_error_handler_5);
+    _x2c_gensym_error_handler_5 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_6);
+  }
+
+}
+
+static String _unreadable(Compiler c, String filename, Symbol cause, List detail){
+  String reason = Var_as_string(List_assoc(detail, Symbol_var(1218550748)));
+  if(! String_truth(reason) && cause == 1358596898646632) reason = _15;
+  long error = Var_long_at(String_truth(reason) ? int_var(0) : List_assoc(detail, Symbol_var(11703198)), ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/frontend.x",.function = "_unreadable",.line = 432}; & _x2c_gensym_error_site_0; }));
+  if(! String_truth(reason)) reason = String_new(strerror((int) error));
+  Compiler_report_error(c, 306819428, _16, NULL, ({
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(_17), cons(String_var(filename), NULL))));  Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_18), cons(String_var(reason), NULL))));  cons(_20, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
+  }
+  ));
 }
 
 static String _script(Compiler c, String text, String path){
-  int end = String_find(text, _23);
+  int end = String_find(text, _21);
   ScriptUnit script = xcalloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
   script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), x2c_slice_bound(end), 1);
   c -> unit_script = script;
-  return String_join(NULL, cons(String_var(_24), cons(String_var(end < 0 ? _1 : String_getslice(text, x2c_slice_bound(end), (-2147483647 - 1), 1)), NULL)));
+  return String_join(NULL, cons(String_var(_22), cons(String_var(end < 0 ? _1 : String_getslice(text, x2c_slice_bound(end), (-2147483647 - 1), 1)), NULL)));
 }
 
 static int _source_lines(String text){
@@ -936,14 +998,14 @@ static List _unit_private_rows(Compiler c, Map globs){
         Var _x2c_gensym_match_var_0 = key;
         int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);
         List _x2c_gensym_match_expr_0 = Var_list_payload(_x2c_gensym_match_var_0);
-        if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _29 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
+        if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _27 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
           Var name;
           name = x2c_match_value_0;
           {
             String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
             if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
             Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
-            Array_push(rows, List_var(_unit_private_row(globs, cons(_30, cons(name, NULL)))));
+            Array_push(rows, List_var(_unit_private_row(globs, cons(_28, cons(name, NULL)))));
           }
 
         }
@@ -986,10 +1048,10 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
         {
           _enter_package(frontend, c);
           {
-            Map _x2c_gensym_return_value_7 = Compiler_collect_symbols(c, (* unit).globals);
+            Map _x2c_gensym_return_value_9 = Compiler_collect_symbols(c, (* unit).globals);
             {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-              return _x2c_gensym_return_value_7;
+              return _x2c_gensym_return_value_9;
             }
 
           }
@@ -1014,9 +1076,9 @@ static void _enter_package(Frontend frontend, Compiler c){
 }
 
 static void _check_cpp_unit(Compiler c){
-  if(c -> layout) Compiler_report_error(c, 306819428, _31, _first_directive(c), _40);
-  if(c -> script) Compiler_report_error(c, 306819428, _41, _first_directive(c), _47);
-  if(c -> unit_source) Compiler_report_error(c, 306819428, _48, _first_directive(c), _57);
+  if(c -> layout) Compiler_report_error(c, 306819428, _29, _first_directive(c), _38);
+  if(c -> script) Compiler_report_error(c, 306819428, _39, _first_directive(c), _45);
+  if(c -> unit_source) Compiler_report_error(c, 306819428, _46, _first_directive(c), _55);
 }
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
@@ -1024,7 +1086,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor = cpp;
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_58), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, frontend -> request -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;
@@ -1056,27 +1118,27 @@ static String _take_line_markers(Compiler cpp, String text){
   int position = 0, text_line = 1;
   {
     String line;
-    List _x2c_gensym_macro_object_5 = String_split(text, _23);
+    List _x2c_gensym_macro_object_5 = String_split(text, _21);
     List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
     Var _x2c_gensym_macro_cursor_output_6;
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       {
         int number = 0;
-        String file = String_startswith(line, _59) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
+        String file = String_startswith(line, _56) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
         if(! String_truth(file)){
           Array_push(kept, String_var(line));
           position += String_len(line) + 1;
           text_line ++;
         }
-        else if(! String_startswith(file, _60)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
+        else if(! String_startswith(file, _57)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
       }
 
     }
 
   }
   cpp -> line_markers = markers;
-  return String_join(_23, Array_list_free(kept));
+  return String_join(_21, Array_list_free(kept));
 }
 
 static void _tokenize_cpp(Compiler cpp, String text){
@@ -1087,7 +1149,6 @@ static void _tokenize_cpp(Compiler cpp, String text){
 }
 
 static void _share_session(Compiler cpp, Compiler c){
-  cpp -> load_source = c -> load_source;
   cpp -> meta_bindings = c -> meta_bindings;
   cpp -> borrowed_bindings = cpp -> meta_bindings != NULL;
   Compiler_share_meta_group(cpp, c);

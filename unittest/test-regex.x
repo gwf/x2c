@@ -63,6 +63,7 @@ static void regex_repeats_greedy_and_lazy(void) {
   EXPECT_STR_EQ(Regex.compile("a{99999999999").match("a{99999999999")[0],
                 "a{99999999999");
   EXPECT_STR_EQ(Regex.compile("x{,2}").match("x{,2}")[0], "x{,2}");
+  EXPECT_STR_EQ(Regex.compile("a{2}{,2}").match("aa{,2}")[0], "aa{,2}");
   EXPECT_STR_EQ(Regex.compile("colou?r").match("color")[0], "color");
   EXPECT_STR_EQ(Regex.compile("(ab)+").match("xababab")[0], "ababab");
   EXPECT_STR_EQ(Regex.compile("(ab)+?b").match("ababb")[0], "ababb");
@@ -179,7 +180,10 @@ static void regex_rejects_bad_patterns(void) {
                  ("(?<1a>x)" "malformed group name" 3)
                  ("(?=x)" "unknown group syntax" 1)
                  ("a**" "nothing to repeat" 2)
-                 ("a+?+" "nothing to repeat" 3));
+                 ("a+?+" "nothing to repeat" 3)
+                 ("a{2}{3}" "nothing to repeat" 4)
+                 ("a*{2}" "nothing to repeat" 2)
+                 ("a{2}?{3,}" "nothing to repeat" 5));
   foreach (List row, cases) {
     String pattern = row.car();
     int caught = 0;
@@ -195,6 +199,24 @@ static void regex_rejects_bad_patterns(void) {
   }
 }
 
+/* Each nested group is a C frame while the pattern parses, so nesting
+   stops at the depth limit, or sooner at the stack floor. */
+static void regex_compile_bounds_group_nesting(void) {
+  $test.scoped();
+  String deep = "(".repeat(100000) + "a" + ")".repeat(100000);
+  int limited = 0;
+  try Regex.compile(deep);
+  catch %(size-limit *detail): {
+    limited = 1;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Regex.compile");
+    EXPECT_STR_EQ(detail.assoc(<pattern>).string(), deep);
+  }
+  EXPECT_INT_EQ(limited, 1);
+  Regex nested = Regex.compile("(".repeat(64) + "a" + ")".repeat(64));
+  EXPECT_INT_EQ(nested.capture_count(), 64);
+  EXPECT_STR_EQ(nested.match("xay")[64], "a");
+}
+
 void regex_suite(void) {
   $test.run(regex_matches_literals_and_sets);
   $test.run(regex_classes_anchors_and_boundaries);
@@ -203,4 +225,5 @@ void regex_suite(void) {
   $test.run(regex_find_all_split_and_offsets);
   $test.run(regex_replaces_and_escapes);
   $test.run(regex_rejects_bad_patterns);
+  $test.run(regex_compile_bounds_group_nesting);
 }

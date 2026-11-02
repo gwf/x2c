@@ -18,13 +18,12 @@ void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 */
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
-  (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
+  (c.meta_build || (X2C_NATIVE_MODULES && meta_in_process));
 
 /** Reports whether a call of a project `meta` function waits for the
-    translation: the project meta build's own parse has no helper yet. A
-    loaded helper's parse calls the ordinary helper of its sources.
+    translation: the project meta build's own parse has no helper yet.
 */
-int Compiler.meta_calls_wait(Compiler c) => c.meta_build && !c.meta_helper;
+int Compiler.meta_calls_wait(Compiler c) => c.meta_build;
 
 /** Records a native callable body `fn` in the unit's helper group. */
 void Compiler.group_meta_function(Compiler c, List fn) {
@@ -156,11 +155,18 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
 
 /* The unit's definitions so far that the group can reach, in source order:
    directives, declarations, included providers, reached functions, and
-   compile-time-only functions that the unit itself never emits. */
-module Array _units(Compiler c) {
+   compile-time-only functions that the unit itself never emits. The
+   `support` the parse queued for the unit, such as a helper that discards
+   an operator's temporaries, joins the later definitions, which the group
+   keeps only where it reaches them. */
+module Array _units(Compiler c, Array support) {
   String lib = %"$(x2c_get_root())/lib/";
   Array ordered = _runtime_includes(c, lib);
   Map later = _source_order(c, ordered, lib);
+  foreach (List item in support) {
+    later[(void *) item] = 1;
+    ordered.push(item);
+  }
   Map reached = _roots(c, ordered, later);
   _close(ordered, reached, later);
   return _reachable(c, ordered, reached, later);
@@ -330,7 +336,7 @@ static Array _reachable(Compiler c, Array ordered, Map reached, Map later) {
   foreach (List item in ordered) {
     if (_optional(item, later) && !_declares_reached(item, reached)) continue;
     if (!_function_identity(item, identity, name) ||
-        (identity in reached && (name != "main" || c.load_source)))
+        (identity in reached && name != "main"))
       units.push(item);
     else if (name != "main")
       match (item) case %(function ?spec ?declarator ?): {
@@ -361,9 +367,10 @@ static int _declares_reached(List item, Map reached) {
   return 0;
 }
 
+/* A function the kernel wrote carries a trailing marker. */
 module int _function_identity(List fn, Var &identity, String &name) {
   match (fn)
-    case %(function ? (bind (binding ?id ?(String spelling)) *) ?): {
+    case %(function ? (bind (binding ?id ?(String spelling)) *) ? *): {
       identity = id;
       name = spelling;
       return 1;

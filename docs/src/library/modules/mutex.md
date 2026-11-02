@@ -34,10 +34,10 @@ Source: `lib/mutex.x`
 
 Destroys an unused, unlocked `Mutex` and releases its `Scope` storage.
 Native destruction occurs first, so a native failure leaves the allocation
-intact. No thread may retain the handle or be waiting on it.
+intact. No thread may retain the handle or be waiting on it. NULL does
+nothing.
 
-**Raises:** `<bad-state>` for NULL, or `<io-fail>` when native destruction
-fails.
+**Raises:** `<io-fail>` when native destruction fails.
 
 Source: `lib/mutex.x`
 
@@ -49,7 +49,7 @@ Source: `lib/mutex.x`
 Locks `mutex`, waiting until it becomes available.
 The `Mutex` is non-recursive; the caller must not already hold it.
 
-**Raises:** `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
+**Raises:** `<bad-arg>` for NULL, or `<io-fail>` when native locking fails.
 
 Source: `lib/mutex.x`
 
@@ -74,7 +74,7 @@ Source: `lib/mutex.x`
 Attempts to lock `mutex` without waiting.
 Returns one when acquired or zero when busy.
 
-**Raises:** `<bad-state>` for NULL, or `<io-fail>` for another native failure.
+**Raises:** `<bad-arg>` for NULL, or `<io-fail>` for another native failure.
 
 Source: `lib/mutex.x`
 
@@ -85,7 +85,7 @@ Source: `lib/mutex.x`
 
 Unlocks a `Mutex` held by the calling thread.
 
-**Raises:** `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
+**Raises:** `<bad-arg>` for NULL, or `<io-fail>` when native unlocking fails.
 
 Source: `lib/mutex.x`
 

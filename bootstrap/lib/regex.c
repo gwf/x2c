@@ -42,7 +42,8 @@ struct _RegexNode{
 typedef struct Parser{
   Regex regex;
   const char * text;
-  int pos, len;
+  int pos, len, depth;
+  unsigned long floor;
 }
 Parser;
 
@@ -51,6 +52,7 @@ typedef struct Matcher{
   const char * text;
   int len, end, depth;
   int * starts, * ends;
+  unsigned long floor;
 }
 Matcher;
 
@@ -111,6 +113,8 @@ static _RegexNode _literal(Parser * p, int byte);
 static int _peek(Parser * p);
 
 _Noreturn static void _fail(Parser * p, String why);
+
+_Noreturn static void _too_nested(Parser * p);
 
 static _RegexNode _node(Symbol kind);
 
@@ -651,7 +655,7 @@ int String_equal(String, String);
 String RegexCapture_name(RegexCapture capture);
 
 RegexCapture RegexMatch_capture(RegexMatch found, Var key){
-  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 220,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 233,.runtime = 1}; & _x2c_gensym_error_site_0; })));
   String name = numbered ? NULL : Var_str(key);
   {
     RegexCapture capture;
@@ -717,11 +721,13 @@ RegexMatch Var_regexmatch(Var value){
 
 void * xcalloc(size_t, size_t);
 
+unsigned long _x2c_stack_floor(void);
+
 static Regex Regex_new(String pattern){
   Regex regex = xcalloc(1, sizeof(struct Regex));
   regex -> pattern = pattern;
   Parser p ={
-    regex, regex -> pattern, 0, String_len(regex -> pattern)
+    regex, regex -> pattern, 0, String_len(regex -> pattern), 0, _x2c_stack_floor()
   }
   ;
   _flags(&(p));
@@ -790,11 +796,16 @@ static _RegexNode _atom(Parser * p){
   return _literal(&((* p)), byte);
 }
 
+static int _x2c_stack_below(unsigned long);
+
 static _RegexNode _parse_group(Parser * p){
+  if((* p).depth == _DEPTH_LIMIT || _x2c_stack_below((* p).floor)) _too_nested(&((* p)));
+  (* p).depth ++;
   int index = _peek(&((* p))) == '?' ? _group_syntax(&((* p))) : _add_capture(&((* p)), NULL);
   _RegexNode body = _parse_alternation(&((* p)));
   if(_peek(&((* p))) != ')') _fail(&((* p)), _2);
   (* p).pos ++;
+  (* p).depth --;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
 
@@ -863,7 +874,11 @@ static _RegexNode _quantified(Parser * p, _RegexNode atom){
   node -> greedy = _peek(&((* p))) != '?';
   node -> child = atom;
   if(! node -> greedy)(* p).pos ++;
-  if(_is_quantifier(_peek(&((* p))))) _fail(&((* p)), _1);
+  int next =(* p).pos;
+  if(_bounds(&((* p)), &(min), &(max))){
+    (* p).pos = next;
+    _fail(&((* p)), _1);
+  }
   return node;
 }
 
@@ -1005,8 +1020,24 @@ _Noreturn static void _fail(Parser * p, String why){
     Var _x2c_gensym_literal_part_2 = String_var((* p).regex -> pattern);
     Var _x2c_gensym_literal_part_3 = int_var((* p).pos);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "_fail",.line = 565,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "_fail",.line = 586,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1, Symbol_var(34470112412), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
+      __builtin_unreachable();
+    }
+
+  }
+
+}
+
+_Noreturn static void _too_nested(Parser * p){
+  {
+    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL)));
+    Var _x2c_gensym_literal_part_5 = String_var((* p).regex -> pattern);
+    Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group nested more deeply than one pattern allows")), NULL)));
+    Var _x2c_gensym_literal_part_7 = int_var((* p).depth);
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "_too_nested",.line = 590,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), _x2c_gensym_literal_part_7);
       __builtin_unreachable();
     }
 
@@ -1083,7 +1114,7 @@ static RegexMatch _search(Regex regex, String subject, int offset){
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
       Matcher m ={
-        regex, subject, String_len(subject), 0, 0, starts, ends
+        regex, subject, String_len(subject), 0, 0, starts, ends, _x2c_stack_floor()
       }
       ;
       for(int at = offset;  at <= m.len;  at ++){
@@ -1195,7 +1226,7 @@ static int _byte_loop(Matcher * m, _RegexNode rep, int pos, Rest k){
 }
 
 static int _iterate(Matcher * m, _RegexNode rep, int count, int pos, int last_start, Rest k){
-  if((* m).depth == _DEPTH_LIMIT) _too_deep(&((* m)));
+  if((* m).depth == _DEPTH_LIMIT || _x2c_stack_below((* m).floor)) _too_deep(&((* m)));
   (* m).depth ++;
   int matched = _iteration(&((* m)), rep, count, pos, last_start, k);
   (* m).depth --;
@@ -1241,12 +1272,13 @@ static int _at_boundary(Matcher * m, int pos){
 
 _Noreturn static void _too_deep(Matcher * m){
   {
-    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL)));
-    Var _x2c_gensym_literal_part_5 = String_var((* m).regex -> pattern);
-    Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
+    Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL)));
+    Var _x2c_gensym_literal_part_9 = String_var((* m).regex -> pattern);
+    Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
+    Var _x2c_gensym_literal_part_11 = int_var((* m).depth);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 779,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), int_var(_DEPTH_LIMIT));
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 805,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(34470112412), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(25782888), _x2c_gensym_literal_part_11);
       __builtin_unreachable();
     }
 

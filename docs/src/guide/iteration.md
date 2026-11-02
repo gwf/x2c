@@ -4,11 +4,10 @@ x2c has two ways to walk a collection. `foreach(T name in collection)` covers
 most cases. `Iter` chains combine operations that process
 one element at a time, then collect, aggregate, or loop over the result.
 
-At runtime, an immediately consumed chain uses caller stack storage for every
-stage. Name that storage yourself when the iterator has to stay live between
-expressions. In a meta function, the destination-free form allocates iterator
-state in the compile-time session `Scope`. The
-[storage convention](#the-storage-convention) covers the runtime forms.
+An immediately consumed chain uses caller stack storage for every stage.
+Name that storage yourself when the iterator has to stay live between
+expressions. A `meta` function body compiles the same way. The
+[storage convention](#the-storage-convention) gives the rules.
 
 [The language reference](../reference/language.md) states the `foreach` rules,
 and the [standard library overview](../library/overview.md) links to every
@@ -183,9 +182,10 @@ foreach(Var item in values)
 ```
 
 If you declare a loop type that has no `Var` conversion, such as one of your
-own structs, x2c still translates the loop, and the C compiler reports an
-incompatible assignment to the loop variable. When that happens, pick a
-converting type or take a `Var` and convert in the body.
+own structs, the loop does not compile. For a typedef name, x2c reports that
+it cannot convert `Var` to that type. For a `struct` tag, the C compiler
+reports an incompatible assignment to the loop variable. Pick a converting
+type, or take a `Var` and convert in the body.
 
 ### What foreach guarantees
 
@@ -193,9 +193,10 @@ For a statically typed collection other than `Iter`, the declared loop type
 can supply a native cursor. Foreach first looks for that type's `try_next`
 method. Its first parameter must match the collection type. The output
 assigned to the last loop binding must match that binding's type. A single
-binding receives the final output; two bindings receive the first two outputs. Ordinary member lookup follows typedef
-aliases. The cursor must be integral or have the collection's own type, as
-with collection-owned cursors. A matching cursor needs no `Iter` adoption.
+binding receives the final output; two bindings receive the first two
+outputs. Ordinary member lookup follows typedef aliases. The cursor must be
+integral or have the collection's own type, as with collection-owned
+cursors. A matching cursor needs no `Iter` adoption.
 
 For example, `foreach (Substr word in text)` uses the prototype
 `Substring.try_next(String, int &, Substring &)` declared in `substring.x`.
@@ -306,10 +307,11 @@ int main(void) {
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
 the enclosing block. Completion applies only when the chain ends in
-`try_next`, `next`, `done`, `list`, `array`, `foldl`, `any`, `all`, `find`,
-`count`, `sum`, `product`, `min`, `max`, or `foreach`. A `List` or `Array`
-destination ends the chain the same way: it calls `list` or `array` for you,
-which is why the chain above needs no explicit collector.
+`try_next`, `next`, `list`, `array`, `foldl`, `any`, `all`, `find`, `count`,
+`sum`, `product`, `min`, `max`, `parallel_map`, `parallel_map_in`, or
+`foreach`. A `List` or `Array` destination ends the chain the same way: it
+calls `list` or `array` for you, which is why the chain above needs no
+explicit collector.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:
@@ -360,16 +362,19 @@ parameter is rejected when it is first invoked, and it never receives an
 alias into source storage. An empty source does not invoke or arity-check
 its callback.
 
-`map`, `filter`, and `foldl` reject a null callback only when they invoke it.
-Lazy `map` and `filter` construction does not pull the source. Their first
-pull consumes one source element before a missing callback raises
-`<bad-arg>`. A seeded fold consumes one element before that failure; a
-seedless fold consumes its seed and the next element. Consumed inputs are
-not restored, just as when a callback itself raises. Empty inputs and
-seedless singleton folds need no invocation.
+`map`, `filter`, `scan`, `map2`, `foldl`, `find`, `any`, and `all` reject a
+null callback only when they invoke it. Lazy stages do not pull the source
+when they are built. Their first pull consumes one source element, or one
+value from each side for `map2`, before a missing callback raises
+`<bad-arg>`. A seeded fold, `find`, `any`, or `all` consumes one element
+before that failure; a seedless fold consumes its seed and the next element.
+Consumed inputs are not restored, just as when a callback itself raises.
+Empty inputs and seedless singleton folds need no invocation, so empty
+`find`, `any`, and `all` calls return `void`, 0, and 1.
 
 This replaces the earlier null-callback identity behavior of `map`, immediate
-exhaustion of `filter`, and drain-without-combining behavior of `foldl`.
+exhaustion of `filter`, drain-without-combining behavior of `foldl`, NULL
+iterators from `scan` and `map2`, and fixed `find`, `any`, and `all` results.
 The corresponding String identity and List accumulator-preservation defaults
 also end; Lisp nil callbacks use the same native contract.
 
@@ -440,9 +445,10 @@ return, and `foldl` given a `void` seed uses the first element as its seed.
 
 `find(predicate)` has the same element-or-`void` result as Array and List
 search. It consumes through the first match and leaves the following elements
-available. An unsuccessful search exhausts the iterator; a null predicate
-returns `void` without consuming anything. Zero, false, and NULL are valid
-matched elements, so use `is void` to test absence.
+available. An unsuccessful search exhausts the iterator. A null predicate
+raises `<bad-arg>` after the first element is pulled, and an empty iterator
+returns `void` without a call. Zero, false, and NULL are valid matched
+elements, so use `is void` to test absence.
 
 ## Handing a pipeline to foreach
 

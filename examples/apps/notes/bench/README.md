@@ -54,7 +54,7 @@ that README describes, then run from the repository root:
 
 ```sh
 python3 examples/apps/notes/bench/compare.py --go-binary /tmp/notes-go \
-  --go-tool go --output examples/apps/notes/bench/reports/current
+  --go-tool go --output examples/apps/notes/bench/results/go
 ```
 
 The comparison builds the x2c application, SQLite adapter, and common load
@@ -90,14 +90,15 @@ libraries differ for Unicode regular expressions, escaped NUL, duplicate query
 parameters, and path redirects, as documented with the Go implementation.
 A shared-host application comparison does not isolate intrinsic language speed.
 
-Dated reports live under [reports/](reports/). No benchmark is added to a gate.
+The `results/` directory is ignored, so reports stay local. No benchmark is
+added to a gate.
 
-The [2026-10-28 report](reports/2026-10-28/interpretation.md) contains the
-measured comparison and its limits. Go led all five 64-client lookup pairs;
-x2c led all five single-client lookup pairs and used lower peak RSS in every
-pair. Durable-write results were too variable to rank. The dated directory
-retains the full matrix, paired ratios, build/configuration verification, and
-raw samples; no slow samples were removed.
+The [2026-10-28 report](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-28/interpretation.md)
+contains the measured comparison and its limits. Go led all five 64-client
+lookup pairs; x2c led all five single-client lookup pairs and used lower peak
+RSS in every pair. Durable-write results were too variable to rank. That
+report's directory retains the full matrix, paired ratios, build/configuration
+verification, and raw samples; no slow samples were removed.
 
 ## Database thread comparison
 
@@ -141,7 +142,7 @@ its note count. Every server receives an independent database copy. The JSON
 report retains every sample, order, latency, lifetime CPU/RSS, host load,
 binary/source hashes, and the temporary directory containing logs.
 
-The [2026-10-28 architecture comparison](reports/2026-10-28-architectures/interpretation.md)
+The [2026-10-28 architecture comparison](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
 records the default-off accounting results. The database-thread variant has
 lower throughput and lower p99 latency than the mutex variant in all five
 rounds; the report includes CPU, memory, raw samples, and limitations.
@@ -190,5 +191,5 @@ Task usable stack reservation is configured capacity, not resident memory;
 guard pages are additional. This probe does not measure native thread stack
 reservation and does not establish end-to-end HTTP performance.
 
-The [2026-10-31 in-process report](reports/2026-10-31-inprocess/interpretation.md)
+The [2026-10-31 in-process report](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
 records the local comparison and its correctness and memory limitations.

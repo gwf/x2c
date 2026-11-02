@@ -4,21 +4,20 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/match-capture-benchmark"
 PROGRAM="$BUILD/match-capture-benchmark"
-MODE=${MATCH_CAPTURE_BENCH_MODE:-$(cat "$ROOT/etc/build-mode.local" \
-  2>/dev/null || cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)}
 ITERATIONS=${MATCH_CAPTURE_BENCH_ITERATIONS:-100000}
 SAMPLES=${MATCH_CAPTURE_BENCH_SAMPLES:-15}
 mkdir -p "$BUILD/benchmarks"
+read -r -a flags <<<"${BUILD_CFLAGS:-}"
 
-case "$MODE" in
-  debug) flags=(-g) ;;
-  optimize) flags=(-O2) ;;
+# The build's flags set the optimization; MATCH_CAPTURE_BENCH_MODE=sanitize
+# adds AddressSanitizer and UBSan.
+case "${MATCH_CAPTURE_BENCH_MODE:-build}" in
+  build) ;;
   sanitize)
-    flags=(-O1 -g -fsanitize=address,undefined
-           -fno-omit-frame-pointer)
+    flags+=(-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer)
     ;;
   *)
-    echo "unknown benchmark mode: $MODE" >&2
+    echo "unknown benchmark mode: $MATCH_CAPTURE_BENCH_MODE" >&2
     exit 2
     ;;
 esac
@@ -29,7 +28,7 @@ esac
   "$ROOT/unittest/match-recursive.x"
 "$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD/benchmarks" \
   "$ROOT/unittest/benchmarks/match-capture-benchmark.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
+"${CC:-cc}" ${flags[@]+"${flags[@]}"} -iquote "$ROOT/include/x2c" \
   -iquote "$ROOT/builds/0/src" "$BUILD/benchmarks/match-capture-benchmark.c" \
   "$BUILD/match-recursive.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"

@@ -98,8 +98,6 @@ $map.scaffold(
   _string_int_reinsert_error, _string_int_insert_error,
   "MapStringInt.reinsert", "MapStringInt.insert");
 
-$integer.raw(_integer_raw);
-
 // families
 
 #include "group-match.h"
@@ -263,22 +261,8 @@ static void _bad_arg(String owner) {
   raise %(bad-arg (operation $owner));
 }
 
-static int _update_int(volatile int *slot, Symbol op, int rhs) {
-  int current = slot[0];
-  unsigned a, b, raw;
-  memcpy(&a, &current, sizeof a);
-  memcpy(&b, &rhs, sizeof b);
-  if ((op == <"<<"> || op == <">>">) && (rhs < 0 || rhs >= 32))
-    _bad_shift(op, rhs);
-  raw = _integer_raw(op, a, b, 32, 0);
-  int result;
-  memcpy(&result, &raw, sizeof result);
-  slot[0] = result;
-  return result;
-}
-
-static void _bad_shift(Symbol op, int count) {
-  raise %(bad-shift (op $op) (count $count) (width 32));
+static int _update_int(int *slot, Symbol op, int rhs) {
+  $integer.update(int, slot, op, rhs);
 }
 
 /* The three iterators each yield one boxed key or value, so a family needs a
@@ -351,26 +335,14 @@ static void _valid_string(String *value) {
 static int _capacity_valid(unsigned capacity) =>
   capacity >= 2 && !(capacity & (capacity - 1));
 
-static double _update_double(volatile double *slot, Symbol op, double rhs) {
-  double current = slot[0], result;
-  switch (op) {
-    case <+>: result = current + rhs; break;
-    case <->: result = current - rhs; break;
-    case <*>: result = current * rhs; break;
-    case </>: result = current / rhs; break;
-    default: _bad_op(op);
-  }
-  slot[0] = result;
-  return result;
+static double _update_double(double *slot, Symbol op, double rhs) {
+  $floating.update(double, slot, op, rhs);
 }
 
-/* Concatenation is the only update a String value has. The family supplies
-   no increment value, so both postfix operators report a bad operator. */
-static String _update_string(volatile String *slot, Symbol op, String rhs) {
-  if (op != <+>) _bad_op(op);
-  String current = slot[0], result = current + rhs;
-  slot[0] = result;
-  return result;
+/* The family supplies no String increment value, so both postfix operators
+   report a bad operator. */
+static String _update_string(String *slot, Symbol op, String rhs) {
+  $string.update(slot, op, rhs);
 }
 
 static void _bad_op(Symbol op) {

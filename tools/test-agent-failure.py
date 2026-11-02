@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """Focused tests for the agent failure index."""
 
-import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
 
+from agent_context import load_script
 
-SPEC = importlib.util.spec_from_file_location(
-    "agent_failure", Path(__file__).with_name("agent-failure.py"))
-failure = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(failure)
+
+failure = load_script(
+    Path(__file__).with_name("agent-failure.py"), "agent_failure")
 ROW = ("| 2026-10-13 | false-claim | said it passed | `abcd1234` | "
        "`/tmp/incident` | open |")
 

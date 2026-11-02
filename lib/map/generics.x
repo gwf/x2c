@@ -416,8 +416,8 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
-  /* Iter.try_next supplies callback outputs; Map.try_next owns null-map
-     exhaustion. */
+  /* Iter.try_next supplies callback outputs. A null map gets no callback,
+     so its iterators start exhausted. */
   static int _step(Iter iter, $key &key, $value &val) {
     $map map = iter.obj.$unbox();
     unsigned cursor = iter.state;
@@ -458,7 +458,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
       iterator.
   */
   Iter $map.iter($map map, Iter dest) {
-    if ((void *) dest == 0) return 0;
+    if ((void *) map == 0) return Iter_init(dest, void, NULL, 0);
     return Iter_init(dest, map, _next, 0);
   }
 
@@ -475,7 +475,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
       while boxing a key.
   */
   Iter $map.keys($map map, Iter dest) {
-    if ((void *) dest == 0) return 0;
+    if ((void *) map == 0) return Iter_init(dest, void, NULL, 0);
     return Iter_init(dest, map, _keys_next, 0);
   }
 
@@ -494,7 +494,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
       Shared causes do not return from the pull.
   */
   Iter $map.enumerate($map map, Iter dest) {
-    if ((void *) dest == 0) return 0;
+    if ((void *) map == 0) return Iter_init(dest, void, NULL, 0);
     return Iter_init(dest, map, _enumerate_next, 0);
   }
 

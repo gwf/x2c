@@ -2,6 +2,10 @@
 
 > Status: reference - current implementation fails mandatory performance acceptance.
 > Measured 2026-10-30. No tradeoff approved; no dev publication performed.
+> Gary accepted the measured costs, and `a596f6cb5` shipped to `dev` on
+> 2026-10-30 (noted 2026-11-02); see the
+> [delivery checkpoint](independent-lock-delivery-checkpoint-2026-10-30.md).
+> The blocked or failing acceptance in this record is historical.
 
 ## Revisions and method
 

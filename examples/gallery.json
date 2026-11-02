@@ -1,7 +1,7 @@
 [
   {
     "slide": "love-00-your-c.md",
-    "example": "power/your-c",
+    "source": "examples/power/your-c.x",
     "optional": false
   },
   {
@@ -76,7 +76,7 @@
   },
   {
     "slide": "power-04-packages.md",
-    "example": "power/imports",
+    "source": "examples/power/imports.x",
     "optional": true
   },
   {

@@ -51,7 +51,8 @@ typedef struct ToolRun {
 // command reports
 
 static macro Stmt $report.toolchain_tool_failed(Expr $phase, Expr $status) =>
-  fprintf(stderr, "x2c: %s failed with status %d\n", $phase, $status);
+  Diagnostics.driver_report(
+    %"$($phase.str()) failed with status $($status)", NULL);
 
 // tool selection
 
@@ -221,7 +222,7 @@ int ToolRun.wait(ToolRun execution) {
   if (output) fputs(output, stderr);
   if (errors) fputs(errors, stderr);
   if (status && action.report)
-    $report.toolchain_tool_failed(action.phase.str(), status);
+    $report.toolchain_tool_failed(action.phase, status);
   return status;
 }
 

@@ -21,8 +21,9 @@ endif
 # of the network, so one wrapper starts it and passes its base URL.
 PACKAGE_TEST_COMMAND := python3 tools/run-fixture.py
 
-.PHONY: example short-example lisp-example run run-lisp \
-	verify-profile verify-headers
+.PHONY: run run-lisp verify-profile verify-headers
+
+check: test run run-lisp
 
 # Nothing links against libcurl until its pinned profile, headers, and
 # licenses have been verified.

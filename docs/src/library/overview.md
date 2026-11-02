@@ -212,6 +212,11 @@ An operation that fails raises its cause through `Error`, and a filtered
 `catch` or the cause's policy handles it. Absence, exhaustion, and parse
 results come back as return values.
 
+A null handle is a contract failure, not absence. An operation on a null
+`Thread`, `Channel`, `Mutex`, `Context`, `Logger`, `Job`, `Listener`,
+`Socket`, `HttpServer`, or `Lisp` raises `<bad-arg>`, while `free`, `close`,
+`destroy`, and `cleanup` accept NULL and do nothing.
+
 ## Use Error transfer and cleanup
 
 Language `raise`, `try`, filtered `catch`, `finally`, and `defer` are backed by

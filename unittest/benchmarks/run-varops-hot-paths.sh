@@ -6,14 +6,18 @@ BUILD="$ROOT/unittest/build/varops-benchmark"
 SOURCE="$ROOT/unittest/benchmarks/varops-hot-paths.x"
 CSV="$BUILD/results.csv"
 mkdir -p "$BUILD"
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 read -r -a link_flags <<<"${BUILD_LDFLAGS:-}"
 
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" "$SOURCE"
-"${CC:-cc}" -g -iquote "$ROOT/include/x2c" \
+# Each copy takes the build's flags and then its own optimization level.
+"${CC:-cc}" ${build_cflags[@]+"${build_cflags[@]}"} -O0 -g \
+  -iquote "$ROOT/include/x2c" \
   "$BUILD/varops-hot-paths.c" -L"$ROOT/builds/0" -lx2c -lm \
   "${link_flags[@]}" \
   -o "$BUILD/varops-hot-paths-debug"
-"${CC:-cc}" -O2 -iquote "$ROOT/include/x2c" \
+"${CC:-cc}" ${build_cflags[@]+"${build_cflags[@]}"} -O2 \
+  -iquote "$ROOT/include/x2c" \
   "$BUILD/varops-hot-paths.c" -L"$ROOT/builds/0" -lx2c -lm \
   "${link_flags[@]}" \
   -o "$BUILD/varops-hot-paths-optimized"

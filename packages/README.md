@@ -3,9 +3,9 @@
 These optional packages make C libraries available through x2c types and
 methods while preserving access to their native APIs. Choose a package for
 its examples, then follow its README to prepare dependencies and run it.
-Release bundles are built on macOS arm64 and x86_64 and on Linux x86_64 and
-arm64; Torch bundles only on macOS arm64 and Linux x86_64, because upstream
-publishes prebuilt CPU libtorch for those two alone.
+Releases publish prebuilt bundles for some packages;
+[the released set](../agents/releasing.md#released-packages) lists them and
+their platforms. Build the others from this checkout.
 
 | Package | What it provides |
 | --- | --- |
@@ -69,10 +69,10 @@ make -C packages/termbox2 short-example
 ./packages/termbox2/builds/game-of-life
 ```
 
-`make packages-check` runs the optional package tests and example checks;
-it is separate from normal compiler checks. Its terminal checks require
-Expect. Expect is not needed to build packages or run Game of Life
-interactively. See
+`make packages-check` runs each package's `check` target, its tests and
+applications; it is separate from normal compiler checks. Its terminal
+checks require Expect. Expect is not needed to build packages or run Game
+of Life interactively. See
 [using packages](../docs/src/guide/packages.md) for imports and
 [wrapping C libraries](../docs/src/guide/wrapping-c-libraries.md) for writing
 an adapter.
@@ -157,11 +157,18 @@ Packages use the following layout:
   retain terms and reviewed facts that cannot be replaced by a generated
   inventory.
 - `Makefile` sets `PACKAGE`, includes `package.mk`, and names the package's
-  example and run targets. `package.mk` builds `builds/lib<package>.a` plus
+  example and run targets and its `check`. `packages/Makefile` lists the
+  packages. `package.mk` builds `builds/lib<package>.a` plus
   the generated headers, objects, and the `builds/<package>.native.rsp`
   native arguments a consumer needs, checks `headers.sha256` and `licenses.sha256` with
   `verify-pins` before archiving, and builds `builds/<name>` from each
   `examples/<name>.x`; tests and examples link that archive.
+
+Custom consumer rules put their source first, then `$(PACKAGE_CONSUMER_DEPS)`.
+That shared prerequisite prepares the archive and native module and invokes
+the existing build driver on every request. The driver reuses translations
+and native objects when possible; executable requests still preprocess and
+link so changed package arguments and modules take effect.
 
 Opaque handle declarations and callback signatures are kept only when the C
 ABI requires them. Method declarations are emitted from their x2c definitions;

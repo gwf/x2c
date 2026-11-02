@@ -6,6 +6,7 @@
 #define __GUARD_0x0F89E663__
 
 #include "error-macros.h"
+#include "integer-ops.h"
 #include "private-keywords.h"
 #include "common.h"
 typedef Block Array;
@@ -37,9 +38,9 @@ Var Array_shift(Array _x2c_gensym_macro_array_19);
 
 Var Array_unshift(Array _x2c_gensym_macro_array_20, Var _x2c_gensym_macro_value_6);
 
-Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_4, Var _x2c_gensym_macro_value_7);
+Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_5, Var _x2c_gensym_macro_value_7);
 
-Var Array_remove(Array _x2c_gensym_macro_array_22, int _x2c_gensym_macro_index_5);
+Var Array_remove(Array _x2c_gensym_macro_array_22, int _x2c_gensym_macro_index_6);
 
 Array Array_copy(Array _x2c_gensym_macro_array_23);
 
@@ -49,7 +50,7 @@ Array Array_setslice(Array _x2c_gensym_macro_array_25, int _x2c_gensym_macro_sta
 
 Array Array_remslice(Array _x2c_gensym_macro_array_26, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7);
 
-Array Array_splice(Array _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_6, int _x2c_gensym_macro_remove_count_1, Array _x2c_gensym_macro_values_3);
+Array Array_splice(Array _x2c_gensym_macro_array_27, int _x2c_gensym_macro_index_7, int _x2c_gensym_macro_remove_count_1, Array _x2c_gensym_macro_values_3);
 
 int Array_index(Array _x2c_gensym_macro_array_28, Var _x2c_gensym_macro_value_9);
 

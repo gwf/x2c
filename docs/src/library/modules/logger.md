@@ -20,10 +20,10 @@ Owned structured event delivery.
 
 Creates a `Logger` in the active `Scope`, filtering below `min_level`.
 The `Logger` borrows the active canonical pool for any memory sinks and
-owns a private `Scope` for sink state. An invalid level returns NULL.
+owns a private `Scope` for sink state.
 
-**Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
-allocated.
+**Raises:** `<bad-arg>` for an unknown level, or `<alloc-fail>` when the
+`Logger` or its private `Scope` cannot be allocated.
 
 Source: `lib/logger.x`
 
@@ -55,12 +55,12 @@ Source: `lib/logger.x`
 | [`Logger.initialize`](#Logger.initialize) | Installs the process-wide info-level `Logger` and stderr sink. |
 | [`Logger.level_priority`](#Logger.level_priority) | Returns the ordering priority of a built-in level, or -1 when invalid. |
 | [`Logger.log`](#Logger.log) | Delivers one event synchronously to eligible sinks in registration order. |
-| [`Logger.min_level`](#Logger.min_level) | Returns `logger`'s minimum enabled level, or the null `Symbol` for NULL. |
+| [`Logger.min_level`](#Logger.min_level) | Returns `logger`'s minimum enabled level. |
 | [`Logger.remove_sink`](#Logger.remove_sink) | Removes and invalidates `sink`, returning one when it belonged to `logger`. |
 | [`Logger.set_min_level`](#Logger.set_min_level) | Sets the minimum enabled level and returns one. |
 | [`Logger.should_log`](#Logger.should_log) | Reports whether an event would reach at least one sink. |
 | [`Logger.shutdown`](#Logger.shutdown) | Shuts down process-wide `Logger` integration. |
-| [`Logger.sink_count`](#Logger.sink_count) | Returns the number of configured sinks, or zero for a NULL `Logger`. |
+| [`Logger.sink_count`](#Logger.sink_count) | Returns the number of configured sinks. |
 | [`Logger.trace`](#Logger.trace) | Logs borrowed `fields` synchronously at trace level under `category`. |
 | [`Logger.warn`](#Logger.warn) | Logs borrowed `fields` synchronously at warn level under `category`. |
 
@@ -173,10 +173,10 @@ Source: `lib/logger.x`
 Adds a plain-text sink for borrowed `file` and returns its handle.
 The caller must keep `file` open until the sink is removed or the `Logger`
 is freed. Removing the sink flushes but never closes the `File`. A NULL
-argument returns NULL.
+`file` returns NULL.
 
-**Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
-represented.
+**Raises:** `<bad-arg>` for a NULL `Logger`, or `<alloc-fail>` or `<bad-enc>`
+when sink state cannot be represented.
 
 Source: `lib/logger.x`
 
@@ -192,10 +192,11 @@ captured by `Logger.new`; a canonical hit may retain an ancestor pool's
 lifetime. Wide values move to the `Logger`'s owning `Scope` on retirement,
 while other pointer-bearing values remain borrowed. Newest events appear
 first.
-A NULL `Logger` or destination returns NULL.
-Registration may raise `<alloc-fail>` or `<bad-enc>` while constructing
-sink state. Later event delivery may raise `<alloc-fail>`, `<size-limit>`,
-or `<bad-enc>` while retaining values.
+A NULL destination returns NULL.
+
+**Raises:** `<bad-arg>` for a NULL `Logger`, or `<alloc-fail>` or `<bad-enc>`
+while constructing sink state. Later event delivery may raise
+`<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while retaining values.
 
 Source: `lib/logger.x`
 
@@ -205,14 +206,13 @@ Source: `lib/logger.x`
 `LogSink Logger.add_sink( Logger logger, LogEmitter emit, LogFlusher flush, Var data)`
 
 Appends a callback sink and returns its `Logger`-owned handle.
-A NULL `Logger` returns NULL; a quiescent `Logger` also returns NULL for a
-NULL emitter. The `Logger` borrows `data` and both callbacks until the
-sink is removed, cleared, or the `Logger` is freed, so anything they
-reference must remain live. Emitters run synchronously in registration
-order.
+A quiescent `Logger` returns NULL for a NULL emitter. The `Logger` borrows
+`data` and both callbacks until the sink is removed, cleared, or the
+`Logger` is freed, so anything they reference must remain live. Emitters
+run synchronously in registration order.
 
-**Raises:** `<bad-state>` during active sink delivery, or `<alloc-fail>` when
-the sink cannot be allocated.
+**Raises:** `<bad-arg>` for a NULL `Logger`, `<bad-state>` during active sink
+delivery, or `<alloc-fail>` when the sink cannot be allocated.
 
 Source: `lib/logger.x`
 
@@ -223,10 +223,10 @@ Source: `lib/logger.x`
 
 Adds a text sink for borrowed `stderr` and returns its `Logger`-owned
 handle. The sink selects color from terminal state at registration and
-flushes after every event. A NULL `Logger` returns NULL.
+flushes after every event.
 
-**Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
-represented.
+**Raises:** `<bad-arg>` for NULL, or `<alloc-fail>` or `<bad-enc>` when sink
+state cannot be represented.
 
 Source: `lib/logger.x`
 
@@ -236,9 +236,8 @@ Source: `lib/logger.x`
 `void Logger.clear_sinks(Logger logger)`
 
 Removes and invalidates every sink from `logger`.
-A NULL `Logger` does nothing.
 
-**Raises:** `<bad-state>` during active sink delivery.
+**Raises:** `<bad-arg>` for NULL, or `<bad-state>` during active sink delivery.
 
 Source: `lib/logger.x`
 
@@ -281,9 +280,10 @@ Source: `lib/logger.x`
 `void Logger.flush(Logger logger)`
 
 Calls configured flushers synchronously in registration order.
-A NULL `Logger` does nothing. A cause raised by a flusher transfers
-immediately, so later sinks are not flushed. A flusher must not mutate the
-sink list or free its `Logger`.
+A cause raised by a flusher transfers immediately, so later sinks are not
+flushed. A flusher must not mutate the sink list or free its `Logger`.
+
+**Raises:** `<bad-arg>` for NULL, or any cause from a flusher.
 
 Source: `lib/logger.x`
 
@@ -349,11 +349,11 @@ Pass each field as a `(key value)` List, or splice a field List with
 `@fields`. With no fields the event's field List is empty.
 `fields` is borrowed for the call. All sinks observe one immutable event,
 sequence numbers increase per `Logger`, and elapsed time starts with its
-first delivered event. NULL, filtered, invalid, sinkless, or category-less
+first delivered event. Filtered, invalid, sinkless, or category-less
 events do nothing. Fatal delivery flushes all sinks afterward.
 
-**Raises:** any cause from an emitter or fatal-event flusher; later callbacks
-are then skipped.
+**Raises:** `<bad-arg>` for a NULL `Logger`, or any cause from an emitter or
+fatal-event flusher; later callbacks are then skipped.
 
 Source: `lib/logger.x`
 
@@ -362,7 +362,9 @@ Source: `lib/logger.x`
 
 `Symbol Logger.min_level(Logger logger)`
 
-Returns `logger`'s minimum enabled level, or the null `Symbol` for NULL.
+Returns `logger`'s minimum enabled level.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/logger.x`
 
@@ -372,10 +374,10 @@ Source: `lib/logger.x`
 `int Logger.remove_sink(Logger logger, LogSink sink)`
 
 Removes and invalidates `sink`, returning one when it belonged to `logger`.
-When quiescent, a NULL argument, foreign sink, or already retired sink
-returns zero.
+When quiescent, a NULL, foreign, or already retired sink returns zero.
 
-**Raises:** `<bad-state>` during active sink delivery.
+**Raises:** `<bad-arg>` for a NULL `Logger`, or `<bad-state>` during active
+sink delivery.
 
 Source: `lib/logger.x`
 
@@ -385,7 +387,9 @@ Source: `lib/logger.x`
 `int Logger.set_min_level(Logger logger, Symbol level)`
 
 Sets the minimum enabled level and returns one.
-A NULL `Logger` or invalid level returns zero without changing anything.
+An invalid level returns zero without changing anything.
+
+**Raises:** `<bad-arg>` for a NULL `Logger`.
 
 Source: `lib/logger.x`
 
@@ -395,9 +399,10 @@ Source: `lib/logger.x`
 `int Logger.should_log(Logger logger, Symbol level, Symbol category)`
 
 Reports whether an event would reach at least one sink.
-A category names an event rather than filtering it. A NULL `Logger` or
-category, no sinks, `<off>`, an invalid level, or a filtered level returns
-zero.
+A category names an event rather than filtering it. A NULL category, no
+sinks, `<off>`, an invalid level, or a filtered level returns zero.
+
+**Raises:** `<bad-arg>` for a NULL `Logger`.
 
 Source: `lib/logger.x`
 
@@ -425,7 +430,9 @@ Source: `lib/logger.x`
 
 `int Logger.sink_count(Logger logger)`
 
-Returns the number of configured sinks, or zero for a NULL `Logger`.
+Returns the number of configured sinks.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/logger.x`
 

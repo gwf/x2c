@@ -54,14 +54,13 @@ static typedef struct Preparation {
     value is source the translator captured, so it lowers under the
     `outer` rules, those active outside the translator's own. A first
     lowering's `preparation` records the outputs for a reusable skeleton.
-    A replacement lowered as written within another's has that one as its
-    `parent`, whose source it may hold
-    as well. A shipped rule's replacement, a statement the kernel wrote,
-    and any replacement lowered within either are `shipped`, as is a
-    written definition while its function rules are chosen: their own
-    code is not source, so no user rule sees it, while the values the
-    watch holds are. A watch whose values are
-    lowered already has them `kept` as they are.
+    A replacement lowered within another's has that one as its `parent`,
+    whose source it may hold as well. A shipped rule's replacement, a
+    statement the kernel wrote, and any replacement lowered within either
+    are `shipped`, as is a written definition while its function rules are
+    chosen: their own code is not source, so no user rule sees it, while
+    the values the watch holds are. A watch whose values are lowered
+    already has them `kept` as they are.
 */
 struct SlotWatch {
   List values;
@@ -414,6 +413,7 @@ static List _prepared(
   Preparation preparation = {[], []};
   struct SlotWatch watch = {values.list(), &preparation};
   watch.outer = c.active_rewrites.cdr();
+  watch.parent = c.slot_watch;
   watch.shipped = rule.builtin;
   foreach (List value in values) preparation.outputs.push(NULL);
   Effects before = _effects(c);
@@ -456,7 +456,7 @@ static List _watched(
   Token site) {
   struct SlotWatch watch = {sources.list()};
   watch.outer = c.active_rewrites.cdr();
-  if (c.slot_watch && !c.slot_watch.preparation) watch.parent = c.slot_watch;
+  watch.parent = c.slot_watch;
   RewriteRule rule = c.active_rewrites.car();
   watch.shipped = rule.builtin || (watch.parent && watch.parent.shipped);
   with (c.slot_watch = &watch) {

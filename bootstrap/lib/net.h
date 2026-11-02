@@ -94,7 +94,7 @@ Socket Socket_adopt(int fd);
 
 void Socket_set_timeout(Socket s, int ms);
 
-void Socket_shutdown_write(Socket socket);
+void Socket_shutdown_write(Socket s);
 
 String Socket_peer(Socket socket);
 

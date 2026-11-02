@@ -5,7 +5,9 @@ include ../package.mk
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(PCRE2_PREFIX)/include
 PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib -lpcre2-posix -lpcre2-8
 
-.PHONY: example short-example lisp-example run run-lisp
+.PHONY: run run-lisp
+
+check: test run run-lisp
 
 example: builds/request-report
 
@@ -23,6 +25,7 @@ run: builds/parse-log builds/request-report builds/gallery-imports
 run-lisp: builds/inline-lisp
 	./builds/inline-lisp
 
-builds/gallery-imports: ../../examples/power/imports.x $(PACKAGE_ARCHIVE) | builds
+builds/gallery-imports: ../../examples/power/imports.x \
+  $(PACKAGE_CONSUMER_DEPS) | builds
 	$(X2C) build --output $@ --build-dir builds/gallery-imports-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<

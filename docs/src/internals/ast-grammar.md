@@ -204,8 +204,7 @@ SIZE-OPERAND ::= EXPR | DECL | (parens EXPR) | (parens DECL)
 SELECTION  ::= (generic EXPR ASSOCIATION*)
              | (va-arg EXPR DECL)
              | (offsetof TYPE MEMBER-TOKENS)
-             | (is-type EXPR TYPE-SYNTAX)
-             | (is-symbol EXPR EXPR) | (type-tag TYPE-SYNTAX)
+             | (type-tag TYPE-SYNTAX)
 ASSOCIATION ::= (association TYPE EXPR) | (association default EXPR)
 MEMBER-TOKENS ::= (C-TOKEN-OR-EXPR*)
 ```
@@ -214,6 +213,12 @@ A statement expression retains `(parens (block ...))`; its final expression
 statement supplies its type, otherwise it is void. A cast's first child is a
 `decl` during binding and a semantic Type after normalization. Parentheses do
 not permit a consumer to discard casts when extracting the original operand.
+
+`value is T` and `value is SELECTOR` have no head of their own. Parsing builds
+the `$has_type` or `$has_symbol` [source form][grammar-owner], and resolution
+replaces it with a runtime test such as a `Var_is` call. A test that must wait
+for template substitution keeps the source form under a `(<macro-expr>)`
+shell.
 
 `offsetof` can retain a member designator such as `("field" "." "nested" "["
 EXPR "]")`. `_Alignof` has no dedicated AST head: it uses `(expr ("size_t")
@@ -251,7 +256,7 @@ boxing/cache support, not a source keyword.
 
 An empty percent String is `(expr ("String") (0))`, whose content has an
 integer head. Ordinary String segments are `segvar` for `$name`, `segexp` for a
-braced expression, and cached text. The interpolation component also accepts
+`$(...)` expression, and cached text. The interpolation component also accepts
 `segraw` text; no current parser producer emits that form.
 
 Owners: [Compiler.parse_list_literal, Compiler.literal_cell][quotation-reader];
@@ -377,9 +382,9 @@ suffixes can splice `fnmod PARAMETERS MODIFIERS` into the enclosing modifier
 sequence without an extra List shell. Therefore a modifier sequence is not
 always a flat List of individually tagged modifier entries. The attribute form
 contains a String of native attribute text. `dim` without an operand retains an
-unspecified array bound. `^` is consumed by the pointer parser as well as
-internal Type operations; that acceptance alone does not promise native
-compiler compatibility for a caret declarator.
+unspecified array bound. The pointer parser accepts a `^` block declarator
+only while collecting C headers, and Type operations keep it as a declarator
+modifier. x2c source that writes one is a parse error.
 
 A C no-argument parameter list is explicitly `(params (param (void) (bind ()
 ())))`. Do not replace it with `(params)` solely because lambdas and calls
@@ -768,6 +773,9 @@ ADOPTION   ::= (adopt BASE TYPE STORAGE-MODE LOCATION)
              | (adopt BASE TYPE STORAGE-MODE (tag EXPR) LOCATION)
 META-PROTOCOL ::= (meta-protocol ADOPTION) | (meta-protocol BASE TYPE)
 STORAGE-MODE ::= external | static
+CONFORMANCE ::= (conform BASE PARTICIPANT FORWARD REVERSE BINDER
+                 DESCRIPTOR (CONFORMANCE-ROW*))
+CONFORMANCE-ROW ::= (MEMBER STATUS SOURCE EXPECTED TEMPLATE PART*)
 ```
 
 Imports are parser-retained unit items; the alias defaults to the package name.
@@ -779,6 +787,14 @@ marker without the discarded operands. Protocol and adoption forms are unit
 items, with associated types and members held in ordered record rows. The
 extended adoption adds a representation or a tag expression; the existing
 protocol rules determine which applies.
+
+A `conform` node is never program syntax. The compiler presents each resolved
+conformance that needs generated support to the protocol adapter rule as one
+`conform` node, and the rule places the forwarding members, descriptor
+thunks, method table, and descriptor registration. Each PART asks for one
+generated declaration: `(default NAME STORAGE)`, `(inherited NAME EXPECTED)`,
+or `(thunk NAME ERASED)`. The comment above `protocol_conformance` in
+`src/components/protocol-adapters.x` defines every field.
 
 Owners: [_parse_import_declaration][units]; [static assertions][declarations];
 [_body, _parse_associated, _parse_member, _adoption][protocol-declarations];
@@ -795,7 +811,8 @@ ERROR-SITE ::= (error-site)
 ```
 
 Compiler-inserted scalar conversions pass this expression to
-`Var_convert_at`. Emission returns the address of a static `X2CErrorSite`
+`Var_convert_at`, or to a site-carrying wide reader such as `Var_long_at`.
+Emission returns the address of a static `X2CErrorSite`
 with the current origin's file, function, and line. It shares the site-field
 owner used by `raise`; the conversion reads the site only on failure.
 
@@ -876,6 +893,29 @@ _callable_defer, _landing_region][cleanup-defer];
 [source initialization and initializer assembly][cache-owner];
 [_local_static, _static_binding, _source_initializer,
 _initializer_macro][emit-initialization].
+
+### Placed code and match tests
+
+```text
+PLACED     ::= (placed NODE)
+MATCH-TEST ::= (m-all TEST*) | (m-any TEST*)
+             | (m-next CURSOR PRIOR) | (m-step CURSOR PRIOR)
+             | (m-take LOCAL CURSOR) | (m-bits CURSOR BITS)
+```
+
+Match lowering writes code that is already lowered. `placed` wraps a lowered
+match switch or arm. The transform lowers only the source parts that the
+active lowering watches inside it and renders the rest as C text; emission
+prints NODE. The match tests are C conditions over List cells. `m-all` and
+`m-any` join two or more tests with `&&` and `||`. `m-next` assigns the
+`cdr` of PRIOR to CURSOR and holds, while `m-step` makes the same assignment
+and tests the new cursor. `m-take` assigns the `car` of CURSOR to LOCAL and
+holds. `m-bits` compares the `u64` bits of the `car` of CURSOR with the
+`uint64_t` literal BITS.
+
+Owners: `src/components/pattern-match.x` writes these forms,
+`_placed` in `src/transform/traversal.x` lowers placed code, and
+`src/emit/dispatch.x` emits both.
 
 ### Cache payloads and compatibility content
 
@@ -1097,6 +1137,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `commas` | [Initializers and destructuring](#initializers-and-destructuring) |
 | `comment` | [Native sequences, decorations, and output tokens](#native-sequences-decorations-and-output-tokens) |
 | `composite` | [Initializers and destructuring](#initializers-and-destructuring) |
+| `conform` | [Imports, protocols, and static assertions](#imports-protocols-and-static-assertions) |
 | `cons` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
 | `construct` | [Roots, wrappers, and identities](#roots-wrappers-and-identities); [Pending applications and captures](#pending-applications-and-captures) |
 | `continue` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
@@ -1155,8 +1196,6 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `initval` | [Native-dependent initializer alternatives](#native-dependent-initializer-alternatives) |
 | `input` | [Native-dependent initializer alternatives](#native-dependent-initializer-alternatives); [Cleanup, initialization, and generated markers](#cleanup-initialization-and-generated-markers) |
 | `int` | [Reading concrete layouts](#reading-concrete-layouts) |
-| `is-symbol` | [Grouping, type operands, and selection](#grouping-type-operands-and-selection) |
-| `is-type` | [Grouping, type operands, and selection](#grouping-type-operands-and-selection) |
 | `kind` | [String-headed syntax values and quotation](#string-headed-syntax-values-and-quotation); [Macro definitions](#macro-definitions) |
 | `label` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `lambda` | [Lambdas and typed adaptation](#lambdas-and-typed-adaptation) |
@@ -1166,6 +1205,12 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `local` | [Macro definitions](#macro-definitions) |
 | `local-macro` | [Pending applications and captures](#pending-applications-and-captures) |
 | `localinit` | [Cleanup, initialization, and generated markers](#cleanup-initialization-and-generated-markers) |
+| `m-all` | [Placed code and match tests](#placed-code-and-match-tests) |
+| `m-any` | [Placed code and match tests](#placed-code-and-match-tests) |
+| `m-bits` | [Placed code and match tests](#placed-code-and-match-tests) |
+| `m-next` | [Placed code and match tests](#placed-code-and-match-tests) |
+| `m-step` | [Placed code and match tests](#placed-code-and-match-tests) |
+| `m-take` | [Placed code and match tests](#placed-code-and-match-tests) |
 | `macro-bind` | [Pending applications and captures](#pending-applications-and-captures) |
 | `macro-invoke` | [Pending applications and captures](#pending-applications-and-captures) |
 | `macro-param` | [String-headed syntax values and quotation](#string-headed-syntax-values-and-quotation); [Macro definitions](#macro-definitions) |
@@ -1193,6 +1238,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `params` | [Lambdas and typed adaptation](#lambdas-and-typed-adaptation); [Declaration forms](#declaration-forms); [Modifiers and parameters](#modifiers-and-parameters); [Reading concrete layouts](#reading-concrete-layouts) |
 | `parens` | [Grouping, type operands, and selection](#grouping-type-operands-and-selection); [Source types and semantic Types](#source-types-and-semantic-types) |
 | `pattern` | [Macro definitions](#macro-definitions) |
+| `placed` | [Placed code and match tests](#placed-code-and-match-tests) |
 | `postfix` | [Operators, calls, and access](#operators-calls-and-access) |
 | `preproc` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `protocol` | [Imports, protocols, and static assertions](#imports-protocols-and-static-assertions) |

@@ -4,8 +4,8 @@ section: power
 tab: speed
 title: Reads like Python, runs close to C.
 links:
-  - label: The benchmarks
-    href: https://github.com/gwf/x2c/blob/main/examples/shootout/README.md
+  - label: The measured benchmark run
+    href: https://github.com/gwf/x2c/blob/f5031f767e3905e650af9ae2d9733182e45c1d3f/examples/shootout/results/current.md
 ---
 
 ```x2c
@@ -40,8 +40,8 @@ Typed collections such as `ArrayInt` and `MapIntInt` skip boxing entirely;
 `responses[i]` becomes the load C would have emitted. Everything compiles
 to C and goes through your C compiler's optimizer like anything else.
 
-In the Benchmarks Game suite, idiomatic x2c ran the eight shared problems at
-a median of 2.52 times C's time, and x2c tuned with these typed collections
+In the 1 November 2026 Benchmarks Game run, idiomatic x2c ran the eight
+shared problems at a median of 2.52 times C's time, and x2c tuned with these typed collections
 at 1.07. Python took 20 times, Go 1.74, Rust 1.08. The x2c came in at 1.16
 times Python's line count. Those are local measurements of those programs on
 one machine, not a ranking of the universe.

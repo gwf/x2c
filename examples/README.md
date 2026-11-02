@@ -41,7 +41,7 @@ replace the executable paths below with absolute paths too:
 ./examples/build/power-exceptions/exceptions /absolute/path/to/fixtures
 ```
 
-The [c2x2c tutorial](c2x2c/README.md) follows eight versions of a word counter,
+The [c2x2c tutorial](c2x2c/README.md) follows nine versions of a word counter,
 from native C to parallel directory counting. Its manual commands and viewer
 are separate from the curated example checks.
 
@@ -189,9 +189,10 @@ threads. [tours/language.x](tours/language.x) is a broader language tour;
 x2c to C programmers one small feature at a time;
 [tours/hello-worlds.x](tours/hello-worlds.x) finds twelve ways to say hello.
 
-The [language shootout](shootout/README.md) keeps fourteen problems, each
-with two x2c implementations and C/Python references. Its optional timing
-suite remains separate from the teaching examples:
+The [language shootout](shootout/README.md) adopts ten Benchmarks Game
+problems, with two x2c variants and up to six contributed reference languages.
+[Current results and charts](shootout/results/README.md) are tracked in dev.
+Its optional timing suite remains separate from the teaching examples:
 
 ```sh
 make shoot-run
@@ -203,8 +204,10 @@ make shoot-run
 separately maintained shootout and package sources. Ordinary examples build
 and run, require a zero exit status and empty stderr, and compare stdout with
 an expected result. Imports is marked optional because it requires PCRE2.
-Map traversal order is unspecified, so its output is compared without
-requiring a particular line order.
+The Your C example needs `--cpp`; its `.flags` file supplies that option.
+The combined examples page shows its native command.
+Map traversal order is unspecified. Examples use named lookups or sorted
+keys when their printed output needs a fixed order.
 
 Rows have six pipe-separated fields:
 

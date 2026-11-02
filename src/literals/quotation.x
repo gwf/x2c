@@ -298,11 +298,26 @@ module List _parse_insertion(Compiler c) {
   return expr;
 }
 
+/* In a template, `$name` and `@name` that name a hole insert its value,
+   and a sequence hole's values form one List, as `List.new(@name)` does.
+   Any other name reads where the code lands. */
 module List _parse_named_reference(Compiler c, Symbol sigil) {
+  List hole = c.macro_holes ? c.peek_macro_hole() : NULL;
+  if (hole && sigil == <@> && hole.assoc(<sequence>).int())
+    return _hole_values(c);
+  if (hole) return c.try_parse_macro_slot(<expression>);
   c.expect(sigil);
   if (c.peek(0) != <ident>)
     $fail.literals_insert_name(c, c.token, sigil);
   return c.parse_variable();
+}
+
+static List _hole_values(Compiler c) {
+  Token origin = c.token;
+  List values = c.try_parse_macro_slot(<argument>);
+  List callee = c.resolve_expression(%(expr () (ident "List_new")), origin);
+  return c.resolve_expression(
+    %(expr () (call $callee (args $values))), origin);
 }
 
 static List _parse_typed_capture(Compiler c) {

@@ -58,7 +58,7 @@ avoid redundant bootstrap builds and leave timings to one quiet coordinator.
   assertions, 1,380 fixtures, 138 matching book outputs, command checks and
   bootstrap/stage comparisons. No generated compiler/runtime delta remains.
   Five shootout harness tests and the complete archive checksum check pass.
-- The immutable [run archive](../../examples/shootout/results/runs/20261101T154144Z/README.md)
+- The immutable [run archive](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/examples/shootout/results/runs/20261101T154144Z/README.md)
   contains raw records, before/after source snapshots, rejected probes,
   CSV, updated figures in all three formats and rendering provenance.
   Original compiler/native binaries remain local under ignored debug storage.

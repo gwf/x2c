@@ -330,6 +330,9 @@ parity remains a separate follow-up; the expectations were not weakened.
   unbalanced Scope state. Ambient errors remain with their configured policy
   owner. Tests return `void` and use bare `EXPECT_*` statements; the harness
   also provides `EXPECT_LIST_EQ`, `TEST_FAIL`, and explicit skipped tests.
+  A `TestHarness_skip` call inside a running test makes that test a skip
+  unless it also fails; it needs no assertions and counts once. The summary
+  total is passed + failed + skipped.
 - `test-match-binder.x` verifies that a matched String binds as a String.
 - Match statement binders enter semantic arm scope as typed `Var` or
   `List` locals, definite assignment is enforced across guard operators, and
@@ -390,6 +393,18 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
   unchanged.
 
 ## Outstanding Items
+
+### Regex matching and deep List rendering overflow the stack
+
+On 2026-11-02, after `Regex.compile` learned to stop at the group-nesting
+limit or the stack floor, matching still recurses through groups without a
+floor check: only `_iterate` (repeated groups) checks it. Sixty thousand
+groups in sequence matched on the 8 MiB main thread exit 139, and 2,000
+nested groups matched in a 32 KiB task exit 138. A floor check at the top of
+`_run` is the likely repair, but `_run` is the matcher's hot path, so the
+repair needs a paired measurement. Until then the contexts chapter's
+statement that matching stops before the stack runs out holds only for
+repetition. `Var.repr` of a 100,000-deep List overflows the same way.
 
 ### Constructed array-dimension macro
 

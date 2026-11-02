@@ -5,16 +5,15 @@ data stay in `etc/`; ephemeral per-workspace state goes in `.context/`.
 
 - `plans/` - active plans and reference inputs. Each file opens with a
   `> Status:` blockquote, usually several lines: the state, then a note
-  saying where the work actually stands. The states in use are `active`,
-  `blocked`, `reference`, and `needs author scoping`.
+  saying where the work actually stands. The states in use are `active`
+  and `reference`.
 - `plans/reference/` - dated evidence and unselected research inputs.
 - `plans/archive/` - finished plans. The same blockquote, recording the
   outcome, its date, and the commit or PR that closed the plan. Write
-  `done`, `rejected`, `obsolete`, or `retired`. Older entries also say
-  `complete`, `completed`, `archived`, `superseded`, and `corrected`; each
-  of those means `done` or `obsolete`. Never delete a plan; archive it with
-  its outcome. Archived workflow restrictions record the authorization that
-  applied at the time; current work follows the root `AGENTS.md`.
+  `done`, `rejected`, `obsolete`, or `retired`. Never delete a plan; archive
+  it with its outcome. Archived and reference workflow restrictions record
+  the authorization that applied at the time; current work follows the root
+  `AGENTS.md`.
 
 Keep a plan concise and decision-complete: the requested behavior, important
 choices, implementation, relevant validation, and delivery should be clear to
@@ -38,18 +37,18 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed 2026-10-31 against `dev` `2b7a2b422`. Completed deliveries are
-archived below. Remaining implementation questions and conditional candidates
-have explicit owners. Historical measurements remain evidence for their named
-revisions; this closeout does not commission deferred work or main promotion.
+Completed deliveries are archived below. Remaining implementation questions
+and conditional candidates have explicit owners. Historical measurements
+remain evidence for their named revisions; this index does not commission
+deferred work or main promotion.
 
 ### Active work
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [October 31 margin repairs](review-repairs-2026-11-01.md) | Three reproduced compiler defects (consumed Macro targets, template `expand` inputs, attribute macros before `typedef`), missing release notes and third-party notice, and recorded drift in Map, Scope, benchmark, guide, and plan records. | Repair batch A from its reproductions first; deliver the code and documentation batches as the plan records. |
+| [Deep review remediation](deep-review-remediation-2026-11-01.md) | Repairs and waste removal from the 2026-11-01 whole-repository review, in batches. | Batches B and C are submitted separately; then the carried defects. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
-| [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
+| [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Historical benchmark and delivery/hold evidence closeout. | Recover the named records; implementation already landed. |
 
@@ -62,6 +61,7 @@ before selecting a candidate.
 | --- | --- |
 | [Deferred language and library candidates](reference/deferred-candidates-2026-10-31.md) | Conditional JSON/assertion sharing, Array rest, meta Map boundary, quotation/TagId adoption, and browser phase 3. |
 | [Deferred async performance](reference/async-performance-followup-2026-10-31.md) | Accepted Channel/memory costs and evidence limits; normal benchmarks remain deferred until requested. |
+| [Async execution-stack evidence](reference/async-validation-2026-10-31.md) | The eleven `reference/async-*.md` records: prototype, spike, validation, native targets, numeric and sanitizer fixes, memory attribution, review, and integration for the work published at `255de641f`. |
 | [Earlier review questions](reference/review-followups-2026-10-24.md) | Dated component, typed List, duplication, SDK/native-type questions. |
 | [Compiler ownership](compiler-ownership-investigation.md) | Refresh one concrete ownership candidate before selection. |
 | [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static inventory at `548b381f`, not a current census. |
@@ -79,9 +79,58 @@ is selected here.
 
 ### Decisions and completed records
 
+This list is selective. Every finished plan lives in `archive/` with its own
+status blockquote; only the records most often consulted are listed here.
+
+- [November 1 repository review](archive/repository-review-remediation-2026-11-01.md):
+  all seven changes implemented through `fd924dc61`, including package and
+  runtime repairs, documentation consistency, and removal of tracked benchmark
+  history. Combined publication validation passed; optional validation limits
+  remain explicit in the record.
+
 - [Regex-redux and source size](archive/plso-regex-and-source-size.md): phase
   profiling supports scratch-buffer replacements; pidigits wrappers are removed
   with flat timing. Independent counts and refreshed charts are validated.
+
+- [October 31 margin repairs](archive/review-repairs-2026-11-01.md): the
+  post-review repair plan; batches A-E repaired three compiler defects,
+  release notes, the third-party notice, and Map, Scope, task, guide, and
+  record margins, with publication evidence per batch.
+
+- [Independent Pool and Channel locks](archive/independent-pool-and-channel-locks.md),
+  its [revised design](archive/independent-locks-revised-design.md), and the
+  [profiled corrections](archive/independent-locks-profiled-corrections.md):
+  the shipped runtime candidate `a596f6cb5` with the accepted costs.
+
+- [Quotation construction](archive/quotation-construction.md): ordinary
+  quotation construction and its adoption, accepted 2026-10-28.
+
+- [Language server](archive/language-server.md): the resident language
+  server and the verified 0.4.0 client, completed through PR #615.
+
+- [Deferred method template name](archive/compiler-deferred-method-name.md):
+  a deferred method template keeps its name, published through PR #614.
+
+- [Name-first expression aliases](archive/alias-name-first.md): both alias
+  spellings, 43 conversions, and 19 compact raises in `2816c20e1`.
+
+- [Public-first function reading order](archive/function-reading-order.md)
+  and the [optional order lint](archive/function-order-lint.md): the skill,
+  the corpus campaign, and the lint candidate; further ordering is deferred.
+
+- [Serve reusable project analysis](archive/graph-serve.md) and
+  [reusable project analysis](archive/reusable-project-analysis.md):
+  persistent snapshots, queries, structural matching, and the served form.
+
+- [Pattern conditions](archive/match-condition.md): implemented 2026-10-26 in
+  `94942111d`.
+
+- [auto declarations](archive/auto-cleanup.md): `auto` declarations and
+  complete initializers, implemented 2026-10-23.
+
+- [Channels, Thread batches, and scope ownership](archive/channels-and-scope-ownership.md):
+  integrated 2026-10-22; shared-scope payloads are superseded by detached
+  Channel ownership.
 
 - [Tuned PLSO kernels](archive/plso-kernels.md): chunk reads, batched sequence
   output, full threshold scanning and contiguous N-body records retain measured
@@ -342,7 +391,7 @@ Archived 2026-10-12 after checking delivery on dev:
 - [Bug findings](archive/bug-findings-f28fc36.md) and the
   [consolidation catalog](archive/consolidation-catalog-f28fc36.md): audits
   of `f28fc36`; every finding is repaired or decided except catalog C13,
-  which is in the backlog.
+  an unselected candidate recorded in the catalog.
 - [Compiler dual-macro campaign](archive/compiler-dual-macro-contract.md#e45-final-source-family-accounting):
   done 2026-09-29 at `82d686e2`; shared grammar projections cover parsed
   source families. The [architecture reference](archive/compiler-dual-macro-architecture.md)

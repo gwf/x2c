@@ -17,7 +17,6 @@ Expression syntax and its resolution.
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
 | [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
-| [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
 | [`Compiler.is_builtin_converter_call`](#Compiler.is_builtin_converter_call) | The global builtin boxers and scalar formatters only observe their arguments. |
 | [`Compiler.needs_resolution`](#Compiler.needs_resolution) | True when syntax still needs ordinary binding or macro substitution. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
@@ -62,11 +61,12 @@ Source: `src/expressions/conversions.x`
 `List Compiler.complete_iter_chain(Compiler c, List expression)`
 
 Completes an eligible resolved `Iter` call chain for immediate consumption.
-It accepts only a typed identifier call of the form
-`(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
-the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
-completed recursively; a call missing only that last formal receives the
-hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+It accepts a typed call `(expr R (call (expr F C) (args A)))` whose
+callee type `F` resolves to a function, or a pointer to one, with formals
+`P`, where `R` and the last formal in `P` canonicalize to `Iter`. `Iter`
+arguments are completed recursively; a call missing only that last formal
+receives the hidden destination. Variadic calls and `Iter_unzip` are
+returned unchanged.
 
 Source: `src/expressions/calls.x`
 
@@ -110,20 +110,6 @@ that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
 Source: `src/expressions/conversions.x`
-
-<a id="Compiler.func_call_parts"></a>
-#### Compiler.func_call_parts
-
-`List Compiler.func_call_parts(Compiler c, Var content)`
-
-Returns the callee and arguments of a typed `Func` call, or NULL for any
-other expression. `content` is the body of the call's `expr` node. Each
-argument is `(func-arg value address source)`: the argument boxed as a
-Var, or `(no-value)` when it has no Var form; its address, or 0; and its
-type, which is `(expr ("List") (ident reference))` for a null argument
-that takes the callee's own type.
-
-Source: `src/expressions/calls.x`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call

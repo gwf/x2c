@@ -1,5 +1,5 @@
 import type { MarkdownInstance } from "astro";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import gallery from "../../../examples/gallery.json";
 
@@ -41,15 +41,21 @@ const browserSafe = (id: string, source: string) =>
   !/\b(Thread|Channel|Dispatch|Job)\b|Pool\.start|File\.popen/.test(source);
 
 const galleryEntries = gallery.flatMap((entry) => {
-  if (!entry.example || entry.language) return [];
-  const path = `examples/${entry.example}.x`;
+  if (entry.language) return [];
+  const path = entry.example ? `examples/${entry.example}.x` : entry.source;
+  if (!path?.startsWith("examples/") || !path.endsWith(".x")) return [];
+  const id = path.slice("examples/".length, -2);
+  const flagFile = path.slice(0, -2) + ".flags";
+  const flags = existsSync(join(import.meta.env.X2C_REPOSITORY_ROOT, flagFile))
+    ? read(flagFile).trim() : "";
   const source = read(path);
   const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`))!;
   return [{
-    id: entry.example, section: slide.frontmatter.section, path, source,
+    id, section: slide.frontmatter.section, path, source,
     label: slide.frontmatter.tab
-      ?? entry.example.split("/").pop()!.replaceAll("-", " "),
-    runnable: !entry.optional && browserSafe(entry.example, source),
+      ?? id.split("/").pop()!.replaceAll("-", " "),
+    runnable: !entry.optional && !flags && browserSafe(id, source),
+    recipe: `x2c run ${flags ? flags + " " : ""}${path}`,
     output: outputFor(path), slide,
   }];
 });

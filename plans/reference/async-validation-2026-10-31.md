@@ -1,5 +1,9 @@
 # Private async performance and regression validation - 2026-10-31
 
+> Status: reference - noted 2026-11-01. The validated work was published
+> to `dev` in `255de641f` on 2026-10-31. The hold and no-push statements
+> below are historical.
+
 Status: the local paired performance, build-cost, functional, and memory
 checks are complete on macOS arm64. Allocation, comparable compiler
 translation, and whole-build cost are close to baseline. Buffered native
@@ -294,7 +298,8 @@ pass.
 
 ## Evidence and remaining work
 
-Local evidence is retained in `.context/async-validation-20261031/`: raw
+Local evidence is retained in the workspace-local, untracked
+`.context/async-validation-20261031/`: raw
 per-process output, interrupted pilot and guarded runs, probe preparation and
 measurement scripts, instruction summaries, memory snapshots, provenance,
 and full check logs. Native probe source remains in

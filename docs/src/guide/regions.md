@@ -29,15 +29,20 @@ includes `String.new`, `String.malloc`, and List cells returned by a helper.
 from that same pool stays there, while a value from a shorter-lived region
 reports at the store.
 
-`Scope.move` and `Context.export` change the storage's owner. After the
-move, the region the pass was tracking no longer holds the allocation, so
-the allocation survives the end of that region. The promote family -
-`String.promote`, `List.promote`, and `Atom.promote` - hands the value to an
-ancestor pool the same way and is exempt for the same reason. Moving into a
-caller's slot is the ordinary way to return mutable storage, and the pass
-stops tracking the value there. Moving into a `Scope` local of the same
-function ties the
-value to that local's storage, so a read after `Scope.destroy` reports.
+A container's `move_to`, `Scope.move`, and `Context.export` change the
+storage's owner. After the move, the region the pass was tracking no longer
+holds the allocation, so the allocation survives the end of that region.
+`Scope.move` relinks only the allocation it is given. An `Array`, `Map`,
+`Block`, or `Buffer` keeps its buffers in other allocations, so the pass
+still ties a container given to `Scope.move` to its region; `move_to` moves
+the whole container. The promote family - `String.promote`, `List.promote`,
+and `Atom.promote` - hands the value to an ancestor pool the same way and is
+exempt for the same reason. Moving into a caller's slot is the ordinary way
+to return mutable storage, and the pass stops tracking the value there.
+Moving into a `Scope` local of the same function ties the value to that
+local's storage. After `Scope.destroy`, the pass reports the value when it
+is returned or stored. It reports a plain read of it only in the optional
+audit.
 
 A typed conversion copies. Assigning a `Block`, `Buffer`, or `Array` into a
 `String` or `List` declaration produces a new canonical value with its own
@@ -60,13 +65,19 @@ holding the value.
 
 A destination that converts its value by copying does not keep it: a `List`
 parameter given an `Array`, or a `Var` given a C string, which it boxes as a
-fresh `String`. A local C array
-passed on, returned, or stored counts as the address of its first element.
+fresh `String`. A copy into a container is fresh storage of the active
+region, and the pass tracks it. An `Array` given a `List` or an `Iter` makes
+such a copy, and so does a conversion either way between a typed `Array` or
+`Map` family and its boxed family. A local C array passed on, returned, or
+stored counts as the address of its first element.
 
 A number holds no address. A value of integer, floating-point, or enum
 type, or a destination of such a type, carries nothing the pass tracks.
 An address cast to `intptr_t` and then returned does not report, and a
-pointer cast back from that number is not followed.
+pointer cast back from that number is not followed. The exception is a
+`Var` given a `long`, `unsigned long`, `long long`, `unsigned long long`, or
+`long double`. The `Var` boxes the number, and the pass tracks the box as
+fresh storage of the active region.
 
 ## What the warnings do not cover
 

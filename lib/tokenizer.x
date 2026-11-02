@@ -335,7 +335,7 @@ static int _lisp_punctuation(Tokenizer t, int list, int collection) {
     case '(': case ')': return _operator(t, 1);
     case '"':
       if (data) return _operator(t, 1);
-      return _status_scanner(t, scan_c_string_status, <lit-char*>);
+      return _status_scanner(t, scan_lisp_string_status, <lit-char*>);
     case '{': case '[': if (data) return _operator(t, 1);
       break;
     case ']': case '}': case ':': if (collection) return _operator(t, 1);

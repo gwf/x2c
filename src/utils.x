@@ -5,13 +5,15 @@
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the
     compiler's identity, how a file is locked or replaced, and the
-    driver's fatal error line. Host tools run through
+    driver's log level and error lines. Host tools run through
     `lib/process.x`.
 */
 
 #pragma once
+#include "logger.x"
 #include "path.x"
 #include "process.x"
+#include "report.x"
 #include "sourceview.x"
 
 /* The 64-bit FNV-1a offset basis, which starts every FNV hash. */
@@ -24,7 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 /** Names the translation state that `src/compiler/compiler.x` defines. */
@@ -47,7 +48,7 @@ static macro Stmt $fail.utils_host_failed(
     %"$($detail.assoc(<operation>)) $($subject): $(
       String.new(strerror($error)))");
 
-static macro Stmt $fail.utils_command_missing(Expr $name) =>
+macro Stmt $fail.utils_command_missing(Expr $name) =>
   Diagnostics.driver_error(
     %"missing x2c-$($name) command; install the matching x2c commands");
 
@@ -376,10 +377,11 @@ String Path.identifier_hash(String filename) {
 
 /** Locks the file `p`, creating it, and returns a descriptor that holds the
     lock until it is closed or the process exits. Returns -1 when `wait` is
-    zero and another process holds the lock.
+    zero and another process holds the lock or `p` cannot be opened.
 */
 int Path.lock_file(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if (lock < 0 && !wait) return -1;
   if (lock < 0) $fail.utils_lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while (flock(lock, operation)) {
@@ -411,17 +413,15 @@ void Path.publish_files(List outputs) {
   }
 }
 
-/** Decodes the wait status `raw` of a child that has ended. Returns its
-    exit status, `128 + signal` when a signal ended it, or -1 otherwise,
-    and stores that signal in `signal`, or 0 when no signal ended it.
-*/
-int Job.decode_wait_status(int raw, int &signal) {
-  signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
-  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
-  return signal ? 128 + signal : -1;
-}
-
 // driver errors
+
+/** Sets the default `Logger`'s minimum level for one command: `<debug>`
+    when `debugging` and `<error>` otherwise. Its stderr sink stays, so an
+    uncaught error always prints its one-line `x2c: uncaught` report.
+*/
+void Compiler.configure_logging(int debugging) {
+  log_get_global_logger().set_min_level(debugging ? <debug> : <error>);
+}
 
 /** Reports a caught `<not-found>` or `<io-fail>` through
     `Diagnostics.driver_error` as its operation, path or program, and system
@@ -435,15 +435,32 @@ void Diagnostics.host_error(List detail) {
   $fail.utils_host_failed(detail, subject, error);
 }
 
-/** Prints `x2c: error: <message>` to stderr and exits with status 2.
-    The streams are flushed and `atexit` handlers do not run, so the call is
-    safe inside a `try` body or a catch arm, whose records those handlers
-    would otherwise find still live.
+/** Prints `x2c: error: <message>` to stderr, then `note: <note>` when
+    `note` is not NULL, after clearing a transient progress line. The
+    caller decides how the command ends.
 */
-void Diagnostics.driver_error(const char *message) {
+void Diagnostics.driver_report(const char *message, const char *note) {
+  report_suspend();
   fprintf(stderr, "x2c: error: %s\n", message);
+  if (note) fprintf(stderr, "note: %s\n", note);
+}
+
+/** Reports `message` and `note` as `Diagnostics.driver_report` does and
+    exits with status 2. The streams are flushed and `atexit` handlers do
+    not run, so the call is safe inside a `try` body or a catch arm, whose
+    records those handlers would otherwise find still live.
+*/
+void Diagnostics.driver_fail(const char *message, const char *note) {
+  Diagnostics.driver_report(message, note);
   fflush(NULL);
   _exit(2);
+}
+
+/** Reports `message` with no note and exits as `Diagnostics.driver_fail`
+    does.
+*/
+_Noreturn void Diagnostics.driver_error(const char *message) {
+  Diagnostics.driver_fail(message, NULL);
 }
 
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
@@ -458,14 +475,15 @@ String Compiler.cache_root(void) {
 
 /** Removes each entry of the cache `directory` whose recorded `source`
     file no longer exists and that no other run holds by its `lock`.
-    An entry without a `source` file stays.
+    An entry without a readable `source` file stays. Another process may
+    prune the same cache, so an entry it removes or locks first is skipped.
 */
 void Compiler.prune_cache(String directory) {
   if (!Path.is_dir(directory)) return;
   foreach (String name, Path.list_dir(directory)) {
-    String entry = Path.join(directory, name);
-    Path source = %"$entry/source";
-    if (!source.is_file() || Path.is_file(source.read_text())) continue;
+    String entry = Path.join(directory, name), script = NULL;
+    if (!SourceView.read(NULL, %"$entry/source", script)) continue;
+    if (Path.is_file(script)) continue;
     int lock = Path.lock_file(%"$entry/lock", 0);
     if (lock < 0) continue;
     try Path.remove_tree(entry);

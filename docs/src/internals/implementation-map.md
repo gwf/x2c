@@ -157,6 +157,9 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Builtin macros and their native prototypes: `etc/compiler-prelude.x`;
   the unit binding table: `src/meta-native/bindings.x`; declaration macros:
   `src/compiler/declarations/production.x`
+- Map a macro over compile-time rows with `expand`:
+  `src/components/macro-mapping.x`, called by the `$expand` decorator in
+  `etc/compiler-prelude.x`
 - Tests: macro import, template, and decorator compiler fixtures;
   compile-time-macros and decorators examples
 - See also: [compile-time macros](../reference/language.md#compile-time-macros)

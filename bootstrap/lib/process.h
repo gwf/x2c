@@ -82,6 +82,8 @@ Job Job_wait_any(Array jobs);
 
 int Job_ready(Job job);
 
+int Job_decode_wait_status(int raw, int * signal);
+
 String Env_get(String name);
 
 

@@ -21,6 +21,12 @@ test("the examples page renders without a compile service", () => {
     assert.match(page, /Running programs is unavailable in this build/);
     assert.match(page, /data-example="love\/values"/);
     assert.match(page, /data-example="power\/channels"/);
+    assert.match(page, /data-example="power\/your-c"/);
+    assert.match(page, /data-example="power\/imports"/);
+    assert.match(page, /x2c run --cpp examples\/power\/your-c\.x/);
+    const data = JSON.parse(page.match(/<script[^>]*data-examples[^>]*>([\s\S]*?)<\/script>/)[1]);
+    assert.equal(data.find(entry => entry.id === "power/your-c").runnable, false);
+    assert.equal(data.find(entry => entry.id === "power/imports").runnable, false);
     assert.match(page, /data-example="programs\/notes"/);
     const redirect = readFileSync(join(destination, "playground/index.html"), "utf8");
     assert.match(redirect, /noindex/);

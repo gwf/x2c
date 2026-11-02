@@ -13,6 +13,7 @@ manifest="$example_dir/manifest.txt"
 build="$example_dir/build"
 x2c=${X2C:-"$root/builds/0/x2c"}
 cc=${CC:-cc}
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 linker_flags=()
 if [[ $(uname -s) == Linux ]]; then
   linker_flags+=(-rdynamic)
@@ -72,9 +73,7 @@ check_stdout() {
     record_failure "$name has no expected stdout at $declared"
     return
   fi
-  if diff -u "$expected" "$actual"; then
-    return
-  fi
+  if diff -u "$expected" "$actual"; then return; fi
   record_failure "$name stdout differs"
 }
 
@@ -114,7 +113,8 @@ check_example() {
       record_failure "$name did not translate"
       return 0
     fi
-    if ! "$cc" ${linker_flags[@]+"${linker_flags[@]}"} \
+    if ! "$cc" ${build_cflags[@]+"${build_cflags[@]}"} \
+        ${linker_flags[@]+"${linker_flags[@]}"} \
         -iquote "$root/include/x2c" \
         "$output/${name##*/}.c" -L"$root/builds/0" -lx2c -lm -o "$program" \
         >"$case_build/cc.stdout" 2>"$case_build/cc.stderr"; then
@@ -224,7 +224,7 @@ done <"$manifest"
 
 if ((${#work[@]})); then
   printf '%s\n' "${work[@]}" | \
-    xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
+    xargs -P "${BUILD_JOBS:-1}" -n 1 \
       "$example_dir/check.sh" "$mode" --one || true
 fi
 

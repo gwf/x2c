@@ -35,7 +35,7 @@ Pool x2c_pool_exchange(Pool pool) {
 */
 void Pool.thread_initialize(void) {
   if (value_thread.current) return;
-  if (!value_root) _fatal("canonical value root is not initialized");
+  if (!value_root) x2c_fatal("Pool: canonical value root is not initialized");
   value_thread.current = value_root;
 }
 

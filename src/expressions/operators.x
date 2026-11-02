@@ -155,12 +155,7 @@ module List _binary_expression(
   }
   if (operator == <in>)
     $fail.expressions_contains_missing(c, origin, rhs_type);
-  /* An untyped preprocessor name beside a converting protocol participant
-     would reach the C compiler with no usable conversion. */
-  if ((lhs_type != NULL) != (rhs_type != NULL))
-    _check_untyped_operand(
-      c, operator, lhs_type ? lhs_type : rhs_type,
-      lhs_type ? rhs : lhs, origin);
+  _check_participant_operand(c, operator, lhs, rhs, origin);
   return _native_binary_expression(c, operator, lhs, rhs, origin);
 }
 
@@ -171,11 +166,11 @@ static int _builtin_index_lvalue(Compiler c, List expression) {
   return 0;
 }
 
+/* A raw string literal beside a String converts for `==` and the
+   comparisons derived from `equal` or `compare`. */
 static void _convert_string_comparison(
   Compiler c, Symbol operator, List &lhs, List &rhs) {
-  if (operator != <==> && operator != <!=> && operator != <"<"> &&
-      operator != <">"> && operator != <"<="> && operator != <">=">)
-    return;
+  if (operator != <==> && !Compiler.derived_member(operator)) return;
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (c.sym.is_string_type(lhs_type) && _is_raw_string_literal(rhs))
     rhs = c.convert_expression(rhs, lhs_type);
@@ -202,15 +197,23 @@ static int _convert_string_addition(
   return constant;
 }
 
-static void _check_untyped_operand(
-  Compiler c, Symbol operator, Type participant, List other,
-  Token origin) {
+/* An arithmetic operator that no member resolved would reach C as pointer
+   arithmetic on a converting participant that has the operator's member,
+   so the operand beside it, which did not convert for the member, is an
+   error. An untyped preprocessor name has no conversion at all. Equality
+   keeps native identity, and a `Var` operand lowers dynamically. */
+static void _check_participant_operand(
+  Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Symbol member = Compiler.operator_member(operator);
-  if (!member || operator == <==> || operator == <!=>) return;
-  if (_converts_operands(c, participant) &&
-      c.resolve_protocol_member(participant, member) &&
-      other ~= %(expr ? (ident ?)))
-    $fail.expressions_operand_untyped(c, origin);
+  if (!member || operator == <==>) return;
+  Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
+  if (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)) return;
+  int left = !!_converting_member(c, lhs_type, member);
+  if (!left && !_converting_member(c, rhs_type, member)) return;
+  if (!lhs_type || !rhs_type) $fail.expressions_operand_untyped(c, origin);
+  $fail.expressions_operand_unconverted(
+    c, origin, left ? lhs_type : rhs_type, member,
+    left ? rhs_type : lhs_type);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
@@ -351,8 +354,8 @@ static List _protocol_operator_expression(
   return %(expr (int) (op $op $call $zero));
 }
 
-/* A binary operator whose one operand is a converting participant converts
-   the other operand to that type through its declared converter, so
+/* A binary operator whose one operand is a converting participant resolves
+   that participant's member and converts the other operand for it, so
    `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
    replaces the original through `lhs` and `rhs`. An operand's qualifier
    describes its storage, not the type that adopts the operator, so the
@@ -387,36 +390,50 @@ static List _resolve_protocol_operator(
     /* `_comparison` lowers a comparison of two `Var` operands, and the
        dynamic rule lowers their arithmetic through its runtime lanes. */
     if (c.sym.is_var_type(participant)) return NULL;
-    if (participant !== rhs_type) {
-      participant = _converted_participant(
-        c, member, participant, rhs_type, lhs, rhs);
-      if (!participant) return NULL;
-    }
+    if (participant !== rhs_type)
+      return _converted_member(c, member, participant, rhs_type, lhs, rhs);
   }
   return participant && member
        ? c.resolve_protocol_member(participant, member)
        : NULL;
 }
 
-static Type _converted_participant(
+static List _converted_member(
   Compiler c, Symbol member, Type lhs_type, Type rhs_type,
   List &lhs, List &rhs) {
   if (c.sym.is_var_type(lhs_type) ||
       c.sym.is_var_type(rhs_type)) return NULL;
   Type shared = _shared_participant(c, lhs_type, rhs_type, member);
-  if (shared) return shared;
-  int lhs_member = !!c.resolve_protocol_member(lhs_type, member) &&
-    _converts_operands(c, lhs_type);
-  int rhs_member = !!c.resolve_protocol_member(rhs_type, member) &&
-    _converts_operands(c, rhs_type);
+  if (shared) return c.resolve_protocol_member(shared, member);
+  List lhs_member = _converting_member(c, lhs_type, member);
+  List rhs_member = _converting_member(c, rhs_type, member);
   if (lhs_member && !rhs_member) {
-    List converted = c.converter_call(rhs, rhs_type, lhs_type);
-    if (converted) { rhs = converted; return lhs_type; }
+    Type parameter = _operand_parameter(lhs_member);
+    List converted = parameter ? c.convert_expression(rhs, parameter)
+                               : c.converter_call(rhs, rhs_type, lhs_type);
+    if (converted) { rhs = converted; return lhs_member; }
   }
-  else if (rhs_member && !lhs_member) {
+  else if (rhs_member && !lhs_member && !_operand_parameter(rhs_member)) {
     List converted = c.converter_call(lhs, lhs_type, rhs_type);
-    if (converted) { lhs = converted; return rhs_type; }
+    if (converted) { lhs = converted; return rhs_member; }
   }
+  return NULL;
+}
+
+/* The member of `type` when `type` converts its operator's other operand. */
+static List _converting_member(Compiler c, Type type, Symbol member) {
+  List resolved = c.resolve_protocol_member(type, member);
+  return resolved && _converts_operands(c, type) ? resolved : NULL;
+}
+
+/* The operand parameter of `member` when its type differs from the
+   receiver's, as `long` does in `T T.add(T, long)`, or NULL. Such a
+   member takes the right operand as an ordinary argument, so only a
+   participant on the left reaches it; the operator never commutes. */
+static Type _operand_parameter(List member) {
+  if (member ~= %(? ((func (?(Type receiver) ?(Type parameter))) *)) &&
+      parameter.canonicalize() != receiver.canonicalize())
+    return parameter;
   return NULL;
 }
 

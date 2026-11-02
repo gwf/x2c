@@ -93,17 +93,17 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
     }
     default: return argument;
   }
-  List raw_params = NULL, Var return_type = void;
-  if (!_lambda_adapter_signature(expected_type, raw_params, return_type) ||
+  List raw_params = NULL;
+  if (!cb.target.function_parts(raw_params, NULL) ||
       _typed_params_variadic(raw_params))
     return argument;
   int all_var = _collect_param_types(raw_params, cb.params);
   List source_params = NULL;
   cb.source.function_parts(source_params, NULL);
   _collect_param_types(source_params, cb.source_params);
-  List result = return_type is <list> ? return_type : $(return_type);
-  if (all_var && result === %("Var")) return argument;
-  cb.result = result;
+  // The adapter's result keeps the qualifiers its callback type declares.
+  cb.result = cb.target.apply();
+  if (all_var && cb.result === %("Var")) return argument;
   return _publish_lambda(cb);
 }
 
@@ -116,8 +116,10 @@ static void _split(Callback &c) {
   if (!c.source_binding || !source || source.is_pointer() ||
       !source.is_function())
     $fail.callable_callback_direct(c);
-  if (!c.target.function_parts(c.params, c.result))
+  if (!c.target.function_parts(c.params, NULL))
     $fail.callable_callback_target(c);
+  // The helper's result keeps the qualifiers its callback type declares.
+  c.result = c.target.apply();
   if (!source.function_parts(c.source_params, c.source_result))
     $fail.callable_callback_source(c);
   if (_typed_params_variadic(c.params) ||
@@ -131,12 +133,11 @@ static void _check_signature(Callback &cb) {
   if (target_count != source_count) {
     $fail.callable_callback_arity(cb, target_count, source_count);
   }
-  cb.result = cb.result.canonicalize();
-  cb.source_result = cb.source_result.canonicalize();
-  if (cb.result === %(void) || cb.source_result === %(void))
+  Type result = cb.result.canonicalize();
+  Type source_result = cb.source_result.canonicalize();
+  if (result === %(void) || source_result === %(void))
     $fail.callable_callback_void_return(cb);
-  if (cb.result != cb.source_result)
-    $fail.callable_callback_result(cb);
+  if (result != source_result) $fail.callable_callback_result(cb);
 }
 
 static void _check_params(Callback &cb) {
@@ -199,19 +200,6 @@ static List _publish_lambda(Callback &cb) {
   List binding = c.sym.introduce(c.fresh_name("lambda_adapt"));
   c.add_early(_function(cb, binding));
   return _func_bound(cb.target, binding);
-}
-
-static int _lambda_adapter_signature(
-  List expected_type, List &raw_params, Var &return_type) {
-  Type expected = expected_type;
-  List signature = expected.canonicalize();
-  if (signature ~= %((!or (!quote *) & ^) *rest)) signature = rest;
-  if (signature ~= %((func (*parameters)) ?return_head *)) {
-    raw_params = parameters;
-    return_type = return_head;
-    return 1;
-  }
-  return 0;
 }
 
 static int _collect_param_types(List raw_params, List &out_types) {

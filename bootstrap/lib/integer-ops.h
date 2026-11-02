@@ -5,5 +5,6 @@
 #ifndef __GUARD_0xE9E258E3__
 #define __GUARD_0xE9E258E3__
 
+#include "var/var.h"
 
 #endif /* __GUARD_0xE9E258E3__ */

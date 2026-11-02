@@ -4,23 +4,14 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/varops-probes"
 PROGRAM="$BUILD/varops-fatal"
-MODE=$(cat "$ROOT/etc/build-mode.local" 2>/dev/null ||
-  cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 mkdir -p "$BUILD"
-
-case "$MODE" in
-  debug) flags=(-g) ;;
-  optimize) flags=(-O2) ;;
-  *)
-    echo "unknown build mode: $MODE" >&2
-    exit 2
-    ;;
-esac
 
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/probes/varops-fatal.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
-  "$BUILD/varops-fatal.c" -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
+"${CC:-cc}" ${build_cflags[@]+"${build_cflags[@]}"} \
+  -iquote "$ROOT/include/x2c" "$BUILD/varops-fatal.c" \
+  -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 
 check_case() {
   local name=$1

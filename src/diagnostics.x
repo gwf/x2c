@@ -561,7 +561,7 @@ static void _write_json_location(Compiler c, Buffer out, List location) {
   if (location ~=
       %((file ?file) (line ?line) (column ?column) (length ?length)
         (position ?position))) {
-    out.write(%",\"file\":$(Var.json(_json_path(c, file)))");
+    out.write(%",\"file\":$(Var.json(_shown_path(c, file)))");
     out.write(%",\"line\":$line,\"column\":$column");
     out.write(%",\"length\":$length,\"position\":$position");
     return;
@@ -570,12 +570,13 @@ static void _write_json_location(Compiler c, Buffer out, List location) {
   out.write(",\"length\":null,\"position\":null");
 }
 
-/* Text names a source under the x2c root relative to that root and leaves
-   another relative path as given. JSON resolves both against the working
-   directory: a relative path that is not there came from the root. A source
-   inside the working directory stays relative to it; any other is absolute.
+/* A location names a source under the x2c root relative to that root and
+   leaves another relative path as given. Both reports resolve it against
+   the working directory: a relative path that is not there came from the
+   root. A source inside the working directory stays relative to it; any
+   other is absolute.
 */
-static String _json_path(Compiler compiler, String path) {
+static String _shown_path(Compiler compiler, String path) {
   if (!path || path.startswith("<")) return path;
   if (!path.startswith("/") && !Path.exists(path))
     path = Path.join(compiler.root_dir, path);
@@ -590,7 +591,7 @@ static void _write_heading(
   if (location ~=
       %((file ?file) (line ?line) (column ?column) (length ?length)
         (position ?position))) {
-    String place = %"$file:$line:$column";
+    String place = %"$(_shown_path(c, file)):$line:$column";
     fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
     _show_source_context(c, line, column, length, position);
     return;

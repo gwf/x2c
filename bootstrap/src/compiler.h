@@ -113,7 +113,6 @@ typedef struct Compiler{
   Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
-  struct MetaHelper * meta_helper;
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;
@@ -121,7 +120,6 @@ typedef struct Compiler{
   Map meta_group_bound;
   int meta_build;
   int skipped_form;
-  int load_source;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;
   int replaying_declaration;
@@ -383,6 +381,8 @@ int Compiler_open_condition_scope(Compiler c, List expression);
 List Compiler_condition_bindings(List expression);
 
 int Compiler_read_source(Compiler c, String path, String volatile * text);
+
+String Compiler_read_source_text(Compiler c, String path);
 
 int Compiler_owns_package_source(Compiler c, String path);
 

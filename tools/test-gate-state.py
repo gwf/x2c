@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Optional offline probes for scoped publication evidence; no Make gates run."""
 import copy
-import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-spec = importlib.util.spec_from_file_location(
-    "gate_state", Path(__file__).with_name("gate-state.py"))
-gate = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(gate)
+from agent_context import load_script
+
+gate = load_script(Path(__file__).with_name("gate-state.py"), "gate_state")
 
 DOC_CHECK = ["make", "doc-check"]
 DOC_OUTPUTS = ["make", "-o", "build", "doc-outputs"]

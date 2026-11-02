@@ -155,13 +155,16 @@ static List _expression_rewrite(Compiler c, List expression) {
 
 /* Access admission has established the getter signature, but its target is
    still intact here. Dispatch before lowering a read or an enclosing
-   update. */
+   update. Parentheses name the same element, so an update rule sees the
+   bare target. */
 static List _access_source(List expression) {
   match (expression) {
     case %(expr ?type (getindex ?base ?key)):
       return %(expr $type (index $base $key));
-    case %(expr ?type (parens ?inner)):
-      return %(expr $type (parens $(_access_source(inner))));
+    case %(expr ? (parens ?(List inner))): {
+      List target = _access_source(inner);
+      return target == inner ? expression : target;
+    }
   }
   return expression;
 }
@@ -281,11 +284,6 @@ module List _declaration(Compiler c, List ast) {
         List converted = c.convert_initializer(
           rhs, target_type, native_target);
         new_bind = %(op = (bind $var $mods) $converted);
-        if (target_type.type().is_static())
-          match (converted)
-            case %(expr ("Func")
-                   (ident (!set ?dependency (binding ? ?)))):
-              c.static_init_deps[var] = $(dependency);
       }
       values.push(new_bind);
     }
@@ -311,15 +309,10 @@ module List _call(Compiler c, List ast) {
       case %((!or (!quote *) & ^) (func ?parameters) *):
         return _typed_call(c, callee, parameters, arguments);
     }
-    Type type = callee.cadr();
-    if (!type) return ast;
-    Type resolved = c.sym.resolve_key(type);
+    // A typedef names the signature of a call through a function pointer.
     List parameters = NULL;
-    if (resolved.rest_index() >= 0 &&
-        resolved.function_parts(parameters, NULL)) {
-      callee = %(expr $resolved $(callee.caddr()));
+    if (c.sym.resolve_key(callee.cadr()).function_parts(parameters, NULL))
       return _typed_call(c, callee, parameters, arguments);
-    }
   }
   return ast;
 }
@@ -332,7 +325,7 @@ module List _typed_call(
   if (callee ~= %(expr ? (ident ?binding)))
     callee_name = Ast.binding_spelling(binding);
   int list_varargs = callee_name == "List_list_n";
-  if (c.fn_name && _iter_immediate_consumer(callee_name) && args)
+  if (_iter_immediate_consumer(callee_name) && args)
     args = cons(c.complete_iter_chain(args.car()), args.cdr());
   Array values = [], int arg_index = 0;
   List p = params, a = args;
@@ -350,6 +343,7 @@ module List _typed_call(
       : c.lower_lambda_expr(arg);
     values.push(converted);
   }
+  _require_destination(c, p, arg_index);
   List rest = p;
   while (rest && !Type.rest_container(rest.car())) rest = rest.cdr();
   if (rest) {
@@ -358,7 +352,7 @@ module List _typed_call(
     packed = c.maybe_adapt_func_arg(packed, container);
     values.push(c.convert_expression(packed, container));
     List native = params[0:arg_index].append($(container));
-    Type signature = callee.cadr();
+    Type signature = c.sym.resolve_key(callee.cadr());
     if (signature.is_pointer())
       signature = cons(
         signature.car(), cons(%(func $native), signature.cdr().cdr()));
@@ -369,6 +363,19 @@ module List _typed_call(
   if (!newargs) newargs = supplied;
   Macro called = $called;
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
+}
+
+/* Arity checking lets a stage that returns an `Iter` omit its final
+   destination for the chain's consumer to supply. A stage whose chain no
+   consumer completed is still one argument short. */
+static void _require_destination(Compiler c, List omitted, int supplied) {
+  match (omitted) case %(?(List formal)) if (_iter_formal(formal)):
+    $fail.expressions_call_arity(c, NULL, 0, 0, supplied + 1, supplied);
+}
+
+static int _iter_formal(Type formal) {
+  if (formal.car() == <param>) formal = formal.type_from_ast();
+  return formal.canonicalize() == %("Iter");
 }
 
 static int _iter_immediate_consumer(String name) =>

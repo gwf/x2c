@@ -9,6 +9,7 @@ typedef struct LispReader{
   Tokenizer tokenizer;
   char * source;
   unsigned base, end;
+  unsigned long floor;
 }
 LispReader;
 
@@ -25,7 +26,7 @@ static Var _prefixed(LispReader * r, Var prefix, int depth);
 
 static Var _list(LispReader * r, int depth);
 
-static int _nested_depth(int depth);
+static int _nested_depth(LispReader * r, int depth);
 
 static Var _atom(LispReader * r, Token token);
 
@@ -39,17 +40,15 @@ _Noreturn static Var _malformed_token(LispReader * r, Token token);
 
 _Noreturn static Var _incomplete(String source, unsigned at);
 
-static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth);
+static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth, unsigned long floor);
 
-static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth);
+static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth, unsigned long floor);
 
 static int _plain_string(char * s, unsigned * at, Var * out);
 
 static int _plain_integer(char * s, unsigned * at, Var * out);
 
 static int _plain_atom(char * s, unsigned * at, Var * out);
-
-static int _digit(char c);
 
 static int _token_end(char c);
 
@@ -101,6 +100,8 @@ Array Array_new(void);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+unsigned long _x2c_stack_floor(void);
+
 void x2c_cleanup_leave(X2CCleanup *);
 
 Scope Scope_new_named(const char *);
@@ -131,7 +132,8 @@ Symbol String_read_lisp_form(String source, unsigned * cursor, Var * out){
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       Var value =((void) 0, Void);
-      if(String_getindex(source, at) && _plain_form(source, &(at), &(value), items, 1)){
+      unsigned long floor = _x2c_stack_floor();
+      if(String_getindex(source, at) && _plain_form(source, &(at), &(value), items, 1, floor)){
         (* cursor) = at;
         if(out)(* out) = value;
         {
@@ -193,7 +195,7 @@ Symbol Tokenizer_read_lisp_form(Tokenizer t, String source, unsigned base, unsig
   unsigned start = base + token -> pos;
   (* cursor) = start;
   LispReader r ={
-    t, source, base, 0
+    t, source, base, 0, _x2c_stack_floor()
   }
   ;
   Var form = _parse_form(&(r), token, 0);
@@ -241,7 +243,7 @@ static Var _parse_form(LispReader * r, Token token, int depth){
     case 11703268 : if(Tokenizer_status((* r).tokenizer) == 664344300629258) return((void) 0, Void);
     return _malformed_token(&((* r)), token);
     case 83 : return _malformed_token(&((* r)), token);
-    case 81 : return _list(&((* r)), _nested_depth(depth));
+    case 81 : return _list(&((* r)), _nested_depth(&((* r)), depth));
     case 79 : prefix = Atom_intern(_0);
     break;
     case 193 : prefix = Atom_intern(_1);
@@ -251,7 +253,7 @@ static Var _parse_form(LispReader * r, Token token, int depth){
     case 11393 : prefix = Atom_intern(_3);
     break;
   }
-  if(! Var_is_void(prefix)) return _prefixed(&((* r)), prefix, _nested_depth(depth));
+  if(! Var_is_void(prefix)) return _prefixed(&((* r)), prefix, _nested_depth(&((* r)), depth));
   (* r).end = token -> pos + token -> len;
   return _atom(&((* r)), token);
 }
@@ -323,6 +325,8 @@ static Var _list(LispReader * r, int depth){
 
 }
 
+static int _x2c_stack_below(unsigned long);
+
 static Var String_var(String);
 
 String String_join(String, List);
@@ -336,11 +340,11 @@ static Var int_var(int);
 
 
 
-static int _nested_depth(int depth){
-  if(++ depth >= LISP_READ_DEPTH_MAX){
+static int _nested_depth(LispReader * r, int depth){
+  if(++ depth >= LISP_READ_DEPTH_MAX || _x2c_stack_below((* r).floor)){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 135,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum-reader.x",.function = "_nested_depth",.line = 139,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(8750352), int_var(depth));
       __builtin_unreachable();
     }
@@ -404,7 +408,7 @@ _Noreturn static Var _malformed_token(LispReader * r, Token token){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 182,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/datum-reader.x",.function = "_malformed_token",.line = 186,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -415,18 +419,18 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, &(line), &(column));
   {
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 188,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/datum-reader.x",.function = "_incomplete",.line = 192,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
 
 }
 
-static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth){
+static int _plain_form(char * s, unsigned * at, Var * out, Array items, int depth, unsigned long floor){
   char c = s[(* at)];
-  if(c == '(') return _plain_list(s, &((* at)), &((* out)), items, depth);
+  if(c == '(') return _plain_list(s, &((* at)), &((* out)), items, depth, floor);
   if(c == '"') return _plain_string(s, &((* at)), &((* out)));
-  if(_digit(c) ||(c == '-' && _digit(s[(* at) + 1]))) return _plain_integer(s, &((* at)), &((* out)));
+  if(scan_ascii_digit(c) ||(c == '-' && scan_ascii_digit(s[(* at) + 1]))) return _plain_integer(s, &((* at)), &((* out)));
   return _plain_atom(s, &((* at)), &((* out)));
 }
 
@@ -434,14 +438,14 @@ List cons(Var, List);
 
 Var Array_getindex(Array, int);
 
-static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth){
-  if(depth >= LISP_READ_DEPTH_MAX) return 0;
+static int _plain_list(char * s, unsigned * at, Var * out, Array items, int depth, unsigned long floor){
+  if(depth >= LISP_READ_DEPTH_MAX || _x2c_stack_below(floor)) return 0;
   int first = Array_len(items);
   for((* at) ++; ; ){
     while(_blank(s[(* at)]))(* at) ++;
     if(s[(* at)] == ')') break;
     Var item =((void) 0, Void);
-    if(! _plain_form(s, &((* at)), &(item), items, depth + 1)) return 0;
+    if(! _plain_form(s, &((* at)), &(item), items, depth + 1, floor)) return 0;
     Array_push(items, item);
   }
   (* at) ++;
@@ -453,7 +457,7 @@ static int _plain_list(char * s, unsigned * at, Var * out, Array items, int dept
 }
 
 static int _plain_string(char * s, unsigned * at, Var * out){
-  int length = scan_c_string(s +(* at));
+  int length = scan_lisp_string_status(s +(* at), NULL);
   if(length < 0 || ! _token_end(s[(* at) + length])) return 0;
   (* out) = String_var(String_unescape(String_new_len(s +(* at) + 1, length - 2)));
   (* at) += length;
@@ -462,9 +466,9 @@ static int _plain_string(char * s, unsigned * at, Var * out){
 
 static int _plain_integer(char * s, unsigned * at, Var * out){
   unsigned end =(* at) +(s[(* at)] == '-');
-  if(s[end] == '0' && _digit(s[end + 1])) return 0;
+  if(s[end] == '0' && scan_ascii_digit(s[end + 1])) return 0;
   long value = 0;
-  for(;  _digit(s[end]);  end ++){
+  for(;  scan_ascii_digit(s[end]);  end ++){
     int digit = s[end] - '0';
     if(value >(LONG_MAX - digit) / 10) return 0;
     value = value * 10 + digit;
@@ -487,10 +491,6 @@ static int _plain_atom(char * s, unsigned * at, Var * out){
   (* out) = Atom_intern(spelling);
   (* at) += length;
   return 1;
-}
-
-static int _digit(char c){
-  return c >= '0' && c <= '9';
 }
 
 static int _token_end(char c){

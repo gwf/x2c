@@ -321,11 +321,13 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
   if args.action in ("calibrate", "check") and not all((go, java, javac)):
     raise HarnessError("reference builds require Go, java, and javac (GO/JAVA/JAVAC)")
 
-  build_mode_path = REPO / "etc/build-mode"
-  build_mode = (
-    build_mode_path.read_text(encoding="utf-8").strip()
-    if build_mode_path.exists()
-    else "unknown"
+  # Make exports BUILD_MODE; by hand, the local switch overrides the
+  # tracked default as it does in etc/build-config.mk.
+  build_mode = os.environ.get("BUILD_MODE") or next(
+    (path.read_text(encoding="utf-8").strip()
+     for path in (REPO / "etc/build-mode.local", REPO / "etc/build-mode")
+     if path.exists()),
+    "unknown",
   )
   if build_mode != "optimize":
     raise HarnessError(
@@ -1352,7 +1354,7 @@ def make_baseline(
   calibration: dict[str, Any],
   args: argparse.Namespace,
 ) -> dict[str, Any]:
-  return {
+  baseline = {
     "schema": 1,
     "methodology": {
       "profile": args.profile,
@@ -1407,6 +1409,14 @@ def make_baseline(
       for benchmark in benchmarks
     },
   }
+
+  for entry in baseline["benchmarks"].values():
+    if entry["comparison"].get("kind", "exact") == "exact":
+      del entry["stdout"]
+    for value in entry.values():
+      if isinstance(value, dict):
+        value.pop("measurements", None)
+  return baseline
 
 
 def load_baseline(
@@ -1468,6 +1478,17 @@ def load_baseline(
   return baseline
 
 
+def compare_pinned_output(
+  name: str, implementation: str, entry: dict[str, Any], output: bytes,
+) -> None:
+  if entry["comparison"].get("kind", "exact") == "exact":
+    if hashlib.sha256(output).hexdigest() != entry["stdout_sha256"]:
+      raise HarnessError(f"{name}/{implementation} output differs from calibration")
+  else:
+    compare_output(name, implementation, entry,
+                   base64.b64decode(entry["stdout"]), output)
+
+
 def pinned_measurements(
   manifest: dict[str, Any],
   benchmarks: list[dict[str, Any]],
@@ -1494,21 +1515,11 @@ def pinned_measurements(
       input_hash = sha256(stdin_path) if stdin_path else None
       if input_hash != baseline_entry.get("stdin_sha256"):
         raise HarnessError(f"{name} stdin differs from its calibration")
-      expected = base64.b64decode(baseline_entry["stdout"])
       outputs: dict[str, bytes] = {}
       for implementation in X2C_IMPLEMENTATIONS:
         binary = binary_path(name, implementation)
         output = run_captured(binary, program_args, args.timeout, stdin_path)
-        compare_output(
-          name,
-          implementation,
-          {
-            "args": program_args,
-            "comparison": baseline_entry["comparison"],
-          },
-          expected,
-          output,
-        )
+        compare_pinned_output(name, implementation, baseline_entry, output)
         outputs[implementation] = output
         for warmup in range(1, args.warmups + 1):
           measure_once(measure, binary, program_args, args.timeout, stdin_path)
@@ -1770,9 +1781,49 @@ def write_latest(
   )
 
 
+def preserve_scores(current: dict[str, Any]) -> None:
+  path = CURRENT_JSON.parent / "history.json"
+  saved = json.loads(path.read_text()) if path.exists() else {"runs": []}
+  cohort = current["summary_benchmarks"]
+  scores = {
+    key: statistics.geometric_mean(
+      (1.0 if key == "c" else
+       current["benchmarks"][name]["factors"][f"time_{key}_over_c"])
+      for name in cohort
+    ) for key in current["implementations"]
+  }
+  row = {
+    "run_id": current["run_id"], "profile": current["profile"],
+    "measured_revision": current["machine"].get("repository", {}).get("revision"),
+    "baseline_sha256": current["baseline_sha256"],
+    "summary_benchmarks": cohort, "elapsed_over_c": scores,
+  }
+  runs = {entry["run_id"]: entry for entry in saved["runs"]}
+  runs[row["run_id"]] = row
+  rows = [runs[key] for key in sorted(runs)]
+  atomic_write(path, json_text({"schema": 1, "runs": rows}))
+  lines = ["# PLSO score history", "",
+           "Geometric means of elapsed-time ratios on each run's shared cohort. "
+           "C is 1.00; lower is better. Run IDs use UTC.", "",
+           "Compare trends only within the same profile, calibration and cohort. "
+           "Early runs used different references and shared problems. "
+           "The earliest optimized column is listed as tuned. "
+           "Exact cohorts, revisions and all language scores are in [history.json](history.json).", "",
+           "| Run | Problems | Calibration | Idiomatic / C | Tuned / C | Tuned / Rust |",
+           "|---|---:|---|---:|---:|---:|"]
+  for entry in rows:
+    values = entry["elapsed_over_c"]
+    rust = f"{values['tuned'] / values['rust']:.2f}" if "rust" in values else "-"
+    lines.append(f"| {entry['run_id']} | {len(entry['summary_benchmarks'])} | "
+                 f"{entry['baseline_sha256'][:12]} | {values['idiomatic']:.2f} | "
+                 f"{values['tuned']:.2f} | {rust} |")
+  atomic_write(path.with_suffix(".md"), "\n".join(lines) + "\n")
+
+
 def promote_current(current: dict[str, Any]) -> None:
   atomic_write(CURRENT_JSON, json_text(current))
   atomic_write(CURRENT_MARKDOWN, render_current(current))
+  preserve_scores(current)
 
 
 def run_pinned(

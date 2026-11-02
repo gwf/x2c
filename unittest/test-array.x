@@ -120,34 +120,72 @@ static void array_void_writes_transfer_before_mutation(void) {
   EXPECT_INT_EQ(array[0].int(), 1);
 }
 
-static void array_null_writes_return_void(void) {
+static void array_null_writes_raise_bad_arg(void) {
   $test.scoped();
   Array array = NULL;
+  int caught = 0;
 
-  EXPECT_TRUE(array.push(1) is void);
-  EXPECT_TRUE(array.unshift(1) is void);
-  EXPECT_TRUE(array.insert(0, 1) is void);
-  EXPECT_TRUE(array.push(void) is void);
-  EXPECT_TRUE(array.unshift(void) is void);
-  EXPECT_TRUE(array.insert(0, void) is void);
+  try array.setindex(0, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Array.setindex");
+  }
+  try array.push(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <push>);
+  }
+  try array.unshift(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <unshift>);
+  }
+  try array.insert(0, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 0);
+  }
+  try array.setindex(0, void);
+  catch %(bad-arg *): caught++;
+  try array.push(void);
+  catch %(bad-arg *): caught++;
+  try array.unshift(void);
+  catch %(bad-arg *): caught++;
+  try array.insert(0, void);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 8);
 }
 
 static void array_absent_elements_return_void(void) {
   $test.scoped();
-  Array missing = NULL, empty = [], values = [7];
-
-  EXPECT_TRUE(missing.take_last() is void);
+  Array empty = [];
   EXPECT_TRUE(empty.take_last() is void);
-  EXPECT_TRUE(missing.shift() is void);
   EXPECT_TRUE(empty.shift() is void);
-  EXPECT_TRUE(missing.remove(0) is void);
-  EXPECT_TRUE(empty.remove(0) is void);
-  EXPECT_TRUE(values.remove(1) is void);
-  EXPECT_TRUE(values.remove(-2) is void);
-  EXPECT_TRUE(values.insert(2, 9) is void);
-  EXPECT_TRUE(values.insert(-3, 9) is void);
-  EXPECT_INT_EQ(values.len(), 1);
-  EXPECT_INT_EQ(values[0].int(), 7);
+}
+
+/* `insert` also accepts the position after the last element, so its range
+   reaches one position further at each end than `setindex`'s. */
+static void array_insert_bounds(void) {
+  $test.scoped();
+  Array values = [7];
+  int caught = 0;
+
+  try values.insert(2, 9);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 2);
+  }
+  try values.insert(-3, 9);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -3);
+  }
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_STR_EQ(values.repr(), "[ 7 ]");
+
+  EXPECT_INT_EQ(values.insert(1, 8).int(), 8);
+  EXPECT_INT_EQ(values.insert(-3, 6).int(), 6);
+  EXPECT_STR_EQ(values.repr(), "[ 6, 7, 8 ]");
 }
 
 
@@ -212,6 +250,45 @@ static void array_insert_and_remove(void) {
   EXPECT_INT_EQ(arr.len(), 2);
 }
 
+/* Removing from a null Array, or at an index outside its elements, raises
+   `<bad-arg>`. An empty Array still yields `void` from `take_last` and
+   `shift`. */
+static void array_null_and_out_of_range_removals_raise(void) {
+  $test.scoped();
+  Array missing = NULL, empty = [], values = [7];
+  int caught = 0;
+
+  try missing.take_last();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <take-last>);
+  }
+  try missing.shift();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <shift>);
+  }
+  try missing.remove(0);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 0);
+  }
+  try empty.remove(0);
+  catch %(bad-arg *): caught++;
+  try values.remove(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 1);
+  }
+  try values.remove(-2);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -2);
+  }
+  EXPECT_INT_EQ(caught, 6);
+  EXPECT_STR_EQ(values.repr(), "[ 7 ]");
+}
+
 static void array_mixed_mutation_integrity(void) {
   $test.scoped();
   Var number = 7;
@@ -232,8 +309,10 @@ static void array_mixed_mutation_integrity(void) {
   EXPECT_VAR_EQ(arr[0], string);
   EXPECT_VAR_EQ(arr[1], list);
 
-  int len = arr.len();
-  EXPECT_TRUE(arr.insert(10, number) is void);
+  int len = arr.len(), caught = 0;
+  try arr.insert(10, number);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(arr.len(), len);
   EXPECT_VAR_EQ(arr[0], string);
   EXPECT_VAR_EQ(arr[1], list);
@@ -250,10 +329,25 @@ static void array_setindex_bounds(void) {
   Var vworld = world;
   EXPECT_VAR_EQ(arr.setindex(0, vworld), vworld);
   EXPECT_VAR_EQ(arr.getindex(-1), vworld);
-  Var one = 1;
-  EXPECT_TRUE(arr.setindex(5, one) is void);
-  EXPECT_TRUE(arr.setindex(5, void) is void);
-  EXPECT_TRUE(arr.setindex(-2, void) is void);
+
+  int caught = 0;
+  try arr.setindex(5, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Array.setindex");
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 5);
+  }
+  try arr.setindex(-2, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -2);
+  }
+  try arr.setindex(5, void);
+  catch %(bad-arg *): caught++;
+  try arr.setindex(-2, void);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+  EXPECT_INT_EQ(arr.len(), 1);
   EXPECT_VAR_EQ(arr[0], vworld);
 }
 
@@ -281,6 +375,17 @@ static void array_getslice_variable_steps(void) {
   EXPECT_VAR_EQ(reverse[0], five);
   EXPECT_VAR_EQ(reverse[1], three);
   EXPECT_VAR_EQ(reverse[2], one);
+}
+
+static void array_getslice_extreme_steps(void) {
+  $test.scoped();
+  Array values = [10, 20, 30];
+  EXPECT_TRUE(values.getslice(1, 3, INT_MAX) == [20]);
+  EXPECT_TRUE(values.getslice(2, INT_MIN, INT_MIN) == [30]);
+  EXPECT_INT_EQ(values.getslice(2, 1, INT_MAX).len(), 0);
+  EXPECT_INT_EQ(values.getslice(0, 2, INT_MIN).len(), 0);
+  Array empty = [];
+  EXPECT_INT_EQ(empty.getslice(0, INT_MIN, INT_MIN).len(), 0);
 }
 
 static void array_setslice_and_remslice(void) {
@@ -359,6 +464,23 @@ static void array_index_contains_count(void) {
   EXPECT_FALSE(arr.contains(forty_two));
 }
 
+/* Search compares with `==`, so numbers of different types match by value.
+   `Map` keys compare with `Var.equal` and keep the types apart. */
+static void array_search_matches_numbers_by_value(void) {
+  $test.scoped();
+  Array numbers = [1, 1.0, 1L];
+  EXPECT_INT_EQ(numbers.count(1), 3);
+  EXPECT_INT_EQ(numbers.count(1.0), 3);
+  EXPECT_INT_EQ(numbers.index(1L), 0);
+  EXPECT_TRUE(numbers.contains(1.0));
+  EXPECT_FALSE(numbers.contains(2));
+
+  Map keyed = {};
+  keyed[1] = <one>;
+  EXPECT_TRUE(keyed[1.0] is void);
+  EXPECT_TRUE(keyed[1L] is void);
+}
+
 static void array_null_iterator_is_exhausted(void) {
   $test.scoped();
   Array values = [10], missing = NULL;
@@ -398,7 +520,6 @@ static void array_find_matches_list_and_iter(void) {
   EXPECT_TRUE(zero.find(always) is not void);
   EXPECT_TRUE(falsity.find(always) is not void);
   EXPECT_TRUE(null_value.find(always) is not void);
-  EXPECT_TRUE(values.find(NULL) is void);
   EXPECT_TRUE(values.find(%!(Var value) => value > 99) is void);
   Array empty = [], missing = NULL;
   EXPECT_TRUE(empty.find(always) is void);
@@ -621,16 +742,22 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   EXPECT_TRUE([1].foldl(void, wrong_arity) == 1);
   int missing = 0;
   try values.map(NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try values.map2(values, NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try values.foldl(0, NULL);
-  catch %(bad-arg *): missing++;
+  catch %(bad-arg (operation "Func.apply")): missing++;
   try values.foldl(void, NULL);
-  catch %(bad-arg *): missing++;
-  EXPECT_INT_EQ(missing, 3);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  try values.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): missing++;
+  EXPECT_INT_EQ(missing, 5);
   EXPECT_INT_EQ(empty.map(NULL).len(), 0);
+  EXPECT_INT_EQ(empty.map2(values, NULL).len(), 0);
   EXPECT_TRUE(empty.foldl(void, NULL) is void);
   EXPECT_TRUE(empty.foldl(7, NULL) == 7);
   EXPECT_TRUE([1].foldl(void, NULL) == 1);
+  EXPECT_TRUE(empty.find(NULL) is void);
 }
 
 
@@ -750,21 +877,25 @@ void array_suite(void) {
   $test.run(array_bare_literal_evaluates_elements);
   $test.run(array_push_pop);
   $test.run(array_void_writes_transfer_before_mutation);
-  $test.run(array_null_writes_return_void);
+  $test.run(array_null_writes_raise_bad_arg);
   $test.run(array_absent_elements_return_void);
+  $test.run(array_insert_bounds);
   $test.run(array_map_transfer_releases_temporary_scope);
   $test.run(array_map2_transfer_releases_temporary_scope);
   $test.run(array_reports_slice_domain_failures);
   $test.run(array_counted_update_preserves_values);
   $test.run(array_insert_and_remove);
+  $test.run(array_null_and_out_of_range_removals_raise);
   $test.run(array_mixed_mutation_integrity);
   $test.run(array_setindex_bounds);
   $test.run(array_getslice_unit_step);
   $test.run(array_getslice_variable_steps);
+  $test.run(array_getslice_extreme_steps);
   $test.run(array_setslice_and_remslice);
   $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);
   $test.run(array_index_contains_count);
+  $test.run(array_search_matches_numbers_by_value);
   $test.run(array_null_iterator_is_exhausted);
   $test.run(array_find_matches_list_and_iter);
   $test.run(array_sort_reverse_join);

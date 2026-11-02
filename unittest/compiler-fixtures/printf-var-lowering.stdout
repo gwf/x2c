@@ -5,3 +5,8 @@ sprintf:23/hello
 snprintf:0x17/   7.0
 string:23/23/3.140000/hello
 buffer:23/3.14
+octal=23 hello
+hex=23 hello
+joined=23 hello
+backslash=\23 hello
+width=   7.0 hello

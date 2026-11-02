@@ -10,10 +10,9 @@
     deletes the matches.
 
     When there is nothing to replace, `str` itself is returned, so the
-    result may be the same pointer as the input.
-    Raises: `<alloc-fail>` when result storage cannot be allocated. An empty
-    or null `old` returns `str`, and an oversized result returns NULL, without
-    raising.
+    result may be the same pointer as the input. An empty or null `old`
+    returns `str`.
+    Raises: the same causes as `String.replace_n`.
 */
 meta native String String.replace(
   String str, String old, String replacement) =>
@@ -23,8 +22,8 @@ meta native String String.replace(
     Scanning proceeds left to right and does not rescan replacement text. A
     negative limit replaces all matches; zero, null or empty `old`, null input,
     or no match returns `str` unchanged. `Null` `replacement` deletes matches.
-    An oversized result returns NULL.
-    Raises: `<alloc-fail>` while constructing a changed result.
+    Raises: `<size-limit>` when the result cannot fit a `String`, or
+    `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.replace_n(
   String str, String old, String replacement, int max_replacements) {
@@ -35,7 +34,7 @@ meta native String String.replace_n(
   int count = _count_matches(str, old, max_replacements);
   if (count == 0) return str;
   int length = _replaced_length(str_len, count, old_len, replacement_len);
-  if (length < 0) return NULL;
+  if (length < 0) raise %(size-limit (operation "String.replace_n"));
   String string = String.malloc(length + 1);
   char *dst = string, int copied = 0, replaced = 0;
   while (copied <= str_len - old_len && replaced < count) {
@@ -82,19 +81,20 @@ int String.getindex(String str, int index) {
     shows the forward rule. Indices are byte positions, so a
     slice can split a multibyte sequence. A full unit-step slice may return
     `s`; other nonempty slices return their canonical `String`.
-    Raises: `<alloc-fail>` while constructing a nonempty result. An empty
-    range, a range that runs the wrong way for its `step`, or a `step` of zero
-    also returns NULL, the empty `String`, without raising.
+    An empty range or one that runs the wrong way for its `step` returns
+    NULL, the empty `String`.
+    Raises: `<bad-arg>` when `step` is zero, including for an empty `s`;
+    `<alloc-fail>` while constructing a nonempty result.
 */
 meta native String String.getslice(String s, int start, int stop, int step) {
-  if (!s || step == 0) return NULL;
   int n = s.len(), len = x2c_normalize_slice(start, stop, step, n);
   if (len <= 0) return NULL;
   if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
   if (step == 1) return x2c_string_from_bytes(s + start, len);
   String string = String.malloc(len + 1);
   char *out = string, const char *src = s;
-  for (int i = 0, idx = start; i < len; i++, idx += step) out[i] = src[idx];
+  long long index = start;
+  for (int i = 0; i < len; i++, index += step) out[i] = src[index];
   return _finish(string, len);
 }
 

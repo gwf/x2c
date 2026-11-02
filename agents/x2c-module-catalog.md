@@ -161,10 +161,9 @@ the compiler's side of the project meta helper.
 
 Public functions:
 
-`Compiler.meta_helper_call`, `Compiler.loaded_helper_call`,
-`Compiler.report_meta_error`, `MetaHelper.new`, `MetaHelper.retain_executable`,
-`Compiler.use_meta_helper`, `MetaHelper.failure`, `Compiler.begin_meta_unit`,
-`Compiler.stop_meta_helper`, `MetaHelper.restart`
+`Compiler.meta_helper_call`, `Compiler.report_meta_error`, `MetaHelper.new`,
+`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
+`Compiler.stop_meta_helper`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -172,7 +171,7 @@ the project meta build.
 
 Public functions:
 
-`Frontend.prepare_meta`, `Frontend.build_loaded`
+`Frontend.prepare_meta`, `Compiler.next_file_scope`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
@@ -198,6 +197,7 @@ C preprocessor directives in x2c source.
 
 Public functions:
 
+`Compiler.never_defined`, `Compiler.hidden_group`,
 `Compiler.preproc_include_target`, `Compiler.preproc_marker_file`,
 `Compiler.scan_conditionals`, `Compiler.macro_directive`,
 `Compiler.scan_directive`, `Compiler.leading_preproc`,
@@ -223,7 +223,8 @@ request-owned source overlays.
 Public functions:
 
 `SourceView.init`, `SourceView.set`, `SourceView.unset`,
-`SourceView.is_changed`, `SourceView.exists`, `SourceView.read`
+`SourceView.is_changed`, `SourceView.exists`, `SourceView.read_text`,
+`SourceView.read`
 
 ### [src/stage.x](../src/stage.x)
 
@@ -267,7 +268,7 @@ synchronous compiler translation requests.
 
 Public functions:
 
-`translate_request`
+`translate_request`, `translate_print_command`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 
@@ -305,7 +306,8 @@ Public functions:
 `SourceView.package_entry`, `Compiler.is_package_source`,
 `Compiler.module_stamp`, `Compiler.identity`, `Path.content_identity`,
 `fnv_file`, `fnv_bytes`, `Path.identifier_hash`, `Path.lock_file`,
-`Path.publish_files`, `Job.decode_wait_status`, `Diagnostics.host_error`,
+`Path.publish_files`, `Compiler.configure_logging`, `Diagnostics.host_error`,
+`Diagnostics.driver_report`, `Diagnostics.driver_fail`,
 `Diagnostics.driver_error`, `Compiler.cache_root`, `Compiler.prune_cache`
 
 ### [src/callables/callables.x](../src/callables/callables.x)
@@ -315,10 +317,9 @@ callable values lowered to C helpers.
 Public functions:
 
 `Compiler.capture_environment`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.context_func_adapter`, `Compiler.prepend_setup`,
-`Compiler.func_parameters`, `Compiler.func_signature`,
-`Compiler.lift_func_expression`, `Compiler.lower_typed_adapter_expr`,
-`Compiler.adapt_lambda_arg`
+`Compiler.prepend_setup`, `Compiler.func_parameters`,
+`Compiler.func_signature`, `Compiler.lift_func_expression`,
+`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
 
 ### [src/cleanup/cleanup.x](../src/cleanup/cleanup.x)
 
@@ -339,8 +340,9 @@ Public functions:
 `CliRequest.parse`, `CliRequest.parse_arguments`, `CliRequest.package_options`,
 `CliRequest.dependency_option`, `CliRequest.is_builtin`,
 `CliRequest.read_arguments`, `CliRequest.command_arguments`,
-`TargetKind.named`, `TargetKind.of`, `CliRequest.new`, `Compiler.version`,
-`CliRequest.inspects`, `CliRequest.package_roots`, `CliRequest.require_input`
+`TargetKind.named`, `TargetKind.of`, `TargetKind.product`, `CliRequest.new`,
+`Compiler.version`, `CliRequest.inspects`, `CliRequest.package_roots`,
+`CliRequest.require_input`
 
 ### [src/collect/collect.x](../src/collect/collect.x)
 
@@ -350,7 +352,8 @@ Public functions:
 
 `Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
 `Compiler.module_source`, `Compiler.collect_symbols`,
-`Compiler.is_prelude_source`, `Compiler.install_syntax_prelude`,
+`Compiler.is_prelude_source`, `Compiler.in_runtime_library`,
+`Compiler.is_runtime_source`, `Compiler.install_syntax_prelude`,
 `Compiler.configure_package`, `Compiler.included_compile_time_effects`,
 `Compiler.prelude_sources`, `Compiler.install_included_effects`,
 `Compiler.included_macros`, `Compiler.initial_macros`,
@@ -363,11 +366,10 @@ Public functions:
 `Compiler.declared_adoptions`, `Compiler.linked_meta_definitions_current`,
 `Compiler.linked_meta_provider_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
-`Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
-`Compiler.name_loaded_provider`, `Compiler.loaded_call_type`,
-`Compiler.collect_package`, `Compiler.configure_interfaces`,
-`Compiler.prelude_missing_interfaces`, `Compiler.prelude_interface`,
-`Compiler.interface_text`, `Compiler.linked_prelude_records`
+`Compiler.name_meta_provider_bindings`, `Compiler.collect_package`,
+`Compiler.configure_interfaces`, `Compiler.prelude_missing_interfaces`,
+`Compiler.prelude_interface`, `Compiler.interface_text`,
+`Compiler.linked_prelude_records`
 
 ### [src/compiler/compiler.x](../src/compiler/compiler.x)
 
@@ -411,7 +413,8 @@ Public functions:
 `Compiler.match_pattern_value`, `Compiler.pattern_binder_declarations`,
 `Compiler.match_capture_value`, `Compiler.match_capture_name`,
 `Compiler.open_condition_scope`, `Compiler.condition_bindings`,
-`Compiler.read_source`, `Compiler.owns_package_source`, `Compiler.source_path`,
+`Compiler.read_source`, `Compiler.read_source_text`,
+`Compiler.owns_package_source`, `Compiler.source_path`,
 `Compiler.canonical_path`, `Path.resolved_absolute`, `Path.real`,
 `Compiler.portable_path`, `Compiler.absolute_home_path`,
 `Compiler.add_translation_dependency`,
@@ -563,12 +566,11 @@ Public functions:
 `Compiler.needs_resolution`, `Compiler.var_tag_expression`,
 `Compiler.reveal_binding`, `_x2c_nominal_getindex`,
 `Compiler.postfix_completions`, `Compiler.resolve_postfix_member`,
-`_x2c_func_call_arguments`, `Compiler.func_call_parts`,
-`Compiler.complete_iter_chain`, `Compiler.printf_static_format`,
-`_x2c_indexed_builtin_helper`, `Compiler.check_explicit_converter`,
-`Compiler.promote_string_literal`, `Compiler.convert_segment_to_string`,
-`Compiler.convert_expression`, `Compiler.converter_call`,
-`Compiler.is_builtin_converter_call`
+`_x2c_func_call_arguments`, `Compiler.complete_iter_chain`,
+`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
+`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
+`Compiler.convert_segment_to_string`, `Compiler.convert_expression`,
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/generate/generate.x](../src/generate/generate.x)
 
@@ -588,9 +590,9 @@ brace initializer conversion.
 
 Public functions:
 
-`Compiler.initializer_rows`, `Compiler.initializer_field_path`,
-`Compiler.initializer_slot`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
+`Compiler.initializer_rows`, `Compiler.initializer_slot`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.initializer_native_types`
 
 ### [src/literals/literals.x](../src/literals/literals.x)
 
@@ -645,6 +647,7 @@ Public functions:
 `Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
 `Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
 `Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.unbound_alias_names`, `Compiler.check_included_names`,
 `Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
@@ -654,8 +657,7 @@ a unit's meta group, emitted as C.
 Public functions:
 
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
-`Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
-`Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
+`Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.meta_calls_wait`,
 `Compiler.group_meta_function`, `Compiler.finish_meta_functions`,
 `Compiler.meta_reaches_compile_time`, `Compiler.public_native_function`,
@@ -774,9 +776,10 @@ Public functions:
 `Compiler.resolve_as_declared`, `Compiler.protocol_member_names`,
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
 `Compiler.resolve_protocol_member`, `Compiler.protocol_members_for`,
-`Compiler.protocol_update_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.discard_helper`, `Compiler.wrapper_function`,
-`Compiler.forward_parameters`, `Compiler.generate_protocol_adapters`,
+`Compiler.protocol_update_helper`, `Compiler.protocol_helper_call`,
+`Compiler.protocol_discard_helper`, `Compiler.discard_helper`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
 `Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
 
@@ -955,7 +958,8 @@ Public functions:
 `x2c_initialize_protocols`, `x2c_var_i32_pair`, `x2c_var_add_lane`,
 `x2c_var_sub_lane`, `x2c_var_mul_lane`, `x2c_var_div_lane`, `x2c_var_mod_lane`,
 `x2c_var_equal_lane`, `x2c_var_order_lane`, `x2c_normalize_index`,
-`x2c_slice_bound`, `x2c_normalize_slice`
+`x2c_slice_bound`, `x2c_normalize_slice`, `x2c_fatal`, `x2c_native_check`,
+`x2c_io_fail`
 
 ### [lib/compiler-meta.x](../lib/compiler-meta.x)
 
@@ -963,7 +967,7 @@ compiler-private meta operations and facts.
 
 Public functions:
 
-`_x2c_operator_rows`
+`_x2c_operator_rows`, `_x2c_operator_row`
 
 ### [lib/context.x](../lib/context.x)
 
@@ -1122,7 +1126,7 @@ Public functions:
 
 ### [lib/integer-ops.x](../lib/integer-ops.x)
 
-shared raw integer arithmetic.
+shared native arithmetic templates.
 
 Public functions:
 
@@ -1271,7 +1275,8 @@ Public functions:
 
 `List.job`, `Job.pipe`, `Job.options`, `Job.run`, `Job.live`, `Job.lines`,
 `Job.output`, `Job.check`, `Job.errors`, `Job.status`, `Job.start`,
-`Job.cleanup`, `Job.kill`, `Job.wait_any`, `Job.ready`, `Env.get`
+`Job.cleanup`, `Job.kill`, `Job.wait_any`, `Job.ready`,
+`Job.decode_wait_status`, `Env.get`
 
 ### [lib/protocols.x](../lib/protocols.x)
 
@@ -1323,11 +1328,11 @@ Public functions:
 `scan_number_typed`, `scan_number_type`, `scan_digital`, `scan_float`,
 `scan_hexponent`, `scan_keyword`, `scan_identifier`, `scan_ascii_alpha`,
 `scan_keyword_type`, `scan_c_operator`, `scan_c_string`,
-`scan_c_string_status`, `scan_c_character`, `scan_string_segment`,
-`scan_symbol_literal`, `scan_symbol_literal_status`, `scan_symbol_set_atom`,
-`scan_atom`, `scan_atom_status`, `scan_escape_sequence`,
-`scan_ascii_hex_value`, `scan_ascii_digit`, `scan_utf8_length`,
-`scan_next_line_col`
+`scan_c_string_status`, `scan_lisp_string_status`, `scan_c_character`,
+`scan_c_escape_value`, `scan_string_segment`, `scan_symbol_literal`,
+`scan_symbol_literal_status`, `scan_symbol_set_atom`, `scan_atom`,
+`scan_atom_status`, `scan_escape_sequence`, `scan_ascii_hex_value`,
+`scan_ascii_digit`, `scan_utf8_length`, `scan_next_line_col`
 
 ### [lib/scripting.x](../lib/scripting.x)
 
@@ -1417,7 +1422,8 @@ native per-thread runtime storage.
 
 Public functions:
 
-`x2c_execution_stack_exchange`, `x2c_thread_state_release`
+`x2c_execution_stack_exchange`, `_x2c_stack_floor`, `_x2c_stack_below`,
+`x2c_thread_state_release`
 
 ### [lib/thread.x](../lib/thread.x)
 
@@ -1943,12 +1949,13 @@ Public functions:
 `Var.integer_compare`, `Var.integer_floating_compare`, `Var.string`,
 `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`,
 `Var.list`, `Var.map`, `Var.convert`, `Var.convert_at`, `Var.numeric_decode`,
-`Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
-`X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`, `Var.signed_from_bits`,
-`Var.width_mask`, `x2c_var_update_i8`, `x2c_var_update_schar`,
-`x2c_var_update_u8`, `x2c_var_update_i16`, `x2c_var_update_u16`,
-`x2c_var_update_i32`, `x2c_var_update_u32`, `x2c_var_update_long`,
-`x2c_var_update_ulong`, `x2c_var_update_long_long`,
+`Var.long_at`, `Var.ulong_at`, `Var.long_long_at`, `Var.ulong_long_at`,
+`Var.long_double_at`, `Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`,
+`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`,
+`Var.signed_from_bits`, `Var.width_mask`, `x2c_var_update_i8`,
+`x2c_var_update_schar`, `x2c_var_update_u8`, `x2c_var_update_i16`,
+`x2c_var_update_u16`, `x2c_var_update_i32`, `x2c_var_update_u32`,
+`x2c_var_update_long`, `x2c_var_update_ulong`, `x2c_var_update_long_long`,
 `x2c_var_update_ulong_long`, `x2c_var_update_f32`, `x2c_var_update_f64`,
 `x2c_var_update_long_double`, `Var.matmul`, `Var.neg`, `x2c_var_equal`,
 `x2c_var_identical`, `x2c_var_order`, `Var.truth`, `Var.fallback_truth`,

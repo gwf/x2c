@@ -42,7 +42,7 @@ telemetry.
 ## Installation
 
 Run `npm ci && npm run build` in `etc/vsc-extension`, then install the resulting
-0.4.1 VSIX with **Extensions: Install from VSIX**.
+VSIX with **Extensions: Install from VSIX**.
 
 ## Compiler diagnostics, definitions, and hover
 
@@ -301,8 +301,9 @@ npm test
 npm run build
 ```
 
-The packaged VSIX is tracked with the extension source. Install it from
-VS Code with **Extensions: Install from VSIX**.
+The build writes `x2c-syntax-<version>.vsix` beside `package.json`. The
+package is ignored, so build it again after changing the grammar. Install it
+from VS Code with **Extensions: Install from VSIX**.
 
 When changing the grammar, keep x2c-specific rules ahead of competing C
 operator, call, string, and angle-bracket rules. Add scope tests for both the

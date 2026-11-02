@@ -78,7 +78,8 @@ static void _gather_surface(Surface &s, String path, List entry) {
     match ($(part)) {
       case %(?(Map rows)): _merge_surface(s, path, rows);
       case %(?(String include)): _include_surface(s, include);
-      default: __builtin_unreachable();
+      // A directive event, `(cpp TEXT FILE LINE)`, carries no surface.
+      default: break;
     }
 }
 

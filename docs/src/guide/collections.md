@@ -623,7 +623,8 @@ Array key, equal contents: void
 Key your `Map`s with `String`s, `Symbol`s, `Atom`s, or numbers. Those compare
 by content. Keys compare by `Var.equal`, which agrees with `Var.hash`, so a
 number key also keeps its type: `3` and `3L` are two keys although
-`3 == 3L`.
+`3 == 3L`. Searching a `List` or `Array` with `index`, `contains`, `count`,
+or `assoc` uses `==` instead, so it finds `3` when given `3L`.
 
 ```x2c
 Map by_number = {};
@@ -692,7 +693,9 @@ length: 3
 
 `List.assoc` treats the `List` as an association list of `(key value ...)`
 pairs and returns the `cadr` of the first matching pair. `List.get` dispatches
-on the key: integers index, anything else does an `assoc` lookup.
+on the key: integers index, anything else does an `assoc` lookup. `assoc`,
+`index`, and `contains` match with `==`, so `1.0` finds the pair keyed by
+`1`, which a `Map` keyed by `1` would not.
 
 The functional `List` operations take `Func`. A fixed nonvariadic function or
 function pointer converts automatically, and you can pass a capturing lambda
@@ -715,13 +718,14 @@ printf("%s %s %s\n", doubled.repr(), big.repr(), total.repr());
 (2 4 6 8) (3 4) 10
 ```
 
-For `map`, `filter`, and `foldl`, a callback is required when an element
-needs an invocation. A null callback then raises `<bad-arg>` through `Func`.
-Empty inputs make no call. A fold with a `void` seed also makes no call for
-a singleton: its only element becomes the result. This rule applies to
-these operations on `List`, `Array`, `String`, and `Iter` where provided.
-Lisp nil callbacks follow the same rule. Other operations, including
-`zip_with`, queries, `map2`, and `scan`, retain their own callback contracts.
+For `map`, `filter`, `foldl`, `map2`, `scan`, and the queries `find`, `any`,
+and `all`, a callback is required when an element needs an invocation. A
+null callback then raises `<bad-arg>` through `Func`. Empty inputs make no
+call, so an empty query still returns `void`, false, or true. A fold with a
+`void` seed also makes no call for a singleton: its only element becomes the
+result. This rule applies to these operations on `List`, `Array`, `String`,
+and `Iter` where provided. Lisp nil callbacks follow the same rule. One
+operation treats a null callback differently: `zip_with` yields pair `List`s.
 
 Transformations and folds keep the callback's `Var` result. The predicates
 `List.filter`, `List.find`, `List.any`, and `List.all` apply `Var`
@@ -844,11 +848,11 @@ rejected abc
 rejected 4x
 ```
 
-`try_long` requires the whole string to be the number. Leading and trailing
-whitespace are allowed, and any other unconsumed character fails, so `4x` is
-rejected instead of read as 4. It accepts a sign and recognizes `0x`, `0o`,
-and `0b` radix prefixes as well as C's leading-zero octal.
-`String.try_double` is the floating counterpart on the same terms.
+`try_long` and `String.try_double` require the whole string, apart from
+surrounding whitespace, to be the number, so `4x` is rejected instead of read
+as 4. [`String.try_long`](../library/modules/string.md#String.try_long) and
+[`String.try_double`](../library/modules/string.md#String.try_double) list
+the signs, radix prefixes, and floating forms each one accepts.
 
 Concatenation with `+` produces a canonical `String`. Comparing a `String`
 with a C string literal using `==` or `!=` promotes the literal to `String`
@@ -874,16 +878,13 @@ promote literals.
 Canonical `String`s are immutable, so repeated `+` in a loop allocates and
 interns at every step. There are two better tools.
 
-`String.malloc` creates a transient mutable buffer in the active
-canonical-value pool. It becomes a canonical `String` only when
-`String.intern_free` finalizes it. Bracket assignment on a `String` is
-rejected, because writing through a canonical `String` would corrupt every
-equal `String` that shares its storage. Bind the buffer to a `char *` to write
-it with native indexing, then finalize it with `String.intern_free`:
-
-The byte count includes room for the terminating NUL, and nothing writes that
-NUL for you. `String.intern_free` measures the buffer with `strlen`, so an
-unterminated buffer is read past its end.
+[`String.malloc`](../library/modules/string.md#String.malloc) creates a
+transient mutable buffer in the active canonical-value pool. It becomes a
+canonical `String` only when `String.intern_free` finalizes it. Bracket
+assignment on a `String` is rejected, because writing through a canonical
+`String` would corrupt every equal `String` that shares its storage. Bind the
+buffer to a `char *` to write it with native indexing, write the terminating
+NUL yourself, then finalize it with `String.intern_free`:
 
 ```x2c
 String buf = String.malloc(6);
@@ -898,19 +899,9 @@ printf("%s %d\n", canonical, canonical == "abcde");
 abcde 1
 ```
 
-Write bytes that way only into such a buffer. On an interned `String` it
-writes through shared canonical storage. To change one byte of a canonical
-`String`, use the copy-producing `String.withindex`:
-
-```x2c
-String word = "hello";
-String capital = word.withindex(0, 'H');
-printf("%s %s\n", word, capital);
-```
-
-```text
-hello Hello
-```
+Write bytes that way only into such a buffer. To change one byte of a
+canonical `String`, use the copy-producing
+[`String.withindex`](../library/modules/string.md#String.withindex).
 
 For anything longer, use `Buffer`. It grows, it tracks indentation, and a
 `String` destination calls `Buffer.str` for the finished canonical `String`.
@@ -960,12 +951,15 @@ printf("%s top=%s len=%zu\n", stack.repr(), top.repr(), stack.len());
 The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `insert`, `remove`, and `splice`; searching is `index`, `find`,
 `contains`, and `count`; and there are `map`, `map2`, `foldl`, `sort`,
-`reverse`, `concat`, `copy`, and `join`.
+`reverse`, `concat`, `copy`, and `join`. `index`, `contains`, and `count`
+compare with `==`, so two numbers compare as their native values do in C:
+`[1, 1.0, 1L].count(1)` is 3.
 
 `index(value)` returns the first equal element's zero-based position, or `-1`.
 `find(predicate)` returns the first accepted element as `Var`, or `void`.
 These names have the same meanings on Array and List; Iter also has `find`.
-Predicates use ordinary `Var` truth. A null predicate returns `void`.
+Predicates use ordinary `Var` truth. A null predicate raises `<bad-arg>` when
+the first element needs it; an empty search returns `void` without a call.
 Matching zero, false, or NULL remains distinct from absence: test `is void`.
 Searching leaves Array and List storage unchanged and borrows matched values.
 Typed Arrays use native equality for `index` and box `find` results as their
@@ -1002,18 +996,9 @@ List descending = %(3 1 2).sort_with(
   %!(int left, int right) => right - left);
 ```
 
-`sort_by` evaluates its key once per element, front to back, and compares the
-keys with `Var.compare`. `sort_with` passes two values to its callback and
-converts the result to `int`: negative orders the first value before the
-second, zero ties, and positive orders it after. Comparators must give a
-consistent ordering. Callbacks are borrowed, run synchronously, and must not
-mutate the Array being sorted; they may sort another container. A failing
-`sort_with` callback or `sort_by` key extractor leaves the original element
-order unchanged. Callback side effects are not undone. Comparisons in `sort`
-and `sort_by` run inside libc qsort and must return normally. If an Error or
-other nonlocal exit crosses qsort, cleanup, memory safety, and container state
-are not guaranteed. Empty inputs call neither callback; a singleton calls its
-key once but never calls a comparator.
+[`Array.sort_by`](../library/modules/array.md#Array.sort_by) and
+[`Array.sort_with`](../library/modules/array.md#Array.sort_with) give the
+callback order, the comparator contract, and what a failing callback leaves.
 
 `Array.map`, `Array.map2`, and `Array.foldl` accept the same `Func` values
 as the `List` operations and pass elements by value. `String.filter` and
@@ -1057,7 +1042,9 @@ smallest first: 10
 
 `Array.push` rejects `void`, and so does the counted construction used by
 non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
-returns `void`. `Array` has no status-bearing read.
+returns `void`. `Array` has no status-bearing read. A write that cannot be
+performed raises `<bad-arg>`: `setindex` or `insert` at an out-of-range
+index, or `setindex`, `push`, `unshift`, or `insert` on a null `Array`.
 
 ### Packed typed Arrays
 
@@ -1137,14 +1124,15 @@ Packed `Array`s cross a `Context` or `Thread` boundary like other values;
 gives the export rules.
 
 Compound update is native as well. `values[i] += 1`, `values[i] <<= 2`, and
-`values[i]++` compute in the element type and compile to the one instruction
-the operator names. Overflow wraps, a narrow element truncates a result too
-wide for it, and a signed right shift keeps the sign, as C does. Three
-failures are kept, since they turn a hardware trap into something you can
-catch: integer `/= 0` and `%= 0` raise `<div-zero>`, a shift count outside
-the element's width raises `<bad-shift>`, and `%` or a bitwise operator on a
-float element raises `<bad-types>`. Each raises before storing, so a failed
-update leaves the element as it was.
+`values[i]++` compute as C does for the element type and compile to the one
+instruction the operator names. The element promotes, overflow wraps, a
+narrow element truncates a result too wide for it, and a signed right shift
+keeps the sign. Three failures are kept, since they turn a hardware trap
+into something you can catch: integer `/= 0` and `%= 0` raise `<div-zero>`,
+a shift count outside the promoted width (`int`, or `long` for `ArrayLong`)
+raises `<bad-shift>`, and `%` or a bitwise operator on a float element
+raises `<bad-types>`. Each raises before storing, so a failed update leaves
+the element as it was. These are the rules a `Var` update follows.
 
 An `ArrayChar` *store* loop has an extra cost: it cannot keep the element base
 in a register, because a byte store may alias any object, including that base.
@@ -1292,15 +1280,9 @@ carries the same lookup, defaulting, update, deletion, traversal, `copy`, and
 declared type, converting every key and value to the field type; an entry that
 cannot be converted raises `<no-convert>`.
 
-Typed Maps use grouped hash storage. Each group compares sixteen one-byte
-fingerprints before checking matching keys. Deletion leaves a reusable slot;
-insertion removes accumulated deleted slots when rebuilding the table.
-`MapStringInt` and `MapSubInt` retain complete key hashes for rebuilding.
-Var Map uses the same grouped storage, with full hashes to preserve custom-key
-filtering and avoid hash callbacks during growth. Below 65,536 buckets those
-hashes share the controls allocation. Larger tables keep the hashes in the
-controls Block's owned storage, which improves reuse of freed growth buffers.
-These representations do not change lookup, ownership, or traversal contracts.
+Typed Maps use the grouped hash storage that the
+[`Map` design notes](../library/modules/map.md#design-notes) describe. The
+representation does not change lookup, ownership, or traversal contracts.
 
 ```x2c
 #include "typed-map.x"
@@ -1385,7 +1367,9 @@ raw native indexing, with no bounds test and no negative-index rule. See
 
 Writing is where the immutable/mutable split shows up in the syntax:
 
-- `array[i] = value` and `map[key] = value` are supported.
+- `array[i] = value` and `map[key] = value` are supported. Unlike a read,
+  `array[i] = value` with `i` out of range raises `<bad-arg>`, as
+  `array[i] += value` does.
 - `list[i] = value` is rejected by the compiler.
 - `string[i] = ch` is rejected, because a canonical `String` is immutable.
   Use the copy-producing `String.withindex`, or bind a transient
@@ -1401,7 +1385,8 @@ letters[0] = "z";   // xform: type ( List ) does not support bracket
 Slicing is `value[start:stop:step]`, available on `Array`, `List`, and
 `String`. Any of the three parts may be omitted. One shared runtime call
 normalizes negative bounds and negative steps, so the rules are identical
-across the three types. A zero step is invalid.
+across the three types. A zero step raises `<bad-arg>`, including on an empty
+collection.
 
 A slice returns the same type as its receiver. Slicing an `Array` gives a
 new `Array`, a `List` gives a new `List`, and a `String` gives a new `String`.

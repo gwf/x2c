@@ -33,11 +33,6 @@ static Symbol _capture_var_runtime_error(List errors, Var data) {
 }
 
 
-static Symbol _var_runtime_error_code(void) {
-  return var_runtime_errors.last().list().assoc(<code>);
-}
-
-
 static String dispatch_fixture_str(Var value) {
   return "custom-str";
 }
@@ -128,7 +123,8 @@ static void var_floating_construction(void) {
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
 }
 
-__attribute__((noinline)) static double decode_volatile_f64(volatile Var &value) {
+__attribute__((noinline))
+static double decode_volatile_f64(volatile Var &value) {
   return value.decode_f64();
 }
 
@@ -404,7 +400,8 @@ static void var_scalar_reader_conversion(void) {
     0x8002000800000000ul, 0x8002000200000100ul,
     0x8002000400010000ul, 0x8003000100000001ul
   };
-  for (unsigned i = 0; i < sizeof malformed_bits / sizeof *malformed_bits; i++) {
+  int malformed_count = sizeof malformed_bits / sizeof *malformed_bits;
+  for (int i = 0; i < malformed_count; i++) {
     Var value = (Var) { .u64 = malformed_bits[i] };
     int caught = 0;
     try value.int();
@@ -468,6 +465,81 @@ static void var_scalar_reader_conversion(void) {
   try huge.int();
   catch %(conv-range *): caught++;
   EXPECT_INT_EQ(caught, 4);
+}
+
+/* Reading a Var as a wide native type converts without boxing the result,
+   so neither an implicit conversion nor a named reader allocates. */
+static void var_wide_native_reads_allocate_nothing(void) {
+  $test.scoped();
+  Var five = 5, u48 = Var.new(<u48>, 5ul);
+  long long total = 0;
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 1000; i++) {
+    long as_long = five;
+    size_t as_size = five;
+    unsigned long as_ulong = five;
+    long long as_llong = five;
+    unsigned long long as_ullong = five;
+    long double as_ldouble = five;
+    total += as_long + (long long) as_size + (long long) as_ulong +
+             as_llong + (long long) as_ullong + (long long) as_ldouble;
+  }
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(total, 30000);
+
+  for (int i = 0; i < 1000; i++)
+    total += five.long() + (long long) five.ulong() + five.long_long() +
+             (long long) five.ulong_long() + (long long) five.long_double() +
+             u48.long();
+  EXPECT_INT_EQ(Scope.stats().live_allocations, after.live_allocations);
+  EXPECT_INT_EQ(total, 60000);
+}
+
+static Symbol _capture_conversion_entry(List errors, Var data) {
+  Map captured = data;
+  captured[<entry>] = Error.snapshot(errors.last());
+  return <declined>;
+}
+
+/* An unboxed wide read raises the causes a boxing conversion raised, and an
+   implicit one still records the site where it was written. */
+static void var_wide_native_reads_keep_conversion_causes(void) {
+  $test.scoped();
+  Var huge = 1.0e30, negative = -1.0, nan = Var.new(<f64>, 0.0 / 0.0);
+  Var text = "text", absent = void;
+  long as_long = 0;
+  unsigned long as_ulong = 0;
+  long long as_llong = 0;
+  unsigned long long as_ullong = 0;
+  long double as_ldouble = 0;
+  int caught = 0;
+  try as_long = huge;
+  catch %(conv-range (source f64) (target long)): caught++;
+  try as_ulong = negative;
+  catch %(conv-range (source f64) (target ulong)): caught++;
+  try as_llong = nan;
+  catch %(conv-range (source f64) (target llong)): caught++;
+  try as_ullong = huge;
+  catch %(conv-range (source f64) (target ullong)): caught++;
+  try as_ldouble = text;
+  catch %(no-convert (target ldouble) (cause (bad-types (source string)))):
+    caught++;
+  EXPECT_INT_EQ(caught, 5);
+  EXPECT_TRUE(!as_long && !as_ulong && !as_llong && !as_ullong);
+  EXPECT_TRUE(as_ldouble == 0);
+
+  Map captured = {};
+  try {
+    ErrorHandler observer = Error.push(_capture_conversion_entry, captured);
+    defer Error.pop(observer);
+    as_ulong = absent;
+  }
+  catch %(void-op (operation "Var.convert") (target ulong)): caught++;
+  EXPECT_INT_EQ(caught, 6);
+  List location = captured[<entry>].list().assoc(<location>);
+  EXPECT_STR_EQ(location.assoc(<function>).string(),
+                "var_wide_native_reads_keep_conversion_causes");
 }
 
 static void var_compare_numeric_total_order(void) {
@@ -1088,7 +1160,8 @@ static void var_long_double_identity_ignores_padding(void) {
 
 static void var_long_double_identity_preserves_value_bits(void) {
   $test.scoped();
-  Var zero = Var.box_long_double(0.0L), negative_zero = Var.box_long_double(-0.0L);
+  Var zero = Var.box_long_double(0.0L);
+  Var negative_zero = Var.box_long_double(-0.0L);
   Var one = Var.box_long_double(1.0L);
   Var adjacent = Var.box_long_double(1.0L + LDBL_EPSILON);
   Var nan = Var.box_long_double(__builtin_nanl("1"));
@@ -1603,6 +1676,8 @@ void var_suite(void) {
   $test.run(var_equality_and_hash);
   $test.run(var_helper_accessors);
   $test.run(var_scalar_reader_conversion);
+  $test.run(var_wide_native_reads_allocate_nothing);
+  $test.run(var_wide_native_reads_keep_conversion_causes);
   $test.run(var_unboxes_at_math_call);
   $test.run(var_converts_in_for_header_and_subscript);
   $test.run(var_compare_numeric_total_order);

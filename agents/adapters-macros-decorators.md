@@ -27,19 +27,10 @@ questions:
    spelling the same operation several times?
 4. Which differences between the copies are policy and must remain visible?
 
-Choose the smallest tool that answers those questions:
-
-- One caller needs a clearer implementation: use a normal helper.
-- Two APIs or representations meet: use a typed adapter.
-- One fixed source form repeats with different names or types: use a macro.
-- Several declarations derive from the same rows: use a compile-time ledger
-  with small projections.
-- Existing code needs one orthogonal wrapper: use a decorator.
-- Keys or membership change while the program runs: use a Map or another
-  runtime collection.
-
-An adapter, macro, decorator, and Map solve different problems. Combining
-them is useful only when each retains one clear job.
+Then choose the smallest tool as
+[MA-1](x2c-code-standard.md#macros-meta-functions-and-lisp-bindings) lists
+them. An adapter, macro, decorator, and Map solve different problems.
+Combining them is useful only when each retains one clear job.
 
 ## Adapters translate; they do not become new owners
 
@@ -332,7 +323,7 @@ facts easiest to inspect.
 ### Whole-test retained Scope
 
 Status: proven as a statement macro; rejected as a function decorator
-Checked: 2026-07-30 at `9d762c97`
+Checked: 2026-07-30
 Owner: `unittest/test-macros.x`
 
 Problem: 156 tests repeated `Scope.retain()` at entry and `Scope.release()` at
@@ -347,7 +338,7 @@ runtime proof.
 ### Lisp session entry decorator
 
 Status: proven
-Checked: 2026-07-30 at `9d762c97`
+Checked: 2026-07-30
 Owner: `lib/lisp/lisp.x`
 
 Problem: `Lisp.eval`, `Lisp.apply`, and `Lisp.eval_string` repeated the same
@@ -363,7 +354,7 @@ scanner own the proof.
 ### SymbolSet replaces generated Symbol switches
 
 Status: proven
-Checked: 2026-08-01 at `b2ac91ae`
+Checked: 2026-08-01
 Owner: `lib/var/var.x` and `lib/symbolset.x`
 
 Problem: the var-tag ledger projected two 109-case switches (`$var.tag.cases`,
@@ -383,7 +374,7 @@ second set lookup to remove a second switch — widen the indexed row instead.
 ### Macro-generated typed array families
 
 Status: proven
-Checked: 2026-08-03 at `66448562`
+Checked: 2026-08-03
 Owner: `lib/array/generics.x`, `lib/array/array.x`, and `lib/typed-array.x`
 
 Problem: packed typed arrays over six scalar element types would repeat one
@@ -439,7 +430,7 @@ family differences, not leftover forwarding code.
 ### Macro-generated typed list families
 
 Status: proven
-Checked: 2026-08-07 at `b2970c0f`
+Checked: 2026-08-07
 Owner: `lib/typed-list.x` and `lib/typed-list.x`
 
 Problem: seven typed cons chains over `List` would restate the structural
@@ -484,7 +475,7 @@ miss the interning table and grow it without bound.
 ### Block(T) base defaults replace forwarding wrappers
 
 Status: proven
-Checked: 2026-08-01 at `21740d80`
+Checked: 2026-08-01
 Owner: `lib/protocols.x` and protocol base-default emission
 
 Problem: `Array` and `Bytes` each hand-forwarded `len`, `capacity`, and
@@ -509,7 +500,7 @@ switches.
 ### Type as a native List protocol participant
 
 Status: rejected
-Checked: 2026-07-30 at `9d762c97`
+Checked: 2026-07-30
 Owner: `src/type.x` and protocol generated-member ownership
 
 Problem, as it stood at the checked revision: `Type` was a `List` typedef that
@@ -534,7 +525,7 @@ machinery without a capability or ownership benefit.
 ### Shipped expression constructors for generators
 
 Status: superseded 2026-10-25; the compiler no longer evaluates Lisp
-Checked: 2026-08-02 at `d2a51d85`
+Checked: 2026-08-02
 Owner: formerly the compiler-side Lisp SDK, now removed
 
 The Lisp literal builders `x2c.literal.string`, `x2c.literal.int`, and

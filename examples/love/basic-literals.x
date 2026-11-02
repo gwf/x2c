@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
   Array a = ["hello", "world", 42];
   String s = "this is a string";
 
-  printf("Map m: %s\n", m.repr());
+  printf("Map m: foo=%s, bar=%s, baz=%s\n", m[<foo>], m[<bar>], m[<baz>]);
   printf("List l: %s\n", l.repr());
   printf("Array a: %s\n", a.repr());
   printf("String s: %s\n", s.repr());

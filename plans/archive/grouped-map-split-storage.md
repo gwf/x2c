@@ -58,7 +58,7 @@ No new allocator, global synchronization, recurring check or backend selector.
   about 1% higher; the report retains those costs and timing limits.
 - Both compiler variants generate fourteen byte-identical files. All four
   measured generated runtime C files also match the final gated files exactly.
-- See the [adoption report](../../unittest/benchmarks/hash-table/results/grouped-split-adoption-20261101.md).
+- See the [adoption report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/grouped-split-adoption-20261101.md).
   Local raw sources, binaries, samples and gate logs remain under the ignored
   `debug/grouped-split-adoption/`. Full external cohorts, PLSO, Notes and
   build-cost/c2x2c scaling were not rerun for this allocation-policy change.

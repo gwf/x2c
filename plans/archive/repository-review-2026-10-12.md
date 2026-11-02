@@ -16,7 +16,7 @@ census and section E backlog.
 This does not establish that every cleanup candidate is resolved.
 [Review follow-ups](../reference/review-followups-2026-10-24.md#repository-review)
 retains typed List conversion policy, surviving duplication, and the dated
-build-cost question. The active [writing plan](../review-remediation-2026-10-11.md)
+build-cost question. The active [writing plan](../language-reference-writing.md)
 and [quotation plan](quotation-adoption-closeout-2026-10-31.md) own their
 remaining scope. No historical runtime or performance probe was rerun here.
 

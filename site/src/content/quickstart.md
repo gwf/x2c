@@ -473,7 +473,8 @@ The
 [Benchmarks Game suite](https://github.com/gwf/x2c/blob/main/examples/shootout/README.md)
 has ten problems written in x2c twice, once with ordinary collections and
 once tuned with typed containers, beside contributed C, Python, Rust, C++,
-Go, and Java programs. On the eight problems every column covers, idiomatic
+Go, and Java programs. In the [1 November 2026 run](https://github.com/gwf/x2c/blob/f5031f767e3905e650af9ae2d9733182e45c1d3f/examples/shootout/results/current.md),
+on the eight problems every column covers, idiomatic
 x2c ran at a median of 2.52 times C's time and tuned x2c at 1.07. Python
 took 20 times. The idiomatic x2c came in at 1.16 times Python's line count.
 Those are local measurements of those programs on one machine, not a

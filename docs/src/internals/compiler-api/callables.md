@@ -14,7 +14,6 @@ Callable values lowered to C helpers.
 | --- | --- |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.capture_environment`](#Compiler.capture_environment) | Binds the file-static context type `name` with the field rows `fields`, for callable defers and function-pointer `Func` values. |
-| [`Compiler.context_func_adapter`](#Compiler.context_func_adapter) | Builds an adapter with `type`'s public signature that passes its own Func as the first argument of `target`, before the declared arguments. |
 | [`Compiler.func_parameters`](#Compiler.func_parameters) | Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var` function taking the lambda parameter rows `entries`: its Func signature as a cached `List`, and each argument as `_func_reads` reads it from `argv` of the Func `fn`. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
@@ -50,17 +49,6 @@ Binds the file-static context type `name` with the field rows `fields`,
 for callable defers and function-pointer `Func` values. The complete
 typedef is bound at once, so each field keeps its member type. It binds
 at file scope whatever local scope is open.
-
-Source: `src/callables/adapters.x`
-
-<a id="Compiler.context_func_adapter"></a>
-#### Compiler.context_func_adapter
-
-`List Compiler.context_func_adapter(Compiler c, Type type, List target)`
-
-Builds an adapter with `type`'s public signature that passes its own
-Func as the first argument of `target`, before the declared arguments.
-The target can read per-instance bindings with `Func.context`.
 
 Source: `src/callables/adapters.x`
 

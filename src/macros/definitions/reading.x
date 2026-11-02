@@ -107,8 +107,11 @@ module void _naming(Definition &d) {
   String spelling = d.name.str();
   if (d.local && d.name == <with>)
     $fail.macros_name_with(c, d.start);
-  if (spelling.startswith("x2c.") && !c.builtin_defs &&
-      !Compiler.is_prelude_source(c.source_path(c.filename)))
+  /* The runtime and the compiler prelude may define the reserved `x2c.*`
+     and `lisp.*` macros. */
+  if ((spelling.startswith("x2c.") || spelling.startswith("lisp.")) &&
+      !c.builtin_defs &&
+      !Compiler.is_runtime_source(c.source_path(c.filename)))
     $fail.macros_macro_reserved(c, d.start, spelling);
 }
 

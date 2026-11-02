@@ -27,9 +27,11 @@ DESKTOP_PREFIX = $(shell $(DEPS_TOOL) path $(DESKTOP_MANIFEST) prefix)
 DESKTOP_FRAMEWORKS := -Wl,-framework,OpenGL -Wl,-framework,Cocoa \
 	-Wl,-framework,IOKit -Wl,-framework,CoreVideo
 
-.PHONY: example short-example run verify prepare-desktop run-interactive
+.PHONY: run verify prepare-desktop run-interactive
 
-example: builds/texture-sheet
+check: verify
+
+example: builds/texture-sheet builds/live-chart
 
 short-example: builds/climate-trends
 
@@ -65,6 +67,6 @@ run-interactive: prepare-desktop
 clean-builds:
 	rm -rf builds
 
-builds/live-chart: examples/live-chart.x $(CHART) $(PACKAGE_ARCHIVE) | builds
+builds/live-chart: examples/live-chart.x $(CHART) $(PACKAGE_CONSUMER_DEPS) | builds
 	$(X2C) build --output $@ --build-dir builds/live-chart-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $< $(CHART)

@@ -96,7 +96,7 @@ static void _release_stack(TaskJob job);
 
 static void _free(TaskJob job);
 
-static void _native_check(int code);
+static void _native_check(int error);
 
 static Code _task_without_callback(Code code);
 
@@ -953,8 +953,10 @@ static void _free(TaskJob job){
   if(job -> match_state) x2c_match_execution_free(job -> match_state);
 }
 
-static void _native_check(int code){
-  if(code) abort();
+void x2c_native_check(int, const char *);
+
+static void _native_check(int error){
+  x2c_native_check(error, "Task: native synchronization failed");
 }
 
 Var Macro_inserted(Var, int, int);

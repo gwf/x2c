@@ -233,24 +233,15 @@ static void typed_array_copy_slice_and_iteration(void) {
   EXPECT_NULL(missing.iter(NULL));
 }
 
-static void _expect_typed_array_common(
-  Var boxed, Var later, Array ordinary,
-  String direct_str, String direct_repr,
-  Buffer streamed_str, Buffer streamed_repr, int comparison) {
-  EXPECT_STR_EQ(direct_str, ordinary.str());
-  EXPECT_STR_EQ(direct_repr, ordinary.repr());
-  EXPECT_STR_EQ(streamed_str.str(), ordinary.str());
-  EXPECT_STR_EQ(streamed_repr.str(), ordinary.repr());
-  EXPECT_STR_EQ(boxed.str(), ordinary.str());
-  EXPECT_STR_EQ(boxed.repr(), ordinary.repr());
-  EXPECT_TRUE(comparison < 0);
-  EXPECT_TRUE(boxed.compare(later) < 0);
-
-  Buffer boxed_str = Buffer.new(0), boxed_repr = Buffer.new(0);
-  EXPECT_TRUE(boxed.write_str(boxed_str) == boxed_str);
-  EXPECT_TRUE(boxed.write_repr(boxed_repr) == boxed_repr);
-  EXPECT_STR_EQ(boxed_str.str(), ordinary.str());
-  EXPECT_STR_EQ(boxed_repr.str(), ordinary.repr());
+static void typed_array_extreme_slice_steps(void) {
+  $test.scoped();
+  ArrayInt values = %[10, 20, 30];
+  ArrayInt forward = values.getslice(1, 3, INT_MAX);
+  ArrayInt reverse = values.getslice(2, INT_MIN, INT_MIN);
+  EXPECT_INT_EQ(forward.len(), 1);
+  EXPECT_INT_EQ(forward[0], 20);
+  EXPECT_INT_EQ(reverse.len(), 1);
+  EXPECT_INT_EQ(reverse[0], 30);
 }
 
 static void typed_array_common_capabilities_cover_every_family(void) {
@@ -263,7 +254,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array char_array = chars;
   Buffer char_str = Buffer.new(0), char_repr = Buffer.new(0);
   chars.write_str(char_str); chars.write_repr(char_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     chars, later_chars, char_array, chars, chars.repr(),
     char_str, char_repr, chars.compare(later_chars));
   EXPECT_INT_EQ(char_array[1].char(), 2);
@@ -275,7 +266,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array short_array = shorts;
   Buffer short_str = Buffer.new(0), short_repr = Buffer.new(0);
   shorts.write_str(short_str); shorts.write_repr(short_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     shorts, later_shorts, short_array, shorts, shorts.repr(),
     short_str, short_repr, shorts.compare(later_shorts));
   EXPECT_INT_EQ(short_array[1].short(), 20);
@@ -287,7 +278,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array int_array = ints;
   Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
   ints.write_str(int_str); ints.write_repr(int_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     ints, later_ints, int_array, ints, ints.repr(),
     int_str, int_repr, ints.compare(later_ints));
   EXPECT_INT_EQ(int_array[1].integer(), 200);
@@ -302,7 +293,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array long_array = longs;
   Buffer long_str = Buffer.new(0), long_repr = Buffer.new(0);
   longs.write_str(long_str); longs.write_repr(long_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     longs, later_longs, long_array, longs, longs.repr(),
     long_str, long_repr, longs.compare(later_longs));
   EXPECT_TRUE(long_array[1].long() == 3000000001L);
@@ -314,7 +305,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array float_array = floats;
   Buffer float_str = Buffer.new(0), float_repr = Buffer.new(0);
   floats.write_str(float_str); floats.write_repr(float_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     floats, later_floats, float_array, floats, floats.repr(),
     float_str, float_repr, floats.compare(later_floats));
   EXPECT_TRUE(float_array[1].float() == 2.5f);
@@ -326,7 +317,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array double_array = doubles;
   Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
   doubles.write_str(double_str); doubles.write_repr(double_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     doubles, later_doubles, double_array, doubles, doubles.repr(),
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_array[1].double() == 2.5);
@@ -339,7 +330,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   Array string_array = strings;
   Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
   strings.write_str(string_str); strings.write_repr(string_repr);
-  _expect_typed_array_common(
+  Test_expect_same_text(
     strings, later_strings, string_array, strings, strings.repr(),
     string_str, string_repr, strings.compare(later_strings));
   EXPECT_STR_EQ(string_array[1].string(), "beta");
@@ -492,12 +483,16 @@ static void typed_array_find_boxes_matches(void) {
   EXPECT_INT_EQ(floats.index(2.5f), 1);
   EXPECT_INT_EQ(doubles.index(3.5), 1);
   EXPECT_INT_EQ(strings.index("match"), 1);
-  EXPECT_TRUE(ints.find(NULL) is void);
+  int rejected = 0;
+  try ints.find(NULL);
+  catch %(bad-arg (operation "Func.apply")): rejected++;
+  EXPECT_INT_EQ(rejected, 1);
   EXPECT_TRUE(ints.find(%!(Var value) => value > 999) is void);
   EXPECT_INT_EQ(ints[0], 0);
   EXPECT_INT_EQ(ints[1], 200);
   ArrayInt empty = ArrayInt.new(), missing = NULL;
   EXPECT_TRUE(empty.find(accept) is void);
+  EXPECT_TRUE(empty.find(NULL) is void);
   EXPECT_TRUE(missing.find(accept) is void);
 }
 
@@ -629,6 +624,20 @@ static void typed_array_narrow_update_truncates(void) {
 
   EXPECT_INT_EQ(bytes[0] += 100, -56);
   EXPECT_INT_EQ(shorts[0] += 30000, -5536);
+
+  // a shift count is checked against the promoted int, as for a native
+  // char, so a narrow element keeps the low bits of the promoted result
+  bytes[0] = 3;
+  shorts[0] = 1;
+  EXPECT_INT_EQ(bytes[0] <<= 10, 0);
+  EXPECT_INT_EQ(shorts[0] <<= 20, 0);
+  int caught = 0;
+  try bytes[0] <<= 32;
+  catch %(bad-shift *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<width>).integer(), 32);
+  }
+  EXPECT_INT_EQ(caught, 1);
 }
 
 static void typed_array_update_faults_transfer(void) {
@@ -656,14 +665,17 @@ static void typed_array_update_faults_transfer(void) {
   try values[0] >>= -1;
   catch %(bad-shift *): caught++;
 
-  // % and the bitwise operators are not defined on a float element
+  // % and the bitwise operators are not defined on a float element, and
+  // an operator without a numeric meaning is not an update at all
   try reals[0] %= 2.0;
   catch %(bad-types *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<op>).symbol() == <%>);
   }
+  try reals.updateindex(0, <@>, 2.0);
+  catch %(bad-op *): caught++;
 
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 6);
   // every failure raised before storing, so both elements are untouched
   EXPECT_INT_EQ(values[0], 7);
   EXPECT_TRUE(reals[0] == 1.5);
@@ -678,6 +690,7 @@ void typed_array_suite(void) {
   $test.run(typed_array_additional_scalar_families);
   $test.run(typed_array_string_family);
   $test.run(typed_array_copy_slice_and_iteration);
+  $test.run(typed_array_extreme_slice_steps);
   $test.run(typed_array_common_capabilities_cover_every_family);
   $test.run(typed_array_common_capabilities_keep_null_and_float_order);
   $test.run(typed_array_int_sequence_mutations);

@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 _Static_assert(CHAR_BIT == 8, "char is 8 bits");
 _Static_assert(CHAR_MIN == - 128 && CHAR_MAX == 127, "char is signed");
@@ -240,6 +241,11 @@ int x2c_var_identical(Var a, Var b);
 double x2c_var_order(Var a, Var b);
 Var Var_convert(Var value, Symbol target);
 Var Var_convert_at(Var value, Symbol target, const X2CErrorSite * site);
+long Var_long_at(Var value, const X2CErrorSite * site);
+ulong Var_ulong_at(Var value, const X2CErrorSite * site);
+long long Var_long_long_at(Var value, const X2CErrorSite * site);
+unsigned long long Var_ulong_long_at(Var value, const X2CErrorSite * site);
+long double Var_long_double_at(Var value, const X2CErrorSite * site);
 int Var_truth(Var value);
 int Var_fallback_truth(Var value);
 Iter Var_fallback_iter(Var value, Iter dest);
@@ -878,23 +884,23 @@ unsigned Var_unsigned(Var x){
 }
 
 long Var_long(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 818062)) return Var_long_value(x);  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return Var_integer(x);  return Var_long_value(Var_convert(x, 818062));
+  if(! _init_guard_) _file_init_();  return Var_long_at(x, NULL);
 }
 
 ulong Var_ulong(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 44858254)) return Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(ulong) Var_integer(x);  return Var_ulong_value(Var_convert(x, 44858254));
+  if(! _init_guard_) _file_init_();  return Var_ulong_at(x, NULL);
 }
 
 long long Var_long_long(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 25983886)) return Var_long_long_value(x);  if(Var_is(x, 818062)) return(long long) Var_long_value(x);  if(Var_kind(x) == 20309162340) return(long long) Var_integer(x);  return Var_long_long_value(Var_convert(x, 25983886));
+  if(! _init_guard_) _file_init_();  return Var_long_long_at(x, NULL);
 }
 
 unsigned long long Var_ulong_long(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 1435270030)) return Var_ulong_long_value(x);  if(Var_is(x, 44858254)) return(unsigned long long) Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(unsigned long long) Var_integer(x);  return Var_ulong_long_value(Var_convert(x, 1435270030));
+  if(! _init_guard_) _file_init_();  return Var_ulong_long_at(x, NULL);
 }
 
 long double Var_long_double(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 26071077642)) return Var_long_double_value(x);  if(Var_is(x, 3356265) || Var_is(x, 3355493)) return(long double) Var_floating(x);  return Var_long_double_value(Var_convert(x, 26071077642));
+  if(! _init_guard_) _file_init_();  return Var_long_double_at(x, NULL);
 }
 
 float Var_float(Var x){
@@ -951,7 +957,7 @@ void x2c_initialize_protocols(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 928,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 912,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -964,18 +970,33 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 953,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 937,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop =(* stop);  if((* start) == INT_MIN)(* start) =(step > 0) ? 0 : length - 1;  if((* stop) == INT_MIN)(* stop) = - 1;  if((* start) < 0){
     (* start) += length;  if((* start) < 0)(* start) =(step < 0) ? - 1 : 0;
   }
   else if((* start) >= length)(* start) =(step < 0) ? length - 1 : length;  if((* stop) < 0){
-    if(step > 0)(* stop) += length + 1;  else{
+    if(step > 0)(* stop) =(* stop) +(long long) length + 1;  else{
       if(orig_stop != INT_MIN)(* stop) += length;
     }
 
   }
-  if((* stop) < - 1)(* stop) = - 1;  if((* stop) > length)(* stop) = length;  int newlen = 0;  if(step < 0 &&(* start) >(* stop)) newlen =((* start) -(* stop) - 1) /(- step) + 1;  else if(step > 0 &&(* start) <(* stop)) newlen =((* stop) -(* start) - 1) / step + 1;  return newlen;
+  if((* stop) < - 1)(* stop) = - 1;  if((* stop) > length)(* stop) = length;  long long newlen = 0;  if(step < 0 &&(* start) >(* stop)) newlen =((long long)(* start) -(* stop) - 1) / -(long long) step + 1;  else if(step > 0 &&(* start) <(* stop)) newlen =((long long)(* stop) -(* start) - 1) / step + 1;  return newlen;
+}
+
+_Noreturn void x2c_fatal(const char * message){
+  if(! _init_guard_) _file_init_();  fprintf(stderr, "%s\n", message);  abort();
+}
+
+void x2c_native_check(int error, const char * failure){
+  if(! _init_guard_) _file_init_();  if(! error) return;  fprintf(stderr, "%s (%d)\n", failure, error);  abort();
+}
+
+_Noreturn void x2c_io_fail(Var operation, int error){
+  if(! _init_guard_) _file_init_(); {
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/common.x",.function = "x2c_io_fail",.line = 998,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 20399393368, 2, Symbol_var(34096809266140), operation, Symbol_var(11703198), int_var(error));  __builtin_unreachable();
+  }
+
 }
 
 Array Var_array(Var);
@@ -1016,19 +1037,19 @@ static inline int _x2c_gensym_proto_array_contains_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_array_getindex_0(Var a0, Var a1){
-  return Array_getindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_2; }))));
+  return Array_getindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_3; }))));
 }
 
 static inline Var _x2c_gensym_proto_array_setindex_0(Var a0, Var a1, Var a2){
-  return Array_setindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_setindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_3; }))), a2);
+  return Array_setindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_setindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_4; }))), a2);
 }
 
 static inline Var _x2c_gensym_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
-  return Array_updateindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_updateindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_4; }))), a2, a3);
+  return Array_updateindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_updateindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_5; }))), a2, a3);
 }
 
 static inline Var _x2c_gensym_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2){
-  return Array_postfixindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_postfixindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_5; }))), a2);
+  return Array_postfixindex(Var_array(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_array_postfixindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_6; }))), a2);
 }
 
 static inline int _x2c_gensym_proto_block_truth_0(Var a0){
@@ -1050,7 +1071,7 @@ static inline int _x2c_gensym_proto_buffer_truth_0(Var a0){
 
 int Buffer_getindex(Buffer, int);
 static inline Var _x2c_gensym_proto_buffer_getindex_0(Var a0, Var a1){
-  return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_buffer_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_6; })))));
+  return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_buffer_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_7; })))));
 }
 
 Bytes Var_bytes(Var);
@@ -1132,7 +1153,7 @@ static inline int _x2c_gensym_proto_list_contains_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_list_getindex_0(Var a0, Var a1){
-  return List_getindex(Var_list(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_list_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_7; }))));
+  return List_getindex(Var_list(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_list_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_8; }))));
 }
 
 Map Var_map(Var);
@@ -1235,7 +1256,7 @@ static inline Var _x2c_gensym_proto_string_add_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_gensym_proto_string_getindex_0(Var a0, Var a1){
-  return int_var(String_getindex(Var_string(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_string_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_8; })))));
+  return int_var(String_getindex(Var_string(a0), Var_int(Var_convert_at(a1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/common.x",.function = "_x2c_gensym_proto_string_getindex_0",.line = 0,.runtime = 1}; & _x2c_gensym_error_site_9; })))));
 }
 
 static inline String _x2c_gensym_proto_symbol_str_0(Var a0){

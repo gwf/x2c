@@ -42,10 +42,10 @@ python3 packages/torch/benchmarks/plots.py session diagnostics
 ```
 
 That sequence is the whole session; `REPORT.md` and the plots come
-out of the last two commands and read nothing but the JSON the earlier
-ones wrote. `plots.py` needs matplotlib, which the pinned torch wheel's
-interpreter does not have, so run it under an interpreter that does; it
-never imports torch.
+out of the last two commands under `debug/torch-comparison/session/`.
+They read only the JSON the earlier commands wrote. `plots.py` needs
+matplotlib, which the pinned torch wheel's interpreter does not have. Run
+it under an interpreter that does; it never imports torch.
 
 Run the required operation-order control separately:
 
@@ -55,8 +55,8 @@ python3 packages/torch/benchmarks/run.py check --run-id matched
 python3 packages/torch/benchmarks/run.py report --run-id matched
 ```
 
-This writes `MATCHED.md`. The Python control uses libtorch 2.10's Adam
-operation order; stock PyTorch remains the ordinary comparison in `REPORT.md`.
+This writes `debug/torch-comparison/matched/MATCHED.md`. The Python control
+uses libtorch 2.10's Adam operation order; stock PyTorch remains the ordinary comparison in `REPORT.md`.
 The control must satisfy the existing tolerances. Stock Adam's measured
 floating-point divergence is reported separately, with any failed tolerance
 kept visible and a nonzero `check` exit status. Never use control timings as
@@ -65,7 +65,7 @@ a conflicting selection later; output directories are separate. Check-mode
 checkpoints are retained beside the raw logs. Preserve that evidence outside
 a disposable worktree before deleting it.
 
-`HISTORICAL-20260910.md` retains the earlier report and its evidence limits.
+[The historical report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/HISTORICAL-20260910.md) retains the earlier report and its evidence limits.
 
 The timing counts are calibrated in `run.py` so the slower language takes
 roughly 15 seconds per sample at one intra-op thread. `--updates`
@@ -86,12 +86,12 @@ defaults to `/tmp/mnist-real`. `prepare` records their SHA-256 in
 `config.json` beside the artifacts.
 
 Datasets, binaries, and checkpoints live under
-`unittest/build/torch-comparison/`; logs and raw samples under
+`unittest/build/torch-comparison/`; reports, plots, logs, and raw samples under
 `debug/torch-comparison/<run-id>/`.
 
 ### Tensor-chain lifetimes
 
-The [fresh chain results](REMEDIES.md) compare explicit release and a scope
+The [historical chain results](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REMEDIES.md) compare explicit release and a scope
 per iteration with original Python, retaining the original x2c loop as a
 control. The [Torch guide](../../../docs/src/guide/torch.md#performance)
 puts these measurements beside training, prediction, and memory results.
@@ -130,18 +130,20 @@ $work/bin/interop time $work/artifacts $work/out freed 190
 $work/bin/interop time $work/artifacts $work/out subscope 190
 ```
 
-The committed [2026-09-11 samples](results/chains-20260911/) contain the
+The historical [2026-09-11 samples](https://github.com/gwf/x2c/tree/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/results/chains-20260911) contain the
 original timings, exact scalar checks, process result records and compact
-provenance. Regenerate the report from those files without running a
-benchmark or loading Torch:
+provenance in Git history. Recover them into an ignored directory, then
+regenerate a report without running a benchmark or loading Torch:
 
 ```sh
-python3 packages/torch/benchmarks/run.py remedies-report
+python3 packages/torch/benchmarks/run.py remedies-report \
+    --results debug/torch-comparison/recovered-chains
 ```
 
 The full native binaries, generated C, source archives, commands and process
 snapshots remain in the durable evidence archive identified by the report.
-The repository carries the small reproducibility records, not those binaries.
+New reports are written beside their inputs. Git history retains the original
+reproducibility records and reports.
 
 ### Checking the comparison runner
 
@@ -315,7 +317,7 @@ Acceptance, in the order it is checked:
 Long-run per-weight equality is reported, not required: float32 training
 diverges from a one-ulp difference over thousands of updates.
 
-`PILOT.md` holds the first measurements and the gaps they exposed.
+[The pilot report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/PILOT.md) holds the first measurements and the gaps they exposed.
 
 ## Supplemental diagnostics
 
@@ -367,7 +369,7 @@ ascending sweep; earlier peaks and allocator caches are still present.
 All interop sizes retain distinct logs and JSON, with Python and each x2c
 lifetime checked against the direct C++ result.
 
-[SUPPLEMENT.md](SUPPLEMENT.md) records the current supplemental results and
+[The historical supplement](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/SUPPLEMENT.md) records the supplemental results and
 the unexplained remainder of the original canonical-churn process peak.
 Stable native/Scope counts and bounded List storage do not identify the
 source of that residual or establish general memory suitability.

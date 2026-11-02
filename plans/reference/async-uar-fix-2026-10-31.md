@@ -3,6 +3,8 @@
 > Status: reference - local runtime fix and focused regression validation.
 > Recorded 2026-10-31. Normal benchmarks remain on hold; no pushes authorized.
 > Source baseline: e1f4ba26b. The Linux numeric findings are outside this fix.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Failure and correction
 
@@ -65,9 +67,9 @@ this repair; no numeric code or expectations were changed.
 
 Full logs use `debug/async-uar-*` and `debug/async-{arm64,amd64}-uar-*`.
 Linux full-check logs and status files are
-also retained under the directory in `.context/async-linux-validation-dir`.
-The reused isolated macOS x86_64 tree is recorded in
-`.context/async-native-validation-dir`.
+also retained under the directory named by the workspace-local, untracked
+`.context/async-linux-validation-dir`. The reused isolated macOS x86_64 tree
+is named by the workspace-local `.context/async-native-validation-dir`.
 
 ## Delivery boundary
 

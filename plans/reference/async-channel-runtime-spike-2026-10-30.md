@@ -1,5 +1,8 @@
 # Async tasks and loop-owned channels: spike results
 
+> Status: reference - noted 2026-11-01. The design that followed this spike
+> was published to `dev` in `255de641f` on 2026-10-31; the "local research
+> only" and no-push statements below are historical.
 > Design succession: [execution stacks](../archive/async-execution-stacks.md) records
 > the subsequent semantic model. This report remains experimental evidence;
 > private task allocation Scopes are not selected language semantics.
@@ -445,7 +448,8 @@ plan status remain local for review. Nothing was pushed to `dev`.
 ## Reproduction and retained evidence
 
 The evidence copy is
-`.context/async-spike-20261030/` in this worktree. The full isolated checkout
+the workspace-local, untracked `.context/async-spike-20261030/` in the
+originating worktree. The full isolated checkout
 is retained at `/tmp/x2c-async-spike-20261030`. Neither location was removed.
 The evidence copy contains:
 

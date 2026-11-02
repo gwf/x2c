@@ -72,6 +72,9 @@ static void _initialize(void) {
     _raw_fatal("could not register shutdown handler");
 }
 
+/* Scope links without the rest of the runtime (see the preinit probe in
+   unittest/probes/run-scope-shutdown), so it keeps this report rather than
+   calling `x2c_fatal`. */
 module void _raw_fatal(const char *message) {
   fprintf(stderr, "Scope: %s\n", message);
   abort();

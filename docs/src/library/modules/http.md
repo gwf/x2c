@@ -157,7 +157,7 @@ Source: `lib/http.x`
 `void HttpServer.close(HttpServer s)`
 
 Stops and releases native resources.
-Call after synchronous serve returns.
+Call after synchronous serve returns. Repeated close is harmless.
 
 Source: `lib/http.x`
 
@@ -170,9 +170,9 @@ Binds immediately; port 0 selects an available port.
 Options use Symbol keys.
 
 **Raises:** `<bad-arg>` for fewer than one worker, an idle timeout below one
-millisecond, a negative body limit, or an invalid port, `<not-found>`
-when the host does not resolve, or `<io-fail>` on a host failure while
-binding, as `Listener.bind` does.
+millisecond, a negative body limit, a NULL `logger`, or an invalid port,
+`<not-found>` when the host does not resolve, or `<io-fail>` on a host
+failure while binding, as `Listener.bind` does.
 
 Source: `lib/http.x`
 
@@ -183,6 +183,8 @@ Source: `lib/http.x`
 
 Reports the bound port.
 
+**Raises:** `<bad-arg>` for NULL.
+
 Source: `lib/http.x`
 
 <a id="HttpServer.serve"></a>
@@ -191,6 +193,8 @@ Source: `lib/http.x`
 `void HttpServer.serve(HttpServer s)`
 
 Runs on the caller until stop; closes the queue and joins every worker.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/http.x`
 
@@ -201,8 +205,8 @@ Source: `lib/http.x`
 
 Starts serving on a joined background Thread.
 
-**Raises:** `<bad-state>` when the server is already serving, or the causes
-of `Thread.start`.
+**Raises:** `<bad-arg>` for NULL, `<bad-state>` when the server is already
+serving, or the causes of `Thread.start`.
 
 Source: `lib/http.x`
 
@@ -212,6 +216,8 @@ Source: `lib/http.x`
 `void HttpServer.stop(HttpServer s)`
 
 Stops accepting and joins the background acceptor when one was started.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/http.x`
 
@@ -232,6 +238,8 @@ Source: `lib/http.x`
 `void Router.dispatch(Router router, HttpRequest req, HttpResponse res)`
 
 Calls the first matching handler; unmatched paths raise 404 or 405.
+A HEAD request without a matching HEAD route calls the first matching
+GET handler, and the server then omits the response body.
 
 Source: `lib/http.x`
 
@@ -340,7 +348,8 @@ Source: `lib/http.x`
 
 `class Router { Array routes; } *`
 
-Routes are tried in registration order within each method.
+Routes are tried in registration order within each method. A HEAD
+request without a matching HEAD route uses the first matching GET route.
 
 Source: `lib/http.x`
 

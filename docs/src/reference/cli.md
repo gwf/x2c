@@ -5,9 +5,11 @@ The root link selects `builds/0/x2c`, the development compiler, without using
 `PATH`. `./bin/x2c` selects the bootstrap compiler until `make build-install`
 links it to an installed copy of the development compiler. Outside the
 checkout, use `x2c` after [installation and PATH setup](../guide/installation.md).
-Every invocation begins with a command:
-`translate`, `build`, `run`, `new`, `test`, `script`, `env`, `install`,
-`remove`, `list`, or `help`.
+Every invocation begins with a command. The driver provides `translate`,
+`build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, and
+`help`. The [external commands](#commands) `test`, `lsp`, and `package`
+ship with the compiler. In a checkout, `make commands` also builds the
+experimental `bind`, `graph`, `lint`, and `repl`.
 
 The generated help is the short option reference:
 
@@ -480,11 +482,13 @@ and `--rebuild` require the cached path.
 `__FILE__`, and `__LINE__` name the `.x` source; use `--no-source-map` for
 generated-C locations.
 
-`--` ends build options. Every later value is passed as one program argument,
-including values that begin with `-` or end in `.x`. x2c returns the program's
-exit status. `-###` prints the build and run actions without creating or
-launching anything. It reads no input file either, so it also prints the
-actions for an artifact a planned target would produce.
+`--` ends build options. Every later value is passed to the program,
+including values that begin with `-` or end in `.x`. The driver expands
+response files before it parses options, so `@file` after `--` passes the
+file's words, and `@@name` passes the literal `@name`. x2c returns the
+program's exit status. `-###` prints the build and run actions without
+creating or launching anything. It reads no input file either, so it also
+prints the actions for an artifact a planned target would produce.
 
 The program inherits standard input, output, and error, so interactive prompts
 and terminal applications work as they do when launched directly. Shell pipes
@@ -502,15 +506,18 @@ ends in `.x`, or may be any name when the first line is a shebang:
 The first run builds an executable into the per-user cache. Later runs
 start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
-includes, a package archive it links, the compiler, the runtime archive, the
-C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also records
-the directories the build searched: include directories, `-L` directories,
-the C compiler's header and library search paths, and the directory of each
-file the build read. Adding or removing a file in one of them rebuilds the
+includes, a package archive it links, a library file that a `-l` option can
+name, the compiler, the runtime archive, the C compiler, the script's
+options, or the `CPATH`, `C_INCLUDE_PATH`, `LIBRARY_PATH`, and `SDKROOT`
+environment variables. The cache also records the directories the build
+searched: include directories, `-L` directories, `LIBRARY_PATH`, the C
+compiler's header and library search paths, and the directory of each file
+the build read. Adding or removing a file in one of them rebuilds the
 script. This covers a header that now shadows an included one, a
 `__has_include` whose result changed, and a `-l` library that now resolves
-elsewhere. `--rebuild` builds regardless.
+elsewhere. A `-l` option that names no library file in those directories,
+such as one found through `-Wl,-L`, rebuilds the script on every run.
+`--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
@@ -725,10 +732,11 @@ The exceptions are:
 --c-system-dir <dir>   C compilation only, system-header semantics
 ```
 
-`--package-dir <dir>` adds a directory of x2c packages. An `import` statement
-searches those directories for a package that is not beside the source. The
-option applies to `translate`, `build`, `run`, and `repl`, and repeats like
-`-I`.
+`--package-dir <dir>` adds a package root, a directory of x2c packages. An
+`import` statement searches only package roots, so a package directory
+beside the source is found only when the source's directory is a root, as
+with `--package-dir .`. `translate`, `build`, `run`, `script`, `env`, and
+`repl` accept the option, and it repeats like `-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
@@ -743,8 +751,8 @@ sources with flat names, and consume package-compiled providers through
 ## Packages
 
 `install`, `remove`, and `list` dispatch to the shipped package command.
-The driver expands response files once. The package command handles their
-options and help with the legacy CLI parser.
+The driver expands response files once. The package command parses their
+options and help with the driver's own option parser.
 The equivalent `x2c package install`, `x2c package remove`, and
 `x2c package list` forms pass arguments literally, like other external commands.
 
@@ -845,9 +853,10 @@ current directory. Discovery selects
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
 
-The selected target's include and package directories are forwarded to
-each build. Concurrent runs print each file's captured output in discovery
-order. Each file runs through
+`--manifest-path FILE` selects that manifest and `--target NAME` its
+target, as for `build`. The selected target's include and package
+directories are forwarded to each build. Concurrent runs print each
+file's captured output in discovery order. Each file runs through
 `x2c script`, so local `.x` includes compile as helpers. The script cache
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
@@ -906,7 +915,9 @@ command treats `-` as an ordinary file name in these modes.
 
 Translation reports each diagnostic on standard error as
 `file:line:column: code: message`, followed by the source line, a caret, and
-any notes. A unit stops after 20 errors. `--max-errors <count>` changes that
+any notes. `file` follows the rule for the JSON `file` field below: relative
+to the working directory for a source inside it and absolute otherwise. A
+unit stops after 20 errors. `--max-errors <count>` changes that
 bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`
 removes it. When the bound is greater than one, a unit that reaches it ends
 with `limit: too many errors, stopping`. With `--max-errors 1`, the unit's

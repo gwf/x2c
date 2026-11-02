@@ -15,6 +15,7 @@
 static keyword loop $private.loop;
 #include "x2c.x"
 #include "path.x"
+#include "encoding.x"
 
 /** The receiverless owner of `Json.parse` and the other JSON operations. */
 typedef Symbol Json;
@@ -53,6 +54,11 @@ static macro Stmt $error.write.depth() {
           (reason "nesting exceeds 512 levels"));
 }
 
+static macro Stmt $error.write.stack() {
+  raise %(size-limit (operation "Var.json")
+          (reason "nesting exceeds the stack"));
+}
+
 static macro Stmt $error.write.type(Expr $tag) {
   raise %(bad-types (operation "Var.json") (tag $($tag)));
 }
@@ -77,6 +83,9 @@ static macro Stmt $error.read.trailing(Expr $reader) =>
 
 static macro Stmt $error.read.depth(Expr $reader) =>
   _fail($reader, "nesting exceeds 512 levels");
+
+static macro Stmt $error.read.stack(Expr $reader) =>
+  _fail($reader, "nesting exceeds the stack");
 
 static macro Stmt $error.read.end(Expr $reader) =>
   _fail($reader, "unexpected end of input");
@@ -144,11 +153,13 @@ static struct JsonBool _json_false = { 0 }, _json_true = { 1 };
 */
 
 /* One parse of `text`: `at` is the byte being read, `depth` counts the open
-   arrays and objects, and `path` names a file for the error details. */
+   arrays and objects, `path` names a file for the error details, and
+   nesting stops when the C stack reaches `floor`. */
 static typedef struct Reader {
   const char *text;
   String path;
   int at, depth;
+  unsigned long floor;
 } Reader;
 
 /*  writing
@@ -160,10 +171,12 @@ static typedef struct Reader {
     integers, strings, and containers.
 */
 
-/* One write: the output Buffer and whether it is indented. */
+/* One write: the output Buffer, whether it is indented, and the C stack
+   address `floor` where nesting stops. */
 static typedef struct Writer {
   Buffer out;
   int pretty;
+  unsigned long floor;
 } Writer;
 
 /** Boxes a JSON boolean. */
@@ -203,8 +216,9 @@ int Json.boolean(Var value) {
     repeated object name keeps its last value.
     Raises: `<malformed>` with `reason`, `offset`, `line`, and `column` details
     when `source` is not one JSON value surrounded only by whitespace, nests
-    arrays and objects more than 512 deep, or contains a number too large for
-    a `double`, an unpaired surrogate escape, or `\u0000`.
+    arrays and objects more than 512 deep or deeper than the stack allows, or
+    contains a number too large for a `double`, an unpaired surrogate escape,
+    or `\u0000`.
 */
 meta native Var Json.parse(String source) => _parse(source, NULL);
 
@@ -237,7 +251,7 @@ void Json.write_file(Var value, Path path) => path.write_text(value.json());
     Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
     for a `String` and a `Symbol` name with the same spelling,
     `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
-    deeper than 512 levels.
+    deeper than 512 levels or than the stack allows.
 */
 String Var.json(Var value) => _json(value, 0);
 
@@ -246,7 +260,7 @@ String Var.json(Var value) => _json(value, 0);
    partial output; the caller owns its rollback policy. Raises the same
    causes as `Var.json`. */
 void _x2c_json_write(Buffer out, Var value, int pretty) {
-  Writer w = {.out = out, .pretty = pretty};
+  Writer w = {.out = out, .pretty = pretty, .floor = _x2c_stack_floor()};
   _write_value(w, value, 0);
 }
 
@@ -257,7 +271,8 @@ meta native JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
 
 static Var _parse(String source, String path) {
-  Reader r = {.text = source ? source : "", .path = path};
+  Reader r = {
+    .text = source ? source : "", .path = path, .floor = _x2c_stack_floor()};
   Var value = _read_value(r);
   _space(r);
   if (_peek(r)) $error.read.trailing(r);
@@ -269,6 +284,7 @@ static Var _read_value(Reader &r) {
   switch (_peek(r)) {
     case '{': case '[': {
       if (++r.depth > JSON_MAX_DEPTH) $error.read.depth(r);
+      if (_x2c_stack_below(r.floor)) $error.read.stack(r);
       Var nested = _peek(r) == '{' ? _object(r) : _array(r);
       r.depth--;
       return nested;
@@ -394,7 +410,7 @@ static void _escape(Reader &r, Buffer out) {
     r.at = start;
     $error.read.nul(r);
   }
-  _write_code_point(out, point);
+  out.write_code_point(point);
 }
 
 static long _hex4(Reader &r) {
@@ -487,27 +503,6 @@ static void _fail(Reader &r, String why) {
   $error.read.text(why, offset, line, column);
 }
 
-/* UTF-8
-
-   Reading validates each unescaped sequence with `scan_utf8_length` and
-   decodes `\u` escapes; writing replaces each ill-formed subpart with
-   U+FFFD. */
-
-static void _write_code_point(Buffer out, long point) {
-  if (point < 0x80) {
-    out.write_char(point);
-    return;
-  }
-  char bytes[4];
-  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
-  for (int i = length - 1; i > 0; i--) {
-    bytes[i] = 0x80 | (point & 0x3F);
-    point >>= 6;
-  }
-  bytes[0] = (0xF0 << (4 - length)) | point;
-  out.write_len(bytes, length);
-}
-
 static String _json(Var value, int pretty) {
   Buffer out = auto Buffer.new(0);
   _x2c_json_write(out, value, pretty);
@@ -516,6 +511,7 @@ static String _json(Var value, int pretty) {
 
 static void _write_value(Writer &w, Var value, int depth) {
   if (depth > JSON_MAX_DEPTH) $error.write.depth();
+  if (_x2c_stack_below(w.floor)) $error.write.stack();
   if (value.is_null()) w.out.write("null");
   else if (value is <jsonbool>) w.out.write(value.jsonbool().str());
   else if (value is <string> || value.is_atom())
@@ -598,7 +594,7 @@ static void _write_string(Buffer out, String text) {
     out.write_len(text + run, at - run);
     if (escape) out.write(escape);
     else if (byte < 0x20) out.printf("\\u%04x", byte);
-    else _write_code_point(out, 0xFFFD);
+    else out.write_code_point(0xFFFD);
     run = at -= sequence;
   }
   // The empty String is NULL, so an empty tail must not offset it.

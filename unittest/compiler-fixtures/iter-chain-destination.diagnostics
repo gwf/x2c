@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/iter-chain-destination.x:16:3: type: function takes 3 arguments, not 2
+    return consume(xs.iter().map(%!(x) => x * 2));
+    ^^^^^^
+

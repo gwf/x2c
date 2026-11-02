@@ -401,6 +401,23 @@ static void lisp_eval_def_and_globals(void) {
   lisp.destroy();
 }
 
+/* A null session breaks the call's contract. A null name or output, or an
+   absent name, finds nothing. */
+static void lisp_try_get_rejects_a_null_session(void) {
+  Lisp missing = NULL, lisp = Lisp.kernel();
+  lisp.set_global("x", 1);
+  Var stored = 7;
+  int rejected = 0;
+  try missing.try_get("x", stored);
+  catch %(bad-arg (operation "Lisp.try_get")): rejected = 1;
+  EXPECT_INT_EQ(rejected, 1);
+  EXPECT_FALSE(lisp.try_get(NULL, stored));
+  EXPECT_FALSE(lisp.try_get("x", NULL));
+  EXPECT_FALSE(lisp.try_get("missing", stored));
+  EXPECT_INT_EQ(stored.integer(), 7);
+  lisp.destroy();
+}
+
 static void lisp_host_binding_shadows_only_the_child(void) {
   Lisp parent = Lisp.kernel();
   parent.set_global("inherited", 1);
@@ -417,6 +434,36 @@ static void lisp_host_binding_shadows_only_the_child(void) {
   EXPECT_INT_EQ(_ev(child, "inherited").integer(), 2);
   child.destroy();
   sibling.destroy();
+  parent.destroy();
+}
+
+static void lisp_def_replaces_host_x2c_names(void) {
+  Lisp lisp = Lisp.kernel();
+  lisp.set_global("x2c.answer", 42);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.answer 43)"), 0);
+  EXPECT_INT_EQ(_ev(lisp, "x2c.answer").integer(), 43);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.other 1)"), 0);
+  Var stored = void;
+  EXPECT_TRUE(lisp.try_get("x2c.other", stored));
+  EXPECT_INT_EQ(stored.integer(), 1);
+  lisp.destroy();
+}
+
+static void lisp_null_session_members_raise_bad_arg(void) {
+  Lisp missing = NULL, parent = Lisp.kernel();
+  int budget = 0, adopted = 0, orphan = 0, frozen = 0;
+  try missing.call_budget(5);
+  catch %(bad-arg (operation "Lisp.call_budget")): budget = 1;
+  try missing.adopt(parent);
+  catch %(bad-arg (operation "Lisp.adopt")): adopted = 1;
+  try parent.adopt(missing);
+  catch %(bad-arg (operation "Lisp.adopt")): orphan = 1;
+  try missing.freeze();
+  catch %(bad-arg (operation "Lisp.freeze")): frozen = 1;
+  EXPECT_TRUE(budget);
+  EXPECT_TRUE(adopted);
+  EXPECT_TRUE(orphan);
+  EXPECT_TRUE(frozen);
   parent.destroy();
 }
 
@@ -454,11 +501,10 @@ static void lisp_transports_void_outside_collections(void) {
   EXPECT_TRUE(_ev(lisp, "(List.assoc '() 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(List.get '() 0)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.getindex (Array.new) 0)") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.setindex (Array.new) 0 1)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.take_last (Array.new))") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.shift (Array.new))") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.remove (Array.new) 0)") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.insert (Array.new) 1 7)") is void);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.remove (Array.new) 0)"), <bad-arg>);
   EXPECT_TRUE(_ev(lisp, "(Map.get (Map.new) 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(Map.del (Map.new) 'missing)") is void);
 
@@ -466,6 +512,10 @@ static void lisp_transports_void_outside_collections(void) {
                 <void-op>);
   EXPECT_INT_EQ(
     _raised_code(lisp, "(Array.push (Array.new) (no-value))"), <void-op>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.setindex (Array.new) 0 1)"), <bad-arg>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.insert (Array.new) 1 7)"), <bad-arg>);
   EXPECT_INT_EQ(
     _raised_code(lisp,
                  "(Map.setindex (Map.new) 'key (no-value))"),
@@ -554,6 +604,21 @@ static void lisp_call_budget_stays_exhausted(void) {
   EXPECT_INT_EQ(
     _raised_code(lisp, "(spin 0) (spin 1) (spin 2) (once 3)"), <call-stack>);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(once 3)")), 3);
+  lisp.destroy();
+}
+
+/* A budget allows at least one call. A rejected budget leaves the session's
+   budget as it was. */
+static void lisp_call_budget_must_be_positive(void) {
+  Lisp lisp = Lisp.kernel();
+  int zero = 0, negative = 0;
+  try lisp.call_budget(0);
+  catch %(bad-arg (operation "Lisp.call_budget") *): zero = 1;
+  try lisp.call_budget(-5);
+  catch %(bad-arg (operation "Lisp.call_budget") *): negative = 1;
+  EXPECT_INT_EQ(zero, 1);
+  EXPECT_INT_EQ(negative, 1);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "((lambda (n) n) 3)")), 3);
   lisp.destroy();
 }
 
@@ -769,7 +834,8 @@ static void lisp_quasiquote_elements_stay_data(void) {
                 _ev(lisp, "'(a unquote (add 1 2))"));
   EXPECT_VAR_EQ(_ev(lisp, "`(a unquote-splicing (add 1 2))"),
                 _ev(lisp, "'(a unquote-splicing (add 1 2))"));
-  EXPECT_VAR_EQ(_ev(lisp, "`(a quasiquote ,(add 1 2))"), %(a quasiquote 3).var());
+  EXPECT_VAR_EQ(
+    _ev(lisp, "`(a quasiquote ,(add 1 2))"), %(a quasiquote 3).var());
   EXPECT_VAR_EQ(_ev(lisp, "`(a ,@'() b ,@'(1 2) c)"), %(a b 1 2 c).var());
   EXPECT_VAR_EQ(_ev(lisp, "((lambda (x) `(a ,x ,@(quote (2 3)))) 1)"),
                 %(a 1 2 3).var());
@@ -781,7 +847,8 @@ static void lisp_quasiquote_elements_stay_data(void) {
   EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote))"), <bad-arity>);
   EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote 1 2))"), <bad-arity>);
   EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote-splicing))"), <bad-arity>);
-  EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote-splicing 1 2))"), <bad-arity>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "`(a (unquote-splicing 1 2))"), <bad-arity>);
   EXPECT_INT_EQ(_raised_code(lisp, "`(a ,@1)"), <bad-types>);
   order_log[0] = 0;
   EXPECT_VAR_EQ(_ev(lisp, "`(,(log! 1) ,@(log! '(2 3)) ,(log! 4))"),
@@ -817,7 +884,8 @@ static void lisp_quasiquote_width_releases_scratch(void) {
   ScopeStats before = Scope.stats();
   EXPECT_TRUE(lisp.eval(expression) == expected);
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
-  EXPECT_INT_EQ(Scope.stats().live_requested_bytes, before.live_requested_bytes);
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes);
   _raised_code(lisp, "`(a ,@1)");
   before = Scope.stats();
   for (int i = 0; i < 3; i++) {
@@ -968,7 +1036,7 @@ static String _nested_reader_source(String open, String close, int count) {
   for (int i = 0; i < count; i++) source.write(open);
   source.write("x");
   if (close) for (int i = 0; i < count; i++) source.write(close);
-  return source.str();
+  return source;
 }
 
 /* Lists and reader prefixes share the same nesting limit. */
@@ -1096,6 +1164,29 @@ static void lisp_datum_reads_valid_string_escapes(void) {
     }
 }
 
+/* A Lisp string takes the escapes of an x2c string: `\x`, `\u`, and `\U`
+   read one or two hexadecimal digits, and a decoded NUL is dropped. Both
+   reader paths and evaluation agree. */
+static void lisp_strings_take_x2c_escapes(void) {
+  Lisp lisp = Lisp.kernel();
+  foreach (List pair, %(
+      ("\"\\x41\"" "A") ("\"\\u41\"" "A") ("\"\\U41\"" "A")
+      ("\"\\x414\"" "A4") ("\"\\u0041\"" "41") ("\"a\\0b\"" "ab"))) {
+    String source = pair.car();
+    Symbol status = 0;
+    EXPECT_VAR_EQ(_read1(lisp, source, &status), pair.cadr());
+    EXPECT_INT_EQ(status, <value>);
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
+                  _read_outcome(lisp, source, 0));
+    EXPECT_VAR_EQ(lisp.eval_string(source), pair.cadr());
+  }
+  foreach (String source, %("\"\\q\"" "\"\\u\"" "(head \"\\xg\")")) {
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 0), "malformed 0 ");
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1), "malformed 0 ");
+  }
+  lisp.destroy();
+}
+
 /* A written Atom reads back as itself, including a spelling that opens a
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
@@ -1104,7 +1195,7 @@ static void lisp_datum_atom_round_trips(void) {
     EXPECT_TRUE(out.write_datum(Atom.intern(spelling), 1));
     unsigned cursor = 0;
     Var back = void;
-    EXPECT_TRUE(String.read_datum(out.str(), cursor, back));
+    EXPECT_TRUE(String.read_datum(out, cursor, back));
     EXPECT_TRUE(back.is_atom());
     EXPECT_STR_EQ(back.str(), spelling);
   }
@@ -1120,11 +1211,11 @@ static void lisp_datum_symbol_round_trips(void) {
       EXPECT_TRUE(out.write_datum(symbol, tagged));
       unsigned cursor = 0;
       Var back = void;
-      EXPECT_TRUE(String.read_datum(out.str(), cursor, back));
+      EXPECT_TRUE(String.read_datum(out, cursor, back));
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
       if (tagged) continue;
       cursor = 0;
-      EXPECT_INT_EQ(Lisp.read(NULL, out.str(), cursor, back), <value>);
+      EXPECT_INT_EQ(Lisp.read(NULL, out, cursor, back), <value>);
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
     }
   Buffer out = auto Buffer.new(0);
@@ -1431,6 +1522,32 @@ static void lisp_deep_recursion_survives_stack(void) {
   _ev(lisp, "(def huge (build 300000 nil))");
   EXPECT_INT_EQ(
     Var.integer(_ev(lisp, "(length (append huge (list 0)))")), 300001);
+  lisp.destroy();
+}
+
+/* `(+ 1 (+ 1 ... 0))`, nested `depth` deep. */
+static Var _nested_sum(int depth) {
+  Var form = 0;
+  for (int i = 0; i < depth; i++) form = %(+ 1 $form);
+  return form;
+}
+
+/* Evaluating, quasiquoting, or capturing through a nested form nests C
+   frames as a call does, so a form nested past the evaluator's share of the
+   stack raises instead of overflowing. */
+static void lisp_nested_forms_stop_at_the_stack_limit(void) {
+  Lisp lisp = _boot_session();
+  EXPECT_INT_EQ(Var.integer(lisp.eval(_nested_sum(1000))), 1000);
+  Var deep = _nested_sum(100000);
+  List forms =
+    %($deep (quasiquote $deep) ((lambda (x) (lambda () $deep)) 1));
+  foreach (Var form in forms) {
+    int limited = 0;
+    try lisp.eval(form);
+    catch %(call-stack (operation "eval")): limited = 1;
+    EXPECT_INT_EQ(limited, 1);
+  }
+  EXPECT_INT_EQ(Var.integer(lisp.eval(_nested_sum(10))), 10);
   lisp.destroy();
 }
 
@@ -1771,6 +1888,19 @@ static void lisp_standard_environment_uses_library_operations(void) {
     lisp, "(Iter.next (Iter.filter (range 1 3 1) nil))"), <bad-arg>);
   EXPECT_INT_EQ(_raised_code(
     lisp, "(Iter.foldl (range 1 3 1) 0 nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.any '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.all '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.find '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.any (range 1 3 1) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.scan (range 1 3 1) 0 nil))"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.map2 (range 1 3 1) (range 1 3 1) nil))"),
+    <bad-arg>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.any '() nil)")), 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.all '() nil)")), 1);
+  EXPECT_TRUE(_ev(lisp, "(List.find '() nil)") is void);
   EXPECT_INT_EQ(Var.integer(
     _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
@@ -1779,8 +1909,9 @@ static void lisp_standard_environment_uses_library_operations(void) {
     "(Array.find (List.array '(0 20)) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
     "(Array.index (List.array '(0 20)) 20)")), 1);
-  EXPECT_TRUE(_ev(lisp,
-    "(Array.find (List.array '(0 20)) nil)") is void);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Array.find (List.array '(0 20)) nil)"), <bad-arg>);
+  EXPECT_TRUE(_ev(lisp, "(Array.find (List.array '()) nil)") is void);
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),
@@ -2113,6 +2244,8 @@ void lisp_suite(void) {
   $test.run(lisp_eval_self_and_quote);
   $test.run(lisp_eval_def_and_globals);
   $test.run(lisp_host_binding_shadows_only_the_child);
+  $test.run(lisp_def_replaces_host_x2c_names);
+  $test.run(lisp_null_session_members_raise_bad_arg);
   $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
@@ -2120,6 +2253,8 @@ void lisp_suite(void) {
   $test.run(lisp_apply_frees_wide_native_arguments);
   $test.run(lisp_call_budget_stops_a_loop);
   $test.run(lisp_call_budget_stays_exhausted);
+  $test.run(lisp_call_budget_must_be_positive);
+  $test.run(lisp_try_get_rejects_a_null_session);
   $test.run(lisp_eval_rest_parameters);
   $test.run(lisp_eval_capture_semantics);
   $test.run(lisp_captures_reserved_spelled_local_values);
@@ -2146,6 +2281,7 @@ void lisp_suite(void) {
   $test.run(lisp_read_fast_path_matches_token_reader);
   $test.run(lisp_datum_rejects_malformed_string_escapes);
   $test.run(lisp_datum_reads_valid_string_escapes);
+  $test.run(lisp_strings_take_x2c_escapes);
   $test.run(lisp_datum_atom_round_trips);
   $test.run(lisp_datum_symbol_round_trips);
   $test.run(lisp_pattern_matching_operations);
@@ -2163,6 +2299,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_file_rejects_embedded_nul);
   $test.run(lisp_bootstrap_arithmetic_and_strings);
   $test.run(lisp_deep_recursion_survives_stack);
+  $test.run(lisp_nested_forms_stop_at_the_stack_limit);
   $test.run(lisp_mutual_tail_calls_run_in_constant_stack);
   $test.run(lisp_tail_arguments_macros_and_captures);
   $test.run(lisp_tail_calls_allow_native_reentry);

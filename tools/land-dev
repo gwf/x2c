@@ -9,7 +9,6 @@ Queued publication pins --expected-dev and uses --review-stop, followed by
 from __future__ import annotations
 
 import argparse
-import fcntl
 import json
 import os
 from pathlib import Path
@@ -18,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 
-from agent_context import publication_blocked
+from agent_context import git, pid_lock, publication_blocked, write_json
 
 DOC_FILES = {
     "agents/x2c-module-catalog.md", "docs/src/SUMMARY.md",
@@ -34,14 +33,6 @@ def generated(path: str) -> bool:
             (str(name.parent) in DOC_DIRS and name.suffix == ".md") or
             (path.startswith(("bootstrap/lib/", "bootstrap/src/")) and
              name.suffix in {".c", ".h"}))
-
-
-def git(*arguments: str) -> str:
-    result = subprocess.run(["git", *arguments], capture_output=True,
-                            text=True, check=False)
-    if result.returncode:
-        raise ValueError(result.stderr.strip() or "git command failed")
-    return result.stdout
 
 
 def changed_paths() -> list[str]:
@@ -114,12 +105,8 @@ def push(logs: Path, base: str) -> bool:
 
 def save_review(candidate: str, base: str, gate: str, run: Path) -> None:
     record = {"candidate": candidate, "upstream": base, "gate": gate}
-    text = json.dumps(record, indent=2, sort_keys=True) + "\n"
-    (run / "review.json").write_text(text)
-    with tempfile.NamedTemporaryFile(mode="w", dir="debug", delete=False) as out:
-        temporary = Path(out.name)
-        out.write(text)
-    os.replace(temporary, "debug/land-dev-review.json")
+    write_json(run / "review.json", record)
+    write_json("debug/land-dev-review.json", record)
 
 
 def publish_reviewed(args: argparse.Namespace, run: Path) -> None:
@@ -209,29 +196,7 @@ def acquire_lock():
         raise ValueError("legacy publication lock directory exists; "
                          "check for an active publisher before removing: " +
                          str(lock))
-    stream = lock.open("a+")
-    try:
-        fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError as error:
-        try:
-            stream.seek(0)
-            holder = stream.read().strip() or "unknown"
-        finally:
-            stream.close()
-        raise ValueError("another publisher is active (pid " + holder + ")") \
-            from error
-    except BaseException:
-        stream.close()
-        raise
-    try:
-        stream.seek(0)
-        stream.truncate()
-        stream.write(str(os.getpid()) + "\n")
-        stream.flush()
-    except BaseException:
-        stream.close()
-        raise
-    return stream
+    return pid_lock(lock, "another publisher is active")
 
 
 def sha(value: str) -> str:

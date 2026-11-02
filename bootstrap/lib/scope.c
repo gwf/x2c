@@ -586,7 +586,7 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 105,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope/runtime.x",.function = "_raw_grow",.line = 108,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 1358596898646632, 0);  __builtin_unreachable();
     }
     items = f7_runtime____raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
@@ -595,14 +595,14 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
 
 static void * _raw_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 114,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope/runtime.x",.function = "_raw_malloc",.line = 117,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
   }
   if(scope_accounting) atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
 static void * f7_runtime____raw_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 121,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope/runtime.x",.function = "f7_runtime____raw_realloc",.line = 124,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 97614135954008, 0);  __builtin_unreachable();
   }
   return result;
 }

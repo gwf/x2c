@@ -63,9 +63,33 @@ examples/*
 examples/packages/*/builds/
 !examples/shootout/
 !examples/shootout/**
-!examples/shootout-unofficial/
-!examples/shootout-unofficial/**
 !**/Makefile
+# Keep the promoted shootout snapshot; older output stays in Git history.
+examples/shootout/results/*
+!examples/shootout/results/README.md
+!examples/shootout/results/current.json
+!examples/shootout/results/current.md
+!examples/shootout/results/history.json
+!examples/shootout/results/history.md
+!examples/shootout/results/charts/
+examples/shootout/results/charts/*
+!examples/shootout/results/charts/runtime-source-size.*
+!examples/shootout/results/charts/runtime-loc-distributions.*
+!examples/shootout/results/charts/implementation-profiles.*
+!examples/shootout/results/charts/measurements.csv
+!examples/shootout/results/charts/summaries.csv
+!examples/shootout/results/charts/provenance.json
+examples/apps/notes/bench/reports/
+unittest/benchmarks/hash-table/results/
+unittest/benchmarks/hash-table/RESEARCH.md
+packages/torch/benchmarks/results/
+packages/torch/benchmarks/*.png
+packages/torch/benchmarks/HISTORICAL-*.md
+packages/torch/benchmarks/MATCHED.md
+packages/torch/benchmarks/PILOT.md
+packages/torch/benchmarks/REMEDIES.md
+packages/torch/benchmarks/REPORT.md
+packages/torch/benchmarks/SUPPLEMENT.md
 bin/x2c-*
 bootstrap/**/x2c
 bootstrap/src/x2c
@@ -85,6 +109,7 @@ dist/
 site/.astro/
 site/node_modules/
 etc/vsc-extension/node_modules/
+etc/vsc-extension/*.vsix
 __pycache__/
 .envrc
 

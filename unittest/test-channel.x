@@ -65,16 +65,38 @@ static void channel_rejects_void_and_exact_tag_mismatch(void) {
 }
 
 static void channel_rejects_invalid_construction(void) {
-  int negative = 0, unknown = 0, fractional = 0;
+  String raised = NULL;
   try Channel.new(-1);
-  catch %(bad-arg *): negative = 1;
+  catch %(bad-arg (operation "Channel.new") (?key ?why)):
+    raised = %"$raised$key $why; ";
   try Channel.new(<int>);
-  catch %(bad-arg *): unknown = 1;
+  catch %(bad-arg (operation "Channel.new") (?key ?why)):
+    raised = %"$raised$key $why; ";
   try Channel.new(1.5);
-  catch %(bad-arg *): fractional = 1;
-  EXPECT_TRUE(negative);
-  EXPECT_TRUE(unknown);
-  EXPECT_TRUE(fractional);
+  catch %(bad-arg (operation "Channel.new") (?key ?why)):
+    raised = %"$raised$key $why; ";
+  EXPECT_STR_EQ(
+    raised,
+    "reason negative or non-integer capacity; reason unknown element tag; "
+    "reason negative or non-integer capacity; ");
+}
+
+static void channel_null_handle_contract(void) {
+  Channel channel = NULL;
+  String raised = NULL;
+  try channel.scope();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.send(1);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.receive();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg Channel.scope; bad-arg Channel.send; bad-arg Channel.receive; ");
 }
 
 static void channel_unbounded_fifo(void) {
@@ -783,4 +805,5 @@ void channel_suite(void) {
   $test.run(channel_close_rejects_unaccepted_rendezvous_send);
   $test.run(channel_close_rejects_blocked_bounded_send);
   $test.run(channel_payload_ownership_is_unchanged);
+  $test.run(channel_null_handle_contract);
 }

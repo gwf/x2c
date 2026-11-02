@@ -74,6 +74,8 @@ static int _header_name(String name);
 
 static int _match(List pattern, List path);
 
+static int _routed(Router router, Symbol method, List segments);
+
 static void _capture(List pattern, List path, Map captures);
 
 static const char * _reason(int code);
@@ -1082,7 +1084,7 @@ String HttpServer_repr(HttpServer value){
 
 void Http_fail(int status, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 58,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/http.x",.function = "Http_fail",.line = 60,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 19010664401496, 2, Symbol_var(1317119334), int_var(status), Symbol_var(1218550748), String_var(reason));
   }
 
@@ -1271,7 +1273,7 @@ String String_join(String, List);
 HttpResponse HttpResponse_header(HttpResponse res, String name, String value){
   if(! _init_guard_) _file_init_();
   if(! _header_name(name) || String_find(value, _24) >= 0 || String_find(value, _25) >= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 150,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/http.x",.function = "HttpResponse_header",.line = 152,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpResponse.header")), NULL))));
     __builtin_unreachable();
   }
@@ -1460,6 +1462,8 @@ void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
   if(! _init_guard_) _file_init_();
   int found = 0;
   List segments = String_split(req -> path, _33);
+  Symbol method = req -> method;
+  if(method == 534600 && ! _routed(router, method, segments)) method = 14696;
   {
     Var entry;
     Array _x2c_gensym_macro_object_2 = router -> routes;
@@ -1471,7 +1475,7 @@ void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
         HttpRoute route = Var_pointer(entry);
         if(! _match(route -> segments, segments)) continue;
         found = 1;
-        if(route -> method != req -> method) continue;
+        if(route -> method != method) continue;
         Map captures = Map_new();
         _capture(route -> segments, segments, captures);
         req -> params = captures;
@@ -1502,7 +1506,7 @@ HttpServer HttpServer_new(Router router, Map options){
   s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
   s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
   if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 281,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 288,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
     __builtin_unreachable();
   }
@@ -1511,6 +1515,11 @@ HttpServer HttpServer_new(Router router, Map options){
     s -> logger = Logger_new(618910);
     Logger_add_stderr_sink(s -> logger);
     s -> owns_logger = 1;
+  }
+  if(! s -> logger){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 295,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
+    __builtin_unreachable();
   }
   String host = Map_contains(options, Symbol_var(556264)) ? Var_str(Map_getindex(options, Symbol_var(556264))) : _63;
   int port = Map_contains(options, Symbol_var(1080488)) ? Var_integer(Map_getindex(options, Symbol_var(1080488))) : 8080;
@@ -1521,6 +1530,11 @@ HttpServer HttpServer_new(Router router, Map options){
 }
 
 int HttpServer_port(HttpServer s){
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "HttpServer_port",.line = 308,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.port")), NULL))));
+    __builtin_unreachable();
+  }
   return Listener_port(s -> listener);
 }
 
@@ -1528,6 +1542,11 @@ Thread Thread_start(ThreadValueFn, Var);
 
 void HttpServer_serve(HttpServer s){
   if(! _init_guard_) _file_init_();
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/http.x",.function = "HttpServer_serve",.line = 316,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.serve")), NULL))));
+    __builtin_unreachable();
+  }
   s -> running = 1;
   {
     _x2c_gensym_defer_env_15 _x2c_gensym_macro_environment_16 ={
@@ -1591,9 +1610,14 @@ void HttpServer_serve(HttpServer s){
 
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 339,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
+    __builtin_unreachable();
+  }
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 324,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 341,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
   s -> acceptor = Thread_start(_accept, Var_new(3683441, s));
@@ -1602,6 +1626,11 @@ void HttpServer_start(HttpServer s){
 Var Thread_join(Thread);
 
 void HttpServer_stop(HttpServer s){
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/http.x",.function = "HttpServer_stop",.line = 349,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.stop")), NULL))));
+    __builtin_unreachable();
+  }
   Listener_stop(s -> listener);
   if(s -> acceptor){
     Thread thread = s -> acceptor;
@@ -1630,10 +1659,11 @@ void HttpServer_stop(HttpServer s){
 void Logger_free(Logger);
 
 void HttpServer_close(HttpServer s){
-  if(! s) return;
+  if(! s || ! s -> channel) return;
   HttpServer_stop(s);
   Listener_close(s -> listener);
   Channel_free(s -> channel);
+  s -> channel = NULL;
   if(s -> owns_logger) Logger_free(s -> logger);
 }
 
@@ -1785,6 +1815,25 @@ static int _match(List pattern, List path){
   return ! List_truth(path);
 }
 
+static int _routed(Router router, Symbol method, List segments){
+  {
+    Var entry;
+    Array _x2c_gensym_macro_object_3 = router -> routes;
+    int _x2c_gensym_macro_cursor_3 = 0;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(Array_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_4))){
+      entry = _x2c_gensym_macro_cursor_output_4;
+      {
+        HttpRoute route = Var_pointer(entry);
+        if(route -> method == method && _match(route -> segments, segments)) return 1;
+      }
+
+    }
+
+  }
+  return 0;
+}
+
 static void _capture(List pattern, List path, Map captures){
   while(List_truth(pattern)){
     String segment = Var_as_string(List_car(pattern));
@@ -1839,13 +1888,13 @@ static Var _worker(Var value){
   HttpServer s = Var_pointer(value);
   {
     int fd;
-    Iter _x2c_gensym_macro_iterator_3 = Channel_iter(s -> channel, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_4 = Channel_iter(s -> channel, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_3;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "_worker",.line = 469,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+    Var _x2c_gensym_macro_item_4;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/http.x",.function = "_worker",.line = 498,.runtime = 1}; & _x2c_gensym_error_site_9; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_2 = connection;

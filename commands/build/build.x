@@ -83,8 +83,8 @@ static macro Stmt $progress.build_translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
 
 static macro Stmt $report.build_database_unwritable(Expr $path) =>
-  fprintf(
-    stderr, "x2c: error: cannot write compilation database: %s\n", $path);
+  Diagnostics.driver_report(
+    %"cannot write compilation database: $($path)", NULL);
 
 static macro Stmt $progress.build_compilation_cached(Expr $source) =>
   fprintf(stderr, "x2c: up-to-date compile %s\n", $source);
@@ -96,9 +96,8 @@ static macro Stmt $progress.build_link_unchanged(Expr $output) =>
   fprintf(stderr, "x2c: unchanged link %s\n", $output);
 
 static macro Stmt $report.build_replace_failed(Expr $output, Expr $reason) =>
-  fprintf(
-    stderr, "x2c: error: cannot replace %s: %s\n",
-    $output, $reason);
+  Diagnostics.driver_report(
+    %"cannot replace $($output): $(String.new($reason))", NULL);
 
 static macro Stmt $warn.build_cleanup_failed(Expr $directory) =>
   fprintf(
@@ -260,9 +259,8 @@ static String _default_output(CliRequest request) {
   String stem = Path.stem(request.inputs.car());
   if (request.compile_only && !request.inputs.cdr())
     return _object_name(request.inputs.car());
-  if (request.kind == <static-lib>) return %"lib$stem.a";
-  if (request.kind == <module>) return %"$stem.so";
-  return "a.out";
+  if (request.kind == <executable>) return "a.out";
+  return TargetKind.product(request.kind, stem);
 }
 
 /* Intermediates go to the requested directory, which the build keeps, or to
@@ -440,10 +438,9 @@ static void _link_packages(Build b, String input, String directory) {
    any consumer. */
 static int _package_built_here(Build b, List roots, String package) {
   /* A nonnull target package makes an absent lookup a mismatch. */
-  foreach (String input, b.request.inputs) {
+  foreach (String input, b.request.inputs)
     if (Compiler.package_directory(roots, input) == package &&
         Compiler.is_package_source(package, Path.absolute(input))) return 1;
-  }
   return 0;
 }
 
@@ -845,7 +842,8 @@ static ToolAction _final_action(Build b, String output, List inputs) {
   if (b.request.kind == <static-lib>)
     return b.toolchain.archive_action(output, inputs);
   if (b.request.kind == <module>)
-    return b.toolchain.module_action(output, inputs, Compiler.driver_executable());
+    return b.toolchain.module_action(
+      output, inputs, Compiler.driver_executable());
   return b.toolchain.link_action(output, inputs);
 }
 
@@ -1132,10 +1130,11 @@ static Map _script_members(Build b, List candidates) {
 /** Moves a script's built executable, and its debug symbols on macOS, to
     `executable` and records what it was built from, so
     `CliRequest.script_current` can reuse it. The record lists the script's
-    translation and compile prerequisites, package archives, and the runtime
-    archive. Unresolved library selections and files changed during the
-    build record nothing, so those executables rebuild through retained
-    translation and object state.
+    translation and compile prerequisites, package archives, the libraries
+    its `-l` selections may name, the runtime archive, and the directories
+    the build searched. A `-l` selection that names no file in those
+    directories, or a file changed during the build, records nothing, so
+    that executable rebuilds through retained translation and object state.
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
@@ -1146,12 +1145,11 @@ void Build.publish_script(Build b, String executable) {
     Path.move_to(%"$(b.output).dSYM", symbols);
   }
   unlink(%"$(b.state_root)/script");
-  // Unknown -l selections follow the ordinary retained build's relink policy.
-  foreach (String arg, b.toolchain.ld_args)
-    foreach (String part, arg.split(","))
-      if (part.startswith("-l")) return;
-  List files = _script_files(b);
-  List paths = files.append(_script_directories(b, files));
+  List files = _script_files(b), libraries = NULL;
+  List directories = _script_directories(b, files);
+  if (!_script_libraries(b, directories, libraries)) return;
+  files = files.append(libraries);
+  List paths = files.append(directories);
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
   if (ok && _files_unchanged(b, files))
@@ -1177,14 +1175,16 @@ static List _script_files(Build b) {
 }
 
 /* Every directory a compile or link of the script searches: explicit include
-   and library options, the compiler's own search lists, and the directory of
-   each prerequisite, where quoted includes look first. */
+   and library options, `LIBRARY_PATH`, the compiler's own search lists, and
+   the directory of each prerequisite, where quoted includes look first. */
 static List _script_directories(Build b, List prerequisites) {
   Array directories = [];
   foreach (Var directory, b.request.include_dirs) directories.push(directory);
   directories.push(b.toolchain.include_dir);
   _add_option_dirs(directories, b.toolchain.cc_args);
   _add_option_dirs(directories, b.toolchain.ld_args);
+  foreach (String directory, Env.get("LIBRARY_PATH").split(":"))
+    if (directory) directories.push(directory);
   foreach (String path, prerequisites)
     if (!path.startswith("search:")) directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
@@ -1219,15 +1219,43 @@ static List _search_entries(Build b, Array directories) {
   return unique.list_free();
 }
 
+/* The files each `-l` selection may name: `lib<name>` with a library
+   suffix in a searched directory. The linker links one of them, so the
+   record holds them all and a replaced library rebuilds the script. A
+   selection that names none returns 0. */
+static int _script_libraries(Build b, List directories, List &libraries) {
+  Array found = [];
+  foreach (String arg, b.toolchain.ld_args)
+    foreach (String part, arg.split(",")) {
+      if (!part.startswith("-l")) continue;
+      if (!_add_library_files(found, directories, part[2:])) return 0;
+    }
+  libraries = found.list_free();
+  return 1;
+}
+
+/* Adds each file `-l<name>` may name in `directories` to `found` and
+   returns how many it added. */
+static int _add_library_files(Array found, List directories, String name) {
+  int count = 0;
+  foreach (String directory, directories)
+    foreach (String suffix, %(".tbd" ".dylib" ".so" ".a")) {
+      String path = %"$(directory)lib$name$suffix";
+      if (!Path.is_file(path)) continue;
+      found.push(path);
+      count++;
+    }
+  return count;
+}
+
 /** Reports whether the script executable under `directory` still matches
     everything recorded when it was built.
 */
 int CliRequest.script_current(CliRequest request, String directory) {
-  String record = %"$directory/.x2c-state/script";
-  if (access(%"$directory/run", X_OK) || access(record, R_OK)) return 0;
-  List lines = NULL;
-  try lines = Path.read_text(record).split_lines(0);
-  catch %(io-fail *): return 0;
+  String record = %"$directory/.x2c-state/script", text = NULL;
+  if (access(%"$directory/run", X_OK) || !SourceView.read(NULL, record, text))
+    return 0;
+  List lines = text.split_lines(0);
   String cc = Toolchain.new(request).cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, lines.cdr(), ok);
@@ -1329,11 +1357,8 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
 }
 
 static List _depfile_inputs(String depfile) {
-  File input = fopen(depfile, "r");
-  if (!input) return NULL;
   String text = NULL;
-  try text = input.string_close();
-  catch %(io-fail *): return NULL;
+  if (!SourceView.read(NULL, depfile, text)) return NULL;
   List paths = translation_depfile_parse(text);
   long search = text.find("\n# x2c-search:");
   if (search >= 0)
@@ -1346,8 +1371,7 @@ static List _depfile_inputs(String depfile) {
 
 static int _state_matches(String path, uint64_t hash) {
   String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return 0;
+  if (!SourceView.read(NULL, path, text)) return 0;
   List lines = text.split_lines(0);
   if (!lines) return 0;
   String first = lines.car();

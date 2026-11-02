@@ -6,7 +6,7 @@ source-unit = ( translation-unit | script-unit ) ;
 script-unit = ? script partition described in grammar.md entry points ? ;
 translation-unit = { unit-item } ;
 module-block = ( "module" , "{" , [ ( c-string , { ( "," , c-string ) } , [ "," ] ) ] , "}" ) ;
-private-interface = ? static typedef, protocol body, class, or Lisp interface item; D4 ? ;
+private-interface = ? static typedef, protocol body, or class; D4 ? ;
 module-declaration = ? module before a file-scope declaration, read as static; D4 ? ;
 unit-item = ( directive |
     static-assert |
@@ -42,7 +42,8 @@ declaration-group = ( typedef-declaration |
     ( specifiers , destructuring-targets , "=" , assignment ) ) ;
 typedef-declaration = ( "typedef" , { qualifier } , type-specifier , declarator-list ) ;
 specifiers = ( { declaration-prefix } , { qualifier } , type-specifier , { trailing-storage } ) ;
-declaration-prefix = ( storage | "inline" | "_Noreturn" | attribute | prefix-macro ) ;
+declaration-prefix = ( storage | "inline" | "_Noreturn" | alignment-specifier | attribute | prefix-macro ) ;
+alignment-specifier = ( "_Alignas" , "(" , ( type-name | expression ) , ")" ) ;
 trailing-storage = ( storage | "inline" | prefix-macro ) ;
 storage = ( ( "extern" , [ c-string ] ) | "static" | "auto" | "register" | "threaded" ) ;
 qualifier = ( "const" | "restrict" | "volatile" ) ;
@@ -52,20 +53,35 @@ type-specifier = ( scalar-specifiers |
     enumeration |
     type-reference |
     typeof-specifier |
+    atomic-specifier |
     type-slot ) ;
+atomic-specifier = ( "_Atomic" ,
+    ( ( "(" , type-name , ")" ) |
+    scalar-specifiers |
+    type-reference |
+    ( ( "struct" | "union" | "enum" ) , identifier ) ) ) ;
 typeof-specifier = ( ( "typeof" | "typeof_unqual" | "__typeof__" | "__typeof" ) ,
     "(" ,
     ( type-name | expression ) ,
     ")" ) ;
 scalar-specifiers = ( scalar-word , { scalar-word } ) ;
-scalar-word = ( "void" | "char" | "short" | "int" | "long" | "float" | "double" | "signed" | "unsigned" ) ;
+scalar-word = ( "void" |
+    "char" |
+    "short" |
+    "int" |
+    "long" |
+    "float" |
+    "double" |
+    "signed" |
+    "unsigned" |
+    "_Complex" ) ;
 type-reference = ( identifier , [ ( "." , identifier ) ] ) ;
 type-name = ( { qualifier } , type-specifier , { pointer-part } ) ;
 type-operand = declaration-group ;
 declarator-list = ( init-declarator , { ( "," , init-declarator ) } ) ;
 init-declarator = ( ( declarator | declarator-row-slot ) , [ ( "=" , [ "auto" ] , assignment ) ] ) ;
 declarator = ( { pointer-part } , [ direct-declarator ] , { declarator-suffix } ) ;
-pointer-part = ( "*" | "^" | ( "&" , [ "?" ] ) | qualifier | qualifier-macro ) ;
+pointer-part = ( "*" | ( "&" , [ "?" ] ) | qualifier | qualifier-macro ) ;
 direct-declarator = ( declaration-name | ( "(" , declarator , ")" ) ) ;
 declaration-name = ( identifier | method-name | name-slot ) ;
 method-name = ( method-owner , "." , identifier ) ;

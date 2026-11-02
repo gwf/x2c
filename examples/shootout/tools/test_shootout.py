@@ -1,6 +1,9 @@
 """Focused checks for mixed reference coverage and source-size accounting."""
 
+import argparse
+import base64
 import copy
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -68,24 +71,24 @@ let literal = "/* keep this */";
   def test_unavailable_problem_does_not_change_shared_summary(self):
     manifest = shootout.load_manifest()
     baseline = json.loads(shootout.BASELINE_PATH.read_text())
-    saved = json.loads(shootout.CURRENT_JSON.read_text())
     build = {"benchmarks": {}}
-    run = {key: saved[key] for key in (
-      "run_id", "profile", "samples", "warmups", "machine",
-    )}
+    run = {"run_id": "synthetic", "profile": "local", "samples": 1,
+           "warmups": 0, "machine": baseline["calibration"]["machine"]}
     run["benchmarks"] = {}
     for benchmark in manifest["benchmarks"]:
       name = benchmark["name"]
       if name != "knucleotide":
         for filename in ("main.go", "main.java"):
           benchmark["references"].setdefault(filename, {})
-      original = saved["benchmarks"][name]
+      original = baseline["benchmarks"][name]
       build["benchmarks"][name] = {}
       run["benchmarks"][name] = {"args": original["args"], "implementations": {}}
       for implementation in shootout.X2C_IMPLEMENTATIONS:
-        program = original[implementation]
+        program = {"statistics": original["c"]["statistics"], "measurements": []}
         build["benchmarks"][name][implementation] = {
-          "source_metrics": program["source"], **program["build"],
+          "source_metrics": original["c"]["source"], "binary_bytes": 1,
+          "binary_sha256": "test", "compile_ns": 1, "translate_ns": 1,
+          "generated_c_sha256": "test",
         }
         run["benchmarks"][name]["implementations"][implementation] = program
       for reference in ("rust", "cpp", "go", "java"):
@@ -115,6 +118,90 @@ let literal = "/* keep this */";
       next(b for b in manifest["benchmarks"] if b["name"] == "knucleotide")
     ))
     self.assertEqual(row.count("N/A"), missing)
+
+  def test_promoted_results_survive_scratch_build_cleanup(self):
+    json_path = shootout.CURRENT_JSON.relative_to(shootout.REPO)
+    markdown_path = shootout.CURRENT_MARKDOWN.relative_to(shootout.REPO)
+    with tempfile.TemporaryDirectory() as directory:
+      repo = Path(directory)
+      current_json, current_markdown = repo / json_path, repo / markdown_path
+      build = repo / shootout.BUILD.relative_to(shootout.REPO)
+      def compile_measure(argv):
+        Path(argv[-1]).write_bytes(b"measure")
+      with mock.patch.multiple(shootout, BUILD=build,
+                               CURRENT_JSON=current_json,
+                               CURRENT_MARKDOWN=current_markdown), \
+           mock.patch.object(shootout, "render_current", return_value="report\n"), \
+           mock.patch.object(shootout, "command", side_effect=compile_measure):
+        shootout.promote_current({
+          "run_id": "preserved", "profile": "local", "baseline_sha256": "test",
+          "machine": {}, "summary_benchmarks": ["toy"],
+          "implementations": ["c", "idiomatic", "tuned"],
+          "benchmarks": {"toy": {"factors": {
+            "time_c_over_c": 1.0, "time_idiomatic_over_c": 3.0,
+            "time_tuned_over_c": 2.0,
+          }}},
+        })
+        chart = current_json.parent / "charts" / "runtime-source-size.svg"
+        chart.parent.mkdir(parents=True)
+        chart.write_text("chart\n")
+        build.mkdir(parents=True, exist_ok=True)
+        (build / "stale-output").write_text("scratch")
+        shootout.prepare_build({"cc": "cc"})
+        self.assertEqual(json.loads(current_json.read_text())["run_id"], "preserved")
+        self.assertEqual(current_markdown.read_text(), "report\n")
+        self.assertEqual(chart.read_text(), "chart\n")
+        history = json.loads((current_json.parent / "history.json").read_text())
+        self.assertEqual(history["runs"][0]["elapsed_over_c"]["tuned"], 2.0)
+        self.assertFalse((build / "stale-output").exists())
+
+
+class CompactBaselineTests(unittest.TestCase):
+  def test_tracked_baseline_loads_without_historical_results(self):
+    saved = json.loads(shootout.BASELINE_PATH.read_text())
+    baseline = shootout.load_baseline(shootout.load_manifest(), saved["methodology"])
+    self.assertEqual(baseline, saved)
+    for entry in baseline["benchmarks"].values():
+      self.assertEqual("stdout" in entry, entry["comparison"]["kind"] != "exact")
+      self.assertFalse(any(isinstance(value, dict) and "measurements" in value
+                           for value in entry.values()))
+
+  def test_exact_hash_and_numeric_tolerance(self):
+    exact = {"comparison": {"kind": "exact"},
+             "stdout_sha256": hashlib.sha256(b"exact\n").hexdigest()}
+    shootout.compare_pinned_output("test", "x2c", exact, b"exact\n")
+    with self.assertRaises(shootout.HarnessError):
+      shootout.compare_pinned_output("test", "x2c", exact, b"wrong\n")
+    numeric = {"args": [], "comparison": {"kind": "numeric_lines",
+               "absolute_tolerance": 1e-8},
+               "stdout": base64.b64encode(b"1.000000000\n").decode()}
+    shootout.compare_pinned_output("test", "x2c", numeric, b"1.000000001\n")
+    for output in (b"1.000000020\n", b"1.0\n"):
+      with self.assertRaises(shootout.HarnessError):
+        shootout.compare_pinned_output("test", "x2c", numeric, output)
+
+  def test_calibration_writes_statistics_without_raw_reference_samples(self):
+    manifest = shootout.load_manifest()
+    saved = json.loads(shootout.BASELINE_PATH.read_text())
+    build = {"toolchain": saved["methodology"], "benchmarks": {}}
+    calibration = {"run_id": "synthetic", "machine": saved["calibration"]["machine"],
+                   "benchmarks": {}}
+    for benchmark in manifest["benchmarks"]:
+      name = benchmark["name"]
+      entry = copy.deepcopy(saved["benchmarks"][name])
+      implementations = {key: value for key, value in entry.items()
+                         if isinstance(value, dict) and "statistics" in value}
+      build["benchmarks"][name] = {key: {"source_metrics": value["source"]}
+                                  for key, value in implementations.items()}
+      for value in implementations.values():
+        del value["source"]
+        value["measurements"] = [{"elapsed_ns": 1}]
+      entry["implementations"] = implementations
+      entry.setdefault("stdout", base64.b64encode(b"exact\n").decode())
+      calibration["benchmarks"][name] = entry
+    result = shootout.make_baseline(manifest, manifest["benchmarks"], build,
+              calibration, argparse.Namespace(profile="local", samples=1, warmups=0))
+    self.assertEqual(result["benchmarks"], saved["benchmarks"])
 
 
 if __name__ == "__main__":

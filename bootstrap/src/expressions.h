@@ -9,6 +9,7 @@
 #include "private-keywords.h"
 #include "compiler/compiler.h"
 #include "type.h"
+#include "scan.h"
 typedef struct PrintfFn{
   const char * name;
   int fmt_arg, first_arg, unresolved;
@@ -62,8 +63,6 @@ List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context, List * binding);
 
 List _x2c_func_call_arguments(List function, List storage, List arguments);
-
-List Compiler_func_call_parts(Compiler c, Var content);
 
 List Compiler_complete_iter_chain(Compiler c, List expression);
 

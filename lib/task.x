@@ -336,7 +336,8 @@ static void _free(TaskJob job) {
   if (job.match_state) x2c_match_execution_free(job.match_state);
 }
 
-static void _native_check(int code) { if (code) abort(); }
+static void _native_check(int error) =>
+  x2c_native_check(error, "Task: native synchronization failed");
 
 $rewrite($task.run.jobs)
 meta static Code _task_without_callback(Code code) {

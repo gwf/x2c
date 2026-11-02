@@ -96,7 +96,7 @@ List syntax_extensions(void) => %(
                x2c-escape byte-escape list-atom collection-atom set-atom signed-number
                octal-integer)
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
-      (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
+      (lexical-note "Percent openers select reader modes; \$(...) interpolation and @(...) splicing re-enter code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
       (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<...>"
                  "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")
@@ -156,9 +156,9 @@ List syntax_extensions(void) => %(
       (reference "../reference/language.md#compile-time-macros")))
   (inherited
     (item c11
-      (summary "C declarations/control flow, designated initializers, compound literals, _Static_assert, _Generic, and _Thread_local are baseline syntax."))
+      (summary "C declarations/control flow, designated initializers, compound literals, _Static_assert, _Generic, _Thread_local, _Alignas, _Atomic, and _Complex are baseline syntax."))
     (item native
-      (summary "GNU statement expressions/attributes, vendor ^ declarators, linkage strings/groups, and native annotation macros are interoperability forms, not x2c inventions."))
+      (summary "GNU statement expressions/attributes, linkage strings/groups, and native annotation macros are interoperability forms, not x2c inventions. Vendor ^ block declarators are read only in collected C headers; x2c source rejects them."))
     (item later-c
       (summary "0b binary integers, thread_local, and native empty initializers overlap C23; x2c Map/Array meaning for {} remains additional.")))
   (differences

@@ -5,7 +5,8 @@ tab: packages
 title: One namespace, zero collisions.
 ---
 
-```x2c
+<!-- ignore: requires the separately built PCRE2 package -->
+```x2c,ignore
 ~#include <assert.h>
 ~
 // Import the package under a name you choose.
@@ -30,6 +31,9 @@ int main(void) {
   return 0;
 }
 ```
+
+Build the PCRE2 package before running the
+[complete example](https://github.com/gwf/x2c/blob/main/examples/power/imports.x).
 
 x2c has one flat namespace, like C, and packages keep names apart. A
 package's public names carry its prefix, so two packages can both

@@ -45,10 +45,14 @@ static macro Stmt $fail.macros_macro_unknown_kind(
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_reserved(
-  Expr $c, Expr $origin, Expr $spelling) =>
-  $c.report_error(
-    <parse>, %"macro name '$($spelling)' is reserved",
-    $origin, %("x2c.* is reserved for compiler facilities"));
+  Expr $c, Expr $origin, Expr $spelling) {
+  {
+    String space = $spelling[:$spelling.find(".")];
+    $c.report_error(
+      <parse>, %"macro name '$($spelling)' is reserved",
+      $origin, $(%"$(space).* is reserved for compiler facilities"));
+  }
+}
 
 static macro Stmt $fail.macros_name_with(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -169,10 +173,10 @@ static macro Stmt $fail.macros_typed_quotation_nested(Expr $c, Expr $origin) {
 }
 
 static macro Stmt $fail.macros_hole_kind_conflict(
-  Expr $c, Expr $site, Expr $name, Expr $kind) {
+  Expr $c, Expr $site, Expr $name, Expr $hole_kind) {
   {
-    String kind = $kind == <expr> ? "an expression"
-      : %"a $(_kind_spelling($kind)) hole";
+    String kind = $hole_kind == <expr> ? "an expression"
+      : %"a $(_kind_spelling($hole_kind)) hole";
     String note = "a quotation's first use of a hole gives it its kind; "
       "bind a second local for the member spelling";
     $c.report_error(
@@ -198,12 +202,6 @@ static macro Stmt $fail.macros_hole_cardinality(
     $c.report_error(<parse>, message, $origin, NULL);
   }
 }
-
-static macro Stmt $fail.macros_keyword_internal(
-  Expr $c, Expr $origin, Expr $spelling, Expr $definition_note) =>
-  $c.report_error(
-    <macro>, %"keyword alias cannot name internal macro kind '$($spelling)'",
-    $origin, $($definition_note));
 
 static macro Stmt $fail.macros_keyword_builtin(Expr $c, Expr $origin) =>
   $c.report_error(

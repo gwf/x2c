@@ -59,7 +59,7 @@ Listener Listener.bind(String host, int port) {
     if (fd >= 0) break;
     error = errno;
   }
-  if (fd < 0) _io("Listener.bind", error);
+  if (fd < 0) x2c_io_fail("Listener.bind", error);
   defer if (fd >= 0) close(fd);
   int bound_port = _bound_port(fd);
   Listener listener = Scope.malloc_finalized(
@@ -73,8 +73,10 @@ Listener Listener.bind(String host, int port) {
 
 /** Accepts a connection, or returns NULL after Listener.stop. Thread.stop
     transfers its cooperative cancellation cause, like a Channel wait.
-    Raises: `<io-fail>` on a native accept or poll failure. */
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` on a native accept or poll
+    failure. */
 Socket Listener.accept(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.accept"));
   int fd = _x2c_net_accept_fd(listener);
   return fd < 0 ? NULL : Socket.adopt(fd);
 }
@@ -86,24 +88,28 @@ int _x2c_net_accept_fd(Listener listener) {
   while (!_stopped(listener)) {
     int ready = poll(&wait, 1, 50);
     if (ready < 0 && errno == EINTR) continue;
-    if (ready < 0) _io("Listener.accept", errno);
+    if (ready < 0) x2c_io_fail("Listener.accept", errno);
     if (!ready || _stopped(listener)) continue;
     int fd = accept(listener.fd, NULL, NULL);
     if (fd < 0 && (errno == EINTR || errno == EAGAIN)) continue;
-    if (fd < 0) _io("Listener.accept", errno);
+    if (fd < 0) x2c_io_fail("Listener.accept", errno);
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0 || fcntl(fd, F_SETFL, flags & ~O_NONBLOCK)) {
       int error = errno;
       close(fd);
-      _io("Listener.accept", error);
+      x2c_io_fail("Listener.accept", error);
     }
     return fd;
   }
   return -1;
 }
 
-/** Returns the actual bound port, including when bind requested port zero. */
-int Listener.port(Listener listener) => listener.port;
+/** Returns the actual bound port, including when bind requested port zero.
+    Raises: `<bad-arg>` for NULL. */
+int Listener.port(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.port"));
+  return listener.port;
+}
 
 /** Writes the listener's fields, reading its stop state atomically. */
 Buffer Listener.write_repr(Listener listener, Buffer out) {
@@ -115,8 +121,10 @@ Buffer Listener.write_repr(Listener listener, Buffer out) {
 }
 
 /** Requests stopping from any thread. A blocked accept returns within one
-    poll interval. The listener descriptor remains owned until close. */
+    poll interval. The listener descriptor remains owned until close.
+    Raises: `<bad-arg>` for NULL. */
 void Listener.stop(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.stop"));
   __atomic_store_n(&listener.stopped, 1, __ATOMIC_RELEASE);
 }
 
@@ -147,7 +155,7 @@ Socket Socket.connect(String host, int port, int timeout_ms) {
     if (fd >= 0) return Socket.adopt(fd);
     error = errno;
   }
-  _io("Socket.connect", error);
+  x2c_io_fail("Socket.connect", error);
 }
 
 /** Takes ownership of fd, including on failure, and creates separate File
@@ -164,10 +172,10 @@ Socket Socket.adopt(int fd) {
   }
   int enabled = 1;
   if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof(enabled)))
-    _io("Socket.adopt", errno);
+    x2c_io_fail("Socket.adopt", errno);
   String peer = _peer(fd);
   copy = dup(fd);
-  if (copy < 0) _io("Socket.adopt", errno);
+  if (copy < 0) x2c_io_fail("Socket.adopt", errno);
   input = File.fdopen(fd, "r");
   output = File.fdopen(copy, "w");
   Socket socket = Socket.new();
@@ -181,25 +189,31 @@ Socket Socket.adopt(int fd) {
 
 /** Sets receive and send timeouts in milliseconds. Zero disables timeouts.
     A timed-out File operation raises `<io-fail>` with EAGAIN or EWOULDBLOCK.
-    Raises: `<bad-arg>` for negative milliseconds, or `<io-fail>`. */
+    Raises: `<bad-arg>` for NULL or negative milliseconds, or `<io-fail>`. */
 void Socket.set_timeout(Socket s, int ms) {
-  if (ms < 0) raise %(bad-arg (operation "Socket.set_timeout"));
+  if (!s || ms < 0) raise %(bad-arg (operation "Socket.set_timeout"));
   struct timeval timeout = { .tv_sec = ms / 1000,
                             .tv_usec = (ms % 1000) * 1000 };
   if (setsockopt(s.fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) ||
       setsockopt(s.fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)))
-    _io("Socket.set_timeout", errno);
+    x2c_io_fail("Socket.set_timeout", errno);
 }
 
 /** Flushes output and sends EOF to the peer while retaining input.
-    Raises: `<io-fail>` if flushing or shutdown fails. */
-void Socket.shutdown_write(Socket socket) {
-  if (socket.output.flush()) _io("Socket.shutdown_write", errno);
-  if (shutdown(socket.fd, SHUT_WR)) _io("Socket.shutdown_write", errno);
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` if flushing or shutdown
+    fails. */
+void Socket.shutdown_write(Socket s) {
+  if (!s) raise %(bad-arg (operation "Socket.shutdown_write"));
+  if (s.output.flush()) x2c_io_fail("Socket.shutdown_write", errno);
+  if (shutdown(s.fd, SHUT_WR)) x2c_io_fail("Socket.shutdown_write", errno);
 }
 
-/** Returns numeric host:port text, with IPv6 in brackets. */
-String Socket.peer(Socket socket) => socket.peer;
+/** Returns numeric host:port text, with IPv6 in brackets.
+    Raises: `<bad-arg>` for NULL. */
+String Socket.peer(Socket socket) {
+  if (!socket) raise %(bad-arg (operation "Socket.peer"));
+  return socket.peer;
+}
 
 /** Closes both streams. Repeated calls are harmless. Close, like File.close,
     discards the close result; flush explicitly to report write errors. */
@@ -230,7 +244,7 @@ static int _bound_port(int fd) {
   struct sockaddr_storage address;
   socklen_t length = sizeof(address);
   if (getsockname(fd, (struct sockaddr *) &address, &length))
-    _io("Listener.bind", errno);
+    x2c_io_fail("Listener.bind", errno);
   if (address.ss_family == AF_INET)
     return ntohs(((struct sockaddr_in *) &address)->sin_port);
   return ntohs(((struct sockaddr_in6 *) &address)->sin6_port);
@@ -276,12 +290,13 @@ static String _peer(int fd) {
   struct sockaddr_storage address;
   socklen_t size = sizeof(address);
   if (getpeername(fd, (struct sockaddr *) &address, &size))
-    _io("Socket.peer", errno);
+    x2c_io_fail("Socket.peer", errno);
   char host[NI_MAXHOST], port[NI_MAXSERV];
   int status = getnameinfo(
     (struct sockaddr *) &address, size, host, sizeof(host),
     port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-  if (status) _io("Socket.peer", status == EAI_SYSTEM ? errno : EINVAL);
+  if (status)
+    x2c_io_fail("Socket.peer", status == EAI_SYSTEM ? errno : EINVAL);
   return address.ss_family == AF_INET6
     ? %"[$host]:$port" : %"$host:$port";
 }
@@ -314,7 +329,7 @@ static struct addrinfo *_resolve(String host, int port, int flags) {
   char service[16];
   snprintf(service, sizeof(service), "%d", port);
   int status = getaddrinfo(host, service, &hints, &addresses);
-  if (status == EAI_SYSTEM) _io("getaddrinfo", errno);
+  if (status == EAI_SYSTEM) x2c_io_fail("getaddrinfo", errno);
   if (status) raise %(not-found (operation "getaddrinfo") (host $host));
   return addresses;
 }
@@ -326,13 +341,9 @@ static int _failed(int fd) {
   return -1;
 }
 
-static void _io(String operation, int error) {
-  raise %(io-fail (operation $operation) (errno $error));
-}
-
 static void _ignore_sigpipe(void) {
   int error = pthread_once(&sigpipe_once, _set_sigpipe);
-  if (error) _io("SIGPIPE", error);
+  if (error) x2c_io_fail("SIGPIPE", error);
 }
 
 static void _set_sigpipe(void) { signal(SIGPIPE, SIG_IGN); }

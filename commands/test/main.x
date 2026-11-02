@@ -24,7 +24,8 @@ int main(int argc, char **argv) {
     (--filter (value substring) repeated (help "Select test names containing substring"))
     (--list (help "List matching tests"))
     (-q --quiet (help "Suppress successful test lines"))
-    (--manifest (value file) (help "Read this project manifest"))
+    (--manifest-path --manifest (value file)
+      (help "Read this project manifest"))
     (--target (value name) (help "Use this manifest target's include directories"))
     (inputs repeated (help "Test files or directories")));
   Map options = NULL;
@@ -55,7 +56,7 @@ static Run _configure(Map options) {
   if (!jobs || *end || count < 1 || count > INT_MAX)
     Diagnostics.driver_error("test: -j requires a positive integer");
   CliRequest project = CliRequest.new(<build>);
-  project.manifest = options["manifest"];
+  project.manifest = options["manifest-path"];
   project.target = options["target"];
   project.dry_run = 1;
   String manifest = project.project_manifest();
@@ -147,11 +148,8 @@ static void _run_files(Run &run, Array files) {
 static void _report(Run &run, Job job) {
   int status = job.status();
   String output = status ? job.output_text : job.output();
-  List lines = output.split_lines(0);
-  String summary = lines ? lines.reverse().car() : NULL;
   int passed, failed, skipped;
-  int counts = summary && sscanf(summary, "%d passed, %d failed, %d skipped",
-                                  &passed, &failed, &skipped) == 3;
+  int counts = _summary_counts(output, passed, failed, skipped);
   if (run.filtered && status == 2 && counts &&
       !passed && !failed && !skipped) return;
   if (output) fputs(output, stdout);
@@ -163,10 +161,22 @@ static void _report(Run &run, Job job) {
   }
 }
 
+static int _summary_counts(
+  String output, int &passed, int &failed, int &skipped) {
+  foreach (String line in output.split_lines(0).reverse()) {
+    if (!line) continue;
+    int end = 0;
+    int fields = sscanf(line, "%d passed, %d failed, %d skipped%n",
+                        &passed, &failed, &skipped, &end);
+    if (fields == 3 && end == line.len()) return 1;
+  }
+  return 0;
+}
+
 static Job _start(Run run, Path file) {
   Array command = [Compiler.driver_executable(), "script"];
   foreach (String dir in run.project.include_dirs) {
-    command.push("--x-include-dir");
+    command.push("-I");
     command.push(dir);
   }
   foreach (String dir in run.project.package_dirs) {

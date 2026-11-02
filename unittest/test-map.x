@@ -764,6 +764,15 @@ static void map_boxed_two_name_foreach(void) {
   EXPECT_INT_EQ(values, 3);
 }
 
+/* A null Map cannot be boxed, so its iterators must not box it. */
+static void map_null_iterators_are_exhausted(void) {
+  Map missing = NULL;
+  struct Iter values, keys, pairs;
+  EXPECT_INT_EQ(missing.iter(&values).count(), 0);
+  EXPECT_INT_EQ(missing.keys(&keys).count(), 0);
+  EXPECT_INT_EQ(missing.enumerate(&pairs).count(), 0);
+}
+
 void map_suite(void) {
   $test.run(map_iterates_values_keys_and_pairs);
   $test.run(map_boxed_two_name_foreach);
@@ -793,4 +802,5 @@ void map_suite(void) {
   $test.run(map_typed_empty_keys);
   $test.run(map_key_equality_across_kinds);
   $test.run(map_null_pair_status_iteration);
+  $test.run(map_null_iterators_are_exhausted);
 }

@@ -169,7 +169,9 @@ commands-check: commands				## Run external command smoke tests
 	  done; \
 	  parallel_wait
 
-verify: build						## Build, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
+# The CLI probe runs x2c-package and x2c-new, whose embedded identity must
+# match the current compiler.
+verify: commands					## Build the compiler and commands, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
 	$(STAGE0_X2C) script unittest/probes/run-suite-coverage
 	$(MAKE) -C unittest clean
 	$(PARALLEL_MAKE) -C unittest test-all
@@ -182,37 +184,21 @@ verify: build						## Build, then run unit suites, compiler fixtures, and probes
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
 
+# packages/Makefile lists the packages; each package's Makefile names its
+# applications and its own `check`.
 packages: configure-packages				## Build packages and examples
 	$(MAKE) build
-	$(MAKE) -C packages/pcre2 build short-example example lisp-example
-	$(MAKE) -C packages/yyjson build short-example example lisp-example
-	$(MAKE) -C packages/sqlite build short-example example lisp-example
-	$(MAKE) -C packages/libcurl build short-example example lisp-example
+	$(MAKE) -C packages examples
 	$(MAKE) -C examples/packages/http-json-releases build
 	$(MAKE) -C examples/apps/notes build
-	$(MAKE) -C packages/termbox2 build short-example example
-	$(MAKE) -C packages/blis build short-example example
-	$(MAKE) -C packages/libuv build short-example example
-	$(MAKE) -C packages/raylib build short-example example builds/live-chart
-	$(MAKE) -C packages/torch build short-example
 
 # Optional: the completed packages need a prepared dependency cache, so this
 # stays out of check and precommit. Run it after a compiler or runtime change
-# that could reach a package client. `test` builds only tests/, so the example
-# programs are named too; they are what a reader of the package actually sees.
+# that could reach a package client.
 packages-check: build					## Test the completed packages
-	$(MAKE) -C packages/pcre2 test run run-lisp
-	$(MAKE) -C packages/yyjson test run run-lisp
-	$(MAKE) -C packages/sqlite test run run-lisp
-	$(MAKE) -C packages/libcurl test run run-lisp
+	$(MAKE) -C packages check
 	$(MAKE) -C examples/packages/http-json-releases test
 	$(MAKE) -C examples/apps/notes check
-	$(MAKE) -C packages/termbox2 test run
-	$(MAKE) -C packages/blis test run
-	$(MAKE) -C packages/libuv test run
-	$(MAKE) -C packages/raylib verify
-	$(MAKE) -C packages/torch test run
-	$(MAKE) -C packages/autodiff check
 
 check: build						## Run extended non-mutating checks
 	time $(MAKE) doc-check
@@ -306,7 +292,7 @@ stage-3: bootstrap-ready				## Clean builds/ and build stages 0 to 3; rewrites n
 verify-sanitize: build					## Run tests under ASan and UBSan
 	$(PARALLEL_MAKE) -C unittest sanitizer
 
-verify-fixtures: build					## Check compiler phase fixtures
+verify-fixtures: commands				## Check compiler phase fixtures
 	$(MAKE) -C unittest compiler-fixtures
 
 verify-fixtures-update: build				## Rewrite compiler fixture output
@@ -448,14 +434,14 @@ performance-runtime: build
 		$(MAKE) $$target; \
 	done
 
-# Shared benchmark steps: translate + compile one focused benchmark
-# ($(1) = source stem, $(2) = target-specific compile flags), and the
-# 5-sample run loop shared by the timing targets.
+# Shared benchmark steps: translate and compile one focused benchmark
+# ($(1) = source stem) with the build's flags, and the 5-sample run loop
+# shared by the timing targets.
 define RUN_X2C_BENCHMARK
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/$(1).x
-	$(CC) $(2) -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -iquote include/x2c \
 		unittest/build/benchmarks/$(1).c \
 		-L builds/0 -lx2c -lm -o unittest/build/benchmarks/$(1)
 endef
@@ -468,36 +454,38 @@ define RUN_BENCHMARK_SAMPLES
 endef
 
 bm-scan: build						## Run focused scanner timings
-	$(call RUN_X2C_BENCHMARK,scan-hot-paths,-O2)
+	$(call RUN_X2C_BENCHMARK,scan-hot-paths)
 	./unittest/build/benchmarks/scan-hot-paths
 
 bm-string: build					## Run focused String timings
-	$(call RUN_X2C_BENCHMARK,string-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,string-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,string-hot-paths)
 
 bm-list: build						## Run focused List timings
 	$(MAKE) -C unittest benchmark-list
 
 bm-block-buffer: build					## Run Block and Buffer timings
-	$(call RUN_X2C_BENCHMARK,block-buffer-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,block-buffer-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,block-buffer-hot-paths)
 
 bm-scope: build						## Run focused Scope timings
 	$(MAKE) -C unittest scope-benchmark
 
 bm-file: build						## Run focused File timings
-	$(call RUN_X2C_BENCHMARK,file-hot-paths,-O2)
+	$(call RUN_X2C_BENCHMARK,file-hot-paths)
 	X2C_SCOPE_ACCOUNTING=1 ./unittest/build/benchmarks/file-hot-paths
 
+# Each Logger copy takes the build's flags and then its own optimization
+# level, which wins.
 bm-logger: build					## Run focused Logger timings
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/logger-hot-paths.x
-	$(CC) -g -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -O0 -g -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-debug
-	$(CC) -O2 -iquote include/x2c \
+	$(CC) $(BUILD_CFLAGS) -O2 -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-optimized
@@ -515,7 +503,7 @@ bm-exception: build					## Run focused exception timings
 	$(MAKE) -C unittest exception-benchmark
 
 bm-var: build						## Run existing Var hot paths
-	$(call RUN_X2C_BENCHMARK,var-hot-paths,$(BUILD_CFLAGS))
+	$(call RUN_X2C_BENCHMARK,var-hot-paths)
 	$(call RUN_BENCHMARK_SAMPLES,var-hot-paths)
 
 bm-varops: build					## Check Var operator fast lanes

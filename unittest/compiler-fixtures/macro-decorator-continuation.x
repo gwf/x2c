@@ -103,6 +103,16 @@ int main(void) {
   if (total != 53) return 9;
   $stacked() { total++; }
   if (total != 64) return 11;
+  /* A Macro-target decorator over a local definition publishes that local.
+     A local decorator without explicit parameters is spelled bare. */
+  $keep()
+  macro Decorator local_guard(Stmt $body) { total += 2; $body }
+  local_guard { total++; }
+  if (total != 67) return 13;
+  $tally_a() $tally_b()
+  macro Decorator local_stacked(Stmt $body) { total += 10; $body }
+  local_stacked { total++; }
+  if (total != 78) return 14;
   /* File-scope collection and parsing each reduce the pair once. */
   if (strncmp($read_order(), "ba", 2) != 0) return 12;
   puts("decorator continuation ok");

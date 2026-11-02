@@ -5,6 +5,8 @@
 > Starting private revision: `38e89217b`. No push or shared-branch update.
 > The two reproduced runtime defects were fixed in the subsequent private
 > runtime follow-up described below. Publication remains held.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Repairs and cleanup
 
@@ -63,7 +65,8 @@ a dispatch-owned pointer exchange at existing boundaries and an interleaved
 custom-renderer regression test. Neither fix needs a new framework or allocator.
 
 Both probes were independently reproduced with the merged worktree compiler.
-Sources remain in `.context/async-tidy-review-20261031/`. Build each with
+Sources remain in the workspace-local, untracked
+`.context/async-tidy-review-20261031/`. Build each with
 `builds/0/x2c build -O2 -o /tmp/PROBE PATH_TO_PROBE.x`, then run it.
 Build and execution evidence is in `debug/async-tidy-{lisp,render}-probe-*`.
 These findings are recorded in `unittest/STATUS.md`; runtime fixes are separate

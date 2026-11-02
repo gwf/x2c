@@ -205,8 +205,8 @@ size_t Buffer.len(Buffer buf) => buf ? buf.content.length : 0;
 */
 String Buffer.str(Buffer buf) {
   if (!buf) return NULL;
-  if (buf.content.length > INT_MAX) {
-    size_t length = buf.content.length, int limit = INT_MAX;
+  if (buf.content.length > INT_MAX - 1) {
+    size_t length = buf.content.length, int limit = INT_MAX - 1;
     raise %(size-limit (size $length) (limit $limit));
   }
   return String.new_len(buf.content.bytes, (int) buf.content.length);

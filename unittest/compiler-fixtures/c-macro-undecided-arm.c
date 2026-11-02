@@ -6,17 +6,12 @@
 #include "x2c.h"
 #ifdef __APPLE__
 #define HOST_WORD 1
-#else
-#define HOST_WORD 1
-#endif
-#ifdef __APPLE__
 int arm_word(void){
   return 1;
 }
 
-#endif
-#ifdef __APPLE__
 #else
+#define HOST_WORD 1
 int arm_word(void){
   return 1;
 }

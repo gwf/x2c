@@ -252,7 +252,6 @@ static List _forwarder(
     if (type != %(void)) forwarded.push(type);
   }
   (List params, List args) = c.forward_parameters(forwarded.list_free());
-  if (!params) params = %((param (void) (bind () ())));
   Type result = c.source_private ? %(static @child) : child;
   List function = $(name), callee = $!($signature){ $binding };
   return c.rebuild_unit_function(

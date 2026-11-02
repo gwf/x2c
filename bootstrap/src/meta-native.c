@@ -4169,7 +4169,7 @@ static Var f9_functions____meta_stub(Func function, const FuncArg * argv){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_13);
     {
-      if(c -> meta_helper || ! Compiler_groups_meta(c)){
+      if(! Compiler_groups_meta(c)){
         Var _x2c_gensym_return_value_3 = Compiler_meta_helper_call(c, name, site, Array_list_free(values), provider);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
@@ -5970,7 +5970,7 @@ static Var _x2c_gensym_func_adapt_91(Func _x2c_gensym_func_binding_91, const Fun
 
 static Var _x2c_gensym_func_adapt_92(Func _x2c_gensym_func_binding_92, const FuncArg * _x2c_gensym_func_argv_92){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_92",.line = 0}; & _x2c_gensym_error_site_11; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_92, _x2c_gensym_func_argv_92, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_92",.line = 0}; & _x2c_gensym_error_site_11; }));
   Array_resize(a0, a1);
   return((void) 0, Void);
 }
@@ -6021,7 +6021,7 @@ static Var _x2c_gensym_func_adapt_98(Func _x2c_gensym_func_binding_98, const Fun
 
 static Var _x2c_gensym_func_adapt_99(Func _x2c_gensym_func_binding_99, const FuncArg * _x2c_gensym_func_argv_99){
   Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 0, 3313778));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_99",.line = 0}; & _x2c_gensym_error_site_17; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_99, _x2c_gensym_func_argv_99, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_99",.line = 0}; & _x2c_gensym_error_site_17; }));
   Array_truncate(a0, a1);
   return((void) 0, Void);
 }
@@ -6082,7 +6082,7 @@ static Var _x2c_gensym_func_adapt_107(Func _x2c_gensym_func_binding_107, const F
 }
 
 static Var _x2c_gensym_func_adapt_108(Func _x2c_gensym_func_binding_108, const FuncArg * _x2c_gensym_func_argv_108){
-  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_108, _x2c_gensym_func_argv_108, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_108",.line = 0}; & _x2c_gensym_error_site_20; })));
+  size_t a0 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_108, _x2c_gensym_func_argv_108, 0, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_108",.line = 0}; & _x2c_gensym_error_site_20; }));
   return Buffer_var(Buffer_new(a0));
   ;
 }
@@ -6125,7 +6125,7 @@ static Var _x2c_gensym_func_adapt_114(Func _x2c_gensym_func_binding_114, const F
 
 static Var _x2c_gensym_func_adapt_115(Func _x2c_gensym_func_binding_115, const FuncArg * _x2c_gensym_func_argv_115){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_115",.line = 0}; & _x2c_gensym_error_site_21; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_115, _x2c_gensym_func_argv_115, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_115",.line = 0}; & _x2c_gensym_error_site_21; }));
   return Buffer_var(Buffer_reserve(a0, a1));
   ;
 }
@@ -6144,7 +6144,7 @@ static Var _x2c_gensym_func_adapt_117(Func _x2c_gensym_func_binding_117, const F
 
 static Var _x2c_gensym_func_adapt_118(Func _x2c_gensym_func_binding_118, const FuncArg * _x2c_gensym_func_argv_118){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 0, 178663780));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_118",.line = 0}; & _x2c_gensym_error_site_22; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_118, _x2c_gensym_func_argv_118, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_118",.line = 0}; & _x2c_gensym_error_site_22; }));
   return Buffer_var(Buffer_unwrite(a0, a1));
   ;
 }
@@ -6166,7 +6166,7 @@ static Var _x2c_gensym_func_adapt_120(Func _x2c_gensym_func_binding_120, const F
 static Var _x2c_gensym_func_adapt_121(Func _x2c_gensym_func_binding_121, const FuncArg * _x2c_gensym_func_argv_121){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 0, 178663780));
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 1);
-  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_121",.line = 0}; & _x2c_gensym_error_site_24; })));
+  size_t a2 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_121, _x2c_gensym_func_argv_121, 2, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_121",.line = 0}; & _x2c_gensym_error_site_24; }));
   return Buffer_var(Buffer_write_len(a0, a1, a2));
   ;
 }
@@ -6174,7 +6174,7 @@ static Var _x2c_gensym_func_adapt_121(Func _x2c_gensym_func_binding_121, const F
 static Var _x2c_gensym_func_adapt_122(Func _x2c_gensym_func_binding_122, const FuncArg * _x2c_gensym_func_argv_122){
   Buffer a0 = Var_buffer_payload(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 0, 178663780));
   char a1 = Var_char(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 1, 26993), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_122",.line = 0}; & _x2c_gensym_error_site_25; })));
-  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_122",.line = 0}; & _x2c_gensym_error_site_26; })));
+  size_t a2 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_122, _x2c_gensym_func_argv_122, 2, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_122",.line = 0}; & _x2c_gensym_error_site_26; }));
   return Buffer_var(Buffer_write_repeat(a0, a1, a2));
   ;
 }
@@ -6776,8 +6776,8 @@ static Var _x2c_gensym_func_adapt_208(Func _x2c_gensym_func_binding_208, const F
 }
 
 static Var _x2c_gensym_func_adapt_209(Func _x2c_gensym_func_binding_209, const FuncArg * _x2c_gensym_func_argv_209){
-  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_41; })));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_42 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_42; })));
+  size_t a0 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 0, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_41; }));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_209, _x2c_gensym_func_argv_209, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_42 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_209",.line = 0}; & _x2c_gensym_error_site_42; }));
   return Var_new(3683441, Scope_calloc(a0, a1));
   ;
 }
@@ -6806,14 +6806,14 @@ static Var _x2c_gensym_func_adapt_213(Func _x2c_gensym_func_binding_213, const F
 }
 
 static Var _x2c_gensym_func_adapt_214(Func _x2c_gensym_func_binding_214, const FuncArg * _x2c_gensym_func_argv_214){
-  size_t a0 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_214, _x2c_gensym_func_argv_214, 0, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_43 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_214",.line = 0}; & _x2c_gensym_error_site_43; })));
+  size_t a0 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_214, _x2c_gensym_func_argv_214, 0, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_43 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_214",.line = 0}; & _x2c_gensym_error_site_43; }));
   return Var_new(3683441, Scope_malloc(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_215(Func _x2c_gensym_func_binding_215, const FuncArg * _x2c_gensym_func_argv_215){
   const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_215, _x2c_gensym_func_argv_215, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_215, _x2c_gensym_func_argv_215, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_215",.line = 0}; & _x2c_gensym_error_site_44; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_215, _x2c_gensym_func_argv_215, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_215",.line = 0}; & _x2c_gensym_error_site_44; }));
   return Var_new(3683441, Scope_memdup(a0, a1));
   ;
 }
@@ -6854,7 +6854,7 @@ static Var _x2c_gensym_func_adapt_221(Func _x2c_gensym_func_binding_221, const F
 
 static Var _x2c_gensym_func_adapt_222(Func _x2c_gensym_func_binding_222, const FuncArg * _x2c_gensym_func_argv_222){
   void * a0 = Var_pointer(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 1, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_222",.line = 0}; & _x2c_gensym_error_site_45; })));
+  size_t a1 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_222, _x2c_gensym_func_argv_222, 1, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_222",.line = 0}; & _x2c_gensym_error_site_45; }));
   return Var_new(3683441, Scope_realloc(a0, a1));
   ;
 }
@@ -8144,7 +8144,7 @@ static Var _x2c_gensym_func_adapt_421(Func _x2c_gensym_func_binding_421, const F
 }
 
 static Var _x2c_gensym_func_adapt_422(Func _x2c_gensym_func_binding_422, const FuncArg * _x2c_gensym_func_argv_422){
-  long a0 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_422, _x2c_gensym_func_argv_422, 0, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_140 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_422",.line = 0}; & _x2c_gensym_error_site_140; })));
+  long a0 = Var_long_at(x2c_func_value_argument(_x2c_gensym_func_binding_422, _x2c_gensym_func_argv_422, 0, 818062), ({ static const X2CErrorSite _x2c_gensym_error_site_140 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_422",.line = 0}; & _x2c_gensym_error_site_140; }));
   return long_var(labs(a0));
   ;
 }
@@ -8176,7 +8176,7 @@ static Var _x2c_gensym_func_adapt_426(Func _x2c_gensym_func_binding_426, const F
 }
 
 static Var _x2c_gensym_func_adapt_427(Func _x2c_gensym_func_binding_427, const FuncArg * _x2c_gensym_func_argv_427){
-  long long a0 = Var_long_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_427, _x2c_gensym_func_argv_427, 0, 25983886), 25983886, ({ static const X2CErrorSite _x2c_gensym_error_site_147 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_427",.line = 0}; & _x2c_gensym_error_site_147; })));
+  long long a0 = Var_long_long_at(x2c_func_value_argument(_x2c_gensym_func_binding_427, _x2c_gensym_func_argv_427, 0, 25983886), ({ static const X2CErrorSite _x2c_gensym_error_site_147 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_427",.line = 0}; & _x2c_gensym_error_site_147; }));
   return Var_box_long_long(llabs(a0));
   ;
 }
@@ -8343,14 +8343,14 @@ static Var _x2c_gensym_func_adapt_453(Func _x2c_gensym_func_binding_453, const F
 
 static Var _x2c_gensym_func_adapt_454(Func _x2c_gensym_func_binding_454, const FuncArg * _x2c_gensym_func_argv_454){
   double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_174 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_454",.line = 0}; & _x2c_gensym_error_site_174; })));
-  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_175 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_454",.line = 0}; & _x2c_gensym_error_site_175; })));
+  long double a1 = Var_long_double_at(x2c_func_value_argument(_x2c_gensym_func_binding_454, _x2c_gensym_func_argv_454, 1, 26071077642), ({ static const X2CErrorSite _x2c_gensym_error_site_175 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_454",.line = 0}; & _x2c_gensym_error_site_175; }));
   return double_var(nexttoward(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_455(Func _x2c_gensym_func_binding_455, const FuncArg * _x2c_gensym_func_argv_455){
   float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_176 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_455",.line = 0}; & _x2c_gensym_error_site_176; })));
-  long double a1 = Var_long_double(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 1, 26071077642), 26071077642, ({ static const X2CErrorSite _x2c_gensym_error_site_177 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_455",.line = 0}; & _x2c_gensym_error_site_177; })));
+  long double a1 = Var_long_double_at(x2c_func_value_argument(_x2c_gensym_func_binding_455, _x2c_gensym_func_argv_455, 1, 26071077642), ({ static const X2CErrorSite _x2c_gensym_error_site_177 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_455",.line = 0}; & _x2c_gensym_error_site_177; }));
   return float_var(nexttowardf(a0, a1));
   ;
 }
@@ -8434,14 +8434,14 @@ static Var _x2c_gensym_func_adapt_466(Func _x2c_gensym_func_binding_466, const F
 
 static Var _x2c_gensym_func_adapt_467(Func _x2c_gensym_func_binding_467, const FuncArg * _x2c_gensym_func_argv_467){
   double a0 = Var_floating(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 0, 3356265), 3356265, ({ static const X2CErrorSite _x2c_gensym_error_site_197 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_467",.line = 0}; & _x2c_gensym_error_site_197; })));
-  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_198 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_467",.line = 0}; & _x2c_gensym_error_site_198; })));
+  long a1 = Var_long_at(x2c_func_value_argument(_x2c_gensym_func_binding_467, _x2c_gensym_func_argv_467, 1, 818062), ({ static const X2CErrorSite _x2c_gensym_error_site_198 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_467",.line = 0}; & _x2c_gensym_error_site_198; }));
   return double_var(scalbln(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_468(Func _x2c_gensym_func_binding_468, const FuncArg * _x2c_gensym_func_argv_468){
   float a0 = Var_float(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 0, 3355493), 3355493, ({ static const X2CErrorSite _x2c_gensym_error_site_199 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_468",.line = 0}; & _x2c_gensym_error_site_199; })));
-  long a1 = Var_long(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 1, 818062), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_200 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_468",.line = 0}; & _x2c_gensym_error_site_200; })));
+  long a1 = Var_long_at(x2c_func_value_argument(_x2c_gensym_func_binding_468, _x2c_gensym_func_argv_468, 1, 818062), ({ static const X2CErrorSite _x2c_gensym_error_site_200 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_468",.line = 0}; & _x2c_gensym_error_site_200; }));
   return float_var(scalblnf(a0, a1));
   ;
 }
@@ -8506,7 +8506,7 @@ static Var _x2c_gensym_func_adapt_477(Func _x2c_gensym_func_binding_477, const F
 static Var _x2c_gensym_func_adapt_478(Func _x2c_gensym_func_binding_478, const FuncArg * _x2c_gensym_func_argv_478){
   const char * a0 = x2c_func_pointer_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 0);
   const char * a1 = x2c_func_pointer_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 1);
-  size_t a2 = Var_ulong(Var_convert_at(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 2, 44858254), 44858254, ({ static const X2CErrorSite _x2c_gensym_error_site_211 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_478",.line = 0}; & _x2c_gensym_error_site_211; })));
+  size_t a2 = Var_ulong_at(x2c_func_value_argument(_x2c_gensym_func_binding_478, _x2c_gensym_func_argv_478, 2, 44858254), ({ static const X2CErrorSite _x2c_gensym_error_site_211 = {.file = "../../src/meta-native/meta-native.x",.function = "_x2c_gensym_func_adapt_478",.line = 0}; & _x2c_gensym_error_site_211; }));
   return int_var(strncmp(a0, a1, a2));
   ;
 }

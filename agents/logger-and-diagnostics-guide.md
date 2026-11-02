@@ -7,20 +7,14 @@ entry through one compiler.
 
 ## Local report catalogues
 
-Named diagnostics keep wording and construction with the code that owns the
-condition. A catalogue used by one file stays near its top as static macros.
-Several call sites may share one definition. Actual shared consumers include
-an owner's `*-reports.x` directly; those definitions remain nonstatic.
-A large local catalogue may use a sibling file, but separation is optional.
-Do not share unrelated conditions merely because their wording matches.
-
-Compiler catalogue macros use one dot: `$action.owner_condition`. The owner
-names the responsibility, not the diagnostic category. `$fail` reports and
-transfers or terminates; `$report` records or emits an error and returns;
-`$warn` records or emits a warning. `$note` constructs note text or a notes
-List, and `$reason` constructs a reason String. `$progress` and `$debug`
-distinguish ordinary status and debug output in mixed catalogues. Existing
-structured Error raises retain `$error` and their runtime conventions.
+[DG-1](x2c-code-standard.md#diagnostics-and-messages) places named
+diagnostics with their owner and defines the `$action.owner_condition`
+actions. A large local catalogue may use a sibling file, but separation is
+optional. Do not share unrelated conditions merely because their wording
+matches. The owner names the responsibility, not the diagnostic category.
+`$progress` and `$debug` distinguish ordinary status and debug output in mixed
+catalogues. Existing structured Error raises retain `$error` and their runtime
+conventions.
 
 Arguments are context, explicit source site when applicable, then semantic
 operands. A site may be a Token, recorded location, or analysis origin, as
@@ -97,11 +91,8 @@ the callback.
 data. `remove_sink` is constant time and idempotent; `clear_sinks` removes
 every sink.
 `add_stderr_sink`, `add_file_sink`, and `add_memory_sink` install owned
-built-in contexts. Files are borrowed and never closed. Sinks added, removed,
-or cleared by an emitter are committed after the outermost emission, so an
-event and recursive events observe one stable registration-order snapshot.
-Freeing the Logger from an emitter is unsupported. Logger is reentrant, and
-calls from different threads are serialized.
+built-in contexts. Files are borrowed and never closed. Logger is reentrant,
+and calls from different threads are serialized.
 
 Text sinks render
 `M:SS.mmm level/category key=repr` directly through reusable Buffers. A

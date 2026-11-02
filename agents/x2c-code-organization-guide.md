@@ -7,53 +7,14 @@ These maps list the current owners. The generated
 
 ## Compiler organization
 
-Compiler paths below are relative to `src/`. Paths beginning with `lib/` or
-`commands/` are relative to the repository root.
+[Module ownership](../docs/src/internals/architecture.md#module-ownership)
+in the architecture chapter lists each compiler module and its
+responsibility, including the shipped components under `src/components/`.
+Report wording lives in static macros in its owner or in the shared
+`src/expressions-reports.x` and `src/parse-reports.x`.
 
-- entry and shared state: `main.x`, `cli/cli.x`, `translation.x`,
-  `frontend.x`, `compiler/compiler.x`
-  (its members in `compiler/` hold parsing, declarations, generated names,
-  lifecycle, binding facts, the literal cache, match patterns, and source
-  files and locations), `symtab/symtab.x`, `diagnostics.x`, `sourceview.x`,
-  `collect/collect.x`, `report.x`, `deps.x`, `utils.x`;
-- shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
-  `cpp/cpp.x`, `preprocess.x`, `parse/parse.x`, `expressions/expressions.x`,
-  `initializers/initializers.x`, `statements.x`, `literals/literals.x`,
-  `lambdas.x`, `macros/macros.x`, `grammar.x`,
-  `ast-rewrite.x`, `ast.x`;
-- compile-time code: `stage.x`, `meta-sdk/meta-sdk.x`,
-  `meta-native/meta-native.x`, `builtins.x`, `meta-group/meta-group.x`,
-  `meta-project.x`, `meta-helper-client.x`;
-- semantic representation and lowering: `type.x`, `type-ledger.x`,
-  `protocol/protocol.x`, `operator-ledger.x`, `transform/transform.x`, which
-  drives normalization and dispatches to the shipped components,
-  `callables/callables.x`, which lowers only `Func` conversions,
-  `cleanup/cleanup.x`, `adapter-memo.x`, `regions/regions.x`;
-- shipped components under `src/components/`, each lowering one language
-  feature on the rewrite
-  primitives: `bracket-access.x` (bracket access policy),
-  `delegate-members.x` (delegate fields), `destructuring.x`
-  (flat List destructuring), `interpolation.x` (interpolated
-  Strings), `lambda-functions.x` (lambda lowering), `collection-literals.x`
-  (Array and Map literals), `pattern-match.x` (match statements),
-  `dynamic-operators.x` (dynamic operators), `printf-format.x` (Var
-  values in printf-family formats), `protocol-adapters.x` (protocol
-  adapters and Var descriptors), `raise.x` (raise),
-  `string-switch.x` (switches on a String), and
-  `try-catch.x` (try, catch, and finally);
-- output: `cache.x`, `generate/generate.x`, `emit/emit.x`, `format.x`;
-- project planning and native primitives: `project/project.x`, `toolchain.x`;
-  build/run/script workflows live in `commands/build/`, and the language
-  server lives in `commands/lsp/`;
-- external package management: `commands/package/` owns installation, removal,
-  listing, and project dependency lockfiles.
-
-- shared source fields: `fields.x`;
-- report wording: static macros in their owner or the shared
-  `expressions-reports.x` and `parse-reports.x`.
-
-`tools/gen-linked-meta.sh` generates `linked-meta.x`, the shipped `meta`
-code compiled into the compiler. Style censuses and these maps exclude it.
+`tools/gen-linked-meta.sh` generates `src/linked-meta.x`, the shipped `meta`
+code compiled into the compiler. Style censuses exclude it.
 
 ## Runtime organization
 

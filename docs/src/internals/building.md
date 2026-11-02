@@ -71,10 +71,7 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
     `llms-full.txt`;
   - `docs/src/reference/syntax/x2c.ebnf` and
     `docs/src/reference/syntax/lexical-data.md`, which
-    `tools/syntax-spec write` renders from `etc/syntax/`;
-  - `tools/version-viewer/snapshots.js` and its digest in the viewer's
-    `index.html`, which `python3 tools/version-viewer/refresh-snapshots.py`
-    rewrites.
+    `tools/syntax-spec write` renders from `etc/syntax/`.
 
 Do not hand-edit any of them; regenerate them with their targets.
 
@@ -143,10 +140,8 @@ check the playground's support notice before running a program.
 
 ## Contributor checks
 
-`make doc-examples` compiles the book and website samples, including the
-PCRE2 import example. Prepare that optional package first with
-`make -C packages/pcre2 build`; the checker uses its generated headers and
-prepared dependency includes. It does not fetch dependencies itself.
+`make doc-examples` compiles the book and website samples. No checked sample
+imports an optional package, so the check needs no package preparation.
 
 For testing, style, debugging, and bootstrap-refresh instructions, start with
 [`agents/README.md`](https://github.com/gwf/x2c/blob/dev/agents/README.md).

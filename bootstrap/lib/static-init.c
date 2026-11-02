@@ -150,9 +150,7 @@ static void _unlock(void){
 }
 
 static void _native_error(int error){
-  if(! error) return;
-  fprintf(stderr, "static initialization: synchronization failed (%d)\n", error);
-  abort();
+  x2c_native_check(error, "static initialization: synchronization failed");
 }
 
 static int _cycle(X2CStatic * guard, StaticThread * self){

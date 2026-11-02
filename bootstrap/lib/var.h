@@ -179,6 +179,16 @@ Var Var_convert_at(Var value, Symbol target, const X2CErrorSite * site);
 
 void Var_numeric_decode(Var value, X2CVarNumeric * out);
 
+long Var_long_at(Var value, const X2CErrorSite * site);
+
+ulong Var_ulong_at(Var value, const X2CErrorSite * site);
+
+long long Var_long_long_at(Var value, const X2CErrorSite * site);
+
+unsigned long long Var_ulong_long_at(Var value, const X2CErrorSite * site);
+
+long double Var_long_double_at(Var value, const X2CErrorSite * site);
+
 Var Var_integer_box(Symbol target, unsigned long long raw);
 
 int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);

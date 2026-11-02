@@ -1,0 +1,43 @@
+{
+  "report_path": "../current.json",
+  "report_sha256": "2417942f249f86aedbb33bdc0a1b2d06e5f5e0b9c1abf884978b4eaec2b587e0",
+  "run_id": "20261101T204543Z",
+  "profile": "local",
+  "measured_revision": "fed582d496606c11eb09e4a817f7fa9ddf2a2464",
+  "quiet_window": null,
+  "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
+  "execution_modes": "Both x2c columns parallelize binarytrees, fannkuch N>=9, Mandelbrot N>=256, regex counts >=65536 bytes and seven k-nucleotide widths. Spectral uses six workers at N>=256 idiomatic and N>=500 tuned. Other programs are serial.",
+  "foreign_measurements": "Pinned calibration; not remeasured in this x2c update",
+  "samples": 12,
+  "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+  "normalization": "Per-problem minima among available columns; all eight for shared problems",
+  "summary": "Geometric mean of the eight shared normalized problem values",
+  "profile_centres": "Arithmetic means, following the historical star-plot form",
+  "runtime": "Median wall-clock elapsed time from the existing report",
+  "loc": "Nonblank source lines after language-aware comment removal",
+  "gzip": "Existing harness game_style_gzip_bytes, not LOC",
+  "benchmark_count": 10,
+  "summary_benchmarks": [
+    "nbody",
+    "spectralnorm",
+    "fannkuchredux",
+    "mandelbrot",
+    "fasta",
+    "revcomp",
+    "regexredux",
+    "pidigits"
+  ],
+  "unavailable": {
+    "binarytrees": {
+      "python": "Current archived #2 and base/#4/#5 reuse a constant tuple at leaves, violating the required per-node leaf allocation. #3 allocates fresh list leaves but explicitly disables GC; it is excluded under the pinned default-GC-when-possible guidance. The leaf violation was reproduced; the GC exclusion is an interpretation of that guidance. No official source was patched."
+    },
+    "knucleotide": {
+      "cpp": "All three current contributed C++ variants require <ext/pb_ds/assoc_container.hpp>, which the configured Apple libc++ toolchain does not provide. No GCC/libstdc++ toolchain is installed. Sources were not rewritten and no compiler/stdlib was installed.",
+      "go": "All five unchanged official Go candidates fail ascending key ordering for equal frequencies. #3/#4/#6 explicitly sort descending keys; #7/#8 sort only counts and inherit randomized map iteration. #3/#4/#6/#7 use compressed nucleotide keys; all count all sliding windows in growing maps and handle missing requested fragments as zero in the tested legal tied sequence.",
+      "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched.",
+      "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
+    }
+  },
+  "restored_from_revision": "a9aeff5b843878fd102b31402a522d2f0a1d2d6c",
+  "restored_from_path": "examples/shootout/results/runs/20261101T204543Z"
+}

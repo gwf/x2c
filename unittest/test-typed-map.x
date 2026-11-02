@@ -255,6 +255,10 @@ static void typed_map_missing_and_null_status_paths(void) {
   EXPECT_INT_EQ(missing.len(), 0);
   EXPECT_FALSE(missing.truth());
   EXPECT_TRUE(missing.equal(NULL));
+  struct Iter storage;
+  EXPECT_INT_EQ(missing.iter(&storage).count(), 0);
+  EXPECT_INT_EQ(missing.keys(&storage).count(), 0);
+  EXPECT_INT_EQ(missing.enumerate(&storage).count(), 0);
 }
 
 static void typed_map_errors_transfer(void) {
@@ -295,6 +299,17 @@ static void typed_map_independent_key_value_widths(void) {
   EXPECT_TRUE(map.getindex(large) == 1.25);
   EXPECT_TRUE(map.updateindex(large, <+>, 0.5) == 1.75);
   EXPECT_TRUE(map.postfixindex(large, <++>) == 1.75);
+  EXPECT_TRUE(map.getindex(large) == 2.75);
+  // a double has no remainder, as for a typed Array or a Var
+  int caught = 0;
+  try map[large] %= 2.0;
+  catch %(bad-types *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<op>).symbol() == <%>);
+  }
+  try map.updateindex(large, <@>, 2.0);
+  catch %(bad-op *): caught++;
+  EXPECT_INT_EQ(caught, 2);
   EXPECT_TRUE(map.getindex(large) == 2.75);
   double out = 19.0;
   EXPECT_TRUE(map.try_del(0, out));
@@ -453,26 +468,6 @@ static void typed_map_string_int_family(void) {
   EXPECT_INT_EQ(keys, 3);
 }
 
-static void _expect_typed_map_common(
-  Var boxed, Var later, Map ordinary,
-  String direct_str, String direct_repr,
-  Buffer streamed_str, Buffer streamed_repr, int comparison) {
-  EXPECT_STR_EQ(direct_str, ordinary.str());
-  EXPECT_STR_EQ(direct_repr, ordinary.repr());
-  EXPECT_STR_EQ(streamed_str.str(), ordinary.str());
-  EXPECT_STR_EQ(streamed_repr.str(), ordinary.repr());
-  EXPECT_STR_EQ(boxed.str(), ordinary.str());
-  EXPECT_STR_EQ(boxed.repr(), ordinary.repr());
-  EXPECT_TRUE(comparison < 0);
-  EXPECT_TRUE(boxed.compare(later) < 0);
-
-  Buffer boxed_str = Buffer.new(0), boxed_repr = Buffer.new(0);
-  EXPECT_TRUE(boxed.write_str(boxed_str) == boxed_str);
-  EXPECT_TRUE(boxed.write_repr(boxed_repr) == boxed_repr);
-  EXPECT_STR_EQ(boxed_str.str(), ordinary.str());
-  EXPECT_STR_EQ(boxed_repr.str(), ordinary.repr());
-}
-
 static void typed_map_common_capabilities_cover_every_family(void) {
   $test.scoped();
 
@@ -480,7 +475,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   Map int_map = ints;
   Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
   ints.write_str(int_str); ints.write_repr(int_repr);
-  _expect_typed_map_common(
+  Test_expect_same_text(
     ints, later_ints, int_map, ints, ints.repr(),
     int_str, int_repr, ints.compare(later_ints));
   EXPECT_INT_EQ(int_map[1].integer(), 2);
@@ -492,7 +487,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   Map double_map = doubles;
   Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
   doubles.write_str(double_str); doubles.write_repr(double_repr);
-  _expect_typed_map_common(
+  Test_expect_same_text(
     doubles, later_doubles, double_map, doubles, doubles.repr(),
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_map[10L].double() == 2.5);
@@ -502,7 +497,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   Map string_map = strings;
   Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
   strings.write_str(string_str); strings.write_repr(string_repr);
-  _expect_typed_map_common(
+  Test_expect_same_text(
     strings, later_strings, string_map, strings, strings.repr(),
     string_str, string_repr, strings.compare(later_strings));
   EXPECT_STR_EQ(string_map["alpha"].string(), "one");
@@ -513,7 +508,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   Buffer string_int_str = Buffer.new(0), string_int_repr = Buffer.new(0);
   string_ints.write_str(string_int_str);
   string_ints.write_repr(string_int_repr);
-  _expect_typed_map_common(
+  Test_expect_same_text(
     string_ints, later_string_ints, string_int_map,
     string_ints, string_ints.repr(),
     string_int_str, string_int_repr,

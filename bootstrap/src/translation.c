@@ -36,7 +36,9 @@ typedef struct Translation{
 }
 Translation;
 
-static String _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _1, _0;
+
+static Var _2;
 
 static int _init_guard_ = 0;
 
@@ -44,11 +46,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _preflight(Translation * t);
 
-_Noreturn static void _stem_collision(String stem, String first, String other, String out_dir);
-
 static void _make_out_dir(String out_dir);
 
-static void _print_command(CliRequest request);
+static void _print_commands(Translation * t);
 
 static void _preprocessor_errors(String text);
 
@@ -71,7 +71,7 @@ static void _preload_modules(Translation * t);
 
 static Map _package_names(Translation * t, List roots);
 
-static List _imported_packages(String path);
+static List _imported_packages(SourceView sources, String path);
 
 static Array _slices(List inputs, int total, int count);
 
@@ -154,25 +154,27 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new(".");
-  _1 = String_new("translation input is not an .x file: ");
-  _2 = String_new("x2c: error: inputs produce the same output stem \'%s\'\n  first input: %s\n  other input: %s\n  output: %s/%s.c\n");
-  _3 = String_new("output directory is not writable: ");
-  _4 = String_new("/builds/");
-  _5 = String_new(".module");
-  _6 = String_new("/");
-  _7 = String_new(".d");
-  _8 = String_new("{");
-  _9 = String_new("}");
-  _10 = String_new("import");
-  _11 = String_new("could not start a translation worker");
-  _12 = String_new(".c");
-  _13 = String_new(".h");
-  _14 = String_new("file");
-  _15 = String_new("files");
-  _16 = String_new("Translated ");
-  _17 = String_new(" x2c ");
-  _18 = String_new(" to ");
-  _19 = String_new(" in ");
+  _1 = String_new("--out-dir");
+  _2 = String_var(_1);
+  _3 = String_new("translation input is not an .x file: ");
+  _4 = String_new("\n      inputs produce the same output stem \'");
+  _5 = String_new("\'\n        first input: ");
+  _6 = String_new("\n        other input: ");
+  _7 = String_new("\n        output: ");
+  _8 = String_new("/");
+  _9 = String_new(".c");
+  _10 = String_new("output directory is not writable: ");
+  _11 = String_new("/builds/");
+  _12 = String_new(".module");
+  _13 = String_new(".d");
+  _14 = String_new("import");
+  _15 = String_new(".h");
+  _16 = String_new("file");
+  _17 = String_new("files");
+  _18 = String_new("Translated ");
+  _19 = String_new(" x2c ");
+  _20 = String_new(" to ");
+  _21 = String_new(" in ");
 }
 
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed)){
@@ -184,7 +186,7 @@ int translate_request(CliRequest request, Map unit_dirs, void * context, void(* 
   }
   ;
   _preflight(&(t));
-  if(request -> verbose || request -> dry_run) _print_command(request);
+  if(request -> verbose || request -> dry_run) _print_commands(&(t));
   if(request -> dry_run) return 0;
   t.frontend = Frontend_new(request);
   t.frontend -> preprocessor_errors = _preprocessor_errors;
@@ -196,6 +198,11 @@ int translate_request(CliRequest request, Map unit_dirs, void * context, void(* 
   else _translate_serial(&(t));
   if(! progress && ! CliRequest_inspects(request)) _report(&(t), started_at);
   return 0;
+}
+
+void translate_print_command(String out_dir, List inputs){
+  if(! _init_guard_) _file_init_();
+  ToolAction_start(ToolAction_new(45220543335690, cons(_2, cons(String_var(out_dir), inputs)), 0, 1));
 }
 
 String Path_stem(Path);
@@ -213,10 +220,13 @@ static void _preflight(Translation * t){
       input = Var_as_string(_x2c_gensym_macro_cursor_output_0);
       {
         CliRequest_require_input(input);
-        if(! Path_is_x2c_source(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_1), cons(String_var(input), NULL))));
+        if(! Path_is_x2c_source(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(input), NULL))));
         if(! shared) continue;
         String stem = Path_stem(input);
-        if(Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_as_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
+        if(Map_contains(stems, String_var(stem))) Diagnostics_driver_error(String_dedent(({
+          Var _x2c_gensym_literal_part_0 = String_var(stem);  Var _x2c_gensym_literal_part_1 = String_var(Var_str(Map_getindex(stems, String_var(stem))));  String_join(NULL, cons(String_var(_4), cons(_x2c_gensym_literal_part_0, cons(String_var(_5), cons(_x2c_gensym_literal_part_1, cons(String_var(_6), cons(String_var(input), cons(String_var(_7), cons(String_var(request -> out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_9), NULL))))))))))));
+        }
+        )));
         Map_setindex(stems, String_var(stem), String_var(input));
       }
 
@@ -224,11 +234,6 @@ static void _preflight(Translation * t){
 
   }
   if(! CliRequest_inspects(request) && ! request -> dry_run) _make_out_dir(request -> out_dir);
-}
-
-_Noreturn static void _stem_collision(String stem, String first, String other, String out_dir){
-  fprintf(stderr, _2, stem, first, other, out_dir, stem);
-  exit(2);
 }
 
 void Path_make_dirs(Path);
@@ -278,24 +283,26 @@ static void _make_out_dir(String out_dir){
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(out_dir), NULL))));
+  if(access(out_dir, W_OK | X_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(out_dir), NULL))));
 }
 
-static void _print_command(CliRequest request){
-  fprintf(stderr, "x2c: translate");
-  fprintf(stderr, " --out-dir %s", request -> out_dir);
+static void _print_commands(Translation * t){
+  if(! Map_truth((* t).unit_dirs)){
+    translate_print_command((* t).request -> out_dir, (* t).request -> inputs);
+    return;
+  }
   {
     String input;
-    List _x2c_gensym_macro_object_1 = request -> inputs;
+    List _x2c_gensym_macro_object_1 =(* t).request -> inputs;
     List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       input = Var_as_string(_x2c_gensym_macro_cursor_output_1);
-      fprintf(stderr, " %s", input);
+      translate_print_command(Var_as_string(Map_getindex((* t).unit_dirs, String_var(input))), cons(String_var(input), NULL));
     }
 
   }
-  fputc('\n', stderr);
+
 }
 
 static void _preprocessor_errors(String text){
@@ -332,7 +339,7 @@ static void _preload_modules(Translation * t){
       {
         String root = NULL;
         if(! String_truth(SourceView_package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
-        String module = String_join(NULL, cons(String_var(root), cons(String_var(_4), cons(String_var(name), cons(String_var(_5), NULL)))));
+        String module = String_join(NULL, cons(String_var(root), cons(String_var(_11), cons(String_var(name), cons(String_var(_12), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
 
@@ -342,7 +349,7 @@ static void _preload_modules(Translation * t){
 
 }
 
-String Path_read_text(Path);
+int SourceView_read(SourceView, String, volatile String *);
 
 Path Path_basename(Path);
 
@@ -358,7 +365,7 @@ static Map _package_names(Translation * t, List roots){
       {
         {
           String name;
-          List _x2c_gensym_macro_object_3 = _imported_packages(input);
+          List _x2c_gensym_macro_object_3 = _imported_packages((* t).request -> sources, input);
           List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
           Var _x2c_gensym_macro_cursor_output_2;
           while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_2))){
@@ -368,56 +375,11 @@ static Map _package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_gensym_literal_part_0 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_6), cons(_x2c_gensym_literal_part_1, cons(String_var(_7), NULL)))));
+          Var _x2c_gensym_literal_part_2 = String_var(_output_dir(&((* t)), input));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_8), cons(_x2c_gensym_literal_part_3, cons(String_var(_13), NULL)))));
         }
         );
-        String volatile text = NULL;
-        {
-          ExceptionFrame _x2c_gensym_exception_frame_1;
-          static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
-          Var _x2c_gensym_macro_patterns_1[1];
-          static ErrorCatchSite _x2c_gensym_macro_site_1 ={
-            _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
-          }
-          ;
-          if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
-            _x2c_gensym_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
-          }
-          volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
-          x2c_exception_push(& _x2c_gensym_exception_frame_1);
-          if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) text = Path_read_text(depfile);
-          else{
-            x2c_exception_landed(& _x2c_gensym_exception_frame_1);
-            if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
-              int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
-              x2c_error_catch_detach(_x2c_gensym_error_handler_1);
-              x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
-              if(_x2c_gensym_macro_selected_1 == 0){
-                {
-                  {
-                    x2c_error_catch_close(_x2c_gensym_error_handler_1);
-                    _x2c_gensym_error_handler_1 = NULL;
-                    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-                    continue;
-                  }
-
-                }
-
-              }
-
-            }
-            else{
-              x2c_error_catch_close(_x2c_gensym_error_handler_1);
-              _x2c_gensym_error_handler_1 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-              __builtin_unreachable();
-            }
-
-          }
-          x2c_error_catch_close(_x2c_gensym_error_handler_1);
-          _x2c_gensym_error_handler_1 = NULL;
-          x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-        }
+        String text = NULL;
+        if(! SourceView_read(NULL, depfile, &(text))) continue;
         {
           String dependency;
           List _x2c_gensym_macro_object_4 = translation_depfile_parse(text);
@@ -442,67 +404,16 @@ static Map _package_names(Translation * t, List roots){
   return names;
 }
 
-static List _imported_packages(String path){
-  String volatile text = NULL;
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_2;
-    static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
-    Var _x2c_gensym_macro_patterns_2[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_2 ={
-      _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
-      _x2c_gensym_macro_patterns_2[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
-    x2c_exception_push(& _x2c_gensym_exception_frame_2);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) text = Path_read_text(path);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_2);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
-        int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_2);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
-        if(_x2c_gensym_macro_selected_2 == 0){
-          {
-            List _x2c_gensym_return_value_0 = NULL;
-            {
-              x2c_error_catch_close(_x2c_gensym_error_handler_2);
-              _x2c_gensym_error_handler_2 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-              return _x2c_gensym_return_value_0;
-            }
-
-          }
-
-        }
-        __builtin_unreachable();
-      }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_2);
-        _x2c_gensym_error_handler_2 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_gensym_error_handler_2);
-    _x2c_gensym_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-  }
+static List _imported_packages(SourceView sources, String path){
+  String text = NULL;
+  if(! SourceView_read(sources, path, &(text))) return NULL;
   Tokenizer tokens = Tokenizer_new(text, 3945159);
   Tokenizer_scan(tokens);
   Array names = Array_new();
   int depth = 0;
-  for(Token token = Tokenizer_next(tokens);  token -> type != 11212;  token = Tokenizer_next(tokens)){
-    if(String_equal(token -> text, _8)) depth ++;
-    else if(String_equal(token -> text, _9)) depth --;
-    else if(! depth && String_equal(token -> text, _10)){
-      token = Tokenizer_next(tokens);
-      if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, x2c_slice_bound(- 1), 1)));
-    }
-
+  for(Token token = Compiler_next_file_scope(tokens, &(depth));  token -> type != 11212;  token = Compiler_next_file_scope(tokens, &(depth))) if(String_equal(token -> text, _14)){
+    token = Tokenizer_next(tokens);
+    if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, x2c_slice_bound(- 1), 1)));
   }
   return Array_list_free(names);
 }
@@ -583,7 +494,7 @@ static void _start(Workers * w){
   sigprocmask(SIG_SETMASK, & unblocked, NULL);
   if(pid > 0) return;
   if(capture) File_close(capture);
-  report_line(11703268, _11);
+  Diagnostics_driver_report("could not start a translation worker", NULL);
   (* w).failed ++;
 }
 
@@ -661,6 +572,8 @@ static sigset_t _block_stop_signals(void){
   sigprocmask(SIG_BLOCK, & stops, & previous);
   return previous;
 }
+
+int Job_decode_wait_status(int, int *);
 
 static int _wait_worker(long * pids, int count, int * status){
   while(1){
@@ -913,8 +826,8 @@ static void _report(Translation * t, unsigned long started_at){
       input = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         String stem = Path_stem(input);
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_6), cons(String_var(stem), cons(String_var(_12), NULL))))));
-        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_6), cons(String_var(stem), cons(String_var(_13), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_9), NULL))))));
+        bytes += Path_regular_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_8), cons(String_var(stem), cons(String_var(_15), NULL))))));
       }
 
     }
@@ -922,8 +835,8 @@ static void _report(Translation * t, unsigned long started_at){
   }
   String duration = report_duration(report_now_us() - started_at);
   int n =(* t).total;
-  String noun = n == 1 ? _14 : _15;
-  report_line(42217975014, String_join(NULL, cons(String_var(_16), cons(String_var(int_str(n)), cons(String_var(_17), cons(String_var(noun), cons(String_var(_18), cons(String_var(out_dir), cons(String_var(_19), cons(String_var(duration), NULL))))))))));
+  String noun = n == 1 ? _16 : _17;
+  report_line(42217975014, String_join(NULL, cons(String_var(_18), cons(String_var(int_str(n)), cons(String_var(_19), cons(String_var(noun), cons(String_var(_20), cons(String_var(out_dir), cons(String_var(_21), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 

@@ -50,11 +50,11 @@ typedef struct ParsedUnit {
 // diagnostics
 
 static macro Stmt $fail.frontend_input_read(
-  Expr $c, Expr $site, Expr $filename) =>
+  Expr $c, Expr $site, Expr $filename, Expr $reason) =>
   $c.report_error(
     <driver>,
     "cannot read input file",
-    $site, %("stage: driver" "file: $($filename)" "reason: cannot open"));
+    $site, %("stage: driver" "file: $($filename)" "reason: $($reason)"));
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
@@ -407,22 +407,31 @@ static String _input_name(Compiler c, String filename) {
    runtime headers unless it lies under `lib/`. `source` is the unit's
    resolved path, or NULL. */
 static void _runtime_roles(Compiler c, const char *source) {
-  char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = %"$(x2c_get_root())/lib";
+  char runtime[PATH_MAX];
+  String prelude = %"$(x2c_get_root())/lib/x2c.x";
   c.prelude =
-    !(source && realpath(%"$dir/x2c.x", runtime) && !strcmp(source, runtime));
-  c.runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
-}
-
-static int _inside(const char *path, const char *dir) {
-  size_t n = strlen(dir);
-  return !strncmp(path, dir, n) && path[n] == '/';
+    !(source && realpath(prelude, runtime) && !strcmp(source, runtime));
+  c.runtime_inc =
+    !(source && Compiler.in_runtime_library(String.new(source)));
 }
 
 static String _read_input(Compiler c) {
-  String filename = c.filename, text = NULL;
-  if (c.read_source(filename, text)) return text;
-  $fail.frontend_input_read(c, NULL, filename);
+  String filename = c.filename;
+  try return c.read_source_text(filename);
+  catch %((!set ?cause (!or not-found io-fail bad-arg size-limit)) *detail):
+    return _unreadable(c, filename, cause, detail);
+}
+
+/* Reports a failed read with the Error's own reason, the String limit, or
+   the system's text for its errno. */
+static String _unreadable(
+  Compiler c, String filename, Symbol cause, List detail) {
+  String reason = detail.assoc(<reason>);
+  if (!reason && cause == <size-limit>) reason = "too large for a String";
+  // Quoted, the key survives a host preprocessor that expands `errno`.
+  long error = reason ? 0 : detail.assoc(<"errno">);
+  if (!reason) reason = String.new(strerror((int) error));
+  $fail.frontend_input_read(c, NULL, filename, reason);
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an
@@ -595,7 +604,6 @@ static void _tokenize_cpp(Compiler cpp, String text) {
 
 // The child parses with the unit's compile-time bindings.
 static void _share_session(Compiler cpp, Compiler c) {
-  cpp.load_source = c.load_source;
   cpp.meta_bindings = c.meta_bindings;
   cpp.borrowed_bindings = cpp.meta_bindings != NULL;
   cpp.share_meta_group(c);

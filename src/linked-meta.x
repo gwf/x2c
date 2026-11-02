@@ -58,6 +58,19 @@ static Symbol _literal_tag(List tag) {
   return 0;
 }
 
+/* --- lib/compiler-meta.x ------------------------------------------------- */
+
+String _x2c_public_inline_role(String role) {
+  int public = 0;
+  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
+    public = type ~= %(* inline *) && !(type ~= %(* static *));
+  if (!public) return NULL;
+  if (x2c_enclosing(<unit>) ~=
+      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
+    return %"$(role)_$("%08x".printf(path.hash()))";
+  return role;
+}
+
 /* --- lib/derive.x -------------------------------------------------------- */
 
 List _derive_methods(
@@ -516,28 +529,9 @@ static Code _access_update(
     participant's `updateindex` member.
 */
 Code access_update(Code code) {
-  match (code) {
-    case $x2c.collection.add(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"+">);
-    case $x2c.collection.subtract(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"-">);
-    case $x2c.collection.multiply(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"*">);
-    case $x2c.collection.divide(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"/">);
-    case $x2c.collection.remainder(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"%">);
-    case $x2c.collection.and(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"&">);
-    case $x2c.collection.or(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"|">);
-    case $x2c.collection.xor(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"^">);
-    case $x2c.collection.left(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"<<">);
-    case $x2c.collection.right(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <">>">);
-  }
+  if (code ~= %(expr ? (op ?(Symbol op) $($indexed(?base, ?key)) ?value)))
+    return _access_update(
+      code, base, key, value, _x2c_operator_row(op).car());
   return code;
 }
 
@@ -793,14 +787,8 @@ static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
 static String _dynamic_lane(Symbol op) {
-  switch (op) {
-    case <+>: return "x2c_var_add_lane";
-    case <->: return "x2c_var_sub_lane";
-    case <*>: return "x2c_var_mul_lane";
-    case </>: return "x2c_var_div_lane";
-    case <%>: return "x2c_var_mod_lane";
-  }
-  return NULL;
+  Var member = _x2c_operator_row(op)[3];
+  return member ? %"x2c_var_$(member.symbol())_lane" : NULL;
 }
 
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
@@ -830,12 +818,6 @@ Code dynamic_binary(Code code) {
   return code;
 }
 
-static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row in _x2c_operator_rows())
-    if (row[2] && row[2] == assignment) return row.car();
-  return 0;
-}
-
 static Code _dynamic_update(
   Type type, Code target, Symbol op, Code value, String helper) {
   Type target_type = target.cadr(), address_type = %(* @target_type);
@@ -863,7 +845,7 @@ Code dynamic_compound(Code code) {
   if (code ~= %(expr ? (op ?(Symbol op) ?left ?right))) {
     Code target = left, rhs = right;
     Type type = target.cadr(), right_type = rhs.cadr();
-    Symbol operation = _dynamic_operation(op);
+    Symbol operation = _x2c_operator_row(op).car();
     if (type ~= %((bitfield *) *))
       $fail.operators_bitfield_target(NULL);
     if (!right_type.is_named("Var") && !right_type.numeric() &&
@@ -1153,19 +1135,6 @@ Code lambda_lift(Code node) {
   return node;
 }
 
-static int _lambda_in_public_inline(void) {
-  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
-    return type ~= %(* inline *) && !(type ~= %(* static *));
-  return 0;
-}
-
-static String _lambda_bridge_role(void) {
-  if (x2c_enclosing(<unit>) ~=
-      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
-    return %"func_from_capture_$("%08x".printf(path.hash()))";
-  return "func_from_capture";
-}
-
 static List _lambda_field(int index) => x2c_ident(%"c$index");
 
 static List _lambda_member(int index) => $(%"c$index");
@@ -1273,8 +1242,11 @@ static Code _lambda_value(
     }
   List initial = values.list_free();
   Code made = NULL;
-  if (_lambda_in_public_inline()) {
-    List bridge = x2c_binding_fresh(_lambda_bridge_role());
+  /* A public inline body reaches the unit's private record only through
+     a bridge. */
+  String bridge_role = _x2c_public_inline_role("func_from_capture");
+  if (bridge_role) {
+    List bridge = x2c_binding_fresh(bridge_role);
     x2c_place(
       %(unit-support),
       _lambda_bridge(bridge, adapter, context, signature, types.list_free()));
@@ -2254,9 +2226,9 @@ static void _printf_conversion(
 
 static void _printf_scan(
   Code call, const char *at, Array arguments, int &next) {
+  if (!at) return;
   while (*at) {
     int ch = *at++;
-    if (ch == '\\' && *at) at++;
     if (ch != '%') continue;
     if (!*at) $fail.printf_incomplete(call);
     if (*at == '%') at++;
@@ -2274,7 +2246,8 @@ static Code _printf_lowered(Code code, Code format, List values) {
   if (code ~= %(expr ?type (call ?callee (args *given)))) {
     Array arguments = given;
     int next = given.len() - values.len();
-    _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
+    String text = format.value();
+    _printf_scan(code, text, arguments, next);
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
         $fail.printf_unused_argument(code);
@@ -2486,18 +2459,6 @@ Code raise_lowering(Code node) {
 
 /* --- src/components/string-switch.x -------------------------------------- */
 
-static String _string_case_bytes(String spelling) {
-  const char *p = spelling;
-  String bytes = "\"";
-  while ((p = strchr(p, '"'))) {
-    const char *start = ++p;
-    while (*p != '"') p += *p == '\\' ? 2 : 1;
-    bytes += String.new_len(start, p - start).unescape();
-    p++;
-  }
-  return bytes + "\"";
-}
-
 static int _string_case_text(Type type) =>
   type ~= %((!or (dim *) (!quote *)) char) ||
   type ~= %((!or (dim *) (!quote *)) const char);
@@ -2507,8 +2468,10 @@ static String _string_case_key(List label) {
     case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
-      if (_string_case_text(type))
-        return "\"" in spelling ? _string_case_bytes(spelling) : spelling;
+      if (_string_case_text(type)) {
+        Code text = %(expr (* char) (literal (* char) $spelling));
+        return text.format() ? text.value().repr() : spelling;
+      }
     }
   }
   return NULL;
@@ -2546,17 +2509,19 @@ static List _string_cases(
 }
 
 static Code _string_switch_helper(Type type, List labels) {
-  List key = %(string-switch $type $labels);
-  List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
+  String role = _x2c_public_inline_role("string_switch");
+  int public = !!role;
+  List key = %(string-switch $type $labels $public);
+  if (!public) role = "string_switch";
+  List name = x2c_binding_for(key, role), s = x2c_ident("s");
+  List declared = public ? %(int) : %(static int);
   Array tests = [];
   int index = 0;
   foreach (List label in labels)
     tests.push($!{ if ($s == $label) return $(++index); });
   x2c_place(
     %(unit-support $key),
-    $!Unit{
-      static int $name($type $s) { @(tests.list_free()) return 0; }
-    });
+    $!Unit{ $declared $name($type $s) { @(tests.list_free()) return 0; } });
   Type callable = %((func ($type)) int);
   return $!($callable){ $name };
 }
@@ -2762,6 +2727,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
   $linked.row(rows, "_literal_tag", _literal_tag);
+  $linked.row(rows, "_x2c_public_inline_role", _x2c_public_inline_role);
   $linked.row(rows, "_derive_methods", _derive_methods);
   $linked.row(rows, "_derive_construct", _derive_construct);
   $linked.row(rows, "_derive_args_spec", _derive_args_spec);
@@ -2833,7 +2799,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_dynamic_operand", _dynamic_operand);
   $linked.row(rows, "_dynamic_lane", _dynamic_lane);
   $linked.row(rows, "dynamic_binary", dynamic_binary);
-  $linked.row(rows, "_dynamic_operation", _dynamic_operation);
   $linked.row(rows, "_dynamic_update", _dynamic_update);
   $linked.row(rows, "_dynamic_helper", _dynamic_helper);
   $linked.row(rows, "dynamic_compound", dynamic_compound);
@@ -2855,8 +2820,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_closure_params", _lambda_closure_params);
   $linked.row(rows, "_lambda_function", _lambda_function);
   $linked.row(rows, "lambda_lift", lambda_lift);
-  $linked.row(rows, "_lambda_in_public_inline", _lambda_in_public_inline);
-  $linked.row(rows, "_lambda_bridge_role", _lambda_bridge_role);
   $linked.row(rows, "_lambda_field", _lambda_field);
   $linked.row(rows, "_lambda_member", _lambda_member);
   $linked.row(rows, "_lambda_field_type", _lambda_field_type);
@@ -2937,7 +2900,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_raise_immutable", _raise_immutable);
   $linked.row(rows, "_raise_value", _raise_value);
   $linked.row(rows, "raise_lowering", raise_lowering);
-  $linked.row(rows, "_string_case_bytes", _string_case_bytes);
   $linked.row(rows, "_string_case_text", _string_case_text);
   $linked.row(rows, "_string_case_key", _string_case_key);
   $linked.row(rows, "_string_case_index", _string_case_index);
@@ -2958,6 +2920,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_lowering", try_lowering);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_x2c_operator_rows", _x2c_operator_rows);
+  $linked.row(rows, "_x2c_operator_row", _x2c_operator_row);
   $linked.row(rows, "_derive_list", _derive_list);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);

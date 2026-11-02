@@ -7,7 +7,7 @@
     declarations through which modules name each other's types and
     operations without an include cycle. Pointer-shaped `Var` extractors are
     ABI crossings whose callers establish the source kind; scalar readers
-    convert other numeric tags through `Var.convert`.
+    convert other numeric tags under the `Var.convert` rules.
 */
 
 #pragma once
@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 _Static_assert(CHAR_BIT == 8, "char is 8 bits");
@@ -386,6 +387,11 @@ double x2c_var_order(Var a, Var b);
 
 Var Var.convert(Var value, Symbol target);
 Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site);
+long Var.long_at(Var value, const X2CErrorSite *site);
+ulong Var.ulong_at(Var value, const X2CErrorSite *site);
+long long Var.long_long_at(Var value, const X2CErrorSite *site);
+unsigned long long Var.ulong_long_at(Var value, const X2CErrorSite *site);
+long double Var.long_double_at(Var value, const X2CErrorSite *site);
 int Var.truth(Var value);
 int Var.fallback_truth(Var value);
 meta Iter Var.fallback_iter(Var value, Iter dest);
@@ -682,7 +688,9 @@ inline Symbol Var.symbol(Var x) {
 /* Scalar readers apply the Var.convert rules. Each direct branch is a fast
    path for a tag it already recognizes and gives the same result as
    converting. The fallback converts to the named target and reads the raw
-   payload; a scalar reader after conversion would recurse. */
+   payload; a scalar reader after conversion would recurse. Converting to a
+   wide target would box, so the wide readers are their site-carrying forms
+   without a site. */
 
 /** Returns `x` as a native `char` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
@@ -752,58 +760,34 @@ meta native unsigned Var.unsigned(Var x) {
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native long Var.long(Var x) {
-  if (x is <long>) return x.long_value();
-  if (x is <i48> || x is <i32> || x is <u32> ||
-      x is <i16> || x is <u16> || x is <i8> || x is <u8>)
-    return x.integer();
-  return x.convert(<long>).long_value();
-}
+meta native long Var.long(Var x) => Var.long_at(x, NULL);
 
 /** Returns `x` as a native `ulong` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native ulong Var.ulong(Var x) {
-  if (x is <ulong>) return x.ulong_value();
-  if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
-    return (ulong) x.integer();
-  return x.convert(<ulong>).ulong_value();
-}
+meta native ulong Var.ulong(Var x) => Var.ulong_at(x, NULL);
 
 /** Returns `x` as a native `long long` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native long long Var.long_long(Var x) {
-  if (x is <llong>) return x.long_long_value();
-  if (x is <long>) return (long long) x.long_value();
-  if (x.kind() == <integer>) return (long long) x.integer();
-  return x.convert(<llong>).long_long_value();
-}
+meta native long long Var.long_long(Var x) => Var.long_long_at(x, NULL);
 
 /** Returns `x` as a native `unsigned long long` under the `Var.convert`
     rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native unsigned long long Var.ulong_long(Var x) {
-  if (x is <ullong>) return x.ulong_long_value();
-  if (x is <ulong>) return (unsigned long long) x.ulong_value();
-  if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
-    return (unsigned long long) x.integer();
-  return x.convert(<ullong>).ulong_long_value();
-}
+meta native unsigned long long Var.ulong_long(Var x) =>
+  Var.ulong_long_at(x, NULL);
 
 /** Returns `x` as a native `long double` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
     invalidly encoded.
 */
-meta native long double Var.long_double(Var x) {
-  if (x is <ldouble>) return x.long_double_value();
-  if (x is <f64> || x is <f32>) return (long double) x.floating();
-  return x.convert(<ldouble>).long_double_value();
-}
+meta native long double Var.long_double(Var x) =>
+  Var.long_double_at(x, NULL);
 
 /** Returns `x` as a native `float` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
@@ -964,7 +948,7 @@ int x2c_normalize_slice(int &start, int &stop, int step, int length) {
 
   // normalize negative forward stops against the endpoint after the last item
   if (stop < 0) {
-    if (step > 0) stop += length + 1;
+    if (step > 0) stop = stop + (long long) length + 1;
     else {
       // preserve the default -1 sentinel so a reverse slice includes index 0
       if (orig_stop != INT_MIN)
@@ -977,11 +961,41 @@ int x2c_normalize_slice(int &start, int &stop, int step, int length) {
      truncates toward zero, so an empty or reversed range would otherwise
      count one element and the caller would read a position outside the
      value. */
-  int newlen = 0;
-  if (step < 0 && start > stop) newlen = (start - stop - 1) / (-step) + 1;
+  long long newlen = 0;
+  if (step < 0 && start > stop)
+    newlen = ((long long) start - stop - 1) / -(long long) step + 1;
   else if (step > 0 && start < stop)
-    newlen = (stop - start - 1) / step + 1;
+    newlen = ((long long) stop - start - 1) / step + 1;
   return newlen;
+}
+
+// runtime failures
+
+/* A failed native primitive leaves shared runtime state unknown, so the
+   runtime reports it on native stderr and aborts. Neither function below
+   allocates, so both serve before Error is ready and while Scope or Error
+   is failing. */
+
+/** Prints `message` on native stderr and aborts. */
+void x2c_fatal(const char *message) {
+  fprintf(stderr, "%s\n", message);
+  abort();
+}
+
+/** Aborts with `failure` and the native error number when `error` is
+    nonzero.
+*/
+void x2c_native_check(int error, const char *failure) {
+  if (!error) return;
+  fprintf(stderr, "%s (%d)\n", failure, error);
+  abort();
+}
+
+/** Raises `<io-fail>` for a failed native handle call, with `operation`
+    naming the call as a String or Symbol and `errno` holding `error`.
+*/
+void x2c_io_fail(Var operation, int error) {
+  raise %(io-fail (operation $operation) (errno $error));
 }
 
 #include "dispatch.x"

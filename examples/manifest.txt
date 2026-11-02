@@ -76,10 +76,10 @@ programs/tiny-lisp.max|external-input|build||-|Formatted and annotated Tiny Lisp
 apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/apps/notes check.
 apps/notes/bench/load|probe|none||-|Optional loopback benchmark client.
 power/derive|showcase|run||expected/derive.stdout|Gallery: JSON round trip, equality, and representation from declared fields.
-power/tests/stack_test|probe|none||-|Standalone tests using test.x and its program entry.
 power/classes|showcase|run||expected/power-classes.stdout|Gallery: a value class and a pointer class with its own init.
 power/protocols|showcase|run||expected/power-protocols.stdout|Gallery: set union and intersection as + and * through a protocol.
 power/channels|showcase|run||expected/power-channels.stdout|Gallery: two threads share a bounded channel under Thread.run.
 power/your-c|showcase|run||expected/power-your-c.stdout|Gallery: X-macros, conditional groups, and C strings in an x2c unit.
 apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.
 apps/notes/bench/inprocess-notes|probe|none||-|Optional local Thread.run and Task.run Notes lookup comparison.
+apps/notes/bench/notes-database|probe|none||-|Shared database support for optional Notes benchmarks.

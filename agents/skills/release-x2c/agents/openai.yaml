@@ -1,4 +1,4 @@
 interface:
   display_name: "Release x2c"
   short_description: "Prepare, stage, promote, and verify a release"
-  default_prompt: "Use $release-x2c to take the current x2c main to a verified public release, handing Gary the merge and tag steps."
+  default_prompt: "Use $release-x2c to take one selected commit from x2c dev through staging to a verified production release, handing Gary the main fast-forward and tag steps."

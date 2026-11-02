@@ -37,10 +37,10 @@ Source: `lib/context.x`
 Closes the current `Context`, reclaims unexported state, and restores
 parent.
 The `Context` must be current; all pointers into its remaining `Scope` or
-private canonical pool become invalid.
+private canonical pool become invalid. NULL does nothing.
 
-**Raises:** `<bad-state>` for a null or noncurrent `Context`, or while its
-`Match` cache has an active lease. The failure leaves the `Context` active.
+**Raises:** `<bad-state>` for a noncurrent `Context`, or while its `Match`
+cache has an active lease. The failure leaves the `Context` active.
 
 Source: `lib/context.x`
 
@@ -56,7 +56,7 @@ Source: `lib/context.x`
 <a id="Context.export"></a>
 #### Context.export
 
-`meta native Var Context.export(Context context, Var value)`
+`meta native Var Context.export(Context c, Var value)`
 
 Exports `value` into the parent of the current `Context`.
 Values may belong to an open region of that `Context`; export them
@@ -71,9 +71,9 @@ Built-in `Array` and `Map` export restores the container's source ownership
 if recursive export fails, but nested exports already completed are not
 rolled back.
 
-**Raises:** `<bad-state>` unless `context` is current, `<bad-types>` for an
-unsupported value without a registered exporter, or a cause from nested
-allocation, hashing, equality, or custom export.
+**Raises:** `<bad-arg>` for NULL, `<bad-state>` unless `c` is current,
+`<bad-types>` for an unsupported value without a registered exporter, or
+a cause from nested allocation, hashing, equality, or custom export.
 
 Source: `lib/context.x`
 
@@ -175,6 +175,8 @@ returns zero for an individual allocation scheduled by
 the enclosing root export commits.
 Scheduling a complete scope does not hide its unvisited descendants.
 
+**Raises:** `<bad-arg>` for a null `Context`.
+
 Source: `lib/context.x`
 
 ## Runtime-internal callables
@@ -211,8 +213,9 @@ Source: `lib/context.x`
 `Scope *Context.export_destination(Context c)`
 
 Returns the borrowed `Scope` slot that receives exports from `c`.
-The slot remains valid only while the `Context`'s destination state lives;
-a null `Context` returns NULL.
+The slot remains valid only while the `Context`'s destination state lives.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/context.x`
 

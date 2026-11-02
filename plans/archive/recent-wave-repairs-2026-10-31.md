@@ -14,7 +14,7 @@
 | Repair | Existing owner and intended result | Focused evidence |
 | --- | --- | --- |
 | Pattern-condition false continuation | `src/transform/conditions.x`: place an `else if` continuation inside a block so generated C preserves its branch without dangling-else warnings. | Execute the chain with true/false arms and strict native warnings. |
-| Leading typedef attributes | `src/parse/declarations.x` and `src/parse/types.x`: recognize typedef storage together with attributes and retain ordinary typedef name binding and layout facts. | Compile a leading unused/alignment typedef example and check the resulting type. |
+| Leading typedef attributes | `src/parse/declarations.x`, `src/parse/types.x`, and `_without_leading_text` in `src/type.x`: recognize typedef storage together with attributes and retain ordinary typedef name binding and layout facts. | Compile a leading unused/alignment typedef example and check the resulting type. |
 | Quoted keyword atoms under CPP | `src/cpp/`: distinguish keyword tokens in source from keyword spellings stored as literal atoms, using the tokenizer's existing kinds. | A visible keyword macro must still expand source while leaving quoted atom data intact. |
 | Syntax generator script helpers | `commands/build/`: include the syntax tool's real source helpers without collecting unrelated compiler runtime assets as script helpers. | Build/run the generator from the checkout and retain command helper-discovery checks. |
 | Scope example migration | Current site examples and agent guide: use the current package examples and Scope operations. | Inspect excerpts and run the relevant small native samples without fetching third-party packages. |

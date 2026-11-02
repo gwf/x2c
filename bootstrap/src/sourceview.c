@@ -53,6 +53,13 @@ _x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
+typedef struct _x2c_gensym_defer_env_3{
+  const void * _x2c_gensym_defer_capture_3;
+}
+_x2c_gensym_defer_env_3;
+
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
+
 #include "exception.h"
 
 
@@ -242,19 +249,51 @@ int SourceView_exists(SourceView sources, String path){
 
 
 
-int SourceView_read(SourceView sources, String path, String volatile * text){
+String SourceView_read_text(SourceView s, String path){
   Var value;
-  if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), &(value))){
-    (* text) = Var_as_string(value);
-    return 1;
+  if(s && Map_try_get(s -> overlays, String_var(Path_absolute(path)), &(value))) return Var_as_string(value);
+  File file = String_open(path, "r");
+  const File _x2c_gensym_macro_acquired_0 = file;
+  {
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    {
+      struct stat info;
+      if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
+        Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("SourceView.read_text")), NULL)));
+        Var _x2c_gensym_literal_part_1 = String_var(path);
+        Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("not a regular file")), NULL)));
+        {
+          static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/sourceview.x",.function = "SourceView_read_text",.line = 75};
+          x2c_error_raise_n(& _x2c_gensym_error_site_0, 20399393368, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1051920), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2);
+          __builtin_unreachable();
+        }
+
+      }
+      {
+        String _x2c_gensym_return_value_3 = File_string(file);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
-  struct stat info;
-  File file = fopen(path, "r");
-  if(! file) return 0;
-  if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
-    File_close(file);
-    return 0;
-  }
+
+}
+
+int SourceView_read(SourceView sources, String path, String volatile * text){
   {
     ExceptionFrame _x2c_gensym_exception_frame_0;
     static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
@@ -264,11 +303,11 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
-      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), cons(Symbol_var(4372499598), cons(Symbol_var(1358596898646632), NULL)))))), cons(Symbol_var(54), NULL)));
     }
     volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0))(* text) = File_string_close(file);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0))(* text) = SourceView_read_text(sources, path);
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_0);
       if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
@@ -277,12 +316,12 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
         x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
         if(_x2c_gensym_macro_selected_0 == 0){
           {
-            int _x2c_gensym_return_value_3 = 0;
+            int _x2c_gensym_return_value_4 = 0;
             {
               x2c_error_catch_close(_x2c_gensym_error_handler_0);
               _x2c_gensym_error_handler_0 = NULL;
               x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-              return _x2c_gensym_return_value_3;
+              return _x2c_gensym_return_value_4;
             }
 
           }
@@ -342,5 +381,10 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
   Buffer_cleanup((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+}
+
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
+  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
+  File_cleanup((*(const File *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 

@@ -140,6 +140,9 @@ static void copy_examples(Path destination) {
   Path examples = root.join("examples");
   foreach (Path source, examples.walk()) {
     String relative = source.remove_prefix(%"$examples/");
+    if (relative.startswith("shootout/results/") ||
+        relative.startswith("apps/notes/bench/results/") ||
+        relative == "shootout/baseline.json") continue;
     int skipped = 0;
     foreach (String part, relative.split("/"))
       if (%("build" "check.sh" "Makefile" "builds").contains(part))

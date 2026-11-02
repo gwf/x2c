@@ -58,24 +58,30 @@ int SourceView.exists(SourceView sources, String path) {
   return !access(path, R_OK) && !stat(path, &info) && S_ISREG(info.st_mode);
 }
 
-/** Reads through the request overlay, falling back to a regular disk file.
-    The return value distinguishes an empty file from a failed read. Disk
-    text belongs to the calling unit; configured snapshots remain borrowed.
+/** Returns the text at `path` through the request overlay, falling back to
+    a regular disk file. An empty file is NULL. Disk text belongs to the
+    calling unit; configured snapshots remain borrowed.
+    Raises: `<not-found>` or `<io-fail>` when the file cannot be opened or
+    read, `<io-fail>` with a `reason` when it is not a regular file,
+    `<bad-arg>` when it holds a NUL byte, or `<size-limit>` when it is too
+    large for a `String`.
+*/
+String SourceView.read_text(SourceView s, String path) {
+  Var value;
+  if (s && s.overlays.try_get(Path.absolute(path), value)) return value;
+  File file = auto path.open("r");
+  struct stat info;
+  if (file.stat(&info) || !S_ISREG(info.st_mode))
+    raise %(io-fail (operation "SourceView.read_text") (path $path)
+      (reason "not a regular file"));
+  return file.string();
+}
+
+/** Reads like `SourceView.read_text`, returning 0 instead of raising. The
+    return value distinguishes an empty file from a failed read.
 */
 int SourceView.read(SourceView sources, String path, String volatile &text) {
-  Var value;
-  if (sources && sources.overlays.try_get(Path.absolute(path), value)) {
-    text = value;
-    return 1;
-  }
-  struct stat info;
-  File file = fopen(path, "r");
-  if (!file) return 0;
-  if (file.stat(&info) || !S_ISREG(info.st_mode)) {
-    file.close();
-    return 0;
-  }
-  try text = file.string_close();
-  catch %(io-fail *): return 0;
+  try text = sources.read_text(path);
+  catch %((!or not-found io-fail bad-arg size-limit) *): return 0;
   return 1;
 }

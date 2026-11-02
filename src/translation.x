@@ -35,21 +35,22 @@ static keyword loop $private.loop;
 #include "format.x"
 #include "protocol/protocol.x"
 
-static macro Stmt $report.main_stem_collision(
+static macro Stmt $fail.main_stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) =>
-  fprintf(
-    stderr, $dedent(%"
-      x2c: error: inputs produce the same output stem '%s'
-        first input: %s
-        other input: %s
-        output: %s/%s.c
-    "),
-    $stem, $first, $other, $directory, $stem);
+  Diagnostics.driver_error(
+    $dedent(%"
+      inputs produce the same output stem '$($stem)'
+        first input: $($first)
+        other input: $($other)
+        output: $($directory)/$($stem).c"));
 
 static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
   fprintf(
     stderr, "x2c: translate with %d workers over %d files\n",
     $jobs, $total);
+
+static macro Stmt $report.main_worker_start_failed() =>
+  Diagnostics.driver_report("could not start a translation worker", NULL);
 
 static macro Stmt $fail.main_input_not_x(Expr $input) =>
   Diagnostics.driver_error(%"translation input is not an .x file: $($input)");
@@ -86,7 +87,7 @@ int translate_request(
     .progress = progress,
     .total = request.inputs.len()};
   _preflight(t);
-  if (request.verbose || request.dry_run) _print_command(request);
+  if (request.verbose || request.dry_run) _print_commands(t);
   if (request.dry_run) return 0;
   t.frontend = Frontend.new(request);
   t.frontend.preprocessor_errors = _preprocessor_errors;
@@ -104,6 +105,13 @@ int translate_request(
   return 0;
 }
 
+/** Prints the translate command that writes `inputs` to `out_dir`, as
+    verbose and dry-run requests show it, quoted as a dry-run tool action
+    prints its arguments.
+*/
+void translate_print_command(String out_dir, List inputs) =>
+  ToolAction.new(<translate>, %("--out-dir" $out_dir @inputs), 0, 1).start();
+
 /* Each input must be a regular `.x` file. Units that write to the shared
    `--out-dir` must not share an output stem; inspection writes nothing. */
 static void _preflight(Translation &t) {
@@ -117,17 +125,11 @@ static void _preflight(Translation &t) {
     if (!shared) continue;
     String stem = Path.stem(input);
     if (stem in stems)
-      _stem_collision(stem, stems[stem], input, request.out_dir);
+      $fail.main_stem_collision(stem, stems[stem], input, request.out_dir);
     stems[stem] = input;
   }
   if (!request.inspects() && !request.dry_run)
     _make_out_dir(request.out_dir);
-}
-
-static void _stem_collision(
-  String stem, String first, String other, String out_dir) {
-  $report.main_stem_collision(stem, first, other, out_dir);
-  exit(2);
 }
 
 static void _make_out_dir(String out_dir) {
@@ -137,11 +139,15 @@ static void _make_out_dir(String out_dir) {
     $fail.main_directory_unwritable(out_dir);
 }
 
-static void _print_command(CliRequest request) {
-  fprintf(stderr, "x2c: translate");
-  fprintf(stderr, " --out-dir %s", request.out_dir);
-  foreach (String input in request.inputs) fprintf(stderr, " %s", input);
-  fputc('\n', stderr);
+/* A build writes each unit to its own directory, so it shows one command
+   per unit, as its dry run does. */
+static void _print_commands(Translation &t) {
+  if (!t.unit_dirs) {
+    translate_print_command(t.request.out_dir, t.request.inputs);
+    return;
+  }
+  foreach (String input in t.request.inputs)
+    translate_print_command(t.unit_dirs[input], $(input));
 }
 
 static void _preprocessor_errors(String text) {
@@ -195,11 +201,11 @@ static void _preload_modules(Translation &t) {
 static Map _package_names(Translation &t, List roots) {
   Map names = {};
   foreach (String input in t.request.inputs) {
-    foreach (String name in _imported_packages(input)) names[name] = 1;
+    foreach (String name in _imported_packages(t.request.sources, input))
+      names[name] = 1;
     String depfile = %"$(_output_dir(t, input))/$(Path.stem(input)).d";
     String text = NULL;
-    try text = Path.read_text(depfile);
-    catch %((!or not-found io-fail) *): continue;
+    if (!SourceView.read(NULL, depfile, text)) continue;
     foreach (String dependency in translation_depfile_parse(text)) {
       String package = Compiler.package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;
@@ -209,23 +215,20 @@ static Map _package_names(Translation &t, List roots) {
 }
 
 /* The packages the top-level `import` declarations of the file at `path`
-   name. A token scan suffices: an import is legal only at file scope. */
-static List _imported_packages(String path) {
+   name. A token scan suffices: an import is legal only at file scope. A
+   file that cannot be read names none; its translation reports it. */
+static List _imported_packages(SourceView sources, String path) {
   String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return NULL;
+  if (!sources.read(path, text)) return NULL;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.scan();
   Array names = [], int depth = 0;
-  for (Token token = tokens.next(); token.type != <eof>;
-       token = tokens.next()) {
-    if (token.text == "{") depth++;
-    else if (token.text == "}") depth--;
-    else if (!depth && token.text == "import") {
+  for (Token token = Compiler.next_file_scope(tokens, depth);
+       token.type != <eof>; token = Compiler.next_file_scope(tokens, depth))
+    if (token.text == "import") {
       token = tokens.next();
       if (token.type == <lit-char*>) names.push(token.text[1:-1]);
     }
-  }
   return names.list_free();
 }
 
@@ -328,7 +331,7 @@ static void _start(Workers &w) {
   sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (pid > 0) return;
   if (capture) capture.close();
-  report_line(<error>, "could not start a translation worker");
+  $report.main_worker_start_failed();
   w.failed++;
 }
 

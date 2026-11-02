@@ -11,12 +11,9 @@ upstream.
 
 ## Choose delivery
 
-An individual session normally integrates and publishes its own change.
-`orchestrate-x2c-work` normally integrates and publishes its workers' combined
-work. To use shared integration, Gary starts `integrate-x2c-prs` in a
-persistent checkout and tells selected individual sessions or orchestrators to
-use the integrator. Those sessions submit ready PRs; other sessions keep their
-chosen mode. A running integrator is not a global switch.
+Individual sessions and orchestrators submit ready PRs to the shared
+integrator by default. The integrator combines changes and owns broad checks
+and publication. Gary can explicitly select direct delivery for a session.
 
 Agents establish the selected worktree context, for example:
 
@@ -54,24 +51,17 @@ run the relevant focused checks, and commit it on a branch based on `dev` or
 the recorded dependency revision. An orchestrator first collects and checks
 its workers' private handoffs into one or more coherent changes.
 
-For compiler, runtime, or shared build changes, pass `make stage-2` on the
-submitted tree before enrollment. If the bootstrap seed cannot consume the
-change, perform the necessary local rebootstrap with the existing bootstrap
-and stage targets, then complete `make stage-2`. Record the actual commands
-and results in submission evidence, including any bootstrap transition.
-Keep the relevant focused checks: stage two builds the compiler and runtime
-but does not run the fixtures or compare generated output. Documentation-only
-and independent external-command changes do not need a stage-two build.
-The submitting parent checks its combined tree; private worker checkpoints
-need no separate stage build. Apply this contract to repaired resubmissions too.
+Use focused checks for the changed behavior. Rebootstrap locally when the
+seed cannot consume a capability needed for development.
 
 Write its reviewed description in `.context/submission/pr-body.md`, then
-create a ready, same-repository PR targeting `dev`:
+create a ready, same-repository PR targeting `dev`. Outside a terminal, `gh`
+also needs a title; `--fill-first` takes it from the branch's first commit:
 
 ```sh
 branch="$(git branch --show-current)"
 git push -u origin "HEAD:refs/heads/$branch"
-gh pr create --base dev --head "$branch" \
+gh pr create --base dev --head "$branch" --fill-first \
   --body-file .context/submission/pr-body.md
 ```
 
@@ -129,22 +119,15 @@ the changed head.
 See the [integration skill](skills/integrate-x2c-prs/SKILL.md#preserve-failures-and-resume-independent-work)
 for blocker messages and uncertain submissions.
 
-This is a work submission. Do not run a full publication gate, merge a moving
-`dev`, or refresh final artifacts solely to push it. The required stage-two
-build, meaningful focused tests, and necessary local rebootstrap remain the
-submitter's responsibility. The integrator owns the final combined review,
-generated artifacts, gate, and `dev` push. Report the PR and focused evidence as
-submitted; the integrator records actual publication. If it is absent, the
-PR waits.
+The integrator owns the final combined review, generated artifacts, broad
+checks, and `dev` push. Report the PR and focused evidence as submitted; the
+integrator records actual publication. If it is absent, the PR waits.
 
-For a requested review stop, switch the submitting parent to
-`individual`/`direct` or `orchestrator`/`direct` context, use normal publication
-validation, and push only a draft PR branch. Leave it unenrolled and do not
-publish to `dev`. Subordinate workers remain `worker`/`private`. Here `direct`
-keeps validation with the session; the requested review stop chooses the
-destination. A PR alone is never automatic permission
-to integrate. Local-only work stays local. Integration readiness requests
-landing the pinned revision; removing it cancels only if observed before push.
+For a requested review stop, keep PR delivery context, push only a draft PR
+branch, and leave it unenrolled until review is complete. Subordinate workers
+remain `worker`/`private`. Local-only work stays local. Integration readiness
+requests landing the pinned revision; removing it cancels only if observed
+before push.
 
 Queue commands are agent responsibilities. The standing skill uses `status`,
 `wait --timeout 60`, `prepare`, `land <batch-id>`, `land <batch-id> --publish`,
@@ -157,7 +140,8 @@ retirement. Selection flags do not exempt a batch from those rules.
 
 ## Build and validate
 
-From a fresh worktree, or after integrating a changed `bootstrap/`:
+Before using `builds/0` in a fresh worktree, or after integrating a changed
+`bootstrap/`:
 
 ```sh
 mkdir -p debug
@@ -177,7 +161,7 @@ required sequence.
 | `make build` | Rebuild the current development compiler. |
 | `make bootstrap-refresh` | Regenerate the bootstrap with the current compiler. |
 | `make build-safe` | Cleanly rebuild stage 0 from bootstrap. |
-| `make stage-2` | Build through stage 2; required before submitting compiler, runtime, or shared build changes. |
+| `make stage-2` | Build through stage 2 when investigating self-hosting. |
 | `make proof-raw-symbols` | Optional full-corpus symbol-mode comparison. |
 | `make verify` | Unit suites, compiler fixtures, and focused probes. |
 | `make stage-3` | Build through the third self-hosted stage. |

@@ -4,7 +4,9 @@
     owns becomes its index, so the body stays an ordinary integer switch on
     a helper's result. The helper returns the index of the first label equal
     to the selector under ordinary `==`, or 0. Switches on the same type
-    with the same labels share one helper.
+    with the same labels share one helper. It is static, except for the
+    switches in public inline functions, whose bodies the header publishes:
+    they share one with external linkage.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -14,25 +16,13 @@
 #include "rewrite.x"
 #include "grammar.x"
 #include "ast-rewrite.x"
+#include "compiler-meta.x"
 
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $report.string_switch_case(Expr $site) =>
   x2c_diagnostic_error_at(
     $site, <xform>, "a case in a String switch takes a string literal",
     %("compare computed values with an if chain or match"));
-
-/* Adjacent literals join after each decodes its own escapes, as in C. */
-meta static String _string_case_bytes(String spelling) {
-  const char *p = spelling;
-  String bytes = "\"";
-  while ((p = strchr(p, '"'))) {
-    const char *start = ++p;
-    while (*p != '"') p += *p == '\\' ? 2 : 1;
-    bytes += String.new_len(start, p - start).unescape();
-    p++;
-  }
-  return bytes + "\"";
-}
 
 /* Whether `type` is the type of a C string literal. `lib/type.x` spells it
    `Type.is_char_pointer_like`, which a component cannot include; see
@@ -49,8 +39,10 @@ meta static String _string_case_key(List label) {
     case %(expr ? $($grouped(?inner))): return _string_case_key(inner);
     case %(expr ? (literal ?type ?text)): {
       String spelling = text;
-      if (_string_case_text(type))
-        return "\"" in spelling ? _string_case_bytes(spelling) : spelling;
+      if (_string_case_text(type)) {
+        Code text = %(expr (* char) (literal (* char) $spelling));
+        return text.format() ? text.value().repr() : spelling;
+      }
     }
   }
   return NULL;
@@ -95,19 +87,22 @@ meta static List _string_cases(
     node, child, _string_cases(child, indices, labels, site));
 }
 
-/* The helper shared by switches on `type` with the same `labels`. */
+/* The helper shared by switches on `type` with the same `labels`, with
+   external linkage when a public inline function holds the switch. */
 meta static Code _string_switch_helper(Type type, List labels) {
-  List key = %(string-switch $type $labels);
-  List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
+  String role = _x2c_public_inline_role("string_switch");
+  int public = !!role;
+  List key = %(string-switch $type $labels $public);
+  if (!public) role = "string_switch";
+  List name = x2c_binding_for(key, role), s = x2c_ident("s");
+  List declared = public ? %(int) : %(static int);
   Array tests = [];
   int index = 0;
   foreach (List label in labels)
     tests.push($!{ if ($s == $label) return $(++index); });
   x2c_place(
     %(unit-support $key),
-    $!Unit{
-      static int $name($type $s) { @(tests.list_free()) return 0; }
-    });
+    $!Unit{ $declared $name($type $s) { @(tests.list_free()) return 0; } });
   Type callable = %((func ($type)) int);
   return $!($callable){ $name };
 }

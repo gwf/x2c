@@ -82,11 +82,13 @@ static struct ArraySortEntry {
   size_t index;
 };
 
-/** Reads `index` from a non-null array, counting negatives from the end.
-    Returns `void` when the normalized index is outside the array.
+/** Reads `index`, counting negatives from the end.
+    Returns `void` when the normalized index is outside the array; a null
+    array reads as empty.
     Raises: `<size-limit>` outside the integer index domain.
 */
 Var Array.getindex(Array array, int index) {
+  if (array == NULL) return void;
   if (array.length > INT_MAX) _size_limit(0, array.length);
   index = x2c_normalize_index(index, (int) array.length);
   if (index < 0) return void;
@@ -94,14 +96,16 @@ Var Array.getindex(Array array, int index) {
 }
 
 /** Stores and returns `value`, counting negatives from the end.
-    Requires a non-null array. Returns `void` for an out-of-range index.
-    Raises: `<size-limit>` outside the index domain or `<void-op>` when
-    storing `void` at a valid index.
+    Raises: `<bad-arg>` for a null `Array` or an index outside it,
+    `<size-limit>` when its length cannot be indexed, or `<void-op>` for a
+    `void` value. The element is unchanged on failure.
 */
 Var Array.setindex(Array array, int index, Var value) {
-  if (array.length > INT_MAX) _size_limit(0, array.length);
-  index = x2c_normalize_index(index, (int) array.length);
-  if (index < 0) return void;
+  if (array == NULL) raise %(bad-arg (operation "Array.setindex"));
+  int requested = index, length = _int_length(array);
+  index = x2c_normalize_index(index, length);
+  if (index < 0)
+    raise %(bad-arg (operation "Array.setindex") (index $requested));
   if (value is void) raise %(void-op);
   return ((Var *) array.bytes)[index] = value;
 }
@@ -116,6 +120,8 @@ inline Array Block.array(Block x)         => (Array) x;
     Values appended before a later `<void-op>`, `<size-limit>`, or
     `<alloc-fail>` remain in `array`. The caller must supply that many `Var`
     arguments.
+    Raises: `<bad-arg>` for a null `array` with a positive `element_count`,
+    or any cause from `Array.push`.
 */
 Self Array.update_n(Self array, unsigned element_count, ...) {
   va_list ap;
@@ -329,11 +335,11 @@ Self Array.sort_by(Self array, Func key) {
     heap.heap_push(20);
     printf("%s %s\n", heap.heap_pop().repr(), heap.heap_pop().repr());
     ```
-    Raises: `<void-op>` when `val` is `void`, or `<size-limit>` when the heap
-    cannot grow within the `Array` index domain, `<alloc-fail>` when storage
-    cannot grow, or a cause from element comparison. A value or earlier swap
-    may remain when comparison fails; pre-insertion failures leave the heap
-    unchanged.
+    Raises: `<bad-arg>` for a null `heap`, `<void-op>` when `val` is `void`,
+    `<size-limit>` when the heap cannot grow within the `Array` index domain,
+    `<alloc-fail>` when storage cannot grow, or a cause from element
+    comparison. A value or earlier swap may remain when comparison fails;
+    pre-insertion failures leave the heap unchanged.
 */
 meta native void Array.heap_push(Array heap, Var val) {
   heap.push(val);

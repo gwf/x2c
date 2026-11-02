@@ -9,5 +9,6 @@
 #include "rewrite.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
+#include "compiler-meta.h"
 
 #endif /* __GUARD_0x9FAE5A8D__ */

@@ -96,7 +96,7 @@ After building the checkout commands and SQLite package, run from the
 repository root:
 
 ```sh
-builds/0/x2c test --manifest packages/sqlite/tests/derive/x2c.toml
+builds/0/x2c test --manifest-path packages/sqlite/tests/derive/x2c.toml
 ```
 
 The pilot's manifest supplies the package search directory. SQLite's native
@@ -118,8 +118,9 @@ after its connection is freed before the connection closes. Wrapper storage
 belongs to the active Scope. Use each statement and connection on one thread
 at a time.
 
-`prepare(sql)` prepares one statement. `bind(values)` resets the statement,
-clears old parameters, and binds a positional List. `bind_named(values)` does
+`prepare(sql)` prepares one statement. `bind(a, b, ...)` resets the
+statement, clears old parameters, and binds its arguments in parameter order;
+splice an existing List with `bind(@values)`. `bind_named(values)` does
 the same for a Map whose String keys are SQLite parameter names, including
 `:`, `@`, or `$`. Both binding methods require every parameter; bind Null
 explicitly for a SQL NULL value. `reset()` keeps the current bindings for

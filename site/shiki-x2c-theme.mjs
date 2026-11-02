@@ -88,6 +88,8 @@ const distinctScopes = [
   "storage.modifier.threaded.x2c",
   "storage.modifier.meta.x2c",
   "storage.modifier.native.x2c",
+  "keyword.other.meta.x2c",
+  "keyword.other.native.x2c",
   "keyword.control.import.x2c",
   "keyword.control.with.x2c",
   "keyword.declaration.protocol.x2c",

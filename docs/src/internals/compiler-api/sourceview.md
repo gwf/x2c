@@ -15,7 +15,8 @@ Request-owned source overlays.
 | [`SourceView.exists`](#SourceView.exists) | Returns readable-file presence, including unsaved new files. |
 | [`SourceView.init`](#SourceView.init) | Initializes empty overlays in the current request lifetime. |
 | [`SourceView.is_changed`](#SourceView.is_changed) | Returns whether this logical file has an unsaved overlay. |
-| [`SourceView.read`](#SourceView.read) | Reads through the request overlay, falling back to a regular disk file. |
+| [`SourceView.read`](#SourceView.read) | Reads like `SourceView.read_text`, returning 0 instead of raising. |
+| [`SourceView.read_text`](#SourceView.read_text) | Returns the text at `path` through the request overlay, falling back to a regular disk file. |
 | [`SourceView.set`](#SourceView.set) | Stores an immutable snapshot under its logical source path. |
 | [`SourceView.unset`](#SourceView.unset) | Removes a closed document so subsequent reads use the disk file. |
 
@@ -53,9 +54,24 @@ Source: `src/sourceview.x`
 
 `int SourceView.read(SourceView sources, String path, String volatile &text)`
 
-Reads through the request overlay, falling back to a regular disk file.
-The return value distinguishes an empty file from a failed read. Disk
-text belongs to the calling unit; configured snapshots remain borrowed.
+Reads like `SourceView.read_text`, returning 0 instead of raising. The
+return value distinguishes an empty file from a failed read.
+
+Source: `src/sourceview.x`
+
+<a id="SourceView.read_text"></a>
+#### SourceView.read_text
+
+`String SourceView.read_text(SourceView s, String path)`
+
+Returns the text at `path` through the request overlay, falling back to
+a regular disk file. An empty file is NULL. Disk text belongs to the
+calling unit; configured snapshots remain borrowed.
+
+**Raises:** `<not-found>` or `<io-fail>` when the file cannot be opened or
+read, `<io-fail>` with a `reason` when it is not a regular file,
+`<bad-arg>` when it holds a NUL byte, or `<size-limit>` when it is too
+large for a `String`.
 
 Source: `src/sourceview.x`
 

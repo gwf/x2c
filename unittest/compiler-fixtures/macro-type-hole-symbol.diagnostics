@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-type-hole-symbol.x:19:3: macro: a Type hole takes type syntax such as %(long), not <long>
+    $declared();
+    ^
+  note: in expansion of 'declared' defined at unittest/compiler-fixtures/macro-type-hole-symbol.x:16:1; input: (args)
+

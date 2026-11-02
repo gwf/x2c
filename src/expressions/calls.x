@@ -14,7 +14,7 @@ static typedef struct CallSite {
 /* dynamic Func calls
 
    A call through a `Func` value prepares its arguments with the templates
-   below; `Compiler.func_call_parts` reads a prepared call back. */
+   below. */
 
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
@@ -128,46 +128,23 @@ static const PrintfFn printf_family_info[] = {
   { "Buffer_printf", 1, 2, 0 }
 };
 
-/** Returns the callee and arguments of a typed `Func` call, or NULL for any
-    other expression. `content` is the body of the call's `expr` node. Each
-    argument is `(func-arg value address source)`: the argument boxed as a
-    Var, or `(no-value)` when it has no Var form; its address, or 0; and its
-    type, which is `(expr ("List") (ident reference))` for a null argument
-    that takes the callee's own type.
-*/
-List Compiler.func_call_parts(Compiler c, Var content) {
-  Macro call = $func_call, apply = $func_apply;
-  match (%(expr () $content)) {
-    case apply(?callee): return $(callee);
-    case call(?callee, ?count, *arguments): {
-      Array parts = auto [callee];
-      foreach (List argument in _slot_statements(arguments)) {
-        List part = _func_arg_part(argument);
-        if (!part) return NULL;
-        parts.push(part);
-      }
-      return parts;
-    }
-  }
-  return NULL;
-}
-
 // Iter chains
 
 /** Completes an eligible resolved `Iter` call chain for immediate consumption.
-    It accepts only a typed identifier call of the form
-    `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
-    the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
-    completed recursively; a call missing only that last formal receives the
-    hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+    It accepts a typed call `(expr R (call (expr F C) (args A)))` whose
+    callee type `F` resolves to a function, or a pointer to one, with formals
+    `P`, where `R` and the last formal in `P` canonicalize to `Iter`. `Iter`
+    arguments are completed recursively; a call missing only that last formal
+    receives the hidden destination. Variadic calls and `Iter_unzip` are
+    returned unchanged.
 */
 List Compiler.complete_iter_chain(Compiler c, List expression) {
+  List parameters = NULL;
   match (expression)
-    case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
-                                      (ident ?binding))),
-                 *arguments):
+    case $called(%(!set ?callee (expr ?type ?)), *arguments)
+        if (c.sym.resolve_key(type).function_parts(parameters, NULL)):
       return _complete_iter_call(
-        c, expression, callee, arguments, parameters, binding);
+        c, expression, callee, arguments, parameters);
   return expression;
 }
 
@@ -181,9 +158,15 @@ String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
     case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
-      int length = spelling ? spelling.len() : 0;
-      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
-        return NULL;
+      int len = spelling.len();
+      if (!len) return NULL;
+      for (int i = 0; i < len;) {
+        if (spelling[i] != '"') return NULL;
+        int size = scan_c_string(spelling + i);
+        if (size < 0) return NULL;
+        i += size;
+        while (i < len && isspace((unsigned char) spelling[i])) i++;
+      }
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
@@ -202,56 +185,16 @@ String Compiler.printf_static_format(Compiler c, Var format) {
   return NULL;
 }
 
-// call preparation and recognition
-
-/* One prepared argument as `(func-arg value address source)`, or NULL for
-   any other statement. */
-static List _func_arg_part(List argument) {
-  Macro prepare = $func_argument, absent = $func_null_argument,
-        boxed = $func_value;
-  Var value = %(no-value), address = NULL, source = NULL;
-  Macro splice = $func_splice, map_splice = $func_map_splice;
-  match (argument) {
-    case splice(?function, ?storage, ?index, ?value):
-      return %(func-splice $value);
-    case map_splice(?function, ?storage, ?index, ?value):
-      return %(func-map-splice $value);
-    case prepare(
-      ?function, ?storage, ?count, ?index, ?pointer, ?type, ?alternative): {
-      match (alternative) case boxed(?boxed_value): value = boxed_value;
-      address = pointer;
-      source = type;
-    }
-    case absent(?function, ?storage, ?count, ?index, ?alternative): {
-      match (alternative) case boxed(?boxed_value): value = boxed_value;
-      address = $!int{ 0 };
-      source = %(expr ("List") (ident reference));
-    }
-    default: return NULL;
-  }
-  return %(func-arg $value $address $source);
-}
-
-/* Open statement groups in a slot. */
-static List _slot_statements(List items) {
-  Array opened = auto [];
-  foreach (List item in items)
-    match (item) {
-      case %(seq *group):
-        foreach (List statement in group) opened.push(statement);
-      default: opened.push(item);
-    }
-  return opened;
-}
+// completing Iter chains
 
 static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,
-  List parameters, List binding) {
-  Type result = expression.cadr();
-  String name = Ast.binding_spelling(binding);
-  if (!_exact_iter_type(result) || name == "Iter_unzip" ||
+  List parameters) {
+  if (!_exact_iter_type(expression.cadr()) ||
       _parameters_variadic(parameters))
     return expression;
+  match (callee) case %(expr ? (ident ?binding)):
+    if (Ast.binding_spelling(binding) == "Iter_unzip") return expression;
   List formal = parameters, actual = arguments;
   int supplied = arguments.len(), expected = formal.len();
   if (!formal ||
@@ -350,11 +293,9 @@ static List _method(CallSite &k, List receiver, List field) {
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
       return _bound(k, binding, signature, declared, parameters, returns);
-    case %(field ?access ?field_type): {
-      List callee = %(expr $field_type
-        (op $access $(k.receiver) $(k.field)));
-      return _finish(k, k.result_type, callee, field_type, NULL);
-    }
+    case %(field ?access ?field_type):
+      return _function(
+        k, %(expr $field_type (op $access $(k.receiver) $(k.field))));
   }
   return NULL;
 }

@@ -195,6 +195,31 @@ int Compiler.scope_declares_alias(Compiler c, String name) {
   return _same_scope(c, _entry(c, name, NULL));
 }
 
+/** Returns the names of the unit's file-scope aliases that `globs`, the
+    unit's names in source order, does not bind. Collection takes them
+    before an include for `Compiler.check_included_names`.
+*/
+List Compiler.unbound_alias_names(Compiler c, Map globs) {
+  Map table = _table(c);
+  if (!table) return NULL;
+  Array names = [];
+  foreach (Var key in table.keys()) {
+    String name = _key_name(key);
+    if (!_unit_binds(c, globs, name)) names.push(name);
+  }
+  return names.list_free();
+}
+
+/** Reports the first of `names`, aliases that `globs` did not bind before
+    the include at `site`, that the include declared. That declaration
+    conflicts with the alias as one written at the include would.
+*/
+void Compiler.check_included_names(
+  Compiler c, List names, Map globs, Token site) {
+  foreach (String name in names)
+    if (_unit_binds(c, globs, name)) $fail.parse_decl_bound(c, site, name);
+}
+
 // uses
 
 /** Returns the expression that the identifier at the cursor stands for when
@@ -301,6 +326,16 @@ static List _unalias(Compiler c, int block) {
    prefix and its name. */
 static int _public_key(Var key) => key is <string>;
 
+static String _key_name(Var key) {
+  if (_public_key(key)) return key;
+  return key.list().cadr();
+}
+
+/* Whether the unit binds `name` at file scope, also in the package's space,
+   where `Sym.get` retries a miss. */
+static int _unit_binds(Compiler c, Map globs, String name) =>
+  $(name) in globs || $(c.package_spelling(name)) in globs;
+
 static int _same_scope(Compiler c, List entry) {
   match (entry) {
     case %(imported *): return !c.alias_level && c.sym.at_file_scope();
@@ -404,10 +439,10 @@ static List _wrapped_forms(Compiler c, int skip_body) {
    alias is keyed by its name alone. Two aliases that one file sees in one
    scope conflict. A semicolon alias at file scope also conflicts with an
    earlier file-scope declaration of its name, which collection, reading
-   declarations in source order, reports; a later one reports itself. An
-   included file's walk also sees its includer's names, which its include
-   line checks instead. A public alias records its compile-time effect for
-   including files. */
+   declarations in source order, reports; a later one reports itself, and
+   a later include reports at its line. An included file's walk also sees
+   its includer's names, which its include line checks instead. A public
+   alias records its compile-time effect for including files. */
 static void _declare(Compiler c, AliasHead &head, int collecting) {
   if (_same_scope(c, _entry(c, head.name, NULL)))
     $fail.parse_decl_bound(c, head.start, head.name);

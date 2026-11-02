@@ -112,11 +112,11 @@ static int thread_live_count;
 
 static pthread_mutex_t thread_completion_mutex;
 
-static List _240, _238, _237, _236, _234, _233, _231, _230, _226, _224, _223, _222, _221, _220, _219, _218, _217, _216, _215, _214, _213, _212, _211, _210, _209, _208, _206, _203, _200, _197, _196, _192, _191, _189, _188, _187, _186, _185, _183, _182, _178, _177, _173, _170, _169, _165, _164, _158, _157, _153, _152, _150, _149, _147, _145, _144, _143, _142, _141, _139, _138, _137, _135, _134, _133, _131, _128, _127, _125, _124, _123, _121, _120, _119, _117, _116, _114, _113, _111, _110, _109, _107, _106, _104, _103, _96, _92, _91, _89, _88, _86, _85, _84, _83, _82, _80, _79, _75, _74, _71, _68, _67, _66, _64, _63, _60, _53, _50, _47, _46, _44, _42, _41, _40, _39, _37, _36, _32, _31, _28, _27, _21, _20, _16, _15, _11, _10, _6, _5;
+static List _242, _240, _239, _238, _236, _235, _233, _232, _228, _226, _225, _224, _223, _222, _221, _220, _219, _218, _217, _216, _215, _214, _213, _212, _211, _210, _208, _205, _202, _199, _198, _194, _193, _191, _190, _189, _188, _187, _185, _184, _180, _179, _175, _172, _171, _167, _166, _160, _159, _155, _154, _152, _151, _149, _147, _146, _145, _144, _143, _141, _140, _139, _137, _136, _135, _133, _130, _129, _127, _126, _125, _123, _122, _121, _119, _118, _116, _115, _113, _112, _111, _109, _108, _106, _105, _98, _94, _93, _91, _90, _88, _87, _86, _85, _84, _82, _81, _77, _76, _73, _70, _69, _68, _66, _65, _62, _55, _52, _49, _48, _46, _44, _43, _42, _41, _39, _38, _34, _33, _30, _29, _23, _22, _18, _17, _13, _12, _8, _7;
 
-static String _228, _194, _162, _101, _1, _0;
+static String _230, _196, _164, _103, _3, _2, _1, _0;
 
-static Var _239, _235, _232, _229, _227, _225, _207, _205, _204, _202, _201, _199, _198, _195, _193, _190, _184, _181, _180, _179, _176, _175, _174, _172, _171, _168, _167, _166, _163, _161, _160, _159, _156, _155, _154, _151, _148, _146, _140, _136, _132, _130, _129, _126, _122, _118, _115, _112, _108, _105, _102, _100, _99, _98, _97, _95, _94, _93, _90, _87, _81, _78, _77, _76, _73, _72, _70, _69, _65, _62, _61, _59, _58, _57, _56, _55, _54, _52, _51, _49, _48, _45, _43, _38, _35, _34, _33, _30, _29, _26, _25, _24, _23, _22, _19, _18, _17, _14, _13, _12, _9, _8, _7, _4, _3, _2;
+static Var _241, _237, _234, _231, _229, _227, _209, _207, _206, _204, _203, _201, _200, _197, _195, _192, _186, _183, _182, _181, _178, _177, _176, _174, _173, _170, _169, _168, _165, _163, _162, _161, _158, _157, _156, _153, _150, _148, _142, _138, _134, _132, _131, _128, _124, _120, _117, _114, _110, _107, _104, _102, _101, _100, _99, _97, _96, _95, _92, _89, _83, _80, _79, _78, _75, _74, _72, _71, _67, _64, _63, _61, _60, _59, _58, _57, _56, _54, _53, _51, _50, _47, _45, _40, _37, _36, _35, _32, _31, _28, _27, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4;
 
 static int _init_guard_ = 0;
 
@@ -147,8 +147,6 @@ static void _shutdown(void);
 static int _create_native(Thread thread);
 
 static void _stack_attributes(pthread_attr_t * attributes);
-
-_Noreturn static void _error(const char * operation, int error);
 
 static void * _run(void * argument);
 
@@ -312,247 +310,249 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("Iter.parallel_map_in");
-  _1 = String_new("Iter.parallel_map");
-  _2 = Symbol_var(895740748108);
-  _3 = Symbol_var(920394);
-  _4 = Atom_intern(String_new("thread.run.jobs"));
-  _5 = cons(_4, NULL);
-  _6 = cons(_3, _5);
-  _7 = List_var(_6);
-  _8 = Symbol_var(740232);
-  _9 = Symbol_var(405758822009820);
-  _10 = cons(_9, NULL);
-  _11 = cons(_8, _10);
-  _12 = List_var(_11);
-  _13 = Symbol_var(1345468776);
-  _14 = Symbol_var(0);
-  _15 = cons(_14, NULL);
-  _16 = cons(_13, _15);
-  _17 = List_var(_16);
-  _18 = Symbol_var(43055000864);
-  _19 = List_var(NULL);
-  _20 = cons(_19, NULL);
-  _21 = cons(_18, _20);
-  _22 = List_var(_21);
-  _23 = Symbol_var(1129338912386214);
-  _24 = Atom_intern(String_new("macro-param"));
-  _25 = Symbol_var(154018148);
-  _26 = Symbol_var(61503654);
-  _27 = cons(_26, NULL);
-  _28 = cons(_25, _27);
-  _29 = List_var(_28);
-  _30 = Symbol_var(377892);
-  _31 = cons(_30, NULL);
-  _32 = cons(_8, _31);
-  _33 = List_var(_32);
-  _34 = Symbol_var(1317592723658);
-  _35 = int_var(0);
-  _36 = cons(_35, NULL);
-  _37 = cons(_34, _36);
-  _38 = List_var(_37);
-  _39 = cons(_38, NULL);
-  _40 = cons(_33, _39);
-  _41 = cons(_29, _40);
-  _42 = cons(_24, _41);
-  _43 = List_var(_42);
-  _44 = cons(_43, NULL);
+  _0 = String_new("pthread_join");
+  _1 = String_new("pthread_create");
+  _2 = String_new("Iter.parallel_map_in");
+  _3 = String_new("Iter.parallel_map");
+  _4 = Symbol_var(895740748108);
+  _5 = Symbol_var(920394);
+  _6 = Atom_intern(String_new("thread.run.jobs"));
+  _7 = cons(_6, NULL);
+  _8 = cons(_5, _7);
+  _9 = List_var(_8);
+  _10 = Symbol_var(740232);
+  _11 = Symbol_var(405758822009820);
+  _12 = cons(_11, NULL);
+  _13 = cons(_10, _12);
+  _14 = List_var(_13);
+  _15 = Symbol_var(1345468776);
+  _16 = Symbol_var(0);
+  _17 = cons(_16, NULL);
+  _18 = cons(_15, _17);
+  _19 = List_var(_18);
+  _20 = Symbol_var(43055000864);
+  _21 = List_var(NULL);
+  _22 = cons(_21, NULL);
+  _23 = cons(_20, _22);
+  _24 = List_var(_23);
+  _25 = Symbol_var(1129338912386214);
+  _26 = Atom_intern(String_new("macro-param"));
+  _27 = Symbol_var(154018148);
+  _28 = Symbol_var(61503654);
+  _29 = cons(_28, NULL);
+  _30 = cons(_27, _29);
+  _31 = List_var(_30);
+  _32 = Symbol_var(377892);
+  _33 = cons(_32, NULL);
+  _34 = cons(_10, _33);
+  _35 = List_var(_34);
+  _36 = Symbol_var(1317592723658);
+  _37 = int_var(0);
+  _38 = cons(_37, NULL);
+  _39 = cons(_36, _38);
+  _40 = List_var(_39);
+  _41 = cons(_40, NULL);
+  _42 = cons(_35, _41);
+  _43 = cons(_31, _42);
+  _44 = cons(_26, _43);
   _45 = List_var(_44);
   _46 = cons(_45, NULL);
-  _47 = cons(_23, _46);
-  _48 = List_var(_47);
-  _49 = Symbol_var(13774032);
-  _50 = cons(_49, _20);
-  _51 = List_var(_50);
-  _52 = Symbol_var(209423012198);
-  _53 = cons(_52, _20);
-  _54 = List_var(_53);
-  _55 = Symbol_var(34470112412);
-  _56 = Symbol_var(102886);
-  _57 = Symbol_var(6544469130);
-  _58 = Symbol_var(1969032);
-  _59 = Symbol_var(1307939018);
-  _60 = cons(_59, _27);
-  _61 = List_var(_60);
-  _62 = Symbol_var(58);
-  _63 = cons(_62, NULL);
-  _64 = cons(_59, _63);
-  _65 = List_var(_64);
-  _66 = cons(_65, NULL);
-  _67 = cons(_61, _66);
-  _68 = cons(_58, _67);
-  _69 = List_var(_68);
-  _70 = Symbol_var(46228810);
-  _71 = cons(_70, _63);
-  _72 = List_var(_71);
-  _73 = Atom_intern(String_new("?__macro_expression_jobs"));
-  _74 = cons(_73, NULL);
-  _75 = cons(_9, _74);
-  _76 = List_var(_75);
-  _77 = Symbol_var(1309427914);
-  _78 = Symbol_var(54);
-  _79 = cons(_78, NULL);
-  _80 = cons(_77, _79);
-  _81 = List_var(_80);
-  _82 = cons(_81, NULL);
-  _83 = cons(_76, _82);
-  _84 = cons(_72, _83);
-  _85 = cons(_69, _84);
-  _86 = cons(_57, _85);
-  _87 = List_var(_86);
-  _88 = cons(_87, NULL);
-  _89 = cons(_56, _88);
-  _90 = List_var(_89);
-  _91 = cons(_90, NULL);
-  _92 = cons(_55, _91);
-  _93 = List_var(_92);
-  _94 = Symbol_var(1386033712394);
-  _95 = Symbol_var(917238582723620);
-  _96 = cons(_95, NULL);
-  _97 = List_var(_96);
-  _98 = Symbol_var(199448);
-  _99 = Symbol_var(19147688);
-  _100 = Atom_intern(String_new("binding-name"));
-  _101 = String_new("Thread_run");
-  _102 = String_var(_101);
-  _103 = cons(_102, NULL);
-  _104 = cons(_100, _103);
-  _105 = List_var(_104);
-  _106 = cons(_105, NULL);
-  _107 = cons(_99, _106);
-  _108 = List_var(_107);
-  _109 = cons(_108, NULL);
-  _110 = cons(_97, _109);
-  _111 = cons(_30, _110);
-  _112 = List_var(_111);
-  _113 = cons(_97, _74);
-  _114 = cons(_30, _113);
-  _115 = List_var(_114);
-  _116 = cons(_115, NULL);
-  _117 = cons(_56, _116);
-  _118 = List_var(_117);
-  _119 = cons(_118, NULL);
-  _120 = cons(_112, _119);
-  _121 = cons(_98, _120);
-  _122 = List_var(_121);
-  _123 = cons(_122, NULL);
-  _124 = cons(_97, _123);
-  _125 = cons(_30, _124);
-  _126 = List_var(_125);
-  _127 = cons(_126, NULL);
-  _128 = cons(_94, _127);
-  _129 = List_var(_128);
-  _130 = Symbol_var(38995839752);
-  _131 = cons(_56, _74);
-  _132 = List_var(_131);
-  _133 = cons(_132, NULL);
-  _134 = cons(_112, _133);
-  _135 = cons(_98, _134);
-  _136 = List_var(_135);
-  _137 = cons(_136, NULL);
-  _138 = cons(_97, _137);
-  _139 = cons(_30, _138);
-  _140 = List_var(_139);
-  _141 = cons(_62, _63);
-  _142 = cons(_62, _141);
-  _143 = cons(_73, _142);
-  _144 = cons(_62, _143);
-  _145 = cons(_62, _144);
-  _146 = List_var(_145);
-  _147 = cons(_146, NULL);
+  _47 = List_var(_46);
+  _48 = cons(_47, NULL);
+  _49 = cons(_25, _48);
+  _50 = List_var(_49);
+  _51 = Symbol_var(13774032);
+  _52 = cons(_51, _22);
+  _53 = List_var(_52);
+  _54 = Symbol_var(209423012198);
+  _55 = cons(_54, _22);
+  _56 = List_var(_55);
+  _57 = Symbol_var(34470112412);
+  _58 = Symbol_var(102886);
+  _59 = Symbol_var(6544469130);
+  _60 = Symbol_var(1969032);
+  _61 = Symbol_var(1307939018);
+  _62 = cons(_61, _29);
+  _63 = List_var(_62);
+  _64 = Symbol_var(58);
+  _65 = cons(_64, NULL);
+  _66 = cons(_61, _65);
+  _67 = List_var(_66);
+  _68 = cons(_67, NULL);
+  _69 = cons(_63, _68);
+  _70 = cons(_60, _69);
+  _71 = List_var(_70);
+  _72 = Symbol_var(46228810);
+  _73 = cons(_72, _65);
+  _74 = List_var(_73);
+  _75 = Atom_intern(String_new("?__macro_expression_jobs"));
+  _76 = cons(_75, NULL);
+  _77 = cons(_11, _76);
+  _78 = List_var(_77);
+  _79 = Symbol_var(1309427914);
+  _80 = Symbol_var(54);
+  _81 = cons(_80, NULL);
+  _82 = cons(_79, _81);
+  _83 = List_var(_82);
+  _84 = cons(_83, NULL);
+  _85 = cons(_78, _84);
+  _86 = cons(_74, _85);
+  _87 = cons(_71, _86);
+  _88 = cons(_59, _87);
+  _89 = List_var(_88);
+  _90 = cons(_89, NULL);
+  _91 = cons(_58, _90);
+  _92 = List_var(_91);
+  _93 = cons(_92, NULL);
+  _94 = cons(_57, _93);
+  _95 = List_var(_94);
+  _96 = Symbol_var(1386033712394);
+  _97 = Symbol_var(917238582723620);
+  _98 = cons(_97, NULL);
+  _99 = List_var(_98);
+  _100 = Symbol_var(199448);
+  _101 = Symbol_var(19147688);
+  _102 = Atom_intern(String_new("binding-name"));
+  _103 = String_new("Thread_run");
+  _104 = String_var(_103);
+  _105 = cons(_104, NULL);
+  _106 = cons(_102, _105);
+  _107 = List_var(_106);
+  _108 = cons(_107, NULL);
+  _109 = cons(_101, _108);
+  _110 = List_var(_109);
+  _111 = cons(_110, NULL);
+  _112 = cons(_99, _111);
+  _113 = cons(_32, _112);
+  _114 = List_var(_113);
+  _115 = cons(_99, _76);
+  _116 = cons(_32, _115);
+  _117 = List_var(_116);
+  _118 = cons(_117, NULL);
+  _119 = cons(_58, _118);
+  _120 = List_var(_119);
+  _121 = cons(_120, NULL);
+  _122 = cons(_114, _121);
+  _123 = cons(_100, _122);
+  _124 = List_var(_123);
+  _125 = cons(_124, NULL);
+  _126 = cons(_99, _125);
+  _127 = cons(_32, _126);
+  _128 = List_var(_127);
+  _129 = cons(_128, NULL);
+  _130 = cons(_96, _129);
+  _131 = List_var(_130);
+  _132 = Symbol_var(38995839752);
+  _133 = cons(_58, _76);
+  _134 = List_var(_133);
+  _135 = cons(_134, NULL);
+  _136 = cons(_114, _135);
+  _137 = cons(_100, _136);
+  _138 = List_var(_137);
+  _139 = cons(_138, NULL);
+  _140 = cons(_99, _139);
+  _141 = cons(_32, _140);
+  _142 = List_var(_141);
+  _143 = cons(_64, _65);
+  _144 = cons(_64, _143);
+  _145 = cons(_75, _144);
+  _146 = cons(_64, _145);
+  _147 = cons(_64, _146);
   _148 = List_var(_147);
   _149 = cons(_148, NULL);
-  _150 = cons(_140, _149);
-  _151 = List_var(_150);
-  _152 = cons(_151, NULL);
-  _153 = cons(_130, _152);
-  _154 = List_var(_153);
-  _155 = Symbol_var(796748);
-  _156 = int_var(1);
-  _157 = cons(_156, NULL);
-  _158 = cons(_155, _157);
-  _159 = List_var(_158);
-  _160 = Symbol_var(1044986460);
-  _161 = Symbol_var(412426);
-  _162 = String_new("../../lib/thread.x");
-  _163 = String_var(_162);
-  _164 = cons(_163, NULL);
-  _165 = cons(_161, _164);
-  _166 = List_var(_165);
-  _167 = Symbol_var(805770);
-  _168 = int_var(135);
-  _169 = cons(_168, NULL);
-  _170 = cons(_167, _169);
-  _171 = List_var(_170);
-  _172 = Symbol_var(233614172);
-  _173 = cons(_172, _157);
-  _174 = List_var(_173);
-  _175 = Symbol_var(816725264);
-  _176 = int_var(5);
-  _177 = cons(_176, NULL);
-  _178 = cons(_175, _177);
-  _179 = List_var(_178);
-  _180 = Symbol_var(1133019155420);
-  _181 = int_var(4342);
-  _182 = cons(_181, NULL);
-  _183 = cons(_180, _182);
-  _184 = List_var(_183);
-  _185 = cons(_184, NULL);
-  _186 = cons(_179, _185);
-  _187 = cons(_174, _186);
-  _188 = cons(_171, _187);
-  _189 = cons(_166, _188);
-  _190 = List_var(_189);
-  _191 = cons(_190, NULL);
-  _192 = cons(_160, _191);
-  _193 = List_var(_192);
-  _194 = String_new("lib/thread.x");
-  _195 = String_var(_194);
-  _196 = cons(_195, NULL);
-  _197 = cons(_161, _196);
-  _198 = List_var(_197);
-  _199 = Symbol_var(5723955804);
-  _200 = cons(_199, _36);
-  _201 = List_var(_200);
-  _202 = Symbol_var(26155096);
-  _203 = cons(_202, _36);
-  _204 = List_var(_203);
-  _205 = Symbol_var(1317118534);
-  _206 = cons(_205, _36);
-  _207 = List_var(_206);
-  _208 = cons(_207, NULL);
-  _209 = cons(_204, _208);
-  _210 = cons(_201, _209);
-  _211 = cons(_198, _210);
-  _212 = cons(_193, _211);
-  _213 = cons(_159, _212);
-  _214 = cons(_154, _213);
-  _215 = cons(_129, _214);
-  _216 = cons(_93, _215);
-  _217 = cons(_54, _216);
-  _218 = cons(_51, _217);
-  _219 = cons(_48, _218);
-  _220 = cons(_22, _219);
-  _221 = cons(_17, _220);
-  _222 = cons(_12, _221);
-  _223 = cons(_7, _222);
-  _224 = cons(_2, _223);
-  _225 = Symbol_var(1473096);
-  _226 = cons(_225, NULL);
-  _227 = List_var(_226);
-  _228 = String_new("NULL");
-  _229 = String_var(_228);
-  _230 = cons(_229, NULL);
-  _231 = cons(_100, _230);
-  _232 = List_var(_231);
-  _233 = cons(_232, NULL);
-  _234 = cons(_99, _233);
-  _235 = List_var(_234);
-  _236 = cons(_235, NULL);
-  _237 = cons(_97, _236);
-  _238 = cons(_30, _237);
-  _239 = List_var(_238);
-  _240 = cons(_239, NULL);
+  _150 = List_var(_149);
+  _151 = cons(_150, NULL);
+  _152 = cons(_142, _151);
+  _153 = List_var(_152);
+  _154 = cons(_153, NULL);
+  _155 = cons(_132, _154);
+  _156 = List_var(_155);
+  _157 = Symbol_var(796748);
+  _158 = int_var(1);
+  _159 = cons(_158, NULL);
+  _160 = cons(_157, _159);
+  _161 = List_var(_160);
+  _162 = Symbol_var(1044986460);
+  _163 = Symbol_var(412426);
+  _164 = String_new("../../lib/thread.x");
+  _165 = String_var(_164);
+  _166 = cons(_165, NULL);
+  _167 = cons(_163, _166);
+  _168 = List_var(_167);
+  _169 = Symbol_var(805770);
+  _170 = int_var(135);
+  _171 = cons(_170, NULL);
+  _172 = cons(_169, _171);
+  _173 = List_var(_172);
+  _174 = Symbol_var(233614172);
+  _175 = cons(_174, _159);
+  _176 = List_var(_175);
+  _177 = Symbol_var(816725264);
+  _178 = int_var(5);
+  _179 = cons(_178, NULL);
+  _180 = cons(_177, _179);
+  _181 = List_var(_180);
+  _182 = Symbol_var(1133019155420);
+  _183 = int_var(4342);
+  _184 = cons(_183, NULL);
+  _185 = cons(_182, _184);
+  _186 = List_var(_185);
+  _187 = cons(_186, NULL);
+  _188 = cons(_181, _187);
+  _189 = cons(_176, _188);
+  _190 = cons(_173, _189);
+  _191 = cons(_168, _190);
+  _192 = List_var(_191);
+  _193 = cons(_192, NULL);
+  _194 = cons(_162, _193);
+  _195 = List_var(_194);
+  _196 = String_new("lib/thread.x");
+  _197 = String_var(_196);
+  _198 = cons(_197, NULL);
+  _199 = cons(_163, _198);
+  _200 = List_var(_199);
+  _201 = Symbol_var(5723955804);
+  _202 = cons(_201, _38);
+  _203 = List_var(_202);
+  _204 = Symbol_var(26155096);
+  _205 = cons(_204, _38);
+  _206 = List_var(_205);
+  _207 = Symbol_var(1317118534);
+  _208 = cons(_207, _38);
+  _209 = List_var(_208);
+  _210 = cons(_209, NULL);
+  _211 = cons(_206, _210);
+  _212 = cons(_203, _211);
+  _213 = cons(_200, _212);
+  _214 = cons(_195, _213);
+  _215 = cons(_161, _214);
+  _216 = cons(_156, _215);
+  _217 = cons(_131, _216);
+  _218 = cons(_95, _217);
+  _219 = cons(_56, _218);
+  _220 = cons(_53, _219);
+  _221 = cons(_50, _220);
+  _222 = cons(_24, _221);
+  _223 = cons(_19, _222);
+  _224 = cons(_14, _223);
+  _225 = cons(_9, _224);
+  _226 = cons(_4, _225);
+  _227 = Symbol_var(1473096);
+  _228 = cons(_227, NULL);
+  _229 = List_var(_228);
+  _230 = String_new("NULL");
+  _231 = String_var(_230);
+  _232 = cons(_231, NULL);
+  _233 = cons(_102, _232);
+  _234 = List_var(_233);
+  _235 = cons(_234, NULL);
+  _236 = cons(_101, _235);
+  _237 = List_var(_236);
+  _238 = cons(_237, NULL);
+  _239 = cons(_99, _238);
+  _240 = cons(_32, _239);
+  _241 = List_var(_240);
+  _242 = cons(_241, NULL);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -730,7 +730,7 @@ ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers){
 ParallelMap Iter_parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int workers){
   if(! _init_guard_) _file_init_();
   if(! pool){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map_in",.line = 286,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map_in",.line = 287,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.parallel_map_in")), NULL))));
     __builtin_unreachable();
   }
@@ -775,7 +775,7 @@ Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
         Var item = _read_result(worker);
         active --;
         if(Var_is_void(item)){
-          static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 332,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 333,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_3, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ParallelMap.foldl")), NULL))));
           __builtin_unreachable();
         }
@@ -851,7 +851,7 @@ int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor * monitor){
 _Noreturn void x2c_thread_cancel(void){
   if(! _init_guard_) _file_init_();
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/thread.x",.function = "x2c_thread_cancel",.line = 406,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/thread.x",.function = "x2c_thread_cancel",.line = 407,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.stop")), NULL))), Symbol_var(6696066638152), int_var(1));
     __builtin_unreachable();
   }
@@ -861,7 +861,7 @@ _Noreturn void x2c_thread_cancel(void){
 void Thread_stop(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_stop",.line = 416,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_stop",.line = 417,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.stop")), NULL))));
     __builtin_unreachable();
   }
@@ -953,7 +953,7 @@ void Thread_finish_all(Array pending){
     return;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_finish_all",.line = 484,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_finish_all",.line = 485,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 23041356991064, 1, Symbol_var(374504614), List_var(List_reverse(failures)));
     __builtin_unreachable();
   }
@@ -963,14 +963,14 @@ void Thread_finish_all(Array pending){
 Var Thread_join(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 498,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 499,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
     __builtin_unreachable();
   }
   Symbol expected = 40094288782;
   if(! __atomic_compare_exchange_n(& t -> state, & expected, 22501280654, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)){
     {
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 503,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 504,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
       __builtin_unreachable();
     }
@@ -979,7 +979,7 @@ Var Thread_join(Thread t){
   int error = pthread_join(t -> native, NULL);
   if(error){
     __atomic_store_n(& t -> state, 40094288782, __ATOMIC_SEQ_CST);
-    _error("pthread_join", error);
+    x2c_io_fail(String_var(_0), error);
   }
   __atomic_fetch_sub(& thread_live_count, 1, __ATOMIC_SEQ_CST);
   {
@@ -1011,8 +1011,9 @@ Var Thread_join(Thread t){
 
 void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
-  if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != 703164744){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 521,.runtime = 1};
+  if(! t) return;
+  if(__atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != 703164744){
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 524,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
     __builtin_unreachable();
   }
@@ -1021,7 +1022,7 @@ void Thread_free(Thread t){
 
 static Thread _start(ThreadFn function, const void * input, size_t input_size, ParallelRun parallel){
   if(! function ||(input_size && ! input)){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/thread.x",.function = "_start",.line = 531,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/thread.x",.function = "_start",.line = 534,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start_raw")), NULL))));
     __builtin_unreachable();
   }
@@ -1041,18 +1042,13 @@ static Thread _start(ThreadFn function, const void * input, size_t input_size, P
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
-      if(pthread_once(& thread_shutdown_once, _register_shutdown)){
-        Error_policy_release(thread -> policy);
-        free(thread);
-        fprintf(stderr, "Thread: could not register shutdown\n");
-        abort();
-      }
+      x2c_native_check(pthread_once(& thread_shutdown_once, _register_shutdown), "Thread: could not register shutdown");
       __atomic_fetch_add(& thread_live_count, 1, __ATOMIC_SEQ_CST);
       Pool_thread_start();
       int error = _create_native(thread);
       if(error){
         __atomic_fetch_sub(& thread_live_count, 1, __ATOMIC_SEQ_CST);
-        _error("pthread_create", error);
+        x2c_io_fail(String_var(_1), error);
       }
       started = 1;
       {
@@ -1124,21 +1120,7 @@ static int _create_native(Thread thread){
 }
 
 static void _stack_attributes(pthread_attr_t * attributes){
-  if(pthread_attr_init(attributes) || pthread_attr_setstacksize(attributes, _STACK_BYTES)){
-    fprintf(stderr, "Thread: could not size the worker stack\n");
-    abort();
-  }
-
-}
-
-_Noreturn static void _error(const char * operation, int error){
-  String name = String_new(operation);
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "_error",.line = 618,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_13, 20399393368, 2, Symbol_var(34096809266140), String_var(name), Symbol_var(11703198), int_var(error));
-    __builtin_unreachable();
-  }
-
+  if(pthread_attr_init(attributes) || pthread_attr_setstacksize(attributes, _STACK_BYTES)) x2c_fatal("Thread: could not size the worker stack");
 }
 
 static void * _run(void * argument){
@@ -1304,8 +1286,8 @@ static Symbol _capture_errors(List errors, Var data){
   if(Error_policy_get(code) != 2260136) return 285842436424;
   thread -> errors = Error_snapshot_in(List_var(errors), & thread -> error_scope, thread -> error_pool);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 706,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_14, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread callback")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 699,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_13, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread callback")), NULL))));
     __builtin_unreachable();
   }
 
@@ -1334,15 +1316,13 @@ static int _parallel_park(Thread thread){
 }
 
 static void _completion_check(int error){
-  if(! error) return;
-  fprintf(stderr, "Thread: completion synchronization failed (%d)\n", error);
-  abort();
+  x2c_native_check(error, "Thread: completion synchronization failed");
 }
 
 static Thread _start_value(ThreadValueFn function, Var value, ParallelRun parallel, Pool pool){
   if(! function){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "_start_value",.line = 749,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "_start_value",.line = 739,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
     __builtin_unreachable();
   }
   struct ThreadValueInput input ={
@@ -1400,8 +1380,8 @@ static Var _read_result(Thread t){
     Var errors = Context_export_scope(t -> error_scope, t -> error_pool, t -> errors);
     t -> errors =((void) 0, Void);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 780,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_16, 23041356991064, 1, Symbol_var(374504614), errors);
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/thread.x",.function = "_read_result",.line = 770,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_15, 23041356991064, 1, Symbol_var(374504614), errors);
       __builtin_unreachable();
     }
 
@@ -1472,11 +1452,11 @@ static void _batch_check_stop(void){
 }
 
 static ParallelMap _parallel_map(Iter i, Pool pool, ThreadValueFn function, int workers){
-  if(workers <= 0){
-    String operation = pool ? _0 : _1;
+  if(! function || workers <= 0){
+    String operation = pool ? _2 : _3;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 821,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/thread.x",.function = "_parallel_map",.line = 809,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
       __builtin_unreachable();
     }
 
@@ -1616,11 +1596,11 @@ static Code _batch_without_callback(Code code){
       .values = _x2c_gensym_match_values_0, .capacity = 1
     }
     ;
-    {static MacroCaseSite _x2c_gensym_macro_site_2; if(Macro_case_capture_at(& _x2c_gensym_macro_site_2, _x2c_gensym_match_expr_0, _224, _27, & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]);
+    {static MacroCaseSite _x2c_gensym_macro_site_2; if(Macro_case_capture_at(& _x2c_gensym_macro_site_2, _x2c_gensym_match_expr_0, _226, _29, & _x2c_gensym_match_capture_0)){Var x2c_match_value_0 =(_x2c_gensym_match_values_0[0]);
     {
       Var jobs;
       jobs = x2c_match_value_0;
-      return cons(_30, cons(_227, cons(List_var(cons(_98, cons(_112, cons(List_var(cons(_56, cons(Macro_inserted(jobs, 1, 1), _240))), NULL)))), NULL)));
+      return cons(_32, cons(_229, cons(List_var(cons(_100, cons(_114, cons(List_var(cons(_58, cons(Macro_inserted(jobs, 1, 1), _242))), NULL)))), NULL)));
     }
     }}
   }
@@ -1689,11 +1669,7 @@ static void _x2c_gensym_defer_cleanup_9(void * _x2c_gensym_defer_opaque_9){
 
 static void _x2c_gensym_defer_cleanup_10(void * _x2c_gensym_defer_opaque_10){
   _x2c_gensym_defer_env_10 * _x2c_gensym_defer_data_10 =(_x2c_gensym_defer_env_10 *) _x2c_gensym_defer_opaque_10;
-  if(Array_len((*(Array *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_13))){
-    fprintf(stderr, "Thread.run: cleanup left unjoined workers\n");
-    abort();
-  }
-
+  if(Array_len((*(Array *) _x2c_gensym_defer_data_10->_x2c_gensym_defer_capture_13))) x2c_fatal("Thread.run: cleanup left unjoined workers");
 }
 
 static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
@@ -1702,11 +1678,7 @@ static void _x2c_gensym_defer_cleanup_11(void * _x2c_gensym_defer_opaque_11){
 
 static void _x2c_gensym_defer_cleanup_12(void * _x2c_gensym_defer_opaque_12){
   _x2c_gensym_defer_env_11 * _x2c_gensym_defer_data_11 =(_x2c_gensym_defer_env_11 *) _x2c_gensym_defer_opaque_12;
-  if(Array_len((*(Array *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_14))){
-    fprintf(stderr, "ParallelMap: cleanup left unjoined workers\n");
-    abort();
-  }
-
+  if(Array_len((*(Array *) _x2c_gensym_defer_data_11->_x2c_gensym_defer_capture_14))) x2c_fatal("ParallelMap: cleanup left unjoined workers");
 }
 
 static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){

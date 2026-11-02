@@ -29,7 +29,7 @@ List syntax_grammar(void) => %(grammar
         (token "}")))
 
     (rule private-interface
-      (external "static typedef, protocol body, class, or Lisp interface item; D4"))
+      (external "static typedef, protocol body, or class; D4"))
 
     (rule module-declaration
       (external "module before a file-scope declaration, read as static; D4"))
@@ -140,8 +140,16 @@ List syntax_grammar(void) => %(grammar
         (ref storage)
         (token "inline")
         (token "_Noreturn")
+        (ref alignment-specifier)
         (ref attribute)
         (ref prefix-macro)))
+
+    (rule alignment-specifier
+      (seq
+        (token "_Alignas")
+        (token "(")
+        (choice (ref type-name) (ref expression))
+        (token ")")))
 
     (rule trailing-storage
       (choice (ref storage) (token "inline") (ref prefix-macro)))
@@ -165,7 +173,19 @@ List syntax_grammar(void) => %(grammar
         (ref enumeration)
         (ref type-reference)
         (ref typeof-specifier)
+        (ref atomic-specifier)
         (ref type-slot)))
+
+    (rule atomic-specifier
+      (seq
+        (token "_Atomic")
+        (choice
+          (seq (token "(") (ref type-name) (token ")"))
+          (ref scalar-specifiers)
+          (ref type-reference)
+          (seq
+            (choice (token "struct") (token "union") (token "enum"))
+            (ref identifier)))))
 
     (rule typeof-specifier
       (seq
@@ -191,7 +211,8 @@ List syntax_grammar(void) => %(grammar
         (token "float")
         (token "double")
         (token "signed")
-        (token "unsigned")))
+        (token "unsigned")
+        (token "_Complex")))
 
     (rule type-reference
       (seq (ref identifier) (optional (seq (token ".") (ref identifier)))))
@@ -224,7 +245,6 @@ List syntax_grammar(void) => %(grammar
     (rule pointer-part
       (choice
         (token "*")
-        (token "^")
         (seq (token "&") (optional (token "?")))
         (ref qualifier)
         (ref qualifier-macro)))

@@ -2,15 +2,15 @@
 
 > Experimental internal benchmarks, separate from the curated x2c examples.
 
-The [2026-11-01 split-storage adoption report](results/grouped-split-adoption-20261101.md)
+The [2026-11-01 split-storage adoption report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/grouped-split-adoption-20261101.md)
 records the production large-table allocation policy, recovered peak RSS,
 paired word counts, compiler comparison and remaining timing costs.
 
-The [Robin Hood retirement report](results/robin-hood-retirement-20261031.md)
+The [Robin Hood retirement report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/robin-hood-retirement-20261031.md)
 records the paired Var Map/Pool migration, word-count results, compiler cost,
 and memory tradeoff. Var and typed Maps now share grouped storage.
 
-The [2026-10-31 grouped adoption report](results/grouped-adoption-20261031.md) records
+The [2026-10-31 grouped adoption report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/results/grouped-adoption-20261031.md) records
 the full matched comparison, shared-baseline chart, word count, String,
 LongDouble, c2x2c and Notes results for the backend published at `9ef736b22`.
 
@@ -164,7 +164,7 @@ checksums, run order, and normalized table. The `baseline` variant is the
 current source unchanged, and the metadata records that source's checksum.
 Recipes for the earlier pre-optimization study no longer apply to the current
 source; they remain in `research.py` at commit `8529c449a`. See
-[RESEARCH.md](RESEARCH.md) for the retained findings and the
+[RESEARCH.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/unittest/benchmarks/hash-table/RESEARCH.md) for the retained findings and the
 production-portability assessment.
 
 The older Var adapters and shell runners described below remain available and

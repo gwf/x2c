@@ -11,7 +11,7 @@ typedef String Color;
 
 static int calls;
 
-static String _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -30,6 +30,9 @@ static String nested(String outer, String inner, int k);
 
 static int count(String * words, int n);
 
+#define CASE_WORD "word"
+static int escaped_labels(String value);
+
 static int _x2c_gensym_string_switch_0(String s);
 
 static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0);
@@ -41,6 +44,8 @@ static int _x2c_gensym_string_switch_2(String s);
 static int _x2c_gensym_string_switch_3(String s);
 
 static int _x2c_gensym_string_switch_4(String s);
+
+static int _x2c_gensym_string_switch_5(String s);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -77,9 +82,19 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _28 = String_new("skip");
   _29 = String_new("two!");
   _30 = String_new("stop");
-  _31 = String_new("pear");
-  _32 = String_new("plum");
-  _33 = String_new("two" "!");
+  _31 = String_new("atail");
+  _32 = String_new("%i");
+  _33 = String_new("\0025i");
+  _34 = String_new("\u00A9");
+  _35 = String_new("A9");
+  _36 = String_new("prewordpost");
+  _37 = String_new("prepost");
+  _38 = String_new("pear");
+  _39 = String_new("plum");
+  _40 = String_new("two" "!");
+  _41 = String_new("a\0tail");
+  _42 = String_new("\x025i");
+  _43 = String_new("pre" CASE_WORD "post");
   _x2c_gensym_static_initialize_0();
 }
 
@@ -153,6 +168,20 @@ static int count(String * words, int n){
   return kept;
 }
 
+static int escaped_labels(String value){
+  switch(_x2c_gensym_string_switch_5(value)){
+    case 1 : return 1;
+    case 2 : return 2;
+    case 3 : return 3;
+    case 4 : return 4;
+    case 5 : return 5;
+    case 6 : return 6;
+    case 7 : return 7;
+    case 8 : return 8;
+  }
+  return 0;
+}
+
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -167,13 +196,14 @@ int main(void){
   }
   ;
   File_printf(Stdout, "count=%d\n", count(words, 6));
+  printf("escapes=%d %d %d %d %d %d %d %d\n", escaped_labels(_22), escaped_labels(_31), escaped_labels(_32), escaped_labels(_33), escaped_labels(_34), escaped_labels(_35), escaped_labels(_36), escaped_labels(_37));
   return 0;
 }
 
 static int _x2c_gensym_string_switch_0(String s){
   if(String_equal(s, _17)) return 1;
-  if(String_equal(s, _31)) return 2;
-  if(String_equal(s, _32)) return 3;
+  if(String_equal(s, _38)) return 2;
+  if(String_equal(s, _39)) return 3;
   if(String_equal(s, _0)) return 4;
   return 0;
 }
@@ -205,7 +235,19 @@ static int _x2c_gensym_string_switch_3(String s){
 static int _x2c_gensym_string_switch_4(String s){
   if(String_equal(s, _28)) return 1;
   if(String_equal(s, _30)) return 2;
-  if(String_equal(s, _33)) return 3;
+  if(String_equal(s, _40)) return 3;
+  return 0;
+}
+
+static int _x2c_gensym_string_switch_5(String s){
+  if(String_equal(s, _41)) return 1;
+  if(String_equal(s, _31)) return 2;
+  if(String_equal(s, _42)) return 3;
+  if(String_equal(s, _33)) return 4;
+  if(String_equal(s, _34)) return 5;
+  if(String_equal(s, _35)) return 6;
+  if(String_equal(s, _43)) return 7;
+  if(String_equal(s, _37)) return 8;
   return 0;
 }
 

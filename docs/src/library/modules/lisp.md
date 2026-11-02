@@ -113,6 +113,9 @@ freezes it with `Lisp.freeze` before the first child runs: a child's
 values belong to a narrower `Context` than the parent's, so nothing a
 child produces may become reachable from the parent.
 
+**Raises:** `<bad-arg>` for a null session or parent, or `<alloc-fail>` or
+`<size-limit>` while creating the child's reserved `Map`.
+
 Source: `lib/lisp/sessions.x`
 
 <a id="Lisp.apply"></a>
@@ -142,12 +145,16 @@ Source: `lib/lisp/evaluate.x`
 Installs `function` as `name` and transfers its storage to `lisp`.
 Invalid arguments raise `<bad-arg>` without transferring ownership. Once
 validation succeeds, the `Func` moves before the global insertion. The
-caller relinquishes ownership even if name canonicalization or `Map`
-growth then raises `<alloc-fail>`, `<size-limit>`, or `<bad-enc>`, but
+caller relinquishes ownership even if the insertion then raises, but
 may borrow the pointer while the session lives. A direct function or
 noncapturing lambda converts to a shared handle that lives for the
 program; the session only borrows it. Values inside the `Func`,
 including its signature graph, retain their existing owners.
+
+**Raises:** `<bad-arg>` for a null session, name, or `function`; after the
+move, `<bad-state>` with operation `Lisp.set_global` for a frozen
+session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+canonicalizing the name or growing the global `Map`.
 
 Source: `lib/lisp/sessions.x`
 
@@ -165,6 +172,8 @@ reach it quickly.
 The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
+
+**Raises:** `<bad-arg>` for a null session or a budget that is not positive.
 
 Source: `lib/lisp/evaluate.x`
 
@@ -194,8 +203,8 @@ forms completed before a later read or evaluation failure are not rolled
 back. A null `Lisp` session is rejected by `Lisp.eval_string` only after
 the stream has been consumed.
 
-**Raises:** `<bad-arg>` for a null stream or embedded NUL, `<io-fail>`,
-`<size-limit>`, or `<alloc-fail>` while reading, or any cause from
+**Raises:** `<bad-arg>` for a null stream, a cause from `File.string` while
+reading, including `<bad-arg>` for an embedded NUL, or any cause from
 `Lisp.eval_string`.
 
 Source: `lib/lisp/evaluate.x`
@@ -228,6 +237,8 @@ Marks `lisp` complete, so nothing produced later may reach it.
 A frozen session rejects `def` and `Lisp.set_global`: a value produced
 while a narrower `Context` is current would leave the session holding
 values that die with that `Context`.
+
+**Raises:** `<bad-arg>` for a null session.
 
 Source: `lib/lisp/sessions.x`
 
@@ -279,10 +290,11 @@ Source: `lib/lisp/evaluate.x`
 `int Lisp.try_get(Lisp lisp, String name, Var &?out)`
 
 Writes the global binding for `name` to `out` when present.
-Returns 1 only after writing the borrowed value. A null session, name, or
-output, or an absent name returns 0 and leaves `out` unchanged. Raises
-`<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
-canonicalized.
+Returns 1 only after writing the borrowed value. A null name or output,
+or an absent name, returns 0 and leaves `out` unchanged.
+
+**Raises:** `<bad-arg>` for a null session, or `<alloc-fail>` or `<bad-enc>`
+when a nonempty lookup name cannot be canonicalized.
 
 Source: `lib/lisp/sessions.x`
 
@@ -362,7 +374,7 @@ Source: `lib/lisp/sessions.x`
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
 
-`void Lisp.set_global(Lisp lisp, String name, Var value)`
+`void Lisp.set_global(Lisp l, String name, Var value)`
 
 Binds `name` to `value` in the embedded Lisp global environment.
 The session stores the value in a raw slot, so `void` remains distinct
@@ -371,12 +383,10 @@ their canonical graphs or other owners must outlive the binding or
 session. A host binding may shadow an inherited name in this session;
 it does not change the ancestor. Lisp `def` still rejects inherited
 names, including a name the host has shadowed locally.
-Binding an `x2c.` name protects that namespace from later Lisp
-`def` forms, but direct calls to this function may replace such a
-binding.
 
-**Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-`<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+**Raises:** `<bad-arg>` for a null session or name, `<bad-state>` for a
+frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+canonicalizing or storing the binding.
 
 Source: `lib/lisp/sessions.x`
 

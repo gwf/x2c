@@ -31,14 +31,14 @@ directly after generating snapshots. The latest comparison opens first.
 
 The default manifest is `examples/c2x2c/versions.json`. Source files remain
 under `examples/c2x2c`; the viewer contains no authoritative tutorial copies.
-`snapshots.js` is a checked-in generated payload. `snapshots.json` is a local
-generated export. Regenerate both after changing canonical source files.
-Do not edit either payload. Generation does not compile or verify sources.
+The generator writes `snapshots.js` for the page and `snapshots.json` as an
+export. Both are ignored local payloads. Regenerate them after changing
+canonical source files; without them, the page shows its demo data. Do not
+edit either payload. Generation does not compile or verify sources.
 
-The generator adds a content hash to the snapshot script URL in `index.html`.
-After regeneration, reload the page. If the browser caches the HTML itself,
-append the printed hash to the page URL as `&v=HASH`. No browser storage needs
-to be cleared.
+The page requests `snapshots.js` with a fresh query on every load, so a reload
+after regeneration shows the new snapshots. No browser storage needs to be
+cleared.
 
 ## Compare another source sequence
 

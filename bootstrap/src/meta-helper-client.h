@@ -19,7 +19,7 @@
 #include <time.h>
 #include <unistd.h>
 typedef struct MetaHelper{
-  String path, snapshot;
+  String path;
   Map failures, units;
   Scope scope;
   pid_t pid, owner;
@@ -30,23 +30,15 @@ typedef struct MetaHelper{
 
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 
-Var Compiler_loaded_helper_call(Compiler c, String name, Token site, List arguments, String provider);
-
 void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal);
 
 MetaHelper MetaHelper_new(String path, Map failures, Map units);
 
-void MetaHelper_retain_executable(MetaHelper helper);
-
 void Compiler_use_meta_helper(MetaHelper helper);
-
-String MetaHelper_failure(MetaHelper m, String provider);
 
 void Compiler_begin_meta_unit(Compiler c, String filename);
 
 void Compiler_stop_meta_helper(void);
-
-void MetaHelper_restart(MetaHelper helper);
 
 
 #endif /* __GUARD_0x099081D7__ */

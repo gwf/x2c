@@ -57,6 +57,9 @@ module Region _birth(
       if (_value_class(w, type ? type : _expression_type(value)) ==
           <container>):
       return _active(w);
+    // Lowering calls the sliced type's getslice.
+    case %(slice (expr (?(String name)) ?) *):
+      return _summary_birth(w, %"$(name)_getslice", born, other);
   }
   if (callee) return _summary_birth(w, callee, born, other);
   born = 0;
@@ -104,9 +107,20 @@ static Region _captured_birth(
   return _active(w);
 }
 
+/* What a destination of `type` receives from `value`: fresh storage when it
+   boxes or converts the value into new storage, otherwise the value's own
+   facts or those of the argument a call hands back. */
+module Fact _received(Walk &w, Var value, Type type, List &?named) {
+  if (_boxes(w, type, value)) return _box(w);
+  Fact fact = _value_fact(w, value, named);
+  return fact ? fact : _returned_argument(w, value, named);
+}
+
 /* The argument a callee hands back as its result, when that argument is a
-   parameter or region-born, so the result keeps its identity. */
-module Fact _returned_argument(Walk &w, Var value, List &?named) {
+   parameter or region-born, so the result keeps its identity. A parameter
+   that boxes or converts its argument hands back the storage the call
+   made. */
+static Fact _returned_argument(Walk &w, Var value, List &?named) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
@@ -115,12 +129,23 @@ module Fact _returned_argument(Walk &w, Var value, List &?named) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
     Type type = NULL;
-    Fact fact = _fact_of(w, _passed(types, arguments, index, type), named);
+    Var argument = _passed(types, arguments, index, type);
+    Fact fact = _boxes(w, type, argument) ? _box(w)
+                                          : _fact_of(w, argument, named);
     if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
                  _cleanup(fact.acquired)))
       return fact;
   }
   return NULL;
+}
+
+/* The box or converted value a destination makes is fresh storage of the
+   active region. */
+static Fact _box(Walk &w) {
+  Fact box = _new_fact(w, NULL, -1);
+  box.born = 1;
+  box.region = _active(w);
+  return box;
 }
 
 // facts and regions
@@ -386,12 +411,14 @@ module Var _address_of(Var value) {
 }
 
 /* The C name a call names directly, or NULL for a call through a value.
+   A conversion the resolver already inserted, such as the box of a wide
+   number in a List literal, names its runtime function by spelling.
    `arguments` omits the marker an empty argument list parses to. */
 module String _callee_of(Var value, List &arguments) {
   match (_source_call(_unwrap(value))) case %(?function ?rows): {
-    List name = _binding_of(function);
     arguments = rows;
-    return Ast.binding_spelling(name);
+    if (function is <string>) return function;
+    return Ast.binding_spelling(_binding_of(function));
   }
   return NULL;
 }
@@ -457,9 +484,29 @@ module int _copies(Walk &w, Type type, Var value) {
   return source.is_char_pointer_like();
 }
 
+/* Whether a destination of `type` makes fresh storage from `value`. A `Var`
+   boxes a number of one of the five wide families, which do not fit beside
+   the tag. Another type converts a value of another named type through the
+   converter the transform inserts, which allocates when the runtime table
+   says so, as `List_array` does for an `Array` given a `List`. A `Var` value
+   is read through its payload instead. */
+static int _boxes(Walk &w, Type type, Var value) {
+  Type given = _expression_type(value);
+  if (w.c.sym.is_var_type(type))
+    return w.c.sym.var_tag_for_type(given, NULL) in
+      %(long ulong llong ullong ldouble);
+  if (!type || !given || given == type || !given.is_typedef_name() ||
+      w.c.sym.is_var_type(given))
+    return 0;
+  List arguments = NULL;
+  List call = w.c.converter_call(
+    value, given.canonicalize(), type.canonicalize());
+  return call && _effect(w, _callee_of(call, arguments)) == %(alloc);
+}
+
 /* A canonical type's values belong to their pool; a container type's
    compound literal allocates. */
-static Symbol _value_class(Walk &w, Type type) {
+module Symbol _value_class(Walk &w, Type type) {
   Symbol tag = w.c.sym.var_tag_for_type(type, NULL);
   if (tag in %(string list symbol)) return <canonical>;
   return tag in %(map array block buffer) ? <container> : 0;
@@ -467,8 +514,10 @@ static Symbol _value_class(Walk &w, Type type) {
 
 /* Whether `value` or a destination of `type` is a number: an integer,
    floating, or enum type. A number holds no address the program can follow
-   without a cast back, so no storage facts propagate with it. */
+   without a cast back, so no storage facts propagate with it. A wide number
+   that a `Var` destination boxes is fresh storage instead. */
 module int _number(Walk &w, Type type, Var value) {
+  if (_boxes(w, type, value)) return 0;
   Type given = _expression_type(value);
   return (type && w.c.sym.resolve_numeric_type(type)) ||
          (given && w.c.sym.resolve_numeric_type(given));

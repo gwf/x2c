@@ -314,7 +314,7 @@ Lists can bracket each request with `Pool.open` and
 Keep stable parameter handles outside that bracket when useful. Surviving
 values still need their ordinary Scope and pool ownership; a pool bracket
 does not extend a Tensor wrapper's lifetime. The canonical-churn measurements
-in [the comparison report](benchmarks/REPORT.md) separate these costs.
+in [the comparison report](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) separate these costs.
 
 An unnamed operator temporary does not wait for the scope. `Tensor`
 declares the `discard` protocol member, so the compiler releases the
@@ -324,7 +324,7 @@ inputs and its result alive; a value bound to a name is never discarded.
 A loop variable reassigned each step therefore keeps its previous value
 until the scope ends: `y = (y * a + b).relu()` retains one tensor per
 step. Free it before the assignment when the chain is long, or give each
-step its own scope. `benchmarks/REPORT.md` measures both.
+step its own scope. [REPORT.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md) measures both.
 
 `Torch.no_grad` and `Torch.inference_mode` are scoped the same way: each
 installs a guard in the active scope, and releasing that scope restores the
@@ -369,7 +369,7 @@ only before that pool starts. `Torch.num_threads` and
 sequence forecasting, and an interop diagnostic, with a runner for
 correctness, timing, and memory modes. They are outside every package
 target and gate; `benchmarks/README.md` gives the commands and
-`benchmarks/PILOT.md` the measured pilot.
+[PILOT.md](https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/PILOT.md) the measured pilot.
 
 ## Devices, optimizer exchange, custom gradients, and Lisp
 

@@ -59,19 +59,21 @@ Path preinit = build.join("scope-preinit");
 Path stage = root.join("builds/0");
 build.make_dirs();
 
-Path x2c = stage.join("x2c");
+String x2c = probe_env("X2C", stage.join("x2c"));
+String cc = probe_env("CC", "cc");
+List flags = probe_cflags();
 Path source = root.join("unittest/probes/scope-shutdown.x");
 %($x2c translate --out-dir $build $source).job().run();
 Path include = root.join("include/x2c"), stage_src = stage.join("src");
 Path generated = build.join("scope-shutdown.c");
 String library = %"-L$stage";
-%(cc -g -iquote $include -iquote $stage_src $generated $library -lx2c -lm
-  -o $program).job().run();
+%($cc @flags -iquote $include -iquote $stage_src $generated $library -lx2c
+  -lm -o $program).job().run();
 Path stage_lib = stage.join("lib");
 Path preinit_c = root.join("unittest/probes/scope-preinit.c");
 Path scope_o = stage_lib.join("scope.o");
 Path thread_o = stage_lib.join("thread-state.o");
-%(cc -g -iquote $stage_lib $preinit_c $scope_o $thread_o -pthread -lm
+%($cc @flags -iquote $stage_lib $preinit_c $scope_o $thread_o -pthread -lm
   -o $preinit).job().run();
 
 Job default_off = %(env -u X2C_SCOPE_ACCOUNTING $program accounting-off)

@@ -21,6 +21,7 @@ Protocols from declaration to conform forms.
 | [`Compiler.native_protocol_alias`](#Compiler.native_protocol_alias) | Reports whether a generated member names a native protocol host function. |
 | [`Compiler.parse_protocol_declaration`](#Compiler.parse_protocol_declaration) | Parses a protocol body or concrete adoption at the current token. |
 | [`Compiler.protocol_discard_helper`](#Compiler.protocol_discard_helper) | The `discard_helper` for `participant`'s protocol `member`. |
+| [`Compiler.protocol_helper_call`](#Compiler.protocol_helper_call) | Returns `call`, which calls the generated protocol helper `name` from the code being lowered. |
 | [`Compiler.protocol_member_names`](#Compiler.protocol_member_names) | Returns unique member spellings from the participant's visible adopted conformances. |
 | [`Compiler.protocol_members_for`](#Compiler.protocol_members_for) | Returns the resolved conformance for `participant` and `base`, if any. |
 | [`Compiler.protocol_rejects_direct_member`](#Compiler.protocol_rejects_direct_member) | Reports whether conformance supersedes an ambient direct member: 0 when it does not, 1 when the participant's own adoption does, and 2 when an ancestor's adoption does. |
@@ -56,8 +57,9 @@ function `binding` of type `signature` and then discards the unnamed
 argument temporaries `which` selects (bit `n` for argument `n`). A
 discarded argument is one the compiler produced for this call alone, so
 its `discard` member may release what it owns before the enclosing scope
-ends. Returns null when no selected argument type has a `discard` member,
-or an ordinary pointer or aggregate result may borrow an argument.
+ends. A public inline body's helper has external linkage. Returns null
+when no selected argument type has a `discard` member, or an ordinary
+pointer or aggregate result may borrow an argument.
 
 Source: `src/protocol/call-helpers.x`
 
@@ -81,7 +83,8 @@ Source: `src/protocol/lookup.x`
 Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it. A rest parameter forwards its
-List elements or Map entries with an explicit splice.
+List elements or Map entries with an explicit splice. A helper without
+parameters declares `(void)`, because `()` is unprototyped C.
 
 Source: `src/protocol/call-helpers.x`
 
@@ -144,6 +147,18 @@ The `discard_helper` for `participant`'s protocol `member`.
 
 Source: `src/protocol/call-helpers.x`
 
+<a id="Compiler.protocol_helper_call"></a>
+#### Compiler.protocol_helper_call
+
+`List Compiler.protocol_helper_call(Compiler c, String name, List call)`
+
+Returns `call`, which calls the generated protocol helper `name` from
+the code being lowered. A public inline body's helper has external
+linkage, and the unit's header carries that body too, so there the call
+declares the helper first.
+
+Source: `src/protocol/call-helpers.x`
+
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
 
@@ -185,9 +200,11 @@ Source: `src/protocol/lookup.x`
 `String Compiler.protocol_update_helper( Compiler c, Type participant, String member, int postfix)`
 
 Returns a generated helper for a direct protocol-backed update.
-The resolved member must have exactly `(Participant, RHS) -> Participant`.
-A matching helper is emitted once into the unit's pending support;
-`postfix` selects whether it returns the old or stored value. Returns null
+The resolved member must have exactly `(Participant, RHS) -> Participant`,
+where the receiver and result may be any typedef that resolves to the
+participant's type. A matching helper is emitted once into the unit's
+pending support; `postfix` selects whether it returns the old or stored
+value. A public inline body's helper has external linkage. Returns null
 when the member cannot implement this update shape.
 
 Source: `src/protocol/call-helpers.x`

@@ -32,19 +32,13 @@ static typedef struct FreeNames {
 
 /* C stack evaluator calls may use below the outermost one. Threads get 8 MB
    (lib/thread.x) and so does a default main thread; the rest is left for the
-   compiler and native calls, so a runaway ends in an error the compiler can
-   report instead of a crash. Tail calls use none. */
+   host program and native calls, so a runaway raises `<call-stack>` instead
+   of crashing. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
-extern threaded unsigned long x2c_execution_stack_low;
-
-#if defined(__GLIBC__)
-extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
-#endif
-
-/* Calls one compile-time evaluation may make before it is stopped. A loop
-   that never ends makes calls without nesting any, so the stack limit never
-   sees it. */
+/* Calls one evaluation may make before it is stopped, unless
+   `Lisp.call_budget` sets another budget. A loop that never ends makes calls
+   without nesting any, so the stack limit never sees it. */
 #define LISP_CALL_STEP_MAX 40000000
 
 static macro Decorator $lisp.entry(Function $function, Expr $operation) {
@@ -52,8 +46,13 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
   Scope.push(&lisp.user);
   defer Scope.pop();
   Lisp prior_lisp = x2c_lisp_active;
+  unsigned long prior_floor = lisp.stack_floor;
   x2c_lisp_active = lisp;
-  defer x2c_lisp_active = prior_lisp;
+  lisp.stack_floor = _stack_floor();
+  defer {
+    x2c_lisp_active = prior_lisp;
+    lisp.stack_floor = prior_floor;
+  }
   @Code.body($function)
 }
 
@@ -66,9 +65,13 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
     The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
     `Lisp.eval_string` each open one, and a call that runs it out does not
     renew it, so one entry reports a runaway once however many calls follow.
+    Raises: `<bad-arg>` for a null session or a budget that is not positive.
 */
 void Lisp.call_budget(Lisp lisp, long budget) {
-  if (lisp && budget > 0) lisp.call_step_max = budget;
+  if (!lisp) $error.entry.null("Lisp.call_budget");
+  if (budget <= 0)
+    raise %(bad-arg (operation "Lisp.call_budget") (actual $budget));
+  lisp.call_step_max = budget;
 }
 
 /** Sets whether evaluation in `lisp` is interrupted. While `interrupted` is
@@ -165,23 +168,13 @@ Var Lisp.eval_string(Lisp lisp, String source) {
     forms completed before a later read or evaluation failure are not rolled
     back. A null `Lisp` session is rejected by `Lisp.eval_string` only after
     the stream has been consumed.
-    Raises: `<bad-arg>` for a null stream or embedded NUL, `<io-fail>`,
-    `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
+    Raises: `<bad-arg>` for a null stream, a cause from `File.string` while
+    reading, including `<bad-arg>` for an embedded NUL, or any cause from
     `Lisp.eval_string`.
 */
 Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
-  Block content = auto Block.new(sizeof(char));
-  if (source.read_into(content) == <eof>) return l.eval_string(NULL);
-  if (content.length > INT_MAX) {
-    size_t size = content.length, int limit = INT_MAX;
-    raise %(size-limit (operation "Lisp.eval_file") (size $size)
-                       (limit $limit));
-  }
-  if (memchr(content.bytes, '\0', content.length))
-    raise %(bad-arg (operation "Lisp.eval_file") (reason "embedded NUL"));
-  String text = String.new_len(content.bytes, (int) content.length);
-  return l.eval_string(text);
+  return l.eval_string(source.string());
 }
 
 /** Marks the actual Lambda installed for one lowered source function. */
@@ -207,6 +200,7 @@ static Var _eval(Lisp lisp, Var expr, LispEnv env) {
     return value;
   }
   if (expr is not <list> || expr.is_nil()) return expr;
+  if (_x2c_stack_below(lisp.stack_floor)) $error.eval.stack();
   List form = expr;
   Var callable = _eval(lisp, form.car(), env);
   return _apply(lisp, callable, form.cdr(), env);
@@ -277,8 +271,6 @@ static Var _special_def(Lisp lisp, List args, LispEnv env) {
     int actual = args.len();
     $error.def.arity(actual, args);
   }
-  if (lisp.protect_x2c && name.str().startswith("x2c."))
-    $error.def.protected(name);
   if (_inherited(lisp, name))
     $error.def.inherited(name);
   /* A frozen session is complete, and a value produced now belongs to a
@@ -364,6 +356,7 @@ static Var _special_import(Lisp lisp, List args, LispEnv env) {
    evaluates to. */
 static Var _qq(Lisp l, Var expr, LispEnv env, int depth) {
   if (expr is not <list> || expr.is_nil()) return expr;
+  if (_x2c_stack_below(l.stack_floor)) $error.eval.stack();
   List form = expr;
   Var head = form.car();
   if (head == lsym_quasiquote)
@@ -428,7 +421,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
 static Var _call_lambda_slots(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
   _spend_call(lisp);
-  _check_stack(lisp, lambda, (unsigned long) __builtin_frame_address(0));
+  _check_stack(lisp, lambda);
   lisp.call_depth++;
   defer lisp.call_depth--;
   Var *owned = NULL;
@@ -597,6 +590,7 @@ static void _free_form(FreeNames &f, Var form, List bound, int depth) {
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
+  if (_x2c_stack_below(f.lisp.stack_floor)) $error.eval.stack();
   if (depth < 0) _all(f, items, bound, depth);
   else if (depth > 0) _quoted(f, items, bound, depth);
   else _free_call(f, items, bound);
@@ -744,9 +738,9 @@ static int _local_lookup(LispEnv env, Var name, Var &out) {
 /* call limits
 
    An evaluation stops with `<call-stack>` when it makes more calls than its
-   budget or nests past its share of the C stack, and with `<interrupt>`
-   while its session is interrupted. The public entry opens the budget, and
-   the outermost call measures the stack. */
+   budget or nests forms or calls past its share of the C stack, and with
+   `<interrupt>` while its session is interrupted. The public entry opens
+   the budget and sets the stack floor for the evaluation it starts. */
 
 static void _spend_call(Lisp lisp) {
   if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
@@ -756,44 +750,18 @@ static void _spend_call(Lisp lisp) {
   }
 }
 
-/* `at` is the frame address of the call being made. The outermost call
-   sets the base and the allowance the calls nested below it share. */
-static void _check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
-  if (!lisp.call_depth) {
-    lisp.stack_base = at;
-    lisp.stack_allowance = _stack_allowance(at);
-  }
-  unsigned long used =
-    lisp.stack_base > at ? lisp.stack_base - at : at - lisp.stack_base;
-  if (used > lisp.stack_allowance)
-    $error.apply.stack(lambda.body);
+static void _check_stack(Lisp lisp, Lambda lambda) {
+  if (_x2c_stack_below(lisp.stack_floor)) $error.apply.stack(lambda.body);
 }
 
-/* Returns the stack evaluator calls starting at `at` may use: four fifths of
-   what the installed task or native thread has left below `at`, at most
-   LISP_STACK_BYTES_MAX. Unknown native bounds use that maximum. */
-static unsigned long _stack_allowance(unsigned long at) {
-  unsigned long low = x2c_execution_stack_low;
-  if (!low) {
-#if defined(__APPLE__)
-    pthread_t self = pthread_self();
-    low = (unsigned long) pthread_get_stackaddr_np(self)
-      - pthread_get_stacksize_np(self);
-#elif defined(__GLIBC__)
-    pthread_attr_t attributes;
-    if (!pthread_getattr_np(pthread_self(), &attributes)) {
-      void *address;
-      size_t size;
-      if (!pthread_attr_getstack(&attributes, &address, &size))
-        low = (unsigned long) address;
-      pthread_attr_destroy(&attributes);
-    }
-#endif
-  }
-  if (!low || low >= at) return LISP_STACK_BYTES_MAX;
-  unsigned long left = at - low;
-  left -= left / 5;
-  return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
+/* Returns the lowest frame address evaluation entered here may reach: the
+   floor `_x2c_stack_floor` sets, at most LISP_STACK_BYTES_MAX below the
+   entry. An unknown bound uses that maximum. */
+static unsigned long _stack_floor(void) {
+  unsigned long lowest =
+    (unsigned long) __builtin_frame_address(0) - LISP_STACK_BYTES_MAX;
+  unsigned long floor = _x2c_stack_floor();
+  return floor > lowest ? floor : lowest;
 }
 
 /* Opens one budget for an outer entry. A call that runs out raises, and

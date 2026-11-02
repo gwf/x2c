@@ -52,6 +52,7 @@ X2C_CC=false "$x2c" translate --fatal-warnings --out-dir "$cov/lib" \
 X2C_CC=false "$x2c" translate --fatal-warnings --out-dir "$cov/src" \
   $(tools/sources.sh --area src)
 X2C=$x2c FIXTURE_BUILD=$cov/fixtures FIXTURE_TIMEOUT_SECONDS=600 \
+  BUILD_JOBS="$(getconf _NPROCESSORS_ONLN)" \
   BUILD_CFLAGS="-L$PWD/builds/9 -fprofile-instr-generate" \
   unittest/compiler-fixtures/run.sh check
 make -C unittest -j"$(getconf _NPROCESSORS_ONLN)" STAGE=9 \

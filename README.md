@@ -25,7 +25,8 @@ int main(void) {
 
 Array literals and iteration work alongside ordinary C functions. The runtime
 is available without an explicit include. The [language tour](examples/tours/language.x)
-shows more: maps, matching, memory scopes, exceptions, and macros.
+shows more: dynamic values, destructuring, maps, lambdas, matching, memory
+scopes, and embedded Lisp.
 
 ## Build and run
 
@@ -64,6 +65,7 @@ It covers release installation and building an installed compiler from source.
   scripts, inspection, and build options. `./x2c --help` lists commands.
 - [Benchmarks Game](examples/shootout/README.md): official problems with
   idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and Java references.
+  [Current results and charts](examples/shootout/results/README.md) are preserved in dev.
 
 ## Status and compatibility
 

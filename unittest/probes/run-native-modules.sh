@@ -318,6 +318,62 @@ EOF
   cmp -s old.so .x2c-build/helpers.so || fail "failed link replaced module"
 )
 
+# A cold package consumer waits for its module; link-only changes reach it.
+python3 - "$ROOT" "$BUILD/package-consumers" "$X2C" <<'PY_PACKAGE_CONSUMERS'
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+root, work, compiler = map(Path, sys.argv[1:])
+package = work / 'tally'
+work.mkdir(parents=True, exist_ok=True)
+shutil.copytree(root / 'unittest/probes/packages/tally', package)
+(package / 'examples').mkdir()
+source = package / 'src/tally.x'
+source.write_text('#include "dependency.h"\n' + source.read_text().replace(
+    'return boxed.tally().total;', 'return boxed.tally().total + increment();'))
+(package / 'src/dependency.h').write_text('int increment(void);\n')
+for name in ['first', 'second']:
+    (package / f'examples/{name}.x').write_text(
+        'import "tally";\nmeta static int ten(void) => tally.tally_sum(4);\n'
+        'int main(void) { printf("%d\\n", $ten()); return 0; }\n')
+for value in [0, 5]:
+    source = work / f'increment-{value}.c'
+    source.write_text(f'int increment(void) {{ return {value}; }}\n')
+    subprocess.run(['cc', '-fPIC', '-c', str(source), '-o',
+                    str(source.with_suffix('.o'))], check=True)
+    subprocess.run(['ar', 'rcs', str(source.with_suffix('.a')),
+                    str(source.with_suffix('.o'))], check=True)
+
+def make(label, *targets, jobs=1, value=0):
+    result = subprocess.run(
+        ['make', '-s', f'-j{jobs}', '-C', str(package), *targets,
+         f'ROOT={root}', f'X2C={compiler}',
+         'PACKAGE_C_FLAGS=--c-include-dir src',
+         f'PACKAGE_LINK={work}/increment-{value}.a'],
+        text=True, capture_output=True)
+    (work / f'{label}.log').write_text(result.stdout + result.stderr)
+    assert result.returncode == 0, (label, result.stdout, result.stderr)
+
+def output(name):
+    return subprocess.check_output([str(package / f'builds/{name}')],
+                                   text=True).strip()
+
+for jobs in [1, 2]:
+    make(f'clean-{jobs}', 'clean')
+    make(f'cold-{jobs}', 'builds/first', 'builds/second', jobs=jobs)
+    assert (package / 'builds/tally.module').exists()
+    assert output('first') == output('second') == '10'
+archive = package / 'builds/libtally.a'
+archive_bytes, archive_stamp = archive.read_bytes(), archive.stat().st_mtime_ns
+make('changed-module-link', 'builds/first', 'builds/second', jobs=2, value=5)
+assert output('first') == output('second') == '15'
+assert archive.read_bytes() == archive_bytes
+assert archive.stat().st_mtime_ns == archive_stamp
+print('cold serial/parallel package consumers and module-link freshness passed')
+PY_PACKAGE_CONSUMERS
+
 printf 'meta int triple(int);\nprintln(%%"$(triple(4))");\n' |
   "$X2C" repl --native-module .x2c-build/helpers.so >repl.out 2>&1
 grep -qx "16" repl.out || {

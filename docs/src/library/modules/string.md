@@ -84,7 +84,9 @@ Canonical byte strings and core text operations.
 Canonicalizes a known NUL-free byte span in the active pool chain.
 Copies bytes only when needed; the caller retains its input storage.
 Null input or a nonpositive length returns the empty String.
-Raises alloc-fail if canonical storage cannot be allocated.
+
+**Raises:** `<size-limit>` for a span longer than `INT_MAX - 1` bytes, or
+`<alloc-fail>` if canonical storage cannot be allocated.
 
 Source: `lib/string/storage.x`
 
@@ -299,13 +301,11 @@ Source: `lib/string/search.x`
 
 Returns the first index of `sub` within `str[start:end]`, or -1.
 The returned index is absolute and counts from the start of `str`.
-Negative `start` and `end` count from the end of `str`, and both are then
-clamped to the `String`.
-
-An `end` of -1 is the sentinel for "to the end of `str`", not "one byte
-before the end". There is therefore no negative `end` that excludes only
-the last byte; pass a nonnegative `end` for that. An empty `sub` matches at
-the normalized `start`.
+`start` and `end` are normalized as slice bounds and then clamped to the
+`String`: a negative `start` counts from the end, and a negative `end`
+counts endpoints from the end, so -1 is the length of `str` and -2 omits
+its last byte. An empty `sub` matches at the normalized `start` unless
+`end` comes before it.
 
 ```x2c
 ~String text = "abcabc";
@@ -372,10 +372,11 @@ and its negative `stop` names the byte the slice stops before. The
 shows the forward rule. Indices are byte positions, so a
 slice can split a multibyte sequence. A full unit-step slice may return
 `s`; other nonempty slices return their canonical `String`.
+An empty range or one that runs the wrong way for its `step` returns
+NULL, the empty `String`.
 
-**Raises:** `<alloc-fail>` while constructing a nonempty result. An empty
-range, a range that runs the wrong way for its `step`, or a `step` of zero
-also returns NULL, the empty `String`, without raising.
+**Raises:** `<bad-arg>` when `step` is zero, including for an empty `s`;
+`<alloc-fail>` while constructing a nonempty result.
 
 Source: `lib/string/editing.x`
 
@@ -511,12 +512,14 @@ The receiver is the separator, not the sequence, so this reads
 `sep.join(parts)`. A null `sep` joins with nothing between elements.
 Empty elements contribute no bytes but still count as positions, so
 joining a split result with the same separator reproduces the original
-text, adjacent separators included. `List` elements that are not `String`s
-convert to the empty `String`.
+text, adjacent separators included. An element that is not a `String`
+contributes what a `String` destination reads from it: its display text,
+rendered once, or nothing for `Null`. A null or empty `List` returns
+NULL, the empty `String`.
 
-**Raises:** `<alloc-fail>` when result storage cannot be allocated. A null or
-empty `List`, or an oversized result, also returns NULL, the empty
-`String`, without raising.
+**Raises:** `<size-limit>` when the result cannot fit a `String`,
+`<alloc-fail>` when result storage cannot be allocated, or a cause from
+rendering an element.
 
 Source: `lib/string/building.x`
 
@@ -627,13 +630,12 @@ The input is borrowed and copied, so `str` may be a stack buffer and
 mutating it afterwards does not disturb the result. Equal nonempty content
 visible in the active pool chain yields the same pointer, which is why
 `==` on canonical `String`s from that chain is a content comparison. A
-detached or sibling pool may hold a distinct equal pointer. Empty input
-canonicalizes to the null pointer, the empty `String`'s only
+detached or sibling pool may hold a distinct equal pointer. Null or empty
+input canonicalizes to the null pointer, the empty `String`'s only
 representation.
 
-**Raises:** `<alloc-fail>` when canonical storage cannot be allocated. A null,
-empty, or oversized input returns NULL, which is indistinguishable from the
-empty `String`, without raising.
+**Raises:** `<size-limit>` when `str` is too long for a `String`, or
+`<alloc-fail>` when canonical storage cannot be allocated.
 
 Source: `lib/string/storage.x`
 
@@ -738,11 +740,12 @@ Source: `lib/string/splitting.x`
 `meta native String String.repeat(String str, int count)`
 
 Returns a canonical `String` containing `count` copies of `str`.
-`Null` or empty input, a nonpositive count, or an oversized result returns
-NULL. A count of one returns `str` when it is already visible in the active
-pool; a transient buffer is copied and interned instead.
+`Null` or empty input, or a nonpositive count, returns NULL. A count of
+one returns `str` when it is already visible in the active pool; a
+transient buffer is copied and interned instead.
 
-**Raises:** `<alloc-fail>` while constructing a nonempty result.
+**Raises:** `<size-limit>` when the result cannot fit a `String`, or
+`<alloc-fail>` while constructing a nonempty result.
 
 Source: `lib/string/building.x`
 
@@ -759,11 +762,10 @@ two replacements, not three. Replaced text is never rescanned, so a
 deletes the matches.
 
 When there is nothing to replace, `str` itself is returned, so the
-result may be the same pointer as the input.
+result may be the same pointer as the input. An empty or null `old`
+returns `str`.
 
-**Raises:** `<alloc-fail>` when result storage cannot be allocated. An empty
-or null `old` returns `str`, and an oversized result returns NULL, without
-raising.
+**Raises:** the same causes as `String.replace_n`.
 
 Source: `lib/string/editing.x`
 
@@ -776,9 +778,9 @@ Replaces at most `max_replacements` non-overlapping occurrences of `old`.
 Scanning proceeds left to right and does not rescan replacement text. A
 negative limit replaces all matches; zero, null or empty `old`, null input,
 or no match returns `str` unchanged. `Null` `replacement` deletes matches.
-An oversized result returns NULL.
 
-**Raises:** `<alloc-fail>` while constructing a changed result.
+**Raises:** `<size-limit>` when the result cannot fit a `String`, or
+`<alloc-fail>` while constructing a changed result.
 
 Source: `lib/string/editing.x`
 
@@ -1134,9 +1136,10 @@ Source: `lib/string/storage.x`
 Returns a canonical escaped representation of the bytes in `str`.
 Common control and delimiter bytes use named escapes, printable ASCII is
 copied, and every other byte uses a three-digit octal escape. `Null`
-input or an oversized result returns NULL.
+input returns NULL.
 
-**Raises:** `<alloc-fail>` while constructing the result.
+**Raises:** `<size-limit>` when the result cannot fit a `String`, or
+`<alloc-fail>` while constructing the result.
 
 Source: `lib/string/escape.x`
 
@@ -1268,7 +1271,8 @@ existing equal `String` in `pool` or an ancestor is returned with that
 owner's lifetime; otherwise the new value is owned by `pool`. A null
 argument, nonpositive length, or empty input returns NULL.
 
-**Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning.
+**Raises:** `<size-limit>` when the bytes cannot fit a `String` or while
+interning, or `<alloc-fail>` or `<invariant>` while interning.
 
 Source: `lib/string/storage.x`
 
@@ -1284,8 +1288,9 @@ first, because a `String` cannot carry embedded NUL bytes:
 not be NUL-terminated, so it may be bounded C input or a window into a
 larger buffer.
 
-**Raises:** `<alloc-fail>` when canonical storage cannot be allocated. A null
-`str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
+**Raises:** `<size-limit>` when the copied bytes cannot fit a `String`, or
+`<alloc-fail>` when canonical storage cannot be allocated. A null `str`,
+nonpositive `len`, or leading NUL returns NULL, the empty `String`,
 without raising.
 
 Source: `lib/string/storage.x`
@@ -1358,7 +1363,8 @@ Source: `lib/string/storage.x`
 Returns a canonical quoted and escaped representation of `str`.
 Empty input returns the canonical literal spelling `"\"\""`.
 
-**Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
+**Raises:** the same causes as `String.escape`, or `<alloc-fail>` while
+formatting a nonempty `String`.
 
 Source: `lib/string/escape.x`
 

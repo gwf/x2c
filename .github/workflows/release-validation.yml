@@ -17,11 +17,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y clang make python3 git unzip autoconf automake libtool pkg-config perl diffutils
-      - name: Select Clang host preprocessor
-        run: |
-          mkdir -p "$RUNNER_TEMP/x2c-clang"
-          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
-          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+      - uses: ./.github/actions/select-clang
       - name: Build from checked-in bootstrap
         run: make build-safe
       - name: Run all ordinary examples and gallery assertions
@@ -31,41 +27,36 @@ jobs:
       - name: Compile documentation examples
         run: make doc-examples
 
+  list:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.list.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: list
+        run: |
+          echo "packages=$(make -s -C packages list | jq -cR 'split(" ")')" \
+            >> "$GITHUB_OUTPUT"
+
   packages:
+    needs: list
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - package: pcre2
-            targets: test run run-lisp
-          - package: yyjson
-            targets: test run run-lisp
-          - package: sqlite
-            targets: test run run-lisp
-          - package: libcurl
-            targets: test run run-lisp
-          - package: termbox2
-            targets: test run
-          - package: blis
-            targets: test run
-          - package: libuv
-            targets: test run
-          - package: raylib
-            targets: verify
+        package: ${{ fromJSON(needs.list.outputs.packages) }}
+        # torch needs a LibTorch download and stays a local check.
+        exclude:
+          - package: torch
     steps:
       - uses: actions/checkout@v5
       - name: Install build and runtime test tools
         run: sudo apt-get update && sudo apt-get install -y build-essential clang python3 git autoconf automake libtool pkg-config perl expect jq file patch ca-certificates unzip diffutils
-      - name: Select Clang host preprocessor
-        run: |
-          mkdir -p "$RUNNER_TEMP/x2c-clang"
-          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
-          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+      - uses: ./.github/actions/select-clang
       - name: Build from checked-in bootstrap
         run: make build-safe
-      - name: Prepare fresh dependency and run package tests and examples
-        run: make -C packages/${{ matrix.package }} ${{ matrix.targets }}
+      - name: Prepare fresh dependency and run the package check
+        run: make -C packages/${{ matrix.package }} check
       - name: Run HTTP and JSON composition
         if: matrix.package == 'libcurl'
         run: make -C examples/packages/http-json-releases test

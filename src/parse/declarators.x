@@ -135,8 +135,7 @@ module List _declarator(
     _direct_declarator(
       c, context, method_identity, source_first,
       source_after).cdr();
-  List sfx = _declarator_suffix(
-    c, c.load_source && !c.return_type && key == %("main"));
+  List sfx = _declarator_suffix(c);
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
   // A parenthesized declarator is assembled twice. Preserve its raw key until
@@ -190,7 +189,7 @@ static List _parenthesized(
   return decl;
 }
 
-static List _declarator_suffix(Compiler c, int loaded_main) {
+static List _declarator_suffix(Compiler c) {
   List type = NULL;
   loop {
     // An attribute after a declarator modifies that declarator alone.
@@ -205,7 +204,7 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
       type = %( @type (bitfield $expr) );
     }
     else if (c.peek(0) == <(>) {
-      List params = _function_parameters(c, loaded_main);
+      List params = _function_parameters(c);
       params = %( params @params );
       type = type ? %(fnmod $params $type) : %((fnmod $params));
     }
@@ -218,10 +217,10 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
    follows is not yet determined, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
    the captured scope. */
-static List _function_parameters(Compiler c, int loaded_main) {
+static List _function_parameters(Compiler c) {
   c.next();
   _x2c_complete_here(c, <type>, _type_keywords());
-  if (c.peek(0) == <)> && !loaded_main)
+  if (c.peek(0) == <)>)
     $fail.parse_params_empty(c, c.token);
   SymScope saved = c.params, parsed;
   int complete = 0;
@@ -244,10 +243,13 @@ static List _function_parameters(Compiler c, int loaded_main) {
   return params;
 }
 
+/* The C that x2c emits cannot spell a block declarator, so x2c source
+   cannot write one. Collection accepts one in a C header, which C reads. */
 module List _pointer(Compiler c) {
   List ptr = NULL;
   loop {
     Symbol symbol = c.peek(0);
+    if (symbol == <^> && !c.shallow) $fail.parse_block_declarator(c, c.token);
     if (symbol == <*> || symbol == <^> || symbol == <&> ||
         symbol.is_type_qualifier()) {
       c.next();
@@ -409,7 +411,7 @@ module List _install_declarator(
   Type declared_type = mods.append(base);
   name = _method_spelling(c, name, declared_type, method, exact_name);
   String exact = _syntax_exact_name(name);
-  _check_rebinding(c, exact, exact_name, declaration);
+  _check_rebinding(c, context, exact, exact_name, declaration);
   List binding = exact ? c.sym.declare(context, $(exact), declared_type)
                : name is <list> ? name.list() : NULL;
   if (binding && !exact) _bind_identity(c, context, binding, declaration);
@@ -477,10 +479,15 @@ static Var _method_spelling(
 
 /* An exact spelling, or a name a parameter holds, may be declared again only
    as another prototype of a function. An alias's name is not declared again
-   in its scope. */
+   in its scope. A field conflicts with an alias of the body that holds it;
+   any other declaration joins its Sym scope through the bodies around it,
+   so it conflicts with theirs too. */
 static void _check_rebinding(
-  Compiler c, String exact, int exact_name, List declaration) {
-  if (exact && c.scope_declares_alias(exact))
+  Compiler c, List context, String exact, int exact_name,
+  List declaration) {
+  int field = context && !(context === %(typedef));
+  if (exact && (field ? c.scope_declares_alias(exact)
+                      : _names_alias(c, exact)))
     $fail.parse_decl_bound(c, c.token, exact);
   List existing = exact ? c.sym.current_binding($(exact)) : NULL;
   if (exact_name || (existing &&
