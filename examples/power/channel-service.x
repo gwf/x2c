@@ -1,9 +1,9 @@
 /*  channel-service.x -- a service and its clients share one batch lifetime */
 
-#include "channel.x"
+#include "task.x"
 #include <stdio.h>
 
-int main(void) {
+static void _service(int tasks) {
   Channel requests = auto Channel.new(2);
   Channel first_reply = auto Channel.new();
   Channel second_reply = auto Channel.new();
@@ -29,13 +29,20 @@ int main(void) {
     return second_reply.receive();
   });
 
-  Thread.run(jobs, %!(Var completed) using &remaining_clients => {
+  Func completed = %!(Var completed) using &remaining_clients => {
     if (completed is <string>) {
       answers.push(completed);
       if (--remaining_clients == 0) requests.close();
     }
-  });
+  };
+  if (tasks) Task.run(jobs, completed);
+  else Thread.run(jobs, completed);
 
   foreach (String answer in answers.sort()) puts(answer);
+}
+
+int main(void) {
+  _service(0);
+  _service(1);
   return 0;
 }

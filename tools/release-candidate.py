@@ -122,8 +122,8 @@ def assemble(args):
             if target.exists():
                 raise ValueError(f'duplicate archive: {path.name}')
             shutil.copyfile(path, target)
-    if len(compilers) != 4 or len(versions) != 1:
-        raise ValueError('need all four compiler archives with one version')
+    if len(compilers) != len(PLATFORMS) or len(versions) != 1:
+        raise ValueError('need every platform compiler archive with one version')
     version = versions.pop()
     manifest = {'schema': 1, 'source_repository': 'gwf/x2c',
                 'source_sha': args.source_sha, 'workflow_sha': args.workflow_sha,

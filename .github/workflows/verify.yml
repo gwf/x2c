@@ -6,6 +6,9 @@ on:
       identity:
         required: true
         type: string
+      runners:
+        required: true
+        type: string
       destination:
         required: true
         type: string
@@ -16,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
+        os: ${{ fromJSON(inputs.runners) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5

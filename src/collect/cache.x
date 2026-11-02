@@ -175,6 +175,5 @@ module void _retain(Var value) {
 
 module void _require_retained(int owned) {
   if (owned) return;
-  fprintf(stderr, "x2c: could not retain process cache entry\n");
-  abort();
+  x2c_fatal("x2c: could not retain process cache entry");
 }

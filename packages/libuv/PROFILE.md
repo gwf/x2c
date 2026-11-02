@@ -67,4 +67,5 @@ results: `uv_dlerror`, `uv_err_name`, `uv_fs_get_path`,
 `uv_pipe_s.pipe_fname`, `uv_process_options_s.cwd`, and
 `uv_process_options_s.file`. Raw callers must preserve the upstream
 read-only meaning. The measured rows are retained in
-`../foreign-qualifier-deltas.json`.
+the focused foreign-qualifier fixtures described in
+`../FOREIGN-C-QUALIFIERS.md`.

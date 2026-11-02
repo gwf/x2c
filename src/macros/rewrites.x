@@ -310,8 +310,7 @@ static MacroMatcher *_prepared_matcher(RewriteRule rule) {
 
 module void _require_owned(int owned) {
   if (owned) return;
-  fprintf(stderr, "x2c: could not retain a shipped rewrite rule\n");
-  abort();
+  x2c_fatal("x2c: could not retain a shipped rewrite rule");
 }
 
 static List _rewrite_candidates(Compiler c, Symbol point, Var kind) {

@@ -440,6 +440,13 @@ cd "$BUILD/project"
 "$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
 [[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "dependency not installed"
 grep -q '^greet 1.0 source - ' x2c.lock || fail "lockfile row"
+
+# A fresh test run restores dependencies directly from the committed lock.
+printf 'import "greet";\nint main(void) { return 0; }\n' > greet_test.x
+"$x2c" remove -q greet
+"$x2c" test greet_test.x > test.stdout
+[[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "test dependency not installed"
+grep -q 'files: 1 passed, 0 failed' test.stdout || fail "test dependency run"
 "$BUILD/project/client" >"$BUILD/project/client.stdout"
 grep -q "ping ping ping" "$BUILD/project/client.stdout" || fail "client output"
 

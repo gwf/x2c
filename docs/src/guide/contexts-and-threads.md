@@ -302,7 +302,7 @@ computation that never waits delays every job in the batch.
 Use the same Channel operations and completion callback shape as Thread.run.
 The callback runs after job cleanup, under restored caller state, and must
 not wait for participant progress. The executable
-`examples/power/channel-task-service.x` shows request/reply and closes requests
+`examples/power/channel-service.x` shows request/reply and closes requests
 after both clients finish.
 
 Each task borrows the caller's active Scope and Pool through the batch. It

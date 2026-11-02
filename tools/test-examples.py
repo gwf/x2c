@@ -100,6 +100,13 @@ program.chmod(0o755)
         self.assertEqual(args[start:start + 2],
                          ["-Wl,probe-one", "-Wl,probe-two"])
 
+    def test_successful_translation_keeps_diagnostics_visible(self):
+        self.source("plain")
+        self.executable("x2c", "#!/bin/sh\nprintf 'translation warning\\n' >&2\n")
+        result = self.run_check("plain|showcase|run||-|warning\n")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "translation warning\n")
+
     def test_duplicate_names_are_literal(self):
         names = ("love/maps", "a*[b]?", "a*[c]?")
         for name in names:

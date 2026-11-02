@@ -113,9 +113,6 @@ check_example() {
       record_failure "$name did not translate"
       return 0
     fi
-    if [[ -s "$case_build/x2c.stderr" ]]; then
-      cat "$case_build/x2c.stderr" >&2
-    fi
     if ! "$cc" ${build_cflags[@]+"${build_cflags[@]}"} \
         ${linker_flags[@]+"${linker_flags[@]}"} \
         -iquote "$root/include/x2c" \
@@ -241,7 +238,10 @@ for name in ${work[@]+"${work[@]}"}; do
   artifact_count=$((artifact_count + name_artifacts))
   run_count=$((run_count + name_run))
   build_count=$((build_count + name_build))
-  ((name_failures)) || continue
+  if ((!name_failures)); then
+    cat "$build/${name//\//-}/x2c.stderr" >&2
+    continue
+  fi
   failures=$((failures + name_failures))
   cat "$build/${name//\//-}/log" >&2
 done

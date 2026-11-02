@@ -25,12 +25,16 @@ concurrency:
 
 jobs:
   stage:
+    outputs:
+      runners: ${{ steps.matrix.outputs.runners }}
     runs-on: ubuntu-24.04
     environment: staging-publication
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - id: matrix
+        run: python3 tools/release-candidate.py matrix >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v8
         with:
           name: candidate
@@ -88,6 +92,7 @@ jobs:
     uses: ./.github/workflows/verify.yml
     with:
       identity: ${{ inputs.identity }}
+      runners: ${{ needs.stage.outputs.runners }}
       destination: staging
   record:
     needs: verify
