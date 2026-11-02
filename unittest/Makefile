@@ -1,6 +1,8 @@
 SOURCE = .
 BUILD = build
 
+# BUILD_JOBS sets the fixture workers and translation jobs here too.
+include ../etc/make-command.mk
 include ../etc/x2c.mk
 
 X2CFLAGS +=
@@ -111,7 +113,7 @@ $(BUILD)/list-hot-paths: benchmarks/list-hot-paths.x FORCE | $(BUILD)
 	$(CC) $(CFLAGS) -o $@ $(BUILD)/list-hot-paths.c $(LDFLAGS) $(LDLIBS)
 
 benchmark-list: $(BUILD)/list-hot-paths
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/list-hot-paths; \
 	done
@@ -122,7 +124,7 @@ $(BUILD)/lisp-reader-stream: benchmarks/lisp-reader-stream.x FORCE | $(BUILD)
 		$(LDFLAGS) $(LDLIBS)
 
 lisp-reader-benchmark: $(BUILD)/lisp-reader-stream
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/lisp-reader-stream; \
 	done
@@ -132,7 +134,7 @@ $(BUILD)/exception-hot-paths: benchmarks/exception-hot-paths.x FORCE | $(BUILD)
 	$(CC) $(CFLAGS) -o $@ $(BUILD)/exception-hot-paths.c $(LDFLAGS) $(LDLIBS)
 
 exception-benchmark: $(BUILD)/exception-hot-paths
-	@for sample in 1 2 3 4 5; do \
+	@set -e; for sample in 1 2 3 4 5; do \
 		echo "sample,$$sample"; \
 		./$(BUILD)/exception-hot-paths; \
 	done

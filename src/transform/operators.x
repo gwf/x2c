@@ -218,10 +218,10 @@ static List _protocol_update(
   }
   String helper = c.protocol_update_helper(type, member_name, !rhs);
   if (!helper) return NULL;
-  List spell = _symbol_expression(spelled);
-  if (!rhs) return _update_call(arg, spell, NULL, helper);
-  List value = rhs;
-  return _update_call(arg, spell, value, helper);
+  List spell = _symbol_expression(spelled), value = NULL;
+  if (rhs) value = rhs;
+  List call = _update_call(arg, spell, value, helper);
+  return c.protocol_helper_call(helper, call);
 }
 
 static List _symbol_expression(Symbol value) =>

@@ -321,11 +321,13 @@ def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
   if args.action in ("calibrate", "check") and not all((go, java, javac)):
     raise HarnessError("reference builds require Go, java, and javac (GO/JAVA/JAVAC)")
 
-  build_mode_path = REPO / "etc/build-mode"
-  build_mode = (
-    build_mode_path.read_text(encoding="utf-8").strip()
-    if build_mode_path.exists()
-    else "unknown"
+  # Make exports BUILD_MODE; by hand, the local switch overrides the
+  # tracked default as it does in etc/build-config.mk.
+  build_mode = os.environ.get("BUILD_MODE") or next(
+    (path.read_text(encoding="utf-8").strip()
+     for path in (REPO / "etc/build-mode.local", REPO / "etc/build-mode")
+     if path.exists()),
+    "unknown",
   )
   if build_mode != "optimize":
     raise HarnessError(

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/parse-alias-enumerator.x:14:10: parse: declaration 'k' is already bound
+  enum E { k };
+           ^
+  note: prior binding: 'k'
+

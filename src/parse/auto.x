@@ -22,14 +22,25 @@ Symbol Compiler.auto_region_form(Compiler c, Symbol position) {
          ? <function> : <statement>;
   }
   if (next.text == "foreach" || next.text == "with" ||
-      next.type in _region_statements)
+      next.type in _region_statements || _contextual_statement(c, next))
     return <statement>;
   return position == <unit> && _function_follows(c, next) ? <function> : 0;
 }
 
 static const SymbolSet _region_statements =
-  %<"{" "%{" if while for do switch match try return raise defer break
-     continue goto>;
+  %<"{" "%{" if while for do switch match return defer break continue
+     goto>;
+
+/* `try` and `raise` are identifiers that begin their statements where the
+   statement parser recognizes them, except that `auto try = value` infers
+   a local named `try`. */
+static int _contextual_statement(Compiler c, Token word) {
+  if (Token.skip_trivia(word + 1).type == <=>) return 0;
+  Token start = c.token;
+  defer c.token = start;
+  c.token = word;
+  return c.at_contextual("try") || c.at_contextual("raise");
+}
 
 /* Whether `token` begins a declaration that stays at file scope. */
 static int _function_follows(Compiler c, Token token) {

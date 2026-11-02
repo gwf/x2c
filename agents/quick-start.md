@@ -55,12 +55,13 @@ Use focused checks for the changed behavior. Rebootstrap locally when the
 seed cannot consume a capability needed for development.
 
 Write its reviewed description in `.context/submission/pr-body.md`, then
-create a ready, same-repository PR targeting `dev`:
+create a ready, same-repository PR targeting `dev`. Outside a terminal, `gh`
+also needs a title; `--fill-first` takes it from the branch's first commit:
 
 ```sh
 branch="$(git branch --show-current)"
 git push -u origin "HEAD:refs/heads/$branch"
-gh pr create --base dev --head "$branch" \
+gh pr create --base dev --head "$branch" --fill-first \
   --body-file .context/submission/pr-body.md
 ```
 

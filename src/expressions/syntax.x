@@ -37,8 +37,8 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       case %((!set ?(List parameter)
                 (param ?base (!set ?binding (bind () ?))))): {
         List decl = %(decl $base (bindings $binding));
-        List cast = _finish_cast(
-          c, decl, parameter.type_from_ast(), _parse_cast(c), origin);
+        List cast = _parse_cast_operand(
+          c, decl, parameter.type_from_ast(), origin);
         return _finish_paren_statement(c, cast, 0);
       }
     foreach (List parameter in parameters)
@@ -300,11 +300,22 @@ static List _parse_cast(Compiler c) {
       Type type = NULL;
       List decl = c.parse_type_operand(&type);
       c.expect(<)>);
-      return _finish_cast(c, decl, type, _parse_cast(c), head);
+      return _parse_cast_operand(c, decl, type, head);
     }
   }
   c.token = head;
   return _parse_unary_op(c);
+}
+
+/* Parses what follows a cast's parenthesized type. A brace there begins a
+   compound literal, which is a postfix expression (C 6.5.2), so an index,
+   call, or member selection after it applies to the whole literal. */
+static List _parse_cast_operand(
+  Compiler c, List decl, Type type, Token origin) {
+  if (c.peek(0) != <"{">)
+    return _finish_cast(c, decl, type, _parse_cast(c), origin);
+  List literal = _finish_cast(c, decl, type, _parse_composite(c), origin);
+  return _parse_postfix_tail(c, literal);
 }
 
 static List _parse_unary_op(Compiler c) {

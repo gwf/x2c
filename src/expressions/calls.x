@@ -356,11 +356,9 @@ static List _method(CallSite &k, List receiver, List field) {
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
       return _bound(k, binding, signature, declared, parameters, returns);
-    case %(field ?access ?field_type): {
-      List callee = %(expr $field_type
-        (op $access $(k.receiver) $(k.field)));
-      return _finish(k, k.result_type, callee, field_type, NULL);
-    }
+    case %(field ?access ?field_type):
+      return _function(
+        k, %(expr $field_type (op $access $(k.receiver) $(k.field))));
   }
   return NULL;
 }

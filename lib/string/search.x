@@ -64,13 +64,11 @@ meta native int String.find(String str, String sub) =>
 
 /** Returns the first index of `sub` within `str[start:end]`, or -1.
     The returned index is absolute and counts from the start of `str`.
-    Negative `start` and `end` count from the end of `str`, and both are then
-    clamped to the `String`.
-
-    An `end` of -1 is the sentinel for "to the end of `str`", not "one byte
-    before the end". There is therefore no negative `end` that excludes only
-    the last byte; pass a nonnegative `end` for that. An empty `sub` matches at
-    the normalized `start`.
+    `start` and `end` are normalized as slice bounds and then clamped to the
+    `String`: a negative `start` counts from the end, and a negative `end`
+    counts endpoints from the end, so -1 is the length of `str` and -2 omits
+    its last byte. An empty `sub` matches at the normalized `start` unless
+    `end` comes before it.
 
     ```x2c
     ~String text = "abcabc";
@@ -80,18 +78,12 @@ meta native int String.find(String str, String sub) =>
 */
 meta native int String.find_within(
   String str, String sub, int start, int end) {
-  int n = str.len(), m = sub.len();
-  if (start < 0) start += n;
-  if (end == -1) end = n;
-  else if (end < 0) end += n;
-  start = _clamp(start, n);
-  end = _clamp(end, n);
+  int m = sub.len();
+  x2c_normalize_slice(start, end, 1, str.len());
   if (start + m > end) return -1;
   if (m == 0) return start;
-  if (!str) return -1;
   const char *p = _find_bytes(str + start, end - start, sub, m);
-  if (!p) return -1;
-  return p - str;
+  return p ? p - str : -1;
 }
 
 /** Reports whether `str` starts with `prefix`.
@@ -115,11 +107,6 @@ meta native int String.endswith(String str, String suffix) {
   if (suffix_len == 0) return 1;
   return str && suffix_len <= str_len &&
          memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
-}
-
-static int _clamp(int index, int n) {
-  if (index < 0) return 0;
-  return index > n ? n : index;
 }
 
 module const char *_find_bytes(

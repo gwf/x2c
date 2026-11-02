@@ -54,8 +54,10 @@ Source: `src/sourceview.x`
 `int SourceView.read(SourceView sources, String path, String volatile &text)`
 
 Reads through the request overlay, falling back to a regular disk file.
-The return value distinguishes an empty file from a failed read. Disk
-text belongs to the calling unit; configured snapshots remain borrowed.
+The return value distinguishes an empty file from a failed read, which
+includes a file that holds a NUL byte or is too large for a `String`.
+Disk text belongs to the calling unit; configured snapshots remain
+borrowed.
 
 Source: `src/sourceview.x`
 

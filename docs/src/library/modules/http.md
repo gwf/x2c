@@ -232,6 +232,8 @@ Source: `lib/http.x`
 `void Router.dispatch(Router router, HttpRequest req, HttpResponse res)`
 
 Calls the first matching handler; unmatched paths raise 404 or 405.
+A HEAD request without a matching HEAD route calls the first matching
+GET handler, and the server then omits the response body.
 
 Source: `lib/http.x`
 
@@ -340,7 +342,8 @@ Source: `lib/http.x`
 
 `class Router { Array routes; } *`
 
-Routes are tried in registration order within each method.
+Routes are tried in registration order within each method. A HEAD
+request without a matching HEAD route uses the first matching GET route.
 
 Source: `lib/http.x`
 

@@ -285,8 +285,8 @@ static List _sdk_template_call(Var stored, List values) {
     m-invoke);
 }
 
-/* The capture rows of a template call's values. A scalar value in an Expr
-   hole lifts to an expression first. */
+/* The capture rows of a template call's values, which `_hole_row`
+   converts for their holes. */
 static List _template_arguments(
   Compiler c, List definition, List values, Token invocation,
   int retain_syntax) {
@@ -298,30 +298,35 @@ static List _template_arguments(
   return %(args @(rows.list_free()));
 }
 
-/* One hole's capture row of `value`. Each scalar value an Expr hole or
-   sequence holds lifts to an expression first. A Type hole's type names
-   its type with a String. */
+/* One hole's capture row of `value`, or of each value a sequence holds,
+   as `_converted` gives it. */
 static List _hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
   Symbol kind = hole.assoc(<kind>);
   if (kind == <macro> && !retain_syntax)
     value = _macro_value_argument(c, value, invocation);
-  int lifts = kind == <expr>;
-  String error = kind == <type> && value is <list>
-               ? type_name_error(value) : NULL;
-  if (error) $fail.macros_type_name(c, invocation, error);
   if (!hole.assoc(<sequence>).int())
     return _capture_row_project(
-      c,
-      hole, $(lifts ? _lifted(c, value, invocation) : value),
-      retain_syntax);
+      c, hole, $(_converted(c, kind, value, invocation)), retain_syntax);
   List sources = value;
-  if (lifts) {
-    Array lifted = [];
-    foreach (Var item in sources) lifted.push(_lifted(c, item, invocation));
-    sources = lifted.list_free();
+  if (kind in %<expr literal name type>) {
+    Array converted = [];
+    foreach (Var item in sources)
+      converted.push(_converted(c, kind, item, invocation));
+    sources = converted.list_free();
   }
   return _capture_row_project(c, hole, sources, retain_syntax);
+}
+
+/* `value` as a hole of `kind` holds it: a scalar in an Expr or Literal
+   hole lifts, and an Atom in a Name hole becomes its spelling. */
+static Var _converted(Compiler c, Symbol kind, Var value, Token invocation) {
+  switch (kind) {
+    case <expr>: case <literal>: return _lifted(c, value, invocation);
+    case <name>: return value.is_atom() ? ((Atom) value).str() : value;
+    case <type>: _require_type_syntax(c, value, invocation); break;
+  }
+  return value;
 }
 
 /* A number, String, or Symbol becomes the literal expression that holds
@@ -329,6 +334,14 @@ static List _hole_row(
 static Var _lifted(Compiler c, Var value, Token invocation) =>
   value.is_integer() || value.is_floating() || value is <string> ||
   value is <symbol> ? c.lift_meta_expression(value, invocation) : value;
+
+/* A Type hole takes type syntax, which names its type with a String. */
+static void _require_type_syntax(Compiler c, Var value, Token invocation) {
+  String error = value is <list> && !value.is_nil()
+    ? type_name_error(value)
+    : %"a Type hole takes type syntax such as %(long), not $(value.repr())";
+  if (error) $fail.macros_type_name(c, invocation, error);
+}
 
 /* A helper's result with each template call the helper left for the
    compiler replaced by its invocation. */

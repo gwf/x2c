@@ -96,7 +96,7 @@ List syntax_extensions(void) => %(
                x2c-escape byte-escape list-atom collection-atom set-atom signed-number
                octal-integer)
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
-      (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
+      (lexical-note "Percent openers select reader modes; \$(...) interpolation and @(...) splicing re-enter code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
       (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<...>"
                  "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")

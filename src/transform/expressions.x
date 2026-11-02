@@ -281,7 +281,8 @@ module List _declaration(Compiler c, List ast) {
         List converted = c.convert_initializer(
           rhs, target_type, native_target);
         new_bind = %(op = (bind $var $mods) $converted);
-        if (target_type.type().is_static())
+        // File-scope initialization assigns a handle before its readers.
+        if (!c.fn_name)
           match (converted)
             case %(expr ("Func")
                    (ident (!set ?dependency (binding ? ?)))):
@@ -350,6 +351,7 @@ module List _typed_call(
       : c.lower_lambda_expr(arg);
     values.push(converted);
   }
+  _require_destination(c, p, arg_index);
   List rest = p;
   while (rest && !Type.rest_container(rest.car())) rest = rest.cdr();
   if (rest) {
@@ -369,6 +371,19 @@ module List _typed_call(
   if (!newargs) newargs = supplied;
   Macro called = $called;
   return c.rebuild_expression(NULL, called(callee, newargs)).caddr();
+}
+
+/* Arity checking lets a stage that returns an `Iter` omit its final
+   destination for the chain's consumer to supply. A stage whose chain no
+   consumer completed is still one argument short. */
+static void _require_destination(Compiler c, List omitted, int supplied) {
+  match (omitted) case %(?(List formal)) if (_iter_formal(formal)):
+    $fail.expressions_call_arity(c, NULL, 0, 0, supplied + 1, supplied);
+}
+
+static int _iter_formal(Type formal) {
+  if (formal.car() == <param>) formal = formal.type_from_ast();
+  return formal.canonicalize() == %("Iter");
 }
 
 static int _iter_immediate_consumer(String name) =>

@@ -12,7 +12,8 @@ description: >-
 Use the compiler-backed snapshot to locate and explain relevant code. Read
 [the snapshot command reference](../../../commands/graph/README.md#reusable-project-snapshots)
 for exact CLI options, query fields, relationship kinds, and working examples.
-The root `AGENTS.md` owns conversational style and delivery policy.
+The root `AGENTS.md` owns delivery policy; the user's global `AGENTS.md` owns
+conversational style.
 
 ## Select the evidence
 

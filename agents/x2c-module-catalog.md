@@ -267,7 +267,7 @@ synchronous compiler translation requests.
 
 Public functions:
 
-`translate_request`
+`translate_request`, `translate_print_command`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 
@@ -305,8 +305,9 @@ Public functions:
 `SourceView.package_entry`, `Compiler.is_package_source`,
 `Compiler.module_stamp`, `Compiler.identity`, `Path.content_identity`,
 `fnv_file`, `fnv_bytes`, `Path.identifier_hash`, `Path.lock_file`,
-`Path.publish_files`, `Job.decode_wait_status`, `Diagnostics.host_error`,
-`Diagnostics.driver_error`, `Compiler.cache_root`, `Compiler.prune_cache`
+`Path.publish_files`, `Job.decode_wait_status`, `Compiler.configure_logging`,
+`Diagnostics.host_error`, `Diagnostics.driver_error`, `Compiler.cache_root`,
+`Compiler.prune_cache`
 
 ### [src/callables/callables.x](../src/callables/callables.x)
 
@@ -774,9 +775,10 @@ Public functions:
 `Compiler.resolve_as_declared`, `Compiler.protocol_member_names`,
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
 `Compiler.resolve_protocol_member`, `Compiler.protocol_members_for`,
-`Compiler.protocol_update_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.discard_helper`, `Compiler.wrapper_function`,
-`Compiler.forward_parameters`, `Compiler.generate_protocol_adapters`,
+`Compiler.protocol_update_helper`, `Compiler.protocol_helper_call`,
+`Compiler.protocol_discard_helper`, `Compiler.discard_helper`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
 `Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
 
@@ -1323,11 +1325,11 @@ Public functions:
 `scan_number_typed`, `scan_number_type`, `scan_digital`, `scan_float`,
 `scan_hexponent`, `scan_keyword`, `scan_identifier`, `scan_ascii_alpha`,
 `scan_keyword_type`, `scan_c_operator`, `scan_c_string`,
-`scan_c_string_status`, `scan_c_character`, `scan_c_escape_value`,
-`scan_string_segment`, `scan_symbol_literal`, `scan_symbol_literal_status`,
-`scan_symbol_set_atom`, `scan_atom`, `scan_atom_status`,
-`scan_escape_sequence`, `scan_ascii_hex_value`, `scan_ascii_digit`,
-`scan_utf8_length`, `scan_next_line_col`
+`scan_c_string_status`, `scan_lisp_string_status`, `scan_c_character`,
+`scan_c_escape_value`, `scan_string_segment`, `scan_symbol_literal`,
+`scan_symbol_literal_status`, `scan_symbol_set_atom`, `scan_atom`,
+`scan_atom_status`, `scan_escape_sequence`, `scan_ascii_hex_value`,
+`scan_ascii_digit`, `scan_utf8_length`, `scan_next_line_col`
 
 ### [lib/scripting.x](../lib/scripting.x)
 
@@ -1417,7 +1419,8 @@ native per-thread runtime storage.
 
 Public functions:
 
-`x2c_execution_stack_exchange`, `x2c_thread_state_release`
+`x2c_execution_stack_exchange`, `_x2c_stack_floor`, `_x2c_stack_below`,
+`x2c_thread_state_release`
 
 ### [lib/thread.x](../lib/thread.x)
 
@@ -1943,12 +1946,13 @@ Public functions:
 `Var.integer_compare`, `Var.integer_floating_compare`, `Var.string`,
 `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.as_iter`,
 `Var.list`, `Var.map`, `Var.convert`, `Var.convert_at`, `Var.numeric_decode`,
-`Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`, `X2CVarNumeric.f32`,
-`X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`, `Var.signed_from_bits`,
-`Var.width_mask`, `x2c_var_update_i8`, `x2c_var_update_schar`,
-`x2c_var_update_u8`, `x2c_var_update_i16`, `x2c_var_update_u16`,
-`x2c_var_update_i32`, `x2c_var_update_u32`, `x2c_var_update_long`,
-`x2c_var_update_ulong`, `x2c_var_update_long_long`,
+`Var.long_at`, `Var.ulong_at`, `Var.long_long_at`, `Var.ulong_long_at`,
+`Var.long_double_at`, `Var.integer_box`, `Var.numeric_info`, `Var.integer_tag`,
+`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`,
+`Var.signed_from_bits`, `Var.width_mask`, `x2c_var_update_i8`,
+`x2c_var_update_schar`, `x2c_var_update_u8`, `x2c_var_update_i16`,
+`x2c_var_update_u16`, `x2c_var_update_i32`, `x2c_var_update_u32`,
+`x2c_var_update_long`, `x2c_var_update_ulong`, `x2c_var_update_long_long`,
 `x2c_var_update_ulong_long`, `x2c_var_update_f32`, `x2c_var_update_f64`,
 `x2c_var_update_long_double`, `Var.matmul`, `Var.neg`, `x2c_var_equal`,
 `x2c_var_identical`, `x2c_var_order`, `Var.truth`, `Var.fallback_truth`,

@@ -99,10 +99,8 @@ Symbol SymbolSet.getindex(SymbolSet x, int index) {
     iterator borrows the generated set storage and allocates nothing. A null
     `dest` returns NULL; a null set produces an empty iterator.
 */
-Iter SymbolSet.iter(SymbolSet x, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init((void *) x, _next, 0);
-}
+Iter SymbolSet.iter(SymbolSet x, Iter dest) =>
+  dest.init((void *) x, _next, 0);
 
 /** Returns the number of `Symbol`s in `set`, or zero for a null set. */
 size_t SymbolSet.len(SymbolSet x) => x ? _u32(x, 4) : 0;

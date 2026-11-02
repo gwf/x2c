@@ -16,12 +16,15 @@ static keyword loop $private.loop;
 #include <limits.h>
 
 /* One read over scanned tokens: `source` holds their text from byte `base`,
-   and `end` is the offset past the last token a form used. */
+   `end` is the offset past the last token a form used, and nesting stops
+   when the C stack reaches `floor`. */
 static typedef struct LispReader {
   Tokenizer tokenizer, char *source, unsigned base, end;
+  unsigned long floor;
 } LispReader;
 
-/* Elements are read in a loop; only Lists and prefixes add nesting. */
+/* Elements are read in a loop; only Lists and prefixes add nesting, which
+   stops at this depth, or sooner at the stack floor of a smaller stack. */
 #define LISP_READ_DEPTH_MAX 1024
 
 /* Reads one Lisp form, returning `<value>` or `<eof>`. A null source or
@@ -39,7 +42,8 @@ Symbol String.read_lisp_form(String source, unsigned &?cursor, Var &?out) {
   while (_blank(source[at])) at++;
   Array items = auto [];
   Var value = void;
-  if (source[at] && _plain_form(source, at, value, items, 1)) {
+  unsigned long floor = _x2c_stack_floor();
+  if (source[at] && _plain_form(source, at, value, items, 1, floor)) {
     cursor = at;
     if (out) out = value;
     return <value>;
@@ -68,7 +72,7 @@ Symbol Tokenizer.read_lisp_form(
   }
   unsigned start = base + token.pos;
   cursor = start;
-  LispReader r = {t, source, base, 0};
+  LispReader r = {t, source, base, 0, _x2c_stack_floor()};
   Var form = _parse_form(r, token, 0);
   if (form is void) _incomplete(source, start);
   if (out) out = form;
@@ -96,13 +100,13 @@ static Var _parse_form(LispReader &r, Token token, int depth) {
       if (r.tokenizer.status() == <incomplete>) return void;
       return _malformed_token(r, token);
     case <")">:  return _malformed_token(r, token);
-    case <"(">:  return _list(r, _nested_depth(depth));
+    case <"(">:  return _list(r, _nested_depth(r, depth));
     case <"'">:  prefix = Atom.intern("quote");            break;
     case <"`">:  prefix = Atom.intern("quasiquote");       break;
     case <",">:  prefix = Atom.intern("unquote");          break;
     case <",@">: prefix = Atom.intern("unquote-splicing"); break;
   }
-  if (prefix is not void) return _prefixed(r, prefix, _nested_depth(depth));
+  if (prefix is not void) return _prefixed(r, prefix, _nested_depth(r, depth));
   r.end = token.pos + token.len;
   return _atom(r, token);
 }
@@ -130,8 +134,8 @@ static Var _list(LispReader &r, int depth) {
   }
 }
 
-static int _nested_depth(int depth) {
-  if (++depth >= LISP_READ_DEPTH_MAX)
+static int _nested_depth(LispReader &r, int depth) {
+  if (++depth >= LISP_READ_DEPTH_MAX || _x2c_stack_below(r.floor))
     raise %(size-limit (operation "Lisp.read") (depth $depth));
   return depth;
 }
@@ -193,12 +197,15 @@ static Var _incomplete(String source, unsigned at) {
    Lists, Strings, decimal integers, and bare Atoms are read here without
    the Lisp tokenizer, which costs most of an interface read. Each reader
    returns 0 for any other spelling, and the token reader then reads the
-   form from its start. `items` holds the elements of the Lists being read. */
+   form from its start. `items` holds the elements of the Lists being read.
+   A List as deep as LISP_READ_DEPTH_MAX or below the stack `floor` is also
+   left to the token reader, which reports it. */
 
 static int _plain_form(
-  char *s, unsigned &at, Var &out, Array items, int depth) {
+  char *s, unsigned &at, Var &out,
+  Array items, int depth, unsigned long floor) {
   char c = s[at];
-  if (c == '(') return _plain_list(s, at, out, items, depth);
+  if (c == '(') return _plain_list(s, at, out, items, depth, floor);
   if (c == '"') return _plain_string(s, at, out);
   if (_digit(c) || (c == '-' && _digit(s[at + 1])))
     return _plain_integer(s, at, out);
@@ -206,14 +213,15 @@ static int _plain_form(
 }
 
 static int _plain_list(
-  char *s, unsigned &at, Var &out, Array items, int depth) {
-  if (depth >= LISP_READ_DEPTH_MAX) return 0;
+  char *s, unsigned &at, Var &out,
+  Array items, int depth, unsigned long floor) {
+  if (depth >= LISP_READ_DEPTH_MAX || _x2c_stack_below(floor)) return 0;
   int first = items.len();
   for (at++; ; ) {
     while (_blank(s[at])) at++;
     if (s[at] == ')') break;
     Var item = void;
-    if (!_plain_form(s, at, item, items, depth + 1)) return 0;
+    if (!_plain_form(s, at, item, items, depth + 1, floor)) return 0;
     items.push(item);
   }
   at++;
@@ -226,7 +234,7 @@ static int _plain_list(
 
 /* Use the same string scanner as the Lisp tokenizer. */
 static int _plain_string(char *s, unsigned &at, Var &out) {
-  int length = scan_c_string(s + at);
+  int length = scan_lisp_string_status(s + at, NULL);
   if (length < 0 || !_token_end(s[at + length])) return 0;
   out = String.new_len(s + at + 1, length - 2).unescape();
   at += length;

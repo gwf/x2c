@@ -209,6 +209,7 @@ static int _test_declaration_start(
   if (sym != <ident>) return 0;
   // A leading attribute belongs to a declaration in every position.
   if (c.token.text == "__attribute__" && _attribute_starts(c)) return 1;
+  if (_c11_specifier_starts(c)) return 1;
   /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
      is a declaration wherever it is written. */
   Var definition;

@@ -104,9 +104,11 @@ invoked, as in a global macro, unless the macro lists it with
 arguments resolve there too.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
-ordinary function. A use without parentheses is an ordinary identifier, and
-`(scaled)(value)` explicitly calls a function. `$scaled(value)` uses only a
-global or imported macro, so local and global definitions may share a name.
+ordinary function. A use without parentheses is an ordinary identifier, except
+for a local decorator with no explicit parameters. That decorator is applied
+as `name TARGET`, like a keyword alias. `(scaled)(value)` explicitly calls a
+function. `$scaled(value)` uses only a global or imported macro, so local and
+global definitions may share a name.
 
 Local expression, statement, field, `Map`-entry, and enumerator generators keep
 their usual result positions. Local decorators are available when their target
@@ -235,8 +237,9 @@ The declared result kind determines where an invocation may appear:
 
 An `Entry` macro can produce zero, one, or several comma-separated `Map` rows.
 `Entry` holes capture complete rows, and `@rows` captures or inserts
-a row sequence. A `Map` literal reads quoted data, so `$(...)` crosses into
-x2c before invoking either a `$handler(...)` or a keyword alias:
+a row sequence. A row of an evaluated `{...}` Map literal can invoke the macro
+directly. A quoted `%{...}` Map reads data, so `$(...)` crosses into x2c
+before invoking either a `$handler(...)` or a keyword alias:
 
 ```x2c
 macro Entry $project.handler(Literal $key, Expr $value) {

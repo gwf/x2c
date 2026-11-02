@@ -37,12 +37,7 @@ if [ "$samples" -lt 1 ]; then
   exit 2
 fi
 
-if [ "$(cat "$root/etc/build-mode.local" 2>/dev/null ||
-  cat "$root/etc/build-mode" 2>/dev/null)" != optimize ]; then
-  echo "map-comparison requires the optimized x2c build mode" >&2
-  echo "run 'make config-optimize', clean, and rebuild before benchmarking" >&2
-  exit 2
-fi
+. "$root/unittest/benchmarks/hash-table/require-optimize.sh"
 
 mkdir -p "$vendor_dir" "$result_dir"
 current_sha=
@@ -67,7 +62,12 @@ mkdir -p "$generated_dir"
 "$root/builds/0/x2c" translate --out-dir "$generated_dir" \
   "$root/unittest/benchmarks/hash-table/x2c/flat-map.x" >/dev/null
 
-"$cc" -O2 -DNDEBUG -Wall -Wextra -Werror \
+# The build's flags come first, then the comparison's own. Deliberate word
+# splitting separates them.
+# shellcheck disable=SC2086
+compile_flags=$(echo ${BUILD_CFLAGS:-} -O2 -DNDEBUG -Wall -Wextra -Werror)
+# shellcheck disable=SC2086
+"$cc" $compile_flags \
   -iquote "$root/include/x2c" -I"$vendor_dir" -I"$generated_dir" \
   -I"$root/unittest/benchmarks/hash-table/x2c" \
   "$root/unittest/benchmarks/hash-table/direct/map-comparison.c" \
@@ -91,7 +91,7 @@ printf '%s\n' \
   "counts=$counts" \
   "probe_multiplier=$probe_multiplier" \
   "iteration_repeats=$iteration_repeats" \
-  "compile_flags=-O2 -DNDEBUG -Wall -Wextra -Werror" \
+  "compile_flags=$compile_flags" \
   "binary_sha256=$(shasum -a 256 "$binary" | awk '{ print $1 }')" \
   "map_source_sha256=$(shasum -a 256 "$result_dir/map.x" | awk '{ print $1 }')" \
   | tee "$result_dir/metadata.txt"

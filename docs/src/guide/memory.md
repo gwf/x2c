@@ -44,8 +44,8 @@ inside it. The
 shorter lifetime.
 
 All other storage is mutable and belongs to a scope: `Block`, `Array`,
-`Buffer`, wide `Var` boxes, and anything you request with `Scope.malloc`,
-`Scope.calloc`, or `Scope.memdup`.
+`Map`, `Buffer`, wide `Var` boxes, and anything you request with
+`Scope.malloc`, `Scope.calloc`, or `Scope.memdup`.
 
 ## A scope is a group of allocations
 
@@ -101,10 +101,10 @@ pushed slot, raises `<bad-state>` and leaves the active region intact.
 A matching `catch` can handle the error. Without one, the default policy
 aborts the program.
 
-Storage returned by these calls is managed memory. `Scope.realloc` grows or
-shrinks it in place, and `Scope.free` frees it before the close. Most
-storage does not need `Scope.free`, because the close frees the whole
-region. `Scope.malloc_finalized`
+Storage returned by these calls is managed memory. `Scope.realloc` resizes
+it and returns a pointer that can differ from the old one, and `Scope.free`
+frees it before the close. Most storage does not need `Scope.free`, because
+the close frees the whole region. `Scope.malloc_finalized`
 allocates storage that runs a function of your choice when it is reclaimed;
 see [attaching a finalizer](#attaching-a-finalizer).
 
@@ -245,9 +245,9 @@ and, when it is opened isolated, a canonical-value pool of its own.
 
 ## Moving a value out of a scope
 
-When a region computes one result that must outlive it, use `Scope.move`.
-It relinks a single allocation onto another scope without copying
-it. The pointer does not change:
+When a region computes one result that must outlive it, move the result to
+a scope that outlives the region. `Scope.move` relinks a single allocation
+onto another scope without copying it. The pointer does not change:
 
 ```x2c
 Scope keep = Scope.new_named("results");
@@ -258,6 +258,30 @@ Scope.close();
 puts(text);
 Scope.destroy(keep);
 ```
+
+A container is more than one allocation. An `Array`, `Map`, `Block`, or
+`Buffer` is a record that holds separate buffers, so `Scope.move` moves only
+the record and leaves the buffers in the region. Move a container with its
+`move_to` method. It moves the record, the buffers, and any owned contents
+together, and the handle does not change:
+
+```x2c
+Scope keep = Scope.new_named("results");
+Array values;
+auto {
+  values = [1, 2, 3];
+  values.move_to(&keep);
+}
+printf("%s\n", values.repr());
+Scope.destroy(keep);
+```
+
+```text
+[ 1, 2, 3 ]
+```
+
+[Explicit storage ownership](storage-ownership.md) describes `move_to` and
+owned contents.
 
 A `String` or a `List` needs no move, because canonical values
 outlive the scope that was active when they were built.
@@ -394,7 +418,8 @@ To avoid dangling pointers:
 
 - Return a canonical value (a `String`, a `List`, or a `Symbol`) when a
   result must cross a scope boundary.
-- Use `Scope.move` when a mutable allocation must outlive its region.
+- Use a container's `move_to` method, or `Scope.move` for a single
+  allocation, when mutable storage must outlive its region.
 - When unsure, let the caller create the scope and pass the slot down. The
   lifetime is then chosen where the caller can see it.
 
@@ -407,9 +432,10 @@ locals, `Scope` locals that `Scope.destroy` ends, `Pool.open` brackets, and
 the function's own locals and parameters.
 
 The rule is: a value allocated inside a region must not be reachable after
-that region ends. `Scope.move`, `Context.export`, `List.promote`, and
-returning a canonical value all follow the rule, because each gives the
-storage an owner that outlives the region.
+that region ends. A container's `move_to`, `Scope.move` of a single
+allocation, `Context.export`, `List.promote`, and returning a canonical value
+all follow the rule, because each gives the storage an owner that outlives
+the region.
 
 Translation warns when code breaks the rule. The warning includes the
 value's name and the way it leaves, and a note gives the line that opened

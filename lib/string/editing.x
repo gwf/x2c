@@ -10,10 +10,9 @@
     deletes the matches.
 
     When there is nothing to replace, `str` itself is returned, so the
-    result may be the same pointer as the input.
-    Raises: `<alloc-fail>` when result storage cannot be allocated. An empty
-    or null `old` returns `str`, and an oversized result returns NULL, without
-    raising.
+    result may be the same pointer as the input. An empty or null `old`
+    returns `str`.
+    Raises: the same causes as `String.replace_n`.
 */
 meta native String String.replace(
   String str, String old, String replacement) =>
@@ -23,8 +22,8 @@ meta native String String.replace(
     Scanning proceeds left to right and does not rescan replacement text. A
     negative limit replaces all matches; zero, null or empty `old`, null input,
     or no match returns `str` unchanged. `Null` `replacement` deletes matches.
-    An oversized result returns NULL.
-    Raises: `<alloc-fail>` while constructing a changed result.
+    Raises: `<size-limit>` when the result cannot fit a `String`, or
+    `<alloc-fail>` while constructing a changed result.
 */
 meta native String String.replace_n(
   String str, String old, String replacement, int max_replacements) {
@@ -35,7 +34,7 @@ meta native String String.replace_n(
   int count = _count_matches(str, old, max_replacements);
   if (count == 0) return str;
   int length = _replaced_length(str_len, count, old_len, replacement_len);
-  if (length < 0) return NULL;
+  if (length < 0) raise %(size-limit (operation "String.replace_n"));
   String string = String.malloc(length + 1);
   char *dst = string, int copied = 0, replaced = 0;
   while (copied <= str_len - old_len && replaced < count) {

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/parse-block-declarator.x:4:15: parse: block declarators are not supported
+  typedef void (^Block)(void);
+                ^
+

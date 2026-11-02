@@ -399,7 +399,8 @@ Source: `src/macros/values.x`
 `int Compiler.macro_starts_entry(Compiler c)`
 
 Tests for a fixed Entry result before a call argument is read. A
-decorator with a dynamic result parses as an expression there.
+producer decorator, such as `expand`, gives the result its source
+generator spells; another dynamic result parses as an expression.
 
 Source: `src/macros/invocations/recognition.x`
 

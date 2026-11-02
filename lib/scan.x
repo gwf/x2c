@@ -288,6 +288,27 @@ int scan_c_string_status(char *s, Symbol *status) {
   return _fail(status, <incomplete>);
 }
 
+/* Returns a Lisp String literal's complete byte count, or -1 on malformed
+   or truncated input. It takes x2c byte escapes, as percent strings do, and
+   rejects raw newlines, as C strings do. The caller supplies the opening
+   quote. `status`, when nonnull, distinguishes `<malformed>` from
+   `<incomplete>`. */
+int scan_lisp_string_status(char *s, Symbol *status) {
+  if (status) *status = <ok>;
+  int n = 1;
+  while (s[n]) {
+    if (s[n] == '\\') {
+      int m = _escape_status(s + n, status);
+      if (m < 0) return -1;
+      n += m;
+    }
+    else if (s[n] == '"') return n + 1;
+    else if (s[n] == '\n' || s[n] == '\r') return _fail(status, <malformed>);
+    else n++;
+  }
+  return _fail(status, <incomplete>);
+}
+
 /* Returns one complete C character literal's byte count, or -1.
    The caller supplies the opening quote; raw newlines and empty or multi-byte
    unescaped contents are malformed. */
@@ -403,7 +424,8 @@ int scan_atom_status(char *s, Symbol *status) {
 
    An escape starts at its backslash. C literals use C escape widths and
    reject raw newlines; percent strings and quoted Symbols keep x2c's
-   byte-oriented escapes and multiline behavior. */
+   byte-oriented escapes and multiline behavior. Lisp strings take x2c's
+   escapes and reject raw newlines. */
 
 /* Returns one x2c byte-oriented escape's length or -1 for malformed or
    truncated input. The caller has already recognized the backslash. */

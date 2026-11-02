@@ -162,10 +162,8 @@ meta native Split String.splits(String str, String sep) =>
     Constructing the iterator does not raise. Pulling may raise
     `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 */
-Iter Split.iter(Split split, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init((void *) split, split ? _iter_next : NULL, 0);
-}
+Iter Split.iter(Split split, Iter dest) =>
+  dest.init((void *) split, split ? _iter_next : NULL, 0);
 
 /** Yields the next field and advances a caller-owned position on success.
     Position must start at zero and thereafter retain only values written by

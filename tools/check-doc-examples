@@ -162,7 +162,7 @@ compiler = root.join("builds/0/x2c")
 if !compiler.exists():
   Stderr.printf("builds/0/x2c is missing; run 'make build' first\n")
   return 1
-String cc = Env.get("CC"), job_limit = Env.get("JOBS")
+String cc = Env.get("CC"), job_limit = Env.get("BUILD_JOBS")
 Array flags = ["--cc", cc ? cc : "cc", "--package-dir",
                 root.join("packages")]
 /* Each `deps` is a symlink, which a glob does not descend into. */
@@ -172,7 +172,7 @@ foreach Path deps in root.join("packages/*/deps").glob():
     flags.push("--c-system-dir")
     flags.push(include)
 build_flags = flags.list_free()
-int limit = job_limit ? atoi(job_limit) : (int) sysconf(_SC_NPROCESSORS_ONLN)
+int limit = job_limit ? atoi(job_limit) : 1
 if limit < 1: limit = 1
 
 int outputs_only = args.len() == 1 && args.car().str() == "--outputs"

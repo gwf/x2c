@@ -97,11 +97,8 @@ the callback.
 data. `remove_sink` is constant time and idempotent; `clear_sinks` removes
 every sink.
 `add_stderr_sink`, `add_file_sink`, and `add_memory_sink` install owned
-built-in contexts. Files are borrowed and never closed. Sinks added, removed,
-or cleared by an emitter are committed after the outermost emission, so an
-event and recursive events observe one stable registration-order snapshot.
-Freeing the Logger from an emitter is unsupported. Logger is reentrant, and
-calls from different threads are serialized.
+built-in contexts. Files are borrowed and never closed. Logger is reentrant,
+and calls from different threads are serialized.
 
 Text sinks render
 `M:SS.mmm level/category key=repr` directly through reusable Buffers. A

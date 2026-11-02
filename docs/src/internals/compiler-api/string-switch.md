@@ -14,7 +14,9 @@ A switch on a String selects its case by content. Each label the switch
 owns becomes its index, so the body stays an ordinary integer switch on
 a helper's result. The helper returns the index of the first label equal
 to the selector under ordinary `==`, or 0. Switches on the same type
-with the same labels share one helper.
+with the same labels share one helper. It is static, except for the
+switches in public inline functions, whose bodies the header publishes:
+they share one with external linkage.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the

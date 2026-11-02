@@ -4,11 +4,10 @@ x2c has two ways to walk a collection. `foreach(T name in collection)` covers
 most cases. `Iter` chains combine operations that process
 one element at a time, then collect, aggregate, or loop over the result.
 
-At runtime, an immediately consumed chain uses caller stack storage for every
-stage. Name that storage yourself when the iterator has to stay live between
-expressions. In a meta function, the destination-free form allocates iterator
-state in the compile-time session `Scope`. The
-[storage convention](#the-storage-convention) covers the runtime forms.
+An immediately consumed chain uses caller stack storage for every stage.
+Name that storage yourself when the iterator has to stay live between
+expressions. A `meta` function body compiles the same way. The
+[storage convention](#the-storage-convention) gives the rules.
 
 [The language reference](../reference/language.md) states the `foreach` rules,
 and the [standard library overview](../library/overview.md) links to every
@@ -183,9 +182,10 @@ foreach(Var item in values)
 ```
 
 If you declare a loop type that has no `Var` conversion, such as one of your
-own structs, x2c still translates the loop, and the C compiler reports an
-incompatible assignment to the loop variable. When that happens, pick a
-converting type or take a `Var` and convert in the body.
+own structs, the loop does not compile. For a typedef name, x2c reports that
+it cannot convert `Var` to that type. For a `struct` tag, the C compiler
+reports an incompatible assignment to the loop variable. Pick a converting
+type, or take a `Var` and convert in the body.
 
 ### What foreach guarantees
 
@@ -306,10 +306,11 @@ int main(void) {
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
 the enclosing block. Completion applies only when the chain ends in
-`try_next`, `next`, `done`, `list`, `array`, `foldl`, `any`, `all`, `find`,
-`count`, `sum`, `product`, `min`, `max`, or `foreach`. A `List` or `Array`
-destination ends the chain the same way: it calls `list` or `array` for you,
-which is why the chain above needs no explicit collector.
+`try_next`, `next`, `list`, `array`, `foldl`, `any`, `all`, `find`, `count`,
+`sum`, `product`, `min`, `max`, `parallel_map`, `parallel_map_in`, or
+`foreach`. A `List` or `Array` destination ends the chain the same way: it
+calls `list` or `array` for you, which is why the chain above needs no
+explicit collector.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:

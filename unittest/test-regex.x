@@ -63,6 +63,7 @@ static void regex_repeats_greedy_and_lazy(void) {
   EXPECT_STR_EQ(Regex.compile("a{99999999999").match("a{99999999999")[0],
                 "a{99999999999");
   EXPECT_STR_EQ(Regex.compile("x{,2}").match("x{,2}")[0], "x{,2}");
+  EXPECT_STR_EQ(Regex.compile("a{2}{,2}").match("aa{,2}")[0], "aa{,2}");
   EXPECT_STR_EQ(Regex.compile("colou?r").match("color")[0], "color");
   EXPECT_STR_EQ(Regex.compile("(ab)+").match("xababab")[0], "ababab");
   EXPECT_STR_EQ(Regex.compile("(ab)+?b").match("ababb")[0], "ababb");
@@ -179,7 +180,10 @@ static void regex_rejects_bad_patterns(void) {
                  ("(?<1a>x)" "malformed group name" 3)
                  ("(?=x)" "unknown group syntax" 1)
                  ("a**" "nothing to repeat" 2)
-                 ("a+?+" "nothing to repeat" 3));
+                 ("a+?+" "nothing to repeat" 3)
+                 ("a{2}{3}" "nothing to repeat" 4)
+                 ("a*{2}" "nothing to repeat" 2)
+                 ("a{2}?{3,}" "nothing to repeat" 5));
   foreach (List row, cases) {
     String pattern = row.car();
     int caught = 0;

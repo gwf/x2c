@@ -58,8 +58,7 @@ module int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
       return _flow(w, yes, type, sink, target) ||
              _flow(w, no, type, sink, target);
   List named = NULL;
-  Fact fact = _value_fact(w, value, named);
-  if (!fact) fact = _returned_argument(w, value, named);
+  Fact fact = _received(w, value, type, named);
   int born = 0, Region other = NULL;
   Acquired acquired = fact ? fact.acquired : NULL;
   Region region = fact ? fact.region

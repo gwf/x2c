@@ -259,14 +259,14 @@ anonymous inline
 [C objects during compilation](#c-objects-during-compilation). Elsewhere
 `meta` remains an ordinary identifier.
 
-A type's methods are not callable at compile time on their own. Each
-function needs its own `meta`:
+A `meta` body can also call ordinary functions and methods. They need no
+`meta` of their own:
 
 ```x2c
 struct Cell { int value; };
 typedef struct Cell Cell;
 
-meta int Cell.twice(Cell cell) => cell.value * 2;
+int Cell.twice(Cell cell) => cell.value * 2;
 
 meta static int doubled(void) {
   Cell cell = { 21 };
@@ -283,8 +283,8 @@ int main(void) {
 42
 ```
 
-Without `meta` on `Cell.twice`, the definition of `doubled` reports
-`no binding for Cell_twice`.
+A `$` call in program code must name a `meta` function. For an ordinary
+function `plain`, `$plain(21)` reports `no binding for plain`.
 
 ## Native C functions
 
@@ -398,14 +398,16 @@ int main(void) {
 4.5 0
 ```
 
-A prototype for a function the compiler does not link is accepted. A meta
-function that calls it is diagnosed where it is defined:
+A prototype for a function the compiler does not link is accepted. A `$`
+call of a meta function that calls it is diagnosed at the call. Here
+`sample.x` declares `meta int rand(void);` and
+`meta static int roll(void) => rand();`:
 
 ```text
-sample.x:2:1: macro: this function cannot run at compile time
-  meta static int roll(void) => rand();
-  ^^^^
-  note: reason: no binding for rand
+sample.x:5:18: macro: this function cannot run at compile time
+    printf("%d\n", $roll());
+                   ^
+  note: function: roll reason: no binding for rand
 ```
 
 Your own native functions come from a
@@ -529,8 +531,9 @@ Every function the module exports needs a `meta native` definition or a
 bodyless `meta` prototype in the module's sources, and a module whose sources
 declare none fails to build.
 
-A module can call any runtime function, because the compiler links the
-whole runtime. This holds for a compiler built from a checkout and for one
+A module can call the runtime functions that the compiler links. They are
+the whole runtime except Lisp, so a module that calls `Lisp.new` fails to
+link. This holds for a compiler built from a checkout and for one
 `make install` installs. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.

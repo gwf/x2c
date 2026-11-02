@@ -4,9 +4,6 @@ module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
-static const SymbolSet alias_kinds =
-  %<expression block-item field enumerator map-entry unit decorator>;
-
 static const SymbolSet macro_positions =
   %<unit block field enumerator map-entry statement expression>;
 
@@ -113,12 +110,6 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
     $fail.macros_keyword_builtin(c, declaration);
   Token reference = c.token;
   List definition = _lookup(c, _name(c), reference);
-  Symbol kind = definition.assoc(<kind>);
-  if (!(kind in alias_kinds)) {
-    String spelling = _kind_spelling(kind);
-    $fail.macros_keyword_internal(
-      c, declaration, spelling, Diagnostics.macro_definition_note(definition));
-  }
   c.expect(<;>);
   c.kw_aliases[alias] = definition;
   if (!storage)
@@ -142,10 +133,15 @@ int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
   _claims(c, _peek_invocation(c, position), position);
 
 /** Tests for a fixed Entry result before a call argument is read. A
-    decorator with a dynamic result parses as an expression there. */
+    producer decorator, such as `expand`, gives the result its source
+    generator spells; another dynamic result parses as an expression.
+*/
 int Compiler.macro_starts_entry(Compiler c) {
   List definition = _peek_invocation(c, <map-entry>);
-  return definition && _result_kind(definition) == <map-entry>;
+  if (!definition) return 0;
+  if (_producer_decorator(definition))
+    return _source_generator_gives(c, %<map-entry>);
+  return _result_kind(definition) == <map-entry>;
 }
 
 // shallow collection
@@ -205,15 +201,17 @@ int Compiler.macro_targets_unit(Compiler c) {
   if (_producer_decorator(definition)) {
     List next = _literal_decorator(definition);
     if (next && _result_kind(next) == <unit>) return 1;
-    return _source_macro_targets_unit(c);
+    return _source_generator_gives(c, %<unit decl-unit>);
   }
   Symbol kind = _result_kind(definition);
   return kind == <unit> || kind == <decl-unit>;
 }
 
-/* A source generator spells its result kind before its body. Script
-   classification reads that header without running the decorator or rows. */
-static int _source_macro_targets_unit(Compiler c) {
+/* Whether a producer decorator's source generator gives a result of one
+   of `kinds`. The generator spells its result kind before its body, so
+   classification reads that header without running the decorator or
+   rows. */
+static int _source_generator_gives(Compiler c, SymbolSet kinds) {
   Token start = c.token;
   defer c.token = start;
   c.skip_macro_invocation();
@@ -221,10 +219,10 @@ static int _source_macro_targets_unit(Compiler c) {
     if (c.at_word("macro")) {
       Token kind = Token.skip_trivia(c.token + 1);
       const MacroCategory *category = _category(kind.text);
-      return category && category.result in %<unit decl-unit>;
+      return category && category.result in kinds;
     }
     List definition = _peek_invocation(c, <unit>);
-    if (definition && _result_kind(definition) in %<unit decl-unit>) return 1;
+    if (definition && _result_kind(definition) in kinds) return 1;
     c.token = c.token.after_group();
   }
   return 0;

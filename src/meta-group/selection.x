@@ -156,11 +156,18 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
 
 /* The unit's definitions so far that the group can reach, in source order:
    directives, declarations, included providers, reached functions, and
-   compile-time-only functions that the unit itself never emits. */
-module Array _units(Compiler c) {
+   compile-time-only functions that the unit itself never emits. The
+   `support` the parse queued for the unit, such as a helper that discards
+   an operator's temporaries, joins the later definitions, which the group
+   keeps only where it reaches them. */
+module Array _units(Compiler c, Array support) {
   String lib = %"$(x2c_get_root())/lib/";
   Array ordered = _runtime_includes(c, lib);
   Map later = _source_order(c, ordered, lib);
+  foreach (List item in support) {
+    later[(void *) item] = 1;
+    ordered.push(item);
+  }
   Map reached = _roots(c, ordered, later);
   _close(ordered, reached, later);
   return _reachable(c, ordered, reached, later);
@@ -361,9 +368,10 @@ static int _declares_reached(List item, Map reached) {
   return 0;
 }
 
+/* A function the kernel wrote carries a trailing marker. */
 module int _function_identity(List fn, Var &identity, String &name) {
   match (fn)
-    case %(function ? (bind (binding ?id ?(String spelling)) *) ?): {
+    case %(function ? (bind (binding ?id ?(String spelling)) *) ? *): {
       identity = id;
       name = spelling;
       return 1;

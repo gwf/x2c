@@ -34,7 +34,9 @@ static typedef struct HttpRoute {
   Func handler;
 } *HttpRoute;
 
-/** Routes are tried in registration order within each method. */
+/** Routes are tried in registration order within each method. A HEAD
+    request without a matching HEAD route uses the first matching GET route.
+*/
 class Router { Array routes; } *;
 
 /** A blocking acceptor with a bounded Channel and joined worker Threads. */
@@ -244,15 +246,20 @@ Router Router.files(Router router, String prefix, Path directory) {
   });
 }
 
-/** Calls the first matching handler; unmatched paths raise 404 or 405. */
+/** Calls the first matching handler; unmatched paths raise 404 or 405.
+    A HEAD request without a matching HEAD route calls the first matching
+    GET handler, and the server then omits the response body.
+*/
 void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
   int found = 0;
   List segments = req.path.split("/");
+  Symbol method = req.method;
+  if (method == <head> && !_routed(router, method, segments)) method = <get>;
   foreach (Var entry in router.routes) {
     HttpRoute route = entry.pointer();
     if (!_match(route.segments, segments)) continue;
     found = 1;
-    if (route.method != req.method) continue;
+    if (route.method != method) continue;
     Map captures = {};
     _capture(route.segments, segments, captures);
     req.params = captures;
@@ -421,6 +428,15 @@ static int _match(List pattern, List path) {
     else if (segment != value) return 0;
   }
   return !path;
+}
+
+/* Reports whether a route for `method` matches `segments`. */
+static int _routed(Router router, Symbol method, List segments) {
+  foreach (Var entry in router.routes) {
+    HttpRoute route = entry.pointer();
+    if (route.method == method && _match(route.segments, segments)) return 1;
+  }
+  return 0;
 }
 
 static void _capture(List pattern, List path, Map captures) {

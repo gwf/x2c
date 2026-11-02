@@ -36,12 +36,6 @@ static typedef struct FreeNames {
    report instead of a crash. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
-extern threaded unsigned long x2c_execution_stack_low;
-
-#if defined(__GLIBC__)
-extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
-#endif
-
 /* Calls one compile-time evaluation may make before it is stopped. A loop
    that never ends makes calls without nesting any, so the stack limit never
    sees it. */
@@ -769,30 +763,11 @@ static void _check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
     $error.apply.stack(lambda.body);
 }
 
-/* Returns the stack evaluator calls starting at `at` may use: four fifths of
-   what the installed task or native thread has left below `at`, at most
-   LISP_STACK_BYTES_MAX. Unknown native bounds use that maximum. */
+/* Returns the stack evaluator calls starting at `at` may use: down to the
+   floor `_x2c_stack_floor` sets, at most LISP_STACK_BYTES_MAX. An unknown
+   bound uses that maximum. */
 static unsigned long _stack_allowance(unsigned long at) {
-  unsigned long low = x2c_execution_stack_low;
-  if (!low) {
-#if defined(__APPLE__)
-    pthread_t self = pthread_self();
-    low = (unsigned long) pthread_get_stackaddr_np(self)
-      - pthread_get_stacksize_np(self);
-#elif defined(__GLIBC__)
-    pthread_attr_t attributes;
-    if (!pthread_getattr_np(pthread_self(), &attributes)) {
-      void *address;
-      size_t size;
-      if (!pthread_attr_getstack(&attributes, &address, &size))
-        low = (unsigned long) address;
-      pthread_attr_destroy(&attributes);
-    }
-#endif
-  }
-  if (!low || low >= at) return LISP_STACK_BYTES_MAX;
-  unsigned long left = at - low;
-  left -= left / 5;
+  unsigned long left = at - _x2c_stack_floor();
   return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
 }
 

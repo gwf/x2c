@@ -2536,18 +2536,32 @@ static List _string_cases(
     node, child, _string_cases(child, indices, labels, site));
 }
 
+static int _switch_in_public_inline(void) {
+  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
+    return type ~= %(* inline *) && !(type ~= %(* static *));
+  return 0;
+}
+
+static String _string_switch_public_role(void) {
+  if (x2c_enclosing(<unit>) ~=
+      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
+    return %"string_switch_$("%08x".printf(path.hash()))";
+  return "string_switch";
+}
+
 static Code _string_switch_helper(Type type, List labels) {
-  List key = %(string-switch $type $labels);
-  List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
+  int public = _switch_in_public_inline();
+  List key = %(string-switch $type $labels $public);
+  String role = public ? _string_switch_public_role() : "string_switch";
+  List name = x2c_binding_for(key, role), s = x2c_ident("s");
+  List declared = public ? %(int) : %(static int);
   Array tests = [];
   int index = 0;
   foreach (List label in labels)
     tests.push($!{ if ($s == $label) return $(++index); });
   x2c_place(
     %(unit-support $key),
-    $!Unit{
-      static int $name($type $s) { @(tests.list_free()) return 0; }
-    });
+    $!Unit{ $declared $name($type $s) { @(tests.list_free()) return 0; } });
   Type callable = %((func ($type)) int);
   return $!($callable){ $name };
 }
@@ -2932,6 +2946,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_string_case_key", _string_case_key);
   $linked.row(rows, "_string_case_index", _string_case_index);
   $linked.row(rows, "_string_cases", _string_cases);
+  $linked.row(rows, "_switch_in_public_inline", _switch_in_public_inline);
+  $linked.row(rows, "_string_switch_public_role", _string_switch_public_role);
   $linked.row(rows, "_string_switch_helper", _string_switch_helper);
   $linked.row(rows, "string_switch_lowering", string_switch_lowering);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);

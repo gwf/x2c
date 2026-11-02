@@ -316,7 +316,7 @@ static void _leaf(Emitter &e, List ast) {
     case <fields>: case <group>: _emit(e, ast.cdr()); return;
     case <block>:      _block(e, ast); return;
     case <parens>:     _surround(e, "(", ast.cdr(), ")"); return;
-    case <sizeof>:     _put(e, "sizeof"); _emit(e, ast.cdr()); return;
+    case <sizeof>:     _sizeof(e, ast.cadr()); return;
     case <case>:       _surround(e, "case", ast.cdr(), ":"); return;
     case <composite>:  _surround(e, "{", ast.cdr(), "}"); return;
     case <default>:    _put(e, "default:"); return;
@@ -405,7 +405,7 @@ static void _cast(Emitter &e, Type type, Var expression) {
   _put(e, "(");
   _put_all(e, _semantic_type(e, type));
   _put(e, ")");
-  _operand(e, expression, EMIT_UNARY);
+  _operand(e, expression, EMIT_CAST);
 }
 
 /* Writes `tokens`, a token List that may nest, in order. */

@@ -218,6 +218,8 @@ static void _collect_references(Var value, Map references, Array ordered) {
     _collect_references(initializer, references, ordered);
     return;
   }
+  // A lambda's body reads its names when it is called.
+  if (node ~= %(lambda *)) return;
   match (node)
     case %(expr (!set ?type (*)) (ident (!set ?binding (binding ? ?)))): {
       if (!type.type().is_function()) {

@@ -1182,10 +1182,13 @@ reports the ordinary operator error. When exactly one operand of a binary
 operator is a struct or union participant with the member, or a handle typedef
 pointing at one, the other operand converts to that type through its declared
 converter, so `meters + 2.0` and `10.0 - meters` resolve when `double.meters`
-exists. Scalar pointers and numeric participants keep native C behavior for a
-mixed operand, so `text + 1` remains pointer arithmetic. The runtime uses the
-same rows itself: `String.add` implements `add` for `protocol Var(String)`, so
-`String` `+` and `+=` are ordinary resolved punctuation.
+exists. A member whose operand parameter is not the participant, such as `long`
+in `T T.add(T, long)`, takes the other operand as an ordinary argument, as a
+direct update does. Scalar pointers and numeric participants keep native C
+behavior for a mixed operand, so `text + 1` remains pointer arithmetic. The
+runtime uses the same rows itself: `String.add` implements `add` for
+`protocol Var(String)`, so `String` `+` and `+=` are ordinary resolved
+punctuation.
 
 Logical operators preserve C short-circuit evaluation: each operand's `truth`
 method runs only when C would evaluate that operand. Indexed compound and
@@ -1271,8 +1274,11 @@ accepts the selected value directly:
 int size = _Generic(sizeof(int), size_t: 1, default: 2);
 ```
 
-A selection does not convert to `Var` or take part in method calls. A cast
-gives it a type: `Var kind = (int)_Generic(text, char *: 1, default: 2);`.
+A selection has no x2c type of its own, so it does not take part in method
+calls. Each association converts to a typed destination, such as an
+initialized variable, an assignment target, or a parameter. So
+`Var kind = _Generic(text, char *: 1, default: 2);` boxes the selected
+value. A cast also gives a selection a type.
 
 An association type is a type name of specifiers, qualifiers, and pointers.
 Name a function-pointer or array type through a typedef.
@@ -1603,8 +1609,12 @@ static int answer(void) {
 The element kind is inferred in the same way as a singular hole and may be
 overridden, for example `Field @members`. Argument-hole names must be
 unique, and a name cannot be both singular and sequence-valued.
-In a quoted `Array` template, an `Expr` sequence hole occupies an element
-position and inserts its captured expressions in order. It may be empty:
+Hole names keep their meaning inside quoted data, such as `%(...)`,
+`%[...]`, `%{...}`, `%"..."`, and `$(...)`. There `$name` inserts a
+singular hole's value. Any other `$name` or `@name` reads where the
+expansion lands. In a quoted `List` or `Array`, an `Expr` sequence hole
+occupies element positions and inserts its captured expressions in order.
+It may be empty:
 
 ```x2c
 ~#include "x2c.x"
@@ -2849,10 +2859,9 @@ when its hash matches the copy's. The hash of every unit definition it reaches
 through references must match too. An edited definition, or one that reaches an
 edited definition, is compiled with the unit's group like any other.
 
-A `meta` function that makes an explicit `$` call or uses a source-template
-constructor is also compile-time-only. A run-time call to a compile-time-only
-function is diagnosed where it is written. The diagnostic gives the function
-and the reason.
+A run-time call to a `meta` function that reaches a compiler query or a
+source-template constructor is diagnosed where it is written. The diagnostic
+gives the function and the reason.
 
 Compiler facilities load before a unit's own source, and macro code cannot
 redefine them.
@@ -2976,7 +2985,7 @@ descriptor table's capacity.
 
 ### Allocation regions
 
-`auto { ... }` retains an allocation region and releases it on every exit.
+`auto { ... }` opens an allocation region and closes it on every exit.
 The same prefix can wrap a control statement, such as `auto for (...) ...`,
 or a function definition, such as `auto int f(void) { ... }`. An
 expression-bodied function can use the prefix too. Normal `return`, `break`,
@@ -3023,8 +3032,8 @@ Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.
 
 `$auto(value)` is an ordinary expression macro. Its expansion calls
-`x2c.enclosing` to get the initialized declarator, places a release after that
-declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
+`x2c_enclosing` to get the initialized declarator, places a release after that
+declarator with `x2c_place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer. When
 the declaration finishes, the compiler checks that the result is the
 declarator's complete initializer. Then it binds the release. The release
@@ -3694,8 +3703,11 @@ The public numeric conversion domain contains all 15 `Var` families: `i8/u8`,
 `f32/f64/ldouble`. `Var.convert(value, tag)` returns the converted value and
 raises the specific `Error` cause when no conversion exists, the target is
 invalid, the value is out of range, or the `Var` encoding is invalid.
-Compiler-inserted `Var`-to-native numeric conversion passes through the same
-function before using the target extractor. The scalar-named readers
+Compiler-inserted `Var`-to-native numeric conversion applies the same rules.
+A narrow target converts through that function and the target extractor; the
+five wide targets use the site-carrying readers `Var.long_at`,
+`Var.ulong_at`, `Var.long_long_at`, `Var.ulong_long_at`, and
+`Var.long_double_at`, which allocate nothing. The scalar-named readers
 `Var.int`, `Var.double`, and their siblings apply the same rules directly. A
 matching tag reads its payload, and any other numeric tag converts through
 `Var.convert`. The raw payload readers `Var.integer` and `Var.floating` and
@@ -4127,8 +4139,8 @@ runtime declaration requirements. Region `auto` uses native syntax; `$lock`
 retains its explicit macro spelling. The compatibility `$scope` decorator
 retains its macro collision policy.
 
-Region `auto` retains one region around its following statement and defers
-release inside an inner block containing that statement. `auto (pointer)`
+Region `auto` opens one region around its following statement and defers its
+close inside an inner block containing that statement. `auto (pointer)`
 evaluates the Scope-pointer expression once, pushes that destination, and
 uses the same inner-block placement for a deferred pop. Pop restores the
 previous destination without destroying the selected Scope. More than one
@@ -4765,9 +4777,14 @@ from the source's, because it also passes the same address on unchanged.
 
 Ordinary x2c translation does not expand C macros. It retains directives,
 reads the declaration and layout information needed from native macros, and
-leaves their uses to the C compiler. Limited conditional handling hides
-impossible arms such as `#if 0`; it is not a full preprocessor. Source must
-otherwise form syntax that x2c can parse.
+leaves their uses to the C compiler. It hides only a fixed set of arms that C
+never takes. One is the first arm of `#if 0`, or of a group that opens by
+requiring a never-defined name, such as `#ifdef _MSC_VER`. The others follow
+the first arm of a group that opens with `#ifndef` or `#if !defined` of such
+a name. `__cplusplus` and `_MSC_VER` are never defined. A compiler built for a
+host other than Windows also treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as
+never defined. Every other arm parses, including the `#else` arm of `#if 1`,
+so the source must form syntax that x2c can parse.
 
 Use `--cpp` on `translate`, `build`, or `run` when existing C needs macro
 expansion to supply grammar. This enables x2c's C expansion engine before
@@ -4812,9 +4829,8 @@ Within signed `long` arithmetic, a condition is decided when every name it
 tests is visible, is known never to be defined, or is a literal. Unsigned
 operands and integer magnitudes outside that range remain undecided.
 `defined NAME` fails after `#undef NAME`. x2c output is compiled as C by a
-GNU-style compiler, so `__GNUC__` is always defined and `__cplusplus` and
-`_MSC_VER` are never defined; a compiler built for a host other than Windows
-treats `_WIN32`, `_WIN64`, and `__CYGWIN__` as never defined too. Only
+GNU-style compiler, so with `--cpp`, `__GNUC__` is always defined. The
+never-defined names of ordinary translation stay never defined. Only
 `defined`, `#ifdef`, and `#ifndef` decide `__GNUC__`: its value is unknown,
 so `#if __GNUC__ >= 4` is undecided. Only the taken arm of a decided group
 parses: the tokens of the other arms are trivia, and an `#include` in one is
@@ -5010,6 +5026,11 @@ A clause's pattern is quoted implicitly and written as `List` syntax, with the
 same `?binder` and `*binder` spellings. A binder keeps its `?` where the body
 reads it. Without an `else` clause an exhausted `match-case` is `nil`.
 
+A string in Lisp source takes the escapes of an x2c
+[percent string](#percent-literals-quote-and-unquote), so `"\x41"` and
+`"\u41"` both read as `A`. Unlike a percent string, it cannot hold a raw
+newline.
+
 A session can also reach the core value types directly. A Lisp value in
 a session is an x2c `Var`: a Lisp list is a `List`, a Lisp string is a
 `String`, and a quoted name is a `Symbol`. The operations below are the
@@ -5089,8 +5110,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `after-free` | A local is read after a call freed it, such as `Scope.free`,
-`Scope.realloc`, `Array.free`, `Array.list_free`, or a `cleanup`. |
+| `after-free` | A local is read after a call freed it, such as `Scope.free`, `Scope.realloc`, `Array.free`, `Array.list_free`, or a `cleanup`. |
 | `bad-free` | `Scope.free` or `Scope.realloc` is given a literal, a local's address, or other storage no Scope allocator returned. |
 
 The check analyzes regions lexically and summarizes each function within its

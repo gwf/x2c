@@ -41,7 +41,7 @@
   - [Lexical Specification](reference/syntax/lexical.md)
   - [Syntax as Data](reference/syntax/data.md)
   - [Lexical Data Inventory](reference/syntax/lexical-data.md)
-- [Compiler Options](reference/cli.md)
+- [Command-line interface](reference/cli.md)
 - [Release Notes](reference/release-notes.md)
 
 # Libraries and Packages
@@ -186,4 +186,4 @@
 - [AST Grammar](internals/ast-grammar.md)
 - [Implementation Map](internals/implementation-map.md)
 - [Building the Compiler](internals/building.md)
-- [A Recursive Lisp in x2c](internals/reference-lisp.md)
+- [Literate Lisp in x2c](internals/reference-lisp.md)

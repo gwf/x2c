@@ -20,7 +20,8 @@
 
 /** Returns a canonical quoted and escaped representation of `str`.
     Empty input returns the canonical literal spelling `"\"\""`.
-    Raises: `<alloc-fail>` while escaping or formatting a nonempty `String`.
+    Raises: the same causes as `String.escape`, or `<alloc-fail>` while
+    formatting a nonempty `String`.
 */
 String String.repr(String str) {
   if (!str) return "\"\"";
@@ -30,15 +31,17 @@ String String.repr(String str) {
 /** Returns a canonical escaped representation of the bytes in `str`.
     Common control and delimiter bytes use named escapes, printable ASCII is
     copied, and every other byte uses a three-digit octal escape. `Null`
-    input or an oversized result returns NULL.
-    Raises: `<alloc-fail>` while constructing the result.
+    input returns NULL.
+    Raises: `<size-limit>` when the result cannot fit a `String`, or
+    `<alloc-fail>` while constructing the result.
 */
 meta native String String.escape(String str) {
   if (!str) return NULL;
   int bytes = 0;
   for (const char *at = str; *at; at++) {
     int width = _escape_byte((unsigned char) *at, NULL);
-    if (bytes > INT_MAX - width - 1) return NULL;
+    if (bytes > INT_MAX - width - 1)
+      raise %(size-limit (operation "String.escape"));
     bytes += width;
   }
   String string = String.malloc(bytes + 1), char *dst = string;
