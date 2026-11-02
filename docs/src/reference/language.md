@@ -1603,8 +1603,12 @@ static int answer(void) {
 The element kind is inferred in the same way as a singular hole and may be
 overridden, for example `Field @members`. Argument-hole names must be
 unique, and a name cannot be both singular and sequence-valued.
-In a quoted `Array` template, an `Expr` sequence hole occupies an element
-position and inserts its captured expressions in order. It may be empty:
+Hole names keep their meaning inside quoted data, such as `%(...)`,
+`%[...]`, `%{...}`, `%"..."`, and `$(...)`. There `$name` inserts a
+singular hole's value. Any other `$name` or `@name` reads where the
+expansion lands. In a quoted `List` or `Array`, an `Expr` sequence hole
+occupies element positions and inserts its captured expressions in order.
+It may be empty:
 
 ```x2c
 ~#include "x2c.x"

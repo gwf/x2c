@@ -169,10 +169,10 @@ static macro Stmt $fail.macros_typed_quotation_nested(Expr $c, Expr $origin) {
 }
 
 static macro Stmt $fail.macros_hole_kind_conflict(
-  Expr $c, Expr $site, Expr $name, Expr $kind) {
+  Expr $c, Expr $site, Expr $name, Expr $hole_kind) {
   {
-    String kind = $kind == <expr> ? "an expression"
-      : %"a $(_kind_spelling($kind)) hole";
+    String kind = $hole_kind == <expr> ? "an expression"
+      : %"a $(_kind_spelling($hole_kind)) hole";
     String note = "a quotation's first use of a hole gives it its kind; "
       "bind a second local for the member spelling";
     $c.report_error(
