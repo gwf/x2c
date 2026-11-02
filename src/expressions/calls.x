@@ -415,7 +415,7 @@ static List _discarding_callee(
     return callee;
   int which = 0, index = 0;
   foreach (Var argument in arguments) {
-    if (argument is <list> && _is_operator_temporary(c, argument))
+    if (argument is <list> && c.is_operator_temporary(argument))
       which |= 1 << index;
     index++;
   }

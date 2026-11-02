@@ -371,8 +371,8 @@ static List _protocol_operator_expression(
   }
   else arguments = $(lhs, rhs);
   if (op != <in>) {
-    if (_is_operator_temporary(c, lhs)) which |= 1;
-    if (rhs && _is_operator_temporary(c, rhs)) which |= 2;
+    if (c.is_operator_temporary(lhs)) which |= 1;
+    if (rhs && c.is_operator_temporary(rhs)) which |= 2;
   }
   if (!derived && c.resolve_protocol_member(result, "discard"))
     _note_fresh_callee(c, binding);
@@ -521,10 +521,11 @@ module void _note_fresh_callee(Compiler c, List binding) {
   c.protocol_helpers[%"fresh-callee $identity"] = 1;
 }
 
-module int _is_operator_temporary(Compiler c, List expression) {
+/** Reports whether an operator result needs discard when consumed. */
+int Compiler.is_operator_temporary(Compiler c, List expression) {
   match (expression) {
     case %(expr ? $($grouped(?inner))):
-      return _is_operator_temporary(c, inner);
+      return c.is_operator_temporary(inner);
   }
   if (expression ~= $called(%(expr ? (ident (!set ?binding (*)))), *arguments))
     return %"fresh-callee $((long) binding.list())" in c.protocol_helpers;
