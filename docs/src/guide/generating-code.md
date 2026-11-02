@@ -370,11 +370,33 @@ because the body is code for another place. A `$(...)` hole therefore means
 the same as a local declared just before the quotation and named with `$`:
 
 ```x2c
-return $!( $(d.callee)(@(d.arguments)) );
-// means
-List callee = d.callee;
-List arguments = d.arguments;
-return $!( $callee(@arguments) );
+~#include "x2c.x"
+~#include "meta.x"
+~#include <assert.h>
+~typedef struct Call { List callee; List arguments; } Call;
+meta static List expression_holes(Call d) {
+  return $!( $(d.callee)(@(d.arguments)) );
+}
+
+// The same call with named holes:
+meta static List named_holes(Call d) {
+  List callee = d.callee;
+  List arguments = d.arguments;
+  return $!( $callee(@arguments) );
+}
+~meta static List sample_call(List callee, List a, List b, int named) {
+~  Call d = {.callee = callee, .arguments = $(a, b)};
+~  return named ? named_holes(d) : expression_holes(d);
+~}
+~macro Expression $sample.call(Expr $f, Expr $a, Expr $b, Expr $named) =>
+~  $sample_call($f, $a, $b, $named);
+~static int sum(int a, int b) => a + b;
+~int main(void) {
+~  int first = $sample.call(sum, 2, 5, 0);
+~  int second = $sample.call(sum, 2, 5, 1);
+~  assert(first == 7 && second == 7);
+~  return 0;
+~}
 ```
 
 The expression's declared type gives the hole its kind, as a local's type
