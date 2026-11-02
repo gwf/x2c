@@ -18,13 +18,12 @@ void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 */
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
-  (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
+  (c.meta_build || (X2C_NATIVE_MODULES && meta_in_process));
 
 /** Reports whether a call of a project `meta` function waits for the
-    translation: the project meta build's own parse has no helper yet. A
-    loaded helper's parse calls the ordinary helper of its sources.
+    translation: the project meta build's own parse has no helper yet.
 */
-int Compiler.meta_calls_wait(Compiler c) => c.meta_build && !c.meta_helper;
+int Compiler.meta_calls_wait(Compiler c) => c.meta_build;
 
 /** Records a native callable body `fn` in the unit's helper group. */
 void Compiler.group_meta_function(Compiler c, List fn) {

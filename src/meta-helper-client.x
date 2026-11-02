@@ -131,7 +131,7 @@ void Compiler.use_meta_helper(MetaHelper helper) {
     and resets the unit's `meta static` values before the first one.
 */
 void Compiler.begin_meta_unit(Compiler c, String filename) {
-  with (active = c.meta_helper ? c.meta_helper : primary) {
+  with (active = primary) {
     if (!active) return;
     active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
     active.reset = 1;
@@ -150,7 +150,7 @@ void Compiler.stop_meta_helper(void) {
 
 static Var _call_helper(
   Compiler c, String name, Token site, List arguments, String provider) {
-  with (active = c.meta_helper ? c.meta_helper : primary) {
+  with (active = primary) {
     if (!active)
       c.refuse_meta_call(name, site, "the project meta module was not built");
     if (c.shallow) c.collection_native = 1;
