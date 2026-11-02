@@ -434,6 +434,23 @@ static void array_index_contains_count(void) {
   EXPECT_FALSE(arr.contains(forty_two));
 }
 
+/* Search compares with `==`, so numbers of different types match by value.
+   `Map` keys compare with `Var.equal` and keep the types apart. */
+static void array_search_matches_numbers_by_value(void) {
+  $test.scoped();
+  Array numbers = [1, 1.0, 1L];
+  EXPECT_INT_EQ(numbers.count(1), 3);
+  EXPECT_INT_EQ(numbers.count(1.0), 3);
+  EXPECT_INT_EQ(numbers.index(1L), 0);
+  EXPECT_TRUE(numbers.contains(1.0));
+  EXPECT_FALSE(numbers.contains(2));
+
+  Map keyed = {};
+  keyed[1] = <one>;
+  EXPECT_TRUE(keyed[1.0] is void);
+  EXPECT_TRUE(keyed[1L] is void);
+}
+
 static void array_null_iterator_is_exhausted(void) {
   $test.scoped();
   Array values = [10], missing = NULL;
@@ -842,6 +859,7 @@ void array_suite(void) {
   $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);
   $test.run(array_index_contains_count);
+  $test.run(array_search_matches_numbers_by_value);
   $test.run(array_null_iterator_is_exhausted);
   $test.run(array_find_matches_list_and_iter);
   $test.run(array_sort_reverse_join);

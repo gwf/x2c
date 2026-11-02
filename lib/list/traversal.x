@@ -54,10 +54,18 @@ Var List.last(List lst) {
   return lst.car();
 }
 
-/** Reports whether `lst` contains `key` by `Var` equality. */
+/** Reports whether `lst` holds an element `==` to `key`.
+    Elements compare as in `List.index`, so `%(1.0)` contains `1`, while a
+    `Map` keyed by `1.0` does not.
+*/
 int List.contains(List lst, Var key) => lst.index(key) != -1;
 
-/** Returns the first index of `key`, or -1 when absent. */
+/** Returns the first index of an element `==` to `key`, or -1 when absent.
+    `==` compares two numbers as their native values do in C, so `1`, `1.0`,
+    and `1L` match, and it compares other values with `Var.equal`. `Map`
+    keys and `List.unique` use `Var.equal` for numbers too, which keeps those
+    types apart.
+*/
 meta native int List.index(List l, Var key) {
   for (int index = 0; l; l = l.cdr(), index++) if (l.car == key) return index;
   return -1;
@@ -108,8 +116,10 @@ Var List.get(List list, Var key) {
 }
 
 /** Returns the second value of the first association whose key equals `key`.
-    Nil entries are skipped. A missing association and a missing second value
-    both return `void`, so the two cases look the same here.
+    Keys compare with `==` as in `List.index`, so `1.0` finds the association
+    keyed by `1`, which a `Map` lookup would miss. Nil entries are skipped. A
+    missing association and a missing second value both return `void`, so the
+    two cases look the same here.
 */
 Var List.assoc(List list, Var key) {
   foreach (List pair in list) {

@@ -553,8 +553,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.splice_elements(index, remove_count, values);
   }
 
-  /** Returns the first index whose native element equals `value`, or -1.
-      A null array returns -1; the scan is linear and preserves source order.
+  /** Returns the first index whose element is `==` to `value`, or -1.
+      On a boxed `Array`, `==` compares two numbers as their native values
+      do in C, so `1`, `1.0`, and `1L` match; `Map` keys and `List.unique`
+      compare with `Var.equal` instead, which keeps those types apart. A
+      packed element uses its own type's `==`. A null array returns -1; the
+      scan is linear and preserves source order.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.index($array array, $element value) {
@@ -563,16 +567,19 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.index_element(value);
   }
 
-  /** Reports whether a native element equals `value`.
-      The scan is linear. Raises: `<size-limit>` when the length exceeds the
-      integer index domain.
+  /** Reports whether an element is `==` to `value`.
+      Elements compare as in `index`, so a boxed `Array` holding `1.0`
+      contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.contains($array array, $element value) {
     return array.index(value) != -1;
   }
 
-  /** Returns how many native elements equal `value`.
-      A null array returns zero; the scan is linear.
+  /** Returns how many elements are `==` to `value`.
+      Elements compare as in `index`, so the boxed `Array` `[1, 1.0, 1L]`
+      counts three matches of `1`, while `List.unique` keeps all three. A
+      null array returns zero; the scan is linear.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.count($array array, $element value) {

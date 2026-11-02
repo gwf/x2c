@@ -3793,7 +3793,10 @@ and relational punctuation orders them with `Var.compare`. `===` on `Var`
 operands compares their bits, and two numbers are identical when they have
 the same type and the same bits. So `NaN === NaN` holds and
 `+0.0 === -0.0` does not. `Map` keys compare with `Var.equal` and sorting
-uses `Var.compare`, so both keep numeric types apart.
+uses `Var.compare`, so both keep numeric types apart; `List.unique` compares
+as `Map` keys do. `List` and `Array` searches compare with `==` instead.
+Given `1.0` or `1L`, `index`, `contains`, `in`, and `Array.count` match an
+element `1`, and `List.assoc` matches a key `1`.
 
 For `==`, `!=`, `<`, `>`, `<=`, and `>=`, a C string literal opposite an
 operand of static type `String`, or an alias reaching `String`, converts to
