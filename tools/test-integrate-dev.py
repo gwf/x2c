@@ -421,11 +421,12 @@ class IntegrationProbe(unittest.TestCase):
         candidate = self.checkout(self.record(batch))
         for name in ('bootstrap/src/compiled.o', 'bootstrap/lib/libx2c.a',
                      'bootstrap/src/x2c', 'bin/x2c-bootstrap',
-                     'bin/x2c-codex_test', 'unittest/test-all',
+                     'bin/x2c-codex_test', 'bin/x2c-feature+test',
+                     'bin/x2c-feature@test', 'unittest/test-all',
                      'unittest/build/test-all.o', 'examples/build/foreach/foreach',
                      'examples/packages/greet/builds/libgreet.a'):
             self.write(candidate / name, 'generated build product\n')
-        (candidate / 'bin/x2c').symlink_to('x2c-bootstrap')
+        (candidate / 'bin/x2c').symlink_to('x2c-feature+test')
         self.write(candidate / 'lib/example.x', 'runtime source\n')
         self.write(candidate / 'bootstrap/lib/example.h', 'header\n')
         self.git('add', 'lib/example.x', 'bootstrap/lib/example.h', cwd=candidate)
@@ -445,9 +446,13 @@ class IntegrationProbe(unittest.TestCase):
         batch = self.prepare()
         self.land(batch)
         candidate = self.checkout(self.record(batch))
+        self.write(candidate / 'bin/x2c-feature+test', 'generated compiler\n')
+        self.write(self.root / '.git' / 'info' / 'exclude', 'bin/private-note\n')
         for name, target in (('bootstrap/src/private.o', None),
                              ('include/x2c/private.h', '../../private-note'),
-                             ('bin/x2c', '../private-note')):
+                             ('bin/x2c', '../private-note'),
+                             ('bin/x2c', '../bin/x2c-feature+test'),
+                             ('bin/private-note', None)):
             path = candidate / name
             path.parent.mkdir(parents=True, exist_ok=True)
             if target:

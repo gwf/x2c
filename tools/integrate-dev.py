@@ -93,12 +93,13 @@ def retirement_build_output(tree, name):
     if name == "unittest/test-all":
         return not file.is_symlink()
     if path.parent == Path("bin"):
+        # etc/branch.mk replaces only slash in a branch suffix.
         if name == "bin/x2c":
             return (file.is_symlink() and
-                    re.fullmatch(r"x2c-[A-Za-z0-9_.-]+", os.readlink(file)) is not None and
+                    re.fullmatch(r"x2c-[^/]+", os.readlink(file)) is not None and
                     file.is_file() and not (file.parent / os.readlink(file)).is_symlink())
         return (not file.is_symlink() and
-                re.fullmatch(r"x2c-[A-Za-z0-9_.-]+", path.name) is not None)
+                re.fullmatch(r"x2c-[^/]+", path.name) is not None)
     if name in {"bootstrap/src/x2c", "bootstrap/lib/libx2c.a"}:
         return not file.is_symlink()
     if path.parent in {Path("bootstrap/src"), Path("bootstrap/lib")}:
