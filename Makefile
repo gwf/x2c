@@ -169,7 +169,9 @@ commands-check: commands				## Run external command smoke tests
 	  done; \
 	  parallel_wait
 
-verify: build						## Build, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
+# The CLI probe runs x2c-package and x2c-new, whose embedded identity must
+# match the current compiler.
+verify: commands					## Build the compiler and commands, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
 	$(STAGE0_X2C) script unittest/probes/run-suite-coverage
 	$(MAKE) -C unittest clean
 	$(PARALLEL_MAKE) -C unittest test-all
@@ -290,7 +292,7 @@ stage-3: bootstrap-ready				## Clean builds/ and build stages 0 to 3; rewrites n
 verify-sanitize: build					## Run tests under ASan and UBSan
 	$(PARALLEL_MAKE) -C unittest sanitizer
 
-verify-fixtures: build					## Check compiler phase fixtures
+verify-fixtures: commands				## Check compiler phase fixtures
 	$(MAKE) -C unittest compiler-fixtures
 
 verify-fixtures-update: build				## Rewrite compiler fixture output
