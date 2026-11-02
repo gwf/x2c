@@ -12,21 +12,22 @@ The project meta build.
 
 | Function | Summary |
 | --- | --- |
-| [`Frontend.build_loaded`](#Frontend.build_loaded) | Builds one helper exposing the loaded files' public functions. |
+| [`Compiler.next_file_scope`](#Compiler.next_file_scope) | Returns the next token of `tokens` at file scope, outside every brace, or the end. |
 | [`Frontend.prepare_meta`](#Frontend.prepare_meta) | Builds the helper that runs the project `meta` functions `inputs` reach, or finds it in the cache, and makes it the one their translation calls. |
 
-### `Frontend`
+### `Compiler`
 
-<a id="Frontend.build_loaded"></a>
-#### Frontend.build_loaded
+<a id="Compiler.next_file_scope"></a>
+#### Compiler.next_file_scope
 
-`MetaHelper Frontend.build_loaded(Frontend f, List filenames)`
+`Token Compiler.next_file_scope(Tokenizer tokens, int &depth)`
 
-Builds one helper exposing the loaded files' public functions.
-Main's native signature stays inside the helper; argc/argv calls accept
-an Array of argument Strings through the data protocol.
+Returns the next token of `tokens` at file scope, outside every brace,
+or the end. `depth` keeps the brace depth between calls, from 0.
 
 Source: `src/meta-project.x`
+
+### `Frontend`
 
 <a id="Frontend.prepare_meta"></a>
 #### Frontend.prepare_meta

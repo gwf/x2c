@@ -1059,11 +1059,22 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_fatal`](#x2c_fatal) | Prints `message` on native stderr and aborts. |
 | [`x2c_hash_bytes`](#x2c_hash_bytes) | Hashes an arbitrary byte block through the shared 64-bit mixer. |
 | [`x2c_hash_word`](#x2c_hash_word) | Narrows a mixed word to the nonzero 32-bit hash the tables expect. |
+| [`x2c_io_fail`](#x2c_io_fail) | Raises `<io-fail>` for a failed native handle call, with `operation` naming the call as a String or Symbol and `errno` holding `error`. |
 | [`x2c_mix64`](#x2c_mix64) | Avalanches one 64-bit word. |
+| [`x2c_native_check`](#x2c_native_check) | Aborts with `failure` and the native error number when `error` is nonzero. |
 
 ### Functions
+
+#### x2c_fatal
+
+`void x2c_fatal(const char *message)`
+
+Prints `message` on native stderr and aborts.
+
+Source: `lib/common.x`
 
 #### x2c_hash_bytes
 
@@ -1086,6 +1097,15 @@ ones; grouped Map storage marks occupancy in control bytes instead.
 
 Source: `lib/common.x`
 
+#### x2c_io_fail
+
+`void x2c_io_fail(Var operation, int error)`
+
+Raises `<io-fail>` for a failed native handle call, with `operation`
+naming the call as a String or Symbol and `errno` holding `error`.
+
+Source: `lib/common.x`
+
 #### x2c_mix64
 
 `inline unsigned long x2c_mix64(unsigned long word)`
@@ -1095,6 +1115,15 @@ This is MurmurHash3's fmix64 finalizer, the shared mixer behind every
 fixed-width hash in the runtime. It is six instructions, and its low bits
 are as well distributed as its high ones, which is what `Map` masks. Use
 `x2c_hash_bytes` for a block that spans several words.
+
+Source: `lib/common.x`
+
+#### x2c_native_check
+
+`void x2c_native_check(int error, const char *failure)`
+
+Aborts with `failure` and the native error number when `error` is
+nonzero.
 
 Source: `lib/common.x`
 

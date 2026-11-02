@@ -37,10 +37,11 @@ System utilities for environment discovery and workers.
 | [`Compiler.prune_cache`](#Compiler.prune_cache) | Removes each entry of the cache `directory` whose recorded `source` file no longer exists and that no other run holds by its `lock`. |
 | [`Compiler.run_command`](#Compiler.run_command) | Runs an external command with inherited streams and returns its status. |
 | [`Compiler.stage_dir`](#Compiler.stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
-| [`Diagnostics.driver_error`](#Diagnostics.driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
+| [`Diagnostics.driver_error`](#Diagnostics.driver_error) | Reports `message` with no note and exits as `Diagnostics.driver_fail` does. |
+| [`Diagnostics.driver_fail`](#Diagnostics.driver_fail) | Reports `message` and `note` as `Diagnostics.driver_report` does and exits with status 2. |
+| [`Diagnostics.driver_report`](#Diagnostics.driver_report) | Prints `x2c: error: <message>` to stderr, then `note: <note>` when `note` is not NULL, after clearing a transient progress line. |
 | [`Diagnostics.host_error`](#Diagnostics.host_error) | Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error` as its operation, path or program, and system reason. |
 | [`Env.find_program`](#Env.find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
-| [`Job.decode_wait_status`](#Job.decode_wait_status) | Decodes the wait status `raw` of a child that has ended. |
 | [`Path.content_identity`](#Path.content_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
 | [`Path.identifier_hash`](#Path.identifier_hash) | Hashes unit filename spelling for stable generated C identifiers. |
 | [`Path.is_layout_source`](#Path.is_layout_source) | Reports whether `path` names a file in the indentation syntax. |
@@ -319,12 +320,33 @@ Source: `src/utils.x`
 <a id="Diagnostics.driver_error"></a>
 #### Diagnostics.driver_error
 
-`void Diagnostics.driver_error(const char *message)`
+`_Noreturn void Diagnostics.driver_error(const char *message)`
 
-Prints `x2c: error: <message>` to stderr and exits with status 2.
-The streams are flushed and `atexit` handlers do not run, so the call is
-safe inside a `try` body or a catch arm, whose records those handlers
-would otherwise find still live.
+Reports `message` with no note and exits as `Diagnostics.driver_fail`
+does.
+
+Source: `src/utils.x`
+
+<a id="Diagnostics.driver_fail"></a>
+#### Diagnostics.driver_fail
+
+`void Diagnostics.driver_fail(const char *message, const char *note)`
+
+Reports `message` and `note` as `Diagnostics.driver_report` does and
+exits with status 2. The streams are flushed and `atexit` handlers do
+not run, so the call is safe inside a `try` body or a catch arm, whose
+records those handlers would otherwise find still live.
+
+Source: `src/utils.x`
+
+<a id="Diagnostics.driver_report"></a>
+#### Diagnostics.driver_report
+
+`void Diagnostics.driver_report(const char *message, const char *note)`
+
+Prints `x2c: error: <message>` to stderr, then `note: <note>` when
+`note` is not NULL, after clearing a transient progress line. The
+caller decides how the command ends.
 
 Source: `src/utils.x`
 
@@ -349,19 +371,6 @@ Source: `src/utils.x`
 Returns the spelling of the first `PATH` candidate for the program `name`
 that this process may execute, searched as `execvp` searches, or NULL.
 An empty entry names the current directory.
-
-Source: `src/utils.x`
-
-### `Job`
-
-<a id="Job.decode_wait_status"></a>
-#### Job.decode_wait_status
-
-`int Job.decode_wait_status(int raw, int &signal)`
-
-Decodes the wait status `raw` of a child that has ended. Returns its
-exit status, `128 + signal` when a signal ended it, or -1 otherwise,
-and stores that signal in `signal`, or 0 when no signal ended it.
 
 Source: `src/utils.x`
 
@@ -476,5 +485,5 @@ Source: `src/utils.x`
 Owns the environment the driver modules share: where the executable,
 home, stage, and packages are, which files are x2c source, the
 compiler's identity, how a file is locked or replaced, and the
-driver's log level and fatal error line. Host tools run through
+driver's log level and error lines. Host tools run through
 `lib/process.x`.

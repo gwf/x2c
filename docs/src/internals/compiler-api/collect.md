@@ -22,6 +22,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.configure_package`](#Compiler.configure_package) | Selects a source file's own package, as its standalone translation does. |
 | [`Compiler.declared_adoptions`](#Compiler.declared_adoptions) | Returns the `(adopt ...)` rows that the current file's collected entry declares, in no particular order. |
 | [`Compiler.forget_provisional_entries`](#Compiler.forget_provisional_entries) | Drops the entries a meta build collected without declaration defaults or with placeholders for its meta calls. |
+| [`Compiler.in_runtime_library`](#Compiler.in_runtime_library) | Reports whether the canonical `path` lies under the runtime's `lib`. |
 | [`Compiler.include_function_declarations`](#Compiler.include_function_declarations) | Adds the public functions an included unit itself declares. |
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
@@ -32,14 +33,12 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.install_syntax_prelude`](#Compiler.install_syntax_prelude) | Installs the syntax prelude's macros and keyword aliases into `c`'s macro state once. |
 | [`Compiler.interface_text`](#Compiler.interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.is_prelude_source`](#Compiler.is_prelude_source) | Reports whether the canonical `path` is a compiler prelude source. |
+| [`Compiler.is_runtime_source`](#Compiler.is_runtime_source) | Reports whether the canonical `path` is a runtime or compiler prelude source. |
 | [`Compiler.linked_meta_definitions_current`](#Compiler.linked_meta_definitions_current) | Reports whether a provider's linked definition hashes still match. |
 | [`Compiler.linked_meta_provider_current`](#Compiler.linked_meta_provider_current) | Reports whether a linked provider and the files it read are unchanged. |
 | [`Compiler.linked_prelude_records`](#Compiler.linked_prelude_records) | Returns the interface record text of each prelude component the compiler links, by home-portable path: the datum its `.xi` holds after the compiler identity. |
-| [`Compiler.loaded_call_type`](#Compiler.loaded_call_type) | Returns the native calling type of a loaded function. |
-| [`Compiler.loaded_provider`](#Compiler.loaded_provider) | Returns this source's native definitions with their canonical declarations and the public type rows needed to check other units' declarations. |
 | [`Compiler.meta_provider_hashes`](#Compiler.meta_provider_hashes) | Returns the shared function hashes of an advertised meta provider. |
 | [`Compiler.module_source`](#Compiler.module_source) | Returns the x2c source at `path`, whose own text is `text`, with its file-scope `module` block replaced by the text of each member it names, in order, or NULL when the text has no block. |
-| [`Compiler.name_loaded_provider`](#Compiler.name_loaded_provider) | Names declared bindings through one loaded provider. |
 | [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
 | [`Compiler.prelude_interface`](#Compiler.prelude_interface) | Returns the path of the first prelude interface this compiler can replay, or NULL when every candidate is absent or stale. |
 | [`Compiler.prelude_missing_interfaces`](#Compiler.prelude_missing_interfaces) | Returns the home-relative paths of the runtime units the prelude interface includes whose own interface cannot be replayed, or NULL when every one is current or there is no prelude interface. |
@@ -177,6 +176,15 @@ parses.
 
 Source: `src/collect/cache.x`
 
+<a id="Compiler.in_runtime_library"></a>
+#### Compiler.in_runtime_library
+
+`int Compiler.in_runtime_library(String path)`
+
+Reports whether the canonical `path` lies under the runtime's `lib`.
+
+Source: `src/collect/walk.x`
+
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
 
@@ -295,6 +303,17 @@ Reports whether the canonical `path` is a compiler prelude source.
 
 Source: `src/collect/walk.x`
 
+<a id="Compiler.is_runtime_source"></a>
+#### Compiler.is_runtime_source
+
+`int Compiler.is_runtime_source(String path)`
+
+Reports whether the canonical `path` is a runtime or compiler prelude
+source. They are collected once for every unit, so the command line's
+macros do not reach them.
+
+Source: `src/collect/walk.x`
+
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
 
@@ -329,27 +348,6 @@ record the interface grammar cannot spell is left out.
 
 Source: `src/collect/interfaces.x`
 
-<a id="Compiler.loaded_call_type"></a>
-#### Compiler.loaded_call_type
-
-`Type Compiler.loaded_call_type(Compiler c, Type type)`
-
-Returns the native calling type of a loaded function. Array parameters
-decay to pointers, and a parameter's outer qualifiers affect only its
-local copy. Keep the declared type for inspection and reload checks.
-
-Source: `src/collect/providers.x`
-
-<a id="Compiler.loaded_provider"></a>
-#### Compiler.loaded_provider
-
-`List Compiler.loaded_provider(Compiler c)`
-
-Returns this source's native definitions with their canonical declarations
-and the public type rows needed to check other units' declarations.
-
-Source: `src/collect/providers.x`
-
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
 
@@ -372,16 +370,6 @@ A member's quoted include of a file beside it is spelled from the
 entry's directory, so it names the same file there.
 
 Source: `src/collect/splice.x`
-
-<a id="Compiler.name_loaded_provider"></a>
-#### Compiler.name_loaded_provider
-
-`void Compiler.name_loaded_provider( Compiler c, String path, int index, List provider)`
-
-Names declared bindings through one loaded provider. Its own source
-declarations remain authoritative; private bindings never link out.
-
-Source: `src/collect/providers.x`
 
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings

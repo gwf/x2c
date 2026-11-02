@@ -194,8 +194,8 @@ forms completed before a later read or evaluation failure are not rolled
 back. A null `Lisp` session is rejected by `Lisp.eval_string` only after
 the stream has been consumed.
 
-**Raises:** `<bad-arg>` for a null stream or embedded NUL, `<io-fail>`,
-`<size-limit>`, or `<alloc-fail>` while reading, or any cause from
+**Raises:** `<bad-arg>` for a null stream, a cause from `File.string` while
+reading, including `<bad-arg>` for an embedded NUL, or any cause from
 `Lisp.eval_string`.
 
 Source: `lib/lisp/evaluate.x`
