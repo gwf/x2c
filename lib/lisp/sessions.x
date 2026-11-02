@@ -142,21 +142,16 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
     session. A host binding may shadow an inherited name in this session;
     it does not change the ancestor. Lisp `def` still rejects inherited
     names, including a name the host has shadowed locally.
-    Binding an `x2c.` name protects that namespace from later Lisp
-    `def` forms, but direct calls to this function may replace such a
-    binding.
-    Raises: `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-    `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+    Raises: `<bad-arg>` for a null session or name, `<bad-state>` for a
+    frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+    canonicalizing or storing the binding.
 */
 void Lisp.set_global(Lisp lisp, String name, Var value) {
   if (!lisp || !name) $error.global.args();
   if (lisp.frozen)
     $error.global.frozen("Lisp.set_global");
-  auto (&lisp.scope) {
-    Var interned = Atom.intern(name);
-    _binding_set(&lisp.scope, lisp.globals, interned, value);
-    if (name.startswith("x2c.")) lisp.protect_x2c = 1;
-  }
+  auto (&lisp.scope)
+    _binding_set(&lisp.scope, lisp.globals, Atom.intern(name), value);
 }
 
 // session storage
