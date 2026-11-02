@@ -19,6 +19,10 @@ static threaded unsigned long native_stack_low;
 extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
 #endif
 
+/* The least stack a recursion leaves for the calls and the raise that stop
+   it. Sanitized builds need about half of it on the smallest task stack. */
+static const unsigned long _STACK_RESERVE = 16 << 10;
+
 /* Exchanges the installed downward-growing task stack bound.
     Zero selects native pthread bounds for stack-aware runtime consumers.
 */
@@ -30,15 +34,17 @@ unsigned long x2c_execution_stack_exchange(unsigned long low) {
 
 /* Returns the lowest frame address that recursion started by the caller
    may reach: four fifths of the way from the caller down to the installed
-   task stack bound or, outside a task, the native thread's bound. The last
-   fifth is left for the calls and the raise that stop the recursion.
+   task stack bound or, outside a task, the native thread's bound, keeping
+   at least _STACK_RESERVE above that bound and no higher than the caller.
    Returns 0, which bounds nothing, when the bound is unknown. */
 unsigned long _x2c_stack_floor(void) {
   unsigned long at = (unsigned long) __builtin_frame_address(0);
   unsigned long low = x2c_execution_stack_low;
   if (!low) low = native_stack_low ? native_stack_low : _native_stack_low();
   if (!low || low >= at) return 0;
-  return low + (at - low) / 5;
+  unsigned long reserve = (at - low) / 5;
+  if (reserve < _STACK_RESERVE) reserve = _STACK_RESERVE;
+  return reserve < at - low ? low + reserve : at;
 }
 
 /* Reports whether the calling frame lies below `floor`, a result of
