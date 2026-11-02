@@ -145,12 +145,16 @@ Source: `lib/lisp/evaluate.x`
 Installs `function` as `name` and transfers its storage to `lisp`.
 Invalid arguments raise `<bad-arg>` without transferring ownership. Once
 validation succeeds, the `Func` moves before the global insertion. The
-caller relinquishes ownership even if name canonicalization or `Map`
-growth then raises `<alloc-fail>`, `<size-limit>`, or `<bad-enc>`, but
+caller relinquishes ownership even if the insertion then raises, but
 may borrow the pointer while the session lives. A direct function or
 noncapturing lambda converts to a shared handle that lives for the
 program; the session only borrows it. Values inside the `Func`,
 including its signature graph, retain their existing owners.
+
+**Raises:** `<bad-arg>` for a null session, name, or `function`; after the
+move, `<bad-state>` with operation `Lisp.set_global` for a frozen
+session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+canonicalizing the name or growing the global `Map`.
 
 Source: `lib/lisp/sessions.x`
 
@@ -169,7 +173,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-**Raises:** `<bad-arg>` for a null session.
+**Raises:** `<bad-arg>` for a null session or a budget that is not positive.
 
 Source: `lib/lisp/evaluate.x`
 
@@ -286,10 +290,11 @@ Source: `lib/lisp/evaluate.x`
 `int Lisp.try_get(Lisp lisp, String name, Var &?out)`
 
 Writes the global binding for `name` to `out` when present.
-Returns 1 only after writing the borrowed value. A null session, name, or
-output, or an absent name returns 0 and leaves `out` unchanged. Raises
-`<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
-canonicalized.
+Returns 1 only after writing the borrowed value. A null name or output,
+or an absent name, returns 0 and leaves `out` unchanged.
+
+**Raises:** `<bad-arg>` for a null session, or `<alloc-fail>` or `<bad-enc>`
+when a nonempty lookup name cannot be canonicalized.
 
 Source: `lib/lisp/sessions.x`
 
