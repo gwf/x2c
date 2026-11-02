@@ -273,3 +273,22 @@ with a NUL after preceding decoded bytes. Hex input `610062` previously
 reported decoded index 1, and base64 `YWJjAA==` reported 3. The shared String
 conversion now maps that position to the input coordinates, 2 and 4, through
 the existing malformed-error owner. Byte-returning decoders remain unchanged.
+
+## Combined validation follow-up
+
+The optional example run passes all 65 executable entries (61 run and four
+build-only). The full book check passes 451 compiled samples and 140 matching
+outputs. The complete runtime unit run passes 1,217 tests and 104,190 assertions.
+
+The fixture survey exercised all 1,468 manifests. Reviewed expectation changes
+cover canonical source paths after fixture symlinks, generated update-parameter
+names, typed null arms, and the outer-local assignment warning at its owning
+store. The literal-order fixture must declare the native macro's Var result;
+A13 deliberately rejects an unresolved native call. Tag forwarding must retain
+the type bindings already established by earlier typedefs.
+
+The sparse Scope preinitialization probe caught String allocation introduced
+by operation metadata. Scope must pass native operation text to Error without
+constructing a String. Error owns its canonical copy after the raw-floor check.
+This preserves String's header contract, the existing counted-raise ABI, and
+the two-object Scope/thread-state probe. No allocator dependency is added.
