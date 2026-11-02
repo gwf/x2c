@@ -326,7 +326,7 @@ remote branch and use `dev` as the base:
 ```sh
 branch="$(git branch --show-current)"
 git push -u origin "HEAD:refs/heads/$branch"
-gh pr create --draft --base dev --head "$branch"
+gh pr create --draft --fill --base dev --head "$branch"
 gh pr view --json baseRefName --jq .baseRefName   # must print dev
 ```
 
