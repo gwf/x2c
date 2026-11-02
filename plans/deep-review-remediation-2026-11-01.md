@@ -1,8 +1,12 @@
 # Deep review remediation (2026-11-01)
 
-> Status: active - batch A in progress from `dev` `024962818`.
-> The review record is workspace-local (`.context/repository-review-2026-11-01.md`
-> in the reviewing worktree); this plan carries the decisions and the batch map.
+> Status: active - batch A integrated from `dev` `024962818` and
+> submitted to the shared integrator on 2026-11-01 on branch
+> `gwf/repo-review-consistency-waste-f9b49f`; batch B is next;
+> batch C waits for Gary's decisions.
+> The review record is workspace-local
+> (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
+> this plan carries the decisions and the batch map.
 
 ## Requested behavior
 
@@ -100,6 +104,81 @@ diff, runs the focused checks on the combined tree, and submits ready PRs.
   split plan name; the twelve reference records that still state holds.
 - Stale derived artifacts: the packaged VS Code grammar and the viewer
   payload get an owner or leave the tree.
+
+### Carried from the batch A handoffs
+
+Defects the workers reproduced outside their files, for a later bug batch:
+
+- A Func conversion nested in a file-scope collection literal runs before
+  its handle (`static Array t = [(Func) twice];` holds a null Func); the
+  fix belongs in `src/cache.x` `_visit`, which should take each deferred
+  initializer's dependencies from the bindings its assignment reads.
+- A protocol update helper named from a public inline body still fails in
+  includers ("call to undeclared function"); its call names the helper by
+  string, so the inline-static check does not see it.
+- `$x2c.callback.adapt` adapters drop a `const` pointer result (`_split`,
+  `_check_signature` in `src/callables/callbacks.x`); an inline lambda
+  callback parameter type loses `const` through `resolve_key` in
+  `_adapt_lambda_value`; nullary adapters are emitted unprototyped.
+- `_check_arity` skips calls through a function pointer and
+  `complete_iter_chain` completes only direct calls; consumers never
+  complete chains at file scope, so a file-scope chain reports a wrong
+  arity at an end-of-file position.
+- The region check is silent on an implicit `List`, `Iter`, or typed-array
+  conversion to `Array` returned from a region (a use-after-free under
+  AddressSanitizer); producers without allocator rows: the base64 and hex
+  `decode_bytes` readers, `ArrayT.array`, `Url.parse_query`, `Args.parse`,
+  `SymbolSet.encode`, and the typed Array and Map families; operations that
+  return their argument (`Array.reverse`, `sort*`, `setslice`, `Map.merge`,
+  `Buffer.printf`) lose that aliasing.
+- `_check_rebinding` misses a wrapped file-scope alias (`_same_scope` in
+  `src/macros/aliases.x`); an alias does not conflict with a name an
+  include delivers; a compound literal receiver is rejected as not
+  addressable; `auto with = 5;` and `auto foreach = 5;` parse as regions.
+- `Map.iter`, `keys`, and `enumerate` on a null Map raise `<bad-arg>`
+  against the documented "exhausted"; `String.new_len` and `Buffer.str`
+  accept a length of `INT_MAX` and overflow in `_store`; `Regex.compile`
+  recursion is unbounded (100,000 nested groups crash); the Lisp evaluator
+  checks the stack only at lambda calls and overflows a 32 KiB task under
+  AddressSanitizer.
+- `$fail.frontend_input_read` always says "cannot open"; `-v` and `-###`
+  translate lines are not shell-quoted (`_print_action` in
+  `src/toolchain.x`); a cache record or depfile with a NUL byte ends in an
+  uncaught `<bad-arg>`; `x2c script` on a file without the shebang reports
+  a parse error instead of the missing shebang.
+
+Waste and drift the workers saw, for this batch:
+
+- `_switch_in_public_inline` and `_string_switch_public_role` repeat
+  `_lambda_in_public_inline` and `_lambda_bridge_role`; the "runtime
+  source" test lives in `src/collect/walk.x`, `src/frontend.x`, and
+  `src/macros/definitions/reading.x`;
+  `$fail.expressions_operand_unconverted` belongs beside its sibling in
+  `src/expressions-reports.x`; `_search_link` in `src/meta-project.x`
+  rebuilds meta helpers for every `-l`; `lib/channel.x` still boxes through
+  `convert(<long>)`; `protocol_helpers` cache entries may survive a
+  semantic-transaction rollback (unverified).
+- `x2c test` takes `--manifest` while `build`, `run`, and `repl` take
+  `--manifest-path`; `JOBS` survives in `unittest/compiler-fixtures/
+  README.md`, `tools/test-examples.py`, `tools/gate-state.py`, and the
+  beautify coverage probe; `examples/Makefile` includes neither `.mk`;
+  `unittest/benchmarks/hash-table/run.py` compiles without
+  `-fsigned-char`; `examples/shootout-unofficial` reads only the tracked
+  mode file; `tools/check-generated-stages.sh` stops at the first
+  differing file; `make verify` does not depend on `commands`, yet its
+  CLI probes make the driver check `x2c-package`, so a compiler rebuild
+  without `make commands` fails them with an identity mismatch.
+- Book: body placement before a later `#define` or `#include` and the
+  public-inline rule in `language.md`; `^` declarators still shown in
+  `x2c-syntax-map.md`, `etc/syntax/grammar.x`, and `extensions.x`, which
+  also omit `_Alignas`, `_Atomic`, and `_Complex`; `language.md` keyword
+  alias kinds omit Declaration, `$lock` is redefinable against the text
+  near line 2857, and the escape spans near line 3363 render with two
+  backslashes; `expand` is reserved in expressions but unlisted; a
+  `foreach` variable typed by a struct tag escapes the Var conversion
+  check; `cli.md` script-reuse triggers omit `-l`; `packages/pcre2/
+  README.md` shows `defer` where the `auto` form is now described;
+  `unittest/AGENTS.md` and `STATUS.md` need the skip-inside-a-test rule.
 
 ## Validation and delivery
 
