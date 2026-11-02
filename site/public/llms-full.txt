@@ -6344,6 +6344,11 @@ A clause's pattern is quoted implicitly and written as `List` syntax, with the
 same `?binder` and `*binder` spellings. A binder keeps its `?` where the body
 reads it. Without an `else` clause an exhausted `match-case` is `nil`.
 
+A string in Lisp source takes the escapes of an x2c
+[percent string](https://x2c-lang.dev/docs/reference/language.html#percent-literals-quote-and-unquote), so `"\x41"` and
+`"\u41"` both read as `A`. Unlike a percent string, it cannot hold a raw
+newline.
+
 A session can also reach the core value types directly. A Lisp value in
 a session is an x2c `Var`: a Lisp list is a `List`, a Lisp string is a
 `String`, and a quoted name is a `Symbol`. The operations below are the

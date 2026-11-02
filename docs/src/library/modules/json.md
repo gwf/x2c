@@ -69,8 +69,9 @@ repeated object name keeps its last value.
 
 **Raises:** `<malformed>` with `reason`, `offset`, `line`, and `column` details
 when `source` is not one JSON value surrounded only by whitespace, nests
-arrays and objects more than 512 deep, or contains a number too large for
-a `double`, an unpaired surrogate escape, or `\u0000`.
+arrays and objects more than 512 deep or deeper than the stack allows, or
+contains a number too large for a `double`, an unpaired surrogate escape,
+or `\u0000`.
 
 Source: `lib/json.x`
 
@@ -162,7 +163,7 @@ JavaScript decoders replace it.
 **Raises:** `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
 for a `String` and a `Symbol` name with the same spelling,
 `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
-deeper than 512 levels.
+deeper than 512 levels or than the stack allows.
 
 Source: `lib/json.x`
 
