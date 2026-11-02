@@ -218,8 +218,6 @@ typedef struct Compiler {
      share. Collection hashes this unit's bodies before they are parsed;
      `meta_calls` lists each parsed definition's referenced names. */
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
-  // An independently loaded source can keep its own compiled helper.
-  struct MetaHelper *meta_helper;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro
      session the first time compile-time code calls it. */
@@ -245,7 +243,6 @@ typedef struct Compiler {
   /* One plus the unit node count before the first form a full parse
      skipped, or zero. */
   int skipped_form;
-  int load_source;  // Expose the loaded unit's public functions.
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;  // Parsing a `module` declaration.
   int replaying_declaration;  // Binding a collected declaration's syntax.

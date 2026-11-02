@@ -135,7 +135,7 @@ static void _share_unit(Compiler c, Compiler owner) {
                source_facts, source_capture, source_occurrences,
                source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build, meta_helper, pending_inline_bodies,
+               meta_build, pending_inline_bodies,
                collection_native_files, command_macros, cpp_expansion);
 }
 

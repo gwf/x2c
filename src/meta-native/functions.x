@@ -142,7 +142,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   Var previous = Macro.subject();
   Macro.use_subject(rows);
   defer Macro.use_subject(previous);
-  if (c.meta_helper || !c.groups_meta())
+  if (!c.groups_meta())
     return c.meta_helper_call(name, site, values.list_free(), provider);
   c.bind_meta_group(name, site);
   Var bound;
