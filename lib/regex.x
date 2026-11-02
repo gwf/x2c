@@ -95,10 +95,12 @@ static typedef struct Parser {
 } Parser;
 
 /* One search of `text`: `end` is where the match ends, `depth` counts the
-   iterations of repeated groups in progress, and `starts` and `ends` hold
-   each capture's offsets, or -1. */
+   iterations of repeated groups in progress, `starts` and `ends` hold each
+   capture's offsets, or -1, and `floor` is the stack bound from
+   `_x2c_stack_floor`. */
 static typedef struct Matcher {
   Regex regex, const char *text, int len, end, depth, int *starts, *ends;
+  unsigned long floor;
 } Matcher;
 
 /* What runs once a sequence ends: the node after a group or alternation,
@@ -107,8 +109,8 @@ static typedef struct Rest {
   int repeat, _RegexNode node, int count, start, struct Rest *up;
 } *Rest;
 
-/* Each iteration of a repeated group is a C frame, so a match bounds them
-   before the stack runs out, on any thread. */
+/* Each iteration of a repeated group is a C frame, so a match stops at this
+   many, or sooner at the stack floor of a smaller stack. */
 static const int _DEPTH_LIMIT = 2000;
 
 // patterns
@@ -624,7 +626,8 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
   int count = regex.capture_count + 1;
   int *starts = xcalloc(2 * count, sizeof(int)), *ends = starts + count;
   defer xfree(starts);
-  Matcher m = {regex, subject, subject.len(), 0, 0, starts, ends};
+  Matcher m = {
+    regex, subject, subject.len(), 0, 0, starts, ends, _x2c_stack_floor()};
   for (int at = offset; at <= m.len; at++) {
     for (int i = 0; i < count; i++) starts[i] = ends[i] = -1;
     if (_run(m, regex.program, at, NULL)) return _found(m, subject, at);
@@ -729,7 +732,7 @@ static int _byte_loop(Matcher &m, _RegexNode rep, int pos, Rest k) {
    at `last_start`. */
 static int _iterate(
   Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest k) {
-  if (m.depth == _DEPTH_LIMIT) _too_deep(m);
+  if (m.depth == _DEPTH_LIMIT || _x2c_stack_below(m.floor)) _too_deep(m);
   m.depth++;
   int matched = _iteration(m, rep, count, pos, last_start, k);
   m.depth--;
@@ -776,7 +779,7 @@ static int _at_boundary(Matcher &m, int pos) {
 }
 
 static void _too_deep(Matcher &m) {
-  $error.depth(m.regex.pattern, _DEPTH_LIMIT);
+  $error.depth(m.regex.pattern, m.depth);
 }
 
 // match results

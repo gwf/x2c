@@ -1,6 +1,8 @@
 /*  test-task.x -- cooperative batch execution with ordinary Channels */
 
 #include "task.x"
+#include "json.x"
+#include "regex.x"
 #include "test-support.x"
 #include "test-macros.x"
 #include <stdatomic.h>
@@ -599,8 +601,49 @@ static void task_configured_stack_sizes_and_invalid_settings(void) {
   }
 }
 
+/* Regex, JSON, and the Lisp reader size their nesting limits for an 8 MiB
+   stack. On the smallest task stack each stops at the stack floor and
+   raises its own cause instead of overflowing. */
+static void task_small_stack_bounds_library_recursion(void) {
+  $test.scoped();
+  String pairs = "ab".repeat(1990);
+  String arrays = %"$("[".repeat(512))$("]".repeat(512))";
+  String lists = %"$("(".repeat(1000))x$(")".repeat(1000))";
+  Var nested = Json.parse(arrays);
+  int matched = 0, parsed = 0, written = 0, read = 0;
+  Func job = %!(void) using &matched, &parsed, &written, &read => {
+    try Regex.compile("^(?:ab)*$").match(pairs);
+    catch %(size-limit (operation "Regex.match") *): matched = 1;
+    try Json.parse(arrays);
+    catch %(malformed (operation "Json.parse")
+                      (reason "nesting exceeds the stack") *): parsed = 1;
+    try nested.json();
+    catch %(size-limit (operation "Var.json")
+                       (reason "nesting exceeds the stack")): written = 1;
+    unsigned cursor = 0;
+    try lists.read_lisp_form(cursor, NULL);
+    catch %(size-limit (operation "Lisp.read") *): read = 1;
+    return void;
+  };
+  const char *previous = getenv("X2C_TASK_STACK_BYTES");
+  char *saved = previous ? strdup(previous) : NULL;
+  try {
+    setenv("X2C_TASK_STACK_BYTES", "32768", 1);
+    Task.run([job]);
+  } finally {
+    if (saved) setenv("X2C_TASK_STACK_BYTES", saved, 1);
+    else unsetenv("X2C_TASK_STACK_BYTES");
+    free(saved);
+  }
+  EXPECT_INT_EQ(matched, 1);
+  EXPECT_INT_EQ(parsed, 1);
+  EXPECT_INT_EQ(written, 1);
+  EXPECT_INT_EQ(read, 1);
+}
+
 void task_suite(void) {
   $test.run(task_configured_stack_sizes_and_invalid_settings);
+  $test.run(task_small_stack_bounds_library_recursion);
   $test.run(task_empty_batch_has_no_completion);
   $test.run(task_request_reply_closes_after_clients_finish);
   $test.run(task_rendezvous_and_buffered_channels_drain);
