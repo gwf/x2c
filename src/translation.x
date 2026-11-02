@@ -51,6 +51,9 @@ static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
     stderr, "x2c: translate with %d workers over %d files\n",
     $jobs, $total);
 
+static macro Stmt $report.main_worker_start_failed() =>
+  fputs("x2c: error: could not start a translation worker\n", stderr);
+
 static macro Stmt $fail.main_input_not_x(Expr $input) =>
   Diagnostics.driver_error(%"translation input is not an .x file: $($input)");
 
@@ -86,7 +89,7 @@ int translate_request(
     .progress = progress,
     .total = request.inputs.len()};
   _preflight(t);
-  if (request.verbose || request.dry_run) _print_command(request);
+  if (request.verbose || request.dry_run) _print_commands(t);
   if (request.dry_run) return 0;
   t.frontend = Frontend.new(request);
   t.frontend.preprocessor_errors = _preprocessor_errors;
@@ -102,6 +105,15 @@ int translate_request(
   else _translate_serial(t);
   if (!progress && !request.inspects()) _report(t, started_at);
   return 0;
+}
+
+/** Prints the translate command that writes `inputs` to `out_dir`, as
+    verbose and dry-run requests show it.
+*/
+void translate_print_command(String out_dir, List inputs) {
+  fprintf(stderr, "x2c: translate --out-dir %s", out_dir);
+  foreach (String input in inputs) fprintf(stderr, " %s", input);
+  fputc('\n', stderr);
 }
 
 /* Each input must be a regular `.x` file. Units that write to the shared
@@ -137,11 +149,15 @@ static void _make_out_dir(String out_dir) {
     $fail.main_directory_unwritable(out_dir);
 }
 
-static void _print_command(CliRequest request) {
-  fprintf(stderr, "x2c: translate");
-  fprintf(stderr, " --out-dir %s", request.out_dir);
-  foreach (String input in request.inputs) fprintf(stderr, " %s", input);
-  fputc('\n', stderr);
+/* A build writes each unit to its own directory, so it shows one command
+   per unit, as its dry run does. */
+static void _print_commands(Translation &t) {
+  if (!t.unit_dirs) {
+    translate_print_command(t.request.out_dir, t.request.inputs);
+    return;
+  }
+  foreach (String input in t.request.inputs)
+    translate_print_command(t.unit_dirs[input], $(input));
 }
 
 static void _preprocessor_errors(String text) {
@@ -329,7 +345,8 @@ static void _start(Workers &w) {
   sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (pid > 0) return;
   if (capture) capture.close();
-  report_line(<error>, "could not start a translation worker");
+  report_suspend();
+  $report.main_worker_start_failed();
   w.failed++;
 }
 

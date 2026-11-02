@@ -91,6 +91,38 @@ chmod 755 "$X2C_CACHE_DIR/runs/stale-locked"
 chmod 644 "$X2C_CACHE_DIR/runs/stale-unread/source"
 [ "$status" = 0 ]
 [ ! -s run-logs/stale ]
+# A script that names a -l library is reused until a library that name may
+# select changes, even in place, or a directory its link searches changes.
+mkdir run-libs run-library-path library-versions
+for value in 0 1; do
+  printf 'int extra(void) { return %s; }\n' "$value" \
+    >"library-versions/extra$value.c"
+  "${CC:-cc}" -c "library-versions/extra$value.c" \
+    -o "library-versions/extra$value.o"
+  "${AR:-ar}" rcs "library-versions/libextra$value.a" \
+    "library-versions/extra$value.o"
+done
+cp library-versions/libextra0.a run-libs/libextra.a
+printf 'int extra(void);\nint main(void) { return extra(); }\n' \
+  >run-sources/linked.x
+linked() {
+  status=0
+  LIBRARY_PATH="$BUILD/run-library-path" "$X2C" script -v \
+    -L "$BUILD/run-libs" -lextra run-sources/linked.x \
+    >run-logs/out 2>"run-logs/$1" || status=$?
+  grep -q '^x2c: link ' "run-logs/$1"
+}
+linked linked-cold
+[ "$status" = 0 ]
+if linked linked-warm; then exit 1; fi
+[ "$status" = 0 ]
+cat library-versions/libextra1.a >run-libs/libextra.a
+linked linked-replaced
+[ "$status" = 1 ]
+: >run-libs/libunused.a
+linked linked-added
+: >run-library-path/libunused.a
+linked linked-library-path
 unset X2C_CACHE_DIR
 # Run keeps one default build receipt, while verbose shows the build phases.
 printf 'int main(void) { puts("program output"); return 0; }\n' > run-output.x

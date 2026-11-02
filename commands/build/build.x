@@ -1132,10 +1132,11 @@ static Map _script_members(Build b, List candidates) {
 /** Moves a script's built executable, and its debug symbols on macOS, to
     `executable` and records what it was built from, so
     `CliRequest.script_current` can reuse it. The record lists the script's
-    translation and compile prerequisites, package archives, and the runtime
-    archive. Unresolved library selections and files changed during the
-    build record nothing, so those executables rebuild through retained
-    translation and object state.
+    translation and compile prerequisites, package archives, the libraries
+    its `-l` selections may name, the runtime archive, and the directories
+    the build searched. A `-l` selection that names no file in those
+    directories, or a file changed during the build, records nothing, so
+    that executable rebuilds through retained translation and object state.
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
@@ -1146,12 +1147,11 @@ void Build.publish_script(Build b, String executable) {
     Path.move_to(%"$(b.output).dSYM", symbols);
   }
   unlink(%"$(b.state_root)/script");
-  // Unknown -l selections follow the ordinary retained build's relink policy.
-  foreach (String arg, b.toolchain.ld_args)
-    foreach (String part, arg.split(","))
-      if (part.startswith("-l")) return;
-  List files = _script_files(b);
-  List paths = files.append(_script_directories(b, files));
+  List files = _script_files(b), libraries = NULL;
+  List directories = _script_directories(b, files);
+  if (!_script_libraries(b, directories, libraries)) return;
+  files = files.append(libraries);
+  List paths = files.append(directories);
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
   if (ok && _files_unchanged(b, files))
@@ -1177,14 +1177,16 @@ static List _script_files(Build b) {
 }
 
 /* Every directory a compile or link of the script searches: explicit include
-   and library options, the compiler's own search lists, and the directory of
-   each prerequisite, where quoted includes look first. */
+   and library options, `LIBRARY_PATH`, the compiler's own search lists, and
+   the directory of each prerequisite, where quoted includes look first. */
 static List _script_directories(Build b, List prerequisites) {
   Array directories = [];
   foreach (Var directory, b.request.include_dirs) directories.push(directory);
   directories.push(b.toolchain.include_dir);
   _add_option_dirs(directories, b.toolchain.cc_args);
   _add_option_dirs(directories, b.toolchain.ld_args);
+  foreach (String directory, Env.get("LIBRARY_PATH").split(":"))
+    if (directory) directories.push(directory);
   foreach (String path, prerequisites)
     if (!path.startswith("search:")) directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
@@ -1217,6 +1219,35 @@ static List _search_entries(Build b, Array directories) {
     if (!(entry in unique)) unique.push(entry);
   }
   return unique.list_free();
+}
+
+/* The files each `-l` selection may name: `lib<name>` with a library
+   suffix in a searched directory. The linker links one of them, so the
+   record holds them all and a replaced library rebuilds the script. A
+   selection that names none returns 0. */
+static int _script_libraries(Build b, List directories, List &libraries) {
+  Array found = [];
+  foreach (String arg, b.toolchain.ld_args)
+    foreach (String part, arg.split(",")) {
+      if (!part.startswith("-l")) continue;
+      if (!_add_library_files(found, directories, part[2:])) return 0;
+    }
+  libraries = found.list_free();
+  return 1;
+}
+
+/* Adds each file `-l<name>` may name in `directories` to `found` and
+   returns how many it added. */
+static int _add_library_files(Array found, List directories, String name) {
+  int count = 0;
+  foreach (String directory, directories)
+    foreach (String suffix, %(".tbd" ".dylib" ".so" ".a")) {
+      String path = %"$(directory)lib$name$suffix";
+      if (!Path.is_file(path)) continue;
+      found.push(path);
+      count++;
+    }
+  return count;
 }
 
 /** Reports whether the script executable under `directory` still matches
