@@ -227,18 +227,11 @@ static List _protocol_update(
 static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "$((unsigned long) value)");
 
-/* A helper with external linkage serves a public inline body, which the
-   unit's header also carries, so its call declares the helper. */
 static List _update_call(
   Compiler c, List target, List operator, List value, String helper) {
   Type type = target.cadr();
   List address = %(expr $(type.reference()) (op & (parens $target)));
   List call = value ? %(call $helper (args $address $operator $value))
                     : %(call $helper (args $address $operator));
-  Type declared = NULL;
-  List binding = c.sym.resolve_global($(helper), declared);
-  if (declared.is_static()) return call;
-  List prototype = declared.declaration_ast(binding);
-  return %(parens
-           (block $prototype (stmnt (expr $(declared.apply()) $call))));
+  return c.protocol_helper_call(helper, call);
 }

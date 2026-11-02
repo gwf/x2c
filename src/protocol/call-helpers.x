@@ -64,6 +64,19 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
+/** Returns `call`, a call of the generated protocol helper `name` from the
+    code being parsed or lowered. A public inline body's helper has external
+    linkage, and the unit's header carries that body too, so there the call
+    declares the helper first.
+*/
+List Compiler.protocol_helper_call(Compiler c, String name, List call) {
+  if (!_exported(c)) return call;
+  Type type = NULL;
+  List binding = c.sym.resolve_global($(name), type);
+  return %(parens (block $(type.declaration_ast(binding))
+                    (stmnt (expr $(type.apply()) $call))));
+}
+
 // discard helpers
 
 /** The `discard_helper` for `participant`'s protocol `member`. */
