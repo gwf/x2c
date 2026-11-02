@@ -78,11 +78,9 @@ static List _source_projection(Compiler c, List ast, Map inline_bodies) {
         }
         else node = %(function $type $declarator $body);
       }
+      case %(typedef ?(Type type) ?): _record_tag(tags, type);
       case %(declare ?type (bindings *declarators)): {
-        Type declared = type;
-        match (declared.base_type())
-          case %((!or struct union) (binding ? ?(String tag)) *):
-            tags.forwarded[tag] = 1;
+        _record_tag(tags, type);
         List kept = declarators.filter(
           %!(item) => !_completed_prototype(c, _declaration_binding(item)));
         if (!kept && !_body_tag(type)) continue;
@@ -315,6 +313,13 @@ static List _private_use(Var value, Map statics, int origin) {
 module List _prototype(List type, List declarator) =>
   %(declare $type $(Ast.prototype_declarator(declarator)));
 
+/* A typedef also declares the tag of the type it names. */
+static void _record_tag(Partition &p, Type type) {
+  match (type.base_type())
+    case %((!or struct union) (binding ? ?(String tag)) *):
+      p.forwarded[tag] = 1;
+}
+
 /* A public prototype that names `struct tag` before the header declares it
    would give the tag prototype scope in C. A forward declaration of each
    tag the prototype spells keeps it the file-scope type. */
@@ -365,9 +370,7 @@ static void _add_declaration(Partition &p, Type type, List bindings) {
     if (_declares_object(bindings)) _keep(p);
     return;
   }
-  match (type.base_type())
-    case %((!or struct union) (binding ? ?(String tag)) *):
-      p.forwarded[tag] = 1;
+  _record_tag(p, type);
   foreach (List declarator in bindings.cdr())
     match (declarator) case %(bind ? ((fnmod *) *)):
       _forward_tags(p, $(type, declarator));
@@ -433,6 +436,7 @@ static int _place_object(Partition &p, List decl, Type type, List bindings) {
    if it were static. */
 static void _publish_node(Partition &p, List node) {
   if (!_names_static(node, p.statics)) {
+    match (node) case %(typedef ?(Type type) ?): _record_tag(p, type);
     p.header.push(node);
     return;
   }

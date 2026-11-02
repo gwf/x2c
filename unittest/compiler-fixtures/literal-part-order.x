@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-/* x2c has no type for a native macro's expansion. */
+/* The cast at the use supplies the native macro expansion's Var type. */
 #define BOXED(n) int_var(n)
 
 static String trail = NULL;
@@ -28,7 +28,7 @@ int main(void) {
   String name = "q";
   List stable = %($name $trail);
   List leading = %($(note("r")) $name);
-  Array native = [BOXED(note("s")), note("t")];
+  Array native = [(Var) BOXED(note("s")), note("t")];
   printf("%s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n", (char *) trail,
          (long) inserted.len(), (long) spliced.len(), (long) joined.len(),
          (long) quoted.len(), (long) bare.len(), (long) keyed.len(),
