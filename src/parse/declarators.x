@@ -250,8 +250,7 @@ module List _pointer(Compiler c) {
   List ptr = NULL;
   loop {
     Symbol symbol = c.peek(0);
-    if (symbol == <^> && !c.shallow)
-      $fail.parse_block_declarator(c, c.token);
+    if (symbol == <^> && !c.shallow) $fail.parse_block_declarator(c, c.token);
     if (symbol == <*> || symbol == <^> || symbol == <&> ||
         symbol.is_type_qualifier()) {
       c.next();
