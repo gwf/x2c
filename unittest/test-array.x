@@ -120,16 +120,40 @@ static void array_void_writes_transfer_before_mutation(void) {
   EXPECT_INT_EQ(array[0].int(), 1);
 }
 
-static void array_null_writes_return_void(void) {
+static void array_null_writes_raise_bad_arg(void) {
   $test.scoped();
   Array array = NULL;
+  int caught = 0;
 
-  EXPECT_TRUE(array.push(1) is void);
-  EXPECT_TRUE(array.unshift(1) is void);
-  EXPECT_TRUE(array.insert(0, 1) is void);
-  EXPECT_TRUE(array.push(void) is void);
-  EXPECT_TRUE(array.unshift(void) is void);
-  EXPECT_TRUE(array.insert(0, void) is void);
+  try array.setindex(0, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Array.setindex");
+  }
+  try array.push(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <push>);
+  }
+  try array.unshift(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <unshift>);
+  }
+  try array.insert(0, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 0);
+  }
+  try array.setindex(0, void);
+  catch %(bad-arg *): caught++;
+  try array.push(void);
+  catch %(bad-arg *): caught++;
+  try array.unshift(void);
+  catch %(bad-arg *): caught++;
+  try array.insert(0, void);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 8);
 }
 
 static void array_absent_elements_return_void(void) {
@@ -144,10 +168,33 @@ static void array_absent_elements_return_void(void) {
   EXPECT_TRUE(empty.remove(0) is void);
   EXPECT_TRUE(values.remove(1) is void);
   EXPECT_TRUE(values.remove(-2) is void);
-  EXPECT_TRUE(values.insert(2, 9) is void);
-  EXPECT_TRUE(values.insert(-3, 9) is void);
   EXPECT_INT_EQ(values.len(), 1);
   EXPECT_INT_EQ(values[0].int(), 7);
+}
+
+/* `insert` also accepts the position after the last element, so its range
+   reaches one position further at each end than `setindex`'s. */
+static void array_insert_bounds(void) {
+  $test.scoped();
+  Array values = [7];
+  int caught = 0;
+
+  try values.insert(2, 9);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 2);
+  }
+  try values.insert(-3, 9);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -3);
+  }
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_STR_EQ(values.repr(), "[ 7 ]");
+
+  EXPECT_INT_EQ(values.insert(1, 8).int(), 8);
+  EXPECT_INT_EQ(values.insert(-3, 6).int(), 6);
+  EXPECT_STR_EQ(values.repr(), "[ 6, 7, 8 ]");
 }
 
 
@@ -232,8 +279,10 @@ static void array_mixed_mutation_integrity(void) {
   EXPECT_VAR_EQ(arr[0], string);
   EXPECT_VAR_EQ(arr[1], list);
 
-  int len = arr.len();
-  EXPECT_TRUE(arr.insert(10, number) is void);
+  int len = arr.len(), caught = 0;
+  try arr.insert(10, number);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(arr.len(), len);
   EXPECT_VAR_EQ(arr[0], string);
   EXPECT_VAR_EQ(arr[1], list);
@@ -250,10 +299,25 @@ static void array_setindex_bounds(void) {
   Var vworld = world;
   EXPECT_VAR_EQ(arr.setindex(0, vworld), vworld);
   EXPECT_VAR_EQ(arr.getindex(-1), vworld);
-  Var one = 1;
-  EXPECT_TRUE(arr.setindex(5, one) is void);
-  EXPECT_TRUE(arr.setindex(5, void) is void);
-  EXPECT_TRUE(arr.setindex(-2, void) is void);
+
+  int caught = 0;
+  try arr.setindex(5, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Array.setindex");
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 5);
+  }
+  try arr.setindex(-2, 1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -2);
+  }
+  try arr.setindex(5, void);
+  catch %(bad-arg *): caught++;
+  try arr.setindex(-2, void);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+  EXPECT_INT_EQ(arr.len(), 1);
   EXPECT_VAR_EQ(arr[0], vworld);
 }
 
@@ -761,8 +825,9 @@ void array_suite(void) {
   $test.run(array_bare_literal_evaluates_elements);
   $test.run(array_push_pop);
   $test.run(array_void_writes_transfer_before_mutation);
-  $test.run(array_null_writes_return_void);
+  $test.run(array_null_writes_raise_bad_arg);
   $test.run(array_absent_elements_return_void);
+  $test.run(array_insert_bounds);
   $test.run(array_map_transfer_releases_temporary_scope);
   $test.run(array_map2_transfer_releases_temporary_scope);
   $test.run(array_reports_slice_domain_failures);

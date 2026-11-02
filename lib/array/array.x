@@ -94,14 +94,16 @@ Var Array.getindex(Array array, int index) {
 }
 
 /** Stores and returns `value`, counting negatives from the end.
-    Requires a non-null array. Returns `void` for an out-of-range index.
-    Raises: `<size-limit>` outside the index domain or `<void-op>` when
-    storing `void` at a valid index.
+    Raises: `<bad-arg>` for a null `Array` or an index outside it,
+    `<size-limit>` when its length cannot be indexed, or `<void-op>` for a
+    `void` value. The element is unchanged on failure.
 */
 Var Array.setindex(Array array, int index, Var value) {
-  if (array.length > INT_MAX) _size_limit(0, array.length);
-  index = x2c_normalize_index(index, (int) array.length);
-  if (index < 0) return void;
+  if (array == NULL) raise %(bad-arg (operation "Array.setindex"));
+  int requested = index, length = _int_length(array);
+  index = x2c_normalize_index(index, length);
+  if (index < 0)
+    raise %(bad-arg (operation "Array.setindex") (index $requested));
   if (value is void) raise %(void-op);
   return ((Var *) array.bytes)[index] = value;
 }

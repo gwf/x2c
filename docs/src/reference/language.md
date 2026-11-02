@@ -3920,6 +3920,8 @@ the collection's mutation operations; a read override does not replace them.
 - `Array` and `Map` indexed assignment are supported.
 - `Array` and `Map` indexed compound assignment and prefix/postfix `++`/`--`
 are supported as single-call updates.
+- An `Array` indexed assignment or update raises `<bad-arg>` on a null
+  `Array` or at an index outside its elements, and changes nothing.
 - Numeric `map[key] += value` initializes an absent key from `value`; other
   indexed updates require an existing destination.
 - `List` indexed assignment is not supported.

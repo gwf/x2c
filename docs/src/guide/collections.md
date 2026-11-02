@@ -1035,7 +1035,9 @@ smallest first: 10
 
 `Array.push` rejects `void`, and so does the counted construction used by
 non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
-returns `void`. `Array` has no status-bearing read.
+returns `void`. `Array` has no status-bearing read. A write that cannot be
+performed raises `<bad-arg>`: `setindex` or `insert` at an out-of-range
+index, or `setindex`, `push`, `unshift`, or `insert` on a null `Array`.
 
 ### Packed typed Arrays
 
@@ -1357,7 +1359,9 @@ raw native indexing, with no bounds test and no negative-index rule. See
 
 Writing is where the immutable/mutable split shows up in the syntax:
 
-- `array[i] = value` and `map[key] = value` are supported.
+- `array[i] = value` and `map[key] = value` are supported. Unlike a read,
+  `array[i] = value` with `i` out of range raises `<bad-arg>`, as
+  `array[i] += value` does.
 - `list[i] = value` is rejected by the compiler.
 - `string[i] = ch` is rejected, because a canonical `String` is immutable.
   Use the copy-producing `String.withindex`, or bind a transient
