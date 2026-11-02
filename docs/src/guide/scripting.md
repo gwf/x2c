@@ -480,7 +480,8 @@ with those names, rename the types, and add the options argument to
 
 A pattern that does not parse raises `<malformed>` with `reason`, the
 `pattern`, and the zero-based byte `offset` of the problem. So does a count
-above `INT_MAX`, 2147483647.
+above `INT_MAX`, 2147483647. Groups nested more than 2,000 deep, or deeper
+than a smaller stack allows, raise `<size-limit>`.
 
 ### Matching
 

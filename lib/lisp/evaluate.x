@@ -46,8 +46,13 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
   Scope.push(&lisp.user);
   defer Scope.pop();
   Lisp prior_lisp = x2c_lisp_active;
+  unsigned long prior_floor = lisp.stack_floor;
   x2c_lisp_active = lisp;
-  defer x2c_lisp_active = prior_lisp;
+  lisp.stack_floor = _stack_floor();
+  defer {
+    x2c_lisp_active = prior_lisp;
+    lisp.stack_floor = prior_floor;
+  }
   @Code.body($function)
 }
 
@@ -60,9 +65,13 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
     The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
     `Lisp.eval_string` each open one, and a call that runs it out does not
     renew it, so one entry reports a runaway once however many calls follow.
+    Raises: `<bad-arg>` for a null session or a budget that is not positive.
 */
 void Lisp.call_budget(Lisp lisp, long budget) {
-  if (lisp && budget > 0) lisp.call_step_max = budget;
+  if (!lisp) $error.entry.null("Lisp.call_budget");
+  if (budget <= 0)
+    raise %(bad-arg (operation "Lisp.call_budget") (budget $budget));
+  lisp.call_step_max = budget;
 }
 
 /** Sets whether evaluation in `lisp` is interrupted. While `interrupted` is
@@ -201,6 +210,7 @@ static Var _eval(Lisp lisp, Var expr, LispEnv env) {
     return value;
   }
   if (expr is not <list> || expr.is_nil()) return expr;
+  if (_x2c_stack_below(lisp.stack_floor)) $error.eval.stack();
   List form = expr;
   Var callable = _eval(lisp, form.car(), env);
   return _apply(lisp, callable, form.cdr(), env);
@@ -358,6 +368,7 @@ static Var _special_import(Lisp lisp, List args, LispEnv env) {
    evaluates to. */
 static Var _qq(Lisp l, Var expr, LispEnv env, int depth) {
   if (expr is not <list> || expr.is_nil()) return expr;
+  if (_x2c_stack_below(l.stack_floor)) $error.eval.stack();
   List form = expr;
   Var head = form.car();
   if (head == lsym_quasiquote)
@@ -422,7 +433,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
 static Var _call_lambda_slots(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
   _spend_call(lisp);
-  _check_stack(lisp, lambda, (unsigned long) __builtin_frame_address(0));
+  _check_stack(lisp, lambda);
   lisp.call_depth++;
   defer lisp.call_depth--;
   Var *owned = NULL;
@@ -591,6 +602,7 @@ static void _free_form(FreeNames &f, Var form, List bound, int depth) {
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
+  if (_x2c_stack_below(f.lisp.stack_floor)) $error.eval.stack();
   if (depth < 0) _all(f, items, bound, depth);
   else if (depth > 0) _quoted(f, items, bound, depth);
   else _free_call(f, items, bound);
@@ -738,9 +750,9 @@ static int _local_lookup(LispEnv env, Var name, Var &out) {
 /* call limits
 
    An evaluation stops with `<call-stack>` when it makes more calls than its
-   budget or nests past its share of the C stack, and with `<interrupt>`
-   while its session is interrupted. The public entry opens the budget, and
-   the outermost call measures the stack. */
+   budget or nests forms or calls past its share of the C stack, and with
+   `<interrupt>` while its session is interrupted. The public entry opens
+   the budget and sets the stack floor for the evaluation it starts. */
 
 static void _spend_call(Lisp lisp) {
   if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
@@ -750,25 +762,18 @@ static void _spend_call(Lisp lisp) {
   }
 }
 
-/* `at` is the frame address of the call being made. The outermost call
-   sets the base and the allowance the calls nested below it share. */
-static void _check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
-  if (!lisp.call_depth) {
-    lisp.stack_base = at;
-    lisp.stack_allowance = _stack_allowance(at);
-  }
-  unsigned long used =
-    lisp.stack_base > at ? lisp.stack_base - at : at - lisp.stack_base;
-  if (used > lisp.stack_allowance)
-    $error.apply.stack(lambda.body);
+static void _check_stack(Lisp lisp, Lambda lambda) {
+  if (_x2c_stack_below(lisp.stack_floor)) $error.apply.stack(lambda.body);
 }
 
-/* Returns the stack evaluator calls starting at `at` may use: down to the
-   floor `_x2c_stack_floor` sets, at most LISP_STACK_BYTES_MAX. An unknown
-   bound uses that maximum. */
-static unsigned long _stack_allowance(unsigned long at) {
-  unsigned long left = at - _x2c_stack_floor();
-  return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
+/* Returns the lowest frame address evaluation entered here may reach: the
+   floor `_x2c_stack_floor` sets, at most LISP_STACK_BYTES_MAX below the
+   entry. An unknown bound uses that maximum. */
+static unsigned long _stack_floor(void) {
+  unsigned long lowest =
+    (unsigned long) __builtin_frame_address(0) - LISP_STACK_BYTES_MAX;
+  unsigned long floor = _x2c_stack_floor();
+  return floor > lowest ? floor : lowest;
 }
 
 /* Opens one budget for an outer entry. A call that runs out raises, and

@@ -601,19 +601,27 @@ static void task_configured_stack_sizes_and_invalid_settings(void) {
   }
 }
 
-/* Regex, JSON, and the Lisp reader size their nesting limits for an 8 MiB
-   stack. On the smallest task stack each stops at the stack floor and
-   raises its own cause instead of overflowing. */
+/* Regex, JSON, and the Lisp reader and evaluator size their nesting limits
+   for an 8 MiB stack. On the smallest task stack each stops at the stack
+   floor and raises its own cause instead of overflowing. */
 static void task_small_stack_bounds_library_recursion(void) {
   $test.scoped();
   String pairs = "ab".repeat(1990);
+  String groups = %"$("(".repeat(1000))a$(")".repeat(1000))";
   String arrays = %"$("[".repeat(512))$("]".repeat(512))";
   String lists = %"$("(".repeat(1000))x$(")".repeat(1000))";
-  Var nested = Json.parse(arrays);
-  int matched = 0, parsed = 0, written = 0, read = 0;
-  Func job = %!(void) using &matched, &parsed, &written, &read => {
+  Var nested = Json.parse(arrays), sum = 0;
+  for (int i = 0; i < 1000; i++) sum = %(+ 1 $sum);
+  Lisp lisp = Lisp.new();
+  defer lisp.destroy();
+  int matched = 0, compiled = 0, parsed = 0, written = 0, read = 0;
+  int evaluated = 0;
+  Func job = %!(void) using &matched, &compiled, &parsed, &written, &read,
+                            &evaluated, &lisp => {
     try Regex.compile("^(?:ab)*$").match(pairs);
     catch %(size-limit (operation "Regex.match") *): matched = 1;
+    try Regex.compile(groups);
+    catch %(size-limit (operation "Regex.compile") *): compiled = 1;
     try Json.parse(arrays);
     catch %(malformed (operation "Json.parse")
                       (reason "nesting exceeds the stack") *): parsed = 1;
@@ -623,6 +631,8 @@ static void task_small_stack_bounds_library_recursion(void) {
     unsigned cursor = 0;
     try lists.read_lisp_form(cursor, NULL);
     catch %(size-limit (operation "Lisp.read") *): read = 1;
+    try lisp.eval(sum);
+    catch %(call-stack (operation "eval")): evaluated = 1;
     return void;
   };
   const char *previous = getenv("X2C_TASK_STACK_BYTES");
@@ -636,9 +646,11 @@ static void task_small_stack_bounds_library_recursion(void) {
     free(saved);
   }
   EXPECT_INT_EQ(matched, 1);
+  EXPECT_INT_EQ(compiled, 1);
   EXPECT_INT_EQ(parsed, 1);
   EXPECT_INT_EQ(written, 1);
   EXPECT_INT_EQ(read, 1);
+  EXPECT_INT_EQ(evaluated, 1);
 }
 
 void task_suite(void) {

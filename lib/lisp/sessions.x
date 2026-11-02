@@ -96,13 +96,15 @@ void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
 // globals
 
 /** Writes the global binding for `name` to `out` when present.
-    Returns 1 only after writing the borrowed value. A null session, name, or
-    output, or an absent name returns 0 and leaves `out` unchanged. Raises
-    `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
-    canonicalized.
+    Returns 1 only after writing the borrowed value. A null name or output,
+    or an absent name, returns 0 and leaves `out` unchanged.
+    Raises: `<bad-arg>` for a null session, or `<alloc-fail>` or `<bad-enc>`
+    when a nonempty lookup name cannot be canonicalized.
 */
-int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
-  lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
+int Lisp.try_get(Lisp lisp, String name, Var &?out) {
+  if (!lisp) $error.entry.null("Lisp.try_get");
+  return name && out && _global_lookup(lisp, Atom.intern(name), out);
+}
 
 /** Removes this session's global binding for `name`, if present. An
     ancestor's binding of the same name becomes visible again. Code that
@@ -122,12 +124,15 @@ void Lisp.remove_global(Lisp lisp, String name) {
 /** Installs `function` as `name` and transfers its storage to `lisp`.
     Invalid arguments raise `<bad-arg>` without transferring ownership. Once
     validation succeeds, the `Func` moves before the global insertion. The
-    caller relinquishes ownership even if name canonicalization or `Map`
-    growth then raises `<alloc-fail>`, `<size-limit>`, or `<bad-enc>`, but
+    caller relinquishes ownership even if the insertion then raises, but
     may borrow the pointer while the session lives. A direct function or
     noncapturing lambda converts to a shared handle that lives for the
     program; the session only borrows it. Values inside the `Func`,
     including its signature graph, retain their existing owners.
+    Raises: `<bad-arg>` for a null session, name, or `function`; after the
+    move, `<bad-state>` with operation `Lisp.set_global` for a frozen
+    session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+    canonicalizing the name or growing the global `Map`.
 */
 void Lisp.bind(Lisp lisp, String name, Func function) {
   if (!lisp || !name || !function) $error.bind.args();

@@ -52,6 +52,10 @@ static macro Stmt $error.eval.unbound(Expr $expr) {
   raise %(unbound (name $($expr)));
 }
 
+static macro Stmt $error.eval.stack() {
+  raise %(call-stack (operation "eval"));
+}
+
 static macro Stmt $error.call.type(Expr $callable) {
   raise %(not-call (actual $($callable.kind())));
 }
@@ -240,8 +244,7 @@ module struct Lisp {
   Func specials[
     sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0])];
   int call_depth;       // evaluator calls nested on this session
-  unsigned long stack_base; // C stack address at the outermost call
-  unsigned long stack_allowance; // bytes below stack_base calls may use
+  unsigned long stack_floor; // lowest frame address evaluation may reach
   Lambda tail_lambda;   // a tail call waiting for its caller's frame
   Var *tail_values;     // its evaluated arguments, owned by the session
   int tail_count;
