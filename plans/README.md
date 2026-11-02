@@ -46,7 +46,7 @@ deferred work or main promotion.
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Deep review remediation](deep-review-remediation-2026-11-01.md) | Repairs and waste removal from the 2026-11-01 whole-repository review, in batches. | Follow the plan's batch map; batch C waits for Gary's decisions. |
+| [Deep review remediation](deep-review-remediation-2026-11-01.md) | Repairs and waste removal from the 2026-11-01 whole-repository review, in batches. | Batches B and C are submitted separately; then the carried defects. |
 | [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
 | [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
