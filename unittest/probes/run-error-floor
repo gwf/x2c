@@ -1,8 +1,8 @@
 #!/usr/bin/env -S x2c script
 /*  run-error-floor -- the error floor and shutdown under terminal failures
 
-    Builds `error-fatal.x` and `error-fatal-preinit.c` in the stage's build
-    mode, then runs each mode and checks its status, standard output, and
+    Builds `error-fatal.x` and `error-fatal-preinit.c` with the build's C
+    flags, then runs each mode and checks its status, standard output, and
     standard error.
 */
 #include "probe.x"
@@ -66,10 +66,10 @@ Path build = root.join("unittest/build/error-probes");
 Path stage = root.join("builds/0");
 program = build.join("error-fatal");
 preinit = build.join("error-fatal-preinit");
-List flags = probe_mode_flags(root);
+List flags = probe_cflags();
 build.make_dirs();
 
-Path x2c = stage.join("x2c");
+String x2c = probe_env("X2C", stage.join("x2c"));
 Path source = root.join("unittest/probes/error-fatal.x");
 %($x2c translate --live-symbols --out-dir $build $source).job().run();
 String cc = probe_env("CC", "cc"), library = %"-L$stage";

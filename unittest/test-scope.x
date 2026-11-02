@@ -10,7 +10,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+// Flush first so the child cannot write the parent's buffered output again.
 static int _scope_rejected(void (*action)(void)) {
+  fflush(NULL);
   pid_t pid = fork();
   if (pid < 0) return 0;
   if (pid == 0) {

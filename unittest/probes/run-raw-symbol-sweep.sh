@@ -195,7 +195,7 @@ done
 # required source, so an xargs that never spawns cannot score green.
 if ((required)); then
   printf '%s\n' "${sources[@]}" | \
-    xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
+    xargs -P "${BUILD_JOBS:-1}" -n 1 \
       "$ROOT/unittest/probes/run-raw-symbol-sweep.sh" --one || true
   failures=$(find "$BUILD/failed" -type f | grep -c '' || true)
   reported=$(find "$BUILD/done" -type f | grep -c '' || true)

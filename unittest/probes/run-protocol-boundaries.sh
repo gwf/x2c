@@ -7,6 +7,7 @@ SOURCE="$ROOT/unittest/probes/protocol"
 FIXTURES="$ROOT/unittest/compiler-fixtures"
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 CC=${CC:-cc}
+read -r -a build_cflags <<<"${BUILD_CFLAGS:-}"
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/tag-scope" "$BUILD/header-batch" "$BUILD/header-solo" \
@@ -29,6 +30,9 @@ fail() {
   echo "protocol boundary probe failure: $1" >&2
   exit 1
 }
+
+# Generated C compiles with the build's flags.
+compile() { "$CC" ${build_cflags[@]+"${build_cflags[@]}"} "$@"; }
 
 copy_runtime_sources() {
   local destination=$1 source
@@ -61,7 +65,7 @@ grep -q 'Vec_var' "$BUILD/header-solo/header-unit.c" ||
   fail "source-declared boxing bypassed its exact converter"
 
 "$X2C" translate --out-dir "$BUILD/converter" "$SOURCE/converter-count.x"
-"$CC" -iquote "$ROOT/include/x2c" "$BUILD/converter/converter-count.c" \
+compile -iquote "$ROOT/include/x2c" "$BUILD/converter/converter-count.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
   -o "$BUILD/converter/converter-count"
 "$BUILD/converter/converter-count" >"$BUILD/converter/stdout"
@@ -69,7 +73,7 @@ grep -qx '1 1' "$BUILD/converter/stdout" ||
   fail "ordinary custom boxing did not call P.var exactly once"
 
 "$X2C" translate --out-dir "$BUILD/wrong-case" "$SOURCE/wrong-case.x"
-"$CC" -iquote "$ROOT/include/x2c" "$BUILD/wrong-case/wrong-case.c" \
+compile -iquote "$ROOT/include/x2c" "$BUILD/wrong-case/wrong-case.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$BUILD/wrong-case/wrong-case"
 if ( "$BUILD/wrong-case/wrong-case" \
       >"$BUILD/wrong-case/stdout" 2>"$BUILD/wrong-case/stderr"
@@ -160,7 +164,7 @@ if grep -q '_x2c_gensym_proto_vec_str\\|x2c_register_descriptor' \
     "$BUILD/protocol-owner/protocol-consumer.c"; then
   fail "protocol consumer claimed owner-local runtime artifacts"
 fi
-"$CC" -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-owner" \
+compile -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-owner" \
   "$BUILD/protocol-owner/protocol-owner.c" \
   "$BUILD/protocol-owner/protocol-consumer.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
@@ -191,7 +195,7 @@ grep -q 'Feet_magnitude(value)' \
   "$BUILD/protocol-basedefault/protocol-basedefault-consumer.c" ||
   fail "base-default consumer did not resolve the dot call to the \
 generated binding"
-"$CC" -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-basedefault" \
+compile -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-basedefault" \
   "$BUILD/protocol-basedefault/protocol-basedefault-owner.c" \
   "$BUILD/protocol-basedefault/protocol-basedefault-consumer.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
@@ -265,7 +269,7 @@ for mode in snapshot live; do
   if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   out="$BUILD/protocol-inherited/$mode"
   "$X2C" translate ${flags[@]+"${flags[@]}"} --out-dir "$out" "$inherited"
-  "$CC" -iquote "$ROOT/include/x2c" \
+  compile -iquote "$ROOT/include/x2c" \
     "$out/protocol-typedef-inherited-adoption.c" \
     -L"$ROOT/builds/0" -lx2c -lm -o "$out/program"
   "$out/program" >"$out/stdout"
@@ -311,7 +315,7 @@ for mode in snapshot live; do
     count=$(grep -c '^int Packet_truth(Packet a0){$' "$out/$name.c")
     [[ "$count" == 1 ]] ||
       fail "$mode $name emitted $count Packet_truth definitions"
-    "$CC" -iquote "$ROOT/include/x2c" "$out/$name.c" \
+    compile -iquote "$ROOT/include/x2c" "$out/$name.c" \
       -L"$ROOT/builds/0" -lx2c -lm -o "$out/program"
     "$out/program" >"$out/stdout"
     cmp -s "$FIXTURES/$name.stdout" "$out/stdout" ||
@@ -512,7 +516,7 @@ done
 collision_build="$BUILD/var-tag-collision"
 mkdir -p "$collision_build"
 "$X2C" translate --out-dir "$collision_build" "$SOURCE/var-tag-collision.x"
-"$CC" -iquote "$ROOT/builds/0/lib" -iquote "$collision_build" \
+compile -iquote "$ROOT/builds/0/lib" -iquote "$collision_build" \
   "$collision_build/var-tag-collision.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$collision_build/var-tag-collision"
 
@@ -537,7 +541,7 @@ for kind in collision builtin; do
   tagged_build="$BUILD/var-explicit-tag-$kind"
   source="$SOURCE/var-explicit-tag-$kind.x"
   "$X2C" translate --out-dir "$tagged_build" "$source"
-  "$CC" -iquote "$ROOT/builds/0/lib" -iquote "$tagged_build" \
+  compile -iquote "$ROOT/builds/0/lib" -iquote "$tagged_build" \
     "$tagged_build/var-explicit-tag-$kind.c" \
     -L"$ROOT/builds/0" -lx2c -lm \
     -o "$tagged_build/var-explicit-tag-$kind"
@@ -572,7 +576,7 @@ mkdir -p "$private_class_build"
 "$X2C" translate --out-dir "$private_class_build" \
   "$SOURCE/class-private-a.x" "$SOURCE/class-private-b.x" \
   "$SOURCE/class-private-main.x"
-"$CC" -iquote "$ROOT/builds/0/lib" -iquote "$private_class_build" \
+compile -iquote "$ROOT/builds/0/lib" -iquote "$private_class_build" \
   "$private_class_build/class-private-a.c" \
   "$private_class_build/class-private-b.c" \
   "$private_class_build/class-private-main.c" \

@@ -299,6 +299,7 @@ static String _program(unsigned long long seed, int groups) {
 Path root = probe_root(argv[0]);
 String x2c = probe_env("X2C", root.join("builds/0/x2c"));
 String cc = probe_env("CC", "cc");
+List flags = probe_cflags();
 Path build = probe_scratch(root, "match-differential");
 unsigned long long first = argc > 1 ? strtoull(argv[1], NULL, 10) : 1;
 int rounds = argc > 2 ? atoi(argv[2]) : 4;
@@ -313,8 +314,8 @@ for (int round = 0; round < rounds; round++) {
   Path c_file = build.join(%"case-$seed.c");
   String include = root.join("include/x2c"), stage = root.join("builds/0/src");
   String library = root.join("builds/0");
-  %($cc -O1 -w -iquote $include -iquote $stage $c_file -L$library -lx2c -lm
-    -o $program).job().run();
+  %($cc @flags -O1 -w -iquote $include -iquote $stage $c_file -L$library
+    -lx2c -lm -o $program).job().run();
   if (%($program).job().status()) failed++;
 }
 if (failed) probe_fail(%"match differential: $failed of $rounds rounds disagree");

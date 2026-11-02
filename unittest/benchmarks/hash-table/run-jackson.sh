@@ -46,12 +46,7 @@ case "$profile" in
     ;;
 esac
 
-if [ "$(cat "$root/etc/build-mode.local" 2>/dev/null ||
-  cat "$root/etc/build-mode" 2>/dev/null)" != optimize ]; then
-  echo "Jackson benchmark requires the optimized x2c build mode" >&2
-  echo "run 'make config-optimize', clean, and rebuild before benchmarking" >&2
-  exit 2
-fi
+. "$root/unittest/benchmarks/hash-table/require-optimize.sh"
 
 mkdir -p "$campaign_dir" "$results_root"
 if [ ! -d "$source_dir/.git" ]; then
@@ -115,7 +110,9 @@ timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 results_dir="$results_root/$timestamp-$mode-$profile"
 mkdir -p "$results_dir"
 
-"$cc" -O3 -DNDEBUG -iquote "$root/include/x2c" \
+# The x2c side takes the build's flags, then the suite's.
+# shellcheck disable=SC2086
+"$cc" ${BUILD_CFLAGS:-} -O3 -DNDEBUG -iquote "$root/include/x2c" \
   -c "$adapter_dir/abi.c" -o "$abi_object"
 
 (
