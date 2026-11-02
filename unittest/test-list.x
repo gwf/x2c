@@ -505,6 +505,20 @@ static void list_assoc_hash_equal(void) {
   EXPECT_INT_EQ(assoc.hash(), assoc_copy.hash());
 }
 
+/* Search compares with `==`, so numbers of different types match by value.
+   `unique` compares with `Var.equal` and keeps the types apart. */
+static void list_search_matches_numbers_by_value(void) {
+  List numbers = %(1 1.0 2);
+  EXPECT_INT_EQ(numbers.index(1.0), 0);
+  EXPECT_INT_EQ(numbers.index(1L), 0);
+  EXPECT_TRUE(numbers.contains(2L));
+  EXPECT_TRUE(numbers.unique() == numbers);
+
+  List alist = %((1 one) (2 two));
+  EXPECT_TRUE(alist.assoc(1.0) == <one>);
+  EXPECT_TRUE(alist.assoc(2L) == <two>);
+}
+
 static void list_array_conversion_boundaries(void) {
   Array values = [1, 2, 3];
   List list = values.list_free();
@@ -703,6 +717,7 @@ void list_suite(void) {
   $test.run(list_literal_integers);
   $test.run(list_literal_nested_collections);
   $test.run(list_assoc_hash_equal);
+  $test.run(list_search_matches_numbers_by_value);
   $test.run(list_array_conversion_boundaries);
   $test.run(list_array_list_free_consumes_the_receiver);
   $test.run(list_sort_orders_values);

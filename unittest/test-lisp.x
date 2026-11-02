@@ -484,11 +484,9 @@ static void lisp_transports_void_outside_collections(void) {
   EXPECT_TRUE(_ev(lisp, "(List.assoc '() 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(List.get '() 0)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.getindex (Array.new) 0)") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.setindex (Array.new) 0 1)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.take_last (Array.new))") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.shift (Array.new))") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.remove (Array.new) 0)") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.insert (Array.new) 1 7)") is void);
   EXPECT_TRUE(_ev(lisp, "(Map.get (Map.new) 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(Map.del (Map.new) 'missing)") is void);
 
@@ -496,6 +494,10 @@ static void lisp_transports_void_outside_collections(void) {
                 <void-op>);
   EXPECT_INT_EQ(
     _raised_code(lisp, "(Array.push (Array.new) (no-value))"), <void-op>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.setindex (Array.new) 0 1)"), <bad-arg>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.insert (Array.new) 1 7)"), <bad-arg>);
   EXPECT_INT_EQ(
     _raised_code(lisp,
                  "(Map.setindex (Map.new) 'key (no-value))"),

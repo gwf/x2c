@@ -623,7 +623,8 @@ Array key, equal contents: void
 Key your `Map`s with `String`s, `Symbol`s, `Atom`s, or numbers. Those compare
 by content. Keys compare by `Var.equal`, which agrees with `Var.hash`, so a
 number key also keeps its type: `3` and `3L` are two keys although
-`3 == 3L`.
+`3 == 3L`. Searching a `List` or `Array` with `index`, `contains`, `count`,
+or `assoc` uses `==` instead, so it finds `3` when given `3L`.
 
 ```x2c
 Map by_number = {};
@@ -692,7 +693,9 @@ length: 3
 
 `List.assoc` treats the `List` as an association list of `(key value ...)`
 pairs and returns the `cadr` of the first matching pair. `List.get` dispatches
-on the key: integers index, anything else does an `assoc` lookup.
+on the key: integers index, anything else does an `assoc` lookup. `assoc`,
+`index`, and `contains` match with `==`, so `1.0` finds the pair keyed by
+`1`, which a `Map` keyed by `1` would not.
 
 The functional `List` operations take `Func`. A fixed nonvariadic function or
 function pointer converts automatically, and you can pass a capturing lambda
@@ -947,7 +950,9 @@ printf("%s top=%s len=%zu\n", stack.repr(), top.repr(), stack.len());
 The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `insert`, `remove`, and `splice`; searching is `index`, `find`,
 `contains`, and `count`; and there are `map`, `map2`, `foldl`, `sort`,
-`reverse`, `concat`, `copy`, and `join`.
+`reverse`, `concat`, `copy`, and `join`. `index`, `contains`, and `count`
+compare with `==`, so two numbers compare as their native values do in C:
+`[1, 1.0, 1L].count(1)` is 3.
 
 `index(value)` returns the first equal element's zero-based position, or `-1`.
 `find(predicate)` returns the first accepted element as `Var`, or `void`.
@@ -1035,7 +1040,9 @@ smallest first: 10
 
 `Array.push` rejects `void`, and so does the counted construction used by
 non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
-returns `void`. `Array` has no status-bearing read.
+returns `void`. `Array` has no status-bearing read. A write that cannot be
+performed raises `<bad-arg>`: `setindex` or `insert` at an out-of-range
+index, or `setindex`, `push`, `unshift`, or `insert` on a null `Array`.
 
 ### Packed typed Arrays
 
@@ -1357,7 +1364,9 @@ raw native indexing, with no bounds test and no negative-index rule. See
 
 Writing is where the immutable/mutable split shows up in the syntax:
 
-- `array[i] = value` and `map[key] = value` are supported.
+- `array[i] = value` and `map[key] = value` are supported. Unlike a read,
+  `array[i] = value` with `i` out of range raises `<bad-arg>`, as
+  `array[i] += value` does.
 - `list[i] = value` is rejected by the compiler.
 - `string[i] = ch` is rejected, because a canonical `String` is immutable.
   Use the copy-producing `String.withindex`, or bind a transient

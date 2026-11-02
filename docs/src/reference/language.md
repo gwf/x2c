@@ -3793,7 +3793,10 @@ and relational punctuation orders them with `Var.compare`. `===` on `Var`
 operands compares their bits, and two numbers are identical when they have
 the same type and the same bits. So `NaN === NaN` holds and
 `+0.0 === -0.0` does not. `Map` keys compare with `Var.equal` and sorting
-uses `Var.compare`, so both keep numeric types apart.
+uses `Var.compare`, so both keep numeric types apart; `List.unique` compares
+as `Map` keys do. `List` and `Array` searches compare with `==` instead.
+Given `1.0` or `1L`, `index`, `contains`, `in`, and `Array.count` match an
+element `1`, and `List.assoc` matches a key `1`.
 
 For `==`, `!=`, `<`, `>`, `<=`, and `>=`, a C string literal opposite an
 operand of static type `String`, or an alias reaching `String`, converts to
@@ -3920,6 +3923,8 @@ the collection's mutation operations; a read override does not replace them.
 - `Array` and `Map` indexed assignment are supported.
 - `Array` and `Map` indexed compound assignment and prefix/postfix `++`/`--`
 are supported as single-call updates.
+- An `Array` indexed assignment or update raises `<bad-arg>` on a null
+  `Array` or at an index outside its elements, and changes nothing.
 - Numeric `map[key] += value` initializes an absent key from `value`; other
   indexed updates require an existing destination.
 - `List` indexed assignment is not supported.
