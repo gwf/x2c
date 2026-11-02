@@ -61,7 +61,7 @@ cached literal slots and deferred file-static initializers.
 Public functions:
 
 `Compiler.setup_cache_init`, `Compiler.zero_initializer`,
-`Compiler.initialization_guard`
+`Compiler.initialization_guard`, `Compiler.without_const`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -247,7 +247,7 @@ Public functions:
 `Compiler.typed_capture_declarations`, `Compiler.parse_callable_body`,
 `Compiler.parse_governed`, `Compiler.parse_block_item`,
 `Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
-`Compiler.finish_return_statement`
+`Compiler.finish_return_statement`, `_x2c_block_keywords`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -352,13 +352,14 @@ Public functions:
 
 `Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
 `Compiler.module_source`, `Compiler.collect_symbols`,
-`Compiler.is_prelude_source`, `Compiler.in_runtime_library`,
-`Compiler.is_runtime_source`, `Compiler.install_syntax_prelude`,
-`Compiler.configure_package`, `Compiler.included_compile_time_effects`,
-`Compiler.prelude_sources`, `Compiler.install_included_effects`,
-`Compiler.included_macros`, `Compiler.initial_macros`,
-`SourceView.resolve_include`, `Compiler.include_typedef_names`,
-`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
+`Compiler.prelude_dependencies`, `Compiler.is_prelude_source`,
+`Compiler.in_runtime_library`, `Compiler.is_runtime_source`,
+`Compiler.install_syntax_prelude`, `Compiler.configure_package`,
+`Compiler.included_compile_time_effects`, `Compiler.prelude_sources`,
+`Compiler.install_included_effects`, `Compiler.included_macros`,
+`Compiler.initial_macros`, `SourceView.resolve_include`,
+`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
 `Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
 `Compiler.callable_symbols`, `Compiler.publish_inline_types`,
@@ -568,9 +569,10 @@ Public functions:
 `Compiler.postfix_completions`, `Compiler.resolve_postfix_member`,
 `_x2c_func_call_arguments`, `Compiler.complete_iter_chain`,
 `Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
-`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
-`Compiler.convert_segment_to_string`, `Compiler.convert_expression`,
-`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+`Compiler.is_operator_temporary`, `Compiler.check_explicit_converter`,
+`Compiler.promote_string_literal`, `Compiler.convert_segment_to_string`,
+`Compiler.convert_expression`, `Compiler.converter_call`,
+`Compiler.is_builtin_converter_call`
 
 ### [src/generate/generate.x](../src/generate/generate.x)
 
@@ -648,7 +650,7 @@ Public functions:
 `Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
 `Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
 `Compiler.unbound_alias_names`, `Compiler.check_included_names`,
-`Compiler.alias_expression`
+`Compiler.alias_expression`, `Compiler.named_alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
 
@@ -740,18 +742,18 @@ Public functions:
 `Compiler.parse_type_name`, `Compiler.parse_named_type`,
 `Compiler.parse_members`, `Compiler.parse_fields`, `Compiler.parse_field`,
 `Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
-`Compiler.parse_declarator_argument`, `Compiler.parse_parameter_list`,
-`Compiler.parse_parameter`, `Compiler.bind_template_local`,
-`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_optional_identifier`,
-`Compiler.parse_basic_identifier`, `Compiler.auto_region_form`,
-`Compiler.parse_function_target`, `Compiler.parse_function_definition`,
-`Ast.declared_return`, `Compiler.enclosing`, `Compiler.enter_function`,
-`Compiler.enter`, `Compiler.function_entry`, `Compiler.exit_function`,
-`Compiler.place_entry`, `Compiler.place_after`, `Compiler.close_placements`,
-`Compiler.leave_item`, `Compiler.finish_initializers`,
-`Compiler.bind_source_statement`, `Compiler.bind_syntax`,
-`Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
+`_x2c_type_keywords`, `Compiler.parse_declarator_argument`,
+`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
+`Compiler.bind_template_local`, `Compiler.bind_parameter`,
+`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
+`Compiler.parse_optional_identifier`, `Compiler.parse_basic_identifier`,
+`Compiler.auto_region_form`, `Compiler.parse_function_target`,
+`Compiler.parse_function_definition`, `Ast.declared_return`,
+`Compiler.enclosing`, `Compiler.enter_function`, `Compiler.enter`,
+`Compiler.function_entry`, `Compiler.exit_function`, `Compiler.place_entry`,
+`Compiler.place_after`, `Compiler.close_placements`, `Compiler.leave_item`,
+`Compiler.finish_initializers`, `Compiler.bind_source_statement`,
+`Compiler.bind_syntax`, `Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
 `Compiler.bind_callable_body`, `Compiler.source_clause`,
 `Compiler.bind_match_condition`
 
@@ -874,7 +876,7 @@ Public functions:
 `Block.reserve`, `Block.len`, `Block.capacity`, `Block.truth`,
 `Block.truncate`, `Block.clear`, `Bytes.try_pop`, `Bytes.block`, `Block.pop`,
 `Block.try_pop`, `Block.scope`, `Bytes.new`, `Block.new`, `Block.free`,
-`Block.move_to`
+`Block.move_to`, `x2c_block_bad_arg`
 
 ### [lib/buffer.x](../lib/buffer.x)
 
@@ -1179,16 +1181,16 @@ optional compound `List` selectors.
 
 Public functions:
 
-`List.cdar`, `Var.cdar`, `List.caaar`, `Var.caaar`, `List.cdaar`, `Var.cdaar`,
-`List.cadar`, `Var.cadar`, `List.cddar`, `Var.cddar`, `List.caadr`,
-`Var.caadr`, `List.cdadr`, `Var.cdadr`, `List.cdddr`, `Var.cdddr`,
-`List.caaaar`, `Var.caaaar`, `List.cdaaar`, `Var.cdaaar`, `List.cadaar`,
-`Var.cadaar`, `List.cddaar`, `Var.cddaar`, `List.caadar`, `Var.caadar`,
-`List.cdadar`, `Var.cdadar`, `List.caddar`, `Var.caddar`, `List.cdddar`,
-`Var.cdddar`, `List.caaadr`, `Var.caaadr`, `List.cdaadr`, `Var.cdaadr`,
-`List.cadadr`, `Var.cadadr`, `List.cddadr`, `Var.cddadr`, `List.caaddr`,
-`Var.caaddr`, `List.cdaddr`, `Var.cdaddr`, `List.cadddr`, `Var.cadddr`,
-`List.cddddr`, `Var.cddddr`
+`List_cdar`, `Var.cdar`, `List.caaar`, `Var.caaar`, `List_cdaar`, `Var.cdaar`,
+`List.cadar`, `Var.cadar`, `List_cddar`, `Var.cddar`, `List.caadr`,
+`Var.caadr`, `List_cdadr`, `Var.cdadr`, `List_cdddr`, `Var.cdddr`,
+`List.caaaar`, `Var.caaaar`, `List_cdaaar`, `Var.cdaaar`, `List.cadaar`,
+`Var.cadaar`, `List_cddaar`, `Var.cddaar`, `List.caadar`, `Var.caadar`,
+`List_cdadar`, `Var.cdadar`, `List.caddar`, `Var.caddar`, `List_cdddar`,
+`Var.cdddar`, `List.caaadr`, `Var.caaadr`, `List_cdaadr`, `Var.cdaadr`,
+`List.cadadr`, `Var.cadadr`, `List_cddadr`, `Var.cddadr`, `List.caaddr`,
+`Var.caaddr`, `List_cdaddr`, `Var.cdaddr`, `List.cadddr`, `Var.cadddr`,
+`List_cddddr`, `Var.cddddr`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -1212,8 +1214,8 @@ the compiler surface a `meta` function calls.
 
 Public functions:
 
-`type_name_error`, `type_declaration_parts`, `type_base_suffix`,
-`declarator_append_modifiers`
+`_x2c_type_qualifiers`, `type_name_error`, `type_declaration_parts`,
+`type_base_suffix`, `declarator_append_modifiers`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -1327,7 +1329,7 @@ Public functions:
 `scan_block_comment_status`, `scan_preprocessor`, `scan_number`,
 `scan_number_typed`, `scan_number_type`, `scan_digital`, `scan_float`,
 `scan_hexponent`, `scan_keyword`, `scan_identifier`, `scan_ascii_alpha`,
-`scan_keyword_type`, `scan_c_operator`, `scan_c_string`,
+`_x2c_ascii_word`, `scan_keyword_type`, `scan_c_operator`, `scan_c_string`,
 `scan_c_string_status`, `scan_lisp_string_status`, `scan_c_character`,
 `scan_c_escape_value`, `scan_string_segment`, `scan_symbol_literal`,
 `scan_symbol_literal_status`, `scan_symbol_set_atom`, `scan_atom`,
@@ -1475,7 +1477,8 @@ Public functions:
 `Type.is_reference`, `Type.is_optional_reference`, `Type.is_function`,
 `Type.is_bitfield`, `Type.reference`, `Type.list`, `Type.apply`,
 `Type.rest_index`, `Type.function_parts`, `Type.dereference`, `List.type`,
-`Type.is_pointer`, `Type.is_array`, `Var.type`, `Type.qualify`,
+`Type.is_pointer`, `Type.is_array`, `Var.type`, `_x2c_type_unqualified`,
+`_x2c_type_specifier_tail`, `_x2c_type_const`, `Type.qualify`,
 `Type.rest_container`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
 `Type.is_threaded`, `Type.is_typedef`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_char_pointer_like`, `Type.is_builtin`,
@@ -1495,10 +1498,10 @@ Public functions:
 
 `ArrayChar.new`, `ArrayChar.try_next`, `ArrayChar.push`,
 `ArrayChar.try_take_last`, `ArrayChar.take_last`, `ArrayChar.shift`,
-`ArrayChar.unshift`, `ArrayChar.insert`, `ArrayChar.remove`, `ArrayChar.copy`,
-`ArrayChar.getslice`, `ArrayChar.setslice`, `ArrayChar.remslice`,
-`ArrayChar.splice`, `ArrayChar.index`, `ArrayChar.contains`, `ArrayChar.count`,
-`ArrayChar.find`, `ArrayChar.concat`, `ArrayChar.reverse`, `ArrayChar.equal`,
+`ArrayChar.unshift`, `ArrayChar.insert`, `ArrayChar.remove`, `ArrayChar_copy`,
+`ArrayChar_getslice`, `ArrayChar_setslice`, `ArrayChar_remslice`,
+`ArrayChar_splice`, `ArrayChar.index`, `ArrayChar.contains`, `ArrayChar.count`,
+`ArrayChar.find`, `ArrayChar_concat`, `ArrayChar_reverse`, `ArrayChar.equal`,
 `ArrayChar.try_get`, `ArrayChar.getindex`, `ArrayChar.setindex`,
 `ArrayChar.compare`, `ArrayChar.write_repr`, `ArrayChar.write_str`,
 `ArrayChar.str`, `ArrayChar.repr`, `ArrayChar.array`, `ArrayChar.updateindex`,
@@ -1506,10 +1509,10 @@ Public functions:
 `Array.arraychar`, `ArrayChar.iter`, `ArrayShort.new`, `ArrayShort.try_next`,
 `ArrayShort.push`, `ArrayShort.try_take_last`, `ArrayShort.take_last`,
 `ArrayShort.shift`, `ArrayShort.unshift`, `ArrayShort.insert`,
-`ArrayShort.remove`, `ArrayShort.copy`, `ArrayShort.getslice`,
-`ArrayShort.setslice`, `ArrayShort.remslice`, `ArrayShort.splice`,
+`ArrayShort.remove`, `ArrayShort_copy`, `ArrayShort_getslice`,
+`ArrayShort_setslice`, `ArrayShort_remslice`, `ArrayShort_splice`,
 `ArrayShort.index`, `ArrayShort.contains`, `ArrayShort.count`,
-`ArrayShort.find`, `ArrayShort.concat`, `ArrayShort.reverse`,
+`ArrayShort.find`, `ArrayShort_concat`, `ArrayShort_reverse`,
 `ArrayShort.equal`, `ArrayShort.try_get`, `ArrayShort.getindex`,
 `ArrayShort.setindex`, `ArrayShort.compare`, `ArrayShort.write_repr`,
 `ArrayShort.write_str`, `ArrayShort.str`, `ArrayShort.repr`,
@@ -1517,10 +1520,10 @@ Public functions:
 `ArrayShort.var`, `ArrayShort.block`, `Var.arrayshort`, `Array.arrayshort`,
 `ArrayShort.iter`, `ArrayInt.new`, `ArrayInt.try_next`, `ArrayInt.push`,
 `ArrayInt.try_take_last`, `ArrayInt.take_last`, `ArrayInt.shift`,
-`ArrayInt.unshift`, `ArrayInt.insert`, `ArrayInt.remove`, `ArrayInt.copy`,
-`ArrayInt.getslice`, `ArrayInt.setslice`, `ArrayInt.remslice`,
-`ArrayInt.splice`, `ArrayInt.index`, `ArrayInt.contains`, `ArrayInt.count`,
-`ArrayInt.find`, `ArrayInt.concat`, `ArrayInt.reverse`, `ArrayInt.equal`,
+`ArrayInt.unshift`, `ArrayInt.insert`, `ArrayInt.remove`, `ArrayInt_copy`,
+`ArrayInt_getslice`, `ArrayInt_setslice`, `ArrayInt_remslice`,
+`ArrayInt_splice`, `ArrayInt.index`, `ArrayInt.contains`, `ArrayInt.count`,
+`ArrayInt.find`, `ArrayInt_concat`, `ArrayInt_reverse`, `ArrayInt.equal`,
 `ArrayInt.try_get`, `ArrayInt.getindex`, `ArrayInt.setindex`,
 `ArrayInt.compare`, `ArrayInt.write_repr`, `ArrayInt.write_str`,
 `ArrayInt.str`, `ArrayInt.repr`, `ArrayInt.array`, `ArrayInt.updateindex`,
@@ -1528,10 +1531,10 @@ Public functions:
 `Array.arrayint`, `ArrayInt.iter`, `ArrayLong.new`, `ArrayLong.try_next`,
 `ArrayLong.push`, `ArrayLong.try_take_last`, `ArrayLong.take_last`,
 `ArrayLong.shift`, `ArrayLong.unshift`, `ArrayLong.insert`, `ArrayLong.remove`,
-`ArrayLong.copy`, `ArrayLong.getslice`, `ArrayLong.setslice`,
-`ArrayLong.remslice`, `ArrayLong.splice`, `ArrayLong.index`,
-`ArrayLong.contains`, `ArrayLong.count`, `ArrayLong.find`, `ArrayLong.concat`,
-`ArrayLong.reverse`, `ArrayLong.equal`, `ArrayLong.try_get`,
+`ArrayLong_copy`, `ArrayLong_getslice`, `ArrayLong_setslice`,
+`ArrayLong_remslice`, `ArrayLong_splice`, `ArrayLong.index`,
+`ArrayLong.contains`, `ArrayLong.count`, `ArrayLong.find`, `ArrayLong_concat`,
+`ArrayLong_reverse`, `ArrayLong.equal`, `ArrayLong.try_get`,
 `ArrayLong.getindex`, `ArrayLong.setindex`, `ArrayLong.compare`,
 `ArrayLong.write_repr`, `ArrayLong.write_str`, `ArrayLong.str`,
 `ArrayLong.repr`, `ArrayLong.array`, `ArrayLong.updateindex`,
@@ -1539,10 +1542,10 @@ Public functions:
 `Array.arraylong`, `ArrayLong.iter`, `ArrayFloat.new`, `ArrayFloat.try_next`,
 `ArrayFloat.push`, `ArrayFloat.try_take_last`, `ArrayFloat.take_last`,
 `ArrayFloat.shift`, `ArrayFloat.unshift`, `ArrayFloat.insert`,
-`ArrayFloat.remove`, `ArrayFloat.copy`, `ArrayFloat.getslice`,
-`ArrayFloat.setslice`, `ArrayFloat.remslice`, `ArrayFloat.splice`,
+`ArrayFloat.remove`, `ArrayFloat_copy`, `ArrayFloat_getslice`,
+`ArrayFloat_setslice`, `ArrayFloat_remslice`, `ArrayFloat_splice`,
 `ArrayFloat.index`, `ArrayFloat.contains`, `ArrayFloat.count`,
-`ArrayFloat.find`, `ArrayFloat.concat`, `ArrayFloat.reverse`,
+`ArrayFloat.find`, `ArrayFloat_concat`, `ArrayFloat_reverse`,
 `ArrayFloat.equal`, `ArrayFloat.try_get`, `ArrayFloat.getindex`,
 `ArrayFloat.setindex`, `ArrayFloat.compare`, `ArrayFloat.write_repr`,
 `ArrayFloat.write_str`, `ArrayFloat.str`, `ArrayFloat.repr`,
@@ -1550,10 +1553,10 @@ Public functions:
 `ArrayFloat.var`, `ArrayFloat.block`, `Var.arrayfloat`, `Array.arrayfloat`,
 `ArrayFloat.iter`, `ArrayDbl.new`, `ArrayDbl.try_next`, `ArrayDbl.push`,
 `ArrayDbl.try_take_last`, `ArrayDbl.take_last`, `ArrayDbl.shift`,
-`ArrayDbl.unshift`, `ArrayDbl.insert`, `ArrayDbl.remove`, `ArrayDbl.copy`,
-`ArrayDbl.getslice`, `ArrayDbl.setslice`, `ArrayDbl.remslice`,
-`ArrayDbl.splice`, `ArrayDbl.index`, `ArrayDbl.contains`, `ArrayDbl.count`,
-`ArrayDbl.find`, `ArrayDbl.concat`, `ArrayDbl.reverse`, `ArrayDbl.equal`,
+`ArrayDbl.unshift`, `ArrayDbl.insert`, `ArrayDbl.remove`, `ArrayDbl_copy`,
+`ArrayDbl_getslice`, `ArrayDbl_setslice`, `ArrayDbl_remslice`,
+`ArrayDbl_splice`, `ArrayDbl.index`, `ArrayDbl.contains`, `ArrayDbl.count`,
+`ArrayDbl.find`, `ArrayDbl_concat`, `ArrayDbl_reverse`, `ArrayDbl.equal`,
 `ArrayDbl.try_get`, `ArrayDbl.getindex`, `ArrayDbl.setindex`,
 `ArrayDbl.compare`, `ArrayDbl.write_repr`, `ArrayDbl.write_str`,
 `ArrayDbl.str`, `ArrayDbl.repr`, `ArrayDbl.array`, `ArrayDbl.updateindex`,
@@ -1561,10 +1564,10 @@ Public functions:
 `Array.arraydbl`, `ArrayDbl.iter`, `ArrayString.new`, `ArrayString.try_next`,
 `ArrayString.push`, `ArrayString.try_take_last`, `ArrayString.take_last`,
 `ArrayString.shift`, `ArrayString.unshift`, `ArrayString.insert`,
-`ArrayString.remove`, `ArrayString.copy`, `ArrayString.getslice`,
-`ArrayString.setslice`, `ArrayString.remslice`, `ArrayString.splice`,
+`ArrayString.remove`, `ArrayString_copy`, `ArrayString_getslice`,
+`ArrayString_setslice`, `ArrayString_remslice`, `ArrayString_splice`,
 `ArrayString.index`, `ArrayString.contains`, `ArrayString.count`,
-`ArrayString.find`, `ArrayString.concat`, `ArrayString.reverse`,
+`ArrayString.find`, `ArrayString_concat`, `ArrayString_reverse`,
 `ArrayString.equal`, `ArrayString.try_get`, `ArrayString.getindex`,
 `ArrayString.setindex`, `ArrayString.compare`, `ArrayString.write_repr`,
 `ArrayString.write_str`, `ArrayString.str`, `ArrayString.repr`,
@@ -1924,9 +1927,10 @@ Public functions:
 `String.is_space`, `String.is_lower`, `String.is_lower_under`,
 `String.is_upper`, `String.is_upper_under`, `String.repr`, `String.escape`,
 `String.write_repr`, `String.parse_char`, `String.parse`, `String.unescape`,
-`String.format`, `String.try_long`, `String.try_double`, `Split.var`,
-`Var.split`, `String.split`, `String.split_n`, `String.split_lines`,
-`String.words`, `String.lines`, `String.splits`, `Split.iter`, `Split.try_next`
+`x2c_string_unescape_bytes`, `String.format`, `String.try_long`,
+`String.try_double`, `Split.var`, `Var.split`, `String.split`,
+`String.split_n`, `String.split_lines`, `String.words`, `String.lines`,
+`String.splits`, `Split.iter`, `Split.try_next`
 
 ### [lib/var/var.x](../lib/var/var.x)
 
