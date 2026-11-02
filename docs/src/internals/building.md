@@ -71,10 +71,7 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
     `llms-full.txt`;
   - `docs/src/reference/syntax/x2c.ebnf` and
     `docs/src/reference/syntax/lexical-data.md`, which
-    `tools/syntax-spec write` renders from `etc/syntax/`;
-  - `tools/version-viewer/snapshots.js` and its digest in the viewer's
-    `index.html`, which `python3 tools/version-viewer/refresh-snapshots.py`
-    rewrites.
+    `tools/syntax-spec write` renders from `etc/syntax/`.
 
 Do not hand-edit any of them; regenerate them with their targets.
 

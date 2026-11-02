@@ -109,6 +109,7 @@ dist/
 site/.astro/
 site/node_modules/
 etc/vsc-extension/node_modules/
+etc/vsc-extension/*.vsix
 __pycache__/
 .envrc
 

@@ -259,4 +259,7 @@ $("export").addEventListener("click", () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 $("changes-only").checked = false;
-loadDataset(window.TUTORIAL_SNAPSHOTS || demo);
+const snapshots = document.createElement("script");
+snapshots.src = `snapshots.js?v=${Date.now()}`;
+snapshots.onload = snapshots.onerror = () => loadDataset(window.TUTORIAL_SNAPSHOTS || demo);
+document.body.append(snapshots);
