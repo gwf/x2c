@@ -972,24 +972,28 @@ int x2c_normalize_slice(int &start, int &stop, int step, int length) {
 // runtime failures
 
 /* A failed native primitive leaves shared runtime state unknown, so the
-   runtime reports it on native stderr and aborts. Neither function
+   runtime reports it on native stderr and aborts. Neither function below
    allocates, so both serve before Error is ready and while Scope or Error
    is failing. */
+
+/** Prints `message` on native stderr and aborts. */
 void x2c_fatal(const char *message) {
   fprintf(stderr, "%s\n", message);
   abort();
 }
 
-/* Aborts with `failure` and the native error number when `error` is
-   nonzero. */
+/** Aborts with `failure` and the native error number when `error` is
+    nonzero.
+*/
 void x2c_native_check(int error, const char *failure) {
   if (!error) return;
   fprintf(stderr, "%s (%d)\n", failure, error);
   abort();
 }
 
-/* Native handle failures share one detail shape: `operation` names the
-   failed call as a String or Symbol, and `errno` holds its error number. */
+/** Raises `<io-fail>` for a failed native handle call, with `operation`
+    naming the call as a String or Symbol and `errno` holding `error`.
+*/
 void x2c_io_fail(Var operation, int error) {
   raise %(io-fail (operation $operation) (errno $error));
 }
