@@ -42,16 +42,18 @@ module typedef struct Emitter {
    structure alone and none of them tracks grouping.
 
    Larger levels bind more tightly, matching the C grammar: member access with
-   postfix, then unary and cast, the binary levels above the conditional,
-   the conditional, and assignment. Level 0 means the emitter has no
-   grouping rule for the operator, which leaves its text exactly as the
-   other cases build it. */
+   postfix, then unary, cast, the binary levels above the conditional, the
+   conditional, and assignment. A cast or a unary operator applies to a
+   cast, but `sizeof` applies only to a unary expression. Level 0 means the
+   emitter has no grouping rule for the operator, which leaves its text
+   exactly as the other cases build it. */
 static enum {
   EMIT_ASSIGNMENT  = 2,
   EMIT_CONDITIONAL = 3,
-  EMIT_UNARY       = 14,
-  EMIT_POSTFIX     = 15,
-  EMIT_PRIMARY     = 16
+  EMIT_CAST        = 14,
+  EMIT_UNARY       = 15,
+  EMIT_POSTFIX     = 16,
+  EMIT_PRIMARY     = 17
 };
 
 module {
