@@ -1,0 +1,45 @@
+unittest/compiler-fixtures/region-conversions.x:9:5: region: 'a' can outlive the region it was allocated in when returned
+      return a;
+      ^^^^^^
+  note: region opened at line 7
+
+unittest/compiler-fixtures/region-conversions.x:17:5: region: 'a' can outlive the region it was allocated in when returned
+      return a;
+      ^^^^^^
+  note: region opened at line 15
+
+unittest/compiler-fixtures/region-conversions.x:25:5: region: 'a' can outlive the region it was allocated in when returned
+      return a;
+      ^^^^^^
+  note: region opened at line 23
+
+unittest/compiler-fixtures/region-conversions.x:33:5: region: 'a' can outlive the region it was allocated in when returned
+      return a;
+      ^^^^^^
+  note: region opened at line 31
+
+unittest/compiler-fixtures/region-conversions.x:41:5: region: 'm' can outlive the region it was allocated in when returned
+      return m;
+      ^^^^^^
+  note: region opened at line 39
+
+unittest/compiler-fixtures/region-conversions.x:49:5: region: 'm' can outlive the region it was allocated in when returned
+      return m;
+      ^^^^^^
+  note: region opened at line 47
+
+unittest/compiler-fixtures/region-conversions.x:57:5: region: a fresh allocation can outlive the region it was allocated in when returned
+      return items;
+      ^^^^^^
+  note: region opened at line 56
+
+unittest/compiler-fixtures/region-conversions.x:67:3: region: 'a' is used after the region that allocated it ended
+    return a;
+    ^^^^^^
+  note: region opened at line 64
+
+unittest/compiler-fixtures/region-conversions.x:77:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+      keep(entries, items);
+      ^^^^
+  note: region opened at line 76
+

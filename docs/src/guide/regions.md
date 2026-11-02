@@ -65,8 +65,11 @@ holding the value.
 
 A destination that converts its value by copying does not keep it: a `List`
 parameter given an `Array`, or a `Var` given a C string, which it boxes as a
-fresh `String`. A local C array
-passed on, returned, or stored counts as the address of its first element.
+fresh `String`. A copy into a container is fresh storage of the active
+region, and the pass tracks it. An `Array` given a `List` or an `Iter` makes
+such a copy, and so does a conversion either way between a typed `Array` or
+`Map` family and its boxed family. A local C array passed on, returned, or
+stored counts as the address of its first element.
 
 A number holds no address. A value of integer, floating-point, or enum
 type, or a destination of such a type, carries nothing the pass tracks.
