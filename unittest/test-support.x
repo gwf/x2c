@@ -47,7 +47,6 @@ typedef struct ContextProbe {
 } *ContextProbe;
 
 typedef struct {
-  int run;
   int passed;
   int failed;
   int skipped;
@@ -80,6 +79,7 @@ List test_match_oracle_search_replace(List input, Var pattern, Var template) {
 
 static TestStats stats;
 static const char *current_test = NULL;
+static int current_skipped;
 static int suite_name_count;
 static char **suite_names;
 
@@ -123,7 +123,6 @@ int Test_register_context_probe(void) {
 }
 
 void TestHarness_begin(void) {
-  stats.run = 0;
   stats.passed = 0;
   stats.failed = 0;
   stats.skipped = 0;
@@ -155,9 +154,12 @@ int TestSuite_begin(const char *name) {
 }
 
 
+// A skip inside a running test makes that test a skip; any other skip
+// registers a deferred test.
 void TestHarness_skip(const char *name, const char *reason) {
-  stats.skipped++;
   Stdout.printf("[SKIP] %s: %s\n", name, reason);
+  if (current_test) current_skipped = 1;
+  else stats.skipped++;
 }
 
 
@@ -195,10 +197,11 @@ static int restore_retained_scopes(Scope *saved_slot, Scope saved_scope) {
 }
 
 // A test fails on a failed assertion, no assertions, or unbalanced scope
-// state. An uncaught Error remains with its configured policy owner.
+// state; a test that skips itself needs no assertions. An uncaught Error
+// remains with its configured policy owner.
 void TestHarness_run(const char *name, TestFn fn) {
   current_test = name;
-  stats.run++;
+  current_skipped = 0;
   Stdout.printf("[RUN] %s\n", name);
   int before = stats.failures, assertions_before = stats.assertions;
   Scope *saved_slot = Scope.top(), saved_scope = *saved_slot;
@@ -214,11 +217,12 @@ void TestHarness_run(const char *name, TestFn fn) {
     stats.failures++;
     report_failure("extra pushed or retained scope", "(harness)", 0, NULL);
   }
-  if (stats.assertions == assertions_before) {
+  if (!current_skipped && stats.assertions == assertions_before) {
     stats.failures++;
     report_failure("test made no assertions", "(harness)", 0, NULL);
   }
   if (stats.failures > before) stats.failed++;
+  else if (current_skipped) stats.skipped++;
   else stats.passed++;
   current_test = NULL;
 }
@@ -283,6 +287,7 @@ int TestHarness_finish(void) {
   Stdout.printf("\nSummary: %d passed, %d failed, %d skipped, ",
                 stats.passed, stats.failed, stats.skipped);
   Stdout.printf("%d total (%d assertions)\n",
-                stats.run + stats.skipped, stats.assertions);
+                stats.passed + stats.failed + stats.skipped,
+                stats.assertions);
   return unknown ? 2 : stats.failed ? 1 : 0;
 }
