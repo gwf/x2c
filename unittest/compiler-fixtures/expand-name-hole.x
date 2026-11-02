@@ -1,12 +1,11 @@
 #include "x2c.x"
 
-/* A Name hole takes an Atom row's spelling, as it takes a String's. */
+/* An expand row gives a Name hole the name a source argument would: an
+   Atom row, short or long, is that name's spelling, as a String row is. */
 int main(void) {
   int total = 0;
-  expand %(alpha beta)
-  macro Stmt(Name $name) { int $name = 1; total += $name; }
-  expand %("gamma")
+  expand %(alpha (beta) "gamma" running_total)
   macro Stmt(Name $name) { int $name = 2; total += $name; }
-  printf("%d %d\n", total, alpha + beta + gamma);
+  printf("%d %d %d %d %d\n", alpha, beta, gamma, running_total, total);
   return 0;
 }
