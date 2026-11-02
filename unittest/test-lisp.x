@@ -1096,6 +1096,29 @@ static void lisp_datum_reads_valid_string_escapes(void) {
     }
 }
 
+/* A Lisp string takes the escapes of an x2c string: `\x`, `\u`, and `\U`
+   read one or two hexadecimal digits, and a decoded NUL is dropped. Both
+   reader paths and evaluation agree. */
+static void lisp_strings_take_x2c_escapes(void) {
+  Lisp lisp = Lisp.kernel();
+  foreach (List pair, %(
+      ("\"\\x41\"" "A") ("\"\\u41\"" "A") ("\"\\U41\"" "A")
+      ("\"\\x414\"" "A4") ("\"\\u0041\"" "41") ("\"a\\0b\"" "ab"))) {
+    String source = pair.car();
+    Symbol status = 0;
+    EXPECT_VAR_EQ(_read1(lisp, source, &status), pair.cadr());
+    EXPECT_INT_EQ(status, <value>);
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
+                  _read_outcome(lisp, source, 0));
+    EXPECT_VAR_EQ(lisp.eval_string(source), pair.cadr());
+  }
+  foreach (String source, %("\"\\q\"" "\"\\u\"" "(head \"\\xg\")")) {
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 0), "malformed 0 ");
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1), "malformed 0 ");
+  }
+  lisp.destroy();
+}
+
 /* A written Atom reads back as itself, including a spelling that opens a
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
@@ -2146,6 +2169,7 @@ void lisp_suite(void) {
   $test.run(lisp_read_fast_path_matches_token_reader);
   $test.run(lisp_datum_rejects_malformed_string_escapes);
   $test.run(lisp_datum_reads_valid_string_escapes);
+  $test.run(lisp_strings_take_x2c_escapes);
   $test.run(lisp_datum_atom_round_trips);
   $test.run(lisp_datum_symbol_round_trips);
   $test.run(lisp_pattern_matching_operations);

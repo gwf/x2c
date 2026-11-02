@@ -233,7 +233,7 @@ static int _plain_list(char *s, unsigned &at, Var &out, Array items,
 
 /* Use the same string scanner as the Lisp tokenizer. */
 static int _plain_string(char *s, unsigned &at, Var &out) {
-  int length = scan_c_string(s + at);
+  int length = scan_lisp_string_status(s + at, NULL);
   if (length < 0 || !_token_end(s[at + length])) return 0;
   out = String.new_len(s + at + 1, length - 2).unescape();
   at += length;
