@@ -68,10 +68,8 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
 // raise payloads and catch patterns
 
 static List _parse_raise_code(Compiler c) {
-  List code = c.try_parse_macro_slot(<expression>);
-  if (!code) code = _parse_insertion(c);
-  if (code) return code;
-  return _parse_bare_symbol(c, <raise>, 0);
+  List code = _parse_insertion(c);
+  return code ? code : _parse_bare_symbol(c, <raise>, 0);
 }
 
 static void _parse_raise_detail(Compiler c, Array args) {

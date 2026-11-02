@@ -44,7 +44,12 @@ module void _generic(Emitter &e, Var control, List associations) {
 
 module void _unary(Emitter &e, Symbol operator, Var argument) {
   _put(e, operator);
-  _operand(e, argument, EMIT_UNARY);
+  _operand(e, argument, EMIT_CAST);
+}
+
+module void _sizeof(Emitter &e, Var operand) {
+  _put(e, "sizeof");
+  _operand(e, operand, EMIT_UNARY);
 }
 
 module void _binary(
@@ -156,7 +161,8 @@ static int _emitted_precedence(Var node) {
     }
     case %(op ? ?):              return EMIT_UNARY;
     case %(op ? ? ? ?):          return EMIT_CONDITIONAL;
-    case %((!or cast sizeof) *): return EMIT_UNARY;
+    case %(cast *):              return EMIT_CAST;
+    case %(sizeof *):            return EMIT_UNARY;
     case %(postfix ? ?):         return EMIT_POSTFIX;
     case %(commas *):            return 1;
     case %(m-all *):             return _operator_precedence(<"&&">);
