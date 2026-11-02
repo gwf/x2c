@@ -64,7 +64,7 @@ program.chmod(0o755)
             "CC": str(self.bin / "cc"),
             "EXAMPLES_CC_LOG": str(self.root / "cc.json"),
             "BUILD_LDFLAGS": linker_flags,
-            "JOBS": "1",
+            "BUILD_JOBS": "1",
         })
         return subprocess.run(
             [BASH, str(self.examples / "check.sh"), "check"],
