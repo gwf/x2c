@@ -370,7 +370,7 @@ module void _error_name(Project p, int line, String message, String name) {
   _error(p, line, %"$message '$name'");
 }
 
-module void _error(Project p, int line, String message) {
+module _Noreturn void _error(Project p, int line, String message) {
   String at = line ? ":%d".printf(line) : NULL;
   if (p && p.path) message = %"manifest '$(p.path)'$at: $message";
   Diagnostics.driver_error(message);

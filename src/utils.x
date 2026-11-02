@@ -459,7 +459,7 @@ void Diagnostics.driver_fail(const char *message, const char *note) {
 /** Reports `message` with no note and exits as `Diagnostics.driver_fail`
     does.
 */
-void Diagnostics.driver_error(const char *message) {
+_Noreturn void Diagnostics.driver_error(const char *message) {
   Diagnostics.driver_fail(message, NULL);
 }
 
