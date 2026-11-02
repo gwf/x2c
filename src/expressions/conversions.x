@@ -304,7 +304,10 @@ static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
   if (expr ~= %(expr ? (op ?operator ?condition ?ontrue ?onfalse))) {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
-    if (ontrue.list() ~= %(expr ? (composite *)) ||
+    int unknown_value = !true_type && !false_type &&
+      (c.sym.is_var_type(declared_target) ||
+       c.sym.is_named_value_type(declared_target, "Func"));
+    if (unknown_value || ontrue.list() ~= %(expr ? (composite *)) ||
         onfalse.list() ~= %(expr ? (composite *)) ||
         (true_type != false_type &&
          !(c.sym.resolve_numeric_type(true_type) &&
@@ -336,6 +339,7 @@ static List _convert_generic_arms(
       return %(expr $declared_target
                (generic $control @(converted.list_free())));
     converted.free();
+    return expr;
   }
   return NULL;
 }
@@ -344,15 +348,19 @@ static List _convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
   List generic = _convert_generic_arms(c, expr, declared_target);
   if (generic) return generic;
-  if (target_is_var)
-    match (expr) {
-      case %(expr () (ident (binding ? "NULL"))):
-        return %(expr ("Var") (call "Var_null" (args)));
-      case %(expr () (!or (ident (binding ? ?)) (call *))):
-        $fail.expressions_var_unresolved(c, NULL);
-    }
+  match (expr) case %(expr () $($grouped(?inner))): {
+    List converted = c.convert_expression(inner, declared_target);
+    return converted == inner ? expr
+      : %(expr $declared_target (parens $converted));
+  }
+  if (target_is_var) {
+    if (expr ~= %(expr () (ident (binding ? "NULL"))))
+      return %(expr ("Var") (call "Var_null" (args)));
+    if (!c.macro_holes && expr ~= %(expr () ?))
+      $fail.expressions_var_unresolved(c, NULL);
+  }
   if (c.sym.is_named_value_type(declared_target, "Func") &&
-      !_null_literal(expr))
+      !_null_literal(expr) && expr ~= %(expr () (ident (binding ? ?))))
     $fail.expressions_func_unresolved(c, NULL);
   return expr;
 }

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-comma-unresolved-call.x:2:18: type: cannot convert an unresolved expression to Var
+  int main(void) { Var value = (0, puts("hi")); (void) value; return 0; }
+                   ^^^
+  note: give the expression a declared x2c type before boxing it
+

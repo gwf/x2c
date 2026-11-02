@@ -451,7 +451,7 @@ static void _check_lambda_captures(Compiler c, List ast) {
       case %(op & ?target):
         _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
-        foreach (List target in targets) _require_capture_lvalue(c, target);
+        foreach (List target in targets) _require_capture_write(c, target);
       case $Macro.call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         _require_reference_arguments(c, callee_type, arguments);

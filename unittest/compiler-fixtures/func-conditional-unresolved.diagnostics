@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/func-conditional-unresolved.x:4:3: type: cannot convert an unresolved expression to Func
+    Func f = argc ? strlen : NULL;
+    ^^^^
+  note: declare the native function's signature before converting it
+

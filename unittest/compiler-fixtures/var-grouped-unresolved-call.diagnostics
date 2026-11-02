@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-grouped-unresolved-call.x:4:3: type: cannot convert an unresolved expression to Var
+    Var value = ((puts("hi")));
+    ^^^
+  note: give the expression a declared x2c type before boxing it
+

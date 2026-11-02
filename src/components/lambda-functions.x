@@ -394,7 +394,9 @@ meta static Code _lambda_adapter(
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
                     (op -> $record $(_lambda_member(index++))));
-    if (type ~= %((dim *) char)) field = field.convert(%("String"));
+    Type resolved = type.resolve();
+    if (resolved ~= %((dim *) *) && resolved.is_text())
+      field = field.convert(%("String"));
     arguments.push(
       type.car() == <&> ? %(expr $(type.cdr()) (op * $field)) : field);
   }

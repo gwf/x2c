@@ -20,8 +20,19 @@ int main(void) {
   Func snapshot = %!() => text;
   text[0] = 'z';
   printf("%s\n", snapshot().repr());
+  const char fixed[4] = "cd";
+  Func read_fixed = %!() => fixed;
+  printf("%s\n", read_fixed().repr());
   const int read_only = 6;
   Func read = %!() using &read_only => read_only;
   printf("%ld\n", read().integer());
+  int n = 1;
+  int *const pointer = &n;
+  const Array values = [1];
+  Func assign = %!() using &pointer => *pointer = 2;
+  Func mutate = %!() using &values => values[0] = 2;
+  assign();
+  mutate();
+  printf("%d %ld\n", n, values[0].integer());
   return 0;
 }

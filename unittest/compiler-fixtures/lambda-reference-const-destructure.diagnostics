@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/lambda-reference-const-destructure.x:9:4: type: cannot write a const object in a lambda
+    };
+     ^
+
