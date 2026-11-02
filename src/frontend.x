@@ -595,7 +595,6 @@ static void _tokenize_cpp(Compiler cpp, String text) {
 
 // The child parses with the unit's compile-time bindings.
 static void _share_session(Compiler cpp, Compiler c) {
-  cpp.load_source = c.load_source;
   cpp.meta_bindings = c.meta_bindings;
   cpp.borrowed_bindings = cpp.meta_bindings != NULL;
   cpp.share_meta_group(c);

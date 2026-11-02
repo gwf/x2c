@@ -337,7 +337,7 @@ static Array _reachable(Compiler c, Array ordered, Map reached, Map later) {
   foreach (List item in ordered) {
     if (_optional(item, later) && !_declares_reached(item, reached)) continue;
     if (!_function_identity(item, identity, name) ||
-        (identity in reached && (name != "main" || c.load_source)))
+        (identity in reached && name != "main"))
       units.push(item);
     else if (name != "main")
       match (item) case %(function ?spec ?declarator ?): {

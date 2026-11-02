@@ -613,8 +613,6 @@ static void _parse(FileWalk &w, String segment, Map overlay) {
 static void _prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.c.owns_package_source(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
-  shadow.load_source =
-    w.c.load_source && w.path == Path.absolute(w.c.filename);
   // Every segment hashes its provider, including its private helpers.
   shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
