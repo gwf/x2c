@@ -32,9 +32,10 @@ x2c="$BUILD/home/bin/x2c"
 for results in shootout/results apps/notes/bench/results; do
   [[ ! -e "$BUILD/home/examples/$results" ]] || fail "installed history"
 done
-[[ ! -e "$BUILD/home/examples/shootout/baseline.json" ]] || fail "installed calibration"
-[[ -f "$BUILD/home/examples/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
-[[ -f "$BUILD/home/examples/apps/notes/bench/run.py" ]] || fail "missing benchmark"
+installed="$BUILD/home/examples"
+[[ ! -e "$installed/shootout/baseline.json" ]] || fail "installed calibration"
+[[ -f "$installed/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
+[[ -f "$installed/apps/notes/bench/run.py" ]] || fail "missing benchmark"
 "$x2c" run -q "$BUILD/home/examples/love/basic-literals.x" >"$BUILD/example.out"
 cmp "$BUILD/example.out" "$ROOT/examples/expected/static-test.stdout" || fail "installed example"
 

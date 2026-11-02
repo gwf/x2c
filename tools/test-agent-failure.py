@@ -8,7 +8,8 @@ import unittest
 from agent_context import load_script
 
 
-failure = load_script(Path(__file__).with_name("agent-failure.py"), "agent_failure")
+failure = load_script(
+    Path(__file__).with_name("agent-failure.py"), "agent_failure")
 ROW = ("| 2026-10-13 | false-claim | said it passed | `abcd1234` | "
        "`/tmp/incident` | open |")
 

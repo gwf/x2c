@@ -11,7 +11,8 @@ import unittest
 from agent_context import load_script
 
 
-metrics = load_script(Path(__file__).with_name("harness-metrics.py"), "harness_metrics")
+metrics = load_script(
+    Path(__file__).with_name("harness-metrics.py"), "harness_metrics")
 DAY = "2026-10-01T12:00:00Z"
 
 

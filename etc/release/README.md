@@ -116,7 +116,8 @@ Run `candidate.yml` from dev with a full reviewed source SHA. Each compiler
 and package job checks out that SHA; its matrices come from
 [the released set](../../agents/releasing.md#released-packages). Assembly
 uses the built Linux compiler once and retains the resulting archives,
-manifest, two index variants and two complete site archives. Native archive bytes never change during promotion.
+manifest, two index variants and two complete site archives. Native
+archive bytes never change during promotion.
 
 A candidate ID contains source SHA, run ID and attempt. A fresh full build gets
 a fresh ID even for the same compiler version. Download-only publication jobs

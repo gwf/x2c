@@ -261,5 +261,6 @@ $("export").addEventListener("click", () => {
 $("changes-only").checked = false;
 const snapshots = document.createElement("script");
 snapshots.src = `snapshots.js?v=${Date.now()}`;
-snapshots.onload = snapshots.onerror = () => loadDataset(window.TUTORIAL_SNAPSHOTS || demo);
+snapshots.onload = snapshots.onerror = () =>
+  loadDataset(window.TUTORIAL_SNAPSHOTS || demo);
 document.body.append(snapshots);
