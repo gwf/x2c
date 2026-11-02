@@ -294,7 +294,7 @@ mkdir -p "$BUILD/home/packages/greet.previous"
 rm -rf "$BUILD/home/packages/greet.previous"
 
 # A removal waits while another process holds the home's packages lock.
-trap 'touch "$BUILD/release"' EXIT
+trap 'touch "$BUILD/release"; wait; rm -rf "$BUILD" "${HISTORY[@]}"' EXIT
 python3 - "$BUILD/home/packages/.lock" "$BUILD/release" <<'PY' &
 import fcntl, os, sys, time
 lock = open(sys.argv[1], "a")
