@@ -620,6 +620,20 @@ static void typed_array_narrow_update_truncates(void) {
 
   EXPECT_INT_EQ(bytes[0] += 100, -56);
   EXPECT_INT_EQ(shorts[0] += 30000, -5536);
+
+  // a shift count is checked against the promoted int, as for a native
+  // char, so a narrow element keeps the low bits of the promoted result
+  bytes[0] = 3;
+  shorts[0] = 1;
+  EXPECT_INT_EQ(bytes[0] <<= 10, 0);
+  EXPECT_INT_EQ(shorts[0] <<= 20, 0);
+  int caught = 0;
+  try bytes[0] <<= 32;
+  catch %(bad-shift *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<width>).integer(), 32);
+  }
+  EXPECT_INT_EQ(caught, 1);
 }
 
 static void typed_array_update_faults_transfer(void) {
@@ -647,14 +661,17 @@ static void typed_array_update_faults_transfer(void) {
   try values[0] >>= -1;
   catch %(bad-shift *): caught++;
 
-  // % and the bitwise operators are not defined on a float element
+  // % and the bitwise operators are not defined on a float element, and
+  // an operator without a numeric meaning is not an update at all
   try reals[0] %= 2.0;
   catch %(bad-types *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<op>).symbol() == <%>);
   }
+  try reals.updateindex(0, <@>, 2.0);
+  catch %(bad-op *): caught++;
 
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 6);
   // every failure raised before storing, so both elements are untouched
   EXPECT_INT_EQ(values[0], 7);
   EXPECT_TRUE(reals[0] == 1.5);

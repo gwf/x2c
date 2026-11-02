@@ -296,6 +296,17 @@ static void typed_map_independent_key_value_widths(void) {
   EXPECT_TRUE(map.updateindex(large, <+>, 0.5) == 1.75);
   EXPECT_TRUE(map.postfixindex(large, <++>) == 1.75);
   EXPECT_TRUE(map.getindex(large) == 2.75);
+  // a double has no remainder, as for a typed Array or a Var
+  int caught = 0;
+  try map[large] %= 2.0;
+  catch %(bad-types *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<op>).symbol() == <%>);
+  }
+  try map.updateindex(large, <@>, 2.0);
+  catch %(bad-op *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_TRUE(map.getindex(large) == 2.75);
   double out = 19.0;
   EXPECT_TRUE(map.try_del(0, out));
   EXPECT_TRUE(out == 0.0);

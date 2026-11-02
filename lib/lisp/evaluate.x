@@ -159,23 +159,13 @@ Var Lisp.eval_string(Lisp lisp, String source) {
     forms completed before a later read or evaluation failure are not rolled
     back. A null `Lisp` session is rejected by `Lisp.eval_string` only after
     the stream has been consumed.
-    Raises: `<bad-arg>` for a null stream or embedded NUL, `<io-fail>`,
-    `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
+    Raises: `<bad-arg>` for a null stream, a cause from `File.string` while
+    reading, including `<bad-arg>` for an embedded NUL, or any cause from
     `Lisp.eval_string`.
 */
 Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
-  Block content = auto Block.new(sizeof(char));
-  if (source.read_into(content) == <eof>) return l.eval_string(NULL);
-  if (content.length > INT_MAX) {
-    size_t size = content.length, int limit = INT_MAX;
-    raise %(size-limit (operation "Lisp.eval_file") (size $size)
-                       (limit $limit));
-  }
-  if (memchr(content.bytes, '\0', content.length))
-    raise %(bad-arg (operation "Lisp.eval_file") (reason "embedded NUL"));
-  String text = String.new_len(content.bytes, (int) content.length);
-  return l.eval_string(text);
+  return l.eval_string(source.string());
 }
 
 /** Marks the actual Lambda installed for one lowered source function. */
