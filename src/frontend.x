@@ -419,16 +419,13 @@ static int _inside(const char *path, const char *dir) {
   return !strncmp(path, dir, n) && path[n] == '/';
 }
 
-/* `Compiler.read_source` reports only that a read failed, so the unit reads
-   its own text and keeps it in the source facts as that read would. */
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
-  try text = c.sources.read_text(filename);
+  try text = c.read_source_text(filename);
   catch %(size-limit *):
     $fail.frontend_input_read(c, NULL, filename, "too large for a String");
   catch %((!or not-found io-fail bad-arg) *detail):
     $fail.frontend_input_read(c, NULL, filename, _read_reason(detail));
-  if (c.source_facts) c.source_texts[Path.absolute(filename)] = text;
   return text;
 }
 
