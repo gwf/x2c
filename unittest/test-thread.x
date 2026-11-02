@@ -606,6 +606,19 @@ static void thread_rejects_free_before_join_and_double_join(void) {
   thread.free();
 }
 
+/* Operations on a null Thread raise; free does nothing. */
+static void thread_null_handle_contract(void) {
+  Thread thread = NULL;
+  String raised = NULL;
+  try thread.join();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try thread.stop();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try thread.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(raised, "bad-arg Thread.join; bad-arg Thread.stop; ");
+}
+
 static void thread_freezes_late_descriptor_registration(void) {
   EXPECT_TRUE(x2c_descriptor_registration_frozen());
   int caught = 0, tag_caught = 0;
@@ -1577,4 +1590,5 @@ void thread_suite(void) {
   $test.run(thread_stack_reaches_library_recursion_limits);
   $test.run(thread_workers_bind_one_catch_site);
   $test.run(thread_promotions_keep_the_first_canonical_identity);
+  $test.run(thread_null_handle_contract);
 }

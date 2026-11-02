@@ -77,6 +77,24 @@ static void channel_rejects_invalid_construction(void) {
   EXPECT_TRUE(fractional);
 }
 
+/* Operations on a null Channel raise; close and free do nothing. */
+static void channel_null_handle_contract(void) {
+  Channel channel = NULL;
+  String raised = NULL;
+  try channel.scope();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.send(1);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.receive();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try channel.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(raised,
+    "bad-arg Channel.scope; bad-arg Channel.send; bad-arg Channel.receive; ");
+}
+
 static void channel_unbounded_fifo(void) {
   $test.scoped();
   Channel channel = auto Channel.new(<i32>, <unbounded>);
@@ -783,4 +801,5 @@ void channel_suite(void) {
   $test.run(channel_close_rejects_unaccepted_rendezvous_send);
   $test.run(channel_close_rejects_blocked_bounded_send);
   $test.run(channel_payload_ownership_is_unchanged);
+  $test.run(channel_null_handle_contract);
 }

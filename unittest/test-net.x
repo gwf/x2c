@@ -138,6 +138,38 @@ static void net_invalid_arguments_and_names(void) {
   EXPECT_INT_EQ(missing, 1);
 }
 
+/* Operations on a null Listener or Socket raise; close and cleanup do
+   nothing. */
+static void net_null_handle_contract(void) {
+  Listener listener = NULL;
+  Socket socket = NULL;
+  String raised = NULL;
+  try listener.accept();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try listener.port();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try listener.stop();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try listener.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try listener.cleanup();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try socket.set_timeout(10);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try socket.shutdown_write();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try socket.peer();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try socket.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try socket.cleanup();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(raised,
+    "bad-arg Listener.accept; bad-arg Listener.port; "
+    "bad-arg Listener.stop; bad-arg Socket.set_timeout; "
+    "bad-arg Socket.shutdown_write; bad-arg Socket.peer; ");
+}
+
 static void net_refused_connection_reports_errno(void) {
   $test.scoped();
   Listener listener = auto Listener.bind("127.0.0.1", 0);
@@ -210,4 +242,5 @@ void net_suite(void) {
   $test.run(net_adopt_failure_releases_descriptor);
   $test.run(net_ipv6_loopback);
   $test.run(net_descriptor_handoff);
+  $test.run(net_null_handle_contract);
 }
