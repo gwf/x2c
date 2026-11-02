@@ -545,7 +545,6 @@ static void _remove(MatchCache cache, int slot) {
 static int _bucket(MatchCache cache, unsigned long key) =>
   (int) (x2c_mix64(key) % (unsigned long) cache.bucket_count);
 
-
 static void _unlink(MatchCache cache, int slot) {
   MatchCacheEntry *entry = &cache.entries[slot];
   cache.entries[entry.lru_prev].lru_next = entry.lru_next;

@@ -279,17 +279,17 @@ meta native void Scope.cleanup(Scope value) { value.destroy(); }
     leaves the scope intact. A NULL `scope` does nothing. Before `Error`
     initialization it terminates at the error floor.
 */
-meta native void Scope.destroy(Scope scope) {
-  if (!scope) return;
+meta native void Scope.destroy(Scope s) {
+  if (!s) return;
   _require_running();
   ScopeThreadState state = _thread();
-  if (scope == *state.base_slot)
+  if (s == *state.base_slot)
     raise %(bad-state (operation "Scope.destroy"));
   for (int i = 0; i < state.stack_size; i++)
-    if (scope == *state.stack[i])
+    if (s == *state.stack[i])
       raise %(bad-state (operation "Scope.destroy"));
-  _forget_retains(scope);
-  _destroy_chain(scope);
+  _forget_retains(s);
+  _destroy_chain(s);
 }
 
 /** Destroys this thread's `Scope` chain and its push and region stacks.

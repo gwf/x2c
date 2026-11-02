@@ -181,9 +181,8 @@ Scope *Lisp.result_storage(Lisp lisp) =>
   lisp.result_owner ? lisp.result_owner : &lisp.scope;
 
 static int _initialize(void) {
-  if (pthread_once(&lisp_initialize_once, _initialize_once)) {
+  if (pthread_once(&lisp_initialize_once, _initialize_once))
     x2c_fatal("Lisp: could not initialize canonical names");
-  }
   return lisp_initialize_success;
 }
 

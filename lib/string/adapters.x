@@ -13,8 +13,7 @@ String String.str(String str) => str;
     borrowed `out` is returned and not retained.
     Raises: any cause from `Buffer.write`.
 */
-Buffer String.write_str(String str, Buffer out) =>
-  out.write_len(str, str.len());
+Buffer String.write_str(String s, Buffer out) => out.write_len(s, s.len());
 
 /** Returns the compact `Symbol` encoded from `str`, or zero for empty input.
     `Symbol`'s restricted spelling folds case and `_` with `-`; other spellings
