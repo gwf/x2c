@@ -285,6 +285,18 @@ static void http_server_rejects_null_logger(void) {
   EXPECT_STR_EQ(raised, "bad-arg HttpServer.new");
 }
 
+static void http_close_twice_is_harmless(void) {
+  $test.scoped();
+  HttpServer server = HttpServer.new(
+    Router.new(), {host: "127.0.0.1", port: 0});
+  server.close();
+  ScopeStats before = Scope.stats();
+  server.close();
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.free_calls, before.free_calls);
+  EXPECT_INT_EQ(after.scope_destructions, before.scope_destructions);
+}
+
 static void http_null_server_contract(void) {
   HttpServer server = NULL;
   String raised = NULL;
@@ -313,4 +325,5 @@ void http_suite(void) {
   $test.run(http_loopback);
   $test.run(http_server_rejects_null_logger);
   $test.run(http_null_server_contract);
+  $test.run(http_close_twice_is_harmless);
 }

@@ -356,10 +356,10 @@ void HttpServer.stop(HttpServer s) {
 }
 
 /** Stops and releases native resources.
-    Call after synchronous serve returns. */
+    Call after synchronous serve returns. Repeated close is harmless. */
 void HttpServer.close(HttpServer s) {
-  if (!s) return;
-  s.stop(); s.listener.close(); s.channel.free();
+  if (!s || !s.channel) return;
+  s.stop(); s.listener.close(); s.channel.free(); s.channel = NULL;
   if (s.owns_logger) s.logger.free();
 }
 

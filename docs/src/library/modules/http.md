@@ -157,7 +157,7 @@ Source: `lib/http.x`
 `void HttpServer.close(HttpServer s)`
 
 Stops and releases native resources.
-Call after synchronous serve returns.
+Call after synchronous serve returns. Repeated close is harmless.
 
 Source: `lib/http.x`
 
