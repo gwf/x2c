@@ -26,10 +26,13 @@ jobs:
     outputs:
       version: ${{ steps.prepare.outputs.version }}
       source_sha: ${{ steps.prepare.outputs.source_sha }}
+      runners: ${{ steps.matrix.outputs.runners }}
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - id: matrix
+        run: python3 tools/release-candidate.py matrix >> "$GITHUB_OUTPUT"
       - name: Verify prior production proof and expected current site
         id: prepare
         env:
@@ -94,10 +97,11 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v5
   verify:
-    needs: pages
+    needs: [pages, prepare]
     uses: ./.github/workflows/verify.yml
     with:
       identity: ${{ inputs.identity }}
+      runners: ${{ needs.prepare.outputs.runners }}
       destination: production
   restore-latest:
     needs: [prepare, verify]
