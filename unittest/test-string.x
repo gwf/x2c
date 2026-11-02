@@ -488,6 +488,17 @@ static void string_search_and_replace(void) {
   EXPECT_TRUE(text.replace("missing", "Q") === text);
 }
 
+/* `end` is a slice stop, so a search covers the text the slice selects. */
+static void string_search_end_is_a_slice_stop(void) {
+  String text = "xxcx", repeated = "abcabc";
+  EXPECT_STR_EQ(text[0:-2], "xxc");
+  EXPECT_INT_EQ(text.find_within("c", 0, -2), 2);
+  EXPECT_STR_EQ(text[0:-3], "xx");
+  EXPECT_INT_EQ(text.find_within("c", 0, -3), -1);
+  EXPECT_STR_EQ(repeated[0:-2], "abcab");
+  EXPECT_TRUE(repeated.find_all("ab", 0, -2) == %(0 3));
+}
+
 /* Each call renders differently, so a join that renders an element twice
    produces neither rendering. */
 class JoinCounter struct { int calls; } *;
@@ -822,6 +833,7 @@ void string_suite(void) {
   $test.run(string_malloc_len_counts_writable_bytes);
   $test.run(string_empty_search_contract);
   $test.run(string_search_and_replace);
+  $test.run(string_search_end_is_a_slice_stop);
   $test.run(string_join_renders_each_element_once);
   $test.run(string_oversized_results_raise_size_limit);
   $test.run(string_foreach_bytes_as_int_and_char);
