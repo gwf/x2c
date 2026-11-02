@@ -797,10 +797,15 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
   return <unknown>;
 }
 
-module int _null_literal(List expr) =>
-  _integer_literal_kind(expr, NULL) == <zero> ||
-  expr ~=
-    %(expr ? (ident (binding ? "NULL")));
+module int _null_literal(List expr) {
+  match (expr) {
+    case %(expr ? $($grouped(?inner))): return _null_literal(inner);
+    case %(expr (* void) (cast ? ?inner)):
+      return _integer_literal_kind(inner, NULL) == <zero>;
+    case %(expr ? (ident (binding ? "NULL"))): return 1;
+  }
+  return _integer_literal_kind(expr, NULL) == <zero>;
+}
 
 /* An explicit converter call, `value.str()` or `value.var()`, is the most
    recent one parsed from source tokens, kept with its spelling and

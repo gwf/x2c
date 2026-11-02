@@ -77,10 +77,10 @@ module List _conditional(
   Type right = r.c.sym.resolve_numeric_type(false_type);
   int same = _conditional_unqualified(true_type.declared()) ==
              _conditional_unqualified(false_type.declared());
-  /* Symbol is a nominal value even though its representation is integral. */
-  if (left && right &&
-      !(same && r.c.sym.is_named_value_type(type, "Symbol")))
-    type = left.widest(right);
+  if (left && right) {
+    Type widest = left.widest(right);
+    if (!same || widest != left) type = widest;
+  }
   else if (!same) {
     Type pointer = _conditional_pointer(r.c, ontrue, onfalse);
     if (pointer) type = pointer;

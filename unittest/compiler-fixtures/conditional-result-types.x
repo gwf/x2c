@@ -4,6 +4,13 @@ typedef short Small;
 typedef const int ConstInt;
 typedef int *IntPointer;
 typedef String Label;
+class Number int;
+
+static int Number.value(Number value) => value;
+String Number.str(Number value) {
+  (void) value;
+  return "nominal";
+}
 
 static int Label.width(Label value) => value.len();
 
@@ -39,6 +46,16 @@ int main(int argc, char **argv) {
   printf("pointers %d %d %d %d %d %d %d %d %d %d\n",
     *p, *q, *r, *s, *t, *u, nil_left == NULL, *nil_right,
     null_left == NULL, *null_right);
+  auto void_right = argc ? plain : (void *)0;
+  auto void_left = argc - 1 ? (void *)0 : plain;
+  auto qualified_left = argc - 1 ? ((void *)0) : constant;
+  auto qualified_right = argc ? constant : (void *)0;
+  printf("void null %d %d %d %d\n",
+    *void_right, *void_left, *qualified_left, *qualified_right);
+  Number first = Number.new(1), second = Number.new(2);
+  auto number = argc ? first : second;
+  String converted = argc ? first : second;
+  printf("nominal %d %s\n", number.value(), converted);
   Symbol symbol = <ok>;
   auto chosen = argc ? symbol : symbol;
   printf("symbol %s\n", chosen.str());

@@ -329,3 +329,59 @@ bootstrap regeneration, publication gate, and performance checkpoint were
 not run here. The shared integrator owns the final combined publication
 checks. Existing Regex matching-stack and deep List rendering follow-ups,
 and the earlier plan's final carried findings, remain outside this repair.
+
+
+## PR 648 review corrections (2026-11-02)
+
+The review found three gaps at submitted head
+`20dd175bd7d6ce62a97b305c27aa742c9291f1c8`. PR 648 was still open.
+Readiness was withdrawn before edits; the queue reported no active batch.
+All three reproductions were confirmed before repair.
+
+- Numeric nominal identity: a conditional over two `Number` values backed
+  by `int` selected the integer String converter and rejected `Number.value`.
+  The numeric join now retains a matching declared type when the arithmetic
+  result equals its resolved numeric type. Actual integer promotion or
+  widening still changes the result. This replaces the Symbol-only exception
+  and preserves the original narrow-scalar repair. The existing fixture now
+  checks both the inferred method and destination converter.
+- Void-pointer null constants: `(void *)0` previously forced an `int *`
+  result to `void *`. The existing `_null_literal` owner now recognizes a
+  zero integer literal cast to `void *`, including grouping, before pointer
+  joining. The fixture dereferences results in both arm orders, with both
+  plain and const pointees, and retains its `0` and `NULL` cases.
+- Retirement binary names: `feature+test` is a valid Git branch, but the
+  classifier rejected its compiler and `bin/x2c` link. Both filename checks
+  now accept the build's nonempty single-component suffix contract. Existing
+  regular-file and symlink destination rules stay in place. Disposable tests
+  cover `+` and `@` suffixes, traversal links to an existing binary, and an
+  unrelated ignored note.
+
+The three reported compiler probes now print `nominal`, `1`, and `7`.
+Completed authored-diff review found no new type owner, constant evaluator,
+branch-name validator, public API, or recurring check. Destination conversion
+still owns String canonicalization. No final bootstrap artifacts changed.
+
+Correction validation on the combined tree:
+
+- `make stage-2` passed, including compiler stages 1 and 2 with strict
+  warnings. No local rebootstrap was needed. This applies the updated
+  shared-integrator submission requirement; it is not a publication gate.
+- The seven focused compiler fixtures listed above passed without new native
+  warnings. The extended fixture includes Number method/converter checks,
+  void-pointer null constants, String/Label methods, and empty-string printf
+  fallbacks.
+- All three focused disposable retirement tests passed.
+- The full accounting-enabled unit suite passed 1,205 tests and 104,084
+  assertions with no final leak report.
+- `make doc-check` and `git diff --check` passed.
+
+One earlier full-unit run stalled in `net_descriptor_handoff` while polling
+for acceptance. Its cause is unknown. The owned process was sampled and
+stopped; standalone network suites then passed on the prior runtime worktree
+and corrected candidate. A complete repeat passed. Logs and the stack sample
+are retained under `debug/pr648-*`; this does not claim a network repair.
+
+The publication gate, final generated artifacts, performance checkpoint,
+full compiler fixture suite, native packages, and other-host validation
+remain with the previously stated scope and integration ownership.
