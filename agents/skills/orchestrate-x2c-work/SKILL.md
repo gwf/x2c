@@ -12,10 +12,9 @@ description: >-
 # Orchestrate and integrate x2c work
 
 The orchestrator splits the work, runs workers in parallel, and collects their
-private handoffs. It normally integrates, gates, and publishes their combined
-work. When Gary says "use the integrator", it submits coherent PRs instead;
-the standing integrator owns the final gate and `dev` publication. A running
-integrator alone does not change this session's delivery.
+private handoffs. It submits coherent PRs with focused evidence to the shared
+integrator by default. The integrator owns broad checks and `dev` publication.
+Gary can explicitly select direct delivery for the orchestrator.
 
 Establish `orchestrator` context with `direct` or `pr` delivery through
 `tools/integrate-dev.py context`, as selected under root
@@ -94,14 +93,14 @@ completed integrated tree; commit organization is an implementation choice.
 
 In shared-integrator mode, follow
 [the submission handoff](../../quick-start.md#submit-to-the-shared-integrator).
-Complete the root submission checks on each coherent submitted tree, including
-stage two and local rebootstrap when applicable. Commit, push the work branch,
+Complete focused checks on each coherent submitted tree. Rebootstrap locally
+when development needs it. Commit, push the work branch,
 and enroll one or more ready PRs targeting `dev` with the actual starting revision, pinned dependencies, focused evidence, and
 transition notes. Do not merge moving `dev`, refresh final generated artifacts,
 or run a publication gate solely to submit. The parent submits; subordinate
-workers remain private. A requested review stop uses `orchestrator`/`direct`
-context for normal publication validation, pushes only a draft PR branch, and
-stays unenrolled; it never publishes to `dev`. Local-only work stays local.
+workers remain private. A requested review stop keeps `orchestrator`/`pr`
+context, pushes only a draft PR branch, and stays unenrolled until review is
+complete. Local-only work stays local.
 Report submitted revisions rather than claiming they landed.
 
 In direct mode, publish the collected batch:

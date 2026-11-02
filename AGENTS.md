@@ -199,9 +199,9 @@ commits need not rebuild from their own bootstrap.
 
 Use `agents/quick-start.md` for setup, focused commands, and optional checks.
 Reproduce a reported defect before editing and verify the user-visible result
-with the relevant tests or executable examples. Unit suites and compiler
-fixtures follow `unittest/AGENTS.md`; ordinary checks preserve checked-in
-expectations. Batch coherent work before broad validation.
+with focused tests or executable examples. Unit suites and compiler fixtures
+follow `unittest/AGENTS.md`; ordinary checks preserve checked-in expectations.
+The integrator runs broad checks once on the completed batch.
 
 Fresh worktrees, or worktrees that have integrated changed `bootstrap/`, need
 `mkdir -p debug && make build-safe >debug/bootstrap.log 2>&1` before using
@@ -211,10 +211,9 @@ can use focused probes and the existing build and stage targets locally; it
 does not require an intermediate publication or full gate. Ordinary publication
 uses the single command below.
 
-Published tips on shared upstream branches, including ordinary requested PR
-branches, must rebuild from their shipped bootstrap. Validate the completed
-integrated tree before pushing; intermediate commits in that push need no
-independent gates. Shared-integrator submissions follow the exception below.
+Published tips on shared upstream branches must rebuild from their shipped
+bootstrap. The integrator validates the completed integrated tree before
+publishing; work branches use focused submission checks.
 
 ### Select integration ownership
 
@@ -224,20 +223,19 @@ fixes on `dev`. Reassess those fixes and tests against the replacement design;
 preserve unaffected requirements, not obsolete assumptions. Never infer
 precedence from merge status or timestamps alone.
 
-There are three delivery modes, chosen by Gary's instruction to the session:
+Shared-integrator submission is the default delivery mode:
 
-- An individual session integrates, gates, and publishes its work to `dev`.
-- An `orchestrate-x2c-work` session collects its workers' private handoffs,
+- With explicit direct delivery, an individual session integrates, gates, and
+  publishes its work to `dev`.
+- With explicit direct delivery, an orchestrator collects private handoffs,
   integrates, gates once per coherent batch, and publishes to `dev`.
-- A session told to use the shared integrator submits ready PRs targeting
+- An individual session or orchestrator normally submits ready PRs targeting
   `dev`. The standing `integrate-x2c-prs` session batches, reviews, gates, and
   publishes them. Either individual sessions or orchestrators may submit.
 
-Direct delivery is the default. Starting an integrator alone changes no other
-session's mode. An explicit choice persists until Gary changes it; pass it to
-delegated workers. Local-only work and a requested review stop still take
-precedence. An absent integrator leaves submissions waiting; do not fall back
-to direct delivery.
+Direct delivery requires Gary's explicit instruction. Pass the selected delivery to delegated workers.
+Local-only work and a requested review stop still take precedence. An absent
+integrator leaves submissions waiting.
 
 When selecting or switching modes, establish the worktree's role and delivery
 with `tools/integrate-dev.py context --role <role> --delivery <delivery>`.
@@ -249,35 +247,23 @@ rather than silently replacing it. These tools and canonical skills work for
 both providers; provider-specific session or messaging APIs are unnecessary.
 
 For shared-integrator delivery, review the authored change and run meaningful
-focused checks. A submission that changes the compiler, runtime, or shared
-build must also pass `make stage-2` on the submitted tree. Perform a local
-rebootstrap first when the seed cannot consume the change, then complete the
-stage-two build. Keep the relevant focused checks; a stage build does not
-replace them. This requirement applies to the submitting parent's
-combined tree, not each private worker checkpoint. Documentation-only and
-independent external-command submissions retain their relevant focused checks.
+focused checks. Rebootstrap locally when the seed cannot consume a capability
+needed for development.
 Then push a work branch and submit its non-draft PR through
 `tools/integrate-dev.py submit`. Record the starting revision, exact head,
-dependencies, stage-build and local-rebootstrap evidence when applicable, and
-focused evidence as described in
+dependencies, local-rebootstrap evidence when applicable, and focused
+evidence as described in
 [quick start](agents/quick-start.md#submit-to-the-shared-integrator).
 The coordinator enrolls it with `integration-ready`; merely creating a PR
 does not enroll it. Readiness requests integration of that pinned revision.
 Withdrawals take effect when observed before push, rather than transactionally
 across GitHub and Git.
 
-A submission may be pushed without a publication gate or final shipped
-bootstrap. Do not merge moving `dev`, regenerate final artifacts, or run a
-full gate solely to submit. The required stage-two build and any necessary
-local rebootstrap are development checks, not final artifact publication.
-Keep local bootstrap transitions usable for development. The integrator owns
-final generated artifacts and the applicable performance work and publication gate once per combined batch. Report a PR
-as submitted, not published or validated. Ordinary review-held PRs retain
-the existing publication validation below and are never enrolled. For that
-review stop, use `individual`/`direct` or `orchestrator`/`direct` context so
-the session owns validation, then push only its draft PR branch. The review
-stop still forbids publishing to `dev`; `direct` identifies validation
-ownership and does not override Gary's requested destination.
+The integrator owns final generated artifacts, performance work, and the
+publication gate once per combined batch. Report a PR as submitted, not
+published. For a requested review stop, use `individual`/`pr` or
+`orchestrator`/`pr` context, push only a draft PR branch, and leave it
+unenrolled until review is complete.
 
 ### Validate publication
 
@@ -321,10 +307,9 @@ isolate the cause with focused checks, and report the failing command when
 work cannot continue within scope. Escalate an increase in failures or an
 unresolved consequential design choice rather than hiding it in output.
 
-Routine implementation includes validated delivery directly to `dev` unless
-Gary selects the shared integrator, requests a PR, review stop, or local-only
-work. Network actions needed for that delivery are authorized by the task.
-Use the explicit destination:
+When Gary explicitly selects direct delivery, the session owns integration
+and publication validation. Network actions needed for the selected delivery
+are authorized by the task. Use the explicit destination:
 
 ```sh
 git push origin HEAD:refs/heads/dev
@@ -335,7 +320,7 @@ and validate the new tree before retrying. Never force-push `dev` or `main`.
 Do not advance `main` as ordinary delivery; Gary authorizes production
 promotion separately under [agents/releasing.md](agents/releasing.md).
 
-For a requested PR, push the current workspace branch to the same-named
+For a requested draft PR review stop, push the workspace branch to the same-named
 remote branch and use `dev` as the base:
 
 ```sh
