@@ -101,11 +101,9 @@
       (args (expr ((dim ("80")) char) (ident (binding 14 "first"))) 
        (expr (* char) (literal (* char) "\"sprintf:%lld/%s\"")) 
        (expr (long long) 
-        (call "Var_long_long" 
-         (args (expr ("Var") 
-                (call "Var_convert_at" 
-                 (args (expr ("Var") (ident (binding 4 "key"))) 
-                  (expr ("Symbol") "25983886") (error-site))))))) 
+        (call "Var_long_long_at" 
+         (args (expr ("Var") (ident (binding 4 "key"))) 
+          (error-site)))) 
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
@@ -179,11 +177,9 @@
                    (args (expr ("Var") (ident (binding 4 "key"))) 
                     (expr ("Symbol") "3453797") (error-site))))))) 
          (expr (long double) 
-          (call "Var_long_double" 
-           (args (expr ("Var") 
-                  (call "Var_convert_at" 
-                   (args (expr ("Dynamic") (ident (binding 6 "val"))) 
-                    (expr ("Symbol") "26071077642") (error-site))))))) 
+          (call "Var_long_double_at" 
+           (args (expr ("Dynamic") (ident (binding 6 "val"))) 
+            (error-site)))) 
          (expr ("String") 
           (call "Var_str" 
            (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))))) 
@@ -222,11 +218,9 @@
       (args (expr ("Buffer") (ident (binding 27 "buffer"))) 
        (expr (* char) (literal (* char) "\"buffer:%ld/%g\"")) 
        (expr (long) 
-        (call "Var_long" 
-         (args (expr ("Var") 
-                (call "Var_convert_at" 
-                 (args (expr ("Var") (ident (binding 4 "key"))) 
-                  (expr ("Symbol") "818062") (error-site))))))) 
+        (call "Var_long_at" 
+         (args (expr ("Var") (ident (binding 4 "key"))) 
+          (error-site)))) 
        (expr (double) 
         (call "Var_floating" 
          (args (expr ("Var") 
