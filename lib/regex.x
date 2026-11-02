@@ -415,7 +415,11 @@ static _RegexNode _quantified(Parser &p, _RegexNode atom) {
   node.greedy = _peek(p) != '?';
   node.child = atom;
   if (!node.greedy) p.pos++;
-  if (_is_quantifier(_peek(p))) _fail(p, reason_no_repeat);
+  int next = p.pos;
+  if (_bounds(p, min, max)) {
+    p.pos = next;
+    _fail(p, reason_no_repeat);
+  }
   return node;
 }
 
