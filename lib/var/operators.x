@@ -63,7 +63,13 @@ $native.update(long double, x2c_var_update_long_double, <ldouble>);
 #include "array/array.x"
 #include "map/map.x"
 
-$integer.raw(_integer_raw);
+static inline unsigned long long _integer_raw(
+  Symbol op, unsigned long long a, unsigned long long b,
+  int bits, int unsigned_value) {
+  unsigned long long raw;
+  $integer.step(raw, op, a, b, bits, unsigned_value);
+  return raw;
+}
 
 /* One arithmetic step in a floating family. Callers pass `+`, `-`, `*`, or
    `/`, so any other operator divides. */
