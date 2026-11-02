@@ -135,8 +135,7 @@ module List _declarator(
     _direct_declarator(
       c, context, method_identity, source_first,
       source_after).cdr();
-  List sfx = _declarator_suffix(
-    c, c.load_source && !c.return_type && key == %("main"));
+  List sfx = _declarator_suffix(c);
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
   // A parenthesized declarator is assembled twice. Preserve its raw key until
@@ -190,7 +189,7 @@ static List _parenthesized(
   return decl;
 }
 
-static List _declarator_suffix(Compiler c, int loaded_main) {
+static List _declarator_suffix(Compiler c) {
   List type = NULL;
   loop {
     // An attribute after a declarator modifies that declarator alone.
@@ -205,7 +204,7 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
       type = %( @type (bitfield $expr) );
     }
     else if (c.peek(0) == <(>) {
-      List params = _function_parameters(c, loaded_main);
+      List params = _function_parameters(c);
       params = %( params @params );
       type = type ? %(fnmod $params $type) : %((fnmod $params));
     }
@@ -218,10 +217,10 @@ static List _declarator_suffix(Compiler c, int loaded_main) {
    follows is not yet determined, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
    the captured scope. */
-static List _function_parameters(Compiler c, int loaded_main) {
+static List _function_parameters(Compiler c) {
   c.next();
   _x2c_complete_here(c, <type>, _type_keywords());
-  if (c.peek(0) == <)> && !loaded_main)
+  if (c.peek(0) == <)>)
     $fail.parse_params_empty(c, c.token);
   SymScope saved = c.params, parsed;
   int complete = 0;

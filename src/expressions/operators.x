@@ -1,13 +1,5 @@
 /*  operators.x -- operator types and protocol operations */
 
-static macro Stmt $fail.expressions_operand_unconverted(
-  Expr $c, Expr $origin, Expr $participant, Expr $member, Expr $operand) =>
-  $c.report_error(
-    <type>, "operand does not convert beside a protocol participant",
-    $origin,
-    %("participant: $($participant.repr())" "member: $($member)"
-      "operand type: $($operand.repr())"));
-
 // operators
 
 /* Returns <array> or <map>, including aliases, and zero for other types. */
@@ -174,11 +166,11 @@ static int _builtin_index_lvalue(Compiler c, List expression) {
   return 0;
 }
 
+/* A raw string literal beside a String converts for `==` and the
+   comparisons derived from `equal` or `compare`. */
 static void _convert_string_comparison(
   Compiler c, Symbol operator, List &lhs, List &rhs) {
-  if (operator != <==> && operator != <!=> && operator != <"<"> &&
-      operator != <">"> && operator != <"<="> && operator != <">=">)
-    return;
+  if (operator != <==> && !Compiler.derived_member(operator)) return;
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (c.sym.is_string_type(lhs_type) && _is_raw_string_literal(rhs))
     rhs = c.convert_expression(rhs, lhs_type);

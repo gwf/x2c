@@ -142,9 +142,8 @@ separate column. The C column measures an actual contributed C program.
 | pidigits | Generate decimal digits with the prescribed arbitrary-precision spigot |
 
 The separate upstream startup experiment is not one of these ten problems.
-The [former custom suite](../shootout-unofficial/README.md) preserves the
-previous workloads and C-port variants, with historical results in Git.
-The active targets do not run it or mix its measurements with this suite.
+The [former custom suite](https://github.com/gwf/x2c/tree/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/shootout-unofficial),
+with its previous workloads and C-port variants, remains in Git history.
 
 ## Sources and specifications
 

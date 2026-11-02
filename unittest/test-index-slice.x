@@ -119,6 +119,34 @@ static void collection_index_boundaries(void) {
 
 }
 
+/* An Array write outside the elements raises `<bad-arg>`, as the compound
+   updates do, while a read there returns `void`. */
+static void array_index_write_bounds(void) {
+  $test.scoped();
+  Array array = [10, 20, 30], missing = NULL;
+  int caught = 0;
+
+  try array[5] = 9;
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 5);
+  }
+  try array[-9] = 9;
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -9);
+  }
+  try array[5] += 1;
+  catch %(bad-arg *): caught++;
+  try array[-9]++;
+  catch %(bad-arg *): caught++;
+  try missing[0] = 9;
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 5);
+  EXPECT_STR_EQ(array.repr(), "[ 10, 20, 30 ]");
+  EXPECT_TRUE(array[5] is void);
+}
+
 static void collection_slice_syntax(void) {
   $test.scoped();
 
@@ -204,6 +232,7 @@ void index_slice_suite(void) {
   $test.run(normalization_extreme_integer_domain);
   $test.run(collection_index_syntax);
   $test.run(collection_index_boundaries);
+  $test.run(array_index_write_bounds);
   $test.run(collection_slice_syntax);
   $test.run(slice_stop_beyond_length_clamps);
   $test.run(slice_negative_step_at_length);

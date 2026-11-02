@@ -506,15 +506,18 @@ ends in `.x`, or may be any name when the first line is a shebang:
 The first run builds an executable into the per-user cache. Later runs
 start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
-includes, a package archive it links, the compiler, the runtime archive, the
-C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also records
-the directories the build searched: include directories, `-L` directories,
-the C compiler's header and library search paths, and the directory of each
-file the build read. Adding or removing a file in one of them rebuilds the
+includes, a package archive it links, a library file that a `-l` option can
+name, the compiler, the runtime archive, the C compiler, the script's
+options, or the `CPATH`, `C_INCLUDE_PATH`, `LIBRARY_PATH`, and `SDKROOT`
+environment variables. The cache also records the directories the build
+searched: include directories, `-L` directories, `LIBRARY_PATH`, the C
+compiler's header and library search paths, and the directory of each file
+the build read. Adding or removing a file in one of them rebuilds the
 script. This covers a header that now shadows an included one, a
 `__has_include` whose result changed, and a `-l` library that now resolves
-elsewhere. `--rebuild` builds regardless.
+elsewhere. A `-l` option that names no library file in those directories,
+such as one found through `-Wl,-L`, rebuilds the script on every run.
+`--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
@@ -850,9 +853,10 @@ current directory. Discovery selects
 `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
 
-The selected target's include and package directories are forwarded to
-each build. Concurrent runs print each file's captured output in discovery
-order. Each file runs through
+`--manifest-path FILE` selects that manifest and `--target NAME` its
+target, as for `build`. The selected target's include and package
+directories are forwarded to each build. Concurrent runs print each
+file's captured output in discovery order. Each file runs through
 `x2c script`, so local `.x` includes compile as helpers. The script cache
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
@@ -911,7 +915,9 @@ command treats `-` as an ordinary file name in these modes.
 
 Translation reports each diagnostic on standard error as
 `file:line:column: code: message`, followed by the source line, a caret, and
-any notes. A unit stops after 20 errors. `--max-errors <count>` changes that
+any notes. `file` follows the rule for the JSON `file` field below: relative
+to the working directory for a source inside it and absolute otherwise. A
+unit stops after 20 errors. `--max-errors <count>` changes that
 bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`
 removes it. When the bound is greater than one, a unit that reaches it ends
 with `limit: too many errors, stopping`. With `--max-errors 1`, the unit's

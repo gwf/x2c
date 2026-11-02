@@ -594,13 +594,13 @@ static void _set_field(CliRequest r, CliOption &option, String value) {
 }
 
 static void _cli_fail_output_command(void) {
-  _fail(
+  Diagnostics.driver_fail(
     "option '-o' needs build or run",
     "use '--out-dir' for translation directories");
 }
 
 static void _cli_fail_expected_command(String arg) {
-  _fail(
+  Diagnostics.driver_fail(
     %"expected a command before '$arg'",
     %"use 'x2c translate $arg'");
 }
@@ -646,15 +646,8 @@ static CliOption *_find_option(
 }
 
 static void _cli_fail_one_dash_removed(String arg, String use) {
-  _fail(%"one-dash long option '$arg' was removed", %"use '$use'");
-}
-
-/* Prints an error and perhaps a note, then exits with status 2. The exit
-   runs the atexit handlers, which Diagnostics.driver_error skips. */
-module void _fail(String message, String note) {
-  fprintf(stderr, "x2c: error: %s\n", message);
-  if (note) fprintf(stderr, "note: %s\n", note);
-  exit(2);
+  Diagnostics.driver_fail(
+    %"one-dash long option '$arg' was removed", %"use '$use'");
 }
 
 /* A package's native word is an archive to link or an option a package may

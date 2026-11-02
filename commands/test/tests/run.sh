@@ -206,7 +206,7 @@ for jobs in 0 -1 nope ''; do
   run -j "$jobs"
   [ "$status" = 2 ]
 done
-(cd "$WORK/empty" && "$TOOL" --manifest "$WORK/project/x2c.toml" \
+(cd "$WORK/empty" && "$TOOL" --manifest-path "$WORK/project/x2c.toml" \
   --target app "$WORK/project/a_test.x") >"$WORK/explicit-manifest"
 grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' \
   "$WORK/explicit-manifest"
@@ -239,10 +239,10 @@ cp -R "$WORK/ordinary-project" "$WORK/root-name/tests"
 cp -R "$WORK/ordinary-project" "$WORK/cache/.x2c-build/nested-project"
 for project in ordinary-project ancestor/tests/nested-project root-name/tests \
     cache/.x2c-build/nested-project; do
-  "$TOOL" --manifest "$WORK/$project/x2c.toml" >"$WORK/discovery"
+  "$TOOL" --manifest-path "$WORK/$project/x2c.toml" >"$WORK/discovery"
   grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
   ! grep -q 'APP RAN' "$WORK/discovery"
-  "$TOOL" --manifest "$WORK/$project/x2c.toml" "$WORK/$project" >"$WORK/discovery"
+  "$TOOL" --manifest-path "$WORK/$project/x2c.toml" "$WORK/$project" >"$WORK/discovery"
   grep -Fxq 'files: 2 passed, 0 failed; tests: 2 passed, 0 failed' "$WORK/discovery"
   ! grep -q 'APP RAN' "$WORK/discovery"
   (cd "$WORK/$project" && "$TOOL" .) >"$WORK/discovery"

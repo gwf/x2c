@@ -606,6 +606,18 @@ static void thread_rejects_free_before_join_and_double_join(void) {
   thread.free();
 }
 
+static void thread_null_handle_contract(void) {
+  Thread thread = NULL;
+  String raised = NULL;
+  try thread.join();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try thread.stop();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try thread.free();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(raised, "bad-arg Thread.join; bad-arg Thread.stop; ");
+}
+
 static void thread_freezes_late_descriptor_registration(void) {
   EXPECT_TRUE(x2c_descriptor_registration_frozen());
   int caught = 0, tag_caught = 0;
@@ -1505,6 +1517,20 @@ static void parallel_map_borrowed_pool_survives_failure(void) {
   EXPECT_TRUE(borrowed.owns(text));
 }
 
+/* A null reducer raises only when a result needs combining. */
+static void parallel_map_null_reducer_raises_when_called(void) {
+  $test.scoped();
+  _parallel_reset();
+  Var empty = range(1, 0, 1).parallel_map(_parallel_count, 2)
+    .foldl(7, (Func) NULL);
+  EXPECT_INT_EQ(empty.int(), 7);
+  String raised = NULL;
+  try range(0, 2, 1).parallel_map(_parallel_count, 2).foldl(0, (Func) NULL);
+  catch %(?code (operation ?op) *): raised = %"$code $op";
+  EXPECT_STR_EQ(raised, "bad-arg Func.apply");
+  EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+}
+
 void thread_borrowed_pool_suite(void) {
   $test.run(parallel_map_borrows_selected_pool);
   $test.run(parallel_map_borrowed_pool_survives_failure);
@@ -1519,6 +1545,7 @@ void thread_parallel_map_suite(void) {
   $test.run(parallel_map_results_outlive_workers);
   $test.run(parallel_map_cleans_worker_and_source_failures);
   $test.run(parallel_map_reuses_workers_with_explicit_transfer);
+  $test.run(parallel_map_null_reducer_raises_when_called);
 }
 
 static pthread_cond_t stop_probe_condition =
@@ -1595,4 +1622,5 @@ void thread_suite(void) {
   $test.run(thread_stack_reaches_library_recursion_limits);
   $test.run(thread_workers_bind_one_catch_site);
   $test.run(thread_promotions_keep_the_first_canonical_identity);
+  $test.run(thread_null_handle_contract);
 }

@@ -9,11 +9,10 @@ numbered indexing and iteration, and returns replacement results as `String`.
 import "pcre2" with Regexp, RegexpMatch;
 
 int main(void) {
-  Regexp request = Regexp.compile(
+  Regexp request = auto Regexp.compile(
     %"^(?<method>[A-Z]+) (?<path>[^ ]+)$$",
     PCRE2_UTF | PCRE2_UCP
   );
-  defer request.free();
 
   RegexpMatch found = request.match("GET /docs");
   if (found)
@@ -102,7 +101,8 @@ reviewed SHA-256 values.
 match context. `Regexp.free` releases those native resources and is safe to
 call more than once while the wrapper itself remains in scope. Every other
 method, including `pattern()` and `capture_count()`, raises `<bad-state>` after
-release. Use `defer` at the acquisition site.
+release. The package adopts `Cleanup` for `Regexp` through `Regexp.free`,
+so `auto` at the acquisition site releases it when its block ends.
 
 Matches copy their capture text and offsets into immutable x2c Lists, so a
 match remains valid after the next call. Reusing the native execution state

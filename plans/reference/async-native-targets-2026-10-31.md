@@ -3,6 +3,8 @@
 > Status: reference - focused tests and local macOS execution evidence.
 > Recorded 2026-10-31. No runtime behavior changed in this follow-up.
 > Normal benchmark reruns remain on hold. No pushes are authorized.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Focused coverage
 

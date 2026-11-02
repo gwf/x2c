@@ -6,8 +6,10 @@
 #define __GUARD_0x0D648550__
 
 #include "x2c.h"
+#include "logger.h"
 #include "path.h"
 #include "process.h"
+#include "report.h"
 #include "sourceview.h"
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
 #include <errno.h>
@@ -17,7 +19,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-#include <sys/wait.h>
 #include <unistd.h>
 typedef struct Compiler * Compiler;
 
@@ -83,9 +84,13 @@ int Path_lock_file(Path p, int wait);
 
 void Path_publish_files(List outputs);
 
-int Job_decode_wait_status(int raw, int * signal);
+void Compiler_configure_logging(int debugging);
 
 void Diagnostics_host_error(List detail);
+
+void Diagnostics_driver_report(const char * message, const char * note);
+
+_Noreturn void Diagnostics_driver_fail(const char * message, const char * note);
 
 _Noreturn void Diagnostics_driver_error(const char * message);
 

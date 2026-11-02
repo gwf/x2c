@@ -77,7 +77,7 @@ Review and fix the complete authored diff before submission.
 
 ## Completed comparison
 
-The [dated report](../../examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
+The [dated report](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-28-architectures/interpretation.md)
 retains all fifteen measurements and build provenance. At 64 clients, medians
 were 49,765 requests/s for mutex x2c, 38,650 for database-thread x2c, and 65,858
 for Go. The database-thread variant had lower p99 latency (2.59 ms versus

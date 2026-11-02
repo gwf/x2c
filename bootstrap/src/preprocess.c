@@ -15,11 +15,11 @@ typedef struct ArmScan{
 }
 ArmScan;
 
-static List _16, _15;
+static List _21, _20;
 
-static String _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _13, _12, _11, _10, _9, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _18, _17, _16, _15, _14, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _14, _8;
+static Var _19, _13;
 
 static int _init_guard_ = 0;
 
@@ -34,10 +34,6 @@ static void _plain_directive(ArmScan * s, Token token, size_t i);
 static int _plain_open_state(String text);
 
 static String _plain_directive_line(String directive);
-
-static int _never_defined(String name);
-
-static int _hidden_group(List open);
 
 static size_t _code(ArmScan * s, Token token, size_t i);
 
@@ -84,40 +80,40 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("include");
-  _1 = String_new(">");
-  _2 = String_new("\"");
-  _3 = String_new("undef");
-  _4 = String_new("define");
-  _5 = String_new("\\\r\n");
-  _6 = String_new("");
-  _7 = String_new("\\\n");
-  _8 = Symbol_var(35579270086);
-  _9 = String_new("if");
-  _10 = String_new("el");
-  _11 = String_new("endif");
-  _12 = String_new("#");
-  _13 = String_new("#endif");
-  _14 = String_var(_13);
-  _15 = cons(_14, NULL);
-  _16 = cons(_8, _15);
-  _17 = String_new("defined ( <never> )");
-  _18 = String_new("defined <never>");
-  _19 = String_new("ifdef <never>");
-  _20 = String_new("if 0");
-  _21 = String_new("if ( 0 )");
-  _22 = String_new("if defined <never>");
-  _23 = String_new("if defined <never> && ");
-  _24 = String_new(" || ");
-  _25 = String_new("ifndef <never>");
-  _26 = String_new("if ! defined <never>");
-  _27 = String_new("<never>");
-  _28 = String_new(" ");
-  _29 = String_new("__cplusplus");
-  _30 = String_new("_MSC_VER");
-  _31 = String_new("_WIN32");
-  _32 = String_new("_WIN64");
-  _33 = String_new("__CYGWIN__");
+  _0 = String_new("__cplusplus");
+  _1 = String_new("_MSC_VER");
+  _2 = String_new("_WIN32");
+  _3 = String_new("_WIN64");
+  _4 = String_new("__CYGWIN__");
+  _5 = String_new("include");
+  _6 = String_new(">");
+  _7 = String_new("\"");
+  _8 = String_new("undef");
+  _9 = String_new("define");
+  _10 = String_new("\\\r\n");
+  _11 = String_new("");
+  _12 = String_new("\\\n");
+  _13 = Symbol_var(35579270086);
+  _14 = String_new("if");
+  _15 = String_new("el");
+  _16 = String_new("endif");
+  _17 = String_new("#");
+  _18 = String_new("#endif");
+  _19 = String_var(_18);
+  _20 = cons(_19, NULL);
+  _21 = cons(_13, _20);
+  _22 = String_new("defined ( <never> )");
+  _23 = String_new("defined <never>");
+  _24 = String_new("ifdef <never>");
+  _25 = String_new("if 0");
+  _26 = String_new("if ( 0 )");
+  _27 = String_new("if defined <never>");
+  _28 = String_new("if defined <never> && ");
+  _29 = String_new(" || ");
+  _30 = String_new("ifndef <never>");
+  _31 = String_new("if ! defined <never>");
+  _32 = String_new("<never>");
+  _33 = String_new(" ");
   _34 = String_new("__attribute__");
   _35 = String_new("packed");
   _36 = String_new("aligned");
@@ -126,18 +122,44 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _39 = String_new("__declspec");
 }
 
+int Compiler_never_defined(String name){
+  if(! _init_guard_) _file_init_();
+  if(String_equal(name, _0) || String_equal(name, _1)) return 1;
+#if defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
+#else
+  return String_equal(name, _2) || String_equal(name, _3) || String_equal(name, _4);
+#endif
+
+}
+
+int Compiler_hidden_group(List open){
+  {
+    List group;
+    List _x2c_gensym_macro_object_0 = open;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      group = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      if(x2c_var_equal_lane(List_caddr(group), Symbol_var(556015964)) || x2c_var_equal_lane(List_caddr(group), int_var(2)) || x2c_var_equal_lane(List_caddr(group), int_var(3))) return 1;
+    }
+
+  }
+  return 0;
+}
+
 String Compiler_preproc_directive(String text);
 
 String Compiler_preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
   (* angle) = 0;
   String body = Compiler_preproc_directive(text);
-  if(! String_startswith(body, _0)) return NULL;
-  body = String_lstrip(String_remove_prefix(body, _0), " \t");
+  if(! String_startswith(body, _5)) return NULL;
+  body = String_lstrip(String_remove_prefix(body, _5), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
   (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, (-2147483647 - 1), 1);
-  int close = String_find(rest, (* angle) ? _1 : _2);
+  int close = String_find(rest, (* angle) ? _6 : _7);
   return close > 0 ? String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(close), 1) : NULL;
 }
 
@@ -147,8 +169,8 @@ String Compiler_preproc_marker_file(String text, int * line){
   size_t digits = 0;
   while(digits < String_len(body) && isdigit(String_getindex(body, digits))) digits ++;
   String rest = String_lstrip(String_getslice(body, x2c_slice_bound(digits), (-2147483647 - 1), 1), " \t");
-  if(! digits || ! String_startswith(rest, _2)) return NULL;
-  int close = String_find(String_getslice(rest, 1, (-2147483647 - 1), 1), _2);
+  if(! digits || ! String_startswith(rest, _7)) return NULL;
+  int close = String_find(String_getslice(rest, 1, (-2147483647 - 1), 1), _7);
   if(close < 0) return NULL;
   (* line) = atoi(body);
   return String_unescape(String_getslice(rest, 1, x2c_slice_bound(close + 1), 1));
@@ -215,15 +237,15 @@ int Token_is_word(Token);
 Token Compiler_macro_directive(String content, int * undefined){
   if(! _init_guard_) _file_init_();
   String directive = Compiler_preproc_directive(content);
-  (* undefined) = String_startswith(directive, _3);
-  if(!(* undefined) && ! String_startswith(directive, _4)) return NULL;
-  Token token = Token_skip_trivia(Compiler_scan_directive(String_remove_prefix(directive, (* undefined) ? _3 : _4)));
+  (* undefined) = String_startswith(directive, _8);
+  if(!(* undefined) && ! String_startswith(directive, _9)) return NULL;
+  Token token = Token_skip_trivia(Compiler_scan_directive(String_remove_prefix(directive, (* undefined) ? _8 : _9)));
   return Token_is_word(token) ? token : NULL;
 }
 
 Token Compiler_scan_directive(String text){
   if(! _init_guard_) _file_init_();
-  Tokenizer scanned = Tokenizer_new(String_replace(String_replace(text, _5, _6), _7, _6), 3945159);
+  Tokenizer scanned = Tokenizer_new(String_replace(String_replace(text, _10, _11), _12, _11), 3945159);
   Tokenizer_scan(scanned);
   return scanned -> tokens;
 }
@@ -244,11 +266,11 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
   if(! _init_guard_) _file_init_();
   {
     List directive;
-    List _x2c_gensym_macro_object_0 = directives;
-    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      directive = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+    List _x2c_gensym_macro_object_1 = directives;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      directive = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       Compiler_note_object_macro(c, Var_as_string(List_cadr(Ast_without_origin(directive))));
     }
 
@@ -273,10 +295,10 @@ Symbol Compiler_preproc_conditional_kind(String text);
 List Compiler_preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
   Symbol kind = Compiler_preproc_conditional_kind(text);
-  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_8, cons(String_var(text), NULL))), NULL)), arms);
+  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_13, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_gensym_literal_part_0 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_1 = List_var(cons(_8, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+    List _x2c_gensym_literal_part_0 = Var_list_payload(List_car(arms));  Var _x2c_gensym_literal_part_1 = List_var(cons(_13, cons(String_var(text), NULL)));  List_append(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -285,15 +307,15 @@ List Compiler_preproc_track_arms(List arms, String text){
 Symbol Compiler_preproc_conditional_kind(String text){
   if(! _init_guard_) _file_init_();
   String directive = Compiler_preproc_directive(text);
-  if(String_startswith(directive, _9)) return 1016156;
-  if(String_startswith(directive, _10)) return 172060880;
-  if(String_startswith(directive, _11)) return 7109834;
+  if(String_startswith(directive, _14)) return 1016156;
+  if(String_startswith(directive, _15)) return 172060880;
+  if(String_startswith(directive, _16)) return 7109834;
   return 0;
 }
 
 String Compiler_preproc_directive(String text){
   if(! _init_guard_) _file_init_();
-  return String_strip(String_remove_prefix(String_strip(text, " \t"), _12), " \t");
+  return String_strip(String_remove_prefix(String_strip(text, " \t"), _17), " \t");
 }
 
 List Compiler_preproc_within_arms(List arms, List items){
@@ -301,18 +323,18 @@ List Compiler_preproc_within_arms(List arms, List items){
   Array out = Array_new();
   {
     List group;
-    List _x2c_gensym_macro_object_2 = List_reverse(arms);
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      group = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_3 = List_reverse(arms);
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      group = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
       {
         List directive;
-        List _x2c_gensym_macro_object_1 = group;
-        List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-        Var _x2c_gensym_macro_cursor_output_1;
-        while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-          directive = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
+        List _x2c_gensym_macro_object_2 = group;
+        List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+        Var _x2c_gensym_macro_cursor_output_2;
+        while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+          directive = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
           Array_push(out, List_var(directive));
         }
 
@@ -323,16 +345,16 @@ List Compiler_preproc_within_arms(List arms, List items){
   }
   {
     List item;
-    List _x2c_gensym_macro_object_3 = items;
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      item = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
+    List _x2c_gensym_macro_object_4 = items;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      item = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
       Array_push(out, List_var(item));
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_16));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_21));
   return Array_list_free(out);
 }
 
@@ -341,7 +363,7 @@ static List _leading_preproc(Compiler c, int located){
   Token base = c -> tokenizer -> tokens, token = c -> token;
   while(-- token >= base){
     if(token -> type == 35579270086){
-      List directive = cons(_8, cons(String_var(token -> text), NULL));
+      List directive = cons(_13, cons(String_var(token -> text), NULL));
       int angle = 0;
       if(located && String_truth(Compiler_preproc_include_target(token -> text, &(angle)))) directive = Compiler_anchor_origin(c, directive, token);
       noncode = cons(List_var(directive), noncode);
@@ -359,7 +381,7 @@ static void _directive(ArmScan * s, Token token, size_t i){
   Var open;
   if(Map_try_get((* s).c -> arm_stacks, long_var((long) i), &(open))){
     (* s).open = Var_list_payload(open);
-    (* s).hidden = _hidden_group((* s).open);
+    (* s).hidden = Compiler_hidden_group((* s).open);
   }
   else if(!(* s).hidden) _note_layout_macro(&((* s)), token -> text);
 }
@@ -387,46 +409,21 @@ static void _plain_directive(ArmScan * s, Token token, size_t i){
   if(! conditional) return;
   (* s).open = Array_list((* s).stack);
   Map_setindex((* s).c -> arm_stacks, long_var((long) i), List_var((* s).open));
-  (* s).hidden = _hidden_group((* s).open);
+  (* s).hidden = Compiler_hidden_group((* s).open);
 }
 
 static int _plain_open_state(String text){
   String line = _plain_directive_line(Compiler_preproc_directive(text));
-  line = String_replace(line, _17, _18);
-  if(String_equal(line, _19) || String_equal(line, _20) || String_equal(line, _21) || String_equal(line, _22) ||(String_startswith(line, _23) && !(String_contains(line, _24)))) return 2;
-  return String_equal(line, _25) || String_equal(line, _26);
+  line = String_replace(line, _22, _23);
+  if(String_equal(line, _24) || String_equal(line, _25) || String_equal(line, _26) || String_equal(line, _27) ||(String_startswith(line, _28) && !(String_contains(line, _29)))) return 2;
+  return String_equal(line, _30) || String_equal(line, _31);
 }
 
 static String _plain_directive_line(String directive){
   Token token = Token_skip_trivia(Compiler_scan_directive(directive));
   Array words = Array_new();
-  for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)) Array_push(words, _never_defined(token -> text) ? String_var(_27) : String_var(token -> text));
-  return String_join(_28, Array_list_free(words));
-}
-
-static int _never_defined(String name){
-  if(String_equal(name, _29) || String_equal(name, _30)) return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return String_equal(name, _31) || String_equal(name, _32) || String_equal(name, _33);
-#endif
-
-}
-
-static int _hidden_group(List open){
-  {
-    List group;
-    List _x2c_gensym_macro_object_4 = open;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      group = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      if(x2c_var_equal_lane(List_caddr(group), Symbol_var(556015964)) || x2c_var_equal_lane(List_caddr(group), int_var(2)) || x2c_var_equal_lane(List_caddr(group), int_var(3))) return 1;
-    }
-
-  }
-  return 0;
+  for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)) Array_push(words, Compiler_never_defined(token -> text) ? String_var(_32) : String_var(token -> text));
+  return String_join(_33, Array_list_free(words));
 }
 
 static size_t _code(ArmScan * s, Token token, size_t i){
@@ -470,7 +467,7 @@ static void _note_layout_macro(ArmScan * s, String content){
     if(token -> type != 19147688) continue;
     int level = 0;
     if(String_equal(token -> text, _34)) level = _attribute_layout(token);
-    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 354}; & _x2c_gensym_error_site_0; })));
+    else if(Map_contains(layout, String_var(token -> text))) level = Var_int(Var_convert_at(Map_getindex(layout, String_var(token -> text)), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/preprocess.x",.function = "_note_layout_macro",.line = 362}; & _x2c_gensym_error_site_0; })));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order_lane(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));

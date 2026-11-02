@@ -46,6 +46,8 @@ int scan_c_string(char * s);
 
 int scan_c_string_status(char * s, Symbol * status);
 
+int scan_lisp_string_status(char * s, Symbol * status);
+
 int scan_c_character(char * s);
 
 int scan_c_escape_value(char * s, int * value);

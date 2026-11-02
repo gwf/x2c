@@ -44,15 +44,14 @@ jobs:
             --pattern 'verified-production-*.json' --dir candidate
           python3 tools/release-candidate.py proof \
             --candidate candidate --destination production
+          python3 tools/release-candidate.py site-version \
+            --expected "$EXPECTED_VERSION"
           python3 - <<'PYCODE'
           import json, os, subprocess
-          from urllib.request import urlopen
           manifest = json.load(open('candidate/candidate.json'))
           release = json.loads(subprocess.check_output(['gh', 'release', 'view',
             'v' + manifest['version'], '--repo', 'gwf/x2c', '--json', 'isDraft,tagName']))
           assert not release['isDraft'], 'target production release is not public'
-          current = urlopen('https://x2c-lang.dev/x2c-version.txt').read().decode().strip()
-          assert current == os.environ['EXPECTED_VERSION'], 'production site changed'
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
             output.write('version=' + manifest['version'] + '\n')
             output.write('source_sha=' + manifest['source_sha'] + '\n')
@@ -76,26 +75,18 @@ jobs:
       pages: write
       id-token: write
     steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          sparse-checkout: tools
       - uses: actions/download-artifact@v8
         with:
           name: production-site
           path: candidate
       - name: Verify and extract the retained site
         run: |
-          python3 - <<'PY'
-          import hashlib, json, pathlib, tarfile
-          root = pathlib.Path('candidate')
-          archive = root / 'site-production.tar.gz'
-          receipt = json.loads((root / 'site-production.json').read_text())
-          assert hashlib.sha256(archive.read_bytes()).hexdigest() == receipt['sha256']
-          assert hashlib.sha256((root / 'candidate.json').read_bytes()).hexdigest() == receipt['manifest_sha256']
-          with tarfile.open(archive) as tar:
-            for member in tar.getmembers():
-              path = pathlib.Path(member.name)
-              assert not path.is_absolute() and '..' not in path.parts
-              assert member.isfile() or member.isdir()
-            tar.extractall('public', filter='data')
-          PY
+          python3 tools/release-candidate.py extract --candidate candidate \
+            --destination production --output public
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

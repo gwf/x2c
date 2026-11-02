@@ -66,8 +66,6 @@ static struct addrinfo * _resolve(String host, int port, int flags);
 
 static int _failed(int fd);
 
-_Noreturn static void _io(String operation, int error);
-
 static void _ignore_sigpipe(void);
 
 static void _set_sigpipe(void);
@@ -484,6 +482,8 @@ void Socket_cleanup(Socket socket){
 
 void x2c_exception_push(ExceptionFrame *);
 
+void x2c_io_fail(Var, int);
+
 void * Scope_malloc_finalized(size_t, void(*)(void *));
 
 int x2c_exception_claim(ExceptionFrame *);
@@ -508,7 +508,7 @@ Listener Listener_bind(String host, int port){
         if(fd >= 0) break;
         error = errno;
       }
-      if(fd < 0) _io(_0, error);
+      if(fd < 0) x2c_io_fail(String_var(_0), error);
       {
         _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
           0
@@ -565,12 +565,28 @@ Listener Listener_bind(String host, int port){
 
 }
 
+static Var Symbol_var(Symbol);
+
+static Var String_var(String);
+
+String String_join(String, List);
+
 int _x2c_net_accept_fd(Listener listener);
 
 Socket Socket_adopt(int fd);
 
+#include "error.h"
+
+
+
+
 Socket Listener_accept(Listener listener){
   if(! _init_guard_) _file_init_();
+  if(! listener){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Listener_accept",.line = 79,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Listener.accept")), NULL))));
+    __builtin_unreachable();
+  }
   int fd = _x2c_net_accept_fd(listener);
   return fd < 0 ? NULL : Socket_adopt(fd);
 }
@@ -584,16 +600,16 @@ int _x2c_net_accept_fd(Listener listener){
   while(! _stopped(listener)){
     int ready = poll(& wait, 1, 50);
     if(ready < 0 && errno == EINTR) continue;
-    if(ready < 0) _io(_1, errno);
+    if(ready < 0) x2c_io_fail(String_var(_1), errno);
     if(! ready || _stopped(listener)) continue;
     int fd = accept(listener -> fd, NULL, NULL);
     if(fd < 0 &&(errno == EINTR || errno == EAGAIN)) continue;
-    if(fd < 0) _io(_1, errno);
+    if(fd < 0) x2c_io_fail(String_var(_1), errno);
     int flags = fcntl(fd, F_GETFL, 0);
     if(flags < 0 || fcntl(fd, F_SETFL, flags & ~ O_NONBLOCK)){
       int error = errno;
       close(fd);
-      _io(_1, error);
+      x2c_io_fail(String_var(_1), error);
     }
     return fd;
   }
@@ -602,6 +618,11 @@ int _x2c_net_accept_fd(Listener listener){
 
 int Listener_port(Listener listener){
   if(! _init_guard_) _file_init_();
+  if(! listener){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Listener_port",.line = 110,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Listener.port")), NULL))));
+    __builtin_unreachable();
+  }
   return listener -> port;
 }
 
@@ -616,6 +637,11 @@ Buffer Listener_write_repr(Listener listener, Buffer out){
 
 void Listener_stop(Listener listener){
   if(! _init_guard_) _file_init_();
+  if(! listener){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "Listener_stop",.line = 127,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Listener.stop")), NULL))));
+    __builtin_unreachable();
+  }
   __atomic_store_n(& listener -> stopped, 1, __ATOMIC_RELEASE);
 }
 
@@ -626,23 +652,12 @@ void Listener_close(Listener listener){
 
 static int String_truth(String);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-String String_join(String, List);
-
-#include "error.h"
-
-
-
-
 Socket Socket_connect(String host, int port, int timeout_ms){
   if(! _init_guard_) _file_init_();
   _port(port, _2);
   if(! String_truth(host) || timeout_ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 140,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.connect")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "Socket_connect",.line = 148,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.connect")), NULL))));
     __builtin_unreachable();
   }
   _ignore_sigpipe();
@@ -667,7 +682,7 @@ Socket Socket_connect(String host, int port, int timeout_ms){
         }
         error = errno;
       }
-      _io(_2, error);
+      x2c_io_fail(String_var(_2), error);
     }
     else{
       x2c_exception_landed(& _x2c_gensym_exception_frame_1);
@@ -710,10 +725,10 @@ Socket Socket_adopt(int fd){
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
       int enabled = 1;
-      if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, & enabled, sizeof(enabled))) _io(_3, errno);
+      if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, & enabled, sizeof(enabled))) x2c_io_fail(String_var(_3), errno);
       String peer = _peer(fd);
       copy = dup(fd);
-      if(copy < 0) _io(_3, errno);
+      if(copy < 0) x2c_io_fail(String_var(_3), errno);
       input = File_fdopen(fd, "r");
       output = File_fdopen(copy, "w");
       Socket socket = Socket_new();
@@ -740,26 +755,36 @@ Socket Socket_adopt(int fd){
 
 void Socket_set_timeout(Socket s, int ms){
   if(! _init_guard_) _file_init_();
-  if(ms < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 186,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.set_timeout")), NULL))));
+  if(! s || ms < 0){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "Socket_set_timeout",.line = 194,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.set_timeout")), NULL))));
     __builtin_unreachable();
   }
   struct timeval timeout ={
     .tv_sec = ms / 1000, .tv_usec =(ms % 1000) * 1000
   }
   ;
-  if(setsockopt(s -> fd, SOL_SOCKET, SO_RCVTIMEO, & timeout, sizeof(timeout)) || setsockopt(s -> fd, SOL_SOCKET, SO_SNDTIMEO, & timeout, sizeof(timeout))) _io(_4, errno);
+  if(setsockopt(s -> fd, SOL_SOCKET, SO_RCVTIMEO, & timeout, sizeof(timeout)) || setsockopt(s -> fd, SOL_SOCKET, SO_SNDTIMEO, & timeout, sizeof(timeout))) x2c_io_fail(String_var(_4), errno);
 }
 
-void Socket_shutdown_write(Socket socket){
+void Socket_shutdown_write(Socket s){
   if(! _init_guard_) _file_init_();
-  if(File_flush(socket -> output)) _io(_5, errno);
-  if(shutdown(socket -> fd, SHUT_WR)) _io(_5, errno);
+  if(! s){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/net.x",.function = "Socket_shutdown_write",.line = 206,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.shutdown_write")), NULL))));
+    __builtin_unreachable();
+  }
+  if(File_flush(s -> output)) x2c_io_fail(String_var(_5), errno);
+  if(shutdown(s -> fd, SHUT_WR)) x2c_io_fail(String_var(_5), errno);
 }
 
 String Socket_peer(Socket socket){
   if(! _init_guard_) _file_init_();
+  if(! socket){
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/net.x",.function = "Socket_peer",.line = 214,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Socket.peer")), NULL))));
+    __builtin_unreachable();
+  }
   return socket -> peer;
 }
 
@@ -783,7 +808,7 @@ static int _bind(struct addrinfo * address){
 static int _bound_port(int fd){
   struct sockaddr_storage address;
   socklen_t length = sizeof(address);
-  if(getsockname(fd, (struct sockaddr *) & address, & length)) _io(_0, errno);
+  if(getsockname(fd, (struct sockaddr *) & address, & length)) x2c_io_fail(String_var(_0), errno);
   if(address.ss_family == AF_INET) return ntohs(((struct sockaddr_in *) & address) -> sin_port);
   return ntohs(((struct sockaddr_in6 *) & address) -> sin6_port);
 }
@@ -839,10 +864,10 @@ static int _connect(struct addrinfo * address, int timeout_ms){
 static String _peer(int fd){
   struct sockaddr_storage address;
   socklen_t size = sizeof(address);
-  if(getpeername(fd, (struct sockaddr *) & address, & size)) _io(_6, errno);
+  if(getpeername(fd, (struct sockaddr *) & address, & size)) x2c_io_fail(String_var(_6), errno);
   char host[NI_MAXHOST], port[NI_MAXSERV];
   int status = getnameinfo((struct sockaddr *) & address, size, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-  if(status) _io(_6, status == EAI_SYSTEM ? errno : EINVAL);
+  if(status) x2c_io_fail(String_var(_6), status == EAI_SYSTEM ? errno : EINVAL);
   return address.ss_family == AF_INET6 ?({
     Var _x2c_gensym_literal_part_0 = String_var(String_new(host));  Var _x2c_gensym_literal_part_1 = String_var(String_new(port));  String_join(NULL, cons(String_var(_7), cons(_x2c_gensym_literal_part_0, cons(String_var(_8), cons(_x2c_gensym_literal_part_1, NULL)))));
   }
@@ -866,8 +891,8 @@ static void _drop_socket(void * ptr){
 
 static void _port(int port, String operation){
   if(port < 0 || port > 65535){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/net.x",.function = "_port",.line = 304,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(1080488), int_var(port));
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/net.x",.function = "_port",.line = 319,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(1080488), int_var(port));
     __builtin_unreachable();
   }
 
@@ -883,12 +908,12 @@ static struct addrinfo * _resolve(String host, int port, int flags){
   char service[16];
   snprintf(service, sizeof(service), "%d", port);
   int status = getaddrinfo(host, service, & hints, & addresses);
-  if(status == EAI_SYSTEM) _io(_10, errno);
+  if(status == EAI_SYSTEM) x2c_io_fail(String_var(_10), errno);
   if(status){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("getaddrinfo")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/net.x",.function = "_resolve",.line = 318,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_3, 31862161386376, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(556264), String_var(host));
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/net.x",.function = "_resolve",.line = 333,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_8, 31862161386376, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(556264), String_var(host));
       __builtin_unreachable();
     }
 
@@ -903,18 +928,9 @@ static int _failed(int fd){
   return - 1;
 }
 
-_Noreturn static void _io(String operation, int error){
-  {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/net.x",.function = "_io",.line = 330,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_4, 20399393368, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(11703198), int_var(error));
-    __builtin_unreachable();
-  }
-
-}
-
 static void _ignore_sigpipe(void){
   int error = pthread_once(& sigpipe_once, _set_sigpipe);
-  if(error) _io(_11, error);
+  if(error) x2c_io_fail(String_var(_11), error);
 }
 
 static void _set_sigpipe(void){

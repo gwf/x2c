@@ -6,7 +6,6 @@
 #define __GUARD_0x1FED3D35__
 
 #include "x2c.h"
-#include <string.h>
 typedef List ListChar;
 
 typedef List ListShort;
@@ -57,11 +56,10 @@ static inline Var _typed_list_encode_f32(float value){
   return Var_box_f32(value);
 }
 
+static float Var_decode_f32(Var);
+
 static inline float _typed_list_decode_f32(Var value){
-  unsigned raw =(unsigned)(value.u64 & 0xFFFFFFFFul);
-  float result;
-  memcpy(& result, & raw, sizeof result);
-  return result;
+  return Var_decode_f32(value);
 }
 
 static Var Var_box_f64(double);
@@ -76,12 +74,10 @@ static inline double _typed_list_decode_f64(Var value){
   return Var_decode_f64(value);
 }
 
+static Var String_var(String);
+
 static inline Var _typed_list_encode_string(String value){
-  unsigned long raw =(unsigned long)(uintptr_t) value;
-  return(Var){
-    .u64 = VAR_STRING_PREFIX | raw
-  }
-  ;
+  return String_var(value);
 }
 
 String Var_as_string(Var);

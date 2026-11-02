@@ -6,6 +6,7 @@
 #include "rewrite.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
+#include "compiler-meta.h"
 static List _23, _22, _20, _19, _18, _16, _15, _14, _7, _3;
 
 static String _8, _1;

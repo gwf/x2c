@@ -7,11 +7,15 @@ PACKAGE_LINK :=
 EXAMPLES := autodiff autodiff-fit
 EXAMPLE_PROGRAMS := $(addprefix builds/example-,$(EXAMPLES))
 
-.PHONY: check fixtures fixtures-update run benchmark
+.PHONY: fixtures fixtures-update run benchmark
 
 # The package's own gate: the runtime and macro tests, the translation
 # fixtures, and the examples against their expected output.
 check: test fixtures run
+
+short-example: builds/example-autodiff
+
+example: builds/example-autodiff-fit
 
 # The fixtures use the shared runner with this package's fixture directory.
 FIXTURES := FIXTURE_DIR=$(CURDIR)/fixtures \

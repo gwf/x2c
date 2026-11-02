@@ -52,6 +52,7 @@ lib/common.x|advanced|x2c_var_add_lane,x2c_var_div_lane,x2c_var_equal_lane
 lib/common.x|advanced|x2c_var_i32_pair,x2c_var_mod_lane,x2c_var_mul_lane
 lib/common.x|advanced|x2c_var_order_lane,x2c_var_sub_lane
 lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
+lib/common.x|internal|x2c_fatal,x2c_io_fail,x2c_native_check
 lib/common.x|internal|X2CErrorSite,X2CStatic
 lib/context.x|advanced|Context.move_allocation,Context.owns
 lib/context.x|internal|Context.move_scope,Context.move_block
@@ -186,6 +187,7 @@ lib/pool/pool.x|internal|Pool.lookup,Pool.insert,Pool.intern,Pool.malloc
 lib/pool/pool.x|internal|Pool.thread_start,Pool.is_permanent,Pool.owns
 lib/pool/pool.x|internal|PoolTable
 lib/pool/pool.x|internal|x2c_pool_exchange
+lib/process.x|advanced|Job.decode_wait_status
 lib/scope/scope.x|advanced|Scope.calloc,Scope.calloc_in,Scope.destroy,Scope.free
 lib/scope/scope.x|advanced|Scope.cleanup
 lib/scope/scope.x|advanced|Scope.malloc,Scope.malloc_in,Scope.memdup,Scope.memdup_in

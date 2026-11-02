@@ -320,6 +320,22 @@ int scan_c_string_status(char * s, Symbol * status){
   return _fail(status, 664344300629258);
 }
 
+int scan_lisp_string_status(char * s, Symbol * status){
+  if(status) * status = 982;
+  int n = 1;
+  while(s[n]){
+    if(s[n] == '\\'){
+      int m = _escape_status(s + n, status);
+      if(m < 0) return - 1;
+      n += m;
+    }
+    else if(s[n] == '"') return n + 1;
+    else if(s[n] == '\n' || s[n] == '\r') return _fail(status, 28682226919752);
+    else n ++;
+  }
+  return _fail(status, 664344300629258);
+}
+
 int scan_c_character(char * s){
   int n = 1;
   if(s[n] == '\\'){

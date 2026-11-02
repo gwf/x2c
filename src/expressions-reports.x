@@ -146,6 +146,14 @@ macro Stmt $fail.expressions_operand_untyped(Expr $c, Expr $origin) =>
     $origin,
     %("a preprocessor macro has no type here: cast it, or bind its value to a local"));
 
+macro Stmt $fail.expressions_operand_unconverted(
+  Expr $c, Expr $origin, Expr $participant, Expr $member, Expr $operand) =>
+  $c.report_error(
+    <type>, "operand does not convert beside a protocol participant",
+    $origin,
+    %("participant: $($participant.repr())" "member: $($member)"
+      "operand type: $($operand.repr())"));
+
 macro Stmt $fail.expressions_is_var(Expr $c, Expr $origin, Expr $type) =>
   $c.report_error(
     <type>, "operator 'is' requires Var on the left",

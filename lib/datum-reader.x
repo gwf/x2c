@@ -207,7 +207,7 @@ static int _plain_form(
   char c = s[at];
   if (c == '(') return _plain_list(s, at, out, items, depth, floor);
   if (c == '"') return _plain_string(s, at, out);
-  if (_digit(c) || (c == '-' && _digit(s[at + 1])))
+  if (scan_ascii_digit(c) || (c == '-' && scan_ascii_digit(s[at + 1])))
     return _plain_integer(s, at, out);
   return _plain_atom(s, at, out);
 }
@@ -244,9 +244,9 @@ static int _plain_string(char *s, unsigned &at, Var &out) {
 /* A decimal integer whose magnitude fits a positive `long`. */
 static int _plain_integer(char *s, unsigned &at, Var &out) {
   unsigned end = at + (s[at] == '-');
-  if (s[end] == '0' && _digit(s[end + 1])) return 0;
+  if (s[end] == '0' && scan_ascii_digit(s[end + 1])) return 0;
   long value = 0;
-  for (; _digit(s[end]); end++) {
+  for (; scan_ascii_digit(s[end]); end++) {
     int digit = s[end] - '0';
     if (value > (LONG_MAX - digit) / 10) return 0;
     value = value * 10 + digit;
@@ -268,8 +268,6 @@ static int _plain_atom(char *s, unsigned &at, Var &out) {
   at += length;
   return 1;
 }
-
-static int _digit(char c) => c >= '0' && c <= '9';
 
 /* Whether the reader's token ends before `c`. */
 static int _token_end(char c) => !c || c == ')' || _blank(c);

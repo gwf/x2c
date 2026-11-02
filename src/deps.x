@@ -19,12 +19,8 @@
 #include "buffer.x"
 
 static macro Stmt $report.deps_write(Expr $path, Expr $error) =>
-  fprintf(
-    stderr, $dedent(%"
-      x2c: error: cannot write dependency file: %s
-      note: %s
-    "), $path,
-    strerror($error));
+  Diagnostics.driver_report(
+    %"cannot write dependency file: $($path)", strerror($error));
 
 /** Publishes the Make depfile for one completed translation.
     `compiler.deps` must reflect the translated `input`, and the selected

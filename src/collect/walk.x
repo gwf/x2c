@@ -73,6 +73,17 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 int Compiler.is_prelude_source(String path) =>
   Compiler.portable_path(path) in Compiler.prelude_sources();
 
+/** Reports whether the canonical `path` lies under the runtime's `lib`. */
+int Compiler.in_runtime_library(String path) =>
+  _inside(path, _canonical_lib());
+
+/** Reports whether the canonical `path` is a runtime or compiler prelude
+    source. They are collected once for every unit, so the command line's
+    macros do not reach them.
+*/
+int Compiler.is_runtime_source(String path) =>
+  Compiler.in_runtime_library(path) || Compiler.is_prelude_source(path);
+
 /** Installs the syntax prelude's macros and keyword aliases into `c`'s
     macro state once. A later file walk with the same macros, whose keyword
     aliases start empty, merges the aliases again.
@@ -201,8 +212,7 @@ void Compiler.install_included_effects(Compiler c) {
    A currently collected file contributes only its recorded prefix. */
 static List _macro_rows(
   Compiler c, String path, Map active) {
-  Map runtime = _inside(path, _canonical_lib())
-              ? {} : _runtime_macros(c);
+  Map runtime = Compiler.in_runtime_library(path) ? {} : _runtime_macros(c);
   Cpp cpp = Cpp.new({});
   auto Map visited = {};
   defer _free_macro_exports(visited);
@@ -259,8 +269,8 @@ List Compiler.included_macros(
 Map Compiler.initial_macros(Compiler c, String path) {
   if (!path) return {};
   String canonical = _canonical_path(path);
-  Map runtime = _inside(canonical, _canonical_lib())
-              ? {} : _runtime_macros(c);
+  Map runtime =
+    Compiler.in_runtime_library(canonical) ? {} : _runtime_macros(c);
   return _initial_macros(c, canonical, runtime, 1);
 }
 
@@ -273,8 +283,8 @@ static Map _runtime_macros(Compiler c) {
    its table. Command-line policy always gets a separate table. */
 static Map _initial_macros(
   Compiler c, String path, Map runtime, int own) {
-  if (_inside(path, _canonical_lib())) return {};
-  int commands = !_runtime_source(path) && c.command_macros;
+  if (Compiler.in_runtime_library(path)) return {};
+  int commands = !Compiler.is_runtime_source(path) && c.command_macros;
   Map macros = own || commands ? runtime.copy() : runtime;
   if (commands)
     macros.merge(Cpp.table(c.command_macros));
@@ -441,11 +451,8 @@ static void _split(FileWalk &w, Token first) {
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
     Var open;
-    if (w.arms && w.arms.try_get((long) token.pos, open)) {
-      hidden = 0;
-      foreach (List group in open.list())
-        if (group.caddr() == 2 || group.caddr() == 3) hidden = 1;
-    }
+    if (w.arms && w.arms.try_get((long) token.pos, open))
+      hidden = Compiler.hidden_group(open);
     String directive = Compiler.preproc_directive(token.text);
     if (Compiler.preproc_conditional_kind(token.text) ||
         directive.startswith("define") || directive.startswith("undef"))
@@ -631,8 +638,6 @@ static void _parse(FileWalk &w, String segment, Map overlay) {
 static void _prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.c.owns_package_source(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
-  shadow.load_source =
-    w.c.load_source && w.path == Path.absolute(w.c.filename);
   // Every segment hashes its provider, including its private helpers.
   shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
@@ -737,12 +742,6 @@ static String _resolve_include(
   }
   return NULL;
 }
-
-/* The runtime and the compiler's prelude are collected once for every
-   unit, so the command line's macros do not reach them. */
-module int _runtime_source(String canonical) =>
-  _inside(canonical, _canonical_lib()) ||
-  Compiler.is_prelude_source(canonical);
 
 static int _inside(String path, String dir) =>
   path.startswith(dir) && path.len() > dir.len() && path[dir.len()] == '/';

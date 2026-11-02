@@ -52,23 +52,8 @@ rule from one of these representations to another.
 
 ## Delete before generating
 
-First look for a current language form or existing operation that removes
-repeated source. Direct receiver calls, supported conversions, protocol
-defaults, `SymbolSet`, and non-returning allocation failure can delete code
-without adding machinery. Do not retain a wrapper, forwarding protocol,
-compatibility alias, or post-allocation branch after its only job disappears.
-
-Use a macro, decorator, or `meta` table only when genuinely uniform
-source remains. The definition, data, helpers, and invocations should be
-shorter or easier to verify than the direct code. Keep policy-bearing names and
-types visible. Good candidates include mechanical function families, test
-registration, and facts duplicated across enums, tables, switches, and
-declarations.
-
-For a hot compiler path, retain an idiom conversion only with fewer source
-lines, a paired timing whose confidence interval is below parity, and
-byte-identical generated output. A readability improvement off the hot path
-needs no timing and must not claim a performance result. Record reusable macro
+PR-3, PR-7, MA-1, and HP-1 in the [code standard](x2c-code-standard.md)
+decide when to delete, generate, or change a hot path. Record reusable macro
 evidence in `agents/adapters-macros-decorators.md`.
 
 A rejected prototype describes that implementation, not a permanent ban.

@@ -5,6 +5,10 @@
 > Revised runtime: `a6be0e6c49a995aed7d097a526235b2ef12e4c54`.
 > Investigated 2026-10-30. No production code or design changed.
 > No tradeoff approved. No merge, push, or publication validation performed.
+> Gary accepted the measured costs, and `a596f6cb5` shipped to `dev` on
+> 2026-10-30 (noted 2026-11-02); see the
+> [delivery checkpoint](independent-lock-delivery-checkpoint-2026-10-30.md).
+> The blocked or failing acceptance in this record is historical.
 
 This follows the [failed acceptance measurements](independent-lock-redesign-performance-2026-10-30.md).
 The remaining costs have different locations: extra user-space work on an

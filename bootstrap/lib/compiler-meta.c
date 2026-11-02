@@ -207,3 +207,27 @@ List _x2c_operator_rows(void){
   return _157;
 }
 
+static int List_try_next(List, List *, Var *);
+
+static List Var_list_payload(Var);
+
+static Var List_car(List);
+
+Var List_getindex(List, int);
+
+List _x2c_operator_row(Symbol op){
+  if(! _init_guard_) _file_init_();
+  {
+    List row;
+    List _x2c_gensym_macro_object_0 = _x2c_operator_rows();
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      if(x2c_var_equal_lane(List_car(row), Symbol_var(op)) || x2c_var_equal_lane(List_getindex(row, 2), Symbol_var(op))) return row;
+    }
+
+  }
+  return NULL;
+}
+

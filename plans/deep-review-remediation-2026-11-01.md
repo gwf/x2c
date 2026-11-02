@@ -1,11 +1,12 @@
 # Deep review remediation (2026-11-01)
 
-> Status: active - batch A landed on `dev` as `9d196566f` (PR #643,
+> Status: active - batch A published on `dev` as `9d196566f` (PR #643,
 > 2026-11-02); batch B (PR #644, branch `gwf/repo-review-batch-b`) and
-> batch C (PR #645, branch `gwf/review-batch-c-contracts`, Gary's accepted
-> decisions) were integrated from `9d196566f` and submitted to the shared
-> integrator on 2026-11-02; the bug batch below was integrated from
-> `9d196566f` and submitted the same day on branch `gwf/review-bug-batch`.
+> batch C (PR #645, branch `gwf/review-batch-c-contracts`, with the
+> decisions below) integrated together from `9d196566f` by the shared
+> integrator on 2026-11-02; the bug batch below (PR #647, branch
+> `gwf/review-bug-batch`) was integrated from `9d196566f`, merged with
+> that `dev`, and submitted the same day.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
@@ -189,6 +190,37 @@ Waste and drift the workers saw, for this batch:
   README.md` shows `defer` where the `auto` form is now described;
   `unittest/AGENTS.md` and `STATUS.md` need the skip-inside-a-test rule.
 
+### Carried from the batch C handoffs
+
+Defects and drift the batch C workers reproduced or read outside their
+items, for a later batch:
+
+- `Logger.new` returns NULL for an invalid level, so the NULL now fails at
+  its first use instead of the constructor raising (ER-1).
+- `Lisp.call_budget` ignores a nonpositive budget silently although its
+  doc says the budget must be positive; the `Lisp.bind` doc omits the
+  `<bad-state>` a frozen session raises after the `Func` has moved;
+  `Lisp.try_get` and `Lisp.read` document their own null-session
+  behaviour, outside the handle rule.
+- `lisp_source_function`, `Lisp.automatic_storage`, and
+  `Lisp.result_storage` have no callers outside `lib/lisp` and its test:
+  candidates for deletion.
+- `Array.take_last`, `shift`, and `remove` return `void` on a null array or
+  an index outside the elements (the decision covered writes only);
+  `Array.getindex` dereferences a null array under its documented
+  non-null precondition.
+- `Iter.parallel_map` and `parallel_map_in` take a `ThreadValueFn`; their
+  null-function behaviour was not checked.
+- `lib/channel.x` uses an `argument` detail key that DG-7 does not list;
+  `Listener.write_repr` formats a null handle's text.
+- Not audited for null-handle sites: `lib/match`, `lib/dispatch.x`,
+  `lib/static-init.x`, `lib/var`, `lib/pool`.
+- Lines over 79 columns that predate the batch: `lib/lisp/lisp.x` (five,
+  deliberate one-line error macros) and `lib/process.x` (three) from the
+  compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
+  `docs/src/guide/iteration.md`, and `collections.md`; translating
+  `test-lisp.x` reports four unnecessary `.str()` conversions.
+
 ### Batch B outcome (2026-11-02)
 
 Changed:
@@ -242,6 +274,10 @@ Declined, with the reason:
   states clauses the standard does not.
 - Fixture copies of `rejected()` stay: fixtures are standalone programs.
 
+Fixed in the same integration batch: the first `make build` after a
+`Compiler` field change segfaulted in `lib/.own-interfaces` because Make
+read a generated header's time before translation rewrote it (PR #646).
+
 Still open for a later bug batch, besides the carried defects above:
 
 - `-v` and `-###` translate lines are not shell-quoted (K7).
@@ -250,39 +286,6 @@ Still open for a later bug batch, besides the carried defects above:
 - `(m["a"]) += 4` emits invalid C.
 - The Var conversion check misses struct-tag destinations
   (`struct Point p = v;` passes x2c and fails in clang).
-- The first `make build` after a `Compiler` field change can segfault in
-  `lib/.own-interfaces`; a second build succeeds (stage build graph).
-### Carried from the batch C handoffs
-
-Defects and drift the batch C workers reproduced or read outside their
-items, for a later batch:
-
-- `Logger.new` returns NULL for an invalid level, so the NULL now fails at
-  its first use instead of the constructor raising (ER-1).
-- `Lisp.call_budget` ignores a nonpositive budget silently although its
-  doc says the budget must be positive; the `Lisp.bind` doc omits the
-  `<bad-state>` a frozen session raises after the `Func` has moved;
-  `Lisp.try_get` and `Lisp.read` document their own null-session
-  behaviour, outside the handle rule.
-- `lisp_source_function`, `Lisp.automatic_storage`, and
-  `Lisp.result_storage` have no callers outside `lib/lisp` and its test:
-  candidates for deletion.
-- `Array.take_last`, `shift`, and `remove` return `void` on a null array or
-  an index outside the elements (the decision covered writes only);
-  `Array.getindex` dereferences a null array under its documented
-  non-null precondition.
-- `Iter.parallel_map` and `parallel_map_in` take a `ThreadValueFn`; their
-  null-function behaviour was not checked.
-- `lib/channel.x` uses an `argument` detail key that DG-7 does not list;
-  `Listener.write_repr` formats a null handle's text.
-- Not audited for null-handle sites: `lib/match`, `lib/dispatch.x`,
-  `lib/static-init.x`, `lib/var`, `lib/pool`.
-- Lines over 79 columns that predate the batch: `lib/lisp/lisp.x` (five,
-  deliberate one-line error macros) and `lib/process.x` (three) from the
-  compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
-  `docs/src/guide/iteration.md`, and `collections.md`; translating
-  `test-lisp.x` reports four unnecessary `.str()` conversions.
-
 ## Bug batch (2026-11-02)
 
 The defects carried above (batch A handoffs, batch B outcome, batch C

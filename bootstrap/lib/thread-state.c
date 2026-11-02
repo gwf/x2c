@@ -6,10 +6,50 @@ _Thread_local int x2c_error_runtime_ready;
 
 _Thread_local unsigned long x2c_execution_stack_low;
 
+static _Thread_local unsigned long native_stack_low;
+
+#if defined(__GLIBC__)
+extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
+
+#endif
+static const unsigned long _STACK_RESERVE = 16 << 10;
+
+static inline int _x2c_stack_below(unsigned long floor){
+  return(unsigned long) __builtin_frame_address(0) < floor;
+}
+
+static unsigned long _native_stack_low(void);
+
 unsigned long x2c_execution_stack_exchange(unsigned long low){
   unsigned long previous = x2c_execution_stack_low;
   x2c_execution_stack_low = low;
   return previous;
+}
+
+unsigned long _x2c_stack_floor(void){
+  unsigned long at =(unsigned long) __builtin_frame_address(0);
+  unsigned long low = x2c_execution_stack_low;
+  if(! low) low = native_stack_low ? native_stack_low : _native_stack_low();
+  if(! low || low >= at) return 0;
+  unsigned long reserve =(at - low) / 5;
+  if(reserve < _STACK_RESERVE) reserve = _STACK_RESERVE;
+  return reserve < at - low ? low + reserve : at;
+}
+
+static unsigned long _native_stack_low(void){
+#if defined(__APPLE__)
+  pthread_t self = pthread_self();
+  native_stack_low =(unsigned long) pthread_get_stackaddr_np(self) - pthread_get_stacksize_np(self);
+#elif defined(__GLIBC__)
+  pthread_attr_t attributes;
+  if(! pthread_getattr_np(pthread_self(), & attributes)){
+    void * address;
+    size_t size;
+    if(! pthread_attr_getstack(& attributes, & address, & size)) native_stack_low =(unsigned long) address;
+    pthread_attr_destroy(& attributes);
+  }
+#endif
+  return native_stack_low;
 }
 
 void x2c_thread_state_release(void){

@@ -788,8 +788,6 @@ static void f5_sites____site_lock(void);
 
 static void f5_sites____site_unlock(void);
 
-static void f5_sites____thread_check(int status, const char * action);
-
 static void f5_sites____register_shutdown_once(void);
 
 static void f5_sites____shutdown(void);
@@ -4030,7 +4028,7 @@ int MatchPlan_borrowable(Var pattern, int permanent_lists){
 void x2c_match_initialize(void){
   if(! _init_guard_) _file_init_();
   int status = pthread_once(& f5_sites___match_shutdown_once, f5_sites____register_shutdown_once);
-  f5_sites____thread_check(status, "register shutdown");
+  x2c_native_check(status, "Match: could not register shutdown");
 }
 
 static MatchPlan f5_sites____published(MatchCaptureSite * site, Var pattern){
@@ -4161,17 +4159,11 @@ static void f5_sites____sites_initialize(void){
 }
 
 static void f5_sites____site_lock(void){
-  f5_sites____thread_check(pthread_mutex_lock(& f5_sites___match_site_mutex), "lock source site");
+  x2c_native_check(pthread_mutex_lock(& f5_sites___match_site_mutex), "Match: could not lock source site");
 }
 
 static void f5_sites____site_unlock(void){
-  f5_sites____thread_check(pthread_mutex_unlock(& f5_sites___match_site_mutex), "unlock source site");
-}
-
-static void f5_sites____thread_check(int status, const char * action){
-  if(! status) return;
-  fprintf(stderr, "Match: could not %s\n", action);
-  abort();
+  x2c_native_check(pthread_mutex_unlock(& f5_sites___match_site_mutex), "Match: could not unlock source site");
 }
 
 static void f5_sites____register_shutdown_once(void){

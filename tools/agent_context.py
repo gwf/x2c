@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""Shared worktree delivery context for the Git hook and publication gate."""
+"""Shared worktree delivery context for the Git hook and publication gate.
+
+The delivery tools also share their Git runner, atomic JSON writes, process
+locks, and script loading from here.
+"""
 
 from __future__ import annotations
 
 import argparse
+import fcntl
+import importlib.machinery
+import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-import tempfile
+import uuid
 
 ROLES = {"individual", "orchestrator", "integrator", "worker"}
 DELIVERIES = {"direct", "pr", "private"}
@@ -54,9 +61,64 @@ def publication_blocked(root: str | Path) -> bool:
     return push_policy(root) != "all"
 
 
-def _git(root: Path, *arguments: str) -> subprocess.CompletedProcess:
+def _git(root: Path | None, *arguments: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *arguments], cwd=root, text=True,
                           capture_output=True, check=False)
+
+
+def git(*arguments: str, root: str | Path | None = None) -> str:
+    """Returns Git's standard output, run in `root` or the current directory.
+    A failure raises ValueError with Git's message."""
+    result = _git(root, *arguments)
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or "git command failed")
+    return result.stdout
+
+
+def write_json(path: str | Path, value: object, sort_keys: bool = True):
+    """Replaces `path` with indented JSON in one rename, so a reader sees the
+    old document or the new one."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex)
+    try:
+        temporary.write_text(json.dumps(value, indent=2, sort_keys=sort_keys) +
+                             "\n", encoding="utf-8")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def pid_lock(path: str | Path, busy: str):
+    """Locks `path` without waiting and records this process's pid in it.
+    Returns the open file, which holds the lock until it closes. A held lock
+    raises ValueError with `busy` and the holder's pid."""
+    stream = Path(path).open("a+")
+    try:
+        try:
+            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            stream.seek(0)
+            holder = stream.read().strip() or "unknown"
+            raise ValueError(f"{busy} (pid {holder})") from error
+        stream.seek(0)
+        stream.truncate()
+        stream.write(f"{os.getpid()}\n")
+        stream.flush()
+    except BaseException:
+        stream.close()
+        raise
+    return stream
+
+
+def load_script(path: str | Path, name: str):
+    """Loads a script whose file name is not a module name, such as
+    `gate-state.py` or `land-dev`, as module `name`."""
+    loader = importlib.machinery.SourceFileLoader(name, str(path))
+    spec = importlib.util.spec_from_loader(name, loader)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _check_hook(root: Path) -> None:
@@ -93,20 +155,8 @@ def set_context(root: str | Path, role: str, delivery: str) -> None:
                          "use --delivery private")
     root = Path(root).resolve()
     _check_hook(root)
-    path = root / "debug" / "agent-context.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(mode="w", dir=path.parent,
-                                         delete=False) as output:
-            temporary = Path(output.name)
-            json.dump({"role": role, "delivery": delivery}, output,
-                      indent=2, sort_keys=True)
-            output.write("\n")
-        os.replace(temporary, path)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
+    write_json(root / "debug" / "agent-context.json",
+               {"role": role, "delivery": delivery})
 
 
 def main() -> int:

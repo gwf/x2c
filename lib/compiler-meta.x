@@ -2,11 +2,12 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    The operator rows give shipped compiler sources their shared facts.
-    Bodyless `meta` prototypes name native operations the compiler
-    supplies for those sources: the built-in macros' algorithms
-    that need the full meta surface, Lisp binding groups, and the generated
-    target tables, hashes, interface records, and SymbolSets. The implicit
+    The operator rows give shipped compiler sources their shared facts,
+    and the functions after them are lookups those sources share. Bodyless
+    `meta` prototypes name native operations the compiler supplies for
+    those sources: the built-in macros' algorithms that need the full meta
+    surface, Lisp binding groups, and the generated target tables, hashes,
+    interface records, and SymbolSets. The implicit
     prelude reaches them through `lisp-bindings.x`, but they are not part
     of the documented meta surface, which `lib/meta.x` owns.
 */
@@ -41,6 +42,30 @@ meta List _x2c_operator_rows(void) => %(
   (</>       10 </=>     <div>     0)
   (<%>       10 <%=>     <mod>     0)
 );
+
+/* Returns the row of the binary operator `op` or of its compound
+   assignment, or NULL for any other `Symbol`. */
+meta List _x2c_operator_row(Symbol op) {
+  foreach (List row in _x2c_operator_rows())
+    if (row.car() == op || row[2] == op) return row;
+  return NULL;
+}
+
+/* Returns `role` for a support function with external linkage when the
+   function being lowered is public inline, whose body its header
+   publishes, or NULL for any other function. The role carries the hash of
+   the unit's path, so units whose public inline functions share a header
+   link together. */
+meta String _x2c_public_inline_role(String role) {
+  int public = 0;
+  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
+    public = type ~= %(* inline *) && !(type ~= %(* static *));
+  if (!public) return NULL;
+  if (x2c_enclosing(<unit>) ~=
+      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
+    return %"$(role)_$("%08x".printf(path.hash()))";
+  return role;
+}
 
 /* Returns `values` as a cached literal expression of the expanding unit,
    so a template can insert data such as a signature as a constant. */

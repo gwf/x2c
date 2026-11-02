@@ -82,17 +82,10 @@ passing tests support that result rather than replace it.
   compatibility concern must identify a concrete contract gap or conflict;
   uncertainty alone does not justify extra machinery. Earlier or more specific
   rejection alone does not justify another check or fixture.
-- Every shared Error cause in `lib/error-macros.x` transfers to a matching
-  catch or terminates; it never returns to the raising call. Rely on that
-  behavior after valid allocation, growth, open, read, write, format, and
-  binding operations. Keep checks for documented null inputs, absence,
-  callbacks, and other returning failures; reserve `$error.fallback` for
-  user-defined causes. Fresh `[]` and `{}` need no null checks.
-- Choose representations and scopes by their actual identity and lifetime
-  behavior. Consult the relevant section of `agents/x2c-philosophy.md` for
-  technical facts and their evidence.
 - Follow `agents/x2c-code-standard.md`, the single definition of x2c source
-  style. Update the book when documented behavior changes.
+  style, including ER-4 and ER-5 for shared Error causes and PR-6 for
+  representations; `agents/x2c-philosophy.md` holds their facts. Update the
+  book when documented behavior changes.
 - The compiler emits calls into the runtime and the bootstrap compiles against
   it, so public runtime signatures are effectively ABI. Preserve them unless
   the task authorizes a compatibility change.

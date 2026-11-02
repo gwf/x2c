@@ -6,6 +6,7 @@
 #define __GUARD_0x0F89E663__
 
 #include "error-macros.h"
+#include "integer-ops.h"
 #include "private-keywords.h"
 #include "common.h"
 typedef Block Array;

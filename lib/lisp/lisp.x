@@ -65,10 +65,6 @@ static macro Stmt $error.def.arity(Expr $actual, Expr $args) {
           (value $($args)));
 }
 
-static macro Stmt $error.def.protected(Expr $name) {
-  raise %(bad-state (operation "def") (name $($name)));
-}
-
 static macro Stmt $error.def.inherited(Expr $name) {
   raise %(bad-state (operation "def") (reason "inherited") (name $($name)));
 }
@@ -249,7 +245,7 @@ module struct Lisp {
   Var *tail_values;     // its evaluated arguments, owned by the session
   int tail_count;
   /* Calls made by the evaluation in progress. Each outer entry resets the
-     count, so a long translation spends one budget per entry. */
+     count, so the budget limits one entry, not the session's lifetime. */
   long call_steps;
   /* The budget ran out or evaluation was interrupted, and no call may renew
      it until the public entry that opened it returns. `Lisp.set_interrupted`
@@ -257,7 +253,6 @@ module struct Lisp {
   volatile sig_atomic_t call_exhausted;
   long call_step_max;   // calls one evaluation may make
   volatile sig_atomic_t interrupted; // stops every call until cleared
-  int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
 
 /* Native value bindings may adapt an interpreted callable to Func. Public

@@ -4,6 +4,10 @@
 > Original baseline: `56fd5ecc1518f40ac46f2c21f50936ae4ab53f93`.
 > Current runtime: `360aab57fbf1fa46343ad514514fb3898dc40c5b`.
 > No runtime, index, or contract changes. No merge or approved tradeoff.
+> Gary accepted the measured costs, and `a596f6cb5` shipped to `dev` on
+> 2026-10-30 (noted 2026-11-02); see the
+> [delivery checkpoint](independent-lock-delivery-checkpoint-2026-10-30.md).
+> The blocked or failing acceptance in this record is historical.
 
 ## Findings
 

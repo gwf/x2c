@@ -5,16 +5,15 @@ data stay in `etc/`; ephemeral per-workspace state goes in `.context/`.
 
 - `plans/` - active plans and reference inputs. Each file opens with a
   `> Status:` blockquote, usually several lines: the state, then a note
-  saying where the work actually stands. The states in use are `active`,
-  `blocked`, `reference`, and `needs author scoping`.
+  saying where the work actually stands. The states in use are `active`
+  and `reference`.
 - `plans/reference/` - dated evidence and unselected research inputs.
 - `plans/archive/` - finished plans. The same blockquote, recording the
   outcome, its date, and the commit or PR that closed the plan. Write
-  `done`, `rejected`, `obsolete`, or `retired`. Older entries also say
-  `complete`, `completed`, `archived`, `superseded`, and `corrected`; each
-  of those means `done` or `obsolete`. Never delete a plan; archive it with
-  its outcome. Archived workflow restrictions record the authorization that
-  applied at the time; current work follows the root `AGENTS.md`.
+  `done`, `rejected`, `obsolete`, or `retired`. Never delete a plan; archive
+  it with its outcome. Archived and reference workflow restrictions record
+  the authorization that applied at the time; current work follows the root
+  `AGENTS.md`.
 
 Keep a plan concise and decision-complete: the requested behavior, important
 choices, implementation, relevant validation, and delivery should be clear to
@@ -38,17 +37,18 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed 2026-10-31 against `dev` `2b7a2b422`. Completed deliveries are
-archived below. Remaining implementation questions and conditional candidates
-have explicit owners. Historical measurements remain evidence for their named
-revisions; this closeout does not commission deferred work or main promotion.
+Completed deliveries are archived below. Remaining implementation questions
+and conditional candidates have explicit owners. Historical measurements
+remain evidence for their named revisions; this index does not commission
+deferred work or main promotion.
 
 ### Active work
 
 | Owning plan | Remaining scope | Next action |
 | --- | --- | --- |
-| [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, documentation gate scope, and local definitions under Macro-target decorators. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
-| [Language-reference writing](review-remediation-2026-10-11.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
+| [Deep review remediation](deep-review-remediation-2026-11-01.md) | Repairs and waste removal from the 2026-11-01 whole-repository review, in batches. | Batches B and C are submitted separately; then the carried defects. |
+| [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
+| [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
 | [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
 | [Detached Channel ownership](detached-channel-ownership.md) | Historical benchmark and delivery/hold evidence closeout. | Recover the named records; implementation already landed. |
 
@@ -391,7 +391,7 @@ Archived 2026-10-12 after checking delivery on dev:
 - [Bug findings](archive/bug-findings-f28fc36.md) and the
   [consolidation catalog](archive/consolidation-catalog-f28fc36.md): audits
   of `f28fc36`; every finding is repaired or decided except catalog C13,
-  which is in the backlog.
+  an unselected candidate recorded in the catalog.
 - [Compiler dual-macro campaign](archive/compiler-dual-macro-contract.md#e45-final-source-family-accounting):
   done 2026-09-29 at `82d686e2`; shared grammar projections cover parsed
   source families. The [architecture reference](archive/compiler-dual-macro-architecture.md)

@@ -121,7 +121,7 @@ The reference follows x2c Lisp, including behavior that differs from Scheme:
 
 Native calls use x2c's existing checked `Func` boundary. Deliberate Lisp
 signature and form errors remain in the evaluator. No additional syntax
-validation or compiler-specific protection of `x2c.*` names is introduced.
+validation is introduced.
 
 Production closures also retain local names that mutable global or unknown
 callables may later read from current data. Captured local special identities

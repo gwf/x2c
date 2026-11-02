@@ -94,7 +94,6 @@ Symbol SymbolSet_getindex(SymbolSet x, int index){
 }
 
 Iter SymbolSet_iter(SymbolSet x, Iter dest){
-  if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) x), _next, int_var(0));
 }
 
@@ -167,7 +166,7 @@ static unsigned _byte(SymbolSet set, size_t offset){
 
 static int _next(Iter iter, Var * out){
   SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
-  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/symbolset.x",.function = "_next",.line = 188,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/symbolset.x",.function = "_next",.line = 186,.runtime = 1}; & _x2c_gensym_error_site_0; })));
   if(index < 0 ||(size_t) index >= SymbolSet_len(x)) return 0;
   * out = Symbol_var(SymbolSet_getindex(x, index));
   iter -> state = int_var(index + 1);

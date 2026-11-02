@@ -609,7 +609,12 @@ Channel Channel_new(Var type, Var capacity){
 }
 
 Scope Channel_scope(Channel channel){
-  return channel ? channel -> lifetime : NULL;
+  if(! channel){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Channel_scope",.line = 118,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.scope")), NULL))));
+    __builtin_unreachable();
+  }
+  return channel -> lifetime;
 }
 
 void Channel_send(Channel c, Var value){
@@ -631,11 +636,7 @@ void Channel_free(Channel channel){
 }
 
 void Channel_close(Channel channel){
-  if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 161,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
-    __builtin_unreachable();
-  }
+  if(! channel) return;
   _lock(& channel -> monitor.mutex);
   channel -> closed = 1;
   _notify(channel);
@@ -648,7 +649,7 @@ Var Channel_var(Channel channel){
 
 Channel Var_channel(Var value){
   if(! Var_is(value, 6982365528)){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 177,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 180,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
     __builtin_unreachable();
   }
@@ -669,7 +670,7 @@ void Scope_transfer(Scope, Scope);
 
 Var Channel_receive(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 197,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 200,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
     __builtin_unreachable();
   }
@@ -713,9 +714,7 @@ static void _drop(void * bytes){
 }
 
 static void _native_check(int error){
-  if(! error) return;
-  fprintf(stderr, "Channel: native synchronization failed (%d)\n", error);
-  abort();
+  x2c_native_check(error, "Channel: native synchronization failed");
 }
 
 int Var_is_integer(Var);
@@ -757,7 +756,7 @@ static size_t _capacity(Var value){
       }
       volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
       x2c_exception_push(& _x2c_gensym_exception_frame_0);
-      if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) capacity = Var_long_value(Var_convert(value, 818062));
+      if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) capacity = Var_long(value);
       else{
         x2c_exception_landed(& _x2c_gensym_exception_frame_0);
         if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){

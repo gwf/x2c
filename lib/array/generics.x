@@ -14,9 +14,11 @@
 
     Compound update is native too. A float element has no `%` and no bitwise
     operators, so compound update is defined in separate update macros instead
-    of the typed family. Numeric families use generated C operators; C
-    promotions and conversions determine their results.
+    of the typed family. Their element rules come from `integer-ops.x`, which
+    typed Maps share.
 */
+
+#include "integer-ops.x"
 
 /*  Generates `postfixindex` for an element family whose `updateindex`
     applies `+` and `-`.
@@ -39,64 +41,30 @@ macro Unit $array.typed.postfix(Type $array, Type $element) {
   }
 }
 
-/*  Generates `updateindex` and `postfixindex` for a signed integer element.
-    The same-width unsigned type `$unsigned` holds raw operands and results.
-    The C operators apply integer promotions, so this does not
-    promise narrow-width wrapping. Division and shift raise before storing
-    anything, so a failed update leaves the element as it was.
+/*  Generates `updateindex` and `postfixindex` for a signed integer element
+    through `$integer.update`.
 */
-macro Unit $array.typed.update.integer(
-  Type $family, Type $element, Type $unsigned
-) {
+macro Unit $array.typed.update.integer(Type $family, Type $element) {
   inline $element $family.updateindex($family, int, Symbol, $element);
 
   /** Applies integer `op` to raw element `index` and returns the stored value.
       The index has the unchecked C-pointer preconditions of bracket access.
-      Arithmetic follows the generated C operators, integer promotions, and
-      result conversion. A failing operation leaves the element unchanged.
-      Raises: `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-      invalid operation.
+      Arithmetic runs at the C-promoted width and the result converts back
+      to the element, as a native compound assignment does. A failing
+      operation leaves the element unchanged.
+      Raises: `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+      count outside the promoted width, or `<bad-op>` for another operator.
   */
   inline $element $family.updateindex(
     $family array, int index, Symbol op, $element rhs) {
-    $element *slot = (($element *) array.bytes) + index;
-    $element lhs = *slot;
-    $unsigned a = ($unsigned) lhs, b = ($unsigned) rhs, raw;
-    switch (op) {
-      case <+>: raw = a + b; break;
-      case <->: raw = a - b; break;
-      case <*>: raw = a * b; break;
-      case <&>: raw = a & b; break;
-      case <|>: raw = a | b; break;
-      case <^>: raw = a ^ b; break;
-      case </>: case <%>: {
-        if (!rhs) raise %(div-zero (op $op));
-        // the one signed pair whose quotient is not representable
-        $element floor = ($element) ~(($unsigned) -1 >> 1);
-        if (lhs == floor && rhs == -1) raw = op == </> ? ($unsigned) lhs : 0;
-        else raw = ($unsigned) (op == </> ? lhs / rhs : lhs % rhs);
-        break;
-      }
-      case <"<<">: case <">>">: {
-        int width = (int) (sizeof($element) * 8);
-        if (rhs < 0 || (long long) rhs >= width) {
-          long long count = rhs;
-          raise %(bad-shift (op $op) (count $count) (width $width));
-        }
-        raw = op == <"<<"> ? a << b : ($unsigned) (lhs >> rhs);
-        break;
-      }
-      default: raise %(bad-op (op $op));
-    }
-    return *slot = ($element) raw;
+    $integer.update($element, (($element *) array.bytes) + index, op, rhs);
   }
 
   $array.typed.postfix($family, $element);
 }
 
-/*  Generates `updateindex` and `postfixindex` for a floating element.
-    Only the four arithmetic operators are defined on a float; the rest
-    raise `<bad-types>`, matching the boxed path.
+/*  Generates `updateindex` and `postfixindex` for a floating element
+    through `$floating.update`.
 */
 macro Unit $array.typed.update.floating(Type $family, Type $element) {
   inline $element $family.updateindex($family, int, Symbol, $element);
@@ -104,18 +72,12 @@ macro Unit $array.typed.update.floating(Type $family, Type $element) {
   /** Applies a floating arithmetic `op` and returns the stored value.
       The supported operators are `+`, `-`, `*`, and `/`; the raw index has
       the unchecked C-pointer preconditions of bracket access.
-      Raises: `<bad-types>` for another operator, before changing the element.
+      Raises: `<bad-types>` for another numeric operator or `<bad-op>` for a
+      non-numeric one, before changing the element.
   */
   inline $element $family.updateindex(
     $family array, int index, Symbol op, $element rhs) {
-    $element *slot = (($element *) array.bytes) + index;
-    switch (op) {
-      case <+>: return *slot += rhs;
-      case <->: return *slot -= rhs;
-      case <*>: return *slot *= rhs;
-      case </>: return *slot /= rhs;
-    }
-    raise %(bad-types (op $op));
+    $floating.update($element, (($element *) array.bytes) + index, op, rhs);
   }
 
   $array.typed.postfix($family, $element);
@@ -134,10 +96,7 @@ macro Unit $array.typed.update.string(Type $array) {
   */
   inline String $array.updateindex(
     $array array, int index, Symbol op, String rhs) {
-    if (op != <+>) raise %(bad-op (op $op));
-    String *slot = ((String *) array.bytes) + index;
-    String result = slot[0] + rhs;
-    return slot[0] = result;
+    $string.update(((String *) array.bytes) + index, op, rhs);
   }
 
   /** Raises `<bad-op>` because String elements have no postfix operation. */
@@ -384,16 +343,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Appends `value` and returns it.
-      Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-      when storage cannot grow.
+      Raises: `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+      `<size-limit>` at the integer index limit, or `<alloc-fail>` when
+      storage cannot grow.
   */
   $element $array.push($array array, $element value) {
-    if (array == NULL) {
-      if ($boxed) return $zero;
-      _bad_operation($owner, <push>);
-    }
+    if (array == NULL) _bad_operation($owner, <push>);
     if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
@@ -437,16 +392,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Inserts `value` at the front and returns it, shifting elements right.
       This operation is O(n).
-      Boxed `Array` returns `void` for a null array.
-      Raises: `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-      value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-      when storage cannot grow.
+      Raises: `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+      `<size-limit>` at the integer index limit, or `<alloc-fail>` when
+      storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
-    if (array == NULL) {
-      if ($boxed) return $zero;
-      _bad_operation($owner, <unshift>);
-    }
+    if (array == NULL) _bad_operation($owner, <unshift>);
     if ($boxed && (Var) value is void) raise %(void-op);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array.insert_element(0, value);
@@ -456,31 +407,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   /** Inserts `value` at normalized `index` and returns it.
       The accepted range includes the position after the last element;
       negative indices are normalized against that wider range.
-      Boxed `Array` returns `void` for a null array or out-of-range index
-      without mutation.
-      Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
-      index, `<void-op>` for a `void` value, `<size-limit>` at the integer
-      index limit, or `<alloc-fail>` when storage cannot grow.
+      Raises: `<bad-arg>` for a null array or an index outside that range,
+      `<void-op>` for a `void` value, `<size-limit>` at the integer index
+      limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
-    if ($boxed) {
-      if (array == NULL) return $zero;
-      if (array.length > INT_MAX) _size_limit($owner, array.length);
-      int n = (int) array.length;
-      if (index < 0) index += n + 1;
-      if (index < 0 || index > n) return $zero;
-      if (n == INT_MAX) _size_limit($owner, n);
-      if ((Var) value is void) raise %(void-op);
-      array.insert_element(index, value);
-      return value;
-    }
-    if (array == NULL || array.length >= INT_MAX ||
-        !array.insert_element(index, value)) {
-      if (array && array.length >= INT_MAX)
-        _size_limit($owner, array.length);
-      size_t size = array ? array.length : 0;
-      _bad_index($owner, index, size);
-    }
+    if (array == NULL) _bad_index($owner, index, 0);
+    if ($boxed && (Var) value is void) raise %(void-op);
+    if (array.length >= INT_MAX) _size_limit($owner, array.length);
+    if (!array.insert_element(index, value))
+      _bad_index($owner, index, array.length);
     return value;
   }
 
@@ -571,8 +507,12 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.splice_elements(index, remove_count, values);
   }
 
-  /** Returns the first index whose native element equals `value`, or -1.
-      A null array returns -1; the scan is linear and preserves source order.
+  /** Returns the first index whose element is `==` to `value`, or -1.
+      On a boxed `Array`, `==` compares two numbers as their native values
+      do in C, so `1`, `1.0`, and `1L` match; `Map` keys and `List.unique`
+      compare with `Var.equal` instead, which keeps those types apart. A
+      packed element uses its own type's `==`. A null array returns -1; the
+      scan is linear and preserves source order.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.index($array array, $element value) {
@@ -581,16 +521,19 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     return array.index_element(value);
   }
 
-  /** Reports whether a native element equals `value`.
-      The scan is linear. Raises: `<size-limit>` when the length exceeds the
-      integer index domain.
+  /** Reports whether an element is `==` to `value`.
+      Elements compare as in `index`, so a boxed `Array` holding `1.0`
+      contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.contains($array array, $element value) {
     return array.index(value) != -1;
   }
 
-  /** Returns how many native elements equal `value`.
-      A null array returns zero; the scan is linear.
+  /** Returns how many elements are `==` to `value`.
+      Elements compare as in `index`, so the boxed `Array` `[1, 1.0, 1L]`
+      counts three matches of `1`, while `List.unique` keeps all three. A
+      null array returns zero; the scan is linear.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.count($array array, $element value) {
@@ -600,9 +543,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Returns the first element accepted by `pred`'s ordinary `Var` truth,
-      or `void` when absent. A null array or predicate returns `void`.
-      Elements are boxed as in iteration; the array and its storage are
-      unchanged. Raises: any cause from boxing, `pred`, or its result's truth
+      or `void` when absent. A null or empty array returns `void` without
+      invoking or checking `pred`. Elements are boxed as in iteration; the
+      array and its storage are unchanged.
+      Raises: `<bad-arg>` from `Func.apply` for a null `pred` on a nonempty
+      array, or any cause from boxing, `pred`, or its result's truth
       operation.
   */
   Var $array.find($array array, Func pred) {

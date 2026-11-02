@@ -39,11 +39,11 @@ ParsedUnit;
 #include "utils.h"
 static const SymbolSet cpp_dumps =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\000\000\000\001\002\040\034\037\266\112\000\000\000\246\053\353\321\017\341\000\000\132\236\343\303\126\011\000\000";
 
-static List _74, _73, _69, _68, _66, _64, _57, _56, _55, _47, _46, _40, _39, _38, _29, _28, _22, _4;
+static List _72, _71, _67, _66, _64, _62, _56, _55, _54, _46, _45, _39, _38, _37, _28, _27, _21, _4;
 
-static String _71, _62, _60, _59, _58, _53, _51, _49, _48, _44, _42, _41, _36, _34, _32, _31, _25, _24, _23, _20, _19, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _2, _1, _0;
+static String _69, _60, _58, _57, _52, _50, _48, _47, _43, _41, _40, _35, _33, _31, _30, _24, _23, _22, _19, _18, _16, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _2, _1, _0;
 
-static Var _72, _70, _67, _65, _63, _61, _54, _52, _50, _45, _43, _37, _35, _33, _30, _27, _26, _21, _18, _7, _3;
+static Var _70, _68, _65, _63, _61, _59, _53, _51, _49, _44, _42, _36, _34, _32, _29, _26, _25, _20, _17, _7, _3;
 
 static int _init_guard_ = 0;
 
@@ -66,8 +66,6 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 static String _input_name(Compiler c, String filename);
 
 static void _runtime_roles(Compiler c, const char * source);
-
-static int _inside(const char * path, const char * dir);
 
 static String _read_input(Compiler c);
 
@@ -116,7 +114,7 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _74)))
+_x2c_gensym_initializer_choice_1A2A7247_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _72)))
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_3;
   const void * _x2c_gensym_defer_capture_4;
@@ -151,67 +149,65 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _11 = String_new("#!");
   _12 = String_new("/");
   _13 = String_new("/");
-  _14 = String_new("/lib");
-  _15 = String_new("/x2c.x");
-  _16 = String_new("cannot read input file");
-  _17 = String_new("stage: driver");
-  _18 = String_var(_17);
-  _19 = String_new("file: ");
-  _20 = String_new("reason: cannot open");
-  _21 = String_var(_20);
-  _22 = cons(_21, NULL);
-  _23 = String_new("\n");
-  _24 = String_new("#include \"scripting.x\"");
-  _25 = String_new("unit-static");
-  _26 = String_var(_25);
-  _27 = Symbol_var(61737802);
-  _28 = cons(_27, NULL);
-  _29 = cons(_26, _28);
-  _30 = Symbol_var(1256204);
-  _31 = String_new("indented units use the default symbol collection");
-  _32 = String_new("the host preprocessor does not keep the indentation, so");
-  _33 = String_var(_32);
-  _34 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
-  _35 = String_var(_34);
-  _36 = String_new("an indented unit");
-  _37 = String_var(_36);
-  _38 = cons(_37, NULL);
-  _39 = cons(_35, _38);
-  _40 = cons(_33, _39);
-  _41 = String_new("script units use the default symbol collection");
-  _42 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
-  _43 = String_var(_42);
-  _44 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
-  _45 = String_var(_44);
-  _46 = cons(_45, NULL);
-  _47 = cons(_43, _46);
-  _48 = String_new("module units use the default symbol collection");
-  _49 = String_new("the host preprocessor reads a module block as C, so");
-  _50 = String_var(_49);
-  _51 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a");
-  _52 = String_var(_51);
-  _53 = String_new("module");
-  _54 = String_var(_53);
-  _55 = cons(_54, NULL);
-  _56 = cons(_52, _55);
-  _57 = cons(_50, _56);
-  _58 = String_new("/lib/x2c.x");
-  _59 = String_new("#");
-  _60 = String_new("<");
-  _61 = Symbol_var(437126);
-  _62 = String_new("String");
-  _63 = String_var(_62);
+  _14 = String_new("/lib/x2c.x");
+  _15 = String_new("cannot read input file");
+  _16 = String_new("stage: driver");
+  _17 = String_var(_16);
+  _18 = String_new("file: ");
+  _19 = String_new("reason: cannot open");
+  _20 = String_var(_19);
+  _21 = cons(_20, NULL);
+  _22 = String_new("\n");
+  _23 = String_new("#include \"scripting.x\"");
+  _24 = String_new("unit-static");
+  _25 = String_var(_24);
+  _26 = Symbol_var(61737802);
+  _27 = cons(_26, NULL);
+  _28 = cons(_25, _27);
+  _29 = Symbol_var(1256204);
+  _30 = String_new("indented units use the default symbol collection");
+  _31 = String_new("the host preprocessor does not keep the indentation, so");
+  _32 = String_var(_31);
+  _33 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
+  _34 = String_var(_33);
+  _35 = String_new("an indented unit");
+  _36 = String_var(_35);
+  _37 = cons(_36, NULL);
+  _38 = cons(_34, _37);
+  _39 = cons(_32, _38);
+  _40 = String_new("script units use the default symbol collection");
+  _41 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
+  _42 = String_var(_41);
+  _43 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
+  _44 = String_var(_43);
+  _45 = cons(_44, NULL);
+  _46 = cons(_42, _45);
+  _47 = String_new("module units use the default symbol collection");
+  _48 = String_new("the host preprocessor reads a module block as C, so");
+  _49 = String_var(_48);
+  _50 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a");
+  _51 = String_var(_50);
+  _52 = String_new("module");
+  _53 = String_var(_52);
+  _54 = cons(_53, NULL);
+  _55 = cons(_51, _54);
+  _56 = cons(_49, _55);
+  _57 = String_new("#");
+  _58 = String_new("<");
+  _59 = Symbol_var(437126);
+  _60 = String_new("String");
+  _61 = String_var(_60);
+  _62 = cons(_61, NULL);
+  _63 = List_var(_62);
   _64 = cons(_63, NULL);
   _65 = List_var(_64);
   _66 = cons(_65, NULL);
-  _67 = List_var(_66);
-  _68 = cons(_67, NULL);
-  _69 = cons(_61, _68);
-  _70 = List_var(_69);
-  _71 = String_new("Var");
-  _72 = String_var(_71);
-  _73 = cons(_72, NULL);
-  _74 = cons(_70, _73);
+  _67 = cons(_59, _66);
+  _68 = List_var(_67);
+  _69 = String_new("Var");
+  _70 = String_var(_69);
+  _71 = cons(_70, NULL);
+  _72 = cons(_68, _71);
   _x2c_gensym_static_initialize_0();
 }
 
@@ -825,30 +821,25 @@ static String _input_name(Compiler c, String filename){
 }
 
 static void _runtime_roles(Compiler c, const char * source){
-  char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL)));
-  c -> prelude = !(source && realpath(String_join(NULL, cons(String_var(dir), cons(String_var(_15), NULL))), runtime) && ! strcmp(source, runtime));
-  c -> runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
-}
-
-static int _inside(const char * path, const char * dir){
-  size_t n = strlen(dir);
-  return ! strncmp(path, dir, n) && path[n] == '/';
+  char runtime[PATH_MAX];
+  String prelude = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL)));
+  c -> prelude = !(source && realpath(prelude, runtime) && ! strcmp(source, runtime));
+  c -> runtime_inc = !(source && Compiler_in_runtime_library(String_new(source)));
 }
 
 static String _read_input(Compiler c){
   String filename = c -> filename, text = NULL;
   if(Compiler_read_source(c, filename, &(text))) return text;
-  Compiler_report_error(c, 306819428, _16, NULL, cons(_18, cons(String_var(String_join(NULL, cons(String_var(_19), cons(String_var(filename), NULL)))), _22)));
+  Compiler_report_error(c, 306819428, _15, NULL, cons(_17, cons(String_var(String_join(NULL, cons(String_var(_18), cons(String_var(filename), NULL)))), _21)));
 }
 
 static String _script(Compiler c, String text, String path){
-  int end = String_find(text, _23);
+  int end = String_find(text, _22);
   ScriptUnit script = xcalloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
   script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), x2c_slice_bound(end), 1);
   c -> unit_script = script;
-  return String_join(NULL, cons(String_var(_24), cons(String_var(end < 0 ? _1 : String_getslice(text, x2c_slice_bound(end), (-2147483647 - 1), 1)), NULL)));
+  return String_join(NULL, cons(String_var(_23), cons(String_var(end < 0 ? _1 : String_getslice(text, x2c_slice_bound(end), (-2147483647 - 1), 1)), NULL)));
 }
 
 static int _source_lines(String text){
@@ -936,14 +927,14 @@ static List _unit_private_rows(Compiler c, Map globs){
         Var _x2c_gensym_match_var_0 = key;
         int _x2c_gensym_match_none_0 = ! Var_is(_x2c_gensym_match_var_0, 806120);
         List _x2c_gensym_match_expr_0 = Var_list_payload(_x2c_gensym_match_var_0);
-        if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _29 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
+        if(! _x2c_gensym_match_none_0){List _x2c_gensym_match_at_0, _x2c_gensym_match_at_1; Var x2c_match_value_0; if(_x2c_gensym_match_expr_0 && Var_equal(_x2c_gensym_match_expr_0 -> car, _28 -> car) &&(_x2c_gensym_match_at_0 = _x2c_gensym_match_expr_0 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_0 ->car, 1) && !(_x2c_gensym_match_at_1 = _x2c_gensym_match_at_0 ->cdr)){
           Var name;
           name = x2c_match_value_0;
           {
             String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
             if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
             Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
-            Array_push(rows, List_var(_unit_private_row(globs, cons(_30, cons(name, NULL)))));
+            Array_push(rows, List_var(_unit_private_row(globs, cons(_29, cons(name, NULL)))));
           }
 
         }
@@ -1014,9 +1005,9 @@ static void _enter_package(Frontend frontend, Compiler c){
 }
 
 static void _check_cpp_unit(Compiler c){
-  if(c -> layout) Compiler_report_error(c, 306819428, _31, _first_directive(c), _40);
-  if(c -> script) Compiler_report_error(c, 306819428, _41, _first_directive(c), _47);
-  if(c -> unit_source) Compiler_report_error(c, 306819428, _48, _first_directive(c), _57);
+  if(c -> layout) Compiler_report_error(c, 306819428, _30, _first_directive(c), _39);
+  if(c -> script) Compiler_report_error(c, 306819428, _40, _first_directive(c), _46);
+  if(c -> unit_source) Compiler_report_error(c, 306819428, _47, _first_directive(c), _56);
 }
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
@@ -1024,7 +1015,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor = cpp;
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_58), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_14), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, frontend -> request -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;
@@ -1056,27 +1047,27 @@ static String _take_line_markers(Compiler cpp, String text){
   int position = 0, text_line = 1;
   {
     String line;
-    List _x2c_gensym_macro_object_5 = String_split(text, _23);
+    List _x2c_gensym_macro_object_5 = String_split(text, _22);
     List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
     Var _x2c_gensym_macro_cursor_output_6;
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       {
         int number = 0;
-        String file = String_startswith(line, _59) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
+        String file = String_startswith(line, _57) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
         if(! String_truth(file)){
           Array_push(kept, String_var(line));
           position += String_len(line) + 1;
           text_line ++;
         }
-        else if(! String_startswith(file, _60)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
+        else if(! String_startswith(file, _58)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
       }
 
     }
 
   }
   cpp -> line_markers = markers;
-  return String_join(_23, Array_list_free(kept));
+  return String_join(_22, Array_list_free(kept));
 }
 
 static void _tokenize_cpp(Compiler cpp, String text){
@@ -1087,7 +1078,6 @@ static void _tokenize_cpp(Compiler cpp, String text){
 }
 
 static void _share_session(Compiler cpp, Compiler c){
-  cpp -> load_source = c -> load_source;
   cpp -> meta_bindings = c -> meta_bindings;
   cpp -> borrowed_bindings = cpp -> meta_bindings != NULL;
   Compiler_share_meta_group(cpp, c);

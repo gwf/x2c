@@ -10,7 +10,17 @@ extern _Thread_local int x2c_error_runtime_ready;
 
 extern _Thread_local unsigned long x2c_execution_stack_low;
 
+#if defined(__GLIBC__)
+extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
+
+#endif
 unsigned long x2c_execution_stack_exchange(unsigned long low);
+
+unsigned long _x2c_stack_floor(void);
+
+static inline int _x2c_stack_below(unsigned long floor){
+  return(unsigned long) __builtin_frame_address(0) < floor;
+}
 
 void x2c_thread_state_release(void);
 

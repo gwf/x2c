@@ -63,8 +63,6 @@ examples/*
 examples/packages/*/builds/
 !examples/shootout/
 !examples/shootout/**
-!examples/shootout-unofficial/
-!examples/shootout-unofficial/**
 !**/Makefile
 # Keep the promoted shootout snapshot; older output stays in Git history.
 examples/shootout/results/*
@@ -81,7 +79,7 @@ examples/shootout/results/charts/*
 !examples/shootout/results/charts/measurements.csv
 !examples/shootout/results/charts/summaries.csv
 !examples/shootout/results/charts/provenance.json
-examples/shootout-unofficial/results/
+examples/apps/notes/bench/reports/
 unittest/benchmarks/hash-table/results/
 unittest/benchmarks/hash-table/RESEARCH.md
 packages/torch/benchmarks/results/
@@ -111,6 +109,7 @@ dist/
 site/.astro/
 site/node_modules/
 etc/vsc-extension/node_modules/
+etc/vsc-extension/*.vsix
 __pycache__/
 .envrc
 

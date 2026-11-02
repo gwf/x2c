@@ -14,7 +14,7 @@ static typedef struct CallSite {
 /* dynamic Func calls
 
    A call through a `Func` value prepares its arguments with the templates
-   below; `Compiler.func_call_parts` reads a prepared call back. */
+   below. */
 
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
@@ -128,30 +128,6 @@ static const PrintfFn printf_family_info[] = {
   { "Buffer_printf", 1, 2, 0 }
 };
 
-/** Returns the callee and arguments of a typed `Func` call, or NULL for any
-    other expression. `content` is the body of the call's `expr` node. Each
-    argument is `(func-arg value address source)`: the argument boxed as a
-    Var, or `(no-value)` when it has no Var form; its address, or 0; and its
-    type, which is `(expr ("List") (ident reference))` for a null argument
-    that takes the callee's own type.
-*/
-List Compiler.func_call_parts(Compiler c, Var content) {
-  Macro call = $func_call, apply = $func_apply;
-  match (%(expr () $content)) {
-    case apply(?callee): return $(callee);
-    case call(?callee, ?count, *arguments): {
-      Array parts = auto [callee];
-      foreach (List argument in _slot_statements(arguments)) {
-        List part = _func_arg_part(argument);
-        if (!part) return NULL;
-        parts.push(part);
-      }
-      return parts;
-    }
-  }
-  return NULL;
-}
-
 // Iter chains
 
 /** Completes an eligible resolved `Iter` call chain for immediate consumption.
@@ -209,47 +185,7 @@ String Compiler.printf_static_format(Compiler c, Var format) {
   return NULL;
 }
 
-// call preparation and recognition
-
-/* One prepared argument as `(func-arg value address source)`, or NULL for
-   any other statement. */
-static List _func_arg_part(List argument) {
-  Macro prepare = $func_argument, absent = $func_null_argument,
-        boxed = $func_value;
-  Var value = %(no-value), address = NULL, source = NULL;
-  Macro splice = $func_splice, map_splice = $func_map_splice;
-  match (argument) {
-    case splice(?function, ?storage, ?index, ?value):
-      return %(func-splice $value);
-    case map_splice(?function, ?storage, ?index, ?value):
-      return %(func-map-splice $value);
-    case prepare(
-      ?function, ?storage, ?count, ?index, ?pointer, ?type, ?alternative): {
-      match (alternative) case boxed(?boxed_value): value = boxed_value;
-      address = pointer;
-      source = type;
-    }
-    case absent(?function, ?storage, ?count, ?index, ?alternative): {
-      match (alternative) case boxed(?boxed_value): value = boxed_value;
-      address = $!int{ 0 };
-      source = %(expr ("List") (ident reference));
-    }
-    default: return NULL;
-  }
-  return %(func-arg $value $address $source);
-}
-
-/* Open statement groups in a slot. */
-static List _slot_statements(List items) {
-  Array opened = auto [];
-  foreach (List item in items)
-    match (item) {
-      case %(seq *group):
-        foreach (List statement in group) opened.push(statement);
-      default: opened.push(item);
-    }
-  return opened;
-}
+// completing Iter chains
 
 static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,

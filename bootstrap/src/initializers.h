@@ -16,8 +16,6 @@
 #include "macros/macros.h"
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
 
-List Compiler_initializer_field_path(Compiler c, Type type, List field);
-
 List Compiler_initializer_slot(Compiler c, List target, List path);
 
 List Compiler_convert_initializer(Compiler c, List value, Type type, List target);

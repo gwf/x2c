@@ -4,7 +4,7 @@
 > The implemented phases and measured declines are historical outcomes;
 > meta integration closed at b4e36b50, with the generated environment and
 > algorithm migrations delivered through 231550b0. The var-tags experiment
-> remains parked, not silently completed; see [the index](../README.md).
+> remains parked, not silently completed; no plan owns it.
 
 ## Original status context
 

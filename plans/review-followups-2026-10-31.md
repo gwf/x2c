@@ -37,7 +37,7 @@ intentional compatibility choice, not an omitted rename.
 
 ## Other owners
 
-- [Language-reference writing](review-remediation-2026-10-11.md) owns the
+- [Language-reference writing](language-reference-writing.md) owns the
   remaining rewrite explanation and runtime Lisp truthiness/host-limit text.
   Binding explanations and the AST catalog already exist.
 - [Structured lint findings](x2c-lint-and-format.md) owns the approved optional

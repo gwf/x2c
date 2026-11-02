@@ -2,7 +2,6 @@
 
 #define __GUARD_0x1FED3D35__
 #include "x2c.h"
-#include <string.h>
 typedef List ListChar;
 
 typedef List ListShort;
@@ -59,11 +58,10 @@ static inline Var _typed_list_encode_f32(float value){
   return Var_box_f32(value);
 }
 
+static float Var_decode_f32(Var);
+
 static inline float _typed_list_decode_f32(Var value){
-  unsigned raw =(unsigned)(value.u64 & 0xFFFFFFFFul);
-  float result;
-  memcpy(& result, & raw, sizeof result);
-  return result;
+  return Var_decode_f32(value);
 }
 
 static Var Var_box_f64(double);
@@ -78,12 +76,10 @@ static inline double _typed_list_decode_f64(Var value){
   return Var_decode_f64(value);
 }
 
+static Var String_var(String);
+
 static inline Var _typed_list_encode_string(String value){
-  unsigned long raw =(unsigned long)(uintptr_t) value;
-  return(Var){
-    .u64 = VAR_STRING_PREFIX | raw
-  }
-  ;
+  return String_var(value);
 }
 
 String Var_as_string(Var);
@@ -182,8 +178,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 static Var Symbol_var(Symbol);
 
-static Var String_var(String);
-
 static Var int_var(int);
 
 #include "error.h"
@@ -193,7 +187,7 @@ static Var int_var(int);
 
 _Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 195,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 185,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 1020285550996648, 3, Symbol_var(34096809266140), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }

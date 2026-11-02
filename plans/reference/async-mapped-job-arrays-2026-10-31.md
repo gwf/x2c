@@ -3,6 +3,8 @@
 > Status: reference
 > Implemented privately at source checkpoint `b185f710`.
 > Normal benchmark reruns remain on hold. No push is authorized.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Change and costs
 

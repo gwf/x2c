@@ -9,13 +9,14 @@ from __future__ import annotations
 
 import argparse
 import csv
-import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
+
+from agent_context import load_script
 
 
 HERE = Path(__file__).resolve().parent
@@ -27,16 +28,9 @@ FIELDS = (
 )
 
 
-def load(name: str, file: str):
-  spec = importlib.util.spec_from_file_location(name, HERE / file)
-  assert spec and spec.loader
-  module = importlib.util.module_from_spec(spec)
-  spec.loader.exec_module(module)
-  return module
-
-
-scaling = load("build_scaling", "build-scaling.py")
-snapshot = load("performance_snapshot", "performance-snapshot.py")
+scaling = load_script(HERE / "build-scaling.py", "build_scaling")
+snapshot = load_script(
+  HERE / "performance-snapshot.py", "performance_snapshot")
 
 
 def commit_facts(commit: str) -> tuple[str, str, int]:

@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """Focused tests for the optional build-cost measurement."""
 
-import importlib.util
 from pathlib import Path
 import sys
 import tempfile
 import unittest
 from unittest import mock
 
+from agent_context import load_script
+
 
 SCRIPT = Path(__file__).with_name("build-scaling.py")
-SPEC = importlib.util.spec_from_file_location("build_scaling", SCRIPT)
-assert SPEC and SPEC.loader
-scaling = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(scaling)
+scaling = load_script(SCRIPT, "build_scaling")
 
 
 class BuildScalingTests(unittest.TestCase):

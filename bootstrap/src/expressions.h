@@ -64,8 +64,6 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 
 List _x2c_func_call_arguments(List function, List storage, List arguments);
 
-List Compiler_func_call_parts(Compiler c, Var content);
-
 List Compiler_complete_iter_chain(Compiler c, List expression);
 
 String Compiler_printf_static_format(Compiler c, Var format);

@@ -58,7 +58,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("/");
   _1 = String_new(".d");
-  _2 = String_new("x2c: error: cannot write dependency file: %s\nnote: %s\n");
+  _2 = String_new("cannot write dependency file: ");
   _3 = String_new("search:");
   _4 = String_new("cwd:");
   _5 = String_new(".c");
@@ -117,7 +117,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
         if(_x2c_gensym_macro_selected_0 == 0){
           List volatile failure;
           failure = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0));
-          error = Var_long(Var_convert_at(List_assoc(failure, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/deps.x",.function = "Compiler_write_depfile",.line = 52}; & _x2c_gensym_error_site_0; })));
+          error = Var_long_at(List_assoc(failure, Symbol_var(11703198)), ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/deps.x",.function = "Compiler_write_depfile",.line = 48}; & _x2c_gensym_error_site_0; }));
         }
 
       }
@@ -133,7 +133,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  fprintf(stderr, _2, path, strerror(error));
+  Diagnostics_driver_report(String_join(NULL, cons(String_var(_2), cons(String_var(path), NULL))), strerror(error));
   return 0;
 }
 

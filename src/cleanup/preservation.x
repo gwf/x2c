@@ -97,8 +97,7 @@ static Var _changed_operand(Compiler c, List node) {
   if (node ~= %(call ?(String helper)
                  (args (expr ? (op & (parens ?target))) *))) {
     if (helper == "x2c_var_update_volatile"
-        || helper == "x2c_var_postfix_volatile"
-        || helper == "Var_update" || helper == "Var_postfix") return target;
+        || helper == "x2c_var_postfix_volatile") return target;
     Type native = c.sym.resolve_numeric_type(target.list().cadr());
     if (native && helper == native.var_numeric_update_helper())
       return target;

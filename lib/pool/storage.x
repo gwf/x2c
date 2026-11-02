@@ -300,7 +300,7 @@ static PoolBlock _fresh_block(Pool inner, int class_index) {
   }
   if (x2c_error_runtime_ready)
     raise %(alloc-fail (operation "Pool backing block"));
-  _fatal("backing block allocation failed");
+  x2c_fatal("Pool: backing block allocation failed");
 }
 
 // blocks
@@ -351,7 +351,7 @@ static PoolBlock _registry_add(PoolBlock block, unsigned bytes) {
   _index_lock();
   while (pool_index_building)
     if (pthread_cond_wait(&pool_index_changed, &pool_index_mutex))
-      _fatal("could not wait for index builder");
+      x2c_fatal("Pool: could not wait for index builder");
   PoolIndex index = __atomic_load_n(&pool_index, __ATOMIC_ACQUIRE);
   int build = pool_index_complete &&
     (!index || (pool_index_used + 2) * 2 > index.slots);
@@ -378,7 +378,7 @@ static PoolBlock _registry_add(PoolBlock block, unsigned bytes) {
   if (build) {
     pool_index_building = 0;
     if (pool_multithreaded && pthread_cond_broadcast(&pool_index_changed))
-      _fatal("could not notify index writers");
+      x2c_fatal("Pool: could not notify index writers");
   }
   _index_unlock();
   return block;
@@ -449,38 +449,32 @@ static unsigned _index_start(uintptr_t page, unsigned slots) =>
 
 static void _index_lock(void) {
   if (pool_multithreaded && pthread_mutex_lock(&pool_index_mutex))
-    _fatal("could not lock index mutex");
+    x2c_fatal("Pool: could not lock index mutex");
 }
 
 static void _index_unlock(void) {
   if (pool_multithreaded && pthread_mutex_unlock(&pool_index_mutex))
-    _fatal("could not unlock index mutex");
+    x2c_fatal("Pool: could not unlock index mutex");
 }
 
 module void _storage_lock(void) {
   if (pool_multithreaded && pthread_mutex_lock(&pool_storage_mutex))
-    _fatal("could not lock storage mutex");
+    x2c_fatal("Pool: could not lock storage mutex");
 }
 
 module void _storage_unlock(void) {
   if (pool_multithreaded && pthread_mutex_unlock(&pool_storage_mutex))
-    _fatal("could not unlock storage mutex");
+    x2c_fatal("Pool: could not unlock storage mutex");
 }
 
 module void _lock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_lock(&pool.mutex))
-    _fatal("could not lock branch mutex");
+    x2c_fatal("Pool: could not lock branch mutex");
 }
 
 module void _unlock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_unlock(&pool.mutex))
-    _fatal("could not unlock branch mutex");
-}
-
-/* Ends the process on a native failure that Error cannot report. */
-module void _fatal(const char *message) {
-  fprintf(stderr, "Pool: %s\n", message);
-  abort();
+    x2c_fatal("Pool: could not unlock branch mutex");
 }
 
 /* Counters share their Pool owner's serialization. Stats reads them without
@@ -556,12 +550,12 @@ static void _add_traffic(PoolTrafficCounts *sum, PoolTrafficCounts *counts) {
 
 static void _traffic_lock(void) {
   if (pool_multithreaded && pthread_mutex_lock(&pool_traffic_mutex))
-    _fatal("could not lock accounting registry");
+    x2c_fatal("Pool: could not lock accounting registry");
 }
 
 static void _traffic_unlock(void) {
   if (pool_multithreaded && pthread_mutex_unlock(&pool_traffic_mutex))
-    _fatal("could not unlock accounting registry");
+    x2c_fatal("Pool: could not unlock accounting registry");
 }
 
 /* The freed slot is reused first, from a block that becomes its class's

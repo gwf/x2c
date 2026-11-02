@@ -134,6 +134,22 @@ class Candidates(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'site receipt mismatch'):
             c.verify(self.candidate)
 
+    def test_pages_extracts_only_the_retained_site(self):
+        self.sites()
+        retained = self.directory / 'retained'
+        retained.mkdir()
+        for name in ('site-production.tar.gz', 'site-production.json',
+                     'candidate.json'):
+            (retained / name).write_bytes((self.candidate / name).read_bytes())
+        public = self.directory / 'public'
+        args = argparse.Namespace(candidate=retained,
+                                  destination='production', output=public)
+        c.extract(args)
+        self.assertEqual((public / 'x2c-version.txt').read_text(), '1.2.3\n')
+        (retained / 'site-production.tar.gz').write_bytes(b'different site')
+        with self.assertRaisesRegex(ValueError, 'site receipt mismatch'):
+            c.extract(args)
+
     def test_promotion_requires_staging_verification(self):
         self.sites()
         with self.assertRaisesRegex(ValueError, 'no staging verification'):

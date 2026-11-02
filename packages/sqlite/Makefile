@@ -6,7 +6,9 @@ PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(SQLITE_PREFIX)/include
 PACKAGE_LINK := --c-include-dir $(PACKAGE_DEPS)/include \
                 -L$(PACKAGE_DEPS)/lib -lsqlite3 -pthread
 
-.PHONY: example short-example lisp-example run run-lisp
+.PHONY: run run-lisp
+
+check: test run run-lisp
 
 example: builds/observation-history
 

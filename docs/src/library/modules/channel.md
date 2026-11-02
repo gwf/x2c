@@ -38,10 +38,8 @@ Source: `lib/channel.x`
 `void Channel.close(Channel channel)`
 
 Ends sends and wakes waiters; accepted messages remain available to drain.
-Repeated close is harmless. Closing does not stop Thread users, free
-payloads, or acknowledge completion of a borrow.
-
-**Raises:** <bad-arg> for NULL.
+Repeated close is harmless, and NULL does nothing. Closing does not stop
+Thread users, free payloads, or acknowledge completion of a borrow.
 
 Source: `lib/channel.x`
 
@@ -109,7 +107,9 @@ Source: `lib/channel.x`
 
 Returns the Channel's own storage scope. Owned queued payloads stay
 detached; ordinary messages remain borrowed. This scope is not a shared
-adoption destination for concurrent senders. NULL returns NULL.
+adoption destination for concurrent senders.
+
+**Raises:** <bad-arg> for NULL.
 
 Source: `lib/channel.x`
 

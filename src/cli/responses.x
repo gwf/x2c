@@ -55,7 +55,7 @@ module void _expand_argument(Array out, String arg, List stack) {
     Diagnostics.driver_error("empty response-file reference '@'");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
-    _fail(%"recursive response-file inclusion: $path", NULL);
+    Diagnostics.driver_error(%"recursive response-file inclusion: $path");
   List nested = cons(identity, stack);
   foreach (String word in _response_arguments(path))
     _expand_argument(out, word, nested);
@@ -64,58 +64,26 @@ module void _expand_argument(Array out, String arg, List stack) {
 /* Reads response-file tokens with ordinary quoting and UTF-8 checks.
    Returns canonical Strings without expanding `@` references. Paths and
    arguments retain the producing pool lifetime. */
-module List _response_arguments(String path) {
-  size_t length = 0, char *text = _read_response_file(path, length);
-  Array words = _response_words(path, text, length);
-  xfree(text);
-  return words.list_free();
-}
+module List _response_arguments(String path) =>
+  _response_words(path, _read_response_file(path)).list_free();
 
 /* The whole file, which must be UTF-8 without a NUL byte. */
-static char *_read_response_file(String path, size_t &length) {
-  FILE *file = fopen(path, "rb");
-  if (!file) _response_error(path, 1, strerror(errno));
-  long end = _response_size(file, path);
-  char *text = xmalloc((size_t) end + 1);
-  size_t got = fread(text, 1, (size_t) end, file), int failed = ferror(file);
-  fclose(file);
-  if (failed || got != (size_t) end)
-    _response_error(path, 1, "could not read complete file");
-  text[got] = 0;
-  if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
-  if (!_valid_utf8((unsigned char *) text))
-    _response_error(path, 1, "input is not valid UTF-8");
-  length = got;
+static String _read_response_file(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(bad-arg *): _response_error(path, 1, "embedded NUL byte");
+  catch %((!or not-found io-fail) *detail): {
+    long error = detail.assoc(<"errno">);
+    _response_error(path, 1, strerror((int) error));
+  }
+  if (!text.is_utf8()) _response_error(path, 1, "input is not valid UTF-8");
   return text;
 }
 
-/* The size of the open file, with its position back at the start. */
-static long _response_size(FILE *file, String path) {
-  long end = -1;
-  if (!fseek(file, 0, SEEK_END)) end = ftell(file);
-  if (end < 0 || fseek(file, 0, SEEK_SET)) {
-    int error = errno;
-    fclose(file);
-    _response_error(path, 1, strerror(error));
-  }
-  return end;
-}
-
-/* Shortest forms of scalar values only: no overlong sequence, surrogate, or
-   code point above U+10FFFF. `text` is NUL-terminated and has no other NUL. */
-static int _valid_utf8(const unsigned char *text) {
-  while (*text) {
-    int length = scan_utf8_length(text);
-    if (length < 0) return 0;
-    text += length;
-  }
-  return 1;
-}
-
-static Array _response_words(String path, const char *text, size_t length) {
+static Array _response_words(String path, String text) {
   Words w = {
     .out = [], .path = path, .word = Buffer.new(0), .line = 1, .blank = 1};
-  for (size_t i = 0; i < length; i++) _scan(w, (unsigned char) text[i]);
+  foreach (char ch in text) _scan(w, (unsigned char) ch);
   _finish_words(w);
   w.word.free();
   return w.out;
@@ -190,7 +158,6 @@ static void _flush(Words &w) {
 }
 
 static void _response_error(String path, int line, const char *message) {
-  fprintf(
-    stderr, "x2c: error: response file '%s':%d: %s\n", path, line, message);
-  exit(2);
+  Diagnostics.driver_error(
+    %"response file '$path':$line: $(String.new(message))");
 }

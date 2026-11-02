@@ -623,7 +623,8 @@ Array key, equal contents: void
 Key your `Map`s with `String`s, `Symbol`s, `Atom`s, or numbers. Those compare
 by content. Keys compare by `Var.equal`, which agrees with `Var.hash`, so a
 number key also keeps its type: `3` and `3L` are two keys although
-`3 == 3L`.
+`3 == 3L`. Searching a `List` or `Array` with `index`, `contains`, `count`,
+or `assoc` uses `==` instead, so it finds `3` when given `3L`.
 
 ```x2c
 Map by_number = {};
@@ -692,7 +693,9 @@ length: 3
 
 `List.assoc` treats the `List` as an association list of `(key value ...)`
 pairs and returns the `cadr` of the first matching pair. `List.get` dispatches
-on the key: integers index, anything else does an `assoc` lookup.
+on the key: integers index, anything else does an `assoc` lookup. `assoc`,
+`index`, and `contains` match with `==`, so `1.0` finds the pair keyed by
+`1`, which a `Map` keyed by `1` would not.
 
 The functional `List` operations take `Func`. A fixed nonvariadic function or
 function pointer converts automatically, and you can pass a capturing lambda
@@ -715,13 +718,14 @@ printf("%s %s %s\n", doubled.repr(), big.repr(), total.repr());
 (2 4 6 8) (3 4) 10
 ```
 
-For `map`, `filter`, and `foldl`, a callback is required when an element
-needs an invocation. A null callback then raises `<bad-arg>` through `Func`.
-Empty inputs make no call. A fold with a `void` seed also makes no call for
-a singleton: its only element becomes the result. This rule applies to
-these operations on `List`, `Array`, `String`, and `Iter` where provided.
-Lisp nil callbacks follow the same rule. Other operations, including
-`zip_with`, queries, `map2`, and `scan`, retain their own callback contracts.
+For `map`, `filter`, `foldl`, `map2`, `scan`, and the queries `find`, `any`,
+and `all`, a callback is required when an element needs an invocation. A
+null callback then raises `<bad-arg>` through `Func`. Empty inputs make no
+call, so an empty query still returns `void`, false, or true. A fold with a
+`void` seed also makes no call for a singleton: its only element becomes the
+result. This rule applies to these operations on `List`, `Array`, `String`,
+and `Iter` where provided. Lisp nil callbacks follow the same rule. One
+operation treats a null callback differently: `zip_with` yields pair `List`s.
 
 Transformations and folds keep the callback's `Var` result. The predicates
 `List.filter`, `List.find`, `List.any`, and `List.all` apply `Var`
@@ -947,12 +951,15 @@ printf("%s top=%s len=%zu\n", stack.repr(), top.repr(), stack.len());
 The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `insert`, `remove`, and `splice`; searching is `index`, `find`,
 `contains`, and `count`; and there are `map`, `map2`, `foldl`, `sort`,
-`reverse`, `concat`, `copy`, and `join`.
+`reverse`, `concat`, `copy`, and `join`. `index`, `contains`, and `count`
+compare with `==`, so two numbers compare as their native values do in C:
+`[1, 1.0, 1L].count(1)` is 3.
 
 `index(value)` returns the first equal element's zero-based position, or `-1`.
 `find(predicate)` returns the first accepted element as `Var`, or `void`.
 These names have the same meanings on Array and List; Iter also has `find`.
-Predicates use ordinary `Var` truth. A null predicate returns `void`.
+Predicates use ordinary `Var` truth. A null predicate raises `<bad-arg>` when
+the first element needs it; an empty search returns `void` without a call.
 Matching zero, false, or NULL remains distinct from absence: test `is void`.
 Searching leaves Array and List storage unchanged and borrows matched values.
 Typed Arrays use native equality for `index` and box `find` results as their
@@ -1035,7 +1042,9 @@ smallest first: 10
 
 `Array.push` rejects `void`, and so does the counted construction used by
 non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
-returns `void`. `Array` has no status-bearing read.
+returns `void`. `Array` has no status-bearing read. A write that cannot be
+performed raises `<bad-arg>`: `setindex` or `insert` at an out-of-range
+index, or `setindex`, `push`, `unshift`, or `insert` on a null `Array`.
 
 ### Packed typed Arrays
 
@@ -1115,14 +1124,15 @@ Packed `Array`s cross a `Context` or `Thread` boundary like other values;
 gives the export rules.
 
 Compound update is native as well. `values[i] += 1`, `values[i] <<= 2`, and
-`values[i]++` compute in the element type and compile to the one instruction
-the operator names. Overflow wraps, a narrow element truncates a result too
-wide for it, and a signed right shift keeps the sign, as C does. Three
-failures are kept, since they turn a hardware trap into something you can
-catch: integer `/= 0` and `%= 0` raise `<div-zero>`, a shift count outside
-the element's width raises `<bad-shift>`, and `%` or a bitwise operator on a
-float element raises `<bad-types>`. Each raises before storing, so a failed
-update leaves the element as it was.
+`values[i]++` compute as C does for the element type and compile to the one
+instruction the operator names. The element promotes, overflow wraps, a
+narrow element truncates a result too wide for it, and a signed right shift
+keeps the sign. Three failures are kept, since they turn a hardware trap
+into something you can catch: integer `/= 0` and `%= 0` raise `<div-zero>`,
+a shift count outside the promoted width (`int`, or `long` for `ArrayLong`)
+raises `<bad-shift>`, and `%` or a bitwise operator on a float element
+raises `<bad-types>`. Each raises before storing, so a failed update leaves
+the element as it was. These are the rules a `Var` update follows.
 
 An `ArrayChar` *store* loop has an extra cost: it cannot keep the element base
 in a register, because a byte store may alias any object, including that base.
@@ -1357,7 +1367,9 @@ raw native indexing, with no bounds test and no negative-index rule. See
 
 Writing is where the immutable/mutable split shows up in the syntax:
 
-- `array[i] = value` and `map[key] = value` are supported.
+- `array[i] = value` and `map[key] = value` are supported. Unlike a read,
+  `array[i] = value` with `i` out of range raises `<bad-arg>`, as
+  `array[i] += value` does.
 - `list[i] = value` is rejected by the compiler.
 - `string[i] = ch` is rejected, because a canonical `String` is immutable.
   Use the copy-producing `String.withindex`, or bind a transient

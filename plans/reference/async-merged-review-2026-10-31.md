@@ -5,6 +5,8 @@
 > Starting private revision: `38e89217b`. No push or shared-branch update.
 > The two reproduced runtime defects were fixed in the subsequent private
 > runtime follow-up described below. Publication remains held.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Repairs and cleanup
 

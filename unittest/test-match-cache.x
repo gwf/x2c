@@ -15,10 +15,6 @@
 static Symbol _acquire(MatchCache cache, Var pattern, MatchLease &lease) =>
   cache.acquire(pattern, lease, "MatchCache.acquire");
 
-static int _try_capture(
-  MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures) =>
-  cache.try_capture(input, pattern, captures, "MatchCache.try_capture");
-
 static int _try_match(
   MatchCache cache, List input, Var pattern, List &?out_bindings) =>
   cache.try_match(input, pattern, out_bindings, "MatchCache.try_match");
@@ -46,11 +42,6 @@ static int _search_replace(
 static Var _keyed_pattern(int index) {
   Var value = index;
   return %(cache-key $value ?value);
-}
-
-static List _keyed_input(int index) {
-  Var value = index;
-  return %(cache-key $value ok);
 }
 
 static void cache_lifecycle_failures_transfer(void) {

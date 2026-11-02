@@ -152,9 +152,10 @@ meta native Job List.job(List command) => Job.new(command);
 /** Adds `command` after the last stage of `job`, reading that stage's
     output, and returns the job. A pipeline `command` adds each of its
     stages.
-    Raises: `<bad-arg>` for a job that has started.
+    Raises: `<bad-arg>` for NULL or a job that has started.
 */
 Job Job.pipe(Job job, List command) {
+  if (!job) raise %(bad-arg (operation "Job.pipe"));
   _unstarted(job, "Job.pipe");
   job.stages = job.stages.append(_stages(command));
   return job;
@@ -178,9 +179,10 @@ Job Job.pipe(Job job, List command) {
     ~}
     ```
 
-    Raises: `<bad-arg>` for an unknown key or a job that has started.
+    Raises: `<bad-arg>` for NULL, an unknown key, or a job that has started.
 */
 Job Job.options(Job job, Map options) {
+  if (!job) raise %(bad-arg (operation "Job.options"));
   _unstarted(job, "Job.options");
   foreach (Var (key, value) in options) {
     if (key is not Symbol) $error.options.key();
@@ -201,9 +203,10 @@ void Job.run(Job job) {
 
 /** Makes `job` pass standard output through instead of capturing it, the
     same as `options({stdout: <inherit>})`, and returns it.
-    Raises: `<bad-arg>` for a job that has started.
+    Raises: `<bad-arg>` for NULL or a job that has started.
 */
 Job Job.live(Job job) {
+  if (!job) raise %(bad-arg (operation "Job.live"));
   _route_output(_unstarted(job, "Job.options").launch, <inherit>);
   return job;
 }
@@ -271,9 +274,10 @@ int Job.status(Job job) {
     returned unchanged.
     Raises: `<not-found>` when a program or the `dir` option does not exist,
     `<io-fail>` when a pipe, fork, output file, or other start step fails, or
-    `<bad-arg>` for an empty command.
+    `<bad-arg>` for NULL or an empty command.
 */
 meta native Job Job.start(Job job) {
+  if (!job) raise %(bad-arg (operation "Job.start"));
   if (!job.started) _start(job);
   return job;
 }
@@ -287,20 +291,24 @@ void Job.cleanup(Job job) {
   _finish(job);
 }
 
-/** Sends `signal` to every stage of `job` that is still running. */
+/** Sends `signal` to every stage of `job` that is still running.
+    Raises: `<bad-arg>` for NULL.
+*/
 void Job.kill(Job job, int signal) {
+  if (!job) raise %(bad-arg (operation "Job.kill"));
   for (int i = 0; i < job.count; i++)
     if (job.pids[i]) kill((pid_t) job.pids[i], signal);
 }
 
 /** Removes and returns the first job in `jobs` that has finished, waiting
     until one does. An empty `jobs` returns NULL.
-    Raises: `<bad-arg>` when a job in `jobs` has not started.
+    Raises: `<bad-arg>` when a job in `jobs` is NULL or has not started.
 */
 Job Job.wait_any(Array jobs) {
-  foreach (Job job in jobs)
-    if (!job.started)
-      $error.wait.unstarted();
+  foreach (Job job in jobs) {
+    if (!job) raise %(bad-arg (operation "Job.wait_any"));
+    if (!job.started) $error.wait.unstarted();
+  }
   while (jobs.len()) {
     for (int i = 0; i < jobs.len(); i++) {
       Job job = jobs[i];
@@ -313,13 +321,26 @@ Job Job.wait_any(Array jobs) {
 
 /** Reports whether every stage of `job` has exited, without blocking. A job
     that has not started reports 0.
+    Raises: `<bad-arg>` for NULL.
 */
 int Job.ready(Job job) {
+  if (!job) raise %(bad-arg (operation "Job.ready"));
   if (!job.started) return 0;
   if (job.finished) return 1;
   if (_running(job)) return 0;
   _finish(job);
   return 1;
+}
+
+/** Decodes the `waitpid` status `raw` of a child that has ended. Returns
+    its exit status, `128 + signal` when a signal ended it, or -1 otherwise.
+    A given `signal` receives that signal, or 0 when no signal ended it.
+*/
+int Job.decode_wait_status(int raw, int &?signal) {
+  int ended = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
+  if (signal) signal = ended;
+  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
+  return ended ? 128 + ended : -1;
 }
 
 // the environment
@@ -376,14 +397,8 @@ static void _reap(Job job, int index, int flags) {
   do pid = waitpid((pid_t) job.pids[index], &status, flags);
   while (pid < 0 && errno == EINTR);
   if (!pid) return;
-  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
+  job.statuses[index] = pid < 0 ? -1 : Job.decode_wait_status(status, NULL);
   job.pids[index] = 0;
-}
-
-static int _decoded_status(int status) {
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
 }
 
 // A command whose first element is a List is a pipeline of those commands.

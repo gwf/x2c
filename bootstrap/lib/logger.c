@@ -352,31 +352,61 @@ void Logger_initialize(void);
 
 void Logger_trace(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "Logger_trace",.line = 149,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 43124938, category, fields);
 }
 
 void Logger_debug(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/logger.x",.function = "Logger_debug",.line = 150,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 8721742, category, fields);
 }
 
 void Logger_info(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/logger.x",.function = "Logger_info",.line = 151,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 618910, category, fields);
 }
 
 void Logger_warn(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/logger.x",.function = "Logger_warn",.line = 152,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 1510556, category, fields);
 }
 
 void Logger_error(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/logger.x",.function = "Logger_error",.line = 153,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 11703268, category, fields);
 }
 
 void Logger_fatal(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/logger.x",.function = "Logger_fatal",.line = 154,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, 12689496, category, fields);
 }
 
@@ -420,6 +450,11 @@ int Logger_should_log(Logger logger, Symbol level, Symbol category){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/logger.x",.function = "Logger_should_log",.line = 184,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.should_log")), NULL))));
+        __builtin_unreachable();
+      }
       {
         int _x2c_gensym_return_value_0 = _should_log(logger, level, category);
         {
@@ -475,8 +510,13 @@ Symbol Logger_min_level(Logger logger){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/logger.x",.function = "Logger_min_level",.line = 203,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.min_level")), NULL))));
+        __builtin_unreachable();
+      }
       {
-        Symbol _x2c_gensym_return_value_2 = logger ? logger -> min_level : 0;
+        Symbol _x2c_gensym_return_value_2 = logger -> min_level;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           return _x2c_gensym_return_value_2;
@@ -500,7 +540,12 @@ int Logger_set_min_level(Logger logger, Symbol level){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
-      if(! logger || _level_priority(level) < 0){
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/logger.x",.function = "Logger_set_min_level",.line = 213,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.set_min_level")), NULL))));
+        __builtin_unreachable();
+      }
+      if(_level_priority(level) < 0){
         int _x2c_gensym_return_value_3 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
@@ -534,6 +579,11 @@ LogSink Logger_add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var da
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/logger.x",.function = "Logger_add_sink",.line = 237,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.add_sink")), NULL))));
+        __builtin_unreachable();
+      }
       _require_quiescent(logger, _0);
       {
         LogSink _x2c_gensym_return_value_5 = _new_sink(logger, emit, flush, data, NULL);
@@ -560,8 +610,13 @@ int Logger_remove_sink(Logger logger, LogSink sink){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/logger.x",.function = "Logger_remove_sink",.line = 249,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.remove_sink")), NULL))));
+        __builtin_unreachable();
+      }
       _require_quiescent(logger, _1);
-      if(! logger || ! sink || sink -> logger != logger || ! sink -> emit){
+      if(! sink || sink -> logger != logger || ! sink -> emit){
         int _x2c_gensym_return_value_6 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
@@ -596,6 +651,11 @@ LogSink Logger_add_file_sink(Logger logger, File file){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/logger.x",.function = "Logger_add_file_sink",.line = 268,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.add_file_sink")), NULL))));
+        __builtin_unreachable();
+      }
       {
         LogSink _x2c_gensym_return_value_8 = _add_text_sink(logger, file, 0, 0);
         {
@@ -621,7 +681,12 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
-      if(! logger || ! destination){
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/logger.x",.function = "Logger_add_memory_sink",.line = 294,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.add_memory_sink")), NULL))));
+        __builtin_unreachable();
+      }
+      if(! destination){
         LogSink _x2c_gensym_return_value_9 = NULL;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
@@ -760,6 +825,11 @@ LogSink Logger_add_stderr_sink(Logger logger){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_11);
     {
+      if(! logger){
+        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/logger.x",.function = "Logger_add_stderr_sink",.line = 356,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.add_stderr_sink")), NULL))));
+        __builtin_unreachable();
+      }
       {
         LogSink _x2c_gensym_return_value_12 = _add_text_sink(logger, stderr, isatty(fileno(stderr)), 1);
         {
@@ -852,20 +922,17 @@ int Logger_sink_count(Logger logger){
     x2c_cleanup_push(& _x2c_gensym_defer_record_13);
     {
       if(! logger){
-        int _x2c_gensym_return_value_18 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
-          return _x2c_gensym_return_value_18;
-        }
-
+        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/logger.x",.function = "Logger_sink_count",.line = 395,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.sink_count")), NULL))));
+        __builtin_unreachable();
       }
       int count = 0;
       for(LogSink sink = logger -> first_sink;  sink;  sink = sink -> next) count ++;
       {
-        int _x2c_gensym_return_value_19 = count;
+        int _x2c_gensym_return_value_18 = count;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
-          return _x2c_gensym_return_value_19;
+          return _x2c_gensym_return_value_18;
         }
 
       }
@@ -887,10 +954,10 @@ Logger log_get_global_logger(void){
     x2c_cleanup_push(& _x2c_gensym_defer_record_14);
     {
       {
-        Logger _x2c_gensym_return_value_20 = global_logger;
+        Logger _x2c_gensym_return_value_19 = global_logger;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_14);
-          return _x2c_gensym_return_value_20;
+          return _x2c_gensym_return_value_19;
         }
 
       }
@@ -948,6 +1015,11 @@ void Logger_shutdown(void){
 
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
+  if(! logger){
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/logger.x",.function = "Logger_log",.line = 464,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.log")), NULL))));
+    __builtin_unreachable();
+  }
   _log_fields(logger, level, category, fields);
 }
 
@@ -991,11 +1063,12 @@ void Logger_clear_sinks(Logger logger){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_17);
     {
-      _require_quiescent(logger, _3);
       if(! logger){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_17);
-        return;
+        static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/logger.x",.function = "Logger_clear_sinks",.line = 494,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.clear_sinks")), NULL))));
+        __builtin_unreachable();
       }
+      _require_quiescent(logger, _3);
       LogSink sink = logger -> first_sink;
       logger -> first_sink = logger -> last_sink = NULL;
       while(sink){
@@ -1021,8 +1094,9 @@ void Logger_flush(Logger logger){
     x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
       if(! logger){
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
-        return;
+        static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/logger.x",.function = "Logger_flush",.line = 512,.runtime = 1};
+        x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Logger.flush")), NULL))));
+        __builtin_unreachable();
       }
       {
         int * _x2c_gensym_macro_address_0 = & logger -> emission_depth;
@@ -1105,11 +1179,11 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_20);
     {
-      if(! logger || ! emit){
-        LogSink _x2c_gensym_return_value_21 = NULL;
+      if(! emit){
+        LogSink _x2c_gensym_return_value_20 = NULL;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
-          return _x2c_gensym_return_value_21;
+          return _x2c_gensym_return_value_20;
         }
 
       }
@@ -1120,10 +1194,10 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
       ;
       _append_sink(logger, sink);
       {
-        LogSink _x2c_gensym_return_value_22 = result = sink;
+        LogSink _x2c_gensym_return_value_21 = result = sink;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_20);
-          return _x2c_gensym_return_value_22;
+          return _x2c_gensym_return_value_21;
         }
 
       }
@@ -1135,9 +1209,9 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 }
 
 static void _require_quiescent(Logger logger, String owner){
-  if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 552,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
+  if(logger -> emission_depth != 0){
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 570,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_18, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
 
@@ -1169,7 +1243,7 @@ static void _retire_sink(LogSink sink){
 }
 
 static LogSink _add_text_sink(Logger logger, File file, int color, int flush_each){
-  if(! logger || ! file) return NULL;
+  if(! file) return NULL;
   LogTextSink context = Scope_calloc_in(& logger -> storage, 1, sizeof(struct LogTextSink));
   int handed_off = 0;
   Var data = LogTextSink_var(context);
@@ -1212,10 +1286,10 @@ static LogSink _add_text_sink(Logger logger, File file, int color, int flush_eac
       }
       handed_off = 1;
       {
-        LogSink _x2c_gensym_return_value_23 = _new_sink(logger, _emit_text, _flush_text, data, _destroy_text);
+        LogSink _x2c_gensym_return_value_22 = _new_sink(logger, _emit_text, _flush_text, data, _destroy_text);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_21);
-          return _x2c_gensym_return_value_23;
+          return _x2c_gensym_return_value_22;
         }
 
       }
@@ -1506,10 +1580,10 @@ static List _retain_list(LogMemorySink l, List list){
       Var * items = heads -> bytes;
       for(size_t i = heads -> length;  i;  i --) tail = List_cons_in(l -> pool, items[i - 1], tail);
       {
-        List _x2c_gensym_return_value_24 = tail;
+        List _x2c_gensym_return_value_23 = tail;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_26);
-          return _x2c_gensym_return_value_24;
+          return _x2c_gensym_return_value_23;
         }
 
       }

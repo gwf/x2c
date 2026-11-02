@@ -139,6 +139,7 @@ static macro Unit $logger.method(Name $method, Literal $level) {
   void Logger.$method(
     Logger $x2c_ident("logger"), Symbol $x2c_ident("category"),
     List @$x2c_ident("fields")) {
+    if (!$x2c_ident("logger")) raise %(bad-arg (operation "Logger.log"));
     _log_fields(
       $x2c_ident("logger"), $level,
       $x2c_ident("category"), $x2c_ident("fields"));
@@ -174,13 +175,15 @@ $logger.global(fatal, log_fatal, <fatal>);
 // level filtering
 
 /** Reports whether an event would reach at least one sink.
-    A category names an event rather than filtering it. A NULL `Logger` or
-    category, no sinks, `<off>`, an invalid level, or a filtered level returns
-    zero.
+    A category names an event rather than filtering it. A NULL category, no
+    sinks, `<off>`, an invalid level, or a filtered level returns zero.
+    Raises: `<bad-arg>` for a NULL `Logger`.
 */
 synchronized
-int Logger.should_log(Logger logger, Symbol level, Symbol category) =>
-  _should_log(logger, level, category);
+int Logger.should_log(Logger logger, Symbol level, Symbol category) {
+  if (!logger) raise %(bad-arg (operation "Logger.should_log"));
+  return _should_log(logger, level, category);
+}
 
 /** Reports whether the current global `Logger` would deliver this event. */
 synchronized
@@ -192,16 +195,23 @@ int log_should_log(Symbol level, Symbol category) =>
 */
 int Logger.level_priority(Symbol level) => _level_priority(level);
 
-/** Returns `logger`'s minimum enabled level, or the null `Symbol` for NULL. */
+/** Returns `logger`'s minimum enabled level.
+    Raises: `<bad-arg>` for NULL.
+*/
 synchronized
-Symbol Logger.min_level(Logger logger) => logger ? logger.min_level : 0;
+Symbol Logger.min_level(Logger logger) {
+  if (!logger) raise %(bad-arg (operation "Logger.min_level"));
+  return logger.min_level;
+}
 
 /** Sets the minimum enabled level and returns one.
-    A NULL `Logger` or invalid level returns zero without changing anything.
+    An invalid level returns zero without changing anything.
+    Raises: `<bad-arg>` for a NULL `Logger`.
 */
 synchronized
 int Logger.set_min_level(Logger logger, Symbol level) {
-  if (!logger || _level_priority(level) < 0) return 0;
+  if (!logger) raise %(bad-arg (operation "Logger.set_min_level"));
+  if (_level_priority(level) < 0) return 0;
   logger.min_level = level;
   return 1;
 }
@@ -214,30 +224,31 @@ int Logger.set_min_level(Logger logger, Symbol level) {
    release only their wrapper storage and never close a borrowed File. */
 
 /** Appends a callback sink and returns its `Logger`-owned handle.
-    A NULL `Logger` returns NULL; a quiescent `Logger` also returns NULL for a
-    NULL emitter. The `Logger` borrows `data` and both callbacks until the
-    sink is removed, cleared, or the `Logger` is freed, so anything they
-    reference must remain live. Emitters run synchronously in registration
-    order.
-    Raises: `<bad-state>` during active sink delivery, or `<alloc-fail>` when
-    the sink cannot be allocated.
+    A quiescent `Logger` returns NULL for a NULL emitter. The `Logger` borrows
+    `data` and both callbacks until the sink is removed, cleared, or the
+    `Logger` is freed, so anything they reference must remain live. Emitters
+    run synchronously in registration order.
+    Raises: `<bad-arg>` for a NULL `Logger`, `<bad-state>` during active sink
+    delivery, or `<alloc-fail>` when the sink cannot be allocated.
 */
 synchronized
 LogSink Logger.add_sink(
   Logger logger, LogEmitter emit, LogFlusher flush, Var data) {
+  if (!logger) raise %(bad-arg (operation "Logger.add_sink"));
   _require_quiescent(logger, "Logger.add_sink");
   return _new_sink(logger, emit, flush, data, NULL);
 }
 
 /** Removes and invalidates `sink`, returning one when it belonged to `logger`.
-    When quiescent, a NULL argument, foreign sink, or already retired sink
-    returns zero.
-    Raises: `<bad-state>` during active sink delivery.
+    When quiescent, a NULL, foreign, or already retired sink returns zero.
+    Raises: `<bad-arg>` for a NULL `Logger`, or `<bad-state>` during active
+    sink delivery.
 */
 synchronized
 int Logger.remove_sink(Logger logger, LogSink sink) {
+  if (!logger) raise %(bad-arg (operation "Logger.remove_sink"));
   _require_quiescent(logger, "Logger.remove_sink");
-  if (!logger || !sink || sink.logger != logger || !sink.emit) return 0;
+  if (!sink || sink.logger != logger || !sink.emit) return 0;
   _unlink_sink(logger, sink);
   _retire_sink(sink);
   return 1;
@@ -248,13 +259,15 @@ int Logger.remove_sink(Logger logger, LogSink sink) {
 /** Adds a plain-text sink for borrowed `file` and returns its handle.
     The caller must keep `file` open until the sink is removed or the `Logger`
     is freed. Removing the sink flushes but never closes the `File`. A NULL
-    argument returns NULL.
-    Raises: `<alloc-fail>` or `<bad-enc>` when sink state cannot be
-    represented.
+    `file` returns NULL.
+    Raises: `<bad-arg>` for a NULL `Logger`, or `<alloc-fail>` or `<bad-enc>`
+    when sink state cannot be represented.
 */
 synchronized
-LogSink Logger.add_file_sink(Logger logger, File file) =>
-  _add_text_sink(logger, file, 0, 0);
+LogSink Logger.add_file_sink(Logger logger, File file) {
+  if (!logger) raise %(bad-arg (operation "Logger.add_file_sink"));
+  return _add_text_sink(logger, file, 0, 0);
+}
 
 /* memory sinks
 
@@ -271,14 +284,15 @@ LogSink Logger.add_file_sink(Logger logger, File file) =>
     lifetime. Wide values move to the `Logger`'s owning `Scope` on retirement,
     while other pointer-bearing values remain borrowed. Newest events appear
     first.
-    A NULL `Logger` or destination returns NULL.
-    Registration may raise `<alloc-fail>` or `<bad-enc>` while constructing
-    sink state. Later event delivery may raise `<alloc-fail>`, `<size-limit>`,
-    or `<bad-enc>` while retaining values.
+    A NULL destination returns NULL.
+    Raises: `<bad-arg>` for a NULL `Logger`, or `<alloc-fail>` or `<bad-enc>`
+    while constructing sink state. Later event delivery may raise
+    `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while retaining values.
 */
 synchronized
 LogSink Logger.add_memory_sink(Logger logger, List *destination) {
-  if (!logger || !destination) return NULL;
+  if (!logger) raise %(bad-arg (operation "Logger.add_memory_sink"));
+  if (!destination) return NULL;
   LogMemorySink context = Scope.calloc_in(
     &logger.storage, 1, sizeof(struct LogMemorySink));
   context.destination = destination;
@@ -333,13 +347,15 @@ void Logger.initialize(void) {
 
 /** Adds a text sink for borrowed `stderr` and returns its `Logger`-owned
     handle. The sink selects color from terminal state at registration and
-    flushes after every event. A NULL `Logger` returns NULL.
-    Raises: `<alloc-fail>` or `<bad-enc>` when sink state cannot be
-    represented.
+    flushes after every event.
+    Raises: `<bad-arg>` for NULL, or `<alloc-fail>` or `<bad-enc>` when sink
+    state cannot be represented.
 */
 synchronized
-LogSink Logger.add_stderr_sink(Logger logger) =>
-  _add_text_sink(logger, stderr, isatty(fileno(stderr)), 1);
+LogSink Logger.add_stderr_sink(Logger logger) {
+  if (!logger) raise %(bad-arg (operation "Logger.add_stderr_sink"));
+  return _add_text_sink(logger, stderr, isatty(fileno(stderr)), 1);
+}
 
 /** Offers the newest `Error` to the current global `Logger`.
     A well-formed entry with `<abort>` or `<log>` policy is rendered as an
@@ -371,10 +387,12 @@ Symbol Logger.error_handler(List errors, Var data) {
   return <declined>;
 }
 
-/** Returns the number of configured sinks, or zero for a NULL `Logger`. */
+/** Returns the number of configured sinks.
+    Raises: `<bad-arg>` for NULL.
+*/
 synchronized
 int Logger.sink_count(Logger logger) {
-  if (!logger) return 0;
+  if (!logger) raise %(bad-arg (operation "Logger.sink_count"));
   int count = 0;
   for (LogSink sink = logger.first_sink; sink; sink = sink.next) count++;
   return count;
@@ -438,13 +456,15 @@ void Logger.shutdown(void) {
     `@fields`. With no fields the event's field List is empty.
     `fields` is borrowed for the call. All sinks observe one immutable event,
     sequence numbers increase per `Logger`, and elapsed time starts with its
-    first delivered event. NULL, filtered, invalid, sinkless, or category-less
+    first delivered event. Filtered, invalid, sinkless, or category-less
     events do nothing. Fatal delivery flushes all sinks afterward.
-    Raises: any cause from an emitter or fatal-event flusher; later callbacks
-    are then skipped.
+    Raises: `<bad-arg>` for a NULL `Logger`, or any cause from an emitter or
+    fatal-event flusher; later callbacks are then skipped.
 */
-void Logger.log(Logger logger, Symbol level, Symbol category, List @fields) =>
+void Logger.log(Logger logger, Symbol level, Symbol category, List @fields) {
+  if (!logger) raise %(bad-arg (operation "Logger.log"));
   _log_fields(logger, level, category, fields);
+}
 
 /** Flushes and retires every sink, then releases `logger` and its storage.
     Borrowed `File`s and callback data are not released. The global and default
@@ -468,13 +488,12 @@ void Logger.free(Logger logger) {
 }
 
 /** Removes and invalidates every sink from `logger`.
-    A NULL `Logger` does nothing.
-    Raises: `<bad-state>` during active sink delivery.
+    Raises: `<bad-arg>` for NULL, or `<bad-state>` during active sink delivery.
 */
 synchronized
 void Logger.clear_sinks(Logger logger) {
+  if (!logger) raise %(bad-arg (operation "Logger.clear_sinks"));
   _require_quiescent(logger, "Logger.clear_sinks");
-  if (!logger) return;
   LogSink sink = logger.first_sink;
   logger.first_sink = logger.last_sink = NULL;
   while (sink) {
@@ -485,13 +504,13 @@ void Logger.clear_sinks(Logger logger) {
 }
 
 /** Calls configured flushers synchronously in registration order.
-    A NULL `Logger` does nothing. A cause raised by a flusher transfers
-    immediately, so later sinks are not flushed. A flusher must not mutate the
-    sink list or free its `Logger`.
+    A cause raised by a flusher transfers immediately, so later sinks are not
+    flushed. A flusher must not mutate the sink list or free its `Logger`.
+    Raises: `<bad-arg>` for NULL, or any cause from a flusher.
 */
 synchronized
 void Logger.flush(Logger logger) {
-  if (!logger) return;
+  if (!logger) raise %(bad-arg (operation "Logger.flush"));
   with (logger.emission_depth = logger.emission_depth + 1) {
     for (LogSink sink = logger.first_sink; sink; sink = sink.next)
       if (sink.flush) sink.flush(logger, sink.data);
@@ -537,7 +556,7 @@ static LogSink _new_sink(
   LogDataDestructor destroy) {
   LogSink result = NULL;
   defer if (!result && destroy) destroy(data);
-  if (!logger || !emit) return NULL;
+  if (!emit) return NULL;
   LogSink sink = Scope.calloc_in(&logger.storage, 1, sizeof(struct LogSink));
   *sink = (struct LogSink) {
     .logger = logger, .emit = emit, .flush = flush, .destroy = destroy,
@@ -549,8 +568,7 @@ static LogSink _new_sink(
 /* Emission walks the sink list, so changing it from inside an emitter raises,
    as freeing the Logger during delivery does. */
 static void _require_quiescent(Logger logger, String owner) {
-  if (logger && logger.emission_depth != 0)
-    raise %(bad-state (operation $owner));
+  if (logger.emission_depth != 0) raise %(bad-state (operation $owner));
 }
 
 static void _append_sink(Logger logger, LogSink sink) {
@@ -580,7 +598,7 @@ static void _retire_sink(LogSink sink) {
 
 static LogSink _add_text_sink(
   Logger logger, File file, int color, int flush_each) {
-  if (!logger || !file) return NULL;
+  if (!file) return NULL;
   LogTextSink context = Scope.calloc_in(
     &logger.storage, 1, sizeof(struct LogTextSink));
   int handed_off = 0;

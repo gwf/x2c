@@ -83,8 +83,8 @@ static macro Stmt $progress.build_translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
 
 static macro Stmt $report.build_database_unwritable(Expr $path) =>
-  fprintf(
-    stderr, "x2c: error: cannot write compilation database: %s\n", $path);
+  Diagnostics.driver_report(
+    %"cannot write compilation database: $($path)", NULL);
 
 static macro Stmt $progress.build_compilation_cached(Expr $source) =>
   fprintf(stderr, "x2c: up-to-date compile %s\n", $source);
@@ -96,9 +96,8 @@ static macro Stmt $progress.build_link_unchanged(Expr $output) =>
   fprintf(stderr, "x2c: unchanged link %s\n", $output);
 
 static macro Stmt $report.build_replace_failed(Expr $output, Expr $reason) =>
-  fprintf(
-    stderr, "x2c: error: cannot replace %s: %s\n",
-    $output, $reason);
+  Diagnostics.driver_report(
+    %"cannot replace $($output): $(String.new($reason))", NULL);
 
 static macro Stmt $warn.build_cleanup_failed(Expr $directory) =>
   fprintf(
@@ -260,9 +259,8 @@ static String _default_output(CliRequest request) {
   String stem = Path.stem(request.inputs.car());
   if (request.compile_only && !request.inputs.cdr())
     return _object_name(request.inputs.car());
-  if (request.kind == <static-lib>) return %"lib$stem.a";
-  if (request.kind == <module>) return %"$stem.so";
-  return "a.out";
+  if (request.kind == <executable>) return "a.out";
+  return TargetKind.product(request.kind, stem);
 }
 
 /* Intermediates go to the requested directory, which the build keeps, or to

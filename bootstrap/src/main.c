@@ -7,7 +7,6 @@
 #include "frontend.h"
 #include "translation.h"
 #include "toolchain.h"
-#include "logger.h"
 #include "utils.h"
 #include <ctype.h>
 #include <errno.h>
@@ -38,8 +37,6 @@ static int _run_env(CliRequest request);
 static List _env_rows(CliRequest request);
 
 static int _run_compiler(CliRequest request);
-
-static void _configure_logging(int debugging);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -274,21 +271,12 @@ static List _env_rows(CliRequest request){
 }
 
 static int _run_compiler(CliRequest request){
-  _configure_logging(request -> debugging);
+  Compiler_configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");
   int status = translate_request(request, NULL, NULL, NULL);
   Context_close(command);
   return status;
-}
-
-static void _configure_logging(int debugging){
-  Logger logger = log_get_global_logger();
-  if(! logger) return;
-  Logger_clear_sinks(logger);
-  if(! debugging) return;
-  Logger_set_min_level(logger, 8721742);
-  Logger_add_stderr_sink(logger);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

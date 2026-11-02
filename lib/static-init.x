@@ -119,12 +119,8 @@ static void _lock(void) => _native_error(pthread_mutex_lock(&static_mutex));
 static void _unlock(void) =>
   _native_error(pthread_mutex_unlock(&static_mutex));
 
-static void _native_error(int error) {
-  if (!error) return;
-  fprintf(
-    stderr, "static initialization: synchronization failed (%d)\n", error);
-  abort();
-}
+static void _native_error(int error) =>
+  x2c_native_check(error, "static initialization: synchronization failed");
 
 static int _cycle(X2CStatic *guard, StaticThread *self) {
   StaticThread *owner = guard.owner;

@@ -45,6 +45,7 @@ TargetKind;
 #include <string.h>
 #include <unistd.h>
 #include "buffer.h"
+#include "encoding.h"
 #include "report.h"
 #include "utils.h"
 #define CLI_FIELD(kind, field) .apply = kind, \
@@ -66,6 +67,8 @@ Array CliRequest_command_arguments(int argc, char * * argv);
 Symbol TargetKind_named(String spelling, String * refusal);
 
 TargetKind * TargetKind_of(Symbol kind);
+
+String TargetKind_product(Symbol kind, String name);
 
 CliRequest CliRequest_new(Symbol command);
 

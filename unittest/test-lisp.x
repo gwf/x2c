@@ -437,6 +437,36 @@ static void lisp_host_binding_shadows_only_the_child(void) {
   parent.destroy();
 }
 
+static void lisp_def_replaces_host_x2c_names(void) {
+  Lisp lisp = Lisp.kernel();
+  lisp.set_global("x2c.answer", 42);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.answer 43)"), 0);
+  EXPECT_INT_EQ(_ev(lisp, "x2c.answer").integer(), 43);
+  EXPECT_INT_EQ(_raised_code(lisp, "(def x2c.other 1)"), 0);
+  Var stored = void;
+  EXPECT_TRUE(lisp.try_get("x2c.other", stored));
+  EXPECT_INT_EQ(stored.integer(), 1);
+  lisp.destroy();
+}
+
+static void lisp_null_session_members_raise_bad_arg(void) {
+  Lisp missing = NULL, parent = Lisp.kernel();
+  int budget = 0, adopted = 0, orphan = 0, frozen = 0;
+  try missing.call_budget(5);
+  catch %(bad-arg (operation "Lisp.call_budget")): budget = 1;
+  try missing.adopt(parent);
+  catch %(bad-arg (operation "Lisp.adopt")): adopted = 1;
+  try parent.adopt(missing);
+  catch %(bad-arg (operation "Lisp.adopt")): orphan = 1;
+  try missing.freeze();
+  catch %(bad-arg (operation "Lisp.freeze")): frozen = 1;
+  EXPECT_TRUE(budget);
+  EXPECT_TRUE(adopted);
+  EXPECT_TRUE(orphan);
+  EXPECT_TRUE(frozen);
+  parent.destroy();
+}
+
 static void lisp_transports_void_outside_collections(void) {
   Lisp lisp = _boot_session();
   _install(lisp, "identity", _native_identity,
@@ -471,12 +501,10 @@ static void lisp_transports_void_outside_collections(void) {
   EXPECT_TRUE(_ev(lisp, "(List.assoc '() 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(List.get '() 0)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.getindex (Array.new) 0)") is void);
-  EXPECT_TRUE(_ev(lisp, "(Array.setindex (Array.new) 0 1)") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.take_last (Array.new))") is void);
   EXPECT_TRUE(_ev(lisp, "(Array.shift (Array.new))") is void);
   EXPECT_INT_EQ(
     _raised_code(lisp, "(Array.remove (Array.new) 0)"), <bad-arg>);
-  EXPECT_TRUE(_ev(lisp, "(Array.insert (Array.new) 1 7)") is void);
   EXPECT_TRUE(_ev(lisp, "(Map.get (Map.new) 'missing)") is void);
   EXPECT_TRUE(_ev(lisp, "(Map.del (Map.new) 'missing)") is void);
 
@@ -484,6 +512,10 @@ static void lisp_transports_void_outside_collections(void) {
                 <void-op>);
   EXPECT_INT_EQ(
     _raised_code(lisp, "(Array.push (Array.new) (no-value))"), <void-op>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.setindex (Array.new) 0 1)"), <bad-arg>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array.insert (Array.new) 1 7)"), <bad-arg>);
   EXPECT_INT_EQ(
     _raised_code(lisp,
                  "(Map.setindex (Map.new) 'key (no-value))"),
@@ -1856,6 +1888,19 @@ static void lisp_standard_environment_uses_library_operations(void) {
     lisp, "(Iter.next (Iter.filter (range 1 3 1) nil))"), <bad-arg>);
   EXPECT_INT_EQ(_raised_code(
     lisp, "(Iter.foldl (range 1 3 1) 0 nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.any '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.all '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(List.find '(4) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.any (range 1 3 1) nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.scan (range 1 3 1) 0 nil))"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.map2 (range 1 3 1) (range 1 3 1) nil))"),
+    <bad-arg>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.any '() nil)")), 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.all '() nil)")), 1);
+  EXPECT_TRUE(_ev(lisp, "(List.find '() nil)") is void);
   EXPECT_INT_EQ(Var.integer(
     _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
@@ -1864,8 +1909,9 @@ static void lisp_standard_environment_uses_library_operations(void) {
     "(Array.find (List.array '(0 20)) (lambda (x) x))")), 0);
   EXPECT_INT_EQ(Var.integer(_ev(lisp,
     "(Array.index (List.array '(0 20)) 20)")), 1);
-  EXPECT_TRUE(_ev(lisp,
-    "(Array.find (List.array '(0 20)) nil)") is void);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Array.find (List.array '(0 20)) nil)"), <bad-arg>);
+  EXPECT_TRUE(_ev(lisp, "(Array.find (List.array '()) nil)") is void);
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),
@@ -2198,6 +2244,8 @@ void lisp_suite(void) {
   $test.run(lisp_eval_self_and_quote);
   $test.run(lisp_eval_def_and_globals);
   $test.run(lisp_host_binding_shadows_only_the_child);
+  $test.run(lisp_def_replaces_host_x2c_names);
+  $test.run(lisp_null_session_members_raise_bad_arg);
   $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);

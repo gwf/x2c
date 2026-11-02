@@ -64,14 +64,14 @@ static pthread_once_t context_shutdown_once =
     if recursive export fails, but nested exports already completed are not
     rolled back.
 
-    Raises: `<bad-state>` unless `context` is current, `<bad-types>` for an
-    unsupported value without a registered exporter, or a cause from nested
-    allocation, hashing, equality, or custom export.
+    Raises: `<bad-arg>` for NULL, `<bad-state>` unless `c` is current,
+    `<bad-types>` for an unsupported value without a registered exporter, or
+    a cause from nested allocation, hashing, equality, or custom export.
 */
-meta native Var Context.export(Context context, Var value) {
-  if (!context || current_context != context)
-    raise %(bad-state (operation "Context.export"));
-  return _export_root(context, value);
+meta native Var Context.export(Context c, Var value) {
+  if (!c) raise %(bad-arg (operation "Context.export"));
+  if (current_context != c) raise %(bad-state (operation "Context.export"));
+  return _export_root(c, value);
 }
 
 /** Exports a sealed worker result `Scope` into the current `Scope` and pool.
@@ -124,10 +124,13 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
 Var Context.export_nested(Context c, Var value) => _export_value(c, value);
 
 /** Returns the borrowed `Scope` slot that receives exports from `c`.
-    The slot remains valid only while the `Context`'s destination state lives;
-    a null `Context` returns NULL.
+    The slot remains valid only while the `Context`'s destination state lives.
+    Raises: `<bad-arg>` for NULL.
 */
-Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
+Scope *Context.export_destination(Context c) {
+  if (!c) raise %(bad-arg (operation "Context.export_destination"));
+  return c.destination_scope;
+}
 
 /** Schedules one allocation during a registered custom export callback.
     A null allocation or one outside `c`'s `Scope` chain is unchanged.
@@ -160,11 +163,14 @@ void Context.move_block(Context c, Block block) {
     `Context.move_allocation`, although physical ownership changes only when
     the enclosing root export commits.
     Scheduling a complete scope does not hide its unvisited descendants.
+    Raises: `<bad-arg>` for a null `Context`.
 */
-int Context.owns(Context context, void *allocation) =>
-  allocation && context &&
-  !(context.exported != NULL && context.exported.contains(allocation)) &&
-  _owns_scope(context, Scope.owner(allocation));
+int Context.owns(Context context, void *allocation) {
+  if (!context) raise %(bad-arg (operation "Context.owns"));
+  return allocation &&
+    !(context.exported != NULL && context.exported.contains(allocation)) &&
+    _owns_scope(context, Scope.owner(allocation));
+}
 
 /** Schedules custom-exporter storage while preserving explicit adoption.
     Root export reparents outermost requested scopes after recursive export.
@@ -233,23 +239,22 @@ meta native void Context.cleanup(Context value) { value.close(); }
 
 /** Registers `Context` cleanup before workers can start. */
 void Context.initialize(void) {
-  if (pthread_once(&context_shutdown_once, _register_shutdown)) {
-    fprintf(stderr, "Context: could not register shutdown\n");
-    abort();
-  }
+  x2c_native_check(
+    pthread_once(&context_shutdown_once, _register_shutdown),
+    "Context: could not register shutdown");
 }
 
 /** Closes the current `Context`, reclaims unexported state, and restores
     parent.
     The `Context` must be current; all pointers into its remaining `Scope` or
-    private canonical pool become invalid.
+    private canonical pool become invalid. NULL does nothing.
 
-    Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
-    `Match` cache has an active lease. The failure leaves the `Context` active.
+    Raises: `<bad-state>` for a noncurrent `Context`, or while its `Match`
+    cache has an active lease. The failure leaves the `Context` active.
 */
 meta native void Context.close(Context c) {
-  if (!c || current_context != c)
-    raise %(bad-state (operation "Context.close"));
+  if (!c) return;
+  if (current_context != c) raise %(bad-state (operation "Context.close"));
 
   /* Match and Error teardown can still use Context-owned values. Release the
      private canonical pool before its Scope, restore the destination Scope

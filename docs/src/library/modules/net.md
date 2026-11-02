@@ -32,7 +32,8 @@ Blocking TCP sockets backed by File streams.
 Accepts a connection, or returns NULL after Listener.stop. Thread.stop
 transfers its cooperative cancellation cause, like a Channel wait.
 
-**Raises:** `<io-fail>` on a native accept or poll failure.
+**Raises:** `<bad-arg>` for NULL, or `<io-fail>` on a native accept or poll
+failure.
 
 Source: `lib/net.x`
 
@@ -67,6 +68,8 @@ Source: `lib/net.x`
 
 Returns the actual bound port, including when bind requested port zero.
 
+**Raises:** `<bad-arg>` for NULL.
+
 Source: `lib/net.x`
 
 <a id="Listener.stop"></a>
@@ -76,6 +79,8 @@ Source: `lib/net.x`
 
 Requests stopping from any thread. A blocked accept returns within one
 poll interval. The listener descriptor remains owned until close.
+
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/net.x`
 
@@ -133,6 +138,8 @@ Source: `lib/net.x`
 
 Returns numeric host:port text, with IPv6 in brackets.
 
+**Raises:** `<bad-arg>` for NULL.
+
 Source: `lib/net.x`
 
 <a id="Socket.set_timeout"></a>
@@ -143,18 +150,19 @@ Source: `lib/net.x`
 Sets receive and send timeouts in milliseconds. Zero disables timeouts.
 A timed-out File operation raises `<io-fail>` with EAGAIN or EWOULDBLOCK.
 
-**Raises:** `<bad-arg>` for negative milliseconds, or `<io-fail>`.
+**Raises:** `<bad-arg>` for NULL or negative milliseconds, or `<io-fail>`.
 
 Source: `lib/net.x`
 
 <a id="Socket.shutdown_write"></a>
 #### Socket.shutdown_write
 
-`void Socket.shutdown_write(Socket socket)`
+`void Socket.shutdown_write(Socket s)`
 
 Flushes output and sends EOF to the peer while retaining input.
 
-**Raises:** `<io-fail>` if flushing or shutdown fails.
+**Raises:** `<bad-arg>` for NULL, or `<io-fail>` if flushing or shutdown
+fails.
 
 Source: `lib/net.x`
 

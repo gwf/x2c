@@ -26,6 +26,8 @@ import threading
 import time
 import uuid
 
+from agent_context import git, write_json
+
 
 ROOT = Path(__file__).resolve().parent.parent
 SHOOTOUT_LATEST = ROOT / "examples/build/shootout/latest"
@@ -52,24 +54,10 @@ class SnapshotError(RuntimeError):
   """A snapshot prerequisite or command failed."""
 
 
-def git(*args: str, cwd: Path = ROOT) -> str:
-  result = subprocess.run(
-    ["git", *args], cwd=cwd, check=True, capture_output=True, text=True,
-  )
-  return result.stdout.strip()
-
-
 def default_output_root() -> Path:
-  common = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
+  common = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir",
+             root=ROOT).strip())
   return common.parent / "debug/performance-history"
-
-
-def atomic_json(path: Path, value: object) -> None:
-  temporary = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex)
-  temporary.write_text(
-    json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8",
-  )
-  os.replace(temporary, path)
 
 
 def successful_today(history: Path, local_date: str) -> bool:
@@ -434,7 +422,7 @@ def render_report(
 def run_snapshot_locked(
   output_root: Path, skip_today: bool, timeout_seconds: int,
 ) -> int:
-  status = git("status", "--porcelain", "--untracked-files=all")
+  status = git("status", "--porcelain", "--untracked-files=all", root=ROOT)
   if status:
     raise SnapshotError("performance snapshots require a clean worktree")
   build_mode = (ROOT / "etc/build-mode").read_text(encoding="utf-8").strip()
@@ -454,7 +442,7 @@ def run_snapshot_locked(
     print(f"performance snapshot already succeeded on {local_date}")
     return 0
 
-  commit = git("rev-parse", "HEAD")
+  commit = git("rev-parse", "HEAD", root=ROOT).strip()
   timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
   run_id = timestamp + "-" + commit[:12]
   run_dir = output_root / "runs" / local_date.replace("-", "/") / run_id
@@ -470,14 +458,14 @@ def run_snapshot_locked(
     "started_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
     "repository": {
       "commit": commit,
-      "tree": git("rev-parse", "HEAD^{tree}"),
-      "remote": git("remote", "get-url", "origin"),
+      "tree": git("rev-parse", "HEAD^{tree}", root=ROOT).strip(),
+      "remote": git("remote", "get-url", "origin", root=ROOT).strip(),
     },
     "configuration": {"build_mode": build_mode, "build_lto": 0},
     "machine": machine_receipt(),
     "steps": [],
   }
-  atomic_json(run_dir / "summary.json", summary)
+  write_json(run_dir / "summary.json", summary)
 
   environment = os.environ.copy()
   for name in ("MAKEFLAGS", "MAKELEVEL", "MFLAGS"):
@@ -499,7 +487,7 @@ def run_snapshot_locked(
         name, command, run_dir, environment, timeout_seconds,
       )
       summary["steps"].append(result)
-      atomic_json(run_dir / "summary.json", summary)
+      write_json(run_dir / "summary.json", summary)
       if result["returncode"]:
         raise SnapshotError(
           f"{name} failed with status {result['returncode']}"
@@ -527,23 +515,23 @@ def run_snapshot_locked(
         )
       elif name == "runtime":
         runtime = runtime_summary(run_dir / "runtime.log")
-        atomic_json(run_dir / "runtime.json", runtime)
+        write_json(run_dir / "runtime.json", runtime)
         summary["runtime_medians"] = runtime["medians"]
-      atomic_json(run_dir / "summary.json", summary)
+      write_json(run_dir / "summary.json", summary)
     summary["status"] = "success"
   except (OSError, SnapshotError, subprocess.SubprocessError) as error:
     summary["status"] = "failed"
     summary["failure"] = str(error)
   summary["finished_at_utc"] = dt.datetime.now(dt.timezone.utc).isoformat()
   summary["machine_end"] = machine_receipt()
-  atomic_json(run_dir / "summary.json", summary)
+  write_json(run_dir / "summary.json", summary)
   history_row = compact_history(summary)
   report = render_report(history_row, prior)
   (run_dir / "report.md").write_text(report, encoding="utf-8")
   append_history(history_path, history_row)
-  atomic_json(output_root / "latest-attempt.json", summary)
+  write_json(output_root / "latest-attempt.json", summary)
   if summary["status"] == "success":
-    atomic_json(output_root / "latest.json", summary)
+    write_json(output_root / "latest.json", summary)
     temporary_report = output_root / ("latest.md.tmp-" + uuid.uuid4().hex)
     temporary_report.write_text(report, encoding="utf-8")
     os.replace(temporary_report, output_root / "latest.md")

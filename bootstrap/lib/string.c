@@ -60,11 +60,11 @@ static String f7_storage____intern_owned(String string);
 static void _free_unchecked(String str);
 static String _finish(String string, int length);
 static int _is_active_canonical(String str);
-static int f6_search____clamp(int index, int n);
 static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len);
 static int _count_matches(String str, String sub, int limit);
 static int f7_editing____replaced_length(int length, int count, int old_len, int new_len);
-static int f8_building____join_length(List strings, int n, int sep_len);
+static int f8_building____join_length(List strings, int sep_len);
+static String f8_building____join_rendered(List strings, String sep);
 static void f8_building____join_into(char * out, List strings, String sep, int sep_len);
 static String f8_building____pad(String str, int width, char fill, int side);
 static int f9_splitting____newline_width(String str);
@@ -176,35 +176,40 @@ static int f7_cursors____iter_next(Iter iter, Var * out);
 static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1);
 static VarMethods _x2c_gensym_protocol_methods_0;
 typedef struct _x2c_gensym_defer_env_0{
-  const void * _x2c_gensym_defer_capture_0;  const void * _x2c_gensym_defer_capture_1;
+  const void * _x2c_gensym_defer_capture_0;
 }
 _x2c_gensym_defer_env_0;
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 typedef struct _x2c_gensym_defer_env_1{
-  const void * _x2c_gensym_defer_capture_2;  const void * _x2c_gensym_defer_capture_3;
+  const void * _x2c_gensym_defer_capture_1;  const void * _x2c_gensym_defer_capture_2;
 }
 _x2c_gensym_defer_env_1;
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 typedef struct _x2c_gensym_defer_env_2{
-  const void * _x2c_gensym_defer_capture_4;  const void * _x2c_gensym_defer_capture_5;
+  const void * _x2c_gensym_defer_capture_3;  const void * _x2c_gensym_defer_capture_4;
 }
 _x2c_gensym_defer_env_2;
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 typedef struct _x2c_gensym_defer_env_3{
-  const void * _x2c_gensym_defer_capture_6;  const void * _x2c_gensym_defer_capture_7;
+  const void * _x2c_gensym_defer_capture_5;  const void * _x2c_gensym_defer_capture_6;
 }
 _x2c_gensym_defer_env_3;
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 typedef struct _x2c_gensym_defer_env_4{
-  const void * _x2c_gensym_defer_capture_8;  const void * _x2c_gensym_defer_capture_9;
+  const void * _x2c_gensym_defer_capture_7;  const void * _x2c_gensym_defer_capture_8;
 }
 _x2c_gensym_defer_env_4;
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 typedef struct _x2c_gensym_defer_env_5{
-  const void * _x2c_gensym_defer_capture_10;
+  const void * _x2c_gensym_defer_capture_9;  const void * _x2c_gensym_defer_capture_10;
 }
 _x2c_gensym_defer_env_5;
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
+typedef struct _x2c_gensym_defer_env_6{
+  const void * _x2c_gensym_defer_capture_11;
+}
+_x2c_gensym_defer_env_6;
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6);
 int x2c_register_builtin_descriptor(Symbol, VarMethods);
 void x2c_register_descriptor(String, VarMethods);
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
@@ -235,8 +240,17 @@ String String_new_len(const char * str, int len){
   if(! str || len <= 0) return NULL;  size_t length = strnlen(str, (size_t) len);  if(length == 0) return NULL;  return x2c_string_from_bytes(str, (int) length);
 }
 
+String String_join(String sep, List strings);
+#include "error.h"
+
+
+
+
 String String_new_in(Pool pool, const char * bytes, int length){
-  if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded || bounded > INT_MAX - 1) return NULL;  return f7_storage____from_bytes_in(pool, bytes, (int) bounded);
+  if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded) return NULL;  if(bounded > INT_MAX - 1){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/storage.x",.function = "String_new_in",.line = 114,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_in")), NULL))));  __builtin_unreachable();
+  }
+  return f7_storage____from_bytes_in(pool, bytes, (int) bounded);
 }
 
 String String_new(const char * str);
@@ -245,7 +259,10 @@ String String_intern(String string){
 }
 
 String String_new(const char * str){
-  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1) return NULL;  return x2c_string_from_bytes(str, (int) length);
+  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/storage.x",.function = "String_new",.line = 144,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new")), NULL))));  __builtin_unreachable();
+  }
+  return x2c_string_from_bytes(str, (int) length);
 }
 
 String x2c_string_from_bytes(const char * bytes, int length){
@@ -351,7 +368,7 @@ int String_find(String str, String sub){
 }
 
 int String_find_within(String str, String sub, int start, int end){
-  int n = String_len(str), m = String_len(sub);  if(start < 0) start += n;  if(end == - 1) end = n;  else if(end < 0) end += n;  start = f6_search____clamp(start, n);  end = f6_search____clamp(end, n);  if(start + m > end) return - 1;  if(m == 0) return start;  if(! String_truth(str)) return - 1;  const char * p = _find_bytes(str + start, end - start, sub, m);  if(! p) return - 1;  return p - str;
+  int m = String_len(sub);  x2c_normalize_slice(&(start), &(end), 1, String_len(str));  if(start + m > end) return - 1;  if(m == 0) return start;  const char * p = _find_bytes(str + start, end - start, sub, m);  return p ? p - str : - 1;
 }
 
 int String_startswith(String str, String prefix){
@@ -360,10 +377,6 @@ int String_startswith(String str, String prefix){
 
 int String_endswith(String str, String suffix){
   int str_len = String_len(str), suffix_len = String_len(suffix);  if(suffix_len == 0) return 1;  return String_truth(str) && suffix_len <= str_len && memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
-}
-
-static int f6_search____clamp(int index, int n){
-  if(index < 0) return 0;  return index > n ? n : index;
 }
 
 static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
@@ -383,7 +396,10 @@ String String_replace(String str, String old, String replacement){
 }
 
 String String_replace_n(String str, String old, String replacement, int max_replacements){
-  if(! String_truth(str) || ! String_truth(old) || ! * old || max_replacements == 0) return str;  if(String_equal(old, replacement) && _is_active_canonical(str)) return str;  int str_len = String_len(str), old_len = String_len(old);  int replacement_len = String_len(replacement);  int count = _count_matches(str, old, max_replacements);  if(count == 0) return str;  int length = f7_editing____replaced_length(str_len, count, old_len, replacement_len);  if(length < 0) return NULL;  String string = String_malloc(length + 1);  char * dst = string;  int copied = 0, replaced = 0;  while(copied <= str_len - old_len && replaced < count){
+  if(! String_truth(str) || ! String_truth(old) || ! * old || max_replacements == 0) return str;  if(String_equal(old, replacement) && _is_active_canonical(str)) return str;  int str_len = String_len(str), old_len = String_len(old);  int replacement_len = String_len(replacement);  int count = _count_matches(str, old, max_replacements);  if(count == 0) return str;  int length = f7_editing____replaced_length(str_len, count, old_len, replacement_len);  if(length < 0){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/editing.x",.function = "String_replace_n",.line = 37,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.replace_n")), NULL))));  __builtin_unreachable();
+  }
+  String string = String_malloc(length + 1);  char * dst = string;  int copied = 0, replaced = 0;  while(copied <= str_len - old_len && replaced < count){
     const char * found = _find_bytes(str + copied, str_len - copied, old, old_len);  int prefix_len = found -(str + copied);  memcpy(dst, str + copied, prefix_len);  dst += prefix_len;  if(replacement_len){
       memcpy(dst, replacement, replacement_len);  dst += replacement_len;
     }
@@ -400,16 +416,10 @@ String String_getslice(String s, int start, int stop, int step){
   int n = String_len(s), len = x2c_normalize_slice(&(start), &(stop), step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return x2c_string_from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  long long index = start;  for(int i = 0;  i < len;  i ++, index += step) out[i] = src[index];  return _finish(string, len);
 }
 
-String String_join(String sep, List strings);
-#include "error.h"
-
-
-
-
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 121,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 120,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -425,7 +435,7 @@ static int f7_editing____replaced_length(int length, int count, int old_len, int
 
 String String_add(String str, String other){
   if(! String_truth(other)) return str;  if(! String_truth(str)) return other;  int left_len = String_len(str), right_len = String_len(other);  size_t length =(size_t) left_len +(size_t) right_len;  if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return x2c_string_from_bytes(bytes, (int) length);
@@ -434,7 +444,13 @@ String String_add(String str, String other){
 }
 
 String String_repeat(String str, int count){
-  if(! String_truth(str) || ! * str || count <= 0) return NULL;  if(count == 1 && _is_active_canonical(str)) return str;  int n = String_len(str);  if((size_t) n >(size_t)(INT_MAX - 1) /(size_t) count) return NULL;  size_t length =(size_t) n *(size_t) count;  String string = String_malloc((int) length + 1);  char * dst = string;  for(int i = 0;  i < count;  i ++){
+  if(! String_truth(str) || ! * str || count <= 0) return NULL;  if(count == 1 && _is_active_canonical(str)) return str;  int n = String_len(str);  if((size_t) n >(size_t)(INT_MAX - 1) /(size_t) count){
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.repeat")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "String_repeat",.line = 48,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
+    }
+
+  }
+  size_t length =(size_t) n *(size_t) count;  String string = String_malloc((int) length + 1);  char * dst = string;  for(int i = 0;  i < count;  i ++){
     memcpy(dst, str, n);  dst += n;
   }
   return _finish(string, (int) length);
@@ -442,11 +458,11 @@ String String_repeat(String str, int count){
 
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;  if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 64,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 66,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
   }
   if(count == INT_MAX){
-    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 66,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 68,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
     }
 
   }
@@ -454,7 +470,7 @@ String String_new_fill(char fill, int count){
 }
 
 String String_join(String sep, List strings){
-  if(! List_truth(strings)) return NULL;  int n = List_len(strings);  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= STRING_STACK_BYTES){
+  int sep_len = String_len(sep), total = f8_building____join_length(strings, sep_len);  if(total < 0) return f8_building____join_rendered(strings, sep);  if(total <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];  f8_building____join_into(bytes, strings, sep, sep_len);  return x2c_string_from_bytes(bytes, total);
   }
   String string = String_malloc(total + 1);  f8_building____join_into(string, strings, sep, sep_len);  return _finish(string, total);
@@ -485,17 +501,39 @@ String String_printf(String fmt, ...){
   return _finish(string, n);
 }
 
-static int f8_building____join_length(List strings, int n, int sep_len){
-  if(sep_len &&(size_t)(n - 1) >(size_t)(INT_MAX - 1) /(size_t) sep_len) return - 1;  size_t total =(size_t)(n - 1) *(size_t) sep_len; {
-    String str;  List _x2c_gensym_macro_object_0 = strings;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      str = Var_as_string(_x2c_gensym_macro_cursor_output_0); {
-        int length = String_len(str);  if((size_t) length >(size_t)(INT_MAX - 1) - total) return - 1;  total +=(size_t) length;
-      }
-
+static int f8_building____join_length(List strings, int sep_len){
+  size_t total = 0;  for(List cell = strings;  List_truth(cell);  cell = List_cdr(cell)){
+    Var item = List_car(cell);  if(! Var_is_row(item, 11, 7, 1)) return - 1;  total +=(size_t) String_len(Var_string_payload(item));  if(List_truth(List_cdr(cell))) total +=(size_t) sep_len;  if(total > INT_MAX - 1){
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/building.x",.function = "f8_building____join_length",.line = 169,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.join")), NULL))));  __builtin_unreachable();
     }
 
   }
   return(int) total;
+}
+
+static String f8_building____join_rendered(List strings, String sep){
+  Buffer out = Buffer_new(0);  const Buffer _x2c_gensym_macro_acquired_0 = out; {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;  X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
+      for(List cell = strings;  List_truth(cell);  cell = List_cdr(cell)){
+        Var item = List_car(cell);  if(! Var_is_null(item)) Var_write_str(item, out);  if(String_truth(sep) && List_truth(List_cdr(cell))) Buffer_write(out, sep);
+      }
+      {
+        String _x2c_gensym_return_value_0 = Buffer_str(out); {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
 }
 
 static void f8_building____join_into(char * out, List strings, String sep, int sep_len){
@@ -513,11 +551,11 @@ static void f8_building____join_into(char * out, List strings, String sep, int s
 
 static String f8_building____pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 190,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 204,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return str;  if(width == INT_MAX){
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 194,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 208,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }
@@ -592,49 +630,18 @@ String String_capitalize(String str){
 
 String String_filter(String str, Func fn){
   if(! String_truth(str) || ! * str) return str;  int _x2c_gensym_macro_length_3 = String_len(str);  String _x2c_gensym_macro_string_3 = String_malloc(_x2c_gensym_macro_length_3 + 1);  int _x2c_gensym_macro_done_0 = 0; {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_done_0;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_string_3;  X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    ;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_done_0;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_string_3;  X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_1); {
       char * _x2c_gensym_macro_dst_0 = _x2c_gensym_macro_string_3;  const char * _x2c_gensym_macro_src_3 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_3;  i ++){
         int ch =(unsigned char) _x2c_gensym_macro_src_3[i];  if(Var_truth(Func_apply_value(fn, char_var((char) ch)))) * _x2c_gensym_macro_dst_0 ++ = _x2c_gensym_macro_src_3[i];
       }
       String _x2c_gensym_macro_result_0 = _finish(_x2c_gensym_macro_string_3, (int)(_x2c_gensym_macro_dst_0 - _x2c_gensym_macro_string_3));  _x2c_gensym_macro_done_0 = 1; {
-        String _x2c_gensym_return_value_0 = _x2c_gensym_macro_result_0; {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
-String String_map(String str, Func fn){
-  if(! String_truth(str) || ! * str) return str;  int n = String_len(str), done = 0;  String string = String_malloc(n + 1); {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-      0
-    }
-    ;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_2 =(const void *) & done;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_3 =(const void *) & string;  X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
-    }
-    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_1); {
-      char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
-        char ch = Var_char(Var_convert_at(Func_apply_value(fn, char_var(src[i])), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_6; })));  if(! ch){
-          Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_7, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
-          }
-
-        }
-        out[i] = ch;
-      }
-      String result = _finish(string, n);  done = 1; {
-        String _x2c_gensym_return_value_1 = result; {
+        String _x2c_gensym_return_value_1 = _x2c_gensym_macro_result_0; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);  return _x2c_gensym_return_value_1;
         }
 
@@ -646,20 +653,26 @@ String String_map(String str, Func fn){
 
 }
 
-String String_keep(String str, String chars){
-  if(! String_truth(str)) return str;  if(! String_truth(chars)) return NULL;  if(! * str) return str;  int _x2c_gensym_macro_length_4 = String_len(str);  String _x2c_gensym_macro_string_4 = String_malloc(_x2c_gensym_macro_length_4 + 1);  int _x2c_gensym_macro_done_1 = 0; {
+String String_map(String str, Func fn){
+  if(! String_truth(str) || ! * str) return str;  int n = String_len(str), done = 0;  String string = String_malloc(n + 1); {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_done_1;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_string_4;  X2CCleanup _x2c_gensym_defer_record_2 ={
+    ;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_3 =(const void *) & done;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & string;  X2CCleanup _x2c_gensym_defer_record_2 ={
       .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_2); {
-      char * _x2c_gensym_macro_dst_1 = _x2c_gensym_macro_string_4;  const char * _x2c_gensym_macro_src_4 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_4;  i ++){
-        int ch =(unsigned char) _x2c_gensym_macro_src_4[i];  if(strchr(chars, ch)) * _x2c_gensym_macro_dst_1 ++ = _x2c_gensym_macro_src_4[i];
+      char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
+        char ch = Var_char(Var_convert_at(Func_apply_value(fn, char_var(src[i])), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_11; })));  if(! ch){
+          Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
+            static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+          }
+
+        }
+        out[i] = ch;
       }
-      String _x2c_gensym_macro_result_1 = _finish(_x2c_gensym_macro_string_4, (int)(_x2c_gensym_macro_dst_1 - _x2c_gensym_macro_string_4));  _x2c_gensym_macro_done_1 = 1; {
-        String _x2c_gensym_return_value_2 = _x2c_gensym_macro_result_1; {
+      String result = _finish(string, n);  done = 1; {
+        String _x2c_gensym_return_value_2 = result; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_2;
         }
 
@@ -671,23 +684,20 @@ String String_keep(String str, String chars){
 
 }
 
-String String_reject(String str, String chars){
-  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  unsigned char excluded[256] ={
-    1
-  }
-  ;  const unsigned char * bytes =(const unsigned char *) chars;  while(* bytes) excluded[* bytes ++] = 1;  int _x2c_gensym_macro_length_5 = String_len(str);  String _x2c_gensym_macro_string_5 = String_malloc(_x2c_gensym_macro_length_5 + 1);  int _x2c_gensym_macro_done_2 = 0; {
+String String_keep(String str, String chars){
+  if(! String_truth(str)) return str;  if(! String_truth(chars)) return NULL;  if(! * str) return str;  int _x2c_gensym_macro_length_4 = String_len(str);  String _x2c_gensym_macro_string_4 = String_malloc(_x2c_gensym_macro_length_4 + 1);  int _x2c_gensym_macro_done_1 = 0; {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_done_2;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_string_5;  X2CCleanup _x2c_gensym_defer_record_3 ={
+    ;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_done_1;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_string_4;  X2CCleanup _x2c_gensym_defer_record_3 ={
       .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_3); {
-      char * _x2c_gensym_macro_dst_2 = _x2c_gensym_macro_string_5;  const char * _x2c_gensym_macro_src_5 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_5;  i ++){
-        int ch =(unsigned char) _x2c_gensym_macro_src_5[i];  if(! excluded[ch]) * _x2c_gensym_macro_dst_2 ++ = _x2c_gensym_macro_src_5[i];
+      char * _x2c_gensym_macro_dst_1 = _x2c_gensym_macro_string_4;  const char * _x2c_gensym_macro_src_4 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_4;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_4[i];  if(strchr(chars, ch)) * _x2c_gensym_macro_dst_1 ++ = _x2c_gensym_macro_src_4[i];
       }
-      String _x2c_gensym_macro_result_2 = _finish(_x2c_gensym_macro_string_5, (int)(_x2c_gensym_macro_dst_2 - _x2c_gensym_macro_string_5));  _x2c_gensym_macro_done_2 = 1; {
-        String _x2c_gensym_return_value_3 = _x2c_gensym_macro_result_2; {
+      String _x2c_gensym_macro_result_1 = _finish(_x2c_gensym_macro_string_4, (int)(_x2c_gensym_macro_dst_1 - _x2c_gensym_macro_string_4));  _x2c_gensym_macro_done_1 = 1; {
+        String _x2c_gensym_return_value_3 = _x2c_gensym_macro_result_1; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);  return _x2c_gensym_return_value_3;
         }
 
@@ -699,20 +709,23 @@ String String_reject(String str, String chars){
 
 }
 
-String String_squeeze(String str, String chars){
-  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_gensym_macro_length_6 = String_len(str);  String _x2c_gensym_macro_string_6 = String_malloc(_x2c_gensym_macro_length_6 + 1);  int _x2c_gensym_macro_done_3 = 0; {
+String String_reject(String str, String chars){
+  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  unsigned char excluded[256] ={
+    1
+  }
+  ;  const unsigned char * bytes =(const unsigned char *) chars;  while(* bytes) excluded[* bytes ++] = 1;  int _x2c_gensym_macro_length_5 = String_len(str);  String _x2c_gensym_macro_string_5 = String_malloc(_x2c_gensym_macro_length_5 + 1);  int _x2c_gensym_macro_done_2 = 0; {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
     }
-    ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_done_3;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_string_6;  X2CCleanup _x2c_gensym_defer_record_4 ={
+    ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_done_2;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_string_5;  X2CCleanup _x2c_gensym_defer_record_4 ={
       .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
-      char * _x2c_gensym_macro_dst_3 = _x2c_gensym_macro_string_6;  const char * _x2c_gensym_macro_src_6 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_6;  i ++){
-        int ch =(unsigned char) _x2c_gensym_macro_src_6[i];  if(!(i && ch ==(unsigned char)((const char *) str)[i - 1] && strchr(chars, ch))) * _x2c_gensym_macro_dst_3 ++ = _x2c_gensym_macro_src_6[i];
+      char * _x2c_gensym_macro_dst_2 = _x2c_gensym_macro_string_5;  const char * _x2c_gensym_macro_src_5 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_5;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_5[i];  if(! excluded[ch]) * _x2c_gensym_macro_dst_2 ++ = _x2c_gensym_macro_src_5[i];
       }
-      String _x2c_gensym_macro_result_3 = _finish(_x2c_gensym_macro_string_6, (int)(_x2c_gensym_macro_dst_3 - _x2c_gensym_macro_string_6));  _x2c_gensym_macro_done_3 = 1; {
-        String _x2c_gensym_return_value_4 = _x2c_gensym_macro_result_3; {
+      String _x2c_gensym_macro_result_2 = _finish(_x2c_gensym_macro_string_5, (int)(_x2c_gensym_macro_dst_2 - _x2c_gensym_macro_string_5));  _x2c_gensym_macro_done_2 = 1; {
+        String _x2c_gensym_return_value_4 = _x2c_gensym_macro_result_2; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);  return _x2c_gensym_return_value_4;
         }
 
@@ -720,6 +733,31 @@ String String_squeeze(String str, String chars){
 
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+  }
+
+}
+
+String String_squeeze(String str, String chars){
+  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_gensym_macro_length_6 = String_len(str);  String _x2c_gensym_macro_string_6 = String_malloc(_x2c_gensym_macro_length_6 + 1);  int _x2c_gensym_macro_done_3 = 0; {
+    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+      0
+    }
+    ;  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_done_3;  _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_string_6;  X2CCleanup _x2c_gensym_defer_record_5 ={
+      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    }
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_5); {
+      char * _x2c_gensym_macro_dst_3 = _x2c_gensym_macro_string_6;  const char * _x2c_gensym_macro_src_6 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_6;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_6[i];  if(!(i && ch ==(unsigned char)((const char *) str)[i - 1] && strchr(chars, ch))) * _x2c_gensym_macro_dst_3 ++ = _x2c_gensym_macro_src_6[i];
+      }
+      String _x2c_gensym_macro_result_3 = _finish(_x2c_gensym_macro_string_6, (int)(_x2c_gensym_macro_dst_3 - _x2c_gensym_macro_string_6));  _x2c_gensym_macro_done_3 = 1; {
+        String _x2c_gensym_return_value_5 = _x2c_gensym_macro_result_3; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);  return _x2c_gensym_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
   }
 
 }
@@ -737,7 +775,7 @@ Symbol String_symbol(String str){
 }
 
 Iter String_iter(String x, Iter dest){
-  if(! Iter_truth(dest)) return NULL;  return Iter_init(dest, String_var(x), f8_adapters____next, int_var(0));
+  return Iter_init(dest, String_var(x), f8_adapters____next, int_var(0));
 }
 
 int String_try_next(String str, int * cursor, int * out){
@@ -745,7 +783,7 @@ int String_try_next(String str, int * cursor, int * out){
 }
 
 static int f8_adapters____next(Iter iter, Var * out){
-  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/adapters.x",.function = "f8_adapters____next",.line = 69,.runtime = 1}; & _x2c_gensym_error_site_8; })));
+  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/string/adapters.x",.function = "f8_adapters____next",.line = 66,.runtime = 1}; & _x2c_gensym_error_site_13; })));
   String str = Var_as_string(iter -> obj);
   if(index >= String_len(str)) return 0;
   * out = int_var(String_getindex(str, index));
@@ -840,7 +878,11 @@ String String_escape(String str){
   int bytes = 0;
   for(const char * at = str;  * at;  at ++){
     int width = f6_escape____escape_byte((unsigned char) * at, NULL);
-    if(bytes > INT_MAX - width - 1) return NULL;
+    if(bytes > INT_MAX - width - 1){
+      static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/string/escape.x",.function = "String_escape",.line = 44,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_14, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.escape")), NULL))));
+      __builtin_unreachable();
+    }
     bytes += width;
   }
   String string = String_malloc(bytes + 1);
@@ -893,8 +935,8 @@ String String_unescape(String str){
   if(f6_escape____unescape_into(string, str) < 0){
     String_free(string);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 120,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 123,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1002,18 +1044,18 @@ static int f6_escape____unescape_into(char * out, const char * src){
 String String_format(String fmt, List values){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_gensym_macro_acquired_0 = out;
+  const Buffer _x2c_gensym_macro_acquired_1 = out;
   {
-    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
+    _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_10 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_5 ={
-      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
+    _x2c_gensym_macro_environment_6._x2c_gensym_defer_capture_11 =(const void *) & _x2c_gensym_macro_acquired_1;
+    X2CCleanup _x2c_gensym_defer_record_6 ={
+      .fn = _x2c_gensym_defer_cleanup_6, .env = & _x2c_gensym_macro_environment_6
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_5);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
       f6_format___Format f ={
         .fmt = fmt, .length = String_len(fmt), .args = values, .out = out
@@ -1024,16 +1066,16 @@ String String_format(String fmt, List values){
       f6_format____write_literal(&(f));
       if(List_truth(f.args)) f6_format____format_error(f.length, _6);
       {
-        String _x2c_gensym_return_value_5 = Buffer_str(out);
+        String _x2c_gensym_return_value_6 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
-          return _x2c_gensym_return_value_5;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
+          return _x2c_gensym_return_value_6;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
   }
 
 }
@@ -1324,8 +1366,8 @@ static void f6_format____fail(f6_format___Format * f, String reason){
 
 _Noreturn static void f6_format____format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 332,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_10, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 332,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_16, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
 
@@ -1334,10 +1376,10 @@ _Noreturn static void f6_format____format_error(int offset, String reason){
 _Noreturn static void f6_format____nested(f6_format___Format * f, String reason, Var code, List details){
   List cause = cons(code, details);
   {
-    Var _x2c_gensym_literal_part_4 = int_var((* f).offset);
+    Var _x2c_gensym_literal_part_5 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 339,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_11, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_4, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 339,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_17, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_5, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }
 
@@ -1449,7 +1491,6 @@ Split String_splits(String str, String sep){
 }
 
 Iter Split_iter(Split split, Iter dest){
-  if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) split), split ? f7_cursors____iter_next : NULL, int_var(0));
 }
 
@@ -1532,7 +1573,7 @@ static int f7_cursors____splits_next(Split split, int * cursor, String * out){
 
 static int f7_cursors____iter_next(Iter iter, Var * out){
   Split split = Var_split(iter -> obj);
-  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/string/cursors.x",.function = "f7_cursors____iter_next",.line = 268,.runtime = 1}; & _x2c_gensym_error_site_12; })));
+  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/string/cursors.x",.function = "f7_cursors____iter_next",.line = 266,.runtime = 1}; & _x2c_gensym_error_site_18; })));
   String value;
   if(! Split_try_next(split, &(cursor), &(value))) return 0;
   iter -> state = int_var(cursor);
@@ -1546,31 +1587,36 @@ static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  if(!(*(int *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0)) String_free((*(String *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  if(!(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2)) String_free((*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3));
+  if(!(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)) String_free((*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2));
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) String_free((*(String *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5));
+  if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) String_free((*(String *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4));
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6)) String_free((*(String *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_7));
+  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_5)) String_free((*(String *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  if(!(*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_8)) String_free((*(String *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_9));
+  if(!(*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_7)) String_free((*(String *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_8));
 }
 
 static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_10));
+  if(!(*(int *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_9)) String_free((*(String *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_10));
+}
+
+static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
+  _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_11));
 }
 
