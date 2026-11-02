@@ -16,8 +16,8 @@ static keyword loop $private.loop;
 #include <limits.h>
 
 /* One read over scanned tokens: `source` holds their text from byte `base`,
-   `end` is the offset past the last token a form used, and `floor` is the
-   stack bound from `_x2c_stack_floor`. */
+   `end` is the offset past the last token a form used, and nesting stops
+   when the C stack reaches `floor`. */
 static typedef struct LispReader {
   Tokenizer tokenizer, char *source, unsigned base, end;
   unsigned long floor;
@@ -106,8 +106,7 @@ static Var _parse_form(LispReader &r, Token token, int depth) {
     case <",">:  prefix = Atom.intern("unquote");          break;
     case <",@">: prefix = Atom.intern("unquote-splicing"); break;
   }
-  if (prefix is not void)
-    return _prefixed(r, prefix, _nested_depth(r, depth));
+  if (prefix is not void) return _prefixed(r, prefix, _nested_depth(r, depth));
   r.end = token.pos + token.len;
   return _atom(r, token);
 }
@@ -202,8 +201,9 @@ static Var _incomplete(String source, unsigned at) {
    A List as deep as LISP_READ_DEPTH_MAX or below the stack `floor` is also
    left to the token reader, which reports it. */
 
-static int _plain_form(char *s, unsigned &at, Var &out, Array items,
-                       int depth, unsigned long floor) {
+static int _plain_form(
+  char *s, unsigned &at, Var &out,
+  Array items, int depth, unsigned long floor) {
   char c = s[at];
   if (c == '(') return _plain_list(s, at, out, items, depth, floor);
   if (c == '"') return _plain_string(s, at, out);
@@ -212,8 +212,9 @@ static int _plain_form(char *s, unsigned &at, Var &out, Array items,
   return _plain_atom(s, at, out);
 }
 
-static int _plain_list(char *s, unsigned &at, Var &out, Array items,
-                       int depth, unsigned long floor) {
+static int _plain_list(
+  char *s, unsigned &at, Var &out,
+  Array items, int depth, unsigned long floor) {
   if (depth >= LISP_READ_DEPTH_MAX || _x2c_stack_below(floor)) return 0;
   int first = items.len();
   for (at++; ; ) {

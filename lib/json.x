@@ -153,7 +153,7 @@ static struct JsonBool _json_false = { 0 }, _json_true = { 1 };
 
 /* One parse of `text`: `at` is the byte being read, `depth` counts the open
    arrays and objects, `path` names a file for the error details, and
-   `floor` is the stack bound from `_x2c_stack_floor`. */
+   nesting stops when the C stack reaches `floor`. */
 static typedef struct Reader {
   const char *text;
   String path;
@@ -170,8 +170,8 @@ static typedef struct Reader {
     integers, strings, and containers.
 */
 
-/* One write: the output Buffer, whether it is indented, and the stack bound
-   from `_x2c_stack_floor`. */
+/* One write: the output Buffer, whether it is indented, and the C stack
+   address `floor` where nesting stops. */
 static typedef struct Writer {
   Buffer out;
   int pretty;

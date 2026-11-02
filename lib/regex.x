@@ -96,8 +96,8 @@ static typedef struct Parser {
 
 /* One search of `text`: `end` is where the match ends, `depth` counts the
    iterations of repeated groups in progress, `starts` and `ends` hold each
-   capture's offsets, or -1, and `floor` is the stack bound from
-   `_x2c_stack_floor`. */
+   capture's offsets, or -1, and iteration stops when the C stack reaches
+   `floor`. */
 static typedef struct Matcher {
   Regex regex, const char *text, int len, end, depth, int *starts, *ends;
   unsigned long floor;
