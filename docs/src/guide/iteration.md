@@ -361,15 +361,15 @@ parameter is rejected when it is first invoked, and it never receives an
 alias into source storage. An empty source does not invoke or arity-check
 its callback.
 
-Every callback operation except `zip_with` rejects a null callback only when
-it invokes it. Lazy `map`, `filter`, `scan`, and `map2` construction does not
-pull the source. Their first pull consumes one source element, or one value
-from each side for `map2`, before a missing callback raises `<bad-arg>`. A
-seeded fold and the queries `find`, `any`, and `all` consume one element
+`map`, `filter`, `scan`, `map2`, `foldl`, `find`, `any`, and `all` reject a
+null callback only when they invoke it. Lazy stages do not pull the source
+when they are built. Their first pull consumes one source element, or one
+value from each side for `map2`, before a missing callback raises
+`<bad-arg>`. A seeded fold, `find`, `any`, or `all` consumes one element
 before that failure; a seedless fold consumes its seed and the next element.
 Consumed inputs are not restored, just as when a callback itself raises.
-Empty inputs and seedless singleton folds need no invocation, so an empty
-query still returns `void`, 0, or 1.
+Empty inputs and seedless singleton folds need no invocation, so empty
+`find`, `any`, and `all` calls return `void`, 0, and 1.
 
 This replaces the earlier null-callback identity behavior of `map`, immediate
 exhaustion of `filter`, drain-without-combining behavior of `foldl`, NULL
