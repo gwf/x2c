@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     (--filter (value substring) repeated (help "Select test names containing substring"))
     (--list (help "List matching tests"))
     (-q --quiet (help "Suppress successful test lines"))
-    (--manifest (value file) (help "Read this project manifest"))
+    (--manifest-path (value file) (help "Read this project manifest"))
     (--target (value name) (help "Use this manifest target's include directories"))
     (inputs repeated (help "Test files or directories")));
   Map options = NULL;
@@ -55,7 +55,7 @@ static Run _configure(Map options) {
   if (!jobs || *end || count < 1 || count > INT_MAX)
     Diagnostics.driver_error("test: -j requires a positive integer");
   CliRequest project = CliRequest.new(<build>);
-  project.manifest = options["manifest"];
+  project.manifest = options["manifest-path"];
   project.target = options["target"];
   project.dry_run = 1;
   String manifest = project.project_manifest();
