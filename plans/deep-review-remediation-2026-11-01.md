@@ -1,12 +1,11 @@
 # Deep review remediation (2026-11-01)
 
-> Status: active - batch A published on `dev` as `9d196566f` (PR #643,
-> 2026-11-02); batch B (PR #644, branch `gwf/repo-review-batch-b`) and
-> batch C (PR #645, branch `gwf/review-batch-c-contracts`, with the
-> decisions below) integrated together from `9d196566f` by the shared
-> integrator on 2026-11-02; the bug batch below (PR #647, branch
-> `gwf/review-bug-batch`) was integrated from `9d196566f`, merged with
-> that `dev`, and submitted the same day.
+> Status: active - selected repair batches A (#643), B (#644), C (#645),
+> and the bug batch (#647) are published on `dev` through `dbcb6c347`.
+> PRs #644 and #645 merged on 2026-11-02 as `149e1f3eb` and `d01f8f7e8`;
+> #647 merged as `7620796c9`. These commits are ancestors of the review
+> baseline. Only the final "Still carried" list remains unfinished scope.
+> Earlier handoff lists record history, not additional current work.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
@@ -53,9 +52,13 @@ integrator with focused evidence.
    `unshift`, and `insert` on a null array or an out-of-range index) raise
    `<bad-arg>` like the compound forms and typed Arrays; reads keep
    returning `void`.
-2. A required `iter.x` callback that is null raises `<bad-arg>` when the
-   operation is called, before any source element is consumed; `zip_with`
-   keeps its documented optional `fn`.
+2. Historical decision, superseded by `14e6fce147` on 2026-11-02:
+   required null callbacks were to raise before consuming input. The current
+   rule raises through `Func.apply` only when an element needs the callback,
+   after consuming that invocation's inputs. Empty sources make no call.
+   The runtime (`lib/iter.x`), regression `05d149382`, and the
+   [iteration guide](../docs/src/guide/iteration.md) record this rule.
+   `zip_with` keeps its documented optional `fn`.
 3. Null handles: an operation on a null handle raises `<bad-arg>`; `free`,
    `close`, `destroy`, and `cleanup` accept a null handle and do nothing;
    causes that describe a non-null handle's state stay `<bad-state>`.

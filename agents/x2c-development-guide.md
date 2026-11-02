@@ -70,8 +70,10 @@ needs macros to supply grammar; see
 [preprocessing](../docs/src/reference/language.md#preprocessing).
 Therefore:
 
-- Preprocessing must not change top-level declaration structure. Do not wrap
-  declarations in `#if` or expand macros into declarations.
+- Declarations in conditional arms follow the language reference's
+  [conditional-arm rules](../docs/src/reference/language.md#preprocessing).
+  Ordinary translation leaves C macros unexpanded; use `--cpp` when existing
+  C needs macro expansion to supply declarations.
 - Object-like constant `#define`s remain valid where C requires an integer
   constant expression. `static const` cannot replace them in every context,
   and 64-bit constants such as `VAR_NULL_BITS` are not portable enumerators.
