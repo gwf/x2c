@@ -146,12 +146,11 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
     frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
     canonicalizing or storing the binding.
 */
-void Lisp.set_global(Lisp lisp, String name, Var value) {
-  if (!lisp || !name) $error.global.args();
-  if (lisp.frozen)
+void Lisp.set_global(Lisp l, String name, Var value) {
+  if (!l || !name) $error.global.args();
+  if (l.frozen)
     $error.global.frozen("Lisp.set_global");
-  auto (&lisp.scope)
-    _binding_set(&lisp.scope, lisp.globals, Atom.intern(name), value);
+  auto (&l.scope) _binding_set(&l.scope, l.globals, Atom.intern(name), value);
 }
 
 // session storage

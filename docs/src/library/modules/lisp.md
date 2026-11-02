@@ -362,7 +362,7 @@ Source: `lib/lisp/sessions.x`
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
 
-`void Lisp.set_global(Lisp lisp, String name, Var value)`
+`void Lisp.set_global(Lisp l, String name, Var value)`
 
 Binds `name` to `value` in the embedded Lisp global environment.
 The session stores the value in a raw slot, so `void` remains distinct
