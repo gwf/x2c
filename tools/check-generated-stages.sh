@@ -48,13 +48,18 @@ if ! diff -u "$scratch/left.files" "$scratch/right.files"; then
   exit 1
 fi
 
-count=0
+count=0 differing=0
 while IFS= read -r relative; do
   if ! cmp -s "$left/$relative" "$right/$relative"; then
     echo "generated-stage comparison: bytes differ: $relative" >&2
-    exit 1
+    differing=$((differing + 1))
   fi
   count=$((count + 1))
 done <"$scratch/left.files"
+if ((differing)); then
+  echo "generated-stage comparison: $differing of $count $label files" \
+    "differ" >&2
+  exit 1
+fi
 
 echo "generated-stage comparison: $left == $right ($count $label files)"

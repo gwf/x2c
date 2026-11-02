@@ -1,3 +1,7 @@
+# check.sh reads the exported BUILD_CFLAGS, BUILD_LDFLAGS, and BUILD_JOBS.
+include ../etc/make-command.mk
+include ../etc/build-config.mk
+
 .PHONY: default check update list clean
 
 default: check
