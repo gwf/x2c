@@ -187,6 +187,19 @@ run native_test.x
 [ "$status" = 1 ]
 grep -Fq 'native-build-diagnostic' "$WORK/out"
 grep -Fxq 'files: 0 passed, 1 failed; tests: 0 passed, 0 failed' "$WORK/out"
+# A target's include directories reach the C compiler as well as x2c.
+printf 'static inline int native_value(void) { return 42; }\n' \
+  >"$WORK/project/include/native-value.h"
+cat >"$WORK/project/native_header_check.x" <<'HEADER'
+#include "test.x"
+#include "native-value.h"
+$test()
+static void native_header(void) { $expect_eq(native_value(), 42); }
+$test.main();
+HEADER
+run native_header_check.x
+[ "$status" = 0 ]
+grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
 run "$WORK/empty"
 [ "$status" = 2 ]
 for jobs in 0 -1 nope ''; do

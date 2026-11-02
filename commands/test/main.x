@@ -175,7 +175,7 @@ static int _summary_counts(
 static Job _start(Run run, Path file) {
   Array command = [Compiler.driver_executable(), "script"];
   foreach (String dir in run.project.include_dirs) {
-    command.push("--x-include-dir");
+    command.push("-I");
     command.push(dir);
   }
   foreach (String dir in run.project.package_dirs) {
