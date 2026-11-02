@@ -166,11 +166,11 @@ static int _builtin_index_lvalue(Compiler c, List expression) {
   return 0;
 }
 
+/* A raw string literal beside a String converts for `==` and the
+   comparisons derived from `equal` or `compare`. */
 static void _convert_string_comparison(
   Compiler c, Symbol operator, List &lhs, List &rhs) {
-  if (operator != <==> && operator != <!=> && operator != <"<"> &&
-      operator != <">"> && operator != <"<="> && operator != <">=">)
-    return;
+  if (operator != <==> && !Compiler.derived_member(operator)) return;
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (c.sym.is_string_type(lhs_type) && _is_raw_string_literal(rhs))
     rhs = c.convert_expression(rhs, lhs_type);
