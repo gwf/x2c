@@ -113,8 +113,8 @@ settings, and never put it in logs, checkout files or chat.
 ## Candidate and release operation
 
 Run `candidate.yml` from dev with a full reviewed source SHA. Each compiler
-and package job checks out that SHA; the existing four compiler and 26 package
-matrix jobs remain intact. Assembly uses the built Linux compiler once and
+and package job checks out that SHA; its matrices come from
+[the released set](../../agents/releasing.md#released-packages). Assembly uses the built Linux compiler once and
 retains the resulting archives, manifest, two index variants and two complete
 site archives. Native archive bytes never change during promotion.
 
@@ -201,14 +201,14 @@ Before the first release, stage two same-version candidates and verify old URLs
 still work, production did not move, and each staging installer/index selects
 its own bytes. Rehearse interrupted upload, conflicting bytes and stale output
 selection using mocks/local data. Then rebuild the final candidate, verify it
-on all four platforms (torch on its two supported platforms), inspect HTTPS,
+on all four platforms (torch on its released platforms), inspect HTTPS,
 site/book/search and the retained production variant, and promote that identity.
 Compare archive digests across staging and production and check prior URLs.
 
-Release cost remains 30 build jobs per explicitly requested full candidate;
-removing tag rebuilds avoids repeating that matrix. Live checks add four small
-install/run jobs after staging and four after production, with torch on two
-platforms. First-release fault/two-candidate rehearsal is one-time. Activation
+Release cost is one build job per compiler platform and per released bundle
+for each explicitly requested full candidate; removing tag rebuilds avoids
+repeating that matrix. Live checks add four small install/run jobs after
+staging and four after production. First-release fault/two-candidate rehearsal is one-time. Activation
 must have the agreed cost approval; do not invent a new ordinary gate.
 
 ## Recovery baseline

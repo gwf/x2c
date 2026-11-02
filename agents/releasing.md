@@ -18,8 +18,9 @@ and their costs are unchanged.
 
 - `Compiler.version` in `src/cli/requests.x` identifies the compiler version.
   The CLI boundary probe and installer example carry corresponding version strings.
-- `candidate.yml` manually builds the selected full source SHA. It retains
-  the existing four compiler platforms and 26 native package bundles, then
+- `candidate.yml` manually builds the selected full source SHA. It builds
+  the compiler on four platforms and the
+  [released package bundles](#released-packages), then
   typesets the complete book PDF, then assembles immutable archives,
   destination indexes and both complete sites.
   It publishes nothing. Tags do not trigger a rebuild.
@@ -35,10 +36,9 @@ and their costs are unchanged.
 - `verify.yml` supplies the release-only install/package checks;
   `restore-pages.yml` restores a previously verified production site.
 
-The compiler matrix uses `macos-15`, `macos-15-intel`, `ubuntu-24.04`, and
-`ubuntu-24.04-arm`. Native packages are pcre2, yyjson, libcurl, termbox2, libuv,
-and blis on all four, plus torch on macos-15 and ubuntu-24.04. raylib is not
-released. Pinned runners preserve known deployment targets and C libraries.
+The compiler builds on `macos-15`, `macos-15-intel`, `ubuntu-24.04`, and
+`ubuntu-24.04-arm`. Pinned runners preserve known deployment targets and C
+libraries.
 
 `candidate.json` binds archives to source SHA, workflow revision, run,
 version, sizes and hashes. Site and verification receipts bind destination
@@ -46,6 +46,24 @@ output to that manifest. Named staging/production indexes preserve their
 separate URLs; the site publishes its selected index as `packages/index.txt`.
 Version, index, installer and site deploy together. They are no longer release
 pointer commits on `main`.
+
+## Released packages
+
+`PLATFORMS` and `BUNDLES` in `tools/release-candidate.py` own the released
+set. `candidate.yml` builds its matrices from them, and assembly and live
+verification check against them. A release publishes these packages:
+
+- Native bundles of pcre2, yyjson, libcurl, termbox2, libuv, and blis on
+  all four platforms.
+- A native torch bundle on darwin-arm64 and linux-x86_64, the two platforms
+  for which PyTorch ships prebuilt CPU libtorch.
+- A source archive of each package with no dependency manifest under
+  `packages/` and `examples/packages/`, currently autodiff and greet.
+
+raylib and SQLite are not released in any form. Build their bundles from a
+checkout with `make -C packages/<name> bundle`. `PACKAGES` in
+`packages/Makefile` is a different list: the packages that `make packages`,
+`make packages-check`, and `release-validation.yml` check.
 
 ## Cut a release
 
