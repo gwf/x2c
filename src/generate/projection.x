@@ -59,6 +59,7 @@ module List _header_and_source(Compiler c, List ast, Map inline_bodies) {
 
 static List _source_projection(Compiler c, List ast, Map inline_bodies) {
   Array source = [];
+  Partition tags = {.header = source, .forwarded = {}};
   foreach (List node in ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
@@ -67,6 +68,7 @@ static List _source_projection(Compiler c, List ast, Map inline_bodies) {
       case %(import ?unit *):
         node = %(preproc "#include \"$(unit.string()).x\"");
       case %(function ?type (!set ?declarator (bind ?binding *)) ?body): {
+        _forward_tags(tags, $(type, declarator));
         type = _with_attributes(c.semantic_binding_facts(), type, binding);
         type = _noreturn(type, declarator, body);
         Type function_type = type;
@@ -77,9 +79,16 @@ static List _source_projection(Compiler c, List ast, Map inline_bodies) {
         else node = %(function $type $declarator $body);
       }
       case %(declare ?type (bindings *declarators)): {
+        Type declared = type;
+        match (declared.base_type())
+          case %((!or struct union) (binding ? ?(String tag)) *):
+            tags.forwarded[tag] = 1;
         List kept = declarators.filter(
           %!(item) => !_completed_prototype(c, _declaration_binding(item)));
         if (!kept && !_body_tag(type)) continue;
+        foreach (List declarator in kept)
+          match (declarator) case %(bind ? ((fnmod *) *)):
+            _forward_tags(tags, $(type, declarator));
         node = %(declare $type (bindings @kept));
       }
     }
@@ -311,10 +320,11 @@ module List _prototype(List type, List declarator) =>
    tag the prototype spells keeps it the file-scope type. */
 static void _forward_tags(Partition &p, List node) {
   match (node)
-    case %((!or ?tag struct union) ?(String name)): {
+    case %((!or ?tag struct union)
+           (!set ?binding (binding ? ?(String name)))): {
       if (name in p.forwarded) return;
       p.forwarded[name] = 1;
-      p.header.push(%(declare ($tag $name) (bindings (bind () ()))));
+      p.header.push(%(declare ($tag $binding) (bindings (bind () ()))));
       return;
     }
   foreach (Var item in node) if (item is <list>) _forward_tags(p, item);
@@ -356,7 +366,11 @@ static void _add_declaration(Partition &p, Type type, List bindings) {
     return;
   }
   match (type.base_type())
-    case %((!or struct union) ?(String tag) *): p.forwarded[tag] = 1;
+    case %((!or struct union) (binding ? ?(String tag)) *):
+      p.forwarded[tag] = 1;
+  foreach (List declarator in bindings.cdr())
+    match (declarator) case %(bind ? ((fnmod *) *)):
+      _forward_tags(p, $(type, declarator));
   if (!_place_tagged_object(p, decl, type, bindings) &&
       !_place_object(p, decl, type, bindings))
     _publish_node(p, _header_declaration(decl, type, bindings));
