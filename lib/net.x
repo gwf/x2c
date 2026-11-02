@@ -73,8 +73,10 @@ Listener Listener.bind(String host, int port) {
 
 /** Accepts a connection, or returns NULL after Listener.stop. Thread.stop
     transfers its cooperative cancellation cause, like a Channel wait.
-    Raises: `<io-fail>` on a native accept or poll failure. */
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` on a native accept or poll
+    failure. */
 Socket Listener.accept(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.accept"));
   int fd = _x2c_net_accept_fd(listener);
   return fd < 0 ? NULL : Socket.adopt(fd);
 }
@@ -102,8 +104,12 @@ int _x2c_net_accept_fd(Listener listener) {
   return -1;
 }
 
-/** Returns the actual bound port, including when bind requested port zero. */
-int Listener.port(Listener listener) => listener.port;
+/** Returns the actual bound port, including when bind requested port zero.
+    Raises: `<bad-arg>` for NULL. */
+int Listener.port(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.port"));
+  return listener.port;
+}
 
 /** Writes the listener's fields, reading its stop state atomically. */
 Buffer Listener.write_repr(Listener listener, Buffer out) {
@@ -115,8 +121,10 @@ Buffer Listener.write_repr(Listener listener, Buffer out) {
 }
 
 /** Requests stopping from any thread. A blocked accept returns within one
-    poll interval. The listener descriptor remains owned until close. */
+    poll interval. The listener descriptor remains owned until close.
+    Raises: `<bad-arg>` for NULL. */
 void Listener.stop(Listener listener) {
+  if (!listener) raise %(bad-arg (operation "Listener.stop"));
   __atomic_store_n(&listener.stopped, 1, __ATOMIC_RELEASE);
 }
 
@@ -181,9 +189,9 @@ Socket Socket.adopt(int fd) {
 
 /** Sets receive and send timeouts in milliseconds. Zero disables timeouts.
     A timed-out File operation raises `<io-fail>` with EAGAIN or EWOULDBLOCK.
-    Raises: `<bad-arg>` for negative milliseconds, or `<io-fail>`. */
+    Raises: `<bad-arg>` for NULL or negative milliseconds, or `<io-fail>`. */
 void Socket.set_timeout(Socket s, int ms) {
-  if (ms < 0) raise %(bad-arg (operation "Socket.set_timeout"));
+  if (!s || ms < 0) raise %(bad-arg (operation "Socket.set_timeout"));
   struct timeval timeout = { .tv_sec = ms / 1000,
                             .tv_usec = (ms % 1000) * 1000 };
   if (setsockopt(s.fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) ||
@@ -192,14 +200,20 @@ void Socket.set_timeout(Socket s, int ms) {
 }
 
 /** Flushes output and sends EOF to the peer while retaining input.
-    Raises: `<io-fail>` if flushing or shutdown fails. */
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` if flushing or shutdown
+    fails. */
 void Socket.shutdown_write(Socket socket) {
+  if (!socket) raise %(bad-arg (operation "Socket.shutdown_write"));
   if (socket.output.flush()) _io("Socket.shutdown_write", errno);
   if (shutdown(socket.fd, SHUT_WR)) _io("Socket.shutdown_write", errno);
 }
 
-/** Returns numeric host:port text, with IPv6 in brackets. */
-String Socket.peer(Socket socket) => socket.peer;
+/** Returns numeric host:port text, with IPv6 in brackets.
+    Raises: `<bad-arg>` for NULL. */
+String Socket.peer(Socket socket) {
+  if (!socket) raise %(bad-arg (operation "Socket.peer"));
+  return socket.peer;
+}
 
 /** Closes both streams. Repeated calls are harmless. Close, like File.close,
     discards the close result; flush explicitly to report write errors. */
