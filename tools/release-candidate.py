@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Assemble and transport immutable release candidates; never build at promotion.
 
-The inactive workflows in etc/release/ own authorization and verification jobs.
-This helper owns archive identity, destination metadata and immutable uploads.
+The workflows in .github/workflows own authorization and verification jobs.
+This helper owns the released platforms and bundles, archive identity,
+destination metadata and immutable uploads.
 """
 from __future__ import annotations
 
@@ -15,10 +16,19 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
+from urllib.request import urlopen
 
-PLATFORMS = ('darwin-arm64', 'darwin-x86_64', 'linux-x86_64', 'linux-aarch64')
-PACKAGES = ('pcre2', 'yyjson', 'libcurl', 'termbox2', 'libuv', 'blis')
+# Each release platform and the runner candidate.yml builds it on.
+PLATFORMS = {'darwin-arm64': 'macos-15', 'darwin-x86_64': 'macos-15-intel',
+             'linux-x86_64': 'ubuntu-24.04',
+             'linux-aarch64': 'ubuntu-24.04-arm'}
+# The native bundles a release publishes; agents/releasing.md describes them.
+# Upstream publishes prebuilt CPU libtorch for two platforms only.
+BUNDLES = {**{package: tuple(PLATFORMS) for package in
+              ('pcre2', 'yyjson', 'libcurl', 'termbox2', 'libuv', 'blis')},
+           'torch': ('darwin-arm64', 'linux-x86_64')}
 REPOSITORIES = {'staging': 'gwf/x2c-staging', 'production': 'gwf/x2c'}
 SITES = {'staging': 'https://staging.x2c-lang.dev',
          'production': 'https://x2c-lang.dev'}
@@ -67,11 +77,18 @@ def base(manifest, destination):
 def inventory(version):
     names = {f'x2c-{version}-{p}.tar.gz' for p in PLATFORMS}
     names |= {name + '.sha256' for name in names}
-    names |= {f'{pkg}-{p}-native.tar.gz'
-              for pkg in PACKAGES for p in PLATFORMS}
-    names |= {'torch-darwin-arm64-native.tar.gz',
-              'torch-linux-x86_64-native.tar.gz'}
+    names |= {f'{package}-{platform}-native.tar.gz'
+              for package, platforms in BUNDLES.items()
+              for platform in platforms}
     return names
+
+
+def matrix(args):
+    """Print the job matrices candidate.yml reads as step outputs."""
+    print('runners=' + json.dumps(list(PLATFORMS.values())))
+    print('bundles=' + json.dumps([
+        {'os': PLATFORMS[platform], 'package': package}
+        for package, platforms in BUNDLES.items() for platform in platforms]))
 
 
 def index_variant(text, old_base, new_base):
@@ -120,8 +137,9 @@ def assemble(args):
                 'identity': identity(f'candidate-{args.source_sha}-'
                                      f'{args.run_id}-{args.attempt}')}
     bundles = sorted(built.glob('bundle-*/*-native.tar.gz'))
-    if len(bundles) != 26:
-        raise ValueError('need all 26 package bundle artifacts')
+    count = sum(map(len, BUNDLES.values()))
+    if len(bundles) != count:
+        raise ValueError(f'need all {count} package bundle artifacts')
     x2c = str(Path(args.x2c).resolve())
     if run(x2c, '--version') != f'x2c {version}':
         raise ValueError('index generator compiler version differs')
@@ -211,15 +229,42 @@ def verify(candidate, expected_sha=None, expected_identity=None,
             (candidate / 'index-production.txt').read_text():
         raise ValueError('destination indexes differ beyond URLs')
     for destination in SITES:
-        receipt = candidate / f'site-{destination}.json'
-        if receipt.exists():
-            data = read(receipt)
-            if data['manifest_sha256'] != digest(candidate / 'candidate.json') or \
-                    data['sha256'] != digest(candidate / f'site-{destination}.tar.gz'):
-                raise ValueError(f'{destination} site receipt mismatch')
+        if (candidate / f'site-{destination}.json').exists():
+            site_archive(candidate, destination)
     if require_staging:
         receipts(candidate, 'staging')
     return manifest
+
+
+def site_archive(candidate, destination):
+    """Return a retained site archive after checking it against its receipt."""
+    archive = candidate / f'site-{destination}.tar.gz'
+    data = read(candidate / f'site-{destination}.json')
+    if data['manifest_sha256'] != digest(candidate / 'candidate.json') or \
+            data['sha256'] != digest(archive):
+        raise ValueError(f'{destination} site receipt mismatch')
+    return archive
+
+
+def extract(args):
+    """Unpack a retained site for Pages after checking it and its members."""
+    archive = site_archive(Path(args.candidate), args.destination)
+    with tarfile.open(archive) as tar:
+        for member in tar.getmembers():
+            path = Path(member.name)
+            if path.is_absolute() or '..' in path.parts or \
+                    not (member.isfile() or member.isdir()):
+                raise ValueError(f'unsafe site member {member.name}')
+        tar.extractall(args.output, filter='data')
+
+
+def site_version(expected):
+    """Stop unless production still serves the version the caller observed."""
+    with urlopen(SITES['production'] + '/x2c-version.txt') as response:
+        current = response.read().decode().strip()
+    if current != expected:
+        raise ValueError(f'production site changed: it serves {current}, '
+                         f'not {expected}')
 
 
 def site(args):
@@ -419,17 +464,23 @@ def main():
     p = commands.add_parser('fetch')
     for name in ('repository', 'identity', 'output'):
         p.add_argument('--' + name, required=True)
-    for name in ('verify', 'site', 'publish', 'receipt', 'guard', 'proof'):
+    commands.add_parser('matrix')
+    p = commands.add_parser('site-version')
+    p.add_argument('--expected', required=True)
+    for name in ('verify', 'site', 'extract', 'publish', 'receipt', 'guard',
+                 'proof'):
         p = commands.add_parser(name)
         p.add_argument('--candidate', required=True)
         if name == 'verify':
             p.add_argument('--source-sha')
             p.add_argument('--identity')
             p.add_argument('--require-staging', action='store_true')
-        if name in ('site', 'publish', 'receipt', 'proof'):
+        if name in ('site', 'extract', 'publish', 'receipt', 'proof'):
             p.add_argument('--destination', choices=SITES, required=True)
         if name == 'site':
             p.add_argument('--site-dir', required=True)
+        if name == 'extract':
+            p.add_argument('--output', required=True)
         if name == 'publish':
             p.add_argument('--repository', required=True)
         if name == 'receipt':
@@ -444,6 +495,8 @@ def main():
         guard(Path(args.candidate))
     elif args.command == 'proof':
         proof(Path(args.candidate), args.destination)
+    elif args.command == 'site-version':
+        site_version(args.expected)
     else:
         globals()[args.command](args)
 
