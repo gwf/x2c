@@ -523,12 +523,27 @@ static Symbol _visit(StaticQueue &q, List binding) {
   Array definitions = q.pending[binding];
   Symbol area = _deferred(q, definitions) ? <finish> : <statics>;
   List dependencies = q.c.static_init_deps.getdefault(binding, %());
+  foreach (List initializer in definitions)
+    dependencies = _func_reads(initializer.cadr(), binding, dependencies);
   foreach (List dependency in dependencies)
     if (dependency in q.pending && _visit(q, dependency) == <finish>)
       area = <finish>;
   _add_calls(q, definitions, area);
   q.state[binding] = area;
   return area;
+}
+
+/* A function converted to Func reads a file-static handle that its own
+   deferred initializer assigns, so every Func an assignment reads, even
+   inside a collection literal, is a dependency. Returns `reads` followed by
+   each Func binding `code` reads other than the assigned `binding`. */
+static List _func_reads(List code, List binding, List reads) {
+  match (code)
+    case %(expr ("Func") (ident ?read)):
+      return read == binding ? reads : reads.append($(read));
+  foreach (Var child in code)
+    if (child is <list>) reads = _func_reads(child, binding, reads);
+  return reads;
 }
 
 static int _deferred(StaticQueue &q, Array definitions) {

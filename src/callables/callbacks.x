@@ -116,8 +116,10 @@ static void _split(Callback &c) {
   if (!c.source_binding || !source || source.is_pointer() ||
       !source.is_function())
     $fail.callable_callback_direct(c);
-  if (!c.target.function_parts(c.params, c.result))
+  if (!c.target.function_parts(c.params, NULL))
     $fail.callable_callback_target(c);
+  // The helper's result keeps the qualifiers its callback type declares.
+  c.result = c.target.apply();
   if (!source.function_parts(c.source_params, c.source_result))
     $fail.callable_callback_source(c);
   if (_typed_params_variadic(c.params) ||
@@ -131,12 +133,11 @@ static void _check_signature(Callback &cb) {
   if (target_count != source_count) {
     $fail.callable_callback_arity(cb, target_count, source_count);
   }
-  cb.result = cb.result.canonicalize();
-  cb.source_result = cb.source_result.canonicalize();
-  if (cb.result === %(void) || cb.source_result === %(void))
+  Type result = cb.result.canonicalize();
+  Type source_result = cb.source_result.canonicalize();
+  if (result === %(void) || source_result === %(void))
     $fail.callable_callback_void_return(cb);
-  if (cb.result != cb.source_result)
-    $fail.callable_callback_result(cb);
+  if (result != source_result) $fail.callable_callback_result(cb);
 }
 
 static void _check_params(Callback &cb) {
@@ -185,6 +186,8 @@ static List _publish_typed(Callback &cb, Type spelling) {
 static List _function(Callback &cb, List binding) {
   Compiler c = cb.c;
   (List declarations, List arguments) = c.forward_parameters(cb.params);
+  // A helper without parameters says `(void)`; `()` is unprototyped C.
+  if (!declarations) declarations = %((param (void) (bind () ())));
   List source = $!($(cb.source)){ $(cb.source_binding) };
   List call = _func_call(
     c, cb.source.apply().canonicalize(), source, arguments);
