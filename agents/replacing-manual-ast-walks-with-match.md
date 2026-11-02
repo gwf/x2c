@@ -558,8 +558,8 @@ Build after the connected authored edit is coherent. Inspect generated C for
 capture binding, implicit conversion selection, evaluation order, and
 fixed-point behavior. Run the fixtures belonging to that grammar family.
 
-Only after the authored diff is accepted should generated symbols and
-bootstrap files be refreshed and the full publication gate run once. Source
+The integrator refreshes final generated symbols and bootstrap files and runs
+the publication gate once on the combined batch. Source
 line motion and large generated diffs are expected consequences; they are not
 reasons to preserve the manual source.
 

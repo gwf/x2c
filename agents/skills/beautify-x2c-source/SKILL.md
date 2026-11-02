@@ -66,23 +66,11 @@ PR-4 to any proposed validator, diagnostic, or negative fixture.
 
 ## Verify
 
-Verify the coherent change once, including a worker batch of related files.
-Run `make build`, then the fixtures and unit suites that exercise the changed
-behavior:
-
-```sh
-unittest/compiler-fixtures/run.sh check --fixture NAME
-make -C unittest test-all && (cd unittest && ./test-all NAME_suite)
-make stage-1 && make stage-diff-1
-```
-
-Stage 1 uses the edited compiler to translate the same source as stage 0.
-`make stage-diff-1` compares those stages; `make stage-diff-0` compares
-bootstrap with stage 0. Neither comparison automatically records the
-pre-edit tree. To establish preservation, use the saved before/after output
-called for by the task. Follow the standard's proof obligations; never
-rebaseline a difference to make a rewrite pass. A hot
-path also follows [performance checkpoints](../../performance-checkpoints.md).
+Use the saved before/after output called for by the task and focused fixtures
+or unit suites that exercise the edited behavior. Build only when those
+checks need an updated compiler. Follow the standard's proof obligations;
+never rebaseline a difference to make a rewrite pass. The integration owner
+handles publication validation and applicable performance checkpoints.
 
 ## Report
 

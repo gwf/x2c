@@ -50,10 +50,10 @@ implementation and authorized delivery.
 
 ## Verify and report
 
-Run `make packages-check` for package implementation or completeness work;
-a package's local test target covers less. Preserve the root rule that this
-network-dependent check remains outside recurring publication gates.
-For a narrower review, state the checks and task coverage actually examined.
+Verify implementations with the affected package's focused tests and examples.
+For reviews, use focused probes when source leaves a concrete question open.
+State the tasks and behavior examined. The integrator selects broader package
+checks when a combined change affects package clients.
 
 Follow the current package acceptance rules; status changes remain Gary's
 decision. Present the short application's real output, the broader example,

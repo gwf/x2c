@@ -45,10 +45,10 @@ inspect generated C or ABI details when they are the relevant behavior.
 
 Remove temporary instrumentation. Review and fix the completed authored diff,
 then follow root validation and publication instructions. Routine authorized
-repairs use the session's root delivery selection: direct integration by
-default, ready PR submission when told to use the integrator, or private
-handoff when acting as a subordinate worker. Requested review stops remain
-held. A submission uses focused evidence, without a publication gate.
+repairs use the session's root delivery selection: ready PR submission with
+focused evidence by default, or private handoff when acting as a subordinate
+worker. Requested review stops remain held. A submission uses focused
+evidence, without a publication gate.
 
 For an investigation, report the reproduced cause, consequence, and proposed
 repair without edits. For a completed fix, report the changed behavior and the
