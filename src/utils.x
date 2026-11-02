@@ -475,8 +475,7 @@ void Compiler.prune_cache(String directory) {
   if (!Path.is_dir(directory)) return;
   foreach (String name, Path.list_dir(directory)) {
     String entry = Path.join(directory, name), script = NULL;
-    try script = Path.read_text(%"$entry/source");
-    catch %((!or not-found io-fail) *): continue;
+    if (!SourceView.read(NULL, %"$entry/source", script)) continue;
     if (Path.is_file(script)) continue;
     int lock = Path.lock_file(%"$entry/lock", 0);
     if (lock < 0) continue;

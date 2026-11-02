@@ -108,13 +108,11 @@ int translate_request(
 }
 
 /** Prints the translate command that writes `inputs` to `out_dir`, as
-    verbose and dry-run requests show it.
+    verbose and dry-run requests show it, quoted as a dry-run tool action
+    prints its arguments.
 */
-void translate_print_command(String out_dir, List inputs) {
-  fprintf(stderr, "x2c: translate --out-dir %s", out_dir);
-  foreach (String input in inputs) fprintf(stderr, " %s", input);
-  fputc('\n', stderr);
-}
+void translate_print_command(String out_dir, List inputs) =>
+  ToolAction.new(<translate>, %("--out-dir" $out_dir @inputs), 0, 1).start();
 
 /* Each input must be a regular `.x` file. Units that write to the shared
    `--out-dir` must not share an output stem; inspection writes nothing. */
@@ -215,8 +213,7 @@ static Map _package_names(Translation &t, List roots) {
       names[name] = 1;
     String depfile = %"$(_output_dir(t, input))/$(Path.stem(input)).d";
     String text = NULL;
-    try text = Path.read_text(depfile);
-    catch %((!or not-found io-fail) *): continue;
+    if (!SourceView.read(NULL, depfile, text)) continue;
     foreach (String dependency in translation_depfile_parse(text)) {
       String package = Compiler.package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;

@@ -388,6 +388,42 @@ grep -Fq "inputs produce the same output stem 'item'" \
 [[ ! -e "$BUILD/inspect-out" ]] || exit 1
 grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
+# Each shown translate command reads back in a shell as the words it names,
+# with its arguments quoted as the native actions' are.
+printf 'int main(void) { return 0; }\n' >"$BUILD/space dir/a b.x"
+"$X2C" translate -### --out-dir "$BUILD/space out" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-translate.stderr"
+"$X2C" build -### --output "$BUILD/space dir/ab" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-dry.stderr"
+"$X2C" build -v --output "$BUILD/space dir/ab" "$BUILD/space dir/a b.x" \
+  2>"$BUILD/space-verbose.stderr"
+translate_words() {
+  local input=$2 line
+  line=$(grep '^x2c: translate ' "$1")
+  eval "set -- ${line#x2c: translate }"
+  [[ $# == 3 && $1 == --out-dir && $3 == "$input" ]]
+}
+for log in space-translate space-dry space-verbose; do
+  translate_words "$BUILD/$log.stderr" "$BUILD/space dir/a b.x"
+done
+quoted="--out-dir '$BUILD/space out' '$BUILD/space dir/a b.x'"
+grep -Fqx "x2c: translate $quoted" "$BUILD/space-translate.stderr"
+
+# An input the driver may not open names the system's reason.
+if [[ $(id -u) != 0 ]]; then
+  mkdir -p "$BUILD/denied"
+  printf 'int main(void) { return 0; }\n' >"$BUILD/denied/input.x"
+  chmod 000 "$BUILD/denied/input.x"
+  set +e
+  "$X2C" translate --out-dir "$BUILD/denied" "$BUILD/denied/input.x" \
+    >/dev/null 2>"$BUILD/denied/input.stderr"
+  denied_status=$?
+  set -e
+  chmod 644 "$BUILD/denied/input.x"
+  [[ $denied_status == 1 ]] || exit 1
+  grep -Fq 'reason: Permission denied' "$BUILD/denied/input.stderr"
+fi
+
 # An inspection covers every input, so a later input's error fails it.
 printf 'int broken(void) { return 1 +; }\n' >"$BUILD/b/broken.x"
 set +e
@@ -1772,6 +1808,41 @@ for run in first second; do
     --output out.o hello.x) >"$nostate/$run.stdout" 2>"$nostate/$run.stderr"
   [[ -s "$nostate/out.o" ]] || exit 1
 done
+
+# A state record, depfile, or script record that is not text is out of date,
+# as a missing one is, so the next build runs. Pruning keeps a cache entry
+# whose recorded source is not text, as it keeps an unreadable one.
+corrupt="$BUILD/corrupt-state"
+mkdir -p "$corrupt"
+printf 'int main(void) { printf("built\\n"); return 0; }\n' >"$corrupt/c.x"
+corrupt_build() {
+  "$X2C" build -q --build-dir "$corrupt/bd" --output "$corrupt/c" \
+    "$corrupt/c.x"
+  [[ $("$corrupt/c") == built ]]
+}
+corrupt_build
+for record in "$corrupt"/bd/.x2c-state/* "$corrupt"/bd/gen/*/c.d; do
+  printf '\0' >>"$record"
+  corrupt_build
+done
+corrupt_script() {
+  local output
+  output=$(X2C_CACHE_DIR="$corrupt/cache" "$X2C" script "$@" "$corrupt/c.x")
+  [[ $output == built ]]
+}
+corrupt_script
+mkdir "$corrupt/cache/scripts/stale"
+printf '%s\0' "$corrupt/gone.x" >"$corrupt/cache/scripts/stale/source"
+corrupt_script --rebuild
+[[ -d "$corrupt/cache/scripts/stale" ]] || exit 1
+printf '\0' >>"$(echo "$corrupt"/cache/scripts/c-*/.x2c-state/script)"
+corrupt_script
+printf 'int one(void) => 1;\n' >"$corrupt/one.x"
+printf 'int two(void) => 2;\n' >"$corrupt/two.x"
+"$X2C" translate -q --out-dir "$corrupt/out" "$corrupt/one.x"
+printf '\0' >>"$corrupt/out/one.d"
+"$X2C" translate -q -j 2 --out-dir "$corrupt/out" "$corrupt/one.x" \
+  "$corrupt/two.x"
 
 # A path holding a percent is a path, not a format.
 percent="$BUILD/percent"

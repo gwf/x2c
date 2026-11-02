@@ -50,11 +50,11 @@ typedef struct ParsedUnit {
 // diagnostics
 
 static macro Stmt $fail.frontend_input_read(
-  Expr $c, Expr $site, Expr $filename) =>
+  Expr $c, Expr $site, Expr $filename, Expr $reason) =>
   $c.report_error(
     <driver>,
     "cannot read input file",
-    $site, %("stage: driver" "file: $($filename)" "reason: cannot open"));
+    $site, %("stage: driver" "file: $($filename)" "reason: $($reason)"));
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
@@ -419,10 +419,26 @@ static int _inside(const char *path, const char *dir) {
   return !strncmp(path, dir, n) && path[n] == '/';
 }
 
+/* `Compiler.read_source` reports only that a read failed, so the unit reads
+   its own text and keeps it in the source facts as that read would. */
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
-  if (c.read_source(filename, text)) return text;
-  $fail.frontend_input_read(c, NULL, filename);
+  try text = c.sources.read_text(filename);
+  catch %(size-limit *):
+    $fail.frontend_input_read(c, NULL, filename, "too large for a String");
+  catch %((!or not-found io-fail bad-arg) *detail):
+    $fail.frontend_input_read(c, NULL, filename, _read_reason(detail));
+  if (c.source_facts) c.source_texts[Path.absolute(filename)] = text;
+  return text;
+}
+
+/* A failed read's own reason, or the system's text for its errno. */
+static String _read_reason(List detail) {
+  Var reason = detail.assoc(<reason>);
+  if (reason is not void) return reason;
+  // Quoted, the key survives a host preprocessor that expands `errno`.
+  long error = detail.assoc(<"errno">);
+  return String.new(strerror((int) error));
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an
