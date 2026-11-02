@@ -4,27 +4,8 @@
 #include "test-support.x"
 #include "meta-support.x"
 #include <time.h>
-#include <unistd.h>
 #include "test-macros.x"
 #include "system-macros.x"
-
-/* Stderr goes to a temporary file between the two calls, so a test reads
-   exactly what $time streamed. */
-static int _capture_stderr(File &file) {
-  fflush(stderr);
-  file = tmpfile();
-  int saved = dup(STDERR_FILENO);
-  dup2(fileno(file), STDERR_FILENO);
-  return saved;
-}
-
-static String _captured_stderr(File file, int saved) {
-  fflush(stderr);
-  dup2(saved, STDERR_FILENO);
-  close(saved);
-  rewind(file);
-  return file.string_close();
-}
 
 /* A multi-line literal cannot sit inside a function-like C macro invocation,
    so each block binds a local before the assertion reads it. */
@@ -124,17 +105,17 @@ static void system_macro_time_reports_a_body_that_leaves(void) {
   $test.scoped();
 
   File file;
-  int saved = _capture_stderr(file);
+  int saved = Test_capture_stderr(file);
   int doubled = _timed_returning(21);
-  String returned = _captured_stderr(file, saved);
+  String returned = Test_captured_stderr(file, saved);
   EXPECT_INT_EQ(doubled, 42);
   EXPECT_TRUE(returned.contains("[time] returning-body"));
 
   String note = NULL;
-  saved = _capture_stderr(file);
+  saved = Test_capture_stderr(file);
   try _timed_raising();
   catch %(bad-arg (note ?text)): note = text;
-  String raised = _captured_stderr(file, saved);
+  String raised = Test_captured_stderr(file, saved);
   EXPECT_TRUE(note == "timed body transfer");
   EXPECT_TRUE(raised.contains("[time] raising-body"));
 }

@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "match-recursive.x"
 
 #define EXPECT_TRUE(expr) \
@@ -275,6 +276,51 @@ int Test_expect_list(
                  expected ? expected.repr() : "(null)",
                  actual ? actual.repr() : "(null)");
   return 0;
+}
+
+/** Checks that a typed container prints and orders like `ordinary`, its
+    conversion to Array or Map: `direct_*` are its own str and repr,
+    `streamed_*` its write_str and write_repr output, `boxed` is it as a
+    Var, and `comparison` compares it with `later`. */
+void Test_expect_same_text(
+  Var boxed, Var later, Var ordinary,
+  String direct_str, String direct_repr,
+  Buffer streamed_str, Buffer streamed_repr, int comparison) {
+  EXPECT_STR_EQ(direct_str, ordinary.str());
+  EXPECT_STR_EQ(direct_repr, ordinary.repr());
+  EXPECT_STR_EQ(streamed_str.str(), ordinary.str());
+  EXPECT_STR_EQ(streamed_repr.str(), ordinary.repr());
+  EXPECT_STR_EQ(boxed.str(), ordinary.str());
+  EXPECT_STR_EQ(boxed.repr(), ordinary.repr());
+  EXPECT_TRUE(comparison < 0);
+  EXPECT_TRUE(boxed.compare(later) < 0);
+
+  Buffer boxed_str = Buffer.new(0), boxed_repr = Buffer.new(0);
+  EXPECT_TRUE(boxed.write_str(boxed_str) == boxed_str);
+  EXPECT_TRUE(boxed.write_repr(boxed_repr) == boxed_repr);
+  EXPECT_STR_EQ(boxed_str.str(), ordinary.str());
+  EXPECT_STR_EQ(boxed_repr.str(), ordinary.repr());
+}
+
+/** Sends stderr to a fresh temporary `file` until Test_captured_stderr, so
+    a test reads exactly what a printer streamed. Returns the saved stderr
+    descriptor that Test_captured_stderr restores. */
+int Test_capture_stderr(File &file) {
+  fflush(stderr);
+  file = tmpfile();
+  int saved = dup(STDERR_FILENO);
+  dup2(fileno(file), STDERR_FILENO);
+  return saved;
+}
+
+/** Restores stderr from `saved` and returns the text captured in `file`,
+    closing it. */
+String Test_captured_stderr(File file, int saved) {
+  fflush(stderr);
+  dup2(saved, STDERR_FILENO);
+  close(saved);
+  rewind(file);
+  return file.string_close();
 }
 
 int TestHarness_finish(void) {
