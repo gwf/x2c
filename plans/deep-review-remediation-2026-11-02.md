@@ -167,9 +167,12 @@ Regex initializer. No `main` or release promotion is authorized.
 
 ## Execution record
 
-The combined change repairs every selected Batch A finding. A second source
-review found additional parenthesized-call, qualified character-array, and
-const-destructuring paths; those repairs remain pending final worker evidence.
+The combined change repairs every selected Batch A finding. A second review
+found parenthesized/comma/conditional native calls, qualified character-array
+captures, const destructuring, and a null-Func regression. The final correction
+passes strict stage-1, 199 related fixtures, and 70 focused Func/lambda tests
+with 298 assertions and scope accounting. Null groups, casts, and conditionals
+retain baseline behavior. Mutable referents of const bindings remain writable.
 
 Scope corrections established while implementing:
 
@@ -197,6 +200,13 @@ The following Batch B deletion proposals were tested or traced and retained:
 | One packages-wide live guard | PCRE2 requires three native handles; SQLite statements depend on their database; BLIS views depend on their owner; Raylib checks native window state; libuv checks its loop and closing state. Causes and return contracts also differ. A shared include would add a bundle dependency without removing these predicates. Keep the existing owners. |
 | One host-platform implementation | Native code uses uname and its diagnostic; shell installers must work standalone; Python dependency selection has its own platform API. No shared C/shell/Python owner exists without another process or bootstrap dependency. Retain local primitives. Release policy and verification matrices now use PLATFORMS. |
 
+Compiler-side filename suffixes use Path.identifier_hash, including protocol
+helpers. The remaining role hash in lib/compiler-meta.x stays within its
+runtime/meta boundary: sharing the compiler utility there would require a
+new provider bridge or a runtime-owner migration. That broader unification
+was not attempted; linked and separately loaded meta helpers keep their
+existing matched role calculation.
+
 These decisions reject the proposed substitutions, not every future shared
 implementation. They preserve the existing contracts without introducing a
 new runtime API solely to wrap libc or a new package distribution dependency.
@@ -221,3 +231,38 @@ Completed focused evidence so far:
 
 Combined final validation and publication are pending. Host coverage remains
 macOS arm64; no Linux or native Torch execution is claimed.
+
+## Local bootstrap transition
+
+The old shipped seed failed the combined table projection's meta helper build.
+An isolated clean reproduction traced the secondary missing-thread-symbol
+message to failed synthetic provider headers. The current compiler's cold
+translation of all 64 source units passes; no current Thread header defect
+is established by that seed failure.
+
+The existing transition workflow resolves the bootstrap dependency without
+changing the final authored initializer or Thread error metadata:
+
+1. Temporarily defer `typetags` with `_tag_types()` instead of `$_tag_types()`.
+2. Run `make build` and `make bootstrap-refresh`.
+3. Restore the exact final `$_tag_types()` initializer.
+4. Run `make build-safe`, then validate the final source and seed through the
+   ordinary publication gate.
+
+The isolated transition also passes strict stage-1. The parent replayed the
+transition after the final conversion fixes; its restored-source build-safe
+passes. Temporary source changes are not part of the delivered diff.
+
+## Design and authored-diff review
+
+The repairs use current binding, conversion, transform, projection, and region
+owners. Existing runtime signatures remain unchanged. Internal escape and
+Block error helpers preserve established dependency boundaries and inline
+success paths. Qualifier and scanner helpers remain inline. The only new
+analysis state is the explicitly approved element provenance described above.
+No new recurring gate, schema validator, locking policy, native dependency,
+constant evaluator, or AST-origin restriction was added. Independent review
+found and corrected the incomplete expression/capture cases, a missed recovery
+workflow input, a stale generated-documentation example input, and configure's
+whitespace-path acceptance. The final publication command regenerates artifacts
+through their existing owners and checks self-host convergence.
