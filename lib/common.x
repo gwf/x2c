@@ -7,7 +7,7 @@
     declarations through which modules name each other's types and
     operations without an include cycle. Pointer-shaped `Var` extractors are
     ABI crossings whose callers establish the source kind; scalar readers
-    convert other numeric tags through `Var.convert`.
+    convert other numeric tags under the `Var.convert` rules.
 */
 
 #pragma once
@@ -386,6 +386,11 @@ double x2c_var_order(Var a, Var b);
 
 Var Var.convert(Var value, Symbol target);
 Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site);
+long Var.long_at(Var value, const X2CErrorSite *site);
+ulong Var.ulong_at(Var value, const X2CErrorSite *site);
+long long Var.long_long_at(Var value, const X2CErrorSite *site);
+unsigned long long Var.ulong_long_at(Var value, const X2CErrorSite *site);
+long double Var.long_double_at(Var value, const X2CErrorSite *site);
 int Var.truth(Var value);
 int Var.fallback_truth(Var value);
 meta Iter Var.fallback_iter(Var value, Iter dest);
@@ -682,7 +687,9 @@ inline Symbol Var.symbol(Var x) {
 /* Scalar readers apply the Var.convert rules. Each direct branch is a fast
    path for a tag it already recognizes and gives the same result as
    converting. The fallback converts to the named target and reads the raw
-   payload; a scalar reader after conversion would recurse. */
+   payload; a scalar reader after conversion would recurse. Converting to a
+   wide target would box, so the wide readers are their site-carrying forms
+   without a site. */
 
 /** Returns `x` as a native `char` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
@@ -752,58 +759,34 @@ meta native unsigned Var.unsigned(Var x) {
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native long Var.long(Var x) {
-  if (x is <long>) return x.long_value();
-  if (x is <i48> || x is <i32> || x is <u32> ||
-      x is <i16> || x is <u16> || x is <i8> || x is <u8>)
-    return x.integer();
-  return x.convert(<long>).long_value();
-}
+meta native long Var.long(Var x) => Var.long_at(x, NULL);
 
 /** Returns `x` as a native `ulong` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native ulong Var.ulong(Var x) {
-  if (x is <ulong>) return x.ulong_value();
-  if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
-    return (ulong) x.integer();
-  return x.convert(<ulong>).ulong_value();
-}
+meta native ulong Var.ulong(Var x) => Var.ulong_at(x, NULL);
 
 /** Returns `x` as a native `long long` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native long long Var.long_long(Var x) {
-  if (x is <llong>) return x.long_long_value();
-  if (x is <long>) return (long long) x.long_value();
-  if (x.kind() == <integer>) return (long long) x.integer();
-  return x.convert(<llong>).long_long_value();
-}
+meta native long long Var.long_long(Var x) => Var.long_long_at(x, NULL);
 
 /** Returns `x` as a native `unsigned long long` under the `Var.convert`
     rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-meta native unsigned long long Var.ulong_long(Var x) {
-  if (x is <ullong>) return x.ulong_long_value();
-  if (x is <ulong>) return (unsigned long long) x.ulong_value();
-  if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
-    return (unsigned long long) x.integer();
-  return x.convert(<ullong>).ulong_long_value();
-}
+meta native unsigned long long Var.ulong_long(Var x) =>
+  Var.ulong_long_at(x, NULL);
 
 /** Returns `x` as a native `long double` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
     invalidly encoded.
 */
-meta native long double Var.long_double(Var x) {
-  if (x is <ldouble>) return x.long_double_value();
-  if (x is <f64> || x is <f32>) return (long double) x.floating();
-  return x.convert(<ldouble>).long_double_value();
-}
+meta native long double Var.long_double(Var x) =>
+  Var.long_double_at(x, NULL);
 
 /** Returns `x` as a native `float` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or

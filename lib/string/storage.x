@@ -104,12 +104,14 @@ String String.new_len(const char *str, int len) {
     existing equal `String` in `pool` or an ancestor is returned with that
     owner's lifetime; otherwise the new value is owned by `pool`. A null
     argument, nonpositive length, or empty input returns NULL.
-    Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning.
+    Raises: `<size-limit>` when the bytes cannot fit a `String` or while
+    interning, or `<alloc-fail>` or `<invariant>` while interning.
 */
 String String.new_in(Pool pool, const char *bytes, int length) {
   if (!pool || !bytes || length <= 0) return NULL;
   size_t bounded = strnlen(bytes, (size_t) length);
-  if (!bounded || bounded > INT_MAX - 1) return NULL;
+  if (!bounded) return NULL;
+  if (bounded > INT_MAX - 1) raise %(size-limit (operation "String.new_in"));
   return _from_bytes_in(pool, bytes, (int) bounded);
 }
 
@@ -130,17 +132,16 @@ meta native Self String.intern(Self string) => string.new();
     mutating it afterwards does not disturb the result. Equal nonempty content
     visible in the active pool chain yields the same pointer, which is why
     `==` on canonical `String`s from that chain is a content comparison. A
-    detached or sibling pool may hold a distinct equal pointer. Empty input
-    canonicalizes to the null pointer, the empty `String`'s only
+    detached or sibling pool may hold a distinct equal pointer. Null or empty
+    input canonicalizes to the null pointer, the empty `String`'s only
     representation.
-    Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null,
-    empty, or oversized input returns NULL, which is indistinguishable from the
-    empty `String`, without raising.
+    Raises: `<size-limit>` when `str` is too long for a `String`, or
+    `<alloc-fail>` when canonical storage cannot be allocated.
 */
 String String.new(const char *str) {
   if (!str || !*str) return NULL;
   size_t length = strlen(str);
-  if (length > INT_MAX - 1) return NULL;
+  if (length > INT_MAX - 1) raise %(size-limit (operation "String.new"));
   return x2c_string_from_bytes(str, (int) length);
 }
 

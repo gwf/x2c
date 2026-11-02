@@ -42,10 +42,7 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
     without retaining them, so the owning pool must outlive iteration. A null
     `dest` returns NULL; `nil` produces an exhausted iterator.
 */
-Iter List.iter(List lst, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(lst, _next, lst);
-}
+Iter List.iter(List lst, Iter dest) => dest.init(lst, _next, lst);
 
 // indexing
 

@@ -488,6 +488,53 @@ static void string_search_and_replace(void) {
   EXPECT_TRUE(text.replace("missing", "Q") === text);
 }
 
+/* `end` is a slice stop, so a search covers the text the slice selects. */
+static void string_search_end_is_a_slice_stop(void) {
+  String text = "xxcx", repeated = "abcabc";
+  EXPECT_STR_EQ(text[0:-2], "xxc");
+  EXPECT_INT_EQ(text.find_within("c", 0, -2), 2);
+  EXPECT_STR_EQ(text[0:-3], "xx");
+  EXPECT_INT_EQ(text.find_within("c", 0, -3), -1);
+  EXPECT_STR_EQ(repeated[0:-2], "abcab");
+  EXPECT_TRUE(repeated.find_all("ab", 0, -2) == %(0 3));
+}
+
+/* Each call renders differently, so a join that renders an element twice
+   produces neither rendering. */
+class JoinCounter struct { int calls; } *;
+
+String JoinCounter.str(JoinCounter counter) =>
+  ++counter.calls == 1 ? "once" : "rendered again";
+
+static void string_join_renders_each_element_once(void) {
+  EXPECT_STR_EQ(",".join(%(1 2.5 sym "s" (x y))),
+                "1,2.500000,sym,s,( x y )");
+  Var null = (Var) { .u64 = 0 };
+  EXPECT_STR_EQ(",".join(%(a $null b)), "a,,b");
+  JoinCounter counter = JoinCounter.new(0);
+  Var element = counter;
+  EXPECT_STR_EQ("-".join(%(a $element b)), "a-once-b");
+  EXPECT_INT_EQ(counter.calls, 1);
+}
+
+/* A result longer than a String can hold raises instead of returning the
+   empty String. */
+static void string_oversized_results_raise_size_limit(void) {
+  int caught = 0;
+  try "ab".repeat(INT_MAX / 2 + 1);
+  catch %(size-limit (operation "String.repeat") *): caught++;
+  String text = "a".repeat(1 << 16), wide = "b".repeat((1 << 15) + 1);
+  try text.replace("a", wide);
+  catch %(size-limit (operation "String.replace_n") *): caught++;
+  /* 2048 references to one 1 MiB String: the measured join is 2 GiB. */
+  String block = "x".repeat(1 << 20);
+  Array parts = auto [];
+  for (int i = 0; i < 2048; i++) parts.push(block);
+  try String.join(NULL, parts);
+  catch %(size-limit (operation "String.join")): caught++;
+  EXPECT_INT_EQ(caught, 3);
+}
+
 static void string_foreach_bytes_as_int_and_char(void) {
   int total = 0, count = 0;
   foreach(int byte, "Az") {
@@ -786,6 +833,9 @@ void string_suite(void) {
   $test.run(string_malloc_len_counts_writable_bytes);
   $test.run(string_empty_search_contract);
   $test.run(string_search_and_replace);
+  $test.run(string_search_end_is_a_slice_stop);
+  $test.run(string_join_renders_each_element_once);
+  $test.run(string_oversized_results_raise_size_limit);
   $test.run(string_foreach_bytes_as_int_and_char);
   $test.run(string_transformations);
   $test.run(string_func_callbacks);

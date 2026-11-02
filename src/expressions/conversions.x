@@ -473,6 +473,8 @@ static List _read_var(Compiler c, List expr, Type type, Type target) {
   if (scalar_target) {
     Symbol tag = scalar_target.scalar_tag();
     if (!tag && scalar_target.is_enum()) tag = <i32>;
+    String wide = _wide_reader(tag);
+    if (wide) return %(expr $target (call $wide (args $expr (error-site))));
     String extractor = scalar_target.var_numeric_extractor();
     if (extractor) {
       String tagsym = %"$((unsigned long) tag)";
@@ -495,6 +497,19 @@ static List _read_var(Compiler c, List expr, Type type, Type target) {
     if (resolved.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
     $fail.expressions_var_convert(c, NULL, target);
+  }
+  return NULL;
+}
+
+/* Converting to a wide family boxes the result in the active Scope, so a
+   wide target reads through its site-carrying reader, which does not. */
+static String _wide_reader(Symbol tag) {
+  switch (tag) {
+    case <long>:    return "Var_long_at";
+    case <ulong>:   return "Var_ulong_at";
+    case <llong>:   return "Var_long_long_at";
+    case <ullong>:  return "Var_ulong_long_at";
+    case <ldouble>: return "Var_long_double_at";
   }
   return NULL;
 }

@@ -120,8 +120,6 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   }
 }
 
-#include <string.h>
-
 /** Typed view of canonical `List` cells whose cars are `<i8>` char values. */
 typedef List ListChar;
 /** Typed view of canonical `List` cells whose cars are `<i16>` short values.
@@ -165,12 +163,7 @@ inline int _typed_list_decode_i32(Var value) =>
 
 inline Var _typed_list_encode_f32(float value) => Var.box_f32(value);
 
-inline float _typed_list_decode_f32(Var value) {
-  unsigned raw = (unsigned) (value.u64 & 0xFFFFFFFFul);
-  float result;
-  memcpy(&result, &raw, sizeof result);
-  return result;
-}
+inline float _typed_list_decode_f32(Var value) => value.decode_f32();
 
 inline Var _typed_list_encode_f64(double value) => Var.box_f64(value);
 
@@ -178,10 +171,7 @@ inline double _typed_list_decode_f64(Var value) => value.decode_f64();
 
 /* String keeps a checked read. Its payload is a pointer, so a masked read of
    the wrong tag is a wild pointer rather than a wrong scalar. */
-inline Var _typed_list_encode_string(String value) {
-  unsigned long raw = (unsigned long) (uintptr_t) value;
-  return (Var) { .u64 = VAR_STRING_PREFIX | raw };
-}
+inline Var _typed_list_encode_string(String value) => value;
 
 inline String _typed_list_decode_string(Var value) => value;
 
