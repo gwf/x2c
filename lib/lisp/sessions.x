@@ -76,9 +76,11 @@ void Lisp.destroy(Lisp lisp) {
     freezes it with `Lisp.freeze` before the first child runs: a child's
     values belong to a narrower `Context` than the parent's, so nothing a
     child produces may become reachable from the parent.
+    Raises: `<bad-arg>` for a null session or parent, or `<alloc-fail>` or
+    `<size-limit>` while creating the child's reserved `Map`.
 */
 void Lisp.adopt(Lisp lisp, Lisp parent) {
-  if (!lisp || !parent) return;
+  if (!lisp || !parent) $error.entry.null("Lisp.adopt");
   lisp.parent = parent;
   auto (&lisp.scope) lisp.reserved = {};
   for (unsigned i = 0; i < _canonical_count(); i++)
@@ -90,8 +92,12 @@ void Lisp.adopt(Lisp lisp, Lisp parent) {
     A frozen session rejects `def` and `Lisp.set_global`: a value produced
     while a narrower `Context` is current would leave the session holding
     values that die with that `Context`.
+    Raises: `<bad-arg>` for a null session.
 */
-void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
+void Lisp.freeze(Lisp lisp) {
+  if (!lisp) $error.entry.null("Lisp.freeze");
+  lisp.frozen = 1;
+}
 
 // globals
 
@@ -142,21 +148,15 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
     session. A host binding may shadow an inherited name in this session;
     it does not change the ancestor. Lisp `def` still rejects inherited
     names, including a name the host has shadowed locally.
-    Binding an `x2c.` name protects that namespace from later Lisp
-    `def` forms, but direct calls to this function may replace such a
-    binding.
-    Raises: `<bad-arg>` for a null session or name, or `<alloc-fail>`,
-    `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
+    Raises: `<bad-arg>` for a null session or name, `<bad-state>` for a
+    frozen session, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
+    canonicalizing or storing the binding.
 */
-void Lisp.set_global(Lisp lisp, String name, Var value) {
-  if (!lisp || !name) $error.global.args();
-  if (lisp.frozen)
+void Lisp.set_global(Lisp l, String name, Var value) {
+  if (!l || !name) $error.global.args();
+  if (l.frozen)
     $error.global.frozen("Lisp.set_global");
-  auto (&lisp.scope) {
-    Var interned = Atom.intern(name);
-    _binding_set(&lisp.scope, lisp.globals, interned, value);
-    if (name.startswith("x2c.")) lisp.protect_x2c = 1;
-  }
+  auto (&l.scope) _binding_set(&l.scope, l.globals, Atom.intern(name), value);
 }
 
 // session storage
