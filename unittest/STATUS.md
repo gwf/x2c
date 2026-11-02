@@ -330,6 +330,9 @@ parity remains a separate follow-up; the expectations were not weakened.
   unbalanced Scope state. Ambient errors remain with their configured policy
   owner. Tests return `void` and use bare `EXPECT_*` statements; the harness
   also provides `EXPECT_LIST_EQ`, `TEST_FAIL`, and explicit skipped tests.
+  A `TestHarness_skip` call inside a running test makes that test a skip
+  unless it also fails; it needs no assertions and counts once. The summary
+  total is passed + failed + skipped.
 - `test-match-binder.x` verifies that a matched String binds as a String.
 - Match statement binders enter semantic arm scope as typed `Var` or
   `List` locals, definite assignment is enforced across guard operators, and

@@ -10,7 +10,9 @@ Use the [agent directory](../agents/README.md) for task routing and the
   specifies. Include `test-macros.x` before its first use.
 - The harness fails a test on a failed assertion, zero assertions, or extra
   pushed/retained scope state. Ambient errors remain with their configured
-  policy owner.
+  policy owner. `TestHarness_skip` inside a running test makes that test a
+  skip unless it also fails: it needs no assertions and counts once. Outside
+  a test, the call registers one skipped test.
 
 ## Fixtures and lifetimes
 

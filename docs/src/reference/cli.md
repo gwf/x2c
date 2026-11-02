@@ -506,15 +506,18 @@ ends in `.x`, or may be any name when the first line is a shebang:
 The first run builds an executable into the per-user cache. Later runs
 start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
-includes, a package archive it links, the compiler, the runtime archive, the
-C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also records
-the directories the build searched: include directories, `-L` directories,
-the C compiler's header and library search paths, and the directory of each
-file the build read. Adding or removing a file in one of them rebuilds the
+includes, a package archive it links, a library file that a `-l` option can
+name, the compiler, the runtime archive, the C compiler, the script's
+options, or the `CPATH`, `C_INCLUDE_PATH`, `LIBRARY_PATH`, and `SDKROOT`
+environment variables. The cache also records the directories the build
+searched: include directories, `-L` directories, `LIBRARY_PATH`, the C
+compiler's header and library search paths, and the directory of each file
+the build read. Adding or removing a file in one of them rebuilds the
 script. This covers a header that now shadows an included one, a
 `__has_include` whose result changed, and a `-l` library that now resolves
-elsewhere. `--rebuild` builds regardless.
+elsewhere. A `-l` option that names no library file in those directories,
+such as one found through `-Wl,-L`, rebuilds the script on every run.
+`--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
