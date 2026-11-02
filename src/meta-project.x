@@ -108,11 +108,9 @@ static List _manifest(Helper &h) {
   Path.make_dirs(h.directory);
   int lock = Path.lock_file(%"$(h.directory)/lock", 1);
   defer close(lock);
-  int searched = _search_link(h.toolchain.ld_args);
-  List manifest = searched ? NULL : _current(h.directory);
-  if (manifest) return manifest;
-  if (searched) h.changed = 1;
-  return _build(h);
+  List manifest = _current(h.directory);
+  if (!manifest) return _build(h);
+  return _search_link(h.toolchain.ld_args) ? _relink(h, manifest) : manifest;
 }
 
 /* Like script publication, named library selections cannot reuse an output
@@ -122,6 +120,25 @@ static int _search_link(List arguments) {
     foreach (String part in argument.split(","))
       if (part.startswith("-l")) return 1;
   return 0;
+}
+
+/* Links the groups of the current `manifest` again, which no library a
+   search selects can change, and returns the manifest it writes. */
+static List _relink(Helper &h, List manifest) {
+  Map failed = {};
+  foreach (List row in manifest.assoc(<failures>)) {
+    failed[row.car()] = 1;
+    h.failures.push(row);
+  }
+  foreach (int index in manifest.assoc(<groups>)) {
+    h.groups.push(index);
+    if (index in failed) continue;
+    h.built.push(index);
+    h.objects.push(%"$(_base(h, index)).o");
+  }
+  foreach (List row in manifest.assoc(<deps>)) h.deps[row.car()] = 1;
+  h.changed = 1;
+  return _write_manifest(h, _link(h, h.owners.len() + 1));
 }
 
 // building the helper
