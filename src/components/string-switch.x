@@ -4,7 +4,9 @@
     owns becomes its index, so the body stays an ordinary integer switch on
     a helper's result. The helper returns the index of the first label equal
     to the selector under ordinary `==`, or 0. Switches on the same type
-    with the same labels share one helper.
+    with the same labels share one helper. It is static, except for the
+    switches in public inline functions, whose bodies the header publishes:
+    they share one with external linkage.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -84,19 +86,39 @@ meta static List _string_cases(
     node, child, _string_cases(child, indices, labels, site));
 }
 
-/* The helper shared by switches on `type` with the same `labels`. */
+/* Whether the function holding the switch is public inline, so that the
+   header publishes its body. */
+meta static int _switch_in_public_inline(void) {
+  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
+    return type ~= %(* inline *) && !(type ~= %(* static *));
+  return 0;
+}
+
+/* The role naming a helper with external linkage, which carries the hash
+   of the unit's path so that units whose public inline functions share a
+   header link together. */
+meta static String _string_switch_public_role(void) {
+  if (x2c_enclosing(<unit>) ~=
+      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
+    return %"string_switch_$("%08x".printf(path.hash()))";
+  return "string_switch";
+}
+
+/* The helper shared by switches on `type` with the same `labels`, with
+   external linkage when a public inline function holds the switch. */
 meta static Code _string_switch_helper(Type type, List labels) {
-  List key = %(string-switch $type $labels);
-  List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
+  int public = _switch_in_public_inline();
+  List key = %(string-switch $type $labels $public);
+  String role = public ? _string_switch_public_role() : "string_switch";
+  List name = x2c_binding_for(key, role), s = x2c_ident("s");
+  List declared = public ? %(int) : %(static int);
   Array tests = [];
   int index = 0;
   foreach (List label in labels)
     tests.push($!{ if ($s == $label) return $(++index); });
   x2c_place(
     %(unit-support $key),
-    $!Unit{
-      static int $name($type $s) { @(tests.list_free()) return 0; }
-    });
+    $!Unit{ $declared $name($type $s) { @(tests.list_free()) return 0; } });
   Type callable = %((func ($type)) int);
   return $!($callable){ $name };
 }
