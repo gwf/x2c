@@ -473,11 +473,29 @@ static int _directive(FileWalk &w, Token token) {
   String target = Compiler.preproc_include_target(token.text, angle);
   if (!target) return 0;
   _flush(w, w.text[w.pos:token.pos]);
+  List aliased = _unbound_aliases(w);
   _include_file(w, target, angle);
+  _check_included(w, aliased, token);
   Token next = token + 1;
   w.line = next.line;
   w.pos = next.pos;
   return 1;
+}
+
+/* The names of the unit's file-scope aliases that no declaration binds
+   yet. A provider's walk also sees its includer's names, which the
+   includer's include line checks instead. */
+static List _unbound_aliases(FileWalk &w) =>
+  w.c.interface_provider ? NULL : w.c.unbound_alias_names(w.globs);
+
+/* An include that declares one of those names conflicts at its line,
+   located as a segment locates its reports. */
+static void _check_included(FileWalk &w, List aliased, Token include) {
+  if (!aliased) return;
+  with (w.c.filename = w.path,
+        w.c.line_markers = w.module ? w.module.markers : NULL) {
+    w.c.check_included_names(aliased, w.globs, include);
+  }
 }
 
 /* Splice one include: replay its entry, or walk it cold, once per unit.

@@ -84,7 +84,9 @@ Canonical byte strings and core text operations.
 Canonicalizes a known NUL-free byte span in the active pool chain.
 Copies bytes only when needed; the caller retains its input storage.
 Null input or a nonpositive length returns the empty String.
-Raises alloc-fail if canonical storage cannot be allocated.
+
+**Raises:** `<size-limit>` for a span longer than `INT_MAX - 1` bytes, or
+`<alloc-fail>` if canonical storage cannot be allocated.
 
 Source: `lib/string/storage.x`
 
@@ -1286,8 +1288,9 @@ first, because a `String` cannot carry embedded NUL bytes:
 not be NUL-terminated, so it may be bounded C input or a window into a
 larger buffer.
 
-**Raises:** `<alloc-fail>` when canonical storage cannot be allocated. A null
-`str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
+**Raises:** `<size-limit>` when the copied bytes cannot fit a `String`, or
+`<alloc-fail>` when canonical storage cannot be allocated. A null `str`,
+nonpositive `len`, or leading NUL returns NULL, the empty `String`,
 without raising.
 
 Source: `lib/string/storage.x`

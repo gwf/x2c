@@ -1302,6 +1302,23 @@ static void parallel_map_cleans_worker_and_source_failures(void) {
   EXPECT_INT_EQ(atomic_load(&parallel_finished), 4);
 }
 
+/* The function and the worker count are checked where the map is
+   described, before any worker starts. */
+static void parallel_map_rejects_arguments_at_the_call(void) {
+  $test.scoped();
+  Pool pool = Pool.current();
+  String raised = NULL;
+  try range(0, 2, 1).parallel_map(NULL, 2);
+  catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
+  try range(0, 2, 1).parallel_map_in(pool, NULL, 2);
+  catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
+  try range(0, 2, 1).parallel_map(_parallel_count, 0);
+  catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised, "bad-arg Iter.parallel_map; bad-arg Iter.parallel_map_in; "
+            "bad-arg Iter.parallel_map; ");
+}
+
 static threaded int parallel_reuse_jobs;
 
 static Var _parallel_reuse_worker(Var input) {
@@ -1524,6 +1541,7 @@ void thread_parallel_map_suite(void) {
   $test.run(parallel_map_borrows_until_reducer_returns);
   $test.run(parallel_map_stops_channel_wait_on_reducer_failure);
   $test.run(parallel_map_bounds_and_completion_order);
+  $test.run(parallel_map_rejects_arguments_at_the_call);
   $test.run(parallel_map_results_outlive_workers);
   $test.run(parallel_map_cleans_worker_and_source_failures);
   $test.run(parallel_map_reuses_workers_with_explicit_transfer);

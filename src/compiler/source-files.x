@@ -9,12 +9,26 @@ static Map real_paths = NULL, static Scope real_paths_scope = NULL;
 // source paths
 
 /** Reads a source through the request view and retains exact response
-    bytes.
+    bytes. Returns 0 instead of raising when the read fails.
 */
 int Compiler.read_source(Compiler c, String path, String volatile &text) {
   if (!c.sources.read(path, text)) return 0;
-  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
+  _retain(c, path, text);
   return 1;
+}
+
+/** Returns a source's text through the request view and retains exact
+    response bytes.
+    Raises: the causes of `SourceView.read_text`.
+*/
+String Compiler.read_source_text(Compiler c, String path) {
+  String text = c.sources.read_text(path);
+  _retain(c, path, text);
+  return text;
+}
+
+static void _retain(Compiler c, String path, String text) {
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
 }
 
 /** Reports whether an x2c source belongs to the current package root.

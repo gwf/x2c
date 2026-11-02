@@ -259,6 +259,8 @@ module int _is_addressable(Compiler c, List expression) {
              _is_addressable(c, receiver);
     case %(expr ? (op (!quote *) ?operand)): return 1;
     case %(expr ? (op (!quote ->) ?receiver ?field)): return 1;
+    // A compound literal is an lvalue (C 6.5.2.5).
+    case %(expr ? (cast ? (expr ? (composite *)))): return 1;
     case %(expr ? $($grouped(?base))):
       return _is_addressable(c, base);
     case %(expr ? (op . ?base ?)):

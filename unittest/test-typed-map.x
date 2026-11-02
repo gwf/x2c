@@ -255,6 +255,10 @@ static void typed_map_missing_and_null_status_paths(void) {
   EXPECT_INT_EQ(missing.len(), 0);
   EXPECT_FALSE(missing.truth());
   EXPECT_TRUE(missing.equal(NULL));
+  struct Iter storage;
+  EXPECT_INT_EQ(missing.iter(&storage).count(), 0);
+  EXPECT_INT_EQ(missing.keys(&storage).count(), 0);
+  EXPECT_INT_EQ(missing.enumerate(&storage).count(), 0);
 }
 
 static void typed_map_errors_transfer(void) {

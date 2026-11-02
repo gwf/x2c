@@ -171,6 +171,20 @@ static void buffer_str_free_consumes_the_receiver(void) {
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
 }
 
+/* A String holds at most INT_MAX - 1 bytes, because its header counts the
+   trailing NUL in an int. The content here is short; only the recorded
+   length decides. */
+static void buffer_str_rejects_a_length_a_string_cannot_hold(void) {
+  char text[] = "short";
+  struct Block content = {
+    .bytes = text, .width = 1, .length = INT_MAX, .cap = INT_MAX };
+  struct Buffer storage = { .content = &content };
+  Buffer buf = &storage;
+  int caught = 0;
+  try buf.str();
+  catch %(size-limit *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+}
 
 void buffer_suite(void) {
   $test.run(buffer_formatting_failure_transfers_and_keeps_text);
@@ -183,4 +197,5 @@ void buffer_suite(void) {
   $test.run(buffer_eager_indents_and_clear_reuse);
   $test.run(buffer_status_get);
   $test.run(buffer_reports_contract_failures);
+  $test.run(buffer_str_rejects_a_length_a_string_cannot_hold);
 }

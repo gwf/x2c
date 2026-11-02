@@ -1252,11 +1252,10 @@ static int _add_library_files(Array found, List directories, String name) {
     everything recorded when it was built.
 */
 int CliRequest.script_current(CliRequest request, String directory) {
-  String record = %"$directory/.x2c-state/script";
-  if (access(%"$directory/run", X_OK) || access(record, R_OK)) return 0;
-  List lines = NULL;
-  try lines = Path.read_text(record).split_lines(0);
-  catch %(io-fail *): return 0;
+  String record = %"$directory/.x2c-state/script", text = NULL;
+  if (access(%"$directory/run", X_OK) || !SourceView.read(NULL, record, text))
+    return 0;
+  List lines = text.split_lines(0);
   String cc = Toolchain.new(request).cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, lines.cdr(), ok);
@@ -1358,11 +1357,8 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
 }
 
 static List _depfile_inputs(String depfile) {
-  File input = fopen(depfile, "r");
-  if (!input) return NULL;
   String text = NULL;
-  try text = input.string_close();
-  catch %(io-fail *): return NULL;
+  if (!SourceView.read(NULL, depfile, text)) return NULL;
   List paths = translation_depfile_parse(text);
   long search = text.find("\n# x2c-search:");
   if (search >= 0)
@@ -1375,8 +1371,7 @@ static List _depfile_inputs(String depfile) {
 
 static int _state_matches(String path, uint64_t hash) {
   String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return 0;
+  if (!SourceView.read(NULL, path, text)) return 0;
   List lines = text.split_lines(0);
   if (!lines) return 0;
   String first = lines.car();

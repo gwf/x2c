@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-included-declaration-imported.x:10:1: parse: declaration 'level' is already bound
+  #include "alias-included/declared.x"
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  note: prior binding: 'level'
+

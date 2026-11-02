@@ -354,12 +354,21 @@ static List _convert_untyped(
   return expr;
 }
 
+/* A lambda adapts to the callback type its destination declares, without
+   the destination's own qualifiers. Only a typedef name is resolved:
+   resolving a spelled type would drop the qualifiers inside it, such as a
+   `const` result. */
 static List _adapt_lambda_value(Compiler c, List expr, Type target) {
   Type type = expr.cadr();
   if (!type.is_function()) return expr;
   List lowered = c.lower_lambda_expr(expr);
-  return lowered == expr ? expr : c.adapt_lambda_arg(
-    lowered, c.sym.resolve_key(target.type_from_ast()));
+  if (lowered == expr) return expr;
+  Type callback = target.type_from_ast();
+  while (callback.car() is <symbol> &&
+         callback.car().symbol().is_type_qualifier())
+    callback = callback.cdr();
+  if (callback.is_bare_typedef_name()) callback = c.sym.resolve_key(callback);
+  return c.adapt_lambda_arg(lowered, callback);
 }
 
 static List _lift_func_value(
@@ -467,6 +476,13 @@ static List _convert_reference(
 // Var crossings
 
 static List _read_var(Compiler c, List expr, Type type, Type target) {
+  /* A destination spelled `struct T` or `union T` converts as the typedef
+     that names the same aggregate. */
+  Type named = target.is_aggregate() ? _tag_typedef(c, target) : NULL;
+  if (named) {
+    List converted = c.convert_expression(expr, named);
+    return %(expr $target $(converted.caddr()));
+  }
   if (target === %("Symbol"))
     return %(expr $target (call "Var_symbol" (args $expr)));
   Type scalar_target = c.sym.resolve_numeric_type(target);
@@ -491,8 +507,9 @@ static List _read_var(Compiler c, List expr, Type type, Type target) {
     $fail.expressions_var_address(c, NULL, target);
   if (target.is_pointer())
     return %(expr $target (call "Var_pointer" (args $expr)));
-  if (target.is_typedef_name()) {
-    // Unknown system typedefs have no proven pointer payload reader.
+  if (target.is_typedef_name() || target.is_aggregate()) {
+    /* Unknown system typedefs have no proven pointer payload reader, and a
+       struct or union that no typedef names has no reader at all. */
     Type resolved = c.sym.resolve_key(target);
     if (resolved.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));

@@ -332,7 +332,8 @@ static void iter_zip_and_unzip(void) {
   List pair = v;
   EXPECT_INT_EQ(pair.car().int(), 0);
   EXPECT_INT_EQ(pair.cdr().car().int(), 10);
-  struct Iter zfu_left_storage, zfu_right_storage, zfu_zip_storage, columns_storage;
+  struct Iter zfu_left_storage, zfu_right_storage, zfu_zip_storage,
+    columns_storage;
   UnzipShared unzip_shared;
   Iter zfu_left = range(0, 2, 1, &zfu_left_storage);
   Iter zfu_right = range(10, 12, 1, &zfu_right_storage);
@@ -393,7 +394,8 @@ static void iter_unzip_compacts_after_half_the_backlog(void) {
   UnzipShared shared;
   Iter left = range(0, count - 1, 1, &left_storage);
   Iter right = range(count, 2 * count - 1, 1, &right_storage);
-  Iter columns = left.zip(right, &zip_storage).unzip(&shared, &columns_storage);
+  Iter columns =
+    left.zip(right, &zip_storage).unzip(&shared, &columns_storage);
   Var first_var = columns.next(), second_var = columns.next();
   struct Iter first_storage, second_storage;
   Iter first = first_var.iter(&first_storage);

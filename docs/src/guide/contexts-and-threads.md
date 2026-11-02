@@ -332,10 +332,10 @@ The first backend targets macOS and Linux on arm64 and x86_64. Each task uses
 an 8 MiB usable, demand-paged stack plus a guard page. Set
 `X2C_TASK_STACK_BYTES` before the call to select another capacity of at least
 32 KiB; capacity rounds up to the native page size. Smaller stacks can exhaust
-space sooner. `Regex` matching, `Json` reading and writing, the Lisp reader,
-and Lisp evaluation stop before the stack runs out and raise their usual depth
-errors, so they allow less nesting on a small stack. Other overflow remains a
-native failure, without guaranteed cleanup.
+space sooner. `Regex` compiling and matching, `Json` reading and writing, the
+Lisp reader, and Lisp evaluation stop before the stack runs out and raise
+their usual depth errors, so they allow less nesting on a small stack. Other
+overflow remains a native failure, without guaranteed cleanup.
 Tasks stay on their original native thread. Other targets retain synchronous
 support; requesting an unavailable task backend raises bad-state.
 

@@ -68,6 +68,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
 | [`Compiler.proven_references`](#Compiler.proven_references) | Returns the optional-reference parameters that `condition` proves the caller supplied when it has truth `holds`. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
+| [`Compiler.read_source_text`](#Compiler.read_source_text) | Returns a source's text through the request view and retains exact response bytes. |
 | [`Compiler.record_inline_function`](#Compiler.record_inline_function) | Records the header linkage of a public inline definition. |
 | [`Compiler.record_origin`](#Compiler.record_origin) | Records a token's location and returns its one-based occurrence. |
 | [`Compiler.record_source_declaration`](#Compiler.record_source_declaration) | Records a physical declaration using the binding's actual scope and key. |
@@ -687,7 +688,19 @@ Source: `src/compiler/binding-facts.x`
 `int Compiler.read_source(Compiler c, String path, String volatile &text)`
 
 Reads a source through the request view and retains exact response
-bytes.
+bytes. Returns 0 instead of raising when the read fails.
+
+Source: `src/compiler/source-files.x`
+
+<a id="Compiler.read_source_text"></a>
+#### Compiler.read_source_text
+
+`String Compiler.read_source_text(Compiler c, String path)`
+
+Returns a source's text through the request view and retains exact
+response bytes.
+
+**Raises:** the causes of `SourceView.read_text`.
 
 Source: `src/compiler/source-files.x`
 

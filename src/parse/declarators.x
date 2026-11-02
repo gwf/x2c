@@ -411,7 +411,7 @@ module List _install_declarator(
   Type declared_type = mods.append(base);
   name = _method_spelling(c, name, declared_type, method, exact_name);
   String exact = _syntax_exact_name(name);
-  _check_rebinding(c, exact, exact_name, declaration);
+  _check_rebinding(c, context, exact, exact_name, declaration);
   List binding = exact ? c.sym.declare(context, $(exact), declared_type)
                : name is <list> ? name.list() : NULL;
   if (binding && !exact) _bind_identity(c, context, binding, declaration);
@@ -479,10 +479,15 @@ static Var _method_spelling(
 
 /* An exact spelling, or a name a parameter holds, may be declared again only
    as another prototype of a function. An alias's name is not declared again
-   in its scope. */
+   in its scope. A field conflicts with an alias of the body that holds it;
+   any other declaration joins its Sym scope through the bodies around it,
+   so it conflicts with theirs too. */
 static void _check_rebinding(
-  Compiler c, String exact, int exact_name, List declaration) {
-  if (exact && c.scope_declares_alias(exact))
+  Compiler c, List context, String exact, int exact_name,
+  List declaration) {
+  int field = context && !(context === %(typedef));
+  if (exact && (field ? c.scope_declares_alias(exact)
+                      : _names_alias(c, exact)))
     $fail.parse_decl_bound(c, c.token, exact);
   List existing = exact ? c.sym.current_binding($(exact)) : NULL;
   if (exact_name || (existing &&

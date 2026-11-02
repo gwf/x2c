@@ -1,0 +1,40 @@
+unittest/compiler-fixtures/region-returned-arguments.x:8:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.reverse();
+      ^^^^^^
+  note: region opened at line 6
+
+unittest/compiler-fixtures/region-returned-arguments.x:16:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.sort();
+      ^^^^^^
+  note: region opened at line 14
+
+unittest/compiler-fixtures/region-returned-arguments.x:24:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.sort_with(compare);
+      ^^^^^^
+  note: region opened at line 22
+
+unittest/compiler-fixtures/region-returned-arguments.x:32:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.sort_by(key);
+      ^^^^^^
+  note: region opened at line 30
+
+unittest/compiler-fixtures/region-returned-arguments.x:40:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.setslice(0, 1, [9]);
+      ^^^^^^
+  note: region opened at line 38
+
+unittest/compiler-fixtures/region-returned-arguments.x:48:5: region: 'm' can outlive the region it was allocated in when returned
+      return m.merge({"b": 2});
+      ^^^^^^
+  note: region opened at line 46
+
+unittest/compiler-fixtures/region-returned-arguments.x:56:5: region: 'b' can outlive the region it was allocated in when returned
+      return b.printf("%d", 1);
+      ^^^^^^
+  note: region opened at line 54
+
+unittest/compiler-fixtures/region-returned-arguments.x:64:5: region: 'a' can outlive the region it was allocated in when returned
+      return a.reverse();
+      ^^^^^^
+  note: region opened at line 62
+

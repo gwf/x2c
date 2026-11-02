@@ -16,7 +16,7 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.find`](#Array.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`Array.foldl`](#Array.foldl) | Folds `fn` over `array` from `seed`, front to back. |
 | [`Array.free`](#Array.free) | Releases the `Array` and its backing storage, invalidating every alias. |
-| [`Array.getindex`](#Array.getindex) | Reads `index` from a non-null array, counting negatives from the end. |
+| [`Array.getindex`](#Array.getindex) | Reads `index`, counting negatives from the end. |
 | [`Array.getslice`](#Array.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`Array.index`](#Array.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`Array.insert`](#Array.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -150,8 +150,9 @@ Source: `lib/array/array.x`
 
 `Var Array.getindex(Array array, int index)`
 
-Reads `index` from a non-null array, counting negatives from the end.
-Returns `void` when the normalized index is outside the array.
+Reads `index`, counting negatives from the end.
+Returns `void` when the normalized index is outside the array; a null
+array reads as empty.
 
 **Raises:** `<size-limit>` outside the integer index domain.
 
@@ -320,11 +321,9 @@ Source: `lib/array/array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/array/array.x`
 
@@ -387,11 +386,11 @@ Source: `lib/array/array.x`
 `Var Array.shift(Array array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/array/array.x`
 
@@ -473,9 +472,9 @@ Source: `lib/array/array.x`
 `Var Array.take_last(Array array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/array/array.x`
 

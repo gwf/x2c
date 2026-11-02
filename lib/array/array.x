@@ -82,11 +82,13 @@ static struct ArraySortEntry {
   size_t index;
 };
 
-/** Reads `index` from a non-null array, counting negatives from the end.
-    Returns `void` when the normalized index is outside the array.
+/** Reads `index`, counting negatives from the end.
+    Returns `void` when the normalized index is outside the array; a null
+    array reads as empty.
     Raises: `<size-limit>` outside the integer index domain.
 */
 Var Array.getindex(Array array, int index) {
+  if (array == NULL) return void;
   if (array.length > INT_MAX) _size_limit(0, array.length);
   index = x2c_normalize_index(index, (int) array.length);
   if (index < 0) return void;

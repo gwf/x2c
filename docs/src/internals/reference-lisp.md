@@ -141,12 +141,13 @@ implementations; they do not prove identical behavior for every program.
 
 ## Production execution
 
-The production evaluator recurses on the C stack for every call except a
-call in tail position, which reuses its caller's frame. A self-recursive loop
-written in tail position therefore runs in constant native stack. The
-outermost call of an evaluation measures the stack. Nested calls may then
-use the smaller of 6 MB and four fifths of the thread's remaining stack, and
-a call beyond that raises `<call-stack>`. Each public entry, such as
+The production evaluator recurses on the C stack for every nested form and
+every call except a call in tail position, which reuses its caller's frame.
+A self-recursive loop written in tail position therefore runs in constant
+native stack. Each public entry measures the stack. Forms and calls nested
+below it may then use the smaller of 6 MB and four fifths of the thread's
+remaining stack, and one nested beyond that raises `<call-stack>`. Each
+public entry, such as
 `Lisp.eval`, also opens a budget of 40,000,000 calls, tail calls included;
 `Lisp.call_budget` changes it. Exhausting it raises `<call-stack>` with
 reason `"steps"`. Free names resolve through the Lambda's captures and

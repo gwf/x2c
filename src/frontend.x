@@ -50,11 +50,11 @@ typedef struct ParsedUnit {
 // diagnostics
 
 static macro Stmt $fail.frontend_input_read(
-  Expr $c, Expr $site, Expr $filename) =>
+  Expr $c, Expr $site, Expr $filename, Expr $reason) =>
   $c.report_error(
     <driver>,
     "cannot read input file",
-    $site, %("stage: driver" "file: $($filename)" "reason: cannot open"));
+    $site, %("stage: driver" "file: $($filename)" "reason: $($reason)"));
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
@@ -416,9 +416,22 @@ static void _runtime_roles(Compiler c, const char *source) {
 }
 
 static String _read_input(Compiler c) {
-  String filename = c.filename, text = NULL;
-  if (c.read_source(filename, text)) return text;
-  $fail.frontend_input_read(c, NULL, filename);
+  String filename = c.filename;
+  try return c.read_source_text(filename);
+  catch %((!set ?cause (!or not-found io-fail bad-arg size-limit)) *detail):
+    return _unreadable(c, filename, cause, detail);
+}
+
+/* Reports a failed read with the Error's own reason, the String limit, or
+   the system's text for its errno. */
+static String _unreadable(
+  Compiler c, String filename, Symbol cause, List detail) {
+  String reason = detail.assoc(<reason>);
+  if (!reason && cause == <size-limit>) reason = "too large for a String";
+  // Quoted, the key survives a host preprocessor that expands `errno`.
+  long error = reason ? 0 : detail.assoc(<"errno">);
+  if (!reason) reason = String.new(strerror((int) error));
+  $fail.frontend_input_read(c, NULL, filename, reason);
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an

@@ -73,6 +73,12 @@ static macro Stmt $error.depth(Expr $pattern, Expr $limit) {
           (limit $($limit)));
 }
 
+static macro Stmt $error.nesting(Expr $pattern, Expr $limit) {
+  raise %(size-limit (operation "Regex.compile") (pattern $($pattern))
+          (reason "a group nested more deeply than one pattern allows")
+          (limit $($limit)));
+}
+
 // private representation
 
 /* One node of the compiled pattern; `next` follows the sequence. A `<set>`
@@ -90,8 +96,11 @@ static struct _RegexNode {
   _RegexNode child, sibling, next;
 };
 
+/* One parse of `text`: `pos` is the byte being read, `depth` counts the
+   groups open there, and nesting stops when the C stack reaches `floor`. */
 static typedef struct Parser {
-  Regex regex, const char *text, int pos, len;
+  Regex regex, const char *text, int pos, len, depth;
+  unsigned long floor;
 } Parser;
 
 /* One search of `text`: `end` is where the match ends, `depth` counts the
@@ -109,7 +118,8 @@ static typedef struct Rest {
   int repeat, _RegexNode node, int count, start, struct Rest *up;
 } *Rest;
 
-/* Each iteration of a repeated group is a C frame, so a match stops at this
+/* Each iteration of a repeated group in a match, and each group nested in
+   another while a pattern parses, is a C frame, so either stops at this
    many, or sooner at the stack floor of a smaller stack. */
 static const int _DEPTH_LIMIT = 2000;
 
@@ -117,7 +127,8 @@ static const int _DEPTH_LIMIT = 2000;
 
 /** Compiles `pattern` and returns the `Regex`, owned by the current scope.
     Raises: `<malformed>` with `reason`, the `pattern`, and the byte `offset`
-    of the problem when the pattern does not parse.
+    of the problem when the pattern does not parse, or `<size-limit>` when
+    groups nest more than 2,000 deep or deeper than the stack allows.
 */
 Regex Regex.compile(String pattern) => Regex.new(pattern);
 
@@ -261,7 +272,8 @@ meta native RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();
 static Regex Regex.new(String pattern) {
   Regex regex = xcalloc(1, sizeof(struct Regex));
   regex.pattern = pattern;
-  Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
+  Parser p = {
+    regex, regex.pattern, 0, regex.pattern.len(), 0, _x2c_stack_floor()};
   _flags(p);
   regex.program = _parse_alternation(p);
   if (p.pos < p.len) _fail(p, reason_unmatched_close);
@@ -334,10 +346,13 @@ static _RegexNode _atom(Parser &p) {
 /* A group after its `(`. A plain `(` captures by number, `(?<name>` by
    number and name, and `(?:` not at all. */
 static _RegexNode _parse_group(Parser &p) {
+  if (p.depth == _DEPTH_LIMIT || _x2c_stack_below(p.floor)) _too_nested(p);
+  p.depth++;
   int index = _peek(p) == '?' ? _group_syntax(p) : _add_capture(p, NULL);
   _RegexNode body = _parse_alternation(p);
   if (_peek(p) != ')') _fail(p, reason_missing_close);
   p.pos++;
+  p.depth--;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
 
@@ -569,6 +584,10 @@ static int _peek(Parser &p) =>
 
 static void _fail(Parser &p, String why) {
   $error.compile(why, p.regex.pattern, p.pos);
+}
+
+static void _too_nested(Parser &p) {
+  $error.nesting(p.regex.pattern, p.depth);
 }
 
 static _RegexNode _node(Symbol kind) {

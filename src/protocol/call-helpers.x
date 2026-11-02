@@ -110,7 +110,8 @@ List Compiler.wrapper_function(
 /** Returns `(declarations arguments)` for a helper that forwards its
     parameters of `types`: each declaration names a fresh parameter `a0`,
     `a1`, ..., and each argument reads it. A rest parameter forwards its
-    List elements or Map entries with an explicit splice.
+    List elements or Map entries with an explicit splice. A helper without
+    parameters declares `(void)`, because `()` is unprototyped C.
 */
 List Compiler.forward_parameters(Compiler c, List types) {
   Array declarations = [], arguments = [];
@@ -125,7 +126,9 @@ List Compiler.forward_parameters(Compiler c, List types) {
     }
     else arguments.push($!($type){ $binding });
   }
-  return $(declarations.list_free(), arguments.list_free());
+  List params = declarations.list_free();
+  if (!params) params = %((param (void) (bind () ())));
+  return $(params, arguments.list_free());
 }
 
 // generated call helpers

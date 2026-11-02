@@ -61,11 +61,12 @@ Source: `src/expressions/conversions.x`
 `List Compiler.complete_iter_chain(Compiler c, List expression)`
 
 Completes an eligible resolved `Iter` call chain for immediate consumption.
-It accepts only a typed identifier call of the form
-`(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
-the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
-completed recursively; a call missing only that last formal receives the
-hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+It accepts a typed call `(expr R (call (expr F C) (args A)))` whose
+callee type `F` resolves to a function, or a pointer to one, with formals
+`P`, where `R` and the last formal in `P` canonicalize to `Iter`. `Iter`
+arguments are completed recursively; a call missing only that last formal
+receives the hidden destination. Variadic calls and `Iter_unzip` are
+returned unchanged.
 
 Source: `src/expressions/calls.x`
 

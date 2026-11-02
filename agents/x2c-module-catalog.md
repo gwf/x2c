@@ -223,7 +223,8 @@ request-owned source overlays.
 Public functions:
 
 `SourceView.init`, `SourceView.set`, `SourceView.unset`,
-`SourceView.is_changed`, `SourceView.exists`, `SourceView.read`
+`SourceView.is_changed`, `SourceView.exists`, `SourceView.read_text`,
+`SourceView.read`
 
 ### [src/stage.x](../src/stage.x)
 
@@ -412,7 +413,8 @@ Public functions:
 `Compiler.match_pattern_value`, `Compiler.pattern_binder_declarations`,
 `Compiler.match_capture_value`, `Compiler.match_capture_name`,
 `Compiler.open_condition_scope`, `Compiler.condition_bindings`,
-`Compiler.read_source`, `Compiler.owns_package_source`, `Compiler.source_path`,
+`Compiler.read_source`, `Compiler.read_source_text`,
+`Compiler.owns_package_source`, `Compiler.source_path`,
 `Compiler.canonical_path`, `Path.resolved_absolute`, `Path.real`,
 `Compiler.portable_path`, `Compiler.absolute_home_path`,
 `Compiler.add_translation_dependency`,
@@ -645,6 +647,7 @@ Public functions:
 `Compiler.parse_alias_statement`, `Compiler.parse_alias_declaration`,
 `Compiler.parse_alias_member`, `Compiler.enter_alias_body`,
 `Compiler.leave_alias_body`, `Compiler.scope_declares_alias`,
+`Compiler.unbound_alias_names`, `Compiler.check_included_names`,
 `Compiler.alias_expression`
 
 ### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)

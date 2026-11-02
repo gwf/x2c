@@ -268,8 +268,8 @@ Thread Thread.wait_any(Array pending) {
     Source values follow `Thread.start` borrowing: their input graphs must
     remain live and read-only while outstanding workers use them. A source
     must not mutate or recycle an outstanding input's storage.
-    Raises: `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
-    descriptor storage.
+    Raises: `<bad-arg>` for a null `function` or a nonpositive worker count,
+    or `<alloc-fail>` for descriptor storage.
 */
 ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
   return _parallel_map(i, NULL, function, workers);
@@ -279,7 +279,8 @@ ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
     The pool and its ancestors must stay live until foldl finishes. The caller
     retains ownership; workers restore their previous pool without releasing
     the borrowed pool. Source traversal and accumulation use the caller's pool.
-    Raises: bad-arg for a null pool or nonpositive worker count, or alloc-fail.
+    Raises: `<bad-arg>` for a null pool or `function` or a nonpositive worker
+    count, or `<alloc-fail>` for descriptor storage.
 */
 ParallelMap Iter.parallel_map_in(
   Iter i, Pool pool, ThreadValueFn function, int workers) {
@@ -803,7 +804,7 @@ static void _batch_check_stop(void) {
 
 static ParallelMap _parallel_map(
   Iter i, Pool pool, ThreadValueFn function, int workers) {
-  if (workers <= 0) {
+  if (!function || workers <= 0) {
     String operation = pool ? "Iter.parallel_map_in" : "Iter.parallel_map";
     raise %(bad-arg (operation $operation));
   }
