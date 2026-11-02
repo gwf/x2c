@@ -254,6 +254,51 @@ static void process_changes_after_start_raise(void) {
   EXPECT_INT_EQ(caught, 5);
 }
 
+/* The result accessors report the Job.start they reach first, and run
+   reports Job.live. */
+static void process_null_job_contract(void) {
+  $test.scoped();
+  Job job = NULL;
+  Array pending = [];
+  pending.push(NULL);
+  String raised = NULL;
+  try job.pipe(%(cat));
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.options({dir: "/"});
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.live();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.run();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.start();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.status();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.check();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.output();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.lines();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.errors();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.kill(SIGTERM);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.ready();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try Job.wait_any(pending);
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try job.cleanup();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg Job.pipe; bad-arg Job.options; bad-arg Job.live; "
+    "bad-arg Job.live; bad-arg Job.start; bad-arg Job.start; "
+    "bad-arg Job.start; bad-arg Job.start; bad-arg Job.start; "
+    "bad-arg Job.start; bad-arg Job.kill; bad-arg Job.ready; "
+    "bad-arg Job.wait_any; ");
+}
+
 static void process_start_failures_raise(void) {
   $test.scoped();
   int caught = 0;
@@ -533,4 +578,5 @@ void process_suite(void) {
   $test.run(process_child_stdio_without_parent_stdio);
   $test.run(process_cleanup_kills_a_job_ignoring_term);
   $test.run(process_scope_end_reaps_an_abandoned_job);
+  $test.run(process_null_job_contract);
 }

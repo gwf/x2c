@@ -276,6 +276,34 @@ static void http_loopback(void) {
   EXPECT_INT_EQ(events.len(), 2);
 }
 
+static void http_server_rejects_null_logger(void) {
+  $test.scoped();
+  String raised = NULL;
+  try HttpServer.new(
+    Router.new(), {host: "127.0.0.1", port: 0, logger: Var.new(<p48>, NULL)});
+  catch %(?code (operation ?op) *): raised = %"$code $op";
+  EXPECT_STR_EQ(raised, "bad-arg HttpServer.new");
+}
+
+static void http_null_server_contract(void) {
+  HttpServer server = NULL;
+  String raised = NULL;
+  try server.port();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try server.serve();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try server.start();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try server.stop();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  try server.close();
+  catch %(?code (operation ?op) *): raised = %"$raised$code $op; ";
+  EXPECT_STR_EQ(
+    raised,
+    "bad-arg HttpServer.port; bad-arg HttpServer.serve; "
+    "bad-arg HttpServer.start; bad-arg HttpServer.stop; ");
+}
+
 void http_suite(void) {
   $test.run(http_parser);
   $test.run(http_parser_rejections);
@@ -283,4 +311,6 @@ void http_suite(void) {
   $test.run(http_router_and_response);
   $test.run(http_route_captures_and_json_failure);
   $test.run(http_loopback);
+  $test.run(http_server_rejects_null_logger);
+  $test.run(http_null_server_contract);
 }

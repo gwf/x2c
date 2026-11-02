@@ -514,10 +514,12 @@ Var Thread.join(Thread t) {
 }
 
 /** Frees a `Thread` handle after its consuming join has completed.
-    Raises: `<bad-state>` for NULL, running, or joining handles.
+    NULL does nothing.
+    Raises: `<bad-state>` for running or joining handles.
 */
 void Thread.free(Thread t) {
-  if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
+  if (!t) return;
+  if (__atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
     raise %(bad-state (operation "Thread.free"));
   free(t);
 }
