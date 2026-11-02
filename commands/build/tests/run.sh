@@ -165,6 +165,14 @@ status=0
 [ "$status" = 1 ]
 grep -q 'missing-include.x:1:10:.*support/helpers.h.*file not found' missing-include.log
 
+# Parallel translation reports an input that is not text.
+printf 'int main(void) { return 0; }\n/* \000 */\n' > not-text.x
+printf 'int helper(void) { return 0; }\n' > text.x
+status=0
+"$X2C" build -q -j 2 not-text.x text.x >not-text.log 2>&1 || status=$?
+[ "$status" = 1 ]
+grep -q 'not-text.x:1:1: driver: cannot read input file' not-text.log
+
 # Source-mapped project meta groups retain included provider selection.
 printf '#pragma once\nmeta int twice(int n) => n * 2;\n' > meta-provider.x
 printf '#include "meta-provider.x"\nmeta int plus(int n) => twice(n) + 1;\nint main(void) { return $plus(3) != 7; }\n' > meta-include.x
