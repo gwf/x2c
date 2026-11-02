@@ -3025,8 +3025,8 @@ Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.
 
 `$auto(value)` is an ordinary expression macro. Its expansion calls
-`x2c.enclosing` to get the initialized declarator, places a release after that
-declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
+`x2c_enclosing` to get the initialized declarator, places a release after that
+declarator with `x2c_place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer. When
 the declaration finishes, the compiler checks that the result is the
 declarator's complete initializer. Then it binds the release. The release
