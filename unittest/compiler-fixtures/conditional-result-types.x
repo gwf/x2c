@@ -45,13 +45,10 @@ int main(int argc, char **argv) {
   String text = "chosen";
   Label label = "label";
   auto text_left = argc ? text : "other";
-  auto text_right = argc ? "other" : text;
   auto label_left = argc ? label : "other";
-  auto label_right = argc ? "other" : label;
-  printf("handles %d %d %d %d %d %d\n",
-    text_left.len(), text_right.len(),
-    (argc ? text : "other").split("/").len(),
-    (argc ? "other" : text).split("/").len(),
-    label_left.width(), label_right.width());
+  printf("handles %d %d %d\n", text_left.len(),
+    (argc ? text : "").split("/").len(), label_left.width());
+  String empty = NULL;
+  printf("empty [%s] [%s]\n", empty ? empty : "", argc ? "" : empty);
   return 0;
 }

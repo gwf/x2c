@@ -83,11 +83,7 @@ module List _conditional(
     type = left.widest(right);
   else if (!same) {
     Type pointer = _conditional_pointer(r.c, ontrue, onfalse);
-    if (pointer) {
-      type = pointer;
-      ontrue = r.c.convert_expression(ontrue, type);
-      onfalse = r.c.convert_expression(onfalse, type);
-    }
+    if (pointer) type = pointer;
     else if (_conditional_joins(r.c, false_type, true_type)) {
       type = false_type;
       ontrue = r.c.convert_expression(ontrue, type);
@@ -122,12 +118,10 @@ static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
       if (!(part in qualifiers)) qualifiers.push(part);
     }
   Type joined = %(* @(qualifiers.list_free()) @base);
-  /* A handle typedef keeps its operations when it already denotes the
+  /* Retain the first arm's handle, as before, when it already denotes the
      complete pointer result. A widened pointee cannot use that handle. */
   Type lhs_type = _conditional_unqualified(lhs.cadr().type().declared());
-  Type rhs_type = _conditional_unqualified(rhs.cadr().type().declared());
   if (lhs_type.is_bare_typedef_name() && left == joined) return lhs_type;
-  if (rhs_type.is_bare_typedef_name() && right == joined) return rhs_type;
   return joined;
 }
 
