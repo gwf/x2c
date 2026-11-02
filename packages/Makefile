@@ -1,11 +1,18 @@
-PACKAGES := pcre2 yyjson sqlite termbox2 raylib libcurl libuv blis torch \
+# The packages `make packages`, `make packages-check`, and the
+# release-validation workflow cover. Each package's own `check` target
+# names what checking it runs; agents/releasing.md lists what releases ship.
+PACKAGES := pcre2 yyjson sqlite libcurl termbox2 blis libuv raylib torch \
   autodiff
-# The packages the root `make packages-check` builds and runs.
-CHECKED_PACKAGES := pcre2 yyjson sqlite libcurl termbox2 blis libuv raylib \
-  torch autodiff
 
-.PHONY: test-deps cache-path prepare-checked \
+.PHONY: list examples check prepare test-deps cache-path \
 	$(addprefix prepare-,$(PACKAGES))
+
+list:
+	@echo $(PACKAGES)
+
+# Build every package's applications, or check every package, in order.
+examples check:
+	@set -e; for package in $(PACKAGES); do $(MAKE) -C $$package $@; done
 
 test-deps:
 	python3 tools/test-deps.py
@@ -13,7 +20,7 @@ test-deps:
 cache-path:
 	@python3 tools/deps.py path pcre2/dependency.json cache
 
-prepare-checked: $(addprefix prepare-,$(CHECKED_PACKAGES))
+prepare: $(addprefix prepare-,$(PACKAGES))
 
 $(addprefix prepare-,$(PACKAGES)): prepare-%:
 	$(MAKE) -C $* prepare

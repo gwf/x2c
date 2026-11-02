@@ -5,7 +5,9 @@ include ../package.mk
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(PCRE2_PREFIX)/include
 PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib -lpcre2-posix -lpcre2-8
 
-.PHONY: example short-example lisp-example run run-lisp
+.PHONY: run run-lisp
+
+check: test run run-lisp
 
 example: builds/request-report
 

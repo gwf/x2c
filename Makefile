@@ -182,37 +182,21 @@ verify: build						## Build, then run unit suites, compiler fixtures, and probes
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
 
+# packages/Makefile lists the packages; each package's Makefile names its
+# applications and its own `check`.
 packages: configure-packages				## Build packages and examples
 	$(MAKE) build
-	$(MAKE) -C packages/pcre2 build short-example example lisp-example
-	$(MAKE) -C packages/yyjson build short-example example lisp-example
-	$(MAKE) -C packages/sqlite build short-example example lisp-example
-	$(MAKE) -C packages/libcurl build short-example example lisp-example
+	$(MAKE) -C packages examples
 	$(MAKE) -C examples/packages/http-json-releases build
 	$(MAKE) -C examples/apps/notes build
-	$(MAKE) -C packages/termbox2 build short-example example
-	$(MAKE) -C packages/blis build short-example example
-	$(MAKE) -C packages/libuv build short-example example
-	$(MAKE) -C packages/raylib build short-example example builds/live-chart
-	$(MAKE) -C packages/torch build short-example
 
 # Optional: the completed packages need a prepared dependency cache, so this
 # stays out of check and precommit. Run it after a compiler or runtime change
-# that could reach a package client. `test` builds only tests/, so the example
-# programs are named too; they are what a reader of the package actually sees.
+# that could reach a package client.
 packages-check: build					## Test the completed packages
-	$(MAKE) -C packages/pcre2 test run run-lisp
-	$(MAKE) -C packages/yyjson test run run-lisp
-	$(MAKE) -C packages/sqlite test run run-lisp
-	$(MAKE) -C packages/libcurl test run run-lisp
+	$(MAKE) -C packages check
 	$(MAKE) -C examples/packages/http-json-releases test
 	$(MAKE) -C examples/apps/notes check
-	$(MAKE) -C packages/termbox2 test run
-	$(MAKE) -C packages/blis test run
-	$(MAKE) -C packages/libuv test run
-	$(MAKE) -C packages/raylib verify
-	$(MAKE) -C packages/torch test run
-	$(MAKE) -C packages/autodiff check
 
 check: build						## Run extended non-mutating checks
 	time $(MAKE) doc-check

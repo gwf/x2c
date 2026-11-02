@@ -38,8 +38,11 @@ PACKAGE_LINK := -Xlinker $(CURDIR)/$(SHIM) -Xlinker $(CURDIR)/$(OPS) \
 	-ltorch -ltorch_cpu -lc10 $(TORCH_CXX_RUNTIME) -Wl,-rpath,$(TORCH_LIB)
 NATIVE := $(SHIM) $(OPS)
 
-.PHONY: example short-example run run-mnist verify-python gen-ops \
-	verify-ops verify-jit
+.PHONY: run run-mnist verify-python gen-ops verify-ops verify-jit
+
+# mnist and jit-infer need data a check cannot assume, so `check` only
+# builds them; `example` compiles every application.
+check: test run run-lisp run-custom example
 
 build: $(NATIVE)
 
@@ -69,7 +72,7 @@ builds/%: tests/%.x $(PACKAGE_CONSUMER_DEPS) | builds
 
 short-example: builds/fit-line
 
-example: builds/mlp builds/mnist builds/jit-infer
+example: builds/mlp builds/mnist builds/jit-infer builds/custom-activation
 
 # mnist.x needs the IDX files and jit-infer.x needs a module Python
 # scripted, so `run` stays the two examples that need neither; run-mnist
@@ -105,7 +108,7 @@ verify-interchange: builds/optimizer-interchange
 run-mps: builds/mnist
 	TORCH_DEVICE=mps ./builds/mnist
 
-.PHONY: lisp-example run-lisp run-custom
+.PHONY: run-lisp run-custom
 
 lisp-example: builds/inline-lisp
 

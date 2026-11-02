@@ -19,8 +19,10 @@ BLIS_STATIC := $(BLIS_PREFIX)/lib/libblis.a
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(BLIS_INCLUDE)
 PACKAGE_LINK := $(BLIS_STATIC)
 
-.PHONY: example short-example run check-profile verify-profile \
-	verify-provenance verify-linkage
+.PHONY: run check-profile verify-profile verify-provenance \
+	verify-linkage
+
+check: test run
 
 # Everything here is only as trustworthy as the prefix it was built against,
 # so build and run check the profile first. test depends on build.
