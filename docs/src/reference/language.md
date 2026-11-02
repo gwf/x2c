@@ -2849,10 +2849,9 @@ when its hash matches the copy's. The hash of every unit definition it reaches
 through references must match too. An edited definition, or one that reaches an
 edited definition, is compiled with the unit's group like any other.
 
-A `meta` function that makes an explicit `$` call or uses a source-template
-constructor is also compile-time-only. A run-time call to a compile-time-only
-function is diagnosed where it is written. The diagnostic gives the function
-and the reason.
+A run-time call to a `meta` function that reaches a compiler query or a
+source-template constructor is diagnosed where it is written. The diagnostic
+gives the function and the reason.
 
 Compiler facilities load before a unit's own source, and macro code cannot
 redefine them.
