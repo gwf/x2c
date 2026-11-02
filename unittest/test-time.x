@@ -102,6 +102,40 @@ static void time_scales_integral_factors_exactly(void) {
   EXPECT_INT_EQ(caught, 2);
 }
 
+static void time_scales_fractional_factors_without_losing_nanoseconds(void) {
+  $test.scoped();
+  long long count = 1000000000000000002LL;
+  EXPECT_TRUE(Duration.new(count).scale(0.5).nanoseconds == count / 2);
+  EXPECT_TRUE(Duration.new(-count).scale(0.5).nanoseconds == -count / 2);
+  EXPECT_TRUE(Duration.new(count).scale(-0.5).nanoseconds == -count / 2);
+  EXPECT_TRUE(Duration.new(-count).scale(-0.5).nanoseconds == count / 2);
+  EXPECT_TRUE(Duration.new(1).scale(0.5).nanoseconds == 1);
+  EXPECT_TRUE(Duration.new(-1).scale(0.5).nanoseconds == -1);
+  EXPECT_TRUE(Duration.new(1).scale(0.25).nanoseconds == 0);
+  EXPECT_TRUE(Duration.new(-1).scale(0.25).nanoseconds == 0);
+  EXPECT_TRUE(Duration.new(LLONG_MIN).scale(0.5).nanoseconds == LLONG_MIN / 2);
+  EXPECT_TRUE(Duration.new(LLONG_MAX).scale(0.5).nanoseconds == LLONG_MAX / 2 + 1);
+  EXPECT_TRUE(Duration.new(LLONG_MIN).scale(0x1.fffffffffffffp-1).nanoseconds ==
+    LLONG_MIN + 1024);
+  EXPECT_TRUE(Duration.new(LLONG_MAX).scale(0x1.fffffffffffffp-1).nanoseconds ==
+    LLONG_MAX - 1024);
+  EXPECT_TRUE(Duration.new(-1).scale(0x1p63).nanoseconds == LLONG_MIN);
+  EXPECT_TRUE(Duration.new(0).scale(0x1p100).nanoseconds == 0);
+  EXPECT_TRUE(Duration.new(LLONG_MAX).scale(0x1p-1074).nanoseconds == 0);
+  int caught = 0;
+  try Duration.new(LLONG_MAX).scale(1.5);
+  catch %(conv-range *): caught++;
+  try Duration.new(LLONG_MIN).scale(-0x1.0000000000001p0);
+  catch %(conv-range *): caught++;
+  try Duration.new(1).scale(0x1p63);
+  catch %(conv-range *): caught++;
+  try Duration.new(0).scale(INFINITY);
+  catch %(conv-range *): caught++;
+  try Duration.new(1).scale(NAN);
+  catch %(conv-range *): caught++;
+  EXPECT_INT_EQ(caught, 5);
+}
+
 static void time_duration_boxes_as_a_value(void) {
   $test.scoped();
   Map seen = {};
@@ -234,6 +268,7 @@ void time_suite(void) {
   $test.run(time_duration_overflow_raises);
   $test.run(time_preserves_nanosecond_boundaries);
   $test.run(time_scales_integral_factors_exactly);
+  $test.run(time_scales_fractional_factors_without_losing_nanoseconds);
   $test.run(time_duration_boxes_as_a_value);
   $test.run(time_clocks_advance);
   $test.run(time_formats_rfc3339_in_utc);

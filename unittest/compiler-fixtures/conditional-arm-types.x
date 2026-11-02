@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-// Arms of one declared type keep it; mixed arms still widen or box.
+// Symbol arms retain their nominal type; numeric arms widen and Var boxes.
 typedef unsigned long Ticks;
 
 static Var pick(int flag) {

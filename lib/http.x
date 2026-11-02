@@ -278,6 +278,8 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
 */
 HttpServer HttpServer.new(Router router, Map options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
+  int ready = 0;
+  defer if (!ready && s.owns_logger) s.logger.free();
   s.router = router;
   s.workers = options.contains(<workers>) ? options[<workers>].integer() : 8;
   s.idle_ms = options.contains(<idle-ms>)
@@ -289,15 +291,18 @@ HttpServer HttpServer.new(Router router, Map options) {
   s.logger = options.contains(<logger>) ? options[<logger>].pointer() : NULL;
   if (!options.contains(<logger>)) {
     s.logger = Logger.new(<info>);
-    s.logger.add_stderr_sink();
     s.owns_logger = 1;
+    s.logger.add_stderr_sink();
   }
   if (!s.logger) raise %(bad-arg (operation "HttpServer.new"));
   String host = options.contains(<host>) ? options[<host>].str() : "::";
   int port = options.contains(<port>) ? options[<port>].integer() : 8080;
   s.listener = Listener.bind(host, port);
+  defer if (!ready) s.listener.close();
   s.channel = Channel.new(<i32>, s.workers);
+  defer if (!ready) s.channel.free();
   s.threads = [];
+  ready = 1;
   return s;
 }
 

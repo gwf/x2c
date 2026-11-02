@@ -101,6 +101,7 @@ static struct _RegexNode {
 static typedef struct Parser {
   Regex regex, const char *text, int pos, len, depth;
   unsigned long floor;
+  Array capture_names;
 } Parser;
 
 /* One search of `text`: `end` is where the match ends, `depth` counts the
@@ -272,11 +273,13 @@ meta native RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();
 static Regex Regex.new(String pattern) {
   Regex regex = xcalloc(1, sizeof(struct Regex));
   regex.pattern = pattern;
+  Array names = auto [];
   Parser p = {
-    regex, regex.pattern, 0, regex.pattern.len(), 0, _x2c_stack_floor()};
+    regex, regex.pattern, 0, regex.pattern.len(), 0, _x2c_stack_floor(), names};
   _flags(p);
   regex.program = _parse_alternation(p);
   if (p.pos < p.len) _fail(p, reason_unmatched_close);
+  regex.capture_names = names;
   return regex;
 }
 
@@ -390,7 +393,7 @@ static String _name(Parser &p) {
 /* Numbers a new capture and records its name, which may be NULL. */
 static int _add_capture(Parser &p, String name) {
   int index = ++p.regex.capture_count;
-  p.regex.capture_names = p.regex.capture_names.append($(name));
+  p.capture_names.push(name);
   return index;
 }
 
@@ -811,16 +814,18 @@ static void _too_deep(Matcher &m) {
 static RegexMatch _found(Matcher &m, String subject, int at) {
   m.starts[0] = at;
   m.ends[0] = m.end;
-  List captures = NULL;
-  for (int i = m.regex.capture_count; i >= 0; i--)
-    captures = cons(_capture(m, subject, i), captures);
-  return (RegexMatch) captures;
+  Array captures = auto [];
+  captures.push(_capture(m, subject, 0, NULL));
+  int index = 0;
+  foreach (String name in m.regex.capture_names)
+    captures.push(_capture(m, subject, ++index, name));
+  return (RegexMatch) captures.list();
 }
 
 /* Result fields are `(index name matched text start end)`. */
-static RegexCapture _capture(Matcher &m, String subject, int i) {
+static RegexCapture _capture(
+  Matcher &m, String subject, int i, String name) {
   int start = m.starts[i], end = m.ends[i], matched = start >= 0;
-  String name = i ? m.regex.capture_names[i - 1] : NULL;
   String text = matched ? subject[start:end] : NULL;
   return $(i, name, matched, text, start, end);
 }

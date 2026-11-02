@@ -130,6 +130,7 @@ Iter Path.walk(Path root, Iter dest) {
     No match returns an empty `List`.
 */
 List Path.glob(Path pattern) {
+  if (!pattern) return NULL;
   String text = pattern;
   const char *wildcard = strpbrk(text, "*?[\\");
   if (!wildcard) return pattern.exists() ? $(pattern) : NULL;

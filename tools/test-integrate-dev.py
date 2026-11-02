@@ -207,6 +207,9 @@ class IntegrationProbe(unittest.TestCase):
         self.write(self.root/'src'/'baseline.x','baseline\n')
         self.write(self.root/'bootstrap'/'src'/'compiled.c','seed\n')
         self.write(self.root/'docs'/'guide.md','old guide\n')
+        (self.root/'include').mkdir()
+        shutil.copy2(TOOL_ROOT/'include'/'.gitignore',
+                     self.root/'include'/'.gitignore')
         self.git('add','.')
         self.git('commit','-qm','fixture baseline')
         self.base = self.git('rev-parse','HEAD').stdout.strip()
@@ -410,6 +413,57 @@ class IntegrationProbe(unittest.TestCase):
                          'land-dev-review.json').exists())
         self.assertTrue(self.record(batch)['retired_at'])
         self.assertEqual(len(self.state()['gates']), 1)
+
+    def test_retirement_accepts_real_build_products(self):
+        self.pr(1)
+        batch = self.prepare()
+        self.land(batch)
+        candidate = self.checkout(self.record(batch))
+        for name in ('bootstrap/src/compiled.o', 'bootstrap/lib/libx2c.a',
+                     'bootstrap/src/x2c', 'bin/x2c-bootstrap',
+                     'bin/x2c-codex_test', 'bin/x2c-feature+test',
+                     'bin/x2c-feature@test', 'unittest/test-all',
+                     'unittest/build/test-all.o', 'examples/build/foreach/foreach',
+                     'examples/packages/greet/builds/libgreet.a'):
+            self.write(candidate / name, 'generated build product\n')
+        (candidate / 'bin/x2c').symlink_to('x2c-feature+test')
+        self.write(candidate / 'lib/example.x', 'runtime source\n')
+        self.write(candidate / 'bootstrap/lib/example.h', 'header\n')
+        self.git('add', 'lib/example.x', 'bootstrap/lib/example.h', cwd=candidate)
+        self.git('commit', '-qm', 'fixture runtime header', cwd=candidate)
+        self.git('push', 'origin', 'HEAD:refs/heads/dev', cwd=candidate)
+        for name, target in (
+                ('example.x', '../../lib/example.x'),
+                ('example.h', '../../builds/0/lib/example.h')):
+            link = candidate / 'include/x2c' / name
+            link.parent.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(target)
+        self.cli('retire', batch, '--reason', 'published', '--apply')
+        self.assertFalse(candidate.exists())
+
+    def test_retirement_preserves_unexpected_build_tree_files_and_links(self):
+        self.pr(1)
+        batch = self.prepare()
+        self.land(batch)
+        candidate = self.checkout(self.record(batch))
+        self.write(candidate / 'bin/x2c-feature+test', 'generated compiler\n')
+        self.write(self.root / '.git' / 'info' / 'exclude', 'bin/private-note\n')
+        for name, target in (('bootstrap/src/private.o', None),
+                             ('include/x2c/private.h', '../../private-note'),
+                             ('bin/x2c', '../private-note'),
+                             ('bin/x2c', '../bin/x2c-feature+test'),
+                             ('bin/private-note', None)):
+            path = candidate / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if target:
+                path.symlink_to(target)
+            else:
+                path.write_text('unrelated ignored file\n')
+            result = self.cli('retire', batch, '--reason', 'done',
+                              '--apply', ok=False)
+            self.assertIn('ignored files', result.stderr)
+            self.assertTrue(candidate.exists())
+            path.unlink()
 
     def test_retirement_refuses_unique_repairs_and_unclassified_ignored_files(self):
         self.pr(1)

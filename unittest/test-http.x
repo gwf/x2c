@@ -285,6 +285,44 @@ static void http_server_rejects_null_logger(void) {
   EXPECT_STR_EQ(raised, "bad-arg HttpServer.new");
 }
 
+static void _failed_server(void) {
+  Context context = auto Context.open_isolated();
+  try HttpServer.new(Router.new(), {host: "127.0.0.1", port: -1});
+  catch %(bad-arg *): return;
+  EXPECT_TRUE(0);
+}
+
+static void http_constructor_failure_releases_owned_resources(void) {
+  $test.scoped();
+  _failed_server();
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 3; i++) _failed_server();
+  Context context = Context.open_isolated();
+  HttpServer server = HttpServer.new(
+    Router.new(), {host: "127.0.0.1", port: 0});
+  server.close();
+  context.close();
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
+}
+
+static void http_constructor_failure_preserves_borrowed_logger(void) {
+  $test.scoped();
+  Logger logger = Logger.new(<info>);
+  defer logger.free();
+  List events = NULL;
+  logger.add_memory_sink(&events);
+  int caught = 0;
+  try HttpServer.new(
+    Router.new(), {host: "127.0.0.1", port: -1, logger: logger});
+  catch %(bad-arg *): caught++;
+  logger.info(<test>, %(message "still usable"));
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(events.len(), 1);
+}
+
 static void http_close_twice_is_harmless(void) {
   $test.scoped();
   HttpServer server = HttpServer.new(
@@ -326,4 +364,6 @@ void http_suite(void) {
   $test.run(http_server_rejects_null_logger);
   $test.run(http_null_server_contract);
   $test.run(http_close_twice_is_harmless);
+  $test.run(http_constructor_failure_releases_owned_resources);
+  $test.run(http_constructor_failure_preserves_borrowed_logger);
 }

@@ -79,6 +79,46 @@ def git(root, *args, deadline=None):
     return command(["git", *args], root, deadline=deadline).stdout.strip()
 
 
+def retirement_build_output(tree, name):
+    """Recognize products of the bootstrap, stage, include and unit builds."""
+    path = Path(name)
+    file = tree / path
+    if name.startswith(("debug/", "builds/", "unittest/build/", "examples/build/")):
+        return True
+    if path.parts[:2] == ("examples", "packages") and len(path.parts) > 4:
+        if path.parts[3] == "builds":
+            return True
+    if "__pycache__" in path.parts and path.suffix == ".pyc":
+        return True
+    if name == "unittest/test-all":
+        return not file.is_symlink()
+    if path.parent == Path("bin"):
+        # etc/branch.mk replaces only slash in a branch suffix.
+        if name == "bin/x2c":
+            return (file.is_symlink() and
+                    re.fullmatch(r"x2c-[^/]+", os.readlink(file)) is not None and
+                    file.is_file() and not (file.parent / os.readlink(file)).is_symlink())
+        return (not file.is_symlink() and
+                re.fullmatch(r"x2c-[^/]+", path.name) is not None)
+    if name in {"bootstrap/src/x2c", "bootstrap/lib/libx2c.a"}:
+        return not file.is_symlink()
+    if path.parent in {Path("bootstrap/src"), Path("bootstrap/lib")}:
+        return (not file.is_symlink() and path.suffix in {".o", ".d"} and
+                file.with_suffix(".c").is_file())
+    if name.startswith("include/x2c/") and file.is_symlink():
+        relative = path.relative_to("include/x2c")
+        if relative.suffix == ".x" and (tree / "lib" / relative).is_file():
+            expected = tree / "lib" / relative
+        elif relative == Path("group-match.h"):
+            expected = tree / "lib/map/group-match.h"
+        elif relative.suffix == ".h" and (tree / "bootstrap/lib" / relative).is_file():
+            expected = tree / "builds/0/lib" / relative
+        else:
+            return False
+        return file.resolve() == expected.resolve()
+    return False
+
+
 def now():
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
@@ -734,8 +774,7 @@ class Queue:
                              "with a landed replacement and --archive-repairs")
         ignored = git(tree, "ls-files", "--others", "--ignored", "--exclude-standard")
         unexpected = [p for p in ignored.splitlines()
-                      if not p.startswith(("debug/", "builds/", "unittest/build/")) and
-                      not ("__pycache__" in Path(p).parts and p.endswith(".pyc"))]
+                      if not retirement_build_output(tree, p)]
         if unexpected:
             raise ValueError("preserve ignored files outside build outputs: " + ", ".join(unexpected))
         retirement = {"reason": args.reason, "replacement": args.replacement,

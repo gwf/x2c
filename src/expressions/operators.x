@@ -72,13 +72,18 @@ module List _conditional(
       true_type === %(<macro-expr>) ||
       false_type === %(<macro-expr>))
     return %(expr (<macro-expr>) (op $operator $condition $ontrue $onfalse));
-  /* Arms of one declared type keep it. A `Symbol` conditional therefore
-     retains `Symbol` as its type. */
   Type type = true_type;
-  if (true_type.declared() != false_type.declared()) {
-    Type left = r.c.sym.resolve_numeric_type(type);
-    Type right = r.c.sym.resolve_numeric_type(false_type);
-    if (left && right) type = left.widest(right);
+  Type left = r.c.sym.resolve_numeric_type(true_type);
+  Type right = r.c.sym.resolve_numeric_type(false_type);
+  int same = _conditional_unqualified(true_type.declared()) ==
+             _conditional_unqualified(false_type.declared());
+  if (left && right) {
+    Type widest = left.widest(right);
+    if (!same || widest != left) type = widest;
+  }
+  else if (!same) {
+    Type pointer = _conditional_pointer(r.c, ontrue, onfalse);
+    if (pointer) type = pointer;
     else if (_conditional_joins(r.c, false_type, true_type)) {
       type = false_type;
       ontrue = r.c.convert_expression(ontrue, type);
@@ -87,6 +92,40 @@ module List _conditional(
       onfalse = r.c.convert_expression(onfalse, type);
   }
   return %(expr $type (op $operator $condition $ontrue $onfalse));
+}
+
+/* Combine compatible non-void pointees without losing their qualifiers.
+   Mixed void pointers retain the existing destination-conversion boundary. */
+static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
+  Type left = _conditional_unqualified(
+    c.sym.normalize_declared_type(lhs.cadr()));
+  Type right = _conditional_unqualified(
+    c.sym.normalize_declared_type(rhs.cadr()));
+  if (left.is_pointer() && _null_literal(rhs)) return lhs.cadr();
+  if (right.is_pointer() && _null_literal(lhs)) return rhs.cadr();
+  Type lbase = left.dereference(), rbase = right.dereference();
+  if (!lbase || !rbase) return NULL;
+  Type base = _conditional_unqualified(lbase);
+  Type other = _conditional_unqualified(rbase);
+  if (base != other || base === %(void)) return NULL;
+  Array qualifiers = [];
+  foreach (Type pointee in $(lbase, rbase))
+    foreach (Var part in pointee) {
+      if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
+      if (!(part in qualifiers)) qualifiers.push(part);
+    }
+  Type joined = %(* @(qualifiers.list_free()) @base);
+  /* Retain the first arm's handle, as before, when it already denotes the
+     complete pointer result. A widened pointee cannot use that handle. */
+  Type lhs_type = _conditional_unqualified(lhs.cadr().type().declared());
+  if (lhs_type.is_bare_typedef_name() && left == joined) return lhs_type;
+  return joined;
+}
+
+static Type _conditional_unqualified(Type type) {
+  while (type.car() is <symbol> && type.car().symbol().is_type_qualifier())
+    type = type.cdr();
+  return type;
 }
 
 /* A conditional whose arms are a `Var` and another value is a `Var`: the
