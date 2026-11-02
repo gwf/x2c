@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """Focused tests for build-cost history identity retention."""
 
-import importlib.util
 import json
 from pathlib import Path
 import tempfile
 import unittest
 from unittest import mock
 
+from agent_context import load_script
+
 
 SCRIPT = Path(__file__).with_name("build-scaling-history.py")
-SPEC = importlib.util.spec_from_file_location("build_scaling_history", SCRIPT)
-assert SPEC and SPEC.loader
-history = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(history)
+history = load_script(SCRIPT, "build_scaling_history")
 
 
 class BuildScalingHistoryTests(unittest.TestCase):

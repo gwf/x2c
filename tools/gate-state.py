@@ -40,18 +40,11 @@ import subprocess
 import sys
 import uuid
 
-from agent_context import publication_blocked
+from agent_context import git, publication_blocked, write_json
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STATE = ROOT / "debug" / "gate-state.json"
 GATES = {"agent-pr-check", "doc-check"}
-
-
-def git(*args: str) -> str:
-    out = subprocess.run(
-        ["git", *args], cwd=ROOT, capture_output=True, text=True, check=True
-    )
-    return out.stdout
 
 
 # The root Makefile owns defaults and precedence. Child Makefiles derive their
@@ -233,21 +226,24 @@ def tree_content() -> dict[str, str]:
     changes. Missing paths are omitted before and after staging their deletion.
     """
     index: dict[str, str] = {}
-    for record in zsplit(git("ls-files", "-s", "-z")):
+    for record in zsplit(git("ls-files", "-s", "-z", root=ROOT)):
         meta, _, path = record.partition("\t")
         fields = meta.split()
         if path and len(fields) >= 2:
             index[path] = fields[1][:16]
     # Git does not compare assume-unchanged or skip-worktree paths.
-    flagged = {entry[2:] for entry in zsplit(git("ls-files", "-v", "-z"))
+    flagged = {entry[2:]
+               for entry in zsplit(git("ls-files", "-v", "-z", root=ROOT))
                if entry[0].islower() or entry[0] == "S"}
-    changed = set(zsplit(git("diff", "--name-only", "-z"))) | flagged
-    untracked = zsplit(git("ls-files", "--others", "--exclude-standard", "-z"))
+    changed = set(zsplit(git("diff", "--name-only", "-z", root=ROOT)))
+    changed |= flagged
+    untracked = zsplit(git("ls-files", "--others", "--exclude-standard", "-z",
+                           root=ROOT))
     # Make reads these names before a Makefile in the same directory.
     shadows = zsplit(git("ls-files", "--others", "-z", "--", *[
         os.path.join(os.path.dirname(path), name)
         for path in index if os.path.basename(path) == "Makefile"
-        for name in ("GNUmakefile", "makefile")]))
+        for name in ("GNUmakefile", "makefile")], root=ROOT))
     if shadows:
         raise ValueError(f"untracked makefile shadows Makefile: {shadows[0]}")
     entries: dict[str, str] = {}
@@ -273,7 +269,7 @@ def digest() -> dict:
         "configuration": build_configuration(),
         # Informational only; never compared. Recorded so a stale stamp can be
         # traced back to the commit it was taken on.
-        "recorded_at_head": git("rev-parse", "HEAD").strip(),
+        "recorded_at_head": git("rev-parse", "HEAD", root=ROOT).strip(),
     }
 
 
@@ -285,8 +281,7 @@ def load() -> dict:
 
 
 def save(records: dict) -> None:
-    STATE.parent.mkdir(parents=True, exist_ok=True)
-    STATE.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n")
+    write_json(STATE, records)
 
 
 def differences(old: dict, new: dict) -> list[str] | None:

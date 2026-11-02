@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Focused tests for the performance snapshot collector."""
 
-import importlib.util
 import contextlib
 import io
 import json
@@ -14,12 +13,11 @@ import unittest
 from unittest import mock
 from types import SimpleNamespace
 
+from agent_context import load_script
+
 
 SCRIPT = Path(__file__).with_name("performance-snapshot.py")
-SPEC = importlib.util.spec_from_file_location("performance_snapshot", SCRIPT)
-assert SPEC and SPEC.loader
-snapshot = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(snapshot)
+snapshot = load_script(SCRIPT, "performance_snapshot")
 
 
 class PerformanceSnapshotTests(unittest.TestCase):
@@ -99,10 +97,10 @@ class PerformanceSnapshotTests(unittest.TestCase):
       self.assertTrue(snapshot.successful_today(path, "2026-09-21"))
       self.assertFalse(snapshot.successful_today(path, "2026-09-22"))
 
-  def test_atomic_json_replaces_complete_document(self):
+  def test_write_json_replaces_complete_document(self):
     with tempfile.TemporaryDirectory() as directory:
       path = Path(directory) / "latest.json"
-      snapshot.atomic_json(path, {"status": "success"})
+      snapshot.write_json(path, {"status": "success"})
       self.assertEqual(json.loads(path.read_text()), {"status": "success"})
       self.assertEqual(list(Path(directory).glob("*.tmp-*")), [])
 
