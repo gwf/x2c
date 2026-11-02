@@ -12,11 +12,12 @@
     same undefined behavior as the equivalent C pointer. Bound loops with
     `len`, and use `try_get` for a checked read.
 
-    Numeric `array[index] += rhs` applies the generated C operator to native
-    values, not a `Var` round trip; `ArrayString` uses canonical String
-    concatenation. Integer promotions and result conversions follow C. Integer
-    division by zero, invalid shifts, and unsupported operators still raise
-    before changing the element; the boxed path's `<conv-range>` is absent.
+    Numeric `array[index] += rhs` operates on native values, not a `Var`
+    round trip; `ArrayString` uses canonical String concatenation. Integer
+    promotions and result conversions follow C, so a shift count is checked
+    against the promoted width. Integer division by zero, invalid shifts, and
+    unsupported operators still raise the causes `Var.update` raises, before
+    changing the element; the boxed path's `<conv-range>` is absent.
 */
 
 #pragma once
@@ -103,7 +104,7 @@ $array.core.family(ArrayChar, char);
 $array.typed.family(ArrayChar, char, 0, "ArrayChar");
 $array.typed.observe(ArrayChar, char, _compare_char);
 $array.typed.box(ArrayChar, char, "ArrayChar");
-$array.typed.update.integer(ArrayChar, char, uchar);
+$array.typed.update.integer(ArrayChar, char);
 $array.typed.publish(
   ArrayChar, char, arraychar, <arraychar>, _prepare_export);
 $array.typed.iterate(ArrayChar, char, arraychar);
@@ -112,7 +113,7 @@ $array.core.family(ArrayShort, short);
 $array.typed.family(ArrayShort, short, 0, "ArrayShort");
 $array.typed.observe(ArrayShort, short, _compare_short);
 $array.typed.box(ArrayShort, short, "ArrayShort");
-$array.typed.update.integer(ArrayShort, short, ushort);
+$array.typed.update.integer(ArrayShort, short);
 $array.typed.publish(
   ArrayShort, short, arrayshort, <arrayshort>, _prepare_export);
 $array.typed.iterate(ArrayShort, short, arrayshort);
@@ -121,7 +122,7 @@ $array.core.family(ArrayInt, int);
 $array.typed.family(ArrayInt, int, 0, "ArrayInt");
 $array.typed.observe(ArrayInt, int, _compare_int);
 $array.typed.box(ArrayInt, int, "ArrayInt");
-$array.typed.update.integer(ArrayInt, int, uint);
+$array.typed.update.integer(ArrayInt, int);
 $array.typed.publish(
   ArrayInt, int, arrayint, <arrayint>, _prepare_export);
 $array.typed.iterate(ArrayInt, int, arrayint);
@@ -130,7 +131,7 @@ $array.core.family(ArrayLong, long);
 $array.typed.family(ArrayLong, long, 0L, "ArrayLong");
 $array.typed.observe(ArrayLong, long, _compare_long);
 $array.typed.box(ArrayLong, long, "ArrayLong");
-$array.typed.update.integer(ArrayLong, long, ulong);
+$array.typed.update.integer(ArrayLong, long);
 $array.typed.publish(
   ArrayLong, long, arraylong, <arraylong>, _prepare_export);
 $array.typed.iterate(ArrayLong, long, arraylong);

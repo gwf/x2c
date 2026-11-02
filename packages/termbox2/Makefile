@@ -12,7 +12,9 @@ endif
 PACKAGE_LINK :=
 PACKAGE_TEST_COMMAND := expect tests/run-test.expect
 
-.PHONY: example short-example run run-interactive run-life-interactive
+.PHONY: run run-interactive run-life-interactive
+
+check: test run
 
 example: builds/incident-filter
 

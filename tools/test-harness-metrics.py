@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Focused transcript tests using synthetic records only."""
 
-import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -9,11 +8,11 @@ import sys
 import tempfile
 import unittest
 
+from agent_context import load_script
 
-SPEC = importlib.util.spec_from_file_location(
-    "harness_metrics", Path(__file__).with_name("harness-metrics.py"))
-metrics = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(metrics)
+
+metrics = load_script(
+    Path(__file__).with_name("harness-metrics.py"), "harness_metrics")
 DAY = "2026-10-01T12:00:00Z"
 
 

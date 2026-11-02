@@ -157,7 +157,7 @@ Source: `lib/net.x`
 <a id="Socket.shutdown_write"></a>
 #### Socket.shutdown_write
 
-`void Socket.shutdown_write(Socket socket)`
+`void Socket.shutdown_write(Socket s)`
 
 Flushes output and sends EOF to the peer while retaining input.
 

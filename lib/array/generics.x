@@ -14,9 +14,11 @@
 
     Compound update is native too. A float element has no `%` and no bitwise
     operators, so compound update is defined in separate update macros instead
-    of the typed family. Numeric families use generated C operators; C
-    promotions and conversions determine their results.
+    of the typed family. Their element rules come from `integer-ops.x`, which
+    typed Maps share.
 */
+
+#include "integer-ops.x"
 
 /*  Generates `postfixindex` for an element family whose `updateindex`
     applies `+` and `-`.
@@ -39,64 +41,30 @@ macro Unit $array.typed.postfix(Type $array, Type $element) {
   }
 }
 
-/*  Generates `updateindex` and `postfixindex` for a signed integer element.
-    The same-width unsigned type `$unsigned` holds raw operands and results.
-    The C operators apply integer promotions, so this does not
-    promise narrow-width wrapping. Division and shift raise before storing
-    anything, so a failed update leaves the element as it was.
+/*  Generates `updateindex` and `postfixindex` for a signed integer element
+    through `$integer.update`.
 */
-macro Unit $array.typed.update.integer(
-  Type $family, Type $element, Type $unsigned
-) {
+macro Unit $array.typed.update.integer(Type $family, Type $element) {
   inline $element $family.updateindex($family, int, Symbol, $element);
 
   /** Applies integer `op` to raw element `index` and returns the stored value.
       The index has the unchecked C-pointer preconditions of bracket access.
-      Arithmetic follows the generated C operators, integer promotions, and
-      result conversion. A failing operation leaves the element unchanged.
-      Raises: `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-      invalid operation.
+      Arithmetic runs at the C-promoted width and the result converts back
+      to the element, as a native compound assignment does. A failing
+      operation leaves the element unchanged.
+      Raises: `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+      count outside the promoted width, or `<bad-op>` for another operator.
   */
   inline $element $family.updateindex(
     $family array, int index, Symbol op, $element rhs) {
-    $element *slot = (($element *) array.bytes) + index;
-    $element lhs = *slot;
-    $unsigned a = ($unsigned) lhs, b = ($unsigned) rhs, raw;
-    switch (op) {
-      case <+>: raw = a + b; break;
-      case <->: raw = a - b; break;
-      case <*>: raw = a * b; break;
-      case <&>: raw = a & b; break;
-      case <|>: raw = a | b; break;
-      case <^>: raw = a ^ b; break;
-      case </>: case <%>: {
-        if (!rhs) raise %(div-zero (op $op));
-        // the one signed pair whose quotient is not representable
-        $element floor = ($element) ~(($unsigned) -1 >> 1);
-        if (lhs == floor && rhs == -1) raw = op == </> ? ($unsigned) lhs : 0;
-        else raw = ($unsigned) (op == </> ? lhs / rhs : lhs % rhs);
-        break;
-      }
-      case <"<<">: case <">>">: {
-        int width = (int) (sizeof($element) * 8);
-        if (rhs < 0 || (long long) rhs >= width) {
-          long long count = rhs;
-          raise %(bad-shift (op $op) (count $count) (width $width));
-        }
-        raw = op == <"<<"> ? a << b : ($unsigned) (lhs >> rhs);
-        break;
-      }
-      default: raise %(bad-op (op $op));
-    }
-    return *slot = ($element) raw;
+    $integer.update($element, (($element *) array.bytes) + index, op, rhs);
   }
 
   $array.typed.postfix($family, $element);
 }
 
-/*  Generates `updateindex` and `postfixindex` for a floating element.
-    Only the four arithmetic operators are defined on a float; the rest
-    raise `<bad-types>`, matching the boxed path.
+/*  Generates `updateindex` and `postfixindex` for a floating element
+    through `$floating.update`.
 */
 macro Unit $array.typed.update.floating(Type $family, Type $element) {
   inline $element $family.updateindex($family, int, Symbol, $element);
@@ -104,18 +72,12 @@ macro Unit $array.typed.update.floating(Type $family, Type $element) {
   /** Applies a floating arithmetic `op` and returns the stored value.
       The supported operators are `+`, `-`, `*`, and `/`; the raw index has
       the unchecked C-pointer preconditions of bracket access.
-      Raises: `<bad-types>` for another operator, before changing the element.
+      Raises: `<bad-types>` for another numeric operator or `<bad-op>` for a
+      non-numeric one, before changing the element.
   */
   inline $element $family.updateindex(
     $family array, int index, Symbol op, $element rhs) {
-    $element *slot = (($element *) array.bytes) + index;
-    switch (op) {
-      case <+>: return *slot += rhs;
-      case <->: return *slot -= rhs;
-      case <*>: return *slot *= rhs;
-      case </>: return *slot /= rhs;
-    }
-    raise %(bad-types (op $op));
+    $floating.update($element, (($element *) array.bytes) + index, op, rhs);
   }
 
   $array.typed.postfix($family, $element);
@@ -134,10 +96,7 @@ macro Unit $array.typed.update.string(Type $array) {
   */
   inline String $array.updateindex(
     $array array, int index, Symbol op, String rhs) {
-    if (op != <+>) raise %(bad-op (op $op));
-    String *slot = ((String *) array.bytes) + index;
-    String result = slot[0] + rhs;
-    return slot[0] = result;
+    $string.update(((String *) array.bytes) + index, op, rhs);
   }
 
   /** Raises `<bad-op>` because String elements have no postfix operation. */

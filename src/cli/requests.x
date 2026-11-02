@@ -15,15 +15,15 @@ static TargetKind target_kinds[] = {
 static macro Stmt $fail.cli_input_not_file(Expr $input) =>
   Diagnostics.driver_error(%"input is not a regular file: $($input)");
 
-static macro Stmt $report.cli_input_directory(Expr $input) {
-  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
-  fputs(
-    "note: pass source files, use a shell wildcard, or define a "
-    "manifest target\n", stderr);
-}
+static macro Stmt $fail.cli_input_directory(Expr $input) =>
+  Diagnostics.driver_fail(
+    %"input is a directory: $($input)",
+    "pass source files, use a shell wildcard, or define a manifest target");
 
-static macro Stmt $report.cli_input_missing(Expr $input) =>
-  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
+static macro Stmt $fail.cli_input_missing(Expr $input) =>
+  Diagnostics.driver_fail(
+    %"input does not exist: $($input)",
+    strpbrk($input, "*?[") ? "x2c does not expand wildcard operands" : NULL);
 
 /** Returns the target kind spelled `spelling`, or 0 when no kind has that
     spelling. `refusal` says why this compiler refuses a known spelling, and
@@ -44,6 +44,14 @@ TargetKind *TargetKind.of(Symbol kind) {
   for (TargetKind *row = target_kinds; row.kind; row++)
     if (row.kind == kind) return row;
   return target_kinds;
+}
+
+/** Returns the default file name of the `kind` product named `name`, such
+    as `libname.a` for a static library.
+*/
+String TargetKind.product(Symbol kind, String name) {
+  TargetKind *row = TargetKind.of(kind);
+  return %"$(row.prefix)$name$(row.suffix)";
 }
 
 // requests
@@ -83,16 +91,9 @@ List CliRequest.package_roots(CliRequest request) {
 void CliRequest.require_input(String input) {
   if (!input) Diagnostics.driver_error("input path is empty");
   if (Path.is_file(input)) return;
-  if (Path.is_dir(input)) {
-    $report.cli_input_directory(input);
-    exit(2);
-  }
-  if (Path.exists(input))
-    $fail.cli_input_not_file(input);
-  $report.cli_input_missing(input);
-  if (strpbrk(input, "*?["))
-    fputs("note: x2c does not expand wildcard operands\n", stderr);
-  exit(2);
+  if (Path.is_dir(input)) $fail.cli_input_directory(input);
+  if (Path.exists(input)) $fail.cli_input_not_file(input);
+  $fail.cli_input_missing(input);
 }
 
 // request defaults and input checks

@@ -16,6 +16,7 @@
 #include "rewrite.x"
 #include "grammar.x"
 #include "ast-rewrite.x"
+#include "compiler-meta.x"
 
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $report.string_switch_case(Expr $site) =>
@@ -86,30 +87,13 @@ meta static List _string_cases(
     node, child, _string_cases(child, indices, labels, site));
 }
 
-/* Whether the function holding the switch is public inline, so that the
-   header publishes its body. */
-meta static int _switch_in_public_inline(void) {
-  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
-    return type ~= %(* inline *) && !(type ~= %(* static *));
-  return 0;
-}
-
-/* The role naming a helper with external linkage, which carries the hash
-   of the unit's path so that units whose public inline functions share a
-   header link together. */
-meta static String _string_switch_public_role(void) {
-  if (x2c_enclosing(<unit>) ~=
-      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
-    return %"string_switch_$("%08x".printf(path.hash()))";
-  return "string_switch";
-}
-
 /* The helper shared by switches on `type` with the same `labels`, with
    external linkage when a public inline function holds the switch. */
 meta static Code _string_switch_helper(Type type, List labels) {
-  int public = _switch_in_public_inline();
+  String role = _x2c_public_inline_role("string_switch");
+  int public = !!role;
   List key = %(string-switch $type $labels $public);
-  String role = public ? _string_switch_public_role() : "string_switch";
+  if (!public) role = "string_switch";
   List name = x2c_binding_for(key, role), s = x2c_ident("s");
   List declared = public ? %(int) : %(static int);
   Array tests = [];

@@ -39,6 +39,7 @@ prefix.
 | [`x2c_exception_mark_handled`](exception.md#x2c_exception_mark_handled) | `lib/exception.x` | `void x2c_exception_mark_handled(ExceptionFrame *frame)` |
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
+| [`x2c_fatal`](common.md#x2c_fatal) | `lib/common.x` | `void x2c_fatal(const char *message)` |
 | [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
 | [`x2c_func_map_splice_argument`](func.md#x2c_func_map_splice_argument) | `lib/func/func.x` | `FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
@@ -57,6 +58,7 @@ prefix.
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
+| [`x2c_io_fail`](common.md#x2c_io_fail) | `lib/common.x` | `void x2c_io_fail(Var operation, int error)` |
 | [`x2c_lisp_exchange`](lisp-bindings.md#x2c_lisp_exchange) | `lib/lisp-bindings.x` | `Lisp x2c_lisp_exchange(Lisp lisp)` |
 | [`x2c_match_execution_free`](match.md#x2c_match_execution_free) | `lib/match/match.x` | `void x2c_match_execution_free(void *backing)` |
 | [`x2c_match_execution_new`](match.md#x2c_match_execution_new) | `lib/match/match.x` | `void *x2c_match_execution_new(void)` |
@@ -75,6 +77,7 @@ prefix.
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
+| [`x2c_native_check`](common.md#x2c_native_check) | `lib/common.x` | `void x2c_native_check(int error, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int &start, int &stop, int step, int length)` |
 | [`x2c_pool_exchange`](pool.md#x2c_pool_exchange) | `lib/pool/pool.x` | `Pool x2c_pool_exchange(Pool pool)` |
@@ -138,4 +141,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 126 functions.
+Total: 129 functions.

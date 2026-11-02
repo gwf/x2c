@@ -27,9 +27,11 @@ DESKTOP_PREFIX = $(shell $(DEPS_TOOL) path $(DESKTOP_MANIFEST) prefix)
 DESKTOP_FRAMEWORKS := -Wl,-framework,OpenGL -Wl,-framework,Cocoa \
 	-Wl,-framework,IOKit -Wl,-framework,CoreVideo
 
-.PHONY: example short-example run verify prepare-desktop run-interactive
+.PHONY: run verify prepare-desktop run-interactive
 
-example: builds/texture-sheet
+check: verify
+
+example: builds/texture-sheet builds/live-chart
 
 short-example: builds/climate-trends
 

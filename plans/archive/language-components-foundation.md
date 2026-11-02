@@ -88,7 +88,7 @@ supersede the initial recovery exclusions and milestone list preserved below.
 Repository review decision 7 settled the self-meta function-rule observation
 discrepancy without a code change; `docs/src/guide/meta-functions.md` states it.
 The confirmed acquired-value cleanup repair is tracked in
-[review remediation](../review-remediation-2026-10-11.md); the initial phrase
+[review remediation](review-remediation-2026-10-11.md); the initial phrase
 "cleanup of the declared binding" does not override that requirement.
 
 ## Initial recovery scope (historical)

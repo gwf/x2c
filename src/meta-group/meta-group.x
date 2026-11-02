@@ -30,11 +30,6 @@
 
 // diagnostics
 
-static macro Stmt $fail.meta_group_main_signature(Expr $c, Expr $site) =>
-  $c.report_error(
-    <type>, "loaded main must take void or (int, char **) and return int",
-    $site, NULL);
-
 static macro Stmt $fail.meta_group_function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
   $c.report_error(
@@ -47,11 +42,10 @@ static macro Stmt $fail.meta_group_function_unavailable(
 
 /* The C compiler and x2c include directory that build meta code. */
 module String meta_cc = NULL, meta_include_dir = NULL;
-module Map meta_build_tables = NULL, meta_build_providers = NULL;
+module Map meta_build_tables = NULL;
 
 module {
   "toolchain.x",
-  "loaded.x",
   "selection.x",
   "emission.x",
   "staging.x",

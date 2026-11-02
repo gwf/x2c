@@ -79,6 +79,9 @@ class Runner:
     def __init__(self, results: Path, cc: str, cxx: str) -> None:
         self.results = results
         self.cc = cc
+        # x2c code builds with the exported runtime flags, such as
+        # -fsigned-char, ahead of each profile's own flags.
+        self.x2c_cc = [cc, *shlex.split(os.environ.get("BUILD_CFLAGS", ""))]
         self.cxx = cxx
         self.command_log = results / "commands.log"
 
@@ -183,7 +186,7 @@ def compile_scalar_object(runner: Runner, profile: str) -> Path:
     BIN.mkdir(parents=True, exist_ok=True)
     output = SCALAR_BUILD / f"u32-map-bridge-{profile}.o"
     command = [
-        runner.cc,
+        *runner.x2c_cc,
         "-std=c11",
         *PROFILE_FLAGS[profile],
         "-Wall",
@@ -208,7 +211,7 @@ def compile_scalar_profile_object(runner: Runner) -> Path:
     BIN.mkdir(parents=True, exist_ok=True)
     output = SCALAR_BUILD / "u32-map-bridge-counters.o"
     runner.run([
-        runner.cc, "-std=c11", *PROFILE_FLAGS["standard"],
+        *runner.x2c_cc, "-std=c11", *PROFILE_FLAGS["standard"],
         "-DU32_MAP_PROFILE", "-Wall", "-Wextra", "-Werror",
         "-I", GENERATED, "-I", HERE / "x2c",
         "-iquote", ROOT / "include" / "x2c", "-c",
@@ -258,7 +261,7 @@ def validate_scalar(runner: Runner, translation: dict[str, str]) -> None:
         "-iquote", ROOT / "include" / "x2c",
     ]
     runner.run([
-        runner.cc, "-std=c11", *PROFILE_FLAGS["standard"],
+        *runner.x2c_cc, "-std=c11", *PROFILE_FLAGS["standard"],
         "-Wall", "-Wextra", "-Werror", *common,
         HERE / "x2c/u32-map-bridge.c", HERE / "x2c/test-u32-map.c",
         "-o", normal,
@@ -268,7 +271,7 @@ def validate_scalar(runner: Runner, translation: dict[str, str]) -> None:
 
     sanitizer = BIN / "test-u32-map-sanitize"
     runner.run([
-        runner.cc, "-std=c11", "-O1", "-g", "-fno-omit-frame-pointer",
+        *runner.x2c_cc, "-std=c11", "-O1", "-g", "-fno-omit-frame-pointer",
         "-fsanitize=address,undefined", "-Wall", "-Wextra", "-Werror",
         *common, HERE / "x2c/u32-map-bridge.c",
         HERE / "x2c/test-u32-map.c", "-o", sanitizer,
@@ -416,7 +419,7 @@ def compile_udb_scalar(
 ) -> Path:
     binary = BIN / f"udb3-x2c-u32-{profile}"
     runner.run([
-        runner.cc, "-std=c11", *PROFILE_FLAGS[profile],
+        *runner.x2c_cc, "-std=c11", *PROFILE_FLAGS[profile],
         "-Wall", "-Wextra", "-Werror", "-I", HERE / "x2c",
         "-I", UDB3_SOURCE, HERE / "udb3/u32-test.c", scalar_object,
         "-o", binary,
@@ -427,7 +430,7 @@ def compile_udb_scalar(
 def compile_production_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-production-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         HERE / "udb3/test.c", "-L", ROOT / "builds/0", "-lx2c",
         "-lm", "-o", binary,
@@ -438,7 +441,7 @@ def compile_production_control(runner: Runner) -> Path:
 def compile_typed_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-typed-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         HERE / "udb3/typed-test.c", "-L", ROOT / "builds/0", "-lx2c",
         "-lm", "-o", binary,
@@ -460,7 +463,7 @@ def compile_flat_control(runner: Runner) -> Path:
     generated = translate_flat(runner)
     binary = BIN / "udb3-x2c-flat-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/flat-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
@@ -472,7 +475,7 @@ def compile_meta_control(runner: Runner) -> Path:
     generated = translate_flat(runner)
     binary = BIN / "udb3-x2c-meta-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/meta-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
@@ -484,7 +487,7 @@ def compile_wide_control(runner: Runner) -> Path:
     generated = translate_flat(runner)
     binary = BIN / "udb3-x2c-wide-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/wide-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
@@ -496,7 +499,7 @@ def compile_khashl_backend_control(runner: Runner) -> Path:
     vendor = ensure_khashl(runner)
     binary = BIN / "udb3-x2c-khashl-standard"
     runner.run([
-        runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
+        *runner.x2c_cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
         "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         "-I", HERE / "x2c", "-I", vendor.parent,
         HERE / "udb3/khashl-backend-test.c", HERE / "x2c/khashl-map.c",
@@ -671,7 +674,7 @@ def run_u32_profile(runner: Runner, scalar_object: Path) -> Path:
     result.mkdir(parents=True, exist_ok=True)
     binary = BIN / "udb3-x2c-u32-counters"
     runner.run([
-        runner.cc, "-std=c11", *PROFILE_FLAGS["standard"],
+        *runner.x2c_cc, "-std=c11", *PROFILE_FLAGS["standard"],
         "-DU32_MAP_PROFILE", "-Wall", "-Wextra", "-Werror",
         "-I", HERE / "x2c", "-I", UDB3_SOURCE,
         HERE / "udb3/u32-profile-test.c", scalar_object, "-o", binary,

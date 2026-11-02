@@ -45,7 +45,7 @@ static macro Stmt $fail.meta_helper_client_helper_stopped(
     after its last call; closing again is harmless.
 */
 typedef struct MetaHelper {
-  String path, snapshot;
+  String path;
   Map failures, units;
   Scope scope;
   pid_t pid, owner;
@@ -65,7 +65,6 @@ static Scope primary_scope = NULL;
 static typedef struct Call {
   Compiler compiler, String name, Token site, int table;
   double limit, deadline;
-  Symbol operation;
 } Call;
 
 /** Calls the project `meta` function `name` in the helper with the values
@@ -79,14 +78,7 @@ static typedef struct Call {
 */
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
-  _call_helper(c, name, site, arguments, provider, <call>);
-
-/** Calls a loaded function with data values and helper-owned selections.
-    Selectors resolve inside the helper. No address crosses its pipes.
-*/
-Var Compiler.loaded_helper_call(
-  Compiler c, String name, Token site, List arguments, String provider) =>
-  _call_helper(c, name, site, arguments, provider, <load-call>);
+  _call_helper(c, name, site, arguments, provider);
 
 /** Reports a meta function's error `message` with `notes` under
     `category` at the position recorded first in or around `node`, or at
@@ -121,16 +113,6 @@ MetaHelper MetaHelper.new(String path, Map failures, Map units) {
   return helper;
 }
 
-/** Retains this helper's executable independently of later cache rebuilds.
-    The copy lasts until close, including across helper restarts.
-*/
-void MetaHelper.retain_executable(MetaHelper helper) {
-  helper.snapshot = Path.temp_dir();
-  String path = %"$(helper.snapshot)/helper";
-  Path.copy_file(helper.path, path);
-  helper.path = path;
-}
-
 /** Uses `helper` for ordinary translation, retaining its configuration
     through process shutdown. Replaces and closes the preceding helper.
 */
@@ -145,21 +127,11 @@ void Compiler.use_meta_helper(MetaHelper helper) {
   foreach ((String key, int value) in helper.units) key.try_own();
 }
 
-/** Returns why this helper cannot call the functions of `provider`: the
-    helper or the provider's table did not build. Returns NULL when it can.
-    Does not invoke a function or reset native state.
-*/
-String MetaHelper.failure(MetaHelper m, String provider) {
-  with (active = m) {
-    return _failure(_table_of(Path.real(provider), 0));
-  }
-}
-
 /** Selects the table of the unit at `filename` for the calls that follow,
     and resets the unit's `meta static` values before the first one.
 */
 void Compiler.begin_meta_unit(Compiler c, String filename) {
-  with (active = c.meta_helper ? c.meta_helper : primary) {
+  with (active = primary) {
     if (!active) return;
     active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
     active.reset = 1;
@@ -174,26 +146,18 @@ void Compiler.stop_meta_helper(void) {
   with (active = primary) { _stop(0); }
 }
 
-/** Stops the process while retaining its executable and configuration.
-    Its next call starts with fresh native state.
-*/
-void MetaHelper.restart(MetaHelper helper) {
-  with (active = helper) { _stop(0); }
-}
-
 // the compiler's side of the project meta helper
 
 static Var _call_helper(
-  Compiler c, String name, Token site, List arguments, String provider,
-  Symbol operation) {
-  with (active = c.meta_helper ? c.meta_helper : primary) {
+  Compiler c, String name, Token site, List arguments, String provider) {
+  with (active = primary) {
     if (!active)
       c.refuse_meta_call(name, site, "the project meta module was not built");
     if (c.shallow) c.collection_native = 1;
     String file = provider ? Path.real(Compiler.absolute_home_path(provider))
                            : Path.real(c.token_source(site, NULL));
     Call call = {
-      .compiler = c, .name = name, .site = site, .operation = operation,
+      .compiler = c, .name = name, .site = site,
       .table = _table_of(file, active.table)};
     _check(call);
     c.refuse_record_meta_call(name, site);
@@ -276,7 +240,7 @@ static void _send(Call &c, List arguments) {
   }
   Var subject = Macro.subject();
   if (subject is void) subject = %();
-  _send_frame(c, $(c.operation, c.table, c.name, arguments, subject));
+  _send_frame(c, $(<call>, c.table, c.name, arguments, subject));
 }
 
 static void _send_frame(Call &call, List message) {
@@ -541,11 +505,6 @@ static void _close(MetaHelper helper) {
   if (!helper || !helper.scope) return;
   with (active = helper) {
     _stop(0);
-    if (helper.snapshot) {
-      unlink(%"$(helper.snapshot)/helper");
-      rmdir(helper.snapshot);
-      helper.snapshot = NULL;
-    }
     helper.scope.destroy();
     helper.scope = NULL;
     helper.path = NULL;

@@ -26,6 +26,7 @@ X2c command-line parsing and presentation.
 | [`Compiler.version`](#Compiler.version) | Returns the version line `--version` prints, without a newline. |
 | [`TargetKind.named`](#TargetKind.named) | Returns the target kind spelled `spelling`, or 0 when no kind has that spelling. |
 | [`TargetKind.of`](#TargetKind.of) | Returns the row of target kind `kind`; any other kind reads as an executable. |
+| [`TargetKind.product`](#TargetKind.product) | Returns the default file name of the `kind` product named `name`, such as `libname.a` for a static library. |
 
 ### `CliRequest`
 
@@ -181,6 +182,16 @@ Source: `src/cli/requests.x`
 
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
+
+Source: `src/cli/requests.x`
+
+<a id="TargetKind.product"></a>
+#### TargetKind.product
+
+`String TargetKind.product(Symbol kind, String name)`
+
+Returns the default file name of the `kind` product named `name`, such
+as `libname.a` for a static library.
 
 Source: `src/cli/requests.x`
 

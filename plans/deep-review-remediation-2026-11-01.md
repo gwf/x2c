@@ -1,9 +1,10 @@
 # Deep review remediation (2026-11-01)
 
 > Status: active - batch A published on `dev` as `9d196566f` (PR #643,
-> 2026-11-02); batch B runs in its own session; batch C integrated from
-> `dev` `9d196566f` and submitted to the shared integrator on 2026-11-02 on
-> branch `gwf/review-batch-c-contracts`, with the decisions below.
+> 2026-11-02); batch B (PR #644, branch `gwf/repo-review-batch-b`) and
+> batch C (PR #645, branch `gwf/review-batch-c-contracts`, with the
+> decisions below) integrated together from `9d196566f` by the shared
+> integrator on 2026-11-02.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
@@ -217,6 +218,70 @@ items, for a later batch:
   compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
   `docs/src/guide/iteration.md`, and `collections.md`; translating
   `test-lisp.x` reports four unnecessary `.str()` conversions.
+
+### Batch B outcome (2026-11-02)
+
+Changed:
+
+- REPL loaded-helper chain, `loaded.x`, the `load_source` and
+  `meta_helper` fields, and the five orphaned compiler methods deleted;
+  `-l` relinks the current meta helper instead of rebuilding it.
+- `examples/shootout-unofficial/`, the Notes benchmark reports, and
+  `commands/graph/clones-experiment.md` removed; the installer skips Notes
+  bench results; the VSIX and the version-viewer snapshots are untracked
+  and documented as regenerated.
+- Each package Makefile defines `check`; `packages/Makefile` holds the one
+  list; `tools/release-candidate.py` owns the released set, which
+  `agents/releasing.md` states once; CI shares one clang step, one mdBook
+  step, and one release script.
+- Driver errors go through `Diagnostics.driver_report`, `driver_fail`, and
+  `driver_error`; stderr and JSON name a source by the same rule;
+  `TargetKind.product` names products.
+- The operator ledger supplies bracket-access, dynamic-operator, stage,
+  and String comparison facts; one public-inline role helper.
+- Shared runtime `x2c_fatal`, `x2c_native_check`, and `x2c_io_fail`;
+  typed compound updates share the integer, floating, and String rules of
+  `Var` (`MapLongDouble %=` now raises `<bad-types>`, an `ArrayChar` shift
+  promotes like C); JSON, Lisp file reading, and the datum reader reuse
+  their owners.
+- Front-end duplicates (`never_defined`, `hidden_group`, the runtime
+  source test, the import scanner), driver duplicates (`_valid_utf8`,
+  response-file reading, `Job.decode_wait_status`), test and tool helpers
+  have one owner each; `BUILD_JOBS` is the only parallelism knob;
+  `make verify` builds the commands its CLI probes run; `x2c test` accepts
+  `--manifest-path` and keeps `--manifest` as a second spelling.
+- Guidance: the code standard's restatements, the duplicated module map,
+  unresolvable commit hashes, plans/README.md drift, the split plan name
+  (now `language-reference-writing.md`), and twelve reference holds.
+- Book: the carried items above, plus the promoted-width rule for typed
+  compound updates.
+
+Declined, with the reason:
+
+- One pool-copy owner for Context, Logger, and Error: a shared owner needs
+  a policy record and a callback for a net saving of two lines, and the
+  Error copy keeps its snapshot and raise-time rules.
+- Scope keeps its own fatal report: the preinit probe links `scope.o`
+  without `common.o`.
+- The `$rewrite` operator lists and `_is_comparison` stay: generating them
+  needs a decorator and a meta function that cost more than they remove.
+- torch stays out of the release-validation matrix: adding it expands a
+  recurring CI check (root AGENTS.md "Process ceiling").
+- The two dated 2026-10-05 approvals stay in the code standard because its
+  proof rule depends on them; the root "established contracts" bullet
+  states clauses the standard does not.
+- Fixture copies of `rejected()` stay: fixtures are standalone programs.
+
+Still open for a later bug batch, besides the carried defects above:
+
+- `-v` and `-###` translate lines are not shell-quoted (K7).
+- `SymTxn.rollback` and `_speculate` do not restore `protocol_helpers`
+  (latent; not reproduced).
+- `(m["a"]) += 4` emits invalid C.
+- The Var conversion check misses struct-tag destinations
+  (`struct Point p = v;` passes x2c and fails in clang).
+- The first `make build` after a `Compiler` field change can segfault in
+  `lib/.own-interfaces`; a second build succeeds (stage build graph).
 
 ## Validation and delivery
 

@@ -2,7 +2,8 @@
 #
 # A package Makefile sets PACKAGE (and DEPENDENCY_PREFIX_VAR when the
 # package has a dependency.json), includes this file, then sets
-# PACKAGE_C_FLAGS and PACKAGE_LINK for its native dependency.
+# PACKAGE_C_FLAGS and PACKAGE_LINK for its native dependency and defines
+# `check`, the package's tests and application runs.
 # tools/deps.py selects dependency-<os>-<arch>.json, dependency-<os>.json,
 # or dependency.json for this host.
 #
@@ -58,7 +59,7 @@ PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
 
-.PHONY: all build test clean prepare deps bundle verify-pins
+.PHONY: all build test check clean prepare deps bundle verify-pins
 # Native action fingerprints own header, tool, and option reuse.
 .PHONY: package-build-force
 
@@ -72,6 +73,12 @@ package-build-force:
 
 build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE) \
   $(PACKAGE_MODULE)
+
+# A package adds its applications to these and names its own checks in
+# `check`; `examples` builds every application without running it.
+.PHONY: short-example example lisp-example examples
+short-example example lisp-example:
+examples: build short-example example lisp-example
 
 BUNDLE_DIR ?= builds/bundle
 bundle: build

@@ -21,7 +21,7 @@ authoritative sources and regenerate derived artifacts through existing
 targets. This plan adds no recurring gate, test requirement, or planning
 step; the one gate change it proposes is a question for Gary (Q2).
 
-The [language-reference writing plan](../review-remediation-2026-10-11.md)
+The [language-reference writing plan](../language-reference-writing.md)
 keeps its separate scope. This plan owns only the October 30 findings.
 Items the review marked plausible are repaired only after a probe confirms
 them; the probe is named with the item.

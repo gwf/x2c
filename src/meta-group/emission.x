@@ -67,15 +67,12 @@ static void _name_provider_bindings(
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
   foreach ((String path, int table) in meta_build_tables)
-    if (meta_build_providers && path != provider)
-      c.name_loaded_provider(path, table, meta_build_providers[path]);
-    else if (path != provider && path in dependencies)
+    if (path != provider && path in dependencies)
       c.name_meta_provider_bindings(path, table);
   Var identity, String name;
   foreach (List item in units)
     if (_function_identity(item, identity, name) &&
-        (c.public_native_function(item, name) ||
-         (c.load_source && name == "main"))) {
+        c.public_native_function(item, name)) {
       List binding = item.caddr().cadr();
       c.set_fact(
         %(emitted $binding), %"_x2c_gensym_meta_group_$(index)_$name");
@@ -430,7 +427,6 @@ static List _targets(Compiler c, List named, List functions) {
         $(c.cache_literal_list(functions))));
   foreach (List row in named) {
     (String name, List binding, Type type) = row;
-    if (c.load_source) type = c.loaded_call_type(type);
     List function = NULL;
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));

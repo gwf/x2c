@@ -48,12 +48,6 @@ static typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 
 // arguments of a `$` call
 
-/* The binary operators a constant argument may apply. */
-static const SymbolSet meta_operators = %<"+" "-" "*" "/" "%" "<<" ">>"
-  "&" "|" "^" "<" ">" "<=" ">=" "==" "!=">;
-
-static const SymbolSet meta_comparisons = %<"<" ">" "<=" ">=" "==" "!=">;
-
 /** Returns the value the argument expression `node` of a `$` call passes to
     a parameter of type `want`, or of no declared type when `want` is NULL:
     a constant, captured syntax, or the result of another `$` call, which
@@ -83,11 +77,15 @@ Var Compiler.meta_argument(
     /* Negation multiplies, so a negated zero keeps its sign. */
     case %(expr ?type (op - ?operand)):
       value = c.meta_argument(operand, type, site, call).binary(<*>, -1);
-    case %(expr ?type
-        (op ?operator ?left ?right)):
-      if (operator in meta_operators) {
+    /* A constant applies an operator that has a compound assignment or a
+       protocol member. The comparisons, which have only a member, compare
+       in the operands' widest numeric type. */
+    case %(expr ? (op ?(Symbol operator) ?left ?right)): {
+      Symbol compound = operator.compound_assignment();
+      if (compound || Compiler.operator_member(operator) ||
+          Compiler.derived_member(operator)) {
         Type common = NULL;
-        if (operator in meta_comparisons) {
+        if (!compound) {
           Type a = c.sym.resolve_numeric_type(left.list().cadr());
           Type b = c.sym.resolve_numeric_type(right.list().cadr());
           if (a && b) common = a.widest(b);
@@ -95,6 +93,7 @@ Var Compiler.meta_argument(
         value = c.meta_argument(left, common, site, call).binary(
           operator, c.meta_argument(right, common, site, call));
       }
+    }
     default: value = c.folded_constant(node);
   }
   if (value is void) value = _name_syntax(c, node, site);

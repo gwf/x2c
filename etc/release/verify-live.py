@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify one platform using immutable candidate metadata and live endpoints."""
 import argparse
-import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -10,14 +10,17 @@ import subprocess
 import tarfile
 import tempfile
 
+# The release helper owns candidate identity, destinations and bundles.
+spec = importlib.util.spec_from_file_location(
+    "release",
+    Path(__file__).resolve().parents[2] / "tools/release-candidate.py")
+release = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(release)
+digest = release.digest
+
 
 def download(url, path):
     subprocess.run(["curl", "-fsSL", "--retry", "3", url, "-o", str(path)], check=True)
-
-
-def digest(path):
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def main():
@@ -25,11 +28,13 @@ def main():
     parser.add_argument("--identity", required=True)
     parser.add_argument("--destination", choices=["staging", "production"], required=True)
     args = parser.parse_args()
-    import re
-    if not re.fullmatch(r"candidate-[0-9a-f]{40}-[0-9]+-[0-9]+", args.identity):
-        parser.error("invalid candidate identity")
-    candidate_url = f"https://github.com/gwf/x2c-staging/releases/download/{args.identity}"
-    site = "https://staging.x2c-lang.dev" if args.destination == "staging" else "https://x2c-lang.dev"
+    try:
+        release.identity(args.identity)
+    except ValueError as error:
+        parser.error(str(error))
+    candidate_url = (f"https://github.com/{release.REPOSITORIES['staging']}"
+                     f"/releases/download/{args.identity}")
+    site = release.SITES[args.destination]
     target = platform.system().lower() + "-" + platform.machine()
     with tempfile.TemporaryDirectory(prefix="x2c-live-") as directory:
         work = Path(directory)
@@ -52,7 +57,7 @@ def main():
                 assert live.read_bytes() == tar.extractfile(members[name]).read(), name
         version = manifest["version"]
         tag = args.identity if args.destination == "staging" else "v" + version
-        repo = "gwf/x2c-staging" if args.destination == "staging" else "gwf/x2c"
+        repo = release.REPOSITORIES[args.destination]
         releases = f"https://github.com/{repo}/releases/download"
         if "x2c-book.pdf" in manifest["assets"]:
             for url in (f"{releases}/{tag}/x2c-book.pdf", f"{site}/x2c-book.pdf"):
@@ -87,7 +92,7 @@ def main():
         smoke = prefix / "examples/foreach.x"
         subprocess.run([x2c, "run", str(smoke)], check=True, cwd=work)
         packages = [("pcre2", "parse-log.x")]
-        if target in ("darwin-arm64", "linux-x86_64"):
+        if target in release.BUNDLES["torch"]:
             packages.append(("torch", "fit-line.x"))
         for package, example in packages:
             subprocess.run([x2c, "install", "-q", "--index",

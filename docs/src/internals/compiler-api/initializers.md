@@ -14,7 +14,6 @@ Brace initializer conversion.
 | --- | --- |
 | [`Compiler.convert_compound_literal`](#Compiler.convert_compound_literal) | Keeps a compound literal's native type definition at its original scope. |
 | [`Compiler.convert_initializer`](#Compiler.convert_initializer) | Converts an initializer using its declared native object for array bounds. |
-| [`Compiler.initializer_field_path`](#Compiler.initializer_field_path) | Returns the initializer path selecting one visible aggregate field. |
 | [`Compiler.initializer_native_types`](#Compiler.initializer_native_types) | Returns native definition/reference types for a compound literal. |
 | [`Compiler.initializer_rows`](#Compiler.initializer_rows) | Returns (original cases) rows; each case is (native-condition path destination value). |
 | [`Compiler.initializer_slot`](#Compiler.initializer_slot) | Selects a native subobject without evaluating it when used by sizeof. |
@@ -39,17 +38,6 @@ Converts an initializer using its declared native object for array
 bounds.
 
 Source: `src/initializers/conversion.x`
-
-<a id="Compiler.initializer_field_path"></a>
-#### Compiler.initializer_field_path
-
-`List Compiler.initializer_field_path( Compiler c, Type type, List field)`
-
-Returns the initializer path selecting one visible aggregate field.
-Anonymous aggregate members remain explicit path frames, so consumers
-observe the same member promotion as native initializer conversion.
-
-Source: `src/initializers/subobjects.x`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types

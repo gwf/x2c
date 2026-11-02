@@ -5,7 +5,7 @@
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the
     compiler's identity, how a file is locked or replaced, and the
-    driver's log level and fatal error line. Host tools run through
+    driver's log level and error lines. Host tools run through
     `lib/process.x`.
 */
 
@@ -13,6 +13,7 @@
 #include "logger.x"
 #include "path.x"
 #include "process.x"
+#include "report.x"
 #include "sourceview.x"
 
 /* The 64-bit FNV-1a offset basis, which starts every FNV hash. */
@@ -25,7 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 /** Names the translation state that `src/compiler/compiler.x` defines. */
@@ -48,7 +48,7 @@ static macro Stmt $fail.utils_host_failed(
     %"$($detail.assoc(<operation>)) $($subject): $(
       String.new(strerror($error)))");
 
-static macro Stmt $fail.utils_command_missing(Expr $name) =>
+macro Stmt $fail.utils_command_missing(Expr $name) =>
   Diagnostics.driver_error(
     %"missing x2c-$($name) command; install the matching x2c commands");
 
@@ -413,16 +413,6 @@ void Path.publish_files(List outputs) {
   }
 }
 
-/** Decodes the wait status `raw` of a child that has ended. Returns its
-    exit status, `128 + signal` when a signal ended it, or -1 otherwise,
-    and stores that signal in `signal`, or 0 when no signal ended it.
-*/
-int Job.decode_wait_status(int raw, int &signal) {
-  signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
-  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
-  return signal ? 128 + signal : -1;
-}
-
 // driver errors
 
 /** Sets the default `Logger`'s minimum level for one command: `<debug>`
@@ -445,15 +435,32 @@ void Diagnostics.host_error(List detail) {
   $fail.utils_host_failed(detail, subject, error);
 }
 
-/** Prints `x2c: error: <message>` to stderr and exits with status 2.
-    The streams are flushed and `atexit` handlers do not run, so the call is
-    safe inside a `try` body or a catch arm, whose records those handlers
-    would otherwise find still live.
+/** Prints `x2c: error: <message>` to stderr, then `note: <note>` when
+    `note` is not NULL, after clearing a transient progress line. The
+    caller decides how the command ends.
 */
-void Diagnostics.driver_error(const char *message) {
+void Diagnostics.driver_report(const char *message, const char *note) {
+  report_suspend();
   fprintf(stderr, "x2c: error: %s\n", message);
+  if (note) fprintf(stderr, "note: %s\n", note);
+}
+
+/** Reports `message` and `note` as `Diagnostics.driver_report` does and
+    exits with status 2. The streams are flushed and `atexit` handlers do
+    not run, so the call is safe inside a `try` body or a catch arm, whose
+    records those handlers would otherwise find still live.
+*/
+void Diagnostics.driver_fail(const char *message, const char *note) {
+  Diagnostics.driver_report(message, note);
   fflush(NULL);
   _exit(2);
+}
+
+/** Reports `message` with no note and exits as `Diagnostics.driver_fail`
+    does.
+*/
+_Noreturn void Diagnostics.driver_error(const char *message) {
+  Diagnostics.driver_fail(message, NULL);
 }
 
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,

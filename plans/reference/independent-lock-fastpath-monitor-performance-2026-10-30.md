@@ -5,6 +5,10 @@
 > Measured candidate: `360aab57fbf1fa46343ad514514fb3898dc40c5b`.
 > Index changes remain blocked. Nothing pushed or merged to dev.
 > No performance, memory, or architectural tradeoff is approved.
+> Gary accepted the measured costs, and `a596f6cb5` shipped to `dev` on
+> 2026-10-30 (noted 2026-11-02); see the
+> [delivery checkpoint](independent-lock-delivery-checkpoint-2026-10-30.md).
+> The blocked or failing acceptance in this record is historical.
 
 ## Delivered scope
 

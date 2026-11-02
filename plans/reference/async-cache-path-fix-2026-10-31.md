@@ -3,6 +3,8 @@
 > Status: reference - implemented and validated locally.
 > Recorded 2026-10-31. Source baseline: 5cef9448b.
 > Normal benchmarks and all pushes remain on hold.
+> Published to `dev` in `255de641f` on 2026-10-31 (noted 2026-11-02).
+> The hold and no-push statements in this record are historical.
 
 ## Cause and smallest correction
 

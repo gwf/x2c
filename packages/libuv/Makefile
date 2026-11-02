@@ -6,7 +6,9 @@ LIBUV_STATIC := $(LIBUV_PREFIX)/lib/libuv.a
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(LIBUV_PREFIX)/include
 PACKAGE_LINK := $(LIBUV_STATIC)
 
-.PHONY: example short-example run check-profile verify-profile verify-linkage
+.PHONY: run check-profile verify-profile verify-linkage
+
+check: test run
 
 example: builds/thread-notify builds/network-report builds/ipc-report \
 	builds/datagram-report builds/release-checks

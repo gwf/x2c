@@ -56,8 +56,9 @@ prevent a simple subtraction of production names from giving that result.
 Three boundaries keep the map useful:
 
 - Existing native extensions: GNU statement expressions `({ ... })`,
-  GNU attributes, vendor `^` declarators, linkage strings/groups, and native
-  annotation macros support interoperability. They are not x2c inventions.
+  GNU attributes, linkage strings/groups, and native annotation macros
+  support interoperability. They are not x2c inventions. Vendor `^` block
+  declarators are read only in collected C headers; x2c source rejects them.
 - Later C overlap: C23 includes binary `0b` integers, the `thread_local`
   keyword, and empty initializers. These are outside the C11 baseline but
   are not uniquely x2c. See [WG14 N3096, sections 6.4.4.1, 6.7.1, and

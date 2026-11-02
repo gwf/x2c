@@ -15,9 +15,9 @@ fail() { echo "package install: $*" >&2; exit 1; }
 
 mkdir -p "$BUILD/src"
 # Ignored local benchmark history must not enter a native installation.
-for suite in shootout shootout-unofficial; do
-  mkdir -p "$ROOT/examples/$suite/results"
-  history=$(mktemp -d "$ROOT/examples/$suite/results/install-probe.XXXXXX")
+for results in shootout/results apps/notes/bench/results; do
+  mkdir -p "$ROOT/examples/$results"
+  history=$(mktemp -d "$ROOT/examples/$results/install-probe.XXXXXX")
   HISTORY+=("$history")
   printf 'local benchmark output\n' >"$history/report.txt"
 done
@@ -29,11 +29,13 @@ done
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 [[ -z "$("$x2c" env prelude_missing)" ]] || fail "installed prelude is incomplete"
-for suite in shootout shootout-unofficial; do
-  [[ ! -e "$BUILD/home/examples/$suite/results" ]] || fail "installed history"
-  [[ ! -e "$BUILD/home/examples/$suite/baseline.json" ]] || fail "installed calibration"
-  [[ -f "$BUILD/home/examples/$suite/benchmarks/nbody/main.x" ]] || fail "missing example"
+for results in shootout/results apps/notes/bench/results; do
+  [[ ! -e "$BUILD/home/examples/$results" ]] || fail "installed history"
 done
+installed="$BUILD/home/examples"
+[[ ! -e "$installed/shootout/baseline.json" ]] || fail "installed calibration"
+[[ -f "$installed/shootout/benchmarks/nbody/main.x" ]] || fail "missing example"
+[[ -f "$installed/apps/notes/bench/run.py" ]] || fail "missing benchmark"
 "$x2c" run -q "$BUILD/home/examples/love/basic-literals.x" >"$BUILD/example.out"
 cmp "$BUILD/example.out" "$ROOT/examples/expected/static-test.stdout" || fail "installed example"
 
@@ -293,7 +295,7 @@ mkdir -p "$BUILD/home/packages/greet.previous"
 rm -rf "$BUILD/home/packages/greet.previous"
 
 # A removal waits while another process holds the home's packages lock.
-trap 'touch "$BUILD/release"' EXIT
+trap 'touch "$BUILD/release"; wait; rm -rf "$BUILD" "${HISTORY[@]}"' EXIT
 python3 - "$BUILD/home/packages/.lock" "$BUILD/release" <<'PY' &
 import fcntl, os, sys, time
 lock = open(sys.argv[1], "a")

@@ -107,16 +107,12 @@ module void _naming(Definition &d) {
   String spelling = d.name.str();
   if (d.local && d.name == <with>)
     $fail.macros_name_with(c, d.start);
+  /* The runtime and the compiler prelude may define the reserved `x2c.*`
+     and `lisp.*` macros. */
   if ((spelling.startswith("x2c.") || spelling.startswith("lisp.")) &&
-      !c.builtin_defs && !_shipped_source(c))
+      !c.builtin_defs &&
+      !Compiler.is_runtime_source(c.source_path(c.filename)))
     $fail.macros_macro_reserved(c, d.start, spelling);
-}
-
-/* Whether the compiler prelude or the runtime library holds the source
-   being read, which may define the reserved `x2c.*` and `lisp.*` macros. */
-static int _shipped_source(Compiler c) {
-  String path = Compiler.portable_path(c.source_path(c.filename));
-  return path.startswith("lib/") || Compiler.is_prelude_source(path);
 }
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first

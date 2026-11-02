@@ -247,6 +247,25 @@ Job job = %(printf "a\nb\n");
 
 Source: `lib/process.x`
 
+## Advanced and interop API
+
+| Function | Summary |
+| --- | --- |
+| [`Job.decode_wait_status`](#Job.decode_wait_status) | Decodes the `waitpid` status `raw` of a child that has ended. |
+
+### `Job`
+
+<a id="Job.decode_wait_status"></a>
+#### Job.decode_wait_status
+
+`int Job.decode_wait_status(int raw, int &?signal)`
+
+Decodes the `waitpid` status `raw` of a child that has ended. Returns
+its exit status, `128 + signal` when a signal ended it, or -1 otherwise.
+A given `signal` receives that signal, or 0 when no signal ended it.
+
+Source: `lib/process.x`
+
 ## Public types
 
 | Type | Kind | Summary |

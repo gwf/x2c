@@ -551,10 +551,11 @@ spaces. They are not shell commands and `@` does not expand another response
 file. Definitions do not change the preceding x2c source preprocessing.
 
 
-Native bundle metadata covers yyjson, PCRE2, BLIS, libuv, termbox2,
-libcurl, raylib, and torch. Releases publish torch for macOS arm64 and Linux
-x86_64, the platforms PyTorch ships prebuilt CPU libtorch for. SQLite remains
-separately distributed as source in this release.
+`make bundle` works for every package with native inputs. Releases publish
+bundles for some of them, on the platforms the
+[released set](https://github.com/gwf/x2c/blob/main/agents/releasing.md#released-packages)
+lists. Build any other package's bundle, including raylib's and SQLite's,
+from a checkout.
 Pure and mixed C/x2c packages with no external native inputs need no dependency
 manifest; their bundle carries an empty native response file. Distribute any
 other x2c package imports alongside them under the registered package root.

@@ -21,8 +21,9 @@ Map/Array values. Their broader applications, clients, tests, and READMEs
 show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
-`make packages-check` includes all nine library packages and the
-dependency-free autodiff package.
+`PACKAGES` in `packages/Makefile` lists the packages that `make packages`,
+`make packages-check`, and `release-validation.yml` cover. Add a new package
+there and give its Makefile a `check` target.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
 API for its admitted build profile. Preserve upstream types, constants,
@@ -188,10 +189,10 @@ package clients. Follow the root instructions for repository-wide validation.
 
 The package `test` target builds only `tests/test-*.x`, so each package also
 has `run` for applications. Packages with Lisp installers add `run-lisp`;
-those without them do not. The current combined check runs all three for
-pcre2, yyjson, sqlite, and libcurl, `test run` for termbox2, blis, and libuv,
-raylib's `verify` target for headers, application, tests, and rendered PNGs,
-`test run` for torch, and `check` for autodiff.
+those without them do not. Each package's `check` target names everything
+its combined check runs: tests, applications, Lisp programs, and any
+package-specific verification. `make packages-check` runs that target for
+every listed package.
 
 A supported release additionally supplies the small public interface,
 complete pinned raw header, importable archive and generated header, link
@@ -206,8 +207,8 @@ dependencies/frameworks, licenses/notices, and foreign-declaration limitations.
 
 Each package's dependency manifests and profile record its supported platforms
 and linkage. Running `make packages-check` supplies evidence for that host's
-profile; it does not verify the other recorded platforms. Release bundles
-select their own package and platform set.
+profile; it does not verify the other recorded platforms. Releases publish
+[their own package and platform set](../agents/releasing.md#released-packages).
 
 ## Dependencies and generated files
 
@@ -231,8 +232,8 @@ completed identical entry.
 Each package sets `PACKAGE` and includes `package.mk`, which uses
 `dependency.mk` when applicable. `prepare` refreshes the ignored `deps`
 symlink; ordinary `test` and `run` reuse the matching entry without network or
-rebuilding dependencies. `make -C packages prepare-checked` prepares the
-packages named by `make packages-check`.
+rebuilding dependencies. `make -C packages prepare` prepares every listed
+package.
 
 Generated C, headers, executables, and application outputs stay in ignored
 `builds/`. `clean` removes local products and `deps`, leaving the cache intact.

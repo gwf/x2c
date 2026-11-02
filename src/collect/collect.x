@@ -116,13 +116,6 @@ static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
     $site, NULL);
 }
 
-static macro Stmt $report.collect_loaded_declaration(
-  Expr $c, Expr $site, Expr $name, Expr $path) {
-  $c.report_error(
-    <type>, %"conflicting native declaration: $($name)", $site,
-    %("provider: $($path)"));
-}
-
 module Scope process_cache_scope = NULL;
 
 /* Paths whose entries a later unit collects again: those a meta build

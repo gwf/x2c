@@ -24,8 +24,6 @@ A unit's meta group, emitted as C.
 | [`Compiler.meta_cc_run`](#Compiler.meta_cc_run) | Runs `arguments`, a C compiler command building the group C in `directory`, and returns NULL, or else its first error, which names `directory` when a group's C is the cause. |
 | [`Compiler.meta_diagnostic_line`](#Compiler.meta_diagnostic_line) | Formats a meta diagnostic as `FILE:LINE:COLUMN: CODE: MESSAGE`, followed by its notes on the same line. |
 | [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Reports whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
-| [`Compiler.prepare_loaded_functions`](#Compiler.prepare_loaded_functions) | Adds a loaded unit's public functions and object accessors to its targets. |
-| [`Compiler.prepare_loaded_main`](#Compiler.prepare_loaded_main) | Exposes a loaded unit's main through the ordinary helper target table. |
 | [`Compiler.public_native_function`](#Compiler.public_native_function) | Reports whether a definition has public native linkage. |
 | [`Compiler.refuse_meta_call`](#Compiler.refuse_meta_call) | Reports at `site` that the `meta` function `name` cannot run at compile time, and `why`. |
 | [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, as determined from its type alone. |
@@ -103,8 +101,7 @@ Source: `src/meta-group/selection.x`
 `int Compiler.meta_calls_wait(Compiler c)`
 
 Reports whether a call of a project `meta` function waits for the
-translation: the project meta build's own parse has no helper yet. A
-loaded helper's parse calls the ordinary helper of its sources.
+translation: the project meta build's own parse has no helper yet.
 
 Source: `src/meta-group/selection.x`
 
@@ -160,29 +157,6 @@ template. Such a function has no runtime form.
 
 Source: `src/meta-group/selection.x`
 
-<a id="Compiler.prepare_loaded_functions"></a>
-#### Compiler.prepare_loaded_functions
-
-`void Compiler.prepare_loaded_functions(Compiler c, Array nodes)`
-
-Adds a loaded unit's public functions and object accessors to its targets.
-Meta closure must finish first so these entries retain runtime semantics.
-Existing meta entries and the adapted main keep their original targets.
-
-Source: `src/meta-group/loaded.x`
-
-<a id="Compiler.prepare_loaded_main"></a>
-#### Compiler.prepare_loaded_main
-
-`void Compiler.prepare_loaded_main(Compiler c, Array nodes)`
-
-Exposes a loaded unit's main through the ordinary helper target table.
-Native calls retain its declared signature; the public argc/argv entry
-takes an Array of Strings. A renamed main still returns zero on falling
-through its closing brace. Source text and tokens are unchanged.
-
-Source: `src/meta-group/loaded.x`
-
 <a id="Compiler.public_native_function"></a>
 #### Compiler.public_native_function
 
@@ -226,7 +200,7 @@ Source: `src/meta-group/selection.x`
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
 
-`void Compiler.use_meta_build_directory( String directory, Array owners, Map providers)`
+`void Compiler.use_meta_build_directory(String directory, Array owners)`
 
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.

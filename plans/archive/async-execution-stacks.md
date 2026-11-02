@@ -898,7 +898,7 @@ tradeoff has been accepted, and no push is authorized.
 
 ### In-process Notes comparison, 2026-10-31
 
-The [Notes Thread.run / Task.run report](../../examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
+The [Notes Thread.run / Task.run report](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/examples/apps/notes/bench/reports/2026-10-31-inprocess/interpretation.md)
 records five paired samples at 1, 8, and 64 clients. Both modes use one native
 SQLite owner and the same SQL, row conversion, JSON, and logging. At 8 and 64
 clients, Task increases lookup throughput and reduces CPU/request. One client

@@ -382,9 +382,9 @@ suffixes can splice `fnmod PARAMETERS MODIFIERS` into the enclosing modifier
 sequence without an extra List shell. Therefore a modifier sequence is not
 always a flat List of individually tagged modifier entries. The attribute form
 contains a String of native attribute text. `dim` without an operand retains an
-unspecified array bound. `^` is consumed by the pointer parser as well as
-internal Type operations; that acceptance alone does not promise native
-compiler compatibility for a caret declarator.
+unspecified array bound. The pointer parser accepts a `^` block declarator
+only while collecting C headers, and Type operations keep it as a declarator
+modifier. x2c source that writes one is a parse error.
 
 A C no-argument parameter list is explicitly `(params (param (void) (bind ()
 ())))`. Do not replace it with `(params)` solely because lambdas and calls

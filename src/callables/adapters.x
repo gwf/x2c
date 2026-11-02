@@ -113,17 +113,6 @@ List Compiler.maybe_adapt_func_arg(
   return _func_bound(expected_type, adapter);
 }
 
-/** Builds an adapter with `type`'s public signature that passes its own
-    Func as the first argument of `target`, before the declared arguments.
-    The target can read per-instance bindings with `Func.context`.
-*/
-List Compiler.context_func_adapter(Compiler c, Type type, List target) {
-  List self = c.sym.introduce(c.fresh_name("func_binding"));
-  return _build_func_adapter(
-    c, %("Func"), type, target, self, NULL,
-    $(_func_bound(%("Func"), self)));
-}
-
 /** Puts `setup` at the entry of a block or typed expression `body`. */
 List Compiler.prepend_setup(Compiler c, List body, List setup) {
   if (!setup) return body;

@@ -332,6 +332,17 @@ int Job.ready(Job job) {
   return 1;
 }
 
+/** Decodes the `waitpid` status `raw` of a child that has ended. Returns
+    its exit status, `128 + signal` when a signal ended it, or -1 otherwise.
+    A given `signal` receives that signal, or 0 when no signal ended it.
+*/
+int Job.decode_wait_status(int raw, int &?signal) {
+  int ended = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
+  if (signal) signal = ended;
+  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
+  return ended ? 128 + ended : -1;
+}
+
 // the environment
 
 /** Returns the value of this process's environment variable `name`, or
@@ -386,14 +397,8 @@ static void _reap(Job job, int index, int flags) {
   do pid = waitpid((pid_t) job.pids[index], &status, flags);
   while (pid < 0 && errno == EINTR);
   if (!pid) return;
-  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
+  job.statuses[index] = pid < 0 ? -1 : Job.decode_wait_status(status, NULL);
   job.pids[index] = 0;
-}
-
-static int _decoded_status(int status) {
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
 }
 
 // A command whose first element is a List is a pipeline of those commands.

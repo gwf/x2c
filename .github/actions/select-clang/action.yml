@@ -1,0 +1,12 @@
+name: Select Clang as cc
+description: >-
+  Put the installed clang first on PATH as cc, the host preprocessor the
+  x2c build runs on Linux.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        mkdir -p "$RUNNER_TEMP/x2c-clang"
+        ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+        echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"

@@ -237,17 +237,14 @@ static void _drop(void *bytes) {
     _native_check(pthread_mutex_destroy(&channel.monitor.mutex));
 }
 
-static void _native_check(int error) {
-  if (!error) return;
-  fprintf(stderr, "Channel: native synchronization failed (%d)\n", error);
-  abort();
-}
+static void _native_check(int error) =>
+  x2c_native_check(error, "Channel: native synchronization failed");
 
 static size_t _capacity(Var value) {
   if (value == <unbounded>) return SIZE_MAX;
   if (value.is_integer()) {
     long capacity = -1;
-    try capacity = value.convert(<long>).long_value();
+    try capacity = value.long();
     catch %(conv-range *): capacity = -1;
     if (capacity >= 0) return (size_t) capacity;
   }

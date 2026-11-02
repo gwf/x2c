@@ -11,8 +11,6 @@ from __future__ import annotations
 import argparse
 import contextlib
 import datetime as dt
-import fcntl
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -23,14 +21,13 @@ import sys
 import time
 import uuid
 
-from agent_context import read_context, set_context
+from agent_context import (DELIVERIES, ROLES, load_script, pid_lock,
+                           read_context, set_context, write_json)
 
 # gate-state owns the rule for what doc-check covers; gate_for applies it to
 # a batch's PR range.
-_spec = importlib.util.spec_from_file_location(
-    "gate_state", Path(__file__).resolve().with_name("gate-state.py"))
-gate_state = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(gate_state)
+gate_state = load_script(
+    Path(__file__).resolve().with_name("gate-state.py"), "gate_state")
 
 READY = "integration-ready"
 START = "<!-- x2c-integration:start -->"
@@ -84,13 +81,6 @@ def git(root, *args, deadline=None):
 
 def now():
     return dt.datetime.now(dt.timezone.utc).isoformat()
-
-
-def atomic_json(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex)
-    temporary.write_text(json.dumps(value, indent=2) + "\n")
-    os.replace(temporary, path)
 
 
 def output(value):
@@ -242,24 +232,15 @@ class Queue:
         return record
 
     def save(self, record):
-        atomic_json(self.path(record["id"]), record)
+        write_json(self.path(record["id"]), record, sort_keys=False)
 
     @contextlib.contextmanager
     def lock(self):
         common = Path(git(self.root, "rev-parse", "--git-common-dir"))
         if not common.is_absolute():
             common = self.root / common
-        with (common / "integration.lock").open("a+") as stream:
-            try:
-                fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                stream.seek(0)
-                holder = stream.read().strip() or "unknown"
-                raise RuntimeError(f"another coordinator command is active (pid {holder})")
-            stream.seek(0)
-            stream.truncate()
-            stream.write(str(os.getpid()))
-            stream.flush()
+        with pid_lock(common / "integration.lock",
+                      "another coordinator command is active"):
             yield
 
     def integrator(self):
@@ -816,9 +797,8 @@ def main():
     parser.add_argument("--root", type=Path, default=Path.cwd())
     commands = parser.add_subparsers(dest="operation", required=True)
     context = commands.add_parser("context", help="select this worktree's delivery")
-    context.add_argument("--role", choices=["individual", "orchestrator",
-                                           "integrator", "worker"], required=True)
-    context.add_argument("--delivery", choices=["direct", "pr", "private"],
+    context.add_argument("--role", choices=sorted(ROLES), required=True)
+    context.add_argument("--delivery", choices=sorted(DELIVERIES),
                          required=True)
     submit = commands.add_parser("submit", help="enroll an existing ready dev PR")
     submit.add_argument("--pr", type=int, required=True)

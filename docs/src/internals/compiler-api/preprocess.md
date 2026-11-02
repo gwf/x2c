@@ -12,9 +12,11 @@ C preprocessor directives in x2c source.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.hidden_group`](#Compiler.hidden_group) | Reports whether a conditional stack `open`, as `arm_stacks` holds it, has an arm C never takes. |
 | [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
 | [`Compiler.located_preproc`](#Compiler.located_preproc) | Returns preceding directives with source-mapped include locations. |
 | [`Compiler.macro_directive`](#Compiler.macro_directive) | Returns the name token of the `#define` or `#undef` directive `content`, or NULL for any other directive, and sets `undefined` for `#undef`. |
+| [`Compiler.never_defined`](#Compiler.never_defined) | Reports whether the macro `name` is never defined for x2c output. |
 | [`Compiler.note_object_macro`](#Compiler.note_object_macro) | Records the name of the `#define` line `content` so a bare atom spelled the same way inside a literal can be flagged and a declaration prefix can be read. |
 | [`Compiler.note_preprocessor_macros`](#Compiler.note_preprocessor_macros) | Records object-like `#define` names and removes names after `#undef`. |
 | [`Compiler.preproc_conditional_kind`](#Compiler.preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
@@ -27,6 +29,16 @@ C preprocessor directives in x2c source.
 | [`Compiler.scan_directive`](#Compiler.scan_directive) | Returns the first token of `text` scanned as x2c tokens after its continuation lines are joined, as a directive's text is read. |
 
 ### `Compiler`
+
+<a id="Compiler.hidden_group"></a>
+#### Compiler.hidden_group
+
+`int Compiler.hidden_group(List open)`
+
+Reports whether a conditional stack `open`, as `arm_stacks` holds it,
+has an arm C never takes.
+
+Source: `src/preprocess.x`
 
 <a id="Compiler.leading_preproc"></a>
 #### Compiler.leading_preproc
@@ -60,6 +72,18 @@ Returns the name token of the `#define` or `#undef` directive
 `#undef`. The text after `define` or `undef` is scanned by
 `Compiler.scan_directive`, so the tokens after the name are the rest of
 the directive.
+
+Source: `src/preprocess.x`
+
+<a id="Compiler.never_defined"></a>
+#### Compiler.never_defined
+
+`int Compiler.never_defined(String name)`
+
+Reports whether the macro `name` is never defined for x2c output. x2c
+output is compiled as C by a GNU-style compiler, so `__cplusplus` and
+`_MSC_VER` are never defined, and a compiler built for a host other
+than Windows never targets it.
 
 Source: `src/preprocess.x`
 

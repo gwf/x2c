@@ -127,20 +127,17 @@ module String _canonical_path(String path) {
 
 module String _canonical_lib(void) {
   static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"$(x2c_get_root())/lib");
+  return _root_directory(cache, "lib");
 }
 
 module String _canonical_include(void) {
   static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"$(x2c_get_root())/include/x2c");
+  return _root_directory(cache, "include/x2c");
 }
 
 module String _canonical_src(void) {
   static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"$(x2c_get_root())/src");
+  return _root_directory(cache, "src");
 }
 
 module String _canonical_cwd(void) {
@@ -154,6 +151,10 @@ static String _cached_canonical(char *cache, String dir) {
     snprintf(cache, PATH_MAX, "%s", (char *) dir);
   return cache;
 }
+
+/* The root's `dir`, spelled only until `cache` holds it. */
+static String _root_directory(char *cache, String dir) =>
+  *cache ? cache : _cached_canonical(cache, %"$(x2c_get_root())/$dir");
 
 module void _retain_rows(List parts) {
   foreach (Var part in parts) {

@@ -15,6 +15,7 @@
 static keyword loop $private.loop;
 #include "x2c.x"
 #include "path.x"
+#include "encoding.x"
 
 /** The receiverless owner of `Json.parse` and the other JSON operations. */
 typedef Symbol Json;
@@ -409,7 +410,7 @@ static void _escape(Reader &r, Buffer out) {
     r.at = start;
     $error.read.nul(r);
   }
-  _write_code_point(out, point);
+  out.write_code_point(point);
 }
 
 static long _hex4(Reader &r) {
@@ -500,27 +501,6 @@ static void _fail(Reader &r, String why) {
   scan_next_line_col((char *) r.text, offset, line, column);
   if (r.path) $error.read.file(r.path, why, offset, line, column);
   $error.read.text(why, offset, line, column);
-}
-
-/* UTF-8
-
-   Reading validates each unescaped sequence with `scan_utf8_length` and
-   decodes `\u` escapes; writing replaces each ill-formed subpart with
-   U+FFFD. */
-
-static void _write_code_point(Buffer out, long point) {
-  if (point < 0x80) {
-    out.write_char(point);
-    return;
-  }
-  char bytes[4];
-  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
-  for (int i = length - 1; i > 0; i--) {
-    bytes[i] = 0x80 | (point & 0x3F);
-    point >>= 6;
-  }
-  bytes[0] = (0xF0 << (4 - length)) | point;
-  out.write_len(bytes, length);
 }
 
 static String _json(Var value, int pretty) {
@@ -614,7 +594,7 @@ static void _write_string(Buffer out, String text) {
     out.write_len(text + run, at - run);
     if (escape) out.write(escape);
     else if (byte < 0x20) out.printf("\\u%04x", byte);
-    else _write_code_point(out, 0xFFFD);
+    else out.write_code_point(0xFFFD);
     run = at -= sequence;
   }
   // The empty String is NULL, so an empty tail must not offset it.

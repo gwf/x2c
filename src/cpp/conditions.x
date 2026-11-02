@@ -119,31 +119,21 @@ static int _condition(Compiler c, Cpp cpp, Token token) {
   return -1;
 }
 
-/* Looks up the condition operand in the current macro table. */
+/* Looks up the condition operand in the current macro table. x2c output
+   is compiled by a GNU-style compiler, so `__GNUC__` is always defined,
+   though its value is unknown. */
 static int _defined(Cpp cpp, Token token) {
   if (!token.is_word()) return -1;
   Var value = cpp.macros[token.text];
   if (value is <list> || (value is void && token.text == "__GNUC__"))
     return 1;
-  if (value == <undef> || (value is void && _never_defined(token.text)))
+  if (value == <undef> ||
+      (value is void && Compiler.never_defined(token.text)))
     return 0;
   return -1;
 }
 
 static int _negate(int holds) => holds < 0 ? holds : !holds;
-
-/* x2c output is compiled as C by a GNU-style compiler, so `__GNUC__` is
-   always defined, though its value is unknown, `__cplusplus` and
-   `_MSC_VER` are never defined, and a compiler built for a host other than
-   Windows never targets it. */
-static int _never_defined(String name) {
-  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
-#endif
-}
 
 // expressions
 
@@ -298,7 +288,7 @@ static CppValue _primary(CppEval &e) {
   else {
     Var value = e.cpp.macros[token.text];
     if (value is <list> || value == <undef> ||
-        (value is void && _never_defined(token.text)))
+        (value is void && Compiler.never_defined(token.text)))
       return _known(0);
   }
   return (CppValue) {0};

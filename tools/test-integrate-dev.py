@@ -848,11 +848,9 @@ class IntegrationProbe(unittest.TestCase):
         lock=common/'land-dev.lock'; lock.mkdir(parents=True)
         pid=lock/'pid'; pid.write_text('99999999\n')
         script=TOOL_ROOT/'tools'/'land-dev'
-        import importlib.machinery, importlib.util
         sys.path.insert(0,str(TOOL_ROOT/'tools'))
-        loader=importlib.machinery.SourceFileLoader('land_dev_probe',str(script))
-        spec=importlib.util.spec_from_loader('land_dev_probe',loader)
-        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        from agent_context import load_script
+        module=load_script(script,'land_dev_probe')
         module.git=lambda *args: str(common)
         with self.assertRaisesRegex(ValueError,'legacy publication lock'):
             module.acquire_lock()

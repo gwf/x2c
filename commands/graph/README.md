@@ -123,8 +123,9 @@ builds/0/libexec/x2c-graph clones --min-size 100 "$@"
 python3 commands/graph/tests/test-clones.py  # optional experiment checks
 ```
 
-The [initial experiment results](clones-experiment.md) include measured
-storage, timing, the size distribution, and source-checked examples.
+The [initial experiment results](https://github.com/gwf/x2c/blob/9d196566fe704b9fbcc99c5d16db9d8cac2681cb/commands/graph/clones-experiment.md)
+include measured storage, timing, the size distribution, and source-checked
+examples.
 
 This is an investigation aid for macro-expanded, typed syntax. Repetition
 introduced by a shared macro can be intentional. Equal normalized fragments

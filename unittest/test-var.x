@@ -33,11 +33,6 @@ static Symbol _capture_var_runtime_error(List errors, Var data) {
 }
 
 
-static Symbol _var_runtime_error_code(void) {
-  return var_runtime_errors.last().list().assoc(<code>);
-}
-
-
 static String dispatch_fixture_str(Var value) {
   return "custom-str";
 }

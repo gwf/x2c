@@ -66,7 +66,8 @@ leaves its expectations unchanged; other successful fixtures may still update.
 Never use it merely to make a failing check pass; review each changed artifact
 as compiler behavior.
 
-Fixtures run in parallel, using `JOBS` workers (the CPU count by default).
+Fixtures run in parallel, using `BUILD_JOBS` workers. Make supplies the CPU
+count by default; a direct `run.sh` without `BUILD_JOBS` uses one worker.
 Check runs report each failure as its worker finishes and stop launching new
 fixtures. Already running workers finish and retain their results. The next
 suite checks previous failures first, then fixtures without a completed

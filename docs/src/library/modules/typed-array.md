@@ -766,11 +766,12 @@ Source: `lib/typed-array.x`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
-Arithmetic follows the generated C operators, integer promotions, and
-result conversion. A failing operation leaves the element unchanged.
+Arithmetic runs at the C-promoted width and the result converts back
+to the element, as a native compound assignment does. A failing
+operation leaves the element unchanged.
 
-**Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-invalid operation.
+**Raises:** `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+count outside the promoted width, or `<bad-op>` for another operator.
 
 Source: `lib/typed-array.x`
 
@@ -1215,7 +1216,8 @@ Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
 the unchecked C-pointer preconditions of bracket access.
 
-**Raises:** `<bad-types>` for another operator, before changing the element.
+**Raises:** `<bad-types>` for another numeric operator or `<bad-op>` for a
+non-numeric one, before changing the element.
 
 Source: `lib/typed-array.x`
 
@@ -1660,7 +1662,8 @@ Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
 the unchecked C-pointer preconditions of bracket access.
 
-**Raises:** `<bad-types>` for another operator, before changing the element.
+**Raises:** `<bad-types>` for another numeric operator or `<bad-op>` for a
+non-numeric one, before changing the element.
 
 Source: `lib/typed-array.x`
 
@@ -2103,11 +2106,12 @@ Source: `lib/typed-array.x`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
-Arithmetic follows the generated C operators, integer promotions, and
-result conversion. A failing operation leaves the element unchanged.
+Arithmetic runs at the C-promoted width and the result converts back
+to the element, as a native compound assignment does. A failing
+operation leaves the element unchanged.
 
-**Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-invalid operation.
+**Raises:** `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+count outside the promoted width, or `<bad-op>` for another operator.
 
 Source: `lib/typed-array.x`
 
@@ -2550,11 +2554,12 @@ Source: `lib/typed-array.x`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
-Arithmetic follows the generated C operators, integer promotions, and
-result conversion. A failing operation leaves the element unchanged.
+Arithmetic runs at the C-promoted width and the result converts back
+to the element, as a native compound assignment does. A failing
+operation leaves the element unchanged.
 
-**Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-invalid operation.
+**Raises:** `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+count outside the promoted width, or `<bad-op>` for another operator.
 
 Source: `lib/typed-array.x`
 
@@ -2997,11 +3002,12 @@ Source: `lib/typed-array.x`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
-Arithmetic follows the generated C operators, integer promotions, and
-result conversion. A failing operation leaves the element unchanged.
+Arithmetic runs at the C-promoted width and the result converts back
+to the element, as a native compound assignment does. A failing
+operation leaves the element unchanged.
 
-**Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
-invalid operation.
+**Raises:** `<div-zero>` for a zero divisor, `<bad-shift>` for a shift
+count outside the promoted width, or `<bad-op>` for another operator.
 
 Source: `lib/typed-array.x`
 
@@ -3650,11 +3656,12 @@ negative-index normalization, so an index outside the elements has the
 same undefined behavior as the equivalent C pointer. Bound loops with
 `len`, and use `try_get` for a checked read.
 
-Numeric `array[index] += rhs` applies the generated C operator to native
-values, not a `Var` round trip; `ArrayString` uses canonical String
-concatenation. Integer promotions and result conversions follow C. Integer
-division by zero, invalid shifts, and unsupported operators still raise
-before changing the element; the boxed path's `<conv-range>` is absent.
+Numeric `array[index] += rhs` operates on native values, not a `Var`
+round trip; `ArrayString` uses canonical String concatenation. Integer
+promotions and result conversions follow C, so a shift count is checked
+against the promoted width. Integer division by zero, invalid shifts, and
+unsupported operators still raise the causes `Var.update` raises, before
+changing the element; the boxed path's `<conv-range>` is absent.
 
 ## Tests and examples
 

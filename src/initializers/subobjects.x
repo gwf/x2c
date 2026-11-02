@@ -33,14 +33,6 @@ List Compiler.initializer_rows(
   return rows.list_free();
 }
 
-/** Returns the initializer path selecting one visible aggregate field.
-    Anonymous aggregate members remain explicit path frames, so consumers
-    observe the same member promotion as native initializer conversion.
-*/
-List Compiler.initializer_field_path(
-  Compiler c, Type type, List field) =>
-  _named_field_path(c, type, field.car(), NULL);
-
 // initializer paths
 
 /** Selects a native subobject without evaluating it when used by sizeof. */

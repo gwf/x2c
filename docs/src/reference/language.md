@@ -26,6 +26,13 @@ object has one definition in the generated C and an `extern` declaration in
 the header. An object of an anonymous `struct`, `union`, or `enum` type has no
 repeatable declaration to publish.
 
+A public `inline` function's body cannot name a `static` function or object
+of its unit, because an includer would reach another unit's definition or
+none. That use is a compile error at the statement holding it. A
+`static inline` function has no such limit. Helpers that the compiler
+generates for a public inline body, such as the one behind a `switch` on a
+`String`, have external linkage, so an includer links to them.
+
 The compiler reserves `_x2c_gensym_*`, `_init_guard_`, `_file_init_`, and
 `_` followed by digits for generated support.
 Source declarations may use `_x2c_*` outside that subspace. The repository
@@ -119,6 +126,9 @@ rules without another tokenization pass.
 `expand` is a predefined keyword alias with the same lexical treatment for
 following literals. It follows keyword-alias invocation precedence rather
 than the ordinary-binding preference of the nine contextual words above.
+Therefore `expand` is reserved in expressions: an object or function named
+`expand` can be declared, but a read or call of it starts the alias. A field
+named `expand` remains usable.
 
 `in` and `match` retain their existing contextual rules, described under
 [Directives in the generated C](#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
@@ -1262,6 +1272,26 @@ macro, gives a type x2c does not resolve; the generated C spells it
 `__typeof__(operand)`, and C types it. `typeof_unqual` names the same type
 without its qualifiers.
 
+### Alignment, atomic, and complex types
+
+C11's alignment specifier, `_Alignas(constant)` or `_Alignas(type)`, is a
+declaration specifier. Write it with the storage class, before the type.
+`_Atomic(type)` names an atomic type. `_Atomic` before scalar words, a
+typedef name, or a tag name, as in `_Atomic long`, names one too. `_Complex`
+combines with scalar words in either order, as in `double _Complex`.
+
+```x2c
+_Alignas(16) unsigned char buffer[64];
+_Atomic(int) hits = 0;
+double _Complex root = 1.0;
+```
+
+x2c keeps an atomic or complex type as its C spelling. The C compiler
+supplies its arithmetic and conversions, and x2c does not convert it to
+`Var`. `_Atomic` written after the type, as in `int _Atomic hits`, is a
+parse error. A `^` block declarator is also a parse error, because the
+generated C cannot spell one. Collection still reads one in a C header.
+
 ### Generic selection
 
 `_Generic(controlling, type: value, ..., default: value)` is a C11 generic
@@ -1874,8 +1904,9 @@ The declaration captures the visible macro definition itself, so redefining
 the same macro name later does not retarget the alias. A later `keyword`
 declaration for the same alias replaces it only for following source.
 
-Registration and use are source ordered. Expression, statement, field,
-entry, enumerator, and unit macro aliases retain their result positions.
+Registration and use are source ordered. Expression, statement,
+declaration, field, entry, enumerator, and unit macro aliases retain their
+result positions.
 `Decorator` aliases retain their captured `Expr`, `Function`, `Stmt`,
 `Field`, `Unit`, `NamedType`, or `Macro` target. An invocation in the wrong
 position receives the same result or target diagnostic as its direct spelling.
@@ -2863,8 +2894,10 @@ A run-time call to a `meta` function that reaches a compiler query or a
 source-template constructor is diagnosed where it is written. The diagnostic
 gives the function and the reason.
 
-Compiler facilities load before a unit's own source, and macro code cannot
-redefine them.
+Compiler facilities load before a unit's own source. A unit cannot define a
+macro in the reserved `x2c.*` or `lisp.*` namespace. The other prelude
+macros, such as `$scope` and `$lock`, follow the ordinary definition rules,
+so a later definition of the same name shadows one for later invocations.
 
 ### Macro-visible syntax
 
@@ -3371,14 +3404,14 @@ contexts do not change Lisp `quote` or
 `quasiquote`.
 
 Percent strings are byte strings: they may span physical lines and their
-`\\x`, `\\u`, and `\\U` escapes consume one or two hexadecimal digits.
+`\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits.
 Ordinary C string and character literals instead follow C escape widths,
-including exactly four digits for `\\u`, eight for `\\U`, and one or more for
-`\\x`; an unescaped newline does not continue an ordinary C literal.
+including exactly four digits for `\u`, eight for `\U`, and one or more for
+`\x`; an unescaped newline does not continue an ordinary C literal.
 
 Adjacent ordinary C string literals form one expression, including across
 comments or newlines. Their separate escape boundaries are preserved:
-`"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
+`"\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
 typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
 `class Path String;`, requires the same conversion. A literal used as the
@@ -4948,10 +4981,15 @@ A public `struct tag { ... } name;` publishes the tag body and
 `extern struct tag name;` in the header and defines `name` in the source.
 A public prototype that uses `struct tag` is preceded in the header by
 `struct tag;` when the header has not declared the tag. A function body that
-follows the declarations keeps the conditional arm it was written in. It is
-emitted before a later `#undef` and before any conditional group that
-contains one, so the macro definitions in effect where it was written apply
-to it.
+follows the declarations keeps the conditional arm it was written in, and it
+can use a macro defined later in the file. It is emitted before a later
+`#undef` and before any conditional group that contains one, so the macro
+definitions in effect where it was written apply to it. A body written inside
+a conditional arm is also emitted before a later `#define` or `#include` and
+before any conditional group that contains one. C therefore selects its arm
+with the macros in effect where it was written. For example, a body inside
+the include-guard idiom `#ifndef GUARD`, `#define GUARD`, ..., `#endif` stays
+in the generated C.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host

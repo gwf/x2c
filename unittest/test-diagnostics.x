@@ -3,25 +3,6 @@
 #include "test-support.x"
 #include "test-macros.x"
 #include "diagnostics.x"
-#include <unistd.h>
-
-/* Stderr goes to a temporary file between the two calls, so a test reads
-   exactly what its printer streamed. */
-static int _capture_stderr(File &file) {
-  fflush(stderr);
-  file = tmpfile();
-  int saved = dup(STDERR_FILENO);
-  dup2(fileno(file), STDERR_FILENO);
-  return saved;
-}
-
-static String _captured_stderr(File file, int saved) {
-  fflush(stderr);
-  dup2(saved, STDERR_FILENO);
-  close(saved);
-  rewind(file);
-  return file.string_close();
-}
 
 static void diagnostics_records_entries(void) {
   $test.scoped();
@@ -30,11 +11,11 @@ static void diagnostics_records_entries(void) {
     Diagnostics.new(xcalloc(1, sizeof(struct Compiler)), 2);
   List first_notes = %( "initialize flag before use" );
   File file;
-  int saved = _capture_stderr(file);
+  int saved = Test_capture_stderr(file);
   diag.report(<first>, "first", NULL, first_notes);
   diag.report(<second>, "second", NULL, NULL);
   diag.report(<third>, "third", NULL, NULL);
-  String printed = _captured_stderr(file, saved);
+  String printed = Test_captured_stderr(file, saved);
 
   EXPECT_INT_EQ(diag.count, 2);
   EXPECT_TRUE(diag.reached_limit());
@@ -74,7 +55,7 @@ static void diagnostics_release_keeps_or_discards(void) {
   Compiler printer = xcalloc(1, sizeof(struct Compiler));
   Diagnostics diag = Diagnostics.new(printer, 1);
   File file;
-  int saved = _capture_stderr(file);
+  int saved = Test_capture_stderr(file);
   DiagnosticsHold hold = diag.hold();
   EXPECT_NULL(diag.printer);
   diag.report(<discarded>, "discarded", NULL, NULL);
@@ -85,10 +66,10 @@ static void diagnostics_release_keeps_or_discards(void) {
 
   hold = diag.hold();
   diag.report(<kept>, "kept", NULL, NULL);
-  EXPECT_STR_EQ(_captured_stderr(file, saved), NULL);
-  saved = _capture_stderr(file);
+  EXPECT_STR_EQ(Test_captured_stderr(file, saved), NULL);
+  saved = Test_capture_stderr(file);
   diag.release(hold, 1);
-  EXPECT_STR_EQ(_captured_stderr(file, saved), "kept: kept\n\n");
+  EXPECT_STR_EQ(Test_captured_stderr(file, saved), "kept: kept\n\n");
   EXPECT_INT_EQ(diag.count, 1);
   EXPECT_TRUE(diag.reached_limit());
 }

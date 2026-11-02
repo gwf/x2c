@@ -132,8 +132,6 @@ int main(int argc, char **argv) {
   $test.suite(test_suite);
   $test.suite(protocols_suite);
   $test.suite(atomic_container_suite);
-  // The core Atom descriptor registers before suites begin. Keep the runtime
-  // consumers ahead of var's dispatch-capacity saturation test.
   $test.suite(func_suite);
   $test.suite(lisp_suite);
   $test.suite(var_suite);

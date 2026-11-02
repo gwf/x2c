@@ -6,7 +6,7 @@
 
 ## Current owner
 
-Continue from the [active plan](../review-remediation-2026-10-11.md). The text below retains its dated observations and earlier
+Continue from the [active plan](../language-reference-writing.md). The text below retains its dated observations and earlier
 decisions; it is not an additional implementation queue.
 
 ## Historical record

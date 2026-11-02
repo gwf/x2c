@@ -84,8 +84,8 @@ named `tests` does not change discovery. Build directories under
 The command builds and runs each file through the matching compiler's
 `script` command. Each file is a complete program. The script command
 builds its local source includes. Package and x2c include directories come
-from the selected project target. Use `--manifest FILE` and `--target NAME`
-to select that configuration explicitly. The runner sets `X2C_CACHE_DIR`
+from the selected project target. Use `--manifest-path FILE` and
+`--target NAME` to select that configuration explicitly. The runner sets `X2C_CACHE_DIR`
 for each job to `.x2c-build/tests/`, so script builds stay there.
 
 For a direct invocation of a test that includes local source helpers, use

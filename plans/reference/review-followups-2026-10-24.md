@@ -37,7 +37,7 @@ delivered repairs and a historical cleanup census. Remaining candidates:
   cleanup ran no benchmark and adds no recurring performance requirement.
 
 The source-form, rewrite, and Lisp explanations belong to the
-[writing plan](../review-remediation-2026-10-11.md). Typed quotation work
+[writing plan](../language-reference-writing.md). Typed quotation work
 belongs to the [quotation plan](../archive/quotation-adoption-closeout-2026-10-31.md).
 
 ## SDK and native types

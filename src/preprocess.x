@@ -34,6 +34,30 @@ static typedef struct ArmScan {
    Each operation classifies one directive line. The conditional scan,
    collection, and generation read directives through them. */
 
+/** Reports whether the macro `name` is never defined for x2c output. x2c
+    output is compiled as C by a GNU-style compiler, so `__cplusplus` and
+    `_MSC_VER` are never defined, and a compiler built for a host other
+    than Windows never targets it.
+*/
+int Compiler.never_defined(String name) {
+  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
+#if defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
+#else
+  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
+#endif
+}
+
+/** Reports whether a conditional stack `open`, as `arm_stacks` holds it,
+    has an arm C never takes.
+*/
+int Compiler.hidden_group(List open) {
+  foreach (List group in open)
+    if (group.caddr() == <hidden> || group.caddr() == 2 ||
+        group.caddr() == 3) return 1;
+  return 0;
+}
+
 /** Returns the file named by the `#include` line `text`, or `NULL` for any
     other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
     the name, such as a comment, is ignored.
@@ -231,7 +255,7 @@ static void _directive(ArmScan &s, Token token, size_t i) {
   Var open;
   if (s.c.arm_stacks.try_get((long) i, open)) {
     s.open = open;
-    s.hidden = _hidden_group(s.open);
+    s.hidden = Compiler.hidden_group(s.open);
   }
   else if (!s.hidden) _note_layout_macro(s, token.text);
 }
@@ -253,7 +277,7 @@ static void _plain_directive(ArmScan &s, Token token, size_t i) {
   if (!conditional) return;
   s.open = s.stack;
   s.c.arm_stacks[(long) i] = s.open;
-  s.hidden = _hidden_group(s.open);
+  s.hidden = Compiler.hidden_group(s.open);
 }
 
 /* State 2 hides the opening arm; state 1 selects it, and state 3 keeps
@@ -272,24 +296,8 @@ static String _plain_directive_line(String directive) {
   Token token = Token.skip_trivia(Compiler.scan_directive(directive));
   Array words = [];
   for (; token.type != <eof>; token = Token.skip_trivia(token + 1))
-    words.push(_never_defined(token.text) ? "<never>" : token.text);
+    words.push(Compiler.never_defined(token.text) ? "<never>" : token.text);
   return " ".join(words.list_free());
-}
-
-static int _never_defined(String name) {
-  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  return 0;
-#else
-  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
-#endif
-}
-
-static int _hidden_group(List open) {
-  foreach (List group in open)
-    if (group.caddr() == <hidden> || group.caddr() == 2 ||
-        group.caddr() == 3) return 1;
-  return 0;
 }
 
 /* Hides a token of an arm C never takes and marks layout attributes, and
