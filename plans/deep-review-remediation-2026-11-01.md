@@ -1,9 +1,9 @@
 # Deep review remediation (2026-11-01)
 
 > Status: active - batch A published on `dev` as `9d196566f` (PR #643,
-> 2026-11-02); batch B runs in its own session; batch C is in progress on
-> branch `gwf/review-batch-c-contracts` from `dev` `9d196566f` with the
-> decisions below, accepted on 2026-11-02.
+> 2026-11-02); batch B runs in its own session; batch C integrated from
+> `dev` `9d196566f` and submitted to the shared integrator on 2026-11-02 on
+> branch `gwf/review-batch-c-contracts`, with the decisions below.
 > The review record is workspace-local
 > (`.context/repository-review-2026-11-01.md` in the reviewing worktree);
 > this plan carries the decisions and the batch map.
