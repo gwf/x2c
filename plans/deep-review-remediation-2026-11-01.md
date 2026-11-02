@@ -272,6 +272,10 @@ Declined, with the reason:
   states clauses the standard does not.
 - Fixture copies of `rejected()` stay: fixtures are standalone programs.
 
+Fixed in the same integration batch: the first `make build` after a
+`Compiler` field change segfaulted in `lib/.own-interfaces` because Make
+read a generated header's time before translation rewrote it (PR #646).
+
 Still open for a later bug batch, besides the carried defects above:
 
 - `-v` and `-###` translate lines are not shell-quoted (K7).
@@ -280,8 +284,6 @@ Still open for a later bug batch, besides the carried defects above:
 - `(m["a"]) += 4` emits invalid C.
 - The Var conversion check misses struct-tag destinations
   (`struct Point p = v;` passes x2c and fails in clang).
-- The first `make build` after a `Compiler` field change can segfault in
-  `lib/.own-interfaces`; a second build succeeds (stage build graph).
 
 ## Validation and delivery
 
