@@ -23,7 +23,7 @@ for the explicitly proposed search migration in D1.
 Change authoritative sources and regenerate their derived artifacts through
 existing targets. This plan adds no recurring gate or publication step.
 
-The earlier [language-reference writing plan](../review-remediation-2026-10-11.md)
+The earlier [language-reference writing plan](../language-reference-writing.md)
 retains its separate scope. This plan owns only the October 26 findings.
 
 ## Evidence at the baseline
