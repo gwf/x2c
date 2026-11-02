@@ -93,9 +93,8 @@ with the converged compiler at `b75c61da9`:
   unnamed parameter list. Parameter binding now normalizes that spelling to
   the empty-parameter sentinel. The `typedef-void-parameters` fixture covers
   direct calls, function pointers, and `Func` adapters.
-- `make doc-examples`: the `language.md:106` sample declares `remainder` with
-  a signature that conflicts with the C math function. The imports slide also
-  requires a built PCRE2 package; that prerequisite is absent in these worktrees.
+- The former `remainder` sample uses `residue` and no longer conflicts with
+  the C math function. Checked book samples import no optional packages.
 
 These checks remain optional. Their repairs are separate from the delimiter
 migration; no expectations or sample classifications were weakened.
@@ -140,15 +139,14 @@ warning policy is unchanged. See the
 [CLI plan](../plans/archive/build-cli-defaults.md) for the retained verification
 evidence.
 
-## Reference Lisp diagnostic mismatch
+## Reference Lisp comparison
 
-On 2026-10-25, the optional `examples/programs/check-reference-lisp --build`
-comparison agrees on 199 of 200 cases. The `lists` case passes `(car nil)`
-to `list`: the runtime reports `(void-op (operation "apply") (index 0))`,
-while the independent reference interpreter reports `(void-op)`.
-The runtime produces the same diagnostic with the original `init.xlisp`
-from `27dd8c6c2`, before standard-environment consolidation. Diagnostic
-parity remains a separate follow-up; the expectations were not weakened.
+On 2026-11-02, `examples/programs/check-reference-lisp --build` agrees on
+all 200 cases. The independent interpreter reads files through `File.string`,
+including its embedded-NUL failure. Its argument evaluator reports rejected
+void arguments as `apply` failures with the argument index, matching the
+runtime Lisp boundary. The comparison still checks exit status, stdout,
+and stderr byte for byte; no expected result was weakened.
 
 ## Coverage
 
@@ -325,7 +323,8 @@ parity remains a separate follow-up; the expectations were not weakened.
   List, Array, Map, and iterator value exclusion.
 - Iter, Logger, File, and scanner suites own their direct runtime
   contracts, hot-path benchmarks, and boundary fixtures. The root `bm-all`
-  target runs every focused benchmark owner.
+  target runs the representative owners named by `RUNTIME_BENCHMARKS`; it does
+  not run the separate full Map campaigns or Match-cache acceptance benchmark.
 - `TestHarness_run` fails on assertion failure, zero assertions, or
   unbalanced Scope state. Ambient errors remain with their configured policy
   owner. Tests return `void` and use bare `EXPECT_*` statements; the harness

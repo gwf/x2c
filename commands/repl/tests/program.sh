@@ -114,3 +114,9 @@ if "$tmp/program-api" "$tmp/duplicate-a.c" "$tmp/duplicate-b.c" \
   echo "duplicate native source definitions unexpectedly succeeded" >&2
   exit 1
 fi
+
+# Native diagnostics count submission lines, excluding the hidden wrapper.
+printf 'int marker = 1;\nundefined_name + marker;\n' | \
+  "$X2C" repl >"$tmp/location.log" 2>&1 && exit 1
+grep -Fq '<repl>:1:' "$tmp/location.log"
+! grep -Fq '<repl>:2:' "$tmp/location.log"

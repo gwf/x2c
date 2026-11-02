@@ -533,7 +533,7 @@ static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
   foreach (Var form in forms) {                                                  // Typed List iteration.
     Var value = self.eval(env, form);                                            // Evaluate each argument once.
     if (value is void)                                                           // Lisp application excludes void values.
-      $fail(<void-op>, "apply", <index>, values.len());                          // Report the argument position.
+      $fail(<void-op>, "apply", <index>, (int) values.len());                          // Report the argument position.
     values.push(value);                                                         // Preserve argument order.
   }
   return values;                                                                 // Build List before Array cleanup.
