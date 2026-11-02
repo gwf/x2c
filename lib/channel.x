@@ -88,7 +88,7 @@ Channel Channel.new(Var type, Var capacity) {
   }
   if (type is not <symbol> ||
       (type != <var> && !Var.known_tag(type)))
-    raise %(bad-arg (operation "Channel.new") (argument type));
+    raise %(bad-arg (operation "Channel.new") (reason "unknown element tag"));
   size_t limit = _capacity(capacity);
   Scope lifetime = Scope.child();
   int ready = 0;
@@ -248,7 +248,8 @@ static size_t _capacity(Var value) {
     catch %(conv-range *): capacity = -1;
     if (capacity >= 0) return (size_t) capacity;
   }
-  raise %(bad-arg (operation "Channel.new") (argument capacity));
+  raise %(bad-arg (operation "Channel.new")
+          (reason "negative or non-integer capacity"));
 }
 
 static void _send(Channel channel, Var value, int owned) {

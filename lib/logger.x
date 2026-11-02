@@ -386,12 +386,13 @@ Logger log_get_global_logger(void) => global_logger;
 
 /** Creates a `Logger` in the active `Scope`, filtering below `min_level`.
     The `Logger` borrows the active canonical pool for any memory sinks and
-    owns a private `Scope` for sink state. An invalid level returns NULL.
-    Raises: `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
-    allocated.
+    owns a private `Scope` for sink state.
+    Raises: `<bad-arg>` for an unknown level, or `<alloc-fail>` when the
+    `Logger` or its private `Scope` cannot be allocated.
 */
 Logger Logger.new(Symbol min_level) {
-  if (_level_priority(min_level) < 0) return NULL;
+  if (_level_priority(min_level) < 0)
+    raise %(bad-arg (operation "Logger.new") (reason "unknown level"));
   Logger logger = xcalloc(1, sizeof(struct Logger));
   *logger = (struct Logger) {
     .min_level = min_level, .owner_scope = *Scope.top(),

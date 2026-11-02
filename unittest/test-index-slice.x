@@ -88,7 +88,7 @@ static void normalization_extreme_integer_domain(void) {
 static void collection_index_boundaries(void) {
   $test.scoped();
 
-  Array array = [10, 20, 30];
+  Array array = [10, 20, 30], missing = NULL;
   List list = %(10 20 30);
   String string = "abc";
 
@@ -104,6 +104,8 @@ static void collection_index_boundaries(void) {
   EXPECT_INT_EQ(array[-3].int(), 10);
   EXPECT_TRUE(array[-4] is void);
   EXPECT_TRUE(array[3] is void);
+  EXPECT_TRUE(missing[0] is void);
+  EXPECT_TRUE(missing[-1] is void);
 
   EXPECT_INT_EQ(list[0].int(), 10);
   EXPECT_INT_EQ(list[-3].int(), 10);

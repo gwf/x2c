@@ -87,8 +87,9 @@ meta native int String.compare(String x, String y) {
     `String.new_len("ab\0cd", 5)` is the two-byte `String` `ab`. `str` need
     not be NUL-terminated, so it may be bounded C input or a window into a
     larger buffer.
-    Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null
-    `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
+    Raises: `<size-limit>` when the copied bytes cannot fit a `String`, or
+    `<alloc-fail>` when canonical storage cannot be allocated. A null `str`,
+    nonpositive `len`, or leading NUL returns NULL, the empty `String`,
     without raising.
 */
 String String.new_len(const char *str, int len) {
@@ -111,7 +112,6 @@ String String.new_in(Pool pool, const char *bytes, int length) {
   if (!pool || !bytes || length <= 0) return NULL;
   size_t bounded = strnlen(bytes, (size_t) length);
   if (!bounded) return NULL;
-  if (bounded > INT_MAX - 1) raise %(size-limit (operation "String.new_in"));
   return _from_bytes_in(pool, bytes, (int) bounded);
 }
 
@@ -148,7 +148,8 @@ String String.new(const char *str) {
 /** Canonicalizes a known NUL-free byte span in the active pool chain.
     Copies bytes only when needed; the caller retains its input storage.
     Null input or a nonpositive length returns the empty String.
-    Raises alloc-fail if canonical storage cannot be allocated.
+    Raises: `<size-limit>` for a span longer than `INT_MAX - 1` bytes, or
+    `<alloc-fail>` if canonical storage cannot be allocated.
 */
 String x2c_string_from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
@@ -279,9 +280,12 @@ static unsigned _hash_n(const char *str, int length) =>
 
 /* A short `String` probes the whole ancestor chain from borrowed bytes before
    anything is allocated, and a miss is installed in `pool`. A long one is
-   stored first, and Pool.intern releases that candidate on a hit. */
+   stored first, and Pool.intern releases that candidate on a hit. Every
+   byte-span constructor reaches here, so this owns their length limit: the
+   header's `int` length also counts the trailing NUL. */
 static String _from_bytes_in(Pool pool, const char *bytes, int length) {
   if (!pool || !bytes || length <= 0) return NULL;
+  if (length > INT_MAX - 1) raise %(size-limit (size $length));
   unsigned hash = _hash_n(bytes, length);
   if (length <= STRING_STACK_BYTES) {
     String existing = x2c_pool_lookup_string(pool, bytes, length, hash);

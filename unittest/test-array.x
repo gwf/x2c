@@ -134,16 +134,10 @@ static void array_null_writes_return_void(void) {
 
 static void array_absent_elements_return_void(void) {
   $test.scoped();
-  Array missing = NULL, empty = [], values = [7];
+  Array empty = [], values = [7];
 
-  EXPECT_TRUE(missing.take_last() is void);
   EXPECT_TRUE(empty.take_last() is void);
-  EXPECT_TRUE(missing.shift() is void);
   EXPECT_TRUE(empty.shift() is void);
-  EXPECT_TRUE(missing.remove(0) is void);
-  EXPECT_TRUE(empty.remove(0) is void);
-  EXPECT_TRUE(values.remove(1) is void);
-  EXPECT_TRUE(values.remove(-2) is void);
   EXPECT_TRUE(values.insert(2, 9) is void);
   EXPECT_TRUE(values.insert(-3, 9) is void);
   EXPECT_INT_EQ(values.len(), 1);
@@ -210,6 +204,45 @@ static void array_insert_and_remove(void) {
   Var removed = arr.remove(1);
   EXPECT_VAR_EQ(removed, two);
   EXPECT_INT_EQ(arr.len(), 2);
+}
+
+/* Removing from a null Array, or at an index outside its elements, raises
+   `<bad-arg>`. An empty Array still yields `void` from `take_last` and
+   `shift`. */
+static void array_null_and_out_of_range_removals_raise(void) {
+  $test.scoped();
+  Array missing = NULL, empty = [], values = [7];
+  int caught = 0;
+
+  try missing.take_last();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <take-last>);
+  }
+  try missing.shift();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <shift>);
+  }
+  try missing.remove(0);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 0);
+  }
+  try empty.remove(0);
+  catch %(bad-arg *): caught++;
+  try values.remove(1);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), 1);
+  }
+  try values.remove(-2);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_INT_EQ(detail.assoc(<index>).int(), -2);
+  }
+  EXPECT_INT_EQ(caught, 6);
+  EXPECT_STR_EQ(values.repr(), "[ 7 ]");
 }
 
 static void array_mixed_mutation_integrity(void) {
@@ -768,6 +801,7 @@ void array_suite(void) {
   $test.run(array_reports_slice_domain_failures);
   $test.run(array_counted_update_preserves_values);
   $test.run(array_insert_and_remove);
+  $test.run(array_null_and_out_of_range_removals_raise);
   $test.run(array_mixed_mutation_integrity);
   $test.run(array_setindex_bounds);
   $test.run(array_getslice_unit_step);

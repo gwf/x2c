@@ -409,10 +409,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Removes and returns the last element.
-      Boxed `Array` returns `void` for a null or empty array.
-      Raises: `<bad-arg>` for a null or empty typed array.
+      Boxed `Array` returns `void` for an empty array.
+      Raises: `<bad-arg>` for a null array or an empty typed array.
   */
   $element $array.take_last($array array) {
+    if (array == NULL) _bad_operation($owner, <take-last>);
     $element value = $zero;
     if (array.try_take_last(value)) return value;
     if ($boxed) return $zero;
@@ -420,17 +421,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Removes and returns the first element, shifting the remainder left.
-      This operation is O(n). Boxed `Array` returns `void` for a null or
-      empty array.
-      Raises: `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-      when the length exceeds the integer index domain in either family.
+      This operation is O(n). Boxed `Array` returns `void` for an empty
+      array.
+      Raises: `<bad-arg>` for a null array or an empty typed array, or
+      `<size-limit>` when the length exceeds the integer index domain.
   */
   $element $array.shift($array array) {
+    if (array == NULL) _bad_operation($owner, <shift>);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
     $element value = $zero;
-    if (array && array.length <= INT_MAX && array.shift_element(&value))
-      return value;
-    if (array && array.length > INT_MAX)
-      _size_limit($owner, array.length);
+    if (array.shift_element(&value)) return value;
     if ($boxed) return $zero;
     _bad_operation($owner, <shift>);
   }
@@ -486,21 +486,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Removes and returns the element at normalized `index`.
       Negative indices count from the end; following elements shift left.
-      Boxed `Array` returns `void` for a null array or out-of-range index.
-      Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
-      index, or `<size-limit>` when the length exceeds the integer index
-      domain in either family.
+      Raises: `<bad-arg>` for a null array or an index outside it, or
+      `<size-limit>` when the length exceeds the integer index domain.
   */
   $element $array.remove($array array, int index) {
+    if (array == NULL) _bad_index($owner, index, 0);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
     $element value = $zero;
-    if (array && array.length <= INT_MAX &&
-        array.remove_element(index, &value))
-      return value;
-    if (array && array.length > INT_MAX)
-      _size_limit($owner, array.length);
-    if ($boxed) return $zero;
-    size_t size = array ? array.length : 0;
-    _bad_index($owner, index, size);
+    if (!array.remove_element(index, &value))
+      _bad_index($owner, index, array.length);
+    return value;
   }
 
   /** Returns a fresh packed copy, or NULL for a null array.

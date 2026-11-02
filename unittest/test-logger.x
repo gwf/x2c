@@ -122,7 +122,10 @@ static void logger_creation_levels_and_queries(void) {
   EXPECT_INT_EQ(Logger.level_priority(<fatal>), 5);
   EXPECT_INT_EQ(Logger.level_priority(<off>), 6);
   EXPECT_INT_EQ(Logger.level_priority(<unknown>), -1);
-  EXPECT_NULL(Logger.new(<unknown>));
+  String rejected = NULL;
+  try Logger.new(<unknown>);
+  catch %(bad-arg (operation "Logger.new") (reason ?why)): rejected = why;
+  EXPECT_STR_EQ(rejected, "unknown level");
 
   CaptureState capture = { 0 };
   logger.add_sink(capture_emit, NULL, Var.new(<p48>, &capture));
