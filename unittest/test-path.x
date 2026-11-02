@@ -116,6 +116,7 @@ static void path_tree_operations(void) {
   EXPECT_LIST_EQ(Path.glob(%"$root/one/*.x"), $(%"$root/one/g.x"));
   EXPECT_LIST_EQ(root.join("one").glob(), $(root.join("one")));
   EXPECT_NULL(Path.glob(%"$root/*.none"));
+  EXPECT_NULL(Path.glob(""));
   root.join(".hidden").make_dirs();
   root.join(".hidden/h.x").write_text("h\n");
   EXPECT_LIST_EQ(Path.glob(%"$root/**/*.x"),
