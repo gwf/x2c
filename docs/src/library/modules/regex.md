@@ -61,7 +61,8 @@ Source: `lib/regex.x`
 Compiles `pattern` and returns the `Regex`, owned by the current scope.
 
 **Raises:** `<malformed>` with `reason`, the `pattern`, and the byte `offset`
-of the problem when the pattern does not parse.
+of the problem when the pattern does not parse, or `<size-limit>` when
+groups nest more than 2,000 deep or deeper than the stack allows.
 
 Source: `lib/regex.x`
 

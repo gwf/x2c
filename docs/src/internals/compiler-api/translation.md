@@ -12,7 +12,7 @@ Synchronous compiler translation requests.
 
 | Function | Summary |
 | --- | --- |
-| [`translate_print_command`](#translate_print_command) | Prints the translate command that writes `inputs` to `out_dir`, as verbose and dry-run requests show it. |
+| [`translate_print_command`](#translate_print_command) | Prints the translate command that writes `inputs` to `out_dir`, as verbose and dry-run requests show it, quoted as a dry-run tool action prints its arguments. |
 | [`translate_request`](#translate_request) | Translates a request synchronously. |
 
 ### Functions
@@ -22,7 +22,8 @@ Synchronous compiler translation requests.
 `void translate_print_command(String out_dir, List inputs)`
 
 Prints the translate command that writes `inputs` to `out_dir`, as
-verbose and dry-run requests show it.
+verbose and dry-run requests show it, quoted as a dry-run tool action
+prints its arguments.
 
 Source: `src/translation.x`
 

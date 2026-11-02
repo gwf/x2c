@@ -20,10 +20,10 @@ Owned structured event delivery.
 
 Creates a `Logger` in the active `Scope`, filtering below `min_level`.
 The `Logger` borrows the active canonical pool for any memory sinks and
-owns a private `Scope` for sink state. An invalid level returns NULL.
+owns a private `Scope` for sink state.
 
-**Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
-allocated.
+**Raises:** `<bad-arg>` for an unknown level, or `<alloc-fail>` when the
+`Logger` or its private `Scope` cannot be allocated.
 
 Source: `lib/logger.x`
 

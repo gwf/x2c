@@ -20,6 +20,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.bind_code_value`](#Compiler.bind_code_value) | Binds a code-value carrier that a meta call returned outside a macro value application as an application binds it, under a transaction that also covers its effects. |
 | [`Compiler.bind_meta_statement`](#Compiler.bind_meta_statement) | Binds a compile-time code `value` returned to a statement at `context`. |
 | [`Compiler.capture_macro_value`](#Compiler.capture_macro_value) | Returns an anonymous macro definition as a `Macro` value. |
+| [`Compiler.check_included_names`](#Compiler.check_included_names) | Reports the first of `names`, aliases that `globs` did not bind before the include at `site`, that the include declared. |
 | [`Compiler.enter_alias_body`](#Compiler.enter_alias_body) | Starts a declaration body whose aliases end at its closing brace, and returns the alias state that `Compiler.leave_alias_body` restores. |
 | [`Compiler.evaluate_declaration_recipe`](#Compiler.evaluate_declaration_recipe) | Evaluates a declaration recipe after its owning source is collected. |
 | [`Compiler.evaluate_macro_rows`](#Compiler.evaluate_macro_rows) | Evaluates a macro slot and returns its syntax as a row sequence. |
@@ -76,6 +77,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.try_parse_macro_slot`](#Compiler.try_parse_macro_slot) | Parses a macro hole or meta call slot for `role` while reading a template. |
 | [`Compiler.try_parse_macro_subpattern`](#Compiler.try_parse_macro_subpattern) | Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern, into the pattern for code NAME builds with each argument pattern in its hole. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
+| [`Compiler.unbound_alias_names`](#Compiler.unbound_alias_names) | Returns the names of the unit's file-scope aliases that `globs`, the unit's names in source order, does not bind. |
 | [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active lowering watches; NULL otherwise. |
 
 ### Functions
@@ -169,6 +171,17 @@ the body applies are captured where the literal is written, so a later
 application applies the same children.
 
 Source: `src/macros/values.x`
+
+<a id="Compiler.check_included_names"></a>
+#### Compiler.check_included_names
+
+`void Compiler.check_included_names( Compiler c, List names, Map globs, Token site)`
+
+Reports the first of `names`, aliases that `globs` did not bind before
+the include at `site`, that the include declared. That declaration
+conflicts with the alias as one written at the include would.
+
+Source: `src/macros/aliases.x`
 
 <a id="Compiler.enter_alias_body"></a>
 #### Compiler.enter_alias_body
@@ -813,6 +826,17 @@ deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
 Source: `src/macros/invocations/targets.x`
+
+<a id="Compiler.unbound_alias_names"></a>
+#### Compiler.unbound_alias_names
+
+`List Compiler.unbound_alias_names(Compiler c, Map globs)`
+
+Returns the names of the unit's file-scope aliases that `globs`, the
+unit's names in source order, does not bind. Collection takes them
+before an include for `Compiler.check_included_names`.
+
+Source: `src/macros/aliases.x`
 
 <a id="Compiler.watched_step"></a>
 #### Compiler.watched_step

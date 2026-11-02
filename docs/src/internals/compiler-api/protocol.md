@@ -83,7 +83,8 @@ Source: `src/protocol/lookup.x`
 Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it. A rest parameter forwards its
-List elements or Map entries with an explicit splice.
+List elements or Map entries with an explicit splice. A helper without
+parameters declares `(void)`, because `()` is unprototyped C.
 
 Source: `src/protocol/call-helpers.x`
 

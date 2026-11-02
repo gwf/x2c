@@ -583,11 +583,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -657,11 +655,11 @@ Source: `lib/typed-array.x`
 `char ArrayChar.shift(ArrayChar array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -694,9 +692,9 @@ Source: `lib/typed-array.x`
 `char ArrayChar.take_last(ArrayChar array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -1023,11 +1021,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -1097,11 +1093,11 @@ Source: `lib/typed-array.x`
 `double ArrayDbl.shift(ArrayDbl array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -1134,9 +1130,9 @@ Source: `lib/typed-array.x`
 `double ArrayDbl.take_last(ArrayDbl array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -1461,11 +1457,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -1535,11 +1529,11 @@ Source: `lib/typed-array.x`
 `float ArrayFloat.shift(ArrayFloat array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -1572,9 +1566,9 @@ Source: `lib/typed-array.x`
 `float ArrayFloat.take_last(ArrayFloat array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -1899,11 +1893,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -1973,11 +1965,11 @@ Source: `lib/typed-array.x`
 `int ArrayInt.shift(ArrayInt array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -2010,9 +2002,9 @@ Source: `lib/typed-array.x`
 `int ArrayInt.take_last(ArrayInt array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -2339,11 +2331,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -2413,11 +2403,11 @@ Source: `lib/typed-array.x`
 `long ArrayLong.shift(ArrayLong array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -2450,9 +2440,9 @@ Source: `lib/typed-array.x`
 `long ArrayLong.take_last(ArrayLong array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -2779,11 +2769,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -2853,11 +2841,11 @@ Source: `lib/typed-array.x`
 `short ArrayShort.shift(ArrayShort array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -2890,9 +2878,9 @@ Source: `lib/typed-array.x`
 `short ArrayShort.take_last(ArrayShort array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 
@@ -3216,11 +3204,9 @@ Source: `lib/typed-array.x`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
-Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, or `<size-limit>` when the length exceeds the integer index
-domain in either family.
+**Raises:** `<bad-arg>` for a null array or an index outside it, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -3290,11 +3276,11 @@ Source: `lib/typed-array.x`
 `String ArrayString.shift(ArrayString array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n). Boxed `Array` returns `void` for a null or
-empty array.
+This operation is O(n). Boxed `Array` returns `void` for an empty
+array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
-when the length exceeds the integer index domain in either family.
+**Raises:** `<bad-arg>` for a null array or an empty typed array, or
+`<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/typed-array.x`
 
@@ -3327,9 +3313,9 @@ Source: `lib/typed-array.x`
 `String ArrayString.take_last(ArrayString array)`
 
 Removes and returns the last element.
-Boxed `Array` returns `void` for a null or empty array.
+Boxed `Array` returns `void` for an empty array.
 
-**Raises:** `<bad-arg>` for a null or empty typed array.
+**Raises:** `<bad-arg>` for a null array or an empty typed array.
 
 Source: `lib/typed-array.x`
 

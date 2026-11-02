@@ -37,8 +37,8 @@ Source values follow `Thread.start` borrowing: their input graphs must
 remain live and read-only while outstanding workers use them. A source
 must not mutate or recycle an outstanding input's storage.
 
-**Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
-descriptor storage.
+**Raises:** `<bad-arg>` for a null `function` or a nonpositive worker count,
+or `<alloc-fail>` for descriptor storage.
 
 Source: `lib/thread.x`
 
@@ -52,7 +52,8 @@ The pool and its ancestors must stay live until foldl finishes. The caller
 retains ownership; workers restore their previous pool without releasing
 the borrowed pool. Source traversal and accumulation use the caller's pool.
 
-**Raises:** bad-arg for a null pool or nonpositive worker count, or alloc-fail.
+**Raises:** `<bad-arg>` for a null pool or `function` or a nonpositive worker
+count, or `<alloc-fail>` for descriptor storage.
 
 Source: `lib/thread.x`
 
