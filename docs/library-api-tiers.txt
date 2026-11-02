@@ -219,6 +219,8 @@ lib/symbol.x|advanced|Symbol.parse,Symbol.repr,Symbol.str,Symbol.write_repr
 lib/var/var.x|advanced|Var.box_long_double,Var.box_long_long,Var.box_long
 lib/var/var.x|advanced|Var.box_ulong,Var.long_double_value,Var.floating
 lib/var/var.x|advanced|Var.box_ulong_long
+lib/var/var.x|advanced|Var.long_at,Var.ulong_at,Var.long_long_at
+lib/var/var.x|advanced|Var.ulong_long_at,Var.long_double_at
 lib/var/var.x|advanced|Var.encoding_valid,Var.known_tag
 lib/var/var.x|advanced|Var.integer_floating_compare,Var.kind,Var.parse,Var.pointer
 lib/var/var.x|advanced|Var.long_long_value

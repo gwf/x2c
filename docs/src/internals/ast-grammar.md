@@ -811,7 +811,8 @@ ERROR-SITE ::= (error-site)
 ```
 
 Compiler-inserted scalar conversions pass this expression to
-`Var_convert_at`. Emission returns the address of a static `X2CErrorSite`
+`Var_convert_at`, or to a site-carrying wide reader such as `Var_long_at`.
+Emission returns the address of a static `X2CErrorSite`
 with the current origin's file, function, and line. It shares the site-field
 owner used by `raise`; the conversion reads the site only on failure.
 

@@ -5036,8 +5036,11 @@ The public numeric conversion domain contains all 15 `Var` families: `i8/u8`,
 `f32/f64/ldouble`. `Var.convert(value, tag)` returns the converted value and
 raises the specific `Error` cause when no conversion exists, the target is
 invalid, the value is out of range, or the `Var` encoding is invalid.
-Compiler-inserted `Var`-to-native numeric conversion passes through the same
-function before using the target extractor. The scalar-named readers
+Compiler-inserted `Var`-to-native numeric conversion applies the same rules.
+A narrow target converts through that function and the target extractor; the
+five wide targets use the site-carrying readers `Var.long_at`,
+`Var.ulong_at`, `Var.long_long_at`, `Var.ulong_long_at`, and
+`Var.long_double_at`, which allocate nothing. The scalar-named readers
 `Var.int`, `Var.double`, and their siblings apply the same rules directly. A
 matching tag reads its payload, and any other numeric tag converts through
 `Var.convert`. The raw payload readers `Var.integer` and `Var.floating` and
