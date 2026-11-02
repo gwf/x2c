@@ -749,7 +749,6 @@ macro Unit $array.typed.iterate(Type $array, Type $element, Name $unbox) {
       Raises: any cause from boxing an element.
   */
   Iter $array.iter($array array, Iter dest) {
-    if (dest == NULL) return NULL;
     if (array == NULL) return Iter_init(dest, void, NULL, 0);
     return Iter_init(dest, array, _next, 0);
   }

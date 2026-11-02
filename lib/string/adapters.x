@@ -41,10 +41,7 @@ meta native Symbol String.symbol(String str) {
 
     This is byte traversal, not Unicode character iteration.
 */
-Iter String.iter(String x, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(x, _next, 0);
-}
+Iter String.iter(String x, Iter dest) => dest.init(x, _next, 0);
 
 /** Writes the next byte, advances `cursor`, and returns one.
     Initialize the caller-owned cursor to zero. A null `String`, a null
