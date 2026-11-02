@@ -76,6 +76,53 @@ run_multi --clean run-sources/multi.x run-sources/value.x
 run_multi --clean run-sources/multi.x run-sources/other.x
 "$X2C" run '-###' run-sources/not-created.x >run-logs/dry 2>&1
 [ ! -e run-sources/not-created.x ]
+# Pruning skips a stale entry it cannot lock or whose source it cannot
+# read, as when another run removes that entry first.
+for entry in stale-locked stale-unread; do
+  mkdir "$X2C_CACHE_DIR/runs/$entry"
+  printf '%s' "$BUILD/run-sources/gone.x" >"$X2C_CACHE_DIR/runs/$entry/source"
+done
+chmod 555 "$X2C_CACHE_DIR/runs/stale-locked"
+chmod 000 "$X2C_CACHE_DIR/runs/stale-unread/source"
+status=0
+"$X2C" run -q --rebuild run-sources/main.x >run-logs/out 2>run-logs/stale ||
+  status=$?
+chmod 755 "$X2C_CACHE_DIR/runs/stale-locked"
+chmod 644 "$X2C_CACHE_DIR/runs/stale-unread/source"
+[ "$status" = 0 ]
+[ ! -s run-logs/stale ]
+# A script that names a -l library is reused until a library that name may
+# select changes, even in place, or a directory its link searches changes.
+mkdir run-libs run-library-path library-versions
+for value in 0 1; do
+  printf 'int extra(void) { return %s; }\n' "$value" \
+    >"library-versions/extra$value.c"
+  "${CC:-cc}" -c "library-versions/extra$value.c" \
+    -o "library-versions/extra$value.o"
+  "${AR:-ar}" rcs "library-versions/libextra$value.a" \
+    "library-versions/extra$value.o"
+done
+cp library-versions/libextra0.a run-libs/libextra.a
+printf 'int extra(void);\nint main(void) { return extra(); }\n' \
+  >run-sources/linked.x
+linked() {
+  status=0
+  LIBRARY_PATH="$BUILD/run-library-path" "$X2C" script -v \
+    -L "$BUILD/run-libs" -lextra run-sources/linked.x \
+    >run-logs/out 2>"run-logs/$1" || status=$?
+  grep -q '^x2c: link ' "run-logs/$1"
+}
+linked linked-cold
+[ "$status" = 0 ]
+if linked linked-warm; then exit 1; fi
+[ "$status" = 0 ]
+cat library-versions/libextra1.a >run-libs/libextra.a
+linked linked-replaced
+[ "$status" = 1 ]
+: >run-libs/libunused.a
+linked linked-added
+: >run-library-path/libunused.a
+linked linked-library-path
 unset X2C_CACHE_DIR
 # Run keeps one default build receipt, while verbose shows the build phases.
 printf 'int main(void) { puts("program output"); return 0; }\n' > run-output.x
@@ -91,6 +138,16 @@ grep -q 'Generated 1 C file' verbose.log
 grep -q '^x2c: run ' verbose.log
 "$X2C" run --plain -q -v run-output.x >quiet-verbose.out 2>quiet-verbose.log
 if grep -q '^x2c: run ' quiet-verbose.log; then exit 1; fi
+# A verbose build prints each unit's translate command as its dry run does.
+printf 'int one(void) { return 0; }\n' > verbose-one.x
+printf 'int one(void);\nint main(void) { return one(); }\n' > verbose-two.x
+for mode in '-###' -v; do
+  "$X2C" build "$mode" --build-dir verbose-bd -o verbose \
+    verbose-one.x verbose-two.x 2>"verbose$mode.log"
+  grep '^x2c: translate --out-dir' "verbose$mode.log" >"verbose$mode.lines"
+done
+[ "$(wc -l < verbose-v.lines | tr -d ' ')" = 2 ]
+cmp 'verbose-###.lines' verbose-v.lines
 
 # Native warnings use the x2c source unless generated-C locations are asked for.
 printf 'int main(void) { char *raw = "hello"; return raw == "hello"; }\n' > warning.x
@@ -107,6 +164,14 @@ status=0
 "$X2C" build -q missing-include.x >missing-include.log 2>&1 || status=$?
 [ "$status" = 1 ]
 grep -q 'missing-include.x:1:10:.*support/helpers.h.*file not found' missing-include.log
+
+# Parallel translation reports an input that is not text.
+printf 'int main(void) { return 0; }\n/* \000 */\n' > not-text.x
+printf 'int helper(void) { return 0; }\n' > text.x
+status=0
+"$X2C" build -q -j 2 not-text.x text.x >not-text.log 2>&1 || status=$?
+[ "$status" = 1 ]
+grep -q 'not-text.x:1:1: driver: cannot read input file' not-text.log
 
 # Source-mapped project meta groups retain included provider selection.
 printf '#pragma once\nmeta int twice(int n) => n * 2;\n' > meta-provider.x

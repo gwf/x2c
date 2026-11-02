@@ -59,8 +59,10 @@ int SourceView.exists(SourceView sources, String path) {
 }
 
 /** Reads through the request overlay, falling back to a regular disk file.
-    The return value distinguishes an empty file from a failed read. Disk
-    text belongs to the calling unit; configured snapshots remain borrowed.
+    The return value distinguishes an empty file from a failed read, which
+    includes a file that holds a NUL byte or is too large for a `String`.
+    Disk text belongs to the calling unit; configured snapshots remain
+    borrowed.
 */
 int SourceView.read(SourceView sources, String path, String volatile &text) {
   Var value;
@@ -76,6 +78,6 @@ int SourceView.read(SourceView sources, String path, String volatile &text) {
     return 0;
   }
   try text = file.string_close();
-  catch %(io-fail *): return 0;
+  catch %((!or io-fail bad-arg size-limit) *): return 0;
   return 1;
 }
