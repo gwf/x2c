@@ -237,8 +237,7 @@ static List _target_modules(Project p, ProjectTarget target) {
 
 static String _target_output(Project p, ProjectTarget target, Symbol kind) {
   if (target.output) return Path.join(p.root, target.output);
-  TargetKind *row = TargetKind.of(kind);
-  return %"$(p.build_root)/$(row.prefix)$(target.name)$(row.suffix)";
+  return %"$(p.build_root)/$(TargetKind.product(kind, target.name))";
 }
 
 // options

@@ -93,8 +93,7 @@ static void _run_command(Array arguments) {
   String path = Compiler.command_path(command);
   if (!path) {
     if (command != "build") CliRequest.parse_arguments(arguments);
-    Diagnostics.driver_error(
-      %"missing x2c-$command command; install the matching x2c commands");
+    $fail.utils_command_missing(command);
   }
   char **args = xcalloc(arguments.len() + 3, sizeof(char *));
   args[1] = "--driver-arguments";

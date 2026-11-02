@@ -373,6 +373,5 @@ module void _error_name(Project p, int line, String message, String name) {
 module void _error(Project p, int line, String message) {
   String at = line ? ":%d".printf(line) : NULL;
   if (p && p.path) message = %"manifest '$(p.path)'$at: $message";
-  fprintf(stderr, "x2c: error: %s\n", message);
-  exit(2);
+  Diagnostics.driver_error(message);
 }

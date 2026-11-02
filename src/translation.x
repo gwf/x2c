@@ -35,16 +35,14 @@ static keyword loop $private.loop;
 #include "format.x"
 #include "protocol/protocol.x"
 
-static macro Stmt $report.main_stem_collision(
+static macro Stmt $fail.main_stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) =>
-  fprintf(
-    stderr, $dedent(%"
-      x2c: error: inputs produce the same output stem '%s'
-        first input: %s
-        other input: %s
-        output: %s/%s.c
-    "),
-    $stem, $first, $other, $directory, $stem);
+  Diagnostics.driver_error(
+    $dedent(%"
+      inputs produce the same output stem '$($stem)'
+        first input: $($first)
+        other input: $($other)
+        output: $($directory)/$($stem).c"));
 
 static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
   fprintf(
@@ -52,7 +50,7 @@ static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
     $jobs, $total);
 
 static macro Stmt $report.main_worker_start_failed() =>
-  fputs("x2c: error: could not start a translation worker\n", stderr);
+  Diagnostics.driver_report("could not start a translation worker", NULL);
 
 static macro Stmt $fail.main_input_not_x(Expr $input) =>
   Diagnostics.driver_error(%"translation input is not an .x file: $($input)");
@@ -129,17 +127,11 @@ static void _preflight(Translation &t) {
     if (!shared) continue;
     String stem = Path.stem(input);
     if (stem in stems)
-      _stem_collision(stem, stems[stem], input, request.out_dir);
+      $fail.main_stem_collision(stem, stems[stem], input, request.out_dir);
     stems[stem] = input;
   }
   if (!request.inspects() && !request.dry_run)
     _make_out_dir(request.out_dir);
-}
-
-static void _stem_collision(
-  String stem, String first, String other, String out_dir) {
-  $report.main_stem_collision(stem, first, other, out_dir);
-  exit(2);
 }
 
 static void _make_out_dir(String out_dir) {
@@ -342,7 +334,6 @@ static void _start(Workers &w) {
   sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (pid > 0) return;
   if (capture) capture.close();
-  report_suspend();
   $report.main_worker_start_failed();
   w.failed++;
 }
