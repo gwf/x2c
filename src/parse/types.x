@@ -685,10 +685,11 @@ module List _publish_enumerator(
   return initializer ? %(op = $binding $initializer) : binding;
 }
 
-/* An enumerator joins the Sym scope around its enum. The bodies between
-   that scope and the enumerator keep their aliases visible there, so an
-   alias that any of them declares already names the enumerator. */
-static int _names_alias(Compiler c, String spelling) {
+/* An enumerator joins the Sym scope around its enum, and a declaration
+   that a file-scope alias wraps keeps its file scope. The bodies between
+   that scope and the name keep their aliases visible there, so an alias
+   that any of them declares already names it. */
+module int _names_alias(Compiler c, String spelling) {
   for (int level = c.alias_level; level >= 0; level--)
     with (c.alias_level = level) {
       if (c.scope_declares_alias(spelling)) return 1;

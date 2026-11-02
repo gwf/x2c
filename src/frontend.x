@@ -420,13 +420,12 @@ static int _inside(const char *path, const char *dir) {
 }
 
 static String _read_input(Compiler c) {
-  String filename = c.filename, text = NULL;
-  try text = c.read_source_text(filename);
+  String filename = c.filename;
+  try return c.read_source_text(filename);
   catch %(size-limit *):
     $fail.frontend_input_read(c, NULL, filename, "too large for a String");
   catch %((!or not-found io-fail bad-arg) *detail):
     $fail.frontend_input_read(c, NULL, filename, _read_reason(detail));
-  return text;
 }
 
 /* A failed read's own reason, or the system's text for its errno. */

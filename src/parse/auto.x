@@ -21,8 +21,7 @@ Symbol Compiler.auto_region_form(Compiler c, Symbol position) {
     return position == <unit> && _function_follows(c, after)
          ? <function> : <statement>;
   }
-  if (next.text == "foreach" || next.text == "with" ||
-      next.type in _region_statements || _contextual_statement(c, next))
+  if (next.type in _region_statements || _contextual_statement(c, next))
     return <statement>;
   return position == <unit> && _function_follows(c, next) ? <function> : 0;
 }
@@ -31,11 +30,12 @@ static const SymbolSet _region_statements =
   %<"{" "%{" if while for do switch match return defer break continue
      goto>;
 
-/* `try` and `raise` are identifiers that begin their statements where the
-   statement parser recognizes them, except that `auto try = value` infers
-   a local named `try`. */
+/* The words `foreach` and `with` begin their statements, and `try` and
+   `raise` begin theirs where the statement parser recognizes them. A
+   following `=` instead infers a local of that name: `auto with = 5`. */
 static int _contextual_statement(Compiler c, Token word) {
   if (Token.skip_trivia(word + 1).type == <=>) return 0;
+  if (word.text == "foreach" || word.text == "with") return 1;
   Token start = c.token;
   defer c.token = start;
   c.token = word;

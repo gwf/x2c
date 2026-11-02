@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-included-declaration.x:13:1: parse: declaration 'declared_kind' is already bound
+  #include "alias-included/declared.x"
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  note: prior binding: 'declared_kind'
+

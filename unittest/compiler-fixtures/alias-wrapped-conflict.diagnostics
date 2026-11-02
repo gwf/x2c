@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-wrapped-conflict.x:8:12: parse: declaration 'size' is already bound
+    int size = 3;
+             ^
+  note: prior binding: 'size'
+
