@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/protocol-handle-reversed.x:27:20: type: operand does not convert beside a protocol participant
+    Acc reversed = 1 + acc;
+                     ^
+  note: participant: ("Acc") member: add operand type: (int)
+
