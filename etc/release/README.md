@@ -114,9 +114,9 @@ settings, and never put it in logs, checkout files or chat.
 
 Run `candidate.yml` from dev with a full reviewed source SHA. Each compiler
 and package job checks out that SHA; its matrices come from
-[the released set](../../agents/releasing.md#released-packages). Assembly uses the built Linux compiler once and
-retains the resulting archives, manifest, two index variants and two complete
-site archives. Native archive bytes never change during promotion.
+[the released set](../../agents/releasing.md#released-packages). Assembly
+uses the built Linux compiler once and retains the resulting archives,
+manifest, two index variants and two complete site archives. Native archive bytes never change during promotion.
 
 A candidate ID contains source SHA, run ID and attempt. A fresh full build gets
 a fresh ID even for the same compiler version. Download-only publication jobs
@@ -208,8 +208,9 @@ Compare archive digests across staging and production and check prior URLs.
 Release cost is one build job per compiler platform and per released bundle
 for each explicitly requested full candidate; removing tag rebuilds avoids
 repeating that matrix. Live checks add four small install/run jobs after
-staging and four after production. First-release fault/two-candidate rehearsal is one-time. Activation
-must have the agreed cost approval; do not invent a new ordinary gate.
+staging and four after production. First-release fault/two-candidate
+rehearsal is one-time. Activation must have the agreed cost approval; do not
+invent a new ordinary gate.
 
 ## Recovery baseline
 

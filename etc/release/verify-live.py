@@ -12,7 +12,8 @@ import tempfile
 
 # The release helper owns candidate identity, destinations and bundles.
 spec = importlib.util.spec_from_file_location(
-    "release", Path(__file__).resolve().parents[2] / "tools/release-candidate.py")
+    "release",
+    Path(__file__).resolve().parents[2] / "tools/release-candidate.py")
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 digest = release.digest
