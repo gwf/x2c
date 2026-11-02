@@ -81,7 +81,8 @@ static void _head(Definition &d) {
     $fail.macros_macro_result(c, c.token);
   d.anonymous = c.peek(0) == <ident> && c.peek(1) == <(>;
   d.local = d.anonymous || (c.peek(0) == <ident> &&
-            c.peek(1) == <ident> && c.peek(2) == <(>);
+            (c.peek(1) == <ident> || c.peek(1) in %<defer while>) &&
+            c.peek(2) == <(>);
   if (c.peek(0) != <ident> || (!d.local && c.peek(1) != <$>))
     $fail.macros_macro_kind(c, c.token);
   Token token = c.token;
@@ -105,8 +106,8 @@ module void _naming(Definition &d) {
   }
   else d.name = _name(c);
   String spelling = d.name.str();
-  if (d.local && d.name == <with>)
-    $fail.macros_name_with(c, d.start);
+  if (d.local && d.name in %<with defer while>)
+    $fail.macros_name_reserved(c, d.start, spelling);
   /* The runtime and the compiler prelude may define the reserved `x2c.*`
      and `lisp.*` macros. */
   if ((spelling.startswith("x2c.") || spelling.startswith("lisp.")) &&

@@ -141,11 +141,6 @@ static macro Stmt $fail.parse_syntax_position(Expr $c, Expr $origin) =>
     <parse>, "syntax cannot be constructed at this position",
     $origin, NULL);
 
-static macro Stmt $fail.parse_paren_unclosed(Expr $c, Expr $site) =>
-  $c.report_error(
-    <parse>, "missing closing parenthesis",
-    $site, NULL);
-
 static macro Stmt $fail.parse_type_unknown(Expr $c, Expr $first) =>
   $c.report_error(
     <parse>, %"unknown type name '$($first.text)'",

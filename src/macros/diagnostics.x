@@ -54,9 +54,10 @@ static macro Stmt $fail.macros_macro_reserved(
   }
 }
 
-static macro Stmt $fail.macros_name_with(Expr $c, Expr $origin) =>
+static macro Stmt $fail.macros_name_reserved(
+  Expr $c, Expr $origin, Expr $name) =>
   $c.report_error(
-    <macro>, "'with' cannot be a local macro name",
+    <macro>, %"'$($name)' cannot be a local macro name",
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_kind_order(Expr $c, Expr $site) =>

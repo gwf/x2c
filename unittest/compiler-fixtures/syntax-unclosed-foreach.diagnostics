@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/syntax-unclosed-foreach.x:1:43: parse: expected ')'
+  int main(void) { foreach (int x in %(1 2) printf("x"); return 0; }
+                                            ^^^^^^
+

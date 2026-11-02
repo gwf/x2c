@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-local-defer-name.x:4:3: macro: 'defer' cannot be a local macro name
+    macro Stmt defer() {
+    ^^^^^
+

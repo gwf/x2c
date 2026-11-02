@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/syntax-unclosed-declarator.x:1:15: parse: expected ')'
+  int (*f(int x);
+                ^
+

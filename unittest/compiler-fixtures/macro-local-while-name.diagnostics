@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-local-while-name.x:4:3: macro: 'while' cannot be a local macro name
+    macro Stmt while() {
+    ^^^^^
+

@@ -80,7 +80,8 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
   /* The `<(>` literal keeps this body braced: the API reference generator
      reads it as an unbalanced parenthesis and drops the rest of the file. */
   return c.at_word("macro") && c.peek(1) == <ident> &&
-         c.peek(2) == <ident> && c.peek(3) == <(>;
+         (c.peek(2) == <ident> || c.peek(2) in %<defer while>) &&
+         c.peek(3) == <(>;
 }
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.

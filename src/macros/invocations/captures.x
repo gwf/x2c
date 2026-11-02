@@ -26,10 +26,8 @@ module List _invocation_arguments(
     arguments.push(_argument_row(c, hole, kind));
     if (nodes.cdr() && c.peek(0) != <)>) _argument_separator(c, kind);
   }
-  if (c.peek(0) != <)>) {
-    if (c.peek(0) == <,>) c.next();
+  if (c.test(<,>))
     $fail.macros_macro_extra_args(c, c.token);
-  }
   c.expect(<)>);
   return %(args @(arguments.list_free()));
 }

@@ -183,7 +183,7 @@ static List _parenthesized(
     if (first.type == <ident> && c.peek(0) == <ident>)
       $fail.parse_type_unknown(c, first);
     else
-      $fail.parse_paren_unclosed(c, c.token);
+      c.expect(<)>);
   }
   c.next();
   return decl;
