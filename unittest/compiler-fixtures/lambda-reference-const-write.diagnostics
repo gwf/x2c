@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/lambda-reference-const-write.x:5:42: type: cannot write a const object in a lambda
+    Func f = %!() using &value => value = 5;
+                                           ^
+

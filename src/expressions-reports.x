@@ -309,3 +309,18 @@ macro Stmt $warn.expressions_call_redundant(
       $location, $(hint));
   }
 }
+
+macro Stmt $fail.expressions_call_nonfunction(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <type>, "cannot call a Var value", $origin,
+    %("convert the value to Func before calling it"));
+
+macro Stmt $fail.expressions_func_unresolved(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <type>, "cannot convert an unresolved expression to Func", $origin,
+    %("declare the native function's signature before converting it"));
+
+macro Stmt $fail.expressions_lambda_untyped(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <type>, "a lambda argument needs a declared native parameter type",
+    $origin, %("declare the function or cast the lambda to its callback type"));

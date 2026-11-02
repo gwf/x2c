@@ -1,7 +1,9 @@
 # Compiler fixtures
 
-Each `.x` source has a one-line `.phases` file naming the exact artifacts that
-the fixture checks. Supported phases are:
+The runner discovers only top-level `.phases` files. Package fixtures use
+top-level links to their package sources and expectations. Each `.x` source
+has a one-line `.phases` file naming the exact artifacts that the fixture
+checks. Supported phases are:
 
 - `tokens` - non-trivia token types, text, and positions; with `--cpp`,
   each expanded token is marked with its C macro

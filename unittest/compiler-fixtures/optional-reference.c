@@ -132,7 +132,7 @@ int main(void){
   )) != 7 || value != 7) return 4;
   if(Var_int(({
     Func _x2c_gensym_macro_function_2 = function;  FuncArg _x2c_gensym_macro_storage_2[1]; {
-      List _x2c_gensym_macro_reference_0 = x2c_func_reference_type(_x2c_gensym_macro_function_2, 1, 0);  if(List_truth(_x2c_gensym_macro_reference_0)) _x2c_gensym_macro_storage_2[0] = FuncArg_reference(0, _x2c_gensym_macro_reference_0);  else _x2c_gensym_macro_storage_2[0] = x2c_func_unrepresentable_argument(_x2c_gensym_macro_function_2, 0, NULL);
+      List _x2c_gensym_macro_reference_0 = x2c_func_reference_type(_x2c_gensym_macro_function_2, 1, 0);  if(List_truth(_x2c_gensym_macro_reference_0)) _x2c_gensym_macro_storage_2[0] = FuncArg_reference(0, _x2c_gensym_macro_reference_0);  else _x2c_gensym_macro_storage_2[0] = FuncArg_value(Var_null());
     }
     Func_apply(_x2c_gensym_macro_function_2, 1, _x2c_gensym_macro_storage_2);
   }
@@ -146,7 +146,7 @@ int main(void){
   }
   )) != 3 || captured != 3 || Var_int(({
     Func _x2c_gensym_macro_function_4 = lambda;  FuncArg _x2c_gensym_macro_storage_4[1]; {
-      List _x2c_gensym_macro_reference_1 = x2c_func_reference_type(_x2c_gensym_macro_function_4, 1, 0);  if(List_truth(_x2c_gensym_macro_reference_1)) _x2c_gensym_macro_storage_4[0] = FuncArg_reference(0, _x2c_gensym_macro_reference_1);  else _x2c_gensym_macro_storage_4[0] = x2c_func_unrepresentable_argument(_x2c_gensym_macro_function_4, 0, NULL);
+      List _x2c_gensym_macro_reference_1 = x2c_func_reference_type(_x2c_gensym_macro_function_4, 1, 0);  if(List_truth(_x2c_gensym_macro_reference_1)) _x2c_gensym_macro_storage_4[0] = FuncArg_reference(0, _x2c_gensym_macro_reference_1);  else _x2c_gensym_macro_storage_4[0] = FuncArg_value(Var_null());
     }
     Func_apply(_x2c_gensym_macro_function_4, 1, _x2c_gensym_macro_storage_4);
   }

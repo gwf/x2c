@@ -72,6 +72,11 @@ module List _conditional(
       true_type === %(<macro-expr>) ||
       false_type === %(<macro-expr>))
     return %(expr (<macro-expr>) (op $operator $condition $ontrue $onfalse));
+  if (r.c.sym.is_string_type(true_type) && _conditional_null(onfalse))
+    onfalse = %(expr $true_type (cast $true_type $onfalse));
+  else if (r.c.sym.is_string_type(false_type) && _conditional_null(ontrue))
+    ontrue = %(expr $false_type (cast $false_type $ontrue));
+  true_type = ontrue.cadr(), false_type = onfalse.cadr();
   Type type = true_type;
   Type left = r.c.sym.resolve_numeric_type(true_type);
   Type right = r.c.sym.resolve_numeric_type(false_type);
@@ -92,6 +97,12 @@ module List _conditional(
       onfalse = r.c.convert_expression(onfalse, type);
   }
   return %(expr $type (op $operator $condition $ontrue $onfalse));
+}
+
+static int _conditional_null(List expression) {
+  match (expression) case %(expr ? $($grouped(?inner))):
+    return _conditional_null(inner);
+  return _null_literal(expression);
 }
 
 /* Combine compatible non-void pointees without losing their qualifiers.
@@ -183,6 +194,10 @@ module List _binary_expression(
     List rewritten = c.rewrite(
       <binary>, operator, source, <expression>, NULL, origin);
     if (rewritten) return rewritten;
+  }
+  if (operator == <in>) {
+    rhs = c.promote_string_literal(rhs);
+    rhs_type = rhs.cadr();
   }
   _convert_string_comparison(c, operator, lhs, rhs);
   int constant_string = _convert_string_addition(c, operator, lhs, rhs);

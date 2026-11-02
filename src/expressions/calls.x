@@ -84,7 +84,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
       c.sym.normalize_declared_type(forwarded ? type.cdr() : type));
     /* C text boxes as a String, as it does for any Var destination. */
     List value = c.bind_syntax(
-      c.sym.var_tag_for_type(type, NULL) ||
+      _null_literal(argument) || c.sym.var_tag_for_type(type, NULL) ||
       type.canonicalize().is_char_pointer_like()
         ? boxed(c.convert_expression(argument, %("Var")))
         : opaque(function, index, source),
@@ -305,6 +305,8 @@ static List _function(CallSite &k, List function) {
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type) == func_type)
     return _resolve_func_call(k.c, resolved, k.supplied, k.origin);
+  if (k.c.sym.is_var_type(type))
+    $fail.expressions_call_nonfunction(k.c, k.origin);
   return _finish(k, k.result_type, resolved, type, NULL);
 }
 
@@ -350,6 +352,11 @@ static List _finish(
     applied = k.c.sym.resolve_key(callee_type).apply();
   List arguments = _resolve_call_arguments(
     k.c, receiver, k.supplied, k.origin);
+  if (!callee_type && !k.c.macro_holes)
+    foreach (List argument in arguments)
+      if (argument.cadr().type().is_function() &&
+          Ast.contains_head(argument, <lambda>))
+        $fail.expressions_lambda_untyped(k.c, k.origin);
   if (_deferred_call(callee, receiver, arguments))
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;

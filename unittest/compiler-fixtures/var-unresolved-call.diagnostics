@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-unresolved-call.x:4:3: type: cannot convert an unresolved expression to Var
+    Var value = printf("hi\n");
+    ^^^
+  note: give the expression a declared x2c type before boxing it
+

@@ -243,14 +243,15 @@ static List _collected_function(
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
       List method = c.fact(%(method $binding));
-      if (method) {
+      // A Self method keeps its bound identity and relative signature.
+      if (method && !c.fact(%(self $binding))) {
         // Replay the resolved owner with this declaration's own member.
         String member = method.cadr();
         String owner = name[:name.len() - member.len() - 1];
         declaration = %(declare $type
           (bindings (bind (($owner) $member) $modifiers)));
       }
-      else {
+      else if (!method) {
         /* Renamed locals keep their identity; exact names complete
            prototypes. */
         Var source;

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-index-call-rejected.x:5:15: type: cannot call a Var value
+    functions[0](3);
+                ^
+  note: convert the value to Func before calling it
+

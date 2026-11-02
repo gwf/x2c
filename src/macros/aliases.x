@@ -228,10 +228,14 @@ void Compiler.check_included_names(
     later declaration hides one of their names.
 */
 List Compiler.alias_expression(Compiler c) {
-  if (c.peek(0) != <ident>) return NULL;
+  return c.peek(0) == <ident>
+    ? c.named_alias_expression(c.token.text) : NULL;
+}
+
+/** Resolves a visible alias by spelling for parsed and constructed names. */
+List Compiler.named_alias_expression(Compiler c, String name) {
   Map table = _table(c);
   if (!table && !c.sym.has_aliases()) return NULL;
-  String name = c.token.text;
   List symbol = $(name);
   int scope = c.sym.declaring_scope(symbol);
   Var key;
@@ -240,7 +244,11 @@ List Compiler.alias_expression(Compiler c) {
   if (!expression && c.sym.has_aliases() &&
       scope >= c.sym.base_scope_count())
     expression = c.fact(%(alias $(c.sym.lookup(symbol, NULL))));
-  if (expression && !c.macro_holes) _reveal_bindings(c, expression);
+  if (expression && !c.macro_holes) {
+    _reveal_bindings(c, expression);
+    if (c.lambda_scopes)
+      expression = c.resolve_expression(expression, c.token);
+  }
   return expression;
 }
 

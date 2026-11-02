@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-call-rejected.x:5:8: type: cannot call a Var value
+    value(3);
+         ^
+  note: convert the value to Func before calling it
+

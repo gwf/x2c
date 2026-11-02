@@ -49,6 +49,10 @@ module int _identifier_needs_resolution(Compiler c, List binding) {
 
 module List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
+  if (!c.macro_holes && value ~= %(binding-name ?(String spelling))) {
+    List alias = c.named_alias_expression(spelling);
+    if (alias) return alias;
+  }
   if (type === %(<macro-expr>)) type = NULL;
   int read_reference = !type;
   int require_type = 0;
@@ -192,6 +196,7 @@ static int _shadow_identifier(
   List visible = c.sym.lookup($(spelling), visible_type);
   if (!visible || visible == binding) return 0;
   if ((c.sym.binding_is_local(binding) &&
+       !(%(emitted $binding) in binding_facts) &&
        !(%(lambda-depth $binding) in binding_facts)) ||
       (!kept && visible_type && _expansion_introduced(c, visible))) {
     binding = visible;

@@ -348,9 +348,12 @@ static List _convert_untyped(
     match (expr) {
       case %(expr () (ident (binding ? "NULL"))):
         return %(expr ("Var") (call "Var_null" (args)));
-      case %(expr () (ident (binding ? ?))):
+      case %(expr () (!or (ident (binding ? ?)) (call *))):
         $fail.expressions_var_unresolved(c, NULL);
     }
+  if (c.sym.is_named_value_type(declared_target, "Func") &&
+      !_null_literal(expr))
+    $fail.expressions_func_unresolved(c, NULL);
   return expr;
 }
 

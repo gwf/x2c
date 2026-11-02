@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/script-local-alias.x:5:1: type: 'total' is declared among the script's statements
+  printf("%d\n", twice);
+  ^^^^^^
+  note: file-scope declarations cannot see those locals; declare it static to share it
+

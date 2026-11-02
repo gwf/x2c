@@ -18,7 +18,7 @@ static macro Stmt $fail.compiler_script_local(
   $c.report_error(
     <type>,
     %"'$($name)' is declared among the script's statements",
-    $site, %("functions cannot see those locals;"
+    $site, %("file-scope declarations cannot see those locals;"
     "declare it static to share it"));
 
 static macro Stmt $fail.compiler_decl_duplicate(

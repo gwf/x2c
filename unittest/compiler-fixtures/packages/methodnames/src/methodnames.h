@@ -11,7 +11,9 @@ typedef struct methodnames__Value{
 }
 methodnames__Value;
 
-int methodnames__Value_read(methodnames__Value _x2c_macro_value_0);
+int methodnames__Value_read(methodnames__Value value);
+
+int methodnames__Value_read(methodnames__Value _x2c_gensym_macro_value_0);
 
 int methodnames__Value_direct(methodnames__Value value);
 

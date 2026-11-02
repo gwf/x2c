@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/lambda-unresolved-callback.x:6:8: type: a lambda argument needs a declared native parameter type
+    qsort(values, 2, sizeof(int), %!(const void *a, const void *b) =>
+         ^
+  note: declare the function or cast the lambda to its callback type
+

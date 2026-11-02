@@ -196,10 +196,9 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
   return stream.append(&placed, 1);
 }
 
-/* A script's functions cannot see the variables declared among its
-   statements, which are locals of `x2c_script`. C would report such a name
-   as undeclared; this names the cause and the `static` spelling that
-   shares it. */
+/* File-scope declarations cannot see the script body's locals. This also
+   catches an alias's unresolved reference where its use lands in that body.
+   Report the cause and the `static` spelling that shares the variable. */
 module void _finish_script(Compiler c, List ast) {
   if (c.script.defines_main || c.error_count()) return;
   Map locals = _script_locals(ast);
@@ -207,7 +206,7 @@ module void _finish_script(Compiler c, List ast) {
   foreach (List node in ast)
     if (node ~= %(function ? (bind (binding ? ?(String function)) ?)
                    (block *items)) &&
-        function != "x2c_script" && function != "main")
+        function != "main")
       _check_local_uses(c, items, locals);
 }
 
@@ -226,16 +225,16 @@ static Map _script_locals(List ast) {
 }
 
 static void _check_local_uses(Compiler c, List items, Map locals) {
+  Map facts = c.semantic_binding_facts();
   foreach (List item in items)
-    if (item ~= %(at ?origin ?statement))
-      foreach (String name in locals.keys()) {
-        Var found;
-        List bindings;
-        int present = statement.list().try_search(
-          %(expr () (ident (binding ? $name))),
-          found, bindings);
-        if (!present) continue;
-        c.origin = origin;
-        $fail.compiler_script_local(c, NULL, name);
-      }
+    if (item ~= %(at ?origin ?statement)) {
+      List node;
+      $ast.walk(statement, node)
+        if (node ~= %(expr ? (ident ?binding))) {
+          String name = Ast.binding_spelling(binding);
+          if (!(name in locals) || %(type $binding) in facts) continue;
+          c.origin = origin;
+          $fail.compiler_script_local(c, NULL, name);
+        }
+    }
 }

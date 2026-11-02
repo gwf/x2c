@@ -45,6 +45,10 @@ static macro Stmt $fail.lambdas_capture_ref(
     $site, %("binding: $(Ast.binding_spelling($binding))"));
 }
 
+static macro Stmt $fail.lambdas_capture_const(Expr $c, Expr $site) =>
+  $c.report_error(
+    <type>, "cannot write a const object in a lambda", $site, NULL);
+
 /* One binding's capture through one lambda frame: the frame's fields, the
    binding and type that the frame sees, and the identifier's source
    binding. `facts` is read before a supplied value resolves. */
@@ -451,7 +455,7 @@ static void _check_lambda_captures(Compiler c, List ast) {
       case $Macro.call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         _require_reference_arguments(c, callee_type, arguments);
-      default: _require_capture_lvalue(c, Ast.written_operand(node));
+      default: _require_capture_write(c, Ast.written_operand(node));
     }
 }
 
@@ -473,6 +477,16 @@ static void _require_capture_lvalue(Compiler c, List target) {
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
     $fail.lambdas_capture_ref(c, c.token, binding);
+}
+
+static void _require_capture_write(Compiler c, List target) {
+  if (!target) return;
+  _require_capture_lvalue(c, target);
+  Type type = c.sym.normalize_declared_type(target.cadr());
+  foreach (Var part in type) {
+    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
+    if (part == <const>) $fail.lambdas_capture_const(c, c.token);
+  }
 }
 
 /* A row's target is a spelling or a binding. An open captured type
