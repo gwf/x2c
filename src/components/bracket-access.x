@@ -8,6 +8,7 @@
 #pragma once
 #include "rewrite.x"
 #include "grammar.x"
+#include "compiler-meta.x"
 
 /* diagnostics
 
@@ -57,29 +58,6 @@ macro Stmt $fail.access_operand(Expr $site, Expr $op, Expr $type) {
 
 macro Expression $x2c.collection.store(Expr $base, Expr $key, Expr $value) =>
   $base[$key] = $value;
-macro Expression $x2c.collection.add(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] += $value;
-macro Expression $x2c.collection.subtract(
-  Expr $base, Expr $key, Expr $value) =>
-  $base[$key] -= $value;
-macro Expression $x2c.collection.multiply(
-  Expr $base, Expr $key, Expr $value) =>
-  $base[$key] *= $value;
-macro Expression $x2c.collection.divide(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] /= $value;
-macro Expression $x2c.collection.remainder(
-  Expr $base, Expr $key, Expr $value) =>
-  $base[$key] %= $value;
-macro Expression $x2c.collection.and(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] &= $value;
-macro Expression $x2c.collection.or(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] |= $value;
-macro Expression $x2c.collection.xor(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] ^= $value;
-macro Expression $x2c.collection.left(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] <<= $value;
-macro Expression $x2c.collection.right(Expr $base, Expr $key, Expr $value) =>
-  $base[$key] >>= $value;
 macro Expression $x2c.collection.increment(Expr $base, Expr $key) =>
   ++$base[$key];
 macro Expression $x2c.collection.decrement(Expr $base, Expr $key) =>
@@ -170,42 +148,15 @@ meta static Code _access_update(
   return $!Var{ Map_updateindex($base, $key, $op, $value) };
 }
 
-$rewrite($x2c.collection.add)
-$rewrite($x2c.collection.subtract)
-$rewrite($x2c.collection.multiply)
-$rewrite($x2c.collection.divide)
-$rewrite($x2c.collection.remainder)
-$rewrite($x2c.collection.and)
-$rewrite($x2c.collection.or)
-$rewrite($x2c.collection.xor)
-$rewrite($x2c.collection.left)
-$rewrite($x2c.collection.right)
+$rewrite(%(expr ? (op (!or <+=> <-=> (!quote *=) </=> <%=> <"<<="> <">>=">
+  <&=> <^=> <|=>) (expr ? (index ? ?)) ?)))
 /** Selects collection compound updates and checks accepted operands, or a
     participant's `updateindex` member.
 */
 meta Code access_update(Code code) {
-  match (code) {
-    case $x2c.collection.add(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"+">);
-    case $x2c.collection.subtract(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"-">);
-    case $x2c.collection.multiply(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"*">);
-    case $x2c.collection.divide(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"/">);
-    case $x2c.collection.remainder(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"%">);
-    case $x2c.collection.and(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"&">);
-    case $x2c.collection.or(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"|">);
-    case $x2c.collection.xor(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"^">);
-    case $x2c.collection.left(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <"<<">);
-    case $x2c.collection.right(?base, ?key, ?value):
-      return _access_update(code, base, key, value, <">>">);
-  }
+  if (code ~= %(expr ? (op ?(Symbol op) $($indexed(?base, ?key)) ?value)))
+    return _access_update(
+      code, base, key, value, _x2c_operator_row(op).car());
   return code;
 }
 

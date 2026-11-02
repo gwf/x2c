@@ -26,6 +26,7 @@
 #include "rewrite.x"
 #include "grammar.x"
 #include "ast-rewrite.x"
+#include "compiler-meta.x"
 
 // rebuilding a body
 
@@ -326,25 +327,6 @@ meta Code lambda_lift(Code node) {
 
 // capturing lambdas
 
-/* Whether the function that holds the lambda being lowered is public
-   inline, so its body reaches the unit's private declarations only through
-   a bridge. */
-meta static int _lambda_in_public_inline(void) {
-  if (x2c_enclosing(<function>) ~= %(function ?(Type type) *))
-    return type ~= %(* inline *) && !(type ~= %(* static *));
-  return 0;
-}
-
-/* The name of the bridge function, which carries the hash of the unit's
-   path so that units whose public inline functions share a header link
-   together. */
-meta static String _lambda_bridge_role(void) {
-  if (x2c_enclosing(<unit>) ~=
-      %(expr ? (segments (segexp (expr ? (literal ? ?(String path)))))))
-    return %"func_from_capture_$("%08x".printf(path.hash()))";
-  return "func_from_capture";
-}
-
 /* The name of record field `index`. */
 meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 
@@ -469,8 +451,11 @@ meta static Code _lambda_value(
     }
   List initial = values.list_free();
   Code made = NULL;
-  if (_lambda_in_public_inline()) {
-    List bridge = x2c_binding_fresh(_lambda_bridge_role());
+  /* A public inline body reaches the unit's private record only through
+     a bridge. */
+  String bridge_role = _x2c_public_inline_role("func_from_capture");
+  if (bridge_role) {
+    List bridge = x2c_binding_fresh(bridge_role);
     x2c_place(
       %(unit-support),
       _lambda_bridge(bridge, adapter, context, signature, types.list_free()));

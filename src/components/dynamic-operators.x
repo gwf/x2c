@@ -55,17 +55,12 @@ macro Stmt $fail.operators_operand(
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
-/* The runtime lane computing `op` on two `<i32>` operands inline, or NULL
-   for an operator that only `Var.binary` computes. */
+/* The runtime lane computing `op` on two `<i32>` operands inline, named
+   for the operator's protocol member, or NULL for an operator without one,
+   which only `Var.binary` computes. */
 meta static String _dynamic_lane(Symbol op) {
-  switch (op) {
-    case <+>: return "x2c_var_add_lane";
-    case <->: return "x2c_var_sub_lane";
-    case <*>: return "x2c_var_mul_lane";
-    case </>: return "x2c_var_div_lane";
-    case <%>: return "x2c_var_mod_lane";
-  }
-  return NULL;
+  Var member = _x2c_operator_row(op)[3];
+  return member ? %"x2c_var_$(member.symbol().str())_lane" : NULL;
 }
 
 $rewrite(%(expr ("Var") (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
@@ -97,13 +92,6 @@ meta Code dynamic_binary(Code code) {
 }
 
 // dynamic updates
-
-/* The operation a compound assignment applies before it stores. */
-meta static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row in _x2c_operator_rows())
-    if (row[2] && row[2] == assignment) return row.car();
-  return 0;
-}
 
 /* A call of the update `helper` with the address of `target`, which the
    cleanup walk recognizes as a write to `target`. */
@@ -138,7 +126,7 @@ meta Code dynamic_compound(Code code) {
   if (code ~= %(expr ? (op ?(Symbol op) ?left ?right))) {
     Code target = left, rhs = right;
     Type type = target.cadr(), right_type = rhs.cadr();
-    Symbol operation = _dynamic_operation(op);
+    Symbol operation = _x2c_operator_row(op).car();
     if (type ~= %((bitfield *) *))
       $fail.operators_bitfield_target(NULL);
     if (!right_type.is_named("Var") && !right_type.numeric() &&

@@ -1,13 +1,5 @@
 /*  operators.x -- operator types and protocol operations */
 
-static macro Stmt $fail.expressions_operand_unconverted(
-  Expr $c, Expr $origin, Expr $participant, Expr $member, Expr $operand) =>
-  $c.report_error(
-    <type>, "operand does not convert beside a protocol participant",
-    $origin,
-    %("participant: $($participant.repr())" "member: $($member)"
-      "operand type: $($operand.repr())"));
-
 // operators
 
 /* Returns <array> or <map>, including aliases, and zero for other types. */
