@@ -57,6 +57,7 @@ typedef struct TargetKind {
 #include <unistd.h>
 
 #include "buffer.x"
+#include "encoding.x"
 #include "report.x"
 #include "utils.x"
 

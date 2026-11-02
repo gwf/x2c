@@ -91,10 +91,8 @@ List CliRequest.package_roots(CliRequest request) {
 void CliRequest.require_input(String input) {
   if (!input) Diagnostics.driver_error("input path is empty");
   if (Path.is_file(input)) return;
-  if (Path.is_dir(input))
-    $fail.cli_input_directory(input);
-  if (Path.exists(input))
-    $fail.cli_input_not_file(input);
+  if (Path.is_dir(input)) $fail.cli_input_directory(input);
+  if (Path.exists(input)) $fail.cli_input_not_file(input);
   $fail.cli_input_missing(input);
 }
 
