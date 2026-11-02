@@ -45,6 +45,9 @@ jobs:
       fail-fast: false
       matrix:
         package: ${{ fromJSON(needs.list.outputs.packages) }}
+        # torch needs a LibTorch download and stays a local check.
+        exclude:
+          - package: torch
     steps:
       - uses: actions/checkout@v5
       - name: Install build and runtime test tools
