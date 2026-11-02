@@ -80,20 +80,20 @@ Mutex Mutex.new(void) {
 
 /** Locks `mutex`, waiting until it becomes available.
     The `Mutex` is non-recursive; the caller must not already hold it.
-    Raises: `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` when native locking fails.
 */
 void Mutex.lock(Mutex mutex) {
-  if (!mutex) raise %(bad-state (operation "Mutex.lock"));
+  if (!mutex) raise %(bad-arg (operation "Mutex.lock"));
   int error = pthread_mutex_lock(&mutex.native);
   if (error) _error("pthread_mutex_lock", error);
 }
 
 /** Attempts to lock `mutex` without waiting.
     Returns one when acquired or zero when busy.
-    Raises: `<bad-state>` for NULL, or `<io-fail>` for another native failure.
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` for another native failure.
 */
 int Mutex.try_lock(Mutex mutex) {
-  if (!mutex) raise %(bad-state (operation "Mutex.try_lock"));
+  if (!mutex) raise %(bad-arg (operation "Mutex.try_lock"));
   int error = pthread_mutex_trylock(&mutex.native);
   if (!error) return 1;
   if (error == EBUSY) return 0;
@@ -101,22 +101,22 @@ int Mutex.try_lock(Mutex mutex) {
 }
 
 /** Unlocks a `Mutex` held by the calling thread.
-    Raises: `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
+    Raises: `<bad-arg>` for NULL, or `<io-fail>` when native unlocking fails.
 */
 void Mutex.unlock(Mutex mutex) {
-  if (!mutex) raise %(bad-state (operation "Mutex.unlock"));
+  if (!mutex) raise %(bad-arg (operation "Mutex.unlock"));
   int error = pthread_mutex_unlock(&mutex.native);
   if (error) _error("pthread_mutex_unlock", error);
 }
 
 /** Destroys an unused, unlocked `Mutex` and releases its `Scope` storage.
     Native destruction occurs first, so a native failure leaves the allocation
-    intact. No thread may retain the handle or be waiting on it.
-    Raises: `<bad-state>` for NULL, or `<io-fail>` when native destruction
-    fails.
+    intact. No thread may retain the handle or be waiting on it. NULL does
+    nothing.
+    Raises: `<io-fail>` when native destruction fails.
 */
 void Mutex.free(Mutex mutex) {
-  if (!mutex) raise %(bad-state (operation "Mutex.free"));
+  if (!mutex) return;
   int error = pthread_mutex_destroy(&mutex.native);
   if (error) _error("pthread_mutex_destroy", error);
   xfree(mutex);
