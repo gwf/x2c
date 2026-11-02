@@ -731,8 +731,8 @@ static int _known_pointee(Type type) {
 
 /* A proven nonzero operand yields its short spelling; unknown forms yield
    NULL. C11 6.3.2.3p3 requires an integer constant expression with value zero,
-   not just the token 0. x2c does not fold constants, so this recognizes
-   only syntactically decidable forms. A wrong guess would reject legal C. */
+   not just the token 0. This rejection recognizes only syntactically
+   proven nonzero forms. A wrong guess would reject legal C. */
 static String _not_null_pointer_constant(Compiler c, List expr) {
   match (expr) {
     case %(expr ? $($grouped(?inner))):
@@ -797,14 +797,43 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
   return <unknown>;
 }
 
-module int _null_literal(List expr) {
+module int _null_literal(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? $($grouped(?inner))): return _null_literal(inner);
-    case %(expr (* void) (cast ? ?inner)):
-      return _integer_literal_kind(inner, NULL) == <zero>;
+    case %(expr ? $($grouped(?inner))): return _null_literal(c, inner);
+    case %(expr ?type (cast ? ?inner)):
+      if (c.sym.normalize_declared_type(type) ~= %((!quote *) void))
+        return _zero_integer_constant(c, inner);
     case %(expr ? (ident (binding ? "NULL"))): return 1;
   }
-  return _integer_literal_kind(expr, NULL) == <zero>;
+  return _zero_integer_constant(c, expr);
+}
+
+/* Only constant integer syntax reaches the meta argument decoder. Names,
+   calls, and pointer or void values cannot become absent references. */
+static int _zero_integer_constant(Compiler c, List expr) =>
+  _integer_constant_expression(c, expr) &&
+  c.meta_argument(expr, expr.cadr(), NULL, NULL) == 0;
+
+static int _integer_constant_expression(Compiler c, List expr) {
+  Type type = c.sym.resolve_numeric_type(expr.cadr());
+  if (!type || !type.is_integral()) return 0;
+  match (expr) {
+    case %(expr ? $($grouped(?inner))):
+      return _integer_constant_expression(c, inner);
+    case %(expr ? (op - ?inner)):
+      return _integer_constant_expression(c, inner);
+    case %(expr ? (op ?(Symbol op) ?left ?right)):
+      return op in %<"+" "-" "*" "/" "%" "&" "|" "^" "<<" ">>"
+                    "==" "!=" "<" "<=" ">" ">="> &&
+        _integer_constant_expression(c, left) &&
+        _integer_constant_expression(c, right);
+    case %(expr ? (literal *)):
+      return c.folded_constant(expr).is_integer();
+    case %(expr ? (cast ? ?inner)):
+      return _integer_constant_expression(c, inner) &&
+        c.folded_constant(expr).is_integer();
+  }
+  return 0;
 }
 
 /* An explicit converter call, `value.str()` or `value.var()`, is the most

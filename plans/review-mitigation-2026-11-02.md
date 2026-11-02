@@ -385,3 +385,73 @@ are retained under `debug/pr648-*`; this does not claim a network repair.
 The publication gate, final generated artifacts, performance checkpoint,
 full compiler fixture suite, native packages, and other-host validation
 remain with the previously stated scope and integration ownership.
+
+
+## Second PR 648 review corrections (2026-11-02)
+
+At reviewed head `5fcd486d093a1145de1a597c16f7b26d31c3fb88`, the
+void-pointer pattern's bare `*` was a sequence wildcard. It admitted both
+`void` and multiple pointer levels. The reviewed compiler printed `77` for
+`Func(read_optional)((void)0)` where baseline translation raises
+`<bad-types>`. Typedef and arithmetic-zero pointer casts also reproduced
+native dereference failures; the baseline versions both print `7`.
+Readiness was withdrawn before editing. The PR was open and the queue had
+no active batch.
+
+The shared expression helper now takes its existing Compiler context. A cast
+qualifies as a void-pointer null constant only when
+`Sym.normalize_declared_type` matches `%((!quote *) void)` exactly and its
+operand is a recognized constant integer zero. Thus aliases use the same
+Type owner, with no extra pointer level or void-valued argument accepted.
+
+The syntax recognizer admits only supported constant integer forms before
+calling the existing `Compiler.meta_argument` arithmetic decoder. Literal
+and cast leaves use `Compiler.folded_constant`; casts also require eligible
+operands, preventing pointer or call syntax from becoming an integer
+constant merely because the decoder can recover a zero value. Names and
+calls never reach arithmetic evaluation. No program code runs to decide
+whether an expression is constant, and no new constant evaluator is added.
+
+All three expression-helper consumers use the Compiler context: conditional
+pointer joining, optional-reference operator admission, and dynamic Func
+argument preparation. The independent recognizer in
+`src/compiler/binding-facts.x` remains unchanged. Admission of an equality
+operator is not a presence proof; its existing literal/NULL guard and
+narrowing behavior is preserved rather than expanded.
+
+The new `conditional-null-consumers` fixture checks that `(void)0`,
+`(void **)0`, `(void *)zero` for a runtime variable, and
+`(long)(void *)0` remain rejected as dynamic optional-reference arguments.
+An independent baseline translation also rejects all four with
+`<bad-types>`. Literal, typedef, and arithmetic-zero void-pointer constants
+retain absent-reference behavior. `_Generic` checks confirm that runtime
+zero casts keep the ordinary `void *` conditional result in both arm orders.
+
+`conditional-result-types` now dereferences results beside typedef and
+arithmetic-zero pointer casts in both arm orders, including const pointees.
+It retains the narrow scalar, Number method/converter, Symbol, String/Label,
+and empty-string printf cases from the previous corrections.
+
+Validation of the corrected combined source:
+
+- `make stage-2` passed with strict compiler stages 1 and 2; no local
+  rebootstrap was required (`debug/pr648-second-final-stage-2.log`).
+- Fourteen focused fixtures passed without native warnings: the two
+  conditional regression fixtures, the original six related fixtures, and
+  six optional-reference/operation fixtures. Exact results are in
+  `debug/pr648-second-final-fixtures.log`.
+- `make -C unittest test-all` completed. The full accounting-enabled unit
+  suite passed 1,205 tests and 104,084 assertions, with no final scope leak
+  report (`debug/pr648-second-units.log`).
+- The reported typedef and arithmetic-zero standalone programs print `7`;
+  the reported void-valued Func argument again raises `<bad-types>`.
+- `make doc-check` and `git diff --check` passed.
+
+Coverage is bounded by the current arithmetic decoder. Integer literals,
+grouping, negation, supported binary arithmetic/comparisons, and decodable
+integer casts are recognized. Other C11 constant-expression forms, including
+unsupported unary/logical forms, sizeof, and enum names, remain unknown;
+this is not a complete C11 integer-constant-expression implementation.
+No presence-proof expansion, runtime library change, publication gate,
+final bootstrap refresh, native package test, or other-host check was added.
+The shared integrator retains final publication ownership.

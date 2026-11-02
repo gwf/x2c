@@ -101,8 +101,8 @@ static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
     c.sym.normalize_declared_type(lhs.cadr()));
   Type right = _conditional_unqualified(
     c.sym.normalize_declared_type(rhs.cadr()));
-  if (left.is_pointer() && _null_literal(rhs)) return lhs.cadr();
-  if (right.is_pointer() && _null_literal(lhs)) return rhs.cadr();
+  if (left.is_pointer() && _null_literal(c, rhs)) return lhs.cadr();
+  if (right.is_pointer() && _null_literal(c, lhs)) return rhs.cadr();
   Type lbase = left.dereference(), rbase = right.dereference();
   if (!lbase || !rbase) return NULL;
   Type base = _conditional_unqualified(lbase);
@@ -305,7 +305,7 @@ static void _check_optional_operands(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (!ltype.is_optional_reference() && !rtype.is_optional_reference()) return;
-  int null_test = _null_literal(lhs) || _null_literal(rhs);
+  int null_test = _null_literal(c, lhs) || _null_literal(c, rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)
     $fail.expressions_optional_ref_unchecked(c, c.token);

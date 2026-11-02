@@ -3,6 +3,7 @@
 typedef short Small;
 typedef const int ConstInt;
 typedef int *IntPointer;
+typedef void *VoidPointer;
 typedef String Label;
 class Number int;
 
@@ -52,6 +53,12 @@ int main(int argc, char **argv) {
   auto qualified_right = argc ? constant : (void *)0;
   printf("void null %d %d %d %d\n",
     *void_right, *void_left, *qualified_left, *qualified_right);
+  auto alias_right = argc ? plain : (VoidPointer)(2 - 2);
+  auto alias_left = argc - 1 ? (VoidPointer)0 : constant;
+  auto constant_right = argc ? constant : (void *)(1 - 1);
+  auto constant_left = argc - 1 ? (void *)((2 + 2) - 4) : plain;
+  printf("constant null %d %d %d %d\n",
+    *alias_right, *alias_left, *constant_right, *constant_left);
   Number first = Number.new(1), second = Number.new(2);
   auto number = argc ? first : second;
   String converted = argc ? first : second;

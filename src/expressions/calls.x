@@ -89,7 +89,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
         ? boxed(c.convert_expression(argument, %("Var")))
         : opaque(function, index, source),
       <expression>, NULL);
-    if (_null_literal(argument)) {
+    if (_null_literal(c, argument)) {
       prepared.push(absent(function, storage, count, index, value));
       continue;
     }
