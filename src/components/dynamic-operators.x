@@ -60,7 +60,7 @@ meta static int _dynamic_operand(Type type, int text) =>
    which only `Var.binary` computes. */
 meta static String _dynamic_lane(Symbol op) {
   Var member = _x2c_operator_row(op)[3];
-  return member ? %"x2c_var_$(member.symbol().str())_lane" : NULL;
+  return member ? %"x2c_var_$(member.symbol())_lane" : NULL;
 }
 
 $rewrite(%(expr ("Var") (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))

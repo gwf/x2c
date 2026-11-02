@@ -3,10 +3,11 @@
     Copyright (c) 2026 Gary William Flake
 
     The operator rows give shipped compiler sources their shared facts,
-    and the functions after them are lookups those sources share. Bodyless `meta` prototypes name native operations the compiler
-    supplies for those sources: the built-in macros' algorithms
-    that need the full meta surface, Lisp binding groups, and the generated
-    target tables, hashes, interface records, and SymbolSets. The implicit
+    and the functions after them are lookups those sources share. Bodyless
+    `meta` prototypes name native operations the compiler supplies for
+    those sources: the built-in macros' algorithms that need the full meta
+    surface, Lisp binding groups, and the generated target tables, hashes,
+    interface records, and SymbolSets. The implicit
     prelude reaches them through `lisp-bindings.x`, but they are not part
     of the documented meta surface, which `lib/meta.x` owns.
 */
