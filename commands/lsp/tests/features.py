@@ -3,14 +3,7 @@ from pathlib import Path
 import sys
 import tempfile
 
-from client import Client
-
-
-def position(text, needle, inside=0):
-    at = text.index(needle) + inside
-    before = text[:at]
-    return {"line": before.count("\n"),
-            "character": len(before.rsplit("\n", 1)[-1].encode("utf-16-le")) // 2}
+from client import Client, position
 
 
 def query(client, method, source, text, needle, inside=0, **extra):

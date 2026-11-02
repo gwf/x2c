@@ -5,6 +5,7 @@
 #pragma once
 #include "sourceview.x"
 #include "scan.x"
+#include "encoding.x"
 
 /** Decodes a local file URI to the compiler's logical absolute path. */
 String lsp_path(String uri) {
@@ -12,32 +13,14 @@ String lsp_path(String uri) {
   const char *at = uri + 7;
   if (!strncmp(at, "localhost/", 10)) at += 9;
   if (*at != '/') return NULL;
-  Buffer out = auto Buffer.new(0);
-  while (*at) {
-    if (*at == '%') {
-      if (!at[1] || !at[2]) return NULL;
-      int hi = scan_ascii_hex_value(at[1]), lo = scan_ascii_hex_value(at[2]);
-      if (hi < 0 || lo < 0 || !(hi * 16 + lo)) return NULL;
-      out.write_char(hi * 16 + lo);
-      at += 3;
-    }
-    else out.write_char(*at++);
-  }
-  return Path.absolute(out.str());
+  String encoded = at;
+  try { return Path.absolute(encoded.percent_decode()); }
+  catch %(malformed *): return NULL;
 }
 
 /** Encodes a logical absolute path as a local file URI. */
-String lsp_uri(String path) {
-  Buffer out = auto Buffer.new(0);
-  out.write("file://");
-  foreach (int byte, path) {
-    if ((byte >= 'a' && byte <= 'z') || (byte >= 'A' && byte <= 'Z') ||
-        (byte >= '0' && byte <= '9') || strchr("/-._~:", byte))
-      out.write_char(byte);
-    else out.printf("%%%02X", (unsigned char) byte);
-  }
-  return out;
-}
+String lsp_uri(String path) =>
+  "file://" + path.percent_encode().replace("%2F", "/").replace("%3A", ":");
 
 /** Converts a UTF-8 byte offset to an LSP UTF-16 position. */
 Map lsp_position(String text, int offset) {

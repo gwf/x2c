@@ -7,14 +7,15 @@ observations for this workload, not a bound on one analysis or an input burst.
 import json
 import os
 from pathlib import Path
-import select
 import subprocess
 import sys
 import tempfile
 import time
 
+from client import Client as ProtocolClient
 
-class Client:
+
+class Client(ProtocolClient):
     def __init__(self, root, directory):
         self.log = directory / "server.stderr"
         self.stderr = self.log.open("wb")
@@ -30,65 +31,20 @@ class Client:
         self.next_id = 1
         self.initialize_responses = 0
         self.send("initialize", {"initializationOptions": {"arguments": []}}, 1)
-        self.capabilities = self.wait(lambda message:
+        self.capabilities = self.wait_for(lambda message:
             message.get("id") == 1)["result"]["capabilities"]
         self.send("initialized")
 
-    def send(self, method, params=None, identifier=None):
-        message = {"jsonrpc": "2.0", "method": method}
-        if params is not None:
-            message["params"] = params
-        if identifier is not None:
-            message["id"] = identifier
-        body = json.dumps(message).encode()
-        data = f"Content-Length: {len(body)}\r\n\r\n".encode() + body
-        while data:
-            count = self.process.stdin.write(data)
-            assert count, "server stdin closed"
-            data = data[count:]
-
-    def read(self, count):
-        chunks = []
-        while count:
-            assert select.select([self.process.stdout], [], [], 60)[0], "response timeout"
-            chunk = os.read(self.process.stdout.fileno(), count)
-            assert chunk, ("server ended", self.process.poll(), self.log.read_text())
-            chunks.append(chunk)
-            count -= len(chunk)
-        return b"".join(chunks)
-
     def message(self):
-        header = bytearray()
-        while not header.endswith(b"\r\n\r\n"):
-            header.extend(self.read(1))
-        fields = dict(line.split(":", 1) for line in header.decode().strip().split("\r\n"))
-        message = json.loads(self.read(int(fields["Content-Length"])))
+        message = super().message()
         self.messages.append(message)
         if message.get("id") == 1:
             self.initialize_responses += 1
         return message
 
-    def wait(self, predicate):
-        while True:
-            message = self.message()
-            if predicate(message):
-                return message
-
-    def opened(self, path, text, language="x2c"):
-        uri = path.as_uri()
-        version = self.versions.get(uri, 0) + 1
-        self.versions[uri] = version
-        if version == 1:
-            self.send("textDocument/didOpen", {"textDocument": {
-                "uri": uri, "languageId": language, "version": version, "text": text}})
-        else:
-            self.send("textDocument/didChange", {"textDocument": {
-                "uri": uri, "version": version}, "contentChanges": [{"text": text}]})
-        return version
-
     def diagnostics(self, path, version=None):
         uri = path.as_uri()
-        return self.wait(lambda message:
+        return self.wait_for(lambda message:
             message.get("method") == "textDocument/publishDiagnostics"
             and message["params"]["uri"] == uri
             and (version is None or message["params"].get("version") == version)
@@ -100,10 +56,7 @@ class Client:
             "position": {"line": 1, "character": 25}})
 
     def request(self, method, params):
-        self.next_id += 1
-        identifier = self.next_id
-        self.send(method, params, identifier)
-        return self.wait(lambda message: message.get("id") == identifier)["result"]
+        return super().request(method, params)["result"]
 
     def checkpoints(self):
         log = self.log.read_text()
@@ -124,10 +77,7 @@ class Client:
                 if message.get("method") == "window/showMessage"]
 
     def close(self):
-        self.send("shutdown", identifier=999999)
-        self.wait(lambda message: message.get("id") == 999999)
-        self.send("exit")
-        assert self.process.wait(timeout=20) == 0
+        super().close(identifier=999999, timeout=20)
         self.stderr.close()
 
 

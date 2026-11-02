@@ -6,13 +6,7 @@ import sys
 import tempfile
 from urllib.parse import unquote, urlparse
 
-from client import Client
-
-
-def position(text, needle):
-    before = text[:text.index(needle) + 1]
-    return {"line": before.count("\n"),
-            "character": len(before.rsplit("\n", 1)[-1].encode("utf-16-le")) // 2}
+from client import Client, position
 
 
 def offset(text, point):
@@ -73,7 +67,7 @@ def check_case(root, directory, texts, inputs, selections, manifest=True):
         for index, (name, needle, new_name, count) in enumerate(selections):
             response = client.request("textDocument/rename", {
                 "textDocument": {"uri": (directory / name).as_uri()},
-                "position": position(texts[name], needle), "newName": new_name})
+                "position": position(texts[name], needle, inside=1), "newName": new_name})
             if count is None:
                 assert response["error"]["code"] == -32602, response
                 assert "result" not in response, response

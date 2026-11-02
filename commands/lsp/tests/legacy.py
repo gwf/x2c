@@ -3,20 +3,13 @@ from pathlib import Path
 import sys
 import tempfile
 
-from client import Client
-
-
-def point(text, needle, last=False):
-    at = text.rindex(needle) if last else text.index(needle)
-    before = text[:at]
-    return {"line": before.count("\n"),
-            "character": len(before.rsplit("\n", 1)[-1].encode("utf-16-le")) // 2}
+from client import Client, position
 
 
 def definition(client, source, text, needle, last=False):
     return client.request("textDocument/definition", {
         "textDocument": {"uri": source.as_uri()},
-        "position": point(text, needle, last)})["result"]
+        "position": position(text, needle, last=last)})["result"]
 
 
 root = Path(sys.argv[1]).resolve()
@@ -50,12 +43,12 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-legacy-") as temporary:
         assert client.diagnostics() == []
         found = definition(client, source, text, "supplied")
         assert found["uri"] == kept.as_uri(), found
-        assert found["range"]["start"] == point(included, "supplied"), found
+        assert found["range"]["start"] == position(included, "supplied"), found
         same_file = macro + "$keep(int supplied);\n"
         client.opened(kept, same_file, "c")
         assert client.diagnostics() == []
         found = definition(client, source, text, "supplied")
-        assert found["range"]["start"] == point(same_file, "supplied"), found
+        assert found["range"]["start"] == position(same_file, "supplied"), found
         client.opened(kept, "\n\n" + same_file, "c")
         assert client.diagnostics() == []
         found = definition(client, source, text, "supplied")

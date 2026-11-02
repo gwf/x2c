@@ -32,34 +32,44 @@ class Client:
         return f"Content-Length: {len(body)}\r\n\r\n".encode() + body
 
     def send(self, method, params=None, identifier=None):
-        self.process.stdin.write(self.frame(method, params, identifier))
+        data = self.frame(method, params, identifier)
+        while data:
+            count = self.process.stdin.write(data)
+            assert count, "server stdin closed"
+            data = data[count:]
         self.process.stdin.flush()
 
     # The gate runs the command checks beside parallel compiles, so a
     # response may take tens of seconds; a hang still fails within a minute.
     TIMEOUT = 60
 
-    def wait(self, key, value):
-        while True:
+    def read(self, count):
+        chunks = []
+        while count:
             assert select.select([self.process.stdout], [], [],
                                  self.TIMEOUT)[0], "response timeout"
-            headers = {}
-            while (line := self.process.stdout.readline()) not in (b"\n", b"\r\n"):
-                assert line, (self.process.poll(), self.process.stderr.read())
-                name, field = line.decode().split(":", 1)
-                headers[name.lower()] = field.strip()
-            remaining = int(headers["content-length"])
-            chunks = []
-            while remaining:
-                assert select.select([self.process.stdout], [], [],
-                                     self.TIMEOUT)[0], "body timeout"
-                chunk = self.process.stdout.read(remaining)
-                assert chunk, "server closed an incomplete frame"
-                chunks.append(chunk)
-                remaining -= len(chunk)
-            message = json.loads(b"".join(chunks))
-            if message.get(key) == value:
+            chunk = os.read(self.process.stdout.fileno(), count)
+            assert chunk, ("server ended", self.process.poll())
+            chunks.append(chunk)
+            count -= len(chunk)
+        return b"".join(chunks)
+
+    def message(self):
+        header = bytearray()
+        while not header.endswith(b"\r\n\r\n"):
+            header.extend(self.read(1))
+        fields = dict(line.lower().split(":", 1)
+                      for line in header.decode().strip().split("\r\n"))
+        return json.loads(self.read(int(fields["content-length"])))
+
+    def wait_for(self, predicate):
+        while True:
+            message = self.message()
+            if predicate(message):
                 return message
+
+    def wait(self, key, value):
+        return self.wait_for(lambda message: message.get(key) == value)
 
     def opened(self, source, text, language="x2c"):
         uri = source.as_uri()
@@ -71,6 +81,7 @@ class Client:
         else:
             self.send("textDocument/didChange", {"textDocument": {
                 "uri": uri, "version": version}, "contentChanges": [{"text": text}]})
+        return version
 
     def diagnostics(self):
         return self.wait("method", "textDocument/publishDiagnostics")["params"]["diagnostics"]
@@ -85,8 +96,15 @@ class Client:
         self.send(method, params, self.next_id)
         return self.wait("id", self.next_id)
 
-    def close(self):
-        self.send("shutdown", identifier=99)
-        self.wait("id", 99)
+    def close(self, identifier=99, timeout=10):
+        self.send("shutdown", identifier=identifier)
+        self.wait_for(lambda message: message.get("id") == identifier)
         self.send("exit")
-        assert self.process.wait(timeout=10) == 0
+        assert self.process.wait(timeout=timeout) == 0
+
+
+def position(text, needle, inside=0, last=False):
+    at = (text.rindex(needle) if last else text.index(needle)) + inside
+    before = text[:at]
+    return {"line": before.count("\n"),
+            "character": len(before.rsplit("\n", 1)[-1].encode("utf-16-le")) // 2}
