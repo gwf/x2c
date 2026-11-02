@@ -1,1 +1,1 @@
-x2c: uncaught <bad-arg>: value 0
+x2c: uncaught <bad-arg>: operation Buffer.write_len, value 0

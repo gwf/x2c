@@ -232,14 +232,14 @@ meta MapStringInt Map.mapstringint(Map);
     converted to a canonical String; the map never retains the view.
     Integer addition and insertion follow updateindex.
 */
-int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
-  if ((void *) map == NULL) _bad_arg("MapStringInt");
+int MapStringInt.add_substr(MapStringInt m, Substr key, int count) {
+  if ((void *) m == NULL) _bad_arg("MapStringInt");
   unsigned hash = key.hash();
   if (!hash) hash = -1;
-  long index = map.find_substr(&key, hash);
+  long index = m.find_substr(&key, hash);
   if (index >= 0)
-    return _update_int(_string_int_value(map, index), <+>, count);
-  return map.updateindex(key, <+>, count);
+    return _update_int(_string_int_value(m, index), <+>, count);
+  return m.updateindex(key, <+>, count);
 }
 
 static int _equal_substr(String *stored, Substr *key) {

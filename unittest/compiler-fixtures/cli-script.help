@@ -10,6 +10,7 @@ Target options:
 
 Output options:
       --source-map            Map generated C locations to original x2c sources
+      --no-source-map         Keep generated C locations in native diagnostics
       --rebuild               Build even when the cached executable is current
       --clean                 Remove the cached build and exit without running it
 

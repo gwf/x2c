@@ -546,7 +546,7 @@
      (param (volatile "String") 
       (bind (binding 55 "_x2c_gensym_macro_lhs_0") 
        (*))) (param ("Symbol") (bind (binding 56 "_x2c_gensym_macro_op_0") ())) 
-     (param ("String") (bind (binding 57 "_x2c_gensym_macro_rhs_0") ())))))) 
+     (param ("String") (bind (binding 57 "rhs") ())))))) 
  (block 
   (at 70 
    (stmnt 
@@ -564,7 +564,7 @@
                 (expr (* volatile "String") 
                  (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
                 (expr (int) (literal (int) "0")))) 
-         (expr ("String") (ident (binding 57 "_x2c_gensym_macro_rhs_0")))))))))) 
+         (expr ("String") (ident (binding 57 "rhs")))))))))) 
   (at 71 
    (return 
     (expr (volatile "String") 
