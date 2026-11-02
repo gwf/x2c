@@ -1,5 +1,13 @@
 /*  operators.x -- operator types and protocol operations */
 
+static macro Stmt $fail.expressions_operand_unconverted(
+  Expr $c, Expr $origin, Expr $participant, Expr $member, Expr $operand) =>
+  $c.report_error(
+    <type>, "operand does not convert beside a protocol participant",
+    $origin,
+    %("participant: $($participant.repr())" "member: $($member)"
+      "operand type: $($operand.repr())"));
+
 // operators
 
 /* Returns <array> or <map>, including aliases, and zero for other types. */
@@ -155,12 +163,7 @@ module List _binary_expression(
   }
   if (operator == <in>)
     $fail.expressions_contains_missing(c, origin, rhs_type);
-  /* An untyped preprocessor name beside a converting protocol participant
-     would reach the C compiler with no usable conversion. */
-  if ((lhs_type != NULL) != (rhs_type != NULL))
-    _check_untyped_operand(
-      c, operator, lhs_type ? lhs_type : rhs_type,
-      lhs_type ? rhs : lhs, origin);
+  _check_participant_operand(c, operator, lhs, rhs, origin);
   return _native_binary_expression(c, operator, lhs, rhs, origin);
 }
 
@@ -202,15 +205,23 @@ static int _convert_string_addition(
   return constant;
 }
 
-static void _check_untyped_operand(
-  Compiler c, Symbol operator, Type participant, List other,
-  Token origin) {
+/* An arithmetic operator that no member resolved would reach C as pointer
+   arithmetic on a converting participant that has the operator's member,
+   so the operand beside it, which did not convert for the member, is an
+   error. An untyped preprocessor name has no conversion at all. Equality
+   keeps native identity, and a `Var` operand lowers dynamically. */
+static void _check_participant_operand(
+  Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Symbol member = Compiler.operator_member(operator);
-  if (!member || operator == <==> || operator == <!=>) return;
-  if (_converts_operands(c, participant) &&
-      c.resolve_protocol_member(participant, member) &&
-      other ~= %(expr ? (ident ?)))
-    $fail.expressions_operand_untyped(c, origin);
+  if (!member || operator == <==>) return;
+  Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
+  if (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)) return;
+  int left = !!_converting_member(c, lhs_type, member);
+  if (!left && !_converting_member(c, rhs_type, member)) return;
+  if (!lhs_type || !rhs_type) $fail.expressions_operand_untyped(c, origin);
+  $fail.expressions_operand_unconverted(
+    c, origin, left ? lhs_type : rhs_type, member,
+    left ? rhs_type : lhs_type);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
@@ -405,10 +416,12 @@ static List _converted_member(
   List lhs_member = _converting_member(c, lhs_type, member);
   List rhs_member = _converting_member(c, rhs_type, member);
   if (lhs_member && !rhs_member) {
-    List converted = _member_operand(c, lhs_member, rhs, lhs_type);
+    Type parameter = _operand_parameter(lhs_member);
+    List converted = parameter ? c.convert_expression(rhs, parameter)
+                               : c.converter_call(rhs, rhs_type, lhs_type);
     if (converted) { rhs = converted; return lhs_member; }
   }
-  else if (rhs_member && !lhs_member) {
+  else if (rhs_member && !lhs_member && !_operand_parameter(rhs_member)) {
     List converted = c.converter_call(lhs, lhs_type, rhs_type);
     if (converted) { lhs = converted; return rhs_member; }
   }
@@ -421,18 +434,15 @@ static List _converting_member(Compiler c, Type type, Symbol member) {
   return resolved && _converts_operands(c, type) ? resolved : NULL;
 }
 
-/* The right operand `rhs` converted for `participant`'s resolved `member`,
-   or NULL. A member whose operand parameter has another type than its
-   receiver, such as `long` in `T T.add(T, long)`, takes `rhs` as an
-   ordinary argument. Otherwise `rhs` converts to the participant through
-   its declared converter, and without one the operator stays native C. */
-static List _member_operand(
-  Compiler c, List member, List rhs, Type participant) {
+/* The operand parameter of `member` when its type differs from the
+   receiver's, as `long` does in `T T.add(T, long)`, or NULL. Such a
+   member takes the right operand as an ordinary argument, so only a
+   participant on the left reaches it; the operator never commutes. */
+static Type _operand_parameter(List member) {
   if (member ~= %(? ((func (?(Type receiver) ?(Type parameter))) *)) &&
       parameter.canonicalize() != receiver.canonicalize())
-    return c.convert_expression(rhs, parameter);
-  Type type = rhs.cadr();
-  return c.converter_call(rhs, type.canonicalize(), participant);
+    return parameter;
+  return NULL;
 }
 
 /* Two different typedef names that share an ancestor meet at the nearest

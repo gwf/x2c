@@ -1182,10 +1182,13 @@ reports the ordinary operator error. When exactly one operand of a binary
 operator is a struct or union participant with the member, or a handle typedef
 pointing at one, the other operand converts to that type through its declared
 converter, so `meters + 2.0` and `10.0 - meters` resolve when `double.meters`
-exists. Scalar pointers and numeric participants keep native C behavior for a
-mixed operand, so `text + 1` remains pointer arithmetic. The runtime uses the
-same rows itself: `String.add` implements `add` for `protocol Var(String)`, so
-`String` `+` and `+=` are ordinary resolved punctuation.
+exists. A member whose operand parameter is not the participant, such as `long`
+in `T T.add(T, long)`, takes the other operand as an ordinary argument, as a
+direct update does. Scalar pointers and numeric participants keep native C
+behavior for a mixed operand, so `text + 1` remains pointer arithmetic. The
+runtime uses the same rows itself: `String.add` implements `add` for
+`protocol Var(String)`, so `String` `+` and `+=` are ordinary resolved
+punctuation.
 
 Logical operators preserve C short-circuit evaluation: each operand's `truth`
 method runs only when C would evaluate that operand. Indexed compound and
