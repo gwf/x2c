@@ -283,6 +283,159 @@ items, for a later batch:
   `docs/src/guide/iteration.md`, and `collections.md`; translating
   `test-lisp.x` reports four unnecessary `.str()` conversions.
 
+## Bug batch (2026-11-02)
+
+The defects carried above (batch A handoffs, batch B outcome, batch C
+handoffs) were each re-run at `dev` `9d196566f` before repair. The ones
+that reproduced were split across six workers on disjoint files, each fix
+proven by a fixture or unit test that fails before and passes after.
+
+Dropped (no longer reproduce, or not defects, at `9d196566f`):
+
+- A protocol update helper named from a public inline body: batch A gave
+  update helpers external linkage with path-hashed names, and the two-unit
+  probe builds and prints the right sum.
+- The first `make build` after a `Compiler` field change: PR #646 rereads
+  generated header times after each translation batch.
+- `SymTxn.rollback` and `_speculate` not restoring `protocol_helpers`: not
+  reachable. Speculation runs only `convert_expression` and
+  `_convert_composite`, which never register a helper; discard helpers
+  register during call and operator resolution, update helpers in the
+  transform, and lambda bodies in unit support. Instrumented runs of
+  native-dependent initializers with rejected speculations left the cache
+  unchanged.
+- `x2c script` on a `.x` file without a shebang: documented behaviour.
+  `cli.md` ("ends in `.x`, or may be any name when the first line is a
+  shebang") makes the file an ordinary unit, and the CLI probes run such
+  files; a file-scope statement in it is a parse error by design.
+- `Listener.write_repr` on a null handle: `Listener` and `Socket` share
+  one `write_str` text for a null handle, and `Var.new` rejects a null
+  handle, so no boxed null reaches it. Kept.
+
+Fixed:
+
+Compiler:
+
+- A `Func` conversion nested in a file-scope collection literal: `_visit`
+  in `src/cache.x` orders each deferred initializer after the `Func`
+  bindings its assignment reads, and the transform's separate dependency
+  record is gone (fixture `function-to-func-collection-init`). Public
+  `Func` objects that read each other now get the existing cycle error.
+- `$x2c.callback.adapt` keeps the callback type's result qualifiers; an
+  inline lambda callback parameter keeps its qualifiers, because
+  `_adapt_lambda_value` resolves only a bare typedef name; a helper
+  without parameters declares `(void)` once, in `forward_parameters`,
+  which also serves the discard and default-forwarding helpers
+  (`callback-adapt-const-result`, `callback-adapt-nullary`,
+  `lambda-adapter-wide-return`).
+- A `struct T` or `union T` destination converts a `Var` as the typedef
+  that names the aggregate, or gets the existing diagnostic
+  (`var-struct-tag-destination`, `var-struct-tag-reader`,
+  `foreach-macro-incompatible-tag`).
+- `complete_iter_chain` reads the callee's resolved signature, so a stage
+  called through a function pointer, a field, or `(*p)()` completes, and
+  file-scope chains complete like in-function ones. Calls through a
+  typedef'd function pointer now convert and check their arguments like
+  direct calls (`iter-chain-pointer`, `iter-chain-file-scope`,
+  `call-pointer-arguments`).
+- A parenthesized index target, `(m["a"]) += 4`, lowers like the bare one
+  (`bracket-grouped-update`).
+- Regions: a copying conversion into a container (`List` or `Iter` to
+  `Array`, a typed family to its boxed family or back) is fresh storage of
+  the active region, found through the converter's allocator row; the
+  three `decode_bytes` readers, `Url.parse_query`, `Args.parse`, and
+  `SymbolSet.encode` have rows; each typed family takes the boxed family's
+  rows by one rule, replacing 22 hand-written rows; `Array.reverse`,
+  `setslice`, `sort*`, and `Buffer.printf` return their argument, and
+  `Map.merge` may return a fresh map (`region-conversions`,
+  `region-producers`, `region-returned-arguments`; regions.md).
+- A declaration inside a wrapped file-scope alias body conflicts with the
+  alias like an unwrapped one, and a name an include delivers conflicts
+  with an alias the unit holds: collection snapshots the unbound alias
+  names around each include and reports at the include line
+  (`alias-wrapped-conflict`, `alias-included-declaration`,
+  `alias-included-declaration-imported`).
+- A compound literal is an addressable receiver and reference argument
+  (`expression-compound-literal-index`); `auto with = 5;` and
+  `auto foreach = 5;` infer locals (`parse-auto-with-foreach`).
+- Driver: the input-read note names the real reason through the new
+  raising `SourceView.read_text`, of which `SourceView.read` is the status
+  form, and `Compiler.read_source_text` retains the source facts; `-v`
+  and `-###` translate lines print through the tool-action printer,
+  quoted; a state record, script record, depfile, or cache `source` that
+  is not text counts as stale through the shared status reader (CLI probe
+  cases; the `driver-nul-input` expectation now says "embedded NUL").
+
+Runtime:
+
+- `Map.iter`, `keys`, and `enumerate` on a null map start exhausted, for
+  the boxed and typed families (test-map, test-typed-map).
+- `_from_bytes_in` owns the `INT_MAX - 1` limit for every byte-span
+  `String` constructor, and `Buffer.str` raises `<size-limit>` above it
+  (test-buffer; the `new_len` overflow is proven by reading).
+- Boxed `Array`: `take_last`, `shift`, and `remove` on a null array raise
+  `<bad-arg>`, `remove` outside the elements raises with the index, an
+  empty array keeps returning `void` from `take_last` and `shift`, and
+  `getindex` on a null array returns `void` instead of crashing
+  (test-array, test-index-slice, and the Lisp binding test).
+- `Iter.parallel_map` and `parallel_map_in` raise `<bad-arg>` for a null
+  function at the call (test-thread); `Channel.new` details use `reason`
+  (test-channel); `Logger.new` raises `<bad-arg>` for an unknown level
+  (test-logger).
+- `Regex.compile` stops at 2,000 nested groups or the stack floor with
+  `<size-limit>` (test-regex, test-task).
+- Lisp: each public entry sets the session's stack floor, and nested
+  forms, quasiquote, and capture walks raise `<call-stack>` at it;
+  `Lisp.call_budget` raises for a nonpositive budget; `Lisp.try_get`
+  raises for a null session; `Lisp.bind` documents the `<bad-state>` a
+  frozen session raises after the `Func` moves (test-lisp;
+  reference-lisp.md, scripting.md, contexts-and-threads.md).
+- Style: the long lines and `.str()` conversions in test-lisp.x, and the
+  long lines in test-iter.x and iteration.md.
+
+Still carried:
+
+- A transform diagnostic at file scope with no site points at the end of
+  the file (`Iter kept = range(1, 4, 1);` reports `6:1` in a five-line
+  file): top-level forms carry no origin. Candidates are
+  `src/transform/traversal.x` `_sequence_item` setting the origin from the
+  `definition-span` fact, or anchoring top-level forms in
+  `src/compiler/parsing/parse.x`.
+- A pointer to a typedef'd function type (`typedef String Namer(Var);
+  Namer *p;`) still calls without argument conversion; `_check_arity`
+  never checks a call through a function pointer at parse time.
+- A typed adapter whose source returns `const char *` for a callback
+  returning `char *` passes x2c and draws a C qualifier warning.
+- A field inside a member wrapper (`struct S { alias 5 as k; alias 1
+  { int k; } }`) still compiles; the check needs the aggregate body's
+  alias level. An include that declares `k` followed by an include that
+  delivers `alias k` still compiles; the full parse's include check sees
+  only names it bound.
+- Regex matching still recurses through groups without a floor check
+  (only repeated groups check): 60,000 groups in sequence on the main
+  thread, or 2,000 nested groups in a 32 KiB task, overflow; `_run` is the
+  matcher's hot path, so the repair needs a paired measurement.
+  `Var.repr` of a 100,000-deep List overflows the same way. Both are in
+  `unittest/STATUS.md`.
+- `Lisp.bind` moves the `Func` before the frozen-session check, so the
+  caller has given up the `Func` when `<bad-state>` is raised; a one-line
+  reorder if the caller should keep it.
+- `Map.merge_with` and the two `update_n` operations return their receiver
+  without allocator rows; the other `Compiler.read_source` failure reports
+  (include, module, runtime, package, embed, manifest) still give no
+  reason and could use `SourceView.read_text`; `x2c_embed_text` keeps its
+  own disk reader; `CliRequest.script_current` reads the record twice.
+- The leading-qualifier loop is copied in six compiler files
+  (`collect/declarations.x`, `collect/providers.x`, `symtab/types.x`
+  twice, `parse/auto.x`, `expressions/conversions.x`); one `Type` owner
+  is a simplification candidate.
+- From the batch C handoffs, unchanged: the three Lisp storage members
+  with no callers outside `lib/lisp` and its test (a public-API removal
+  for Gary); the null-handle audit of `lib/match`, `lib/dispatch.x`,
+  `lib/static-init.x`, `lib/var`, and `lib/pool`; the one-line error
+  macros over 79 columns in `lib/lisp/lisp.x` and `lib/process.x`
+  (deliberate) and the table row in collections.md.
+
 ## Validation and delivery
 
 Workers: focused checks only. Orchestrator: combined focused checks and
