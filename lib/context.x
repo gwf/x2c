@@ -233,10 +233,9 @@ meta native void Context.cleanup(Context value) { value.close(); }
 
 /** Registers `Context` cleanup before workers can start. */
 void Context.initialize(void) {
-  if (pthread_once(&context_shutdown_once, _register_shutdown)) {
-    fprintf(stderr, "Context: could not register shutdown\n");
-    abort();
-  }
+  x2c_native_check(
+    pthread_once(&context_shutdown_once, _register_shutdown),
+    "Context: could not register shutdown");
 }
 
 /** Closes the current `Context`, reclaims unexported state, and restores

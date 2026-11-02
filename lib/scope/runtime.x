@@ -64,17 +64,12 @@ void Scope_shutdown(void) {
 static void _initialize(void) {
   if (scope_state == <running> || scope_state == <shutting>) return;
   if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
+    x2c_fatal("Scope: operation attempted after shutdown");
   const char *accounting = getenv("X2C_SCOPE_ACCOUNTING");
   scope_accounting = accounting && strcmp(accounting, "1") == 0;
   scope_state = <running>;
   if (atexit(Scope_shutdown))
-    _raw_fatal("could not register shutdown handler");
-}
-
-module void _raw_fatal(const char *message) {
-  fprintf(stderr, "Scope: %s\n", message);
-  abort();
+    x2c_fatal("Scope: could not register shutdown handler");
 }
 
 /* A hook that registers another runs it next, still newest first. */
@@ -129,5 +124,5 @@ module void _require_running(void) {
 static void _ensure_running(void) {
   if (scope_state == <uninit>) _initialize();
   else if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
+    x2c_fatal("Scope: operation attempted after shutdown");
 }

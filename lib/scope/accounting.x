@@ -81,12 +81,12 @@ ScopeStats Scope.stats(void) {
 
 static void _metadata_lock(void) {
   if (pthread_mutex_lock(&scope_metadata_mutex))
-    _raw_fatal("could not lock metadata");
+    x2c_fatal("Scope: could not lock metadata");
 }
 
 static void _metadata_unlock(void) {
   if (pthread_mutex_unlock(&scope_metadata_mutex))
-    _raw_fatal("could not unlock metadata");
+    x2c_fatal("Scope: could not unlock metadata");
 }
 
 /* Return native allocation failure to the constructor, which frees its

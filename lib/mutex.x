@@ -30,10 +30,8 @@ void Mutex.recursive_initialize(pthread_mutex_t *mutex, const char *failure) {
   pthread_mutexattr_t attributes;
   if (pthread_mutexattr_init(&attributes) ||
       pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
-      pthread_mutex_init(mutex, &attributes)) {
-    fprintf(stderr, "%s\n", failure);
-    abort();
-  }
+      pthread_mutex_init(mutex, &attributes))
+    x2c_fatal(failure);
   pthread_mutexattr_destroy(&attributes);
 }
 
@@ -43,20 +41,15 @@ void Mutex.recursive_initialize(pthread_mutex_t *mutex, const char *failure) {
 void Mutex.recursive_lock(
   pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void),
   const char *failure) {
-  if (pthread_once(once, initialize) || pthread_mutex_lock(mutex)) {
-    fprintf(stderr, "%s\n", failure);
-    abort();
-  }
+  if (pthread_once(once, initialize) || pthread_mutex_lock(mutex))
+    x2c_fatal(failure);
 }
 
 /** Unlocks the recursive mutex.
     On pthread failure, prints `failure` to native stderr and aborts.
 */
 void Mutex.recursive_unlock(pthread_mutex_t *mutex, const char *failure) {
-  if (pthread_mutex_unlock(mutex)) {
-    fprintf(stderr, "%s\n", failure);
-    abort();
-  }
+  if (pthread_mutex_unlock(mutex)) x2c_fatal(failure);
 }
 
 static struct Mutex {
@@ -73,7 +66,7 @@ Mutex Mutex.new(void) {
   int error = pthread_mutex_init(&mutex.native, NULL);
   if (error) {
     xfree(mutex);
-    _error("pthread_mutex_init", error);
+    x2c_io_fail("pthread_mutex_init", error);
   }
   return mutex;
 }
@@ -85,7 +78,7 @@ Mutex Mutex.new(void) {
 void Mutex.lock(Mutex mutex) {
   if (!mutex) raise %(bad-state (operation "Mutex.lock"));
   int error = pthread_mutex_lock(&mutex.native);
-  if (error) _error("pthread_mutex_lock", error);
+  if (error) x2c_io_fail("pthread_mutex_lock", error);
 }
 
 /** Attempts to lock `mutex` without waiting.
@@ -97,7 +90,7 @@ int Mutex.try_lock(Mutex mutex) {
   int error = pthread_mutex_trylock(&mutex.native);
   if (!error) return 1;
   if (error == EBUSY) return 0;
-  _error("pthread_mutex_trylock", error);
+  x2c_io_fail("pthread_mutex_trylock", error);
 }
 
 /** Unlocks a `Mutex` held by the calling thread.
@@ -106,7 +99,7 @@ int Mutex.try_lock(Mutex mutex) {
 void Mutex.unlock(Mutex mutex) {
   if (!mutex) raise %(bad-state (operation "Mutex.unlock"));
   int error = pthread_mutex_unlock(&mutex.native);
-  if (error) _error("pthread_mutex_unlock", error);
+  if (error) x2c_io_fail("pthread_mutex_unlock", error);
 }
 
 /** Destroys an unused, unlocked `Mutex` and releases its `Scope` storage.
@@ -118,13 +111,6 @@ void Mutex.unlock(Mutex mutex) {
 void Mutex.free(Mutex mutex) {
   if (!mutex) raise %(bad-state (operation "Mutex.free"));
   int error = pthread_mutex_destroy(&mutex.native);
-  if (error) _error("pthread_mutex_destroy", error);
+  if (error) x2c_io_fail("pthread_mutex_destroy", error);
   xfree(mutex);
-}
-
-// native errors
-
-static void _error(const char *operation, int error) {
-  String name = operation;
-  raise %(io-fail (operation $name) (errno $error));
 }

@@ -156,7 +156,7 @@ int MatchPlan.borrowable(Var pattern, int permanent_lists) =>
 */
 void x2c_match_initialize(void) {
   int status = pthread_once(&match_shutdown_once, _register_shutdown_once);
-  _thread_check(status, "register shutdown");
+  x2c_native_check(status, "Match: could not register shutdown");
 }
 
 /* Returns this site's plan, publishing it on the first call and returning
@@ -248,19 +248,15 @@ static void _sites_initialize(void) {
 }
 
 static void _site_lock(void) {
-  _thread_check(pthread_mutex_lock(&match_site_mutex), "lock source site");
+  x2c_native_check(
+    pthread_mutex_lock(&match_site_mutex),
+    "Match: could not lock source site");
 }
 
 static void _site_unlock(void) {
-  _thread_check(pthread_mutex_unlock(&match_site_mutex), "unlock source site");
-}
-
-/* A native thread primitive that fails leaves the registry in an unknown
-   state, so the process reports it and aborts. */
-static void _thread_check(int status, const char *action) {
-  if (!status) return;
-  fprintf(stderr, "Match: could not %s\n", action);
-  abort();
+  x2c_native_check(
+    pthread_mutex_unlock(&match_site_mutex),
+    "Match: could not unlock source site");
 }
 
 static void _register_shutdown_once(void) {
