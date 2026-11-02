@@ -988,7 +988,8 @@ void x2c_native_check(int error, const char *failure) {
   abort();
 }
 
-/* Raises `<io-fail>` with `operation` and `errno` details. */
+/* Native handle failures share one detail shape: `operation` names the
+   failed call as a String or Symbol, and `errno` holds its error number. */
 void x2c_io_fail(Var operation, int error) {
   raise %(io-fail (operation $operation) (errno $error));
 }

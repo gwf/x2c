@@ -193,10 +193,9 @@ void Socket.set_timeout(Socket s, int ms) {
 
 /** Flushes output and sends EOF to the peer while retaining input.
     Raises: `<io-fail>` if flushing or shutdown fails. */
-void Socket.shutdown_write(Socket socket) {
-  if (socket.output.flush()) x2c_io_fail("Socket.shutdown_write", errno);
-  if (shutdown(socket.fd, SHUT_WR))
-    x2c_io_fail("Socket.shutdown_write", errno);
+void Socket.shutdown_write(Socket s) {
+  if (s.output.flush()) x2c_io_fail("Socket.shutdown_write", errno);
+  if (shutdown(s.fd, SHUT_WR)) x2c_io_fail("Socket.shutdown_write", errno);
 }
 
 /** Returns numeric host:port text, with IPv6 in brackets. */
