@@ -2,3 +2,4 @@ narrow 100000 100000 100000
 byte 4 100000
 pointers 7 7 7 7 7 7 1 7 1 7
 symbol ok
+handles 6 5 1 1 5 5

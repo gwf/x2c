@@ -3,6 +3,9 @@
 typedef short Small;
 typedef const int ConstInt;
 typedef int *IntPointer;
+typedef String Label;
+
+static int Label.width(Label value) => value.len();
 
 meta int narrow(int choose) {
   Small a = 1, b = 2;
@@ -39,5 +42,16 @@ int main(int argc, char **argv) {
   Symbol symbol = <ok>;
   auto chosen = argc ? symbol : symbol;
   printf("symbol %s\n", chosen.str());
+  String text = "chosen";
+  Label label = "label";
+  auto text_left = argc ? text : "other";
+  auto text_right = argc ? "other" : text;
+  auto label_left = argc ? label : "other";
+  auto label_right = argc ? "other" : label;
+  printf("handles %d %d %d %d %d %d\n",
+    text_left.len(), text_right.len(),
+    (argc ? text : "other").split("/").len(),
+    (argc ? "other" : text).split("/").len(),
+    label_left.width(), label_right.width());
   return 0;
 }
