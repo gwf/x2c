@@ -422,19 +422,20 @@ static int _inside(const char *path, const char *dir) {
 static String _read_input(Compiler c) {
   String filename = c.filename;
   try return c.read_source_text(filename);
-  catch %(size-limit *):
-    $fail.frontend_input_read(c, NULL, filename, "too large for a String");
-  catch %((!or not-found io-fail bad-arg) *detail):
-    $fail.frontend_input_read(c, NULL, filename, _read_reason(detail));
+  catch %((!set ?cause (!or not-found io-fail bad-arg size-limit)) *detail):
+    return _unreadable(c, filename, cause, detail);
 }
 
-/* A failed read's own reason, or the system's text for its errno. */
-static String _read_reason(List detail) {
-  Var reason = detail.assoc(<reason>);
-  if (reason is not void) return reason;
+/* Reports a failed read with the Error's own reason, the String limit, or
+   the system's text for its errno. */
+static String _unreadable(
+  Compiler c, String filename, Symbol cause, List detail) {
+  String reason = detail.assoc(<reason>);
+  if (!reason && cause == <size-limit>) reason = "too large for a String";
   // Quoted, the key survives a host preprocessor that expands `errno`.
-  long error = detail.assoc(<"errno">);
-  return String.new(strerror((int) error));
+  long error = reason ? 0 : detail.assoc(<"errno">);
+  if (!reason) reason = String.new(strerror((int) error));
+  $fail.frontend_input_read(c, NULL, filename, reason);
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an
