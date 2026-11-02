@@ -83,8 +83,11 @@ def retirement_build_output(tree, name):
     """Recognize products of the bootstrap, stage, include and unit builds."""
     path = Path(name)
     file = tree / path
-    if name.startswith(("debug/", "builds/", "unittest/build/")):
+    if name.startswith(("debug/", "builds/", "unittest/build/", "examples/build/")):
         return True
+    if path.parts[:2] == ("examples", "packages") and len(path.parts) > 4:
+        if path.parts[3] == "builds":
+            return True
     if "__pycache__" in path.parts and path.suffix == ".pyc":
         return True
     if name == "unittest/test-all":

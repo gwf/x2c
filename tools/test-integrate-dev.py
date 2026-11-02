@@ -422,7 +422,8 @@ class IntegrationProbe(unittest.TestCase):
         for name in ('bootstrap/src/compiled.o', 'bootstrap/lib/libx2c.a',
                      'bootstrap/src/x2c', 'bin/x2c-bootstrap',
                      'bin/x2c-codex_test', 'unittest/test-all',
-                     'unittest/build/test-all.o'):
+                     'unittest/build/test-all.o', 'examples/build/foreach/foreach',
+                     'examples/packages/greet/builds/libgreet.a'):
             self.write(candidate / name, 'generated build product\n')
         (candidate / 'bin/x2c').symlink_to('x2c-bootstrap')
         self.write(candidate / 'lib/example.x', 'runtime source\n')
