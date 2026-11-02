@@ -114,7 +114,7 @@ static Token _block(Splice &s) {
        token.type != <eof>; token = Token.skip_trivia(token + 1)) {
     if (!depth && token.text == "module" &&
         Token.skip_trivia(token + 1).type == <"{"> &&
-        !(previous && _is_word(previous.text))) {
+        !(previous && _x2c_ascii_word((unsigned char) previous.text[0]))) {
       if (block) $fail.collect_module_second(s.c, token);
       block = token;
     }
@@ -129,9 +129,6 @@ static Token _block(Splice &s) {
    comments separate it from its brace. */
 static int _spells_block(const char *text) =>
   text && strstr(text, "module");
-
-static int _is_word(String text) =>
-  isalnum((unsigned char) text[0]) || text[0] == '_';
 
 /* The member paths of the block `block` opens, whose closing brace becomes
    `close`. */

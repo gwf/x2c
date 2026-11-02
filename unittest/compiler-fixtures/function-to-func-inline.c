@@ -26,29 +26,29 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static long add(long left, long right);
 
-Func _x2c_gensym_func_get_e915dee0_0(void);
+Func _x2c_gensym_func_get_EB5855FF_0(void);
 
 static inline Func inline_direct(void){
   return({
-    extern Func _x2c_gensym_func_get_e915dee0_0(void);  _x2c_gensym_func_get_e915dee0_0();
+    extern Func _x2c_gensym_func_get_EB5855FF_0(void);  _x2c_gensym_func_get_EB5855FF_0();
   }
   );
 }
 
-Func _x2c_gensym_func_from_pointer_e915dee0_0(long(* _x2c_gensym_func_pointer_0)(long, long));
+Func _x2c_gensym_func_from_pointer_EB5855FF_0(long(* _x2c_gensym_func_pointer_0)(long, long));
 
 static inline Func inline_pointer(InlineBinary pointer){
   return({
-    extern Func _x2c_gensym_func_from_pointer_e915dee0_0(long(*)(long, long));  _x2c_gensym_func_from_pointer_e915dee0_0(pointer);
+    extern Func _x2c_gensym_func_from_pointer_EB5855FF_0(long(*)(long, long));  _x2c_gensym_func_from_pointer_EB5855FF_0(pointer);
   }
   );
 }
 
-Func _x2c_gensym_func_get_e915dee0_1(void);
+Func _x2c_gensym_func_get_EB5855FF_1(void);
 
 static inline Func inline_noncapturing(void){
   return({
-    extern Func _x2c_gensym_func_get_e915dee0_1(void);  _x2c_gensym_func_get_e915dee0_1();
+    extern Func _x2c_gensym_func_get_EB5855FF_1(void);  _x2c_gensym_func_get_EB5855FF_1();
   }
   );
 }
@@ -151,7 +151,7 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
   ;
 }
 
-Func _x2c_gensym_func_get_e915dee0_0(void){
+Func _x2c_gensym_func_get_EB5855FF_0(void){
   if(! _init_guard_) _file_init_();
   return _x2c_gensym_func_handle_0;
 }
@@ -164,7 +164,7 @@ static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncA
   ;
 }
 
-Func _x2c_gensym_func_from_pointer_e915dee0_0(long(* _x2c_gensym_func_pointer_0)(long, long)){
+Func _x2c_gensym_func_from_pointer_EB5855FF_0(long(* _x2c_gensym_func_pointer_0)(long, long)){
   if(! _init_guard_) _file_init_();
   return({
     _x2c_gensym_func_pointer_context_0 _x2c_gensym_func_pointer_context_2 ={
@@ -186,7 +186,7 @@ static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncA
   ;
 }
 
-Func _x2c_gensym_func_get_e915dee0_1(void){
+Func _x2c_gensym_func_get_EB5855FF_1(void){
   if(! _init_guard_) _file_init_();
   return _x2c_gensym_func_handle_1;
 }

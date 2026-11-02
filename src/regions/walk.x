@@ -370,10 +370,7 @@ static void _declare(Walk &w, Var specifiers, List bindings) {
 static void _declare_initialized(
   Walk &w, List name, Var value, Type type) {
   Fact fact = _new_fact(w, name, -1);
-  foreach (Var part in w.c.sym.normalize_declared_type(type)) {
-    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
-    if (part == <const>) fact.constant = 1;
-  }
+  fact.constant = _x2c_type_const(w.c.sym.normalize_declared_type(type));
   _assign(w, fact, value, type, 0);
 }
 

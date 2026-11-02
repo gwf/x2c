@@ -849,7 +849,7 @@ static List _field_on(List field, List receiver) {
 static List _value_type(List type) {
   Array kept = [];
   foreach (Var item in type) {
-    if (item == <const> || item == <volatile> || item == <restrict>) continue;
+    if (item is <symbol> && item.symbol().is_type_qualifier()) continue;
     if (item ~= %(bitfield *)) continue;
     kept.push(item);
   }

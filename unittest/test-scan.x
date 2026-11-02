@@ -1,6 +1,8 @@
 /*  test-scan.x -- character scanner contract tests */
 
 #include "test-support.x"
+#include "regex.x"
+#include "test-macros.x"
 #include <string.h>
 
 static void scan_whitespace_and_positions(void) {
@@ -58,42 +60,29 @@ static void scan_comments_and_preprocessor(void) {
 }
 
 
-struct KeywordCase {
-  char *text;
-  Symbol type;
-};
-
+static Map scan_keyword_rows(String source, String pattern) {
+  Map rows = {};
+  foreach (RegexMatch match in Regex.compile(pattern).find_all(source))
+    rows[match[1]] = Atom.intern(match[2]);
+  return rows;
+}
 
 static void scan_identifiers_and_keywords(void) {
+  $test.scoped();
   EXPECT_INT_EQ(scan_identifier("alpha_123+"), 9);
   EXPECT_INT_EQ(scan_identifier("_private "), 8);
 
-  struct KeywordCase cases[] = {
-    {"associated", <associated>},
-    {"auto", <auto>}, {"break", <break>}, {"case", <case>},
-    {"catch", <catch>}, {"char", <char>}, {"const", <const>},
-    {"continue", <continue>}, {"default", <default>},
-    {"defer", <defer>}, {"do", <do>}, {"double", <double>},
-    {"else", <else>}, {"enum", <enum>}, {"extern", <extern>},
-    {"expand", <expand>},
-    {"float", <float>}, {"finally", <finally>}, {"for", <for>},
-    {"goto", <goto>}, {"if", <if>}, {"in", <in>},
-    {"inline", <inline>}, {"match", <match>}, {"int", <int>},
-    {"long", <long>}, {"protocol", <protocol>},
-    {"register", <register>},
-    {"raise", <raise>}, {"restrict", <restrict>}, {"return", <return>},
-    {"short", <short>}, {"signed", <signed>},
-    {"sizeof", <sizeof>}, {"static", <static>},
-    {"struct", <struct>}, {"switch", <switch>},
-    {"try", <try>}, {"typedef", <typedef>},
-    {"union", <union>}, {"unsigned", <unsigned>}, {"void", <void>},
-    {"volatile", <volatile>}, {"while", <while>}
-  };
-  int count = sizeof(cases) / sizeof(cases[0]);
-  for (int i = 0; i < count; i++) {
-    int len = strlen(cases[i].text);
-    EXPECT_TRUE(scan_keyword_type(cases[i].text, len) == cases[i].type);
-    EXPECT_INT_EQ(scan_keyword(cases[i].text), len);
+  Map described = scan_keyword_rows(
+    File.open("../etc/syntax/lexical.x", "r").string_close(),
+    "[(]keyword \"([^\"]+)\" ([a-z_]+)[)]");
+  Map implemented = scan_keyword_rows(
+    File.open("../lib/scan.x", "r").string_close(),
+    "memcmp[(]s, \"([^\"]+)\", [0-9]+[)][)] return <([a-z_]+)>");
+  EXPECT_TRUE(described.len() > 0);
+  EXPECT_TRUE(described.equal(implemented));
+  foreach ((String word, Symbol type) in described) {
+    EXPECT_TRUE(scan_keyword_type(word, word.len()) == type);
+    EXPECT_INT_EQ(scan_keyword(word), word.len());
   }
   EXPECT_INT_EQ(scan_keyword("identifier"), -1);
   EXPECT_INT_EQ(scan_keyword("throw"), -1);
@@ -300,9 +289,6 @@ static void scan_lisp_status_variants(void) {
   EXPECT_INT_EQ(scan_symbol_literal_status("<\"\\z\">", &status), -1);
   EXPECT_INT_EQ(status, <malformed>);
 }
-
-
-#include "test-macros.x"
 
 void scan_suite(void) {
   $test.run(scan_prefix_failures_transfer);

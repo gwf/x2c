@@ -80,8 +80,8 @@ module List _conditional(
   Type type = true_type;
   Type left = r.c.sym.resolve_numeric_type(true_type);
   Type right = r.c.sym.resolve_numeric_type(false_type);
-  int same = _conditional_unqualified(true_type.declared()) ==
-             _conditional_unqualified(false_type.declared());
+  int same = _x2c_type_unqualified(true_type.declared()) ==
+             _x2c_type_unqualified(false_type.declared());
   if (left && right) {
     Type widest = left.widest(right);
     if (!same || widest != left) type = widest;
@@ -108,16 +108,16 @@ static int _conditional_null(List expression) {
 /* Combine compatible non-void pointees without losing their qualifiers.
    Mixed void pointers retain the existing destination-conversion boundary. */
 static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
-  Type left = _conditional_unqualified(
+  Type left = _x2c_type_unqualified(
     c.sym.normalize_declared_type(lhs.cadr()));
-  Type right = _conditional_unqualified(
+  Type right = _x2c_type_unqualified(
     c.sym.normalize_declared_type(rhs.cadr()));
   if (left.is_pointer() && _null_literal(rhs)) return lhs.cadr();
   if (right.is_pointer() && _null_literal(lhs)) return rhs.cadr();
   Type lbase = left.dereference(), rbase = right.dereference();
   if (!lbase || !rbase) return NULL;
-  Type base = _conditional_unqualified(lbase);
-  Type other = _conditional_unqualified(rbase);
+  Type base = _x2c_type_unqualified(lbase);
+  Type other = _x2c_type_unqualified(rbase);
   if (base != other || base === %(void)) return NULL;
   Array qualifiers = [];
   foreach (Type pointee in $(lbase, rbase))
@@ -128,15 +128,9 @@ static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
   Type joined = %(* @(qualifiers.list_free()) @base);
   /* Retain the first arm's handle, as before, when it already denotes the
      complete pointer result. A widened pointee cannot use that handle. */
-  Type lhs_type = _conditional_unqualified(lhs.cadr().type().declared());
+  Type lhs_type = _x2c_type_unqualified(lhs.cadr().type().declared());
   if (lhs_type.is_bare_typedef_name() && left == joined) return lhs_type;
   return joined;
-}
-
-static Type _conditional_unqualified(Type type) {
-  while (type.car() is <symbol> && type.car().symbol().is_type_qualifier())
-    type = type.cdr();
-  return type;
 }
 
 /* A conditional whose arms are a `Var` and another value is a `Var`: the

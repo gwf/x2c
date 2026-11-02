@@ -367,9 +367,7 @@ static List _adapt_lambda_value(Compiler c, List expr, Type target) {
   List lowered = c.lower_lambda_expr(expr);
   if (lowered == expr) return expr;
   Type callback = target.type_from_ast();
-  while (callback.car() is <symbol> &&
-         callback.car().symbol().is_type_qualifier())
-    callback = callback.cdr();
+  callback = _x2c_type_unqualified(callback);
   if (callback.is_bare_typedef_name()) callback = c.sym.resolve_key(callback);
   return c.adapt_lambda_arg(lowered, callback);
 }

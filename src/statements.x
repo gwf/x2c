@@ -181,7 +181,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
     `(seq ...)` node containing several block items.
 */
 List Compiler.parse_block_item(Compiler c) {
-  _x2c_complete_here(c, <block>, _block_keywords());
+  _x2c_complete_here(c, <block>, _x2c_block_keywords());
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
@@ -494,7 +494,7 @@ static List _block_items(Compiler c, int anchor_items) {
   List present_before = c.present_references();
   defer c.restore_reference_presence(present_before);
   loop {
-    _x2c_complete_here(c, <block>, _block_keywords());
+    _x2c_complete_here(c, <block>, _x2c_block_keywords());
     if (c.token != c.directives_taken)
       foreach (List directive in c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;
@@ -709,12 +709,11 @@ static List _continued(Compiler c, List statement) {
   return directives ? %(group $statement @directives) : statement;
 }
 
-static List _block_keywords(void) => %(
-  "void" "char" "short" "int" "long" "float" "double"
-  "signed" "unsigned" "if" "while" "for" "do" "return"
-  "case" "break" "continue" "goto" "try" "raise" "defer"
-  "match" "switch" "default" "with" "alias" "unalias"
-);
+/* Compose once; ordinary parsing queries completion at every statement. */
+static const List block_keywords =
+  _x2c_type_keywords()[0:9].append(_statement_keywords());
+
+List _x2c_block_keywords(void) => block_keywords;
 
 /* A local macro definition, which only a template keeps as an item. */
 static List _local_macro(Compiler c) {

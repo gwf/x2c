@@ -154,12 +154,16 @@ int scan_identifier(char *s) {
   if (!s || (!scan_ascii_alpha((unsigned char) s[0]) && s[0] != '_'))
     raise %(bad-arg (operation "scan_identifier"));
   int n = 1;
-  while (!_token_break((unsigned char) s[n])) n++;
+  while (_x2c_ascii_word((unsigned char) s[n])) n++;
   return n;
 }
 
 /* Reports an ASCII letter without consulting the process locale. */
 inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
+
+/* An ASCII identifier byte, independent of the process locale. */
+inline int _x2c_ascii_word(int c) =>
+  scan_ascii_alpha(c) || scan_ascii_digit(c) || c == '_';
 
 /* Returns the lexical keyword Symbol for exactly `n` borrowed bytes, or zero.
    The compiler recognizes contextual x2c words after scanning; a lexical
@@ -625,7 +629,7 @@ static int _int_suffix(char *s) {
       n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
       break;
   }
-  return _token_break(s[n]) ? n : -1;
+  return !_x2c_ascii_word(s[n]) ? n : -1;
 }
 
 /* The length of an `l` or `ll` at `s`, or zero. */
@@ -641,11 +645,8 @@ static int _float_suffix(char *s) {
   switch (s[n]) {
     case 'f': case 'F': case 'l': case 'L': n++; break;
   }
-  return _token_break(s[n]) ? n : -1;
+  return !_x2c_ascii_word(s[n]) ? n : -1;
 }
-
-static inline int _token_break(int c) =>
-  !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 
 /* Scans a C escape and classifies truncation separately. */
 static int _c_escape_status(char *s, Symbol *status, int *value) {

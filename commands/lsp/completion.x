@@ -33,8 +33,9 @@ Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
 static Array _lsp_complete(
   LspWorkspace w, Frontend frontend, String path, String source, int offset) {
   int start = offset, end = offset;
-  while (start && _lsp_identifier_byte(source[start - 1])) start--;
-  while (end < source.len() && _lsp_identifier_byte(source[end])) end++;
+  while (start && _x2c_ascii_word((unsigned char) source[start - 1])) start--;
+  while (end < source.len() &&
+         _x2c_ascii_word((unsigned char) source[end])) end++;
   String prefix = source[start:offset];
   String marked = source[:start] + "__x2c_completion__" + source[end:];
   SourceView sources = SourceView.new();
@@ -76,9 +77,6 @@ static int _lsp_completion_marker(Compiler c) {
       return token.pos;
   return -1;
 }
-
-static int _lsp_identifier_byte(unsigned char byte) =>
-  byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
 
 /* Find the enclosing top-level form; the parser owns its meta classification. */
 static int _lsp_meta_completion(Compiler c, int offset) {

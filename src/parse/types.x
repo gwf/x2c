@@ -137,7 +137,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
 module List _type_qualifiers(Compiler c) {
   Array quals = auto [];
   loop {
-    _x2c_complete_here(c, <type>, _type_keywords());
+    _x2c_complete_here(c, <type>, _x2c_type_keywords());
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);
@@ -148,7 +148,7 @@ module List _type_qualifiers(Compiler c) {
   return quals;
 }
 
-module List _type_keywords(void) => %(
+List _x2c_type_keywords(void) => %(
   "void" "char" "short" "int" "long" "float" "double"
   "signed" "unsigned" "struct" "union" "enum"
   "const" "restrict" "volatile"
@@ -249,9 +249,7 @@ static List _typeof_specifier(Compiler c) {
   c.expect(<)>);
   if (!unqualified) return type;
   if (type ~= %("__typeof__" *)) return %(unqual @type);
-  while (type.car() is <symbol> && type.car().symbol().is_type_qualifier())
-    type = type.cdr();
-  return type;
+  return _x2c_type_unqualified(type);
 }
 
 /* Scalar words in any order. C11's `_Complex` among them makes an opaque

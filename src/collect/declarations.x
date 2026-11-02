@@ -422,10 +422,7 @@ module void _needed_types(List syntax, Map rows, Map needed) {
         pending.push(declaration);
       continue;
     }
-    List type = item;
-    while (type.car() is <symbol> &&
-           (type.car().symbol().is_type_qualifier() ||
-            type.car().symbol().is_storage_class())) type = type.cdr();
+    List type = _x2c_type_specifier_tail(item);
     List family = _type_family(type);
     if (family && family in rows) needed[family] = 1;
     /* A typedef spelling is needed through any declarator. Aggregate

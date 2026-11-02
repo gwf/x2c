@@ -159,7 +159,7 @@ void Rule.print_table(void):
            rule.kind.str(), rule.rule)
 
 /** Whether `ch` continues a word: a letter, digit, or `_`. */
-int lint_word_char(int ch) => isalnum(ch) || ch == '_'
+int lint_word_char(int ch) => _x2c_ascii_word(ch)
 
 /** Whether lower-case `text` contains `phrase` as whole words. */
 int lint_phrase(String text, String phrase):

@@ -106,10 +106,7 @@ static void _sx_declaration_source(
       entity["source_spelling"] =
         String.new_len(text + begin.int(), end.int() - begin.int());
       int line = 1, column = 1;
-      for (int i = 0; i < begin.int(); i++) {
-        if (text[i] == '\n') { line++; column = 1; }
-        else column++;
-      }
+      scan_next_line_col(text, begin.int(), line, column);
       entity["line"] = line;
       entity["column"] = column;
     }

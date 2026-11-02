@@ -14,6 +14,7 @@
 
 #pragma once
 #include "compiler-meta.x"
+#include "native-scalar-types.x"
 
 // tag table and tag sets
 
@@ -229,12 +230,19 @@ meta String _tag_id(List row)    => row[1];
 
 // type lookup
 
-/* Type's tag lookup: each `(TYPE TAG)` of `native`, then every boxed row
-   as its capitalized source type name and a pointer to it, such as
-   `("List") : list` and `(* "List") : <list*>`. */
-meta Map _tag_types(List native) {
-  Map types = {};
-  foreach (List row in native) types[row[0]] = row[1];
+/* Type's tag lookup: native pointers from the scalar and tag ledgers,
+   then every boxed row as its capitalized source type and a pointer to it.
+   Plain char pointers remain text rather than a native pointer family. */
+meta Map _tag_types(void) {
+  Map types = { %(* void): <p48>, %(* * void): <p48*> };
+  List tags = _tag_names();
+  foreach ((Type type, List scalar) in native_scalar_types()) {
+    if (type === %(char)) continue;
+    Symbol pointer = scalar.car().str() + "*";
+    if (pointer in tags) types[%(* @type)] = pointer;
+    pointer = pointer.str() + "*";
+    if (pointer in tags) types[%(* * @type)] = pointer;
+  }
   Symbol star = <*>;
   foreach (List row in _tag_rows()) {
     if (!_tag_descriptor(row)) continue;

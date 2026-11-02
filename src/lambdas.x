@@ -483,10 +483,7 @@ static void _require_capture_write(Compiler c, List target) {
   if (!target) return;
   _require_capture_lvalue(c, target);
   Type type = c.sym.normalize_declared_type(target.cadr());
-  foreach (Var part in type) {
-    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
-    if (part == <const>) $fail.lambdas_capture_const(c, c.token);
-  }
+  if (_x2c_type_const(type)) $fail.lambdas_capture_const(c, c.token);
 }
 
 /* A row's target is a spelling or a binding. An open captured type

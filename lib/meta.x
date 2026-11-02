@@ -39,6 +39,27 @@ typedef List Macro;
 /** Semantic type syntax with canonical List-pool lifetime. */
 typedef List Type;
 
+/* Shared qualifier classification is implemented by the Type module. */
+int Symbol.is_type_qualifier(Symbol symbol);
+
+/* Consume the qualifiers at the front of one type and report them as a set.
+   The cursor advances past them so a caller can walk a pointer chain one
+   level at a time. */
+inline unsigned _x2c_type_qualifiers(Type &cursor) {
+  unsigned found = 0;
+  while (cursor.car() is <symbol>) {
+    Symbol head = cursor.car();
+    switch (head) {
+      case <const>:    found |= 1; break;
+      case <volatile>: found |= 2; break;
+      case <restrict>: found |= 4; break;
+      default: return found;
+    }
+    cursor = cursor.cdr();
+  }
+  return found;
+}
+
 /** Captured code parsed from source or produced by a quotation. */
 typedef List Code;
 
@@ -462,7 +483,7 @@ String type_name_error(List type) {
   if (name is <string>) return NULL;
   Symbol symbol = name;
   if (symbol &&
-      (symbol == <*> || _base_keyword(symbol) || _type_qualifier(symbol)))
+      (symbol == <*> || _base_keyword(symbol) || symbol.is_type_qualifier()))
     return NULL;
   if (name is not <lsym> && name is not <symbol>) return NULL;
   Array fixed = [];
@@ -485,7 +506,7 @@ List type_declaration_parts(List type) {
   List reversed = %(), qualifiers = %();
   for (List rest = type; rest !== base; rest = rest.cdr())
     reversed = cons(rest.car(), reversed);
-  while (reversed && _type_qualifier(reversed.car())) {
+  while (reversed && Symbol.is_type_qualifier(reversed.car())) {
     qualifiers = cons(reversed.car(), qualifiers);
     reversed = reversed.cdr();
   }
@@ -514,9 +535,6 @@ static int _base_keyword(Symbol symbol) {
     default: return 0;
   }
 }
-
-static int _type_qualifier(Symbol symbol) =>
-  symbol == <const> || symbol == <restrict> || symbol == <volatile>;
 
 /* A function modifier's parameter types become parameter declarations. */
 static Var _modifier_syntax(Var modifier) {

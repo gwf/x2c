@@ -161,7 +161,7 @@ String Regex.escape(String literal) {
   int n = literal.len();
   for (int i = 0; i < n; i++) {
     int byte = (unsigned char) literal[i];
-    if (byte < 128 && !_is_word(byte)) out.write_char('\\');
+    if (byte < 128 && !_x2c_ascii_word(byte)) out.write_char('\\');
     out.write_char((char) byte);
   }
   return out;
@@ -405,7 +405,7 @@ static int _group_syntax(Parser &p) {
    digit. */
 static String _name(Parser &p) {
   int start = p.pos;
-  while (_is_word(_peek(p))) p.pos++;
+  while (_x2c_ascii_word(_peek(p))) p.pos++;
   if (p.pos == start || scan_ascii_digit(p.text[start]) || _peek(p) != '>') {
     p.pos = start;
     _fail(p, reason_group_name);
@@ -590,7 +590,7 @@ static int _escape(Parser &p) {
     case '0': return 0;
     case 'd': case 'D': case 'w': case 'W': case 's': case 'S': return -byte;
   }
-  if (!_is_word(byte) && byte < 128) return byte;
+  if (!_x2c_ascii_word(byte) && byte < 128) return byte;
   p.pos--;
   _fail(p, reason_unknown_escape);
 }
@@ -636,7 +636,7 @@ static void _add_class(_RegexNode node, int letter) {
   if (letter == 'd') _add_range(bytes, '0', '9');
   if (letter == 'w')
     for (int byte = 0; byte < 256; byte++)
-      if (_is_word(byte)) _add(bytes, byte);
+      if (_x2c_ascii_word(byte)) _add(bytes, byte);
   if (letter == 's') {
     _add(bytes, ' ');
     _add_range(bytes, '\t', '\r');
@@ -644,9 +644,6 @@ static void _add_class(_RegexNode node, int letter) {
   for (int i = 0; i < 32; i++)
     node.set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
 }
-
-static int _is_word(int byte) =>
-  byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
 
 static void _add_range(_RegexNode node, int low, int high) {
   for (int byte = low; byte <= high; byte++) _add(node, byte);
@@ -824,8 +821,8 @@ static int _at_line_end(Matcher &m, int pos) =>
   pos == m.len || (m.regex.multiline && m.text[pos] == '\n');
 
 static int _at_boundary(Matcher &m, int pos) {
-  int before = pos > 0 && _is_word((unsigned char) m.text[pos - 1]);
-  int after = pos < m.len && _is_word((unsigned char) m.text[pos]);
+  int before = pos > 0 && _x2c_ascii_word((unsigned char) m.text[pos - 1]);
+  int after = pos < m.len && _x2c_ascii_word((unsigned char) m.text[pos]);
   return before != after;
 }
 

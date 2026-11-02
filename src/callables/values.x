@@ -125,16 +125,12 @@ static List _direct_func_handle(
 static Type _func_pointer_value_type(Compiler c, Type type) {
   Type resolved = c.sym.resolve_key(type);
   if (resolved) type = resolved;
-  while (type && _func_type_qualifier(type.car())) type = type.cdr();
+  type = _x2c_type_unqualified(type);
   if (!type || type.car() != <*>) return NULL;
-  List tail = type.cdr();
-  while (tail && _func_type_qualifier(tail.car())) tail = tail.cdr();
+  List tail = _x2c_type_unqualified(type.cdr());
   Type pointer = cons(<*>, tail);
   return pointer.dereference().is_function() ? pointer : NULL;
 }
-
-static int _func_type_qualifier(Var value) =>
-  value == <const> || value == <volatile> || value == <restrict>;
 
 /* A dereferenced function pointer reaches the lift untyped or typed as a
    bare pointer, possibly under parens or address-of shells; recover the
@@ -198,7 +194,7 @@ static List _indirect_func_lift(
 }
 
 static List _func_bridge_binding(Compiler c, String stem) {
-  String hash = "%08x".printf(c.filename.hash());
+  String hash = Path.identifier_hash(c.filename);
   return c.sym.introduce(c.fresh_name(%"$(stem)_$hash"));
 }
 

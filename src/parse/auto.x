@@ -85,15 +85,12 @@ module List _auto_declaration(
       if (mods || !type || type == %(void) || type == %(<macro-expr>))
         $fail.parse_auto_inference(c, c.token);
       Type resolved = c.sym.normalize_declared_type(type);
-      Type shape = resolved;
-      while (shape.car() is <symbol> &&
-             shape.car().symbol().is_type_qualifier()) shape = shape.cdr();
+      Type shape = _x2c_type_unqualified(resolved);
       if (shape == %(void)) $fail.parse_auto_inference(c, c.token);
       if (shape.is_array()) type = %(* @(resolved.dereference()));
       else if (shape.is_function()) type = %(* @type);
       else {
-        while (type.car() is <symbol> &&
-               type.car().symbol().is_type_qualifier()) type = type.cdr();
+        type = _x2c_type_unqualified(type);
         if (c.sym.normalize_declared_type(type) != shape)
           type = %(unqual @type);
       }

@@ -183,7 +183,7 @@ int Type.function_parts(Type type, List &params, Type &?return_type) {
 /** Removes one outer pointer-like or array modifier, or returns `NULL`. */
 Type Type.dereference(Type type) {
   Type declared = type;
-  _qualifiers(type);
+  _x2c_type_qualifiers(type);
   if (type.is_array()) return cdr(type).type().qualify(declared);
   if (type.is_pointer()) return cdr(type);
   return NULL;
@@ -201,6 +201,23 @@ int Type.is_array(Type type) => _declarator_kind(type) == <dim>;
 /** Returns the `List` payload of `x` as a `Type`, or `NULL` for another tag.
 */
 inline Type Var.type(Var x) => x is <list> ? (Type) x.pointer() : (Type) NULL;
+
+/* The shared suffix after leading qualifiers, without copying the type. */
+inline Type _x2c_type_unqualified(Type type) {
+  _x2c_type_qualifiers(type);
+  return type;
+}
+
+/* The shared suffix after qualifier and storage specifiers. */
+inline Type _x2c_type_specifier_tail(Type type) {
+  while (type.car() is <symbol> &&
+         (type.car().symbol().is_type_qualifier() ||
+          type.car().symbol().is_storage_class())) type = type.cdr();
+  return type;
+}
+
+/* Whether the stored object itself is const, before any indirection. */
+inline int _x2c_type_const(Type type) => _x2c_type_qualifiers(type) & 1;
 
 /** Applies `source`'s outer qualifiers to `type`. */
 Type Type.qualify(Type type, Type source) {
@@ -264,12 +281,13 @@ Type Type.declared(Type type) => _canonical(type, 1);
     function copies instead of aliasing.
 */
 int Type.discards_qualifiers(Type source, Type target) {
-  _qualifiers(source);
-  _qualifiers(target);
+  _x2c_type_qualifiers(source);
+  _x2c_type_qualifiers(target);
   while (source && target) {
     source = source.cdr();
     target = target.cdr();
-    unsigned wanted = _qualifiers(source), offered = _qualifiers(target);
+    unsigned wanted = _x2c_type_qualifiers(source),
+             offered = _x2c_type_qualifiers(target);
     if (wanted & ~offered) return 1;
     if (target === %(void)) return 0;
   }
@@ -502,26 +520,6 @@ static int _omit_specifier(Symbol first, int keep_qualifiers) =>
    (!keep_qualifiers && (first.is_type_qualifier() || first == <unqual>)) ||
    first.is_inline()) &&
   first != <typedef>;
-
-/* Consume the qualifiers at the front of one type and report them as a set.
-   The cursor advances past them so a caller can walk a pointer chain one
-   level at a time. */
-static unsigned _qualifiers(Type &cursor) {
-  unsigned found = 0;
-  Type type = cursor;
-  while (type.car() is <symbol>) {
-    Symbol head = type.car();
-    if (!head.is_type_qualifier()) break;
-    switch (head) {
-      case <const>:    found |= 1; break;
-      case <volatile>: found |= 2; break;
-      case <restrict>: found |= 4; break;
-    }
-    type = type.cdr();
-  }
-  cursor = type;
-  return found;
-}
 
 static int _is_tagged(Type type) {
   Var first = type.car();

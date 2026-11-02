@@ -507,26 +507,11 @@ static void *_reference_argument(
 /* A reference aliases the source object itself, so only that object's leading
    qualifiers may be strengthened. The remaining declarator must be exact:
    accepting int * as const int * would expose int ** as const int **. */
-static int _reference_type_accepts(List target, List source) {
-  unsigned target_qualifiers = _type_qualifiers(target);
-  unsigned source_qualifiers = _type_qualifiers(source);
+static int _reference_type_accepts(Type target, Type source) {
+  unsigned target_qualifiers = _x2c_type_qualifiers(target);
+  unsigned source_qualifiers = _x2c_type_qualifiers(source);
   return !(source_qualifiers & ~target_qualifiers) &&
          target == source;
-}
-
-static unsigned _type_qualifiers(List &cursor) {
-  unsigned qualifiers = 0;
-  while (cursor.car() is <symbol>) {
-    Symbol head = cursor.car();
-    switch (head) {
-      case <const>:    qualifiers |= 1; break;
-      case <volatile>: qualifiers |= 2; break;
-      case <restrict>: qualifiers |= 4; break;
-      default: return qualifiers;
-    }
-    cursor = cursor.cdr();
-  }
-  return qualifiers;
 }
 
 /* Constructors accept canonical `((func (ptype ...)) rtype ...)` Lists. The

@@ -254,7 +254,7 @@ static Map _identifiers(String text) {
   int start = -1, length = text.len();
   for (int i = 0; i <= length; i++) {
     int c = i < length ? text[i] : 0;
-    if (c == '_' || isalnum(c)) {
+    if (_x2c_ascii_word(c)) {
       if (start < 0) start = i;
     }
     else if (start >= 0) {

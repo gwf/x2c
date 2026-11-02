@@ -719,11 +719,7 @@ static void _add_forwards(
 module void _spelled_types(List node, Map names) {
   List item;
   $ast.walk(node, item) {
-    List base = item;
-    while (base.car() is <symbol> &&
-           (base.car().symbol().is_type_qualifier() ||
-            base.car().symbol().is_storage_class()))
-      base = base.cdr();
+    List base = _x2c_type_specifier_tail(item);
     if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
     match (base)
       case %((!or ?kind struct union enum) ?name *):

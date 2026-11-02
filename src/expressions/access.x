@@ -237,11 +237,7 @@ module void _check_dynamic_target(Compiler c, List target, Token origin) {
       return _check_dynamic_target(c, inner, origin);
   }
   Type type = c.sym.normalize_declared_type(target.cadr());
-  foreach (Var part in type) {
-    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
-    if (part == <const>)
-      $fail.expressions_dynamic_const(c, origin);
-  }
+  if (_x2c_type_const(type)) $fail.expressions_dynamic_const(c, origin);
   if (!_is_addressable(c, target))
     $fail.expressions_dynamic_address(c, origin);
 }
