@@ -25,6 +25,7 @@ features that need generated support and lifetime handling.
 | [destructuring.x](destructuring.x) | Lowers flat List destructuring into extraction and binding operations. |
 | [interpolation.x](interpolation.x) | Joins String text and insertion values in evaluation order. |
 | [lambda-functions.x](lambda-functions.x) | Builds lambda functions, captured contexts, Func adapters, and shared reference cells. |
+| [macro-mapping.x](macro-mapping.x) | Applies a code-producing macro to each row of a compile-time List for `expand`, whose decorator `etc/compiler-prelude.x` declares. |
 | [collection-literals.x](collection-literals.x) | Constructs Array and Map values from literal entries. |
 | [pattern-match.x](pattern-match.x) | Lowers match statements, pattern tests, and capture bindings. |
 | [dynamic-operators.x](dynamic-operators.x) | Lowers operations involving dynamic values through the runtime's operator functions. |

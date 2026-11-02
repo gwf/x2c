@@ -970,8 +970,17 @@ returns, the translation ends with `no rule lowers this protocol conformance`.
 Native aliases stay in the compiler, because they enter at the participant
 typedef's header boundary.
 
-The components and `src/grammar.x`, whose source forms they recognize, are
-compiler prelude sources.
+`src/components/macro-mapping.x` supplies `_x2c_expand_rows`, the operation
+behind `expand`. The `$expand` decorator in `etc/compiler-prelude.x`
+declares it with a bodyless `meta` prototype and passes it the row List and
+the following macro. It reads the rows as a compile-time value and returns one
+pending application of the macro for each row, so ordinary insertion binds
+them. It reports a decorator as the macro, input that is not a List, and a row
+with the wrong number of arguments.
+
+The rewrite components and `src/grammar.x`, whose source forms they
+recognize, are compiler prelude sources. The compiler links
+`macro-mapping.x` without reading it as a prelude source.
 
 A compiler runs its own linked copies of the components' translators, as it
 runs its own kernel. An edited component therefore changes the compiler built
