@@ -37,7 +37,7 @@ String cycle_a(int value){
 
 String cycle_b(int value){
   if(! _init_guard_) _file_init_();
-  return value ? cycle_a(value - 1) : NULL;
+  return value ? cycle_a(value - 1) :(String) NULL;
 }
 
 int disconnected(void){

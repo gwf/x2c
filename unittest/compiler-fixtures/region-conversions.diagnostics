@@ -33,9 +33,9 @@ unittest/compiler-fixtures/region-conversions.x:57:5: region: a fresh allocation
       ^^^^^^
   note: region opened at line 56
 
-unittest/compiler-fixtures/region-conversions.x:67:3: region: 'a' is used after the region that allocated it ended
-    return a;
-    ^^^^^^
+unittest/compiler-fixtures/region-conversions.x:65:5: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+      a = items;
+      ^
   note: region opened at line 64
 
 unittest/compiler-fixtures/region-conversions.x:77:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
