@@ -109,15 +109,15 @@ int MapIntInt_try_next(MapIntInt _x2c_gensym_macro_map_46, unsigned * _x2c_gensy
 
 int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_47);
 
-int MapIntInt_equal(MapIntInt _x2c_gensym_macro_a_2, MapIntInt _x2c_gensym_macro_b_2);
+int MapIntInt_equal(MapIntInt _x2c_gensym_macro_a_1, MapIntInt _x2c_gensym_macro_b_1);
 
-int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_49, int _x2c_gensym_macro_key_25, Symbol _x2c_gensym_macro_op_2, int _x2c_gensym_macro_rhs_1);
+int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_49, int _x2c_gensym_macro_key_25, Symbol _x2c_gensym_macro_op_1, int _x2c_gensym_macro_rhs_1);
 
-int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_50, int _x2c_gensym_macro_key_26, Symbol _x2c_gensym_macro_op_3);
+int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_50, int _x2c_gensym_macro_key_26, Symbol _x2c_gensym_macro_op_2);
 
 MapIntInt Map_mapintint(Map _x2c_gensym_macro_entries_5);
 
-int MapIntInt_compare(MapIntInt _x2c_gensym_macro_a_5, MapIntInt _x2c_gensym_macro_b_5);
+int MapIntInt_compare(MapIntInt _x2c_gensym_macro_a_4, MapIntInt _x2c_gensym_macro_b_4);
 
 Buffer MapIntInt_write_repr(MapIntInt _x2c_gensym_macro_map_52, Buffer _x2c_gensym_macro_out_10);
 
@@ -179,15 +179,15 @@ int MapLongDouble_try_next(MapLongDouble _x2c_gensym_macro_map_102, unsigned * _
 
 int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_103);
 
-int MapLongDouble_equal(MapLongDouble _x2c_gensym_macro_a_7, MapLongDouble _x2c_gensym_macro_b_7);
+int MapLongDouble_equal(MapLongDouble _x2c_gensym_macro_a_6, MapLongDouble _x2c_gensym_macro_b_6);
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_105, long _x2c_gensym_macro_key_60, Symbol _x2c_gensym_macro_op_5, double _x2c_gensym_macro_rhs_3);
+double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_105, long _x2c_gensym_macro_key_60, Symbol _x2c_gensym_macro_op_4, double _x2c_gensym_macro_rhs_3);
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_106, long _x2c_gensym_macro_key_61, Symbol _x2c_gensym_macro_op_6);
+double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_106, long _x2c_gensym_macro_key_61, Symbol _x2c_gensym_macro_op_5);
 
 MapLongDouble Map_maplongdouble(Map _x2c_gensym_macro_entries_11);
 
-int MapLongDouble_compare(MapLongDouble _x2c_gensym_macro_a_10, MapLongDouble _x2c_gensym_macro_b_10);
+int MapLongDouble_compare(MapLongDouble _x2c_gensym_macro_a_9, MapLongDouble _x2c_gensym_macro_b_9);
 
 Buffer MapLongDouble_write_repr(MapLongDouble _x2c_gensym_macro_map_108, Buffer _x2c_gensym_macro_out_27);
 
@@ -249,15 +249,15 @@ int MapStringString_try_next(MapStringString _x2c_gensym_macro_map_158, unsigned
 
 int MapStringString_truth(MapStringString _x2c_gensym_macro_map_159);
 
-int MapStringString_equal(MapStringString _x2c_gensym_macro_a_12, MapStringString _x2c_gensym_macro_b_12);
+int MapStringString_equal(MapStringString _x2c_gensym_macro_a_11, MapStringString _x2c_gensym_macro_b_11);
 
-String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_161, String _x2c_gensym_macro_key_95, Symbol _x2c_gensym_macro_op_8, String _x2c_gensym_macro_rhs_5);
+String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_161, String _x2c_gensym_macro_key_95, Symbol _x2c_gensym_macro_op_7, String _x2c_gensym_macro_rhs_5);
 
-String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_162, String _x2c_gensym_macro_key_96, Symbol _x2c_gensym_macro_op_9);
+String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_162, String _x2c_gensym_macro_key_96, Symbol _x2c_gensym_macro_op_8);
 
 MapStringString Map_mapstringstring(Map _x2c_gensym_macro_entries_17);
 
-int MapStringString_compare(MapStringString _x2c_gensym_macro_a_15, MapStringString _x2c_gensym_macro_b_15);
+int MapStringString_compare(MapStringString _x2c_gensym_macro_a_14, MapStringString _x2c_gensym_macro_b_14);
 
 Buffer MapStringString_write_repr(MapStringString _x2c_gensym_macro_map_164, Buffer _x2c_gensym_macro_out_44);
 
@@ -319,15 +319,15 @@ int MapStringInt_try_next(MapStringInt _x2c_gensym_macro_map_214, unsigned * _x2
 
 int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_215);
 
-int MapStringInt_equal(MapStringInt _x2c_gensym_macro_a_17, MapStringInt _x2c_gensym_macro_b_17);
+int MapStringInt_equal(MapStringInt _x2c_gensym_macro_a_16, MapStringInt _x2c_gensym_macro_b_16);
 
-int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_217, String _x2c_gensym_macro_key_130, Symbol _x2c_gensym_macro_op_11, int _x2c_gensym_macro_rhs_7);
+int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_217, String _x2c_gensym_macro_key_130, Symbol _x2c_gensym_macro_op_10, int _x2c_gensym_macro_rhs_7);
 
-int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_218, String _x2c_gensym_macro_key_131, Symbol _x2c_gensym_macro_op_12);
+int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_218, String _x2c_gensym_macro_key_131, Symbol _x2c_gensym_macro_op_11);
 
 MapStringInt Map_mapstringint(Map _x2c_gensym_macro_entries_23);
 
-int MapStringInt_compare(MapStringInt _x2c_gensym_macro_a_20, MapStringInt _x2c_gensym_macro_b_20);
+int MapStringInt_compare(MapStringInt _x2c_gensym_macro_a_19, MapStringInt _x2c_gensym_macro_b_19);
 
 Buffer MapStringInt_write_repr(MapStringInt _x2c_gensym_macro_map_220, Buffer _x2c_gensym_macro_out_61);
 

@@ -28,6 +28,10 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 
 int Compiler_is_prelude_source(String path);
 
+int Compiler_in_runtime_library(String path);
+
+int Compiler_is_runtime_source(String path);
+
 void Compiler_install_syntax_prelude(Compiler c);
 
 void Compiler_configure_package(Compiler c, List roots, String filename);
@@ -79,12 +83,6 @@ Map Compiler_meta_provider_hashes(Compiler c, String provider);
 void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows);
 
 void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
-
-List Compiler_loaded_provider(Compiler c);
-
-void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
-
-Type Compiler_loaded_call_type(Compiler c, Type type);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 

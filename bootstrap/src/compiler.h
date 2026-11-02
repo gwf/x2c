@@ -113,7 +113,6 @@ typedef struct Compiler{
   Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
-  struct MetaHelper * meta_helper;
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;
@@ -121,7 +120,6 @@ typedef struct Compiler{
   Map meta_group_bound;
   int meta_build;
   int skipped_form;
-  int load_source;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;
   int replaying_declaration;

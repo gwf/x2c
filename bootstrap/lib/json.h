@@ -8,6 +8,7 @@
 #include "private-keywords.h"
 #include "x2c.h"
 #include "path.h"
+#include "encoding.h"
 typedef Symbol Json;
 
 typedef struct JsonBool * JsonBool;

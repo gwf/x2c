@@ -10,7 +10,6 @@
 #include "frontend.h"
 #include "translation.h"
 #include "toolchain.h"
-#include "logger.h"
 #include "utils.h"
 #include <ctype.h>
 #include <errno.h>

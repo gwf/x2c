@@ -18,12 +18,6 @@ _Thread_local extern Lisp x2c_lisp_active;
 
 #define LISP_NATIVE_ARG_MAX  8
 #define LISP_STACK_BYTES_MAX (6L << 20)
-extern _Thread_local unsigned long x2c_execution_stack_low;
-
-#if defined(__GLIBC__)
-extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
-
-#endif
 #define LISP_CALL_STEP_MAX 40000000
 void Lisp_call_budget(Lisp lisp, long budget);
 
@@ -59,7 +53,7 @@ void Lisp_remove_global(Lisp lisp, String name);
 
 void Lisp_bind(Lisp lisp, String name, Func function);
 
-void Lisp_set_global(Lisp lisp, String name, Var value);
+void Lisp_set_global(Lisp l, String name, Var value);
 
 Lisp Lisp_active(void);
 

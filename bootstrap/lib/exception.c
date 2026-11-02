@@ -173,7 +173,7 @@ static ExceptionThreadState _thread(void){
 
 _Noreturn static void _fatal(const char * message){
   fprintf(stderr, "Fatal: uncaught exception %s\n", message);
-  exit(1);
+  abort();
 }
 
 static ExceptionFrame * _landable(void){

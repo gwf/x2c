@@ -6,6 +6,7 @@
 #include "rewrite.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
+#include "compiler-meta.h"
 static int _string_case_text(Type type);
 
 static int _string_case_text(Type type){

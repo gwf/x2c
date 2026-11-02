@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 typedef void * Bytes;
 
@@ -426,6 +427,16 @@ double x2c_var_order(Var a, Var b);
 Var Var_convert(Var value, Symbol target);
 
 Var Var_convert_at(Var value, Symbol target, const X2CErrorSite * site);
+
+long Var_long_at(Var value, const X2CErrorSite * site);
+
+ulong Var_ulong_at(Var value, const X2CErrorSite * site);
+
+long long Var_long_long_at(Var value, const X2CErrorSite * site);
+
+unsigned long long Var_ulong_long_at(Var value, const X2CErrorSite * site);
+
+long double Var_long_double_at(Var value, const X2CErrorSite * site);
 
 int Var_truth(Var value);
 
@@ -956,6 +967,9 @@ static inline double x2c_var_order_lane(Var lhs, Var rhs){
 int x2c_normalize_index(int index, int length);
 int x2c_slice_bound(int bound);
 int x2c_normalize_slice(int * start, int * stop, int step, int length);
+_Noreturn void x2c_fatal(const char * message);
+void x2c_native_check(int error, const char * failure);
+_Noreturn void x2c_io_fail(Var operation, int error);
 extern File Stdin, Stdout, Stderr;
 extern Var Void;
 extern List nil;

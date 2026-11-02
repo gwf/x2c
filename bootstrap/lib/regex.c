@@ -51,6 +51,7 @@ typedef struct Matcher{
   const char * text;
   int len, end, depth;
   int * starts, * ends;
+  unsigned long floor;
 }
 Matcher;
 
@@ -651,7 +652,7 @@ int String_equal(String, String);
 String RegexCapture_name(RegexCapture capture);
 
 RegexCapture RegexMatch_capture(RegexMatch found, Var key){
-  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 220,.runtime = 1}; & _x2c_gensym_error_site_0; })));
+  int numbered = Var_is_integer(key), number = Var_int(Var_convert_at(numbered ? key : int_var(- 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/regex.x",.function = "RegexMatch_capture",.line = 222,.runtime = 1}; & _x2c_gensym_error_site_0; })));
   String name = numbered ? NULL : Var_str(key);
   {
     RegexCapture capture;
@@ -863,7 +864,11 @@ static _RegexNode _quantified(Parser * p, _RegexNode atom){
   node -> greedy = _peek(&((* p))) != '?';
   node -> child = atom;
   if(! node -> greedy)(* p).pos ++;
-  if(_is_quantifier(_peek(&((* p))))) _fail(&((* p)), _1);
+  int next =(* p).pos;
+  if(_bounds(&((* p)), &(min), &(max))){
+    (* p).pos = next;
+    _fail(&((* p)), _1);
+  }
   return node;
 }
 
@@ -1005,7 +1010,7 @@ _Noreturn static void _fail(Parser * p, String why){
     Var _x2c_gensym_literal_part_2 = String_var((* p).regex -> pattern);
     Var _x2c_gensym_literal_part_3 = int_var((* p).pos);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "_fail",.line = 565,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/regex.x",.function = "_fail",.line = 571,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1, Symbol_var(34470112412), _x2c_gensym_literal_part_2, Symbol_var(1019648360), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -1067,6 +1072,8 @@ static int _has(_RegexNode node, int byte){
   return node -> set[byte >> 3] &(1 <<(byte & 7));
 }
 
+unsigned long _x2c_stack_floor(void);
+
 static RegexMatch _search(Regex regex, String subject, int offset){
   int count = regex -> capture_count + 1;
   int * starts = xcalloc(2 * count, sizeof(int)), * ends = starts + count;
@@ -1083,7 +1090,7 @@ static RegexMatch _search(Regex regex, String subject, int offset){
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
       Matcher m ={
-        regex, subject, String_len(subject), 0, 0, starts, ends
+        regex, subject, String_len(subject), 0, 0, starts, ends, _x2c_stack_floor()
       }
       ;
       for(int at = offset;  at <= m.len;  at ++){
@@ -1194,8 +1201,10 @@ static int _byte_loop(Matcher * m, _RegexNode rep, int pos, Rest k){
   return 0;
 }
 
+static int _x2c_stack_below(unsigned long);
+
 static int _iterate(Matcher * m, _RegexNode rep, int count, int pos, int last_start, Rest k){
-  if((* m).depth == _DEPTH_LIMIT) _too_deep(&((* m)));
+  if((* m).depth == _DEPTH_LIMIT || _x2c_stack_below((* m).floor)) _too_deep(&((* m)));
   (* m).depth ++;
   int matched = _iteration(&((* m)), rep, count, pos, last_start, k);
   (* m).depth --;
@@ -1244,9 +1253,10 @@ _Noreturn static void _too_deep(Matcher * m){
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL)));
     Var _x2c_gensym_literal_part_5 = String_var((* m).regex -> pattern);
     Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
+    Var _x2c_gensym_literal_part_7 = int_var((* m).depth);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 779,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), int_var(_DEPTH_LIMIT));
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 786,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(34470112412), _x2c_gensym_literal_part_5, Symbol_var(1218550748), _x2c_gensym_literal_part_6, Symbol_var(25782888), _x2c_gensym_literal_part_7);
       __builtin_unreachable();
     }
 

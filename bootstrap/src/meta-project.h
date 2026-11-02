@@ -16,7 +16,7 @@
 #include <unistd.h>
 void Frontend_prepare_meta(Frontend f, List inputs);
 
-MetaHelper Frontend_build_loaded(Frontend f, List filenames);
+Token Compiler_next_file_scope(Tokenizer tokens, int * depth);
 
 
 #endif /* __GUARD_0xDBB8A4A6__ */

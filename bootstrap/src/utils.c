@@ -31,8 +31,10 @@
 #define __GUARD_0x0D648550__
 #include "x2c.h"
 
+#include "logger.h"
 #include "path.h"
 #include "process.h"
+#include "report.h"
 #include "sourceview.h"
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
 #include <errno.h>
@@ -42,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-#include <sys/wait.h>
 #include <unistd.h>
 typedef struct Compiler * Compiler;
 
@@ -555,6 +556,7 @@ String Path_identifier_hash(String filename){
 int Path_lock_file(Path p, int wait){
   if(! _init_guard_) _file_init_();
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if(lock < 0 && ! wait) return - 1;
   if(lock < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_46), cons(String_var(p), NULL))));
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while(flock(lock, operation)){
@@ -596,29 +598,39 @@ void Path_publish_files(List outputs){
 
 }
 
-int Job_decode_wait_status(int raw, int * signal){
+void Compiler_configure_logging(int debugging){
   if(! _init_guard_) _file_init_();
-  (* signal) = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
-  if(WIFEXITED(raw)) return WEXITSTATUS(raw);
-  return(* signal) ? 128 +(* signal) : - 1;
+  Logger_set_min_level(log_get_global_logger(), debugging ? 8721742 : 11703268);
 }
 
 void Diagnostics_host_error(List detail){
   if(! _init_guard_) _file_init_();
   Var subject = List_assoc(detail, Symbol_var(1051920));
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
-  long error = Var_long(Var_convert_at(List_assoc(detail, Symbol_var(11703198)), 818062, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/utils.x",.function = "Diagnostics_host_error",.line = 434}; & _x2c_gensym_error_site_0; })));
+  long error = Var_long_at(List_assoc(detail, Symbol_var(11703198)), ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/utils.x",.function = "Diagnostics_host_error",.line = 434}; & _x2c_gensym_error_site_0; }));
   Diagnostics_driver_error(({
     Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(subject));  Var _x2c_gensym_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_48), cons(_x2c_gensym_literal_part_3, cons(String_var(_49), cons(_x2c_gensym_literal_part_4, NULL))))));
   }
   ));
 }
 
-_Noreturn void Diagnostics_driver_error(const char * message){
+void Diagnostics_driver_report(const char * message, const char * note){
   if(! _init_guard_) _file_init_();
+  report_suspend();
   fprintf(stderr, "x2c: error: %s\n", message);
+  if(note) fprintf(stderr, "note: %s\n", note);
+}
+
+_Noreturn void Diagnostics_driver_fail(const char * message, const char * note){
+  if(! _init_guard_) _file_init_();
+  Diagnostics_driver_report(message, note);
   fflush(NULL);
   _exit(2);
+}
+
+_Noreturn void Diagnostics_driver_error(const char * message){
+  if(! _init_guard_) _file_init_();
+  Diagnostics_driver_fail(message, NULL);
 }
 
 String Compiler_cache_root(void){
@@ -640,10 +652,7 @@ void Compiler_prune_cache(String directory){
       name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
       {
         String entry = Path_join(directory, name);
-        Path source = String_join(NULL, cons(String_var(entry), cons(String_var(_54), NULL)));
-        if(! Path_is_file(source) || Path_is_file(Path_read_text(source))) continue;
-        int lock = Path_lock_file(String_join(NULL, cons(String_var(entry), cons(String_var(_55), NULL))), 0);
-        if(lock < 0) continue;
+        String volatile script = NULL;
         {
           ExceptionFrame _x2c_gensym_exception_frame_1;
           static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
@@ -653,11 +662,11 @@ void Compiler_prune_cache(String directory){
           }
           ;
           if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
-            _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+            _x2c_gensym_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
           }
           volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
           x2c_exception_push(& _x2c_gensym_exception_frame_1);
-          if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) Path_remove_tree(entry);
+          if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) script = Path_read_text(String_join(NULL, cons(String_var(entry), cons(String_var(_54), NULL))));
           else{
             x2c_exception_landed(& _x2c_gensym_exception_frame_1);
             if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
@@ -667,7 +676,10 @@ void Compiler_prune_cache(String directory){
               if(_x2c_gensym_macro_selected_1 == 0){
                 {
                   {
-
+                    x2c_error_catch_close(_x2c_gensym_error_handler_1);
+                    _x2c_gensym_error_handler_1 = NULL;
+                    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+                    continue;
                   }
 
                 }
@@ -686,6 +698,52 @@ void Compiler_prune_cache(String directory){
           x2c_error_catch_close(_x2c_gensym_error_handler_1);
           _x2c_gensym_error_handler_1 = NULL;
           x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+        }
+        if(Path_is_file(script)) continue;
+        int lock = Path_lock_file(String_join(NULL, cons(String_var(entry), cons(String_var(_55), NULL))), 0);
+        if(lock < 0) continue;
+        {
+          ExceptionFrame _x2c_gensym_exception_frame_2;
+          static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
+          Var _x2c_gensym_macro_patterns_2[1];
+          static ErrorCatchSite _x2c_gensym_macro_site_2 ={
+            _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+          }
+          ;
+          if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
+            _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
+          }
+          volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
+          x2c_exception_push(& _x2c_gensym_exception_frame_2);
+          if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) Path_remove_tree(entry);
+          else{
+            x2c_exception_landed(& _x2c_gensym_exception_frame_2);
+            if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
+              int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
+              x2c_error_catch_detach(_x2c_gensym_error_handler_2);
+              x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
+              if(_x2c_gensym_macro_selected_2 == 0){
+                {
+                  {
+
+                  }
+
+                }
+
+              }
+
+            }
+            else{
+              x2c_error_catch_close(_x2c_gensym_error_handler_2);
+              _x2c_gensym_error_handler_2 = NULL;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+              __builtin_unreachable();
+            }
+
+          }
+          x2c_error_catch_close(_x2c_gensym_error_handler_2);
+          _x2c_gensym_error_handler_2 = NULL;
+          x2c_exception_leave(& _x2c_gensym_exception_frame_2);
         }
         close(lock);
       }

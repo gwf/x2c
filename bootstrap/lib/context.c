@@ -112,14 +112,19 @@ void Context_initialize(void);
 
 
 
-Var Context_export(Context context, Var value){
+Var Context_export(Context c, Var value){
   if(! _init_guard_) Context_initialize();
-  if(! context || current_context != context){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
+  if(! c){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 72,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
-  return _export_root(context, value);
+  if(current_context != c){
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
+    __builtin_unreachable();
+  }
+  return _export_root(c, value);
 }
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value){
@@ -138,7 +143,12 @@ Var Context_export_nested(Context c, Var value){
 
 Scope * Context_export_destination(Context c){
   if(! _init_guard_) Context_initialize();
-  return c ? c -> destination_scope : NULL;
+  if(! c){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_export_destination",.line = 131,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export_destination")), NULL))));
+    __builtin_unreachable();
+  }
+  return c -> destination_scope;
 }
 
 int Context_owns(Context context, void * allocation);
@@ -159,7 +169,12 @@ void Context_move_block(Context c, Block block){
 
 int Context_owns(Context context, void * allocation){
   if(! _init_guard_) Context_initialize();
-  return allocation && context && !(context -> exported != NULL && Map_contains(context -> exported, Var_new(3683441, allocation))) && _owns_scope(context, Scope_owner(allocation));
+  if(! context){
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/context.x",.function = "Context_owns",.line = 169,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.owns")), NULL))));
+    __builtin_unreachable();
+  }
+  return allocation && !(context -> exported != NULL && Map_contains(context -> exported, Var_new(3683441, allocation))) && _owns_scope(context, Scope_owner(allocation));
 }
 
 void Context_move_scope(Context c, Scope storage){
@@ -210,18 +225,15 @@ void Context_initialize(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _x2c_gensym_static_initialize_0();
-  if(pthread_once(& context_shutdown_once, _register_shutdown)){
-    fprintf(stderr, "Context: could not register shutdown\n");
-    abort();
-  }
-
+  x2c_native_check(pthread_once(& context_shutdown_once, _register_shutdown), "Context: could not register shutdown");
 }
 
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
-  if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "Context_close",.line = 252,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
+  if(! c) return;
+  if(current_context != c){
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/context.x",.function = "Context_close",.line = 257,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
   MatchCache_context_close(c -> match_state);
@@ -341,8 +353,8 @@ static Var _export_value(Context c, Var v){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "_export_value",.line = 333,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/context.x",.function = "_export_value",.line = 338,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
 

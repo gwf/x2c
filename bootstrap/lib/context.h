@@ -22,7 +22,7 @@
 #include "string/string.h"
 #include "var/var.h"
 #include <stdlib.h>
-Var Context_export(Context context, Var value);
+Var Context_export(Context c, Var value);
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value);
 

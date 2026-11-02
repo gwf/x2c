@@ -756,13 +756,15 @@ static int _lisp_prefix(Tokenizer t, int list, int collection){
   return 0;
 }
 
+int scan_lisp_string_status(char *, Symbol *);
+
 static int _lisp_punctuation(Tokenizer t, int list, int collection){
   char * text = t -> text + t -> pos;
   int data = list || collection;
   switch(text[0]){
     case '(' : case ')' : return _operator(t, 1);
     case '"' : if(data) return _operator(t, 1);
-    return _status_scanner(t, scan_c_string_status, 27051791223990);
+    return _status_scanner(t, scan_lisp_string_status, 27051791223990);
     case '{' : case '[' : if(data) return _operator(t, 1);
     break;
     case ']' : case '}' : case ':' : if(collection) return _operator(t, 1);

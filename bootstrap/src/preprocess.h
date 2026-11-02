@@ -9,6 +9,10 @@
 #include "compiler/compiler.h"
 #include "ast.h"
 #include <ctype.h>
+int Compiler_never_defined(String name);
+
+int Compiler_hidden_group(List open);
+
 String Compiler_preproc_include_target(String text, int * angle);
 
 String Compiler_preproc_marker_file(String text, int * line);

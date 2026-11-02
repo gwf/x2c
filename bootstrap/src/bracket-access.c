@@ -5,3 +5,4 @@
 
 #include "rewrite.h"
 #include "grammar.h"
+#include "compiler-meta.h"
