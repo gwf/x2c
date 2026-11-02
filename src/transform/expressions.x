@@ -284,12 +284,6 @@ module List _declaration(Compiler c, List ast) {
         List converted = c.convert_initializer(
           rhs, target_type, native_target);
         new_bind = %(op = (bind $var $mods) $converted);
-        // File-scope initialization assigns a handle before its readers.
-        if (!c.fn_name)
-          match (converted)
-            case %(expr ("Func")
-                   (ident (!set ?dependency (binding ? ?)))):
-              c.static_init_deps[var] = $(dependency);
       }
       values.push(new_bind);
     }

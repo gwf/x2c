@@ -391,6 +391,18 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
 
 ## Outstanding Items
 
+### Regex matching and deep List rendering overflow the stack
+
+On 2026-11-02, after `Regex.compile` learned to stop at the group-nesting
+limit or the stack floor, matching still recurses through groups without a
+floor check: only `_iterate` (repeated groups) checks it. Sixty thousand
+groups in sequence matched on the 8 MiB main thread exit 139, and 2,000
+nested groups matched in a 32 KiB task exit 138. A floor check at the top of
+`_run` is the likely repair, but `_run` is the matcher's hot path, so the
+repair needs a paired measurement. Until then the contexts chapter's
+statement that matching stops before the stack runs out holds only for
+repetition. `Var.repr` of a 100,000-deep List overflows the same way.
+
 ### Constructed array-dimension macro
 
 On 2026-10-28, `160828e5f` reproduces an unresolved macro in a constructed

@@ -133,7 +133,9 @@ either has that tag or it does not. Assigning to `List`, `Map`, `Array`,
 `Symbol`, or a type with a declared `protocol Var(T)` conversion uses that
 type's exact reader, and a wrong tag yields NULL. An alias of such a type,
 declared with `class` or `typedef`, uses the reader of its nearest ancestor
-that has one. A `String` destination reads a `String` payload as itself,
+that has one, and a destination spelled `struct T` or `union T` uses the
+reader of the typedef that names that aggregate. A `String` destination
+reads a `String` payload as itself,
 displays any other value through `.str()`, and reads `void` and `Null` as NULL.
 The explicit readers `.list()`, `.map()`, `.array()`, `.block()`, `.buffer()`,
 `.bytes()`, `.file()`, `.as_iter()`, and `.string()` extract their payload and

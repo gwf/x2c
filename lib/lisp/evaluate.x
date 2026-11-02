@@ -70,7 +70,7 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
 void Lisp.call_budget(Lisp lisp, long budget) {
   if (!lisp) $error.entry.null("Lisp.call_budget");
   if (budget <= 0)
-    raise %(bad-arg (operation "Lisp.call_budget") (budget $budget));
+    raise %(bad-arg (operation "Lisp.call_budget") (actual $budget));
   lisp.call_step_max = budget;
 }
 

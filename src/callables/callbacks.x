@@ -186,8 +186,6 @@ static List _publish_typed(Callback &cb, Type spelling) {
 static List _function(Callback &cb, List binding) {
   Compiler c = cb.c;
   (List declarations, List arguments) = c.forward_parameters(cb.params);
-  // A helper without parameters says `(void)`; `()` is unprototyped C.
-  if (!declarations) declarations = %((param (void) (bind () ())));
   List source = $!($(cb.source)){ $(cb.source_binding) };
   List call = _func_call(
     c, cb.source.apply().canonicalize(), source, arguments);
