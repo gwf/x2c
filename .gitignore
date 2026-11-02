@@ -71,6 +71,8 @@ examples/shootout/results/*
 !examples/shootout/results/README.md
 !examples/shootout/results/current.json
 !examples/shootout/results/current.md
+!examples/shootout/results/history.json
+!examples/shootout/results/history.md
 !examples/shootout/results/charts/
 examples/shootout/results/charts/*
 !examples/shootout/results/charts/runtime-source-size.*

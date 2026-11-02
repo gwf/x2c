@@ -298,7 +298,10 @@ and provenance. A pull brings these files into the checkout.
 
 `make shoot-run` keeps scratch output under ignored `examples/build/shootout/`.
 `make shoot-update` promotes its report to tracked `results/current.json` and
-`results/current.md`, outside scratch cleanup. Regenerate charts from that
+`results/current.md`, outside scratch cleanup. Each update also retains a
+compact row in [score history](results/history.md); the history records
+cohorts and calibration identities so changed comparisons are visible.
+Regenerate charts from that
 report before committing the snapshot:
 
 ```sh

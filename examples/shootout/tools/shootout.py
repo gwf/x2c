@@ -1779,9 +1779,49 @@ def write_latest(
   )
 
 
+def preserve_scores(current: dict[str, Any]) -> None:
+  path = CURRENT_JSON.parent / "history.json"
+  saved = json.loads(path.read_text()) if path.exists() else {"runs": []}
+  cohort = current["summary_benchmarks"]
+  scores = {
+    key: statistics.geometric_mean(
+      (1.0 if key == "c" else
+       current["benchmarks"][name]["factors"][f"time_{key}_over_c"])
+      for name in cohort
+    ) for key in current["implementations"]
+  }
+  row = {
+    "run_id": current["run_id"], "profile": current["profile"],
+    "measured_revision": current["machine"].get("repository", {}).get("revision"),
+    "baseline_sha256": current["baseline_sha256"],
+    "summary_benchmarks": cohort, "elapsed_over_c": scores,
+  }
+  runs = {entry["run_id"]: entry for entry in saved["runs"]}
+  runs[row["run_id"]] = row
+  rows = [runs[key] for key in sorted(runs)]
+  atomic_write(path, json_text({"schema": 1, "runs": rows}))
+  lines = ["# PLSO score history", "",
+           "Geometric means of elapsed-time ratios on each run's shared cohort. "
+           "C is 1.00; lower is better. Run IDs use UTC.", "",
+           "Compare trends only within the same profile, calibration and cohort. "
+           "Early runs used different references and shared problems. "
+           "The earliest optimized column is listed as tuned. "
+           "Exact cohorts, revisions and all language scores are in [history.json](history.json).", "",
+           "| Run | Problems | Calibration | Idiomatic / C | Tuned / C | Tuned / Rust |",
+           "|---|---:|---|---:|---:|---:|"]
+  for entry in rows:
+    values = entry["elapsed_over_c"]
+    rust = f"{values['tuned'] / values['rust']:.2f}" if "rust" in values else "-"
+    lines.append(f"| {entry['run_id']} | {len(entry['summary_benchmarks'])} | "
+                 f"{entry['baseline_sha256'][:12]} | {values['idiomatic']:.2f} | "
+                 f"{values['tuned']:.2f} | {rust} |")
+  atomic_write(path.with_suffix(".md"), "\n".join(lines) + "\n")
+
+
 def promote_current(current: dict[str, Any]) -> None:
   atomic_write(CURRENT_JSON, json_text(current))
   atomic_write(CURRENT_MARKDOWN, render_current(current))
+  preserve_scores(current)
 
 
 def run_pinned(

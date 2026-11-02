@@ -134,7 +134,15 @@ let literal = "/* keep this */";
                                CURRENT_MARKDOWN=current_markdown), \
            mock.patch.object(shootout, "render_current", return_value="report\n"), \
            mock.patch.object(shootout, "command", side_effect=compile_measure):
-        shootout.promote_current({"run_id": "preserved"})
+        shootout.promote_current({
+          "run_id": "preserved", "profile": "local", "baseline_sha256": "test",
+          "machine": {}, "summary_benchmarks": ["toy"],
+          "implementations": ["c", "idiomatic", "tuned"],
+          "benchmarks": {"toy": {"factors": {
+            "time_c_over_c": 1.0, "time_idiomatic_over_c": 3.0,
+            "time_tuned_over_c": 2.0,
+          }}},
+        })
         chart = current_json.parent / "charts" / "runtime-source-size.svg"
         chart.parent.mkdir(parents=True)
         chart.write_text("chart\n")
@@ -144,6 +152,8 @@ let literal = "/* keep this */";
         self.assertEqual(json.loads(current_json.read_text())["run_id"], "preserved")
         self.assertEqual(current_markdown.read_text(), "report\n")
         self.assertEqual(chart.read_text(), "chart\n")
+        history = json.loads((current_json.parent / "history.json").read_text())
+        self.assertEqual(history["runs"][0]["elapsed_over_c"]["tuned"], 2.0)
         self.assertFalse((build / "stale-output").exists())
 
 

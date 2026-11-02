@@ -1,6 +1,6 @@
 # Current benchmark results
 
-[Full results table](current.md) | [Structured data](current.json) | [Summary chart](charts/runtime-source-size.svg) | [Per-problem profiles](charts/implementation-profiles.svg) | [Runtime and source-size distributions](charts/runtime-loc-distributions.svg)
+[Score history](history.md) | [Full results table](current.md) | [Structured data](current.json) | [Summary chart](charts/runtime-source-size.svg) | [Per-problem profiles](charts/implementation-profiles.svg) | [Runtime and source-size distributions](charts/runtime-loc-distributions.svg)
 
 ![Runtime and source size](charts/runtime-source-size.png)
 
@@ -30,7 +30,9 @@ reproduce the source-size counts: tuned uses 0.953x C source lines but
 
 This directory is the tracked, promoted snapshot. A pull includes the report,
 all three charts in PNG/SVG/PDF, plotted measurements and summaries in CSV,
-and chart provenance. The report and figure bytes were recovered from
+and chart provenance. [Score history](history.md) retains compact headline
+ratios from published runs, with [structured history](history.json) for
+all language scores, cohorts and calibration identities. The report and figure bytes were recovered from
 `a9aeff5b843878fd102b31402a522d2f0a1d2d6c`; the provenance report path is
 relative so the snapshot works in another checkout.
 
@@ -49,7 +51,9 @@ remain available in Git history rather than being restored here.
 `make shoot-run` records scratch measurements under ignored
 `examples/build/shootout/`. It leaves this published snapshot intact.
 `make shoot-update` promotes the new report to `current.json` and `current.md`
-in this directory. Scratch build cleanup does not remove these files.
+in this directory and retains its summary scores in `history.json` and
+`history.md`. Previous score rows remain when the current report is replaced.
+Scratch build cleanup does not remove these files.
 
 Render the promoted report without running benchmarks:
 

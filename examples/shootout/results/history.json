@@ -1,0 +1,346 @@
+{
+  "runs": [
+    {
+      "baseline_sha256": "d985eacc9290a8a0c79dff46cba8ac252423f87bbdf4225485df249aed538aec",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "idiomatic": 5.3765224389170925,
+        "python": 17.392822582333878,
+        "tuned": 1.9092865700398907
+      },
+      "measured_revision": "e3d702f6de179115cc241c7a9d7d1782dcfaf95d",
+      "profile": "local",
+      "run_id": "20261031T011256Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "knucleotide",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "c777007be2f2d389164ac1509d3deacefc39f5bbd1295a5dcbd3be74457293dd",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.387946624781496,
+        "idiomatic": 5.27124238042399,
+        "python": 21.49715232889628,
+        "rust": 0.6594393365804295,
+        "tuned": 1.7738950403742857
+      },
+      "measured_revision": "10ef5112652291ef35ad7bac6820de040c20ccfd",
+      "profile": "local",
+      "run_id": "20261031T024309Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "d6eb1012997078b80472a28f7477715e108e0ed87dda46480a21203bb4073c5f",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.360309405912564,
+        "go": 1.5452887957914678,
+        "idiomatic": 5.125400303909059,
+        "java": 4.486790167369824,
+        "python": 20.830127051027116,
+        "rust": 0.6401902413454686,
+        "tuned": 1.7329117934573746
+      },
+      "measured_revision": "ba99bc1b4c7e4edc4d765070434d672b51afd711",
+      "profile": "local",
+      "run_id": "20261031T031704Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "7aa02ea1565e990a8a037ced35a20510e0ac94f24be46d2696c8c5b33e728516",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.3744595661272812,
+        "go": 1.5406686635868037,
+        "idiomatic": 4.182078401000946,
+        "java": 4.483837236382867,
+        "python": 20.819758664872648,
+        "rust": 0.6440104029334325,
+        "tuned": 1.7514118884239678
+      },
+      "measured_revision": "68156a1c6b9df92cdcd720aa4cc9735fff2831cf",
+      "profile": "local",
+      "run_id": "20261031T035446Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "e980f067de6fa42b6884fa0846f9521d7ee11c14be699c8f5991a8f7fedfc470",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.366729079111198,
+        "go": 1.546986662027399,
+        "idiomatic": 2.918159954455074,
+        "java": 4.540054165182687,
+        "python": 21.116162085252217,
+        "rust": 0.6529074519084132,
+        "tuned": 1.7522562830562076
+      },
+      "measured_revision": "d7c7787c7d1c608f86730b1ba5be3f22722c0299",
+      "profile": "local",
+      "run_id": "20261031T134323Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "7aa3e0e370d3129b7a8a3ce117bf28594dd44c47e1ef4187adb51f9f1ec3a66d",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.3626251037281074,
+        "go": 1.5438578421388462,
+        "idiomatic": 2.3514654119052905,
+        "java": 4.516167393544074,
+        "python": 21.073231858808864,
+        "rust": 0.6479426428520261,
+        "tuned": 1.499991278152858
+      },
+      "measured_revision": "e44721497e0004c921ccacec098f330bd2248726",
+      "profile": "local",
+      "run_id": "20261031T145604Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "3a798f74363417e9f0c9e6e3e56620d2319e5937e80961ffcff3d231a3fd01a7",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.3644631101328777,
+        "go": 1.5586366285715736,
+        "idiomatic": 2.0162854575706906,
+        "java": 4.529326568698373,
+        "python": 21.113922856630545,
+        "rust": 0.6507898925040099,
+        "tuned": 1.5015926603295937
+      },
+      "measured_revision": "a8d02959e25f6517cdcf189d386c637f587f016e",
+      "profile": "local",
+      "run_id": "20261031T161720Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "2d8b84188a41dd857a647751ee798bd66a8c57277d1d26b97cad322d00ddda8c",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.365853171675068,
+        "go": 1.5353037324051781,
+        "idiomatic": 1.67032188872597,
+        "java": 4.471348423273311,
+        "python": 20.440118204469286,
+        "rust": 0.6357124093755523,
+        "tuned": 1.499617447302131
+      },
+      "measured_revision": "06a81d6535120d6c0c07e320751548075c5d3fc1",
+      "profile": "local",
+      "run_id": "20261031T170749Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "binarytrees",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "479a192b239c39b8bd6a8cdb7bbfbcf33cd472da681858d43446c93ac915879d",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.544119389337719,
+        "go": 2.06827135670108,
+        "idiomatic": 3.4057621065932815,
+        "java": 9.327158736138475,
+        "python": 15.484296657640648,
+        "rust": 1.1709105079543511,
+        "tuned": 3.0153396227942295
+      },
+      "measured_revision": "381673a8d6d51098a44f62a635db98c0c9ca927e",
+      "profile": "local",
+      "run_id": "20261031T181939Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.5460047317489656,
+        "go": 2.052490849903867,
+        "idiomatic": 2.723903157328863,
+        "java": 9.387256515170192,
+        "python": 15.386324160719598,
+        "rust": 1.1727696234514524,
+        "tuned": 3.005232952842671
+      },
+      "measured_revision": "3318f8d8aea057e95b9a9dbf1ccc09d8e7a36d4a",
+      "profile": "local",
+      "run_id": "20261031T211435Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.5460047317489656,
+        "go": 2.052490849903867,
+        "idiomatic": 2.6609941942385693,
+        "java": 9.387256515170192,
+        "python": 15.386324160719598,
+        "rust": 1.1727696234514524,
+        "tuned": 1.7689125322116364
+      },
+      "measured_revision": "19e79b5026679638e63297fc7f839a97b5aac32c",
+      "profile": "local",
+      "run_id": "20261101T154144Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.5460047317489656,
+        "go": 2.052490849903867,
+        "idiomatic": 2.6974409848612444,
+        "java": 9.387256515170192,
+        "python": 15.386324160719598,
+        "rust": 1.1727696234514524,
+        "tuned": 1.2423621453050313
+      },
+      "measured_revision": "b81b82c3065ffcfaf900d6febdd9d874ec179b5a",
+      "profile": "local",
+      "run_id": "20261101T161913Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "regexredux",
+        "pidigits"
+      ]
+    },
+    {
+      "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
+      "elapsed_over_c": {
+        "c": 1.0,
+        "cpp": 1.5460047317489656,
+        "go": 2.052490849903867,
+        "idiomatic": 2.694966368061602,
+        "java": 9.387256515170192,
+        "python": 15.386324160719598,
+        "rust": 1.1727696234514524,
+        "tuned": 1.109537214936266
+      },
+      "measured_revision": "fed582d496606c11eb09e4a817f7fa9ddf2a2464",
+      "profile": "local",
+      "run_id": "20261101T204543Z",
+      "summary_benchmarks": [
+        "nbody",
+        "spectralnorm",
+        "fannkuchredux",
+        "mandelbrot",
+        "fasta",
+        "revcomp",
+        "regexredux",
+        "pidigits"
+      ]
+    }
+  ],
+  "schema": 1
+}
