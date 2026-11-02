@@ -281,7 +281,8 @@ module List _declaration(Compiler c, List ast) {
         List converted = c.convert_initializer(
           rhs, target_type, native_target);
         new_bind = %(op = (bind $var $mods) $converted);
-        if (target_type.type().is_static())
+        // A file-scope object initialized from a handle runs after it.
+        if (!c.fn_name)
           match (converted)
             case %(expr ("Func")
                    (ident (!set ?dependency (binding ? ?)))):
