@@ -361,16 +361,19 @@ parameter is rejected when it is first invoked, and it never receives an
 alias into source storage. An empty source does not invoke or arity-check
 its callback.
 
-`map`, `filter`, and `foldl` reject a null callback only when they invoke it.
-Lazy `map` and `filter` construction does not pull the source. Their first
-pull consumes one source element before a missing callback raises
-`<bad-arg>`. A seeded fold consumes one element before that failure; a
-seedless fold consumes its seed and the next element. Consumed inputs are
-not restored, just as when a callback itself raises. Empty inputs and
-seedless singleton folds need no invocation.
+Every callback operation except `zip_with` rejects a null callback only when
+it invokes it. Lazy `map`, `filter`, `scan`, and `map2` construction does not
+pull the source. Their first pull consumes one source element, or one value
+from each side for `map2`, before a missing callback raises `<bad-arg>`. A
+seeded fold and the queries `find`, `any`, and `all` consume one element
+before that failure; a seedless fold consumes its seed and the next element.
+Consumed inputs are not restored, just as when a callback itself raises.
+Empty inputs and seedless singleton folds need no invocation, so an empty
+query still returns `void`, 0, or 1.
 
 This replaces the earlier null-callback identity behavior of `map`, immediate
-exhaustion of `filter`, and drain-without-combining behavior of `foldl`.
+exhaustion of `filter`, drain-without-combining behavior of `foldl`, NULL
+iterators from `scan` and `map2`, and fixed `find`, `any`, and `all` results.
 The corresponding String identity and List accumulator-preservation defaults
 also end; Lisp nil callbacks use the same native contract.
 
@@ -441,9 +444,10 @@ return, and `foldl` given a `void` seed uses the first element as its seed.
 
 `find(predicate)` has the same element-or-`void` result as Array and List
 search. It consumes through the first match and leaves the following elements
-available. An unsuccessful search exhausts the iterator; a null predicate
-returns `void` without consuming anything. Zero, false, and NULL are valid
-matched elements, so use `is void` to test absence.
+available. An unsuccessful search exhausts the iterator. A null predicate
+raises `<bad-arg>` after the first element is pulled, and an empty iterator
+returns `void` without a call. Zero, false, and NULL are valid matched
+elements, so use `is void` to test absence.
 
 ## Handing a pipeline to foreach
 

@@ -715,13 +715,15 @@ printf("%s %s %s\n", doubled.repr(), big.repr(), total.repr());
 (2 4 6 8) (3 4) 10
 ```
 
-For `map`, `filter`, and `foldl`, a callback is required when an element
-needs an invocation. A null callback then raises `<bad-arg>` through `Func`.
-Empty inputs make no call. A fold with a `void` seed also makes no call for
-a singleton: its only element becomes the result. This rule applies to
-these operations on `List`, `Array`, `String`, and `Iter` where provided.
-Lisp nil callbacks follow the same rule. Other operations, including
-`zip_with`, queries, `map2`, and `scan`, retain their own callback contracts.
+For `map`, `filter`, `foldl`, `map2`, `scan`, and the queries `find`, `any`,
+and `all`, a callback is required when an element needs an invocation. A
+null callback then raises `<bad-arg>` through `Func`. Empty inputs make no
+call, so an empty query still returns `void`, false, or true. A fold with a
+`void` seed also makes no call for a singleton: its only element becomes the
+result. This rule applies to these operations on `List`, `Array`, `String`,
+and `Iter` where provided. Lisp nil callbacks follow the same rule. Two
+operations treat a null callback differently: `zip_with` yields pair `List`s,
+and `List.map2` returns `nil`.
 
 Transformations and folds keep the callback's `Var` result. The predicates
 `List.filter`, `List.find`, `List.any`, and `List.all` apply `Var`
@@ -952,7 +954,8 @@ The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `index(value)` returns the first equal element's zero-based position, or `-1`.
 `find(predicate)` returns the first accepted element as `Var`, or `void`.
 These names have the same meanings on Array and List; Iter also has `find`.
-Predicates use ordinary `Var` truth. A null predicate returns `void`.
+Predicates use ordinary `Var` truth. A null predicate raises `<bad-arg>` when
+the first element needs it; an empty search returns `void` without a call.
 Matching zero, false, or NULL remains distinct from absence: test `is void`.
 Searching leaves Array and List storage unchanged and borrows matched values.
 Typed Arrays use native equality for `index` and box `find` results as their
