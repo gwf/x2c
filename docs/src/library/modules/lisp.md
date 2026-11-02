@@ -113,6 +113,9 @@ freezes it with `Lisp.freeze` before the first child runs: a child's
 values belong to a narrower `Context` than the parent's, so nothing a
 child produces may become reachable from the parent.
 
+**Raises:** `<bad-arg>` for a null session or parent, or `<alloc-fail>` or
+`<size-limit>` while creating the child's reserved `Map`.
+
 Source: `lib/lisp/sessions.x`
 
 <a id="Lisp.apply"></a>
@@ -165,6 +168,8 @@ reach it quickly.
 The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
+
+**Raises:** `<bad-arg>` for a null session.
 
 Source: `lib/lisp/evaluate.x`
 
@@ -228,6 +233,8 @@ Marks `lisp` complete, so nothing produced later may reach it.
 A frozen session rejects `def` and `Lisp.set_global`: a value produced
 while a narrower `Context` is current would leave the session holding
 values that die with that `Context`.
+
+**Raises:** `<bad-arg>` for a null session.
 
 Source: `lib/lisp/sessions.x`
 
