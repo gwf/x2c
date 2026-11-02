@@ -139,9 +139,10 @@ static macro Unit $logger.method(Name $method, Literal $level) {
   void Logger.$method(
     Logger $x2c_ident("logger"), Symbol $x2c_ident("category"),
     List @$x2c_ident("fields")) {
-    Logger.log(
+    if (!$x2c_ident("logger")) raise %(bad-arg (operation "Logger.log"));
+    _log_fields(
       $x2c_ident("logger"), $level,
-      $x2c_ident("category"), @$x2c_ident("fields"));
+      $x2c_ident("category"), $x2c_ident("fields"));
   }
 }
 
