@@ -27,40 +27,8 @@ String Compiler.protocol_update_helper(
     $("protocol-update-helper", participant, member, postfix, exported);
   Var stored;
   if (c.protocol_helpers.try_get(key, stored)) return stored;
-
-  List resolved = c.resolve_protocol_member(participant, member);
-  if (!resolved) return NULL;
-  List (source_binding, source_type) = resolved;
-  Type rhs_type = _update_rhs(c, participant, source_type);
-  if (!rhs_type) return NULL;
-
-  String suffix = postfix ? "postfix" : "update";
-  String name = _helper_name(
-    c, %"proto_$(participant.car().str().lower())_$(member)_$suffix",
-    exported);
-  List helper = c.sym.introduce(name);
-  List callee = $!($source_type){ $source_binding };
-  Type result = exported ? participant : %(static @participant);
-  /* A direct update stores the member's result through `lhs`; the `op`
-     parameter keeps the update ABI of the dynamic path. The postfix form
-     adds one and returns the value it read first. */
-  List update = postfix
-    ? $!Unit{
-        $result $helper(volatile $participant *lhs, Symbol op) {
-          $participant old = lhs[0];
-          lhs[0] = $callee(lhs[0], 1);
-          return old;
-        }
-      }
-    : $!Unit{
-        $result $helper(
-            volatile $participant *lhs, Symbol op, $rhs_type rhs) {
-          lhs[0] = $callee(lhs[0], rhs);
-          return lhs[0];
-        }
-      };
-  _publish_update(c, helper, update);
-  c.protocol_helpers[key] = name;
+  String name = _update_helper(c, participant, member, postfix, exported);
+  if (name) c.protocol_helpers[key] = name;
   return name;
 }
 
@@ -171,12 +139,43 @@ static int _exported(Compiler c) {
   return 0;
 }
 
-/* The generated helper name for `stem`. An `exported` name ends in the hash
-   of the unit's path, so units whose headers call such helpers link
-   together, as lambda bridges do. */
-static String _helper_name(Compiler c, String stem, int exported) {
-  String name = %"_x2c_gensym_$stem";
-  return exported ? %"$(name)_$("%08x".printf(c.filename.hash()))" : name;
+/* Publishes the update helper of `participant`'s `member` and returns its
+   name, or returns NULL when the member cannot implement the update. */
+static String _update_helper(
+  Compiler c, Type participant, String member, int postfix, int exported) {
+  List resolved = c.resolve_protocol_member(participant, member);
+  if (!resolved) return NULL;
+  List (source_binding, source_type) = resolved;
+  Type rhs_type = _update_rhs(c, participant, source_type);
+  if (!rhs_type) return NULL;
+
+  String suffix = postfix ? "postfix" : "update";
+  String name = _helper_name(
+    c, %"proto_$(participant.car().str().lower())_$(member)_$suffix",
+    exported);
+  List helper = c.sym.introduce(name);
+  List callee = $!($source_type){ $source_binding };
+  Type result = exported ? participant : %(static @participant);
+  /* A direct update stores the member's result through `lhs`; the `op`
+     parameter keeps the update ABI of the dynamic path. The postfix form
+     adds one and returns the value it read first. */
+  List update = postfix
+    ? $!Unit{
+        $result $helper(volatile $participant *lhs, Symbol op) {
+          $participant old = lhs[0];
+          lhs[0] = $callee(lhs[0], 1);
+          return old;
+        }
+      }
+    : $!Unit{
+        $result $helper(
+            volatile $participant *lhs, Symbol op, $rhs_type rhs) {
+          lhs[0] = $callee(lhs[0], rhs);
+          return lhs[0];
+        }
+      };
+  _publish_update(c, helper, update);
+  return name;
 }
 
 /* The `RHS` of a member `(Participant, RHS) -> Participant`, or NULL. Its
@@ -190,6 +189,14 @@ static Type _update_rhs(Compiler c, Type participant, Type signature) {
       c.sym.resolve_key(signature.cdr()) == self)
     return rhs;
   return NULL;
+}
+
+/* The generated helper name for `stem`. An `exported` name ends in the hash
+   of the unit's path, so units whose headers call such helpers link
+   together, as lambda bridges do. */
+static String _helper_name(Compiler c, String stem, int exported) {
+  String name = %"_x2c_gensym_$stem";
+  return exported ? %"$(name)_$("%08x".printf(c.filename.hash()))" : name;
 }
 
 static void _publish_update(Compiler c, List helper, List syntax) {
