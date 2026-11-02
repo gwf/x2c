@@ -203,7 +203,6 @@ static macro Stmt $fail.macros_hole_cardinality(
   }
 }
 
-
 static macro Stmt $fail.macros_keyword_builtin(Expr $c, Expr $origin) =>
   $c.report_error(
     <macro>, "built-in keyword alias cannot be replaced",

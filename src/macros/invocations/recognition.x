@@ -4,7 +4,6 @@ module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
-
 static const SymbolSet macro_positions =
   %<unit block field enumerator map-entry statement expression>;
 
