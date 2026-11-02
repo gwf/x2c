@@ -10,15 +10,15 @@ Dynamic contiguous arrays of `Var` elements.
 | Function | Summary |
 | --- | --- |
 | [`Array.concat`](#Array.concat) | Returns a fresh array holding `a` followed by `b`. |
-| [`Array.contains`](#Array.contains) | Reports whether a native element equals `value`. |
+| [`Array.contains`](#Array.contains) | Reports whether an element is `==` to `value`. |
 | [`Array.copy`](#Array.copy) | Returns a fresh packed copy, or NULL for a null array. |
-| [`Array.count`](#Array.count) | Returns how many native elements equal `value`. |
+| [`Array.count`](#Array.count) | Returns how many elements are `==` to `value`. |
 | [`Array.find`](#Array.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`Array.foldl`](#Array.foldl) | Folds `fn` over `array` from `seed`, front to back. |
 | [`Array.free`](#Array.free) | Releases the `Array` and its backing storage, invalidating every alias. |
 | [`Array.getindex`](#Array.getindex) | Reads `index` from a non-null array, counting negatives from the end. |
 | [`Array.getslice`](#Array.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`Array.index`](#Array.index) | Returns the first index whose native element equals `value`, or -1. |
+| [`Array.index`](#Array.index) | Returns the first index whose element is `==` to `value`, or -1. |
 | [`Array.insert`](#Array.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`Array.iter`](#Array.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`Array.join`](#Array.join) | Joins the elements of `array` into one `String` separated by `separator`. |
@@ -67,9 +67,11 @@ Source: `lib/array/array.x`
 
 `int Array.contains(Array array, Var value)`
 
-Reports whether a native element equals `value`.
-The scan is linear. Raises: `<size-limit>` when the length exceeds the
-integer index domain.
+Reports whether an element is `==` to `value`.
+Elements compare as in `index`, so a boxed `Array` holding `1.0`
+contains `1`, unlike a `Map` keyed by `1.0`. The scan is linear.
+
+**Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
 Source: `lib/array/array.x`
 
@@ -92,8 +94,10 @@ Source: `lib/array/array.x`
 
 `int Array.count(Array array, Var value)`
 
-Returns how many native elements equal `value`.
-A null array returns zero; the scan is linear.
+Returns how many elements are `==` to `value`.
+Elements compare as in `index`, so the boxed `Array` `[1, 1.0, 1L]`
+counts three matches of `1`, while `List.unique` keeps all three. A
+null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
@@ -174,8 +178,12 @@ Source: `lib/array/array.x`
 
 `int Array.index(Array array, Var value)`
 
-Returns the first index whose native element equals `value`, or -1.
-A null array returns -1; the scan is linear and preserves source order.
+Returns the first index whose element is `==` to `value`, or -1.
+On a boxed `Array`, `==` compares two numbers as their native values
+do in C, so `1`, `1.0`, and `1L` match; `Map` keys and `List.unique`
+compare with `Var.equal` instead, which keeps those types apart. A
+packed element uses its own type's `==`. A null array returns -1; the
+scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
@@ -189,12 +197,10 @@ Source: `lib/array/array.x`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
-Boxed `Array` returns `void` for a null array or out-of-range index
-without mutation.
 
-**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
-index, `<void-op>` for a `void` value, `<size-limit>` at the integer
-index limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null array or an index outside that range,
+`<void-op>` for a `void` value, `<size-limit>` at the integer index
+limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/array/array.x`
 
@@ -297,11 +303,10 @@ Source: `lib/array/array.x`
 `Var Array.push(Array array, Var value)`
 
 Appends `value` and returns it.
-Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-when storage cannot grow.
+**Raises:** `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+`<size-limit>` at the integer index limit, or `<alloc-fail>` when
+storage cannot grow.
 
 Source: `lib/array/array.x`
 
@@ -349,10 +354,10 @@ Source: `lib/array/array.x`
 `Var Array.setindex(Array array, int index, Var value)`
 
 Stores and returns `value`, counting negatives from the end.
-Requires a non-null array. Returns `void` for an out-of-range index.
 
-**Raises:** `<size-limit>` outside the index domain or `<void-op>` when
-storing `void` at a valid index.
+**Raises:** `<bad-arg>` for a null `Array` or an index outside it,
+`<size-limit>` when its length cannot be indexed, or `<void-op>` for a
+`void` value. The element is unchanged on failure.
 
 Source: `lib/array/array.x`
 
@@ -502,11 +507,10 @@ Source: `lib/array/array.x`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
-Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null typed array, `<void-op>` for a `void`
-value, `<size-limit>` at the integer index limit, or `<alloc-fail>`
-when storage cannot grow.
+**Raises:** `<bad-arg>` for a null array, `<void-op>` for a `void` value,
+`<size-limit>` at the integer index limit, or `<alloc-fail>` when
+storage cannot grow.
 
 Source: `lib/array/array.x`
 

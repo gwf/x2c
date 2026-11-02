@@ -21,7 +21,7 @@ Linked list with `Var` elements.
 | [`List.array`](#List.array) | Returns a new `Array` holding the elements of `lst` in order. |
 | [`List.concat`](#List.concat) | Returns the concatenation of the List arguments in order. |
 | [`List.concat_n`](#List.concat_n) | Returns the concatenation of exactly `list_count` `List` arguments. |
-| [`List.contains`](#List.contains) | Reports whether `lst` contains `key` by `Var` equality. |
+| [`List.contains`](#List.contains) | Reports whether `lst` holds an element `==` to `key`. |
 | [`List.filter`](#List.filter) | Returns the elements `pred` accepts by ordinary `Var` truthiness. |
 | [`List.find`](#List.find) | Returns the first element `pred` accepts by ordinary `Var` truthiness, or `void`. |
 | [`List.foldl`](#List.foldl) | Folds `fn` over the elements of `lst` from the left, starting at `seed`. |
@@ -29,7 +29,7 @@ Linked list with `Var` elements.
 | [`List.getindex`](#List.getindex) | Returns `list[index]`, or `void` when out of range. |
 | [`List.getslice`](#List.getslice) | Returns `list[start:stop:step]`. |
 | [`List.head`](#List.head) | Returns the first `count` elements of `list`. |
-| [`List.index`](#List.index) | Returns the first index of `key`, or -1 when absent. |
+| [`List.index`](#List.index) | Returns the first index of an element `==` to `key`, or -1 when absent. |
 | [`List.iter`](#List.iter) | Initializes caller-owned `dest` as a forward iterator over `lst`. |
 | [`List.last`](#List.last) | Returns the last value in `lst`, or `void` when it is empty. |
 | [`List.len`](#List.len) | Returns the number of cells in `lst` in O(n) time. |
@@ -224,7 +224,9 @@ Source: `lib/list/building.x`
 
 `int List.contains(List lst, Var key)`
 
-Reports whether `lst` contains `key` by `Var` equality.
+Reports whether `lst` holds an element `==` to `key`.
+Elements compare as in `List.index`, so `%(1.0)` contains `1`, while a
+`Map` keyed by `1.0` does not.
 
 Source: `lib/list/traversal.x`
 
@@ -335,7 +337,11 @@ Source: `lib/list/traversal.x`
 
 `meta native int List.index(List l, Var key)`
 
-Returns the first index of `key`, or -1 when absent.
+Returns the first index of an element `==` to `key`, or -1 when absent.
+`==` compares two numbers as their native values do in C, so `1`, `1.0`,
+and `1L` match, and it compares other values with `Var.equal`. `Map`
+keys and `List.unique` use `Var.equal` for numbers too, which keeps those
+types apart.
 
 Source: `lib/list/traversal.x`
 
@@ -631,8 +637,10 @@ Source: `lib/list/building.x`
 `Var List.assoc(List list, Var key)`
 
 Returns the second value of the first association whose key equals `key`.
-Nil entries are skipped. A missing association and a missing second value
-both return `void`, so the two cases look the same here.
+Keys compare with `==` as in `List.index`, so `1.0` finds the association
+keyed by `1`, which a `Map` lookup would miss. Nil entries are skipped. A
+missing association and a missing second value both return `void`, so the
+two cases look the same here.
 
 Source: `lib/list/traversal.x`
 
