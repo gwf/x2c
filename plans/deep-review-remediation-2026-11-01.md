@@ -187,6 +187,37 @@ Waste and drift the workers saw, for this batch:
   README.md` shows `defer` where the `auto` form is now described;
   `unittest/AGENTS.md` and `STATUS.md` need the skip-inside-a-test rule.
 
+### Carried from the batch C handoffs
+
+Defects and drift the batch C workers reproduced or read outside their
+items, for a later batch:
+
+- `Logger.new` returns NULL for an invalid level, so the NULL now fails at
+  its first use instead of the constructor raising (ER-1).
+- `Lisp.call_budget` ignores a nonpositive budget silently although its
+  doc says the budget must be positive; the `Lisp.bind` doc omits the
+  `<bad-state>` a frozen session raises after the `Func` has moved;
+  `Lisp.try_get` and `Lisp.read` document their own null-session
+  behaviour, outside the handle rule.
+- `lisp_source_function`, `Lisp.automatic_storage`, and
+  `Lisp.result_storage` have no callers outside `lib/lisp` and its test:
+  candidates for deletion.
+- `Array.take_last`, `shift`, and `remove` return `void` on a null array or
+  an index outside the elements (the decision covered writes only);
+  `Array.getindex` dereferences a null array under its documented
+  non-null precondition.
+- `Iter.parallel_map` and `parallel_map_in` take a `ThreadValueFn`; their
+  null-function behaviour was not checked.
+- `lib/channel.x` uses an `argument` detail key that DG-7 does not list;
+  `Listener.write_repr` formats a null handle's text.
+- Not audited for null-handle sites: `lib/match`, `lib/dispatch.x`,
+  `lib/static-init.x`, `lib/var`, `lib/pool`.
+- Lines over 79 columns that predate the batch: `lib/lisp/lisp.x` (five,
+  deliberate one-line error macros) and `lib/process.x` (three) from the
+  compact-diagnostics commit, `unittest/test-lisp.x`, `test-iter.x`,
+  `docs/src/guide/iteration.md`, and `collections.md`; translating
+  `test-lisp.x` reports four unnecessary `.str()` conversions.
+
 ## Validation and delivery
 
 Workers: focused checks only. Orchestrator: combined focused checks and
