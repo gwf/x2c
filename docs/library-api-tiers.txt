@@ -25,7 +25,6 @@ lib/buffer.x|advanced|Buffer.repr,Buffer.reserve,Buffer.str,Buffer.str_free
 lib/buffer.x|advanced|Buffer.tabstop,Buffer.unwrite,Buffer.write
 lib/buffer.x|advanced|Buffer.write_char,Buffer.write_len,Buffer.write_repeat
 lib/buffer.x|compatibility|Buffer.get
-lib/buffer.x|internal|Buffer.move_to
 lib/common.x|advanced|Array.var,Block.var,Buffer.var,Bytes.var,File.var
 lib/common.x|advanced|Iter.truth,Iter.var,List.truth,List.var,Map.var
 lib/common.x|advanced|String.truth,String.var,Symbol.var,Var.array_payload

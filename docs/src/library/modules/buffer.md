@@ -12,6 +12,7 @@ Growable text buffer with indentation support.
 | [`Buffer.clear`](#Buffer.clear) | Empties `buf` and its indentation stack without releasing capacity. |
 | [`Buffer.getindex`](#Buffer.getindex) | Returns `buf.get(index)`, so `buf[index]` reads a byte. |
 | [`Buffer.len`](#Buffer.len) | Returns the number of bytes currently stored in `buf`. |
+| [`Buffer.move_to`](#Buffer.move_to) | Moves `buf` and both owned `Block`s into `scope`, keeping their identities. |
 | [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` whose `pad` method writes `padding` spaces. |
 | [`Buffer.pop`](#Buffer.pop) | Pops one indentation depth from `buf`'s stack when present. |
 | [`Buffer.push`](#Buffer.push) | Pushes the current column as a later indentation depth. |
@@ -44,6 +45,19 @@ Source: `lib/buffer.x`
 `size_t Buffer.len(Buffer buf)`
 
 Returns the number of bytes currently stored in `buf`.
+
+Source: `lib/buffer.x`
+
+<a id="Buffer.move_to"></a>
+#### Buffer.move_to
+
+`void Buffer.move_to(Buffer buf, Scope *scope)`
+
+Moves `buf` and both owned `Block`s into `scope`, keeping their identities.
+Their lifetime then ends with the destination `Scope` unless freed earlier.
+For a nonnull `Buffer`, raises `<bad-arg>` for a null destination slot, or
+`<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
+ownership unchanged.
 
 Source: `lib/buffer.x`
 
@@ -328,30 +342,6 @@ Source: `lib/buffer.x`
 Returns the byte at `index`, or NUL when `index` is out of range.
 Stored bytes are never NUL. Prefer `Buffer.try_get` to also report
 whether the index is present.
-
-Source: `lib/buffer.x`
-
-## Runtime-internal callables
-
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`Buffer.move_to`](#Buffer.move_to) | Moves `buf` and both owned `Block`s into `scope`, keeping their identities. |
-
-### `Buffer`
-
-<a id="Buffer.move_to"></a>
-#### Buffer.move_to
-
-`void Buffer.move_to(Buffer buf, Scope *scope)`
-
-Moves `buf` and both owned `Block`s into `scope`, keeping their identities.
-Their lifetime then ends with the destination `Scope` unless freed earlier.
-For a nonnull `Buffer`, raises `<bad-arg>` for a null destination slot, or
-`<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
-ownership unchanged.
 
 Source: `lib/buffer.x`
 
