@@ -5,6 +5,18 @@
     change the native macro state before its source position.
 */
 
+// diagnostics
+
+static macro Stmt $fail.generate_inline_private(
+  Expr $c, Expr $origin, Expr $function, Expr $name) {
+  with ($c.origin = $origin) {
+    $c.report_error(
+      <emit>,
+      %"public inline function '$($function)' uses unit-private '$($name)'",
+      NULL, NULL);
+  }
+}
+
 // header and source
 
 /* One unit's split into header and source. `pending` holds each late
@@ -33,13 +45,15 @@ static typedef struct HeaderNeeds {
 /* Partition a normalized unit without changing source order. Non-inline
    public functions publish a header declaration and keep their body in the
    source; public inline definitions also publish their bodies. Static
-   functions and objects stay in the source. Static types enter the header
-   when a public declaration or inline body needs them. */
+   functions and objects stay in the source, so a public inline body may
+   not use them. Static types enter the header when a public declaration
+   or inline body needs them. */
 module List _header_and_source(Compiler c, List ast, Map inline_bodies) {
   Partition p = {
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
   foreach (Ast node in ast) _add(p, node);
+  _check_inline_bodies(p);
   return $(_finish(p), _source_projection(c, ast, inline_bodies));
 }
 
@@ -256,6 +270,37 @@ static Type _noreturn(Type type, List declarator, Ast body) {
 static List _header_function(Type type, List declarator, List body) {
   if (type.is_inline()) return %(function (static @type) $declarator $body);
   return _prototype(type, declarator);
+}
+
+/* C forbids a public inline definition to use a static function or object
+   of its unit, and an includer of the header would reach another unit's
+   definition or none. The first use fails at the statement holding it. */
+static void _check_inline_bodies(Partition &p) {
+  foreach (List item in p.header)
+    match (item) case %(function ? (bind ?function *) ?body): {
+      List use = _private_use(body, p.statics, 0);
+      if (use)
+        $fail.generate_inline_private(
+          p.c, use.car(), _display_name(p.c, function),
+          _display_name(p.c, use.cadr()));
+    }
+}
+
+/* The first binding within `value` that `statics` holds, as `(origin
+   binding)` with the origin of the innermost statement around it, or
+   NULL. */
+static List _private_use(Var value, Map statics, int origin) {
+  if (value is not <list>) return NULL;
+  List node = value;
+  match (node) {
+    case %(binding ? ?): return node in statics ? $(origin, node) : NULL;
+    case %(at ?(int at) ?inner): return _private_use(inner, statics, at);
+  }
+  foreach (Var child in node) {
+    List use = _private_use(child, statics, origin);
+    if (use) return use;
+  }
+  return NULL;
 }
 
 module List _prototype(List type, List declarator) =>
