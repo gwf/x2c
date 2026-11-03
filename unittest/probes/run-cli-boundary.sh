@@ -398,14 +398,20 @@ printf 'int main(void) { return 0; }\n' >"$BUILD/space dir/a b.x"
 "$X2C" build -v --output "$BUILD/space dir/ab" "$BUILD/space dir/a b.x" \
   2>"$BUILD/space-verbose.stderr"
 translate_words() {
-  local input=$2 line
+  local input=$2 mapping=${3:-} line
   line=$(grep '^x2c: translate ' "$1")
   eval "set -- ${line#x2c: translate }"
-  [[ $# == 3 && $1 == --out-dir && $3 == "$input" ]]
+  [[ $1 == --out-dir && -n $2 ]]
+  shift 2
+  if [[ -n $mapping ]]; then
+    [[ $1 == "$mapping" ]]
+    shift
+  fi
+  [[ $# == 1 && $1 == "$input" ]]
 }
-for log in space-translate space-dry space-verbose; do
-  translate_words "$BUILD/$log.stderr" "$BUILD/space dir/a b.x"
-done
+translate_words "$BUILD/space-translate.stderr" "$BUILD/space dir/a b.x"
+translate_words "$BUILD/space-dry.stderr" "$BUILD/space dir/a b.x" --source-map
+translate_words "$BUILD/space-verbose.stderr" "$BUILD/space dir/a b.x" --source-map
 quoted="--out-dir '$BUILD/space out' '$BUILD/space dir/a b.x'"
 grep -Fqx "x2c: translate $quoted" "$BUILD/space-translate.stderr"
 
