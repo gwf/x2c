@@ -127,4 +127,4 @@ after changing the option; ordinary builds keep `BUILD_LTO=0`.
 - `agents/x2c-code-organization-guide.md` - where code belongs.
 - `agents/x2c-debugging-guide.md` - phase dumps and miscompile isolation.
 - `docs/src/internals/implementation-map.md` - feature routing.
-- `plans/README.md` - durable plan format and archival rules.
+- `plans/README.md` - current work, durable plan format, and historical record.

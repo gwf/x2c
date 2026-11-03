@@ -284,7 +284,7 @@ directory keep their distinct path-derived objects under `<dir>/obj/`.
 - `examples/` - curated executable examples.
 - `docs/` - language, library, and compiler book.
 - `agents/` - task routing and implementation references.
-- `plans/` - active plans and archived decisions.
+- `plans/` - active work and one compressed historical record.
 - `etc/` - shared build rules, the compiler prelude, and runtime Lisp assets.
 - `packages/` - optional third-party adapters, outside `make check`.
 - `site/` - public website; it is not gated. Candidate assembly retains complete destination sites; promotion deploys

@@ -2,8 +2,9 @@
 
 Four paired workloads, the same work on both sides, run live. Each pair
 reads one set of artifacts, prints the same records, and is compared by a
-runner that owns no model logic. The plan is
-[archived here](../../../plans/archive/x2c-torch-comparison.md).
+runner that owns no model logic. The
+[history](../../../plans/HISTORY.md#packages-applications-and-releases)
+summarizes the original matched-application study.
 
 This suite is optional. It is outside `test`, `check`, `packages-check`,
 `precommit`, and every publication gate, and it adds nothing to them.

@@ -4,7 +4,7 @@
 
     `meta-import-defs.x` imports this file, so its definition reaches
     the consuming unit through two levels of macro import rather than one.
-    See `plans/archive/meta-functions.md`.
+    See `docs/src/guide/meta-functions.md`.
 */
 
 meta String mi_dashed(String path) => path.replace(".", "-");

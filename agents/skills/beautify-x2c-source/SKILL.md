@@ -19,8 +19,8 @@ algorithms, and data structures stay the same. A small tweak is allowed when
 it is neutral or better and makes the code easier to read. The standard is
 [the code standard](../../x2c-code-standard.md), especially FN, FA, FI,
 and NM.
-The [source organization plan](../../../plans/archive/x2c-source-organization.md)
-records the last campaign, its rules, and its measurements.
+The [history](../../../plans/HISTORY.md#reviews-simplification-and-deferred-research)
+records earlier organization campaigns; the current standard owns their rules.
 
 ## Settle the file boundary first
 

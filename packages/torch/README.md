@@ -365,7 +365,8 @@ only before that pool starts. `Torch.num_threads` and
 ## Benchmarks
 
 `benchmarks/` holds the matched x2c and PyTorch applications from
-`plans/archive/x2c-torch-comparison.md`: tabular regression, the MNIST CNN,
+the [historical comparison](../../plans/HISTORY.md#packages-applications-and-releases):
+tabular regression, the MNIST CNN,
 sequence forecasting, and an interop diagnostic, with a runner for
 correctness, timing, and memory modes. They are outside every package
 target and gate; `benchmarks/README.md` gives the commands and
@@ -499,8 +500,8 @@ bundle into a scratch prefix and runs a program against it.
 - Python optimizer interchange currently covers Adam. Other optimizers
   retain C++ archive save/load. Module state works in both directions.
 - The generated operator tier is a function count, not coverage:
-  `schema/README.md` names the families it leaves out. The design is in
-  `plans/archive/x2c-torch.md`.
+  `schema/README.md` names the families it leaves out; this README owns the
+  package's current surface and limits.
 - Custom autograd currently supports one output and first-order gradients.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
   they capture Python. x2c runs a TorchScript model but cannot produce

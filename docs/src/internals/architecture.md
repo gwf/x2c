@@ -34,7 +34,7 @@ unittest/   runtime suites, compiler fixtures, probes, and benchmarks
 examples/   curated executable and build-checked programs
 docs/       this book: guide, reference, library, and internals
 agents/     repository-facing documentation, contracts, and project skills
-plans/      active plans-as-logs and archived execution records
+plans/      active work and compressed history; originals remain in Git
 etc/        shared Makefile rules, build configuration, the compiler
             prelude with the built-in macros, and runtime Lisp assets
 tools/      documentation and stage-comparison checkers

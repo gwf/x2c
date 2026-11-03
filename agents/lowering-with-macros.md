@@ -7,19 +7,10 @@ template whose body is the C builds the output. This page shows the try
 lowering, which every later lowering copies, and states the rules a
 lowering meets. The try lowering is a shipped component,
 `src/components/try-catch.x`, registered through `$rewrite` like
-`src/components/bracket-access.x`. The
-[dual-macro contract](../plans/archive/compiler-dual-macro-contract.md) uses these
-rules as its acceptance test for later migrations. Any code that builds
-syntax follows [Choosing how to build syntax](#choosing-how-to-build-syntax).
-
-The campaign also reviews ownership across the compiler. Shared grammar
-macros remove repeated knowledge of source structure; recognition-only use
-is sufficient reason for a macro. Group related transformations and their
-templates coherently while preserving shared semantic services. Individual
-case conversions must serve that architecture, not determine it accidentally.
-The contract's [historical handoff](../plans/archive/compiler-dual-macro-contract.md#current-campaign-handoff)
-records the architectural survey and coordination agreement; E45 records the
-delivered source-family coverage and retained boundaries.
+`src/components/bracket-access.x`. Any code that builds syntax follows
+[Choosing how to build syntax](#choosing-how-to-build-syntax).
+The [history](../plans/HISTORY.md#compiler-architecture) summarizes the
+migration; the rules below and the current code standard own this guidance.
 
 ## The rules
 

@@ -13,8 +13,8 @@ here. A local representation, ABI, or measured cost may require an exception;
 state that constraint beside the exception and keep the rule.
 
 Status: accepted as of 2026-10-05. This is the single definition of x2c
-source style. [The adoption plan](../plans/archive/x2c-code-standard.md) tracks its
-adoption.
+source style. The [history](../plans/HISTORY.md#reviews-simplification-and-deferred-research)
+records its adoption.
 
 ## How to read this standard
 
@@ -1351,8 +1351,8 @@ and files outside that corpus still need review. The new codes are
 candidates except `same-line-else`: its compiler and runtime census is
 zero, so it is a violation.
 
-The [adoption plan](../plans/archive/x2c-code-standard.md) lists the detectors to
-build for the rows marked "none", ordered by value and cost.
+Rows marked "none" have no detector. Historical detector proposals do not
+commission their implementation.
 
 ## Turning bad code into good code
 

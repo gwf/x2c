@@ -74,9 +74,10 @@ and explains accepted behavior or unresolved research in its README. A compact
 profile file may retain facts that materially inform review. Generated API or
 compiled-source inventories stay outside Git and may be regenerated from the
 pinned source when needed. Candidate research keeps concise evidence under
-`plans/`, with completed or rejected investigations in `plans/archive/`, so a
-later review can distinguish a changed upstream profile from a repeated
-investigation.
+`plans/` while active. Completed outcomes belong in
+[the history](../plans/HISTORY.md#packages-applications-and-releases), with
+full originals retained in Git, so later reviews can distinguish a changed
+upstream profile from a repeated investigation.
 
 ## Approved libtorch OpenMP exception (2026-11-02)
 

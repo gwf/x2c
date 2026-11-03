@@ -2,11 +2,10 @@
 
 An external command is an ordinary x2c program in `commands/<name>/` that
 the driver runs as `x2c <name>`. Read the current command and its tests
-before changing its behavior. The
-[completed design](../plans/archive/external-commands.md) owns the framework
-decisions; the [CLI reference](../docs/src/reference/cli.md#commands)
-describes what users see. A feature plan owns the command's behavior. Check
-its current owner before moving a tool or adding rules to a command.
+before changing its behavior. This guide describes the framework; the
+[CLI reference](../docs/src/reference/cli.md#commands) describes what users
+see. Check the current command owner before moving a tool or adding rules.
+The [history](../plans/HISTORY.md#tools-and-commands) records earlier designs.
 
 ## Add or move a command
 

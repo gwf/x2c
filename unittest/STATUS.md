@@ -11,7 +11,7 @@ cache keys, locking, and compiler timeout policy are unchanged.
 The existing cache-key probe includes cold absolute and relative symlink cases
 with bounded process-group cleanup. The regression fails before the fix and
 passes afterward. The complete local gate also passes. See
-[the repair evidence](../plans/reference/async-cache-path-fix-2026-10-31.md).
+[the repair evidence](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-cache-path-fix-2026-10-31.md).
 
 ## Resolved GCC async use-after-return finding on 2026-10-31
 
@@ -27,13 +27,13 @@ The focused follow-up uses GCC/Clang's physical frame address in the existing
 bounds check. Metadata and bounds rejection remain active. The new optional
 `task-stack-uar.c` regression fails before the fix and passes on all four
 native targets after it. See
-[the repair evidence](../plans/reference/async-uar-fix-2026-10-31.md).
+[the repair evidence](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-uar-fix-2026-10-31.md).
 
 Linux validation also exposed two sanitizer-harness defects. The harness now
 passes the runtime's required `-fsigned-char` flag and links compiler objects
 before the runtime archive. The repaired harness passes on all four native targets
 after the numeric repair below. See
-[the target report](../plans/reference/async-native-targets-2026-10-31.md).
+[the target report](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-native-targets-2026-10-31.md).
 
 ## Resolved Linux x86_64 numeric findings on 2026-10-31
 
@@ -48,7 +48,7 @@ preserves other formats. Three focused tests cover nonconstant NaN decoding,
 formatting, differing padding, cloning, Map keys, precision, signed zero, and
 NaN payloads. Full normal and ASan/UBSan suites pass on all four native targets.
 No expectation was weakened. See
-[the repair evidence](../plans/reference/async-numeric-fixes-2026-10-31.md).
+[the repair evidence](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-numeric-fixes-2026-10-31.md).
 
 ## Private async stack coverage on 2026-10-31
 
@@ -60,7 +60,7 @@ runtime API or recurring gate. Focused normal and ordinary sanitizer Task
 checks pass on all four selected native targets. All four pass full normal
 and ordinary sanitizer suites after the numeric repair. The GCC use-after-return
 false overflow is resolved by the focused repair recorded above. See
-[the native target report](../plans/reference/async-native-targets-2026-10-31.md).
+[the native target report](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-native-targets-2026-10-31.md).
 
 ## Private async review on 2026-10-31
 
@@ -76,7 +76,7 @@ the subsequent authorized runtime follow-up:
 Both now save their activation pointers at the existing task boundaries.
 Two focused task-suite tests cover interleaved suspension, fresh task state,
 caller restoration, failure, and cancellation cleanup. See
-[the merged review](../plans/reference/async-merged-review-2026-10-31.md).
+[the merged review](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/reference/async-merged-review-2026-10-31.md).
 
 The full local check also encountered a REPL replay compilation failure:
 `x2c.h` was not found. The terminal check and complete command checks passed
@@ -116,7 +116,7 @@ module units using their supported collection mode.
 
 ## Dual-macro migration follow-ups
 
-The [migration tasks](../plans/archive/compiler-dual-macro-contract.md#migration-defect-tasks)
+The [migration tasks](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/archive/compiler-dual-macro-contract.md#migration-defect-tasks)
 record the completed parameter-redeclaration and standalone raw-symbol
 repairs. The depth fixture reaches a normal 64-level diagnostic; a truly
 null-site invocation remains an unverified coverage gap, not a reproduced
@@ -136,7 +136,7 @@ repair proceeded. The upstream repair at `81a76f090` now replaces the local
 coordination record with cleanup-owned storage and has been integrated here.
 The normal publication gate passed on the combined tree at `27812dffe`;
 warning policy is unchanged. See the
-[CLI plan](../plans/archive/build-cli-defaults.md) for the retained verification
+[CLI plan](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/archive/build-cli-defaults.md) for the retained verification
 evidence.
 
 ## Reference Lisp comparison
@@ -155,7 +155,7 @@ and stderr byte for byte; no expected result was weakened.
   reproduces the C arity error. The local Lisp-independence work supplies
   `<x2c>` while removing its reader-only evaluator session; conversion parity
   verification is recorded in the
-  [local plan](../plans/archive/compiler-lisp-independence.md#local-result-and-evidence).
+  [local plan](https://github.com/gwf/x2c/blob/a7a01924c8406b9e7da8edb74ac891a0aa6b2e1a/plans/archive/compiler-lisp-independence.md#local-result-and-evidence).
 
 - Retired component experiments leave focused compiler fixtures for indexed
   rewrite entry points and rule order, independent rule composition, local

@@ -39,8 +39,9 @@ different target.
 
 ## Decide what belongs in the tracked ledger
 
-Update `plans/overengineering-candidates.md` only for a source-reviewed live
-candidate or a deliberate calibration case. A live row must name the current
+Create or update `plans/overengineering-candidates.md` only for a source-reviewed
+live candidate. Historical calibration is in
+[the history](../../../plans/HISTORY.md#reviews-simplification-and-deferred-research). A live row must name the current
 file, function or type, exact lines, machinery, actual consumers, smallest
 removal hypothesis, strongest keep case, provenance, confidence, and one next
 proof. Do not put a mechanical hit in the ledger before reading its source.

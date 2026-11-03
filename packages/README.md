@@ -176,8 +176,8 @@ packages do not maintain a second hand-written prototype list.
 
 Applications that demonstrate two or more packages together are under
 `examples/packages/`. `http-json-releases` imports libcurl and yyjson and
-links both archives. Completed candidate and prerequisite research is
-archived under `plans/archive/`.
+links both archives. Completed candidate and prerequisite research is summarized in
+[the history](../plans/HISTORY.md#packages-applications-and-releases).
 
 ## Dependency terms
 

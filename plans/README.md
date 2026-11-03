@@ -1,80 +1,57 @@
 # plans/
 
-All durable planning lives here. Build tooling and runtime-loaded bootstrap
-data stay in `etc/`; ephemeral per-workspace state goes in `.context/`.
+Active plans live here while their work needs a design or execution record.
+Each opens with a `> Status:` block stating its actual state. Durable plans
+follow the review below; workspace notes belong in `.context/`.
 
-- `plans/` - active plans and reference inputs. Each file opens with a
-  `> Status:` blockquote, usually several lines: the state, then a note
-  saying where the work actually stands. The states in use are `active`
-  and `reference`.
-- `plans/reference/` - dated evidence and unselected research inputs.
-- `plans/archive/` - finished plans. The same blockquote, recording the
-  outcome, its date, and the commit or PR that closed the plan. Write
-  `done`, `rejected`, `obsolete`, or `retired`. Never delete a plan; archive
-  it with its outcome. Archived and reference workflow restrictions record
-  the authorization that applied at the time; current work follows the root
-  `AGENTS.md`.
+[HISTORY.md](HISTORY.md) is the single compressed historical record. It keeps
+material outcomes, supersession, and evidence limits. Git retains the complete
+original plans and research files. Finished plans can be folded into that
+record; their instructions do not remain current requirements.
 
-Keep a plan concise and decision-complete: the requested behavior, important
-choices, implementation, relevant validation, and delivery should be clear to
-another engineer. Use phases only when the work needs separately delivered
-changes. Record measurements when they decide the design or verify its result,
-rather than requiring a count for every task. Update status when work lands.
+The book owns language/library contracts. Source owners and current repository
+guidance own implementation and workflow. A historical rejection does not
+forbid a different design or a new workload-supported investigation.
 
-A planning-only request ends with the plan. An implementation request allows
-routine missing details and the design review to be completed during the work.
-Ask about unresolved consequential choices, such as public semantics or
-compatibility beyond the request, rather than stopping for missing paperwork.
-Delivery follows the root `AGENTS.md`; a plan need not imply a PR or another
-session.
+## Current work
 
-An archived rejection records the exact implementation, compiler capability,
-and evidence measured at that time. It does not create a permanent rule against
-the candidate family. New syntax, projections, compilation behavior, source
-structure, or measurements may justify a new prototype. Treat old phrases such
-as `do not reopen` or `no other candidate` as historical unless current
-`AGENTS.md`, agent guidance, or an active plan restates the exact restriction.
+Checked against `a7a01924c` on 2026-11-02. These are the remaining items from
+the former active plans, verified during consolidation. This cleanup does not
+implement them. Completed and superseded items are explained in the history.
 
-## Current work and backlog
-
-Completed deliveries are archived below. Remaining implementation questions
-and conditional candidates have explicit owners. Historical measurements
-remain evidence for their named revisions; this index does not commission
-deferred work or main promotion.
-
-### Active work
-
-| Owning plan | Remaining scope | Next action |
+| Remaining work | Current evidence and owner | Next bounded action |
 | --- | --- | --- |
-| [Deep review remediation](deep-review-remediation-2026-11-01.md) | Only the final "Still carried" findings; batches A, B, C, and the bug batch are published through `dbcb6c347`. | Reproduce each selected follow-up; preserve the superseding invocation-time iterator callback rule. |
-| [Review follow-ups](review-followups-2026-10-31.md) | Script LSP offsets, native-module probe, lint tiers, attribute macros, Linux dependency identities, CPP overflow, example instructions, and documentation gate scope. | Start each selected repair with its named reproduction; do not reopen completed campaigns. |
-| [Language-reference writing](language-reference-writing.md) | Remaining rewrite explanation and runtime Lisp truthiness/host-limit coverage. | Preserve delivered AST catalog and binding explanations; fill exact missing coverage. |
-| [Structured lint findings](x2c-lint-and-format.md) | Approved optional List output and compiler consumption. | Implement that interface when selected; preserve experimental distribution. |
+| File-scope diagnostic location | A five-line Iter initializer reports `6:1`; [transform traversal](../src/transform/traversal.x) does not select the recorded definition span. | Anchor that diagnostic through the existing source-location owner. |
+| Pointer to a typedef'd function type | A `Namer *` call emits an integer argument where its Var parameter requires boxing; [call typing](../src/expressions/calls.x) and [call transformation](../src/transform/expressions.x). | Normalize this callable shape through the existing argument-conversion path. |
+| Callback result qualifiers | A const-char result adapted to mutable char passes translation and warns in C; [callback adapters](../src/callables/callbacks.x). | Preserve the existing qualifier contract at adapter construction. |
+| Alias collisions | Member-wrapper and declaration-before-included-alias cases still translate; [aggregate parsing](../src/parse/types.x), [aliases](../src/macros/aliases.x). | Repair these shapes through their existing binding checks. |
+| Regex and List rendering recursion | [Regex](../lib/regex.x) checks repeated-group iteration but not all recursive matching; [List rendering](../lib/list/rendering.x) has no recursive floor check. [STATUS](../unittest/STATUS.md) retains prior overflow evidence; large crashes were not rerun. | Bound the respective recursive paths; pair Regex changes with focused hot-path measurements. |
+| Receiver-return region summaries | Translation misses escapes through `Map.merge_with`, `Map.update_n`, and `Array.update_n`; their rows are absent from [runtime summaries](../src/regions/runtime.x). | Reuse the existing receiver-return summary model. |
+| First hover on an unopened script | First hover returns null, identical second/opened hover finds the value; [LSP requests](../commands/lsp/lsp.x) compute the cursor before [analysis](../commands/lsp/analysis.x) rewrites stored script text. | Preserve original cursor coordinates through the existing mapping. |
+| Optional native-module probe | [The probe](../unittest/probes/run-native-modules.sh) submits a REPL meta declaration that the current playground explicitly rejects. | Use source loading for that check while preserving compile-time native coverage. |
+| Lint member documentation tier | Entry-only internal manifest classification does not reach its member; [comment checks](../commands/lint/comments.x) use the member path despite an existing entry field. | Reuse the entry's classification and cover the module case. |
+| HTTP releases example endpoint | [The example](../examples/packages/http-json-releases/http-json-releases.x) appends `/summary` after the default URL's query and assumes a private POST response. | Verify the intended local-fixture flow and correct the default/documented endpoint contract. |
+| Notes benchmark instructions | [The instructions](../examples/apps/notes/bench/database-thread.md) repeat include and prefix discovery already supplied by package linking. | Remove only those redundant arguments; no database architecture change. |
+| Runtime Lisp explanation | [The reference](../docs/src/reference/language.md#runtime-lisp) documents bindings but not explicit condition truthiness or the evaluator's stack/step limits. | Explain those existing semantics using [the evaluator](../lib/lisp/evaluate.x) and current Lisp API. |
+| Optional structured lint findings | [Lint](../commands/lint/x2c-lint.x) still prints human text only; [Lint.print](../commands/lint/lint.x) has findings to reuse. | Complete the previously approved List-output option and thin compiler consumer; keep execution optional and lint experimental. |
 
-### Research and reference
+### Evidence questions
 
-These records do not commission implementation. Use their stated trigger
-before selecting a candidate.
+- Included-header attribute macros: the [reference](../docs/src/reference/language.md)
+  supports attribute-prefix macros in ordinary mode, but the included-header
+  probe fails without `--cpp`. Trace header visibility through
+  [type parsing](../src/parse/types.x) before classifying the gap or choosing
+  a compatibility change.
+- Linux REPL dependency identity: [dependency collection](../commands/repl/repl-program.x)
+  treats an entire trace line as a path. Decorated GNU linker output and stale
+  reuse have not been reproduced on Linux. Obtain that evidence before repair.
+- CPP arithmetic: [conditions](../src/cpp/conditions.x) use native signed
+  arithmetic. Settle intermediate-overflow behavior against the reference and
+  obtain sanitizer evidence before choosing arithmetic semantics.
 
-| Record | Use |
-| --- | --- |
-| [Deferred language and library candidates](reference/deferred-candidates-2026-10-31.md) | Conditional JSON/assertion sharing, Array rest, meta Map boundary, quotation/TagId adoption, and browser phase 3. |
-| [Deferred async performance](reference/async-performance-followup-2026-10-31.md) | Accepted Channel/memory costs and evidence limits; normal benchmarks remain deferred until requested. |
-| [Async execution-stack evidence](reference/async-validation-2026-10-31.md) | The eleven `reference/async-*.md` records: prototype, spike, validation, native targets, numeric and sanitizer fixes, memory attribution, review, and integration for the work published at `255de641f`. |
-| [Earlier review questions](reference/review-followups-2026-10-24.md) | Dated component, typed List, duplication, SDK/native-type questions. |
-| [Compiler ownership](compiler-ownership-investigation.md) | Refresh one concrete ownership candidate before selection. |
-| [Compiler ownership evidence](reference/compiler-ownership-evidence.md) | Static inventory at `548b381f`, not a current census. |
-| [Lifetime proof](lifetime-proof-followup.md) | Dormant extension; first name a current blocked program. |
-| [Prepared formats](prepared-format.md) | Dormant feasibility work; first establish a useful repeated-format caller. |
-| [Overengineering ledger](overengineering-candidates.md) | No live candidates selected. |
-| [Harness evidence](reference/harness-evidence-2026-10-05.md) | Historical external incidents; repository repairs landed. |
-| [Remediation evidence](reference/review-remediation-evidence-2026-10-11.md) | Dated repair and reproduction evidence. |
-| [Language ledger](reference/review-remediation-language-ledger-2026-10-11.md) | Historical study coverage, not an active task list. |
-| [Benchmark website integration](../site/BENCHMARKS.md) | Future page requirements and saved-data paths; no deployment selected. |
-
-Future releases use [releasing](../agents/releasing.md) and
-[deployment operations](../etc/release/README.md). No production promotion
-is selected here.
+Dormant feasibility studies and unselected optimization ideas are historical,
+not active work. No broad null audit, public-API deletion, extra gate, or new
+benchmark campaign is commissioned by this list.
 
 ## Required plan review
 

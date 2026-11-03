@@ -6,7 +6,7 @@
     compile-time form and the run-time form shows up as a pair whose two
     numbers differ. The run-time argument is derived from `argc`, which the
     C compiler cannot fold.
-    See `plans/archive/meta-functions.md`.
+    See `docs/src/guide/meta-functions.md`.
 */
 
 #include "x2c.x"

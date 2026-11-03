@@ -73,8 +73,7 @@ HARNESS_GROUPS = [
     ("instructions", "**/AGENTS.md", "file"),
     ("skills", "agents/skills/*/SKILL.md", "skill"),
     ("guides", "agents/*.md", "guide"),
-    ("plans_active", "plans/*.md", "plan"),
-    ("plans_archived", "plans/archive/*.md", "plan"),
+    ("plans", "plans/*.md", "record"),
 ]
 
 

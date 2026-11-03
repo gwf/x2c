@@ -11,8 +11,8 @@ Everyday integration uses dev; main is the published-release branch. Releases
 `pages.yml` source remains unchanged with its workflow registration disabled
 until Gary retires it, as described under "Recovery baseline" below.
 
-The [archived workflow plan](../../plans/archive/public-release-workflow.md)
-records the implementation design and staging history. Current release
+The [historical record](../../plans/HISTORY.md#packages-applications-and-releases)
+summarizes the workflow's implementation and staging history. Current release
 operations follow [releasing](../../agents/releasing.md) and this document.
 The source repository stays public at `gwf/x2c`. `gwf/x2c-staging` stores generated
 output and immutable candidates; it is not another development source tree.
