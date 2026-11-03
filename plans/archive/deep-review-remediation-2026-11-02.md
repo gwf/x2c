@@ -1,10 +1,11 @@
 # Deep review remediation (2026-11-02, second pass)
 
-> Status: active - implementation and combined review underway on 2026-11-02.
+> Status: done - implementation and validation completed on 2026-11-02.
 > Gary selected direct delivery to `dev`. Starting revision:
 > `87ced5324f15a2098bca98cee7500bb1a0f5b3b4`; review baseline:
 > `6f537e429`. Worker repairs are collected on `codex/remediation-20261102`.
-> Final publication evidence is recorded below when complete.
+> Validated source and artifacts: `1b968f1a62f06279025fccfbe3f50938ea7d32d6`.
+> Direct delivery targets `dev`; validation and performance evidence follows.
 
 ## Requested behavior
 
@@ -211,7 +212,7 @@ These decisions reject the proposed substitutions, not every future shared
 implementation. They preserve the existing contracts without introducing a
 new runtime API solely to wrap libc or a new package distribution dependency.
 
-Completed focused evidence so far:
+Focused evidence:
 
 - All reported compiler regressions were reproduced before repair. Worker
   builds and strict stage-1 builds pass; their focused fixtures and unit
@@ -229,8 +230,8 @@ Completed focused evidence so far:
   files through relative symlinks. Thirty-five example output names follow
   their source names. One service example checks both schedulers.
 
-Combined final validation and publication are pending. Host coverage remains
-macOS arm64; no Linux or native Torch execution is claimed.
+Host coverage remains macOS arm64; no Linux or native Torch execution is
+claimed. Combined validation is recorded below.
 
 ## Local bootstrap transition
 
@@ -308,3 +309,49 @@ calls, build with that compiler, and refresh bootstrap. Final source contains
 all 18 calls. No temporary source substitution is delivered. The complete
 compiler fixture target passes 1,468 cases and 2,452 artifacts after the tag
 projection repair and reviewed expectation updates.
+
+## Final validation and delivery
+
+The final code and generated-artifact head is
+`1b968f1a62f06279025fccfbe3f50938ea7d32d6`. The complete
+`tools/gate-state.py ensure agent-pr-check` passes on that exact tree,
+including shipped-bootstrap recovery, strict stage 1, self-host comparisons,
+cold collection, command and REPL checks, and documentation checks.
+The fixture target passes 1,468 cases and 2,452 artifacts. Runtime tests pass
+1,217 cases with 104,190 assertions; the separate thread run passes 26 cases
+with 96 assertions. The final book rerun compiles 451 samples and matches all
+140 output samples. The earlier executable-example run passes all 65 entries.
+
+Generated artifacts were refreshed through repository targets. The final
+three-file refresh changes cached source metadata and source-location line
+numbers. It changes no executable operation. Temporary capability-transition
+substitutions and the later static-record experiment are absent from the
+validated tree. Direct publication advances `dev`, with no `main` promotion.
+
+The isolated performance checkpoint succeeds for that same head:
+`20261103T000854Z-1b968f1a62f0`. It includes builds through stage 3, every
+stage comparison, build scaling, shootout, all runtime workloads, and compiler
+translation. The sequential stage workload uses 44.0322 CPU seconds for
+99,904 authored lines. The previous same-host snapshot at `024962818b11`
+uses 43.6860 CPU seconds for 99,494 lines. Their normalized build-cost scores
+are 61.4311 and 61.1992, a 0.38% increase. That comparison spans earlier
+commits as well as this batch; it does not isolate this batch's cost.
+
+The six-source-plus-tokenizer translation medians are 3.56483 seconds for
+stage 0 and 2.05837 seconds for stage 1, versus 3.42852 and 1.95260 seconds
+previously. Stage-3 elapsed time is 26.3837 seconds versus 43.6386 seconds.
+The checkpoint retains runtime metric names and raw samples; its runtime
+numbers must be interpreted with each benchmark's units.
+
+The checkpoint's Scope malloc/free sample is 19.317 ns per operation versus
+15.802 previously. Seven same-host alternating runs with MallocNanoZone=0
+measure the delivered stack-record version at a median 16.239 ns per operation
+and an experimental static-record version at 16.782 ns. The experiment does
+not support attributing the checkpoint's 22% sample increase to record
+storage. It was reverted. These advisory observations establish no regression
+threshold or performance guarantee.
+
+Full logs and the comparison report remain under this worktree's ignored
+`debug/remediation-performance/` and `debug/remediation-*.log`. The final
+archival edit carries documentation only and retains the validated compiler
+proof under the existing gate-state rules.
