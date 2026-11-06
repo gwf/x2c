@@ -534,7 +534,7 @@ The directory may be missing or empty; `x2c new .` fills the current empty
 directory. `new` exits with an error for any other existing path and never
 overwrites a file. The target name is the directory's last component and may
 contain letters, digits, `_`, and `-`. `-q` suppresses the
-`x2c: created <dir>` line.
+`x2c: created <dir>` line and the line that names the next command.
 
 ## Project manifests
 
@@ -765,7 +765,9 @@ search root; an ancestor named `tests` does not select application sources.
 `--manifest-path FILE` selects that manifest and `--target NAME` its
 target, as for `build`. The selected target's include and package
 directories are forwarded to each build. Concurrent runs print each
-file's captured output in discovery order. Each file runs through
+file's captured output in discovery order. When several files run, a
+`Testing <file>` line precedes each file's output, and failure locations
+are relative to the working directory. Each file runs through
 `x2c script`, so local `.x` includes compile as helpers. The script cache
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
