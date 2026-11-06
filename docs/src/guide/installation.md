@@ -373,7 +373,7 @@ extension from `etc/vsc-extension`; it starts `x2c lsp` and needs VS Code
 
 An upgrade removes `x2c repl` from the prefix. The native library
 playground is available only in a source checkout: run `make commands`,
-then `./x2c repl`. See [Library playground](repl.md).
+then `./x2c repl`. See [Library Playground](repl.md).
 
 #### Long-double hashes
 
