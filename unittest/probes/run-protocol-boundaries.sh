@@ -51,7 +51,7 @@ if "$X2C" translate --out-dir "$BUILD/tag-scope" \
     >"$BUILD/tag-scope/stdout" 2>"$BUILD/tag-scope/stderr"; then
   fail "a source-declared Var tag leaked into the next translation unit"
 fi
-grep -q 'cannot convert ("Vec") to Var without loss' \
+grep -q 'cannot convert Vec to Var without loss' \
   "$BUILD/tag-scope/stderr" ||
   fail "tag-scope rejection did not report the missing conversion"
 
