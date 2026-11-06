@@ -30,7 +30,7 @@ typedef struct ToolAction {
 } *ToolAction;
 
 /** Tracks one `Scope`-owned started action and its job.
-    A tool that could not start has no job and keeps the message its
+    A tool that could not start has no job and keeps the error its
     `ToolRun.wait` reports. The borrowed action must remain valid through
     that wait.
 */
@@ -53,6 +53,9 @@ typedef struct ToolRun {
 static macro Stmt $report.toolchain_tool_failed(Expr $phase, Expr $status) =>
   Diagnostics.driver_report(
     %"$($phase.str()) failed with status $($status)", NULL);
+
+static macro Stmt $report.toolchain_tool_missing(Expr $error, Expr $phase) =>
+  Diagnostics.driver_report($error, _tool_selection($phase));
 
 // tool selection
 
@@ -204,9 +207,10 @@ ToolRun ToolAction.start(ToolAction action) {
 int ToolRun.ready(ToolRun t) => !t.job || t.job.ready();
 
 /** Waits for an execution, forwards its captured streams, and returns its
-    shell-style status. Signals return `128 + signal`, a tool that could not
-    start returns 127, and a dry run returns 0. Captured output goes to
-    stderr; program actions inherit standard streams.
+    shell-style status. Signals return `128 + signal`, and a dry run
+    returns 0. A tool that could not start reports why, with how to select
+    another, and returns 127. Captured output goes to stderr; program
+    actions inherit standard streams.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
     reading either capture as a `String`.
@@ -215,12 +219,14 @@ int ToolRun.wait(ToolRun execution) {
   ToolAction action = execution.action;
   if (action.dry_run) return 0;
   Job job = execution.job;
-  int status = job ? job.status() : 127;
-  String output = job ? job.output_text : NULL;
-  String errors = job ? job.errors_text : execution.start_error;
+  if (!job) {
+    $report.toolchain_tool_missing(execution.start_error, action.phase);
+    return 127;
+  }
+  int status = job.status();
   report_suspend();
-  if (output) fputs(output, stderr);
-  if (errors) fputs(errors, stderr);
+  if (job.output_text) fputs(job.output_text, stderr);
+  if (job.errors_text) fputs(job.errors_text, stderr);
   if (status && action.report)
     $report.toolchain_tool_failed(action.phase, status);
   return status;
@@ -310,6 +316,16 @@ static Toolchain _toolchain(String cc, String ar) {
   return t;
 }
 
+/* How the user selects the tool that runs `phase`, or NULL. */
+static String _tool_selection(Symbol phase) {
+  switch (phase) {
+    case <archive>: return "select an archiver with --ar, X2C_AR, or AR";
+    case <compile>: case <preprocess>: case <link>:
+      return "select a C compiler with --cc, X2C_CC, or CC";
+  }
+  return NULL;
+}
+
 /* The explicit tool, `X2C_<NAME>`, `<NAME>`, the installed toolchain
    record's `<NAME>=` line, then `fallback`. */
 static String _tool(String explicit, String name, String fallback) {
@@ -374,15 +390,14 @@ static List _module_shape(String loader) {
 static Job _captured(List arguments) =>
   arguments.job().options({stdout: <capture>, stderr: <capture>});
 
-/* A tool that cannot start reports like a child that exited 127, the status
-   a shell gives a missing program, so every caller keeps one failure path. */
+/* A tool that cannot start has no job and leaves the error in `failure`.
+   Callers give it the status 127 a shell gives a missing program. */
 static Job _start_tool(Job command, String program, String &failure) {
   Job job = NULL;
   try job = command.start();
   catch %((!or not-found io-fail) *detail): {
     long error = detail.assoc(<"errno">);
-    String reason = String.new(strerror((int) error));
-    failure = %"x2c: unable to execute $program: $reason\n";
+    failure = %"cannot run '$program': $(String.new(strerror((int) error)))";
   }
   return job;
 }
@@ -435,7 +450,10 @@ static int _accepts(String cc, String option) {
 static int _capture(
   Job command, String program, String &output, String &errors) {
   Job job = _start_tool(command, program, errors);
-  if (!job) return 127;
+  if (!job) {
+    errors = %"x2c: error: $errors\n";
+    return 127;
+  }
   int status = job.status();
   output = job.output_text;
   errors = job.errors_text;
