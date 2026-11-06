@@ -906,13 +906,35 @@ static void _report_uncaught(List entry) {
 /* `key value` pairs in raise order; Strings and Symbols show their text. */
 static String _detail_text(List detail) {
   List parts = NULL;
-  foreach (List pair in detail) {
-    Var value = pair.cadr();
-    String text = value is <string> || value is <symbol>
-                ? value.str() : value.repr();
-    parts = $(@parts, %"$(pair.car) $text");
-  }
+  foreach (List pair in detail)
+    parts = $(@parts, %"$(pair.car) $(_detail_value(pair.cadr()))");
   return String.join(", ", parts);
+}
+
+/* A nested cause, `(code (key value)...)` or `(code ((key value)...))`,
+   shows its code and its pairs in parentheses. */
+static String _detail_value(Var value) {
+  if (value is <string> || value is <symbol>) return value.str();
+  List cause = value is <list> ? value.list() : NULL;
+  Var code = cause ? cause.car() : void;
+  if (code is not <symbol>) return value.repr();
+  List pairs = cause.cdr();
+  if (pairs && !pairs.cdr() && _detail_pairs(pairs.car())) pairs = pairs.car();
+  if (!pairs) return %"<$code>";
+  if (!_detail_pairs(pairs)) return value.repr();
+  return %"<$code> ($(_detail_text(pairs)))";
+}
+
+static int _detail_pairs(Var value) {
+  if (value is not <list>) return 0;
+  List items = value;
+  if (!items) return 0;
+  foreach (Var item in items) {
+    if (item is not <list>) return 0;
+    List pair = item;
+    if (pair.len() != 2 || pair.car() is not <symbol>) return 0;
+  }
+  return 1;
 }
 
 static void _log_pending(Logger active) {
