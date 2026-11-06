@@ -14,9 +14,9 @@
 #include <limits.h>
 static List _145, _144, _142, _141, _139, _138, _136, _135, _134, _132, _129, _128, _127, _121, _120, _119, _118, _112, _111, _110, _109, _103, _102, _101, _100, _94, _93, _92, _91, _85, _83, _82, _81, _78, _76, _75, _74, _68, _66, _65, _64, _58, _57, _56, _55, _49, _48, _47, _46, _41, _39, _38, _37, _31, _29, _28, _27, _21, _19, _18, _17, _11, _9, _8, _7, _1;
 
-static String _146, _125, _123, _116, _114, _107, _105, _98, _96, _89, _87, _79, _72, _70, _62, _60, _53, _51, _44, _42, _35, _33, _25, _23, _15, _13, _5, _3;
+static String _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _125, _123, _116, _114, _107, _105, _98, _96, _89, _87, _79, _72, _70, _62, _60, _53, _51, _44, _42, _35, _33, _25, _23, _15, _13, _5, _3;
 
-static Var _148, _147, _143, _140, _137, _133, _131, _130, _126, _124, _122, _117, _115, _113, _108, _106, _104, _99, _97, _95, _90, _88, _86, _84, _80, _77, _73, _71, _69, _67, _63, _61, _59, _54, _52, _50, _45, _43, _40, _36, _34, _32, _30, _26, _24, _22, _20, _16, _14, _12, _10, _6, _4, _2, _0;
+static Var _160, _159, _143, _140, _137, _133, _131, _130, _126, _124, _122, _117, _115, _113, _108, _106, _104, _99, _97, _95, _90, _88, _86, _84, _80, _77, _73, _71, _69, _67, _63, _61, _59, _54, _52, _50, _45, _43, _40, _36, _34, _32, _30, _26, _24, _22, _20, _16, _14, _12, _10, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -124,6 +124,20 @@ static int _literal_magnitude(String text, int end, unsigned long long * magnitu
 static int _radix(String text, int end, int * pos);
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative);
+
+static String _source_text(Type type);
+
+static String _pointer_text(Var item);
+
+static String _suffix_text(List modifier);
+
+static String _parameters_text(List parameters);
+
+static String _base_text(Type base, String text);
+
+static int _is_placement(Var item);
+
+static String _spaced(String left, String right);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -289,8 +303,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _144 = cons(_143, _134);
   _145 = cons(_130, _144);
   _146 = String_new("Var_int");
-  _147 = Symbol_var(157714837990);
-  _148 = Symbol_var(8932560010);
+  _147 = String_new("(");
+  _148 = String_new(")");
+  _149 = String_new("*");
+  _150 = String_new("&");
+  _151 = String_new("&?");
+  _152 = String_new("^");
+  _153 = String_new("[]");
+  _154 = String_new("[");
+  _155 = String_new("]");
+  _156 = String_new(", ");
+  _157 = String_new("");
+  _158 = String_new(" ");
+  _159 = Symbol_var(157714837990);
+  _160 = Symbol_var(8932560010);
   _x2c_gensym_static_initialize_0();
 }
 
@@ -1219,28 +1245,174 @@ static Type _integer_literal_type(unsigned long long magnitude, int decimal, int
   return List_type(_112);
 }
 
+String Type_spelling(Type type){
+  if(! _init_guard_) _file_init_();
+  String text = _source_text(type);
+  return String_truth(text) ? text : List_repr(Type_list(type));
+}
+
+String String_add(String, String);
+
+String Var_str(Var);
+
+String String_join(String, List);
+
+static String _source_text(Type type){
+  Type base = List_type(type_base_suffix(Type_list(type)));
+  String declarator = NULL, qualifiers = NULL;
+  int prefixed = 0;
+  for(;  type != base;  type = List_cdr(type)){
+    Var item = List_car(Type_list(type));
+    String pointer = _pointer_text(item);
+    if(String_truth(pointer)){
+      if(String_truth(qualifiers)) pointer = _spaced(String_add(pointer, qualifiers), declarator);
+      else if(String_truth(declarator)) pointer = String_add(pointer, declarator);
+      declarator = pointer;
+      qualifiers = NULL;
+      prefixed = 1;
+    }
+    else if(Var_is(item, 1328354264) && Symbol_is_type_qualifier(Var_symbol(item))) qualifiers = _spaced(qualifiers, Var_str(item));
+    else if(Var_is_row(item, 9, 7, 4)){
+      String suffix = String_truth(qualifiers) ?(String) NULL : _suffix_text(Var_list_payload(item));
+      if(! String_truth(suffix)) return NULL;
+      declarator = prefixed ? String_join(NULL, cons(String_var(_147), cons(String_var(declarator), cons(String_var(_148), cons(String_var(suffix), NULL))))) : String_truth(declarator) ? String_add(declarator, suffix) : suffix;
+      prefixed = 0;
+    }
+    else if(! _is_placement(item)) return NULL;
+  }
+  String head = _base_text(base, qualifiers);
+  return String_truth(head) ? _spaced(head, declarator) :(String) NULL;
+}
+
+static String _pointer_text(Var item){
+  switch(Var_is(item, 1328354264) ? Var_symbol(item) :(Symbol) 0){
+    case 54 : return _149;
+    case 77 : return _150;
+    case 33330008396 : return _151;
+    case 189 : return _152;
+    default: return NULL;
+  }
+
+}
+
+static String _suffix_text(List modifier){
+  {
+    List _x2c_gensym_match_expr_19 = modifier;
+    switch(_x2c_gensym_match_expr_19 ? _x2c_gensym_match_expr_19 -> car.u64 : 0){
+      case 9224497936761627226ULL :{List _x2c_gensym_match_at_47; if(_x2c_gensym_match_expr_19 && _x2c_gensym_match_expr_19 ->car.u64 == 9224497936761627226ULL && !(_x2c_gensym_match_at_47 = _x2c_gensym_match_expr_19 ->cdr)){return _153;
+      break;}}{List _x2c_gensym_match_at_47, _x2c_gensym_match_at_48, _x2c_gensym_match_at_49, _x2c_gensym_match_at_50; Var x2c_match_value_0; if(_x2c_gensym_match_expr_19 && _x2c_gensym_match_expr_19 ->car.u64 == 9224497936761627226ULL &&(_x2c_gensym_match_at_47 = _x2c_gensym_match_expr_19 ->cdr) &&(Var_is(_x2c_gensym_match_at_47 -> car, 806120) &&(_x2c_gensym_match_at_48 = Var_list_payload(_x2c_gensym_match_at_47 -> car), 1)) && _x2c_gensym_match_at_48 &&(x2c_match_value_0 = _x2c_gensym_match_at_48 ->car, 1) && Var_is(_x2c_gensym_match_at_48 -> car, 1318210446) && !(_x2c_gensym_match_at_49 = _x2c_gensym_match_at_48 ->cdr) && !(_x2c_gensym_match_at_50 = _x2c_gensym_match_at_47 ->cdr)){{
+        Var size;
+        size = x2c_match_value_0;
+        {
+          Var _x2c_gensym_match_value_2 = size;
+          {
+            String size = Var_as_string(_x2c_gensym_match_value_2);
+            return String_join(NULL, cons(String_var(_154), cons(String_var(size), cons(String_var(_155), NULL))));
+          }
+
+        }
+
+      }
+      break;}} case 9224497936762055558ULL :{List _x2c_gensym_match_at_47, _x2c_gensym_match_at_48; Var x2c_match_value_0; if(_x2c_gensym_match_expr_19 && _x2c_gensym_match_expr_19 ->car.u64 == 9224497936762055558ULL &&(_x2c_gensym_match_at_47 = _x2c_gensym_match_expr_19 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_47 ->car, 1) && Var_is(_x2c_gensym_match_at_47 -> car, 806120) && !(_x2c_gensym_match_at_48 = _x2c_gensym_match_at_47 ->cdr)){{
+        Var parameters;
+        parameters = x2c_match_value_0;
+        {
+          Var _x2c_gensym_match_value_3 = parameters;
+          {
+            List parameters = Var_list_payload(_x2c_gensym_match_value_3);
+            return _parameters_text(parameters);
+          }
+
+        }
+
+      }
+      break;}} default: break;
+    }
+
+  }
+  return NULL;
+}
+
+static String _parameters_text(List parameters){
+  String text = NULL;
+  {
+    List parameter;
+    List _x2c_gensym_macro_object_6 = parameters;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_0))){
+      parameter = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      {
+        String spelled = _source_text(List_type(parameter));
+        if(! String_truth(spelled)) return NULL;
+        text = String_truth(text) ? String_join(NULL, cons(String_var(text), cons(String_var(_156), cons(String_var(spelled), NULL)))) : spelled;
+      }
+
+    }
+
+  }
+  return String_join(NULL, cons(String_var(_147), cons(String_var(String_truth(text) ? text : _157), cons(String_var(_148), NULL))));
+}
+
+static String _base_text(Type base, String text){
+  if(! List_truth(Type_list(base))) return NULL;
+  int tag = 0;
+  {
+    Var item;
+    Iter _x2c_gensym_macro_iterator_7 = List_iter(Type_list(base), &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_gensym_macro_item_7;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
+      item = _x2c_gensym_macro_item_7;
+      {
+        if(Var_is_row(item, 9, 7, 4) && tag == 2) continue;
+        if(! Var_is(item, 1328354264) && ! Var_is_row(item, 11, 7, 1)) return NULL;
+        if(_is_placement(item)) continue;
+        if(Var_is(item, 1328354264) && _is_tag_keyword(Var_symbol(item))) tag = 1;
+        else if(Var_is_row(item, 11, 7, 1) && tag == 1) tag = 2;
+        text = _spaced(text, Var_str(item));
+      }
+
+    }
+
+  }
+  return text;
+}
+
+static int _is_placement(Var item){
+  if(! Var_is(item, 1328354264)) return 0;
+  Symbol symbol = Var_symbol(item);
+  return Symbol_is_storage_class(symbol) || Symbol_is_inline(symbol) || symbol == 863490 || symbol == 1439803480;
+}
+
+static String _spaced(String left, String right){
+  return ! String_truth(left) ? right : ! String_truth(right) ? left : String_join(NULL, cons(String_var(left), cons(String_var(_158), cons(String_var(right), NULL))));
+}
+
 List Macro_declaration(Type specifiers, List rows){
   if(! _init_guard_) _file_init_();
   List modifiers = NULL;
   List base = Type_declaration_base(specifiers, &(modifiers));
   if(! List_truth(modifiers)) return({
-    Var _x2c_gensym_literal_part_2 = List_var(base);  Var _x2c_gensym_literal_part_3 = List_var(cons(_147, rows));  cons(_148, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
+    Var _x2c_gensym_literal_part_2 = List_var(base);  Var _x2c_gensym_literal_part_3 = List_var(cons(_159, rows));  cons(_160, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
   }
   );
   Array moved = Array_new();
   {
     List row;
-    List _x2c_gensym_macro_object_6 = rows;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_0))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+    List _x2c_gensym_macro_object_8 = rows;
+    List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_1))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       Array_push(moved, List_var(declarator_append_modifiers(row, modifiers)));
     }
 
   }
   return({
-    Var _x2c_gensym_literal_part_4 = List_var(base);  Var _x2c_gensym_literal_part_5 = List_var(cons(_147, Array_list_free(moved)));  cons(_148, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
+    Var _x2c_gensym_literal_part_4 = List_var(base);  Var _x2c_gensym_literal_part_5 = List_var(cons(_159, Array_list_free(moved)));  cons(_160, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
   }
   );
 }

@@ -238,8 +238,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _20 = cons(_19, NULL);
   _21 = Symbol_var(54);
   _22 = cons(_21, NULL);
-  _23 = String_new("expected 'case' or 'default' in match statement");
-  _24 = String_new("token:");
+  _23 = String_new("expected \'case\' or \'default\' in match, found \'");
+  _24 = String_new("\'");
   _25 = Symbol_var(1995752);
   _26 = Symbol_var(377892);
   _27 = String_new("List");
@@ -667,8 +667,8 @@ static int _default_after_directive(Array groups, int saw_default, List d){
   if(kind == 1016156) Array_push(groups, List_var(cons(int_var(saw_default), cons(int_var(saw_default), NULL))));
   else if(kind && Array_len(groups)){
     List _x2c_gensym_destructure_0 = Var_list_payload(Array_take_last(groups));
-    int before = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 312}; & _x2c_gensym_error_site_0; })));
-    int any = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 312}; & _x2c_gensym_error_site_1; })));
+    int before = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 0), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 313}; & _x2c_gensym_error_site_0; })));
+    int any = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_0, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/statements.x",.function = "_default_after_directive",.line = 313}; & _x2c_gensym_error_site_1; })));
     any |= saw_default;
     if(kind == 7109834) return any;
     Array_push(groups, List_var(cons(int_var(before), cons(int_var(any), NULL))));
@@ -683,7 +683,7 @@ static List _match_case(Compiler c){
   List pattern = NULL, types = NULL;
   if(Compiler_test(c, 199882)) pattern = _case_pattern(c, start, &(types));
   else if(Compiler_test(c, 8938171176)) pattern = _22;
-  else Compiler_report_error(c, 33658058, _23, c -> token, cons(String_var(_24), cons(String_var(c -> token -> text), NULL)));
+  else Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_23), cons(String_var(c -> token -> text), cons(String_var(_24), NULL)))), c -> token, NULL);
   return Compiler_bind_match_arm(c, pattern, Compiler_source_clause(3226), start, peek == 199882, types);
 }
 

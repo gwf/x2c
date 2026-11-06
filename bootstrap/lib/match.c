@@ -1294,7 +1294,7 @@ void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
 void MatchMachine_finish(MatchMachine * m){
   if(! _init_guard_) _file_init_();
   if((* m).running){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 104,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_finish",.line = 105,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
@@ -1322,7 +1322,7 @@ MatchMachine * MatchMachine_acquire(MachineStats * stats){
   if(! _init_guard_) _file_init_();
   MatchMachine * m = f7_machine___machine_thread.count ? f7_machine___machine_thread.spares[-- f7_machine___machine_thread.count] : calloc(1, sizeof(MatchMachine));
   if(! m){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 134,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match/machine.x",.function = "MatchMachine_acquire",.line = 135,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
     __builtin_unreachable();
   }

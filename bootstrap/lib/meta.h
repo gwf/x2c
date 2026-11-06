@@ -19,6 +19,8 @@ typedef List Type;
 
 int Symbol_is_type_qualifier(Symbol symbol);
 
+String Type_spelling(Type type);
+
 int Var_is(Var, Symbol);
 
 static Var List_car(List);

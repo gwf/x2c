@@ -13,11 +13,11 @@
 #include "lambdas.h"
 #include <stdint.h>
 #include <string.h>
-static List _219, _217, _211, _210, _209, _200, _195, _194, _193, _191, _188, _183, _182, _181, _179, _178, _176, _175, _174, _170, _165, _164, _162, _154, _149, _145, _144, _143, _141, _132, _125, _124, _123, _121, _120, _119, _117, _116, _112, _111, _110, _105, _101, _100, _99, _96, _93, _92, _87, _86, _85, _83, _82, _74, _73, _72, _70, _69, _68, _66, _65, _64, _62, _61, _60, _58, _54, _51, _50, _42, _38, _37, _36, _34, _33, _32, _30, _29, _25, _24, _23, _21, _20, _19, _17, _16, _10, _9, _8, _6, _3;
+static List _217, _215, _211, _210, _209, _200, _195, _194, _193, _191, _188, _183, _182, _181, _179, _178, _176, _175, _174, _170, _165, _164, _162, _154, _149, _145, _144, _143, _141, _132, _125, _124, _123, _121, _120, _119, _117, _116, _112, _111, _110, _105, _101, _100, _99, _96, _93, _92, _87, _86, _85, _83, _82, _74, _73, _72, _70, _69, _68, _66, _65, _64, _62, _61, _60, _58, _54, _51, _50, _42, _38, _37, _36, _34, _33, _32, _30, _29, _25, _24, _23, _21, _20, _19, _17, _16, _10, _9, _8, _6, _3;
 
-static String _231, _230, _229, _228, _227, _226, _225, _224, _223, _221, _220, _215, _214, _213, _207, _206, _205, _201, _198, _197, _186, _168, _160, _159, _156, _155, _152, _151, _150, _147, _146, _140, _139, _138, _137, _136, _135, _134, _133, _130, _129, _128, _126, _107, _103, _94, _80, _78, _77, _76, _75, _56, _52, _47, _46, _45, _44, _43, _40, _12, _11, _1;
+static String _229, _228, _227, _226, _225, _224, _223, _222, _221, _219, _218, _213, _207, _206, _205, _201, _198, _197, _186, _168, _160, _159, _156, _155, _152, _151, _150, _147, _146, _140, _139, _138, _137, _136, _135, _134, _133, _130, _129, _128, _126, _107, _103, _94, _80, _78, _77, _76, _75, _56, _52, _47, _46, _45, _44, _43, _40, _12, _11, _1;
 
-static Var _222, _218, _216, _212, _208, _204, _203, _202, _199, _196, _192, _190, _189, _187, _185, _184, _180, _177, _173, _172, _171, _169, _167, _166, _163, _161, _158, _157, _153, _148, _142, _131, _127, _122, _118, _115, _114, _113, _109, _108, _106, _104, _102, _98, _97, _95, _91, _90, _89, _88, _84, _81, _79, _71, _67, _63, _59, _57, _55, _53, _49, _48, _41, _39, _35, _31, _28, _27, _26, _22, _18, _15, _14, _13, _7, _5, _4, _2, _0;
+static Var _220, _216, _214, _212, _208, _204, _203, _202, _199, _196, _192, _190, _189, _187, _185, _184, _180, _177, _173, _172, _171, _169, _167, _166, _163, _161, _158, _157, _153, _148, _142, _131, _127, _122, _118, _115, _114, _113, _109, _108, _106, _104, _102, _98, _97, _95, _91, _90, _89, _88, _84, _81, _79, _71, _67, _63, _59, _57, _55, _53, _49, _48, _41, _39, _35, _31, _28, _27, _26, _22, _18, _15, _14, _13, _7, _5, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -413,25 +413,23 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _210 = cons(_114, _209);
   _211 = cons(_102, _210);
   _212 = List_var(_164);
-  _213 = String_new("expected atomic expression");
-  _214 = String_new("token:");
-  _215 = String_new("kind:");
-  _216 = Symbol_var(301273866);
+  _213 = String_new("expected atomic expression, found \'");
+  _214 = Symbol_var(301273866);
+  _215 = cons(_214, NULL);
+  _216 = Symbol_var(19368);
   _217 = cons(_216, NULL);
-  _218 = Symbol_var(19368);
-  _219 = cons(_218, NULL);
-  _220 = String_new("numeric literal is outside the supported scalar range");
-  _221 = String_new("literal:");
-  _222 = Symbol_var(2050325770);
-  _223 = String_new("$((long) ");
-  _224 = String_new(")");
-  _225 = String_new("\' is a Symbol here; unquote a typed value such as ");
-  _226 = String_new(" to insert the macro\'s value");
-  _227 = String_new("invalid match binder name");
-  _228 = String_new("binder-name:");
-  _229 = String_new("Symbol literal does not round-trip");
-  _230 = String_new("source spelling: ");
-  _231 = String_new("encoded spelling: ");
+  _218 = String_new("numeric literal is outside the supported scalar range");
+  _219 = String_new("literal:");
+  _220 = Symbol_var(2050325770);
+  _221 = String_new("$((long) ");
+  _222 = String_new(")");
+  _223 = String_new("\' is a Symbol here; unquote a typed value such as ");
+  _224 = String_new(" to insert the macro\'s value");
+  _225 = String_new("invalid match binder name");
+  _226 = String_new("binder-name:");
+  _227 = String_new("Symbol literal does not round-trip");
+  _228 = String_new("source spelling: ");
+  _229 = String_new("encoded spelling: ");
 }
 
 List Compiler_parse_macro_pattern_arguments(Compiler c){
@@ -1550,17 +1548,13 @@ List Compiler_parse_atomic_literal(Compiler c){
     }
     );
   }
-  Symbol kind = Compiler_peek(c, 0);
-  Compiler_report_error(c, 33658058, _213, c -> token, ({
-    Var _x2c_gensym_literal_part_9 = String_var(c -> token -> text);  Var _x2c_gensym_literal_part_10 = String_var(Symbol_str(kind));  cons(String_var(_214), cons(_x2c_gensym_literal_part_9, cons(String_var(_215), cons(_x2c_gensym_literal_part_10, NULL))));
-  }
-  ));
+  Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_213), cons(String_var(c -> token -> text), cons(String_var(_76), NULL)))), c -> token, NULL);
 }
 
 static List f5_atoms____number_literal(Compiler c, String text, int floating){
   Type type = Type_numeric_literal(text, floating);
-  if(! List_truth(Type_list(type)) && c -> shallow) type = List_type(floating ? _217 : _219);
-  if(! List_truth(Type_list(type))) Compiler_report_error(c, 1362954, _220, c -> token, cons(String_var(_221), cons(String_var(text), NULL)));
+  if(! List_truth(Type_list(type)) && c -> shallow) type = List_type(floating ? _215 : _217);
+  if(! List_truth(Type_list(type))) Compiler_report_error(c, 1362954, _218, c -> token, cons(String_var(_219), cons(String_var(text), NULL)));
   return cons(_102, cons(List_var(type), cons(String_var(text), NULL)));
 }
 
@@ -1570,18 +1564,18 @@ static List _atom_literal(Compiler c, String text){
   f5_atoms____check_binder(c, atom);
   if(Map_contains(c -> object_macros, String_var(spelling))) f5_atoms____warn_macro_name(c, spelling);
   if(Var_is(atom, 1328354264)) return({
-    Var _x2c_gensym_literal_part_11 = String_var(text);  Var _x2c_gensym_literal_part_12 = Symbol_var(Var_symbol(atom));  cons(_102, cons(_97, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL))));
+    Var _x2c_gensym_literal_part_9 = String_var(text);  Var _x2c_gensym_literal_part_10 = Symbol_var(Var_symbol(atom));  cons(_102, cons(_97, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL))));
   }
   );
-  Var value = Map_truth(c -> macro_holes) && Var_is_binder(atom) ? List_var(cons(_222, cons(atom, NULL))) : atom;
+  Var value = Map_truth(c -> macro_holes) && Var_is_binder(atom) ? List_var(cons(_220, cons(atom, NULL))) : atom;
   return cons(_102, cons(_106, cons(String_var(spelling), cons(value, NULL))));
 }
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 
 static void f5_atoms____warn_macro_name(Compiler c, String spelling){
-  String unquoted = String_add(String_add(_223, spelling), _224);
-  Compiler_report_warning(c, 26416091224, String_add(String_join(NULL, cons(String_var(_76), cons(String_var(spelling), cons(String_var(_225), NULL)))), String_join(NULL, cons(String_var(unquoted), cons(String_var(_226), NULL)))), c -> token, NULL);
+  String unquoted = String_add(String_add(_221, spelling), _222);
+  Compiler_report_warning(c, 26416091224, String_add(String_join(NULL, cons(String_var(_76), cons(String_var(spelling), cons(String_var(_223), NULL)))), String_join(NULL, cons(String_var(unquoted), cons(String_var(_224), NULL)))), c -> token, NULL);
 }
 
 static List f5_atoms____symbol_literal(Compiler c, String text){
@@ -1596,7 +1590,7 @@ static void f5_atoms____check_binder(Compiler c, Atom atom){
   if((first != '?' && first != '*') || Var_is_binder(atom)) return;
   int reserved = x2c_var_equal_lane(atom, Symbol_var(1997793406138)) || x2c_var_equal_lane(atom, Symbol_var(1860354452666));
   if(reserved && c -> match_is && Compiler_peek(c, 1) == 83) return;
-  Compiler_report_error(c, 33658058, _227, c -> token, cons(String_var(_228), cons(String_var(Atom_str(atom)), NULL)));
+  Compiler_report_error(c, 33658058, _225, c -> token, cons(String_var(_226), cons(String_var(Atom_str(atom)), NULL)));
 }
 
 static String _angle_spelling(String text){
@@ -1609,8 +1603,8 @@ static Symbol _exact_symbol(Compiler c, Token token, String spelling){
   Symbol symbol;
   if(Symbol_try_new(spelling, &(symbol))) return symbol;
   Symbol lossy = String_truth(spelling) ? Symbol_new(spelling) : 0;
-  Compiler_report_error(c, 33658058, _229, token, ({
-    Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(_230), cons(String_var(spelling), NULL))));  Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(_231), cons(String_var(Symbol_str(lossy)), NULL))));  cons(_x2c_gensym_literal_part_13, cons(_x2c_gensym_literal_part_14, NULL));
+  Compiler_report_error(c, 33658058, _227, token, ({
+    Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(_228), cons(String_var(spelling), NULL))));  Var _x2c_gensym_literal_part_12 = String_var(String_join(NULL, cons(String_var(_229), cons(String_var(Symbol_str(lossy)), NULL))));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
   }
   ));
 }

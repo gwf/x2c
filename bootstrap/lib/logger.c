@@ -97,7 +97,7 @@ typedef struct LogMemorySink{
 * LogMemorySink;
 
 #include "var-adapters.h"
-static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -226,6 +226,10 @@ static int _plain_report(Logger logger);
 static void _report_uncaught(List entry);
 
 static String _detail_text(List detail);
+
+static String _detail_value(Var value);
+
+static int _detail_pairs(Var value);
 
 static void _log_pending(Logger active);
 
@@ -791,6 +795,8 @@ void Logger_initialize(void){
   _10 = String_new(": ");
   _11 = String_new(" ");
   _12 = String_new(", ");
+  _13 = String_new("<");
+  _14 = String_new("> (");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -1763,22 +1769,55 @@ static String _detail_text(List detail){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       pair = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
-      {
-        Var value = List_cadr(pair);
-        String text = Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264) ? Var_str(value) : Var_repr(value);
-        parts =({
-          List _x2c_gensym_literal_part_9 = parts;  Var _x2c_gensym_literal_part_10 = String_var(({
-            Var _x2c_gensym_literal_part_8 = String_var(Var_str(pair -> car));  String_join(NULL, cons(_x2c_gensym_literal_part_8, cons(String_var(_11), cons(String_var(text), NULL))));
-          }
-          ));  List_append(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL));
+      parts =({
+        List _x2c_gensym_literal_part_10 = parts;  Var _x2c_gensym_literal_part_11 = String_var(({
+          Var _x2c_gensym_literal_part_8 = String_var(Var_str(pair -> car));  Var _x2c_gensym_literal_part_9 = String_var(_detail_value(List_cadr(pair)));  String_join(NULL, cons(_x2c_gensym_literal_part_8, cons(String_var(_11), cons(_x2c_gensym_literal_part_9, NULL))));
         }
-        );
+        ));  List_append(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL));
+      }
+      );
+    }
+
+  }
+  return String_join(_12, parts);
+}
+
+static String _detail_value(Var value){
+  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264)) return Var_str(value);
+  List cause = Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
+  Var code = List_truth(cause) ? List_car(cause) :((void) 0, Void);
+  if(! Var_is(code, 1328354264)) return Var_repr(value);
+  List pairs = List_cdr(cause);
+  if(List_truth(pairs) && ! List_truth(List_cdr(pairs)) && _detail_pairs(List_car(pairs))) pairs = Var_list_payload(List_car(pairs));
+  if(! List_truth(pairs)) return String_join(NULL, cons(String_var(_13), cons(String_var(Var_str(code)), cons(String_var(_5), NULL))));
+  if(! _detail_pairs(List_var(pairs))) return Var_repr(value);
+  return({
+    Var _x2c_gensym_literal_part_12 = String_var(Var_str(code));  Var _x2c_gensym_literal_part_13 = String_var(_detail_text(pairs));  String_join(NULL, cons(String_var(_13), cons(_x2c_gensym_literal_part_12, cons(String_var(_14), cons(_x2c_gensym_literal_part_13, cons(String_var(_9), NULL))))));
+  }
+  );
+}
+
+static int _detail_pairs(Var value){
+  if(! Var_is_row(value, 9, 7, 4)) return 0;
+  List items = Var_list_payload(value);
+  if(! List_truth(items)) return 0;
+  {
+    Var item;
+    List _x2c_gensym_macro_object_2 = items;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      item = _x2c_gensym_macro_cursor_output_2;
+      {
+        if(! Var_is_row(item, 9, 7, 4)) return 0;
+        List pair = Var_list_payload(item);
+        if(List_len(pair) != 2 || ! Var_is(List_car(pair), 1328354264)) return 0;
       }
 
     }
 
   }
-  return String_join(_12, parts);
+  return 1;
 }
 
 static void _log_pending(Logger active){
@@ -1786,11 +1825,11 @@ static void _log_pending(Logger active){
   List pending = Error_since(logger_error_mark);
   {
     List entry;
-    List _x2c_gensym_macro_object_2 = pending;
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_3 = pending;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
       _deliver_fields(active, 11703268, 392730881588392, entry);
     }
 

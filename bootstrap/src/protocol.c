@@ -792,7 +792,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _355 = String_var(_354);
   _356 = List_var(NULL);
   _357 = Symbol_var(106239471489226);
-  _358 = int_var(2268);
+  _358 = int_var(2266);
   _359 = String_new("");
   _360 = String_var(_359);
   _361 = String_new("x2c.hole");
@@ -895,7 +895,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _458 = cons(_450, _457);
   _459 = cons(_444, _458);
   _460 = List_var(_459);
-  _461 = int_var(2333);
+  _461 = int_var(2331);
   _462 = Symbol_var(1544849476362);
   _463 = List_var(_30);
   _464 = cons(_463, NULL);
@@ -989,7 +989,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _549 = cons(_450, NULL);
   _550 = cons(_444, _549);
   _551 = List_var(_550);
-  _552 = int_var(2340);
+  _552 = int_var(2338);
   _553 = Symbol_var(405758822009820);
   _554 = cons(_403, _396);
   _555 = cons(_363, _554);
@@ -1475,7 +1475,7 @@ static String _adoption_spelling(Type base, Type participant){
 }
 
 static String _type_spelling(Type type){
-  return Var_as_string(Type_is_bare_typedef_name(type) ? List_car(Type_list(type)) : String_var(List_repr(Type_list(type))));
+  return Type_spelling(type);
 }
 
 static List f8_registry____node(f8_registry___AdoptionDraft * a){

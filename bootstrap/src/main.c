@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-static String _40, _39, _38, _37, _36, _34, _32, _30, _28, _27, _25, _23, _21, _19, _17, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _42, _41, _40, _39, _38, _36, _34, _32, _30, _29, _27, _25, _23, _21, _19, _17, _15, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _35, _33, _31, _29, _26, _24, _22, _20, _18, _16, _14, _12;
+static Var _37, _35, _33, _31, _28, _26, _24, _22, _20, _18, _16, _14;
 
 static int _init_guard_ = 0;
 
@@ -61,42 +61,44 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = String_new("build");
   _3 = String_new("new");
   _4 = String_new("package");
-  _5 = String_new("missing x2c-");
-  _6 = String_new(" command; install the matching x2c commands");
-  _7 = String_new("cannot run external command \'");
-  _8 = String_new("\': ");
-  _9 = String_new("unknown env name \'");
-  _10 = String_new(":");
-  _11 = String_new("home");
-  _12 = String_var(_11);
-  _13 = String_new("executable");
+  _5 = String_new("run 'make commands' in this checkout");
+  _6 = String_new("install the matching x2c commands");
+  _7 = String_new("missing x2c-");
+  _8 = String_new(" command; ");
+  _9 = String_new("cannot run external command \'");
+  _10 = String_new("\': ");
+  _11 = String_new("unknown env name \'");
+  _12 = String_new(":");
+  _13 = String_new("home");
   _14 = String_var(_13);
-  _15 = String_new("libexec");
+  _15 = String_new("executable");
   _16 = String_var(_15);
-  _17 = String_new("identity");
+  _17 = String_new("libexec");
   _18 = String_var(_17);
-  _19 = String_new("include_dir");
+  _19 = String_new("identity");
   _20 = String_var(_19);
-  _21 = String_new("runtime_lib");
+  _21 = String_new("include_dir");
   _22 = String_var(_21);
-  _23 = String_new("prelude");
+  _23 = String_new("runtime_lib");
   _24 = String_var(_23);
-  _25 = String_new("prelude_missing");
+  _25 = String_new("prelude");
   _26 = String_var(_25);
-  _27 = String_new(" ");
-  _28 = String_new("package_dirs");
-  _29 = String_var(_28);
-  _30 = String_new("cc");
+  _27 = String_new("prelude_missing");
+  _28 = String_var(_27);
+  _29 = String_new(" ");
+  _30 = String_new("package_dirs");
   _31 = String_var(_30);
-  _32 = String_new("ar");
+  _32 = String_new("cc");
   _33 = String_var(_32);
-  _34 = String_new("cache_dir");
+  _34 = String_new("ar");
   _35 = String_var(_34);
-  _36 = String_new("run");
-  _37 = String_new("script");
-  _38 = String_new("install");
-  _39 = String_new("remove");
-  _40 = String_new("list");
+  _36 = String_new("cache_dir");
+  _37 = String_var(_36);
+  _38 = String_new("run");
+  _39 = String_new("script");
+  _40 = String_new("install");
+  _41 = String_new("remove");
+  _42 = String_new("list");
 }
 
 int diagnostics_write_json(String);
@@ -189,7 +191,10 @@ static void _run_command(Array arguments){
   String path = Compiler_command_path(command);
   if(! String_truth(path)){
     if(! String_equal(command, _2)) CliRequest_parse_arguments(arguments);
-    Diagnostics_driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(command), cons(String_var(_6), NULL)))));
+    Diagnostics_driver_error(({
+      Var _x2c_gensym_literal_part_0 = String_var(command);  Var _x2c_gensym_literal_part_1 = String_var(String_truth(Compiler_stage_dir()) ? _5 : _6);  String_join(NULL, cons(String_var(_7), cons(_x2c_gensym_literal_part_0, cons(String_var(_8), cons(_x2c_gensym_literal_part_1, NULL)))));
+    }
+    ));
   }
   char * * args = xcalloc(Array_len(arguments) + 3, sizeof(char *));
   args[1] = "--driver-arguments";
@@ -217,7 +222,7 @@ static void _exec(String command, String path, char * * args){
   args[0] = path;
   execv(path, args);
   Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_0 = String_var(path);  Var _x2c_gensym_literal_part_1 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_7), cons(_x2c_gensym_literal_part_0, cons(String_var(_8), cons(_x2c_gensym_literal_part_1, NULL)))));
+    Var _x2c_gensym_literal_part_2 = String_var(path);  Var _x2c_gensym_literal_part_3 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_9), cons(_x2c_gensym_literal_part_2, cons(String_var(_10), cons(_x2c_gensym_literal_part_3, NULL)))));
   }
   ));
 }
@@ -249,7 +254,7 @@ static int _run_env(CliRequest request){
     }
 
   }
-  if(String_truth(wanted)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(wanted), cons(String_var(_1), NULL)))));
+  if(String_truth(wanted)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(wanted), cons(String_var(_1), NULL)))));
   return 0;
 }
 
@@ -262,10 +267,10 @@ List Compiler_prelude_missing_interfaces(void);
 static List _env_rows(CliRequest request){
   Toolchain toolchain = Toolchain_new(request);
   String executable = x2c_get_executable();
-  String roots = String_join(_10, CliRequest_package_roots(request));
+  String roots = String_join(_12, CliRequest_package_roots(request));
   Compiler_configure_interfaces(request -> out_dir, 0);
   return({
-    Var _x2c_gensym_literal_part_2 = List_var(cons(_12, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_gensym_literal_part_3 = List_var(cons(_14, cons(String_var(executable), NULL)));  Var _x2c_gensym_literal_part_4 = List_var(cons(_16, cons(String_var(Compiler_home_libexec()), NULL)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_18, cons(String_var(Compiler_identity()), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_20, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_22, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_24, cons(String_var(Compiler_prelude_interface()), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_26, cons(String_var(String_join(_27, Compiler_prelude_missing_interfaces())), NULL)));  Var _x2c_gensym_literal_part_10 = List_var(cons(_29, cons(String_var(roots), NULL)));  Var _x2c_gensym_literal_part_11 = List_var(cons(_31, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_gensym_literal_part_12 = List_var(cons(_33, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_gensym_literal_part_13 = List_var(cons(_35, cons(String_var(Compiler_cache_root()), NULL)));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL))))))))))));
+    Var _x2c_gensym_literal_part_4 = List_var(cons(_14, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_16, cons(String_var(executable), NULL)));  Var _x2c_gensym_literal_part_6 = List_var(cons(_18, cons(String_var(Compiler_home_libexec()), NULL)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_20, cons(String_var(Compiler_identity()), NULL)));  Var _x2c_gensym_literal_part_8 = List_var(cons(_22, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_gensym_literal_part_9 = List_var(cons(_24, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_gensym_literal_part_10 = List_var(cons(_26, cons(String_var(Compiler_prelude_interface()), NULL)));  Var _x2c_gensym_literal_part_11 = List_var(cons(_28, cons(String_var(String_join(_29, Compiler_prelude_missing_interfaces())), NULL)));  Var _x2c_gensym_literal_part_12 = List_var(cons(_31, cons(String_var(roots), NULL)));  Var _x2c_gensym_literal_part_13 = List_var(cons(_33, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_gensym_literal_part_14 = List_var(cons(_35, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_gensym_literal_part_15 = List_var(cons(_37, cons(String_var(Compiler_cache_root()), NULL)));  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, cons(_x2c_gensym_literal_part_14, cons(_x2c_gensym_literal_part_15, NULL))))))))))));
   }
   );
 }
@@ -286,12 +291,12 @@ static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
 
 static int _x2c_gensym_string_switch_0(String s){
   if(String_equal(s, _2)) return 1;
-  if(String_equal(s, _36)) return 2;
-  if(String_equal(s, _37)) return 3;
+  if(String_equal(s, _38)) return 2;
+  if(String_equal(s, _39)) return 3;
   if(String_equal(s, _3)) return 4;
-  if(String_equal(s, _38)) return 5;
-  if(String_equal(s, _39)) return 6;
-  if(String_equal(s, _40)) return 7;
+  if(String_equal(s, _40)) return 5;
+  if(String_equal(s, _41)) return 6;
+  if(String_equal(s, _42)) return 7;
   return 0;
 }
 

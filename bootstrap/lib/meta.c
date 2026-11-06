@@ -15,6 +15,8 @@ typedef List Type;
 
 int Symbol_is_type_qualifier(Symbol symbol);
 
+String Type_spelling(Type type);
+
 static List _3;
 
 static String _1, _0;

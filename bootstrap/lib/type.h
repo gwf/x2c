@@ -158,6 +158,8 @@ int Symbol_is_inline(Symbol sym);
 
 int Symbol_is_type_qualifier(Symbol sym);
 
+String Type_spelling(Type type);
+
 List Macro_declaration(Type specifiers, List rows);
 
 
