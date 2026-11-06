@@ -3,7 +3,6 @@
 #include "path.x"
 #include "channel.x"
 #include <ctype.h>
-#include <stdio.h>
 
 int main(int argc, char **argv) {
   Path root = argc > 1 ? argv[1]

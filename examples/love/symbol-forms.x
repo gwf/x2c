@@ -1,7 +1,4 @@
-/* symbols.x -- exercise simple and quoted symbol literals */
-
-#include <stdio.h>
-
+/*  symbol-forms.x -- simple and quoted Symbol literals */
 
 int main(void) {
   Symbol simple = <demo>;

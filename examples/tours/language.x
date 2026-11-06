@@ -1,7 +1,6 @@
 /*  language.x -- executable fifteen-minute language tour */
 #include "system-macros.x"
 
-
 int main(void) {
   auto {
     Var answer = 41;
@@ -27,8 +26,8 @@ int main(void) {
     "));
     input.rewind();
     Map counts = {};
-    foreach(String line in input)
-      foreach(String word in line.words())
+    foreach (String line in input)
+      foreach (String word in line.words())
         counts[word] += 1;
     printf("beta=%ld\n", counts["beta"]);
 

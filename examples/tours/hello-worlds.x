@@ -63,7 +63,6 @@ static void _partitioned(void) {
   puts(%"$(hello.capitalize())$comma$(world.capitalize())!");
 }
 
-
 /*  hello-world: list DSL  */
 static void _list_dsl(void) {
   List hello = %(script (title hello) (text ", ")
@@ -97,11 +96,10 @@ static void _array_sort(void) {
   puts(greeting);
 }
 
-
 /*  hello-world: closure pipeline  */
 static void _closure_pipeline(void) {
   Func speech = %!(String text) => text;
-  foreach(String word in %("Hello" ", " "World" "!"))
+  foreach (String word in %("Hello" ", " "World" "!"))
     speech = _then(speech, _says(word));
   String greeting = speech(%"");
   puts(greeting);

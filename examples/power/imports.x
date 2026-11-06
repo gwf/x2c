@@ -1,3 +1,10 @@
+/*  imports.x -- extract named request fields with the PCRE2 package
+
+    In a checkout, `make -C packages/pcre2 run` builds the package and runs
+    this example. With an installed x2c, run `x2c install pcre2` first; then
+    `x2c run -q examples/power/imports.x` finds the package.
+*/
+
 #include <assert.h>
 // Import the package under a name you choose.
 import "pcre2" as rx;

@@ -1,6 +1,8 @@
 #!/usr/bin/env -S x2c script
-/* Small steps from C to x2c.
-   Run with: x2c script examples/tours/field-guide.x */
+/*  field-guide.x -- small steps from C to x2c
+
+    Run with: x2c script examples/tours/field-guide.x
+*/
 
 /* C declarations and calls still work. A script needs no main function. */
 int count = 3;
@@ -46,7 +48,7 @@ printf("phase %s: member %d, index %d\n", phase.str(),
 /* A short lambda transforms a List without changing the source. */
 List small = %(1 2 3);
 List doubled = small.map(%!(value) => value * 2);
-printf("doubled: %s; original: %s\n", doubled.str(), small.str());
+printf("doubled: %s; original: %s\n", doubled.repr(), small.repr());
 
 /* Match picks apart a structured List by its shape. */
 List event = %(score "Ada" 15);

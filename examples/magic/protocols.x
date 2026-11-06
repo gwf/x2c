@@ -1,6 +1,5 @@
 /*  protocols.x -- protocol declaration, adoption, and base defaults */
 
-
 /* Each magnitude is an ordinary record value initialized by its class
    constructor. Protocols share the magnitude and display operations. */
 class Meters { long value; };

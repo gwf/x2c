@@ -1,6 +1,5 @@
 /*  word-count-summary.x -- task-oriented file and collection tutorial */
 
-
 int main(int argc, char **argv) {
   if (argc != 2) {
     Stderr.printf("usage: %s FILE\n", argv[0]);
@@ -13,9 +12,9 @@ int main(int argc, char **argv) {
 
     try {
       auto File input = File.open(argv[1], "r");
-      foreach(String line in input) {
+      foreach (String line in input) {
         lines++;
-        foreach(String word in line.lower().words()) {
+        foreach (String word in line.lower().words()) {
           Var old;
           long count = counts.try_get(word, old) ? old.integer() : 0;
           counts[word] = count + 1;

@@ -1,7 +1,5 @@
 /*  contexts.x -- discard temporary work and export one result */
 
-#include <stdio.h>
-
 int main(void) {
   Context input = Context.open_isolated_named("input file");
 

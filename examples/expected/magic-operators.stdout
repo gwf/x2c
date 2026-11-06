@@ -1,1 +1,2 @@
-bare name: Symbol=1 Atom=0
+union: (apple bread pear)
+intersection: (pear)

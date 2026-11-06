@@ -1,7 +1,5 @@
 /*  shared-threads.x -- isolated workers with shared coordinated state */
 
-#include <stdio.h>
-
 typedef struct Work {
   String name;
   int iterations;

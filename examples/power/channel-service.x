@@ -1,7 +1,6 @@
 /*  channel-service.x -- a service and its clients share one batch lifetime */
 
 #include "task.x"
-#include <stdio.h>
 
 static void _service(int tasks) {
   Channel requests = auto Channel.new(2);

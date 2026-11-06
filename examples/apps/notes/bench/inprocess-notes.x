@@ -1,12 +1,11 @@
-/* inprocess-notes.x -- optional Thread.run / Task.run Notes service probe
+/*  inprocess-notes.x -- optional Thread.run / Task.run Notes service probe
 
-   SQLite, row conversion, and JSON are real Notes work. HTTP parsing and
+    SQLite, row conversion, and JSON are real Notes work. HTTP parsing and
    sockets are excluded. The batch owns all borrowed request storage until
    the database queue drains and its native thread joins, including failure.
 */
 #include "notes-database.x"
 #include "task.x"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>

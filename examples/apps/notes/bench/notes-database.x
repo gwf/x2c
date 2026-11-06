@@ -1,4 +1,4 @@
-/* notes-database.x -- database work shared by the Notes comparison servers */
+/*  notes-database.x -- database work shared by the Notes comparison servers */
 #pragma once
 #include "system-macros.x"
 import "sqlite" with Database, Prepared;

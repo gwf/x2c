@@ -1,14 +1,13 @@
 /*  iterators.x -- lazy selection, merging, and validation */
 
-
 int main(void) {
   auto {
     List seen = %(3 1 3 2 1 4);
-    printf("unique: %s\n", seen.iter().unique().list().str());
+    printf("unique: %s\n", seen.iter().unique().list().repr());
 
     List urgent = %(101 102), routine = %(201 202 203);
     printf("queue: %s\n", urgent.iter()
-      .chain(routine.iter()).head(4).list().str());
+      .chain(routine.iter()).head(4).list().repr());
 
     printf("first square over threshold: %d\n", range(1, 20, 1)
       .map(%!(value) => value * value)
@@ -25,7 +24,7 @@ int main(void) {
       .all(%!(score) => score >= 0 && score <= 100) ? "yes" : "no");
 
     printf("numbered: %s\n", %(<parse> <compile> <link>).iter()
-      .enumerate(1).list().str());
+      .enumerate(1).list().repr());
   }
   return 0;
 }

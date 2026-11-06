@@ -1,6 +1,4 @@
-
-
-#include <stdio.h>
+/*  basic-literals.x -- Map, List, Array, and String literals */
 
 int main(int argc, char **argv) {
   Map m = {

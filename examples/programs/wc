@@ -1,4 +1,8 @@
 #!/usr/bin/env -S x2c script
+/*  wc -- print the ten most frequent words in a file
+
+    x2c script examples/programs/wc examples/data/docs-words.txt
+*/
 
 puts(String.new(argv[1]).open("r")
   .string_close().lower().words().iter()

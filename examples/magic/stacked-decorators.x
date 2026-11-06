@@ -1,3 +1,4 @@
+/*  stacked-decorators.x -- function decorators that inspect and stack */
 
 macro Decorator $trace(Function $function, Expr $label) {
   printf("[%s] enter %s\n", $label, $Code.name($function));

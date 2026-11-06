@@ -1,3 +1,5 @@
+/*  range-and-swap.x -- local range and swap constructs from macros */
+
 #include "x2c.x"
 
 macro Decorator $control.range(

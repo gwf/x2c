@@ -1,11 +1,8 @@
-/*  lambdas.x -- Demonstrate expression lambda literal forms in X2C.
+/*  lambdas.x -- expression lambda literal forms
 
     Invokes the runtime-generated helpers for no-arg, bare-parameter, and
     typed-parameter lambdas, then returns and invokes a captured Func.
 */
-
-
-#include <stdio.h>
 
 int main(void) {
   int no_arg = (%!() => 42)();

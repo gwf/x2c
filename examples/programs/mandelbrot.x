@@ -2,7 +2,6 @@
 
 #include "system-macros.x"
 #include <math.h>
-#include <stdio.h>
 #include "typed-array.x"
 
 static const int nworkers = 10, width = 960, height = 540, maxits = 5000;

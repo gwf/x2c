@@ -29,7 +29,7 @@ int main(void):
   printf("\n%.2f %s %d\n", total, describe(total), (int) names["square"])
   List sizes = words
     .map(%!(Var w) => w.str().len())
-  printf("%s\n", sizes.str())
+  printf("%s\n", sizes.repr())
   return 0
 
 double area(struct Item item):

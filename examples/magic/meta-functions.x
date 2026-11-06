@@ -1,3 +1,5 @@
+/*  meta-functions.x -- implement a macro with meta functions */
+
 #include "meta.x"
 #include <assert.h>
 // A macro implemented in x2c. `meta` marks a function the compiler runs

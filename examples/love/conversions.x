@@ -1,5 +1,4 @@
-/* Show verified numeric and typed nonnumeric Var crossings. */
-
+/*  conversions.x -- numeric and typed nonnumeric Var conversions */
 
 int main(void) {
   Var integer_value = 42;
@@ -24,7 +23,7 @@ int main(void) {
 
   List mixed = $(
     integer_value, floating_value, string_value, symbol_value, list_value);
-  foreach(Var item in mixed)
+  foreach (Var item in mixed)
     printf("mixed: %s %s\n", item.tag().str(), item);
 
   return 0;

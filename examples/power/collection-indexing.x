@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include "typed-array.x"
+/*  collection-indexing.x -- ordinary and packed indexing, checked reads, and slices */
 
+#include "typed-array.x"
 
 int main(void) {
   // Native pointer and array indexing (baseline C semantics).

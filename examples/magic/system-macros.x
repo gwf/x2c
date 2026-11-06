@@ -1,3 +1,5 @@
+/*  system-macros.x -- classes, value keys, allocation destinations, and cleanup */
+
 #include <assert.h>
 
 class Count int;

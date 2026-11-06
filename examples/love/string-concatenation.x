@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+/*  string-concatenation.x -- join Strings, literals, and C strings */
 
 int main(void) {
   String lhs = "hello, ", rhs = "world", combined = lhs + rhs;

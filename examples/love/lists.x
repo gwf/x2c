@@ -16,7 +16,7 @@ printf("selected: %s + %s = %s\n", first, second, sum);
 
 // A literal can combine names, computed values, and nested Lists.
 puts(%(total $sum items $selected).repr());
-puts(%"original: $prices; extended: $extended");
+puts(%"original: $(prices.repr()); extended: $(extended.repr())");
 
 // car gets the first value; cdr gets the rest, spliced with @.
 List parts = %((first $(selected.car())) (rest @(selected.cdr())));

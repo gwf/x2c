@@ -1,6 +1,5 @@
 /*  math.x -- lazy numeric pipelines */
 
-
 int main(void) {
   auto {
     printf("odd squares: %d\n", range(1, 10, 1)

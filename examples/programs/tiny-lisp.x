@@ -1,4 +1,6 @@
-/* Copyright (c) 2026 Gary William Flake
+/*  tiny-lisp.x -- an eight-form Lisp in a few dense lines
+
+   Copyright (c) 2026 Gary William Flake
 
    A tiny Lisp: quote, if, lambda, def, car, cdr, cons, eq. Only () is false.
    Functions use dynamic scope; atoms are names, including numerals.

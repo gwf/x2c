@@ -1,3 +1,5 @@
+/*  answer.x -- a meta function and macro for imported-macros.x */
+
 #pragma once
 
 meta int example_answer_offset(void) => 2;

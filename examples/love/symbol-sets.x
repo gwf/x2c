@@ -1,6 +1,5 @@
 /*  symbol-sets.x -- ordered Symbol sets: membership, index, dispatch */
 
-
 static const SymbolSet lights = %<green yellow red>;
 
 /* The dense index reaches a parallel table; no switch needed. */
@@ -16,7 +15,7 @@ int main(void) {
   printf("first light: %s\n", lights.getindex(0).str());
   printf("last light: %s\n", lights.getindex(-1).str());
 
-  foreach(Symbol light in lights) {
+  foreach (Symbol light in lights) {
     printf("light: %s\n", light.str());
   }
 
