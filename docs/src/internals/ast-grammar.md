@@ -1,4 +1,4 @@
-# AST grammar
+# AST Grammar
 
 This chapter describes the compiler's canonical List structures. Use it to read
 a literal AST construction, a structural pattern, or an AST dump. The

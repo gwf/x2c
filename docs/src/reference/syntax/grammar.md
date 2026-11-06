@@ -1,4 +1,4 @@
-# Source grammar
+# Source Grammar
 
 The [EBNF file](x2c.ebnf), generated from [ordinary List data](data.md),
 describes x2c's current source forms. It consumes tokens after the [lexical

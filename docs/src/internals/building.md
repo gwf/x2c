@@ -1,10 +1,11 @@
 # Building the Compiler
 
 Language users can skip this chapter. It describes how the self-hosting
-repository builds itself and what a contributor is expected to rebuild.
+repository builds itself from a source checkout and which files each build
+step regenerates.
 
 A source checkout needs a GCC- or Clang-compatible C compiler, `ar`,
-GNU Make, and `/bin/bash`. Optional package preparation and contributor
+GNU Make, and `/bin/bash`. Optional package preparation and repository
 checks also use Python 3.
 
 ## Check build prerequisites
@@ -59,8 +60,7 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
 - Numbered build directories are generated and untracked.
 - The tracked generated outputs are:
   - the portable bootstrap C under `bootstrap/`, which
-    `make bootstrap-refresh` rewrites, as do `make precommit`,
-    `make agent-pr-check`, and `make sanity-check`, which run it;
+    `make bootstrap-refresh` rewrites;
   - the runtime aggregator `lib/x2c.x`, the shipped `meta` code compiled
     into the compiler, `src/linked-meta.x`, and the meta helper's compiler
     queries, `etc/meta-queries.x`, which `make build` and every target that
@@ -138,13 +138,10 @@ behavior. In-memory HTTP parsing, routing, and response construction remain
 available. Browser execution requires Memory64;
 check the playground's support notice before running a program.
 
-## Contributor checks
+## Checking book samples
 
 `make doc-examples` compiles the book and website samples. No checked sample
 imports an optional package, so the check needs no package preparation.
-
-For testing, style, debugging, and bootstrap-refresh instructions, start with
-[`agents/README.md`](https://github.com/gwf/x2c/blob/dev/agents/README.md).
 
 See [Compiler Architecture](architecture.md) for the translation phases and
 the [Implementation Map](implementation-map.md) for feature ownership.

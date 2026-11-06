@@ -1,4 +1,4 @@
-# Architecture
+# Compiler Architecture
 
 x2c translates one `.x` file at a time into a `.c` file, a `.h` file, a `.xi`
 unit interface, and a `.d` dependency file. A C compiler then builds the C.
@@ -32,12 +32,15 @@ lib/        x2c runtime sources
 src/        x2c compiler sources
 unittest/   runtime suites, compiler fixtures, probes, and benchmarks
 examples/   curated executable and build-checked programs
+packages/   x2c packages for C libraries, with their examples
 docs/       this book: guide, reference, library, and internals
+site/       the public website, which also publishes this book
 agents/     repository-facing documentation, contracts, and project skills
-plans/      active work and compressed history; originals remain in Git
+plans/      design records for work in progress
 etc/        shared Makefile rules, build configuration, the compiler
             prelude with the built-in macros, and runtime Lisp assets
 tools/      documentation and stage-comparison checkers
+LICENSES/   license texts of third-party code in the runtime and commands
 ```
 
 Three of those directories hold generated files. `builds/` holds whole staged
@@ -786,7 +789,7 @@ earlier.
 
 The comparison is byte-exact. `tools/check-generated-stages.sh`, behind the
 `make stage-diff-0` through `make stage-diff-3` targets, compares the generated
-`.c`/`.h` file sets of two neighbouring stages and then compares every file
+`.c`/`.h` file sets of two neighboring stages and then compares every file
 byte for byte. `stage-diff-0` checks whether the bootstrap compiler re-emits the
 C it was built from; the rest check whether each stage emits what the stage
 before it emitted. Once two adjacent stages agree, the chain has reached a

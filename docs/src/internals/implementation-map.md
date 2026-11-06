@@ -409,9 +409,9 @@ inline-lisp example
 - Tests: parse-error, diagnostic-width, and invalid-list-splice fixtures plus
   the diagnostics suite
 
-The exact location fields, one-based coordinates, token-width rendering,
-CLI default of 20 errors, low-level one-error default, and reusable store
-limit are documented in `agents/logger-and-diagnostics-guide.md`.
+[Compiler diagnostics](../reference/cli.md#compiler-diagnostics) documents
+the location fields, one-based coordinates, token-width rendering, and the
+default limit of 20 errors.
 
 ## Compiler phase boundaries
 

@@ -1,4 +1,4 @@
-# Syntax specifications
+# Syntax Specifications
 
 x2c's syntax is specified here as a token grammar plus lexical transition
 rules that describe the parser. The specification data in `etc/syntax/` is

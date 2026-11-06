@@ -1,4 +1,4 @@
-# Lexical specification
+# Lexical Specification
 
 This is an operational specification of `lib/scan.x`, `lib/tokenizer.x`, and
 the keyword retagging in `src/compiler/parsing/tokens.x`. Rules are ordered

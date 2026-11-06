@@ -1,4 +1,4 @@
-# Command-line interface
+# Command-Line Interface
 
 After [installation and PATH setup](../guide/installation.md), run the
 compiler as `x2c`. Every invocation begins with a command. `x2c help` lists

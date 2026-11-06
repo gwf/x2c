@@ -1,4 +1,4 @@
-# Syntax as data
+# Syntax as Data
 
 The source grammar and lexical rules are ordinary x2c `List` values. A tool
 can compile them, inspect their structure, and generate another representation
